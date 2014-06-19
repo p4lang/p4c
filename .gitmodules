@@ -1,0 +1,6 @@
+[submodule "submodules/infra"]
+	path = submodules/infra
+	url = git@github.com:barefootnetworks/infra.git
+[submodule "submodules/bigcode"]
+	path = submodules/bigcode
+	url = git@github.com:barefootnetworks/bigcode.git
