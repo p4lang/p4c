@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# Python byet code
+*.pyc
+
+# Emacs
+*~
