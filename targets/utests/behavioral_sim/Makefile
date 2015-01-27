@@ -10,4 +10,6 @@ TEST_MODULE := behavioral_sim
 DEPENDMODULES := AIM
 GLOBAL_CFLAGS += -DAIM_CONFIG_INCLUDE_MODULES_INIT=1
 GLOBAL_CFLAGS += -DAIM_CONFIG_INCLUDE_MAIN=1
+GLOBAL_LINK_LIBS += -lpthread -lJudy -lgmpxx -lgmp
+
 include $(BUILDER)/build-unit-test.mk
