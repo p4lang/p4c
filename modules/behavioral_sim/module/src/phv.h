@@ -1,7 +1,7 @@
 #ifndef _BM_PHV_H_
 #define _BM_PHV_H_
 
-#include "data.h"
+#include "fields.h"
 
 class PHV
 {
