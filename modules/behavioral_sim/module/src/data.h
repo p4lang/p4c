@@ -35,7 +35,7 @@ public:
     return mpz_get_ui(value);
   }
 
-  void sync_value() {
+  void sync_value() const {
   }
 
   template<typename U, typename V> void add(U &src1, V &src2) {
@@ -45,7 +45,7 @@ public:
   }
 
   friend bool operator==(const Data &lhs, const Data &rhs) {
-    return (lhs.value == rhs.value);
+    return !mpz_cmp(lhs.value, rhs.value);
   }
 
   friend bool operator!=(const Data &lhs, const Data &rhs) {
