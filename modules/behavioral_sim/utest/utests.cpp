@@ -1,7 +1,10 @@
 #include <gtest/gtest.h>
 
+// implemented in test_data.cpp
 int pull_test_data();
 
+// See this link for explanation:
+// https://code.google.com/p/googletest/wiki/Primer#Important_note_for_Visual_C++_users
 void pull_tests() {
   pull_test_data();
 }
