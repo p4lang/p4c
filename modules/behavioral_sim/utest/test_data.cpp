@@ -21,6 +21,15 @@ TEST(Data, InEqualityOp) {
   ASSERT_TRUE(d1 != d2);
 }
 
+TEST(Data, CopyOp) {
+  const Data d1(0xaba);
+  Data d2;
+  d2 = d1;
+  EXPECT_EQ(d1, d2);
+  d2.set(0);
+  EXPECT_EQ(d1.get_ui(), (unsigned) 0xaba);
+}
+
 TEST(Data, AddDestIsSrc) {
   Data d1(11);
   const Data d2(22);

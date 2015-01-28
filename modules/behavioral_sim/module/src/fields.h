@@ -8,17 +8,25 @@ class Field : public Data
 private:
   char *bytes;
   int nbytes;
+  int nbits;
   bool value_sync;
+  char first_byte_mask;
 
 public:
   Field() {
-    value_sync = false;
+    bytes = NULL;
   }
 
-  Field(char *b, int n) {
-    bytes = b;
-    nbytes = n;
+  Field(int nbits)
+    : nbits(nbits) {
+    nbytes = (nbits + 7) / 8;
+    bytes = new char[nbytes];
     value_sync = false;
+    first_byte_mask = 0xFF >> (nbytes * 8 - nbits);
+  }
+
+  ~Field() {
+    if(bytes) delete[] bytes;
   }
 
   void sync_value() {
@@ -35,6 +43,20 @@ public:
     Data::add(src1, src2);
     size_t count;
     mpz_export(bytes, &count, 1, nbytes, 1, 0, value);
+  }
+
+  Field& operator=(const Field &other) {
+    if(&other == this)
+      return *this;
+    if(other.nbytes != nbytes) {
+      delete[] bytes;
+      bytes = new char[other.nbytes];
+      nbytes = other.nbytes;
+    }
+    memcpy(bytes, other.bytes, nbytes);
+    bytes[0] &= first_byte_mask;
+    value_sync = false;
+    return *this;
   }
 
 };

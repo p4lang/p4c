@@ -21,6 +21,10 @@ public:
     mpz_set_ui(value, i);
   }
 
+  ~Data() {
+    mpz_clear(value);
+  }
+
   void set(unsigned int i) {
     mpz_set_ui(value, i);
   }
@@ -40,6 +44,13 @@ public:
     src1.sync_value();
     src2.sync_value();
     mpz_add(value, src1.value, src2.value);
+  }
+
+  Data& operator=(const Data &other) {
+    if(&other == this)
+      return *this;
+    mpz_set(value, other.value);
+    return *this;
   }
 
   friend bool operator==(const Data &lhs, const Data &rhs) {
