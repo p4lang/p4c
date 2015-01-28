@@ -40,7 +40,8 @@ public:
   void sync_value() const {
   }
 
-  template<typename U, typename V> void add(U &src1, V &src2) {
+  /* we do not overload the + operator to avoid temporaries */
+  void add(Data &src1, Data &src2) {
     src1.sync_value();
     src2.sync_value();
     mpz_add(value, src1.value, src2.value);

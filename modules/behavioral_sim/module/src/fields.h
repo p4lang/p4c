@@ -41,11 +41,12 @@ public:
     return bytes;
   }
 
-  template<typename U, typename V> void add(U &src1, V &src2) {
+  void add(Data &src1, Data &src2) {
     Data::add(src1, src2);
     size_t count;
     mpz_export(bytes, &count, 1, nbytes, 1, 0, value);
   }
+  
 
   Field& operator=(const Field &other) {
     if(&other == this)

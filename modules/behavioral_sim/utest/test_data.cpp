@@ -32,14 +32,14 @@ TEST(Data, CopyOp) {
 
 TEST(Data, AddDestIsSrc) {
   Data d1(11);
-  const Data d2(22);
+  Data d2(22);
   d1.add(d1, d2);
   EXPECT_EQ(d1.get_ui(), (unsigned) 33);
 }
 
 TEST(Data, Add) {
-  const Data d1(11);
-  const Data d2(22);
+  Data d1(11);
+  Data d2(22);
   Data d3;
   d3.add(d1, d2);
   EXPECT_EQ(d3.get_ui(), (unsigned) 33);
