@@ -1,6 +1,8 @@
 #ifndef _BM_FIELDS_H_
 #define _BM_FIELDS_H_
 
+#include <algorithm>
+
 #include "data.h"
 
 class Field : public Data
@@ -48,14 +50,14 @@ public:
   Field& operator=(const Field &other) {
     if(&other == this)
       return *this;
-    if(other.nbytes != nbytes) {
-      delete[] bytes;
-      bytes = new char[other.nbytes];
-      nbytes = other.nbytes;
-    }
-    memcpy(bytes, other.bytes, nbytes);
-    bytes[0] &= first_byte_mask;
+    memset(bytes, 0, nbytes);
+    memcpy(bytes, other.bytes, std::min(nbytes, other.nbytes));
     value_sync = false;
+    return *this;
+  }
+
+  Field& operator=(const Data &other) {
+    /* TODO */
     return *this;
   }
 
