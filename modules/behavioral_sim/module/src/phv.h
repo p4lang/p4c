@@ -1,36 +1,16 @@
 #ifndef _BM_PHV_H_
 #define _BM_PHV_H_
 
+#include <vector>
+
 #include <cassert>
 
 #include "fields.h"
-
-class Header
-{
-  Field **fields;
-  int num_fields;
-  int field_offset;
-
-public:
-  Header() {}
-
-  Header(int num_fields)
-    : num_fields(num_fields) {
-    field_offset = 0;
-    fields = new Field *[num_fields];
-  }
-
-  ~Header() {
-    delete[] fields;
-  }
-
-  void add_field(Field *field) {
-    fields[field_offset++] = field;
-  }
-};
+#include "headers.h"
 
 typedef int field_id;
 typedef int header_id;
+
 
 class PHV
 {
@@ -57,40 +37,24 @@ public:
     fields[field_index] = Field(nbits);
   }
 
-  void init_header(header_id header_index, int num_fields) {
-    headers[header_index] = Header(num_fields);
+  void init_header(header_id header_index,
+		   header_type_id header_type,
+		   std::vector<field_id> &field_ids) {
+    std::vector<Field *> field_ptrs;
+    for (std::vector<field_id>::iterator it = field_ids.begin();
+	 it != field_ids.end();
+	 ++it) {
+      field_ptrs.push_back(&fields[*it]);
+    }
+    headers[header_index] = Header(header_type, field_ptrs);
   }
 
-  void add_field_to_header(header_id header_index, field_id field_index) {
-    Header &header = headers[header_index];
-    Field *field = &fields[field_index];
-    header.add_field(field);
+  Field &get_field(field_id field) {
+    return fields[field];
   }
 
-  void primitive_add(field_id dst, field_id src1, field_id src2) {
-    Field &field_dst = fields[dst];
-    Field &field_src1 = fields[src1];
-    Field &field_src2 = fields[src2];
-
-    field_dst.add(field_src1, field_src2);
-  }
-
-  void primitive_copy_header(header_id dst, header_id src) {
-    Header &dst = headers[dst];
-    const Header &src = headers[src];
-    
-    
-  }
-
-  void primitive_modify_field(field_id dst, field_id src) {
-    Field &field_dst = fields[dst];
-    const Field &field_src = fields[src];
-    field_dst = field_src;
-  }
-
-  void primitive_modify_field(field_id dst, const Data &src) {
-    Field &field_dst = fields[dst];
-    field_dst = src;
+  Header &get_header(header_id header) {
+    return headers[header];
   }
 
 };
