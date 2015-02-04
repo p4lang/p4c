@@ -21,6 +21,10 @@ public:
     mpz_set_ui(value, i);
   }
 
+  Data (const Data &other) {
+    mpz_init_set(value, other.value);
+  }
+
   ~Data() {
     mpz_clear(value);
   }

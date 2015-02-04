@@ -8,54 +8,38 @@
 #include "fields.h"
 #include "headers.h"
 
-typedef int field_id;
-typedef int header_id;
+typedef int header_id_t;
 
 
 class PHV
 {
 private:
-  int num_fields;
-  int num_headers;
-
-  Field *fields;
-  Header *headers;
+  std::vector<Header> headers;
 
 public:
-  PHV(int num_fields, int num_headers)
-    : num_fields(num_fields), num_headers(num_headers) {
-    fields = new Field [num_fields];
-    headers = new Header [num_headers];
+  header_id_t add_header(const HeaderType &header_type)
+  {
+    headers.push_back( Header(header_type) );
+    return headers.size() - 1;
   }
 
-  ~PHV() {
-    delete[] headers;
-    delete[] fields;
+  Field &get_field(header_id_t header_index, int field_offset) {
+    return headers[header_index].get_field(field_offset);
   }
 
-  void init_field(field_id field_index, int nbits) {
-    fields[field_index] = Field(nbits);
+  Header &get_header(header_id_t header_index) {
+    return headers[header_index];
   }
 
-  void init_header(header_id header_index,
-		   header_type_id header_type,
-		   std::vector<field_id> &field_ids) {
-    std::vector<Field *> field_ptrs;
-    for (std::vector<field_id>::iterator it = field_ids.begin();
-	 it != field_ids.end();
-	 ++it) {
-      field_ptrs.push_back(&fields[*it]);
-    }
-    headers[header_index] = Header(header_type, field_ptrs);
+  const Field &get_field(header_id_t header_index, int field_offset) const {
+    return headers[header_index].get_field(field_offset);
   }
 
-  Field &get_field(field_id field) {
-    return fields[field];
+  const Header &get_header(header_id_t header_index) const {
+    return headers[header_index];
   }
 
-  Header &get_header(header_id header) {
-    return headers[header];
-  }
+  void reset();
 
 };
 

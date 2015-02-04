@@ -2,11 +2,14 @@
 
 // implemented in test_data.cpp
 int pull_test_data();
+// implemented in test_parser.cpp
+int pull_test_parser();
 
 // See this link for explanation:
 // https://code.google.com/p/googletest/wiki/Primer#Important_note_for_Visual_C++_users
 void pull_tests() {
   pull_test_data();
+  pull_test_parser();
 }
 
 #ifdef __cplusplus

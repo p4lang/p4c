@@ -5,6 +5,8 @@
 
 #include "data.h"
 
+#define BYTE_ROUND_UP(x) ((x + 7) >> 3)
+
 class Field : public Data
 {
 private:
@@ -12,23 +14,26 @@ private:
   int nbytes;
   int nbits;
   bool value_sync;
-  char first_byte_mask;
 
 public:
-  Field() {
-    bytes = NULL;
-  }
-
   Field(int nbits)
     : nbits(nbits) {
     nbytes = (nbits + 7) / 8;
     bytes = new char[nbytes];
     value_sync = false;
-    first_byte_mask = 0xFF >> (nbytes * 8 - nbits);
   }
 
   ~Field() {
-    if(bytes) delete[] bytes;
+    delete[] bytes;
+  }
+
+  Field(const Field &other)
+    : Data(other) {
+    nbytes = other.nbytes;
+    nbits = other.nbits;
+    value_sync = other.value_sync;
+    bytes = new char[nbytes];
+    memcpy(bytes, other.bytes, nbytes);
   }
 
   void sync_value() {
@@ -37,8 +42,16 @@ public:
     value_sync = true;
   }
 
-  char *get_bytes() {
+  const char *get_bytes() const {
     return bytes;
+  }
+
+  int get_nbytes() const {
+    return nbytes;
+  }
+
+  int get_nbits() const {
+    return nbits;
   }
 
   void add(Data &src1, Data &src2) {
@@ -49,17 +62,59 @@ public:
   
 
   Field& operator=(const Field &other) {
-    if(&other == this)
-      return *this;
-    memset(bytes, 0, nbytes);
-    memcpy(bytes, other.bytes, std::min(nbytes, other.nbytes));
-    value_sync = false;
+    assert(NULL);
+    // std::cout << "PPPP\n";
+    // if(&other == this)
+    //   return *this;
+    // memset(bytes, 0, nbytes);
+    // memcpy(bytes, other.bytes, std::min(nbytes, other.nbytes));
+    // value_sync = false;
     return *this;
   }
 
-  Field& operator=(const Data &other) {
-    /* TODO */
-    return *this;
+  /* Field& operator=(const Data &other) { */
+  /*   // TODO */
+  /*   return *this; */
+  /* } */
+
+  friend std::ostream& operator<<( std::ostream &out, Field &f ) {
+    f.sync_value();
+    out << f.value;
+    return out;
+  }
+
+  int extract(const char *data, int hdr_offset) {
+    if(hdr_offset == 0 && nbits % 8 == 0) {
+      memcpy(bytes, data, nbytes);
+    }
+
+    int field_offset = (nbytes << 3) - nbits;
+    int i;
+
+    int offset = hdr_offset - field_offset;
+    if (offset == 0) {
+      memcpy(bytes, data, nbytes);
+      bytes[0] &= (0xFF >> field_offset);
+    }
+    else if (offset > 0) { /* shift left */
+      for (i = 0; i < nbytes - 1; i++) {
+	bytes[i] = (data[i] << offset) | (data[i + 1] >> (8 - offset));
+      }
+      bytes[i] = data[i] << offset;
+      if((offset + nbits) > (nbytes << 3)) {
+	bytes[i] |= (data[i + 1] >> (8 - offset));
+      }
+    }
+    else { /* shift right */
+      offset = -offset;
+      bytes[0] = data[0] >> offset;
+      for (i = 1; i < nbytes; i++) {
+	bytes[i] = (data[i - 1] << (8 - offset)) | (data[i] >> offset);
+      }
+      /* Am I forgetting something ? */
+    }
+
+    return nbits;
   }
 
 };
