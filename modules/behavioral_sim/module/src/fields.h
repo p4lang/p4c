@@ -36,6 +36,11 @@ public:
     memcpy(bytes, other.bytes, nbytes);
   }
 
+  unsigned int get_ui() {
+    sync_value();
+    return mpz_get_ui(value);
+  }
+
   void sync_value() {
     if(value_sync) return;
     mpz_import(value, 1, 1, nbytes, 1, 0, bytes);

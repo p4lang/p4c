@@ -44,10 +44,11 @@ private:
   int nbytes_packet;
 
 public:
-  Header() : nbytes_phv(0), nbytes_packet(0) {}
+ Header() : valid(false), nbytes_phv(0), nbytes_packet(0) {}
 
   Header(const HeaderType &header_type)
   {
+    valid = false;
     nbytes_phv = 0;
     nbytes_packet = 0;
     header_type_id = header_type.get_type_id();

@@ -2,9 +2,10 @@
 
 bool ParseSwitchCase::match(const char *input, const ParseState **state) const {
   if(!mask) {
-    if(!memcmp(key, input, nbytes_key))
+    if(!memcmp(key, input, nbytes_key)) {
       *state = next_state;
       return true;
+    }
   }
   else {
     int byte_index;
@@ -54,6 +55,6 @@ void Parser::parse(const char *data, PHV &phv) const {
   int bytes_parsed = 0;
   while(next_state) {
     next_state = (*next_state)(data + bytes_parsed, phv, &bytes_parsed);
-    std::cout << "bytes parsed: " << bytes_parsed << std::endl;
+    // std::cout << "bytes parsed: " << bytes_parsed << std::endl;
   }
 }

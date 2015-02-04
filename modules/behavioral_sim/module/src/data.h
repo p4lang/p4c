@@ -41,8 +41,7 @@ public:
     return mpz_get_ui(value);
   }
 
-  void sync_value() const {
-  }
+  virtual void sync_value() {}
 
   /* we do not overload the + operator to avoid temporaries */
   void add(Data &src1, Data &src2) {
