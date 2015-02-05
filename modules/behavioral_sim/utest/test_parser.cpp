@@ -214,13 +214,54 @@ TEST_F(ParserTest, ParseEthernetIPv4TCP_Stress) {
   }
 }
 
-TEST_F(ParserTest, DeparseEthernetIPv4) {
+TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
   parser.parse((const char *) tcp_pkt, phv);
   
   char deparsed_tcp_pkt[sizeof(tcp_pkt)];
   memset(deparsed_tcp_pkt, 0, sizeof(deparsed_tcp_pkt));
   deparser.deparse(phv, deparsed_tcp_pkt);
 
-  ASSERT_EQ(memcmp(tcp_pkt, deparsed_tcp_pkt, 54), 0); // 54 is size without payload
+  // 54 is size without payload
+  ASSERT_EQ(memcmp(tcp_pkt, deparsed_tcp_pkt, 54), 0);
+}
+
+TEST_F(ParserTest, DeparseEthernetIPv4UDP) {
+  parser.parse((const char *) udp_pkt, phv);
+  
+  char deparsed_udp_pkt[sizeof(udp_pkt)];
+  memset(deparsed_udp_pkt, 0, sizeof(deparsed_udp_pkt));
+  deparser.deparse(phv, deparsed_udp_pkt);
+
+  // 54 is size without payload
+  ASSERT_EQ(memcmp(udp_pkt, deparsed_udp_pkt, 42), 0);
+}
+
+TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
+  
+  char deparsed_tcp_pkt[sizeof(tcp_pkt)];
+  char deparsed_udp_pkt[sizeof(udp_pkt)];
+  const char *pkt;
+  char *deparsed_pkt;
+  int size;
+
+  for(int t = 0; t < 10000; t++) {
+    if(t % 2 == 0) {
+      pkt = (const char *) tcp_pkt;
+      deparsed_pkt = deparsed_tcp_pkt;
+      size = 54;
+    }
+    else {
+      pkt = (const char *) udp_pkt;
+      deparsed_pkt = deparsed_udp_pkt;
+      size = 42;
+    }
+    parser.parse(pkt, phv);
+    memset(deparsed_pkt, 0, size);
+    deparser.deparse(phv, deparsed_pkt);
+    ASSERT_EQ(memcmp(tcp_pkt, deparsed_tcp_pkt, size), 0);
+
+    phv.reset();
+  }
+
 }
 
