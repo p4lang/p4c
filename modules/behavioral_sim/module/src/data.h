@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 
+#include <cstddef> // libgmp5 is buggy withh gcc4.9, this fixes it
 #include <gmp.h>
 
 class Data

@@ -8,6 +8,8 @@
 #include "fields.h"
 #include "headers.h"
 
+#include "packet.h"
+
 typedef int header_id_t;
 
 
@@ -39,7 +41,7 @@ public:
     return headers[header_index];
   }
 
-  void reset();
+  void reset(); // mark all headers as invalid
 
 };
 
