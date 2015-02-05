@@ -104,7 +104,6 @@ public:
   }
 
   void extract(const char *data) {
-    // TODO
     int hdr_offset = 0;
     for(std::vector<Field>::iterator it = fields.begin();
 	it != fields.end();
@@ -114,6 +113,18 @@ public:
       hdr_offset = hdr_offset % 8;
     }
     mark_valid();
+    return;
+  }
+
+  void deparse(char *data) const {
+    int hdr_offset = 0;
+    for(std::vector<Field>::const_iterator it = fields.begin();
+	it != fields.end();
+	++it) {
+      hdr_offset += it->deparse(data, hdr_offset);
+      data += hdr_offset / 8;
+      hdr_offset = hdr_offset % 8;
+    }
     return;
   }
 };

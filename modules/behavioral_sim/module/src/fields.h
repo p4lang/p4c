@@ -3,9 +3,9 @@
 
 #include <algorithm>
 
-#include "data.h"
+#include <cassert>
 
-#define BYTE_ROUND_UP(x) ((x + 7) >> 3)
+#include "data.h"
 
 class Field : public Data
 {
@@ -88,39 +88,11 @@ public:
     return out;
   }
 
-  int extract(const char *data, int hdr_offset) {
-    if(hdr_offset == 0 && nbits % 8 == 0) {
-      memcpy(bytes, data, nbytes);
-    }
+  /* returns the number of bits extracted */
+  int extract(const char *data, int hdr_offset);
 
-    int field_offset = (nbytes << 3) - nbits;
-    int i;
-
-    int offset = hdr_offset - field_offset;
-    if (offset == 0) {
-      memcpy(bytes, data, nbytes);
-      bytes[0] &= (0xFF >> field_offset);
-    }
-    else if (offset > 0) { /* shift left */
-      for (i = 0; i < nbytes - 1; i++) {
-	bytes[i] = (data[i] << offset) | (data[i + 1] >> (8 - offset));
-      }
-      bytes[i] = data[i] << offset;
-      if((offset + nbits) > (nbytes << 3)) {
-	bytes[i] |= (data[i + 1] >> (8 - offset));
-      }
-    }
-    else { /* shift right */
-      offset = -offset;
-      bytes[0] = data[0] >> offset;
-      for (i = 1; i < nbytes; i++) {
-	bytes[i] = (data[i - 1] << (8 - offset)) | (data[i] >> offset);
-      }
-      /* Am I forgetting something ? */
-    }
-
-    return nbits;
-  }
+  /* returns the number of bits deparsed */
+  int deparse(char *data, int hdr_offset) const;
 
 };
 

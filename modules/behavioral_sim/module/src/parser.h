@@ -118,11 +118,11 @@ public:
 
 class ParseState {
 private:
-  std::vector<ParserOp *> parser_ops;
+  vector<ParserOp *> parser_ops;
   int nbytes_key;
   bool has_switch;
   ParseSwitchKeyBuilder key_builder;
-  std::vector<ParseSwitchCase> parser_switch;
+  vector<ParseSwitchCase> parser_switch;
 
 public:
   ParseState()
@@ -146,7 +146,7 @@ public:
   }
 
   ~ParseState() {
-    for (std::vector<ParserOp *>::iterator it = parser_ops.begin();
+    for (vector<ParserOp *>::iterator it = parser_ops.begin();
 	 it != parser_ops.end();
 	 ++it) {
       delete *it;

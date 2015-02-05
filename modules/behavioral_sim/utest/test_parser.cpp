@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "parser.h"
+#include "deparser.h"
 
 int pull_test_parser() { return 0; }
 
@@ -42,6 +43,8 @@ protected:
   header_id_t ethernetHeader, ipv4Header, udpHeader, tcpHeader;
 
   Parser parser;
+
+  Deparser deparser;
 
   ParserTest()
     : ethernetHeaderType(0), ipv4HeaderType(1),
@@ -113,6 +116,11 @@ protected:
     ipv4ParseState.add_switch_case(ipv4_tcp_key, &tcpParseState);
 
     parser.set_init_state(&ethernetParseState);
+
+    deparser.add_header(ethernetHeader);
+    deparser.add_header(ipv4Header);
+    deparser.add_header(tcpHeader);
+    deparser.add_header(udpHeader);
   }
 
   // virtual void TearDown() {}
@@ -204,5 +212,15 @@ TEST_F(ParserTest, ParseEthernetIPv4TCP_Stress) {
 
     phv.reset();
   }
+}
+
+TEST_F(ParserTest, DeparseEthernetIPv4) {
+  parser.parse((const char *) tcp_pkt, phv);
+  
+  char deparsed_tcp_pkt[sizeof(tcp_pkt)];
+  memset(deparsed_tcp_pkt, 0, sizeof(deparsed_tcp_pkt));
+  deparser.deparse(phv, deparsed_tcp_pkt);
+
+  ASSERT_EQ(memcmp(tcp_pkt, deparsed_tcp_pkt, 54), 0); // 54 is size without payload
 }
 

@@ -21,7 +21,6 @@ bool ParseSwitchCase::match(const char *input, const ParseState **state) const {
 
 const ParseState *ParseState::operator()(const char *data,
 					 PHV &phv, int *bytes_parsed) const{
-  *bytes_parsed = 0;
   // execute parser ops
   ParserOp *parser_op;
   for (std::vector<ParserOp *>::const_iterator it = parser_ops.begin();
