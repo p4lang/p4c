@@ -1,5 +1,8 @@
 #include "tables.h"
 
+using std::vector;
+using std::copy;
+
 int MatchTable::get_and_set_handle(int *handle)
 {
   Word_t jhandle = 0;
@@ -27,26 +30,35 @@ int MatchTable::delete_entry(int handle)
 
 void MatchTable::apply(const PHV &phv)
 {
-  char lookup_key[nbytes_key];
+  string lookup_key;
   build_key(phv, lookup_key);
-  MatchEntry *entry = lookup(lookup_key);
-  if(!entry) return; /* TODO : default action */
-  entry->action_fn(phv);
+  // char lookup_key[nbytes_key];
+  // build_key(phv, lookup_key);
+  // MatchEntry *entry = lookup(lookup_key);
+  // if(!entry) return; /* TODO : default action */
+  // entry->action_fn(phv);
 }
 
 
-ExactMatchEntry *ExactMatchTable::lookup(const char *key)
+const ExactMatchEntry *ExactMatchTable::lookup(const string &key) const
 {
-  /* TODO */
-  ExactMatchEntry *entry = NULL;
-  return entry;
+  unordered_map<string, const ExactMatchEntry *>::const_iterator entry_it =
+    entries_map.find(key);
+  if(entry_it == entries_map.end()) return nullptr;
+  return entry_it->second;
 }
 
-int ExactMatchTable::add_entry(const char *key, const ActionFn &action_fn,
+int ExactMatchTable::add_entry(const string &key, const ActionFn &action_fn,
 			       int *handle)
 {
-  /* TODO */
-  return get_and_set_handle(handle);
+  int status = get_and_set_handle(handle);
+  if(!status) return status;
+  
+  entries[*handle] = ExactMatchEntry(key, action_fn);
+  // the key is copied a second time, but it should not incur a significant cost
+  entries_map[key] = &entries[*handle];
+
+  return 0;
 }
 
 int ExactMatchTable::delete_entry(int handle)
@@ -56,7 +68,7 @@ int ExactMatchTable::delete_entry(int handle)
   return 0;
 }
 
-LongestPrefixMatchEntry *LongestPrefixMatchTable::lookup(const char *key)
+const LongestPrefixMatchEntry *LongestPrefixMatchTable::lookup(const string &key) const
 {
   /* TODO */
   LongestPrefixMatchEntry *entry = NULL;
@@ -78,7 +90,7 @@ int LongestPrefixMatchTable::delete_entry(int handle)
   return 0;
 }
 
-TernaryMatchEntry *TernaryMatchTable::lookup(const char *key)
+const TernaryMatchEntry *TernaryMatchTable::lookup(const string &key) const
 {
   /* TODO */
   TernaryMatchEntry *entry = NULL;
