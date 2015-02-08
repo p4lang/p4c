@@ -1,8 +1,12 @@
+#include <algorithm>
+
 #include "fields.h"
 
 int Field::extract(const char *data, int hdr_offset) {
+  value_sync = false;
+
   if(hdr_offset == 0 && nbits % 8 == 0) {
-    memcpy(bytes, data, nbytes);
+    std::copy(data, data + nbytes, bytes.begin());
     return nbits;
   }
 
@@ -11,7 +15,7 @@ int Field::extract(const char *data, int hdr_offset) {
   
   int offset = hdr_offset - field_offset;
   if (offset == 0) {
-    memcpy(bytes, data, nbytes);
+    std::copy(data, data + nbytes, bytes.begin());
     bytes[0] &= (0xFF >> field_offset);
   }
   else if (offset > 0) { /* shift left */
@@ -36,7 +40,7 @@ int Field::extract(const char *data, int hdr_offset) {
 
 int Field::deparse(char *data, int hdr_offset) const {
   if(hdr_offset == 0 && nbits % 8 == 0) {
-    memcpy(data, bytes, nbytes);
+    std::copy(bytes.begin(), bytes.end(), data);
     return nbits;
   }
 
@@ -50,7 +54,7 @@ int Field::deparse(char *data, int hdr_offset) const {
 
   int offset = field_offset - hdr_offset;
   if (offset == 0) {
-    memcpy(data + 1, bytes + 1, hdr_bytes - 1);
+    std::copy(bytes.begin() + 1, bytes.begin() + hdr_bytes, data + 1);
     data[0] |= bytes[0];
   }
   else if (offset > 0) { /* shift left */
