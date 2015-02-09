@@ -15,6 +15,8 @@ using std::vector;
 using std::unordered_map;
 using std::pair;
 
+typedef int entry_handle_t;
+
 struct MatchKeyBuilder
 {
   vector< pair<header_id_t, int> > fields;
@@ -43,14 +45,10 @@ public:
       nbytes_key(nbytes_key),
       match_key_builder(match_key_builder) { }
   
-  ~MatchTable() {
-    
-  }
-  
   void apply(const PHV &phv);
   
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
-  virtual int delete_entry(int handle);
+  virtual int delete_entry(entry_handle_t handle);
 
 protected:
   int size;
@@ -62,8 +60,8 @@ protected:
     match_key_builder(phv, key);
   }
   
-  int get_and_set_handle(int *handle);
-  int unset_handle(int handle);
+  int get_and_set_handle(entry_handle_t *handle);
+  int unset_handle(entry_handle_t handle);
 
 };
 
@@ -78,12 +76,12 @@ public:
 
   const ExactMatchEntry *lookup(const ByteContainer &key) const;
   int add_entry(const ByteContainer &key, const ActionFn &action_fn,
-		int *handle);
-  int delete_entry(int handle);
+		entry_handle_t *handle);
+  int delete_entry(entry_handle_t handle);
 
 private:
   vector<ExactMatchEntry> entries;
-  unordered_map<ByteContainer, const ExactMatchEntry *, ByteContainerKeyHash> entries_map;
+  unordered_map<ByteContainer, int, ByteContainerKeyHash> entries_map;
 };
 
 class LongestPrefixMatchTable : public MatchTable
@@ -96,9 +94,9 @@ public:
   }
   
   const LongestPrefixMatchEntry *lookup(const ByteContainer &key) const;
-  int add_entry(const char *key, int prefix_length, const ActionFn &action_fn,
-		int *handle);
-  int delete_entry(int handle);
+  int add_entry(const ByteContainer &key, int prefix_length,
+		const ActionFn &action_fn, entry_handle_t *handle);
+  int delete_entry(entry_handle_t handle);
 
 private:
   vector<LongestPrefixMatchEntry> entries;
@@ -115,10 +113,9 @@ public:
   }
 
   const TernaryMatchEntry *lookup(const ByteContainer &key) const;
-  int add_entry(const char *key, const char *mask, int priority,
-		const ActionFn &action_fn,
-		int *handle);
-  int delete_entry(int handle);
+  int add_entry(const ByteContainer &key, const ByteContainer &mask,
+		int priority, const ActionFn &action_fn, entry_handle_t *handle);
+  int delete_entry(entry_handle_t handle);
 
 private:
   vector<TernaryMatchEntry> entries;
