@@ -37,21 +37,28 @@ struct MatchKeyBuilder
 };
 
 class MatchTable
-{  
+{
 public:
-  MatchTable(int size, int nbytes_key,
+  enum ErrorCode {
+    SUCCESS = 0,
+    TABLE_FULL,
+    ERROR
+  };
+public:
+  MatchTable(size_t size, int nbytes_key,
 	     const MatchKeyBuilder &match_key_builder)
-    : size(size),
+    : size(size), num_entries(0),
       nbytes_key(nbytes_key),
       match_key_builder(match_key_builder) { }
   
   void apply(const PHV &phv);
   
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
-  virtual int delete_entry(entry_handle_t handle);
+  virtual ErrorCode delete_entry(entry_handle_t handle);
 
 protected:
-  int size;
+  size_t size;
+  size_t num_entries;
   int nbytes_key;
   Pvoid_t handles_used; // Judy array of used entries, for handles
   
@@ -60,8 +67,8 @@ protected:
     match_key_builder(phv, key);
   }
   
-  int get_and_set_handle(entry_handle_t *handle);
-  int unset_handle(entry_handle_t handle);
+  ErrorCode get_and_set_handle(entry_handle_t *handle);
+  ErrorCode unset_handle(entry_handle_t handle);
 
 };
 
@@ -75,9 +82,9 @@ public:
   }
 
   const ExactMatchEntry *lookup(const ByteContainer &key) const;
-  int add_entry(const ByteContainer &key, const ActionFn &action_fn,
-		entry_handle_t *handle);
-  int delete_entry(entry_handle_t handle);
+  ErrorCode add_entry(const ByteContainer &key, const ActionFn &action_fn,
+		      entry_handle_t *handle);
+  ErrorCode delete_entry(entry_handle_t handle);
 
 private:
   vector<ExactMatchEntry> entries;
@@ -94,9 +101,9 @@ public:
   }
   
   const LongestPrefixMatchEntry *lookup(const ByteContainer &key) const;
-  int add_entry(const ByteContainer &key, int prefix_length,
-		const ActionFn &action_fn, entry_handle_t *handle);
-  int delete_entry(entry_handle_t handle);
+  ErrorCode add_entry(const ByteContainer &key, int prefix_length,
+		      const ActionFn &action_fn, entry_handle_t *handle);
+  ErrorCode delete_entry(entry_handle_t handle);
 
 private:
   vector<LongestPrefixMatchEntry> entries;
@@ -113,9 +120,9 @@ public:
   }
 
   const TernaryMatchEntry *lookup(const ByteContainer &key) const;
-  int add_entry(const ByteContainer &key, const ByteContainer &mask,
-		int priority, const ActionFn &action_fn, entry_handle_t *handle);
-  int delete_entry(entry_handle_t handle);
+  ErrorCode add_entry(const ByteContainer &key, const ByteContainer &mask,
+		      int priority, const ActionFn &action_fn, entry_handle_t *handle);
+  ErrorCode delete_entry(entry_handle_t handle);
 
 private:
   vector<TernaryMatchEntry> entries;
