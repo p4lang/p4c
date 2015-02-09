@@ -4,18 +4,17 @@
 #include <unordered_map>
 #include <string>
 
-#include <Judy.h>
-
 #include "entries.h"
 #include "phv.h"
 #include "actions.h"
 #include "bytecontainer.h"
+#include "handle_mgr.h"
 
 using std::vector;
 using std::unordered_map;
 using std::pair;
 
-typedef int entry_handle_t;
+typedef unsigned entry_handle_t;
 
 struct MatchKeyBuilder
 {
@@ -42,6 +41,7 @@ public:
   enum ErrorCode {
     SUCCESS = 0,
     TABLE_FULL,
+    INVALID_HANDLE,
     ERROR
   };
 public:
@@ -56,11 +56,13 @@ public:
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
   virtual ErrorCode delete_entry(entry_handle_t handle);
 
+  size_t get_num_entries() const {return num_entries;}
+
 protected:
   size_t size;
   size_t num_entries;
   int nbytes_key;
-  Pvoid_t handles_used; // Judy array of used entries, for handles
+  HandleMgr handles;
   
   MatchKeyBuilder match_key_builder;
   void build_key(const PHV &phv, ByteContainer &key) {
@@ -70,6 +72,7 @@ protected:
   ErrorCode get_and_set_handle(entry_handle_t *handle);
   ErrorCode unset_handle(entry_handle_t handle);
 
+  bool valid_handle(entry_handle_t handle) const;
 };
 
 class ExactMatchTable : public MatchTable

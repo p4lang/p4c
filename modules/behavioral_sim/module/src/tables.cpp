@@ -1,4 +1,5 @@
 #include "tables.h"
+#include <iostream>
 
 using std::vector;
 using std::copy;
@@ -9,25 +10,22 @@ MatchTable::ErrorCode MatchTable::get_and_set_handle(entry_handle_t *handle)
     return TABLE_FULL;
   }
 
-  Word_t jhandle = 0;
-  int Rc_int;
-  J1FE(Rc_int, handles_used, jhandle); // Judy1FirstEmpty()
-  if(!Rc_int) return ERROR;
-  J1S(Rc_int, handles_used, jhandle); // Judy1Set()
-  if(!Rc_int) return ERROR;
+  if(handles.get_handle(handle)) return ERROR;
 
-  *handle = jhandle;
-
+  num_entries++;
   return SUCCESS;
 }
 
 MatchTable::ErrorCode MatchTable::unset_handle(entry_handle_t handle)
 {
-  int Rc_int;
-  J1U(Rc_int, handles_used, handle); // Judy1Unset()
-  if(!Rc_int) return ERROR;
+  if(handles.release_handle(handle)) return INVALID_HANDLE;
 
+  num_entries--;
   return SUCCESS;
+}
+
+bool MatchTable::valid_handle(entry_handle_t handle) const {
+  return valid_handle(handle);
 }
 
 MatchTable::ErrorCode MatchTable::delete_entry(entry_handle_t handle)
