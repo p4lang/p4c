@@ -4,6 +4,8 @@
 #include <vector>
 #include <iterator>
 
+#include <boost/functional/hash.hpp>
+
 using std::vector;
 
 class ByteContainer
@@ -18,6 +20,8 @@ public:
   typedef size_t size_type;
 
   public:
+  ByteContainer() {}
+
   ByteContainer(int nbytes)
     : bytes(vector<char>(nbytes)) {}
 
@@ -77,8 +81,23 @@ public:
     return bytes.data();
   }
 
+  bool operator==(const ByteContainer& other) const {
+    return bytes == other.bytes;
+  }
+
+  bool operator!=(const ByteContainer& other) const {
+    return !(*this == other);
+  }
+
 private:
   vector<char> bytes;
+};
+
+struct ByteContainerKeyHash {
+  std::size_t operator()(const ByteContainer& b) const {
+    // Murmur, boost::hash_range or Jenkins?
+    return boost::hash_range(b.begin(), b.end());
+  }
 };
 
 #endif

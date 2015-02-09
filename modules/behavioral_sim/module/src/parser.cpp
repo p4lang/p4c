@@ -1,8 +1,9 @@
 #include "parser.h"
 
-bool ParseSwitchCase::match(const char *input, const ParseState **state) const {
-  if(!mask) {
-    if(!memcmp(key, input, nbytes_key)) {
+bool ParseSwitchCase::match(const ByteContainer &input,
+			    const ParseState **state) const {
+  if(!with_mask) {
+    if(key == input) {
       *state = next_state;
       return true;
     }
@@ -33,7 +34,7 @@ const ParseState *ParseState::operator()(const char *data,
   if(!has_switch) return NULL;
 
   // build key
-  char key[nbytes_key];
+  ByteContainer key;
   key_builder(phv, data, key);
 
   // try the matches in order

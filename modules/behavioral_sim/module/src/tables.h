@@ -9,10 +9,10 @@
 #include "entries.h"
 #include "phv.h"
 #include "actions.h"
+#include "bytecontainer.h"
 
 using std::vector;
 using std::unordered_map;
-using std::string;
 using std::pair;
 
 struct MatchKeyBuilder
@@ -23,13 +23,13 @@ struct MatchKeyBuilder
     fields.push_back( pair<header_id_t, int>(header, field_offset) );
   }
 
-  void operator()(const PHV &phv, string &key) const
+  void operator()(const PHV &phv, ByteContainer &key) const
   {
     for(vector< pair<header_id_t, int> >::const_iterator it = fields.begin();
 	it != fields.end();
 	it++) {
       const Field &field = phv.get_field((*it).first, (*it).second);
-      key.append(field.get_bytes(), field.get_nbytes());
+      key.append(field.get_bytes());
     }
   }
 };
@@ -49,7 +49,7 @@ public:
   
   void apply(const PHV &phv);
   
-  virtual const MatchEntry *lookup(const string &key) const = 0;
+  virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
   virtual int delete_entry(int handle);
 
 protected:
@@ -58,7 +58,9 @@ protected:
   Pvoid_t handles_used; // Judy array of used entries, for handles
   
   MatchKeyBuilder match_key_builder;
-  void build_key(const PHV &phv, string &key) { match_key_builder(phv, key); }
+  void build_key(const PHV &phv, ByteContainer &key) {
+    match_key_builder(phv, key);
+  }
   
   int get_and_set_handle(int *handle);
   int unset_handle(int handle);
@@ -74,14 +76,14 @@ public:
     entries = vector<ExactMatchEntry>(size);
   }
 
-  const ExactMatchEntry *lookup(const string &key) const;
-  int add_entry(const string &key, const ActionFn &action_fn,
+  const ExactMatchEntry *lookup(const ByteContainer &key) const;
+  int add_entry(const ByteContainer &key, const ActionFn &action_fn,
 		int *handle);
   int delete_entry(int handle);
 
 private:
   vector<ExactMatchEntry> entries;
-  unordered_map<string, const ExactMatchEntry *> entries_map;
+  unordered_map<ByteContainer, const ExactMatchEntry *, ByteContainerKeyHash> entries_map;
 };
 
 class LongestPrefixMatchTable : public MatchTable
@@ -93,7 +95,7 @@ public:
     entries = vector<LongestPrefixMatchEntry>(size);
   }
   
-  const LongestPrefixMatchEntry *lookup(const string &key) const;
+  const LongestPrefixMatchEntry *lookup(const ByteContainer &key) const;
   int add_entry(const char *key, int prefix_length, const ActionFn &action_fn,
 		int *handle);
   int delete_entry(int handle);
@@ -112,7 +114,7 @@ public:
     entries = vector<TernaryMatchEntry>(size);
   }
 
-  const TernaryMatchEntry *lookup(const string &key) const;
+  const TernaryMatchEntry *lookup(const ByteContainer &key) const;
   int add_entry(const char *key, const char *mask, int priority,
 		const ActionFn &action_fn,
 		int *handle);

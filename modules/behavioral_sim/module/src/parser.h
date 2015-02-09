@@ -46,16 +46,14 @@ struct ParseSwitchKeyBuilder
     fields.push_back( pair<header_id_t, int>(header, field_offset) );
   }
   
-  void operator()(const PHV &phv, const char *data, char *key) const
+  // data not used for now
+  void operator()(const PHV &phv, const char *data, ByteContainer &key) const
   {
-    int new_bytes;
     for(vector< pair<header_id_t, int> >::const_iterator it = fields.begin();
 	it != fields.end();
 	it++) {
       const Field &field = phv.get_field((*it).first, (*it).second);
-      new_bytes = field.get_nbytes();
-      memcpy(key, field.get_bytes(), new_bytes);
-      key += new_bytes;
+      key.append(field.get_bytes());
     }
   }
 
@@ -72,48 +70,32 @@ class ParseState;
 class ParseSwitchCase {
 private:
   int nbytes_key;
-  char *key;
-  char *mask;
+  ByteContainer key;
+  ByteContainer mask;
+  bool with_mask;
   const ParseState *next_state; /* NULL if end */
 
 public:
-  ParseSwitchCase(int nbytes_key, const char *src_key,
+  ParseSwitchCase(int nbytes_key, const ByteContainer &key,
 		  const ParseState *next_state)
-    : nbytes_key(nbytes_key), next_state(next_state) {
-    mask = NULL;
-    key = new char[nbytes_key];
-    memcpy(key, src_key, nbytes_key);
+    : nbytes_key(nbytes_key), key(key), with_mask(false),
+      next_state(next_state) {
   }
 
-  ParseSwitchCase(int nbytes_key, const char *src_key, const char *src_mask,
+  ParseSwitchCase(int nbytes_key, const char *key,
 		  const ParseState *next_state)
-    : nbytes_key(nbytes_key), next_state(next_state) {
-    key = new char[nbytes_key];
-    memcpy(key, src_key, nbytes_key);
-    mask = new char[nbytes_key];
-    memcpy(mask, src_mask, nbytes_key);
+    : nbytes_key(nbytes_key), key(ByteContainer(key, nbytes_key)),
+      with_mask(false), next_state(next_state) {
   }
 
-  ParseSwitchCase(const ParseSwitchCase &other) {
-    nbytes_key = other.nbytes_key;
-    key = new char[nbytes_key];
-    memcpy(key, other.key, nbytes_key);
-    if(!other.mask) {
-      mask = NULL;
-    }
-    else {
-      mask = new char[nbytes_key];
-      memcpy(mask, other.mask, nbytes_key);
-    }
-    next_state = other.next_state;
+  ParseSwitchCase(int nbytes_key, const ByteContainer &key,
+		  const ByteContainer &mask,
+		  const ParseState *next_state)
+    : nbytes_key(nbytes_key), key(key), mask(mask), with_mask(true),
+      next_state(next_state) {
   }
 
-  ~ParseSwitchCase() {
-    delete[] key;
-    if(mask) delete[] mask;
-  }
-
-  bool match(const char *input, const ParseState **state) const;
+  bool match(const ByteContainer &input, const ParseState **state) const;
 };
 
 class ParseState {
@@ -139,6 +121,10 @@ public:
     has_switch = true;
     key_builder = builder;
     nbytes_key = nbytes;
+  }
+
+  void add_switch_case(const ByteContainer &key, const ParseState *next_state) {
+    parser_switch.push_back( ParseSwitchCase(nbytes_key, key, next_state) );
   }
 
   void add_switch_case(const char *key, const ParseState *next_state) {

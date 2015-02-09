@@ -31,9 +31,8 @@ public:
     return (unsigned) value;
   }
 
-  /* TODO: change */
-  const char *get_bytes() const {
-    return bytes.data();
+  const ByteContainer &get_bytes() const {
+    return bytes;
   }
 
   int get_nbytes() const {

@@ -202,7 +202,7 @@ TEST_F(ParserTest, ParseEthernetIPv4TCP_Stress) {
   const Header &tcp_hdr = phv.get_header(tcpHeader);
   const Header &udp_hdr = phv.get_header(udpHeader);
 
-  for(int t = 0; t < 1000000; t++) {
+  for(int t = 0; t < 10000; t++) {
     parser.parse((const char *) tcp_pkt, phv);
 
     ASSERT_TRUE(ethernet_hdr.is_valid());

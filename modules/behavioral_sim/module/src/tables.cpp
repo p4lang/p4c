@@ -30,7 +30,7 @@ int MatchTable::delete_entry(int handle)
 
 void MatchTable::apply(const PHV &phv)
 {
-  string lookup_key;
+  ByteContainer lookup_key;
   build_key(phv, lookup_key);
   // char lookup_key[nbytes_key];
   // build_key(phv, lookup_key);
@@ -40,15 +40,14 @@ void MatchTable::apply(const PHV &phv)
 }
 
 
-const ExactMatchEntry *ExactMatchTable::lookup(const string &key) const
+const ExactMatchEntry *ExactMatchTable::lookup(const ByteContainer &key) const
 {
-  unordered_map<string, const ExactMatchEntry *>::const_iterator entry_it =
-    entries_map.find(key);
+  auto entry_it = entries_map.find(key);
   if(entry_it == entries_map.end()) return nullptr;
   return entry_it->second;
 }
 
-int ExactMatchTable::add_entry(const string &key, const ActionFn &action_fn,
+int ExactMatchTable::add_entry(const ByteContainer &key, const ActionFn &action_fn,
 			       int *handle)
 {
   int status = get_and_set_handle(handle);
@@ -68,7 +67,7 @@ int ExactMatchTable::delete_entry(int handle)
   return 0;
 }
 
-const LongestPrefixMatchEntry *LongestPrefixMatchTable::lookup(const string &key) const
+const LongestPrefixMatchEntry *LongestPrefixMatchTable::lookup(const ByteContainer &key) const
 {
   /* TODO */
   LongestPrefixMatchEntry *entry = NULL;
@@ -90,7 +89,7 @@ int LongestPrefixMatchTable::delete_entry(int handle)
   return 0;
 }
 
-const TernaryMatchEntry *TernaryMatchTable::lookup(const string &key) const
+const TernaryMatchEntry *TernaryMatchTable::lookup(const ByteContainer &key) const
 {
   /* TODO */
   TernaryMatchEntry *entry = NULL;
