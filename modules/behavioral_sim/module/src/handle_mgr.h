@@ -1,9 +1,112 @@
 #ifndef _BM_HANDLE_MGR_H_
 #define _BM_HANDLE_MGR_H_
 
+#include <type_traits>
+
 #include <Judy.h>
 
+class HandleMgrIterator;
+class constHandleMgrIterator;
+
 class HandleMgr {
+  // friend class HandleMgrIterator;
+  // friend class constHandleMgrIterator;
+
+public:
+
+  // iterators: since they are very simple, I did not mind duplicating the
+  // code. Maybe it would be a good idea to condition the const'ness of the
+  // iterator with a boolean template, to unify the 2 iterators. See :
+  // www.sj-vs.net/c-implementing-const_iterator-and-non-const-iterator-without-code-duplication/
+
+  class const_iterator;
+
+  class iterator
+  {
+    friend class const_iterator;
+  
+  public:
+    iterator(HandleMgr *handle_mgr, unsigned index)
+      : handle_mgr(handle_mgr), index(index) {}
+    
+    unsigned &operator*() {return index;}
+    unsigned *operator->() {return &index;}
+    
+    bool operator==(const iterator &other) const {
+      return (handle_mgr == other.handle_mgr) && (index == other.index);
+    }
+    
+    bool operator!=(const iterator &other) const {
+      return !(*this == other);
+    }
+    
+    iterator& operator++() {
+      int Rc_int;
+      Word_t jindex = index;;
+      J1N(Rc_int, handle_mgr->handles, jindex);
+      index = jindex;
+      return *this;
+    }
+
+    iterator operator++(int){
+      // Use operator++()
+      const iterator old(*this);
+      ++(*this);
+      return old;
+    }
+
+  private:
+    HandleMgr *handle_mgr;
+    unsigned index;
+  };
+
+  class const_iterator
+  {
+  public:
+    const_iterator(const HandleMgr *handle_mgr, unsigned index)
+      : handle_mgr(handle_mgr), index(index) {}
+
+    const_iterator(const iterator &other)
+      : handle_mgr(other.handle_mgr), index(other.index) {}
+    
+    const unsigned &operator*() const {return index;}
+    const unsigned *operator->() const {return &index;}
+
+    const_iterator& operator=(const const_iterator &other) {
+      handle_mgr = other.handle_mgr;
+      index = other.index;
+      return *this;
+    }
+
+    bool operator==(const const_iterator &other) const {
+      return (handle_mgr == other.handle_mgr) && (index == other.index);
+    }
+  
+    bool operator!=(const const_iterator &other) const {
+      return !(*this == other);
+    }
+
+    const const_iterator& operator++(){
+      int Rc_int;
+      Word_t jindex = index;
+      J1N(Rc_int, handle_mgr->handles, jindex);
+      index = jindex;
+      return *this;
+    }
+
+    const const_iterator operator++(int){
+      // Use operator++()
+      const const_iterator old(*this);
+      ++(*this);
+      return old;
+    }
+
+  private:
+    const HandleMgr *handle_mgr;
+    unsigned index;
+  };
+
+
 public:
   HandleMgr()
     : handles((Pvoid_t) NULL) {}
@@ -43,6 +146,14 @@ public:
     return *this;
   }
 
+  bool operator==(const HandleMgr &other) const {
+    return (handles == other.handles);
+  }
+
+  bool operator!=(const HandleMgr &other) const {
+    return !(*this == other);
+  }
+
   /* Return 0 on success, -1 on failure */
 
   int get_handle(unsigned *handle) {
@@ -77,8 +188,41 @@ public:
     return (Rc == 1);
   }
 
+  // iterators
+
+  iterator begin() {
+    Word_t index = 0;
+    int Rc_int;
+    J1F(Rc_int, handles, index);
+    return iterator(this, index);
+  }
+
+  const_iterator begin() const {
+    Word_t index = 0;
+    int Rc_int;
+    J1F(Rc_int, handles, index);
+    return const_iterator(this, index);
+  }
+
+  iterator end() {
+    Word_t index = -1;
+    int Rc_int;
+    J1L(Rc_int, handles, index);
+    return iterator(this, index);
+  }
+
+  const_iterator end() const {
+    Word_t index = -1;
+    int Rc_int;
+    J1L(Rc_int, handles, index);
+    return const_iterator(this, index);
+  }
+
 private:
   Pvoid_t handles;
 };
+
+
+
 
 #endif

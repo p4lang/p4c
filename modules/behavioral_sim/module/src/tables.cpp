@@ -25,7 +25,7 @@ MatchTable::ErrorCode MatchTable::unset_handle(entry_handle_t handle)
 }
 
 bool MatchTable::valid_handle(entry_handle_t handle) const {
-  return valid_handle(handle);
+  return handles.valid_handle(handle);
 }
 
 MatchTable::ErrorCode MatchTable::delete_entry(entry_handle_t handle)
@@ -68,7 +68,9 @@ MatchTable::ErrorCode ExactMatchTable::add_entry(const ByteContainer &key,
 
 MatchTable::ErrorCode ExactMatchTable::delete_entry(entry_handle_t handle)
 {
-  /* TODO */
+  if(!valid_handle(handle)) return INVALID_HANDLE;
+  ByteContainer &key = entries[handle].key;
+  entries_map.erase(key);
   return MatchTable::delete_entry(handle);
 }
 
@@ -96,6 +98,11 @@ MatchTable::ErrorCode LongestPrefixMatchTable::delete_entry(entry_handle_t handl
 
 const TernaryMatchEntry *TernaryMatchTable::lookup(const ByteContainer &key) const
 {
+  // auto entry_it = entries_map.find(key);
+  // if(entry_it == entries_map.end()) return nullptr;
+  // return &entries[entry_it->second];
+
+  
   /* TODO */
   TernaryMatchEntry *entry = NULL;
   return entry;
@@ -107,12 +114,16 @@ MatchTable::ErrorCode TernaryMatchTable::add_entry(const ByteContainer &key,
 						   const ActionFn &action_fn,
 						   entry_handle_t *handle)
 {
-  /* TODO */
-  return get_and_set_handle(handle);
+  ErrorCode status = get_and_set_handle(handle);
+  if(status != SUCCESS) return status;
+  
+  entries[*handle] = TernaryMatchEntry(key, action_fn, mask, priority);
+
+  return SUCCESS;
 }
 
 MatchTable::ErrorCode TernaryMatchTable::delete_entry(entry_handle_t handle)
 {
-  /* TODO */
+  if(!valid_handle(handle)) return INVALID_HANDLE;
   return MatchTable::delete_entry(handle);
 }

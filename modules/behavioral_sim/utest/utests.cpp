@@ -8,6 +8,8 @@ int pull_test_parser();
 int pull_test_packet();
 // implemented in test_tables.cpp
 int pull_test_tables();
+// implemented in test_handle_mgr.cpp
+int pull_test_handle_mgr();
 
 // See this link for explanation:
 // https://code.google.com/p/googletest/wiki/Primer#Important_note_for_Visual_C++_users
@@ -16,6 +18,7 @@ void pull_tests() {
   pull_test_parser();
   pull_test_packet();
   pull_test_tables();
+  pull_test_handle_mgr();
 }
 
 #ifdef __cplusplus
