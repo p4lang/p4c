@@ -48,7 +48,11 @@ struct TernaryMatchEntry : MatchEntry
 
   TernaryMatchEntry(const ByteContainer &key, ActionFn action_fn,
 		    const ByteContainer &mask, int priority)
-    : MatchEntry(key, action_fn), mask(mask), priority(priority) {}
+    : MatchEntry(key, action_fn), mask(mask), priority(priority) {
+    for(unsigned byte_index = 0; byte_index < key.size(); byte_index++) {
+      this->key[byte_index] &= mask[byte_index];
+    }
+  }
 };
 
 #endif

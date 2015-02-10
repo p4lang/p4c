@@ -102,10 +102,32 @@ const TernaryMatchEntry *TernaryMatchTable::lookup(const ByteContainer &key) con
   // if(entry_it == entries_map.end()) return nullptr;
   // return &entries[entry_it->second];
 
-  
-  /* TODO */
-  TernaryMatchEntry *entry = NULL;
-  return entry;
+  int max_priority = 0;
+  bool match;
+
+  const TernaryMatchEntry *entry;
+  const TernaryMatchEntry *max_entry = nullptr;
+
+  for(auto it = handles.begin(); it != handles.end(); ++it) {
+    entry = &entries[*it];
+
+    if(entry->priority <= max_priority) continue;
+    
+    match = true;
+    for(int byte_index = 0; byte_index < nbytes_key; byte_index++) {
+      if(entry->key[byte_index] != (key[byte_index] & entry->mask[byte_index])) {
+	match = false;
+	break;
+      }
+    }
+
+    if(match) {
+      max_priority = entry->priority;
+      max_entry = entry;
+    }
+  }
+
+  return max_entry;
 }
 
 MatchTable::ErrorCode TernaryMatchTable::add_entry(const ByteContainer &key,
