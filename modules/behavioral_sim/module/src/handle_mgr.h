@@ -44,7 +44,10 @@ public:
       int Rc_int;
       Word_t jindex = index;;
       J1N(Rc_int, handle_mgr->handles, jindex);
-      index = jindex;
+      if(!Rc_int)
+	index = -1;
+      else
+	index = jindex;
       return *this;
     }
 
@@ -90,7 +93,10 @@ public:
       int Rc_int;
       Word_t jindex = index;
       J1N(Rc_int, handle_mgr->handles, jindex);
-      index = jindex;
+      if(!Rc_int)
+	index = -1;
+      else
+	index = jindex;
       return *this;
     }
 
@@ -194,6 +200,7 @@ public:
     Word_t index = 0;
     int Rc_int;
     J1F(Rc_int, handles, index);
+    if(!Rc_int) index = -1;
     return iterator(this, index);
   }
 
@@ -201,20 +208,21 @@ public:
     Word_t index = 0;
     int Rc_int;
     J1F(Rc_int, handles, index);
+    if(!Rc_int) index = -1;
     return const_iterator(this, index);
   }
 
   iterator end() {
     Word_t index = -1;
-    int Rc_int;
-    J1L(Rc_int, handles, index);
+    /* int Rc_int; */
+    /* J1L(Rc_int, handles, index); */
     return iterator(this, index);
   }
 
   const_iterator end() const {
     Word_t index = -1;
-    int Rc_int;
-    J1L(Rc_int, handles, index);
+    /* int Rc_int; */
+    /* J1L(Rc_int, handles, index); */
     return const_iterator(this, index);
   }
 
