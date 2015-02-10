@@ -35,16 +35,6 @@ ifndef SUBMODULE_INFRA
   endif
 endif
 
-ifndef SUBMODULE_BIGCODE
-  ifdef SUBMODULES
-    SUBMODULE_BIGCODE := $(SUBMODULES)/bigcode
-  else
-    SUBMODULE_BIGCODE := $(ROOT)/submodules/bigcode
-    SUBMODULES_LOCAL += bigcode
-  endif
-endif
-
-
 ifdef SUBMODULES_LOCAL
   SUBMODULES_LOCAL_UPDATE := $(shell python $(ROOT)/submodules/init.py --update $(SUBMODULES_LOCAL))
   ifneq ($(lastword $(SUBMODULES_LOCAL_UPDATE)),submodules:ok.)
@@ -56,15 +46,12 @@ ifdef SUBMODULES_LOCAL
 endif
 
 export SUBMODULE_INFRA
-export SUBMODULE_BIGCODE
 export BUILDER := $(SUBMODULE_INFRA)/builder/unix
 
-MODULE_DIRS := $(ROOT)/modules $(SUBMODULE_INFRA)/modules \
-    $(SUBMODULE_BIGCODE)/modules
+MODULE_DIRS := $(ROOT)/modules $(SUBMODULE_INFRA)/modules
 
 .show-submodules:
 	@echo infra @ $(SUBMODULE_INFRA)
-	@echo bigcode @ $(SUBMODULE_BIGCODE)
 
 
 
