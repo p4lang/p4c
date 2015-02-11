@@ -33,7 +33,7 @@ public:
 
   void insert_prefix(const ByteContainer &prefix, int prefix_length,
 		     uintptr_t value) {
-    bf_lpm_trie_insert(trie, prefix.data(), prefix_length, (void *) value);
+    bf_lpm_trie_insert(trie, prefix.data(), prefix_length, (value_t) value);
   }
 
   bool delete_prefix(const ByteContainer &prefix, int prefix_length) {
@@ -41,7 +41,7 @@ public:
   }
 
   bool lookup(const ByteContainer &key, uintptr_t *value) const {
-    return bf_lpm_trie_get(trie, key.data(), (void **) value);
+    return bf_lpm_trie_get(trie, key.data(), (value_t *) value);
   }
 
 private:
