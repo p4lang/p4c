@@ -34,8 +34,18 @@ struct LongestPrefixMatchEntry : MatchEntry
     : MatchEntry() {}
 
   LongestPrefixMatchEntry(const ByteContainer &key, ActionFn action_fn,
-			  int prefix_length)
-    : MatchEntry(key, action_fn), prefix_length(prefix_length) {}
+			  unsigned prefix_length)
+    : MatchEntry(key, action_fn), prefix_length(prefix_length) {
+    unsigned byte_index = prefix_length / 8;
+    unsigned mod = prefix_length % 8;
+    if(mod > 0) {
+      byte_index++;
+      this->key[byte_index] &= ~(0xFF >> mod);
+    }
+    for(; byte_index < key.size(); byte_index++) {
+      this->key[byte_index] = 0;
+    }
+  }
 };
 
 struct TernaryMatchEntry : MatchEntry

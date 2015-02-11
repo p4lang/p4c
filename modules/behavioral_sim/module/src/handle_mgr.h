@@ -5,6 +5,8 @@
 
 #include <Judy.h>
 
+typedef uintptr_t handle_t;
+
 class HandleMgrIterator;
 class constHandleMgrIterator;
 
@@ -26,11 +28,11 @@ public:
     friend class const_iterator;
   
   public:
-    iterator(HandleMgr *handle_mgr, unsigned index)
+    iterator(HandleMgr *handle_mgr, handle_t index)
       : handle_mgr(handle_mgr), index(index) {}
     
-    unsigned &operator*() {return index;}
-    unsigned *operator->() {return &index;}
+    handle_t &operator*() {return index;}
+    handle_t *operator->() {return &index;}
     
     bool operator==(const iterator &other) const {
       return (handle_mgr == other.handle_mgr) && (index == other.index);
@@ -60,20 +62,20 @@ public:
 
   private:
     HandleMgr *handle_mgr;
-    unsigned index;
+    handle_t index;
   };
 
   class const_iterator
   {
   public:
-    const_iterator(const HandleMgr *handle_mgr, unsigned index)
+    const_iterator(const HandleMgr *handle_mgr, handle_t index)
       : handle_mgr(handle_mgr), index(index) {}
 
     const_iterator(const iterator &other)
       : handle_mgr(other.handle_mgr), index(other.index) {}
     
-    const unsigned &operator*() const {return index;}
-    const unsigned *operator->() const {return &index;}
+    const handle_t &operator*() const {return index;}
+    const handle_t *operator->() const {return &index;}
 
     const_iterator& operator=(const const_iterator &other) {
       handle_mgr = other.handle_mgr;
@@ -109,7 +111,7 @@ public:
 
   private:
     const HandleMgr *handle_mgr;
-    unsigned index;
+    handle_t index;
   };
 
 
@@ -162,7 +164,7 @@ public:
 
   /* Return 0 on success, -1 on failure */
 
-  int get_handle(unsigned *handle) {
+  int get_handle(handle_t *handle) {
     Word_t jhandle = 0;
     int Rc;
 
@@ -176,7 +178,7 @@ public:
     return 0;
   }
 
-  int release_handle(unsigned handle) {
+  int release_handle(handle_t handle) {
     int Rc;
     J1U(Rc, handles, handle); // Judy1Unset()
     return Rc ? 0 : -1;
@@ -188,7 +190,7 @@ public:
     return size;
   }
 
-  bool valid_handle(unsigned handle) const {
+  bool valid_handle(handle_t handle) const {
     int Rc;
     J1T(Rc, handles, handle); // Judy1Test()
     return (Rc == 1);

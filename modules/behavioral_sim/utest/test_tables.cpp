@@ -35,6 +35,15 @@ TableSizeOne<ExactMatchTable>::add_entry(const ByteContainer &key,
 
 template<>
 MatchTable::ErrorCode
+TableSizeOne<LongestPrefixMatchTable>::add_entry(const ByteContainer &key,
+						 entry_handle_t *handle) {
+  ActionFn action_fn;
+  int prefix_length = 16;
+  return table.add_entry(key, prefix_length, action_fn, handle);
+}
+
+template<>
+MatchTable::ErrorCode
 TableSizeOne<TernaryMatchTable>::add_entry(const ByteContainer &key,
 					   entry_handle_t *handle) {
   char mask_[2] = {(char) 0xff, (char) 0xff};
@@ -44,7 +53,9 @@ TableSizeOne<TernaryMatchTable>::add_entry(const ByteContainer &key,
   return table.add_entry(key, mask, priority, action_fn, handle);
 }
 
-typedef Types<ExactMatchTable, TernaryMatchTable> TableTypes;
+typedef Types<ExactMatchTable,
+	      LongestPrefixMatchTable,
+	      TernaryMatchTable> TableTypes;
 
 TYPED_TEST_CASE(TableSizeOne, TableTypes);
 

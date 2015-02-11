@@ -24,7 +24,7 @@ TYPED_TEST(SimpleTest, Iterate) {
   HandleMgr handle_mgr;
 
   const int N = 32;
-  unsigned handles[N];
+  handle_t handles[N];
   
   int rc;
   int i;

@@ -9,12 +9,13 @@
 #include "actions.h"
 #include "bytecontainer.h"
 #include "handle_mgr.h"
+#include "lpm_trie.h"
 
 using std::vector;
 using std::unordered_map;
 using std::pair;
 
-typedef unsigned entry_handle_t;
+typedef uintptr_t entry_handle_t;
 
 struct MatchKeyBuilder
 {
@@ -99,7 +100,8 @@ class LongestPrefixMatchTable : public MatchTable
 public:
   LongestPrefixMatchTable(int size, int nbytes_key, 
 			  const MatchKeyBuilder &match_key_builder)
-    : MatchTable(size, nbytes_key, match_key_builder) {
+    : MatchTable(size, nbytes_key, match_key_builder),
+    entries_trie(nbytes_key) {
     entries = vector<LongestPrefixMatchEntry>(size);
   }
   
@@ -110,6 +112,7 @@ public:
 
 private:
   vector<LongestPrefixMatchEntry> entries;
+  LPMTrie entries_trie;
 };
 
 

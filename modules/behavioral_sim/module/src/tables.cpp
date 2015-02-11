@@ -76,9 +76,11 @@ MatchTable::ErrorCode ExactMatchTable::delete_entry(entry_handle_t handle)
 
 const LongestPrefixMatchEntry *LongestPrefixMatchTable::lookup(const ByteContainer &key) const
 {
-  /* TODO */
-  LongestPrefixMatchEntry *entry = NULL;
-  return entry;
+  entry_handle_t handle;
+  if(entries_trie.lookup(key, &handle)) {
+    return &entries[handle];
+  }
+  return nullptr;
 }
 
 MatchTable::ErrorCode LongestPrefixMatchTable::add_entry(const ByteContainer &key,
@@ -86,22 +88,26 @@ MatchTable::ErrorCode LongestPrefixMatchTable::add_entry(const ByteContainer &ke
 							 const ActionFn &action_fn,
 							 entry_handle_t *handle)
 {
-  /* TODO */
-  return get_and_set_handle(handle);
+  assert(prefix_length >= 0);
+  ErrorCode status = get_and_set_handle(handle);
+  if(status != SUCCESS) return status;
+  
+  entries[*handle] = LongestPrefixMatchEntry(key, action_fn, prefix_length);
+  entries_trie.insert_prefix(entries[*handle].key, prefix_length, *handle);
+
+  return SUCCESS;
 }
 
 MatchTable::ErrorCode LongestPrefixMatchTable::delete_entry(entry_handle_t handle)
 {
-  /* TODO */
+  if(!valid_handle(handle)) return INVALID_HANDLE;
+  LongestPrefixMatchEntry &entry = entries[handle];
+  assert(entries_trie.delete_prefix(entry.key, entry.prefix_length));
   return MatchTable::delete_entry(handle);
 }
 
 const TernaryMatchEntry *TernaryMatchTable::lookup(const ByteContainer &key) const
 {
-  // auto entry_it = entries_map.find(key);
-  // if(entry_it == entries_map.end()) return nullptr;
-  // return &entries[entry_it->second];
-
   int max_priority = 0;
   bool match;
 

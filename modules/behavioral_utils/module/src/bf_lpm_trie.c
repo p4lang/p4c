@@ -60,7 +60,7 @@ void bf_lpm_trie_destroy(bf_lpm_trie_t *t) {
   free(t);
 }
 
-static inline node_t *get_next_node(node_t *current_node, byte_t byte) {
+static inline node_t *get_next_node(const node_t *current_node, byte_t byte) {
   Word_t *pnode;
   JLG(pnode, current_node->PJLarray_branches, (Word_t) byte);
   if(!pnode) return NULL;
@@ -88,7 +88,7 @@ static inline unsigned short get_prefix_key(unsigned prefix_length,
 /* returns 1 if was present, 0 otherwise */
 static inline int insert_prefix(node_t *current_node,
 				unsigned short prefix_key,
-				void *value) {
+				const void *value) {
   Word_t *pvalue;
   int rc;
   JLI(pvalue, current_node->PJLarray_prefixes, (Word_t) prefix_key);
@@ -97,15 +97,7 @@ static inline int insert_prefix(node_t *current_node,
   return rc;
 }
 
-static inline void *get_prefix(node_t *current_node,
-			       unsigned short prefix_key) {
-  Word_t *pvalue;
-  JLG(pvalue, current_node->PJLarray_prefixes, (Word_t) prefix_key);
-  if(!pvalue) return NULL;
-  return (void *) *pvalue;
-}
-
-static inline void **get_prefix_ptr(node_t *current_node,
+static inline void **get_prefix_ptr(const node_t *current_node,
 				    unsigned short prefix_key) {
   Word_t *pvalue;
   JLG(pvalue, current_node->PJLarray_prefixes, (Word_t) prefix_key);
@@ -121,8 +113,8 @@ static inline int delete_prefix(node_t *current_node,
 }
 
 void bf_lpm_trie_insert(bf_lpm_trie_t *trie,
-			char *prefix, int prefix_length,
-			void *value) {
+			const char *prefix, int prefix_length,
+			const void *value) {
   node_t *current_node = trie->root;
   byte_t byte;
   unsigned short prefix_key;
@@ -152,27 +144,27 @@ void bf_lpm_trie_insert(bf_lpm_trie_t *trie,
     current_node->pref_num++;
 }
 
-void *bf_lpm_trie_get(bf_lpm_trie_t *trie, char *key) {
-  node_t *current_node = trie->root;
+bool bf_lpm_trie_get(const bf_lpm_trie_t *trie, const char *key,
+		     void **pvalue) {
+  const node_t *current_node = trie->root;
   byte_t byte;
   size_t key_width = trie->key_width_bytes;
-  void *best_fit_data = NULL;
-  void *data;
+  void **pdata = NULL;
   unsigned short prefix_key;
   unsigned i;
 
   while(current_node) {
-    data = get_prefix(current_node, 0);
-    if(data) {
-      best_fit_data = data;
+    pdata = get_prefix_ptr(current_node, 0);
+    if(pdata) {
+      *pvalue = *pdata;
     }
     if(key_width > 0) {
       byte = (byte_t) *key;
       for(i = 7; i > 0; i--) {
 	prefix_key = get_prefix_key((unsigned) i, byte);
-	data = get_prefix(current_node, prefix_key);
-	if(data) {
-	  best_fit_data = data;
+	pdata = get_prefix_ptr(current_node, prefix_key);
+	if(pdata) {
+	  *pvalue = *pdata;
 	  break;
 	}
       }
@@ -186,15 +178,15 @@ void *bf_lpm_trie_get(bf_lpm_trie_t *trie, char *key) {
     }
   }
 
-  return best_fit_data;
+  return (pdata != NULL);
 }
 
-void *bf_lpm_trie_delete(bf_lpm_trie_t *trie, char *prefix, int prefix_length) {
+bool bf_lpm_trie_delete(bf_lpm_trie_t *trie, const char *prefix,
+			int prefix_length) {
   node_t *current_node = trie->root;
   byte_t byte;
   unsigned short prefix_key;
-  void **pdata;
-  void *data;
+  void **pdata = NULL;
 
   while(prefix_length >= 8) {
     byte = (byte_t) *prefix;
@@ -212,10 +204,7 @@ void *bf_lpm_trie_delete(bf_lpm_trie_t *trie, char *prefix, int prefix_length) {
     prefix_key = get_prefix_key((unsigned) prefix_length, (byte_t) *prefix);
 
   pdata = get_prefix_ptr(current_node, prefix_key);
-  if(!pdata) return NULL;
-
-  data = *pdata;
-  *pdata = NULL;
+  if(!pdata) return false;
 
   if(trie->release_memory) {
     assert(delete_prefix(current_node, prefix_key) == 1);
@@ -230,7 +219,7 @@ void *bf_lpm_trie_delete(bf_lpm_trie_t *trie, char *prefix, int prefix_length) {
     }
   }
   
-  return data;
+  return true;
 }
 
 
