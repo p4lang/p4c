@@ -5,6 +5,7 @@
 #include <string>
 
 #include "entries.h"
+#include "packet.h"
 #include "phv.h"
 #include "actions.h"
 #include "bytecontainer.h"
@@ -52,7 +53,7 @@ public:
       nbytes_key(nbytes_key),
       match_key_builder(match_key_builder) { }
   
-  void apply(const PHV &phv);
+  void apply(const Packet &pkt, PHV *phv);
   
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
   virtual ErrorCode delete_entry(entry_handle_t handle);

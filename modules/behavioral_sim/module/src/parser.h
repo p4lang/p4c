@@ -4,6 +4,7 @@
 #include <utility>
 #include <iostream>
 
+#include "packet.h"
 #include "phv.h"
 
 using std::pair;
@@ -12,7 +13,7 @@ using std::vector;
 struct ParserOp {
   virtual ~ParserOp() {};
   virtual void operator()(const char *data,
-			  PHV &phv, int *bytes_parsed) const = 0;
+			  PHV *phv, size_t *bytes_parsed) const = 0;
 };
 
 struct ParserOpExtract : ParserOp {
@@ -24,9 +25,9 @@ struct ParserOpExtract : ParserOp {
   ~ParserOpExtract() {}
 
   void operator()(const char *data,
-		  PHV &phv, int *bytes_parsed) const
+		  PHV *phv, size_t *bytes_parsed) const
   {
-    Header &hdr = phv.get_header(header);
+    Header &hdr = phv->get_header(header);
     hdr.extract(data);
     *bytes_parsed += hdr.get_nbytes_packet();
   }
@@ -140,7 +141,7 @@ public:
   }
 
   const ParseState *operator()(const char *data,
-			       PHV &phv, int *bytes_parsed) const;
+			       PHV *phv, size_t *bytes_parsed) const;
 };
 
 class Parser {
@@ -158,7 +159,7 @@ public:
     init_state = state;
   }
 
-  void parse(const char *data, PHV &phv) const;
+  void parse(Packet *pkt, PHV *phv) const;
 };
 
 #endif

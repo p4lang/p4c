@@ -2,6 +2,7 @@
 #define _BM_DEPARSER_H_
 
 #include "phv.h"
+#include "packet.h"
 
 using std::vector;
 
@@ -16,7 +17,9 @@ public:
     headers.push_back(header_id);
   }
 
-  void deparse(const PHV &phv, char *data) const;
+  size_t get_headers_size(const PHV &phv) const;
+
+  void deparse(const PHV &phv, Packet *pkt) const;
 
 };
 

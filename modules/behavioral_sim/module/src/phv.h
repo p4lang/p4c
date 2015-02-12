@@ -8,8 +8,6 @@
 #include "fields.h"
 #include "headers.h"
 
-#include "packet.h"
-
 typedef int header_id_t;
 
 

@@ -33,10 +33,10 @@ MatchTable::ErrorCode MatchTable::delete_entry(entry_handle_t handle)
   return unset_handle(handle);
 }
 
-void MatchTable::apply(const PHV &phv)
+void MatchTable::apply(const Packet &pkt, PHV *phv)
 {
   ByteContainer lookup_key;
-  build_key(phv, lookup_key);
+  build_key(*phv, lookup_key);
   // char lookup_key[nbytes_key];
   // build_key(phv, lookup_key);
   // MatchEntry *entry = lookup(lookup_key);
