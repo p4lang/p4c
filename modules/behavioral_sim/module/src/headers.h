@@ -44,7 +44,7 @@ private:
   int nbytes_packet;
 
 public:
- Header() : valid(false), nbytes_phv(0), nbytes_packet(0) {}
+  Header() : valid(false), nbytes_phv(0), nbytes_packet(0) {}
 
   Header(const HeaderType &header_type)
   {
@@ -53,16 +53,13 @@ public:
     nbytes_packet = 0;
     header_type_id = header_type.get_type_id();
     for(int i = 0; i < header_type.get_num_fields(); i++) {
+      // use emplace_back instead?
       fields.push_back(Field(header_type.get_bit_width(i)));
       nbytes_phv += fields.back().get_nbytes();
       nbytes_packet += fields.back().get_nbits();
     }
     assert(nbytes_packet % 8 == 0);
     nbytes_packet /= 8;
-  }
-
-  ~Header() {
-
   }
 
   int get_nbytes_packet() const {
@@ -87,20 +84,6 @@ public:
 
   const Field &get_field(int field_offset) const {
     return fields[field_offset];
-  }
-
-  Header& operator=(const Header &other) {
-    if(&other == this)
-      return *this;
-    assert(NULL);
-    // assert(header_type_id == other.header_type_id);
-    // for(unsigned field_index = 0; field_index < fields.size(); field_index++) {
-    //   fields[field_index] = other.fields[field_index];
-    // }
-    header_type_id = other.header_type_id;
-    fields = other.fields;
-    valid = other.valid;
-    return *this;
   }
 
   void extract(const char *data) {

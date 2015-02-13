@@ -19,6 +19,7 @@ private:
 public:
   header_id_t add_header(const HeaderType &header_type)
   {
+    // use emplace_back instead?
     headers.push_back( Header(header_type) );
     return headers.size() - 1;
   }
