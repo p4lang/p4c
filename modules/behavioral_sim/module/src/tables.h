@@ -15,6 +15,7 @@
 using std::vector;
 using std::unordered_map;
 using std::pair;
+using std::string;
 
 typedef uintptr_t entry_handle_t;
 
@@ -47,11 +48,15 @@ public:
     ERROR
   };
 public:
-  MatchTable(size_t size, int nbytes_key,
+  MatchTable(string name, size_t size, int nbytes_key,
 	     const MatchKeyBuilder &match_key_builder)
-    : size(size), num_entries(0),
+    : name(name), size(size), num_entries(0),
       nbytes_key(nbytes_key),
-      match_key_builder(match_key_builder) { }
+      match_key_builder(match_key_builder) {
+    auto table_it = tables_map.find(name);
+    assert(table_it == tables_map.end()); // make sure the table name is not taken
+    tables_map[name] = this;
+  }
   
   void apply(const Packet &pkt, PHV *phv);
   
@@ -61,12 +66,14 @@ public:
   size_t get_num_entries() const {return num_entries;}
 
 protected:
+  string name;
+
   size_t size;
   size_t num_entries;
   int nbytes_key;
   HandleMgr handles;
-  
   MatchKeyBuilder match_key_builder;
+
   void build_key(const PHV &phv, ByteContainer &key) {
     match_key_builder(phv, key);
   }
@@ -75,15 +82,19 @@ protected:
   ErrorCode unset_handle(entry_handle_t handle);
 
   bool valid_handle(entry_handle_t handle) const;
+
+private:
+  static unordered_map<string, MatchTable *> tables_map;
 };
 
 class ExactMatchTable : public MatchTable
 {
 public:
-  ExactMatchTable(int size, int nbytes_key,
+  ExactMatchTable(string name, int size, int nbytes_key,
 		  const MatchKeyBuilder &match_key_builder)
-    : MatchTable(size, nbytes_key, match_key_builder) {
+    : MatchTable(name, size, nbytes_key, match_key_builder) {
     entries = vector<ExactMatchEntry>(size);
+    entries_map.reserve(size);
   }
 
   const ExactMatchEntry *lookup(const ByteContainer &key) const;
@@ -93,15 +104,15 @@ public:
 
 private:
   vector<ExactMatchEntry> entries;
-  unordered_map<ByteContainer, int, ByteContainerKeyHash> entries_map;
+  unordered_map<ByteContainer, entry_handle_t, ByteContainerKeyHash> entries_map;
 };
 
 class LongestPrefixMatchTable : public MatchTable
 {
 public:
-  LongestPrefixMatchTable(int size, int nbytes_key, 
+  LongestPrefixMatchTable(string name, int size, int nbytes_key, 
 			  const MatchKeyBuilder &match_key_builder)
-    : MatchTable(size, nbytes_key, match_key_builder),
+    : MatchTable(name, size, nbytes_key, match_key_builder),
     entries_trie(nbytes_key) {
     entries = vector<LongestPrefixMatchEntry>(size);
   }
@@ -120,9 +131,9 @@ private:
 class TernaryMatchTable : public MatchTable
 {
 public:
-  TernaryMatchTable(int size, int nbytes_key,
+  TernaryMatchTable(string name, int size, int nbytes_key,
 		    const MatchKeyBuilder &match_key_builder)
-    : MatchTable(size, nbytes_key, match_key_builder) {
+    : MatchTable(name, size, nbytes_key, match_key_builder) {
     entries = vector<TernaryMatchEntry>(size);
   }
 

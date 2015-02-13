@@ -4,7 +4,10 @@
 using std::vector;
 using std::copy;
 
-MatchTable::ErrorCode MatchTable::get_and_set_handle(entry_handle_t *handle)
+unordered_map<string, MatchTable *> MatchTable::tables_map;
+
+MatchTable::ErrorCode
+MatchTable::get_and_set_handle(entry_handle_t *handle)
 {
   if(num_entries >= size) { // table is full
     return TABLE_FULL;
@@ -16,7 +19,8 @@ MatchTable::ErrorCode MatchTable::get_and_set_handle(entry_handle_t *handle)
   return SUCCESS;
 }
 
-MatchTable::ErrorCode MatchTable::unset_handle(entry_handle_t handle)
+MatchTable::ErrorCode
+MatchTable::unset_handle(entry_handle_t handle)
 {
   if(handles.release_handle(handle)) return INVALID_HANDLE;
 
@@ -24,16 +28,19 @@ MatchTable::ErrorCode MatchTable::unset_handle(entry_handle_t handle)
   return SUCCESS;
 }
 
-bool MatchTable::valid_handle(entry_handle_t handle) const {
+bool
+MatchTable::valid_handle(entry_handle_t handle) const {
   return handles.valid_handle(handle);
 }
 
-MatchTable::ErrorCode MatchTable::delete_entry(entry_handle_t handle)
+MatchTable::ErrorCode
+MatchTable::delete_entry(entry_handle_t handle)
 {
   return unset_handle(handle);
 }
 
-void MatchTable::apply(const Packet &pkt, PHV *phv)
+void
+MatchTable::apply(const Packet &pkt, PHV *phv)
 {
   ByteContainer lookup_key;
   build_key(*phv, lookup_key);
@@ -45,16 +52,18 @@ void MatchTable::apply(const Packet &pkt, PHV *phv)
 }
 
 
-const ExactMatchEntry *ExactMatchTable::lookup(const ByteContainer &key) const
+const ExactMatchEntry *
+ExactMatchTable::lookup(const ByteContainer &key) const
 {
   auto entry_it = entries_map.find(key);
   if(entry_it == entries_map.end()) return nullptr;
   return &entries[entry_it->second];
 }
 
-MatchTable::ErrorCode ExactMatchTable::add_entry(const ByteContainer &key,
-						 const ActionFn &action_fn,
-						 entry_handle_t *handle)
+MatchTable::ErrorCode
+ExactMatchTable::add_entry(const ByteContainer &key,
+			   const ActionFn &action_fn,
+			   entry_handle_t *handle)
 {
   ErrorCode status = get_and_set_handle(handle);
   if(status != SUCCESS) return status;
@@ -66,7 +75,8 @@ MatchTable::ErrorCode ExactMatchTable::add_entry(const ByteContainer &key,
   return SUCCESS;
 }
 
-MatchTable::ErrorCode ExactMatchTable::delete_entry(entry_handle_t handle)
+MatchTable::ErrorCode
+ExactMatchTable::delete_entry(entry_handle_t handle)
 {
   if(!valid_handle(handle)) return INVALID_HANDLE;
   ByteContainer &key = entries[handle].key;
@@ -74,7 +84,8 @@ MatchTable::ErrorCode ExactMatchTable::delete_entry(entry_handle_t handle)
   return MatchTable::delete_entry(handle);
 }
 
-const LongestPrefixMatchEntry *LongestPrefixMatchTable::lookup(const ByteContainer &key) const
+const LongestPrefixMatchEntry *
+LongestPrefixMatchTable::lookup(const ByteContainer &key) const
 {
   entry_handle_t handle;
   if(entries_trie.lookup(key, &handle)) {
@@ -83,10 +94,11 @@ const LongestPrefixMatchEntry *LongestPrefixMatchTable::lookup(const ByteContain
   return nullptr;
 }
 
-MatchTable::ErrorCode LongestPrefixMatchTable::add_entry(const ByteContainer &key,
-							 int prefix_length,
-							 const ActionFn &action_fn,
-							 entry_handle_t *handle)
+MatchTable::ErrorCode
+LongestPrefixMatchTable::add_entry(const ByteContainer &key,
+				   int prefix_length,
+				   const ActionFn &action_fn,
+				   entry_handle_t *handle)
 {
   assert(prefix_length >= 0);
   ErrorCode status = get_and_set_handle(handle);
@@ -98,7 +110,8 @@ MatchTable::ErrorCode LongestPrefixMatchTable::add_entry(const ByteContainer &ke
   return SUCCESS;
 }
 
-MatchTable::ErrorCode LongestPrefixMatchTable::delete_entry(entry_handle_t handle)
+MatchTable::ErrorCode
+LongestPrefixMatchTable::delete_entry(entry_handle_t handle)
 {
   if(!valid_handle(handle)) return INVALID_HANDLE;
   LongestPrefixMatchEntry &entry = entries[handle];
@@ -106,7 +119,8 @@ MatchTable::ErrorCode LongestPrefixMatchTable::delete_entry(entry_handle_t handl
   return MatchTable::delete_entry(handle);
 }
 
-const TernaryMatchEntry *TernaryMatchTable::lookup(const ByteContainer &key) const
+const TernaryMatchEntry *
+TernaryMatchTable::lookup(const ByteContainer &key) const
 {
   int max_priority = 0;
   bool match;
@@ -136,11 +150,12 @@ const TernaryMatchEntry *TernaryMatchTable::lookup(const ByteContainer &key) con
   return max_entry;
 }
 
-MatchTable::ErrorCode TernaryMatchTable::add_entry(const ByteContainer &key,
-						   const ByteContainer &mask,
-						   int priority,
-						   const ActionFn &action_fn,
-						   entry_handle_t *handle)
+MatchTable::ErrorCode
+TernaryMatchTable::add_entry(const ByteContainer &key,
+			     const ByteContainer &mask,
+			     int priority,
+			     const ActionFn &action_fn,
+			     entry_handle_t *handle)
 {
   ErrorCode status = get_and_set_handle(handle);
   if(status != SUCCESS) return status;
@@ -150,7 +165,8 @@ MatchTable::ErrorCode TernaryMatchTable::add_entry(const ByteContainer &key,
   return SUCCESS;
 }
 
-MatchTable::ErrorCode TernaryMatchTable::delete_entry(entry_handle_t handle)
+MatchTable::ErrorCode
+TernaryMatchTable::delete_entry(entry_handle_t handle)
 {
   if(!valid_handle(handle)) return INVALID_HANDLE;
   return MatchTable::delete_entry(handle);
