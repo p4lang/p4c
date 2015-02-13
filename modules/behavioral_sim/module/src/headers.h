@@ -17,8 +17,10 @@ public:
   HeaderType(header_type_id_t type_id)
     : type_id(type_id) {}
 
-  void add_field(int bit_width) {
+  // returns field offset
+  int push_back_field(int bit_width) {
     fields_bit_width.push_back(bit_width);
+    return fields_bit_width.size() - 1;
   }
 
   int get_bit_width(int field_offset) const {

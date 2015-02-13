@@ -43,7 +43,7 @@ struct ParseSwitchKeyBuilder
 {
   vector< pair<header_id_t, int> > fields;
 
-  void add_field(header_id_t header, int field_offset) {
+  void push_back_field(header_id_t header, int field_offset) {
     fields.push_back( pair<header_id_t, int>(header, field_offset) );
   }
   

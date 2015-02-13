@@ -13,7 +13,7 @@ private:
 public:
   Deparser() {}
 
-  void add_header(header_id_t header_id) {
+  void push_back_header(header_id_t header_id) {
     headers.push_back(header_id);
   }
 
