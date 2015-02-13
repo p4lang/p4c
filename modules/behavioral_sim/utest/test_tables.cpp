@@ -38,7 +38,7 @@ MatchTable::ErrorCode
 TableSizeOne<ExactMatchTable>::add_entry(const ByteContainer &key,
 					 entry_handle_t *handle) {
   ActionFn action_fn;
-  return table.add_entry(key, action_fn, handle);
+  return table.add_entry(ExactMatchEntry(key, action_fn), handle);
 }
 
 template<>
@@ -47,7 +47,8 @@ TableSizeOne<LongestPrefixMatchTable>::add_entry(const ByteContainer &key,
 						 entry_handle_t *handle) {
   ActionFn action_fn;
   int prefix_length = 16;
-  return table.add_entry(key, prefix_length, action_fn, handle);
+  return table.add_entry(LongestPrefixMatchEntry(key, action_fn, prefix_length),
+			 handle);
 }
 
 template<>
@@ -58,7 +59,8 @@ TableSizeOne<TernaryMatchTable>::add_entry(const ByteContainer &key,
   ByteContainer mask(mask_, sizeof(mask_));
   ActionFn action_fn;
   int priority = 1;
-  return table.add_entry(key, mask, priority, action_fn, handle);
+  return table.add_entry(TernaryMatchEntry(key, action_fn, mask, priority),
+			 handle);
 }
 
 typedef Types<ExactMatchTable,

@@ -98,8 +98,8 @@ public:
   }
 
   const ExactMatchEntry *lookup(const ByteContainer &key) const;
-  ErrorCode add_entry(const ByteContainer &key, const ActionFn &action_fn,
-		      entry_handle_t *handle);
+  // ErrorCode add_entry(const ExactMatchEntry &entry, entry_handle_t *handle);
+  ErrorCode add_entry(ExactMatchEntry &&entry, entry_handle_t *handle);
   ErrorCode delete_entry(entry_handle_t handle);
 
 private:
@@ -118,8 +118,10 @@ public:
   }
   
   const LongestPrefixMatchEntry *lookup(const ByteContainer &key) const;
-  ErrorCode add_entry(const ByteContainer &key, int prefix_length,
-		      const ActionFn &action_fn, entry_handle_t *handle);
+  // ErrorCode add_entry(const LongestPrefixMatchEntry &entry,
+  // 		      entry_handle_t *handle);
+  ErrorCode add_entry(LongestPrefixMatchEntry &&entry,
+		      entry_handle_t *handle);
   ErrorCode delete_entry(entry_handle_t handle);
 
 private:
@@ -138,8 +140,8 @@ public:
   }
 
   const TernaryMatchEntry *lookup(const ByteContainer &key) const;
-  ErrorCode add_entry(const ByteContainer &key, const ByteContainer &mask,
-		      int priority, const ActionFn &action_fn, entry_handle_t *handle);
+  // ErrorCode add_entry(const TernaryMatchEntry &entry, entry_handle_t *handle);
+  ErrorCode add_entry(TernaryMatchEntry &&entry, entry_handle_t *handle);
   ErrorCode delete_entry(entry_handle_t handle);
 
 private:

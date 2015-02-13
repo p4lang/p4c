@@ -61,15 +61,14 @@ ExactMatchTable::lookup(const ByteContainer &key) const
 }
 
 MatchTable::ErrorCode
-ExactMatchTable::add_entry(const ByteContainer &key,
-			   const ActionFn &action_fn,
-			   entry_handle_t *handle)
+ExactMatchTable::add_entry(ExactMatchEntry &&entry, entry_handle_t *handle)
 {
   ErrorCode status = get_and_set_handle(handle);
   if(status != SUCCESS) return status;
   
-  entries[*handle] = ExactMatchEntry(key, action_fn);
+  entries[*handle] = std::move(entry);
   // the key is copied a second time, but it should not incur a significant cost
+  ByteContainer &key = entries[*handle].key;
   entries_map[key] = *handle;
 
   return SUCCESS;
@@ -95,17 +94,17 @@ LongestPrefixMatchTable::lookup(const ByteContainer &key) const
 }
 
 MatchTable::ErrorCode
-LongestPrefixMatchTable::add_entry(const ByteContainer &key,
-				   int prefix_length,
-				   const ActionFn &action_fn,
+LongestPrefixMatchTable::add_entry(LongestPrefixMatchEntry &&entry,
 				   entry_handle_t *handle)
 {
-  assert(prefix_length >= 0);
   ErrorCode status = get_and_set_handle(handle);
   if(status != SUCCESS) return status;
   
-  entries[*handle] = LongestPrefixMatchEntry(key, action_fn, prefix_length);
-  entries_trie.insert_prefix(entries[*handle].key, prefix_length, *handle);
+  entries[*handle] = std::move(entry);
+  ByteContainer &key = entries[*handle].key;
+  int &prefix_length = entries[*handle].prefix_length;
+  assert(prefix_length >= 0);
+  entries_trie.insert_prefix(key, prefix_length, *handle);
 
   return SUCCESS;
 }
@@ -151,16 +150,12 @@ TernaryMatchTable::lookup(const ByteContainer &key) const
 }
 
 MatchTable::ErrorCode
-TernaryMatchTable::add_entry(const ByteContainer &key,
-			     const ByteContainer &mask,
-			     int priority,
-			     const ActionFn &action_fn,
-			     entry_handle_t *handle)
+TernaryMatchTable::add_entry(TernaryMatchEntry &&entry, entry_handle_t *handle)
 {
   ErrorCode status = get_and_set_handle(handle);
   if(status != SUCCESS) return status;
   
-  entries[*handle] = TernaryMatchEntry(key, action_fn, mask, priority);
+  entries[*handle] = std::move(entry);
 
   return SUCCESS;
 }
