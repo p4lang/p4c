@@ -10,6 +10,8 @@ int pull_test_packet();
 int pull_test_tables();
 // implemented in test_handle_mgr.cpp
 int pull_test_handle_mgr();
+// implemented in test_queue.cpp
+int pull_test_queue();
 
 // See this link for explanation:
 // https://code.google.com/p/googletest/wiki/Primer#Important_note_for_Visual_C++_users
@@ -19,6 +21,7 @@ void pull_tests() {
   pull_test_packet();
   pull_test_tables();
   pull_test_handle_mgr();
+  pull_test_queue();
 }
 
 #ifdef __cplusplus
