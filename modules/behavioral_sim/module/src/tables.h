@@ -48,7 +48,7 @@ public:
     ERROR
   };
 public:
-  MatchTable(string name, size_t size, int nbytes_key,
+  MatchTable(const string &name, size_t size, size_t nbytes_key,
 	     const MatchKeyBuilder &match_key_builder)
     : name(name), size(size), num_entries(0),
       nbytes_key(nbytes_key),
@@ -56,6 +56,10 @@ public:
     auto table_it = tables_map.find(name);
     assert(table_it == tables_map.end()); // make sure the table name is not taken
     tables_map[name] = this;
+  }
+
+  ~MatchTable() {
+    tables_map.erase(name);
   }
   
   void apply(const Packet &pkt, PHV *phv);
@@ -65,12 +69,14 @@ public:
 
   size_t get_num_entries() const {return num_entries;}
 
+  size_t get_nbytes_key() const {return nbytes_key;}
+
 protected:
   string name;
 
   size_t size;
   size_t num_entries;
-  int nbytes_key;
+  size_t nbytes_key;
   HandleMgr handles;
   MatchKeyBuilder match_key_builder;
 
@@ -85,12 +91,15 @@ protected:
 
 private:
   static unordered_map<string, MatchTable *> tables_map;
+
+public:
+  static MatchTable *get_table(const string &name);
 };
 
 class ExactMatchTable : public MatchTable
 {
 public:
-  ExactMatchTable(string name, int size, int nbytes_key,
+  ExactMatchTable(const string &name, int size, int nbytes_key,
 		  const MatchKeyBuilder &match_key_builder)
     : MatchTable(name, size, nbytes_key, match_key_builder) {
     entries = vector<ExactMatchEntry>(size);
@@ -110,7 +119,7 @@ private:
 class LongestPrefixMatchTable : public MatchTable
 {
 public:
-  LongestPrefixMatchTable(string name, int size, int nbytes_key, 
+  LongestPrefixMatchTable(const string &name, int size, int nbytes_key, 
 			  const MatchKeyBuilder &match_key_builder)
     : MatchTable(name, size, nbytes_key, match_key_builder),
     entries_trie(nbytes_key) {
@@ -133,7 +142,7 @@ private:
 class TernaryMatchTable : public MatchTable
 {
 public:
-  TernaryMatchTable(string name, int size, int nbytes_key,
+  TernaryMatchTable(const string &name, int size, int nbytes_key,
 		    const MatchKeyBuilder &match_key_builder)
     : MatchTable(name, size, nbytes_key, match_key_builder) {
     entries = vector<TernaryMatchEntry>(size);

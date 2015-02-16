@@ -12,15 +12,11 @@ using std::to_string;
 template <typename TableType>
 class TableSizeOne : public ::testing::Test {
 protected:
-  static int table_cnt;
-  string table_name;
   MatchKeyBuilder key_builder;
   TableType table;
 
-  // a bit dirty, but we need to generate a unique name for the table
   TableSizeOne() 
-    : table_name(typeid(TableType).name() + to_string(++table_cnt)),
-      key_builder(), table(table_name, 1, 2, key_builder) { }
+    : key_builder(), table("test_table", 1, 2, key_builder) { }
 
   MatchTable::ErrorCode add_entry(const ByteContainer &key,
 				  entry_handle_t *handle);
@@ -29,9 +25,6 @@ protected:
 
   // virtual void TearDown() {}
 };
-
-template<typename TableType>
-int TableSizeOne<TableType>::table_cnt = 0;
 
 template<>
 MatchTable::ErrorCode

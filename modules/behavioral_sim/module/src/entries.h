@@ -13,7 +13,7 @@ struct MatchEntry
 
   MatchEntry() {}
 
-  MatchEntry(const ByteContainer &key, ActionFn action_fn)
+  MatchEntry(const ByteContainer &key, ActionFn &action_fn)
     : key(key), action_fn(action_fn) {}
 };
 
@@ -22,7 +22,7 @@ struct ExactMatchEntry: MatchEntry
   ExactMatchEntry()
     : MatchEntry() {}
 
-  ExactMatchEntry(const ByteContainer &key, ActionFn action_fn)
+  ExactMatchEntry(const ByteContainer &key, ActionFn &action_fn)
     : MatchEntry(key, action_fn) {}
 };
 
@@ -33,7 +33,7 @@ struct LongestPrefixMatchEntry : MatchEntry
   LongestPrefixMatchEntry()
     : MatchEntry() {}
 
-  LongestPrefixMatchEntry(const ByteContainer &key, ActionFn action_fn,
+  LongestPrefixMatchEntry(const ByteContainer &key, ActionFn &action_fn,
 			  unsigned prefix_length)
     : MatchEntry(key, action_fn), prefix_length(prefix_length) {
     unsigned byte_index = prefix_length / 8;
@@ -56,7 +56,7 @@ struct TernaryMatchEntry : MatchEntry
   TernaryMatchEntry()
     : MatchEntry() {}
 
-  TernaryMatchEntry(const ByteContainer &key, ActionFn action_fn,
+  TernaryMatchEntry(const ByteContainer &key, ActionFn &action_fn,
 		    const ByteContainer &mask, int priority)
     : MatchEntry(key, action_fn), mask(mask), priority(priority) {
     for(unsigned byte_index = 0; byte_index < key.size(); byte_index++) {

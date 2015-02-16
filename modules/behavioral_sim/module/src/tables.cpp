@@ -3,8 +3,15 @@
 
 using std::vector;
 using std::copy;
+using std::string;
 
 unordered_map<string, MatchTable *> MatchTable::tables_map;
+
+MatchTable * MatchTable::get_table(const string &name) {
+  auto table_it = tables_map.find(name);
+  if(table_it == tables_map.end()) return nullptr;
+  return table_it->second;
+}
 
 MatchTable::ErrorCode
 MatchTable::get_and_set_handle(entry_handle_t *handle)
@@ -133,7 +140,7 @@ TernaryMatchTable::lookup(const ByteContainer &key) const
     if(entry->priority <= max_priority) continue;
     
     match = true;
-    for(int byte_index = 0; byte_index < nbytes_key; byte_index++) {
+    for(size_t byte_index = 0; byte_index < nbytes_key; byte_index++) {
       if(entry->key[byte_index] != (key[byte_index] & entry->mask[byte_index])) {
 	match = false;
 	break;

@@ -28,7 +28,7 @@ public:
   ByteContainer(const vector<char> &bytes)
     : bytes(bytes) {}
 
-  ByteContainer(const char *bytes, int nbytes)
+  ByteContainer(const char *bytes, size_t nbytes)
     : bytes(vector<char>(bytes, bytes + nbytes)) {}
 
   size_type size() const noexcept { return bytes.size(); }
