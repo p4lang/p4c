@@ -98,8 +98,8 @@ void P4Objects::init_objects(std::istream &is) {
       	// ignore mask for now
 	const string next_state_name = cfg_transition["next_state"].asString();
       	const ParseState *next_state = current_parse_states[next_state_name];
-	ByteContainer c(9);
-	parse_state->add_switch_case(c, next_state);
+	parse_state->add_switch_case(ByteContainer(value_hexstr),
+				     next_state);
       }
     }
 
