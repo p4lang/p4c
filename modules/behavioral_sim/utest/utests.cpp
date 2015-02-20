@@ -14,6 +14,8 @@ int pull_test_handle_mgr();
 int pull_test_queue();
 // implemented in test_runtime.cpp
 int pull_test_runtime();
+// implemented in test_p4objects.cpp
+int pull_test_p4objects();
 
 // See this link for explanation:
 // https://code.google.com/p/googletest/wiki/Primer#Important_note_for_Visual_C++_users
@@ -25,6 +27,7 @@ void pull_tests() {
   pull_test_handle_mgr();
   pull_test_queue();
   pull_test_runtime();
+  pull_test_p4objects();
 }
 
 #ifdef __cplusplus

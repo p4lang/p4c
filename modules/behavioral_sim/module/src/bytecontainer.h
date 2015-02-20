@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iterator>
+#include <string>
 
 #include <boost/functional/hash.hpp>
 
@@ -30,6 +31,17 @@ public:
 
   ByteContainer(const char *bytes, size_t nbytes)
     : bytes(vector<char>(bytes, bytes + nbytes)) {}
+
+  ByteContainer(const std::string hexstring) {
+    for (char c : hexstring) {
+      if(c >= '0' && c <= '9')
+	bytes.push_back(c - '0');
+      if(c >= 'A' && c <= 'F')
+	bytes.push_back(c - 'A' + 10);
+      if(c >= 'a' && c <= 'f')
+	bytes.push_back(c - 'a' + 10);
+    }
+  }
 
   size_type size() const noexcept { return bytes.size(); }
 
@@ -88,6 +100,8 @@ public:
   bool operator!=(const ByteContainer& other) const {
     return !(*this == other);
   }
+
+  // TODO: implement reserve
 
 private:
   vector<char> bytes;

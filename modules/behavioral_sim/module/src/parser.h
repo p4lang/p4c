@@ -3,12 +3,16 @@
 
 #include <utility>
 #include <iostream>
+#include <string>
+
+#include <cassert>
 
 #include "packet.h"
 #include "phv.h"
 
 using std::pair;
 using std::vector;
+using std::string;
 
 struct ParserOp {
   virtual ~ParserOp() {};
@@ -70,30 +74,26 @@ class ParseState;
 
 class ParseSwitchCase {
 private:
-  int nbytes_key;
   ByteContainer key;
   ByteContainer mask;
   bool with_mask;
   const ParseState *next_state; /* NULL if end */
 
 public:
-  ParseSwitchCase(int nbytes_key, const ByteContainer &key,
-		  const ParseState *next_state)
-    : nbytes_key(nbytes_key), key(key), with_mask(false),
-      next_state(next_state) {
+  ParseSwitchCase(const ByteContainer &key, const ParseState *next_state)
+    : key(key), with_mask(false), next_state(next_state) {
   }
 
-  ParseSwitchCase(int nbytes_key, const char *key,
-		  const ParseState *next_state)
-    : nbytes_key(nbytes_key), key(ByteContainer(key, nbytes_key)),
+  ParseSwitchCase(int nbytes_key, const char *key, const ParseState *next_state)
+    : key(ByteContainer(key, nbytes_key)),
       with_mask(false), next_state(next_state) {
   }
-
-  ParseSwitchCase(int nbytes_key, const ByteContainer &key,
+  
+  ParseSwitchCase(const ByteContainer &key,
 		  const ByteContainer &mask,
 		  const ParseState *next_state)
-    : nbytes_key(nbytes_key), key(key), mask(mask), with_mask(true),
-      next_state(next_state) {
+    : key(key), mask(mask), with_mask(true), next_state(next_state) {
+	assert(key.size() == mask.size());
   }
 
   bool match(const ByteContainer &input, const ParseState **state) const;
@@ -101,36 +101,36 @@ public:
 
 class ParseState {
 private:
+  string name;
   vector<ParserOp *> parser_ops;
-  int nbytes_key;
   bool has_switch;
   ParseSwitchKeyBuilder key_builder;
   vector<ParseSwitchCase> parser_switch;
 
 public:
-  ParseState()
-    : has_switch(false) {}
+  ParseState(string name)
+    : name(name), has_switch(false) {}
 
   void add_extract(header_id_t header) {
     ParserOp *parser_op = new ParserOpExtract(header);
-    // std::cout << parser_op << std::endl;
     parser_ops.push_back(parser_op);
-    // std::cout << parser_op << std::endl;
   }
 
-  void set_key_builder(int nbytes, const ParseSwitchKeyBuilder &builder) {
+  void set_key_builder(const ParseSwitchKeyBuilder &builder) {
     has_switch = true;
     key_builder = builder;
-    nbytes_key = nbytes;
   }
 
   void add_switch_case(const ByteContainer &key, const ParseState *next_state) {
+    parser_switch.push_back( ParseSwitchCase(key, next_state) );
+  }
+
+  void add_switch_case(int nbytes_key, const char *key,
+		       const ParseState *next_state) {
     parser_switch.push_back( ParseSwitchCase(nbytes_key, key, next_state) );
   }
 
-  void add_switch_case(const char *key, const ParseState *next_state) {
-    parser_switch.push_back( ParseSwitchCase(nbytes_key, key, next_state) );
-  }
+  const string &get_name() const { return name; }
 
   ~ParseState() {
     for (vector<ParserOp *>::iterator it = parser_ops.begin();
@@ -140,26 +140,35 @@ public:
     }
   }
 
+  // Copy constructor
+  ParseState (const ParseState& other) = delete;
+
+  // Copy assignment operator
+  ParseState &operator =(const ParseState& other) = delete;
+ 
+  // Move constructor
+  ParseState(ParseState&& other)= default;
+ 
+  // Move assignment operator
+  ParseState &operator =(ParseState &&other) = default;
+
   const ParseState *operator()(const char *data,
 			       PHV *phv, size_t *bytes_parsed) const;
 };
 
 class Parser {
-private:
-  const ParseState *init_state;
-  
 public:
   Parser()
     : init_state(NULL) {}
-
-  Parser(const ParseState *init_state)
-    : init_state(init_state) {}
 
   void set_init_state(const ParseState *state) {
     init_state = state;
   }
 
   void parse(Packet *pkt, PHV *phv) const;
+
+private:
+  const ParseState *init_state;
 };
 
 #endif

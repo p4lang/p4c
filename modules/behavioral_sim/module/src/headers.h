@@ -2,8 +2,12 @@
 #define _BM_HEADERS_H_
 
 #include <vector>
+#include <string>
 
 #include "fields.h"
+
+using std::vector;
+using std::string;
 
 typedef int header_type_id_t;
 
@@ -11,15 +15,19 @@ class HeaderType
 {
 private:
   header_type_id_t type_id;
-  std::vector<int> fields_bit_width;
+  // TODO: replace vectors by map ?
+  vector<int> fields_bit_width;
+  vector<string> fields_name;
+  string name;
 
 public:
-  HeaderType(header_type_id_t type_id)
-    : type_id(type_id) {}
+  HeaderType(header_type_id_t type_id, const string &name)
+    : type_id(type_id), name(name) {}
 
   // returns field offset
-  int push_back_field(int bit_width) {
-    fields_bit_width.push_back(bit_width);
+  int push_back_field(const string &field_name, int field_bit_width) {
+    fields_bit_width.push_back(field_bit_width);
+    fields_name.push_back(field_name);
     return fields_bit_width.size() - 1;
   }
 
@@ -34,26 +42,31 @@ public:
   int get_num_fields() const {
     return fields_bit_width.size();
   }
+
+  int get_field_offset(const string &field_name) const {
+    int res = 0;
+    while(field_name != fields_name[res]) res++;
+    return res;
+  }
 };
 
 class Header
 {
 private:
-  header_type_id_t header_type_id;
+  string name;
+  const HeaderType &header_type;
   std::vector<Field> fields;
   bool valid;
   int nbytes_phv;
   int nbytes_packet;
 
 public:
-  Header() : valid(false), nbytes_phv(0), nbytes_packet(0) {}
-
-  Header(const HeaderType &header_type)
-  {
+  Header(const string &name, const HeaderType &header_type)
+    : name(name), header_type(header_type) {
     valid = false;
     nbytes_phv = 0;
     nbytes_packet = 0;
-    header_type_id = header_type.get_type_id();
+    // header_type_id = header_type.get_type_id();
     for(int i = 0; i < header_type.get_num_fields(); i++) {
       // use emplace_back instead?
       fields.push_back(Field(header_type.get_bit_width(i)));
@@ -86,6 +99,12 @@ public:
 
   const Field &get_field(int field_offset) const {
     return fields[field_offset];
+  }
+
+  const HeaderType &get_header_type() const { return header_type; }
+  
+  header_type_id_t get_header_type_id() const {
+    return header_type.get_type_id();
   }
 
   void extract(const char *data) {

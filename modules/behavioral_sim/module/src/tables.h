@@ -58,7 +58,7 @@ public:
     tables_map[name] = this;
   }
 
-  ~MatchTable() {
+  virtual ~MatchTable() {
     tables_map.erase(name);
   }
   

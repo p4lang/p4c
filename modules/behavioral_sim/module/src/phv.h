@@ -17,10 +17,11 @@ private:
   std::vector<Header> headers;
 
 public:
-  header_id_t push_back_header(const HeaderType &header_type)
+  header_id_t push_back_header(const string &header_name,
+			       const HeaderType &header_type)
   {
     // use emplace_back instead?
-    headers.push_back( Header(header_type) );
+    headers.push_back( Header(header_name, header_type) );
     return headers.size() - 1;
   }
 

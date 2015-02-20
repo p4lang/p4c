@@ -6,11 +6,24 @@
 // will be subclassed in PD
 struct ActionFn
 {
-  void operator()(const PHV &phv) const
+  void operator()(PHV &phv) const
   {
     // execute the action
   }
 };
+
+/* if there is action data, it will actually look like this: */
+
+/* struct myAction : ActionFn */
+/* { */
+/*   std::vector<Data> action_data; */
+/*   myAction(const std::vector<Data> &action_data) */
+/*     : action_data(action_data) {} */
+/*   void operator()(PHV &phv) const */
+/*   { */
+
+/*   } */
+/* }; */
 
 
 #endif

@@ -9,8 +9,7 @@ bool ParseSwitchCase::match(const ByteContainer &input,
     }
   }
   else {
-    int byte_index;
-    for(byte_index = 0; byte_index < nbytes_key; byte_index++) {
+    for(unsigned int byte_index = 0; byte_index < key.size(); byte_index++) {
       if(key[byte_index] != (input[byte_index] & mask[byte_index]))
 	return false;
     }

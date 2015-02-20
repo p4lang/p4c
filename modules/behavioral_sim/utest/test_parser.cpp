@@ -47,55 +47,59 @@ protected:
   Deparser deparser;
 
   ParserTest()
-    : ethernetHeaderType(0), ipv4HeaderType(1),
-      udpHeaderType(2), tcpHeaderType(3) {
-    ethernetHeaderType.push_back_field(48); // dstAddr
-    ethernetHeaderType.push_back_field(48); // srcAddr
-    ethernetHeaderType.push_back_field(16); // ethertype
+    : ethernetHeaderType(0, "ethernet_t"), ipv4HeaderType(1, "ipv4_t"),
+      udpHeaderType(2, "udp_t"), tcpHeaderType(3, "tcp_t"),
+      ethernetParseState("parse_ethernet"),
+      ipv4ParseState("parse_ipv4"),
+      udpParseState("parse_udp"),
+      tcpParseState("parse_tcp") {
+    ethernetHeaderType.push_back_field("dstAddr", 48);
+    ethernetHeaderType.push_back_field("srcAddr", 48);
+    ethernetHeaderType.push_back_field("ethertype", 16);
 
-    ipv4HeaderType.push_back_field(4); // version
-    ipv4HeaderType.push_back_field(4); // ihl
-    ipv4HeaderType.push_back_field(8); // diffserv
-    ipv4HeaderType.push_back_field(16); // len
-    ipv4HeaderType.push_back_field(16); // identification
-    ipv4HeaderType.push_back_field(3); // flags
-    ipv4HeaderType.push_back_field(13); // flagOffset
-    ipv4HeaderType.push_back_field(8); // ttl
-    ipv4HeaderType.push_back_field(8); // protocol
-    ipv4HeaderType.push_back_field(16); // checksum
-    ipv4HeaderType.push_back_field(32); // srcAddr
-    ipv4HeaderType.push_back_field(32); // dstAddr
+    ipv4HeaderType.push_back_field("version", 4);
+    ipv4HeaderType.push_back_field("ihl", 4);
+    ipv4HeaderType.push_back_field("diffserv", 8);
+    ipv4HeaderType.push_back_field("len", 16);
+    ipv4HeaderType.push_back_field("id", 16);
+    ipv4HeaderType.push_back_field("flags", 3);
+    ipv4HeaderType.push_back_field("flagOffset", 13);
+    ipv4HeaderType.push_back_field("ttl", 8);
+    ipv4HeaderType.push_back_field("protocol", 8);
+    ipv4HeaderType.push_back_field("checksum", 16);
+    ipv4HeaderType.push_back_field("srcAddr", 32);
+    ipv4HeaderType.push_back_field("dstAddr", 32);
 
-    udpHeaderType.push_back_field(16); // srcPort
-    udpHeaderType.push_back_field(16); // dstPort
-    udpHeaderType.push_back_field(16); // length
-    udpHeaderType.push_back_field(16); // checksum  
+    udpHeaderType.push_back_field("srcPort", 16);
+    udpHeaderType.push_back_field("dstPort", 16);
+    udpHeaderType.push_back_field("length", 16);
+    udpHeaderType.push_back_field("checksum", 16);
 
-    tcpHeaderType.push_back_field(16); // srcPort
-    tcpHeaderType.push_back_field(16); // dstPort
-    tcpHeaderType.push_back_field(32); // seqNo
-    tcpHeaderType.push_back_field(32); // ackNo
-    tcpHeaderType.push_back_field(4); // dataOffset
-    tcpHeaderType.push_back_field(4); // res
-    tcpHeaderType.push_back_field(8); // flags
-    tcpHeaderType.push_back_field(16); // window
-    tcpHeaderType.push_back_field(16); // checksum
-    tcpHeaderType.push_back_field(16); // urgentPtr
+    tcpHeaderType.push_back_field("srcPort", 16);
+    tcpHeaderType.push_back_field("dstPort", 16);
+    tcpHeaderType.push_back_field("seqNo", 32);
+    tcpHeaderType.push_back_field("ackNo", 32);
+    tcpHeaderType.push_back_field("dataOffset", 4);
+    tcpHeaderType.push_back_field("res", 4);
+    tcpHeaderType.push_back_field("flags", 8);
+    tcpHeaderType.push_back_field("window", 16);
+    tcpHeaderType.push_back_field("checksum", 16);
+    tcpHeaderType.push_back_field("urgentPtr", 16);
 
-    ethernetHeader = phv.push_back_header(ethernetHeaderType);
-    ipv4Header = phv.push_back_header(ipv4HeaderType);
-    udpHeader = phv.push_back_header(udpHeaderType);
-    tcpHeader = phv.push_back_header(tcpHeaderType);
+    ethernetHeader = phv.push_back_header("ethernet", ethernetHeaderType);
+    ipv4Header = phv.push_back_header("ipv4", ipv4HeaderType);
+    udpHeader = phv.push_back_header("udp", udpHeaderType);
+    tcpHeader = phv.push_back_header("tcp", tcpHeaderType);
   }
 
   virtual void SetUp() {
     ParseSwitchKeyBuilder ethernetKeyBuilder;
     ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
-    ethernetParseState.set_key_builder(2, ethernetKeyBuilder);
+    ethernetParseState.set_key_builder(ethernetKeyBuilder);
 
     ParseSwitchKeyBuilder ipv4KeyBuilder;
     ipv4KeyBuilder.push_back_field(ipv4Header, 8); // protocol
-    ipv4ParseState.set_key_builder(1, ipv4KeyBuilder);
+    ipv4ParseState.set_key_builder(ipv4KeyBuilder);
 
     ethernetParseState.add_extract(ethernetHeader);
     ipv4ParseState.add_extract(ipv4Header);
@@ -105,15 +109,18 @@ protected:
     char ethernet_ipv4_key[2];
     ethernet_ipv4_key[0] = 0x08;
     ethernet_ipv4_key[1] = 0x00;
-    ethernetParseState.add_switch_case(ethernet_ipv4_key, &ipv4ParseState);
+    ethernetParseState.add_switch_case(sizeof(ethernet_ipv4_key),
+				       ethernet_ipv4_key, &ipv4ParseState);
 
     char ipv4_udp_key[1];
     ipv4_udp_key[0] = 17;
-    ipv4ParseState.add_switch_case(ipv4_udp_key, &udpParseState);
+    ipv4ParseState.add_switch_case(sizeof(ipv4_udp_key), ipv4_udp_key,
+				   &udpParseState);
 
     char ipv4_tcp_key[1];
     ipv4_tcp_key[0] = 6;
-    ipv4ParseState.add_switch_case(ipv4_tcp_key, &tcpParseState);
+    ipv4ParseState.add_switch_case(sizeof(ipv4_tcp_key),
+				   ipv4_tcp_key, &tcpParseState);
 
     parser.set_init_state(&ethernetParseState);
 
