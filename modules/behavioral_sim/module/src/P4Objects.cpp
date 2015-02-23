@@ -2,6 +2,8 @@
 #include "behavioral_utils/json.h"
 #include <iostream>
 
+typedef unsigned char opcode_t;
+
 void P4Objects::init_objects(std::istream &is) {
   Json::Value cfg_root;
   is >> cfg_root;
@@ -124,6 +126,44 @@ void P4Objects::init_objects(std::istream &is) {
       deparser->push_back_header(get_header_id(header_name));
     }
   }
+
+  // action primitives' opcodes
+
+  unordered_map<string, opcode_t> primitive_opcodes;
+  const Json::Value cfg_primitive_opcodes = cfg_root["primitive_opcodes"];
+  for (auto it = cfg_primitive_opcodes.begin();
+       it != cfg_primitive_opcodes.end(); it++) {
+    const string primitive_name = it.key().asString();
+    opcode_t opcode = (*it).asInt();
+    primitive_opcodes[primitive_name] = opcode;
+  }
+
+  // actions
+  
+  // const Json::Value cfg_actions = cfg_root["actions"];
+  // for (const auto &cfg_actions : cfg_actions) {
+
+  //   const string action_name = cfg_action["name"].asString();
+  //   ActionFn *action_fn = new ActionFn();
+
+  //   add_action(action_name, action);    
+
+  //   const Json::Value cfg_parameters = cfg_action["parameters"];
+  //   for (const auto &cfg_parameter : cfg_parameters) {
+      
+  //     const string parameter_type = cfg_parameter["type"].asString();
+
+  //     if(parameter_type == "field") {
+  // 	const Json::Value cfg_value = cfg_parameter["value"];
+  // 	const string header_name = cfg_value[0].asString();
+  // 	header_id_t header_id = get_header_id(header_name);
+  // 	const HeaderType &header_type =
+  // 	  phv.get_header(header_id).get_header_type();
+  // 	int field_offset = header_type.get_field_offset(field_name);	
+  //     }
+  //   }
+
+  // }
 }
 
 /* use unique pointers to get rid of this code ?, it is not really important
