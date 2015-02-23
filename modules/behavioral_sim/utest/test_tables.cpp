@@ -30,17 +30,17 @@ template<>
 MatchTable::ErrorCode
 TableSizeOne<ExactMatchTable>::add_entry(const ByteContainer &key,
 					 entry_handle_t *handle) {
-  ActionFn action_fn;
-  return table.add_entry(ExactMatchEntry(key, action_fn), handle);
+  ActionFnEntry action_entry;
+  return table.add_entry(ExactMatchEntry(key, action_entry), handle);
 }
 
 template<>
 MatchTable::ErrorCode
 TableSizeOne<LongestPrefixMatchTable>::add_entry(const ByteContainer &key,
 						 entry_handle_t *handle) {
-  ActionFn action_fn;
+  ActionFnEntry action_entry;
   int prefix_length = 16;
-  return table.add_entry(LongestPrefixMatchEntry(key, action_fn, prefix_length),
+  return table.add_entry(LongestPrefixMatchEntry(key, action_entry, prefix_length),
 			 handle);
 }
 
@@ -50,9 +50,9 @@ TableSizeOne<TernaryMatchTable>::add_entry(const ByteContainer &key,
 					   entry_handle_t *handle) {
   char mask_[2] = {(char) 0xff, (char) 0xff};
   ByteContainer mask(mask_, sizeof(mask_));
-  ActionFn action_fn;
+  ActionFnEntry action_entry;
   int priority = 1;
-  return table.add_entry(TernaryMatchEntry(key, action_fn, mask, priority),
+  return table.add_entry(TernaryMatchEntry(key, action_entry, mask, priority),
 			 handle);
 }
 

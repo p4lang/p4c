@@ -4,16 +4,12 @@
 int pull_test_data();
 // implemented in test_parser.cpp
 int pull_test_parser();
-// implemented in test_packet.cpp
-int pull_test_packet();
 // implemented in test_tables.cpp
 int pull_test_tables();
 // implemented in test_handle_mgr.cpp
 int pull_test_handle_mgr();
 // implemented in test_queue.cpp
 int pull_test_queue();
-// implemented in test_runtime.cpp
-int pull_test_runtime();
 // implemented in test_p4objects.cpp
 int pull_test_p4objects();
 
@@ -22,11 +18,9 @@ int pull_test_p4objects();
 void pull_tests() {
   pull_test_data();
   pull_test_parser();
-  pull_test_packet();
   pull_test_tables();
   pull_test_handle_mgr();
   pull_test_queue();
-  pull_test_runtime();
   pull_test_p4objects();
 }
 

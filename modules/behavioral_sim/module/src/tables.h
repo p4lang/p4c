@@ -52,15 +52,9 @@ public:
 	     const MatchKeyBuilder &match_key_builder)
     : name(name), size(size), num_entries(0),
       nbytes_key(nbytes_key),
-      match_key_builder(match_key_builder) {
-    auto table_it = tables_map.find(name);
-    assert(table_it == tables_map.end()); // make sure the table name is not taken
-    tables_map[name] = this;
-  }
+      match_key_builder(match_key_builder) {}
 
-  virtual ~MatchTable() {
-    tables_map.erase(name);
-  }
+  virtual ~MatchTable() {}
   
   void apply(const Packet &pkt, PHV *phv);
   
@@ -88,12 +82,6 @@ protected:
   ErrorCode unset_handle(entry_handle_t handle);
 
   bool valid_handle(entry_handle_t handle) const;
-
-private:
-  static unordered_map<string, MatchTable *> tables_map;
-
-public:
-  static MatchTable *get_table(const string &name);
 };
 
 class ExactMatchTable : public MatchTable

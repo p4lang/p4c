@@ -5,14 +5,6 @@ using std::vector;
 using std::copy;
 using std::string;
 
-unordered_map<string, MatchTable *> MatchTable::tables_map;
-
-MatchTable * MatchTable::get_table(const string &name) {
-  auto table_it = tables_map.find(name);
-  if(table_it == tables_map.end()) return nullptr;
-  return table_it->second;
-}
-
 MatchTable::ErrorCode
 MatchTable::get_and_set_handle(entry_handle_t *handle)
 {

@@ -16,6 +16,10 @@ public:
   Data(unsigned i)
     : value(i) {}
 
+  Data(const char *bytes, int nbytes) {
+    bignum::import_bytes(value, bytes, nbytes);
+  }
+
   void set(unsigned int i) {
     value = i;
   }
