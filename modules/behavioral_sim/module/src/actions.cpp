@@ -14,7 +14,7 @@ void ActionFn::parameter_push_back_header(header_id_t header) {
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_const(const Data &data) {
+void ActionFn::parameter_push_back_const(Data &data) {
   const_values.push_back(data);
   ActionParam param;
   param.tag = ActionParam::CONST;

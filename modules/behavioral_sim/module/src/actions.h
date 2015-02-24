@@ -32,12 +32,12 @@ struct ActionParam
 
 struct ActionEngineState {
   PHV &phv;
-  const vector<Data> &action_data;
-  const vector<Data> &const_values;
+  vector<Data> &action_data;
+  vector<Data> &const_values;
 
   ActionEngineState(PHV &phv,
-		    const vector<Data> &action_data,
-		    const vector<Data> &const_values)
+		    vector<Data> &action_data,
+		    vector<Data> &const_values)
     : phv(phv), action_data(action_data), const_values(const_values) {}
 };
 
@@ -51,12 +51,7 @@ struct ActionParamWithState {
   /* I cannot think of an alternate solution to this. Is there any danger to
      overload cast operators like this ? */
 
-  operator Field &() {
-    assert(ap.tag == ActionParam::FIELD);
-    return state.phv.get_field(ap.field.header, ap.field.field_offset);
-  }
-
-  operator const Data &() {
+  operator Data &() {
     switch(ap.tag) {
     case ActionParam::CONST:
       return state.const_values[ap.const_offset];
@@ -67,6 +62,11 @@ struct ActionParamWithState {
     default:
       assert(0);
     }
+  }
+
+  operator Field &() {
+    assert(ap.tag == ActionParam::FIELD);
+    return state.phv.get_field(ap.field.header, ap.field.field_offset);
   }
 
   operator Header &() {
@@ -103,7 +103,7 @@ struct unpack_caller
 private:
   template <typename T, size_t... I>
   void call(T *pObj, ActionEngineState &state,
-	    vector<ActionParam> &args,
+	    const vector<ActionParam> &args,
 	    indices<I...>){
     (*pObj)(ActionParamWithState(args[I], state)...);
   }
@@ -111,7 +111,7 @@ private:
 public:
   template <typename T>
   void operator () (T* pObj, ActionEngineState &state,
-		    std::vector<ActionParam> &args){
+		    const std::vector<ActionParam> &args){
     assert(args.size() == num_args); // just to be sure
     call(pObj, state, args, BuildIndices<num_args>{});
   }
@@ -121,14 +121,14 @@ class ActionPrimitive_
 {
 public:
   virtual void
-  execute(ActionEngineState &state, const vector<ActionParam> &args) const = 0;
+  execute(ActionEngineState &state, const vector<ActionParam> &args) = 0;
 };
 
 template <typename... Args>
 class ActionPrimitive : public ActionPrimitive_
 {
 public:
-  void execute(ActionEngineState &state, const vector<ActionParam> &args) const {
+  void execute(ActionEngineState &state, const vector<ActionParam> &args) {
     caller(this, state, args);
   }
 
@@ -162,7 +162,7 @@ class ActionFn
 public:
   void parameter_push_back_field(header_id_t header, int field_offset);
   void parameter_push_back_header(header_id_t header);
-  void parameter_push_back_const(const Data &data);
+  void parameter_push_back_const(Data &data);
   void parameter_push_back_action_data(int action_data_offset);
 
   void push_back_primitive(unique_ptr<ActionPrimitive_> primitive);
@@ -179,7 +179,7 @@ class ActionFnEntry
 public:
   ActionFnEntry() {}
 
-  ActionFnEntry(const ActionFn *action_fn, unsigned int action_data_cnt = 0)
+  ActionFnEntry(ActionFn *action_fn, unsigned int action_data_cnt = 0)
     : action_fn(action_fn) {
     action_data.reserve(action_data_cnt);
   }
@@ -208,7 +208,7 @@ public:
   }
 
 private:
-  const ActionFn *action_fn{nullptr};
+  ActionFn *action_fn{nullptr};
   vector<Data> action_data;
 };
 
