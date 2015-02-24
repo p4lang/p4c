@@ -13,22 +13,12 @@ class Field : public Data
 {
 public:
   // Data() is called automatically
-  Field(int nbits)
+  Field(int nbits, bool arith = true)
     : nbits(nbits), nbytes( (nbits + 7) / 8 ),
-    bytes(nbytes), value_sync(false) {}
-
+      bytes(nbytes), arith(arith) {}
+  
   void sync_value() {
-    if(value_sync) return;
     bignum::import_bytes(value, bytes.data(), nbytes);
-    value_sync = true;
-  }
-
-  unsigned int get_ui() const = delete;
-
-  unsigned int get_ui() {
-    sync_value();
-    // Bad ?
-    return (unsigned) value;
   }
 
   const ByteContainer &get_bytes() const {
@@ -43,7 +33,7 @@ public:
     return nbits;
   }
 
-  void add(Data &src1, Data &src2) {
+  void add(const Data &src1, const Data &src2) {
     Data::add(src1, src2);
     bignum::export_bytes(bytes.data(), value);
   }
@@ -58,7 +48,7 @@ private:
   int nbits;
   int nbytes;
   ByteContainer bytes;
-  bool value_sync;
+  bool arith;
 };
 
 #endif

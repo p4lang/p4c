@@ -3,10 +3,9 @@
 #include "fields.h"
 
 int Field::extract(const char *data, int hdr_offset) {
-  value_sync = false;
-
   if(hdr_offset == 0 && nbits % 8 == 0) {
     std::copy(data, data + nbytes, bytes.begin());
+    if(arith) sync_value();
     return nbits;
   }
 
@@ -34,6 +33,8 @@ int Field::extract(const char *data, int hdr_offset) {
       bytes[i] = (data[i - 1] << (8 - offset)) | (data[i] >> offset);
     }
   }
+
+  if(arith) sync_value();
 
   return nbits;
 }

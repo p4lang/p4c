@@ -28,8 +28,7 @@ public:
     bignum::import_bytes(value, bytes, nbytes);
   }
 
-  void set(Data &data) {
-    data.sync_value();
+  void set(const Data &data) {
     value = data.value;
   }
 
@@ -38,11 +37,7 @@ public:
     return (unsigned) value;
   }
 
-  virtual void sync_value() {}
-
-  void add(Data &src1, Data &src2) {
-    src1.sync_value();
-    src2.sync_value();
+  void add(const Data &src1, const Data &src2) {
     value = src1.value + src2.value;
   }
 
@@ -54,8 +49,7 @@ public:
     return !(lhs == rhs);
   }
 
-  friend std::ostream& operator<<( std::ostream &out, Data &d ) {
-    d.sync_value();
+  friend std::ostream& operator<<( std::ostream &out, const Data &d ) {
     out << d.value;
     return out;
   }

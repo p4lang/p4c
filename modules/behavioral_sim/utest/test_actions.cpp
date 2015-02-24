@@ -51,12 +51,30 @@ protected:
   // virtual void TearDown() {}
 };
 
-TEST_F(ActionsTest, OneSet) {
+TEST_F(ActionsTest, SetFromConst) {
   Data value(0xaba);
   auto primitive = unique_ptr<ActionPrimitive_>(new SetField());
   testActionFn.push_back_primitive(std::move(primitive));
   testActionFn.parameter_push_back_field(testHeader, 3); // f16
   testActionFn.parameter_push_back_const(value);
+
+  Field &f = phv.get_field(testHeader, 3); // f16
+  f.set(0);
+
+  ASSERT_EQ((unsigned) 0, f.get_ui());
+
+  testActionFnEntry(phv);
+
+  ASSERT_EQ((unsigned) 0xaba, f.get_ui());
+}
+
+TEST_F(ActionsTest, SetFromActionData) {
+  Data value(0xaba);
+  auto primitive = unique_ptr<ActionPrimitive_>(new SetField());
+  testActionFn.push_back_primitive(std::move(primitive));
+  testActionFn.parameter_push_back_field(testHeader, 3); // f16
+  testActionFn.parameter_push_back_action_data(0);
+  testActionFnEntry.push_back_action_data(value);
 
   Field &f = phv.get_field(testHeader, 3); // f16
   f.set(0);
