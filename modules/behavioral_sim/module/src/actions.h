@@ -48,6 +48,9 @@ struct ActionParamWithState {
   ActionParamWithState(const ActionParam &ap, ActionEngineState &state)
     : ap(ap), state(state) {}
 
+  /* I cannot think of an alternate solution to this. Is there any danger to
+     overload cast operators like this ? */
+
   operator Field &() {
     assert(ap.tag == ActionParam::FIELD);
     return state.phv.get_field(ap.field.header, ap.field.field_offset);
@@ -161,6 +164,8 @@ public:
   void parameter_push_back_header(header_id_t header);
   void parameter_push_back_const(const Data &data);
   void parameter_push_back_action_data(int action_data_offset);
+
+  void push_back_primitive(unique_ptr<ActionPrimitive_> primitive);
 
 private:
   vector<unique_ptr<ActionPrimitive_> > primitives;
