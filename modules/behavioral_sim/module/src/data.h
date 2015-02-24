@@ -28,6 +28,11 @@ public:
     bignum::import_bytes(value, bytes, nbytes);
   }
 
+  void set(Data &data) {
+    data.sync_value();
+    value = data.value;
+  }
+
   unsigned int get_ui() const{
     // Bad ?
     return (unsigned) value;

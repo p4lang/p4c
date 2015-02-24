@@ -3,17 +3,14 @@
 
 #include <vector>
 #include <functional>
+#include <memory>
 
 #include <cassert>
 
 #include "phv.h"
 
 using std::vector;
-
-// forward declaration of ActionStack
-class ActionStack;
-
-typedef std::function<void(PHV &, ActionStack &)> ActionPrimitive;
+using std::unique_ptr;
 
 struct ActionParam
 {
@@ -33,41 +30,146 @@ struct ActionParam
   };
 };
 
-class ActionStack
+struct ActionEngineState {
+  PHV &phv;
+  const vector<Data> &action_data;
+  const vector<Data> &const_values;
+
+  ActionEngineState(PHV &phv,
+		    const vector<Data> &action_data,
+		    const vector<Data> &const_values)
+    : phv(phv), action_data(action_data), const_values(const_values) {}
+};
+
+struct ActionParamWithState {
+  const ActionParam &ap;
+  ActionEngineState &state;
+
+  ActionParamWithState(const ActionParam &ap, ActionEngineState &state)
+    : ap(ap), state(state) {}
+
+  operator Field &() {
+    assert(ap.tag == ActionParam::FIELD);
+    return state.phv.get_field(ap.field.header, ap.field.field_offset);
+  }
+
+  operator const Data &() {
+    switch(ap.tag) {
+    case ActionParam::CONST:
+      return state.const_values[ap.const_offset];
+    case ActionParam::FIELD:
+      return state.phv.get_field(ap.field.header, ap.field.field_offset);
+    case ActionParam::ACTION_DATA:
+      return state.action_data[ap.action_data_offset];
+    default:
+      assert(0);
+    }
+  }
+
+  operator Header &() {
+    assert(ap.tag == ActionParam::HEADER);
+    return state.phv.get_header(ap.header);    
+  }
+};
+
+/* This is adapted from stack overflow code:
+   http://stackoverflow.com/questions/11044504/any-solution-to-unpack-a-vector-to-function-arguments-in-c
+*/
+
+template <std::size_t... Indices>
+struct indices {
+  using next = indices<Indices..., sizeof...(Indices)>;
+};
+
+template <std::size_t N>
+struct build_indices {
+  using type = typename build_indices<N-1>::type::next;
+};
+
+template <>
+struct build_indices<0> {
+  using type = indices<>;
+};
+
+template <std::size_t N>
+using BuildIndices = typename build_indices<N>::type;
+
+template <size_t num_args>
+struct unpack_caller
+{
+private:
+  template <typename T, size_t... I>
+  void call(T *pObj, ActionEngineState &state,
+	    vector<ActionParam> &args,
+	    indices<I...>){
+    (*pObj)(ActionParamWithState(args[I], state)...);
+  }
+
+public:
+  template <typename T>
+  void operator () (T* pObj, ActionEngineState &state,
+		    std::vector<ActionParam> &args){
+    assert(args.size() == num_args); // just to be sure
+    call(pObj, state, args, BuildIndices<num_args>{});
+  }
+};
+
+class ActionPrimitive_
 {
 public:
-  virtual const Data &pop_const_data(PHV &phv) = 0;
-  virtual Field &pop_field(PHV &phv) = 0;
-  virtual Header &pop_header(PHV &phv) = 0;
-  // TODO: stateful
-
-protected:
-  int param_idx{0};
+  virtual void
+  execute(ActionEngineState &state, const vector<ActionParam> &args) const = 0;
 };
+
+template <typename... Args>
+class ActionPrimitive : public ActionPrimitive_
+{
+public:
+  void execute(ActionEngineState &state, const vector<ActionParam> &args) const {
+    caller(this, state, args);
+  }
+
+  virtual void operator ()(Args...) = 0;
+
+private:
+  unpack_caller<sizeof...(Args)> caller;
+};
+
+// This is how you declare a primitive:
+// class SetField : public ActionPrimitive<Field &, Data &> {
+//   void operator ()(Field &f, Data &d) {
+//     f.set(d);
+//   }
+// };
+
+// class Add : public ActionPrimitive<Field &, Data &, Data &> {
+//   void operator ()(Field &f, Data &d1, Data &d2) {
+//     f.add(d1, d2);
+//   }
+// };
+  
  
+// forward declaration
+class ActionFnEntry;
 
 class ActionFn
 {
+  friend class ActionFnEntry;
+
 public:
   void parameter_push_back_field(header_id_t header, int field_offset);
   void parameter_push_back_header(header_id_t header);
   void parameter_push_back_const(const Data &data);
   void parameter_push_back_action_data(int action_data_offset);
 
-  const vector<ActionPrimitive> &get_primitives() const { return primitives; }
-  const vector<ActionParam> &get_params() const { return params; }
-
-  const Data &get_const_value(int const_offset) const {
-    return const_values[const_offset];
-  }
-
 private:
-  vector<ActionPrimitive> primitives;
+  vector<unique_ptr<ActionPrimitive_> > primitives;
   vector<ActionParam> params;
   vector<Data> const_values;
 };
 
-class ActionFnEntry : public ActionStack
+
+class ActionFnEntry
 {
 public:
   ActionFnEntry() {}
@@ -79,12 +181,12 @@ public:
 
   void operator()(PHV &phv)
   {
-    param_idx = 0;
-    auto &primitives = action_fn->get_primitives();
+    ActionEngineState state(phv, action_data, action_fn->const_values);
+    auto &primitives = action_fn->primitives;
     for(auto primitive_it = primitives.begin();
 	primitive_it != primitives.end();
 	++primitive_it) {
-      (*primitive_it)(phv, *this);
+      (*primitive_it)->execute(state, action_fn->params);
     }
   }
 
@@ -98,35 +200,6 @@ public:
 
   void push_back_action_data(const char *bytes, int nbytes) {
     action_data.emplace_back(bytes, nbytes);
-  }
-
-  const Data &pop_const_data(PHV &phv) {
-    const auto &params = action_fn->get_params();
-    const ActionParam &param = params[param_idx++];
-    switch(param.tag) {
-    case ActionParam::CONST:
-      return action_fn->get_const_value(param.const_offset);
-    case ActionParam::FIELD:
-      return phv.get_field(param.field.header, param.field.field_offset);
-    case ActionParam::ACTION_DATA:
-      return action_data[param.action_data_offset];
-    default:
-      assert(0);
-    }
-  }
-
-  Field &pop_field(PHV &phv) {
-    const auto &params = action_fn->get_params();
-    const ActionParam &param = params[param_idx++];
-    assert(param.tag == ActionParam::FIELD);
-    return phv.get_field(param.field.header, param.field.field_offset);
-  }
-
-  Header &pop_header(PHV &phv) {
-    const auto &params = action_fn->get_params();
-    const ActionParam &param = params[param_idx++];
-    assert(param.tag == ActionParam::HEADER);
-    return phv.get_header(param.header);
   }
 
 private:
