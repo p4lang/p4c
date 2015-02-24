@@ -10,7 +10,6 @@
 #include "phv.h"
 
 using std::vector;
-using std::unique_ptr;
 
 struct ActionParam
 {
@@ -165,10 +164,10 @@ public:
   void parameter_push_back_const(Data &data);
   void parameter_push_back_action_data(int action_data_offset);
 
-  void push_back_primitive(unique_ptr<ActionPrimitive_> primitive);
+  void push_back_primitive(ActionPrimitive_ *primitive);
 
 private:
-  vector<unique_ptr<ActionPrimitive_> > primitives;
+  vector<ActionPrimitive_ *> primitives;
   vector<ActionParam> params;
   vector<Data> const_values;
 };

@@ -6,8 +6,6 @@
 
 int pull_test_actions() { return 0; }
 
-using std::unique_ptr;
-
 // Two primitives definitions
 
 class SetField : public ActionPrimitive<Field &, Data &> {
@@ -53,8 +51,7 @@ protected:
 
 TEST_F(ActionsTest, SetFromConst) {
   Data value(0xaba);
-  auto primitive = unique_ptr<ActionPrimitive_>(new SetField());
-  testActionFn.push_back_primitive(std::move(primitive));
+  testActionFn.push_back_primitive(new SetField());
   testActionFn.parameter_push_back_field(testHeader, 3); // f16
   testActionFn.parameter_push_back_const(value);
 
@@ -70,8 +67,7 @@ TEST_F(ActionsTest, SetFromConst) {
 
 TEST_F(ActionsTest, SetFromActionData) {
   Data value(0xaba);
-  auto primitive = unique_ptr<ActionPrimitive_>(new SetField());
-  testActionFn.push_back_primitive(std::move(primitive));
+  testActionFn.push_back_primitive(new SetField());
   testActionFn.parameter_push_back_field(testHeader, 3); // f16
   testActionFn.parameter_push_back_action_data(0);
   testActionFnEntry.push_back_action_data(value);
@@ -88,8 +84,7 @@ TEST_F(ActionsTest, SetFromActionData) {
 
 
 TEST_F(ActionsTest, SetFromField) {
-  auto primitive = unique_ptr<ActionPrimitive_>(new SetField());
-  testActionFn.push_back_primitive(std::move(primitive));
+  testActionFn.push_back_primitive(new SetField());
   testActionFn.parameter_push_back_field(testHeader, 3); // f16
   testActionFn.parameter_push_back_field(testHeader, 0); // f32
 
@@ -108,8 +103,7 @@ TEST_F(ActionsTest, SetFromField) {
 
 TEST_F(ActionsTest, SetFromConstStress) {
   Data value(0xaba);
-  auto primitive = unique_ptr<ActionPrimitive_>(new SetField());
-  testActionFn.push_back_primitive(std::move(primitive));
+  testActionFn.push_back_primitive(new SetField());
   testActionFn.parameter_push_back_field(testHeader, 3); // f16
   testActionFn.parameter_push_back_const(value);
 

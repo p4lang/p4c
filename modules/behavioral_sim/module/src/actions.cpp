@@ -29,6 +29,6 @@ void ActionFn::parameter_push_back_action_data(int action_data_offset) {
   params.push_back(param);
 }
 
-void ActionFn::push_back_primitive(unique_ptr<ActionPrimitive_> primitive) {
-  primitives.push_back(std::move(primitive));
+void ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
+  primitives.push_back(primitive);
 }
