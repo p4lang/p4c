@@ -13,9 +13,10 @@ class Field : public Data
 {
 public:
   // Data() is called automatically
-  Field(int nbits, bool arith = true)
-    : nbits(nbits), nbytes( (nbits + 7) / 8 ),
-      bytes(nbytes), arith(arith) {}
+  Field(int nbits, bool arith_flag = true)
+    : nbits(nbits), nbytes( (nbits + 7) / 8 ), bytes(nbytes) {
+    arith = arith_flag;
+  }
   
   void sync_value() {
     bignum::import_bytes(value, bytes.data(), nbytes);
@@ -48,7 +49,6 @@ private:
   int nbits;
   int nbytes;
   ByteContainer bytes;
-  bool arith;
 };
 
 #endif

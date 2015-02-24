@@ -85,3 +85,40 @@ TEST_F(ActionsTest, SetFromActionData) {
 
   ASSERT_EQ((unsigned) 0xaba, f.get_ui());
 }
+
+
+TEST_F(ActionsTest, SetFromField) {
+  auto primitive = unique_ptr<ActionPrimitive_>(new SetField());
+  testActionFn.push_back_primitive(std::move(primitive));
+  testActionFn.parameter_push_back_field(testHeader, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader, 0); // f32
+
+  Field &src = phv.get_field(testHeader, 0); // 32
+  src.set(0xaba);
+
+  Field &dst = phv.get_field(testHeader, 3); // f16
+  dst.set(0);
+
+  ASSERT_EQ((unsigned) 0, dst.get_ui());
+
+  testActionFnEntry(phv);
+
+  ASSERT_EQ((unsigned) 0xaba, dst.get_ui());
+}
+
+TEST_F(ActionsTest, SetFromConstStress) {
+  Data value(0xaba);
+  auto primitive = unique_ptr<ActionPrimitive_>(new SetField());
+  testActionFn.push_back_primitive(std::move(primitive));
+  testActionFn.parameter_push_back_field(testHeader, 3); // f16
+  testActionFn.parameter_push_back_const(value);
+
+  Field &f = phv.get_field(testHeader, 3); // f16
+
+  for(int i = 0; i < 100000; i++) {
+    f.set(0);
+    ASSERT_EQ((unsigned) 0, f.get_ui());
+    testActionFnEntry(phv);
+    ASSERT_EQ((unsigned) 0xaba, f.get_ui());
+  }
+}
