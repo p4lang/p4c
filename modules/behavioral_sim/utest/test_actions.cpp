@@ -1,12 +1,17 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <string>
+
+#include <cassert>
 
 #include "actions.h"
 
+using std::string;
+
 int pull_test_actions() { return 0; }
 
-// Two primitives definitions
+// some primitive definitions for testing
 
 class SetField : public ActionPrimitive<Field &, Data &> {
   void operator ()(Field &f, Data &d) {
@@ -24,6 +29,27 @@ class Add : public ActionPrimitive<Field &, Data &, Data &> {
 
 REGISTER_PRIMITIVE(Add);
 
+class RemoveHeader : public ActionPrimitive<Header &> {
+  void operator ()(Header &hdr) {
+    hdr.mark_invalid();
+  }
+};
+
+REGISTER_PRIMITIVE(RemoveHeader);
+
+class CopyHeader : public ActionPrimitive<Header &, Header &> {
+  void operator ()(Header &dst, Header &src) {
+    if(!src.is_valid()) return;
+    dst.mark_valid();
+    assert(dst.get_header_type_id() == src.get_header_type_id());
+    for(unsigned int i = 0; i < dst.size(); i++) {
+      dst[i].set(src[i]);
+    }
+  }
+};
+
+REGISTER_PRIMITIVE(CopyHeader);
+
 // Google Test fixture for actions tests
 class ActionsTest : public ::testing::Test {
 protected:
@@ -31,7 +57,7 @@ protected:
   PHV phv;
 
   HeaderType testHeaderType;
-  header_id_t testHeader;
+  header_id_t testHeader1, testHeader2;
 
   ActionFn testActionFn;
   ActionFnEntry testActionFnEntry;
@@ -44,7 +70,8 @@ protected:
     testHeaderType.push_back_field("f8", 8);
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f128", 128);
-    testHeader = phv.push_back_header("test", testHeaderType);
+    testHeader1 = phv.push_back_header("test1", testHeaderType);
+    testHeader2 = phv.push_back_header("test2", testHeaderType);
   }
 
   virtual void SetUp() {
@@ -57,10 +84,10 @@ TEST_F(ActionsTest, SetFromConst) {
   Data value(0xaba);
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
   testActionFn.parameter_push_back_const(value);
 
-  Field &f = phv.get_field(testHeader, 3); // f16
+  Field &f = phv.get_field(testHeader1, 3); // f16
   f.set(0);
 
   ASSERT_EQ((unsigned) 0, f.get_ui());
@@ -74,11 +101,11 @@ TEST_F(ActionsTest, SetFromActionData) {
   Data value(0xaba);
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
   testActionFn.parameter_push_back_action_data(0);
   testActionFnEntry.push_back_action_data(value);
 
-  Field &f = phv.get_field(testHeader, 3); // f16
+  Field &f = phv.get_field(testHeader1, 3); // f16
   f.set(0);
 
   ASSERT_EQ((unsigned) 0, f.get_ui());
@@ -92,13 +119,13 @@ TEST_F(ActionsTest, SetFromActionData) {
 TEST_F(ActionsTest, SetFromField) {
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader, 3); // f16
-  testActionFn.parameter_push_back_field(testHeader, 0); // f32
+  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 0); // f32
 
-  Field &src = phv.get_field(testHeader, 0); // 32
+  Field &src = phv.get_field(testHeader1, 0); // 32
   src.set(0xaba);
 
-  Field &dst = phv.get_field(testHeader, 3); // f16
+  Field &dst = phv.get_field(testHeader1, 3); // f16
   dst.set(0);
 
   ASSERT_EQ((unsigned) 0, dst.get_ui());
@@ -112,15 +139,50 @@ TEST_F(ActionsTest, SetFromConstStress) {
   Data value(0xaba);
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
   testActionFn.parameter_push_back_const(value);
 
-  Field &f = phv.get_field(testHeader, 3); // f16
+  Field &f = phv.get_field(testHeader1, 3); // f16
 
   for(int i = 0; i < 100000; i++) {
     f.set(0);
     ASSERT_EQ((unsigned) 0, f.get_ui());
     testActionFnEntry(phv);
     ASSERT_EQ((unsigned) 0xaba, f.get_ui());
+  }
+}
+
+TEST_F(ActionsTest, CopyHeader) {
+  Header &hdr1 = phv.get_header(testHeader1);
+  ASSERT_FALSE(hdr1.is_valid());
+
+  Header &hdr2 = phv.get_header(testHeader2);
+  ASSERT_FALSE(hdr2.is_valid());
+
+  for(unsigned int i = 0; i < hdr1.size(); i++) {
+    hdr1[i].set(0);
+  }
+
+  for(unsigned int i = 0; i < hdr2.size(); i++) {
+    hdr2[i].set(i + 1);
+  }
+
+  CopyHeader primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_header(testHeader1);
+  testActionFn.parameter_push_back_header(testHeader2);
+  
+  testActionFnEntry(phv);
+  ASSERT_FALSE(hdr1.is_valid());
+  ASSERT_FALSE(hdr2.is_valid());
+  for(unsigned int i = 0; i < hdr2.size(); i++) {
+    ASSERT_EQ(0, hdr1[i]);
+  }
+
+  hdr2.mark_valid();
+  testActionFnEntry(phv);
+  ASSERT_TRUE(hdr1.is_valid());
+  for(unsigned int i = 0; i < hdr1.size(); i++) {
+    ASSERT_EQ(i + 1, hdr1[i]);
   }
 }

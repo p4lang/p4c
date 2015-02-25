@@ -78,10 +78,10 @@ public:
     valid = false;
   }
 
+  // prefer operator [] to those functions
   Field &get_field(int field_offset) {
     return fields[field_offset];
   }
-
   const Field &get_field(int field_offset) const {
     return fields[field_offset];
   }
@@ -95,6 +95,9 @@ public:
   void extract(const char *data);
 
   void deparse(char *data) const;
+
+  // return the number of fields
+  size_type size() const noexcept { return fields.size(); }
 
   // iterators
   iterator begin() { return fields.begin(); }
