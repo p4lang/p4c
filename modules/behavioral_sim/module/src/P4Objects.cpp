@@ -17,7 +17,6 @@ void P4Objects::init_objects(std::istream &is) {
     const string header_type_name = cfg_header_type["name"].asString();
     HeaderType *header_type = new HeaderType(header_type_id++,
 					     header_type_name);
-    add_header_type(header_type_name, header_type);
 
     const Json::Value cfg_fields = cfg_header_type["fields"];
     for (auto it = cfg_fields.begin(); it != cfg_fields.end(); it++) {
@@ -25,6 +24,8 @@ void P4Objects::init_objects(std::istream &is) {
       int field_bit_width = (*it).asInt();
       header_type->push_back_field(field_name, field_bit_width);
     }
+
+    add_header_type(header_type_name, unique_ptr<HeaderType>(header_type));
   }
 
   // headers
@@ -49,7 +50,6 @@ void P4Objects::init_objects(std::istream &is) {
     const string parser_name = cfg_parser["name"].asString();
 
     Parser *parser = new Parser();
-    add_parser(parser_name, parser);
 
     unordered_map<string, ParseState *> current_parse_states;
 
@@ -75,17 +75,15 @@ void P4Objects::init_objects(std::istream &is) {
       for (const auto &cfg_key_field : cfg_transition_key) {
 
 	const string header_name = cfg_key_field[0].asString();
-	const string field_name = cfg_key_field[1].asString();
 	header_id_t header_id = get_header_id(header_name);
-	const HeaderType &header_type =
-	  phv.get_header(header_id).get_header_type();
-	int field_offset = header_type.get_field_offset(field_name);
+	const string field_name = cfg_key_field[1].asString();
+	int field_offset = get_field_offset(header_id, field_name);
 	key_builder.push_back_field(header_id, field_offset);
       }
       
       parse_state->set_key_builder(key_builder);
 
-      parse_states.push_back(parse_state);
+      parse_states.push_back(unique_ptr<ParseState>(parse_state));
       current_parse_states[parse_state_name] = parse_state;
     }
 
@@ -108,6 +106,8 @@ void P4Objects::init_objects(std::istream &is) {
     const string init_state_name = cfg_parser["init_state"].asString();
     const ParseState *init_state = current_parse_states[init_state_name];
     parser->set_init_state(init_state);
+
+    add_parser(parser_name, unique_ptr<Parser>(parser));
   }
 
   // deparsers
@@ -117,7 +117,6 @@ void P4Objects::init_objects(std::istream &is) {
 
     const string deparser_name = cfg_deparser["name"].asString();
     Deparser *deparser = new Deparser();
-    add_deparser(deparser_name, deparser);
 
     const Json::Value cfg_ordered_headers = cfg_deparser["order"];
     for (const auto &cfg_header : cfg_ordered_headers) {
@@ -125,63 +124,88 @@ void P4Objects::init_objects(std::istream &is) {
       const string header_name = cfg_header.asString();
       deparser->push_back_header(get_header_id(header_name));
     }
+
+    add_deparser(deparser_name, unique_ptr<Deparser>(deparser));
   }
 
   // action primitives' opcodes
 
-  unordered_map<string, opcode_t> primitive_opcodes;
-  const Json::Value cfg_primitive_opcodes = cfg_root["primitive_opcodes"];
-  for (auto it = cfg_primitive_opcodes.begin();
-       it != cfg_primitive_opcodes.end(); it++) {
-    const string primitive_name = it.key().asString();
-    opcode_t opcode = (*it).asInt();
-    primitive_opcodes[primitive_name] = opcode;
-  }
+  // I decided to get rid of opcodes...
+
+  // unordered_map<string, opcode_t> primitive_opcodes;
+  // const Json::Value cfg_primitive_opcodes = cfg_root["primitive_opcodes"];
+  // for (auto it = cfg_primitive_opcodes.begin();
+  //      it != cfg_primitive_opcodes.end(); it++) {
+  //   const string primitive_name = it.key().asString();
+  //   opcode_t opcode = (*it).asInt();
+  //   primitive_opcodes[primitive_name] = opcode;
+  // }
 
   // actions
   
-  // const Json::Value cfg_actions = cfg_root["actions"];
-  // for (const auto &cfg_actions : cfg_actions) {
+  const Json::Value cfg_actions = cfg_root["actions"];
+  for (const auto &cfg_action : cfg_actions) {
 
-  //   const string action_name = cfg_action["name"].asString();
-  //   ActionFn *action_fn = new ActionFn();
+    const string action_name = cfg_action["name"].asString();
+    ActionFn *action_fn = new ActionFn();
 
-  //   add_action(action_name, action);    
+    // This runtime data is only useful for the PD layer
 
-  //   const Json::Value cfg_parameters = cfg_action["parameters"];
-  //   for (const auto &cfg_parameter : cfg_parameters) {
+    // const Json::Value cfg_runtime_data = cfg_action["runtime_data"];
+    // for (const auto &cfg_parameter : cfg_runtime_data) {
       
-  //     const string parameter_type = cfg_parameter["type"].asString();
+    //   const string parameter_name = cfg_parameter["name"].asString();
+    //   int parameter_bitwidth = cfg_parameter["bitwidth"].asInt();
+    // }
 
-  //     if(parameter_type == "field") {
-  // 	const Json::Value cfg_value = cfg_parameter["value"];
-  // 	const string header_name = cfg_value[0].asString();
-  // 	header_id_t header_id = get_header_id(header_name);
-  // 	const HeaderType &header_type =
-  // 	  phv.get_header(header_id).get_header_type();
-  // 	int field_offset = header_type.get_field_offset(field_name);	
-  //     }
-  //   }
+    const Json::Value cfg_primitive_calls = cfg_action["primitives"];
+    for (const auto &cfg_primitive_call : cfg_primitive_calls) {
+      const string primitive_name = cfg_primitive_call["op"].asString();
 
-  // }
+      ActionPrimitive_ *primitive =
+	ActionOpcodesMap::get_instance()->get_primitive(primitive_name);
+
+      action_fn->push_back_primitive(primitive);
+
+      const Json::Value cfg_primitive_parameters =
+	cfg_primitive_call["parameters"];
+      for(const auto &cfg_parameter : cfg_primitive_parameters) {
+	
+	const string type = cfg_parameter["type"].asString();
+
+	if(type == "immediate") {
+	  const string value_hexstr = cfg_parameter["value"].asString();
+	  action_fn->parameter_push_back_const(Data(value_hexstr));
+	}
+	else if(type == "runtime_data") {
+	  int action_data_offset = cfg_parameter["value"].asInt();
+	  action_fn->parameter_push_back_action_data(action_data_offset);
+	}
+	else if(type == "header") {
+	  const string header_name = cfg_parameter["value"].asString();
+	  header_id_t header_id = get_header_id(header_name);
+	  action_fn->parameter_push_back_header(header_id);
+	}
+	else if(type == "field") {
+	  Json::Value cfg_value_field = cfg_parameter["value"];
+	  const string header_name = cfg_value_field[0].asString();
+	  header_id_t header_id = get_header_id(header_name);
+	  const string field_name = cfg_value_field[1].asString();
+	  int field_offset = get_field_offset(header_id, field_name);
+	  action_fn->parameter_push_back_field(header_id, field_offset);
+	}
+      }
+    }
+    add_action(action_name, unique_ptr<ActionFn>(action_fn));
+  }
 }
 
-/* use unique pointers to get rid of this code ?, it is not really important
-   anyway, this is config only, and is only allocated once */
-
 void P4Objects::destroy_objects() {
-  for(auto it = header_types_map.begin(); it != header_types_map.end(); ++it)
-    delete it->second;
-  for(auto it = exact_tables_map.begin(); it != exact_tables_map.end(); ++it)
-    delete it->second;
-  for(auto it = lpm_tables_map.begin(); it != lpm_tables_map.end(); ++it)
-    delete it->second;
-  for(auto it = ternary_tables_map.begin(); it != ternary_tables_map.end(); ++it)
-    delete it->second;
-  for(auto it = parsers.begin(); it != parsers.end(); ++it)
-    delete it->second;
-  for(auto it = deparsers.begin(); it != deparsers.end(); ++it)
-    delete it->second;
-  for(auto it : parse_states)
-    delete it;
+  // TODO: I moved to unique_ptr's so just remove this function ?
+}
+
+int P4Objects::get_field_offset(header_id_t header_id, const string &field_name) {
+  const HeaderType &header_type =
+    phv.get_header(header_id).get_header_type();
+  return header_type.get_field_offset(field_name);  
 }

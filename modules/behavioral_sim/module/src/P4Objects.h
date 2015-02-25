@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <memory>
 
 #include "tables.h"
 #include "headers.h"
@@ -12,6 +13,7 @@
 using std::vector;
 using std::unordered_map;
 using std::string;
+using std::unique_ptr;
 
 class P4Objects {
 public:
@@ -23,12 +25,12 @@ public:
   P4Objects() = default;
 
 private:
-  void add_header_type(const string &name, HeaderType *header_type) {
-    header_types_map[name] = header_type;
+  void add_header_type(const string &name, unique_ptr<HeaderType> header_type) {
+    header_types_map[name] = std::move(header_type);
   }
 
   HeaderType *get_header_type(const string &name) {
-    return header_types_map[name];
+    return header_types_map[name].get();
   }
 
   void add_header_id(const string &name, header_id_t header_id) {
@@ -39,20 +41,28 @@ private:
     return header_ids_map[name];
   }
 
-  void add_parser(const string &name, Parser *parser) {
-    parsers[name] = parser;
+  void add_action(const string &name, unique_ptr<ActionFn> action) {
+    actions_map[name] = std::move(action);
+  }
+
+  ActionFn *get_action(const string &name) {
+    return actions_map[name].get();
+  }
+
+  void add_parser(const string &name, unique_ptr<Parser> parser) {
+    parsers[name] = std::move(parser);
   }
 
   Parser *get_parser(const string &name) {
-    return parsers[name];
+    return parsers[name].get();
   }
 
-  void add_deparser(const string &name, Deparser *deparser) {
-    deparsers[name] = deparser;
+  void add_deparser(const string &name, unique_ptr<Deparser> deparser) {
+    deparsers[name] = std::move(deparser);
   }
 
   Deparser *get_deparser(const string &name) {
-    return deparsers[name];
+    return deparsers[name].get();
   }
 
 private:
@@ -60,17 +70,23 @@ private:
 
   unordered_map<string, header_id_t> header_ids_map;
 
-  unordered_map<string, HeaderType *> header_types_map;
+  unordered_map<string, unique_ptr<HeaderType> > header_types_map;
 
   // tables
-  unordered_map<string, ExactMatchTable *> exact_tables_map;
-  unordered_map<string, LongestPrefixMatchTable *> lpm_tables_map;
-  unordered_map<string, TernaryMatchTable *> ternary_tables_map;
+  unordered_map<string, unique_ptr<ExactMatchTable> > exact_tables_map;
+  unordered_map<string, unique_ptr<LongestPrefixMatchTable> > lpm_tables_map;
+  unordered_map<string, unique_ptr<TernaryMatchTable> > ternary_tables_map;
+
+  // actions
+  unordered_map<string, unique_ptr<ActionFn> > actions_map;
 
   // parsers
-  unordered_map<string, Parser *> parsers;
+  unordered_map<string, unique_ptr<Parser> > parsers;
   // this is to give the objects a place where to live
-  vector<ParseState *> parse_states;
+  vector<unique_ptr<ParseState> > parse_states;
 
-  unordered_map<string, Deparser *> deparsers;
+  unordered_map<string, unique_ptr<Deparser> > deparsers;
+
+private:
+  int get_field_offset(header_id_t header_id, const string &field_name);
 };

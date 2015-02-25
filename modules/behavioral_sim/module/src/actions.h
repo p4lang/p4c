@@ -23,7 +23,7 @@ public:
       const char *name,
       std::unique_ptr<ActionPrimitive_> primitive);
 
-  ActionPrimitive_ *get_primitive(std::string &name);
+  ActionPrimitive_ *get_primitive(const std::string &name);
 private:
   std::unordered_map<std::string, std::unique_ptr<ActionPrimitive_> > map_;
 };
@@ -185,7 +185,7 @@ class ActionFn
 public:
   void parameter_push_back_field(header_id_t header, int field_offset);
   void parameter_push_back_header(header_id_t header);
-  void parameter_push_back_const(Data &data);
+  void parameter_push_back_const(const Data &data);
   void parameter_push_back_action_data(int action_data_offset);
 
   void push_back_primitive(ActionPrimitive_ *primitive);

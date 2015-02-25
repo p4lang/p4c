@@ -20,6 +20,19 @@ public:
     bignum::import_bytes(value, bytes, nbytes);
   }
 
+  Data(const std::string hexstring) {
+    std::vector<char> bytes;
+    for (char c : hexstring) {
+      if(c >= '0' && c <= '9')
+	bytes.push_back(c - '0');
+      if(c >= 'A' && c <= 'F')
+	bytes.push_back(c - 'A' + 10);
+      if(c >= 'a' && c <= 'f')
+	bytes.push_back(c - 'a' + 10);
+    }
+    bignum::import_bytes(value, bytes.data(), bytes.size());
+  }
+
   void set(unsigned int i) {
     value = i;
   }

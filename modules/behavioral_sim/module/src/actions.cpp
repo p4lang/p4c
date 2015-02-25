@@ -14,7 +14,7 @@ void ActionFn::parameter_push_back_header(header_id_t header) {
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_const(Data &data) {
+void ActionFn::parameter_push_back_const(const Data &data) {
   const_values.push_back(data);
   ActionParam param;
   param.tag = ActionParam::CONST;
@@ -44,7 +44,7 @@ bool ActionOpcodesMap::register_primitive(
   return true;
 }
 
-ActionPrimitive_ *ActionOpcodesMap::get_primitive(std::string &name) {
+ActionPrimitive_ *ActionOpcodesMap::get_primitive(const std::string &name) {
   return map_[name].get();
 }
 
