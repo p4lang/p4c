@@ -14,11 +14,15 @@ class SetField : public ActionPrimitive<Field &, Data &> {
   }
 };
 
+REGISTER_PRIMITIVE(SetField);
+
 class Add : public ActionPrimitive<Field &, Data &, Data &> {
   void operator ()(Field &f, Data &d1, Data &d2) {
     f.add(d1, d2);
   }
 };
+
+REGISTER_PRIMITIVE(Add);
 
 // Google Test fixture for actions tests
 class ActionsTest : public ::testing::Test {
@@ -51,7 +55,8 @@ protected:
 
 TEST_F(ActionsTest, SetFromConst) {
   Data value(0xaba);
-  testActionFn.push_back_primitive(new SetField());
+  SetField primitive;
+  testActionFn.push_back_primitive(&primitive);
   testActionFn.parameter_push_back_field(testHeader, 3); // f16
   testActionFn.parameter_push_back_const(value);
 
@@ -67,7 +72,8 @@ TEST_F(ActionsTest, SetFromConst) {
 
 TEST_F(ActionsTest, SetFromActionData) {
   Data value(0xaba);
-  testActionFn.push_back_primitive(new SetField());
+  SetField primitive;
+  testActionFn.push_back_primitive(&primitive);
   testActionFn.parameter_push_back_field(testHeader, 3); // f16
   testActionFn.parameter_push_back_action_data(0);
   testActionFnEntry.push_back_action_data(value);
@@ -84,7 +90,8 @@ TEST_F(ActionsTest, SetFromActionData) {
 
 
 TEST_F(ActionsTest, SetFromField) {
-  testActionFn.push_back_primitive(new SetField());
+  SetField primitive;
+  testActionFn.push_back_primitive(&primitive);
   testActionFn.parameter_push_back_field(testHeader, 3); // f16
   testActionFn.parameter_push_back_field(testHeader, 0); // f32
 
@@ -103,7 +110,8 @@ TEST_F(ActionsTest, SetFromField) {
 
 TEST_F(ActionsTest, SetFromConstStress) {
   Data value(0xaba);
-  testActionFn.push_back_primitive(new SetField());
+  SetField primitive;
+  testActionFn.push_back_primitive(&primitive);
   testActionFn.parameter_push_back_field(testHeader, 3); // f16
   testActionFn.parameter_push_back_const(value);
 

@@ -4,12 +4,35 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <unordered_map>
+#include <string>
 
 #include <cassert>
 
 #include "phv.h"
 
 using std::vector;
+
+// forward declaration of ActionPrimitive_
+class ActionPrimitive_;
+
+class ActionOpcodesMap {
+public:
+  static ActionOpcodesMap *get_instance();
+  bool register_primitive(
+      const char *name,
+      std::unique_ptr<ActionPrimitive_> primitive);
+
+  ActionPrimitive_ *get_primitive(std::string &name);
+private:
+  std::unordered_map<std::string, std::unique_ptr<ActionPrimitive_> > map_;
+};
+
+#define REGISTER_PRIMITIVE(primitive_name)\
+  bool primitive_name##_create_ =\
+    ActionOpcodesMap::get_instance()->register_primitive(\
+        #primitive_name,\
+        std::unique_ptr<ActionPrimitive_>(new primitive_name()));
 
 struct ActionParam
 {
@@ -119,8 +142,9 @@ public:
 class ActionPrimitive_
 {
 public:
-  virtual void
-  execute(ActionEngineState &state, const vector<ActionParam> &args) = 0;
+  virtual void execute(
+      ActionEngineState &state,
+      const vector<ActionParam> &args) = 0;
 };
 
 template <typename... Args>
