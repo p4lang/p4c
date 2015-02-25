@@ -13,16 +13,16 @@ int pull_test_actions() { return 0; }
 
 // some primitive definitions for testing
 
-class SetField : public ActionPrimitive<Field &, Data &> {
-  void operator ()(Field &f, Data &d) {
+class SetField : public ActionPrimitive<Field &, const Data &> {
+  void operator ()(Field &f, const Data &d) {
     f.set(d);
   }
 };
 
 REGISTER_PRIMITIVE(SetField);
 
-class Add : public ActionPrimitive<Field &, Data &, Data &> {
-  void operator ()(Field &f, Data &d1, Data &d2) {
+class Add : public ActionPrimitive<Field &, const Data &, const Data &> {
+  void operator ()(Field &f, const Data &d1, const Data &d2) {
     f.add(d1, d2);
   }
 };
@@ -37,8 +37,8 @@ class RemoveHeader : public ActionPrimitive<Header &> {
 
 REGISTER_PRIMITIVE(RemoveHeader);
 
-class CopyHeader : public ActionPrimitive<Header &, Header &> {
-  void operator ()(Header &dst, Header &src) {
+class CopyHeader : public ActionPrimitive<Header &, const Header &> {
+  void operator ()(Header &dst, const Header &src) {
     if(!src.is_valid()) return;
     dst.mark_valid();
     assert(dst.get_header_type_id() == src.get_header_type_id());
