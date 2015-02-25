@@ -52,30 +52,15 @@ public:
 
 class Header
 {
-private:
-  string name;
-  const HeaderType &header_type;
-  std::vector<Field> fields;
-  bool valid;
-  int nbytes_phv;
-  int nbytes_packet;
+public:
+  typedef vector<Field>::iterator iterator;
+  typedef vector<Field>::const_iterator const_iterator;
+  typedef vector<Field>::reference reference;
+  typedef vector<Field>::const_reference const_reference;
+  typedef size_t size_type;
 
 public:
-  Header(const string &name, const HeaderType &header_type)
-    : name(name), header_type(header_type) {
-    valid = false;
-    nbytes_phv = 0;
-    nbytes_packet = 0;
-    // header_type_id = header_type.get_type_id();
-    for(int i = 0; i < header_type.get_num_fields(); i++) {
-      // use emplace_back instead?
-      fields.push_back(Field(header_type.get_bit_width(i)));
-      nbytes_phv += fields.back().get_nbytes();
-      nbytes_packet += fields.back().get_nbits();
-    }
-    assert(nbytes_packet % 8 == 0);
-    nbytes_packet /= 8;
-  }
+  Header(const string &name, const HeaderType &header_type);
 
   int get_nbytes_packet() const {
     return nbytes_packet;
@@ -107,30 +92,36 @@ public:
     return header_type.get_type_id();
   }
 
-  void extract(const char *data) {
-    int hdr_offset = 0;
-    for(std::vector<Field>::iterator it = fields.begin();
-	it != fields.end();
-	++it) {
-      hdr_offset += it->extract(data, hdr_offset);
-      data += hdr_offset / 8;
-      hdr_offset = hdr_offset % 8;
-    }
-    mark_valid();
-    return;
+  void extract(const char *data);
+
+  void deparse(char *data) const;
+
+  // iterators
+  iterator begin() { return fields.begin(); }
+
+  const_iterator begin() const { return fields.begin(); }
+
+  iterator end() { return fields.end(); }
+
+  const_iterator end() const { return fields.end(); }
+
+  reference operator[](size_type n) {
+    assert(n < fields.size());
+    return fields[n];
   }
 
-  void deparse(char *data) const {
-    int hdr_offset = 0;
-    for(std::vector<Field>::const_iterator it = fields.begin();
-	it != fields.end();
-	++it) {
-      hdr_offset += it->deparse(data, hdr_offset);
-      data += hdr_offset / 8;
-      hdr_offset = hdr_offset % 8;
-    }
-    return;
+  const_reference operator[](size_type n) const {
+    assert(n < fields.size());
+    return fields[n];
   }
+
+private:
+  string name;
+  const HeaderType &header_type;
+  std::vector<Field> fields;
+  bool valid;
+  int nbytes_phv;
+  int nbytes_packet;
 };
 
 #endif
