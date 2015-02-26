@@ -198,6 +198,63 @@ void P4Objects::init_objects(std::istream &is) {
     }
     add_action(action_name, unique_ptr<ActionFn>(action_fn));
   }
+
+  // pipelines
+  
+  const Json::Value cfg_pipelines = cfg_root["pipelines"];
+  for (const auto &cfg_pipeline : cfg_pipelines) {
+
+    const string pipeline_name = cfg_pipeline["name"].asString();
+    const string first_table_name = cfg_pipeline["init_table"].asString();
+    
+    const Json::Value cfg_tables = cfg_pipeline["tables"];
+    for (const auto &cfg_table : cfg_tables) {
+
+      const string table_name = cfg_table["name"].asString();
+
+      size_t nbytes_key = 0;
+
+      MatchKeyBuilder key_builder;
+      const Json::Value cfg_match_key = cfg_table["key"];
+      for (const auto &cfg_key_field : cfg_match_key) {
+
+	const string header_name = cfg_key_field[0].asString();
+	header_id_t header_id = get_header_id(header_name);
+	const string field_name = cfg_key_field[1].asString();
+	int field_offset = get_field_offset(header_id, field_name);
+	key_builder.push_back_field(header_id, field_offset);
+
+	nbytes_key += get_field_bytes(header_id, field_offset);
+      }
+
+      const string table_type = cfg_table["type"].asString();
+      const int table_size = cfg_table["max_size"].asInt();
+      // for now, discard ageing and counters
+      
+      if(table_type == "exact") {
+      	ExactMatchTable *table =
+	  new ExactMatchTable(table_name, table_size,
+			      nbytes_key, key_builder);
+	add_exact_match_table(table_name, unique_ptr<ExactMatchTable>(table));
+      }
+      else if(table_type == "lpm") {
+	LongestPrefixMatchTable *table =
+	  new LongestPrefixMatchTable(table_name, table_size,
+				      nbytes_key, key_builder);
+	add_lpm_table(table_name, unique_ptr<LongestPrefixMatchTable>(table));
+      }
+      else if(table_type == "ternary") {
+	TernaryMatchTable *table =
+	  new TernaryMatchTable(table_name, table_size,
+				nbytes_key, key_builder);
+	add_ternary_match_table(table_name, unique_ptr<TernaryMatchTable>(table));
+      }
+    }
+
+    MatchTable *first_table = get_match_table(first_table_name);
+    Pipeline *pipeline = new Pipeline(pipeline_name, first_table);
+    add_pipeline(pipeline_name, unique_ptr<Pipeline>(pipeline));
+  }
 }
 
 void P4Objects::destroy_objects() {
@@ -208,4 +265,11 @@ int P4Objects::get_field_offset(header_id_t header_id, const string &field_name)
   const HeaderType &header_type =
     phv.get_header(header_id).get_header_type();
   return header_type.get_field_offset(field_name);  
+}
+
+size_t P4Objects::get_field_bytes(header_id_t header_id,
+				  int field_offset) {
+  const HeaderType &header_type =
+    phv.get_header(header_id).get_header_type();
+  return (header_type.get_bit_width(field_offset) + 7) / 8;
 }

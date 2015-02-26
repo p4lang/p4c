@@ -38,7 +38,7 @@ MatchTable::delete_entry(entry_handle_t handle)
   return unset_handle(handle);
 }
 
-void
+MatchTable *
 MatchTable::apply(const Packet &pkt, PHV *phv)
 {
   ByteContainer lookup_key;
@@ -48,6 +48,7 @@ MatchTable::apply(const Packet &pkt, PHV *phv)
   // MatchEntry *entry = lookup(lookup_key);
   // if(!entry) return; /* TODO : default action */
   // entry->action_fn(phv);
+  return nullptr;
 }
 
 

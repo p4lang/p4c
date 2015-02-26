@@ -23,7 +23,7 @@ struct MatchKeyBuilder
 {
   vector< pair<header_id_t, int> > fields;
 
-  void add_field(header_id_t header, int field_offset) {
+  void push_back_field(header_id_t header, int field_offset) {
     fields.push_back( pair<header_id_t, int>(header, field_offset) );
   }
 
@@ -56,7 +56,8 @@ public:
 
   virtual ~MatchTable() {}
   
-  void apply(const Packet &pkt, PHV *phv);
+  // return pointer to next table
+  MatchTable *apply(const Packet &pkt, PHV *phv);
   
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
   virtual ErrorCode delete_entry(entry_handle_t handle);
