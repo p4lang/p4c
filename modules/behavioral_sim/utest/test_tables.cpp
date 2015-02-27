@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "tables.h"
+#include "behavioral_sim/tables.h"
 
 int pull_test_tables() { return 0; }
 

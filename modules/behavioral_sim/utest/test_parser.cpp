@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include "parser.h"
-#include "deparser.h"
+#include "behavioral_sim/parser.h"
+#include "behavioral_sim/deparser.h"
 
 int pull_test_parser() { return 0; }
 

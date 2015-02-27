@@ -1,4 +1,4 @@
-#include "headers.h"
+#include "behavioral_sim/headers.h"
 
 Header::Header(const string &name, const HeaderType &header_type)
   : name(name), header_type(header_type) {

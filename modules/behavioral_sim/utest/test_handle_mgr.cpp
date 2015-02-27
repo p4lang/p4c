@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "handle_mgr.h"
+#include "behavioral_sim/handle_mgr.h"
 
 int pull_test_handle_mgr() { return 0; }
 

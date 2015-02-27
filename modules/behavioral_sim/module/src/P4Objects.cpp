@@ -1,6 +1,5 @@
-#include "P4Objects.h"
+#include "behavioral_sim/P4Objects.h"
 #include "behavioral_utils/json.h"
-#include <iostream>
 
 typedef unsigned char opcode_t;
 

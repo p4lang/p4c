@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "data.h"
+#include "behavioral_sim/data.h"
 
 int pull_test_data() { return 0; }
 

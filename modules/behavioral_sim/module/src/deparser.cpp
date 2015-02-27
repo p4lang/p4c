@@ -1,4 +1,4 @@
-#include "deparser.h"
+#include "behavioral_sim/deparser.h"
 
 size_t Deparser::get_headers_size(const PHV &phv) const {
   size_t headers_size = 0;

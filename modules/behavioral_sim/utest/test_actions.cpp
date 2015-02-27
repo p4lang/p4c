@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-#include "actions.h"
+#include "behavioral_sim/actions.h"
 
 using std::string;
 

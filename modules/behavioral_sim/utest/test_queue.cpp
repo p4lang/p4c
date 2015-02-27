@@ -2,7 +2,7 @@
 
 #include <thread>
 
-#include <queue.h>
+#include "behavioral_sim/queue.h"
 
 int pull_test_queue() { return 0; }
 

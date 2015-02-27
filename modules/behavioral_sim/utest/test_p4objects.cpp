@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-#include "P4Objects.h"
+#include "behavioral_sim/P4Objects.h"
 
 int pull_test_p4objects() { return 0; }
 

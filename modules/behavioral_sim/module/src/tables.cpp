@@ -1,5 +1,6 @@
-#include "tables.h"
 #include <iostream>
+
+#include "behavioral_sim/tables.h"
 
 using std::vector;
 using std::copy;

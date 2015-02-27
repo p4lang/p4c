@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include "fields.h"
+#include "behavioral_sim/fields.h"
 
 int Field::extract(const char *data, int hdr_offset) {
   if(hdr_offset == 0 && nbits % 8 == 0) {
