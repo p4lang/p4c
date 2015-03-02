@@ -90,11 +90,11 @@ TEST_F(ActionsTest, SetFromConst) {
   Field &f = phv.get_field(testHeader1, 3); // f16
   f.set(0);
 
-  ASSERT_EQ((unsigned) 0, f.get_ui());
+  ASSERT_EQ((unsigned) 0, f.get_uint());
 
   testActionFnEntry(phv);
 
-  ASSERT_EQ((unsigned) 0xaba, f.get_ui());
+  ASSERT_EQ((unsigned) 0xaba, f.get_uint());
 }
 
 TEST_F(ActionsTest, SetFromActionData) {
@@ -108,11 +108,11 @@ TEST_F(ActionsTest, SetFromActionData) {
   Field &f = phv.get_field(testHeader1, 3); // f16
   f.set(0);
 
-  ASSERT_EQ((unsigned) 0, f.get_ui());
+  ASSERT_EQ((unsigned) 0, f.get_uint());
 
   testActionFnEntry(phv);
 
-  ASSERT_EQ((unsigned) 0xaba, f.get_ui());
+  ASSERT_EQ((unsigned) 0xaba, f.get_uint());
 }
 
 
@@ -128,11 +128,11 @@ TEST_F(ActionsTest, SetFromField) {
   Field &dst = phv.get_field(testHeader1, 3); // f16
   dst.set(0);
 
-  ASSERT_EQ((unsigned) 0, dst.get_ui());
+  ASSERT_EQ((unsigned) 0, dst.get_uint());
 
   testActionFnEntry(phv);
 
-  ASSERT_EQ((unsigned) 0xaba, dst.get_ui());
+  ASSERT_EQ((unsigned) 0xaba, dst.get_uint());
 }
 
 TEST_F(ActionsTest, SetFromConstStress) {
@@ -146,9 +146,9 @@ TEST_F(ActionsTest, SetFromConstStress) {
 
   for(int i = 0; i < 100000; i++) {
     f.set(0);
-    ASSERT_EQ((unsigned) 0, f.get_ui());
+    ASSERT_EQ((unsigned) 0, f.get_uint());
     testActionFnEntry(phv);
-    ASSERT_EQ((unsigned) 0xaba, f.get_ui());
+    ASSERT_EQ((unsigned) 0xaba, f.get_uint());
   }
 }
 

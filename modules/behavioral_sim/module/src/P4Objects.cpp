@@ -172,7 +172,7 @@ void P4Objects::init_objects(std::istream &is) {
 	
 	const string type = cfg_parameter["type"].asString();
 
-	if(type == "immediate") {
+	if(type == "hexstr") {
 	  const string value_hexstr = cfg_parameter["value"].asString();
 	  action_fn->parameter_push_back_const(Data(value_hexstr));
 	}
@@ -215,8 +215,9 @@ void P4Objects::init_objects(std::istream &is) {
 
       MatchKeyBuilder key_builder;
       const Json::Value cfg_match_key = cfg_table["key"];
-      for (const auto &cfg_key_field : cfg_match_key) {
-
+      for (const auto &cfg_key_entry : cfg_match_key) {
+	
+	const Json::Value cfg_key_field = cfg_key_entry["target"];
 	const string header_name = cfg_key_field[0].asString();
 	header_id_t header_id = get_header_id(header_name);
 	const string field_name = cfg_key_field[1].asString();

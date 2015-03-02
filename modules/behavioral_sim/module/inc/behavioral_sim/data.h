@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <cassert>
 
 #include "bignum.h"
 
@@ -20,17 +21,45 @@ public:
     bignum::import_bytes(value, bytes, nbytes);
   }
 
+  static char char2digit(char c) {
+    if(c >= '0' && c <= '9')
+      return (c - '0');
+    if(c >= 'A' && c <= 'F')
+      return (c - 'A' + 10);
+    if(c >= 'a' && c <= 'f')
+      return (c - 'a' + 10);
+    assert(0);
+    return 0;
+  }
+
   Data(const std::string hexstring) {
     std::vector<char> bytes;
-    for (char c : hexstring) {
-      if(c >= '0' && c <= '9')
-	bytes.push_back(c - '0');
-      if(c >= 'A' && c <= 'F')
-	bytes.push_back(c - 'A' + 10);
-      if(c >= 'a' && c <= 'f')
-	bytes.push_back(c - 'a' + 10);
+    size_t idx = 0;
+    bool neg = false;
+
+    if(hexstring[idx] == '-') {
+      neg = true;
+      ++idx;
     }
+    if(hexstring[idx] == '0' && hexstring[idx + 1] == 'x') {
+      idx += 2;
+    }
+    size_t size = hexstring.size();
+    assert((size - idx) > 0);
+
+    if((size - idx) % 2 != 0) {
+      char c = char2digit(hexstring[idx++]);
+      bytes.push_back(c);
+    }
+
+    for(; idx < size; ) {
+      char c = char2digit(hexstring[idx++]) << 4;
+      c += char2digit(hexstring[idx++]);
+      bytes.push_back(c);
+    }
+
     bignum::import_bytes(value, bytes.data(), bytes.size());
+    if(neg) value = -value;
   }
 
   void set(unsigned int i) {
@@ -45,10 +74,16 @@ public:
     value = data.value;
   }
 
-  unsigned int get_ui() const {
+  unsigned int get_uint() const {
     assert(arith);
     // Bad ?
     return (unsigned) value;
+  }
+
+  int get_int() const {
+    assert(arith);
+    // Bad ?
+    return (int) value;
   }
 
   void add(const Data &src1, const Data &src2) {

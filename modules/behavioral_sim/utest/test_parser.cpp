@@ -161,40 +161,40 @@ TEST_F(ParserTest, ParseEthernetIPv4TCP) {
   ASSERT_TRUE(ipv4_hdr.is_valid());
 
   Field &ipv4_version = phv.get_field(ipv4Header, 0);
-  ASSERT_EQ((unsigned) 0x4, ipv4_version.get_ui());
+  ASSERT_EQ((unsigned) 0x4, ipv4_version.get_uint());
 
   Field &ipv4_ihl = phv.get_field(ipv4Header, 1);
-  ASSERT_EQ((unsigned) 0x5, ipv4_ihl.get_ui());
+  ASSERT_EQ((unsigned) 0x5, ipv4_ihl.get_uint());
 
   Field &ipv4_diffserv = phv.get_field(ipv4Header, 2);
-  ASSERT_EQ((unsigned) 0x00, ipv4_diffserv.get_ui());
+  ASSERT_EQ((unsigned) 0x00, ipv4_diffserv.get_uint());
 
   Field &ipv4_len = phv.get_field(ipv4Header, 3);
-  ASSERT_EQ((unsigned) 0x0034, ipv4_len.get_ui());
+  ASSERT_EQ((unsigned) 0x0034, ipv4_len.get_uint());
 
   Field &ipv4_identification = phv.get_field(ipv4Header, 4);
-  ASSERT_EQ((unsigned) 0x7090, ipv4_identification.get_ui());
+  ASSERT_EQ((unsigned) 0x7090, ipv4_identification.get_uint());
 
   Field &ipv4_flags = phv.get_field(ipv4Header, 5);
-  ASSERT_EQ((unsigned) 0x2, ipv4_flags.get_ui());
+  ASSERT_EQ((unsigned) 0x2, ipv4_flags.get_uint());
 
   Field &ipv4_flagOffset = phv.get_field(ipv4Header, 6);
-  ASSERT_EQ((unsigned) 0x0000, ipv4_flagOffset.get_ui());
+  ASSERT_EQ((unsigned) 0x0000, ipv4_flagOffset.get_uint());
 
   Field &ipv4_ttl = phv.get_field(ipv4Header, 7);
-  ASSERT_EQ((unsigned) 0x40, ipv4_ttl.get_ui());
+  ASSERT_EQ((unsigned) 0x40, ipv4_ttl.get_uint());
 
   Field &ipv4_protocol = phv.get_field(ipv4Header, 8);
-  ASSERT_EQ((unsigned) 0x06, ipv4_protocol.get_ui());
+  ASSERT_EQ((unsigned) 0x06, ipv4_protocol.get_uint());
 
   Field &ipv4_checksum = phv.get_field(ipv4Header, 9);
-  ASSERT_EQ((unsigned) 0x3508, ipv4_checksum.get_ui());
+  ASSERT_EQ((unsigned) 0x3508, ipv4_checksum.get_uint());
 
   Field &ipv4_srcAddr = phv.get_field(ipv4Header, 10);
-  ASSERT_EQ((unsigned) 0x0a36c121, ipv4_srcAddr.get_ui());
+  ASSERT_EQ((unsigned) 0x0a36c121, ipv4_srcAddr.get_uint());
 
   Field &ipv4_dstAddr = phv.get_field(ipv4Header, 11);
-  ASSERT_EQ((unsigned) 0x4e287bac, ipv4_dstAddr.get_ui());
+  ASSERT_EQ((unsigned) 0x4e287bac, ipv4_dstAddr.get_uint());
 
   const Header &tcp_hdr = phv.get_header(tcpHeader);
   ASSERT_TRUE(tcp_hdr.is_valid());

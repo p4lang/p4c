@@ -32,14 +32,38 @@ public:
   ByteContainer(const char *bytes, size_t nbytes)
     : bytes(vector<char>(bytes, bytes + nbytes)) {}
 
+  static char char2digit(char c) {
+    if(c >= '0' && c <= '9')
+      return (c - '0');
+    if(c >= 'A' && c <= 'F')
+      return (c - 'A' + 10);
+    if(c >= 'a' && c <= 'f')
+      return (c - 'a' + 10);
+    assert(0);
+    return 0;
+  }
+
   ByteContainer(const std::string hexstring) {
-    for (char c : hexstring) {
-      if(c >= '0' && c <= '9')
-	bytes.push_back(c - '0');
-      if(c >= 'A' && c <= 'F')
-	bytes.push_back(c - 'A' + 10);
-      if(c >= 'a' && c <= 'f')
-	bytes.push_back(c - 'a' + 10);
+    std::vector<char> bytes;
+    size_t idx = 0;
+
+    assert(hexstring[idx] != '-');
+
+    if(hexstring[idx] == '0' && hexstring[idx + 1] == 'x') {
+      idx += 2;
+    }
+    size_t size = hexstring.size();
+    assert((size - idx) > 0);
+
+    if((size - idx) % 2 != 0) {
+      char c = char2digit(hexstring[idx++]);
+      bytes.push_back(c);
+    }
+
+    for(; idx < size; ) {
+      char c = char2digit(hexstring[idx++]) << 4;
+      c += char2digit(hexstring[idx++]);
+      bytes.push_back(c);
     }
   }
 

@@ -1,12 +1,28 @@
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "behavioral_sim/data.h"
 
 int pull_test_data() { return 0; }
 
 TEST(Data, ConstructorFromUInt) {
   const Data d(0xaba);
-  EXPECT_EQ(d.get_ui(), (unsigned) 0xaba);
+  EXPECT_EQ((unsigned) 0xaba, d.get_uint());
+}
+
+TEST(Data, ConstructorFromBytes) {
+  unsigned char bytes[2] = {0x0a, 0xba};
+  const Data d((char *) bytes, sizeof(bytes));
+  EXPECT_EQ((unsigned) 0xaba, d.get_uint());
+}
+
+TEST(Data, ConstructorFromHexStr) {
+  const Data d1(std::string("0xaba"));
+  EXPECT_EQ((unsigned) 0xaba, d1.get_uint());
+
+  const Data d2("-0xaba");
+  EXPECT_EQ(-0xaba, d2.get_int());
 }
 
 TEST(Data, EqualityOp) {
@@ -27,14 +43,14 @@ TEST(Data, CopyOp) {
   d2 = d1;
   EXPECT_EQ(d1, d2);
   d2.set(0);
-  EXPECT_EQ(d1.get_ui(), (unsigned) 0xaba);
+  EXPECT_EQ((unsigned) 0xaba, d1.get_uint());
 }
 
 TEST(Data, AddDestIsSrc) {
   Data d1(11);
   Data d2(22);
   d1.add(d1, d2);
-  EXPECT_EQ(d1.get_ui(), (unsigned) 33);
+  EXPECT_EQ((unsigned) 33, d1.get_uint());
 }
 
 TEST(Data, Add) {
@@ -42,5 +58,5 @@ TEST(Data, Add) {
   Data d2(22);
   Data d3;
   d3.add(d1, d2);
-  EXPECT_EQ(d3.get_ui(), (unsigned) 33);
+  EXPECT_EQ((unsigned) 33, d3.get_uint());
 }
