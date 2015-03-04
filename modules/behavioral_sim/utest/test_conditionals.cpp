@@ -212,7 +212,7 @@ TEST_F(ConditionalsTest, Not) {
 
   Conditional c2;
   c2.op_push_back_load_bool(true);
-  c2.op_push_back_op(ExprOpcode::AND);
+  c2.op_push_back_op(ExprOpcode::NOT);
   c2.build();
 
   ASSERT_FALSE(c2.eval(phv));

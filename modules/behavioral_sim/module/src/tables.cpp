@@ -39,8 +39,8 @@ MatchTable::delete_entry(entry_handle_t handle)
   return unset_handle(handle);
 }
 
-MatchTable *
-MatchTable::apply(const Packet &pkt, PHV *phv)
+ControlFlowNode *
+MatchTable::operator()(const Packet &pkt, PHV *phv)
 {
   ByteContainer lookup_key;
   build_key(*phv, lookup_key);

@@ -5,21 +5,21 @@
 
 #include "actions.h"
 #include "bytecontainer.h"
-#include "tables.h"
+#include "control_flow.h"
 
-class MatchTable;
+class ControlFlowNode;
 
 struct MatchEntry
 {
   ByteContainer key;
   ActionFnEntry action_entry; // includes action data
-  const MatchTable *next_table;
+  const ControlFlowNode *next_table;
 
   MatchEntry() {}
 
   MatchEntry(const ByteContainer &key,
 	     ActionFnEntry &action_entry,
-	     const MatchTable *next_table)
+	     const ControlFlowNode *next_table)
     : key(key), action_entry(action_entry), next_table(next_table) {}
 };
 
@@ -30,7 +30,7 @@ struct ExactMatchEntry: MatchEntry
 
   ExactMatchEntry(const ByteContainer &key,
 		  ActionFnEntry &action_entry,
-		  const MatchTable *next_table)
+		  const ControlFlowNode *next_table)
     : MatchEntry(key, action_entry, next_table) {}
 };
 
@@ -42,7 +42,7 @@ struct LongestPrefixMatchEntry : MatchEntry
     : MatchEntry() {}
 
   LongestPrefixMatchEntry(const ByteContainer &key, ActionFnEntry &action_entry,
-			  unsigned prefix_length, const MatchTable *next_table)
+			  unsigned prefix_length, const ControlFlowNode *next_table)
     : MatchEntry(key, action_entry, next_table), prefix_length(prefix_length) {
     unsigned byte_index = prefix_length / 8;
     unsigned mod = prefix_length % 8;
@@ -66,7 +66,7 @@ struct TernaryMatchEntry : MatchEntry
 
   TernaryMatchEntry(const ByteContainer &key, ActionFnEntry &action_entry,
 		    const ByteContainer &mask, int priority,
-		    const MatchTable *next_table)
+		    const ControlFlowNode *next_table)
     : MatchEntry(key, action_entry, next_table), mask(mask), priority(priority) {
     for(unsigned byte_index = 0; byte_index < key.size(); byte_index++) {
       this->key[byte_index] &= mask[byte_index];

@@ -11,6 +11,7 @@
 #include "bytecontainer.h"
 #include "handle_mgr.h"
 #include "lpm_trie.h"
+#include "control_flow.h"
 
 using std::vector;
 using std::unordered_map;
@@ -38,7 +39,7 @@ struct MatchKeyBuilder
   }
 };
 
-class MatchTable
+class MatchTable : public ControlFlowNode
 {
 public:
   enum ErrorCode {
@@ -56,8 +57,8 @@ public:
 
   virtual ~MatchTable() {}
   
-  // return pointer to next table
-  MatchTable *apply(const Packet &pkt, PHV *phv);
+  // return pointer to next control flow node
+  ControlFlowNode *operator()(const Packet &pkt, PHV *phv);
   
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
   virtual ErrorCode delete_entry(entry_handle_t handle);

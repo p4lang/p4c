@@ -4,19 +4,19 @@
 class Pipeline
 {
 public:
-  Pipeline(const std::string &name, MatchTable *first_table)
-    : name(name), first_table(first_table) {}
+  Pipeline(const std::string &name, ControlFlowNode *first_node)
+    : name(name), first_node(first_node) {}
 
   void apply(const Packet &pkt, PHV *phv) {
-    MatchTable *table = first_table;
-    while(table) {
-      table = table->apply(pkt, phv); 
+    ControlFlowNode *node = first_node;
+    while(node) {
+      node = (*node)(pkt, phv); 
     }
   }
 
 private:
   std::string name;
-  MatchTable *first_table;
+  ControlFlowNode *first_node;
 };
 
 #endif
