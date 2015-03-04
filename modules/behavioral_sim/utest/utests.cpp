@@ -14,6 +14,8 @@ int pull_test_queue();
 int pull_test_p4objects();
 // implemented in test_actions.cpp
 int pull_test_actions();
+// implemented in test_conditionals.cpp
+int pull_test_conditionals();
 
 // See this link for explanation:
 // https://code.google.com/p/googletest/wiki/Primer#Important_note_for_Visual_C++_users
@@ -25,6 +27,7 @@ void pull_tests() {
   pull_test_queue();
   pull_test_p4objects();
   pull_test_actions();
+  pull_test_conditionals();
 }
 
 #ifdef __cplusplus

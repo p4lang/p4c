@@ -14,6 +14,9 @@ class Data
 public:
   Data() {}
 
+  Data(int i)
+    : value(i) {}
+
   Data(unsigned i)
     : value(i) {}
 
@@ -86,9 +89,31 @@ public:
     return (int) value;
   }
 
+  // TODO: overload operators for those ?
+
   void add(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value + src2.value;
+  }
+
+  void bit_and(const Data &src1, const Data &src2) {
+    assert(src1.arith && src2.arith);
+    value = src1.value & src2.value;
+  }
+
+  void bit_or(const Data &src1, const Data &src2) {
+    assert(src1.arith && src2.arith);
+    value = src1.value | src2.value;
+  }
+
+  void bit_xor(const Data &src1, const Data &src2) {
+    assert(src1.arith && src2.arith);
+    value = src1.value ^ src2.value;
+  }
+
+  void bit_neg(const Data &src) {
+    assert(src.arith);
+    value = ~src.value;
   }
 
   friend bool operator==(const Data &lhs, const Data &rhs) {
@@ -99,6 +124,26 @@ public:
   friend bool operator!=(const Data &lhs, const Data &rhs) {
     assert(lhs.arith && rhs.arith);
     return !(lhs == rhs);
+  }
+
+  friend bool operator>(const Data &lhs, const Data &rhs) {
+    assert(lhs.arith && rhs.arith);
+    return lhs.value > rhs.value;
+  }
+
+  friend bool operator>=(const Data &lhs, const Data &rhs) {
+    assert(lhs.arith && rhs.arith);
+    return lhs.value >= rhs.value;
+  }
+
+  friend bool operator<(const Data &lhs, const Data &rhs) {
+    assert(lhs.arith && rhs.arith);
+    return lhs.value < rhs.value;
+  }
+
+  friend bool operator<=(const Data &lhs, const Data &rhs) {
+    assert(lhs.arith && rhs.arith);
+    return lhs.value <= rhs.value;
   }
 
   friend std::ostream& operator<<( std::ostream &out, const Data &d ) {

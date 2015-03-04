@@ -60,3 +60,10 @@ TEST(Data, Add) {
   d3.add(d1, d2);
   EXPECT_EQ((unsigned) 33, d3.get_uint());
 }
+
+TEST(Data, BitNeg) {
+  Data d1(0xaba);
+  Data d2;
+  d2.bit_neg(d1);
+  EXPECT_EQ(~0xaba, d2.get_int());
+}
