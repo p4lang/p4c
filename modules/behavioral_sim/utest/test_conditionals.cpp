@@ -37,9 +37,9 @@ protected:
 
 TEST_F(ConditionalsTest, EqData) {
   Conditional c;
-  c.op_push_back_load_field(testHeader1, 3); // f16
-  c.op_push_back_load_const(Data(0xaba));
-  c.op_push_back_op(ExprOpcode::EQ_DATA);
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_const(Data(0xaba));
+  c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
   Field &f = phv.get_field(testHeader1, 3); // f16
@@ -54,9 +54,9 @@ TEST_F(ConditionalsTest, EqData) {
 
 TEST_F(ConditionalsTest, NeqData) {
   Conditional c;
-  c.op_push_back_load_field(testHeader1, 3); // f16
-  c.op_push_back_load_const(Data(0xaba));
-  c.op_push_back_op(ExprOpcode::NEQ_DATA);
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_const(Data(0xaba));
+  c.push_back_op(ExprOpcode::NEQ_DATA);
   c.build();
 
   Field &f = phv.get_field(testHeader1, 3); // f16
@@ -71,9 +71,9 @@ TEST_F(ConditionalsTest, NeqData) {
 
 TEST_F(ConditionalsTest, GtData) {
   Conditional c;
-  c.op_push_back_load_field(testHeader1, 3); // f16
-  c.op_push_back_load_const(Data(0x1001));
-  c.op_push_back_op(ExprOpcode::GT_DATA);
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_const(Data(0x1001));
+  c.push_back_op(ExprOpcode::GT_DATA);
   c.build();
 
   Field &f = phv.get_field(testHeader1, 3); // f16
@@ -88,9 +88,9 @@ TEST_F(ConditionalsTest, GtData) {
 
 TEST_F(ConditionalsTest, LtData) {
   Conditional c;
-  c.op_push_back_load_field(testHeader1, 3); // f16
-  c.op_push_back_load_const(Data(0x1001));
-  c.op_push_back_op(ExprOpcode::LT_DATA);
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_const(Data(0x1001));
+  c.push_back_op(ExprOpcode::LT_DATA);
   c.build();
 
   Field &f = phv.get_field(testHeader1, 3); // f16
@@ -105,9 +105,9 @@ TEST_F(ConditionalsTest, LtData) {
 
 TEST_F(ConditionalsTest, GetData) {
   Conditional c;
-  c.op_push_back_load_field(testHeader1, 3); // f16
-  c.op_push_back_load_const(Data(0x1001));
-  c.op_push_back_op(ExprOpcode::GET_DATA);
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_const(Data(0x1001));
+  c.push_back_op(ExprOpcode::GET_DATA);
   c.build();
 
   Field &f = phv.get_field(testHeader1, 3); // f16
@@ -126,9 +126,9 @@ TEST_F(ConditionalsTest, GetData) {
 
 TEST_F(ConditionalsTest, LetData) {
   Conditional c;
-  c.op_push_back_load_field(testHeader1, 3); // f16
-  c.op_push_back_load_const(Data(0x1001));
-  c.op_push_back_op(ExprOpcode::LET_DATA);
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_const(Data(0x1001));
+  c.push_back_op(ExprOpcode::LET_DATA);
   c.build();
 
   Field &f = phv.get_field(testHeader1, 3); // f16
@@ -147,11 +147,11 @@ TEST_F(ConditionalsTest, LetData) {
 
 TEST_F(ConditionalsTest, Add) {
   Conditional c;
-  c.op_push_back_load_field(testHeader1, 3); // f16
-  c.op_push_back_load_field(testHeader2, 1); // f48
-  c.op_push_back_op(ExprOpcode::ADD);
-  c.op_push_back_load_const(Data(0x33));
-  c.op_push_back_op(ExprOpcode::EQ_DATA);
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader2, 1); // f48
+  c.push_back_op(ExprOpcode::ADD);
+  c.push_back_load_const(Data(0x33));
+  c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
   Field &f1 = phv.get_field(testHeader1, 3); // f16
@@ -168,17 +168,17 @@ TEST_F(ConditionalsTest, Add) {
 
 TEST_F(ConditionalsTest, And) {
   Conditional c1;
-  c1.op_push_back_load_bool(true);
-  c1.op_push_back_load_bool(true);
-  c1.op_push_back_op(ExprOpcode::AND);
+  c1.push_back_load_bool(true);
+  c1.push_back_load_bool(true);
+  c1.push_back_op(ExprOpcode::AND);
   c1.build();
 
   ASSERT_TRUE(c1.eval(phv));
 
   Conditional c2;
-  c2.op_push_back_load_bool(true);
-  c2.op_push_back_load_bool(false);
-  c2.op_push_back_op(ExprOpcode::AND);
+  c2.push_back_load_bool(true);
+  c2.push_back_load_bool(false);
+  c2.push_back_op(ExprOpcode::AND);
   c2.build();
 
   ASSERT_FALSE(c2.eval(phv));
@@ -186,17 +186,17 @@ TEST_F(ConditionalsTest, And) {
 
 TEST_F(ConditionalsTest, Or) {
   Conditional c1;
-  c1.op_push_back_load_bool(true);
-  c1.op_push_back_load_bool(false);
-  c1.op_push_back_op(ExprOpcode::OR);
+  c1.push_back_load_bool(true);
+  c1.push_back_load_bool(false);
+  c1.push_back_op(ExprOpcode::OR);
   c1.build();
 
   ASSERT_TRUE(c1.eval(phv));
 
   Conditional c2;
-  c2.op_push_back_load_bool(false);
-  c2.op_push_back_load_bool(false);
-  c2.op_push_back_op(ExprOpcode::OR);
+  c2.push_back_load_bool(false);
+  c2.push_back_load_bool(false);
+  c2.push_back_op(ExprOpcode::OR);
   c2.build();
 
   ASSERT_FALSE(c2.eval(phv));
@@ -204,15 +204,15 @@ TEST_F(ConditionalsTest, Or) {
 
 TEST_F(ConditionalsTest, Not) {
   Conditional c1;
-  c1.op_push_back_load_bool(false);
-  c1.op_push_back_op(ExprOpcode::NOT);
+  c1.push_back_load_bool(false);
+  c1.push_back_op(ExprOpcode::NOT);
   c1.build();
 
   ASSERT_TRUE(c1.eval(phv));
 
   Conditional c2;
-  c2.op_push_back_load_bool(true);
-  c2.op_push_back_op(ExprOpcode::NOT);
+  c2.push_back_load_bool(true);
+  c2.push_back_op(ExprOpcode::NOT);
   c2.build();
 
   ASSERT_FALSE(c2.eval(phv));
@@ -223,11 +223,11 @@ TEST_F(ConditionalsTest, BitAnd) {
   int v2 = 0x123456;
 
   Conditional c;
-  c.op_push_back_load_const(Data(v1));
-  c.op_push_back_load_const(Data(v2));
-  c.op_push_back_op(ExprOpcode::BIT_AND);
-  c.op_push_back_load_const(Data(v1 & v2));
-  c.op_push_back_op(ExprOpcode::EQ_DATA);
+  c.push_back_load_const(Data(v1));
+  c.push_back_load_const(Data(v2));
+  c.push_back_op(ExprOpcode::BIT_AND);
+  c.push_back_load_const(Data(v1 & v2));
+  c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
   ASSERT_TRUE(c.eval(phv));
@@ -238,11 +238,11 @@ TEST_F(ConditionalsTest, BitOr) {
   int v2 = 0x123456;
 
   Conditional c;
-  c.op_push_back_load_const(Data(v1));
-  c.op_push_back_load_const(Data(v2));
-  c.op_push_back_op(ExprOpcode::BIT_OR);
-  c.op_push_back_load_const(Data(v1 | v2));
-  c.op_push_back_op(ExprOpcode::EQ_DATA);
+  c.push_back_load_const(Data(v1));
+  c.push_back_load_const(Data(v2));
+  c.push_back_op(ExprOpcode::BIT_OR);
+  c.push_back_load_const(Data(v1 | v2));
+  c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
   ASSERT_TRUE(c.eval(phv));
@@ -253,11 +253,11 @@ TEST_F(ConditionalsTest, BitXor) {
   int v2 = 0x123456;
 
   Conditional c;
-  c.op_push_back_load_const(Data(v1));
-  c.op_push_back_load_const(Data(v2));
-  c.op_push_back_op(ExprOpcode::BIT_XOR);
-  c.op_push_back_load_const(Data(v1 ^ v2));
-  c.op_push_back_op(ExprOpcode::EQ_DATA);
+  c.push_back_load_const(Data(v1));
+  c.push_back_load_const(Data(v2));
+  c.push_back_op(ExprOpcode::BIT_XOR);
+  c.push_back_load_const(Data(v1 ^ v2));
+  c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
   ASSERT_TRUE(c.eval(phv));
@@ -267,10 +267,10 @@ TEST_F(ConditionalsTest, BitNeg) {
   int v = 0xababa;
 
   Conditional c;
-  c.op_push_back_load_const(Data(v));
-  c.op_push_back_op(ExprOpcode::BIT_NEG);
-  c.op_push_back_load_const(Data(~v));
-  c.op_push_back_op(ExprOpcode::EQ_DATA);
+  c.push_back_load_const(Data(v));
+  c.push_back_op(ExprOpcode::BIT_NEG);
+  c.push_back_load_const(Data(~v));
+  c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
   ASSERT_TRUE(c.eval(phv));
@@ -278,8 +278,8 @@ TEST_F(ConditionalsTest, BitNeg) {
 
 TEST_F(ConditionalsTest, ValidHeader) {
   Conditional c;
-  c.op_push_back_load_header(testHeader1);
-  c.op_push_back_op(ExprOpcode::VALID_HEADER);
+  c.push_back_load_header(testHeader1);
+  c.push_back_op(ExprOpcode::VALID_HEADER);
   c.build();
 
   Header &hdr1 = phv.get_header(testHeader1);
@@ -295,18 +295,18 @@ TEST_F(ConditionalsTest, ValidHeader) {
 TEST_F(ConditionalsTest, Stress) {
   Conditional c;
   // (valid(testHeader1) && (false || (testHeader1.f16 == 1))) && !valid(testHeader2)
-  c.op_push_back_load_header(testHeader1);
-  c.op_push_back_op(ExprOpcode::VALID_HEADER);
-  c.op_push_back_load_bool(false);
-  c.op_push_back_load_field(testHeader1, 3); // f16
-  c.op_push_back_load_const(Data(1));
-  c.op_push_back_op(ExprOpcode::EQ_DATA);
-  c.op_push_back_op(ExprOpcode::OR);
-  c.op_push_back_op(ExprOpcode::AND);
-  c.op_push_back_load_header(testHeader2);
-  c.op_push_back_op(ExprOpcode::VALID_HEADER);
-  c.op_push_back_op(ExprOpcode::NOT);
-  c.op_push_back_op(ExprOpcode::AND);
+  c.push_back_load_header(testHeader1);
+  c.push_back_op(ExprOpcode::VALID_HEADER);
+  c.push_back_load_bool(false);
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_const(Data(1));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.push_back_op(ExprOpcode::OR);
+  c.push_back_op(ExprOpcode::AND);
+  c.push_back_load_header(testHeader2);
+  c.push_back_op(ExprOpcode::VALID_HEADER);
+  c.push_back_op(ExprOpcode::NOT);
+  c.push_back_op(ExprOpcode::AND);
   c.build();
 
   Header &hdr1 = phv.get_header(testHeader1);

@@ -58,7 +58,7 @@ public:
   virtual ~MatchTable() {}
   
   // return pointer to next control flow node
-  ControlFlowNode *operator()(const Packet &pkt, PHV *phv);
+  ControlFlowNode *operator()(const Packet &pkt, PHV *phv) override;
   
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
   virtual ErrorCode delete_entry(entry_handle_t handle);

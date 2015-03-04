@@ -1,7 +1,44 @@
 #include "behavioral_sim/P4Objects.h"
-#include "behavioral_utils/json.h"
 
 typedef unsigned char opcode_t;
+
+void P4Objects::build_conditional(const Json::Value &json_expression,
+				  Conditional *conditional) {
+  if(json_expression.isNull()) return ;
+  const std::string type = json_expression["type"].asString();
+  const Json::Value json_value = json_expression["value"];
+  if(type == "expression") {
+    const std::string op = json_value["op"].asString();
+    const Json::Value json_left = json_value["left"];
+    const Json::Value json_right = json_value["left"];
+
+    build_conditional(json_left, conditional);
+    build_conditional(json_right, conditional);
+    
+    ExprOpcode opcode = ExprOpcodesMap::get_opcode(op);
+    conditional->push_back_op(opcode);
+  }
+  else if(type == "header") {
+    header_id_t header_id = get_header_id(json_value.asString());
+    conditional->push_back_load_header(header_id);
+  }
+  else if(type == "field") {
+    const string header_name = json_value[0].asString();
+    header_id_t header_id = get_header_id(header_name);
+    const string field_name = json_value[1].asString();
+    int field_offset = get_field_offset(header_id, field_name);
+    conditional->push_back_load_field(header_id, field_offset);
+  }
+  else if(type == "bool") {
+    conditional->push_back_load_bool(json_value.asBool());
+  }
+  else if(type == "hexstr") {
+    conditional->push_back_load_const( Data(json_value.asString()) );
+  }
+  else {
+    assert(0);
+  }
+}
 
 void P4Objects::init_objects(std::istream &is) {
   Json::Value cfg_root;
@@ -97,8 +134,13 @@ void P4Objects::init_objects(std::istream &is) {
       	// ignore mask for now
 	const string next_state_name = cfg_transition["next_state"].asString();
       	const ParseState *next_state = current_parse_states[next_state_name];
-	parse_state->add_switch_case(ByteContainer(value_hexstr),
-				     next_state);
+
+	if(value_hexstr == "default") {
+	  parse_state->set_default_switch_case(next_state);
+	}
+	else {
+	  parse_state->add_switch_case(ByteContainer(value_hexstr), next_state);
+	}
       }
     }
 
@@ -199,12 +241,14 @@ void P4Objects::init_objects(std::istream &is) {
   }
 
   // pipelines
-  
+
   const Json::Value cfg_pipelines = cfg_root["pipelines"];
   for (const auto &cfg_pipeline : cfg_pipelines) {
 
     const string pipeline_name = cfg_pipeline["name"].asString();
-    const string first_table_name = cfg_pipeline["init_table"].asString();
+    const string first_node_name = cfg_pipeline["init_table"].asString();
+
+    // pipelines -> tables
     
     const Json::Value cfg_tables = cfg_pipeline["tables"];
     for (const auto &cfg_table : cfg_tables) {
@@ -251,8 +295,40 @@ void P4Objects::init_objects(std::istream &is) {
       }
     }
 
-    MatchTable *first_table = get_match_table(first_table_name);
-    Pipeline *pipeline = new Pipeline(pipeline_name, first_table);
+    // pipelines -> conditionals
+    
+    const Json::Value cfg_conditionals = cfg_pipeline["conditionals"];
+    for (const auto &cfg_conditional : cfg_conditionals) {
+
+      const string conditional_name = cfg_conditional["name"].asString();
+      Conditional *conditional = new Conditional(conditional_name);
+
+      const Json::Value cfg_expression = cfg_conditional["expression"];
+      build_conditional(cfg_expression, conditional);
+
+      add_conditional(conditional_name, unique_ptr<Conditional>(conditional));
+    }
+
+    for (const auto &cfg_conditional : cfg_conditionals) {
+
+      const string conditional_name = cfg_conditional["name"].asString();
+      Conditional *conditional = get_conditional(conditional_name);
+      
+      const Json::Value cfg_true_next = cfg_conditional["true_next"];
+      const Json::Value cfg_false_next = cfg_conditional["false_next"];
+
+      if(!cfg_true_next.isNull()) {
+	ControlFlowNode *next_node = get_control_node(cfg_true_next.asString());
+	conditional->set_next_node_if_true(next_node);
+      }
+      if(!cfg_false_next.isNull()) {
+	ControlFlowNode *next_node = get_control_node(cfg_false_next.asString());
+	conditional->set_next_node_if_false(next_node);
+      }
+    }
+
+    ControlFlowNode *first_node = get_control_node(first_node_name);
+    Pipeline *pipeline = new Pipeline(pipeline_name, first_node);
     add_pipeline(pipeline_name, unique_ptr<Pipeline>(pipeline));
   }
 }

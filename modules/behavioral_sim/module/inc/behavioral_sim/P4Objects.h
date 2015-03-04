@@ -4,12 +4,16 @@
 #include <string>
 #include <memory>
 
+#include "behavioral_utils/json.h"
+
 #include "tables.h"
 #include "headers.h"
 #include "phv.h"
 #include "parser.h"
 #include "deparser.h"
 #include "pipeline.h"
+#include "conditionals.h"
+#include "control_flow.h"
 
 using std::vector;
 using std::unordered_map;
@@ -52,6 +56,14 @@ public:
 
   MatchTable *get_match_table(const string &name) {
     return tables_map[name];
+  }
+
+  Conditional *get_conditional(const string &name) {
+    return conditionals_map[name].get();
+  }
+
+  ControlFlowNode *get_control_node(const string &name) {
+    return control_nodes_map[name];
   }
 
   Pipeline *get_pipeline(const string &name) {
@@ -107,11 +119,25 @@ private:
 
   void add_match_table(const string &name, MatchTable *table) {
     tables_map[name] = table;
+    add_control_node(name, table);
+  }
+
+  void add_conditional(const string &name,
+		       unique_ptr<Conditional> conditional) {
+    conditionals_map[name] = std::move(conditional);
+    add_control_node(name, conditional.get());
+  }
+
+  void add_control_node(const string &name, ControlFlowNode *node) {
+    control_nodes_map[name] = node;
   }
 
   void add_pipeline(const string &name, unique_ptr<Pipeline> pipeline) {
     pipelines_map[name] = std::move(pipeline);
   }
+
+  void build_conditional(const Json::Value &json_expression,
+			 Conditional *conditional);
 
 private:
   PHV phv;
@@ -125,6 +151,10 @@ private:
   unordered_map<string, unique_ptr<LongestPrefixMatchTable> > lpm_tables_map;
   unordered_map<string, unique_ptr<TernaryMatchTable> > ternary_tables_map;
   unordered_map<string, MatchTable *> tables_map;
+
+  unordered_map<string, unique_ptr<Conditional> > conditionals_map;
+
+  unordered_map<string, ControlFlowNode *> control_nodes_map;
 
   // pipelines
   unordered_map<string, unique_ptr<Pipeline> > pipelines_map;

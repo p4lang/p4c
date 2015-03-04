@@ -7,6 +7,7 @@
 
 #include "data.h"
 #include "phv.h"
+#include "control_flow.h"
 
 enum class ExprOpcode {
   LOAD_FIELD, LOAD_HEADER, LOAD_BOOL, LOAD_CONST,
@@ -49,24 +50,43 @@ struct Op {
   };
 };
 
-class Conditional {
+class Conditional : public ControlFlowNode {
 public:
-  void op_push_back_load_field(header_id_t header, int field_offset);
-  void op_push_back_load_bool(bool value);
-  void op_push_back_load_header(header_id_t header);
-  void op_push_back_load_const(const Data &data);
-  void op_push_back_op(ExprOpcode opcode);
+  Conditional() {}
+
+  Conditional(const std::string &name)
+    : name(name) {}
+
+  void push_back_load_field(header_id_t header, int field_offset);
+  void push_back_load_bool(bool value);
+  void push_back_load_header(header_id_t header);
+  void push_back_load_const(const Data &data);
+  void push_back_op(ExprOpcode opcode);
 
   void build();
 
   bool eval(const PHV &phv);
 
+  void set_next_node_if_true(ControlFlowNode *next_node) {
+    true_next = next_node;
+  }
+
+  void set_next_node_if_false(ControlFlowNode *next_node) {
+    false_next = next_node;
+  }
+
+  // return pointer to next control flow node
+  ControlFlowNode *operator()(const Packet &pkt, PHV *phv) override;
+
 private:
   int assign_dest_registers();
   
 private:
+  std::string name;
   std::vector<Op> ops;
   std::vector<Data> const_values;
+  ControlFlowNode *true_next{nullptr};
+  ControlFlowNode *false_next{nullptr};
   int data_registers_cnt{0};
   bool built{false};
 };

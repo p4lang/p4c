@@ -35,7 +35,7 @@ public:
     return 0;
   }
 
-  Data(const std::string hexstring) {
+  Data(const std::string &hexstring) {
     std::vector<char> bytes;
     size_t idx = 0;
     bool neg = false;

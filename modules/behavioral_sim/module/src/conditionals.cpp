@@ -41,28 +41,28 @@ ExprOpcode ExprOpcodesMap::get_opcode(std::string expr_name) {
   return instance->opcodes_map[expr_name];
 }
 
-void Conditional::op_push_back_load_field(header_id_t header, int field_offset) {
+void Conditional::push_back_load_field(header_id_t header, int field_offset) {
   Op op;
   op.opcode = ExprOpcode::LOAD_FIELD;
   op.field = {header, field_offset};
   ops.push_back(op);
 }
 
-void Conditional::op_push_back_load_bool(bool value) {
+void Conditional::push_back_load_bool(bool value) {
   Op op;
   op.opcode = ExprOpcode::LOAD_BOOL;
   op.bool_value = value;
   ops.push_back(op);
 }
 
-void Conditional::op_push_back_load_header(header_id_t header) {
+void Conditional::push_back_load_header(header_id_t header) {
   Op op;
   op.opcode = ExprOpcode::LOAD_HEADER;
   op.header = header;
   ops.push_back(op);
 }
 
-void Conditional::op_push_back_load_const(const Data &data) {
+void Conditional::push_back_load_const(const Data &data) {
   const_values.push_back(data);
   Op op;
   op.opcode = ExprOpcode::LOAD_CONST;
@@ -70,7 +70,7 @@ void Conditional::op_push_back_load_const(const Data &data) {
   ops.push_back(op);
 }
 
-void Conditional::op_push_back_op(ExprOpcode opcode) {
+void Conditional::push_back_op(ExprOpcode opcode) {
   Op op;
   op.opcode = opcode;
   ops.push_back(op);
@@ -222,6 +222,11 @@ bool Conditional::eval(const PHV &phv) {
   }
 
   return bool_temps_stack.back();
+}
+
+ControlFlowNode *Conditional::operator()(const Packet &pkt, PHV *phv)
+{
+  return eval(*phv) ? true_next : false_next;
 }
 
 int Conditional::assign_dest_registers() {

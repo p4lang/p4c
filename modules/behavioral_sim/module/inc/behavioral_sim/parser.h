@@ -106,6 +106,7 @@ private:
   bool has_switch;
   ParseSwitchKeyBuilder key_builder;
   vector<ParseSwitchCase> parser_switch;
+  const ParseState *default_next_state{nullptr};
 
 public:
   ParseState(string name)
@@ -128,6 +129,10 @@ public:
   void add_switch_case(int nbytes_key, const char *key,
 		       const ParseState *next_state) {
     parser_switch.push_back( ParseSwitchCase(nbytes_key, key, next_state) );
+  }
+
+  void set_default_switch_case(const ParseState *default_next) {
+    default_next_state = default_next;
   }
 
   const string &get_name() const { return name; }

@@ -43,7 +43,7 @@ public:
     return 0;
   }
 
-  ByteContainer(const std::string hexstring) {
+  ByteContainer(const std::string &hexstring) {
     std::vector<char> bytes;
     size_t idx = 0;
 

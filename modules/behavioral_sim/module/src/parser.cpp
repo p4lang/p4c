@@ -44,8 +44,7 @@ const ParseState *ParseState::operator()(const char *data,
     if(it->match(key, &next_state)) return next_state;
   }
 
-  // not match, return NULL (EOP)
-  return NULL;
+  return default_next_state;
 }
 
 void Parser::parse(Packet *pkt, PHV *phv) const {
