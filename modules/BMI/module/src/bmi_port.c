@@ -72,7 +72,7 @@ static void *run_select(void *data) {
       if(FD_ISSET(port_info->fd, &fds) && port_info->bmi) {
 	--n;
 	pkt_len = bmi_interface_recv(port_info->bmi, &pkt_data);
-	printf("Received pkt of len %d on port %d\n", pkt_len, i);
+	/* printf("Received pkt of len %d on port %d\n", pkt_len, i); */
 	if(port_mgr->packet_handler) {
 	  port_mgr->packet_handler(i, pkt_data, pkt_len);
 	}
