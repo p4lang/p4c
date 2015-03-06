@@ -22,9 +22,9 @@ int aim_main(int argc, char* argv[])
     bmi_port_mgr_t *port_mgr;
     bmi_port_create_mgr(&port_mgr);
 
-    bmi_port_interface_add(port_mgr, "lo", 1);
+    bmi_port_interface_add(port_mgr, "lo", 1, NULL);
 
-    sleep(5);
+    sleep(100);
 
     bmi_port_interface_remove(port_mgr, 1);
 

@@ -7,12 +7,15 @@
 typedef struct bmi_interface_s {
   pcap_t *pcap;
   int fd;
+  pcap_dumper_t *pcap_dumper;
 } bmi_interface_t;
 
 int bmi_interface_create(bmi_interface_t **bmi, const char *device) {
   bmi_interface_t *bmi_ = malloc(sizeof(bmi_interface_t));
 
   if(!bmi_) return -1;
+
+  bmi_->pcap_dumper = NULL;
 
   char errbuf[PCAP_ERRBUF_SIZE];
   bmi_->pcap = pcap_create(device, errbuf);
@@ -59,11 +62,28 @@ int bmi_interface_create(bmi_interface_t **bmi, const char *device) {
 
 int bmi_interface_destroy(bmi_interface_t *bmi) {
   pcap_close(bmi->pcap);
+  if(bmi->pcap_dumper) pcap_dump_close(bmi->pcap_dumper);
   free(bmi);
   return 0;
 }
 
+int bmi_interface_add_dumper(bmi_interface_t *bmi, const char *filename) {
+  if((bmi->pcap_dumper = pcap_dump_open(bmi->pcap, filename)) == NULL) {
+    return -1;
+  }
+  return 0;
+}
+
 int bmi_interface_send(bmi_interface_t *bmi, char *data, int len) {
+  if(bmi->pcap_dumper) {
+    struct pcap_pkthdr pkt_header;
+    memset(&pkt_header, 0, sizeof(pkt_header));
+    gettimeofday(&pkt_header.ts, NULL);
+    pkt_header.caplen = len;
+    pkt_header.len = len;
+    pcap_dump((unsigned char *) bmi->pcap_dumper, &pkt_header,
+	      (unsigned char *) data);
+  }
   return pcap_sendpacket(bmi->pcap, (unsigned char *) data, len);
 }
 
@@ -78,6 +98,10 @@ int bmi_interface_recv(bmi_interface_t *bmi, const char **data) {
 
   if(pkt_header->caplen != pkt_header->len) {
     return -1;
+  }
+
+  if(bmi->pcap_dumper) {
+    pcap_dump((unsigned char *) bmi->pcap_dumper, pkt_header, pkt_data);
   }
 
   *data = (const char *) pkt_data;
@@ -96,6 +120,10 @@ int bmi_interface_recv_with_copy(bmi_interface_t *bmi, char *data, int max_len) 
 
   if(pkt_header->caplen != pkt_header->len) {
     return -1;
+  }
+
+  if(bmi->pcap_dumper) {
+    pcap_dump((unsigned char *) bmi->pcap_dumper, pkt_header, pkt_data);
   }
 
   rv = (max_len < pkt_header->len) ? max_len : pkt_header->len;
