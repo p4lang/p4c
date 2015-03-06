@@ -101,8 +101,15 @@ int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
   return 0;
 }
 
+int bmi_set_packet_handler(bmi_port_mgr_t *port_mgr,
+			   bmi_packet_handler_t packet_handler) {
+  port_mgr->packet_handler = packet_handler;
+  return 0;
+}
+
 int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
-			   const char *ifname, int port_num) {
+			   const char *ifname, int port_num,
+			   const char *pcap_dump) {
   if(!port_num_valid(port_num)) return -1;
 
   bmi_port_t *port = get_port(port_mgr, port_num);
@@ -112,6 +119,8 @@ int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
 
   bmi_interface_t *bmi;
   if(bmi_interface_create(&bmi, ifname) != 0) return -1;
+
+  if(pcap_dump) bmi_interface_add_dumper(bmi, pcap_dump);
 
   pthread_mutex_lock(&port_mgr->lock);
 
