@@ -18,8 +18,10 @@ class Packet {
 public:
   Packet() {}
 
-  Packet(packet_id_t id, packet_id_t copy_id, PacketBuffer &&buffer)
-    : packet_id(id), copy_id(copy_id), buffer(std::move(buffer)) {}
+  Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
+	 PacketBuffer &&buffer)
+    : ingress_port(ingress_port), packet_id(id), copy_id(copy_id),
+      buffer(std::move(buffer)) {}
 
   packet_id_t get_packet_id() const { return packet_id; }
 
@@ -54,6 +56,7 @@ public:
   const PacketBuffer &get_packet_buffer() const { return buffer; }
 
 private:
+  int ingress_port;
   packet_id_t packet_id;
   packet_id_t copy_id;
 

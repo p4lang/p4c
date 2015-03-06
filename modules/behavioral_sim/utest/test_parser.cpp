@@ -132,7 +132,7 @@ protected:
 
   Packet get_tcp_pkt() {
     Packet pkt = Packet(
-        0, 0,
+	0, 0, 0,
 	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt))
     );
     return pkt;
@@ -140,7 +140,7 @@ protected:
 
   Packet get_udp_pkt() {
     Packet pkt = Packet(
-        0, 0,
+	0, 0, 0, 
 	PacketBuffer(256, (const char *) raw_udp_pkt, sizeof(raw_udp_pkt))
     );
     return pkt;
