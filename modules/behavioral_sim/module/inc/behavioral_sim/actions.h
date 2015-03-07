@@ -152,13 +152,24 @@ class ActionPrimitive : public ActionPrimitive_
 {
 public:
   void execute(ActionEngineState &state, const vector<ActionParam> &args) {
+    phv = &(state.phv);
     caller(this, state, args);
   }
 
   virtual void operator ()(Args...) = 0;
 
+protected:
+  Field &get_field(std::string name) {
+    return phv->get_field(name);
+  }
+
+  Header &get_header(std::string name) {
+    return phv->get_header(name);
+  }
+
 private:
   unpack_caller<sizeof...(Args)> caller;
+  PHV *phv;
 };
 
 // This is how you declare a primitive:

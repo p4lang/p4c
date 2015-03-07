@@ -50,6 +50,16 @@ class CopyHeader : public ActionPrimitive<Header &, const Header &> {
 
 REGISTER_PRIMITIVE(CopyHeader);
 
+/* this is an example of primitive that can be used to set known control
+   registers, e.g. a drop() primitive that would set a drop metadata bit flag */
+class CRSet : public ActionPrimitive<> {
+  void operator ()() {
+    get_field("test1.f16").set(666);
+  }
+};
+
+REGISTER_PRIMITIVE(CRSet);
+
 // Google Test fixture for actions tests
 class ActionsTest : public ::testing::Test {
 protected:
@@ -185,4 +195,19 @@ TEST_F(ActionsTest, CopyHeader) {
   for(unsigned int i = 0; i < hdr1.size(); i++) {
     ASSERT_EQ(i + 1, hdr1[i]);
   }
+}
+
+
+TEST_F(ActionsTest, CRSet) {
+  CRSet primitive;
+  testActionFn.push_back_primitive(&primitive);
+
+  Field &f = phv.get_field(testHeader1, 3); // f16
+  f.set(0);
+
+  ASSERT_EQ((unsigned) 0, f.get_uint());
+
+  testActionFnEntry(phv);
+
+  ASSERT_EQ((unsigned) 666, f.get_uint());
 }
