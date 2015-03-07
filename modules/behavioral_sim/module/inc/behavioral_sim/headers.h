@@ -15,7 +15,6 @@ class HeaderType
 {
 private:
   header_type_id_t type_id;
-  // TODO: replace vectors by map ?
   vector<int> fields_bit_width;
   vector<string> fields_name;
   string name;
@@ -33,6 +32,10 @@ public:
 
   int get_bit_width(int field_offset) const {
     return fields_bit_width[field_offset];
+  }
+
+  const string &get_field_name(int field_offset) const {
+    return fields_name[field_offset];
   }
 
   header_type_id_t get_type_id() const {
@@ -77,6 +80,8 @@ public:
   void mark_invalid() {
     valid = false;
   }
+
+  const string &get_name() const { return name; }
 
   // prefer operator [] to those functions
   Field &get_field(int field_offset) {
