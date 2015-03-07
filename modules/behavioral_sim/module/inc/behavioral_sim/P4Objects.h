@@ -30,6 +30,8 @@ public:
   P4Objects() = default;
 
 public:
+  PHV &get_phv() { return phv; }
+
   ActionFn *get_action(const string &name) {
     return actions_map[name].get();
   }
@@ -140,7 +142,7 @@ private:
 			 Conditional *conditional);
 
 private:
-  PHV phv;
+  PHV phv; /* this is probably temporary */
 
   unordered_map<string, header_id_t> header_ids_map;
 

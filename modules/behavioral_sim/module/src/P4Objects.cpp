@@ -205,6 +205,7 @@ void P4Objects::init_objects(std::istream &is) {
 
       ActionPrimitive_ *primitive =
 	ActionOpcodesMap::get_instance()->get_primitive(primitive_name);
+      assert(primitive);
 
       action_fn->push_back_primitive(primitive);
 
