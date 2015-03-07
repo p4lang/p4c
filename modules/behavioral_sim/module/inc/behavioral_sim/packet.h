@@ -25,6 +25,10 @@ public:
 
   packet_id_t get_packet_id() const { return packet_id; }
 
+  int get_egress_port() const { return egress_port; }
+
+  void set_egress_port(int port) { egress_port = port; }
+
   packet_id_t get_copy_id() const { return copy_id; }
 
   const string get_unique_id() const {
@@ -57,6 +61,7 @@ public:
 
 private:
   int ingress_port;
+  int egress_port;
   packet_id_t packet_id;
   packet_id_t copy_id;
 
