@@ -9,7 +9,7 @@ int bmi_interface_add_dumper(bmi_interface_t *bmi, const char *filename);
 
 int bmi_interface_destroy(bmi_interface_t *bmi);
 
-int bmi_interface_send(bmi_interface_t *bmi, char *data, int len);
+int bmi_interface_send(bmi_interface_t *bmi, const char *data, int len);
 
 int bmi_interface_recv(bmi_interface_t *bmi, const char **data);
 

@@ -107,6 +107,17 @@ int bmi_set_packet_handler(bmi_port_mgr_t *port_mgr,
   return 0;
 }
 
+int bmi_port_send(bmi_port_mgr_t *port_mgr,
+		  int port_num, const char *buffer, int len) {
+  if(!port_num_valid(port_num)) return -1;
+  bmi_port_t *port = get_port(port_mgr, port_num);
+  if(!port_in_use(port)) return -1;
+
+  if(bmi_interface_send(port->bmi, buffer, len) != 0) return -1;
+
+  return 0;
+}
+
 int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
 			   const char *ifname, int port_num,
 			   const char *pcap_dump) {

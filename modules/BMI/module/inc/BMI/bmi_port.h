@@ -15,6 +15,9 @@ int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr);
 int bmi_set_packet_handler(bmi_port_mgr_t *port_mgr,
 			   bmi_packet_handler_t packet_handler);
 
+int bmi_port_send(bmi_port_mgr_t *port_mgr,
+		  int port_num, const char *buffer, int len);
+
 int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
 			   const char *ifname, int port_num,
 			   const char *pcap_dump);
