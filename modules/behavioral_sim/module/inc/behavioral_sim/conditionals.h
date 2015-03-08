@@ -65,7 +65,7 @@ public:
 
   void build();
 
-  bool eval(const PHV &phv);
+  bool eval(const PHV &phv) const;
 
   void set_next_node_if_true(ControlFlowNode *next_node) {
     true_next = next_node;
@@ -76,7 +76,7 @@ public:
   }
 
   // return pointer to next control flow node
-  ControlFlowNode *operator()(const Packet &pkt, PHV *phv) override;
+  const ControlFlowNode *operator()(const Packet &pkt, PHV *phv) const override;
 
 private:
   int assign_dest_registers();

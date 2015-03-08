@@ -58,7 +58,7 @@ public:
   virtual ~MatchTable() {}
   
   // return pointer to next control flow node
-  ControlFlowNode *operator()(const Packet &pkt, PHV *phv) override;
+  const ControlFlowNode *operator()(const Packet &pkt, PHV *phv) const override;
   
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
   virtual ErrorCode delete_entry(entry_handle_t handle);
@@ -66,6 +66,12 @@ public:
   size_t get_num_entries() const {return num_entries;}
 
   size_t get_nbytes_key() const {return nbytes_key;}
+
+  void set_default_action(const ActionFnEntry &action_entry,
+			  const ControlFlowNode *next_node) {
+    default_action_entry = action_entry;
+    default_next_node = next_node;
+  }
 
 protected:
   string name;
@@ -75,8 +81,10 @@ protected:
   size_t nbytes_key;
   HandleMgr handles;
   MatchKeyBuilder match_key_builder;
+  ActionFnEntry default_action_entry;
+  const ControlFlowNode *default_next_node;
 
-  void build_key(const PHV &phv, ByteContainer &key) {
+  void build_key(const PHV &phv, ByteContainer &key) const {
     match_key_builder(phv, key);
   }
   

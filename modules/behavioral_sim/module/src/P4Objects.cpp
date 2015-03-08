@@ -10,7 +10,7 @@ void P4Objects::build_conditional(const Json::Value &json_expression,
   if(type == "expression") {
     const std::string op = json_value["op"].asString();
     const Json::Value json_left = json_value["left"];
-    const Json::Value json_right = json_value["left"];
+    const Json::Value json_right = json_value["right"];
 
     build_conditional(json_left, conditional);
     build_conditional(json_right, conditional);
@@ -306,9 +306,12 @@ void P4Objects::init_objects(std::istream &is) {
 
       const Json::Value cfg_expression = cfg_conditional["expression"];
       build_conditional(cfg_expression, conditional);
+      conditional->build();
 
       add_conditional(conditional_name, unique_ptr<Conditional>(conditional));
     }
+
+    // next node resolution for conditionals
 
     for (const auto &cfg_conditional : cfg_conditionals) {
 

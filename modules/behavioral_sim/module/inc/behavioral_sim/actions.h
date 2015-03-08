@@ -54,12 +54,12 @@ struct ActionParam
 
 struct ActionEngineState {
   PHV &phv;
-  vector<Data> &action_data;
-  vector<Data> &const_values;
+  const vector<Data> &action_data;
+  const vector<Data> &const_values;
 
   ActionEngineState(PHV &phv,
-		    vector<Data> &action_data,
-		    vector<Data> &const_values)
+		    const vector<Data> &action_data,
+		    const vector<Data> &const_values)
     : phv(phv), action_data(action_data), const_values(const_values) {}
 };
 
@@ -73,7 +73,8 @@ struct ActionParamWithState {
   /* I cannot think of an alternate solution to this. Is there any danger to
      overload cast operators like this ? */
 
-  operator Data &() {
+  /* If you want to modify it, don't ask for data..., can I improve this? */
+  operator const Data &() {
     switch(ap.tag) {
     case ActionParam::CONST:
       return state.const_values[ap.const_offset];
@@ -218,7 +219,7 @@ public:
     action_data.reserve(action_data_cnt);
   }
 
-  void operator()(PHV &phv)
+  void operator()(PHV &phv) const
   {
     ActionEngineState state(phv, action_data, action_fn->const_values);
     auto &primitives = action_fn->primitives;

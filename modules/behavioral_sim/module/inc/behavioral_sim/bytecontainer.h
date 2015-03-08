@@ -44,7 +44,6 @@ public:
   }
 
   ByteContainer(const std::string &hexstring) {
-    std::vector<char> bytes;
     size_t idx = 0;
 
     assert(hexstring[idx] != '-');

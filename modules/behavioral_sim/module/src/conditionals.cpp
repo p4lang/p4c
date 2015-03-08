@@ -81,7 +81,7 @@ void Conditional::build() {
   built = true;
 }
 
-bool Conditional::eval(const PHV &phv) {
+bool Conditional::eval(const PHV &phv) const {
   assert(built);
 
   std::vector<Data> data_temps(data_registers_cnt);
@@ -224,7 +224,7 @@ bool Conditional::eval(const PHV &phv) {
   return bool_temps_stack.back();
 }
 
-ControlFlowNode *Conditional::operator()(const Packet &pkt, PHV *phv)
+const ControlFlowNode *Conditional::operator()(const Packet &pkt, PHV *phv) const
 {
   return eval(*phv) ? true_next : false_next;
 }

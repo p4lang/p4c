@@ -39,17 +39,20 @@ MatchTable::delete_entry(entry_handle_t handle)
   return unset_handle(handle);
 }
 
-ControlFlowNode *
-MatchTable::operator()(const Packet &pkt, PHV *phv)
+const ControlFlowNode *
+MatchTable::operator()(const Packet &pkt, PHV *phv) const
 {
   ByteContainer lookup_key;
   build_key(*phv, lookup_key);
-  // char lookup_key[nbytes_key];
-  // build_key(phv, lookup_key);
-  // MatchEntry *entry = lookup(lookup_key);
-  // if(!entry) return; /* TODO : default action */
-  // entry->action_fn(phv);
-  return nullptr;
+  const MatchEntry *entry = lookup(lookup_key);
+  if(!entry) {
+    default_action_entry(*phv);
+    return default_next_node;
+  }
+  else {
+    entry->action_entry(*phv);
+    return entry->next_table;
+  }
 }
 
 

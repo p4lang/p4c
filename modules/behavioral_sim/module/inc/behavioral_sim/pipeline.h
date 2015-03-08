@@ -8,7 +8,7 @@ public:
     : name(name), first_node(first_node) {}
 
   void apply(const Packet &pkt, PHV *phv) {
-    ControlFlowNode *node = first_node;
+    const ControlFlowNode *node = first_node;
     while(node) {
       node = (*node)(pkt, phv); 
     }

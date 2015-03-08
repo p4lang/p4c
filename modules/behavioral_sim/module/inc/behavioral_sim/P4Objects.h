@@ -103,20 +103,20 @@ private:
 
   void add_exact_match_table(const string &name,
 			     unique_ptr<ExactMatchTable> table) {
-    exact_tables_map[name] = std::move(table);
     add_match_table(name, table.get());
+    exact_tables_map[name] = std::move(table);
   }
 
   void add_lpm_table(const string &name,
 		     unique_ptr<LongestPrefixMatchTable> table) {
-    lpm_tables_map[name] = std::move(table);
     add_match_table(name, table.get());
+    lpm_tables_map[name] = std::move(table);
   }
 
   void add_ternary_match_table(const string &name,
 			       unique_ptr<TernaryMatchTable> table) {
-    ternary_tables_map[name] = std::move(table);
     add_match_table(name, table.get());
+    ternary_tables_map[name] = std::move(table);
   }
 
   void add_match_table(const string &name, MatchTable *table) {
@@ -126,8 +126,8 @@ private:
 
   void add_conditional(const string &name,
 		       unique_ptr<Conditional> conditional) {
-    conditionals_map[name] = std::move(conditional);
     add_control_node(name, conditional.get());
+    conditionals_map[name] = std::move(conditional);
   }
 
   void add_control_node(const string &name, ControlFlowNode *node) {
