@@ -7,6 +7,7 @@
 #include "behavioral_sim/packet.h"
 #include "behavioral_sim/parser.h"
 #include "behavioral_sim/P4Objects.h"
+#include "behavioral_sim/tables.h"
 
 #include "simple_switch.h"
 
@@ -60,15 +61,19 @@ static void pipeline_thread() {
     std::cout<< "processing packet " << packet->get_packet_id() << std::endl;
 
     parser->parse(packet.get(), &phv);
-
+    ingress_mau->apply(*packet.get(), &phv);
     deparser->deparse(phv, packet.get());
 
     int egress_port = phv.get_field("standard_metadata.egress_spec").get_int();
     std::cout << "egress port is " << egress_port << std::endl;
-    egress_port = 4;
-    packet->set_egress_port(egress_port);
 
-    output_buffer.push_front(std::move(packet));
+    if(egress_port == 0) {
+      std::cout << "dropping packet\n";
+    }
+    else {
+      packet->set_egress_port(egress_port);
+      output_buffer.push_front(std::move(packet));
+    }
   }
 }
 
@@ -85,12 +90,28 @@ static void transmit_thread() {
   }
 }
 
+static void add_test_entry(void) {
+  ExactMatchTable *table = p4objects->get_exact_match_table("forward");
+  assert(table);
+
+  entry_handle_t hdl;
+  ActionFn *action_fn = p4objects->get_action("set_egress_port");
+  ActionFnEntry action_entry(action_fn);
+  action_entry.push_back_action_data(2);
+  const MatchTable *next_table = nullptr;
+  ByteContainer key("0xaabbccddeeff");
+
+  table->add_entry(ExactMatchEntry(key, action_entry, next_table), &hdl);
+}
+
 void start_processing(transmit_fn_t transmit_fn) {
   transmit_fn_ = transmit_fn;
 
   p4objects = new P4Objects();
   std::fstream fs("simple_switch.json");
   p4objects->init_objects(fs);
+
+  add_test_entry();
 
   std::cout << "Processing packets\n";
 
