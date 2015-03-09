@@ -29,30 +29,35 @@ int TransportNanomsg::send(const char *msg, int len) const {
 };
 
 template <typename Transport>
-void EventLogger<Transport>::log_parser_start() { };
+void EventLogger<Transport>::packet_in(const Packet &packet) {
+  
+};
 
 template <typename Transport>
-void EventLogger<Transport>::log_parser_extract() { };
+void EventLogger<Transport>::parser_start(const Packet &packet) { };
 
 template <typename Transport>
-void EventLogger<Transport>::log_deparser_start() { };
+void EventLogger<Transport>::parser_extract(const Packet &packet) { };
 
 template <typename Transport>
-void EventLogger<Transport>::log_deparser_deparse() { };
+void EventLogger<Transport>::deparser_start(const Packet &packet) { };
 
 template <typename Transport>
-void EventLogger<Transport>::log_cond_eval() { };
+void EventLogger<Transport>::deparser_deparse(const Packet &packet) { };
 
 template <typename Transport>
-void EventLogger<Transport>::log_table_hit() {
+void EventLogger<Transport>::cond_eval(const Packet &packet) { };
+
+template <typename Transport>
+void EventLogger<Transport>::table_hit(const Packet &packet) {
   transport_instance->send("table hit!");
 };
 
 template <typename Transport>
-void EventLogger<Transport>::log_table_miss() { };
+void EventLogger<Transport>::table_miss(const Packet &packet) { };
 
 template <typename Transport>
-void EventLogger<Transport>::log_action_execute() { };
+void EventLogger<Transport>::action_execute(const Packet &packet) { };
 
 
 template class EventLogger<TransportNanomsg>;

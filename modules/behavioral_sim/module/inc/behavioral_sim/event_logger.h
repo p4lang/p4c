@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+#include "packet.h"
+
 class TransportIface {
 public:
   virtual int open(const std::string &name) = 0;
@@ -45,14 +47,15 @@ public:
     transport_instance->open(transport_name);
   }
 
-  void log_parser_start();
-  void log_parser_extract();
-  void log_deparser_start();
-  void log_deparser_deparse();
-  void log_cond_eval();
-  void log_table_hit();
-  void log_table_miss();
-  void log_action_execute();
+  void packet_in(const Packet &packet);
+  void parser_start(const Packet &packet);
+  void parser_extract(const Packet &packet);
+  void deparser_start(const Packet &packet);
+  void deparser_deparse(const Packet &packet);
+  void cond_eval(const Packet &packet);
+  void table_hit(const Packet &packet);
+  void table_miss(const Packet &packet);
+  void action_execute(const Packet &packet);
 
 public:
   static EventLogger<Transport> *create_instance(const std::string transport_name) {
@@ -75,6 +78,6 @@ static EventLogger<TransportNULL> *logger =
   EventLogger<TransportNULL>::create_instance("");
 #endif
 
-#define ELOG_TABLE_HIT logger->log_table_hit
+#define ELOG_TABLE_HIT logger->table_hit
 
 #endif

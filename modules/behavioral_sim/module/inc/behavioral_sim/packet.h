@@ -6,6 +6,8 @@
 
 #include <cassert>
 
+#include "behavioral_utils/xxhash.h"
+
 #include "packet_buffer.h"
 
 using std::string;
@@ -21,7 +23,9 @@ public:
   Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
 	 PacketBuffer &&buffer)
     : ingress_port(ingress_port), packet_id(id), copy_id(copy_id),
-      buffer(std::move(buffer)) {}
+      buffer(std::move(buffer)) {
+    signature = XXH64(buffer.start(), buffer.get_data_size(), 0);
+  }
 
   packet_id_t get_packet_id() const { return packet_id; }
 
@@ -57,6 +61,10 @@ public:
     return buffer.pop(bytes);
   }
 
+  unsigned long long get_packet_signature() {
+    return signature;
+  }
+
   const PacketBuffer &get_packet_buffer() const { return buffer; }
 
 private:
@@ -64,6 +72,8 @@ private:
   int egress_port;
   packet_id_t packet_id;
   packet_id_t copy_id;
+
+  unsigned long long signature{0};
 
   PacketBuffer buffer;
 

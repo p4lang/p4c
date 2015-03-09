@@ -52,7 +52,7 @@ MatchTable::operator()(const Packet &pkt, PHV *phv) const
     return default_next_node;
   }
   else {
-    ELOG_TABLE_HIT();
+    ELOG_TABLE_HIT(pkt);
     entry->action_entry(*phv);
     return entry->next_table;
   }
