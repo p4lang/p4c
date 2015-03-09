@@ -2,6 +2,8 @@
 
 #include "behavioral_sim/tables.h"
 
+#include "behavioral_sim/event_logger.h"
+
 using std::vector;
 using std::copy;
 using std::string;
@@ -50,6 +52,7 @@ MatchTable::operator()(const Packet &pkt, PHV *phv) const
     return default_next_node;
   }
   else {
+    ELOG_TABLE_HIT();
     entry->action_entry(*phv);
     return entry->next_table;
   }
