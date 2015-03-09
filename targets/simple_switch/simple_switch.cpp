@@ -8,58 +8,57 @@
 #include "behavioral_sim/parser.h"
 #include "behavioral_sim/P4Objects.h"
 #include "behavioral_sim/tables.h"
+#include "behavioral_sim/switch.h"
 
 #include "simple_switch.h"
+#include "simple_switch_primitives.h"
 
-using std::unique_ptr;
-using std::thread;
+class SimpleSwitch : public Switch {
+public:
+  SimpleSwitch(transmit_fn_t transmit_fn)
+    : input_buffer(1024), transmit_fn(transmit_fn) {}
 
-static Queue<unique_ptr<Packet> > input_buffer(1024);
-static Queue<unique_ptr<Packet> > output_buffer(1024);
-
-static P4Objects *p4objects;
-
-class modify_field : public ActionPrimitive<Field &, const Data &> {
-  void operator ()(Field &f, const Data &d) {
-    f.set(d);
+  int receive(int port_num, const char *buffer, int len) {
+    static int pkt_id = 0;
+    input_buffer.push_front(
+        std::unique_ptr<Packet>(
+	    new Packet(port_num, pkt_id++, 0, PacketBuffer(2048, buffer, len))
+        )
+    );
+    return 0;
   }
+
+  void start_and_return() {
+    std::thread t(&SimpleSwitch::pipeline_thread, this);
+    t.detach();    
+  }
+
+private:
+  void pipeline_thread();
+
+  int transmit(const Packet &packet) {
+    std::cout<< "transmitting packet " << packet.get_packet_id() << std::endl;
+    transmit_fn(packet.get_egress_port(), packet.data(), packet.get_data_size());
+    return 0;
+  }
+
+private:
+  Queue<unique_ptr<Packet> > input_buffer;
+  transmit_fn_t transmit_fn;
 };
 
-REGISTER_PRIMITIVE(modify_field);
 
-class drop : public ActionPrimitive<> {
-  void operator ()() {
-    get_field("standard_metadata.egress_spec").set(0);
-  }
-};
-
-REGISTER_PRIMITIVE(drop);
-
-extern "C" {
-
-int packet_accept(int port_num, const char *buffer, int len) {
-  static int pkt_id = 0;
-  input_buffer.push_front(
-      unique_ptr<Packet>(
-	 new Packet(port_num, pkt_id++, 0, PacketBuffer(2048, buffer, len))
-      )
-  );
-  return 0;
-}
-
-static void pipeline_thread() {
+void SimpleSwitch::pipeline_thread() {
   Pipeline *ingress_mau = p4objects->get_pipeline("ingress");
   Parser *parser = p4objects->get_parser("parser");
   Deparser *deparser = p4objects->get_deparser("deparser");
   PHV &phv = p4objects->get_phv();
 
-  (void) ingress_mau; (void) parser; (void) deparser; (void) phv;
-
   while(1) {
     unique_ptr<Packet> packet;
     input_buffer.pop_back(&packet);
     std::cout<< "processing packet " << packet->get_packet_id() << std::endl;
-
+    
     parser->parse(packet.get(), &phv);
     ingress_mau->apply(*packet.get(), &phv);
     deparser->deparse(phv, packet.get());
@@ -72,25 +71,20 @@ static void pipeline_thread() {
     }
     else {
       packet->set_egress_port(egress_port);
-      output_buffer.push_front(std::move(packet));
+      transmit(*packet);
     }
   }
 }
 
-static transmit_fn_t transmit_fn_;
+/* Switch instance */
 
-static void transmit_thread() {
-  while(1) {
-    unique_ptr<Packet> packet;
-    output_buffer.pop_back(&packet);
-    std::cout<< "transmitting packet " << packet->get_packet_id() << std::endl;
+static SimpleSwitch *simple_switch;
 
-    transmit_fn_(packet->get_egress_port(),
-		 packet->data(), packet->get_data_size());
-  }
-}
+
+/* For test purposes only, temporary */
 
 static void add_test_entry(void) {
+  P4Objects *p4objects = simple_switch->get_p4objects();
   ExactMatchTable *table = p4objects->get_exact_match_table("forward");
   assert(table);
 
@@ -102,24 +96,33 @@ static void add_test_entry(void) {
   ByteContainer key("0xaabbccddeeff");
 
   table->add_entry(ExactMatchEntry(key, action_entry, next_table), &hdl);
+
+  /* default behavior */
+
+  ActionFn *default_action_fn = p4objects->get_action("_drop");
+  ActionFnEntry default_action_entry(default_action_fn);
+  const MatchTable *default_next_table = nullptr;
+
+  table->set_default_action(default_action_entry, default_next_table);
+}
+
+
+/* C bindings */
+
+extern "C" {
+
+int packet_accept(int port_num, const char *buffer, int len) {
+  return simple_switch->receive(port_num, buffer, len);
 }
 
 void start_processing(transmit_fn_t transmit_fn) {
-  transmit_fn_ = transmit_fn;
-
-  p4objects = new P4Objects();
-  std::fstream fs("simple_switch.json");
-  p4objects->init_objects(fs);
+  simple_switch = new SimpleSwitch(transmit_fn);
+  simple_switch->init_objects("simple_switch.json");
 
   add_test_entry();
 
-  std::cout << "Processing packets\n";
-
-  thread t1(pipeline_thread);
-  t1.detach();
-
-  thread t2(transmit_thread);
-  t2.detach();
+  simple_switch->start_and_return();
 }
 
 }
+

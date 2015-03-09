@@ -49,6 +49,8 @@ public:
 
   char *data() { return buffer.start(); }
 
+  const char *data() const { return buffer.start(); }
+
   char *payload() { 
     assert(payload_size > 0);
     return buffer.end() - payload_size;

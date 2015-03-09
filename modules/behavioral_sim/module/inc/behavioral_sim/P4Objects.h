@@ -1,3 +1,6 @@
+#ifndef _BM_P4OBJECTS_H_
+#define _BM_P4OBJECTS_H_
+
 #include <istream>
 #include <vector>
 #include <unordered_map>
@@ -175,3 +178,6 @@ private:
   int get_field_offset(header_id_t header_id, const string &field_name);
   size_t get_field_bytes(header_id_t header_id, int field_offset);
 };
+
+
+#endif
