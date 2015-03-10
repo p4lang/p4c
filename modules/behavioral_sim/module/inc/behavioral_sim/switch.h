@@ -8,8 +8,9 @@
 #include "P4Objects.h"
 #include "queue.h"
 #include "packet.h"
+#include "runtime_interface.h"
 
-class Switch {
+class Switch : public RuntimeInterface {
 public:
   Switch();
 
