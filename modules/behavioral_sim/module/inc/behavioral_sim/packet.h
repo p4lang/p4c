@@ -63,7 +63,7 @@ public:
     return buffer.pop(bytes);
   }
 
-  unsigned long long get_packet_signature() {
+  unsigned long long get_signature() const {
     return signature;
   }
 

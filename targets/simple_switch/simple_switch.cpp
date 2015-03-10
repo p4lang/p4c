@@ -9,6 +9,7 @@
 #include "behavioral_sim/P4Objects.h"
 #include "behavioral_sim/tables.h"
 #include "behavioral_sim/switch.h"
+#include "behavioral_sim/event_logger.h"
 
 #include "simple_switch.h"
 #include "simple_switch_primitives.h"
@@ -20,11 +21,13 @@ public:
 
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
-    input_buffer.push_front(
-        std::unique_ptr<Packet>(
-	    new Packet(port_num, pkt_id++, 0, PacketBuffer(2048, buffer, len))
-        )
-    );
+
+    Packet *packet =
+      new Packet(port_num, pkt_id++, 0, PacketBuffer(2048, buffer, len));
+
+    ELOG_PACKET_IN(*packet);
+
+    input_buffer.push_front(std::unique_ptr<Packet>(packet));
     return 0;
   }
 
