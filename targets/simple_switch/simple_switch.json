@@ -3,43 +3,112 @@
         {
             "name": "standard_metadata_t",
             "id": 0,
-            "fields": {
-                "ingress_port": 9,
-                "packet_length": 32,
-                "egress_spec": 9,
-                "egress_port": 9,
-                "egress_instance": 32,
-                "instance_type": 32,
-                "clone_spec": 32,
-                "_padding": 5
-            }
+            "fields": [
+                [
+                    "ingress_port",
+                    9
+                ],
+                [
+                    "packet_length",
+                    32
+                ],
+                [
+                    "egress_spec",
+                    9
+                ],
+                [
+                    "egress_port",
+                    9
+                ],
+                [
+                    "egress_instance",
+                    32
+                ],
+                [
+                    "instance_type",
+                    32
+                ],
+                [
+                    "clone_spec",
+                    32
+                ],
+                [
+                    "_padding",
+                    5
+                ]
+            ]
         },
         {
             "name": "ethernet_t",
             "id": 1,
-            "fields": {
-                "dstAddr": 48,
-                "srcAddr": 48,
-                "etherType": 16
-            }
+            "fields": [
+                [
+                    "dstAddr",
+                    48
+                ],
+                [
+                    "srcAddr",
+                    48
+                ],
+                [
+                    "etherType",
+                    16
+                ]
+            ]
         },
         {
             "name": "ipv4_t",
             "id": 2,
-            "fields": {
-                "version": 4,
-                "ihl": 4,
-                "diffserv": 8,
-                "totalLen": 16,
-                "identification": 16,
-                "flags": 3,
-                "fragOffset": 13,
-                "ttl": 8,
-                "protocol": 8,
-                "hdrChecksum": 16,
-                "srcAddr": 32,
-                "dstAddr": 32
-            }
+            "fields": [
+                [
+                    "version",
+                    4
+                ],
+                [
+                    "ihl",
+                    4
+                ],
+                [
+                    "diffserv",
+                    8
+                ],
+                [
+                    "totalLen",
+                    16
+                ],
+                [
+                    "identification",
+                    16
+                ],
+                [
+                    "flags",
+                    3
+                ],
+                [
+                    "fragOffset",
+                    13
+                ],
+                [
+                    "ttl",
+                    8
+                ],
+                [
+                    "protocol",
+                    8
+                ],
+                [
+                    "hdrChecksum",
+                    16
+                ],
+                [
+                    "srcAddr",
+                    32
+                ],
+                [
+                    "dstAddr",
+                    32
+                ]
+            ]
         }
     ],
     "headers": [

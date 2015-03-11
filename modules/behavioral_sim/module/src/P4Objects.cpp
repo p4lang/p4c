@@ -54,9 +54,9 @@ void P4Objects::init_objects(std::istream &is) {
 					     header_type_id);
 
     const Json::Value cfg_fields = cfg_header_type["fields"];
-    for (auto it = cfg_fields.begin(); it != cfg_fields.end(); it++) {
-      const string field_name = it.key().asString();
-      int field_bit_width = (*it).asInt();
+    for (const auto cfg_field : cfg_fields) {
+      const string field_name = cfg_field[0].asString();
+      int field_bit_width = cfg_field[1].asInt();
       header_type->push_back_field(field_name, field_bit_width);
     }
 
