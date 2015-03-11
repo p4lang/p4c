@@ -38,8 +38,9 @@ class MSG_TYPES:
     (PACKET_IN, PACKET_OUT,
      PARSER_START, PARSER_DONE, PARSER_EXTRACT,
      DEPARSER_START, DEPARSER_DONE, DEPARSER_EMIT,
+     PIPELINE_START, PIPELINE_DONE,
      CONDITION_EVAL, TABLE_HIT, TABLE_MISS,
-     ACTION_EXECUTE) = range(12)
+     ACTION_EXECUTE) = range(14)
 
     @staticmethod
     def get_msg_class(type_):
@@ -52,6 +53,8 @@ class MSG_TYPES:
             MSG_TYPES.DEPARSER_START: DeparserStart,
             MSG_TYPES.DEPARSER_DONE: DeparserDone,
             MSG_TYPES.DEPARSER_EMIT: DeparserEmit,
+            MSG_TYPES.PIPELINE_START: PipelineStart,
+            MSG_TYPES.PIPELINE_DONE: PipelineDone,
             MSG_TYPES.CONDITION_EVAL: ConditionEval,
             MSG_TYPES.TABLE_HIT: TableHit,
             MSG_TYPES.TABLE_MISS: TableMiss,
@@ -70,6 +73,8 @@ class MSG_TYPES:
             MSG_TYPES.DEPARSER_START: "DEPARSER_START",
             MSG_TYPES.DEPARSER_DONE: "DEPARSER_DONE",
             MSG_TYPES.DEPARSER_EMIT: "DEPARSER_EMIT",
+            MSG_TYPES.PIPELINE_START: "PIPELINE_START",
+            MSG_TYPES.PIPELINE_DONE: "PIPELINE_DONE",
             MSG_TYPES.CONDITION_EVAL: "CONDITION_EVAL",
             MSG_TYPES.TABLE_HIT: "TABLE_HIT",
             MSG_TYPES.TABLE_MISS: "TABLE_MISS",
@@ -227,6 +232,40 @@ class DeparserEmit(Msg):
         if name: s += " (" + name + ")"
         return s
 
+class PipelineStart(Msg):
+    def __init__(self, msg):
+        super(PipelineStart, self).__init__(msg)
+        self.type_ = MSG_TYPES.PIPELINE_START
+        self.type_str = MSG_TYPES.get_str(self.type_)
+        self.struct_ = struct.Struct("i")
+        
+    def extract(self):
+        self.pipeline_id, = super(PipelineStart, self).extract()
+
+    def __str__(self):
+        s = super(PipelineStart, self).__str__()
+        s += ", pipeline_id: " +  str(self.pipeline_id)
+        name = name_lookup("pipeline", self.pipeline_id)
+        if name: s += " (" + name + ")"
+        return s
+
+class PipelineDone(Msg):
+    def __init__(self, msg):
+        super(PipelineDone, self).__init__(msg)
+        self.type_ = MSG_TYPES.PIPELINE_DONE
+        self.type_str = MSG_TYPES.get_str(self.type_)
+        self.struct_ = struct.Struct("i")
+        
+    def extract(self):
+        self.pipeline_id, = super(PipelineDone, self).extract()
+
+    def __str__(self):
+        s = super(PipelineDone, self).__str__()
+        s += ", pipeline_id: " +  str(self.pipeline_id)
+        name = name_lookup("pipeline", self.pipeline_id)
+        if name: s += " (" + name + ")"
+        return s
+
 class ConditionEval(Msg):
     def __init__(self, msg):
         super(ConditionEval, self).__init__(msg)
@@ -252,16 +291,17 @@ class TableHit(Msg):
         super(TableHit, self).__init__(msg)
         self.type_ = MSG_TYPES.TABLE_HIT
         self.type_str = MSG_TYPES.get_str(self.type_)
-        self.struct_ = struct.Struct("i")
+        self.struct_ = struct.Struct("ii")
         
     def extract(self):
-        self.table_id, = super(TableHit, self).extract()
+        self.table_id, self.entry_hdl = super(TableHit, self).extract()
 
     def __str__(self):
         s = super(TableHit, self).__str__()
         s += ", table_id: " +  str(self.table_id)
         name = name_lookup("table", self.table_id)
         if name: s += " (" + name + ")"
+        s += ", entry_hdl: " +  str(self.entry_hdl)
         return s
 
 class TableMiss(Msg):

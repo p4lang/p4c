@@ -53,7 +53,7 @@ MatchTable::operator()(const Packet &pkt, PHV *phv) const
     return default_next_node;
   }
   else {
-    ELOGGER->table_hit(pkt, *this);
+    ELOGGER->table_hit(pkt, *this, *entry);
     entry->action_entry(*phv);
     return entry->next_table;
   }

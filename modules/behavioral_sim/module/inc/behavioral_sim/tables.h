@@ -66,6 +66,8 @@ public:
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
   virtual ErrorCode delete_entry(entry_handle_t handle);
 
+  virtual entry_handle_t get_entry_handle(const MatchEntry &entry) const = 0;
+
   size_t get_num_entries() const {return num_entries;}
 
   size_t get_nbytes_key() const {return nbytes_key;}
@@ -111,6 +113,10 @@ public:
   ErrorCode add_entry(ExactMatchEntry &&entry, entry_handle_t *handle);
   ErrorCode delete_entry(entry_handle_t handle);
 
+  entry_handle_t get_entry_handle(const MatchEntry &entry) const {
+    return ((char *) &entry - (char *) entries.data()) / sizeof(entry);
+  }
+
 private:
   vector<ExactMatchEntry> entries;
   unordered_map<ByteContainer, entry_handle_t, ByteContainerKeyHash> entries_map;
@@ -134,6 +140,10 @@ public:
 		      entry_handle_t *handle);
   ErrorCode delete_entry(entry_handle_t handle);
 
+  entry_handle_t get_entry_handle(const MatchEntry &entry) const {
+    return ((char *) &entry - (char *) entries.data()) / sizeof(entry);
+  }
+
 private:
   vector<LongestPrefixMatchEntry> entries;
   LPMTrie entries_trie;
@@ -154,6 +164,10 @@ public:
   // ErrorCode add_entry(const TernaryMatchEntry &entry, entry_handle_t *handle);
   ErrorCode add_entry(TernaryMatchEntry &&entry, entry_handle_t *handle);
   ErrorCode delete_entry(entry_handle_t handle);
+
+  entry_handle_t get_entry_handle(const MatchEntry &entry) const {
+    return ((char *) &entry - (char *) entries.data()) / sizeof(entry);
+  }
 
 private:
   vector<TernaryMatchEntry> entries;

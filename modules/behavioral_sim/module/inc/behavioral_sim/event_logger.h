@@ -8,6 +8,8 @@
 
 #include "packet.h"
 #include "phv.h"
+#include "pipeline.h"
+#include "tables.h"
 
 class TransportIface {
 public:
@@ -78,9 +80,13 @@ public:
   void deparser_done(const Packet &packet, const Deparser &deparser);
   void deparser_emit(const Packet &packet, header_id_t header);
 
+  void pipeline_start(const Packet &packet, const Pipeline &pipeline);
+  void pipeline_done(const Packet &packet, const Pipeline &pipeline);
+
   void condition_eval(const Packet &packet,
 		      const Conditional &cond, bool result);
-  void table_hit(const Packet &packet, const MatchTable &table);
+  void table_hit(const Packet &packet,
+		 const MatchTable &table, const MatchEntry &entry);
   void table_miss(const Packet &packet, const MatchTable &table);
 
   void action_execute(const Packet &packet);

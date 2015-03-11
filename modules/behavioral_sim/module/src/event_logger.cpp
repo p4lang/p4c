@@ -48,6 +48,7 @@ enum EventType {
   PACKET_IN = 0, PACKET_OUT,
   PARSER_START, PARSER_DONE, PARSER_EXTRACT,
   DEPARSER_START, DEPARSER_DONE, DEPARSER_EMIT,
+  PIPELINE_START, PIPELINE_DONE,
   CONDITION_EVAL, TABLE_HIT, TABLE_MISS,
   ACTION_EXECUTE
 };
@@ -173,6 +174,32 @@ void EventLogger<Transport>::deparser_emit(const Packet &packet,
 };
 
 template <typename Transport>
+void EventLogger<Transport>::pipeline_start(const Packet &packet,
+					    const Pipeline &pipeline) {
+  typedef struct : msg_hdr_t {
+    int pipeline_id;
+  } __attribute__((packed)) msg_t;
+
+  msg_t msg;
+  fill_msg_hdr(EventType::PIPELINE_START, packet, &msg);
+  msg.pipeline_id = pipeline.get_id();
+  transport_instance->send((char *) &msg, sizeof(msg));
+};
+
+template <typename Transport>
+void EventLogger<Transport>::pipeline_done(const Packet &packet,
+					   const Pipeline &pipeline) {
+  typedef struct : msg_hdr_t {
+    int pipeline_id;
+  } __attribute__((packed)) msg_t;
+
+  msg_t msg;
+  fill_msg_hdr(EventType::PIPELINE_DONE, packet, &msg);
+  msg.pipeline_id = pipeline.get_id();
+  transport_instance->send((char *) &msg, sizeof(msg));
+};
+
+template <typename Transport>
 void EventLogger<Transport>::condition_eval(const Packet &packet,
 					    const Conditional &cond, bool result) {
   typedef struct : msg_hdr_t {
@@ -187,16 +214,29 @@ void EventLogger<Transport>::condition_eval(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
+// static inline size_t get_pascal_str_size(const ByteContainer &src) {
+//   return 1 + src.size();
+// }
+
+// static inline void dump_pascal_str(const ByteContainer &src, char *dst) {
+//   assert(src.size() < 256);
+//   dst[0] = (char) src.size();
+//   std::copy(src.begin(), src.end(), dst);
+// }
+
 template <typename Transport>
 void EventLogger<Transport>::table_hit(const Packet &packet,
-				       const MatchTable &table) {
+				       const MatchTable &table,
+				       const MatchEntry &entry) {
   typedef struct : msg_hdr_t {
     int table_id;
+    int entry_hdl;
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
   fill_msg_hdr(EventType::TABLE_HIT, packet, &msg);
   msg.table_id = table.get_id();
+  msg.entry_hdl = (int) table.get_entry_handle(entry);
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 

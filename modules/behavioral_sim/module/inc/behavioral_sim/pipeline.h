@@ -1,6 +1,7 @@
 #ifndef _BM_PIPELINE_H_
 #define _BM_PIPELINE_H_
 
+#include "control_flow.h"
 #include "named_p4object.h"
 
 class Pipeline : public NamedP4Object
@@ -10,12 +11,7 @@ public:
 	   ControlFlowNode *first_node)
     : NamedP4Object(name, id), first_node(first_node) {}
 
-  void apply(const Packet &pkt, PHV *phv) {
-    const ControlFlowNode *node = first_node;
-    while(node) {
-      node = (*node)(pkt, phv); 
-    }
-  }
+  void apply(const Packet &pkt, PHV *phv);
 
 private:
   ControlFlowNode *first_node;
