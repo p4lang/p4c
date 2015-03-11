@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <string>
 #include <memory>
+#include <set>
 
 #include "behavioral_utils/json.h"
 
@@ -144,10 +145,14 @@ private:
   void build_conditional(const Json::Value &json_expression,
 			 Conditional *conditional);
 
+  std::set<int> build_arith_offsets(const Json::Value &json_actions,
+				    const std::string &header_name);
+
 private:
   PHV phv; /* this is probably temporary */
 
   unordered_map<string, header_id_t> header_ids_map;
+  unordered_map<string, HeaderType *> header_to_type_map;
 
   unordered_map<string, unique_ptr<HeaderType> > header_types_map;
 

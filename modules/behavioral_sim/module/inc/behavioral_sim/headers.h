@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <set>
 
 #include "fields.h"
 #include "named_p4object.h"
@@ -61,7 +62,8 @@ public:
   typedef size_t size_type;
 
 public:
-  Header(const string &name, p4object_id_t id, const HeaderType &header_type);
+  Header(const string &name, p4object_id_t id, const HeaderType &header_type,
+	 const std::set<int> *arith_offsets = nullptr);
 
   int get_nbytes_packet() const {
     return nbytes_packet;

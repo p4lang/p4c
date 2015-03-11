@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include <functional>
+#include <set>
 
 #include <cassert>
 
@@ -31,12 +32,17 @@ public:
 
   // all headers need to be pushed back in order (according to header_index) !!!
   // TODO: remove this constraint?
-  void push_back_header(const string &header_name,
-			header_id_t header_index,
-			const HeaderType &header_type) {
+  void push_back_header(
+      const string &header_name,
+      header_id_t header_index,
+      const HeaderType &header_type,
+      const std::set<int> *arith_offsets = nullptr
+  ) {
     assert(header_index < (int) capacity);
     assert(header_index == (int) headers.size());
-    headers.push_back(Header(header_name, header_index, header_type));
+    headers.push_back(
+        Header(header_name, header_index, header_type, arith_offsets)
+    );
 
     headers_map.emplace(header_name, get_header(header_index));
 

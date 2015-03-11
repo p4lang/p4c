@@ -34,6 +34,8 @@ public:
     return nbits;
   }
 
+  void set_arith(bool arith_flag) { arith = arith_flag; }
+
   void add(const Data &src1, const Data &src2) {
     Data::add(src1, src2);
     bignum::export_bytes(bytes.data(), value);

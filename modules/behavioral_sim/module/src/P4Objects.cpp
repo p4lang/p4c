@@ -2,6 +2,40 @@
 
 typedef unsigned char opcode_t;
 
+// std::set<int> P4Objects::build_arith_offsets(const Json::Value &json_actions,
+// 					     const std::string &header_name) {
+//   HeaderType *header_type = header_to_type_map[header_name];
+//   assert(header_type);
+
+//   std::set<int> arith_offset;
+
+//   for (const auto &cfg_action : json_actions) {
+
+//     const Json::Value cfg_primitive_calls = cfg_action["primitives"];
+//     for (const auto &cfg_primitive_call : cfg_primitive_calls) {
+
+//       const Json::Value cfg_primitive_parameters =
+// 	cfg_primitive_call["parameters"];
+//       for(const auto &cfg_parameter : cfg_primitive_parameters) {
+	
+// 	const string type = cfg_parameter["type"].asString();
+// 	if(type != "field") continue;
+
+// 	Json::Value cfg_value_field = cfg_parameter["value"];
+// 	const string header_name_ = cfg_value_field[0].asString();
+// 	if(header_name_ != header_name) continue;
+
+// 	const string field_name = cfg_value_field[1].asString();
+// 	int field_offset = header_type->get_field_offset(field_name);
+	
+// 	arith_offset.insert(field_offset);
+//       }
+//     }
+//   }
+
+//   return arith_offset;
+// }
+
 void P4Objects::build_conditional(const Json::Value &json_expression,
 				  Conditional *conditional) {
   if(json_expression.isNull()) return ;
@@ -28,6 +62,8 @@ void P4Objects::build_conditional(const Json::Value &json_expression,
     const string field_name = json_value[1].asString();
     int field_offset = get_field_offset(header_id, field_name);
     conditional->push_back_load_field(header_id, field_offset);
+
+    phv.get_field(header_id, field_offset).set_arith(true);
   }
   else if(type == "bool") {
     conditional->push_back_load_bool(json_value.asBool());
@@ -66,10 +102,10 @@ void P4Objects::init_objects(std::istream &is) {
   // headers
 
   const Json::Value cfg_headers = cfg_root["headers"];
-  // TODO: improve this part
-  size_t num_headers = 0;
-  for (const auto &cfg_header : cfg_headers) { num_headers++; }
+  size_t num_headers = cfg_headers.size();
+
   phv = PHV(num_headers);
+
   for (const auto &cfg_header : cfg_headers) {
 
     const string header_name = cfg_header["name"].asString();
@@ -77,8 +113,14 @@ void P4Objects::init_objects(std::istream &is) {
     header_id_t header_id = cfg_header["id"].asInt();
     
     HeaderType *header_type = get_header_type(header_type_name);
+    header_to_type_map[header_name] = header_type;
     
-    phv.push_back_header(header_name, header_id, *header_type);
+    // std::set<int> arith_offsets =
+    //   build_arith_offsets(cfg_root["actions"], header_name);
+
+    std::set<int> arith_offsets;
+    // empty set so all Fields have arith == false
+    phv.push_back_header(header_name, header_id, *header_type, &arith_offsets);
     add_header_id(header_name, header_id);
   }
 
@@ -243,6 +285,8 @@ void P4Objects::init_objects(std::istream &is) {
 	  const string field_name = cfg_value_field[1].asString();
 	  int field_offset = get_field_offset(header_id, field_name);
 	  action_fn->parameter_push_back_field(header_id, field_offset);
+
+	  phv.get_field(header_id, field_offset).set_arith(true);
 	}
       }
     }
