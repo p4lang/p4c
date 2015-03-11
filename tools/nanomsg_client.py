@@ -1,9 +1,38 @@
 import nnpy
 import struct
+import sys
+import json
 
-def get_msg_type(msg):
-    type_, = struct.unpack('i', msg[:4])
-    return type_
+class NameMap:
+    def __init__(self):
+        self.names = {}
+
+    def load_names(self, json_src):
+        with open(json_src, 'r') as f:
+            json_ = json.load(f)
+            
+            for type_ in {"header_type", "header", "parser",
+                          "deparser", "action", "pipeline"}:
+                json_list = json_[type_ + "s"]
+                for obj in json_list:
+                    self.names[(type_, obj["id"])] = obj["name"]
+
+            for pipeline in json_["pipelines"]:
+                tables = pipeline["tables"]
+                for obj in tables:
+                    self.names[("table", obj["id"])] = obj["name"]
+
+                conds = pipeline["conditionals"]
+                for obj in conds:
+                    self.names[("condition", obj["id"])] = obj["name"]
+
+    def get_name(self, type_, id_):
+        return self.names.get( (type_, id_), None )
+
+name_map = NameMap()
+
+def name_lookup(type_, id_):
+    return name_map.get_name(type_, id_)
 
 class MSG_TYPES:
     (PACKET_IN, PACKET_OUT,
@@ -107,8 +136,11 @@ class ParserStart(Msg):
         self.parser_id, = super(ParserStart, self).extract()
 
     def __str__(self):
-        return super(ParserStart, self).__str__() +\
-            ", parser_id: %d" % self.parser_id
+        s = super(ParserStart, self).__str__()
+        s += ", parser_id: " +  str(self.parser_id)
+        name = name_lookup("parser", self.parser_id)
+        if name: s += " (" + name + ")"
+        return s
 
 class ParserDone(Msg):
     def __init__(self, msg):
@@ -121,8 +153,11 @@ class ParserDone(Msg):
         self.parser_id, = super(ParserDone, self).extract()
 
     def __str__(self):
-        return super(ParserDone, self).__str__() +\
-            ", parser_id: %d" % self.parser_id
+        s = super(ParserDone, self).__str__()
+        s += ", parser_id: " +  str(self.parser_id)
+        name = name_lookup("parser", self.parser_id)
+        if name: s += " (" + name + ")"
+        return s
 
 class ParserExtract(Msg):
     def __init__(self, msg):
@@ -132,11 +167,14 @@ class ParserExtract(Msg):
         self.struct_ = struct.Struct("i")
         
     def extract(self):
-        self.header_id = super(ParserExtract, self).extract()
+        self.header_id, = super(ParserExtract, self).extract()
 
     def __str__(self):
-        return super(ParserExtract, self).__str__() +\
-            ", header_id: %d" % self.header_id
+        s = super(ParserExtract, self).__str__()
+        s += ", header_id: " +  str(self.header_id)
+        name = name_lookup("header", self.header_id)
+        if name: s += " (" + name + ")"
+        return s
 
 class DeparserStart(Msg):
     def __init__(self, msg):
@@ -149,8 +187,11 @@ class DeparserStart(Msg):
         self.deparser_id, = super(DeparserStart, self).extract()
 
     def __str__(self):
-        return super(DeparserStart, self).__str__() +\
-            ", deparser_id: %d" % self.deparser_id
+        s = super(DeparserStart, self).__str__()
+        s += ", deparser_id: " +  str(self.deparser_id)
+        name = name_lookup("deparser", self.deparser_id)
+        if name: s += " (" + name + ")"
+        return s
 
 class DeparserDone(Msg):
     def __init__(self, msg):
@@ -163,8 +204,11 @@ class DeparserDone(Msg):
         self.deparser_id, = super(DeparserDone, self).extract()
 
     def __str__(self):
-        return super(DeparserDone, self).__str__() +\
-            ", deparser_id: %d" % self.deparser_id
+        s = super(DeparserDone, self).__str__()
+        s += ", deparser_id: " +  str(self.deparser_id)
+        name = name_lookup("deparser", self.deparser_id)
+        if name: s += " (" + name + ")"
+        return s
 
 class DeparserEmit(Msg):
     def __init__(self, msg):
@@ -174,11 +218,14 @@ class DeparserEmit(Msg):
         self.struct_ = struct.Struct("i")
         
     def extract(self):
-         self.header_id = super(DeparserEmit, self).extract()
+         self.header_id, = super(DeparserEmit, self).extract()
 
     def __str__(self):
-        return super(DeparserEmit, self).__str__() +\
-            ", header_id: %d" % self.header_id
+        s = super(DeparserEmit, self).__str__()
+        s += ", header_id: " +  str(self.header_id)
+        name = name_lookup("header", self.header_id)
+        if name: s += " (" + name + ")"
+        return s
 
 class ConditionEval(Msg):
     def __init__(self, msg):
@@ -192,8 +239,12 @@ class ConditionEval(Msg):
         self.result = True if self.result != 0 else False
 
     def __str__(self):
-        return super(ConditionEval, self).__str__() +\
-            ", condition_id: %d, result: %s" % (self.condition_id, self.result)
+        s = super(ConditionEval, self).__str__()
+        s += ", condition_id: " +  str(self.condition_id)
+        name = name_lookup("condition", self.condition_id)
+        if name: s += " (" + name + ")"
+        s += ", result: " + str(self.result)
+        return s
 
 
 class TableHit(Msg):
@@ -204,11 +255,14 @@ class TableHit(Msg):
         self.struct_ = struct.Struct("i")
         
     def extract(self):
-        self.table_id = super(TableHit, self).extract()
+        self.table_id, = super(TableHit, self).extract()
 
     def __str__(self):
-        return super(TableHit, self).__str__() +\
-            ", table_id: %d" % self.table_id
+        s = super(TableHit, self).__str__()
+        s += ", table_id: " +  str(self.table_id)
+        name = name_lookup("table", self.table_id)
+        if name: s += " (" + name + ")"
+        return s
 
 class TableMiss(Msg):
     def __init__(self, msg):
@@ -218,11 +272,14 @@ class TableMiss(Msg):
         self.struct_ = struct.Struct("i")
         
     def extract(self):
-        self.table_id = super(TableMiss, self).extract()
+        self.table_id, = super(TableMiss, self).extract()
 
     def __str__(self):
-        return super(TableMiss, self).__str__() +\
-            ", table_id: %d" % self.table_id
+        s = super(TableMiss, self).__str__()
+        s += ", table_id: " +  str(self.table_id)
+        name = name_lookup("table", self.table_id)
+        if name: s += " (" + name + ")"
+        return s
 
 class ActionExecute(Msg):
     def __init__(self, msg):
@@ -237,7 +294,11 @@ class ActionExecute(Msg):
     def __str__(self):
         return super(ActionExecute, self).__str__()
 
-def main():
+def recv_msgs():
+    def get_msg_type(msg):
+        type_, = struct.unpack('i', msg[:4])
+        return type_
+
     sub = nnpy.Socket(nnpy.AF_SP, nnpy.SUB)
     sub.connect('ipc:///tmp/test_bm.ipc')
     sub.setsockopt(nnpy.SUB, nnpy.SUB_SUBSCRIBE, '')
@@ -246,13 +307,23 @@ def main():
         msg = sub.recv()
         msg_type = get_msg_type(msg)
 
-        # try:
-        p = MSG_TYPES.get_msg_class(msg_type)(msg)
-        # except:
-        #     print "Unknown msg type", msg_type
-        #     continue
+        try:
+            p = MSG_TYPES.get_msg_class(msg_type)(msg)
+        except:
+            print "Unknown msg type", msg_type
+            continue
         p.extract()
         print p
+
+def main():
+    json_src = None
+    if len(sys.argv) > 1:
+        json_src = sys.argv[1]
+
+    if json_src:
+        name_map.load_names(json_src)
+
+    recv_msgs()
 
 if __name__ == "__main__":
     main()
