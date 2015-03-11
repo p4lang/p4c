@@ -31,6 +31,8 @@ public:
 
   int get_egress_port() const { return egress_port; }
 
+  int get_ingress_port() const { return ingress_port; }
+
   void set_egress_port(int port) { egress_port = port; }
 
   packet_id_t get_copy_id() const { return copy_id; }

@@ -19,7 +19,7 @@ bool ParseSwitchCase::match(const ByteContainer &input,
   return false;
 }
 
-const ParseState *ParseState::operator()(const char *data,
+const ParseState *ParseState::operator()(const Packet &pkt, const char *data,
 					 PHV *phv, size_t *bytes_parsed) const{
   // execute parser ops
   ParserOp *parser_op;
@@ -27,7 +27,7 @@ const ParseState *ParseState::operator()(const char *data,
        it != parser_ops.end();
        ++it) {
     parser_op = *it;
-    (*parser_op)(data, phv, bytes_parsed);
+    (*parser_op)(pkt, data, phv, bytes_parsed);
   }
 
   if(!has_switch) return NULL;
@@ -48,13 +48,15 @@ const ParseState *ParseState::operator()(const char *data,
 }
 
 void Parser::parse(Packet *pkt, PHV *phv) const {
+  ELOGGER->parser_start(*pkt, *this);
   const char *data = pkt->data();
   if(!init_state) return;
   const ParseState *next_state = init_state;
   size_t bytes_parsed = 0;
   while(next_state) {
-    next_state = (*next_state)(data + bytes_parsed, phv, &bytes_parsed);
+    next_state = (*next_state)(*pkt, data + bytes_parsed, phv, &bytes_parsed);
     // std::cout << "bytes parsed: " << bytes_parsed << std::endl;
   }
   pkt->remove(bytes_parsed);
+  ELOGGER->parser_done(*pkt, *this);
 }

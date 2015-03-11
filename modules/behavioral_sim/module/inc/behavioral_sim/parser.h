@@ -9,6 +9,8 @@
 
 #include "packet.h"
 #include "phv.h"
+#include "named_p4object.h"
+#include "event_logger.h"
 
 using std::pair;
 using std::vector;
@@ -16,7 +18,7 @@ using std::string;
 
 struct ParserOp {
   virtual ~ParserOp() {};
-  virtual void operator()(const char *data,
+  virtual void operator()(const Packet &pkt, const char *data,
 			  PHV *phv, size_t *bytes_parsed) const = 0;
 };
 
@@ -28,9 +30,10 @@ struct ParserOpExtract : ParserOp {
 
   ~ParserOpExtract() {}
 
-  void operator()(const char *data,
+  void operator()(const Packet &pkt, const char *data,
 		  PHV *phv, size_t *bytes_parsed) const
   {
+    ELOGGER->parser_extract(pkt, header);
     Header &hdr = phv->get_header(header);
     hdr.extract(data);
     *bytes_parsed += hdr.get_nbytes_packet();
@@ -157,14 +160,14 @@ public:
   // Move assignment operator
   ParseState &operator =(ParseState &&other) = default;
 
-  const ParseState *operator()(const char *data,
+  const ParseState *operator()(const Packet &pkt, const char *data,
 			       PHV *phv, size_t *bytes_parsed) const;
 };
 
-class Parser {
+class Parser : public NamedP4Object {
 public:
-  Parser()
-    : init_state(NULL) {}
+ Parser(const std::string &name, p4object_id_t id)
+   : NamedP4Object(name, id), init_state(NULL) {}
 
   void set_init_state(const ParseState *state) {
     init_state = state;

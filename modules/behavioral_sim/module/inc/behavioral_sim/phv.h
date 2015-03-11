@@ -10,8 +10,9 @@
 
 #include "fields.h"
 #include "headers.h"
+#include "named_p4object.h"
 
-typedef int header_id_t;
+typedef p4object_id_t header_id_t;
 
 class PHV
 {
@@ -19,28 +20,31 @@ private:
   typedef std::reference_wrapper<Header> HeaderRef;
   typedef std::reference_wrapper<Field> FieldRef;
 
-private:
-  std::vector<Header> headers;
-  std::unordered_map<std::string, HeaderRef> headers_map;
-  std::unordered_map<std::string, FieldRef> fields_map;
-
 public:
-  header_id_t push_back_header(const string &header_name,
-			       const HeaderType &header_type)
-  {
-    // use emplace_back instead?
-    headers.push_back( Header(header_name, header_type) );
+  PHV() {}
 
-    header_id_t header_index = headers.size() - 1;
+  PHV(size_t num_headers)
+    : capacity(num_headers) {
+    // this is needed, otherwise our references will not be valid anymore
+    headers.reserve(num_headers);
+  }
+
+  // all headers need to be pushed back in order (according to header_index) !!!
+  // TODO: remove this constraint?
+  void push_back_header(const string &header_name,
+			header_id_t header_index,
+			const HeaderType &header_type) {
+    assert(header_index < (int) capacity);
+    assert(header_index == (int) headers.size());
+    headers.push_back(Header(header_name, header_index, header_type));
 
     headers_map.emplace(header_name, get_header(header_index));
 
     for(int i = 0; i < header_type.get_num_fields(); i++) {
       const string name = header_name + "." + header_type.get_field_name(i);
+      // std::cout << header_index << " " << i << " " << name << std::endl;
       fields_map.emplace(name, get_field(header_index, i));
     }
-
-    return header_index;
   }
 
   Header &get_header(header_id_t header_index) {
@@ -77,6 +81,11 @@ public:
 
   void reset(); // mark all headers as invalid
 
+private:
+  std::vector<Header> headers;
+  std::unordered_map<std::string, HeaderRef> headers_map;
+  std::unordered_map<std::string, FieldRef> fields_map;
+  size_t capacity{0};
 };
 
 

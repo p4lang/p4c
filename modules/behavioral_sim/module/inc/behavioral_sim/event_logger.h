@@ -7,6 +7,7 @@
 #include "behavioral_utils/nn.h"
 
 #include "packet.h"
+#include "phv.h"
 
 class TransportIface {
 public:
@@ -46,6 +47,17 @@ public:
   int send(const char *msg, int len) const override { return 0; }
 };
 
+
+/* Forward declarations of P4 object classes. This is ugly, but:
+   1) I don't have to worry about circular dependencies
+   2) If I decide to switch from id to name for msgs, I won't have to modify the
+   EventLogger interface */
+class Parser;
+class Deparser;
+class MatchTable;
+class ActionFn;
+class Conditional;
+
 template <typename Transport>
 class EventLogger {
 public:
@@ -54,14 +66,23 @@ public:
     transport_instance->open(transport_name);
   }
 
+  // we need the ingress / egress ports, but they are part of the Packet
   void packet_in(const Packet &packet);
-  void parser_start(const Packet &packet);
-  void parser_extract(const Packet &packet);
-  void deparser_start(const Packet &packet);
-  void deparser_deparse(const Packet &packet);
-  void cond_eval(const Packet &packet);
-  void table_hit(const Packet &packet, const std::string &table_name);
-  void table_miss(const Packet &packet);
+  void packet_out(const Packet &packet);
+
+  void parser_start(const Packet &packet, const Parser &parser);
+  void parser_done(const Packet &packet, const Parser &parser);
+  void parser_extract(const Packet &packet, header_id_t header);
+
+  void deparser_start(const Packet &packet, const Deparser &deparser);
+  void deparser_done(const Packet &packet, const Deparser &deparser);
+  void deparser_emit(const Packet &packet, header_id_t header);
+
+  void condition_eval(const Packet &packet,
+		      const Conditional &cond, bool result);
+  void table_hit(const Packet &packet, const MatchTable &table);
+  void table_miss(const Packet &packet, const MatchTable &table);
+
   void action_execute(const Packet &packet);
 
 public:
@@ -86,7 +107,6 @@ static EventLogger<TransportNULL> *logger =
   EventLogger<TransportNULL>::create_instance("");
 #endif
 
-#define ELOG_PACKET_IN logger->packet_in
-#define ELOG_TABLE_HIT logger->table_hit
+#define ELOGGER logger
 
 #endif

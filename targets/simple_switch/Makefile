@@ -37,6 +37,6 @@ GLOBAL_CFLAGS += -DAIM_CONFIG_INCLUDE_MAIN=1
 GLOBAL_CFLAGS += -g
 GLOBAL_CFLAGS += -DELOGGER_NANOMSG
 
-GXX_PEDANTIC_FLAGS += --std=c++11 -g
+GXX_PEDANTIC_FLAGS += --std=c++11 -g 
 
 GLOBAL_LINK_LIBS += -lpthread -lpcap -lm -lgmp -lJudy -lnanomsg

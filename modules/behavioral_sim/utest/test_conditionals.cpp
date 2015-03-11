@@ -16,17 +16,17 @@ protected:
   PHV phv;
 
   HeaderType testHeaderType;
-  header_id_t testHeader1, testHeader2;
+  header_id_t testHeader1{0}, testHeader2{1};
 
   ConditionalsTest()
-    : testHeaderType(0, "test_t") {
+    : phv(2), testHeaderType("test_t", 0) {
     testHeaderType.push_back_field("f32", 32);
     testHeaderType.push_back_field("f48", 48);
     testHeaderType.push_back_field("f8", 8);
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f128", 128);
-    testHeader1 = phv.push_back_header("test1", testHeaderType);
-    testHeader2 = phv.push_back_header("test2", testHeaderType);
+    phv.push_back_header("test1", testHeader1, testHeaderType);
+    phv.push_back_header("test2", testHeader2, testHeaderType);
   }
 
   virtual void SetUp() {
@@ -36,7 +36,7 @@ protected:
 };
 
 TEST_F(ConditionalsTest, EqData) {
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_field(testHeader1, 3); // f16
   c.push_back_load_const(Data(0xaba));
   c.push_back_op(ExprOpcode::EQ_DATA);
@@ -53,7 +53,7 @@ TEST_F(ConditionalsTest, EqData) {
 }
 
 TEST_F(ConditionalsTest, NeqData) {
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_field(testHeader1, 3); // f16
   c.push_back_load_const(Data(0xaba));
   c.push_back_op(ExprOpcode::NEQ_DATA);
@@ -70,7 +70,7 @@ TEST_F(ConditionalsTest, NeqData) {
 }
 
 TEST_F(ConditionalsTest, GtData) {
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_field(testHeader1, 3); // f16
   c.push_back_load_const(Data(0x1001));
   c.push_back_op(ExprOpcode::GT_DATA);
@@ -87,7 +87,7 @@ TEST_F(ConditionalsTest, GtData) {
 }
 
 TEST_F(ConditionalsTest, LtData) {
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_field(testHeader1, 3); // f16
   c.push_back_load_const(Data(0x1001));
   c.push_back_op(ExprOpcode::LT_DATA);
@@ -104,7 +104,7 @@ TEST_F(ConditionalsTest, LtData) {
 }
 
 TEST_F(ConditionalsTest, GetData) {
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_field(testHeader1, 3); // f16
   c.push_back_load_const(Data(0x1001));
   c.push_back_op(ExprOpcode::GET_DATA);
@@ -125,7 +125,7 @@ TEST_F(ConditionalsTest, GetData) {
 }
 
 TEST_F(ConditionalsTest, LetData) {
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_field(testHeader1, 3); // f16
   c.push_back_load_const(Data(0x1001));
   c.push_back_op(ExprOpcode::LET_DATA);
@@ -146,7 +146,7 @@ TEST_F(ConditionalsTest, LetData) {
 }
 
 TEST_F(ConditionalsTest, Add) {
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_field(testHeader1, 3); // f16
   c.push_back_load_field(testHeader2, 1); // f48
   c.push_back_op(ExprOpcode::ADD);
@@ -167,7 +167,7 @@ TEST_F(ConditionalsTest, Add) {
 }
 
 TEST_F(ConditionalsTest, And) {
-  Conditional c1;
+  Conditional c1("c1test", 0);
   c1.push_back_load_bool(true);
   c1.push_back_load_bool(true);
   c1.push_back_op(ExprOpcode::AND);
@@ -175,7 +175,7 @@ TEST_F(ConditionalsTest, And) {
 
   ASSERT_TRUE(c1.eval(phv));
 
-  Conditional c2;
+  Conditional c2("c2test", 1);
   c2.push_back_load_bool(true);
   c2.push_back_load_bool(false);
   c2.push_back_op(ExprOpcode::AND);
@@ -185,7 +185,7 @@ TEST_F(ConditionalsTest, And) {
 }
 
 TEST_F(ConditionalsTest, Or) {
-  Conditional c1;
+  Conditional c1("c1test", 0);
   c1.push_back_load_bool(true);
   c1.push_back_load_bool(false);
   c1.push_back_op(ExprOpcode::OR);
@@ -193,7 +193,7 @@ TEST_F(ConditionalsTest, Or) {
 
   ASSERT_TRUE(c1.eval(phv));
 
-  Conditional c2;
+  Conditional c2("c2test", 1);
   c2.push_back_load_bool(false);
   c2.push_back_load_bool(false);
   c2.push_back_op(ExprOpcode::OR);
@@ -203,14 +203,14 @@ TEST_F(ConditionalsTest, Or) {
 }
 
 TEST_F(ConditionalsTest, Not) {
-  Conditional c1;
+  Conditional c1("c1test", 0);
   c1.push_back_load_bool(false);
   c1.push_back_op(ExprOpcode::NOT);
   c1.build();
 
   ASSERT_TRUE(c1.eval(phv));
 
-  Conditional c2;
+  Conditional c2("c2test", 1);
   c2.push_back_load_bool(true);
   c2.push_back_op(ExprOpcode::NOT);
   c2.build();
@@ -222,7 +222,7 @@ TEST_F(ConditionalsTest, BitAnd) {
   int v1 = 0xababa;
   int v2 = 0x123456;
 
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_const(Data(v1));
   c.push_back_load_const(Data(v2));
   c.push_back_op(ExprOpcode::BIT_AND);
@@ -237,7 +237,7 @@ TEST_F(ConditionalsTest, BitOr) {
   int v1 = 0xababa;
   int v2 = 0x123456;
 
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_const(Data(v1));
   c.push_back_load_const(Data(v2));
   c.push_back_op(ExprOpcode::BIT_OR);
@@ -252,7 +252,7 @@ TEST_F(ConditionalsTest, BitXor) {
   int v1 = 0xababa;
   int v2 = 0x123456;
 
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_const(Data(v1));
   c.push_back_load_const(Data(v2));
   c.push_back_op(ExprOpcode::BIT_XOR);
@@ -266,7 +266,7 @@ TEST_F(ConditionalsTest, BitXor) {
 TEST_F(ConditionalsTest, BitNeg) {
   int v = 0xababa;
 
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_const(Data(v));
   c.push_back_op(ExprOpcode::BIT_NEG);
   c.push_back_load_const(Data(~v));
@@ -277,7 +277,7 @@ TEST_F(ConditionalsTest, BitNeg) {
 }
 
 TEST_F(ConditionalsTest, ValidHeader) {
-  Conditional c;
+  Conditional c("ctest", 0);
   c.push_back_load_header(testHeader1);
   c.push_back_op(ExprOpcode::VALID_HEADER);
   c.build();
@@ -293,7 +293,7 @@ TEST_F(ConditionalsTest, ValidHeader) {
 }
 
 TEST_F(ConditionalsTest, Stress) {
-  Conditional c;
+  Conditional c("ctest", 0);
   // (valid(testHeader1) && (false || (testHeader1.f16 == 1))) && !valid(testHeader2)
   c.push_back_load_header(testHeader1);
   c.push_back_op(ExprOpcode::VALID_HEADER);

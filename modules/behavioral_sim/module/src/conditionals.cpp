@@ -226,7 +226,9 @@ bool Conditional::eval(const PHV &phv) const {
 
 const ControlFlowNode *Conditional::operator()(const Packet &pkt, PHV *phv) const
 {
-  return eval(*phv) ? true_next : false_next;
+  bool result = eval(*phv);
+  ELOGGER->condition_eval(pkt, *this, result);
+  return result ? true_next : false_next;
 }
 
 int Conditional::assign_dest_registers() {

@@ -16,7 +16,7 @@ protected:
   TableType table;
 
   TableSizeOne() 
-    : key_builder(), table("test_table", 1, 2, key_builder) { }
+    : key_builder(), table("test_table", 0, 1, 2, key_builder) { }
 
   MatchTable::ErrorCode add_entry(const ByteContainer &key,
 				  entry_handle_t *handle);

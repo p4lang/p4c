@@ -8,6 +8,8 @@
 #include "data.h"
 #include "phv.h"
 #include "control_flow.h"
+#include "event_logger.h"
+#include "named_p4object.h"
 
 enum class ExprOpcode {
   LOAD_FIELD, LOAD_HEADER, LOAD_BOOL, LOAD_CONST,
@@ -50,12 +52,10 @@ struct Op {
   };
 };
 
-class Conditional : public ControlFlowNode {
+class Conditional : public ControlFlowNode, public NamedP4Object {
 public:
-  Conditional() {}
-
-  Conditional(const std::string &name)
-    : name(name) {}
+  Conditional(const std::string &name, p4object_id_t id)
+    : NamedP4Object(name, id) {}
 
   void push_back_load_field(header_id_t header, int field_offset);
   void push_back_load_bool(bool value);
@@ -82,7 +82,6 @@ private:
   int assign_dest_registers();
   
 private:
-  std::string name;
   std::vector<Op> ops;
   std::vector<Data> const_values;
   ControlFlowNode *true_next{nullptr};

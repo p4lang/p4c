@@ -1,7 +1,8 @@
 #include "behavioral_sim/headers.h"
 
-Header::Header(const string &name, const HeaderType &header_type)
-  : name(name), header_type(header_type) {
+Header::Header(const string &name, p4object_id_t id,
+	       const HeaderType &header_type)
+  : NamedP4Object(name, id), header_type(header_type) {
   valid = false;
   nbytes_phv = 0;
   nbytes_packet = 0;
@@ -11,7 +12,7 @@ Header::Header(const string &name, const HeaderType &header_type)
     fields.push_back(Field(header_type.get_bit_width(i)));
     nbytes_phv += fields.back().get_nbytes();
     nbytes_packet += fields.back().get_nbits();
-    }
+  }
   assert(nbytes_packet % 8 == 0);
   nbytes_packet /= 8;
 }

@@ -10,6 +10,7 @@
 #include <cassert>
 
 #include "phv.h"
+#include "named_p4object.h"
 
 using std::vector;
 
@@ -190,11 +191,14 @@ private:
 // forward declaration
 class ActionFnEntry;
 
-class ActionFn
+class ActionFn : public NamedP4Object
 {
   friend class ActionFnEntry;
 
 public:
+  ActionFn(const std::string &name, p4object_id_t id)
+    : NamedP4Object(name, id) { }
+
   void parameter_push_back_field(header_id_t header, int field_offset);
   void parameter_push_back_header(header_id_t header);
   void parameter_push_back_const(const Data &data);

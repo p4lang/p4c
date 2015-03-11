@@ -44,15 +44,14 @@ void P4Objects::init_objects(std::istream &is) {
   Json::Value cfg_root;
   is >> cfg_root;
 
-  header_type_id_t header_type_id = 0;
-
   // header types
 
   const Json::Value cfg_header_types = cfg_root["header_types"];
   for (const auto &cfg_header_type : cfg_header_types) {
     const string header_type_name = cfg_header_type["name"].asString();
-    HeaderType *header_type = new HeaderType(header_type_id++,
-					     header_type_name);
+    header_type_id_t header_type_id = cfg_header_type["id"].asInt();
+    HeaderType *header_type = new HeaderType(header_type_name,
+					     header_type_id);
 
     const Json::Value cfg_fields = cfg_header_type["fields"];
     for (auto it = cfg_fields.begin(); it != cfg_fields.end(); it++) {
@@ -67,14 +66,19 @@ void P4Objects::init_objects(std::istream &is) {
   // headers
 
   const Json::Value cfg_headers = cfg_root["headers"];
+  // TODO: improve this part
+  size_t num_headers = 0;
+  for (const auto &cfg_header : cfg_headers) { num_headers++; }
+  phv = PHV(num_headers);
   for (const auto &cfg_header : cfg_headers) {
 
     const string header_name = cfg_header["name"].asString();
     const string header_type_name = cfg_header["header_type"].asString();
+    header_id_t header_id = cfg_header["id"].asInt();
     
     HeaderType *header_type = get_header_type(header_type_name);
-
-    header_id_t header_id = phv.push_back_header(header_name, *header_type);
+    
+    phv.push_back_header(header_name, header_id, *header_type);
     add_header_id(header_name, header_id);
   }
 
@@ -84,8 +88,9 @@ void P4Objects::init_objects(std::istream &is) {
   for (const auto &cfg_parser : cfg_parsers) {
 
     const string parser_name = cfg_parser["name"].asString();
+    p4object_id_t parser_id = cfg_parser["id"].asInt();
 
-    Parser *parser = new Parser();
+    Parser *parser = new Parser(parser_name, parser_id);
 
     unordered_map<string, ParseState *> current_parse_states;
 
@@ -95,6 +100,7 @@ void P4Objects::init_objects(std::istream &is) {
     for (const auto &cfg_parse_state : cfg_parse_states) {
 
       const string parse_state_name = cfg_parse_state["name"].asString();
+      // p4object_id_t parse_state_id = cfg_parse_state["id"].asInt();
       ParseState *parse_state = new ParseState(parse_state_name);
 
       const Json::Value cfg_extracts = cfg_parse_state["extracts"];
@@ -157,7 +163,8 @@ void P4Objects::init_objects(std::istream &is) {
   for (const auto &cfg_deparser : cfg_deparsers) {
 
     const string deparser_name = cfg_deparser["name"].asString();
-    Deparser *deparser = new Deparser();
+    p4object_id_t deparser_id = cfg_deparser["id"].asInt();
+    Deparser *deparser = new Deparser(deparser_name, deparser_id);
 
     const Json::Value cfg_ordered_headers = cfg_deparser["order"];
     for (const auto &cfg_header : cfg_ordered_headers) {
@@ -188,7 +195,8 @@ void P4Objects::init_objects(std::istream &is) {
   for (const auto &cfg_action : cfg_actions) {
 
     const string action_name = cfg_action["name"].asString();
-    ActionFn *action_fn = new ActionFn();
+    p4object_id_t action_id = cfg_action["id"].asInt();
+    ActionFn *action_fn = new ActionFn(action_name, action_id);
 
     // This runtime data is only useful for the PD layer
 
@@ -247,6 +255,7 @@ void P4Objects::init_objects(std::istream &is) {
   for (const auto &cfg_pipeline : cfg_pipelines) {
 
     const string pipeline_name = cfg_pipeline["name"].asString();
+    p4object_id_t pipeline_id = cfg_pipeline["id"].asInt();
     const string first_node_name = cfg_pipeline["init_table"].asString();
 
     // pipelines -> tables
@@ -255,6 +264,7 @@ void P4Objects::init_objects(std::istream &is) {
     for (const auto &cfg_table : cfg_tables) {
 
       const string table_name = cfg_table["name"].asString();
+      p4object_id_t table_id = cfg_table["id"].asInt();
 
       size_t nbytes_key = 0;
 
@@ -278,19 +288,19 @@ void P4Objects::init_objects(std::istream &is) {
       
       if(table_type == "exact") {
       	ExactMatchTable *table =
-	  new ExactMatchTable(table_name, table_size,
+	  new ExactMatchTable(table_name, table_id, table_size,
 			      nbytes_key, key_builder);
 	add_exact_match_table(table_name, unique_ptr<ExactMatchTable>(table));
       }
       else if(table_type == "lpm") {
 	LongestPrefixMatchTable *table =
-	  new LongestPrefixMatchTable(table_name, table_size,
+	  new LongestPrefixMatchTable(table_name, table_id, table_size,
 				      nbytes_key, key_builder);
 	add_lpm_table(table_name, unique_ptr<LongestPrefixMatchTable>(table));
       }
       else if(table_type == "ternary") {
 	TernaryMatchTable *table =
-	  new TernaryMatchTable(table_name, table_size,
+	  new TernaryMatchTable(table_name, table_id, table_size,
 				nbytes_key, key_builder);
 	add_ternary_match_table(table_name, unique_ptr<TernaryMatchTable>(table));
       }
@@ -302,7 +312,9 @@ void P4Objects::init_objects(std::istream &is) {
     for (const auto &cfg_conditional : cfg_conditionals) {
 
       const string conditional_name = cfg_conditional["name"].asString();
-      Conditional *conditional = new Conditional(conditional_name);
+      p4object_id_t conditional_id = cfg_conditional["id"].asInt();
+      Conditional *conditional = new Conditional(conditional_name,
+						 conditional_id);
 
       const Json::Value cfg_expression = cfg_conditional["expression"];
       build_conditional(cfg_expression, conditional);
@@ -332,7 +344,7 @@ void P4Objects::init_objects(std::istream &is) {
     }
 
     ControlFlowNode *first_node = get_control_node(first_node_name);
-    Pipeline *pipeline = new Pipeline(pipeline_name, first_node);
+    Pipeline *pipeline = new Pipeline(pipeline_name, pipeline_id, first_node);
     add_pipeline(pipeline_name, unique_ptr<Pipeline>(pipeline));
   }
 }

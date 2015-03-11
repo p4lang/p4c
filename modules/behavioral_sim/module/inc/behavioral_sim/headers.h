@@ -5,23 +5,17 @@
 #include <string>
 
 #include "fields.h"
+#include "named_p4object.h"
 
 using std::vector;
 using std::string;
 
-typedef int header_type_id_t;
+typedef p4object_id_t header_type_id_t;
 
-class HeaderType
-{
-private:
-  header_type_id_t type_id;
-  vector<int> fields_bit_width;
-  vector<string> fields_name;
-  string name;
-
+class HeaderType : public NamedP4Object {
 public:
-  HeaderType(header_type_id_t type_id, const string &name)
-    : type_id(type_id), name(name) {}
+  HeaderType(const string &name, p4object_id_t id)
+    : NamedP4Object(name, id) {}
 
   // returns field offset
   int push_back_field(const string &field_name, int field_bit_width) {
@@ -39,7 +33,7 @@ public:
   }
 
   header_type_id_t get_type_id() const {
-    return type_id;
+    return get_id();
   }
 
   int get_num_fields() const {
@@ -51,9 +45,13 @@ public:
     while(field_name != fields_name[res]) res++;
     return res;
   }
+
+private:
+  vector<int> fields_bit_width;
+  vector<string> fields_name;
 };
 
-class Header
+class Header : public NamedP4Object
 {
 public:
   typedef vector<Field>::iterator iterator;
@@ -63,7 +61,7 @@ public:
   typedef size_t size_type;
 
 public:
-  Header(const string &name, const HeaderType &header_type);
+  Header(const string &name, p4object_id_t id, const HeaderType &header_type);
 
   int get_nbytes_packet() const {
     return nbytes_packet;
@@ -80,8 +78,6 @@ public:
   void mark_invalid() {
     valid = false;
   }
-
-  const string &get_name() const { return name; }
 
   // prefer operator [] to those functions
   Field &get_field(int field_offset) {
@@ -124,7 +120,6 @@ public:
   }
 
 private:
-  string name;
   const HeaderType &header_type;
   std::vector<Field> fields;
   bool valid;

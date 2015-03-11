@@ -25,7 +25,7 @@ public:
     Packet *packet =
       new Packet(port_num, pkt_id++, 0, PacketBuffer(2048, buffer, len));
 
-    ELOG_PACKET_IN(*packet);
+    ELOGGER->packet_in(*packet);
 
     input_buffer.push_front(std::unique_ptr<Packet>(packet));
     return 0;
@@ -40,6 +40,7 @@ private:
   void pipeline_thread();
 
   int transmit(const Packet &packet) {
+    ELOGGER->packet_out(packet);
     std::cout<< "transmitting packet " << packet.get_packet_id() << std::endl;
     transmit_fn(packet.get_egress_port(), packet.data(), packet.get_data_size());
     return 0;

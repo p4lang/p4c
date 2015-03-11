@@ -48,11 +48,12 @@ MatchTable::operator()(const Packet &pkt, PHV *phv) const
   build_key(*phv, lookup_key);
   const MatchEntry *entry = lookup(lookup_key);
   if(!entry) {
+    ELOGGER->table_miss(pkt, *this);
     default_action_entry(*phv);
     return default_next_node;
   }
   else {
-    ELOG_TABLE_HIT(pkt, name);
+    ELOGGER->table_hit(pkt, *this);
     entry->action_entry(*phv);
     return entry->next_table;
   }

@@ -12,6 +12,7 @@
 #include "handle_mgr.h"
 #include "lpm_trie.h"
 #include "control_flow.h"
+#include "named_p4object.h"
 
 using std::vector;
 using std::unordered_map;
@@ -39,7 +40,7 @@ struct MatchKeyBuilder
   }
 };
 
-class MatchTable : public ControlFlowNode
+class MatchTable : public ControlFlowNode, public NamedP4Object
 {
 public:
   enum ErrorCode {
@@ -49,9 +50,11 @@ public:
     ERROR
   };
 public:
-  MatchTable(const string &name, size_t size, size_t nbytes_key,
+  MatchTable(const string &name, p4object_id_t id,
+	     size_t size, size_t nbytes_key,
 	     const MatchKeyBuilder &match_key_builder)
-    : name(name), size(size), num_entries(0),
+    : NamedP4Object(name, id),
+      size(size), num_entries(0),
       nbytes_key(nbytes_key),
       match_key_builder(match_key_builder) {}
 
@@ -74,8 +77,6 @@ public:
   }
 
 protected:
-  string name;
-
   size_t size;
   size_t num_entries;
   size_t nbytes_key;
@@ -97,9 +98,10 @@ protected:
 class ExactMatchTable : public MatchTable
 {
 public:
-  ExactMatchTable(const string &name, int size, int nbytes_key,
+  ExactMatchTable(const string &name, p4object_id_t id,
+		  int size, int nbytes_key,
 		  const MatchKeyBuilder &match_key_builder)
-    : MatchTable(name, size, nbytes_key, match_key_builder) {
+    : MatchTable(name, id, size, nbytes_key, match_key_builder) {
     entries = vector<ExactMatchEntry>(size);
     entries_map.reserve(size);
   }
@@ -117,9 +119,10 @@ private:
 class LongestPrefixMatchTable : public MatchTable
 {
 public:
-  LongestPrefixMatchTable(const string &name, int size, int nbytes_key, 
+  LongestPrefixMatchTable(const string &name, p4object_id_t id,
+			  int size, int nbytes_key, 
 			  const MatchKeyBuilder &match_key_builder)
-    : MatchTable(name, size, nbytes_key, match_key_builder),
+    : MatchTable(name, id, size, nbytes_key, match_key_builder),
     entries_trie(nbytes_key) {
     entries = vector<LongestPrefixMatchEntry>(size);
   }
@@ -140,9 +143,10 @@ private:
 class TernaryMatchTable : public MatchTable
 {
 public:
-  TernaryMatchTable(const string &name, int size, int nbytes_key,
+  TernaryMatchTable(const string &name, p4object_id_t id,
+		    int size, int nbytes_key,
 		    const MatchKeyBuilder &match_key_builder)
-    : MatchTable(name, size, nbytes_key, match_key_builder) {
+    : MatchTable(name, id, size, nbytes_key, match_key_builder) {
     entries = vector<TernaryMatchEntry>(size);
   }
 

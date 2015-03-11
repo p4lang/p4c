@@ -40,19 +40,21 @@ protected:
   PHV phv;
   HeaderType ethernetHeaderType, ipv4HeaderType, udpHeaderType, tcpHeaderType;
   ParseState ethernetParseState, ipv4ParseState, udpParseState, tcpParseState;
-  header_id_t ethernetHeader, ipv4Header, udpHeader, tcpHeader;
+  header_id_t ethernetHeader{0}, ipv4Header{1}, udpHeader{2}, tcpHeader{3};
 
   Parser parser;
 
   Deparser deparser;
 
   ParserTest()
-    : ethernetHeaderType(0, "ethernet_t"), ipv4HeaderType(1, "ipv4_t"),
-      udpHeaderType(2, "udp_t"), tcpHeaderType(3, "tcp_t"),
+    : phv(4),
+      ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
+      udpHeaderType("udp_t", 2), tcpHeaderType("tcp_t", 3),
       ethernetParseState("parse_ethernet"),
       ipv4ParseState("parse_ipv4"),
       udpParseState("parse_udp"),
-      tcpParseState("parse_tcp") {
+      tcpParseState("parse_tcp"),
+      parser("test_parser", 0), deparser("test_deparser", 0) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
     ethernetHeaderType.push_back_field("ethertype", 16);
@@ -86,10 +88,10 @@ protected:
     tcpHeaderType.push_back_field("checksum", 16);
     tcpHeaderType.push_back_field("urgentPtr", 16);
 
-    ethernetHeader = phv.push_back_header("ethernet", ethernetHeaderType);
-    ipv4Header = phv.push_back_header("ipv4", ipv4HeaderType);
-    udpHeader = phv.push_back_header("udp", udpHeaderType);
-    tcpHeader = phv.push_back_header("tcp", tcpHeaderType);
+    phv.push_back_header("ethernet", ethernetHeader, ethernetHeaderType);
+    phv.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
+    phv.push_back_header("udp", udpHeader, udpHeaderType);
+    phv.push_back_header("tcp", tcpHeader, tcpHeaderType);
   }
 
   virtual void SetUp() {
