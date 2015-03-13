@@ -68,6 +68,8 @@ public:
 
   size_type size() const noexcept { return bytes.size(); }
 
+  void clear() { return bytes.clear(); }
+
   // iterators
   iterator begin() { return bytes.begin(); }
 

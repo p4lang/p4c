@@ -40,3 +40,4 @@ GLOBAL_CFLAGS += -DELOGGER_NANOMSG
 GXX_PEDANTIC_FLAGS += --std=c++11 -g
 
 GLOBAL_LINK_LIBS += -lpthread -lpcap -lm -lgmp -lJudy -lnanomsg
+GLOBAL_LINK_LIBS += -lboost_thread -lboost_system

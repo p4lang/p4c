@@ -5,12 +5,6 @@
 #include <mutex>
 #include <condition_variable>
 
-
-using std::deque;
-using std::mutex;
-using std::condition_variable;
-using std::unique_lock;
-
 /* TODO: implement non blocking behavior */
 
 template <class T>
@@ -25,7 +19,7 @@ public:
     : capacity(capacity), wb(wb), rb(rb) {}
 
   void push_front(const T &item) {
-    unique_lock<mutex> lock(q_mutex);
+    std::unique_lock<std::mutex> lock(q_mutex);
     while(!is_not_full())
       q_not_full.wait(lock);
     queue.push_front(item);
@@ -34,7 +28,7 @@ public:
   }
 
   void push_front(T &&item) {
-    unique_lock<mutex> lock(q_mutex);
+    std::unique_lock<std::mutex> lock(q_mutex);
     while(!is_not_full())
       q_not_full.wait(lock);
     queue.push_front(std::move(item));
@@ -43,7 +37,7 @@ public:
   }
 
   void pop_back(T* pItem) {
-    unique_lock<mutex> lock(q_mutex);
+    std::unique_lock<std::mutex> lock(q_mutex);
     while(!is_not_empty())
       q_not_empty.wait(lock);
     *pItem = std::move(queue.back());
@@ -66,13 +60,13 @@ private:
   bool is_not_full() const { return queue.size() < capacity; }
 
   const size_t capacity;
-  deque<T> queue;
+  std::deque<T> queue;
   WriteBehavior wb;
   ReadBehavior rb;
 
-  mutex q_mutex;
-  condition_variable q_not_empty;
-  condition_variable q_not_full;
+  std::mutex q_mutex;
+  std::condition_variable q_not_empty;
+  std::condition_variable q_not_full;
 };
 
 #endif

@@ -33,7 +33,8 @@ const ParseState *ParseState::operator()(const Packet &pkt, const char *data,
   if(!has_switch) return NULL;
 
   // build key
-  ByteContainer key;
+  static thread_local ByteContainer key;
+  key.clear();
   key_builder(*phv, data, key);
 
   // try the matches in order

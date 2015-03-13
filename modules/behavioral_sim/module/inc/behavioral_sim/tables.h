@@ -14,6 +14,9 @@
 #include "control_flow.h"
 #include "named_p4object.h"
 
+// shared_mutex will only be available in C++-14, so for now I'm using boost
+#include <boost/thread/shared_mutex.hpp>
+
 using std::vector;
 using std::unordered_map;
 using std::pair;
@@ -96,6 +99,8 @@ protected:
   unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes;
   ActionFnEntry default_action_entry;
   const ControlFlowNode *default_next_node;
+
+  mutable boost::shared_mutex t_mutex;
 
   void build_key(const PHV &phv, ByteContainer &key) const {
     match_key_builder(phv, key);

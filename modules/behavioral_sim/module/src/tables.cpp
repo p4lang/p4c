@@ -44,7 +44,8 @@ MatchTable::delete_entry(entry_handle_t handle)
 const ControlFlowNode *
 MatchTable::operator()(const Packet &pkt, PHV *phv) const
 {
-  ByteContainer lookup_key;
+  static thread_local ByteContainer lookup_key;
+  lookup_key.clear();
   build_key(*phv, lookup_key);
   const MatchEntry *entry = lookup(lookup_key);
   if(!entry) {
@@ -63,6 +64,8 @@ MatchTable::operator()(const Packet &pkt, PHV *phv) const
 const ExactMatchEntry *
 ExactMatchTable::lookup(const ByteContainer &key) const
 {
+  boost::shared_lock<boost::shared_mutex> lock(t_mutex);
+
   auto entry_it = entries_map.find(key);
   if(entry_it == entries_map.end()) return nullptr;
   return &entries[entry_it->second];
@@ -71,6 +74,8 @@ ExactMatchTable::lookup(const ByteContainer &key) const
 MatchTable::ErrorCode
 ExactMatchTable::add_entry(ExactMatchEntry &&entry, entry_handle_t *handle)
 {
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
   ErrorCode status = get_and_set_handle(handle);
   if(status != SUCCESS) return status;
   
@@ -85,6 +90,8 @@ ExactMatchTable::add_entry(ExactMatchEntry &&entry, entry_handle_t *handle)
 MatchTable::ErrorCode
 ExactMatchTable::delete_entry(entry_handle_t handle)
 {
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
   if(!valid_handle(handle)) return INVALID_HANDLE;
   ByteContainer &key = entries[handle].key;
   entries_map.erase(key);
@@ -94,6 +101,8 @@ ExactMatchTable::delete_entry(entry_handle_t handle)
 const LongestPrefixMatchEntry *
 LongestPrefixMatchTable::lookup(const ByteContainer &key) const
 {
+  boost::shared_lock<boost::shared_mutex> lock(t_mutex);
+
   entry_handle_t handle;
   if(entries_trie.lookup(key, &handle)) {
     return &entries[handle];
@@ -105,6 +114,8 @@ MatchTable::ErrorCode
 LongestPrefixMatchTable::add_entry(LongestPrefixMatchEntry &&entry,
 				   entry_handle_t *handle)
 {
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
   ErrorCode status = get_and_set_handle(handle);
   if(status != SUCCESS) return status;
   
@@ -120,6 +131,8 @@ LongestPrefixMatchTable::add_entry(LongestPrefixMatchEntry &&entry,
 MatchTable::ErrorCode
 LongestPrefixMatchTable::delete_entry(entry_handle_t handle)
 {
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
   if(!valid_handle(handle)) return INVALID_HANDLE;
   LongestPrefixMatchEntry &entry = entries[handle];
   assert(entries_trie.delete_prefix(entry.key, entry.prefix_length));
@@ -129,6 +142,8 @@ LongestPrefixMatchTable::delete_entry(entry_handle_t handle)
 const TernaryMatchEntry *
 TernaryMatchTable::lookup(const ByteContainer &key) const
 {
+  boost::shared_lock<boost::shared_mutex> lock(t_mutex);
+
   int max_priority = 0;
   bool match;
 
@@ -160,6 +175,8 @@ TernaryMatchTable::lookup(const ByteContainer &key) const
 MatchTable::ErrorCode
 TernaryMatchTable::add_entry(TernaryMatchEntry &&entry, entry_handle_t *handle)
 {
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
   ErrorCode status = get_and_set_handle(handle);
   if(status != SUCCESS) return status;
   
@@ -171,6 +188,8 @@ TernaryMatchTable::add_entry(TernaryMatchEntry &&entry, entry_handle_t *handle)
 MatchTable::ErrorCode
 TernaryMatchTable::delete_entry(entry_handle_t handle)
 {
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
   if(!valid_handle(handle)) return INVALID_HANDLE;
   return MatchTable::delete_entry(handle);
 }

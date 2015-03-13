@@ -81,10 +81,20 @@ void Conditional::build() {
   built = true;
 }
 
+
+/* I have made this function more efficient by using thread_local variables
+   instead of dynamic allocation at each call. Maybe it would be better to just
+   try to use a stack allocator */
 bool Conditional::eval(const PHV &phv) const {
   assert(built);
 
-  std::vector<Data> data_temps(data_registers_cnt);
+  static thread_local int data_temps_size = 4;
+  // std::vector<Data> data_temps(data_registers_cnt);
+  static thread_local std::vector<Data> data_temps(data_temps_size);
+  while(data_temps_size < data_registers_cnt) {
+    data_temps.emplace_back();
+    data_temps_size++;
+  }
 
   /* Logically, I am using these as stacks but experiments showed that using
      vectors directly was more efficient (also I can call reserve to avoid 
@@ -93,14 +103,17 @@ bool Conditional::eval(const PHV &phv) const {
   /* 4 is arbitrary, it is possible to do an analysis on the Conditional to find
      the exact number needed, but I don't think it is worth it... */
 
-  std::vector<bool> bool_temps_stack;
-  bool_temps_stack.reserve(4);
+  static thread_local std::vector<bool> bool_temps_stack;
+  bool_temps_stack.clear();
+  // bool_temps_stack.reserve(4);
 
-  std::vector<const Data *> data_temps_stack;
-  data_temps_stack.reserve(4);
+  static thread_local std::vector<const Data *> data_temps_stack;
+  data_temps_stack.clear();
+  // data_temps_stack.reserve(4);
 
-  std::vector<const Header *> header_temps_stack;
-  header_temps_stack.reserve(4);
+  static thread_local std::vector<const Header *> header_temps_stack;
+  header_temps_stack.clear();
+  // header_temps_stack.reserve(4);
 
   bool lb, rb;
   const Data *ld, *rd;

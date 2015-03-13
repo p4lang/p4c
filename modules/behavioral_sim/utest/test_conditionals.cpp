@@ -294,12 +294,14 @@ TEST_F(ConditionalsTest, ValidHeader) {
 
 TEST_F(ConditionalsTest, Stress) {
   Conditional c("ctest", 0);
-  // (valid(testHeader1) && (false || (testHeader1.f16 == 1))) && !valid(testHeader2)
+  // (valid(testHeader1) && (false || (testHeader1.f16 + 1 == 2))) && !valid(testHeader2)
   c.push_back_load_header(testHeader1);
   c.push_back_op(ExprOpcode::VALID_HEADER);
   c.push_back_load_bool(false);
   c.push_back_load_field(testHeader1, 3); // f16
   c.push_back_load_const(Data(1));
+  c.push_back_op(ExprOpcode::ADD);
+  c.push_back_load_const(Data(2));
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.push_back_op(ExprOpcode::OR);
   c.push_back_op(ExprOpcode::AND);
