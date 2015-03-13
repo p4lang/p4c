@@ -367,6 +367,28 @@ void P4Objects::init_objects(std::istream &is) {
       add_conditional(conditional_name, unique_ptr<Conditional>(conditional));
     }
 
+    // next node resolution for tables
+
+    for (const auto &cfg_table : cfg_tables) {
+
+      const string table_name = cfg_table["name"].asString();
+      MatchTable *table = get_match_table(table_name);
+
+      const Json::Value cfg_next_nodes = cfg_table["next_tables"];
+      const Json::Value cfg_actions = cfg_table["actions"];
+
+      for (const auto &cfg_action : cfg_actions) {
+
+	const string action_name = cfg_action.asString();
+	const Json::Value cfg_next_node = cfg_next_nodes[action_name];
+	const ControlFlowNode *next_node = nullptr;
+	if(!cfg_next_node.isNull()) {
+	  next_node = get_control_node(cfg_next_node.asString());
+	}
+	table->set_next_node(get_action(action_name)->get_id(), next_node);
+      }
+    }
+
     // next node resolution for conditionals
 
     for (const auto &cfg_conditional : cfg_conditionals) {

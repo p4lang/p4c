@@ -53,13 +53,32 @@ struct ActionParam
   };
 };
 
+struct ActionData {
+  const Data &get(int offset) const { return action_data[offset]; }
+
+  void push_back_action_data(const Data &data) {
+    action_data.push_back(data);
+  }
+
+  void push_back_action_data(unsigned int data) {
+    action_data.emplace_back(data);
+  }
+
+  void push_back_action_data(const char *bytes, int nbytes) {
+    action_data.emplace_back(bytes, nbytes);
+  }
+
+  vector<Data> action_data;
+};
+
 struct ActionEngineState {
   PHV &phv;
-  const vector<Data> &action_data;
+  const ActionData &action_data;
+  /* const vector<Data> &action_data; */
   const vector<Data> &const_values;
 
   ActionEngineState(PHV &phv,
-		    const vector<Data> &action_data,
+		    const ActionData &action_data,
 		    const vector<Data> &const_values)
     : phv(phv), action_data(action_data), const_values(const_values) {}
 };
@@ -82,7 +101,7 @@ struct ActionParamWithState {
     case ActionParam::FIELD:
       return state.phv.get_field(ap.field.header, ap.field.field_offset);
     case ActionParam::ACTION_DATA:
-      return state.action_data[ap.action_data_offset];
+      return state.action_data.get(ap.action_data_offset);
     default:
       assert(0);
     }
@@ -218,10 +237,11 @@ class ActionFnEntry
 public:
   ActionFnEntry() {}
 
-  ActionFnEntry(ActionFn *action_fn, unsigned int action_data_cnt = 0)
-    : action_fn(action_fn) {
-    action_data.reserve(action_data_cnt);
-  }
+  ActionFnEntry(const ActionFn *action_fn, const ActionData &action_data)
+    : action_fn(action_fn), action_data(action_data) { }
+
+  ActionFnEntry(const ActionFn *action_fn)
+    : action_fn(action_fn) { }
 
   void operator()(PHV &phv) const
   {
@@ -235,20 +255,20 @@ public:
   }
 
   void push_back_action_data(const Data &data) {
-    action_data.push_back(data);
+    action_data.push_back_action_data(data);
   }
 
   void push_back_action_data(unsigned int data) {
-    action_data.emplace_back(data);
+    action_data.push_back_action_data(data);
   }
 
   void push_back_action_data(const char *bytes, int nbytes) {
-    action_data.emplace_back(bytes, nbytes);
+    action_data.push_back_action_data(bytes, nbytes);
   }
 
 private:
-  ActionFn *action_fn{nullptr};
-  vector<Data> action_data;
+  const ActionFn *action_fn{nullptr};
+  ActionData action_data;
 };
 
 #endif

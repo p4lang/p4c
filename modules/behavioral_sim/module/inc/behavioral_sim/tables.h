@@ -72,6 +72,14 @@ public:
 
   size_t get_nbytes_key() const {return nbytes_key;}
 
+  void set_next_node(p4object_id_t action_id, const ControlFlowNode *next_node) {
+    next_nodes[action_id] = next_node;
+  }
+
+  const ControlFlowNode *get_next_node(p4object_id_t action_id) const {
+    return next_nodes.at(action_id);
+  }
+
   void set_default_action(const ActionFnEntry &action_entry,
 			  const ControlFlowNode *next_node) {
     default_action_entry = action_entry;
@@ -84,6 +92,8 @@ protected:
   size_t nbytes_key;
   HandleMgr handles;
   MatchKeyBuilder match_key_builder;
+  // indexed by the action id
+  unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes;
   ActionFnEntry default_action_entry;
   const ControlFlowNode *default_next_node;
 

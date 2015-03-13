@@ -88,26 +88,15 @@ static SimpleSwitch *simple_switch;
 /* For test purposes only, temporary */
 
 static void add_test_entry(void) {
-  P4Objects *p4objects = simple_switch->get_p4objects();
-  ExactMatchTable *table = p4objects->get_exact_match_table("forward");
-  assert(table);
-
-  entry_handle_t hdl;
-  ActionFn *action_fn = p4objects->get_action("set_egress_port");
-  ActionFnEntry action_entry(action_fn);
-  action_entry.push_back_action_data(2);
-  const MatchTable *next_table = nullptr;
   ByteContainer key("0xaabbccddeeff");
-
-  table->add_entry(ExactMatchEntry(key, action_entry, next_table), &hdl);
-
+  ActionData action_data;
+  action_data.push_back_action_data(2);
+  entry_handle_t hdl;
+  simple_switch->table_add_exact_match_entry("forward", "set_egress_port",
+					     key, action_data, &hdl);
+					     
   /* default behavior */
-
-  ActionFn *default_action_fn = p4objects->get_action("_drop");
-  ActionFnEntry default_action_entry(default_action_fn);
-  const MatchTable *default_next_table = nullptr;
-
-  table->set_default_action(default_action_entry, default_next_table);
+  simple_switch->table_set_default_action("forward", "_drop", ActionData());
 }
 
 
