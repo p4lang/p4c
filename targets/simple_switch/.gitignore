@@ -1,4 +1,3 @@
 /build
-/dependmodules.x
-/tm_target.mk
+/simple_switch
 /*.pcap

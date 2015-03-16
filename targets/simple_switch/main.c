@@ -33,7 +33,7 @@ static void transmit_fn(int port_num, const char *buffer, int len) {
 }
 
 int 
-aim_main(int argc, char* argv[])
+main(int argc, char* argv[])
 {
     (void)(argc);  /* COMPILER_REFERENCE */
     (void)(argv);

@@ -3,13 +3,13 @@
 #include <thread>
 #include <fstream>
 
-#include "behavioral_sim/queue.h"
-#include "behavioral_sim/packet.h"
-#include "behavioral_sim/parser.h"
-#include "behavioral_sim/P4Objects.h"
-#include "behavioral_sim/tables.h"
-#include "behavioral_sim/switch.h"
-#include "behavioral_sim/event_logger.h"
+#include "bm_sim/queue.h"
+#include "bm_sim/packet.h"
+#include "bm_sim/parser.h"
+#include "bm_sim/P4Objects.h"
+#include "bm_sim/tables.h"
+#include "bm_sim/switch.h"
+#include "bm_sim/event_logger.h"
 
 #include "simple_switch.h"
 #include "simple_switch_primitives.h"

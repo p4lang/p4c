@@ -1,43 +1,74 @@
-#################################################################
-# @FIXME Top matter
-#
-# Makefile for testmod target
-#################################################################
-include ../../init.mk
+CC:= gcc
+CXX:= g++
+COMMON_FLAGS:=
+CFLAGS:= -O0 -g -Wall
+CPPFLAGS:= -O0 -g -Wall --std=c++11
+LIBS:= -lJudy
+INCS:=
 
-MODULE := simple_switch
-include $(BUILDER)/standardinit.mk
+TARGET:=simple_switch
 
+BUILD_DIR := build
+BUILD_DIRS := $(BUILD_DIR)
 
-LIBRARY := simple_switch_main
-$(LIBRARY)_SUBDIR := $(dir $(lastword $(MAKEFILE_LIST)))
-include $(BUILDER)/lib.mk
+srcs_C:=
+srcs_CXX:=
 
-DEPENDMODULES := AIM behavioral_utils BMI behavioral_sim
+MODULES_DIR :=
+MODULES_NAMES :=
 
-include $(BUILDER)/dependmodules.mk
+include ../../modules.mk
 
-BINARY := simple_switch
+include simple_switch.mk
 
-$(BINARY)_LIBRARIES := $(LIBRARY_TARGETS) 
-include $(BUILDER)/bin.mk
+CFLAGS += $(COMMON_FLAGS)
+CPPFLAGS += $(COMMON_FLAGS)
 
+srcs := $(srcs_C) $(srcs_CXX)
+BUILD_DIRS += $(patsubst %, $(BUILD_DIR)/%, $(sort $(realpath $(dir $(srcs)))))
 
-include $(BUILDER)/targets.mk
+CFLAGS += $(patsubst %, -I%, $(INCS))
+CPPFLAGS += $(patsubst %, -I%, $(INCS))
 
-# These indicate Linux specific implementations to be used for
-# various features
-GLOBAL_CFLAGS += -DAIM_CONFIG_INCLUDE_MODULES_INIT=1
-GLOBAL_CFLAGS += -DAIM_CONFIG_INCLUDE_MAIN=1
+objs_C := $(patsubst %.c, %.o, $(srcs_C))
+objs_CXX := $(patsubst %.cpp, %.o, $(srcs_CXX))
 
-# @FIXME
-# GLOBAL_CFLAGS += -Wno-sign-compare -Wno-unused-parameter -Wno-type-limits
+objs := $(objs_C) $(objs_CXX)
 
-#GLOBAL_CFLAGS += -DOF_OBJECT_TRACKING
-GLOBAL_CFLAGS += -g
-GLOBAL_CFLAGS += -DELOGGER_NANOMSG
+deps_C := $(patsubst %.c, %.d, $(srcs_C))
+deps_CXX := $(patsubst %.cpp, %.d, $(srcs_CXX))
 
-GXX_PEDANTIC_FLAGS += --std=c++11 -g
+deps := $(deps_C) $(deps_CXX)
 
-GLOBAL_LINK_LIBS += -lpthread -lpcap -lm -lgmp -lJudy -lnanomsg
-GLOBAL_LINK_LIBS += -lboost_thread -lboost_system
+deps_ := $(patsubst %, $(BUILD_DIR)/%, $(deps))
+objs_ := $(patsubst %, $(BUILD_DIR)/%, $(objs))
+
+$(TARGET): $(objs_) | $(BUILD_DIRS)
+	$(CXX) $(CPPFLAGS) -o $@ $^ $(LIBS)
+
+$(BUILD_DIRS):
+	mkdir -p $@
+
+$(BUILD_DIR)/%.d: %.c | $(BUILD_DIRS)
+	$(CC) $(CFLAGS) $(INC) -MM $< -MT $(BUILD_DIR)$*.o -o $(BUILD_DIR)$*.d
+
+$(BUILD_DIR)/%.d: %.cpp | $(BUILD_DIRS)
+	$(CXX) $(CPPFLAGS) $(INC) -MM $< -MT $(BUILD_DIR)$*.o -o $(BUILD_DIR)$*.d
+
+ifeq ($(MAKECMDGOALS),clean)
+# doing clean, so dont make deps.
+else
+# doing build, so make deps.
+-include $(deps_)
+endif
+
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIRS)
+	$(CC) $(CFLAGS) $(INC) -c -o $(BUILD_DIR)$*.o $<
+
+$(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIRS)
+	$(CXX) $(CPPFLAGS) $(INC) -c -o $(BUILD_DIR)$*.o $<
+
+clean:
+	rm -rf $(BUILD_DIRS) $(TARGET)
+
+.PHONY: clean
