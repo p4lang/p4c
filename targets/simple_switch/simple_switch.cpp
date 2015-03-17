@@ -14,6 +14,8 @@
 #include "simple_switch.h"
 #include "simple_switch_primitives.h"
 
+#include "bm_runtime/bm_runtime.h"
+
 class SimpleSwitch : public Switch {
 public:
   SimpleSwitch(transmit_fn_t transmit_fn)
@@ -111,6 +113,8 @@ int packet_accept(int port_num, const char *buffer, int len) {
 void start_processing(transmit_fn_t transmit_fn) {
   simple_switch = new SimpleSwitch(transmit_fn);
   simple_switch->init_objects("simple_switch.json");
+
+  bm_runtime::start_server(simple_switch);
 
   add_test_entry();
 
