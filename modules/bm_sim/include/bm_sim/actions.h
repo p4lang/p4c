@@ -245,6 +245,7 @@ public:
 
   void operator()(PHV &phv) const
   {
+    if(!action_fn) return; // happens when no default action specified... TODO
     ActionEngineState state(phv, action_data, action_fn->const_values);
     auto &primitives = action_fn->primitives;
     for(auto primitive_it = primitives.begin();

@@ -26,39 +26,107 @@ class RuntimeHandler : virtual public RuntimeIf {
   }
 
   BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const BmActionData& action_data) {
-    // Your implementation goes here
     printf("bm_table_add_exact_match_entry\n");
-    return 0;
+    entry_handle_t entry_handle;
+    ActionData data;
+    for(const std::string &d : action_data) {
+      data.push_back_action_data(d.data(), d.size());
+    }
+    MatchTable::ErrorCode error_code = switch_->table_add_exact_match_entry(
+        table_name, action_name,
+	ByteContainer(key.data(), key.size()),
+	std::move(data),
+	&entry_handle
+    );
+    if(error_code != MatchTable::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = (TableOperationErrorCode::type) error_code;
+      throw ito;
+    }
+    return (BmEntryHandle) entry_handle;
   }
 
   BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const int32_t prefix_length, const BmActionData& action_data) {
-    // Your implementation goes here
     printf("bm_table_add_lpm_entry\n");
-    return 0;
+    entry_handle_t entry_handle;
+    ActionData data;
+    for(const std::string &d : action_data) {
+      data.push_back_action_data(d.data(), d.size());
+    }
+    MatchTable::ErrorCode error_code = switch_->table_add_lpm_entry(
+        table_name, action_name,
+	ByteContainer(key.data(), key.size()),
+	prefix_length,
+	std::move(data),
+	&entry_handle
+    );
+    if(error_code != MatchTable::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = (TableOperationErrorCode::type) error_code;
+      throw ito;
+    }
+    return (BmEntryHandle) entry_handle;
   }
 
   BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const std::string& mask, const int32_t priority, const BmActionData& action_data) {
-    // Your implementation goes here
     printf("bm_table_add_ternary_match_entry\n");
-    return 0;
+    entry_handle_t entry_handle;
+    ActionData data;
+    for(const std::string &d : action_data) {
+      data.push_back_action_data(d.data(), d.size());
+    }
+    MatchTable::ErrorCode error_code = switch_->table_add_ternary_match_entry(
+        table_name, action_name,
+	ByteContainer(key.data(), key.size()),
+	ByteContainer(mask.data(), mask.size()),
+	priority,
+	std::move(data),
+	&entry_handle
+    );
+    if(error_code != MatchTable::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = (TableOperationErrorCode::type) error_code;
+      throw ito;
+    }
+    return (BmEntryHandle) entry_handle;
   }
 
   void bm_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
-    // Your implementation goes here
     printf("bm_set_default_action\n");
+    ActionData data;
+    for(const std::string &d : action_data) {
+      data.push_back_action_data(d.data(), d.size());
+    }
+    MatchTable::ErrorCode error_code = switch_->table_set_default_action(
+        table_name,
+	action_name,
+	std::move(data)
+    );
+    if(error_code != MatchTable::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = (TableOperationErrorCode::type) error_code;
+      throw ito;
+    }
   }
 
   void bm_table_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
-    // Your implementation goes here
     printf("bm_table_delete_entry\n");
+    MatchTable::ErrorCode error_code = switch_->table_delete_entry(
+        table_name,
+	entry_handle
+    );
+    if(error_code != MatchTable::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = (TableOperationErrorCode::type) error_code;
+      throw ito;
+    }
   }
 
 };
 
 namespace bm_runtime {
 
-static int serve() {
-  int port = 9090;
+static int serve(int port) {
   shared_ptr<RuntimeHandler> handler(new RuntimeHandler());
   shared_ptr<TProcessor> processor(new RuntimeProcessor(handler));
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
@@ -70,9 +138,9 @@ static int serve() {
   return 0;  
 }
 
-int start_server(Switch *sw) {
+  int start_server(Switch *sw, int port) {
   switch_ = sw;
-  std::thread server_thread(serve);
+  std::thread server_thread(serve, port);
   printf("Thrift server was started\n");
   server_thread.detach();
   return 0;

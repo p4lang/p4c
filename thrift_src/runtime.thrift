@@ -3,8 +3,14 @@ namespace cpp bm_runtime
 typedef i32 BmEntryHandle
 typedef list<binary> BmActionData
 
+enum TableOperationErrorCode {
+  TABLE_FULL = 1,
+  INVALID_HANDLE = 2,
+  ERROR = 3
+}
+
 exception InvalidTableOperation {
-  1: i32 what
+  1: TableOperationErrorCode what
 }
 
 service Runtime {

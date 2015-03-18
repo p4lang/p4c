@@ -56,14 +56,14 @@ uint32_t Runtime_bm_table_add_exact_match_entry_args::read(::apache::thrift::pro
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->action_data.clear();
-            uint32_t _size0;
-            ::apache::thrift::protocol::TType _etype3;
-            xfer += iprot->readListBegin(_etype3, _size0);
-            this->action_data.resize(_size0);
-            uint32_t _i4;
-            for (_i4 = 0; _i4 < _size0; ++_i4)
+            uint32_t _size1;
+            ::apache::thrift::protocol::TType _etype4;
+            xfer += iprot->readListBegin(_etype4, _size1);
+            this->action_data.resize(_size1);
+            uint32_t _i5;
+            for (_i5 = 0; _i5 < _size1; ++_i5)
             {
-              xfer += iprot->readBinary(this->action_data[_i4]);
+              xfer += iprot->readBinary(this->action_data[_i5]);
             }
             xfer += iprot->readListEnd();
           }
@@ -103,10 +103,10 @@ uint32_t Runtime_bm_table_add_exact_match_entry_args::write(::apache::thrift::pr
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->action_data.size()));
-    std::vector<std::string> ::const_iterator _iter5;
-    for (_iter5 = this->action_data.begin(); _iter5 != this->action_data.end(); ++_iter5)
+    std::vector<std::string> ::const_iterator _iter6;
+    for (_iter6 = this->action_data.begin(); _iter6 != this->action_data.end(); ++_iter6)
     {
-      xfer += oprot->writeBinary((*_iter5));
+      xfer += oprot->writeBinary((*_iter6));
     }
     xfer += oprot->writeListEnd();
   }
@@ -136,10 +136,10 @@ uint32_t Runtime_bm_table_add_exact_match_entry_pargs::write(::apache::thrift::p
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->action_data)).size()));
-    std::vector<std::string> ::const_iterator _iter6;
-    for (_iter6 = (*(this->action_data)).begin(); _iter6 != (*(this->action_data)).end(); ++_iter6)
+    std::vector<std::string> ::const_iterator _iter7;
+    for (_iter7 = (*(this->action_data)).begin(); _iter7 != (*(this->action_data)).end(); ++_iter7)
     {
-      xfer += oprot->writeBinary((*_iter6));
+      xfer += oprot->writeBinary((*_iter7));
     }
     xfer += oprot->writeListEnd();
   }
@@ -322,14 +322,14 @@ uint32_t Runtime_bm_table_add_lpm_entry_args::read(::apache::thrift::protocol::T
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->action_data.clear();
-            uint32_t _size7;
-            ::apache::thrift::protocol::TType _etype10;
-            xfer += iprot->readListBegin(_etype10, _size7);
-            this->action_data.resize(_size7);
-            uint32_t _i11;
-            for (_i11 = 0; _i11 < _size7; ++_i11)
+            uint32_t _size8;
+            ::apache::thrift::protocol::TType _etype11;
+            xfer += iprot->readListBegin(_etype11, _size8);
+            this->action_data.resize(_size8);
+            uint32_t _i12;
+            for (_i12 = 0; _i12 < _size8; ++_i12)
             {
-              xfer += iprot->readBinary(this->action_data[_i11]);
+              xfer += iprot->readBinary(this->action_data[_i12]);
             }
             xfer += iprot->readListEnd();
           }
@@ -373,10 +373,10 @@ uint32_t Runtime_bm_table_add_lpm_entry_args::write(::apache::thrift::protocol::
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 5);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->action_data.size()));
-    std::vector<std::string> ::const_iterator _iter12;
-    for (_iter12 = this->action_data.begin(); _iter12 != this->action_data.end(); ++_iter12)
+    std::vector<std::string> ::const_iterator _iter13;
+    for (_iter13 = this->action_data.begin(); _iter13 != this->action_data.end(); ++_iter13)
     {
-      xfer += oprot->writeBinary((*_iter12));
+      xfer += oprot->writeBinary((*_iter13));
     }
     xfer += oprot->writeListEnd();
   }
@@ -410,10 +410,10 @@ uint32_t Runtime_bm_table_add_lpm_entry_pargs::write(::apache::thrift::protocol:
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 5);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->action_data)).size()));
-    std::vector<std::string> ::const_iterator _iter13;
-    for (_iter13 = (*(this->action_data)).begin(); _iter13 != (*(this->action_data)).end(); ++_iter13)
+    std::vector<std::string> ::const_iterator _iter14;
+    for (_iter14 = (*(this->action_data)).begin(); _iter14 != (*(this->action_data)).end(); ++_iter14)
     {
-      xfer += oprot->writeBinary((*_iter13));
+      xfer += oprot->writeBinary((*_iter14));
     }
     xfer += oprot->writeListEnd();
   }
@@ -604,14 +604,14 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_args::read(::apache::thrift::p
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->action_data.clear();
-            uint32_t _size14;
-            ::apache::thrift::protocol::TType _etype17;
-            xfer += iprot->readListBegin(_etype17, _size14);
-            this->action_data.resize(_size14);
-            uint32_t _i18;
-            for (_i18 = 0; _i18 < _size14; ++_i18)
+            uint32_t _size15;
+            ::apache::thrift::protocol::TType _etype18;
+            xfer += iprot->readListBegin(_etype18, _size15);
+            this->action_data.resize(_size15);
+            uint32_t _i19;
+            for (_i19 = 0; _i19 < _size15; ++_i19)
             {
-              xfer += iprot->readBinary(this->action_data[_i18]);
+              xfer += iprot->readBinary(this->action_data[_i19]);
             }
             xfer += iprot->readListEnd();
           }
@@ -659,10 +659,10 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_args::write(::apache::thrift::
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 6);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->action_data.size()));
-    std::vector<std::string> ::const_iterator _iter19;
-    for (_iter19 = this->action_data.begin(); _iter19 != this->action_data.end(); ++_iter19)
+    std::vector<std::string> ::const_iterator _iter20;
+    for (_iter20 = this->action_data.begin(); _iter20 != this->action_data.end(); ++_iter20)
     {
-      xfer += oprot->writeBinary((*_iter19));
+      xfer += oprot->writeBinary((*_iter20));
     }
     xfer += oprot->writeListEnd();
   }
@@ -700,10 +700,10 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_pargs::write(::apache::thrift:
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 6);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->action_data)).size()));
-    std::vector<std::string> ::const_iterator _iter20;
-    for (_iter20 = (*(this->action_data)).begin(); _iter20 != (*(this->action_data)).end(); ++_iter20)
+    std::vector<std::string> ::const_iterator _iter21;
+    for (_iter21 = (*(this->action_data)).begin(); _iter21 != (*(this->action_data)).end(); ++_iter21)
     {
-      xfer += oprot->writeBinary((*_iter20));
+      xfer += oprot->writeBinary((*_iter21));
     }
     xfer += oprot->writeListEnd();
   }
@@ -870,14 +870,14 @@ uint32_t Runtime_bm_set_default_action_args::read(::apache::thrift::protocol::TP
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->action_data.clear();
-            uint32_t _size21;
-            ::apache::thrift::protocol::TType _etype24;
-            xfer += iprot->readListBegin(_etype24, _size21);
-            this->action_data.resize(_size21);
-            uint32_t _i25;
-            for (_i25 = 0; _i25 < _size21; ++_i25)
+            uint32_t _size22;
+            ::apache::thrift::protocol::TType _etype25;
+            xfer += iprot->readListBegin(_etype25, _size22);
+            this->action_data.resize(_size22);
+            uint32_t _i26;
+            for (_i26 = 0; _i26 < _size22; ++_i26)
             {
-              xfer += iprot->readBinary(this->action_data[_i25]);
+              xfer += iprot->readBinary(this->action_data[_i26]);
             }
             xfer += iprot->readListEnd();
           }
@@ -913,10 +913,10 @@ uint32_t Runtime_bm_set_default_action_args::write(::apache::thrift::protocol::T
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->action_data.size()));
-    std::vector<std::string> ::const_iterator _iter26;
-    for (_iter26 = this->action_data.begin(); _iter26 != this->action_data.end(); ++_iter26)
+    std::vector<std::string> ::const_iterator _iter27;
+    for (_iter27 = this->action_data.begin(); _iter27 != this->action_data.end(); ++_iter27)
     {
-      xfer += oprot->writeBinary((*_iter26));
+      xfer += oprot->writeBinary((*_iter27));
     }
     xfer += oprot->writeListEnd();
   }
@@ -942,10 +942,10 @@ uint32_t Runtime_bm_set_default_action_pargs::write(::apache::thrift::protocol::
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->action_data)).size()));
-    std::vector<std::string> ::const_iterator _iter27;
-    for (_iter27 = (*(this->action_data)).begin(); _iter27 != (*(this->action_data)).end(); ++_iter27)
+    std::vector<std::string> ::const_iterator _iter28;
+    for (_iter28 = (*(this->action_data)).begin(); _iter28 != (*(this->action_data)).end(); ++_iter28)
     {
-      xfer += oprot->writeBinary((*_iter27));
+      xfer += oprot->writeBinary((*_iter28));
     }
     xfer += oprot->writeListEnd();
   }

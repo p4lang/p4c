@@ -83,10 +83,11 @@ public:
     return next_nodes.at(action_id);
   }
 
-  void set_default_action(const ActionFnEntry &action_entry,
-			  const ControlFlowNode *next_node) {
+  ErrorCode set_default_action(const ActionFnEntry &action_entry,
+			       const ControlFlowNode *next_node) {
     default_action_entry = action_entry;
     default_next_node = next_node;
+    return SUCCESS;
   }
 
 protected:

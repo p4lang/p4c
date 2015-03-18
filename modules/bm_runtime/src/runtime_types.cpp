@@ -10,8 +10,20 @@
 
 namespace bm_runtime {
 
-const char* InvalidTableOperation::ascii_fingerprint = "E86CACEB22240450EDCBEFC3A83970E4";
-const uint8_t InvalidTableOperation::binary_fingerprint[16] = {0xE8,0x6C,0xAC,0xEB,0x22,0x24,0x04,0x50,0xED,0xCB,0xEF,0xC3,0xA8,0x39,0x70,0xE4};
+int _kTableOperationErrorCodeValues[] = {
+  TableOperationErrorCode::TABLE_FULL,
+  TableOperationErrorCode::INVALID_HANDLE,
+  TableOperationErrorCode::ERROR
+};
+const char* _kTableOperationErrorCodeNames[] = {
+  "TABLE_FULL",
+  "INVALID_HANDLE",
+  "ERROR"
+};
+const std::map<int, const char*> _TableOperationErrorCode_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(3, _kTableOperationErrorCodeValues, _kTableOperationErrorCodeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
+
+const char* InvalidTableOperation::ascii_fingerprint = "8BBB3D0C3B370CB38F2D1340BB79F0AA";
+const uint8_t InvalidTableOperation::binary_fingerprint[16] = {0x8B,0xBB,0x3D,0x0C,0x3B,0x37,0x0C,0xB3,0x8F,0x2D,0x13,0x40,0xBB,0x79,0xF0,0xAA};
 
 uint32_t InvalidTableOperation::read(::apache::thrift::protocol::TProtocol* iprot) {
 
@@ -35,7 +47,9 @@ uint32_t InvalidTableOperation::read(::apache::thrift::protocol::TProtocol* ipro
     {
       case 1:
         if (ftype == ::apache::thrift::protocol::T_I32) {
-          xfer += iprot->readI32(this->what);
+          int32_t ecast0;
+          xfer += iprot->readI32(ecast0);
+          this->what = (TableOperationErrorCode::type)ecast0;
           this->__isset.what = true;
         } else {
           xfer += iprot->skip(ftype);
@@ -58,7 +72,7 @@ uint32_t InvalidTableOperation::write(::apache::thrift::protocol::TProtocol* opr
   xfer += oprot->writeStructBegin("InvalidTableOperation");
 
   xfer += oprot->writeFieldBegin("what", ::apache::thrift::protocol::T_I32, 1);
-  xfer += oprot->writeI32(this->what);
+  xfer += oprot->writeI32((int32_t)this->what);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();

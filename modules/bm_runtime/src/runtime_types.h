@@ -17,6 +17,16 @@
 
 namespace bm_runtime {
 
+struct TableOperationErrorCode {
+  enum type {
+    TABLE_FULL = 1,
+    INVALID_HANDLE = 2,
+    ERROR = 3
+  };
+};
+
+extern const std::map<int, const char*> _TableOperationErrorCode_VALUES_TO_NAMES;
+
 typedef int32_t BmEntryHandle;
 
 typedef std::vector<std::string>  BmActionData;
@@ -29,19 +39,19 @@ typedef struct _InvalidTableOperation__isset {
 class InvalidTableOperation : public ::apache::thrift::TException {
  public:
 
-  static const char* ascii_fingerprint; // = "E86CACEB22240450EDCBEFC3A83970E4";
-  static const uint8_t binary_fingerprint[16]; // = {0xE8,0x6C,0xAC,0xEB,0x22,0x24,0x04,0x50,0xED,0xCB,0xEF,0xC3,0xA8,0x39,0x70,0xE4};
+  static const char* ascii_fingerprint; // = "8BBB3D0C3B370CB38F2D1340BB79F0AA";
+  static const uint8_t binary_fingerprint[16]; // = {0x8B,0xBB,0x3D,0x0C,0x3B,0x37,0x0C,0xB3,0x8F,0x2D,0x13,0x40,0xBB,0x79,0xF0,0xAA};
 
-  InvalidTableOperation() : what(0) {
+  InvalidTableOperation() : what((TableOperationErrorCode::type)0) {
   }
 
   virtual ~InvalidTableOperation() throw() {}
 
-  int32_t what;
+  TableOperationErrorCode::type what;
 
   _InvalidTableOperation__isset __isset;
 
-  void __set_what(const int32_t val) {
+  void __set_what(const TableOperationErrorCode::type val) {
     what = val;
   }
 

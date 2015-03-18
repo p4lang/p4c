@@ -22,7 +22,7 @@ CFLAGS += $(COMMON_FLAGS)
 CPPFLAGS += $(COMMON_FLAGS)
 
 srcs := $(srcs_C) $(srcs_CXX)
-BUILD_DIRS += $(patsubst %, $(BUILD_DIR)/%, $(sort $(realpath $(dir $(srcs)))))
+BUILD_DIRS += $(patsubst %, $(BUILD_DIR)%, $(sort $(realpath $(dir $(srcs)))))
 
 CFLAGS += $(patsubst %, -I%, $(INCS))
 CPPFLAGS += $(patsubst %, -I%, $(INCS))
@@ -37,8 +37,12 @@ deps_CXX := $(patsubst %.cpp, %.d, $(srcs_CXX))
 
 deps := $(deps_C) $(deps_CXX)
 
-deps_ := $(patsubst %, $(BUILD_DIR)/%, $(deps))
-objs_ := $(patsubst %, $(BUILD_DIR)/%, $(objs))
+deps_C_ := $(patsubst %, $(BUILD_DIR)%, $(deps_C))
+deps_CXX_ := $(patsubst %, $(BUILD_DIR)%, $(deps_CXX))
+deps_ := $(patsubst %, $(BUILD_DIR)%, $(deps))
+objs_C_ := $(patsubst %, $(BUILD_DIR)%, $(objs_C))
+objs_CXX_ := $(patsubst %, $(BUILD_DIR)%, $(objs_CXX))
+objs_ := $(patsubst %, $(BUILD_DIR)%, $(objs))
 
 $(TARGET): $(objs_) | $(BUILD_DIRS)
 	ar -rcs $@ $^
@@ -46,10 +50,10 @@ $(TARGET): $(objs_) | $(BUILD_DIRS)
 $(BUILD_DIRS):
 	mkdir -p $@
 
-$(BUILD_DIR)/%.d: %.c | $(BUILD_DIRS)
+$(deps_C_): $(BUILD_DIR)%.d: %.c | $(BUILD_DIRS)
 	$(CC) $(CFLAGS) $(INC) -MM $< -MT $(BUILD_DIR)$*.o -o $(BUILD_DIR)$*.d
 
-$(BUILD_DIR)/%.d: %.cpp | $(BUILD_DIRS)
+$(deps_CXX_): $(BUILD_DIR)%.d: %.cpp | $(BUILD_DIRS)
 	$(CXX) $(CPPFLAGS) $(INC) -MM $< -MT $(BUILD_DIR)$*.o -o $(BUILD_DIR)$*.d
 
 ifeq ($(MAKECMDGOALS),clean)
@@ -59,10 +63,10 @@ else
 -include $(deps_)
 endif
 
-$(BUILD_DIR)/%.o: %.c | $(BUILD_DIRS)
+$(objs_C_): $(BUILD_DIR)%.o: %.c | $(BUILD_DIRS)
 	$(CC) $(CFLAGS) $(INC) -c -o $(BUILD_DIR)$*.o $<
 
-$(BUILD_DIR)/%.o: %.cpp | $(BUILD_DIRS)
+$(objs_CXX_): $(BUILD_DIR)%.o: %.cpp | $(BUILD_DIRS)
 	$(CXX) $(CPPFLAGS) $(INC) -c -o $(BUILD_DIR)$*.o $<
 
 clean:

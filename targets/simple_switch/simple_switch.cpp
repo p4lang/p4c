@@ -89,17 +89,17 @@ static SimpleSwitch *simple_switch;
 
 /* For test purposes only, temporary */
 
-static void add_test_entry(void) {
-  ByteContainer key("0xaabbccddeeff");
-  ActionData action_data;
-  action_data.push_back_action_data(2);
-  entry_handle_t hdl;
-  simple_switch->table_add_exact_match_entry("forward", "set_egress_port",
-					     key, action_data, &hdl);
+// static void add_test_entry(void) {
+//   ByteContainer key("0xaabbccddeeff");
+//   ActionData action_data;
+//   action_data.push_back_action_data(2);
+//   entry_handle_t hdl;
+//   simple_switch->table_add_exact_match_entry("forward", "set_egress_port",
+// 					     key, action_data, &hdl);
 					     
-  /* default behavior */
-  simple_switch->table_set_default_action("forward", "_drop", ActionData());
-}
+//   /* default behavior */
+//   simple_switch->table_set_default_action("forward", "_drop", ActionData());
+// }
 
 
 /* C bindings */
@@ -114,9 +114,9 @@ void start_processing(transmit_fn_t transmit_fn) {
   simple_switch = new SimpleSwitch(transmit_fn);
   simple_switch->init_objects("simple_switch.json");
 
-  bm_runtime::start_server(simple_switch);
+  bm_runtime::start_server(simple_switch, 9090);
 
-  add_test_entry();
+  // add_test_entry();
 
   simple_switch->start_and_return();
 }

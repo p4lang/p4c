@@ -5,7 +5,7 @@
 
 namespace bm_runtime {
 
-int start_server(Switch *sw);
+int start_server(Switch *sw, int port);
 
 }
 
