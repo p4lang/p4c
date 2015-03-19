@@ -4,8 +4,6 @@
 
 #include "bm_sim/data.h"
 
-int pull_test_data() { return 0; }
-
 TEST(Data, ConstructorFromUInt) {
   const Data d(0xaba);
   EXPECT_EQ((unsigned) 0xaba, d.get_uint());

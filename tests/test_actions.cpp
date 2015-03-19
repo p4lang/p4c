@@ -9,8 +9,6 @@
 
 using std::string;
 
-int pull_test_actions() { return 0; }
-
 // some primitive definitions for testing
 
 class SetField : public ActionPrimitive<Field &, const Data &> {

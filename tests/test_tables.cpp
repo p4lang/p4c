@@ -2,8 +2,6 @@
 
 #include "bm_sim/tables.h"
 
-int pull_test_tables() { return 0; }
-
 using testing::Types;
 
 using std::string;

@@ -5,8 +5,6 @@
 
 #include "bm_sim/P4Objects.h"
 
-int pull_test_p4objects() { return 0; }
-
 class modify_field : public ActionPrimitive<Field &, const Data &> {
   void operator ()(Field &f, const Data &d) {
     f.set(d);

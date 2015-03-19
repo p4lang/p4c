@@ -4,8 +4,6 @@
 
 #include "bm_sim/queue.h"
 
-int pull_test_queue() { return 0; }
-
 using std::unique_ptr;
 
 using std::thread;

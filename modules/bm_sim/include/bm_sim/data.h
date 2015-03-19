@@ -65,16 +65,21 @@ public:
     if(neg) value = -value;
   }
 
+  virtual void export_bytes() {}
+
   void set(unsigned int i) {
     value = i;
+    export_bytes();
   }
 
   void set(const char *bytes, int nbytes) {
     bignum::import_bytes(value, bytes, nbytes);
+    export_bytes();
   }
 
   void set(const Data &data) {
     value = data.value;
+    export_bytes();
   }
 
   unsigned int get_uint() const {
@@ -94,26 +99,31 @@ public:
   void add(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value + src2.value;
+    export_bytes();
   }
 
   void bit_and(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value & src2.value;
+    export_bytes();
   }
 
   void bit_or(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value | src2.value;
+    export_bytes();
   }
 
   void bit_xor(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value ^ src2.value;
+    export_bytes();
   }
 
   void bit_neg(const Data &src) {
     assert(src.arith);
     value = ~src.value;
+    export_bytes();
   }
 
   friend bool operator==(const Data &lhs, const Data &rhs) {

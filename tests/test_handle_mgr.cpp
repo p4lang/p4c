@@ -2,8 +2,6 @@
 
 #include "bm_sim/handle_mgr.h"
 
-int pull_test_handle_mgr() { return 0; }
-
 using testing::Types;
 
 template <typename IteratorType>
