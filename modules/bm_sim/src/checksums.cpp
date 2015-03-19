@@ -52,7 +52,7 @@ static inline unsigned short csum16(char *buf, size_t len) {
 #define IPV4_CSUM_OFFSET 10 // byte offset
 
 void update_ipv4_csum(header_id_t ipv4_hdr_id, int ipv4_csum_field, PHV *phv) {
-  static thread_local char buffer[60];
+  char buffer[60];
   Header &ipv4_hdr = phv->get_header(ipv4_hdr_id);
   Field &ipv4_csum = ipv4_hdr[ipv4_csum_field];
   ipv4_hdr.deparse(buffer);
