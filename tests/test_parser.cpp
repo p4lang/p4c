@@ -244,7 +244,7 @@ TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
   Packet packet = get_tcp_pkt();
   parser.parse(&packet, &phv);
   
-  deparser.deparse(phv, &packet);
+  deparser.deparse(&phv, &packet);
 
   ASSERT_EQ(sizeof(raw_tcp_pkt), packet.get_data_size());
   ASSERT_EQ(0, memcmp(raw_tcp_pkt, packet.data(), sizeof(raw_tcp_pkt)));
@@ -254,7 +254,7 @@ TEST_F(ParserTest, DeparseEthernetIPv4UDP) {
   Packet packet = get_udp_pkt();
   parser.parse(&packet, &phv);
   
-  deparser.deparse(phv, &packet);
+  deparser.deparse(&phv, &packet);
 
   ASSERT_EQ(sizeof(raw_udp_pkt), packet.get_data_size());
   ASSERT_EQ(0, memcmp(raw_udp_pkt, packet.data(), sizeof(raw_udp_pkt)));
@@ -277,7 +277,7 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
       size = sizeof(raw_udp_pkt);
     }
     parser.parse(&packet, &phv);
-    deparser.deparse(phv, &packet);
+    deparser.deparse(&phv, &packet);
     ASSERT_EQ(0, memcmp(ref_pkt, packet.data(), size));
 
     phv.reset();

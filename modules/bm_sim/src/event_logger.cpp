@@ -48,6 +48,7 @@ enum EventType {
   PACKET_IN = 0, PACKET_OUT,
   PARSER_START, PARSER_DONE, PARSER_EXTRACT,
   DEPARSER_START, DEPARSER_DONE, DEPARSER_EMIT,
+  CHECKSUM_UPDATE,
   PIPELINE_START, PIPELINE_DONE,
   CONDITION_EVAL, TABLE_HIT, TABLE_MISS,
   ACTION_EXECUTE
@@ -170,6 +171,19 @@ void EventLogger<Transport>::deparser_emit(const Packet &packet,
   msg_t msg;
   fill_msg_hdr(EventType::DEPARSER_EMIT, packet, &msg);
   msg.header_id = header;
+  transport_instance->send((char *) &msg, sizeof(msg));
+};
+
+template <typename Transport>
+void EventLogger<Transport>::checksum_update(const Packet &packet,
+					     const Checksum &checksum) {
+  typedef struct : msg_hdr_t {
+    int checksum_id;
+  } __attribute__((packed)) msg_t;
+
+  msg_t msg;
+  fill_msg_hdr(EventType::CHECKSUM_UPDATE, packet, &msg);
+  msg.checksum_id = checksum.get_id();
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 

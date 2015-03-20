@@ -67,7 +67,7 @@ void SimpleSwitch::pipeline_thread() {
     
     parser->parse(packet.get(), &phv);
     ingress_mau->apply(*packet.get(), &phv);
-    deparser->deparse(phv, packet.get());
+    deparser->deparse(&phv, packet.get());
 
     int egress_port = phv.get_field("standard_metadata.egress_spec").get_int();
     std::cout << "egress port is " << egress_port << std::endl;

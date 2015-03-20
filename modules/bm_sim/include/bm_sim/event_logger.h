@@ -10,6 +10,7 @@
 #include "phv.h"
 #include "pipeline.h"
 #include "tables.h"
+#include "checksums.h"
 
 class TransportIface {
 public:
@@ -59,6 +60,7 @@ class Deparser;
 class MatchTable;
 class ActionFn;
 class Conditional;
+class Checksum;
 
 template <typename Transport>
 class EventLogger {
@@ -79,6 +81,8 @@ public:
   void deparser_start(const Packet &packet, const Deparser &deparser);
   void deparser_done(const Packet &packet, const Deparser &deparser);
   void deparser_emit(const Packet &packet, header_id_t header);
+
+  void checksum_update(const Packet &packet, const Checksum &checksum);
 
   void pipeline_start(const Packet &packet, const Pipeline &pipeline);
   void pipeline_done(const Packet &packet, const Pipeline &pipeline);

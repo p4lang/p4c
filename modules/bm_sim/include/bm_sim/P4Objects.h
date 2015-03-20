@@ -177,6 +177,9 @@ private:
   // this is to give the objects a place where to live
   vector<unique_ptr<ParseState> > parse_states;
 
+  // checksums
+  vector<unique_ptr<Checksum> > checksums;
+
   unordered_map<string, unique_ptr<Deparser> > deparsers;
 
 private:

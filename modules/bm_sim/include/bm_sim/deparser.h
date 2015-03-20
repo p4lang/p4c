@@ -8,6 +8,7 @@
 #include "packet.h"
 #include "event_logger.h"
 #include "named_p4object.h"
+#include "checksums.h"
 
 class Deparser : public NamedP4Object {  
 public:
@@ -18,12 +19,20 @@ public:
     headers.push_back(header_id);
   }
 
+  void add_checksum(const Checksum *checksum) {
+    checksums.push_back(checksum);
+  }
+
   size_t get_headers_size(const PHV &phv) const;
 
-  void deparse(const PHV &phv, Packet *pkt) const;
+  void deparse(PHV *phv, Packet *pkt) const;
+
+private:
+  void update_checksums(PHV *phv, Packet *pkt) const;
 
 private:
   std::vector<header_id_t> headers;
+  std::vector<const Checksum *> checksums;
 };
 
 #endif

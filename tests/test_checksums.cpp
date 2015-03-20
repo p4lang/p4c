@@ -127,29 +127,63 @@ protected:
     parser.set_init_state(&ethernetParseState);
   }
 
-  void get_ipv4_pkt(Packet *pkt, unsigned short *csum) {
+  void get_ipv4_pkt(Packet *pkt, unsigned short *cksum) {
     *pkt = Packet(
 	0, 0, 0,
 	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt))
     );
-    *csum = 0x3508; // big endian
+    *cksum = 0x3508; // big endian
   }
 
   // virtual void TearDown() {}
 };
 
-TEST_F(ChecksumTest, IPv4Checksum) {
+TEST_F(ChecksumTest, IPv4ChecksumVerify) {
   Packet packet;
-  unsigned short csum;
-  get_ipv4_pkt(&packet, &csum);
+  unsigned short cksum;
+  get_ipv4_pkt(&packet, &cksum);
+  parser.parse(&packet, &phv);
+
+  IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
+  ASSERT_TRUE(cksum_engine.verify(phv));
+
+  Field &ipv4_checksum = phv.get_field(ipv4Header, 9);
+  ipv4_checksum.set(0);  
+  ASSERT_FALSE(cksum_engine.verify(phv));
+}
+
+TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
+  Packet packet;
+  unsigned short cksum;
+  get_ipv4_pkt(&packet, &cksum);
   parser.parse(&packet, &phv);
 
   Field &ipv4_checksum = phv.get_field(ipv4Header, 9);
-  ASSERT_EQ(csum, ipv4_checksum.get_uint());
+  ASSERT_EQ(cksum, ipv4_checksum.get_uint());
 
   ipv4_checksum.set(0);
   ASSERT_EQ((unsigned) 0, ipv4_checksum.get_uint());
 
-  checksum::update_ipv4_csum(ipv4Header, 9, &phv);
-  ASSERT_EQ(csum, ipv4_checksum.get_uint());
+  IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
+  cksum_engine.update(&phv);
+  ASSERT_EQ(cksum, ipv4_checksum.get_uint());
+}
+
+TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
+  Packet packet;
+  unsigned short cksum;
+  get_ipv4_pkt(&packet, &cksum);
+  parser.parse(&packet, &phv);
+
+  Field &ipv4_checksum = phv.get_field(ipv4Header, 9);
+  ASSERT_EQ(cksum, ipv4_checksum.get_uint());
+
+  IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
+  for(int i = 0; i < 100000; i++) {
+    ipv4_checksum.set(0);
+    ASSERT_EQ((unsigned) 0, ipv4_checksum.get_uint());
+
+    cksum_engine.update(&phv);
+    ASSERT_EQ(cksum, ipv4_checksum.get_uint());
+  }
 }

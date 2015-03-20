@@ -302,5 +302,16 @@
             "tables": [],
             "conditionals": []
         }
+    ],
+    "checksums": [
+        {
+            "name": "ipv4.hdrChecksum",
+            "id": 0,
+            "target": [
+                "ipv4",
+                "hdrChecksum"
+            ],
+            "type": "ipv4"
+        }
     ]
 }

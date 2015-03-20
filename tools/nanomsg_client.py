@@ -12,7 +12,7 @@ class NameMap:
             json_ = json.load(f)
             
             for type_ in {"header_type", "header", "parser",
-                          "deparser", "action", "pipeline"}:
+                          "deparser", "action", "pipeline", "checksum"}:
                 json_list = json_[type_ + "s"]
                 for obj in json_list:
                     self.names[(type_, obj["id"])] = obj["name"]
@@ -38,9 +38,10 @@ class MSG_TYPES:
     (PACKET_IN, PACKET_OUT,
      PARSER_START, PARSER_DONE, PARSER_EXTRACT,
      DEPARSER_START, DEPARSER_DONE, DEPARSER_EMIT,
+     CHECKSUM_UPDATE,
      PIPELINE_START, PIPELINE_DONE,
      CONDITION_EVAL, TABLE_HIT, TABLE_MISS,
-     ACTION_EXECUTE) = range(14)
+     ACTION_EXECUTE) = range(15)
 
     @staticmethod
     def get_msg_class(type_):
@@ -53,6 +54,7 @@ class MSG_TYPES:
             MSG_TYPES.DEPARSER_START: DeparserStart,
             MSG_TYPES.DEPARSER_DONE: DeparserDone,
             MSG_TYPES.DEPARSER_EMIT: DeparserEmit,
+            MSG_TYPES.CHECKSUM_UPDATE: ChecksumUpdate,
             MSG_TYPES.PIPELINE_START: PipelineStart,
             MSG_TYPES.PIPELINE_DONE: PipelineDone,
             MSG_TYPES.CONDITION_EVAL: ConditionEval,
@@ -73,6 +75,7 @@ class MSG_TYPES:
             MSG_TYPES.DEPARSER_START: "DEPARSER_START",
             MSG_TYPES.DEPARSER_DONE: "DEPARSER_DONE",
             MSG_TYPES.DEPARSER_EMIT: "DEPARSER_EMIT",
+            MSG_TYPES.CHECKSUM_UPDATE: "CHECKSUM_UPDATE",
             MSG_TYPES.PIPELINE_START: "PIPELINE_START",
             MSG_TYPES.PIPELINE_DONE: "PIPELINE_DONE",
             MSG_TYPES.CONDITION_EVAL: "CONDITION_EVAL",
@@ -229,6 +232,23 @@ class DeparserEmit(Msg):
         s = super(DeparserEmit, self).__str__()
         s += ", header_id: " +  str(self.header_id)
         name = name_lookup("header", self.header_id)
+        if name: s += " (" + name + ")"
+        return s
+
+class ChecksumUpdate(Msg):
+    def __init__(self, msg):
+        super(ChecksumUpdate, self).__init__(msg)
+        self.type_ = MSG_TYPES.CHECKSUM_UPDATE
+        self.type_str = MSG_TYPES.get_str(self.type_)
+        self.struct_ = struct.Struct("i")
+        
+    def extract(self):
+         self.cksum_id, = super(ChecksumUpdate, self).extract()
+
+    def __str__(self):
+        s = super(ChecksumUpdate, self).__str__()
+        s += ", cksum_id: " +  str(self.cksum_id)
+        name = name_lookup("checksum", self.cksum_id)
         if name: s += " (" + name + ")"
         return s
 

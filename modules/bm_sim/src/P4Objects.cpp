@@ -413,6 +413,37 @@ void P4Objects::init_objects(std::istream &is) {
     Pipeline *pipeline = new Pipeline(pipeline_name, pipeline_id, first_node);
     add_pipeline(pipeline_name, unique_ptr<Pipeline>(pipeline));
   }
+
+  // checksums
+  
+  const Json::Value cfg_checksums = cfg_root["checksums"];
+  for (const auto &cfg_checksum : cfg_checksums) {
+    
+    const string checksum_name = cfg_checksum["name"].asString();
+    p4object_id_t checksum_id = cfg_checksum["id"].asInt();
+    const string checksum_type = cfg_checksum["type"].asString();
+
+    const Json::Value cfg_cksum_field = cfg_checksum["target"];
+    const string header_name = cfg_cksum_field[0].asString();
+    header_id_t header_id = get_header_id(header_name);
+    const string field_name = cfg_cksum_field[1].asString();
+    int field_offset = get_field_offset(header_id, field_name);
+
+    Checksum *checksum;
+    if(checksum_type == "ipv4") {
+      checksum = new IPv4Checksum(checksum_name, checksum_id,
+				  header_id, field_offset);
+    }
+    else {
+      assert(0);
+    }
+
+    checksums.push_back(unique_ptr<Checksum>(checksum));
+
+    for(auto it = deparsers.begin(); it != deparsers.end(); ++it) {
+      it->second->add_checksum(checksum);
+    }
+  }
 }
 
 void P4Objects::destroy_objects() {
