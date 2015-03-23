@@ -212,3 +212,29 @@ TEST_F(ActionsTest, CRSet) {
 
   ASSERT_EQ((unsigned) 666, f.get_uint());
 }
+
+TEST_F(ActionsTest, TwoPrimitives) {
+  SetField primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 0); // f32
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_field(testHeader2, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader2, 0); // f32
+
+  Field &src1 = phv.get_field(testHeader1, 0); // 32
+  Field &src2 = phv.get_field(testHeader2, 0); // 32
+  src1.set(0xaba); src2.set(0xaba);
+
+  Field &dst1 = phv.get_field(testHeader1, 3); // f16
+  Field &dst2 = phv.get_field(testHeader2, 3); // f16
+  dst1.set(0); dst2.set(0);
+
+  ASSERT_EQ((unsigned) 0, dst1.get_uint());
+  ASSERT_EQ((unsigned) 0, dst2.get_uint());
+
+  testActionFnEntry(phv);
+
+  ASSERT_EQ((unsigned) 0xaba, dst1.get_uint());
+  ASSERT_EQ((unsigned) 0xaba, dst2.get_uint());
+}

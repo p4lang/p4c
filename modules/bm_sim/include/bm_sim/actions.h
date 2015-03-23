@@ -146,7 +146,7 @@ struct unpack_caller
 private:
   template <typename T, size_t... I>
   void call(T *pObj, ActionEngineState &state,
-	    const vector<ActionParam> &args,
+	    const ActionParam *args,
 	    indices<I...>){
     (*pObj)(ActionParamWithState(args[I], state)...);
   }
@@ -154,8 +154,8 @@ private:
 public:
   template <typename T>
   void operator () (T* pObj, ActionEngineState &state,
-		    const std::vector<ActionParam> &args){
-    assert(args.size() == num_args); // just to be sure
+		    const ActionParam *args){
+    // assert(args.size() == num_args); // just to be sure
     call(pObj, state, args, BuildIndices<num_args>{});
   }
 };
@@ -165,17 +165,23 @@ class ActionPrimitive_
 public:
   virtual void execute(
       ActionEngineState &state,
-      const vector<ActionParam> &args) = 0;
+      const ActionParam *args) = 0;
+
+  virtual size_t get_num_params() = 0;
 };
 
 template <typename... Args>
 class ActionPrimitive : public ActionPrimitive_
 {
 public:
-  void execute(ActionEngineState &state, const vector<ActionParam> &args) {
+  void execute(ActionEngineState &state, const ActionParam *args) {
     phv = &(state.phv);
     caller(this, state, args);
   }
+
+  // cannot make it constexpr because it is virtual
+  // too slow? make it a return value for execute?
+  size_t get_num_params() { return sizeof...(Args); }
 
   virtual void operator ()(Args...) = 0;
 
@@ -248,10 +254,12 @@ public:
     if(!action_fn) return; // happens when no default action specified... TODO
     ActionEngineState state(phv, action_data, action_fn->const_values);
     auto &primitives = action_fn->primitives;
+    size_t param_offset = 0;
     for(auto primitive_it = primitives.begin();
 	primitive_it != primitives.end();
 	++primitive_it) {
-      (*primitive_it)->execute(state, action_fn->params);
+      (*primitive_it)->execute(state, &(action_fn->params[param_offset]));
+      param_offset += (*primitive_it)->get_num_params();
     }
   }
 
