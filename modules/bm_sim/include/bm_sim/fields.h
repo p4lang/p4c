@@ -46,7 +46,7 @@ public:
 
   void export_bytes() {
     std::fill(bytes.begin(), bytes.end(), 0); // very important !
-    bignum::export_bytes(bytes.data(), value);
+    bignum::export_bytes(bytes.data(), nbytes, value);
   }
 
   /* void add(const Data &src1, const Data &src2) { */

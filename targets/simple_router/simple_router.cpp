@@ -56,6 +56,7 @@ private:
 
 void SimpleSwitch::pipeline_thread() {
   Pipeline *ingress_mau = p4objects->get_pipeline("ingress");
+  Pipeline *egress_mau = p4objects->get_pipeline("egress");
   Parser *parser = p4objects->get_parser("parser");
   Deparser *deparser = p4objects->get_deparser("deparser");
   PHV &phv = p4objects->get_phv();
@@ -67,16 +68,17 @@ void SimpleSwitch::pipeline_thread() {
     
     parser->parse(packet.get(), &phv);
     ingress_mau->apply(*packet.get(), &phv);
-    deparser->deparse(&phv, packet.get());
 
-    int egress_port = phv.get_field("standard_metadata.egress_spec").get_int();
-    std::cout << "egress port is " << egress_port << std::endl;
+    int egress_port = phv.get_field("standard_metadata.egress_port").get_int();
+    std::cout << "egress port is " << egress_port << std::endl;    
 
     if(egress_port == 0) {
       std::cout << "dropping packet\n";
     }
     else {
       packet->set_egress_port(egress_port);
+      egress_mau->apply(*packet.get(), &phv);
+      deparser->deparse(&phv, packet.get());
       transmit(*packet);
     }
   }
@@ -102,10 +104,6 @@ static SimpleSwitch *simple_switch;
 // }
 
 
-/* C bindings */
-
-extern "C" {
-
 int packet_accept(int port_num, const char *buffer, int len) {
   return simple_switch->receive(port_num, buffer, len);
 }
@@ -119,7 +117,5 @@ void start_processing(transmit_fn_t transmit_fn) {
   // add_test_entry();
 
   simple_switch->start_and_return();
-}
-
 }
 

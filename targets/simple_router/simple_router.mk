@@ -7,6 +7,6 @@ srcs_CXX += $(wildcard $(SRC_DIR)/*.cpp)
 
 INCS +=
 
-LIBS +=
+LIBS += -lboost_program_options
 
-COMMON_FLAGS += -DELOGGER_NANOMSG
+# COMMON_FLAGS += -DELOGGER_NANOMSG

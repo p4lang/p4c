@@ -256,7 +256,7 @@
                             "type": "field",
                             "value": [
                                 "standard_metadata",
-                                "egress_spec"
+                                "egress_port"
                             ]
                         },
                         {

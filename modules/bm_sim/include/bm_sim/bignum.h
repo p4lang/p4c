@@ -12,9 +12,9 @@ namespace bignum {
 
   typedef number<gmp_int> Bignum;
   
-  inline size_t export_bytes(char *dst, const Bignum &src) {
+  inline size_t export_bytes(char *dst, size_t size, const Bignum &src) {
     size_t count;
-    mpz_export(dst, &count, 1, 1, 1, 0, src.backend().data());
+    mpz_export(dst, &count, 1, size, 1, 0, src.backend().data());
     return count;
   }
 

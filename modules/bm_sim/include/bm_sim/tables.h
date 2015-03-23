@@ -99,7 +99,7 @@ protected:
   // indexed by the action id
   unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes;
   ActionFnEntry default_action_entry;
-  const ControlFlowNode *default_next_node;
+  const ControlFlowNode *default_next_node{nullptr};
 
   mutable boost::shared_mutex t_mutex;
 
