@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import nnpy
 import struct
 import sys

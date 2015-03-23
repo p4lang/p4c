@@ -12,7 +12,7 @@
 #include "bm_sim/event_logger.h"
 
 #include "simple_switch.h"
-#include "simple_switch_primitives.h"
+#include "primitives.h"
 
 #include "bm_runtime/bm_runtime.h"
 
