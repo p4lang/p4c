@@ -55,12 +55,13 @@ static void *run_select(void *data) {
 
     fds = port_mgr->fds;
     n = select(port_mgr->max_fd + 1, &fds, NULL, NULL, &timeout);
-    assert(n >= 0);
+    /* TODO: investigate this further */
+    assert(n >= 0 || errno == EINTR);
 
     /* the thread terminates */
     if(port_mgr->max_fd == -1) return NULL;
 
-    if(n == 0) { // timeout
+    if(n <= 0) { // timeout or EINTR
       continue;
     }
 
@@ -72,6 +73,7 @@ static void *run_select(void *data) {
       if(FD_ISSET(port_info->fd, &fds) && port_info->bmi) {
 	--n;
 	pkt_len = bmi_interface_recv(port_info->bmi, &pkt_data);
+	if(pkt_len < 0) continue;
 	/* printf("Received pkt of len %d on port %d\n", pkt_len, i); */
 	if(port_mgr->packet_handler) {
 	  port_mgr->packet_handler(i, pkt_data, pkt_len);

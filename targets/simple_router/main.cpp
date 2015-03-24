@@ -18,6 +18,12 @@
 
 #include <boost/program_options.hpp>
 
+#define PROFILER
+
+#ifdef PROFILER
+#include <gperftools/profiler.h>
+#endif
+
 extern "C" {
 #include "BMI/bmi_port.h"
 }
@@ -26,7 +32,7 @@ extern "C" {
 
 #define CHECK(x) assert(!x)
 
-#define PCAP_DUMP
+// #define PCAP_DUMP
 
 static bmi_port_mgr_t *port_mgr;
 
@@ -141,6 +147,9 @@ main(int argc, char* argv[])
   
   while(1) {
     std::this_thread::sleep_for(std::chrono::seconds(5));
+#ifdef PROFILER
+    ProfilerFlush();
+#endif
   }
   
   bmi_port_destroy_mgr(port_mgr);
