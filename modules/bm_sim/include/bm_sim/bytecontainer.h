@@ -100,6 +100,11 @@ public:
     return *this;
   }
 
+  ByteContainer &append(const char *byte_array, size_t nbytes) {
+    bytes.insert(end(), byte_array, byte_array + nbytes);
+    return *this;
+  }
+
   reference operator[](size_type n) {
     assert(n < size());
     return bytes[n];
@@ -126,7 +131,9 @@ public:
     return !(*this == other);
   }
 
-  // TODO: implement reserve
+  void reserve(size_t n) {
+    bytes.reserve(n);
+  }
 
 private:
   vector<char> bytes;

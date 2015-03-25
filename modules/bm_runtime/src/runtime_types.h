@@ -31,6 +31,8 @@ typedef int32_t BmEntryHandle;
 
 typedef std::vector<std::string>  BmActionData;
 
+typedef std::vector<std::string>  BmMatchKey;
+
 typedef struct _InvalidTableOperation__isset {
   _InvalidTableOperation__isset() : what(false) {}
   bool what;

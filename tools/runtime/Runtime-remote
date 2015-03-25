@@ -23,9 +23,9 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print 'Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] function [arg1 [arg2...]]'
   print ''
   print 'Functions:'
-  print '  BmEntryHandle bm_table_add_exact_match_entry(string table_name, string action_name, string key, BmActionData action_data)'
-  print '  BmEntryHandle bm_table_add_lpm_entry(string table_name, string action_name, string key, i32 prefix_length, BmActionData action_data)'
-  print '  BmEntryHandle bm_table_add_ternary_match_entry(string table_name, string action_name, string key, string mask, i32 priority, BmActionData action_data)'
+  print '  BmEntryHandle bm_table_add_exact_match_entry(string table_name, string action_name, BmMatchKey match_key, BmActionData action_data)'
+  print '  BmEntryHandle bm_table_add_lpm_entry(string table_name, string action_name, BmMatchKey match_key, i32 prefix_length, BmActionData action_data)'
+  print '  BmEntryHandle bm_table_add_ternary_match_entry(string table_name, string action_name, BmMatchKey match_key, BmMatchKey match_mask, i32 priority, BmActionData action_data)'
   print '  void bm_set_default_action(string table_name, string action_name, BmActionData action_data)'
   print '  void bm_table_delete_entry(string table_name, BmEntryHandle entry_handle)'
   print ''
@@ -83,19 +83,19 @@ if cmd == 'bm_table_add_exact_match_entry':
   if len(args) != 4:
     print 'bm_table_add_exact_match_entry requires 4 args'
     sys.exit(1)
-  pp.pprint(client.bm_table_add_exact_match_entry(args[0],args[1],args[2],eval(args[3]),))
+  pp.pprint(client.bm_table_add_exact_match_entry(args[0],args[1],eval(args[2]),eval(args[3]),))
 
 elif cmd == 'bm_table_add_lpm_entry':
   if len(args) != 5:
     print 'bm_table_add_lpm_entry requires 5 args'
     sys.exit(1)
-  pp.pprint(client.bm_table_add_lpm_entry(args[0],args[1],args[2],eval(args[3]),eval(args[4]),))
+  pp.pprint(client.bm_table_add_lpm_entry(args[0],args[1],eval(args[2]),eval(args[3]),eval(args[4]),))
 
 elif cmd == 'bm_table_add_ternary_match_entry':
   if len(args) != 6:
     print 'bm_table_add_ternary_match_entry requires 6 args'
     sys.exit(1)
-  pp.pprint(client.bm_table_add_ternary_match_entry(args[0],args[1],args[2],args[3],eval(args[4]),eval(args[5]),))
+  pp.pprint(client.bm_table_add_ternary_match_entry(args[0],args[1],eval(args[2]),eval(args[3]),eval(args[4]),eval(args[5]),))
 
 elif cmd == 'bm_set_default_action':
   if len(args) != 3:

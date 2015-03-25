@@ -25,16 +25,21 @@ class RuntimeHandler : virtual public RuntimeIf {
     // Your initialization goes here
   }
 
-  BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const BmActionData& action_data) {
+  BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmActionData& action_data) {
     printf("bm_table_add_exact_match_entry\n");
     entry_handle_t entry_handle;
+    ByteContainer key;
+    key.reserve(64);
+    for(const std::string &d : match_key) {
+      key.append(d.data(), d.size());
+    }
     ActionData data;
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
     MatchTable::ErrorCode error_code = switch_->table_add_exact_match_entry(
         table_name, action_name,
-	ByteContainer(key.data(), key.size()),
+	std::move(key),
 	std::move(data),
 	&entry_handle
     );
@@ -46,16 +51,21 @@ class RuntimeHandler : virtual public RuntimeIf {
     return (BmEntryHandle) entry_handle;
   }
 
-  BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const int32_t prefix_length, const BmActionData& action_data) {
+  BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const int32_t prefix_length, const BmActionData& action_data) {
     printf("bm_table_add_lpm_entry\n");
     entry_handle_t entry_handle;
+    ByteContainer key;
+    key.reserve(64);
+    for(const std::string &d : match_key) {
+      key.append(d.data(), d.size());
+    }
     ActionData data;
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
     MatchTable::ErrorCode error_code = switch_->table_add_lpm_entry(
         table_name, action_name,
-	ByteContainer(key.data(), key.size()),
+	std::move(key),
 	prefix_length,
 	std::move(data),
 	&entry_handle
@@ -68,17 +78,27 @@ class RuntimeHandler : virtual public RuntimeIf {
     return (BmEntryHandle) entry_handle;
   }
 
-  BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const std::string& mask, const int32_t priority, const BmActionData& action_data) {
+  BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmMatchKey& match_mask, const int32_t priority, const BmActionData& action_data) {
     printf("bm_table_add_ternary_match_entry\n");
     entry_handle_t entry_handle;
+    ByteContainer key;
+    key.reserve(64);
+    for(const std::string &d : match_key) {
+      key.append(d.data(), d.size());
+    }
+    ByteContainer mask;
+    mask.reserve(64);
+    for(const std::string &d : match_mask) {
+      mask.append(d.data(), d.size());
+    }
     ActionData data;
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
     MatchTable::ErrorCode error_code = switch_->table_add_ternary_match_entry(
         table_name, action_name,
-	ByteContainer(key.data(), key.size()),
-	ByteContainer(mask.data(), mask.size()),
+	std::move(key),
+	std::move(mask),
 	priority,
 	std::move(data),
 	&entry_handle

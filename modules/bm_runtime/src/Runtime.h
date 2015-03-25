@@ -15,9 +15,9 @@ namespace bm_runtime {
 class RuntimeIf {
  public:
   virtual ~RuntimeIf() {}
-  virtual BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const BmActionData& action_data) = 0;
-  virtual BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const int32_t prefix_length, const BmActionData& action_data) = 0;
-  virtual BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const std::string& mask, const int32_t priority, const BmActionData& action_data) = 0;
+  virtual BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmActionData& action_data) = 0;
+  virtual BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const int32_t prefix_length, const BmActionData& action_data) = 0;
+  virtual BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmMatchKey& match_mask, const int32_t priority, const BmActionData& action_data) = 0;
   virtual void bm_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) = 0;
   virtual void bm_table_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) = 0;
 };
@@ -49,15 +49,15 @@ class RuntimeIfSingletonFactory : virtual public RuntimeIfFactory {
 class RuntimeNull : virtual public RuntimeIf {
  public:
   virtual ~RuntimeNull() {}
-  BmEntryHandle bm_table_add_exact_match_entry(const std::string& /* table_name */, const std::string& /* action_name */, const std::string& /* key */, const BmActionData& /* action_data */) {
+  BmEntryHandle bm_table_add_exact_match_entry(const std::string& /* table_name */, const std::string& /* action_name */, const BmMatchKey& /* match_key */, const BmActionData& /* action_data */) {
     BmEntryHandle _return = 0;
     return _return;
   }
-  BmEntryHandle bm_table_add_lpm_entry(const std::string& /* table_name */, const std::string& /* action_name */, const std::string& /* key */, const int32_t /* prefix_length */, const BmActionData& /* action_data */) {
+  BmEntryHandle bm_table_add_lpm_entry(const std::string& /* table_name */, const std::string& /* action_name */, const BmMatchKey& /* match_key */, const int32_t /* prefix_length */, const BmActionData& /* action_data */) {
     BmEntryHandle _return = 0;
     return _return;
   }
-  BmEntryHandle bm_table_add_ternary_match_entry(const std::string& /* table_name */, const std::string& /* action_name */, const std::string& /* key */, const std::string& /* mask */, const int32_t /* priority */, const BmActionData& /* action_data */) {
+  BmEntryHandle bm_table_add_ternary_match_entry(const std::string& /* table_name */, const std::string& /* action_name */, const BmMatchKey& /* match_key */, const BmMatchKey& /* match_mask */, const int32_t /* priority */, const BmActionData& /* action_data */) {
     BmEntryHandle _return = 0;
     return _return;
   }
@@ -70,24 +70,24 @@ class RuntimeNull : virtual public RuntimeIf {
 };
 
 typedef struct _Runtime_bm_table_add_exact_match_entry_args__isset {
-  _Runtime_bm_table_add_exact_match_entry_args__isset() : table_name(false), action_name(false), key(false), action_data(false) {}
+  _Runtime_bm_table_add_exact_match_entry_args__isset() : table_name(false), action_name(false), match_key(false), action_data(false) {}
   bool table_name;
   bool action_name;
-  bool key;
+  bool match_key;
   bool action_data;
 } _Runtime_bm_table_add_exact_match_entry_args__isset;
 
 class Runtime_bm_table_add_exact_match_entry_args {
  public:
 
-  Runtime_bm_table_add_exact_match_entry_args() : table_name(), action_name(), key() {
+  Runtime_bm_table_add_exact_match_entry_args() : table_name(), action_name() {
   }
 
   virtual ~Runtime_bm_table_add_exact_match_entry_args() throw() {}
 
   std::string table_name;
   std::string action_name;
-  std::string key;
+  BmMatchKey match_key;
   BmActionData action_data;
 
   _Runtime_bm_table_add_exact_match_entry_args__isset __isset;
@@ -100,8 +100,8 @@ class Runtime_bm_table_add_exact_match_entry_args {
     action_name = val;
   }
 
-  void __set_key(const std::string& val) {
-    key = val;
+  void __set_match_key(const BmMatchKey& val) {
+    match_key = val;
   }
 
   void __set_action_data(const BmActionData& val) {
@@ -114,7 +114,7 @@ class Runtime_bm_table_add_exact_match_entry_args {
       return false;
     if (!(action_name == rhs.action_name))
       return false;
-    if (!(key == rhs.key))
+    if (!(match_key == rhs.match_key))
       return false;
     if (!(action_data == rhs.action_data))
       return false;
@@ -140,7 +140,7 @@ class Runtime_bm_table_add_exact_match_entry_pargs {
 
   const std::string* table_name;
   const std::string* action_name;
-  const std::string* key;
+  const BmMatchKey* match_key;
   const BmActionData* action_data;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -215,10 +215,10 @@ class Runtime_bm_table_add_exact_match_entry_presult {
 };
 
 typedef struct _Runtime_bm_table_add_lpm_entry_args__isset {
-  _Runtime_bm_table_add_lpm_entry_args__isset() : table_name(false), action_name(false), key(false), prefix_length(false), action_data(false) {}
+  _Runtime_bm_table_add_lpm_entry_args__isset() : table_name(false), action_name(false), match_key(false), prefix_length(false), action_data(false) {}
   bool table_name;
   bool action_name;
-  bool key;
+  bool match_key;
   bool prefix_length;
   bool action_data;
 } _Runtime_bm_table_add_lpm_entry_args__isset;
@@ -226,14 +226,14 @@ typedef struct _Runtime_bm_table_add_lpm_entry_args__isset {
 class Runtime_bm_table_add_lpm_entry_args {
  public:
 
-  Runtime_bm_table_add_lpm_entry_args() : table_name(), action_name(), key(), prefix_length(0) {
+  Runtime_bm_table_add_lpm_entry_args() : table_name(), action_name(), prefix_length(0) {
   }
 
   virtual ~Runtime_bm_table_add_lpm_entry_args() throw() {}
 
   std::string table_name;
   std::string action_name;
-  std::string key;
+  BmMatchKey match_key;
   int32_t prefix_length;
   BmActionData action_data;
 
@@ -247,8 +247,8 @@ class Runtime_bm_table_add_lpm_entry_args {
     action_name = val;
   }
 
-  void __set_key(const std::string& val) {
-    key = val;
+  void __set_match_key(const BmMatchKey& val) {
+    match_key = val;
   }
 
   void __set_prefix_length(const int32_t val) {
@@ -265,7 +265,7 @@ class Runtime_bm_table_add_lpm_entry_args {
       return false;
     if (!(action_name == rhs.action_name))
       return false;
-    if (!(key == rhs.key))
+    if (!(match_key == rhs.match_key))
       return false;
     if (!(prefix_length == rhs.prefix_length))
       return false;
@@ -293,7 +293,7 @@ class Runtime_bm_table_add_lpm_entry_pargs {
 
   const std::string* table_name;
   const std::string* action_name;
-  const std::string* key;
+  const BmMatchKey* match_key;
   const int32_t* prefix_length;
   const BmActionData* action_data;
 
@@ -369,11 +369,11 @@ class Runtime_bm_table_add_lpm_entry_presult {
 };
 
 typedef struct _Runtime_bm_table_add_ternary_match_entry_args__isset {
-  _Runtime_bm_table_add_ternary_match_entry_args__isset() : table_name(false), action_name(false), key(false), mask(false), priority(false), action_data(false) {}
+  _Runtime_bm_table_add_ternary_match_entry_args__isset() : table_name(false), action_name(false), match_key(false), match_mask(false), priority(false), action_data(false) {}
   bool table_name;
   bool action_name;
-  bool key;
-  bool mask;
+  bool match_key;
+  bool match_mask;
   bool priority;
   bool action_data;
 } _Runtime_bm_table_add_ternary_match_entry_args__isset;
@@ -381,15 +381,15 @@ typedef struct _Runtime_bm_table_add_ternary_match_entry_args__isset {
 class Runtime_bm_table_add_ternary_match_entry_args {
  public:
 
-  Runtime_bm_table_add_ternary_match_entry_args() : table_name(), action_name(), key(), mask(), priority(0) {
+  Runtime_bm_table_add_ternary_match_entry_args() : table_name(), action_name(), priority(0) {
   }
 
   virtual ~Runtime_bm_table_add_ternary_match_entry_args() throw() {}
 
   std::string table_name;
   std::string action_name;
-  std::string key;
-  std::string mask;
+  BmMatchKey match_key;
+  BmMatchKey match_mask;
   int32_t priority;
   BmActionData action_data;
 
@@ -403,12 +403,12 @@ class Runtime_bm_table_add_ternary_match_entry_args {
     action_name = val;
   }
 
-  void __set_key(const std::string& val) {
-    key = val;
+  void __set_match_key(const BmMatchKey& val) {
+    match_key = val;
   }
 
-  void __set_mask(const std::string& val) {
-    mask = val;
+  void __set_match_mask(const BmMatchKey& val) {
+    match_mask = val;
   }
 
   void __set_priority(const int32_t val) {
@@ -425,9 +425,9 @@ class Runtime_bm_table_add_ternary_match_entry_args {
       return false;
     if (!(action_name == rhs.action_name))
       return false;
-    if (!(key == rhs.key))
+    if (!(match_key == rhs.match_key))
       return false;
-    if (!(mask == rhs.mask))
+    if (!(match_mask == rhs.match_mask))
       return false;
     if (!(priority == rhs.priority))
       return false;
@@ -455,8 +455,8 @@ class Runtime_bm_table_add_ternary_match_entry_pargs {
 
   const std::string* table_name;
   const std::string* action_name;
-  const std::string* key;
-  const std::string* mask;
+  const BmMatchKey* match_key;
+  const BmMatchKey* match_mask;
   const int32_t* priority;
   const BmActionData* action_data;
 
@@ -794,14 +794,14 @@ class RuntimeClient : virtual public RuntimeIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const BmActionData& action_data);
-  void send_bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const BmActionData& action_data);
+  BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmActionData& action_data);
+  void send_bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmActionData& action_data);
   BmEntryHandle recv_bm_table_add_exact_match_entry();
-  BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const int32_t prefix_length, const BmActionData& action_data);
-  void send_bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const int32_t prefix_length, const BmActionData& action_data);
+  BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const int32_t prefix_length, const BmActionData& action_data);
+  void send_bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const int32_t prefix_length, const BmActionData& action_data);
   BmEntryHandle recv_bm_table_add_lpm_entry();
-  BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const std::string& mask, const int32_t priority, const BmActionData& action_data);
-  void send_bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const std::string& mask, const int32_t priority, const BmActionData& action_data);
+  BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmMatchKey& match_mask, const int32_t priority, const BmActionData& action_data);
+  void send_bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmMatchKey& match_mask, const int32_t priority, const BmActionData& action_data);
   BmEntryHandle recv_bm_table_add_ternary_match_entry();
   void bm_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data);
   void send_bm_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data);
@@ -865,31 +865,31 @@ class RuntimeMultiface : virtual public RuntimeIf {
     ifaces_.push_back(iface);
   }
  public:
-  BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const BmActionData& action_data) {
+  BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmActionData& action_data) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->bm_table_add_exact_match_entry(table_name, action_name, key, action_data);
+      ifaces_[i]->bm_table_add_exact_match_entry(table_name, action_name, match_key, action_data);
     }
-    return ifaces_[i]->bm_table_add_exact_match_entry(table_name, action_name, key, action_data);
+    return ifaces_[i]->bm_table_add_exact_match_entry(table_name, action_name, match_key, action_data);
   }
 
-  BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const int32_t prefix_length, const BmActionData& action_data) {
+  BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const int32_t prefix_length, const BmActionData& action_data) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->bm_table_add_lpm_entry(table_name, action_name, key, prefix_length, action_data);
+      ifaces_[i]->bm_table_add_lpm_entry(table_name, action_name, match_key, prefix_length, action_data);
     }
-    return ifaces_[i]->bm_table_add_lpm_entry(table_name, action_name, key, prefix_length, action_data);
+    return ifaces_[i]->bm_table_add_lpm_entry(table_name, action_name, match_key, prefix_length, action_data);
   }
 
-  BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const std::string& key, const std::string& mask, const int32_t priority, const BmActionData& action_data) {
+  BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmMatchKey& match_mask, const int32_t priority, const BmActionData& action_data) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->bm_table_add_ternary_match_entry(table_name, action_name, key, mask, priority, action_data);
+      ifaces_[i]->bm_table_add_ternary_match_entry(table_name, action_name, match_key, match_mask, priority, action_data);
     }
-    return ifaces_[i]->bm_table_add_ternary_match_entry(table_name, action_name, key, mask, priority, action_data);
+    return ifaces_[i]->bm_table_add_ternary_match_entry(table_name, action_name, match_key, match_mask, priority, action_data);
   }
 
   void bm_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {

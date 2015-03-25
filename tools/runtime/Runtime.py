@@ -18,34 +18,34 @@ except:
 
 
 class Iface:
-  def bm_table_add_exact_match_entry(self, table_name, action_name, key, action_data):
+  def bm_table_add_exact_match_entry(self, table_name, action_name, match_key, action_data):
     """
     Parameters:
      - table_name
      - action_name
-     - key
+     - match_key
      - action_data
     """
     pass
 
-  def bm_table_add_lpm_entry(self, table_name, action_name, key, prefix_length, action_data):
+  def bm_table_add_lpm_entry(self, table_name, action_name, match_key, prefix_length, action_data):
     """
     Parameters:
      - table_name
      - action_name
-     - key
+     - match_key
      - prefix_length
      - action_data
     """
     pass
 
-  def bm_table_add_ternary_match_entry(self, table_name, action_name, key, mask, priority, action_data):
+  def bm_table_add_ternary_match_entry(self, table_name, action_name, match_key, match_mask, priority, action_data):
     """
     Parameters:
      - table_name
      - action_name
-     - key
-     - mask
+     - match_key
+     - match_mask
      - priority
      - action_data
     """
@@ -76,23 +76,23 @@ class Client(Iface):
       self._oprot = oprot
     self._seqid = 0
 
-  def bm_table_add_exact_match_entry(self, table_name, action_name, key, action_data):
+  def bm_table_add_exact_match_entry(self, table_name, action_name, match_key, action_data):
     """
     Parameters:
      - table_name
      - action_name
-     - key
+     - match_key
      - action_data
     """
-    self.send_bm_table_add_exact_match_entry(table_name, action_name, key, action_data)
+    self.send_bm_table_add_exact_match_entry(table_name, action_name, match_key, action_data)
     return self.recv_bm_table_add_exact_match_entry()
 
-  def send_bm_table_add_exact_match_entry(self, table_name, action_name, key, action_data):
+  def send_bm_table_add_exact_match_entry(self, table_name, action_name, match_key, action_data):
     self._oprot.writeMessageBegin('bm_table_add_exact_match_entry', TMessageType.CALL, self._seqid)
     args = bm_table_add_exact_match_entry_args()
     args.table_name = table_name
     args.action_name = action_name
-    args.key = key
+    args.match_key = match_key
     args.action_data = action_data
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
@@ -114,24 +114,24 @@ class Client(Iface):
       raise result.ouch
     raise TApplicationException(TApplicationException.MISSING_RESULT, "bm_table_add_exact_match_entry failed: unknown result");
 
-  def bm_table_add_lpm_entry(self, table_name, action_name, key, prefix_length, action_data):
+  def bm_table_add_lpm_entry(self, table_name, action_name, match_key, prefix_length, action_data):
     """
     Parameters:
      - table_name
      - action_name
-     - key
+     - match_key
      - prefix_length
      - action_data
     """
-    self.send_bm_table_add_lpm_entry(table_name, action_name, key, prefix_length, action_data)
+    self.send_bm_table_add_lpm_entry(table_name, action_name, match_key, prefix_length, action_data)
     return self.recv_bm_table_add_lpm_entry()
 
-  def send_bm_table_add_lpm_entry(self, table_name, action_name, key, prefix_length, action_data):
+  def send_bm_table_add_lpm_entry(self, table_name, action_name, match_key, prefix_length, action_data):
     self._oprot.writeMessageBegin('bm_table_add_lpm_entry', TMessageType.CALL, self._seqid)
     args = bm_table_add_lpm_entry_args()
     args.table_name = table_name
     args.action_name = action_name
-    args.key = key
+    args.match_key = match_key
     args.prefix_length = prefix_length
     args.action_data = action_data
     args.write(self._oprot)
@@ -154,26 +154,26 @@ class Client(Iface):
       raise result.ouch
     raise TApplicationException(TApplicationException.MISSING_RESULT, "bm_table_add_lpm_entry failed: unknown result");
 
-  def bm_table_add_ternary_match_entry(self, table_name, action_name, key, mask, priority, action_data):
+  def bm_table_add_ternary_match_entry(self, table_name, action_name, match_key, match_mask, priority, action_data):
     """
     Parameters:
      - table_name
      - action_name
-     - key
-     - mask
+     - match_key
+     - match_mask
      - priority
      - action_data
     """
-    self.send_bm_table_add_ternary_match_entry(table_name, action_name, key, mask, priority, action_data)
+    self.send_bm_table_add_ternary_match_entry(table_name, action_name, match_key, match_mask, priority, action_data)
     return self.recv_bm_table_add_ternary_match_entry()
 
-  def send_bm_table_add_ternary_match_entry(self, table_name, action_name, key, mask, priority, action_data):
+  def send_bm_table_add_ternary_match_entry(self, table_name, action_name, match_key, match_mask, priority, action_data):
     self._oprot.writeMessageBegin('bm_table_add_ternary_match_entry', TMessageType.CALL, self._seqid)
     args = bm_table_add_ternary_match_entry_args()
     args.table_name = table_name
     args.action_name = action_name
-    args.key = key
-    args.mask = mask
+    args.match_key = match_key
+    args.match_mask = match_mask
     args.priority = priority
     args.action_data = action_data
     args.write(self._oprot)
@@ -294,7 +294,7 @@ class Processor(Iface, TProcessor):
     iprot.readMessageEnd()
     result = bm_table_add_exact_match_entry_result()
     try:
-      result.success = self._handler.bm_table_add_exact_match_entry(args.table_name, args.action_name, args.key, args.action_data)
+      result.success = self._handler.bm_table_add_exact_match_entry(args.table_name, args.action_name, args.match_key, args.action_data)
     except InvalidTableOperation, ouch:
       result.ouch = ouch
     oprot.writeMessageBegin("bm_table_add_exact_match_entry", TMessageType.REPLY, seqid)
@@ -308,7 +308,7 @@ class Processor(Iface, TProcessor):
     iprot.readMessageEnd()
     result = bm_table_add_lpm_entry_result()
     try:
-      result.success = self._handler.bm_table_add_lpm_entry(args.table_name, args.action_name, args.key, args.prefix_length, args.action_data)
+      result.success = self._handler.bm_table_add_lpm_entry(args.table_name, args.action_name, args.match_key, args.prefix_length, args.action_data)
     except InvalidTableOperation, ouch:
       result.ouch = ouch
     oprot.writeMessageBegin("bm_table_add_lpm_entry", TMessageType.REPLY, seqid)
@@ -322,7 +322,7 @@ class Processor(Iface, TProcessor):
     iprot.readMessageEnd()
     result = bm_table_add_ternary_match_entry_result()
     try:
-      result.success = self._handler.bm_table_add_ternary_match_entry(args.table_name, args.action_name, args.key, args.mask, args.priority, args.action_data)
+      result.success = self._handler.bm_table_add_ternary_match_entry(args.table_name, args.action_name, args.match_key, args.match_mask, args.priority, args.action_data)
     except InvalidTableOperation, ouch:
       result.ouch = ouch
     oprot.writeMessageBegin("bm_table_add_ternary_match_entry", TMessageType.REPLY, seqid)
@@ -366,7 +366,7 @@ class bm_table_add_exact_match_entry_args:
   Attributes:
    - table_name
    - action_name
-   - key
+   - match_key
    - action_data
   """
 
@@ -374,14 +374,14 @@ class bm_table_add_exact_match_entry_args:
     None, # 0
     (1, TType.STRING, 'table_name', None, None, ), # 1
     (2, TType.STRING, 'action_name', None, None, ), # 2
-    (3, TType.STRING, 'key', None, None, ), # 3
+    (3, TType.LIST, 'match_key', (TType.STRING,None), None, ), # 3
     (4, TType.LIST, 'action_data', (TType.STRING,None), None, ), # 4
   )
 
-  def __init__(self, table_name=None, action_name=None, key=None, action_data=None,):
+  def __init__(self, table_name=None, action_name=None, match_key=None, action_data=None,):
     self.table_name = table_name
     self.action_name = action_name
-    self.key = key
+    self.match_key = match_key
     self.action_data = action_data
 
   def read(self, iprot):
@@ -404,17 +404,22 @@ class bm_table_add_exact_match_entry_args:
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.STRING:
-          self.key = iprot.readString();
+        if ftype == TType.LIST:
+          self.match_key = []
+          (_etype3, _size0) = iprot.readListBegin()
+          for _i4 in xrange(_size0):
+            _elem5 = iprot.readString();
+            self.match_key.append(_elem5)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.LIST:
           self.action_data = []
-          (_etype3, _size0) = iprot.readListBegin()
-          for _i4 in xrange(_size0):
-            _elem5 = iprot.readString();
-            self.action_data.append(_elem5)
+          (_etype9, _size6) = iprot.readListBegin()
+          for _i10 in xrange(_size6):
+            _elem11 = iprot.readString();
+            self.action_data.append(_elem11)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -436,15 +441,18 @@ class bm_table_add_exact_match_entry_args:
       oprot.writeFieldBegin('action_name', TType.STRING, 2)
       oprot.writeString(self.action_name)
       oprot.writeFieldEnd()
-    if self.key is not None:
-      oprot.writeFieldBegin('key', TType.STRING, 3)
-      oprot.writeString(self.key)
+    if self.match_key is not None:
+      oprot.writeFieldBegin('match_key', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRING, len(self.match_key))
+      for iter12 in self.match_key:
+        oprot.writeString(iter12)
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.action_data is not None:
       oprot.writeFieldBegin('action_data', TType.LIST, 4)
       oprot.writeListBegin(TType.STRING, len(self.action_data))
-      for iter6 in self.action_data:
-        oprot.writeString(iter6)
+      for iter13 in self.action_data:
+        oprot.writeString(iter13)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -542,7 +550,7 @@ class bm_table_add_lpm_entry_args:
   Attributes:
    - table_name
    - action_name
-   - key
+   - match_key
    - prefix_length
    - action_data
   """
@@ -551,15 +559,15 @@ class bm_table_add_lpm_entry_args:
     None, # 0
     (1, TType.STRING, 'table_name', None, None, ), # 1
     (2, TType.STRING, 'action_name', None, None, ), # 2
-    (3, TType.STRING, 'key', None, None, ), # 3
+    (3, TType.LIST, 'match_key', (TType.STRING,None), None, ), # 3
     (4, TType.I32, 'prefix_length', None, None, ), # 4
     (5, TType.LIST, 'action_data', (TType.STRING,None), None, ), # 5
   )
 
-  def __init__(self, table_name=None, action_name=None, key=None, prefix_length=None, action_data=None,):
+  def __init__(self, table_name=None, action_name=None, match_key=None, prefix_length=None, action_data=None,):
     self.table_name = table_name
     self.action_name = action_name
-    self.key = key
+    self.match_key = match_key
     self.prefix_length = prefix_length
     self.action_data = action_data
 
@@ -583,8 +591,13 @@ class bm_table_add_lpm_entry_args:
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.STRING:
-          self.key = iprot.readString();
+        if ftype == TType.LIST:
+          self.match_key = []
+          (_etype17, _size14) = iprot.readListBegin()
+          for _i18 in xrange(_size14):
+            _elem19 = iprot.readString();
+            self.match_key.append(_elem19)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 4:
@@ -595,10 +608,10 @@ class bm_table_add_lpm_entry_args:
       elif fid == 5:
         if ftype == TType.LIST:
           self.action_data = []
-          (_etype10, _size7) = iprot.readListBegin()
-          for _i11 in xrange(_size7):
-            _elem12 = iprot.readString();
-            self.action_data.append(_elem12)
+          (_etype23, _size20) = iprot.readListBegin()
+          for _i24 in xrange(_size20):
+            _elem25 = iprot.readString();
+            self.action_data.append(_elem25)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -620,9 +633,12 @@ class bm_table_add_lpm_entry_args:
       oprot.writeFieldBegin('action_name', TType.STRING, 2)
       oprot.writeString(self.action_name)
       oprot.writeFieldEnd()
-    if self.key is not None:
-      oprot.writeFieldBegin('key', TType.STRING, 3)
-      oprot.writeString(self.key)
+    if self.match_key is not None:
+      oprot.writeFieldBegin('match_key', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRING, len(self.match_key))
+      for iter26 in self.match_key:
+        oprot.writeString(iter26)
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.prefix_length is not None:
       oprot.writeFieldBegin('prefix_length', TType.I32, 4)
@@ -631,8 +647,8 @@ class bm_table_add_lpm_entry_args:
     if self.action_data is not None:
       oprot.writeFieldBegin('action_data', TType.LIST, 5)
       oprot.writeListBegin(TType.STRING, len(self.action_data))
-      for iter13 in self.action_data:
-        oprot.writeString(iter13)
+      for iter27 in self.action_data:
+        oprot.writeString(iter27)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -730,8 +746,8 @@ class bm_table_add_ternary_match_entry_args:
   Attributes:
    - table_name
    - action_name
-   - key
-   - mask
+   - match_key
+   - match_mask
    - priority
    - action_data
   """
@@ -740,17 +756,17 @@ class bm_table_add_ternary_match_entry_args:
     None, # 0
     (1, TType.STRING, 'table_name', None, None, ), # 1
     (2, TType.STRING, 'action_name', None, None, ), # 2
-    (3, TType.STRING, 'key', None, None, ), # 3
-    (4, TType.STRING, 'mask', None, None, ), # 4
+    (3, TType.LIST, 'match_key', (TType.STRING,None), None, ), # 3
+    (4, TType.LIST, 'match_mask', (TType.STRING,None), None, ), # 4
     (5, TType.I32, 'priority', None, None, ), # 5
     (6, TType.LIST, 'action_data', (TType.STRING,None), None, ), # 6
   )
 
-  def __init__(self, table_name=None, action_name=None, key=None, mask=None, priority=None, action_data=None,):
+  def __init__(self, table_name=None, action_name=None, match_key=None, match_mask=None, priority=None, action_data=None,):
     self.table_name = table_name
     self.action_name = action_name
-    self.key = key
-    self.mask = mask
+    self.match_key = match_key
+    self.match_mask = match_mask
     self.priority = priority
     self.action_data = action_data
 
@@ -774,13 +790,23 @@ class bm_table_add_ternary_match_entry_args:
         else:
           iprot.skip(ftype)
       elif fid == 3:
-        if ftype == TType.STRING:
-          self.key = iprot.readString();
+        if ftype == TType.LIST:
+          self.match_key = []
+          (_etype31, _size28) = iprot.readListBegin()
+          for _i32 in xrange(_size28):
+            _elem33 = iprot.readString();
+            self.match_key.append(_elem33)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 4:
-        if ftype == TType.STRING:
-          self.mask = iprot.readString();
+        if ftype == TType.LIST:
+          self.match_mask = []
+          (_etype37, _size34) = iprot.readListBegin()
+          for _i38 in xrange(_size34):
+            _elem39 = iprot.readString();
+            self.match_mask.append(_elem39)
+          iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 5:
@@ -791,10 +817,10 @@ class bm_table_add_ternary_match_entry_args:
       elif fid == 6:
         if ftype == TType.LIST:
           self.action_data = []
-          (_etype17, _size14) = iprot.readListBegin()
-          for _i18 in xrange(_size14):
-            _elem19 = iprot.readString();
-            self.action_data.append(_elem19)
+          (_etype43, _size40) = iprot.readListBegin()
+          for _i44 in xrange(_size40):
+            _elem45 = iprot.readString();
+            self.action_data.append(_elem45)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -816,13 +842,19 @@ class bm_table_add_ternary_match_entry_args:
       oprot.writeFieldBegin('action_name', TType.STRING, 2)
       oprot.writeString(self.action_name)
       oprot.writeFieldEnd()
-    if self.key is not None:
-      oprot.writeFieldBegin('key', TType.STRING, 3)
-      oprot.writeString(self.key)
+    if self.match_key is not None:
+      oprot.writeFieldBegin('match_key', TType.LIST, 3)
+      oprot.writeListBegin(TType.STRING, len(self.match_key))
+      for iter46 in self.match_key:
+        oprot.writeString(iter46)
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
-    if self.mask is not None:
-      oprot.writeFieldBegin('mask', TType.STRING, 4)
-      oprot.writeString(self.mask)
+    if self.match_mask is not None:
+      oprot.writeFieldBegin('match_mask', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRING, len(self.match_mask))
+      for iter47 in self.match_mask:
+        oprot.writeString(iter47)
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.priority is not None:
       oprot.writeFieldBegin('priority', TType.I32, 5)
@@ -831,8 +863,8 @@ class bm_table_add_ternary_match_entry_args:
     if self.action_data is not None:
       oprot.writeFieldBegin('action_data', TType.LIST, 6)
       oprot.writeListBegin(TType.STRING, len(self.action_data))
-      for iter20 in self.action_data:
-        oprot.writeString(iter20)
+      for iter48 in self.action_data:
+        oprot.writeString(iter48)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -967,10 +999,10 @@ class bm_set_default_action_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.action_data = []
-          (_etype24, _size21) = iprot.readListBegin()
-          for _i25 in xrange(_size21):
-            _elem26 = iprot.readString();
-            self.action_data.append(_elem26)
+          (_etype52, _size49) = iprot.readListBegin()
+          for _i53 in xrange(_size49):
+            _elem54 = iprot.readString();
+            self.action_data.append(_elem54)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -995,8 +1027,8 @@ class bm_set_default_action_args:
     if self.action_data is not None:
       oprot.writeFieldBegin('action_data', TType.LIST, 3)
       oprot.writeListBegin(TType.STRING, len(self.action_data))
-      for iter27 in self.action_data:
-        oprot.writeString(iter27)
+      for iter55 in self.action_data:
+        oprot.writeString(iter55)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()

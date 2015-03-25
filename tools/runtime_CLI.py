@@ -182,8 +182,8 @@ def parse_match_key_exact(table, key_fields):
         match_type = match_types[idx]
         assert(match_type == MatchType.EXACT)
         bw = bitwidths[idx]
-        byte_array += parse_param(field, bw)
-    return bytes_to_string(byte_array)
+        byte_array += [bytes_to_string(parse_param(field, bw))]
+    return byte_array
 
 def parse_match_key_lpm(table, key_fields): 
     match_types = [t for (_, t, _) in table.key]
@@ -196,14 +196,14 @@ def parse_match_key_lpm(table, key_fields):
         assert(match_type == MatchType.EXACT or match_type == MatchType.LPM)
         bw = bitwidths[idx]
         if match_type == MatchType.EXACT:
-            byte_array += parse_param(field, bw)
+            byte_array += [bytes_to_string(parse_param(field, bw))]
             prefix_length += bw
         elif match_type == MatchType.LPM:
             assert(not lpm_byte_array)
             prefix, length = field.split("/")
             lpm_byte_array = parse_param(prefix, bw)
             prefix_length += int(length)
-    return bytes_to_string(byte_array + lpm_byte_array), prefix_length
+    return [bytes_to_string(lpm_byte_array)] + byte_array, prefix_length
 
 def gen_prefix_bytes(length, num_bytes):
     byte_array = []
@@ -228,17 +228,17 @@ def parse_match_key_ternary(table, key_fields):
     for idx, field in enumerate(key_fields):
         match_type = match_types[idx]
         if match_type == MatchType.EXACT:
-            byte_array += parse_param(field, bw)
-            mask_array += [0xFF] * ((bw + 7) / 8)
+            byte_array += [bytes_to_string(parse_param(field, bw))]
+            mask_array += [[0xFF] * ((bw + 7) / 8)]
         elif match_type == MatchType.LPM:
             prefix, length = field.split("/")
-            byte_array += parse_param(prefix, bw)
-            mask_array += gen_prefix_bytes(length, (bw + 7) / 8)
+            byte_array += [bytes_to_string(parse_param(prefix, bw))]
+            mask_array += [bytes_to_string(gen_prefix_bytes(length, (bw + 7) / 8))]
         elif match_type == MatchType.TERNARY:
             bytes_, mask = field.split("&&&")
-            byte_array += parse_param(bytes_, bw)
-            mask_array += parse_param(mask, bw)
-    return bytes_to_string(byte_array), bytes_to_string(mask_array)
+            byte_array += [bytes_to_string(parse_param(bytes_, bw))]
+            mask_array += [bytes_to_string(parse_param(mask, bw))]
+    return byte_array, mask_array
 
 def printable_byte_str(s):
     return ":".join("{:02x}".format(ord(c)) for c in s)
@@ -401,7 +401,10 @@ class RuntimeAPI(cmd.Cmd):
         elif table.type_ == MatchType.TERNARY:
             match_key, mask = parse_match_key_ternary_match(table, match_key)
 
-        print "{0:20} {1}".format("match key:", printable_byte_str(match_key))
+        print "{0:20} {1}".format(
+            "match key:",
+            "\t".join(printable_byte_str(d) for d in match_key)
+        )
         print "{0:20} {1}".format("action:", action_name)
         print "{0:20} {1}".format(
             "runtime data:",
