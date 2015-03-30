@@ -17,6 +17,7 @@ MODULES_DIR :=
 MODULES_NAMES :=
 
 include gen-cpp/module.mk
+include fixed-cpp/module.mk
 
 CFLAGS += $(COMMON_FLAGS)
 CPPFLAGS += $(COMMON_FLAGS)
