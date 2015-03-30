@@ -19,7 +19,7 @@
 class SimpleSwitch : public Switch {
 public:
   SimpleSwitch(transmit_fn_t transmit_fn)
-    : input_buffer(1024), transmit_fn(transmit_fn) {}
+    : input_buffer(1024), output_buffer(128), transmit_fn(transmit_fn) {}
 
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
@@ -34,25 +34,31 @@ public:
   }
 
   void start_and_return() {
-    std::thread t(&SimpleSwitch::pipeline_thread, this);
-    t.detach();    
+    std::thread t1(&SimpleSwitch::pipeline_thread, this);
+    t1.detach();
+    std::thread t2(&SimpleSwitch::transmit_thread, this);
+    t2.detach();
   }
 
 private:
   void pipeline_thread();
-
-  int transmit(const Packet &packet) {
-    ELOGGER->packet_out(packet);
-    std::cout<< "transmitting packet " << packet.get_packet_id() << std::endl;
-    transmit_fn(packet.get_egress_port(), packet.data(), packet.get_data_size());
-    return 0;
-  }
+  void transmit_thread();
 
 private:
   Queue<unique_ptr<Packet> > input_buffer;
+  Queue<unique_ptr<Packet> > output_buffer;
   transmit_fn_t transmit_fn;
 };
 
+void SimpleSwitch::transmit_thread() {
+  while(1) {
+    unique_ptr<Packet> packet;
+    output_buffer.pop_back(&packet);
+    ELOGGER->packet_out(*packet);
+    std::cout<< "transmitting packet " << packet->get_packet_id() << std::endl;
+    transmit_fn(packet->get_egress_port(), packet->data(), packet->get_data_size());
+  }
+}
 
 void SimpleSwitch::pipeline_thread() {
   Pipeline *ingress_mau = p4objects->get_pipeline("ingress");
@@ -79,7 +85,7 @@ void SimpleSwitch::pipeline_thread() {
       packet->set_egress_port(egress_port);
       egress_mau->apply(*packet.get(), &phv);
       deparser->deparse(&phv, packet.get());
-      transmit(*packet);
+      output_buffer.push_front(std::move(packet));
     }
   }
 }
@@ -87,21 +93,6 @@ void SimpleSwitch::pipeline_thread() {
 /* Switch instance */
 
 static SimpleSwitch *simple_switch;
-
-
-/* For test purposes only, temporary */
-
-// static void add_test_entry(void) {
-//   ByteContainer key("0xaabbccddeeff");
-//   ActionData action_data;
-//   action_data.push_back_action_data(2);
-//   entry_handle_t hdl;
-//   simple_switch->table_add_exact_match_entry("forward", "set_egress_port",
-// 					     key, action_data, &hdl);
-					     
-//   /* default behavior */
-//   simple_switch->table_set_default_action("forward", "_drop", ActionData());
-// }
 
 
 int packet_accept(int port_num, const char *buffer, int len) {
