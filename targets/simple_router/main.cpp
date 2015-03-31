@@ -29,6 +29,7 @@ extern "C" {
 }
 
 #include "simple_router.h"
+#include "simplelog.h"
 
 #define CHECK(x) assert(!x)
 
@@ -37,7 +38,7 @@ extern "C" {
 static bmi_port_mgr_t *port_mgr;
 
 static void packet_handler(int port_num, const char *buffer, int len) {
-  std::cout << "Received packet of length " << len
+  SIMPLELOG << "Received packet of length " << len
 	    << " on port " << port_num << std::endl;
   packet_accept(port_num, buffer, len);
 }

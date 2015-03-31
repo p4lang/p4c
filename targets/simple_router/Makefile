@@ -2,8 +2,8 @@ CC:= gcc
 CXX:= g++
 CFLAGS:= -O0 -g -Wall
 CPPFLAGS:= -O0 -g -Wall --std=c++11
-# CFLAGS:= -O3 -Wall
-# CPPFLAGS:= -O3 -Wall --std=c++11
+# CFLAGS:= -O3 -g -Wall
+# CPPFLAGS:= -O3 -g -Wall --std=c++11
 LIBS:= -lJudy
 INCS:=
 

@@ -10,3 +10,4 @@ INCS +=
 LIBS += -lboost_program_options -lprofiler
 
 # COMMON_FLAGS += -DELOGGER_NANOMSG
+# COMMON_FLAGS += -DENABLE_SIMPLELOG

@@ -13,6 +13,7 @@
 
 #include "simple_router.h"
 #include "primitives.h"
+#include "simplelog.h"
 
 #include "bm_runtime/bm_runtime.h"
 
@@ -55,7 +56,7 @@ void SimpleSwitch::transmit_thread() {
     unique_ptr<Packet> packet;
     output_buffer.pop_back(&packet);
     ELOGGER->packet_out(*packet);
-    std::cout<< "transmitting packet " << packet->get_packet_id() << std::endl;
+    SIMPLELOG << "transmitting packet " << packet->get_packet_id() << std::endl;
     transmit_fn(packet->get_egress_port(), packet->data(), packet->get_data_size());
   }
 }
@@ -70,16 +71,16 @@ void SimpleSwitch::pipeline_thread() {
   while(1) {
     unique_ptr<Packet> packet;
     input_buffer.pop_back(&packet);
-    std::cout<< "processing packet " << packet->get_packet_id() << std::endl;
+    SIMPLELOG << "processing packet " << packet->get_packet_id() << std::endl;
     
     parser->parse(packet.get(), &phv);
     ingress_mau->apply(*packet.get(), &phv);
 
     int egress_port = phv.get_field("standard_metadata.egress_port").get_int();
-    std::cout << "egress port is " << egress_port << std::endl;    
+    SIMPLELOG << "egress port is " << egress_port << std::endl;    
 
     if(egress_port == 0) {
-      std::cout << "dropping packet\n";
+      SIMPLELOG << "dropping packet\n";
     }
     else {
       packet->set_egress_port(egress_port);
