@@ -5,7 +5,7 @@ CPPFLAGS:= -O0 -g -Wall --std=c++11
 LIBS:= -lJudy
 INCS:=
 
-TARGET:=libModules
+TARGET:=libModules.a
 
 BUILD_DIR := build
 BUILD_DIRS := $(BUILD_DIR)
