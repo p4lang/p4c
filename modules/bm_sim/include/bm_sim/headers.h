@@ -63,7 +63,7 @@ public:
 
 public:
   Header(const string &name, p4object_id_t id, const HeaderType &header_type,
-	 const std::set<int> *arith_offsets = nullptr);
+	 const std::set<int> &arith_offsets);
 
   int get_nbytes_packet() const {
     return nbytes_packet;
@@ -120,6 +120,12 @@ public:
     assert(n < fields.size());
     return fields[n];
   }
+
+  Header(const Header &other) = delete;
+  Header &operator=(const Header &other) = delete;
+
+  Header(Header &&other) = default;
+  Header &operator=(Header &&other) = default;
 
 private:
   const HeaderType &header_type;

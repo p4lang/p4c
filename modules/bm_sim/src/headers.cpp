@@ -2,7 +2,7 @@
 
 Header::Header(const string &name, p4object_id_t id,
 	       const HeaderType &header_type,
-	       const std::set<int> *arith_offsets)
+	       const std::set<int> &arith_offsets)
   : NamedP4Object(name, id), header_type(header_type) {
   valid = false;
   nbytes_phv = 0;
@@ -11,8 +11,7 @@ Header::Header(const string &name, p4object_id_t id,
   for(int i = 0; i < header_type.get_num_fields(); i++) {
     // use emplace_back instead?
     bool arith_flag = true;
-    if(arith_offsets != nullptr &&
-       arith_offsets->find(i) == arith_offsets->end()) {
+    if(arith_offsets.find(i) == arith_offsets.end()) {
       arith_flag = false;
     }
     fields.push_back(Field(header_type.get_bit_width(i), arith_flag));

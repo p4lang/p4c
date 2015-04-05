@@ -35,7 +35,9 @@ static const unsigned char raw_udp_pkt[82] = {
 class ParserTest : public ::testing::Test {
 protected:
 
-  PHV phv;
+  PHVFactory phv_factory;
+  std::unique_ptr<PHV> phv;
+
   HeaderType ethernetHeaderType, ipv4HeaderType, udpHeaderType, tcpHeaderType;
   ParseState ethernetParseState, ipv4ParseState, udpParseState, tcpParseState;
   header_id_t ethernetHeader{0}, ipv4Header{1}, udpHeader{2}, tcpHeader{3};
@@ -45,8 +47,7 @@ protected:
   Deparser deparser;
 
   ParserTest()
-    : phv(4),
-      ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
+    : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
       udpHeaderType("udp_t", 2), tcpHeaderType("tcp_t", 3),
       ethernetParseState("parse_ethernet"),
       ipv4ParseState("parse_ipv4"),
@@ -86,10 +87,10 @@ protected:
     tcpHeaderType.push_back_field("checksum", 16);
     tcpHeaderType.push_back_field("urgentPtr", 16);
 
-    phv.push_back_header("ethernet", ethernetHeader, ethernetHeaderType);
-    phv.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
-    phv.push_back_header("udp", udpHeader, udpHeaderType);
-    phv.push_back_header("tcp", tcpHeader, tcpHeaderType);
+    phv_factory.push_back_header("ethernet", ethernetHeader, ethernetHeaderType);
+    phv_factory.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
+    phv_factory.push_back_header("udp", udpHeader, udpHeaderType);
+    phv_factory.push_back_header("tcp", tcpHeader, tcpHeaderType);
   }
 
   virtual void SetUp() {
@@ -128,6 +129,8 @@ protected:
     deparser.push_back_header(ipv4Header);
     deparser.push_back_header(tcpHeader);
     deparser.push_back_header(udpHeader);
+
+    phv = phv_factory.create();
   }
 
   Packet get_tcp_pkt() {
@@ -151,100 +154,100 @@ protected:
 
 TEST_F(ParserTest, ParseEthernetIPv4TCP) {
   Packet packet = get_tcp_pkt();
-  parser.parse(&packet, &phv);
+  parser.parse(&packet, phv.get());
 
-  const Header &ethernet_hdr = phv.get_header(ethernetHeader);
+  const Header &ethernet_hdr = phv->get_header(ethernetHeader);
   ASSERT_TRUE(ethernet_hdr.is_valid());
 
 
-  const Header &ipv4_hdr = phv.get_header(ipv4Header);
+  const Header &ipv4_hdr = phv->get_header(ipv4Header);
   ASSERT_TRUE(ipv4_hdr.is_valid());
 
-  Field &ipv4_version = phv.get_field(ipv4Header, 0);
+  Field &ipv4_version = phv->get_field(ipv4Header, 0);
   ASSERT_EQ((unsigned) 0x4, ipv4_version.get_uint());
 
-  Field &ipv4_ihl = phv.get_field(ipv4Header, 1);
+  Field &ipv4_ihl = phv->get_field(ipv4Header, 1);
   ASSERT_EQ((unsigned) 0x5, ipv4_ihl.get_uint());
 
-  Field &ipv4_diffserv = phv.get_field(ipv4Header, 2);
+  Field &ipv4_diffserv = phv->get_field(ipv4Header, 2);
   ASSERT_EQ((unsigned) 0x00, ipv4_diffserv.get_uint());
 
-  Field &ipv4_len = phv.get_field(ipv4Header, 3);
+  Field &ipv4_len = phv->get_field(ipv4Header, 3);
   ASSERT_EQ((unsigned) 0x0034, ipv4_len.get_uint());
 
-  Field &ipv4_identification = phv.get_field(ipv4Header, 4);
+  Field &ipv4_identification = phv->get_field(ipv4Header, 4);
   ASSERT_EQ((unsigned) 0x7090, ipv4_identification.get_uint());
 
-  Field &ipv4_flags = phv.get_field(ipv4Header, 5);
+  Field &ipv4_flags = phv->get_field(ipv4Header, 5);
   ASSERT_EQ((unsigned) 0x2, ipv4_flags.get_uint());
 
-  Field &ipv4_flagOffset = phv.get_field(ipv4Header, 6);
+  Field &ipv4_flagOffset = phv->get_field(ipv4Header, 6);
   ASSERT_EQ((unsigned) 0x0000, ipv4_flagOffset.get_uint());
 
-  Field &ipv4_ttl = phv.get_field(ipv4Header, 7);
+  Field &ipv4_ttl = phv->get_field(ipv4Header, 7);
   ASSERT_EQ((unsigned) 0x40, ipv4_ttl.get_uint());
 
-  Field &ipv4_protocol = phv.get_field(ipv4Header, 8);
+  Field &ipv4_protocol = phv->get_field(ipv4Header, 8);
   ASSERT_EQ((unsigned) 0x06, ipv4_protocol.get_uint());
 
-  Field &ipv4_checksum = phv.get_field(ipv4Header, 9);
+  Field &ipv4_checksum = phv->get_field(ipv4Header, 9);
   ASSERT_EQ((unsigned) 0x3508, ipv4_checksum.get_uint());
 
-  Field &ipv4_srcAddr = phv.get_field(ipv4Header, 10);
+  Field &ipv4_srcAddr = phv->get_field(ipv4Header, 10);
   ASSERT_EQ((unsigned) 0x0a36c121, ipv4_srcAddr.get_uint());
 
-  Field &ipv4_dstAddr = phv.get_field(ipv4Header, 11);
+  Field &ipv4_dstAddr = phv->get_field(ipv4Header, 11);
   ASSERT_EQ((unsigned) 0x4e287bac, ipv4_dstAddr.get_uint());
 
-  const Header &tcp_hdr = phv.get_header(tcpHeader);
+  const Header &tcp_hdr = phv->get_header(tcpHeader);
   ASSERT_TRUE(tcp_hdr.is_valid());
 
-  const Header &udp_hdr = phv.get_header(udpHeader);
+  const Header &udp_hdr = phv->get_header(udpHeader);
   ASSERT_FALSE(udp_hdr.is_valid());
 }
 
 TEST_F(ParserTest, ParseEthernetIPv4UDP) {
   Packet packet = get_udp_pkt();
-  parser.parse(&packet, &phv);
+  parser.parse(&packet, phv.get());
 
-  const Header &ethernet_hdr = phv.get_header(ethernetHeader);
+  const Header &ethernet_hdr = phv->get_header(ethernetHeader);
   ASSERT_TRUE(ethernet_hdr.is_valid());
 
-  const Header &ipv4_hdr = phv.get_header(ipv4Header);
+  const Header &ipv4_hdr = phv->get_header(ipv4Header);
   ASSERT_TRUE(ipv4_hdr.is_valid());
 
-  const Header &udp_hdr = phv.get_header(udpHeader);
+  const Header &udp_hdr = phv->get_header(udpHeader);
   ASSERT_TRUE(udp_hdr.is_valid());
 
-  const Header &tcp_hdr = phv.get_header(tcpHeader);
+  const Header &tcp_hdr = phv->get_header(tcpHeader);
   ASSERT_FALSE(tcp_hdr.is_valid());
 }
 
 
 TEST_F(ParserTest, ParseEthernetIPv4TCP_Stress) {
-  const Header &ethernet_hdr = phv.get_header(ethernetHeader);
-  const Header &ipv4_hdr = phv.get_header(ipv4Header);
-  const Header &tcp_hdr = phv.get_header(tcpHeader);
-  const Header &udp_hdr = phv.get_header(udpHeader);
+  const Header &ethernet_hdr = phv->get_header(ethernetHeader);
+  const Header &ipv4_hdr = phv->get_header(ipv4Header);
+  const Header &tcp_hdr = phv->get_header(tcpHeader);
+  const Header &udp_hdr = phv->get_header(udpHeader);
 
   for(int t = 0; t < 10000; t++) {
     Packet packet = get_tcp_pkt();
-    parser.parse(&packet, &phv);
+    parser.parse(&packet, phv.get());
 
     ASSERT_TRUE(ethernet_hdr.is_valid());
     ASSERT_TRUE(ipv4_hdr.is_valid());
     ASSERT_TRUE(tcp_hdr.is_valid());
     ASSERT_FALSE(udp_hdr.is_valid());
 
-    phv.reset();
+    phv->reset();
   }
 }
 
 TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
   Packet packet = get_tcp_pkt();
-  parser.parse(&packet, &phv);
+  parser.parse(&packet, phv.get());
   
-  deparser.deparse(&phv, &packet);
+  deparser.deparse(phv.get(), &packet);
 
   ASSERT_EQ(sizeof(raw_tcp_pkt), packet.get_data_size());
   ASSERT_EQ(0, memcmp(raw_tcp_pkt, packet.data(), sizeof(raw_tcp_pkt)));
@@ -252,9 +255,9 @@ TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
 
 TEST_F(ParserTest, DeparseEthernetIPv4UDP) {
   Packet packet = get_udp_pkt();
-  parser.parse(&packet, &phv);
+  parser.parse(&packet, phv.get());
   
-  deparser.deparse(&phv, &packet);
+  deparser.deparse(phv.get(), &packet);
 
   ASSERT_EQ(sizeof(raw_udp_pkt), packet.get_data_size());
   ASSERT_EQ(0, memcmp(raw_udp_pkt, packet.data(), sizeof(raw_udp_pkt)));
@@ -276,11 +279,11 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
       ref_pkt = (const char *) raw_udp_pkt;
       size = sizeof(raw_udp_pkt);
     }
-    parser.parse(&packet, &phv);
-    deparser.deparse(&phv, &packet);
+    parser.parse(&packet, phv.get());
+    deparser.deparse(phv.get(), &packet);
     ASSERT_EQ(0, memcmp(ref_pkt, packet.data(), size));
 
-    phv.reset();
+    phv->reset();
   }
 
 }

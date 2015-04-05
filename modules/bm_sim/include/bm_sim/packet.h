@@ -1,18 +1,13 @@
 #ifndef _BM_PACKET_H_
 #define _BM_PACKET_H_
 
-#include <memory>
 #include <iostream>
 
 #include <cassert>
 
-#include "xxhash.h"
-
 #include "packet_buffer.h"
-
-using std::string;
-using std::to_string;
-using std::unique_ptr;
+#include "phv.h"
+#include "phvpool.h"
 
 typedef unsigned long long packet_id_t;
 
@@ -21,11 +16,12 @@ public:
   Packet() {}
 
   Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
-	 PacketBuffer &&buffer)
-    : ingress_port(ingress_port), packet_id(id), copy_id(copy_id),
-      buffer(std::move(buffer)) {
-    signature = XXH64(buffer.start(), buffer.get_data_size(), 0);
-  }
+	 PacketBuffer &&buffer);
+
+  Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
+	 PacketBuffer &&buffer, const PHV &src_phv);
+
+  ~Packet();
 
   packet_id_t get_packet_id() const { return packet_id; }
 
@@ -37,8 +33,8 @@ public:
 
   packet_id_t get_copy_id() const { return copy_id; }
 
-  const string get_unique_id() const {
-    return to_string(packet_id) + "." + to_string(copy_id);
+  const std::string get_unique_id() const {
+    return std::to_string(packet_id) + "." + std::to_string(copy_id);
   }
 
   void set_copy_id(packet_id_t id) { copy_id = id; }
@@ -71,6 +67,14 @@ public:
 
   const PacketBuffer &get_packet_buffer() const { return buffer; }
 
+  PHV *get_phv() { return phv.get(); }
+
+  Packet(const Packet &other) = delete;
+  Packet &operator=(const Packet &other) = delete;
+
+  Packet(Packet &&other) = default;
+  Packet &operator=(Packet &&other) = default;
+
 private:
   int ingress_port;
   int egress_port;
@@ -82,6 +86,15 @@ private:
   PacketBuffer buffer;
 
   size_t payload_size{0};
+
+  std::unique_ptr<PHV> phv;
+
+private:
+  static PHVPool *phv_pool;
+
+public:
+  static void init_phv_pool(size_t size);
+  static void add_to_phv_pool(std::unique_ptr<PHV> phv);
 };
 
 #endif

@@ -62,7 +62,8 @@ REGISTER_PRIMITIVE(CRSet);
 class ActionsTest : public ::testing::Test {
 protected:
 
-  PHV phv;
+  PHVFactory phv_factory;
+  std::unique_ptr<PHV> phv;
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
@@ -71,8 +72,7 @@ protected:
   ActionFnEntry testActionFnEntry;
 
   ActionsTest()
-    : phv(2),
-      testHeaderType("test_t", 0),
+    : testHeaderType("test_t", 0),
       testActionFn("test_action", 0),
       testActionFnEntry(&testActionFn) {
     testHeaderType.push_back_field("f32", 32);
@@ -80,11 +80,12 @@ protected:
     testHeaderType.push_back_field("f8", 8);
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f128", 128);
-    phv.push_back_header("test1", testHeader1, testHeaderType);
-    phv.push_back_header("test2", testHeader2, testHeaderType);
+    phv_factory.push_back_header("test1", testHeader1, testHeaderType);
+    phv_factory.push_back_header("test2", testHeader2, testHeaderType);
   }
 
   virtual void SetUp() {
+    phv = phv_factory.create();
   }
 
   // virtual void TearDown() {}
@@ -97,12 +98,12 @@ TEST_F(ActionsTest, SetFromConst) {
   testActionFn.parameter_push_back_field(testHeader1, 3); // f16
   testActionFn.parameter_push_back_const(value);
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
   f.set(0);
 
   ASSERT_EQ((unsigned) 0, f.get_uint());
 
-  testActionFnEntry(phv);
+  testActionFnEntry(*phv);
 
   ASSERT_EQ((unsigned) 0xaba, f.get_uint());
 }
@@ -115,12 +116,12 @@ TEST_F(ActionsTest, SetFromActionData) {
   testActionFn.parameter_push_back_action_data(0);
   testActionFnEntry.push_back_action_data(value);
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
   f.set(0);
 
   ASSERT_EQ((unsigned) 0, f.get_uint());
 
-  testActionFnEntry(phv);
+  testActionFnEntry(*phv);
 
   ASSERT_EQ((unsigned) 0xaba, f.get_uint());
 }
@@ -132,15 +133,15 @@ TEST_F(ActionsTest, SetFromField) {
   testActionFn.parameter_push_back_field(testHeader1, 3); // f16
   testActionFn.parameter_push_back_field(testHeader1, 0); // f32
 
-  Field &src = phv.get_field(testHeader1, 0); // 32
+  Field &src = phv->get_field(testHeader1, 0); // 32
   src.set(0xaba);
 
-  Field &dst = phv.get_field(testHeader1, 3); // f16
+  Field &dst = phv->get_field(testHeader1, 3); // f16
   dst.set(0);
 
   ASSERT_EQ((unsigned) 0, dst.get_uint());
 
-  testActionFnEntry(phv);
+  testActionFnEntry(*phv);
 
   ASSERT_EQ((unsigned) 0xaba, dst.get_uint());
 }
@@ -152,21 +153,21 @@ TEST_F(ActionsTest, SetFromConstStress) {
   testActionFn.parameter_push_back_field(testHeader1, 3); // f16
   testActionFn.parameter_push_back_const(value);
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
 
   for(int i = 0; i < 100000; i++) {
     f.set(0);
     ASSERT_EQ((unsigned) 0, f.get_uint());
-    testActionFnEntry(phv);
+    testActionFnEntry(*phv);
     ASSERT_EQ((unsigned) 0xaba, f.get_uint());
   }
 }
 
 TEST_F(ActionsTest, CopyHeader) {
-  Header &hdr1 = phv.get_header(testHeader1);
+  Header &hdr1 = phv->get_header(testHeader1);
   ASSERT_FALSE(hdr1.is_valid());
 
-  Header &hdr2 = phv.get_header(testHeader2);
+  Header &hdr2 = phv->get_header(testHeader2);
   ASSERT_FALSE(hdr2.is_valid());
 
   for(unsigned int i = 0; i < hdr1.size(); i++) {
@@ -182,7 +183,7 @@ TEST_F(ActionsTest, CopyHeader) {
   testActionFn.parameter_push_back_header(testHeader1);
   testActionFn.parameter_push_back_header(testHeader2);
   
-  testActionFnEntry(phv);
+  testActionFnEntry(*phv);
   ASSERT_FALSE(hdr1.is_valid());
   ASSERT_FALSE(hdr2.is_valid());
   for(unsigned int i = 0; i < hdr2.size(); i++) {
@@ -190,7 +191,7 @@ TEST_F(ActionsTest, CopyHeader) {
   }
 
   hdr2.mark_valid();
-  testActionFnEntry(phv);
+  testActionFnEntry(*phv);
   ASSERT_TRUE(hdr1.is_valid());
   for(unsigned int i = 0; i < hdr1.size(); i++) {
     ASSERT_EQ(i + 1, hdr1[i]);
@@ -202,12 +203,12 @@ TEST_F(ActionsTest, CRSet) {
   CRSet primitive;
   testActionFn.push_back_primitive(&primitive);
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
   f.set(0);
 
   ASSERT_EQ((unsigned) 0, f.get_uint());
 
-  phv.get_field("test1.f16").set(666);
+  phv->get_field("test1.f16").set(666);
   // testActionFnEntry(phv);
 
   ASSERT_EQ((unsigned) 666, f.get_uint());
@@ -222,18 +223,18 @@ TEST_F(ActionsTest, TwoPrimitives) {
   testActionFn.parameter_push_back_field(testHeader2, 3); // f16
   testActionFn.parameter_push_back_field(testHeader2, 0); // f32
 
-  Field &src1 = phv.get_field(testHeader1, 0); // 32
-  Field &src2 = phv.get_field(testHeader2, 0); // 32
+  Field &src1 = phv->get_field(testHeader1, 0); // 32
+  Field &src2 = phv->get_field(testHeader2, 0); // 32
   src1.set(0xaba); src2.set(0xaba);
 
-  Field &dst1 = phv.get_field(testHeader1, 3); // f16
-  Field &dst2 = phv.get_field(testHeader2, 3); // f16
+  Field &dst1 = phv->get_field(testHeader1, 3); // f16
+  Field &dst2 = phv->get_field(testHeader2, 3); // f16
   dst1.set(0); dst2.set(0);
 
   ASSERT_EQ((unsigned) 0, dst1.get_uint());
   ASSERT_EQ((unsigned) 0, dst2.get_uint());
 
-  testActionFnEntry(phv);
+  testActionFnEntry(*phv);
 
   ASSERT_EQ((unsigned) 0xaba, dst1.get_uint());
   ASSERT_EQ((unsigned) 0xaba, dst2.get_uint());
