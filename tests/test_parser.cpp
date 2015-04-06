@@ -275,7 +275,6 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
       ref_pkt = (const char *) raw_udp_pkt;
       size = sizeof(raw_udp_pkt);
     }
-    assert(packet.get_phv());
     parser.parse(&packet);
     deparser.deparse(&packet);
     ASSERT_EQ(0, memcmp(ref_pkt, packet.data(), size));

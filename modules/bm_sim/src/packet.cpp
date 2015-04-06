@@ -26,8 +26,34 @@ Packet::Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
 }
   
 Packet::~Packet() {
-  // could have been "moved"
-  if(phv) phv_pool->release(std::move(phv));
+  assert(phv);
+  phv_pool->release(std::move(phv));
+}
+
+/* Cannot get away with defaults here, we need to swap the phvs, otherwise we
+   could "leak" the old phv (i.e. not put it back into the pool) */
+
+Packet::Packet(Packet &&other) noexcept
+  : ingress_port(other.ingress_port), egress_port(other.egress_port),
+    packet_id(other.packet_id), copy_id(other.copy_id),
+    signature(other.signature), payload_size(other.payload_size) {
+  buffer = std::move(buffer);
+  std::swap(phv, other.phv);
+}
+
+Packet &
+Packet::operator=(Packet &&other) noexcept {
+  ingress_port = other.ingress_port;
+  egress_port = other.egress_port;
+  packet_id = other.packet_id;
+  copy_id = other.copy_id;
+  signature = other.signature;
+  payload_size = other.payload_size;
+
+  std::swap(buffer, other.buffer);
+  std::swap(phv, other.phv);
+
+  return *this;
 }
 
 Packet::PHVPool *Packet::phv_pool = nullptr;

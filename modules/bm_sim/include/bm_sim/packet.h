@@ -1,7 +1,6 @@
 #ifndef _BM_PACKET_H_
 #define _BM_PACKET_H_
 
-#include <iostream>
 #include <memory>
 
 #include <cassert>
@@ -72,8 +71,8 @@ public:
   Packet(const Packet &other) = delete;
   Packet &operator=(const Packet &other) = delete;
 
-  Packet(Packet &&other) = default;
-  Packet &operator=(Packet &&other) = default;
+  Packet(Packet &&other) noexcept;
+  Packet &operator=(Packet &&other) noexcept;
 
 private:
   int ingress_port;
