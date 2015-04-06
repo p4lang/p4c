@@ -2,6 +2,7 @@
 #define _BM_PACKET_H_
 
 #include <memory>
+#include <mutex>
 
 #include <cassert>
 
@@ -99,7 +100,7 @@ private:
     static PHVPool *get_instance();
 
   private:
-    // std::mutex q_mutex;
+    std::mutex mutex;
     std::vector<std::unique_ptr<PHV> > phvs;
     const PHVFactory &phv_factory;
   };

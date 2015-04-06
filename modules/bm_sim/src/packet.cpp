@@ -78,7 +78,9 @@ Packet::PHVPool::PHVPool(const PHVFactory &phv_factory)
 
 std::unique_ptr<PHV>
 Packet::PHVPool::get() {
+  std::unique_lock<std::mutex> lock(mutex);
   if(phvs.size() == 0) {
+    lock.unlock();
     return phv_factory.create();
   }
   std::unique_ptr<PHV> phv = std::move(phvs.back());
@@ -88,5 +90,6 @@ Packet::PHVPool::get() {
 
 void
 Packet::PHVPool::release(std::unique_ptr<PHV> phv) {
+  std::unique_lock<std::mutex> lock(mutex);
   phvs.push_back(std::move(phv));
 }
