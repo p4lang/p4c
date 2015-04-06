@@ -1,9 +1,9 @@
 #ifndef _BM_PACKET_BUFFER_H_
 #define _BM_PACKET_BUFFER_H_
 
-#include <cassert>
+#include <memory>
 
-using std::unique_ptr;
+#include <cassert>
 
 class PacketBuffer {
 public:
@@ -12,13 +12,13 @@ public:
   PacketBuffer(size_t size)
     : size(size),
       data_size(0),
-      buffer(unique_ptr<char []>(new char[size])),
+      buffer(std::unique_ptr<char []>(new char[size])),
       head(buffer.get() + size) {}
 
   PacketBuffer(size_t size, const char *data, size_t data_size)
     : size(size),
       data_size(0),
-      buffer(unique_ptr<char []>(new char[size])),
+      buffer(std::unique_ptr<char []>(new char[size])),
       head(buffer.get() + size) {
     std::copy(data, data + data_size, push(data_size));
   }
@@ -53,7 +53,7 @@ public:
 private:
   size_t size;
   size_t data_size;
-  unique_ptr<char []> buffer;
+  std::unique_ptr<char []> buffer;
   char *head;
 };
 

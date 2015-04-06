@@ -34,7 +34,7 @@ public:
   P4Objects() = default;
 
 public:
-  PHV &get_phv() { return phv; }
+  PHVFactory &get_phv_factory() { return phv_factory; }
 
   ActionFn *get_action(const string &name) {
     return actions_map[name].get();
@@ -149,7 +149,7 @@ private:
 				    const std::string &header_name);
 
 private:
-  PHV phv; /* this is probably temporary */
+  PHVFactory phv_factory; /* this is probably temporary */
 
   unordered_map<string, header_id_t> header_ids_map;
   unordered_map<string, HeaderType *> header_to_type_map;

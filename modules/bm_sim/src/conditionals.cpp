@@ -237,10 +237,11 @@ bool Conditional::eval(const PHV &phv) const {
   return bool_temps_stack.back();
 }
 
-const ControlFlowNode *Conditional::operator()(const Packet &pkt, PHV *phv) const
+const ControlFlowNode *Conditional::operator()(Packet *pkt) const
 {
+  PHV *phv = pkt->get_phv();
   bool result = eval(*phv);
-  ELOGGER->condition_eval(pkt, *this, result);
+  ELOGGER->condition_eval(*pkt, *this, result);
   return result ? true_next : false_next;
 }
 

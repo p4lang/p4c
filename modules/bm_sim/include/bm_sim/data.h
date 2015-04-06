@@ -162,6 +162,26 @@ public:
     return out;
   }
 
+  /* Copy constructor
+     I know it is considered a style exception by many to define this manually.
+     However, I need to be able to check whether the bignum value needs to be
+     copied */
+  Data(const Data &other)
+    : arith(other.arith) {
+    if(other.arith) value = other.value;
+  }
+
+  /* Copy assignment operator */
+  Data &operator=(const Data &other) {
+    Data tmp(other); // re-use copy-constructor
+    *this = std::move(tmp); // re-use move-assignment
+    return *this;
+  }
+
+  Data(Data &&other) = default;
+
+  Data &operator=(Data &&other) = default;
+
 protected:
   Bignum value;
   bool arith{true};

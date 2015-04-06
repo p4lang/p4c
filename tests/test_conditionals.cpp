@@ -11,23 +11,25 @@ TEST(ExprOpcodesMap, GetOpcode) {
 class ConditionalsTest : public ::testing::Test {
 protected:
 
-  PHV phv;
+  PHVFactory phv_factory;
+  std::unique_ptr<PHV> phv;
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
 
   ConditionalsTest()
-    : phv(2), testHeaderType("test_t", 0) {
+    : testHeaderType("test_t", 0) {
     testHeaderType.push_back_field("f32", 32);
     testHeaderType.push_back_field("f48", 48);
     testHeaderType.push_back_field("f8", 8);
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f128", 128);
-    phv.push_back_header("test1", testHeader1, testHeaderType);
-    phv.push_back_header("test2", testHeader2, testHeaderType);
+    phv_factory.push_back_header("test1", testHeader1, testHeaderType);
+    phv_factory.push_back_header("test2", testHeader2, testHeaderType);
   }
 
   virtual void SetUp() {
+    phv = phv_factory.create();
   }
 
   // virtual void TearDown() {}
@@ -40,14 +42,14 @@ TEST_F(ConditionalsTest, EqData) {
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
   f.set(0xaba);
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 
   f.set(0xabb);
 
-  ASSERT_FALSE(c.eval(phv));
+  ASSERT_FALSE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, NeqData) {
@@ -57,14 +59,14 @@ TEST_F(ConditionalsTest, NeqData) {
   c.push_back_op(ExprOpcode::NEQ_DATA);
   c.build();
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
   f.set(0xaba);
 
-  ASSERT_FALSE(c.eval(phv));
+  ASSERT_FALSE(c.eval(*phv));
 
   f.set(0xabb);
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, GtData) {
@@ -74,14 +76,14 @@ TEST_F(ConditionalsTest, GtData) {
   c.push_back_op(ExprOpcode::GT_DATA);
   c.build();
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
   f.set(0x1002);
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 
   f.set(0x1000);
 
-  ASSERT_FALSE(c.eval(phv));
+  ASSERT_FALSE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, LtData) {
@@ -91,14 +93,14 @@ TEST_F(ConditionalsTest, LtData) {
   c.push_back_op(ExprOpcode::LT_DATA);
   c.build();
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
   f.set(0x1002);
 
-  ASSERT_FALSE(c.eval(phv));
+  ASSERT_FALSE(c.eval(*phv));
 
   f.set(0x1000);
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, GetData) {
@@ -108,18 +110,18 @@ TEST_F(ConditionalsTest, GetData) {
   c.push_back_op(ExprOpcode::GET_DATA);
   c.build();
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
   f.set(0x1002);
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 
   f.set(0x1001);
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 
   f.set(0x1000);
 
-  ASSERT_FALSE(c.eval(phv));
+  ASSERT_FALSE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, LetData) {
@@ -129,18 +131,18 @@ TEST_F(ConditionalsTest, LetData) {
   c.push_back_op(ExprOpcode::LET_DATA);
   c.build();
 
-  Field &f = phv.get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3); // f16
   f.set(0x1002);
 
-  ASSERT_FALSE(c.eval(phv));
+  ASSERT_FALSE(c.eval(*phv));
 
   f.set(0x1001);
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 
   f.set(0x1000);
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, Add) {
@@ -152,16 +154,16 @@ TEST_F(ConditionalsTest, Add) {
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  Field &f1 = phv.get_field(testHeader1, 3); // f16
-  Field &f2 = phv.get_field(testHeader2, 1); // f48
+  Field &f1 = phv->get_field(testHeader1, 3); // f16
+  Field &f2 = phv->get_field(testHeader2, 1); // f48
   f1.set(0x11);
   f2.set(0x22);
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 
   f2.set(0x21);
 
-  ASSERT_FALSE(c.eval(phv));
+  ASSERT_FALSE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, And) {
@@ -171,7 +173,7 @@ TEST_F(ConditionalsTest, And) {
   c1.push_back_op(ExprOpcode::AND);
   c1.build();
 
-  ASSERT_TRUE(c1.eval(phv));
+  ASSERT_TRUE(c1.eval(*phv));
 
   Conditional c2("c2test", 1);
   c2.push_back_load_bool(true);
@@ -179,7 +181,7 @@ TEST_F(ConditionalsTest, And) {
   c2.push_back_op(ExprOpcode::AND);
   c2.build();
 
-  ASSERT_FALSE(c2.eval(phv));
+  ASSERT_FALSE(c2.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, Or) {
@@ -189,7 +191,7 @@ TEST_F(ConditionalsTest, Or) {
   c1.push_back_op(ExprOpcode::OR);
   c1.build();
 
-  ASSERT_TRUE(c1.eval(phv));
+  ASSERT_TRUE(c1.eval(*phv));
 
   Conditional c2("c2test", 1);
   c2.push_back_load_bool(false);
@@ -197,7 +199,7 @@ TEST_F(ConditionalsTest, Or) {
   c2.push_back_op(ExprOpcode::OR);
   c2.build();
 
-  ASSERT_FALSE(c2.eval(phv));
+  ASSERT_FALSE(c2.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, Not) {
@@ -206,14 +208,14 @@ TEST_F(ConditionalsTest, Not) {
   c1.push_back_op(ExprOpcode::NOT);
   c1.build();
 
-  ASSERT_TRUE(c1.eval(phv));
+  ASSERT_TRUE(c1.eval(*phv));
 
   Conditional c2("c2test", 1);
   c2.push_back_load_bool(true);
   c2.push_back_op(ExprOpcode::NOT);
   c2.build();
 
-  ASSERT_FALSE(c2.eval(phv));
+  ASSERT_FALSE(c2.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, BitAnd) {
@@ -228,7 +230,7 @@ TEST_F(ConditionalsTest, BitAnd) {
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, BitOr) {
@@ -243,7 +245,7 @@ TEST_F(ConditionalsTest, BitOr) {
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, BitXor) {
@@ -258,7 +260,7 @@ TEST_F(ConditionalsTest, BitXor) {
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, BitNeg) {
@@ -271,7 +273,7 @@ TEST_F(ConditionalsTest, BitNeg) {
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, ValidHeader) {
@@ -280,14 +282,14 @@ TEST_F(ConditionalsTest, ValidHeader) {
   c.push_back_op(ExprOpcode::VALID_HEADER);
   c.build();
 
-  Header &hdr1 = phv.get_header(testHeader1);
+  Header &hdr1 = phv->get_header(testHeader1);
   hdr1.mark_valid();
 
-  ASSERT_TRUE(c.eval(phv));
+  ASSERT_TRUE(c.eval(*phv));
 
   hdr1.mark_invalid();
 
-  ASSERT_FALSE(c.eval(phv));
+  ASSERT_FALSE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, Stress) {
@@ -309,22 +311,22 @@ TEST_F(ConditionalsTest, Stress) {
   c.push_back_op(ExprOpcode::AND);
   c.build();
 
-  Header &hdr1 = phv.get_header(testHeader1);
+  Header &hdr1 = phv->get_header(testHeader1);
   hdr1.mark_valid();
 
-  Field &f1 = phv.get_field(testHeader1, 3); // f16
+  Field &f1 = phv->get_field(testHeader1, 3); // f16
 
-  Header &hdr2 = phv.get_header(testHeader2);
+  Header &hdr2 = phv->get_header(testHeader2);
   hdr2.mark_invalid();
 
   for(int i = 0; i < 100000; i++) {
     if(i % 2 == 0) {
       f1.set(1);
-      ASSERT_TRUE(c.eval(phv));
+      ASSERT_TRUE(c.eval(*phv));
     }
     else {
       f1.set(0);
-      ASSERT_FALSE(c.eval(phv));
+      ASSERT_FALSE(c.eval(*phv));
     }
   }
 }

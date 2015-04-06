@@ -37,7 +37,7 @@ static const unsigned char raw_udp_pkt[82] = {
 class ChecksumTest : public ::testing::Test {
 protected:
 
-  PHV phv;
+  PHVFactory phv_factory;
   HeaderType ethernetHeaderType, ipv4HeaderType, udpHeaderType, tcpHeaderType;
   ParseState ethernetParseState, ipv4ParseState, udpParseState, tcpParseState;
   header_id_t ethernetHeader{0}, ipv4Header{1}, udpHeader{2}, tcpHeader{3};
@@ -47,8 +47,7 @@ protected:
   std::uniform_int_distribution<char> rd;
 
   ChecksumTest()
-    : phv(4),
-      ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
+    : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
       udpHeaderType("udp_t", 2), tcpHeaderType("tcp_t", 3),
       ethernetParseState("parse_ethernet"),
       ipv4ParseState("parse_ipv4"),
@@ -88,13 +87,15 @@ protected:
     tcpHeaderType.push_back_field("checksum", 16);
     tcpHeaderType.push_back_field("urgentPtr", 16);
 
-    phv.push_back_header("ethernet", ethernetHeader, ethernetHeaderType);
-    phv.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
-    phv.push_back_header("udp", udpHeader, udpHeaderType);
-    phv.push_back_header("tcp", tcpHeader, tcpHeaderType);
+    phv_factory.push_back_header("ethernet", ethernetHeader, ethernetHeaderType);
+    phv_factory.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
+    phv_factory.push_back_header("udp", udpHeader, udpHeaderType);
+    phv_factory.push_back_header("tcp", tcpHeader, tcpHeaderType);
   }
 
   virtual void SetUp() {
+    Packet::set_phv_factory(phv_factory);
+
     ParseSwitchKeyBuilder ethernetKeyBuilder;
     ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
     ethernetParseState.set_key_builder(ethernetKeyBuilder);
@@ -135,37 +136,41 @@ protected:
     *cksum = 0x3508; // big endian
   }
 
-  // virtual void TearDown() {}
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
 };
 
 TEST_F(ChecksumTest, IPv4ChecksumVerify) {
   Packet packet;
   unsigned short cksum;
   get_ipv4_pkt(&packet, &cksum);
-  parser.parse(&packet, &phv);
-
+  PHV *phv = packet.get_phv();
+  parser.parse(&packet);
+  
   IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
-  ASSERT_TRUE(cksum_engine.verify(phv));
+  ASSERT_TRUE(cksum_engine.verify(*phv));
 
-  Field &ipv4_checksum = phv.get_field(ipv4Header, 9);
+  Field &ipv4_checksum = phv->get_field(ipv4Header, 9);
   ipv4_checksum.set(0);  
-  ASSERT_FALSE(cksum_engine.verify(phv));
+  ASSERT_FALSE(cksum_engine.verify(*phv));
 }
 
 TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
   Packet packet;
   unsigned short cksum;
   get_ipv4_pkt(&packet, &cksum);
-  parser.parse(&packet, &phv);
+  PHV *phv = packet.get_phv();
+  parser.parse(&packet);
 
-  Field &ipv4_checksum = phv.get_field(ipv4Header, 9);
+  Field &ipv4_checksum = phv->get_field(ipv4Header, 9);
   ASSERT_EQ(cksum, ipv4_checksum.get_uint());
 
   ipv4_checksum.set(0);
   ASSERT_EQ((unsigned) 0, ipv4_checksum.get_uint());
 
   IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
-  cksum_engine.update(&phv);
+  cksum_engine.update(phv);
   ASSERT_EQ(cksum, ipv4_checksum.get_uint());
 }
 
@@ -173,9 +178,10 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
   Packet packet;
   unsigned short cksum;
   get_ipv4_pkt(&packet, &cksum);
-  parser.parse(&packet, &phv);
+  PHV *phv = packet.get_phv();
+  parser.parse(&packet);
 
-  Field &ipv4_checksum = phv.get_field(ipv4Header, 9);
+  Field &ipv4_checksum = phv->get_field(ipv4Header, 9);
   ASSERT_EQ(cksum, ipv4_checksum.get_uint());
 
   IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
@@ -183,7 +189,7 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
     ipv4_checksum.set(0);
     ASSERT_EQ((unsigned) 0, ipv4_checksum.get_uint());
 
-    cksum_engine.update(&phv);
+    cksum_engine.update(phv);
     ASSERT_EQ(cksum, ipv4_checksum.get_uint());
   }
 }

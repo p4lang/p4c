@@ -63,7 +63,7 @@ void P4Objects::build_conditional(const Json::Value &json_expression,
     int field_offset = get_field_offset(header_id, field_name);
     conditional->push_back_load_field(header_id, field_offset);
 
-    phv.get_field(header_id, field_offset).set_arith(true);
+    phv_factory.enable_field_arith(header_id, field_offset);
   }
   else if(type == "bool") {
     conditional->push_back_load_bool(json_value.asBool());
@@ -102,9 +102,7 @@ void P4Objects::init_objects(std::istream &is) {
   // headers
 
   const Json::Value cfg_headers = cfg_root["headers"];
-  size_t num_headers = cfg_headers.size();
-
-  phv = PHV(num_headers);
+  // size_t num_headers = cfg_headers.size();
 
   for (const auto &cfg_header : cfg_headers) {
 
@@ -118,9 +116,8 @@ void P4Objects::init_objects(std::istream &is) {
     // std::set<int> arith_offsets =
     //   build_arith_offsets(cfg_root["actions"], header_name);
 
-    std::set<int> arith_offsets;
-    // empty set so all Fields have arith == false
-    phv.push_back_header(header_name, header_id, *header_type, &arith_offsets);
+    phv_factory.push_back_header(header_name, header_id, *header_type);
+    phv_factory.disable_all_field_arith(header_id);
     add_header_id(header_name, header_id);
   }
 
@@ -286,7 +283,7 @@ void P4Objects::init_objects(std::istream &is) {
 	  int field_offset = get_field_offset(header_id, field_name);
 	  action_fn->parameter_push_back_field(header_id, field_offset);
 
-	  phv.get_field(header_id, field_offset).set_arith(true);
+	  phv_factory.enable_field_arith(header_id, field_offset);
 	}
       }
     }
@@ -444,21 +441,21 @@ void P4Objects::init_objects(std::istream &is) {
       it->second->add_checksum(checksum);
     }
   }
+
+  Packet::set_phv_factory(phv_factory);
 }
 
 void P4Objects::destroy_objects() {
-  // TODO: I moved to unique_ptr's so just remove this function ?
+  Packet::unset_phv_factory();
 }
 
 int P4Objects::get_field_offset(header_id_t header_id, const string &field_name) {
-  const HeaderType &header_type =
-    phv.get_header(header_id).get_header_type();
+  const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_field_offset(field_name);  
 }
 
 size_t P4Objects::get_field_bytes(header_id_t header_id,
 				  int field_offset) {
-  const HeaderType &header_type =
-    phv.get_header(header_id).get_header_type();
+  const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return (header_type.get_bit_width(field_offset) + 7) / 8;
 }

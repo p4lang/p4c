@@ -66,17 +66,18 @@ void SimpleSwitch::pipeline_thread() {
   Pipeline *egress_mau = p4objects->get_pipeline("egress");
   Parser *parser = p4objects->get_parser("parser");
   Deparser *deparser = p4objects->get_deparser("deparser");
-  PHV &phv = p4objects->get_phv();
+  PHV *phv;
 
   while(1) {
     unique_ptr<Packet> packet;
     input_buffer.pop_back(&packet);
+    phv = packet->get_phv();
     SIMPLELOG << "processing packet " << packet->get_packet_id() << std::endl;
     
-    parser->parse(packet.get(), &phv);
-    ingress_mau->apply(*packet.get(), &phv);
+    parser->parse(packet.get());
+    ingress_mau->apply(packet.get());
 
-    int egress_port = phv.get_field("standard_metadata.egress_port").get_int();
+    int egress_port = phv->get_field("standard_metadata.egress_port").get_int();
     SIMPLELOG << "egress port is " << egress_port << std::endl;    
 
     if(egress_port == 0) {
@@ -84,8 +85,8 @@ void SimpleSwitch::pipeline_thread() {
     }
     else {
       packet->set_egress_port(egress_port);
-      egress_mau->apply(*packet.get(), &phv);
-      deparser->deparse(&phv, packet.get());
+      egress_mau->apply(packet.get());
+      deparser->deparse(packet.get());
       output_buffer.push_front(std::move(packet));
     }
   }

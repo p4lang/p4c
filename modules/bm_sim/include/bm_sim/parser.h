@@ -18,8 +18,8 @@ using std::string;
 
 struct ParserOp {
   virtual ~ParserOp() {};
-  virtual void operator()(const Packet &pkt, const char *data,
-			  PHV *phv, size_t *bytes_parsed) const = 0;
+  virtual void operator()(Packet *pkt, const char *data,
+			  size_t *bytes_parsed) const = 0;
 };
 
 struct ParserOpExtract : ParserOp {
@@ -30,10 +30,11 @@ struct ParserOpExtract : ParserOp {
 
   ~ParserOpExtract() {}
 
-  void operator()(const Packet &pkt, const char *data,
-		  PHV *phv, size_t *bytes_parsed) const
+  void operator()(Packet *pkt, const char *data,
+		  size_t *bytes_parsed) const
   {
-    ELOGGER->parser_extract(pkt, header);
+    PHV *phv = pkt->get_phv();
+    ELOGGER->parser_extract(*pkt, header);
     Header &hdr = phv->get_header(header);
     hdr.extract(data);
     *bytes_parsed += hdr.get_nbytes_packet();
@@ -160,8 +161,8 @@ public:
   // Move assignment operator
   ParseState &operator =(ParseState &&other) = default;
 
-  const ParseState *operator()(const Packet &pkt, const char *data,
-			       PHV *phv, size_t *bytes_parsed) const;
+  const ParseState *operator()(Packet *pkt, const char *data,
+			       size_t *bytes_parsed) const;
 };
 
 class Parser : public NamedP4Object {
@@ -173,7 +174,7 @@ public:
     init_state = state;
   }
 
-  void parse(Packet *pkt, PHV *phv) const;
+  void parse(Packet *pkt) const;
 
 private:
   const ParseState *init_state;

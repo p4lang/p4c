@@ -42,19 +42,20 @@ MatchTable::delete_entry(entry_handle_t handle)
 }
 
 const ControlFlowNode *
-MatchTable::operator()(const Packet &pkt, PHV *phv) const
+MatchTable::operator()(Packet *pkt) const
 {
   static thread_local ByteContainer lookup_key;
+  PHV *phv = pkt->get_phv();
   lookup_key.clear();
   build_key(*phv, lookup_key);
   const MatchEntry *entry = lookup(lookup_key);
   if(!entry) {
-    ELOGGER->table_miss(pkt, *this);
+    ELOGGER->table_miss(*pkt, *this);
     default_action_entry(*phv);
     return default_next_node;
   }
   else {
-    ELOGGER->table_hit(pkt, *this, *entry);
+    ELOGGER->table_hit(*pkt, *this, *entry);
     entry->action_entry(*phv);
     return entry->next_table;
   }

@@ -76,7 +76,7 @@ public:
   }
 
   // return pointer to next control flow node
-  const ControlFlowNode *operator()(const Packet &pkt, PHV *phv) const override;
+  const ControlFlowNode *operator()(Packet *pkt) const override;
 
 private:
   int assign_dest_registers();
