@@ -11,7 +11,7 @@ public:
 	   ControlFlowNode *first_node)
     : NamedP4Object(name, id), first_node(first_node) {}
 
-  void apply(const Packet &pkt, PHV *phv);
+  void apply(Packet *pkt);
 
 private:
   ControlFlowNode *first_node;

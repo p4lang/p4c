@@ -2,18 +2,18 @@
 #define _BM_PACKET_H_
 
 #include <iostream>
+#include <memory>
 
 #include <cassert>
 
 #include "packet_buffer.h"
 #include "phv.h"
-#include "phvpool.h"
 
 typedef unsigned long long packet_id_t;
 
 class Packet {
 public:
-  Packet() {}
+  Packet();
 
   Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
 	 PacketBuffer &&buffer);
@@ -90,11 +90,30 @@ private:
   std::unique_ptr<PHV> phv;
 
 private:
-  static PHVPool *phv_pool;
+  class PHVPool {
+  public:
+    PHVPool(const PHVFactory &phv_factory);
+    std::unique_ptr<PHV> get();
+    void release(std::unique_ptr<PHV> phv);
+
+  public:
+    static PHVPool *get_instance();
+
+  private:
+    // std::mutex q_mutex;
+    std::vector<std::unique_ptr<PHV> > phvs;
+    const PHVFactory &phv_factory;
+  };
 
 public:
-  static void init_phv_pool(size_t size);
-  static void add_to_phv_pool(std::unique_ptr<PHV> phv);
+  static void set_phv_factory(const PHVFactory &phv_factory);
+  static void unset_phv_factory();
+
+private:
+  // static variable
+  // Google style guidelines stipulate that we have to use a raw pointer and
+  // leak the memory
+  static PHVPool *phv_pool;
 };
 
 #endif

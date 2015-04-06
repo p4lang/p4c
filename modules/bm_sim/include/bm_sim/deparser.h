@@ -25,10 +25,10 @@ public:
 
   size_t get_headers_size(const PHV &phv) const;
 
-  void deparse(PHV *phv, Packet *pkt) const;
+  void deparse(Packet *pkt) const;
 
 private:
-  void update_checksums(PHV *phv, Packet *pkt) const;
+  void update_checksums(Packet *pkt) const;
 
 private:
   std::vector<header_id_t> headers;

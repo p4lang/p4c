@@ -36,7 +36,6 @@ class ParserTest : public ::testing::Test {
 protected:
 
   PHVFactory phv_factory;
-  std::unique_ptr<PHV> phv;
 
   HeaderType ethernetHeaderType, ipv4HeaderType, udpHeaderType, tcpHeaderType;
   ParseState ethernetParseState, ipv4ParseState, udpParseState, tcpParseState;
@@ -94,6 +93,8 @@ protected:
   }
 
   virtual void SetUp() {
+    Packet::set_phv_factory(phv_factory);
+
     ParseSwitchKeyBuilder ethernetKeyBuilder;
     ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
     ethernetParseState.set_key_builder(ethernetKeyBuilder);
@@ -129,8 +130,6 @@ protected:
     deparser.push_back_header(ipv4Header);
     deparser.push_back_header(tcpHeader);
     deparser.push_back_header(udpHeader);
-
-    phv = phv_factory.create();
   }
 
   Packet get_tcp_pkt() {
@@ -149,16 +148,18 @@ protected:
     return pkt;
   }
 
-  // virtual void TearDown() {}
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
 };
 
 TEST_F(ParserTest, ParseEthernetIPv4TCP) {
   Packet packet = get_tcp_pkt();
-  parser.parse(&packet, phv.get());
+  PHV *phv = packet.get_phv();
+  parser.parse(&packet);
 
   const Header &ethernet_hdr = phv->get_header(ethernetHeader);
   ASSERT_TRUE(ethernet_hdr.is_valid());
-
 
   const Header &ipv4_hdr = phv->get_header(ipv4Header);
   ASSERT_TRUE(ipv4_hdr.is_valid());
@@ -208,7 +209,8 @@ TEST_F(ParserTest, ParseEthernetIPv4TCP) {
 
 TEST_F(ParserTest, ParseEthernetIPv4UDP) {
   Packet packet = get_udp_pkt();
-  parser.parse(&packet, phv.get());
+  PHV *phv = packet.get_phv();
+  parser.parse(&packet);
 
   const Header &ethernet_hdr = phv->get_header(ethernetHeader);
   ASSERT_TRUE(ethernet_hdr.is_valid());
@@ -225,29 +227,23 @@ TEST_F(ParserTest, ParseEthernetIPv4UDP) {
 
 
 TEST_F(ParserTest, ParseEthernetIPv4TCP_Stress) {
-  const Header &ethernet_hdr = phv->get_header(ethernetHeader);
-  const Header &ipv4_hdr = phv->get_header(ipv4Header);
-  const Header &tcp_hdr = phv->get_header(tcpHeader);
-  const Header &udp_hdr = phv->get_header(udpHeader);
-
   for(int t = 0; t < 10000; t++) {
     Packet packet = get_tcp_pkt();
-    parser.parse(&packet, phv.get());
+    PHV *phv = packet.get_phv();
+    parser.parse(&packet);
 
-    ASSERT_TRUE(ethernet_hdr.is_valid());
-    ASSERT_TRUE(ipv4_hdr.is_valid());
-    ASSERT_TRUE(tcp_hdr.is_valid());
-    ASSERT_FALSE(udp_hdr.is_valid());
-
-    phv->reset();
+    ASSERT_TRUE(phv->get_header(ethernetHeader).is_valid());
+    ASSERT_TRUE(phv->get_header(ipv4Header).is_valid());
+    ASSERT_TRUE(phv->get_header(tcpHeader).is_valid());
+    ASSERT_FALSE(phv->get_header(udpHeader).is_valid());
   }
 }
 
 TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
   Packet packet = get_tcp_pkt();
-  parser.parse(&packet, phv.get());
+  parser.parse(&packet);
   
-  deparser.deparse(phv.get(), &packet);
+  deparser.deparse(&packet);
 
   ASSERT_EQ(sizeof(raw_tcp_pkt), packet.get_data_size());
   ASSERT_EQ(0, memcmp(raw_tcp_pkt, packet.data(), sizeof(raw_tcp_pkt)));
@@ -255,9 +251,9 @@ TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
 
 TEST_F(ParserTest, DeparseEthernetIPv4UDP) {
   Packet packet = get_udp_pkt();
-  parser.parse(&packet, phv.get());
+  parser.parse(&packet);
   
-  deparser.deparse(phv.get(), &packet);
+  deparser.deparse(&packet);
 
   ASSERT_EQ(sizeof(raw_udp_pkt), packet.get_data_size());
   ASSERT_EQ(0, memcmp(raw_udp_pkt, packet.data(), sizeof(raw_udp_pkt)));
@@ -279,11 +275,10 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
       ref_pkt = (const char *) raw_udp_pkt;
       size = sizeof(raw_udp_pkt);
     }
-    parser.parse(&packet, phv.get());
-    deparser.deparse(phv.get(), &packet);
+    assert(packet.get_phv());
+    parser.parse(&packet);
+    deparser.deparse(&packet);
     ASSERT_EQ(0, memcmp(ref_pkt, packet.data(), size));
-
-    phv->reset();
   }
 
 }

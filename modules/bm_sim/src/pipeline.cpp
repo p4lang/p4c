@@ -2,11 +2,11 @@
 #include "bm_sim/event_logger.h"
 
 void
-Pipeline::apply(const Packet &pkt, PHV *phv) {
-  ELOGGER->pipeline_start(pkt, *this);
+Pipeline::apply(Packet *pkt) {
+  ELOGGER->pipeline_start(*pkt, *this);
   const ControlFlowNode *node = first_node;
   while(node) {
-    node = (*node)(pkt, phv); 
+    node = (*node)(pkt); 
   }
-  ELOGGER->pipeline_done(pkt, *this);
+  ELOGGER->pipeline_done(*pkt, *this);
 }

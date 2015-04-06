@@ -441,10 +441,12 @@ void P4Objects::init_objects(std::istream &is) {
       it->second->add_checksum(checksum);
     }
   }
+
+  Packet::set_phv_factory(phv_factory);
 }
 
 void P4Objects::destroy_objects() {
-  // TODO: I moved to unique_ptr's so just remove this function ?
+  Packet::unset_phv_factory();
 }
 
 int P4Objects::get_field_offset(header_id_t header_id, const string &field_name) {
