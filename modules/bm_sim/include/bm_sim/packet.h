@@ -69,6 +69,8 @@ public:
 
   PHV *get_phv() { return phv.get(); }
 
+  Packet clone(packet_id_t new_copy_id) const;
+
   Packet(const Packet &other) = delete;
   Packet &operator=(const Packet &other) = delete;
 

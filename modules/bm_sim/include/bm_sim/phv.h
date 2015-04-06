@@ -80,11 +80,8 @@ public:
 
   void copy_headers(const PHV &src) {
     for(unsigned int h = 0; h < headers.size(); h++) {
-      if(!src.headers[h].is_valid()) continue;
-      headers[h].mark_valid();
-      for(unsigned int f = 0; f < headers[h].size(); f++) {
-	headers[h][f] = src.headers[h][f];
-      }
+      headers[h].valid = src.headers[h].valid;
+      if(headers[h].valid) headers[h].fields = src.headers[h].fields;
     }
   }
 

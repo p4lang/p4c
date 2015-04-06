@@ -61,6 +61,8 @@ public:
   typedef vector<Field>::const_reference const_reference;
   typedef size_t size_type;
 
+  friend class PHV;
+
 public:
   Header(const string &name, p4object_id_t id, const HeaderType &header_type,
 	 const std::set<int> &arith_offsets);
@@ -130,7 +132,7 @@ public:
 private:
   const HeaderType &header_type;
   std::vector<Field> fields;
-  bool valid;
+  bool valid{false};
   int nbytes_phv;
   int nbytes_packet;
 };

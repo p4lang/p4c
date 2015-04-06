@@ -22,12 +22,20 @@ Packet::Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
   assert(phv_pool);
   signature = XXH64(buffer.start(), buffer.get_data_size(), 0);
   phv = phv_pool->get();
-  // phv->copy_headers(src_phv);
+  phv->copy_headers(src_phv);
 }
   
 Packet::~Packet() {
   assert(phv);
   phv_pool->release(std::move(phv));
+}
+
+Packet
+Packet::clone(packet_id_t new_copy_id) const {
+  Packet pkt(ingress_port, packet_id, new_copy_id,
+	     buffer.clone(buffer.get_data_size()));
+  pkt.phv->copy_headers(*phv);
+  return pkt;
 }
 
 /* Cannot get away with defaults here, we need to swap the phvs, otherwise we

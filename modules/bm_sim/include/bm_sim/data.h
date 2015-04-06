@@ -36,6 +36,27 @@ public:
   }
 
   Data(const std::string &hexstring) {
+    set(hexstring);
+  }
+
+  virtual void export_bytes() {}
+
+  void set(unsigned int i) {
+    value = i;
+    export_bytes();
+  }
+
+  void set(const char *bytes, int nbytes) {
+    bignum::import_bytes(value, bytes, nbytes);
+    export_bytes();
+  }
+
+  void set(const Data &data) {
+    value = data.value;
+    export_bytes();
+  }
+
+  void set(const std::string &hexstring) {
     std::vector<char> bytes;
     size_t idx = 0;
     bool neg = false;
@@ -65,23 +86,6 @@ public:
     if(neg) value = -value;
   }
 
-  virtual void export_bytes() {}
-
-  void set(unsigned int i) {
-    value = i;
-    export_bytes();
-  }
-
-  void set(const char *bytes, int nbytes) {
-    bignum::import_bytes(value, bytes, nbytes);
-    export_bytes();
-  }
-
-  void set(const Data &data) {
-    value = data.value;
-    export_bytes();
-  }
-
   unsigned int get_uint() const {
     assert(arith);
     // Bad ?
@@ -93,6 +97,8 @@ public:
     // Bad ?
     return (int) value;
   }
+
+  bool get_arith() const { return arith; }
 
   // TODO: overload operators for those ?
 
