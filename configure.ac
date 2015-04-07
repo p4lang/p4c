@@ -43,9 +43,9 @@ AC_LANG_POP(C++)
 # Generate makefiles
 AC_CONFIG_FILES([Makefile
 		modules/Makefile
+		modules/bf_lpm_trie/Makefile
 		modules/bm_sim/Makefile
 		modules/bm_runtime/Makefile
-		modules/bf_lpm_trie/Makefile
 		modules/BMI/Makefile
 		thrift_src/Makefile
 		tests/Makefile])
