@@ -40,14 +40,12 @@ AC_TYPE_SIZE_T
 AC_TYPE_UINT64_T
 AC_LANG_POP(C++)
 
-# Checks for library functions.
-
+# Generate makefiles
 AC_CONFIG_FILES([Makefile
-		src/Makefile
-		tests/Makefile
-		protobufs/Makefile
-		tools/Makefile
-		omnet/Makefile
-		omnet/msgs/Makefile
-		omnet/src/Makefile])
+		modules/bm_sim/Makefile
+		modules/bm_runtime/Makefile
+		modules/bf_lpm_trie/Makefile
+		modules/BMI/Makefile
+		thrift_src/Makefile
+		tests/Makefile])
 AC_OUTPUT
