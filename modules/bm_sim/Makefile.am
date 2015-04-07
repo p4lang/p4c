@@ -1,8 +1,9 @@
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
+AM_CFLAGS = $(PICKY_CFLAGS)
 
 noinst_LIBRARIES = libbmsim.a
 
-common_source =
+common_source = \
 src/actions.cpp \
 src/checksums.cpp \
 src/deparser.cpp \

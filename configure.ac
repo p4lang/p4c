@@ -12,12 +12,15 @@ AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_RANLIB
 
-# Add picky CXXFLAGS
-CPPFLAGS="-std=c++11 -pthread"
+# Add picky flags
+CXXFLAGS="-std=c++11"
 PICKY_CXXFLAGS="-pedantic -Wall -Wextra -Weffc++ -Werror"
+PICKY_CFLAGS="-pedantic -Wall -Wextra -Werror"
 AC_SUBST([PICKY_CXXFLAGS])
+AC_SUBST([PICKY_CFLAGS])
 
 # Checks for header files.
+AC_LANG_PUSH(C)
 AC_LANG_PUSH(C++)
 
 AC_CHECK_HEADERS([algorithm array cassert cmath queue \

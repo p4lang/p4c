@@ -1,4 +1,5 @@
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
+AM_CFLAGS = $(PICKY_CFLAGS)
 
 noinst_LIBRARIES = libbflpmtrie.a
 
