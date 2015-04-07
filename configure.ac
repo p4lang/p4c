@@ -2,27 +2,20 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([tm_sim], [0.1], [anirudh@barefootnetworks.com])
+AC_INIT([bm_sim], [0.1], [antonin@barefootnetworks.com])
 AM_INIT_AUTOMAKE([foreign])
-AC_CONFIG_SRCDIR([src/buffer_manager.cc])
+AC_CONFIG_SRCDIR([modules/bm_sim/src/checksums.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
+AC_PROG_CC
 AC_PROG_RANLIB
 
 # Add picky CXXFLAGS
 CPPFLAGS="-std=c++11 -pthread"
-PICKY_CXXFLAGS="-pedantic -Wall -Wextra -Weffc++ -Werror -fno-default-inline"
+PICKY_CXXFLAGS="-pedantic -Wall -Wextra -Weffc++ -Werror"
 AC_SUBST([PICKY_CXXFLAGS])
-
-# Google Unit Test framework
-AC_ARG_VAR(GTEST_DIR, "Root directory of Google Unit Test")
-AC_SUBST([GTEST_DIR])
-
-# OMNeT++ simulation framework
-AC_ARG_VAR(OMNETPP_DIR, "Root directory of OMNeT++ simulation framework")
-AC_SUBST([OMNETPP_DIR])
 
 # Checks for header files.
 AC_LANG_PUSH(C++)
@@ -31,16 +24,10 @@ AC_CHECK_HEADERS([algorithm array cassert cmath queue \
 cstdio string sys/stat.h sys/types.h ctime tuple unistd.h unordered_map \
 utility vector], [], [AC_MSG_ERROR([Missing header file])])
 
-# Check for protobuf support
-AC_PATH_PROG([PROTOC], [protoc], [])
-AS_IF([test x"$PROTOC" = x],
-[AC_MSG_ERROR([cannot find protoc, the Protocol Buffers compiler])])
-PKG_CHECK_MODULES([protobuf], [protobuf])
-
-# Check for opp_msgc support (OMNeT's header library)
-AC_PATH_PROG([MSGC], [opp_msgc], [])
+# Check for thrift support (Facebook's Thrift RPC library)
+AC_PATH_PROG([MSGC], [thrift], [])
 AS_IF([test x"$MSGC" = x],
-[AC_MSG_ERROR([cannot find opp_msgc, the OMNeT message compiler])])
+[AC_MSG_ERROR([cannot find thrift])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
