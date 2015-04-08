@@ -8,7 +8,7 @@
 #include <memory>
 #include <set>
 
-#include <jsoncpp/json.h>
+#include <jsoncpp/json/json.h>
 
 #include "tables.h"
 #include "headers.h"
