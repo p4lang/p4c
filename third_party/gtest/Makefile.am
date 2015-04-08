@@ -2,7 +2,7 @@ AM_CPPFLAGS = -I$(srcdir)/..
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 AM_CFLAGS = $(PICKY_CFLAGS)
 
-noinst_LIBRARIES = libgtest.a
+check_LIBRARIES = libgtest.a
 
 common_source = \
 gtest-all.cpp
