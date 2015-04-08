@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I$(srcdir)/include/ -I$(srcdir)/../bf_lpm_trie/include/
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 AM_CFLAGS = $(PICKY_CFLAGS)
 
