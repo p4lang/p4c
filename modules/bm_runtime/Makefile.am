@@ -1,17 +1,10 @@
-AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/../bm_sim/include -I$(srcdir)/../bf_lpm_trie/include
+AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/../bm_sim/include -I$(srcdir)/../bf_lpm_trie/include -I$(srcdir)/../../thrift_src/gen-cpp
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 AM_CFLAGS = $(PICKY_CFLAGS)
-
 noinst_LIBRARIES = libbmruntime.a
 
 common_source = \
-src/runtime_constants.cpp \
-src/runtime_constants.h \
-src/Runtime.cpp \
-src/Runtime.h \
-src/Runtime_server.cpp \
-src/runtime_types.cpp \
-src/runtime_types.h
+src/Runtime_server.cpp
 
 common_include = \
 include/bm_runtime/bm_runtime.h
