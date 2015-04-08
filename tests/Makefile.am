@@ -1,5 +1,5 @@
-AM_CXXFLAGS = -isystem $(srcdir)/../third_party/gtest -I$(srcdir)/../modules/bm_sim/include -I$(srcdir)/../modules/bf_lpm_trie/include -pthread
-LDADD = $(srcdir)/../third_party/gtest/libgtest.a $(srcdir)/../third_party/gtest/libjson.a $(srcdir)/../modules/bm_sim/libbmsim.a $(srcdir)/../modules/bf_lpm_trie/libbflpmtrie.a -lnanomsg -lboost_system -lboost_thread -lm -lgmp -lJudy
+AM_CXXFLAGS = -isystem $(srcdir)/../third_party/ -I$(srcdir)/../modules/bm_sim/include -I$(srcdir)/../modules/bf_lpm_trie/include -pthread
+LDADD = $(srcdir)/../third_party/gtest/libgtest.a $(srcdir)/../modules/bm_sim/libbmsim.a $(srcdir)/../modules/bf_lpm_trie/libbflpmtrie.a $(srcdir)/../third_party/jsoncpp/libjson.a -lnanomsg -lboost_system -lboost_thread -lm -lgmp -lJudy
 
 # Define unit tests
 common_source = main.cpp
