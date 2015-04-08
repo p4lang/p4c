@@ -1,15 +1,9 @@
-GTEST_DIR=/home/anirudh/Downloads/gtest-1.7.0
-AM_CXXFLAGS = -isystem ${GTEST_DIR}/include -I${GTEST_DIR} -I$(srcdir)/../modules/bm_sim/include -I$(srcdir)/../modules/bf_lpm_trie/include -pthread
-LDADD = libgtest.a libgmain.a $(srcdir)/../modules/bm_sim/libbmsim.a $(srcdir)/../modules/bf_lpm_trie/libbflpmtrie.a -lnanomsg -lboost_system -lboost_thread -lm -lgmp -lJudy -ljsoncpp
+AM_CXXFLAGS = -isystem $(srcdir)/../third_party/gtest -I$(srcdir)/../modules/bm_sim/include -I$(srcdir)/../modules/bf_lpm_trie/include -pthread
+LDADD = $(srcdir)/../third_party/gtest/libgtest.a $(srcdir)/../modules/bm_sim/libbmsim.a $(srcdir)/../modules/bf_lpm_trie/libbflpmtrie.a -lnanomsg -lboost_system -lboost_thread -lm -lgmp -lJudy -ljsoncpp
 AUTOMAKE_OPTIONS = foreign subdir-objects no-dependencies
 
-# Static library for gtest
-check_LIBRARIES = libgtest.a libgmain.a
-libgtest_a_SOURCES = ${GTEST_DIR}/src/gtest-all.cc
-libgmain_a_SOURCES = ${GTEST_DIR}/src/gtest_main.cc
-
 # Define unit tests
-common_source =
+common_source = main.cpp
 TESTS = test_actions \
 test_checksums \
 test_conditionals \
