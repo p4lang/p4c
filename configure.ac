@@ -28,8 +28,8 @@ cstdio string sys/stat.h sys/types.h ctime tuple unistd.h unordered_map \
 utility vector], [], [AC_MSG_ERROR([Missing header file])])
 
 # Check for thrift support (Facebook's Thrift RPC library)
-AC_PATH_PROG([MSGC], [thrift], [])
-AS_IF([test x"$MSGC" = x],
+AC_PATH_PROG([THRIFT], [thrift], [])
+AS_IF([test x"$THRIFT" = x],
 [AC_MSG_ERROR([cannot find thrift])])
 
 # Check for libnanomsg, libjsoncpp
