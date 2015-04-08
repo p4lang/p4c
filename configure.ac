@@ -32,9 +32,8 @@ AC_PATH_PROG([THRIFT], [thrift], [])
 AS_IF([test x"$THRIFT" = x],
 [AC_MSG_ERROR([cannot find thrift])])
 
-# Check for libnanomsg, libjsoncpp
+# Check for libnanomsg, libgmp3, libjudy, boost-thread, boost-system
 PKG_CHECK_MODULES([libnanomsg], [libnanomsg])
-PKG_CHECK_MODULES([jsoncpp], [jsoncpp])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
