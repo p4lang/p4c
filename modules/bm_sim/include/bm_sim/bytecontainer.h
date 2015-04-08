@@ -20,7 +20,7 @@ public:
   typedef vector<char>::const_reference const_reference;
   typedef size_t size_type;
 
-  public:
+public:
   ByteContainer() {}
 
   ByteContainer(int nbytes)
