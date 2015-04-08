@@ -1,1 +1,1 @@
-SUBDIRS = modules thrift_src tests
+SUBDIRS = third_party modules thrift_src tests

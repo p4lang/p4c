@@ -44,6 +44,9 @@ AC_LANG_POP(C++)
 
 # Generate makefiles
 AC_CONFIG_FILES([Makefile
+		third_party/Makefile
+		third_party/gtest/Makefile
+		third_party/jsoncpp/Makefile
 		modules/Makefile
 		modules/bf_lpm_trie/Makefile
 		modules/bm_sim/Makefile
