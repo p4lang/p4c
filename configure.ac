@@ -14,8 +14,8 @@ AC_PROG_RANLIB
 
 # Add picky flags
 CXXFLAGS="-std=c++11"
-PICKY_CXXFLAGS="-pedantic -Wall -Wextra -Weffc++ -Werror"
-PICKY_CFLAGS="-pedantic -Wall -Wextra -Werror"
+PICKY_CXXFLAGS=""
+PICKY_CFLAGS=""
 AC_SUBST([PICKY_CXXFLAGS])
 AC_SUBST([PICKY_CFLAGS])
 
