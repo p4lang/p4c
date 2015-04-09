@@ -109,5 +109,3 @@ TEST_F(LearningTest, OneSample) {
   ASSERT_EQ((char) 0xa, buffer[0]);
   ASSERT_EQ((char) 0xba, buffer[1]);
 }
-
-k
