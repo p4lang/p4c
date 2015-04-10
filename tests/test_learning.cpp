@@ -117,9 +117,11 @@ private:
 
 TEST_F(LearningTest, OneSample) {
   LearnEngine::list_id_t list_id = 1;
+  size_t max_samples = 1;
+  unsigned int timeout_ms = 500;
   char buffer[sizeof(LearnEngine::msg_hdr_t) + 2];
   std::shared_ptr<MemoryAccessor> learn_writer(new MemoryAccessor(sizeof(buffer)));
-  learn_engine.list_create(list_id, learn_writer, 1, 10000);
+  learn_engine.list_create(list_id, learn_writer, max_samples, timeout_ms);
   learn_engine.list_push_back_constant(list_id, "0xaba"); // 2 bytes
   learn_engine.list_init(list_id);
 
@@ -139,4 +141,45 @@ TEST_F(LearningTest, OneSample) {
 
   ASSERT_EQ((char) 0xa, data[0]);
   ASSERT_EQ((char) 0xba, data[1]);
+}
+
+TEST_F(LearningTest, OneSampleTimeout) {
+  typedef std::chrono::high_resolution_clock clock;
+  using std::chrono::milliseconds;
+  using std::chrono::duration_cast;
+
+  clock::time_point start = clock::now();
+
+  LearnEngine::list_id_t list_id = 1;
+  size_t max_samples = 2;
+  unsigned int timeout_ms = 500;
+  char buffer[sizeof(LearnEngine::msg_hdr_t) + 2];
+  std::shared_ptr<MemoryAccessor> learn_writer(new MemoryAccessor(sizeof(buffer)));
+  learn_engine.list_create(list_id, learn_writer, max_samples, timeout_ms);
+  learn_engine.list_push_back_constant(list_id, "0xaba"); // 2 bytes
+  learn_engine.list_init(list_id);
+
+  Packet pkt = get_pkt();
+
+  learn_engine.learn(list_id, pkt);
+
+  learn_writer->read(buffer, sizeof(buffer));
+
+  clock::time_point end = clock::now();
+
+  LearnEngine::msg_hdr_t *msg_hdr = (LearnEngine::msg_hdr_t *) buffer;
+  const char *data = buffer + sizeof(LearnEngine::msg_hdr_t);
+
+  ASSERT_EQ(0, msg_hdr->switch_id);
+  ASSERT_EQ(list_id, msg_hdr->list_id);
+  ASSERT_EQ(0u, msg_hdr->buffer_id);
+  ASSERT_EQ(1u, msg_hdr->num_samples);
+
+  ASSERT_EQ((char) 0xa, data[0]);
+  ASSERT_EQ((char) 0xba, data[1]);
+
+  // check that the timeout was on time :)
+  unsigned int elapsed = duration_cast<milliseconds>(end - start).count();
+  ASSERT_GT(elapsed, timeout_ms - 50u);
+  ASSERT_LT(elapsed, timeout_ms + 50u);
 }

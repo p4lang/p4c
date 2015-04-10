@@ -143,6 +143,7 @@ void LearnEngine::LearnList::buffer_transmit_loop()
       b_can_send.wait_until(lock, last_sent + timeout);
     else
       b_can_send.wait(lock);
+    now = clock::now();
   }
 
   if(buffer_tmp.size() == 0) {
