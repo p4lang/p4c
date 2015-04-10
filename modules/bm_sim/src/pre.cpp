@@ -51,6 +51,7 @@ McPre::mc_l1_node_associate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
     mgid_entry.l1_list.push_back(l1_entry_it->first);
     l1_entry.mgrp_hdl = mgrp_hdl;
     l1_entry_it->second = l1_entry;
+    mgid_entry_it->second = mgid_entry;
     return SUCCESS;
 }
 
@@ -78,6 +79,7 @@ McPre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl, std::bitset<51
     l1_entry.l2_hdl = *l2_hdl;
     l1_entry_it->second = l1_entry;
     L2Entry l2_entry(l1_hdl, port_map);
+    l2_entries.insert(std::make_pair(*l2_hdl, std::move(l2_entry)));
     return SUCCESS;
 }
 
@@ -108,8 +110,8 @@ std::vector<McPre_Out>
 McPre::replicate(const McPre_In ingress_info)
 {
     std::vector<McPre_Out> egress_info_list;
-    McPre_Out egress_info;
     egress_port_t port_id;
+    McPre_Out egress_info;
     boost::shared_lock<boost::shared_mutex> lock1(mgid_mutex);
     boost::shared_lock<boost::shared_mutex> lock2(l1_mutex);
     boost::shared_lock<boost::shared_mutex> lock3(l2_mutex);
@@ -120,13 +122,13 @@ McPre::replicate(const McPre_In ingress_info)
         auto l1_entry_it = l1_entries.find(*it);
         L1Entry l1_entry = l1_entry_it->second;
         auto l2_entry_it = l2_entries.find(l1_entry.l2_hdl);
-        L2Entry l2_entry = l2_entry_it->second;
         egress_info.rid = l1_entry.rid;
+        L2Entry l2_entry = l2_entry_it->second;
         for (port_id = 0; port_id < 512; port_id++) {
-             if (l2_entry.port_map[port_id]) {
-                 egress_info.egress_port = port_id;
-                 egress_info_list.push_back(egress_info);
-             }
+            if (l2_entry.port_map[port_id]) {
+                egress_info.egress_port = port_id;
+                egress_info_list.push_back(egress_info);
+            }
         }
     }
     return egress_info_list;

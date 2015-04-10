@@ -61,7 +61,8 @@ class McPre {
             ERROR
         };
 
-        McPre();
+    public:
+        McPre() {}
         McReturnCode mc_mgrp_create(const mgrp_t, mgrp_hdl_t *);
         McReturnCode mc_mgrp_destroy(const mgrp_hdl_t);
         McReturnCode mc_l1_node_create(const rid_t, l1_hdl_t *);
