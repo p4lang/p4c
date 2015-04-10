@@ -19,6 +19,9 @@
 class LearnWriter {
 public:
   virtual int send(const char *buffer, size_t len) const = 0;
+  virtual int send_msgs(
+      const std::initializer_list<TransportIface::MsgBuf> &msgs
+  ) const = 0;
 };
 
 template <typename Transport>
@@ -27,6 +30,9 @@ public:
   LearnWriterImpl(const std::string &transport_name);
 
   int send(const char *buffer, size_t len) const override;
+  virtual int send_msgs(
+      const std::initializer_list<TransportIface::MsgBuf> &msgs
+  ) const override;
 
 private:
   std::unique_ptr<Transport> transport_instance;
@@ -35,6 +41,13 @@ private:
 class LearnEngine {
 public:
   typedef int list_id_t;
+
+  typedef struct {
+    int switch_id;
+    int list_id;
+    unsigned long long buffer_id;
+    unsigned int num_samples;
+  } __attribute__((packed)) msg_hdr_t;
 
   void list_create(list_id_t list_id, std::shared_ptr<LearnWriter> learn_writer,
 		   size_t max_samples = 1, unsigned int timeout_ms = 1000);
@@ -82,9 +95,11 @@ private:
   
   typedef std::unordered_set<ByteContainer, ByteContainerKeyHash> LearnFilter;
 
+  typedef unsigned long long buffer_id_t;
+
   class LearnList {
   public:
-    LearnList(size_t max_samples, unsigned int timeout);
+    LearnList(list_id_t list_id, size_t max_samples, unsigned int timeout);
     void init();
 
     void set_learn_writer(std::shared_ptr<LearnWriter> learn_writer);
@@ -95,18 +110,23 @@ private:
     void add_sample(const PHV &phv);
 
   private:
+    void swap_buffers();
     void buffer_transmit_loop();
     
   private:
     mutable std::mutex mutex;
 
+    list_id_t list_id;
+
     LearnSampleBuilder builder;
     std::vector<char> buffer;
+    buffer_id_t buffer_id{0};
     // size_t sample_size{0};
     size_t num_samples{0};
     const size_t max_samples;
     clock::time_point last_sent;
     const milliseconds timeout;
+    const bool with_timeout;
 
     LearnFilter filter;
 

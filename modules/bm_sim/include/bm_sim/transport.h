@@ -11,7 +11,7 @@ class TransportIface {
 public:
   struct MsgBuf {
     char *buf;
-    int len;
+    unsigned int len;
   };
 
 public:

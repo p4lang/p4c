@@ -66,7 +66,29 @@ public:
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
       lock.lock();
     }
-    std::copy(buffer, buffer + len, buffer_.begin());
+    buffer_.insert(buffer_.end(), buffer, buffer + len);
+    status = Status::CAN_READ;
+    return 0;
+  }
+
+  int send_msgs(
+      const std::initializer_list<TransportIface::MsgBuf> &msgs
+  ) const override
+  {
+    size_t len = 0;
+    for(const auto &msg : msgs) {
+      len += msg.len;
+    }
+    if(len > max_size) return -1;
+    std::unique_lock<std::mutex> lock(mutex);
+    while(status != Status::CAN_WRITE) {
+      lock.unlock();
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      lock.lock();
+    }
+    for(const auto &msg : msgs) {
+      buffer_.insert(buffer_.end(), msg.buf, msg.buf + msg.len);
+    }
     status = Status::CAN_READ;
     return 0;
   }
@@ -80,6 +102,7 @@ public:
       lock.lock();
     }
     std::copy(buffer_.begin(), buffer_.begin() + len, dst);
+    buffer_.clear();
     status = Status::CAN_WRITE;
     return 0;
   }
@@ -93,8 +116,8 @@ private:
 };
 
 TEST_F(LearningTest, OneSample) {
-  LearnEngine::list_id_t list_id = 0;
-  char buffer[2];
+  LearnEngine::list_id_t list_id = 1;
+  char buffer[sizeof(LearnEngine::msg_hdr_t) + 2];
   std::shared_ptr<MemoryAccessor> learn_writer(new MemoryAccessor(sizeof(buffer)));
   learn_engine.list_create(list_id, learn_writer, 1, 10000);
   learn_engine.list_push_back_constant(list_id, "0xaba"); // 2 bytes
@@ -106,6 +129,14 @@ TEST_F(LearningTest, OneSample) {
 
   learn_writer->read(buffer, sizeof(buffer));
 
-  ASSERT_EQ((char) 0xa, buffer[0]);
-  ASSERT_EQ((char) 0xba, buffer[1]);
+  LearnEngine::msg_hdr_t *msg_hdr = (LearnEngine::msg_hdr_t *) buffer;
+  const char *data = buffer + sizeof(LearnEngine::msg_hdr_t);
+
+  ASSERT_EQ(0, msg_hdr->switch_id);
+  ASSERT_EQ(list_id, msg_hdr->list_id);
+  ASSERT_EQ(0u, msg_hdr->buffer_id);
+  ASSERT_EQ(1u, msg_hdr->num_samples);
+
+  ASSERT_EQ((char) 0xa, data[0]);
+  ASSERT_EQ((char) 0xba, data[1]);
 }

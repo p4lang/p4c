@@ -16,6 +16,14 @@ int LearnWriterImpl<Transport>::send(const char *buffer, size_t len) const
   return transport_instance->send(buffer, len);
 }
 
+template <typename Transport>
+int LearnWriterImpl<Transport>::send_msgs(
+    const std::initializer_list<TransportIface::MsgBuf> &msgs
+) const
+{
+  return transport_instance->send_msgs(msgs);
+}
+
 void LearnEngine::LearnSampleBuilder::push_back_constant(
     const ByteContainer &constant
 )
@@ -58,8 +66,10 @@ void LearnEngine::LearnSampleBuilder::operator()(
   }
 }
 
-LearnEngine::LearnList::LearnList(size_t max_samples, unsigned int timeout)
-  : max_samples(max_samples), last_sent(clock::now()), timeout(timeout) { }
+LearnEngine::LearnList::LearnList(
+    list_id_t list_id, size_t max_samples, unsigned int timeout
+) : list_id(list_id), max_samples(max_samples), last_sent(clock::now()),
+    timeout(timeout), with_timeout(timeout > 0) { }
 
 void LearnEngine::LearnList::init()
 {
@@ -86,6 +96,12 @@ void LearnEngine::LearnList::push_back_constant(const std::string &hexstring)
   builder.push_back_constant(ByteContainer(hexstring));
 }
 
+void LearnEngine::LearnList::swap_buffers() {
+  buffer_tmp.swap(buffer);
+  num_samples = 0;
+  buffer_id++;
+}
+
 void LearnEngine::LearnList::add_sample(const PHV &phv)
 {
   static thread_local ByteContainer sample;
@@ -102,16 +118,12 @@ void LearnEngine::LearnList::add_sample(const PHV &phv)
 
   filter.insert(filter.end(), std::move(sample));
 
-  clock::time_point now = clock::now();
-  using std::chrono::duration_cast;
-  milliseconds elapsed = duration_cast<milliseconds>(now - last_sent);
-  if(num_samples >= max_samples || elapsed >= timeout) {
+  if(num_samples >= max_samples) {
     while(buffer_tmp.size() != 0) {
       b_can_swap.wait(lock);
     }
-    buffer_tmp.swap(buffer);
-    num_samples = 0;
-    last_sent = now;
+
+    swap_buffers();
 
     lock.unlock();
     b_can_send.notify_one();
@@ -120,12 +132,40 @@ void LearnEngine::LearnList::add_sample(const PHV &phv)
 
 void LearnEngine::LearnList::buffer_transmit_loop()
 {
+  // using std::chrono::duration_cast;
+
+  clock::time_point now = clock::now();
+  milliseconds time_to_sleep;
+  size_t num_samples_to_send;
   std::unique_lock<std::mutex> lock(mutex);
-  while(buffer_tmp.size() == 0) {
-    b_can_send.wait(lock);
+  while(buffer_tmp.size() == 0 && now < (last_sent + timeout)) {
+    if(with_timeout)
+      b_can_send.wait_until(lock, last_sent + timeout);
+    else
+      b_can_send.wait(lock);
   }
 
-  writer->send(buffer_tmp.data(), buffer_tmp.size());
+  if(buffer_tmp.size() == 0) {
+    num_samples_to_send = num_samples;
+    swap_buffers();
+  }
+  else {
+    num_samples_to_send = max_samples;
+  }
+
+  last_sent = now;
+
+  // do not forget the -1 !!!
+  // swap_buffers() is in charge of incrementing the count
+  msg_hdr_t msg_hdr = {0, list_id, buffer_id - 1,
+		       (unsigned int) num_samples_to_send};
+  
+  TransportIface::MsgBuf buf_hdr = {(char *) &msg_hdr, sizeof(msg_hdr)};
+  TransportIface::MsgBuf buf_samples = {buffer_tmp.data(),
+					(unsigned int) buffer_tmp.size()};
+
+  writer->send_msgs({buf_hdr, buf_samples});
+
   buffer_tmp.clear();
 
   lock.unlock();
@@ -139,7 +179,7 @@ void LearnEngine::list_create(
 {
   assert(learn_lists.find(list_id) == learn_lists.end());
   learn_lists[list_id] =
-    std::unique_ptr<LearnList>(new LearnList(max_samples, timeout_ms));
+    std::unique_ptr<LearnList>(new LearnList(list_id, max_samples, timeout_ms));
   learn_lists[list_id]->set_learn_writer(learn_writer);
 }
 
