@@ -68,13 +68,20 @@ void LearnEngine::LearnSampleBuilder::operator()(
 
 LearnEngine::LearnList::LearnList(
     list_id_t list_id, size_t max_samples, unsigned int timeout
-) : list_id(list_id), max_samples(max_samples), last_sent(clock::now()),
+) : list_id(list_id), max_samples(max_samples),
     timeout(timeout), with_timeout(timeout > 0) { }
 
 void LearnEngine::LearnList::init()
 {
   transmit_thread = std::thread(&LearnList::buffer_transmit_loop, this);
-  transmit_thread.detach();
+  // transmit_thread.detach();
+}
+
+LearnEngine::LearnList::~LearnList()
+{
+  stop_transmit_thread = true;
+  b_can_send.notify_all();
+  transmit_thread.join();
 }
 
 void LearnEngine::LearnList::set_learn_writer(
@@ -113,6 +120,8 @@ void LearnEngine::LearnList::add_sample(const PHV &phv)
   const auto it = filter.find(sample);
   if(it != filter.end()) return;
 
+  if(num_samples == 0) buffer_started = clock::now(); 
+
   buffer.insert(buffer.end(), sample.begin(), sample.end());
   num_samples++;
 
@@ -122,35 +131,33 @@ void LearnEngine::LearnList::add_sample(const PHV &phv)
     while(buffer_tmp.size() != 0) {
       b_can_swap.wait(lock);
     }
-
     swap_buffers();
 
-    lock.unlock();
     b_can_send.notify_one();
   }
 }
 
-void LearnEngine::LearnList::buffer_transmit_loop()
+void LearnEngine::LearnList::buffer_transmit()
 {
-  // using std::chrono::duration_cast;
-
   clock::time_point now = clock::now();
   milliseconds time_to_sleep;
   size_t num_samples_to_send;
   std::unique_lock<std::mutex> lock(mutex);
-  while(buffer_tmp.size() == 0 && now < (last_sent + timeout)) {
+  while(buffer_tmp.size() == 0 &&
+	(!with_timeout || num_samples == 0 || now < (buffer_started + timeout))) {
     if(with_timeout)
-      b_can_send.wait_until(lock, last_sent + timeout);
+      b_can_send.wait_until(lock, buffer_started + timeout);
     else
       b_can_send.wait(lock);
+    if(stop_transmit_thread) return;
     now = clock::now();
   }
 
-  if(buffer_tmp.size() == 0) {
+  if(buffer_tmp.size() == 0) { // timeout -> we need to swap here
     num_samples_to_send = num_samples;
     swap_buffers();
   }
-  else {
+  else { // buffer full -> swapping was already done
     num_samples_to_send = max_samples;
   }
 
@@ -169,8 +176,15 @@ void LearnEngine::LearnList::buffer_transmit_loop()
 
   buffer_tmp.clear();
 
-  lock.unlock();
   b_can_swap.notify_one();
+}
+
+void LearnEngine::LearnList::buffer_transmit_loop()
+{
+  while(1) {
+    buffer_transmit();
+    if(stop_transmit_thread) return;
+  }
 }
 
 void LearnEngine::list_create(

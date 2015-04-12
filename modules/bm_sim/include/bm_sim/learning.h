@@ -102,6 +102,8 @@ private:
     LearnList(list_id_t list_id, size_t max_samples, unsigned int timeout);
     void init();
 
+    ~LearnList();
+
     void set_learn_writer(std::shared_ptr<LearnWriter> learn_writer);
 
     void push_back_field(header_id_t header_id, int field_offset);
@@ -109,9 +111,15 @@ private:
 
     void add_sample(const PHV &phv);
 
+    LearnList(const LearnList &other) = delete;
+    LearnList &operator=(const LearnList &other) = delete;
+    LearnList(LearnList &&other) = delete;
+    LearnList &operator=(LearnList &&other) = delete;
+
   private:
     void swap_buffers();
     void buffer_transmit_loop();
+    void buffer_transmit();
     
   private:
     mutable std::mutex mutex;
@@ -124,6 +132,7 @@ private:
     // size_t sample_size{0};
     size_t num_samples{0};
     const size_t max_samples;
+    clock::time_point buffer_started;
     clock::time_point last_sent;
     const milliseconds timeout;
     const bool with_timeout;
@@ -134,6 +143,7 @@ private:
     mutable std::condition_variable b_can_swap;
     mutable std::condition_variable b_can_send;
     std::thread transmit_thread;
+    bool stop_transmit_thread{false};
 
     std::shared_ptr<LearnWriter> writer{nullptr};
   };
