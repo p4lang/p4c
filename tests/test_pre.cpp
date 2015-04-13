@@ -5,21 +5,21 @@
 TEST(McPre, Replicate)
 {
     McPre pre;
-    mgrp_t mgid = 0x400;
-    mgrp_hdl_t mgrp_hdl;
-    std::vector<l1_hdl_t> l1_hdl_list;
-    std::vector<l2_hdl_t> l2_hdl_list;
-    rid_t rid_list[] = {0x200, 0x211, 0x221};
-    std::vector<std::vector<egress_port_t>> port_list = {{1, 4}, {5, 6}, {2, 7, 8, 9}};
+    McPre::mgrp_t mgid = 0x400;
+    McPre::mgrp_hdl_t mgrp_hdl;
+    std::vector<McPre::l1_hdl_t> l1_hdl_list;
+    std::vector<McPre::l2_hdl_t> l2_hdl_list;
+    McPre::rid_t rid_list[] = {0x200, 0x211, 0x221};
+    std::vector<std::vector<McPre::egress_port_t>> port_list = {{1, 4}, {5, 6}, {2, 7, 8, 9}};
     McPre::McReturnCode rc;
-    McPre_In ingress_info;
-    std::vector<McPre_Out> egress_info;
+    McPre::McPre_In ingress_info;
+    std::vector<McPre::McPre_Out> egress_info;
 
     rc = pre.mc_mgrp_create(mgid, &mgrp_hdl);
     ASSERT_EQ(rc, McPre::SUCCESS);
 
     for (unsigned int i = 0; i < 3; i++) {
-        l1_hdl_t l1_hdl;
+        McPre::l1_hdl_t l1_hdl;
         rc = pre.mc_l1_node_create(rid_list[i], &l1_hdl);
         ASSERT_EQ(rc, McPre::SUCCESS);
         l1_hdl_list.push_back(l1_hdl);
@@ -27,13 +27,13 @@ TEST(McPre, Replicate)
         ASSERT_EQ(rc, McPre::SUCCESS);
     }
 
+    std::bitset<McPre::PORT_MAP_SIZE> port_map[3];
     for (unsigned int i = 0; i < 3; i++) {
-        std::bitset<512> port_map;
         for (unsigned int j = 0; j < port_list[i].size(); j++) {
-            port_map[port_list[i][j]] = 1;
+            port_map[i][port_list[i][j]] = 1;
         }
-        l2_hdl_t l2_hdl;
-        rc = pre.mc_l2_node_create(l1_hdl_list[i], &l2_hdl, port_map);
+        McPre::l2_hdl_t l2_hdl;
+        rc = pre.mc_l2_node_create(l1_hdl_list[i], &l2_hdl, &port_map[i]);
         ASSERT_EQ(rc, McPre::SUCCESS);
         l2_hdl_list.push_back(l2_hdl);
     }
