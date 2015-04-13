@@ -31,8 +31,7 @@ McPre::mc_l1_node_create(const rid_t rid, l1_hdl_t *l1_hdl)
     size_t num_entries = l1_entries.size();
     if (num_entries >= L1_MAX_ENTRIES) return TABLE_FULL;
     if (l1_handles.get_handle(l1_hdl)) return ERROR;
-    L1Entry l1_entry(rid);
-    l1_entries.insert(std::make_pair(*l1_hdl, std::move(l1_entry)));
+    l1_entries.insert(std::make_pair(*l1_hdl, L1Entry(rid)));
     return SUCCESS;
 }
 
@@ -60,7 +59,7 @@ McPre::mc_l1_node_destroy(const l1_hdl_t l1_hdl)
 }
 
 McPre::McReturnCode
-McPre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl, std::bitset<PORT_MAP_SIZE> *port_map)
+McPre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl, const std::bitset<PORT_MAP_SIZE> port_map)
 {
     boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
     boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
@@ -70,18 +69,20 @@ McPre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl, std::bitset<PO
     if (!l1_handles.valid_handle(l1_hdl)) return INVALID_L1_HANDLE;
     L1Entry &l1_entry = l1_entries[l1_hdl];
     l1_entry.l2_hdl = *l2_hdl;
-    L2Entry l2_entry(l1_hdl, port_map);
-    l2_entries.insert(std::make_pair(*l2_hdl, std::move(l2_entry)));
+    std::bitset<PORT_MAP_SIZE> *port_map_copy = new std::bitset<PORT_MAP_SIZE>(port_map);
+    l2_entries.insert(std::make_pair(*l2_hdl, L2Entry(l1_hdl, port_map_copy)));
     return SUCCESS;
 }
 
 McPre::McReturnCode
-McPre::mc_l2_node_update(const l2_hdl_t l2_hdl, std::bitset<PORT_MAP_SIZE> *port_map)
+McPre::mc_l2_node_update(const l2_hdl_t l2_hdl, const std::bitset<PORT_MAP_SIZE> port_map)
 {
     boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
     if (!l2_handles.valid_handle(l2_hdl)) return INVALID_L2_HANDLE;
     L2Entry &l2_entry = l2_entries[l2_hdl];
-    l2_entry.port_map = port_map;
+    for (int i = 0; i < PORT_MAP_SIZE; i++) {
+        (*l2_entry.port_map)[i] = port_map[i];
+    }
     return SUCCESS;
 }
 
