@@ -120,14 +120,15 @@ void LearnEngine::LearnList::add_sample(const PHV &phv)
   const auto it = filter.find(sample);
   if(it != filter.end()) return;
 
-  if(num_samples == 0) buffer_started = clock::now(); 
-
   buffer.insert(buffer.end(), sample.begin(), sample.end());
   num_samples++;
-
   filter.insert(filter.end(), std::move(sample));
 
-  if(num_samples >= max_samples) {
+  if(num_samples == 1 && max_samples > 1) {
+    buffer_started = clock::now(); 
+    b_can_send.notify_one(); // wake transmit thread to update cond var wait time
+  }
+  else if(num_samples >= max_samples) {
     while(buffer_tmp.size() != 0) {
       b_can_swap.wait(lock);
     }
@@ -139,16 +140,18 @@ void LearnEngine::LearnList::add_sample(const PHV &phv)
 
 void LearnEngine::LearnList::buffer_transmit()
 {
-  clock::time_point now = clock::now();
   milliseconds time_to_sleep;
   size_t num_samples_to_send;
   std::unique_lock<std::mutex> lock(mutex);
+  clock::time_point now = clock::now();
   while(buffer_tmp.size() == 0 &&
 	(!with_timeout || num_samples == 0 || now < (buffer_started + timeout))) {
-    if(with_timeout)
+    if(with_timeout && num_samples > 0) {
       b_can_send.wait_until(lock, buffer_started + timeout);
-    else
+    }
+    else {
       b_can_send.wait(lock);
+    }
     if(stop_transmit_thread) return;
     now = clock::now();
   }
