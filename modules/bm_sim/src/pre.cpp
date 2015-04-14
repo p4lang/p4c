@@ -59,7 +59,8 @@ McPre::mc_l1_node_destroy(const l1_hdl_t l1_hdl)
 }
 
 McPre::McReturnCode
-McPre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl, const std::bitset<PORT_MAP_SIZE> port_map)
+McPre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl,
+			 const std::bitset<PORT_MAP_SIZE> &port_map)
 {
     boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
     boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
@@ -69,20 +70,18 @@ McPre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl, const std::bit
     if (!l1_handles.valid_handle(l1_hdl)) return INVALID_L1_HANDLE;
     L1Entry &l1_entry = l1_entries[l1_hdl];
     l1_entry.l2_hdl = *l2_hdl;
-    std::bitset<PORT_MAP_SIZE> *port_map_copy = new std::bitset<PORT_MAP_SIZE>(port_map);
-    l2_entries.insert(std::make_pair(*l2_hdl, L2Entry(l1_hdl, port_map_copy)));
+    l2_entries.insert(std::make_pair(*l2_hdl, L2Entry(l1_hdl, port_map)));
     return SUCCESS;
 }
 
 McPre::McReturnCode
-McPre::mc_l2_node_update(const l2_hdl_t l2_hdl, const std::bitset<PORT_MAP_SIZE> port_map)
+McPre::mc_l2_node_update(const l2_hdl_t l2_hdl,
+			 const std::bitset<PORT_MAP_SIZE> &port_map)
 {
     boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
     if (!l2_handles.valid_handle(l2_hdl)) return INVALID_L2_HANDLE;
     L2Entry &l2_entry = l2_entries[l2_hdl];
-    for (int i = 0; i < PORT_MAP_SIZE; i++) {
-        (*l2_entry.port_map)[i] = port_map[i];
-    }
+    l2_entry.port_map = port_map;
     return SUCCESS;
 }
 
@@ -111,7 +110,7 @@ McPre::replicate(const McPre::McPre_In ingress_info)
         egress_info.rid = l1_entry.rid;
         const L2Entry l2_entry = l2_entries[l1_entry.l2_hdl];
         for (port_id = 0; port_id < PORT_MAP_SIZE; port_id++) {
-            if ((*l2_entry.port_map)[port_id]) {
+            if (l2_entry.port_map[port_id]) {
                 egress_info.egress_port = port_id;
                 egress_info_list.push_back(egress_info);
             }

@@ -34,11 +34,11 @@ class McPre {
 
         struct L2Entry {
             l1_hdl_t l1_hdl;
-            std::bitset<PORT_MAP_SIZE> *port_map;
+            std::bitset<PORT_MAP_SIZE> port_map;
 
             L2Entry() {}
-            L2Entry(l1_hdl_t l1_hdl, std::bitset<PORT_MAP_SIZE> *port_map) :
-            l1_hdl(l1_hdl), port_map(port_map) {}
+            L2Entry(l1_hdl_t l1_hdl, const std::bitset<PORT_MAP_SIZE> &port_map)
+	    : l1_hdl(l1_hdl), port_map(port_map) {}
         };
 
         struct MgidEntry {
@@ -84,8 +84,10 @@ class McPre {
         McReturnCode mc_l1_node_create(const rid_t, l1_hdl_t *);
         McReturnCode mc_l1_node_associate(const mgrp_hdl_t, const l1_hdl_t);
         McReturnCode mc_l1_node_destroy(const l1_hdl_t);
-        McReturnCode mc_l2_node_create(const l1_hdl_t, l2_hdl_t *, const std::bitset<PORT_MAP_SIZE> port_map);
-        McReturnCode mc_l2_node_update(const l2_hdl_t l2_hdl, const std::bitset<PORT_MAP_SIZE> port_map);
+        McReturnCode mc_l2_node_create(const l1_hdl_t, l2_hdl_t *,
+				       const std::bitset<PORT_MAP_SIZE> &port_map);
+        McReturnCode mc_l2_node_update(const l2_hdl_t l2_hdl,
+				       const std::bitset<PORT_MAP_SIZE> &port_map);
         McReturnCode mc_l2_node_destroy(const l2_hdl_t);
         std::vector<McPre_Out> replicate(const McPre_In);
 };
