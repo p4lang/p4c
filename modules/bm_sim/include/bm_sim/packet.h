@@ -68,6 +68,7 @@ public:
   const PacketBuffer &get_packet_buffer() const { return buffer; }
 
   PHV *get_phv() { return phv.get(); }
+  const PHV *get_phv() const { return phv.get(); }
 
   Packet clone(packet_id_t new_copy_id) const;
 
@@ -98,11 +99,8 @@ private:
     std::unique_ptr<PHV> get();
     void release(std::unique_ptr<PHV> phv);
 
-  public:
-    static PHVPool *get_instance();
-
   private:
-    std::mutex mutex;
+    mutable std::mutex mutex;
     std::vector<std::unique_ptr<PHV> > phvs;
     const PHVFactory &phv_factory;
   };

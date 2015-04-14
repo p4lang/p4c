@@ -1,8 +1,4 @@
-#include <iostream>
-
 #include <cstring>
-
-#include <nanomsg/pubsub.h>
 
 #include <bm_sim/event_logger.h>
 
@@ -11,38 +7,6 @@
 #include "bm_sim/tables.h"
 #include "bm_sim/conditionals.h"
 #include "bm_sim/actions.h"
-
-int TransportSTDOUT::open(const std::string &name) {
-  return 0;
-}
-
-int TransportSTDOUT::send(const std::string &msg) const {
-  std::cout << msg << std::endl;
-  return 0;
-};
-
-int TransportSTDOUT::send(const char *msg, int len) const {
-  std::cout << msg << std::endl;
-  return 0;
-};
-
-TransportNanomsg::TransportNanomsg()
-  : s(AF_SP, NN_PUB) {}
-
-int TransportNanomsg::open(const std::string &name) {
-  // TODO: catch exception
-  s.bind(name.c_str());
-  return 0;
-}
-
-int TransportNanomsg::send(const std::string &msg) const {
-  return 0;
-};
-
-int TransportNanomsg::send(const char *msg, int len) const {
-  s.send(msg, len, 0);
-  return 0;
-};
 
 enum EventType {
   PACKET_IN = 0, PACKET_OUT,

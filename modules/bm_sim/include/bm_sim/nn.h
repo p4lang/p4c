@@ -159,7 +159,7 @@ namespace nn
 	return rc;
       }
 
-      inline int sendmsg (const struct nn_msghdr *msghdr, int flags)
+      inline int sendmsg (const struct nn_msghdr *msghdr, int flags) const
       {
 	int rc = nn_sendmsg (s, msghdr, flags);
 	if (nn_slow (rc < 0)) {

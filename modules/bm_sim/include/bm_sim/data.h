@@ -84,6 +84,7 @@ public:
 
     bignum::import_bytes(value, bytes.data(), bytes.size());
     if(neg) value = -value;
+    export_bytes(); // not very efficient for fields, we import then export...
   }
 
   unsigned int get_uint() const {
