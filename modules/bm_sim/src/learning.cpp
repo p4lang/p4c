@@ -122,7 +122,10 @@ void LearnEngine::LearnList::add_sample(const PHV &phv)
 
   buffer.insert(buffer.end(), sample.begin(), sample.end());
   num_samples++;
-  filter.insert(filter.end(), std::move(sample));
+  auto filter_it = filter.insert(filter.end(), std::move(sample));
+  FilterPtrs &filter_ptrs = old_buffers[buffer_id];
+  filter_ptrs.unacked_count++;
+  filter_ptrs.buffer.push_back(filter_it);
 
   if(num_samples == 1 && max_samples > 1) {
     buffer_started = clock::now(); 
@@ -165,6 +168,8 @@ void LearnEngine::LearnList::buffer_transmit()
   }
 
   last_sent = now;
+  
+  lock.unlock();
 
   // do not forget the -1 !!!
   // swap_buffers() is in charge of incrementing the count
@@ -175,7 +180,9 @@ void LearnEngine::LearnList::buffer_transmit()
   TransportIface::MsgBuf buf_samples = {buffer_tmp.data(),
 					(unsigned int) buffer_tmp.size()};
 
-  writer->send_msgs({buf_hdr, buf_samples});
+  writer->send_msgs({buf_hdr, buf_samples}); // no lock for I/O
+
+  lock.lock();
 
   buffer_tmp.clear();
 
@@ -187,6 +194,17 @@ void LearnEngine::LearnList::buffer_transmit_loop()
   while(1) {
     buffer_transmit();
     if(stop_transmit_thread) return;
+  }
+}
+
+void LearnEngine::LearnList::ack(buffer_id_t buffer_id, int sample_id) {
+  std::unique_lock<std::mutex> lock(mutex);
+  auto it = old_buffers.find(buffer_id);
+  assert(it != old_buffers.end());
+  FilterPtrs &filter_ptrs = it->second;
+  filter.erase(filter_ptrs.buffer[sample_id]); // what happens if bad input :(
+  if(--filter_ptrs.unacked_count == 0) {
+    old_buffers.erase(it);
   }
 }
 
@@ -233,4 +251,12 @@ void LearnEngine::learn(list_id_t list_id, const Packet &pkt) {
   assert(it != learn_lists.end());
   LearnList *list = it->second.get();
   list->add_sample(*pkt.get_phv());
+}
+
+void LearnEngine::ack(list_id_t list_id, buffer_id_t buffer_id, int sample_id) {
+  // TODO : event logging
+  auto it = learn_lists.find(list_id);
+  assert(it != learn_lists.end());
+  LearnList *list = it->second.get();
+  list->ack(buffer_id, sample_id);
 }

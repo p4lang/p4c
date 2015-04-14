@@ -41,6 +41,7 @@ private:
 class LearnEngine {
 public:
   typedef int list_id_t;
+  typedef unsigned long long buffer_id_t;
 
   typedef struct {
     int switch_id;
@@ -60,6 +61,8 @@ public:
   void list_init(list_id_t list_id);
 
   void learn(list_id_t list_id, const Packet &pkt);
+
+  void ack(list_id_t list_id, buffer_id_t buffer_id, int sample_id);
 
 private:
   class LearnSampleBuilder {
@@ -95,7 +98,11 @@ private:
   
   typedef std::unordered_set<ByteContainer, ByteContainerKeyHash> LearnFilter;
 
-  typedef unsigned long long buffer_id_t;
+  private:
+  struct FilterPtrs {
+    size_t unacked_count{0};
+    std::vector<LearnFilter::iterator> buffer;
+  };
 
   class LearnList {
   public:
@@ -111,6 +118,8 @@ private:
 
     void add_sample(const PHV &phv);
 
+    void ack(buffer_id_t buffer_id, int sample_id);
+
     LearnList(const LearnList &other) = delete;
     LearnList &operator=(const LearnList &other) = delete;
     LearnList(LearnList &&other) = delete;
@@ -120,7 +129,7 @@ private:
     void swap_buffers();
     void buffer_transmit_loop();
     void buffer_transmit();
-    
+
   private:
     mutable std::mutex mutex;
 
@@ -138,6 +147,7 @@ private:
     const bool with_timeout;
 
     LearnFilter filter;
+    std::unordered_map<buffer_id_t, FilterPtrs> old_buffers;
 
     std::vector<char> buffer_tmp;
     mutable std::condition_variable b_can_swap;
