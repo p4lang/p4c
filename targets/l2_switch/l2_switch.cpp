@@ -88,6 +88,7 @@ void SimpleSwitch::pipeline_thread() {
 
     if(learn_id > 0) {
       get_learn_engine()->learn(learn_id, *packet.get());
+      phv->get_field("intrinsic_metadata.learn_id").set(0);
     }
 
     if(egress_port == 0) {

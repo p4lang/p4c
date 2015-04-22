@@ -8,6 +8,12 @@
 
 #include "nn.h"
 
+#include <thrift/protocol/TBinaryProtocol.h>
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TTransportUtils.h>
+
+#include "Runtime.h"
+
 typedef struct {
   int switch_id;
   int list_id;
@@ -20,7 +26,22 @@ typedef struct {
   short ingress_port;
 } __attribute__((packed)) sample_t;
 
+using namespace bm_runtime;
+
+using namespace apache::thrift;
+using namespace apache::thrift::protocol;
+using namespace apache::thrift::transport;
+
 int main() {
+
+  boost::shared_ptr<TTransport> socket(new TSocket("localhost", 9090));
+  boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+  boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+
+  RuntimeClient client(protocol);
+
+  transport->open();
+
   nn::socket s(AF_SP, NN_SUB);
   s.setsockopt(NN_SUB, NN_SUB_SUBSCRIBE, "", 0);
   s.connect("ipc:///tmp/test_bm_learning.ipc");
@@ -38,15 +59,31 @@ int main() {
   msghdr.msg_iovlen = 2;
 
   while(s.recvmsg(&msghdr, 0) >= 0) {
-    std::cout << "I received " << learn_hdr.num_samples << " samples" << std::endl;
+    std::cout << "I received " << learn_hdr.num_samples << " samples"
+	      << std::endl;
 
     for(unsigned int i = 0; i < learn_hdr.num_samples; i++) {
       sample_t *sample = ((sample_t *) data) + i;
 
-      sample->ingress_port = ntohs(sample->ingress_port);
+      std::cout << "ingress port is " << ntohs(sample->ingress_port)
+		<< std::endl;
 
-      std::cout << "ingress port is " << sample->ingress_port << std::endl;
+      std::vector<std::string> match_key =
+	{std::string(sample->src_addr, sizeof(sample->src_addr))};
+
+      client.bm_table_add_exact_match_entry("smac", "_nop",
+					    match_key,
+					    std::vector<std::string>());
+
+      std::vector<std::string> action_data =
+	{std::string((char *) &sample->ingress_port, 2)};
+
+      client.bm_table_add_exact_match_entry("dmac", "forward",
+					    match_key,
+					    action_data);
     }
+
+    client.bm_learning_ack_buffer(learn_hdr.list_id, learn_hdr.buffer_id);
   }
 
   return 0;
