@@ -142,6 +142,16 @@ class RuntimeHandler : virtual public RuntimeIf {
     }
   }
 
+  void bm_learning_ack(const BmLearningListId list_id, const BmLearningBufferId buffer_id, const std::vector<BmLearningSampleId> & sample_ids) {
+    printf("bm_learning_ack\n");
+    switch_->get_learn_engine()->ack(list_id, buffer_id, sample_ids);
+  }
+
+  void bm_learning_ack_buffer(const BmLearningListId list_id, const BmLearningBufferId buffer_id) {
+    printf("bm_learning_ack_buffer\n");
+    switch_->get_learn_engine()->ack_buffer(list_id, buffer_id);
+  }
+
 };
 
 namespace bm_runtime {

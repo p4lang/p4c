@@ -4,6 +4,10 @@ typedef i32 BmEntryHandle
 typedef list<binary> BmActionData
 typedef list<binary> BmMatchKey
 
+typedef i32 BmLearningListId
+typedef i64 BmLearningBufferId
+typedef i32 BmLearningSampleId
+
 enum TableOperationErrorCode {
   TABLE_FULL = 1,
   INVALID_HANDLE = 2,
@@ -43,10 +47,21 @@ service Runtime {
     1:string table_name,
     2:string action_name,
     3:BmActionData action_data
-  ) throws (1:InvalidTableOperation ouch)
+  ) throws (1:InvalidTableOperation ouch),
 
   void bm_table_delete_entry(
     1:string table_name,
     2:BmEntryHandle entry_handle
-  ) throws (1:InvalidTableOperation ouch)
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_learning_ack(
+    1:BmLearningListId list_id,
+    2:BmLearningBufferId buffer_id,
+    3:list<BmLearningSampleId> sample_ids
+  ),
+
+  void bm_learning_ack_buffer(
+    1:BmLearningListId list_id,
+    2:BmLearningBufferId buffer_id
+  )
 }

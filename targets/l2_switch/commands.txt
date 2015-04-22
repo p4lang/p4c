@@ -1,0 +1,2 @@
+table_set_default smac mac_learn
+table_set_default dmac _drop

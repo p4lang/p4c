@@ -8,6 +8,7 @@
 #include "P4Objects.h"
 #include "queue.h"
 #include "packet.h"
+#include "learning.h"
 #include "runtime_interface.h"
 
 class Switch : public RuntimeInterface {
@@ -65,6 +66,8 @@ public:
   MatchTable::ErrorCode
   table_delete_entry(const std::string &table_name,
 		     entry_handle_t handle) override;
+
+  LearnEngine *get_learn_engine();
 
 protected:
   std::unique_ptr<P4Objects> p4objects;

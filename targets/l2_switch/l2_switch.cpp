@@ -11,7 +11,7 @@
 #include "bm_sim/switch.h"
 #include "bm_sim/event_logger.h"
 
-#include "simple_router.h"
+#include "l2_switch.h"
 #include "primitives.h"
 #include "simplelog.h"
 
@@ -73,22 +73,32 @@ void SimpleSwitch::pipeline_thread() {
     input_buffer.pop_back(&packet);
     phv = packet->get_phv();
     SIMPLELOG << "processing packet " << packet->get_packet_id() << std::endl;
+
+    int ingress_port = packet->get_ingress_port();
+    phv->get_field("standard_metadata.ingress_port").set(ingress_port);
     
     parser->parse(packet.get());
     ingress_mau->apply(packet.get());
 
     int egress_port = phv->get_field("standard_metadata.egress_port").get_int();
-    SIMPLELOG << "egress port is " << egress_port << std::endl;    
+    SIMPLELOG << "egress port is " << egress_port << std::endl;
+
+    int learn_id = phv->get_field("intrinsic_metadata.learn_id").get_int();
+    SIMPLELOG << "learn id is " << learn_id << std::endl;
+
+    if(learn_id > 0) {
+      get_learn_engine()->learn(learn_id, *packet.get());
+    }
 
     if(egress_port == 0) {
       SIMPLELOG << "dropping packet\n";
+      continue;
     }
-    else {
-      packet->set_egress_port(egress_port);
-      egress_mau->apply(packet.get());
-      deparser->deparse(packet.get());
-      output_buffer.push_front(std::move(packet));
-    }
+
+    packet->set_egress_port(egress_port);
+    egress_mau->apply(packet.get());
+    deparser->deparse(packet.get());
+    output_buffer.push_front(std::move(packet));
   }
 }
 
@@ -103,7 +113,7 @@ int packet_accept(int port_num, const char *buffer, int len) {
 
 void start_processing(transmit_fn_t transmit_fn) {
   simple_switch = new SimpleSwitch(transmit_fn);
-  simple_switch->init_objects("simple_router.json");
+  simple_switch->init_objects("l2_switch.json");
 
   bm_runtime::start_server(simple_switch, 9090);
 

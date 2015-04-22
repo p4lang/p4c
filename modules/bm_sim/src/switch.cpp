@@ -111,3 +111,8 @@ MatchTable::ErrorCode Switch::table_delete_entry(
   assert(table);
   return table->delete_entry(handle);
 }
+
+LearnEngine *Switch::get_learn_engine()
+{
+  return p4objects->get_learn_engine();
+}

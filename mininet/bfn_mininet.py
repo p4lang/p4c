@@ -77,8 +77,8 @@ class BFNSwitch(Switch):
 
         print ' '.join(args)
 
-        # self.cmd( ' '.join(args) + ' >' + logfile + ' 2>&1 &' )
-        self.cmd( ' '.join(args) + ' > /dev/null 2>&1 &' )
+        self.cmd( ' '.join(args) + ' >' + logfile + ' 2>&1 &' )
+        # self.cmd( ' '.join(args) + ' > /dev/null 2>&1 &' )
 
         print "switch has been started"
 
