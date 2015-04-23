@@ -10,6 +10,7 @@
 #include "packet.h"
 #include "learning.h"
 #include "runtime_interface.h"
+#include "pre.h"
 
 class Switch : public RuntimeInterface {
 public:
@@ -69,8 +70,11 @@ public:
 
   LearnEngine *get_learn_engine();
 
+  McPre *get_pre() { return pre.get(); }
+
 protected:
   std::unique_ptr<P4Objects> p4objects;
+  std::unique_ptr<McPre> pre;
 };
 
 #endif

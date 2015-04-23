@@ -8,6 +8,7 @@
 #include <thrift/transport/TBufferTransports.h>
 
 #include <bm_sim/switch.h>
+#include <bm_sim/pre.h>
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -151,6 +152,102 @@ class RuntimeHandler : virtual public RuntimeIf {
   void bm_learning_ack_buffer(const BmLearningListId list_id, const BmLearningBufferId buffer_id) {
     printf("bm_learning_ack_buffer\n");
     switch_->get_learn_engine()->ack_buffer(list_id, buffer_id);
+  }
+
+  BmMcMgrpHandle bm_mc_mgrp_create(const BmMcMgrp mgrp) {
+    printf("bm_mc_mgrp_create\n");
+    McPre::mgrp_hdl_t mgrp_hdl;
+    McPre::McReturnCode error_code =
+      switch_->get_pre()->mc_mgrp_create(mgrp, &mgrp_hdl);
+    if(error_code != McPre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+    return mgrp_hdl;
+  }
+
+  void bm_mc_mgrp_destroy(const BmMcMgrpHandle mgrp_handle) {
+    printf("bm_mc_mgrp_destroy\n");
+    McPre::McReturnCode error_code =
+      switch_->get_pre()->mc_mgrp_destroy(mgrp_handle);
+    if(error_code != McPre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
+
+  BmMcL1Handle bm_mc_l1_node_create(const BmMcRid rid) {
+    printf("bm_mc_l1_node_create\n");
+    McPre::l1_hdl_t l1_hdl;
+    McPre::McReturnCode error_code =
+      switch_->get_pre()->mc_l1_node_create(rid, &l1_hdl);
+    if(error_code != McPre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+    return l1_hdl;
+  }
+
+  void bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
+    printf("bm_mc_l1_node_associate\n");
+    McPre::McReturnCode error_code =
+      switch_->get_pre()->mc_l1_node_associate(mgrp_handle, l1_handle);
+    if(error_code != McPre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
+
+  void bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle) {
+    printf("bm_mc_l1_node_destroy\n");
+    McPre::McReturnCode error_code =
+      switch_->get_pre()->mc_l1_node_destroy(l1_handle);
+    if(error_code != McPre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
+
+  BmMcL2Handle bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) {
+    printf("bm_mc_l2_node_create\n");
+    McPre::l2_hdl_t l2_hdl;
+    McPre::McReturnCode error_code = switch_->get_pre()->mc_l2_node_create(
+        l1_handle, &l2_hdl, McPre::PortMap(port_map)
+    );
+    if(error_code != McPre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+    return l2_hdl;
+  }
+
+  void bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map) {
+    printf("bm_mc_l2_node_update\n");
+    McPre::McReturnCode error_code = switch_->get_pre()->mc_l2_node_update(
+        l2_handle, McPre::PortMap(port_map)
+    );
+    if(error_code != McPre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
+
+  void bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle) {
+    printf("bm_mc_l2_node_destroy\n");
+    McPre::McReturnCode error_code =
+      switch_->get_pre()->mc_l2_node_destroy(l2_handle);
+    if(error_code != McPre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
   }
 
 };

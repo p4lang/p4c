@@ -27,6 +27,19 @@ struct TableOperationErrorCode {
 
 extern const std::map<int, const char*> _TableOperationErrorCode_VALUES_TO_NAMES;
 
+struct McOperationErrorCode {
+  enum type {
+    TABLE_FULL = 1,
+    INVALID_HANDLE = 2,
+    INVALID_MGID = 3,
+    INVALID_L1_HANDLE = 4,
+    INVALID_L2_HANLDE = 5,
+    ERROR = 6
+  };
+};
+
+extern const std::map<int, const char*> _McOperationErrorCode_VALUES_TO_NAMES;
+
 typedef int32_t BmEntryHandle;
 
 typedef std::vector<std::string>  BmActionData;
@@ -38,6 +51,18 @@ typedef int32_t BmLearningListId;
 typedef int64_t BmLearningBufferId;
 
 typedef int32_t BmLearningSampleId;
+
+typedef int32_t BmMcMgrp;
+
+typedef int32_t BmMcRid;
+
+typedef int32_t BmMcMgrpHandle;
+
+typedef int32_t BmMcL1Handle;
+
+typedef int32_t BmMcL2Handle;
+
+typedef std::string BmMcPortMap;
 
 typedef struct _InvalidTableOperation__isset {
   _InvalidTableOperation__isset() : what(false) {}
@@ -81,6 +106,49 @@ class InvalidTableOperation : public ::apache::thrift::TException {
 };
 
 void swap(InvalidTableOperation &a, InvalidTableOperation &b);
+
+typedef struct _InvalidMcOperation__isset {
+  _InvalidMcOperation__isset() : what(false) {}
+  bool what;
+} _InvalidMcOperation__isset;
+
+class InvalidMcOperation : public ::apache::thrift::TException {
+ public:
+
+  static const char* ascii_fingerprint; // = "8BBB3D0C3B370CB38F2D1340BB79F0AA";
+  static const uint8_t binary_fingerprint[16]; // = {0x8B,0xBB,0x3D,0x0C,0x3B,0x37,0x0C,0xB3,0x8F,0x2D,0x13,0x40,0xBB,0x79,0xF0,0xAA};
+
+  InvalidMcOperation() : what((McOperationErrorCode::type)0) {
+  }
+
+  virtual ~InvalidMcOperation() throw() {}
+
+  McOperationErrorCode::type what;
+
+  _InvalidMcOperation__isset __isset;
+
+  void __set_what(const McOperationErrorCode::type val) {
+    what = val;
+  }
+
+  bool operator == (const InvalidMcOperation & rhs) const
+  {
+    if (!(what == rhs.what))
+      return false;
+    return true;
+  }
+  bool operator != (const InvalidMcOperation &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const InvalidMcOperation & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+void swap(InvalidMcOperation &a, InvalidMcOperation &b);
 
 } // namespace
 

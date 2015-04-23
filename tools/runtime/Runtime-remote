@@ -28,6 +28,16 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print '  BmEntryHandle bm_table_add_ternary_match_entry(string table_name, string action_name, BmMatchKey match_key, BmMatchKey match_mask, i32 priority, BmActionData action_data)'
   print '  void bm_set_default_action(string table_name, string action_name, BmActionData action_data)'
   print '  void bm_table_delete_entry(string table_name, BmEntryHandle entry_handle)'
+  print '  void bm_learning_ack(BmLearningListId list_id, BmLearningBufferId buffer_id,  sample_ids)'
+  print '  void bm_learning_ack_buffer(BmLearningListId list_id, BmLearningBufferId buffer_id)'
+  print '  BmMcMgrpHandle bm_mc_mgrp_create(BmMcMgrp mgrp)'
+  print '  void bm_mc_mgrp_destroy(BmMcMgrpHandle mgrp_handle)'
+  print '  BmMcL1Handle bm_mc_l1_node_create(BmMcRid rid)'
+  print '  void bm_mc_l1_node_associate(BmMcMgrpHandle mgrp_handle, BmMcL1Handle l1_handle)'
+  print '  void bm_mc_l1_node_destroy(BmMcL1Handle l1_handle)'
+  print '  BmMcL2Handle bm_mc_l2_node_create(BmMcL1Handle l1_handle, BmMcPortMap port_map)'
+  print '  void bm_mc_l2_node_update(BmMcL2Handle l2_handle, BmMcPortMap port_map)'
+  print '  void bm_mc_l2_node_destroy(BmMcL2Handle l2_handle)'
   print ''
   sys.exit(0)
 
@@ -108,6 +118,66 @@ elif cmd == 'bm_table_delete_entry':
     print 'bm_table_delete_entry requires 2 args'
     sys.exit(1)
   pp.pprint(client.bm_table_delete_entry(args[0],eval(args[1]),))
+
+elif cmd == 'bm_learning_ack':
+  if len(args) != 3:
+    print 'bm_learning_ack requires 3 args'
+    sys.exit(1)
+  pp.pprint(client.bm_learning_ack(eval(args[0]),eval(args[1]),eval(args[2]),))
+
+elif cmd == 'bm_learning_ack_buffer':
+  if len(args) != 2:
+    print 'bm_learning_ack_buffer requires 2 args'
+    sys.exit(1)
+  pp.pprint(client.bm_learning_ack_buffer(eval(args[0]),eval(args[1]),))
+
+elif cmd == 'bm_mc_mgrp_create':
+  if len(args) != 1:
+    print 'bm_mc_mgrp_create requires 1 args'
+    sys.exit(1)
+  pp.pprint(client.bm_mc_mgrp_create(eval(args[0]),))
+
+elif cmd == 'bm_mc_mgrp_destroy':
+  if len(args) != 1:
+    print 'bm_mc_mgrp_destroy requires 1 args'
+    sys.exit(1)
+  pp.pprint(client.bm_mc_mgrp_destroy(eval(args[0]),))
+
+elif cmd == 'bm_mc_l1_node_create':
+  if len(args) != 1:
+    print 'bm_mc_l1_node_create requires 1 args'
+    sys.exit(1)
+  pp.pprint(client.bm_mc_l1_node_create(eval(args[0]),))
+
+elif cmd == 'bm_mc_l1_node_associate':
+  if len(args) != 2:
+    print 'bm_mc_l1_node_associate requires 2 args'
+    sys.exit(1)
+  pp.pprint(client.bm_mc_l1_node_associate(eval(args[0]),eval(args[1]),))
+
+elif cmd == 'bm_mc_l1_node_destroy':
+  if len(args) != 1:
+    print 'bm_mc_l1_node_destroy requires 1 args'
+    sys.exit(1)
+  pp.pprint(client.bm_mc_l1_node_destroy(eval(args[0]),))
+
+elif cmd == 'bm_mc_l2_node_create':
+  if len(args) != 2:
+    print 'bm_mc_l2_node_create requires 2 args'
+    sys.exit(1)
+  pp.pprint(client.bm_mc_l2_node_create(eval(args[0]),eval(args[1]),))
+
+elif cmd == 'bm_mc_l2_node_update':
+  if len(args) != 2:
+    print 'bm_mc_l2_node_update requires 2 args'
+    sys.exit(1)
+  pp.pprint(client.bm_mc_l2_node_update(eval(args[0]),eval(args[1]),))
+
+elif cmd == 'bm_mc_l2_node_destroy':
+  if len(args) != 1:
+    print 'bm_mc_l2_node_destroy requires 1 args'
+    sys.exit(1)
+  pp.pprint(client.bm_mc_l2_node_destroy(eval(args[0]),))
 
 else:
   print 'Unrecognized method %s' % cmd

@@ -65,7 +65,7 @@
                     4
                 ],
                 [
-                    "_padding",
+                    "mgid",
                     4
                 ]
             ]
@@ -138,47 +138,8 @@
     ],
     "actions": [
         {
-            "name": "_drop",
-            "id": 0,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "drop",
-                    "parameters": []
-                }
-            ]
-        },
-        {
-            "name": "forward",
-            "id": 1,
-            "runtime_data": [
-                {
-                    "name": "port",
-                    "bitwidth": 9
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "mac_learn",
-            "id": 2,
+            "id": 0,
             "runtime_data": [],
             "primitives": [
                 {
@@ -207,6 +168,57 @@
                         {
                             "type": "hexstr",
                             "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "broadcast",
+            "id": 1,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "intrinsic_metadata",
+                                "mgid"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "forward",
+            "id": 2,
+            "runtime_data": [
+                {
+                    "name": "port",
+                    "bitwidth": 9
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_port"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
                         }
                     ]
                 }
@@ -265,11 +277,11 @@
                     ],
                     "actions": [
                         "forward",
-                        "_drop"
+                        "broadcast"
                     ],
                     "next_tables": {
                         "forward": null,
-                        "_drop": null
+                        "broadcast": null
                     },
                     "default_action": null
                 }

@@ -33,7 +33,7 @@ extern "C" {
 
 #define CHECK(x) assert(!x)
 
-// #define PCAP_DUMP
+#define PCAP_DUMP
 
 static bmi_port_mgr_t *port_mgr;
 

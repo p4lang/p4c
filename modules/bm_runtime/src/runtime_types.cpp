@@ -22,6 +22,24 @@ const char* _kTableOperationErrorCodeNames[] = {
 };
 const std::map<int, const char*> _TableOperationErrorCode_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(3, _kTableOperationErrorCodeValues, _kTableOperationErrorCodeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
 
+int _kMcOperationErrorCodeValues[] = {
+  McOperationErrorCode::TABLE_FULL,
+  McOperationErrorCode::INVALID_HANDLE,
+  McOperationErrorCode::INVALID_MGID,
+  McOperationErrorCode::INVALID_L1_HANDLE,
+  McOperationErrorCode::INVALID_L2_HANLDE,
+  McOperationErrorCode::ERROR
+};
+const char* _kMcOperationErrorCodeNames[] = {
+  "TABLE_FULL",
+  "INVALID_HANDLE",
+  "INVALID_MGID",
+  "INVALID_L1_HANDLE",
+  "INVALID_L2_HANLDE",
+  "ERROR"
+};
+const std::map<int, const char*> _McOperationErrorCode_VALUES_TO_NAMES(::apache::thrift::TEnumIterator(6, _kMcOperationErrorCodeValues, _kMcOperationErrorCodeNames), ::apache::thrift::TEnumIterator(-1, NULL, NULL));
+
 const char* InvalidTableOperation::ascii_fingerprint = "8BBB3D0C3B370CB38F2D1340BB79F0AA";
 const uint8_t InvalidTableOperation::binary_fingerprint[16] = {0x8B,0xBB,0x3D,0x0C,0x3B,0x37,0x0C,0xB3,0x8F,0x2D,0x13,0x40,0xBB,0x79,0xF0,0xAA};
 
@@ -81,6 +99,70 @@ uint32_t InvalidTableOperation::write(::apache::thrift::protocol::TProtocol* opr
 }
 
 void swap(InvalidTableOperation &a, InvalidTableOperation &b) {
+  using ::std::swap;
+  swap(a.what, b.what);
+  swap(a.__isset, b.__isset);
+}
+
+const char* InvalidMcOperation::ascii_fingerprint = "8BBB3D0C3B370CB38F2D1340BB79F0AA";
+const uint8_t InvalidMcOperation::binary_fingerprint[16] = {0x8B,0xBB,0x3D,0x0C,0x3B,0x37,0x0C,0xB3,0x8F,0x2D,0x13,0x40,0xBB,0x79,0xF0,0xAA};
+
+uint32_t InvalidMcOperation::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          int32_t ecast1;
+          xfer += iprot->readI32(ecast1);
+          this->what = (McOperationErrorCode::type)ecast1;
+          this->__isset.what = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t InvalidMcOperation::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("InvalidMcOperation");
+
+  xfer += oprot->writeFieldBegin("what", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((int32_t)this->what);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+void swap(InvalidMcOperation &a, InvalidMcOperation &b) {
   using ::std::swap;
   swap(a.what, b.what);
   swap(a.__isset, b.__isset);

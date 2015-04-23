@@ -50,7 +50,7 @@ $(TARGET): $(objs_) | $(BUILD_DIRS)
 	$(CXX) $(CPPFLAGS) -o $@ $^ $(LIBS)
 
 check: $(TARGET)
-	./$(TARGET)
+	sudo ./$(TARGET)
 
 $(BUILD_DIRS):
 	mkdir -p $@

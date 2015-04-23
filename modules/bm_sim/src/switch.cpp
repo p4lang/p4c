@@ -5,6 +5,7 @@
 
 Switch::Switch() {
   p4objects = std::unique_ptr<P4Objects>(new P4Objects());
+  pre = std::unique_ptr<McPre>(new McPre());
 }
 
 void Switch::init_objects(const std::string &json_path) {

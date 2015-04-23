@@ -48,14 +48,14 @@ uint32_t Runtime_bm_table_add_exact_match_entry_args::read(::apache::thrift::pro
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->match_key.clear();
-            uint32_t _size1;
-            ::apache::thrift::protocol::TType _etype4;
-            xfer += iprot->readListBegin(_etype4, _size1);
-            this->match_key.resize(_size1);
-            uint32_t _i5;
-            for (_i5 = 0; _i5 < _size1; ++_i5)
+            uint32_t _size2;
+            ::apache::thrift::protocol::TType _etype5;
+            xfer += iprot->readListBegin(_etype5, _size2);
+            this->match_key.resize(_size2);
+            uint32_t _i6;
+            for (_i6 = 0; _i6 < _size2; ++_i6)
             {
-              xfer += iprot->readBinary(this->match_key[_i5]);
+              xfer += iprot->readBinary(this->match_key[_i6]);
             }
             xfer += iprot->readListEnd();
           }
@@ -68,14 +68,14 @@ uint32_t Runtime_bm_table_add_exact_match_entry_args::read(::apache::thrift::pro
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->action_data.clear();
-            uint32_t _size6;
-            ::apache::thrift::protocol::TType _etype9;
-            xfer += iprot->readListBegin(_etype9, _size6);
-            this->action_data.resize(_size6);
-            uint32_t _i10;
-            for (_i10 = 0; _i10 < _size6; ++_i10)
+            uint32_t _size7;
+            ::apache::thrift::protocol::TType _etype10;
+            xfer += iprot->readListBegin(_etype10, _size7);
+            this->action_data.resize(_size7);
+            uint32_t _i11;
+            for (_i11 = 0; _i11 < _size7; ++_i11)
             {
-              xfer += iprot->readBinary(this->action_data[_i10]);
+              xfer += iprot->readBinary(this->action_data[_i11]);
             }
             xfer += iprot->readListEnd();
           }
@@ -111,10 +111,10 @@ uint32_t Runtime_bm_table_add_exact_match_entry_args::write(::apache::thrift::pr
   xfer += oprot->writeFieldBegin("match_key", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->match_key.size()));
-    std::vector<std::string> ::const_iterator _iter11;
-    for (_iter11 = this->match_key.begin(); _iter11 != this->match_key.end(); ++_iter11)
+    std::vector<std::string> ::const_iterator _iter12;
+    for (_iter12 = this->match_key.begin(); _iter12 != this->match_key.end(); ++_iter12)
     {
-      xfer += oprot->writeBinary((*_iter11));
+      xfer += oprot->writeBinary((*_iter12));
     }
     xfer += oprot->writeListEnd();
   }
@@ -123,10 +123,10 @@ uint32_t Runtime_bm_table_add_exact_match_entry_args::write(::apache::thrift::pr
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->action_data.size()));
-    std::vector<std::string> ::const_iterator _iter12;
-    for (_iter12 = this->action_data.begin(); _iter12 != this->action_data.end(); ++_iter12)
+    std::vector<std::string> ::const_iterator _iter13;
+    for (_iter13 = this->action_data.begin(); _iter13 != this->action_data.end(); ++_iter13)
     {
-      xfer += oprot->writeBinary((*_iter12));
+      xfer += oprot->writeBinary((*_iter13));
     }
     xfer += oprot->writeListEnd();
   }
@@ -152,10 +152,10 @@ uint32_t Runtime_bm_table_add_exact_match_entry_pargs::write(::apache::thrift::p
   xfer += oprot->writeFieldBegin("match_key", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->match_key)).size()));
-    std::vector<std::string> ::const_iterator _iter13;
-    for (_iter13 = (*(this->match_key)).begin(); _iter13 != (*(this->match_key)).end(); ++_iter13)
+    std::vector<std::string> ::const_iterator _iter14;
+    for (_iter14 = (*(this->match_key)).begin(); _iter14 != (*(this->match_key)).end(); ++_iter14)
     {
-      xfer += oprot->writeBinary((*_iter13));
+      xfer += oprot->writeBinary((*_iter14));
     }
     xfer += oprot->writeListEnd();
   }
@@ -164,10 +164,10 @@ uint32_t Runtime_bm_table_add_exact_match_entry_pargs::write(::apache::thrift::p
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->action_data)).size()));
-    std::vector<std::string> ::const_iterator _iter14;
-    for (_iter14 = (*(this->action_data)).begin(); _iter14 != (*(this->action_data)).end(); ++_iter14)
+    std::vector<std::string> ::const_iterator _iter15;
+    for (_iter15 = (*(this->action_data)).begin(); _iter15 != (*(this->action_data)).end(); ++_iter15)
     {
-      xfer += oprot->writeBinary((*_iter14));
+      xfer += oprot->writeBinary((*_iter15));
     }
     xfer += oprot->writeListEnd();
   }
@@ -334,14 +334,14 @@ uint32_t Runtime_bm_table_add_lpm_entry_args::read(::apache::thrift::protocol::T
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->match_key.clear();
-            uint32_t _size15;
-            ::apache::thrift::protocol::TType _etype18;
-            xfer += iprot->readListBegin(_etype18, _size15);
-            this->match_key.resize(_size15);
-            uint32_t _i19;
-            for (_i19 = 0; _i19 < _size15; ++_i19)
+            uint32_t _size16;
+            ::apache::thrift::protocol::TType _etype19;
+            xfer += iprot->readListBegin(_etype19, _size16);
+            this->match_key.resize(_size16);
+            uint32_t _i20;
+            for (_i20 = 0; _i20 < _size16; ++_i20)
             {
-              xfer += iprot->readBinary(this->match_key[_i19]);
+              xfer += iprot->readBinary(this->match_key[_i20]);
             }
             xfer += iprot->readListEnd();
           }
@@ -362,14 +362,14 @@ uint32_t Runtime_bm_table_add_lpm_entry_args::read(::apache::thrift::protocol::T
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->action_data.clear();
-            uint32_t _size20;
-            ::apache::thrift::protocol::TType _etype23;
-            xfer += iprot->readListBegin(_etype23, _size20);
-            this->action_data.resize(_size20);
-            uint32_t _i24;
-            for (_i24 = 0; _i24 < _size20; ++_i24)
+            uint32_t _size21;
+            ::apache::thrift::protocol::TType _etype24;
+            xfer += iprot->readListBegin(_etype24, _size21);
+            this->action_data.resize(_size21);
+            uint32_t _i25;
+            for (_i25 = 0; _i25 < _size21; ++_i25)
             {
-              xfer += iprot->readBinary(this->action_data[_i24]);
+              xfer += iprot->readBinary(this->action_data[_i25]);
             }
             xfer += iprot->readListEnd();
           }
@@ -405,10 +405,10 @@ uint32_t Runtime_bm_table_add_lpm_entry_args::write(::apache::thrift::protocol::
   xfer += oprot->writeFieldBegin("match_key", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->match_key.size()));
-    std::vector<std::string> ::const_iterator _iter25;
-    for (_iter25 = this->match_key.begin(); _iter25 != this->match_key.end(); ++_iter25)
+    std::vector<std::string> ::const_iterator _iter26;
+    for (_iter26 = this->match_key.begin(); _iter26 != this->match_key.end(); ++_iter26)
     {
-      xfer += oprot->writeBinary((*_iter25));
+      xfer += oprot->writeBinary((*_iter26));
     }
     xfer += oprot->writeListEnd();
   }
@@ -421,10 +421,10 @@ uint32_t Runtime_bm_table_add_lpm_entry_args::write(::apache::thrift::protocol::
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 5);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->action_data.size()));
-    std::vector<std::string> ::const_iterator _iter26;
-    for (_iter26 = this->action_data.begin(); _iter26 != this->action_data.end(); ++_iter26)
+    std::vector<std::string> ::const_iterator _iter27;
+    for (_iter27 = this->action_data.begin(); _iter27 != this->action_data.end(); ++_iter27)
     {
-      xfer += oprot->writeBinary((*_iter26));
+      xfer += oprot->writeBinary((*_iter27));
     }
     xfer += oprot->writeListEnd();
   }
@@ -450,10 +450,10 @@ uint32_t Runtime_bm_table_add_lpm_entry_pargs::write(::apache::thrift::protocol:
   xfer += oprot->writeFieldBegin("match_key", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->match_key)).size()));
-    std::vector<std::string> ::const_iterator _iter27;
-    for (_iter27 = (*(this->match_key)).begin(); _iter27 != (*(this->match_key)).end(); ++_iter27)
+    std::vector<std::string> ::const_iterator _iter28;
+    for (_iter28 = (*(this->match_key)).begin(); _iter28 != (*(this->match_key)).end(); ++_iter28)
     {
-      xfer += oprot->writeBinary((*_iter27));
+      xfer += oprot->writeBinary((*_iter28));
     }
     xfer += oprot->writeListEnd();
   }
@@ -466,10 +466,10 @@ uint32_t Runtime_bm_table_add_lpm_entry_pargs::write(::apache::thrift::protocol:
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 5);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->action_data)).size()));
-    std::vector<std::string> ::const_iterator _iter28;
-    for (_iter28 = (*(this->action_data)).begin(); _iter28 != (*(this->action_data)).end(); ++_iter28)
+    std::vector<std::string> ::const_iterator _iter29;
+    for (_iter29 = (*(this->action_data)).begin(); _iter29 != (*(this->action_data)).end(); ++_iter29)
     {
-      xfer += oprot->writeBinary((*_iter28));
+      xfer += oprot->writeBinary((*_iter29));
     }
     xfer += oprot->writeListEnd();
   }
@@ -636,14 +636,14 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_args::read(::apache::thrift::p
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->match_key.clear();
-            uint32_t _size29;
-            ::apache::thrift::protocol::TType _etype32;
-            xfer += iprot->readListBegin(_etype32, _size29);
-            this->match_key.resize(_size29);
-            uint32_t _i33;
-            for (_i33 = 0; _i33 < _size29; ++_i33)
+            uint32_t _size30;
+            ::apache::thrift::protocol::TType _etype33;
+            xfer += iprot->readListBegin(_etype33, _size30);
+            this->match_key.resize(_size30);
+            uint32_t _i34;
+            for (_i34 = 0; _i34 < _size30; ++_i34)
             {
-              xfer += iprot->readBinary(this->match_key[_i33]);
+              xfer += iprot->readBinary(this->match_key[_i34]);
             }
             xfer += iprot->readListEnd();
           }
@@ -656,14 +656,14 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_args::read(::apache::thrift::p
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->match_mask.clear();
-            uint32_t _size34;
-            ::apache::thrift::protocol::TType _etype37;
-            xfer += iprot->readListBegin(_etype37, _size34);
-            this->match_mask.resize(_size34);
-            uint32_t _i38;
-            for (_i38 = 0; _i38 < _size34; ++_i38)
+            uint32_t _size35;
+            ::apache::thrift::protocol::TType _etype38;
+            xfer += iprot->readListBegin(_etype38, _size35);
+            this->match_mask.resize(_size35);
+            uint32_t _i39;
+            for (_i39 = 0; _i39 < _size35; ++_i39)
             {
-              xfer += iprot->readBinary(this->match_mask[_i38]);
+              xfer += iprot->readBinary(this->match_mask[_i39]);
             }
             xfer += iprot->readListEnd();
           }
@@ -684,14 +684,14 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_args::read(::apache::thrift::p
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->action_data.clear();
-            uint32_t _size39;
-            ::apache::thrift::protocol::TType _etype42;
-            xfer += iprot->readListBegin(_etype42, _size39);
-            this->action_data.resize(_size39);
-            uint32_t _i43;
-            for (_i43 = 0; _i43 < _size39; ++_i43)
+            uint32_t _size40;
+            ::apache::thrift::protocol::TType _etype43;
+            xfer += iprot->readListBegin(_etype43, _size40);
+            this->action_data.resize(_size40);
+            uint32_t _i44;
+            for (_i44 = 0; _i44 < _size40; ++_i44)
             {
-              xfer += iprot->readBinary(this->action_data[_i43]);
+              xfer += iprot->readBinary(this->action_data[_i44]);
             }
             xfer += iprot->readListEnd();
           }
@@ -727,10 +727,10 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_args::write(::apache::thrift::
   xfer += oprot->writeFieldBegin("match_key", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->match_key.size()));
-    std::vector<std::string> ::const_iterator _iter44;
-    for (_iter44 = this->match_key.begin(); _iter44 != this->match_key.end(); ++_iter44)
+    std::vector<std::string> ::const_iterator _iter45;
+    for (_iter45 = this->match_key.begin(); _iter45 != this->match_key.end(); ++_iter45)
     {
-      xfer += oprot->writeBinary((*_iter44));
+      xfer += oprot->writeBinary((*_iter45));
     }
     xfer += oprot->writeListEnd();
   }
@@ -739,10 +739,10 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_args::write(::apache::thrift::
   xfer += oprot->writeFieldBegin("match_mask", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->match_mask.size()));
-    std::vector<std::string> ::const_iterator _iter45;
-    for (_iter45 = this->match_mask.begin(); _iter45 != this->match_mask.end(); ++_iter45)
+    std::vector<std::string> ::const_iterator _iter46;
+    for (_iter46 = this->match_mask.begin(); _iter46 != this->match_mask.end(); ++_iter46)
     {
-      xfer += oprot->writeBinary((*_iter45));
+      xfer += oprot->writeBinary((*_iter46));
     }
     xfer += oprot->writeListEnd();
   }
@@ -755,10 +755,10 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_args::write(::apache::thrift::
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 6);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->action_data.size()));
-    std::vector<std::string> ::const_iterator _iter46;
-    for (_iter46 = this->action_data.begin(); _iter46 != this->action_data.end(); ++_iter46)
+    std::vector<std::string> ::const_iterator _iter47;
+    for (_iter47 = this->action_data.begin(); _iter47 != this->action_data.end(); ++_iter47)
     {
-      xfer += oprot->writeBinary((*_iter46));
+      xfer += oprot->writeBinary((*_iter47));
     }
     xfer += oprot->writeListEnd();
   }
@@ -784,10 +784,10 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_pargs::write(::apache::thrift:
   xfer += oprot->writeFieldBegin("match_key", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->match_key)).size()));
-    std::vector<std::string> ::const_iterator _iter47;
-    for (_iter47 = (*(this->match_key)).begin(); _iter47 != (*(this->match_key)).end(); ++_iter47)
+    std::vector<std::string> ::const_iterator _iter48;
+    for (_iter48 = (*(this->match_key)).begin(); _iter48 != (*(this->match_key)).end(); ++_iter48)
     {
-      xfer += oprot->writeBinary((*_iter47));
+      xfer += oprot->writeBinary((*_iter48));
     }
     xfer += oprot->writeListEnd();
   }
@@ -796,10 +796,10 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_pargs::write(::apache::thrift:
   xfer += oprot->writeFieldBegin("match_mask", ::apache::thrift::protocol::T_LIST, 4);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->match_mask)).size()));
-    std::vector<std::string> ::const_iterator _iter48;
-    for (_iter48 = (*(this->match_mask)).begin(); _iter48 != (*(this->match_mask)).end(); ++_iter48)
+    std::vector<std::string> ::const_iterator _iter49;
+    for (_iter49 = (*(this->match_mask)).begin(); _iter49 != (*(this->match_mask)).end(); ++_iter49)
     {
-      xfer += oprot->writeBinary((*_iter48));
+      xfer += oprot->writeBinary((*_iter49));
     }
     xfer += oprot->writeListEnd();
   }
@@ -812,10 +812,10 @@ uint32_t Runtime_bm_table_add_ternary_match_entry_pargs::write(::apache::thrift:
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 6);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->action_data)).size()));
-    std::vector<std::string> ::const_iterator _iter49;
-    for (_iter49 = (*(this->action_data)).begin(); _iter49 != (*(this->action_data)).end(); ++_iter49)
+    std::vector<std::string> ::const_iterator _iter50;
+    for (_iter50 = (*(this->action_data)).begin(); _iter50 != (*(this->action_data)).end(); ++_iter50)
     {
-      xfer += oprot->writeBinary((*_iter49));
+      xfer += oprot->writeBinary((*_iter50));
     }
     xfer += oprot->writeListEnd();
   }
@@ -982,14 +982,14 @@ uint32_t Runtime_bm_set_default_action_args::read(::apache::thrift::protocol::TP
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->action_data.clear();
-            uint32_t _size50;
-            ::apache::thrift::protocol::TType _etype53;
-            xfer += iprot->readListBegin(_etype53, _size50);
-            this->action_data.resize(_size50);
-            uint32_t _i54;
-            for (_i54 = 0; _i54 < _size50; ++_i54)
+            uint32_t _size51;
+            ::apache::thrift::protocol::TType _etype54;
+            xfer += iprot->readListBegin(_etype54, _size51);
+            this->action_data.resize(_size51);
+            uint32_t _i55;
+            for (_i55 = 0; _i55 < _size51; ++_i55)
             {
-              xfer += iprot->readBinary(this->action_data[_i54]);
+              xfer += iprot->readBinary(this->action_data[_i55]);
             }
             xfer += iprot->readListEnd();
           }
@@ -1025,10 +1025,10 @@ uint32_t Runtime_bm_set_default_action_args::write(::apache::thrift::protocol::T
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->action_data.size()));
-    std::vector<std::string> ::const_iterator _iter55;
-    for (_iter55 = this->action_data.begin(); _iter55 != this->action_data.end(); ++_iter55)
+    std::vector<std::string> ::const_iterator _iter56;
+    for (_iter56 = this->action_data.begin(); _iter56 != this->action_data.end(); ++_iter56)
     {
-      xfer += oprot->writeBinary((*_iter55));
+      xfer += oprot->writeBinary((*_iter56));
     }
     xfer += oprot->writeListEnd();
   }
@@ -1054,10 +1054,10 @@ uint32_t Runtime_bm_set_default_action_pargs::write(::apache::thrift::protocol::
   xfer += oprot->writeFieldBegin("action_data", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_STRING, static_cast<uint32_t>((*(this->action_data)).size()));
-    std::vector<std::string> ::const_iterator _iter56;
-    for (_iter56 = (*(this->action_data)).begin(); _iter56 != (*(this->action_data)).end(); ++_iter56)
+    std::vector<std::string> ::const_iterator _iter57;
+    for (_iter57 = (*(this->action_data)).begin(); _iter57 != (*(this->action_data)).end(); ++_iter57)
     {
-      xfer += oprot->writeBinary((*_iter56));
+      xfer += oprot->writeBinary((*_iter57));
     }
     xfer += oprot->writeListEnd();
   }
@@ -1382,14 +1382,14 @@ uint32_t Runtime_bm_learning_ack_args::read(::apache::thrift::protocol::TProtoco
         if (ftype == ::apache::thrift::protocol::T_LIST) {
           {
             this->sample_ids.clear();
-            uint32_t _size57;
-            ::apache::thrift::protocol::TType _etype60;
-            xfer += iprot->readListBegin(_etype60, _size57);
-            this->sample_ids.resize(_size57);
-            uint32_t _i61;
-            for (_i61 = 0; _i61 < _size57; ++_i61)
+            uint32_t _size58;
+            ::apache::thrift::protocol::TType _etype61;
+            xfer += iprot->readListBegin(_etype61, _size58);
+            this->sample_ids.resize(_size58);
+            uint32_t _i62;
+            for (_i62 = 0; _i62 < _size58; ++_i62)
             {
-              xfer += iprot->readI32(this->sample_ids[_i61]);
+              xfer += iprot->readI32(this->sample_ids[_i62]);
             }
             xfer += iprot->readListEnd();
           }
@@ -1425,10 +1425,10 @@ uint32_t Runtime_bm_learning_ack_args::write(::apache::thrift::protocol::TProtoc
   xfer += oprot->writeFieldBegin("sample_ids", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_I32, static_cast<uint32_t>(this->sample_ids.size()));
-    std::vector<BmLearningSampleId> ::const_iterator _iter62;
-    for (_iter62 = this->sample_ids.begin(); _iter62 != this->sample_ids.end(); ++_iter62)
+    std::vector<BmLearningSampleId> ::const_iterator _iter63;
+    for (_iter63 = this->sample_ids.begin(); _iter63 != this->sample_ids.end(); ++_iter63)
     {
-      xfer += oprot->writeI32((*_iter62));
+      xfer += oprot->writeI32((*_iter63));
     }
     xfer += oprot->writeListEnd();
   }
@@ -1454,10 +1454,10 @@ uint32_t Runtime_bm_learning_ack_pargs::write(::apache::thrift::protocol::TProto
   xfer += oprot->writeFieldBegin("sample_ids", ::apache::thrift::protocol::T_LIST, 3);
   {
     xfer += oprot->writeListBegin(::apache::thrift::protocol::T_I32, static_cast<uint32_t>((*(this->sample_ids)).size()));
-    std::vector<BmLearningSampleId> ::const_iterator _iter63;
-    for (_iter63 = (*(this->sample_ids)).begin(); _iter63 != (*(this->sample_ids)).end(); ++_iter63)
+    std::vector<BmLearningSampleId> ::const_iterator _iter64;
+    for (_iter64 = (*(this->sample_ids)).begin(); _iter64 != (*(this->sample_ids)).end(); ++_iter64)
     {
-      xfer += oprot->writeI32((*_iter63));
+      xfer += oprot->writeI32((*_iter64));
     }
     xfer += oprot->writeListEnd();
   }
@@ -1672,6 +1672,1410 @@ uint32_t Runtime_bm_learning_ack_buffer_presult::read(::apache::thrift::protocol
       break;
     }
     xfer += iprot->skip(ftype);
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_create_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->mgrp);
+          this->__isset.mgrp = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_create_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_mgrp_create_args");
+
+  xfer += oprot->writeFieldBegin("mgrp", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->mgrp);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_create_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_mgrp_create_pargs");
+
+  xfer += oprot->writeFieldBegin("mgrp", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->mgrp)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_create_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->success);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_create_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_mgrp_create_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I32, 0);
+    xfer += oprot->writeI32(this->success);
+    xfer += oprot->writeFieldEnd();
+  } else if (this->__isset.ouch) {
+    xfer += oprot->writeFieldBegin("ouch", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ouch.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_create_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32((*(this->success)));
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_destroy_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->mgrp_handle);
+          this->__isset.mgrp_handle = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_destroy_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_mgrp_destroy_args");
+
+  xfer += oprot->writeFieldBegin("mgrp_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->mgrp_handle);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_destroy_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_mgrp_destroy_pargs");
+
+  xfer += oprot->writeFieldBegin("mgrp_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->mgrp_handle)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_destroy_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_destroy_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_mgrp_destroy_result");
+
+  if (this->__isset.ouch) {
+    xfer += oprot->writeFieldBegin("ouch", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ouch.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_mgrp_destroy_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_create_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->rid);
+          this->__isset.rid = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_create_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l1_node_create_args");
+
+  xfer += oprot->writeFieldBegin("rid", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->rid);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_create_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l1_node_create_pargs");
+
+  xfer += oprot->writeFieldBegin("rid", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->rid)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_create_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->success);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_create_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l1_node_create_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I32, 0);
+    xfer += oprot->writeI32(this->success);
+    xfer += oprot->writeFieldEnd();
+  } else if (this->__isset.ouch) {
+    xfer += oprot->writeFieldBegin("ouch", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ouch.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_create_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32((*(this->success)));
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_associate_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->mgrp_handle);
+          this->__isset.mgrp_handle = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->l1_handle);
+          this->__isset.l1_handle = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_associate_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l1_node_associate_args");
+
+  xfer += oprot->writeFieldBegin("mgrp_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->mgrp_handle);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("l1_handle", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->l1_handle);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_associate_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l1_node_associate_pargs");
+
+  xfer += oprot->writeFieldBegin("mgrp_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->mgrp_handle)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("l1_handle", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32((*(this->l1_handle)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_associate_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_associate_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l1_node_associate_result");
+
+  if (this->__isset.ouch) {
+    xfer += oprot->writeFieldBegin("ouch", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ouch.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_associate_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_destroy_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->l1_handle);
+          this->__isset.l1_handle = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_destroy_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l1_node_destroy_args");
+
+  xfer += oprot->writeFieldBegin("l1_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->l1_handle);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_destroy_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l1_node_destroy_pargs");
+
+  xfer += oprot->writeFieldBegin("l1_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->l1_handle)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_destroy_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_destroy_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l1_node_destroy_result");
+
+  if (this->__isset.ouch) {
+    xfer += oprot->writeFieldBegin("ouch", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ouch.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l1_node_destroy_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_create_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->l1_handle);
+          this->__isset.l1_handle = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->port_map);
+          this->__isset.port_map = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_create_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l2_node_create_args");
+
+  xfer += oprot->writeFieldBegin("l1_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->l1_handle);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("port_map", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->port_map);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_create_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l2_node_create_pargs");
+
+  xfer += oprot->writeFieldBegin("l1_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->l1_handle)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("port_map", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->port_map)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_create_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->success);
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_create_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l2_node_create_result");
+
+  if (this->__isset.success) {
+    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_I32, 0);
+    xfer += oprot->writeI32(this->success);
+    xfer += oprot->writeFieldEnd();
+  } else if (this->__isset.ouch) {
+    xfer += oprot->writeFieldBegin("ouch", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ouch.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_create_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32((*(this->success)));
+          this->__isset.success = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_update_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->l2_handle);
+          this->__isset.l2_handle = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readString(this->port_map);
+          this->__isset.port_map = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_update_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l2_node_update_args");
+
+  xfer += oprot->writeFieldBegin("l2_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->l2_handle);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("port_map", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString(this->port_map);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_update_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l2_node_update_pargs");
+
+  xfer += oprot->writeFieldBegin("l2_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->l2_handle)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("port_map", ::apache::thrift::protocol::T_STRING, 2);
+  xfer += oprot->writeString((*(this->port_map)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_update_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_update_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l2_node_update_result");
+
+  if (this->__isset.ouch) {
+    xfer += oprot->writeFieldBegin("ouch", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ouch.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_update_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_destroy_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->l2_handle);
+          this->__isset.l2_handle = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_destroy_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l2_node_destroy_args");
+
+  xfer += oprot->writeFieldBegin("l2_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32(this->l2_handle);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_destroy_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+  uint32_t xfer = 0;
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l2_node_destroy_pargs");
+
+  xfer += oprot->writeFieldBegin("l2_handle", ::apache::thrift::protocol::T_I32, 1);
+  xfer += oprot->writeI32((*(this->l2_handle)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_destroy_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
+    xfer += iprot->readFieldEnd();
+  }
+
+  xfer += iprot->readStructEnd();
+
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_destroy_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+
+  uint32_t xfer = 0;
+
+  xfer += oprot->writeStructBegin("Runtime_bm_mc_l2_node_destroy_result");
+
+  if (this->__isset.ouch) {
+    xfer += oprot->writeFieldBegin("ouch", ::apache::thrift::protocol::T_STRUCT, 1);
+    xfer += this->ouch.write(oprot);
+    xfer += oprot->writeFieldEnd();
+  }
+  xfer += oprot->writeFieldStop();
+  xfer += oprot->writeStructEnd();
+  return xfer;
+}
+
+uint32_t Runtime_bm_mc_l2_node_destroy_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+
+  uint32_t xfer = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TType ftype;
+  int16_t fid;
+
+  xfer += iprot->readStructBegin(fname);
+
+  using ::apache::thrift::protocol::TProtocolException;
+
+
+  while (true)
+  {
+    xfer += iprot->readFieldBegin(fname, ftype, fid);
+    if (ftype == ::apache::thrift::protocol::T_STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+        if (ftype == ::apache::thrift::protocol::T_STRUCT) {
+          xfer += this->ouch.read(iprot);
+          this->__isset.ouch = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      default:
+        xfer += iprot->skip(ftype);
+        break;
+    }
     xfer += iprot->readFieldEnd();
   }
 
@@ -2099,6 +3503,472 @@ void RuntimeClient::recv_bm_learning_ack_buffer()
   return;
 }
 
+BmMcMgrpHandle RuntimeClient::bm_mc_mgrp_create(const BmMcMgrp mgrp)
+{
+  send_bm_mc_mgrp_create(mgrp);
+  return recv_bm_mc_mgrp_create();
+}
+
+void RuntimeClient::send_bm_mc_mgrp_create(const BmMcMgrp mgrp)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("bm_mc_mgrp_create", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  Runtime_bm_mc_mgrp_create_pargs args;
+  args.mgrp = &mgrp;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+BmMcMgrpHandle RuntimeClient::recv_bm_mc_mgrp_create()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("bm_mc_mgrp_create") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  BmMcMgrpHandle _return;
+  Runtime_bm_mc_mgrp_create_presult result;
+  result.success = &_return;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    return _return;
+  }
+  if (result.__isset.ouch) {
+    throw result.ouch;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "bm_mc_mgrp_create failed: unknown result");
+}
+
+void RuntimeClient::bm_mc_mgrp_destroy(const BmMcMgrpHandle mgrp_handle)
+{
+  send_bm_mc_mgrp_destroy(mgrp_handle);
+  recv_bm_mc_mgrp_destroy();
+}
+
+void RuntimeClient::send_bm_mc_mgrp_destroy(const BmMcMgrpHandle mgrp_handle)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("bm_mc_mgrp_destroy", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  Runtime_bm_mc_mgrp_destroy_pargs args;
+  args.mgrp_handle = &mgrp_handle;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+void RuntimeClient::recv_bm_mc_mgrp_destroy()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("bm_mc_mgrp_destroy") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  Runtime_bm_mc_mgrp_destroy_presult result;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ouch) {
+    throw result.ouch;
+  }
+  return;
+}
+
+BmMcL1Handle RuntimeClient::bm_mc_l1_node_create(const BmMcRid rid)
+{
+  send_bm_mc_l1_node_create(rid);
+  return recv_bm_mc_l1_node_create();
+}
+
+void RuntimeClient::send_bm_mc_l1_node_create(const BmMcRid rid)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("bm_mc_l1_node_create", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  Runtime_bm_mc_l1_node_create_pargs args;
+  args.rid = &rid;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+BmMcL1Handle RuntimeClient::recv_bm_mc_l1_node_create()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("bm_mc_l1_node_create") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  BmMcL1Handle _return;
+  Runtime_bm_mc_l1_node_create_presult result;
+  result.success = &_return;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    return _return;
+  }
+  if (result.__isset.ouch) {
+    throw result.ouch;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "bm_mc_l1_node_create failed: unknown result");
+}
+
+void RuntimeClient::bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle)
+{
+  send_bm_mc_l1_node_associate(mgrp_handle, l1_handle);
+  recv_bm_mc_l1_node_associate();
+}
+
+void RuntimeClient::send_bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("bm_mc_l1_node_associate", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  Runtime_bm_mc_l1_node_associate_pargs args;
+  args.mgrp_handle = &mgrp_handle;
+  args.l1_handle = &l1_handle;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+void RuntimeClient::recv_bm_mc_l1_node_associate()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("bm_mc_l1_node_associate") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  Runtime_bm_mc_l1_node_associate_presult result;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ouch) {
+    throw result.ouch;
+  }
+  return;
+}
+
+void RuntimeClient::bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle)
+{
+  send_bm_mc_l1_node_destroy(l1_handle);
+  recv_bm_mc_l1_node_destroy();
+}
+
+void RuntimeClient::send_bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("bm_mc_l1_node_destroy", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  Runtime_bm_mc_l1_node_destroy_pargs args;
+  args.l1_handle = &l1_handle;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+void RuntimeClient::recv_bm_mc_l1_node_destroy()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("bm_mc_l1_node_destroy") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  Runtime_bm_mc_l1_node_destroy_presult result;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ouch) {
+    throw result.ouch;
+  }
+  return;
+}
+
+BmMcL2Handle RuntimeClient::bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map)
+{
+  send_bm_mc_l2_node_create(l1_handle, port_map);
+  return recv_bm_mc_l2_node_create();
+}
+
+void RuntimeClient::send_bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("bm_mc_l2_node_create", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  Runtime_bm_mc_l2_node_create_pargs args;
+  args.l1_handle = &l1_handle;
+  args.port_map = &port_map;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+BmMcL2Handle RuntimeClient::recv_bm_mc_l2_node_create()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("bm_mc_l2_node_create") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  BmMcL2Handle _return;
+  Runtime_bm_mc_l2_node_create_presult result;
+  result.success = &_return;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.success) {
+    return _return;
+  }
+  if (result.__isset.ouch) {
+    throw result.ouch;
+  }
+  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "bm_mc_l2_node_create failed: unknown result");
+}
+
+void RuntimeClient::bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map)
+{
+  send_bm_mc_l2_node_update(l2_handle, port_map);
+  recv_bm_mc_l2_node_update();
+}
+
+void RuntimeClient::send_bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("bm_mc_l2_node_update", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  Runtime_bm_mc_l2_node_update_pargs args;
+  args.l2_handle = &l2_handle;
+  args.port_map = &port_map;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+void RuntimeClient::recv_bm_mc_l2_node_update()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("bm_mc_l2_node_update") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  Runtime_bm_mc_l2_node_update_presult result;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ouch) {
+    throw result.ouch;
+  }
+  return;
+}
+
+void RuntimeClient::bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle)
+{
+  send_bm_mc_l2_node_destroy(l2_handle);
+  recv_bm_mc_l2_node_destroy();
+}
+
+void RuntimeClient::send_bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle)
+{
+  int32_t cseqid = 0;
+  oprot_->writeMessageBegin("bm_mc_l2_node_destroy", ::apache::thrift::protocol::T_CALL, cseqid);
+
+  Runtime_bm_mc_l2_node_destroy_pargs args;
+  args.l2_handle = &l2_handle;
+  args.write(oprot_);
+
+  oprot_->writeMessageEnd();
+  oprot_->getTransport()->writeEnd();
+  oprot_->getTransport()->flush();
+}
+
+void RuntimeClient::recv_bm_mc_l2_node_destroy()
+{
+
+  int32_t rseqid = 0;
+  std::string fname;
+  ::apache::thrift::protocol::TMessageType mtype;
+
+  iprot_->readMessageBegin(fname, mtype, rseqid);
+  if (mtype == ::apache::thrift::protocol::T_EXCEPTION) {
+    ::apache::thrift::TApplicationException x;
+    x.read(iprot_);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+    throw x;
+  }
+  if (mtype != ::apache::thrift::protocol::T_REPLY) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  if (fname.compare("bm_mc_l2_node_destroy") != 0) {
+    iprot_->skip(::apache::thrift::protocol::T_STRUCT);
+    iprot_->readMessageEnd();
+    iprot_->getTransport()->readEnd();
+  }
+  Runtime_bm_mc_l2_node_destroy_presult result;
+  result.read(iprot_);
+  iprot_->readMessageEnd();
+  iprot_->getTransport()->readEnd();
+
+  if (result.__isset.ouch) {
+    throw result.ouch;
+  }
+  return;
+}
+
 bool RuntimeProcessor::dispatchCall(::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, const std::string& fname, int32_t seqid, void* callContext) {
   ProcessMap::iterator pfn;
   pfn = processMap_.find(fname);
@@ -2504,6 +4374,457 @@ void RuntimeProcessor::process_bm_learning_ack_buffer(int32_t seqid, ::apache::t
 
   if (this->eventHandler_.get() != NULL) {
     this->eventHandler_->postWrite(ctx, "Runtime.bm_learning_ack_buffer", bytes);
+  }
+}
+
+void RuntimeProcessor::process_bm_mc_mgrp_create(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("Runtime.bm_mc_mgrp_create", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Runtime.bm_mc_mgrp_create");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "Runtime.bm_mc_mgrp_create");
+  }
+
+  Runtime_bm_mc_mgrp_create_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "Runtime.bm_mc_mgrp_create", bytes);
+  }
+
+  Runtime_bm_mc_mgrp_create_result result;
+  try {
+    result.success = iface_->bm_mc_mgrp_create(args.mgrp);
+    result.__isset.success = true;
+  } catch (InvalidMcOperation &ouch) {
+    result.ouch = ouch;
+    result.__isset.ouch = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "Runtime.bm_mc_mgrp_create");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("bm_mc_mgrp_create", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "Runtime.bm_mc_mgrp_create");
+  }
+
+  oprot->writeMessageBegin("bm_mc_mgrp_create", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "Runtime.bm_mc_mgrp_create", bytes);
+  }
+}
+
+void RuntimeProcessor::process_bm_mc_mgrp_destroy(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("Runtime.bm_mc_mgrp_destroy", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Runtime.bm_mc_mgrp_destroy");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "Runtime.bm_mc_mgrp_destroy");
+  }
+
+  Runtime_bm_mc_mgrp_destroy_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "Runtime.bm_mc_mgrp_destroy", bytes);
+  }
+
+  Runtime_bm_mc_mgrp_destroy_result result;
+  try {
+    iface_->bm_mc_mgrp_destroy(args.mgrp_handle);
+  } catch (InvalidMcOperation &ouch) {
+    result.ouch = ouch;
+    result.__isset.ouch = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "Runtime.bm_mc_mgrp_destroy");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("bm_mc_mgrp_destroy", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "Runtime.bm_mc_mgrp_destroy");
+  }
+
+  oprot->writeMessageBegin("bm_mc_mgrp_destroy", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "Runtime.bm_mc_mgrp_destroy", bytes);
+  }
+}
+
+void RuntimeProcessor::process_bm_mc_l1_node_create(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("Runtime.bm_mc_l1_node_create", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Runtime.bm_mc_l1_node_create");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "Runtime.bm_mc_l1_node_create");
+  }
+
+  Runtime_bm_mc_l1_node_create_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "Runtime.bm_mc_l1_node_create", bytes);
+  }
+
+  Runtime_bm_mc_l1_node_create_result result;
+  try {
+    result.success = iface_->bm_mc_l1_node_create(args.rid);
+    result.__isset.success = true;
+  } catch (InvalidMcOperation &ouch) {
+    result.ouch = ouch;
+    result.__isset.ouch = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "Runtime.bm_mc_l1_node_create");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("bm_mc_l1_node_create", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "Runtime.bm_mc_l1_node_create");
+  }
+
+  oprot->writeMessageBegin("bm_mc_l1_node_create", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "Runtime.bm_mc_l1_node_create", bytes);
+  }
+}
+
+void RuntimeProcessor::process_bm_mc_l1_node_associate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("Runtime.bm_mc_l1_node_associate", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Runtime.bm_mc_l1_node_associate");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "Runtime.bm_mc_l1_node_associate");
+  }
+
+  Runtime_bm_mc_l1_node_associate_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "Runtime.bm_mc_l1_node_associate", bytes);
+  }
+
+  Runtime_bm_mc_l1_node_associate_result result;
+  try {
+    iface_->bm_mc_l1_node_associate(args.mgrp_handle, args.l1_handle);
+  } catch (InvalidMcOperation &ouch) {
+    result.ouch = ouch;
+    result.__isset.ouch = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "Runtime.bm_mc_l1_node_associate");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("bm_mc_l1_node_associate", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "Runtime.bm_mc_l1_node_associate");
+  }
+
+  oprot->writeMessageBegin("bm_mc_l1_node_associate", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "Runtime.bm_mc_l1_node_associate", bytes);
+  }
+}
+
+void RuntimeProcessor::process_bm_mc_l1_node_destroy(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("Runtime.bm_mc_l1_node_destroy", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Runtime.bm_mc_l1_node_destroy");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "Runtime.bm_mc_l1_node_destroy");
+  }
+
+  Runtime_bm_mc_l1_node_destroy_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "Runtime.bm_mc_l1_node_destroy", bytes);
+  }
+
+  Runtime_bm_mc_l1_node_destroy_result result;
+  try {
+    iface_->bm_mc_l1_node_destroy(args.l1_handle);
+  } catch (InvalidMcOperation &ouch) {
+    result.ouch = ouch;
+    result.__isset.ouch = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "Runtime.bm_mc_l1_node_destroy");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("bm_mc_l1_node_destroy", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "Runtime.bm_mc_l1_node_destroy");
+  }
+
+  oprot->writeMessageBegin("bm_mc_l1_node_destroy", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "Runtime.bm_mc_l1_node_destroy", bytes);
+  }
+}
+
+void RuntimeProcessor::process_bm_mc_l2_node_create(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("Runtime.bm_mc_l2_node_create", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Runtime.bm_mc_l2_node_create");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "Runtime.bm_mc_l2_node_create");
+  }
+
+  Runtime_bm_mc_l2_node_create_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "Runtime.bm_mc_l2_node_create", bytes);
+  }
+
+  Runtime_bm_mc_l2_node_create_result result;
+  try {
+    result.success = iface_->bm_mc_l2_node_create(args.l1_handle, args.port_map);
+    result.__isset.success = true;
+  } catch (InvalidMcOperation &ouch) {
+    result.ouch = ouch;
+    result.__isset.ouch = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "Runtime.bm_mc_l2_node_create");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("bm_mc_l2_node_create", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "Runtime.bm_mc_l2_node_create");
+  }
+
+  oprot->writeMessageBegin("bm_mc_l2_node_create", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "Runtime.bm_mc_l2_node_create", bytes);
+  }
+}
+
+void RuntimeProcessor::process_bm_mc_l2_node_update(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("Runtime.bm_mc_l2_node_update", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Runtime.bm_mc_l2_node_update");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "Runtime.bm_mc_l2_node_update");
+  }
+
+  Runtime_bm_mc_l2_node_update_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "Runtime.bm_mc_l2_node_update", bytes);
+  }
+
+  Runtime_bm_mc_l2_node_update_result result;
+  try {
+    iface_->bm_mc_l2_node_update(args.l2_handle, args.port_map);
+  } catch (InvalidMcOperation &ouch) {
+    result.ouch = ouch;
+    result.__isset.ouch = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "Runtime.bm_mc_l2_node_update");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("bm_mc_l2_node_update", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "Runtime.bm_mc_l2_node_update");
+  }
+
+  oprot->writeMessageBegin("bm_mc_l2_node_update", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "Runtime.bm_mc_l2_node_update", bytes);
+  }
+}
+
+void RuntimeProcessor::process_bm_mc_l2_node_destroy(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+{
+  void* ctx = NULL;
+  if (this->eventHandler_.get() != NULL) {
+    ctx = this->eventHandler_->getContext("Runtime.bm_mc_l2_node_destroy", callContext);
+  }
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Runtime.bm_mc_l2_node_destroy");
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preRead(ctx, "Runtime.bm_mc_l2_node_destroy");
+  }
+
+  Runtime_bm_mc_l2_node_destroy_args args;
+  args.read(iprot);
+  iprot->readMessageEnd();
+  uint32_t bytes = iprot->getTransport()->readEnd();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postRead(ctx, "Runtime.bm_mc_l2_node_destroy", bytes);
+  }
+
+  Runtime_bm_mc_l2_node_destroy_result result;
+  try {
+    iface_->bm_mc_l2_node_destroy(args.l2_handle);
+  } catch (InvalidMcOperation &ouch) {
+    result.ouch = ouch;
+    result.__isset.ouch = true;
+  } catch (const std::exception& e) {
+    if (this->eventHandler_.get() != NULL) {
+      this->eventHandler_->handlerError(ctx, "Runtime.bm_mc_l2_node_destroy");
+    }
+
+    ::apache::thrift::TApplicationException x(e.what());
+    oprot->writeMessageBegin("bm_mc_l2_node_destroy", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    x.write(oprot);
+    oprot->writeMessageEnd();
+    oprot->getTransport()->writeEnd();
+    oprot->getTransport()->flush();
+    return;
+  }
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->preWrite(ctx, "Runtime.bm_mc_l2_node_destroy");
+  }
+
+  oprot->writeMessageBegin("bm_mc_l2_node_destroy", ::apache::thrift::protocol::T_REPLY, seqid);
+  result.write(oprot);
+  oprot->writeMessageEnd();
+  bytes = oprot->getTransport()->writeEnd();
+  oprot->getTransport()->flush();
+
+  if (this->eventHandler_.get() != NULL) {
+    this->eventHandler_->postWrite(ctx, "Runtime.bm_mc_l2_node_destroy", bytes);
   }
 }
 

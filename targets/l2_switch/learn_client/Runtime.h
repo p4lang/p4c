@@ -22,6 +22,14 @@ class RuntimeIf {
   virtual void bm_table_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) = 0;
   virtual void bm_learning_ack(const BmLearningListId list_id, const BmLearningBufferId buffer_id, const std::vector<BmLearningSampleId> & sample_ids) = 0;
   virtual void bm_learning_ack_buffer(const BmLearningListId list_id, const BmLearningBufferId buffer_id) = 0;
+  virtual BmMcMgrpHandle bm_mc_mgrp_create(const BmMcMgrp mgrp) = 0;
+  virtual void bm_mc_mgrp_destroy(const BmMcMgrpHandle mgrp_handle) = 0;
+  virtual BmMcL1Handle bm_mc_l1_node_create(const BmMcRid rid) = 0;
+  virtual void bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) = 0;
+  virtual void bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle) = 0;
+  virtual BmMcL2Handle bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) = 0;
+  virtual void bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map) = 0;
+  virtual void bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle) = 0;
 };
 
 class RuntimeIfFactory {
@@ -73,6 +81,33 @@ class RuntimeNull : virtual public RuntimeIf {
     return;
   }
   void bm_learning_ack_buffer(const BmLearningListId /* list_id */, const BmLearningBufferId /* buffer_id */) {
+    return;
+  }
+  BmMcMgrpHandle bm_mc_mgrp_create(const BmMcMgrp /* mgrp */) {
+    BmMcMgrpHandle _return = 0;
+    return _return;
+  }
+  void bm_mc_mgrp_destroy(const BmMcMgrpHandle /* mgrp_handle */) {
+    return;
+  }
+  BmMcL1Handle bm_mc_l1_node_create(const BmMcRid /* rid */) {
+    BmMcL1Handle _return = 0;
+    return _return;
+  }
+  void bm_mc_l1_node_associate(const BmMcMgrpHandle /* mgrp_handle */, const BmMcL1Handle /* l1_handle */) {
+    return;
+  }
+  void bm_mc_l1_node_destroy(const BmMcL1Handle /* l1_handle */) {
+    return;
+  }
+  BmMcL2Handle bm_mc_l2_node_create(const BmMcL1Handle /* l1_handle */, const BmMcPortMap& /* port_map */) {
+    BmMcL2Handle _return = 0;
+    return _return;
+  }
+  void bm_mc_l2_node_update(const BmMcL2Handle /* l2_handle */, const BmMcPortMap& /* port_map */) {
+    return;
+  }
+  void bm_mc_l2_node_destroy(const BmMcL2Handle /* l2_handle */) {
     return;
   }
 };
@@ -985,6 +1020,927 @@ class Runtime_bm_learning_ack_buffer_presult {
 
 };
 
+typedef struct _Runtime_bm_mc_mgrp_create_args__isset {
+  _Runtime_bm_mc_mgrp_create_args__isset() : mgrp(false) {}
+  bool mgrp;
+} _Runtime_bm_mc_mgrp_create_args__isset;
+
+class Runtime_bm_mc_mgrp_create_args {
+ public:
+
+  Runtime_bm_mc_mgrp_create_args() : mgrp(0) {
+  }
+
+  virtual ~Runtime_bm_mc_mgrp_create_args() throw() {}
+
+  BmMcMgrp mgrp;
+
+  _Runtime_bm_mc_mgrp_create_args__isset __isset;
+
+  void __set_mgrp(const BmMcMgrp val) {
+    mgrp = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_mgrp_create_args & rhs) const
+  {
+    if (!(mgrp == rhs.mgrp))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_mgrp_create_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_mgrp_create_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class Runtime_bm_mc_mgrp_create_pargs {
+ public:
+
+
+  virtual ~Runtime_bm_mc_mgrp_create_pargs() throw() {}
+
+  const BmMcMgrp* mgrp;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_mgrp_create_result__isset {
+  _Runtime_bm_mc_mgrp_create_result__isset() : success(false), ouch(false) {}
+  bool success;
+  bool ouch;
+} _Runtime_bm_mc_mgrp_create_result__isset;
+
+class Runtime_bm_mc_mgrp_create_result {
+ public:
+
+  Runtime_bm_mc_mgrp_create_result() : success(0) {
+  }
+
+  virtual ~Runtime_bm_mc_mgrp_create_result() throw() {}
+
+  BmMcMgrpHandle success;
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_mgrp_create_result__isset __isset;
+
+  void __set_success(const BmMcMgrpHandle val) {
+    success = val;
+  }
+
+  void __set_ouch(const InvalidMcOperation& val) {
+    ouch = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_mgrp_create_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ouch == rhs.ouch))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_mgrp_create_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_mgrp_create_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_mgrp_create_presult__isset {
+  _Runtime_bm_mc_mgrp_create_presult__isset() : success(false), ouch(false) {}
+  bool success;
+  bool ouch;
+} _Runtime_bm_mc_mgrp_create_presult__isset;
+
+class Runtime_bm_mc_mgrp_create_presult {
+ public:
+
+
+  virtual ~Runtime_bm_mc_mgrp_create_presult() throw() {}
+
+  BmMcMgrpHandle* success;
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_mgrp_create_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _Runtime_bm_mc_mgrp_destroy_args__isset {
+  _Runtime_bm_mc_mgrp_destroy_args__isset() : mgrp_handle(false) {}
+  bool mgrp_handle;
+} _Runtime_bm_mc_mgrp_destroy_args__isset;
+
+class Runtime_bm_mc_mgrp_destroy_args {
+ public:
+
+  Runtime_bm_mc_mgrp_destroy_args() : mgrp_handle(0) {
+  }
+
+  virtual ~Runtime_bm_mc_mgrp_destroy_args() throw() {}
+
+  BmMcMgrpHandle mgrp_handle;
+
+  _Runtime_bm_mc_mgrp_destroy_args__isset __isset;
+
+  void __set_mgrp_handle(const BmMcMgrpHandle val) {
+    mgrp_handle = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_mgrp_destroy_args & rhs) const
+  {
+    if (!(mgrp_handle == rhs.mgrp_handle))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_mgrp_destroy_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_mgrp_destroy_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class Runtime_bm_mc_mgrp_destroy_pargs {
+ public:
+
+
+  virtual ~Runtime_bm_mc_mgrp_destroy_pargs() throw() {}
+
+  const BmMcMgrpHandle* mgrp_handle;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_mgrp_destroy_result__isset {
+  _Runtime_bm_mc_mgrp_destroy_result__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_mgrp_destroy_result__isset;
+
+class Runtime_bm_mc_mgrp_destroy_result {
+ public:
+
+  Runtime_bm_mc_mgrp_destroy_result() {
+  }
+
+  virtual ~Runtime_bm_mc_mgrp_destroy_result() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_mgrp_destroy_result__isset __isset;
+
+  void __set_ouch(const InvalidMcOperation& val) {
+    ouch = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_mgrp_destroy_result & rhs) const
+  {
+    if (!(ouch == rhs.ouch))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_mgrp_destroy_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_mgrp_destroy_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_mgrp_destroy_presult__isset {
+  _Runtime_bm_mc_mgrp_destroy_presult__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_mgrp_destroy_presult__isset;
+
+class Runtime_bm_mc_mgrp_destroy_presult {
+ public:
+
+
+  virtual ~Runtime_bm_mc_mgrp_destroy_presult() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_mgrp_destroy_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _Runtime_bm_mc_l1_node_create_args__isset {
+  _Runtime_bm_mc_l1_node_create_args__isset() : rid(false) {}
+  bool rid;
+} _Runtime_bm_mc_l1_node_create_args__isset;
+
+class Runtime_bm_mc_l1_node_create_args {
+ public:
+
+  Runtime_bm_mc_l1_node_create_args() : rid(0) {
+  }
+
+  virtual ~Runtime_bm_mc_l1_node_create_args() throw() {}
+
+  BmMcRid rid;
+
+  _Runtime_bm_mc_l1_node_create_args__isset __isset;
+
+  void __set_rid(const BmMcRid val) {
+    rid = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l1_node_create_args & rhs) const
+  {
+    if (!(rid == rhs.rid))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l1_node_create_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l1_node_create_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class Runtime_bm_mc_l1_node_create_pargs {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l1_node_create_pargs() throw() {}
+
+  const BmMcRid* rid;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l1_node_create_result__isset {
+  _Runtime_bm_mc_l1_node_create_result__isset() : success(false), ouch(false) {}
+  bool success;
+  bool ouch;
+} _Runtime_bm_mc_l1_node_create_result__isset;
+
+class Runtime_bm_mc_l1_node_create_result {
+ public:
+
+  Runtime_bm_mc_l1_node_create_result() : success(0) {
+  }
+
+  virtual ~Runtime_bm_mc_l1_node_create_result() throw() {}
+
+  BmMcL1Handle success;
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l1_node_create_result__isset __isset;
+
+  void __set_success(const BmMcL1Handle val) {
+    success = val;
+  }
+
+  void __set_ouch(const InvalidMcOperation& val) {
+    ouch = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l1_node_create_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ouch == rhs.ouch))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l1_node_create_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l1_node_create_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l1_node_create_presult__isset {
+  _Runtime_bm_mc_l1_node_create_presult__isset() : success(false), ouch(false) {}
+  bool success;
+  bool ouch;
+} _Runtime_bm_mc_l1_node_create_presult__isset;
+
+class Runtime_bm_mc_l1_node_create_presult {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l1_node_create_presult() throw() {}
+
+  BmMcL1Handle* success;
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l1_node_create_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _Runtime_bm_mc_l1_node_associate_args__isset {
+  _Runtime_bm_mc_l1_node_associate_args__isset() : mgrp_handle(false), l1_handle(false) {}
+  bool mgrp_handle;
+  bool l1_handle;
+} _Runtime_bm_mc_l1_node_associate_args__isset;
+
+class Runtime_bm_mc_l1_node_associate_args {
+ public:
+
+  Runtime_bm_mc_l1_node_associate_args() : mgrp_handle(0), l1_handle(0) {
+  }
+
+  virtual ~Runtime_bm_mc_l1_node_associate_args() throw() {}
+
+  BmMcMgrpHandle mgrp_handle;
+  BmMcL1Handle l1_handle;
+
+  _Runtime_bm_mc_l1_node_associate_args__isset __isset;
+
+  void __set_mgrp_handle(const BmMcMgrpHandle val) {
+    mgrp_handle = val;
+  }
+
+  void __set_l1_handle(const BmMcL1Handle val) {
+    l1_handle = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l1_node_associate_args & rhs) const
+  {
+    if (!(mgrp_handle == rhs.mgrp_handle))
+      return false;
+    if (!(l1_handle == rhs.l1_handle))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l1_node_associate_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l1_node_associate_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class Runtime_bm_mc_l1_node_associate_pargs {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l1_node_associate_pargs() throw() {}
+
+  const BmMcMgrpHandle* mgrp_handle;
+  const BmMcL1Handle* l1_handle;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l1_node_associate_result__isset {
+  _Runtime_bm_mc_l1_node_associate_result__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_l1_node_associate_result__isset;
+
+class Runtime_bm_mc_l1_node_associate_result {
+ public:
+
+  Runtime_bm_mc_l1_node_associate_result() {
+  }
+
+  virtual ~Runtime_bm_mc_l1_node_associate_result() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l1_node_associate_result__isset __isset;
+
+  void __set_ouch(const InvalidMcOperation& val) {
+    ouch = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l1_node_associate_result & rhs) const
+  {
+    if (!(ouch == rhs.ouch))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l1_node_associate_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l1_node_associate_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l1_node_associate_presult__isset {
+  _Runtime_bm_mc_l1_node_associate_presult__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_l1_node_associate_presult__isset;
+
+class Runtime_bm_mc_l1_node_associate_presult {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l1_node_associate_presult() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l1_node_associate_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _Runtime_bm_mc_l1_node_destroy_args__isset {
+  _Runtime_bm_mc_l1_node_destroy_args__isset() : l1_handle(false) {}
+  bool l1_handle;
+} _Runtime_bm_mc_l1_node_destroy_args__isset;
+
+class Runtime_bm_mc_l1_node_destroy_args {
+ public:
+
+  Runtime_bm_mc_l1_node_destroy_args() : l1_handle(0) {
+  }
+
+  virtual ~Runtime_bm_mc_l1_node_destroy_args() throw() {}
+
+  BmMcL1Handle l1_handle;
+
+  _Runtime_bm_mc_l1_node_destroy_args__isset __isset;
+
+  void __set_l1_handle(const BmMcL1Handle val) {
+    l1_handle = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l1_node_destroy_args & rhs) const
+  {
+    if (!(l1_handle == rhs.l1_handle))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l1_node_destroy_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l1_node_destroy_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class Runtime_bm_mc_l1_node_destroy_pargs {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l1_node_destroy_pargs() throw() {}
+
+  const BmMcL1Handle* l1_handle;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l1_node_destroy_result__isset {
+  _Runtime_bm_mc_l1_node_destroy_result__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_l1_node_destroy_result__isset;
+
+class Runtime_bm_mc_l1_node_destroy_result {
+ public:
+
+  Runtime_bm_mc_l1_node_destroy_result() {
+  }
+
+  virtual ~Runtime_bm_mc_l1_node_destroy_result() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l1_node_destroy_result__isset __isset;
+
+  void __set_ouch(const InvalidMcOperation& val) {
+    ouch = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l1_node_destroy_result & rhs) const
+  {
+    if (!(ouch == rhs.ouch))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l1_node_destroy_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l1_node_destroy_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l1_node_destroy_presult__isset {
+  _Runtime_bm_mc_l1_node_destroy_presult__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_l1_node_destroy_presult__isset;
+
+class Runtime_bm_mc_l1_node_destroy_presult {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l1_node_destroy_presult() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l1_node_destroy_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _Runtime_bm_mc_l2_node_create_args__isset {
+  _Runtime_bm_mc_l2_node_create_args__isset() : l1_handle(false), port_map(false) {}
+  bool l1_handle;
+  bool port_map;
+} _Runtime_bm_mc_l2_node_create_args__isset;
+
+class Runtime_bm_mc_l2_node_create_args {
+ public:
+
+  Runtime_bm_mc_l2_node_create_args() : l1_handle(0), port_map() {
+  }
+
+  virtual ~Runtime_bm_mc_l2_node_create_args() throw() {}
+
+  BmMcL1Handle l1_handle;
+  BmMcPortMap port_map;
+
+  _Runtime_bm_mc_l2_node_create_args__isset __isset;
+
+  void __set_l1_handle(const BmMcL1Handle val) {
+    l1_handle = val;
+  }
+
+  void __set_port_map(const BmMcPortMap& val) {
+    port_map = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l2_node_create_args & rhs) const
+  {
+    if (!(l1_handle == rhs.l1_handle))
+      return false;
+    if (!(port_map == rhs.port_map))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l2_node_create_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l2_node_create_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class Runtime_bm_mc_l2_node_create_pargs {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l2_node_create_pargs() throw() {}
+
+  const BmMcL1Handle* l1_handle;
+  const BmMcPortMap* port_map;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l2_node_create_result__isset {
+  _Runtime_bm_mc_l2_node_create_result__isset() : success(false), ouch(false) {}
+  bool success;
+  bool ouch;
+} _Runtime_bm_mc_l2_node_create_result__isset;
+
+class Runtime_bm_mc_l2_node_create_result {
+ public:
+
+  Runtime_bm_mc_l2_node_create_result() : success(0) {
+  }
+
+  virtual ~Runtime_bm_mc_l2_node_create_result() throw() {}
+
+  BmMcL2Handle success;
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l2_node_create_result__isset __isset;
+
+  void __set_success(const BmMcL2Handle val) {
+    success = val;
+  }
+
+  void __set_ouch(const InvalidMcOperation& val) {
+    ouch = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l2_node_create_result & rhs) const
+  {
+    if (!(success == rhs.success))
+      return false;
+    if (!(ouch == rhs.ouch))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l2_node_create_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l2_node_create_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l2_node_create_presult__isset {
+  _Runtime_bm_mc_l2_node_create_presult__isset() : success(false), ouch(false) {}
+  bool success;
+  bool ouch;
+} _Runtime_bm_mc_l2_node_create_presult__isset;
+
+class Runtime_bm_mc_l2_node_create_presult {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l2_node_create_presult() throw() {}
+
+  BmMcL2Handle* success;
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l2_node_create_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _Runtime_bm_mc_l2_node_update_args__isset {
+  _Runtime_bm_mc_l2_node_update_args__isset() : l2_handle(false), port_map(false) {}
+  bool l2_handle;
+  bool port_map;
+} _Runtime_bm_mc_l2_node_update_args__isset;
+
+class Runtime_bm_mc_l2_node_update_args {
+ public:
+
+  Runtime_bm_mc_l2_node_update_args() : l2_handle(0), port_map() {
+  }
+
+  virtual ~Runtime_bm_mc_l2_node_update_args() throw() {}
+
+  BmMcL2Handle l2_handle;
+  BmMcPortMap port_map;
+
+  _Runtime_bm_mc_l2_node_update_args__isset __isset;
+
+  void __set_l2_handle(const BmMcL2Handle val) {
+    l2_handle = val;
+  }
+
+  void __set_port_map(const BmMcPortMap& val) {
+    port_map = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l2_node_update_args & rhs) const
+  {
+    if (!(l2_handle == rhs.l2_handle))
+      return false;
+    if (!(port_map == rhs.port_map))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l2_node_update_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l2_node_update_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class Runtime_bm_mc_l2_node_update_pargs {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l2_node_update_pargs() throw() {}
+
+  const BmMcL2Handle* l2_handle;
+  const BmMcPortMap* port_map;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l2_node_update_result__isset {
+  _Runtime_bm_mc_l2_node_update_result__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_l2_node_update_result__isset;
+
+class Runtime_bm_mc_l2_node_update_result {
+ public:
+
+  Runtime_bm_mc_l2_node_update_result() {
+  }
+
+  virtual ~Runtime_bm_mc_l2_node_update_result() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l2_node_update_result__isset __isset;
+
+  void __set_ouch(const InvalidMcOperation& val) {
+    ouch = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l2_node_update_result & rhs) const
+  {
+    if (!(ouch == rhs.ouch))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l2_node_update_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l2_node_update_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l2_node_update_presult__isset {
+  _Runtime_bm_mc_l2_node_update_presult__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_l2_node_update_presult__isset;
+
+class Runtime_bm_mc_l2_node_update_presult {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l2_node_update_presult() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l2_node_update_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
+typedef struct _Runtime_bm_mc_l2_node_destroy_args__isset {
+  _Runtime_bm_mc_l2_node_destroy_args__isset() : l2_handle(false) {}
+  bool l2_handle;
+} _Runtime_bm_mc_l2_node_destroy_args__isset;
+
+class Runtime_bm_mc_l2_node_destroy_args {
+ public:
+
+  Runtime_bm_mc_l2_node_destroy_args() : l2_handle(0) {
+  }
+
+  virtual ~Runtime_bm_mc_l2_node_destroy_args() throw() {}
+
+  BmMcL2Handle l2_handle;
+
+  _Runtime_bm_mc_l2_node_destroy_args__isset __isset;
+
+  void __set_l2_handle(const BmMcL2Handle val) {
+    l2_handle = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l2_node_destroy_args & rhs) const
+  {
+    if (!(l2_handle == rhs.l2_handle))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l2_node_destroy_args &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l2_node_destroy_args & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+
+class Runtime_bm_mc_l2_node_destroy_pargs {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l2_node_destroy_pargs() throw() {}
+
+  const BmMcL2Handle* l2_handle;
+
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l2_node_destroy_result__isset {
+  _Runtime_bm_mc_l2_node_destroy_result__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_l2_node_destroy_result__isset;
+
+class Runtime_bm_mc_l2_node_destroy_result {
+ public:
+
+  Runtime_bm_mc_l2_node_destroy_result() {
+  }
+
+  virtual ~Runtime_bm_mc_l2_node_destroy_result() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l2_node_destroy_result__isset __isset;
+
+  void __set_ouch(const InvalidMcOperation& val) {
+    ouch = val;
+  }
+
+  bool operator == (const Runtime_bm_mc_l2_node_destroy_result & rhs) const
+  {
+    if (!(ouch == rhs.ouch))
+      return false;
+    return true;
+  }
+  bool operator != (const Runtime_bm_mc_l2_node_destroy_result &rhs) const {
+    return !(*this == rhs);
+  }
+
+  bool operator < (const Runtime_bm_mc_l2_node_destroy_result & ) const;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+  uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
+
+};
+
+typedef struct _Runtime_bm_mc_l2_node_destroy_presult__isset {
+  _Runtime_bm_mc_l2_node_destroy_presult__isset() : ouch(false) {}
+  bool ouch;
+} _Runtime_bm_mc_l2_node_destroy_presult__isset;
+
+class Runtime_bm_mc_l2_node_destroy_presult {
+ public:
+
+
+  virtual ~Runtime_bm_mc_l2_node_destroy_presult() throw() {}
+
+  InvalidMcOperation ouch;
+
+  _Runtime_bm_mc_l2_node_destroy_presult__isset __isset;
+
+  uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
+
+};
+
 class RuntimeClient : virtual public RuntimeIf {
  public:
   RuntimeClient(boost::shared_ptr< ::apache::thrift::protocol::TProtocol> prot) :
@@ -1026,6 +1982,30 @@ class RuntimeClient : virtual public RuntimeIf {
   void bm_learning_ack_buffer(const BmLearningListId list_id, const BmLearningBufferId buffer_id);
   void send_bm_learning_ack_buffer(const BmLearningListId list_id, const BmLearningBufferId buffer_id);
   void recv_bm_learning_ack_buffer();
+  BmMcMgrpHandle bm_mc_mgrp_create(const BmMcMgrp mgrp);
+  void send_bm_mc_mgrp_create(const BmMcMgrp mgrp);
+  BmMcMgrpHandle recv_bm_mc_mgrp_create();
+  void bm_mc_mgrp_destroy(const BmMcMgrpHandle mgrp_handle);
+  void send_bm_mc_mgrp_destroy(const BmMcMgrpHandle mgrp_handle);
+  void recv_bm_mc_mgrp_destroy();
+  BmMcL1Handle bm_mc_l1_node_create(const BmMcRid rid);
+  void send_bm_mc_l1_node_create(const BmMcRid rid);
+  BmMcL1Handle recv_bm_mc_l1_node_create();
+  void bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle);
+  void send_bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle);
+  void recv_bm_mc_l1_node_associate();
+  void bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle);
+  void send_bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle);
+  void recv_bm_mc_l1_node_destroy();
+  BmMcL2Handle bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map);
+  void send_bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map);
+  BmMcL2Handle recv_bm_mc_l2_node_create();
+  void bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map);
+  void send_bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map);
+  void recv_bm_mc_l2_node_update();
+  void bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle);
+  void send_bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle);
+  void recv_bm_mc_l2_node_destroy();
  protected:
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> piprot_;
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> poprot_;
@@ -1048,6 +2028,14 @@ class RuntimeProcessor : public ::apache::thrift::TDispatchProcessor {
   void process_bm_table_delete_entry(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_bm_learning_ack(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_bm_learning_ack_buffer(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_bm_mc_mgrp_create(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_bm_mc_mgrp_destroy(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_bm_mc_l1_node_create(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_bm_mc_l1_node_associate(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_bm_mc_l1_node_destroy(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_bm_mc_l2_node_create(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_bm_mc_l2_node_update(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_bm_mc_l2_node_destroy(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
  public:
   RuntimeProcessor(boost::shared_ptr<RuntimeIf> iface) :
     iface_(iface) {
@@ -1058,6 +2046,14 @@ class RuntimeProcessor : public ::apache::thrift::TDispatchProcessor {
     processMap_["bm_table_delete_entry"] = &RuntimeProcessor::process_bm_table_delete_entry;
     processMap_["bm_learning_ack"] = &RuntimeProcessor::process_bm_learning_ack;
     processMap_["bm_learning_ack_buffer"] = &RuntimeProcessor::process_bm_learning_ack_buffer;
+    processMap_["bm_mc_mgrp_create"] = &RuntimeProcessor::process_bm_mc_mgrp_create;
+    processMap_["bm_mc_mgrp_destroy"] = &RuntimeProcessor::process_bm_mc_mgrp_destroy;
+    processMap_["bm_mc_l1_node_create"] = &RuntimeProcessor::process_bm_mc_l1_node_create;
+    processMap_["bm_mc_l1_node_associate"] = &RuntimeProcessor::process_bm_mc_l1_node_associate;
+    processMap_["bm_mc_l1_node_destroy"] = &RuntimeProcessor::process_bm_mc_l1_node_destroy;
+    processMap_["bm_mc_l2_node_create"] = &RuntimeProcessor::process_bm_mc_l2_node_create;
+    processMap_["bm_mc_l2_node_update"] = &RuntimeProcessor::process_bm_mc_l2_node_update;
+    processMap_["bm_mc_l2_node_destroy"] = &RuntimeProcessor::process_bm_mc_l2_node_destroy;
   }
 
   virtual ~RuntimeProcessor() {}
@@ -1147,6 +2143,78 @@ class RuntimeMultiface : virtual public RuntimeIf {
       ifaces_[i]->bm_learning_ack_buffer(list_id, buffer_id);
     }
     ifaces_[i]->bm_learning_ack_buffer(list_id, buffer_id);
+  }
+
+  BmMcMgrpHandle bm_mc_mgrp_create(const BmMcMgrp mgrp) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->bm_mc_mgrp_create(mgrp);
+    }
+    return ifaces_[i]->bm_mc_mgrp_create(mgrp);
+  }
+
+  void bm_mc_mgrp_destroy(const BmMcMgrpHandle mgrp_handle) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->bm_mc_mgrp_destroy(mgrp_handle);
+    }
+    ifaces_[i]->bm_mc_mgrp_destroy(mgrp_handle);
+  }
+
+  BmMcL1Handle bm_mc_l1_node_create(const BmMcRid rid) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->bm_mc_l1_node_create(rid);
+    }
+    return ifaces_[i]->bm_mc_l1_node_create(rid);
+  }
+
+  void bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->bm_mc_l1_node_associate(mgrp_handle, l1_handle);
+    }
+    ifaces_[i]->bm_mc_l1_node_associate(mgrp_handle, l1_handle);
+  }
+
+  void bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->bm_mc_l1_node_destroy(l1_handle);
+    }
+    ifaces_[i]->bm_mc_l1_node_destroy(l1_handle);
+  }
+
+  BmMcL2Handle bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->bm_mc_l2_node_create(l1_handle, port_map);
+    }
+    return ifaces_[i]->bm_mc_l2_node_create(l1_handle, port_map);
+  }
+
+  void bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->bm_mc_l2_node_update(l2_handle, port_map);
+    }
+    ifaces_[i]->bm_mc_l2_node_update(l2_handle, port_map);
+  }
+
+  void bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle) {
+    size_t sz = ifaces_.size();
+    size_t i = 0;
+    for (; i < (sz - 1); ++i) {
+      ifaces_[i]->bm_mc_l2_node_destroy(l2_handle);
+    }
+    ifaces_[i]->bm_mc_l2_node_destroy(l2_handle);
   }
 
 };

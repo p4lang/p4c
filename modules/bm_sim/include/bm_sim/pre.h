@@ -44,6 +44,11 @@ public:
     typedef std::bitset<PORT_MAP_SIZE>::reference reference;
 
   public:
+    constexpr PortMap() noexcept { }
+
+    PortMap(const std::string &str)
+      : port_map(str) { }
+
     bool operator[] (size_t pos) const { return port_map[pos]; }
     reference operator[] (size_t pos) { return port_map[pos]; }
 
