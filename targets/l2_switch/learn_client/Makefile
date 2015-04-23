@@ -2,10 +2,12 @@ CC:= gcc
 CXX:= g++
 CFLAGS:= -O0 -g -Wall
 CPPFLAGS:= -O0 -g -Wall --std=c++11
+# CFLAGS:= -O3 -g -Wall
+# CPPFLAGS:= -O3 -g -Wall --std=c++11
 LIBS:= -lJudy
 INCS:=
 
-TARGET:=test
+TARGET:=learn_client
 
 BUILD_DIR := build
 BUILD_DIRS := $(BUILD_DIR)
@@ -16,9 +18,9 @@ srcs_CXX:=
 MODULES_DIR :=
 MODULES_NAMES :=
 
-include ../modules.mk
+# include ../../modules.mk
 
-include tests.mk
+include learn_client.mk
 
 CFLAGS += $(COMMON_FLAGS)
 CPPFLAGS += $(COMMON_FLAGS)
@@ -48,9 +50,6 @@ objs_ := $(patsubst %, $(BUILD_DIR)%, $(objs))
 
 $(TARGET): $(objs_) | $(BUILD_DIRS)
 	$(CXX) $(CPPFLAGS) -o $@ $^ $(LIBS)
-
-check: $(TARGET)
-	sudo ./$(TARGET)
 
 $(BUILD_DIRS):
 	mkdir -p $@

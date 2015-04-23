@@ -343,3 +343,77 @@ TEST_F(LearningTest, FilterAck) {
   ASSERT_EQ((char) 0xa, data[0]);
   ASSERT_EQ((char) 0xba, data[1]);
 }
+
+TEST_F(LearningTest, FilterAcks) {
+  LearnEngine::list_id_t list_id = 1;
+  size_t max_samples = 2; unsigned timeout_ms = 0;
+  learn_on_test1_f16(list_id, max_samples, timeout_ms);
+
+  LearnEngine::msg_hdr_t *msg_hdr = (LearnEngine::msg_hdr_t *) buffer;
+
+  Packet pkt = get_pkt();
+  Field &f = pkt.get_phv()->get_field(testHeader1, 0);
+
+  f.set("0xaba");
+  learn_engine.learn(list_id, pkt);
+
+  f.set("0xabb");
+  learn_engine.learn(list_id, pkt);
+
+  learn_writer->read(buffer, sizeof(buffer));
+  ASSERT_EQ(0u, msg_hdr->buffer_id);
+  ASSERT_EQ(2u, msg_hdr->num_samples);
+
+  learn_engine.learn(list_id, pkt); // cannot learn a second time
+  sleep_for(milliseconds(100));
+  ASSERT_NE(MemoryAccessor::Status::CAN_READ, learn_writer->check_status());
+
+  learn_engine.ack(list_id, 0, {0, 1}); // ack both samples and learn again
+
+  f.set("0xaba");
+  learn_engine.learn(list_id, pkt);
+
+  f.set("0xabb");
+  learn_engine.learn(list_id, pkt);
+
+  learn_writer->read(buffer, sizeof(buffer));
+  ASSERT_EQ(1u, msg_hdr->buffer_id); // buffer id was incremented
+  ASSERT_EQ(2u, msg_hdr->num_samples);
+}
+
+TEST_F(LearningTest, FilterAckBuffer) {
+  LearnEngine::list_id_t list_id = 1;
+  size_t max_samples = 2; unsigned timeout_ms = 0;
+  learn_on_test1_f16(list_id, max_samples, timeout_ms);
+
+  LearnEngine::msg_hdr_t *msg_hdr = (LearnEngine::msg_hdr_t *) buffer;
+
+  Packet pkt = get_pkt();
+  Field &f = pkt.get_phv()->get_field(testHeader1, 0);
+
+  f.set("0xaba");
+  learn_engine.learn(list_id, pkt);
+
+  f.set("0xabb");
+  learn_engine.learn(list_id, pkt);
+
+  learn_writer->read(buffer, sizeof(buffer));
+  ASSERT_EQ(0u, msg_hdr->buffer_id);
+  ASSERT_EQ(2u, msg_hdr->num_samples);
+
+  learn_engine.learn(list_id, pkt); // cannot learn a second time
+  sleep_for(milliseconds(100));
+  ASSERT_NE(MemoryAccessor::Status::CAN_READ, learn_writer->check_status());
+
+  learn_engine.ack_buffer(list_id, 0); // ack whole buffer
+
+  f.set("0xaba");
+  learn_engine.learn(list_id, pkt);
+
+  f.set("0xabb");
+  learn_engine.learn(list_id, pkt);
+
+  learn_writer->read(buffer, sizeof(buffer));
+  ASSERT_EQ(1u, msg_hdr->buffer_id); // buffer id was incremented
+  ASSERT_EQ(2u, msg_hdr->num_samples);
+}

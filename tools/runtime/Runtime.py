@@ -68,6 +68,82 @@ class Iface:
     """
     pass
 
+  def bm_learning_ack(self, list_id, buffer_id, sample_ids):
+    """
+    Parameters:
+     - list_id
+     - buffer_id
+     - sample_ids
+    """
+    pass
+
+  def bm_learning_ack_buffer(self, list_id, buffer_id):
+    """
+    Parameters:
+     - list_id
+     - buffer_id
+    """
+    pass
+
+  def bm_mc_mgrp_create(self, mgrp):
+    """
+    Parameters:
+     - mgrp
+    """
+    pass
+
+  def bm_mc_mgrp_destroy(self, mgrp_handle):
+    """
+    Parameters:
+     - mgrp_handle
+    """
+    pass
+
+  def bm_mc_l1_node_create(self, rid):
+    """
+    Parameters:
+     - rid
+    """
+    pass
+
+  def bm_mc_l1_node_associate(self, mgrp_handle, l1_handle):
+    """
+    Parameters:
+     - mgrp_handle
+     - l1_handle
+    """
+    pass
+
+  def bm_mc_l1_node_destroy(self, l1_handle):
+    """
+    Parameters:
+     - l1_handle
+    """
+    pass
+
+  def bm_mc_l2_node_create(self, l1_handle, port_map):
+    """
+    Parameters:
+     - l1_handle
+     - port_map
+    """
+    pass
+
+  def bm_mc_l2_node_update(self, l2_handle, port_map):
+    """
+    Parameters:
+     - l2_handle
+     - port_map
+    """
+    pass
+
+  def bm_mc_l2_node_destroy(self, l2_handle):
+    """
+    Parameters:
+     - l2_handle
+    """
+    pass
+
 
 class Client(Iface):
   def __init__(self, iprot, oprot=None):
@@ -262,6 +338,320 @@ class Client(Iface):
       raise result.ouch
     return
 
+  def bm_learning_ack(self, list_id, buffer_id, sample_ids):
+    """
+    Parameters:
+     - list_id
+     - buffer_id
+     - sample_ids
+    """
+    self.send_bm_learning_ack(list_id, buffer_id, sample_ids)
+    self.recv_bm_learning_ack()
+
+  def send_bm_learning_ack(self, list_id, buffer_id, sample_ids):
+    self._oprot.writeMessageBegin('bm_learning_ack', TMessageType.CALL, self._seqid)
+    args = bm_learning_ack_args()
+    args.list_id = list_id
+    args.buffer_id = buffer_id
+    args.sample_ids = sample_ids
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_learning_ack(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_learning_ack_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    return
+
+  def bm_learning_ack_buffer(self, list_id, buffer_id):
+    """
+    Parameters:
+     - list_id
+     - buffer_id
+    """
+    self.send_bm_learning_ack_buffer(list_id, buffer_id)
+    self.recv_bm_learning_ack_buffer()
+
+  def send_bm_learning_ack_buffer(self, list_id, buffer_id):
+    self._oprot.writeMessageBegin('bm_learning_ack_buffer', TMessageType.CALL, self._seqid)
+    args = bm_learning_ack_buffer_args()
+    args.list_id = list_id
+    args.buffer_id = buffer_id
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_learning_ack_buffer(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_learning_ack_buffer_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    return
+
+  def bm_mc_mgrp_create(self, mgrp):
+    """
+    Parameters:
+     - mgrp
+    """
+    self.send_bm_mc_mgrp_create(mgrp)
+    return self.recv_bm_mc_mgrp_create()
+
+  def send_bm_mc_mgrp_create(self, mgrp):
+    self._oprot.writeMessageBegin('bm_mc_mgrp_create', TMessageType.CALL, self._seqid)
+    args = bm_mc_mgrp_create_args()
+    args.mgrp = mgrp
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_mc_mgrp_create(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_mc_mgrp_create_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.ouch is not None:
+      raise result.ouch
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "bm_mc_mgrp_create failed: unknown result");
+
+  def bm_mc_mgrp_destroy(self, mgrp_handle):
+    """
+    Parameters:
+     - mgrp_handle
+    """
+    self.send_bm_mc_mgrp_destroy(mgrp_handle)
+    self.recv_bm_mc_mgrp_destroy()
+
+  def send_bm_mc_mgrp_destroy(self, mgrp_handle):
+    self._oprot.writeMessageBegin('bm_mc_mgrp_destroy', TMessageType.CALL, self._seqid)
+    args = bm_mc_mgrp_destroy_args()
+    args.mgrp_handle = mgrp_handle
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_mc_mgrp_destroy(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_mc_mgrp_destroy_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
+    return
+
+  def bm_mc_l1_node_create(self, rid):
+    """
+    Parameters:
+     - rid
+    """
+    self.send_bm_mc_l1_node_create(rid)
+    return self.recv_bm_mc_l1_node_create()
+
+  def send_bm_mc_l1_node_create(self, rid):
+    self._oprot.writeMessageBegin('bm_mc_l1_node_create', TMessageType.CALL, self._seqid)
+    args = bm_mc_l1_node_create_args()
+    args.rid = rid
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_mc_l1_node_create(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_mc_l1_node_create_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.ouch is not None:
+      raise result.ouch
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "bm_mc_l1_node_create failed: unknown result");
+
+  def bm_mc_l1_node_associate(self, mgrp_handle, l1_handle):
+    """
+    Parameters:
+     - mgrp_handle
+     - l1_handle
+    """
+    self.send_bm_mc_l1_node_associate(mgrp_handle, l1_handle)
+    self.recv_bm_mc_l1_node_associate()
+
+  def send_bm_mc_l1_node_associate(self, mgrp_handle, l1_handle):
+    self._oprot.writeMessageBegin('bm_mc_l1_node_associate', TMessageType.CALL, self._seqid)
+    args = bm_mc_l1_node_associate_args()
+    args.mgrp_handle = mgrp_handle
+    args.l1_handle = l1_handle
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_mc_l1_node_associate(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_mc_l1_node_associate_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
+    return
+
+  def bm_mc_l1_node_destroy(self, l1_handle):
+    """
+    Parameters:
+     - l1_handle
+    """
+    self.send_bm_mc_l1_node_destroy(l1_handle)
+    self.recv_bm_mc_l1_node_destroy()
+
+  def send_bm_mc_l1_node_destroy(self, l1_handle):
+    self._oprot.writeMessageBegin('bm_mc_l1_node_destroy', TMessageType.CALL, self._seqid)
+    args = bm_mc_l1_node_destroy_args()
+    args.l1_handle = l1_handle
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_mc_l1_node_destroy(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_mc_l1_node_destroy_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
+    return
+
+  def bm_mc_l2_node_create(self, l1_handle, port_map):
+    """
+    Parameters:
+     - l1_handle
+     - port_map
+    """
+    self.send_bm_mc_l2_node_create(l1_handle, port_map)
+    return self.recv_bm_mc_l2_node_create()
+
+  def send_bm_mc_l2_node_create(self, l1_handle, port_map):
+    self._oprot.writeMessageBegin('bm_mc_l2_node_create', TMessageType.CALL, self._seqid)
+    args = bm_mc_l2_node_create_args()
+    args.l1_handle = l1_handle
+    args.port_map = port_map
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_mc_l2_node_create(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_mc_l2_node_create_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.success is not None:
+      return result.success
+    if result.ouch is not None:
+      raise result.ouch
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "bm_mc_l2_node_create failed: unknown result");
+
+  def bm_mc_l2_node_update(self, l2_handle, port_map):
+    """
+    Parameters:
+     - l2_handle
+     - port_map
+    """
+    self.send_bm_mc_l2_node_update(l2_handle, port_map)
+    self.recv_bm_mc_l2_node_update()
+
+  def send_bm_mc_l2_node_update(self, l2_handle, port_map):
+    self._oprot.writeMessageBegin('bm_mc_l2_node_update', TMessageType.CALL, self._seqid)
+    args = bm_mc_l2_node_update_args()
+    args.l2_handle = l2_handle
+    args.port_map = port_map
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_mc_l2_node_update(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_mc_l2_node_update_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
+    return
+
+  def bm_mc_l2_node_destroy(self, l2_handle):
+    """
+    Parameters:
+     - l2_handle
+    """
+    self.send_bm_mc_l2_node_destroy(l2_handle)
+    self.recv_bm_mc_l2_node_destroy()
+
+  def send_bm_mc_l2_node_destroy(self, l2_handle):
+    self._oprot.writeMessageBegin('bm_mc_l2_node_destroy', TMessageType.CALL, self._seqid)
+    args = bm_mc_l2_node_destroy_args()
+    args.l2_handle = l2_handle
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_mc_l2_node_destroy(self):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = bm_mc_l2_node_destroy_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
+    return
+
 
 class Processor(Iface, TProcessor):
   def __init__(self, handler):
@@ -272,6 +662,16 @@ class Processor(Iface, TProcessor):
     self._processMap["bm_table_add_ternary_match_entry"] = Processor.process_bm_table_add_ternary_match_entry
     self._processMap["bm_set_default_action"] = Processor.process_bm_set_default_action
     self._processMap["bm_table_delete_entry"] = Processor.process_bm_table_delete_entry
+    self._processMap["bm_learning_ack"] = Processor.process_bm_learning_ack
+    self._processMap["bm_learning_ack_buffer"] = Processor.process_bm_learning_ack_buffer
+    self._processMap["bm_mc_mgrp_create"] = Processor.process_bm_mc_mgrp_create
+    self._processMap["bm_mc_mgrp_destroy"] = Processor.process_bm_mc_mgrp_destroy
+    self._processMap["bm_mc_l1_node_create"] = Processor.process_bm_mc_l1_node_create
+    self._processMap["bm_mc_l1_node_associate"] = Processor.process_bm_mc_l1_node_associate
+    self._processMap["bm_mc_l1_node_destroy"] = Processor.process_bm_mc_l1_node_destroy
+    self._processMap["bm_mc_l2_node_create"] = Processor.process_bm_mc_l2_node_create
+    self._processMap["bm_mc_l2_node_update"] = Processor.process_bm_mc_l2_node_update
+    self._processMap["bm_mc_l2_node_destroy"] = Processor.process_bm_mc_l2_node_destroy
 
   def process(self, iprot, oprot):
     (name, type, seqid) = iprot.readMessageBegin()
@@ -354,6 +754,140 @@ class Processor(Iface, TProcessor):
     except InvalidTableOperation, ouch:
       result.ouch = ouch
     oprot.writeMessageBegin("bm_table_delete_entry", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_learning_ack(self, seqid, iprot, oprot):
+    args = bm_learning_ack_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_learning_ack_result()
+    self._handler.bm_learning_ack(args.list_id, args.buffer_id, args.sample_ids)
+    oprot.writeMessageBegin("bm_learning_ack", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_learning_ack_buffer(self, seqid, iprot, oprot):
+    args = bm_learning_ack_buffer_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_learning_ack_buffer_result()
+    self._handler.bm_learning_ack_buffer(args.list_id, args.buffer_id)
+    oprot.writeMessageBegin("bm_learning_ack_buffer", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_mc_mgrp_create(self, seqid, iprot, oprot):
+    args = bm_mc_mgrp_create_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_mc_mgrp_create_result()
+    try:
+      result.success = self._handler.bm_mc_mgrp_create(args.mgrp)
+    except InvalidMcOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_mc_mgrp_create", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_mc_mgrp_destroy(self, seqid, iprot, oprot):
+    args = bm_mc_mgrp_destroy_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_mc_mgrp_destroy_result()
+    try:
+      self._handler.bm_mc_mgrp_destroy(args.mgrp_handle)
+    except InvalidMcOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_mc_mgrp_destroy", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_mc_l1_node_create(self, seqid, iprot, oprot):
+    args = bm_mc_l1_node_create_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_mc_l1_node_create_result()
+    try:
+      result.success = self._handler.bm_mc_l1_node_create(args.rid)
+    except InvalidMcOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_mc_l1_node_create", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_mc_l1_node_associate(self, seqid, iprot, oprot):
+    args = bm_mc_l1_node_associate_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_mc_l1_node_associate_result()
+    try:
+      self._handler.bm_mc_l1_node_associate(args.mgrp_handle, args.l1_handle)
+    except InvalidMcOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_mc_l1_node_associate", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_mc_l1_node_destroy(self, seqid, iprot, oprot):
+    args = bm_mc_l1_node_destroy_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_mc_l1_node_destroy_result()
+    try:
+      self._handler.bm_mc_l1_node_destroy(args.l1_handle)
+    except InvalidMcOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_mc_l1_node_destroy", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_mc_l2_node_create(self, seqid, iprot, oprot):
+    args = bm_mc_l2_node_create_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_mc_l2_node_create_result()
+    try:
+      result.success = self._handler.bm_mc_l2_node_create(args.l1_handle, args.port_map)
+    except InvalidMcOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_mc_l2_node_create", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_mc_l2_node_update(self, seqid, iprot, oprot):
+    args = bm_mc_l2_node_update_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_mc_l2_node_update_result()
+    try:
+      self._handler.bm_mc_l2_node_update(args.l2_handle, args.port_map)
+    except InvalidMcOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_mc_l2_node_update", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_mc_l2_node_destroy(self, seqid, iprot, oprot):
+    args = bm_mc_l2_node_destroy_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_mc_l2_node_destroy_result()
+    try:
+      self._handler.bm_mc_l2_node_destroy(args.l2_handle)
+    except InvalidMcOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_mc_l2_node_destroy", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -1221,6 +1755,1291 @@ class bm_table_delete_entry_result:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('bm_table_delete_entry_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_learning_ack_args:
+  """
+  Attributes:
+   - list_id
+   - buffer_id
+   - sample_ids
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'list_id', None, None, ), # 1
+    (2, TType.I64, 'buffer_id', None, None, ), # 2
+    (3, TType.LIST, 'sample_ids', (TType.I32,None), None, ), # 3
+  )
+
+  def __init__(self, list_id=None, buffer_id=None, sample_ids=None,):
+    self.list_id = list_id
+    self.buffer_id = buffer_id
+    self.sample_ids = sample_ids
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.list_id = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I64:
+          self.buffer_id = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.LIST:
+          self.sample_ids = []
+          (_etype59, _size56) = iprot.readListBegin()
+          for _i60 in xrange(_size56):
+            _elem61 = iprot.readI32();
+            self.sample_ids.append(_elem61)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_learning_ack_args')
+    if self.list_id is not None:
+      oprot.writeFieldBegin('list_id', TType.I32, 1)
+      oprot.writeI32(self.list_id)
+      oprot.writeFieldEnd()
+    if self.buffer_id is not None:
+      oprot.writeFieldBegin('buffer_id', TType.I64, 2)
+      oprot.writeI64(self.buffer_id)
+      oprot.writeFieldEnd()
+    if self.sample_ids is not None:
+      oprot.writeFieldBegin('sample_ids', TType.LIST, 3)
+      oprot.writeListBegin(TType.I32, len(self.sample_ids))
+      for iter62 in self.sample_ids:
+        oprot.writeI32(iter62)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_learning_ack_result:
+
+  thrift_spec = (
+  )
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_learning_ack_result')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_learning_ack_buffer_args:
+  """
+  Attributes:
+   - list_id
+   - buffer_id
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'list_id', None, None, ), # 1
+    (2, TType.I64, 'buffer_id', None, None, ), # 2
+  )
+
+  def __init__(self, list_id=None, buffer_id=None,):
+    self.list_id = list_id
+    self.buffer_id = buffer_id
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.list_id = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I64:
+          self.buffer_id = iprot.readI64();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_learning_ack_buffer_args')
+    if self.list_id is not None:
+      oprot.writeFieldBegin('list_id', TType.I32, 1)
+      oprot.writeI32(self.list_id)
+      oprot.writeFieldEnd()
+    if self.buffer_id is not None:
+      oprot.writeFieldBegin('buffer_id', TType.I64, 2)
+      oprot.writeI64(self.buffer_id)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_learning_ack_buffer_result:
+
+  thrift_spec = (
+  )
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_learning_ack_buffer_result')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_mgrp_create_args:
+  """
+  Attributes:
+   - mgrp
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'mgrp', None, None, ), # 1
+  )
+
+  def __init__(self, mgrp=None,):
+    self.mgrp = mgrp
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.mgrp = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_mgrp_create_args')
+    if self.mgrp is not None:
+      oprot.writeFieldBegin('mgrp', TType.I32, 1)
+      oprot.writeI32(self.mgrp)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_mgrp_create_result:
+  """
+  Attributes:
+   - success
+   - ouch
+  """
+
+  thrift_spec = (
+    (0, TType.I32, 'success', None, None, ), # 0
+    (1, TType.STRUCT, 'ouch', (InvalidMcOperation, InvalidMcOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, success=None, ouch=None,):
+    self.success = success
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.I32:
+          self.success = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidMcOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_mgrp_create_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.I32, 0)
+      oprot.writeI32(self.success)
+      oprot.writeFieldEnd()
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_mgrp_destroy_args:
+  """
+  Attributes:
+   - mgrp_handle
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'mgrp_handle', None, None, ), # 1
+  )
+
+  def __init__(self, mgrp_handle=None,):
+    self.mgrp_handle = mgrp_handle
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.mgrp_handle = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_mgrp_destroy_args')
+    if self.mgrp_handle is not None:
+      oprot.writeFieldBegin('mgrp_handle', TType.I32, 1)
+      oprot.writeI32(self.mgrp_handle)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_mgrp_destroy_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidMcOperation, InvalidMcOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidMcOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_mgrp_destroy_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l1_node_create_args:
+  """
+  Attributes:
+   - rid
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'rid', None, None, ), # 1
+  )
+
+  def __init__(self, rid=None,):
+    self.rid = rid
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.rid = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l1_node_create_args')
+    if self.rid is not None:
+      oprot.writeFieldBegin('rid', TType.I32, 1)
+      oprot.writeI32(self.rid)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l1_node_create_result:
+  """
+  Attributes:
+   - success
+   - ouch
+  """
+
+  thrift_spec = (
+    (0, TType.I32, 'success', None, None, ), # 0
+    (1, TType.STRUCT, 'ouch', (InvalidMcOperation, InvalidMcOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, success=None, ouch=None,):
+    self.success = success
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.I32:
+          self.success = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidMcOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l1_node_create_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.I32, 0)
+      oprot.writeI32(self.success)
+      oprot.writeFieldEnd()
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l1_node_associate_args:
+  """
+  Attributes:
+   - mgrp_handle
+   - l1_handle
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'mgrp_handle', None, None, ), # 1
+    (2, TType.I32, 'l1_handle', None, None, ), # 2
+  )
+
+  def __init__(self, mgrp_handle=None, l1_handle=None,):
+    self.mgrp_handle = mgrp_handle
+    self.l1_handle = l1_handle
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.mgrp_handle = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.l1_handle = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l1_node_associate_args')
+    if self.mgrp_handle is not None:
+      oprot.writeFieldBegin('mgrp_handle', TType.I32, 1)
+      oprot.writeI32(self.mgrp_handle)
+      oprot.writeFieldEnd()
+    if self.l1_handle is not None:
+      oprot.writeFieldBegin('l1_handle', TType.I32, 2)
+      oprot.writeI32(self.l1_handle)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l1_node_associate_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidMcOperation, InvalidMcOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidMcOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l1_node_associate_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l1_node_destroy_args:
+  """
+  Attributes:
+   - l1_handle
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'l1_handle', None, None, ), # 1
+  )
+
+  def __init__(self, l1_handle=None,):
+    self.l1_handle = l1_handle
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.l1_handle = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l1_node_destroy_args')
+    if self.l1_handle is not None:
+      oprot.writeFieldBegin('l1_handle', TType.I32, 1)
+      oprot.writeI32(self.l1_handle)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l1_node_destroy_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidMcOperation, InvalidMcOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidMcOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l1_node_destroy_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l2_node_create_args:
+  """
+  Attributes:
+   - l1_handle
+   - port_map
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'l1_handle', None, None, ), # 1
+    (2, TType.STRING, 'port_map', None, None, ), # 2
+  )
+
+  def __init__(self, l1_handle=None, port_map=None,):
+    self.l1_handle = l1_handle
+    self.port_map = port_map
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.l1_handle = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.port_map = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l2_node_create_args')
+    if self.l1_handle is not None:
+      oprot.writeFieldBegin('l1_handle', TType.I32, 1)
+      oprot.writeI32(self.l1_handle)
+      oprot.writeFieldEnd()
+    if self.port_map is not None:
+      oprot.writeFieldBegin('port_map', TType.STRING, 2)
+      oprot.writeString(self.port_map)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l2_node_create_result:
+  """
+  Attributes:
+   - success
+   - ouch
+  """
+
+  thrift_spec = (
+    (0, TType.I32, 'success', None, None, ), # 0
+    (1, TType.STRUCT, 'ouch', (InvalidMcOperation, InvalidMcOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, success=None, ouch=None,):
+    self.success = success
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 0:
+        if ftype == TType.I32:
+          self.success = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidMcOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l2_node_create_result')
+    if self.success is not None:
+      oprot.writeFieldBegin('success', TType.I32, 0)
+      oprot.writeI32(self.success)
+      oprot.writeFieldEnd()
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l2_node_update_args:
+  """
+  Attributes:
+   - l2_handle
+   - port_map
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'l2_handle', None, None, ), # 1
+    (2, TType.STRING, 'port_map', None, None, ), # 2
+  )
+
+  def __init__(self, l2_handle=None, port_map=None,):
+    self.l2_handle = l2_handle
+    self.port_map = port_map
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.l2_handle = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.port_map = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l2_node_update_args')
+    if self.l2_handle is not None:
+      oprot.writeFieldBegin('l2_handle', TType.I32, 1)
+      oprot.writeI32(self.l2_handle)
+      oprot.writeFieldEnd()
+    if self.port_map is not None:
+      oprot.writeFieldBegin('port_map', TType.STRING, 2)
+      oprot.writeString(self.port_map)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l2_node_update_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidMcOperation, InvalidMcOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidMcOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l2_node_update_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l2_node_destroy_args:
+  """
+  Attributes:
+   - l2_handle
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'l2_handle', None, None, ), # 1
+  )
+
+  def __init__(self, l2_handle=None,):
+    self.l2_handle = l2_handle
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.l2_handle = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l2_node_destroy_args')
+    if self.l2_handle is not None:
+      oprot.writeFieldBegin('l2_handle', TType.I32, 1)
+      oprot.writeI32(self.l2_handle)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mc_l2_node_destroy_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidMcOperation, InvalidMcOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidMcOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mc_l2_node_destroy_result')
     if self.ouch is not None:
       oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
       self.ouch.write(oprot)

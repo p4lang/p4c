@@ -444,6 +444,73 @@ class RuntimeAPI(cmd.Cmd):
     def complete_table_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
+
+    def do_mc_mgrp_create(self, line):
+        mgrp = int(line.split()[0])
+        print "Creating multicast group", mgrp
+        mgrp_hdl = self.client.bm_mc_mgrp_create(mgrp)
+        print "SUCCESS"
+        assert(mgrp == mgrp_hdl)
+
+    def do_mc_mgrp_destroy(self, line):
+        mgrp = int(line.split()[0])
+        print "Destroying multicast group", mgrp
+        self.client.bm_mc_mgrp_destroy(mgrp)
+        print "SUCCESS"
+
+    def do_mc_l1_node_create(self, line):
+        rid = int(line.split()[0])
+        print "Creating l1 node with rid", rid
+        l1_hdl = self.client.bm_mc_l1_node_create(rid)
+        print "SUCCESS"
+        print "l1 node was created with handle", l1_hdl
+
+    def do_mc_l1_node_associate(self, line):
+        mgrp = int(line.split()[0])
+        l1_hdl = int(line.split()[1])
+        print "Associating l1 node", l1_hdl, "to multicast group", mgrp
+        self.client.bm_mc_l1_node_associate(mgrp, l1_hdl)
+        print "SUCCESS"
+
+    def do_mc_l1_node_destroy(self, line):
+        l1_hdl = int(line.split()[0])
+        print "Destroying l1 node", l1_hdl,
+        self.client.bm_mc_l1_node_destroy(l1_hdl)
+        print "SUCCESS"
+
+    def ports_to_port_map_str(self, ports):
+        last_port_num = 0
+        port_map_str = ""
+        for port_num_str in ports:
+            port_num = int(port_num_str)
+            port_map_str += "0" * (port_num - last_port_num) + "1"
+            last_port_num = port_num
+        return port_map_str[::-1]
+
+    def do_mc_l2_node_create(self, line):
+        args = line.split()
+        l1_hdl = int(args[0])
+        port_map_str = self.ports_to_port_map_str(args[1:])
+        print "Creating l2 node for l1 node", l1_hdl, "with port map", port_map_str
+        l2_hdl = self.client.bm_mc_l2_node_create(l1_hdl, port_map_str)
+        print "SUCCESS"
+        print "l2 node was created with handle", l2_hdl
+
+    def do_mc_l2_node_update(self, line):
+        args = line.split()
+        l2_hdl = int(args[0])
+        port_map_str = self.ports_to_port_map_str(args[1:])
+        print "Updating l2 node", l2_hdl, "with port map", port_map_str
+        self.client.bm_mc_l2_node_update(l2_hdl, port_map_str)
+        print "SUCCESS"
+
+    def do_mc_l2_node_destroy(self, line):
+        l2_hdl = int(line.split()[0])
+        print "Destroying l2 node", l2_hdl,
+        self.client.bm_mc_l2_node_destroy(l2_hdl)
+        print "SUCCESS"
+
+
 def thrift_connect():
     # Make socket
     transport = TSocket.TSocket('localhost', THRIFT_PORT)

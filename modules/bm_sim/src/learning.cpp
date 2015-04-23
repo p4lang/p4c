@@ -24,6 +24,9 @@ int LearnWriterImpl<Transport>::send_msgs(
   return transport_instance->send_msgs(msgs);
 }
 
+// explicit template instantiation
+template class LearnWriterImpl<TransportNanomsg>;
+
 void LearnEngine::LearnSampleBuilder::push_back_constant(
     const ByteContainer &constant
 )
@@ -197,15 +200,39 @@ void LearnEngine::LearnList::buffer_transmit_loop()
   }
 }
 
-void LearnEngine::LearnList::ack(buffer_id_t buffer_id, int sample_id) {
+void LearnEngine::LearnList::ack(
+    buffer_id_t buffer_id, const std::vector<int> &sample_ids
+)
+{
   std::unique_lock<std::mutex> lock(mutex);
   auto it = old_buffers.find(buffer_id);
   assert(it != old_buffers.end());
   FilterPtrs &filter_ptrs = it->second;
-  filter.erase(filter_ptrs.buffer[sample_id]); // what happens if bad input :(
-  if(--filter_ptrs.unacked_count == 0) {
-    old_buffers.erase(it);
+  for (int sample_id : sample_ids) {
+    filter.erase(filter_ptrs.buffer[sample_id]); // what happens if bad input :(
+    if(--filter_ptrs.unacked_count == 0) {
+      old_buffers.erase(it);
+    }
   }
+}
+
+void LearnEngine::LearnList::ack_buffer(buffer_id_t buffer_id)
+{
+  std::unique_lock<std::mutex> lock(mutex);
+  auto it = old_buffers.find(buffer_id);
+  assert(it != old_buffers.end());
+  FilterPtrs &filter_ptrs = it->second;
+  // we optimize for this case (no learning occured since the buffer as sent out
+  // and the ack clears out the filter
+  if(filter_ptrs.unacked_count == filter.size()) {
+    filter.clear();
+  }
+  else { // slow: linear in the number of elements acked
+    for(const auto &sample_it : filter_ptrs.buffer) {
+      filter.erase(sample_it);
+    }
+  }
+  old_buffers.erase(it);
 }
 
 void LearnEngine::list_create(
@@ -258,5 +285,22 @@ void LearnEngine::ack(list_id_t list_id, buffer_id_t buffer_id, int sample_id) {
   auto it = learn_lists.find(list_id);
   assert(it != learn_lists.end());
   LearnList *list = it->second.get();
-  list->ack(buffer_id, sample_id);
+  list->ack(buffer_id, {sample_id});
+}
+
+void LearnEngine::ack(list_id_t list_id, buffer_id_t buffer_id,
+		      const std::vector<int> &sample_ids) {
+  // TODO : event logging
+  auto it = learn_lists.find(list_id);
+  assert(it != learn_lists.end());
+  LearnList *list = it->second.get();
+  list->ack(buffer_id, sample_ids);
+}
+
+void LearnEngine::ack_buffer(list_id_t list_id, buffer_id_t buffer_id) {
+  // TODO : event logging
+  auto it = learn_lists.find(list_id);
+  assert(it != learn_lists.end());
+  LearnList *list = it->second.get();
+  list->ack_buffer(buffer_id);
 }

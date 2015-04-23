@@ -45,6 +45,8 @@ TransportNanomsg::TransportNanomsg()
 int TransportNanomsg::open(const std::string &name) {
   // TODO: catch exception
   s.bind(name.c_str());
+  int linger = 0;
+  s.setsockopt(NN_SOL_SOCKET, NN_LINGER, &linger, sizeof (linger));
   return 0;
 }
 

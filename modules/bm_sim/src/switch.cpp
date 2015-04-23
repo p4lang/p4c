@@ -5,6 +5,7 @@
 
 Switch::Switch() {
   p4objects = std::unique_ptr<P4Objects>(new P4Objects());
+  pre = std::unique_ptr<McPre>(new McPre());
 }
 
 void Switch::init_objects(const std::string &json_path) {
@@ -110,4 +111,9 @@ MatchTable::ErrorCode Switch::table_delete_entry(
   MatchTable *table = p4objects->get_match_table(table_name);
   assert(table);
   return table->delete_entry(handle);
+}
+
+LearnEngine *Switch::get_learn_engine()
+{
+  return p4objects->get_learn_engine();
 }

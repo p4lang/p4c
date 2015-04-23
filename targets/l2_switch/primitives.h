@@ -25,4 +25,13 @@ class drop : public ActionPrimitive<> {
 
 REGISTER_PRIMITIVE(drop);
 
+class generate_digest : public ActionPrimitive<const Data &, const Data &> {
+  void operator ()(const Data &receiver, const Data &learn_id) {
+    // discared receiver for now
+    get_field("intrinsic_metadata.learn_id").set(learn_id.get_uint());
+  }
+};
+
+REGISTER_PRIMITIVE(generate_digest);
+
 #endif

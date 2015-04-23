@@ -63,6 +63,9 @@ public:
   void learn(list_id_t list_id, const Packet &pkt);
 
   void ack(list_id_t list_id, buffer_id_t buffer_id, int sample_id);
+  void ack(list_id_t list_id, buffer_id_t buffer_id,
+	   const std::vector<int> &sample_ids);
+  void ack_buffer(list_id_t list_id, buffer_id_t buffer_id);
 
 private:
   class LearnSampleBuilder {
@@ -118,7 +121,8 @@ private:
 
     void add_sample(const PHV &phv);
 
-    void ack(buffer_id_t buffer_id, int sample_id);
+    void ack(buffer_id_t buffer_id, const std::vector<int> &sample_ids);
+    void ack_buffer(buffer_id_t buffer_id);
 
     LearnList(const LearnList &other) = delete;
     LearnList &operator=(const LearnList &other) = delete;

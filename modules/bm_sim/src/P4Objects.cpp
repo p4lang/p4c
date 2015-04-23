@@ -1,5 +1,7 @@
 #include "bm_sim/P4Objects.h"
 
+using std::unique_ptr;
+
 typedef unsigned char opcode_t;
 
 // std::set<int> P4Objects::build_arith_offsets(const Json::Value &json_actions,
@@ -440,6 +442,39 @@ void P4Objects::init_objects(std::istream &is) {
     for(auto it = deparsers.begin(); it != deparsers.end(); ++it) {
       it->second->add_checksum(checksum);
     }
+  }
+
+  // learn lists
+
+  learn_engine = std::unique_ptr<LearnEngine>(new LearnEngine());
+
+  typedef LearnWriterImpl<TransportNanomsg> MyLearnWriter;
+  const std::string learning_ipc_name = "ipc:///tmp/test_bm_learning.ipc";
+  auto learn_writer = 
+    std::shared_ptr<MyLearnWriter>(new MyLearnWriter(learning_ipc_name));
+
+  const Json::Value cfg_learn_lists = cfg_root["learn_lists"];
+  for (const auto &cfg_learn_list : cfg_learn_lists) {
+    
+    LearnEngine::list_id_t list_id = cfg_learn_list["id"].asInt();
+    learn_engine->list_create(list_id, learn_writer);
+
+    const Json::Value cfg_learn_elements = cfg_learn_list["elements"];
+    for (const auto &cfg_learn_element : cfg_learn_elements) {
+
+      const std::string type = cfg_learn_element["type"].asString();
+      assert(type == "field");  // TODO: other types
+
+      Json::Value cfg_value_field = cfg_learn_element["value"];
+      const string header_name = cfg_value_field[0].asString();
+      header_id_t header_id = get_header_id(header_name);
+      const string field_name = cfg_value_field[1].asString();
+      int field_offset = get_field_offset(header_id, field_name);
+      learn_engine->list_push_back_field(list_id, header_id, field_offset);
+
+    }
+
+    learn_engine->list_init(list_id);
   }
 
   Packet::set_phv_factory(phv_factory);

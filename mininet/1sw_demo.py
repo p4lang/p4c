@@ -17,6 +17,7 @@ parser.add_argument('--thrift-port', help='Thrift server port for table updates'
                     type=int, action="store", default=22222)
 parser.add_argument('--num-hosts', help='Number of hosts to connect to switch',
                     type=int, action="store", default=2)
+parser.add_argument('--mode', choices=['l2', 'l3'], type=str, default='l3')
 
 args = parser.parse_args()
 
@@ -40,6 +41,7 @@ class SingleSwitchTopo(Topo):
 
 def main():
     num_hosts = args.num_hosts
+    mode = args.mode
 
     topo = SingleSwitchTopo(args.behavioral_exe,
                             args.thrift_port,
@@ -58,8 +60,11 @@ def main():
 
     for n in xrange(num_hosts):
         h = net.get('h%d' % (n + 1))
-        h.setARP(sw_addr[n], sw_mac[n])
-        h.setDefaultRoute("dev eth0 via %s" % sw_addr[n])
+        if mode == "l2":
+            h.setDefaultRoute("dev eth0")
+        else:
+            h.setARP(sw_addr[n], sw_mac[n])
+            h.setDefaultRoute("dev eth0 via %s" % sw_addr[n])
 
     for n in xrange(num_hosts):
         h = net.get('h%d' % (n + 1))
