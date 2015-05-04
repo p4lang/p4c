@@ -9,4 +9,4 @@ libp4runtime_la_SOURCES =
 libp4runtime_la_LIBADD = bm_runtime/libbmruntime.la ../thrift_src/libruntimestubs.la
 
 libbmi_la_SOURCES =
-libbmi_la_LIBADD = BMI/libbmi_la
+libbmi_la_LIBADD = BMI/libbmi.la
