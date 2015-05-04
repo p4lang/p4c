@@ -60,3 +60,6 @@ test-driver
 tests/test_*
 *.log
 *.trs
+config.guess
+config.sub
+ltmain.sh
