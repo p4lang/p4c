@@ -1,5 +1,8 @@
 # BEHAVIORAL MODEL REPOSITORY
 
+## Common instructions:
+1. Always run make from the top-level folder, otherwise dependency tracking won't work.
+
 ## Building the code:
 1. sudo apt-get install autotools-dev dh-autoreconf
 2. ./autogen.sh
