@@ -2,8 +2,8 @@ BUILT_SOURCES = gen-cpp/runtime_constants.cpp gen-cpp/runtime_constants.h gen-cp
 
 AUTOMAKE_OPTIONS = foreign no-dependencies subdir-objects
 
-noinst_LIBRARIES = libruntimestubs.a
-libruntimestubs_a_SOURCES = \
+noinst_LTLIBRARIES = libruntimestubs.la
+libruntimestubs_la_SOURCES = \
 	${BUILT_SOURCES}
 
 ${BUILT_SOURCES} : runtime.thrift

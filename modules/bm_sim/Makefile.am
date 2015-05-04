@@ -2,7 +2,7 @@ AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/i
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 AM_CFLAGS = $(PICKY_CFLAGS)
 
-noinst_LIBRARIES = libbmsim.a
+noinst_LTLIBRARIES = libbmsim.la
 
 common_source = \
 src/actions.cpp \
@@ -57,4 +57,4 @@ include/bm_sim/learning.h \
 include/bm_sim/pre.h \
 include/bm_sim/transport.h
 
-libbmsim_a_SOURCES = $(common_source) $(common_include)
+libbmsim_la_SOURCES = $(common_source) $(common_include)
