@@ -67,5 +67,6 @@ AC_CONFIG_FILES([Makefile
 		targets/Makefile
 		targets/simple_router/Makefile
 		targets/l2_switch/Makefile
+		targets/l2_switch/learn_client/Makefile
 		tests/Makefile])
 AC_OUTPUT
