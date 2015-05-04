@@ -20,7 +20,10 @@ src/headers.cpp \
 src/packet.cpp \
 src/phv.cpp \
 src/switch.cpp \
-src/xxhash.c
+src/xxhash.c \
+src/learning.cpp \
+src/pre.cpp \
+src/transport.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -49,6 +52,9 @@ include/bm_sim/queue.h \
 include/bm_sim/runtime_interface.h \
 include/bm_sim/stateful.h \
 include/bm_sim/switch.h \
-include/bm_sim/tables.h
+include/bm_sim/tables.h \
+include/bm_sim/learning.h \
+include/bm_sim/pre.h \
+include/bm_sim/transport.h
 
 libbmsim_a_SOURCES = $(common_source) $(common_include)

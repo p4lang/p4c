@@ -1,1 +1,1 @@
-SUBDIRS = simple_router
+SUBDIRS = simple_router l2_switch

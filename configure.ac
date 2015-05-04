@@ -66,5 +66,6 @@ AC_CONFIG_FILES([Makefile
 		modules/BMI/Makefile
 		targets/Makefile
 		targets/simple_router/Makefile
+		targets/l2_switch/Makefile
 		tests/Makefile])
 AC_OUTPUT
