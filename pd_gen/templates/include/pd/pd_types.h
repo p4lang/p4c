@@ -1,6 +1,8 @@
 #ifndef _P4_PD_TYPES_H_
 #define _P4_PD_TYPES_H_
 
+#include <stdint.h>
+
 /* MATCH STRUCTS */
 
 //:: for t_name, t in tables.items():

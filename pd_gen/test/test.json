@@ -1,0 +1,288 @@
+{
+    "header_types": [
+        {
+            "name": "standard_metadata_t",
+            "id": 0,
+            "fields": [
+                [
+                    "ingress_port",
+                    9
+                ],
+                [
+                    "packet_length",
+                    32
+                ],
+                [
+                    "egress_spec",
+                    9
+                ],
+                [
+                    "egress_port",
+                    9
+                ],
+                [
+                    "egress_instance",
+                    32
+                ],
+                [
+                    "instance_type",
+                    32
+                ],
+                [
+                    "clone_spec",
+                    32
+                ],
+                [
+                    "_padding",
+                    5
+                ]
+            ]
+        },
+        {
+            "name": "header_test_t",
+            "id": 1,
+            "fields": [
+                [
+                    "field8",
+                    8
+                ],
+                [
+                    "field16",
+                    16
+                ],
+                [
+                    "field20",
+                    20
+                ],
+                [
+                    "field24",
+                    24
+                ],
+                [
+                    "field32",
+                    32
+                ],
+                [
+                    "field48",
+                    48
+                ],
+                [
+                    "field64",
+                    64
+                ],
+                [
+                    "_padding",
+                    4
+                ]
+            ]
+        }
+    ],
+    "headers": [
+        {
+            "name": "standard_metadata",
+            "id": 0,
+            "header_type": "standard_metadata_t"
+        },
+        {
+            "name": "header_test",
+            "id": 1,
+            "header_type": "header_test_t"
+        }
+    ],
+    "parsers": [
+        {
+            "name": "parser",
+            "id": 0,
+            "init_state": "start",
+            "parse_states": [
+                {
+                    "name": "start",
+                    "id": 0,
+                    "extracts": [],
+                    "sets": [],
+                    "transition_key": [],
+                    "transitions": [
+                        {
+                            "value": "default",
+                            "mask": null,
+                            "next_state": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "deparsers": [
+        {
+            "name": "deparser",
+            "id": 0,
+            "order": []
+        }
+    ],
+    "actions": [
+        {
+            "name": "actionA",
+            "id": 0,
+            "runtime_data": [
+                {
+                    "name": "param",
+                    "bitwidth": 48
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "header_test",
+                                "field48"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "pipelines": [
+        {
+            "name": "ingress",
+            "id": 0,
+            "init_table": "ExactOne",
+            "tables": [
+                {
+                    "name": "ExactOne",
+                    "id": 0,
+                    "type": "exact",
+                    "max_size": 512,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "actionA"
+                    ],
+                    "next_tables": {
+                        "actionA": "LpmOne"
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "LpmOne",
+                    "id": 1,
+                    "type": "lpm",
+                    "max_size": 512,
+                    "key": [
+                        {
+                            "match_type": "lpm",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "actionA"
+                    ],
+                    "next_tables": {
+                        "actionA": "TernaryOne"
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "TernaryOne",
+                    "id": 2,
+                    "type": "ternary",
+                    "max_size": 512,
+                    "key": [
+                        {
+                            "match_type": "ternary",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "actionA"
+                    ],
+                    "next_tables": {
+                        "actionA": "ExactOneNA"
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "ExactOneNA",
+                    "id": 3,
+                    "type": "exact",
+                    "max_size": 512,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field20"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "actionA"
+                    ],
+                    "next_tables": {
+                        "actionA": "ExactTwo"
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "ExactTwo",
+                    "id": 4,
+                    "type": "exact",
+                    "max_size": 512,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        },
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field16"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "actionA"
+                    ],
+                    "next_tables": {
+                        "actionA": null
+                    },
+                    "default_action": null
+                }
+            ],
+            "conditionals": []
+        },
+        {
+            "name": "egress",
+            "id": 1,
+            "init_table": null,
+            "tables": [],
+            "conditionals": []
+        }
+    ],
+    "checksums": [],
+    "learn_lists": []
+}

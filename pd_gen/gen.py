@@ -200,7 +200,7 @@ def main():
     render_dict["get_c_name"] = get_c_name
     render_dict["tables"] = TABLES
     render_dict["actions"] = ACTIONS
-    render_all_files(render_dict, _validate_dir("gen-cpp"))
+    render_all_files(render_dict, _validate_dir(os.path.join(_THIS_DIR, "gen-cpp")))
 
 if __name__ == '__main__':
     main()

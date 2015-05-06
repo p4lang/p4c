@@ -32,17 +32,17 @@ static std::vector<std::string> build_key_${t_name} (
 //::   if not t.key: continue
 //::   if t.type_ != MatchType.TERNARY: continue
 static std::vector<std::string> build_mask_${t_name} (
-    ${pd_prefix}${table}_match_spec_t *match_spec
+    ${pd_prefix}${t_name}_match_spec_t *match_spec
 ) {
   std::vector<std::string> mask;
 //::   for field_name, field_match_type, field_bw in t.key:
 //::     field_name = get_c_name(field_name)
 //::     width = bits_to_bytes(field_bw)
-//::     if field_match_type == "exact":
+//::     if field_match_type == MatchType.EXACT:
   mask.push_back(std::string((char) 0xFF, ${width}));
-//::     elif field_match_type == "ternary":
+//::     elif field_match_type == MatchType.TERNARY:
   mask.push_back(std::string((char *) &(match_spec->${field_name}_mask), ${width}));
-//::     elif field_match_type == "lpm":
+//::     elif field_match_type == MatchType.LPM:
   int pref_length = match_spec->${field_name}_prefix_length;
   std::string pref((char) 0x00, ${width});
   std::fill(pref.begin(), pref.begin() + (pref_length / 8), (char) 0xFF);
@@ -90,7 +90,7 @@ extern "C" {
 //::     if has_match_spec:
 //::       params += [pd_prefix + t_name + "_match_spec_t *match_spec"]
 //::     #endif
-//::     if match_type == "ternary":
+//::     if match_type == MatchType.TERNARY:
 //::       params += ["int priority"]
 //::     #endif
 //::     if has_action_spec:

@@ -2,6 +2,7 @@
 #define _P4_PD_TABLES_H_
 
 #include "pd/pd_types.h"
+#include "pd/pd_static.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +22,7 @@ extern "C" {
 //::     if has_match_spec:
 //::       params += [pd_prefix + t_name + "_match_spec_t *match_spec"]
 //::     #endif
-//::     if match_type == "ternary":
+//::     if match_type == MatchType.TERNARY:
 //::       params += ["int priority"]
 //::     #endif
 //::     if has_action_spec:

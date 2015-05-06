@@ -1,27 +1,21 @@
 CC:= gcc
 CXX:= g++
-CFLAGS:= -O0 -g -Wall -fPIC
-CPPFLAGS:= -O0 -g -Wall --std=c++11 -fPIC
+COMMON_FLAGS:=
+CFLAGS:= -O0 -g -Wall
+CPPFLAGS:= -O0 -g -Wall --std=c++11
 LIBS:=
 INCS:=
 
-TARGET:=libpd.so
+TARGET:=test
 
 BUILD_DIR := build
 BUILD_DIRS := $(BUILD_DIR)
 
 srcs_C:=
-srcs_CXX:=
+srcs_CXX:= test.cpp
 
-MODULES_DIR :=
-MODULES_NAMES :=
-
-LIBPD_MK_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-$(TARGET)_TARGET := $(LIBPD_MK_DIR)$(TARGET)
-
-include libpd.mk
-
-$(TARGET)_PUBLIC_INCS := $(INCS)
+include ../libpd.mk
+include thrift_endpoint/module.mk
 
 CFLAGS += $(COMMON_FLAGS)
 CPPFLAGS += $(COMMON_FLAGS)
@@ -49,8 +43,13 @@ objs_C_ := $(patsubst %, $(BUILD_DIR)%, $(objs_C))
 objs_CXX_ := $(patsubst %, $(BUILD_DIR)%, $(objs_CXX))
 objs_ := $(patsubst %, $(BUILD_DIR)%, $(objs))
 
+LIBS := $(sort $(LIBS))
+
 $(TARGET): $(objs_) | $(BUILD_DIRS)
-	$(CXX) -o $@ $^ -shared -fPIC
+	$(CXX) -o $@ $^ $(LIBS)
+
+check: $(TARGET)
+	./run_tests.sh
 
 $(BUILD_DIRS):
 	mkdir -p $@
@@ -76,5 +75,7 @@ $(objs_CXX_): $(BUILD_DIR)%.o: %.cpp | $(BUILD_DIRS)
 
 clean:
 	rm -rf $(BUILD_DIRS) $(TARGET)
+	rm -f *.o *.d
+	rm -f test.output
 
 .PHONY: clean
