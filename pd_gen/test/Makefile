@@ -59,7 +59,7 @@ $(objs_) $(deps_) : .thrift_gen
 .thrift_gen: .pd_from_json
 
 .pd_from_json: test.json ../gen-cpp/src/pd_tables.cpp
-	../gen.py --json test.json
+	../gen.py --json test.json --p4-prefix test
 	@touch .pd_from_json
 
 $(deps_C_): $(BUILD_DIR)%.d: %.c | $(BUILD_DIRS)

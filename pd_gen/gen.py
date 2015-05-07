@@ -15,6 +15,8 @@ tenjin_prefix = "//::" # Use // in prefix for C syntax processing
 parser = argparse.ArgumentParser(description='PD library C code generator')
 parser.add_argument('--json', help='JSON description of P4 program',
                     type=str, action="store", required=True)
+parser.add_argument('--p4-prefix', help='P4 name use for API function prefix',
+                    type=str, action="store", required=True)
 
 args = parser.parse_args()
 
@@ -190,8 +192,8 @@ def get_c_name(name):
 def main():
     load_json(args.json)
     render_dict = {}
-    render_dict["p4_prefix"] = "ab"
-    render_dict["pd_prefix"] = "p4_pd_ab_"
+    render_dict["p4_prefix"] = args.p4_prefix
+    render_dict["pd_prefix"] = "p4_pd_" + args.p4_prefix + "_"
     render_dict["MatchType"] = MatchType
     render_dict["gen_match_params"] = gen_match_params
     render_dict["gen_action_params"] = gen_action_params
