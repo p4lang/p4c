@@ -54,6 +54,14 @@ check: $(TARGET)
 $(BUILD_DIRS):
 	mkdir -p $@
 
+$(objs_) $(deps_) : .thrift_gen
+
+.thrift_gen: .pd_from_json
+
+.pd_from_json: test.json ../gen-cpp/src/pd_tables.cpp
+	../gen.py --json test.json
+	@touch .pd_from_json
+
 $(deps_C_): $(BUILD_DIR)%.d: %.c | $(BUILD_DIRS)
 	$(CC) $(CFLAGS) $(INC) -MM $< -MT $(BUILD_DIR)$*.o -o $(BUILD_DIR)$*.d
 
@@ -73,9 +81,10 @@ $(objs_C_): $(BUILD_DIR)%.o: %.c | $(BUILD_DIRS)
 $(objs_CXX_): $(BUILD_DIR)%.o: %.cpp | $(BUILD_DIRS)
 	$(CXX) $(CPPFLAGS) $(INC) -c -o $(BUILD_DIR)$*.o $<
 
-clean:
+clean: .thrift_gen_clean
 	rm -rf $(BUILD_DIRS) $(TARGET)
 	rm -f *.o *.d
 	rm -f test.output
+	rm -rf .pd_from_json
 
 .PHONY: clean

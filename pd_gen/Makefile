@@ -55,6 +55,9 @@ $(TARGET): $(objs_) | $(BUILD_DIRS)
 $(BUILD_DIRS):
 	mkdir -p $@
 
+$(objs_) : .thrift_gen
+$(deps_) : .thrift_gen
+
 $(deps_C_): $(BUILD_DIR)%.d: %.c | $(BUILD_DIRS)
 	$(CC) $(CFLAGS) $(INC) -MM $< -MT $(BUILD_DIR)$*.o -o $(BUILD_DIR)$*.d
 
@@ -74,7 +77,7 @@ $(objs_C_): $(BUILD_DIR)%.o: %.c | $(BUILD_DIRS)
 $(objs_CXX_): $(BUILD_DIR)%.o: %.cpp | $(BUILD_DIRS)
 	$(CXX) $(CPPFLAGS) $(INC) -c -o $(BUILD_DIR)$*.o $<
 
-clean:
+clean: .thrift_gen_clean
 	rm -rf $(BUILD_DIRS) $(TARGET)
 
 .PHONY: clean
