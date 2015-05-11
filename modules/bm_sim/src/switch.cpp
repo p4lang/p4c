@@ -113,6 +113,20 @@ MatchTable::ErrorCode Switch::table_delete_entry(
   return table->delete_entry(handle);
 }
 
+MatchTable::ErrorCode Switch::table_modify_entry(
+    const std::string &table_name,
+    entry_handle_t handle,
+    const std::string &action_name,
+    const ActionData &action_data
+) {
+  MatchTable *table = p4objects->get_match_table(table_name);
+  const ActionFn *action = p4objects->get_action(action_name);
+  assert(table); assert(action);
+  const ControlFlowNode *next_node = table->get_next_node(action->get_id());
+  ActionFnEntry action_entry(action, action_data);
+  return table->modify_entry(handle, action_entry, next_node);
+}
+
 LearnEngine *Switch::get_learn_engine()
 {
   return p4objects->get_learn_engine();

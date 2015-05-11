@@ -88,6 +88,14 @@ class RuntimeHandler : virtual public RuntimeIf {
 	      << entry_handle << std::endl;
   }
 
+  void bm_table_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const std::string &action_name, const BmActionData& action_data) {
+    std::cout << "bm_table_modify_entry" << std::endl
+	      << table_name << std::endl
+	      << entry_handle << std::endl
+	      << action_name << std::endl;
+    print_spec(action_data);
+  }
+
   void bm_learning_ack(const BmLearningListId list_id, const BmLearningBufferId buffer_id, const std::vector<BmLearningSampleId> & sample_ids) {
     // Your implementation goes here
     printf("bm_learning_ack\n");

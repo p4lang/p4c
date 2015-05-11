@@ -68,6 +68,8 @@ struct ActionData {
     action_data.emplace_back(bytes, nbytes);
   }
 
+  size_t size() const { return action_data.size(); }
+
   vector<Data> action_data;
 };
 
@@ -273,6 +275,12 @@ public:
 
   void push_back_action_data(const char *bytes, int nbytes) {
     action_data.push_back_action_data(bytes, nbytes);
+  }
+
+  size_t action_data_size() const { return action_data.size(); }
+
+  const Data&get_action_data(int offset) const {
+    return action_data.get(offset);
   }
 
 private:

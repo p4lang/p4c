@@ -193,6 +193,15 @@ ${name}
 (
  ${param_str}
 ) {
+//::     if not has_action_spec:
+  std::vector<std::string> action_data;
+//::     else:
+  std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
+//::     #endif
+  pd_conn_mgr_client(dev_id)->bm_table_modify_entry(
+      "${t_name}", entry_hdl,
+      "${a_name}", action_data
+  );
   return 0;
 }
 

@@ -99,6 +99,19 @@ ExactMatchTable::delete_entry(entry_handle_t handle)
   return MatchTable::delete_entry(handle);
 }
 
+MatchTable::ErrorCode
+ExactMatchTable::modify_entry(entry_handle_t handle,
+			      const ActionFnEntry &action_entry,
+			      const ControlFlowNode *next_table)
+{
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
+  if(!valid_handle(handle)) return INVALID_HANDLE;
+  ExactMatchEntry &entry = entries[handle];
+  entry.action_entry = action_entry;
+  entry.next_table = next_table;
+}
+
 const LongestPrefixMatchEntry *
 LongestPrefixMatchTable::lookup(const ByteContainer &key) const
 {
@@ -138,6 +151,19 @@ LongestPrefixMatchTable::delete_entry(entry_handle_t handle)
   LongestPrefixMatchEntry &entry = entries[handle];
   assert(entries_trie.delete_prefix(entry.key, entry.prefix_length));
   return MatchTable::delete_entry(handle);
+}
+
+MatchTable::ErrorCode
+LongestPrefixMatchTable::modify_entry(entry_handle_t handle,
+				      const ActionFnEntry &action_entry,
+				      const ControlFlowNode *next_table)
+{
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
+  if(!valid_handle(handle)) return INVALID_HANDLE;
+  LongestPrefixMatchEntry &entry = entries[handle];
+  entry.action_entry = action_entry;
+  entry.next_table = next_table;
 }
 
 const TernaryMatchEntry *
@@ -193,4 +219,17 @@ TernaryMatchTable::delete_entry(entry_handle_t handle)
 
   if(!valid_handle(handle)) return INVALID_HANDLE;
   return MatchTable::delete_entry(handle);
+}
+
+MatchTable::ErrorCode
+TernaryMatchTable::modify_entry(entry_handle_t handle,
+				const ActionFnEntry &action_entry,
+				const ControlFlowNode *next_table)
+{
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
+  if(!valid_handle(handle)) return INVALID_HANDLE;
+  TernaryMatchEntry &entry = entries[handle];
+  entry.action_entry = action_entry;
+  entry.next_table = next_table;
 }

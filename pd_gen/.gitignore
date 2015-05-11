@@ -1,3 +1,6 @@
 gen-cpp/include/
 gen-cpp/src/
 build/
+.thrift_gen
+fixed-cpp/src/runtime*
+fixed-cpp/src/Runtime*
