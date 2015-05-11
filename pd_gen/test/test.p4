@@ -20,12 +20,16 @@ action actionA(param) {
     modify_field(header_test.field48, param);
 }
 
+action actionB(param) {
+    modify_field(header_test.field8, param);
+}
+
 table ExactOne {
     reads {
          header_test.field32 : exact;
     }
     actions {
-        actionA;
+        actionA; actionB;
     }
     size: 512;
 }

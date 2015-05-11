@@ -1,4 +1,3 @@
 .pd_from_json
-*.d
 test
 test.output

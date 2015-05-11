@@ -121,8 +121,36 @@
     ],
     "actions": [
         {
-            "name": "actionA",
+            "name": "actionB",
             "id": 0,
+            "runtime_data": [
+                {
+                    "name": "param",
+                    "bitwidth": 8
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "header_test",
+                                "field8"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "actionA",
+            "id": 1,
             "runtime_data": [
                 {
                     "name": "param",
@@ -170,10 +198,12 @@
                         }
                     ],
                     "actions": [
-                        "actionA"
+                        "actionA",
+                        "actionB"
                     ],
                     "next_tables": {
-                        "actionA": "LpmOne"
+                        "actionA": "LpmOne",
+                        "actionB": "LpmOne"
                     },
                     "default_action": null
                 },

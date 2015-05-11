@@ -12,7 +12,7 @@ BUILD_DIR := build
 BUILD_DIRS := $(BUILD_DIR)
 
 srcs_C:=
-srcs_CXX:= test.cpp
+srcs_CXX:= $(realpath $(dir $(lastword $(MAKEFILE_LIST)))test.cpp)
 
 include ../libpd.mk
 include thrift_endpoint/module.mk

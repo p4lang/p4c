@@ -3,6 +3,11 @@ ExactOne
 actionA
 bb00aa00 
 aabbccddeeff 
+bm_table_modify_entry
+ExactOne
+0
+actionB
+ab 
 bm_table_delete_entry
 ExactOne
 0
