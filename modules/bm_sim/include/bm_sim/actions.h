@@ -11,6 +11,8 @@
 
 #include "phv.h"
 #include "named_p4object.h"
+#include "packet.h"
+#include "event_logger.h"
 
 using std::vector;
 
@@ -251,10 +253,12 @@ public:
   ActionFnEntry(const ActionFn *action_fn)
     : action_fn(action_fn) { }
 
-  void operator()(PHV &phv) const
+  void operator()(Packet *pkt) const
   {
     if(!action_fn) return; // happens when no default action specified... TODO
-    ActionEngineState state(phv, action_data, action_fn->const_values);
+    ELOGGER->action_execute(*pkt, *action_fn, action_data);
+    ActionEngineState state(*pkt->get_phv(), action_data,
+			    action_fn->const_values);
     auto &primitives = action_fn->primitives;
     size_t param_offset = 0;
     for(auto primitive_it = primitives.begin();

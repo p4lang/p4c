@@ -7,9 +7,12 @@
 #include "packet.h"
 #include "phv.h"
 #include "pipeline.h"
-#include "tables.h"
 #include "checksums.h"
 #include "transport.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 /* Forward declarations of P4 object classes. This is ugly, but:
    1) I don't have to worry about circular dependencies
@@ -18,9 +21,12 @@
 class Parser;
 class Deparser;
 class MatchTable;
+class MatchEntry;
 class ActionFn;
+class ActionData;
 class Conditional;
 class Checksum;
+class ActionFn;
 
 template <typename Transport>
 class EventLogger {
@@ -53,7 +59,8 @@ public:
 		 const MatchTable &table, const MatchEntry &entry);
   void table_miss(const Packet &packet, const MatchTable &table);
 
-  void action_execute(const Packet &packet);
+  void action_execute(const Packet &packet,
+		      const ActionFn &action_fn, const ActionData &action_data);
 
 public:
   // TODO: improve this super ugly test

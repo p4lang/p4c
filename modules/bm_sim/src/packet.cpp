@@ -3,6 +3,7 @@
 #include "xxhash.h"
 
 Packet::Packet() {
+  assert(phv_pool);
   phv = phv_pool->get(); // needed ?
 }
 
@@ -27,7 +28,8 @@ Packet::Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
   
 Packet::~Packet() {
   assert(phv);
-  phv_pool->release(std::move(phv));
+  // corner case: phv_pool has already been destroyed
+  if(phv_pool) phv_pool->release(std::move(phv));
 }
 
 Packet

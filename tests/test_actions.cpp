@@ -63,7 +63,8 @@ class ActionsTest : public ::testing::Test {
 protected:
 
   PHVFactory phv_factory;
-  std::unique_ptr<PHV> phv;
+  std::unique_ptr<Packet> pkt;
+  PHV *phv{nullptr};
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
@@ -85,10 +86,14 @@ protected:
   }
 
   virtual void SetUp() {
-    phv = phv_factory.create();
+    Packet::set_phv_factory(phv_factory);
+    pkt = std::unique_ptr<Packet>(new Packet());
+    phv = pkt->get_phv();
   }
 
-  // virtual void TearDown() {}
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
 };
 
 TEST_F(ActionsTest, SetFromConst) {
@@ -103,7 +108,7 @@ TEST_F(ActionsTest, SetFromConst) {
 
   ASSERT_EQ((unsigned) 0, f.get_uint());
 
-  testActionFnEntry(*phv);
+  testActionFnEntry(pkt.get());
 
   ASSERT_EQ((unsigned) 0xaba, f.get_uint());
 }
@@ -121,7 +126,7 @@ TEST_F(ActionsTest, SetFromActionData) {
 
   ASSERT_EQ((unsigned) 0, f.get_uint());
 
-  testActionFnEntry(*phv);
+  testActionFnEntry(pkt.get());
 
   ASSERT_EQ((unsigned) 0xaba, f.get_uint());
 }
@@ -141,7 +146,7 @@ TEST_F(ActionsTest, SetFromField) {
 
   ASSERT_EQ((unsigned) 0, dst.get_uint());
 
-  testActionFnEntry(*phv);
+  testActionFnEntry(pkt.get());
 
   ASSERT_EQ((unsigned) 0xaba, dst.get_uint());
 }
@@ -158,7 +163,7 @@ TEST_F(ActionsTest, SetFromConstStress) {
   for(int i = 0; i < 100000; i++) {
     f.set(0);
     ASSERT_EQ((unsigned) 0, f.get_uint());
-    testActionFnEntry(*phv);
+    testActionFnEntry(pkt.get());
     ASSERT_EQ((unsigned) 0xaba, f.get_uint());
   }
 }
@@ -183,7 +188,7 @@ TEST_F(ActionsTest, CopyHeader) {
   testActionFn.parameter_push_back_header(testHeader1);
   testActionFn.parameter_push_back_header(testHeader2);
   
-  testActionFnEntry(*phv);
+  testActionFnEntry(pkt.get());
   ASSERT_FALSE(hdr1.is_valid());
   ASSERT_FALSE(hdr2.is_valid());
   for(unsigned int i = 0; i < hdr2.size(); i++) {
@@ -191,7 +196,7 @@ TEST_F(ActionsTest, CopyHeader) {
   }
 
   hdr2.mark_valid();
-  testActionFnEntry(*phv);
+  testActionFnEntry(pkt.get());
   ASSERT_TRUE(hdr1.is_valid());
   for(unsigned int i = 0; i < hdr1.size(); i++) {
     ASSERT_EQ(i + 1, hdr1[i]);
@@ -234,7 +239,7 @@ TEST_F(ActionsTest, TwoPrimitives) {
   ASSERT_EQ((unsigned) 0, dst1.get_uint());
   ASSERT_EQ((unsigned) 0, dst2.get_uint());
 
-  testActionFnEntry(*phv);
+  testActionFnEntry(pkt.get());
 
   ASSERT_EQ((unsigned) 0xaba, dst1.get_uint());
   ASSERT_EQ((unsigned) 0xaba, dst2.get_uint());

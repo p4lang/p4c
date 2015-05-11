@@ -46,13 +46,11 @@ public:
 
   void export_bytes() {
     std::fill(bytes.begin(), bytes.end(), 0); // very important !
+    // TODO: this can overflow !!!
+    // maybe bytes is not large enough !!!
+    // I am supposed to mask off extra bits...
     bignum::export_bytes(bytes.data(), nbytes, value);
   }
-
-  /* void add(const Data &src1, const Data &src2) { */
-  /*   Data::add(src1, src2); */
-  /*   bignum::export_bytes(bytes.data(), value); */
-  /* } */
 
   /* returns the number of bits extracted */
   int extract(const char *data, int hdr_offset);

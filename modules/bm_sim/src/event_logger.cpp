@@ -232,7 +232,19 @@ void EventLogger<Transport>::table_miss(const Packet &packet,
 }
 
 template <typename Transport>
-void EventLogger<Transport>::action_execute(const Packet &packet) { };
+void EventLogger<Transport>::action_execute(const Packet &packet,
+					    const ActionFn &action_fn,
+					    const ActionData &action_data) {
+  typedef struct : msg_hdr_t {
+    int action_id;
+  } __attribute__((packed)) msg_t;
+
+  msg_t msg;
+  fill_msg_hdr(EventType::ACTION_EXECUTE, packet, &msg);
+  msg.action_id = action_fn.get_id();
+  transport_instance->send((char *) &msg, sizeof(msg));
+  // to costly to send action data?
+};
 
 
 template class EventLogger<TransportNanomsg>;

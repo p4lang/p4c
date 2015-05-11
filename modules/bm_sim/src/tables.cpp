@@ -45,18 +45,17 @@ const ControlFlowNode *
 MatchTable::operator()(Packet *pkt) const
 {
   static thread_local ByteContainer lookup_key;
-  PHV *phv = pkt->get_phv();
   lookup_key.clear();
-  build_key(*phv, lookup_key);
+  build_key(*pkt->get_phv(), lookup_key);
   const MatchEntry *entry = lookup(lookup_key);
   if(!entry) {
     ELOGGER->table_miss(*pkt, *this);
-    default_action_entry(*phv);
+    default_action_entry(pkt);
     return default_next_node;
   }
   else {
     ELOGGER->table_hit(*pkt, *this, *entry);
-    entry->action_entry(*phv);
+    entry->action_entry(pkt);
     return entry->next_table;
   }
 }

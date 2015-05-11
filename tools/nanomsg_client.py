@@ -350,10 +350,14 @@ class ActionExecute(Msg):
         self.struct_ = struct.Struct("i")
         
     def extract(self):
-        super(ActionExecute, self).extract()
+        self.action_id, = super(ActionExecute, self).extract()
 
     def __str__(self):
-        return super(ActionExecute, self).__str__()
+        s = super(ActionExecute, self).__str__()
+        s += ", action_id: " +  str(self.action_id)
+        name = name_lookup("action", self.action_id)
+        if name: s += " (" + name + ")"
+        return s
 
 def recv_msgs():
     def get_msg_type(msg):

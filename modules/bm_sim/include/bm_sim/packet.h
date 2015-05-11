@@ -67,6 +67,7 @@ public:
 
   const PacketBuffer &get_packet_buffer() const { return buffer; }
 
+  // TODO: use references instead?
   PHV *get_phv() { return phv.get(); }
   const PHV *get_phv() const { return phv.get(); }
 

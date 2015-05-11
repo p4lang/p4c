@@ -19,6 +19,10 @@ PICKY_CFLAGS=""
 AC_SUBST([PICKY_CXXFLAGS])
 AC_SUBST([PICKY_CFLAGS])
 
+# Preprocessor flags
+AC_DEFINE([ELOGGER_NANOMSG], [], [Enable nanomsg event logger])
+# AC_DEFINE([ENABLE_SIMPLELOG], [], [Simple stdout log in switch target])
+
 # Checks for header files.
 AC_LANG_PUSH(C)
 AC_LANG_PUSH(C++)
