@@ -119,3 +119,31 @@ TYPED_TEST(TableSizeOne, LookupEntry) {
 
   ASSERT_EQ(nullptr, this->table.lookup(key));
 }
+
+TYPED_TEST(TableSizeOne, ModifyEntry) {
+  char key_[2] = {(char) 0x0a, (char) 0xba};
+  ByteContainer key(key_, sizeof(key_));
+  entry_handle_t handle;
+  MatchTable::ErrorCode rc;
+
+  rc = this->add_entry(key, &handle);
+  ASSERT_EQ(MatchTable::SUCCESS, rc);
+
+  const MatchEntry *entry = this->table.lookup(key);
+  ASSERT_NE(nullptr, entry);
+  ASSERT_EQ(0, entry->action_entry.action_data_size());
+
+  // in theory I could modify the entry directly using the pointer, but I need
+  // to exercise my modify_entry function
+
+  // we define a different action entry (with some action data) and modify the
+  // entry using this action entry
+  ActionFnEntry new_action_entry;
+  new_action_entry.push_back_action_data(0xaba);
+  this->table.modify_entry(handle, new_action_entry, nullptr);
+
+  entry = this->table.lookup(key);
+  ASSERT_NE(nullptr, entry);
+  ASSERT_NE(0, entry->action_entry.action_data_size());
+  ASSERT_EQ((unsigned) 0xaba, entry->action_entry.get_action_data(0).get_uint());
+}

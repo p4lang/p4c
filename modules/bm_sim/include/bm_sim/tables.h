@@ -68,6 +68,9 @@ public:
   
   virtual const MatchEntry *lookup(const ByteContainer &key) const = 0;
   virtual ErrorCode delete_entry(entry_handle_t handle);
+  virtual ErrorCode modify_entry(entry_handle_t handle,
+				 const ActionFnEntry &action_entry,
+				 const ControlFlowNode *next_table) = 0;
 
   virtual entry_handle_t get_entry_handle(const MatchEntry &entry) const = 0;
 
@@ -128,6 +131,9 @@ public:
   // ErrorCode add_entry(const ExactMatchEntry &entry, entry_handle_t *handle);
   ErrorCode add_entry(ExactMatchEntry &&entry, entry_handle_t *handle);
   ErrorCode delete_entry(entry_handle_t handle);
+  ErrorCode modify_entry(entry_handle_t handle,
+			 const ActionFnEntry &action_entry,
+			 const ControlFlowNode *next_table);
 
   entry_handle_t get_entry_handle(const MatchEntry &entry) const {
     return ((char *) &entry - (char *) entries.data()) / sizeof(entry);
@@ -155,6 +161,9 @@ public:
   ErrorCode add_entry(LongestPrefixMatchEntry &&entry,
 		      entry_handle_t *handle);
   ErrorCode delete_entry(entry_handle_t handle);
+  ErrorCode modify_entry(entry_handle_t handle,
+			 const ActionFnEntry &action_entry,
+			 const ControlFlowNode *next_table);
 
   entry_handle_t get_entry_handle(const MatchEntry &entry) const {
     return ((char *) &entry - (char *) entries.data()) / sizeof(entry);
@@ -180,6 +189,9 @@ public:
   // ErrorCode add_entry(const TernaryMatchEntry &entry, entry_handle_t *handle);
   ErrorCode add_entry(TernaryMatchEntry &&entry, entry_handle_t *handle);
   ErrorCode delete_entry(entry_handle_t handle);
+  ErrorCode modify_entry(entry_handle_t handle,
+			 const ActionFnEntry &action_entry,
+			 const ControlFlowNode *next_table);
 
   entry_handle_t get_entry_handle(const MatchEntry &entry) const {
     return ((char *) &entry - (char *) entries.data()) / sizeof(entry);
