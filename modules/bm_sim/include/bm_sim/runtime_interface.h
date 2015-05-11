@@ -50,6 +50,11 @@ public:
   table_delete_entry(const std::string &table_name,
 		     entry_handle_t handle) = 0;
 
+  virtual MatchTable::ErrorCode
+  table_modify_entry(const std::string &table_name,
+		     entry_handle_t handle,
+		     const std::string &action_name,
+		     const ActionData &action_data) = 0;
 };
 
 #endif

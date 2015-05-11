@@ -144,6 +144,25 @@ class RuntimeHandler : virtual public RuntimeIf {
     }
   }
 
+  void bm_table_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const std::string &action_name, const BmActionData& action_data) {
+    printf("bm_table_modify_entry\n");
+    ActionData data;
+    for(const std::string &d : action_data) {
+      data.push_back_action_data(d.data(), d.size());
+    }
+    MatchTable::ErrorCode error_code = switch_->table_modify_entry(
+        table_name,
+	entry_handle,
+	action_name,
+	data
+    );
+    if(error_code != MatchTable::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = (TableOperationErrorCode::type) error_code;
+      throw ito;
+    }
+  }
+
   void bm_learning_ack(const BmLearningListId list_id, const BmLearningBufferId buffer_id, const std::vector<BmLearningSampleId> & sample_ids) {
     printf("bm_learning_ack\n");
     switch_->get_learn_engine()->ack(list_id, buffer_id, sample_ids);
