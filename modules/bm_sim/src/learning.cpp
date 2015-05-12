@@ -91,7 +91,25 @@ void LearnEngine::LearnList::set_learn_writer(
     std::shared_ptr<LearnWriter> learn_writer
 )
 {
+  std::unique_lock<std::mutex> lock(mutex);
+  while(writer_busy) {
+    can_change_writer.wait(lock);  
+  }
+  learn_mode = LearnMode::WRITER;
   writer = learn_writer;
+}
+
+void LearnEngine::LearnList::set_learn_cb(
+    const LearnCb &learn_cb, void *cookie
+)
+{
+  std::unique_lock<std::mutex> lock(mutex);
+  while(writer_busy) {
+    can_change_writer.wait(lock);  
+  }
+  learn_mode = LearnMode::CB;
+  cb_fn = learn_cb;
+  cb_cookie = cookie;
 }
 
 void LearnEngine::LearnList::push_back_field(
@@ -171,21 +189,35 @@ void LearnEngine::LearnList::buffer_transmit()
   }
 
   last_sent = now;
+  writer_busy = true;
   
   lock.unlock();
 
-  // do not forget the -1 !!!
-  // swap_buffers() is in charge of incrementing the count
   msg_hdr_t msg_hdr = {0, list_id, buffer_id - 1,
 		       (unsigned int) num_samples_to_send};
-  
-  TransportIface::MsgBuf buf_hdr = {(char *) &msg_hdr, sizeof(msg_hdr)};
-  TransportIface::MsgBuf buf_samples = {buffer_tmp.data(),
-					(unsigned int) buffer_tmp.size()};
 
-  writer->send_msgs({buf_hdr, buf_samples}); // no lock for I/O
+  if(learn_mode == LearnMode::WRITER) {
+    // do not forget the -1 !!!
+    // swap_buffers() is in charge of incrementing the count
+    TransportIface::MsgBuf buf_hdr = {(char *) &msg_hdr, sizeof(msg_hdr)};
+    TransportIface::MsgBuf buf_samples = {buffer_tmp.data(),
+					  (unsigned int) buffer_tmp.size()};
+    
+    writer->send_msgs({buf_hdr, buf_samples}); // no lock for I/O
+  }
+  else if(learn_mode == LearnMode::CB) {
+    std::unique_ptr<char []> buf(new char[buffer_tmp.size()]);
+    std::copy(buffer_tmp.begin(), buffer_tmp.end(), &buf[0]);
+    cb_fn(msg_hdr, buffer_tmp.size(), std::move(buf), cb_cookie); 
+  }
+  else {
+    assert(learn_mode == LearnMode::NONE);
+  }
 
   lock.lock();
+
+  writer_busy = false;
+  can_change_writer.notify_all();
 
   buffer_tmp.clear();
 
@@ -236,14 +268,32 @@ void LearnEngine::LearnList::ack_buffer(buffer_id_t buffer_id)
 }
 
 void LearnEngine::list_create(
-    list_id_t list_id, std::shared_ptr<LearnWriter> learn_writer,
-    size_t max_samples, unsigned int timeout_ms
+    list_id_t list_id, size_t max_samples, unsigned int timeout_ms
 )
 {
   assert(learn_lists.find(list_id) == learn_lists.end());
   learn_lists[list_id] =
     std::unique_ptr<LearnList>(new LearnList(list_id, max_samples, timeout_ms));
-  learn_lists[list_id]->set_learn_writer(learn_writer);
+}
+
+void LearnEngine::list_set_learn_writer(
+    list_id_t list_id, std::shared_ptr<LearnWriter> learn_writer
+)
+{
+  auto it = learn_lists.find(list_id);
+  assert(it != learn_lists.end());
+  LearnList *list = it->second.get();
+  list->set_learn_writer(learn_writer);
+}
+
+void LearnEngine::list_set_learn_cb(
+    list_id_t list_id, const LearnCb &learn_cb, void *cookie
+)
+{
+  auto it = learn_lists.find(list_id);
+  assert(it != learn_lists.end());
+  LearnList *list = it->second.get();
+  list->set_learn_cb(learn_cb, cookie);
 }
 
 void LearnEngine::list_push_back_field(

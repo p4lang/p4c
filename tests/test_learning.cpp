@@ -94,13 +94,18 @@ protected:
 
 protected:
   PHVFactory phv_factory;
-  std::unique_ptr<PHV> phv;
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
 
   std::shared_ptr<MemoryAccessor> learn_writer;
   char buffer[4096];
+
+  // used exclusively for callback mode
+  LearnEngine::msg_hdr_t cb_hdr;
+  bool cb_written;
+  mutable std::mutex cb_written_mutex;
+  mutable std::condition_variable cb_written_cv;
 
   LearnEngine learn_engine;
 
@@ -126,7 +131,8 @@ protected:
 
   void learn_on_test1_f16(LearnEngine::list_id_t list_id,
 			  size_t max_samples, unsigned timeout_ms) {
-    learn_engine.list_create(list_id, learn_writer, max_samples, timeout_ms);
+    learn_engine.list_create(list_id, max_samples, timeout_ms);
+    learn_engine.list_set_learn_writer(list_id, learn_writer);
     learn_engine.list_push_back_field(list_id, testHeader1, 0); // test1.f16
     learn_engine.list_init(list_id);
   }
@@ -137,6 +143,21 @@ protected:
 
   Packet get_pkt() {
     return Packet(0, 0, 0, PacketBuffer(256));
+  }
+
+  void learn_cb_(LearnEngine::msg_hdr_t msg_hdr, size_t size,
+		 std::unique_ptr<char []> data) {
+    std::unique_lock<std::mutex> lock(cb_written_mutex);
+    std::copy(&data[0], &data[size], buffer);
+    cb_hdr = msg_hdr;
+    cb_written = true;
+    cb_written_cv.notify_one();    
+  }
+
+  static void learn_cb(LearnEngine::msg_hdr_t msg_hdr, size_t size,
+		       std::unique_ptr<char []> data, void *cookie) {
+    assert(size <= sizeof(buffer));
+    ((LearningTest *) cookie)->learn_cb_(msg_hdr, size, std::move(data));
   }
 };
 
@@ -223,7 +244,8 @@ TEST_F(LearningTest, OneSampleConstData) {
   char buffer[sizeof(LearnEngine::msg_hdr_t) + 2];
   std::shared_ptr<MemoryAccessor> learn_writer(new
   MemoryAccessor(sizeof(buffer)));
-  learn_engine.list_create(list_id, learn_writer, max_samples, timeout_ms);
+  learn_engine.list_create(list_id, max_samples, timeout_ms);
+  learn_engine.list_set_learn_writer(list_id, learn_writer);
   learn_engine.list_push_back_constant(list_id, "0xaba"); // 2 bytes
   learn_engine.list_init(list_id);
 
@@ -416,4 +438,36 @@ TEST_F(LearningTest, FilterAckBuffer) {
   learn_writer->read(buffer, sizeof(buffer));
   ASSERT_EQ(1u, msg_hdr->buffer_id); // buffer id was incremented
   ASSERT_EQ(2u, msg_hdr->num_samples);
+}
+
+TEST_F(LearningTest, OneSampleCbMode) {
+  LearnEngine::list_id_t list_id = 1;
+  size_t max_samples = 1; unsigned timeout_ms = 100;
+  learn_engine.list_create(list_id, max_samples, timeout_ms);
+  learn_engine.list_set_learn_cb(list_id, LearningTest::learn_cb, this);
+  learn_engine.list_push_back_field(list_id, testHeader1, 0); // test1.f16
+  learn_engine.list_init(list_id);
+
+  cb_written = false;
+
+  Packet pkt = get_pkt();
+  Field &f = pkt.get_phv()->get_field(testHeader1, 0);
+  f.set("0xaba");
+
+  learn_engine.learn(list_id, pkt);
+
+  std::unique_lock<std::mutex> lock(cb_written_mutex);
+  while(!cb_written) {
+    cb_written_cv.wait(lock);
+  }
+
+  const char *data = buffer;
+
+  ASSERT_EQ(0, cb_hdr.switch_id);
+  ASSERT_EQ(list_id, cb_hdr.list_id);
+  ASSERT_EQ(0u, cb_hdr.buffer_id);
+  ASSERT_EQ(1u, cb_hdr.num_samples);
+
+  ASSERT_EQ((char) 0xa, data[0]);
+  ASSERT_EQ((char) 0xba, data[1]);
 }

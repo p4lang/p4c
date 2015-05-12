@@ -457,7 +457,8 @@ void P4Objects::init_objects(std::istream &is) {
   for (const auto &cfg_learn_list : cfg_learn_lists) {
     
     LearnEngine::list_id_t list_id = cfg_learn_list["id"].asInt();
-    learn_engine->list_create(list_id, learn_writer);
+    learn_engine->list_create(list_id);
+    learn_engine->list_set_learn_writer(list_id, learn_writer);
 
     const Json::Value cfg_learn_elements = cfg_learn_list["elements"];
     for (const auto &cfg_learn_element : cfg_learn_elements) {

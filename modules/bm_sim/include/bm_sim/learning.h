@@ -10,6 +10,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <memory>
+#include <functional>
 
 #include "packet.h"
 #include "phv.h"
@@ -52,8 +53,15 @@ public:
     unsigned int num_samples;
   } __attribute__((packed)) msg_hdr_t;
 
-  void list_create(list_id_t list_id, std::shared_ptr<LearnWriter> learn_writer,
+  typedef std::function<void(const msg_hdr_t &, size_t, std::unique_ptr<char []>, void *)> LearnCb;
+
+  void list_create(list_id_t list_id,
 		   size_t max_samples = 1, unsigned int timeout_ms = 1000);
+
+  void list_set_learn_writer(list_id_t list_id,
+			     std::shared_ptr<LearnWriter> learn_writer);
+  void list_set_learn_cb(list_id_t list_id,
+			 const LearnCb &learn_cb, void * cookie);
 
   void list_push_back_field(list_id_t list_id,
 			    header_id_t header_id, int field_offset);
@@ -111,12 +119,16 @@ private:
 
   class LearnList {
   public:
+    enum class LearnMode {NONE, WRITER, CB};
+
+  public:
     LearnList(list_id_t list_id, size_t max_samples, unsigned int timeout);
     void init();
 
     ~LearnList();
 
     void set_learn_writer(std::shared_ptr<LearnWriter> learn_writer);
+    void set_learn_cb(const LearnCb &learn_cb, void *cookie);
 
     void push_back_field(header_id_t header_id, int field_offset);
     void push_back_constant(const std::string &hexstring);
@@ -161,7 +173,15 @@ private:
     std::thread transmit_thread{};
     bool stop_transmit_thread{false};
 
+    LearnMode learn_mode{LearnMode::NONE};
+
+    // shoudl I use a union here? or is it not worth the trouble?
     std::shared_ptr<LearnWriter> writer{nullptr};
+    LearnCb cb_fn{};
+    void *cb_cookie{nullptr};
+
+    bool writer_busy{false};
+    mutable std::condition_variable can_change_writer{};
   };
 
 private:
