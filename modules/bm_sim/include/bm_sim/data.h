@@ -47,6 +47,11 @@ public:
     value = i;
     export_bytes();
   }
+  
+  void set(unsigned long long i) {
+    value = i;
+    export_bytes();
+  }
 
   void set(const char *bytes, int nbytes) {
     bignum::import_bytes(value, bytes, nbytes);
