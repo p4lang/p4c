@@ -15,6 +15,8 @@ public:
   };
 
 public:
+  virtual ~TransportIface() { }
+
   virtual int open(const std::string &name) = 0;
 
   virtual int send(const std::string &msg) const = 0;
@@ -53,16 +55,29 @@ public:
 
 class TransportNULL : public TransportIface {
 public:
-  int open(const std::string &name) override { return 0; }
+  int open(const std::string &name) override {
+    (void) name; // compiler warning
+    return 0;
+  }
 
-  int send(const std::string &msg) const override { return 0; }
-  int send(const char *msg, int len) const override { return 0; }
+  int send(const std::string &msg) const override {
+    (void) msg; // compiler warning
+    return 0;
+  }
+
+  int send(const char *msg, int len) const override {
+    (void) msg; // compiler warning
+    (void) len;
+    return 0;
+  }
 
   int send_msgs(const std::initializer_list<std::string> &msgs) const override {
+    (void) msgs; // compiler warning
     return 0;
   }
 
   int send_msgs(const std::initializer_list<MsgBuf> &msgs) const override {
+    (void) msgs; // compiler warning
     return 0;
   }
 };

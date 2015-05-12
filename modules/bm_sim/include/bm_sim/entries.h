@@ -11,9 +11,9 @@ class ControlFlowNode;
 
 struct MatchEntry
 {
-  ByteContainer key;
-  ActionFnEntry action_entry; // includes action data
-  const ControlFlowNode *next_table;
+  ByteContainer key{};
+  ActionFnEntry action_entry{}; // includes action data
+  const ControlFlowNode *next_table{nullptr};
 
   MatchEntry() {}
 
@@ -21,6 +21,12 @@ struct MatchEntry
 	     ActionFnEntry &action_entry,
 	     const ControlFlowNode *next_table)
     : key(key), action_entry(action_entry), next_table(next_table) {}
+
+  MatchEntry(const MatchEntry &other) = delete;
+  MatchEntry &operator=(const MatchEntry &other) = delete;
+
+  MatchEntry(MatchEntry &&other) = default;
+  MatchEntry &operator=(MatchEntry &&other) = default;
 };
 
 struct ExactMatchEntry: MatchEntry
@@ -36,7 +42,7 @@ struct ExactMatchEntry: MatchEntry
 
 struct LongestPrefixMatchEntry : MatchEntry
 {
-  int prefix_length;
+  int prefix_length{0};
 
   LongestPrefixMatchEntry()
     : MatchEntry() {}
@@ -58,8 +64,8 @@ struct LongestPrefixMatchEntry : MatchEntry
 
 struct TernaryMatchEntry : MatchEntry
 {
-  ByteContainer mask;
-  int priority;
+  ByteContainer mask{};
+  int priority{0};
 
   TernaryMatchEntry()
     : MatchEntry() {}

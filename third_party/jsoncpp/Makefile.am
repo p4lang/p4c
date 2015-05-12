@@ -1,5 +1,5 @@
 AM_CPPFLAGS = -I$(srcdir)/include
-AM_CXXFLAGS = $(PICKY_CXXFLAGS)
+# AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 AM_CFLAGS = $(PICKY_CFLAGS)
 
 noinst_LTLIBRARIES = libjson.la

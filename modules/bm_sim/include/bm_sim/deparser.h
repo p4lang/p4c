@@ -31,8 +31,8 @@ private:
   void update_checksums(Packet *pkt) const;
 
 private:
-  std::vector<header_id_t> headers;
-  std::vector<const Checksum *> checksums;
+  std::vector<header_id_t> headers{};
+  std::vector<const Checksum *> checksums{};
 };
 
 #endif

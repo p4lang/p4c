@@ -8,6 +8,8 @@ class Checksum : public NamedP4Object{
 public:
   Checksum(const string &name, p4object_id_t id,
 	   header_id_t header_id, int field_offset);
+  virtual ~Checksum() { }
+
   virtual void update(PHV *phv) const = 0;
   virtual bool verify(const PHV &phv) const = 0;
 

@@ -50,11 +50,17 @@ public:
     return pb;
   }
 
+  PacketBuffer(const PacketBuffer &other) = delete;
+  PacketBuffer &operator=(const PacketBuffer &other) = delete;
+
+  PacketBuffer(PacketBuffer &&other) noexcept = default;
+  PacketBuffer &operator=(PacketBuffer &&other) noexcept = default;
+
 private:
-  size_t size;
-  size_t data_size;
-  std::unique_ptr<char []> buffer;
-  char *head;
+  size_t size{0};
+  size_t data_size{0};
+  std::unique_ptr<char []> buffer{nullptr};
+  char *head{nullptr};
 };
 
 #endif

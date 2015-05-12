@@ -21,7 +21,8 @@ public:
   typedef size_t size_type;
 
 public:
-  ByteContainer() {}
+  ByteContainer()
+    : bytes() {}
 
   ByteContainer(int nbytes)
     : bytes(vector<char>(nbytes)) {}
@@ -43,7 +44,8 @@ public:
     return 0;
   }
 
-  ByteContainer(const std::string &hexstring) {
+  ByteContainer(const std::string &hexstring)
+    : bytes() {
     size_t idx = 0;
 
     assert(hexstring[idx] != '-');

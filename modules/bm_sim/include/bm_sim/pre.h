@@ -55,7 +55,7 @@ public:
     constexpr size_t size() noexcept { return port_map.size(); }
 
   private:
-    std::bitset<PORT_MAP_SIZE> port_map;
+    std::bitset<PORT_MAP_SIZE> port_map{};
   };
   
   McPre() {}
@@ -82,17 +82,17 @@ private:
   static constexpr int L2_MAX_ENTRIES = 8192;
   
   struct L1Entry {
-    mgrp_hdl_t mgrp_hdl;
-    rid_t rid;
-    l2_hdl_t l2_hdl;
+    mgrp_hdl_t mgrp_hdl{};
+    rid_t rid{};
+    l2_hdl_t l2_hdl{};
     
     L1Entry() {}
     L1Entry(rid_t rid) : rid(rid) {}
   };
   
   struct L2Entry {
-    l1_hdl_t l1_hdl;
-    PortMap port_map;
+    l1_hdl_t l1_hdl{};
+    PortMap port_map{};
     
     L2Entry() {}
     L2Entry(l1_hdl_t l1_hdl, const PortMap &port_map)
@@ -100,22 +100,22 @@ private:
   };
   
   struct MgidEntry {
-    mgrp_t mgid;
-    std::vector<l1_hdl_t> l1_list;
+    mgrp_t mgid{};
+    std::vector<l1_hdl_t> l1_list{};
     
     MgidEntry() {}
     MgidEntry(mgrp_t mgid) : mgid(mgid) {}
   };
 
 private:
-  std::unordered_map<mgrp_hdl_t, MgidEntry> mgid_entries;
-  std::unordered_map<l1_hdl_t, L1Entry> l1_entries;
-  std::unordered_map<l2_hdl_t, L2Entry> l2_entries;
-  HandleMgr l1_handles;
-  HandleMgr l2_handles;
-  mutable boost::shared_mutex mgid_lock;
-  mutable boost::shared_mutex l1_lock;
-  mutable boost::shared_mutex l2_lock;
+  std::unordered_map<mgrp_hdl_t, MgidEntry> mgid_entries{};
+  std::unordered_map<l1_hdl_t, L1Entry> l1_entries{};
+  std::unordered_map<l2_hdl_t, L2Entry> l2_entries{};
+  HandleMgr l1_handles{};
+  HandleMgr l2_handles{};
+  mutable boost::shared_mutex mgid_lock{};
+  mutable boost::shared_mutex l1_lock{};
+  mutable boost::shared_mutex l2_lock{};
 };
 
 #endif

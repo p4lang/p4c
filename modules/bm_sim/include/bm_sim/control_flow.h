@@ -5,6 +5,7 @@
 
 class ControlFlowNode {
 public:
+  virtual ~ControlFlowNode() { };
   virtual const ControlFlowNode *operator()(Packet *pkt) const = 0;
 };
 

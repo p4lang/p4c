@@ -48,8 +48,8 @@ public:
   }
 
 private:
-  vector<int> fields_bit_width;
-  vector<string> fields_name;
+  vector<int> fields_bit_width{};
+  vector<string> fields_name{};
 };
 
 class Header : public NamedP4Object
@@ -131,10 +131,10 @@ public:
 
 private:
   const HeaderType &header_type;
-  std::vector<Field> fields;
+  std::vector<Field> fields{};
   bool valid{false};
-  int nbytes_phv;
-  int nbytes_packet;
+  int nbytes_phv{0};
+  int nbytes_packet{0};
 };
 
 #endif

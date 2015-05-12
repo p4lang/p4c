@@ -7,6 +7,8 @@
 
 class RuntimeInterface {
 public:
+  virtual ~RuntimeInterface() { }
+
   virtual int table_add_entry(const std::string &table_name,
 			      ExactMatchEntry &&entry,
 			      entry_handle_t *handle) = 0;

@@ -147,40 +147,40 @@ private:
 				    const std::string &header_name);
 
 private:
-  PHVFactory phv_factory; /* this is probably temporary */
+  PHVFactory phv_factory{}; /* this is probably temporary */
 
-  std::unordered_map<std::string, header_id_t> header_ids_map;
-  std::unordered_map<std::string, HeaderType *> header_to_type_map;
+  std::unordered_map<std::string, header_id_t> header_ids_map{};
+  std::unordered_map<std::string, HeaderType *> header_to_type_map{};
 
-  std::unordered_map<std::string, std::unique_ptr<HeaderType> > header_types_map;
+  std::unordered_map<std::string, std::unique_ptr<HeaderType> > header_types_map{};
 
   // tables
-  std::unordered_map<std::string, std::unique_ptr<ExactMatchTable> > exact_tables_map;
-  std::unordered_map<std::string, std::unique_ptr<LongestPrefixMatchTable> > lpm_tables_map;
-  std::unordered_map<std::string, std::unique_ptr<TernaryMatchTable> > ternary_tables_map;
-  std::unordered_map<std::string, MatchTable *> tables_map;
+  std::unordered_map<std::string, std::unique_ptr<ExactMatchTable> > exact_tables_map{};
+  std::unordered_map<std::string, std::unique_ptr<LongestPrefixMatchTable> > lpm_tables_map{};
+  std::unordered_map<std::string, std::unique_ptr<TernaryMatchTable> > ternary_tables_map{};
+  std::unordered_map<std::string, MatchTable *> tables_map{};
 
-  std::unordered_map<std::string, std::unique_ptr<Conditional> > conditionals_map;
+  std::unordered_map<std::string, std::unique_ptr<Conditional> > conditionals_map{};
 
-  std::unordered_map<std::string, ControlFlowNode *> control_nodes_map;
+  std::unordered_map<std::string, ControlFlowNode *> control_nodes_map{};
 
   // pipelines
-  std::unordered_map<std::string, std::unique_ptr<Pipeline> > pipelines_map;
+  std::unordered_map<std::string, std::unique_ptr<Pipeline> > pipelines_map{};
 
   // actions
-  std::unordered_map<std::string, std::unique_ptr<ActionFn> > actions_map;
+  std::unordered_map<std::string, std::unique_ptr<ActionFn> > actions_map{};
 
   // parsers
-  std::unordered_map<std::string, std::unique_ptr<Parser> > parsers;
+  std::unordered_map<std::string, std::unique_ptr<Parser> > parsers{};
   // this is to give the objects a place where to live
-  std::vector<std::unique_ptr<ParseState> > parse_states;
+  std::vector<std::unique_ptr<ParseState> > parse_states{};
 
   // checksums
-  std::vector<std::unique_ptr<Checksum> > checksums;
+  std::vector<std::unique_ptr<Checksum> > checksums{};
 
-  std::unordered_map<std::string, std::unique_ptr<Deparser> > deparsers;
+  std::unordered_map<std::string, std::unique_ptr<Deparser> > deparsers{};
 
-  std::unique_ptr<LearnEngine> learn_engine;
+  std::unique_ptr<LearnEngine> learn_engine{};
 
 private:
   int get_field_offset(header_id_t header_id, const std::string &field_name);

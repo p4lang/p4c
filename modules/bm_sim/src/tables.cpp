@@ -109,6 +109,8 @@ ExactMatchTable::modify_entry(entry_handle_t handle,
   ExactMatchEntry &entry = entries[handle];
   entry.action_entry = action_entry;
   entry.next_table = next_table;
+
+  return SUCCESS;
 }
 
 const LongestPrefixMatchEntry *
@@ -163,6 +165,8 @@ LongestPrefixMatchTable::modify_entry(entry_handle_t handle,
   LongestPrefixMatchEntry &entry = entries[handle];
   entry.action_entry = action_entry;
   entry.next_table = next_table;
+
+  return SUCCESS;
 }
 
 const TernaryMatchEntry *
@@ -231,4 +235,6 @@ TernaryMatchTable::modify_entry(entry_handle_t handle,
   TernaryMatchEntry &entry = entries[handle];
   entry.action_entry = action_entry;
   entry.next_table = next_table;
+
+  return SUCCESS;
 }

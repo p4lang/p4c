@@ -9,6 +9,7 @@ class NamedP4Object {
 public:
   NamedP4Object(const std::string &name, p4object_id_t id)
     : name(name), id(id) {}
+  virtual ~NamedP4Object() { };
 
   const std::string &get_name() const { return name; }
 

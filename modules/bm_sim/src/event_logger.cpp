@@ -244,6 +244,7 @@ void EventLogger<Transport>::action_execute(const Packet &packet,
   msg.action_id = action_fn.get_id();
   transport_instance->send((char *) &msg, sizeof(msg));
   // to costly to send action data?
+  (void) action_data;
 };
 
 

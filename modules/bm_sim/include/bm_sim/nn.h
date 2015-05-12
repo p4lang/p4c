@@ -183,7 +183,7 @@ namespace nn
 
     private:
 
-      int s;
+      int s{0};
 
       /*  Prevent making copies of the socket by accident. */
       socket (const socket&);

@@ -23,6 +23,8 @@ public:
   Data(const char *bytes, int nbytes) {
     bignum::import_bytes(value, bytes, nbytes);
   }
+  
+  virtual ~Data() { };
 
   static char char2digit(char c) {
     if(c >= '0' && c <= '9')
@@ -190,7 +192,7 @@ public:
   Data &operator=(Data &&other) = default;
 
 protected:
-  Bignum value;
+  Bignum value{0};
   bool arith{true};
 };
 

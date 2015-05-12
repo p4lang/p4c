@@ -28,7 +28,7 @@ public:
 
   ActionPrimitive_ *get_primitive(const std::string &name);
 private:
-  std::unordered_map<std::string, std::unique_ptr<ActionPrimitive_> > map_;
+  std::unordered_map<std::string, std::unique_ptr<ActionPrimitive_> > map_{};
 };
 
 #define REGISTER_PRIMITIVE(primitive_name)\
@@ -72,7 +72,7 @@ struct ActionData {
 
   size_t size() const { return action_data.size(); }
 
-  vector<Data> action_data;
+  vector<Data> action_data{};
 };
 
 struct ActionEngineState {
@@ -167,6 +167,8 @@ public:
 class ActionPrimitive_
 {
 public:
+  virtual ~ActionPrimitive_() { };
+
   virtual void execute(
       ActionEngineState &state,
       const ActionParam *args) = 0;
@@ -236,9 +238,9 @@ public:
   void push_back_primitive(ActionPrimitive_ *primitive);
 
 private:
-  vector<ActionPrimitive_ *> primitives;
-  vector<ActionParam> params;
-  vector<Data> const_values;
+  vector<ActionPrimitive_ *> primitives{};
+  vector<ActionParam> params{};
+  vector<Data> const_values{};
 };
 
 
@@ -287,9 +289,15 @@ public:
     return action_data.get(offset);
   }
 
+  ActionFnEntry(const ActionFnEntry &other) = default;
+  ActionFnEntry &operator=(const ActionFnEntry &other) = default;
+
+  ActionFnEntry(ActionFnEntry &&other) noexcept = default;
+  ActionFnEntry &operator=(ActionFnEntry &&other) noexcept = default;
+
 private:
   const ActionFn *action_fn{nullptr};
-  ActionData action_data;
+  ActionData action_data{};
 };
 
 #endif

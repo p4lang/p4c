@@ -6,6 +6,7 @@
 #include "bm_sim/transport.h"
 
 int TransportSTDOUT::open(const std::string &name) {
+  (void) name; // compiler warning
   return 0;
 }
 
@@ -15,6 +16,7 @@ int TransportSTDOUT::send(const std::string &msg) const {
 };
 
 int TransportSTDOUT::send(const char *msg, int len) const {
+  (void) len; // compiler warning
   std::cout << msg << std::endl;
   return 0;
 };

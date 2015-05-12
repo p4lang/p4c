@@ -1,5 +1,8 @@
 # BEHAVIORAL MODEL REPOSITORY
 
+**If you get a nanomsg error when running the tests (make check), try running
+  them as sudo **  
+
 ## Common instructions:
 1. Always run make from the top-level folder, otherwise dependency tracking won't work.
 

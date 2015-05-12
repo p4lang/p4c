@@ -18,6 +18,8 @@
 
 class LearnWriter {
 public:
+  virtual ~LearnWriter() { }
+
   virtual int send(const char *buffer, size_t len) const = 0;
   virtual int send_msgs(
       const std::initializer_list<TransportIface::MsgBuf> &msgs
@@ -92,8 +94,8 @@ private:
     };
 
   private:
-    std::vector<LearnSampleEntry> entries;
-    std::vector<ByteContainer> constants;
+    std::vector<LearnSampleEntry> entries{};
+    std::vector<ByteContainer> constants{};
   };
 
   typedef std::chrono::high_resolution_clock clock;
@@ -104,7 +106,7 @@ private:
   private:
   struct FilterPtrs {
     size_t unacked_count{0};
-    std::vector<LearnFilter::iterator> buffer;
+    std::vector<LearnFilter::iterator> buffer{0};
   };
 
   class LearnList {
@@ -135,28 +137,28 @@ private:
     void buffer_transmit();
 
   private:
-    mutable std::mutex mutex;
+    mutable std::mutex mutex{};
 
     list_id_t list_id;
 
-    LearnSampleBuilder builder;
-    std::vector<char> buffer;
+    LearnSampleBuilder builder{};
+    std::vector<char> buffer{};
     buffer_id_t buffer_id{0};
     // size_t sample_size{0};
     size_t num_samples{0};
     const size_t max_samples;
-    clock::time_point buffer_started;
-    clock::time_point last_sent;
+    clock::time_point buffer_started{};
+    clock::time_point last_sent{};
     const milliseconds timeout;
     const bool with_timeout;
 
-    LearnFilter filter;
-    std::unordered_map<buffer_id_t, FilterPtrs> old_buffers;
+    LearnFilter filter{};
+    std::unordered_map<buffer_id_t, FilterPtrs> old_buffers{};
 
-    std::vector<char> buffer_tmp;
-    mutable std::condition_variable b_can_swap;
-    mutable std::condition_variable b_can_send;
-    std::thread transmit_thread;
+    std::vector<char> buffer_tmp{};
+    mutable std::condition_variable b_can_swap{};
+    mutable std::condition_variable b_can_send{};
+    std::thread transmit_thread{};
     bool stop_transmit_thread{false};
 
     std::shared_ptr<LearnWriter> writer{nullptr};
@@ -164,7 +166,7 @@ private:
 
 private:
   // LearnList is not movable because of the mutex, I am using pointers
-  std::unordered_map<list_id_t, std::unique_ptr<LearnList> > learn_lists;
+  std::unordered_map<list_id_t, std::unique_ptr<LearnList> > learn_lists{};
 };
 
 #endif

@@ -10,10 +10,6 @@
 #include "checksums.h"
 #include "transport.h"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 /* Forward declarations of P4 object classes. This is ugly, but:
    1) I don't have to worry about circular dependencies
    2) If I decide to switch from id to name for msgs, I won't have to modify the

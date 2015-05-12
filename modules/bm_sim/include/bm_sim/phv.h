@@ -111,9 +111,9 @@ private:
   }
 
 private:
-  std::vector<Header> headers;
-  std::unordered_map<std::string, HeaderRef> headers_map;
-  std::unordered_map<std::string, FieldRef> fields_map;
+  std::vector<Header> headers{};
+  std::unordered_map<std::string, HeaderRef> headers_map{};
+  std::unordered_map<std::string, FieldRef> fields_map{};
   size_t capacity{0};
 };
 
@@ -124,7 +124,7 @@ private:
     const std::string name;
     header_id_t index;
     const HeaderType &header_type;
-    std::set<int> arith_offsets;
+    std::set<int> arith_offsets{};
 
     HeaderDesc(const std::string &name, const header_id_t index,
 	       const HeaderType &header_type)
@@ -174,7 +174,7 @@ public:
   }
 
 private:
-  std::map<header_id_t, HeaderDesc> header_descs; // sorted by header id
+  std::map<header_id_t, HeaderDesc> header_descs{}; // sorted by header id
 };
 
 #endif

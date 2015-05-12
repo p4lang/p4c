@@ -12,10 +12,6 @@
 #include "named_p4object.h"
 #include "event_logger.h"
 
-using std::pair;
-using std::vector;
-using std::string;
-
 struct ParserOp {
   virtual ~ParserOp() {};
   virtual void operator()(Packet *pkt, const char *data,
@@ -49,16 +45,17 @@ struct ParserOpSet : ParserOp {
 
 struct ParseSwitchKeyBuilder
 {
-  vector< pair<header_id_t, int> > fields;
+  std::vector< std::pair<header_id_t, int> > fields{};
 
   void push_back_field(header_id_t header, int field_offset) {
-    fields.push_back( pair<header_id_t, int>(header, field_offset) );
+    fields.push_back( std::pair<header_id_t, int>(header, field_offset) );
   }
   
   // data not used for now
   void operator()(const PHV &phv, const char *data, ByteContainer &key) const
   {
-    for(vector< pair<header_id_t, int> >::const_iterator it = fields.begin();
+    (void) data;
+    for(std::vector< std::pair<header_id_t, int> >::const_iterator it = fields.begin();
 	it != fields.end();
 	it++) {
       const Field &field = phv.get_field((*it).first, (*it).second);
@@ -66,6 +63,7 @@ struct ParseSwitchKeyBuilder
     }
   }
 
+  // TODO: is this needed? I don't think so...
   ParseSwitchKeyBuilder& operator=(const ParseSwitchKeyBuilder &other) {
     if(&other == this)
       return *this;
@@ -77,12 +75,6 @@ struct ParseSwitchKeyBuilder
 class ParseState;
 
 class ParseSwitchCase {
-private:
-  ByteContainer key;
-  ByteContainer mask;
-  bool with_mask;
-  const ParseState *next_state; /* NULL if end */
-
 public:
   ParseSwitchCase(const ByteContainer &key, const ParseState *next_state)
     : key(key), with_mask(false), next_state(next_state) {
@@ -101,19 +93,23 @@ public:
   }
 
   bool match(const ByteContainer &input, const ParseState **state) const;
+
+  ParseSwitchCase(const ParseSwitchCase &other) = delete;
+  ParseSwitchCase &operator=(const ParseSwitchCase &other) = delete;
+
+  ParseSwitchCase(ParseSwitchCase &&other) noexcept = default;
+  ParseSwitchCase &operator=(ParseSwitchCase &&other) noexcept = default;
+
+private:
+  ByteContainer key;
+  ByteContainer mask{};
+  bool with_mask;
+  const ParseState *next_state; /* NULL if end */
 };
 
 class ParseState {
-private:
-  string name;
-  vector<ParserOp *> parser_ops;
-  bool has_switch;
-  ParseSwitchKeyBuilder key_builder;
-  vector<ParseSwitchCase> parser_switch;
-  const ParseState *default_next_state{nullptr};
-
 public:
-  ParseState(string name)
+  ParseState(std::string name)
     : name(name), has_switch(false) {}
 
   void add_extract(header_id_t header) {
@@ -139,10 +135,10 @@ public:
     default_next_state = default_next;
   }
 
-  const string &get_name() const { return name; }
+  const std::string &get_name() const { return name; }
 
   ~ParseState() {
-    for (vector<ParserOp *>::iterator it = parser_ops.begin();
+    for (std::vector<ParserOp *>::iterator it = parser_ops.begin();
 	 it != parser_ops.end();
 	 ++it) {
       delete *it;
@@ -163,6 +159,14 @@ public:
 
   const ParseState *operator()(Packet *pkt, const char *data,
 			       size_t *bytes_parsed) const;
+
+private:
+  std::string name;
+  std::vector<ParserOp *> parser_ops{};
+  bool has_switch;
+  ParseSwitchKeyBuilder key_builder{};
+  std::vector<ParseSwitchCase> parser_switch{};
+  const ParseState *default_next_state{nullptr};
 };
 
 class Parser : public NamedP4Object {
@@ -175,6 +179,12 @@ public:
   }
 
   void parse(Packet *pkt) const;
+
+  Parser(const Parser &other) = delete;
+  Parser &operator=(const Parser &other) = delete;
+
+  Parser(Parser &&other) noexcept = default;
+  Parser &operator=(Parser &&other) noexcept = default;
 
 private:
   const ParseState *init_state;

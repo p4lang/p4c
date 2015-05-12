@@ -4,9 +4,6 @@ Header::Header(const string &name, p4object_id_t id,
 	       const HeaderType &header_type,
 	       const std::set<int> &arith_offsets)
   : NamedP4Object(name, id), header_type(header_type) {
-  valid = false;
-  nbytes_phv = 0;
-  nbytes_packet = 0;
   // header_type_id = header_type.get_type_id();
   for(int i = 0; i < header_type.get_num_fields(); i++) {
     // use emplace_back instead?

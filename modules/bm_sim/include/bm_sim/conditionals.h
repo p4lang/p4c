@@ -30,7 +30,7 @@ private:
   ExprOpcodesMap();
 
 private:
-  std::unordered_map<std::string, ExprOpcode> opcodes_map;
+  std::unordered_map<std::string, ExprOpcode> opcodes_map{};
 };
 
 struct Op {
@@ -78,12 +78,18 @@ public:
   // return pointer to next control flow node
   const ControlFlowNode *operator()(Packet *pkt) const override;
 
+  Conditional(const Conditional &other) = delete;
+  Conditional &operator=(const Conditional &other) = delete;
+
+  Conditional(Conditional &&other) noexcept = default;
+  Conditional &operator=(Conditional &&other) noexcept = default;
+
 private:
   int assign_dest_registers();
   
 private:
-  std::vector<Op> ops;
-  std::vector<Data> const_values;
+  std::vector<Op> ops{};
+  std::vector<Data> const_values{};
   ControlFlowNode *true_next{nullptr};
   ControlFlowNode *false_next{nullptr};
   int data_registers_cnt{0};

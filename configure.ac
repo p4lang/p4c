@@ -14,14 +14,17 @@ LT_INIT
 
 # Add picky flags
 CXXFLAGS="-std=c++11"
-PICKY_CXXFLAGS=""
+# Do not include -pedantic because it reject long long
+PICKY_CXXFLAGS="-Wall -Werror -Wextra"
 PICKY_CFLAGS=""
+# I do not want work to use AC_DEFINE cause I do not want to include config.h
+# It interfers with Thrift's config.h and it's too much work to do that cleanly
+DEBUG_CPPFLAGS=""
+DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -DELOGGER_NANOMSG"
+# DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -DENABLE_SIMPLELOG"
 AC_SUBST([PICKY_CXXFLAGS])
 AC_SUBST([PICKY_CFLAGS])
-
-# Preprocessor flags
-AC_DEFINE([ELOGGER_NANOMSG], [], [Enable nanomsg event logger])
-# AC_DEFINE([ENABLE_SIMPLELOG], [], [Simple stdout log in switch target])
+AC_SUBST([DEBUG_CPPFLAGS])
 
 # Checks for header files.
 AC_LANG_PUSH(C)

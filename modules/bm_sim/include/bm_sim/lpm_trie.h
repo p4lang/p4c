@@ -45,8 +45,8 @@ public:
   }
 
 private:
-  size_t key_width_bytes;
-  bf_lpm_trie_t *trie;
+  size_t key_width_bytes{0};
+  bf_lpm_trie_t *trie{nullptr};
 };
 
 

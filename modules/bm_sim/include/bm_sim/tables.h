@@ -26,7 +26,7 @@ typedef uintptr_t entry_handle_t;
 
 struct MatchKeyBuilder
 {
-  vector< pair<header_id_t, int> > fields;
+  vector< pair<header_id_t, int> > fields{};
 
   void push_back_field(header_id_t header, int field_offset) {
     fields.push_back( pair<header_id_t, int>(header, field_offset) );
@@ -57,7 +57,7 @@ public:
 	     size_t size, size_t nbytes_key,
 	     const MatchKeyBuilder &match_key_builder)
     : NamedP4Object(name, id),
-      size(size), num_entries(0),
+      size(size),
       nbytes_key(nbytes_key),
       match_key_builder(match_key_builder) {}
 
@@ -93,18 +93,24 @@ public:
     return SUCCESS;
   }
 
+  MatchTable(const MatchTable &other) = delete;
+  MatchTable &operator=(const MatchTable &other) = delete;
+
+  MatchTable(MatchTable &&other) noexcept = default;
+  MatchTable &operator=(MatchTable &&other) noexcept = default;
+
 protected:
-  size_t size;
-  size_t num_entries;
+  size_t size{0};
+  size_t num_entries{0};
   size_t nbytes_key;
-  HandleMgr handles;
+  HandleMgr handles{};
   MatchKeyBuilder match_key_builder;
   // indexed by the action id
-  unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes;
-  ActionFnEntry default_action_entry;
+  unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
+  ActionFnEntry default_action_entry{};
   const ControlFlowNode *default_next_node{nullptr};
 
-  mutable boost::shared_mutex t_mutex;
+  mutable boost::shared_mutex t_mutex{};
 
   void build_key(const PHV &phv, ByteContainer &key) const {
     match_key_builder(phv, key);
@@ -140,8 +146,8 @@ public:
   }
 
 private:
-  vector<ExactMatchEntry> entries;
-  unordered_map<ByteContainer, entry_handle_t, ByteContainerKeyHash> entries_map;
+  vector<ExactMatchEntry> entries{};
+  unordered_map<ByteContainer, entry_handle_t, ByteContainerKeyHash> entries_map{};
 };
 
 class LongestPrefixMatchTable : public MatchTable
@@ -151,7 +157,7 @@ public:
 			  int size, int nbytes_key, 
 			  const MatchKeyBuilder &match_key_builder)
     : MatchTable(name, id, size, nbytes_key, match_key_builder),
-    entries_trie(nbytes_key) {
+      entries_trie(nbytes_key) {
     entries = vector<LongestPrefixMatchEntry>(size);
   }
   
@@ -170,7 +176,7 @@ public:
   }
 
 private:
-  vector<LongestPrefixMatchEntry> entries;
+  vector<LongestPrefixMatchEntry> entries{};
   LPMTrie entries_trie;
 };
 
@@ -198,7 +204,7 @@ public:
   }
 
 private:
-  vector<TernaryMatchEntry> entries;
+  vector<TernaryMatchEntry> entries{};
 };
 
 #endif

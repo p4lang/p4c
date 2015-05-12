@@ -1,5 +1,9 @@
 AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/include/ -I$(srcdir)/../bf_lpm_trie/include/
-AM_CXXFLAGS = $(PICKY_CXXFLAGS)
+AM_CPPFLAGS += $(DEBUG_CPPFLAGS)
+# I chose to add -Weffc++ for this module. I feel that most of it is excessively
+# pedantic (like constructior initializers for non POD data), but it may be
+# useful :/
+AM_CXXFLAGS = $(PICKY_CXXFLAGS) -Weffc++
 AM_CFLAGS = $(PICKY_CFLAGS)
 
 noinst_LTLIBRARIES = libbmsim.la

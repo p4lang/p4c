@@ -80,18 +80,18 @@ public:
   Packet &operator=(Packet &&other) noexcept;
 
 private:
-  int ingress_port;
-  int egress_port;
-  packet_id_t packet_id;
-  packet_id_t copy_id;
+  int ingress_port{-1};
+  int egress_port{-1};
+  packet_id_t packet_id{0};
+  packet_id_t copy_id{0};
 
   unsigned long long signature{0};
 
-  PacketBuffer buffer;
+  PacketBuffer buffer{};
 
   size_t payload_size{0};
 
-  std::unique_ptr<PHV> phv;
+  std::unique_ptr<PHV> phv{nullptr};
 
 private:
   class PHVPool {
@@ -101,8 +101,8 @@ private:
     void release(std::unique_ptr<PHV> phv);
 
   private:
-    mutable std::mutex mutex;
-    std::vector<std::unique_ptr<PHV> > phvs;
+    mutable std::mutex mutex{};
+    std::vector<std::unique_ptr<PHV> > phvs{};
     const PHVFactory &phv_factory;
   };
 

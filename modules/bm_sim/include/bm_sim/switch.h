@@ -79,8 +79,8 @@ public:
   McPre *get_pre() { return pre.get(); }
 
 protected:
-  std::unique_ptr<P4Objects> p4objects;
-  std::unique_ptr<McPre> pre;
+  std::unique_ptr<P4Objects> p4objects{nullptr};
+  std::unique_ptr<McPre> pre{nullptr};
 };
 
 #endif
