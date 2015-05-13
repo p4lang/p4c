@@ -96,8 +96,8 @@ public:
   MatchTable(const MatchTable &other) = delete;
   MatchTable &operator=(const MatchTable &other) = delete;
 
-  MatchTable(MatchTable &&other) noexcept = default;
-  MatchTable &operator=(MatchTable &&other) noexcept = default;
+  MatchTable(MatchTable &&other) /*noexcept*/ = default;
+  MatchTable &operator=(MatchTable &&other) /*noexcept*/ = default;
 
 protected:
   size_t size{0};

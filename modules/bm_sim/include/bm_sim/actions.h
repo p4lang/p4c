@@ -292,8 +292,8 @@ public:
   ActionFnEntry(const ActionFnEntry &other) = default;
   ActionFnEntry &operator=(const ActionFnEntry &other) = default;
 
-  ActionFnEntry(ActionFnEntry &&other) noexcept = default;
-  ActionFnEntry &operator=(ActionFnEntry &&other) noexcept = default;
+  ActionFnEntry(ActionFnEntry &&other) /*noexcept*/ = default;
+  ActionFnEntry &operator=(ActionFnEntry &&other) /*noexcept*/ = default;
 
 private:
   const ActionFn *action_fn{nullptr};

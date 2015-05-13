@@ -53,8 +53,8 @@ public:
   PacketBuffer(const PacketBuffer &other) = delete;
   PacketBuffer &operator=(const PacketBuffer &other) = delete;
 
-  PacketBuffer(PacketBuffer &&other) noexcept = default;
-  PacketBuffer &operator=(PacketBuffer &&other) noexcept = default;
+  PacketBuffer(PacketBuffer &&other) /*noexcept*/ = default;
+  PacketBuffer &operator=(PacketBuffer &&other) /*noexcept*/ = default;
 
 private:
   size_t size{0};

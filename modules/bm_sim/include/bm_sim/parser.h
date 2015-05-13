@@ -97,8 +97,8 @@ public:
   ParseSwitchCase(const ParseSwitchCase &other) = delete;
   ParseSwitchCase &operator=(const ParseSwitchCase &other) = delete;
 
-  ParseSwitchCase(ParseSwitchCase &&other) noexcept = default;
-  ParseSwitchCase &operator=(ParseSwitchCase &&other) noexcept = default;
+  ParseSwitchCase(ParseSwitchCase &&other) /*noexcept*/ = default;
+  ParseSwitchCase &operator=(ParseSwitchCase &&other) /*noexcept*/ = default;
 
 private:
   ByteContainer key;
@@ -183,8 +183,8 @@ public:
   Parser(const Parser &other) = delete;
   Parser &operator=(const Parser &other) = delete;
 
-  Parser(Parser &&other) noexcept = default;
-  Parser &operator=(Parser &&other) noexcept = default;
+  Parser(Parser &&other) /*noexcept*/ = default;
+  Parser &operator=(Parser &&other) /*noexcept*/ = default;
 
 private:
   const ParseState *init_state;

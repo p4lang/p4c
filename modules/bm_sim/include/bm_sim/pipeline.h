@@ -16,8 +16,8 @@ public:
   Pipeline(const Pipeline &other) = delete;
   Pipeline &operator=(const Pipeline &other) = delete;
 
-  Pipeline(Pipeline &&other) noexcept = default;
-  Pipeline &operator=(Pipeline &&other) noexcept = default;
+  Pipeline(Pipeline &&other) /*noexcept*/ = default;
+  Pipeline &operator=(Pipeline &&other) /*noexcept*/ = default;
 
 private:
   ControlFlowNode *first_node;

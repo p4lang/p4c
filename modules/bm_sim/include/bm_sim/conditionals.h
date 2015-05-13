@@ -81,8 +81,8 @@ public:
   Conditional(const Conditional &other) = delete;
   Conditional &operator=(const Conditional &other) = delete;
 
-  Conditional(Conditional &&other) noexcept = default;
-  Conditional &operator=(Conditional &&other) noexcept = default;
+  Conditional(Conditional &&other) /*noexcept*/ = default;
+  Conditional &operator=(Conditional &&other) /*noexcept*/ = default;
 
 private:
   int assign_dest_registers();
