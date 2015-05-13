@@ -137,12 +137,9 @@ protected:
     learn_engine.list_init(list_id);
   }
 
-  // std::unique_ptr<Packet> get_pkt() {
-  //   return std::unique_ptr<Packet>(new Packet(0, 0, 0, PacketBuffer(256)));
-  // }
-
   Packet get_pkt() {
-    return Packet(0, 0, 0, PacketBuffer(256));
+    // dummy packet, won't be parsed
+    return Packet(0, 0, 0, 128, PacketBuffer(256));
   }
 
   void learn_cb_(LearnEngine::msg_hdr_t msg_hdr, size_t size,

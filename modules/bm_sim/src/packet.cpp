@@ -8,18 +8,18 @@ Packet::Packet() {
 }
 
 Packet::Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
-	       PacketBuffer &&buffer)
+	       int ingress_length, PacketBuffer &&buffer)
   : ingress_port(ingress_port), packet_id(id), copy_id(copy_id),
-    buffer(std::move(buffer)) {
+    ingress_length(ingress_length), buffer(std::move(buffer)) {
   assert(phv_pool);
   signature = XXH64(buffer.start(), buffer.get_data_size(), 0);
   phv = phv_pool->get();
 }
 
 Packet::Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
-	       PacketBuffer &&buffer, const PHV &src_phv)
+	       int ingress_length, PacketBuffer &&buffer, const PHV &src_phv)
   : ingress_port(ingress_port), packet_id(id), copy_id(copy_id),
-    buffer(std::move(buffer)) {
+    ingress_length(ingress_length), buffer(std::move(buffer)) {
   assert(phv_pool);
   signature = XXH64(buffer.start(), buffer.get_data_size(), 0);
   phv = phv_pool->get();
@@ -34,7 +34,7 @@ Packet::~Packet() {
 
 Packet
 Packet::clone(packet_id_t new_copy_id) const {
-  Packet pkt(ingress_port, packet_id, new_copy_id,
+  Packet pkt(ingress_port, packet_id, new_copy_id, ingress_length,
 	     buffer.clone(buffer.get_data_size()));
   pkt.phv->copy_headers(*phv);
   return pkt;
@@ -46,6 +46,7 @@ Packet::clone(packet_id_t new_copy_id) const {
 Packet::Packet(Packet &&other) noexcept
   : ingress_port(other.ingress_port), egress_port(other.egress_port),
     packet_id(other.packet_id), copy_id(other.copy_id),
+    ingress_length(other.ingress_length),
     signature(other.signature), payload_size(other.payload_size) {
   buffer = std::move(buffer);
   std::swap(phv, other.phv);
@@ -57,6 +58,7 @@ Packet::operator=(Packet &&other) noexcept {
   egress_port = other.egress_port;
   packet_id = other.packet_id;
   copy_id = other.copy_id;
+  ingress_length = other.ingress_length;
   signature = other.signature;
   payload_size = other.payload_size;
 

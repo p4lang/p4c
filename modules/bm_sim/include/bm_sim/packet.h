@@ -16,10 +16,10 @@ public:
   Packet();
 
   Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
-	 PacketBuffer &&buffer);
+	 int ingress_length, PacketBuffer &&buffer);
 
   Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
-	 PacketBuffer &&buffer, const PHV &src_phv);
+	 int ingress_length, PacketBuffer &&buffer, const PHV &src_phv);
 
   ~Packet();
 
@@ -38,6 +38,8 @@ public:
   }
 
   void set_copy_id(packet_id_t id) { copy_id = id; }
+
+  int get_ingress_length() const { return ingress_length; }
 
   void set_payload_size(size_t size) { payload_size = size; }
 
@@ -84,6 +86,7 @@ private:
   int egress_port{-1};
   packet_id_t packet_id{0};
   packet_id_t copy_id{0};
+  int ingress_length{0};
 
   unsigned long long signature{0};
 

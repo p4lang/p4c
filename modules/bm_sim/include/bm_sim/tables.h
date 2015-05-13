@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <string>
+#include <atomic>
 
 #include "entries.h"
 #include "packet.h"
@@ -50,16 +51,27 @@ public:
     SUCCESS = 0,
     TABLE_FULL,
     INVALID_HANDLE,
-    ERROR
+    ERROR,
+    COUNTERS_DISABLED
   };
+  
+  typedef struct {
+    std::atomic<std::uint_fast64_t> bytes{0};
+    std::atomic<std::uint_fast64_t> packets{0};
+  } Counter;
+  typedef uint64_t counter_value_t;
+
 public:
   MatchTable(const string &name, p4object_id_t id,
 	     size_t size, size_t nbytes_key,
-	     const MatchKeyBuilder &match_key_builder)
+	     const MatchKeyBuilder &match_key_builder,
+	     bool with_counters = false)
     : NamedP4Object(name, id),
       size(size),
       nbytes_key(nbytes_key),
-      match_key_builder(match_key_builder) {}
+      match_key_builder(match_key_builder),
+      with_counters(with_counters),
+      counters(size) { }
 
   virtual ~MatchTable() {}
   
@@ -93,6 +105,34 @@ public:
     return SUCCESS;
   }
 
+  void update_counters(entry_handle_t handle, const Packet &pkt) const {
+    assert(with_counters);
+    Counter &c = counters[handle];
+    c.bytes += pkt.get_ingress_length();
+    c.packets += 1;
+  }
+
+  ErrorCode query_counters(entry_handle_t handle,
+			   counter_value_t *bytes,
+			   counter_value_t *packets) const {
+    if(!with_counters) return COUNTERS_DISABLED;
+    Counter &c = counters[handle];
+    *bytes = c.bytes;
+    *packets = c.packets;
+    return SUCCESS;
+  }
+
+  ErrorCode reset_counters() const {
+    if(!with_counters) return COUNTERS_DISABLED;
+    // could take a while, but do not block anyone else
+    // alternative would be to do a fill and use a lock
+    for(Counter &c : counters) {
+      c.bytes = 0;
+      c.packets = 0;
+    }
+    return SUCCESS;
+  }
+
   MatchTable(const MatchTable &other) = delete;
   MatchTable &operator=(const MatchTable &other) = delete;
 
@@ -109,6 +149,12 @@ protected:
   unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
   ActionFnEntry default_action_entry{};
   const ControlFlowNode *default_next_node{nullptr};
+  std::atomic_bool with_counters{false};
+  // is it really legit for me to use mutable for counters
+  // do counters really have a different status than entries
+  // or is it just a hortcut for now?
+  // TODO
+  mutable std::vector<Counter> counters{};
 
   mutable boost::shared_mutex t_mutex{};
 
@@ -127,8 +173,9 @@ class ExactMatchTable : public MatchTable
 public:
   ExactMatchTable(const string &name, p4object_id_t id,
 		  int size, int nbytes_key,
-		  const MatchKeyBuilder &match_key_builder)
-    : MatchTable(name, id, size, nbytes_key, match_key_builder) {
+		  const MatchKeyBuilder &match_key_builder,
+		  bool with_counters = false)
+    : MatchTable(name, id, size, nbytes_key, match_key_builder, with_counters) {
     entries = vector<ExactMatchEntry>(size);
     entries_map.reserve(size);
   }
@@ -155,8 +202,9 @@ class LongestPrefixMatchTable : public MatchTable
 public:
   LongestPrefixMatchTable(const string &name, p4object_id_t id,
 			  int size, int nbytes_key, 
-			  const MatchKeyBuilder &match_key_builder)
-    : MatchTable(name, id, size, nbytes_key, match_key_builder),
+			  const MatchKeyBuilder &match_key_builder,
+			  bool with_counters = false)
+    : MatchTable(name, id, size, nbytes_key, match_key_builder, with_counters),
       entries_trie(nbytes_key) {
     entries = vector<LongestPrefixMatchEntry>(size);
   }
@@ -186,8 +234,9 @@ class TernaryMatchTable : public MatchTable
 public:
   TernaryMatchTable(const string &name, p4object_id_t id,
 		    int size, int nbytes_key,
-		    const MatchKeyBuilder &match_key_builder)
-    : MatchTable(name, id, size, nbytes_key, match_key_builder) {
+		    const MatchKeyBuilder &match_key_builder,
+		    bool with_counters = false)
+    : MatchTable(name, id, size, nbytes_key, match_key_builder, with_counters) {
     entries = vector<TernaryMatchEntry>(size);
   }
 

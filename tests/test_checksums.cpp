@@ -130,7 +130,7 @@ protected:
 
   void get_ipv4_pkt(Packet *pkt, unsigned short *cksum) {
     *pkt = Packet(
-	0, 0, 0,
+        0, 0, 0, sizeof(raw_tcp_pkt),
 	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt))
     );
     *cksum = 0x3508; // big endian

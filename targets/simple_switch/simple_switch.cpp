@@ -25,7 +25,7 @@ public:
     static int pkt_id = 0;
 
     Packet *packet =
-      new Packet(port_num, pkt_id++, 0, PacketBuffer(2048, buffer, len));
+      new Packet(port_num, pkt_id++, 0, len, PacketBuffer(2048, buffer, len));
 
     ELOGGER->packet_in(*packet);
 

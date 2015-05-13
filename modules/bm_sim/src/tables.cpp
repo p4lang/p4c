@@ -55,6 +55,9 @@ MatchTable::operator()(Packet *pkt) const
   }
   else {
     ELOGGER->table_hit(*pkt, *this, *entry);
+    if(with_counters) {
+      update_counters(get_entry_handle(*entry), *pkt);
+    }
     entry->action_entry(pkt);
     return entry->next_table;
   }
