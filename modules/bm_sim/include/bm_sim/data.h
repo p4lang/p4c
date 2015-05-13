@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <cassert>
+#include <type_traits>
 
 #include "bignum.h"
 
@@ -43,16 +44,15 @@ public:
 
   virtual void export_bytes() {}
 
-  void set(unsigned int i) {
+  // need to figure out what to do with signed values
+
+  template<typename T>
+  typename std::enable_if<std::is_integral<T>::value, void>::type 
+  set(T i) {
     value = i;
     export_bytes();
   }
   
-  void set(unsigned long long i) {
-    value = i;
-    export_bytes();
-  }
-
   void set(const char *bytes, int nbytes) {
     bignum::import_bytes(value, bytes, nbytes);
     export_bytes();
