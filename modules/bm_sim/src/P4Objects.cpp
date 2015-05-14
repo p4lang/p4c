@@ -327,24 +327,25 @@ void P4Objects::init_objects(std::istream &is) {
 
       const string table_type = cfg_table["type"].asString();
       const int table_size = cfg_table["max_size"].asInt();
+      const bool with_counters = cfg_table["with_counters"].asBool();
       // for now, discard ageing and counters
       
       if(table_type == "exact") {
       	ExactMatchTable *table =
 	  new ExactMatchTable(table_name, table_id, table_size,
-			      nbytes_key, key_builder);
+			      nbytes_key, key_builder, with_counters);
 	add_exact_match_table(table_name, unique_ptr<ExactMatchTable>(table));
       }
       else if(table_type == "lpm") {
 	LongestPrefixMatchTable *table =
 	  new LongestPrefixMatchTable(table_name, table_id, table_size,
-				      nbytes_key, key_builder);
+				      nbytes_key, key_builder, with_counters);
 	add_lpm_table(table_name, unique_ptr<LongestPrefixMatchTable>(table));
       }
       else if(table_type == "ternary") {
 	TernaryMatchTable *table =
 	  new TernaryMatchTable(table_name, table_id, table_size,
-				nbytes_key, key_builder);
+				nbytes_key, key_builder, with_counters);
 	add_ternary_match_table(table_name, unique_ptr<TernaryMatchTable>(table));
       }
     }

@@ -8,6 +8,11 @@ ExactOne
 0
 actionB
 ab 
+bm_table_read_counter
+ExactOne
+0
+bm_table_reset_counters
+ExactOne
 bm_table_delete_entry
 ExactOne
 0

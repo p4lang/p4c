@@ -15,6 +15,11 @@ typedef i32 BmMcL1Handle
 typedef i32 BmMcL2Handle
 typedef string BmMcPortMap // string of 0s and 1s
 
+struct BmCounterValue {
+  1:i64 bytes;
+  2:i64 packets;
+}
+
 enum TableOperationErrorCode {
   TABLE_FULL = 1,
   INVALID_HANDLE = 2,
@@ -22,7 +27,7 @@ enum TableOperationErrorCode {
 }
 
 exception InvalidTableOperation {
-  1: TableOperationErrorCode what
+  1:TableOperationErrorCode what
 }
 
 enum McOperationErrorCode {
@@ -35,7 +40,7 @@ enum McOperationErrorCode {
 }
 
 exception InvalidMcOperation {
-  1: McOperationErrorCode what
+  1:McOperationErrorCode what
 }
 
 service Runtime {
@@ -82,6 +87,15 @@ service Runtime {
     2:BmEntryHandle entry_handle,
     3:string action_name,
     4:BmActionData action_data
+  ) throws (1:InvalidTableOperation ouch),
+
+  BmCounterValue bm_table_read_counter(
+    1:string table_name,
+    2:BmEntryHandle entry_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_table_reset_counters(
+    1:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
   // learning acks

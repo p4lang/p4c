@@ -104,6 +104,32 @@ ${name}
 //::   #endfor
 //:: #endfor
 
+
+/* DIRECT COUNTERS */
+
+//:: for t_name, t in tables.items():
+//::   if not t.with_counters: continue
+//::   t_name = get_c_name(t_name)
+//::   name = pd_prefix + t_name + "_read_counter"
+p4_pd_status_t
+${name}
+(
+ p4_pd_sess_hdl_t sess_hdl,
+ p4_pd_dev_target_t dev_tgt,
+ p4_pd_entry_hdl_t entry_hdl,
+ p4_pd_counter_value_t *counter_value
+);
+
+//::   name = pd_prefix + t_name + "_reset_counters"
+p4_pd_status_t
+${name}
+(
+ p4_pd_sess_hdl_t sess_hdl,
+ p4_pd_dev_target_t dev_tgt
+);
+
+//:: #endfor
+
 #ifdef __cplusplus
 }
 #endif

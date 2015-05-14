@@ -35,7 +35,12 @@ int main() {
 
   p4_pd_test_ExactOne_table_modify_with_actionB(sess_hdl, dev_tgt.device_id,
                                                 entry_hdl, &actionB_action_spec);
-  
+
+  p4_pd_counter_value_t counter_value;
+  p4_pd_test_ExactOne_read_counter(sess_hdl, dev_tgt, entry_hdl, &counter_value);  
+
+  p4_pd_test_ExactOne_reset_counters(sess_hdl, dev_tgt);
+
   p4_pd_test_ExactOne_table_delete(sess_hdl, dev_tgt.device_id, entry_hdl);
   
   p4_pd_test_LpmOne_match_spec_t LpmOne_match_spec = {0x12345678, 12};
@@ -67,7 +72,6 @@ int main() {
   p4_pd_test_ExactOne_set_default_action_actionA(sess_hdl, dev_tgt,
                                                  &actionA_action_spec,
                                                  &entry_hdl);
-  
   
   return 0;
 }

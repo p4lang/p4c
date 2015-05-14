@@ -57,6 +57,15 @@ public:
 		     entry_handle_t handle,
 		     const std::string &action_name,
 		     const ActionData &action_data) = 0;
+
+  virtual MatchTable::ErrorCode
+  table_read_counters(const std::string &table_name,
+		      entry_handle_t handle,
+		      MatchTable::counter_value_t *bytes,
+		      MatchTable::counter_value_t *packets) = 0;
+
+  virtual MatchTable::ErrorCode
+  table_reset_counters(const std::string &table_name) = 0;
 };
 
 #endif

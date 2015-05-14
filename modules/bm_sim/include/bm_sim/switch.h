@@ -74,6 +74,15 @@ public:
 		     const std::string &action_name,
 		     const ActionData &action_data) override;
 
+  MatchTable::ErrorCode
+  table_read_counters(const std::string &table_name,
+		      entry_handle_t handle,
+		      MatchTable::counter_value_t *bytes,
+		      MatchTable::counter_value_t *packets) override;
+
+  MatchTable::ErrorCode
+  table_reset_counters(const std::string &table_name) override;
+
   LearnEngine *get_learn_engine();
 
   McPre *get_pre() { return pre.get(); }

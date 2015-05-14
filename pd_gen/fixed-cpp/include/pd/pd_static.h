@@ -22,6 +22,11 @@ typedef struct p4_pd_dev_target {
 			 */
 } p4_pd_dev_target_t;
 
+typedef struct p4_pd_counter_value {
+  uint64_t packets;
+  uint64_t bytes;
+} p4_pd_counter_value_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -96,6 +96,17 @@ class RuntimeHandler : virtual public RuntimeIf {
     print_spec(action_data);
   }
 
+  void bm_table_read_counter(BmCounterValue& _return, const std::string& table_name, const BmEntryHandle entry_handle) {
+    std::cout << "bm_table_read_counter" << std::endl
+	      << table_name << std::endl
+	      << entry_handle << std::endl;      
+  }
+
+  void bm_table_reset_counters(const std::string& table_name) {
+    std::cout << "bm_table_reset_counters" << std::endl
+	      << table_name << std::endl;
+  }
+
   void bm_learning_ack(const BmLearningListId list_id, const BmLearningBufferId buffer_id, const std::vector<BmLearningSampleId> & sample_ids) {
     // Your implementation goes here
     printf("bm_learning_ack\n");

@@ -105,6 +105,8 @@ def load_json(json_src):
             for j_table in j_pipeline["tables"]:
                 table = Table(j_table["name"], j_table["id"])
                 table.type_ = MatchType.from_str(j_table["type"])
+                table.with_counters = j_table["with_counters"]
+                assert(type(table.with_counters) is bool)
                 for action in j_table["actions"]:
                     table.actions[action] = ACTIONS[action]
                 for j_key in j_table["key"]:

@@ -58,7 +58,11 @@ $(objs_) $(deps_) : .thrift_gen
 
 .thrift_gen: .pd_from_json
 
-.pd_from_json: test.json ../gen-cpp/src/pd_tables.cpp
+TEMPLATES_DIR := ../templates
+TEMPLATES_CPP := $(wildcard $(TEMPLATES_DIR)/src/*.cpp)
+TEMPLATES_H := $(wildcard $(TEMPLATES_DIR)/include/pd/*.h)
+
+.pd_from_json: test.json ../gen-cpp/src/pd_tables.cpp $(TEMPLATES_CPP) $(TEMPLATES_H)
 	../gen.py --json test.json --p4-prefix test
 	@touch .pd_from_json
 

@@ -244,4 +244,48 @@ ${name}
 //::   #endfor
 //:: #endfor
 
+
+
+/* DIRECT COUNTERS */
+
+//:: for t_name, t in tables.items():
+//::   if not t.with_counters: continue
+//::   t_name = get_c_name(t_name)
+//::   name = pd_prefix + t_name + "_read_counter"
+p4_pd_status_t
+${name}
+(
+ p4_pd_sess_hdl_t sess_hdl,
+ p4_pd_dev_target_t dev_tgt,
+ p4_pd_entry_hdl_t entry_hdl,
+ p4_pd_counter_value_t *counter_value
+) {
+  BmCounterValue value;
+  // Thrift's weirdness ? even on client side, the return value becomes the
+  // first argument and is passed by reference
+  pd_conn_mgr_client(dev_tgt.device_id)->bm_table_read_counter(
+      value,
+      "${t_name}",
+      entry_hdl
+  );
+  counter_value->bytes = (uint64_t) value.bytes;
+  counter_value->packets = (uint64_t) value.packets;
+  return 0;
+}
+
+//::   name = pd_prefix + t_name + "_reset_counters"
+p4_pd_status_t
+${name}
+(
+ p4_pd_sess_hdl_t sess_hdl,
+ p4_pd_dev_target_t dev_tgt
+) {
+  pd_conn_mgr_client(dev_tgt.device_id)->bm_table_reset_counters(
+      "${t_name}"
+  );
+  return 0;
+}
+
+//:: #endfor
+
 }

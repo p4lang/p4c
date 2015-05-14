@@ -127,6 +127,25 @@ MatchTable::ErrorCode Switch::table_modify_entry(
   return table->modify_entry(handle, action_entry, next_node);
 }
 
+MatchTable::ErrorCode Switch::table_read_counters(
+    const std::string &table_name,
+    entry_handle_t handle,
+    MatchTable::counter_value_t *bytes,
+    MatchTable::counter_value_t *packets
+) {
+  MatchTable *table = p4objects->get_match_table(table_name);
+  assert(table);
+  return table->query_counters(handle, bytes, packets);
+}
+
+MatchTable::ErrorCode Switch::table_reset_counters(
+    const std::string &table_name
+) {
+  MatchTable *table = p4objects->get_match_table(table_name);
+  assert(table);
+  return table->reset_counters();
+}
+
 LearnEngine *Switch::get_learn_engine()
 {
   return p4objects->get_learn_engine();

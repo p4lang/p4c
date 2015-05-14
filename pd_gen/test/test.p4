@@ -34,6 +34,11 @@ table ExactOne {
     size: 512;
 }
 
+counter ExactOne_counter {
+    type : packets;
+    direct : ExactOne;
+}
+
 table LpmOne {
     reads {
          header_test.field32 : lpm;

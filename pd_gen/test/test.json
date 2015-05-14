@@ -121,36 +121,8 @@
     ],
     "actions": [
         {
-            "name": "actionB",
-            "id": 0,
-            "runtime_data": [
-                {
-                    "name": "param",
-                    "bitwidth": 8
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "header_test",
-                                "field8"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "actionA",
-            "id": 1,
+            "id": 0,
             "runtime_data": [
                 {
                     "name": "param",
@@ -175,6 +147,34 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "actionB",
+            "id": 1,
+            "runtime_data": [
+                {
+                    "name": "param",
+                    "bitwidth": 8
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "header_test",
+                                "field8"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "pipelines": [
@@ -188,6 +188,7 @@
                     "id": 0,
                     "type": "exact",
                     "max_size": 512,
+                    "with_counters": true,
                     "key": [
                         {
                             "match_type": "exact",
@@ -212,6 +213,7 @@
                     "id": 1,
                     "type": "lpm",
                     "max_size": 512,
+                    "with_counters": false,
                     "key": [
                         {
                             "match_type": "lpm",
@@ -234,6 +236,7 @@
                     "id": 2,
                     "type": "ternary",
                     "max_size": 512,
+                    "with_counters": false,
                     "key": [
                         {
                             "match_type": "ternary",
@@ -256,6 +259,7 @@
                     "id": 3,
                     "type": "exact",
                     "max_size": 512,
+                    "with_counters": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -278,6 +282,7 @@
                     "id": 4,
                     "type": "exact",
                     "max_size": 512,
+                    "with_counters": false,
                     "key": [
                         {
                             "match_type": "exact",

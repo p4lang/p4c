@@ -163,6 +163,36 @@ class RuntimeHandler : virtual public RuntimeIf {
     }
   }
 
+  void bm_table_read_counter(BmCounterValue& _return, const std::string& table_name, const BmEntryHandle entry_handle) {
+    printf("bm_table_read_counter\n");
+    MatchTable::counter_value_t bytes; // unsigned
+    MatchTable::counter_value_t packets;
+    MatchTable::ErrorCode error_code = switch_->table_read_counters(
+        table_name,
+	entry_handle,
+	&bytes, &packets
+    );
+    if(error_code != MatchTable::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = (TableOperationErrorCode::type) error_code;
+      throw ito;
+    }
+    _return.bytes = (int64_t) bytes;
+    _return.packets = (int64_t) packets;
+  }
+
+  void bm_table_reset_counters(const std::string& table_name) {
+    printf("bm_table_reset_counters\n");
+    MatchTable::ErrorCode error_code = switch_->table_reset_counters(
+        table_name
+    );
+    if(error_code != MatchTable::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = (TableOperationErrorCode::type) error_code;
+      throw ito;
+    }
+  }
+
   void bm_learning_ack(const BmLearningListId list_id, const BmLearningBufferId buffer_id, const std::vector<BmLearningSampleId> & sample_ids) {
     printf("bm_learning_ack\n");
     switch_->get_learn_engine()->ack(list_id, buffer_id, sample_ids);
