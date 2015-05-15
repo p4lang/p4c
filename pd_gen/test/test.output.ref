@@ -1,7 +1,7 @@
-bm_table_add_exact_match_entry
+bm_table_add_entry
 ExactOne
+EXACT: bb00aa00
 actionA
-bb00aa00 
 aabbccddeeff 
 bm_table_modify_entry
 ExactOne
@@ -16,28 +16,27 @@ ExactOne
 bm_table_delete_entry
 ExactOne
 0
-bm_table_add_lpm_entry
+bm_table_add_entry
 LpmOne
+LPM: 78563412/12
 actionA
-78563412 
-12
 aabbccddeeff 
-bm_table_add_ternary_match_entry
+bm_table_add_entry
 TernaryOne
+TERNARY: 10101010&&&000a00ff
 actionA
-10101010 
-000a00ff 
+aabbccddeeff 
 22
-aabbccddeeff 
-bm_table_add_exact_match_entry
+bm_table_add_entry
 ExactOneNA
+EXACT: 0abcde
 actionA
-0abcde 
 aabbccddeeff 
-bm_table_add_exact_match_entry
+bm_table_add_entry
 ExactTwo
+EXACT: ddccbbaa
+EXACT: ffee
 actionA
-ddccbbaa ffee 
 aabbccddeeff 
 bm_set_default_action
 ExactOne

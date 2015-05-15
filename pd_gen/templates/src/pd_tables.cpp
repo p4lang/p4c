@@ -12,50 +12,57 @@
 //:: for t_name, t in tables.items():
 //::   t_name = get_c_name(t_name)
 //::   if not t.key: continue
-static std::vector<std::string> build_key_${t_name} (
+static std::vector<BmMatchParam> build_key_${t_name} (
     ${pd_prefix}${t_name}_match_spec_t *match_spec
 ) {
-  std::vector<std::string> key;
+  std::vector<BmMatchParam> key;
+  key.reserve(${len(t.key)});
+
+  BmMatchParam param;
+  BmMatchParamExact param_exact; (void) param_exact;
+  BmMatchParamLPM param_lpm; (void) param_lpm;
+  BmMatchParamTernary param_ternary; (void) param_ternary;
+  BmMatchParamValid param_valid; (void) param_valid;
+
 //::   for field_name, field_match_type, field_bw in t.key:
 //::     field_name = get_c_name(field_name)
 //::     width = bits_to_bytes(field_bw)
-  key.push_back(std::string((char *) &(match_spec->${field_name}), ${width}));
+//::     if field_match_type == MatchType.EXACT:
+  param_exact.key = std::string((char *) &(match_spec->${field_name}), ${width});
+  param = BmMatchParam();
+  param.type = BmMatchParamType::type::EXACT;
+  param.__set_exact(param_exact); // does a copy of param_exact
+  key.push_back(std::move(param));
+//::     elif field_match_type == MatchType.LPM:
+  param_lpm.key = std::string((char *) &(match_spec->${field_name}), ${width});
+  param_lpm.prefix_length = match_spec->${field_name}_prefix_length;
+  param = BmMatchParam();
+  param.type = BmMatchParamType::type::LPM;
+  param.__set_lpm(param_lpm); // does a copy of param_lpm
+  key.push_back(std::move(param));
+//::     elif field_match_type == MatchType.TERNARY:
+  param_ternary.key = std::string((char *) &(match_spec->${field_name}), ${width});
+  param_ternary.mask = std::string((char *) &(match_spec->${field_name}_mask), ${width});
+  param = BmMatchParam();
+  param.type = BmMatchParamType::type::TERNARY;
+  param.__set_ternary(param_ternary); // does a copy of param_ternary
+  key.push_back(std::move(param));
+//::     elif field_match_type == MatchType.VALID:
+  param_valid.key = (match_spec->${field_name} == 1);
+  param = BmMatchParam();
+  param.type = BmMatchParamType::type::VALID;
+  param.__set_valid(param_valid); // does a copy of param_ternary
+  key.push_back(std::move(param));
+//::     else:
+//::       assert(0)
+//::     #endif
+
 //::   #endfor
   return key;
 }
 
 //:: #endfor
 //::
-//::
-//:: for t_name, t in tables.items():
-//::   t_name = get_c_name(t_name)
-//::   if not t.key: continue
-//::   if t.type_ != MatchType.TERNARY: continue
-static std::vector<std::string> build_mask_${t_name} (
-    ${pd_prefix}${t_name}_match_spec_t *match_spec
-) {
-  std::vector<std::string> mask;
-//::   for field_name, field_match_type, field_bw in t.key:
-//::     field_name = get_c_name(field_name)
-//::     width = bits_to_bytes(field_bw)
-//::     if field_match_type == MatchType.EXACT:
-  mask.push_back(std::string((char) 0xFF, ${width}));
-//::     elif field_match_type == MatchType.TERNARY:
-  mask.push_back(std::string((char *) &(match_spec->${field_name}_mask), ${width}));
-//::     elif field_match_type == MatchType.LPM:
-  int pref_length = match_spec->${field_name}_prefix_length;
-  std::string pref((char) 0x00, ${width});
-  std::fill(pref.begin(), pref.begin() + (pref_length / 8), (char) 0xFF);
-  if(pref_length % 8 != 0) {
-    pref[pref_length / 8] = (char) 0xFF << (8 - (pref_length % 8));
-  }
-  mask.push_back(std::move(pref));
-//::     #endif
-//::   #endfor
-  return mask;
-}
-
-//:: #endfor
 
 //:: for a_name, a in actions.items():
 //::   a_name = get_c_name(a_name)
@@ -105,50 +112,26 @@ ${name}
  ${param_str}
 ) {
 //::     if not has_match_spec:
-  std::vector<std::string> match_key;
+  std::vector<BmMatchParam> match_key;
 //::     else:
-  std::vector<std::string> match_key = build_key_${t_name}(match_spec);
+  std::vector<BmMatchParam> match_key = build_key_${t_name}(match_spec);
 //::     #endif
 //::     if not has_action_spec:
   std::vector<std::string> action_data;
 //::     else:
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
-//::     if match_type == MatchType.EXACT:
-  *entry_hdl = pd_conn_mgr_client(dev_tgt.device_id)->bm_table_add_exact_match_entry(
-       "${t_name}", "${a_name}",
-       match_key,
-       action_data
-  );
-//::     elif match_type == MatchType.LPM:
-//::       prefix_length = 0
-//::       lpm_field = None
-//::       for field_name, field_match_type, field_bw in t.key:
-//::         if field_match_type == MatchType.EXACT:
-//::           prefix_length += bits_to_bytes(field_bw) * 8
-//::         elif field_match_type == MatchType.LPM:
-//::           assert(not lpm_field)
-//::           lpm_field = field_name
-//::         else:
-//::           assert(False)
-//::         #endif
-//::       #endfor
-  int prefix_length = ${prefix_length} + match_spec->${get_c_name(field_name)}_prefix_length;
-  *entry_hdl = pd_conn_mgr_client(dev_tgt.device_id)->bm_table_add_lpm_entry(
-       "${t_name}", "${a_name}",
-       match_key,
-       prefix_length,
-       action_data
-  );
-//::     elif match_type == MatchType.TERNARY:
-  *entry_hdl = pd_conn_mgr_client(dev_tgt.device_id)->bm_table_add_ternary_match_entry(
-       "${t_name}", "${a_name}",
-       match_key,
-       build_mask_${t_name}(match_spec),
-       priority,
-       action_data
-  );
+  BmAddEntryOptions options;
+//::     if match_type == MatchType.TERNARY:
+  options.__set_priority(priority);
 //::     #endif
+  *entry_hdl = pd_conn_mgr_client(dev_tgt.device_id)->bm_table_add_entry(
+       "${t_name}",
+       match_key,
+       "${a_name}",
+       action_data,
+       options
+  );
   return 0;
 }
 

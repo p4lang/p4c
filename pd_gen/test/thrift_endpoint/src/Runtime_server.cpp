@@ -45,6 +45,31 @@ class RuntimeHandler : virtual public RuntimeIf {
     std::cout << std::endl;
   }
 
+  void print_match_param(const BmMatchParam &param) {
+    switch(param.type) {
+    case BmMatchParamType::type::EXACT:
+      std::cout << "EXACT: "
+		<< ToHex(param.exact.key);
+      break;
+    case BmMatchParamType::type::LPM:
+      std::cout << "LPM: "
+		<< ToHex(param.lpm.key) << "/" << param.lpm.prefix_length;
+      break;
+    case BmMatchParamType::type::TERNARY:
+      std::cout << "TERNARY: "
+		<<ToHex(param.ternary.key) << "&&&" << ToHex(param.ternary.mask);
+      break;
+    case BmMatchParamType::type::VALID:
+      std::cout << "VALID: "
+		<<std::boolalpha << param.valid.key << std::noboolalpha;
+      break;
+    default:
+      assert(0 && "invalid match type");
+      break;
+    }
+    std::cout << std::endl;
+  }
+
   BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmActionData& action_data) {
     std::cout << "bm_table_add_exact_match_entry" << std::endl
 	      << table_name << std::endl
@@ -72,6 +97,18 @@ class RuntimeHandler : virtual public RuntimeIf {
     print_spec(match_mask);
     std::cout << priority << std::endl;
     print_spec(action_data);
+    return 0;
+  }
+
+  BmEntryHandle bm_table_add_entry(const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
+    std::cout << "bm_table_add_entry" << std::endl
+	      << table_name << std::endl;
+    for(const auto &p : match_key)
+      print_match_param(p);
+    std::cout << action_name << std::endl;
+    print_spec(action_data);
+    if(options.__isset.priority)
+      std::cout << options.priority << std::endl;
     return 0;
   }
 
