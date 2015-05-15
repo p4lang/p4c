@@ -211,72 +211,6 @@ def parse_match_key(table, key_fields):
         params.append(param)
     return params
 
-# def parse_match_key_exact(table, key_fields):
-#     match_types = [t for (_, t, _) in table.key]
-#     bitwidths = [bw for (_, _, bw) in table.key]
-#     byte_array = []
-#     for idx, field in enumerate(key_fields):
-#         match_type = match_types[idx]
-#         assert(match_type == MatchType.EXACT)
-#         bw = bitwidths[idx]
-#         byte_array += [bytes_to_string(parse_param(field, bw))]
-#     return byte_array
-
-# def parse_match_key_lpm(table, key_fields): 
-#     match_types = [t for (_, t, _) in table.key]
-#     bitwidths = [bw for (_, _, bw) in table.key]
-#     lpm_byte_array = None
-#     byte_array = []
-#     prefix_length = 0
-#     for idx, field in enumerate(key_fields):
-#         match_type = match_types[idx]
-#         assert(match_type == MatchType.EXACT or match_type == MatchType.LPM)
-#         bw = bitwidths[idx]
-#         if match_type == MatchType.EXACT:
-#             byte_array += [bytes_to_string(parse_param(field, bw))]
-#             prefix_length += bw
-#         elif match_type == MatchType.LPM:
-#             assert(not lpm_byte_array)
-#             prefix, length = field.split("/")
-#             lpm_byte_array = parse_param(prefix, bw)
-#             prefix_length += int(length)
-#     return [bytes_to_string(lpm_byte_array)] + byte_array, prefix_length
-
-# def gen_prefix_bytes(length, num_bytes):
-#     byte_array = []
-#     while length >= 8:
-#         byte_array.append(0xFF)
-#         length -= 8
-#         num_bytes -= 1
-#     if length > 0:
-#         byte_array.append((0xFF << (8 - length) & 0xFF))
-#         num_bytes -= 1
-#     assert(num_bytes >= 0)
-#     while num_bytes > 0:
-#         byte_array.append(0)
-#         num_bytes -= 1
-#     return byte_array
-
-# def parse_match_key_ternary(table, key_fields):
-#     match_types = [t for (_, t, _) in table.key]
-#     bitwidths = [bw for (_, _, bw) in table.key]
-#     byte_array = []
-#     mask_array = []
-#     for idx, field in enumerate(key_fields):
-#         match_type = match_types[idx]
-#         if match_type == MatchType.EXACT:
-#             byte_array += [bytes_to_string(parse_param(field, bw))]
-#             mask_array += [[0xFF] * ((bw + 7) / 8)]
-#         elif match_type == MatchType.LPM:
-#             prefix, length = field.split("/")
-#             byte_array += [bytes_to_string(parse_param(prefix, bw))]
-#             mask_array += [bytes_to_string(gen_prefix_bytes(length, (bw + 7) / 8))]
-#         elif match_type == MatchType.TERNARY:
-#             bytes_, mask = field.split("&&&")
-#             byte_array += [bytes_to_string(parse_param(bytes_, bw))]
-#             mask_array += [bytes_to_string(parse_param(mask, bw))]
-#     return byte_array, mask_array
-
 def printable_byte_str(s):
     return ":".join("{:02x}".format(ord(c)) for c in s)
 
@@ -459,12 +393,6 @@ class RuntimeAPI(cmd.Cmd):
         print "Adding entry to", MatchType.to_str(table.type_), "match table", table_name
 
         match_key = parse_match_key(table, match_key)
-        # if table.type_ == MatchType.EXACT:
-        #     match_key = parse_match_key_exact(table, match_key)
-        # elif table.type_ == MatchType.LPM:
-        #     match_key, prefix_length = parse_match_key_lpm(table, match_key)
-        # elif table.type_ == MatchType.TERNARY:
-        #     match_key, mask = parse_match_key_ternary_match(table, match_key)
 
         print "{0:20} {1}".format(
             "match key:",
@@ -480,18 +408,6 @@ class RuntimeAPI(cmd.Cmd):
             table_name, match_key, action_name, runtime_data,
             BmAddEntryOptions(priority = priority)
         )
-        # if table.type_ == MatchType.EXACT:
-        #     entry_handle = self.client.bm_table_add_exact_match_entry(
-        #         table_name, action_name, match_key, runtime_data
-        #     )
-        # elif table.type_ == MatchType.LPM:
-        #     entry_handle = self.client.bm_table_add_lpm_entry(
-        #         table_name, action_name, match_key, prefix_length, runtime_data
-        #     )
-        # elif table.type_ == MatchType.TERNARY:
-        #     entry_handle = self.client.bm_table_add_lpm_entry(
-        #         table_name, action_name, match_key, mask, priority, runtime_data
-        #     )
         print "SUCCESS"
         print "entry has been added with handle", entry_handle
 
