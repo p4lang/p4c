@@ -70,36 +70,6 @@ class RuntimeHandler : virtual public RuntimeIf {
     std::cout << std::endl;
   }
 
-  BmEntryHandle bm_table_add_exact_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmActionData& action_data) {
-    std::cout << "bm_table_add_exact_match_entry" << std::endl
-	      << table_name << std::endl
-	      << action_name << std::endl;
-    print_spec(match_key);
-    print_spec(action_data);
-    return 0;
-  }
-
-  BmEntryHandle bm_table_add_lpm_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const int32_t prefix_length, const BmActionData& action_data) {
-    std::cout << "bm_table_add_lpm_entry" << std::endl
-	      << table_name << std::endl
-	      << action_name << std::endl;
-    print_spec(match_key);
-    std::cout << prefix_length << std::endl;
-    print_spec(action_data);
-    return 0;
-  }
-
-  BmEntryHandle bm_table_add_ternary_match_entry(const std::string& table_name, const std::string& action_name, const BmMatchKey& match_key, const BmMatchKey& match_mask, const int32_t priority, const BmActionData& action_data) {
-    std::cout << "bm_table_add_ternary_match_entry" << std::endl
-	      << table_name << std::endl
-	      << action_name << std::endl;
-    print_spec(match_key);
-    print_spec(match_mask);
-    std::cout << priority << std::endl;
-    print_spec(action_data);
-    return 0;
-  }
-
   BmEntryHandle bm_table_add_entry(const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
     std::cout << "bm_table_add_entry" << std::endl
 	      << table_name << std::endl;

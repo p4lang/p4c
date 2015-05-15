@@ -68,19 +68,25 @@ int main() {
       std::cout << "ingress port is " << ntohs(sample->ingress_port)
 		<< std::endl;
 
-      std::vector<std::string> match_key =
-	{std::string(sample->src_addr, sizeof(sample->src_addr))};
+      BmMatchParam match_param;
+      match_param.type = BmMatchParamType::type::EXACT;
+      BmMatchParamExact match_param_exact;
+      match_param_exact.key =
+	std::string(sample->src_addr, sizeof(sample->src_addr));
+      match_param.__set_exact(match_param_exact);
 
-      client.bm_table_add_exact_match_entry("smac", "_nop",
-					    match_key,
-					    std::vector<std::string>());
+      BmAddEntryOptions options;
+
+      client.bm_table_add_entry("smac", {match_param},
+				"_nop", std::vector<std::string>(),
+				options);
 
       std::vector<std::string> action_data =
 	{std::string((char *) &sample->ingress_port, 2)};
 
-      client.bm_table_add_exact_match_entry("dmac", "forward",
-					    match_key,
-					    action_data);
+      client.bm_table_add_entry("dmac", {match_param},
+				"forward", action_data,
+				options);
     }
 
     client.bm_learning_ack_buffer(learn_hdr.list_id, learn_hdr.buffer_id);

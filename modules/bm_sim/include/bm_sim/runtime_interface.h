@@ -9,6 +9,9 @@ class RuntimeInterface {
 public:
   virtual ~RuntimeInterface() { }
 
+  // These functions were made obsolete by the generic add_entry function
+  // Should I remove them now or keep them around for a little bit?
+
   virtual int table_add_entry(const std::string &table_name,
 			      ExactMatchEntry &&entry,
 			      entry_handle_t *handle) = 0;
