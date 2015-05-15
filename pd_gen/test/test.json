@@ -87,6 +87,11 @@
             "name": "header_test",
             "id": 1,
             "header_type": "header_test_t"
+        },
+        {
+            "name": "header_test_1",
+            "id": 2,
+            "header_type": "header_test_t"
         }
     ],
     "parsers": [
@@ -297,6 +302,33 @@
                                 "header_test",
                                 "field16"
                             ]
+                        }
+                    ],
+                    "actions": [
+                        "actionA"
+                    ],
+                    "next_tables": {
+                        "actionA": "ExactAndValid"
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "ExactAndValid",
+                    "id": 5,
+                    "type": "exact",
+                    "max_size": 512,
+                    "with_counters": false,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        },
+                        {
+                            "match_type": "valid",
+                            "target": "header_test_1"
                         }
                     ],
                     "actions": [

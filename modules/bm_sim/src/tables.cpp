@@ -101,11 +101,20 @@ ExactMatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
 
   ByteContainer new_key;
   new_key.reserve(nbytes_key);
+
+  // take care of valid first
+
+  for(const MatchKeyParam &param : match_key) {
+    if(param.type == MatchKeyParam::Type::VALID)
+      new_key.append(param.key);
+  }
+
   for(const MatchKeyParam &param : match_key) {
     switch(param.type) {
     case MatchKeyParam::Type::EXACT:
-    case MatchKeyParam::Type::VALID:
       new_key.append(param.key);
+      break;
+    case MatchKeyParam::Type::VALID: // already done
       break;
     default:
       assert(0 && "invalid param type in match_key");
@@ -197,16 +206,23 @@ LongestPrefixMatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
   new_key.reserve(nbytes_key);
   int prefix_length = 0;
   const MatchKeyParam *lpm_param = nullptr;
+
+  for(const MatchKeyParam &param : match_key) {
+    if(param.type == MatchKeyParam::Type::VALID)
+      new_key.append(param.key);
+  }
+
   for(const MatchKeyParam &param : match_key) {
     switch(param.type) {
     case MatchKeyParam::Type::EXACT:
-    case MatchKeyParam::Type::VALID:
       new_key.append(param.key);
       prefix_length += param.key.size();
       break;
     case MatchKeyParam::Type::LPM:
       assert(!lpm_param && "more than one lpm param in match key");
       lpm_param = &param;
+      break;
+    case MatchKeyParam::Type::VALID: // already done
       break;
     default:
       assert(0 && "invalid param type in match_key");
@@ -325,10 +341,15 @@ TernaryMatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
   ByteContainer new_key;
   ByteContainer new_mask;
   new_key.reserve(nbytes_key);
+
+  for(const MatchKeyParam &param : match_key) {
+    if(param.type == MatchKeyParam::Type::VALID)
+      new_key.append(param.key);
+  }
+
   for(const MatchKeyParam &param : match_key) {
     switch(param.type) {
     case MatchKeyParam::Type::EXACT:
-    case MatchKeyParam::Type::VALID:
       new_key.append(param.key);
       new_mask.append(std::string(param.key.size(), '\xff'));
       break;
@@ -339,6 +360,8 @@ TernaryMatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
     case MatchKeyParam::Type::TERNARY:
       new_key.append(param.key);
       new_mask.append(param.mask);
+      break;
+    case MatchKeyParam::Type::VALID: // already done
       break;
     default:
       assert(0 && "invalid param type in match_key");

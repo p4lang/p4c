@@ -11,6 +11,7 @@ header_type header_test_t {
 }
 
 header header_test_t header_test;
+header header_test_t header_test_1;
 
 parser start {
     return ingress;
@@ -80,12 +81,25 @@ table ExactTwo {
     size: 512;
 }
 
+table ExactAndValid {
+    reads {
+         header_test.field32 : exact;
+         header_test_1 : valid;
+    }
+    actions {
+        actionA;
+    }
+    size: 512;
+}
+
+
 control ingress {
     apply(ExactOne);
     apply(LpmOne);
     apply(TernaryOne);
     apply(ExactOneNA);
     apply(ExactTwo);
+    apply(ExactAndValid);
 }
 
 control egress {

@@ -133,7 +133,7 @@ void P4Objects::init_objects(std::istream &is) {
 
     Parser *parser = new Parser(parser_name, parser_id);
 
-    unordered_map<string, ParseState *> current_parse_states;
+    std::unordered_map<string, ParseState *> current_parse_states;
 
     // parse states
 
@@ -221,7 +221,7 @@ void P4Objects::init_objects(std::istream &is) {
 
   // I decided to get rid of opcodes...
 
-  // unordered_map<string, opcode_t> primitive_opcodes;
+  // std::unordered_map<string, opcode_t> primitive_opcodes;
   // const Json::Value cfg_primitive_opcodes = cfg_root["primitive_opcodes"];
   // for (auto it = cfg_primitive_opcodes.begin();
   //      it != cfg_primitive_opcodes.end(); it++) {
@@ -315,14 +315,22 @@ void P4Objects::init_objects(std::istream &is) {
       const Json::Value cfg_match_key = cfg_table["key"];
       for (const auto &cfg_key_entry : cfg_match_key) {
 	
+	const string match_type = cfg_key_entry["match_type"].asString();
 	const Json::Value cfg_key_field = cfg_key_entry["target"];
-	const string header_name = cfg_key_field[0].asString();
-	header_id_t header_id = get_header_id(header_name);
-	const string field_name = cfg_key_field[1].asString();
-	int field_offset = get_field_offset(header_id, field_name);
-	key_builder.push_back_field(header_id, field_offset);
-
-	nbytes_key += get_field_bytes(header_id, field_offset);
+	if(match_type == "valid") {
+	  const string header_name = cfg_key_field.asString();
+	  header_id_t header_id = get_header_id(header_name);
+	  key_builder.push_back_valid_header(header_id);
+	  nbytes_key += 1;
+	}
+	else {
+	  const string header_name = cfg_key_field[0].asString();
+	  header_id_t header_id = get_header_id(header_name);
+	  const string field_name = cfg_key_field[1].asString();
+	  int field_offset = get_field_offset(header_id, field_name);
+	  key_builder.push_back_field(header_id, field_offset);
+	  nbytes_key += get_field_bytes(header_id, field_offset);
+	}
       }
 
       const string table_type = cfg_table["type"].asString();

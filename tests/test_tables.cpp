@@ -19,6 +19,10 @@ protected:
   // whould I consider doing that ?
   // TODO
   std::unique_ptr<TableType> table;
+
+  MatchKeyBuilder key_builder_w_valid;
+  std::unique_ptr<TableType> table_w_valid;
+
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
   ActionFn action_fn;
@@ -32,13 +36,27 @@ protected:
 
     key_builder.push_back_field(testHeader1, 0);
 
+    key_builder_w_valid.push_back_field(testHeader1, 0);
+    key_builder_w_valid.push_back_valid_header(testHeader2);
+
     // true enables counters
-    table = std::unique_ptr<TableType>(new TableType("test_table", 0, 1, 2, key_builder, true));
+    table = std::unique_ptr<TableType>(
+        new TableType("test_table", 0, 1, 2, key_builder, true)
+    );
     table->set_next_node(0, nullptr);
+
+    table_w_valid = std::unique_ptr<TableType>(
+        new TableType("test_table_w_valid", 0, 1, 2, key_builder_w_valid, true)
+    );
+    table_w_valid->set_next_node(0, nullptr);
   }
 
   MatchTable::ErrorCode add_entry(const std::string &key,
 				  entry_handle_t *handle);
+
+  MatchTable::ErrorCode add_entry_w_valid(const std::string &key,
+					  bool valid,
+					  entry_handle_t *handle);
 
   Packet get_pkt(int length) {
     // dummy packet, won't be parsed
@@ -85,6 +103,46 @@ TableSizeOne<TernaryMatchTable>::add_entry(const std::string &key,
   int priority = 1;
   match_key.emplace_back(MatchKeyParam::Type::TERNARY, key, std::move(mask));
   return table->add_entry(match_key, action_fn, action_data, handle, priority);
+}
+
+template<>
+MatchTable::ErrorCode
+TableSizeOne<ExactMatchTable>::add_entry_w_valid(const std::string &key,
+						 bool valid,
+						 entry_handle_t *handle) {
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  match_key.emplace_back(MatchKeyParam::Type::EXACT, key);
+  // I'm putting the valid match in second position on purpose
+  match_key.emplace_back(MatchKeyParam::Type::VALID, valid ? "\x01" : "\x00");
+  return table_w_valid->add_entry(match_key, action_fn, action_data, handle);
+}
+
+template<>
+MatchTable::ErrorCode
+TableSizeOne<LongestPrefixMatchTable>::add_entry_w_valid(const std::string &key,
+							 bool valid,
+							 entry_handle_t *handle) {
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  int prefix_length = 16;
+  match_key.emplace_back(MatchKeyParam::Type::LPM, key, prefix_length);
+  match_key.emplace_back(MatchKeyParam::Type::VALID, valid ? "\x01" : "\x00");
+  return table_w_valid->add_entry(match_key, action_fn, action_data, handle);
+}
+
+template<>
+MatchTable::ErrorCode
+TableSizeOne<TernaryMatchTable>::add_entry_w_valid(const std::string &key,
+						   bool valid,
+						   entry_handle_t *handle) {
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  std::string mask = "\xff\xff";
+  int priority = 1;
+  match_key.emplace_back(MatchKeyParam::Type::TERNARY, key, std::move(mask));
+  match_key.emplace_back(MatchKeyParam::Type::VALID, valid ? "\x01" : "\x00");
+  return table_w_valid->add_entry(match_key, action_fn, action_data, handle, priority);
 }
 
 typedef Types<ExactMatchTable,
@@ -216,4 +274,34 @@ TYPED_TEST(TableSizeOne, Counters) {
   ASSERT_EQ(rc, MatchTable::SUCCESS);
   ASSERT_EQ(64u, counter_bytes);
   ASSERT_EQ(1u, counter_packets);
+}
+
+TYPED_TEST(TableSizeOne, Valid) {
+  std::string key_ = "\x0a\xba";
+  bool valid = true;
+  entry_handle_t handle;
+  MatchTable::ErrorCode rc;
+
+  rc = this->add_entry_w_valid(key_, valid, &handle);
+  ASSERT_EQ(rc, MatchTable::SUCCESS);
+  ASSERT_EQ(1u, this->table_w_valid->get_num_entries());
+
+  Packet pkt = this->get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+  f.set("0xaba");
+  Header &h2 = pkt.get_phv()->get_header(this->testHeader2);
+  ASSERT_FALSE(h2.is_valid());
+
+  ByteContainer lookup_key;
+  this->key_builder_w_valid(*(pkt.get_phv()), lookup_key);
+  ASSERT_EQ(ByteContainer("0x000aba"), lookup_key);
+
+  ASSERT_EQ(nullptr, this->table_w_valid->lookup(lookup_key));
+
+  h2.mark_valid();
+  lookup_key.clear();
+  this->key_builder_w_valid(*(pkt.get_phv()), lookup_key);
+  ASSERT_EQ(ByteContainer("0x010aba"), lookup_key);
+
+  ASSERT_NE(nullptr, this->table_w_valid->lookup(lookup_key));
 }

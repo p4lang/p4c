@@ -111,12 +111,17 @@ def load_json(json_src):
                     table.actions[action] = ACTIONS[action]
                 for j_key in j_table["key"]:
                     target = j_key["target"]
-                    field_name = ".".join(target)
-                    header_type = get_header_type(target[0], json_["headers"])
-                    bitwidth = get_field_bitwidth(header_type, target[1], json_["header_types"])
-                    table.key += [(field_name,
-                                   MatchType.from_str(j_key["match_type"]),
-                                   bitwidth)]
+                    match_type = MatchType.from_str(j_key["match_type"])
+                    if match_type == MatchType.VALID:
+                        field_name = target
+                        bitwidth = -1
+                    else:
+                        field_name = ".".join(target)
+                        header_type = get_header_type(target[0],
+                                                      json_["headers"])
+                        bitwidth = get_field_bitwidth(header_type, target[1],
+                                                      json_["header_types"])
+                    table.key += [(field_name, match_type, bitwidth)]
 
 
 def ignore_template_file(filename):

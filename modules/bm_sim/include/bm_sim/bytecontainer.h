@@ -112,6 +112,10 @@ public:
     return *this;
   }
 
+  void push_back(char c) {
+    bytes.push_back(c);
+  }
+
   reference operator[](size_type n) {
     assert(n < size());
     return bytes[n];

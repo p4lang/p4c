@@ -68,6 +68,12 @@ int main() {
                                              &ExactTwo_match_spec,
                                              &actionA_action_spec,
                                              &entry_hdl);
+
+  p4_pd_test_ExactAndValid_match_spec_t ExactAndValid_match_spec = {0xaabbccdd, 1u};
+  p4_pd_test_ExactAndValid_table_add_with_actionA(sess_hdl, dev_tgt,
+						  &ExactAndValid_match_spec,
+						  &actionA_action_spec,
+						  &entry_hdl);
   
   p4_pd_test_ExactOne_set_default_action_actionA(sess_hdl, dev_tgt,
                                                  &actionA_action_spec,

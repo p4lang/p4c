@@ -18,11 +18,6 @@
 // shared_mutex will only be available in C++-14, so for now I'm using boost
 #include <boost/thread/shared_mutex.hpp>
 
-using std::vector;
-using std::unordered_map;
-using std::pair;
-using std::string;
-
 typedef uintptr_t entry_handle_t;
 
 // using string and not ByteBontainer for efficiency
@@ -51,18 +46,24 @@ struct MatchKeyParam {
 
 struct MatchKeyBuilder
 {
-  vector< pair<header_id_t, int> > fields{};
+  std::vector<header_id_t> valid_headers{};
+  std::vector<std::pair<header_id_t, int> > fields{};
 
   void push_back_field(header_id_t header, int field_offset) {
-    fields.push_back( pair<header_id_t, int>(header, field_offset) );
+    fields.push_back(std::pair<header_id_t, int>(header, field_offset));
+  }
+
+  void push_back_valid_header(header_id_t header) {
+    valid_headers.push_back(header);
   }
 
   void operator()(const PHV &phv, ByteContainer &key) const
   {
-    for(vector< pair<header_id_t, int> >::const_iterator it = fields.begin();
-	it != fields.end();
-	it++) {
-      const Field &field = phv.get_field((*it).first, (*it).second);
+    for(const auto &h : valid_headers) {
+      key.push_back(phv.get_header(h).is_valid() ? '\x01' : '\x00');
+    }
+    for(const auto &p : fields) {
+      const Field &field = phv.get_field(p.first, p.second);
       key.append(field.get_bytes());
     }
   }
@@ -86,7 +87,7 @@ public:
   typedef uint64_t counter_value_t;
 
 public:
-  MatchTable(const string &name, p4object_id_t id,
+  MatchTable(const std::string &name, p4object_id_t id,
 	     size_t size, size_t nbytes_key,
 	     const MatchKeyBuilder &match_key_builder,
 	     bool with_counters = false)
@@ -175,7 +176,7 @@ protected:
   HandleMgr handles{};
   MatchKeyBuilder match_key_builder;
   // indexed by the action id
-  unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
+  std::unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
   ActionFnEntry default_action_entry{};
   const ControlFlowNode *default_next_node{nullptr};
   std::atomic_bool with_counters{false};
@@ -200,12 +201,12 @@ protected:
 class ExactMatchTable : public MatchTable
 {
 public:
-  ExactMatchTable(const string &name, p4object_id_t id,
+  ExactMatchTable(const std::string &name, p4object_id_t id,
 		  int size, int nbytes_key,
 		  const MatchKeyBuilder &match_key_builder,
 		  bool with_counters = false)
     : MatchTable(name, id, size, nbytes_key, match_key_builder, with_counters) {
-    entries = vector<ExactMatchEntry>(size);
+    entries = std::vector<ExactMatchEntry>(size);
     entries_map.reserve(size);
   }
 
@@ -227,20 +228,20 @@ public:
   }
 
 private:
-  vector<ExactMatchEntry> entries{};
-  unordered_map<ByteContainer, entry_handle_t, ByteContainerKeyHash> entries_map{};
+  std::vector<ExactMatchEntry> entries{};
+  std::unordered_map<ByteContainer, entry_handle_t, ByteContainerKeyHash> entries_map{};
 };
 
 class LongestPrefixMatchTable : public MatchTable
 {
 public:
-  LongestPrefixMatchTable(const string &name, p4object_id_t id,
+  LongestPrefixMatchTable(const std::string &name, p4object_id_t id,
 			  int size, int nbytes_key, 
 			  const MatchKeyBuilder &match_key_builder,
 			  bool with_counters = false)
     : MatchTable(name, id, size, nbytes_key, match_key_builder, with_counters),
       entries_trie(nbytes_key) {
-    entries = vector<LongestPrefixMatchEntry>(size);
+    entries = std::vector<LongestPrefixMatchEntry>(size);
   }
   
   const LongestPrefixMatchEntry *lookup(const ByteContainer &key) const;
@@ -263,7 +264,7 @@ public:
   }
 
 private:
-  vector<LongestPrefixMatchEntry> entries{};
+  std::vector<LongestPrefixMatchEntry> entries{};
   LPMTrie entries_trie;
 };
 
@@ -271,12 +272,12 @@ private:
 class TernaryMatchTable : public MatchTable
 {
 public:
-  TernaryMatchTable(const string &name, p4object_id_t id,
+  TernaryMatchTable(const std::string &name, p4object_id_t id,
 		    int size, int nbytes_key,
 		    const MatchKeyBuilder &match_key_builder,
 		    bool with_counters = false)
     : MatchTable(name, id, size, nbytes_key, match_key_builder, with_counters) {
-    entries = vector<TernaryMatchEntry>(size);
+    entries = std::vector<TernaryMatchEntry>(size);
   }
 
   const TernaryMatchEntry *lookup(const ByteContainer &key) const;
@@ -297,7 +298,7 @@ public:
   }
 
 private:
-  vector<TernaryMatchEntry> entries{};
+  std::vector<TernaryMatchEntry> entries{};
 };
 
 #endif

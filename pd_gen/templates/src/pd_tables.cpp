@@ -51,7 +51,7 @@ static std::vector<BmMatchParam> build_key_${t_name} (
   param_valid.key = (match_spec->${field_name} == 1);
   param = BmMatchParam();
   param.type = BmMatchParamType::type::VALID;
-  param.__set_valid(param_valid); // does a copy of param_ternary
+  param.__set_valid(param_valid); // does a copy of param_valid
   key.push_back(std::move(param));
 //::     else:
 //::       assert(0)

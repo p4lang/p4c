@@ -38,6 +38,12 @@ EXACT: ddccbbaa
 EXACT: ffee
 actionA
 aabbccddeeff 
+bm_table_add_entry
+ExactAndValid
+EXACT: ddccbbaa
+VALID: true
+actionA
+aabbccddeeff 
 bm_set_default_action
 ExactOne
 actionA
