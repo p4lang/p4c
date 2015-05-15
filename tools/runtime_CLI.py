@@ -42,14 +42,15 @@ class MatchType:
     EXACT = 0
     LPM = 1
     TERNARY = 2
+    VALID = 3 # not yet supported
 
     @staticmethod
     def to_str(x):
-        return {0: "exact", 1: "lpm", 2: "ternary"}[x]
+        return {0: "exact", 1: "lpm", 2: "ternary", 3: "valid"}[x]
 
     @staticmethod
     def from_str(x):
-        return {"exact": 0, "lpm": 1, "ternary": 2}[x]
+        return {"exact": 0, "lpm": 1, "ternary": 2, "valid": 3}[x]
 
 class Table:
     def __init__(self, name, id_):
@@ -174,74 +175,135 @@ def parse_runtime_data(action, params):
         byte_array += [bytes_to_string(parse_param(input_str, bitwidth))]
     return byte_array
 
-def parse_match_key_exact(table, key_fields):
+_match_types_mapping = {
+    MatchType.EXACT : BmMatchParamType.EXACT,
+    MatchType.LPM : BmMatchParamType.LPM,
+    MatchType.TERNARY : BmMatchParamType.TERNARY,
+    MatchType.VALID : BmMatchParamType.VALID,
+}
+
+def parse_match_key(table, key_fields):
+    params = []
     match_types = [t for (_, t, _) in table.key]
     bitwidths = [bw for (_, _, bw) in table.key]
-    byte_array = []
     for idx, field in enumerate(key_fields):
-        match_type = match_types[idx]
-        assert(match_type == MatchType.EXACT)
+        param_type = _match_types_mapping[match_types[idx]]
         bw = bitwidths[idx]
-        byte_array += [bytes_to_string(parse_param(field, bw))]
-    return byte_array
-
-def parse_match_key_lpm(table, key_fields): 
-    match_types = [t for (_, t, _) in table.key]
-    bitwidths = [bw for (_, _, bw) in table.key]
-    lpm_byte_array = None
-    byte_array = []
-    prefix_length = 0
-    for idx, field in enumerate(key_fields):
-        match_type = match_types[idx]
-        assert(match_type == MatchType.EXACT or match_type == MatchType.LPM)
-        bw = bitwidths[idx]
-        if match_type == MatchType.EXACT:
-            byte_array += [bytes_to_string(parse_param(field, bw))]
-            prefix_length += bw
-        elif match_type == MatchType.LPM:
-            assert(not lpm_byte_array)
+        if param_type == BmMatchParamType.EXACT:
+            key = bytes_to_string(parse_param(field, bw))
+            param = BmMatchParam(type = param_type,
+                                 exact = BmMatchParamExact(key))
+        elif param_type == BmMatchParamType.LPM:
             prefix, length = field.split("/")
-            lpm_byte_array = parse_param(prefix, bw)
-            prefix_length += int(length)
-    return [bytes_to_string(lpm_byte_array)] + byte_array, prefix_length
+            key = bytes_to_string(parse_param(prefix, bw))
+            param = BmMatchParam(type = param_type,
+                                 lpm = BmMatchParamLPM(key, int(length)))
+        elif param_type == BmMatchParamType.TERNARY:
+            key, mask = field.split("&&&")
+            key = bytes_to_string(parse_param(key, bw))
+            mask = bytes_to_string(parse_param(mask, bw))
+            param = BmMatchParam(type = param_type,
+                                 ternary = BmMatchParamTernary(key, mask))
+        elif param_type == BmMatchParamType.VALID:
+            assert(0)
+        else:
+            assert(0)
+        params.append(param)
+    return params
 
-def gen_prefix_bytes(length, num_bytes):
-    byte_array = []
-    while length >= 8:
-        byte_array.append(0xFF)
-        length -= 8
-        num_bytes -= 1
-    if length > 0:
-        byte_array.append((0xFF << (8 - length) & 0xFF))
-        num_bytes -= 1
-    assert(num_bytes >= 0)
-    while num_bytes > 0:
-        byte_array.append(0)
-        num_bytes -= 1
-    return byte_array
+# def parse_match_key_exact(table, key_fields):
+#     match_types = [t for (_, t, _) in table.key]
+#     bitwidths = [bw for (_, _, bw) in table.key]
+#     byte_array = []
+#     for idx, field in enumerate(key_fields):
+#         match_type = match_types[idx]
+#         assert(match_type == MatchType.EXACT)
+#         bw = bitwidths[idx]
+#         byte_array += [bytes_to_string(parse_param(field, bw))]
+#     return byte_array
 
-def parse_match_key_ternary(table, key_fields):
-    match_types = [t for (_, t, _) in table.key]
-    bitwidths = [bw for (_, _, bw) in table.key]
-    byte_array = []
-    mask_array = []
-    for idx, field in enumerate(key_fields):
-        match_type = match_types[idx]
-        if match_type == MatchType.EXACT:
-            byte_array += [bytes_to_string(parse_param(field, bw))]
-            mask_array += [[0xFF] * ((bw + 7) / 8)]
-        elif match_type == MatchType.LPM:
-            prefix, length = field.split("/")
-            byte_array += [bytes_to_string(parse_param(prefix, bw))]
-            mask_array += [bytes_to_string(gen_prefix_bytes(length, (bw + 7) / 8))]
-        elif match_type == MatchType.TERNARY:
-            bytes_, mask = field.split("&&&")
-            byte_array += [bytes_to_string(parse_param(bytes_, bw))]
-            mask_array += [bytes_to_string(parse_param(mask, bw))]
-    return byte_array, mask_array
+# def parse_match_key_lpm(table, key_fields): 
+#     match_types = [t for (_, t, _) in table.key]
+#     bitwidths = [bw for (_, _, bw) in table.key]
+#     lpm_byte_array = None
+#     byte_array = []
+#     prefix_length = 0
+#     for idx, field in enumerate(key_fields):
+#         match_type = match_types[idx]
+#         assert(match_type == MatchType.EXACT or match_type == MatchType.LPM)
+#         bw = bitwidths[idx]
+#         if match_type == MatchType.EXACT:
+#             byte_array += [bytes_to_string(parse_param(field, bw))]
+#             prefix_length += bw
+#         elif match_type == MatchType.LPM:
+#             assert(not lpm_byte_array)
+#             prefix, length = field.split("/")
+#             lpm_byte_array = parse_param(prefix, bw)
+#             prefix_length += int(length)
+#     return [bytes_to_string(lpm_byte_array)] + byte_array, prefix_length
+
+# def gen_prefix_bytes(length, num_bytes):
+#     byte_array = []
+#     while length >= 8:
+#         byte_array.append(0xFF)
+#         length -= 8
+#         num_bytes -= 1
+#     if length > 0:
+#         byte_array.append((0xFF << (8 - length) & 0xFF))
+#         num_bytes -= 1
+#     assert(num_bytes >= 0)
+#     while num_bytes > 0:
+#         byte_array.append(0)
+#         num_bytes -= 1
+#     return byte_array
+
+# def parse_match_key_ternary(table, key_fields):
+#     match_types = [t for (_, t, _) in table.key]
+#     bitwidths = [bw for (_, _, bw) in table.key]
+#     byte_array = []
+#     mask_array = []
+#     for idx, field in enumerate(key_fields):
+#         match_type = match_types[idx]
+#         if match_type == MatchType.EXACT:
+#             byte_array += [bytes_to_string(parse_param(field, bw))]
+#             mask_array += [[0xFF] * ((bw + 7) / 8)]
+#         elif match_type == MatchType.LPM:
+#             prefix, length = field.split("/")
+#             byte_array += [bytes_to_string(parse_param(prefix, bw))]
+#             mask_array += [bytes_to_string(gen_prefix_bytes(length, (bw + 7) / 8))]
+#         elif match_type == MatchType.TERNARY:
+#             bytes_, mask = field.split("&&&")
+#             byte_array += [bytes_to_string(parse_param(bytes_, bw))]
+#             mask_array += [bytes_to_string(parse_param(mask, bw))]
+#     return byte_array, mask_array
 
 def printable_byte_str(s):
     return ":".join("{:02x}".format(ord(c)) for c in s)
+
+def BmMatchParam_to_str(self):
+    return BmMatchParamType._VALUES_TO_NAMES[self.type] + "-" +\
+        (self.exact.to_str() if self.exact else "") +\
+        (self.lpm.to_str() if self.lpm else "") +\
+        (self.ternary.to_str() if self.ternary else "") +\
+        (self.valid.to_str() if self.valid else "")
+
+def BmMatchParamExact_to_str(self):
+    return printable_byte_str(self.key)
+
+def BmMatchParamLPM_to_str(self):
+    return printable_byte_str(self.key) + "/" + str(self.prefix_length)
+
+def BmMatchParamTernary_to_str(self):
+    return printable_byte_str(self.key) + " &&& " + printable_byte_str(self.mask)
+
+def BmMatchParamValid_to_str(self):
+    return ""
+
+BmMatchParam.to_str = BmMatchParam_to_str
+BmMatchParamExact.to_str = BmMatchParamExact_to_str
+BmMatchParamLPM.to_str = BmMatchParamLPM_to_str
+BmMatchParamTernary.to_str = BmMatchParamTernary_to_str
+BmMatchParamValid.to_str = BmMatchParamValid_to_str
     
 class RuntimeAPI(cmd.Cmd):
     prompt = 'RuntimeCmd: '
@@ -373,6 +435,8 @@ class RuntimeAPI(cmd.Cmd):
             return
         if table.type_ == MatchType.TERNARY:
             priority = int(args.pop(-1))
+        else:
+            priority = 0
         action = ACTIONS[action_name]
         for idx, input_ in enumerate(args[2:]):
             if input_ == "=>": break
@@ -394,16 +458,17 @@ class RuntimeAPI(cmd.Cmd):
 
         print "Adding entry to", MatchType.to_str(table.type_), "match table", table_name
 
-        if table.type_ == MatchType.EXACT:
-            match_key = parse_match_key_exact(table, match_key)
-        elif table.type_ == MatchType.LPM:
-            match_key, prefix_length = parse_match_key_lpm(table, match_key)
-        elif table.type_ == MatchType.TERNARY:
-            match_key, mask = parse_match_key_ternary_match(table, match_key)
+        match_key = parse_match_key(table, match_key)
+        # if table.type_ == MatchType.EXACT:
+        #     match_key = parse_match_key_exact(table, match_key)
+        # elif table.type_ == MatchType.LPM:
+        #     match_key, prefix_length = parse_match_key_lpm(table, match_key)
+        # elif table.type_ == MatchType.TERNARY:
+        #     match_key, mask = parse_match_key_ternary_match(table, match_key)
 
         print "{0:20} {1}".format(
             "match key:",
-            "\t".join(printable_byte_str(d) for d in match_key)
+            "\t".join(d.to_str() for d in match_key)
         )
         print "{0:20} {1}".format("action:", action_name)
         print "{0:20} {1}".format(
@@ -411,18 +476,22 @@ class RuntimeAPI(cmd.Cmd):
             "\t".join(printable_byte_str(d) for d in runtime_data)
         )
 
-        if table.type_ == MatchType.EXACT:
-            entry_handle = self.client.bm_table_add_exact_match_entry(
-                table_name, action_name, match_key, runtime_data
-            )
-        elif table.type_ == MatchType.LPM:
-            entry_handle = self.client.bm_table_add_lpm_entry(
-                table_name, action_name, match_key, prefix_length, runtime_data
-            )
-        elif table.type_ == MatchType.TERNARY:
-            entry_handle = self.client.bm_table_add_lpm_entry(
-                table_name, action_name, match_key, mask, priority, runtime_data
-            )
+        entry_handle = self.client.bm_table_add_entry(
+            table_name, match_key, action_name, runtime_data,
+            BmAddEntryOptions(priority = priority)
+        )
+        # if table.type_ == MatchType.EXACT:
+        #     entry_handle = self.client.bm_table_add_exact_match_entry(
+        #         table_name, action_name, match_key, runtime_data
+        #     )
+        # elif table.type_ == MatchType.LPM:
+        #     entry_handle = self.client.bm_table_add_lpm_entry(
+        #         table_name, action_name, match_key, prefix_length, runtime_data
+        #     )
+        # elif table.type_ == MatchType.TERNARY:
+        #     entry_handle = self.client.bm_table_add_lpm_entry(
+        #         table_name, action_name, match_key, mask, priority, runtime_data
+        #     )
         print "SUCCESS"
         print "entry has been added with handle", entry_handle
 
