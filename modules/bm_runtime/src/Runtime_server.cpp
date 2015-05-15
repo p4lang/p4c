@@ -113,6 +113,53 @@ class RuntimeHandler : virtual public RuntimeIf {
     return (BmEntryHandle) entry_handle;
   }
 
+  BmEntryHandle bm_table_add_entry(const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
+    printf("bm_table_add_entry\n");
+    entry_handle_t entry_handle;
+    std::vector<MatchKeyParam> params;
+    params.reserve(match_key.size()); // the number of elements will be the same
+    for(const BmMatchParam &bm_param : match_key) {
+      switch(bm_param.type) {
+      case BmMatchParamType::type::EXACT:
+	params.emplace_back(MatchKeyParam::Type::EXACT,
+			    bm_param.exact.key);
+	break;
+      case BmMatchParamType::type::LPM:
+	params.emplace_back(MatchKeyParam::Type::LPM,
+			    bm_param.lpm.key, bm_param.lpm.prefix_length);
+	break;
+      case BmMatchParamType::type::TERNARY:
+	params.emplace_back(MatchKeyParam::Type::TERNARY,
+			    bm_param.ternary.key, bm_param.ternary.mask);
+	break;
+      case BmMatchParamType::type::VALID:
+	params.emplace_back(MatchKeyParam::Type::VALID,
+			    bm_param.valid.key ? "\x01" : "\x00");
+	break;
+      default:
+	assert(0 && "wrong type");
+      }
+    }
+    ActionData data;
+    for(const std::string &d : action_data) {
+      data.push_back_action_data(d.data(), d.size());
+    }
+    MatchTable::ErrorCode error_code = switch_->table_add_entry(
+        table_name,
+	params,
+	action_name,
+	std::move(data),
+	&entry_handle,
+	options.priority
+    );
+    if(error_code != MatchTable::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = (TableOperationErrorCode::type) error_code;
+      throw ito;
+    }
+    return entry_handle;
+  }
+
   void bm_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
     printf("bm_set_default_action\n");
     ActionData data;

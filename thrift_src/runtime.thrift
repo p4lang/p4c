@@ -15,6 +15,46 @@ typedef i32 BmMcL1Handle
 typedef i32 BmMcL2Handle
 typedef string BmMcPortMap // string of 0s and 1s
 
+enum BmMatchParamType {
+  EXACT = 0,
+  LPM = 1,
+  TERNARY = 2,
+  VALID = 3
+}
+
+struct BmMatchParamExact {
+  1:binary key
+}
+
+struct BmMatchParamLPM {
+  1:binary key,
+  2:i32 prefix_length
+}
+
+struct BmMatchParamTernary {
+  1:binary key,
+  2:binary mask
+}
+
+struct BmMatchParamValid {
+  1:bool key
+}
+
+# Thrift union sucks in C++, the following is much better
+struct BmMatchParam {
+  1:BmMatchParamType type,
+  2:optional BmMatchParamExact exact,
+  3:optional BmMatchParamLPM lpm,
+  4:optional BmMatchParamTernary ternary,
+  5:optional BmMatchParamValid valid
+}
+
+typedef list<BmMatchParam> BmMatchParams
+
+struct BmAddEntryOptions {
+  1:optional i32 priority
+}
+
 struct BmCounterValue {
   1:i64 bytes;
   2:i64 packets;
@@ -69,6 +109,14 @@ service Runtime {
     4:BmMatchKey match_mask,
     5:i32 priority,
     6:BmActionData action_data
+  ) throws (1:InvalidTableOperation ouch),
+
+  BmEntryHandle bm_table_add_entry(
+    1:string table_name,
+    2:BmMatchParams match_key,
+    3:string action_name,
+    4:BmActionData action_data,
+    5:BmAddEntryOptions options
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_set_default_action(
