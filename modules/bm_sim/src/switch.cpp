@@ -91,6 +91,20 @@ int Switch::table_add_entry(const std::string &table_name,
   return 0;
 }
 
+MatchTable::ErrorCode Switch::table_add_entry(
+    const std::string &table_name,
+    const std::vector<MatchKeyParam> &match_key,
+    const std::string &action_name,
+    const ActionData &action_data,
+    entry_handle_t *handle,
+    int priority
+) {
+  MatchTable *table = p4objects->get_match_table(table_name);
+  const ActionFn *action = p4objects->get_action(action_name);
+  assert(table); assert(action);
+  return table->add_entry(match_key, *action, action_data, handle, priority);
+}
+
 MatchTable::ErrorCode Switch::table_set_default_action(
     const std::string &table_name,
     const std::string &action_name,

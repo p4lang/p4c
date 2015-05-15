@@ -25,6 +25,30 @@ using std::string;
 
 typedef uintptr_t entry_handle_t;
 
+// using string and not ByteBontainer for efficiency
+struct MatchKeyParam {
+  enum class Type {
+    EXACT,
+    LPM,
+    TERNARY,
+    VALID
+  };
+
+  MatchKeyParam(const Type &type, std::string key)
+    : type(type), key(std::move(key)) { }
+
+  MatchKeyParam(const Type &type, std::string key, std::string mask)
+    : type(type), key(std::move(key)), mask(std::move(mask)) { }
+
+  MatchKeyParam(const Type &type, std::string key, int prefix_length)
+    : type(type), key(std::move(key)), prefix_length(prefix_length) { }
+
+  Type type;
+  std::string key;
+  std::string mask{}; // optional
+  int prefix_length{0}; // optional
+};
+
 struct MatchKeyBuilder
 {
   vector< pair<header_id_t, int> > fields{};
@@ -83,6 +107,11 @@ public:
   virtual ErrorCode modify_entry(entry_handle_t handle,
 				 const ActionFnEntry &action_entry,
 				 const ControlFlowNode *next_table) = 0;
+  virtual ErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
+			      const ActionFn &action_fn,
+			      const ActionData &action_data,
+			      entry_handle_t *handle,
+			      int priority = -1) = 0;
 
   virtual entry_handle_t get_entry_handle(const MatchEntry &entry) const = 0;
 
@@ -183,6 +212,11 @@ public:
   const ExactMatchEntry *lookup(const ByteContainer &key) const;
   // ErrorCode add_entry(const ExactMatchEntry &entry, entry_handle_t *handle);
   ErrorCode add_entry(ExactMatchEntry &&entry, entry_handle_t *handle);
+  ErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
+		      const ActionFn &action_fn,
+		      const ActionData &action_data,
+		      entry_handle_t *handle,
+		      int priority = -1) override;
   ErrorCode delete_entry(entry_handle_t handle);
   ErrorCode modify_entry(entry_handle_t handle,
 			 const ActionFnEntry &action_entry,
@@ -214,6 +248,11 @@ public:
   // 		      entry_handle_t *handle);
   ErrorCode add_entry(LongestPrefixMatchEntry &&entry,
 		      entry_handle_t *handle);
+  ErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
+		      const ActionFn &action_fn,
+		      const ActionData &action_data,
+		      entry_handle_t *handle,
+		      int priority = -1) override;
   ErrorCode delete_entry(entry_handle_t handle);
   ErrorCode modify_entry(entry_handle_t handle,
 			 const ActionFnEntry &action_entry,
@@ -243,6 +282,11 @@ public:
   const TernaryMatchEntry *lookup(const ByteContainer &key) const;
   // ErrorCode add_entry(const TernaryMatchEntry &entry, entry_handle_t *handle);
   ErrorCode add_entry(TernaryMatchEntry &&entry, entry_handle_t *handle);
+  ErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
+		      const ActionFn &action_fn,
+		      const ActionData &action_data,
+		      entry_handle_t *handle,
+		      int priority = -1) override;
   ErrorCode delete_entry(entry_handle_t handle);
   ErrorCode modify_entry(entry_handle_t handle,
 			 const ActionFnEntry &action_entry,

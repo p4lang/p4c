@@ -21,9 +21,10 @@ protected:
   std::unique_ptr<TableType> table;
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
+  ActionFn action_fn;
 
   TableSizeOne() 
-    : testHeaderType("test_t", 0) {
+    : testHeaderType("test_t", 0), action_fn("actionA", 0) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
@@ -33,9 +34,10 @@ protected:
 
     // true enables counters
     table = std::unique_ptr<TableType>(new TableType("test_table", 0, 1, 2, key_builder, true));
+    table->set_next_node(0, nullptr);
   }
 
-  MatchTable::ErrorCode add_entry(const ByteContainer &key,
+  MatchTable::ErrorCode add_entry(const std::string &key,
 				  entry_handle_t *handle);
 
   Packet get_pkt(int length) {
@@ -54,37 +56,35 @@ protected:
 
 template<>
 MatchTable::ErrorCode
-TableSizeOne<ExactMatchTable>::add_entry(const ByteContainer &key,
+TableSizeOne<ExactMatchTable>::add_entry(const std::string &key,
 					 entry_handle_t *handle) {
-  ActionFnEntry action_entry;
-  const MatchTable *next_table = nullptr;
-  return table->add_entry(ExactMatchEntry(key, action_entry, next_table), handle);
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  match_key.emplace_back(MatchKeyParam::Type::EXACT, key);
+  return table->add_entry(match_key, action_fn, action_data, handle);
 }
 
 template<>
 MatchTable::ErrorCode
-TableSizeOne<LongestPrefixMatchTable>::add_entry(const ByteContainer &key,
+TableSizeOne<LongestPrefixMatchTable>::add_entry(const std::string &key,
 						 entry_handle_t *handle) {
-  ActionFnEntry action_entry;
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
   int prefix_length = 16;
-  const MatchTable *next_table = nullptr;
-  return table->add_entry(
-      LongestPrefixMatchEntry(key, action_entry, prefix_length, next_table),
-      handle);
+  match_key.emplace_back(MatchKeyParam::Type::LPM, key, prefix_length);
+  return table->add_entry(match_key, action_fn, action_data, handle);
 }
 
 template<>
 MatchTable::ErrorCode
-TableSizeOne<TernaryMatchTable>::add_entry(const ByteContainer &key,
+TableSizeOne<TernaryMatchTable>::add_entry(const std::string &key,
 					   entry_handle_t *handle) {
-  char mask_[2] = {(char) 0xff, (char) 0xff};
-  ByteContainer mask(mask_, sizeof(mask_));
-  ActionFnEntry action_entry;
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  std::string mask = "\xff\xff";
   int priority = 1;
-  const MatchTable *next_table = nullptr;
-  return table->add_entry(
-      TernaryMatchEntry(key, action_entry, mask, priority, next_table),
-      handle);
+  match_key.emplace_back(MatchKeyParam::Type::TERNARY, key, std::move(mask));
+  return table->add_entry(match_key, action_fn, action_data, handle, priority);
 }
 
 typedef Types<ExactMatchTable,
@@ -94,25 +94,27 @@ typedef Types<ExactMatchTable,
 TYPED_TEST_CASE(TableSizeOne, TableTypes);
 
 TYPED_TEST(TableSizeOne, AddEntry) {
-  ByteContainer key(2);
+  std::string key_ = "\xaa\xaa";
+  ByteContainer key("0xaaaa");
   entry_handle_t handle_1, handle_2;
   MatchTable::ErrorCode rc;
 
-  rc = this->add_entry(key, &handle_1);
+  rc = this->add_entry(key_, &handle_1);
   ASSERT_EQ(rc, MatchTable::SUCCESS);
   ASSERT_EQ(1u, this->table->get_num_entries());
 
-  rc = this->add_entry(key, &handle_2);
+  rc = this->add_entry(key_, &handle_2);
   ASSERT_EQ(MatchTable::TABLE_FULL, rc);
   ASSERT_EQ(1u, this->table->get_num_entries());
 }
 
 TYPED_TEST(TableSizeOne, DeleteEntry) {
-  ByteContainer key(2);
+  std::string key_ = "\xaa\xaa";
+  ByteContainer key("0xaaaa");
   entry_handle_t handle;
   MatchTable::ErrorCode rc;
 
-  rc = this->add_entry(key, &handle);
+  rc = this->add_entry(key_, &handle);
   ASSERT_EQ(MatchTable::SUCCESS, rc);
 
   rc = this->table->delete_entry(handle);
@@ -122,23 +124,23 @@ TYPED_TEST(TableSizeOne, DeleteEntry) {
   rc = this->table->delete_entry(handle);
   ASSERT_EQ(MatchTable::INVALID_HANDLE, rc);
 
-  rc = this->add_entry(key, &handle);
+  rc = this->add_entry(key_, &handle);
   ASSERT_EQ(MatchTable::SUCCESS, rc);
 }
 
 TYPED_TEST(TableSizeOne, LookupEntry) {
-  char key_[2] = {(char) 0x0a, (char) 0xba};
-  ByteContainer key(key_, sizeof(key_));
+  std::string key_ = "\x0a\xba";
+  ByteContainer key("0x0aba");
   entry_handle_t handle;
   MatchTable::ErrorCode rc;
 
-  rc = this->add_entry(key, &handle);
+  rc = this->add_entry(key_, &handle);
   ASSERT_EQ(MatchTable::SUCCESS, rc);
 
   ASSERT_NE(nullptr, this->table->lookup(key));
 
-  char nkey_[2] = {(char) 0x0a, (char) 0xbb};
-  ByteContainer nkey(nkey_, sizeof(nkey_));
+  std::string nkey_ = "\x0a\xbb";
+  ByteContainer nkey("0x0abb");
 
   ASSERT_EQ(nullptr, this->table->lookup(nkey));
 
@@ -149,12 +151,12 @@ TYPED_TEST(TableSizeOne, LookupEntry) {
 }
 
 TYPED_TEST(TableSizeOne, ModifyEntry) {
-  char key_[2] = {(char) 0x0a, (char) 0xba};
-  ByteContainer key(key_, sizeof(key_));
+  std::string key_ = "\x0a\xba";
+  ByteContainer key("0x0aba");
   entry_handle_t handle;
   MatchTable::ErrorCode rc;
 
-  rc = this->add_entry(key, &handle);
+  rc = this->add_entry(key_, &handle);
   ASSERT_EQ(MatchTable::SUCCESS, rc);
 
   const MatchEntry *entry = this->table->lookup(key);
@@ -177,12 +179,12 @@ TYPED_TEST(TableSizeOne, ModifyEntry) {
 }
 
 TYPED_TEST(TableSizeOne, Counters) {
-  char key_[2] = {(char) 0x0a, (char) 0xba};
-  ByteContainer key(key_, sizeof(key_));
+  std::string key_ = "\x0a\xba";
+  ByteContainer key("0x0aba");
   entry_handle_t handle;
   MatchTable::ErrorCode rc;
 
-  rc = this->add_entry(key, &handle);
+  rc = this->add_entry(key_, &handle);
   ASSERT_EQ(rc, MatchTable::SUCCESS);
   ASSERT_EQ(1u, this->table->get_num_entries());
 

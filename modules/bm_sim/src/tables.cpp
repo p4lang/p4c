@@ -91,6 +91,44 @@ ExactMatchTable::add_entry(ExactMatchEntry &&entry, entry_handle_t *handle)
 }
 
 MatchTable::ErrorCode
+ExactMatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
+			   const ActionFn &action_fn,
+			   const ActionData &action_data,
+			   entry_handle_t *handle,
+			   int priority/*not used*/)
+{
+  (void) priority;
+
+  ByteContainer new_key;
+  new_key.reserve(nbytes_key);
+  for(const MatchKeyParam &param : match_key) {
+    switch(param.type) {
+    case MatchKeyParam::Type::EXACT:
+    case MatchKeyParam::Type::VALID:
+      new_key.append(param.key);
+      break;
+    default:
+      assert(0 && "invalid param type in match_key");
+      break;
+    }
+  }
+
+  ActionFnEntry action_entry(&action_fn, action_data);
+  const ControlFlowNode *next_node = get_next_node(action_fn.get_id());
+  ExactMatchEntry entry(new_key, std::move(action_entry), next_node);
+
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
+  ErrorCode status = get_and_set_handle(handle);
+  if(status != SUCCESS) return status;
+
+  entries[*handle] = std::move(entry);
+  entries_map[std::move(new_key)] = *handle;
+
+  return SUCCESS;
+}
+
+MatchTable::ErrorCode
 ExactMatchTable::delete_entry(entry_handle_t handle)
 {
   boost::unique_lock<boost::shared_mutex> lock(t_mutex);
@@ -142,6 +180,56 @@ LongestPrefixMatchTable::add_entry(LongestPrefixMatchEntry &&entry,
   int &prefix_length = entries[*handle].prefix_length;
   assert(prefix_length >= 0);
   entries_trie.insert_prefix(key, prefix_length, *handle);
+
+  return SUCCESS;
+}
+
+MatchTable::ErrorCode
+LongestPrefixMatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
+				   const ActionFn &action_fn,
+				   const ActionData &action_data,
+				   entry_handle_t *handle,
+				   int priority/*not used*/)
+{
+  (void) priority;
+
+  ByteContainer new_key;
+  new_key.reserve(nbytes_key);
+  int prefix_length = 0;
+  const MatchKeyParam *lpm_param = nullptr;
+  for(const MatchKeyParam &param : match_key) {
+    switch(param.type) {
+    case MatchKeyParam::Type::EXACT:
+    case MatchKeyParam::Type::VALID:
+      new_key.append(param.key);
+      prefix_length += param.key.size();
+      break;
+    case MatchKeyParam::Type::LPM:
+      assert(!lpm_param && "more than one lpm param in match key");
+      lpm_param = &param;
+      break;
+    default:
+      assert(0 && "invalid param type in match_key");
+      break;
+    }
+  }
+
+  assert(lpm_param && "no lpm param in match key");
+  new_key.append(lpm_param->key);
+  prefix_length += lpm_param->prefix_length;
+
+  ActionFnEntry action_entry(&action_fn, action_data);
+  const ControlFlowNode *next_node = get_next_node(action_fn.get_id());
+  LongestPrefixMatchEntry entry(new_key, std::move(action_entry),
+				prefix_length, next_node);
+
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
+  ErrorCode status = get_and_set_handle(handle);
+  if(status != SUCCESS) return status;
+
+  entries[*handle] = std::move(entry);
+  entries_trie.insert_prefix(std::move(new_key), prefix_length, *handle);
 
   return SUCCESS;
 }
@@ -213,6 +301,61 @@ TernaryMatchTable::add_entry(TernaryMatchEntry &&entry, entry_handle_t *handle)
   ErrorCode status = get_and_set_handle(handle);
   if(status != SUCCESS) return status;
   
+  entries[*handle] = std::move(entry);
+
+  return SUCCESS;
+}
+
+static std::string create_mask_from_pref_len(int prefix_length, int size) {
+  std::string mask(size, '\xff');
+  std::fill(mask.begin(), mask.begin() + (prefix_length / 8), '\xff');
+  if(prefix_length % 8 != 0) {
+    mask[prefix_length / 8] = (char) 0xFF << (8 - (prefix_length % 8));
+  }
+  return mask;
+}
+
+MatchTable::ErrorCode
+TernaryMatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
+			     const ActionFn &action_fn,
+			     const ActionData &action_data,
+			     entry_handle_t *handle,
+			     int priority)
+{
+  ByteContainer new_key;
+  ByteContainer new_mask;
+  new_key.reserve(nbytes_key);
+  for(const MatchKeyParam &param : match_key) {
+    switch(param.type) {
+    case MatchKeyParam::Type::EXACT:
+    case MatchKeyParam::Type::VALID:
+      new_key.append(param.key);
+      new_mask.append(std::string(param.key.size(), '\xff'));
+      break;
+    case MatchKeyParam::Type::LPM:
+      new_key.append(param.key);
+      new_mask.append(create_mask_from_pref_len(param.prefix_length, param.key.size()));
+      break;
+    case MatchKeyParam::Type::TERNARY:
+      new_key.append(param.key);
+      new_mask.append(param.mask);
+      break;
+    default:
+      assert(0 && "invalid param type in match_key");
+      break;
+    }
+  }
+
+  ActionFnEntry action_entry(&action_fn, action_data);
+  const ControlFlowNode *next_node = get_next_node(action_fn.get_id());
+  TernaryMatchEntry entry(std::move(new_key), std::move(action_entry),
+			  std::move(new_mask), priority, next_node);
+
+  boost::unique_lock<boost::shared_mutex> lock(t_mutex);
+
+  ErrorCode status = get_and_set_handle(handle);
+  if(status != SUCCESS) return status;
+
   entries[*handle] = std::move(entry);
 
   return SUCCESS;

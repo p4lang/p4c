@@ -17,10 +17,11 @@ struct MatchEntry
 
   MatchEntry() {}
 
-  MatchEntry(const ByteContainer &key,
-	     ActionFnEntry &action_entry,
+  MatchEntry(ByteContainer key,
+	     ActionFnEntry action_entry,
 	     const ControlFlowNode *next_table)
-    : key(key), action_entry(action_entry), next_table(next_table) {}
+  : key(std::move(key)), action_entry(std::move(action_entry)),
+    next_table(next_table) {}
 
   MatchEntry(const MatchEntry &other) = delete;
   MatchEntry &operator=(const MatchEntry &other) = delete;
@@ -34,10 +35,10 @@ struct ExactMatchEntry: MatchEntry
   ExactMatchEntry()
     : MatchEntry() {}
 
-  ExactMatchEntry(const ByteContainer &key,
-		  ActionFnEntry &action_entry,
+  ExactMatchEntry(ByteContainer key,
+		  ActionFnEntry action_entry,
 		  const ControlFlowNode *next_table)
-    : MatchEntry(key, action_entry, next_table) {}
+    : MatchEntry(std::move(key), std::move(action_entry), next_table) {}
 };
 
 struct LongestPrefixMatchEntry : MatchEntry
@@ -47,9 +48,12 @@ struct LongestPrefixMatchEntry : MatchEntry
   LongestPrefixMatchEntry()
     : MatchEntry() {}
 
-  LongestPrefixMatchEntry(const ByteContainer &key, ActionFnEntry &action_entry,
-			  unsigned prefix_length, const ControlFlowNode *next_table)
-    : MatchEntry(key, action_entry, next_table), prefix_length(prefix_length) {
+  LongestPrefixMatchEntry(ByteContainer key,
+			  ActionFnEntry action_entry,
+			  unsigned int prefix_length,
+			  const ControlFlowNode *next_table)
+    : MatchEntry(std::move(key), std::move(action_entry), next_table),
+    prefix_length(prefix_length) {
     unsigned byte_index = prefix_length / 8;
     unsigned mod = prefix_length % 8;
     if(mod > 0) {
@@ -70,10 +74,11 @@ struct TernaryMatchEntry : MatchEntry
   TernaryMatchEntry()
     : MatchEntry() {}
 
-  TernaryMatchEntry(const ByteContainer &key, ActionFnEntry &action_entry,
-		    const ByteContainer &mask, int priority,
+  TernaryMatchEntry(ByteContainer key, ActionFnEntry action_entry,
+		    ByteContainer mask, int priority,
 		    const ControlFlowNode *next_table)
-    : MatchEntry(key, action_entry, next_table), mask(mask), priority(priority) {
+    : MatchEntry(std::move(key), std::move(action_entry), next_table),
+    mask(std::move(mask)), priority(priority) {
     for(unsigned byte_index = 0; byte_index < key.size(); byte_index++) {
       this->key[byte_index] &= mask[byte_index];
     }

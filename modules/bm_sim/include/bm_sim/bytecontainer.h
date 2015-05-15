@@ -107,6 +107,11 @@ public:
     return *this;
   }
 
+  ByteContainer &append(const std::string &other) {
+    bytes.insert(end(), other.begin(), other.end());
+    return *this;
+  }
+
   reference operator[](size_type n) {
     assert(n < size());
     return bytes[n];
