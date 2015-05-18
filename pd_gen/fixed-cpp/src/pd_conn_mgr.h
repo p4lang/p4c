@@ -5,8 +5,13 @@
 
 using namespace  ::bm_runtime;
 
-void pd_conn_mgr_init();
+typedef struct pd_conn_mgr_s pd_conn_mgr_t;
 
-RuntimeClient *pd_conn_mgr_client(int dev_id);
+pd_conn_mgr_t *pd_conn_mgr_create();
+void pd_conn_mgr_destroy(pd_conn_mgr_t *conn_mgr_state);
+
+RuntimeClient *pd_conn_mgr_client(pd_conn_mgr_t *, int dev_id);
+
+int pd_conn_mgr_client_init(pd_conn_mgr_t *, int dev_id, int thrift_port_num);
 
 #endif

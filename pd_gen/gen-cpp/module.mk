@@ -7,6 +7,6 @@ srcs_CXX += $(wildcard $(SRC_DIR)/*.cpp)
 
 INCS += $(THIS_DIR)include/
 
-LIBS += -lthrift
+LIBS += -lthrift -lnanomsg
 
 

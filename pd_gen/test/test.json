@@ -126,8 +126,36 @@
     ],
     "actions": [
         {
-            "name": "actionA",
+            "name": "actionB",
             "id": 0,
+            "runtime_data": [
+                {
+                    "name": "param",
+                    "bitwidth": 8
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "header_test",
+                                "field8"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "actionA",
+            "id": 1,
             "runtime_data": [
                 {
                     "name": "param",
@@ -154,28 +182,20 @@
             ]
         },
         {
-            "name": "actionB",
-            "id": 1,
-            "runtime_data": [
-                {
-                    "name": "param",
-                    "bitwidth": 8
-                }
-            ],
+            "name": "ActionLearn",
+            "id": 2,
+            "runtime_data": [],
             "primitives": [
                 {
-                    "op": "modify_field",
+                    "op": "generate_digest",
                     "parameters": [
                         {
-                            "type": "field",
-                            "value": [
-                                "header_test",
-                                "field8"
-                            ]
+                            "type": "hexstr",
+                            "value": "0x1"
                         },
                         {
-                            "type": "runtime_data",
-                            "value": 0
+                            "type": "hexstr",
+                            "value": "0x1"
                         }
                     ]
                 }
@@ -335,7 +355,30 @@
                         "actionA"
                     ],
                     "next_tables": {
-                        "actionA": null
+                        "actionA": "Learn"
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "Learn",
+                    "id": 6,
+                    "type": "exact",
+                    "max_size": 512,
+                    "with_counters": false,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "ActionLearn"
+                    ],
+                    "next_tables": {
+                        "ActionLearn": null
                     },
                     "default_action": null
                 }
@@ -351,5 +394,26 @@
         }
     ],
     "checksums": [],
-    "learn_lists": []
+    "learn_lists": [
+        {
+            "id": 1,
+            "name": "LearnDigest",
+            "elements": [
+                {
+                    "type": "field",
+                    "value": [
+                        "header_test",
+                        "field32"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "header_test",
+                        "field16"
+                    ]
+                }
+            ]
+        }
+    ]
 }

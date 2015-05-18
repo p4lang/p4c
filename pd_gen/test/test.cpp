@@ -4,6 +4,9 @@
 
 #include <pd/pd_tables.h>
 #include <pd/pd_static.h>
+#include <pd/pd.h>
+
+#define DEVICE_THRIFT_PORT 9090
 
 int main() {
   start_server();
@@ -17,6 +20,10 @@ int main() {
   
   p4_pd_dev_target_t dev_tgt = {0, 0xFF};
   p4_pd_entry_hdl_t entry_hdl;
+
+  /* P4 dependent initialization */
+  p4_pd_test_init(NULL);
+  p4_pd_test_assign_device(dev_tgt.device_id, DEVICE_THRIFT_PORT);
   
   /* TEST BEGIN */
   

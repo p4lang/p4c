@@ -26,6 +26,7 @@ templates_dir = os.path.join(_THIS_DIR, "templates")
 
 TABLES = {}
 ACTIONS = {}
+LEARN_QUANTAS = {}
 
 class MatchType:
     EXACT = 0
@@ -78,6 +79,20 @@ class Action:
     def action_str(self):
         return "{0:30} [{1}]".format(self.name, self.runtime_data_str())
 
+class LearnQuanta:
+    def __init__(self, name, id_):
+        self.name = name
+        self.id_ = id_
+        self.fields = []
+
+        LEARN_QUANTAS[name] = self
+
+    def fields_str(self):
+        return ",\t".join([name + "(" + str(bw) + ")" for name, bw in self.fields])
+
+    def learn_quanta_str(self):
+        return "{0:30} [{1}]".format(self.name, self.fields_str())
+
 def load_json(json_src):
     def get_header_type(header_name, j_headers):
         for h in j_headers:
@@ -122,6 +137,19 @@ def load_json(json_src):
                         bitwidth = get_field_bitwidth(header_type, target[1],
                                                       json_["header_types"])
                     table.key += [(field_name, match_type, bitwidth)]
+
+        for j_learn_quanta in json_["learn_lists"]:
+            learn_quanta = LearnQuanta(j_learn_quanta["name"],
+                                       j_learn_quanta["id"])
+            for j_field in j_learn_quanta["elements"]:
+                assert(j_field["type"] == "field")
+                value = j_field["value"]
+                field_name = ".".join(value)
+                header_type = get_header_type(value[0],
+                                              json_["headers"])
+                bitwidth = get_field_bitwidth(header_type, value[1],
+                                              json_["header_types"])
+                learn_quanta.fields += [(field_name, bitwidth)]
 
 
 def ignore_template_file(filename):
@@ -209,6 +237,7 @@ def main():
     render_dict["get_c_name"] = get_c_name
     render_dict["tables"] = TABLES
     render_dict["actions"] = ACTIONS
+    render_dict["learn_quantas"] = LEARN_QUANTAS
     render_all_files(render_dict, _validate_dir(os.path.join(_THIS_DIR, "gen-cpp")))
 
 if __name__ == '__main__':

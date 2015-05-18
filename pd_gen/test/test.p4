@@ -92,6 +92,26 @@ table ExactAndValid {
     size: 512;
 }
 
+#define LEARN_RECEIVER 1
+
+field_list LearnDigest {
+    header_test.field32;
+    header_test.field16;
+}
+
+action ActionLearn() {
+    generate_digest(LEARN_RECEIVER, LearnDigest);
+}
+
+table Learn {
+    reads {
+         header_test.field32 : exact;
+    }
+    actions {
+        ActionLearn;
+    }
+    size: 512;
+}
 
 control ingress {
     apply(ExactOne);
@@ -100,6 +120,7 @@ control ingress {
     apply(ExactOneNA);
     apply(ExactTwo);
     apply(ExactAndValid);
+    apply(Learn);
 }
 
 control egress {

@@ -9,6 +9,8 @@
 
 #define HOST_BYTE_ORDER_CALLER 1
 
+extern pd_conn_mgr_t *conn_mgr_state;
+
 //:: for t_name, t in tables.items():
 //::   t_name = get_c_name(t_name)
 //::   if not t.key: continue
@@ -23,6 +25,8 @@ static std::vector<BmMatchParam> build_key_${t_name} (
   BmMatchParamLPM param_lpm; (void) param_lpm;
   BmMatchParamTernary param_ternary; (void) param_ternary;
   BmMatchParamValid param_valid; (void) param_valid;
+
+  // TODO: 3-byte fields (mapped to uint32) are probably handled incorrectly
 
 //::   for field_name, field_match_type, field_bw in t.key:
 //::     field_name = get_c_name(field_name)
@@ -125,7 +129,7 @@ ${name}
 //::     if match_type == MatchType.TERNARY:
   options.__set_priority(priority);
 //::     #endif
-  *entry_hdl = pd_conn_mgr_client(dev_tgt.device_id)->bm_table_add_entry(
+  *entry_hdl = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_table_add_entry(
        "${t_name}",
        match_key,
        "${a_name}",
@@ -150,7 +154,7 @@ ${name}
  uint8_t dev_id,
  p4_pd_entry_hdl_t entry_hdl
 ) {
-  pd_conn_mgr_client(dev_id)->bm_table_delete_entry("${t_name}", entry_hdl);
+  pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_table_delete_entry("${t_name}", entry_hdl);
   return 0;
 }
 
@@ -181,7 +185,7 @@ ${name}
 //::     else:
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
-  pd_conn_mgr_client(dev_id)->bm_table_modify_entry(
+  pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_table_modify_entry(
       "${t_name}", entry_hdl,
       "${a_name}", action_data
   );
@@ -217,7 +221,7 @@ ${name}
 //::     else:
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
-  pd_conn_mgr_client(dev_tgt.device_id)->bm_set_default_action(
+  pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_set_default_action(
       "${t_name}", "${a_name}",
       action_data
   );
@@ -246,7 +250,7 @@ ${name}
   BmCounterValue value;
   // Thrift's weirdness ? even on client side, the return value becomes the
   // first argument and is passed by reference
-  pd_conn_mgr_client(dev_tgt.device_id)->bm_table_read_counter(
+  pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_table_read_counter(
       value,
       "${t_name}",
       entry_hdl
@@ -263,7 +267,7 @@ ${name}
  p4_pd_sess_hdl_t sess_hdl,
  p4_pd_dev_target_t dev_tgt
 ) {
-  pd_conn_mgr_client(dev_tgt.device_id)->bm_table_reset_counters(
+  pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_table_reset_counters(
       "${t_name}"
   );
   return 0;

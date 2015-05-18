@@ -9,7 +9,6 @@ extern "C" {
 
 p4_pd_status_t
 p4_pd_init(void) {
-  pd_conn_mgr_init();
   return 0;
 }
 
