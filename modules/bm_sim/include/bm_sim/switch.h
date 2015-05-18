@@ -25,40 +25,6 @@ public:
   virtual void start_and_return() = 0;
 
 public:
-  int table_add_entry(const std::string &table_name,
-		      ExactMatchEntry &&entry,
-		      entry_handle_t *handle) override;
-  int table_add_entry(const std::string &table_name,
-		      LongestPrefixMatchEntry &&entry,
-		      entry_handle_t *handle) override;
-  int table_add_entry(const std::string &table_name,
-		      TernaryMatchEntry &&entry,
-		      entry_handle_t *handle) override;
-
-  MatchTable::ErrorCode
-  table_add_exact_match_entry(const std::string &table_name,
-			      const std::string &action_name,
-			      const ByteContainer &key,
-			      const ActionData &action_data,
-			      entry_handle_t *handle) override;
-
-  MatchTable::ErrorCode
-  table_add_lpm_entry(const std::string &table_name,
-		      const std::string &action_name,
-		      const ByteContainer &key,
-		      unsigned int prefix_length,
-		      const ActionData &action_data,
-		      entry_handle_t *handle) override;
-
-  MatchTable::ErrorCode
-  table_add_ternary_match_entry(const std::string &table_name,
-				const std::string &action_name,
-				const ByteContainer &key,
-				const ByteContainer &mask,
-				int priority,
-				const ActionData &action_data,
-				entry_handle_t *handle) override;
-
   MatchTable::ErrorCode 
   table_add_entry(const std::string &table_name,
 		  const std::vector<MatchKeyParam> &match_key,

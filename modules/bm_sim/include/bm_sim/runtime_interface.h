@@ -9,43 +9,6 @@ class RuntimeInterface {
 public:
   virtual ~RuntimeInterface() { }
 
-  // These functions were made obsolete by the generic add_entry function
-  // Should I remove them now or keep them around for a little bit?
-
-  virtual int table_add_entry(const std::string &table_name,
-			      ExactMatchEntry &&entry,
-			      entry_handle_t *handle) = 0;
-  virtual int table_add_entry(const std::string &table_name,
-  			      LongestPrefixMatchEntry &&entry,
-			      entry_handle_t *handle) = 0;
-  virtual int table_add_entry(const std::string &table_name,
-  			      TernaryMatchEntry &&entry,
-			      entry_handle_t *handle) = 0;
-
-  virtual MatchTable::ErrorCode
-  table_add_exact_match_entry(const std::string &table_name,
-			      const std::string &action_name,
-			      const ByteContainer &key,
-			      const ActionData &action_data,
-			      entry_handle_t *handle) = 0;
-
-  virtual MatchTable::ErrorCode
-  table_add_lpm_entry(const std::string &table_name,
-		      const std::string &action_name,
-		      const ByteContainer &key,
-		      unsigned int prefix_length,
-		      const ActionData &action_data,
-		      entry_handle_t *handle) = 0;
-
-  virtual MatchTable::ErrorCode
-  table_add_ternary_match_entry(const std::string &table_name,
-				const std::string &action_name,
-				const ByteContainer &key,
-				const ByteContainer &mask,
-				int priority,
-				const ActionData &action_data,
-				entry_handle_t *handle) = 0;
-
   virtual MatchTable::ErrorCode
   table_add_entry(const std::string &table_name,
 		  const std::vector<MatchKeyParam> &match_key,
