@@ -19,7 +19,8 @@
 class SimpleSwitch : public Switch {
 public:
   SimpleSwitch(transmit_fn_t transmit_fn)
-    : input_buffer(1024), output_buffer(128), transmit_fn(transmit_fn) {}
+    : Switch(true), // enable_switch = true
+      input_buffer(1024), output_buffer(128), transmit_fn(transmit_fn) {}
 
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
@@ -72,6 +73,14 @@ void SimpleSwitch::pipeline_thread() {
     input_buffer.pop_back(&packet);
     phv = packet->get_phv();
     SIMPLELOG << "processing packet " << packet->get_packet_id() << std::endl;
+
+    // swap is enabled, so update pointers if needed
+    if(this->do_swap() == 0) { // a swap took place
+      ingress_mau = this->get_pipeline("ingress");
+      egress_mau = this->get_pipeline("egress");
+      parser = this->get_parser("parser");
+      deparser = this->get_deparser("deparser");
+    }
     
     parser->parse(packet.get());
     ingress_mau->apply(packet.get());
