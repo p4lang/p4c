@@ -6,7 +6,6 @@
 #include "bm_sim/queue.h"
 #include "bm_sim/packet.h"
 #include "bm_sim/parser.h"
-#include "bm_sim/P4Objects.h"
 #include "bm_sim/tables.h"
 #include "bm_sim/switch.h"
 #include "bm_sim/event_logger.h"
@@ -62,10 +61,10 @@ void SimpleSwitch::transmit_thread() {
 }
 
 void SimpleSwitch::pipeline_thread() {
-  Pipeline *ingress_mau = p4objects->get_pipeline("ingress");
-  Pipeline *egress_mau = p4objects->get_pipeline("egress");
-  Parser *parser = p4objects->get_parser("parser");
-  Deparser *deparser = p4objects->get_deparser("deparser");
+  Pipeline *ingress_mau = this->get_pipeline("ingress");
+  Pipeline *egress_mau = this->get_pipeline("egress");
+  Parser *parser = this->get_parser("parser");
+  Deparser *deparser = this->get_deparser("deparser");
   PHV *phv;
 
   while(1) {

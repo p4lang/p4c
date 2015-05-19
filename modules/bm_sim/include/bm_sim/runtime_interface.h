@@ -7,6 +7,14 @@
 
 class RuntimeInterface {
 public:
+  enum ErrorCode {
+    SUCCESS = 0,
+    CONFIG_SWAP_DISABLED,
+    ONGOING_SWAP,
+    NO_ONGOING_SWAP
+  };
+
+public:
   virtual ~RuntimeInterface() { }
 
   virtual MatchTable::ErrorCode
@@ -40,6 +48,13 @@ public:
 
   virtual MatchTable::ErrorCode
   table_reset_counters(const std::string &table_name) = 0;
+
+  virtual ErrorCode
+  load_new_config(const std::string &new_config) = 0;
+  
+  virtual ErrorCode
+  swap_configs() = 0;
+
 };
 
 #endif
