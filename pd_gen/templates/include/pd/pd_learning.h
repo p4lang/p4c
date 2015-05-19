@@ -2,7 +2,7 @@
 #define _P4_PD_TABLES_H_
 
 #include "pd/pd_types.h"
-#include "pd/pd_static.h"
+#include "pd/pd_common.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -124,6 +124,16 @@ class RuntimeHandler : virtual public RuntimeIf {
     printf("bm_learning_ack_buffer\n");
   }
 
+  void bm_load_new_config(const std::string& config_str) {
+    // Your implementation goes here
+    printf("bm_load_new_config\n");
+  }
+
+  void bm_swap_configs() {
+    // Your implementation goes here
+    printf("bm_swap_configs\n");
+  }
+
   BmMcMgrpHandle bm_mc_mgrp_create(const BmMcMgrp mgrp) {
     // Your implementation goes here
     printf("bm_mc_mgrp_create\n");

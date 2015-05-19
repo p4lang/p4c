@@ -11,6 +11,8 @@ p4_pd_status_t ${pd_prefix}init(const char *learning_addr);
 
 p4_pd_status_t ${pd_prefix}assign_device(int dev_id, int rpc_port_num);
 
+p4_pd_status_t ${pd_prefix}remove_device(int dev_id);
+
 #ifdef __cplusplus
 }
 #endif

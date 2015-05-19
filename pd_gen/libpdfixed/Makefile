@@ -1,22 +1,21 @@
 CC:= gcc
 CXX:= g++
-COMMON_FLAGS:=
-CFLAGS:= -O0 -g -Wall
-CPPFLAGS:= -O0 -g -Wall --std=c++11
+CFLAGS:= -O0 -g -Wall -fPIC
+CPPFLAGS:= -O0 -g -Wall --std=c++11 -fPIC
 LIBS:=
 INCS:=
 
-TARGET:=test
+TARGET:=libpdfixed.so
 
 BUILD_DIR := build
 BUILD_DIRS := $(BUILD_DIR)
 
 srcs_C:=
-srcs_CXX:= $(realpath $(dir $(lastword $(MAKEFILE_LIST)))test.cpp)
+srcs_CXX:=
 
-include ../libpdfixed/libpdfixed.mk
-include ../libpd/libpd.mk
-include thrift_endpoint/module.mk
+include libpdfixed.mk
+
+$(TARGET)_PUBLIC_INCS := $(INCS)
 
 CFLAGS += $(COMMON_FLAGS)
 CPPFLAGS += $(COMMON_FLAGS)
@@ -44,28 +43,14 @@ objs_C_ := $(patsubst %, $(BUILD_DIR)%, $(objs_C))
 objs_CXX_ := $(patsubst %, $(BUILD_DIR)%, $(objs_CXX))
 objs_ := $(patsubst %, $(BUILD_DIR)%, $(objs))
 
-LIBS := $(sort $(LIBS))
-
 $(TARGET): $(objs_) | $(BUILD_DIRS)
-	$(CXX) -o $@ $^ $(LIBS)
-
-check: $(TARGET)
-	./run_tests.sh
+	$(CXX) -o $@ $^ -shared -fPIC
 
 $(BUILD_DIRS):
 	mkdir -p $@
 
-$(objs_) $(deps_) : .thrift_gen
-
-.thrift_gen: .pd_from_json
-
-TEMPLATES_DIR := ../templates
-TEMPLATES_CPP := $(wildcard $(TEMPLATES_DIR)/src/*.cpp)
-TEMPLATES_H := $(wildcard $(TEMPLATES_DIR)/include/pd/*.h)
-
-.pd_from_json: test.json ../gen-cpp/src/pd_tables.cpp $(TEMPLATES_CPP) $(TEMPLATES_H)
-	../gen.py --json test.json --p4-prefix test
-	@touch .pd_from_json
+$(objs_) : .thrift_gen
+$(deps_) : .thrift_gen
 
 $(deps_C_): $(BUILD_DIR)%.d: %.c | $(BUILD_DIRS)
 	$(CC) $(CFLAGS) $(INC) -MM $< -MT $(BUILD_DIR)$*.o -o $(BUILD_DIR)$*.d
@@ -88,8 +73,5 @@ $(objs_CXX_): $(BUILD_DIR)%.o: %.cpp | $(BUILD_DIRS)
 
 clean: .thrift_gen_clean
 	rm -rf $(BUILD_DIRS) $(TARGET)
-	rm -f *.o *.d
-	rm -f test.output
-	rm -rf .pd_from_json
 
 .PHONY: clean

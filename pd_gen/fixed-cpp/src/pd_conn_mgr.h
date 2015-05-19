@@ -13,5 +13,6 @@ void pd_conn_mgr_destroy(pd_conn_mgr_t *conn_mgr_state);
 RuntimeClient *pd_conn_mgr_client(pd_conn_mgr_t *, int dev_id);
 
 int pd_conn_mgr_client_init(pd_conn_mgr_t *, int dev_id, int thrift_port_num);
+int pd_conn_mgr_client_close(pd_conn_mgr_t *, int dev_id);
 
 #endif

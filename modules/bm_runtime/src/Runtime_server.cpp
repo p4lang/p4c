@@ -164,6 +164,27 @@ class RuntimeHandler : virtual public RuntimeIf {
     switch_->get_learn_engine()->ack_buffer(list_id, buffer_id);
   }
 
+  void bm_load_new_config(const std::string& config_str) {
+    printf("bm_load_new_config\n");
+    RuntimeInterface::ErrorCode error_code =
+      switch_->load_new_config(config_str);
+    if(error_code != RuntimeInterface::SUCCESS) {
+      InvalidSwapOperation iso;
+      iso.what = (SwapOperationErrorCode::type) error_code;
+      throw iso;
+    }
+  }
+
+  void bm_swap_configs() {
+    printf("bm_swap_configs\n");
+    RuntimeInterface::ErrorCode error_code = switch_->swap_configs();
+    if(error_code != RuntimeInterface::SUCCESS) {
+      InvalidSwapOperation iso;
+      iso.what = (SwapOperationErrorCode::type) error_code;
+      throw iso;
+    }
+  }
+
   BmMcMgrpHandle bm_mc_mgrp_create(const BmMcMgrp mgrp) {
     printf("bm_mc_mgrp_create\n");
     McPre::mgrp_hdl_t mgrp_hdl;

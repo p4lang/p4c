@@ -10,6 +10,7 @@
 #define NUM_DEVICES 256
 
 extern pd_conn_mgr_t *conn_mgr_state;
+extern int *my_devices;
 
 //:: for lq_name, lq in learn_quantas.items():
 //::   lq_name = get_c_name(lq_name)
@@ -64,13 +65,13 @@ static void learning_listener(nn::socket s) {
 //:: for lq_name, lq in learn_quantas.items():
 //::   lq_name = get_c_name(lq_name)
     case ${lq.id_}:
+      state = device_state[learn_hdr.switch_id];
       lock = std::unique_lock<std::mutex>(state->${lq_name}_mutex);
       ${pd_prefix}${lq_name}_digest_msg_t ${lq_name}_msg;
       ${lq_name}_msg.dev_tgt.device_id = (uint8_t) learn_hdr.switch_id;
       ${lq_name}_msg.num_entries = learn_hdr.num_samples;
       ${lq_name}_msg.entries = (${pd_prefix}${lq_name}_digest_entry_t *) data;
       ${lq_name}_msg.buffer_id = learn_hdr.buffer_id;
-      state = device_state[learn_hdr.switch_id];
       for(const auto &it : state->${lq_name}_clients) {
 	it.second.cb_fn(it.first, &${lq_name}_msg, it.second.cb_cookie);
       }
@@ -121,6 +122,7 @@ p4_pd_status_t ${pd_prefix}${lq_name}_notify_ack
  p4_pd_sess_hdl_t sess_hdl,
  ${pd_prefix}${lq_name}_digest_msg_t *msg
 ) {
+  assert(my_devices[msg->dev_tgt.device_id]);
   pd_conn_mgr_client(conn_mgr_state, msg->dev_tgt.device_id)->bm_learning_ack_buffer(
       ${lq.id_},
       msg->buffer_id
@@ -132,6 +134,12 @@ p4_pd_status_t ${pd_prefix}${lq_name}_notify_ack
 
 p4_pd_status_t ${pd_prefix}learning_new_device(int dev_id) {
   device_state[dev_id] = new LearnState();
+  return 0;
+}
+
+p4_pd_status_t ${pd_prefix}learning_remove_device(int dev_id) {
+  assert(device_state[dev_id]);
+  delete device_state[dev_id];
   return 0;
 }
 

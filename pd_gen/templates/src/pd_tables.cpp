@@ -10,6 +10,7 @@
 #define HOST_BYTE_ORDER_CALLER 1
 
 extern pd_conn_mgr_t *conn_mgr_state;
+extern int *my_devices;
 
 //:: for t_name, t in tables.items():
 //::   t_name = get_c_name(t_name)
@@ -115,6 +116,7 @@ ${name}
 (
  ${param_str}
 ) {
+  assert(my_devices[dev_tgt.device_id]);
 //::     if not has_match_spec:
   std::vector<BmMatchParam> match_key;
 //::     else:
@@ -154,6 +156,7 @@ ${name}
  uint8_t dev_id,
  p4_pd_entry_hdl_t entry_hdl
 ) {
+  assert(my_devices[dev_id]);
   pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_table_delete_entry("${t_name}", entry_hdl);
   return 0;
 }
@@ -180,6 +183,7 @@ ${name}
 (
  ${param_str}
 ) {
+  assert(my_devices[dev_id]);
 //::     if not has_action_spec:
   std::vector<std::string> action_data;
 //::     else:
@@ -216,6 +220,7 @@ ${name}
 (
  ${param_str}
 ) {
+  assert(my_devices[dev_tgt.device_id]);
 //::     if not has_action_spec:
   std::vector<std::string> action_data;
 //::     else:
@@ -247,6 +252,7 @@ ${name}
  p4_pd_entry_hdl_t entry_hdl,
  p4_pd_counter_value_t *counter_value
 ) {
+  assert(my_devices[dev_tgt.device_id]);
   BmCounterValue value;
   // Thrift's weirdness ? even on client side, the return value becomes the
   // first argument and is passed by reference
@@ -267,6 +273,7 @@ ${name}
  p4_pd_sess_hdl_t sess_hdl,
  p4_pd_dev_target_t dev_tgt
 ) {
+  assert(my_devices[dev_tgt.device_id]);
   pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_table_reset_counters(
       "${t_name}"
   );

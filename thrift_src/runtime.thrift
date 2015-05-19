@@ -69,6 +69,16 @@ exception InvalidTableOperation {
   1:TableOperationErrorCode what
 }
 
+enum SwapOperationErrorCode {
+  CONFIG_SWAP_DISABLED = 1,
+  ONGOING_SWAP = 2,
+  NO_ONGOING_SWAP = 3
+}
+
+exception InvalidSwapOperation {
+  1:SwapOperationErrorCode what
+}
+
 enum McOperationErrorCode {
   TABLE_FULL = 1,
   INVALID_HANDLE = 2,
@@ -133,6 +143,14 @@ service Runtime {
     1:BmLearningListId list_id,
     2:BmLearningBufferId buffer_id
   ),
+
+  // swap configs
+
+  void bm_load_new_config(
+    1:string config_str
+  ) throws (1:InvalidSwapOperation ouch),
+
+  void bm_swap_configs() throws (1:InvalidSwapOperation ouch),
 
   // pre operations
 

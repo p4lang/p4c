@@ -85,6 +85,10 @@ int main() {
   p4_pd_test_ExactOne_set_default_action_actionA(sess_hdl, dev_tgt,
                                                  &actionA_action_spec,
                                                  &entry_hdl);
+
+  /* END TEST */
+
+  p4_pd_test_remove_device(dev_tgt.device_id);
   
   return 0;
 }
