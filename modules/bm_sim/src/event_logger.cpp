@@ -204,8 +204,8 @@ void EventLogger<Transport>::condition_eval(const Packet &packet,
 
 template <typename Transport>
 void EventLogger<Transport>::table_hit(const Packet &packet,
-				       const MatchTable &table,
-				       const MatchEntry &entry) {
+				       const MatchTableAbstract &table,
+				       entry_handle_t handle) {
   typedef struct : msg_hdr_t {
     int table_id;
     int entry_hdl;
@@ -214,13 +214,13 @@ void EventLogger<Transport>::table_hit(const Packet &packet,
   msg_t msg;
   fill_msg_hdr(EventType::TABLE_HIT, packet, &msg);
   msg.table_id = table.get_id();
-  msg.entry_hdl = (int) table.get_entry_handle(entry);
+  msg.entry_hdl = (int) handle;
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
 template <typename Transport>
 void EventLogger<Transport>::table_miss(const Packet &packet,
-					const MatchTable &table) {
+					const MatchTableAbstract &table) {
   typedef struct : msg_hdr_t {
     int table_id;
   } __attribute__((packed)) msg_t;

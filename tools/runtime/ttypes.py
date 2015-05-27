@@ -39,18 +39,24 @@ class BmMatchParamType:
 class TableOperationErrorCode:
   TABLE_FULL = 1
   INVALID_HANDLE = 2
-  ERROR = 3
+  COUNTERS_DISABLED = 3
+  WRONG_TABLE_TYPE = 4
+  ERROR = 5
 
   _VALUES_TO_NAMES = {
     1: "TABLE_FULL",
     2: "INVALID_HANDLE",
-    3: "ERROR",
+    3: "COUNTERS_DISABLED",
+    4: "WRONG_TABLE_TYPE",
+    5: "ERROR",
   }
 
   _NAMES_TO_VALUES = {
     "TABLE_FULL": 1,
     "INVALID_HANDLE": 2,
-    "ERROR": 3,
+    "COUNTERS_DISABLED": 3,
+    "WRONG_TABLE_TYPE": 4,
+    "ERROR": 5,
   }
 
 class SwapOperationErrorCode:

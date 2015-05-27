@@ -17,79 +17,94 @@ void Switch::init_objects(const std::string &json_path) {
   Packet::set_phv_factory(p4objects->get_phv_factory());
 }
 
-MatchTable::ErrorCode Switch::table_add_entry(
+MatchErrorCode Switch::match_table_add_entry(
     const std::string &table_name,
     const std::vector<MatchKeyParam> &match_key,
     const std::string &action_name,
-    const ActionData &action_data,
+    ActionData action_data,
     entry_handle_t *handle,
     int priority
 ) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTable *table = p4objects_rt->get_match_table(table_name);
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  assert(abstract_table);
+  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
+  if(!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   const ActionFn *action = p4objects_rt->get_action(action_name);
-  assert(table); assert(action);
-  return table->add_entry(match_key, *action, action_data, handle, priority);
+  assert(action);
+  return table->add_entry(
+    match_key, action, std::move(action_data), handle, priority
+  );
 }
 
-MatchTable::ErrorCode Switch::table_set_default_action(
+MatchErrorCode Switch::match_table_set_default_action(
     const std::string &table_name,
     const std::string &action_name,
-    const ActionData &action_data
+    ActionData action_data
 ) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTable *table = p4objects_rt->get_match_table(table_name);
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  assert(abstract_table);
+  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
+  if(!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   const ActionFn *action = p4objects_rt->get_action(action_name);
-  assert(table); assert(action);
-  const ControlFlowNode *next_node = table->get_next_node(action->get_id());
-  ActionFnEntry action_entry(action, action_data);
-  return table->set_default_action(action_entry, next_node);
+  assert(action);
+  return table->set_default_action(action, std::move(action_data));
 }
 
-MatchTable::ErrorCode Switch::table_delete_entry(
+MatchErrorCode Switch::match_table_delete_entry(
     const std::string &table_name,
     entry_handle_t handle
 ) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTable *table = p4objects_rt->get_match_table(table_name);
-  assert(table);
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  assert(abstract_table);
+  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
+  if(!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   return table->delete_entry(handle);
 }
 
-MatchTable::ErrorCode Switch::table_modify_entry(
+MatchErrorCode Switch::match_table_modify_entry(
     const std::string &table_name,
     entry_handle_t handle,
     const std::string &action_name,
-    const ActionData &action_data
+    const ActionData action_data
 ) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTable *table = p4objects_rt->get_match_table(table_name);
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  assert(abstract_table);
+  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
+  if(!table) return MatchErrorCode::WRONG_TABLE_TYPE;
   const ActionFn *action = p4objects_rt->get_action(action_name);
-  assert(table); assert(action);
-  const ControlFlowNode *next_node = table->get_next_node(action->get_id());
-  ActionFnEntry action_entry(action, action_data);
-  return table->modify_entry(handle, action_entry, next_node);
+  assert(action);
+  return table->modify_entry(handle, action, std::move(action_data));
 }
 
-MatchTable::ErrorCode Switch::table_read_counters(
+MatchErrorCode Switch::table_read_counters(
     const std::string &table_name,
     entry_handle_t handle,
-    MatchTable::counter_value_t *bytes,
-    MatchTable::counter_value_t *packets
+    MatchTableAbstract::counter_value_t *bytes,
+    MatchTableAbstract::counter_value_t *packets
 ) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTable *table = p4objects_rt->get_match_table(table_name);
-  assert(table);
-  return table->query_counters(handle, bytes, packets);
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  assert(abstract_table);
+  return abstract_table->query_counters(handle, bytes, packets);
 }
 
-MatchTable::ErrorCode Switch::table_reset_counters(
+MatchErrorCode Switch::table_reset_counters(
     const std::string &table_name
 ) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTable *table = p4objects_rt->get_match_table(table_name);
-  assert(table);
-  return table->reset_counters();
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  assert(abstract_table);
+  return abstract_table->reset_counters();
 }
 
 RuntimeInterface::ErrorCode Switch::load_new_config(const std::string &new_config) {

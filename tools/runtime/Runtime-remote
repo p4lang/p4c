@@ -24,10 +24,10 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print('Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] [-s[sl]] function [arg1 [arg2...]]')
   print('')
   print('Functions:')
-  print('  BmEntryHandle bm_table_add_entry(string table_name, BmMatchParams match_key, string action_name, BmActionData action_data, BmAddEntryOptions options)')
-  print('  void bm_set_default_action(string table_name, string action_name, BmActionData action_data)')
-  print('  void bm_table_delete_entry(string table_name, BmEntryHandle entry_handle)')
-  print('  void bm_table_modify_entry(string table_name, BmEntryHandle entry_handle, string action_name, BmActionData action_data)')
+  print('  BmEntryHandle bm_match_table_add_entry(string table_name, BmMatchParams match_key, string action_name, BmActionData action_data, BmAddEntryOptions options)')
+  print('  void bm_match_table_set_default_action(string table_name, string action_name, BmActionData action_data)')
+  print('  void bm_match_table_delete_entry(string table_name, BmEntryHandle entry_handle)')
+  print('  void bm_match_table_modify_entry(string table_name, BmEntryHandle entry_handle, string action_name, BmActionData action_data)')
   print('  BmCounterValue bm_table_read_counter(string table_name, BmEntryHandle entry_handle)')
   print('  void bm_table_reset_counters(string table_name)')
   print('  void bm_learning_ack(BmLearningListId list_id, BmLearningBufferId buffer_id,  sample_ids)')
@@ -98,29 +98,29 @@ protocol = TBinaryProtocol.TBinaryProtocol(transport)
 client = Runtime.Client(protocol)
 transport.open()
 
-if cmd == 'bm_table_add_entry':
+if cmd == 'bm_match_table_add_entry':
   if len(args) != 5:
-    print('bm_table_add_entry requires 5 args')
+    print('bm_match_table_add_entry requires 5 args')
     sys.exit(1)
-  pp.pprint(client.bm_table_add_entry(args[0],eval(args[1]),args[2],eval(args[3]),eval(args[4]),))
+  pp.pprint(client.bm_match_table_add_entry(args[0],eval(args[1]),args[2],eval(args[3]),eval(args[4]),))
 
-elif cmd == 'bm_set_default_action':
+elif cmd == 'bm_match_table_set_default_action':
   if len(args) != 3:
-    print('bm_set_default_action requires 3 args')
+    print('bm_match_table_set_default_action requires 3 args')
     sys.exit(1)
-  pp.pprint(client.bm_set_default_action(args[0],args[1],eval(args[2]),))
+  pp.pprint(client.bm_match_table_set_default_action(args[0],args[1],eval(args[2]),))
 
-elif cmd == 'bm_table_delete_entry':
+elif cmd == 'bm_match_table_delete_entry':
   if len(args) != 2:
-    print('bm_table_delete_entry requires 2 args')
+    print('bm_match_table_delete_entry requires 2 args')
     sys.exit(1)
-  pp.pprint(client.bm_table_delete_entry(args[0],eval(args[1]),))
+  pp.pprint(client.bm_match_table_delete_entry(args[0],eval(args[1]),))
 
-elif cmd == 'bm_table_modify_entry':
+elif cmd == 'bm_match_table_modify_entry':
   if len(args) != 4:
-    print('bm_table_modify_entry requires 4 args')
+    print('bm_match_table_modify_entry requires 4 args')
     sys.exit(1)
-  pp.pprint(client.bm_table_modify_entry(args[0],eval(args[1]),args[2],eval(args[3]),))
+  pp.pprint(client.bm_match_table_modify_entry(args[0],eval(args[1]),args[2],eval(args[3]),))
 
 elif cmd == 'bm_table_read_counter':
   if len(args) != 2:

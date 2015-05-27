@@ -77,16 +77,16 @@ int main() {
 
       BmAddEntryOptions options;
 
-      client.bm_table_add_entry("smac", {match_param},
-				"_nop", std::vector<std::string>(),
-				options);
+      client.bm_match_table_add_entry("smac", {match_param},
+				      "_nop", std::vector<std::string>(),
+				      options);
 
       std::vector<std::string> action_data =
 	{std::string((char *) &sample->ingress_port, 2)};
 
-      client.bm_table_add_entry("dmac", {match_param},
-				"forward", action_data,
-				options);
+      client.bm_match_table_add_entry("dmac", {match_param},
+				      "forward", std::move(action_data),
+				      options);
     }
 
     client.bm_learning_ack_buffer(learn_hdr.list_id, learn_hdr.buffer_id);

@@ -27,36 +27,36 @@ public:
   virtual void start_and_return() = 0;
 
 public:
-  MatchTable::ErrorCode 
-  table_add_entry(const std::string &table_name,
-		  const std::vector<MatchKeyParam> &match_key,
-		  const std::string &action_name,
-		  const ActionData &action_data,
-		  entry_handle_t *handle,
-		  int priority = -1/*only used for ternary*/) override;
+  MatchErrorCode 
+  match_table_add_entry(const std::string &table_name,
+			const std::vector<MatchKeyParam> &match_key,
+			const std::string &action_name,
+			ActionData action_data,
+			entry_handle_t *handle,
+			int priority = -1/*only used for ternary*/) override;
 
-  MatchTable::ErrorCode
-  table_set_default_action(const std::string &table_name,
-			   const std::string &action_name,
-			   const ActionData &action_data) override;
+  MatchErrorCode
+  match_table_set_default_action(const std::string &table_name,
+				 const std::string &action_name,
+				 ActionData action_data) override;
   
-  MatchTable::ErrorCode
-  table_delete_entry(const std::string &table_name,
-		     entry_handle_t handle) override;
+  MatchErrorCode
+  match_table_delete_entry(const std::string &table_name,
+			   entry_handle_t handle) override;
 
-  MatchTable::ErrorCode
-  table_modify_entry(const std::string &table_name,
-		     entry_handle_t handle,
-		     const std::string &action_name,
-		     const ActionData &action_data) override;
+  MatchErrorCode
+  match_table_modify_entry(const std::string &table_name,
+			   entry_handle_t handle,
+			   const std::string &action_name,
+			   ActionData action_data) override;
 
-  MatchTable::ErrorCode
+  MatchErrorCode
   table_read_counters(const std::string &table_name,
 		      entry_handle_t handle,
-		      MatchTable::counter_value_t *bytes,
-		      MatchTable::counter_value_t *packets) override;
+		      MatchTableAbstract::counter_value_t *bytes,
+		      MatchTableAbstract::counter_value_t *packets) override;
 
-  MatchTable::ErrorCode
+  MatchErrorCode
   table_reset_counters(const std::string &table_name) override;
 
   RuntimeInterface::ErrorCode

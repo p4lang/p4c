@@ -350,7 +350,7 @@ class RuntimeAPI(cmd.Cmd):
             "runtime data:",
             "\t".join(printable_byte_str(d) for d in runtime_data)
         )
-        self.client.bm_set_default_action(table_name, action_name, runtime_data)
+        self.client.bm_match_table_set_default_action(table_name, action_name, runtime_data)
         print "SUCCESS"
 
     def complete_table_set_default(self, text, line, start_index, end_index):
@@ -404,7 +404,7 @@ class RuntimeAPI(cmd.Cmd):
             "\t".join(printable_byte_str(d) for d in runtime_data)
         )
 
-        entry_handle = self.client.bm_table_add_entry(
+        entry_handle = self.client.bm_match_table_add_entry(
             table_name, match_key, action_name, runtime_data,
             BmAddEntryOptions(priority = priority)
         )
@@ -423,7 +423,7 @@ class RuntimeAPI(cmd.Cmd):
             return
         entry_handle = int(args[1])
         print "Deleting entry", entry_handle, "from", table_name
-        self.client.bm_table_delete_entry(table_name, entry_handle)
+        self.client.bm_match_table_delete_entry(table_name, entry_handle)
         print "SUCCESS"
 
     def complete_table_delete(self, text, line, start_index, end_index):

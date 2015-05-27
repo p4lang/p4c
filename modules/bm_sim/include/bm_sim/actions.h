@@ -249,8 +249,8 @@ class ActionFnEntry
 public:
   ActionFnEntry() {}
 
-  ActionFnEntry(const ActionFn *action_fn, const ActionData &action_data)
-    : action_fn(action_fn), action_data(action_data) { }
+  ActionFnEntry(const ActionFn *action_fn, ActionData action_data)
+    : action_fn(action_fn), action_data(std::move(action_data)) { }
 
   ActionFnEntry(const ActionFn *action_fn)
     : action_fn(action_fn) { }
