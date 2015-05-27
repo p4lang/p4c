@@ -88,6 +88,16 @@ class Iface:
     """
     pass
 
+  def bm_load_new_config(self, config_str):
+    """
+    Parameters:
+     - config_str
+    """
+    pass
+
+  def bm_swap_configs(self):
+    pass
+
   def bm_mc_mgrp_create(self, mgrp):
     """
     Parameters:
@@ -431,6 +441,63 @@ class Client(Iface):
     iprot.readMessageEnd()
     return
 
+  def bm_load_new_config(self, config_str):
+    """
+    Parameters:
+     - config_str
+    """
+    self.send_bm_load_new_config(config_str)
+    self.recv_bm_load_new_config()
+
+  def send_bm_load_new_config(self, config_str):
+    self._oprot.writeMessageBegin('bm_load_new_config', TMessageType.CALL, self._seqid)
+    args = bm_load_new_config_args()
+    args.config_str = config_str
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_load_new_config(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = bm_load_new_config_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
+    return
+
+  def bm_swap_configs(self):
+    self.send_bm_swap_configs()
+    self.recv_bm_swap_configs()
+
+  def send_bm_swap_configs(self):
+    self._oprot.writeMessageBegin('bm_swap_configs', TMessageType.CALL, self._seqid)
+    args = bm_swap_configs_args()
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_swap_configs(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = bm_swap_configs_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
+    return
+
   def bm_mc_mgrp_create(self, mgrp):
     """
     Parameters:
@@ -704,6 +771,8 @@ class Processor(Iface, TProcessor):
     self._processMap["bm_table_reset_counters"] = Processor.process_bm_table_reset_counters
     self._processMap["bm_learning_ack"] = Processor.process_bm_learning_ack
     self._processMap["bm_learning_ack_buffer"] = Processor.process_bm_learning_ack_buffer
+    self._processMap["bm_load_new_config"] = Processor.process_bm_load_new_config
+    self._processMap["bm_swap_configs"] = Processor.process_bm_swap_configs
     self._processMap["bm_mc_mgrp_create"] = Processor.process_bm_mc_mgrp_create
     self._processMap["bm_mc_mgrp_destroy"] = Processor.process_bm_mc_mgrp_destroy
     self._processMap["bm_mc_l1_node_create"] = Processor.process_bm_mc_l1_node_create
@@ -830,6 +899,34 @@ class Processor(Iface, TProcessor):
     result = bm_learning_ack_buffer_result()
     self._handler.bm_learning_ack_buffer(args.list_id, args.buffer_id)
     oprot.writeMessageBegin("bm_learning_ack_buffer", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_load_new_config(self, seqid, iprot, oprot):
+    args = bm_load_new_config_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_load_new_config_result()
+    try:
+      self._handler.bm_load_new_config(args.config_str)
+    except InvalidSwapOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_load_new_config", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_swap_configs(self, seqid, iprot, oprot):
+    args = bm_swap_configs_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_swap_configs_result()
+    try:
+      self._handler.bm_swap_configs()
+    except InvalidSwapOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_swap_configs", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -2193,6 +2290,249 @@ class bm_learning_ack_buffer_result:
 
   def __hash__(self):
     value = 17
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_load_new_config_args:
+  """
+  Attributes:
+   - config_str
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'config_str', None, None, ), # 1
+  )
+
+  def __init__(self, config_str=None,):
+    self.config_str = config_str
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.config_str = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_load_new_config_args')
+    if self.config_str is not None:
+      oprot.writeFieldBegin('config_str', TType.STRING, 1)
+      oprot.writeString(self.config_str)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.config_str)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_load_new_config_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidSwapOperation, InvalidSwapOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidSwapOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_load_new_config_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.ouch)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_swap_configs_args:
+
+  thrift_spec = (
+  )
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_swap_configs_args')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_swap_configs_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidSwapOperation, InvalidSwapOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidSwapOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_swap_configs_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.ouch)
     return value
 
   def __repr__(self):

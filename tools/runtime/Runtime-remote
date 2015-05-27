@@ -32,6 +32,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print('  void bm_table_reset_counters(string table_name)')
   print('  void bm_learning_ack(BmLearningListId list_id, BmLearningBufferId buffer_id,  sample_ids)')
   print('  void bm_learning_ack_buffer(BmLearningListId list_id, BmLearningBufferId buffer_id)')
+  print('  void bm_load_new_config(string config_str)')
+  print('  void bm_swap_configs()')
   print('  BmMcMgrpHandle bm_mc_mgrp_create(BmMcMgrp mgrp)')
   print('  void bm_mc_mgrp_destroy(BmMcMgrpHandle mgrp_handle)')
   print('  BmMcL1Handle bm_mc_l1_node_create(BmMcRid rid)')
@@ -143,6 +145,18 @@ elif cmd == 'bm_learning_ack_buffer':
     print('bm_learning_ack_buffer requires 2 args')
     sys.exit(1)
   pp.pprint(client.bm_learning_ack_buffer(eval(args[0]),eval(args[1]),))
+
+elif cmd == 'bm_load_new_config':
+  if len(args) != 1:
+    print('bm_load_new_config requires 1 args')
+    sys.exit(1)
+  pp.pprint(client.bm_load_new_config(args[0],))
+
+elif cmd == 'bm_swap_configs':
+  if len(args) != 0:
+    print('bm_swap_configs requires 0 args')
+    sys.exit(1)
+  pp.pprint(client.bm_swap_configs())
 
 elif cmd == 'bm_mc_mgrp_create':
   if len(args) != 1:

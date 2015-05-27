@@ -495,6 +495,31 @@ class RuntimeAPI(cmd.Cmd):
         self.client.bm_mc_l2_node_destroy(l2_hdl)
         print "SUCCESS"
 
+    def do_load_new_config_file(self, line):
+        "Load new json config: load_new_config_file <path to .json file>"        
+        filename = line
+        if not os.path.isfile(filename):
+            print filename, "is not a valid file"
+            return
+        print "Loading new Json config"
+        with open(filename, 'r') as f:
+            json_str = f.read()
+            try:
+                json.loads(json_str)
+            except:
+                print filename, "is not a valid json file"
+                return
+            # TODO: catch exception
+            self.client.bm_load_new_config(json_str)
+        print "SUCCESS"
+
+    def do_swap_configs(self, line):
+        "Swap the 2 existing configs, need to have called load_new_config_file before"
+        print "Swapping configs"
+        # TODO: catch exception
+        self.client.bm_swap_configs()
+        print "SUCCESS"
+
 
 def thrift_connect():
     # Make socket

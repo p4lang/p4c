@@ -14,6 +14,7 @@ Switch::Switch(bool enable_swap)
 void Switch::init_objects(const std::string &json_path) {
   std::fstream fs(json_path);
   p4objects->init_objects(fs);
+  Packet::set_phv_factory(p4objects->get_phv_factory());
 }
 
 MatchTable::ErrorCode Switch::table_add_entry(
@@ -98,7 +99,7 @@ RuntimeInterface::ErrorCode Switch::load_new_config(const std::string &new_confi
   if(p4objects != p4objects_rt) return ONGOING_SWAP;
   p4objects_rt = std::make_shared<P4Objects>();
   std::stringstream ss(new_config);
-  p4objects->init_objects(ss);
+  p4objects_rt->init_objects(ss);
   return SUCCESS;
 }
  
@@ -115,6 +116,7 @@ int Switch::do_swap() {
   if(!swap_ordered) return 1;
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);
   p4objects = p4objects_rt;
+  Packet::swap_phv_factory(p4objects->get_phv_factory());
   swap_ordered = false;
   return 0;
 }

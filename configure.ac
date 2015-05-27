@@ -20,6 +20,7 @@ PICKY_CFLAGS=""
 # I do not want work to use AC_DEFINE cause I do not want to include config.h
 # It interfers with Thrift's config.h and it's too much work to do that cleanly
 DEBUG_CPPFLAGS=""
+DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -g"
 DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -DELOGGER_NANOMSG"
 # DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -DENABLE_SIMPLELOG"
 AC_SUBST([PICKY_CXXFLAGS])

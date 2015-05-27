@@ -486,8 +486,6 @@ void P4Objects::init_objects(std::istream &is) {
 
     learn_engine->list_init(list_id);
   }
-
-  Packet::set_phv_factory(phv_factory);
 }
 
 void P4Objects::destroy_objects() {

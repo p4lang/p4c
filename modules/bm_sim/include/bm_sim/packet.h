@@ -112,6 +112,7 @@ private:
 public:
   static void set_phv_factory(const PHVFactory &phv_factory);
   static void unset_phv_factory();
+  static void swap_phv_factory(const PHVFactory &phv_factory);
 
 private:
   // static variable

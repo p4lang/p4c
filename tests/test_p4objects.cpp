@@ -47,5 +47,5 @@ TEST(P4Objects, LoadFromJSON) {
   ASSERT_NE(nullptr, objects.get_conditional("_condition_0"));
   ASSERT_NE(nullptr, objects.get_control_node("forward"));
 
-  objects.destroy_objects();
+  // objects.destroy_objects();
 }
