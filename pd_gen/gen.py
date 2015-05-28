@@ -17,12 +17,17 @@ parser.add_argument('--json', help='JSON description of P4 program',
                     type=str, action="store", required=True)
 parser.add_argument('--p4-prefix', help='P4 name use for API function prefix',
                     type=str, action="store", required=True)
+parser.add_argument('--plugin', dest='plugin_list', action="append",
+                        default = [],
+                        help="list of plugins to generate templates")
 
 args = parser.parse_args()
 
 _THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 
 templates_dir = os.path.join(_THIS_DIR, "templates")
+plugin_base = os.path.join(_THIS_DIR, 'plugin/')
+
 
 TABLES = {}
 ACTIONS = {}
@@ -168,13 +173,13 @@ def gen_file_lists(current_dir, gen_dir):
         for filename in files:
             if ignore_template_file(filename):
                 continue
-            relpath = os.path.relpath(os.path.join(root, filename), templates_dir)
+            relpath = os.path.relpath(os.path.join(root, filename), current_dir)
             template_file = relpath
             target_file = os.path.join(gen_dir, relpath)
             files_out.append((template_file, target_file))
     return files_out
 
-def render_all_files(render_dict, gen_dir):
+def render_all_files(render_dict, gen_dir, with_plugin_list=[]):
     files = gen_file_lists(templates_dir, gen_dir)
     for template, target in files:
         path = os.path.dirname(target)
@@ -183,6 +188,19 @@ def render_all_files(render_dict, gen_dir):
         with open(target, "w") as f:
             render_template(f, template, render_dict, templates_dir,
                             prefix = tenjin_prefix)
+    if len(with_plugin_list) > 0:
+        for s in with_plugin_list:
+            plugin_dir =  plugin_base + s
+            plugin_files = gen_file_lists(plugin_dir, gen_dir+'/plugin/'+s)
+            for template, target in plugin_files:
+                path = os.path.dirname(target)
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                with open(target, "w") as f:
+                    render_template(f, template, render_dict, plugin_dir,
+                            prefix = tenjin_prefix)
+
+
 
 def _validate_dir(dir_name):
     if not os.path.isdir(dir_name):
@@ -238,7 +256,8 @@ def main():
     render_dict["tables"] = TABLES
     render_dict["actions"] = ACTIONS
     render_dict["learn_quantas"] = LEARN_QUANTAS
-    render_all_files(render_dict, _validate_dir(os.path.join(_THIS_DIR, "gen-cpp")))
+    render_all_files(render_dict, _validate_dir(os.path.join(_THIS_DIR, "gen-cpp")),
+                           with_plugin_list = args.plugin_list)
 
 if __name__ == '__main__':
     main()
