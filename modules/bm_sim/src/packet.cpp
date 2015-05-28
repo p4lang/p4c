@@ -83,6 +83,13 @@ Packet::unset_phv_factory() {
   phv_pool = nullptr;
 }
 
+void
+Packet::swap_phv_factory(const PHVFactory &phv_factory) {
+  assert(phv_pool);
+  delete phv_pool;
+  phv_pool = new PHVPool(phv_factory);
+}
+
 Packet::PHVPool::PHVPool(const PHVFactory &phv_factory)
   : phv_factory(phv_factory) {
   phvs.push_back(std::move(phv_factory.create()));

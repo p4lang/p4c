@@ -350,7 +350,7 @@ class RuntimeAPI(cmd.Cmd):
             "runtime data:",
             "\t".join(printable_byte_str(d) for d in runtime_data)
         )
-        self.client.bm_set_default_action(table_name, action_name, runtime_data)
+        self.client.bm_match_table_set_default_action(table_name, action_name, runtime_data)
         print "SUCCESS"
 
     def complete_table_set_default(self, text, line, start_index, end_index):
@@ -404,7 +404,7 @@ class RuntimeAPI(cmd.Cmd):
             "\t".join(printable_byte_str(d) for d in runtime_data)
         )
 
-        entry_handle = self.client.bm_table_add_entry(
+        entry_handle = self.client.bm_match_table_add_entry(
             table_name, match_key, action_name, runtime_data,
             BmAddEntryOptions(priority = priority)
         )
@@ -423,7 +423,7 @@ class RuntimeAPI(cmd.Cmd):
             return
         entry_handle = int(args[1])
         print "Deleting entry", entry_handle, "from", table_name
-        self.client.bm_table_delete_entry(table_name, entry_handle)
+        self.client.bm_match_table_delete_entry(table_name, entry_handle)
         print "SUCCESS"
 
     def complete_table_delete(self, text, line, start_index, end_index):
@@ -493,6 +493,31 @@ class RuntimeAPI(cmd.Cmd):
         l2_hdl = int(line.split()[0])
         print "Destroying l2 node", l2_hdl,
         self.client.bm_mc_l2_node_destroy(l2_hdl)
+        print "SUCCESS"
+
+    def do_load_new_config_file(self, line):
+        "Load new json config: load_new_config_file <path to .json file>"        
+        filename = line
+        if not os.path.isfile(filename):
+            print filename, "is not a valid file"
+            return
+        print "Loading new Json config"
+        with open(filename, 'r') as f:
+            json_str = f.read()
+            try:
+                json.loads(json_str)
+            except:
+                print filename, "is not a valid json file"
+                return
+            # TODO: catch exception
+            self.client.bm_load_new_config(json_str)
+        print "SUCCESS"
+
+    def do_swap_configs(self, line):
+        "Swap the 2 existing configs, need to have called load_new_config_file before"
+        print "Swapping configs"
+        # TODO: catch exception
+        self.client.bm_swap_configs()
         print "SUCCESS"
 
 

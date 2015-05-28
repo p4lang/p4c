@@ -70,7 +70,7 @@ class RuntimeHandler : virtual public RuntimeIf {
     std::cout << std::endl;
   }
 
-  BmEntryHandle bm_table_add_entry(const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
+  BmEntryHandle bm_match_table_add_entry(const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
     std::cout << "bm_table_add_entry" << std::endl
 	      << table_name << std::endl;
     for(const auto &p : match_key)
@@ -82,20 +82,20 @@ class RuntimeHandler : virtual public RuntimeIf {
     return 0;
   }
 
-  void bm_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
+  void bm_match_table_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
     std::cout << "bm_set_default_action" << std::endl
 	      << table_name << std::endl
 	      << action_name << std::endl;
     print_spec(action_data);
   }
 
-  void bm_table_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
+  void bm_match_table_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
     std::cout << "bm_table_delete_entry" << std::endl
 	      << table_name << std::endl
 	      << entry_handle << std::endl;
   }
 
-  void bm_table_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const std::string &action_name, const BmActionData& action_data) {
+  void bm_match_table_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const std::string &action_name, const BmActionData& action_data) {
     std::cout << "bm_table_modify_entry" << std::endl
 	      << table_name << std::endl
 	      << entry_handle << std::endl

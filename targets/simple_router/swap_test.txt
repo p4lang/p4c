@@ -1,0 +1,44 @@
+shell echo 'Loading initial entries'
+table_set_default send_frame _drop
+table_set_default forward _drop
+table_set_default ipv4_lpm _drop
+table_add send_frame rewrite_mac 1 => 00:aa:bb:00:00:00
+table_add send_frame rewrite_mac 2 => 00:aa:bb:00:00:01
+table_add forward set_dmac 10.0.0.10 => 00:04:00:00:00:00
+table_add forward set_dmac 10.0.1.10 => 00:04:00:00:00:01
+table_add ipv4_lpm set_nhop 10.0.0.10/32 => 10.0.0.10 1
+table_add ipv4_lpm set_nhop 10.0.1.10/32 => 10.0.1.10 2
+shell echo 'Done, sleeping for 5 secs'
+shell echo 'Traffic can get through'
+shell sleep 5
+shell echo 'Swap, with same json'
+load_new_config_file simple_router.json
+shell echo 'Sleeping for 5 secs'
+shell echo 'Ready to swap, traffic should get through still, no interruption'
+shell echo 'Swapping now'
+swap_configs
+shell echo 'Done, sleeping for 5 secs'
+shell echo 'No entries so no traffic can get through'
+shell sleep 5
+shell echo 'Starting swap, with same json, but this time I will add entries'
+load_new_config_file simple_router.json
+shell echo 'Done, sleeping for 5 secs'
+shell echo 'Still no traffic'
+shell sleep 5
+shell echo 'Reloading all new entries'
+table_set_default send_frame _drop
+table_set_default forward _drop
+table_set_default ipv4_lpm _drop
+table_add send_frame rewrite_mac 1 => 00:aa:bb:00:00:00
+table_add send_frame rewrite_mac 2 => 00:aa:bb:00:00:01
+table_add forward set_dmac 10.0.0.10 => 00:04:00:00:00:00
+table_add forward set_dmac 10.0.1.10 => 00:04:00:00:00:01
+table_add ipv4_lpm set_nhop 10.0.0.10/32 => 10.0.0.10 1
+table_add ipv4_lpm set_nhop 10.0.1.10/32 => 10.0.1.10 2
+shell echo 'Done, sleeping for 5 secs'
+shell echo 'Swap has not yet be done, so no traffic'
+shell sleep 5
+shell echo 'Swapping'
+swap_configs
+shell echo 'Done'
+shell echo 'Traffic can go through now'

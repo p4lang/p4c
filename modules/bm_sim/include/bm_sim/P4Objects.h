@@ -46,20 +46,12 @@ public:
     return deparsers[name].get();
   }
 
-  ExactMatchTable *get_exact_match_table(const std::string &name) {
-    return exact_tables_map[name].get();
+  MatchTableAbstract *get_abstract_match_table(const std::string &name) {
+    return match_action_tables_map[name]->get_match_table();
   }
 
-  LongestPrefixMatchTable *get_lpm_table(const std::string &name) {
-    return lpm_tables_map[name].get();
-  }
-
-  TernaryMatchTable *get_ternary_match_table(const std::string &name) {
-    return ternary_tables_map[name].get();
-  }
-
-  MatchTable *get_match_table(const std::string &name) {
-    return tables_map[name];
+  MatchActionTable *get_match_action_table(const std::string &name) {
+    return match_action_tables_map[name].get();
   }
 
   Conditional *get_conditional(const std::string &name) {
@@ -103,27 +95,10 @@ private:
     deparsers[name] = std::move(deparser);
   }
 
-  void add_exact_match_table(const std::string &name,
-			     std::unique_ptr<ExactMatchTable> table) {
-    add_match_table(name, table.get());
-    exact_tables_map[name] = std::move(table);
-  }
-
-  void add_lpm_table(const std::string &name,
-		     std::unique_ptr<LongestPrefixMatchTable> table) {
-    add_match_table(name, table.get());
-    lpm_tables_map[name] = std::move(table);
-  }
-
-  void add_ternary_match_table(const std::string &name,
-			       std::unique_ptr<TernaryMatchTable> table) {
-    add_match_table(name, table.get());
-    ternary_tables_map[name] = std::move(table);
-  }
-
-  void add_match_table(const std::string &name, MatchTable *table) {
-    tables_map[name] = table;
-    add_control_node(name, table);
+  void add_match_action_table(const std::string &name,
+			      std::unique_ptr<MatchActionTable> table) {
+    add_control_node(name, table.get());
+    match_action_tables_map[name] = std::move(table);
   }
 
   void add_conditional(const std::string &name,
@@ -155,10 +130,7 @@ private:
   std::unordered_map<std::string, std::unique_ptr<HeaderType> > header_types_map{};
 
   // tables
-  std::unordered_map<std::string, std::unique_ptr<ExactMatchTable> > exact_tables_map{};
-  std::unordered_map<std::string, std::unique_ptr<LongestPrefixMatchTable> > lpm_tables_map{};
-  std::unordered_map<std::string, std::unique_ptr<TernaryMatchTable> > ternary_tables_map{};
-  std::unordered_map<std::string, MatchTable *> tables_map{};
+  std::unordered_map<std::string, std::unique_ptr<MatchActionTable> > match_action_tables_map{};
 
   std::unordered_map<std::string, std::unique_ptr<Conditional> > conditionals_map{};
 

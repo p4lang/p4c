@@ -18,7 +18,7 @@ except:
 
 
 class Iface:
-  def bm_table_add_entry(self, table_name, match_key, action_name, action_data, options):
+  def bm_match_table_add_entry(self, table_name, match_key, action_name, action_data, options):
     """
     Parameters:
      - table_name
@@ -29,7 +29,7 @@ class Iface:
     """
     pass
 
-  def bm_set_default_action(self, table_name, action_name, action_data):
+  def bm_match_table_set_default_action(self, table_name, action_name, action_data):
     """
     Parameters:
      - table_name
@@ -38,7 +38,7 @@ class Iface:
     """
     pass
 
-  def bm_table_delete_entry(self, table_name, entry_handle):
+  def bm_match_table_delete_entry(self, table_name, entry_handle):
     """
     Parameters:
      - table_name
@@ -46,7 +46,7 @@ class Iface:
     """
     pass
 
-  def bm_table_modify_entry(self, table_name, entry_handle, action_name, action_data):
+  def bm_match_table_modify_entry(self, table_name, entry_handle, action_name, action_data):
     """
     Parameters:
      - table_name
@@ -86,6 +86,16 @@ class Iface:
      - list_id
      - buffer_id
     """
+    pass
+
+  def bm_load_new_config(self, config_str):
+    """
+    Parameters:
+     - config_str
+    """
+    pass
+
+  def bm_swap_configs(self):
     pass
 
   def bm_mc_mgrp_create(self, mgrp):
@@ -155,7 +165,7 @@ class Client(Iface):
       self._oprot = oprot
     self._seqid = 0
 
-  def bm_table_add_entry(self, table_name, match_key, action_name, action_data, options):
+  def bm_match_table_add_entry(self, table_name, match_key, action_name, action_data, options):
     """
     Parameters:
      - table_name
@@ -164,12 +174,12 @@ class Client(Iface):
      - action_data
      - options
     """
-    self.send_bm_table_add_entry(table_name, match_key, action_name, action_data, options)
-    return self.recv_bm_table_add_entry()
+    self.send_bm_match_table_add_entry(table_name, match_key, action_name, action_data, options)
+    return self.recv_bm_match_table_add_entry()
 
-  def send_bm_table_add_entry(self, table_name, match_key, action_name, action_data, options):
-    self._oprot.writeMessageBegin('bm_table_add_entry', TMessageType.CALL, self._seqid)
-    args = bm_table_add_entry_args()
+  def send_bm_match_table_add_entry(self, table_name, match_key, action_name, action_data, options):
+    self._oprot.writeMessageBegin('bm_match_table_add_entry', TMessageType.CALL, self._seqid)
+    args = bm_match_table_add_entry_args()
     args.table_name = table_name
     args.match_key = match_key
     args.action_name = action_name
@@ -179,7 +189,7 @@ class Client(Iface):
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_bm_table_add_entry(self):
+  def recv_bm_match_table_add_entry(self):
     iprot = self._iprot
     (fname, mtype, rseqid) = iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
@@ -187,28 +197,28 @@ class Client(Iface):
       x.read(iprot)
       iprot.readMessageEnd()
       raise x
-    result = bm_table_add_entry_result()
+    result = bm_match_table_add_entry_result()
     result.read(iprot)
     iprot.readMessageEnd()
     if result.success is not None:
       return result.success
     if result.ouch is not None:
       raise result.ouch
-    raise TApplicationException(TApplicationException.MISSING_RESULT, "bm_table_add_entry failed: unknown result");
+    raise TApplicationException(TApplicationException.MISSING_RESULT, "bm_match_table_add_entry failed: unknown result");
 
-  def bm_set_default_action(self, table_name, action_name, action_data):
+  def bm_match_table_set_default_action(self, table_name, action_name, action_data):
     """
     Parameters:
      - table_name
      - action_name
      - action_data
     """
-    self.send_bm_set_default_action(table_name, action_name, action_data)
-    self.recv_bm_set_default_action()
+    self.send_bm_match_table_set_default_action(table_name, action_name, action_data)
+    self.recv_bm_match_table_set_default_action()
 
-  def send_bm_set_default_action(self, table_name, action_name, action_data):
-    self._oprot.writeMessageBegin('bm_set_default_action', TMessageType.CALL, self._seqid)
-    args = bm_set_default_action_args()
+  def send_bm_match_table_set_default_action(self, table_name, action_name, action_data):
+    self._oprot.writeMessageBegin('bm_match_table_set_default_action', TMessageType.CALL, self._seqid)
+    args = bm_match_table_set_default_action_args()
     args.table_name = table_name
     args.action_name = action_name
     args.action_data = action_data
@@ -216,7 +226,7 @@ class Client(Iface):
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_bm_set_default_action(self):
+  def recv_bm_match_table_set_default_action(self):
     iprot = self._iprot
     (fname, mtype, rseqid) = iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
@@ -224,32 +234,32 @@ class Client(Iface):
       x.read(iprot)
       iprot.readMessageEnd()
       raise x
-    result = bm_set_default_action_result()
+    result = bm_match_table_set_default_action_result()
     result.read(iprot)
     iprot.readMessageEnd()
     if result.ouch is not None:
       raise result.ouch
     return
 
-  def bm_table_delete_entry(self, table_name, entry_handle):
+  def bm_match_table_delete_entry(self, table_name, entry_handle):
     """
     Parameters:
      - table_name
      - entry_handle
     """
-    self.send_bm_table_delete_entry(table_name, entry_handle)
-    self.recv_bm_table_delete_entry()
+    self.send_bm_match_table_delete_entry(table_name, entry_handle)
+    self.recv_bm_match_table_delete_entry()
 
-  def send_bm_table_delete_entry(self, table_name, entry_handle):
-    self._oprot.writeMessageBegin('bm_table_delete_entry', TMessageType.CALL, self._seqid)
-    args = bm_table_delete_entry_args()
+  def send_bm_match_table_delete_entry(self, table_name, entry_handle):
+    self._oprot.writeMessageBegin('bm_match_table_delete_entry', TMessageType.CALL, self._seqid)
+    args = bm_match_table_delete_entry_args()
     args.table_name = table_name
     args.entry_handle = entry_handle
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_bm_table_delete_entry(self):
+  def recv_bm_match_table_delete_entry(self):
     iprot = self._iprot
     (fname, mtype, rseqid) = iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
@@ -257,14 +267,14 @@ class Client(Iface):
       x.read(iprot)
       iprot.readMessageEnd()
       raise x
-    result = bm_table_delete_entry_result()
+    result = bm_match_table_delete_entry_result()
     result.read(iprot)
     iprot.readMessageEnd()
     if result.ouch is not None:
       raise result.ouch
     return
 
-  def bm_table_modify_entry(self, table_name, entry_handle, action_name, action_data):
+  def bm_match_table_modify_entry(self, table_name, entry_handle, action_name, action_data):
     """
     Parameters:
      - table_name
@@ -272,12 +282,12 @@ class Client(Iface):
      - action_name
      - action_data
     """
-    self.send_bm_table_modify_entry(table_name, entry_handle, action_name, action_data)
-    self.recv_bm_table_modify_entry()
+    self.send_bm_match_table_modify_entry(table_name, entry_handle, action_name, action_data)
+    self.recv_bm_match_table_modify_entry()
 
-  def send_bm_table_modify_entry(self, table_name, entry_handle, action_name, action_data):
-    self._oprot.writeMessageBegin('bm_table_modify_entry', TMessageType.CALL, self._seqid)
-    args = bm_table_modify_entry_args()
+  def send_bm_match_table_modify_entry(self, table_name, entry_handle, action_name, action_data):
+    self._oprot.writeMessageBegin('bm_match_table_modify_entry', TMessageType.CALL, self._seqid)
+    args = bm_match_table_modify_entry_args()
     args.table_name = table_name
     args.entry_handle = entry_handle
     args.action_name = action_name
@@ -286,7 +296,7 @@ class Client(Iface):
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_bm_table_modify_entry(self):
+  def recv_bm_match_table_modify_entry(self):
     iprot = self._iprot
     (fname, mtype, rseqid) = iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
@@ -294,7 +304,7 @@ class Client(Iface):
       x.read(iprot)
       iprot.readMessageEnd()
       raise x
-    result = bm_table_modify_entry_result()
+    result = bm_match_table_modify_entry_result()
     result.read(iprot)
     iprot.readMessageEnd()
     if result.ouch is not None:
@@ -429,6 +439,63 @@ class Client(Iface):
     result = bm_learning_ack_buffer_result()
     result.read(iprot)
     iprot.readMessageEnd()
+    return
+
+  def bm_load_new_config(self, config_str):
+    """
+    Parameters:
+     - config_str
+    """
+    self.send_bm_load_new_config(config_str)
+    self.recv_bm_load_new_config()
+
+  def send_bm_load_new_config(self, config_str):
+    self._oprot.writeMessageBegin('bm_load_new_config', TMessageType.CALL, self._seqid)
+    args = bm_load_new_config_args()
+    args.config_str = config_str
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_load_new_config(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = bm_load_new_config_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
+    return
+
+  def bm_swap_configs(self):
+    self.send_bm_swap_configs()
+    self.recv_bm_swap_configs()
+
+  def send_bm_swap_configs(self):
+    self._oprot.writeMessageBegin('bm_swap_configs', TMessageType.CALL, self._seqid)
+    args = bm_swap_configs_args()
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_swap_configs(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = bm_swap_configs_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
     return
 
   def bm_mc_mgrp_create(self, mgrp):
@@ -696,14 +763,16 @@ class Processor(Iface, TProcessor):
   def __init__(self, handler):
     self._handler = handler
     self._processMap = {}
-    self._processMap["bm_table_add_entry"] = Processor.process_bm_table_add_entry
-    self._processMap["bm_set_default_action"] = Processor.process_bm_set_default_action
-    self._processMap["bm_table_delete_entry"] = Processor.process_bm_table_delete_entry
-    self._processMap["bm_table_modify_entry"] = Processor.process_bm_table_modify_entry
+    self._processMap["bm_match_table_add_entry"] = Processor.process_bm_match_table_add_entry
+    self._processMap["bm_match_table_set_default_action"] = Processor.process_bm_match_table_set_default_action
+    self._processMap["bm_match_table_delete_entry"] = Processor.process_bm_match_table_delete_entry
+    self._processMap["bm_match_table_modify_entry"] = Processor.process_bm_match_table_modify_entry
     self._processMap["bm_table_read_counter"] = Processor.process_bm_table_read_counter
     self._processMap["bm_table_reset_counters"] = Processor.process_bm_table_reset_counters
     self._processMap["bm_learning_ack"] = Processor.process_bm_learning_ack
     self._processMap["bm_learning_ack_buffer"] = Processor.process_bm_learning_ack_buffer
+    self._processMap["bm_load_new_config"] = Processor.process_bm_load_new_config
+    self._processMap["bm_swap_configs"] = Processor.process_bm_swap_configs
     self._processMap["bm_mc_mgrp_create"] = Processor.process_bm_mc_mgrp_create
     self._processMap["bm_mc_mgrp_destroy"] = Processor.process_bm_mc_mgrp_destroy
     self._processMap["bm_mc_l1_node_create"] = Processor.process_bm_mc_l1_node_create
@@ -728,58 +797,58 @@ class Processor(Iface, TProcessor):
       self._processMap[name](self, seqid, iprot, oprot)
     return True
 
-  def process_bm_table_add_entry(self, seqid, iprot, oprot):
-    args = bm_table_add_entry_args()
+  def process_bm_match_table_add_entry(self, seqid, iprot, oprot):
+    args = bm_match_table_add_entry_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = bm_table_add_entry_result()
+    result = bm_match_table_add_entry_result()
     try:
-      result.success = self._handler.bm_table_add_entry(args.table_name, args.match_key, args.action_name, args.action_data, args.options)
+      result.success = self._handler.bm_match_table_add_entry(args.table_name, args.match_key, args.action_name, args.action_data, args.options)
     except InvalidTableOperation, ouch:
       result.ouch = ouch
-    oprot.writeMessageBegin("bm_table_add_entry", TMessageType.REPLY, seqid)
+    oprot.writeMessageBegin("bm_match_table_add_entry", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_bm_set_default_action(self, seqid, iprot, oprot):
-    args = bm_set_default_action_args()
+  def process_bm_match_table_set_default_action(self, seqid, iprot, oprot):
+    args = bm_match_table_set_default_action_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = bm_set_default_action_result()
+    result = bm_match_table_set_default_action_result()
     try:
-      self._handler.bm_set_default_action(args.table_name, args.action_name, args.action_data)
+      self._handler.bm_match_table_set_default_action(args.table_name, args.action_name, args.action_data)
     except InvalidTableOperation, ouch:
       result.ouch = ouch
-    oprot.writeMessageBegin("bm_set_default_action", TMessageType.REPLY, seqid)
+    oprot.writeMessageBegin("bm_match_table_set_default_action", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_bm_table_delete_entry(self, seqid, iprot, oprot):
-    args = bm_table_delete_entry_args()
+  def process_bm_match_table_delete_entry(self, seqid, iprot, oprot):
+    args = bm_match_table_delete_entry_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = bm_table_delete_entry_result()
+    result = bm_match_table_delete_entry_result()
     try:
-      self._handler.bm_table_delete_entry(args.table_name, args.entry_handle)
+      self._handler.bm_match_table_delete_entry(args.table_name, args.entry_handle)
     except InvalidTableOperation, ouch:
       result.ouch = ouch
-    oprot.writeMessageBegin("bm_table_delete_entry", TMessageType.REPLY, seqid)
+    oprot.writeMessageBegin("bm_match_table_delete_entry", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_bm_table_modify_entry(self, seqid, iprot, oprot):
-    args = bm_table_modify_entry_args()
+  def process_bm_match_table_modify_entry(self, seqid, iprot, oprot):
+    args = bm_match_table_modify_entry_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = bm_table_modify_entry_result()
+    result = bm_match_table_modify_entry_result()
     try:
-      self._handler.bm_table_modify_entry(args.table_name, args.entry_handle, args.action_name, args.action_data)
+      self._handler.bm_match_table_modify_entry(args.table_name, args.entry_handle, args.action_name, args.action_data)
     except InvalidTableOperation, ouch:
       result.ouch = ouch
-    oprot.writeMessageBegin("bm_table_modify_entry", TMessageType.REPLY, seqid)
+    oprot.writeMessageBegin("bm_match_table_modify_entry", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -830,6 +899,34 @@ class Processor(Iface, TProcessor):
     result = bm_learning_ack_buffer_result()
     self._handler.bm_learning_ack_buffer(args.list_id, args.buffer_id)
     oprot.writeMessageBegin("bm_learning_ack_buffer", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_load_new_config(self, seqid, iprot, oprot):
+    args = bm_load_new_config_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_load_new_config_result()
+    try:
+      self._handler.bm_load_new_config(args.config_str)
+    except InvalidSwapOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_load_new_config", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_swap_configs(self, seqid, iprot, oprot):
+    args = bm_swap_configs_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_swap_configs_result()
+    try:
+      self._handler.bm_swap_configs()
+    except InvalidSwapOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_swap_configs", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -949,7 +1046,7 @@ class Processor(Iface, TProcessor):
 
 # HELPER FUNCTIONS AND STRUCTURES
 
-class bm_table_add_entry_args:
+class bm_match_table_add_entry_args:
   """
   Attributes:
    - table_name
@@ -1030,7 +1127,7 @@ class bm_table_add_entry_args:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_table_add_entry_args')
+    oprot.writeStructBegin('bm_match_table_add_entry_args')
     if self.table_name is not None:
       oprot.writeFieldBegin('table_name', TType.STRING, 1)
       oprot.writeString(self.table_name)
@@ -1084,7 +1181,7 @@ class bm_table_add_entry_args:
   def __ne__(self, other):
     return not (self == other)
 
-class bm_table_add_entry_result:
+class bm_match_table_add_entry_result:
   """
   Attributes:
    - success
@@ -1129,7 +1226,7 @@ class bm_table_add_entry_result:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_table_add_entry_result')
+    oprot.writeStructBegin('bm_match_table_add_entry_result')
     if self.success is not None:
       oprot.writeFieldBegin('success', TType.I32, 0)
       oprot.writeI32(self.success)
@@ -1162,7 +1259,7 @@ class bm_table_add_entry_result:
   def __ne__(self, other):
     return not (self == other)
 
-class bm_set_default_action_args:
+class bm_match_table_set_default_action_args:
   """
   Attributes:
    - table_name
@@ -1220,7 +1317,7 @@ class bm_set_default_action_args:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_set_default_action_args')
+    oprot.writeStructBegin('bm_match_table_set_default_action_args')
     if self.table_name is not None:
       oprot.writeFieldBegin('table_name', TType.STRING, 1)
       oprot.writeString(self.table_name)
@@ -1261,7 +1358,7 @@ class bm_set_default_action_args:
   def __ne__(self, other):
     return not (self == other)
 
-class bm_set_default_action_result:
+class bm_match_table_set_default_action_result:
   """
   Attributes:
    - ouch
@@ -1299,7 +1396,7 @@ class bm_set_default_action_result:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_set_default_action_result')
+    oprot.writeStructBegin('bm_match_table_set_default_action_result')
     if self.ouch is not None:
       oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
       self.ouch.write(oprot)
@@ -1327,7 +1424,7 @@ class bm_set_default_action_result:
   def __ne__(self, other):
     return not (self == other)
 
-class bm_table_delete_entry_args:
+class bm_match_table_delete_entry_args:
   """
   Attributes:
    - table_name
@@ -1372,7 +1469,7 @@ class bm_table_delete_entry_args:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_table_delete_entry_args')
+    oprot.writeStructBegin('bm_match_table_delete_entry_args')
     if self.table_name is not None:
       oprot.writeFieldBegin('table_name', TType.STRING, 1)
       oprot.writeString(self.table_name)
@@ -1405,7 +1502,7 @@ class bm_table_delete_entry_args:
   def __ne__(self, other):
     return not (self == other)
 
-class bm_table_delete_entry_result:
+class bm_match_table_delete_entry_result:
   """
   Attributes:
    - ouch
@@ -1443,7 +1540,7 @@ class bm_table_delete_entry_result:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_table_delete_entry_result')
+    oprot.writeStructBegin('bm_match_table_delete_entry_result')
     if self.ouch is not None:
       oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
       self.ouch.write(oprot)
@@ -1471,7 +1568,7 @@ class bm_table_delete_entry_result:
   def __ne__(self, other):
     return not (self == other)
 
-class bm_table_modify_entry_args:
+class bm_match_table_modify_entry_args:
   """
   Attributes:
    - table_name
@@ -1537,7 +1634,7 @@ class bm_table_modify_entry_args:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_table_modify_entry_args')
+    oprot.writeStructBegin('bm_match_table_modify_entry_args')
     if self.table_name is not None:
       oprot.writeFieldBegin('table_name', TType.STRING, 1)
       oprot.writeString(self.table_name)
@@ -1583,7 +1680,7 @@ class bm_table_modify_entry_args:
   def __ne__(self, other):
     return not (self == other)
 
-class bm_table_modify_entry_result:
+class bm_match_table_modify_entry_result:
   """
   Attributes:
    - ouch
@@ -1621,7 +1718,7 @@ class bm_table_modify_entry_result:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_table_modify_entry_result')
+    oprot.writeStructBegin('bm_match_table_modify_entry_result')
     if self.ouch is not None:
       oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
       self.ouch.write(oprot)
@@ -2193,6 +2290,249 @@ class bm_learning_ack_buffer_result:
 
   def __hash__(self):
     value = 17
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_load_new_config_args:
+  """
+  Attributes:
+   - config_str
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'config_str', None, None, ), # 1
+  )
+
+  def __init__(self, config_str=None,):
+    self.config_str = config_str
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.config_str = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_load_new_config_args')
+    if self.config_str is not None:
+      oprot.writeFieldBegin('config_str', TType.STRING, 1)
+      oprot.writeString(self.config_str)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.config_str)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_load_new_config_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidSwapOperation, InvalidSwapOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidSwapOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_load_new_config_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.ouch)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_swap_configs_args:
+
+  thrift_spec = (
+  )
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_swap_configs_args')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_swap_configs_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidSwapOperation, InvalidSwapOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidSwapOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_swap_configs_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.ouch)
     return value
 
   def __repr__(self):

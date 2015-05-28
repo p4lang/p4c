@@ -131,7 +131,7 @@ ${name}
 //::     if match_type == MatchType.TERNARY:
   options.__set_priority(priority);
 //::     #endif
-  *entry_hdl = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_table_add_entry(
+  *entry_hdl = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_match_table_add_entry(
        "${t_name}",
        match_key,
        "${a_name}",
@@ -157,7 +157,7 @@ ${name}
  p4_pd_entry_hdl_t entry_hdl
 ) {
   assert(my_devices[dev_id]);
-  pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_table_delete_entry("${t_name}", entry_hdl);
+  pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_match_table_delete_entry("${t_name}", entry_hdl);
   return 0;
 }
 
@@ -189,7 +189,7 @@ ${name}
 //::     else:
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
-  pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_table_modify_entry(
+  pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_match_table_modify_entry(
       "${t_name}", entry_hdl,
       "${a_name}", action_data
   );
@@ -226,7 +226,7 @@ ${name}
 //::     else:
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
-  pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_set_default_action(
+  pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_match_table_set_default_action(
       "${t_name}", "${a_name}",
       action_data
   );

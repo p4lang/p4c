@@ -27,7 +27,24 @@ class RuntimeHandler : virtual public RuntimeIf {
     // Your initialization goes here
   }
 
-  BmEntryHandle bm_table_add_entry(const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
+  static TableOperationErrorCode::type get_exception_code(MatchErrorCode bm_code) {
+    switch(bm_code) {
+    case MatchErrorCode::TABLE_FULL:
+      return TableOperationErrorCode::TABLE_FULL;
+    case MatchErrorCode::INVALID_HANDLE:
+      return TableOperationErrorCode::INVALID_HANDLE;
+    case MatchErrorCode::COUNTERS_DISABLED:
+      return TableOperationErrorCode::COUNTERS_DISABLED;
+    case MatchErrorCode::WRONG_TABLE_TYPE:
+      return TableOperationErrorCode::WRONG_TABLE_TYPE;
+    case MatchErrorCode::ERROR:
+      return TableOperationErrorCode::ERROR;
+    default:
+      assert(0 && "invalid error code");
+    }
+  }
+
+  BmEntryHandle bm_match_table_add_entry(const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
     printf("bm_table_add_entry\n");
     entry_handle_t entry_handle;
     std::vector<MatchKeyParam> params;
@@ -58,7 +75,7 @@ class RuntimeHandler : virtual public RuntimeIf {
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
-    MatchTable::ErrorCode error_code = switch_->table_add_entry(
+    MatchErrorCode error_code = switch_->match_table_add_entry(
         table_name,
 	params,
 	action_name,
@@ -66,60 +83,60 @@ class RuntimeHandler : virtual public RuntimeIf {
 	&entry_handle,
 	options.priority
     );
-    if(error_code != MatchTable::SUCCESS) {
+    if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
-      ito.what = (TableOperationErrorCode::type) error_code;
+      ito.what = get_exception_code(error_code);
       throw ito;
     }
     return entry_handle;
   }
 
-  void bm_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
+  void bm_match_table_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
     printf("bm_set_default_action\n");
     ActionData data;
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
-    MatchTable::ErrorCode error_code = switch_->table_set_default_action(
+    MatchErrorCode error_code = switch_->match_table_set_default_action(
         table_name,
 	action_name,
 	std::move(data)
     );
-    if(error_code != MatchTable::SUCCESS) {
+    if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
-      ito.what = (TableOperationErrorCode::type) error_code;
+      ito.what = get_exception_code(error_code);
       throw ito;
     }
   }
 
-  void bm_table_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
+  void bm_match_table_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
     printf("bm_table_delete_entry\n");
-    MatchTable::ErrorCode error_code = switch_->table_delete_entry(
+    MatchErrorCode error_code = switch_->match_table_delete_entry(
         table_name,
 	entry_handle
     );
-    if(error_code != MatchTable::SUCCESS) {
+    if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
-      ito.what = (TableOperationErrorCode::type) error_code;
+      ito.what = get_exception_code(error_code);
       throw ito;
     }
   }
 
-  void bm_table_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const std::string &action_name, const BmActionData& action_data) {
+  void bm_match_table_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const std::string &action_name, const BmActionData& action_data) {
     printf("bm_table_modify_entry\n");
     ActionData data;
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
-    MatchTable::ErrorCode error_code = switch_->table_modify_entry(
+    MatchErrorCode error_code = switch_->match_table_modify_entry(
         table_name,
 	entry_handle,
 	action_name,
 	data
     );
-    if(error_code != MatchTable::SUCCESS) {
+    if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
-      ito.what = (TableOperationErrorCode::type) error_code;
+      ito.what = get_exception_code(error_code);
       throw ito;
     }
   }
@@ -128,14 +145,14 @@ class RuntimeHandler : virtual public RuntimeIf {
     printf("bm_table_read_counter\n");
     MatchTable::counter_value_t bytes; // unsigned
     MatchTable::counter_value_t packets;
-    MatchTable::ErrorCode error_code = switch_->table_read_counters(
+    MatchErrorCode error_code = switch_->table_read_counters(
         table_name,
 	entry_handle,
 	&bytes, &packets
     );
-    if(error_code != MatchTable::SUCCESS) {
+    if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
-      ito.what = (TableOperationErrorCode::type) error_code;
+      ito.what = get_exception_code(error_code);
       throw ito;
     }
     _return.bytes = (int64_t) bytes;
@@ -144,12 +161,12 @@ class RuntimeHandler : virtual public RuntimeIf {
 
   void bm_table_reset_counters(const std::string& table_name) {
     printf("bm_table_reset_counters\n");
-    MatchTable::ErrorCode error_code = switch_->table_reset_counters(
+    MatchErrorCode error_code = switch_->table_reset_counters(
         table_name
     );
-    if(error_code != MatchTable::SUCCESS) {
+    if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
-      ito.what = (TableOperationErrorCode::type) error_code;
+      ito.what = get_exception_code(error_code);
       throw ito;
     }
   }

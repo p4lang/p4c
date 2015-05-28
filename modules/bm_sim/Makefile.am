@@ -16,7 +16,8 @@ src/fields.cpp \
 src/P4Objects.cpp \
 src/parser.cpp \
 src/pipeline.cpp \
-src/tables.cpp \
+src/match_units.cpp \
+src/match_tables.cpp \
 src/xxhash.h \
 src/conditionals.cpp \
 src/event_logger.cpp \

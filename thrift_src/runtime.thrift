@@ -62,7 +62,9 @@ struct BmCounterValue {
 enum TableOperationErrorCode {
   TABLE_FULL = 1,
   INVALID_HANDLE = 2,
-  ERROR = 3
+  COUNTERS_DISABLED = 3,
+  WRONG_TABLE_TYPE = 4,
+  ERROR = 5,
 }
 
 exception InvalidTableOperation {
@@ -96,7 +98,7 @@ service Runtime {
 	
   // table operations
 
-  BmEntryHandle bm_table_add_entry(
+  BmEntryHandle bm_match_table_add_entry(
     1:string table_name,
     2:BmMatchParams match_key,
     3:string action_name,
@@ -104,18 +106,18 @@ service Runtime {
     5:BmAddEntryOptions options
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_set_default_action(
+  void bm_match_table_set_default_action(
     1:string table_name,
     2:string action_name,
     3:BmActionData action_data
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_table_delete_entry(
+  void bm_match_table_delete_entry(
     1:string table_name,
     2:BmEntryHandle entry_handle
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_table_modify_entry(
+  void bm_match_table_modify_entry(
     1:string table_name,
     2:BmEntryHandle entry_handle,
     3:string action_name,

@@ -338,24 +338,32 @@ void P4Objects::init_objects(std::istream &is) {
       const bool with_counters = cfg_table["with_counters"].asBool();
       // for now, discard ageing and counters
       
+      std::unique_ptr<MatchTableAbstract> match_table;
       if(table_type == "exact") {
-      	ExactMatchTable *table =
-	  new ExactMatchTable(table_name, table_id, table_size,
-			      nbytes_key, key_builder, with_counters);
-	add_exact_match_table(table_name, unique_ptr<ExactMatchTable>(table));
+	match_table = MatchTable::create_match_table<MatchUnitExact>(
+          table_name, table_id,
+	  table_size, nbytes_key, key_builder, with_counters
+        );
       }
       else if(table_type == "lpm") {
-	LongestPrefixMatchTable *table =
-	  new LongestPrefixMatchTable(table_name, table_id, table_size,
-				      nbytes_key, key_builder, with_counters);
-	add_lpm_table(table_name, unique_ptr<LongestPrefixMatchTable>(table));
+	match_table = MatchTable::create_match_table<MatchUnitLPM>(
+          table_name, table_id,
+	  table_size, nbytes_key, key_builder, with_counters
+        );
       }
       else if(table_type == "ternary") {
-	TernaryMatchTable *table =
-	  new TernaryMatchTable(table_name, table_id, table_size,
-				nbytes_key, key_builder, with_counters);
-	add_ternary_match_table(table_name, unique_ptr<TernaryMatchTable>(table));
+	match_table = MatchTable::create_match_table<MatchUnitTernary>(
+          table_name, table_id,
+	  table_size, nbytes_key, key_builder, with_counters
+        );
       }
+
+      MatchActionTable *table = new MatchActionTable(
+        table_name, table_id, std::move(match_table)
+      );
+
+      add_match_action_table(table_name,
+			     std::unique_ptr<MatchActionTable>(table));
     }
 
     // pipelines -> conditionals
@@ -380,7 +388,7 @@ void P4Objects::init_objects(std::istream &is) {
     for (const auto &cfg_table : cfg_tables) {
 
       const string table_name = cfg_table["name"].asString();
-      MatchTable *table = get_match_table(table_name);
+      MatchTableAbstract *table = get_abstract_match_table(table_name);
 
       const Json::Value cfg_next_nodes = cfg_table["next_tables"];
       const Json::Value cfg_actions = cfg_table["actions"];
@@ -486,8 +494,6 @@ void P4Objects::init_objects(std::istream &is) {
 
     learn_engine->list_init(list_id);
   }
-
-  Packet::set_phv_factory(phv_factory);
 }
 
 void P4Objects::destroy_objects() {

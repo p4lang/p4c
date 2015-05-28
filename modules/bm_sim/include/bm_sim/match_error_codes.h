@@ -1,0 +1,13 @@
+#ifndef _BM_MATCH_ERROR_CODES_H_
+#define _BM_MATCH_ERROR_CODES_H_
+
+enum class MatchErrorCode {
+  SUCCESS = 0,
+  TABLE_FULL,
+  INVALID_HANDLE,
+  COUNTERS_DISABLED,
+  WRONG_TABLE_TYPE,
+  ERROR,
+};
+
+#endif

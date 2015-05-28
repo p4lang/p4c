@@ -16,13 +16,15 @@
    EventLogger interface */
 class Parser;
 class Deparser;
-class MatchTable;
+class MatchTableAbstract;
 class MatchEntry;
 class ActionFn;
 class ActionData;
 class Conditional;
 class Checksum;
 class ActionFn;
+
+typedef uintptr_t entry_handle_t;
 
 template <typename Transport>
 class EventLogger {
@@ -52,8 +54,8 @@ public:
   void condition_eval(const Packet &packet,
 		      const Conditional &cond, bool result);
   void table_hit(const Packet &packet,
-		 const MatchTable &table, const MatchEntry &entry);
-  void table_miss(const Packet &packet, const MatchTable &table);
+		 const MatchTableAbstract &table, entry_handle_t handle);
+  void table_miss(const Packet &packet, const MatchTableAbstract &table);
 
   void action_execute(const Packet &packet,
 		      const ActionFn &action_fn, const ActionData &action_data);

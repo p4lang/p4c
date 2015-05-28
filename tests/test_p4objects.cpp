@@ -41,11 +41,16 @@ TEST(P4Objects, LoadFromJSON) {
   ASSERT_NE(nullptr, objects.get_action("_drop"));
   ASSERT_NE(nullptr, objects.get_parser("parser"));
   ASSERT_NE(nullptr, objects.get_deparser("deparser"));
-  ASSERT_NE(nullptr, objects.get_exact_match_table("forward"));
-  ASSERT_NE(nullptr, objects.get_lpm_table("ipv4_lpm"));
-  ASSERT_NE(nullptr, objects.get_match_table("forward"));
+  MatchTableAbstract *table;
+  table = objects.get_abstract_match_table("forward"); 
+  ASSERT_NE(nullptr, table);
+  ASSERT_NE(nullptr, dynamic_cast<MatchTable *>(table));
+  table = objects.get_abstract_match_table("ipv4_lpm"); 
+  ASSERT_NE(nullptr, table);
+  ASSERT_NE(nullptr, dynamic_cast<MatchTable *>(table));
+  ASSERT_NE(nullptr, objects.get_match_action_table("forward"));
   ASSERT_NE(nullptr, objects.get_conditional("_condition_0"));
   ASSERT_NE(nullptr, objects.get_control_node("forward"));
 
-  objects.destroy_objects();
+  // objects.destroy_objects();
 }
