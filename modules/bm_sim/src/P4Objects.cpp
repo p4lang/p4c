@@ -309,8 +309,6 @@ void P4Objects::init_objects(std::istream &is) {
       const string table_name = cfg_table["name"].asString();
       p4object_id_t table_id = cfg_table["id"].asInt();
 
-      size_t nbytes_key = 0;
-
       MatchKeyBuilder key_builder;
       const Json::Value cfg_match_key = cfg_table["key"];
       for (const auto &cfg_key_entry : cfg_match_key) {
@@ -321,49 +319,28 @@ void P4Objects::init_objects(std::istream &is) {
 	  const string header_name = cfg_key_field.asString();
 	  header_id_t header_id = get_header_id(header_name);
 	  key_builder.push_back_valid_header(header_id);
-	  nbytes_key += 1;
 	}
 	else {
 	  const string header_name = cfg_key_field[0].asString();
 	  header_id_t header_id = get_header_id(header_name);
 	  const string field_name = cfg_key_field[1].asString();
 	  int field_offset = get_field_offset(header_id, field_name);
-	  key_builder.push_back_field(header_id, field_offset);
-	  nbytes_key += get_field_bytes(header_id, field_offset);
+	  key_builder.push_back_field(header_id, field_offset,
+				      get_field_bits(header_id, field_offset));
 	}
       }
 
       const string table_type = cfg_table["type"].asString();
       const int table_size = cfg_table["max_size"].asInt();
       const bool with_counters = cfg_table["with_counters"].asBool();
-      // for now, discard ageing and counters
-      
-      std::unique_ptr<MatchTableAbstract> match_table;
-      if(table_type == "exact") {
-	match_table = MatchTable::create_match_table<MatchUnitExact>(
-          table_name, table_id,
-	  table_size, nbytes_key, key_builder, with_counters
-        );
-      }
-      else if(table_type == "lpm") {
-	match_table = MatchTable::create_match_table<MatchUnitLPM>(
-          table_name, table_id,
-	  table_size, nbytes_key, key_builder, with_counters
-        );
-      }
-      else if(table_type == "ternary") {
-	match_table = MatchTable::create_match_table<MatchUnitTernary>(
-          table_name, table_id,
-	  table_size, nbytes_key, key_builder, with_counters
-        );
-      }
+      // for now, discard ageing
 
-      MatchActionTable *table = new MatchActionTable(
-        table_name, table_id, std::move(match_table)
-      );
+      std::unique_ptr<MatchActionTable> table =
+	MatchActionTable::create_match_action_table<MatchTable>(
+          table_type, table_name, table_id, table_size, key_builder, with_counters
+        );
 
-      add_match_action_table(table_name,
-			     std::unique_ptr<MatchActionTable>(table));
+      add_match_action_table(table_name, std::move(table));
     }
 
     // pipelines -> conditionals
@@ -505,8 +482,12 @@ int P4Objects::get_field_offset(header_id_t header_id, const string &field_name)
   return header_type.get_field_offset(field_name);  
 }
 
-size_t P4Objects::get_field_bytes(header_id_t header_id,
-				  int field_offset) {
+size_t P4Objects::get_field_bytes(header_id_t header_id, int field_offset) {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return (header_type.get_bit_width(field_offset) + 7) / 8;
+}
+
+size_t P4Objects::get_field_bits(header_id_t header_id, int field_offset) {
+  const HeaderType &header_type = phv_factory.get_header_type(header_id);
+  return header_type.get_bit_width(field_offset);
 }

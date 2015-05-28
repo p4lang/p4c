@@ -35,22 +35,22 @@ protected:
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
 
-    key_builder.push_back_field(testHeader1, 0);
+    key_builder.push_back_field(testHeader1, 0, 16);
 
-    key_builder_w_valid.push_back_field(testHeader1, 0);
+    key_builder_w_valid.push_back_field(testHeader1, 0, 16);
     key_builder_w_valid.push_back_valid_header(testHeader2);
 
     std::unique_ptr<MUType> match_unit;
     std::unique_ptr<MatchTableAbstract> match_table;
 
     // true enables counters
-    match_unit = std::unique_ptr<MUType>(new MUType(1, 2, key_builder));
+    match_unit = std::unique_ptr<MUType>(new MUType(1, key_builder));
     table = std::unique_ptr<MatchTable>(
       new MatchTable("test_table", 0, std::move(match_unit), true)
     );
     table->set_next_node(0, nullptr);
 
-    match_unit = std::unique_ptr<MUType>(new MUType(1, 2, key_builder_w_valid));
+    match_unit = std::unique_ptr<MUType>(new MUType(1, key_builder_w_valid));
     table_w_valid = std::unique_ptr<MatchTable>(
       new MatchTable("test_table", 0, std::move(match_unit))
     );

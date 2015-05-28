@@ -45,13 +45,16 @@ struct MatchKeyBuilder
 {
   std::vector<header_id_t> valid_headers{};
   std::vector<std::pair<header_id_t, int> > fields{};
+  size_t nbytes_key{0};
 
-  void push_back_field(header_id_t header, int field_offset) {
+  void push_back_field(header_id_t header, int field_offset, size_t nbits) {
     fields.push_back(std::pair<header_id_t, int>(header, field_offset));
+    nbytes_key += (nbits + 7) / 8;
   }
 
   void push_back_valid_header(header_id_t header) {
     valid_headers.push_back(header);
+    nbytes_key++;
   }
 
   void operator()(const PHV &phv, ByteContainer &key) const
@@ -64,6 +67,8 @@ struct MatchKeyBuilder
       key.append(field.get_bytes());
     }
   }
+
+  size_t get_nbytes_key() const { return nbytes_key; }
 };
 
 template <typename V>
@@ -83,10 +88,9 @@ public:
   };
 
 public:
-  MatchUnitAbstract(size_t size, size_t nbytes_key,
-		    const MatchKeyBuilder &match_key_builder)
+  MatchUnitAbstract(size_t size, const MatchKeyBuilder &match_key_builder)
     : size(size),
-      nbytes_key(nbytes_key),
+      nbytes_key(match_key_builder.get_nbytes_key()),
       match_key_builder(match_key_builder) { }
 
   virtual ~MatchUnitAbstract() { }
@@ -136,9 +140,8 @@ public:
   typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
 
 public:
-  MatchUnitExact(size_t size, size_t nbytes_key,
-		 const MatchKeyBuilder &match_key_builder)
-    : MatchUnitAbstract<V>(size, nbytes_key, match_key_builder),
+  MatchUnitExact(size_t size, const MatchKeyBuilder &match_key_builder)
+    : MatchUnitAbstract<V>(size, match_key_builder),
       entries(size) {
     entries_map.reserve(size);
   }
@@ -179,11 +182,10 @@ public:
   typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
 
 public:
-  MatchUnitLPM(size_t size, size_t nbytes_key,
-	       const MatchKeyBuilder &match_key_builder)
-    : MatchUnitAbstract<V>(size, nbytes_key, match_key_builder),
+  MatchUnitLPM(size_t size, const MatchKeyBuilder &match_key_builder)
+    : MatchUnitAbstract<V>(size, match_key_builder),
       entries(size),
-      entries_trie(nbytes_key) { }
+      entries_trie(this->nbytes_key) { }
 
 private:
   struct Entry {
@@ -222,9 +224,8 @@ public:
   typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
 
 public:
-  MatchUnitTernary(size_t size, size_t nbytes_key,
-		   const MatchKeyBuilder &match_key_builder)
-    : MatchUnitAbstract<V>(size, nbytes_key, match_key_builder),
+  MatchUnitTernary(size_t size, const MatchKeyBuilder &match_key_builder)
+    : MatchUnitAbstract<V>(size, match_key_builder),
       entries(size) { }
 
 private:

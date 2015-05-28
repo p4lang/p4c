@@ -89,8 +89,8 @@ public:
 
 public:
   MatchTable(const std::string &name, p4object_id_t id,
-	      std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit,
-	      bool with_counters = false) 
+	     std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit,
+	     bool with_counters = false) 
     : MatchTableAbstract(name, id, match_unit->get_size(), with_counters),
       match_unit(std::move(match_unit)) { }
 
@@ -118,19 +118,26 @@ public:
   }
 
 public:
-  template <template <class C> class U>
   static std::unique_ptr<MatchTable> create_match_table(
+    const std::string &match_type, 
     const std::string &name, p4object_id_t id,
-    size_t size, size_t nbytes_key, const MatchKeyBuilder &match_key_builder,
+    size_t size, const MatchKeyBuilder &match_key_builder,
     bool with_counters
   ) {
-    static_assert(
-      std::is_base_of<MatchUnitAbstract<ActionEntry>, U<ActionEntry> >::value,
-      "incorrect class template"
-    );
-    std::unique_ptr<U<ActionEntry> > match_unit(
-      new U<ActionEntry>(size, nbytes_key, match_key_builder)
-    );    
+    typedef MatchUnitExact<ActionEntry> MUExact;
+    typedef MatchUnitLPM<ActionEntry> MULPM;
+    typedef MatchUnitTernary<ActionEntry> MUTernary;
+
+    std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit;
+    if(match_type == "exact")
+      match_unit = std::unique_ptr<MUExact>(new MUExact(size, match_key_builder));
+    else if(match_type == "lpm")
+      match_unit = std::unique_ptr<MULPM>(new MULPM(size, match_key_builder));
+    else if(match_type == "ternary")
+      match_unit = std::unique_ptr<MUTernary>(new MUTernary(size, match_key_builder));
+    else
+      assert(0 && "invalid match type");
+
     return std::unique_ptr<MatchTable>(
       new MatchTable(name, id, std::move(match_unit), with_counters)
     );

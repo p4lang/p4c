@@ -276,10 +276,13 @@ MatchUnitTernary<V>::add_entry(
   ByteContainer new_key;
   ByteContainer new_mask;
   new_key.reserve(this->nbytes_key);
+  new_mask.reserve(this->nbytes_key);
 
   for(const MatchKeyParam &param : match_key) {
-    if(param.type == MatchKeyParam::Type::VALID)
+    if(param.type == MatchKeyParam::Type::VALID) {
       new_key.append(param.key);
+      new_mask.append("\xff");
+    }
   }
 
   for(const MatchKeyParam &param : match_key) {
