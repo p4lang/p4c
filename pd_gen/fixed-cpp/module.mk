@@ -6,6 +6,8 @@ srcs_C += $(wildcard $(SRC_DIR)/*.c)
 srcs_CXX += $(wildcard $(SRC_DIR)/*.cpp)
 
 INCS += $(THIS_DIR)include/
+$(TARGET)_PUBLIC_INCS := $(INCS)
+
 INCS += $(THIS_DIR)src/
 
 LIBS += -lthrift

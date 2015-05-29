@@ -15,8 +15,6 @@ srcs_CXX:=
 
 include libpd.mk
 
-$(TARGET)_PUBLIC_INCS := $(INCS)
-
 CFLAGS += $(COMMON_FLAGS)
 CPPFLAGS += $(COMMON_FLAGS)
 
@@ -43,8 +41,11 @@ objs_C_ := $(patsubst %, $(BUILD_DIR)%, $(objs_C))
 objs_CXX_ := $(patsubst %, $(BUILD_DIR)%, $(objs_CXX))
 objs_ := $(patsubst %, $(BUILD_DIR)%, $(objs))
 
+BUILD_DIRS += include
+
 $(TARGET): $(objs_) | $(BUILD_DIRS)
 	$(CXX) -o $@ $^ -shared -fPIC
+	cp -r $($(TARGET)_PUBLIC_INCS)/* include/
 
 $(BUILD_DIRS):
 	mkdir -p $@

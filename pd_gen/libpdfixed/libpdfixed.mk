@@ -13,5 +13,3 @@ THRIFT_IDL := $(LIBPDFIXED_MK_DIR)../../thrift_src/runtime.thrift
 	rm -f .thrift_gen
 
 include $(LIBPDFIXED_MK_DIR)../fixed-cpp/module.mk
-
-$(TARGET)_PUBLIC_INCS := $(INCS)
