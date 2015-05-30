@@ -47,8 +47,6 @@ template<typename V>
 typename MatchUnitExact<V>::MatchUnitLookup
 MatchUnitExact<V>::lookup_key(const ByteContainer &key) const
 {
-  boost::shared_lock<boost::shared_mutex> lock(this->t_mutex);
-
   const auto entry_it = entries_map.find(key);
   if(entry_it == entries_map.end()) return MatchUnitLookup::empty_entry();
   return MatchUnitLookup(entry_it->second, &entries[entry_it->second].value);
@@ -86,8 +84,6 @@ MatchUnitExact<V>::add_entry(
     }
   }
 
-  boost::unique_lock<boost::shared_mutex> lock(this->t_mutex);
-
   MatchErrorCode status = this->get_and_set_handle(handle);
   if(status != MatchErrorCode::SUCCESS) return status;
   
@@ -101,8 +97,6 @@ template<typename V>
 MatchErrorCode
 MatchUnitExact<V>::delete_entry(entry_handle_t handle)
 {
-  boost::unique_lock<boost::shared_mutex> lock(this->t_mutex);
-  
   if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   const ByteContainer &key = entries[handle].key;
   entries_map.erase(key);
@@ -114,8 +108,6 @@ template<typename V>
 MatchErrorCode
 MatchUnitExact<V>::modify_entry(entry_handle_t handle, V value)
 {
-  boost::unique_lock<boost::shared_mutex> lock(this->t_mutex);
-
   if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   Entry &entry = entries[handle];
   entry.value = std::move(value);
@@ -128,8 +120,6 @@ template<typename V>
 typename MatchUnitLPM<V>::MatchUnitLookup
 MatchUnitLPM<V>::lookup_key(const ByteContainer &key) const
 {
-  boost::shared_lock<boost::shared_mutex> lock(this->t_mutex);
-
   entry_handle_t handle;
   if(entries_trie.lookup(key, &handle)) {
     return MatchUnitLookup(handle, &entries[handle].value);
@@ -178,8 +168,6 @@ MatchUnitLPM<V>::add_entry(
   new_key.append(lpm_param->key);
   prefix_length += lpm_param->prefix_length;
 
-  boost::unique_lock<boost::shared_mutex> lock(this->t_mutex);
-
   MatchErrorCode status = this->get_and_set_handle(handle);
   if(status != MatchErrorCode::SUCCESS) return status;
   
@@ -194,8 +182,6 @@ template<typename V>
 MatchErrorCode
 MatchUnitLPM<V>::delete_entry(entry_handle_t handle)
 {
-  boost::unique_lock<boost::shared_mutex> lock(this->t_mutex);
-  
   if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   const Entry &entry = entries[handle];
   assert(entries_trie.delete_prefix(entry.key, entry.prefix_length));
@@ -207,8 +193,6 @@ template<typename V>
 MatchErrorCode
 MatchUnitLPM<V>::modify_entry(entry_handle_t handle, V value)
 {
-  boost::unique_lock<boost::shared_mutex> lock(this->t_mutex);
-
   if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   Entry &entry = entries[handle];
   entry.value = std::move(value);
@@ -221,8 +205,6 @@ template<typename V>
 typename MatchUnitTernary<V>::MatchUnitLookup
 MatchUnitTernary<V>::lookup_key(const ByteContainer &key) const
 {
-  boost::shared_lock<boost::shared_mutex> lock(this->t_mutex);
-
   int max_priority = 0;
   bool match;
 
@@ -308,8 +290,6 @@ MatchUnitTernary<V>::add_entry(
     }
   }
 
-  boost::unique_lock<boost::shared_mutex> lock(this->t_mutex);
-
   MatchErrorCode status = this->get_and_set_handle(handle);
   if(status != MatchErrorCode::SUCCESS) return status;
   
@@ -323,8 +303,6 @@ template<typename V>
 MatchErrorCode
 MatchUnitTernary<V>::delete_entry(entry_handle_t handle)
 {
-  boost::unique_lock<boost::shared_mutex> lock(this->t_mutex);
-  
   if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
 
   return this->unset_handle(handle);
@@ -334,8 +312,6 @@ template<typename V>
 MatchErrorCode
 MatchUnitTernary<V>::modify_entry(entry_handle_t handle, V value)
 {
-  boost::unique_lock<boost::shared_mutex> lock(this->t_mutex);
-
   if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   Entry &entry = entries[handle];
   entry.value = std::move(value);
@@ -349,13 +325,13 @@ MatchUnitTernary<V>::modify_entry(entry_handle_t handle, V value)
 // I did not think I had to explicitly instantiate MatchUnitAbstract, because it
 // is a base class for the others, but I get an linker error if I don't
 template class MatchUnitAbstract<MatchTableAbstract::ActionEntry>;
-template class MatchUnitAbstract<int>;
+template class MatchUnitAbstract<MatchTableIndirect::IndirectIndex>;
 
 template class MatchUnitExact<MatchTableAbstract::ActionEntry>;
-template class MatchUnitExact<int>;
+template class MatchUnitExact<MatchTableIndirect::IndirectIndex>;
 
 template class MatchUnitLPM<MatchTableAbstract::ActionEntry>;
-template class MatchUnitLPM<int>;
+template class MatchUnitLPM<MatchTableIndirect::IndirectIndex>;
 
 template class MatchUnitTernary<MatchTableAbstract::ActionEntry>;
-template class MatchUnitTernary<int>;
+template class MatchUnitTernary<MatchTableIndirect::IndirectIndex>;

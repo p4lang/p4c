@@ -41,11 +41,10 @@ public:
 
   virtual ~MatchTableAbstract() { }
 
-  const ActionEntry &lookup_action(const Packet &pkt);
+  const ControlFlowNode *apply_action(Packet *pkt);
 
-  virtual void lookup(const Packet &pkt,
-		      const ActionEntry **action_entry,
-		      entry_handle_t *handle) = 0;
+  virtual const ActionEntry &lookup(const Packet &pkt, bool *hit,
+				    entry_handle_t *handle) = 0;
 
   virtual size_t get_num_entries() const = 0;
 
@@ -59,6 +58,10 @@ public:
   MatchErrorCode reset_counters();
 
 protected:
+  typedef boost::shared_lock<boost::shared_mutex> ReadLock;
+  typedef boost::unique_lock<boost::shared_mutex> WriteLock;
+
+protected:
   const ControlFlowNode *get_next_node(p4object_id_t action_id) const {
     return next_nodes.at(action_id);
   }
@@ -70,6 +73,11 @@ protected:
     c.packets += 1;
   }
 
+  ReadLock lock_read() { return ReadLock(t_mutex); }
+  WriteLock lock_write() { return WriteLock(t_mutex); }
+  void lock_release(ReadLock &lock) { lock.release(); }
+  void lock_release(WriteLock &lock) { lock.release(); }
+
 protected:
   size_t size{0};
 
@@ -77,7 +85,9 @@ protected:
   std::vector<Counter> counters{};
 
   std::unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
-  ActionEntry default_entry{};
+
+private:
+  mutable boost::shared_mutex t_mutex{};
 };
 
 // MatchTable is exposed to the runtime for configuration
@@ -109,66 +119,117 @@ public:
   MatchErrorCode set_default_action(const ActionFn *action_fn,
 				    ActionData action_data);
 
-  void lookup(const Packet &pkt,
-	      const ActionEntry **action_entry,
-	      entry_handle_t *handle) override;
+  const ActionEntry &lookup(const Packet &pkt, bool *hit,
+			    entry_handle_t *handle) override;
 
   size_t get_num_entries() const override {
     return match_unit->get_num_entries();
   }
 
 public:
-  static std::unique_ptr<MatchTable> create_match_table(
+  static std::unique_ptr<MatchTable> create(
     const std::string &match_type, 
     const std::string &name, p4object_id_t id,
     size_t size, const MatchKeyBuilder &match_key_builder,
     bool with_counters
-  ) {
-    typedef MatchUnitExact<ActionEntry> MUExact;
-    typedef MatchUnitLPM<ActionEntry> MULPM;
-    typedef MatchUnitTernary<ActionEntry> MUTernary;
-
-    std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit;
-    if(match_type == "exact")
-      match_unit = std::unique_ptr<MUExact>(new MUExact(size, match_key_builder));
-    else if(match_type == "lpm")
-      match_unit = std::unique_ptr<MULPM>(new MULPM(size, match_key_builder));
-    else if(match_type == "ternary")
-      match_unit = std::unique_ptr<MUTernary>(new MUTernary(size, match_key_builder));
-    else
-      assert(0 && "invalid match type");
-
-    return std::unique_ptr<MatchTable>(
-      new MatchTable(name, id, std::move(match_unit), with_counters)
-    );
-  }
+  );
 
 private:
+  ActionEntry default_entry{};
   std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit;
 
 };
 
-// class MatchTableIndirectAction : public MatchTableAbstract
-// {
-// public:
-//   MatchTableIndirectAction() 
-//     : match_unit(new MatchUnitAbstract<int>())
-//   {
+class MatchTableIndirect : public MatchTableAbstract
+{
+public:
+  typedef MatchTableAbstract::ActionEntry ActionEntry;
 
-//   }
+  typedef uintptr_t mbr_hdl_t;
 
-//   const ActionEntry &operator(const Packet &pkt) {
+  class IndirectIndex {
+  public:
+    IndirectIndex() { }
 
-//   }
+    bool is_mbr() const { return ((index >> 24) == _mbr); }
+    bool is_grp() const { return ((index >> 24) == _grp); }
+    mbr_hdl_t get() const { return (index & _index_mask); }
 
-//   int add_entry(const std::vector<MatchKeyParam> &match_key,
-// 		int member_hdl,
-// 		entry_handle_t *handle,
-// 		int priority = -1);
+    static IndirectIndex make_mbr_index(unsigned int index) {
+      assert(index <= _index_mask);
+      return IndirectIndex((_mbr << 24) | index);
+    }
 
-// private:
-//   std::unique_ptr<MatchUnitAbstract<int> > match_unit;
+    static IndirectIndex make_grp_index(unsigned int index) {
+      assert(index <= _index_mask);
+      return IndirectIndex((_grp << 24) | index);
+    }
 
-// };
+  private:
+    IndirectIndex(unsigned int index) : index(index) { }
+
+    static const unsigned char _mbr = 0x00;
+    static const unsigned char _grp = 0x01;
+    static const unsigned int _index_mask = 0x00FFFFFF;
+
+    unsigned int index{0};
+  };
+
+public:
+  MatchTableIndirect(
+    const std::string &name, p4object_id_t id,
+    std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit,
+    bool with_counters = false
+  ) 
+    : MatchTableAbstract(name, id, match_unit->get_size(), with_counters),
+      match_unit(std::move(match_unit)) { }
+
+  MatchErrorCode add_member(const ActionFn *action_fn,
+			    ActionData action_data, // move it
+			    mbr_hdl_t *mbr);
+
+  MatchErrorCode delete_member(mbr_hdl_t mbr);
+
+  MatchErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
+			   mbr_hdl_t mbr,
+			   entry_handle_t *handle,
+			   int priority = -1);
+
+  MatchErrorCode delete_entry(entry_handle_t handle);
+
+  MatchErrorCode modify_entry(entry_handle_t handle, mbr_hdl_t mbr);
+
+  MatchErrorCode set_default_member(mbr_hdl_t mbr);
+
+  const ActionEntry &lookup(const Packet &pkt, bool *hit,
+			    entry_handle_t *handle) override;
+
+  size_t get_num_entries() const override {
+    return match_unit->get_num_entries();
+  }
+
+  size_t get_num_members() const {
+    return num_members;
+  }
+
+public:
+  static std::unique_ptr<MatchTableIndirect> create(
+    const std::string &match_type, 
+    const std::string &name, p4object_id_t id,
+    size_t size, const MatchKeyBuilder &match_key_builder,
+    bool with_counters
+  );
+
+private:
+  void entries_insert(mbr_hdl_t mbr, ActionEntry &&entry);
+
+private:
+  IndirectIndex default_index{};
+  std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit;
+  HandleMgr mbr_handles{};
+  size_t num_members{0};
+  std::vector<ActionEntry> action_entries{};
+  std::vector<size_t> mbr_ref_count{};
+};
 
 #endif

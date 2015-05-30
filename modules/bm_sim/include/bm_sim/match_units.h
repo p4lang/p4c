@@ -129,8 +129,6 @@ protected:
   size_t nbytes_key;
   HandleMgr handles{};
   MatchKeyBuilder match_key_builder;
-
-  mutable boost::shared_mutex t_mutex{};
 };
 
 template <typename V>

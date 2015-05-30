@@ -7,6 +7,21 @@
 #include "named_p4object.h"
 #include "match_tables.h"
 
+// from http://stackoverflow.com/questions/87372/check-if-a-class-has-a-member-function-of-a-given-signature
+
+template<typename T>
+struct HasFactoryMethod
+{
+  typedef std::unique_ptr<T> (*Signature)(
+    const std::string &, const std::string &,
+    p4object_id_t, size_t, const MatchKeyBuilder &, bool
+  );
+  template <typename U, Signature> struct SFINAE {};
+  template<typename U> static char Test(SFINAE<U, U::create>*);
+  template<typename U> static int Test(...);
+  static const bool value = sizeof(Test<T>(nullptr)) == sizeof(char);
+};
+
 class MatchActionTable : public ControlFlowNode, public NamedP4Object
 {
 public:
@@ -16,10 +31,7 @@ public:
       match_table(std::move(match_table)) { }
 
   const ControlFlowNode *operator()(Packet *pkt) const override {
-    typedef MatchTableAbstract::ActionEntry ActionEntry;
-    const ActionEntry &action_entry = match_table->lookup_action(*pkt);
-    action_entry.action_fn(pkt);
-    return action_entry.next_node;
+    return match_table->apply_action(pkt);
   }
 
   MatchTableAbstract *get_match_table() { return match_table.get(); }
@@ -34,7 +46,11 @@ public:
   ) {
     static_assert(std::is_base_of<MatchTableAbstract, MT>::value,
 		  "incorrect template, needs to be a subclass of MatchTableAbstract");
-    std::unique_ptr<MT> match_table = MT::create_match_table(
+
+    static_assert(HasFactoryMethod<MT>::value,
+		  "template class needs to have a create() static factory method");
+
+    std::unique_ptr<MT> match_table = MT::create(
       match_type, name, id, size, match_key_builder, with_counters
     );
 
