@@ -12,19 +12,21 @@ MatchTableAbstract::apply_action(Packet *pkt)
 
   const ActionEntry &action_entry = lookup(*pkt, &hit, &handle);
 
+  // we're holding the lock for this...
+  if(hit) {
+    ELOGGER->table_hit(*pkt, *this, handle);
+  }
+  else {
+    ELOGGER->table_miss(*pkt, *this);
+  }
+
   action_entry.action_fn(pkt);
 
   const ControlFlowNode *next_node = action_entry.next_node;
 
-  lock.release();
+  lock.unlock();
 
-  if(hit) {
-    // ELOGGER->table_hit(*pkt, *this, *entry);
-    if(with_counters) update_counters(handle, *pkt);
-  }
-  else {
-    // ELOGGER->table_miss(*pkt, *this);
-  }
+  if(hit && with_counters) update_counters(handle, *pkt);
 
   return next_node;
 }

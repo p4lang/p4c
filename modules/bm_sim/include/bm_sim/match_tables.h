@@ -75,8 +75,8 @@ protected:
 
   ReadLock lock_read() { return ReadLock(t_mutex); }
   WriteLock lock_write() { return WriteLock(t_mutex); }
-  void lock_release(ReadLock &lock) { lock.release(); }
-  void lock_release(WriteLock &lock) { lock.release(); }
+  void unlock(ReadLock &lock) { lock.unlock(); }
+  void unlock(WriteLock &lock) { lock.unlock(); }
 
 protected:
   size_t size{0};
