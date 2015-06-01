@@ -28,7 +28,8 @@ src/switch.cpp \
 src/xxhash.c \
 src/learning.cpp \
 src/pre.cpp \
-src/transport.cpp
+src/transport.cpp \
+src/calculations.cpp
 
 common_include = \
 include/bm_sim/actions.h \

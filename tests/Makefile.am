@@ -14,7 +14,8 @@ test_phv \
 test_queue \
 test_tables \
 test_learning \
-test_pre
+test_pre \
+test_calculations
 check_PROGRAMS = $(TESTS) test_all
 
 # Sources for tests
@@ -30,4 +31,5 @@ test_queue_SOURCES         = $(common_source) test_queue.cpp
 test_tables_SOURCES        = $(common_source) test_tables.cpp
 test_learning_SOURCES      = $(common_source) test_learning.cpp
 test_pre_SOURCES           = $(common_source) test_pre.cpp
-test_all_SOURCES           = $(common_source) test_actions.cpp test_checksums.cpp test_conditionals.cpp test_data.cpp test_handle_mgr.cpp test_p4objects.cpp test_parser.cpp test_phv.cpp test_queue.cpp test_tables.cpp test_learning.cpp test_pre.cpp
+test_calculations_SOURCES  = $(common_source) test_calculations.cpp
+test_all_SOURCES           = $(common_source) test_actions.cpp test_checksums.cpp test_conditionals.cpp test_data.cpp test_handle_mgr.cpp test_p4objects.cpp test_parser.cpp test_phv.cpp test_queue.cpp test_tables.cpp test_learning.cpp test_pre.cpp test_calculations.cpp

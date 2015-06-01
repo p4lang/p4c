@@ -8,6 +8,7 @@
 #include "match_units.h"
 #include "actions.h"
 #include "ras.h"
+#include "calculations.h"
 
 class MatchTableAbstract : public NamedP4Object
 {
@@ -301,6 +302,10 @@ public:
   ) 
     : MatchTableIndirect(name, id, std::move(match_unit), with_counters) { }
 
+  void set_hash(std::unique_ptr<Calculation<unsigned int> > h) {
+    hash = std::move(h);
+  }
+
   MatchErrorCode create_group(grp_hdl_t *grp);
 
   MatchErrorCode delete_group(grp_hdl_t grp);
@@ -338,8 +343,14 @@ protected:
     return grp_handles.valid_handle(grp);
   }
 
+  size_t get_grp_size(grp_hdl_t grp) const {
+    return group_entries[grp].size();
+  }
+
 private:
   void groups_insert(grp_hdl_t grp);
+
+  mbr_hdl_t choose_from_group(grp_hdl_t grp, const Packet &pkt) const;
 
 private:
   class GroupInfo {
@@ -348,8 +359,7 @@ private:
     MatchErrorCode delete_member(mbr_hdl_t mbr);
     bool contains_member(mbr_hdl_t mbr) const;
     size_t size() const;
-
-    mbr_hdl_t choose(const Packet &pkt) const;
+    mbr_hdl_t get_nth(size_t n) const;
 
   private:
     RandAccessUIntSet mbrs{};
@@ -359,6 +369,7 @@ private:
   HandleMgr grp_handles{};
   size_t num_groups{0};
   std::vector<GroupInfo> group_entries{};
+  std::unique_ptr<Calculation<unsigned int> > hash{nullptr};
 };
 
 #endif

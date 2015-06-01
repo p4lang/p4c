@@ -28,7 +28,7 @@ const ParseState *ParseState::operator()(Packet *pkt, const char *data,
        it != parser_ops.end();
        ++it) {
     parser_op = *it;
-    (*parser_op)(pkt, data, bytes_parsed);
+    (*parser_op)(pkt, data + *bytes_parsed, bytes_parsed);
   }
 
   if(!has_switch) return NULL;
@@ -56,7 +56,7 @@ void Parser::parse(Packet *pkt) const {
   const ParseState *next_state = init_state;
   size_t bytes_parsed = 0;
   while(next_state) {
-    next_state = (*next_state)(pkt, data + bytes_parsed, &bytes_parsed);
+    next_state = (*next_state)(pkt, data, &bytes_parsed);
     // std::cout << "bytes parsed: " << bytes_parsed << std::endl;
   }
   pkt->remove(bytes_parsed);

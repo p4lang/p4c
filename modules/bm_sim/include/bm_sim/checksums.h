@@ -23,7 +23,7 @@ public:
   IPv4Checksum(const string &name, p4object_id_t id,
 	       header_id_t header_id, int field_offset);
   void update(PHV *phv) const override;
-  virtual bool verify(const PHV &phv) const override;
+  bool verify(const PHV &phv) const override;
 };
 
 #endif

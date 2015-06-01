@@ -146,6 +146,10 @@ public:
     bytes.reserve(n);
   }
 
+  void resize(size_t n) {
+    bytes.resize(n);
+  }
+
 private:
   vector<char> bytes;
 };

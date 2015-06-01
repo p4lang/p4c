@@ -16,6 +16,7 @@ public:
   Field(int nbits, bool arith_flag = true)
     : nbits(nbits), nbytes( (nbits + 7) / 8 ), bytes(nbytes) {
     arith = arith_flag;
+    if(arith) { mask <<= nbits; mask -= 1; }
   }
 
   // Overload set? Make it more generic (arbitary length) ?
@@ -49,6 +50,8 @@ public:
     // TODO: this can overflow !!!
     // maybe bytes is not large enough !!!
     // I am supposed to mask off extra bits...
+    // is this efficient enough:
+    value &= mask;
     bignum::export_bytes(bytes.data(), nbytes, value);
   }
 
@@ -62,6 +65,7 @@ private:
   int nbits;
   int nbytes;
   ByteContainer bytes;
+  Bignum mask{1};
 };
 
 #endif

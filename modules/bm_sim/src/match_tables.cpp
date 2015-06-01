@@ -325,11 +325,9 @@ MatchTableIndirectWS::GroupInfo::size() const
 }
 
 MatchTableIndirect::mbr_hdl_t
-MatchTableIndirectWS::GroupInfo::choose(const Packet &pkt) const
+MatchTableIndirectWS::GroupInfo::get_nth(size_t n) const
 {
-  // TODO
-  (void) pkt;
-  return mbrs.get_nth(0);
+  return mbrs.get_nth(n);
 }
 
 
@@ -360,6 +358,17 @@ MatchTableIndirectWS::create(
   );
 }
 
+MatchTableIndirect::mbr_hdl_t
+MatchTableIndirectWS::choose_from_group(grp_hdl_t grp, const Packet &pkt) const
+{
+  const GroupInfo &group_info = group_entries[grp];
+  size_t s = group_info.size();
+  assert(s > 0);
+  if(!hash) return group_info.get_nth(0);
+  unsigned int h = hash->output(pkt);
+  return group_info.get_nth(h % s);
+}
+
 const ActionEntry &
 MatchTableIndirectWS::lookup(
   const Packet &pkt, bool *hit, entry_handle_t *handle
@@ -378,8 +387,7 @@ MatchTableIndirectWS::lookup(
   else {
     grp_hdl_t grp = index.get_grp();
     assert(is_valid_grp(grp));
-    GroupInfo &group_info = group_entries[grp];
-    mbr = group_info.choose(pkt);
+    mbr = choose_from_group(grp, pkt);
   }
   assert(is_valid_mbr(mbr));
 
@@ -473,6 +481,9 @@ MatchTableIndirectWS::add_entry_ws(
   WriteLock lock = lock_write();
 
   if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+
+  if(get_grp_size(grp) == 0) return MatchErrorCode::EMPTY_GRP;
+
   IndirectIndex index = IndirectIndex::make_grp_index(grp);
   index_ref_count.increase(index);
   return match_unit->add_entry(match_key, std::move(index), handle, priority);
@@ -491,6 +502,8 @@ MatchTableIndirectWS::modify_entry_ws(
   index_ref_count.decrease(*index);
 
   if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+
+  if(get_grp_size(grp) == 0) return MatchErrorCode::EMPTY_GRP;
 
   IndirectIndex new_index = IndirectIndex::make_grp_index(grp);
   index_ref_count.increase(new_index);

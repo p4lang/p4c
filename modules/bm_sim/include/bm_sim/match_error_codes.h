@@ -13,6 +13,7 @@ enum class MatchErrorCode {
   MBR_NOT_IN_GRP,
   INVALID_GRP_HANDLE,
   GRP_STILL_USED,
+  EMPTY_GRP,
   ERROR,
 };
 
