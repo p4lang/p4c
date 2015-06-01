@@ -103,6 +103,7 @@ public:
 				   int priority = -1) = 0;
   virtual MatchErrorCode delete_entry(entry_handle_t handle) = 0;
   virtual MatchErrorCode modify_entry(entry_handle_t handle, V value) = 0;
+  virtual MatchErrorCode get_value(entry_handle_t handle, const V **value) = 0;
 
   size_t get_num_entries() const { return num_entries; }
 
@@ -165,6 +166,8 @@ private:
 
   MatchErrorCode modify_entry(entry_handle_t handle, V value) override;
 
+  MatchErrorCode get_value(entry_handle_t handle, const V **value) override;
+
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
 private:
@@ -208,6 +211,8 @@ private:
 
   MatchErrorCode modify_entry(entry_handle_t handle, V value) override;
 
+  MatchErrorCode get_value(entry_handle_t handle, const V **value) override;
+
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
 private:
@@ -249,6 +254,8 @@ private:
   MatchErrorCode delete_entry(entry_handle_t handle) override;
 
   MatchErrorCode modify_entry(entry_handle_t handle, V value) override;
+
+  MatchErrorCode get_value(entry_handle_t handle, const V **value) override;
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 

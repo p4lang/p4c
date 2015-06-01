@@ -452,6 +452,12 @@ TEST_F(TableIndirect, DeleteMember) {
 
   rc = table->delete_member(mbr);
   ASSERT_EQ(rc, MatchErrorCode::MBR_STILL_USED);
+
+  rc = table->delete_entry(handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->delete_member(mbr);
+  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
 }
 
 TEST_F(TableIndirect, ModifyEntry) {

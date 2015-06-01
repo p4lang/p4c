@@ -182,8 +182,9 @@ MatchTableIndirect::lookup(
   *hit = res.found();
   *handle = res.handle;
 
-  mbr_hdl_t mbr = (*hit) ? (*res.value).get() : default_index.get();
-  assert(mbr_handles.valid_handle(mbr));
+  const IndirectIndex &index = (*hit) ? *res.value : default_index;
+  mbr_hdl_t mbr = index.get_mbr();
+  assert(is_valid_mbr(mbr));
 
   return action_entries[mbr];
 }
@@ -191,17 +192,16 @@ MatchTableIndirect::lookup(
 void
 MatchTableIndirect::entries_insert(mbr_hdl_t mbr, ActionEntry &&entry)
 {
-  assert(mbr <= (unsigned) action_entries.size());
-  assert(action_entries.size() == mbr_ref_count.size());
+  assert(mbr <= action_entries.size());
 
   if(mbr == action_entries.size()) {
     action_entries.push_back(std::move(entry));
-    mbr_ref_count.push_back(0);
   }
   else {
     action_entries[mbr] = std::move(entry);
-    mbr_ref_count[mbr] = 0;
   }
+
+  index_ref_count.set(IndirectIndex::make_mbr_index(mbr), 0);
 }
 
 MatchErrorCode
@@ -229,10 +229,10 @@ MatchTableIndirect::delete_member(mbr_hdl_t mbr)
 {
   WriteLock lock = lock_write();
 
-  if(mbr_handles.release_handle(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+  if(index_ref_count.get(IndirectIndex::make_mbr_index(mbr)) > 0)
+    return MatchErrorCode::MBR_STILL_USED;
 
-  // TODO: check if an entry is still pointing to it
-  if(mbr_ref_count[mbr] > 0) return MatchErrorCode::MBR_STILL_USED;
+  if(mbr_handles.release_handle(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
 
   num_members--;
 
@@ -247,11 +247,10 @@ MatchTableIndirect::add_entry(
 {
   WriteLock lock = lock_write();
 
-  if(!mbr_handles.valid_handle(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
-  mbr_ref_count[mbr]++;
-  return match_unit->add_entry(
-    match_key, IndirectIndex::make_mbr_index(mbr), handle, priority
-  );
+  if(!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+  IndirectIndex index = IndirectIndex::make_mbr_index(mbr);
+  index_ref_count.increase(index);
+  return match_unit->add_entry(match_key, std::move(index), handle, priority);
 }
 
 MatchErrorCode
@@ -259,6 +258,11 @@ MatchTableIndirect::delete_entry(entry_handle_t handle)
 {
   WriteLock lock = lock_write();
 
+  const IndirectIndex *index;
+  MatchErrorCode rc = match_unit->get_value(handle, &index);
+  if(rc != MatchErrorCode::SUCCESS) return rc;
+  index_ref_count.decrease(*index);
+  
   return match_unit->delete_entry(handle);
 }
 
@@ -269,9 +273,17 @@ MatchTableIndirect::modify_entry(
 {
   WriteLock lock = lock_write();
 
-  if(!mbr_handles.valid_handle(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
-  mbr_ref_count[mbr]--;
-  return match_unit->modify_entry(handle, IndirectIndex::make_mbr_index(mbr));
+  const IndirectIndex *index;
+  MatchErrorCode rc = match_unit->get_value(handle, &index);
+  if(rc != MatchErrorCode::SUCCESS) return rc;
+  index_ref_count.decrease(*index);
+
+  if(!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+
+  IndirectIndex new_index = IndirectIndex::make_mbr_index(mbr);
+  index_ref_count.increase(new_index);
+
+  return match_unit->modify_entry(handle, std::move(new_index));
 }
 
 MatchErrorCode
@@ -279,8 +291,220 @@ MatchTableIndirect::set_default_member(mbr_hdl_t mbr)
 {
   WriteLock lock = lock_write();
 
-  if(!mbr_handles.valid_handle(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+  if(!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
   default_index = IndirectIndex::make_mbr_index(mbr);
+
+  return MatchErrorCode::SUCCESS;
+}
+
+
+MatchErrorCode
+MatchTableIndirectWS::GroupInfo::add_member(mbr_hdl_t mbr)
+{
+  if(!mbrs.add(mbr)) return MatchErrorCode::MBR_ALREADY_IN_GRP;
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableIndirectWS::GroupInfo::delete_member(mbr_hdl_t mbr)
+{
+  if(!mbrs.remove(mbr)) return MatchErrorCode::MBR_NOT_IN_GRP;
+  return MatchErrorCode::SUCCESS;
+}
+
+bool
+MatchTableIndirectWS::GroupInfo::contains_member(mbr_hdl_t mbr) const
+{
+  return mbrs.contains(mbr);
+}
+
+size_t
+MatchTableIndirectWS::GroupInfo::size() const
+{
+  return mbrs.count();
+}
+
+MatchTableIndirect::mbr_hdl_t
+MatchTableIndirectWS::GroupInfo::choose(const Packet &pkt) const
+{
+  // TODO
+  (void) pkt;
+  return mbrs.get_nth(0);
+}
+
+
+std::unique_ptr<MatchTableIndirectWS>
+MatchTableIndirectWS::create(
+  const std::string &match_type, 
+  const std::string &name, p4object_id_t id,
+  size_t size, const MatchKeyBuilder &match_key_builder,
+  bool with_counters
+)
+{
+  typedef MatchUnitExact<IndirectIndex> MUExact;
+  typedef MatchUnitLPM<IndirectIndex> MULPM;
+  typedef MatchUnitTernary<IndirectIndex> MUTernary;
+  
+  std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit;
+  if(match_type == "exact")
+    match_unit = std::unique_ptr<MUExact>(new MUExact(size, match_key_builder));
+  else if(match_type == "lpm")
+    match_unit = std::unique_ptr<MULPM>(new MULPM(size, match_key_builder));
+  else if(match_type == "ternary")
+    match_unit = std::unique_ptr<MUTernary>(new MUTernary(size, match_key_builder));
+  else
+    assert(0 && "invalid match type");
+
+  return std::unique_ptr<MatchTableIndirectWS>(
+    new MatchTableIndirectWS(name, id, std::move(match_unit), with_counters)
+  );
+}
+
+const ActionEntry &
+MatchTableIndirectWS::lookup(
+  const Packet &pkt, bool *hit, entry_handle_t *handle
+)
+{
+  MatchUnitAbstract<IndirectIndex>::MatchUnitLookup res = match_unit->lookup(pkt);
+  *hit = res.found();
+  *handle = res.handle;
+
+  const IndirectIndex &index = (*hit) ? *res.value : default_index;
+
+  mbr_hdl_t mbr;
+  if(index.is_mbr()) {
+    mbr = index.get_mbr();
+  }
+  else {
+    grp_hdl_t grp = index.get_grp();
+    assert(is_valid_grp(grp));
+    GroupInfo &group_info = group_entries[grp];
+    mbr = group_info.choose(pkt);
+  }
+  assert(is_valid_mbr(mbr));
+
+  return action_entries[mbr];
+}
+
+void
+MatchTableIndirectWS::groups_insert(grp_hdl_t grp)
+{
+  assert(grp <= group_entries.size());
+
+  if(grp == group_entries.size()) {
+    group_entries.emplace_back();
+  }
+  else {
+    group_entries[grp] = GroupInfo();
+  }
+
+  index_ref_count.set(IndirectIndex::make_grp_index(grp), 0);
+}
+
+MatchErrorCode
+MatchTableIndirectWS::create_group(grp_hdl_t *grp)
+{
+  WriteLock lock = lock_write();
+
+  if(grp_handles.get_handle(grp)) return MatchErrorCode::ERROR;
+
+  groups_insert(*grp);
+
+  num_groups++;
+
+  return MatchErrorCode::SUCCESS;  
+}
+
+MatchErrorCode
+MatchTableIndirectWS::delete_group(grp_hdl_t grp)
+{
+  WriteLock lock = lock_write();
+
+  if(index_ref_count.get(IndirectIndex::make_grp_index(grp)) > 0)
+    return MatchErrorCode::GRP_STILL_USED;
+
+  if(grp_handles.release_handle(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+
+  num_groups--;
+
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableIndirectWS::add_member_to_group(mbr_hdl_t mbr, grp_hdl_t grp)
+{
+  WriteLock lock = lock_write();
+
+  if(!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+  if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+
+  GroupInfo &group_info = group_entries[grp];
+  MatchErrorCode rc = group_info.add_member(mbr);
+  if(rc != MatchErrorCode::SUCCESS) return rc;
+
+  index_ref_count.increase(IndirectIndex::make_mbr_index(mbr));
+
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableIndirectWS::remove_member_from_group(mbr_hdl_t mbr, grp_hdl_t grp)
+{
+  WriteLock lock = lock_write();
+
+  if(!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+  if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+
+  GroupInfo &group_info = group_entries[grp];
+  MatchErrorCode rc = group_info.delete_member(mbr);
+  if(rc != MatchErrorCode::SUCCESS) return rc;
+
+  index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
+
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableIndirectWS::add_entry_ws(
+  const std::vector<MatchKeyParam> &match_key,
+  grp_hdl_t grp, entry_handle_t *handle, int priority
+)
+{
+  WriteLock lock = lock_write();
+
+  if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+  IndirectIndex index = IndirectIndex::make_grp_index(grp);
+  index_ref_count.increase(index);
+  return match_unit->add_entry(match_key, std::move(index), handle, priority);
+}
+
+MatchErrorCode
+MatchTableIndirectWS::modify_entry_ws(
+  entry_handle_t handle, grp_hdl_t grp
+)
+{
+  WriteLock lock = lock_write();
+
+  const IndirectIndex *index;
+  MatchErrorCode rc = match_unit->get_value(handle, &index);
+  if(rc != MatchErrorCode::SUCCESS) return rc;
+  index_ref_count.decrease(*index);
+
+  if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+
+  IndirectIndex new_index = IndirectIndex::make_grp_index(grp);
+  index_ref_count.increase(new_index);
+
+  return match_unit->modify_entry(handle, std::move(new_index));
+}
+
+MatchErrorCode
+MatchTableIndirectWS::set_default_group(grp_hdl_t grp)
+{
+  WriteLock lock = lock_write();
+
+  if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+  default_index = IndirectIndex::make_grp_index(grp);
 
   return MatchErrorCode::SUCCESS;
 }

@@ -115,6 +115,16 @@ MatchUnitExact<V>::modify_entry(entry_handle_t handle, V value)
   return MatchErrorCode::SUCCESS;
 }
 
+template<typename V>
+MatchErrorCode
+MatchUnitExact<V>::get_value(entry_handle_t handle, const V **value)
+{
+  if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
+  Entry &entry = entries[handle];
+  *value = &entry.value;
+
+  return MatchErrorCode::SUCCESS;
+}
 
 template<typename V>
 typename MatchUnitLPM<V>::MatchUnitLookup
@@ -196,6 +206,17 @@ MatchUnitLPM<V>::modify_entry(entry_handle_t handle, V value)
   if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   Entry &entry = entries[handle];
   entry.value = std::move(value);
+
+  return MatchErrorCode::SUCCESS;
+}
+
+template<typename V>
+MatchErrorCode
+MatchUnitLPM<V>::get_value(entry_handle_t handle, const V **value)
+{
+  if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
+  Entry &entry = entries[handle];
+  *value = &entry.value;
 
   return MatchErrorCode::SUCCESS;
 }
@@ -315,6 +336,17 @@ MatchUnitTernary<V>::modify_entry(entry_handle_t handle, V value)
   if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   Entry &entry = entries[handle];
   entry.value = std::move(value);
+
+  return MatchErrorCode::SUCCESS;
+}
+
+template<typename V>
+MatchErrorCode
+MatchUnitTernary<V>::get_value(entry_handle_t handle, const V **value)
+{
+  if(!this->valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
+  Entry &entry = entries[handle];
+  *value = &entry.value;
 
   return MatchErrorCode::SUCCESS;
 }

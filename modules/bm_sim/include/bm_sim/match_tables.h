@@ -7,6 +7,7 @@
 
 #include "match_units.h"
 #include "actions.h"
+#include "ras.h"
 
 class MatchTableAbstract : public NamedP4Object
 {
@@ -153,7 +154,9 @@ public:
 
     bool is_mbr() const { return ((index >> 24) == _mbr); }
     bool is_grp() const { return ((index >> 24) == _grp); }
-    mbr_hdl_t get() const { return (index & _index_mask); }
+    unsigned int get() const { return (index & _index_mask); }
+    unsigned int get_mbr() const { assert(is_mbr()); return get(); }
+    unsigned int get_grp() const { assert(is_grp()); return get(); }
 
     static IndirectIndex make_mbr_index(unsigned int index) {
       assert(index <= _index_mask);
@@ -165,6 +168,11 @@ public:
       return IndirectIndex((_grp << 24) | index);
     }
 
+    // template<typename UT, typename = typename std::enable_if<std::is_unsigned<UT>::value, UT>::type> operator UT() {
+    //   static_assert(sizeof(UT) >= sizeof(unsigned int), "cannot convert");
+    //   return static_cast<UT>(i);
+    // }
+
   private:
     IndirectIndex(unsigned int index) : index(index) { }
 
@@ -173,6 +181,47 @@ public:
     static const unsigned int _index_mask = 0x00FFFFFF;
 
     unsigned int index{0};
+  };
+
+  class IndirectIndexRefCount {
+  public:
+    typedef unsigned int count_t;
+
+  public:
+    void set(const IndirectIndex &index, count_t value) {
+      unsigned int i = index.get();
+      auto &v = (index.is_mbr()) ? mbr_count : grp_count;
+      assert(i <= v.size());
+      if(i == v.size())
+	v.push_back(value);
+      else
+	v[i] = value;
+    }
+
+    count_t get(const IndirectIndex &index) const {
+      unsigned int i = index.get();
+      return (index.is_mbr()) ? mbr_count[i] : grp_count[i];
+    }
+
+    void increase(const IndirectIndex &index) {
+      unsigned int i = index.get();
+      if(index.is_mbr())
+	mbr_count[i]++;
+      else
+	grp_count[i]++;
+    }
+
+    void decrease(const IndirectIndex &index) {
+      unsigned int i = index.get();
+      if(index.is_mbr())
+	mbr_count[i]--;
+      else
+	grp_count[i]--;
+    }
+    
+  private:
+    std::vector<count_t> mbr_count{};
+    std::vector<count_t> grp_count{};
   };
 
 public:
@@ -220,16 +269,96 @@ public:
     bool with_counters
   );
 
+protected:
+  bool is_valid_mbr(mbr_hdl_t mbr) const {
+    return mbr_handles.valid_handle(mbr);
+  }
+
+protected:
+  IndirectIndex default_index{};
+  IndirectIndexRefCount index_ref_count{};
+  HandleMgr mbr_handles{};
+  std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit;
+  std::vector<ActionEntry> action_entries{};
+
 private:
   void entries_insert(mbr_hdl_t mbr, ActionEntry &&entry);
 
 private:
-  IndirectIndex default_index{};
-  std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit;
-  HandleMgr mbr_handles{};
   size_t num_members{0};
-  std::vector<ActionEntry> action_entries{};
-  std::vector<size_t> mbr_ref_count{};
+};
+
+class MatchTableIndirectWS : public MatchTableIndirect
+{
+public:
+  typedef uintptr_t grp_hdl_t;
+
+public:
+  MatchTableIndirectWS(
+    const std::string &name, p4object_id_t id,
+    std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit,
+    bool with_counters = false
+  ) 
+    : MatchTableIndirect(name, id, std::move(match_unit), with_counters) { }
+
+  MatchErrorCode create_group(grp_hdl_t *grp);
+
+  MatchErrorCode delete_group(grp_hdl_t grp);
+
+  MatchErrorCode add_member_to_group(mbr_hdl_t mbr, grp_hdl_t grp);
+
+  MatchErrorCode remove_member_from_group(mbr_hdl_t mbr, grp_hdl_t grp);
+
+  MatchErrorCode add_entry_ws(const std::vector<MatchKeyParam> &match_key,
+			      grp_hdl_t grp,
+			      entry_handle_t *handle,
+			      int priority = -1);
+
+  MatchErrorCode modify_entry_ws(entry_handle_t handle, grp_hdl_t grp);
+
+  MatchErrorCode set_default_group(grp_hdl_t grp);
+
+  const ActionEntry &lookup(const Packet &pkt, bool *hit,
+			    entry_handle_t *handle) override;
+
+  size_t get_num_groups() const {
+    return num_groups;
+  }
+
+public:
+  static std::unique_ptr<MatchTableIndirectWS> create(
+    const std::string &match_type, 
+    const std::string &name, p4object_id_t id,
+    size_t size, const MatchKeyBuilder &match_key_builder,
+    bool with_counters
+  );
+
+protected:
+  bool is_valid_grp(grp_hdl_t grp) const {
+    return grp_handles.valid_handle(grp);
+  }
+
+private:
+  void groups_insert(grp_hdl_t grp);
+
+private:
+  class GroupInfo {
+  public:
+    MatchErrorCode add_member(mbr_hdl_t mbr);
+    MatchErrorCode delete_member(mbr_hdl_t mbr);
+    bool contains_member(mbr_hdl_t mbr) const;
+    size_t size() const;
+
+    mbr_hdl_t choose(const Packet &pkt) const;
+
+  private:
+    RandAccessUIntSet mbrs{};
+  };
+
+private:
+  HandleMgr grp_handles{};
+  size_t num_groups{0};
+  std::vector<GroupInfo> group_entries{};
 };
 
 #endif
