@@ -28,27 +28,89 @@ public:
 
 public:
   MatchErrorCode 
-  match_table_add_entry(const std::string &table_name,
-			const std::vector<MatchKeyParam> &match_key,
-			const std::string &action_name,
-			ActionData action_data,
-			entry_handle_t *handle,
-			int priority = -1/*only used for ternary*/) override;
-
-  MatchErrorCode
-  match_table_set_default_action(const std::string &table_name,
-				 const std::string &action_name,
-				 ActionData action_data) override;
+  mt_add_entry(const std::string &table_name,
+	       const std::vector<MatchKeyParam> &match_key,
+	       const std::string &action_name,
+	       ActionData action_data,
+	       entry_handle_t *handle,
+	       int priority = -1/*only used for ternary*/) override;
   
   MatchErrorCode
-  match_table_delete_entry(const std::string &table_name,
+  mt_set_default_action(const std::string &table_name,
+			const std::string &action_name,
+			ActionData action_data) override;
+  
+  MatchErrorCode
+  mt_delete_entry(const std::string &table_name,
+		  entry_handle_t handle) override;
+
+  MatchErrorCode
+  mt_modify_entry(const std::string &table_name,
+		  entry_handle_t handle,
+		  const std::string &action_name,
+		  ActionData action_data) override;
+
+  MatchErrorCode
+  mt_indirect_add_member(const std::string &table_name,
+			 const std::string &action_name,
+			 ActionData action_data,
+			 mbr_hdl_t *mbr) override;
+  
+  MatchErrorCode
+  mt_indirect_delete_member(const std::string &table_name,
+			    mbr_hdl_t mbr) override;
+  
+  MatchErrorCode
+  mt_indirect_add_entry(const std::string &table_name,
+			const std::vector<MatchKeyParam> &match_key,
+			mbr_hdl_t mbr,
+			entry_handle_t *handle,
+			int priority = 1) override;
+
+  MatchErrorCode
+  mt_indirect_modify_entry(const std::string &table_name,
+			   entry_handle_t handle,
+			   mbr_hdl_t mbr) override;
+  
+  MatchErrorCode
+  mt_indirect_delete_entry(const std::string &table_name,
 			   entry_handle_t handle) override;
 
   MatchErrorCode
-  match_table_modify_entry(const std::string &table_name,
-			   entry_handle_t handle,
-			   const std::string &action_name,
-			   ActionData action_data) override;
+  mt_indirect_set_default_member(const std::string &table_name,
+				 mbr_hdl_t mbr) override;
+  
+  MatchErrorCode
+  mt_indirect_ws_create_group(const std::string &table_name,
+			      grp_hdl_t *grp) override;
+  
+  MatchErrorCode
+  mt_indirect_ws_delete_group(const std::string &table_name,
+			      grp_hdl_t grp) override;
+  
+  MatchErrorCode
+  mt_indirect_ws_add_member_to_group(const std::string &table_name,
+				     mbr_hdl_t mbr, grp_hdl_t grp) override;
+ 
+  MatchErrorCode
+  mt_indirect_ws_remove_member_from_group(const std::string &table_name,
+					  mbr_hdl_t mbr, grp_hdl_t grp) override;
+
+  MatchErrorCode
+  mt_indirect_ws_add_entry(const std::string &table_name,
+			   const std::vector<MatchKeyParam> &match_key,
+			   grp_hdl_t grp,
+			   entry_handle_t *handle,
+			   int priority = 1) override;
+
+  MatchErrorCode
+  mt_indirect_ws_modify_entry(const std::string &table_name,
+			      entry_handle_t handle,
+			      grp_hdl_t grp) override;
+
+  MatchErrorCode
+  mt_indirect_ws_set_default_group(const std::string &table_name,
+				   grp_hdl_t grp) override;
 
   MatchErrorCode
   table_read_counters(const std::string &table_name,
@@ -87,6 +149,12 @@ protected:
   Deparser *get_deparser(const std::string &name) {
     return p4objects->get_deparser(name);
   }
+
+private:
+  MatchErrorCode get_mt_indirect(const std::string &table_name,
+				 MatchTableIndirect **table);
+  MatchErrorCode get_mt_indirect_ws(const std::string &table_name,
+				    MatchTableIndirectWS **table);
 
 protected:
   std::unique_ptr<McPre> pre{nullptr};

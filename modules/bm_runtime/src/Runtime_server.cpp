@@ -75,7 +75,7 @@ class RuntimeHandler : virtual public RuntimeIf {
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
-    MatchErrorCode error_code = switch_->match_table_add_entry(
+    MatchErrorCode error_code = switch_->mt_add_entry(
         table_name,
 	params,
 	action_name,
@@ -97,7 +97,7 @@ class RuntimeHandler : virtual public RuntimeIf {
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
-    MatchErrorCode error_code = switch_->match_table_set_default_action(
+    MatchErrorCode error_code = switch_->mt_set_default_action(
         table_name,
 	action_name,
 	std::move(data)
@@ -111,7 +111,7 @@ class RuntimeHandler : virtual public RuntimeIf {
 
   void bm_match_table_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
     printf("bm_table_delete_entry\n");
-    MatchErrorCode error_code = switch_->match_table_delete_entry(
+    MatchErrorCode error_code = switch_->mt_delete_entry(
         table_name,
 	entry_handle
     );
@@ -128,7 +128,7 @@ class RuntimeHandler : virtual public RuntimeIf {
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
-    MatchErrorCode error_code = switch_->match_table_modify_entry(
+    MatchErrorCode error_code = switch_->mt_modify_entry(
         table_name,
 	entry_handle,
 	action_name,
