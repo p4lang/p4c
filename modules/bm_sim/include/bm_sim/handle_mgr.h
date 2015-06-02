@@ -7,13 +7,7 @@
 
 typedef uintptr_t handle_t;
 
-class HandleMgrIterator;
-class constHandleMgrIterator;
-
 class HandleMgr {
-  // friend class HandleMgrIterator;
-  // friend class constHandleMgrIterator;
-
 public:
 
   // iterators: since they are very simple, I did not mind duplicating the

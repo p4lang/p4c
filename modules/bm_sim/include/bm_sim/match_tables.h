@@ -75,10 +75,10 @@ protected:
     c.packets += 1;
   }
 
-  ReadLock lock_read() { return ReadLock(t_mutex); }
-  WriteLock lock_write() { return WriteLock(t_mutex); }
-  void unlock(ReadLock &lock) { lock.unlock(); }
-  void unlock(WriteLock &lock) { lock.unlock(); }
+  ReadLock lock_read() const { return ReadLock(t_mutex); }
+  WriteLock lock_write() const { return WriteLock(t_mutex); }
+  void unlock(ReadLock &lock) const { lock.unlock(); }
+  void unlock(WriteLock &lock) const { lock.unlock(); }
 
 protected:
   size_t size{0};
@@ -294,6 +294,8 @@ class MatchTableIndirectWS : public MatchTableIndirect
 public:
   typedef uintptr_t grp_hdl_t;
 
+  typedef unsigned int hash_t;
+
 public:
   MatchTableIndirectWS(
     const std::string &name, p4object_id_t id,
@@ -302,7 +304,7 @@ public:
   ) 
     : MatchTableIndirect(name, id, std::move(match_unit), with_counters) { }
 
-  void set_hash(std::unique_ptr<Calculation<unsigned int> > h) {
+  void set_hash(std::unique_ptr<Calculation<hash_t> > h) {
     hash = std::move(h);
   }
 
@@ -330,6 +332,8 @@ public:
     return num_groups;
   }
 
+  MatchErrorCode get_num_members_in_group(grp_hdl_t grp, size_t *nb) const;
+
 public:
   static std::unique_ptr<MatchTableIndirectWS> create(
     const std::string &match_type, 
@@ -355,11 +359,21 @@ private:
 private:
   class GroupInfo {
   public:
+    typedef RandAccessUIntSet::iterator iterator;
+    typedef RandAccessUIntSet::const_iterator const_iterator;
+
     MatchErrorCode add_member(mbr_hdl_t mbr);
     MatchErrorCode delete_member(mbr_hdl_t mbr);
     bool contains_member(mbr_hdl_t mbr) const;
     size_t size() const;
     mbr_hdl_t get_nth(size_t n) const;
+
+    // iterators
+    iterator begin() { return mbrs.begin(); }
+    const_iterator begin() const { return mbrs.begin(); }
+    iterator end() { return mbrs.end(); }
+    const_iterator end() const { return mbrs.end(); }
+
 
   private:
     RandAccessUIntSet mbrs{};
@@ -369,7 +383,7 @@ private:
   HandleMgr grp_handles{};
   size_t num_groups{0};
   std::vector<GroupInfo> group_entries{};
-  std::unique_ptr<Calculation<unsigned int> > hash{nullptr};
+  std::unique_ptr<Calculation<hash_t> > hash{nullptr};
 };
 
 #endif

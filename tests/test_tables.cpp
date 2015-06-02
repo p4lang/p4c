@@ -28,7 +28,7 @@ protected:
   header_id_t testHeader1{0}, testHeader2{1};
   ActionFn action_fn;
 
-  TableSizeOne() 
+  TableSizeOne()
     : testHeaderType("test_t", 0), action_fn("actionA", 0) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -518,4 +518,264 @@ TEST_F(TableIndirect, LookupEntry) {
   f.set("0xaba");
   table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_FALSE(hit);
+}
+
+class TableIndirectWS : public ::testing::Test {
+protected:
+  typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
+  typedef MatchTableIndirectWS::grp_hdl_t grp_hdl_t;
+  typedef MatchTableIndirectWS::hash_t hash_t;
+
+protected:
+  PHVFactory phv_factory;
+
+  MatchKeyBuilder key_builder;
+  std::unique_ptr<MatchTableIndirectWS> table;
+
+  HeaderType testHeaderType;
+  header_id_t testHeader1{0}, testHeader2{1};
+  ActionFn action_fn;
+
+  // I am not seeding this on purpose, at least for now
+  std::mt19937 gen;
+  std::uniform_int_distribution<unsigned int> dis;
+
+  static const size_t table_size = 128;
+
+  TableIndirectWS() 
+    : testHeaderType("test_t", 0), action_fn("actionA", 0) {
+    testHeaderType.push_back_field("f16", 16);
+    testHeaderType.push_back_field("f48", 48);
+    phv_factory.push_back_header("test1", testHeader1, testHeaderType);
+    phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+
+    key_builder.push_back_field(testHeader1, 0, 16);
+
+    table = MatchTableIndirectWS::create("exact", "test_table", 0,
+					 table_size, key_builder, true);
+    table->set_next_node(0, nullptr);
+
+    BufBuilder builder;
+    
+    builder.push_back_field(testHeader1, 1, 48); // h1.f48
+    builder.push_back_field(testHeader2, 0, 16); // h2.f16
+    builder.push_back_field(testHeader2, 1, 48); // h2.f48
+
+    std::unique_ptr<Calculation<hash_t> > calc(new Calculation<hash_t>(builder));
+    calc->set_compute_fn(hash::xxh64<hash_t>);
+
+    table->set_hash(std::move(calc));
+  }
+
+  MatchErrorCode add_entry(const std::string &key,
+  			   mbr_hdl_t mbr,
+  			   entry_handle_t *handle) {
+    std::vector<MatchKeyParam> match_key;
+    match_key.emplace_back(MatchKeyParam::Type::EXACT, key);
+    return table->add_entry(match_key, mbr, handle);
+  }
+
+  MatchErrorCode add_entry_ws(const std::string &key,
+			      grp_hdl_t grp,
+			      entry_handle_t *handle) {
+    std::vector<MatchKeyParam> match_key;
+    match_key.emplace_back(MatchKeyParam::Type::EXACT, key);
+    return table->add_entry_ws(match_key, grp, handle);
+  }
+
+  MatchErrorCode add_member(unsigned int data, mbr_hdl_t *mbr) {
+    ActionData action_data;
+    action_data.push_back_action_data(data);
+    return table->add_member(&action_fn, std::move(action_data), mbr);
+  }
+
+  Packet get_pkt(int length) {
+    // dummy packet, won't be parsed
+    return Packet(0, 0, 0, length, PacketBuffer(length * 2));
+  }
+
+  virtual void SetUp() {
+    Packet::set_phv_factory(phv_factory);
+  }
+
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
+};
+
+TEST_F(TableIndirectWS, Group) {
+  MatchErrorCode rc;
+  grp_hdl_t grp;
+  mbr_hdl_t mbr_1;
+  mbr_hdl_t mbr_bad = 999u;
+  mbr_hdl_t grp_bad = 999u;
+  size_t num_mbrs;
+  unsigned int data = 666u;
+
+  ASSERT_EQ(0u, table->get_num_groups());
+
+  rc = table->create_group(&grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(1u, table->get_num_groups());
+
+  rc = table->get_num_members_in_group(grp, &num_mbrs);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(0u, num_mbrs);
+
+  rc = add_member(data, &mbr_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->add_member_to_group(mbr_1, grp_bad);
+  ASSERT_EQ(MatchErrorCode::INVALID_GRP_HANDLE, rc);
+
+  rc = table->add_member_to_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->add_member_to_group(mbr_bad, grp);
+  ASSERT_EQ(MatchErrorCode::INVALID_MBR_HANDLE, rc);
+
+  rc = table->get_num_members_in_group(grp, &num_mbrs);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(1u, num_mbrs);
+
+  rc = table->add_member_to_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::MBR_ALREADY_IN_GRP, rc);
+
+  rc = table->get_num_members_in_group(grp, &num_mbrs);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(1u, num_mbrs);
+
+  rc = table->delete_member(mbr_1);
+  ASSERT_EQ(MatchErrorCode::MBR_STILL_USED, rc);
+
+  rc = table->remove_member_from_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->get_num_members_in_group(grp, &num_mbrs);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(0u, num_mbrs);
+
+  rc = table->remove_member_from_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::MBR_NOT_IN_GRP, rc);
+
+  rc = table->delete_member(mbr_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->delete_group(grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  ASSERT_EQ(0u, table->get_num_groups());
+
+  rc = table->delete_group(grp);
+  ASSERT_EQ(MatchErrorCode::INVALID_GRP_HANDLE, rc);
+}
+
+TEST_F(TableIndirectWS, EntryWS) {
+  MatchErrorCode rc;
+  grp_hdl_t grp;
+  mbr_hdl_t mbr_1;
+  mbr_hdl_t mbr_bad = 999u;
+  mbr_hdl_t grp_bad = 999u;
+  entry_handle_t handle;
+  std::string key = "\x0a\xba";
+  unsigned int data = 666u;
+
+  rc = table->create_group(&grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = add_entry_ws(key, grp, &handle);
+  ASSERT_EQ(MatchErrorCode::EMPTY_GRP, rc);
+
+  rc = add_member(data, &mbr_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->add_member_to_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = add_entry_ws(key, grp, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->delete_group(grp);
+  ASSERT_EQ(MatchErrorCode::GRP_STILL_USED, rc);
+
+  rc = table->delete_entry(handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->delete_group(grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+}
+
+TEST_F(TableIndirectWS, LookupEntryWS) {
+  MatchErrorCode rc;
+  grp_hdl_t grp;
+  mbr_hdl_t mbr_1, mbr_2;
+  entry_handle_t handle;
+  entry_handle_t lookup_handle;
+  bool hit;
+  std::string key = "\x0a\xba";
+  unsigned int data_1 = 666u;
+  unsigned int data_2 = 777u;
+
+  rc = table->create_group(&grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = add_member(data_1, &mbr_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = table->add_member_to_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = add_entry_ws(key, grp, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  Packet pkt = get_pkt(64);
+  Field &h1_f16 = pkt.get_phv()->get_field(testHeader1, 0);
+  Field &h1_f48 = pkt.get_phv()->get_field(testHeader1, 1);
+  Field &h2_f16 = pkt.get_phv()->get_field(testHeader2, 0);
+  Field &h2_f48 = pkt.get_phv()->get_field(testHeader2, 1);
+
+  h1_f16.set("0xaba");
+
+  // do a few lookups, should always resolve to mbr_1
+  for(int i = 0; i < 16; i++) {
+    h1_f48.set(dis(gen));
+    h2_f16.set(dis(gen));
+    h2_f48.set(dis(gen));
+    const ActionEntry &entry = table->lookup(pkt, &hit, &lookup_handle);
+    ASSERT_TRUE(hit);
+    ASSERT_EQ(data_1, entry.action_fn.get_action_data(0).get_uint());
+  }
+
+  // add a second member
+  rc = add_member(data_2, &mbr_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = table->add_member_to_group(mbr_2, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  // do a few lookups, should resolve to 1 or 2 with equal probability
+  size_t hits_1 = 0;
+  size_t hits_2 = 0;
+  for(int i = 0; i < 2000; i++) {
+    h1_f48.set(dis(gen));
+    h2_f16.set(dis(gen));
+    h2_f48.set(dis(gen));
+    const ActionEntry &entry = table->lookup(pkt, &hit, &lookup_handle);
+    ASSERT_TRUE(hit);
+    unsigned int data = entry.action_fn.get_action_data(0).get_uint();
+    if (data == data_1) hits_1++;
+    else if (data == data_2) hits_2++;
+    else FAIL();
+  }
+
+  ASSERT_NEAR(hits_1, hits_2, 100);
+
+  rc = table->delete_entry(handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->delete_group(grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->delete_member(mbr_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = table->delete_member(mbr_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 }

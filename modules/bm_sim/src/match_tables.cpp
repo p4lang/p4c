@@ -365,7 +365,7 @@ MatchTableIndirectWS::choose_from_group(grp_hdl_t grp, const Packet &pkt) const
   size_t s = group_info.size();
   assert(s > 0);
   if(!hash) return group_info.get_nth(0);
-  unsigned int h = hash->output(pkt);
+  hash_t h = hash->output(pkt);
   return group_info.get_nth(h % s);
 }
 
@@ -428,10 +428,19 @@ MatchTableIndirectWS::delete_group(grp_hdl_t grp)
 {
   WriteLock lock = lock_write();
 
+  if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+
   if(index_ref_count.get(IndirectIndex::make_grp_index(grp)) > 0)
     return MatchErrorCode::GRP_STILL_USED;
 
-  if(grp_handles.release_handle(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+  /* we allow deletion of non-empty groups, but we must remember to decrease the
+     ref count for the members. Note that we do not allow deletion of a member
+     which is in a group */
+  GroupInfo &group_info = group_entries[grp];
+  for(auto mbr : group_info)
+    index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
+
+  assert(!grp_handles.release_handle(grp));
 
   num_groups--;
 
@@ -518,6 +527,19 @@ MatchTableIndirectWS::set_default_group(grp_hdl_t grp)
 
   if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
   default_index = IndirectIndex::make_grp_index(grp);
+
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableIndirectWS::get_num_members_in_group(grp_hdl_t grp, size_t *nb) const
+{
+  ReadLock lock = lock_read();
+
+  if(!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+
+  const GroupInfo &group_info = group_entries[grp];
+  *nb = group_info.size();
 
   return MatchErrorCode::SUCCESS;
 }
