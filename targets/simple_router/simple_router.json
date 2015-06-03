@@ -284,19 +284,8 @@
             ]
         },
         {
-            "name": "_drop",
-            "id": 1,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "drop",
-                    "parameters": []
-                }
-            ]
-        },
-        {
             "name": "rewrite_mac",
-            "id": 2,
+            "id": 1,
             "runtime_data": [
                 {
                     "name": "smac",
@@ -319,6 +308,17 @@
                             "value": 0
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "name": "_drop",
+            "id": 2,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "drop",
+                    "parameters": []
                 }
             ]
         },
@@ -360,8 +360,10 @@
                 {
                     "name": "ipv4_lpm",
                     "id": 0,
-                    "type": "lpm",
+                    "match_type": "lpm",
+                    "type": "simple",
                     "max_size": 1024,
+                    "with_counters": false,
                     "key": [
                         {
                             "match_type": "lpm",
@@ -384,8 +386,10 @@
                 {
                     "name": "forward",
                     "id": 1,
-                    "type": "exact",
+                    "match_type": "exact",
+                    "type": "simple",
                     "max_size": 512,
+                    "with_counters": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -457,8 +461,10 @@
                 {
                     "name": "send_frame",
                     "id": 2,
-                    "type": "exact",
+                    "match_type": "exact",
+                    "type": "simple",
                     "max_size": 256,
+                    "with_counters": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -492,5 +498,6 @@
             ],
             "type": "ipv4"
         }
-    ]
+    ],
+    "learn_lists": []
 }

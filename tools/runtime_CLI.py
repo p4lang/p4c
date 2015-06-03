@@ -56,7 +56,7 @@ class Table:
     def __init__(self, name, id_):
         self.name = name
         self.id_ = id_
-        self.type_ = None
+        self.match_type_ = None
         self.actions = {}
         self.key = []
         self.default_action = None
@@ -115,7 +115,10 @@ def load_json(json_src):
         for j_pipeline in json_["pipelines"]:
             for j_table in j_pipeline["tables"]:
                 table = Table(j_table["name"], j_table["id"])
-                table.type_ = MatchType.from_str(j_table["type"])
+                table.match_type = MatchType.from_str(j_table["match_type"])
+                type_ = j_table["type"]
+                if type_ != "simple":
+                    assert(0 and "only 'simple' table type supported for now")
                 for action in j_table["actions"]:
                     table.actions[action] = ACTIONS[action]
                 for j_key in j_table["key"]:
@@ -367,7 +370,7 @@ class RuntimeAPI(cmd.Cmd):
         if action_name not in table.actions:
             print "Invalid action"
             return
-        if table.type_ == MatchType.TERNARY:
+        if table.match_type == MatchType.TERNARY:
             priority = int(args.pop(-1))
         else:
             priority = 0
@@ -390,7 +393,7 @@ class RuntimeAPI(cmd.Cmd):
             print "Invalid parameter"
             return
 
-        print "Adding entry to", MatchType.to_str(table.type_), "match table", table_name
+        print "Adding entry to", MatchType.to_str(table.match_type), "match table", table_name
 
         match_key = parse_match_key(table, match_key)
 

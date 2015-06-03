@@ -138,8 +138,36 @@
     ],
     "actions": [
         {
-            "name": "mac_learn",
+            "name": "forward",
             "id": 0,
+            "runtime_data": [
+                {
+                    "name": "port",
+                    "bitwidth": 9
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_port"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "mac_learn",
+            "id": 1,
             "runtime_data": [],
             "primitives": [
                 {
@@ -175,7 +203,7 @@
         },
         {
             "name": "broadcast",
-            "id": 1,
+            "id": 2,
             "runtime_data": [],
             "primitives": [
                 {
@@ -197,34 +225,6 @@
             ]
         },
         {
-            "name": "forward",
-            "id": 2,
-            "runtime_data": [
-                {
-                    "name": "port",
-                    "bitwidth": 9
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "_nop",
             "id": 3,
             "runtime_data": [],
@@ -240,8 +240,10 @@
                 {
                     "name": "smac",
                     "id": 0,
-                    "type": "exact",
+                    "match_type": "exact",
+                    "type": "simple",
                     "max_size": 512,
+                    "with_counters": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -264,8 +266,10 @@
                 {
                     "name": "dmac",
                     "id": 1,
-                    "type": "exact",
+                    "match_type": "exact",
+                    "type": "simple",
                     "max_size": 512,
+                    "with_counters": false,
                     "key": [
                         {
                             "match_type": "exact",
