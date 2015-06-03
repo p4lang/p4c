@@ -70,7 +70,7 @@ class RuntimeHandler : virtual public RuntimeIf {
     std::cout << std::endl;
   }
 
-  BmEntryHandle bm_match_table_add_entry(const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
+  BmEntryHandle bm_mt_add_entry(const std::string& table_name, const BmMatchParams& match_key, const std::string& action_name, const BmActionData& action_data, const BmAddEntryOptions& options) {
     std::cout << "bm_table_add_entry" << std::endl
 	      << table_name << std::endl;
     for(const auto &p : match_key)
@@ -82,25 +82,94 @@ class RuntimeHandler : virtual public RuntimeIf {
     return 0;
   }
 
-  void bm_match_table_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
+  void bm_mt_set_default_action(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
     std::cout << "bm_set_default_action" << std::endl
 	      << table_name << std::endl
 	      << action_name << std::endl;
     print_spec(action_data);
   }
 
-  void bm_match_table_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
+  void bm_mt_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
     std::cout << "bm_table_delete_entry" << std::endl
 	      << table_name << std::endl
 	      << entry_handle << std::endl;
   }
 
-  void bm_match_table_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const std::string &action_name, const BmActionData& action_data) {
+  void bm_mt_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const std::string &action_name, const BmActionData& action_data) {
     std::cout << "bm_table_modify_entry" << std::endl
 	      << table_name << std::endl
 	      << entry_handle << std::endl
 	      << action_name << std::endl;
     print_spec(action_data);
+  }
+
+  BmMemberHandle bm_mt_indirect_add_member(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_add_member\n");
+    return 0;
+  }
+
+  void bm_mt_indirect_delete_member(const std::string& table_name, const BmMemberHandle mbr_handle) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_delete_member\n");
+  }
+
+  BmEntryHandle bm_mt_indirect_add_entry(const std::string& table_name, const BmMatchParams& match_key, const BmMemberHandle mbr_handle, const BmAddEntryOptions& options) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_add_entry\n");
+    return 0;
+  }
+
+  void bm_mt_indirect_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const BmMemberHandle mbr_handle) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_modify_entry\n");
+  }
+
+  void bm_mt_indirect_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_delete_entry\n");
+  }
+
+  void bm_mt_indirect_set_default_member(const std::string& table_name, const BmMemberHandle mbr_handle) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_set_default_member\n");
+  }
+
+  BmGroupHandle bm_mt_indirect_ws_create_group(const std::string& table_name) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_ws_create_group\n");
+    return 0;
+  }
+
+  void bm_mt_indirect_ws_delete_group(const std::string& table_name, const BmGroupHandle grp_handle) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_ws_delete_group\n");
+  }
+
+  void bm_mt_indirect_ws_add_member_to_group(const std::string& table_name, const BmMemberHandle mbr_handle, const BmGroupHandle grp_handle) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_ws_add_member_to_group\n");
+  }
+
+  void bm_mt_indirect_ws_remove_member_from_group(const std::string& table_name, const BmMemberHandle mbr_handle, const BmGroupHandle grp_handle) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_ws_remove_member_from_group\n");
+  }
+
+  BmEntryHandle bm_mt_indirect_ws_add_entry(const std::string& table_name, const BmMatchParams& match_key, const BmGroupHandle grp_handle, const BmAddEntryOptions& options) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_ws_add_entry\n");
+    return 0;
+  }
+
+  void bm_mt_indirect_ws_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const BmGroupHandle grp_handle) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_ws_modify_entry\n");
+  }
+
+  void bm_mt_indirect_ws_set_default_group(const std::string& table_name, const BmGroupHandle grp_handle) {
+    // Your implementation goes here
+    printf("bm_mt_indirect_ws_set_default_group\n");
   }
 
   void bm_table_read_counter(BmCounterValue& _return, const std::string& table_name, const BmEntryHandle entry_handle) {

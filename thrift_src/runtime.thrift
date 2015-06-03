@@ -3,6 +3,9 @@ namespace cpp bm_runtime
 typedef i32 BmEntryHandle
 typedef list<binary> BmActionData
 
+typedef i32 BmMemberHandle
+typedef i32 BmGroupHandle
+
 typedef i32 BmLearningListId
 typedef i64 BmLearningBufferId
 typedef i32 BmLearningSampleId
@@ -63,8 +66,17 @@ enum TableOperationErrorCode {
   TABLE_FULL = 1,
   INVALID_HANDLE = 2,
   COUNTERS_DISABLED = 3,
-  WRONG_TABLE_TYPE = 4,
-  ERROR = 5,
+  INVALID_TABLE_NAME = 4,
+  INVALID_ACTION_NAME = 5,
+  WRONG_TABLE_TYPE = 6,
+  INVALID_MBR_HANDLE = 7,
+  MBR_STILL_USED = 8,
+  MBR_ALREADY_IN_GRP = 9,
+  MBR_NOT_IN_GRP = 10,
+  INVALID_GRP_HANDLE = 11,
+  GRP_STILL_USED = 12,
+  EMPTY_GRP = 13,
+  ERROR = 14,
 }
 
 exception InvalidTableOperation {
@@ -98,7 +110,7 @@ service Runtime {
 	
   // table operations
 
-  BmEntryHandle bm_match_table_add_entry(
+  BmEntryHandle bm_mt_add_entry(
     1:string table_name,
     2:BmMatchParams match_key,
     3:string action_name,
@@ -106,23 +118,101 @@ service Runtime {
     5:BmAddEntryOptions options
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_match_table_set_default_action(
+  void bm_mt_set_default_action(
     1:string table_name,
     2:string action_name,
     3:BmActionData action_data
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_match_table_delete_entry(
+  void bm_mt_delete_entry(
     1:string table_name,
     2:BmEntryHandle entry_handle
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_match_table_modify_entry(
+  void bm_mt_modify_entry(
     1:string table_name,
     2:BmEntryHandle entry_handle,
     3:string action_name,
     4:BmActionData action_data
   ) throws (1:InvalidTableOperation ouch),
+
+  // indirect tables
+
+  BmMemberHandle bm_mt_indirect_add_member(
+    1:string table_name,
+    2:string action_name,
+    3:BmActionData action_data
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_delete_member(
+    1:string table_name,
+    2:BmMemberHandle mbr_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  BmEntryHandle bm_mt_indirect_add_entry(
+    1:string table_name,
+    2:BmMatchParams match_key,
+    3:BmMemberHandle mbr_handle,
+    4:BmAddEntryOptions options
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_modify_entry(
+    1:string table_name,
+    2:BmEntryHandle entry_handle,
+    3:BmMemberHandle mbr_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_delete_entry(
+    1:string table_name,
+    2:BmEntryHandle entry_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_set_default_member(
+    1:string table_name,
+    2:BmMemberHandle mbr_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  // indirect tables with selector
+
+  BmGroupHandle bm_mt_indirect_ws_create_group(
+    1:string table_name
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_ws_delete_group(
+    1:string table_name,
+    2:BmGroupHandle grp_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_ws_add_member_to_group(
+    1:string table_name,
+    2:BmMemberHandle mbr_handle,
+    3:BmGroupHandle grp_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_ws_remove_member_from_group(
+    1:string table_name,
+    2:BmMemberHandle mbr_handle,
+    3:BmGroupHandle grp_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  BmEntryHandle bm_mt_indirect_ws_add_entry(
+    1:string table_name,
+    2:BmMatchParams match_key,
+    3:BmGroupHandle grp_handle
+    4:BmAddEntryOptions options
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_ws_modify_entry(
+    1:string table_name,
+    2:BmEntryHandle entry_handle,
+    3:BmGroupHandle grp_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_ws_set_default_group(
+    1:string table_name,
+    2:BmGroupHandle grp_handle
+  ) throws (1:InvalidTableOperation ouch),
+
 
   BmCounterValue bm_table_read_counter(
     1:string table_name,
