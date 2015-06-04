@@ -12,16 +12,18 @@ AC_PROG_CXX
 AC_PROG_CC
 LT_INIT
 
+# enforce -std=c++11
+AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
+
 # Add picky flags
-CXXFLAGS="-std=c++11"
 # Do not include -pedantic because it reject long long
 PICKY_CXXFLAGS="-Wall -Werror -Wextra"
 PICKY_CFLAGS=""
 # I do not want work to use AC_DEFINE cause I do not want to include config.h
 # It interfers with Thrift's config.h and it's too much work to do that cleanly
 DEBUG_CPPFLAGS=""
-DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -g"
-DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -DELOGGER_NANOMSG"
+# DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -g"
+# DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -DELOGGER_NANOMSG"
 # DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -DENABLE_SIMPLELOG"
 AC_SUBST([PICKY_CXXFLAGS])
 AC_SUBST([PICKY_CFLAGS])

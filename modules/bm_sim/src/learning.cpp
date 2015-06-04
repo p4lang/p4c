@@ -75,7 +75,7 @@ void LearnEngine::LearnSampleBuilder::operator()(
 ) const
 {
   for(const LearnSampleEntry &entry : entries) {
-    const ByteContainer *bytes;
+    const ByteContainer *bytes = nullptr;
     switch(entry.tag) {
     case LearnSampleEntry::FIELD:
       bytes = &phv.get_field(entry.field.header, entry.field.offset).get_bytes();

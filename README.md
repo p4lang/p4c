@@ -3,6 +3,9 @@
 **If you get a nanomsg error when running the tests (make check), try running
   them as sudo **  
 
+In 'debug mode', you probably want to do:  
+./configure 'CXXFLAGS=-O0 -g' 'CPPFLAGS=-DELOGGER_NANOMSG -DENABLE_SIMPLELOG'
+
 ## Common instructions:
 1. Always run make from the top-level folder, otherwise dependency tracking won't work.
 
