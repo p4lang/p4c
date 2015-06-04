@@ -68,7 +68,7 @@ TEST_F(CalculationTest, SimpleTest) {
 
   builder.push_back_field(testHeader2, 2, 32); // f32_1
 
-  Calculation<hash_t> calc(builder);;
+  Calculation<hash_t> calc(builder);
 
   calc.set_compute_fn(hash::xxh64<hash_t>);
 
