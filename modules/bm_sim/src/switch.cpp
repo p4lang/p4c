@@ -125,6 +125,22 @@ Switch::mt_indirect_delete_member(
     return rc;
   return table->delete_member(mbr);
 }
+
+MatchErrorCode
+Switch::mt_indirect_modify_member(
+  const std::string &table_name, mbr_hdl_t mbr,
+  const std::string &action_name, ActionData action_data
+)
+{
+  MatchErrorCode rc;
+  MatchTableIndirect *table;
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  if((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
+    return rc;
+  const ActionFn *action = p4objects_rt->get_action(action_name);
+  if(!action) return MatchErrorCode::INVALID_ACTION_NAME;
+  return table->modify_member(mbr, action, std::move(action_data));
+}
  
 MatchErrorCode
 Switch::mt_indirect_add_entry(

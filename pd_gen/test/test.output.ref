@@ -52,6 +52,11 @@ bm_mt_indirect_add_member
 Indirect
 actionA
 aabbccddeeff 
+bm_mt_indirect_modify_member
+Indirect
+0
+actionB
+ab 
 bm_mt_indirect_add_entry
 Indirect
 EXACT: ddccbbaa

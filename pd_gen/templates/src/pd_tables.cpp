@@ -417,10 +417,9 @@ ${name}
 //::     #endif
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
   (void) action_data; (void) client;
-  // TODO: implement in bm_sim
-  // client->bm_mt_indirect_modify_member(
-  //    "${t_name}", "${a_name}", action_data
-  // );
+  client->bm_mt_indirect_modify_member(
+    "${t_name}", mbr_hdl, "${a_name}", action_data
+  );
   return 0;
 }
 

@@ -198,6 +198,22 @@ class RuntimeHandler : virtual public RuntimeIf {
     }
   }
 
+  void bm_mt_indirect_modify_member(const std::string& table_name, const BmMemberHandle mbr_handle, const std::string& action_name, const BmActionData& action_data) {
+    printf("bm_mt_indirect_modify_member\n");
+    ActionData data;
+    for(const std::string &d : action_data) {
+      data.push_back_action_data(d.data(), d.size());
+    }
+    MatchErrorCode error_code = switch_->mt_indirect_modify_member(
+      table_name, mbr_handle, action_name, std::move(data)
+    );
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
   BmEntryHandle bm_mt_indirect_add_entry(const std::string& table_name, const BmMatchParams& match_key, const BmMemberHandle mbr_handle, const BmAddEntryOptions& options) {
     printf("bm_mt_indirect_add_entry\n");
     entry_handle_t entry_handle;

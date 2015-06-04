@@ -53,6 +53,12 @@ public:
   virtual MatchErrorCode
   mt_indirect_delete_member(const std::string &table_name,
 			    mbr_hdl_t mbr) = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_modify_member(const std::string &table_name,
+			    mbr_hdl_t mbr_hdl,
+			    const std::string &action_name,
+			    ActionData action_data) = 0;
   
   virtual MatchErrorCode
   mt_indirect_add_entry(const std::string &table_name,

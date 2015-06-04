@@ -94,7 +94,6 @@ int main() {
 					     &actionA_action_spec,
 					     &mbr_hdl);
 
-  // not implemented yet, so there will be no output
   p4_pd_test_ActProf_modify_member_with_actionB(sess_hdl, dev_tgt.device_id,
 						mbr_hdl,
 						&actionB_action_spec);

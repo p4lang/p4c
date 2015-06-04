@@ -149,6 +149,13 @@ service Runtime {
     2:BmMemberHandle mbr_handle
   ) throws (1:InvalidTableOperation ouch),
 
+  void bm_mt_indirect_modify_member(
+    1:string table_name,
+    2:BmMemberHandle mbr_handle,
+    3:string action_name,
+    4:BmActionData action_data
+  ) throws (1:InvalidTableOperation ouch),
+
   BmEntryHandle bm_mt_indirect_add_entry(
     1:string table_name,
     2:BmMatchParams match_key,

@@ -59,6 +59,12 @@ public:
   MatchErrorCode
   mt_indirect_delete_member(const std::string &table_name,
 			    mbr_hdl_t mbr) override;
+
+  MatchErrorCode
+  mt_indirect_modify_member(const std::string &table_name,
+			    mbr_hdl_t mbr_hdl,
+			    const std::string &action_name,
+			    ActionData action_data) override;
   
   MatchErrorCode
   mt_indirect_add_entry(const std::string &table_name,

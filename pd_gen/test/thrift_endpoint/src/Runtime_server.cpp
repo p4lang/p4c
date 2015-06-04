@@ -117,6 +117,14 @@ class RuntimeHandler : virtual public RuntimeIf {
 	      << mbr_handle << std::endl;
   }
 
+  void bm_mt_indirect_modify_member(const std::string& table_name, const BmMemberHandle mbr_handle, const std::string& action_name, const BmActionData& action_data) {
+    std::cout << "bm_mt_indirect_modify_member" << std::endl
+	      << table_name << std::endl
+	      << mbr_handle << std::endl
+	      << action_name << std::endl;
+    print_spec(action_data);
+  }
+
   BmEntryHandle bm_mt_indirect_add_entry(const std::string& table_name, const BmMatchParams& match_key, const BmMemberHandle mbr_handle, const BmAddEntryOptions& options) {
     std::cout << "bm_mt_indirect_add_entry" << std::endl
 	      << table_name << std::endl;

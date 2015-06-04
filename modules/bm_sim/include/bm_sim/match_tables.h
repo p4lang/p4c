@@ -240,6 +240,10 @@ public:
 
   MatchErrorCode delete_member(mbr_hdl_t mbr);
 
+  MatchErrorCode modify_member(mbr_hdl_t mbr,
+			       const ActionFn *action_fn,
+			       ActionData action_data);
+
   MatchErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
 			   mbr_hdl_t mbr,
 			   entry_handle_t *handle,

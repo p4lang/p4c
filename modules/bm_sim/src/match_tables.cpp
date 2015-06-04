@@ -240,6 +240,23 @@ MatchTableIndirect::delete_member(mbr_hdl_t mbr)
 }
 
 MatchErrorCode
+MatchTableIndirect::modify_member(
+  mbr_hdl_t mbr, const ActionFn *action_fn, ActionData action_data
+)
+{
+  ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
+  const ControlFlowNode *next_node = get_next_node(action_fn->get_id());
+
+  WriteLock lock = lock_write();
+
+  if(!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+
+  action_entries[mbr] = ActionEntry(std::move(action_fn_entry), next_node);
+
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
 MatchTableIndirect::add_entry(
   const std::vector<MatchKeyParam> &match_key, mbr_hdl_t mbr,
   entry_handle_t *handle, int priority

@@ -367,6 +367,12 @@ protected:
     return table->add_member(&action_fn, std::move(action_data), mbr);
   }
 
+  MatchErrorCode modify_member(mbr_hdl_t mbr, unsigned int data) {
+    ActionData action_data;
+    action_data.push_back_action_data(data);
+    return table->modify_member(mbr, &action_fn, std::move(action_data));
+  }
+
   Packet get_pkt(int length) {
     // dummy packet, won't be parsed
     return Packet(0, 0, 0, length, PacketBuffer(length * 2));
@@ -518,6 +524,40 @@ TEST_F(TableIndirect, LookupEntry) {
   f.set("0xaba");
   table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_FALSE(hit);
+}
+
+TEST_F(TableIndirect, ModifyMember) {
+  MatchErrorCode rc;
+  mbr_hdl_t mbr;
+  unsigned int data_1 = 0xaba;
+  unsigned int data_2 = 0xabb;
+  std::string key = "\x0a\xba";
+  entry_handle_t handle;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  Packet pkt = get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(testHeader1, 0);
+  f.set("0xaba");
+
+  // I don't have a way of inspecting a member (yet?), so I perform a lookup
+  // instead 
+  rc = add_member(data_1, &mbr);
+  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  rc = add_entry(key, mbr, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  const ActionEntry &entry_1 = table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+  ASSERT_EQ(data_1, entry_1.action_fn.get_action_data(0).get_uint());
+
+  rc = modify_member(mbr, data_2);
+  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  const ActionEntry &entry_2 = table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+  ASSERT_EQ(data_2, entry_2.action_fn.get_action_data(0).get_uint());
 }
 
 class TableIndirectWS : public ::testing::Test {

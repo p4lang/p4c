@@ -73,6 +73,16 @@ class Iface:
     """
     pass
 
+  def bm_mt_indirect_modify_member(self, table_name, mbr_handle, action_name, action_data):
+    """
+    Parameters:
+     - table_name
+     - mbr_handle
+     - action_name
+     - action_data
+    """
+    pass
+
   def bm_mt_indirect_add_entry(self, table_name, match_key, mbr_handle, options):
     """
     Parameters:
@@ -160,7 +170,7 @@ class Iface:
     """
     pass
 
-  def bm_mt_indirect_set_default_group(self, table_name, grp_handle):
+  def bm_mt_indirect_ws_set_default_group(self, table_name, grp_handle):
     """
     Parameters:
      - table_name
@@ -487,6 +497,43 @@ class Client(Iface):
       iprot.readMessageEnd()
       raise x
     result = bm_mt_indirect_delete_member_result()
+    result.read(iprot)
+    iprot.readMessageEnd()
+    if result.ouch is not None:
+      raise result.ouch
+    return
+
+  def bm_mt_indirect_modify_member(self, table_name, mbr_handle, action_name, action_data):
+    """
+    Parameters:
+     - table_name
+     - mbr_handle
+     - action_name
+     - action_data
+    """
+    self.send_bm_mt_indirect_modify_member(table_name, mbr_handle, action_name, action_data)
+    self.recv_bm_mt_indirect_modify_member()
+
+  def send_bm_mt_indirect_modify_member(self, table_name, mbr_handle, action_name, action_data):
+    self._oprot.writeMessageBegin('bm_mt_indirect_modify_member', TMessageType.CALL, self._seqid)
+    args = bm_mt_indirect_modify_member_args()
+    args.table_name = table_name
+    args.mbr_handle = mbr_handle
+    args.action_name = action_name
+    args.action_data = action_data
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_bm_mt_indirect_modify_member(self):
+    iprot = self._iprot
+    (fname, mtype, rseqid) = iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(iprot)
+      iprot.readMessageEnd()
+      raise x
+    result = bm_mt_indirect_modify_member_result()
     result.read(iprot)
     iprot.readMessageEnd()
     if result.ouch is not None:
@@ -843,25 +890,25 @@ class Client(Iface):
       raise result.ouch
     return
 
-  def bm_mt_indirect_set_default_group(self, table_name, grp_handle):
+  def bm_mt_indirect_ws_set_default_group(self, table_name, grp_handle):
     """
     Parameters:
      - table_name
      - grp_handle
     """
-    self.send_bm_mt_indirect_set_default_group(table_name, grp_handle)
-    self.recv_bm_mt_indirect_set_default_group()
+    self.send_bm_mt_indirect_ws_set_default_group(table_name, grp_handle)
+    self.recv_bm_mt_indirect_ws_set_default_group()
 
-  def send_bm_mt_indirect_set_default_group(self, table_name, grp_handle):
-    self._oprot.writeMessageBegin('bm_mt_indirect_set_default_group', TMessageType.CALL, self._seqid)
-    args = bm_mt_indirect_set_default_group_args()
+  def send_bm_mt_indirect_ws_set_default_group(self, table_name, grp_handle):
+    self._oprot.writeMessageBegin('bm_mt_indirect_ws_set_default_group', TMessageType.CALL, self._seqid)
+    args = bm_mt_indirect_ws_set_default_group_args()
     args.table_name = table_name
     args.grp_handle = grp_handle
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_bm_mt_indirect_set_default_group(self):
+  def recv_bm_mt_indirect_ws_set_default_group(self):
     iprot = self._iprot
     (fname, mtype, rseqid) = iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
@@ -869,7 +916,7 @@ class Client(Iface):
       x.read(iprot)
       iprot.readMessageEnd()
       raise x
-    result = bm_mt_indirect_set_default_group_result()
+    result = bm_mt_indirect_ws_set_default_group_result()
     result.read(iprot)
     iprot.readMessageEnd()
     if result.ouch is not None:
@@ -1334,6 +1381,7 @@ class Processor(Iface, TProcessor):
     self._processMap["bm_mt_modify_entry"] = Processor.process_bm_mt_modify_entry
     self._processMap["bm_mt_indirect_add_member"] = Processor.process_bm_mt_indirect_add_member
     self._processMap["bm_mt_indirect_delete_member"] = Processor.process_bm_mt_indirect_delete_member
+    self._processMap["bm_mt_indirect_modify_member"] = Processor.process_bm_mt_indirect_modify_member
     self._processMap["bm_mt_indirect_add_entry"] = Processor.process_bm_mt_indirect_add_entry
     self._processMap["bm_mt_indirect_modify_entry"] = Processor.process_bm_mt_indirect_modify_entry
     self._processMap["bm_mt_indirect_delete_entry"] = Processor.process_bm_mt_indirect_delete_entry
@@ -1344,7 +1392,7 @@ class Processor(Iface, TProcessor):
     self._processMap["bm_mt_indirect_ws_remove_member_from_group"] = Processor.process_bm_mt_indirect_ws_remove_member_from_group
     self._processMap["bm_mt_indirect_ws_add_entry"] = Processor.process_bm_mt_indirect_ws_add_entry
     self._processMap["bm_mt_indirect_ws_modify_entry"] = Processor.process_bm_mt_indirect_ws_modify_entry
-    self._processMap["bm_mt_indirect_set_default_group"] = Processor.process_bm_mt_indirect_set_default_group
+    self._processMap["bm_mt_indirect_ws_set_default_group"] = Processor.process_bm_mt_indirect_ws_set_default_group
     self._processMap["bm_table_read_counter"] = Processor.process_bm_table_read_counter
     self._processMap["bm_table_reset_counters"] = Processor.process_bm_table_reset_counters
     self._processMap["bm_learning_ack"] = Processor.process_bm_learning_ack
@@ -1455,6 +1503,20 @@ class Processor(Iface, TProcessor):
     except InvalidTableOperation, ouch:
       result.ouch = ouch
     oprot.writeMessageBegin("bm_mt_indirect_delete_member", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_bm_mt_indirect_modify_member(self, seqid, iprot, oprot):
+    args = bm_mt_indirect_modify_member_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = bm_mt_indirect_modify_member_result()
+    try:
+      self._handler.bm_mt_indirect_modify_member(args.table_name, args.mbr_handle, args.action_name, args.action_data)
+    except InvalidTableOperation, ouch:
+      result.ouch = ouch
+    oprot.writeMessageBegin("bm_mt_indirect_modify_member", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -1599,16 +1661,16 @@ class Processor(Iface, TProcessor):
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_bm_mt_indirect_set_default_group(self, seqid, iprot, oprot):
-    args = bm_mt_indirect_set_default_group_args()
+  def process_bm_mt_indirect_ws_set_default_group(self, seqid, iprot, oprot):
+    args = bm_mt_indirect_ws_set_default_group_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = bm_mt_indirect_set_default_group_result()
+    result = bm_mt_indirect_ws_set_default_group_result()
     try:
-      self._handler.bm_mt_indirect_set_default_group(args.table_name, args.grp_handle)
+      self._handler.bm_mt_indirect_ws_set_default_group(args.table_name, args.grp_handle)
     except InvalidTableOperation, ouch:
       result.ouch = ouch
-    oprot.writeMessageBegin("bm_mt_indirect_set_default_group", TMessageType.REPLY, seqid)
+    oprot.writeMessageBegin("bm_mt_indirect_ws_set_default_group", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -2827,6 +2889,184 @@ class bm_mt_indirect_delete_member_result:
   def __ne__(self, other):
     return not (self == other)
 
+class bm_mt_indirect_modify_member_args:
+  """
+  Attributes:
+   - table_name
+   - mbr_handle
+   - action_name
+   - action_data
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRING, 'table_name', None, None, ), # 1
+    (2, TType.I32, 'mbr_handle', None, None, ), # 2
+    (3, TType.STRING, 'action_name', None, None, ), # 3
+    (4, TType.LIST, 'action_data', (TType.STRING,None), None, ), # 4
+  )
+
+  def __init__(self, table_name=None, mbr_handle=None, action_name=None, action_data=None,):
+    self.table_name = table_name
+    self.mbr_handle = mbr_handle
+    self.action_name = action_name
+    self.action_data = action_data
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.table_name = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I32:
+          self.mbr_handle = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.action_name = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.LIST:
+          self.action_data = []
+          (_etype38, _size35) = iprot.readListBegin()
+          for _i39 in xrange(_size35):
+            _elem40 = iprot.readString();
+            self.action_data.append(_elem40)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mt_indirect_modify_member_args')
+    if self.table_name is not None:
+      oprot.writeFieldBegin('table_name', TType.STRING, 1)
+      oprot.writeString(self.table_name)
+      oprot.writeFieldEnd()
+    if self.mbr_handle is not None:
+      oprot.writeFieldBegin('mbr_handle', TType.I32, 2)
+      oprot.writeI32(self.mbr_handle)
+      oprot.writeFieldEnd()
+    if self.action_name is not None:
+      oprot.writeFieldBegin('action_name', TType.STRING, 3)
+      oprot.writeString(self.action_name)
+      oprot.writeFieldEnd()
+    if self.action_data is not None:
+      oprot.writeFieldBegin('action_data', TType.LIST, 4)
+      oprot.writeListBegin(TType.STRING, len(self.action_data))
+      for iter41 in self.action_data:
+        oprot.writeString(iter41)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.table_name)
+    value = (value * 31) ^ hash(self.mbr_handle)
+    value = (value * 31) ^ hash(self.action_name)
+    value = (value * 31) ^ hash(self.action_data)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class bm_mt_indirect_modify_member_result:
+  """
+  Attributes:
+   - ouch
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.STRUCT, 'ouch', (InvalidTableOperation, InvalidTableOperation.thrift_spec), None, ), # 1
+  )
+
+  def __init__(self, ouch=None,):
+    self.ouch = ouch
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ouch = InvalidTableOperation()
+          self.ouch.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('bm_mt_indirect_modify_member_result')
+    if self.ouch is not None:
+      oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
+      self.ouch.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __hash__(self):
+    value = 17
+    value = (value * 31) ^ hash(self.ouch)
+    return value
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
 class bm_mt_indirect_add_entry_args:
   """
   Attributes:
@@ -2867,11 +3107,11 @@ class bm_mt_indirect_add_entry_args:
       elif fid == 2:
         if ftype == TType.LIST:
           self.match_key = []
-          (_etype38, _size35) = iprot.readListBegin()
-          for _i39 in xrange(_size35):
-            _elem40 = BmMatchParam()
-            _elem40.read(iprot)
-            self.match_key.append(_elem40)
+          (_etype45, _size42) = iprot.readListBegin()
+          for _i46 in xrange(_size42):
+            _elem47 = BmMatchParam()
+            _elem47.read(iprot)
+            self.match_key.append(_elem47)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -2903,8 +3143,8 @@ class bm_mt_indirect_add_entry_args:
     if self.match_key is not None:
       oprot.writeFieldBegin('match_key', TType.LIST, 2)
       oprot.writeListBegin(TType.STRUCT, len(self.match_key))
-      for iter41 in self.match_key:
-        iter41.write(oprot)
+      for iter48 in self.match_key:
+        iter48.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.mbr_handle is not None:
@@ -4105,11 +4345,11 @@ class bm_mt_indirect_ws_add_entry_args:
       elif fid == 2:
         if ftype == TType.LIST:
           self.match_key = []
-          (_etype45, _size42) = iprot.readListBegin()
-          for _i46 in xrange(_size42):
-            _elem47 = BmMatchParam()
-            _elem47.read(iprot)
-            self.match_key.append(_elem47)
+          (_etype52, _size49) = iprot.readListBegin()
+          for _i53 in xrange(_size49):
+            _elem54 = BmMatchParam()
+            _elem54.read(iprot)
+            self.match_key.append(_elem54)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4141,8 +4381,8 @@ class bm_mt_indirect_ws_add_entry_args:
     if self.match_key is not None:
       oprot.writeFieldBegin('match_key', TType.LIST, 2)
       oprot.writeListBegin(TType.STRUCT, len(self.match_key))
-      for iter48 in self.match_key:
-        iter48.write(oprot)
+      for iter55 in self.match_key:
+        iter55.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.grp_handle is not None:
@@ -4414,7 +4654,7 @@ class bm_mt_indirect_ws_modify_entry_result:
   def __ne__(self, other):
     return not (self == other)
 
-class bm_mt_indirect_set_default_group_args:
+class bm_mt_indirect_ws_set_default_group_args:
   """
   Attributes:
    - table_name
@@ -4459,7 +4699,7 @@ class bm_mt_indirect_set_default_group_args:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_mt_indirect_set_default_group_args')
+    oprot.writeStructBegin('bm_mt_indirect_ws_set_default_group_args')
     if self.table_name is not None:
       oprot.writeFieldBegin('table_name', TType.STRING, 1)
       oprot.writeString(self.table_name)
@@ -4492,7 +4732,7 @@ class bm_mt_indirect_set_default_group_args:
   def __ne__(self, other):
     return not (self == other)
 
-class bm_mt_indirect_set_default_group_result:
+class bm_mt_indirect_ws_set_default_group_result:
   """
   Attributes:
    - ouch
@@ -4530,7 +4770,7 @@ class bm_mt_indirect_set_default_group_result:
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('bm_mt_indirect_set_default_group_result')
+    oprot.writeStructBegin('bm_mt_indirect_ws_set_default_group_result')
     if self.ouch is not None:
       oprot.writeFieldBegin('ouch', TType.STRUCT, 1)
       self.ouch.write(oprot)
@@ -4888,10 +5128,10 @@ class bm_learning_ack_args:
       elif fid == 3:
         if ftype == TType.LIST:
           self.sample_ids = []
-          (_etype52, _size49) = iprot.readListBegin()
-          for _i53 in xrange(_size49):
-            _elem54 = iprot.readI32();
-            self.sample_ids.append(_elem54)
+          (_etype59, _size56) = iprot.readListBegin()
+          for _i60 in xrange(_size56):
+            _elem61 = iprot.readI32();
+            self.sample_ids.append(_elem61)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -4916,8 +5156,8 @@ class bm_learning_ack_args:
     if self.sample_ids is not None:
       oprot.writeFieldBegin('sample_ids', TType.LIST, 3)
       oprot.writeListBegin(TType.I32, len(self.sample_ids))
-      for iter55 in self.sample_ids:
-        oprot.writeI32(iter55)
+      for iter62 in self.sample_ids:
+        oprot.writeI32(iter62)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
