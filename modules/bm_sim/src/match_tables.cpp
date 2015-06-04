@@ -56,6 +56,7 @@ MatchTableAbstract::query_counters(entry_handle_t handle,
 				   counter_value_t *bytes,
 				   counter_value_t *packets) const {
   if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
+  if(!is_valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   const Counter &c = counters[handle];
   *bytes = c.bytes;
   *packets = c.packets;

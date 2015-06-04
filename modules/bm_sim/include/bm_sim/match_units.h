@@ -131,10 +131,11 @@ public:
 
   size_t get_nbytes_key() const { return nbytes_key; }
 
+  bool valid_handle(entry_handle_t handle) const;
+
 protected:
   MatchErrorCode get_and_set_handle(entry_handle_t *handle);
   MatchErrorCode unset_handle(entry_handle_t handle);
-  bool valid_handle(entry_handle_t handle) const;
 
 private:
   virtual MatchUnitLookup lookup_key(const ByteContainer &key) const = 0;

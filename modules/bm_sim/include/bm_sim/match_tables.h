@@ -70,6 +70,8 @@ public:
 
   virtual size_t get_num_entries() const = 0;
 
+  virtual bool is_valid_handle(entry_handle_t handle) const = 0;
+
   void set_next_node(p4object_id_t action_id, const ControlFlowNode *next_node) {
     next_nodes[action_id] = next_node;
   }
@@ -146,6 +148,10 @@ public:
 
   size_t get_num_entries() const override {
     return match_unit->get_num_entries();
+  }
+
+  bool is_valid_handle(entry_handle_t handle) const override {
+    return match_unit->valid_handle(handle);
   }
 
 public:
@@ -280,6 +286,10 @@ public:
 
   size_t get_num_entries() const override {
     return match_unit->get_num_entries();
+  }
+
+  bool is_valid_handle(entry_handle_t handle) const override {
+    return match_unit->valid_handle(handle);
   }
 
   size_t get_num_members() const {

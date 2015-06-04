@@ -192,6 +192,19 @@ TYPED_TEST(TableSizeOne, AddEntry) {
   ASSERT_EQ(1u, this->table->get_num_entries());
 }
 
+TYPED_TEST(TableSizeOne, IsValidHandle) {
+  std::string key_ = "\xaa\xaa";
+  entry_handle_t handle_1 = 0;
+  MatchErrorCode rc;
+
+  ASSERT_FALSE(this->table->is_valid_handle(handle_1));
+
+  rc = this->add_entry(key_, &handle_1);
+  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+
+  ASSERT_TRUE(this->table->is_valid_handle(handle_1));
+}
+
 TYPED_TEST(TableSizeOne, DeleteEntry) {
   std::string key_ = "\xaa\xaa";
   ByteContainer key("0xaaaa");
@@ -280,6 +293,7 @@ TYPED_TEST(TableSizeOne, Counters) {
   std::string key_ = "\x0a\xba";
   ByteContainer key("0x0aba");
   entry_handle_t handle;
+  entry_handle_t bad_handle = 999u;
   MatchErrorCode rc;
 
   rc = this->add_entry(key_, &handle);
@@ -288,6 +302,9 @@ TYPED_TEST(TableSizeOne, Counters) {
 
   uint64_t counter_bytes = 0;
   uint64_t counter_packets = 0;
+
+  rc = this->table->query_counters(bad_handle, &counter_bytes, &counter_packets);
+  ASSERT_EQ(rc, MatchErrorCode::INVALID_HANDLE);
 
   rc = this->table->query_counters(handle, &counter_bytes, &counter_packets);
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
