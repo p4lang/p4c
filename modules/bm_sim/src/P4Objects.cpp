@@ -456,10 +456,14 @@ void P4Objects::init_objects(std::istream &is) {
 
   typedef LearnWriterImpl<TransportNanomsg> MyLearnWriter;
   const std::string learning_ipc_name = "ipc:///tmp/test_bm_learning.ipc";
-  auto learn_writer = 
-    std::shared_ptr<MyLearnWriter>(new MyLearnWriter(learning_ipc_name));
+  std::shared_ptr<MyLearnWriter> learn_writer;
 
   const Json::Value cfg_learn_lists = cfg_root["learn_lists"];
+
+  if(cfg_learn_lists.size() > 0) {
+    learn_writer = std::shared_ptr<MyLearnWriter>(new MyLearnWriter(learning_ipc_name));
+  }
+
   for (const auto &cfg_learn_list : cfg_learn_lists) {
 
     LearnEngine::list_id_t list_id = cfg_learn_list["id"].asInt();

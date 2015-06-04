@@ -102,7 +102,10 @@ void LearnEngine::LearnList::init()
 
 LearnEngine::LearnList::~LearnList()
 {
-  stop_transmit_thread = true;
+  {
+    std::unique_lock<std::mutex> lock(mutex);
+    stop_transmit_thread = true;
+  }
   b_can_send.notify_all();
   transmit_thread.join();
 }
@@ -188,7 +191,8 @@ void LearnEngine::LearnList::buffer_transmit()
   size_t num_samples_to_send;
   std::unique_lock<std::mutex> lock(mutex);
   clock::time_point now = clock::now();
-  while(buffer_tmp.size() == 0 &&
+  while(!stop_transmit_thread &&
+	buffer_tmp.size() == 0 &&
 	(!with_timeout || num_samples == 0 || now < (buffer_started + timeout))) {
     if(with_timeout && num_samples > 0) {
       b_can_send.wait_until(lock, buffer_started + timeout);
@@ -196,9 +200,10 @@ void LearnEngine::LearnList::buffer_transmit()
     else {
       b_can_send.wait(lock);
     }
-    if(stop_transmit_thread) return;
     now = clock::now();
   }
+
+  if(stop_transmit_thread) return;
 
   if(buffer_tmp.size() == 0) { // timeout -> we need to swap here
     num_samples_to_send = num_samples;
