@@ -48,3 +48,20 @@ bm_set_default_action
 ExactOne
 actionA
 aabbccddeeff 
+bm_mt_indirect_add_member
+Indirect
+actionA
+aabbccddeeff 
+bm_mt_indirect_add_entry
+Indirect
+EXACT: ddccbbaa
+0
+bm_mt_indirect_delete_entry
+Indirect
+0
+bm_mt_indirect_set_default_member
+Indirect
+0
+bm_mt_indirect_delete_member
+Indirect
+0

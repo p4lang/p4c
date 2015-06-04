@@ -33,25 +33,30 @@ TABLES = {}
 ACTIONS = {}
 LEARN_QUANTAS = {}
 
-class MatchType:
-    EXACT = 0
-    LPM = 1
-    TERNARY = 2
-    VALID = 3
-
+def enum(type_name, *sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    reverse = dict((value, key) for key, value in enums.iteritems())
+    # enums['reverse_mapping'] = reverse
     @staticmethod
     def to_str(x):
-        return {0: "exact", 1: "lpm", 2: "ternary", 3: "valid"}[x]
-
+        return reverse[x].lower()
+    enums['to_str'] = to_str
     @staticmethod
     def from_str(x):
-        return {"exact": 0, "lpm": 1, "ternary": 2, "valid": 3}[x]
+        return enums[x.upper()]
+    enums['from_str'] = from_str
+    return type(type_name, (), enums)
+
+MatchType = enum('MatchType', 'EXACT', 'LPM', 'TERNARY', 'VALID')
+TableType = enum('TableType', 'SIMPLE', 'INDIRECT', 'INDIRECT_WS')
 
 class Table:
     def __init__(self, name, id_):
         self.name = name
         self.id_ = id_
+        self.match_type = None
         self.type_ = None
+        self.act_prof = None # for indirect tables only
         self.actions = {}
         self.key = []
         self.default_action = None
@@ -124,7 +129,8 @@ def load_json(json_src):
         for j_pipeline in json_["pipelines"]:
             for j_table in j_pipeline["tables"]:
                 table = Table(j_table["name"], j_table["id"])
-                table.type_ = MatchType.from_str(j_table["type"])
+                table.match_type = MatchType.from_str(j_table["match_type"])
+                table.type_ = TableType.from_str(j_table["type"])
                 table.with_counters = j_table["with_counters"]
                 assert(type(table.with_counters) is bool)
                 for action in j_table["actions"]:
@@ -142,6 +148,14 @@ def load_json(json_src):
                         bitwidth = get_field_bitwidth(header_type, target[1],
                                                       json_["header_types"])
                     table.key += [(field_name, match_type, bitwidth)]
+
+                if table.type_ == TableType.INDIRECT or\
+                   table.type_ == TableType.INDIRECT_WS:
+                    if "act_prof_name" not in j_table:
+                        print "WARNING: no action profile name found for table", table.name, "; using the table name by default"
+                        table.act_prof = table.name
+                    else:
+                        table.act_prof = j_table["act_prof_name"]
 
         for j_learn_quanta in json_["learn_lists"]:
             learn_quanta = LearnQuanta(j_learn_quanta["name"],
@@ -248,6 +262,7 @@ def main():
     render_dict["p4_prefix"] = args.p4_prefix
     render_dict["pd_prefix"] = "p4_pd_" + args.p4_prefix + "_"
     render_dict["MatchType"] = MatchType
+    render_dict["TableType"] = TableType
     render_dict["gen_match_params"] = gen_match_params
     render_dict["gen_action_params"] = gen_action_params
     render_dict["bits_to_bytes"] = bits_to_bytes

@@ -211,7 +211,8 @@
                 {
                     "name": "ExactOne",
                     "id": 0,
-                    "type": "exact",
+                    "match_type": "exact",
+                    "type": "simple",
                     "max_size": 512,
                     "with_counters": true,
                     "key": [
@@ -236,7 +237,8 @@
                 {
                     "name": "LpmOne",
                     "id": 1,
-                    "type": "lpm",
+                    "match_type": "lpm",
+                    "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
                     "key": [
@@ -259,7 +261,8 @@
                 {
                     "name": "TernaryOne",
                     "id": 2,
-                    "type": "ternary",
+                    "match_type": "ternary",
+                    "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
                     "key": [
@@ -282,7 +285,8 @@
                 {
                     "name": "ExactOneNA",
                     "id": 3,
-                    "type": "exact",
+                    "match_type": "exact",
+                    "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
                     "key": [
@@ -305,7 +309,8 @@
                 {
                     "name": "ExactTwo",
                     "id": 4,
-                    "type": "exact",
+                    "match_type": "exact",
+                    "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
                     "key": [
@@ -335,7 +340,8 @@
                 {
                     "name": "ExactAndValid",
                     "id": 5,
-                    "type": "exact",
+                    "match_type": "exact",
+                    "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
                     "key": [
@@ -360,9 +366,90 @@
                     "default_action": null
                 },
                 {
-                    "name": "Learn",
+                    "name": "Indirect",
                     "id": 6,
-                    "type": "exact",
+                    "match_type": "exact",
+                    "type": "indirect",
+                    "act_prof_name": "ActProf",
+                    "max_size": 512,
+                    "with_counters": false,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "actionA",
+                        "actionB"
+                    ],
+                    "next_tables": {
+                        "actionA": "IndirectWS",
+                        "actionB": "IndirectWS"
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "IndirectWS",
+                    "id": 7,
+                    "match_type": "exact",
+                    "type": "indirect_ws",
+                    "act_prof_name": "ActProfWS",
+                    "selector": {
+                        "algo": "crc16",
+                        "input": [
+                            {
+                                "type": "field",
+                                "value": [
+                                    "header_test",
+                                    "field24"
+                                ]
+                            },
+                            {
+                                "type": "field",
+                                "value": [
+                                    "header_test",
+                                    "field48"
+                                ]
+                            },
+                            {
+                                "type": "field",
+                                "value": [
+                                    "header_test",
+                                    "field64"
+                                ]
+                            }
+                        ]
+                    },
+                    "max_size": 512,
+                    "with_counters": false,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "actionA",
+                        "actionB"
+                    ],
+                    "next_tables": {
+                        "actionA": null,
+                        "actionB": null
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "Learn",
+                    "id": 8,
+                    "match_type": "exact",
+                    "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
                     "key": [
@@ -378,7 +465,7 @@
                         "ActionLearn"
                     ],
                     "next_tables": {
-                        "ActionLearn": null
+                        "ActionLearn": "Indirect"
                     },
                     "default_action": null
                 }

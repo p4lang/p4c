@@ -92,6 +92,57 @@ table ExactAndValid {
     size: 512;
 }
 
+table Indirect {
+    reads {
+         header_test.field32 : exact;
+    }
+    action_profile: ActProf;
+    size: 512;
+}
+
+action_profile ActProf {
+    actions {
+        actionA;
+        actionB;
+    }
+    size : 128;
+}
+
+table IndirectWS {
+    reads {
+         header_test.field32 : exact;
+    }
+    action_profile: ActProfWS;
+    size: 512;
+}
+
+action_profile ActProfWS {
+    actions {
+        actionA;
+        actionB;
+    }
+    size : 128;
+    dynamic_action_selection : Selector;
+}
+
+action_selector Selector {
+    selection_key : SelectorHash;
+}
+
+field_list HashFields {
+    header_test.field24;
+    header_test.field48;
+    header_test.field64;
+}
+
+field_list_calculation SelectorHash {
+    input {
+        HashFields;
+    }
+    algorithm : crc16; // ignored for now
+    output_width : 16;
+}
+
 #define LEARN_RECEIVER 1
 
 field_list LearnDigest {
@@ -121,6 +172,8 @@ control ingress {
     apply(ExactTwo);
     apply(ExactAndValid);
     apply(Learn);
+    apply(Indirect);
+    apply(IndirectWS);
 }
 
 control egress {

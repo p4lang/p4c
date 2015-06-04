@@ -91,8 +91,10 @@ extern "C" {
 /* ADD ENTRIES */
 
 //:: for t_name, t in tables.items():
+//::   t_type = t.type_
+//::   if t_type != TableType.SIMPLE: continue
 //::   t_name = get_c_name(t_name)
-//::   match_type = t.type_
+//::   match_type = t.match_type
 //::   has_match_spec = len(t.key) > 0
 //::   for a_name, a in t.actions.items():
 //::     a_name = get_c_name(a_name)
@@ -144,9 +146,84 @@ ${name}
 //::   #endfor
 //:: #endfor
 
+//:: for t_name, t in tables.items():
+//::   t_type = t.type_
+//::   if t_type == TableType.SIMPLE: continue
+//::   t_name = get_c_name(t_name)
+//::   match_type = t.match_type
+//::   has_match_spec = len(t.key) > 0
+//::   params = ["p4_pd_sess_hdl_t sess_hdl",
+//::             "p4_pd_dev_target_t dev_tgt"]
+//::   if has_match_spec:
+//::     params += [pd_prefix + t_name + "_match_spec_t *match_spec"]
+//::   #endif
+//::   if match_type == MatchType.TERNARY:
+//::     params += ["int priority"]
+//::   #endif
+//::
+//::   params_indirect = params + ["p4_pd_mbr_hdl_t mbr_hdl", "p4_pd_entry_hdl_t *entry_hdl"]
+//::   param_str = ",\n ".join(params_indirect)
+//::   name = pd_prefix + t_name + "_add_entry"
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_tgt.device_id]);
+//::   if not has_match_spec:
+  std::vector<BmMatchParam> match_key;
+//::   else:
+  std::vector<BmMatchParam> match_key = build_key_${t_name}(match_spec);
+//::   #endif
+  BmAddEntryOptions options;
+//::   if match_type == MatchType.TERNARY:
+  options.__set_priority(priority);
+//::   #endif
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  *entry_hdl = client->bm_mt_indirect_add_entry(
+       "${t_name}",
+       match_key,
+       mbr_hdl,
+       options
+  );
+  return 0;
+}
+
+//::   if t_type != TableType.INDIRECT_WS: continue
+//::   params_indirect_ws = params + ["p4_pd_grp_hdl_t grp_hdl", "p4_pd_entry_hdl_t *entry_hdl"]
+//::   param_str = ",\n ".join(params_indirect_ws)
+//::   name = pd_prefix + t_name + "_add_entry_with_selector"
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_tgt.device_id]);
+//::   if not has_match_spec:
+  std::vector<BmMatchParam> match_key;
+//::   else:
+  std::vector<BmMatchParam> match_key = build_key_${t_name}(match_spec);
+//::   #endif
+  BmAddEntryOptions options;
+//::   if match_type == MatchType.TERNARY:
+  options.__set_priority(priority);
+//::   #endif
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  *entry_hdl = client->bm_mt_indirect_ws_add_entry(
+       "${t_name}",
+       match_key,
+       grp_hdl,
+       options
+  );
+  return 0;
+}
+
+//:: #endfor
+
 /* DELETE ENTRIES */
 
 //:: for t_name, t in tables.items():
+//::   t_type = t.type_
 //::   t_name = get_c_name(t_name)
 //::   name = pd_prefix + t_name + "_table_delete"
 p4_pd_status_t
@@ -157,7 +234,12 @@ ${name}
  p4_pd_entry_hdl_t entry_hdl
 ) {
   assert(my_devices[dev_id]);
-  pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_mt_delete_entry("${t_name}", entry_hdl);
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+//::   if t_type == TableType.SIMPLE:
+  client->bm_mt_delete_entry("${t_name}", entry_hdl);
+//::   else:
+  client->bm_mt_indirect_delete_entry("${t_name}", entry_hdl);
+//::   #endif
   return 0;
 }
 
@@ -166,6 +248,8 @@ ${name}
 /* MODIFY ENTRIES */
 
 //:: for t_name, t in tables.items():
+//::   t_type = t.type_
+//::   if t_type != TableType.SIMPLE: continue
 //::   t_name = get_c_name(t_name)
 //::   for a_name, a in t.actions.items():
 //::     a_name = get_c_name(a_name)
@@ -203,6 +287,8 @@ ${name}
 /* SET DEFAULT_ACTION */
 
 //:: for t_name, t in tables.items():
+//::   t_type = t.type_
+//::   if t_type != TableType.SIMPLE: continue
 //::   t_name = get_c_name(t_name)
 //::   for a_name, a in t.actions.items():
 //::     a_name = get_c_name(a_name)
@@ -236,7 +322,197 @@ ${name}
 //::   #endfor
 //:: #endfor
 
+//:: for t_name, t in tables.items():
+//::   t_type = t.type_
+//::   if t_type == TableType.SIMPLE: continue
+//::   t_name = get_c_name(t_name)
+//::   params = ["p4_pd_sess_hdl_t sess_hdl",
+//::             "p4_pd_dev_target_t dev_tgt"]
+//::
+//::   params_indirect = params + ["p4_pd_mbr_hdl_t mbr_hdl", "p4_pd_entry_hdl_t *entry_hdl"]
+//::   param_str = ",\n ".join(params_indirect)
+//::   name = pd_prefix + t_name + "_set_default_entry"
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_tgt.device_id]);
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  client->bm_mt_indirect_set_default_member("${t_name}", mbr_hdl);
+  return 0;
+}
 
+//::   if t_type != TableType.INDIRECT_WS: continue
+//::   params_indirect_ws = params + ["p4_pd_grp_hdl_t grp_hdl", "p4_pd_entry_hdl_t *entry_hdl"]
+//::   param_str = ",\n ".join(params_indirect_ws)
+//::   name = pd_prefix + t_name + "_set_default_entry_with_selector"
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_tgt.device_id]);
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  client->bm_mt_indirect_ws_set_default_group("${t_name}", grp_hdl);
+  return 0;
+}
+
+//:: #endfor
+
+//:: for t_name, t in tables.items():
+//::   t_type = t.type_
+//::   if t_type == TableType.SIMPLE: continue
+//::   t_name = get_c_name(t_name)
+//::   act_prof_name = get_c_name(t.act_prof)
+//::   match_type = t.match_type
+//::   has_match_spec = len(t.key) > 0
+//::   for a_name, a in t.actions.items():
+//::     a_name = get_c_name(a_name)
+//::     has_action_spec = len(a.runtime_data) > 0
+//::     params = ["p4_pd_sess_hdl_t sess_hdl",
+//::               "p4_pd_dev_target_t dev_tgt"]
+//::     if has_action_spec:
+//::       params += [pd_prefix + a_name + "_action_spec_t *action_spec"]
+//::     #endif
+//::     params += ["p4_pd_mbr_hdl_t *mbr_hdl"]
+//::     param_str = ",\n ".join(params)
+//::     name = pd_prefix + act_prof_name + "_add_member_with_" + a_name
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_tgt.device_id]);
+//::     if not has_action_spec:
+  std::vector<std::string> action_data;
+//::     else:
+  std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
+//::     #endif
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  *mbr_hdl = client->bm_mt_indirect_add_member(
+     "${t_name}", "${a_name}", action_data
+  );
+  return 0;
+}
+
+//::     params = ["p4_pd_sess_hdl_t sess_hdl",
+//::               "uint8_t dev_id",
+//::               "p4_pd_mbr_hdl_t mbr_hdl"]
+//::     if has_action_spec:
+//::       params += [pd_prefix + a_name + "_action_spec_t *action_spec"]
+//::     #endif
+//::     param_str = ",\n ".join(params)
+//::     name = pd_prefix + act_prof_name + "_modify_member_with_" + a_name
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_id]);
+//::     if not has_action_spec:
+  std::vector<std::string> action_data;
+//::     else:
+  std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
+//::     #endif
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  (void) action_data; (void) client;
+  // TODO: implement in bm_sim
+  // client->bm_mt_indirect_modify_member(
+  //    "${t_name}", "${a_name}", action_data
+  // );
+  return 0;
+}
+
+//::   #endfor
+//::
+//::   params = ["p4_pd_sess_hdl_t sess_hdl",
+//::             "uint8_t dev_id",
+//::             "p4_pd_mbr_hdl_t mbr_hdl"]
+//::   param_str = ",\n ".join(params)
+//::   name = pd_prefix + act_prof_name + "_del_member"
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_id]);
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  client->bm_mt_indirect_delete_member("${t_name}", mbr_hdl);
+  return 0;
+}
+
+//::   if t.type_ != TableType.INDIRECT_WS: continue
+//::
+//::   params = ["p4_pd_sess_hdl_t sess_hdl",
+//::             "p4_pd_dev_target_t dev_tgt",
+//::             "uint16_t max_grp_size",
+//::             "p4_pd_grp_hdl_t *grp_hdl"]
+//::   param_str = ",\n ".join(params)
+//::   name = pd_prefix + act_prof_name + "_create_group"
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  (void) max_grp_size;
+  assert(my_devices[dev_tgt.device_id]);
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  *grp_hdl = client->bm_mt_indirect_ws_create_group("${t_name}");
+  return 0;
+}
+
+//::   params = ["p4_pd_sess_hdl_t sess_hdl",
+//::             "uint8_t dev_id",
+//::             "p4_pd_grp_hdl_t grp_hdl"]
+//::   param_str = ",\n ".join(params)
+//::   name = pd_prefix + act_prof_name + "_del_group"
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_id]);
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  client->bm_mt_indirect_ws_delete_group("${t_name}", grp_hdl);
+  return 0;
+}
+
+//::   params = ["p4_pd_sess_hdl_t sess_hdl",
+//::             "uint8_t dev_id",
+//::             "p4_pd_grp_hdl_t grp_hdl",
+//::             "p4_pd_mbr_hdl_t mbr_hdl"]
+//::   param_str = ",\n ".join(params)
+//::   name = pd_prefix + act_prof_name + "_add_member_to_group"
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_id]);
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  client->bm_mt_indirect_ws_add_member_to_group("${t_name}", mbr_hdl, grp_hdl);
+  return 0;
+}
+
+//::   params = ["p4_pd_sess_hdl_t sess_hdl",
+//::             "uint8_t dev_id",
+//::             "p4_pd_grp_hdl_t grp_hdl",
+//::             "p4_pd_mbr_hdl_t mbr_hdl"]
+//::   param_str = ",\n ".join(params)
+//::   name = pd_prefix + act_prof_name + "_del_member_from_group"
+p4_pd_status_t
+${name}
+(
+ ${param_str}
+) {
+  assert(my_devices[dev_id]);
+  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  client->bm_mt_indirect_ws_remove_member_from_group("${t_name}", mbr_hdl, grp_hdl);
+  return 0;
+}
+
+//:: #endfor
 
 /* DIRECT COUNTERS */
 

@@ -86,6 +86,32 @@ int main() {
                                                  &actionA_action_spec,
                                                  &entry_hdl);
 
+  /* indirect table */
+
+  p4_pd_mbr_hdl_t mbr_hdl;
+
+  p4_pd_test_ActProf_add_member_with_actionA(sess_hdl, dev_tgt,
+					     &actionA_action_spec,
+					     &mbr_hdl);
+
+  // not implemented yet, so there will be no output
+  p4_pd_test_ActProf_modify_member_with_actionB(sess_hdl, dev_tgt.device_id,
+						mbr_hdl,
+						&actionB_action_spec);
+
+  p4_pd_test_Indirect_match_spec_t Indirect_match_spec = {0xaabbccdd};
+  p4_pd_test_Indirect_add_entry(sess_hdl, dev_tgt,
+				&Indirect_match_spec, mbr_hdl,
+				&entry_hdl);
+
+  p4_pd_test_Indirect_table_delete(sess_hdl, dev_tgt.device_id, entry_hdl);
+
+  p4_pd_test_Indirect_set_default_entry(sess_hdl, dev_tgt,
+					mbr_hdl, &entry_hdl);
+
+  p4_pd_test_ActProf_del_member(sess_hdl, dev_tgt.device_id, mbr_hdl);
+
+
   /* END TEST */
 
   p4_pd_test_remove_device(sess_hdl, dev_tgt.device_id);

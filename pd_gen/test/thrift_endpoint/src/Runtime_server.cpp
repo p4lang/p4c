@@ -104,35 +104,47 @@ class RuntimeHandler : virtual public RuntimeIf {
   }
 
   BmMemberHandle bm_mt_indirect_add_member(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
-    // Your implementation goes here
-    printf("bm_mt_indirect_add_member\n");
+    std::cout << "bm_mt_indirect_add_member" << std::endl
+	      << table_name << std::endl
+	      << action_name << std::endl;
+    print_spec(action_data);
     return 0;
   }
 
   void bm_mt_indirect_delete_member(const std::string& table_name, const BmMemberHandle mbr_handle) {
-    // Your implementation goes here
-    printf("bm_mt_indirect_delete_member\n");
+    std::cout << "bm_mt_indirect_delete_member" << std::endl
+	      << table_name << std::endl
+	      << mbr_handle << std::endl;
   }
 
   BmEntryHandle bm_mt_indirect_add_entry(const std::string& table_name, const BmMatchParams& match_key, const BmMemberHandle mbr_handle, const BmAddEntryOptions& options) {
-    // Your implementation goes here
-    printf("bm_mt_indirect_add_entry\n");
+    std::cout << "bm_mt_indirect_add_entry" << std::endl
+	      << table_name << std::endl;
+    for(const auto &p : match_key)
+      print_match_param(p);
+    std::cout << mbr_handle << std::endl;
+    if(options.__isset.priority)
+      std::cout << options.priority << std::endl;
     return 0;
   }
 
   void bm_mt_indirect_modify_entry(const std::string& table_name, const BmEntryHandle entry_handle, const BmMemberHandle mbr_handle) {
-    // Your implementation goes here
-    printf("bm_mt_indirect_modify_entry\n");
+    std::cout << "bm_mt_indirect_modify_entry" << std::endl
+	      << table_name << std::endl
+	      << entry_handle << std::endl
+	      << mbr_handle << std::endl;
   }
 
   void bm_mt_indirect_delete_entry(const std::string& table_name, const BmEntryHandle entry_handle) {
-    // Your implementation goes here
-    printf("bm_mt_indirect_delete_entry\n");
+    std::cout << "bm_mt_indirect_delete_entry" << std::endl
+	      << table_name << std::endl
+	      << entry_handle << std::endl;
   }
 
   void bm_mt_indirect_set_default_member(const std::string& table_name, const BmMemberHandle mbr_handle) {
-    // Your implementation goes here
-    printf("bm_mt_indirect_set_default_member\n");
+    std::cout << "bm_mt_indirect_set_default_member" << std::endl
+	      << table_name << std::endl
+	      << mbr_handle << std::endl;
   }
 
   BmGroupHandle bm_mt_indirect_ws_create_group(const std::string& table_name) {
