@@ -12,6 +12,8 @@ AC_PROG_CXX
 AC_PROG_CC
 LT_INIT
 
+AC_CONFIG_MACRO_DIR([m4])
+
 # enforce -std=c++11
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 
