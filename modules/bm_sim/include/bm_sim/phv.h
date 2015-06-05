@@ -33,6 +33,7 @@
 
 #include "fields.h"
 #include "headers.h"
+#include "header_stacks.h"
 #include "named_p4object.h"
 
 typedef p4object_id_t header_id_t;
@@ -52,10 +53,11 @@ private:
 public:
   PHV() {}
 
-  PHV(size_t num_headers)
-    : capacity(num_headers) {
+  PHV(size_t num_headers, size_t num_header_stacks)
+    : capacity(num_headers), capacity_stacks(num_header_stacks) {
     // this is needed, otherwise our references will not be valid anymore
     headers.reserve(num_headers);
+    header_stacks.reserve(num_header_stacks);
   }
 
   Header &get_header(header_id_t header_index) {
@@ -88,6 +90,14 @@ public:
 
   const Field &get_field(const std::string &field_name) const {
     return fields_map.at(field_name);
+  }
+
+  HeaderStack &get_header_stack(header_stack_id_t header_stack_index) {
+    return header_stacks[header_stack_index];
+  }
+
+  const HeaderStack &get_header_stack(header_stack_id_t header_stack_index) const {
+    return header_stacks[header_stack_index];
   }
 
   void reset(); // mark all headers as invalid
@@ -130,11 +140,28 @@ private:
     }
   }
 
+  void push_back_header_stack(
+      const string &header_stack_name,
+      header_stack_id_t header_stack_index,
+      const HeaderType &header_type,
+      const std::vector<header_id_t> &header_ids
+  ) {
+    assert(header_stack_index < (int) capacity_stacks);
+    assert(header_stack_index == (int) header_stacks.size());
+    HeaderStack header_stack(header_stack_name, header_stack_index, header_type);
+    for(header_id_t header_id : header_ids) {
+      header_stack.set_next_header(get_header(header_id));
+    }
+    header_stacks.push_back(std::move(header_stack));
+  }
+
 private:
   std::vector<Header> headers{};
+  std::vector<HeaderStack> header_stacks{};
   std::unordered_map<std::string, HeaderRef> headers_map{};
   std::unordered_map<std::string, FieldRef> fields_map{};
   size_t capacity{0};
+  size_t capacity_stacks{0};
 };
 
 class PHVFactory
@@ -155,13 +182,36 @@ private:
     }
   };
 
+  struct HeaderStackDesc {
+    const std::string name;
+    header_stack_id_t index;
+    const HeaderType &header_type;
+    std::vector<header_id_t> headers;
+
+    HeaderStackDesc(const std::string &name, const header_stack_id_t index,
+		    const HeaderType &header_type,
+		    const std::vector<header_id_t> &headers)
+      : name(name), index(index), header_type(header_type), headers(headers) { }
+  };
+
 public:
   void push_back_header(const string &header_name,
 			const header_id_t header_index,
 			const HeaderType &header_type) {
     HeaderDesc desc = HeaderDesc(header_name, header_index, header_type);
-    // cannot use opeartor[] because it requires default constructibility
+    // cannot use operator[] because it requires default constructibility
     header_descs.insert(std::make_pair(header_index, desc));
+  }
+
+  void push_back_header_stack(const string &header_stack_name,
+			      const header_stack_id_t header_stack_index,
+			      const HeaderType &header_type,
+			      const std::vector<header_id_t> &headers) {
+    HeaderStackDesc desc = HeaderStackDesc(
+      header_stack_name, header_stack_index, header_type, headers
+    );
+    // cannot use operator[] because it requires default constructibility
+    header_stack_descs.insert(std::make_pair(header_stack_index, desc));
   }
 
   const HeaderType &get_header_type(header_id_t header_id) const {
@@ -184,17 +234,27 @@ public:
   }
 
   std::unique_ptr<PHV> create() const {
-    std::unique_ptr<PHV> phv(new PHV(header_descs.size()));
+    std::unique_ptr<PHV> phv(new PHV(header_descs.size(),
+				     header_stack_descs.size()));
+
     for(const auto &e : header_descs) {
       const HeaderDesc &desc = e.second;
       phv->push_back_header(desc.name, desc.index,
 			    desc.header_type, desc.arith_offsets);
     }
+
+    for(const auto &e : header_stack_descs) {
+      const HeaderStackDesc &desc = e.second;
+      phv->push_back_header_stack(desc.name, desc.index,
+				  desc.header_type, desc.headers);
+    }
+
     return phv;
   }
 
 private:
   std::map<header_id_t, HeaderDesc> header_descs{}; // sorted by header id
+  std::map<header_stack_id_t, HeaderStackDesc> header_stack_descs{};
 };
 
 #endif

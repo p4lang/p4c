@@ -143,9 +143,20 @@ public:
     return fields[n];
   }
 
+  // useful for header stacks
+  void swap_values(Header &other) {
+    std::swap(valid, other.valid);
+    // cannot do that, would invalidate references
+    // std::swap(fields, other.fields);
+    for(size_t i = 0; i < fields.size(); i++) {
+      std::swap(fields[i], other.fields[i]);
+    }
+  }
+
   Header(const Header &other) = delete;
   Header &operator=(const Header &other) = delete;
 
+  // TODO: this may as well be delete's I think, class a a reference member
   Header(Header &&other) = default;
   Header &operator=(Header &&other) = default;
 
