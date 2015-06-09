@@ -20,6 +20,61 @@
 
 #include "bm_sim/parser.h"
 
+template<>
+void
+ParserOpSet<field_t>::operator()(
+  Packet *pkt, const char *data, size_t *bytes_parsed
+) const
+{
+  (void) bytes_parsed; (void) data;
+  PHV *phv = pkt->get_phv();
+  Field &f_dst = phv->get_field(dst.header, dst.offset);
+  Field &f_src = phv->get_field(src.header, src.offset);
+  f_dst.set(f_src);
+}
+
+template<>
+void
+ParserOpSet<Data>::operator()(
+  Packet *pkt, const char *data, size_t *bytes_parsed
+) const
+{
+  (void) bytes_parsed; (void) data;
+  PHV *phv = pkt->get_phv();
+  Field &f_dst = phv->get_field(dst.header, dst.offset);
+  f_dst.set(src);
+}
+
+template<>
+void
+ParserOpSet<ParserLookAhead>::operator()(
+  Packet *pkt, const char *data, size_t *bytes_parsed
+) const
+{
+  (void) bytes_parsed;
+  static thread_local ByteContainer bc;
+  PHV *phv = pkt->get_phv();
+  Field &f_dst = phv->get_field(dst.header, dst.offset);
+  int f_bits = f_dst.get_nbits();
+  /* I expect the first case to be the most common one. In the first case, we
+     extract the packet bytes to the field bytes and sync the bignum value. The
+     second case requires extracting the packet bytes to the ByteContainer, then
+     importing the bytes into the field's bignum value, then finally exporting
+     the bignum value to the field's byte array. I could alternatively write a
+     more general extract function which would account for a potential size
+     difference between source and destination. */
+  // TODO
+  if(src.bitwidth == f_bits) {
+    data += src.byte_offset;
+    f_dst.extract(data, src.bit_offset);
+  }
+  else {
+    bc.clear();
+    src.peek(data, bc);
+    f_dst.set(bc);
+  }
+}
+
 bool ParseSwitchCase::match(const ByteContainer &input,
 			    const ParseState **state) const {
   if(!with_mask) {
@@ -42,14 +97,9 @@ bool ParseSwitchCase::match(const ByteContainer &input,
 const ParseState *ParseState::operator()(Packet *pkt, const char *data,
 					 size_t *bytes_parsed) const{
   // execute parser ops
-  ParserOp *parser_op;
   PHV *phv = pkt->get_phv();
-  for (std::vector<ParserOp *>::const_iterator it = parser_ops.begin();
-       it != parser_ops.end();
-       ++it) {
-    parser_op = *it;
+  for (auto &parser_op : parser_ops)
     (*parser_op)(pkt, data + *bytes_parsed, bytes_parsed);
-  }
 
   if(!has_switch) return NULL;
 
@@ -60,11 +110,8 @@ const ParseState *ParseState::operator()(Packet *pkt, const char *data,
 
   // try the matches in order
   const ParseState *next_state = NULL;
-  for (std::vector<ParseSwitchCase>::const_iterator it = parser_switch.begin();
-       it != parser_switch.end();
-       ++it) {
-    if(it->match(key, &next_state)) return next_state;
-  }
+  for (const auto &switch_case : parser_switch)
+    if(switch_case.match(key, &next_state)) return next_state;
 
   return default_next_state;
 }

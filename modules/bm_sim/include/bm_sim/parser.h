@@ -32,6 +32,76 @@
 #include "named_p4object.h"
 #include "event_logger.h"
 
+struct field_t {
+  header_id_t header;
+  int offset;
+  
+  static field_t make(header_id_t header, int offset) {
+    field_t field = {header, offset};
+    return field;
+  }
+};
+
+namespace {
+
+void extract(const char *data, int bit_offset, int bitwidth, char *dst) {
+  int nbytes = (bitwidth + 7) / 8;
+
+  if(bit_offset == 0 && bitwidth % 8 == 0) {
+    std::copy(data, data + nbytes, dst);
+  }
+
+  int dst_offset = (nbytes << 3) - bitwidth;
+  int i;
+  
+  // necessary to ensure correct behavior when shifting right (no sign extension)
+  unsigned char *udata = (unsigned char *) data;
+
+  int offset = bit_offset - dst_offset;
+  if (offset == 0) {
+    std::copy(udata, udata + nbytes, dst);
+    dst[0] &= (0xFF >> dst_offset);
+  }
+  else if (offset > 0) { /* shift left */
+    for (i = 0; i < nbytes - 1; i++) {
+      dst[i] = (udata[i] << offset) | (udata[i + 1] >> (8 - offset));
+    }
+    dst[0] &= (0xFF >> dst_offset);
+    dst[i] = udata[i] << offset;
+    if((bit_offset + bitwidth) > (nbytes << 3)) {
+      dst[i] |= (udata[i + 1] >> (8 - offset));
+    }
+  }
+  else { /* shift right */
+    offset = -offset;
+    dst[0] = udata[0] >> offset;
+      for (i = 1; i < nbytes; i++) {
+	dst[i] = (udata[i - 1] << (8 - offset)) | (udata[i] >> offset);
+      }
+  }
+}
+
+}
+
+struct ParserLookAhead {
+  int byte_offset;
+  int bit_offset;  
+  int bitwidth;
+  size_t nbytes;
+
+  ParserLookAhead(int offset, int bitwidth)
+    : byte_offset(offset / 8), bit_offset(offset % 8),
+      bitwidth(bitwidth),
+      nbytes((bitwidth + 7) / 8) { }
+
+  void peek(const char *data, ByteContainer &res) const {
+    size_t old_size = res.size();
+    res.resize(old_size + nbytes);
+    char *dst = &res[old_size];
+    extract(data + byte_offset, bit_offset, bitwidth, dst);
+  }
+};
+
 struct ParserOp {
   virtual ~ParserOp() {};
   virtual void operator()(Packet *pkt, const char *data,
@@ -44,10 +114,8 @@ struct ParserOpExtract : ParserOp {
   ParserOpExtract(header_id_t header)
     : header(header) {}
 
-  ~ParserOpExtract() {}
-
   void operator()(Packet *pkt, const char *data,
-		  size_t *bytes_parsed) const
+		  size_t *bytes_parsed) const override
   {
     PHV *phv = pkt->get_phv();
     ELOGGER->parser_extract(*pkt, header);
@@ -57,38 +125,97 @@ struct ParserOpExtract : ParserOp {
   }
 };
 
-struct ParserOpSet : ParserOp {
-  // TODO
+// push back a header on a tag stack
+// TODO: probably room for improvement here
+struct ParserOpExtractStack : ParserOp {
+  header_stack_id_t header_stack;
 
-  ~ParserOpSet() {}
+  ParserOpExtractStack(header_stack_id_t header_stack)
+    : header_stack(header_stack) {}
+
+  void operator()(Packet *pkt, const char *data,
+		  size_t *bytes_parsed) const override
+  {
+    PHV *phv = pkt->get_phv();
+    HeaderStack &stack = phv->get_header_stack(header_stack);
+    Header &next_hdr = stack.get_next(); // TODO: will assert if full
+    ELOGGER->parser_extract(*pkt, next_hdr.get_id());
+    next_hdr.extract(data);
+    *bytes_parsed += next_hdr.get_nbytes_packet();
+    stack.push_back(); // should I have a HeaderStack::extract() method instead?
+  }
+};
+
+template <typename T>
+struct ParserOpSet : ParserOp {
+  field_t dst;
+  T src;
+  
+  ParserOpSet(header_id_t header, int offset, const T &src)
+    : src(src) { 
+    dst = {header, offset};
+  }
+
+  void operator()(Packet *pkt, const char *data,
+		  size_t *bytes_parsed) const override;
 };
 
 struct ParseSwitchKeyBuilder
 {
-  std::vector< std::pair<header_id_t, int> > fields{};
+  struct Entry {
+    // I could use a union, but I only have 2 choices, and they are both quite
+    // small. Plus I make a point of not using unions for non POD data. So I
+    // could either change ParserLookAhead to POD data or go through the trouble
+    // of implementing a union with setters, a copy assignment operator, a
+    // dtor... I'll see if it is worth it later
+    // The larger picture: is there really an improvement in performance. versus
+    // using derived classes and virtual methods ? I guess there is a small one,
+    // not because of the use of the vtable, but because I don't have to store
+    // pointers, but I can store the objects in the vector directly
+    // After some testing, it appears that using this is at least a couple times
+    // faster
+    enum {FIELD, LOOKAHEAD} tag{};
+    field_t field{0, 0};
+    ParserLookAhead lookahead{0, 0};
+
+    static Entry make_field(header_id_t header, int offset) {
+      Entry e;
+      e.tag = FIELD;
+      e.field.header = header;
+      e.field.offset = offset;
+      return e;
+    }
+
+    static Entry make_lookahead(int offset, int bitwidth) {
+      Entry e;
+      e.tag = LOOKAHEAD;
+      e.lookahead = ParserLookAhead(offset, bitwidth);
+      return e;
+    }
+  };
+
+  std::vector<Entry> entries{};
 
   void push_back_field(header_id_t header, int field_offset) {
-    fields.push_back( std::pair<header_id_t, int>(header, field_offset) );
-  }
-  
-  // data not used for now
-  void operator()(const PHV &phv, const char *data, ByteContainer &key) const
-  {
-    (void) data;
-    for(std::vector< std::pair<header_id_t, int> >::const_iterator it = fields.begin();
-	it != fields.end();
-	it++) {
-      const Field &field = phv.get_field((*it).first, (*it).second);
-      key.append(field.get_bytes());
-    }
+    entries.push_back(Entry::make_field(header, field_offset));
   }
 
-  // TODO: is this needed? I don't think so...
-  ParseSwitchKeyBuilder& operator=(const ParseSwitchKeyBuilder &other) {
-    if(&other == this)
-      return *this;
-    fields = other.fields;
-    return *this;
+  void push_back_lookahead(int offset, int bitwidth) {
+    entries.push_back(Entry::make_lookahead(offset, bitwidth));
+  }
+  
+  void operator()(const PHV &phv, const char *data, ByteContainer &key) const
+  {
+    for(const Entry &e : entries) {
+      switch(e.tag) {
+      case Entry::FIELD:
+	key.append(phv.get_field(e.field.header, e.field.offset).get_bytes());
+	break;
+      case Entry::LOOKAHEAD:
+	e.lookahead.peek(data, key);
+	break;
+      }
+    }
   }
 };
 
@@ -133,8 +260,11 @@ public:
     : name(name), has_switch(false) {}
 
   void add_extract(header_id_t header) {
-    ParserOp *parser_op = new ParserOpExtract(header);
-    parser_ops.push_back(parser_op);
+    parser_ops.emplace_back(new ParserOpExtract(header));
+  }
+
+  void add_extract_to_stack(header_stack_id_t header_stack) {
+    parser_ops.emplace_back(new ParserOpExtractStack(header_stack));
   }
 
   void set_key_builder(const ParseSwitchKeyBuilder &builder) {
@@ -157,14 +287,6 @@ public:
 
   const std::string &get_name() const { return name; }
 
-  ~ParseState() {
-    for (std::vector<ParserOp *>::iterator it = parser_ops.begin();
-	 it != parser_ops.end();
-	 ++it) {
-      delete *it;
-    }
-  }
-
   // Copy constructor
   ParseState (const ParseState& other) = delete;
 
@@ -182,7 +304,7 @@ public:
 
 private:
   std::string name;
-  std::vector<ParserOp *> parser_ops{};
+  std::vector<std::unique_ptr<ParserOp> > parser_ops{};
   bool has_switch;
   ParseSwitchKeyBuilder key_builder{};
   std::vector<ParseSwitchCase> parser_switch{};

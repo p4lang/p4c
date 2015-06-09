@@ -31,26 +31,30 @@ int Field::extract(const char *data, int hdr_offset) {
 
   int field_offset = (nbytes << 3) - nbits;
   int i;
+
+  // necessary to ensure correct behavior when shifting right (no sign extension)
+  unsigned char *udata = (unsigned char *) data;
   
   int offset = hdr_offset - field_offset;
   if (offset == 0) {
-    std::copy(data, data + nbytes, bytes.begin());
+    std::copy(udata, udata + nbytes, bytes.begin());
     bytes[0] &= (0xFF >> field_offset);
   }
   else if (offset > 0) { /* shift left */
     for (i = 0; i < nbytes - 1; i++) {
-      bytes[i] = (data[i] << offset) | (data[i + 1] >> (8 - offset));
+      bytes[i] = (udata[i] << offset) | (udata[i + 1] >> (8 - offset));
     }
-    bytes[i] = data[i] << offset;
+    bytes[0] &= (0xFF >> field_offset);
+    bytes[i] = udata[i] << offset;
     if((hdr_offset + nbits) > (nbytes << 3)) {
-      bytes[i] |= (data[i + 1] >> (8 - offset));
+      bytes[i] |= (udata[i + 1] >> (8 - offset));
     }
   }
   else { /* shift right */
     offset = -offset;
-    bytes[0] = data[0] >> offset;
+    bytes[0] = udata[0] >> offset;
     for (i = 1; i < nbytes; i++) {
-      bytes[i] = (data[i - 1] << (8 - offset)) | (data[i] >> offset);
+      bytes[i] = (udata[i - 1] << (8 - offset)) | (udata[i] >> offset);
     }
   }
 

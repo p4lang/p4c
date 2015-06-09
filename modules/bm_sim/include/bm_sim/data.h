@@ -27,6 +27,7 @@
 #include <type_traits>
 
 #include "bignum.h"
+#include "bytecontainer.h"
 
 using bignum::Bignum;
 
@@ -80,6 +81,11 @@ public:
 
   void set(const Data &data) {
     value = data.value;
+    export_bytes();
+  }
+
+  void set(const ByteContainer &bc) {
+    bignum::import_bytes(value, bc.data(), bc.size());
     export_bytes();
   }
 

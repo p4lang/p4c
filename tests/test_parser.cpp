@@ -302,3 +302,179 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
 
 }
 
+TEST(LookAhead, Peek) {
+  ByteContainer res;
+  // 1011 0101, 1001 1101, 1111 1101, 0001 0111, 1101 0101, 1101 0111
+  const unsigned char data_[6] = {0xb5, 0x9d, 0xfd, 0x17, 0xd5, 0xd7};
+  const char *data = (char *) data_;
+
+  ParserLookAhead lookahead1(0, 16);
+  lookahead1.peek(data, res);
+  ASSERT_EQ(ByteContainer("0xb59d"), res);
+  res.clear();
+
+  ParserLookAhead lookahead2(3, 16);
+  lookahead2.peek(data, res);
+  // 1010 1100, 1110 1111
+  ASSERT_EQ(ByteContainer("0xacef"), res);
+  res.clear();
+
+  ParserLookAhead lookahead3(0, 21);
+  lookahead3.peek(data, res);
+  // 0001 0110, 1011 0011, 1011 1111
+  ASSERT_EQ(ByteContainer("0x16b3bf"), res);
+  res.clear();
+
+  ParserLookAhead lookahead4(18, 15);
+  lookahead4.peek(data, res);
+  // 0111 1010, 0010 1111
+  ASSERT_EQ(ByteContainer("0x7a2f"), res);
+  res.clear();
+
+  ParserLookAhead lookahead5_1(0, 16);
+  lookahead5_1.peek(data, res);
+  ParserLookAhead lookahead5_2(16, 16);
+  lookahead5_2.peek(data, res);
+  ASSERT_EQ(ByteContainer("0xb59dfd17"), res);
+}
+
+// Google Test fixture for ParserOpSet tests
+class ParserOpSetTest : public ::testing::Test {
+protected:
+
+  PHVFactory phv_factory;
+
+  HeaderType testHeaderType;
+  header_id_t testHeader1{0}, testHeader2{1};
+
+  ParserOpSetTest()
+    : testHeaderType("test_t", 0) {
+    testHeaderType.push_back_field("f16", 16);
+    testHeaderType.push_back_field("f32", 32);
+    testHeaderType.push_back_field("f48", 48);
+
+    phv_factory.push_back_header("test1", testHeader1, testHeaderType);
+    phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+  }
+
+  Packet get_pkt() {
+    // dummy packet, won't be parsed
+    return Packet(0, 0, 0, 64, PacketBuffer(128));
+  }
+
+  virtual void SetUp() {
+    Packet::set_phv_factory(phv_factory);
+  }
+
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
+};
+
+TEST_F(ParserOpSetTest, SetFromData) {
+  Data src("0xaba");
+  ParserOpSet<Data> op(testHeader1, 1, src); // f32
+  ParserOp &opRef = op;
+  Packet pkt = get_pkt();
+  Field &f = pkt.get_phv()->get_field(testHeader1, 1);
+  ASSERT_EQ(0u, f.get_uint());
+  opRef(&pkt, nullptr, nullptr);
+  ASSERT_EQ(0xaba, f.get_uint());
+}
+
+TEST_F(ParserOpSetTest, SetFromField) {
+  ParserOpSet<field_t> op(testHeader1, 1, field_t::make(testHeader2, 1)); // f32
+  ParserOp &opRef = op;
+  Packet pkt = get_pkt();
+  Field &f = pkt.get_phv()->get_field(testHeader1, 1);
+  Field &f_src = pkt.get_phv()->get_field(testHeader2, 1);
+  f_src.set("0xaba");
+  ASSERT_EQ(0u, f.get_uint());
+  opRef(&pkt, nullptr, nullptr);
+  ASSERT_EQ(0xaba, f.get_uint());
+}
+
+TEST_F(ParserOpSetTest, SetFromLookahead) {
+  const unsigned char data_[6] = {0xb5, 0x9d, 0xfd, 0x17, 0xd5, 0xd7};
+  const char *data = (char *) data_;
+
+  ParserLookAhead lookahead1(0, 32);
+  const ParserOpSet<ParserLookAhead> op1(testHeader1, 1, lookahead1); // f32
+  const ParserOp &op1Ref = op1;
+  Packet pkt1 = get_pkt();
+  Field &f1 = pkt1.get_phv()->get_field(testHeader1, 1);
+  ASSERT_EQ(0u, f1.get_uint());
+  op1Ref(&pkt1, (const char *) data, nullptr);
+  ASSERT_EQ(0xb59dfd17, f1.get_uint());
+
+  ParserLookAhead lookahead2(8, 8);
+  const ParserOpSet<ParserLookAhead> op2(testHeader1, 1, lookahead2); // f32
+  const ParserOp &op2Ref = op2;
+  Packet pkt2 = get_pkt();
+  Field &f2 = pkt2.get_phv()->get_field(testHeader1, 1);
+  ASSERT_EQ(0u, f2.get_uint());
+  op2Ref(&pkt2, (const char *) data, nullptr);
+  ASSERT_EQ(0x9d, f2.get_uint());
+}
+
+// Google Test fixture for ParseSwitchKeyBuilder tests
+class ParseSwitchKeyBuilderTest : public ::testing::Test {
+protected:
+
+  PHVFactory phv_factory;
+
+  HeaderType testHeaderType;
+  header_id_t testHeader1{0}, testHeader2{1};
+
+  ParseSwitchKeyBuilderTest()
+    : testHeaderType("test_t", 0) {
+    testHeaderType.push_back_field("f16", 16);
+    testHeaderType.push_back_field("f32", 32);
+    testHeaderType.push_back_field("f48", 48);
+
+    phv_factory.push_back_header("test1", testHeader1, testHeaderType);
+    phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+  }
+
+  Packet get_pkt() {
+    // dummy packet, won't be parsed
+    return Packet(0, 0, 0, 64, PacketBuffer(128));
+  }
+
+  virtual void SetUp() {
+    Packet::set_phv_factory(phv_factory);
+  }
+
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
+};
+
+TEST_F(ParseSwitchKeyBuilderTest, Mix) {
+  ParseSwitchKeyBuilder builder;
+  builder.push_back_field(testHeader1, 2);
+  builder.push_back_lookahead(0, 16);
+  builder.push_back_field(testHeader2, 0);
+  builder.push_back_field(testHeader2, 1);
+  builder.push_back_lookahead(16, 32);
+  builder.push_back_lookahead(20, 20);
+
+  const unsigned char data_[6] = {0xb5, 0x9d, 0xfd, 0x17, 0xd5, 0xd7};
+  const char *data = (char *) data_;
+
+  Packet pkt = get_pkt();
+  PHV *phv = pkt.get_phv();
+  Field &f1_2 = phv->get_field(testHeader1, 2);
+  Field &f2_0 = phv->get_field(testHeader2, 0);
+  Field &f2_1 = phv->get_field(testHeader2, 1);
+
+  f1_2.set("0xaabbccddeeff");
+  f2_0.set("0x1122");
+  f2_1.set("0xababab");
+
+  // aabbccddeeff b59d 1122 00ababab fd17d5d7 0d17d5
+  ByteContainer expected("0xaabbccddeeffb59d112200abababfd17d5d70d17d5");
+  ByteContainer res;
+  builder(*phv, data, res);
+  ASSERT_EQ(expected, res);
+}
