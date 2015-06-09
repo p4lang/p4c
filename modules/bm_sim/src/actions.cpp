@@ -30,7 +30,14 @@ void ActionFn::parameter_push_back_field(header_id_t header, int field_offset) {
 void ActionFn::parameter_push_back_header(header_id_t header) {
   ActionParam param;
   param.tag = ActionParam::HEADER;
-  param.header = header;;
+  param.header = header;
+  params.push_back(param);
+}
+
+void ActionFn::parameter_push_back_header_stack(header_stack_id_t header_stack) {
+  ActionParam param;
+  param.tag = ActionParam::HEADER_STACK;
+  param.header_stack = header_stack;
   params.push_back(param);
 }
 

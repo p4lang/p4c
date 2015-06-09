@@ -59,7 +59,7 @@ private:
 
 struct ActionParam
 {
-  enum {CONST, FIELD, HEADER, ACTION_DATA} tag;
+  enum {CONST, FIELD, HEADER, ACTION_DATA, HEADER_STACK} tag;
 
   union {
     unsigned int const_offset;
@@ -72,6 +72,8 @@ struct ActionParam
     header_id_t header;
 
     unsigned int action_data_offset;
+
+    header_stack_id_t header_stack;
   };
 };
 
@@ -138,7 +140,12 @@ struct ActionParamWithState {
 
   operator Header &() {
     assert(ap.tag == ActionParam::HEADER);
-    return state.phv.get_header(ap.header);    
+    return state.phv.get_header(ap.header);
+  }
+
+  operator HeaderStack &() {
+    assert(ap.tag == ActionParam::HEADER_STACK);
+    return state.phv.get_header_stack(ap.header_stack);
   }
 };
 
@@ -252,6 +259,7 @@ public:
 
   void parameter_push_back_field(header_id_t header, int field_offset);
   void parameter_push_back_header(header_id_t header);
+  void parameter_push_back_header_stack(header_stack_id_t header_stack);
   void parameter_push_back_const(const Data &data);
   void parameter_push_back_action_data(int action_data_offset);
 
