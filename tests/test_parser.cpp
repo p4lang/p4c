@@ -425,6 +425,8 @@ protected:
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
+  header_id_t testHeaderStack1{2}, testHeaderStack2{3};
+  header_stack_id_t testHeaderStack{0};
 
   ParseSwitchKeyBuilderTest()
     : testHeaderType("test_t", 0) {
@@ -434,6 +436,11 @@ protected:
 
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+    phv_factory.push_back_header("test_stack_1", testHeaderStack1, testHeaderType);
+    phv_factory.push_back_header("test_stack_2", testHeaderStack2, testHeaderType);
+    phv_factory.push_back_header_stack("test_stack",
+				       testHeaderStack, testHeaderType,
+				       {testHeaderStack1, testHeaderStack2});
   }
 
   Packet get_pkt() {
@@ -458,6 +465,7 @@ TEST_F(ParseSwitchKeyBuilderTest, Mix) {
   builder.push_back_field(testHeader2, 1);
   builder.push_back_lookahead(16, 32);
   builder.push_back_lookahead(20, 20);
+  builder.push_back_stack_field(testHeaderStack, 1);
 
   const unsigned char data_[6] = {0xb5, 0x9d, 0xfd, 0x17, 0xd5, 0xd7};
   const char *data = (char *) data_;
@@ -472,9 +480,143 @@ TEST_F(ParseSwitchKeyBuilderTest, Mix) {
   f2_0.set("0x1122");
   f2_1.set("0xababab");
 
-  // aabbccddeeff b59d 1122 00ababab fd17d5d7 0d17d5
-  ByteContainer expected("0xaabbccddeeffb59d112200abababfd17d5d70d17d5");
+  HeaderStack &stack = phv->get_header_stack(testHeaderStack);
+  ASSERT_EQ(1u, stack.push_back());
+  Header &h = phv->get_header(testHeaderStack1);
+  ASSERT_TRUE(h.is_valid());
+  h.get_field(1).set("0x44332211");
+
+  // aabbccddeeff b59d 1122 00ababab fd17d5d7 0d17d5 44332211
+  ByteContainer expected("0xaabbccddeeffb59d112200abababfd17d5d70d17d544332211");
   ByteContainer res;
   builder(*phv, data, res);
   ASSERT_EQ(expected, res);
+}
+
+static const unsigned char raw_mpls_pkt[93] = {
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x88, 0x47, 0x00, 0x00,
+  0x10, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00,
+  0x31, 0x00, 0x45, 0x00, 0x00, 0x43, 0x00, 0x01,
+  0x00, 0x00, 0x40, 0x06, 0x7c, 0xb2, 0x7f, 0x00,
+  0x00, 0x01, 0x7f, 0x00, 0x00, 0x01, 0x00, 0x14,
+  0x00, 0x50, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x50, 0x02, 0x20, 0x00, 0x3e, 0x6f,
+  0x00, 0x00, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61,
+  0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61,
+  0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61, 0x61,
+  0x61, 0x61, 0x61, 0x61, 0x61
+};
+
+// Google Test fixture for special MPLS test
+// This test complements the ParserTest by using header stacks
+class MPLSParserTest : public ::testing::Test {
+protected:
+
+  PHVFactory phv_factory;
+
+  HeaderType ethernetHeaderType, MPLSHeaderType;
+  ParseState ethernetParseState, MPLSParseState;
+  header_id_t ethernetHeader{0};
+  header_id_t MPLSHeader1{1}, MPLSHeader2{2}, MPLSHeader3{3}, MPLSHeader4{4};
+
+  header_stack_id_t MPLSStack{0};
+
+  Parser parser;
+
+  Deparser deparser;
+
+  MPLSParserTest()
+    : ethernetHeaderType("ethernet_t", 0), MPLSHeaderType("mpls_t", 1),
+      ethernetParseState("parse_ethernet"),
+      MPLSParseState("parse_mpls"),
+      parser("test_parser", 0), deparser("test_deparser", 0) {
+    ethernetHeaderType.push_back_field("dstAddr", 48);
+    ethernetHeaderType.push_back_field("srcAddr", 48);
+    ethernetHeaderType.push_back_field("ethertype", 16);
+
+    MPLSHeaderType.push_back_field("label", 20);
+    MPLSHeaderType.push_back_field("exp", 3);
+    MPLSHeaderType.push_back_field("bos", 1);
+    MPLSHeaderType.push_back_field("ttl", 8);
+
+    phv_factory.push_back_header("ethernet", ethernetHeader, ethernetHeaderType);
+    phv_factory.push_back_header("mpls0", MPLSHeader1, MPLSHeaderType);
+    phv_factory.push_back_header("mpls1", MPLSHeader2, MPLSHeaderType);
+    phv_factory.push_back_header("mpls2", MPLSHeader3, MPLSHeaderType);
+    phv_factory.push_back_header("mpls3", MPLSHeader4, MPLSHeaderType);
+    phv_factory.push_back_header_stack(
+      "mpls", MPLSStack, MPLSHeaderType,
+      {MPLSHeader1, MPLSHeader2, MPLSHeader3, MPLSHeader4});
+  }
+
+  virtual void SetUp() {
+    Packet::set_phv_factory(phv_factory);
+
+    ParseSwitchKeyBuilder ethernetKeyBuilder;
+    ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
+    ethernetParseState.set_key_builder(ethernetKeyBuilder);
+
+    ParseSwitchKeyBuilder MPLSKeyBuilder;
+    MPLSKeyBuilder.push_back_stack_field(MPLSStack, 2); // bos
+    MPLSParseState.set_key_builder(MPLSKeyBuilder);
+
+    ethernetParseState.add_extract(ethernetHeader);
+    MPLSParseState.add_extract_to_stack(MPLSStack);
+
+    char ethernet_ipv4_key[2];
+    ethernet_ipv4_key[0] = 0x88;
+    ethernet_ipv4_key[1] = 0x47;
+    ethernetParseState.add_switch_case(sizeof(ethernet_ipv4_key),
+				       ethernet_ipv4_key, &MPLSParseState);
+
+    char mpls_mpls_key[1];
+    mpls_mpls_key[0] = 0x00;
+    MPLSParseState.add_switch_case(sizeof(mpls_mpls_key),
+				   mpls_mpls_key, &MPLSParseState);
+
+    parser.set_init_state(&ethernetParseState);
+
+    deparser.push_back_header(ethernetHeader);
+    // TODO
+    // would it be better to have a push_back_stack here, for the deparser ?
+    deparser.push_back_header(MPLSHeader1);
+    deparser.push_back_header(MPLSHeader2);
+    deparser.push_back_header(MPLSHeader3);
+    deparser.push_back_header(MPLSHeader4);
+  }
+
+  Packet get_mpls_pkt() {
+    Packet pkt = Packet(
+	0, 0, 0, sizeof(raw_mpls_pkt),
+	PacketBuffer(256, (const char *) raw_mpls_pkt, sizeof(raw_mpls_pkt))
+    );
+    return pkt;
+  }
+
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
+};
+
+TEST_F(MPLSParserTest, ParseEthernetMPLS3) {
+  Packet packet = get_mpls_pkt();
+  PHV *phv = packet.get_phv();
+  parser.parse(&packet);
+
+  const Header &ethernet_hdr = phv->get_header(ethernetHeader);
+  ASSERT_TRUE(ethernet_hdr.is_valid());
+
+  const Header &MPLS_hdr_1 = phv->get_header(MPLSHeader1);
+  ASSERT_TRUE(MPLS_hdr_1.is_valid());
+  const Header &MPLS_hdr_2 = phv->get_header(MPLSHeader2);
+  ASSERT_TRUE(MPLS_hdr_2.is_valid());
+  const Header &MPLS_hdr_3 = phv->get_header(MPLSHeader3);
+  ASSERT_TRUE(MPLS_hdr_3.is_valid());
+  const Header &MPLS_hdr_4 = phv->get_header(MPLSHeader4);
+  ASSERT_FALSE(MPLS_hdr_4.is_valid());
+
+  ASSERT_EQ(1u, MPLS_hdr_1.get_field(0)); // label
+  ASSERT_EQ(2u, MPLS_hdr_2.get_field(0)); // label
+  ASSERT_EQ(3u, MPLS_hdr_3.get_field(0)); // label
 }

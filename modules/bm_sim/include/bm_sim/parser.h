@@ -174,7 +174,7 @@ struct ParseSwitchKeyBuilder
     // pointers, but I can store the objects in the vector directly
     // After some testing, it appears that using this is at least a couple times
     // faster
-    enum {FIELD, LOOKAHEAD} tag{};
+    enum {FIELD, LOOKAHEAD, STACK_FIELD} tag{};
     field_t field{0, 0};
     ParserLookAhead lookahead{0, 0};
 
@@ -182,6 +182,14 @@ struct ParseSwitchKeyBuilder
       Entry e;
       e.tag = FIELD;
       e.field.header = header;
+      e.field.offset = offset;
+      return e;
+    }
+
+    static Entry make_stack_field(header_stack_id_t header_stack, int offset) {
+      Entry e;
+      e.tag = STACK_FIELD;
+      e.field.header = header_stack;
       e.field.offset = offset;
       return e;
     }
@@ -200,6 +208,10 @@ struct ParseSwitchKeyBuilder
     entries.push_back(Entry::make_field(header, field_offset));
   }
 
+  void push_back_stack_field(header_stack_id_t header_stack, int field_offset) {
+    entries.push_back(Entry::make_stack_field(header_stack, field_offset));
+  }
+
   void push_back_lookahead(int offset, int bitwidth) {
     entries.push_back(Entry::make_lookahead(offset, bitwidth));
   }
@@ -210,6 +222,9 @@ struct ParseSwitchKeyBuilder
       switch(e.tag) {
       case Entry::FIELD:
 	key.append(phv.get_field(e.field.header, e.field.offset).get_bytes());
+	break;
+      case Entry::STACK_FIELD:
+	key.append(phv.get_header_stack(e.field.header).get_last().get_field(e.field.offset).get_bytes());
 	break;
       case Entry::LOOKAHEAD:
 	e.lookahead.peek(data, key);
