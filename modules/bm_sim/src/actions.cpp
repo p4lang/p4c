@@ -56,6 +56,13 @@ void ActionFn::parameter_push_back_action_data(int action_data_offset) {
   params.push_back(param);
 }
 
+void ActionFn::parameter_push_back_calculation(const NamedCalculation *calculation) {
+  ActionParam param;
+  param.tag = ActionParam::CALCULATION;
+  param.calculation = calculation;
+  params.push_back(param);
+}
+
 void ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
   primitives.push_back(primitive);
 }

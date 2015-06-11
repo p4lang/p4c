@@ -31,6 +31,7 @@ T xxh64(const char *buf, size_t len) {
 }
 
 template unsigned int xxh64<unsigned int>(const char *, size_t);
+template uint64_t xxh64<uint64_t>(const char *, size_t);
 
 }
 

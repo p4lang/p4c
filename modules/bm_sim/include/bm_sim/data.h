@@ -36,10 +36,9 @@ class Data
 public:
   Data() {}
 
-  Data(int i)
-    : value(i) {}
-
-  Data(unsigned i)
+  template<typename T,
+	   typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+  Data(T i)
     : value(i) {}
 
   Data(const char *bytes, int nbytes) {
@@ -66,10 +65,9 @@ public:
   virtual void export_bytes() {}
 
   // need to figure out what to do with signed values
-
-  template<typename T>
-  typename std::enable_if<std::is_integral<T>::value, void>::type 
-  set(T i) {
+  template<typename T,
+	   typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+  void set(T i) {
     value = i;
     export_bytes();
   }
@@ -120,10 +118,23 @@ public:
     export_bytes(); // not very efficient for fields, we import then export...
   }
 
+  template<typename T,
+	   typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+  T get() const {
+    assert(arith);
+    return static_cast<T>(value);
+  }
+
   unsigned int get_uint() const {
     assert(arith);
     // Bad ?
     return (unsigned) value;
+  }
+
+  uint64_t get_uint64() const {
+    assert(arith);
+    // Bad ?
+    return (uint64_t) value;
   }
 
   int get_int() const {
@@ -139,6 +150,12 @@ public:
   void add(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value + src2.value;
+    export_bytes();
+  }
+
+  void mod(const Data &src1, const Data &src2) {
+    assert(src1.arith && src2.arith);
+    value = src1.value % src2.value;
     export_bytes();
   }
 

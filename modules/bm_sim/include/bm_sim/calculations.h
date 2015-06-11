@@ -74,18 +74,42 @@ public:
 
   void set_compute_fn(const CFn<T> &fn) { compute_fn = fn; }
 
-  T output(const Packet &pkt) const {
+  T output(const PHV &phv) const {
     static thread_local ByteContainer key;
     key.resize(nbytes);
     key[nbytes - 1] = '\x00';
-    builder(*pkt.get_phv(), key.data());
+    builder(phv, key.data());
     return compute_fn(key.data(), nbytes);
+  }
+
+  T output(const Packet &pkt) const {
+    return output(*pkt.get_phv());
   }
 
 private:
   CFn<T> compute_fn{};
   BufBuilder builder;
   size_t nbytes;
+};
+
+// quick and dirty and hopefully temporary
+// added for support of old primitive modify_field_with_hash_based_offset()
+class NamedCalculation : public NamedP4Object, Calculation<uint64_t>
+{
+public:
+  NamedCalculation(const std::string &name, p4object_id_t id,
+		   const BufBuilder &builder)
+    : NamedP4Object(name, id), Calculation<uint64_t>(builder) {
+    set_compute_fn(hash::xxh64<uint64_t>);
+  }
+
+  uint64_t output(const PHV &phv) const {
+    return Calculation<uint64_t>::output(phv); 
+  }
+
+  uint64_t output(const Packet &pkt) const {
+    return Calculation<uint64_t>::output(pkt); 
+  }
 };
 
 #endif
