@@ -16,7 +16,8 @@ test_tables \
 test_learning \
 test_pre \
 test_calculations \
-test_header_stacks
+test_header_stacks \
+test_meters
 check_PROGRAMS = $(TESTS) test_all
 
 # Sources for tests
@@ -34,4 +35,5 @@ test_learning_SOURCES      = $(common_source) test_learning.cpp
 test_pre_SOURCES           = $(common_source) test_pre.cpp
 test_calculations_SOURCES  = $(common_source) test_calculations.cpp
 test_header_stacks_SOURCES = $(common_source) test_header_stacks.cpp
-test_all_SOURCES           = $(common_source) test_actions.cpp test_checksums.cpp test_conditionals.cpp test_data.cpp test_handle_mgr.cpp test_p4objects.cpp test_parser.cpp test_phv.cpp test_queue.cpp test_tables.cpp test_learning.cpp test_pre.cpp test_calculations.cpp test_header_stacks.cpp
+test_meters_SOURCES = $(common_source) test_meters.cpp
+test_all_SOURCES           = $(common_source) test_actions.cpp test_checksums.cpp test_conditionals.cpp test_data.cpp test_handle_mgr.cpp test_p4objects.cpp test_parser.cpp test_phv.cpp test_queue.cpp test_tables.cpp test_learning.cpp test_pre.cpp test_calculations.cpp test_header_stacks.cpp test_meters.cpp

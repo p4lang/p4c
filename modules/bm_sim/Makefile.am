@@ -29,7 +29,8 @@ src/xxhash.c \
 src/learning.cpp \
 src/pre.cpp \
 src/transport.cpp \
-src/calculations.cpp
+src/calculations.cpp \
+src/meters.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -46,6 +47,7 @@ include/bm_sim/fields.h \
 include/bm_sim/handle_mgr.h \
 include/bm_sim/headers.h \
 include/bm_sim/lpm_trie.h \
+include/bm_sim/meters.h \
 include/bm_sim/named_p4object.h \
 include/bm_sim/nn.h \
 include/bm_sim/P4Objects.h \

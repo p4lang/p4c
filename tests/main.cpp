@@ -24,9 +24,16 @@
 
 #include <gtest/gtest.h>
 
+bool WITH_VALGRIND = false;
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
+  for (int i = 0; i < argc; i++) {
+    if (strcmp(argv[i], "--valgrind") == 0) {
+      WITH_VALGRIND = true;
+    }
+  }
   return RUN_ALL_TESTS();
 }
 

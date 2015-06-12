@@ -39,6 +39,7 @@
 #include "conditionals.h"
 #include "control_flow.h"
 #include "learning.h"
+#include "meters.h"
 
 class P4Objects {
 public:

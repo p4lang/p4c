@@ -21,14 +21,11 @@
 #ifndef _BM_STATEFUL_H_
 #define _BM_STATEFUL_H_
 
+#include <array>
+
 #include "data.h"
 
 class Register : public Data
-{
-
-};
-
-class Meter : public Data
 {
 
 };
