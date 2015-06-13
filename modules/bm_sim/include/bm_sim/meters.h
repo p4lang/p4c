@@ -109,13 +109,14 @@ private:
   bool configured{false};
 };
 
-typedef p4object_id_t meter_array_id;
+typedef p4object_id_t meter_array_id_t;
 
 class MeterArray {
 public:
   typedef Meter::MeterErrorCode MeterErrorCode;
   typedef Meter::color_t color_t;
   typedef Meter::MeterType MeterType;
+  typedef Meter::rate_config_t rate_config_t;
 
   typedef vector<Meter>::iterator iterator;
   typedef vector<Meter>::const_iterator const_iterator;
@@ -129,6 +130,17 @@ public:
 
   color_t execute_meter(const Packet &pkt, size_t idx) {
     return meters[idx].execute(pkt);
+  }
+
+  MeterErrorCode
+  set_all_rates(const std::initializer_list<rate_config_t> &configs) {
+    // check validity of rates here?
+    MeterErrorCode rc;
+    for(Meter &m : meters) {
+      rc = m.set_rates(configs);
+      if(rc != MeterErrorCode::SUCCESS) return rc;
+    }
+    return MeterErrorCode::SUCCESS;
   }
 
   Meter &get_meter(size_t idx) {

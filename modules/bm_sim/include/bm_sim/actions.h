@@ -34,6 +34,7 @@
 #include "packet.h"
 #include "event_logger.h"
 #include "calculations.h"
+#include "meters.h"
 
 using std::vector;
 
@@ -62,7 +63,8 @@ struct ActionParam
 {
   // some old P4 primitives take a calculation as a parameter, I don't know if I
   // will keep it around but for now I need it
-  enum {CONST, FIELD, HEADER, ACTION_DATA, HEADER_STACK, CALCULATION} tag;
+  enum {CONST, FIELD, HEADER, ACTION_DATA,
+	HEADER_STACK, CALCULATION, METER_ARRAY} tag;
 
   union {
     unsigned int const_offset;
@@ -78,8 +80,11 @@ struct ActionParam
 
     header_stack_id_t header_stack;
 
-    // now owning pointer
+    // non owning pointer
     const NamedCalculation *calculation;
+
+    // non owning pointer
+    MeterArray *meter_array;
   };
 };
 
@@ -104,15 +109,17 @@ struct ActionData {
 };
 
 struct ActionEngineState {
+  Packet &pkt;
   PHV &phv;
   const ActionData &action_data;
   /* const vector<Data> &action_data; */
   const vector<Data> &const_values;
 
-  ActionEngineState(PHV &phv,
+  ActionEngineState(Packet *pkt,
 		    const ActionData &action_data,
 		    const vector<Data> &const_values)
-    : phv(phv), action_data(action_data), const_values(const_values) {}
+    : pkt(*pkt), phv(*pkt->get_phv()),
+      action_data(action_data), const_values(const_values) {}
 };
 
 struct ActionParamWithState {
@@ -157,6 +164,11 @@ struct ActionParamWithState {
   operator const NamedCalculation &() {
     assert(ap.tag == ActionParam::CALCULATION);
     return *(ap.calculation);
+  }
+
+  operator MeterArray &() {
+    assert(ap.tag == ActionParam::METER_ARRAY);
+    return *(ap.meter_array);
   }
 };
 
@@ -219,7 +231,8 @@ class ActionPrimitive : public ActionPrimitive_
 {
 public:
   void execute(ActionEngineState &state, const ActionParam *args) {
-    phv = &(state.phv);
+    phv = &state.phv;
+    pkt = &state.pkt;
     caller(this, state, args);
   }
 
@@ -243,9 +256,15 @@ protected:
     return *phv;
   }
 
+  // so far used only for meter arrays
+  Packet &get_packet() {
+    return *pkt;
+  }
+
 private:
   unpack_caller<sizeof...(Args)> caller;
   PHV *phv;
+  Packet *pkt;
 };
 
 // This is how you declare a primitive:
@@ -279,6 +298,7 @@ public:
   void parameter_push_back_const(const Data &data);
   void parameter_push_back_action_data(int action_data_offset);
   void parameter_push_back_calculation(const NamedCalculation *calculation);
+  void parameter_push_back_meter_array(MeterArray *meter_array);
 
   void push_back_primitive(ActionPrimitive_ *primitive);
 
@@ -304,7 +324,7 @@ public:
   {
     if(!action_fn) return; // happens when no default action specified... TODO
     ELOGGER->action_execute(*pkt, *action_fn, action_data);
-    ActionEngineState state(*pkt->get_phv(), action_data,
+    ActionEngineState state(pkt, action_data,
 			    action_fn->const_values);
     auto &primitives = action_fn->primitives;
     size_t param_offset = 0;

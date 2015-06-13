@@ -63,6 +63,13 @@ void ActionFn::parameter_push_back_calculation(const NamedCalculation *calculati
   params.push_back(param);
 }
 
+void ActionFn::parameter_push_back_meter_array(MeterArray *meter_array) {
+  ActionParam param;
+  param.tag = ActionParam::METER_ARRAY;
+  param.meter_array = meter_array;
+  params.push_back(param);
+}
+
 void ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
   primitives.push_back(primitive);
 }

@@ -101,6 +101,14 @@ class ModifyFieldWithHashBasedOffset
 
 REGISTER_PRIMITIVE(ModifyFieldWithHashBasedOffset);
 
+class ExecuteMeter : public ActionPrimitive<Field &, MeterArray &, const Data &> {
+  void operator ()(Field &dst, MeterArray &meter_array, const Data &idx) {
+    dst.set(meter_array.execute_meter(get_packet(), idx.get_uint()));
+  }
+};
+
+REGISTER_PRIMITIVE(ExecuteMeter);
+
 // Google Test fixture for actions tests
 class ActionsTest : public ::testing::Test {
 protected:
@@ -303,6 +311,40 @@ TEST_F(ActionsTest, ModifyFieldWithHashBasedOffset) {
 
   testActionFnEntry(pkt.get());
   ASSERT_EQ(expected, phv->get_field(testHeader2, 3).get_uint());
+}
+
+TEST_F(ActionsTest, ExecuteMeter) {
+  typedef MeterArray::MeterErrorCode MeterErrorCode;
+  typedef MeterArray::color_t color_t;
+  MeterErrorCode rc;
+  const color_t GREEN = 0;
+  const color_t RED = 1;
+
+  MeterArray meter_array(MeterArray::MeterType::PACKETS, 1, 64);
+  // 10 packets per second, burst size of 5
+  MeterArray::rate_config_t rate = {0.00001, 5};
+  rc = meter_array.set_all_rates({rate});
+  ASSERT_EQ(MeterErrorCode::SUCCESS, rc);
+
+  ExecuteMeter primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_field(testHeader1, 0); // f32
+  testActionFn.parameter_push_back_meter_array(&meter_array);
+  testActionFn.parameter_push_back_const(Data(16u)); // idx
+
+  const Field &fdst = phv->get_field(testHeader1, 0);
+
+  // send 5 packets very quickly, it is less than the burst size, so all packets
+  // should be marked GREEN
+  for(int i = 0; i < 5; i++) {
+      testActionFnEntry(pkt.get());
+      ASSERT_EQ(GREEN, fdst.get_uint());
+  }
+  // after the burst size, packets should be marked RED
+  for(int i = 0; i < 5; i++) {
+      testActionFnEntry(pkt.get());
+      ASSERT_EQ(RED, fdst.get_uint());
+  }
 }
 
 TEST_F(ActionsTest, TwoPrimitives) {
