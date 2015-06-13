@@ -23,6 +23,7 @@
 
 #include <vector>
 #include <mutex>
+#include <memory>
 
 #include "named_p4object.h"
 #include "packet.h"
@@ -39,8 +40,6 @@
    for the meter type.
    Maybe I will change this later, but meters are not used that much so for now
    I am going for simplicity */
-
-typedef p4object_id_t meter_id;
 
 class Meter
 {
@@ -76,18 +75,17 @@ public:
   Meter(MeterType type, size_t rate_count)
     : type(type), rates(rate_count) { }
 
-
   // the rate configs must be sorted from smaller rate to higher rate
   // in the 2 rate meter case: {CIR, PIR}
   MeterErrorCode set_rates(const std::initializer_list<rate_config_t> &configs);
 
   MeterErrorCode reset_rates();
 
-  color_t execute_meter(const Packet &pkt);
+  color_t execute(const Packet &pkt);
 
 private:
   typedef std::unique_lock<std::mutex> UniqueLock;
-  UniqueLock unique_lock() const { return UniqueLock(m_mutex); }
+  UniqueLock unique_lock() const { return UniqueLock(*m_mutex); }
   void unlock(UniqueLock &lock) const { lock.unlock(); }
 
 private:
@@ -102,9 +100,68 @@ private:
 
 private:
   MeterType type;
-  mutable std::mutex m_mutex{};
+  // I decided to take the easy route and wrap the m_mutex into a
+  // unique_ptr. Mutexes are not movable and that would be a problem with the
+  // MeterArray implementation. I don't think this will incur a performance hit
+  std::unique_ptr<std::mutex> m_mutex{new std::mutex()};
+  // mutable std::mutex m_mutex;
   std::vector<MeterRate> rates;
   bool configured{false};
+};
+
+typedef p4object_id_t meter_array_id;
+
+class MeterArray {
+public:
+  typedef Meter::MeterErrorCode MeterErrorCode;
+  typedef Meter::color_t color_t;
+  typedef Meter::MeterType MeterType;
+
+  typedef vector<Meter>::iterator iterator;
+  typedef vector<Meter>::const_iterator const_iterator;
+
+public:
+  MeterArray(MeterType type, size_t rate_count, size_t size) {
+    meters.reserve(size);
+    for(size_t i = 0; i < size; i++)
+      meters.emplace_back(type, rate_count);
+  }
+
+  color_t execute_meter(const Packet &pkt, size_t idx) {
+    return meters[idx].execute(pkt);
+  }
+
+  Meter &get_meter(size_t idx) {
+    return meters[idx];
+  }
+
+  const Meter &get_meter(size_t idx) const {
+    return meters[idx];
+  }
+
+  Meter &operator[](size_t idx) {
+    assert(idx < size());
+    return meters[idx];
+  }
+
+  const Meter &operator[](size_t idx) const {
+    assert(idx < size());
+    return meters[idx];
+  }
+
+  // iterators
+  iterator begin() { return meters.begin(); }
+
+  const_iterator begin() const { return meters.begin(); }
+
+  iterator end() { return meters.end(); }
+
+  const_iterator end() const { return meters.end(); }
+
+  size_t size() const { return meters.size(); }
+
+private:
+  std::vector<Meter> meters{};
 };
 
 #endif

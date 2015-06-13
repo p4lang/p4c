@@ -87,20 +87,20 @@ TEST_F(MetersTest, trTCM) {
 
   color_t color;
   for(size_t i = 0; i < 9; i++) {
-    color = meter.execute_meter(pkt);
+    color = meter.execute(pkt);
     output.push_back(color);
     next_stop += milliseconds(90);
     sleep_until(next_stop);
   }
   for(size_t i = 0; i < 3; i++) {
-    color = meter.execute_meter(pkt);
+    color = meter.execute(pkt);
     output.push_back(color);
     next_stop += milliseconds(10);
     sleep_until(next_stop);
   }
   next_stop += milliseconds(200);
   sleep_until(next_stop);
-  color = meter.execute_meter(pkt);
+  color = meter.execute(pkt);
   output.push_back(color);
 
   // I chose a step interval of 90 ms, because I never get to close to multiple

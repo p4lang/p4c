@@ -66,7 +66,7 @@ Meter::reset_rates(){
 }
 
 Meter::color_t
-Meter::execute_meter(const Packet &pkt) {
+Meter::execute(const Packet &pkt) {
   color_t packet_color = 0;
 
   if(!configured) return packet_color;
@@ -104,3 +104,4 @@ Meter::execute_meter(const Packet &pkt) {
 
   return packet_color;
 }
+
