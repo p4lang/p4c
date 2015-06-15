@@ -323,7 +323,7 @@ TEST_F(ActionsTest, ExecuteMeter) {
   MeterArray meter_array(MeterArray::MeterType::PACKETS, 1, 64);
   // 10 packets per second, burst size of 5
   MeterArray::rate_config_t rate = {0.00001, 5};
-  rc = meter_array.set_all_rates({rate});
+  rc = meter_array.set_rates({rate});
   ASSERT_EQ(MeterErrorCode::SUCCESS, rc);
 
   ExecuteMeter primitive;

@@ -32,26 +32,18 @@ Meter::clock::time_point time_init = Meter::clock::now();
 }
 
 MeterErrorCode
-Meter::set_rates(const std::initializer_list<rate_config_t> &configs) {
-  auto lock = unique_lock();
-  if(configs.size() != rates.size()) return BAD_RATES_LIST;
-  size_t idx = 0;
-  for (const rate_config_t &config : configs) {
-    MeterRate &rate = rates[idx];
-    rate.valid = true;
-    rate.info_rate = config.info_rate;
-    rate.burst_size = config.burst_size;
-    rate.tokens = config.burst_size;
-    rate.tokens_last = 0u;
-    rate.color = (idx + 1);
-    if(idx > 0) {
-      MeterRate &prev_rate = rates[idx - 1];
-      if(prev_rate.info_rate > rate.info_rate) return INVALID_INFO_RATE_VALUE;
-    }
-    ++idx;
+Meter::set_rate(size_t idx, const rate_config_t &config) {
+  MeterRate &rate = rates[idx];
+  rate.valid = true;
+  rate.info_rate = config.info_rate;
+  rate.burst_size = config.burst_size;
+  rate.tokens = config.burst_size;
+  rate.tokens_last = 0u;
+  rate.color = (idx + 1);
+  if(idx > 0) {
+    MeterRate &prev_rate = rates[idx - 1];
+    if(prev_rate.info_rate > rate.info_rate) return INVALID_INFO_RATE_VALUE;
   }
-  std::reverse(rates.begin(), rates.end());
-  configured = true;
   return SUCCESS;
 }
 

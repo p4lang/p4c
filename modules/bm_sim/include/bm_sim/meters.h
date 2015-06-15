@@ -77,7 +77,41 @@ public:
 
   // the rate configs must be sorted from smaller rate to higher rate
   // in the 2 rate meter case: {CIR, PIR}
-  MeterErrorCode set_rates(const std::initializer_list<rate_config_t> &configs);
+  
+  /* this is probably a total overkill, but I am entitled to my fun. set_rates
+     accepts a vector, an initializer list, or any Random Accces Iterator pair.
+  */
+  template<typename RAIt>
+  MeterErrorCode set_rates(const RAIt first, const RAIt last) {
+    // I think using static asserts is cleaner than using SFINAE / enable_if
+    static_assert(std::is_same<std::random_access_iterator_tag,
+		  typename std::iterator_traits<RAIt>::iterator_category>::value,
+		  "wrong iterator category");
+    static_assert(std::is_same<rate_config_t,
+		  typename std::iterator_traits<RAIt>::value_type>::value,
+		  "wrong iterator value type");
+    typename std::iterator_traits<RAIt>::difference_type n =
+      std::distance(first, last);
+    assert(n >= 0);
+    auto lock = unique_lock();
+    if(static_cast<size_t>(n) != rates.size()) return BAD_RATES_LIST;
+    size_t idx = 0;
+    for(auto it = first; it < last; ++it) {
+      MeterErrorCode rc = set_rate(idx++, *it);
+      if(rc != SUCCESS) return rc;
+    }
+    std::reverse(rates.begin(), rates.end());
+    configured = true;
+    return SUCCESS;
+  }
+
+  MeterErrorCode set_rates(const std::vector<rate_config_t> &configs) {
+    return set_rates(configs.begin(), configs.end());
+  }
+
+  MeterErrorCode set_rates(const std::initializer_list<rate_config_t> &configs) {
+    return set_rates(configs.begin(), configs.end());
+  }
 
   MeterErrorCode reset_rates();
 
@@ -97,6 +131,9 @@ private:
     uint64_t tokens_last{};
     color_t color{};
   };
+
+private:
+  MeterErrorCode set_rate(size_t idx, const rate_config_t &config);
 
 private:
   MeterType type;
@@ -132,15 +169,23 @@ public:
     return meters[idx].execute(pkt);
   }
 
-  MeterErrorCode
-  set_all_rates(const std::initializer_list<rate_config_t> &configs) {
+  template<class RAIt>
+  MeterErrorCode set_rates(const RAIt first, const RAIt last) {
     // check validity of rates here?
     MeterErrorCode rc;
     for(Meter &m : meters) {
-      rc = m.set_rates(configs);
+      rc = m.set_rates(first, last);
       if(rc != MeterErrorCode::SUCCESS) return rc;
     }
     return MeterErrorCode::SUCCESS;
+  }
+
+  MeterErrorCode set_rates(const std::vector<rate_config_t> &configs) {
+    return set_rates(configs.begin(), configs.end());
+  }
+
+  MeterErrorCode set_rates(const std::initializer_list<rate_config_t> &configs) {
+    return set_rates(configs.begin(), configs.end());
   }
 
   Meter &get_meter(size_t idx) {

@@ -87,6 +87,10 @@ public:
     return pipelines_map[name].get();
   }
 
+  MeterArray *get_meter_array(const std::string &name) {
+    return meter_arrays[name].get();
+  }
+
 private:
   void add_header_type(const std::string &name, std::unique_ptr<HeaderType> header_type) {
     header_types_map[name] = std::move(header_type);
@@ -136,6 +140,11 @@ private:
     pipelines_map[name] = std::move(pipeline);
   }
 
+  void add_meter_array(const std::string &name,
+		       std::unique_ptr<MeterArray> meter_array) {
+    meter_arrays[name] = std::move(meter_array);
+  }
+
   void build_conditional(const Json::Value &json_expression,
 			 Conditional *conditional);
 
@@ -174,6 +183,9 @@ private:
   std::unordered_map<std::string, std::unique_ptr<Deparser> > deparsers{};
 
   std::unique_ptr<LearnEngine> learn_engine{};
+
+  // meter arrays
+  std::unordered_map<std::string, std::unique_ptr<MeterArray> > meter_arrays{};
 
 private:
   int get_field_offset(header_id_t header_id, const std::string &field_name);

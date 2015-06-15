@@ -30,6 +30,8 @@ public:
   typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
   typedef MatchTableIndirectWS::grp_hdl_t grp_hdl_t;
 
+  typedef Meter::MeterErrorCode MeterErrorCode;
+
 public:
   enum ErrorCode {
     SUCCESS = 0,
@@ -141,6 +143,14 @@ public:
 
   virtual MatchErrorCode
   table_reset_counters(const std::string &table_name) = 0;
+
+  virtual MeterErrorCode
+  meter_array_set_rates(const std::string &meter_name,
+			const std::vector<Meter::rate_config_t> &configs) = 0;
+
+  virtual MeterErrorCode
+  meter_set_rate(const std::string &meter_name, size_t idx,
+		 const std::vector<Meter::rate_config_t> &configs) = 0;
 
   virtual ErrorCode
   load_new_config(const std::string &new_config) = 0;

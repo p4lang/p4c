@@ -345,6 +345,27 @@ MatchErrorCode Switch::table_reset_counters(
   return abstract_table->reset_counters();
 }
 
+RuntimeInterface::MeterErrorCode
+Switch::meter_array_set_rates(
+  const std::string &meter_name, const std::vector<Meter::rate_config_t> &configs
+) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MeterArray *meter_array = p4objects_rt->get_meter_array(meter_name);
+  assert(meter_array);
+  return meter_array->set_rates(configs);
+}
+
+RuntimeInterface::MeterErrorCode
+Switch::meter_set_rate(
+  const std::string &meter_name, size_t idx,
+  const std::vector<Meter::rate_config_t> &configs
+) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MeterArray *meter_array = p4objects_rt->get_meter_array(meter_name);
+  assert(meter_array);
+  return meter_array->get_meter(idx).set_rates(configs);
+}
+
 RuntimeInterface::ErrorCode Switch::load_new_config(const std::string &new_config) {
   if(!enable_swap) return CONFIG_SWAP_DISABLED;
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);
