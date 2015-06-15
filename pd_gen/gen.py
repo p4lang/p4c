@@ -295,7 +295,11 @@ def bits_to_bytes(bw):
     return (bw + 7) / 8
 
 def get_c_name(name):
-    return name.replace(".", "_")
+    # TODO: improve
+    n = name.replace(".", "_")
+    n = n.replace("[", "_")
+    n = n.replace("]", "_")
+    return n
 
 def main():
     load_json(args.json)

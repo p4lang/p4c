@@ -153,6 +153,12 @@ public:
     export_bytes();
   }
 
+  void sub(const Data &src1, const Data &src2) {
+    assert(src1.arith && src2.arith);
+    value = src1.value - src2.value;
+    export_bytes();
+  }
+
   void mod(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value % src2.value;

@@ -26,20 +26,22 @@
 #include "bm_sim/queue.h"
 #include "bm_sim/packet.h"
 #include "bm_sim/parser.h"
-#include "bm_sim/P4Objects.h"
 #include "bm_sim/tables.h"
 #include "bm_sim/switch.h"
 #include "bm_sim/event_logger.h"
 
 #include "simple_switch.h"
 #include "primitives.h"
+#include "simplelog.h"
 
 #include "bm_runtime/bm_runtime.h"
 
 class SimpleSwitch : public Switch {
 public:
   SimpleSwitch(transmit_fn_t transmit_fn)
-    : input_buffer(1024), transmit_fn(transmit_fn) {}
+    : Switch(false), // enable_switch = false
+      input_buffer(1024), egress_buffer(1024),
+      output_buffer(128), transmit_fn(transmit_fn) {}
 
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
@@ -54,51 +56,151 @@ public:
   }
 
   void start_and_return() {
-    std::thread t(&SimpleSwitch::pipeline_thread, this);
-    t.detach();    
+    std::thread t1(&SimpleSwitch::ingress_thread, this);
+    t1.detach();
+    std::thread t2(&SimpleSwitch::egress_thread, this);
+    t2.detach();
+    std::thread t3(&SimpleSwitch::transmit_thread, this);
+    t3.detach();
   }
 
 private:
-  void pipeline_thread();
-
-  int transmit(const Packet &packet) {
-    ELOGGER->packet_out(packet);
-    std::cout<< "transmitting packet " << packet.get_packet_id() << std::endl;
-    transmit_fn(packet.get_egress_port(), packet.data(), packet.get_data_size());
-    return 0;
-  }
+  enum PktInstanceType {
+    PKT_INSTANCE_TYPE_NORMAL,
+    PKT_INSTANCE_TYPE_INGRESS_CLONE,
+    PKT_INSTANCE_TYPE_EGRESS_CLONE,
+    PKT_INSTANCE_TYPE_COALESCED,
+    PKT_INSTANCE_TYPE_INGRESS_RECIRC,
+    PKT_INSTANCE_TYPE_REPLICATION,
+    PKT_INSTANCE_TYPE_RESUBMIT,
+  };
 
 private:
-  Queue<unique_ptr<Packet> > input_buffer;
+  void ingress_thread();
+  void egress_thread();
+  void transmit_thread();
+
+private:
+  Queue<std::unique_ptr<Packet> > input_buffer;
+  Queue<std::unique_ptr<Packet> > egress_buffer;
+  Queue<std::unique_ptr<Packet> > output_buffer;
   transmit_fn_t transmit_fn;
 };
 
+void SimpleSwitch::transmit_thread() {
+  while(1) {
+    std::unique_ptr<Packet> packet;
+    output_buffer.pop_back(&packet);
+    ELOGGER->packet_out(*packet);
+    SIMPLELOG << "transmitting packet " << packet->get_packet_id() << std::endl;
+    transmit_fn(packet->get_egress_port(), packet->data(), packet->get_data_size());
+  }
+}
 
-void SimpleSwitch::pipeline_thread() {
-  Pipeline *ingress_mau = p4objects->get_pipeline("ingress");
-  Parser *parser = p4objects->get_parser("parser");
-  Deparser *deparser = p4objects->get_deparser("deparser");
-  PHV &phv = p4objects->get_phv();
+void SimpleSwitch::ingress_thread() {
+  Parser *parser = this->get_parser("parser");
+  Pipeline *ingress_mau = this->get_pipeline("ingress");
+  PHV *phv;
 
   while(1) {
-    unique_ptr<Packet> packet;
+    std::unique_ptr<Packet> packet;
     input_buffer.pop_back(&packet);
-    std::cout<< "processing packet " << packet->get_packet_id() << std::endl;
+    phv = packet->get_phv();
+    SIMPLELOG << "processing packet " << packet->get_packet_id() << std::endl;
+
+    // setting standard metadata
+    int ingress_port = packet->get_ingress_port();
+    phv->get_field("standard_metadata.ingress_port").set(ingress_port);
+    int ingress_length = packet->get_ingress_length();
+    phv->get_field("standard_metadata.packet_length").set(ingress_length);
+    Field &f_instance_type = phv->get_field("standard_metadata.instance_type");
+    f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
+
+    parser->parse(packet.get());
+
+    ingress_mau->apply(packet.get());
+
+    Field &f_egress_spec = phv->get_field("standard_metadata.egress_spec");
+    int egress_spec = f_egress_spec.get_int();
+    f_egress_spec.set(0);
+
+    Field &f_clone_spec = phv->get_field("standard_metadata.clone_spec");
+    int clone_spec = f_clone_spec.get_int();
+    f_clone_spec.set(0);
+
+    Field &f_learn_id = phv->get_field("intrinsic_metadata.lf_field_list");
+    int learn_id = f_learn_id.get_int();
+    f_learn_id.set(0);
+
+    Field &f_mgid = phv->get_field("intrinsic_metadata.eg_mcast_group");
+    unsigned int mgid = f_mgid.get_uint();
+    f_mgid.set(0);
+
+    packet_id_t copy_id = 1;
+    int egress_port;
+
+    // INGRESS CLONING
+    if(clone_spec) {
+      SIMPLELOG << "cloning packet at ingress" << std::endl;
+      f_instance_type.set(PKT_INSTANCE_TYPE_INGRESS_CLONE);
+      std::unique_ptr<Packet> packet_copy(new Packet(packet->clone(copy_id++)));
+      // TODO: this is not how it works !!!
+      packet_copy->set_egress_port(clone_spec);
+      egress_buffer.push_front(std::move(packet_copy));
+      f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
+    }
     
-    parser->parse(packet.get(), &phv);
-    ingress_mau->apply(*packet.get(), &phv);
-    deparser->deparse(&phv, packet.get());
-
-    int egress_port = phv.get_field("standard_metadata.egress_spec").get_int();
-    std::cout << "egress port is " << egress_port << std::endl;
-
-    if(egress_port == 0) {
-      std::cout << "dropping packet\n";
+    // LEARNING
+    if(learn_id > 0) {
+      get_learn_engine()->learn(learn_id, *packet.get());
     }
-    else {
-      packet->set_egress_port(egress_port);
-      transmit(*packet);
+
+    // MULTICAST
+    if(mgid != 0) {
+      const auto pre_out = pre->replicate({mgid});
+      for(const auto &out : pre_out) {
+	egress_port = out.egress_port;
+	if(ingress_port == egress_port) continue; // pruning
+	SIMPLELOG << "replicating packet out of port " << egress_port
+		  << std::endl;
+	std::unique_ptr<Packet> packet_copy(new Packet(packet->clone(copy_id++)));
+	packet_copy->set_egress_port(egress_port);
+	egress_buffer.push_front(std::move(packet_copy));
+      }
+
+      // when doing multicast, we discard the original packet
+      continue;
     }
+
+    egress_port = egress_spec;
+    SIMPLELOG << "egress port is " << egress_port << std::endl;    
+
+    if(egress_port == 511) {  // drop packet
+      SIMPLELOG << "dropping packet\n";
+      continue;
+    }
+
+    packet->set_egress_port(egress_port);
+    egress_buffer.push_front(std::move(packet));
+  }
+}
+
+void SimpleSwitch::egress_thread() {
+  Deparser *deparser = this->get_deparser("deparser");
+  Pipeline *egress_mau = this->get_pipeline("egress");
+  PHV *phv;
+
+  while(1) {
+    std::unique_ptr<Packet> packet;
+    egress_buffer.pop_back(&packet);
+    phv = packet->get_phv();
+
+    egress_mau->apply(packet.get());
+    deparser->deparse(packet.get());
+
+    // TODO: egress cloning
+
+    output_buffer.push_front(std::move(packet));
   }
 }
 
@@ -106,25 +208,6 @@ void SimpleSwitch::pipeline_thread() {
 
 static SimpleSwitch *simple_switch;
 
-
-/* For test purposes only, temporary */
-
-// static void add_test_entry(void) {
-//   ByteContainer key("0xaabbccddeeff");
-//   ActionData action_data;
-//   action_data.push_back_action_data(2);
-//   entry_handle_t hdl;
-//   simple_switch->table_add_exact_match_entry("forward", "set_egress_port",
-// 					     key, action_data, &hdl);
-					     
-//   /* default behavior */
-//   simple_switch->table_set_default_action("forward", "_drop", ActionData());
-// }
-
-
-/* C bindings */
-
-extern "C" {
 
 int packet_accept(int port_num, const char *buffer, int len) {
   return simple_switch->receive(port_num, buffer, len);
@@ -136,10 +219,6 @@ void start_processing(transmit_fn_t transmit_fn) {
 
   bm_runtime::start_server(simple_switch, 9090);
 
-  // add_test_entry();
-
   simple_switch->start_and_return();
-}
-
 }
 
