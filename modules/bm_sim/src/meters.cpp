@@ -82,7 +82,7 @@ Meter::execute(const Packet &pkt) {
     size_t new_tokens = tokens_since_init - rate.tokens_last;
     rate.tokens_last = tokens_since_init;
     rate.tokens = std::min(rate.tokens + new_tokens, rate.burst_size);
-    
+
     size_t input = (type == MeterType::PACKETS) ? 1u : pkt.get_ingress_length();
 
     if(rate.tokens < input) {
@@ -97,3 +97,7 @@ Meter::execute(const Packet &pkt) {
   return packet_color;
 }
 
+void
+Meter::reset_global_clock() {
+  time_init = Meter::clock::now(); 
+}

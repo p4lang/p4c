@@ -152,8 +152,8 @@ struct ParserOpSet : ParserOp {
   T src;
   
   ParserOpSet(header_id_t header, int offset, const T &src)
-    : src(src) { 
-    dst = {header, offset};
+    : dst({header, offset}), src(src) { 
+    // dst = {header, offset};
   }
 
   void operator()(Packet *pkt, const char *data,
@@ -280,6 +280,29 @@ public:
 
   void add_extract_to_stack(header_stack_id_t header_stack) {
     parser_ops.emplace_back(new ParserOpExtractStack(header_stack));
+  }
+
+  void add_set_from_field(header_id_t dst_header, int dst_offset,
+			  header_id_t src_header, int src_offset) {
+    parser_ops.emplace_back(
+      new ParserOpSet<field_t>(dst_header, dst_offset,
+			       field_t::make(src_header, src_offset))
+    );
+  }
+
+  void add_set_from_data(header_id_t dst_header, int dst_offset,
+			 const Data &src) {
+    parser_ops.emplace_back(
+      new ParserOpSet<Data>(dst_header, dst_offset, src)
+    );
+  }
+
+  void add_set_from_lookahead(header_id_t dst_header, int dst_offset,
+			      int src_offset, int src_bitwidth) {
+    parser_ops.emplace_back(
+      new ParserOpSet<ParserLookAhead>(dst_header, dst_offset,
+				       ParserLookAhead(src_offset, src_bitwidth))
+    );
   }
 
   void set_key_builder(const ParseSwitchKeyBuilder &builder) {

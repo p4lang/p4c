@@ -40,14 +40,11 @@ protected:
 protected:
   PHVFactory phv_factory;
 
-  clock::time_point start;
-
   MetersTest() {
   }
 
   virtual void SetUp() {
     Packet::set_phv_factory(phv_factory);
-    start = clock::now();
   }
 
   virtual void TearDown() {
@@ -81,9 +78,12 @@ TEST_F(MetersTest, trTCM) {
   std::vector<color_t> output;
   output.reserve(32);
 
-  clock::time_point next_stop = clock::now();
-
   Packet pkt = get_pkt(128);
+
+  Meter::reset_global_clock();
+
+  clock::time_point start = clock::now();
+  clock::time_point next_stop = clock::now();
 
   color_t color;
   for(size_t i = 0; i < 9; i++) {

@@ -88,6 +88,7 @@
             "header_type": "intrinsic_metadata_t"
         }
     ],
+    "header_stacks": [],
     "parsers": [
         {
             "name": "parser",
@@ -97,8 +98,7 @@
                 {
                     "name": "start",
                     "id": 0,
-                    "extracts": [],
-                    "sets": [],
+                    "parser_ops": [],
                     "transition_key": [],
                     "transitions": [
                         {
@@ -111,10 +111,17 @@
                 {
                     "name": "parse_ethernet",
                     "id": 1,
-                    "extracts": [
-                        "ethernet"
+                    "parser_ops": [
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "regular",
+                                    "value": "ethernet"
+                                }
+                            ]
+                        }
                     ],
-                    "sets": [],
                     "transition_key": [],
                     "transitions": [
                         {
@@ -136,6 +143,7 @@
             ]
         }
     ],
+    "meter_arrays": [],
     "actions": [
         {
             "name": "forward",
@@ -300,6 +308,7 @@
             "conditionals": []
         }
     ],
+    "calculations": [],
     "checksums": [],
     "learn_lists": [
         {

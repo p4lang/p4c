@@ -70,14 +70,14 @@ void P4Objects::init_objects(std::istream &is) {
 
   // header types
 
-  const Json::Value cfg_header_types = cfg_root["header_types"];
+  const Json::Value &cfg_header_types = cfg_root["header_types"];
   for (const auto &cfg_header_type : cfg_header_types) {
     const string header_type_name = cfg_header_type["name"].asString();
     header_type_id_t header_type_id = cfg_header_type["id"].asInt();
     HeaderType *header_type = new HeaderType(header_type_name,
 					     header_type_id);
 
-    const Json::Value cfg_fields = cfg_header_type["fields"];
+    const Json::Value &cfg_fields = cfg_header_type["fields"];
     for (const auto cfg_field : cfg_fields) {
       const string field_name = cfg_field[0].asString();
       int field_bit_width = cfg_field[1].asInt();
@@ -89,7 +89,7 @@ void P4Objects::init_objects(std::istream &is) {
 
   // headers
 
-  const Json::Value cfg_headers = cfg_root["headers"];
+  const Json::Value &cfg_headers = cfg_root["headers"];
   // size_t num_headers = cfg_headers.size();
 
   for (const auto &cfg_header : cfg_headers) {
@@ -109,9 +109,31 @@ void P4Objects::init_objects(std::istream &is) {
     add_header_id(header_name, header_id);
   }
 
+  // header stacks
+  
+  const Json::Value &cfg_header_stacks = cfg_root["header_stacks"];
+  
+  for (const auto &cfg_header_stack : cfg_header_stacks) {
+
+    const string header_stack_name = cfg_header_stack["name"].asString();
+    const string header_type_name = cfg_header_stack["header_type"].asString();
+    header_stack_id_t header_stack_id = cfg_header_stack["id"].asInt();
+
+    HeaderType *header_stack_type = get_header_type(header_type_name);
+    header_stack_to_type_map[header_stack_name] = header_stack_type;
+
+    std::vector<header_id_t> header_ids;
+    for(const auto &cfg_header_id : cfg_header_stack["header_ids"])
+      header_ids.push_back(cfg_header_id.asInt());
+
+    phv_factory.push_back_header_stack(header_stack_name, header_stack_id,
+				       *header_stack_type, header_ids);
+    add_header_stack_id(header_stack_name, header_stack_id);
+  }
+
   // parsers
 
-  const Json::Value cfg_parsers = cfg_root["parsers"];
+  const Json::Value &cfg_parsers = cfg_root["parsers"];
   for (const auto &cfg_parser : cfg_parsers) {
 
     const string parser_name = cfg_parser["name"].asString();
@@ -123,30 +145,99 @@ void P4Objects::init_objects(std::istream &is) {
 
     // parse states
 
-    const Json::Value cfg_parse_states = cfg_parser["parse_states"];
+    const Json::Value &cfg_parse_states = cfg_parser["parse_states"];
     for (const auto &cfg_parse_state : cfg_parse_states) {
 
       const string parse_state_name = cfg_parse_state["name"].asString();
       // p4object_id_t parse_state_id = cfg_parse_state["id"].asInt();
       ParseState *parse_state = new ParseState(parse_state_name);
 
-      const Json::Value cfg_extracts = cfg_parse_state["extracts"];
-      for(const auto &cfg_extract : cfg_extracts) {
-	const string header_name = cfg_extract.asString();
-	header_id_t header_id = get_header_id(header_name);
-	parse_state->add_extract(header_id);
+      const Json::Value &cfg_parser_ops = cfg_parse_state["parser_ops"];
+      for(const auto &cfg_parser_op : cfg_parser_ops) {
+	const string op_type = cfg_parser_op["op"].asString();
+	const Json::Value &cfg_parameters = cfg_parser_op["parameters"];
+	if(op_type == "extract") {
+	  assert(cfg_parameters.size() == 1);
+	  const Json::Value &cfg_extract = cfg_parameters[0];
+	  const string extract_type = cfg_extract["type"].asString();
+	  const string extract_header = cfg_extract["value"].asString();
+	  if(extract_type == "regular") {
+	    header_id_t header_id = get_header_id(extract_header);
+	    parse_state->add_extract(header_id);
+	  }
+	  else if(extract_type == "stack") {
+	    header_stack_id_t header_stack_id =
+	      get_header_stack_id(extract_header);
+	    parse_state->add_extract_to_stack(header_stack_id);
+	  }
+	  else {
+	    assert(0 && "parser extract op not supported");
+	  }
+	}
+	else if(op_type == "set") {
+	  assert(cfg_parameters.size() == 2);
+	  const Json::Value &cfg_dest = cfg_parameters[0];
+	  const Json::Value &cfg_src = cfg_parameters[1];
+
+	  const string &dest_type = cfg_dest["type"].asString();
+	  assert(dest_type == "field");
+	  const auto dest = field_info(cfg_dest["value"][0].asString(),
+				       cfg_dest["value"][1].asString());
+
+	  const string &src_type = cfg_src["type"].asString();
+	  if(src_type == "field") {
+	    const auto src = field_info(cfg_src["value"][0].asString(),
+					cfg_src["value"][1].asString());
+	    parse_state->add_set_from_field(std::get<0>(dest), std::get<1>(dest),
+					    std::get<0>(src), std::get<1>(src));
+	  }
+	  else if(src_type == "hexstr") {
+	    parse_state->add_set_from_data(std::get<0>(dest), std::get<1>(dest),
+					   Data(cfg_src["value"].asString()));
+	  }
+	  else if(src_type == "lookahead") {
+	    int offset = cfg_src["value"][0].asInt();
+	    int bitwidth = cfg_src["value"][1].asInt();
+	    parse_state->add_set_from_lookahead(std::get<0>(dest), std::get<1>(dest),
+						offset, bitwidth);
+	  }
+	  else {
+	    assert(0 && "parser set op not supported");
+	  }
+	}
+	else {
+	  assert(0 && "parser op not supported");
+	}
       }
 
       // we do not support parser set ops for now
 
       ParseSwitchKeyBuilder key_builder;
-      const Json::Value cfg_transition_key = cfg_parse_state["transition_key"];
-      for (const auto &cfg_key_field : cfg_transition_key) {
-	const string header_name = cfg_key_field[0].asString();
-	header_id_t header_id = get_header_id(header_name);
-	const string field_name = cfg_key_field[1].asString();
-	int field_offset = get_field_offset(header_id, field_name);
-	key_builder.push_back_field(header_id, field_offset);
+      const Json::Value &cfg_transition_key = cfg_parse_state["transition_key"];
+      for (const auto &cfg_key_elem : cfg_transition_key) {
+	const string type = cfg_key_elem["type"].asString();
+	const auto &cfg_value = cfg_key_elem["value"];
+	if(type == "field") {
+	  const auto field = field_info(cfg_value[0].asString(),
+					cfg_value[1].asString());
+	  key_builder.push_back_field(std::get<0>(field), std::get<1>(field));
+	}
+	else if(type == "stack_field") {
+	  const string header_stack_name = cfg_value[0].asString();
+	  header_stack_id_t header_stack_id = get_header_stack_id(header_stack_name);
+	  HeaderType *header_type = header_stack_to_type_map[header_stack_name];
+	  const string field_name = cfg_value[1].asString();
+	  int field_offset = header_type->get_field_offset(field_name);
+	  key_builder.push_back_stack_field(header_stack_id, field_offset);
+	}
+	else if(type == "lookahead") {
+	  int offset = cfg_value[0].asInt();
+	  int bitwidth = cfg_value[1].asInt();
+	  key_builder.push_back_lookahead(offset, bitwidth);
+	}
+	else {
+	  assert(0 && "invalid entry in parse state key");
+	}
       }
 
       parse_state->set_key_builder(key_builder);
@@ -159,7 +250,7 @@ void P4Objects::init_objects(std::istream &is) {
 
       const string parse_state_name = cfg_parse_state["name"].asString();
       ParseState *parse_state = current_parse_states[parse_state_name];
-      const Json::Value cfg_transitions = cfg_parse_state["transitions"];
+      const Json::Value &cfg_transitions = cfg_parse_state["transitions"];
       for(const auto &cfg_transition : cfg_transitions) {
 
       	const string value_hexstr = cfg_transition["value"].asString();
@@ -185,14 +276,14 @@ void P4Objects::init_objects(std::istream &is) {
 
   // deparsers
 
-  const Json::Value cfg_deparsers = cfg_root["deparsers"];
+  const Json::Value &cfg_deparsers = cfg_root["deparsers"];
   for (const auto &cfg_deparser : cfg_deparsers) {
 
     const string deparser_name = cfg_deparser["name"].asString();
     p4object_id_t deparser_id = cfg_deparser["id"].asInt();
     Deparser *deparser = new Deparser(deparser_name, deparser_id);
 
-    const Json::Value cfg_ordered_headers = cfg_deparser["order"];
+    const Json::Value &cfg_ordered_headers = cfg_deparser["order"];
     for (const auto &cfg_header : cfg_ordered_headers) {
 
       const string header_name = cfg_header.asString();
@@ -202,16 +293,65 @@ void P4Objects::init_objects(std::istream &is) {
     add_deparser(deparser_name, unique_ptr<Deparser>(deparser));
   }
 
+  // calculations
+
+  const Json::Value &cfg_calculations = cfg_root["calculations"];
+  for (const auto &cfg_calculation : cfg_calculations) {
+    
+    const string name = cfg_calculation["name"].asString();
+    const p4object_id_t id = cfg_calculation["id"].asInt();
+
+    BufBuilder builder;
+    for (const auto &cfg_field : cfg_calculation["input"]) {
+      assert(cfg_field["type"].asString() == "field");
+      header_id_t header_id;
+      int offset;
+      std::tie(header_id, offset) = field_info(cfg_field["value"][0].asString(),
+					       cfg_field["value"][1].asString());
+      builder.push_back_field(header_id, offset, get_field_bits(header_id, offset));
+    }
+
+    NamedCalculation *calculation = new NamedCalculation(name, id, builder);
+
+    add_named_calculation(name, unique_ptr<NamedCalculation>(calculation));
+  }
+
+  // meter arrays
+
+  const Json::Value &cfg_meter_arrays = cfg_root["meter_arrays"];
+  for (const auto &cfg_meter_array : cfg_meter_arrays) {
+
+    const string name = cfg_meter_array["name"].asString();
+    const p4object_id_t id = cfg_meter_array["id"].asInt();
+    const string type = cfg_meter_array["type"].asString();
+    Meter::MeterType meter_type;
+    if(type == "packets") {
+      meter_type = Meter::MeterType::PACKETS;
+    }
+    else if(type == "bytes") {
+      meter_type = Meter::MeterType::BYTES;
+    }
+    else {
+      assert(0 && "invalid meter type");
+    }
+    const size_t rate_count = cfg_meter_array["rate_count"].asUInt();
+    const size_t size = cfg_meter_array["size"].asUInt();
+
+    MeterArray *meter_array = new MeterArray(name, id,
+					     meter_type, rate_count, size);
+    add_meter_array(name, unique_ptr<MeterArray>(meter_array));
+  }
+
   // actions
 
-  const Json::Value cfg_actions = cfg_root["actions"];
+  const Json::Value &cfg_actions = cfg_root["actions"];
   for (const auto &cfg_action : cfg_actions) {
 
     const string action_name = cfg_action["name"].asString();
     p4object_id_t action_id = cfg_action["id"].asInt();
     ActionFn *action_fn = new ActionFn(action_name, action_id);
 
-    const Json::Value cfg_primitive_calls = cfg_action["primitives"];
+    const Json::Value &cfg_primitive_calls = cfg_action["primitives"];
     for (const auto &cfg_primitive_call : cfg_primitive_calls) {
       const string primitive_name = cfg_primitive_call["op"].asString();
 
@@ -221,7 +361,7 @@ void P4Objects::init_objects(std::istream &is) {
 
       action_fn->push_back_primitive(primitive);
 
-      const Json::Value cfg_primitive_parameters =
+      const Json::Value &cfg_primitive_parameters =
 	cfg_primitive_call["parameters"];
       for(const auto &cfg_parameter : cfg_primitive_parameters) {
 	const string type = cfg_parameter["type"].asString();
@@ -240,7 +380,7 @@ void P4Objects::init_objects(std::istream &is) {
 	  action_fn->parameter_push_back_header(header_id);
 	}
 	else if(type == "field") {
-	  Json::Value cfg_value_field = cfg_parameter["value"];
+	  const Json::Value &cfg_value_field = cfg_parameter["value"];
 	  const string header_name = cfg_value_field[0].asString();
 	  header_id_t header_id = get_header_id(header_name);
 	  const string field_name = cfg_value_field[1].asString();
@@ -249,6 +389,19 @@ void P4Objects::init_objects(std::istream &is) {
 
 	  phv_factory.enable_field_arith(header_id, field_offset);
 	}
+	else if(type == "calculation") {
+	  const string name = cfg_parameter["value"].asString();
+	  NamedCalculation *calculation = get_named_calculation(name);
+	  action_fn->parameter_push_back_calculation(calculation);
+	}
+	else if(type == "meter_array") {
+	  const string name = cfg_parameter["value"].asString();
+	  MeterArray *meter = get_meter_array(name);
+	  action_fn->parameter_push_back_meter_array(meter);
+	}
+	else {
+	  assert(0 && "parameter not supported");
+	}
       }
     }
     add_action(action_name, unique_ptr<ActionFn>(action_fn));
@@ -256,7 +409,7 @@ void P4Objects::init_objects(std::istream &is) {
 
   // pipelines
 
-  const Json::Value cfg_pipelines = cfg_root["pipelines"];
+  const Json::Value &cfg_pipelines = cfg_root["pipelines"];
   for (const auto &cfg_pipeline : cfg_pipelines) {
 
     const string pipeline_name = cfg_pipeline["name"].asString();
@@ -265,18 +418,18 @@ void P4Objects::init_objects(std::istream &is) {
 
     // pipelines -> tables
 
-    const Json::Value cfg_tables = cfg_pipeline["tables"];
+    const Json::Value &cfg_tables = cfg_pipeline["tables"];
     for (const auto &cfg_table : cfg_tables) {
 
       const string table_name = cfg_table["name"].asString();
       p4object_id_t table_id = cfg_table["id"].asInt();
 
       MatchKeyBuilder key_builder;
-      const Json::Value cfg_match_key = cfg_table["key"];
+      const Json::Value &cfg_match_key = cfg_table["key"];
       for (const auto &cfg_key_entry : cfg_match_key) {
 
 	const string match_type = cfg_key_entry["match_type"].asString();
-	const Json::Value cfg_key_field = cfg_key_entry["target"];
+	const Json::Value &cfg_key_field = cfg_key_entry["target"];
 	if(match_type == "valid") {
 	  const string header_name = cfg_key_field.asString();
 	  header_id_t header_id = get_header_id(header_name);
@@ -333,7 +486,7 @@ void P4Objects::init_objects(std::istream &is) {
 	  const std::string type = cfg_element["type"].asString();
 	  assert(type == "field");  // TODO: other types
 
-	  Json::Value cfg_value_field = cfg_element["value"];
+	  const Json::Value &cfg_value_field = cfg_element["value"];
 	  const string header_name = cfg_value_field[0].asString();
 	  header_id_t header_id = get_header_id(header_name);
 	  const string field_name = cfg_value_field[1].asString();
@@ -357,7 +510,7 @@ void P4Objects::init_objects(std::istream &is) {
 
     // pipelines -> conditionals
 
-    const Json::Value cfg_conditionals = cfg_pipeline["conditionals"];
+    const Json::Value &cfg_conditionals = cfg_pipeline["conditionals"];
     for (const auto &cfg_conditional : cfg_conditionals) {
 
       const string conditional_name = cfg_conditional["name"].asString();
@@ -365,7 +518,7 @@ void P4Objects::init_objects(std::istream &is) {
       Conditional *conditional = new Conditional(conditional_name,
 						 conditional_id);
 
-      const Json::Value cfg_expression = cfg_conditional["expression"];
+      const Json::Value &cfg_expression = cfg_conditional["expression"];
       build_conditional(cfg_expression, conditional);
       conditional->build();
 
@@ -379,13 +532,13 @@ void P4Objects::init_objects(std::istream &is) {
       const string table_name = cfg_table["name"].asString();
       MatchTableAbstract *table = get_abstract_match_table(table_name);
 
-      const Json::Value cfg_next_nodes = cfg_table["next_tables"];
-      const Json::Value cfg_actions = cfg_table["actions"];
+      const Json::Value &cfg_next_nodes = cfg_table["next_tables"];
+      const Json::Value &cfg_actions = cfg_table["actions"];
 
       for (const auto &cfg_action : cfg_actions) {
 
 	const string action_name = cfg_action.asString();
-	const Json::Value cfg_next_node = cfg_next_nodes[action_name];
+	const Json::Value &cfg_next_node = cfg_next_nodes[action_name];
 	const ControlFlowNode *next_node = nullptr;
 	if(!cfg_next_node.isNull()) {
 	  next_node = get_control_node(cfg_next_node.asString());
@@ -401,8 +554,8 @@ void P4Objects::init_objects(std::istream &is) {
       const string conditional_name = cfg_conditional["name"].asString();
       Conditional *conditional = get_conditional(conditional_name);
 
-      const Json::Value cfg_true_next = cfg_conditional["true_next"];
-      const Json::Value cfg_false_next = cfg_conditional["false_next"];
+      const Json::Value &cfg_true_next = cfg_conditional["true_next"];
+      const Json::Value &cfg_false_next = cfg_conditional["false_next"];
 
       if(!cfg_true_next.isNull()) {
 	ControlFlowNode *next_node = get_control_node(cfg_true_next.asString());
@@ -421,14 +574,14 @@ void P4Objects::init_objects(std::istream &is) {
 
   // checksums
 
-  const Json::Value cfg_checksums = cfg_root["checksums"];
+  const Json::Value &cfg_checksums = cfg_root["checksums"];
   for (const auto &cfg_checksum : cfg_checksums) {
 
     const string checksum_name = cfg_checksum["name"].asString();
     p4object_id_t checksum_id = cfg_checksum["id"].asInt();
     const string checksum_type = cfg_checksum["type"].asString();
 
-    const Json::Value cfg_cksum_field = cfg_checksum["target"];
+    const Json::Value &cfg_cksum_field = cfg_checksum["target"];
     const string header_name = cfg_cksum_field[0].asString();
     header_id_t header_id = get_header_id(header_name);
     const string field_name = cfg_cksum_field[1].asString();
@@ -458,7 +611,7 @@ void P4Objects::init_objects(std::istream &is) {
   const std::string learning_ipc_name = "ipc:///tmp/test_bm_learning.ipc";
   std::shared_ptr<MyLearnWriter> learn_writer;
 
-  const Json::Value cfg_learn_lists = cfg_root["learn_lists"];
+  const Json::Value &cfg_learn_lists = cfg_root["learn_lists"];
 
   if(cfg_learn_lists.size() > 0) {
     learn_writer = std::shared_ptr<MyLearnWriter>(new MyLearnWriter(learning_ipc_name));
@@ -470,13 +623,13 @@ void P4Objects::init_objects(std::istream &is) {
     learn_engine->list_create(list_id);
     learn_engine->list_set_learn_writer(list_id, learn_writer);
 
-    const Json::Value cfg_learn_elements = cfg_learn_list["elements"];
+    const Json::Value &cfg_learn_elements = cfg_learn_list["elements"];
     for (const auto &cfg_learn_element : cfg_learn_elements) {
 
       const std::string type = cfg_learn_element["type"].asString();
       assert(type == "field");  // TODO: other types
 
-      Json::Value cfg_value_field = cfg_learn_element["value"];
+      const Json::Value &cfg_value_field = cfg_learn_element["value"];
       const string header_name = cfg_value_field[0].asString();
       header_id_t header_id = get_header_id(header_name);
       const string field_name = cfg_value_field[1].asString();
@@ -505,4 +658,10 @@ size_t P4Objects::get_field_bytes(header_id_t header_id, int field_offset) {
 size_t P4Objects::get_field_bits(header_id_t header_id, int field_offset) {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_bit_width(field_offset);
+}
+
+std::tuple<header_id_t, int> P4Objects::field_info(const string &header_name,
+						   const string &field_name) {
+  header_id_t header_id = get_header_id(header_name);
+  return std::make_tuple(header_id, get_field_offset(header_id, field_name));
 }

@@ -132,7 +132,7 @@ int packet_accept(int port_num, const char *buffer, int len) {
 
 void start_processing(transmit_fn_t transmit_fn) {
   simple_switch = new SimpleSwitch(transmit_fn);
-  simple_switch->init_objects("simple_switch.json");
+  simple_switch->init_objects("switch.json");
 
   bm_runtime::start_server(simple_switch, 9090);
 

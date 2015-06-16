@@ -27,6 +27,7 @@
 #include <string>
 #include <memory>
 #include <set>
+#include <tuple>
 
 #include <jsoncpp/json.h>
 
@@ -91,6 +92,10 @@ public:
     return meter_arrays[name].get();
   }
 
+  NamedCalculation *get_named_calculation(const std::string &name) {
+    return calculations[name].get();
+  }
+
 private:
   void add_header_type(const std::string &name, std::unique_ptr<HeaderType> header_type) {
     header_types_map[name] = std::move(header_type);
@@ -104,8 +109,17 @@ private:
     header_ids_map[name] = header_id;
   }
 
+  void add_header_stack_id(const std::string &name,
+			   header_stack_id_t header_stack_id) {
+    header_stack_ids_map[name] = header_stack_id;
+  }
+
   header_id_t get_header_id(const std::string &name) {
     return header_ids_map[name];
+  }
+
+  header_stack_id_t get_header_stack_id(const std::string &name) {
+    return header_stack_ids_map[name];
   }
 
   void add_action(const std::string &name, std::unique_ptr<ActionFn> action) {
@@ -145,6 +159,11 @@ private:
     meter_arrays[name] = std::move(meter_array);
   }
 
+  void add_named_calculation(const std::string &name,
+			     std::unique_ptr<NamedCalculation> calculation) {
+    calculations[name] = std::move(calculation);
+  }
+
   void build_conditional(const Json::Value &json_expression,
 			 Conditional *conditional);
 
@@ -155,7 +174,9 @@ private:
   PHVFactory phv_factory{}; /* this is probably temporary */
 
   std::unordered_map<std::string, header_id_t> header_ids_map{};
+  std::unordered_map<std::string, header_stack_id_t> header_stack_ids_map{};
   std::unordered_map<std::string, HeaderType *> header_to_type_map{};
+  std::unordered_map<std::string, HeaderType *> header_stack_to_type_map{};
 
   std::unordered_map<std::string, std::unique_ptr<HeaderType> > header_types_map{};
 
@@ -187,10 +208,15 @@ private:
   // meter arrays
   std::unordered_map<std::string, std::unique_ptr<MeterArray> > meter_arrays{};
 
+  // calculations
+  std::unordered_map<std::string, std::unique_ptr<NamedCalculation> > calculations{};
+
 private:
   int get_field_offset(header_id_t header_id, const std::string &field_name);
   size_t get_field_bytes(header_id_t header_id, int field_offset);
   size_t get_field_bits(header_id_t header_id, int field_offset);
+  std::tuple<header_id_t, int> field_info(const string &header_name,
+					  const string &field_name);
 };
 
 

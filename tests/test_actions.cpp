@@ -320,7 +320,7 @@ TEST_F(ActionsTest, ExecuteMeter) {
   const color_t GREEN = 0;
   const color_t RED = 1;
 
-  MeterArray meter_array(MeterArray::MeterType::PACKETS, 1, 64);
+  MeterArray meter_array("meter_test", 0, MeterArray::MeterType::PACKETS, 1, 64);
   // 10 packets per second, burst size of 5
   MeterArray::rate_config_t rate = {0.00001, 5};
   rc = meter_array.set_rates({rate});

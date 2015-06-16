@@ -94,6 +94,7 @@
             "header_type": "header_test_t"
         }
     ],
+    "header_stacks": [],
     "parsers": [
         {
             "name": "parser",
@@ -103,8 +104,7 @@
                 {
                     "name": "start",
                     "id": 0,
-                    "extracts": [],
-                    "sets": [],
+                    "parser_ops": [],
                     "transition_key": [],
                     "transitions": [
                         {
@@ -124,6 +124,7 @@
             "order": []
         }
     ],
+    "meter_arrays": [],
     "actions": [
         {
             "name": "actionB",
@@ -478,6 +479,36 @@
             "init_table": null,
             "tables": [],
             "conditionals": []
+        }
+    ],
+    "calculations": [
+        {
+            "name": "SelectorHash",
+            "id": 0,
+            "input": [
+                {
+                    "type": "field",
+                    "value": [
+                        "header_test",
+                        "field24"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "header_test",
+                        "field48"
+                    ]
+                },
+                {
+                    "type": "field",
+                    "value": [
+                        "header_test",
+                        "field64"
+                    ]
+                }
+            ],
+            "algo": "crc16"
         }
     ],
     "checksums": [],

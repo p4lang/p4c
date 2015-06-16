@@ -117,6 +117,10 @@ public:
 
   color_t execute(const Packet &pkt);
 
+public:
+  /* This is for testing purposes only, for more accurate tests */
+  static void reset_global_clock();
+
 private:
   typedef std::unique_lock<std::mutex> UniqueLock;
   UniqueLock unique_lock() const { return UniqueLock(*m_mutex); }
@@ -148,7 +152,7 @@ private:
 
 typedef p4object_id_t meter_array_id_t;
 
-class MeterArray {
+class MeterArray : public NamedP4Object {
 public:
   typedef Meter::MeterErrorCode MeterErrorCode;
   typedef Meter::color_t color_t;
@@ -159,7 +163,9 @@ public:
   typedef vector<Meter>::const_iterator const_iterator;
 
 public:
-  MeterArray(MeterType type, size_t rate_count, size_t size) {
+  MeterArray(const std::string &name, p4object_id_t id,
+	     MeterType type, size_t rate_count, size_t size)
+    : NamedP4Object(name, id) {
     meters.reserve(size);
     for(size_t i = 0; i < size; i++)
       meters.emplace_back(type, rate_count);
