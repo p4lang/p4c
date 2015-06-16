@@ -70,3 +70,8 @@ Indirect
 bm_mt_indirect_delete_member
 Indirect
 0
+bm_meter_set_rates
+MeterA
+16
+1 1000
+2 1000

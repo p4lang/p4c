@@ -52,6 +52,7 @@ plugin_base = os.path.join(_THIS_DIR, 'plugin/')
 TABLES = {}
 ACTIONS = {}
 LEARN_QUANTAS = {}
+METER_ARRAYS = {}
 
 def enum(type_name, *sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
@@ -69,6 +70,7 @@ def enum(type_name, *sequential, **named):
 
 MatchType = enum('MatchType', 'EXACT', 'LPM', 'TERNARY', 'VALID')
 TableType = enum('TableType', 'SIMPLE', 'INDIRECT', 'INDIRECT_WS')
+MeterType = enum('MeterType', 'PACKETS', 'BYTES')
 
 class Table:
     def __init__(self, name, id_):
@@ -122,6 +124,19 @@ class LearnQuanta:
 
     def learn_quanta_str(self):
         return "{0:30} [{1}]".format(self.name, self.fields_str())
+
+class MeterArray:
+    def __init__(self, name, id_):
+        self.name = name
+        self.id_ = id_
+        self.type_ = None
+        self.size = None
+        self.rate_count = None
+
+        METER_ARRAYS[name] = self
+
+    def meter_str(self):
+        return "{0:30} [{1}, {2}]".format(self.name, self.size, MeterType.to_str(self.type_))
 
 def load_json(json_src):
     def get_header_type(header_name, j_headers):
@@ -189,6 +204,12 @@ def load_json(json_src):
                 bitwidth = get_field_bitwidth(header_type, value[1],
                                               json_["header_types"])
                 learn_quanta.fields += [(field_name, bitwidth)]
+
+        for j_meter in json_["meter_arrays"]:
+            meter_array = MeterArray(j_meter["name"], j_meter["id"])
+            meter_array.size = j_meter["size"]
+            meter_array.type_ = MeterType.from_str(j_meter["type"])
+            meter_array.rate_count = j_meter["rate_count"]
 
 
 def ignore_template_file(filename):
@@ -283,6 +304,7 @@ def main():
     render_dict["pd_prefix"] = "p4_pd_" + args.p4_prefix + "_"
     render_dict["MatchType"] = MatchType
     render_dict["TableType"] = TableType
+    render_dict["MeterType"] = MeterType
     render_dict["gen_match_params"] = gen_match_params
     render_dict["gen_action_params"] = gen_action_params
     render_dict["bits_to_bytes"] = bits_to_bytes
@@ -291,6 +313,7 @@ def main():
     render_dict["tables"] = TABLES
     render_dict["actions"] = ACTIONS
     render_dict["learn_quantas"] = LEARN_QUANTAS
+    render_dict["meter_arrays"] = METER_ARRAYS
     render_all_files(render_dict, _validate_dir(os.path.join(_THIS_DIR, "gen-cpp")),
                            with_plugin_list = args.plugin_list)
 

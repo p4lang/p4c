@@ -283,6 +283,20 @@ class RuntimeHandler : virtual public RuntimeIf {
     printf("bm_mc_l2_node_destroy\n");
   }
 
+  void bm_meter_array_set_rates(const std::string& meter_array_name, const std::vector<BmMeterRateConfig> & rates) {
+    // Your implementation goes here
+    printf("bm_meter_array_set_rates\n");
+  }
+
+  void bm_meter_set_rates(const std::string& meter_array_name, const int32_t index, const std::vector<BmMeterRateConfig> & rates) {
+    std::cout << "bm_meter_set_rates" << std::endl
+	      << meter_array_name << std::endl
+	      << index << std::endl;
+    for(const auto &rate : rates) {
+      std::cout << rate.units_per_micros << " " << rate.burst_size << std::endl;
+    }
+  }
+
 };
 
 void run_server(int port) {

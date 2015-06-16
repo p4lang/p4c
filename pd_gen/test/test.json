@@ -124,7 +124,15 @@
             "order": []
         }
     ],
-    "meter_arrays": [],
+    "meter_arrays": [
+        {
+            "name": "MeterA",
+            "id": 0,
+            "rate_count": 2,
+            "type": "bytes",
+            "size": 1024
+        }
+    ],
     "actions": [
         {
             "name": "actionB",
@@ -155,8 +163,35 @@
             ]
         },
         {
-            "name": "actionA",
+            "name": "_MeterAAction",
             "id": 1,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "execute_meter",
+                    "parameters": [
+                        {
+                            "type": "meter_array",
+                            "value": "MeterA"
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "header_test",
+                                "field48"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "actionA",
+            "id": 2,
             "runtime_data": [
                 {
                     "name": "param",
@@ -184,7 +219,7 @@
         },
         {
             "name": "ActionLearn",
-            "id": 2,
+            "id": 3,
             "runtime_data": [],
             "primitives": [
                 {
@@ -441,8 +476,8 @@
                         "actionB"
                     ],
                     "next_tables": {
-                        "actionA": null,
-                        "actionB": null
+                        "actionA": "_MeterATable",
+                        "actionB": "_MeterATable"
                     },
                     "default_action": null
                 },
@@ -467,6 +502,30 @@
                     ],
                     "next_tables": {
                         "ActionLearn": "Indirect"
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "_MeterATable",
+                    "id": 9,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 512,
+                    "with_counters": false,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "_MeterAAction"
+                    ],
+                    "next_tables": {
+                        "_MeterAAction": null
                     },
                     "default_action": null
                 }

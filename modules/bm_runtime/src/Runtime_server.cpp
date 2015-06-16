@@ -533,6 +533,43 @@ class RuntimeHandler : virtual public RuntimeIf {
     }
   }
 
+  void bm_meter_array_set_rates(const std::string& meter_array_name, const std::vector<BmMeterRateConfig> & rates) {
+    printf("bm_meter_array_set_rates\n");
+    std::vector<Meter::rate_config_t> rates_;
+    rates_.reserve(rates.size());
+    for(const auto &rate : rates) {
+      rates_.push_back(
+        {rate.units_per_micros, static_cast<size_t>(rate.burst_size)}
+      );
+    }
+    Meter::MeterErrorCode error_code =
+      switch_->meter_array_set_rates(meter_array_name, rates_);
+    if(error_code != Meter::MeterErrorCode::SUCCESS) {
+      InvalidMeterOperation imo;
+      imo.what = (MeterOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
+
+  void bm_meter_set_rates(const std::string& meter_array_name, const int32_t index, const std::vector<BmMeterRateConfig> & rates) {
+    printf("bm_meter_set_rates\n");
+    std::vector<Meter::rate_config_t> rates_;
+    rates_.reserve(rates.size());
+    for(const auto &rate : rates) {
+      rates_.push_back(
+        {rate.units_per_micros, static_cast<size_t>(rate.burst_size)}
+      );
+    }
+    Meter::MeterErrorCode error_code = switch_->meter_set_rates(
+      meter_array_name, static_cast<size_t>(index), rates_
+    );
+    if(error_code != Meter::MeterErrorCode::SUCCESS) {
+      InvalidMeterOperation imo;
+      imo.what = (MeterOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
+
 };
 
 namespace bm_runtime {

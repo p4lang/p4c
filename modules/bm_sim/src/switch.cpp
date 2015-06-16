@@ -356,7 +356,7 @@ Switch::meter_array_set_rates(
 }
 
 RuntimeInterface::MeterErrorCode
-Switch::meter_set_rate(
+Switch::meter_set_rates(
   const std::string &meter_name, size_t idx,
   const std::vector<Meter::rate_config_t> &configs
 ) {

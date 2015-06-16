@@ -149,8 +149,8 @@ public:
 			const std::vector<Meter::rate_config_t> &configs) = 0;
 
   virtual MeterErrorCode
-  meter_set_rate(const std::string &meter_name, size_t idx,
-		 const std::vector<Meter::rate_config_t> &configs) = 0;
+  meter_set_rates(const std::string &meter_name, size_t idx,
+		  const std::vector<Meter::rate_config_t> &configs) = 0;
 
   virtual ErrorCode
   load_new_config(const std::string &new_config) = 0;

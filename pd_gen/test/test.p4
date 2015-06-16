@@ -179,6 +179,25 @@ table Learn {
     size: 512;
 }
 
+meter MeterA {
+    type : bytes;
+    instance_count : 1024;
+}
+
+action _MeterAAction() {
+    execute_meter(MeterA, 16, header_test.field48);
+}
+
+table _MeterATable {
+    reads {
+         header_test.field32 : exact;
+    }
+    actions {
+        _MeterAAction;
+    }
+    size: 512;
+}    
+
 control ingress {
     apply(ExactOne);
     apply(LpmOne);
@@ -189,6 +208,7 @@ control ingress {
     apply(Learn);
     apply(Indirect);
     apply(IndirectWS);
+    apply(_MeterATable);
 }
 
 control egress {

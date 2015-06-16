@@ -23,6 +23,7 @@
 #include <thrift_endpoint.h>
 
 #include <pd/pd_tables.h>
+#include <pd/pd_meters.h>
 #include <pd/pd_static.h>
 #include <pd/pd.h>
 
@@ -130,6 +131,15 @@ int main() {
 
   p4_pd_test_ActProf_del_member(sess_hdl, dev_tgt.device_id, mbr_hdl);
 
+  /* meter test */
+
+  uint32_t cir_kbps = 8000;
+  uint32_t cburst_kbits = 8;
+  uint32_t pir_kbps = 16000;
+  uint32_t pburst_kbits = 8;
+  p4_pd_test_meter_configure_MeterA(sess_hdl, dev_tgt, 16,
+				    cir_kbps, cburst_kbits,
+				    pir_kbps, pburst_kbits);
 
   /* END TEST */
 

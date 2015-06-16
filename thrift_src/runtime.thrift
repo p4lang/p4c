@@ -82,6 +82,11 @@ struct BmCounterValue {
   2:i64 packets;
 }
 
+struct BmMeterRateConfig {
+  1:double units_per_micros;
+  2:i32 burst_size;
+}
+
 enum TableOperationErrorCode {
   TABLE_FULL = 1,
   INVALID_HANDLE = 2,
@@ -124,6 +129,18 @@ enum McOperationErrorCode {
 
 exception InvalidMcOperation {
   1:McOperationErrorCode what
+}
+
+enum MeterOperationErrorCode {
+  INVALID_INDEX = 1,
+  BAD_RATES_LIST = 2,
+  INVALID_INFO_RATE_VALUE = 3,
+  INVALID_BURST_SIZE_VALUE = 4,
+  ERROR = 5
+}
+
+exception InvalidMeterOperation {
+ 1:MeterOperationErrorCode what
 }
 
 service Runtime {
@@ -308,4 +325,16 @@ service Runtime {
     1:BmMcL2Handle l2_handle
   ) throws (1:InvalidMcOperation ouch)
   
+  // meters
+
+  void bm_meter_array_set_rates(
+    1:string meter_array_name,
+    2:list<BmMeterRateConfig> rates
+  ) throws (1:InvalidMeterOperation ouch)
+
+  void bm_meter_set_rates(
+    1:string meter_array_name,
+    2:i32 index,
+    3:list<BmMeterRateConfig> rates
+  ) throws (1:InvalidMeterOperation ouch)
 }
