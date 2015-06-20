@@ -24,7 +24,7 @@
 #include "bm_sim/P4Objects.h"
 
 Switch::Switch(bool enable_swap)
-  : enable_swap(enable_swap) {
+  : DevMgr(), enable_swap(enable_swap) {
   p4objects = std::make_shared<P4Objects>();
   p4objects_rt = p4objects;
   // p4objects = std::unique_ptr<P4Objects>(new P4Objects());
@@ -35,6 +35,9 @@ void Switch::init_objects(const std::string &json_path) {
   std::fstream fs(json_path);
   p4objects->init_objects(fs);
   Packet::set_phv_factory(p4objects->get_phv_factory());
+
+  // TODO: is this the right place to do this?
+  set_packet_handler(&Switch::packet_handler, (void *) this);
 }
 
 MatchErrorCode Switch::mt_add_entry(

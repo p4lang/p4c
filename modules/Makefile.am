@@ -1,4 +1,4 @@
-SUBDIRS = bf_lpm_trie bm_sim bm_runtime BMI
+SUBDIRS = bf_lpm_trie BMI bm_sim bm_runtime
 
 lib_LTLIBRARIES = libp4.la libp4runtime.la libbmi.la
 

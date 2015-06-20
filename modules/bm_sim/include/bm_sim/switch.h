@@ -31,10 +31,11 @@
 #include "learning.h"
 #include "runtime_interface.h"
 #include "pre.h"
+#include "dev_mgr.h"
 
 #include <boost/thread/shared_mutex.hpp>
 
-class Switch : public RuntimeInterface {
+class Switch : public RuntimeInterface, public DevMgr {
 public:
   Switch(bool enable_swap = false);
 
@@ -182,6 +183,12 @@ protected:
 
   Deparser *get_deparser(const std::string &name) {
     return p4objects->get_deparser(name);
+  }
+
+private:
+  static void packet_handler(int port_num, const char *buffer, int len,
+                             void *cookie) {
+    ((Switch *) cookie)->receive(port_num, buffer, len);
   }
 
 private:

@@ -36,7 +36,9 @@ public:
   Field(int nbits, bool arith_flag = true)
     : nbits(nbits), nbytes( (nbits + 7) / 8 ), bytes(nbytes) {
     arith = arith_flag;
-    if(arith) { mask <<= nbits; mask -= 1; }
+    // TODO ?
+    // should I only do that for arith fields ?
+    mask <<= nbits; mask -= 1;
   }
 
   // Overload set? Make it more generic (arbitary length) ?

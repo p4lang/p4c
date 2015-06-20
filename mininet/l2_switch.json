@@ -162,6 +162,22 @@
                             "type": "field",
                             "value": [
                                 "standard_metadata",
+                                "ingress_port"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x101"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
                                 "egress_port"
                             ]
                         },
@@ -174,8 +190,31 @@
             ]
         },
         {
-            "name": "mac_learn",
+            "name": "broadcast",
             "id": 1,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "intrinsic_metadata",
+                                "mgid"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "mac_learn",
+            "id": 2,
             "runtime_data": [],
             "primitives": [
                 {
@@ -200,29 +239,6 @@
                         {
                             "type": "hexstr",
                             "value": "0x1"
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "broadcast",
-            "id": 2,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "intrinsic_metadata",
-                                "mgid"
-                            ]
                         },
                         {
                             "type": "hexstr",

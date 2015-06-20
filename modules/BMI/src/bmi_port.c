@@ -41,6 +41,7 @@ typedef struct bmi_port_mgr_s {
   bmi_port_t ports_info[PORT_COUNT_MAX];
   fd_set fds;
   int max_fd;
+  void *cookie;
   bmi_packet_handler_t packet_handler;
   pthread_t select_thread;
   pthread_mutex_t lock;
@@ -96,7 +97,7 @@ static void *run_select(void *data) {
 	if(pkt_len < 0) continue;
 	/* printf("Received pkt of len %d on port %d\n", pkt_len, i); */
 	if(port_mgr->packet_handler) {
-	  port_mgr->packet_handler(i, pkt_data, pkt_len);
+	  port_mgr->packet_handler(i, pkt_data, pkt_len, port_mgr->cookie);
 	}
       }
     }
@@ -124,8 +125,10 @@ int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
 }
 
 int bmi_set_packet_handler(bmi_port_mgr_t *port_mgr,
-			   bmi_packet_handler_t packet_handler) {
+			   bmi_packet_handler_t packet_handler,
+			   void *cookie) {
   port_mgr->packet_handler = packet_handler;
+  port_mgr->cookie = cookie;
   return 0;
 }
 

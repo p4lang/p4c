@@ -69,6 +69,8 @@ table smac {
 }
 
 action forward(port) {
+    // hack to force BM to enable arithmetic on this field
+    modify_field(standard_metadata.ingress_port, 257);
     modify_field(standard_metadata.egress_port, port);
 }
 

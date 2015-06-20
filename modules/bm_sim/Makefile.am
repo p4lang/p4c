@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/include/ -I$(srcdir)/../bf_lpm_trie/include/
+AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/include/ -I$(srcdir)/../bf_lpm_trie/include/ -I$(srcdir)/../BMI/include/
 AM_CPPFLAGS += $(DEBUG_CPPFLAGS)
 # I chose to add -Weffc++ for this module. I feel that most of it is excessively
 # pedantic (like constructior initializers for non POD data), but it may be
@@ -30,7 +30,8 @@ src/learning.cpp \
 src/pre.cpp \
 src/transport.cpp \
 src/calculations.cpp \
-src/meters.cpp
+src/meters.cpp \
+src/dev_mgr.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -41,6 +42,7 @@ include/bm_sim/conditionals.h \
 include/bm_sim/control_flow.h \
 include/bm_sim/data.h \
 include/bm_sim/deparser.h \
+include/bm_sim/dev_mgr.h \
 include/bm_sim/entries.h \
 include/bm_sim/event_logger.h \
 include/bm_sim/fields.h \
