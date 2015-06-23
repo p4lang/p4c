@@ -59,6 +59,7 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
       port_add(iface, port_num++, NULL);
     }
   }
+  thrift_port = parser.thrift_port;
 }
 
 MatchErrorCode

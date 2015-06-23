@@ -49,11 +49,13 @@ class BFNSwitch(Switch):
     listenerPort = 11111
     thriftPort = 22222
 
-    def __init__( self, name, sw_path = "", json_path = "",
+    def __init__( self, name, sw_path = None, json_path = None,
                   thrift_port = None,
                   pcap_dump = False,
                   verbose = False, **kwargs ):
         Switch.__init__( self, name, **kwargs )
+        assert(sw_path)
+        assert(json_path)
         self.sw_path = sw_path
         self.json_path = json_path
         self.verbose = verbose
@@ -77,12 +79,9 @@ class BFNSwitch(Switch):
                 args.extend( ['-i', intf.name] )
         if self.pcap_dump:
             args.append("--pcap")
+        if self.thrift_port:
+            args.extend( ['--thrift-port', str(self.thrift_port)] )
         args.append(self.json_path)
-        # if self.thrift_port:
-        #     thrift_port = self.thrift_port
-        # else:
-        #     thrift_port =  self.thriftPort
-        #     self.thriftPort += 1
 
         logfile = '/tmp/bfns.%s.log' % self.name
 

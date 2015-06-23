@@ -136,7 +136,9 @@ main(int argc, char* argv[])
   simple_switch = new SimpleSwitch();
   simple_switch->init_from_command_line_options(argc, argv);
 
-  bm_runtime::start_server(simple_switch, 9090);
+  // should this be done by the call to init_from_command_line_options
+  int thrift_port = simple_switch->get_runtime_port();
+  bm_runtime::start_server(simple_switch, thrift_port);
 
   simple_switch->start_and_return();
 

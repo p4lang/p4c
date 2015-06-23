@@ -39,7 +39,9 @@ OptionsParser::parse(int argc, char *argv[])
     ("help,h", "Display this help message")
     ("interface,i", po::value<std::vector<std::string> >()->composing(),
      "Attach this network interface at startup")
-    ("pcap", "Generate pcap files for interfaces");
+    ("pcap", "Generate pcap files for interfaces")
+    ("thrift-port", po::value<int>(),
+     "TCP port on which to run the Thrift runtime server");
 
   po::options_description hidden;
   hidden.add_options()
@@ -90,4 +92,15 @@ OptionsParser::parse(int argc, char *argv[])
 
   assert(vm.count("input-config"));
   config_file_path = vm["input-config"].as<std::string>();
+
+  int default_thrift_port = 9090;
+  if(vm.count("thrift-port")) {
+    thrift_port = vm["thrift-port"].as<int>();
+  }
+  else {
+    std::cout << "Thrift port was not specified, will use "
+	      << default_thrift_port
+	      << std::endl;
+    thrift_port = default_thrift_port;
+  }
 }

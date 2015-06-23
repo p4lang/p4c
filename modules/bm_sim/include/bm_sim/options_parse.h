@@ -53,6 +53,7 @@ private:
   std::string config_file_path{};
   InterfaceList ifaces{};
   bool pcap{false};
+  int thrift_port{};
 };
 
 #endif

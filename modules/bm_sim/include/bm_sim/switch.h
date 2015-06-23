@@ -49,6 +49,9 @@ public:
 
   virtual void start_and_return() = 0;
 
+  // returns the Thrift port if one was specified on the command line
+  int get_runtime_port() { return thrift_port; }
+
 public:
   MatchErrorCode
   mt_add_entry(const std::string &table_name,
@@ -210,6 +213,8 @@ private:
   std::shared_ptr<P4Objects> p4objects_rt{nullptr};
 
   bool enable_swap{false};
+  
+  int thrift_port{};
 };
 
 #endif
