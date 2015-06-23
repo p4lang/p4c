@@ -297,6 +297,16 @@ class RuntimeHandler : virtual public RuntimeIf {
     }
   }
 
+  void bm_dev_mgr_add_port(const std::string& iface_name, const int32_t port_num, const std::string& pcap_path) {
+    // Your implementation goes here
+    printf("bm_dev_mgr_add_port\n");
+  }
+
+  void bm_dev_mgr_remove_port(const int32_t port_num) {
+    // Your implementation goes here
+    printf("bm_dev_mgr_remove_port\n");
+  }
+
 };
 
 void run_server(int port) {

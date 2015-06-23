@@ -143,6 +143,15 @@ exception InvalidMeterOperation {
  1:MeterOperationErrorCode what
 }
 
+// TODO
+enum DevMgrErrorCode {
+  ERROR = 1
+}
+
+exception InvalidDevMgrOperation {
+ 1:DevMgrErrorCode what
+}
+
 service Runtime {
 	
   // table operations
@@ -337,4 +346,16 @@ service Runtime {
     2:i32 index,
     3:list<BmMeterRateConfig> rates
   ) throws (1:InvalidMeterOperation ouch)
+
+  // device manager
+
+  void bm_dev_mgr_add_port(
+    1:string iface_name,
+    2:i32 port_num,
+    3:string pcap_path // optional
+  ) throws (1:InvalidDevMgrOperation ouch)
+
+  void bm_dev_mgr_remove_port(
+    1:i32 port_num
+  ) throws (1:InvalidDevMgrOperation ouch)
 }

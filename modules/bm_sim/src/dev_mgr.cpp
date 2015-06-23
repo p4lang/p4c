@@ -39,7 +39,13 @@ DevMgr::port_add(const std::string &iface_name, port_t port_num,
   return ReturnCode::SUCCESS;
 }
 
-#include <iostream>
+DevMgr::ReturnCode
+DevMgr::port_remove(port_t port_num)
+{
+  // TODO: check if port is taken...
+  assert(!bmi_port_interface_remove(port_mgr, port_num));
+  return ReturnCode::SUCCESS;
+}
 
 DevMgr::ReturnCode
 DevMgr::set_packet_handler(PacketHandler handler, void *cookie)

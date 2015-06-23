@@ -570,6 +570,30 @@ class RuntimeHandler : virtual public RuntimeIf {
     }
   }
 
+  void bm_dev_mgr_add_port(const std::string& iface_name, const int32_t port_num, const std::string& pcap_path) {
+    printf("bm_dev_mgr_add_port\n");
+    const char *pcap = NULL;
+    if(pcap_path == "") pcap = pcap_path.c_str();
+    DevMgr::ReturnCode error_code;
+    error_code = switch_->port_add(iface_name, port_num, pcap);
+    if(error_code != DevMgr::ReturnCode::SUCCESS) {
+      InvalidDevMgrOperation idmo;
+      idmo.what = (DevMgrErrorCode::type) 1; // TODO
+      throw idmo;
+    }
+  }
+
+  void bm_dev_mgr_remove_port(const int32_t port_num) {
+    printf("bm_dev_mgr_remove_port\n");
+    DevMgr::ReturnCode error_code;
+    error_code = switch_->port_remove(port_num);
+    if(error_code != DevMgr::ReturnCode::SUCCESS) {
+      InvalidDevMgrOperation idmo;
+      idmo.what = (DevMgrErrorCode::type) 1; // TODO
+      throw idmo;
+    }
+  }
+
 };
 
 namespace bm_runtime {

@@ -43,6 +43,8 @@ public:
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
 		      const char *pcap);
 
+  ReturnCode port_remove(port_t port_num);
+
   void transmit_fn(int port_num, const char *buffer, int len) {
     bmi_port_send(port_mgr, port_num, buffer, len);
   }
