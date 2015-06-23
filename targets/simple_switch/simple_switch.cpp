@@ -22,12 +22,8 @@
 #include <memory>
 #include <thread>
 #include <fstream>
-#include <list>
-#include <vector>
 #include <string>
 #include <chrono>
-
-#include <boost/program_options.hpp>
 
 #include <unistd.h>
 
@@ -215,100 +211,11 @@ void SimpleSwitch::egress_thread() {
 static SimpleSwitch *simple_switch;
 
 
-class InterfaceList {
-public:
-  typedef std::list<std::string>::iterator iterator;
-  typedef std::list<std::string>::const_iterator const_iterator;
-public:
-  void append(const std::string &iface) { ifaces.push_back(iface); }
-  bool empty() { return ifaces.empty(); }
-  // iterators
-  iterator begin() { return ifaces.begin(); }
-  const_iterator begin() const { return ifaces.begin(); }
-  iterator end() { return ifaces.end(); }
-  const_iterator end() const { return ifaces.end(); }
-private:
-  std::list<std::string> ifaces;
-public:
-  static InterfaceList *get_instance() {
-    static InterfaceList list;
-    return &list;
-  }
-};
-
-static void parse_options(int argc, char* argv[]) {
-  namespace po = boost::program_options;
-
-  po::options_description description("Simple switch model");
-
-  description.add_options()
-    ("help,h", "Display this help message")
-    ("interface,i", po::value<std::vector<std::string> >()->composing(),
-     "Attach this network interface at startup\n");
-
-  po::variables_map vm;
-
-  try {
-    po::store(
-      po::command_line_parser(argc, argv).options(description).run(), 
-      vm
-    ); // throws on error
-  }
-  catch(...) {
-    std::cout << "Error while parsing command line arguments" << std::endl;
-    std::cout << description;
-    exit(1);
-  }
-
-  if(vm.count("help")) {
-    std::cout << description;
-    exit(0);
-  }
-
-  if(vm.count("interface")) {
-    for (const auto &iface : vm["interface"].as<std::vector<std::string> >()) {
-      InterfaceList::get_instance()->append(iface);
-    }
-  }
-}
-
-
 int 
 main(int argc, char* argv[])
 {
-  parse_options(argc, argv);
-
   simple_switch = new SimpleSwitch();
-  simple_switch->init_objects("switch.json");
-
-  InterfaceList *ifaces = InterfaceList::get_instance();
-  if(ifaces->empty()) {
-    std::cout << "Adding all 4 ports\n";  
-#ifdef PCAP_DUMP
-    simple_switch->port_add("veth1", 1, "port1.pcap");
-    simple_switch->port_add("veth3", 2, "port2.pcap");
-    simple_switch->port_add("veth5", 3, "port3.pcap");
-    simple_switch->port_add("veth7", 4, "port4.pcap");
-#else
-    simple_switch->port_add("veth1", 1, NULL);
-    simple_switch->port_add("veth3", 2, NULL);
-    simple_switch->port_add("veth5", 3, NULL);
-    simple_switch->port_add("veth7", 4, NULL);
-#endif
-  }
-  else {
-    int port_num = 1;
-    for(const auto &iface : *ifaces) {
-      std::cout << "Adding interface " << iface
-		<< " as port " << port_num << std::endl;
-#ifdef PCAP_DUMP
-      const std::string pcap = iface + ".pcap";
-      simple_switch->port_add(iface, port_num++, pcap.c_str());
-#else
-      simple_switch->port_add(iface, port_num++, NULL);
-#endif
-    }
-  }
+  simple_switch->init_from_command_line_options(argc, argv);
 
   bm_runtime::start_server(simple_switch, 9090);
 

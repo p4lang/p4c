@@ -25,6 +25,8 @@
 #include <string>
 #include <fstream>
 
+#include <boost/thread/shared_mutex.hpp>
+
 #include "P4Objects.h"
 #include "queue.h"
 #include "packet.h"
@@ -33,13 +35,13 @@
 #include "pre.h"
 #include "dev_mgr.h"
 
-#include <boost/thread/shared_mutex.hpp>
-
 class Switch : public RuntimeInterface, public DevMgr {
 public:
   Switch(bool enable_swap = false);
 
   void init_objects(const std::string &json_path);
+
+  void init_from_command_line_options(int argc, char *argv[]);
 
   P4Objects *get_p4objects() { return p4objects.get(); }
 
@@ -48,7 +50,7 @@ public:
   virtual void start_and_return() = 0;
 
 public:
-  MatchErrorCode 
+  MatchErrorCode
   mt_add_entry(const std::string &table_name,
 	       const std::vector<MatchKeyParam> &match_key,
 	       const std::string &action_name,

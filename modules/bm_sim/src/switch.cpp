@@ -22,6 +22,7 @@
 
 #include "bm_sim/switch.h"
 #include "bm_sim/P4Objects.h"
+#include "bm_sim/options_parse.h"
 
 Switch::Switch(bool enable_swap)
   : DevMgr(), enable_swap(enable_swap) {
@@ -31,7 +32,8 @@ Switch::Switch(bool enable_swap)
   pre = std::unique_ptr<McPre>(new McPre());
 }
 
-void Switch::init_objects(const std::string &json_path) {
+void
+Switch::init_objects(const std::string &json_path) {
   std::fstream fs(json_path);
   p4objects->init_objects(fs);
   Packet::set_phv_factory(p4objects->get_phv_factory());
@@ -40,7 +42,27 @@ void Switch::init_objects(const std::string &json_path) {
   set_packet_handler(&Switch::packet_handler, (void *) this);
 }
 
-MatchErrorCode Switch::mt_add_entry(
+void
+Switch::init_from_command_line_options(int argc, char *argv[]) {
+  OptionsParser parser;
+  parser.parse(argc, argv);
+  init_objects(parser.config_file_path);
+  int port_num = 1;
+  for(const auto &iface : parser.ifaces) {
+    std::cout << "Adding interface " << iface
+	      << " as port " << port_num << std::endl;
+    if(parser.pcap) {
+      const std::string pcap = iface + ".pcap";
+      port_add(iface, port_num++, pcap.c_str());
+    }
+    else {
+      port_add(iface, port_num++, NULL);
+    }
+  }
+}
+
+MatchErrorCode
+Switch::mt_add_entry(
     const std::string &table_name,
     const std::vector<MatchKeyParam> &match_key,
     const std::string &action_name,
@@ -61,7 +83,8 @@ MatchErrorCode Switch::mt_add_entry(
   );
 }
 
-MatchErrorCode Switch::mt_set_default_action(
+MatchErrorCode
+Switch::mt_set_default_action(
     const std::string &table_name,
     const std::string &action_name,
     ActionData action_data
@@ -77,7 +100,8 @@ MatchErrorCode Switch::mt_set_default_action(
   return table->set_default_action(action, std::move(action_data));
 }
 
-MatchErrorCode Switch::mt_delete_entry(
+MatchErrorCode
+Switch::mt_delete_entry(
     const std::string &table_name,
     entry_handle_t handle
 ) {
@@ -90,7 +114,8 @@ MatchErrorCode Switch::mt_delete_entry(
   return table->delete_entry(handle);
 }
 
-MatchErrorCode Switch::mt_modify_entry(
+MatchErrorCode
+Switch::mt_modify_entry(
     const std::string &table_name,
     entry_handle_t handle,
     const std::string &action_name,

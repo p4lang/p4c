@@ -31,7 +31,8 @@ src/pre.cpp \
 src/transport.cpp \
 src/calculations.cpp \
 src/meters.cpp \
-src/dev_mgr.cpp
+src/dev_mgr.cpp \
+src/options_parse.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -52,6 +53,7 @@ include/bm_sim/lpm_trie.h \
 include/bm_sim/meters.h \
 include/bm_sim/named_p4object.h \
 include/bm_sim/nn.h \
+include/bm_sim/options_parse.h \
 include/bm_sim/P4Objects.h \
 include/bm_sim/packet_buffer.h \
 include/bm_sim/packet.h \

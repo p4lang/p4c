@@ -49,12 +49,13 @@ class BFNSwitch(Switch):
     listenerPort = 11111
     thriftPort = 22222
 
-    def __init__( self, name, sw_path = "dc_full",
+    def __init__( self, name, sw_path = "", json_path = "",
                   thrift_port = None,
                   pcap_dump = False,
                   verbose = False, **kwargs ):
         Switch.__init__( self, name, **kwargs )
         self.sw_path = sw_path
+        self.json_path = json_path
         self.verbose = verbose
         logfile = '/tmp/bfns.%s.log' % self.name
         self.output = open(logfile, 'w')
@@ -74,19 +75,14 @@ class BFNSwitch(Switch):
         for intf in self.intfs.values():
             if not intf.IP():
                 args.extend( ['-i', intf.name] )
-        # args.extend( ['--listener', '127.0.0.1:%d' % self.listenerPort] )
-        # self.listenerPort += 1
-        # # FIXME
+        if self.pcap_dump:
+            args.append("--pcap")
+        args.append(self.json_path)
         # if self.thrift_port:
         #     thrift_port = self.thrift_port
         # else:
         #     thrift_port =  self.thriftPort
         #     self.thriftPort += 1
-        # args.extend( ['--pd-server', '127.0.0.1:%d' % thrift_port] )
-        # args.append( '--no-cli' )
-        # if not self.pcap_dump:
-        #     args.append( '--no-cli' )
-        # args.append( self.opts )
 
         logfile = '/tmp/bfns.%s.log' % self.name
 
