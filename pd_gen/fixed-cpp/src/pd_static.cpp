@@ -84,9 +84,9 @@ p4_pd_load_new_config(p4_pd_sess_hdl_t shdl, uint8_t dev_id,
   assert(client);
   try {
     client->bm_load_new_config(std::string(config_str));
-  } catch(InvalidSwapOperation& iso) {
+  } catch(InvalidSwapOperation &iso) {
     const char *what =
-      _TableOperationErrorCode_VALUES_TO_NAMES.find(iso.what)->second;
+      _SwapOperationErrorCode_VALUES_TO_NAMES.find(iso.what)->second;
     std::cout << "Invalid swap operation (" << iso.what << "): "
 	      << what << std::endl;
     return iso.what;
@@ -100,9 +100,9 @@ p4_pd_swap_configs(p4_pd_sess_hdl_t shdl, uint8_t dev_id) {
   assert(client);
   try {
     client->bm_swap_configs();
-  } catch(InvalidSwapOperation& iso) {
+  } catch(InvalidSwapOperation &iso) {
     const char *what =
-      _TableOperationErrorCode_VALUES_TO_NAMES.find(iso.what)->second;
+      _SwapOperationErrorCode_VALUES_TO_NAMES.find(iso.what)->second;
     std::cout << "Invalid swap operation (" << iso.what << "): "
 	      << what << std::endl;
     return iso.what;

@@ -159,13 +159,19 @@ ${name}
 //::     if match_type == MatchType.TERNARY:
   options.__set_priority(priority);
 //::     #endif
-  *entry_hdl = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_mt_add_entry(
-       "${t_name}",
-       match_key,
-       "${a_name}",
-       action_data,
-       options
-  );
+  try {
+    *entry_hdl = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_mt_add_entry(
+      "${t_name}", match_key,
+      "${a_name}", action_data,
+      options
+    );
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -206,12 +212,17 @@ ${name}
   options.__set_priority(priority);
 //::   #endif
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
-  *entry_hdl = client->bm_mt_indirect_add_entry(
-       "${t_name}",
-       match_key,
-       mbr_hdl,
-       options
-  );
+  try {
+    *entry_hdl = client->bm_mt_indirect_add_entry(
+      "${t_name}", match_key, mbr_hdl, options
+    );
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -235,12 +246,17 @@ ${name}
   options.__set_priority(priority);
 //::   #endif
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
-  *entry_hdl = client->bm_mt_indirect_ws_add_entry(
-       "${t_name}",
-       match_key,
-       grp_hdl,
-       options
-  );
+  try {
+    *entry_hdl = client->bm_mt_indirect_ws_add_entry(
+      "${t_name}", match_key, grp_hdl, options
+    );
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -261,11 +277,19 @@ ${name}
 ) {
   assert(my_devices[dev_id]);
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  try {
 //::   if t_type == TableType.SIMPLE:
-  client->bm_mt_delete_entry("${t_name}", entry_hdl);
+    client->bm_mt_delete_entry("${t_name}", entry_hdl);
 //::   else:
-  client->bm_mt_indirect_delete_entry("${t_name}", entry_hdl);
+    client->bm_mt_indirect_delete_entry("${t_name}", entry_hdl);
 //::   #endif
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -299,10 +323,17 @@ ${name}
 //::     else:
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
-  pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_mt_modify_entry(
-      "${t_name}", entry_hdl,
-      "${a_name}", action_data
-  );
+  try {
+    pd_conn_mgr_client(conn_mgr_state, dev_id)->bm_mt_modify_entry(
+      "${t_name}", entry_hdl, "${a_name}", action_data
+    );
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -338,10 +369,17 @@ ${name}
 //::     else:
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
-  pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_mt_set_default_action(
-      "${t_name}", "${a_name}",
-      action_data
-  );
+  try {
+    pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_mt_set_default_action(
+      "${t_name}", "${a_name}", action_data
+    );
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -365,7 +403,15 @@ ${name}
 ) {
   assert(my_devices[dev_tgt.device_id]);
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
-  client->bm_mt_indirect_set_default_member("${t_name}", mbr_hdl);
+  try {
+    client->bm_mt_indirect_set_default_member("${t_name}", mbr_hdl);
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -380,7 +426,15 @@ ${name}
 ) {
   assert(my_devices[dev_tgt.device_id]);
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
-  client->bm_mt_indirect_ws_set_default_group("${t_name}", grp_hdl);
+  try {
+    client->bm_mt_indirect_ws_set_default_group("${t_name}", grp_hdl);
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -416,9 +470,17 @@ ${name}
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
-  *mbr_hdl = client->bm_mt_indirect_add_member(
-     "${t_name}", "${a_name}", action_data
-  );
+  try {
+    *mbr_hdl = client->bm_mt_indirect_add_member(
+      "${t_name}", "${a_name}", action_data
+    );
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -442,10 +504,17 @@ ${name}
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
-  (void) action_data; (void) client;
-  client->bm_mt_indirect_modify_member(
-    "${t_name}", mbr_hdl, "${a_name}", action_data
-  );
+  try {
+    client->bm_mt_indirect_modify_member(
+      "${t_name}", mbr_hdl, "${a_name}", action_data
+    );
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -463,7 +532,15 @@ ${name}
 ) {
   assert(my_devices[dev_id]);
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
-  client->bm_mt_indirect_delete_member("${t_name}", mbr_hdl);
+  try {
+    client->bm_mt_indirect_delete_member("${t_name}", mbr_hdl);
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -483,7 +560,15 @@ ${name}
   (void) max_grp_size;
   assert(my_devices[dev_tgt.device_id]);
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
-  *grp_hdl = client->bm_mt_indirect_ws_create_group("${t_name}");
+  try {
+    *grp_hdl = client->bm_mt_indirect_ws_create_group("${t_name}");
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -499,7 +584,15 @@ ${name}
 ) {
   assert(my_devices[dev_id]);
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
-  client->bm_mt_indirect_ws_delete_group("${t_name}", grp_hdl);
+  try {
+    client->bm_mt_indirect_ws_delete_group("${t_name}", grp_hdl);
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -516,7 +609,15 @@ ${name}
 ) {
   assert(my_devices[dev_id]);
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
-  client->bm_mt_indirect_ws_add_member_to_group("${t_name}", mbr_hdl, grp_hdl);
+  try {
+    client->bm_mt_indirect_ws_add_member_to_group("${t_name}", mbr_hdl, grp_hdl);
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
@@ -533,7 +634,15 @@ ${name}
 ) {
   assert(my_devices[dev_id]);
   RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
-  client->bm_mt_indirect_ws_remove_member_from_group("${t_name}", mbr_hdl, grp_hdl);
+  try {
+    client->bm_mt_indirect_ws_remove_member_from_group("${t_name}", mbr_hdl, grp_hdl);
+  } catch (InvalidTableOperation &ito) {
+    const char *what =
+      _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;
+    std::cout << "Invalid table (" << "${t_name}" << ") operation ("
+	      << ito.what << "): " << what << std::endl;
+    return ito.what;
+  }
   return 0;
 }
 
