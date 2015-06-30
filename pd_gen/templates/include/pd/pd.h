@@ -22,18 +22,21 @@
 #define _P4_PD_H_
 
 #include "pd/pd_static.h"
+#include "pd/pd_tables.h"
+#include "pd/pd_learning.h"
+#include "pd/pd_meters.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-p4_pd_status_t ${pd_prefix}init(p4_pd_sess_hdl_t sess_hdl,
-				const char *learning_addr);
+// I am not using sess_hdl for these functions, right thing to do?
 
-p4_pd_status_t ${pd_prefix}assign_device(p4_pd_sess_hdl_t sess_hdl,
-					 int dev_id, int rpc_port_num);
+p4_pd_status_t ${pd_prefix}init(const char *learning_addr);
 
-p4_pd_status_t ${pd_prefix}remove_device(p4_pd_sess_hdl_t sess_hdl, int dev_id);
+p4_pd_status_t ${pd_prefix}assign_device(int dev_id, int rpc_port_num);
+
+p4_pd_status_t ${pd_prefix}remove_device(int dev_id);
 
 #ifdef __cplusplus
 }

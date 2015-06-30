@@ -163,35 +163,8 @@
             ]
         },
         {
-            "name": "_MeterAAction",
-            "id": 1,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "execute_meter",
-                    "parameters": [
-                        {
-                            "type": "meter_array",
-                            "value": "MeterA"
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x10"
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "header_test",
-                                "field48"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "actionA",
-            "id": 2,
+            "id": 1,
             "runtime_data": [
                 {
                     "name": "param",
@@ -212,6 +185,33 @@
                         {
                             "type": "runtime_data",
                             "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "_MeterAAction",
+            "id": 2,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "execute_meter",
+                    "parameters": [
+                        {
+                            "type": "meter_array",
+                            "value": "MeterA"
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x10"
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "header_test",
+                                "field48"
+                            ]
                         }
                     ]
                 }
@@ -251,6 +251,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": true,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -277,6 +278,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "lpm",
@@ -301,6 +303,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "ternary",
@@ -325,6 +328,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -349,6 +353,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -380,6 +385,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -409,6 +415,7 @@
                     "act_prof_name": "ActProf",
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -462,6 +469,7 @@
                     },
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -488,6 +496,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -512,6 +521,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",

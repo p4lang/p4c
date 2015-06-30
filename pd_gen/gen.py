@@ -82,6 +82,8 @@ class Table:
         self.actions = {}
         self.key = []
         self.default_action = None
+        self.with_counters = False
+        self.support_timeout = False
 
         TABLES[name] = self
 
@@ -167,15 +169,17 @@ def load_json(json_src):
                 table.match_type = MatchType.from_str(j_table["match_type"])
                 table.type_ = TableType.from_str(j_table["type"])
                 table.with_counters = j_table["with_counters"]
+                table.support_timeout = j_table["support_timeout"]
                 assert(type(table.with_counters) is bool)
+                assert(type(table.support_timeout) is bool)
                 for action in j_table["actions"]:
                     table.actions[action] = ACTIONS[action]
                 for j_key in j_table["key"]:
                     target = j_key["target"]
                     match_type = MatchType.from_str(j_key["match_type"])
                     if match_type == MatchType.VALID:
-                        field_name = target
-                        bitwidth = -1
+                        field_name = target + "_valid"
+                        bitwidth = 1
                     else:
                         field_name = ".".join(target)
                         header_type = get_header_type(target[0],

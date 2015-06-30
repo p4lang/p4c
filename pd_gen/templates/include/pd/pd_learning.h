@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _P4_PD_TABLES_H_
-#define _P4_PD_TABLES_H_
+#ifndef _P4_PD_LEARNING_H_
+#define _P4_PD_LEARNING_H_
 
 #include "pd/pd_types.h"
 #include "pd/pd_common.h"
@@ -27,6 +27,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+p4_pd_status_t ${pd_prefix}set_learning_timeout
+(
+ p4_pd_sess_hdl_t sess_hdl,
+ uint8_t device_id,
+ uint64_t usecs
+);
 
 //:: for lq_name, lq in learn_quantas.items():
 //::   lq_name = get_c_name(lq_name)

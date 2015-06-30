@@ -268,8 +268,9 @@ class RuntimeHandler : virtual public RuntimeIf {
   }
 
   BmMcL2Handle bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) {
-    // Your implementation goes here
-    printf("bm_mc_l2_node_create\n");
+    std::cout << "bm_mc_l2_node_create" << std::endl
+	      << l1_handle << std::endl
+	      << port_map.substr(0, 16) << std::endl;
     return 0;
   }
 

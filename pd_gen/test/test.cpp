@@ -20,12 +20,15 @@
 
 #include <iostream>
 
+#include <cstring>
+
 #include <thrift_endpoint.h>
 
 #include <pd/pd_tables.h>
 #include <pd/pd_meters.h>
 #include <pd/pd_static.h>
 #include <pd/pd.h>
+#include <pd/pd_pre.h>
 
 #define DEVICE_THRIFT_PORT 9090
 
@@ -33,19 +36,19 @@ int main() {
   start_server();
 
   p4_pd_init();
+
+  p4_pd_dev_target_t dev_tgt = {0, 0xFF};
+  p4_pd_entry_hdl_t entry_hdl;
+
+  /* P4 dependent initialization */
+  p4_pd_test_init(NULL);
+  p4_pd_test_assign_device(dev_tgt.device_id, DEVICE_THRIFT_PORT);
   
   p4_pd_sess_hdl_t sess_hdl;
   p4_pd_client_init(&sess_hdl, 16);
   
   std::cerr << "session handle is " << sess_hdl << std::endl;
-  
-  p4_pd_dev_target_t dev_tgt = {0, 0xFF};
-  p4_pd_entry_hdl_t entry_hdl;
-
-  /* P4 dependent initialization */
-  p4_pd_test_init(sess_hdl, NULL);
-  p4_pd_test_assign_device(sess_hdl, dev_tgt.device_id, DEVICE_THRIFT_PORT);
-  
+    
   /* TEST BEGIN */
   
   p4_pd_test_actionA_action_spec actionA_action_spec =
@@ -141,9 +144,18 @@ int main() {
 				    cir_kbps, cburst_kbits,
 				    pir_kbps, pburst_kbits);
 
+  /* multicast */
+  
+  uint8_t port_map[PRE_PORTS_MAX];
+  std::memset(port_map, 0, sizeof(port_map));
+  port_map[0] = 1;
+  port_map[1] = (1 << 5) + (1 << 2);
+  mc_l2_node_hdl_t l2_hdl;
+  mc_l2_node_create(sess_hdl, dev_tgt.device_id, 21, port_map, NULL, &l2_hdl);
+
   /* END TEST */
 
-  p4_pd_test_remove_device(sess_hdl, dev_tgt.device_id);
+  p4_pd_test_remove_device(dev_tgt.device_id);
   
   return 0;
 }

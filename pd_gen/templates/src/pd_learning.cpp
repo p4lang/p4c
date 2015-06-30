@@ -106,6 +106,17 @@ static void learning_listener(nn::socket s) {
 
 extern "C" {
 
+p4_pd_status_t ${pd_prefix}set_learning_timeout
+(
+ p4_pd_sess_hdl_t sess_hdl,
+ uint8_t device_id,
+ uint64_t usecs
+) {
+  // TODO
+  (void) sess_hdl; (void) device_id; (void) usecs;
+  return 0;
+}
+
 //:: for lq_name, lq in learn_quantas.items():
 //::   lq_name = get_c_name(lq_name)
 

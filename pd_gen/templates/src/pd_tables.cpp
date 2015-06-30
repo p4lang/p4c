@@ -130,6 +130,9 @@ extern "C" {
 //::     if has_action_spec:
 //::       params += [pd_prefix + a_name + "_action_spec_t *action_spec"]
 //::     #endif
+//::     if t.support_timeout:
+//::       params += ["uint32_t ttl"]
+//::     #endif
 //::     params += ["p4_pd_entry_hdl_t *entry_hdl"]
 //::     param_str = ",\n ".join(params)
 //::     name = pd_prefix + t_name + "_table_add_with_" + a_name
@@ -138,6 +141,9 @@ ${name}
 (
  ${param_str}
 ) {
+//::     if t.support_timeout:
+  (void) ttl;
+//::     #endif
   assert(my_devices[dev_tgt.device_id]);
 //::     if not has_match_spec:
   std::vector<BmMatchParam> match_key;
@@ -575,6 +581,42 @@ ${name}
   return 0;
 }
 
+//:: #endfor
+
+//:: for t_name, t in tables.items():
+//:: if not t.support_timeout: continue
+//::   p4_pd_enable_hit_state_scan = "_".join([pd_prefix[:-1], t_name, "enable_hit_state_scan"])
+//::   p4_pd_get_hit_state = "_".join([pd_prefix[:-1], t_name, "get_hit_state"])
+//::   p4_pd_set_entry_ttl = "_".join([pd_prefix[:-1], t_name, "set_entry_ttl"])
+//::   p4_pd_enable_entry_timeout = "_".join([pd_prefix[:-1], t_name, "enable_entry_timeout"])
+p4_pd_status_t
+${p4_pd_enable_hit_state_scan}(p4_pd_sess_hdl_t sess_hdl, uint32_t scan_interval) {
+  // This function is a no-op. Needed for real hardware.
+  (void)sess_hdl;
+  (void)scan_interval;
+  return 0;
+}
+
+p4_pd_status_t
+${p4_pd_get_hit_state}(p4_pd_sess_hdl_t sess_hdl, p4_pd_entry_hdl_t entry_hdl, p4_pd_hit_state_t *hit_state) {
+  (void) sess_hdl; (void) entry_hdl; (void) hit_state;
+  return 0;
+}
+
+p4_pd_status_t
+${p4_pd_set_entry_ttl}(p4_pd_sess_hdl_t sess_hdl, p4_pd_entry_hdl_t entry_hdl, uint32_t ttl) {
+  (void) sess_hdl; (void) entry_hdl; (void) ttl;
+  return 0;
+}
+
+p4_pd_status_t
+${p4_pd_enable_entry_timeout}(p4_pd_sess_hdl_t sess_hdl,
+			      p4_pd_notify_timeout_cb cb_fn,
+			      uint32_t max_ttl,
+			      void *client_data) {
+  (void) sess_hdl; (void) cb_fn; (void) max_ttl; (void) client_data;
+  return 0;
+}
 //:: #endfor
 
 }

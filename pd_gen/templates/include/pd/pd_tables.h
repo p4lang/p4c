@@ -50,6 +50,9 @@ extern "C" {
 //::     if has_action_spec:
 //::       params += [pd_prefix + a_name + "_action_spec_t *action_spec"]
 //::     #endif
+//::     if t.support_timeout:
+//::       params += ["uint32_t ttl"]
+//::     #endif
 //::     params += ["p4_pd_entry_hdl_t *entry_hdl"]
 //::     param_str = ",\n ".join(params)
 //::     name = pd_prefix + t_name + "_table_add_with_" + a_name
@@ -320,6 +323,28 @@ ${name}
  p4_pd_dev_target_t dev_tgt
 );
 
+//:: #endfor
+
+//:: for t_name, t in tables.items():
+//:: if not t.support_timeout: continue
+//::   p4_pd_enable_hit_state_scan = "_".join([pd_prefix[:-1], t_name, "enable_hit_state_scan"])
+//::   p4_pd_get_hit_state = "_".join([pd_prefix[:-1], t_name, "get_hit_state"])
+//::   p4_pd_set_entry_ttl = "_".join([pd_prefix[:-1], t_name, "set_entry_ttl"])
+//::   p4_pd_enable_entry_timeout = "_".join([pd_prefix[:-1], t_name, "enable_entry_timeout"])
+p4_pd_status_t
+${p4_pd_enable_hit_state_scan}(p4_pd_sess_hdl_t sess_hdl, uint32_t scan_interval);
+
+p4_pd_status_t
+${p4_pd_get_hit_state}(p4_pd_sess_hdl_t sess_hdl, p4_pd_entry_hdl_t entry_hdl, p4_pd_hit_state_t *hit_state);
+
+p4_pd_status_t
+${p4_pd_set_entry_ttl}(p4_pd_sess_hdl_t sess_hdl, p4_pd_entry_hdl_t entry_hdl, uint32_t ttl);
+
+p4_pd_status_t
+${p4_pd_enable_entry_timeout}(p4_pd_sess_hdl_t sess_hdl,
+			      p4_pd_notify_timeout_cb cb_fn,
+			      uint32_t max_ttl,
+			      void *client_data);
 //:: #endfor
 
 #ifdef __cplusplus
