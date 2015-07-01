@@ -102,6 +102,8 @@ public:
 
   void reset(); // mark all headers as invalid
 
+  void reset_header_stacks();
+
   PHV(const PHV &other) = delete;
   PHV &operator=(const PHV &other) = delete;
 

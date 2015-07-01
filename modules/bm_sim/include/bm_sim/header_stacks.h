@@ -134,6 +134,10 @@ public:
     return headers[next];
   }
 
+  void reset() {
+    next = 0;
+  }
+
 private:
   // To be called by PHV class
   void set_next_header(Header &h) { 

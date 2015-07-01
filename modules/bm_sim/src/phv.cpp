@@ -21,9 +21,11 @@
 #include "bm_sim/phv.h"
 
 void PHV::reset() {
-  for(std::vector<Header>::iterator it = headers.begin();
-      it != headers.end();
-      it++) {
-    (*it).mark_invalid();
-  }
+  for(auto &h : headers)
+    h.mark_invalid();
+}
+
+void PHV::reset_header_stacks() {
+  for(auto &hs : header_stacks)
+    hs.reset();
 }

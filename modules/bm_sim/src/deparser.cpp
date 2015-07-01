@@ -46,6 +46,7 @@ void Deparser::deparse(Packet *pkt) const {
       header.mark_invalid();
     }
   }
+  phv->reset_header_stacks();
   ELOGGER->deparser_done(*pkt, *this);
 }
 
