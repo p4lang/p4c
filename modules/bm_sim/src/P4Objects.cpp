@@ -639,6 +639,20 @@ void P4Objects::init_objects(std::istream &is) {
 
     learn_engine->list_init(list_id);
   }
+
+  // force arith fields
+
+  if(cfg_root.isMember("force_arith")) {
+
+    const Json::Value &cfg_force_arith = cfg_root["force_arith"];
+
+    for (const auto &cfg_field : cfg_force_arith) {
+
+      const auto field = field_info(cfg_field[0].asString(),
+				    cfg_field[1].asString());
+      phv_factory.enable_field_arith(std::get<0>(field), std::get<1>(field));
+    }
+  }
 }
 
 void P4Objects::destroy_objects() {
