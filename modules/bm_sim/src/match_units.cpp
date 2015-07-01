@@ -104,6 +104,8 @@ MatchUnitExact<V>::add_entry(
     }
   }
 
+  assert(new_key.size() == this->nbytes_key);
+
   MatchErrorCode status = this->get_and_set_handle(handle);
   if(status != MatchErrorCode::SUCCESS) return status;
   
@@ -197,6 +199,8 @@ MatchUnitLPM<V>::add_entry(
   assert(lpm_param && "no lpm param in match key");
   new_key.append(lpm_param->key);
   prefix_length += lpm_param->prefix_length;
+
+  assert(new_key.size() == this->nbytes_key);
 
   MatchErrorCode status = this->get_and_set_handle(handle);
   if(status != MatchErrorCode::SUCCESS) return status;
@@ -330,6 +334,9 @@ MatchUnitTernary<V>::add_entry(
       break;
     }
   }
+
+  assert(new_key.size() == this->nbytes_key);
+  assert(new_mask.size() == this->nbytes_key);
 
   MatchErrorCode status = this->get_and_set_handle(handle);
   if(status != MatchErrorCode::SUCCESS) return status;

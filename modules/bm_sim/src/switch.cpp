@@ -47,7 +47,7 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
   OptionsParser parser;
   parser.parse(argc, argv);
   init_objects(parser.config_file_path);
-  int port_num = 1;
+  int port_num = 0;
   for(const auto &iface : parser.ifaces) {
     std::cout << "Adding interface " << iface
 	      << " as port " << port_num << std::endl;

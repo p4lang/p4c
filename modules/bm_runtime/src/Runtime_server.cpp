@@ -104,7 +104,7 @@ class RuntimeHandler : virtual public RuntimeIf {
 	break;
       case BmMatchParamType::type::VALID:
 	params.emplace_back(MatchKeyParam::Type::VALID,
-			    bm_param.valid.key ? "\x01" : "\x00");
+			    bm_param.valid.key ? std::string("\x01", 1) : std::string("\x00", 1));
 	break;
       default:
 	assert(0 && "wrong type");
