@@ -15,6 +15,8 @@ srcs_CXX:=
 
 include libpd.mk
 
+COMMON_FLAGS += $(MAKE_FLAGS) # from command line
+
 CFLAGS += $(COMMON_FLAGS)
 CPPFLAGS += $(COMMON_FLAGS)
 

@@ -88,7 +88,10 @@ int main() {
                                                &actionA_action_spec,
                                                &entry_hdl);
   
-  p4_pd_test_ExactOneNA_match_spec_t ExactOneNA_match_spec = {0xdebc0a};
+  /* we want the 20-bit key to be abcde (in network order)
+     which means the 4 bytes are 00 0a bc de (in network order)
+     which means the int is de bc 0a 00 (in host order) */
+  p4_pd_test_ExactOneNA_match_spec_t ExactOneNA_match_spec = {0xdebc0a00};
   p4_pd_test_ExactOneNA_table_add_with_actionA(sess_hdl, dev_tgt,
                                                &ExactOneNA_match_spec,
                                                &actionA_action_spec,

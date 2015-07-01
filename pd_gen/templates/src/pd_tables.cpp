@@ -27,15 +27,55 @@
 
 #define PD_DEBUG 1
 
-#define HOST_BYTE_ORDER_CALLER 1
+// default is disbaled
+// #define HOST_BYTE_ORDER_CALLER
 
 extern pd_conn_mgr_t *conn_mgr_state;
 extern int *my_devices;
 
+namespace {
+
+template <int L>
+std::string string_from_field(char *field) {
+  return std::string((char *) field, L);
+}
+
+template <>
+std::string string_from_field<1>(char *field) {
+  return std::string(field, 1);
+}
+
+template <>
+std::string string_from_field<2>(char *field) {
+  uint16_t tmp = *(uint16_t *) field;
+#ifdef HOST_BYTE_ORDER_CALLER
+  tmp = ntohs(tmp);
+#endif
+  return std::string((char *) &tmp, 2);
+}
+
+template <>
+std::string string_from_field<3>(char *field) {
+  uint32_t tmp = *(uint32_t *) field;
+#ifdef HOST_BYTE_ORDER_CALLER
+  tmp = ntohl(tmp);
+#endif
+  return std::string(((char *) &tmp) + 1, 3);
+}
+
+template <>
+std::string string_from_field<4>(char *field) {
+  uint32_t tmp = *(uint32_t *) field;
+#ifdef HOST_BYTE_ORDER_CALLER
+  tmp = ntohl(tmp);
+#endif
+  return std::string((char *) &tmp, 4);
+}
+
 //:: for t_name, t in tables.items():
 //::   t_name = get_c_name(t_name)
 //::   if not t.key: continue
-static std::vector<BmMatchParam> build_key_${t_name} (
+std::vector<BmMatchParam> build_key_${t_name} (
     ${pd_prefix}${t_name}_match_spec_t *match_spec
 ) {
   std::vector<BmMatchParam> key;
@@ -53,21 +93,21 @@ static std::vector<BmMatchParam> build_key_${t_name} (
 //::     field_name = get_c_name(field_name)
 //::     width = bits_to_bytes(field_bw)
 //::     if field_match_type == MatchType.EXACT:
-  param_exact.key = std::string((char *) &(match_spec->${field_name}), ${width});
+  param_exact.key = string_from_field<${width}>((char *) &(match_spec->${field_name}));
   param = BmMatchParam();
   param.type = BmMatchParamType::type::EXACT;
   param.__set_exact(param_exact); // does a copy of param_exact
   key.push_back(std::move(param));
 //::     elif field_match_type == MatchType.LPM:
-  param_lpm.key = std::string((char *) &(match_spec->${field_name}), ${width});
+  param_lpm.key = string_from_field<${width}>((char *) &(match_spec->${field_name}));
   param_lpm.prefix_length = match_spec->${field_name}_prefix_length;
   param = BmMatchParam();
   param.type = BmMatchParamType::type::LPM;
   param.__set_lpm(param_lpm); // does a copy of param_lpm
   key.push_back(std::move(param));
 //::     elif field_match_type == MatchType.TERNARY:
-  param_ternary.key = std::string((char *) &(match_spec->${field_name}), ${width});
-  param_ternary.mask = std::string((char *) &(match_spec->${field_name}_mask), ${width});
+  param_ternary.key = string_from_field<${width}>((char *) &(match_spec->${field_name}));
+  param_ternary.mask = string_from_field<${width}>((char *) &(match_spec->${field_name}_mask));
   param = BmMatchParam();
   param.type = BmMatchParamType::type::TERNARY;
   param.__set_ternary(param_ternary); // does a copy of param_ternary
@@ -93,18 +133,20 @@ static std::vector<BmMatchParam> build_key_${t_name} (
 //::   a_name = get_c_name(a_name)
 //::   if not a.runtime_data: continue
 //::   action_params = gen_action_params(a.runtime_data)
-static std::vector<std::string> build_action_data_${a_name} (
+std::vector<std::string> build_action_data_${a_name} (
     ${pd_prefix}${a_name}_action_spec_t *action_spec
 ) {
   std::vector<std::string> action_data;
 //::   for name, width in action_params:
 //::     name = get_c_name(name)
-  action_data.push_back(std::string((char *) &(action_spec->${name}), ${width}));
+  action_data.push_back(string_from_field<${width}>((char *) &(action_spec->${name})));
 //::   #endfor
   return action_data;
 }
 
 //:: #endfor
+
+}
 
 extern "C" {
 
