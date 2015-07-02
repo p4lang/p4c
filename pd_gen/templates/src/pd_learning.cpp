@@ -52,6 +52,56 @@ struct LearnState {
 
 static LearnState *device_state[NUM_DEVICES];
 
+namespace {
+
+template <int L>
+void bytes_to_field(const char *bytes, char *field) {
+  std::memcpy(field, bytes, L);
+}
+
+template <>
+void bytes_to_field<1>(const char *bytes, char *field) {
+  field[0] = bytes[0];
+}
+
+template <>
+void bytes_to_field<2>(const char *bytes, char *field) {
+#ifdef HOST_BYTE_ORDER_CALLER
+  field[0] = bytes[1];
+  field[1] = bytes[0];
+#else
+  field[0] = bytes[0];
+  field[1] = bytes[1];
+#endif
+}
+
+template <>
+void bytes_to_field<3>(const char *bytes, char *field) {
+#ifdef HOST_BYTE_ORDER_CALLER
+  field[0] = bytes[2];
+  field[1] = bytes[1];
+  field[2] = bytes[0];
+  field[3] = '\0';
+#else
+  field[0] = '\0';
+  std::memcpy(field + 1, bytes, 3);
+#endif
+}
+
+template <>
+void bytes_to_field<4>(const char *bytes, char *field) {
+#ifdef HOST_BYTE_ORDER_CALLER
+  field[0] = bytes[3];
+  field[1] = bytes[2];
+  field[2] = bytes[1];
+  field[3] = bytes[0];
+#else
+  std::memcpy(field, bytes, 4);
+#endif
+}
+
+}
+
 typedef struct {
   int switch_id;
   int list_id;
@@ -59,7 +109,44 @@ typedef struct {
   unsigned int num_samples;
 } __attribute__((packed)) learn_hdr_t;
 
-static void learning_listener(nn::socket s) {
+
+//:: for lq_name, lq in learn_quantas.items():
+//::   lq_name = get_c_name(lq_name)
+void ${lq_name}_handle_learn_msg(const learn_hdr_t &hdr, const char *data) {
+  LearnState *state = device_state[hdr.switch_id];
+  auto lock = std::unique_lock<std::mutex>(state->${lq_name}_mutex);
+  ${pd_prefix}${lq_name}_digest_msg_t msg;
+  msg.dev_tgt.device_id = static_cast<uint8_t>(hdr.switch_id);
+  msg.num_entries = hdr.num_samples;
+  std::unique_ptr<char []> buf(
+    new char[hdr.num_samples * sizeof(${pd_prefix}${lq_name}_digest_entry_t)]
+  );
+  char *buf_ = buf.get();
+  const char *data_ = data;
+  for(size_t i = 0; i < hdr.num_samples; i++){
+//::   for name, bit_width in lq.fields:
+//::     c_name = get_c_name(name)
+//::     width = (bit_width + 7) / 8
+//::     field_width = width if width != 3 else 4 
+    bytes_to_field<${width}>(data_, buf_);
+    data_ += ${width};
+    buf_ += ${field_width};
+//::   #endfor	
+  }
+  msg.entries = (${pd_prefix}${lq_name}_digest_entry_t *) buf.get();
+  msg.buffer_id = hdr.buffer_id;
+  for(const auto &it : state->${lq_name}_clients) {
+    it.second.cb_fn(it.first, &msg, it.second.cb_cookie);
+  }
+}
+
+//:: #endfor
+
+static void learning_listener(const char *learning_addr) {
+  nn::socket s(AF_SP, NN_SUB);
+  s.setsockopt(NN_SUB, NN_SUB_SUBSCRIBE, "", 0);
+  s.connect(learning_addr);
+
   struct nn_msghdr msghdr;
   struct nn_iovec iov[2];
   learn_hdr_t learn_hdr;
@@ -72,29 +159,14 @@ static void learning_listener(nn::socket s) {
   msghdr.msg_iov = iov;
   msghdr.msg_iovlen = 2;
 
-  LearnState *state;
-  std::unique_lock<std::mutex> lock;
-
   while(s.recvmsg(&msghdr, 0) >= 0) {
     std::cout << "I received " << learn_hdr.num_samples << " samples"
 	      << std::endl;
-
-    // right now I am just sending the data as is, this is wrong for those damn
-    // 3 byte fields which are padded to 4 bytes in the PD
     switch(learn_hdr.list_id) {
 //:: for lq_name, lq in learn_quantas.items():
 //::   lq_name = get_c_name(lq_name)
     case ${lq.id_}:
-      state = device_state[learn_hdr.switch_id];
-      lock = std::unique_lock<std::mutex>(state->${lq_name}_mutex);
-      ${pd_prefix}${lq_name}_digest_msg_t ${lq_name}_msg;
-      ${lq_name}_msg.dev_tgt.device_id = (uint8_t) learn_hdr.switch_id;
-      ${lq_name}_msg.num_entries = learn_hdr.num_samples;
-      ${lq_name}_msg.entries = (${pd_prefix}${lq_name}_digest_entry_t *) data;
-      ${lq_name}_msg.buffer_id = learn_hdr.buffer_id;
-      for(const auto &it : state->${lq_name}_clients) {
-	it.second.cb_fn(it.first, &${lq_name}_msg, it.second.cb_cookie);
-      }
+      ${lq_name}_handle_learn_msg(learn_hdr, data);
       break;
 //:: #endfor
     default:
@@ -175,11 +247,7 @@ p4_pd_status_t ${pd_prefix}learning_remove_device(int dev_id) {
 }
 
 p4_pd_status_t ${pd_prefix}start_learning_listener(const char *learning_addr) {
-  nn::socket s(AF_SP, NN_SUB);
-  s.setsockopt(NN_SUB, NN_SUB_SUBSCRIBE, "", 0);
-  s.connect(learning_addr);
-
-  std::thread t(learning_listener, std::move(s));
+  std::thread t(learning_listener, learning_addr);
 
   t.detach();
 

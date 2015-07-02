@@ -181,7 +181,7 @@ namespace nn
 	return rc;
       }
 
-      void operator = (socket&&);
+      socket &operator=(socket&&) = default;
       socket (socket&&) = default;
 
     private:
