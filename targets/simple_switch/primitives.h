@@ -79,7 +79,7 @@ REGISTER_PRIMITIVE(bit_and);
 
 class drop : public ActionPrimitive<> {
   void operator ()() {
-    get_field("standard_metadata.egress_port").set(0);
+    get_field("standard_metadata.egress_spec").set(511);
   }
 };
 

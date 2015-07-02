@@ -120,7 +120,7 @@ void SimpleSwitch::pipeline_thread() {
       phv->get_field("intrinsic_metadata.learn_id").set(0);
     }
 
-    if(egress_port == 0 && mgid == 0) {
+    if(egress_port == 511 && mgid == 0) {
       SIMPLELOG << "dropping packet\n";
       continue;
     }

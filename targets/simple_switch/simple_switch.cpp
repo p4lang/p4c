@@ -178,6 +178,8 @@ void SimpleSwitch::ingress_thread() {
     egress_port = egress_spec;
     SIMPLELOG << "egress port is " << egress_port << std::endl;    
 
+    // TODO: set egress_port
+
     if(egress_port == 511) {  // drop packet
       SIMPLELOG << "dropping packet\n";
       continue;

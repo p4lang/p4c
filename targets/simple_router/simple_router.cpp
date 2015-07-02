@@ -113,7 +113,7 @@ void SimpleSwitch::pipeline_thread() {
     int egress_port = phv->get_field("standard_metadata.egress_port").get_int();
     SIMPLELOG << "egress port is " << egress_port << std::endl;    
 
-    if(egress_port == 0) {
+    if(egress_port == 511) {
       SIMPLELOG << "dropping packet\n";
     }
     else {
