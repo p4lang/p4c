@@ -113,7 +113,9 @@ public:
   void copy_headers(const PHV &src) {
     for(unsigned int h = 0; h < headers.size(); h++) {
       headers[h].valid = src.headers[h].valid;
-      if(headers[h].valid) headers[h].fields = src.headers[h].fields;
+      headers[h].metadata = src.headers[h].metadata;
+      if(headers[h].valid || headers[h].metadata)
+	headers[h].fields = src.headers[h].fields;
     }
   }
 
