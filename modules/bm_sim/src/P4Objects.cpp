@@ -97,6 +97,7 @@ void P4Objects::init_objects(std::istream &is) {
     const string header_name = cfg_header["name"].asString();
     const string header_type_name = cfg_header["header_type"].asString();
     header_id_t header_id = cfg_header["id"].asInt();
+    bool metadata = cfg_header["metadata"].asBool();
 
     HeaderType *header_type = get_header_type(header_type_name);
     header_to_type_map[header_name] = header_type;
@@ -104,7 +105,7 @@ void P4Objects::init_objects(std::istream &is) {
     // std::set<int> arith_offsets =
     //   build_arith_offsets(cfg_root["actions"], header_name);
 
-    phv_factory.push_back_header(header_name, header_id, *header_type);
+    phv_factory.push_back_header(header_name, header_id, *header_type, metadata);
     phv_factory.disable_all_field_arith(header_id);
     add_header_id(header_name, header_id);
   }

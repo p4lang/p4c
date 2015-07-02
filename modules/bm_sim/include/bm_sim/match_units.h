@@ -84,8 +84,19 @@ struct MatchKeyBuilder
       key.push_back(phv.get_header(h).is_valid() ? '\x01' : '\x00');
     }
     for(const auto &p : fields) {
-      const Field &field = phv.get_field(p.first, p.second);
-      key.append(field.get_bytes());
+      // we do not reset all fields to 0 in between packets
+      // so I need this hack if the P4 programmer assumed that:
+      // field not valid => field set to 0
+      // const Field &field = phv.get_field(p.first, p.second);
+      // key.append(field.get_bytes());
+      const Header &header = phv.get_header(p.first);
+      const Field &field = header[p.second];
+      if(header.is_valid()) {
+	key.append(field.get_bytes());
+      }
+      else {
+	key.append(std::string(field.get_nbytes(), '\x00'));
+      }
     }
   }
 

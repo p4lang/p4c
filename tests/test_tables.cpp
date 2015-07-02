@@ -85,7 +85,10 @@ protected:
 
   Packet get_pkt(int length) {
     // dummy packet, won't be parsed
-    return Packet(0, 0, 0, length, PacketBuffer(length * 2));
+    Packet packet(0, 0, 0, length, PacketBuffer(length * 2));
+    packet.get_phv()->get_header(testHeader1).mark_valid();
+    packet.get_phv()->get_header(testHeader2).mark_valid();
+    return packet;
   }
 
   virtual void SetUp() {
@@ -349,7 +352,9 @@ TYPED_TEST(TableSizeOne, Valid) {
   Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
   f.set("0xaba");
   Header &h2 = pkt.get_phv()->get_header(this->testHeader2);
-  ASSERT_FALSE(h2.is_valid());
+  EXPECT_TRUE(h2.is_valid());
+  
+  h2.mark_invalid();
 
   this->table_w_valid->lookup(pkt, &hit, &lookup_handle);
   ASSERT_FALSE(hit);
@@ -412,7 +417,10 @@ protected:
 
   Packet get_pkt(int length) {
     // dummy packet, won't be parsed
-    return Packet(0, 0, 0, length, PacketBuffer(length * 2));
+    Packet packet(0, 0, 0, length, PacketBuffer(length * 2));
+    packet.get_phv()->get_header(testHeader1).mark_valid();
+    packet.get_phv()->get_header(testHeader2).mark_valid();
+    return packet;
   }
 
   virtual void SetUp() {
@@ -469,7 +477,7 @@ TEST_F(TableIndirect, AddEntry) {
 }
 
 TEST_F(TableIndirect, DeleteMember) {
-  std::string key("\x0a\ba");
+  std::string key("\x0a\xba");
   MatchErrorCode rc;
   entry_handle_t handle;
   mbr_hdl_t mbr;
@@ -668,7 +676,10 @@ protected:
 
   Packet get_pkt(int length) {
     // dummy packet, won't be parsed
-    return Packet(0, 0, 0, length, PacketBuffer(length * 2));
+    Packet packet(0, 0, 0, length, PacketBuffer(length * 2));
+    packet.get_phv()->get_header(testHeader1).mark_valid();
+    packet.get_phv()->get_header(testHeader2).mark_valid();
+    return packet;
   }
 
   virtual void SetUp() {

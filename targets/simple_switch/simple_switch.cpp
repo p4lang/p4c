@@ -159,6 +159,7 @@ void SimpleSwitch::ingress_thread() {
 
     // MULTICAST
     if(mgid != 0) {
+      SIMPLELOG << "multicast\n";
       const auto pre_out = pre->replicate({mgid});
       for(const auto &out : pre_out) {
 	egress_port = out.egress_port;

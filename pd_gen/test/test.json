@@ -81,17 +81,20 @@
         {
             "name": "standard_metadata",
             "id": 0,
-            "header_type": "standard_metadata_t"
+            "header_type": "standard_metadata_t",
+            "metadata": true
         },
         {
             "name": "header_test",
             "id": 1,
-            "header_type": "header_test_t"
+            "header_type": "header_test_t",
+            "metadata": false
         },
         {
             "name": "header_test_1",
             "id": 2,
-            "header_type": "header_test_t"
+            "header_type": "header_test_t",
+            "metadata": false
         }
     ],
     "header_stacks": [],
@@ -135,36 +138,8 @@
     ],
     "actions": [
         {
-            "name": "actionB",
-            "id": 0,
-            "runtime_data": [
-                {
-                    "name": "param",
-                    "bitwidth": 8
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "header_test",
-                                "field8"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "actionA",
-            "id": 1,
+            "id": 0,
             "runtime_data": [
                 {
                     "name": "param",
@@ -192,7 +167,7 @@
         },
         {
             "name": "_MeterAAction",
-            "id": 2,
+            "id": 1,
             "runtime_data": [],
             "primitives": [
                 {
@@ -212,6 +187,34 @@
                                 "header_test",
                                 "field48"
                             ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "actionB",
+            "id": 2,
+            "runtime_data": [
+                {
+                    "name": "param",
+                    "bitwidth": 8
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "header_test",
+                                "field8"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
                         }
                     ]
                 }
@@ -602,5 +605,39 @@
                 }
             ]
         }
+    ],
+    "force_arith": [
+        [
+            "standard_metadata",
+            "ingress_port"
+        ],
+        [
+            "standard_metadata",
+            "packet_length"
+        ],
+        [
+            "standard_metadata",
+            "egress_spec"
+        ],
+        [
+            "standard_metadata",
+            "egress_port"
+        ],
+        [
+            "standard_metadata",
+            "egress_instance"
+        ],
+        [
+            "standard_metadata",
+            "instance_type"
+        ],
+        [
+            "standard_metadata",
+            "clone_spec"
+        ],
+        [
+            "standard_metadata",
+            "_padding"
+        ]
     ]
 }

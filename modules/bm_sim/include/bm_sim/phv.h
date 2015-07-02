@@ -125,12 +125,13 @@ private:
       const string &header_name,
       header_id_t header_index,
       const HeaderType &header_type,
-      const std::set<int> &arith_offsets
+      const std::set<int> &arith_offsets,
+      const bool metadata
   ) {
     assert(header_index < (int) capacity);
     assert(header_index == (int) headers.size());
     headers.push_back(
-        Header(header_name, header_index, header_type, arith_offsets)
+      Header(header_name, header_index, header_type, arith_offsets, metadata)
     );
 
     headers_map.emplace(header_name, get_header(header_index));
@@ -174,10 +175,11 @@ private:
     header_id_t index;
     const HeaderType &header_type;
     std::set<int> arith_offsets{};
+    bool metadata;
 
     HeaderDesc(const std::string &name, const header_id_t index,
-	       const HeaderType &header_type)
-      : name(name), index(index), header_type(header_type) {
+	       const HeaderType &header_type, const bool metadata)
+      : name(name), index(index), header_type(header_type), metadata(metadata) {
       for(int offset = 0; offset < header_type.get_num_fields(); offset++) {
 	arith_offsets.insert(offset);
       }
@@ -199,8 +201,9 @@ private:
 public:
   void push_back_header(const string &header_name,
 			const header_id_t header_index,
-			const HeaderType &header_type) {
-    HeaderDesc desc = HeaderDesc(header_name, header_index, header_type);
+			const HeaderType &header_type,
+			const bool metadata = false) {
+    HeaderDesc desc = HeaderDesc(header_name, header_index, header_type, metadata);
     // cannot use operator[] because it requires default constructibility
     header_descs.insert(std::make_pair(header_index, desc));
   }
@@ -242,7 +245,8 @@ public:
     for(const auto &e : header_descs) {
       const HeaderDesc &desc = e.second;
       phv->push_back_header(desc.name, desc.index,
-			    desc.header_type, desc.arith_offsets);
+			    desc.header_type, desc.arith_offsets,
+			    desc.metadata);
     }
 
     for(const auto &e : header_stack_descs) {

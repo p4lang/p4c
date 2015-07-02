@@ -125,22 +125,26 @@
         {
             "name": "standard_metadata",
             "id": 0,
-            "header_type": "standard_metadata_t"
+            "header_type": "standard_metadata_t",
+            "metadata": true
         },
         {
             "name": "ethernet",
             "id": 1,
-            "header_type": "ethernet_t"
+            "header_type": "ethernet_t",
+            "metadata": false
         },
         {
             "name": "ipv4",
             "id": 2,
-            "header_type": "ipv4_t"
+            "header_type": "ipv4_t",
+            "metadata": false
         },
         {
             "name": "routing_metadata",
             "id": 3,
-            "header_type": "routing_metadata_t"
+            "header_type": "routing_metadata_t",
+            "metadata": true
         }
     ],
     "header_stacks": [],
@@ -238,8 +242,19 @@
     "meter_arrays": [],
     "actions": [
         {
-            "name": "set_nhop",
+            "name": "_drop",
             "id": 0,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "drop",
+                    "parameters": []
+                }
+            ]
+        },
+        {
+            "name": "set_nhop",
+            "id": 1,
             "runtime_data": [
                 {
                     "name": "nhop_ipv4",
@@ -303,7 +318,7 @@
         },
         {
             "name": "rewrite_mac",
-            "id": 1,
+            "id": 2,
             "runtime_data": [
                 {
                     "name": "smac",
@@ -326,17 +341,6 @@
                             "value": 0
                         }
                     ]
-                }
-            ]
-        },
-        {
-            "name": "_drop",
-            "id": 2,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "drop",
-                    "parameters": []
                 }
             ]
         },
@@ -382,6 +386,7 @@
                     "type": "simple",
                     "max_size": 1024,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "lpm",
@@ -408,6 +413,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -483,6 +489,7 @@
                     "type": "simple",
                     "max_size": 256,
                     "with_counters": false,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
@@ -603,5 +610,39 @@
             "type": "ipv4"
         }
     ],
-    "learn_lists": []
+    "learn_lists": [],
+    "force_arith": [
+        [
+            "standard_metadata",
+            "ingress_port"
+        ],
+        [
+            "standard_metadata",
+            "packet_length"
+        ],
+        [
+            "standard_metadata",
+            "egress_spec"
+        ],
+        [
+            "standard_metadata",
+            "egress_port"
+        ],
+        [
+            "standard_metadata",
+            "egress_instance"
+        ],
+        [
+            "standard_metadata",
+            "instance_type"
+        ],
+        [
+            "standard_metadata",
+            "clone_spec"
+        ],
+        [
+            "standard_metadata",
+            "_padding"
+        ]
+    ]
 }
