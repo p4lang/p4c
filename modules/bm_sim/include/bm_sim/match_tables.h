@@ -24,6 +24,7 @@
 #include <atomic>
 #include <vector>
 #include <type_traits>
+#include <iostream>
 
 #include "match_units.h"
 #include "actions.h"
@@ -44,6 +45,10 @@ public:
 
     ActionEntry(ActionFnEntry action_fn, const ControlFlowNode *next_node)
       : action_fn(std::move(action_fn)), next_node(next_node) { }
+
+    void dump(std::ostream &stream) const {
+      action_fn.dump(stream);
+    }
 
     ActionEntry(const ActionEntry &other) = delete;
     ActionEntry &operator=(const ActionEntry &other) = delete;
@@ -71,6 +76,8 @@ public:
   virtual size_t get_num_entries() const = 0;
 
   virtual bool is_valid_handle(entry_handle_t handle) const = 0;
+
+  virtual void dump(std::ostream &stream) const = 0;
 
   void set_next_node(p4object_id_t action_id, const ControlFlowNode *next_node) {
     next_nodes[action_id] = next_node;
@@ -154,6 +161,8 @@ public:
     return match_unit->valid_handle(handle);
   }
 
+  void dump(std::ostream &stream) const override;
+
 public:
   static std::unique_ptr<MatchTable> create(
     const std::string &match_type, 
@@ -184,6 +193,10 @@ public:
     unsigned int get() const { return (index & _index_mask); }
     unsigned int get_mbr() const { assert(is_mbr()); return get(); }
     unsigned int get_grp() const { assert(is_grp()); return get(); }
+
+    void dump(std::ostream &stream) const {
+      stream << index;
+    }
 
     static IndirectIndex make_mbr_index(unsigned int index) {
       assert(index <= _index_mask);
@@ -291,6 +304,8 @@ public:
   bool is_valid_handle(entry_handle_t handle) const override {
     return match_unit->valid_handle(handle);
   }
+
+  void dump(std::ostream &stream) const override;
 
   size_t get_num_members() const {
     return num_members;

@@ -594,6 +594,13 @@ class RuntimeHandler : virtual public RuntimeIf {
     }
   }
 
+  void bm_dump_table(std::string& _return, const std::string& table_name) {
+    printf("dump_table\n");
+    std::ostringstream stream;
+    switch_->dump_table(table_name, stream);
+    _return.append(stream.str());
+  }
+
 };
 
 namespace bm_runtime {

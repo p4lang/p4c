@@ -24,6 +24,9 @@
 #include <vector>
 #include <iterator>
 #include <string>
+#include <iostream>
+#include <sstream> 
+#include <iomanip>
 
 #include <boost/functional/hash.hpp>
 
@@ -168,6 +171,18 @@ public:
 
   void resize(size_t n) {
     bytes.resize(n);
+  }
+
+  std::string to_hex(bool upper_case = false) const {
+    std::ostringstream ret;
+
+    for (std::string::size_type i = 0; i < size(); i++) {
+      ret << std::setw(2) << std::setfill('0') << std::hex
+	  << (upper_case ? std::uppercase : std::nouppercase)
+	  << (int) static_cast<unsigned char>(bytes[i]);
+    }
+
+    return ret.str();
   }
 
 private:

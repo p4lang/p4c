@@ -24,6 +24,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 // shared_mutex will only be available in C++-14, so for now I'm using boost
 #include <boost/thread/shared_mutex.hpp>
@@ -125,6 +126,8 @@ public:
   virtual MatchErrorCode modify_entry(entry_handle_t handle, V value) = 0;
   virtual MatchErrorCode get_value(entry_handle_t handle, const V **value) = 0;
 
+  virtual void dump(std::ostream &stream) const = 0;
+
   size_t get_num_entries() const { return num_entries; }
 
   size_t get_size() const { return size; }
@@ -189,6 +192,8 @@ private:
 
   MatchErrorCode get_value(entry_handle_t handle, const V **value) override;
 
+  void dump(std::ostream &stream) const override;
+
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
 private:
@@ -234,6 +239,8 @@ private:
 
   MatchErrorCode get_value(entry_handle_t handle, const V **value) override;
 
+  void dump(std::ostream &stream) const override;
+
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
 private:
@@ -277,6 +284,8 @@ private:
   MatchErrorCode modify_entry(entry_handle_t handle, V value) override;
 
   MatchErrorCode get_value(entry_handle_t handle, const V **value) override;
+
+  void dump(std::ostream &stream) const override;
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 

@@ -308,6 +308,11 @@ class RuntimeHandler : virtual public RuntimeIf {
     printf("bm_dev_mgr_remove_port\n");
   }
 
+  void bm_dump_table(std::string& _return, const std::string& table_name) {
+    // Your implementation goes here
+    printf("bm_dump_table\n");
+  }
+
 };
 
 void run_server(int port) {

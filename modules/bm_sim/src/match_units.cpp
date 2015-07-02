@@ -68,6 +68,7 @@ typename MatchUnitExact<V>::MatchUnitLookup
 MatchUnitExact<V>::lookup_key(const ByteContainer &key) const
 {
   const auto entry_it = entries_map.find(key);
+  // std::cout << "looking up: " << key.to_hex() << "\n";
   if(entry_it == entries_map.end()) return MatchUnitLookup::empty_entry();
   return MatchUnitLookup(entry_it->second, &entries[entry_it->second].value);
 }
@@ -146,6 +147,18 @@ MatchUnitExact<V>::get_value(entry_handle_t handle, const V **value)
   *value = &entry.value;
 
   return MatchErrorCode::SUCCESS;
+}
+
+template<typename V>
+void
+MatchUnitExact<V>::dump(std::ostream &stream) const
+{
+  for(entry_handle_t handle : this->handles) {
+    const Entry &entry = entries[handle];
+    stream << handle << ": " << entry.key.to_hex() << " => ";
+    entry.value.dump(stream);
+    stream << "\n";
+  }
 }
 
 template<typename V>
@@ -243,6 +256,19 @@ MatchUnitLPM<V>::get_value(entry_handle_t handle, const V **value)
   *value = &entry.value;
 
   return MatchErrorCode::SUCCESS;
+}
+
+template<typename V>
+void
+MatchUnitLPM<V>::dump(std::ostream &stream) const
+{
+  for(entry_handle_t handle : this->handles) {
+    const Entry &entry = entries[handle];
+    stream << handle << ": "
+	   << entry.key.to_hex() << "/" << entry.prefix_length << " => ";
+    entry.value.dump(stream);
+    stream << "\n";
+  }
 }
 
 
@@ -376,6 +402,19 @@ MatchUnitTernary<V>::get_value(entry_handle_t handle, const V **value)
   *value = &entry.value;
 
   return MatchErrorCode::SUCCESS;
+}
+
+template<typename V>
+void
+MatchUnitTernary<V>::dump(std::ostream &stream) const
+{
+  for(entry_handle_t handle : this->handles) {
+    const Entry &entry = entries[handle];
+    stream << handle << ": "
+	   << entry.key.to_hex() << " &&& " << entry.mask.to_hex() << " => ";
+    entry.value.dump(stream);
+    stream << "\n";
+  }
 }
 
 

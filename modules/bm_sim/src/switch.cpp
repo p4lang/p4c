@@ -401,7 +401,7 @@ RuntimeInterface::ErrorCode Switch::load_new_config(const std::string &new_confi
   // check that there is no ongoing config swap
   if(p4objects != p4objects_rt) return ONGOING_SWAP;
   p4objects_rt = std::make_shared<P4Objects>();
-  std::stringstream ss(new_config);
+  std::istringstream ss(new_config);
   p4objects_rt->init_objects(ss);
   return SUCCESS;
 }
@@ -413,6 +413,18 @@ RuntimeInterface::ErrorCode Switch::swap_configs() {
   if(p4objects == p4objects_rt) return NO_ONGOING_SWAP;
   swap_ordered = true;
   return SUCCESS;
+}
+
+MatchErrorCode Switch::dump_table(
+  const std::string& table_name,
+  std::ostream &stream
+) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  assert(abstract_table);
+  abstract_table->dump(stream);
+  return MatchErrorCode::SUCCESS;
 }
 
 int Switch::do_swap() {

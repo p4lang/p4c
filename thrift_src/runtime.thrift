@@ -358,4 +358,10 @@ service Runtime {
   void bm_dev_mgr_remove_port(
     1:i32 port_num
   ) throws (1:InvalidDevMgrOperation ouch)
+
+  // debug functions
+
+  string bm_dump_table(
+    1:string table_name
+  )
 }

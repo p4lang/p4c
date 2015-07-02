@@ -142,6 +142,14 @@ MatchTable::set_default_action(
   return MatchErrorCode::SUCCESS;
 }
 
+void
+MatchTable::dump(std::ostream &stream) const
+{
+  ReadLock lock = lock_read();
+  stream << name << ":\n";
+  match_unit->dump(stream);
+}
+
 std::unique_ptr<MatchTable>
 MatchTable::create(
   const std::string &match_type, const std::string &name, p4object_id_t id,
@@ -333,6 +341,19 @@ MatchTableIndirect::set_default_member(mbr_hdl_t mbr)
   default_index = IndirectIndex::make_mbr_index(mbr);
 
   return MatchErrorCode::SUCCESS;
+}
+
+void
+MatchTableIndirect::dump(std::ostream &stream) const
+{
+  ReadLock lock = lock_read();
+  stream << name << ":\n";
+  match_unit->dump(stream);
+  for(mbr_hdl_t mbr : mbr_handles) {
+    stream << mbr << ": ";
+    action_entries[mbr].dump(stream);
+    stream << "\n";
+  }
 }
 
 

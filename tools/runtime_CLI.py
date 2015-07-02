@@ -543,6 +543,19 @@ class RuntimeAPI(cmd.Cmd):
         self.client.bm_swap_configs()
         print "SUCCESS"
 
+    def do_dump_table(self, line):
+        "Display some (non-formatted) information about a table"
+        args = line.split()
+        table_name = args[0]
+        if table_name not in TABLES:
+            print "Invalid table"
+            return
+        print self.client.bm_dump_table(table_name)
+        print "SUCCESS"
+
+    def complete_dump_table(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
 
 def thrift_connect():
     # Make socket

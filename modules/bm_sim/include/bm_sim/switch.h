@@ -167,6 +167,10 @@ public:
   RuntimeInterface::ErrorCode
   swap_configs() override;
 
+  MatchErrorCode
+  dump_table(const std::string& table_name,
+	     std::ostream &stream) const override;
+
   LearnEngine *get_learn_engine();
 
   McPre *get_pre() { return pre.get(); }

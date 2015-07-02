@@ -26,6 +26,7 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
+#include <iostream>
 
 #include <cassert>
 
@@ -352,6 +353,15 @@ public:
 
   const Data&get_action_data(int offset) const {
     return action_data.get(offset);
+  }
+  
+  void dump(std::ostream &stream) const {
+    stream << action_fn->name << " - ";
+    std::ios_base::fmtflags ff;
+    ff = std::cout.flags();
+    for(const Data &d : action_data.action_data)
+      stream << std::hex << d << ",";
+    stream.flags(ff);
   }
 
   ActionFnEntry(const ActionFnEntry &other) = default;
