@@ -88,7 +88,7 @@ std::string convert_map(const uint8_t *input, const size_t size) {
     uint8_t byte = input[i / 8];
     int offset = i % 8;
     if(byte & (1 << offset)) {
-      output[i] = '1';
+      output[size - 1 - i] = '1';
     }
   }
   return output;

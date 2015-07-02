@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 #define PRE_MGID_MAX 16384
-#define PRE_PORTS_MAX 256
+#define PRE_PORTS_MAX 512
 #define PRE_L1_NODE_MAX 16384
 #define PRE_L2_NODE_MAX 4096
 #define PRE_LAG_MAX 256
