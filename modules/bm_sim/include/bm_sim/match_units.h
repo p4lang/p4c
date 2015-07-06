@@ -36,7 +36,8 @@
 #include "handle_mgr.h"
 #include "lpm_trie.h"
 
-typedef uintptr_t entry_handle_t;
+typedef uintptr_t internal_handle_t;
+typedef uint64_t entry_handle_t;
 
 // using string and not ByteBontainer for efficiency
 struct MatchKeyParam {
@@ -148,8 +149,9 @@ public:
   bool valid_handle(entry_handle_t handle) const;
 
 protected:
-  MatchErrorCode get_and_set_handle(entry_handle_t *handle);
-  MatchErrorCode unset_handle(entry_handle_t handle);
+  MatchErrorCode get_and_set_handle(internal_handle_t *handle);
+  MatchErrorCode unset_handle(internal_handle_t handle);
+  bool valid_handle_(internal_handle_t handle) const;
 
 private:
   virtual MatchUnitLookup lookup_key(const ByteContainer &key) const = 0;
@@ -184,11 +186,12 @@ private:
   struct Entry {
     Entry() { }
 
-    Entry(ByteContainer key, V value)
-      : key(std::move(key)), value(std::move(value)) { }
+    Entry(ByteContainer key, V value, uint32_t version)
+      : key(std::move(key)), value(std::move(value)), version(version) { }
 
     ByteContainer key{};
     V value{};
+    uint32_t version{0};
   };
 
 private:
@@ -229,13 +232,14 @@ private:
   struct Entry {
     Entry() { }
 
-    Entry(ByteContainer key, int prefix_length, V value)
+    Entry(ByteContainer key, int prefix_length, V value, uint32_t version)
       : key(std::move(key)), prefix_length(prefix_length),
-	value(std::move(value)) { }
+	value(std::move(value)), version(version) { }
 
     ByteContainer key{};
     int prefix_length{0};
     V value{};
+    uint32_t version{0};
   };
 
 private:
@@ -274,14 +278,16 @@ private:
   struct Entry {
     Entry() { }
 
-    Entry(ByteContainer key, ByteContainer mask, int priority, V value)
+    Entry(ByteContainer key, ByteContainer mask, int priority, V value,
+	  uint32_t version)
       : key(std::move(key)), mask(std::move(mask)), priority(priority),
-	value(std::move(value)) { }
+	value(std::move(value)), version(version) { }
 
     ByteContainer key{};
     ByteContainer mask{};
     int priority{0};
     V value{};
+    uint32_t version{0};
   };
 
 private:

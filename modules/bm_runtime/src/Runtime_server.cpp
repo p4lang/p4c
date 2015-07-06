@@ -56,6 +56,8 @@ class RuntimeHandler : virtual public RuntimeIf {
       return TableOperationErrorCode::TABLE_FULL;
     case MatchErrorCode::INVALID_HANDLE:
       return TableOperationErrorCode::INVALID_HANDLE;
+    case MatchErrorCode::EXPIRED_HANDLE:
+      return TableOperationErrorCode::EXPIRED_HANDLE;
     case MatchErrorCode::COUNTERS_DISABLED:
       return TableOperationErrorCode::COUNTERS_DISABLED;
     case MatchErrorCode::INVALID_TABLE_NAME:

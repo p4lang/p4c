@@ -228,6 +228,28 @@ TYPED_TEST(TableSizeOne, DeleteEntry) {
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 }
 
+TYPED_TEST(TableSizeOne, DeleteEntryHandleUpdate) {
+  std::string key_ = "\xaa\xaa";
+  ByteContainer key("0xaaaa");
+  entry_handle_t handle_1, handle_2;
+  MatchErrorCode rc;
+
+  rc = this->add_entry(key_, &handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = this->table->delete_entry(handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(0u, this->table->get_num_entries());
+
+  rc = this->add_entry(key_, &handle_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  ASSERT_NE(handle_1, handle_2);
+
+  rc = this->table->delete_entry(handle_1);
+  ASSERT_EQ(MatchErrorCode::EXPIRED_HANDLE, rc);
+}
+
 TYPED_TEST(TableSizeOne, LookupEntry) {
   std::string key_ = "\x0a\xba";
   ByteContainer key("0x0aba");
