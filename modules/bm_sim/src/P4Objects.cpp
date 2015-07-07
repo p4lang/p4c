@@ -449,25 +449,32 @@ void P4Objects::init_objects(std::istream &is) {
       const string match_type = cfg_table["match_type"].asString();
       const string table_type = cfg_table["type"].asString();
       const int table_size = cfg_table["max_size"].asInt();
-      const bool with_counters = cfg_table["with_counters"].asBool();
-      // for now, discard ageing
+      const Json::Value false_value(false);
+      // if attribute is missing, default is false
+      const bool with_counters =
+	cfg_table.get("with_counters", false_value).asBool();
+      const bool with_ageing =
+	cfg_table.get("support_timeout", false_value).asBool();
 
       // TODO: improve this to make it easier to create new kind of tables
       // e.g. like the register mechanism for primitives :)
       std::unique_ptr<MatchActionTable> table;
       if(table_type == "simple") {
 	table = MatchActionTable::create_match_action_table<MatchTable>(
-          match_type, table_name, table_id, table_size, key_builder, with_counters
+          match_type, table_name, table_id, table_size, key_builder,
+	  with_counters, with_ageing
         );
       }
       else if(table_type == "indirect") {
 	table = MatchActionTable::create_match_action_table<MatchTableIndirect>(
-          match_type, table_name, table_id, table_size, key_builder, with_counters
+          match_type, table_name, table_id, table_size, key_builder,
+	  with_counters, with_ageing
         );
       }
       else if(table_type == "indirect_ws") {
 	table = MatchActionTable::create_match_action_table<MatchTableIndirectWS>(
-          match_type, table_name, table_id, table_size, key_builder, with_counters
+          match_type, table_name, table_id, table_size, key_builder,
+	  with_counters, with_ageing
         );
 
 	if(!cfg_table.isMember("selector")) {

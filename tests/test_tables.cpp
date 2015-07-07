@@ -412,8 +412,10 @@ protected:
 
     key_builder.push_back_field(testHeader1, 0, 16);
 
+    // with counters, without ageing
     table = MatchTableIndirect::create("exact", "test_table", 0,
-				       table_size, key_builder, true);
+				       table_size, key_builder,
+				       true, false);
     table->set_next_node(0, nullptr);
   }
 
@@ -658,8 +660,10 @@ protected:
 
     key_builder.push_back_field(testHeader1, 0, 16);
 
+    // with counters, without ageing
     table = MatchTableIndirectWS::create("exact", "test_table", 0,
-					 table_size, key_builder, true);
+					 table_size, key_builder,
+					 true, false);
     table->set_next_node(0, nullptr);
 
     BufBuilder builder;

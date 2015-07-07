@@ -62,9 +62,10 @@ public:
 
 public:
   MatchTableAbstract(const std::string &name, p4object_id_t id,
-		     size_t size, bool with_counters)
+		     size_t size, bool with_counters, bool with_ageing)
     : NamedP4Object(name, id), size(size),
-      with_counters(with_counters), counters(size) { }
+      with_counters(with_counters), counters(size),
+      with_ageing(with_ageing) { }
 
   virtual ~MatchTableAbstract() { }
 
@@ -115,6 +116,8 @@ protected:
   std::atomic_bool with_counters{false};
   std::vector<Counter> counters{};
 
+  bool with_ageing{false};
+
   std::unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
 
 private:
@@ -131,8 +134,9 @@ public:
 public:
   MatchTable(const std::string &name, p4object_id_t id,
 	     std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit,
-	     bool with_counters = false) 
-    : MatchTableAbstract(name, id, match_unit->get_size(), with_counters),
+	     bool with_counters = false, bool with_ageing = false) 
+    : MatchTableAbstract(name, id, match_unit->get_size(),
+			 with_counters, with_ageing),
       match_unit(std::move(match_unit)) { }
 
   MatchErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
@@ -168,7 +172,7 @@ public:
     const std::string &match_type, 
     const std::string &name, p4object_id_t id,
     size_t size, const MatchKeyBuilder &match_key_builder,
-    bool with_counters
+    bool with_counters, bool with_ageing
   );
 
 private:
@@ -268,9 +272,10 @@ public:
   MatchTableIndirect(
     const std::string &name, p4object_id_t id,
     std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit,
-    bool with_counters = false
+    bool with_counters = false, bool with_ageing = false
   ) 
-    : MatchTableAbstract(name, id, match_unit->get_size(), with_counters),
+    : MatchTableAbstract(name, id, match_unit->get_size(),
+			 with_counters, with_ageing),
       match_unit(std::move(match_unit)) { }
 
   MatchErrorCode add_member(const ActionFn *action_fn,
@@ -316,7 +321,7 @@ public:
     const std::string &match_type, 
     const std::string &name, p4object_id_t id,
     size_t size, const MatchKeyBuilder &match_key_builder,
-    bool with_counters
+    bool with_counters, bool with_ageing
   );
 
 protected:
@@ -349,9 +354,10 @@ public:
   MatchTableIndirectWS(
     const std::string &name, p4object_id_t id,
     std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit,
-    bool with_counters = false
+    bool with_counters = false, bool with_ageing = false
   ) 
-    : MatchTableIndirect(name, id, std::move(match_unit), with_counters) { }
+    : MatchTableIndirect(name, id, std::move(match_unit),
+			 with_counters, with_ageing) { }
 
   void set_hash(std::unique_ptr<Calculation<hash_t> > h) {
     hash = std::move(h);
@@ -388,7 +394,7 @@ public:
     const std::string &match_type, 
     const std::string &name, p4object_id_t id,
     size_t size, const MatchKeyBuilder &match_key_builder,
-    bool with_counters
+    bool with_counters, bool with_ageing
   );
 
 protected:
