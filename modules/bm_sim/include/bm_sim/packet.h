@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <mutex>
+#include <chrono>
 
 #include <cassert>
 
@@ -32,6 +33,9 @@
 typedef unsigned long long packet_id_t;
 
 class Packet {
+public:
+  typedef std::chrono::system_clock clock;
+
 public:
   Packet();
 
@@ -89,6 +93,8 @@ public:
 
   const PacketBuffer &get_packet_buffer() const { return buffer; }
 
+  uint64_t get_ingress_ts_ms() const { return ingress_ts_ms; }
+
   // TODO: use references instead?
   PHV *get_phv() { return phv.get(); }
   const PHV *get_phv() const { return phv.get(); }
@@ -102,6 +108,10 @@ public:
   Packet &operator=(Packet &&other) noexcept;
 
 private:
+  void update_signature(unsigned long long seed = 0);
+  void set_ingress_ts();
+
+private:
   int ingress_port{-1};
   int egress_port{-1};
   packet_id_t packet_id{0};
@@ -113,6 +123,9 @@ private:
   PacketBuffer buffer{};
 
   size_t payload_size{0};
+
+  clock::time_point ingress_ts{};
+  uint64_t ingress_ts_ms{};
 
   std::unique_ptr<PHV> phv{nullptr};
 

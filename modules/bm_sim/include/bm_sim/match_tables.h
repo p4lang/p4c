@@ -21,7 +21,6 @@
 #ifndef _BM_MATCH_TABLES_H_
 #define _BM_MATCH_TABLES_H_
 
-#include <atomic>
 #include <vector>
 #include <type_traits>
 #include <iostream>
@@ -34,10 +33,6 @@
 class MatchTableAbstract : public NamedP4Object
 {
 public:
-  struct Counter {
-    std::atomic<std::uint_fast64_t> bytes{0};
-    std::atomic<std::uint_fast64_t> packets{0};
-  };
   typedef uint64_t counter_value_t;
 
   struct ActionEntry {
@@ -62,10 +57,11 @@ public:
 
 public:
   MatchTableAbstract(const std::string &name, p4object_id_t id,
-		     size_t size, bool with_counters, bool with_ageing)
+		     size_t size, bool with_counters, bool with_ageing,
+		     MatchUnitAbstract_ *mu)
     : NamedP4Object(name, id), size(size),
-      with_counters(with_counters), counters(size),
-      with_ageing(with_ageing) { }
+      with_counters(with_counters), with_ageing(with_ageing),
+      match_unit_(mu) { }
 
   virtual ~MatchTableAbstract() { }
 
@@ -89,6 +85,12 @@ public:
 				counter_value_t *packets) const;
   MatchErrorCode reset_counters();
 
+  MatchTableAbstract(const MatchTableAbstract &other) = delete;
+  MatchTableAbstract &operator=(const MatchTableAbstract &other) = delete;
+  
+  MatchTableAbstract(MatchTableAbstract &&other) = delete;
+  MatchTableAbstract &operator=(MatchTableAbstract &&other) = delete;
+
 protected:
   typedef boost::shared_lock<boost::shared_mutex> ReadLock;
   typedef boost::unique_lock<boost::shared_mutex> WriteLock;
@@ -96,13 +98,6 @@ protected:
 protected:
   const ControlFlowNode *get_next_node(p4object_id_t action_id) const {
     return next_nodes.at(action_id);
-  }
-
-  void update_counters(entry_handle_t handle, const Packet &pkt) {
-    assert(with_counters);
-    Counter &c = counters[handle];
-    c.bytes += pkt.get_ingress_length();
-    c.packets += 1;
   }
 
   ReadLock lock_read() const { return ReadLock(t_mutex); }
@@ -114,14 +109,13 @@ protected:
   size_t size{0};
 
   std::atomic_bool with_counters{false};
-  std::vector<Counter> counters{};
-
-  bool with_ageing{false};
+  std::atomic_bool with_ageing{false};
 
   std::unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
 
 private:
   mutable boost::shared_mutex t_mutex{};
+  MatchUnitAbstract_ *match_unit_{nullptr};
 };
 
 // MatchTable is exposed to the runtime for configuration
@@ -136,7 +130,8 @@ public:
 	     std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit,
 	     bool with_counters = false, bool with_ageing = false) 
     : MatchTableAbstract(name, id, match_unit->get_size(),
-			 with_counters, with_ageing),
+			 with_counters, with_ageing,
+			 match_unit.get()),
       match_unit(std::move(match_unit)) { }
 
   MatchErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
@@ -275,7 +270,8 @@ public:
     bool with_counters = false, bool with_ageing = false
   ) 
     : MatchTableAbstract(name, id, match_unit->get_size(),
-			 with_counters, with_ageing),
+			 with_counters, with_ageing,
+			 match_unit.get()),
       match_unit(std::move(match_unit)) { }
 
   MatchErrorCode add_member(const ActionFn *action_fn,

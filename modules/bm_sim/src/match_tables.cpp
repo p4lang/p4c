@@ -72,8 +72,6 @@ MatchTableAbstract::apply_action(Packet *pkt)
 
   lock.unlock();
 
-  if(hit && with_counters) update_counters(handle, *pkt);
-
   return next_node;
 }
 
@@ -83,21 +81,17 @@ MatchTableAbstract::query_counters(entry_handle_t handle,
 				   counter_value_t *packets) const {
   if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
   if(!is_valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
-  const Counter &c = counters[handle];
-  *bytes = c.bytes;
-  *packets = c.packets;
+  const MatchUnit::EntryMeta &meta = match_unit_->get_entry_meta(handle);
+  *bytes = meta.counter.bytes;
+  *packets = meta.counter.packets;
   return MatchErrorCode::SUCCESS;
 }
 
+/* really needed ? */
 MatchErrorCode
 MatchTableAbstract::reset_counters() {
   if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
-  // could take a while, but do not block anyone else
-  // alternative would be to do a fill and use a lock
-  for(Counter &c : counters) {
-    c.bytes = 0;
-    c.packets = 0;
-  }
+  match_unit_->reset_counters();
   return MatchErrorCode::SUCCESS;
 }
 

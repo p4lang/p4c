@@ -22,12 +22,13 @@
 #include "bm_sim/match_tables.h"
 
 #define HANDLE_VERSION(h) (h >> 32)
-#define HANDLE_INTERNAL(h) (h && 0xffffffff)
+#define HANDLE_INTERNAL(h) (h & 0xffffffff)
 #define HANDLE_SET(v, i) ((((uint64_t) v) << 32) | i)
 
-template<typename V>
+using namespace MatchUnit;
+
 MatchErrorCode
-MatchUnitAbstract<V>::get_and_set_handle(internal_handle_t *handle)
+MatchUnitAbstract_::get_and_set_handle(internal_handle_t *handle)
 {
   if(num_entries >= size) { // table is full
     return MatchErrorCode::TABLE_FULL;
@@ -39,9 +40,8 @@ MatchUnitAbstract<V>::get_and_set_handle(internal_handle_t *handle)
   return MatchErrorCode::SUCCESS;
 }
 
-template<typename V>
 MatchErrorCode
-MatchUnitAbstract<V>::unset_handle(internal_handle_t handle)
+MatchUnitAbstract_::unset_handle(internal_handle_t handle)
 {
   if(handles.release_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   
@@ -49,29 +49,91 @@ MatchUnitAbstract<V>::unset_handle(internal_handle_t handle)
   return MatchErrorCode::SUCCESS;
 }
 
-template<typename V>
 bool
-MatchUnitAbstract<V>::valid_handle_(internal_handle_t handle) const
+MatchUnitAbstract_::valid_handle_(internal_handle_t handle) const
 {
   return handles.valid_handle(handle);
 }
 
-template<typename V>
 bool
-MatchUnitAbstract<V>::valid_handle(entry_handle_t handle) const
+MatchUnitAbstract_::valid_handle(entry_handle_t handle) const
 {
   return this->valid_handle_(HANDLE_INTERNAL(handle));
 }
 
+EntryMeta &
+MatchUnitAbstract_::get_entry_meta(entry_handle_t handle)
+{
+  return this->entry_meta[HANDLE_INTERNAL(handle)];
+}
+
+const EntryMeta &
+MatchUnitAbstract_::get_entry_meta(entry_handle_t handle) const
+{
+  return this->entry_meta[HANDLE_INTERNAL(handle)];
+}
+
+void
+MatchUnitAbstract_::reset_counters()
+{
+  // could take a while, but do not block anyone else
+  for(EntryMeta &meta : entry_meta) {
+    meta.counter.reset();
+  }
+}
+
 template<typename V>
 typename MatchUnitAbstract<V>::MatchUnitLookup
-MatchUnitAbstract<V>::lookup(const Packet &pkt) const
+MatchUnitAbstract<V>::lookup(const Packet &pkt)
 {
   static thread_local ByteContainer key;
   key.clear();
   build_key(*pkt.get_phv(), key);
 
-  return lookup_key(key);
+  MatchUnitLookup res = lookup_key(key);
+  if(res.found()) {
+    EntryMeta &meta = entry_meta[HANDLE_INTERNAL(res.handle)];
+    update_counters(meta.counter, pkt);
+    update_ts(meta.ts, pkt);
+  }
+  return res;
+}
+
+template<typename V>
+MatchErrorCode
+MatchUnitAbstract<V>::add_entry(
+  const std::vector<MatchKeyParam> &match_key, V value,
+  entry_handle_t *handle, int priority
+)
+{
+  MatchErrorCode rc = add_entry_(match_key, std::move(value), handle, priority);
+  if(rc != MatchErrorCode::SUCCESS) return rc;
+  // TODO: take care of this
+  MatchUnit::EntryMeta &meta = entry_meta[*handle & 0xffffffff];
+  meta.reset();
+  return rc;
+}
+
+template<typename V>
+MatchErrorCode
+MatchUnitAbstract<V>::delete_entry(entry_handle_t handle)
+{
+  return delete_entry_(handle);
+}
+
+template<typename V>
+MatchErrorCode
+MatchUnitAbstract<V>::modify_entry(entry_handle_t handle, V value)
+{
+
+  return modify_entry_(handle, std::move(value));
+}
+
+template<typename V>
+MatchErrorCode
+MatchUnitAbstract<V>::get_value(entry_handle_t handle, const V **value)
+{
+  return get_value_(handle, value);
 }
 
 template<typename V>
@@ -81,12 +143,14 @@ MatchUnitExact<V>::lookup_key(const ByteContainer &key) const
   const auto entry_it = entries_map.find(key);
   // std::cout << "looking up: " << key.to_hex() << "\n";
   if(entry_it == entries_map.end()) return MatchUnitLookup::empty_entry();
-  return MatchUnitLookup(entry_it->second, &entries[entry_it->second].value);
+  const Entry &entry = entries[entry_it->second];
+  entry_handle_t handle = HANDLE_SET(entry.version, entry_it->second);
+  return MatchUnitLookup(handle, &entry.value);
 }
 
 template<typename V>
 MatchErrorCode
-MatchUnitExact<V>::add_entry(
+MatchUnitExact<V>::add_entry_(
   const std::vector<MatchKeyParam> &match_key, V value,
   entry_handle_t *handle, int priority
 )
@@ -133,7 +197,7 @@ MatchUnitExact<V>::add_entry(
 
 template<typename V>
 MatchErrorCode
-MatchUnitExact<V>::delete_entry(entry_handle_t handle)
+MatchUnitExact<V>::delete_entry_(entry_handle_t handle)
 {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if(!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
@@ -148,7 +212,7 @@ MatchUnitExact<V>::delete_entry(entry_handle_t handle)
 
 template<typename V>
 MatchErrorCode
-MatchUnitExact<V>::modify_entry(entry_handle_t handle, V value)
+MatchUnitExact<V>::modify_entry_(entry_handle_t handle, V value)
 {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if(!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
@@ -162,7 +226,7 @@ MatchUnitExact<V>::modify_entry(entry_handle_t handle, V value)
 
 template<typename V>
 MatchErrorCode
-MatchUnitExact<V>::get_value(entry_handle_t handle, const V **value)
+MatchUnitExact<V>::get_value_(entry_handle_t handle, const V **value)
 {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if(!this->valid_handle(handle_)) return MatchErrorCode::INVALID_HANDLE;
@@ -176,7 +240,7 @@ MatchUnitExact<V>::get_value(entry_handle_t handle, const V **value)
 
 template<typename V>
 void
-MatchUnitExact<V>::dump(std::ostream &stream) const
+MatchUnitExact<V>::dump_(std::ostream &stream) const
 {
   for(internal_handle_t handle_ : this->handles) {
     const Entry &entry = entries[handle_];
@@ -190,16 +254,18 @@ template<typename V>
 typename MatchUnitLPM<V>::MatchUnitLookup
 MatchUnitLPM<V>::lookup_key(const ByteContainer &key) const
 {
-  entry_handle_t handle;
-  if(entries_trie.lookup(key, &handle)) {
-    return MatchUnitLookup(handle, &entries[handle].value);
+  internal_handle_t handle_;
+  if(entries_trie.lookup(key, &handle_)) {
+    const Entry &entry = entries[handle_];
+    entry_handle_t handle = HANDLE_SET(entry.version, handle_);
+    return MatchUnitLookup(handle, &entry.value);
   }
   return MatchUnitLookup::empty_entry();
 }
 
 template<typename V>
 MatchErrorCode
-MatchUnitLPM<V>::add_entry(
+MatchUnitLPM<V>::add_entry_(
   const std::vector<MatchKeyParam> &match_key, V value,
   entry_handle_t *handle, int priority
 )
@@ -257,7 +323,7 @@ MatchUnitLPM<V>::add_entry(
 
 template<typename V>
 MatchErrorCode
-MatchUnitLPM<V>::delete_entry(entry_handle_t handle)
+MatchUnitLPM<V>::delete_entry_(entry_handle_t handle)
 {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if(!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
@@ -272,7 +338,7 @@ MatchUnitLPM<V>::delete_entry(entry_handle_t handle)
 
 template<typename V>
 MatchErrorCode
-MatchUnitLPM<V>::modify_entry(entry_handle_t handle, V value)
+MatchUnitLPM<V>::modify_entry_(entry_handle_t handle, V value)
 {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if(!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
@@ -286,7 +352,7 @@ MatchUnitLPM<V>::modify_entry(entry_handle_t handle, V value)
 
 template<typename V>
 MatchErrorCode
-MatchUnitLPM<V>::get_value(entry_handle_t handle, const V **value)
+MatchUnitLPM<V>::get_value_(entry_handle_t handle, const V **value)
 {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if(!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
@@ -300,7 +366,7 @@ MatchUnitLPM<V>::get_value(entry_handle_t handle, const V **value)
 
 template<typename V>
 void
-MatchUnitLPM<V>::dump(std::ostream &stream) const
+MatchUnitLPM<V>::dump_(std::ostream &stream) const
 {
   for(internal_handle_t handle_ : this->handles) {
     const Entry &entry = entries[handle_];
@@ -344,7 +410,8 @@ MatchUnitTernary<V>::lookup_key(const ByteContainer &key) const
   }
 
   if(max_entry) {
-    return MatchUnitLookup(max_handle, &max_entry->value);
+    entry_handle_t handle = HANDLE_SET(max_entry->version, max_handle);
+    return MatchUnitLookup(handle, &max_entry->value);
   }
 
   return MatchUnitLookup::empty_entry();
@@ -361,7 +428,7 @@ static std::string create_mask_from_pref_len(int prefix_length, int size) {
 
 template<typename V>
 MatchErrorCode
-MatchUnitTernary<V>::add_entry(
+MatchUnitTernary<V>::add_entry_(
   const std::vector<MatchKeyParam> &match_key, V value,
   entry_handle_t *handle, int priority
 )
@@ -419,7 +486,7 @@ MatchUnitTernary<V>::add_entry(
 
 template<typename V>
 MatchErrorCode
-MatchUnitTernary<V>::delete_entry(entry_handle_t handle)
+MatchUnitTernary<V>::delete_entry_(entry_handle_t handle)
 {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if(!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
@@ -433,7 +500,7 @@ MatchUnitTernary<V>::delete_entry(entry_handle_t handle)
 
 template<typename V>
 MatchErrorCode
-MatchUnitTernary<V>::modify_entry(entry_handle_t handle, V value)
+MatchUnitTernary<V>::modify_entry_(entry_handle_t handle, V value)
 {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if(!this->valid_handle(handle_)) return MatchErrorCode::INVALID_HANDLE;
@@ -447,7 +514,7 @@ MatchUnitTernary<V>::modify_entry(entry_handle_t handle, V value)
 
 template<typename V>
 MatchErrorCode
-MatchUnitTernary<V>::get_value(entry_handle_t handle, const V **value)
+MatchUnitTernary<V>::get_value_(entry_handle_t handle, const V **value)
 {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if(!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
@@ -461,7 +528,7 @@ MatchUnitTernary<V>::get_value(entry_handle_t handle, const V **value)
 
 template<typename V>
 void
-MatchUnitTernary<V>::dump(std::ostream &stream) const
+MatchUnitTernary<V>::dump_(std::ostream &stream) const
 {
   for(internal_handle_t handle_ : this->handles) {
     const Entry &entry = entries[handle_];

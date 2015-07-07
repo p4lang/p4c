@@ -22,6 +22,19 @@
 
 #include "xxhash.h"
 
+void
+Packet::update_signature(unsigned long long seed) {
+  signature = XXH64(buffer.start(), buffer.get_data_size(), seed);
+}
+
+void
+Packet::set_ingress_ts() {
+  ingress_ts = clock::now();
+  ingress_ts_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+    ingress_ts.time_since_epoch()
+  ).count();
+}
+
 Packet::Packet() {
   assert(phv_pool);
   phv = phv_pool->get(); // needed ?
@@ -32,7 +45,8 @@ Packet::Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
   : ingress_port(ingress_port), packet_id(id), copy_id(copy_id),
     ingress_length(ingress_length), buffer(std::move(buffer)) {
   assert(phv_pool);
-  signature = XXH64(buffer.start(), buffer.get_data_size(), 0);
+  update_signature();
+  set_ingress_ts();
   phv = phv_pool->get();
 }
 
@@ -41,7 +55,8 @@ Packet::Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
   : ingress_port(ingress_port), packet_id(id), copy_id(copy_id),
     ingress_length(ingress_length), buffer(std::move(buffer)) {
   assert(phv_pool);
-  signature = XXH64(buffer.start(), buffer.get_data_size(), 0);
+  update_signature();
+  set_ingress_ts();
   phv = phv_pool->get();
   phv->copy_headers(src_phv);
 }
