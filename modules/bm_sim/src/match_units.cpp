@@ -77,15 +77,26 @@ void
 MatchUnitAbstract_::reset_counters()
 {
   // could take a while, but do not block anyone else
+  // lock (even read lock) does not have to be held while doing this
   for(EntryMeta &meta : entry_meta) {
     meta.counter.reset();
   }
 }
 
+MatchErrorCode
+MatchUnitAbstract_::set_entry_ttl(
+  entry_handle_t handle, unsigned int ttl_ms
+)
+{
+  internal_handle_t handle_ = HANDLE_INTERNAL(handle);
+  if(!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
+  EntryMeta &meta = entry_meta[handle_];
+  meta.timeout_ms = ttl_ms;
+  return MatchErrorCode::SUCCESS;
+}
+
 void
-MatchUnitAbstract_::sweep_entries(
-  std::vector<entry_handle_t> &entries, unsigned int timeout
-) const
+MatchUnitAbstract_::sweep_entries(std::vector<entry_handle_t> &entries) const
 {
   using namespace std::chrono;
   auto tp = Packet::clock::now();
@@ -93,7 +104,7 @@ MatchUnitAbstract_::sweep_entries(
   for(auto it = handles.begin(); it != handles.end(); ++it) {
     const EntryMeta &meta = entry_meta[*it];
     assert(now_ms >= meta.ts.get_ms());
-    if(now_ms - meta.ts.get_ms() >= timeout) {
+    if(meta.timeout_ms > 0 && (now_ms - meta.ts.get_ms() >= meta.timeout_ms)) {
       entries.push_back(HANDLE_SET(meta.version, *it));
     }
   }

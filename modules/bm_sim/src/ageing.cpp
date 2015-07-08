@@ -95,7 +95,7 @@ AgeingMonitor::do_sweep()
     TableData &data = entry.second;
     const MatchTableAbstract *t = data.table;
     auto &prev_sweep_entries = data.prev_sweep_entries;
-    t->sweep_entries(entries_tmp, sweep_interval_ms);
+    t->sweep_entries(entries_tmp);
     if(entries_tmp.empty()) {
       prev_sweep_entries.clear();
       continue;

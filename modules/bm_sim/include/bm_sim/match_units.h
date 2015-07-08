@@ -164,6 +164,7 @@ struct EntryMeta {
   typedef Packet::clock clock;
 
   AtomicTimestamp ts{};
+  uint32_t timeout_ms{0};
   Counter counter{};
   uint32_t version{};
 
@@ -197,7 +198,9 @@ public:
 
   void reset_counters();
 
-  void sweep_entries(std::vector<entry_handle_t> &entries, unsigned int timeout) const;
+  MatchErrorCode set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms);
+
+  void sweep_entries(std::vector<entry_handle_t> &entries) const;
 
 protected:
   MatchErrorCode get_and_set_handle(internal_handle_t *handle);

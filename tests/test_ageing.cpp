@@ -170,11 +170,15 @@ protected:
     return packet;
   }
 
-  MatchErrorCode add_entry(const std::string &key, entry_handle_t *handle) {
+  MatchErrorCode add_entry(const std::string &key, entry_handle_t *handle,
+			   unsigned int ttl_ms) {
     ActionData action_data;
     std::vector<MatchKeyParam> match_key;
     match_key.emplace_back(MatchKeyParam::Type::EXACT, key);
-    return table->add_entry(match_key, &action_fn, action_data, handle);
+    MatchErrorCode rc;
+    rc = table->add_entry(match_key, &action_fn, action_data, handle);
+    if(rc != MatchErrorCode::SUCCESS) return rc;
+    return table->set_entry_ttl(*handle, ttl_ms);
   }
 
   MatchErrorCode delete_entry(entry_handle_t handle) {
@@ -205,9 +209,9 @@ TEST_F(AgeingTest, OneNotification) {
   std::string key("0x0aba");
   entry_handle_t handle_1;
   entry_handle_t lookup_handle;
-  unsigned int sweep_int = 200u;
+  unsigned int sweep_int = 200u; // use it as timeout too
   init_monitor(sweep_int);
-  ASSERT_EQ(MatchErrorCode::SUCCESS, add_entry(key_, &handle_1));
+  ASSERT_EQ(MatchErrorCode::SUCCESS, add_entry(key_, &handle_1, sweep_int));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, ageing_writer->check_status());
   sleep_for(milliseconds(150));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, ageing_writer->check_status());
@@ -236,7 +240,7 @@ TEST_F(AgeingTest, NoDuplicate) {
   unsigned int sweep_int = 200u;
   init_monitor(sweep_int);
   auto tp1 = clock::now();
-  ASSERT_EQ(MatchErrorCode::SUCCESS, add_entry(key_, &handle_1));
+  ASSERT_EQ(MatchErrorCode::SUCCESS, add_entry(key_, &handle_1, sweep_int));
   ageing_writer->read(buffer, sizeof(buffer));
   auto tp2 = clock::now();
 

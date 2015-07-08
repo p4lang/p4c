@@ -78,12 +78,23 @@ MatchTableAbstract::query_counters(entry_handle_t handle,
 				   counter_value_t *bytes,
 				   counter_value_t *packets) const
 {
+  ReadLock lock = lock_read();
   if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
   if(!is_valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   const MatchUnit::EntryMeta &meta = match_unit_->get_entry_meta(handle);
   *bytes = meta.counter.bytes;
   *packets = meta.counter.packets;
   return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableAbstract::set_entry_ttl(
+  entry_handle_t handle, unsigned int ttl_ms
+)
+{
+  if(!with_ageing) return MatchErrorCode::AGEING_DISABLED;
+  WriteLock lock = lock_write();
+  return match_unit_->set_entry_ttl(handle, ttl_ms);
 }
 
 /* really needed ? */
@@ -96,12 +107,10 @@ MatchTableAbstract::reset_counters()
 }
 
 void
-MatchTableAbstract::sweep_entries(
-  std::vector<entry_handle_t> &entries, unsigned int timeout
-) const
+MatchTableAbstract::sweep_entries(std::vector<entry_handle_t> &entries) const
 {
   ReadLock lock = lock_read(); // TODO: how to avoid this?
-  match_unit_->sweep_entries(entries, timeout);
+  match_unit_->sweep_entries(entries);
 }
 
 const ActionEntry &
