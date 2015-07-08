@@ -120,6 +120,13 @@ class RuntimeHandler : virtual public RuntimeIf {
     print_spec(action_data);
   }
 
+  void bm_mt_set_entry_ttl(const std::string& table_name, const BmEntryHandle entry_handle, const int32_t timeout_ms) {
+    std::cout << "bm_mt_set_entry_ttl" << std::endl
+	      << table_name << std::endl
+	      << entry_handle << std::endl
+	      << timeout_ms << std::endl;
+  }
+
   BmMemberHandle bm_mt_indirect_add_member(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
     std::cout << "bm_mt_indirect_add_member" << std::endl
 	      << table_name << std::endl
@@ -164,6 +171,13 @@ class RuntimeHandler : virtual public RuntimeIf {
     std::cout << "bm_mt_indirect_delete_entry" << std::endl
 	      << table_name << std::endl
 	      << entry_handle << std::endl;
+  }
+
+  void bm_mt_indirect_set_entry_ttl(const std::string& table_name, const BmEntryHandle entry_handle, const int32_t timeout_ms) {
+    std::cout << "bm_mt_indirect_set_entry_ttl" << std::endl
+	      << table_name << std::endl
+	      << entry_handle << std::endl
+	      << timeout_ms << std::endl;
   }
 
   void bm_mt_indirect_set_default_member(const std::string& table_name, const BmMemberHandle mbr_handle) {

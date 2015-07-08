@@ -92,17 +92,18 @@ enum TableOperationErrorCode {
   INVALID_HANDLE = 2,
   EXPIRED_HANDLE = 3,
   COUNTERS_DISABLED = 4,
-  INVALID_TABLE_NAME = 5,
-  INVALID_ACTION_NAME = 6,
-  WRONG_TABLE_TYPE = 7,
-  INVALID_MBR_HANDLE = 8,
-  MBR_STILL_USED = 9,
-  MBR_ALREADY_IN_GRP = 10,
-  MBR_NOT_IN_GRP = 11,
-  INVALID_GRP_HANDLE = 12,
-  GRP_STILL_USED = 13,
-  EMPTY_GRP = 14,
-  ERROR = 15,
+  AGEING_DISABLED = 5,
+  INVALID_TABLE_NAME = 6,
+  INVALID_ACTION_NAME = 7,
+  WRONG_TABLE_TYPE = 8,
+  INVALID_MBR_HANDLE = 9,
+  MBR_STILL_USED = 10,
+  MBR_ALREADY_IN_GRP = 11,
+  MBR_NOT_IN_GRP = 12,
+  INVALID_GRP_HANDLE = 13,
+  GRP_STILL_USED = 14,
+  EMPTY_GRP = 15,
+  ERROR = 16,
 }
 
 exception InvalidTableOperation {
@@ -183,6 +184,12 @@ service Runtime {
     4:BmActionData action_data
   ) throws (1:InvalidTableOperation ouch),
 
+  void bm_mt_set_entry_ttl(
+    1:string table_name
+    2:BmEntryHandle entry_handle,
+    3:i32 timeout_ms
+  ) throws (1:InvalidTableOperation ouch),
+
   // indirect tables
 
   BmMemberHandle bm_mt_indirect_add_member(
@@ -219,6 +226,12 @@ service Runtime {
   void bm_mt_indirect_delete_entry(
     1:string table_name,
     2:BmEntryHandle entry_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_set_entry_ttl(
+    1:string table_name
+    2:BmEntryHandle entry_handle,
+    3:i32 timeout_ms
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_indirect_set_default_member(

@@ -77,6 +77,11 @@ public:
 		  ActionData action_data) override;
 
   MatchErrorCode
+  mt_set_entry_ttl(const std::string &table_name,
+		   entry_handle_t handle,
+		   unsigned int ttl_ms);
+
+  MatchErrorCode
   mt_indirect_add_member(const std::string &table_name,
 			 const std::string &action_name,
 			 ActionData action_data,
@@ -107,6 +112,11 @@ public:
   MatchErrorCode
   mt_indirect_delete_entry(const std::string &table_name,
 			   entry_handle_t handle) override;
+
+  MatchErrorCode
+  mt_indirect_set_entry_ttl(const std::string &table_name,
+			    entry_handle_t handle,
+			    unsigned int ttl_ms);
 
   MatchErrorCode
   mt_indirect_set_default_member(const std::string &table_name,

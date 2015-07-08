@@ -189,6 +189,19 @@ class RuntimeHandler : virtual public RuntimeIf {
     }
   }
 
+  void bm_mt_set_entry_ttl(const std::string& table_name, const BmEntryHandle entry_handle, const int32_t timeout_ms) {
+    printf("bm_mt_set_entry_ttl\n");
+    MatchErrorCode error_code = switch_->mt_set_entry_ttl(
+        table_name, entry_handle,
+	static_cast<unsigned int>(timeout_ms)
+    );
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
   BmMemberHandle bm_mt_indirect_add_member(const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
     printf("bm_mt_indirect_add_member\n");
     mbr_hdl_t mbr_handle;
@@ -268,6 +281,19 @@ class RuntimeHandler : virtual public RuntimeIf {
     printf("bm_mt_indirect_delete_entry\n");
     MatchErrorCode error_code = switch_->mt_indirect_delete_entry(
       table_name, entry_handle
+    );
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
+  void bm_mt_indirect_set_entry_ttl(const std::string& table_name, const BmEntryHandle entry_handle, const int32_t timeout_ms) {
+    printf("bm_mt_indirect_set_entry_ttl\n");
+    MatchErrorCode error_code = switch_->mt_indirect_set_entry_ttl(
+        table_name, entry_handle,
+	static_cast<unsigned int>(timeout_ms)
     );
     if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;

@@ -183,9 +183,6 @@ ${name}
 (
  ${param_str}
 ) {
-//::     if t.support_timeout:
-  (void) ttl;
-//::     #endif
   assert(my_devices[dev_tgt.device_id]);
 //::     if not has_match_spec:
   std::vector<BmMatchParam> match_key;
@@ -207,6 +204,13 @@ ${name}
       "${a_name}", action_data,
       options
     );
+//::     if t.support_timeout:
+
+    // bmv2 takes a ttl in milliseconds
+    pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id)->bm_mt_set_entry_ttl(
+      "${t_name}", *entry_hdl, ttl * 1000
+    );
+//::     #endif
   } catch (InvalidTableOperation &ito) {
     const char *what =
       _TableOperationErrorCode_VALUES_TO_NAMES.find(ito.what)->second;

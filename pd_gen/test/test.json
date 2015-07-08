@@ -138,12 +138,12 @@
     ],
     "actions": [
         {
-            "name": "actionA",
+            "name": "actionB",
             "id": 0,
             "runtime_data": [
                 {
                     "name": "param",
-                    "bitwidth": 48
+                    "bitwidth": 8
                 }
             ],
             "primitives": [
@@ -154,7 +154,7 @@
                             "type": "field",
                             "value": [
                                 "header_test",
-                                "field48"
+                                "field8"
                             ]
                         },
                         {
@@ -193,12 +193,12 @@
             ]
         },
         {
-            "name": "actionB",
+            "name": "actionA",
             "id": 2,
             "runtime_data": [
                 {
                     "name": "param",
-                    "bitwidth": 8
+                    "bitwidth": 48
                 }
             ],
             "primitives": [
@@ -209,7 +209,7 @@
                             "type": "field",
                             "value": [
                                 "header_test",
-                                "field8"
+                                "field48"
                             ]
                         },
                         {
@@ -275,8 +275,35 @@
                     "default_action": null
                 },
                 {
-                    "name": "LpmOne",
+                    "name": "ExactOneAgeing",
                     "id": 1,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 512,
+                    "with_counters": false,
+                    "support_timeout": true,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "header_test",
+                                "field32"
+                            ]
+                        }
+                    ],
+                    "actions": [
+                        "actionA",
+                        "actionB"
+                    ],
+                    "next_tables": {
+                        "actionA": null,
+                        "actionB": null
+                    },
+                    "default_action": null
+                },
+                {
+                    "name": "LpmOne",
+                    "id": 2,
                     "match_type": "lpm",
                     "type": "simple",
                     "max_size": 512,
@@ -301,7 +328,7 @@
                 },
                 {
                     "name": "TernaryOne",
-                    "id": 2,
+                    "id": 3,
                     "match_type": "ternary",
                     "type": "simple",
                     "max_size": 512,
@@ -326,7 +353,7 @@
                 },
                 {
                     "name": "ExactOneNA",
-                    "id": 3,
+                    "id": 4,
                     "match_type": "exact",
                     "type": "simple",
                     "max_size": 512,
@@ -351,7 +378,7 @@
                 },
                 {
                     "name": "ExactTwo",
-                    "id": 4,
+                    "id": 5,
                     "match_type": "exact",
                     "type": "simple",
                     "max_size": 512,
@@ -383,7 +410,7 @@
                 },
                 {
                     "name": "ExactAndValid",
-                    "id": 5,
+                    "id": 6,
                     "match_type": "exact",
                     "type": "simple",
                     "max_size": 512,
@@ -412,7 +439,7 @@
                 },
                 {
                     "name": "Indirect",
-                    "id": 6,
+                    "id": 7,
                     "match_type": "exact",
                     "type": "indirect",
                     "act_prof_name": "ActProf",
@@ -440,7 +467,7 @@
                 },
                 {
                     "name": "IndirectWS",
-                    "id": 7,
+                    "id": 8,
                     "match_type": "exact",
                     "type": "indirect_ws",
                     "act_prof_name": "ActProfWS",
@@ -494,7 +521,7 @@
                 },
                 {
                     "name": "Learn",
-                    "id": 8,
+                    "id": 9,
                     "match_type": "exact",
                     "type": "simple",
                     "max_size": 512,
@@ -519,7 +546,7 @@
                 },
                 {
                     "name": "_MeterATable",
-                    "id": 9,
+                    "id": 10,
                     "match_type": "exact",
                     "type": "simple",
                     "max_size": 512,
@@ -538,7 +565,7 @@
                         "_MeterAAction"
                     ],
                     "next_tables": {
-                        "_MeterAAction": null
+                        "_MeterAAction": "ExactOneAgeing"
                     },
                     "default_action": null
                 }

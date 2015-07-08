@@ -73,6 +73,13 @@ int main() {
   p4_pd_test_ExactOne_reset_counters(sess_hdl, dev_tgt);
 
   p4_pd_test_ExactOne_table_delete(sess_hdl, dev_tgt.device_id, entry_hdl);
+
+  p4_pd_test_ExactOneAgeing_match_spec_t ExactOneAgeing_match_spec = {0x00aa00bb};
+  p4_pd_test_ExactOneAgeing_table_add_with_actionA(sess_hdl, dev_tgt,
+						   &ExactOneAgeing_match_spec,
+						   &actionA_action_spec,
+						   2, // ttl
+						   &entry_hdl);
   
   p4_pd_test_LpmOne_match_spec_t LpmOne_match_spec = {0x12345678, 12};
   p4_pd_test_LpmOne_table_add_with_actionA(sess_hdl, dev_tgt,

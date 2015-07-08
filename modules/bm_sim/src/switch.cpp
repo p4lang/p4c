@@ -134,6 +134,19 @@ Switch::mt_modify_entry(
 }
 
 MatchErrorCode
+Switch::mt_set_entry_ttl(
+    const std::string &table_name,
+    entry_handle_t handle,
+    unsigned int ttl_ms
+)
+{
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  if(!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  return abstract_table->set_entry_ttl(handle, ttl_ms);
+}
+
+MatchErrorCode
 Switch::get_mt_indirect(
   const std::string &table_name, MatchTableIndirect **table
 )
@@ -230,6 +243,19 @@ Switch::mt_indirect_delete_entry(
   if((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
     return rc;
   return table->delete_entry(handle);
+}
+
+MatchErrorCode
+Switch::mt_indirect_set_entry_ttl(
+    const std::string &table_name,
+    entry_handle_t handle,
+    unsigned int ttl_ms
+)
+{
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  if(!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  return abstract_table->set_entry_ttl(handle, ttl_ms);
 }
 
 MatchErrorCode

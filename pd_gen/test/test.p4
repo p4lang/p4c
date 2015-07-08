@@ -55,6 +55,17 @@ counter ExactOne_counter {
     direct : ExactOne;
 }
 
+table ExactOneAgeing {
+    reads {
+         header_test.field32 : exact;
+    }
+    actions {
+        actionA; actionB;
+    }
+    size: 512;
+    support_timeout: true;
+}
+
 table LpmOne {
     reads {
          header_test.field32 : lpm;
@@ -209,6 +220,7 @@ control ingress {
     apply(Indirect);
     apply(IndirectWS);
     apply(_MeterATable);
+    apply(ExactOneAgeing);
 }
 
 control egress {
