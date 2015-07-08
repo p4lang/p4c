@@ -410,6 +410,11 @@ void P4Objects::init_objects(std::istream &is) {
 
   // pipelines
 
+  typedef AgeingWriterImpl<TransportNanomsg> MyAgeingWriter;
+  const std::string ageing_ipc_name = "ipc:///tmp/test_bm_ageing.ipc";
+  std::shared_ptr<MyAgeingWriter> ageing_writer(new MyAgeingWriter(ageing_ipc_name));
+  ageing_monitor = std::unique_ptr<AgeingMonitor>(new AgeingMonitor(ageing_writer));
+
   const Json::Value &cfg_pipelines = cfg_root["pipelines"];
   for (const auto &cfg_pipeline : cfg_pipelines) {
 
@@ -512,6 +517,8 @@ void P4Objects::init_objects(std::istream &is) {
       else {
 	assert(0 && "invalid table type");
       }
+
+      if(with_ageing) ageing_monitor->add_table(table->get_match_table());
 
       add_match_action_table(table_name, std::move(table));
     }

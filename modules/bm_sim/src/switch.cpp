@@ -440,3 +440,8 @@ LearnEngine *Switch::get_learn_engine()
 {
   return p4objects->get_learn_engine();
 }
+
+AgeingMonitor *Switch::get_ageing_monitor()
+{
+  return p4objects->get_ageing_monitor();
+}

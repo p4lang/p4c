@@ -20,6 +20,31 @@
 
 #include "bm_sim/ageing.h"
 
+template <typename Transport>
+AgeingWriterImpl<Transport>::AgeingWriterImpl(const std::string &transport_name)
+  : transport_instance(std::unique_ptr<Transport>(new Transport()))
+{
+  // should not be doing this in the constructor ?
+  transport_instance->open(transport_name);
+}
+
+template <typename Transport>
+int AgeingWriterImpl<Transport>::send(const char *buffer, size_t len) const 
+{
+  return transport_instance->send(buffer, len);
+}
+
+template <typename Transport>
+int AgeingWriterImpl<Transport>::send_msgs(
+    const std::initializer_list<TransportIface::MsgBuf> &msgs
+) const
+{
+  return transport_instance->send_msgs(msgs);
+}
+
+// explicit template instantiation
+template class AgeingWriterImpl<TransportNanomsg>;
+
 AgeingMonitor::AgeingMonitor(std::shared_ptr<AgeingWriter> writer,
 			     unsigned int sweep_interval_ms)
   : writer(writer), sweep_interval_ms(sweep_interval_ms)

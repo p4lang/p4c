@@ -175,6 +175,8 @@ public:
 
   McPre *get_pre() { return pre.get(); }
 
+  AgeingMonitor *get_ageing_monitor();
+
 protected:
   int swap_requested() { return swap_ordered; }
   // TODO: should I return shared_ptrs instead of raw_ptrs?
