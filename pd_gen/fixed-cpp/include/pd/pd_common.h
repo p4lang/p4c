@@ -32,7 +32,7 @@ typedef uint32_t p4_pd_status_t;
 
 typedef uint32_t p4_pd_sess_hdl_t;
 
-typedef uint32_t p4_pd_entry_hdl_t;
+typedef uint64_t p4_pd_entry_hdl_t;
 typedef uint32_t p4_pd_mbr_hdl_t;
 typedef uint32_t p4_pd_grp_hdl_t;
 /* TODO: change that, it is horrible */

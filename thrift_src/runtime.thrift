@@ -20,7 +20,7 @@
 
 namespace cpp bm_runtime
 
-typedef i32 BmEntryHandle
+typedef i64 BmEntryHandle
 typedef list<binary> BmActionData
 
 typedef i32 BmMemberHandle
