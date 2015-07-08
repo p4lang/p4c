@@ -82,6 +82,23 @@ MatchUnitAbstract_::reset_counters()
   }
 }
 
+void
+MatchUnitAbstract_::sweep_entries(
+  std::vector<entry_handle_t> &entries, unsigned int timeout
+) const
+{
+  using namespace std::chrono;
+  auto tp = Packet::clock::now();
+  uint64_t now_ms = duration_cast<milliseconds>(tp.time_since_epoch()).count();
+  for(auto it = handles.begin(); it != handles.end(); ++it) {
+    const EntryMeta &meta = entry_meta[*it];
+    assert(now_ms >= meta.ts.get_ms());
+    if(now_ms - meta.ts.get_ms() >= timeout) {
+      entries.push_back(HANDLE_SET(meta.version, *it));
+    }
+  }
+}
+
 template<typename V>
 typename MatchUnitAbstract<V>::MatchUnitLookup
 MatchUnitAbstract<V>::lookup(const Packet &pkt)
@@ -108,9 +125,9 @@ MatchUnitAbstract<V>::add_entry(
 {
   MatchErrorCode rc = add_entry_(match_key, std::move(value), handle, priority);
   if(rc != MatchErrorCode::SUCCESS) return rc;
-  // TODO: take care of this
-  MatchUnit::EntryMeta &meta = entry_meta[*handle & 0xffffffff];
+  MatchUnit::EntryMeta &meta = entry_meta[HANDLE_INTERNAL(*handle)];
   meta.reset();
+  meta.version = HANDLE_VERSION(*handle);
   return rc;
 }
 

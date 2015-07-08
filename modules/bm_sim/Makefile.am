@@ -32,10 +32,12 @@ src/transport.cpp \
 src/calculations.cpp \
 src/meters.cpp \
 src/dev_mgr.cpp \
-src/options_parse.cpp
+src/options_parse.cpp \
+src/ageing.cpp
 
 common_include = \
 include/bm_sim/actions.h \
+include/bm_sim/ageing.h \
 include/bm_sim/bignum.h \
 include/bm_sim/bytecontainer.h \
 include/bm_sim/checksums.h \

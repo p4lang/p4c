@@ -53,7 +53,7 @@ public:
   LearnWriterImpl(const std::string &transport_name);
 
   int send(const char *buffer, size_t len) const override;
-  virtual int send_msgs(
+  int send_msgs(
       const std::initializer_list<TransportIface::MsgBuf> &msgs
   ) const override;
 

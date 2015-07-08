@@ -85,6 +85,8 @@ public:
 				counter_value_t *packets) const;
   MatchErrorCode reset_counters();
 
+  void sweep_entries(std::vector<entry_handle_t> &entries, unsigned int timeout) const;
+
   MatchTableAbstract(const MatchTableAbstract &other) = delete;
   MatchTableAbstract &operator=(const MatchTableAbstract &other) = delete;
   

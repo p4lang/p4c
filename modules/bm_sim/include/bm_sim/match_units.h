@@ -165,6 +165,7 @@ struct EntryMeta {
 
   AtomicTimestamp ts{};
   Counter counter{};
+  uint32_t version{};
 
   void reset() {
     counter.reset();
@@ -195,6 +196,8 @@ public:
   const MatchUnit::EntryMeta &get_entry_meta(entry_handle_t handle) const;
 
   void reset_counters();
+
+  void sweep_entries(std::vector<entry_handle_t> &entries, unsigned int timeout) const;
 
 protected:
   MatchErrorCode get_and_set_handle(internal_handle_t *handle);

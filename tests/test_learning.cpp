@@ -44,8 +44,6 @@ public:
     buffer_.reserve(max_size);
   }
 
-  // I could use conditional variables, but I'm feeling lazy :P
-
   int send(const char *buffer, size_t len) const override {
     if(len > max_size) return -1;
     std::unique_lock<std::mutex> lock(mutex);

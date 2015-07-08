@@ -70,15 +70,14 @@ MatchTableAbstract::apply_action(Packet *pkt)
 
   const ControlFlowNode *next_node = action_entry.next_node;
 
-  lock.unlock();
-
   return next_node;
 }
 
 MatchErrorCode
 MatchTableAbstract::query_counters(entry_handle_t handle,
 				   counter_value_t *bytes,
-				   counter_value_t *packets) const {
+				   counter_value_t *packets) const
+{
   if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
   if(!is_valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   const MatchUnit::EntryMeta &meta = match_unit_->get_entry_meta(handle);
@@ -89,10 +88,20 @@ MatchTableAbstract::query_counters(entry_handle_t handle,
 
 /* really needed ? */
 MatchErrorCode
-MatchTableAbstract::reset_counters() {
+MatchTableAbstract::reset_counters()
+{
   if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
   match_unit_->reset_counters();
   return MatchErrorCode::SUCCESS;
+}
+
+void
+MatchTableAbstract::sweep_entries(
+  std::vector<entry_handle_t> &entries, unsigned int timeout
+) const
+{
+  ReadLock lock = lock_read(); // TODO: how to avoid this?
+  match_unit_->sweep_entries(entries, timeout);
 }
 
 const ActionEntry &
