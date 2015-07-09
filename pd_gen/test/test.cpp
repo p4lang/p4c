@@ -41,7 +41,7 @@ int main() {
   p4_pd_entry_hdl_t entry_hdl;
 
   /* P4 dependent initialization */
-  p4_pd_test_init(NULL);
+  p4_pd_test_init(NULL, NULL);
   p4_pd_test_assign_device(dev_tgt.device_id, DEVICE_THRIFT_PORT);
   
   p4_pd_sess_hdl_t sess_hdl;

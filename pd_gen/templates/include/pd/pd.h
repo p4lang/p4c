@@ -32,7 +32,7 @@ extern "C" {
 
 // I am not using sess_hdl for these functions, right thing to do?
 
-p4_pd_status_t ${pd_prefix}init(const char *learning_addr);
+p4_pd_status_t ${pd_prefix}init(const char *learning_addr, const char *ageing_addr);
 
 p4_pd_status_t ${pd_prefix}assign_device(int dev_id, int rpc_port_num);
 

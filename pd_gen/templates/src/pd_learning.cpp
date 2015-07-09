@@ -25,7 +25,7 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
-#include<map>
+#include <map>
 
 #define NUM_DEVICES 256
 

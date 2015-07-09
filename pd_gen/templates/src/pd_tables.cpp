@@ -754,7 +754,8 @@ ${p4_pd_enable_hit_state_scan}(p4_pd_sess_hdl_t sess_hdl, uint32_t scan_interval
 
 p4_pd_status_t
 ${p4_pd_get_hit_state}(p4_pd_sess_hdl_t sess_hdl, p4_pd_entry_hdl_t entry_hdl, p4_pd_hit_state_t *hit_state) {
-  (void) sess_hdl; (void) entry_hdl; (void) hit_state;
+  (void) sess_hdl; (void) entry_hdl;
+  *hit_state = ENTRY_HIT; /* TODO */
   return 0;
 }
 
@@ -764,13 +765,18 @@ ${p4_pd_set_entry_ttl}(p4_pd_sess_hdl_t sess_hdl, p4_pd_entry_hdl_t entry_hdl, u
   return 0;
 }
 
+p4_pd_status_t ${pd_prefix}ageing_set_cb(int dev_id, int table_id,
+					 p4_pd_notify_timeout_cb cb_fn,
+					 void *cb_cookie);
+
 p4_pd_status_t
 ${p4_pd_enable_entry_timeout}(p4_pd_sess_hdl_t sess_hdl,
 			      p4_pd_notify_timeout_cb cb_fn,
 			      uint32_t max_ttl,
 			      void *client_data) {
-  (void) sess_hdl; (void) cb_fn; (void) max_ttl; (void) client_data;
-  return 0;
+  (void) sess_hdl; (void) max_ttl;
+  // TODO: use max_ttl to set up sweep interval
+  return ${pd_prefix}ageing_set_cb(0, ${t.id_}, cb_fn, client_data);
 }
 //:: #endfor
 

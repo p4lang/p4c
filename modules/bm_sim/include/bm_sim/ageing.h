@@ -63,7 +63,7 @@ public:
   typedef struct {
     int switch_id;
     uint64_t buffer_id;
-    p4object_id_t table_id;
+    int table_id;
     unsigned int num_entries;
   } __attribute__((packed)) msg_hdr_t;
 
