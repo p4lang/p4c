@@ -104,6 +104,8 @@ public:
 
   void reset_header_stacks();
 
+  void reset_metadata();
+
   PHV(const PHV &other) = delete;
   PHV &operator=(const PHV &other) = delete;
 

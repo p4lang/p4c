@@ -91,8 +91,12 @@ public:
     return nbytes_packet;
   }
 
-  bool is_valid() const{
+  bool is_valid() const {
     return (metadata || valid);
+  }
+
+  bool is_metadata() const {
+    return metadata;
   }
 
   void mark_valid() {
@@ -101,6 +105,11 @@ public:
 
   void mark_invalid() {
     valid = false;
+  }
+
+  void reset() {
+    for(Field &f : fields)
+      f.set(0);
   }
 
   // prefer operator [] to those functions

@@ -108,6 +108,7 @@ void SimpleSwitch::ingress_thread() {
     std::unique_ptr<Packet> packet;
     input_buffer.pop_back(&packet);
     phv = packet->get_phv();
+    phv->reset_metadata();
     SIMPLELOG << "processing packet " << packet->get_packet_id() << std::endl;
 
     // setting standard metadata
@@ -124,19 +125,15 @@ void SimpleSwitch::ingress_thread() {
 
     Field &f_egress_spec = phv->get_field("standard_metadata.egress_spec");
     int egress_spec = f_egress_spec.get_int();
-    f_egress_spec.set(0);
 
     Field &f_clone_spec = phv->get_field("standard_metadata.clone_spec");
     int clone_spec = f_clone_spec.get_int();
-    f_clone_spec.set(0);
 
     Field &f_learn_id = phv->get_field("intrinsic_metadata.lf_field_list");
     int learn_id = f_learn_id.get_int();
-    f_learn_id.set(0);
 
     Field &f_mgid = phv->get_field("intrinsic_metadata.eg_mcast_group");
     unsigned int mgid = f_mgid.get_uint();
-    f_mgid.set(0);
 
     packet_id_t copy_id = 1;
     int egress_port;
