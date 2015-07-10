@@ -97,6 +97,7 @@ int Field::deparse(char *data, int hdr_offset) const {
   else { /* shift right */
     offset = -offset;
     data[0] |= (bytes[0] >> offset);
+    if(hdr_bytes == 1) return nbits;
     for (i = 1; i < hdr_bytes - 1; i++) {
       data[i] = (bytes[i - 1] << (8 - offset)) | (bytes[i] >> offset);
     }
