@@ -29,6 +29,10 @@ namespace hash {
 template <typename T,
 	  typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
 T xxh64(const char *buf, size_t len);
+
+template <typename T,
+	  typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
+T crc16(const char *buf, size_t len);
   
 }
 

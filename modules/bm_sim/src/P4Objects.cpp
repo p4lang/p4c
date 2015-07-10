@@ -509,7 +509,13 @@ void P4Objects::init_objects(std::istream &is) {
 	}
 	typedef MatchTableIndirectWS::hash_t hash_t;
 	std::unique_ptr<Calculation<hash_t> > calc(new Calculation<hash_t>(builder));
-	calc->set_compute_fn(hash::xxh64<hash_t>);
+	// I need to find a better way to manage the different selection algos
+	// Maybe something similar to what I am doing for action primitives
+	// with a register mechanism
+	if(selector_algo == "crc16")
+	  calc->set_compute_fn(hash::crc16<hash_t>);
+	else
+	  calc->set_compute_fn(hash::xxh64<hash_t>);
 	MatchTableIndirectWS *mt_indirect_ws =
 	  static_cast<MatchTableIndirectWS *>(table->get_match_table());
 	mt_indirect_ws->set_hash(std::move(calc));
