@@ -371,7 +371,7 @@ class RuntimeHandler : virtual public RuntimeIf {
     entry_handle_t entry_handle;
     std::vector<MatchKeyParam> params;
     build_match_key(params, match_key);
-    MatchErrorCode error_code = switch_->mt_indirect_add_entry(
+    MatchErrorCode error_code = switch_->mt_indirect_ws_add_entry(
       table_name, params, grp_handle, &entry_handle, options.priority
     );
     if(error_code != MatchErrorCode::SUCCESS) {
