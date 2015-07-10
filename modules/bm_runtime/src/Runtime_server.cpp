@@ -60,6 +60,8 @@ class RuntimeHandler : virtual public RuntimeIf {
       return TableOperationErrorCode::EXPIRED_HANDLE;
     case MatchErrorCode::COUNTERS_DISABLED:
       return TableOperationErrorCode::COUNTERS_DISABLED;
+    case MatchErrorCode::AGEING_DISABLED:
+      return TableOperationErrorCode::AGEING_DISABLED;
     case MatchErrorCode::INVALID_TABLE_NAME:
       return TableOperationErrorCode::INVALID_TABLE_NAME;
     case MatchErrorCode::INVALID_ACTION_NAME:

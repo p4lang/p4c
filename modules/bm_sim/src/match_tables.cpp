@@ -195,12 +195,11 @@ MatchTable::create(
   bool with_counters, bool with_ageing
 )
 {
-  (void) with_ageing;
   std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit = 
     create_match_unit<ActionEntry>(match_type, size, match_key_builder);
 
   return std::unique_ptr<MatchTable>(
-    new MatchTable(name, id, std::move(match_unit), with_counters)
+    new MatchTable(name, id, std::move(match_unit), with_counters, with_ageing)
   );
 }
 
@@ -212,12 +211,11 @@ MatchTableIndirect::create(
   bool with_counters, bool with_ageing
 )
 {
-  (void) with_ageing;
   std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit = 
     create_match_unit<IndirectIndex>(match_type, size, match_key_builder);
 
   return std::unique_ptr<MatchTableIndirect>(
-    new MatchTableIndirect(name, id, std::move(match_unit), with_counters)
+    new MatchTableIndirect(name, id, std::move(match_unit), with_counters, with_ageing)
   );
 }
 
@@ -417,12 +415,11 @@ MatchTableIndirectWS::create(
   bool with_counters, bool with_ageing
 )
 {
-  (void) with_ageing;
   std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit = 
     create_match_unit<IndirectIndex>(match_type, size, match_key_builder);
 
   return std::unique_ptr<MatchTableIndirectWS>(
-    new MatchTableIndirectWS(name, id, std::move(match_unit), with_counters)
+    new MatchTableIndirectWS(name, id, std::move(match_unit), with_counters, with_ageing)
   );
 }
 
