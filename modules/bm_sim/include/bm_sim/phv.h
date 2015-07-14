@@ -232,6 +232,13 @@ public:
     desc.arith_offsets.insert(field_offset);
   }
 
+  void enable_all_field_arith(header_id_t header_id) {
+    HeaderDesc &desc = header_descs.at(header_id);
+    for(int offset = 0; offset < desc.header_type.get_num_fields(); offset++) {
+      desc.arith_offsets.insert(offset);
+    }
+  }
+
   void disable_field_arith(header_id_t header_id, int field_offset) {
     HeaderDesc &desc = header_descs.at(header_id);
     desc.arith_offsets.erase(field_offset);

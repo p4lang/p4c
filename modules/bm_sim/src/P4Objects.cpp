@@ -379,6 +379,9 @@ void P4Objects::init_objects(std::istream &is) {
 	  const string header_name = cfg_parameter["value"].asString();
 	  header_id_t header_id = get_header_id(header_name);
 	  action_fn->parameter_push_back_header(header_id);
+
+	  // TODO: overkill, needs something more efficient, but looks hard:
+	  phv_factory.enable_all_field_arith(header_id);
 	}
 	else if(type == "field") {
 	  const Json::Value &cfg_value_field = cfg_parameter["value"];
