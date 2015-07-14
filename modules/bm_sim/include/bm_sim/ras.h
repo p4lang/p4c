@@ -139,8 +139,15 @@ public:
   RandAccessUIntSet(const RandAccessUIntSet &other) = delete;
   RandAccessUIntSet &operator=(const RandAccessUIntSet &other) = delete;
 
-  RandAccessUIntSet(RandAccessUIntSet &&other) = default;
-  RandAccessUIntSet &operator=(RandAccessUIntSet &&other) = default;
+  RandAccessUIntSet(RandAccessUIntSet &&other)
+    : members(other.members) {
+    other.members = nullptr;
+  }
+
+  RandAccessUIntSet &operator=(RandAccessUIntSet &&other) {
+    std::swap(members, other.members);
+    return *this;
+  }
 
   // returns 0 if already present (0 element added), 1 otherwise
   int add(mbr_t mbr) {
