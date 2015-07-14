@@ -314,7 +314,7 @@ MatchUnitLPM<V>::add_entry_(
     switch(param.type) {
     case MatchKeyParam::Type::EXACT:
       new_key.append(param.key);
-      prefix_length += param.key.size();
+      prefix_length += param.key.size() << 3;
       break;
     case MatchKeyParam::Type::LPM:
       assert(!lpm_param && "more than one lpm param in match key");
