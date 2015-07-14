@@ -64,7 +64,11 @@ Packet::Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
 Packet::~Packet() {
   assert(phv);
   // corner case: phv_pool has already been destroyed
-  if(phv_pool) phv_pool->release(std::move(phv));
+  if(phv_pool) {
+    phv->reset();
+    phv->reset_header_stacks();
+    phv_pool->release(std::move(phv));
+  }
 }
 
 Packet

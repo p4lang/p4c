@@ -37,16 +37,18 @@ void Deparser::deparse(Packet *pkt) const {
   update_checksums(pkt);
   char *data = pkt->prepend(get_headers_size(*phv));
   int bytes_parsed = 0;
+  // invalidating headers, and resetting header stacks is done in the Packet
+  // destructor, when the PHV is released
   for(auto it = headers.begin(); it != headers.end(); ++it) {
     Header &header = phv->get_header(*it);
     if(header.is_valid()){
       ELOGGER->deparser_emit(*pkt, *it);
       header.deparse(data + bytes_parsed);
       bytes_parsed += header.get_nbytes_packet();
-      header.mark_invalid();
+      // header.mark_invalid();
     }
   }
-  phv->reset_header_stacks();
+  // phv->reset_header_stacks();
   ELOGGER->deparser_done(*pkt, *this);
 }
 
