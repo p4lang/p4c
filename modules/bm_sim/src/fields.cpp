@@ -74,6 +74,9 @@ int Field::deparse(char *data, int hdr_offset) const {
   int hdr_bytes = (hdr_offset + nbits + 7) / 8;
 
   int i;
+
+  // necessary to ensure correct behavior when shifting right (no sign extension)
+  unsigned char *ubytes = (unsigned char *) bytes.data();
   
   // zero out bits we are going to write in data[0]
   data[0] &= (~(0xFF >> hdr_offset));
@@ -81,30 +84,29 @@ int Field::deparse(char *data, int hdr_offset) const {
   int offset = field_offset - hdr_offset;
   if (offset == 0) {
     std::copy(bytes.begin() + 1, bytes.begin() + hdr_bytes, data + 1);
-    data[0] |= bytes[0];
+    data[0] |= ubytes[0];
   }
   else if (offset > 0) { /* shift left */
     /* this assumes that the packet was memset to 0, TODO: improve */
     for (i = 0; i < hdr_bytes - 1; i++) {
-      data[i] |= (bytes[i] << offset) | (bytes[i + 1] >> (8 - offset));
+      data[i] = (ubytes[i] << offset) | (ubytes[i + 1] >> (8 - offset));
     }
-    int tail_offset = (hdr_bytes << 3) - (hdr_offset + nbits);
-    data[i] &= (~((1 << tail_offset) - 1));
-    data[i] |= bytes[i] << offset;
+    if(i > 0) data[i] = 0;
+    data[i] |= ubytes[i] << offset;
     if((field_offset + nbits) > (hdr_bytes << 3)) {
-      data[i] |= (bytes[i + 1] >> (8 - offset));
+      data[i] |= (ubytes[i + 1] >> (8 - offset));
     }
   }
   else { /* shift right */
     offset = -offset;
-    data[0] |= (bytes[0] >> offset);
+    data[0] |= (ubytes[0] >> offset);
     if(nbytes == 1) return nbits;
     for (i = 1; i < hdr_bytes - 1; i++) {
-      data[i] = (bytes[i - 1] << (8 - offset)) | (bytes[i] >> offset);
+      data[i] = (ubytes[i - 1] << (8 - offset)) | (ubytes[i] >> offset);
     }
     int tail_offset = (hdr_bytes >> 3) - (hdr_offset + nbits);
     data[i] &= ((1 << tail_offset) - 1);
-    data[i] |= (bytes[i - 1] << (8 - offset)) | (bytes[i] >> offset);
+    data[i] |= (ubytes[i - 1] << (8 - offset)) | (ubytes[i] >> offset);
   }
 
   return nbits;

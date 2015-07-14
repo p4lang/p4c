@@ -106,7 +106,7 @@ const ParseState *ParseState::operator()(Packet *pkt, const char *data,
   // build key
   static thread_local ByteContainer key;
   key.clear();
-  key_builder(*phv, data, key);
+  key_builder(*phv, data + *bytes_parsed, key);
 
   // try the matches in order
   const ParseState *next_state = NULL;
