@@ -53,6 +53,7 @@ int Field::extract(const char *data, int hdr_offset) {
   else { /* shift right */
     offset = -offset;
     bytes[0] = udata[0] >> offset;
+    bytes[0] &= (0xFF >> field_offset);
     for (i = 1; i < nbytes; i++) {
       bytes[i] = (udata[i - 1] << (8 - offset)) | (udata[i] >> offset);
     }
@@ -88,7 +89,7 @@ int Field::deparse(char *data, int hdr_offset) const {
       data[i] |= (bytes[i] << offset) | (bytes[i + 1] >> (8 - offset));
     }
     int tail_offset = (hdr_bytes << 3) - (hdr_offset + nbits);
-    data[i] &= ((1 << tail_offset) - 1);
+    data[i] &= (~((1 << tail_offset) - 1));
     data[i] |= bytes[i] << offset;
     if((field_offset + nbits) > (hdr_bytes << 3)) {
       data[i] |= (bytes[i + 1] >> (8 - offset));
