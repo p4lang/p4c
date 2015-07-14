@@ -403,6 +403,11 @@ void P4Objects::init_objects(std::istream &is) {
 	  MeterArray *meter = get_meter_array(name);
 	  action_fn->parameter_push_back_meter_array(meter);
 	}
+	else if(type == "header_stack") {
+	  const string header_stack_name = cfg_parameter["value"].asString();
+	  header_id_t header_stack_id = get_header_stack_id(header_stack_name);
+	  action_fn->parameter_push_back_header_stack(header_stack_id);
+	}
 	else {
 	  assert(0 && "parameter not supported");
 	}
