@@ -108,6 +108,8 @@ void SimpleSwitch::ingress_thread() {
     std::unique_ptr<Packet> packet;
     input_buffer.pop_back(&packet);
     phv = packet->get_phv();
+    // many current P4 programs assume this
+    // it is also part of the original P4 spec
     phv->reset_metadata();
     SIMPLELOG << "processing packet " << packet->get_packet_id() << std::endl;
 
@@ -132,7 +134,7 @@ void SimpleSwitch::ingress_thread() {
     Field &f_learn_id = phv->get_field("intrinsic_metadata.lf_field_list");
     int learn_id = f_learn_id.get_int();
 
-    Field &f_mgid = phv->get_field("intrinsic_metadata.eg_mcast_group");
+    Field &f_mgid = phv->get_field("intrinsic_metadata.mcast_grp");
     unsigned int mgid = f_mgid.get_uint();
 
     packet_id_t copy_id = 1;
