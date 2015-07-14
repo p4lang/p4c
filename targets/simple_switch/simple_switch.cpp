@@ -159,12 +159,14 @@ void SimpleSwitch::ingress_thread() {
     // MULTICAST
     if(mgid != 0) {
       SIMPLELOG << "multicast\n";
+      Field &f_rid = phv->get_field("intrinsic_metadata.egress_rid");
       const auto pre_out = pre->replicate({mgid});
       for(const auto &out : pre_out) {
 	egress_port = out.egress_port;
-	if(ingress_port == egress_port) continue; // pruning
+	// if(ingress_port == egress_port) continue; // pruning
 	SIMPLELOG << "replicating packet out of port " << egress_port
 		  << std::endl;
+	f_rid.set(out.rid);
 	std::unique_ptr<Packet> packet_copy(new Packet(packet->clone(copy_id++)));
 	packet_copy->set_egress_port(egress_port);
 	egress_buffer.push_front(std::move(packet_copy));
@@ -176,8 +178,6 @@ void SimpleSwitch::ingress_thread() {
 
     egress_port = egress_spec;
     SIMPLELOG << "egress port is " << egress_port << std::endl;    
-
-    // TODO: set egress_port
 
     if(egress_port == 511) {  // drop packet
       SIMPLELOG << "dropping packet\n";
@@ -199,7 +199,21 @@ void SimpleSwitch::egress_thread() {
     egress_buffer.pop_back(&packet);
     phv = packet->get_phv();
 
+    int egress_port = packet->get_egress_port();
+    phv->get_field("standard_metadata.egress_port").set(egress_port);
+
+    Field &f_egress_spec = phv->get_field("standard_metadata.egress_spec");
+    f_egress_spec.set(0);
+
     egress_mau->apply(packet.get());
+
+    // TODO: should not be done like this in egress pipeline
+    int egress_spec = f_egress_spec.get_int();
+    if(egress_spec == 511) {  // drop packet
+      SIMPLELOG << "dropping packet\n";
+      continue;
+    }
+
     deparser->deparse(packet.get());
 
     // TODO: egress cloning
