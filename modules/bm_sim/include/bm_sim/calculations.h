@@ -71,9 +71,9 @@ struct BufBuilder
 
 template <typename T,
 	  typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
-class Calculation {
+class Calculation_ {
 public:
-  Calculation(const BufBuilder &builder)
+  Calculation_(const BufBuilder &builder)
     : builder(builder), nbytes(builder.get_nbytes_key()) { }
 
   void set_compute_fn(const CFn<T> &fn) { compute_fn = fn; }
@@ -90,29 +90,40 @@ public:
     return output(*pkt.get_phv());
   }
 
+protected:
+  ~Calculation_() { }
+
 private:
   CFn<T> compute_fn{};
   BufBuilder builder;
   size_t nbytes;
 };
 
+template <typename T,
+	  typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
+class Calculation : public Calculation_<T> {
+public:
+  Calculation(const BufBuilder &builder)
+    : Calculation_<T>(builder) { }
+};
+
 // quick and dirty and hopefully temporary
 // added for support of old primitive modify_field_with_hash_based_offset()
-class NamedCalculation : public NamedP4Object, Calculation<uint64_t>
+class NamedCalculation : public NamedP4Object, public Calculation_<uint64_t>
 {
 public:
   NamedCalculation(const std::string &name, p4object_id_t id,
 		   const BufBuilder &builder)
-    : NamedP4Object(name, id), Calculation<uint64_t>(builder) {
+    : NamedP4Object(name, id), Calculation_<uint64_t>(builder) {
     set_compute_fn(hash::xxh64<uint64_t>);
   }
 
   uint64_t output(const PHV &phv) const {
-    return Calculation<uint64_t>::output(phv); 
+    return Calculation_<uint64_t>::output(phv); 
   }
 
   uint64_t output(const Packet &pkt) const {
-    return Calculation<uint64_t>::output(pkt); 
+    return Calculation_<uint64_t>::output(pkt); 
   }
 };
 

@@ -18,6 +18,8 @@
  *
  */
 
+#include <netinet/in.h>
+
 #include "bm_sim/calculations.h"
 
 #include "xxhash.h"
@@ -63,7 +65,12 @@ T crc16(const char *buf, size_t len) {
     int data = reflect(buf[byte], 8) ^ (remainder >> 8);
     remainder = table_crc16[data] ^ (remainder << 8);
   }
-  return static_cast<T>(reflect(remainder, 16) ^ final_xor_value);
+  /* why is the ntohs() call needed?
+     the input buf is made of bytes, yet we return an integer value
+     so either I call this function, or I return bytes...
+     is returning an integer really the right thing to do?
+  */
+  return static_cast<T>(ntohs(reflect(remainder, 16) ^ final_xor_value));
 }
 
 template unsigned int xxh64<unsigned int>(const char *, size_t);

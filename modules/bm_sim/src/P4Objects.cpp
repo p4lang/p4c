@@ -301,6 +301,7 @@ void P4Objects::init_objects(std::istream &is) {
     
     const string name = cfg_calculation["name"].asString();
     const p4object_id_t id = cfg_calculation["id"].asInt();
+    const string algo = cfg_calculation["algo"].asString();
 
     BufBuilder builder;
     for (const auto &cfg_field : cfg_calculation["input"]) {
@@ -313,7 +314,13 @@ void P4Objects::init_objects(std::istream &is) {
     }
 
     NamedCalculation *calculation = new NamedCalculation(name, id, builder);
-
+    // I need to find a better way to manage the different selection algos
+    // Maybe something similar to what I am doing for action primitives
+    // with a register mechanism
+    if(algo == "crc16")
+      calculation->set_compute_fn(hash::crc16<uint64_t>);
+    else
+      calculation->set_compute_fn(hash::xxh64<uint64_t>);    
     add_named_calculation(name, unique_ptr<NamedCalculation>(calculation));
   }
 
