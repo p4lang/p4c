@@ -18,31 +18,19 @@
  *
  */
 
+#include "Standard.h"
+
 #include <iostream>
 #include <sstream> 
 #include <iomanip>
-#include <thread>
 
-#include "Runtime.h"
-#include <thrift/protocol/TBinaryProtocol.h>
-#include <thrift/server/TSimpleServer.h>
-#include <thrift/transport/TServerSocket.h>
-#include <thrift/transport/TBufferTransports.h>
+namespace standard_server {
 
-using namespace ::apache::thrift;
-using namespace ::apache::thrift::protocol;
-using namespace ::apache::thrift::transport;
-using namespace ::apache::thrift::server;
+using namespace  ::bm_runtime::standard;
 
-using boost::shared_ptr;
-
-using namespace  ::bm_runtime;
-
-class RuntimeHandler : virtual public RuntimeIf {
- public:
-  RuntimeHandler() {
-    // Your initialization goes here
-  }
+class StandardHandler : virtual public StandardIf {
+public:
+  StandardHandler() { }
 
   std::string ToHex(const std::string& s, bool upper_case = false) {
     std::ostringstream ret;
@@ -254,51 +242,6 @@ class RuntimeHandler : virtual public RuntimeIf {
     printf("bm_swap_configs\n");
   }
 
-  BmMcMgrpHandle bm_mc_mgrp_create(const BmMcMgrp mgrp) {
-    // Your implementation goes here
-    printf("bm_mc_mgrp_create\n");
-    return 0;
-  }
-
-  void bm_mc_mgrp_destroy(const BmMcMgrpHandle mgrp_handle) {
-    // Your implementation goes here
-    printf("bm_mc_mgrp_destroy\n");
-  }
-
-  BmMcL1Handle bm_mc_l1_node_create(const BmMcRid rid) {
-    // Your implementation goes here
-    printf("bm_mc_l1_node_create\n");
-    return 0;
-  }
-
-  void bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
-    // Your implementation goes here
-    printf("bm_mc_l1_node_associate\n");
-  }
-
-  void bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle) {
-    // Your implementation goes here
-    printf("bm_mc_l1_node_destroy\n");
-  }
-
-  BmMcL2Handle bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) {
-    std::string str(port_map.rbegin(), port_map.rbegin() + 16);
-    std::cout << "bm_mc_l2_node_create" << std::endl
-	      << l1_handle << std::endl
-	      << str << std::endl;
-    return 0;
-  }
-
-  void bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map) {
-    // Your implementation goes here
-    printf("bm_mc_l2_node_update\n");
-  }
-
-  void bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle) {
-    // Your implementation goes here
-    printf("bm_mc_l2_node_destroy\n");
-  }
-
   void bm_meter_array_set_rates(const std::string& meter_array_name, const std::vector<BmMeterRateConfig> & rates) {
     // Your implementation goes here
     printf("bm_meter_array_set_rates\n");
@@ -327,23 +270,7 @@ class RuntimeHandler : virtual public RuntimeIf {
     // Your implementation goes here
     printf("bm_dump_table\n");
   }
-
+  
 };
 
-void run_server(int port) {
-  shared_ptr<RuntimeHandler> handler(new RuntimeHandler());
-  shared_ptr<TProcessor> processor(new RuntimeProcessor(handler));
-  shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
-  shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
-  shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
-
-  TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
-  server.serve();
-}
-
-int start_server(void) {
-  int port = 9090;
-  std::thread t(run_server, port);
-  t.detach();
-  return 0;
 }

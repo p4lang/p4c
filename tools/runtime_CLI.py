@@ -31,9 +31,12 @@ from thrift import Thrift
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
+from thrift.protocol import TMultiplexedProtocol
 
-from runtime import Runtime
-from runtime.ttypes import *
+from bm_runtime.standard import Standard
+from bm_runtime.standard.ttypes import *
+from bm_runtime.simple_pre import SimplePre
+from bm_runtime.simple_pre.ttypes import *
 
 
 def bytes_to_string(byte_array):
@@ -271,9 +274,10 @@ class RuntimeAPI(cmd.Cmd):
     prompt = 'RuntimeCmd: '
     intro = "Control utility for runtime P4 table manipulation"
 
-    def __init__(self, thrift_client):
+    def __init__(self, standard_client, mc_client):
         cmd.Cmd.__init__(self)
-        self.client = thrift_client
+        self.client = standard_client
+        self.mc_client = mc_client
 
     def do_greet(self, line):
         print "hello"
@@ -461,20 +465,20 @@ class RuntimeAPI(cmd.Cmd):
     def do_mc_mgrp_create(self, line):
         mgrp = int(line.split()[0])
         print "Creating multicast group", mgrp
-        mgrp_hdl = self.client.bm_mc_mgrp_create(mgrp)
+        mgrp_hdl = self.mc_client.bm_mc_mgrp_create(mgrp)
         print "SUCCESS"
         assert(mgrp == mgrp_hdl)
 
     def do_mc_mgrp_destroy(self, line):
         mgrp = int(line.split()[0])
         print "Destroying multicast group", mgrp
-        self.client.bm_mc_mgrp_destroy(mgrp)
+        self.mc_client.bm_mc_mgrp_destroy(mgrp)
         print "SUCCESS"
 
     def do_mc_l1_node_create(self, line):
         rid = int(line.split()[0])
         print "Creating l1 node with rid", rid
-        l1_hdl = self.client.bm_mc_l1_node_create(rid)
+        l1_hdl = self.mc_client.bm_mc_l1_node_create(rid)
         print "SUCCESS"
         print "l1 node was created with handle", l1_hdl
 
@@ -482,13 +486,13 @@ class RuntimeAPI(cmd.Cmd):
         mgrp = int(line.split()[0])
         l1_hdl = int(line.split()[1])
         print "Associating l1 node", l1_hdl, "to multicast group", mgrp
-        self.client.bm_mc_l1_node_associate(mgrp, l1_hdl)
+        self.mc_client.bm_mc_l1_node_associate(mgrp, l1_hdl)
         print "SUCCESS"
 
     def do_mc_l1_node_destroy(self, line):
         l1_hdl = int(line.split()[0])
         print "Destroying l1 node", l1_hdl,
-        self.client.bm_mc_l1_node_destroy(l1_hdl)
+        self.mc_client.bm_mc_l1_node_destroy(l1_hdl)
         print "SUCCESS"
 
     def ports_to_port_map_str(self, ports):
@@ -505,7 +509,7 @@ class RuntimeAPI(cmd.Cmd):
         l1_hdl = int(args[0])
         port_map_str = self.ports_to_port_map_str(args[1:])
         print "Creating l2 node for l1 node", l1_hdl, "with port map", port_map_str
-        l2_hdl = self.client.bm_mc_l2_node_create(l1_hdl, port_map_str)
+        l2_hdl = self.mc_client.bm_mc_l2_node_create(l1_hdl, port_map_str)
         print "SUCCESS"
         print "l2 node was created with handle", l2_hdl
 
@@ -514,13 +518,13 @@ class RuntimeAPI(cmd.Cmd):
         l2_hdl = int(args[0])
         port_map_str = self.ports_to_port_map_str(args[1:])
         print "Updating l2 node", l2_hdl, "with port map", port_map_str
-        self.client.bm_mc_l2_node_update(l2_hdl, port_map_str)
+        self.mc_client.bm_mc_l2_node_update(l2_hdl, port_map_str)
         print "SUCCESS"
 
     def do_mc_l2_node_destroy(self, line):
         l2_hdl = int(line.split()[0])
         print "Destroying l2 node", l2_hdl,
-        self.client.bm_mc_l2_node_destroy(l2_hdl)
+        self.mc_client.bm_mc_l2_node_destroy(l2_hdl)
         print "SUCCESS"
 
     def do_load_new_config_file(self, line):
@@ -569,25 +573,27 @@ def thrift_connect():
     transport = TTransport.TBufferedTransport(transport)
     # Wrap in a protocol
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
-    # Create a client to use the protocol encoder
-    client = Runtime.Client(protocol)
+    standard_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, "standard")
+    mc_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, "simple_pre")
+    standard_client = Standard.Client(standard_protocol)
+    mc_client = SimplePre.Client(mc_protocol)
     # Connect!
     transport.open()
 
-    return client
+    return standard_client, mc_client
 
 
 def main():
     load_json(args.json)
 
     try:
-        client = thrift_connect()
+        standard_client, mc_client = thrift_connect()
     except TTransport.TTransportException:
         print "Could not connect to thrift client on port", THRIFT_PORT
         print "Make sure the switch is running and that you have the right port"
         sys.exit(1)
 
-    RuntimeAPI(client).cmdloop()
+    RuntimeAPI(standard_client, mc_client).cmdloop()
 
 if __name__ == '__main__':
     main()

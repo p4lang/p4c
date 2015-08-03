@@ -4,7 +4,7 @@ AM_CFLAGS = $(PICKY_CFLAGS)
 noinst_LTLIBRARIES = libbmruntime.la
 
 common_source = \
-src/Runtime_server.cpp
+src/server.cpp
 
 common_include = \
 include/bm_runtime/bm_runtime.h

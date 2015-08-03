@@ -2,5 +2,7 @@ gen-cpp/include/
 gen-cpp/src/
 build/
 .thrift_gen
-fixed-cpp/src/runtime*
-fixed-cpp/src/Runtime*
+fixed-cpp/src/standard*
+fixed-cpp/src/Standard*
+fixed-cpp/src/simple_pre*
+fixed-cpp/src/SimplePre*

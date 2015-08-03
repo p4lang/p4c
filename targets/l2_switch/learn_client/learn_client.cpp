@@ -11,8 +11,10 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
+#include <thrift/protocol/TMultiplexedProtocol.h>
 
-#include "Runtime.h"
+#include "Standard.h"
+#include "SimplePre.h"
 
 typedef struct {
   int switch_id;
@@ -26,7 +28,7 @@ typedef struct {
   short ingress_port;
 } __attribute__((packed)) sample_t;
 
-using namespace bm_runtime;
+using namespace bm_runtime::standard;
 
 using namespace apache::thrift;
 using namespace apache::thrift::protocol;
@@ -38,7 +40,11 @@ int main() {
   boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
   boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
 
-  RuntimeClient client(protocol);
+  boost::shared_ptr<TMultiplexedProtocol> standard_protocol(
+    new TMultiplexedProtocol(protocol, "standard")
+  );
+
+  StandardClient client(standard_protocol);
 
   transport->open();
 

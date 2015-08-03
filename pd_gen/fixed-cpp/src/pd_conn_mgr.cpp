@@ -23,6 +23,7 @@
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
+#include <thrift/protocol/TMultiplexedProtocol.h>
 
 #include "pd_conn_mgr.h"
 
@@ -32,8 +33,13 @@ using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 
+struct client_t {
+  StandardClient *client;
+  McClient *mc_client;
+};
+
 struct pd_conn_mgr_s {
-  RuntimeClient *clients[NUM_DEVICES];
+  client_t clients[NUM_DEVICES];
   boost::shared_ptr<TTransport> transports[NUM_DEVICES];
 };
 
@@ -50,14 +56,22 @@ void pd_conn_mgr_destroy(pd_conn_mgr_t *conn_mgr_state) {
 
 int pd_conn_mgr_client_init(pd_conn_mgr_t *conn_mgr_state,
 			    int dev_id, int thrift_port_num) {
-  assert(!conn_mgr_state->clients[dev_id]);
+  assert(!conn_mgr_state->clients[dev_id].client);
 
   boost::shared_ptr<TTransport> socket(new TSocket("localhost", thrift_port_num));
   boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
   boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
 
+  boost::shared_ptr<TMultiplexedProtocol> standard_protocol(
+    new TMultiplexedProtocol(protocol, "standard")
+  );
+  boost::shared_ptr<TMultiplexedProtocol> mc_protocol(
+    new TMultiplexedProtocol(protocol, "simple_pre")
+  );
+
   conn_mgr_state->transports[dev_id] = transport;
-  conn_mgr_state->clients[dev_id] = new RuntimeClient(protocol);
+  conn_mgr_state->clients[dev_id].client = new StandardClient(standard_protocol);
+  conn_mgr_state->clients[dev_id].mc_client = new McClient(mc_protocol);
 
   try {
     transport->open();
@@ -73,14 +87,21 @@ int pd_conn_mgr_client_init(pd_conn_mgr_t *conn_mgr_state,
 }
 
 int pd_conn_mgr_client_close(pd_conn_mgr_t *conn_mgr_state, int dev_id) {
-  assert(conn_mgr_state->clients[dev_id]);
+  assert(conn_mgr_state->clients[dev_id].client);
   conn_mgr_state->transports[dev_id]->close();
-  delete conn_mgr_state->clients[dev_id];
-  conn_mgr_state->clients[dev_id] = NULL;
+  delete conn_mgr_state->clients[dev_id].client;
+  delete conn_mgr_state->clients[dev_id].mc_client;
+  conn_mgr_state->clients[dev_id].client = NULL;
+  conn_mgr_state->clients[dev_id].mc_client = NULL;
   return 0;
 }
 
-RuntimeClient *pd_conn_mgr_client(pd_conn_mgr_t *conn_mgr_state,
-				  int dev_id) {
-  return conn_mgr_state->clients[dev_id];
+Client *pd_conn_mgr_client(pd_conn_mgr_t *conn_mgr_state,
+			   int dev_id) {
+  return conn_mgr_state->clients[dev_id].client;
+}
+
+McClient *pd_conn_mgr_mc_client(pd_conn_mgr_t *conn_mgr_state,
+				int dev_id) {
+  return conn_mgr_state->clients[dev_id].mc_client;
 }

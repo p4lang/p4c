@@ -257,7 +257,7 @@ ${name}
 //::   if match_type == MatchType.TERNARY:
   options.__set_priority(priority);
 //::   #endif
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
   try {
     *entry_hdl = client->bm_mt_indirect_add_entry(
       "${t_name}", match_key, mbr_hdl, options
@@ -291,7 +291,7 @@ ${name}
 //::   if match_type == MatchType.TERNARY:
   options.__set_priority(priority);
 //::   #endif
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
   try {
     *entry_hdl = client->bm_mt_indirect_ws_add_entry(
       "${t_name}", match_key, grp_hdl, options
@@ -322,7 +322,7 @@ ${name}
  p4_pd_entry_hdl_t entry_hdl
 ) {
   assert(my_devices[dev_id]);
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
   try {
 //::   if t_type == TableType.SIMPLE:
     client->bm_mt_delete_entry("${t_name}", entry_hdl);
@@ -448,7 +448,7 @@ ${name}
  ${param_str}
 ) {
   assert(my_devices[dev_tgt.device_id]);
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
   try {
     client->bm_mt_indirect_set_default_member("${t_name}", mbr_hdl);
   } catch (InvalidTableOperation &ito) {
@@ -471,7 +471,7 @@ ${name}
  ${param_str}
 ) {
   assert(my_devices[dev_tgt.device_id]);
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
   try {
     client->bm_mt_indirect_ws_set_default_group("${t_name}", grp_hdl);
   } catch (InvalidTableOperation &ito) {
@@ -515,7 +515,7 @@ ${name}
 //::     else:
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
   try {
     *mbr_hdl = client->bm_mt_indirect_add_member(
       "${t_name}", "${a_name}", action_data
@@ -549,7 +549,7 @@ ${name}
 //::     else:
   std::vector<std::string> action_data = build_action_data_${a_name}(action_spec);
 //::     #endif
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
   try {
     client->bm_mt_indirect_modify_member(
       "${t_name}", mbr_hdl, "${a_name}", action_data
@@ -577,7 +577,7 @@ ${name}
  ${param_str}
 ) {
   assert(my_devices[dev_id]);
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
   try {
     client->bm_mt_indirect_delete_member("${t_name}", mbr_hdl);
   } catch (InvalidTableOperation &ito) {
@@ -605,7 +605,7 @@ ${name}
 ) {
   (void) max_grp_size;
   assert(my_devices[dev_tgt.device_id]);
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_tgt.device_id);
   try {
     *grp_hdl = client->bm_mt_indirect_ws_create_group("${t_name}");
   } catch (InvalidTableOperation &ito) {
@@ -629,7 +629,7 @@ ${name}
  ${param_str}
 ) {
   assert(my_devices[dev_id]);
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
   try {
     client->bm_mt_indirect_ws_delete_group("${t_name}", grp_hdl);
   } catch (InvalidTableOperation &ito) {
@@ -654,7 +654,7 @@ ${name}
  ${param_str}
 ) {
   assert(my_devices[dev_id]);
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
   try {
     client->bm_mt_indirect_ws_add_member_to_group("${t_name}", mbr_hdl, grp_hdl);
   } catch (InvalidTableOperation &ito) {
@@ -679,7 +679,7 @@ ${name}
  ${param_str}
 ) {
   assert(my_devices[dev_id]);
-  RuntimeClient *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
+  Client *client = pd_conn_mgr_client(conn_mgr_state, dev_id);
   try {
     client->bm_mt_indirect_ws_remove_member_from_group("${t_name}", mbr_hdl, grp_hdl);
   } catch (InvalidTableOperation &ito) {
