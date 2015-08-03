@@ -45,19 +45,27 @@ using ::bm_runtime::simple_pre::SimplePreProcessor;
 namespace {
 Switch *switch_;
 
-int serve(int port) {
-  shared_ptr<StandardHandler> standard_handler(new StandardHandler(switch_));
-  shared_ptr<SimplePreHandler> simple_pre_handler(new SimplePreHandler(switch_));
+template<typename T>
+bool switch_has_component() {
+  return (switch_->get_component<T>() != nullptr);
+}
 
+int serve(int port) {
   shared_ptr<TMultiplexedProcessor> processor(new TMultiplexedProcessor());
+
+  shared_ptr<StandardHandler> standard_handler(new StandardHandler(switch_));
   processor->registerProcessor(
     "standard",
     shared_ptr<TProcessor>(new StandardProcessor(standard_handler))
   );
-  processor->registerProcessor(
-    "simple_pre",
-    shared_ptr<TProcessor>(new SimplePreProcessor(simple_pre_handler))
-  );
+
+  if(switch_has_component<McPre>()) {
+    shared_ptr<SimplePreHandler> simple_pre_handler(new SimplePreHandler(switch_));
+    processor->registerProcessor(
+      "simple_pre",
+      shared_ptr<TProcessor>(new SimplePreProcessor(simple_pre_handler))
+    );
+  }
 
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());

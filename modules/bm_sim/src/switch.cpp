@@ -25,11 +25,10 @@
 #include "bm_sim/options_parse.h"
 
 Switch::Switch(bool enable_swap)
-  : DevMgr(), enable_swap(enable_swap) {
+  : DevMgr(),
+    enable_swap(enable_swap) {
   p4objects = std::make_shared<P4Objects>();
   p4objects_rt = p4objects;
-  // p4objects = std::unique_ptr<P4Objects>(new P4Objects());
-  pre = std::unique_ptr<McPre>(new McPre());
 }
 
 void

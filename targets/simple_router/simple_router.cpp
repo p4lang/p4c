@@ -46,7 +46,7 @@ class SimpleSwitch : public Switch {
 public:
   SimpleSwitch()
     : Switch(true), // enable_switch = true
-      input_buffer(1024), output_buffer(128) {}
+      input_buffer(1024), output_buffer(128) { }
 
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;

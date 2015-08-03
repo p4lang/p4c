@@ -24,6 +24,8 @@
 #include <memory>
 #include <string>
 #include <fstream>
+#include <typeinfo>
+#include <typeindex>
 
 #include <boost/thread/shared_mutex.hpp>
 
@@ -32,7 +34,6 @@
 #include "packet.h"
 #include "learning.h"
 #include "runtime_interface.h"
-#include "pre.h"
 #include "dev_mgr.h"
 
 class Switch : public RuntimeInterface, public DevMgr {
@@ -183,7 +184,12 @@ public:
 
   LearnEngine *get_learn_engine();
 
-  McPre *get_pre() { return pre.get(); }
+  template<typename T>
+  std::shared_ptr<T> get_component() {
+    const auto &search = components.find(std::type_index(typeid(T)));
+    if(search == components.end()) return nullptr;
+    return std::static_pointer_cast<T>(search->second);
+  }
 
   AgeingMonitor *get_ageing_monitor();
 
@@ -192,6 +198,13 @@ protected:
   // TODO: should I return shared_ptrs instead of raw_ptrs?
   // invalidate all pointers obtained with get_pipeline(), get_parser(),...
   int do_swap();
+
+  template<typename T>
+  bool add_component(std::shared_ptr<T> ptr) {
+    std::shared_ptr<void> ptr_ = std::static_pointer_cast<void>(ptr);
+    const auto &r = components.insert({std::type_index(typeid(T)), ptr_});
+    return r.second;
+  }
 
   // do these methods need any protection
   Pipeline *get_pipeline(const std::string &name) {
@@ -219,7 +232,7 @@ private:
 				    MatchTableIndirectWS **table);
 
 protected:
-  std::unique_ptr<McPre> pre{nullptr};
+  std::unordered_map<std::type_index, std::shared_ptr<void> > components{};
 
 private:
   mutable boost::shared_mutex request_mutex{};
