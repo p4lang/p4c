@@ -22,9 +22,7 @@
 
 #include <bm_sim/pre.h>
 
-namespace simple_pre_server {
-
-using namespace  ::bm_runtime::simple_pre;
+namespace bm_runtime { namespace simple_pre {
 
 class SimplePreHandler : virtual public SimplePreIf {
 public:
@@ -131,4 +129,4 @@ private:
   Switch *switch_;
 };
 
-}
+} }

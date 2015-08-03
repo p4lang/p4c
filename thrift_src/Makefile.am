@@ -1,5 +1,5 @@
 standard_thrift_files = \
-$(srcdir)/../tools/standard/__init__.py \
+$(srcdir)/../tools/bm_runtime/standard/__init__.py \
 gen-cpp/standard_constants.cpp \
 gen-cpp/standard_constants.h \
 gen-cpp/Standard.cpp \
@@ -8,7 +8,7 @@ gen-cpp/standard_types.cpp \
 gen-cpp/standard_types.h
 
 simple_pre_thrift_files = \
-$(srcdir)/../tools/simple_pre/__init__.py \
+$(srcdir)/../tools/bm_runtime/simple_pre/__init__.py \
 gen-cpp/simple_pre_constants.cpp \
 gen-cpp/simple_pre_constants.h \
 gen-cpp/SimplePre.cpp \

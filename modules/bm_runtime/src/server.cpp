@@ -37,10 +37,10 @@ using namespace ::apache::thrift::server;
 
 using boost::shared_ptr;
 
-using ::standard_server::StandardHandler;
-using ::standard_server::StandardProcessor;
-using ::simple_pre_server::SimplePreHandler;
-using ::simple_pre_server::SimplePreProcessor;
+using ::bm_runtime::standard::StandardHandler;
+using ::bm_runtime::standard::StandardProcessor;
+using ::bm_runtime::simple_pre::SimplePreHandler;
+using ::bm_runtime::simple_pre::SimplePreProcessor;
 
 namespace {
 Switch *switch_;

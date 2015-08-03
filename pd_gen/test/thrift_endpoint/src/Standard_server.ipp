@@ -24,9 +24,7 @@
 #include <sstream> 
 #include <iomanip>
 
-namespace standard_server {
-
-using namespace  ::bm_runtime::standard;
+namespace bm_runtime { namespace standard {
 
 class StandardHandler : virtual public StandardIf {
 public:
@@ -273,4 +271,4 @@ public:
   
 };
 
-}
+} }

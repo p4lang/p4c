@@ -22,9 +22,7 @@
 
 #include <bm_sim/switch.h>
 
-namespace standard_server {
-
-using namespace  ::bm_runtime::standard;
+namespace bm_runtime { namespace standard {
 
 typedef RuntimeInterface::mbr_hdl_t mbr_hdl_t;
 typedef RuntimeInterface::grp_hdl_t grp_hdl_t;
@@ -523,4 +521,4 @@ private:
   Switch *switch_;
 };
 
-}
+} }
