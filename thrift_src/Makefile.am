@@ -26,19 +26,13 @@ noinst_LTLIBRARIES = libruntimestubs.la
 libruntimestubs_la_SOURCES = \
 	$(BUILT_SOURCES)
 
-$(standard_thrift_files) : standard.thrift
-	$(THRIFT) --gen cpp -r $<
-	$(THRIFT) --gen py -r $<
-	rm -rf $(srcdir)/../tools/bm_runtime/standard/
-	mkdir -p $(srcdir)/../tools/bm_runtime
-	cp -r gen-py/bm_runtime/standard/ $(srcdir)/../tools/bm_runtime/
-
-$(simple_pre_thrift_files) : simple_pre.thrift
-	$(THRIFT) --gen cpp -r $<
-	$(THRIFT) --gen py -r $<
-	rm -rf $(srcdir)/../tools/bm_runtime/simple_pre/
-	mkdir -p $(srcdir)/../tools/bm_runtime
-	cp -r gen-py/bm_runtime/simple_pre/ $(srcdir)/../tools/bm_runtime/
+$(BUILT_SOURCES) : standard.thrift simple_pre.thrift
+	$(THRIFT) --gen cpp -r standard.thrift
+	$(THRIFT) --gen py -r standard.thrift
+	$(THRIFT) --gen cpp -r simple_pre.thrift
+	$(THRIFT) --gen py -r simple_pre.thrift
+	rm -rf $(srcdir)/../tools/bm_runtime/
+	cp -r gen-py/bm_runtime/ $(srcdir)/../tools/
 
 clean-local:
 	rm -rf gen-cpp gen-py
