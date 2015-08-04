@@ -29,6 +29,7 @@
 
 #include "Standard_server.ipp"
 #include "SimplePre_server.ipp"
+#include "SimplePreLAG_server.ipp"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -41,6 +42,8 @@ using ::bm_runtime::standard::StandardHandler;
 using ::bm_runtime::standard::StandardProcessor;
 using ::bm_runtime::simple_pre::SimplePreHandler;
 using ::bm_runtime::simple_pre::SimplePreProcessor;
+using ::bm_runtime::simple_pre_lag::SimplePreLAGHandler;
+using ::bm_runtime::simple_pre_lag::SimplePreLAGProcessor;
 
 namespace {
 Switch *switch_;
@@ -64,6 +67,14 @@ int serve(int port) {
     processor->registerProcessor(
       "simple_pre",
       shared_ptr<TProcessor>(new SimplePreProcessor(simple_pre_handler))
+    );
+  }
+
+  if(switch_has_component<McSimplePreLAG>()) {
+    shared_ptr<SimplePreLAGHandler> simple_pre_handler(new SimplePreLAGHandler(switch_));
+    processor->registerProcessor(
+      "simple_pre_lag",
+      shared_ptr<TProcessor>(new SimplePreLAGProcessor(simple_pre_handler))
     );
   }
 

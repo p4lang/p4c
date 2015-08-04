@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 #include "bm_sim/simple_pre.h"
+#include "bm_sim/simple_pre_lag.h"
 #include <bitset>
 
 TEST(McSimplePre, Replicate)
@@ -99,4 +100,10 @@ TEST(McSimplePre, Replicate)
   }
   rc = pre.mc_mgrp_destroy(mgrp_hdl);
   ASSERT_EQ(rc, McSimplePre::SUCCESS);
+}
+
+
+TEST(McSimplePreLAG, Replicate)
+{
+  // TODO Krishna
 }
