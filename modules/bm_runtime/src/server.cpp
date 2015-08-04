@@ -59,7 +59,7 @@ int serve(int port) {
     shared_ptr<TProcessor>(new StandardProcessor(standard_handler))
   );
 
-  if(switch_has_component<McPre>()) {
+  if(switch_has_component<McSimplePre>()) {
     shared_ptr<SimplePreHandler> simple_pre_handler(new SimplePreHandler(switch_));
     processor->registerProcessor(
       "simple_pre",

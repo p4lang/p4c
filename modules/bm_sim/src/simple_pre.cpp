@@ -19,14 +19,14 @@
  *
  */
 
-#include "bm_sim/pre.h"
+#include "bm_sim/simple_pre.h"
 
 using std::vector;
 using std::copy;
 using std::string;
 
-McPre::McReturnCode
-McPre::mc_mgrp_create(const mgrp_t mgid, mgrp_hdl_t *mgrp_hdl)
+McSimplePre::McReturnCode
+McSimplePre::mc_mgrp_create(const mgrp_t mgid, mgrp_hdl_t *mgrp_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock(mgid_lock);
   size_t num_entries = mgid_entries.size();
@@ -37,16 +37,16 @@ McPre::mc_mgrp_create(const mgrp_t mgid, mgrp_hdl_t *mgrp_hdl)
   return SUCCESS;
 }
 
-McPre::McReturnCode
-McPre::mc_mgrp_destroy(mgrp_hdl_t mgrp_hdl)
+McSimplePre::McReturnCode
+McSimplePre::mc_mgrp_destroy(mgrp_hdl_t mgrp_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock(mgid_lock);
   mgid_entries.erase(mgrp_hdl);
   return SUCCESS;
 }
 
-McPre::McReturnCode
-McPre::mc_l1_node_create(const rid_t rid, l1_hdl_t *l1_hdl)
+McSimplePre::McReturnCode
+McSimplePre::mc_l1_node_create(const rid_t rid, l1_hdl_t *l1_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock(l1_lock);
   size_t num_entries = l1_entries.size();
@@ -56,8 +56,8 @@ McPre::mc_l1_node_create(const rid_t rid, l1_hdl_t *l1_hdl)
   return SUCCESS;
 }
 
-McPre::McReturnCode
-McPre::mc_l1_node_associate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
+McSimplePre::McReturnCode
+McSimplePre::mc_l1_node_associate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock1(mgid_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l1_lock);
@@ -69,8 +69,8 @@ McPre::mc_l1_node_associate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
   return SUCCESS;
 }
 
-McPre::McReturnCode
-McPre::mc_l1_node_destroy(const l1_hdl_t l1_hdl)
+McSimplePre::McReturnCode
+McSimplePre::mc_l1_node_destroy(const l1_hdl_t l1_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock(l1_lock);
   if (!l1_handles.valid_handle(l1_hdl)) return INVALID_L1_HANDLE;
@@ -79,8 +79,8 @@ McPre::mc_l1_node_destroy(const l1_hdl_t l1_hdl)
   return SUCCESS;
 }
 
-McPre::McReturnCode
-McPre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl,
+McSimplePre::McReturnCode
+McSimplePre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl,
 			 const PortMap &port_map)
 {
   boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
@@ -95,8 +95,8 @@ McPre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl,
   return SUCCESS;
 }
 
-McPre::McReturnCode
-McPre::mc_l2_node_update(const l2_hdl_t l2_hdl,
+McSimplePre::McReturnCode
+McSimplePre::mc_l2_node_update(const l2_hdl_t l2_hdl,
 			 const PortMap &port_map)
 {
   boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
@@ -106,8 +106,8 @@ McPre::mc_l2_node_update(const l2_hdl_t l2_hdl,
   return SUCCESS;
 }
 
-McPre::McReturnCode
-McPre::mc_l2_node_destroy(const l2_hdl_t l2_hdl)
+McSimplePre::McReturnCode
+McSimplePre::mc_l2_node_destroy(const l2_hdl_t l2_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
   if (!l2_handles.valid_handle(l2_hdl)) return INVALID_L2_HANDLE;
@@ -116,12 +116,12 @@ McPre::mc_l2_node_destroy(const l2_hdl_t l2_hdl)
   return SUCCESS;
 }
 
-std::vector<McPre::McPre_Out>
-McPre::replicate(const McPre::McPre_In ingress_info) const
+std::vector<McSimplePre::McOut>
+McSimplePre::replicate(const McSimplePre::McIn ingress_info) const
 {
-  std::vector<McPre::McPre_Out> egress_info_list;
+  std::vector<McSimplePre::McOut> egress_info_list;
   egress_port_t port_id;
-  McPre::McPre_Out egress_info;
+  McSimplePre::McOut egress_info;
   boost::shared_lock<boost::shared_mutex> lock1(mgid_lock);
   boost::shared_lock<boost::shared_mutex> lock2(l1_lock);
   boost::shared_lock<boost::shared_mutex> lock3(l2_lock);
