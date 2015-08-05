@@ -1,9 +1,10 @@
 AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/include/ -I$(srcdir)/../bf_lpm_trie/include/ -I$(srcdir)/../BMI/include/
 AM_CPPFLAGS += $(DEBUG_CPPFLAGS)
-# I chose to add -Weffc++ for this module. I feel that most of it is excessively
-# pedantic (like constructior initializers for non POD data), but it may be
-# useful :/
-AM_CXXFLAGS = $(PICKY_CXXFLAGS) -Weffc++
+# I used to have -Weffc++ for this module. I felt that most of it was excessively
+# pedantic (like constructior initializers for non POD data), but it was
+# useful. However in some versions of g++, it warns for non-virtual destructors
+# in base classes even when the destructor is protected, so I removed it :/
+AM_CXXFLAGS = $(PICKY_CXXFLAGS) # -Weffc++
 AM_CFLAGS = $(PICKY_CFLAGS)
 
 noinst_LTLIBRARIES = libbmsim.la
