@@ -220,6 +220,7 @@ private:
   int get_field_offset(header_id_t header_id, const std::string &field_name);
   size_t get_field_bytes(header_id_t header_id, int field_offset);
   size_t get_field_bits(header_id_t header_id, int field_offset);
+  size_t get_header_bits(header_id_t header_id);
   std::tuple<header_id_t, int> field_info(const string &header_name,
 					  const string &field_name);
 };

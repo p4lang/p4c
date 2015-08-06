@@ -150,8 +150,9 @@ void P4Objects::init_objects(std::istream &is) {
     for (const auto &cfg_parse_state : cfg_parse_states) {
 
       const string parse_state_name = cfg_parse_state["name"].asString();
+      const p4object_id_t id = cfg_parse_state["id"].asInt();
       // p4object_id_t parse_state_id = cfg_parse_state["id"].asInt();
-      ParseState *parse_state = new ParseState(parse_state_name);
+      ParseState *parse_state = new ParseState(parse_state_name, id);
 
       const Json::Value &cfg_parser_ops = cfg_parse_state["parser_ops"];
       for(const auto &cfg_parser_op : cfg_parser_ops) {
@@ -305,12 +306,25 @@ void P4Objects::init_objects(std::istream &is) {
 
     BufBuilder builder;
     for (const auto &cfg_field : cfg_calculation["input"]) {
-      assert(cfg_field["type"].asString() == "field");
-      header_id_t header_id;
-      int offset;
-      std::tie(header_id, offset) = field_info(cfg_field["value"][0].asString(),
-					       cfg_field["value"][1].asString());
-      builder.push_back_field(header_id, offset, get_field_bits(header_id, offset));
+      const string type = cfg_field["type"].asString();
+      if(type == "field") {
+	header_id_t header_id;
+	int offset;
+	std::tie(header_id, offset) = field_info(cfg_field["value"][0].asString(),
+						 cfg_field["value"][1].asString());
+	builder.push_back_field(header_id, offset, get_field_bits(header_id, offset));
+      }
+      else if(type == "hexstr") {
+	builder.push_back_constant(ByteContainer(cfg_field["value"].asString()),
+				   cfg_field["bitwidth"].asInt());
+      }
+      else if(type == "header") {
+	header_id_t header_id = get_header_id(cfg_field["value"].asString());
+	builder.push_back_header(header_id, get_header_bits(header_id));
+      }
+      else if(type == "payload") {
+	builder.append_payload();
+      }
     }
 
     NamedCalculation *calculation = new NamedCalculation(name, id, builder);
@@ -319,6 +333,8 @@ void P4Objects::init_objects(std::istream &is) {
     // with a register mechanism
     if(algo == "crc16")
       calculation->set_compute_fn(hash::crc16<uint64_t>);
+    else if(algo == "csum16")
+      calculation->set_compute_fn(hash::cksum16<uint64_t>);
     else
       calculation->set_compute_fn(hash::xxh64<uint64_t>);    
     add_named_calculation(name, unique_ptr<NamedCalculation>(calculation));
@@ -629,7 +645,11 @@ void P4Objects::init_objects(std::istream &is) {
 				  header_id, field_offset);
     }
     else {
-      assert(0);
+      assert(checksum_type == "generic");
+      const string calculation_name = cfg_checksum["calculation"].asString();
+      NamedCalculation *calculation = get_named_calculation(calculation_name);
+      checksum = new CalcBasedChecksum(checksum_name, checksum_id,
+				       header_id, field_offset, calculation);
     }
 
     checksums.push_back(unique_ptr<Checksum>(checksum));
@@ -708,6 +728,11 @@ size_t P4Objects::get_field_bytes(header_id_t header_id, int field_offset) {
 size_t P4Objects::get_field_bits(header_id_t header_id, int field_offset) {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_bit_width(field_offset);
+}
+
+size_t P4Objects::get_header_bits(header_id_t header_id) {
+  const HeaderType &header_type = phv_factory.get_header_type(header_id);
+  return header_type.get_bit_width();
 }
 
 std::tuple<header_id_t, int> P4Objects::field_info(const string &header_name,

@@ -68,10 +68,10 @@ protected:
   ParserTest()
     : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
       udpHeaderType("udp_t", 2), tcpHeaderType("tcp_t", 3),
-      ethernetParseState("parse_ethernet"),
-      ipv4ParseState("parse_ipv4"),
-      udpParseState("parse_udp"),
-      tcpParseState("parse_tcp"),
+      ethernetParseState("parse_ethernet", 0),
+      ipv4ParseState("parse_ipv4", 1),
+      udpParseState("parse_udp", 2),
+      tcpParseState("parse_tcp", 3),
       parser("test_parser", 0), deparser("test_deparser", 0) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
@@ -528,8 +528,8 @@ protected:
 
   MPLSParserTest()
     : ethernetHeaderType("ethernet_t", 0), MPLSHeaderType("mpls_t", 1),
-      ethernetParseState("parse_ethernet"),
-      MPLSParseState("parse_mpls"),
+      ethernetParseState("parse_ethernet", 0),
+      MPLSParseState("parse_mpls", 1),
       parser("test_parser", 0), deparser("test_deparser", 0) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);

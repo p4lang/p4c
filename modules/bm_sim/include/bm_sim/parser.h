@@ -269,10 +269,11 @@ private:
   const ParseState *next_state; /* NULL if end */
 };
 
-class ParseState {
+class ParseState : public NamedP4Object {
 public:
-  ParseState(std::string name)
-    : name(name), has_switch(false) {}
+  ParseState(const std::string &name, p4object_id_t id)
+    : NamedP4Object(name, id),
+      has_switch(false) {}
 
   void add_extract(header_id_t header) {
     parser_ops.emplace_back(new ParserOpExtract(header));
@@ -323,8 +324,6 @@ public:
     default_next_state = default_next;
   }
 
-  const std::string &get_name() const { return name; }
-
   // Copy constructor
   ParseState (const ParseState& other) = delete;
 
@@ -341,7 +340,6 @@ public:
 			       size_t *bytes_parsed) const;
 
 private:
-  std::string name;
   std::vector<std::unique_ptr<ParserOp> > parser_ops{};
   bool has_switch;
   ParseSwitchKeyBuilder key_builder{};

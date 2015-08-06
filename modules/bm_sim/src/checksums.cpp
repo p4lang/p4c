@@ -24,6 +24,7 @@
 
 namespace checksum {
 
+// TODO: remove this ? it is duplicated in calculations.cpp
 static inline unsigned short cksum16(char *buf, size_t len) {
   uint64_t sum = 0;
   uint64_t *b = (uint64_t *) buf;
@@ -75,14 +76,37 @@ Checksum::Checksum(const string &name, p4object_id_t id,
   : NamedP4Object(name, id),
     header_id(header_id), field_offset(field_offset) {}
 
+CalcBasedChecksum::CalcBasedChecksum(
+  const string &name, p4object_id_t id,
+  header_id_t header_id, int field_offset,
+  const NamedCalculation *calculation
+)
+  : Checksum(name, id, header_id, field_offset),
+    calculation(calculation) { }
+
+void CalcBasedChecksum::update_(Packet *pkt) const
+{
+  const uint64_t cksum = calculation->output(*pkt);
+  Field &f_cksum = pkt->get_phv()->get_field(header_id, field_offset);
+  f_cksum.set(cksum);
+}
+
+bool CalcBasedChecksum::verify_(const Packet &pkt) const
+{
+  const uint64_t cksum = calculation->output(pkt);
+  const Field &f_cksum = pkt.get_phv()->get_field(header_id, field_offset);
+  return (cksum == f_cksum.get<uint64_t>());
+}
+
 IPv4Checksum::IPv4Checksum(const string &name, p4object_id_t id,
 			   header_id_t header_id, int field_offset)
   : Checksum(name, id, header_id, field_offset) {}
 
 #define IPV4_HDR_MAX_LEN 60
 #define IPV4_CKSUM_OFFSET 10 // byte offset
-void IPv4Checksum::update(PHV *phv) const {
+void IPv4Checksum::update_(Packet *pkt) const {
   char buffer[60];
+  PHV *phv = pkt->get_phv();
   Header &ipv4_hdr = phv->get_header(header_id);
   if(!ipv4_hdr.is_valid()) return;
   Field &ipv4_cksum = ipv4_hdr[field_offset];
@@ -93,8 +117,9 @@ void IPv4Checksum::update(PHV *phv) const {
   ipv4_cksum.set_bytes((char *) &cksum, 2);
 }
 
-bool IPv4Checksum::verify(const PHV &phv) const {
+bool IPv4Checksum::verify_(const Packet &pkt) const {
   char buffer[60];
+  const PHV &phv = *(pkt.get_phv());
   const Header &ipv4_hdr = phv.get_header(header_id);
   if(!ipv4_hdr.is_valid()) return true; // return true if no header... TODO ?
   const Field &ipv4_cksum = ipv4_hdr[field_offset];

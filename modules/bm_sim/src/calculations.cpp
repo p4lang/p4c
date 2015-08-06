@@ -73,11 +73,60 @@ T crc16(const char *buf, size_t len) {
   return static_cast<T>(ntohs(reflect(remainder, 16) ^ final_xor_value));
 }
 
+template <typename T,
+	  typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
+T cksum16(const char *buf, size_t len) {
+  uint64_t sum = 0;
+  uint64_t *b = (uint64_t *) buf;
+  uint32_t t1, t2;
+  uint16_t t3, t4;
+  uint8_t *tail;
+  /* Main loop - 8 bytes at a time */
+  while (len >= sizeof(uint64_t)) {
+      uint64_t s = *b++;
+      sum += s;
+      if (sum < s) sum++;
+      len -= 8;
+  }
+  /* Handle tail less than 8-bytes long */
+  tail = (uint8_t *) b;
+  if (len & 4) {
+      uint32_t s = *(uint32_t *)tail;
+      sum += s;
+      if (sum < s) sum++;
+      tail += 4;
+  }
+  if (len & 2) {
+      uint16_t s = *(uint16_t *) tail;
+      sum += s;
+      if (sum < s) sum++;
+      tail += 2;
+  }
+  if (len & 1) {
+      uint8_t s = *(uint8_t *) tail;
+      sum += s;
+      if (sum < s) sum++;
+  }
+  /* Fold down to 16 bits */
+  t1 = sum;
+  t2 = sum >> 32;
+  t1 += t2;
+  if (t1 < t2) t1++;
+  t3 = t1;
+  t4 = t1 >> 16;
+  t3 += t4;
+  if (t3 < t4) t3++;
+  return static_cast<T>(ntohs(~t3));
+}
+
 template unsigned int xxh64<unsigned int>(const char *, size_t);
 template uint64_t xxh64<uint64_t>(const char *, size_t);
 
 template unsigned int crc16<unsigned int>(const char *, size_t);
 template uint64_t crc16<uint64_t>(const char *, size_t);
+
+template unsigned int cksum16<unsigned int>(const char *, size_t);
+template uint64_t cksum16<uint64_t>(const char *, size_t);
 
 }
 

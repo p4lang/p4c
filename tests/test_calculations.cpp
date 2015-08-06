@@ -46,7 +46,7 @@ protected:
 
   CalculationTest()
     : testHeaderType("test_t", 0),
-      oneParseState("parse_state"),
+      oneParseState("parse_state", 0),
       parser("test_parser", 0)
   {
     testHeaderType.push_back_field("f16", 16);
@@ -138,6 +138,80 @@ TEST_F(CalculationTest, NonAlignedTest) {
   /* A bit primitive, I have to  build the buffer myself */
   unsigned char expected_buf[3];
   std::copy(&pkt_buf[16], &pkt_buf[19], &expected_buf[0]);
+
+  hash_t expected = hash::xxh64<hash_t>((const char *) expected_buf,
+					sizeof(expected_buf));
+  hash_t actual = calc.output(pkt);
+
+  ASSERT_EQ(expected, actual);
+}
+
+TEST_F(CalculationTest, WithConstant) {
+  BufBuilder builder;
+
+  ByteContainer constant("0x12ab");
+
+  builder.push_back_field(testHeader1, 0, 16); // f16
+  builder.push_back_field(testHeader1, 1, 48); // f48
+  builder.push_back_constant(constant, 16);
+  builder.push_back_field(testHeader1, 3, 32); // f32_2
+
+  Calculation<hash_t> calc(builder);
+
+  calc.set_compute_fn(hash::xxh64<hash_t>);
+
+  unsigned char pkt_buf[2 * header_size];
+
+  for(size_t i = 0; i < sizeof(pkt_buf); i++) {
+    pkt_buf[i] = dis(gen);
+  }
+
+  Packet pkt = get_pkt((const char *) pkt_buf, sizeof(pkt_buf));
+  parser.parse(&pkt);
+
+  /* A bit primitive, I have to  build the buffer myself */
+  unsigned char expected_buf[14];
+  std::copy(&pkt_buf[0], &pkt_buf[2], &expected_buf[0]);
+  std::copy(&pkt_buf[2], &pkt_buf[8], &expected_buf[2]);
+  std::copy(constant.begin(), constant.end(), &expected_buf[8]);
+  std::copy(&pkt_buf[12], &pkt_buf[16], &expected_buf[10]);
+
+  hash_t expected = hash::xxh64<hash_t>((const char *) expected_buf,
+					sizeof(expected_buf));
+  hash_t actual = calc.output(pkt);
+
+  ASSERT_EQ(expected, actual);
+}
+
+TEST_F(CalculationTest, WithPayload) {
+  BufBuilder builder;
+
+  builder.push_back_field(testHeader1, 0, 16); // f16
+  builder.push_back_field(testHeader1, 1, 48); // f48
+  builder.push_back_field(testHeader1, 3, 32); // f32_2
+  builder.push_back_header(testHeader2, header_size * 8);
+  builder.append_payload();
+
+  Calculation<hash_t> calc(builder);
+
+  calc.set_compute_fn(hash::xxh64<hash_t>);
+
+  unsigned char pkt_buf[2 * header_size + 196];
+
+  for(size_t i = 0; i < sizeof(pkt_buf); i++) {
+    pkt_buf[i] = dis(gen);
+  }
+
+  Packet pkt = get_pkt((const char *) pkt_buf, sizeof(pkt_buf));
+  parser.parse(&pkt);
+
+  /* A bit primitive, I have to  build the buffer myself */
+  unsigned char expected_buf[12 + header_size + 196];
+  std::copy(&pkt_buf[0], &pkt_buf[2], &expected_buf[0]);
+  std::copy(&pkt_buf[2], &pkt_buf[8], &expected_buf[2]);
+  std::copy(&pkt_buf[12], &pkt_buf[16], &expected_buf[8]);
+  std::copy(&pkt_buf[header_size], &pkt_buf[sizeof(pkt_buf)],
+	    &expected_buf[12]);
 
   hash_t expected = hash::xxh64<hash_t>((const char *) expected_buf,
 					sizeof(expected_buf));

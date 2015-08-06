@@ -94,7 +94,7 @@ class ModifyFieldWithHashBasedOffset
   void operator ()(Field &dst, const Data &base,
 		   const NamedCalculation &hash, const Data &size) {
     uint64_t v =
-      (hash.output(get_phv()) + base.get<uint64_t>()) % size.get<uint64_t>();
+      (hash.output(get_packet()) + base.get<uint64_t>()) % size.get<uint64_t>();
     dst.set(v);
   }
 };
@@ -307,7 +307,7 @@ TEST_F(ActionsTest, ModifyFieldWithHashBasedOffset) {
   testActionFn.parameter_push_back_calculation(&calculation);
   testActionFn.parameter_push_back_const(Data(size));
 
-  unsigned int expected = (base + calculation.output(*phv)) % size;
+  unsigned int expected = (base + calculation.output(*pkt)) % size;
 
   testActionFnEntry(pkt.get());
   ASSERT_EQ(expected, phv->get_field(testHeader2, 3).get_uint());

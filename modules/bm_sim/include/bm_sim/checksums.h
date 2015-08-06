@@ -23,27 +23,60 @@
 
 #include "bm_sim/phv.h"
 #include "bm_sim/named_p4object.h"
+#include "bm_sim/calculations.h"
 
 class Checksum : public NamedP4Object{
 public:
-  Checksum(const string &name, p4object_id_t id,
+  Checksum(const std::string &name, p4object_id_t id,
 	   header_id_t header_id, int field_offset);
   virtual ~Checksum() { }
 
-  virtual void update(PHV *phv) const = 0;
-  virtual bool verify(const PHV &phv) const = 0;
+public:
+  void update(Packet *pkt) const {
+    update_(pkt);
+  }
+
+  bool verify(const Packet &pkt) const {
+    return verify_(pkt);
+  }
+
+private:
+  virtual void update_(Packet *pkt) const = 0;
+  virtual bool verify_(const Packet &pkt) const = 0;
 
 protected:
   header_id_t header_id;
   int field_offset;
 };
 
+class CalcBasedChecksum : public Checksum {
+public:
+  CalcBasedChecksum(const std::string &name, p4object_id_t id,
+		    header_id_t header_id, int field_offset,
+		    const NamedCalculation *calculation);
+
+  CalcBasedChecksum(const CalcBasedChecksum &other) = delete;
+  CalcBasedChecksum &operator=(const CalcBasedChecksum &other) = delete;
+
+  CalcBasedChecksum(CalcBasedChecksum &&other) = default;
+  CalcBasedChecksum &operator=(CalcBasedChecksum &&other) = default;
+
+private:
+  void update_(Packet *pkt) const override;
+  bool verify_(const Packet &pkt) const override;
+
+private:
+  const NamedCalculation *calculation{nullptr};
+};
+
 class IPv4Checksum : public Checksum {
 public:
-  IPv4Checksum(const string &name, p4object_id_t id,
+  IPv4Checksum(const std::string &name, p4object_id_t id,
 	       header_id_t header_id, int field_offset);
-  void update(PHV *phv) const override;
-  bool verify(const PHV &phv) const override;
+
+private:
+  void update_(Packet *pkt) const override;
+  bool verify_(const Packet &pkt) const override;
 };
 
 #endif

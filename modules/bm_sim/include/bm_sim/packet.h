@@ -80,6 +80,11 @@ public:
     return buffer.end() - payload_size;
   }
 
+  const char *payload() const { 
+    assert(payload_size > 0);
+    return buffer.end() - payload_size;
+  }
+
   char *prepend(size_t bytes) { return buffer.push(bytes); }
 
   char *remove(size_t bytes) {

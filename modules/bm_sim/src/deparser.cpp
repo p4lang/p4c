@@ -53,9 +53,8 @@ void Deparser::deparse(Packet *pkt) const {
 }
 
 void Deparser::update_checksums(Packet *pkt) const {
-  PHV *phv = pkt->get_phv();
   for(const Checksum *checksum : checksums) {
-    checksum->update(phv);
+    checksum->update(pkt);
     ELOGGER->checksum_update(*pkt, *checksum);
   } 
 }

@@ -49,6 +49,13 @@ public:
     return fields_bit_width[field_offset];
   }
 
+  int get_bit_width() const {
+    int bitwidth = 0;
+    for(int i : fields_bit_width)
+      bitwidth += i;
+    return bitwidth;
+  }
+
   const string &get_field_name(int field_offset) const {
     return fields_name[field_offset];
   }
