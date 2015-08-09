@@ -29,7 +29,6 @@ TEST(McSimplePre, Replicate)
   McSimplePre::mgrp_t mgid = 0x400;
   McSimplePre::mgrp_hdl_t mgrp_hdl;
   std::vector<McSimplePre::l1_hdl_t> l1_hdl_list;
-  std::vector<McSimplePre::l2_hdl_t> l2_hdl_list;
   McSimplePre::rid_t rid_list[] = {0x200, 0x211, 0x221};
   std::vector<std::vector<McSimplePre::egress_port_t>> port_list1 = {{1, 4}, {5, 6}, {2, 7, 8, 9}};
   std::vector<std::vector<McSimplePre::egress_port_t>> port_list2 = {{1, 4}, {5, 6}, {2, 9}};
@@ -37,65 +36,94 @@ TEST(McSimplePre, Replicate)
   McSimplePre::McIn ingress_info;
   std::vector<McSimplePre::McOut> egress_info;
   unsigned int count = 0;
+  unsigned int nodes = 3;
 
   rc = pre.mc_mgrp_create(mgid, &mgrp_hdl);
   ASSERT_EQ(rc, McSimplePre::SUCCESS);
 
-  for (unsigned int i = 0; i < 3; i++) {
+  McSimplePre::PortMap port_maps[nodes];
+  for (unsigned int i = 0; i < nodes; i++) {
     McSimplePre::l1_hdl_t l1_hdl;
-    rc = pre.mc_l1_node_create(rid_list[i], &l1_hdl);
-    ASSERT_EQ(rc, McSimplePre::SUCCESS);
-    l1_hdl_list.push_back(l1_hdl);
-    rc = pre.mc_l1_node_associate(mgrp_hdl, l1_hdl);
-    ASSERT_EQ(rc, McSimplePre::SUCCESS);
-  }
-
-  McSimplePre::PortMap port_maps[3];
-  for (unsigned int i = 0; i < 3; i++) {
     McSimplePre::PortMap &port_map = port_maps[i];
     for (unsigned int j = 0; j < port_list1[i].size(); j++) {
       port_map[port_list1[i][j]] = 1;
     }
-    McSimplePre::l2_hdl_t l2_hdl;
-    rc = pre.mc_l2_node_create(l1_hdl_list[i], &l2_hdl, port_map);
+    rc = pre.mc_node_create(rid_list[i], port_map, &l1_hdl);
     ASSERT_EQ(rc, McSimplePre::SUCCESS);
-    l2_hdl_list.push_back(l2_hdl);
+    l1_hdl_list.push_back(l1_hdl);
+    rc = pre.mc_node_associate(mgrp_hdl, l1_hdl);
+    ASSERT_EQ(rc, McSimplePre::SUCCESS);
   }
 
   ingress_info.mgid = mgid;
+/*
+ *             ---------------
+ *             | mgid = 0x400|
+ *             ---------------
+ *                    |
+ *                    V
+ *             ---------------    ---------------    ---------------
+ *             | rid = 0x200 | -> | rid = 0x211 | -> | rid = 0x221 |
+ *             ---------------    ---------------    ---------------
+ *                    |                  |                  |
+ *                    V                  V                  V
+ * ----------   ---------------   ---------------     ---------------
+ * port_map |   | 1, 4        |   | 5, 6        |     | 2, 7, 8, 9  |
+ * ----------   ---------------   ---------------     ---------------
+ */
+
   egress_info = pre.replicate(ingress_info);
   count = 0;
-  for (unsigned int i = 0; i < 3; i++) {
+  for (unsigned int i = 0; i < nodes; i++) {
     for (unsigned int j = 0; j < port_list1[i].size(); j++) {
       ASSERT_EQ(egress_info[count].rid, rid_list[i]);
       ASSERT_EQ(egress_info[count].egress_port, port_list1[i][j]);
       count++;
     }
   }
+  // number of replicated copies = 8
   ASSERT_EQ(egress_info.size(), count);
 
+  // remove ports 7 and 8 from 3rd node port_map
   McSimplePre::PortMap &port_map_2 = port_maps[2];
   port_map_2[7] = 0;
   port_map_2[8] = 0;
-  rc = pre.mc_l2_node_update(l2_hdl_list[2], port_map_2);
+  rc = pre.mc_node_update(l1_hdl_list[2], port_map_2);
   ASSERT_EQ(rc, McSimplePre::SUCCESS);
   ingress_info.mgid = mgid;
   
+/*
+ * Multicast tree view
+ *
+ *             ---------------
+ *             | mgid = 0x400|
+ *             ---------------
+ *                    |
+ *                    V
+ *             ---------------    ---------------    ---------------
+ *             | rid = 0x200 | -> | rid = 0x211 | -> | rid = 0x221 |
+ *             ---------------    ---------------    ---------------
+ *                    |                  |                  |
+ *                    V                  V                  V
+ * ----------   ---------------   ---------------     ---------------
+ * port_map |   | 1, 4        |   | 5, 6        |     | 2, 9        |
+ * ----------   ---------------   ---------------     ---------------
+ */
   egress_info = pre.replicate(ingress_info);
   count = 0;
-  for (unsigned int i = 0; i < 3; i++) {
+  for (unsigned int i = 0; i < nodes; i++) {
     for (unsigned int j = 0; j < port_list2[i].size(); j++) {
       ASSERT_EQ(egress_info[count].rid, rid_list[i]);
       ASSERT_EQ(egress_info[count].egress_port, port_list2[i][j]);
       count++;
     }
   }
+  // number of replicated copies = 6
   ASSERT_EQ(egress_info.size(), count);
   
+  // cleanup
   for (unsigned int i = 0; i < l1_hdl_list.size(); i++) {
-    rc = pre.mc_l2_node_destroy(l2_hdl_list[i]);
-    ASSERT_EQ(rc, McSimplePre::SUCCESS);
-    rc = pre.mc_l1_node_destroy(l1_hdl_list[i]);
+    rc = pre.mc_node_destroy(l1_hdl_list[i]);
     ASSERT_EQ(rc, McSimplePre::SUCCESS);
   }
   rc = pre.mc_mgrp_destroy(mgrp_hdl);
@@ -105,5 +133,198 @@ TEST(McSimplePre, Replicate)
 
 TEST(McSimplePreLAG, Replicate)
 {
-  // TODO Krishna
+  McSimplePreLAG pre;
+  McSimplePre::mgrp_t mgid = 0x400;
+  McSimplePre::mgrp_hdl_t mgrp_hdl;
+  std::vector<McSimplePre::l1_hdl_t> l1_hdl_list;
+  McSimplePre::rid_t rid_list[] = {0x200, 0x211, 0x221};
+  std::vector<std::vector<McSimplePre::egress_port_t>> port_list1 = {{1, 4}, {5, 6}, {2, 7, 8, 9}};
+  std::vector<std::vector<McSimplePre::egress_port_t>> port_list2 = {{1, 4}, {5, 6}, {2, 9}};
+  std::vector<std::vector<McSimplePre::egress_port_t>> lag_port_list1 = {{10, 12, 20, 21}, {11, 14, 16, 24}, {34, 38, 41, 42}};
+  std::vector<std::vector<McSimplePre::egress_port_t>> lag_port_list2 = {{10, 12}, {11, 16}};
+  std::vector<McSimplePreLAG::lag_id_t> lag_id_slist1 = {2, 22, 24};
+  std::vector<McSimplePreLAG::lag_id_t> lag_id_slist2 = {2, 22};
+  std::vector<std::vector<McSimplePreLAG::lag_id_t>> lag_id_list1 = {{2, 22}, {24}};
+  std::vector<std::vector<McSimplePreLAG::lag_id_t>> lag_id_list2 = {{2, 22}};
+  McSimplePre::McReturnCode rc;
+  McSimplePre::McIn ingress_info;
+  std::vector<McSimplePre::McOut> egress_info;
+  unsigned int count = 0;
+  unsigned int member_count = 0;
+  unsigned int nodes = 3;
+
+  rc = pre.mc_mgrp_create(mgid, &mgrp_hdl);
+  ASSERT_EQ(rc, McSimplePre::SUCCESS);
+
+  // Update lag membership
+  for (unsigned int i = 0; i < lag_id_slist1.size(); i++) {
+    McSimplePre::PortMap lag_port_map;
+    for (unsigned int j = 0; j < lag_port_list1[i].size(); j++) {
+      lag_port_map[lag_port_list1[i][j]] = 1;
+    }
+    rc = pre.mc_set_lag_membership(lag_id_slist1[i], lag_port_map);
+    ASSERT_EQ(rc, McSimplePre::SUCCESS);
+  }
+
+  McSimplePre::PortMap port_maps[nodes];
+  McSimplePre::LagMap lag_maps[nodes];
+  for (unsigned int i = 0; i < 3; i++) {
+    McSimplePre::l1_hdl_t l1_hdl;
+    McSimplePre::PortMap &port_map = port_maps[i];
+    for (unsigned int j = 0; j < port_list1[i].size(); j++) {
+      port_map[port_list1[i][j]] = 1;
+    }
+
+    if (i < lag_id_list1.size()) {
+      McSimplePre::LagMap &lag_map = lag_maps[i];
+      for (unsigned int j = 0; j < lag_id_list1[i].size(); j++) {
+        lag_map[lag_id_list1[i][j]] = 1;
+      }
+    }
+
+    rc = pre.mc_node_create(rid_list[i], port_maps[i], lag_maps[i], &l1_hdl);
+    ASSERT_EQ(rc, McSimplePre::SUCCESS);
+    l1_hdl_list.push_back(l1_hdl);
+    rc = pre.mc_node_associate(mgrp_hdl, l1_hdl);
+    ASSERT_EQ(rc, McSimplePre::SUCCESS);
+  }
+
+/*
+ * Multicast tree view
+ *
+ *             ---------------
+ *             | mgid = 0x400|
+ *             ---------------
+ *                    |
+ *                    V
+ *             ---------------    ---------------    ---------------
+ *             | rid = 0x200 | -> | rid = 0x211 | -> | rid = 0x221 |
+ *             ---------------    ---------------    ---------------
+ *                    |                  |                  |
+ *                    V                  V                  V
+ *-----------   ---------------   ---------------    ---------------
+ * port_map |   | 1, 4        |   | 5, 6        |    | 2, 7, 8, 9  |
+ *-----------   ---------------   ---------------    ---------------
+ * lag_map  |   | 2, 22       |   | 24          |    |             |
+ *-----------   ---------------   ---------------    ---------------
+ *
+ * Lag table
+ *
+ *-----------   ---------------   ---------------    ---------------
+ * lag_index|   | 2           |   | 22          |    | 24          |   
+ *-----------   ---------------   ---------------    --------------- 
+ *                     |                 |                  |
+ *                     V                 V                  V
+ *-----------   ----------------  ----------------   ----------------
+ * port_map |   |10, 12, 20, 21|  |11, 14, 16, 24|   |34, 38, 41, 42|
+ *-----------   ----------------  ----------------   ----------------
+ */
+  ingress_info.mgid = mgid;
+  egress_info = pre.replicate(ingress_info);
+
+  count = 0;
+  member_count = 0;
+  for (unsigned int i = 0; i < 3; i++) {
+    for (unsigned int j = 0; j < port_list1[i].size(); j++) {
+      ASSERT_EQ(egress_info[count].rid, rid_list[i]);
+      ASSERT_EQ(egress_info[count].egress_port, port_list1[i][j]);
+      count++;
+    }
+    if (i < lag_id_list1.size()) {
+      for (unsigned int j = 0; j < lag_id_list1[i].size(); j++) {
+        ASSERT_EQ(egress_info[count].rid, rid_list[i]);
+        ASSERT_NE(std::find(lag_port_list1[member_count].begin(),
+                          lag_port_list1[member_count].end(),
+                          egress_info[count].egress_port),
+                  lag_port_list1[member_count].end());
+        count++;
+        member_count++;
+      }
+    }
+  }
+  ASSERT_EQ(egress_info.size(), count);
+
+  // update lag membership
+  for (unsigned int i = 0; i < lag_id_slist2.size(); i++) {
+    McSimplePre::PortMap lag_port_map;
+    for (unsigned int j = 0; j < lag_port_list2[i].size(); j++) {
+      lag_port_map[lag_port_list2[i][j]] = 1;
+    }
+    rc = pre.mc_set_lag_membership(lag_id_slist2[i], lag_port_map);
+    ASSERT_EQ(rc, McSimplePre::SUCCESS);
+  }
+
+  // remove ports 7 and 8 from 3rd node port_map
+  McSimplePre::PortMap &port_map_2 = port_maps[2];
+  port_map_2[7] = 0;
+  port_map_2[8] = 0;
+  rc = pre.mc_node_update(l1_hdl_list[2], port_maps[2], lag_maps[2]);
+  ASSERT_EQ(rc, McSimplePre::SUCCESS);
+
+  McSimplePre::LagMap &lag_map_1 = lag_maps[1];
+  lag_map_1[24] = 0;
+  rc = pre.mc_node_update(l1_hdl_list[1], port_maps[1], lag_maps[1]);
+  ASSERT_EQ(rc, McSimplePre::SUCCESS);
+
+/*
+ * Multicast tree view
+ *
+ *             ---------------
+ *             | mgid = 0x400|
+ *             ---------------
+ *                    |
+ *                    V
+ *             ---------------    ---------------    ---------------
+ *             | rid = 0x200 | -> | rid = 0x211 | -> | rid = 0x221 |
+ *             ---------------    ---------------    ---------------
+ *                    |                  |                  |
+ *                    V                  V                  V
+ *-----------   ---------------   ---------------    ---------------
+ * port_map |   | 1, 4        |   | 5, 6        |    | 2, 9        |
+ *-----------   ---------------   ---------------    ---------------
+ * lag_map  |   | 2, 22       |   |             |    |             |
+ *-----------   ---------------   ---------------    ---------------
+ *
+ * Lag table
+ *-----------   ---------------   ---------------
+ * lag_index|   | 2           |   | 22          |   
+ *-----------   ---------------   ---------------
+ *                     |                 |
+ *                     V                 V
+ *-----------   ----------------  ----------------
+ * port_map |   |10, 12, 20, 21|  |11, 14, 16, 24|
+ *-----------   ----------------  ----------------
+ */
+  ingress_info.mgid = mgid;
+  egress_info = pre.replicate(ingress_info);
+
+  count = 0;
+  member_count = 0;
+  for (unsigned int i = 0; i < 3; i++) {
+    for (unsigned int j = 0; j < port_list2[i].size(); j++) {
+      ASSERT_EQ(egress_info[count].rid, rid_list[i]);
+      ASSERT_EQ(egress_info[count].egress_port, port_list2[i][j]);
+      count++;
+    }
+    if (i < lag_id_list2.size()) {
+      for (unsigned int j = 0; j < lag_id_list2[i].size(); j++) {
+        ASSERT_EQ(egress_info[count].rid, rid_list[i]);
+        ASSERT_NE(std::find(lag_port_list2[member_count].begin(),
+                          lag_port_list2[member_count].end(),
+                          egress_info[count].egress_port),
+                  lag_port_list2[member_count].end());
+        count++;
+        member_count++;
+      }
+    }
+  }
+  ASSERT_EQ(egress_info.size(), count);
+  
+  // cleanup
+  for (unsigned int i = 0; i < l1_hdl_list.size(); i++) {
+    rc = pre.mc_node_destroy(l1_hdl_list[i]);
+    ASSERT_EQ(rc, McSimplePre::SUCCESS);
+  }
+  rc = pre.mc_mgrp_destroy(mgrp_hdl);
+  ASSERT_EQ(rc, McSimplePre::SUCCESS);
 }

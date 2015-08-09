@@ -32,7 +32,50 @@ public:
     assert(pre != nullptr);
   }
 
-  // TODO Krishna
+  BmMcL1Handle bm_mc_node_create(const BmMcRid rid,
+                                 const BmMcPortMap& port_map,
+                                 const BmMcLagMap& lag_map) {
+    printf("bm_mc_node_create\n");
+    McSimplePre::l1_hdl_t l1_hdl;
+    McSimplePre::McReturnCode error_code =
+      pre->mc_node_create(rid, port_map, lag_map, &l1_hdl);
+    if(error_code != McSimplePre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+    return l1_hdl;
+  }
+
+  void bm_mc_node_update(const BmMcL1Handle l1_handle,
+                         const BmMcPortMap& port_map,
+                         const BmMcLagMap& lag_map) {
+    printf("bm_mc_node_update\n");
+    McSimplePre::McReturnCode error_code = pre->mc_node_update(
+        l1_handle,
+        McSimplePre::PortMap(port_map),
+        McSimplePre::LagMap(lag_map)
+    );
+    if(error_code != McSimplePre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
+
+  void bm_mc_set_lag_membership(const BmMcLagIndex lag_index,
+                                const BmMcPortMap& port_map) {
+    printf("bm_mc_set_lag_membership\n");
+    McSimplePre::McReturnCode error_code = pre->mc_set_lag_membership(
+        lag_index,
+        McSimplePre::PortMap(port_map)
+    );
+    if(error_code != McSimplePre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
 
 private:
   Switch *switch_{nullptr};

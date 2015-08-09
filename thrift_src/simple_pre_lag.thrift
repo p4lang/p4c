@@ -22,6 +22,41 @@
 namespace cpp bm_runtime.simple_pre_lag
 namespace py bm_runtime.simple_pre_lag
 
+typedef i32 BmMcRid
+typedef i32 BmMcMgrpHandle
+typedef i32 BmMcL1Handle
+typedef i16 BmMcLagIndex
+typedef string BmMcPortMap // string of 0s and 1s
+typedef string BmMcLagMap // string of 0s and 1s
+
+enum McOperationErrorCode {
+  TABLE_FULL = 1,
+  INVALID_HANDLE = 2,
+  INVALID_MGID = 3,
+  INVALID_L1_HANDLE = 4,
+  INVALID_L2_HANLDE = 5,
+  ERROR = 6
+}
+
+exception InvalidMcOperation {
+  1:McOperationErrorCode what
+}
+
 service SimplePreLAG {
-  // TODO Krishna
+  BmMcL1Handle bm_mc_node_create(
+    1:BmMcRid rid,
+    2:BmMcPortMap port_map,
+    3:BmMcLagMap lag_map
+  ) throws (1:InvalidMcOperation ouch),
+
+  void bm_mc_node_update(
+    1:BmMcL1Handle l1_handle,
+    2:BmMcPortMap port_map,
+    3:BmMcLagMap lag_map
+  ) throws (1:InvalidMcOperation ouch),
+
+  void bm_mc_set_lag_membership(
+    1:BmMcLagIndex lag_index,
+    2:BmMcPortMap port_map
+  ) throws (1:InvalidMcOperation ouch),
 }

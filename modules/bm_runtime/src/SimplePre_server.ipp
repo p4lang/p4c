@@ -56,11 +56,11 @@ public:
     }
   }
 
-  BmMcL1Handle bm_mc_l1_node_create(const BmMcRid rid) {
-    printf("bm_mc_l1_node_create\n");
+  BmMcL1Handle bm_mc_node_create(const BmMcRid rid, const BmMcPortMap& port_map) {
+    printf("bm_mc_node_create\n");
     McSimplePre::l1_hdl_t l1_hdl;
     McSimplePre::McReturnCode error_code =
-      pre->mc_l1_node_create(rid, &l1_hdl);
+      pre->mc_node_create(rid, port_map, &l1_hdl);
     if(error_code != McSimplePre::SUCCESS) {
       InvalidMcOperation imo;
       imo.what = (McOperationErrorCode::type) error_code;
@@ -69,10 +69,10 @@ public:
     return l1_hdl;
   }
 
-  void bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
-    printf("bm_mc_l1_node_associate\n");
+  void bm_mc_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
+    printf("bm_mc_node_associate\n");
     McSimplePre::McReturnCode error_code =
-      pre->mc_l1_node_associate(mgrp_handle, l1_handle);
+      pre->mc_node_associate(mgrp_handle, l1_handle);
     if(error_code != McSimplePre::SUCCESS) {
       InvalidMcOperation imo;
       imo.what = (McOperationErrorCode::type) error_code;
@@ -80,10 +80,10 @@ public:
     }
   }
 
-  void bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle) {
-    printf("bm_mc_l1_node_destroy\n");
+  void bm_mc_node_destroy(const BmMcL1Handle l1_handle) {
+    printf("bm_mc_node_destroy\n");
     McSimplePre::McReturnCode error_code =
-      pre->mc_l1_node_destroy(l1_handle);
+      pre->mc_node_destroy(l1_handle);
     if(error_code != McSimplePre::SUCCESS) {
       InvalidMcOperation imo;
       imo.what = (McOperationErrorCode::type) error_code;
@@ -91,36 +91,11 @@ public:
     }
   }
 
-  BmMcL2Handle bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) {
-    printf("bm_mc_l2_node_create\n");
-    McSimplePre::l2_hdl_t l2_hdl;
-    McSimplePre::McReturnCode error_code = pre->mc_l2_node_create(
-        l1_handle, &l2_hdl, McSimplePre::PortMap(port_map)
+  void bm_mc_node_update(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) {
+    printf("bm_mc_node_update\n");
+    McSimplePre::McReturnCode error_code = pre->mc_node_update(
+        l1_handle, McSimplePre::PortMap(port_map)
     );
-    if(error_code != McSimplePre::SUCCESS) {
-      InvalidMcOperation imo;
-      imo.what = (McOperationErrorCode::type) error_code;
-      throw imo;
-    }
-    return l2_hdl;
-  }
-
-  void bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map) {
-    printf("bm_mc_l2_node_update\n");
-    McSimplePre::McReturnCode error_code = pre->mc_l2_node_update(
-        l2_handle, McSimplePre::PortMap(port_map)
-    );
-    if(error_code != McSimplePre::SUCCESS) {
-      InvalidMcOperation imo;
-      imo.what = (McOperationErrorCode::type) error_code;
-      throw imo;
-    }
-  }
-
-  void bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle) {
-    printf("bm_mc_l2_node_destroy\n");
-    McSimplePre::McReturnCode error_code =
-      pre->mc_l2_node_destroy(l2_handle);
     if(error_code != McSimplePre::SUCCESS) {
       InvalidMcOperation imo;
       imo.what = (McOperationErrorCode::type) error_code;

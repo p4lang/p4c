@@ -25,7 +25,6 @@ typedef i32 BmMcMgrp
 typedef i32 BmMcRid
 typedef i32 BmMcMgrpHandle
 typedef i32 BmMcL1Handle
-typedef i32 BmMcL2Handle
 typedef string BmMcPortMap // string of 0s and 1s
 
 enum McOperationErrorCode {
@@ -51,31 +50,22 @@ service SimplePre {
     1:BmMcMgrpHandle mgrp_handle
   ) throws (1:InvalidMcOperation ouch),
 
-  BmMcL1Handle bm_mc_l1_node_create(
+  BmMcL1Handle bm_mc_node_create(
     1:BmMcRid rid
+    2:BmMcPortMap port_map
   ) throws (1:InvalidMcOperation ouch),
 
-  void bm_mc_l1_node_associate(
+  void bm_mc_node_associate(
     1:BmMcMgrpHandle mgrp_handle,
     2:BmMcL1Handle l1_handle
   ) throws (1:InvalidMcOperation ouch),
 
-  void bm_mc_l1_node_destroy(
+  void bm_mc_node_destroy(
     1:BmMcL1Handle l1_handle
   ) throws (1:InvalidMcOperation ouch),
 
-  BmMcL2Handle bm_mc_l2_node_create(
+  void bm_mc_node_update(
     1:BmMcL1Handle l1_handle,
     2:BmMcPortMap port_map
   ) throws (1:InvalidMcOperation ouch),
-
-  void bm_mc_l2_node_update(
-    1:BmMcL2Handle l2_handle,
-    2:BmMcPortMap port_map
-  ) throws (1:InvalidMcOperation ouch),
-
-  void bm_mc_l2_node_destroy(
-    1:BmMcL2Handle l2_handle
-  ) throws (1:InvalidMcOperation ouch)
-
 }
