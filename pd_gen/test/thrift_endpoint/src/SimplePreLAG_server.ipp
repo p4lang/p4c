@@ -18,13 +18,13 @@
  *
  */
 
-#include "SimplePre.h"
+#include "SimplePreLAG.h"
 
-namespace bm_runtime { namespace simple_pre {
+namespace bm_runtime { namespace simple_pre_lag {
 
-class SimplePreHandler : virtual public SimplePreIf {
+class SimplePreLAGHandler : virtual public SimplePreLAGIf {
 public:
-  SimplePreHandler() { }
+  SimplePreLAGHandler() { }
 
   BmMcMgrpHandle bm_mc_mgrp_create(const BmMcMgrp mgrp) {
     // Your implementation goes here
@@ -37,38 +37,39 @@ public:
     printf("bm_mc_mgrp_destroy\n");
   }
 
-  BmMcL1Handle bm_mc_l1_node_create(const BmMcRid rid) {
-    // Your implementation goes here
-    printf("bm_mc_l1_node_create\n");
+  BmMcL1Handle bm_mc_node_create(const BmMcRid rid,
+                                 const BmMcPortMap& port_map,
+                                 const BmMcLagMap& lag_map) {
+    std::string port_str(port_map.rbegin(), port_map.rbegin() + 16);
+    std::string lag_str(lag_map.rbegin(), lag_map.rbegin() + 16);
+    std::cout << "bm_mc_node_create" << std::endl
+	      << rid << std::endl
+	      << port_str << std::endl
+	      << lag_str << std::endl;
     return 0;
   }
 
-  void bm_mc_l1_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
+  void bm_mc_node_associate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
     // Your implementation goes here
-    printf("bm_mc_l1_node_associate\n");
+    printf("bm_mc_node_associate\n");
   }
 
-  void bm_mc_l1_node_destroy(const BmMcL1Handle l1_handle) {
+  void bm_mc_node_destroy(const BmMcL1Handle l1_handle) {
     // Your implementation goes here
     printf("bm_mc_l1_node_destroy\n");
   }
 
-  BmMcL2Handle bm_mc_l2_node_create(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) {
-    std::string str(port_map.rbegin(), port_map.rbegin() + 16);
-    std::cout << "bm_mc_l2_node_create" << std::endl
-	      << l1_handle << std::endl
-	      << str << std::endl;
-    return 0;
+  void bm_mc_node_update(const BmMcL1Handle l1_handle,
+                         const BmMcPortMap& port_map,
+                         const BmMcLagMap& lag_map) {
+    // Your implementation goes here
+    printf("bm_mc_node_update\n");
   }
 
-  void bm_mc_l2_node_update(const BmMcL2Handle l2_handle, const BmMcPortMap& port_map) {
+  void bm_mc_set_lag_membership(const BmMcLagIndex lag_index,
+                                const BmMcPortMap& port_map) {
     // Your implementation goes here
-    printf("bm_mc_l2_node_update\n");
-  }
-
-  void bm_mc_l2_node_destroy(const BmMcL2Handle l2_handle) {
-    // Your implementation goes here
-    printf("bm_mc_l2_node_destroy\n");
+    printf("bm_mc_set_lag_membership\n");
   }
 };
 

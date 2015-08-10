@@ -3,7 +3,7 @@ LIBPDFIXED_MK_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 $(TARGET)_TARGET := $(LIBPDFIXED_MK_DIR)$(TARGET)
 
 THRIFT_IDL := $(LIBPDFIXED_MK_DIR)../../thrift_src/standard.thrift
-THRIFT_IDL_MC := $(LIBPDFIXED_MK_DIR)../../thrift_src/simple_pre.thrift
+THRIFT_IDL_MC := $(LIBPDFIXED_MK_DIR)../../thrift_src/simple_pre_lag.thrift
 
 .thrift_gen: $(THRIFT_IDL) $(THRIFT_IDL_MC)
 	thrift --gen cpp -out $(LIBPDFIXED_MK_DIR)../fixed-cpp/src/ $(THRIFT_IDL)

@@ -84,6 +84,7 @@ MeterA
 16
 1 1000
 2 1000
-bm_mc_l2_node_create
+bm_mc_node_create
 21
 1000000000100100
+0000000100000100

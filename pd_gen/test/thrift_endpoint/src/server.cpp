@@ -28,7 +28,7 @@
 #include <thrift/processor/TMultiplexedProcessor.h>
 
 #include "Standard_server.ipp"
-#include "SimplePre_server.ipp"
+#include "SimplePreLAG_server.ipp"
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -39,12 +39,12 @@ using boost::shared_ptr;
 
 using ::bm_runtime::standard::StandardHandler;
 using ::bm_runtime::standard::StandardProcessor;
-using ::bm_runtime::simple_pre::SimplePreHandler;
-using ::bm_runtime::simple_pre::SimplePreProcessor;
+using ::bm_runtime::simple_pre_lag::SimplePreLAGHandler;
+using ::bm_runtime::simple_pre_lag::SimplePreLAGProcessor;
 
 void run_server(int port) {
   shared_ptr<StandardHandler> standard_handler(new StandardHandler());
-  shared_ptr<SimplePreHandler> simple_pre_handler(new SimplePreHandler());
+  shared_ptr<SimplePreLAGHandler> simple_pre_lag_handler(new SimplePreLAGHandler());
 
   shared_ptr<TMultiplexedProcessor> processor(new TMultiplexedProcessor());
   processor->registerProcessor(
@@ -52,8 +52,8 @@ void run_server(int port) {
     shared_ptr<TProcessor>(new StandardProcessor(standard_handler))
   );
   processor->registerProcessor(
-    "simple_pre",
-    shared_ptr<TProcessor>(new SimplePreProcessor(simple_pre_handler))
+    "simple_pre_lag",
+    shared_ptr<TProcessor>(new SimplePreLAGProcessor(simple_pre_lag_handler))
   );
 
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));

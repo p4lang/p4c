@@ -66,7 +66,7 @@ int pd_conn_mgr_client_init(pd_conn_mgr_t *conn_mgr_state,
     new TMultiplexedProtocol(protocol, "standard")
   );
   boost::shared_ptr<TMultiplexedProtocol> mc_protocol(
-    new TMultiplexedProtocol(protocol, "simple_pre")
+    new TMultiplexedProtocol(protocol, "simple_pre_lag")
   );
 
   conn_mgr_state->transports[dev_id] = transport;

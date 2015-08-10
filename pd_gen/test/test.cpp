@@ -160,8 +160,12 @@ int main() {
   std::memset(port_map, 0, sizeof(port_map));
   port_map[0] = 1;
   port_map[1] = (1 << 5) + (1 << 2);
-  mc_l2_node_hdl_t l2_hdl;
-  mc_l2_node_create(sess_hdl, dev_tgt.device_id, 21, port_map, NULL, &l2_hdl);
+  uint8_t lag_map[PRE_LAG_MAX];
+  std::memset(lag_map, 0, sizeof(lag_map));
+  lag_map[0] = (1 << 7);
+  lag_map[1] = (1 << 5);
+  mc_node_hdl_t node_hdl;
+  mc_node_create(sess_hdl, dev_tgt.device_id, 21, port_map, lag_map, &node_hdl);
 
   /* END TEST */
 
