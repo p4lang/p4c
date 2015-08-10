@@ -80,6 +80,17 @@ public:
     }
   }
 
+  void bm_mc_node_dissociate(const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
+    printf("bm_mc_node_dissociate\n");
+    McSimplePre::McReturnCode error_code =
+      pre->mc_node_dissociate(mgrp_handle, l1_handle);
+    if(error_code != McSimplePre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
+
   void bm_mc_node_destroy(const BmMcL1Handle l1_handle) {
     printf("bm_mc_node_destroy\n");
     McSimplePre::McReturnCode error_code =

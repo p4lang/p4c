@@ -110,6 +110,28 @@ McSimplePre::mc_node_associate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
 }
 
 McSimplePre::McReturnCode
+McSimplePre::mc_node_dissociate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
+{
+  boost::unique_lock<boost::shared_mutex> lock1(mgid_lock);
+  boost::unique_lock<boost::shared_mutex> lock2(l1_lock);
+  if (!l1_handles.valid_handle(l1_hdl)) {
+    std::cout << "node dissociate failed. invalid l1 handle\n";
+    return INVALID_L1_HANDLE;
+  }
+  MgidEntry &mgid_entry = mgid_entries[mgrp_hdl];
+  L1Entry &l1_entry = l1_entries[l1_hdl];
+  mgid_entry.l1_list.erase(std::remove(mgid_entry.l1_list.begin(),
+                                       mgid_entry.l1_list.end(),
+                                       l1_hdl),
+                           mgid_entry.l1_list.end());
+  l1_entry.mgrp_hdl = 0;
+  if (pre_debug) {
+    std::cout << "node dissociated with mgid : " << mgrp_hdl << "\n";
+  }
+  return SUCCESS;
+}
+
+McSimplePre::McReturnCode
 McSimplePre::mc_node_destroy(const l1_hdl_t l1_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock1(l1_lock);

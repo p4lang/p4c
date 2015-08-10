@@ -70,6 +70,7 @@ public:
 		              const PortMap &port_map,
                               l1_hdl_t *l1_hdl);
   McReturnCode mc_node_associate(const mgrp_hdl_t, const l1_hdl_t);
+  McReturnCode mc_node_dissociate(const mgrp_hdl_t, const l1_hdl_t);
   McReturnCode mc_node_disassociate(const mgrp_hdl_t, const l1_hdl_t);
   McReturnCode mc_node_destroy(const l1_hdl_t);
   McReturnCode mc_node_update(const l1_hdl_t l1_hdl,

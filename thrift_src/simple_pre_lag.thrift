@@ -64,6 +64,11 @@ service SimplePreLAG {
     2:BmMcL1Handle l1_handle
   ) throws (1:InvalidMcOperation ouch),
 
+  void bm_mc_node_dissociate(
+    1:BmMcMgrpHandle mgrp_handle,
+    2:BmMcL1Handle l1_handle
+  ) throws (1:InvalidMcOperation ouch),
+
   void bm_mc_node_destroy(
     1:BmMcL1Handle l1_handle
   ) throws (1:InvalidMcOperation ouch),

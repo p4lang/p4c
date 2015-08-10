@@ -123,6 +123,8 @@ TEST(McSimplePre, Replicate)
   
   // cleanup
   for (unsigned int i = 0; i < l1_hdl_list.size(); i++) {
+    rc = pre.mc_node_dissociate(mgrp_hdl, l1_hdl_list[i]);
+    ASSERT_EQ(rc, McSimplePre::SUCCESS);
     rc = pre.mc_node_destroy(l1_hdl_list[i]);
     ASSERT_EQ(rc, McSimplePre::SUCCESS);
   }
@@ -322,6 +324,8 @@ TEST(McSimplePreLAG, Replicate)
   
   // cleanup
   for (unsigned int i = 0; i < l1_hdl_list.size(); i++) {
+    rc = pre.mc_node_dissociate(mgrp_hdl, l1_hdl_list[i]);
+    ASSERT_EQ(rc, McSimplePre::SUCCESS);
     rc = pre.mc_node_destroy(l1_hdl_list[i]);
     ASSERT_EQ(rc, McSimplePre::SUCCESS);
   }
