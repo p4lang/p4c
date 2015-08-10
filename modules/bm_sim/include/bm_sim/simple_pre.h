@@ -85,7 +85,7 @@ protected:
   static constexpr int MGID_TABLE_SIZE = 4096;
   static constexpr int L1_MAX_ENTRIES = 4096;
   static constexpr int L2_MAX_ENTRIES = 8192;
-  bool pre_debug = 1;
+  bool pre_debug{0};
   
   struct MgidEntry {
     mgrp_t mgid{};

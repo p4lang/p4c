@@ -154,6 +154,7 @@ McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const
       }
     }
   }
-  std::cout << "number of packets replicated : " << egress_info_list.size() << "\n";
+  // std::cout << "number of packets replicated : "
+  // 	    << egress_info_list.size() << "\n";
   return egress_info_list;
 }
