@@ -54,32 +54,6 @@ p4_pd_status_t mc_mgrp_destroy(
   return 0; // TODO
 }
 
-p4_pd_status_t mc_l1_node_create(
-  p4_pd_sess_hdl_t session, int8_t device,
-  mgrp_rid_t rid, mc_l1_node_hdl_t *l1_hdl
-) {
-  (void) session;
-  *l1_hdl = pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_l1_node_create(rid);
-  return 0; // TODO
-}
-
-p4_pd_status_t mc_l1_associate_node(
-  p4_pd_sess_hdl_t session, int8_t device,
-  mc_mgrp_hdl_t mgrp_hdl, mc_l1_node_hdl_t l1_hdl
-) {
-  (void) session;
-  pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_l1_node_associate(mgrp_hdl, l1_hdl);
-  return 0; // TODO
-}
-
-p4_pd_status_t mc_l1_node_destroy(
-  p4_pd_sess_hdl_t session, int8_t device, mc_l1_node_hdl_t l1_hdl
-) {
-  (void) session;
-  pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_l1_node_destroy(l1_hdl);
-  return 0; // TODO
-}
-
 namespace {
 
 std::string convert_map(const uint8_t *input, const size_t size) {
@@ -96,41 +70,63 @@ std::string convert_map(const uint8_t *input, const size_t size) {
 
 }
 
-p4_pd_status_t mc_l2_node_create(
+p4_pd_status_t mc_node_create(
   p4_pd_sess_hdl_t session, int8_t device,
-  mc_l1_node_hdl_t l1_hdl, const uint8_t *port_map,
-  const uint8_t *lag_map, mc_l2_node_hdl_t *l2_hdl
-) {
-  (void) session; (void) lag_map;
-  std::string port_map_ = convert_map(port_map, PRE_PORTS_MAX);
-  *l2_hdl = pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_l2_node_create(l1_hdl, port_map_);
-  return 0; // TODO
-}
-
-p4_pd_status_t mc_l2_node_destroy(
-  p4_pd_sess_hdl_t session, int8_t device, mc_l2_node_hdl_t l2_hdl
+  mgrp_rid_t rid, const uint8_t *port_map, const uint8_t *lag_map,
+  mc_node_hdl_t *node_hdl
 ) {
   (void) session;
-  pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_l2_node_destroy(l2_hdl);
-  return 0; // TODO
-}
-
-p4_pd_status_t mc_l2_node_update(
-  p4_pd_sess_hdl_t session, int8_t device,
-  mc_l2_node_hdl_t l2_hdl, const uint8_t *port_map, const uint8_t *lag_map
-) {
-  (void) session; (void) lag_map;
   std::string port_map_ = convert_map(port_map, PRE_PORTS_MAX);
-  pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_l2_node_update(l2_hdl, port_map_);
+  std::string lag_map_ = convert_map(lag_map, PRE_LAG_MAX);
+  *node_hdl = pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_node_create(rid, port_map_, lag_map_);
   return 0; // TODO
 }
 
-p4_pd_status_t mc_l2_lag_update(p4_pd_sess_hdl_t session,
-				int8_t dev_id,
-				mgrp_lag_id_t lag_id,
-				const uint8_t *port_map) {
-  (void) session; (void) dev_id; (void) lag_id; (void) port_map;
+p4_pd_status_t mc_associate_node(
+  p4_pd_sess_hdl_t session, int8_t device,
+  mc_mgrp_hdl_t mgrp_hdl, mc_node_hdl_t hdl
+) {
+  (void) session;
+  pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_node_associate(mgrp_hdl, hdl);
+  return 0; // TODO
+}
+
+p4_pd_status_t mc_dissociate_node(
+  p4_pd_sess_hdl_t session, int8_t device,
+  mc_mgrp_hdl_t mgrp_hdl, mc_node_hdl_t node_hdl
+) {
+  // TODO: needed ?
+  (void) session; (void) mgrp_hdl; (void) node_hdl;
   return 0;
+}
+
+p4_pd_status_t mc_node_destroy(
+  p4_pd_sess_hdl_t session, int8_t device, mc_node_hdl_t node_hdl
+) {
+  (void) session;
+  pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_node_destroy(node_hdl);
+  return 0; // TODO
+}
+
+p4_pd_status_t mc_node_update(
+  p4_pd_sess_hdl_t session, int8_t device, mc_node_hdl_t node_hdl,
+  const uint8_t *port_map, const uint8_t *lag_map
+) {
+  (void) session;
+  std::string port_map_ = convert_map(port_map, PRE_PORTS_MAX);
+  std::string lag_map_ = convert_map(lag_map, PRE_LAG_MAX);
+  pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_node_update(node_hdl, port_map_, lag_map_);
+  return 0; // TODO
+}
+
+p4_pd_status_t mc_set_lag_membership(
+  p4_pd_sess_hdl_t session, int8_t device,
+  mgrp_lag_id_t lag_id, const uint8_t *port_map
+) {
+  (void) session;
+  std::string port_map_ = convert_map(port_map, PRE_PORTS_MAX);
+  pd_conn_mgr_mc_client(conn_mgr_state, device)->bm_mc_set_lag_membership(lag_id, port_map_);
+  return 0; // TODO
 }
 
 }

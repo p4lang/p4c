@@ -22,13 +22,13 @@
 #define _P4_PD_CONN_MGR_H_
 
 #include "Standard.h"
-#include "SimplePre.h"
+#include "SimplePreLAG.h"
 
 using namespace  ::bm_runtime::standard;
-using namespace  ::bm_runtime::simple_pre;
+using namespace  ::bm_runtime::simple_pre_lag;
 
 typedef StandardClient Client;
-typedef SimplePreClient McClient;
+typedef SimplePreLAGClient McClient;
 
 typedef struct pd_conn_mgr_s pd_conn_mgr_t;
 

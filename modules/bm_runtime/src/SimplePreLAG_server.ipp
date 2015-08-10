@@ -18,17 +18,17 @@
  *
  */
 
-#include "SimplePre.h"
+#include "SimplePreLAG.h"
 
-#include <bm_sim/simple_pre.h>
+#include <bm_sim/simple_pre_lag.h>
 
-namespace bm_runtime { namespace simple_pre {
+namespace bm_runtime { namespace simple_pre_lag {
 
-class SimplePreHandler : virtual public SimplePreIf {
+class SimplePreLAGHandler : virtual public SimplePreLAGIf {
 public:
-  SimplePreHandler(Switch *sw) 
+  SimplePreLAGHandler(Switch *sw) 
     : switch_(sw) {
-    pre = sw->get_component<McSimplePre>();
+    pre = sw->get_component<McSimplePreLAG>();
     assert(pre != nullptr);
   }
 
@@ -56,11 +56,13 @@ public:
     }
   }
 
-  BmMcL1Handle bm_mc_node_create(const BmMcRid rid, const BmMcPortMap& port_map) {
+  BmMcL1Handle bm_mc_node_create(const BmMcRid rid,
+                                 const BmMcPortMap& port_map,
+                                 const BmMcLagMap& lag_map) {
     printf("bm_mc_node_create\n");
     McSimplePre::l1_hdl_t l1_hdl;
     McSimplePre::McReturnCode error_code =
-      pre->mc_node_create(rid, port_map, &l1_hdl);
+      pre->mc_node_create(rid, port_map, lag_map, &l1_hdl);
     if(error_code != McSimplePre::SUCCESS) {
       InvalidMcOperation imo;
       imo.what = (McOperationErrorCode::type) error_code;
@@ -102,10 +104,28 @@ public:
     }
   }
 
-  void bm_mc_node_update(const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) {
+  void bm_mc_node_update(const BmMcL1Handle l1_handle,
+                         const BmMcPortMap& port_map,
+                         const BmMcLagMap& lag_map) {
     printf("bm_mc_node_update\n");
     McSimplePre::McReturnCode error_code = pre->mc_node_update(
-        l1_handle, McSimplePre::PortMap(port_map)
+        l1_handle,
+        McSimplePre::PortMap(port_map),
+        McSimplePre::LagMap(lag_map)
+    );
+    if(error_code != McSimplePre::SUCCESS) {
+      InvalidMcOperation imo;
+      imo.what = (McOperationErrorCode::type) error_code;
+      throw imo;
+    }
+  }
+
+  void bm_mc_set_lag_membership(const BmMcLagIndex lag_index,
+                                const BmMcPortMap& port_map) {
+    printf("bm_mc_set_lag_membership\n");
+    McSimplePre::McReturnCode error_code = pre->mc_set_lag_membership(
+        lag_index,
+        McSimplePre::PortMap(port_map)
     );
     if(error_code != McSimplePre::SUCCESS) {
       InvalidMcOperation imo;
@@ -116,7 +136,7 @@ public:
 
 private:
   Switch *switch_{nullptr};
-  std::shared_ptr<McSimplePre> pre{nullptr};
+  std::shared_ptr<McSimplePreLAG> pre{nullptr};
 };
 
 } }

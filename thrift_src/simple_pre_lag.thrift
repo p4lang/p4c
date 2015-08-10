@@ -14,18 +14,21 @@
  */
 
 /*
+ * Srikrishna Gopu (krishna@barefootnetworks.com)
  * Antonin Bas (antonin@barefootnetworks.com)
  *
  */
 
-namespace cpp bm_runtime.simple_pre
-namespace py bm_runtime.simple_pre
+namespace cpp bm_runtime.simple_pre_lag
+namespace py bm_runtime.simple_pre_lag
 
 typedef i32 BmMcMgrp
 typedef i32 BmMcRid
 typedef i32 BmMcMgrpHandle
 typedef i32 BmMcL1Handle
+typedef i16 BmMcLagIndex
 typedef string BmMcPortMap // string of 0s and 1s
+typedef string BmMcLagMap // string of 0s and 1s
 
 enum McOperationErrorCode {
   TABLE_FULL = 1,
@@ -40,7 +43,7 @@ exception InvalidMcOperation {
   1:McOperationErrorCode what
 }
 
-service SimplePre {
+service SimplePreLAG {
 
   BmMcMgrpHandle bm_mc_mgrp_create(
     1:BmMcMgrp mgrp
@@ -51,8 +54,9 @@ service SimplePre {
   ) throws (1:InvalidMcOperation ouch),
 
   BmMcL1Handle bm_mc_node_create(
-    1:BmMcRid rid
-    2:BmMcPortMap port_map
+    1:BmMcRid rid,
+    2:BmMcPortMap port_map,
+    3:BmMcLagMap lag_map
   ) throws (1:InvalidMcOperation ouch),
 
   void bm_mc_node_associate(
@@ -71,6 +75,12 @@ service SimplePre {
 
   void bm_mc_node_update(
     1:BmMcL1Handle l1_handle,
+    2:BmMcPortMap port_map,
+    3:BmMcLagMap lag_map
+  ) throws (1:InvalidMcOperation ouch),
+
+  void bm_mc_set_lag_membership(
+    1:BmMcLagIndex lag_index,
     2:BmMcPortMap port_map
   ) throws (1:InvalidMcOperation ouch),
 }

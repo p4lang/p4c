@@ -30,10 +30,16 @@ McSimplePre::mc_mgrp_create(const mgrp_t mgid, mgrp_hdl_t *mgrp_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock(mgid_lock);
   size_t num_entries = mgid_entries.size();
-  if (num_entries >= MGID_TABLE_SIZE) return TABLE_FULL;
+  if (num_entries >= MGID_TABLE_SIZE) {
+    std::cout << "mgrp create failed. mgid table full!\n";
+    return TABLE_FULL;
+  }
   *mgrp_hdl = mgid;
   MgidEntry mgid_entry(mgid);
   mgid_entries.insert(std::make_pair(*mgrp_hdl, std::move(mgid_entry)));
+  if (pre_debug) {
+    std::cout << "mgrp node created for mgid : " << mgid << "\n";
+  }
   return SUCCESS;
 }
 
@@ -42,77 +48,134 @@ McSimplePre::mc_mgrp_destroy(mgrp_hdl_t mgrp_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock(mgid_lock);
   mgid_entries.erase(mgrp_hdl);
+  if (pre_debug) {
+    std::cout << "mgrp node deleted for mgid : " << mgrp_hdl << "\n";
+  }
   return SUCCESS;
 }
 
 McSimplePre::McReturnCode
-McSimplePre::mc_l1_node_create(const rid_t rid, l1_hdl_t *l1_hdl)
+McSimplePre::mc_node_create(const rid_t rid,
+                            const PortMap &portmap,
+                            l1_hdl_t *l1_hdl)
 {
-  boost::unique_lock<boost::shared_mutex> lock(l1_lock);
-  size_t num_entries = l1_entries.size();
-  if (num_entries >= L1_MAX_ENTRIES) return TABLE_FULL;
-  if (l1_handles.get_handle(l1_hdl)) return ERROR;
+  boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
+  boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
+  l2_hdl_t l2_hdl;
+  size_t num_l1_entries = l1_entries.size();
+  size_t num_l2_entries = l2_entries.size();
+  if (num_l1_entries >= L1_MAX_ENTRIES) {
+    std::cout << "node create failed. l1 table full!\n"; 
+    return TABLE_FULL;
+  }
+  if (num_l2_entries >= L2_MAX_ENTRIES) {
+    std::cout << "node create failed. l2 table full!\n"; 
+    return TABLE_FULL;
+  }
+  if (l1_handles.get_handle(l1_hdl)) {
+    std::cout << "node create failed. l1 handle failed!\n";
+    return ERROR;
+  }
+  if (l2_handles.get_handle(&l2_hdl)) {
+    std::cout << "node create failed. l2 handle failed!\n";
+    return ERROR;
+  }
   l1_entries.insert(std::make_pair(*l1_hdl, L1Entry(rid)));
+  L1Entry &l1_entry = l1_entries[*l1_hdl];
+  l1_entry.l2_hdl = l2_hdl;
+  l2_entries.insert(std::make_pair(l2_hdl, L2Entry(*l1_hdl, portmap)));
+  if (pre_debug) {
+    std::cout << "node created for rid : " << rid << "\n";
+  }
   return SUCCESS;
 }
 
 McSimplePre::McReturnCode
-McSimplePre::mc_l1_node_associate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
+McSimplePre::mc_node_associate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock1(mgid_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l1_lock);
-  if (!l1_handles.valid_handle(l1_hdl)) return INVALID_L1_HANDLE;
+  if (!l1_handles.valid_handle(l1_hdl)) {
+    std::cout << "node associate failed. invalid l1 handle\n";
+    return INVALID_L1_HANDLE;
+  }
   MgidEntry &mgid_entry = mgid_entries[mgrp_hdl];
   L1Entry &l1_entry = l1_entries[l1_hdl];
   mgid_entry.l1_list.push_back(l1_hdl);
   l1_entry.mgrp_hdl = mgrp_hdl;
+  if (pre_debug) {
+    std::cout << "node associated with mgid : " << mgrp_hdl << "\n";
+  }
   return SUCCESS;
 }
 
 McSimplePre::McReturnCode
-McSimplePre::mc_l1_node_destroy(const l1_hdl_t l1_hdl)
+McSimplePre::mc_node_dissociate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
 {
-  boost::unique_lock<boost::shared_mutex> lock(l1_lock);
-  if (!l1_handles.valid_handle(l1_hdl)) return INVALID_L1_HANDLE;
-  l1_entries.erase(l1_hdl);
-  if (l1_handles.release_handle(l1_hdl)) return INVALID_L1_HANDLE;
+  boost::unique_lock<boost::shared_mutex> lock1(mgid_lock);
+  boost::unique_lock<boost::shared_mutex> lock2(l1_lock);
+  if (!l1_handles.valid_handle(l1_hdl)) {
+    std::cout << "node dissociate failed. invalid l1 handle\n";
+    return INVALID_L1_HANDLE;
+  }
+  MgidEntry &mgid_entry = mgid_entries[mgrp_hdl];
+  L1Entry &l1_entry = l1_entries[l1_hdl];
+  mgid_entry.l1_list.erase(std::remove(mgid_entry.l1_list.begin(),
+                                       mgid_entry.l1_list.end(),
+                                       l1_hdl),
+                           mgid_entry.l1_list.end());
+  l1_entry.mgrp_hdl = 0;
+  if (pre_debug) {
+    std::cout << "node dissociated with mgid : " << mgrp_hdl << "\n";
+  }
   return SUCCESS;
 }
 
 McSimplePre::McReturnCode
-McSimplePre::mc_l2_node_create(const l1_hdl_t l1_hdl, l2_hdl_t *l2_hdl,
-			 const PortMap &port_map)
+McSimplePre::mc_node_destroy(const l1_hdl_t l1_hdl)
 {
   boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
-  size_t num_entries = l2_entries.size();
-  if (num_entries >= L2_MAX_ENTRIES) return TABLE_FULL;
-  if (l2_handles.get_handle(l2_hdl)) return ERROR;
-  if (!l1_handles.valid_handle(l1_hdl)) return INVALID_L1_HANDLE;
+  rid_t rid;
+  if (!l1_handles.valid_handle(l1_hdl)) {
+    std::cout << "node destroy failed. invalid l1 handle!\n";
+    return INVALID_L1_HANDLE;
+  }
   L1Entry &l1_entry = l1_entries[l1_hdl];
-  l1_entry.l2_hdl = *l2_hdl;
-  l2_entries.insert(std::make_pair(*l2_hdl, L2Entry(l1_hdl, port_map)));
+  rid = l1_entry.rid;
+  l2_entries.erase(l1_entry.l2_hdl);
+  if (l2_handles.release_handle(l1_entry.l2_hdl)) {
+    std::cout << "node destroy failed. invalid l2 handle!\n";
+    return INVALID_L2_HANDLE;
+  }
+  l1_entries.erase(l1_hdl);
+  if (l1_handles.release_handle(l1_hdl)) {
+    std::cout << "node destroy failed. invalid l2 handle!\n";
+    return INVALID_L1_HANDLE;
+  }
+  if (pre_debug) {
+    std::cout << "node destroyed for rid : " << rid << "\n";
+  }
   return SUCCESS;
 }
 
 McSimplePre::McReturnCode
-McSimplePre::mc_l2_node_update(const l2_hdl_t l2_hdl,
-			 const PortMap &port_map)
+McSimplePre::mc_node_update(const l1_hdl_t l1_hdl,
+			    const PortMap &port_map)
 {
+  boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
-  if (!l2_handles.valid_handle(l2_hdl)) return INVALID_L2_HANDLE;
+  if (!l1_handles.valid_handle(l1_hdl)) {
+    std::cout << "node update failed. invalid l1 handle!\n";
+    return INVALID_L1_HANDLE;
+  }
+  L1Entry &l1_entry = l1_entries[l1_hdl];
+  l2_hdl_t l2_hdl = l1_entry.l2_hdl;
   L2Entry &l2_entry = l2_entries[l2_hdl];
   l2_entry.port_map = port_map;
-  return SUCCESS;
-}
-
-McSimplePre::McReturnCode
-McSimplePre::mc_l2_node_destroy(const l2_hdl_t l2_hdl)
-{
-  boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
-  if (!l2_handles.valid_handle(l2_hdl)) return INVALID_L2_HANDLE;
-  l2_entries.erase(l2_hdl);
-  if (l2_handles.release_handle(l2_hdl)) return INVALID_L2_HANDLE;
+  if (pre_debug) {
+    std::cout << "node updated for rid : " << l1_entry.rid << "\n";
+  }
   return SUCCESS;
 }
 
@@ -130,12 +193,16 @@ McSimplePre::replicate(const McSimplePre::McIn ingress_info) const
     const L1Entry l1_entry = l1_entries.at(l1_hdl);
     egress_info.rid = l1_entry.rid;
     const L2Entry l2_entry = l2_entries.at(l1_entry.l2_hdl);
+    // Port replication
     for (port_id = 0; port_id < l2_entry.port_map.size(); port_id++) {
       if (l2_entry.port_map[port_id]) {
 	egress_info.egress_port = port_id;
 	egress_info_list.push_back(egress_info);
       }
     }
+  }
+  if (pre_debug) {
+    std::cout << "number of packets replicated : " << egress_info_list.size() << "\n";
   }
   return egress_info_list;
 }
