@@ -1,9 +1,7 @@
 table_set_default smac mac_learn
 table_set_default dmac broadcast
 mc_mgrp_create 1
-mc_l1_node_create 0
-mc_l1_node_create 1
-mc_l1_node_associate 1 0
-mc_l1_node_associate 1 1
-mc_l2_node_create 0 0
-mc_l2_node_create 1 1
+mc_node_create 0 0
+mc_node_create 1 1
+mc_node_associate 1 0
+mc_node_associate 1 1

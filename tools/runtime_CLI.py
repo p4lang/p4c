@@ -475,26 +475,6 @@ class RuntimeAPI(cmd.Cmd):
         self.mc_client.bm_mc_mgrp_destroy(mgrp)
         print "SUCCESS"
 
-    def do_mc_l1_node_create(self, line):
-        rid = int(line.split()[0])
-        print "Creating l1 node with rid", rid
-        l1_hdl = self.mc_client.bm_mc_l1_node_create(rid)
-        print "SUCCESS"
-        print "l1 node was created with handle", l1_hdl
-
-    def do_mc_l1_node_associate(self, line):
-        mgrp = int(line.split()[0])
-        l1_hdl = int(line.split()[1])
-        print "Associating l1 node", l1_hdl, "to multicast group", mgrp
-        self.mc_client.bm_mc_l1_node_associate(mgrp, l1_hdl)
-        print "SUCCESS"
-
-    def do_mc_l1_node_destroy(self, line):
-        l1_hdl = int(line.split()[0])
-        print "Destroying l1 node", l1_hdl,
-        self.mc_client.bm_mc_l1_node_destroy(l1_hdl)
-        print "SUCCESS"
-
     def ports_to_port_map_str(self, ports):
         last_port_num = 0
         port_map_str = ""
@@ -504,31 +484,39 @@ class RuntimeAPI(cmd.Cmd):
             last_port_num = port_num
         return port_map_str[::-1]
 
-    def do_mc_l2_node_create(self, line):
+    def do_mc_node_create(self, line):
+        args = line.split()
+        rid = int(args[0])
+        port_map_str = self.ports_to_port_map_str(args[1:])
+        print "Creating node with rid", rid, "and with port map", port_map_str
+        l1_hdl = self.mc_client.bm_mc_node_create(rid, port_map_str)
+        print "SUCCESS"
+        print "node was created with handle", l1_hdl
+
+    def do_mc_node_associate(self, line):
+        args = line.split()
+        mgrp = int(args[0])
+        l1_hdl = int(args[1])
+        print "Associating node", l1_hdl, "to multicast group", mgrp
+        self.mc_client.bm_mc_node_associate(mgrp, l1_hdl)
+        print "SUCCESS"
+
+    def do_mc_node_destroy(self, line):
+        l1_hdl = int(line.split()[0])
+        print "Destroying node", l1_hdl
+        self.mc_client.bm_mc_node_destroy(l1_hdl)
+        print "SUCCESS"
+
+    def do_mc_node_update(self, line):
         args = line.split()
         l1_hdl = int(args[0])
         port_map_str = self.ports_to_port_map_str(args[1:])
-        print "Creating l2 node for l1 node", l1_hdl, "with port map", port_map_str
-        l2_hdl = self.mc_client.bm_mc_l2_node_create(l1_hdl, port_map_str)
-        print "SUCCESS"
-        print "l2 node was created with handle", l2_hdl
-
-    def do_mc_l2_node_update(self, line):
-        args = line.split()
-        l2_hdl = int(args[0])
-        port_map_str = self.ports_to_port_map_str(args[1:])
-        print "Updating l2 node", l2_hdl, "with port map", port_map_str
-        self.mc_client.bm_mc_l2_node_update(l2_hdl, port_map_str)
-        print "SUCCESS"
-
-    def do_mc_l2_node_destroy(self, line):
-        l2_hdl = int(line.split()[0])
-        print "Destroying l2 node", l2_hdl,
-        self.mc_client.bm_mc_l2_node_destroy(l2_hdl)
+        print "Updating node", l1_hdl, "with port map", port_map_str
+        self.mc_client.bm_mc_node_update(l1_hdl, port_map_str)
         print "SUCCESS"
 
     def do_load_new_config_file(self, line):
-        "Load new json config: load_new_config_file <path to .json file>"        
+        "Load new json config: load_new_config_file <path to .json file>"
         filename = line
         if not os.path.isfile(filename):
             print filename, "is not a valid file"
