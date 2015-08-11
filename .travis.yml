@@ -1,0 +1,53 @@
+# Config file for automatic testing at travis-ci.org
+
+sudo: required
+
+language: cpp
+
+addons:
+  apt:
+    sources:
+      - boost-latest
+      - ubuntu-toolchain-r-test
+    packages:
+      - libjudy-dev
+      - libgmp-dev
+      - libpcap-dev
+      - libboost1.55-dev
+      - libboost-test1.55-dev
+      - libboost-program-options1.55-dev
+      - libboost-system1.55-dev
+      - libboost-filesystem1.55-dev
+      - libboost-thread1.55-dev
+      - libevent-dev
+      - automake
+      - libtool
+      - flex 
+      - bison
+      - pkg-config
+      - g++-4.8
+      - libssl-dev
+      - gperf # needed ?
+      - google-perftools # needed ?
+      - libgoogle-perftools # needed ?
+      - libgoogle-perftools-dev # needed ?
+
+before_install:
+  - g++ -v
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 99
+  - g++ -v
+  - bash build/travis/install-thrift.sh
+  - bash build/travis/install-nanomsg.sh
+  - sudo ldconfig
+
+install:
+  - ./autogen.sh && ./configure && make all
+
+# command to run tests, e.g. python setup.py test
+script:
+  - make check
+
+# after_success:
+  # Report coverage results to codecov.io
+  # - pip install codecov
+  # - codecov
