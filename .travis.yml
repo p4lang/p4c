@@ -4,6 +4,10 @@ sudo: required
 
 language: cpp
 
+branches:
+  only:
+    - develop
+
 addons:
   apt:
     sources:
