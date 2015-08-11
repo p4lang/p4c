@@ -30,6 +30,11 @@ typedef struct bmi_interface_s {
   pcap_dumper_t *pcap_dumper;
 } bmi_interface_t;
 
+/* static get_version(int *x, int *y, int *z) { */
+/*   const char *str = pcap_lib_version(); */
+/*   sscanf(str, "%*s %*s %d.%d.%d", x, y, z); */
+/* } */
+
 int bmi_interface_create(bmi_interface_t **bmi, const char *device) {
   bmi_interface_t *bmi_ = malloc(sizeof(bmi_interface_t));
 
@@ -51,6 +56,7 @@ int bmi_interface_create(bmi_interface_t **bmi, const char *device) {
     return -1;
   }
 
+#ifdef WITH_PCAP_FIX
   if(pcap_set_timeout(bmi_->pcap, 1) != 0) {
     pcap_close(bmi_->pcap);
     free(bmi_);
@@ -62,6 +68,7 @@ int bmi_interface_create(bmi_interface_t **bmi, const char *device) {
     free(bmi_);
     return -1;
   }
+#endif
 
   if (pcap_activate(bmi_->pcap) != 0) {
     pcap_close(bmi_->pcap);
