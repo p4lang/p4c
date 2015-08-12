@@ -1,5 +1,7 @@
 # BEHAVIORAL MODEL REPOSITORY
 
+[![Build Status](https://travis-ci.org/p4lang/behavioral-model.svg?branch=develop)](https://travis-ci.org/p4lang/behavioral-model)
+
 **If you get a nanomsg error when running the tests (make check), try running
   them as sudo **  
 
