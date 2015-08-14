@@ -36,6 +36,7 @@
 #include "event_logger.h"
 #include "calculations.h"
 #include "meters.h"
+#include "counters.h"
 
 using std::vector;
 
@@ -65,7 +66,7 @@ struct ActionParam
   // some old P4 primitives take a calculation as a parameter, I don't know if I
   // will keep it around but for now I need it
   enum {CONST, FIELD, HEADER, ACTION_DATA,
-	HEADER_STACK, CALCULATION, METER_ARRAY} tag;
+	HEADER_STACK, CALCULATION, METER_ARRAY, COUNTER_ARRAY} tag;
 
   union {
     unsigned int const_offset;
@@ -86,6 +87,9 @@ struct ActionParam
 
     // non owning pointer
     MeterArray *meter_array;
+
+    // non owning pointer
+    CounterArray *counter_array;
   };
 };
 
@@ -170,6 +174,11 @@ struct ActionParamWithState {
   operator MeterArray &() {
     assert(ap.tag == ActionParam::METER_ARRAY);
     return *(ap.meter_array);
+  }
+
+  operator CounterArray &() {
+    assert(ap.tag == ActionParam::COUNTER_ARRAY);
+    return *(ap.counter_array);
   }
 };
 
@@ -257,7 +266,7 @@ protected:
     return *phv;
   }
 
-  // so far used only for meter arrays
+  // so far used only for meter arrays and counter arrays
   Packet &get_packet() {
     return *pkt;
   }
@@ -300,6 +309,7 @@ public:
   void parameter_push_back_action_data(int action_data_offset);
   void parameter_push_back_calculation(const NamedCalculation *calculation);
   void parameter_push_back_meter_array(MeterArray *meter_array);
+  void parameter_push_back_counter_array(CounterArray *counter_array);
 
   void push_back_primitive(ActionPrimitive_ *primitive);
 

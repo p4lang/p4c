@@ -388,11 +388,11 @@ public:
     }
   }
 
-  void bm_table_read_counter(BmCounterValue& _return, const std::string& table_name, const BmEntryHandle entry_handle) {
-    printf("bm_table_read_counter\n");
+  void bm_mt_read_counter(BmCounterValue& _return, const std::string& table_name, const BmEntryHandle entry_handle) {
+    printf("bm_mt_read_counter\n");
     MatchTable::counter_value_t bytes; // unsigned
     MatchTable::counter_value_t packets;
-    MatchErrorCode error_code = switch_->table_read_counters(
+    MatchErrorCode error_code = switch_->mt_read_counters(
         table_name,
 	entry_handle,
 	&bytes, &packets
@@ -406,15 +406,75 @@ public:
     _return.packets = (int64_t) packets;
   }
 
-  void bm_table_reset_counters(const std::string& table_name) {
-    printf("bm_table_reset_counters\n");
-    MatchErrorCode error_code = switch_->table_reset_counters(
+  void bm_mt_reset_counters(const std::string& table_name) {
+    printf("bm_mt_reset_counters\n");
+    MatchErrorCode error_code = switch_->mt_reset_counters(
         table_name
     );
     if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
       ito.what = get_exception_code(error_code);
       throw ito;
+    }
+  }
+
+  void bm_mt_write_counters(const std::string& table_name, const BmEntryHandle entry_handle, const BmCounterValue& value) {
+    printf("bm_mt_write_counters\n");
+    MatchTable::counter_value_t bytes = (uint64_t) value.bytes;
+    MatchTable::counter_value_t packets = (uint64_t) value.packets;
+    MatchErrorCode error_code = switch_->mt_write_counters(
+        table_name,
+	entry_handle,
+	bytes, packets
+    );
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.what = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
+  void bm_counter_read(BmCounterValue& _return, const std::string& counter_name, const int32_t index) {
+    printf("bm_counter_read\n");
+    MatchTable::counter_value_t bytes; // unsigned
+    MatchTable::counter_value_t packets;
+    Counter::CounterErrorCode error_code = switch_->read_counters(
+        counter_name,
+	index,
+	&bytes, &packets
+    );
+    if(error_code != Counter::CounterErrorCode::SUCCESS) {
+      InvalidCounterOperation ico;
+      ico.what = (CounterOperationErrorCode::type) error_code;
+      throw ico;
+    }
+    _return.bytes = (int64_t) bytes;
+    _return.packets = (int64_t) packets;
+  }
+
+  void bm_counter_reset_all(const std::string& counter_name) {
+    printf("bm_counter_reset_all\n");
+    Counter::CounterErrorCode error_code = switch_->reset_counters(counter_name);
+    if(error_code != Counter::CounterErrorCode::SUCCESS) {
+      InvalidCounterOperation ico;
+      ico.what = (CounterOperationErrorCode::type) error_code;
+      throw ico;
+    }
+  }
+
+  void bm_counter_write(const std::string& counter_name, const int32_t index, const BmCounterValue& value) {
+    printf("bm_counter_write\n");
+    MatchTable::counter_value_t bytes = (uint64_t) value.bytes;
+    MatchTable::counter_value_t packets = (uint64_t) value.packets;
+    Counter::CounterErrorCode error_code = switch_->write_counters(
+        counter_name,
+	(size_t) index,
+	bytes, packets
+    );
+    if(error_code != Counter::CounterErrorCode::SUCCESS) {
+      InvalidCounterOperation ico;
+      ico.what = (CounterOperationErrorCode::type) error_code;
+      throw ico;
     }
   }
 

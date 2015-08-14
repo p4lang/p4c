@@ -20,8 +20,6 @@
 
 #include <gtest/gtest.h>
 
-#include <random>
-
 #include "bm_sim/checksums.h"
 #include "bm_sim/parser.h"
 
@@ -65,8 +63,6 @@ protected:
   header_id_t metaHeader{4};
 
   Parser parser;
-
-  std::uniform_int_distribution<char> rd;
 
   std::unique_ptr<NamedCalculation> tcp_cksum_engine_calc{nullptr};
   std::unique_ptr<CalcBasedChecksum> tcp_cksum_engine{nullptr};

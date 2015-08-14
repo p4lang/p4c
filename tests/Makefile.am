@@ -18,7 +18,8 @@ test_pre \
 test_calculations \
 test_header_stacks \
 test_meters \
-test_ageing
+test_ageing \
+test_counters
 check_PROGRAMS = $(TESTS) test_all
 
 # Sources for tests
@@ -38,6 +39,7 @@ test_calculations_SOURCES  = $(common_source) test_calculations.cpp
 test_header_stacks_SOURCES = $(common_source) test_header_stacks.cpp
 test_meters_SOURCES        = $(common_source) test_meters.cpp
 test_ageing_SOURCES        = $(common_source) test_ageing.cpp
+test_counters_SOURCES      = $(common_source) test_counters.cpp
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
 test_checksums.cpp \
@@ -54,4 +56,5 @@ test_pre.cpp \
 test_calculations.cpp \
 test_header_stacks.cpp \
 test_meters.cpp \
-test_ageing.cpp
+test_ageing.cpp \
+test_counters.cpp

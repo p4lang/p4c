@@ -136,13 +136,35 @@ public:
   
 
   virtual MatchErrorCode
-  table_read_counters(const std::string &table_name,
-		      entry_handle_t handle,
-		      MatchTableAbstract::counter_value_t *bytes,
-		      MatchTableAbstract::counter_value_t *packets) = 0;
+  mt_read_counters(const std::string &table_name,
+		   entry_handle_t handle,
+		   MatchTableAbstract::counter_value_t *bytes,
+		   MatchTableAbstract::counter_value_t *packets) = 0;
 
   virtual MatchErrorCode
-  table_reset_counters(const std::string &table_name) = 0;
+  mt_reset_counters(const std::string &table_name) = 0;
+
+  virtual MatchErrorCode
+  mt_write_counters(const std::string &table_name,
+		    entry_handle_t handle,
+		    MatchTableAbstract::counter_value_t bytes,
+		    MatchTableAbstract::counter_value_t packets) = 0;
+
+  virtual Counter::CounterErrorCode
+  read_counters(const std::string &counter_name,
+		size_t index,
+		MatchTableAbstract::counter_value_t *bytes,
+		MatchTableAbstract::counter_value_t *packets) = 0;
+
+  virtual Counter::CounterErrorCode
+  reset_counters(const std::string &counter_name) = 0;
+
+  virtual Counter::CounterErrorCode
+  write_counters(const std::string &counter_name,
+		 size_t index,
+		 MatchTableAbstract::counter_value_t bytes,
+		 MatchTableAbstract::counter_value_t packets) = 0;
+
 
   virtual MeterErrorCode
   meter_array_set_rates(const std::string &meter_name,
