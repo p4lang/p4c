@@ -376,11 +376,11 @@ Switch::mt_indirect_ws_set_default_group(
   return table->set_default_group(grp);
 }
 
-MatchErrorCode Switch::table_read_counters(
-    const std::string &table_name,
-    entry_handle_t handle,
-    MatchTableAbstract::counter_value_t *bytes,
-    MatchTableAbstract::counter_value_t *packets
+MatchErrorCode Switch::mt_read_counters(
+  const std::string &table_name,
+  entry_handle_t handle,
+  MatchTableAbstract::counter_value_t *bytes,
+  MatchTableAbstract::counter_value_t *packets
 ) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   MatchTableAbstract *abstract_table = 
@@ -389,14 +389,60 @@ MatchErrorCode Switch::table_read_counters(
   return abstract_table->query_counters(handle, bytes, packets);
 }
 
-MatchErrorCode Switch::table_reset_counters(
-    const std::string &table_name
+MatchErrorCode Switch::mt_reset_counters(
+  const std::string &table_name
 ) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   MatchTableAbstract *abstract_table = 
     p4objects_rt->get_abstract_match_table(table_name);
   assert(abstract_table);
   return abstract_table->reset_counters();
+}
+
+MatchErrorCode Switch::mt_write_counters(
+  const std::string &table_name,
+  entry_handle_t handle,
+  MatchTableAbstract::counter_value_t bytes,
+  MatchTableAbstract::counter_value_t packets
+) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MatchTableAbstract *abstract_table = 
+    p4objects_rt->get_abstract_match_table(table_name);
+  assert(abstract_table);
+  return abstract_table->write_counters(handle, bytes, packets);
+}
+
+Counter::CounterErrorCode Switch::read_counters(
+  const std::string &counter_name,
+  size_t index,
+  MatchTableAbstract::counter_value_t *bytes,
+  MatchTableAbstract::counter_value_t *packets
+) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  CounterArray *counter_array = p4objects_rt->get_counter_array(counter_name);
+  assert(counter_array);
+  return (*counter_array)[index].query_counter(bytes, packets);
+}
+
+Counter::CounterErrorCode Switch::reset_counters(
+  const std::string &counter_name
+) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  CounterArray *counter_array = p4objects_rt->get_counter_array(counter_name);
+  assert(counter_array);
+  return counter_array->reset_counters();
+}
+
+Counter::CounterErrorCode Switch::write_counters(
+  const std::string &counter_name,
+  size_t index,
+  MatchTableAbstract::counter_value_t bytes,
+  MatchTableAbstract::counter_value_t packets
+) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  CounterArray *counter_array = p4objects_rt->get_counter_array(counter_name);
+  assert(counter_array);
+  return (*counter_array)[index].write_counter(bytes, packets);
 }
 
 RuntimeInterface::MeterErrorCode

@@ -156,13 +156,34 @@ public:
 				   grp_hdl_t grp) override;
 
   MatchErrorCode
-  table_read_counters(const std::string &table_name,
-		      entry_handle_t handle,
-		      MatchTableAbstract::counter_value_t *bytes,
-		      MatchTableAbstract::counter_value_t *packets) override;
+  mt_read_counters(const std::string &table_name,
+		   entry_handle_t handle,
+		   MatchTableAbstract::counter_value_t *bytes,
+		   MatchTableAbstract::counter_value_t *packets) override;
 
   MatchErrorCode
-  table_reset_counters(const std::string &table_name) override;
+  mt_reset_counters(const std::string &table_name) override;
+
+  MatchErrorCode
+  mt_write_counters(const std::string &table_name,
+		    entry_handle_t handle,
+		    MatchTableAbstract::counter_value_t bytes,
+		    MatchTableAbstract::counter_value_t packets) override;
+
+  Counter::CounterErrorCode
+  read_counters(const std::string &counter_name,
+		size_t index,
+		MatchTableAbstract::counter_value_t *bytes,
+		MatchTableAbstract::counter_value_t *packets) override;
+
+  Counter::CounterErrorCode
+  reset_counters(const std::string &counter_name) override;
+
+  Counter::CounterErrorCode
+  write_counters(const std::string &counter_name,
+		 size_t index,
+		 MatchTableAbstract::counter_value_t bytes,
+		 MatchTableAbstract::counter_value_t packets) override;
 
   MeterErrorCode
   meter_array_set_rates(const std::string &meter_name,

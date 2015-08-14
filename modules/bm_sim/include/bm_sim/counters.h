@@ -50,6 +50,10 @@ public:
 
   CounterErrorCode reset_counter();
 
+  // in case something more general than reset is needed
+  CounterErrorCode write_counter(counter_value_t bytes,
+				 counter_value_t packets);
+
 private:
   std::atomic<std::uint_fast64_t> bytes{0u};
   std::atomic<std::uint_fast64_t> packets{0u};
@@ -60,6 +64,8 @@ typedef p4object_id_t meter_array_id_t;
 class CounterArray : public NamedP4Object
 {
 public:
+  typedef Counter::CounterErrorCode CounterErrorCode;
+
   typedef vector<Counter>::iterator iterator;
   typedef vector<Counter>::const_iterator const_iterator;
 
@@ -67,6 +73,8 @@ public:
   CounterArray(const std::string &name, p4object_id_t id,
 	       size_t size)
     : NamedP4Object(name, id), counters(size) { }
+
+  CounterErrorCode reset_counters();
 
   Counter &get_counter(size_t idx) {
     return counters[idx];

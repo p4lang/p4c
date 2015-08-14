@@ -84,6 +84,9 @@ public:
 				counter_value_t *bytes,
 				counter_value_t *packets) const;
   MatchErrorCode reset_counters();
+  MatchErrorCode write_counters(entry_handle_t handle,
+				counter_value_t bytes,
+				counter_value_t packets);
 
   MatchErrorCode set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms);
 

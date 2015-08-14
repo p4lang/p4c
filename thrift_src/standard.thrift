@@ -104,6 +104,16 @@ exception InvalidTableOperation {
   1:TableOperationErrorCode what
 }
 
+enum CounterOperationErrorCode {
+  INVALID_COUNTER_NAME = 1,
+  INVALID_INDEX = 2,
+  ERROR = 3,
+}
+
+exception InvalidCounterOperation {
+  1:CounterOperationErrorCode what
+}
+
 enum SwapOperationErrorCode {
   CONFIG_SWAP_DISABLED = 1,
   ONGOING_SWAP = 2,
@@ -261,15 +271,37 @@ service Standard {
     2:BmGroupHandle grp_handle
   ) throws (1:InvalidTableOperation ouch),
 
-
-  BmCounterValue bm_table_read_counter(
+  BmCounterValue bm_mt_read_counter(
     1:string table_name,
     2:BmEntryHandle entry_handle
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_table_reset_counters(
+  void bm_mt_reset_counters(
     1:string table_name
   ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_write_counters(
+    1:string table_name,
+    2:BmEntryHandle entry_handle,
+    3:BmCounterValue value,
+  ) throws (1:InvalidTableOperation ouch),
+
+  // indirect counters
+
+  BmCounterValue bm_counter_read(
+    1:string counter_name,
+    2:i32 index
+  ) throws (1:InvalidCounterOperation ouch),
+
+  void bm_counter_reset_all(
+    1:string counter_name
+  ) throws (1:InvalidCounterOperation ouch),
+
+  void bm_counter_write(
+    1:string counter_name,
+    2:i32 index,
+    3:BmCounterValue value
+  ) throws (1:InvalidCounterOperation ouch),
 
   // learning acks
 

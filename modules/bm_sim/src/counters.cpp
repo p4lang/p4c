@@ -35,3 +35,19 @@ Counter::reset_counter()
   packets = 0u;
   return SUCCESS;
 }
+
+Counter::CounterErrorCode
+Counter::write_counter(counter_value_t bytes, counter_value_t packets)
+{
+  this->bytes = bytes;
+  this->packets = packets;
+  return SUCCESS;
+}
+
+Counter::CounterErrorCode
+CounterArray::reset_counters()
+{
+  for(Counter &c : counters)
+    c.reset_counter();
+  return Counter::SUCCESS;
+}

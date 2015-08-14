@@ -366,6 +366,19 @@ void P4Objects::init_objects(std::istream &is) {
     add_meter_array(name, unique_ptr<MeterArray>(meter_array));
   }
 
+  // counter arrays
+
+  const Json::Value &cfg_counter_arrays = cfg_root["counter_arrays"];
+  for (const auto &cfg_counter_array : cfg_counter_arrays) {
+
+    const string name = cfg_counter_array["name"].asString();
+    const p4object_id_t id = cfg_counter_array["id"].asInt();
+    const size_t size = cfg_counter_array["size"].asUInt();
+
+    CounterArray *counter_array = new CounterArray(name, id, size);
+    add_counter_array(name, unique_ptr<CounterArray>(counter_array));
+  }
+
   // actions
 
   const Json::Value &cfg_actions = cfg_root["actions"];

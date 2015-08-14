@@ -87,6 +87,29 @@ MatchTableAbstract::query_counters(entry_handle_t handle,
   return MatchErrorCode::SUCCESS;
 }
 
+/* really needed ? */
+MatchErrorCode
+MatchTableAbstract::reset_counters()
+{
+  if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
+  match_unit_->reset_counters();
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableAbstract::write_counters(entry_handle_t handle,
+				   counter_value_t bytes,
+				   counter_value_t packets)
+{
+  ReadLock lock = lock_write();
+  if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
+  if(!is_valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
+  MatchUnit::EntryMeta &meta = match_unit_->get_entry_meta(handle);
+  // should I hide counter implementation more?
+  meta.counter.write_counter(bytes, packets);
+  return MatchErrorCode::SUCCESS;
+}
+
 MatchErrorCode
 MatchTableAbstract::set_entry_ttl(
   entry_handle_t handle, unsigned int ttl_ms
@@ -95,15 +118,6 @@ MatchTableAbstract::set_entry_ttl(
   if(!with_ageing) return MatchErrorCode::AGEING_DISABLED;
   WriteLock lock = lock_write();
   return match_unit_->set_entry_ttl(handle, ttl_ms);
-}
-
-/* really needed ? */
-MatchErrorCode
-MatchTableAbstract::reset_counters()
-{
-  if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
-  match_unit_->reset_counters();
-  return MatchErrorCode::SUCCESS;
 }
 
 void

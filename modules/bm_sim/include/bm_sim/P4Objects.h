@@ -41,6 +41,7 @@
 #include "control_flow.h"
 #include "learning.h"
 #include "meters.h"
+#include "counters.h"
 #include "ageing.h"
 
 class P4Objects {
@@ -93,6 +94,10 @@ public:
 
   MeterArray *get_meter_array(const std::string &name) {
     return meter_arrays[name].get();
+  }
+
+  CounterArray *get_counter_array(const std::string &name) {
+    return counter_arrays[name].get();
   }
 
   NamedCalculation *get_named_calculation(const std::string &name) {
@@ -162,6 +167,11 @@ private:
     meter_arrays[name] = std::move(meter_array);
   }
 
+  void add_counter_array(const std::string &name,
+		       std::unique_ptr<CounterArray> counter_array) {
+    counter_arrays[name] = std::move(counter_array);
+  }
+
   void add_named_calculation(const std::string &name,
 			     std::unique_ptr<NamedCalculation> calculation) {
     calculations[name] = std::move(calculation);
@@ -212,6 +222,9 @@ private:
 
   // meter arrays
   std::unordered_map<std::string, std::unique_ptr<MeterArray> > meter_arrays{};
+
+  // counter arrays
+  std::unordered_map<std::string, std::unique_ptr<CounterArray> > counter_arrays{};
 
   // calculations
   std::unordered_map<std::string, std::unique_ptr<NamedCalculation> > calculations{};
