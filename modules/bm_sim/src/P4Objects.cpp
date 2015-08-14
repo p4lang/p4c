@@ -375,7 +375,7 @@ void P4Objects::init_objects(std::istream &is) {
     const p4object_id_t id = cfg_counter_array["id"].asInt();
     const size_t size = cfg_counter_array["size"].asUInt();
     const Json::Value false_value(false);
-    const bool is_direct = cfg_header.get("is_direct", false_value).asBool();
+    const bool is_direct = cfg_counter.get("is_direct", false_value).asBool();
     if(is_direct) continue;
 
     CounterArray *counter_array = new CounterArray(name, id, size);
