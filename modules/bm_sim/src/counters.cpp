@@ -18,16 +18,20 @@
  *
  */
 
-#ifndef _BM_STATEFUL_H_
-#define _BM_STATEFUL_H_
+#include "bm_sim/counters.h"
 
-#include <array>
-
-#include "data.h"
-
-class Register : public Data
+Counter::CounterErrorCode
+Counter::query_counter(counter_value_t *bytes, counter_value_t *packets) const
 {
+  *bytes = this->bytes;
+  *packets = this->packets;
+  return SUCCESS;
+}
 
-};
-
-#endif
+Counter::CounterErrorCode
+Counter::reset_counter()
+{
+  bytes = 0u;
+  packets = 0u;
+  return SUCCESS;
+}

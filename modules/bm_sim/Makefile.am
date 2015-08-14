@@ -33,6 +33,7 @@ src/simple_pre_lag.cpp \
 src/transport.cpp \
 src/calculations.cpp \
 src/meters.cpp \
+src/counters.cpp \
 src/dev_mgr.cpp \
 src/options_parse.cpp \
 src/ageing.cpp
@@ -45,6 +46,7 @@ include/bm_sim/bytecontainer.h \
 include/bm_sim/checksums.h \
 include/bm_sim/conditionals.h \
 include/bm_sim/control_flow.h \
+include/bm_sim/counters.h \
 include/bm_sim/data.h \
 include/bm_sim/deparser.h \
 include/bm_sim/dev_mgr.h \
