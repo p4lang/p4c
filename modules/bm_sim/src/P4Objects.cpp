@@ -442,6 +442,11 @@ void P4Objects::init_objects(std::istream &is) {
 	  MeterArray *meter = get_meter_array(name);
 	  action_fn->parameter_push_back_meter_array(meter);
 	}
+	else if(type == "counter_array") {
+	  const string name = cfg_parameter["value"].asString();
+	  CounterArray *counter = get_counter_array(name);
+	  action_fn->parameter_push_back_counter_array(counter);
+	}
 	else if(type == "header_stack") {
 	  const string header_stack_name = cfg_parameter["value"].asString();
 	  header_id_t header_stack_id = get_header_stack_id(header_stack_name);
