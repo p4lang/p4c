@@ -418,7 +418,7 @@ public:
     }
   }
 
-  void bm_mt_write_counters(const std::string& table_name, const BmEntryHandle entry_handle, const BmCounterValue& value) {
+  void bm_mt_write_counter(const std::string& table_name, const BmEntryHandle entry_handle, const BmCounterValue& value) {
     printf("bm_mt_write_counters\n");
     MatchTable::counter_value_t bytes = (uint64_t) value.bytes;
     MatchTable::counter_value_t packets = (uint64_t) value.packets;

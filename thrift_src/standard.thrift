@@ -280,7 +280,7 @@ service Standard {
     1:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_mt_write_counters(
+  void bm_mt_write_counter(
     1:string table_name,
     2:BmEntryHandle entry_handle,
     3:BmCounterValue value,
