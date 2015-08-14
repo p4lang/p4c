@@ -36,6 +36,7 @@
 #include "packet.h"
 #include "handle_mgr.h"
 #include "lpm_trie.h"
+#include "counters.h"
 
 typedef uintptr_t internal_handle_t;
 typedef uint64_t entry_handle_t;
@@ -107,16 +108,6 @@ struct MatchKeyBuilder
 
 namespace MatchUnit {
 
-struct Counter {
-  std::atomic<std::uint_fast64_t> bytes{0u};
-  std::atomic<std::uint_fast64_t> packets{0u};
-
-  void reset() {
-    bytes = 0u;
-    packets = 0u;
-  }
-};
-
 struct AtomicTimestamp {
   std::atomic<uint64_t> ms_{};
 
@@ -169,7 +160,7 @@ struct EntryMeta {
   uint32_t version{};
 
   void reset() {
-    counter.reset();
+    counter.reset_counter();
     ts.set(clock::now());
   }
 };
@@ -212,9 +203,8 @@ protected:
     match_key_builder(phv, key);
   }
 
-  void update_counters(MatchUnit::Counter &c, const Packet &pkt) {
-    c.bytes += pkt.get_ingress_length();
-    c.packets += 1;
+  void update_counters(Counter &c, const Packet &pkt) {
+    c.increment_counter(pkt);
   }
 
   void update_ts(MatchUnit::AtomicTimestamp &ts, const Packet &pkt) {

@@ -82,8 +82,8 @@ MatchTableAbstract::query_counters(entry_handle_t handle,
   if(!with_counters) return MatchErrorCode::COUNTERS_DISABLED;
   if(!is_valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
   const MatchUnit::EntryMeta &meta = match_unit_->get_entry_meta(handle);
-  *bytes = meta.counter.bytes;
-  *packets = meta.counter.packets;
+  // should I hide counter implementation more?
+  meta.counter.query_counter(bytes, packets);
   return MatchErrorCode::SUCCESS;
 }
 

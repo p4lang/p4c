@@ -33,7 +33,7 @@
 class MatchTableAbstract : public NamedP4Object
 {
 public:
-  typedef uint64_t counter_value_t;
+  typedef Counter::counter_value_t counter_value_t;
 
   struct ActionEntry {
     ActionEntry() { }

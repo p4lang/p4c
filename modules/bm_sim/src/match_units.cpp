@@ -79,7 +79,7 @@ MatchUnitAbstract_::reset_counters()
   // could take a while, but do not block anyone else
   // lock (even read lock) does not have to be held while doing this
   for(EntryMeta &meta : entry_meta) {
-    meta.counter.reset();
+    meta.counter.reset_counter();
   }
 }
 
