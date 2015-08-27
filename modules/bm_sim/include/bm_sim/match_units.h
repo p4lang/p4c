@@ -189,6 +189,8 @@ public:
 
   void reset_counters();
 
+  void reset_state();
+
   MatchErrorCode set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms);
 
   void sweep_entries(std::vector<entry_handle_t> &entries) const;

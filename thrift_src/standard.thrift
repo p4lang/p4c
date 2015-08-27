@@ -355,4 +355,6 @@ service Standard {
   string bm_dump_table(
     1:string table_name
   )
+
+  void bm_reset_state()
 }

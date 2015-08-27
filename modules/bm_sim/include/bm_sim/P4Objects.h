@@ -60,6 +60,8 @@ public:
 
   AgeingMonitor *get_ageing_monitor() { return ageing_monitor.get(); }
 
+  void reset_state();
+
   ActionFn *get_action(const std::string &name) {
     return actions_map[name].get();
   }

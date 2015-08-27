@@ -80,6 +80,8 @@ public:
     next_nodes[action_id] = next_node;
   }
 
+  void reset_state();
+
   MatchErrorCode query_counters(entry_handle_t handle,
 				counter_value_t *bytes,
 				counter_value_t *packets) const;

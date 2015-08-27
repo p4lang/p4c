@@ -577,6 +577,11 @@ public:
     _return.append(stream.str());
   }
 
+  void bm_reset_state() {
+    printf("bm_reset_state\n");
+    switch_->reset_state();
+  }
+
 private:
   Switch *switch_;
 };

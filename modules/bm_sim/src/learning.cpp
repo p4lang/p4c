@@ -292,6 +292,18 @@ void LearnEngine::LearnList::ack_buffer(buffer_id_t buffer_id)
   old_buffers.erase(it);
 }
 
+void LearnEngine::LearnList::reset_state()
+{
+  std::unique_lock<std::mutex> lock(mutex);
+  // TODO: need to make this robust, what if an unexpected ack comes later?
+  buffer.clear();
+  buffer_id = 0;
+  num_samples = 0;
+  filter.clear();
+  old_buffers.clear();
+  buffer_tmp.clear();
+}
+
 void LearnEngine::list_create(
     list_id_t list_id, size_t max_samples, unsigned int timeout_ms
 )
@@ -378,4 +390,9 @@ void LearnEngine::ack_buffer(list_id_t list_id, buffer_id_t buffer_id) {
   assert(it != learn_lists.end());
   LearnList *list = it->second.get();
   list->ack_buffer(buffer_id);
+}
+
+void LearnEngine::reset_state() {
+  for(auto &p : learn_lists)
+    p.second->reset_state();
 }

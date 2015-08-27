@@ -73,6 +73,12 @@ MatchTableAbstract::apply_action(Packet *pkt)
   return next_node;
 }
 
+void
+MatchTableAbstract::reset_state() {
+  WriteLock lock = lock_write();
+  match_unit_->reset_state();
+}
+
 MatchErrorCode
 MatchTableAbstract::query_counters(entry_handle_t handle,
 				   counter_value_t *bytes,

@@ -83,6 +83,14 @@ MatchUnitAbstract_::reset_counters()
   }
 }
 
+void
+MatchUnitAbstract_::reset_state()
+{
+  num_entries = 0;
+  handles.clear();
+  entry_meta = std::vector<MatchUnit::EntryMeta>(size);
+}
+
 MatchErrorCode
 MatchUnitAbstract_::set_entry_ttl(
   entry_handle_t handle, unsigned int ttl_ms

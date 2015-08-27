@@ -736,6 +736,15 @@ void P4Objects::destroy_objects() {
   Packet::unset_phv_factory();
 }
 
+void P4Objects::reset_state() {
+  // TODO: is this robust?
+  for(auto &table : match_action_tables_map) {
+    table.second->get_match_table()->reset_state();
+  }
+  learn_engine->reset_state();
+  ageing_monitor->reset_state();
+}
+
 int P4Objects::get_field_offset(header_id_t header_id, const string &field_name) {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_field_offset(field_name);  

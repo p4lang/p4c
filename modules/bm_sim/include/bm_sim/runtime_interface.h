@@ -180,6 +180,9 @@ public:
   virtual ErrorCode
   swap_configs() = 0;
 
+  virtual ErrorCode
+  reset_state() = 0;
+
   virtual MatchErrorCode
   dump_table(const std::string& table_name,
 	     std::ostream &stream) const = 0;

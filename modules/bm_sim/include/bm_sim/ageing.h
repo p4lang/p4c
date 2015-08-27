@@ -76,6 +76,8 @@ public:
 
   void set_sweep_interval(unsigned int ms);
 
+  void reset_state();
+
 private:
   void sweep_loop();
   void do_sweep();

@@ -97,6 +97,8 @@ public:
 	   const std::vector<int> &sample_ids);
   void ack_buffer(list_id_t list_id, buffer_id_t buffer_id);
 
+  void reset_state();
+
 private:
   class LearnSampleBuilder {
   public:
@@ -158,6 +160,8 @@ private:
     void ack(buffer_id_t buffer_id, const std::vector<int> &sample_ids);
     void ack_buffer(buffer_id_t buffer_id);
 
+    void reset_state();
+
     LearnList(const LearnList &other) = delete;
     LearnList &operator=(const LearnList &other) = delete;
     LearnList(LearnList &&other) = delete;
@@ -195,7 +199,7 @@ private:
 
     LearnMode learn_mode{LearnMode::NONE};
 
-    // shoudl I use a union here? or is it not worth the trouble?
+    // should I use a union here? or is it not worth the trouble?
     std::shared_ptr<LearnWriter> writer{nullptr};
     LearnCb cb_fn{};
     void *cb_cookie{nullptr};

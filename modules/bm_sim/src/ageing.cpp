@@ -75,6 +75,19 @@ AgeingMonitor::set_sweep_interval(unsigned int ms)
 }
 
 void
+AgeingMonitor::reset_state()
+{
+  std::unique_lock<std::mutex> lock(mutex);
+  entries.clear();
+  entries_tmp.clear();
+  buffer_id = 0;
+  for(auto &entry : tables_with_ageing) {
+    TableData &data = entry.second;
+    data.prev_sweep_entries.clear();
+  }
+}
+
+void
 AgeingMonitor::sweep_loop()
 {
   using std::chrono::milliseconds;

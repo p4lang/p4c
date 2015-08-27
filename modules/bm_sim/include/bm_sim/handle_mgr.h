@@ -210,6 +210,11 @@ public:
     return (Rc == 1);
   }
 
+  void clear() {
+    Word_t Rc_word;
+    J1FA(Rc_word, handles);
+  }
+
   // iterators
 
   iterator begin() {

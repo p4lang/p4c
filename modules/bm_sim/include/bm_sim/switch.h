@@ -199,6 +199,9 @@ public:
   RuntimeInterface::ErrorCode
   swap_configs() override;
 
+  RuntimeInterface::ErrorCode
+  reset_state() override;
+
   MatchErrorCode
   dump_table(const std::string& table_name,
 	     std::ostream &stream) const override;

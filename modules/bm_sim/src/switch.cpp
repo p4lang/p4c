@@ -486,6 +486,12 @@ RuntimeInterface::ErrorCode Switch::swap_configs() {
   return SUCCESS;
 }
 
+RuntimeInterface::ErrorCode Switch::reset_state() {
+  boost::unique_lock<boost::shared_mutex> lock(request_mutex);
+  p4objects_rt->reset_state();
+  return SUCCESS;
+}
+
 MatchErrorCode Switch::dump_table(
   const std::string& table_name,
   std::ostream &stream
