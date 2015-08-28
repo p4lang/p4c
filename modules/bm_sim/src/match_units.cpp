@@ -83,14 +83,6 @@ MatchUnitAbstract_::reset_counters()
   }
 }
 
-void
-MatchUnitAbstract_::reset_state()
-{
-  num_entries = 0;
-  handles.clear();
-  entry_meta = std::vector<MatchUnit::EntryMeta>(size);
-}
-
 MatchErrorCode
 MatchUnitAbstract_::set_entry_ttl(
   entry_handle_t handle, unsigned int ttl_ms
@@ -171,6 +163,17 @@ MatchUnitAbstract<V>::get_value(entry_handle_t handle, const V **value)
 {
   return get_value_(handle, value);
 }
+
+template<typename V>
+void
+MatchUnitAbstract<V>::reset_state()
+{
+  this->num_entries = 0;
+  this->handles.clear();
+  this->entry_meta = std::vector<MatchUnit::EntryMeta>(size);
+  reset_state_();
+}
+
 
 template<typename V>
 typename MatchUnitExact<V>::MatchUnitLookup
@@ -284,6 +287,14 @@ MatchUnitExact<V>::dump_(std::ostream &stream) const
     entry.value.dump(stream);
     stream << "\n";
   }
+}
+
+template<typename V>
+void
+MatchUnitExact<V>::reset_state_()
+{
+  entries = std::vector<Entry>(this->size);
+  entries_map.clear();
 }
 
 template<typename V>
@@ -411,6 +422,14 @@ MatchUnitLPM<V>::dump_(std::ostream &stream) const
     entry.value.dump(stream);
     stream << "\n";
   }
+}
+
+template<typename V>
+void
+MatchUnitLPM<V>::reset_state_()
+{
+  entries = std::vector<Entry>(this->size);
+  entries_trie.clear();
 }
 
 
@@ -573,6 +592,13 @@ MatchUnitTernary<V>::dump_(std::ostream &stream) const
     entry.value.dump(stream);
     stream << "\n";
   }
+}
+
+template<typename V>
+void
+MatchUnitTernary<V>::reset_state_()
+{
+  entries = std::vector<Entry>(this->size);
 }
 
 

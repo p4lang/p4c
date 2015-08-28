@@ -76,7 +76,7 @@ MatchTableAbstract::apply_action(Packet *pkt)
 void
 MatchTableAbstract::reset_state() {
   WriteLock lock = lock_write();
-  match_unit_->reset_state();
+  reset_state_();
 }
 
 MatchErrorCode
@@ -208,6 +208,13 @@ MatchTable::dump(std::ostream &stream) const
   match_unit->dump(stream);
 }
 
+void
+MatchTable::reset_state_()
+{
+  // reset default_entry ?
+  match_unit->reset_state();
+}
+
 std::unique_ptr<MatchTable>
 MatchTable::create(
   const std::string &match_type, const std::string &name, p4object_id_t id,
@@ -295,10 +302,12 @@ MatchTableIndirect::delete_member(mbr_hdl_t mbr)
 {
   WriteLock lock = lock_write();
 
+  if(!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+
   if(index_ref_count.get(IndirectIndex::make_mbr_index(mbr)) > 0)
     return MatchErrorCode::MBR_STILL_USED;
 
-  if(mbr_handles.release_handle(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+  assert(!mbr_handles.release_handle(mbr));
 
   num_members--;
 
@@ -391,6 +400,16 @@ MatchTableIndirect::dump(std::ostream &stream) const
     action_entries[mbr].dump(stream);
     stream << "\n";
   }
+}
+
+void
+MatchTableIndirect::reset_state_()
+{
+  index_ref_count = IndirectIndexRefCount();
+  mbr_handles.clear();
+  action_entries.clear();
+  num_members = 0;
+  match_unit->reset_state();
 }
 
 
@@ -627,4 +646,12 @@ MatchTableIndirectWS::get_num_members_in_group(grp_hdl_t grp, size_t *nb) const
   *nb = group_info.size();
 
   return MatchErrorCode::SUCCESS;
+}
+
+void
+MatchTableIndirectWS::reset_state_()
+{
+  MatchTableIndirect::reset_state_();
+  num_groups = 0;
+  group_entries.clear();
 }

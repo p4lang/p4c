@@ -387,6 +387,37 @@ TYPED_TEST(TableSizeOne, Valid) {
   ASSERT_TRUE(hit);
 }
 
+TYPED_TEST(TableSizeOne, ResetState) {
+  std::string key_ = "\x0a\xba";
+  ByteContainer key("0x0aba");
+  entry_handle_t handle;
+  MatchErrorCode rc;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  Packet pkt = this->get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+
+  rc = this->add_entry(key_, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  f.set("0xaba");
+  this->table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+
+  this->table->reset_state();
+  this->table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_FALSE(hit);
+  rc = this->table->delete_entry(handle);
+  ASSERT_EQ(MatchErrorCode::INVALID_HANDLE, rc);
+
+  rc = this->add_entry(key_, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  this->table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+}
+
+
 class TableIndirect : public ::testing::Test {
 protected:
   typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
@@ -628,6 +659,42 @@ TEST_F(TableIndirect, ModifyMember) {
   ASSERT_TRUE(hit);
   ASSERT_EQ(data_2, entry_2.action_fn.get_action_data(0).get_uint());
 }
+
+TEST_F(TableIndirect, ResetState) {
+  std::string key = "\x0a\xba";
+  std::string nkey = "\x0a\xbb";
+  unsigned int data = 666u;
+  mbr_hdl_t mbr;
+  entry_handle_t handle;
+  MatchErrorCode rc;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  Packet pkt = get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(testHeader1, 0);
+  f.set("0xaba");
+
+  rc = add_member(data, &mbr);
+  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+  rc = add_entry(key, mbr, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+
+  table->reset_state();
+  rc = table->delete_entry(handle);
+  ASSERT_EQ(MatchErrorCode::INVALID_HANDLE, rc);
+  rc = table->delete_member(mbr);
+  ASSERT_EQ(MatchErrorCode::INVALID_MBR_HANDLE, rc);
+
+  rc = add_member(data, &mbr);
+  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+  rc = add_entry(key, mbr, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+}
+
 
 class TableIndirectWS : public ::testing::Test {
 protected:

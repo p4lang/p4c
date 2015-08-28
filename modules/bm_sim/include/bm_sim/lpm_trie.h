@@ -64,6 +64,11 @@ public:
     return bf_lpm_trie_get(trie, key.data(), (value_t *) value);
   }
 
+  void clear() {
+    bf_lpm_trie_destroy(trie);
+    trie = bf_lpm_trie_create(key_width_bytes, true);
+  }
+
 private:
   size_t key_width_bytes{0};
   bf_lpm_trie_t *trie{nullptr};

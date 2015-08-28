@@ -189,8 +189,6 @@ public:
 
   void reset_counters();
 
-  void reset_state();
-
   MatchErrorCode set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms);
 
   void sweep_entries(std::vector<entry_handle_t> &entries) const;
@@ -264,6 +262,8 @@ public:
     return dump_(stream);
   }
 
+  void reset_state();
+
 private:
   virtual MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
 				    V value, // by value for possible std::move
@@ -277,6 +277,8 @@ private:
   virtual MatchErrorCode get_value_(entry_handle_t handle, const V **value) = 0;
 
   virtual void dump_(std::ostream &stream) const = 0;
+
+  virtual void reset_state_() = 0;
 
   virtual MatchUnitLookup lookup_key(const ByteContainer &key) const = 0;
 };
@@ -319,6 +321,8 @@ private:
   MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
 
   void dump_(std::ostream &stream) const override;
+
+  void reset_state_() override;
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
@@ -368,6 +372,8 @@ private:
 
   void dump_(std::ostream &stream) const override;
 
+  void reset_state_() override;
+
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
 private:
@@ -415,6 +421,8 @@ private:
   MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
 
   void dump_(std::ostream &stream) const override;
+
+  void reset_state_() override;
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 

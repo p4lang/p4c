@@ -76,11 +76,11 @@ public:
 
   virtual void dump(std::ostream &stream) const = 0;
 
+  void reset_state();
+
   void set_next_node(p4object_id_t action_id, const ControlFlowNode *next_node) {
     next_nodes[action_id] = next_node;
   }
-
-  void reset_state();
 
   MatchErrorCode query_counters(entry_handle_t handle,
 				counter_value_t *bytes,
@@ -121,6 +121,9 @@ protected:
   std::atomic_bool with_ageing{false};
 
   std::unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
+
+private:
+  virtual void reset_state_() = 0;
 
 private:
   mutable boost::shared_mutex t_mutex{};
@@ -178,6 +181,9 @@ public:
     size_t size, const MatchKeyBuilder &match_key_builder,
     bool with_counters, bool with_ageing
   );
+
+private:
+  void reset_state_() override;
 
 private:
   ActionEntry default_entry{};
@@ -334,6 +340,8 @@ protected:
     return mbr_handles.valid_handle(mbr);
   }
 
+  void reset_state_() override;
+
 protected:
   IndirectIndex default_index{};
   IndirectIndexRefCount index_ref_count{};
@@ -415,6 +423,8 @@ private:
   void groups_insert(grp_hdl_t grp);
 
   mbr_hdl_t choose_from_group(grp_hdl_t grp, const Packet &pkt) const;
+
+  void reset_state_() override;
 
 private:
   class GroupInfo {
