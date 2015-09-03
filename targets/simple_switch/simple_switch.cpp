@@ -33,7 +33,7 @@
 #include "bm_sim/tables.h"
 #include "bm_sim/switch.h"
 #include "bm_sim/event_logger.h"
-#include "bm_sim/simple_pre.h"
+#include "bm_sim/simple_pre_lag.h"
 
 #include "simple_switch.h"
 #include "primitives.h"
@@ -46,8 +46,8 @@ public:
   SimpleSwitch()
     : Switch(false), // enable_switch = false
       input_buffer(1024), egress_buffer(1024), output_buffer(128),
-      pre(new McSimplePre()) {
-    add_component<McSimplePre>(pre);
+      pre(new McSimplePreLAG()) {
+    add_component<McSimplePreLAG>(pre);
   }
 
   int receive(int port_num, const char *buffer, int len) {
@@ -91,7 +91,7 @@ private:
   Queue<std::unique_ptr<Packet> > input_buffer;
   Queue<std::unique_ptr<Packet> > egress_buffer;
   Queue<std::unique_ptr<Packet> > output_buffer;
-  std::shared_ptr<McSimplePre> pre;
+  std::shared_ptr<McSimplePreLAG> pre;
 };
 
 void SimpleSwitch::transmit_thread() {
