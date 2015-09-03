@@ -57,7 +57,7 @@ public:
   };
 
 public:
-  static constexpr size_t PORT_MAP_SIZE = 512;
+  static constexpr size_t PORT_MAP_SIZE = 256;
   typedef McPre::Set<PORT_MAP_SIZE> PortMap;
 
   static constexpr size_t LAG_MAP_SIZE = 256;
