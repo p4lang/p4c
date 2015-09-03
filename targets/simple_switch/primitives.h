@@ -163,6 +163,14 @@ class execute_meter : public ActionPrimitive<Field &, MeterArray &, const Data &
 
 REGISTER_PRIMITIVE(execute_meter);
 
+class count : public ActionPrimitive<CounterArray &, const Data &> {
+  void operator ()(CounterArray &counter_array, const Data &idx) {
+    counter_array.get_counter(idx.get_uint()).increment_counter(get_packet());
+  }
+};
+
+REGISTER_PRIMITIVE(count);
+
 class push : public ActionPrimitive<HeaderStack &, const Data &> {
   void operator ()(HeaderStack &stack, const Data &num) {
     stack.push_front(num.get_uint());

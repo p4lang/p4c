@@ -116,10 +116,11 @@ void SimpleSwitch::ingress_thread() {
     // many current P4 programs assume this
     // it is also part of the original P4 spec
     phv->reset_metadata();
-    SIMPLELOG << "processing packet " << packet->get_packet_id() << std::endl;
+    int ingress_port = packet->get_ingress_port();
+    SIMPLELOG << "processing packet " << packet->get_packet_id()
+	      << " received on port "<< ingress_port << std::endl;
 
     // setting standard metadata
-    int ingress_port = packet->get_ingress_port();
     phv->get_field("standard_metadata.ingress_port").set(ingress_port);
     int ingress_length = packet->get_ingress_length();
     phv->get_field("standard_metadata.packet_length").set(ingress_length);
