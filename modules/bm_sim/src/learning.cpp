@@ -263,7 +263,10 @@ void LearnEngine::LearnList::ack(
 {
   std::unique_lock<std::mutex> lock(mutex);
   auto it = old_buffers.find(buffer_id);
-  assert(it != old_buffers.end());
+  // assert(it != old_buffers.end());
+  // we assume that this was acked already, and simply return
+  if(it == old_buffers.end())
+    return;
   FilterPtrs &filter_ptrs = it->second;
   for (int sample_id : sample_ids) {
     filter.erase(filter_ptrs.buffer[sample_id]); // what happens if bad input :(
@@ -277,7 +280,10 @@ void LearnEngine::LearnList::ack_buffer(buffer_id_t buffer_id)
 {
   std::unique_lock<std::mutex> lock(mutex);
   auto it = old_buffers.find(buffer_id);
-  assert(it != old_buffers.end());
+  // assert(it != old_buffers.end());
+  // we assume that this was acked already, and simply return
+  if(it == old_buffers.end())
+    return;
   FilterPtrs &filter_ptrs = it->second;
   // we optimize for this case (no learning occured since the buffer as sent out
   // and the ack clears out the filter
