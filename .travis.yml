@@ -31,10 +31,6 @@ addons:
       - pkg-config
       - g++-4.8
       - libssl-dev
-      - gperf # needed ?
-      - google-perftools # needed ?
-      - libgoogle-perftools # needed ?
-      - libgoogle-perftools-dev # needed ?
 
 before_install:
   - g++ -v

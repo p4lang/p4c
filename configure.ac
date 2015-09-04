@@ -44,13 +44,12 @@ AC_PATH_PROG([THRIFT], [thrift], [])
 AS_IF([test x"$THRIFT" = x],
 [AC_MSG_ERROR([cannot find thrift])])
 
-# Check for libjudy, libgmp, libnanomsg, libpcap, libprofiler (gperf-tools)
+# Check for libjudy, libgmp, libnanomsg, libpcap
 AC_CHECK_LIB([Judy], [Judy1Next], [], [AC_MSG_ERROR([Missing libJudy])])
 AC_CHECK_LIB([gmp], [__gmpz_init], [], [AC_MSG_ERROR([Missing libgmp])])
 AC_CHECK_LIB([nanomsg], [nn_errno], [], [AC_MSG_ERROR([Missing libnanomsg])])
 AC_CHECK_LIB([pcap], [pcap_create], [], [AC_MSG_ERROR([Missing libpcap])])
 AC_CHECK_LIB([pcap], [pcap_set_immediate_mode], [pcap_fix=yes], [pcap_fix=no])
-AC_CHECK_LIB([profiler], [ProfilerFlush], [], [AC_MSG_ERROR([Missing gperftools])])
 
 AM_CONDITIONAL([WITH_PCAP_FIX], [test "$pcap_fix" = "yes"])
 
