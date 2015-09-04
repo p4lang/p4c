@@ -137,11 +137,16 @@ void SimpleSwitch::ingress_thread() {
     Field &f_clone_spec = phv->get_field("standard_metadata.clone_spec");
     int clone_spec = f_clone_spec.get_int();
 
-    Field &f_learn_id = phv->get_field("intrinsic_metadata.lf_field_list");
-    int learn_id = f_learn_id.get_int();
+    int learn_id = 0;
+    unsigned int mgid = 0u;
 
-    Field &f_mgid = phv->get_field("intrinsic_metadata.mcast_grp");
-    unsigned int mgid = f_mgid.get_uint();
+    if(phv->has_header("intrinsic_metadata")) {
+      Field &f_learn_id = phv->get_field("intrinsic_metadata.lf_field_list");
+      learn_id = f_learn_id.get_int();
+
+      Field &f_mgid = phv->get_field("intrinsic_metadata.mcast_grp");
+      mgid = f_mgid.get_uint();
+    }
 
     packet_id_t copy_id = 1;
     int egress_port;
@@ -163,6 +168,7 @@ void SimpleSwitch::ingress_thread() {
     }
 
     // MULTICAST
+    int instance_type = f_instance_type.get_int();
     if(mgid != 0) {
       SIMPLELOG << "multicast\n";
       Field &f_rid = phv->get_field("intrinsic_metadata.egress_rid");
@@ -173,10 +179,12 @@ void SimpleSwitch::ingress_thread() {
 	SIMPLELOG << "replicating packet out of port " << egress_port
 		  << std::endl;
 	f_rid.set(out.rid);
+	f_instance_type.set(PKT_INSTANCE_TYPE_REPLICATION);
 	std::unique_ptr<Packet> packet_copy(new Packet(packet->clone(copy_id++)));
 	packet_copy->set_egress_port(egress_port);
 	egress_buffer.push_front(std::move(packet_copy));
       }
+      f_instance_type.set(instance_type);
 
       // when doing multicast, we discard the original packet
       continue;

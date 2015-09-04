@@ -76,6 +76,11 @@ public:
     return headers_map.at(header_name);
   }
 
+  bool has_header(const std::string &header_name) const {
+    auto it = headers_map.find(header_name);
+    return (it != headers_map.end());
+  }
+
   Field &get_field(header_id_t header_index, int field_offset) {
     return headers[header_index].get_field(field_offset);
   }

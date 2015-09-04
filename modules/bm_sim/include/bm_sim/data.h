@@ -71,6 +71,13 @@ public:
     value = i;
     export_bytes();
   }
+
+  template<typename T,
+	   typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+  void set(T i) {
+    value = (int) i;
+    export_bytes();
+  }
   
   void set(const char *bytes, int nbytes) {
     bignum::import_bytes(value, bytes, nbytes);
