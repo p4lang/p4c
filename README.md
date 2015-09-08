@@ -65,8 +65,8 @@ To run the unit tests, simply do:
 ## Running your P4 program
 
 To run your own P4 programs in bmv2, you first need to transform the P4 code
-into a json representation which can be consummed by the software switch. This
-representation will tell bmv2 which tables to initialize, how to cinfigure the
+into a json representation which can be consumed by the software switch. This
+representation will tell bmv2 which tables to initialize, how to configure the
 parser, ... It is produced by the [p4c-bm](https://github.com/p4lang/p4c-bm)
 tool. Please take a look at the
 [README](https://github.com/p4lang/p4c-bm/blob/master/README.rst) for this repo
@@ -145,18 +145,18 @@ Now the switch is running and the tables have been populated. You can run
 
 ### Why did we need bmv2 ?
 
-- the new C++ code is not auto-generated for each P4 program. This means that it
+- The new C++ code is not auto-generated for each P4 program. This means that it
   becomes very easy and very fast to change your P4 program and test it
   again. The whole P4 development process becomes more efficient. Every time you
   change your P4 program, you simply need to produce the json for it using
   p4c-bm and feed it to the bmv2 executable.
-- because the bmv2 code is not auto-generated, we hope it is easier to
+- Because the bmv2 code is not auto-generated, we hope it is easier to
   understand. We hope this will encourage the community to contribute even more
   to the P4 software switch.
-- using the auto-generated PD library (which of course still needs to be
+- Using the auto-generated PD library (which of course still needs to be
   recompiled for each P4 program) is now optional. We provide an intuitive CLI
   which can be used to program the runtime behavior of each switch device.
-- the new code is target independent. While the original p4c-behavioral assumed
+- The new code is target independent. While the original p4c-behavioral assumed
   a fixed abstract switch model with 2 pipelines (ingress and egress), bmv2
   makes no such assumption and can be used to represent many switch
   architectures. Three different -although similar- such architectures can be
@@ -171,15 +171,42 @@ document with detailed information.
 
 ### What else is new in bmv2 ?
 
-- arithmetic is now possible on arbitrarily wide fields (no more limited to <=
+- Arithmetic is now possible on arbitrarily wide fields (no more limited to <=
   32-bit fields).
-- we finally have unit tests!
-- while it is still incomplete, we provide a convenient 'event-logger' built on
+- We finally have unit tests!
+- While it is still incomplete, we provide a convenient 'event-logger' built on
   top of nanomsg. Every time a 'significant' event happens (e.g. table hit,
   parser transition,...) a message is broadcast on a nanomsg channel and any
   client can consume it.
 
+### Are all features supported yet ?
+
+No. Some features described in the P4 spec are missing compared to the original
+behavioral model:
+
+- mirroring, cloning, resubmit
+- direct meters
+- registers, stateful memories (will be added soon)
+- parse value sets
+
+Some features which were absent in the original behavioral model are still
+missing:
+
+- variable length fields
+
+If you find more missing features or if you would like to request that a
+specific feature be added, please send us an email (p4-dev@p4.org) or submit an
+issue with the appropriate label on
+[Github](https://github.com/p4lang/behavioral-model/issues). Do not hesitate to
+contribute code yourself!
+
+### How do I signal a bug ?
+
+Please submit an issue with the appropriate label on
+[Github](https://github.com/p4lang/behavioral-model/issues).
+
 ### How can I contribute ?
 
 You can fork the repo and submit a pull request in Github. For more information
-send us an email (antonin@barefootnetworks.com).
+send us an email (p4-dev@p4.org). We ask that all contributors sign a Apache
+SLA.
