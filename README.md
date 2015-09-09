@@ -103,10 +103,12 @@ supported commands. This list includes:
     - table_add <table name> <action name> <match fields> => <action parameters> [priority]
     - table_delete <table name> <entry handle>
 
-The CLI include commands to program the default multicast engine. Unfortunately
-they will not work with the *simple_switch* target which uses a more advanced
-engine (support will be added soon). They will work with the *l2_switch* target
-though.
+The CLI include commands to program the multicast engine. Because we provide 2
+different engines (*SimplePre* and *SimplePreLAG*), you have to specify which
+one your target is using when starting the CLI, using the *--pre*
+option. Accepted values are: *None*, *SimplePre* (default value) and
+*SimplePreLAG*. The *l2_switch* target uses the *SimplePre* engine, while the
+*simple_switch* target uses the *SimplePreLAG* engine.
 
 You can take a look at the *commands.txt* file for
 [*l2_switch*](targets/l2_switch/commands.txt) and 

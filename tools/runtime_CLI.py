@@ -35,9 +35,32 @@ from thrift.protocol import TMultiplexedProtocol
 
 from bm_runtime.standard import Standard
 from bm_runtime.standard.ttypes import *
-from bm_runtime.simple_pre import SimplePre
-from bm_runtime.simple_pre.ttypes import *
+try:
+    from bm_runtime.simple_pre import SimplePre
+except:
+    pass
+try:
+    from bm_runtime.simple_pre_lag import SimplePreLAG
+except:
+    pass
 
+def enum(type_name, *sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    reverse = dict((value, key) for key, value in enums.iteritems())
+
+    @staticmethod
+    def to_str(x):
+        return reverse[x]
+    enums['to_str'] = to_str
+
+    @staticmethod
+    def from_str(x):
+        return enums[x]
+
+    enums['from_str'] = from_str
+    return type(type_name, (), enums)
+
+PreType = enum('PreType', 'None', 'SimplePre', 'SimplePreLAG')
 
 def bytes_to_string(byte_array):
     form = 'B' * len(byte_array)
@@ -46,6 +69,16 @@ def bytes_to_string(byte_array):
 def table_error_name(x):
     return TableOperationErrorCode._VALUES_TO_NAMES[x]
 
+class ActionToPreType(argparse.Action):
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        if nargs is not None:
+            raise ValueError("nargs not allowed")
+        super(ActionToPreType, self).__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        assert(type(values) is str)
+        setattr(namespace, self.dest, PreType.from_str(values))
+
 parser = argparse.ArgumentParser(description='BM runtime CLI')
 # One port == one device !!!! This is not a multidevice CLI
 parser.add_argument('--thrift-port', help='Thrift server port for table updates',
@@ -53,6 +86,10 @@ parser.add_argument('--thrift-port', help='Thrift server port for table updates'
 
 parser.add_argument('--json', help='JSON description of P4 program',
                     type=str, action="store", required=True)
+
+parser.add_argument('--pre', help='Packet Replication Engine used by target',
+                    type=str, choices=['None', 'SimplePre', 'SimplePreLAG'],
+                    default=PreType.SimplePre, action=ActionToPreType)
 
 args = parser.parse_args()
 
@@ -274,10 +311,11 @@ class RuntimeAPI(cmd.Cmd):
     prompt = 'RuntimeCmd: '
     intro = "Control utility for runtime P4 table manipulation"
 
-    def __init__(self, standard_client, mc_client):
+    def __init__(self, standard_client, mc_client, pre_type):
         cmd.Cmd.__init__(self)
         self.client = standard_client
         self.mc_client = mc_client
+        self.pre_type = pre_type
 
     def do_greet(self, line):
         print "hello"
@@ -461,8 +499,9 @@ class RuntimeAPI(cmd.Cmd):
     def complete_table_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
-
     def do_mc_mgrp_create(self, line):
+        "Create multicast group: mc_mgrp_create <group id>"
+        assert(self.pre_type != PreType.None)
         mgrp = int(line.split()[0])
         print "Creating multicast group", mgrp
         mgrp_hdl = self.mc_client.bm_mc_mgrp_create(mgrp)
@@ -470,6 +509,8 @@ class RuntimeAPI(cmd.Cmd):
         assert(mgrp == mgrp_hdl)
 
     def do_mc_mgrp_destroy(self, line):
+        "Destroy multicast group: mc_mgrp_destroy <group id>"
+        assert(self.pre_type != PreType.None)
         mgrp = int(line.split()[0])
         print "Destroying multicast group", mgrp
         self.mc_client.bm_mc_mgrp_destroy(mgrp)
@@ -484,16 +525,53 @@ class RuntimeAPI(cmd.Cmd):
             last_port_num = port_num
         return port_map_str[::-1]
 
+    def parse_ports_and_lags(self, args):
+        ports = []
+        i = 1
+        while (i < len(args) and args[i] != '|'):
+            ports.append(args[i])
+            i += 1
+        port_map_str = self.ports_to_port_map_str(ports)
+        if self.pre_type == PreType.SimplePreLAG:
+            i += 1
+            lags = [] if i == len(args) else args[i:]
+            lag_map_str = self.ports_to_port_map_str(lags)
+        else:
+            lag_map_str = None
+        return port_map_str, lag_map_str
+
     def do_mc_node_create(self, line):
+        "Create multicast node: mc_node_create <rid> <space-separated port list> [ | <space-separated lag list> ]"
+        assert(self.pre_type != PreType.None)
         args = line.split()
         rid = int(args[0])
-        port_map_str = self.ports_to_port_map_str(args[1:])
-        print "Creating node with rid", rid, "and with port map", port_map_str
-        l1_hdl = self.mc_client.bm_mc_node_create(rid, port_map_str)
+        port_map_str, lag_map_str = self.parse_ports_and_lags(args)
+        if self.pre_type == PreType.SimplePre:
+            print "Creating node with rid", rid, "and with port map", port_map_str
+            l1_hdl = self.mc_client.bm_mc_node_create(rid, port_map_str)
+        else:
+            print "Creating node with rid", rid, ", port map", port_map_str, "and lag map", lag_map_str
+            l1_hdl = self.mc_client.bm_mc_node_create(rid, port_map_str, lag_map_str)
         print "SUCCESS"
         print "node was created with handle", l1_hdl
 
+    def do_mc_node_update(self, line):
+        "Update multicast node: mc_node_update <node handle> <space-separated port list> [ | <space-separated lag list> ]"
+        assert(self.pre_type != PreType.None)
+        args = line.split()
+        l1_hdl = int(args[0])
+        port_map_str, lag_map_str = self.parse_ports_and_lags(args)
+        if self.pre_type == PreType.SimplePre:
+            print "Updating node", l1_hdl, "with port map", port_map_str
+            self.mc_client.bm_mc_node_update(l1_hdl, port_map_str)
+        else:
+            print "Updating node", l1_hdl, "with port map", port_map_str, "and lag map", lag_map_str
+            self.mc_client.bm_mc_node_update(l1_hdl, port_map_str, lag_map_str)
+        print "SUCCESS"
+
     def do_mc_node_associate(self, line):
+        "Associate node to multicast group: mc_node_associate <node handle> <group handle>"
+        assert(self.pre_type != PreType.None)
         args = line.split()
         mgrp = int(args[0])
         l1_hdl = int(args[1])
@@ -501,18 +579,32 @@ class RuntimeAPI(cmd.Cmd):
         self.mc_client.bm_mc_node_associate(mgrp, l1_hdl)
         print "SUCCESS"
 
+    def do_mc_node_dissociate(self, line):
+        "Dissociate node from multicast group: mc_node_associate <node handle> <group handle>"
+        assert(self.pre_type != PreType.None)
+        args = line.split()
+        mgrp = int(args[0])
+        l1_hdl = int(args[1])
+        print "Dissociating node", l1_hdl, "from multicast group", mgrp
+        self.mc_client.bm_mc_node_dissociate(mgrp, l1_hdl)
+        print "SUCCESS"
+
     def do_mc_node_destroy(self, line):
+        "Destroy multicast node: mc_node_destroy <node handle>"
+        assert(self.pre_type != PreType.None)
         l1_hdl = int(line.split()[0])
         print "Destroying node", l1_hdl
         self.mc_client.bm_mc_node_destroy(l1_hdl)
         print "SUCCESS"
 
-    def do_mc_node_update(self, line):
+    def do_mc_set_lag_membership(self, line):
+        "Set lag membership of port list: mc_set_lag_membership <lag index> <space-separated port list>"
+        assert(self.pre_type == PreType.SimplePreLAG)
         args = line.split()
-        l1_hdl = int(args[0])
+        lag_index = int(args[0])
         port_map_str = self.ports_to_port_map_str(args[1:])
-        print "Updating node", l1_hdl, "with port map", port_map_str
-        self.mc_client.bm_mc_node_update(l1_hdl, port_map_str)
+        print "Setting lag membership:", lag_index, "<-", port_map_str
+        self.mc_client.bm_mc_set_lag_membership(lag_index, port_map_str)
         print "SUCCESS"
 
     def do_load_new_config_file(self, line):
@@ -554,17 +646,26 @@ class RuntimeAPI(cmd.Cmd):
         return self._complete_tables(text)
 
 
-def thrift_connect():
+def thrift_connect(pre_type):
     # Make socket
     transport = TSocket.TSocket('localhost', THRIFT_PORT)
     # Buffering is critical. Raw sockets are very slow
     transport = TTransport.TBufferedTransport(transport)
     # Wrap in a protocol
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
+
     standard_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, "standard")
-    mc_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, "simple_pre")
     standard_client = Standard.Client(standard_protocol)
-    mc_client = SimplePre.Client(mc_protocol)
+
+    if pre_type == PreType.SimplePre:
+        mc_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, "simple_pre")
+        mc_client = SimplePre.Client(mc_protocol)
+    elif pre_type == PreType.SimplePreLAG:
+        mc_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, "simple_pre_lag")
+        mc_client = SimplePreLAG.Client(mc_protocol)
+    else:
+        mc_client = None
+
     # Connect!
     transport.open()
 
@@ -573,15 +674,16 @@ def thrift_connect():
 
 def main():
     load_json(args.json)
+    pre_type = args.pre
 
     try:
-        standard_client, mc_client = thrift_connect()
+        standard_client, mc_client = thrift_connect(pre_type)
     except TTransport.TTransportException:
         print "Could not connect to thrift client on port", THRIFT_PORT
         print "Make sure the switch is running and that you have the right port"
         sys.exit(1)
 
-    RuntimeAPI(standard_client, mc_client).cmdloop()
+    RuntimeAPI(standard_client, mc_client, pre_type).cmdloop()
 
 if __name__ == '__main__':
     main()
