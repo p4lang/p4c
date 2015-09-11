@@ -212,6 +212,6 @@ Please submit an issue with the appropriate label on
 You can fork the repo and submit a pull request in Github. For more information
 send us an email (p4-dev@p4.org).
 
-All developpers must sign the [P4.org](http://p4.org) CLA and return it to
+All developers must sign the [P4.org](http://p4.org) CLA and return it to
 (membership@p4.org) before making contributions. The CLA is available
 [here](http://p4.org/wp-content/uploads/2015/07/P4_Language_Consortium_Membership_Agreement.pdf).
