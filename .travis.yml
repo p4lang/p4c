@@ -4,10 +4,6 @@ sudo: required
 
 language: cpp
 
-branches:
-  only:
-    - master
-
 addons:
   apt:
     sources:
