@@ -171,6 +171,22 @@ class count : public ActionPrimitive<CounterArray &, const Data &> {
 
 REGISTER_PRIMITIVE(count);
 
+class register_read : public ActionPrimitive<Field &, const RegisterArray &, const Data &> {
+  void operator ()(Field &dst, const RegisterArray &src, const Data &idx) {
+    dst.set(src[idx.get_uint()]);
+  }
+};
+
+REGISTER_PRIMITIVE(register_read);
+
+class register_write : public ActionPrimitive<RegisterArray &, const Data &, const Data &> {
+  void operator ()(RegisterArray &dst, const Data &src, const Data &idx) {
+    dst[idx.get_uint()].set(src);
+  }
+};
+
+REGISTER_PRIMITIVE(register_write);
+
 class push : public ActionPrimitive<HeaderStack &, const Data &> {
   void operator ()(HeaderStack &stack, const Data &num) {
     stack.push_front(num.get_uint());
