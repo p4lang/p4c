@@ -77,6 +77,13 @@ void ActionFn::parameter_push_back_counter_array(CounterArray *counter_array) {
   params.push_back(param);
 }
 
+void ActionFn::parameter_push_back_register_array(RegisterArray *register_array) {
+  ActionParam param;
+  param.tag = ActionParam::REGISTER_ARRAY;
+  param.register_array = register_array;
+  params.push_back(param);
+}
+
 void ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
   primitives.push_back(primitive);
 }

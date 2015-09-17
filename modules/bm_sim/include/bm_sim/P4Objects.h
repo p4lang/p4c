@@ -42,6 +42,7 @@
 #include "learning.h"
 #include "meters.h"
 #include "counters.h"
+#include "stateful.h"
 #include "ageing.h"
 
 class P4Objects {
@@ -100,6 +101,10 @@ public:
 
   CounterArray *get_counter_array(const std::string &name) {
     return counter_arrays[name].get();
+  }
+
+  RegisterArray *get_register_array(const std::string &name) {
+    return register_arrays[name].get();
   }
 
   NamedCalculation *get_named_calculation(const std::string &name) {
@@ -170,8 +175,13 @@ private:
   }
 
   void add_counter_array(const std::string &name,
-		       std::unique_ptr<CounterArray> counter_array) {
+			 std::unique_ptr<CounterArray> counter_array) {
     counter_arrays[name] = std::move(counter_array);
+  }
+
+  void add_register_array(const std::string &name,
+			  std::unique_ptr<RegisterArray> register_array) {
+    register_arrays[name] = std::move(register_array);
   }
 
   void add_named_calculation(const std::string &name,
@@ -227,6 +237,9 @@ private:
 
   // counter arrays
   std::unordered_map<std::string, std::unique_ptr<CounterArray> > counter_arrays{};
+
+  // register arrays
+  std::unordered_map<std::string, std::unique_ptr<RegisterArray> > register_arrays{};
 
   // calculations
   std::unordered_map<std::string, std::unique_ptr<NamedCalculation> > calculations{};
