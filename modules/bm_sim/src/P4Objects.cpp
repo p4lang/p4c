@@ -382,6 +382,20 @@ void P4Objects::init_objects(std::istream &is) {
     add_counter_array(name, unique_ptr<CounterArray>(counter_array));
   }
 
+  // register arrays
+
+  const Json::Value &cfg_register_arrays = cfg_root["register_arrays"];
+  for (const auto &cfg_register_array : cfg_register_arrays) {
+
+    const string name = cfg_register_array["name"].asString();
+    const p4object_id_t id = cfg_register_array["id"].asInt();
+    const size_t size = cfg_register_array["size"].asUInt();
+    const int bitwidth = cfg_register_array["bitwidth"].asInt();
+
+    RegisterArray *register_array = new RegisterArray(name, id, size, bitwidth);
+    add_register_array(name, unique_ptr<RegisterArray>(register_array));
+  }
+
   // actions
 
   const Json::Value &cfg_actions = cfg_root["actions"];
@@ -446,6 +460,11 @@ void P4Objects::init_objects(std::istream &is) {
 	  const string name = cfg_parameter["value"].asString();
 	  CounterArray *counter = get_counter_array(name);
 	  action_fn->parameter_push_back_counter_array(counter);
+	}
+	else if(type == "register_array") {
+	  const string name = cfg_parameter["value"].asString();
+	  RegisterArray *register_array = get_register_array(name);
+	  action_fn->parameter_push_back_register_array(register_array);
 	}
 	else if(type == "header_stack") {
 	  const string header_stack_name = cfg_parameter["value"].asString();

@@ -37,6 +37,7 @@
 #include "calculations.h"
 #include "meters.h"
 #include "counters.h"
+#include "stateful.h"
 
 using std::vector;
 
@@ -66,7 +67,8 @@ struct ActionParam
   // some old P4 primitives take a calculation as a parameter, I don't know if I
   // will keep it around but for now I need it
   enum {CONST, FIELD, HEADER, ACTION_DATA,
-	HEADER_STACK, CALCULATION, METER_ARRAY, COUNTER_ARRAY} tag;
+	HEADER_STACK, CALCULATION,
+        METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY} tag;
 
   union {
     unsigned int const_offset;
@@ -90,6 +92,9 @@ struct ActionParam
 
     // non owning pointer
     CounterArray *counter_array;
+
+    // non owning pointer
+    RegisterArray *register_array;
   };
 };
 
@@ -139,6 +144,8 @@ struct ActionParamWithState {
 
   /* If you want to modify it, don't ask for data..., can I improve this? */
   operator const Data &() {
+    /* Should probably be able to return a register reference here, but not
+       needed right now */
     switch(ap.tag) {
     case ActionParam::CONST:
       return state.const_values[ap.const_offset];
@@ -179,6 +186,11 @@ struct ActionParamWithState {
   operator CounterArray &() {
     assert(ap.tag == ActionParam::COUNTER_ARRAY);
     return *(ap.counter_array);
+  }
+
+  operator RegisterArray &() {
+    assert(ap.tag == ActionParam::REGISTER_ARRAY);
+    return *(ap.register_array);
   }
 };
 
@@ -310,6 +322,7 @@ public:
   void parameter_push_back_calculation(const NamedCalculation *calculation);
   void parameter_push_back_meter_array(MeterArray *meter_array);
   void parameter_push_back_counter_array(CounterArray *counter_array);
+  void parameter_push_back_register_array(RegisterArray *register_array);
 
   void push_back_primitive(ActionPrimitive_ *primitive);
 

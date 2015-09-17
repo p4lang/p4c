@@ -70,8 +70,7 @@ public:
   typedef vector<Counter>::const_iterator const_iterator;
 
 public:
-  CounterArray(const std::string &name, p4object_id_t id,
-	       size_t size)
+  CounterArray(const std::string &name, p4object_id_t id, size_t size)
     : NamedP4Object(name, id), counters(size) { }
 
   CounterErrorCode reset_counters();
