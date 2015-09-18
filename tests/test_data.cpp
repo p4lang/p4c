@@ -85,3 +85,19 @@ TEST(Data, BitNeg) {
   d2.bit_neg(d1);
   EXPECT_EQ(~0xaba, d2.get_int());
 }
+
+TEST(Data, ShiftLeft) {
+  Data d1(0xaba);
+  Data d2(3);
+  Data d3;
+  d3.shift_left(d1, d2);
+  EXPECT_EQ((0xaba) << 3, d3.get_int());
+}
+
+TEST(Data, ShiftRight) {
+  Data d1(0xabababa);
+  Data d2(3);
+  Data d3;
+  d3.shift_right(d1, d2);
+  EXPECT_EQ((0xabababa) >> 3, d3.get_int());
+}
