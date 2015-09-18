@@ -77,6 +77,22 @@ class bit_and : public ActionPrimitive<Field &, const Data &, const Data &> {
 
 REGISTER_PRIMITIVE(bit_and);
 
+class shift_left : public ActionPrimitive<Field &, const Data &, const Data &> {
+  void operator ()(Field &f, const Data &d1, const Data &d2) {
+    f.shift_left(d1, d2);
+  }
+};
+
+REGISTER_PRIMITIVE(shift_left);
+
+class shift_right : public ActionPrimitive<Field &, const Data &, const Data &> {
+  void operator ()(Field &f, const Data &d1, const Data &d2) {
+    f.shift_right(d1, d2);
+  }
+};
+
+REGISTER_PRIMITIVE(shift_right);
+
 class drop : public ActionPrimitive<> {
   void operator ()() {
     get_field("standard_metadata.egress_spec").set(511);
