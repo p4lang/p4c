@@ -40,9 +40,9 @@ class Switch : public RuntimeInterface, public DevMgr {
 public:
   Switch(bool enable_swap = false);
 
-  void init_objects(const std::string &json_path);
+  int init_objects(const std::string &json_path);
 
-  void init_from_command_line_options(int argc, char *argv[]);
+  int init_from_command_line_options(int argc, char *argv[]);
 
   P4Objects *get_p4objects() { return p4objects.get(); }
 

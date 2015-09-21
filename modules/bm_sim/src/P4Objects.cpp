@@ -64,7 +64,7 @@ void P4Objects::build_conditional(const Json::Value &json_expression,
   }
 }
 
-void P4Objects::init_objects(std::istream &is) {
+int P4Objects::init_objects(std::istream &is) {
   Json::Value cfg_root;
   is >> cfg_root;
 
@@ -403,7 +403,7 @@ void P4Objects::init_objects(std::istream &is) {
 
     const string action_name = cfg_action["name"].asString();
     p4object_id_t action_id = cfg_action["id"].asInt();
-    ActionFn *action_fn = new ActionFn(action_name, action_id);
+    std::unique_ptr<ActionFn> action_fn(new ActionFn(action_name, action_id));
 
     const Json::Value &cfg_primitive_calls = cfg_action["primitives"];
     for (const auto &cfg_primitive_call : cfg_primitive_calls) {
@@ -411,7 +411,11 @@ void P4Objects::init_objects(std::istream &is) {
 
       ActionPrimitive_ *primitive =
 	ActionOpcodesMap::get_instance()->get_primitive(primitive_name);
-      assert(primitive);
+      if(!primitive) {
+        outstream << "Unknown primitive action: " << primitive_name
+		  << std::endl;
+	return 1;
+      }
 
       action_fn->push_back_primitive(primitive);
 
@@ -476,7 +480,7 @@ void P4Objects::init_objects(std::istream &is) {
 	}
       }
     }
-    add_action(action_name, unique_ptr<ActionFn>(action_fn));
+    add_action(action_name, std::move(action_fn));
   }
 
   // pipelines
@@ -749,6 +753,8 @@ void P4Objects::init_objects(std::istream &is) {
       phv_factory.enable_field_arith(std::get<0>(field), std::get<1>(field));
     }
   }
+
+  return 0;
 }
 
 void P4Objects::destroy_objects() {

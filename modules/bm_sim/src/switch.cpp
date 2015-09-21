@@ -31,21 +31,24 @@ Switch::Switch(bool enable_swap)
   p4objects_rt = p4objects;
 }
 
-void
+int
 Switch::init_objects(const std::string &json_path) {
   std::fstream fs(json_path);
-  p4objects->init_objects(fs);
+  int status = p4objects->init_objects(fs);
+  if(status != 0) return status;
   Packet::set_phv_factory(p4objects->get_phv_factory());
 
   // TODO: is this the right place to do this?
   set_packet_handler(&Switch::packet_handler, (void *) this);
+  return status;
 }
 
-void
+int
 Switch::init_from_command_line_options(int argc, char *argv[]) {
   OptionsParser parser;
   parser.parse(argc, argv);
-  init_objects(parser.config_file_path);
+  int status = init_objects(parser.config_file_path);
+  if(status != 0) return status;
   int port_num = 0;
   for(const auto &iface : parser.ifaces) {
     std::cout << "Adding interface " << iface
@@ -59,6 +62,7 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
     }
   }
   thrift_port = parser.thrift_port;
+  return status;
 }
 
 MatchErrorCode

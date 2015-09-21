@@ -22,6 +22,7 @@
 #define _BM_P4OBJECTS_H_
 
 #include <istream>
+#include <ostream>
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -47,12 +48,14 @@
 
 class P4Objects {
 public:
-  void init_objects(std::istream &is);
+  P4Objects(std::ostream &outstream = std::cout)
+    : outstream(outstream) { }
+
+  int init_objects(std::istream &is);
   void destroy_objects();
 
   P4Objects(const P4Objects &other) = delete;
   P4Objects &operator=(const P4Objects &) = delete;
-  P4Objects() = default;
 
 public:
   PHVFactory &get_phv_factory() { return phv_factory; }
@@ -243,6 +246,10 @@ private:
 
   // calculations
   std::unordered_map<std::string, std::unique_ptr<NamedCalculation> > calculations{};
+
+public:
+  // public to be accessed by test class
+  std::ostream &outstream;
 
 private:
   int get_field_offset(header_id_t header_id, const std::string &field_name);

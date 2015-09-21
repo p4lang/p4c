@@ -134,7 +134,8 @@ int
 main(int argc, char* argv[])
 {
   simple_switch = new SimpleSwitch();
-  simple_switch->init_from_command_line_options(argc, argv);
+  int status = simple_switch->init_from_command_line_options(argc, argv);
+  if(status != 0) std::exit(status);
 
   // should this be done by the call to init_from_command_line_options
   int thrift_port = simple_switch->get_runtime_port();

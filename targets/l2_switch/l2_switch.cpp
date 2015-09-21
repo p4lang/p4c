@@ -165,7 +165,8 @@ int
 main(int argc, char* argv[])
 {
   simple_switch = new SimpleSwitch();
-  simple_switch->init_from_command_line_options(argc, argv);
+  int status = simple_switch->init_from_command_line_options(argc, argv);
+  if(status != 0) std::exit(status);
 
   int thrift_port = simple_switch->get_runtime_port();
   bm_runtime::start_server(simple_switch, thrift_port);

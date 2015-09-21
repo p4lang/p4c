@@ -69,7 +69,7 @@ const std::string JSON_TEST_STRING_2 =
 TEST(P4Objects, LoadFromJSON1) {
   std::stringstream is(JSON_TEST_STRING_1);
   P4Objects objects;
-  objects.init_objects(is);
+  ASSERT_EQ(0, objects.init_objects(is));
 
   ASSERT_NE(nullptr, objects.get_pipeline("ingress"));
   ASSERT_NE(nullptr, objects.get_action("_drop"));
@@ -92,7 +92,7 @@ TEST(P4Objects, LoadFromJSON1) {
 TEST(P4Objects, LoadFromJSON2) {
   std::stringstream is(JSON_TEST_STRING_2);
   P4Objects objects;
-  objects.init_objects(is);
+  ASSERT_EQ(0, objects.init_objects(is));
 
   // this second test just checks that learn lists and indirect tables get
   // parsed correctly
@@ -104,4 +104,19 @@ TEST(P4Objects, LoadFromJSON2) {
   table = objects.get_abstract_match_table("IndirectWS");
   ASSERT_NE(nullptr, table);
   ASSERT_NE(nullptr, dynamic_cast<MatchTableIndirectWS *>(table));
+}
+
+TEST(P4Objects, Empty) {
+  std::stringstream is("{}");
+  P4Objects objects;
+  ASSERT_EQ(0, objects.init_objects(is));
+}
+
+TEST(P4Objects, UnknownPrimitive) {
+  std::stringstream is("{\"actions\":[{\"name\":\"_drop\",\"id\":2,\"runtime_data\":[],\"primitives\":[{\"op\":\"bad_primitive\",\"parameters\":[]}]}]}");
+  std::stringstream os;
+  P4Objects objects(os);
+  std::string expected("Unknown primitive action: bad_primitive\n");
+  ASSERT_NE(0, objects.init_objects(is));
+  EXPECT_EQ(expected, os.str());
 }
