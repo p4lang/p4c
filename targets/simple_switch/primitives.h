@@ -53,6 +53,14 @@ class add : public ActionPrimitive<Field &, const Data &, const Data &> {
 
 REGISTER_PRIMITIVE(add);
 
+class subtract : public ActionPrimitive<Field &, const Data &, const Data &> {
+  void operator ()(Field &f, const Data &d1, const Data &d2) {
+    f.sub(d1, d2);
+  }
+};
+
+REGISTER_PRIMITIVE(subtract);
+
 class bit_xor : public ActionPrimitive<Field &, const Data &, const Data &> {
   void operator ()(Field &f, const Data &d1, const Data &d2) {
     f.bit_xor(d1, d2);

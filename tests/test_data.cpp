@@ -79,6 +79,14 @@ TEST(Data, Add) {
   EXPECT_EQ((unsigned) 33, d3.get_uint());
 }
 
+TEST(Data, Sub) {
+  Data d1(22);
+  Data d2(10);
+  Data d3;
+  d3.sub(d1, d2);
+  EXPECT_EQ((unsigned) 12, d3.get_uint());
+}
+
 TEST(Data, BitNeg) {
   Data d1(0xaba);
   Data d2;
