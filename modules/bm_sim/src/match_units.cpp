@@ -18,6 +18,8 @@
  *
  */
 
+#include <limits>
+
 #include "bm_sim/match_units.h"
 #include "bm_sim/match_tables.h"
 
@@ -437,17 +439,17 @@ template<typename V>
 typename MatchUnitTernary<V>::MatchUnitLookup
 MatchUnitTernary<V>::lookup_key(const ByteContainer &key) const
 {
-  int max_priority = 0;
+  int min_priority = std::numeric_limits<int>::max();;
   bool match;
 
   const Entry *entry;
-  const Entry *max_entry = nullptr;
-  entry_handle_t max_handle = 0;
+  const Entry *min_entry = nullptr;
+  entry_handle_t min_handle = 0;
 
   for(auto it = this->handles.begin(); it != this->handles.end(); ++it) {
     entry = &entries[*it];
 
-    if(entry->priority <= max_priority) continue;
+    if(entry->priority >= min_priority) continue;
     
     match = true;
     for(size_t byte_index = 0; byte_index < this->nbytes_key; byte_index++) {
@@ -458,15 +460,15 @@ MatchUnitTernary<V>::lookup_key(const ByteContainer &key) const
     }
 
     if(match) {
-      max_priority = entry->priority;
-      max_entry = entry;
-      max_handle = *it;
+      min_priority = entry->priority;
+      min_entry = entry;
+      min_handle = *it;
     }
   }
 
-  if(max_entry) {
-    entry_handle_t handle = HANDLE_SET(max_entry->version, max_handle);
-    return MatchUnitLookup(handle, &max_entry->value);
+  if(min_entry) {
+    entry_handle_t handle = HANDLE_SET(min_entry->version, min_handle);
+    return MatchUnitLookup(handle, &min_entry->value);
   }
 
   return MatchUnitLookup::empty_entry();
