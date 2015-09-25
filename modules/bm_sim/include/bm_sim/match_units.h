@@ -426,6 +426,9 @@ private:
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
+  bool has_rule(const ByteContainer &key, const ByteContainer &mask,
+		int priority) const;
+
 private:
   std::vector<Entry> entries{};
 };

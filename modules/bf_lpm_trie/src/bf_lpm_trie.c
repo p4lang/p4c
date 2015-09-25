@@ -120,7 +120,7 @@ static inline int insert_prefix(node_t *current_node,
 }
 
 static inline value_t *get_prefix_ptr(const node_t *current_node,
-				    unsigned short prefix_key) {
+				      unsigned short prefix_key) {
   Word_t *pvalue;
   JLG(pvalue, current_node->PJLarray_prefixes, (Word_t) prefix_key);
   return (value_t *) pvalue;
@@ -166,8 +166,33 @@ void bf_lpm_trie_insert(bf_lpm_trie_t *trie,
     current_node->pref_num++;
 }
 
-bool bf_lpm_trie_get(const bf_lpm_trie_t *trie, const char *key,
-		     value_t *pvalue) {
+bool bf_lpm_trie_has_prefix(const bf_lpm_trie_t *trie,
+			    const char *prefix, int prefix_length) {
+  node_t *current_node = trie->root;
+  byte_t byte;
+  unsigned short prefix_key;
+
+  while(prefix_length >= 8) {
+    byte = (byte_t) *prefix;
+    node_t *node = get_next_node(current_node, byte);
+    if(!node)
+      return false;
+
+    prefix++;
+    prefix_length -= 8;
+    current_node = node;
+  }
+
+  if(prefix_length == 0)
+    prefix_key = 0;
+  else 
+    prefix_key = get_prefix_key((unsigned) prefix_length, (byte_t) *prefix);
+
+  return (get_prefix_ptr(current_node, prefix_key) != NULL);
+}
+
+bool bf_lpm_trie_lookup(const bf_lpm_trie_t *trie, const char *key,
+			value_t *pvalue) {
   const node_t *current_node = trie->root;
   byte_t byte;
   size_t key_width = trie->key_width_bytes;

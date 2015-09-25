@@ -34,7 +34,7 @@ typedef MatchUnitLPM<ActionEntry> MULPM;
 typedef MatchUnitTernary<ActionEntry> MUTernary;
 
 template <typename MUType>
-class TableSizeOne : public ::testing::Test {
+class TableSizeTwo : public ::testing::Test {
 protected:
   PHVFactory phv_factory;
 
@@ -48,7 +48,7 @@ protected:
   header_id_t testHeader1{0}, testHeader2{1};
   ActionFn action_fn;
 
-  TableSizeOne()
+  TableSizeTwo()
     : testHeaderType("test_t", 0), action_fn("actionA", 0) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -63,13 +63,13 @@ protected:
     std::unique_ptr<MUType> match_unit;
 
     // true enables counters
-    match_unit = std::unique_ptr<MUType>(new MUType(1, key_builder));
+    match_unit = std::unique_ptr<MUType>(new MUType(2, key_builder));
     table = std::unique_ptr<MatchTable>(
       new MatchTable("test_table", 0, std::move(match_unit), true)
     );
     table->set_next_node(0, nullptr);
 
-    match_unit = std::unique_ptr<MUType>(new MUType(1, key_builder_w_valid));
+    match_unit = std::unique_ptr<MUType>(new MUType(2, key_builder_w_valid));
     table_w_valid = std::unique_ptr<MatchTable>(
       new MatchTable("test_table", 0, std::move(match_unit))
     );
@@ -102,7 +102,7 @@ protected:
 
 template<>
 MatchErrorCode
-TableSizeOne<MUExact>::add_entry(const std::string &key,
+TableSizeTwo<MUExact>::add_entry(const std::string &key,
 				 entry_handle_t *handle) {
   ActionData action_data;
   std::vector<MatchKeyParam> match_key;
@@ -112,7 +112,7 @@ TableSizeOne<MUExact>::add_entry(const std::string &key,
 
 template<>
 MatchErrorCode
-TableSizeOne<MULPM>::add_entry(const std::string &key,
+TableSizeTwo<MULPM>::add_entry(const std::string &key,
 			       entry_handle_t *handle) {
   ActionData action_data;
   std::vector<MatchKeyParam> match_key;
@@ -123,7 +123,7 @@ TableSizeOne<MULPM>::add_entry(const std::string &key,
 
 template<>
 MatchErrorCode
-TableSizeOne<MUTernary>::add_entry(const std::string &key,
+TableSizeTwo<MUTernary>::add_entry(const std::string &key,
 				   entry_handle_t *handle) {
   ActionData action_data;
   std::vector<MatchKeyParam> match_key;
@@ -135,7 +135,7 @@ TableSizeOne<MUTernary>::add_entry(const std::string &key,
 
 template<>
 MatchErrorCode
-TableSizeOne<MUExact>::add_entry_w_valid(const std::string &key,
+TableSizeTwo<MUExact>::add_entry_w_valid(const std::string &key,
 					 bool valid,
 					 entry_handle_t *handle) {
   ActionData action_data;
@@ -148,7 +148,7 @@ TableSizeOne<MUExact>::add_entry_w_valid(const std::string &key,
 
 template<>
 MatchErrorCode
-TableSizeOne<MULPM>::add_entry_w_valid(const std::string &key,
+TableSizeTwo<MULPM>::add_entry_w_valid(const std::string &key,
 				       bool valid,
 				       entry_handle_t *handle) {
   ActionData action_data;
@@ -161,7 +161,7 @@ TableSizeOne<MULPM>::add_entry_w_valid(const std::string &key,
 
 template<>
 MatchErrorCode
-TableSizeOne<MUTernary>::add_entry_w_valid(const std::string &key,
+TableSizeTwo<MUTernary>::add_entry_w_valid(const std::string &key,
 					   bool valid,
 					   entry_handle_t *handle) {
   ActionData action_data;
@@ -178,24 +178,33 @@ typedef Types<MUExact,
 	      MULPM,
 	      MUTernary> TableTypes;
 
-TYPED_TEST_CASE(TableSizeOne, TableTypes);
+TYPED_TEST_CASE(TableSizeTwo, TableTypes);
 
-TYPED_TEST(TableSizeOne, AddEntry) {
-  std::string key_ = "\xaa\xaa";
-  ByteContainer key("0xaaaa");
+TYPED_TEST(TableSizeTwo, AddEntry) {
+  std::string key_1 = "\xaa\xaa";
+  std::string key_2 = "\xbb\xbb";
+  std::string key_3 = "\xcc\xcc";
   entry_handle_t handle_1, handle_2;
   MatchErrorCode rc;
 
-  rc = this->add_entry(key_, &handle_1);
+  rc = this->add_entry(key_1, &handle_1);
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
   ASSERT_EQ(1u, this->table->get_num_entries());
 
-  rc = this->add_entry(key_, &handle_2);
-  ASSERT_EQ(MatchErrorCode::TABLE_FULL, rc);
+  rc = this->add_entry(key_1, &handle_2);
+  ASSERT_EQ(MatchErrorCode::DUPLICATE_ENTRY, rc);
   ASSERT_EQ(1u, this->table->get_num_entries());
+
+  rc = this->add_entry(key_2, &handle_1);
+  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+  ASSERT_EQ(2u, this->table->get_num_entries());
+
+  rc = this->add_entry(key_3, &handle_1);
+  ASSERT_EQ(rc, MatchErrorCode::TABLE_FULL);
+  ASSERT_EQ(2u, this->table->get_num_entries());
 }
 
-TYPED_TEST(TableSizeOne, IsValidHandle) {
+TYPED_TEST(TableSizeTwo, IsValidHandle) {
   std::string key_ = "\xaa\xaa";
   entry_handle_t handle_1 = 0;
   MatchErrorCode rc;
@@ -208,7 +217,7 @@ TYPED_TEST(TableSizeOne, IsValidHandle) {
   ASSERT_TRUE(this->table->is_valid_handle(handle_1));
 }
 
-TYPED_TEST(TableSizeOne, DeleteEntry) {
+TYPED_TEST(TableSizeTwo, DeleteEntry) {
   std::string key_ = "\xaa\xaa";
   ByteContainer key("0xaaaa");
   entry_handle_t handle;
@@ -228,7 +237,7 @@ TYPED_TEST(TableSizeOne, DeleteEntry) {
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 }
 
-TYPED_TEST(TableSizeOne, DeleteEntryHandleUpdate) {
+TYPED_TEST(TableSizeTwo, DeleteEntryHandleUpdate) {
   std::string key_ = "\xaa\xaa";
   ByteContainer key("0xaaaa");
   entry_handle_t handle_1, handle_2;
@@ -250,7 +259,7 @@ TYPED_TEST(TableSizeOne, DeleteEntryHandleUpdate) {
   ASSERT_EQ(MatchErrorCode::EXPIRED_HANDLE, rc);
 }
 
-TYPED_TEST(TableSizeOne, LookupEntry) {
+TYPED_TEST(TableSizeTwo, LookupEntry) {
   std::string key_ = "\x0a\xba";
   ByteContainer key("0x0aba");
   entry_handle_t handle;
@@ -280,7 +289,7 @@ TYPED_TEST(TableSizeOne, LookupEntry) {
   ASSERT_FALSE(hit);
 }
 
-TYPED_TEST(TableSizeOne, ModifyEntry) {
+TYPED_TEST(TableSizeTwo, ModifyEntry) {
   std::string key_ = "\x0a\xba";
   ByteContainer key("0x0aba");
   entry_handle_t handle;
@@ -314,7 +323,7 @@ TYPED_TEST(TableSizeOne, ModifyEntry) {
   ASSERT_EQ((unsigned) 0xaba, entry_2.action_fn.get_action_data(0).get_uint());
 }
 
-TYPED_TEST(TableSizeOne, Counters) {
+TYPED_TEST(TableSizeTwo, Counters) {
   std::string key_ = "\x0a\xba";
   ByteContainer key("0x0aba");
   entry_handle_t handle;
@@ -358,7 +367,7 @@ TYPED_TEST(TableSizeOne, Counters) {
   ASSERT_EQ(1u, counter_packets);
 }
 
-TYPED_TEST(TableSizeOne, Valid) {
+TYPED_TEST(TableSizeTwo, Valid) {
   std::string key_ = "\x0a\xba";
   bool valid = true;
   entry_handle_t handle;
@@ -387,7 +396,7 @@ TYPED_TEST(TableSizeOne, Valid) {
   ASSERT_TRUE(hit);
 }
 
-TYPED_TEST(TableSizeOne, ResetState) {
+TYPED_TEST(TableSizeTwo, ResetState) {
   std::string key_ = "\x0a\xba";
   ByteContainer key("0x0aba");
   entry_handle_t handle;
@@ -506,22 +515,24 @@ TEST_F(TableIndirect, AddEntry) {
   mbr_hdl_t mbr_1;
   mbr_hdl_t mbr_2 = 999u;
   entry_handle_t handle;
-  std::string key;
+  std::string key("\x00\x00");
   unsigned int data = 666u;
 
   rc = add_member(data, &mbr_1);
-  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   rc = add_entry(key, mbr_2, &handle);
-  ASSERT_EQ(rc, MatchErrorCode::INVALID_MBR_HANDLE);
+  ASSERT_EQ(MatchErrorCode::INVALID_MBR_HANDLE, rc);
   ASSERT_EQ(0u, table->get_num_entries());  
 
-  static_assert(table_size < 256, "");
+  static_assert(table_size < 255, "");
 
   for(unsigned int i = 0; i < table_size; i++) {
-    key = std::string(2, (char) table_size);
+    key = std::string(2, (char) i);
     rc = add_entry(key, mbr_1, &handle);
-    ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+    rc = add_entry(key, mbr_1, &handle);
+    ASSERT_EQ(MatchErrorCode::DUPLICATE_ENTRY, rc);
     // this is implementation specific, is it a good idea ?
     ASSERT_EQ(i, handle);
     ASSERT_EQ(i + 1, table->get_num_entries());  

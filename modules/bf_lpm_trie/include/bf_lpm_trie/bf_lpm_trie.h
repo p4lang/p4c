@@ -40,8 +40,11 @@ void bf_lpm_trie_insert(bf_lpm_trie_t *trie,
 			const char *prefix, int prefix_length,
 			const value_t value);
 
-bool bf_lpm_trie_get(const bf_lpm_trie_t *trie, const char *key,
-		     value_t *pvalue);
+bool bf_lpm_trie_has_prefix(const bf_lpm_trie_t *trie,
+			    const char *prefix, int prefix_length);
+
+bool bf_lpm_trie_lookup(const bf_lpm_trie_t *trie, const char *key,
+			value_t *pvalue);
 
 bool bf_lpm_trie_delete(bf_lpm_trie_t *trie, const char *prefix,
 			int prefix_length);
