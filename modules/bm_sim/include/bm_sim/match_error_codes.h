@@ -38,6 +38,7 @@ enum class MatchErrorCode {
   INVALID_GRP_HANDLE,
   GRP_STILL_USED,
   EMPTY_GRP,
+  DUPLICATE_ENTRY,
   ERROR,
 };
 

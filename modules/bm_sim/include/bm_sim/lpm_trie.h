@@ -60,8 +60,12 @@ public:
     return bf_lpm_trie_delete(trie, prefix.data(), prefix_length);
   }
 
+  bool has_prefix(const ByteContainer &prefix, int prefix_length) const {
+    return bf_lpm_trie_has_prefix(trie, prefix.data(), prefix_length);
+  }
+
   bool lookup(const ByteContainer &key, uintptr_t *value) const {
-    return bf_lpm_trie_get(trie, key.data(), (value_t *) value);
+    return bf_lpm_trie_lookup(trie, key.data(), (value_t *) value);
   }
 
   void clear() {

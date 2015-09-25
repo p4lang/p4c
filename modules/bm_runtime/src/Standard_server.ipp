@@ -64,6 +64,8 @@ public:
       return TableOperationErrorCode::GRP_STILL_USED;
     case MatchErrorCode::EMPTY_GRP:
       return TableOperationErrorCode::EMPTY_GRP;
+    case MatchErrorCode::DUPLICATE_ENTRY:
+      return TableOperationErrorCode::DUPLICATE_ENTRY;
     case MatchErrorCode::ERROR:
       return TableOperationErrorCode::ERROR;
     default:

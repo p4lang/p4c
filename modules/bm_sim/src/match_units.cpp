@@ -223,6 +223,10 @@ MatchUnitExact<V>::add_entry_(
 
   assert(new_key.size() == this->nbytes_key);
 
+  // check if the key is already present
+  if(entries_map.find(new_key) != entries_map.end())
+    return MatchErrorCode::DUPLICATE_ENTRY;
+
   internal_handle_t handle_;
   MatchErrorCode status = this->get_and_set_handle(&handle_);
   if(status != MatchErrorCode::SUCCESS) return status;
@@ -355,6 +359,10 @@ MatchUnitLPM<V>::add_entry_(
 
   assert(new_key.size() == this->nbytes_key);
 
+  // check if the key is already present
+  if(entries_trie.has_prefix(new_key, prefix_length))
+    return MatchErrorCode::DUPLICATE_ENTRY;
+
   internal_handle_t handle_;
   MatchErrorCode status = this->get_and_set_handle(&handle_);
   if(status != MatchErrorCode::SUCCESS) return status;
@@ -483,6 +491,13 @@ static std::string create_mask_from_pref_len(int prefix_length, int size) {
   return mask;
 }
 
+static void format_ternary_key(ByteContainer *key, const ByteContainer &mask) {
+  assert(key->size() == mask.size());
+  for(size_t byte_index = 0; byte_index < mask.size(); byte_index++) {
+    (*key)[byte_index] = (*key)[byte_index] & mask[byte_index];
+  }
+}
+
 template<typename V>
 MatchErrorCode
 MatchUnitTernary<V>::add_entry_(
@@ -528,6 +543,13 @@ MatchUnitTernary<V>::add_entry_(
   assert(new_key.size() == this->nbytes_key);
   assert(new_mask.size() == this->nbytes_key);
 
+  // in theory I just need to do that for TERNARY MatchKeyParam's...
+  format_ternary_key(&new_key, new_mask);
+
+  // check if the key is already present
+  if(has_rule(new_key, new_mask, priority))
+    return MatchErrorCode::DUPLICATE_ENTRY;
+
   internal_handle_t handle_;
   MatchErrorCode status = this->get_and_set_handle(&handle_);
   if(status != MatchErrorCode::SUCCESS) return status;
@@ -539,6 +561,24 @@ MatchUnitTernary<V>::add_entry_(
 			   std::move(value), version);
   
   return MatchErrorCode::SUCCESS;
+}
+
+template<typename V>
+bool
+MatchUnitTernary<V>::has_rule(
+  const ByteContainer &key, const ByteContainer &mask, int priority
+) const
+{
+  for(auto it = this->handles.begin(); it != this->handles.end(); ++it) {
+    const Entry &entry = entries[*it];
+
+    if(entry.priority == priority &&
+       entry.key == key &&
+       entry.mask == mask) {
+      return true;
+    }
+  }
+  return false;
 }
 
 template<typename V>
