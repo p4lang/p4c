@@ -96,7 +96,7 @@ int TransportNanomsg::send_msgs(
   for(const auto &msg : msgs) {
     // wish I could write this, but string.data() return const char *
     // iov[i].iov_base = msg.data();
-    std::unique_ptr<char []> data(new char(msg.size()));
+    std::unique_ptr<char []> data(new char[msg.size()]);
     msg.copy(data.get(), msg.size());
     iov[i].iov_base = data.get();
     iov[i].iov_len = msg.size();
