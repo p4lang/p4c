@@ -20,7 +20,7 @@ from mininet.topo import Topo
 from mininet.log import setLogLevel, info
 from mininet.cli import CLI
 
-from bfn_mininet import BFNSwitch, BFNHost
+from p4_mininet import P4Switch, P4Host
 
 import argparse
 from time import sleep
@@ -66,8 +66,8 @@ def main():
                             args.thrift_port,
                             num_hosts)
     net = Mininet(topo = topo,
-                  host = BFNHost,
-                  switch = BFNSwitch,
+                  host = P4Host,
+                  switch = P4Switch,
                   controller = None)
     net.start()
 

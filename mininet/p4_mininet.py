@@ -17,7 +17,7 @@ from mininet.net import Mininet
 from mininet.node import Switch, Host
 from mininet.log import setLogLevel, info
 
-class BFNHost(Host):
+class P4Host(Host):
     def config(self, **params):
         r = super(Host, self).config(**params)
 
@@ -44,8 +44,8 @@ class BFNHost(Host):
         )
         print "**********"
         
-class BFNSwitch(Switch):
-    """BFN virtual switch"""
+class P4Switch(Switch):
+    """P4 virtual switch"""
     listenerPort = 11111
     thriftPort = 22222
 
@@ -59,7 +59,7 @@ class BFNSwitch(Switch):
         self.sw_path = sw_path
         self.json_path = json_path
         self.verbose = verbose
-        logfile = '/tmp/bfns.%s.log' % self.name
+        logfile = '/tmp/p4s.%s.log' % self.name
         self.output = open(logfile, 'w')
         self.thrift_port = thrift_port
         self.pcap_dump = pcap_dump
@@ -69,8 +69,8 @@ class BFNSwitch(Switch):
         pass
 
     def start( self, controllers ):
-        "Start up a new BFN switch"
-        print "Starting BFN switch", self.name
+        "Start up a new P4 switch"
+        print "Starting P4 switch", self.name
         args = [self.sw_path]
         # args.extend( ['--name', self.name] )
         # args.extend( ['--dpid', self.dpid] )
@@ -83,7 +83,7 @@ class BFNSwitch(Switch):
             args.extend( ['--thrift-port', str(self.thrift_port)] )
         args.append(self.json_path)
 
-        logfile = '/tmp/bfns.%s.log' % self.name
+        logfile = '/tmp/p4s.%s.log' % self.name
 
         print ' '.join(args)
 
@@ -101,13 +101,8 @@ class BFNSwitch(Switch):
 
     def attach( self, intf ):
         "Connect a data port"
-        print "Connecting data port", intf, "to switch", self.name
-        self.cmd( 'bfns-ctl', 'add-port', '--datapath', self.name, intf )
+        assert(0)
 
     def detach( self, intf ):
         "Disconnect a data port"
-        self.cmd( 'bfns-ctl', 'del-port', '--datapath', self.name, intf )
-
-    def dpctl( self, *args ):
-        "Run dpctl command"
-        pass
+        assert(0)
