@@ -273,7 +273,9 @@ def parse_match_key(table, key_fields):
             param = BmMatchParam(type = param_type,
                                  ternary = BmMatchParamTernary(key, mask))
         elif param_type == BmMatchParamType.VALID:
-            assert(0)
+            key = bool(int(field))
+            param = BmMatchParam(type = param_type,
+                                 valid = BmMatchParamValid(key))
         else:
             assert(0)
         params.append(param)
