@@ -32,8 +32,16 @@ On Ubuntu 14.04, the following packages are required:
 - g++
 - libssl-dev
 
-You also need to install *thrift* and *nanomsg* from source. Feel free to use
-the install scripts under build/travis/.
+You also need to install [thrift](https://github.com/apache/thrift) and
+[nanomsg](http://download.nanomsg.org/nanomsg-0.5-beta.tar.gz) from source. Feel
+free to use the install scripts under build/travis/.
+
+To use the CLI, you will need to install the
+[nnpy](https://github.com/nanomsg/nnpy) Python package. Feel free to use
+build/travis/install-nnpy.sh
+
+To make your life easier, we provide the *install_deps.sh* script, which will
+install all the dependencies needed on Ubuntu 14.04.
 
 Our Travis regression tests run on Ubuntu 12.04. Look at .travis.yml for more
 information on the Ubuntu 12.04 dependencies.
