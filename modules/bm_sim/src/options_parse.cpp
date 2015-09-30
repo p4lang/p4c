@@ -21,12 +21,55 @@
 #include <vector>
 #include <list>
 #include <iostream>
+#include <sstream>
 
 #include <cassert>
 
 #include <boost/program_options.hpp>
 
 #include "bm_sim/options_parse.h"
+#include "bm_sim/event_logger.h"
+
+struct interface {
+  interface(const std::string &name, int port)
+    : name(name), port(port) { }
+
+  std::string name{};
+  int port{};
+};
+
+void validate(boost::any& v, 
+              std::vector<std::string> const& values,
+              interface* /* target_type */,
+              int)
+{
+  namespace po = boost::program_options;
+
+  // Make sure no previous assignment to 'v' was made.
+  po::validators::check_first_occurrence(v);
+
+  // Extract the first string from 'values'. If there is more than
+  // one string, it's an error, and exception will be thrown.
+  const std::string &s = po::validators::get_single_string(values);
+
+  std::istringstream stream(s);
+  std::string tok;
+  std::getline(stream, tok, '@');
+  int port;
+  try {
+    port = std::stoi(tok, nullptr);
+  }
+  catch (...) {
+    throw po::validation_error(po::validation_error::invalid_option_value,
+			       "interface");
+  }
+  if(tok == s) {
+    throw po::validation_error(po::validation_error::invalid_option_value,
+			       "interface");
+  }
+  std::getline(stream, tok);
+  v = boost::any(interface(tok, port));
+}
 
 void
 OptionsParser::parse(int argc, char *argv[])
@@ -37,11 +80,17 @@ OptionsParser::parse(int argc, char *argv[])
 
   description.add_options()
     ("help,h", "Display this help message")
-    ("interface,i", po::value<std::vector<std::string> >()->composing(),
-     "Attach this network interface at startup")
+    ("interface,i", po::value<std::vector<interface> >()->composing(),
+     "<port-num>@<interface-name>: "
+     "Attach network interface <interface-name> as port <port-num> at startup. "
+     "Can appear multiple times")
     ("pcap", "Generate pcap files for interfaces")
     ("thrift-port", po::value<int>(),
-     "TCP port on which to run the Thrift runtime server");
+     "TCP port on which to run the Thrift runtime server")
+    ("device-id", po::value<int>(),
+     "Device ID, used to identify the device in IPC messages (default 0)")
+    ("nanolog", po::value<std::string>(),
+     "IPC socket to use for nanomsg pub/sub logs (default: no nanomsg logging");
 
   po::options_description hidden;
   hidden.add_options()
@@ -80,9 +129,24 @@ OptionsParser::parse(int argc, char *argv[])
     exit(1);
   }
 
+  device_id = 0;
+  if(vm.count("device-id")) {
+    device_id = vm["device-id"].as<int>();
+  }
+
+  // event_logger_addr = std::string("ipc:///tmp/bm-")
+  //   .append(std::to_string(device_id))
+  //   .append("-log.ipc");
+  if(vm.count("nanolog")) {
+    event_logger_addr = vm["nanolog"].as<std::string>();
+    logger = new EventLogger(
+      TransportIface::create_instance<TransportNanomsg>(event_logger_addr)
+    );
+  }
+
   if(vm.count("interface")) {
-    for (const auto &iface : vm["interface"].as<std::vector<std::string> >()) {
-      ifaces.append(iface);
+    for (const auto &iface : vm["interface"].as<std::vector<interface> >()) {
+      ifaces.add(iface.port, iface.name);
     }
   }
 

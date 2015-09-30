@@ -24,14 +24,17 @@
 #define _BM_OPTIONS_PARSE_H_
 
 #include <string>
+#include <map>
 
 class InterfaceList {
 public:
-  typedef std::list<std::string>::iterator iterator;
-  typedef std::list<std::string>::const_iterator const_iterator;
+  typedef std::map<int, std::string>::iterator iterator;
+  typedef std::map<int, std::string>::const_iterator const_iterator;
 
 public:
-  void append(const std::string &iface) { ifaces.push_back(iface); }
+  void add(int port, const std::string &iface) {
+    ifaces[port] = iface;
+  }
   bool empty() { return ifaces.empty(); }
   // iterators
   iterator begin() { return ifaces.begin(); }
@@ -40,7 +43,7 @@ public:
   const_iterator end() const { return ifaces.end(); }
 
 private:
-  std::list<std::string> ifaces{};
+  std::map<int, std::string> ifaces{};
 };
 
 class OptionsParser {
@@ -54,6 +57,8 @@ private:
   InterfaceList ifaces{};
   bool pcap{false};
   int thrift_port{};
+  int device_id{};
+  std::string event_logger_addr{};
 };
 
 #endif

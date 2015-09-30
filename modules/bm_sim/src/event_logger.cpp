@@ -56,8 +56,7 @@ static inline void fill_msg_hdr(EventType type, const Packet &packet,
   msg_hdr->copy_id = packet.get_copy_id();
 }
 
-template <typename Transport>
-void EventLogger<Transport>::packet_in(const Packet &packet) {
+void EventLogger::packet_in(const Packet &packet) {
   typedef struct : msg_hdr_t {
     int port_in;
   } __attribute__((packed)) msg_t;
@@ -68,8 +67,7 @@ void EventLogger<Transport>::packet_in(const Packet &packet) {
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::packet_out(const Packet &packet) {
+void EventLogger::packet_out(const Packet &packet) {
   typedef struct : msg_hdr_t {
     int port_out;
   } __attribute__((packed)) msg_t;
@@ -80,9 +78,8 @@ void EventLogger<Transport>::packet_out(const Packet &packet) {
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::parser_start(const Packet &packet, 
-					  const Parser &parser) {
+void EventLogger::parser_start(const Packet &packet, 
+			       const Parser &parser) {
   typedef struct : msg_hdr_t {
     int parser_id;
   } __attribute__((packed)) msg_t;
@@ -93,9 +90,8 @@ void EventLogger<Transport>::parser_start(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::parser_done(const Packet &packet,
-					 const Parser &parser) {
+void EventLogger::parser_done(const Packet &packet,
+			      const Parser &parser) {
   typedef struct : msg_hdr_t {
     int parser_id;
   } __attribute__((packed)) msg_t;
@@ -106,9 +102,8 @@ void EventLogger<Transport>::parser_done(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::parser_extract(const Packet &packet,
-					    header_id_t header) {
+void EventLogger::parser_extract(const Packet &packet,
+				 header_id_t header) {
   typedef struct : msg_hdr_t {
     int header_id;
   } __attribute__((packed)) msg_t;
@@ -119,9 +114,8 @@ void EventLogger<Transport>::parser_extract(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::deparser_start(const Packet &packet,
-					    const Deparser &deparser) {
+void EventLogger::deparser_start(const Packet &packet,
+				 const Deparser &deparser) {
   typedef struct : msg_hdr_t {
     int deparser_id;
   } __attribute__((packed)) msg_t;
@@ -132,9 +126,8 @@ void EventLogger<Transport>::deparser_start(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::deparser_done(const Packet &packet,
-					   const Deparser &deparser) {
+void EventLogger::deparser_done(const Packet &packet,
+				const Deparser &deparser) {
   typedef struct : msg_hdr_t {
     int deparser_id;
   } __attribute__((packed)) msg_t;
@@ -145,9 +138,8 @@ void EventLogger<Transport>::deparser_done(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::deparser_emit(const Packet &packet,
-					   header_id_t header) {
+void EventLogger::deparser_emit(const Packet &packet,
+				header_id_t header) {
   typedef struct : msg_hdr_t {
     int header_id;
   } __attribute__((packed)) msg_t;
@@ -158,9 +150,8 @@ void EventLogger<Transport>::deparser_emit(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::checksum_update(const Packet &packet,
-					     const Checksum &checksum) {
+void EventLogger::checksum_update(const Packet &packet,
+				  const Checksum &checksum) {
   typedef struct : msg_hdr_t {
     int checksum_id;
   } __attribute__((packed)) msg_t;
@@ -171,9 +162,8 @@ void EventLogger<Transport>::checksum_update(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::pipeline_start(const Packet &packet,
-					    const Pipeline &pipeline) {
+void EventLogger::pipeline_start(const Packet &packet,
+				 const Pipeline &pipeline) {
   typedef struct : msg_hdr_t {
     int pipeline_id;
   } __attribute__((packed)) msg_t;
@@ -184,9 +174,8 @@ void EventLogger<Transport>::pipeline_start(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::pipeline_done(const Packet &packet,
-					   const Pipeline &pipeline) {
+void EventLogger::pipeline_done(const Packet &packet,
+				const Pipeline &pipeline) {
   typedef struct : msg_hdr_t {
     int pipeline_id;
   } __attribute__((packed)) msg_t;
@@ -197,9 +186,8 @@ void EventLogger<Transport>::pipeline_done(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::condition_eval(const Packet &packet,
-					    const Conditional &cond, bool result) {
+void EventLogger::condition_eval(const Packet &packet,
+				 const Conditional &cond, bool result) {
   typedef struct : msg_hdr_t {
     int condition_id;
     int result;  // 0 (true) or 1 (false);
@@ -222,10 +210,9 @@ void EventLogger<Transport>::condition_eval(const Packet &packet,
 //   std::copy(src.begin(), src.end(), dst);
 // }
 
-template <typename Transport>
-void EventLogger<Transport>::table_hit(const Packet &packet,
-				       const MatchTableAbstract &table,
-				       entry_handle_t handle) {
+void EventLogger::table_hit(const Packet &packet,
+			    const MatchTableAbstract &table,
+			    entry_handle_t handle) {
   typedef struct : msg_hdr_t {
     int table_id;
     int entry_hdl;
@@ -238,9 +225,8 @@ void EventLogger<Transport>::table_hit(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 };
 
-template <typename Transport>
-void EventLogger<Transport>::table_miss(const Packet &packet,
-					const MatchTableAbstract &table) {
+void EventLogger::table_miss(const Packet &packet,
+			     const MatchTableAbstract &table) {
   typedef struct : msg_hdr_t {
     int table_id;
   } __attribute__((packed)) msg_t;
@@ -251,10 +237,9 @@ void EventLogger<Transport>::table_miss(const Packet &packet,
   transport_instance->send((char *) &msg, sizeof(msg));
 }
 
-template <typename Transport>
-void EventLogger<Transport>::action_execute(const Packet &packet,
-					    const ActionFn &action_fn,
-					    const ActionData &action_data) {
+void EventLogger::action_execute(const Packet &packet,
+				 const ActionFn &action_fn,
+				 const ActionData &action_data) {
   typedef struct : msg_hdr_t {
     int action_id;
   } __attribute__((packed)) msg_t;
@@ -267,7 +252,5 @@ void EventLogger<Transport>::action_execute(const Packet &packet,
   (void) action_data;
 };
 
-
-template class EventLogger<TransportNanomsg>;
-template class EventLogger<TransportNULL>;
-template class EventLogger<TransportSTDOUT>;
+// TODO: move this?
+EventLogger *logger = new EventLogger(std::move(TransportIface::create_instance<TransportNULL>("")));

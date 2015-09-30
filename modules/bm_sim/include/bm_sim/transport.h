@@ -44,6 +44,13 @@ public:
 
   virtual int send_msgs(const std::initializer_list<std::string> &msgs) const = 0;
   virtual int send_msgs(const std::initializer_list<MsgBuf> &msgs) const = 0;
+
+  template <typename T>
+  static std::unique_ptr<T> create_instance(const std::string &name) {
+    T *transport = new T();
+    transport->open(name);
+    return std::unique_ptr<T>(transport);
+  }
 };
 
 class TransportNanomsg : public TransportIface {

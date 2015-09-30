@@ -49,19 +49,19 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
   parser.parse(argc, argv);
   int status = init_objects(parser.config_file_path);
   if(status != 0) return status;
-  int port_num = 0;
   for(const auto &iface : parser.ifaces) {
-    std::cout << "Adding interface " << iface
-	      << " as port " << port_num << std::endl;
+    std::cout << "Adding interface " << iface.second
+	      << " as port " << iface.first << std::endl;
     if(parser.pcap) {
-      const std::string pcap = iface + ".pcap";
-      port_add(iface, port_num++, pcap.c_str());
+      const std::string pcap = iface.second + ".pcap";
+      port_add(iface.second, iface.first, pcap.c_str());
     }
     else {
-      port_add(iface, port_num++, NULL);
+      port_add(iface.second, iface.first, NULL);
     }
   }
   thrift_port = parser.thrift_port;
+  device_id = parser.device_id;
   return status;
 }
 

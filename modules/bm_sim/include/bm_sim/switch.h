@@ -268,6 +268,8 @@ private:
   bool enable_swap{false};
   
   int thrift_port{};
+
+  int device_id{};
 };
 
 #endif

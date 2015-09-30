@@ -24,6 +24,16 @@ import nnpy
 import struct
 import sys
 import json
+import argparse
+
+parser = argparse.ArgumentParser(description='BM nanomsg event logger client')
+parser.add_argument('--socket', help='IPC socket to which to subscribe',
+                    action="store", default="ipc:///tmp/bm-0-log.ipc")
+
+parser.add_argument('--json', help='JSON description of P4 program',
+                    action="store")
+
+args = parser.parse_args()
 
 class NameMap:
     def __init__(self):
@@ -386,7 +396,7 @@ def recv_msgs():
         return type_
 
     sub = nnpy.Socket(nnpy.AF_SP, nnpy.SUB)
-    sub.connect('ipc:///tmp/test_bm.ipc')
+    sub.connect(args.socket)
     sub.setsockopt(nnpy.SUB, nnpy.SUB_SUBSCRIBE, '')
     
     while True:
@@ -402,9 +412,7 @@ def recv_msgs():
         print p
 
 def main():
-    json_src = None
-    if len(sys.argv) > 1:
-        json_src = sys.argv[1]
+    json_src = args.json
 
     if json_src:
         name_map.load_names(json_src)

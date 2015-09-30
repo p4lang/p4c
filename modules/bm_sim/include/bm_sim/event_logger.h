@@ -46,13 +46,10 @@ class ActionFn;
 
 typedef uintptr_t entry_handle_t;
 
-template <typename Transport>
 class EventLogger {
 public:
-  EventLogger(const std::string &transport_name)
-    : transport_instance(std::unique_ptr<Transport>(new Transport())) {
-    transport_instance->open(transport_name);
-  }
+  EventLogger(std::unique_ptr<TransportIface> transport)
+    : transport_instance(std::move(transport)) { }
 
   // we need the ingress / egress ports, but they are part of the Packet
   void packet_in(const Packet &packet);
@@ -80,27 +77,11 @@ public:
   void action_execute(const Packet &packet,
 		      const ActionFn &action_fn, const ActionData &action_data);
 
-public:
-  // TODO: improve this super ugly test
-  static EventLogger<Transport> *create_instance(const std::string transport_name) {
-    static EventLogger<Transport> logger(transport_name);
-    return &logger;
-  }
-
 private:
-  std::unique_ptr<Transport> transport_instance;
+  std::unique_ptr<TransportIface> transport_instance;
 };
 
-#if defined ELOGGER_STDOUT
-static EventLogger<TransportSTDOUT> *logger =
-  EventLogger<TransportSTDOUT>::create_instance("");
-#elif defined ELOGGER_NANOMSG
-static EventLogger<TransportNanomsg> *logger =
-  EventLogger<TransportNanomsg>::create_instance("ipc:///tmp/test_bm.ipc");
-#else
-static EventLogger<TransportNULL> *logger =
-  EventLogger<TransportNULL>::create_instance("");
-#endif
+extern EventLogger *logger;
 
 #define ELOGGER logger
 

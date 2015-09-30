@@ -46,13 +46,14 @@ class P4Host(Host):
         
 class P4Switch(Switch):
     """P4 virtual switch"""
-    listenerPort = 11111
-    thriftPort = 22222
+    device_id = 0
 
     def __init__( self, name, sw_path = None, json_path = None,
                   thrift_port = None,
                   pcap_dump = False,
-                  verbose = False, **kwargs ):
+                  verbose = False,
+                  device_id = None,
+                  **kwargs ):
         Switch.__init__( self, name, **kwargs )
         assert(sw_path)
         assert(json_path)
@@ -63,6 +64,13 @@ class P4Switch(Switch):
         self.output = open(logfile, 'w')
         self.thrift_port = thrift_port
         self.pcap_dump = pcap_dump
+        if device_id is not None:
+            self.device_id = device_id
+            P4Switch.device_id = max(P4Switch.device_id, device_id)
+        else:
+            self.device_id = P4Switch.device_id
+            P4Switch.device_id += 1
+        self.nanomsg = "ipc:///tmp/bm-%d-log.ipc" % self.device_id
 
     @classmethod
     def setup( cls ):
@@ -74,13 +82,17 @@ class P4Switch(Switch):
         args = [self.sw_path]
         # args.extend( ['--name', self.name] )
         # args.extend( ['--dpid', self.dpid] )
-        for intf in self.intfs.values():
+        for port, intf in self.intfs.items():
             if not intf.IP():
-                args.extend( ['-i', intf.name] )
+                args.extend( ['-i', str(port) + "@" + intf.name] )
         if self.pcap_dump:
             args.append("--pcap")
         if self.thrift_port:
             args.extend( ['--thrift-port', str(self.thrift_port)] )
+        if self.nanomsg:
+            args.extend( ['--nanolog', self.nanomsg] )
+        args.extend( ['--device-id', str(self.device_id)] )
+        P4Switch.device_id += 1
         args.append(self.json_path)
 
         logfile = '/tmp/p4s.%s.log' % self.name

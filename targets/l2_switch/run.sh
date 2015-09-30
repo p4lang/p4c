@@ -1,1 +1,1 @@
-sudo ./l2_switch -i veth1 -i veth3 -i veth5 -i veth7 --pcap l2_switch.json
+sudo ./l2_switch -i 0@veth1 -i 1@veth3 -i 2@veth5 -i 3@veth7 --pcap l2_switch.json
