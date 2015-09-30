@@ -35,12 +35,14 @@ before_install:
   - bash build/travis/install-thrift.sh
   - bash build/travis/install-nanomsg.sh
   - sudo ldconfig
+  - bash build/travis/install-nnpy.sh
 
 install:
   - ./autogen.sh && ./configure && make all
 
 # command to run tests, e.g. python setup.py test
 script:
+  - python build/travis/check-nnpy.py
   - make check
 
 # after_success:
