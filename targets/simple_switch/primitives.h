@@ -207,7 +207,7 @@ class register_read : public ActionPrimitive<Field &, const RegisterArray &, con
 REGISTER_PRIMITIVE(register_read);
 
 class register_write : public ActionPrimitive<RegisterArray &, const Data &, const Data &> {
-  void operator ()(RegisterArray &dst, const Data &src, const Data &idx) {
+  void operator ()(RegisterArray &dst, const Data &idx, const Data &src) {
     dst[idx.get_uint()].set(src);
   }
 };
