@@ -97,6 +97,11 @@ public:
     return fields_map.at(field_name);
   }
 
+  bool has_field(const std::string &field_name) const {
+    auto it = fields_map.find(field_name);
+    return (it != fields_map.end());
+  }
+
   HeaderStack &get_header_stack(header_stack_id_t header_stack_index) {
     return header_stacks[header_stack_index];
   }

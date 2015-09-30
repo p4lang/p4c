@@ -41,12 +41,19 @@
 
 #include "bm_runtime/bm_runtime.h"
 
+using std::chrono::microseconds;
+using std::chrono::duration_cast;
+
 class SimpleSwitch : public Switch {
+private:
+  typedef std::chrono::high_resolution_clock clock;
+
 public:
   SimpleSwitch()
     : Switch(false), // enable_switch = false
       input_buffer(1024), egress_buffer(1024), output_buffer(128),
-      pre(new McSimplePreLAG()) {
+      pre(new McSimplePreLAG()),
+      start(clock::now()) {
     add_component<McSimplePreLAG>(pre);
   }
 
@@ -92,6 +99,7 @@ private:
   Queue<std::unique_ptr<Packet> > egress_buffer;
   Queue<std::unique_ptr<Packet> > output_buffer;
   std::shared_ptr<McSimplePreLAG> pre;
+  clock::time_point start;
 };
 
 void SimpleSwitch::transmit_thread() {
@@ -119,6 +127,11 @@ void SimpleSwitch::ingress_thread() {
     int ingress_port = packet->get_ingress_port();
     SIMPLELOG << "processing packet " << packet->get_packet_id()
 	      << " received on port "<< ingress_port << std::endl;
+
+    if(phv->has_field("intrinsic_metadata.ingress_global_timestamp")) {
+      phv->get_field("intrinsic_metadata.ingress_global_timestamp")
+        .set(duration_cast<microseconds>(clock::now() - start).count());
+    }
 
     // setting standard metadata
     phv->get_field("standard_metadata.ingress_port").set(ingress_port);
