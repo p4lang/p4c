@@ -55,7 +55,7 @@ information on the Ubuntu 12.04 dependencies.
 To enable logging, you probably want to use the following flags when running
 configure:
 
-    ./configure 'CPPFLAGS=-DELOGGER_NANOMSG -DENABLE_SIMPLELOG'
+    ./configure 'CPPFLAGS=-DENABLE_SIMPLELOG'
 
 In 'debug mode', you probably want to also use the following as well:
 
@@ -125,10 +125,15 @@ used.
 
 ## Displaying the event logging messages
 
+To enable event logging when starting your switch, use the *--nanolog* command
+line option. For example, to use the ipc address *ipc:///tmp/bm-log.ipc*:
+
+    sudo ./simple_switch -i <iface0> -i <iface1> --nanolog ipc:///tmp/bm-log.ipc <path to JSON file>
+
 Use [tools/nanomsg_client.py](tools/nanomsg_client.py) as follows when the
 switch is running:
 
-    sudo ./nanomsg_client.py <path to JSON file>
+    sudo ./nanomsg_client.py --json <path to JSON file> --socket <ipc address>
 
 The script will display events of significance (table hits / misses, parser
 transitions, ...) for each packet.
