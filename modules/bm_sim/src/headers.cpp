@@ -20,7 +20,7 @@
 
 #include "bm_sim/headers.h"
 
-Header::Header(const string &name, p4object_id_t id,
+Header::Header(const std::string &name, p4object_id_t id,
 	       const HeaderType &header_type,
 	       const std::set<int> &arith_offsets,
 	       const bool metadata)

@@ -37,7 +37,7 @@ public:
   friend class PHV;
 
 public:
-  HeaderStack(const string &name, p4object_id_t id,
+  HeaderStack(const std::string &name, p4object_id_t id,
 	      const HeaderType &header_type)
     : NamedP4Object(name, id),
       header_type(header_type) { }
