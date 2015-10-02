@@ -17,9 +17,18 @@ sudo apt-get install -y \
     bison \
     pkg-config \
     g++ \
-    libssl-dev
+    libssl-dev \
+    mktemp \
+    libffi-dev \
+    python-pip
 
-bash build/travis/install-thrift.sh
-bash build/travis/install-nanomsg.sh
-sudo ldconfig
-bash build/travis/install-nnpy.sh
+tmpdir=`mktemp -d -p .`
+cd $tmpdir
+
+# bash ../build/travis/install-thrift.sh
+# bash ../build/travis/install-nanomsg.sh
+# sudo ldconfig
+bash ../build/travis/install-nnpy.sh
+
+cd ..
+rm -rf $tmpdir
