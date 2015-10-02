@@ -19,6 +19,7 @@
  */
 
 #include <cassert>
+#include <fstream>
 
 #include "bm_sim/switch.h"
 #include "bm_sim/P4Objects.h"
@@ -31,10 +32,27 @@ Switch::Switch(bool enable_swap)
   p4objects_rt = p4objects;
 }
 
+void
+Switch::add_required_field(const std::string &header_name,
+			   const std::string &field_name) {
+  required_fields.insert(std::make_pair(header_name, field_name));
+}
+
+void
+Switch::force_arith_field(const std::string &header_name,
+			  const std::string &field_name) {
+  arith_fields.insert(std::make_pair(header_name, field_name));
+}
+
 int
 Switch::init_objects(const std::string &json_path) {
-  std::fstream fs(json_path);
-  int status = p4objects->init_objects(fs);
+  std::ifstream fs(json_path, std::ios::in);
+  if(!fs) {
+    std::cout << "JSON input file " << json_path << " cannot be opened\n";
+    return 1;
+  }
+
+  int status = p4objects->init_objects(fs, required_fields, arith_fields);
   if(status != 0) return status;
   Packet::set_phv_factory(p4objects->get_phv_factory());
 
@@ -477,7 +495,7 @@ RuntimeInterface::ErrorCode Switch::load_new_config(const std::string &new_confi
   if(p4objects != p4objects_rt) return ONGOING_SWAP;
   p4objects_rt = std::make_shared<P4Objects>();
   std::istringstream ss(new_config);
-  p4objects_rt->init_objects(ss);
+  p4objects_rt->init_objects(ss, required_fields, arith_fields);
   return SUCCESS;
 }
  

@@ -48,10 +48,15 @@
 
 class P4Objects {
 public:
+  typedef std::pair<std::string, std::string> header_field_pair;
+
+public:
   P4Objects(std::ostream &outstream = std::cout)
     : outstream(outstream) { }
 
-  int init_objects(std::istream &is);
+  int init_objects(std::istream &is,
+		   const std::set<header_field_pair> &required_fields = std::set<header_field_pair>(),
+		   const std::set<header_field_pair> &arith_fields = std::set<header_field_pair>());
   void destroy_objects();
 
   P4Objects(const P4Objects &other) = delete;
@@ -256,8 +261,11 @@ private:
   size_t get_field_bytes(header_id_t header_id, int field_offset);
   size_t get_field_bits(header_id_t header_id, int field_offset);
   size_t get_header_bits(header_id_t header_id);
-  std::tuple<header_id_t, int> field_info(const string &header_name,
-					  const string &field_name);
+  std::tuple<header_id_t, int> field_info(const std::string &header_name,
+					  const std::string &field_name);
+  bool field_exists(const std::string &header_name,
+		    const std::string &field_name);
+  bool check_required_fields(const std::set<header_field_pair> &required_fields);
 };
 
 

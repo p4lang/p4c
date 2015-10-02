@@ -136,7 +136,7 @@ private:
   // all headers need to be pushed back in order (according to header_index) !!!
   // TODO: remove this constraint?
   void push_back_header(
-      const string &header_name,
+      const std::string &header_name,
       header_id_t header_index,
       const HeaderType &header_type,
       const std::set<int> &arith_offsets,
@@ -151,14 +151,14 @@ private:
     headers_map.emplace(header_name, get_header(header_index));
 
     for(int i = 0; i < header_type.get_num_fields(); i++) {
-      const string name = header_name + "." + header_type.get_field_name(i);
+      const std::string name = header_name + "." + header_type.get_field_name(i);
       // std::cout << header_index << " " << i << " " << name << std::endl;
       fields_map.emplace(name, get_field(header_index, i));
     }
   }
 
   void push_back_header_stack(
-      const string &header_stack_name,
+      const std::string &header_stack_name,
       header_stack_id_t header_stack_index,
       const HeaderType &header_type,
       const std::vector<header_id_t> &header_ids
@@ -213,7 +213,7 @@ private:
   };
 
 public:
-  void push_back_header(const string &header_name,
+  void push_back_header(const std::string &header_name,
 			const header_id_t header_index,
 			const HeaderType &header_type,
 			const bool metadata = false) {
@@ -222,7 +222,7 @@ public:
     header_descs.insert(std::make_pair(header_index, desc));
   }
 
-  void push_back_header_stack(const string &header_stack_name,
+  void push_back_header_stack(const std::string &header_stack_name,
 			      const header_stack_id_t header_stack_index,
 			      const HeaderType &header_type,
 			      const std::vector<header_id_t> &headers) {

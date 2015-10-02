@@ -71,13 +71,13 @@ static inline unsigned short cksum16(char *buf, size_t len) {
 
 }
 
-Checksum::Checksum(const string &name, p4object_id_t id,
+Checksum::Checksum(const std::string &name, p4object_id_t id,
 		   header_id_t header_id, int field_offset)
   : NamedP4Object(name, id),
     header_id(header_id), field_offset(field_offset) {}
 
 CalcBasedChecksum::CalcBasedChecksum(
-  const string &name, p4object_id_t id,
+  const std::string &name, p4object_id_t id,
   header_id_t header_id, int field_offset,
   const NamedCalculation *calculation
 )
@@ -98,7 +98,7 @@ bool CalcBasedChecksum::verify_(const Packet &pkt) const
   return (cksum == f_cksum.get<uint64_t>());
 }
 
-IPv4Checksum::IPv4Checksum(const string &name, p4object_id_t id,
+IPv4Checksum::IPv4Checksum(const std::string &name, p4object_id_t id,
 			   header_id_t header_id, int field_offset)
   : Checksum(name, id, header_id, field_offset) {}
 

@@ -28,18 +28,15 @@
 #include "fields.h"
 #include "named_p4object.h"
 
-using std::vector;
-using std::string;
-
 typedef p4object_id_t header_type_id_t;
 
 class HeaderType : public NamedP4Object {
 public:
-  HeaderType(const string &name, p4object_id_t id)
+  HeaderType(const std::string &name, p4object_id_t id)
     : NamedP4Object(name, id) {}
 
   // returns field offset
-  int push_back_field(const string &field_name, int field_bit_width) {
+  int push_back_field(const std::string &field_name, int field_bit_width) {
     fields_bit_width.push_back(field_bit_width);
     fields_name.push_back(field_name);
     return fields_bit_width.size() - 1;
@@ -56,7 +53,7 @@ public:
     return bitwidth;
   }
 
-  const string &get_field_name(int field_offset) const {
+  const std::string &get_field_name(int field_offset) const {
     return fields_name[field_offset];
   }
 
@@ -68,31 +65,33 @@ public:
     return fields_bit_width.size();
   }
 
-  int get_field_offset(const string &field_name) const {
-    int res = 0;
-    while(field_name != fields_name[res]) res++;
-    return res;
+  int get_field_offset(const std::string &field_name) const {
+    for(unsigned int res = 0; res < fields_name.size(); res++) {
+      if(field_name == fields_name[res]) return res;
+    }
+    return -1;
   }
 
 private:
-  vector<int> fields_bit_width{};
-  vector<string> fields_name{};
+  std::vector<int> fields_bit_width{};
+  std::vector<std::string> fields_name{};
 };
 
 class Header : public NamedP4Object
 {
 public:
-  typedef vector<Field>::iterator iterator;
-  typedef vector<Field>::const_iterator const_iterator;
-  typedef vector<Field>::reference reference;
-  typedef vector<Field>::const_reference const_reference;
+  typedef std::vector<Field>::iterator iterator;
+  typedef std::vector<Field>::const_iterator const_iterator;
+  typedef std::vector<Field>::reference reference;
+  typedef std::vector<Field>::const_reference const_reference;
   typedef size_t size_type;
 
   friend class PHV;
 
 public:
-  Header(const string &name, p4object_id_t id, const HeaderType &header_type,
-	 const std::set<int> &arith_offsets, const bool metadata = false);
+  Header(const std::string &name, p4object_id_t id,
+	 const HeaderType &header_type, const std::set<int> &arith_offsets,
+	 const bool metadata = false);
 
   int get_nbytes_packet() const {
     return nbytes_packet;

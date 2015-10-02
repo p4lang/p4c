@@ -21,16 +21,17 @@
 #include "bm_sim/P4Objects.h"
 
 using std::unique_ptr;
+using std::string;
 
 typedef unsigned char opcode_t;
 
 void P4Objects::build_conditional(const Json::Value &json_expression,
 				  Conditional *conditional) {
   if(json_expression.isNull()) return ;
-  const std::string type = json_expression["type"].asString();
+  const string type = json_expression["type"].asString();
   const Json::Value json_value = json_expression["value"];
   if(type == "expression") {
-    const std::string op = json_value["op"].asString();
+    const string op = json_value["op"].asString();
     const Json::Value json_left = json_value["left"];
     const Json::Value json_right = json_value["right"];
 
@@ -64,7 +65,9 @@ void P4Objects::build_conditional(const Json::Value &json_expression,
   }
 }
 
-int P4Objects::init_objects(std::istream &is) {
+int P4Objects::init_objects(std::istream &is,
+			    const std::set<header_field_pair> &required_fields,
+			    const std::set<header_field_pair> &arith_fields) {
   Json::Value cfg_root;
   is >> cfg_root;
 
@@ -486,7 +489,7 @@ int P4Objects::init_objects(std::istream &is) {
   // pipelines
 
   typedef AgeingWriterImpl<TransportNanomsg> MyAgeingWriter;
-  const std::string ageing_ipc_name = "ipc:///tmp/test_bm_ageing.ipc";
+  const string ageing_ipc_name = "ipc:///tmp/test_bm_ageing.ipc";
   std::shared_ptr<MyAgeingWriter> ageing_writer(new MyAgeingWriter(ageing_ipc_name));
   ageing_monitor = std::unique_ptr<AgeingMonitor>(new AgeingMonitor(ageing_writer));
 
@@ -571,7 +574,7 @@ int P4Objects::init_objects(std::istream &is) {
 	// nicer way
 	for (const auto &cfg_element : cfg_table_selector_input) {
 
-	  const std::string type = cfg_element["type"].asString();
+	  const string type = cfg_element["type"].asString();
 	  assert(type == "field");  // TODO: other types
 
 	  const Json::Value &cfg_value_field = cfg_element["value"];
@@ -708,7 +711,7 @@ int P4Objects::init_objects(std::istream &is) {
   learn_engine = std::unique_ptr<LearnEngine>(new LearnEngine());
 
   typedef LearnWriterImpl<TransportNanomsg> MyLearnWriter;
-  const std::string learning_ipc_name = "ipc:///tmp/test_bm_learning.ipc";
+  const string learning_ipc_name = "ipc:///tmp/test_bm_learning.ipc";
   std::shared_ptr<MyLearnWriter> learn_writer;
 
   const Json::Value &cfg_learn_lists = cfg_root["learn_lists"];
@@ -726,7 +729,7 @@ int P4Objects::init_objects(std::istream &is) {
     const Json::Value &cfg_learn_elements = cfg_learn_list["elements"];
     for (const auto &cfg_learn_element : cfg_learn_elements) {
 
-      const std::string type = cfg_learn_element["type"].asString();
+      const string type = cfg_learn_element["type"].asString();
       assert(type == "field");  // TODO: other types
 
       const Json::Value &cfg_value_field = cfg_learn_element["value"];
@@ -740,6 +743,10 @@ int P4Objects::init_objects(std::istream &is) {
     learn_engine->list_init(list_id);
   }
 
+  if(!check_required_fields(required_fields)) {
+    return 1;
+  }
+
   // force arith fields
 
   if(cfg_root.isMember("force_arith")) {
@@ -750,6 +757,17 @@ int P4Objects::init_objects(std::istream &is) {
 
       const auto field = field_info(cfg_field[0].asString(),
 				    cfg_field[1].asString());
+      phv_factory.enable_field_arith(std::get<0>(field), std::get<1>(field));
+    }
+  }
+
+  for(const auto &p : arith_fields) {
+    if(!field_exists(p.first, p.second)) {
+      outstream << "field " << p.first << "." << p.second
+		<< " does not exist but required for arith, ignoring\n";
+    }
+    else {
+      const auto field = field_info(p.first, p.second);
       phv_factory.enable_field_arith(std::get<0>(field), std::get<1>(field));
     }
   }
@@ -794,4 +812,26 @@ std::tuple<header_id_t, int> P4Objects::field_info(const string &header_name,
 						   const string &field_name) {
   header_id_t header_id = get_header_id(header_name);
   return std::make_tuple(header_id, get_field_offset(header_id, field_name));
+}
+
+bool
+P4Objects::field_exists(const string &header_name,
+			const string &field_name) {
+  const auto it = header_to_type_map.find(header_name);
+  if(it == header_to_type_map.end()) return false;
+  const HeaderType *header_type = it->second;
+  return (header_type->get_field_offset(field_name) != -1);
+}
+
+bool
+P4Objects::check_required_fields(const std::set<header_field_pair> &required_fields) {
+  bool res = true;
+  for(const auto &p : required_fields) {
+    if(!field_exists(p.first, p.second)) {
+      res = false;
+      outstream << "Field " << p.first << "." << p.second
+		<< " is required by switch target but is not defined\n";
+    }
+  }
+  return res;
 }

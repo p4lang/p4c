@@ -55,6 +55,12 @@ public:
       pre(new McSimplePreLAG()),
       start(clock::now()) {
     add_component<McSimplePreLAG>(pre);
+
+    add_required_field("standard_metadata", "ingress_port");
+    add_required_field("standard_metadata", "packet_length");
+    add_required_field("standard_metadata", "instance_type");
+    add_required_field("standard_metadata", "egress_spec");
+    add_required_field("standard_metadata", "clone_spec");
   }
 
   int receive(int port_num, const char *buffer, int len) {

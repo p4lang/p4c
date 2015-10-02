@@ -23,9 +23,9 @@
 
 #include <memory>
 #include <string>
-#include <fstream>
 #include <typeinfo>
 #include <typeindex>
+#include <set>
 
 #include <boost/thread/shared_mutex.hpp>
 
@@ -39,6 +39,16 @@
 class Switch : public RuntimeInterface, public DevMgr {
 public:
   Switch(bool enable_swap = false);
+
+  /* Specify that is required for this target switch, i.e. the field
+     needs to be defined in the input json */
+  void add_required_field(const std::string &header_name,
+			  const std::string &field_name);
+
+  /* Force arithmetic on field. No effect if field is not defined in the
+     input json */
+  void force_arith_field(const std::string &header_name,
+			 const std::string &field_name);
 
   int init_objects(const std::string &json_path);
 
@@ -259,6 +269,9 @@ protected:
   std::unordered_map<std::type_index, std::shared_ptr<void> > components{};
 
 private:
+  typedef P4Objects::header_field_pair header_field_pair;
+
+private:
   mutable boost::shared_mutex request_mutex{};
   std::atomic<bool> swap_ordered{false};
 
@@ -266,6 +279,9 @@ private:
   std::shared_ptr<P4Objects> p4objects_rt{nullptr};
 
   bool enable_swap{false};
+
+  std::set<header_field_pair> required_fields{};
+  std::set<header_field_pair> arith_fields{};
   
   int thrift_port{};
 
