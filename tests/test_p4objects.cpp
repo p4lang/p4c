@@ -67,7 +67,7 @@ const std::string JSON_TEST_STRING_2 =
   "{\"header_types\":[{\"name\":\"standard_metadata_t\",\"id\":0,\"fields\":[[\"ingress_port\",9],[\"packet_length\",32],[\"egress_spec\",9],[\"egress_port\",9],[\"egress_instance\",32],[\"instance_type\",32],[\"clone_spec\",32],[\"_padding\",5]]},{\"name\":\"header_test_t\",\"id\":1,\"fields\":[[\"field8\",8],[\"field16\",16],[\"field20\",20],[\"field24\",24],[\"field32\",32],[\"field48\",48],[\"field64\",64],[\"_padding\",4]]}],\"headers\":[{\"name\":\"standard_metadata\",\"id\":0,\"header_type\":\"standard_metadata_t\"},{\"name\":\"header_test\",\"id\":1,\"header_type\":\"header_test_t\"},{\"name\":\"header_test_1\",\"id\":2,\"header_type\":\"header_test_t\"}],\"header_stacks\":[],\"parsers\":[{\"name\":\"parser\",\"id\":0,\"init_state\":\"start\",\"parse_states\":[{\"name\":\"start\",\"id\":0,\"parser_ops\":[],\"transition_key\":[],\"transitions\":[{\"value\":\"default\",\"mask\":null,\"next_state\":null}]}]}],\"deparsers\":[{\"name\":\"deparser\",\"id\":0,\"order\":[]}],\"meter_arrays\":[],\"actions\":[{\"name\":\"actionB\",\"id\":0,\"runtime_data\":[{\"name\":\"param\",\"bitwidth\":8}],\"primitives\":[{\"op\":\"modify_field\",\"parameters\":[{\"type\":\"field\",\"value\":[\"header_test\",\"field8\"]},{\"type\":\"runtime_data\",\"value\":0}]}]},{\"name\":\"actionA\",\"id\":1,\"runtime_data\":[{\"name\":\"param\",\"bitwidth\":48}],\"primitives\":[{\"op\":\"modify_field\",\"parameters\":[{\"type\":\"field\",\"value\":[\"header_test\",\"field48\"]},{\"type\":\"runtime_data\",\"value\":0}]}]},{\"name\":\"ActionLearn\",\"id\":2,\"runtime_data\":[],\"primitives\":[{\"op\":\"generate_digest\",\"parameters\":[{\"type\":\"hexstr\",\"value\":\"0x1\"},{\"type\":\"hexstr\",\"value\":\"0x1\"}]}]}],\"pipelines\":[{\"name\":\"ingress\",\"id\":0,\"init_table\":\"ExactOne\",\"tables\":[{\"name\":\"ExactOne\",\"id\":0,\"match_type\":\"exact\",\"type\":\"simple\",\"max_size\":512,\"with_counters\":true,\"key\":[{\"match_type\":\"exact\",\"target\":[\"header_test\",\"field32\"]}],\"actions\":[\"actionA\",\"actionB\"],\"next_tables\":{\"actionA\":\"LpmOne\",\"actionB\":\"LpmOne\"},\"default_action\":null},{\"name\":\"LpmOne\",\"id\":1,\"match_type\":\"lpm\",\"type\":\"simple\",\"max_size\":512,\"with_counters\":false,\"key\":[{\"match_type\":\"lpm\",\"target\":[\"header_test\",\"field32\"]}],\"actions\":[\"actionA\"],\"next_tables\":{\"actionA\":\"TernaryOne\"},\"default_action\":null},{\"name\":\"TernaryOne\",\"id\":2,\"match_type\":\"ternary\",\"type\":\"simple\",\"max_size\":512,\"with_counters\":false,\"key\":[{\"match_type\":\"ternary\",\"target\":[\"header_test\",\"field32\"]}],\"actions\":[\"actionA\"],\"next_tables\":{\"actionA\":\"ExactOneNA\"},\"default_action\":null},{\"name\":\"ExactOneNA\",\"id\":3,\"match_type\":\"exact\",\"type\":\"simple\",\"max_size\":512,\"with_counters\":false,\"key\":[{\"match_type\":\"exact\",\"target\":[\"header_test\",\"field20\"]}],\"actions\":[\"actionA\"],\"next_tables\":{\"actionA\":\"ExactTwo\"},\"default_action\":null},{\"name\":\"ExactTwo\",\"id\":4,\"match_type\":\"exact\",\"type\":\"simple\",\"max_size\":512,\"with_counters\":false,\"key\":[{\"match_type\":\"exact\",\"target\":[\"header_test\",\"field32\"]},{\"match_type\":\"exact\",\"target\":[\"header_test\",\"field16\"]}],\"actions\":[\"actionA\"],\"next_tables\":{\"actionA\":\"ExactAndValid\"},\"default_action\":null},{\"name\":\"ExactAndValid\",\"id\":5,\"match_type\":\"exact\",\"type\":\"simple\",\"max_size\":512,\"with_counters\":false,\"key\":[{\"match_type\":\"exact\",\"target\":[\"header_test\",\"field32\"]},{\"match_type\":\"valid\",\"target\":\"header_test_1\"}],\"actions\":[\"actionA\"],\"next_tables\":{\"actionA\":\"Learn\"},\"default_action\":null},{\"name\":\"Indirect\",\"id\":6,\"match_type\":\"exact\",\"type\":\"indirect\",\"act_prof_name\":\"ActProf\",\"max_size\":512,\"with_counters\":false,\"key\":[{\"match_type\":\"exact\",\"target\":[\"header_test\",\"field32\"]}],\"actions\":[\"actionA\",\"actionB\"],\"next_tables\":{\"actionA\":\"IndirectWS\",\"actionB\":\"IndirectWS\"},\"default_action\":null},{\"name\":\"IndirectWS\",\"id\":7,\"match_type\":\"exact\",\"type\":\"indirect_ws\",\"act_prof_name\":\"ActProfWS\",\"selector\":{\"algo\":\"crc16\",\"input\":[{\"type\":\"field\",\"value\":[\"header_test\",\"field24\"]},{\"type\":\"field\",\"value\":[\"header_test\",\"field48\"]},{\"type\":\"field\",\"value\":[\"header_test\",\"field64\"]}]},\"max_size\":512,\"with_counters\":false,\"key\":[{\"match_type\":\"exact\",\"target\":[\"header_test\",\"field32\"]}],\"actions\":[\"actionA\",\"actionB\"],\"next_tables\":{\"actionA\":null,\"actionB\":null},\"default_action\":null},{\"name\":\"Learn\",\"id\":8,\"match_type\":\"exact\",\"type\":\"simple\",\"max_size\":512,\"with_counters\":false,\"key\":[{\"match_type\":\"exact\",\"target\":[\"header_test\",\"field32\"]}],\"actions\":[\"ActionLearn\"],\"next_tables\":{\"ActionLearn\":\"Indirect\"},\"default_action\":null}],\"conditionals\":[]},{\"name\":\"egress\",\"id\":1,\"init_table\":null,\"tables\":[],\"conditionals\":[]}],\"calculations\":[{\"name\":\"SelectorHash\",\"id\":0,\"input\":[{\"type\":\"field\",\"value\":[\"header_test\",\"field24\"]},{\"type\":\"field\",\"value\":[\"header_test\",\"field48\"]},{\"type\":\"field\",\"value\":[\"header_test\",\"field64\"]}],\"algo\":\"crc16\"}],\"checksums\":[],\"learn_lists\":[{\"id\":1,\"name\":\"LearnDigest\",\"elements\":[{\"type\":\"field\",\"value\":[\"header_test\",\"field32\"]},{\"type\":\"field\",\"value\":[\"header_test\",\"field16\"]}]}]}";
 
 TEST(P4Objects, LoadFromJSON1) {
-  std::stringstream is(JSON_TEST_STRING_1);
+  std::istringstream is(JSON_TEST_STRING_1);
   P4Objects objects;
   ASSERT_EQ(0, objects.init_objects(is));
 
@@ -90,7 +90,7 @@ TEST(P4Objects, LoadFromJSON1) {
 }
 
 TEST(P4Objects, LoadFromJSON2) {
-  std::stringstream is(JSON_TEST_STRING_2);
+  std::istringstream is(JSON_TEST_STRING_2);
   P4Objects objects;
   ASSERT_EQ(0, objects.init_objects(is));
 
@@ -107,13 +107,13 @@ TEST(P4Objects, LoadFromJSON2) {
 }
 
 TEST(P4Objects, Empty) {
-  std::stringstream is("{}");
+  std::istringstream is("{}");
   P4Objects objects;
   ASSERT_EQ(0, objects.init_objects(is));
 }
 
 TEST(P4Objects, UnknownPrimitive) {
-  std::stringstream is("{\"actions\":[{\"name\":\"_drop\",\"id\":2,\"runtime_data\":[],\"primitives\":[{\"op\":\"bad_primitive\",\"parameters\":[]}]}]}");
+  std::istringstream is("{\"actions\":[{\"name\":\"_drop\",\"id\":2,\"runtime_data\":[],\"primitives\":[{\"op\":\"bad_primitive\",\"parameters\":[]}]}]}");
   std::stringstream os;
   P4Objects objects(os);
   std::string expected("Unknown primitive action: bad_primitive\n");
