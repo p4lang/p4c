@@ -120,3 +120,14 @@ TEST(P4Objects, UnknownPrimitive) {
   ASSERT_NE(0, objects.init_objects(is));
   EXPECT_EQ(expected, os.str());
 }
+
+TEST(P4Objects, RequiredField) {
+  std::istringstream is("{}");
+  std::set<P4Objects::header_field_pair> required_fields;
+  required_fields.insert(std::make_pair("standard_metadata", "egress_port"));
+  std::stringstream os;
+  P4Objects objects(os);
+  std::string expected("Field standard_metadata.egress_port is required by switch target but is not defined\n");
+  ASSERT_NE(0, objects.init_objects(is, required_fields));
+  EXPECT_EQ(expected, os.str());
+}
