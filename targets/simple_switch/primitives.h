@@ -124,11 +124,22 @@ REGISTER_PRIMITIVE(generate_digest);
 class add_header : public ActionPrimitive<Header &> {
   void operator ()(Header &hdr) {
     // TODO: reset header to 0?
-    hdr.mark_valid();
+    if(!hdr.is_valid()) {
+      hdr.reset();
+      hdr.mark_valid();
+    }
   }
 };
 
 REGISTER_PRIMITIVE(add_header);
+
+class add_header_fast : public ActionPrimitive<Header &> {
+  void operator ()(Header &hdr) {
+    hdr.mark_valid();
+  }
+};
+
+REGISTER_PRIMITIVE(add_header_fast);
 
 class remove_header : public ActionPrimitive<Header &> {
   void operator ()(Header &hdr) {
