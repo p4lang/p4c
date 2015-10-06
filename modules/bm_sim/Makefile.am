@@ -53,6 +53,7 @@ include/bm_sim/dev_mgr.h \
 include/bm_sim/entries.h \
 include/bm_sim/event_logger.h \
 include/bm_sim/fields.h \
+include/bm_sim/field_lists.h \
 include/bm_sim/handle_mgr.h \
 include/bm_sim/headers.h \
 include/bm_sim/lpm_trie.h \

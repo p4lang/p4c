@@ -743,6 +743,30 @@ int P4Objects::init_objects(std::istream &is,
     learn_engine->list_init(list_id);
   }
 
+  const Json::Value &cfg_field_lists = cfg_root["field_lists"];
+  // used only for cloning
+  // TODO: some cleanup for learn lists / clone lists / calculation lists
+  for (const auto &cfg_field_list : cfg_field_lists) {
+
+    p4object_id_t list_id = cfg_field_list["id"].asInt();
+    std::unique_ptr<FieldList> field_list(new FieldList());
+    const Json::Value &cfg_elements = cfg_field_list["elements"];
+    for (const auto &cfg_element : cfg_elements) {
+      
+      const string type = cfg_element["type"].asString();
+      assert(type == "field");  // TODO: other types
+
+      const Json::Value &cfg_value_field = cfg_element["value"];
+      const string header_name = cfg_value_field[0].asString();
+      header_id_t header_id = get_header_id(header_name);
+      const string field_name = cfg_value_field[1].asString();
+      int field_offset = get_field_offset(header_id, field_name);
+      field_list->push_back_field(header_id, field_offset);
+    }
+
+    add_field_list(list_id, std::move(field_list));
+  }
+
   if(!check_required_fields(required_fields)) {
     return 1;
   }
