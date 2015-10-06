@@ -34,14 +34,19 @@ public:
   enum ReadBehavior { ReadBlock, ReadReturn };
 
 public:
+ Queue()
+   : capacity(1024), wb(WriteBlock), rb(ReadBlock) { }
+
   Queue(size_t capacity,
-	WriteBehavior wb = WriteReturn, ReadBehavior rb = ReadBlock)
+	WriteBehavior wb = WriteBlock, ReadBehavior rb = ReadBlock)
     : capacity(capacity), wb(wb), rb(rb) {}
 
   void push_front(const T &item) {
     std::unique_lock<std::mutex> lock(q_mutex);
-    while(!is_not_full())
+    while(!is_not_full()) {
+      if(wb == WriteReturn) return;
       q_not_full.wait(lock);
+    }
     queue.push_front(item);
     lock.unlock();
     q_not_empty.notify_one();
@@ -49,8 +54,10 @@ public:
 
   void push_front(T &&item) {
     std::unique_lock<std::mutex> lock(q_mutex);
-    while(!is_not_full())
+    while(!is_not_full()) {
+      if(wb == WriteReturn) return;
       q_not_full.wait(lock);
+    }
     queue.push_front(std::move(item));
     lock.unlock();
     q_not_empty.notify_one();
@@ -72,6 +79,13 @@ public:
     q_mutex.unlock();
   }
 
+  void set_capacity(const size_t c) {
+    // change capacity but does not discard elements
+    q_mutex.lock();
+    capacity = c;
+    q_mutex.unlock();
+  }
+
   Queue(const Queue &) = delete;
   Queue &operator =(const Queue &) = delete;
 
@@ -79,7 +93,7 @@ private:
   bool is_not_empty() const { return queue.size() > 0; }
   bool is_not_full() const { return queue.size() < capacity; }
 
-  const size_t capacity;
+  size_t capacity;
   std::deque<T> queue;
   WriteBehavior wb;
   ReadBehavior rb;

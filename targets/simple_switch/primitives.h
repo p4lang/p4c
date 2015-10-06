@@ -162,15 +162,27 @@ class copy_header : public ActionPrimitive<Header &, const Header &> {
 
 REGISTER_PRIMITIVE(copy_header);
 
-/* TODO: according to the P4 spec, this primitive can take a additional optional
-   argument (field list), not supported for now */
-class clone_ingress_pkt_to_egress : public ActionPrimitive<const Data &> {
-  void operator ()(const Data &clone_spec) {
-    get_field("standard_metadata.clone_spec").set(clone_spec);
+/* standard_metadata.clone_spec will contain the mirror id (16 LSB) and the
+   field list id to copy (16 MSB) */
+class clone_ingress_pkt_to_egress : public ActionPrimitive<const Data &, const Data &> {
+  void operator ()(const Data &clone_spec, const Data &field_list_id) {
+    Field &f_clone_spec = get_field("standard_metadata.clone_spec");
+    f_clone_spec.shift_left(field_list_id, 16);
+    f_clone_spec.add(f_clone_spec, clone_spec);
   }
 };
 
 REGISTER_PRIMITIVE(clone_ingress_pkt_to_egress);
+
+class clone_egress_pkt_to_egress : public ActionPrimitive<const Data &, const Data &> {
+  void operator ()(const Data &clone_spec, const Data &field_list_id) {
+    Field &f_clone_spec = get_field("standard_metadata.clone_spec");
+    f_clone_spec.shift_left(field_list_id, 16);
+    f_clone_spec.add(f_clone_spec, clone_spec);
+  }
+};
+
+REGISTER_PRIMITIVE(clone_egress_pkt_to_egress);
 
 class modify_field_with_hash_based_offset
   : public ActionPrimitive<Field &, const Data &,
