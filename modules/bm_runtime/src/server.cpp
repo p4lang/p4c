@@ -19,6 +19,7 @@
  */
 
 #include <thread>
+#include <mutex>
 
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
@@ -45,8 +46,16 @@ using ::bm_runtime::simple_pre::SimplePreProcessor;
 using ::bm_runtime::simple_pre_lag::SimplePreLAGHandler;
 using ::bm_runtime::simple_pre_lag::SimplePreLAGProcessor;
 
-namespace {
+namespace bm_runtime {
+
 Switch *switch_;
+TMultiplexedProcessor *processor_;
+
+namespace {
+
+std::mutex m_ready;
+std::condition_variable cv_ready;
+bool ready = false;
 
 template<typename T>
 bool switch_has_component() {
@@ -55,6 +64,7 @@ bool switch_has_component() {
 
 int serve(int port) {
   shared_ptr<TMultiplexedProcessor> processor(new TMultiplexedProcessor());
+  processor_ = processor.get();
 
   shared_ptr<StandardHandler> standard_handler(new StandardHandler(switch_));
   processor->registerProcessor(
@@ -82,18 +92,25 @@ int serve(int port) {
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
   shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
 
+  {
+    std::unique_lock<std::mutex> lock(m_ready);
+    ready = true;
+    cv_ready.notify_one();
+  }
+
   TThreadedServer server(processor, serverTransport, transportFactory, protocolFactory);
   server.serve();
   return 0;  
 }
-}
 
-namespace bm_runtime {
+}
 
 int start_server(Switch *sw, int port) {
   switch_ = sw;
   std::thread server_thread(serve, port);
   printf("Thrift server was started\n");
+  std::unique_lock<std::mutex> lock(m_ready);
+  while(!ready) cv_ready.wait(lock);
   server_thread.detach();
   return 0;
 }
