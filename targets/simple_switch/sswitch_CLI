@@ -1,12 +1,22 @@
 #!/bin/bash
 
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 port=""
-if [ $# -gt 0 ]; then
-    port="--thrift-port $1"
+if [ $# -lt 1 ]; then
+    echo "Please specify JSON input file"
+    exit 1
+fi
+json=$1
+echo "Using JSON input $json"
+if [ $# -gt 1 ]; then
+    echo "Using Thrift port $2"
+    port="--thrift-port $2"
 else
     echo "No Thrift port specified, using CLI default"
 fi
 
-PYTHONPATH=$PYTHONPATH:../../tools/ python sswitch_CLI.py \
-    --json simple_router.json \
-    $port
+CLI=$THIS_DIR/sswitch_CLI.py
+TOOLS_DIR=$THIS_DIR/../../tools/
+
+PYTHONPATH=$PYTHONPATH:$TOOLS_DIR python $CLI --json $json $port
