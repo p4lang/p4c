@@ -1,1 +1,12 @@
-PYTHONPATH=$PYTHONPATH:../../tools/ python sswitch_CLI.py --json simple_router.json
+#!/bin/bash
+
+port=""
+if [ $# -gt 0 ]; then
+    port="--thrift-port $1"
+else
+    echo "No Thrift port specified, using CLI default"
+fi
+
+PYTHONPATH=$PYTHONPATH:../../tools/ python sswitch_CLI.py \
+    --json simple_router.json \
+    $port
