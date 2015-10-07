@@ -86,7 +86,7 @@ as follows:
 The json file can now be 'fed' to bmv2. Assuming you are using the
 *simple_switch* target:
 
-    sudo ./simple_switch -i <iface0> -i <iface1> <path to JSON file>
+    sudo ./simple_switch -i 0@<iface0> -i 1@<iface1> <path to JSON file>
 
 In this example \<iface0\> and \<iface1\> are the interfaces which are bound to
 the switch (as ports 0 and 1).
@@ -128,7 +128,7 @@ used.
 To enable event logging when starting your switch, use the *--nanolog* command
 line option. For example, to use the ipc address *ipc:///tmp/bm-log.ipc*:
 
-    sudo ./simple_switch -i <iface0> -i <iface1> --nanolog ipc:///tmp/bm-log.ipc <path to JSON file>
+    sudo ./simple_switch -i 0@<iface0> -i 1@<iface1> --nanolog ipc:///tmp/bm-log.ipc <path to JSON file>
 
 Use [tools/nanomsg_client.py](tools/nanomsg_client.py) as follows when the
 switch is running:
