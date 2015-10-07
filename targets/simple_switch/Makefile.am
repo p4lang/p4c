@@ -61,6 +61,3 @@ $(BUILT_SOURCES): thrift_files.ts
 
 CLEANFILES = $(BUILT_SOURCES) \
 thrift_files.ts
-
-clean-local:
-	rm -rf gen-cpp gen-py
