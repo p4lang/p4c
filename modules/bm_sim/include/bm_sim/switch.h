@@ -253,6 +253,10 @@ protected:
     return p4objects->get_deparser(name);
   }
 
+  FieldList *get_field_list(const p4object_id_t field_list_id) {
+    return p4objects->get_field_list(field_list_id);
+  }
+
 private:
   static void packet_handler(int port_num, const char *buffer, int len,
                              void *cookie) {

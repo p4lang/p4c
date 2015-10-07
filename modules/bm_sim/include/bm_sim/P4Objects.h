@@ -45,6 +45,7 @@
 #include "counters.h"
 #include "stateful.h"
 #include "ageing.h"
+#include "field_lists.h"
 
 class P4Objects {
 public:
@@ -117,6 +118,10 @@ public:
 
   NamedCalculation *get_named_calculation(const std::string &name) {
     return calculations[name].get();
+  }
+
+  FieldList *get_field_list(const p4object_id_t field_list_id) {
+    return field_lists[field_list_id].get();
   }
 
 private:
@@ -197,6 +202,11 @@ private:
     calculations[name] = std::move(calculation);
   }
 
+  void add_field_list(const p4object_id_t field_list_id,
+		      std::unique_ptr<FieldList> field_list) {
+    field_lists[field_list_id] = std::move(field_list);
+  }
+
   void build_conditional(const Json::Value &json_expression,
 			 Conditional *conditional);
 
@@ -251,6 +261,9 @@ private:
 
   // calculations
   std::unordered_map<std::string, std::unique_ptr<NamedCalculation> > calculations{};
+
+  // field lists
+  std::unordered_map<p4object_id_t, std::unique_ptr<FieldList> > field_lists;
 
 public:
   // public to be accessed by test class

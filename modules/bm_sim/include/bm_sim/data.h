@@ -186,6 +186,18 @@ public:
     export_bytes();
   }
 
+  void shift_left(const Data &src1, unsigned int src2) {
+    assert(src1.arith);
+    value = src1.value << src2;
+    export_bytes();
+  }
+
+  void shift_right(const Data &src1, unsigned int src2) {
+    assert(src1.arith);
+    value = src1.value >> src2;
+    export_bytes();
+  }
+
   void bit_and(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value & src2.value;

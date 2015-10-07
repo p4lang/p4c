@@ -1,0 +1,1 @@
+PYTHONPATH=$PYTHONPATH:../../tools/ python sswitch_CLI.py --json simple_router.json

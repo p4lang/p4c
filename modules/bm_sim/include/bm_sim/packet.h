@@ -105,6 +105,7 @@ public:
   const PHV *get_phv() const { return phv.get(); }
 
   Packet clone(packet_id_t new_copy_id) const;
+  Packet clone_and_reset_metadata(packet_id_t new_copy_id) const;
 
   Packet(const Packet &other) = delete;
   Packet &operator=(const Packet &other) = delete;

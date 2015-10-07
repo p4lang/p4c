@@ -69,31 +69,34 @@ def bytes_to_string(byte_array):
 def table_error_name(x):
     return TableOperationErrorCode._VALUES_TO_NAMES[x]
 
-class ActionToPreType(argparse.Action):
-    def __init__(self, option_strings, dest, nargs=None, **kwargs):
-        if nargs is not None:
-            raise ValueError("nargs not allowed")
-        super(ActionToPreType, self).__init__(option_strings, dest, **kwargs)
+def get_parser():
 
-    def __call__(self, parser, namespace, values, option_string=None):
-        assert(type(values) is str)
-        setattr(namespace, self.dest, PreType.from_str(values))
+    class ActionToPreType(argparse.Action):
+        def __init__(self, option_strings, dest, nargs=None, **kwargs):
+            if nargs is not None:
+                raise ValueError("nargs not allowed")
+            super(ActionToPreType, self).__init__(option_strings, dest, **kwargs)
 
-parser = argparse.ArgumentParser(description='BM runtime CLI')
-# One port == one device !!!! This is not a multidevice CLI
-parser.add_argument('--thrift-port', help='Thrift server port for table updates',
-                    type=int, action="store", default=9090)
+        def __call__(self, parser, namespace, values, option_string=None):
+            assert(type(values) is str)
+            setattr(namespace, self.dest, PreType.from_str(values))
 
-parser.add_argument('--json', help='JSON description of P4 program',
-                    type=str, action="store", required=True)
+    parser = argparse.ArgumentParser(description='BM runtime CLI')
+    # One port == one device !!!! This is not a multidevice CLI
+    parser.add_argument('--thrift-port', help='Thrift server port for table updates',
+                        type=int, action="store", default=9090)
 
-parser.add_argument('--pre', help='Packet Replication Engine used by target',
-                    type=str, choices=['None', 'SimplePre', 'SimplePreLAG'],
-                    default=PreType.SimplePre, action=ActionToPreType)
+    parser.add_argument('--thrift-ip', help='Thrift IP address for table updates',
+                        type=str, action="store", default='localhost')
 
-args = parser.parse_args()
+    parser.add_argument('--json', help='JSON description of P4 program',
+                        type=str, action="store", required=True)
 
-THRIFT_PORT = args.thrift_port
+    parser.add_argument('--pre', help='Packet Replication Engine used by target',
+                        type=str, choices=['None', 'SimplePre', 'SimplePreLAG'],
+                        default=PreType.SimplePre, action=ActionToPreType)
+    
+    return parser
 
 TABLES = {}
 ACTIONS = {}
@@ -308,12 +311,53 @@ BmMatchParamExact.to_str = BmMatchParamExact_to_str
 BmMatchParamLPM.to_str = BmMatchParamLPM_to_str
 BmMatchParamTernary.to_str = BmMatchParamTernary_to_str
 BmMatchParamValid.to_str = BmMatchParamValid_to_str
-    
+
+# services is [(service_name, client_class), ...]
+def thrift_connect(thrift_ip, thrift_port, services):
+    # Make socket
+    transport = TSocket.TSocket(thrift_ip, thrift_port)
+    # Buffering is critical. Raw sockets are very slow
+    transport = TTransport.TBufferedTransport(transport)
+    # Wrap in a protocol
+    bprotocol = TBinaryProtocol.TBinaryProtocol(transport)
+
+    clients = []
+
+    for service_name, service_cls in services:
+        if service_name is None:
+            clients.append(None)
+        protocol = TMultiplexedProtocol.TMultiplexedProtocol(bprotocol, service_name)
+        client = service_cls(protocol)
+        clients.append(client)
+
+    # Connect!
+    try:
+        transport.open()
+    except TTransport.TTransportException:
+        print "Could not connect to thrift client on port", thrift_port
+        print "Make sure the switch is running and that you have the right port"
+        sys.exit(1)
+
+    return clients
+
 class RuntimeAPI(cmd.Cmd):
     prompt = 'RuntimeCmd: '
     intro = "Control utility for runtime P4 table manipulation"
+    
+    @staticmethod
+    def get_thrift_services(pre_type):
+        services = [("standard", Standard.Client)]
 
-    def __init__(self, standard_client, mc_client, pre_type):
+        if pre_type == PreType.SimplePre:
+            services += [("simple_pre", SimplePre.Client)]
+        elif pre_type == PreType.SimplePreLAG:
+            services += [("simple_pre_lag", SimplePreLAG.Client)]
+        else:
+            services += [(None, None)]
+
+        return services
+
+    def __init__(self, pre_type, standard_client, mc_client=None):
         cmd.Cmd.__init__(self)
         self.client = standard_client
         self.mc_client = mc_client
@@ -330,10 +374,6 @@ class RuntimeAPI(cmd.Cmd):
         "Run a shell command"
         output = os.popen(line).read()
         print output
-
-    def do_show_thrift_port(self, line):
-        "Show thrift port used to send commands to Simple Router"
-        print THRIFT_PORT
 
     def do_show_tables(self, line):
         "List tables defined in the P4 program"
@@ -647,47 +687,17 @@ class RuntimeAPI(cmd.Cmd):
     def complete_dump_table(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
-
-def thrift_connect(pre_type):
-    # Make socket
-    transport = TSocket.TSocket('localhost', THRIFT_PORT)
-    # Buffering is critical. Raw sockets are very slow
-    transport = TTransport.TBufferedTransport(transport)
-    # Wrap in a protocol
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)
-
-    standard_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, "standard")
-    standard_client = Standard.Client(standard_protocol)
-
-    if pre_type == PreType.SimplePre:
-        mc_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, "simple_pre")
-        mc_client = SimplePre.Client(mc_protocol)
-    elif pre_type == PreType.SimplePreLAG:
-        mc_protocol = TMultiplexedProtocol.TMultiplexedProtocol(protocol, "simple_pre_lag")
-        mc_client = SimplePreLAG.Client(mc_protocol)
-    else:
-        mc_client = None
-
-    # Connect!
-    transport.open()
-
-    return standard_client, mc_client
-
-
 def main():
+    args = get_parser().parse_args()
+
     load_json(args.json)
-    pre_type = args.pre
 
-    try:
-        standard_client, mc_client = thrift_connect(pre_type)
-    except TTransport.TTransportException:
-        print "Could not connect to thrift client on port", THRIFT_PORT
-        print "Make sure the switch is running and that you have the right port"
-        sys.exit(1)
+    standard_client, mc_client = thrift_connect(
+        args.thrift_ip, args.thrift_port,
+        RuntimeAPI.get_thrift_services(args.pre)
+    )
 
-    RuntimeAPI(standard_client, mc_client, pre_type).cmdloop()
+    RuntimeAPI(args.pre, standard_client, mc_client).cmdloop()
 
 if __name__ == '__main__':
     main()
-
-

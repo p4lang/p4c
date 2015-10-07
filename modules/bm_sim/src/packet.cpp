@@ -79,6 +79,14 @@ Packet::clone(packet_id_t new_copy_id) const {
   return pkt;
 }
 
+Packet
+Packet::clone_and_reset_metadata(packet_id_t new_copy_id) const {
+  Packet pkt(ingress_port, packet_id, new_copy_id, ingress_length,
+	     buffer.clone(buffer.get_data_size()));
+  pkt.phv->reset_metadata();
+  return pkt;
+}
+
 /* Cannot get away with defaults here, we need to swap the phvs, otherwise we
    could "leak" the old phv (i.e. not put it back into the pool) */
 
