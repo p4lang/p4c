@@ -15,7 +15,7 @@ using namespace ::apache::thrift::server;
 
 using boost::shared_ptr;
 
-using namespace  ::bm_runtime::simple_switch;
+using namespace  ::sswitch_runtime;
 
 class SimpleSwitchHandler : virtual public SimpleSwitchIf {
  public:

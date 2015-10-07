@@ -18,8 +18,8 @@
  *
  */
 
-namespace cpp bm_runtime.simple_switch
-namespace py bm_runtime.simple_switch
+namespace cpp sswitch_runtime
+namespace py sswitch_runtime
 
 service SimpleSwitch {
 
