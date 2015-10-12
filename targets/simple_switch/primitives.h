@@ -190,7 +190,7 @@ class modify_field_with_hash_based_offset
   void operator ()(Field &dst, const Data &base,
 		   const NamedCalculation &hash, const Data &size) {
     uint64_t v =
-      (hash.output(get_packet()) + base.get<uint64_t>()) % size.get<uint64_t>();
+      (hash.output(get_packet()) % size.get<uint64_t>()) + base.get<uint64_t>();
     dst.set(v);
   }
 };
