@@ -36,7 +36,8 @@ src/meters.cpp \
 src/counters.cpp \
 src/dev_mgr.cpp \
 src/options_parse.cpp \
-src/ageing.cpp
+src/ageing.cpp \
+src/expressions.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -52,6 +53,7 @@ include/bm_sim/deparser.h \
 include/bm_sim/dev_mgr.h \
 include/bm_sim/entries.h \
 include/bm_sim/event_logger.h \
+include/bm_sim/expressions.h \
 include/bm_sim/fields.h \
 include/bm_sim/field_lists.h \
 include/bm_sim/handle_mgr.h \
