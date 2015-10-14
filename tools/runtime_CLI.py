@@ -326,6 +326,7 @@ def thrift_connect(thrift_ip, thrift_port, services):
     for service_name, service_cls in services:
         if service_name is None:
             clients.append(None)
+            continue
         protocol = TMultiplexedProtocol.TMultiplexedProtocol(bprotocol, service_name)
         client = service_cls(protocol)
         clients.append(client)
