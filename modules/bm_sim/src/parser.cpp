@@ -94,6 +94,12 @@ bool ParseSwitchCase::match(const ByteContainer &input,
   return false;
 }
 
+void ParseSwitchCase::mask_key() {
+  for(unsigned int byte_index = 0; byte_index < key.size(); byte_index++)
+    key[byte_index] = key[byte_index] & mask[byte_index];
+}
+
+
 const ParseState *ParseState::operator()(Packet *pkt, const char *data,
 					 size_t *bytes_parsed) const{
   // execute parser ops

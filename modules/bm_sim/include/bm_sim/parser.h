@@ -22,7 +22,6 @@
 #define _BM_PARSER_H_
 
 #include <utility>
-#include <iostream>
 #include <string>
 
 #include <cassert>
@@ -251,7 +250,16 @@ public:
 		  const ByteContainer &mask,
 		  const ParseState *next_state)
     : key(key), mask(mask), with_mask(true), next_state(next_state) {
-	assert(key.size() == mask.size());
+    assert(key.size() == mask.size());
+    mask_key();
+  }
+
+  ParseSwitchCase(int nbytes_key, const char *key, const char *mask,
+		  const ParseState *next_state)
+    : key(ByteContainer(key, nbytes_key)),
+      mask(ByteContainer(mask, nbytes_key)),
+      with_mask(true), next_state(next_state) {
+    mask_key();
   }
 
   bool match(const ByteContainer &input, const ParseState **state) const;
@@ -261,6 +269,9 @@ public:
 
   ParseSwitchCase(ParseSwitchCase &&other) /*noexcept*/ = default;
   ParseSwitchCase &operator=(ParseSwitchCase &&other) /*noexcept*/ = default;
+
+private:
+  void mask_key();
 
 private:
   ByteContainer key;
@@ -318,6 +329,18 @@ public:
   void add_switch_case(int nbytes_key, const char *key,
 		       const ParseState *next_state) {
     parser_switch.push_back( ParseSwitchCase(nbytes_key, key, next_state) );
+  }
+
+  void add_switch_case_with_mask(const ByteContainer &key,
+				 const ByteContainer &mask,
+				 const ParseState *next_state) {
+    parser_switch.push_back( ParseSwitchCase(key, mask, next_state) );
+  }
+
+  void add_switch_case_with_mask(int nbytes_key, const char *key,
+				 const char *mask,
+				 const ParseState *next_state) {
+    parser_switch.push_back( ParseSwitchCase(nbytes_key, key, mask, next_state) );
   }
 
   void set_default_switch_case(const ParseState *default_next) {

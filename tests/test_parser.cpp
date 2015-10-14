@@ -620,3 +620,73 @@ TEST_F(MPLSParserTest, ParseEthernetMPLS3) {
   ASSERT_EQ(2u, MPLS_hdr_2.get_field(0)); // label
   ASSERT_EQ(3u, MPLS_hdr_3.get_field(0)); // label
 }
+
+class SwitchCaseTest : public ::testing::Test {
+protected:
+  PHVFactory phv_factory;
+
+  SwitchCaseTest() { }
+
+  Packet get_pkt() {
+    // dummy packet, won't be parsed
+    return Packet(0, 0, 0, 64, PacketBuffer(128));
+  }
+
+  unsigned int bc_as_uint(const ByteContainer &bc) {
+    unsigned int res = 0;
+    for(auto c : bc)
+      res = (res << 8) + static_cast<unsigned char>(c);
+    return res;
+  }
+
+  virtual void SetUp() {
+    Packet::set_phv_factory(phv_factory);
+  }
+
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
+};
+
+TEST_F(SwitchCaseTest, Mask) {
+  ParseState pstate("pstate", 0);
+  std::unique_ptr<ParseState> next_state_1(new ParseState("s1", 1));
+  std::unique_ptr<ParseState> next_state_2(new ParseState("s2", 2));
+  std::unique_ptr<ParseState> next_state_3(new ParseState("s3", 3));
+  pstate.set_default_switch_case(nullptr);
+  const ByteContainer key_1("0x00ab");
+  const ByteContainer key_2("0x1989");
+  const ByteContainer key_3("0xabcd");
+  const ByteContainer mask_1("0x00ff");
+  const ByteContainer mask_2("0x39d9");
+  const ByteContainer mask_3("0xebcf");
+  pstate.add_switch_case_with_mask(key_1, mask_1, next_state_1.get());
+  pstate.add_switch_case_with_mask(key_2, mask_2, next_state_2.get());
+  pstate.add_switch_case_with_mask(key_3, mask_3, next_state_3.get());
+
+  ParseSwitchKeyBuilder builder;
+  builder.push_back_lookahead(0, 16);
+  pstate.set_key_builder(builder);
+
+  std::vector<ParseState *> expected_next_states(65536);
+  for(int i = 0; i < 65536; i++) {
+    if((i & bc_as_uint(mask_1)) == (bc_as_uint(key_1) & bc_as_uint(mask_1)))
+      expected_next_states[i] = next_state_1.get();
+    else if((i & bc_as_uint(mask_2)) == (bc_as_uint(key_2) & bc_as_uint(mask_2)))
+      expected_next_states[i] = next_state_2.get();
+    else if((i & bc_as_uint(mask_3)) == (bc_as_uint(key_3) & bc_as_uint(mask_3)))
+      expected_next_states[i] = next_state_3.get();
+    else
+      expected_next_states[i] = nullptr;
+  }
+
+  Packet packet = get_pkt();
+  for(int i = 0; i < 65536; i++) {
+    size_t bytes_parsed = 0;
+    const char data[2] = {static_cast<char>(i >> 8),
+			  static_cast<char>(i & 0xff)};
+    const ParseState *next_state = pstate(&packet, data, &bytes_parsed);
+
+    ASSERT_EQ(expected_next_states[i], next_state);
+  }
+}
