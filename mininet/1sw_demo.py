@@ -49,7 +49,7 @@ class SingleSwitchTopo(Topo):
                                 sw_path = sw_path,
                                 json_path = json_path,
                                 thrift_port = thrift_port,
-                                pcap_dump = False)
+                                pcap_dump = True)
         
         for h in xrange(n):
             host = self.addHost('h%d' % (h + 1),
