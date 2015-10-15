@@ -38,14 +38,14 @@ before_install:
   - bash build/travis/install-nnpy.sh
 
 install:
-  - ./autogen.sh && ./configure && make all
+  - ./autogen.sh && ./configure --enable-coverage && make all
 
 # command to run tests, e.g. python setup.py test
 script:
   - python build/travis/check-nnpy.py
   - make check
 
-# after_success:
-  # Report coverage results to codecov.io
-  # - pip install codecov
-  # - codecov
+# code coverage
+after_success:
+  - cd modules/bm_sim/src; gcov -r -o .libs/ *.cpp; cd -
+  - bash <(curl -s https://codecov.io/bash)

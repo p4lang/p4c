@@ -4,8 +4,8 @@ AM_CPPFLAGS += $(DEBUG_CPPFLAGS)
 # pedantic (like constructior initializers for non POD data), but it was
 # useful. However in some versions of g++, it warns for non-virtual destructors
 # in base classes even when the destructor is protected, so I removed it :/
-AM_CXXFLAGS = $(PICKY_CXXFLAGS) # -Weffc++
-AM_CFLAGS = $(PICKY_CFLAGS)
+AM_CXXFLAGS = $(PICKY_CXXFLAGS) $(COVERAGE_FLAGS) # -Weffc++
+AM_CFLAGS = $(PICKY_CFLAGS) $(COVERAGE_FLAGS)
 
 noinst_LTLIBRARIES = libbmsim.la
 
@@ -78,3 +78,6 @@ include/bm_sim/simple_pre_lag.h \
 include/bm_sim/transport.h
 
 libbmsim_la_SOURCES = $(common_source) $(common_include)
+
+clean-local:
+	find $(srcdir) -type f -name '*.gcda' -o -name '*.gcov' -o -name "*.gcno" -delete
