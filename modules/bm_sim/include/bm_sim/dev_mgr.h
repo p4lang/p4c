@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/*
+/* -*-c++-*-
  * Antonin Bas (antonin@barefootnetworks.com)
  *
  */
@@ -23,32 +23,58 @@
 
 #include <string>
 #include <functional>
+#include "bm_sim/pcap_file.h"
+#include "bm_sim/packet_handler.h"
 
 extern "C" {
 #include "BMI/bmi_port.h"
 }
 
-class DevMgr {
+class DevMgrInterface
+    : public IPacketHandler
+{
 public:
   typedef unsigned int port_t;
-  enum class ReturnCode {
-    SUCCESS,
-    ERROR
-  };
-  typedef std::function<void(int port_num, const char *buffer, int len, void *cookie)> PacketHandler;
 
+  virtual ReturnCode port_add(const std::string &iface_name, port_t port_num,
+		      const char *in_pcap, const char*out_pcap) = 0;
+
+  virtual ReturnCode port_remove(port_t port_num) = 0;
+
+  virtual void transmit_fn(int port_num, const char *buffer, int len) = 0;
+
+  // start the thread that performs packet processing
+  virtual void start() = 0;
+
+  virtual ReturnCode set_packet_handler(PacketHandler handler, void* cookie) = 0;
+
+  virtual ~DevMgrInterface() {}
+};
+
+
+class DevMgr :
+    public DevMgrInterface
+{
 public:
   DevMgr();
+
+  // If useFiles is true I/O is performed from PCAP files.
+  // The interface names are instead interpreted as file names.
+  // Should be called before port_add and port_remove.
+  // wait_time_in_seconds indicate how long the starting thread should
+  // wait before starting to process packets.
+  void setUseFiles(bool useFiles, unsigned wait_time_in_seconds);
   
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
-		      const char *pcap);
+		      const char *in_pcap, const char*out_pcap);
 
   ReturnCode port_remove(port_t port_num);
 
-  void transmit_fn(int port_num, const char *buffer, int len) {
-    bmi_port_send(port_mgr, port_num, buffer, len);
-  }
+  void transmit_fn(int port_num, const char *buffer, int len);
 
+  // start the thread that performs packet processing
+  void start();
+  
   DevMgr(const DevMgr &other) = delete;
   DevMgr &operator=(const DevMgr &other) = delete;
 
@@ -56,12 +82,13 @@ public:
   DevMgr &operator=(DevMgr &&other) = delete;
 
 protected:
-  ~DevMgr();
+  ~DevMgr() {}
 
-  ReturnCode set_packet_handler(PacketHandler handler, void *cookie);
-  
+  ReturnCode set_packet_handler(PacketHandler handler, void* cookie);
+
 private:
-  bmi_port_mgr_t *port_mgr{nullptr};
+  // Actual implementation (private)
+  std::unique_ptr<DevMgrInterface> impl;
 };
 
 #endif

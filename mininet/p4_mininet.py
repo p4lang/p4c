@@ -87,6 +87,7 @@ class P4Switch(Switch):
                 args.extend( ['-i', str(port) + "@" + intf.name] )
         if self.pcap_dump:
             args.append("--pcap")
+            # args.append("--useFiles")
         if self.thrift_port:
             args.extend( ['--thrift-port', str(self.thrift_port)] )
         if self.nanomsg:

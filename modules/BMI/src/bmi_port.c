@@ -108,17 +108,23 @@ static void *run_select(void *data) {
   return NULL;
 }
 
+int bmi_start_mgr(bmi_port_mgr_t* port_mgr)
+{
+  return pthread_create(&port_mgr->select_thread, NULL, run_select, port_mgr);
+}
+
 int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
   bmi_port_mgr_t *port_mgr_ = malloc(sizeof(bmi_port_mgr_t));
+  int exitCode;
   if(!port_mgr) return -1;
 
   memset(port_mgr_, 0, sizeof(bmi_port_mgr_t));
 
   FD_ZERO(&port_mgr_->fds);
 
-  pthread_mutex_init(&port_mgr_->lock, NULL);
-
-  pthread_create(&port_mgr_->select_thread, NULL, run_select, port_mgr_);
+  exitCode = pthread_mutex_init(&port_mgr_->lock, NULL);
+  if (exitCode != 0)
+      return exitCode;
 
   *port_mgr = port_mgr_;
   return 0;
@@ -145,7 +151,9 @@ int bmi_port_send(bmi_port_mgr_t *port_mgr,
 
 int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
 			   const char *ifname, int port_num,
-			   const char *pcap_dump) {
+			   const char *pcap_input_dump,
+			   const char* pcap_output_dump)
+{
   if(!port_num_valid(port_num)) return -1;
 
   bmi_port_t *port = get_port(port_mgr, port_num);
@@ -156,7 +164,8 @@ int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
   bmi_interface_t *bmi;
   if(bmi_interface_create(&bmi, ifname) != 0) return -1;
 
-  if(pcap_dump) bmi_interface_add_dumper(bmi, pcap_dump);
+  if(pcap_input_dump) bmi_interface_add_dumper(bmi, pcap_input_dump, 1);
+  if(pcap_output_dump) bmi_interface_add_dumper(bmi, pcap_output_dump, 0);
 
   pthread_mutex_lock(&port_mgr->lock);
 

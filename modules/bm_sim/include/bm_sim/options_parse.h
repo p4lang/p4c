@@ -58,6 +58,8 @@ private:
   bool pcap{false};
   int thrift_port{};
   int device_id{};
+  bool useFiles{false}; // if true read/write packets from files instead of interfaces
+  int waitTime{0};      // Time to wait (in seconds) before starting packet processing
   std::string event_logger_addr{};
 };
 

@@ -35,13 +35,15 @@ parser.add_argument('--num-hosts', help='Number of hosts to connect to switch',
 parser.add_argument('--mode', choices=['l2', 'l3'], type=str, default='l3')
 parser.add_argument('--json', help='Path to JSON config file',
                     type=str, action="store", required=True)
+parser.add_argument('--pcap-dump', help='Dump packets on interfaces to pcap files',
+                    type=str, action="store", required=False, default=False)
 
 args = parser.parse_args()
 
 
 class SingleSwitchTopo(Topo):
     "Single switch connected to n (< 256) hosts."
-    def __init__(self, sw_path, json_path, thrift_port, n, **opts):
+    def __init__(self, sw_path, json_path, thrift_port, pcap_dump, n, **opts):
         # Initialize topology and default options
         Topo.__init__(self, **opts)
 
@@ -49,7 +51,7 @@ class SingleSwitchTopo(Topo):
                                 sw_path = sw_path,
                                 json_path = json_path,
                                 thrift_port = thrift_port,
-                                pcap_dump = True)
+                                pcap_dump = pcap_dump)
         
         for h in xrange(n):
             host = self.addHost('h%d' % (h + 1),
@@ -64,6 +66,7 @@ def main():
     topo = SingleSwitchTopo(args.behavioral_exe,
                             args.json,
                             args.thrift_port,
+                            args.pcap_dump,
                             num_hosts)
     net = Mininet(topo = topo,
                   host = P4Host,
