@@ -144,6 +144,7 @@ void SimpleSwitch::ingress_thread() {
 	const Packet::buffer_state_t packet_out_state = packet->save_buffer_state();
 	packet->restore_buffer_state(packet_in_state);
 	f_instance_type.set(PKT_INSTANCE_TYPE_INGRESS_CLONE);
+	f_clone_spec.set(0);
 	p4object_id_t field_list_id = clone_spec >> 16;
 	copy_id = copy_id_dis(gen);
 	std::unique_ptr<Packet> packet_copy(new Packet(packet->clone_no_phv(copy_id)));
@@ -238,6 +239,7 @@ void SimpleSwitch::egress_thread(int port) {
       egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
       if(egress_port >= 0) {
 	f_instance_type.set(PKT_INSTANCE_TYPE_EGRESS_CLONE);
+	f_clone_spec.set(0);
 	p4object_id_t field_list_id = clone_spec >> 16;
 	copy_id = copy_id_dis(gen);
 	std::unique_ptr<Packet> packet_copy(new Packet(packet->clone_and_reset_metadata(copy_id++)));
