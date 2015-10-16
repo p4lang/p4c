@@ -30,6 +30,7 @@
 #include "phv.h"
 #include "named_p4object.h"
 #include "event_logger.h"
+#include "bm_sim/expressions.h"
 
 struct field_t {
   header_id_t header;
@@ -314,6 +315,13 @@ public:
     parser_ops.emplace_back(
       new ParserOpSet<ParserLookAhead>(dst_header, dst_offset,
 				       ParserLookAhead(src_offset, src_bitwidth))
+    );
+  }
+
+  void add_set_from_expression(header_id_t dst_header, int dst_offset,
+			       const ArithExpression &expr) {
+    parser_ops.emplace_back(
+      new ParserOpSet<ArithExpression>(dst_header, dst_offset, expr)
     );
   }
 

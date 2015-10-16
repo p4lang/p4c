@@ -25,8 +25,8 @@ using std::string;
 
 typedef unsigned char opcode_t;
 
-void P4Objects::build_conditional(const Json::Value &json_expression,
-				  Conditional *conditional) {
+void P4Objects::build_expression(const Json::Value &json_expression,
+				 Expression *expr) {
   if(json_expression.isNull()) return ;
   const string type = json_expression["type"].asString();
   const Json::Value json_value = json_expression["value"];
@@ -35,30 +35,33 @@ void P4Objects::build_conditional(const Json::Value &json_expression,
     const Json::Value json_left = json_value["left"];
     const Json::Value json_right = json_value["right"];
 
-    build_conditional(json_left, conditional);
-    build_conditional(json_right, conditional);
+    build_expression(json_left, expr);
+    build_expression(json_right, expr);
 
     ExprOpcode opcode = ExprOpcodesMap::get_opcode(op);
-    conditional->push_back_op(opcode);
+    expr->push_back_op(opcode);
   }
   else if(type == "header") {
     header_id_t header_id = get_header_id(json_value.asString());
-    conditional->push_back_load_header(header_id);
+    expr->push_back_load_header(header_id);
   }
   else if(type == "field") {
     const string header_name = json_value[0].asString();
     header_id_t header_id = get_header_id(header_name);
     const string field_name = json_value[1].asString();
     int field_offset = get_field_offset(header_id, field_name);
-    conditional->push_back_load_field(header_id, field_offset);
+    expr->push_back_load_field(header_id, field_offset);
 
     phv_factory.enable_field_arith(header_id, field_offset);
   }
   else if(type == "bool") {
-    conditional->push_back_load_bool(json_value.asBool());
+    expr->push_back_load_bool(json_value.asBool());
   }
   else if(type == "hexstr") {
-    conditional->push_back_load_const( Data(json_value.asString()) );
+    expr->push_back_load_const( Data(json_value.asString()) );
+  }
+  else if(type == "local") { // runtime data for expressions in actions
+    expr->push_back_load_local(json_value.asInt());
   }
   else {
     assert(0);
@@ -205,6 +208,14 @@ int P4Objects::init_objects(std::istream &is,
 	    int bitwidth = cfg_src["value"][1].asInt();
 	    parse_state->add_set_from_lookahead(std::get<0>(dest), std::get<1>(dest),
 						offset, bitwidth);
+	  }
+	  else if(src_type == "expression") {
+	    ArithExpression expr;
+	    build_expression(cfg_src, &expr);
+	    expr.build();
+	    parse_state->add_set_from_expression(
+              std::get<0>(dest), std::get<1>(dest), expr
+            );
 	  }
 	  else {
 	    assert(0 && "parser set op not supported");
@@ -478,6 +489,16 @@ int P4Objects::init_objects(std::istream &is,
 	  header_id_t header_stack_id = get_header_stack_id(header_stack_name);
 	  action_fn->parameter_push_back_header_stack(header_stack_id);
 	}
+	// TODO: shold this make the field case (and other) obsolete
+	// maybe if we can optimize this case
+	else if(type == "expression") {
+	  ArithExpression *expr = new ArithExpression();
+	  build_expression(cfg_parameter["value"], expr);
+	  expr->build();
+	  action_fn->parameter_push_back_expression(
+            std::unique_ptr<ArithExpression>(expr)
+	  );
+	}
 	else {
 	  assert(0 && "parameter not supported");
 	}
@@ -618,7 +639,7 @@ int P4Objects::init_objects(std::istream &is,
 						 conditional_id);
 
       const Json::Value &cfg_expression = cfg_conditional["expression"];
-      build_conditional(cfg_expression, conditional);
+      build_expression(cfg_expression, conditional);
       conditional->build();
 
       add_conditional(conditional_name, unique_ptr<Conditional>(conditional));

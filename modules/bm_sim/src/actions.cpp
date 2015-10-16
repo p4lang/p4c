@@ -20,6 +20,9 @@
 
 #include "bm_sim/actions.h"
 
+// thread_local needed here, to match actions.h definition
+thread_local std::vector<Data> ActionFn::data_tmps = {};
+
 void ActionFn::parameter_push_back_field(header_id_t header, int field_offset) {
   ActionParam param;
   param.tag = ActionParam::FIELD;
@@ -81,6 +84,25 @@ void ActionFn::parameter_push_back_register_array(RegisterArray *register_array)
   ActionParam param;
   param.tag = ActionParam::REGISTER_ARRAY;
   param.register_array = register_array;
+  params.push_back(param);
+}
+
+void ActionFn::parameter_push_back_expression(
+  std::unique_ptr<ArithExpression> expr
+) {
+  size_t nb_expression_params = 0;
+  for(const ActionParam &p : params)
+    if(p.tag == ActionParam::EXPRESSION) nb_expression_params += 1;
+
+  assert(nb_expression_params <= ActionFn::data_tmps.size());
+  if(nb_expression_params == ActionFn::data_tmps.size())
+    ActionFn::data_tmps.emplace_back();
+
+  expressions.push_back(std::move(expr));
+  ActionParam param;
+  param.tag = ActionParam::EXPRESSION;
+  param.expression = {static_cast<unsigned int>(nb_expression_params),
+		      expressions.back().get()};
   params.push_back(param);
 }
 

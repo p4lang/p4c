@@ -417,6 +417,24 @@ TEST_F(ParserOpSetTest, SetFromLookahead) {
   ASSERT_EQ(0x9d, f2.get_uint());
 }
 
+TEST_F(ParserOpSetTest, SetFromExpression) {
+  ArithExpression expr;
+  expr.push_back_load_field(testHeader2, 1);
+  expr.push_back_load_const(Data(1));
+  expr.push_back_op(ExprOpcode::ADD);
+  expr.build();
+
+  ParserOpSet<ArithExpression> op(testHeader1, 1, expr);
+  ParserOp &opRef = op;
+  Packet pkt = get_pkt();
+  Field &f = pkt.get_phv()->get_field(testHeader1, 1);
+  Field &f_src = pkt.get_phv()->get_field(testHeader2, 1);
+  f_src.set("0xaba");
+  ASSERT_EQ(0u, f.get_uint());
+  opRef(&pkt, nullptr, nullptr);
+  ASSERT_EQ(0xabb, f.get_uint());
+}
+
 // Google Test fixture for ParseSwitchKeyBuilder tests
 class ParseSwitchKeyBuilderTest : public ::testing::Test {
 protected:
