@@ -32,6 +32,7 @@ ExprOpcodesMap::ExprOpcodesMap() {
     {"load_const", ExprOpcode::LOAD_CONST},
     {"load_local", ExprOpcode::LOAD_LOCAL},
     {"+", ExprOpcode::ADD},
+    {"*", ExprOpcode::MUL},
     {"==", ExprOpcode::EQ_DATA},
     {"!=", ExprOpcode::NEQ_DATA},
     {">", ExprOpcode::GT_DATA},
@@ -174,6 +175,13 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
       data_temps_stack.push_back(&data_temps[op.data_dest_index]);
       break;
 
+    case ExprOpcode::MUL:
+      rd = data_temps_stack.back(); data_temps_stack.pop_back();
+      ld = data_temps_stack.back(); data_temps_stack.pop_back();
+      data_temps[op.data_dest_index].multiply(*ld, *rd);
+      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+      break;
+
     case ExprOpcode::EQ_DATA:
       rd = data_temps_stack.back(); data_temps_stack.pop_back();
       ld = data_temps_stack.back(); data_temps_stack.pop_back();
@@ -304,6 +312,7 @@ int Expression::assign_dest_registers() {
     case ExprOpcode::ADD:
     case ExprOpcode::SUB:
     case ExprOpcode::MOD:
+    case ExprOpcode::MUL:
     case ExprOpcode::BIT_AND:
     case ExprOpcode::BIT_OR:
     case ExprOpcode::BIT_XOR:

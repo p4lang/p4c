@@ -172,6 +172,12 @@ public:
     export_bytes();
   }
 
+  void multiply(const Data &src1, const Data &src2) {
+    assert(src1.arith && src2.arith);
+    value = src1.value * src2.value;
+    export_bytes();
+  }
+
   void shift_left(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     assert(src2.value >= 0);

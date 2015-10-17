@@ -120,7 +120,7 @@ const ParseState *ParseState::operator()(Packet *pkt, const char *data,
   for (auto &parser_op : parser_ops)
     (*parser_op)(pkt, data + *bytes_parsed, bytes_parsed);
 
-  if(!has_switch) return NULL;
+  if(!has_switch) return default_next_state;
 
   // build key
   static thread_local ByteContainer key;

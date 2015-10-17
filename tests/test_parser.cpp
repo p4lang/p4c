@@ -666,11 +666,29 @@ protected:
   }
 };
 
+TEST_F(SwitchCaseTest, NoSwitch) {
+  ParseState pstate("pstate", 0);
+  Packet packet = get_pkt();
+  size_t bytes_parsed = 0;
+
+  {
+    const ParseState *next_state = pstate(&packet, nullptr, &bytes_parsed);
+    ASSERT_EQ(nullptr, next_state);
+  }
+
+  {
+    const ParseState expected_next_state("next_state", 1);
+    pstate.set_default_switch_case(&expected_next_state);
+    const ParseState *next_state = pstate(&packet, nullptr, &bytes_parsed);
+    ASSERT_EQ(&expected_next_state, next_state);
+  }
+}
+
 TEST_F(SwitchCaseTest, Mask) {
   ParseState pstate("pstate", 0);
-  std::unique_ptr<ParseState> next_state_1(new ParseState("s1", 1));
-  std::unique_ptr<ParseState> next_state_2(new ParseState("s2", 2));
-  std::unique_ptr<ParseState> next_state_3(new ParseState("s3", 3));
+  const ParseState next_state_1("s1", 1);
+  const ParseState next_state_2("s2", 2);
+  const ParseState next_state_3("s3", 3);
   pstate.set_default_switch_case(nullptr);
   const ByteContainer key_1("0x00ab");
   const ByteContainer key_2("0x1989");
@@ -678,22 +696,22 @@ TEST_F(SwitchCaseTest, Mask) {
   const ByteContainer mask_1("0x00ff");
   const ByteContainer mask_2("0x39d9");
   const ByteContainer mask_3("0xebcf");
-  pstate.add_switch_case_with_mask(key_1, mask_1, next_state_1.get());
-  pstate.add_switch_case_with_mask(key_2, mask_2, next_state_2.get());
-  pstate.add_switch_case_with_mask(key_3, mask_3, next_state_3.get());
+  pstate.add_switch_case_with_mask(key_1, mask_1, &next_state_1);
+  pstate.add_switch_case_with_mask(key_2, mask_2, &next_state_2);
+  pstate.add_switch_case_with_mask(key_3, mask_3, &next_state_3);
 
   ParseSwitchKeyBuilder builder;
   builder.push_back_lookahead(0, 16);
   pstate.set_key_builder(builder);
 
-  std::vector<ParseState *> expected_next_states(65536);
+  std::vector<const ParseState *> expected_next_states(65536);
   for(int i = 0; i < 65536; i++) {
     if((i & bc_as_uint(mask_1)) == (bc_as_uint(key_1) & bc_as_uint(mask_1)))
-      expected_next_states[i] = next_state_1.get();
+      expected_next_states[i] = &next_state_1;
     else if((i & bc_as_uint(mask_2)) == (bc_as_uint(key_2) & bc_as_uint(mask_2)))
-      expected_next_states[i] = next_state_2.get();
+      expected_next_states[i] = &next_state_2;
     else if((i & bc_as_uint(mask_3)) == (bc_as_uint(key_3) & bc_as_uint(mask_3)))
-      expected_next_states[i] = next_state_3.get();
+      expected_next_states[i] = &next_state_3;
     else
       expected_next_states[i] = nullptr;
   }
@@ -706,5 +724,365 @@ TEST_F(SwitchCaseTest, Mask) {
     const ParseState *next_state = pstate(&packet, data, &bytes_parsed);
 
     ASSERT_EQ(expected_next_states[i], next_state);
+  }
+}
+
+
+// Google Test fixture for IPv4 TLV parsing test
+// This test is targetted a TLV parsing but covers many aspects of the parser
+// (e.g. header stacks)
+class IPv4TLVParsingTest : public ::testing::Test {
+protected:
+
+  PHVFactory phv_factory;
+
+  HeaderType ethernetHeaderType, ipv4HeaderType;
+  HeaderType ipv4OptionAHeaderType, ipv4OptionBHeaderType;
+  HeaderType ipv4PaddingHeaderType;
+  HeaderType pMetaType;
+  ParseState ethernetParseState, ipv4ParseState, ipv4OptionsParseState;
+  ParseState ipv4OptionAParseState, ipv4OptionBParseState;
+  ParseState ipv4PaddingParseState;
+  header_id_t ethernetHeader{0}, ipv4Header{1};
+  header_id_t ipv4OptionAHeader{2}, ipv4OptionBHeader{3};
+  header_id_t ipv4PaddingHeader1{4}, ipv4PaddingHeader2{5};
+  header_id_t ipv4PaddingHeader3{6}, ipv4PaddingHeader4{7};
+  header_id_t pMeta{8};
+  header_stack_id_t ipv4PaddingStack{0};
+
+  Parser parser;
+
+  IPv4TLVParsingTest()
+    : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
+      ipv4OptionAHeaderType("ipv4_optionA_t", 2),
+      ipv4OptionBHeaderType("ipv4_optionB_t", 3),
+      ipv4PaddingHeaderType("ipv4_padding_t", 4),
+      pMetaType("pmeta_t", 5),
+      ethernetParseState("parse_ethernet", 0),
+      ipv4ParseState("parse_ipv4", 1),
+      ipv4OptionsParseState("parse_ipv4", 2),
+      ipv4OptionAParseState("parse_ipv4_optionA", 3),
+      ipv4OptionBParseState("parse_ipv4_optionB", 4),
+      ipv4PaddingParseState("parse_ipv4_padding", 5),
+      parser("test_parser", 0) {
+
+    pMetaType.push_back_field("byte_counter", 8);
+
+    ethernetHeaderType.push_back_field("dstAddr", 48);
+    ethernetHeaderType.push_back_field("srcAddr", 48);
+    ethernetHeaderType.push_back_field("ethertype", 16);
+
+    ipv4HeaderType.push_back_field("version", 4);
+    ipv4HeaderType.push_back_field("ihl", 4);
+    ipv4HeaderType.push_back_field("diffserv", 8);
+    ipv4HeaderType.push_back_field("len", 16);
+    ipv4HeaderType.push_back_field("id", 16);
+    ipv4HeaderType.push_back_field("flags", 3);
+    ipv4HeaderType.push_back_field("flagOffset", 13);
+    ipv4HeaderType.push_back_field("ttl", 8);
+    ipv4HeaderType.push_back_field("protocol", 8);
+    ipv4HeaderType.push_back_field("checksum", 16);
+    ipv4HeaderType.push_back_field("srcAddr", 32);
+    ipv4HeaderType.push_back_field("dstAddr", 32);
+
+    ipv4OptionAHeaderType.push_back_field("type", 8);
+    ipv4OptionAHeaderType.push_back_field("length", 8);
+    ipv4OptionAHeaderType.push_back_field("f1", 16);
+    ipv4OptionAHeaderType.push_back_field("f2", 32);
+
+    ipv4OptionBHeaderType.push_back_field("type", 8);
+
+    ipv4PaddingHeaderType.push_back_field("pad", 8);
+
+    phv_factory.push_back_header("pMeta", pMeta, pMetaType);
+
+    phv_factory.push_back_header("ethernet", ethernetHeader,
+				 ethernetHeaderType);
+    phv_factory.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
+    phv_factory.push_back_header("ipv4OptionA", ipv4OptionAHeader,
+				 ipv4OptionAHeaderType);
+    phv_factory.push_back_header("ipv4OptionB", ipv4OptionBHeader,
+				 ipv4OptionBHeaderType);
+    phv_factory.push_back_header("ipv4Padding1", ipv4PaddingHeader1,
+				 ipv4PaddingHeaderType);
+    phv_factory.push_back_header("ipv4Padding2", ipv4PaddingHeader2,
+				 ipv4PaddingHeaderType);
+    phv_factory.push_back_header("ipv4Padding3", ipv4PaddingHeader3,
+				 ipv4PaddingHeaderType);
+    phv_factory.push_back_header("ipv4Padding4", ipv4PaddingHeader4,
+				 ipv4PaddingHeaderType);
+
+    const std::vector<header_id_t> hs = {ipv4PaddingHeader1, ipv4PaddingHeader2,
+					 ipv4PaddingHeader3, ipv4PaddingHeader4};
+    phv_factory.push_back_header_stack(
+      "ipv4Padding", ipv4PaddingStack, ipv4PaddingHeaderType, hs
+    );
+  }
+
+  virtual void SetUp() {
+    Packet::set_phv_factory(phv_factory);
+
+    // parse_ethernet
+    ethernetParseState.add_extract(ethernetHeader);
+    ParseSwitchKeyBuilder ethernetKeyBuilder;
+    ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
+    ethernetParseState.set_key_builder(ethernetKeyBuilder);
+    ethernetParseState.add_switch_case(ByteContainer("0x0800"),
+				       &ipv4ParseState);
+
+    // parse_ipv4
+    /* extract(ipv4);
+       set(pMeta.byte_counter, ipv4.ihl * 4 - 20);
+       return select(ipv4.ihl) {
+         0x05 : accept;
+         default : parse_ipv4_options;
+       }
+    */
+    ipv4ParseState.add_extract(ipv4Header);
+    ArithExpression expr;
+    expr.push_back_load_field(ipv4Header, 1); // IHL
+    expr.push_back_load_const(Data(4));
+    expr.push_back_op(ExprOpcode::MUL);
+    expr.push_back_load_const(Data(20));
+    expr.push_back_op(ExprOpcode::SUB);
+    expr.build();
+    ipv4ParseState.add_set_from_expression(pMeta, 0, expr);
+    ParseSwitchKeyBuilder ipv4KeyBuilder;
+    ipv4KeyBuilder.push_back_field(ipv4Header, 1); // IHL
+    ipv4ParseState.set_key_builder(ipv4KeyBuilder);
+    ipv4ParseState.add_switch_case(ByteContainer("0x05"), nullptr);
+    ipv4ParseState.set_default_switch_case(&ipv4OptionsParseState);
+
+    // parse_ipv4_options
+    /* return select(pMeta.byte_counter, current(0, 8)) {
+         0x0000 mask 0xff00 : accept;
+         0x00aa mask 0x00ff : parse_ipv4_optionA;
+         0x00bb mask 0x00ff : parse_ipv4_optionB;
+         0x0000 mask 0x00ff : parse_ipv4_padding;
+       }
+    */
+    ParseSwitchKeyBuilder ipv4OptionsKeyBuilder;
+    ipv4OptionsKeyBuilder.push_back_field(pMeta, 0); // byte_counter
+    ipv4OptionsKeyBuilder.push_back_lookahead(0, 8);
+    ipv4OptionsParseState.set_key_builder(ipv4OptionsKeyBuilder);
+    ipv4OptionsParseState.add_switch_case_with_mask(
+      ByteContainer("0x0000"), ByteContainer("0xff00"), nullptr
+    );
+    ipv4OptionsParseState.add_switch_case_with_mask(
+      ByteContainer("0x00aa"), ByteContainer("0x00ff"), &ipv4OptionAParseState
+    );
+    ipv4OptionsParseState.add_switch_case_with_mask(
+      ByteContainer("0x00bb"), ByteContainer("0x00ff"), &ipv4OptionBParseState
+    );
+    ipv4OptionsParseState.add_switch_case_with_mask(
+      ByteContainer("0x0000"), ByteContainer("0x00ff"), &ipv4PaddingParseState
+    );
+
+    // parse_ipv4_optionA
+    /* extract(ipv4_optionA);
+       set(pMeta.byte_counter, pMeta.byte_counter - 8);
+       return parse_ipv4_options;
+    */
+    ipv4OptionAParseState.add_extract(ipv4OptionAHeader);
+    ArithExpression exprA;
+    exprA.push_back_load_field(pMeta, 0);
+    exprA.push_back_load_const(Data(8));
+    exprA.push_back_op(ExprOpcode::SUB);
+    exprA.build();
+    ipv4OptionAParseState.add_set_from_expression(pMeta, 0, exprA);
+    ipv4OptionAParseState.set_default_switch_case(&ipv4OptionsParseState);
+
+    // parse_ipv4_optionB
+    /* extract(ipv4_optionB);
+       set(pMeta.byte_counter, pMeta.byte_counter - 1);
+       return parse_ipv4_options;
+    */
+    ipv4OptionBParseState.add_extract(ipv4OptionBHeader);
+    ArithExpression exprB;
+    exprB.push_back_load_field(pMeta, 0);
+    exprB.push_back_load_const(Data(1));
+    exprB.push_back_op(ExprOpcode::SUB);
+    exprB.build();
+    ipv4OptionBParseState.add_set_from_expression(pMeta, 0, exprB);
+    ipv4OptionBParseState.set_default_switch_case(&ipv4OptionsParseState);
+
+    // parse_ipv4_padding
+    /* extract(ipv4_padding[next]);
+       set(pMeta.byte_counter, pMeta.byte_counter - 1);
+       return parse_ipv4_options;
+    */
+    ipv4PaddingParseState.add_extract_to_stack(ipv4PaddingStack);
+    ArithExpression exprPad;
+    exprPad.push_back_load_field(pMeta, 0);
+    exprPad.push_back_load_const(Data(1));
+    exprPad.push_back_op(ExprOpcode::SUB);
+    exprPad.build();
+    ipv4PaddingParseState.add_set_from_expression(pMeta, 0, exprPad);
+    ipv4PaddingParseState.set_default_switch_case(&ipv4OptionsParseState);
+
+    parser.set_init_state(&ethernetParseState);
+  }
+
+  ByteContainer get_ipv4_base() const {
+    static const unsigned char base[34] = {
+      0x00, 0x18, 0x0a, 0x05, 0x5a, 0x10, 0xa0, 0x88,
+      0x69, 0x0c, 0xc3, 0x03, 0x08, 0x00, 0x45, 0x00,
+      0x00, 0x34, 0x70, 0x90, 0x40, 0x00, 0x40, 0x06,
+      0x35, 0x08, 0x0a, 0x36, 0xc1, 0x21, 0x4e, 0x28,
+      0x7b, 0xac
+    };
+    return ByteContainer((const char *) base, sizeof(base));
+  }
+
+  void add_optionA(ByteContainer *buf,
+		   const ByteContainer &f1, const ByteContainer &f2) const {
+    buf->push_back('\xaa');
+    buf->push_back('\x07');
+    buf->append(f1);
+    buf->append(f2);
+  }
+
+  void add_optionB(ByteContainer *buf) const {
+    buf->push_back('\xbb');
+  }
+
+  void do_padding(ByteContainer *buf) const {
+    size_t IHL = buf->size() - 14u; // - ethernet
+    size_t IHL_words = (IHL + 3) / 4;
+    assert(IHL_words < 16u);
+    (*buf)[14] = ((*buf)[14] & 0xf0) | (static_cast<char>(IHL_words));
+    // pad
+    for(size_t i = 0; i < (IHL_words * 4 - IHL); i++) {
+      buf->push_back('\x00');
+    }
+  }
+
+  void check_base(const PHV &phv) {
+    const Header &ethernet_hdr = phv.get_header(ethernetHeader);
+    ASSERT_TRUE(ethernet_hdr.is_valid());
+    const Header &ipv4_hdr = phv.get_header(ipv4Header);
+    ASSERT_TRUE(ipv4_hdr.is_valid());
+  }
+
+  void check_optionA(const PHV &phv,
+		     const ByteContainer &f1, const ByteContainer &f2) {
+    const Header &ipv4OptionA_hdr = phv.get_header(ipv4OptionAHeader);
+    ASSERT_TRUE(ipv4OptionA_hdr.is_valid());
+    ASSERT_EQ(0xaa, ipv4OptionA_hdr.get_field(0).get_int());
+    ASSERT_EQ(0x07, ipv4OptionA_hdr.get_field(1).get_int());
+    ASSERT_EQ(f1, ipv4OptionA_hdr.get_field(2).get_bytes());
+    ASSERT_EQ(f2, ipv4OptionA_hdr.get_field(3).get_bytes());
+  }
+
+  void check_no_optionA(const PHV &phv) {
+    const Header &ipv4OptionA_hdr = phv.get_header(ipv4OptionAHeader);
+    ASSERT_FALSE(ipv4OptionA_hdr.is_valid());
+  }
+
+  void check_optionB(const PHV &phv) {
+    const Header &ipv4OptionB_hdr = phv.get_header(ipv4OptionBHeader);
+    ASSERT_TRUE(ipv4OptionB_hdr.is_valid());
+  }
+
+  void check_no_optionB(const PHV &phv) {
+    const Header &ipv4OptionB_hdr = phv.get_header(ipv4OptionBHeader);
+    ASSERT_FALSE(ipv4OptionB_hdr.is_valid());
+  }
+
+  void check_padding(const PHV &phv, size_t expected_count) {
+    const HeaderStack &ipv4Padding_stack =
+      phv.get_header_stack(ipv4PaddingStack);
+    ASSERT_EQ(expected_count, ipv4Padding_stack.get_count());
+  }
+
+  Packet get_pkt(const ByteContainer &buf) const {
+    // add one byte at the end of the buffer
+    // this is because our parser does a lookahead on the first byte after (to
+    // make the parser simpler) and Valgrind complains
+    ByteContainer buf_(buf);
+    buf_.push_back('\xab');
+    Packet pkt = Packet(
+	0, 0, 0, buf_.size(),
+        PacketBuffer(512, buf_.data(), buf_.size())
+    );
+    return pkt;
+  }
+
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
+};
+
+TEST_F(IPv4TLVParsingTest, NoOption) {
+  ByteContainer buf = get_ipv4_base();
+  Packet packet = get_pkt(buf);
+  const PHV &phv = *packet.get_phv();
+
+  parser.parse(&packet);
+
+  check_base(phv);
+  check_no_optionA(phv);
+  check_no_optionB(phv);
+  check_padding(phv, 0u);
+}
+
+TEST_F(IPv4TLVParsingTest, OptionA) {
+  ByteContainer buf = get_ipv4_base();
+  const ByteContainer f1("0x00a1");
+  const ByteContainer f2("0x000000a2");
+  add_optionA(&buf, f1, f2);
+  do_padding(&buf);
+  Packet packet = get_pkt(buf);
+  const PHV &phv = *packet.get_phv();
+
+  parser.parse(&packet);
+
+  check_base(phv);
+  check_optionA(phv, f1, f2);
+  check_no_optionB(phv);
+  check_padding(phv, 0u);
+}
+
+TEST_F(IPv4TLVParsingTest, OptionB) {
+  ByteContainer buf = get_ipv4_base();
+  add_optionB(&buf);
+  do_padding(&buf);
+  Packet packet = get_pkt(buf);
+  const PHV &phv = *packet.get_phv();
+
+  parser.parse(&packet);
+
+  check_base(phv);
+  check_no_optionA(phv);
+  check_optionB(phv);
+  check_padding(phv, 3u);
+}
+
+TEST_F(IPv4TLVParsingTest, BothOptions) {
+  const ByteContainer f1("0x00a1");
+  const ByteContainer f2("0x000000a2");
+
+  for(const auto order: {"AB", "BA"}) {
+    ByteContainer buf = get_ipv4_base();
+
+    if(order == "AB") {
+      add_optionA(&buf, f1, f2);
+      add_optionB(&buf);
+    }
+    else {
+      add_optionB(&buf);
+      add_optionA(&buf, f1, f2);
+    }
+
+    do_padding(&buf);
+    Packet packet = get_pkt(buf);
+    const PHV &phv = *packet.get_phv();
+
+    parser.parse(&packet);
+
+    check_base(phv);
+    check_optionA(phv, f1, f2);
+    check_optionB(phv);
+    check_padding(phv, 3u);
   }
 }
