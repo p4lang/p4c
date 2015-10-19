@@ -61,6 +61,7 @@ def enum(type_name, *sequential, **named):
     return type(type_name, (), enums)
 
 PreType = enum('PreType', 'None', 'SimplePre', 'SimplePreLAG')
+MeterType = enum('MeterType', 'packets', 'bytes')
 
 def bytes_to_string(byte_array):
     form = 'B' * len(byte_array)
@@ -100,6 +101,7 @@ def get_parser():
 
 TABLES = {}
 ACTIONS = {}
+METER_ARRAYS = {}
 
 class MatchType:
     EXACT = 0
@@ -152,6 +154,20 @@ class Action:
     def action_str(self):
         return "{0:30} [{1}]".format(self.name, self.runtime_data_str())
 
+class MeterArray:
+    def __init__(self, name, id_):
+        self.name = name
+        self.id_ = id_
+        self.type_ = None
+        self.size = None
+        self.rate_count = None
+
+        METER_ARRAYS[name] = self
+
+    def meter_str(self):
+        return "{0:30} [{1}, {2}]".format(self.name, self.size,
+                                          MeterType.to_str(self.type_))
+
 def load_json(json_src):
     def get_header_type(header_name, j_headers):
         for h in j_headers:
@@ -197,6 +213,12 @@ def load_json(json_src):
                         bitwidth = get_field_bitwidth(header_type, target[1],
                                                       json_["header_types"])
                     table.key += [(field_name, match_type, bitwidth)]
+
+        for j_meter in json_["meter_arrays"]:
+            meter_array = MeterArray(j_meter["name"], j_meter["id"])
+            meter_array.size = j_meter["size"]
+            meter_array.type_ = MeterType.from_str(j_meter["type"])
+            meter_array.rate_count = j_meter["rate_count"]
 
 def ipv4Addr_to_bytes(addr):
     return [int(b) for b in addr.split('.')]
@@ -674,6 +696,43 @@ class RuntimeAPI(cmd.Cmd):
         # TODO: catch exception
         self.client.bm_swap_configs()
         print "SUCCESS"
+
+    def do_meter_set_rates(self, line):
+        "Configure rates for meter: meter_set_rates <name> <rate_1>:<burst_1> <rate_2>:<burst_2> ..."
+        args = line.split()
+        if len(args) < 1:
+            print "Invalid number of args"
+            return
+        meter_name = args[0]
+        if meter_name not in METER_ARRAYS:
+            print "Invalid meter name"
+            return
+        rates = args[1:]
+        meter = METER_ARRAYS[meter_name]
+        if len(rates) != meter.rate_count:
+            print "Invalid number of rates, expected", meter.rate_count, "but got", len(rates)
+            return
+        new_rates = []
+        for rate in rates:
+            try:
+                r, b = rate.split(':')
+                r = float(r)
+                b = int(b)
+                new_rates.append(BmMeterRateConfig(r, b))
+            except:
+                print "Error while parsing rates"
+                return
+        self.client.bm_meter_array_set_rates(meter_name, new_rates)
+        print "SUCCESS"
+
+    def complete_meter_set_rates(self, text, line, start_index, end_index):
+        return self._complete_meters(text)
+
+    def _complete_meters(self, text):
+        meters = sorted(METER_ARRAYS.keys())
+        if not text:
+            return meters
+        return [t for t in meters if t.startswith(text)]
 
     def do_dump_table(self, line):
         "Display some (non-formatted) information about a table"
