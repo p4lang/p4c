@@ -36,6 +36,8 @@ class Packet {
 public:
   typedef std::chrono::system_clock clock;
 
+  typedef PacketBuffer::state_t buffer_state_t;
+
 public:
   Packet();
 
@@ -75,6 +77,14 @@ public:
 
   const char *data() const { return buffer.start(); }
 
+  const buffer_state_t save_buffer_state() const {
+    return buffer.save_state();
+  }
+
+  void restore_buffer_state(const buffer_state_t &state) {
+    buffer.restore_state(state);
+  }
+
   char *payload() { 
     assert(payload_size > 0);
     return buffer.end() - payload_size;
@@ -106,6 +116,7 @@ public:
 
   Packet clone(packet_id_t new_copy_id) const;
   Packet clone_and_reset_metadata(packet_id_t new_copy_id) const;
+  Packet clone_no_phv(packet_id_t new_copy_id) const;
 
   Packet(const Packet &other) = delete;
   Packet &operator=(const Packet &other) = delete;

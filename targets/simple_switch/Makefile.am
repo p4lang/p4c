@@ -1,5 +1,5 @@
 simple_switch_thrift_files = \
-gen-py/simple_switch/__init__.py \
+gen-py/sswitch_runtime/__init__.py \
 gen-cpp/simple_switch_constants.cpp \
 gen-cpp/simple_switch_constants.h \
 gen-cpp/SimpleSwitch.cpp \

@@ -27,6 +27,12 @@
 
 class PacketBuffer {
 public:
+  struct state_t {
+    char *head;
+    size_t data_size;
+  };
+
+public:
   PacketBuffer() {}
 
   PacketBuffer(size_t size)
@@ -59,6 +65,15 @@ public:
     data_size -= bytes;
     head += bytes;
     return head;
+  }
+
+  const state_t save_state() const {
+    return {head, data_size};
+  }
+
+  void restore_state(const state_t &state) {
+    head = state.head;
+    data_size = state.data_size;
   }
   
   size_t get_data_size() const { return data_size; }

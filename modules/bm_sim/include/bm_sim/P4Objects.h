@@ -207,8 +207,7 @@ private:
     field_lists[field_list_id] = std::move(field_list);
   }
 
-  void build_conditional(const Json::Value &json_expression,
-			 Conditional *conditional);
+  void build_expression(const Json::Value &json_expression, Expression *expr);
 
   std::set<int> build_arith_offsets(const Json::Value &json_actions,
 				    const std::string &header_name);

@@ -104,6 +104,14 @@ void SimpleSwitch::ingress_thread() {
     Field &f_instance_type = phv->get_field("standard_metadata.instance_type");
     f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
 
+    /* This looks like it comes out of the blue. However this is needed for
+       ingress cloning. The parser updates the buffer state (pops the parsed
+       headers) to make the deparser's job easier (the same buffer is
+       re-used). But for ingress cloning, the original packet is needed. This
+       kind of looks hacky though. Maybe a better solution would be to have the
+       parser leave the buffer unchanged, and move the pop logic to the
+       deparser. TODO? */
+    const Packet::buffer_state_t packet_in_state = packet->save_buffer_state();
     parser->parse(packet.get());
 
     ingress_mau->apply(packet.get());
@@ -133,19 +141,28 @@ void SimpleSwitch::ingress_thread() {
       SIMPLELOG << "cloning packet at ingress" << std::endl;
       egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
       if(egress_port >= 0) {
+	const Packet::buffer_state_t packet_out_state = packet->save_buffer_state();
+	packet->restore_buffer_state(packet_in_state);
 	f_instance_type.set(PKT_INSTANCE_TYPE_INGRESS_CLONE);
+	f_clone_spec.set(0);
 	p4object_id_t field_list_id = clone_spec >> 16;
 	copy_id = copy_id_dis(gen);
-	std::unique_ptr<Packet> packet_copy(new Packet(packet->clone_and_reset_metadata(copy_id)));
+	std::unique_ptr<Packet> packet_copy(new Packet(packet->clone_no_phv(copy_id)));
 	PHV *phv_copy = packet_copy->get_phv();
+	phv_copy->reset_metadata();
 	FieldList *field_list = this->get_field_list(field_list_id);
 	for(const auto &p : *field_list) {
 	  phv_copy->get_field(p.first, p.second)
 	    .set(phv->get_field(p.first, p.second));
 	}
+	// we need to parse again
+	// the alternative would be to pay the (huge) price of PHV copy for
+	// every ingress packet
+	parser->parse(packet_copy.get());
 	packet_copy->set_egress_port(egress_port);
 	egress_buffers[egress_port].push_front(std::move(packet_copy));
 	f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
+	packet->restore_buffer_state(packet_out_state);
       }
     }
     
@@ -222,6 +239,7 @@ void SimpleSwitch::egress_thread(int port) {
       egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
       if(egress_port >= 0) {
 	f_instance_type.set(PKT_INSTANCE_TYPE_EGRESS_CLONE);
+	f_clone_spec.set(0);
 	p4object_id_t field_list_id = clone_spec >> 16;
 	copy_id = copy_id_dis(gen);
 	std::unique_ptr<Packet> packet_copy(new Packet(packet->clone_and_reset_metadata(copy_id++)));

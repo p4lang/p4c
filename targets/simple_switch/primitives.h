@@ -205,8 +205,8 @@ class no_op : public ActionPrimitive<> {
 
 REGISTER_PRIMITIVE(no_op);
 
-class execute_meter : public ActionPrimitive<Field &, MeterArray &, const Data &> {
-  void operator ()(Field &dst, MeterArray &meter_array, const Data &idx) {
+class execute_meter : public ActionPrimitive<MeterArray &, const Data &, Field &> {
+  void operator ()(MeterArray &meter_array, const Data &idx, Field &dst) {
     dst.set(meter_array.execute_meter(get_packet(), idx.get_uint()));
   }
 };

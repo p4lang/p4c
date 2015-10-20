@@ -192,7 +192,6 @@ TEST_F(ActionsTest, SetFromActionData) {
   ASSERT_EQ((unsigned) 0xaba, f.get_uint());
 }
 
-
 TEST_F(ActionsTest, SetFromField) {
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
@@ -210,6 +209,31 @@ TEST_F(ActionsTest, SetFromField) {
   testActionFnEntry(pkt.get());
 
   ASSERT_EQ((unsigned) 0xaba, dst.get_uint());
+}
+
+TEST_F(ActionsTest, SetFromExpression) {
+  std::unique_ptr<ArithExpression> expr(new ArithExpression());
+  expr->push_back_load_field(testHeader1, 0); // f32
+  expr->push_back_load_const(Data(1));
+  expr->push_back_op(ExprOpcode::ADD);
+  expr->build();
+
+  SetField primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_expression(std::move(expr));
+
+  Field &f32 = phv->get_field(testHeader1, 0);
+  f32.set(0xaba);
+
+  Field &dst = phv->get_field(testHeader1, 3); // f16
+  dst.set(0);
+
+  ASSERT_EQ((unsigned) 0, dst.get_uint());
+
+  testActionFnEntry(pkt.get());
+
+  ASSERT_EQ((unsigned) 0xabb, dst.get_uint());
 }
 
 TEST_F(ActionsTest, SetFromConstStress) {

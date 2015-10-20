@@ -75,6 +75,19 @@ ParserOpSet<ParserLookAhead>::operator()(
   }
 }
 
+// TODO: use pointer instead for ArithExpression?
+template<>
+void
+ParserOpSet<ArithExpression>::operator()(
+  Packet *pkt, const char *data, size_t *bytes_parsed
+) const
+{
+  (void) bytes_parsed; (void) data;
+  PHV *phv = pkt->get_phv();
+  Field &f_dst = phv->get_field(dst.header, dst.offset);
+  src.eval(*phv, &f_dst);
+}
+
 bool ParseSwitchCase::match(const ByteContainer &input,
 			    const ParseState **state) const {
   if(!with_mask) {
@@ -94,6 +107,12 @@ bool ParseSwitchCase::match(const ByteContainer &input,
   return false;
 }
 
+void ParseSwitchCase::mask_key() {
+  for(unsigned int byte_index = 0; byte_index < key.size(); byte_index++)
+    key[byte_index] = key[byte_index] & mask[byte_index];
+}
+
+
 const ParseState *ParseState::operator()(Packet *pkt, const char *data,
 					 size_t *bytes_parsed) const{
   // execute parser ops
@@ -101,7 +120,7 @@ const ParseState *ParseState::operator()(Packet *pkt, const char *data,
   for (auto &parser_op : parser_ops)
     (*parser_op)(pkt, data + *bytes_parsed, bytes_parsed);
 
-  if(!has_switch) return NULL;
+  if(!has_switch) return default_next_state;
 
   // build key
   static thread_local ByteContainer key;

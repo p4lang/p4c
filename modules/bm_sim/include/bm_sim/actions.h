@@ -38,8 +38,7 @@
 #include "meters.h"
 #include "counters.h"
 #include "stateful.h"
-
-using std::vector;
+#include "expressions.h"
 
 // forward declaration of ActionPrimitive_
 class ActionPrimitive_;
@@ -68,7 +67,8 @@ struct ActionParam
   // will keep it around but for now I need it
   enum {CONST, FIELD, HEADER, ACTION_DATA,
 	HEADER_STACK, CALCULATION,
-        METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY} tag;
+        METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY,
+        EXPRESSION} tag;
 
   union {
     unsigned int const_offset;
@@ -95,6 +95,14 @@ struct ActionParam
 
     // non owning pointer
     RegisterArray *register_array;
+
+    struct {
+      unsigned int offset;
+      // non owning pointer
+      // in theory, could be an owning pointer, but the union makes this
+      // complicated, so instead the ActionFn keeps a vector of owning pointers
+      ArithExpression *ptr;
+    } expression;
   };
 };
 
@@ -115,21 +123,23 @@ struct ActionData {
 
   size_t size() const { return action_data.size(); }
 
-  vector<Data> action_data{};
+  std::vector<Data> action_data{};
 };
 
 struct ActionEngineState {
   Packet &pkt;
   PHV &phv;
   const ActionData &action_data;
-  /* const vector<Data> &action_data; */
-  const vector<Data> &const_values;
+  const std::vector<Data> &const_values;
+  std::vector<Data> &data_tmps;
 
   ActionEngineState(Packet *pkt,
 		    const ActionData &action_data,
-		    const vector<Data> &const_values)
+		    const std::vector<Data> &const_values,
+		    std::vector<Data> &data_tmps)
     : pkt(*pkt), phv(*pkt->get_phv()),
-      action_data(action_data), const_values(const_values) {}
+      action_data(action_data), const_values(const_values),
+      data_tmps(data_tmps) {}
 };
 
 struct ActionParamWithState {
@@ -153,6 +163,10 @@ struct ActionParamWithState {
       return state.phv.get_field(ap.field.header, ap.field.field_offset);
     case ActionParam::ACTION_DATA:
       return state.action_data.get(ap.action_data_offset);
+    case ActionParam::EXPRESSION:
+      ap.expression.ptr->eval(state.phv, &state.data_tmps[ap.expression.offset],
+			      state.action_data.action_data);
+      return state.data_tmps[ap.expression.offset];
     default:
       assert(0);
     }
@@ -323,13 +337,21 @@ public:
   void parameter_push_back_meter_array(MeterArray *meter_array);
   void parameter_push_back_counter_array(CounterArray *counter_array);
   void parameter_push_back_register_array(RegisterArray *register_array);
+  void parameter_push_back_expression(std::unique_ptr<ArithExpression> expr);
 
   void push_back_primitive(ActionPrimitive_ *primitive);
 
 private:
-  vector<ActionPrimitive_ *> primitives{};
-  vector<ActionParam> params{};
-  vector<Data> const_values{};
+  std::vector<ActionPrimitive_ *> primitives{};
+  std::vector<ActionParam> params{};
+  std::vector<Data> const_values{};
+  // should I store the objects in the vector, instead of pointers?
+  std::vector<std::unique_ptr<ArithExpression> > expressions{};
+
+private:
+  // thread_local sounds like a good choice here
+  // alternative would be to have one vector in for each ActionFnEntry
+  static thread_local std::vector<Data> data_tmps;
 };
 
 
@@ -349,7 +371,7 @@ public:
     if(!action_fn) return; // happens when no default action specified... TODO
     ELOGGER->action_execute(*pkt, *action_fn, action_data);
     ActionEngineState state(pkt, action_data,
-			    action_fn->const_values);
+			    action_fn->const_values, ActionFn::data_tmps);
     auto &primitives = action_fn->primitives;
     size_t param_offset = 0;
     for(auto primitive_it = primitives.begin();

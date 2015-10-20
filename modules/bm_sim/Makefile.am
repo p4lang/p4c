@@ -4,8 +4,8 @@ AM_CPPFLAGS += $(DEBUG_CPPFLAGS)
 # pedantic (like constructior initializers for non POD data), but it was
 # useful. However in some versions of g++, it warns for non-virtual destructors
 # in base classes even when the destructor is protected, so I removed it :/
-AM_CXXFLAGS = $(PICKY_CXXFLAGS) # -Weffc++
-AM_CFLAGS = $(PICKY_CFLAGS)
+AM_CXXFLAGS = $(PICKY_CXXFLAGS) $(COVERAGE_FLAGS) # -Weffc++
+AM_CFLAGS = $(PICKY_CFLAGS) $(COVERAGE_FLAGS)
 
 noinst_LTLIBRARIES = libbmsim.la
 
@@ -36,7 +36,8 @@ src/meters.cpp \
 src/counters.cpp \
 src/dev_mgr.cpp \
 src/options_parse.cpp \
-src/ageing.cpp
+src/ageing.cpp \
+src/expressions.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -52,6 +53,7 @@ include/bm_sim/deparser.h \
 include/bm_sim/dev_mgr.h \
 include/bm_sim/entries.h \
 include/bm_sim/event_logger.h \
+include/bm_sim/expressions.h \
 include/bm_sim/fields.h \
 include/bm_sim/field_lists.h \
 include/bm_sim/handle_mgr.h \
@@ -78,3 +80,6 @@ include/bm_sim/simple_pre_lag.h \
 include/bm_sim/transport.h
 
 libbmsim_la_SOURCES = $(common_source) $(common_include)
+
+clean-local:
+	find $(srcdir) -type f -name '*.gcda' -o -name '*.gcov' -o -name "*.gcno" -delete
