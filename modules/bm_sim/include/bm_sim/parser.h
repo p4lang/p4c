@@ -120,7 +120,7 @@ struct ParserOpExtract : ParserOp {
     PHV *phv = pkt->get_phv();
     ELOGGER->parser_extract(*pkt, header);
     Header &hdr = phv->get_header(header);
-    hdr.extract(data);
+    hdr.extract(data, *phv);
     *bytes_parsed += hdr.get_nbytes_packet();
   }
 };
@@ -140,7 +140,7 @@ struct ParserOpExtractStack : ParserOp {
     HeaderStack &stack = phv->get_header_stack(header_stack);
     Header &next_hdr = stack.get_next(); // TODO: will assert if full
     ELOGGER->parser_extract(*pkt, next_hdr.get_id());
-    next_hdr.extract(data);
+    next_hdr.extract(data, *phv);
     *bytes_parsed += next_hdr.get_nbytes_packet();
     stack.push_back(); // should I have a HeaderStack::extract() method instead?
   }

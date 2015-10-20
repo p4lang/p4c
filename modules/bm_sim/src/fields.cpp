@@ -64,6 +64,14 @@ int Field::extract(const char *data, int hdr_offset) {
   return nbits;
 }
 
+int Field::extract_VL(const char *data, int hdr_offset, int computed_nbits) {
+  nbits = computed_nbits;
+  nbytes = (nbits + 7) / 8;
+  mask = (1 << nbits); mask -= 1;
+  bytes.resize(nbytes);
+  return Field::extract(data, hdr_offset);
+}
+
 int Field::deparse(char *data, int hdr_offset) const {
   if(hdr_offset == 0 && nbits % 8 == 0) {
     std::copy(bytes.begin(), bytes.end(), data);

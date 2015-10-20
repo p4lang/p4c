@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "data.h"
-#include "phv.h"
+#include "phv_forward.h"
 
 enum class ExprOpcode {
   LOAD_FIELD, LOAD_HEADER, LOAD_BOOL, LOAD_CONST, LOAD_LOCAL,
@@ -111,6 +111,8 @@ private:
   std::vector<Data> const_values{};
   int data_registers_cnt{0};
   bool built{false};
+
+  friend class VLHeaderExpression;
 };
 
 
@@ -121,6 +123,18 @@ public:
 	    const std::vector<Data> &locals = {}) const {
     eval_arith(phv, data, locals);
   }
+};
+
+class VLHeaderExpression
+{
+public:
+  VLHeaderExpression(const ArithExpression &expr)
+    : expr(expr) {}
+
+  ArithExpression resolve(header_id_t header_id);
+
+private:
+  ArithExpression expr;
 };
 
 #endif

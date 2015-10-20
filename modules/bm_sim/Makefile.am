@@ -68,6 +68,7 @@ include/bm_sim/packet_buffer.h \
 include/bm_sim/packet.h \
 include/bm_sim/parser.h \
 include/bm_sim/phv.h \
+include/bm_sim/phv_forward.h \
 include/bm_sim/pipeline.h \
 include/bm_sim/queue.h \
 include/bm_sim/runtime_interface.h \
