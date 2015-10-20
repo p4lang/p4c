@@ -221,9 +221,13 @@ def load_json(json_src):
             meter_array.rate_count = j_meter["rate_count"]
 
 def ipv4Addr_to_bytes(addr):
+    if not '.' in addr:
+        raise Exception()
     return [int(b) for b in addr.split('.')]
 
 def macAddr_to_bytes(addr):
+    if not ':' in addr:
+        raise Exception()
     return [int(b, 16) for b in addr.split(':')]
 
 def ipv6Addr_to_bytes(addr):
