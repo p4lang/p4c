@@ -27,7 +27,7 @@ typedef unsigned char opcode_t;
 
 void P4Objects::build_expression(const Json::Value &json_expression,
 				 Expression *expr) {
-  if(json_expression.isNull()) return ;
+  if(json_expression.isNull()) return;
   const string type = json_expression["type"].asString();
   const Json::Value json_value = json_expression["value"];
   if(type == "expression") {
@@ -86,8 +86,22 @@ int P4Objects::init_objects(std::istream &is,
     const Json::Value &cfg_fields = cfg_header_type["fields"];
     for (const auto cfg_field : cfg_fields) {
       const string field_name = cfg_field[0].asString();
-      int field_bit_width = cfg_field[1].asInt();
-      header_type->push_back_field(field_name, field_bit_width);
+      if(cfg_field[1].asString() == "*") { // VL field
+	ArithExpression raw_expr;
+	assert(cfg_header_type.isMember("length_exp"));
+	const Json::Value &cfg_length_exp = cfg_header_type["length_exp"];
+	assert(!cfg_length_exp.isNull());
+	build_expression(cfg_length_exp, &raw_expr);
+	raw_expr.build();
+	std::unique_ptr<VLHeaderExpression> VL_expr(
+          new VLHeaderExpression(raw_expr)
+        );
+	header_type->push_back_VL_field(field_name, std::move(VL_expr));
+      }
+      else {
+	int field_bit_width = cfg_field[1].asInt();
+	header_type->push_back_field(field_name, field_bit_width);
+      }
     }
 
     add_header_type(header_type_name, unique_ptr<HeaderType>(header_type));

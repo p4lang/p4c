@@ -23,6 +23,7 @@
 #include <cassert>
 
 #include "bm_sim/expressions.h"
+#include "bm_sim/phv.h"
 
 ExprOpcodesMap::ExprOpcodesMap() {
   opcodes_map = {
@@ -175,6 +176,13 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
       data_temps_stack.push_back(&data_temps[op.data_dest_index]);
       break;
 
+    case ExprOpcode::SUB:
+      rd = data_temps_stack.back(); data_temps_stack.pop_back();
+      ld = data_temps_stack.back(); data_temps_stack.pop_back();
+      data_temps[op.data_dest_index].sub(*ld, *rd);
+      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+      break;
+
     case ExprOpcode::MUL:
       rd = data_temps_stack.back(); data_temps_stack.pop_back();
       ld = data_temps_stack.back(); data_temps_stack.pop_back();
@@ -268,6 +276,7 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
       break;
 
     default:
+      assert(0 && "invalid operand");
       break;
     }
   }
@@ -348,4 +357,19 @@ int Expression::assign_dest_registers() {
     }
   }
   return registers_cnt;
+}
+
+ArithExpression VLHeaderExpression::resolve(header_id_t header_id) {
+  assert(expr.built);
+
+  std::vector<Op> &ops = expr.ops;
+  for(size_t i = 0; i < ops.size(); i++) {
+    Op &op = ops[i];
+    if(op.opcode == ExprOpcode::LOAD_LOCAL) {
+      op.opcode = ExprOpcode::LOAD_FIELD;
+      op.field.field_offset = op.local_offset;
+      op.field.header = header_id;
+    }
+  }
+  return expr;
 }

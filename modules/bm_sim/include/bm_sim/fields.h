@@ -80,6 +80,8 @@ public:
   /* returns the number of bits extracted */
   int extract(const char *data, int hdr_offset);
 
+  int extract_VL(const char *data, int hdr_offset, int computed_nbits);
+
   /* returns the number of bits deparsed */
   int deparse(char *data, int hdr_offset) const;
 

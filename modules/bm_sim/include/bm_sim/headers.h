@@ -27,8 +27,11 @@
 
 #include "fields.h"
 #include "named_p4object.h"
+#include "expressions.h"
 
 typedef p4object_id_t header_type_id_t;
+
+class PHV;
 
 class HeaderType : public NamedP4Object {
 public:
@@ -40,6 +43,16 @@ public:
     fields_bit_width.push_back(field_bit_width);
     fields_name.push_back(field_name);
     return fields_bit_width.size() - 1;
+  }
+
+  int push_back_VL_field(const std::string &field_name,
+			 std::unique_ptr<VLHeaderExpression> field_length_expr) {
+    int offset = push_back_field(field_name, 0);
+    // TODO
+    assert(!is_VL_header() && "header can only have one VL field");
+    VL_expr_raw = std::move(field_length_expr);
+    VL_offset = offset;
+    return offset;
   }
 
   int get_bit_width(int field_offset) const {
@@ -72,9 +85,27 @@ public:
     return -1;
   }
 
+  bool is_VL_header() const {
+    return (VL_expr_raw != nullptr);
+  }
+
+  std::unique_ptr<ArithExpression> resolve_VL_expr(header_id_t header_id) const {
+    if(!is_VL_header()) return nullptr;
+    std::unique_ptr<ArithExpression> expr(new ArithExpression());
+    *expr = VL_expr_raw->resolve(header_id);
+    return expr;
+  }
+
+  int get_VL_offset() const {
+    return VL_offset;
+  }
+
 private:
   std::vector<int> fields_bit_width{};
   std::vector<std::string> fields_name{};
+  // used for VL headers only
+  std::unique_ptr<VLHeaderExpression> VL_expr_raw{nullptr};
+  int VL_offset{-1};
 };
 
 class Header : public NamedP4Object
@@ -132,7 +163,10 @@ public:
     return header_type.get_type_id();
   }
 
-  void extract(const char *data);
+  bool is_VL_header() const { return VL_expr != nullptr; }
+
+  // phv needed for variable length extraction
+  void extract(const char *data, const PHV &phv);
 
   void deparse(char *data) const;
 
@@ -176,12 +210,16 @@ public:
   Header &operator=(Header &&other) = default;
 
 private:
+  void extract_VL(const char *data, const PHV &phv);
+
+private:
   const HeaderType &header_type;
   std::vector<Field> fields{};
   bool valid{false};
   bool metadata{false};
   int nbytes_phv{0};
   int nbytes_packet{0};
+  std::unique_ptr<ArithExpression> VL_expr{nullptr};
 };
 
 #endif

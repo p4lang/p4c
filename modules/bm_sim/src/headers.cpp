@@ -19,6 +19,8 @@
  */
 
 #include "bm_sim/headers.h"
+#include "bm_sim/phv.h"
+#include "bm_sim/expressions.h"
 
 Header::Header(const std::string &name, p4object_id_t id,
 	       const HeaderType &header_type,
@@ -40,27 +42,47 @@ Header::Header(const std::string &name, p4object_id_t id,
   nbytes_packet /= 8;
 }
 
-void Header::extract(const char *data) {
+void Header::extract(const char *data, const PHV &phv) {
+  if(is_VL_header()) return extract_VL(data, phv);
   int hdr_offset = 0;
-  for(std::vector<Field>::iterator it = fields.begin();
-      it != fields.end();
-      ++it) {
-    hdr_offset += it->extract(data, hdr_offset);
+  for(Field &f : fields) {
+    hdr_offset += f.extract(data, hdr_offset);
     data += hdr_offset / 8;
     hdr_offset = hdr_offset % 8;
   }
   mark_valid();
-  return;
+}
+
+void Header::extract_VL(const char *data, const PHV &phv) {
+  static thread_local Data computed_nbits;
+  int VL_offset = header_type.get_VL_offset();
+  int hdr_offset = 0;
+  // Should I take care of nbytes_phv? I don't think it is being used anymore
+  nbytes_packet = 0;
+  for(int i = 0; i < header_type.get_num_fields(); i++) {
+    Field &f = fields[i];
+    if(VL_offset == i) {
+      VL_expr->eval(phv, &computed_nbits);
+      hdr_offset += f.extract_VL(data, hdr_offset, computed_nbits.get_int());
+    }
+    else {
+      hdr_offset += f.extract(data, hdr_offset);
+    }
+    data += hdr_offset / 8;
+    hdr_offset = hdr_offset % 8;
+    nbytes_packet += f.get_nbits();
+  }
+  assert(nbytes_packet % 8 == 0);
+  nbytes_packet /= 8;
+  mark_valid();
 }
 
 void Header::deparse(char *data) const {
+  // TODO: special case for VL header ?
   int hdr_offset = 0;
-  for(std::vector<Field>::const_iterator it = fields.begin();
-      it != fields.end();
-      ++it) {
-    hdr_offset += it->deparse(data, hdr_offset);
+  for(const Field &f : fields) {
+    hdr_offset += f.deparse(data, hdr_offset);
     data += hdr_offset / 8;
     hdr_offset = hdr_offset % 8;
   }
-  return;
 }

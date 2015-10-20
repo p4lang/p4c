@@ -760,7 +760,7 @@ protected:
       pMetaType("pmeta_t", 5),
       ethernetParseState("parse_ethernet", 0),
       ipv4ParseState("parse_ipv4", 1),
-      ipv4OptionsParseState("parse_ipv4", 2),
+      ipv4OptionsParseState("parse_ipv4_options", 2),
       ipv4OptionAParseState("parse_ipv4_optionA", 3),
       ipv4OptionBParseState("parse_ipv4_optionB", 4),
       ipv4PaddingParseState("parse_ipv4_padding", 5),
@@ -1085,4 +1085,177 @@ TEST_F(IPv4TLVParsingTest, BothOptions) {
     check_optionB(phv);
     check_padding(phv, 3u);
   }
+}
+
+
+// Google Test fixture for IPv4 Variable Length parsing test
+// This test parses the options as one VL field
+class IPv4VLParsingTest : public ::testing::Test {
+protected:
+
+  PHVFactory phv_factory;
+
+  HeaderType ethernetHeaderType, ipv4HeaderType;
+  ParseState ethernetParseState, ipv4ParseState;
+  header_id_t ethernetHeader{0}, ipv4Header{1};
+
+  Parser parser;
+
+  Deparser deparser;
+
+  IPv4VLParsingTest()
+    : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
+      ethernetParseState("parse_ethernet", 0),
+      ipv4ParseState("parse_ipv4", 1),
+      parser("test_parser", 0), deparser("test_deparser", 0) {
+
+    ethernetHeaderType.push_back_field("dstAddr", 48);
+    ethernetHeaderType.push_back_field("srcAddr", 48);
+    ethernetHeaderType.push_back_field("ethertype", 16);
+
+    ipv4HeaderType.push_back_field("version", 4);
+    ipv4HeaderType.push_back_field("ihl", 4);
+    ipv4HeaderType.push_back_field("diffserv", 8);
+    ipv4HeaderType.push_back_field("len", 16);
+    ipv4HeaderType.push_back_field("id", 16);
+    ipv4HeaderType.push_back_field("flags", 3);
+    ipv4HeaderType.push_back_field("flagOffset", 13);
+    ipv4HeaderType.push_back_field("ttl", 8);
+    ipv4HeaderType.push_back_field("protocol", 8);
+    ipv4HeaderType.push_back_field("checksum", 16);
+    ipv4HeaderType.push_back_field("srcAddr", 32);
+    ipv4HeaderType.push_back_field("dstAddr", 32);
+    ArithExpression raw_expr;
+    raw_expr.push_back_load_local(1); // IHL
+    raw_expr.push_back_load_const(Data(4));
+    raw_expr.push_back_op(ExprOpcode::MUL);
+    raw_expr.push_back_load_const(Data(20));
+    raw_expr.push_back_op(ExprOpcode::SUB);
+    raw_expr.push_back_load_const(Data(8));
+    raw_expr.push_back_op(ExprOpcode::MUL); // to bits
+    raw_expr.build();
+    std::unique_ptr<VLHeaderExpression> expr(new VLHeaderExpression(raw_expr));
+    ipv4HeaderType.push_back_VL_field("options", std::move(expr));
+
+    phv_factory.push_back_header("ethernet", ethernetHeader,
+				 ethernetHeaderType);
+    phv_factory.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
+  }
+
+  virtual void SetUp() {
+    Packet::set_phv_factory(phv_factory);
+
+    // parse_ethernet
+    ethernetParseState.add_extract(ethernetHeader);
+    ParseSwitchKeyBuilder ethernetKeyBuilder;
+    ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
+    ethernetParseState.set_key_builder(ethernetKeyBuilder);
+    ethernetParseState.add_switch_case(ByteContainer("0x0800"),
+				       &ipv4ParseState);
+
+    ipv4ParseState.add_extract(ipv4Header);
+    ipv4ParseState.set_default_switch_case(nullptr);
+
+    parser.set_init_state(&ethernetParseState);
+
+    deparser.push_back_header(ethernetHeader);
+    deparser.push_back_header(ipv4Header);
+  }
+
+  ByteContainer option_value(size_t options_words) const {
+    ByteContainer buf;
+    for(size_t i = 0; i < options_words * 4; i++)
+      buf.push_back(static_cast<char>(options_words));
+    return buf;
+  }
+
+  ByteContainer get_ipv4_bytes(size_t options_words) const {
+    static const unsigned char base[34] = {
+      0x00, 0x18, 0x0a, 0x05, 0x5a, 0x10, 0xa0, 0x88,
+      0x69, 0x0c, 0xc3, 0x03, 0x08, 0x00, 0x45, 0x00,
+      0x00, 0x34, 0x70, 0x90, 0x40, 0x00, 0x40, 0x06,
+      0x35, 0x08, 0x0a, 0x36, 0xc1, 0x21, 0x4e, 0x28,
+      0x7b, 0xac
+    };
+    ByteContainer buf((const char *) base, sizeof(base));
+    buf.append(option_value(options_words));
+    size_t IHL_words = options_words + 5;
+    assert(IHL_words < 16u);
+    buf[14] = (buf[14] & 0xf0) | (static_cast<char>(IHL_words));
+    return buf;
+  }
+
+  Packet get_pkt(const ByteContainer &buf) const {
+    Packet pkt = Packet(
+        0, 0, 0, buf.size(),
+        PacketBuffer(512, buf.data(), buf.size())
+    );
+    return pkt;
+  }
+
+  void check_base(const PHV &phv, size_t option_words) {
+    const Header &ethernet_hdr = phv.get_header(ethernetHeader);
+    ASSERT_TRUE(ethernet_hdr.is_valid());
+    const Header &ipv4_hdr = phv.get_header(ipv4Header);
+    ASSERT_TRUE(ipv4_hdr.is_valid());
+    ASSERT_TRUE(ipv4_hdr.is_VL_header());
+    ASSERT_EQ(20 + option_words * 4, ipv4_hdr.get_nbytes_packet());
+  }
+
+  void check_option(const PHV &phv, size_t option_words,
+		    const ByteContainer &v) {
+    assert(v.size() == option_words * 4);
+    const Field &f_options = phv.get_field(ipv4Header, 12);
+    ASSERT_EQ(option_words * 4 * 8, f_options.get_nbits());
+    ASSERT_EQ(option_words * 4, f_options.get_nbytes());
+    ASSERT_EQ(v, f_options.get_bytes());
+  }
+
+  template<size_t OptionWords>
+  void test() {
+    const ByteContainer buf = get_ipv4_bytes(OptionWords);
+    Packet packet = get_pkt(buf);
+    const PHV &phv = *packet.get_phv();
+
+    parser.parse(&packet);
+
+    check_base(phv, OptionWords);
+    ByteContainer expected_value = option_value(OptionWords);
+    check_option(phv, OptionWords, expected_value);
+  }
+
+  virtual void TearDown() {
+    Packet::unset_phv_factory();
+  }
+};
+
+TEST_F(IPv4VLParsingTest, NoOption) {
+  test<0u>();
+}
+
+TEST_F(IPv4VLParsingTest, SmallOption) {
+  test<3u>();
+}
+
+TEST_F(IPv4VLParsingTest, BigOption) {
+  test<9u>(); // max value
+}
+
+TEST_F(IPv4VLParsingTest, Deparser) {
+  const size_t option_words = 4;
+  const ByteContainer buf = get_ipv4_bytes(option_words);
+  const ByteContainer buf_save = buf;
+  Packet packet = get_pkt(buf);
+  const PHV &phv = *packet.get_phv();
+
+  parser.parse(&packet);
+
+  check_base(phv, option_words);
+  ByteContainer expected_value = option_value(option_words);
+  check_option(phv, option_words, expected_value);
+
+  deparser.deparse(&packet);
+
+  ASSERT_EQ(buf_save.size(), packet.get_data_size());
+  ASSERT_EQ(0, memcmp(buf_save.data(), packet.data(), buf_save.size()));
 }
