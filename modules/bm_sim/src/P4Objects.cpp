@@ -225,7 +225,7 @@ int P4Objects::init_objects(std::istream &is,
 	  }
 	  else if(src_type == "expression") {
 	    ArithExpression expr;
-	    build_expression(cfg_src, &expr);
+	    build_expression(cfg_src["value"], &expr);
 	    expr.build();
 	    parse_state->add_set_from_expression(
               std::get<0>(dest), std::get<1>(dest), expr
@@ -284,15 +284,21 @@ int P4Objects::init_objects(std::istream &is,
       for(const auto &cfg_transition : cfg_transitions) {
 
       	const string value_hexstr = cfg_transition["value"].asString();
-      	// ignore mask for now
+
 	const string next_state_name = cfg_transition["next_state"].asString();
       	const ParseState *next_state = current_parse_states[next_state_name];
 
 	if(value_hexstr == "default") {
 	  parse_state->set_default_switch_case(next_state);
 	}
-	else {
+	else if(cfg_transition["mask"].isNull()) {
 	  parse_state->add_switch_case(ByteContainer(value_hexstr), next_state);
+	}
+	else {
+	  const string mask_hexstr = cfg_transition["mask"].asString();
+	  parse_state->add_switch_case_with_mask(ByteContainer(value_hexstr),
+						 ByteContainer(mask_hexstr),
+						 next_state);
 	}
       }
     }
@@ -600,7 +606,7 @@ int P4Objects::init_objects(std::istream &is,
 	}
 	const Json::Value &cfg_table_selector = cfg_table["selector"];
 	const string selector_algo = cfg_table_selector["algo"].asString();
-	// algo is ignore for now, we always use XXH64
+	// algo is ignored for now, we always use XXH64
 	(void) selector_algo;
 	const Json::Value &cfg_table_selector_input = cfg_table_selector["input"];
 
