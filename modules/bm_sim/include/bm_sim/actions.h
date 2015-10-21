@@ -131,15 +131,12 @@ struct ActionEngineState {
   PHV &phv;
   const ActionData &action_data;
   const std::vector<Data> &const_values;
-  std::vector<Data> &data_tmps;
 
   ActionEngineState(Packet *pkt,
 		    const ActionData &action_data,
-		    const std::vector<Data> &const_values,
-		    std::vector<Data> &data_tmps)
+		    const std::vector<Data> &const_values)
     : pkt(*pkt), phv(*pkt->get_phv()),
-      action_data(action_data), const_values(const_values),
-      data_tmps(data_tmps) {}
+      action_data(action_data), const_values(const_values) {}
 };
 
 struct ActionParamWithState {
@@ -154,6 +151,11 @@ struct ActionParamWithState {
 
   /* If you want to modify it, don't ask for data..., can I improve this? */
   operator const Data &() {
+    // thread_local sounds like a good choice here
+    // alternative would be to have one vector for each ActionFnEntry
+    static thread_local unsigned int data_temps_size = 4;
+    static thread_local std::vector<Data> data_temps(data_temps_size);
+
     /* Should probably be able to return a register reference here, but not
        needed right now */
     switch(ap.tag) {
@@ -164,9 +166,13 @@ struct ActionParamWithState {
     case ActionParam::ACTION_DATA:
       return state.action_data.get(ap.action_data_offset);
     case ActionParam::EXPRESSION:
-      ap.expression.ptr->eval(state.phv, &state.data_tmps[ap.expression.offset],
+      while(data_temps_size <= ap.expression.offset) {
+	data_temps.emplace_back();
+	data_temps_size++;
+      }
+      ap.expression.ptr->eval(state.phv, &data_temps[ap.expression.offset],
 			      state.action_data.action_data);
-      return state.data_tmps[ap.expression.offset];
+      return data_temps[ap.expression.offset];
     default:
       assert(0);
     }
@@ -349,9 +355,7 @@ private:
   std::vector<std::unique_ptr<ArithExpression> > expressions{};
 
 private:
-  // thread_local sounds like a good choice here
-  // alternative would be to have one vector in for each ActionFnEntry
-  static thread_local std::vector<Data> data_tmps;
+  static size_t nb_data_tmps;
 };
 
 
@@ -370,8 +374,7 @@ public:
   {
     if(!action_fn) return; // happens when no default action specified... TODO
     ELOGGER->action_execute(*pkt, *action_fn, action_data);
-    ActionEngineState state(pkt, action_data,
-			    action_fn->const_values, ActionFn::data_tmps);
+    ActionEngineState state(pkt, action_data, action_fn->const_values);
     auto &primitives = action_fn->primitives;
     size_t param_offset = 0;
     for(auto primitive_it = primitives.begin();

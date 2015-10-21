@@ -20,8 +20,7 @@
 
 #include "bm_sim/actions.h"
 
-// thread_local needed here, to match actions.h definition
-thread_local std::vector<Data> ActionFn::data_tmps = {};
+size_t ActionFn::nb_data_tmps = 0;
 
 void ActionFn::parameter_push_back_field(header_id_t header, int field_offset) {
   ActionParam param;
@@ -94,9 +93,9 @@ void ActionFn::parameter_push_back_expression(
   for(const ActionParam &p : params)
     if(p.tag == ActionParam::EXPRESSION) nb_expression_params += 1;
 
-  assert(nb_expression_params <= ActionFn::data_tmps.size());
-  if(nb_expression_params == ActionFn::data_tmps.size())
-    ActionFn::data_tmps.emplace_back();
+  assert(nb_expression_params <= ActionFn::nb_data_tmps);
+  if(nb_expression_params == ActionFn::nb_data_tmps)
+    ActionFn::nb_data_tmps += 1;
 
   expressions.push_back(std::move(expr));
   ActionParam param;
