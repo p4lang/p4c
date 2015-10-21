@@ -83,6 +83,8 @@ Packet
 Packet::clone_and_reset_metadata(packet_id_t new_copy_id) const {
   Packet pkt(ingress_port, packet_id, new_copy_id, ingress_length,
 	     buffer.clone(buffer.get_data_size()));
+  // TODO: optimize this
+  pkt.phv->copy_headers(*phv);
   pkt.phv->reset_metadata();
   return pkt;
 }
