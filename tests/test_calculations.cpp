@@ -82,11 +82,11 @@ protected:
 TEST_F(CalculationTest, SimpleTest) {
   BufBuilder builder;
 
-  builder.push_back_field(testHeader1, 0, 16); // f16
-  builder.push_back_field(testHeader1, 1, 48); // f48
-  builder.push_back_field(testHeader1, 3, 32); // f32_2
+  builder.push_back_field(testHeader1, 0); // f16
+  builder.push_back_field(testHeader1, 1); // f48
+  builder.push_back_field(testHeader1, 3); // f32_2
 
-  builder.push_back_field(testHeader2, 2, 32); // f32_1
+  builder.push_back_field(testHeader2, 2); // f32_1
 
   Calculation<hash_t> calc(builder);
 
@@ -119,8 +119,8 @@ TEST_F(CalculationTest, SimpleTest) {
 TEST_F(CalculationTest, NonAlignedTest) {
   BufBuilder builder;
 
-  builder.push_back_field(testHeader1, 4, 5); // f5
-  builder.push_back_field(testHeader1, 5, 19); // f19
+  builder.push_back_field(testHeader1, 4); // f5
+  builder.push_back_field(testHeader1, 5); // f19
 
   Calculation<hash_t> calc(builder);;
 
@@ -151,10 +151,10 @@ TEST_F(CalculationTest, WithConstant) {
 
   ByteContainer constant("0x12ab");
 
-  builder.push_back_field(testHeader1, 0, 16); // f16
-  builder.push_back_field(testHeader1, 1, 48); // f48
+  builder.push_back_field(testHeader1, 0); // f16
+  builder.push_back_field(testHeader1, 1); // f48
   builder.push_back_constant(constant, 16);
-  builder.push_back_field(testHeader1, 3, 32); // f32_2
+  builder.push_back_field(testHeader1, 3); // f32_2
 
   Calculation<hash_t> calc(builder);
 
@@ -186,10 +186,10 @@ TEST_F(CalculationTest, WithConstant) {
 TEST_F(CalculationTest, WithPayload) {
   BufBuilder builder;
 
-  builder.push_back_field(testHeader1, 0, 16); // f16
-  builder.push_back_field(testHeader1, 1, 48); // f48
-  builder.push_back_field(testHeader1, 3, 32); // f32_2
-  builder.push_back_header(testHeader2, header_size * 8);
+  builder.push_back_field(testHeader1, 0); // f16
+  builder.push_back_field(testHeader1, 1); // f48
+  builder.push_back_field(testHeader1, 3); // f32_2
+  builder.push_back_header(testHeader2);
   builder.append_payload();
 
   Calculation<hash_t> calc(builder);

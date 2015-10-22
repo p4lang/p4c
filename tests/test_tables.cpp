@@ -746,9 +746,9 @@ protected:
 
     BufBuilder builder;
     
-    builder.push_back_field(testHeader1, 1, 48); // h1.f48
-    builder.push_back_field(testHeader2, 0, 16); // h2.f16
-    builder.push_back_field(testHeader2, 1, 48); // h2.f48
+    builder.push_back_field(testHeader1, 1); // h1.f48
+    builder.push_back_field(testHeader2, 0); // h2.f16
+    builder.push_back_field(testHeader2, 1); // h2.f48
 
     std::unique_ptr<Calculation<hash_t> > calc(new Calculation<hash_t>(builder));
     calc->set_compute_fn(hash::xxh64<hash_t>);

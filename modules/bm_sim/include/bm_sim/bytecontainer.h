@@ -149,6 +149,22 @@ public:
     return bytes[n];
   }
 
+  reference back() {
+    return bytes.back();
+  }
+
+  const_reference back() const {
+    return bytes.back();
+  }
+
+  reference front() {
+    return bytes.front();
+  }
+
+  const_reference front() const {
+    return bytes.front();
+  }
+
   char* data() noexcept {
     return bytes.data();
   }

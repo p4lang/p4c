@@ -118,21 +118,21 @@ protected:
     phv_factory.push_back_header("meta", metaHeader, metaHeaderType, true);
 
     BufBuilder tcp_cksum_engine_builder;
-    tcp_cksum_engine_builder.push_back_field(ipv4Header, 10, 32); // ipv4.srcAddr
-    tcp_cksum_engine_builder.push_back_field(ipv4Header, 11, 32); // ipv4.dstAddr
+    tcp_cksum_engine_builder.push_back_field(ipv4Header, 10); // ipv4.srcAddr
+    tcp_cksum_engine_builder.push_back_field(ipv4Header, 11); // ipv4.dstAddr
     tcp_cksum_engine_builder.push_back_constant(ByteContainer({'\x00'}), 8);
-    tcp_cksum_engine_builder.push_back_field(ipv4Header, 8, 8); // ipv4.protocol
-    tcp_cksum_engine_builder.push_back_field(metaHeader, 0, 16); // for tcpLength
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 0, 16); // tcp.srcPort
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 1, 16); // tcp.dstPort
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 2, 32); // tcp.seqNo
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 3, 32); // tcp.ackNo
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 4, 4); // tcp.dataOffset
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 5, 4); // tcp.res
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 6, 8); // tcp.flags
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 7, 16); // tcp.window
+    tcp_cksum_engine_builder.push_back_field(ipv4Header, 8); // ipv4.protocol
+    tcp_cksum_engine_builder.push_back_field(metaHeader, 0); // for tcpLength
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 0); // tcp.srcPort
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 1); // tcp.dstPort
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 2); // tcp.seqNo
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 3); // tcp.ackNo
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 4); // tcp.dataOffset
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 5); // tcp.res
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 6); // tcp.flags
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 7); // tcp.window
     // skip tcp.checksum of course
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 9, 16); // tcp.urgentPtr
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 9); // tcp.urgentPtr
     // no headers after that, directly payload
     tcp_cksum_engine_builder.append_payload();
 

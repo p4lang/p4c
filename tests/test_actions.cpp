@@ -320,8 +320,8 @@ TEST_F(ActionsTest, ModifyFieldWithHashBasedOffset) {
   uint64_t size = 65536; // 16 bits
 
   BufBuilder builder;
-  builder.push_back_field(testHeader1, 0, 32);
-  builder.push_back_field(testHeader1, 4, 128);
+  builder.push_back_field(testHeader1, 0);
+  builder.push_back_field(testHeader1, 4);
   NamedCalculation calculation("test_calculation", 0, builder);
 
   ModifyFieldWithHashBasedOffset primitive;
