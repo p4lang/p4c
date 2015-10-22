@@ -90,27 +90,22 @@ struct BufBuilder
 
   std::vector<boost::variant<field_t, constant_t, header_t> > entries{};
   bool with_payload{false};
-  size_t nbits_key{0};
 
-  void push_back_field(header_id_t header, int field_offset, size_t nbits) {
+  void push_back_field(header_id_t header, int field_offset) {
     field_t f = {header, field_offset};
     entries.emplace_back(f);
-    nbits_key += nbits;
   }
 
   void push_back_constant(const ByteContainer &v, size_t nbits) {
     // TODO: general case
-    assert(nbits_key % 8 == 0 && nbits % 8 == 0);
+    assert(nbits % 8 == 0);
     constant_t c = {v, nbits};
     entries.emplace_back(c);
-    nbits_key += nbits;
   }
 
-  void push_back_header(header_id_t header, size_t nbits) {
-    assert(nbits_key % 8 == 0 && nbits % 8 == 0);
+  void push_back_header(header_id_t header) {
     header_t h = {header};
     entries.emplace_back(h);
-    nbits_key += nbits;
   }
 
   void append_payload() {
@@ -118,50 +113,60 @@ struct BufBuilder
   }
 
   struct Deparse : public boost::static_visitor<> {
-    Deparse(const PHV &phv, char *buf)
+    Deparse(const PHV &phv, ByteContainer *buf)
       : phv(phv), buf(buf) { }
+
+    char *extend(int more_bits) {
+      int nbits_ = nbits + more_bits;
+      buf->resize((nbits_ + 7) / 8);
+      char *ptr = buf->data() + (nbits / 8);
+      nbits = nbits_;
+      // needed ?
+      // if(new_bytes > 0) buf->back() = '\x00';
+      return ptr;
+    }
+
+    int get_offset() const {
+      return nbits % 8;
+    }
     
     void operator()(const field_t &f) {
-      const Field &field = phv.get_field(f.header, f.field_offset);
+      const Header &header = phv.get_header(f.header);
+      if(!header.is_valid()) return;
+      const Field &field = header.get_field(f.field_offset);
       // taken from headers.cpp::deparse
-      offset += field.deparse(buf, offset);
-      buf += offset / 8;
-      offset = offset % 8;
+      field.deparse(extend(field.get_nbits()), get_offset());
     }
 
     void operator()(const constant_t &c) {
-      assert(offset == 0);
-      std::copy(c.v.begin(), c.v.end(), buf);
-      buf += (c.nbits / 8);
+      assert(get_offset() == 0);
+      std::copy(c.v.begin(), c.v.end(), extend(c.nbits));
     }
 
     void operator()(const header_t &h) {
-      assert(offset == 0);
+      assert(get_offset() == 0);
       const Header &header = phv.get_header(h.header);
       if(header.is_valid()) {
-	header.deparse(buf);
-	buf += header.get_nbytes_packet();
+	header.deparse(extend(header.get_nbytes_packet() * 8));
       }
     }
 
-  Deparse(const Deparse &other) = delete;
-  Deparse &operator=(const Deparse &other) = delete;
+    Deparse(const Deparse &other) = delete;
+    Deparse &operator=(const Deparse &other) = delete;
 
-  Deparse(Deparse &&other) = delete;
-  Deparse &operator=(Deparse &&other) = delete;
+    Deparse(Deparse &&other) = delete;
+    Deparse &operator=(Deparse &&other) = delete;
 
     const PHV &phv;
-    char *buf;
-    int offset{0};
+    ByteContainer *buf;
+    int nbits{0};
   };
 
   void operator()(const Packet &pkt, ByteContainer *buf) const
   {
-    size_t nbytes = get_nbytes_key();
-    buf->resize(nbytes);
-    (*buf)[nbytes - 1] = '\x00';
+    buf->clear();
     const PHV *phv = pkt.get_phv();
-    Deparse visitor(*phv, buf->data());
+    Deparse visitor(*phv, buf);
     std::for_each(entries.begin(), entries.end(), boost::apply_visitor(visitor));
     if(with_payload) {
       size_t curr = buf->size();
@@ -170,8 +175,6 @@ struct BufBuilder
       std::copy(pkt.data(), pkt.data() + psize, buf->begin() + curr);
     }
   }
-
-  size_t get_nbytes_key() const { return (nbits_key + 7) / 8; }
 };
 
 
@@ -183,7 +186,7 @@ template <typename T,
 class Calculation_ {
 public:
   Calculation_(const BufBuilder &builder)
-    : builder(builder), nbytes(builder.get_nbytes_key()) { }
+    : builder(builder) { }
 
   void set_compute_fn(const CFn<T> &fn) { compute_fn = fn; }
 
@@ -199,7 +202,6 @@ protected:
 private:
   CFn<T> compute_fn{};
   BufBuilder builder;
-  size_t nbytes;
 };
 
 template <typename T,
