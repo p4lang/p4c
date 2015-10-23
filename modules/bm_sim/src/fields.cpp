@@ -96,7 +96,7 @@ int Field::deparse(char *data, int hdr_offset) const {
   }
   else if (offset > 0) { /* shift left */
     /* this assumes that the packet was memset to 0, TODO: improve */
-    for (i = 0; i < hdr_bytes - 1; i++) {
+    for(i = 0; i < hdr_bytes - 1; i++) {
       data[i] = (ubytes[i] << offset) | (ubytes[i + 1] >> (8 - offset));
     }
     if(i > 0) data[i] = 0;
@@ -114,12 +114,12 @@ int Field::deparse(char *data, int hdr_offset) const {
       data[1] = ubytes[0] << (8 - offset);
       return nbits;
     }
-    for (i = 1; i < hdr_bytes - 1; i++) {
+    for(i = 1; i < hdr_bytes - 1; i++) {
       data[i] = (ubytes[i - 1] << (8 - offset)) | (ubytes[i] >> offset);
     }
-    int tail_offset = (hdr_bytes >> 3) - (hdr_offset + nbits);
+    int tail_offset = (hdr_bytes << 3) - (hdr_offset + nbits);
     data[i] &= ((1 << tail_offset) - 1);
-    data[i] |= (ubytes[i - 1] << (8 - offset)) | (ubytes[i] >> offset);
+    data[i] |= (ubytes[i - 1] << (8 - offset));
   }
 
   return nbits;
