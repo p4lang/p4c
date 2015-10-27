@@ -25,6 +25,12 @@
 #include "bm_sim/P4Objects.h"
 #include "bm_sim/options_parse.h"
 
+static void
+packet_handler(int port_num, const char *buffer, int len, void *cookie)
+{
+    ((Switch *) cookie)->receive(port_num, buffer, len);
+}
+
 Switch::Switch(bool enable_swap)
   : DevMgr(),
     enable_swap(enable_swap) {
@@ -56,8 +62,6 @@ Switch::init_objects(const std::string &json_path) {
   if(status != 0) return status;
   Packet::set_phv_factory(p4objects->get_phv_factory());
 
-  // TODO: is this the right place to do this?
-  set_packet_handler(&Switch::packet_handler, (void *) this);
   return status;
 }
 
@@ -67,19 +71,42 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
   parser.parse(argc, argv);
   int status = init_objects(parser.config_file_path);
   if(status != 0) return status;
+
+  setUseFiles(parser.useFiles, parser.waitTime);
+
   for(const auto &iface : parser.ifaces) {
     std::cout << "Adding interface " << iface.second
-	      << " as port " << iface.first << std::endl;
-    if(parser.pcap) {
-      const std::string pcap = iface.second + ".pcap";
-      port_add(iface.second, iface.first, pcap.c_str());
+	      << " as port " << iface.first
+              << (parser.useFiles ? " (files)" : "")
+              << std::endl;
+
+    const char* inFileName = NULL;
+    const char* outFileName = NULL;
+
+    std::string inFile;
+    std::string outFile;
+
+    if (parser.useFiles)
+    {
+	inFile = iface.second + "_in.pcap";
+	inFileName = inFile.c_str();
+	outFile = iface.second + "_out.pcap";
+	outFileName = outFile.c_str();
     }
-    else {
-      port_add(iface.second, iface.first, NULL);
+    else if (parser.pcap) {
+	inFile = iface.second + ".pcap";
+	inFileName = inFile.c_str();
+	outFileName = inFileName;
     }
+
+    port_add(iface.second, iface.first, inFileName, outFileName);
   }
   thrift_port = parser.thrift_port;
   device_id = parser.device_id;
+
+  // TODO: is this the right place to do this?
+  set_packet_handler(packet_handler, (void *) this);
+  start();
   return status;
 }
 

@@ -37,7 +37,8 @@ src/counters.cpp \
 src/dev_mgr.cpp \
 src/options_parse.cpp \
 src/ageing.cpp \
-src/expressions.cpp
+src/expressions.cpp \
+src/pcap_file.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -67,6 +68,7 @@ include/bm_sim/P4Objects.h \
 include/bm_sim/packet_buffer.h \
 include/bm_sim/packet.h \
 include/bm_sim/parser.h \
+include/bm_sim/pcap_file.h \
 include/bm_sim/phv.h \
 include/bm_sim/phv_forward.h \
 include/bm_sim/pipeline.h \

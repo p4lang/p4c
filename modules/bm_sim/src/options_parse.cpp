@@ -85,6 +85,9 @@ OptionsParser::parse(int argc, char *argv[])
      "Attach network interface <interface-name> as port <port-num> at startup. "
      "Can appear multiple times")
     ("pcap", "Generate pcap files for interfaces")
+    ("useFiles", po::value<int>(), "Read/write packets from files (interface X "
+     "corresponds to two files X_in.pcap and X_out.pcap).  Argument is the time"
+     "to wait (in seconds) before starting to process the packet files.")
     ("thrift-port", po::value<int>(),
      "TCP port on which to run the Thrift runtime server")
     ("device-id", po::value<int>(),
@@ -152,6 +155,14 @@ OptionsParser::parse(int argc, char *argv[])
 
   if(vm.count("pcap")) {
     pcap = true;
+  }
+
+  if(vm.count("useFiles"))
+  {
+    useFiles = true;
+    waitTime = vm["useFiles"].as<int>();
+    if (waitTime < 0)
+      waitTime = 0;
   }
 
   assert(vm.count("input-config"));

@@ -258,12 +258,6 @@ protected:
   }
 
 private:
-  static void packet_handler(int port_num, const char *buffer, int len,
-                             void *cookie) {
-    ((Switch *) cookie)->receive(port_num, buffer, len);
-  }
-
-private:
   MatchErrorCode get_mt_indirect(const std::string &table_name,
 				 MatchTableIndirect **table);
   MatchErrorCode get_mt_indirect_ws(const std::string &table_name,

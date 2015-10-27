@@ -23,9 +23,15 @@
 
 typedef struct bmi_interface_s bmi_interface_t;
 
+typedef enum
+{
+    bmi_input_dumper,
+    bmi_output_dumper
+}  bmi_dumper_kind_t;
+    
 int bmi_interface_create(bmi_interface_t **bmi, const char *device);
 
-int bmi_interface_add_dumper(bmi_interface_t *bmi, const char *filename);
+int bmi_interface_add_dumper(bmi_interface_t *bmi, const char *filename, bmi_dumper_kind_t dumper_kind);
 
 int bmi_interface_destroy(bmi_interface_t *bmi);
 

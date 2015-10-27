@@ -553,7 +553,7 @@ public:
     const char *pcap = NULL;
     if(pcap_path == "") pcap = pcap_path.c_str();
     DevMgr::ReturnCode error_code;
-    error_code = switch_->port_add(iface_name, port_num, pcap);
+    error_code = switch_->port_add(iface_name, port_num, pcap, pcap);
     if(error_code != DevMgr::ReturnCode::SUCCESS) {
       InvalidDevMgrOperation idmo;
       idmo.what = (DevMgrErrorCode::type) 1; // TODO
