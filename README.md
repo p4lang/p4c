@@ -187,7 +187,7 @@ document with detailed information.
 ### What else is new in bmv2 ?
 
 - Arithmetic is now possible on arbitrarily wide fields (no more limited to <=
-  32-bit fields).
+  32-bit fields) and **variable-length fields are now supported**.
 - We finally have unit tests!
 - While it is still incomplete, we provide a convenient 'event-logger' built on
   top of nanomsg. Every time a 'significant' event happens (e.g. table hit,
@@ -199,15 +199,9 @@ document with detailed information.
 No. Some features described in the P4 spec are missing compared to the original
 behavioral model:
 
-- mirroring, cloning, resubmit
+- resubmit
 - direct meters
-- registers, stateful memories (will be added soon)
 - parse value sets
-
-Some features which were absent in the original behavioral model are still
-missing:
-
-- variable length fields
 
 If you find more missing features or if you would like to request that a
 specific feature be added, please send us an email (p4-dev@p4.org) or submit an
