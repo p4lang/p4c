@@ -1,1 +1,1 @@
-SUBDIRS = gtest jsoncpp
+SUBDIRS = gtest jsoncpp spdlog

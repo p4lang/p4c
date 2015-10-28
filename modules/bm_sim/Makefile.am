@@ -1,4 +1,8 @@
-AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/include/ -I$(srcdir)/../bf_lpm_trie/include/ -I$(srcdir)/../BMI/include/
+AM_CPPFLAGS = -isystem $(top_srcdir)/third_party/jsoncpp/include \
+-I$(srcdir)/include/ \
+-I$(srcdir)/../bf_lpm_trie/include/ \
+-I$(srcdir)/../BMI/include/ \
+-I$(top_srcdir)/third_party/spdlog/include/
 AM_CPPFLAGS += $(DEBUG_CPPFLAGS)
 # I used to have -Weffc++ for this module. I felt that most of it was excessively
 # pedantic (like constructior initializers for non POD data), but it was
