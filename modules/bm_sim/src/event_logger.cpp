@@ -253,4 +253,4 @@ void EventLogger::action_execute(const Packet &packet,
 };
 
 // TODO: move this?
-EventLogger *logger = new EventLogger(std::move(TransportIface::create_instance<TransportNULL>("")));
+EventLogger *event_logger = new EventLogger(std::move(TransportIface::create_instance<TransportNULL>("")));

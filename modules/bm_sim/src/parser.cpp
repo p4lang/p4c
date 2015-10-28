@@ -31,6 +31,11 @@ ParserOpSet<field_t>::operator()(
   Field &f_dst = phv->get_field(dst.header, dst.offset);
   Field &f_src = phv->get_field(src.header, src.offset);
   f_dst.set(f_src);
+  BMLOG_DEBUG_PKT(
+    *pkt,
+    "Parser set: setting field ({}, {}) from field ({}, {}) ({})",
+    dst.header, dst.offset, src.header, src.offset, f_dst
+  );
 }
 
 template<>
@@ -43,6 +48,8 @@ ParserOpSet<Data>::operator()(
   PHV *phv = pkt->get_phv();
   Field &f_dst = phv->get_field(dst.header, dst.offset);
   f_dst.set(src);
+  BMLOG_DEBUG_PKT(*pkt, "Parser set: setting field ({}, {}) to {}",
+		  dst.header, dst.offset, f_dst);
 }
 
 template<>
@@ -73,6 +80,11 @@ ParserOpSet<ParserLookAhead>::operator()(
     src.peek(data, bc);
     f_dst.set(bc);
   }
+  BMLOG_DEBUG_PKT(
+    *pkt,
+    "Parser set: setting field ({}, {}) from lookahead ({}, {}), new value is {}",
+    dst.header, dst.offset, src.bit_offset, src.bitwidth, f_dst
+  );
 }
 
 // TODO: use pointer instead for ArithExpression?
@@ -86,6 +98,11 @@ ParserOpSet<ArithExpression>::operator()(
   PHV *phv = pkt->get_phv();
   Field &f_dst = phv->get_field(dst.header, dst.offset);
   src.eval(*phv, &f_dst);
+  BMLOG_DEBUG_PKT(
+    *pkt,
+    "Parser set: setting field ({}, {}) from expression, new value is {}",
+    dst.header, dst.offset, f_dst
+  );
 }
 
 bool ParseSwitchCase::match(const ByteContainer &input,
@@ -120,12 +137,22 @@ const ParseState *ParseState::operator()(Packet *pkt, const char *data,
   for (auto &parser_op : parser_ops)
     (*parser_op)(pkt, data + *bytes_parsed, bytes_parsed);
 
-  if(!has_switch) return default_next_state;
+  if(!has_switch) {
+    BMLOG_DEBUG_PKT(
+      *pkt,
+      "Parser state '{}' has no switch, going to default next state",
+      get_name()
+    );
+    return default_next_state;
+  }
 
   // build key
   static thread_local ByteContainer key;
   key.clear();
   key_builder(*phv, data + *bytes_parsed, key);
+
+  BMLOG_DEBUG_PKT(*pkt, "Parser state '{}': key is {}",
+		  get_name(), key.to_hex());
 
   // try the matches in order
   const ParseState *next_state = NULL;
@@ -137,14 +164,16 @@ const ParseState *ParseState::operator()(Packet *pkt, const char *data,
 
 void Parser::parse(Packet *pkt) const {
   ELOGGER->parser_start(*pkt, *this);
+  BMLOG_DEBUG_PKT(*pkt, "Parser '{}': start", get_name());
   const char *data = pkt->data();
   if(!init_state) return;
   const ParseState *next_state = init_state;
   size_t bytes_parsed = 0;
   while(next_state) {
     next_state = (*next_state)(pkt, data, &bytes_parsed);
-    // std::cout << "bytes parsed: " << bytes_parsed << std::endl;
+    BMLOG_TRACE("Bytes parsed: {}", bytes_parsed);
   }
   pkt->remove(bytes_parsed);
   ELOGGER->parser_done(*pkt, *this);
+  BMLOG_DEBUG_PKT(*pkt, "Parser '{}': end", get_name());
 }

@@ -21,9 +21,10 @@
 #ifndef _BM_CHECKSUMS_H_
 #define _BM_CHECKSUMS_H_
 
-#include "bm_sim/phv.h"
-#include "bm_sim/named_p4object.h"
-#include "bm_sim/calculations.h"
+#include "phv.h"
+#include "named_p4object.h"
+#include "calculations.h"
+#include "logger.h"
 
 class Checksum : public NamedP4Object{
 public:
@@ -33,11 +34,14 @@ public:
 
 public:
   void update(Packet *pkt) const {
+    BMLOG_DEBUG_PKT(*pkt, "Updating checksum '{}'", get_name());
     update_(pkt);
   }
 
   bool verify(const Packet &pkt) const {
-    return verify_(pkt);
+    bool valid = verify_(pkt);
+    BMLOG_DEBUG_PKT(pkt, "Verifying checksum '{}': {}", get_name(), valid);
+    return valid;
   }
 
 private:

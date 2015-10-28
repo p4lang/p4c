@@ -22,6 +22,7 @@
 
 #include "bm_sim/match_units.h"
 #include "bm_sim/match_tables.h"
+#include "bm_sim/logger.h"
 
 #define HANDLE_VERSION(h) (h >> 32)
 #define HANDLE_INTERNAL(h) (h & 0xffffffff)
@@ -119,6 +120,8 @@ MatchUnitAbstract<V>::lookup(const Packet &pkt)
   static thread_local ByteContainer key;
   key.clear();
   build_key(*pkt.get_phv(), key);
+
+  BMLOG_DEBUG_PKT(pkt, "Looking up key {}", key.to_hex());
 
   MatchUnitLookup res = lookup_key(key);
   if(res.found()) {

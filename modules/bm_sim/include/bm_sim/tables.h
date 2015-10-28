@@ -26,6 +26,7 @@
 #include "control_flow.h"
 #include "named_p4object.h"
 #include "match_tables.h"
+#include "logger.h"
 
 // from http://stackoverflow.com/questions/87372/check-if-a-class-has-a-member-function-of-a-given-signature
 
@@ -52,6 +53,7 @@ public:
       match_table(std::move(match_table)) { }
 
   const ControlFlowNode *operator()(Packet *pkt) const override {
+    BMLOG_TRACE_PKT(*pkt, "Applying table '{}'", get_name());
     return match_table->apply_action(pkt);
   }
 

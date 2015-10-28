@@ -19,6 +19,7 @@
  */
 
 #include "bm_sim/match_tables.h"
+#include "bm_sim/logger.h"
 
 namespace {
 
@@ -61,10 +62,15 @@ MatchTableAbstract::apply_action(Packet *pkt)
   // we're holding the lock for this...
   if(hit) {
     ELOGGER->table_hit(*pkt, *this, handle);
+    BMLOG_DEBUG_PKT(*pkt, "Table '{}': hit with handle {}",
+		      get_name(), handle);
   }
   else {
     ELOGGER->table_miss(*pkt, *this);
+    BMLOG_DEBUG_PKT(*pkt, "Table '{}': miss", get_name());
   }
+
+  BMLOG_DEBUG_PKT(*pkt, "Action entry is {}", action_entry);
 
   action_entry.action_fn(pkt);
 

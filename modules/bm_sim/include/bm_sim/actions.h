@@ -404,6 +404,10 @@ public:
   }
   
   void dump(std::ostream &stream) const {
+    if(action_fn == nullptr) {
+      stream << "NULL";
+      return;
+    }
     stream << action_fn->name << " - ";
     std::ios_base::fmtflags ff;
     ff = std::cout.flags();

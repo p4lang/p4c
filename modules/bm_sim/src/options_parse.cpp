@@ -93,7 +93,11 @@ OptionsParser::parse(int argc, char *argv[])
     ("device-id", po::value<int>(),
      "Device ID, used to identify the device in IPC messages (default 0)")
     ("nanolog", po::value<std::string>(),
-     "IPC socket to use for nanomsg pub/sub logs (default: no nanomsg logging");
+     "IPC socket to use for nanomsg pub/sub logs (default: no nanomsg logging")
+    ("log-console",
+     "Enable logging on stdout")
+    ("log-file", po::value<std::string>(),
+     "Enable logging to given file");
 
   po::options_description hidden;
   hidden.add_options()
@@ -142,9 +146,22 @@ OptionsParser::parse(int argc, char *argv[])
   //   .append("-log.ipc");
   if(vm.count("nanolog")) {
     event_logger_addr = vm["nanolog"].as<std::string>();
-    logger = new EventLogger(
+    event_logger = new EventLogger(
       TransportIface::create_instance<TransportNanomsg>(event_logger_addr)
     );
+  }
+
+  if(vm.count("log-console") && vm.count("log-file")) {
+    std::cout << "Error: --log-console and --log-file are exclusive\n";
+    exit(1);
+  }
+
+  if(vm.count("log-console")) {
+    console_logging = true;
+  }
+
+  if(vm.count("log-file")) {
+    file_logger = vm["log-file"].as<std::string>();
   }
 
   if(vm.count("interface")) {

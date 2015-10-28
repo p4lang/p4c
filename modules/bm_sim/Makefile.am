@@ -42,7 +42,8 @@ src/dev_mgr.cpp \
 src/options_parse.cpp \
 src/ageing.cpp \
 src/expressions.cpp \
-src/pcap_file.cpp
+src/pcap_file.cpp \
+src/logger.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -63,6 +64,7 @@ include/bm_sim/fields.h \
 include/bm_sim/field_lists.h \
 include/bm_sim/handle_mgr.h \
 include/bm_sim/headers.h \
+include/bm_sim/logger.h \
 include/bm_sim/lpm_trie.h \
 include/bm_sim/meters.h \
 include/bm_sim/named_p4object.h \

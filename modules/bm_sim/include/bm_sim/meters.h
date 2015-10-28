@@ -27,6 +27,7 @@
 
 #include "named_p4object.h"
 #include "packet.h"
+#include "logger.h"
 
 /* I initially implemented this with template values: meter type and rate
    count. I thought it would potentially speed up operations. However, it meant
@@ -172,6 +173,7 @@ public:
   }
 
   color_t execute_meter(const Packet &pkt, size_t idx) {
+    BMLOG_DEBUG_PKT(pkt, "Executing meter {}[{}]", get_name(), idx);
     return meters[idx].execute(pkt);
   }
 

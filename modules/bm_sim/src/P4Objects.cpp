@@ -270,7 +270,8 @@ int P4Objects::init_objects(std::istream &is,
 	}
       }
 
-      parse_state->set_key_builder(key_builder);
+      if(cfg_transition_key.size() > 0u)
+	parse_state->set_key_builder(key_builder);
 
       parse_states.push_back(unique_ptr<ParseState>(parse_state));
       current_parse_states[parse_state_name] = parse_state;

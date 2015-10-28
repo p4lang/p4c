@@ -61,6 +61,8 @@ private:
   bool useFiles{false}; // if true read/write packets from files instead of interfaces
   int waitTime{0};      // Time to wait (in seconds) before starting packet processing
   std::string event_logger_addr{};
+  std::string file_logger{};
+  bool console_logging{false};
 };
 
 #endif
