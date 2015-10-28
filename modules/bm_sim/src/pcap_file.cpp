@@ -369,14 +369,14 @@ void PcapFilesReader::start()
     }
   }
 
-#if DEBUG_TIMING
-  std::cout << "First packet time " << PcapPacket::timevalToString(firstTime) << std::endl;
-#endif
   
-  firstPacketTime = *firstTime;
   if (nonEmptyFiles > 0)
   {
     assert(firstTime != nullptr);
+    firstPacketTime = *firstTime;
+#if DEBUG_TIMING
+    std::cout << "First packet time " << PcapPacket::timevalToString(firstTime) << std::endl;
+#endif
   }
 
   if (started)
@@ -388,7 +388,7 @@ void PcapFilesReader::start()
 }
 
 
-IPacketHandler::ReturnCode
+PacketDispatcherInterface::ReturnCode
 PcapFilesReader::set_packet_handler(PacketHandler hnd, void* ck)
 {
   assert(hnd);

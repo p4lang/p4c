@@ -31,7 +31,7 @@ extern "C" {
 }
 
 class DevMgrInterface
-    : public IPacketHandler
+    : public PacketDispatcherInterface
 {
 public:
   typedef unsigned int port_t;
