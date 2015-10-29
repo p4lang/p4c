@@ -179,10 +179,10 @@ public:
   mbr_t get_nth(size_t n) const {
     assert(n <= count());
     int Rc;
-    mbr_t mbr;
+    Word_t mbr;
     J1BC(Rc, members, n + 1, mbr);
     assert(Rc == 1);
-    return mbr;
+    return static_cast<mbr_t>(mbr);
   }
 
   // iterators
