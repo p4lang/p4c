@@ -44,7 +44,7 @@ class Conditional;
 class Checksum;
 class ActionFn;
 
-typedef uintptr_t entry_handle_t;
+typedef uint64_t entry_handle_t;
 
 class EventLogger {
 public:
