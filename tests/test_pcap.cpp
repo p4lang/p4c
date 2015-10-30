@@ -20,15 +20,10 @@
 
 // Google Test fixture for pcap tests
 class PcapTest : public ::testing::Test {
- protected:
-  PcapTest() :
-    testDataFolder{"testdata"},
-    testfile1{"en0.pcap"},
-    testfile2{"lo0.pcap"},
-    tmpfile{"tmp.pcap"},
-    received{0},
-    receiver{nullptr}
-  {}
+protected:
+  PcapTest()
+    : testDataFolder("testdata"), testfile1("en0.pcap"), testfile2("lo0.pcap"),
+      tmpfile("tmp.pcap"), received(0), receiver(nullptr) {}
 
   virtual void SetUp()  {}
 
@@ -53,14 +48,14 @@ class PcapTest : public ::testing::Test {
     receiver = recv;
   }
   
- public:
+public:
   int receive(int port_num, const char *buffer, int len) {
     received++;
     if (receiver != nullptr)
       receiver->send_packet(port_num, buffer, len);
   }
 
- protected:
+protected:
   PacketReceiverInterface* receiver;
   int received;
   std::string testDataFolder;
@@ -70,23 +65,26 @@ class PcapTest : public ::testing::Test {
 };
 
 // exit codes are based on the cmp file comparison utility
-#define OK 0
-#define DIFFERENT 1
-#define EXCEPTION 2
+// #define OK 0
+// #define DIFFERENT 1
+// #define EXCEPTION 2
 
 class PcapFileComparator
 {
- private:
+public:
+  enum class Status { OK, DIFFERENT, EXCEPTION };
+
+private:
   bool verbose;
   unsigned packetIndex;
 
-  int reportDifference(std::string message) {
+  Status reportDifference(std::string message) {
     if (this->verbose)
       std::cerr << message << std::endl;
-    return DIFFERENT;
+    return Status::DIFFERENT;
   }
 
-  int comparePackets(std::unique_ptr<PcapPacket> p1, std::unique_ptr<PcapPacket> p2) {
+  Status comparePackets(std::unique_ptr<PcapPacket> p1, std::unique_ptr<PcapPacket> p2) {
     unsigned p1len = p1->getLength();
     unsigned p2len = p2->getLength();
 
@@ -100,16 +98,14 @@ class PcapFileComparator
       return this->reportDifference(std::string("Packet with index ") + std::to_string(this->packetIndex) + " differs ");
     }
 
-    return OK;
+    return Status::OK;
   }
     
- public:
+public:
   PcapFileComparator(bool verbose)
-      : verbose(verbose),
-        packetIndex(0)
-  {}
+      : verbose(verbose), packetIndex(0) {}
 
-  int compare(std::string file1, std::string file2) {
+  Status compare(std::string file1, std::string file2) {
     PcapFileIn pf1(0, file1);
     PcapFileIn pf2(0, file2);
 
@@ -130,14 +126,14 @@ class PcapFileComparator
       std::unique_ptr<PcapPacket> p1 = pf1.current();
       std::unique_ptr<PcapPacket> p2 = pf2.current();
 
-      int cp = this->comparePackets(std::move(p1), std::move(p2));
-      if (cp != OK)
+      Status cp = this->comparePackets(std::move(p1), std::move(p2));
+      if (cp != Status::OK)
         return cp;
 
       this->packetIndex++;
     }
         
-    return OK;
+    return Status::OK;
   }
 };
 
@@ -196,6 +192,8 @@ TEST_F(PcapTest, MergeFiles) {
 }
 
 TEST_F(PcapTest, Write) {
+  typedef PcapFileComparator::Status Status;
+
   PcapFilesReader reader(false, 0);
   reader.addFile(0, getFile1());
   reader.addFile(1, getFile2());
@@ -210,6 +208,6 @@ TEST_F(PcapTest, Write) {
   setReceiver(nullptr);
 
   PcapFileComparator comparator(false);
-  int comparison = comparator.compare(getFile1(), getTmpFile());
-  ASSERT_EQ(comparison, 0);
+  Status comparison = comparator.compare(getFile1(), getTmpFile());
+  ASSERT_EQ(Status::OK, comparison);
 }
