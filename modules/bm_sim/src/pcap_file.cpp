@@ -68,10 +68,20 @@ PcapFileIn::PcapFileIn(unsigned port, std::string filename)
 }
 
 
-PcapFileIn::~PcapFileIn()
+void
+PcapFileIn::deallocate()
 {
   if (pcap != nullptr)
     pcap_close(pcap);
+  pcap = nullptr;
+  current_header = nullptr;
+  current_data = nullptr;
+}
+
+
+PcapFileIn::~PcapFileIn()
+{
+  deallocate();
 }
 
 
@@ -79,7 +89,7 @@ void
 PcapFileIn::open()
 {
   char errbuf[PCAP_ERRBUF_SIZE];
-  
+
   pcap = pcap_open_offline(filename.c_str(), errbuf);
   if (pcap == nullptr)
     bm_fatal_error(errbuf);
@@ -89,8 +99,7 @@ PcapFileIn::open()
 void
 PcapFileIn::reset()
 {
-  pcap = nullptr;
-  current_header = nullptr;
+  deallocate();
   state = State::Uninitialized;
   open();
 }
@@ -363,8 +372,10 @@ PcapFilesReader::set_packet_handler(PacketHandler hnd, void* ck)
 PcapFileOut::PcapFileOut(unsigned port, std::string filename)
   : PcapFileBase(port, filename)
 {
-  pcap_t* fake = pcap_open_dead(0, 0);
-  dumper = pcap_dump_open(fake, filename.c_str());
+  pcap = pcap_open_dead(0, 0);
+  if (pcap == nullptr)
+    bm_fatal_error(std::string("Could not open file ") + filename + " for writing");
+  dumper = pcap_dump_open(pcap, filename.c_str());
   if (dumper == nullptr)
     bm_fatal_error(std::string("Could not open file ") + filename + " for writing");
 }
@@ -385,6 +396,7 @@ PcapFileOut::writePacket(const char* data, unsigned length)
 PcapFileOut::~PcapFileOut()
 {
   pcap_dump_close(dumper);
+  pcap_close(pcap);
 }
 
 

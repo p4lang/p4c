@@ -103,6 +103,7 @@ class PcapFileIn :
  private:
   void open();
   bool advance();
+  void deallocate();
 
   PcapFileIn(PcapFileIn const& ) = delete;
   PcapFileIn& operator=(PcapFileIn const&) = delete;
@@ -118,6 +119,7 @@ class PcapFileOut :
   void writePacket(const char* data, unsigned length);
     
  private:
+  pcap_t* pcap;
   pcap_dumper_t* dumper;
 
   PcapFileOut(PcapFileOut const& ) = delete;
