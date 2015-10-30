@@ -16,54 +16,45 @@
 #include <gtest/gtest.h>
 
 #include "bm_sim/pcap_file.h"
-#include "pcap_file.cpp"
 #include <stdio.h>
 
 // Google Test fixture for pcap tests
 class PcapTest : public ::testing::Test {
  protected:
-  PcapTest()
-  {
-    testDataFolder = "testdata";
-    testfile1 = "en0.pcap";
-    testfile2 = "lo0.pcap";
-    tmpfile = "tmp.pcap";
-    received = 0;
-    receiver = nullptr;
-  }
-
-  virtual void SetUp()
+  PcapTest() :
+    testDataFolder{"testdata"},
+    testfile1{"en0.pcap"},
+    testfile2{"lo0.pcap"},
+    tmpfile{"tmp.pcap"},
+    received{0},
+    receiver{nullptr}
   {}
 
-  virtual void TearDown()
-  {
+  virtual void SetUp()  {}
+
+  virtual void TearDown() {
     std::string tmpfile = getTmpFile();
     remove(tmpfile.c_str());
   }
 
-  std::string getFile1()
-  {
+  std::string getFile1() {
     return testDataFolder + "/" + testfile1;
   }
 
-  std::string getFile2()
-  {
+  std::string getFile2() {
     return testDataFolder + "/" + testfile2;
   }
 
-  std::string getTmpFile()
-  {
+  std::string getTmpFile() {
     return testDataFolder + "/" + tmpfile;
   }
 
-  void setReceiver(PacketReceiverInterface* recv)
-  {
+  void setReceiver(PacketReceiverInterface* recv) {
     receiver = recv;
   }
   
  public:
-  int receive(int port_num, const char *buffer, int len)
-  {
+  int receive(int port_num, const char *buffer, int len) {
     received++;
     if (receiver != nullptr)
       receiver->send_packet(port_num, buffer, len);
@@ -89,15 +80,13 @@ class PcapFileComparator
   bool verbose;
   unsigned packetIndex;
 
-  int reportDifference(std::string message)
-  {
+  int reportDifference(std::string message) {
     if (this->verbose)
       std::cerr << message << std::endl;
     return DIFFERENT;
   }
 
-  int comparePackets(std::unique_ptr<PcapPacket> p1, std::unique_ptr<PcapPacket> p2)
-  {
+  int comparePackets(std::unique_ptr<PcapPacket> p1, std::unique_ptr<PcapPacket> p2) {
     unsigned p1len = p1->getLength();
     unsigned p2len = p2->getLength();
 
@@ -107,8 +96,7 @@ class PcapFileComparator
     const char* p2d = p2->getData();
 
     int cmp = memcmp(p1d, p2d, p1len);
-    if (cmp != 0)
-    {
+    if (cmp != 0) {
       return this->reportDifference(std::string("Packet with index ") + std::to_string(this->packetIndex) + " differs ");
     }
 
@@ -121,18 +109,15 @@ class PcapFileComparator
         packetIndex(0)
   {}
 
-  int compare(std::string file1, std::string file2)
-  {
+  int compare(std::string file1, std::string file2) {
     PcapFileIn pf1(0, file1);
     PcapFileIn pf2(0, file2);
 
-    while (true)
-    {
+    while (true) {
       bool f1 = pf1.moveNext();
       bool f2 = pf2.moveNext();
 
-      if (f1 != f2)
-      {
+      if (f1 != f2) {
         if (f1 == false)
           return this->reportDifference(file1 + " is shorter");
         if (f2 == false)
@@ -156,22 +141,19 @@ class PcapFileComparator
   }
 };
 
-TEST_F(PcapTest, ReadOneFile)
-{
+TEST_F(PcapTest, ReadOneFile) {
   std::unique_ptr<PcapFileIn> file = std::unique_ptr<PcapFileIn>(new PcapFileIn(0, getFile1()));
 
   unsigned packetsRead = 0;
   unsigned packetsSize = 0;
-  while (file->moveNext())
-  {
+  while (file->moveNext()) {
     std::unique_ptr<PcapPacket> packet = file->current();
     packetsRead++;
     packetsSize += packet->getLength();
   }
     
   file->reset();
-  while (file->moveNext())
-  {
+  while (file->moveNext()) {
     std::unique_ptr<PcapPacket> packet = file->current();
     packetsRead--;
     packetsSize -= packet->getLength();
@@ -183,14 +165,12 @@ TEST_F(PcapTest, ReadOneFile)
 
 
 static void
-packet_handler(int port_num, const char *buffer, int len, void *cookie)
-{
+packet_handler(int port_num, const char *buffer, int len, void *cookie) {
   ((PcapTest*) cookie)->receive(port_num, buffer, len);
 }
 
 
-TEST_F(PcapTest, MergeFiles)
-{
+TEST_F(PcapTest, MergeFiles) {
   PcapFilesReader reader(false, 0);
   reader.addFile(0, getFile1());
   reader.addFile(1, getFile2());
@@ -215,8 +195,7 @@ TEST_F(PcapTest, MergeFiles)
   ASSERT_EQ(totalPackets, file1Packets + file2Packets);
 }
 
-TEST_F(PcapTest, Write)
-{
+TEST_F(PcapTest, Write) {
   PcapFilesReader reader(false, 0);
   reader.addFile(0, getFile1());
   reader.addFile(1, getFile2());

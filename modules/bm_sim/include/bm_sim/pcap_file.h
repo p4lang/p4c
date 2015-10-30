@@ -27,11 +27,35 @@
 #include <unordered_map>
 #include "bm_sim/packet_handler.h"
 
-class PacketBase;
-
 void bm_fatal_error(std::string message);
 
-class PcapPacket;
+// A PcapPacket is a packet that has been read from a Pcap file.
+// These packets can only be created by the PcapFileIn class.
+class PcapPacket {
+private:
+  unsigned port; // port index where packet originated
+  const u_char* data; // type defined in pcap.h
+  // The packet is only valid as long as the cursor
+  // in the PcapFileIn is not changed, since the pcap_header*
+  // points to a buffer returned by the pcap library.
+  const pcap_pkthdr* pcap_header;
+
+  PcapPacket(unsigned port, const u_char* data, const pcap_pkthdr* pcap_header)
+    : port(port),
+      data(data),
+      pcap_header(pcap_header)
+  {}
+
+  // Only class that can call constructor
+  friend class PcapFileIn;
+public:
+  static std::string timevalToString(const struct timeval* tv);
+
+  const char* getData() const { return (const char*)data; }
+  unsigned getLength() const { return (unsigned)pcap_header->len; }
+  const struct timeval* getTime() const { return &pcap_header->ts; }
+  unsigned getPort() const { return port; }
+};
 
 class PcapFileBase
 {
@@ -47,8 +71,7 @@ class PcapFileBase
    Assumes that all packets in a file are sorted on time.
 */
 class PcapFileIn :
-    public PcapFileBase
-{
+    public PcapFileBase {
  public:
   PcapFileIn(unsigned port, std::string filename);
   virtual ~PcapFileIn();
@@ -70,10 +93,10 @@ class PcapFileIn :
 
   enum class State {
     Uninitialized,
-      Opened,
-      Reading,
-      AtEnd
-        };
+    Opened,
+    Reading,
+    AtEnd
+  };
 
   State state;
     
@@ -87,8 +110,7 @@ class PcapFileIn :
 
 
 class PcapFileOut :
-    public PcapFileBase
-{
+    public PcapFileBase {
  public:
   // port is not really used 
   PcapFileOut(unsigned port, std::string filename);
@@ -106,8 +128,7 @@ class PcapFileOut :
 // Reads data from a set of Pcap files; returns packets in order
 // of their timestamps.
 class PcapFilesReader :
-    public PacketDispatcherInterface
-{
+    public PacketDispatcherInterface {
  public:
   // Read packets from a set of files in timestamp order.
   // Each file is associated to a port number corresponding to its index in the files vector.
@@ -157,8 +178,7 @@ class PcapFilesReader :
 
 // Writes data to a set of Pcap files.
 class PcapFilesWriter :
-    public PacketReceiverInterface
-{
+    public PacketReceiverInterface {
  public:
   PcapFilesWriter();
   // Add a file corresponding to the specified port.
