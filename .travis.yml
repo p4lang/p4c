@@ -33,13 +33,18 @@ before_install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 99
   - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 99
   - g++ -v
-  - bash build/travis/install-thrift.sh
+  - wget https://s3-us-west-2.amazonaws.com/p4lang/thrift_bin.tar.gz
+  - tar -xzvf thrift_bin.tar.gz -C $HOME/
+  - export PATH=$PATH:$HOME/thrift/bin/
+  - export LDFLAGS="$LDFLAGS -L$HOME/thrift/lib"
+  - export CPPFLAGS="$CPPFLAGS -I$HOME/thrift/include"
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/thrift/lib
   - bash build/travis/install-nanomsg.sh
   - sudo ldconfig
   - bash build/travis/install-nnpy.sh
 
 install:
-  - ./autogen.sh && ./configure --enable-coverage && make all
+  - ./autogen.sh && ./configure --enable-coverage && make all -j2
 
 # command to run tests, e.g. python setup.py test
 script:
