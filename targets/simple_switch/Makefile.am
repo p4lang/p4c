@@ -10,22 +10,23 @@ gen-cpp/simple_switch_types.h
 BUILT_SOURCES = $(simple_switch_thrift_files)
 
 AM_CPPFLAGS = \
--I$(srcdir)/../../modules/bm_sim/include \
--I$(srcdir)/../../modules/bf_lpm_trie/include \
--I$(srcdir)/../../third_party/jsoncpp/include \
--I$(srcdir)/../../modules/bm_runtime/include \
--I$(srcdir)/../../modules/BMI/include \
+-I$(top_srcdir)/modules/bm_sim/include \
+-I$(top_srcdir)/modules/bf_lpm_trie/include \
+-I$(top_srcdir)/third_party/jsoncpp/include \
+-I$(top_srcdir)/third_party/spdlog/include \
+-I$(top_srcdir)/modules/bm_runtime/include \
+-I$(top_srcdir)/modules/BMI/include \
 -I$(srcdir)/thrift/src/ \
 -I$(srcdir)/gen-cpp
 bin_PROGRAMS = simple_switch
 simple_switch_SOURCES = simple_switch.cpp simple_switch.h primitives.h $(BUILT_SOURCES)
 simple_switch_LDADD = \
-$(srcdir)/../../modules/bm_runtime/libbmruntime.la \
-$(srcdir)/../../modules/bm_sim/libbmsim.la \
-$(srcdir)/../../modules/bf_lpm_trie/libbflpmtrie.la \
-$(srcdir)/../../thrift_src/libruntimestubs.la \
-$(srcdir)/../../modules/BMI/libbmi.la \
-$(srcdir)/../../third_party/jsoncpp/libjson.la -lboost_system -lboost_thread -lthrift -lboost_program_options
+$(top_srcdir)/modules/bm_runtime/libbmruntime.la \
+$(top_srcdir)/modules/bm_sim/libbmsim.la \
+$(top_srcdir)/modules/bf_lpm_trie/libbflpmtrie.la \
+$(top_srcdir)/thrift_src/libruntimestubs.la \
+$(top_srcdir)/modules/BMI/libbmi.la \
+$(top_srcdir)/third_party/jsoncpp/libjson.la -lboost_system -lboost_thread -lthrift -lboost_program_options
 simple_switch_LDFLAGS = -pthread
 
 # See http://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html

@@ -81,8 +81,8 @@ private:
   std::unique_ptr<TransportIface> transport_instance;
 };
 
-extern EventLogger *logger;
+extern EventLogger *event_logger;
 
-#define ELOGGER logger
+#define ELOGGER event_logger
 
 #endif

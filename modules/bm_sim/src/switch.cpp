@@ -24,6 +24,7 @@
 #include "bm_sim/switch.h"
 #include "bm_sim/P4Objects.h"
 #include "bm_sim/options_parse.h"
+#include "bm_sim/logger.h"
 
 static void
 packet_handler(int port_num, const char *buffer, int len, void *cookie)
@@ -71,6 +72,12 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
   parser.parse(argc, argv);
   int status = init_objects(parser.config_file_path);
   if(status != 0) return status;
+
+  if(parser.console_logging)
+    Logger::set_logger_console();
+
+  if(parser.file_logger != "")
+    Logger::set_logger_file(parser.file_logger);
 
   setUseFiles(parser.useFiles, parser.waitTime);
 

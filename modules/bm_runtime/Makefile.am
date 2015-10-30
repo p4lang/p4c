@@ -1,4 +1,9 @@
-AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/../bm_sim/include -I$(srcdir)/../bf_lpm_trie/include -I$(srcdir)/../BMI/include -I$(srcdir)/../../thrift_src/gen-cpp
+AM_CPPFLAGS = -isystem $(top_srcdir)/third_party/jsoncpp/include \
+-I$(srcdir)/../bm_sim/include \
+-I$(srcdir)/../bf_lpm_trie/include \
+-I$(srcdir)/../BMI/include \
+-I$(srcdir)/../../thrift_src/gen-cpp \
+-I$(top_srcdir)/third_party/spdlog/include/
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 AM_CFLAGS = $(PICKY_CFLAGS)
 noinst_LTLIBRARIES = libbmruntime.la

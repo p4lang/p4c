@@ -30,7 +30,8 @@
 #include "phv.h"
 #include "named_p4object.h"
 #include "event_logger.h"
-#include "bm_sim/expressions.h"
+#include "logger.h"
+#include "expressions.h"
 
 struct field_t {
   header_id_t header;
@@ -119,6 +120,7 @@ struct ParserOpExtract : ParserOp {
   {
     PHV *phv = pkt->get_phv();
     ELOGGER->parser_extract(*pkt, header);
+    BMLOG_DEBUG_PKT(*pkt, "Extracting header {}", header);
     Header &hdr = phv->get_header(header);
     hdr.extract(data, *phv);
     *bytes_parsed += hdr.get_nbytes_packet();
@@ -140,6 +142,8 @@ struct ParserOpExtractStack : ParserOp {
     HeaderStack &stack = phv->get_header_stack(header_stack);
     Header &next_hdr = stack.get_next(); // TODO: will assert if full
     ELOGGER->parser_extract(*pkt, next_hdr.get_id());
+    BMLOG_DEBUG_PKT(*pkt, "Extracting to header stack {}, next header is {}",
+		    header_stack, next_hdr.get_id());
     next_hdr.extract(data, *phv);
     *bytes_parsed += next_hdr.get_nbytes_packet();
     stack.push_back(); // should I have a HeaderStack::extract() method instead?

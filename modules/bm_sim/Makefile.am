@@ -1,4 +1,8 @@
-AM_CPPFLAGS = -isystem $(srcdir)/../../third_party/jsoncpp/include -I$(srcdir)/include/ -I$(srcdir)/../bf_lpm_trie/include/ -I$(srcdir)/../BMI/include/
+AM_CPPFLAGS = -isystem $(top_srcdir)/third_party/jsoncpp/include \
+-I$(srcdir)/include/ \
+-I$(srcdir)/../bf_lpm_trie/include/ \
+-I$(srcdir)/../BMI/include/ \
+-I$(top_srcdir)/third_party/spdlog/include/
 AM_CPPFLAGS += $(DEBUG_CPPFLAGS)
 # I used to have -Weffc++ for this module. I felt that most of it was excessively
 # pedantic (like constructior initializers for non POD data), but it was
@@ -38,7 +42,8 @@ src/dev_mgr.cpp \
 src/options_parse.cpp \
 src/ageing.cpp \
 src/expressions.cpp \
-src/pcap_file.cpp
+src/pcap_file.cpp \
+src/logger.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -59,6 +64,7 @@ include/bm_sim/fields.h \
 include/bm_sim/field_lists.h \
 include/bm_sim/handle_mgr.h \
 include/bm_sim/headers.h \
+include/bm_sim/logger.h \
 include/bm_sim/lpm_trie.h \
 include/bm_sim/meters.h \
 include/bm_sim/named_p4object.h \

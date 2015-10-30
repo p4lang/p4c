@@ -45,6 +45,11 @@ public:
       action_fn.dump(stream);
     }
 
+    friend std::ostream& operator<<(std::ostream &out, const ActionEntry &e) {
+      e.dump(out);
+      return out;
+    }
+
     ActionEntry(const ActionEntry &other) = delete;
     ActionEntry &operator=(const ActionEntry &other) = delete;
     
