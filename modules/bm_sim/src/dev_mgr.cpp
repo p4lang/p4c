@@ -165,7 +165,7 @@ DevMgr::setUseFiles(bool useFiles, unsigned wait_time_in_seconds)
     impl = std::unique_ptr<DevMgrInterface>(new BmiDevMgrImplementation());
 }
 
-IPacketHandler::ReturnCode
+PacketDispatcherInterface::ReturnCode
 DevMgr::port_add(const std::string &iface_name, port_t port_num,
 		 const char *pcap_in, const char* pcap_out)
 {
@@ -181,14 +181,14 @@ DevMgr::transmit_fn(int port_num, const char *buffer, int len)
   impl->transmit_fn(port_num, buffer, len);
 }
 
-IPacketHandler::ReturnCode
+PacketDispatcherInterface::ReturnCode
 DevMgr::port_remove(port_t port_num)
 {
   assert(impl);
   return impl->port_remove(port_num);
 }
 
-IPacketHandler::ReturnCode
+PacketDispatcherInterface::ReturnCode
 DevMgr::set_packet_handler(PacketHandler handler, void *cookie)
 {
   assert(impl);

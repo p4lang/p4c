@@ -27,15 +27,39 @@
 #include <unordered_map>
 #include "bm_sim/packet_handler.h"
 
-class PacketBase;
-
 void bm_fatal_error(std::string message);
 
-class PcapPacket;
+// A PcapPacket is a packet that has been read from a Pcap file.
+// These packets can only be created by the PcapFileIn class.
+class PcapPacket {
+private:
+  unsigned port; // port index where packet originated
+  const u_char* data; // type defined in pcap.h
+  // The packet is only valid as long as the cursor
+  // in the PcapFileIn is not changed, since the pcap_header*
+  // points to a buffer returned by the pcap library.
+  const pcap_pkthdr* pcap_header;
+
+  PcapPacket(unsigned port, const u_char* data, const pcap_pkthdr* pcap_header)
+    : port(port),
+      data(data),
+      pcap_header(pcap_header)
+  {}
+
+  // Only class that can call constructor
+  friend class PcapFileIn;
+public:
+  static std::string timevalToString(const struct timeval* tv);
+
+  const char* getData() const { return (const char*)data; }
+  unsigned getLength() const { return (unsigned)pcap_header->len; }
+  const struct timeval* getTime() const { return &pcap_header->ts; }
+  unsigned getPort() const { return port; }
+};
 
 class PcapFileBase
 {
-protected:
+ protected:
   unsigned port; // port number represented by this file
   std::string filename;
 
@@ -47,9 +71,8 @@ protected:
    Assumes that all packets in a file are sorted on time.
 */
 class PcapFileIn :
-public PcapFileBase
-{
-public:
+    public PcapFileBase {
+ public:
   PcapFileIn(unsigned port, std::string filename);
   virtual ~PcapFileIn();
     
@@ -63,17 +86,17 @@ public:
   // True if we have reached end of file.
   bool atEOF() const;
     
-private:
+ private:
   pcap_t* pcap;
   pcap_pkthdr* current_header;
   const u_char* current_data;
 
   enum class State {
     Uninitialized,
-      Opened,
-      Reading,
-      AtEnd
-      };
+    Opened,
+    Reading,
+    AtEnd
+  };
 
   State state;
     
@@ -87,15 +110,14 @@ private:
 
 
 class PcapFileOut :
-public PcapFileBase
-{
-public:
+    public PcapFileBase {
+ public:
   // port is not really used 
   PcapFileOut(unsigned port, std::string filename);
   virtual ~PcapFileOut();
   void writePacket(const char* data, unsigned length);
     
-private:
+ private:
   pcap_dumper_t* dumper;
 
   PcapFileOut(PcapFileOut const& ) = delete;
@@ -106,9 +128,8 @@ private:
 // Reads data from a set of Pcap files; returns packets in order
 // of their timestamps.
 class PcapFilesReader :
-public IPacketHandler
-{
-public:
+    public PacketDispatcherInterface {
+ public:
   // Read packets from a set of files in timestamp order.
   // Each file is associated to a port number corresponding to its index in the files vector.
   // If 'respectTiming' is true, the PcapFilesReader
@@ -122,11 +143,10 @@ public:
   void addFile(unsigned port, std::string file);
   void start(); // start processing the pcap files
 
-  // Invoked every time a packet is read;
-  // implements IPacketHandler
-  IPacketHandler::ReturnCode set_packet_handler(PacketHandler handler, void *cookie);
+  // Invoked every time a packet is read
+  PacketDispatcherInterface::ReturnCode set_packet_handler(PacketHandler handler, void *cookie);
 
-private:
+ private:
   std::vector<std::unique_ptr<PcapFileIn>> files;
   unsigned nonEmptyFiles;
   unsigned wait_time_in_seconds;
@@ -157,18 +177,15 @@ private:
 
 
 // Writes data to a set of Pcap files.
-class PcapFilesWriter
-{
-public:
+class PcapFilesWriter :
+    public PacketReceiverInterface {
+ public:
   PcapFilesWriter();
   // Add a file corresponding to the specified port.
   void addFile(unsigned port, std::string file);
-
-  // Invoked every time a packet is read;
-  // implements IPacketHandler
   void send_packet(int port_num, const char* buffer, int len);
 
-private:
+ private:
   std::unordered_map<unsigned, std::unique_ptr<PcapFileOut>> files;
 
   PcapFilesWriter(PcapFilesWriter const& ) = delete;

@@ -31,49 +31,8 @@ void bm_fatal_error(std::string message)
   exit(1);
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-// Abstract base class to represent a packet
-class PacketBase
-{
-public:
-  virtual const char* getData() const = 0;
-  virtual unsigned getPort() const = 0;
-  virtual unsigned getLength() const = 0;
-  virtual ~PacketBase() {}
-};
-
 /////////////////////////////////////////////////////////////////////////////////
 
-// A PcapPacket is a packet that has been read from a Pcap file.
-// These packets can only be created by the PcapFileIn class.
-class PcapPacket :
-  public PacketBase
-{
-private:
-  unsigned port; // port index where packet originated
-  const u_char* data; // type defined in pcap.h
-  // The packet is only valid as long as the cursor
-  // in the PcapFileIn is not changed, since the pcap_header*
-  // points to a buffer returned by the pcap library.
-  const pcap_pkthdr* pcap_header;
-
-  PcapPacket(unsigned port, const u_char* data, const pcap_pkthdr* pcap_header)
-    : port(port),
-      data(data),
-      pcap_header(pcap_header)
-  {}
-
-  // Only class that can call constructor
-  friend class PcapFileIn;
-public:
-  static std::string timevalToString(const struct timeval* tv);
-
-  const char* getData() const { return (const char*)data; }
-  unsigned getLength() const { return (unsigned)pcap_header->len; }
-  const struct timeval* getTime() const { return &pcap_header->ts; }
-  unsigned getPort() const { return port; }
-};
 
 
 // This method should be in some separate C library
@@ -369,14 +328,14 @@ void PcapFilesReader::start()
     }
   }
 
-#if DEBUG_TIMING
-  std::cout << "First packet time " << PcapPacket::timevalToString(firstTime) << std::endl;
-#endif
   
-  firstPacketTime = *firstTime;
   if (nonEmptyFiles > 0)
   {
     assert(firstTime != nullptr);
+    firstPacketTime = *firstTime;
+#if DEBUG_TIMING
+    std::cout << "First packet time " << PcapPacket::timevalToString(firstTime) << std::endl;
+#endif
   }
 
   if (started)
@@ -388,7 +347,7 @@ void PcapFilesReader::start()
 }
 
 
-IPacketHandler::ReturnCode
+PacketDispatcherInterface::ReturnCode
 PcapFilesReader::set_packet_handler(PacketHandler hnd, void* ck)
 {
   assert(hnd);

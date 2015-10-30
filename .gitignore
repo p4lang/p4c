@@ -66,6 +66,8 @@ targets/simple_router/simple_router
 test-driver
 .dirstamp
 tests/test_*
+!tests/test_*.cpp
+!tests/testdata/*.pcap
 *.log
 *.trs
 config.guess

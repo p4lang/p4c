@@ -2,7 +2,8 @@ AM_CPPFLAGS = -isystem $(top_srcdir)/third_party/ \
 -isystem $(top_srcdir)/third_party/jsoncpp/include \
 -isystem $(top_srcdir)/third_party/spdlog/include \
 -I$(top_srcdir)/modules/bm_sim/include/ \
--I$(top_srcdir)/modules/bf_lpm_trie/include/
+-I$(top_srcdir)/modules/bf_lpm_trie/include/ \
+-I$(top_srcdir)/modules/bm_sim/src # need to include pcap_file.cc, because it contains a private class implementation needed for tests
 AM_CXXFLAGS = -pthread
 LDADD = $(srcdir)/../third_party/gtest/libgtest.la $(srcdir)/../modules/bm_sim/libbmsim.la $(srcdir)/../modules/bf_lpm_trie/libbflpmtrie.la $(srcdir)/../third_party/jsoncpp/libjson.la -lboost_system -lboost_thread
 
@@ -25,6 +26,7 @@ test_header_stacks \
 test_meters \
 test_ageing \
 test_counters \
+test_pcap \
 test_fields
 check_PROGRAMS = $(TESTS) test_all
 
@@ -47,6 +49,7 @@ test_meters_SOURCES        = $(common_source) test_meters.cpp
 test_ageing_SOURCES        = $(common_source) test_ageing.cpp
 test_counters_SOURCES      = $(common_source) test_counters.cpp
 test_fields_SOURCES   	   = $(common_source) test_fields.cpp
+test_pcap_SOURCES          = $(common_source) test_pcap.cpp
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
 test_checksums.cpp \
@@ -65,4 +68,5 @@ test_header_stacks.cpp \
 test_meters.cpp \
 test_ageing.cpp \
 test_counters.cpp \
+test_pcap.cpp \
 test_fields.cpp
