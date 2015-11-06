@@ -591,7 +591,7 @@ class RuntimeAPI(cmd.Cmd):
         for port_num_str in ports:
             port_num = int(port_num_str)
             port_map_str += "0" * (port_num - last_port_num) + "1"
-            last_port_num = port_num
+            last_port_num = port_num + 1
         return port_map_str[::-1]
 
     def parse_ports_and_lags(self, args):
