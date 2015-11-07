@@ -20,6 +20,7 @@ sudo apt-get install -y \
     libssl-dev \
     mktemp \
     libffi-dev \
+    python-dev \
     python-pip
 
 tmpdir=`mktemp -d -p .`
@@ -31,4 +32,4 @@ sudo ldconfig
 bash ../build/travis/install-nnpy.sh
 
 cd ..
-rm -rf $tmpdir
+sudo rm -rf $tmpdir
