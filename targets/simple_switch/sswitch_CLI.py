@@ -41,6 +41,8 @@ class SimpleSwitchAPI(runtime_CLI.RuntimeAPI):
 def main():
     args = runtime_CLI.get_parser().parse_args()
 
+    args.pre = runtime_CLI.PreType.SimplePreLAG
+
     runtime_CLI.load_json(args.json)
 
     services = runtime_CLI.RuntimeAPI.get_thrift_services(args.pre)
