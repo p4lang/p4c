@@ -31,6 +31,7 @@ public:
   typedef MatchTableIndirectWS::grp_hdl_t grp_hdl_t;
 
   typedef Meter::MeterErrorCode MeterErrorCode;
+  typedef Register::RegisterErrorCode RegisterErrorCode;
 
 public:
   enum ErrorCode {
@@ -173,6 +174,14 @@ public:
   virtual MeterErrorCode
   meter_set_rates(const std::string &meter_name, size_t idx,
 		  const std::vector<Meter::rate_config_t> &configs) = 0;
+
+  virtual RegisterErrorCode
+  register_read(const std::string &register_name,
+		const size_t idx, Data *value) = 0;
+
+  virtual RegisterErrorCode
+  register_write(const std::string &meter_name,
+		 const size_t idx, Data value) = 0; // to be moved
 
   virtual ErrorCode
   load_new_config(const std::string &new_config) = 0;

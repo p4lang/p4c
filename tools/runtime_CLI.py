@@ -102,6 +102,7 @@ def get_parser():
 TABLES = {}
 ACTIONS = {}
 METER_ARRAYS = {}
+REGISTER_ARRAYS = {}
 
 class MatchType:
     EXACT = 0
@@ -168,6 +169,18 @@ class MeterArray:
         return "{0:30} [{1}, {2}]".format(self.name, self.size,
                                           MeterType.to_str(self.type_))
 
+class RegisterArray:
+    def __init__(self, name, id_):
+        self.name = name
+        self.id_ = id_
+        self.width = None
+        self.size = None
+
+        REGISTER_ARRAYS[name] = self
+
+    def register_str(self):
+        return "{0:30} [{1}]".format(self.name, self.size)
+
 def load_json(json_src):
     def get_header_type(header_name, j_headers):
         for h in j_headers:
@@ -219,6 +232,12 @@ def load_json(json_src):
             meter_array.size = j_meter["size"]
             meter_array.type_ = MeterType.from_str(j_meter["type"])
             meter_array.rate_count = j_meter["rate_count"]
+
+        for j_register in json_["register_arrays"]:
+            register_array = RegisterArray(j_register["name"], j_register["id"])
+            register_array.size = j_register["size"]
+            register_array.width = j_register["bitwidth"]
+
 
 def ipv4Addr_to_bytes(addr):
     if not '.' in addr:
@@ -737,6 +756,65 @@ class RuntimeAPI(cmd.Cmd):
         if not text:
             return meters
         return [t for t in meters if t.startswith(text)]
+
+    def do_register_read(self, line):
+        "Read register value: register_read <name> <index>"
+        args = line.split()
+        if len(args) != 2:
+            print "Invalid number of args"
+            return
+        register_name = args[0]
+        if register_name not in REGISTER_ARRAYS:
+            print "Invalid register name"
+            return
+        index = args[1]
+        try:
+            index = int(index)
+        except:
+            print "index must be an integer value"
+            return
+        register = REGISTER_ARRAYS[register_name]
+        value = self.client.bm_register_read(register_name, index)
+        print "%s[%d]= " % (register_name, index), value
+        print "SUCCESS"
+
+    def complete_register_read(self, text, line, start_index, end_index):
+        return self._complete_registers(text)
+
+    def do_register_write(self, line):
+        "Write register value: register_write <name> <index> <value>"
+        args = line.split()
+        if len(args) != 3:
+            print "Invalid number of args"
+            return
+        register_name = args[0]
+        if register_name not in REGISTER_ARRAYS:
+            print "Invalid register name"
+            return
+        index = args[1]
+        try:
+            index = int(index)
+        except:
+            print "index must be an integer value"
+            return
+        value = args[2]
+        try:
+            value = int(value)
+        except:
+            print "value must be an integer value"
+            return
+        register = REGISTER_ARRAYS[register_name]
+        self.client.bm_register_write(register_name, index, value)
+        print "SUCCESS"
+
+    def complete_register_write(self, text, line, start_index, end_index):
+        return self._complete_registers(text)
+
+    def _complete_registers(self, text):
+        registers = sorted(REGISTER_ARRAYS.keys())
+        if not text:
+            return registers
+        return [t for t in registers if t.startswith(text)]
 
     def do_dump_table(self, line):
         "Display some (non-formatted) information about a table"

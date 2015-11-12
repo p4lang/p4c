@@ -89,6 +89,11 @@ public:
     export_bytes();
   }
 
+  void set(Data &&data) {
+    value = std::move(data.value);
+    export_bytes();
+  }
+
   void set(const ByteContainer &bc) {
     bignum::import_bytes(value, bc.data(), bc.size());
     export_bytes();

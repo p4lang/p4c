@@ -548,6 +548,32 @@ public:
     }
   }
 
+  BmRegisterValue bm_register_read(const std::string& register_name, const int32_t index) {
+    printf("bm_register_read\n");
+    Data value; // make it thread_local ?
+    Register::RegisterErrorCode error_code = switch_->register_read(
+      register_name, (size_t) index, &value
+    );
+    if(error_code != Register::RegisterErrorCode::SUCCESS) {
+      InvalidRegisterOperation iro;
+      iro.what = (RegisterOperationErrorCode::type) error_code;
+      throw iro;
+    }
+    return value.get<int64_t>();
+  }
+
+  void bm_register_write(const std::string& register_name, const int32_t index, const BmRegisterValue value) {
+    printf("bm_register_write\n");
+    Register::RegisterErrorCode error_code = switch_->register_write(
+      register_name, (size_t) index, Data(value)
+    );
+    if(error_code != Register::RegisterErrorCode::SUCCESS) {
+      InvalidRegisterOperation iro;
+      iro.what = (RegisterOperationErrorCode::type) error_code;
+      throw iro;
+    }
+  }
+
   void bm_dev_mgr_add_port(const std::string& iface_name, const int32_t port_num, const std::string& pcap_path) {
     printf("bm_dev_mgr_add_port\n");
     const char *pcap = NULL;

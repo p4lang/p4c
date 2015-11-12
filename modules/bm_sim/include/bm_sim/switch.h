@@ -203,6 +203,14 @@ public:
   meter_set_rates(const std::string &meter_name, size_t idx,
 		  const std::vector<Meter::rate_config_t> &configs) override;
 
+  RegisterErrorCode
+  register_read(const std::string &register_name,
+		const size_t idx, Data *value) override;
+
+  RegisterErrorCode
+  register_write(const std::string &meter_name,
+		 const size_t idx, Data value) override;
+
   RuntimeInterface::ErrorCode
   load_new_config(const std::string &new_config) override;
 

@@ -522,6 +522,34 @@ Switch::meter_set_rates(
   return meter_array->get_meter(idx).set_rates(configs);
 }
 
+RuntimeInterface::RegisterErrorCode
+Switch::register_read(
+  const std::string &register_name,
+  const size_t idx, Data *value
+) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  RegisterArray *register_array =
+    p4objects_rt->get_register_array(register_name);
+  if(!register_array) return Register::ERROR;
+  if(idx >= register_array->size()) return Register::INVALID_INDEX;
+  value->set((*register_array)[idx]);
+  return Register::SUCCESS;
+}
+
+RuntimeInterface::RegisterErrorCode
+Switch::register_write(
+  const std::string &register_name,
+  const size_t idx, Data value
+) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  RegisterArray *register_array =
+    p4objects_rt->get_register_array(register_name);
+  if(!register_array) return Register::ERROR;
+  if(idx >= register_array->size()) return Register::INVALID_INDEX;
+  (*register_array)[idx].set(std::move(value));
+  return Register::SUCCESS;
+}
+
 RuntimeInterface::ErrorCode Switch::load_new_config(const std::string &new_config) {
   if(!enable_swap) return CONFIG_SWAP_DISABLED;
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);

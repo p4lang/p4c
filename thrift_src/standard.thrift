@@ -137,6 +137,17 @@ exception InvalidMeterOperation {
  1:MeterOperationErrorCode what
 }
 
+typedef i64 BmRegisterValue
+
+enum RegisterOperationErrorCode {
+  INVALID_INDEX = 1,
+  ERROR = 2
+}
+
+exception InvalidRegisterOperation {
+ 1:RegisterOperationErrorCode what
+}
+
 // TODO
 enum DevMgrErrorCode {
   ERROR = 1
@@ -338,6 +349,21 @@ service Standard {
     2:i32 index,
     3:list<BmMeterRateConfig> rates
   ) throws (1:InvalidMeterOperation ouch)
+
+
+  // registers
+
+  BmRegisterValue bm_register_read(
+    1:string register_array_name,
+    2:i32 idx
+  ) throws (1:InvalidRegisterOperation ouch)
+
+  void bm_register_write(
+    1:string register_array_name,
+    2:i32 index,
+    3:BmRegisterValue value
+  ) throws (1:InvalidRegisterOperation ouch)
+
 
   // device manager
 

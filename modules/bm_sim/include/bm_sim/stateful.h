@@ -29,6 +29,13 @@
 class Register : public Data
 {
 public:
+  enum RegisterErrorCode {
+    SUCCESS = 0,
+    INVALID_INDEX,
+    ERROR
+  };
+
+public:
   Register(int nbits)
     : nbits(nbits) {
     mask <<= nbits; mask -= 1;
