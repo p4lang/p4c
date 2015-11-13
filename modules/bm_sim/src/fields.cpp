@@ -21,43 +21,10 @@
 #include <algorithm>
 
 #include "bm_sim/fields.h"
+#include "extract.h"
 
 int Field::extract(const char *data, int hdr_offset) {
-  if(hdr_offset == 0 && nbits % 8 == 0) {
-    std::copy(data, data + nbytes, bytes.begin());
-    if(arith) sync_value();
-    return nbits;
-  }
-
-  int field_offset = (nbytes << 3) - nbits;
-  int i;
-
-  // necessary to ensure correct behavior when shifting right (no sign extension)
-  unsigned char *udata = (unsigned char *) data;
-  
-  int offset = hdr_offset - field_offset;
-  if (offset == 0) {
-    std::copy(udata, udata + nbytes, bytes.begin());
-    bytes[0] &= (0xFF >> field_offset);
-  }
-  else if (offset > 0) { /* shift left */
-    for (i = 0; i < nbytes - 1; i++) {
-      bytes[i] = (udata[i] << offset) | (udata[i + 1] >> (8 - offset));
-    }
-    bytes[0] &= (0xFF >> field_offset);
-    bytes[i] = udata[i] << offset;
-    if((hdr_offset + nbits) > (nbytes << 3)) {
-      bytes[i] |= (udata[i + 1] >> (8 - offset));
-    }
-  }
-  else { /* shift right */
-    offset = -offset;
-    bytes[0] = udata[0] >> offset;
-    bytes[0] &= (0xFF >> field_offset);
-    for (i = 1; i < nbytes; i++) {
-      bytes[i] = (udata[i - 1] << (8 - offset)) | (udata[i] >> offset);
-    }
-  }
+  generic_extract(data, hdr_offset, nbits, bytes.data());
 
   if(arith) sync_value();
 

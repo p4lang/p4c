@@ -19,6 +19,18 @@
  */
 
 #include "bm_sim/parser.h"
+#include "extract.h"
+
+ParserLookAhead::ParserLookAhead(int offset, int bitwidth)
+  : byte_offset(offset / 8), bit_offset(offset % 8),
+    bitwidth(bitwidth), nbytes((bitwidth + 7) / 8) { }
+
+void ParserLookAhead::peek(const char *data, ByteContainer &res) const {
+  size_t old_size = res.size();
+  res.resize(old_size + nbytes);
+  char *dst = &res[old_size];
+  generic_extract(data + byte_offset, bit_offset, bitwidth, dst);
+}
 
 template<>
 void

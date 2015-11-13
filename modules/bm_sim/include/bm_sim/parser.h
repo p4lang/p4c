@@ -43,64 +43,15 @@ struct field_t {
   }
 };
 
-namespace {
-
-void extract(const char *data, int bit_offset, int bitwidth, char *dst) {
-  int nbytes = (bitwidth + 7) / 8;
-
-  if(bit_offset == 0 && bitwidth % 8 == 0) {
-    std::copy(data, data + nbytes, dst);
-  }
-
-  int dst_offset = (nbytes << 3) - bitwidth;
-  int i;
-  
-  // necessary to ensure correct behavior when shifting right (no sign extension)
-  unsigned char *udata = (unsigned char *) data;
-
-  int offset = bit_offset - dst_offset;
-  if (offset == 0) {
-    std::copy(udata, udata + nbytes, dst);
-    dst[0] &= (0xFF >> dst_offset);
-  }
-  else if (offset > 0) { /* shift left */
-    for (i = 0; i < nbytes - 1; i++) {
-      dst[i] = (udata[i] << offset) | (udata[i + 1] >> (8 - offset));
-    }
-    dst[0] &= (0xFF >> dst_offset);
-    dst[i] = udata[i] << offset;
-    if((bit_offset + bitwidth) > (nbytes << 3)) {
-      dst[i] |= (udata[i + 1] >> (8 - offset));
-    }
-  }
-  else { /* shift right */
-    offset = -offset;
-    dst[0] = udata[0] >> offset;
-      for (i = 1; i < nbytes; i++) {
-	dst[i] = (udata[i - 1] << (8 - offset)) | (udata[i] >> offset);
-      }
-  }
-}
-
-}
-
 struct ParserLookAhead {
   int byte_offset;
   int bit_offset;  
   int bitwidth;
   size_t nbytes;
 
-  ParserLookAhead(int offset, int bitwidth)
-    : byte_offset(offset / 8), bit_offset(offset % 8),
-      bitwidth(bitwidth),
-      nbytes((bitwidth + 7) / 8) { }
+  ParserLookAhead(int offset, int bitwidth);
 
-  void peek(const char *data, ByteContainer &res) const {
-    size_t old_size = res.size();
-    res.resize(old_size + nbytes);
-    char *dst = &res[old_size];
-    extract(data + byte_offset, bit_offset, bitwidth, dst);
-  }
+  void peek(const char *data, ByteContainer &res) const;
 };
 
 struct ParserOp {
