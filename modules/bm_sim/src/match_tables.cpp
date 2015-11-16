@@ -63,7 +63,7 @@ MatchTableAbstract::apply_action(Packet *pkt)
   if(hit) {
     ELOGGER->table_hit(*pkt, *this, handle);
     BMLOG_DEBUG_PKT(*pkt, "Table '{}': hit with handle {}",
-		      get_name(), handle);
+		    get_name(), handle);
   }
   else {
     ELOGGER->table_miss(*pkt, *this);

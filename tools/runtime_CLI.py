@@ -102,6 +102,7 @@ def get_parser():
 TABLES = {}
 ACTIONS = {}
 METER_ARRAYS = {}
+COUNTER_ARRAYS = {}
 REGISTER_ARRAYS = {}
 
 class MatchType:
@@ -169,6 +170,19 @@ class MeterArray:
         return "{0:30} [{1}, {2}]".format(self.name, self.size,
                                           MeterType.to_str(self.type_))
 
+class CounterArray:
+    def __init__(self, name, id_):
+        self.name = name
+        self.id_ = id_
+        self.is_direct = None
+        self.size = None
+        self.binding = None
+
+        COUNTER_ARRAYS[name] = self
+
+    def counter_str(self):
+        return "{0:30} [{1}]".format(self.name, self.size)
+
 class RegisterArray:
     def __init__(self, name, id_):
         self.name = name
@@ -232,6 +246,14 @@ def load_json(json_src):
             meter_array.size = j_meter["size"]
             meter_array.type_ = MeterType.from_str(j_meter["type"])
             meter_array.rate_count = j_meter["rate_count"]
+
+        for j_counter in json_["counter_arrays"]:
+            counter_array = CounterArray(j_counter["name"], j_counter["id"])
+            counter_array.is_direct = j_counter["is_direct"]
+            if counter_array.is_direct:
+                counter_array.binding = j_counter["binding"]
+            else:
+                counter_array.size = j_counter["size"]
 
         for j_register in json_["register_arrays"]:
             register_array = RegisterArray(j_register["name"], j_register["id"])
@@ -756,6 +778,64 @@ class RuntimeAPI(cmd.Cmd):
         if not text:
             return meters
         return [t for t in meters if t.startswith(text)]
+
+    def do_counter_read(self, line):
+        "Read counter value: counter_read <name> <index>"
+        args = line.split()
+        if len(args) != 2:
+            print "Invalid number of args"
+            return
+        counter_name = args[0]
+        if counter_name not in COUNTER_ARRAYS:
+            print "Invalid counter name"
+            return
+        index = args[1]
+        try:
+            index = int(index)
+        except:
+            print "index must be an integer value"
+            return
+        counter = COUNTER_ARRAYS[counter_name]
+        if counter.is_direct:
+            table_name = counter.binding
+            print "this is the direct counter for table", table_name
+            index = index & 0xffffffff
+            value = self.client.bm_mt_read_counter(table_name, index)
+        else:
+            value = self.client.bm_counter_read(counter_name, index)
+        print "%s[%d]= " % (counter_name, index), value
+        print "SUCCESS"
+
+    def complete_counter_read(self, text, line, start_index, end_index):
+        return self._complete_counters(text)
+
+    def do_counter_reset(self, line):
+        "Reset counter: counter_reset <name>"
+        args = line.split()
+        if len(args) != 1:
+            print "Invalid number of args"
+            return
+        counter_name = args[0]
+        if counter_name not in COUNTER_ARRAYS:
+            print "Invalid counter name"
+            return
+        counter = COUNTER_ARRAYS[counter_name]
+        if counter.is_direct:
+            table_name = counter.binding
+            print "this is the direct counter for table", table_name
+            value = self.client.bm_mt_reset_counters(table_name)
+        else:
+            value = self.client.bm_counter_reset_all(counter_name)
+        print "SUCCESS"
+
+    def complete_counter_reset(self, text, line, start_index, end_index):
+        return self._complete_counters(text)
+
+    def _complete_counters(self, text):
+        counters = sorted(COUNTER_ARRAYS.keys())
+        if not text:
+            return counters
+        return [t for t in counters if t.startswith(text)]
 
     def do_register_read(self, line):
         "Read register value: register_read <name> <index>"
