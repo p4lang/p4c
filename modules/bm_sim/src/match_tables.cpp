@@ -396,16 +396,23 @@ MatchTableIndirect::set_default_member(mbr_hdl_t mbr)
 }
 
 void
-MatchTableIndirect::dump(std::ostream &stream) const
+MatchTableIndirect::dump_(std::ostream &stream) const
 {
-  ReadLock lock = lock_read();
   stream << name << ":\n";
   match_unit->dump(stream);
+  stream << "members:\n";
   for(mbr_hdl_t mbr : mbr_handles) {
     stream << mbr << ": ";
     action_entries[mbr].dump(stream);
     stream << "\n";
   }
+}
+
+void
+MatchTableIndirect::dump(std::ostream &stream) const
+{
+  ReadLock lock = lock_read();
+  dump_(stream);
 }
 
 void
@@ -449,6 +456,15 @@ MatchTableIndirect::mbr_hdl_t
 MatchTableIndirectWS::GroupInfo::get_nth(size_t n) const
 {
   return mbrs.get_nth(n);
+}
+
+void
+MatchTableIndirectWS::GroupInfo::dump(std::ostream &stream) const
+{
+  stream << "{ ";
+  for(const auto &mbr : mbrs)
+    stream << mbr << ", ";
+  stream << "}";
 }
 
 
@@ -652,6 +668,20 @@ MatchTableIndirectWS::get_num_members_in_group(grp_hdl_t grp, size_t *nb) const
   *nb = group_info.size();
 
   return MatchErrorCode::SUCCESS;
+}
+
+void
+MatchTableIndirectWS::dump(std::ostream &stream) const
+{
+  ReadLock lock = lock_read();
+  MatchTableIndirect::dump_(stream);
+  stream << "groups:\n";
+  for(grp_hdl_t grp : grp_handles) {
+    IndirectIndex::make_grp_index(grp).dump(stream);
+    stream << ": ";
+    group_entries[grp].dump(stream);
+    stream << "\n";
+  }
 }
 
 void

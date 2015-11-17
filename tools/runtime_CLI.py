@@ -62,6 +62,7 @@ def enum(type_name, *sequential, **named):
 
 PreType = enum('PreType', 'None', 'SimplePre', 'SimplePreLAG')
 MeterType = enum('MeterType', 'packets', 'bytes')
+TableType = enum('TableType', 'simple', 'indirect', 'indirect_ws')
 
 def bytes_to_string(byte_array):
     form = 'B' * len(byte_array)
@@ -127,6 +128,7 @@ class Table:
         self.actions = {}
         self.key = []
         self.default_action = None
+        self.type_ = None
 
         TABLES[name] = self
 
@@ -222,9 +224,7 @@ def load_json(json_src):
             for j_table in j_pipeline["tables"]:
                 table = Table(j_table["name"], j_table["id"])
                 table.match_type = MatchType.from_str(j_table["match_type"])
-                type_ = j_table["type"]
-                # if type_ != "simple":
-                #     assert(0 and "only 'simple' table type supported for now")
+                table.type_ = TableType.from_str(j_table["type"])
                 for action in j_table["actions"]:
                     table.actions[action] = ACTIONS[action]
                 for j_key in j_table["key"]:
@@ -701,6 +701,14 @@ class RuntimeAPI(cmd.Cmd):
     def complete_table_set_default(self, text, line, start_index, end_index):
         return self._complete_table_and_action(text, line)
 
+    def parse_runtime_data(self, action, action_params):
+        if len(action_params) != action.num_params():
+            raise UIn_Error(
+                "Action %s needs %d parameters" % (action_name, action.num_params())
+            )
+
+        return parse_runtime_data(action, action_params)
+
     # for debugging
     def print_table_add(self, match_key, action_name, runtime_data):
         print "{0:20} {1}".format(
@@ -749,12 +757,8 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error(
                 "Table %s needs %d key fields" % (table_name, table.num_key_fields())
             )
-        if len(action_params) != action.num_params():
-            raise UIn_Error(
-                "Action %s needs %d parameters" % (action_name, action.num_params())
-            )
 
-        runtime_data = parse_runtime_data(action, action_params)
+        runtime_data = self.parse_runtime_data(action, action_params)
 
         match_key = parse_match_key(table, match_key)
 
@@ -796,12 +800,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for entry handle")
 
         action_params = args[3:]
-        if len(action_params) != action.num_params():
-            raise UIn_Error(
-                "Action %s needs %d parameters" % (action_name, action.num_params())
-            )
-
-        runtime_data = parse_runtime_data(action, action_params)
+        runtime_data = self.parse_runtime_data(action, action_params)
 
         print "Modifying entry", entry_handle, "for", MatchType.to_str(table.match_type), "match table", table_name
 
@@ -833,6 +832,327 @@ class RuntimeAPI(cmd.Cmd):
 
     def complete_table_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
+
+    def check_indirect(self, table):
+        if table.type_ not in {TableType.indirect, TableType.indirect_ws}:
+            raise UIn_Error("Cannot run this command on non-indirect table")
+
+    def check_indirect_ws(self, table):
+        if table.type_ != TableType.indirect_ws:
+            raise UIn_Error(
+                "Cannot run this command on non-indirect table,"\
+                " or on indirect table with no selector"
+            )
+
+    @handle_bad_input
+    def do_table_indirect_create_member(self, line):
+        "Add a member to an indirect match table: table_indirect_create_member <table name> <action_name> [action parameters]"
+        args = line.split()
+
+        self.at_least_n_args(args, 2)
+
+        table_name, action_name = args[0], args[1]
+        table = self.get_res("table", table_name, TABLES)
+
+        self.check_indirect(table)
+
+        if action_name not in table.actions:
+            raise UIn_Error(
+                "Table %s has no action %s" % (table_name, action_name)
+            )
+        action = ACTIONS[action_name]
+
+        action_params = args[2:]
+        runtime_data = self.parse_runtime_data(action, action_params)
+
+        mbr_handle = self.client.bm_mt_indirect_add_member(
+            table_name, action_name, runtime_data
+        )
+
+        print "Member has been created with handle", mbr_handle
+
+    def complete_table_indirect_create_member(self, text, line, start_index, end_index):
+        # TODO: only show indirect tables
+        return self._complete_table_and_action(text, line)
+
+    @handle_bad_input
+    def do_table_indirect_delete_member(self, line):
+        "Delete a member in an indirect match table: table_indirect_delete_member <table name> <member handle>"
+        args = line.split()
+
+        self.exactly_n_args(args, 2)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+
+        self.check_indirect(table)
+
+        try:
+            mbr_handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for member handle")
+
+        self.client.bm_mt_indirect_delete_member(table_name, mbr_handle)
+
+    def complete_table_indirect_delete_member(self, text, line, start_index, end_index):
+        # TODO: only show indirect tables
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_modify_member(self, line):
+        "Modify member in an indirect match table: table_indirect_modify_member <table name> <action_name> <member_handle> [action parameters]"
+        args = line.split()
+
+        self.at_least_n_args(args, 3)
+
+        table_name, action_name = args[0], args[1]
+        table = self.get_res("table", table_name, TABLES)
+
+        self.check_indirect(table)
+
+        if action_name not in table.actions:
+            raise UIn_Error(
+                "Table %s has no action %s" % (table_name, action_name)
+            )
+        action = ACTIONS[action_name]
+
+        try:
+            mbr_handle = int(args[2])
+        except:
+            raise UIn_Error("Bad format for member handle")
+
+        action_params = args[3:]
+        runtime_data = self.parse_runtime_data(action, action_params)
+
+        mbr_handle = self.client.bm_mt_indirect_modify_member(
+            table_name, action_name, mbr_handle, runtime_data
+        )
+
+    def complete_table_indirect_modify_member(self, text, line, start_index, end_index):
+        # TODO: only show indirect tables
+        return self._complete_table_and_action(text, line)
+
+    # dirty hack to be consistent with bmv2
+    # TODO: clean this up
+    def is_grp_handle(self, h):
+        return (h >= (1 << 24))
+
+    def make_grp_handle(self, h):
+        return (h | (1 << 24))
+
+    def unmake_grp_handle(self, h):
+        return (h & 0xffffff)
+
+    @handle_bad_input
+    def do_table_indirect_add(self, line):
+        "Add entry to an indirect match table: table_indirect_add <table name> <match fields> => < member handle | group handle> [priority]"
+        args = line.split()
+
+        self.at_least_n_args(args, 1)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+        self.check_indirect(table)
+
+        if table.match_type == MatchType.TERNARY:
+            try:
+                priority = int(args.pop(-1))
+            except:
+                raise UIn_Error(
+                    "Table is ternary, but could not extract a valid priority from args"
+                )
+        else:
+            priority = 0
+
+        for idx, input_ in enumerate(args[1:]):
+            if input_ == "=>": break
+        idx += 1
+        match_key = args[1:idx]
+        if len(args) != (idx + 2):
+            raise UIn_Error("Invalid arguments, could not find handle")
+        handle = args[idx+1]
+
+        try:
+            handle = int(handle)
+        except:
+            raise UIn_Error("Bad format for handle")
+
+        match_key = parse_match_key(table, match_key)
+
+        print "Adding entry to indirect match table", table_name
+
+        if self.is_grp_handle(handle):
+            api = self.client.bm_mt_indirect_ws_add_entry
+            handle = self.unmake_grp_handle(handle)
+        else:
+            api = self.client.bm_mt_indirect_add_entry
+
+        entry_handle = api(
+            table_name, match_key, handle, BmAddEntryOptions(priority = priority)
+        )
+
+        print "Entry has been added with handle", entry_handle
+
+    def complete_table_indirect_add(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_delete(self, line):
+        "Delete entry from an indirect match table: table_indirect_delete <table name> <entry handle>"
+        args = line.split()
+
+        self.exactly_n_args(args, 2)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+        self.check_indirect(table)
+
+        try:
+            entry_handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for entry handle")
+
+        print "Deleting entry", entry_handle, "from", table_name
+
+        self.client.bm_mt_indirect_delete_entry(table_name, entry_handle)
+
+    def complete_table_indirect_delete(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_set_default(self, line):
+        "Set default member / group for indirect match table: table_indirect_set_default <table name> <member handle | group handle>"
+        args = line.split()
+
+        self.exactly_n_args(args, 2)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+        self.check_indirect(table)
+
+        try:
+            handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for handle")
+
+        if self.is_grp_handle(handle):
+            api = self.client.bm_mt_indirect_ws_set_default_group
+            handle = self.unmake_grp_handle(handle)
+        else:
+            api = self.client.bm_mt_indirect_set_default_member
+
+        api(table_name, handle)
+
+    def complete_table_indirect_set_default(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_create_group(self, line):
+        "Add a group to an indirect match table: table_indirect_create_group <table name>"
+        args = line.split()
+
+        self.exactly_n_args(args, 1)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+
+        self.check_indirect_ws(table)
+
+        grp_handle = self.client.bm_mt_indirect_ws_create_group(table_name)
+
+        grp_handle = self.make_grp_handle(grp_handle)
+
+        print "Group has been created with handle", grp_handle
+
+    def complete_table_indirect_create_group(self, text, line, start_index, end_index):
+        # TODO: only show indirect_ws tables
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_delete_group(self, line):
+        "Delete a group: table_indirect_delete_group <table name> <group handle>"
+        args = line.split()
+
+        self.exactly_n_args(args, 2)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+
+        self.check_indirect_ws(table)
+
+        try:
+            grp_handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for group handle")
+
+        self.client.bm_mt_indirect_ws_delete_group(
+            table_name, self.unmake_grp_handle(grp_handle)
+        )
+
+    def complete_table_indirect_delete_group(self, text, line, start_index, end_index):
+        # TODO: only show indirect_ws tables
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_add_member_to_group(self, line):
+        "Delete a group: table_indirect_add_member_to_group <table name> <member handle> <group handle>"
+        args = line.split()
+
+        self.exactly_n_args(args, 3)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+
+        self.check_indirect_ws(table)
+
+        try:
+            mbr_handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for member handle")
+
+        try:
+            grp_handle = int(args[2])
+        except:
+            raise UIn_Error("Bad format for group handle")
+
+        self.client.bm_mt_indirect_ws_add_member_to_group(
+            table_name, mbr_handle, self.unmake_grp_handle(grp_handle)
+        )
+
+    def complete_table_indirect_add_member_to_group(self, text, line, start_index, end_index):
+        # TODO: only show indirect_ws tables
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_remove_member_from_group(self, line):
+        "Delete a group: table_indirect_remove_member_from_group <table name> <member handle> <group handle>"
+        args = line.split()
+
+        self.exactly_n_args(args, 3)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+
+        self.check_indirect_ws(table)
+
+        try:
+            mbr_handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for member handle")
+
+        try:
+            grp_handle = int(args[2])
+        except:
+            raise UIn_Error("Bad format for group handle")
+
+        self.client.bm_mt_indirect_ws_remove_member_from_group(
+            table_name, mbr_handle, self.unmake_grp_handle(grp_handle)
+        )
+
+    def complete_table_indirect_remove_member_from_group(self, text, line, start_index, end_index):
+        # TODO: only show indirect_ws tables
+        return self._complete_tables(text)
+
 
     def check_has_pre(self):
         if self.pre_type == PreType.None:
