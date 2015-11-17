@@ -66,6 +66,8 @@ public:
       return TableOperationErrorCode::EMPTY_GRP;
     case MatchErrorCode::DUPLICATE_ENTRY:
       return TableOperationErrorCode::DUPLICATE_ENTRY;
+    case MatchErrorCode::BAD_MATCH_KEY:
+      return TableOperationErrorCode::BAD_MATCH_KEY;
     case MatchErrorCode::ERROR:
       return TableOperationErrorCode::ERROR;
     default:
