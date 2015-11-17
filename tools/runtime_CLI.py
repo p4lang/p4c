@@ -323,7 +323,10 @@ def ipv4Addr_to_bytes(addr):
     s = addr.split('.')
     if len(s) != 4:
         raise UIn_BadIPv4Error()
-    return [int(b) for b in s]
+    try:
+        return [int(b) for b in s]
+    except:
+        raise UIn_BadIPv4Error()
 
 def macAddr_to_bytes(addr):
     if not ':' in addr:
@@ -331,7 +334,10 @@ def macAddr_to_bytes(addr):
     s = addr.split(':')
     if len(s) != 6:
         raise UIn_BadMacError()
-    return [int(b, 16) for b in s]
+    try:
+        return [int(b, 16) for b in s]
+    except:
+        raise UIn_BadMacError()
 
 def ipv6Addr_to_bytes(addr):
     from ipaddr import IPv6Address
@@ -341,7 +347,10 @@ def ipv6Addr_to_bytes(addr):
         ip = IPv6Address(addr)
     except:
         raise UIn_BadIPv6Error()
-    return [ord(b) for b in ip.packed]
+    try:
+        return [ord(b) for b in ip.packed]
+    except:
+        raise UIn_BadIPv6Error()
 
 def int_to_bytes(i, num):
     byte_array = []
@@ -762,6 +771,45 @@ class RuntimeAPI(cmd.Cmd):
         print "Entry has been added with handle", entry_handle
 
     def complete_table_add(self, text, line, start_index, end_index):
+        return self._complete_table_and_action(text, line)
+
+    @handle_bad_input
+    def do_table_modify(self, line):
+        "Add entry to a match table: table_modify <table name> <action name> <entry handle> [action parameters]"
+        args = line.split()
+
+        self.at_least_n_args(args, 3)
+
+        table_name, action_name = args[0], args[1]
+        table = self.get_res("table", table_name, TABLES)
+        if action_name not in table.actions:
+            raise UIn_Error(
+                "Table %s has no action %s" % (table_name, action_name)
+            )
+
+        # guaranteed to exist
+        action = ACTIONS[action_name]
+
+        try:
+            entry_handle = int(args[2])
+        except:
+            raise UIn_Error("Bad format for entry handle")
+
+        action_params = args[3:]
+        if len(action_params) != action.num_params():
+            raise UIn_Error(
+                "Action %s needs %d parameters" % (action_name, action.num_params())
+            )
+
+        runtime_data = parse_runtime_data(action, action_params)
+
+        print "Modifying entry", entry_handle, "for", MatchType.to_str(table.match_type), "match table", table_name
+
+        entry_handle = self.client.bm_mt_modify_entry(
+            table_name, entry_handle, action_name, runtime_data
+        )
+
+    def complete_table_modify(self, text, line, start_index, end_index):
         return self._complete_table_and_action(text, line)
 
     @handle_bad_input

@@ -293,7 +293,8 @@ MatchUnitExact<V>::dump_(std::ostream &stream) const
 {
   for(internal_handle_t handle_ : this->handles) {
     const Entry &entry = entries[handle_];
-    stream << handle_ << ": " << entry.key.to_hex() << " => ";
+    stream << HANDLE_SET(entry.version, handle_) << ": "
+	   << entry.key.to_hex() << " => ";
     entry.value.dump(stream);
     stream << "\n";
   }
@@ -432,7 +433,7 @@ MatchUnitLPM<V>::dump_(std::ostream &stream) const
 {
   for(internal_handle_t handle_ : this->handles) {
     const Entry &entry = entries[handle_];
-    stream << handle_ << ": "
+    stream << HANDLE_SET(entry.version, handle_) << ": "
 	   << entry.key.to_hex() << "/" << entry.prefix_length << " => ";
     entry.value.dump(stream);
     stream << "\n";
@@ -636,7 +637,7 @@ MatchUnitTernary<V>::dump_(std::ostream &stream) const
 {
   for(internal_handle_t handle_ : this->handles) {
     const Entry &entry = entries[handle_];
-    stream << handle_ << ": "
+    stream << HANDLE_SET(entry.version, handle_) << ": "
 	   << entry.key.to_hex() << " &&& " << entry.mask.to_hex() << " => ";
     entry.value.dump(stream);
     stream << "\n";
