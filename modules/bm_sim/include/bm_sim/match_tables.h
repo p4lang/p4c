@@ -214,7 +214,10 @@ public:
     unsigned int get_grp() const { assert(is_grp()); return get(); }
 
     void dump(std::ostream &stream) const {
-      stream << index;
+      if(is_grp())
+	stream << "group(" << get() << ")";
+      else
+	stream << "member(" << get() << ")";
     }
 
     static IndirectIndex make_mbr_index(unsigned int index) {

@@ -26,6 +26,7 @@ import os
 import sys
 import struct
 import json
+from functools import wraps
 
 from thrift import Thrift
 from thrift.transport import TSocket
@@ -523,6 +524,7 @@ def thrift_connect(thrift_ip, thrift_port, services):
     return clients
 
 def handle_bad_input(f):
+    @wraps(f)
     def handle(*args, **kwargs):
         try:
             return f(*args, **kwargs)
@@ -704,7 +706,7 @@ class RuntimeAPI(cmd.Cmd):
     def parse_runtime_data(self, action, action_params):
         if len(action_params) != action.num_params():
             raise UIn_Error(
-                "Action %s needs %d parameters" % (action_name, action.num_params())
+                "Action %s needs %d parameters" % (action.name, action.num_params())
             )
 
         return parse_runtime_data(action, action_params)
@@ -726,7 +728,7 @@ class RuntimeAPI(cmd.Cmd):
         "Add entry to a match table: table_add <table name> <action name> <match fields> => <action parameters> [priority]"
         args = line.split()
 
-        self.at_least_n_args(args, 2)
+        self.at_least_n_args(args, 3)
 
         table_name, action_name = args[0], args[1]
         table = self.get_res("table", table_name, TABLES)
@@ -800,6 +802,9 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for entry handle")
 
         action_params = args[3:]
+        if args[3] == "=>":
+            # be more tolerant
+            action_params = args[4:]
         runtime_data = self.parse_runtime_data(action, action_params)
 
         print "Modifying entry", entry_handle, "for", MatchType.to_str(table.match_type), "match table", table_name
@@ -922,6 +927,9 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for member handle")
 
         action_params = args[3:]
+        if args[3] == "=>":
+            # be more tolerant
+            action_params = args[4:]
         runtime_data = self.parse_runtime_data(action, action_params)
 
         mbr_handle = self.client.bm_mt_indirect_modify_member(
@@ -932,27 +940,18 @@ class RuntimeAPI(cmd.Cmd):
         # TODO: only show indirect tables
         return self._complete_table_and_action(text, line)
 
-    # dirty hack to be consistent with bmv2
-    # TODO: clean this up
-    def is_grp_handle(self, h):
-        return (h >= (1 << 24))
-
-    def make_grp_handle(self, h):
-        return (h | (1 << 24))
-
-    def unmake_grp_handle(self, h):
-        return (h & 0xffffff)
-
-    @handle_bad_input
-    def do_table_indirect_add(self, line):
-        "Add entry to an indirect match table: table_indirect_add <table name> <match fields> => < member handle | group handle> [priority]"
+    def indirect_add_common(self, line, ws=False):
         args = line.split()
 
-        self.at_least_n_args(args, 1)
+        self.at_least_n_args(args, 2)
 
         table_name = args[0]
         table = self.get_res("table", table_name, TABLES)
-        self.check_indirect(table)
+
+        if ws:
+            self.check_indirect_ws(table)
+        else:
+            self.check_indirect(table)
 
         if table.match_type == MatchType.TERNARY:
             try:
@@ -981,19 +980,36 @@ class RuntimeAPI(cmd.Cmd):
 
         print "Adding entry to indirect match table", table_name
 
-        if self.is_grp_handle(handle):
-            api = self.client.bm_mt_indirect_ws_add_entry
-            handle = self.unmake_grp_handle(handle)
-        else:
-            api = self.client.bm_mt_indirect_add_entry
+        return table_name, match_key, handle, BmAddEntryOptions(priority = priority)
 
-        entry_handle = api(
-            table_name, match_key, handle, BmAddEntryOptions(priority = priority)
+    @handle_bad_input
+    def do_table_indirect_add(self, line):
+        "Add entry to an indirect match table: table_indirect_add <table name> <match fields> => <member handle> [priority]"
+
+        table_name, match_key, handle, options = self.indirect_add_common(line)
+
+        entry_handle = self.client.bm_mt_indirect_add_entry(
+            table_name, match_key, handle, options
         )
 
         print "Entry has been added with handle", entry_handle
 
     def complete_table_indirect_add(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_add_with_group(self, line):
+        "Add entry to an indirect match table: table_indirect_add <table name> <match fields> => <group handle> [priority]"
+
+        table_name, match_key, handle, options = self.indirect_add_common(line, ws=True)
+
+        entry_handle = self.client.bm_mt_indirect_ws_add_entry(
+            table_name, match_key, handle, options
+        )
+
+        print "Entry has been added with handle", entry_handle
+
+    def complete_table_indirect_add_with_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
     @handle_bad_input
@@ -1019,31 +1035,46 @@ class RuntimeAPI(cmd.Cmd):
     def complete_table_indirect_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
-    @handle_bad_input
-    def do_table_indirect_set_default(self, line):
-        "Set default member / group for indirect match table: table_indirect_set_default <table name> <member handle | group handle>"
+    def indirect_set_default_common(self, line, ws=False):
         args = line.split()
 
         self.exactly_n_args(args, 2)
 
         table_name = args[0]
         table = self.get_res("table", table_name, TABLES)
-        self.check_indirect(table)
+
+        if ws:
+            self.check_indirect_ws(table)
+        else:
+            self.check_indirect(table)
 
         try:
             handle = int(args[1])
         except:
             raise UIn_Error("Bad format for handle")
 
-        if self.is_grp_handle(handle):
-            api = self.client.bm_mt_indirect_ws_set_default_group
-            handle = self.unmake_grp_handle(handle)
-        else:
-            api = self.client.bm_mt_indirect_set_default_member
+        return table_name, handle
 
-        api(table_name, handle)
+    @handle_bad_input
+    def do_table_indirect_set_default(self, line):
+        "Set default member for indirect match table: table_indirect_set_default <table name> <member handle>"
+
+        table_name, handle = self.indirect_set_default_common(line)
+
+        self.client.bm_mt_indirect_set_default_member(table_name, handle)
 
     def complete_table_indirect_set_default(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_indirect_set_default_with_group(self, line):
+        "Set default group for indirect match table: table_indirect_set_default <table name> <group handle>"
+
+        table_name, handle = self.indirect_set_default_common(line, ws=True)
+
+        self.client.bm_mt_indirect_ws_set_default_group(table_name, handle)
+
+    def complete_table_indirect_set_default_with_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
     @handle_bad_input
@@ -1059,8 +1090,6 @@ class RuntimeAPI(cmd.Cmd):
         self.check_indirect_ws(table)
 
         grp_handle = self.client.bm_mt_indirect_ws_create_group(table_name)
-
-        grp_handle = self.make_grp_handle(grp_handle)
 
         print "Group has been created with handle", grp_handle
 
@@ -1085,9 +1114,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for group handle")
 
-        self.client.bm_mt_indirect_ws_delete_group(
-            table_name, self.unmake_grp_handle(grp_handle)
-        )
+        self.client.bm_mt_indirect_ws_delete_group(table_name, grp_handle)
 
     def complete_table_indirect_delete_group(self, text, line, start_index, end_index):
         # TODO: only show indirect_ws tables
@@ -1116,7 +1143,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for group handle")
 
         self.client.bm_mt_indirect_ws_add_member_to_group(
-            table_name, mbr_handle, self.unmake_grp_handle(grp_handle)
+            table_name, mbr_handle, grp_handle
         )
 
     def complete_table_indirect_add_member_to_group(self, text, line, start_index, end_index):
@@ -1146,7 +1173,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for group handle")
 
         self.client.bm_mt_indirect_ws_remove_member_from_group(
-            table_name, mbr_handle, self.unmake_grp_handle(grp_handle)
+            table_name, mbr_handle, grp_handle
         )
 
     def complete_table_indirect_remove_member_from_group(self, text, line, start_index, end_index):
@@ -1441,8 +1468,8 @@ class RuntimeAPI(cmd.Cmd):
         return self._complete_res(REGISTER_ARRAYS, text)
 
     @handle_bad_input
-    def do_dump_table(self, line):
-        "Display some (non-formatted) information about a table: dump_table <table_name>"
+    def do_table_dump(self, line):
+        "Display some (non-formatted) information about a table: table_dump <table_name>"
         args = line.split()
         self.exactly_n_args(args, 1)
         table_name = args[0]

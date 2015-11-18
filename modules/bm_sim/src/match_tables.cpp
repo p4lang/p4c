@@ -677,8 +677,7 @@ MatchTableIndirectWS::dump(std::ostream &stream) const
   MatchTableIndirect::dump_(stream);
   stream << "groups:\n";
   for(grp_hdl_t grp : grp_handles) {
-    IndirectIndex::make_grp_index(grp).dump(stream);
-    stream << ": ";
+    stream << grp << ": ";
     group_entries[grp].dump(stream);
     stream << "\n";
   }
