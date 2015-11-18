@@ -98,7 +98,8 @@ enum TableOperationErrorCode {
   GRP_STILL_USED = 14,
   EMPTY_GRP = 15,
   DUPLICATE_ENTRY = 16,
-  ERROR = 17,
+  BAD_MATCH_KEY = 17,
+  ERROR = 18,
 }
 
 exception InvalidTableOperation {

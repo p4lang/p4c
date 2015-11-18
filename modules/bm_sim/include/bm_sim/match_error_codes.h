@@ -39,6 +39,7 @@ enum class MatchErrorCode {
   GRP_STILL_USED,
   EMPTY_GRP,
   DUPLICATE_ENTRY,
+  BAD_MATCH_KEY,
   ERROR,
 };
 

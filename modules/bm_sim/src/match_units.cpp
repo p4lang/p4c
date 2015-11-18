@@ -224,7 +224,8 @@ MatchUnitExact<V>::add_entry_(
     }
   }
 
-  assert(new_key.size() == this->nbytes_key);
+  if(new_key.size() != this->nbytes_key)
+    return MatchErrorCode::BAD_MATCH_KEY;
 
   // check if the key is already present
   if(entries_map.find(new_key) != entries_map.end())
@@ -292,7 +293,8 @@ MatchUnitExact<V>::dump_(std::ostream &stream) const
 {
   for(internal_handle_t handle_ : this->handles) {
     const Entry &entry = entries[handle_];
-    stream << handle_ << ": " << entry.key.to_hex() << " => ";
+    stream << HANDLE_SET(entry.version, handle_) << ": "
+	   << entry.key.to_hex() << " => ";
     entry.value.dump(stream);
     stream << "\n";
   }
@@ -360,7 +362,8 @@ MatchUnitLPM<V>::add_entry_(
   new_key.append(lpm_param->key);
   prefix_length += lpm_param->prefix_length;
 
-  assert(new_key.size() == this->nbytes_key);
+  if(new_key.size() != this->nbytes_key)
+    return MatchErrorCode::BAD_MATCH_KEY;
 
   // check if the key is already present
   if(entries_trie.has_prefix(new_key, prefix_length))
@@ -430,7 +433,7 @@ MatchUnitLPM<V>::dump_(std::ostream &stream) const
 {
   for(internal_handle_t handle_ : this->handles) {
     const Entry &entry = entries[handle_];
-    stream << handle_ << ": "
+    stream << HANDLE_SET(entry.version, handle_) << ": "
 	   << entry.key.to_hex() << "/" << entry.prefix_length << " => ";
     entry.value.dump(stream);
     stream << "\n";
@@ -543,8 +546,10 @@ MatchUnitTernary<V>::add_entry_(
     }
   }
 
-  assert(new_key.size() == this->nbytes_key);
-  assert(new_mask.size() == this->nbytes_key);
+  if(new_key.size() != this->nbytes_key)
+    return MatchErrorCode::BAD_MATCH_KEY;
+  if(new_mask.size() != this->nbytes_key)
+    return MatchErrorCode::BAD_MATCH_KEY;
 
   // in theory I just need to do that for TERNARY MatchKeyParam's...
   format_ternary_key(&new_key, new_mask);
@@ -632,7 +637,7 @@ MatchUnitTernary<V>::dump_(std::ostream &stream) const
 {
   for(internal_handle_t handle_ : this->handles) {
     const Entry &entry = entries[handle_];
-    stream << handle_ << ": "
+    stream << HANDLE_SET(entry.version, handle_) << ": "
 	   << entry.key.to_hex() << " &&& " << entry.mask.to_hex() << " => ";
     entry.value.dump(stream);
     stream << "\n";

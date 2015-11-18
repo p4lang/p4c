@@ -214,7 +214,10 @@ public:
     unsigned int get_grp() const { assert(is_grp()); return get(); }
 
     void dump(std::ostream &stream) const {
-      stream << index;
+      if(is_grp())
+	stream << "group(" << get() << ")";
+      else
+	stream << "member(" << get() << ")";
     }
 
     static IndirectIndex make_mbr_index(unsigned int index) {
@@ -347,6 +350,8 @@ protected:
 
   void reset_state_() override;
 
+  void dump_(std::ostream &stream) const;
+
 protected:
   IndirectIndex default_index{};
   IndirectIndexRefCount index_ref_count{};
@@ -407,6 +412,8 @@ public:
 
   MatchErrorCode get_num_members_in_group(grp_hdl_t grp, size_t *nb) const;
 
+  void dump(std::ostream &stream) const override;
+
 public:
   static std::unique_ptr<MatchTableIndirectWS> create(
     const std::string &match_type, 
@@ -449,6 +456,7 @@ private:
     iterator end() { return mbrs.end(); }
     const_iterator end() const { return mbrs.end(); }
 
+    void dump(std::ostream &stream) const;
 
   private:
     RandAccessUIntSet mbrs{};

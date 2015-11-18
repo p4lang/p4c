@@ -240,6 +240,8 @@
         }
     ],
     "meter_arrays": [],
+    "counter_arrays": [],
+    "register_arrays": [],
     "actions": [
         {
             "name": "_drop",
