@@ -1,5 +1,7 @@
-AM_CPPFLAGS =  -I$(srcdir)/../../../thrift_src/gen-cpp
+AM_CPPFLAGS = \
+-I$(top_srcdir)/thrift_src/gen-cpp \
+-I$(top_srcdir)/modules/bm_apps/include
 bin_PROGRAMS = learn_client
-learn_client_SOURCES = learn_client.cpp nn.h
-learn_client_LDADD = -lJudy -lnanomsg -lthrift $(srcdir)/../../../thrift_src/libruntimestubs.la
+learn_client_SOURCES = learn_client.cpp
+learn_client_LDADD = $(top_srcdir)/modules/bm_apps/libbmapps.la
 learn_client_LDFLAGS = -pthread

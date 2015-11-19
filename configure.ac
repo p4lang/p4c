@@ -39,6 +39,12 @@ AC_SUBST([PICKY_CXXFLAGS])
 AC_SUBST([PICKY_CFLAGS])
 AC_SUBST([DEBUG_CPPFLAGS])
 
+AC_SUBST([AM_CPPFLAGS], ["-I\$(top_srcdir)/modules/bf_lpm_trie/include \
+                          -isystem\$(top_srcdir)/third_party/jsoncpp/include \
+                          -isystem\$(top_srcdir)/third_party/spdlog/include \
+                          -I\$(top_srcdir)/modules/BMI/include"])
+
+
 # Checks for header files.
 AC_LANG_PUSH(C)
 AC_LANG_PUSH(C++)
@@ -91,6 +97,8 @@ AC_CONFIG_FILES([Makefile
 		modules/bm_sim/Makefile
 		modules/bm_runtime/Makefile
 		modules/BMI/Makefile
+		modules/bm_apps/Makefile
+		modules/bm_apps/include/Makefile
 		targets/Makefile
 		targets/simple_router/Makefile
 		targets/l2_switch/Makefile

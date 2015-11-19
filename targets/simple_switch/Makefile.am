@@ -9,13 +9,9 @@ gen-cpp/simple_switch_types.h
 
 BUILT_SOURCES = $(simple_switch_thrift_files)
 
-AM_CPPFLAGS = \
+AM_CPPFLAGS += \
 -I$(top_srcdir)/modules/bm_sim/include \
--I$(top_srcdir)/modules/bf_lpm_trie/include \
--I$(top_srcdir)/third_party/jsoncpp/include \
--I$(top_srcdir)/third_party/spdlog/include \
 -I$(top_srcdir)/modules/bm_runtime/include \
--I$(top_srcdir)/modules/BMI/include \
 -I$(srcdir)/thrift/src/ \
 -I$(srcdir)/gen-cpp
 bin_PROGRAMS = simple_switch
