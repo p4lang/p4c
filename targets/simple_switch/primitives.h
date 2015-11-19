@@ -29,6 +29,21 @@ class modify_field : public ActionPrimitive<Field &, const Data &> {
 
 REGISTER_PRIMITIVE(modify_field);
 
+class modify_field_rng_uniform
+  : public ActionPrimitive<Field &, const Data &, const Data &> {
+  void operator ()(Field &f, const Data &b, const Data &e) {
+    // TODO: a little hacky, fix later if there is a need using GMP random fns
+    using engine = std::default_random_engine;
+    using hash = std::hash<std::thread::id>;
+    static thread_local engine generator(hash()(std::this_thread::get_id()));
+    using distrib64 = std::uniform_int_distribution<uint64_t>;
+    distrib64 distribution(b.get_uint64(), e.get_uint64());
+    f.set(distribution(generator));
+  }
+};
+
+REGISTER_PRIMITIVE(modify_field_rng_uniform);
+
 class add_to_field : public ActionPrimitive<Field &, const Data &> {
   void operator ()(Field &f, const Data &d) {
     f.add(f, d);
