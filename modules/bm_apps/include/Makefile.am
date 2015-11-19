@@ -1,2 +1,2 @@
 nobase_include_HEADERS = \
-bm_apps/test.h
+bm_apps/learn.h
