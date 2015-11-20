@@ -74,16 +74,14 @@ public:
   }
 
   size_t size() {
-    q_mutex.lock();
+    std::unique_lock<std::mutex> lock(q_mutex);
     return queue.size();
-    q_mutex.unlock();
   }
 
   void set_capacity(const size_t c) {
     // change capacity but does not discard elements
-    q_mutex.lock();
+    std::unique_lock<std::mutex> lock(q_mutex);
     capacity = c;
-    q_mutex.unlock();
   }
 
   Queue(const Queue &) = delete;
