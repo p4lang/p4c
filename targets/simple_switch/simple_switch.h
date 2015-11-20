@@ -31,7 +31,7 @@
 #include "bm_sim/event_logger.h"
 #include "bm_sim/simple_pre_lag.h"
 
-using std::chrono::microseconds;
+using ts_res = std::chrono::microseconds;
 using std::chrono::duration_cast;
 using ticks = std::chrono::nanoseconds;
 
@@ -141,6 +141,10 @@ private:
     if(it == mirroring_map.end()) return -1;
     return it->second;
   }
+
+  ts_res get_ts() const;
+
+  void enqueue(int egress_port, std::unique_ptr<Packet> &&pkt);
 
 private:
   int max_port;

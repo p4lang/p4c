@@ -76,6 +76,24 @@ void SimpleSwitch::transmit_thread() {
   }
 }
 
+ts_res SimpleSwitch::get_ts() const {
+  return duration_cast<ts_res>(clock::now() - start);
+}
+
+void SimpleSwitch::enqueue(int egress_port, std::unique_ptr<Packet> &&packet) {
+    packet->set_egress_port(egress_port);
+
+    PHV *phv = packet->get_phv();
+
+    if(phv->has_header("queueing_metadata")) {
+      phv->get_field("queueing_metadata.enq_timestamp").set(get_ts().count());
+      phv->get_field("queueing_metadata.enq_qdepth")
+	.set(egress_buffers[egress_port].size());
+    }
+
+    egress_buffers[egress_port].push_front(std::move(packet));
+}
+
 void SimpleSwitch::ingress_thread() {
   Parser *parser = this->get_parser("parser");
   Pipeline *ingress_mau = this->get_pipeline("ingress");
@@ -94,7 +112,7 @@ void SimpleSwitch::ingress_thread() {
 
     if(phv->has_field("intrinsic_metadata.ingress_global_timestamp")) {
       phv->get_field("intrinsic_metadata.ingress_global_timestamp")
-        .set(duration_cast<microseconds>(clock::now() - start).count());
+        .set(get_ts().count());
     }
 
     // setting standard metadata
@@ -159,8 +177,7 @@ void SimpleSwitch::ingress_thread() {
 	// the alternative would be to pay the (huge) price of PHV copy for
 	// every ingress packet
 	parser->parse(packet_copy.get());
-	packet_copy->set_egress_port(egress_port);
-	egress_buffers[egress_port].push_front(std::move(packet_copy));
+	enqueue(egress_port, std::move(packet_copy));
 	f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
 	packet->restore_buffer_state(packet_out_state);
       }
@@ -186,8 +203,7 @@ void SimpleSwitch::ingress_thread() {
 	f_instance_type.set(PKT_INSTANCE_TYPE_REPLICATION);
 	copy_id = copy_id_dis(gen);
 	std::unique_ptr<Packet> packet_copy(new Packet(packet->clone(copy_id++)));
-	packet_copy->set_egress_port(egress_port);
-	egress_buffers[egress_port].push_front(std::move(packet_copy));
+	enqueue(egress_port, std::move(packet_copy));
       }
       f_instance_type.set(instance_type);
 
@@ -203,8 +219,7 @@ void SimpleSwitch::ingress_thread() {
       continue;
     }
 
-    packet->set_egress_port(egress_port);
-    egress_buffers[egress_port].push_front(std::move(packet));
+    enqueue(egress_port, std::move(packet));
   }
 }
 
@@ -216,10 +231,16 @@ void SimpleSwitch::egress_thread(int port) {
   while(1) {
     std::unique_ptr<Packet> packet;
     egress_buffers[port].pop_back(&packet);
+
     phv = packet->get_phv();
 
-    int egress_port = packet->get_egress_port();
-    phv->get_field("standard_metadata.egress_port").set(egress_port);
+    if(phv->has_header("queueing_metadata")) {
+      phv->get_field("queueing_metadata.deq_timestamp").set(get_ts().count());
+      phv->get_field("queueing_metadata.deq_qdepth")
+	.set(egress_buffers[port].size());
+    }
+
+    phv->get_field("standard_metadata.egress_port").set(port);
 
     Field &f_egress_spec = phv->get_field("standard_metadata.egress_spec");
     f_egress_spec.set(0);
@@ -236,7 +257,7 @@ void SimpleSwitch::egress_thread(int port) {
     // EGRESS CLONING
     if(clone_spec) {
       SIMPLELOG << "cloning packet at egress" << std::endl;
-      egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
+      int egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
       if(egress_port >= 0) {
 	f_instance_type.set(PKT_INSTANCE_TYPE_EGRESS_CLONE);
 	f_clone_spec.set(0);
@@ -249,8 +270,7 @@ void SimpleSwitch::egress_thread(int port) {
 	  phv_copy->get_field(p.first, p.second)
 	    .set(phv->get_field(p.first, p.second));
 	}
-	packet_copy->set_egress_port(egress_port);
-	egress_buffers[egress_port].push_front(std::move(packet_copy));
+	enqueue(egress_port, std::move(packet_copy));
 	f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
       }
     }

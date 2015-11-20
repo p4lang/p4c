@@ -127,6 +127,10 @@ int P4Objects::init_objects(std::istream &is,
 
     phv_factory.push_back_header(header_name, header_id, *header_type, metadata);
     phv_factory.disable_all_field_arith(header_id);
+    // if(!metadata) // temporary ?
+    //   phv_factory.disable_all_field_arith(header_id);
+    // else
+    //   phv_factory.enable_all_field_arith(header_id);
     add_header_id(header_name, header_id);
   }
 
