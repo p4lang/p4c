@@ -1483,7 +1483,7 @@ class RuntimeAPI(cmd.Cmd):
         self.get_res("table", table_name, TABLES)
         print self.client.bm_dump_table(table_name)
 
-    def complete_dump_table(self, text, line, start_index, end_index):
+    def complete_table_dump(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
 def main():

@@ -212,6 +212,7 @@ MatchTable::dump(std::ostream &stream) const
   ReadLock lock = lock_read();
   stream << name << ":\n";
   match_unit->dump(stream);
+  stream << "default: " << default_entry << "\n";
 }
 
 void
