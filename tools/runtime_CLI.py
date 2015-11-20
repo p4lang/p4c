@@ -533,7 +533,7 @@ def handle_bad_input(f):
         except UIn_RuntimeDataError as e:
             print "Invalid runtime data:", e
         except UIn_Error as e:
-            print e
+            print "Error:", e
         except InvalidTableOperation as e:
             error = TableOperationErrorCode._VALUES_TO_NAMES[e.what]
             print "Invalid table operation (%s)" % error
@@ -1217,8 +1217,15 @@ class RuntimeAPI(cmd.Cmd):
     def ports_to_port_map_str(self, ports):
         last_port_num = 0
         port_map_str = ""
+        ports_int = []
         for port_num_str in ports:
-            port_num = int(port_num_str)
+            try:
+                port_num = int(port_num_str)
+            except:
+                raise UIn_Error("'%s' is not a valid port number" % port_num_str)
+            ports_int.append(port_num)
+        ports_int.sort()
+        for port_num in ports_int:
             port_map_str += "0" * (port_num - last_port_num) + "1"
             last_port_num = port_num + 1
         return port_map_str[::-1]
