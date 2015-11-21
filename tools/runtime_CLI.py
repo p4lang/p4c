@@ -535,19 +535,19 @@ def handle_bad_input(f):
         except UIn_Error as e:
             print "Error:", e
         except InvalidTableOperation as e:
-            error = TableOperationErrorCode._VALUES_TO_NAMES[e.what]
+            error = TableOperationErrorCode._VALUES_TO_NAMES[e.code]
             print "Invalid table operation (%s)" % error
         except InvalidCounterOperation as e:
-            error = CounterOperationErrorCode._VALUES_TO_NAMES[e.what]
+            error = CounterOperationErrorCode._VALUES_TO_NAMES[e.code]
             print "Invalid counter operation (%s)" % error
         except InvalidMeterOperation as e:
-            error = MeterOperationErrorCode._VALUES_TO_NAMES[e.what]
+            error = MeterOperationErrorCode._VALUES_TO_NAMES[e.code]
             print "Invalid meter operation (%s)" % error
         except InvalidRegisterOperation as e:
-            error = RegisterOperationErrorCode._VALUES_TO_NAMES[e.what]
+            error = RegisterOperationErrorCode._VALUES_TO_NAMES[e.code]
             print "Invalid meter operation (%s)" % error
         except InvalidSwapOperation as e:
-            error = SwapOperationErrorCode._VALUES_TO_NAMES[e.what]
+            error = SwapOperationErrorCode._VALUES_TO_NAMES[e.code]
             print "Invalid swap operation (%s)" % error
     return handle
 
