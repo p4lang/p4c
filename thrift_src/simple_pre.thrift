@@ -37,7 +37,7 @@ enum McOperationErrorCode {
 }
 
 exception InvalidMcOperation {
-  1:McOperationErrorCode what
+  1:McOperationErrorCode code
 }
 
 service SimplePre {

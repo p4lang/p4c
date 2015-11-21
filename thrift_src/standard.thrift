@@ -103,7 +103,7 @@ enum TableOperationErrorCode {
 }
 
 exception InvalidTableOperation {
-  1:TableOperationErrorCode what
+  1:TableOperationErrorCode code
 }
 
 enum CounterOperationErrorCode {
@@ -113,7 +113,7 @@ enum CounterOperationErrorCode {
 }
 
 exception InvalidCounterOperation {
-  1:CounterOperationErrorCode what
+  1:CounterOperationErrorCode code
 }
 
 enum SwapOperationErrorCode {
@@ -123,7 +123,7 @@ enum SwapOperationErrorCode {
 }
 
 exception InvalidSwapOperation {
-  1:SwapOperationErrorCode what
+  1:SwapOperationErrorCode code
 }
 
 enum MeterOperationErrorCode {
@@ -135,7 +135,7 @@ enum MeterOperationErrorCode {
 }
 
 exception InvalidMeterOperation {
- 1:MeterOperationErrorCode what
+ 1:MeterOperationErrorCode code
 }
 
 typedef i64 BmRegisterValue
@@ -146,7 +146,7 @@ enum RegisterOperationErrorCode {
 }
 
 exception InvalidRegisterOperation {
- 1:RegisterOperationErrorCode what
+ 1:RegisterOperationErrorCode code
 }
 
 // TODO
@@ -155,7 +155,7 @@ enum DevMgrErrorCode {
 }
 
 exception InvalidDevMgrOperation {
- 1:DevMgrErrorCode what
+ 1:DevMgrErrorCode code
 }
 
 service Standard {
