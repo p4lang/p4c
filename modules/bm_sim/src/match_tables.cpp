@@ -492,7 +492,7 @@ MatchTableIndirectWS::choose_from_group(grp_hdl_t grp, const Packet &pkt) const
   size_t s = group_info.size();
   assert(s > 0);
   if(!hash) return group_info.get_nth(0);
-  hash_t h = hash->output(pkt);
+  hash_t h = static_cast<hash_t>(hash->output(pkt));
   return group_info.get_nth(h % s);
 }
 

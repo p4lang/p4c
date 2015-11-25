@@ -322,7 +322,7 @@ TEST_F(ActionsTest, ModifyFieldWithHashBasedOffset) {
   BufBuilder builder;
   builder.push_back_field(testHeader1, 0);
   builder.push_back_field(testHeader1, 4);
-  NamedCalculation calculation("test_calculation", 0, builder);
+  NamedCalculation calculation("test_calculation", 0, builder, "xxh64");
 
   ModifyFieldWithHashBasedOffset primitive;
   testActionFn.push_back_primitive(&primitive);

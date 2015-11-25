@@ -36,6 +36,37 @@
 
 #include "SimpleSwitch_server.ipp"
 
+namespace {
+
+struct hash_ex {
+  uint32_t operator()(const char *buf, size_t s) const {
+    const int p = 16777619;
+    int hash = 2166136261;
+
+    for (size_t i = 0; i < s; i++)
+      hash = (hash ^ buf[i]) * p;
+
+    hash += hash << 13;
+    hash ^= hash >> 7;
+    hash += hash << 3;
+    hash ^= hash >> 17;
+    hash += hash << 5;
+    return static_cast<uint32_t>(hash);
+  }
+};
+
+REGISTER_HASH(hash_ex);
+
+struct bmv2_hash {
+  uint64_t operator()(const char *buf, size_t s) const {
+    return hash::xxh64(buf, s);
+  }
+};
+
+REGISTER_HASH(bmv2_hash);
+
+}
+
 SimpleSwitch::SimpleSwitch(int max_port)
   : Switch(false), // enable_switch = false
     max_port(max_port),

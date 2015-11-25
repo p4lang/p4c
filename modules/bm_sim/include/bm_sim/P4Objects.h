@@ -278,6 +278,8 @@ private:
   bool field_exists(const std::string &header_name,
 		    const std::string &field_name);
   bool check_required_fields(const std::set<header_field_pair> &required_fields);
+
+  std::unique_ptr<CalculationsMap::MyC> check_hash(const std::string &name) const;
 };
 
 

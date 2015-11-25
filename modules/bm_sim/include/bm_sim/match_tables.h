@@ -382,7 +382,7 @@ public:
     : MatchTableIndirect(name, id, std::move(match_unit),
 			 with_counters, with_ageing) { }
 
-  void set_hash(std::unique_ptr<Calculation<hash_t> > h) {
+  void set_hash(std::unique_ptr<Calculation> h) {
     hash = std::move(h);
   }
 
@@ -466,7 +466,7 @@ private:
   HandleMgr grp_handles{};
   size_t num_groups{0};
   std::vector<GroupInfo> group_entries{};
-  std::unique_ptr<Calculation<hash_t> > hash{nullptr};
+  std::unique_ptr<Calculation> hash{nullptr};
 };
 
 #endif

@@ -121,6 +121,24 @@ TEST(P4Objects, UnknownPrimitive) {
   EXPECT_EQ(expected, os.str());
 }
 
+TEST(P4Objects, UnknownHash) {
+  std::istringstream is("{\"calculations\":[{\"name\":\"calc\",\"id\":0,\"input\":[],\"algo\":\"bad_hash_1\"}]}");
+  std::stringstream os;
+  P4Objects objects(os);
+  std::string expected("Unknown hash algorithm: bad_hash_1\n");
+  ASSERT_NE(0, objects.init_objects(is));
+  EXPECT_EQ(expected, os.str());
+}
+
+TEST(P4Objects, UnknownHashSelector) {
+  std::istringstream is("{\"pipelines\":[{\"name\":\"ingress\",\"id\":0,\"init_table\":\"t1\",\"tables\":[{\"name\":\"t1\",\"id\":0,\"match_type\":\"exact\",\"type\":\"indirect_ws\",\"selector\":{\"algo\":\"bad_hash_2\",\"input\":[]},\"max_size\":1024,\"with_counters\":false,\"key\":[],\"actions\":[\"_drop\"],\"next_tables\":{\"_drop\":null},\"default_action\":null}]}]}");
+  std::stringstream os;
+  P4Objects objects(os);
+  std::string expected("Unknown hash algorithm: bad_hash_2\n");
+  ASSERT_NE(0, objects.init_objects(is));
+  EXPECT_EQ(expected, os.str());
+}
+
 TEST(P4Objects, RequiredField) {
   std::istringstream is("{}");
   std::set<P4Objects::header_field_pair> required_fields;

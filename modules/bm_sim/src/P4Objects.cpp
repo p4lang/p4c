@@ -366,16 +366,10 @@ int P4Objects::init_objects(std::istream &is,
       }
     }
 
-    NamedCalculation *calculation = new NamedCalculation(name, id, builder);
-    // I need to find a better way to manage the different selection algos
-    // Maybe something similar to what I am doing for action primitives
-    // with a register mechanism
-    if(algo == "crc16")
-      calculation->set_compute_fn(hash::crc16<uint64_t>);
-    else if(algo == "csum16")
-      calculation->set_compute_fn(hash::cksum16<uint64_t>);
-    else
-      calculation->set_compute_fn(hash::xxh64<uint64_t>);    
+    // check algo
+    if(!check_hash(algo)) return 1;
+
+    NamedCalculation *calculation = new NamedCalculation(name, id, builder, algo);
     add_named_calculation(name, unique_ptr<NamedCalculation>(calculation));
   }
 
@@ -628,15 +622,11 @@ int P4Objects::init_objects(std::istream &is,
 	  int field_offset = get_field_offset(header_id, field_name);
 	  builder.push_back_field(header_id, field_offset);
 	}
-	typedef MatchTableIndirectWS::hash_t hash_t;
-	std::unique_ptr<Calculation<hash_t> > calc(new Calculation<hash_t>(builder));
-	// I need to find a better way to manage the different selection algos
-	// Maybe something similar to what I am doing for action primitives
-	// with a register mechanism
-	if(selector_algo == "crc16")
-	  calc->set_compute_fn(hash::crc16<hash_t>);
-	else
-	  calc->set_compute_fn(hash::xxh64<hash_t>);
+	// typedef MatchTableIndirectWS::hash_t hash_t;
+	// check algo
+	if(!check_hash(selector_algo)) return 1;
+
+	std::unique_ptr<Calculation> calc(new Calculation(builder, selector_algo));
 	MatchTableIndirectWS *mt_indirect_ws =
 	  static_cast<MatchTableIndirectWS *>(table->get_match_table());
 	mt_indirect_ws->set_hash(std::move(calc));
@@ -901,4 +891,11 @@ P4Objects::check_required_fields(const std::set<header_field_pair> &required_fie
     }
   }
   return res;
+}
+
+std::unique_ptr<CalculationsMap::MyC>
+P4Objects::check_hash(const std::string &name) const {
+  auto h = CalculationsMap::get_instance()->get_copy(name);
+  if(!h) outstream << "Unknown hash algorithm: " << name  << std::endl;
+  return h;
 }

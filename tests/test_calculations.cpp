@@ -28,8 +28,6 @@
 // Google Test fixture for calculations tests
 class CalculationTest : public ::testing::Test {
 protected:
-  typedef unsigned int hash_t;
-
   PHVFactory phv_factory;
 
   HeaderType testHeaderType;
@@ -88,9 +86,7 @@ TEST_F(CalculationTest, SimpleTest) {
 
   builder.push_back_field(testHeader2, 2); // f32_1
 
-  Calculation<hash_t> calc(builder);
-
-  calc.set_compute_fn(hash::xxh64<hash_t>);
+  Calculation calc(builder, "xxh64");
 
   unsigned char pkt_buf[2 * header_size];
 
@@ -109,9 +105,8 @@ TEST_F(CalculationTest, SimpleTest) {
   std::copy(&pkt_buf[header_size + 8], &pkt_buf[header_size + 12],
 	    &expected_buf[12]);
 
-  hash_t expected = hash::xxh64<hash_t>((const char *) expected_buf,
-					sizeof(expected_buf));
-  hash_t actual = calc.output(pkt);
+  auto expected = hash::xxh64((const char *) expected_buf, sizeof(expected_buf));
+  auto actual = calc.output(pkt);
 
   ASSERT_EQ(expected, actual);
 }
@@ -122,9 +117,7 @@ TEST_F(CalculationTest, NonAlignedTest) {
   builder.push_back_field(testHeader1, 4); // f5
   builder.push_back_field(testHeader1, 5); // f19
 
-  Calculation<hash_t> calc(builder);;
-
-  calc.set_compute_fn(hash::xxh64<hash_t>);
+  Calculation calc(builder, "xxh64");;
 
   unsigned char pkt_buf[2 * header_size];
 
@@ -139,9 +132,8 @@ TEST_F(CalculationTest, NonAlignedTest) {
   unsigned char expected_buf[3];
   std::copy(&pkt_buf[16], &pkt_buf[19], &expected_buf[0]);
 
-  hash_t expected = hash::xxh64<hash_t>((const char *) expected_buf,
-					sizeof(expected_buf));
-  hash_t actual = calc.output(pkt);
+  auto expected = hash::xxh64((const char *) expected_buf, sizeof(expected_buf));
+  auto actual = calc.output(pkt);
 
   ASSERT_EQ(expected, actual);
 }
@@ -156,9 +148,7 @@ TEST_F(CalculationTest, WithConstant) {
   builder.push_back_constant(constant, 16);
   builder.push_back_field(testHeader1, 3); // f32_2
 
-  Calculation<hash_t> calc(builder);
-
-  calc.set_compute_fn(hash::xxh64<hash_t>);
+  Calculation calc(builder, "xxh64");
 
   unsigned char pkt_buf[2 * header_size];
 
@@ -176,9 +166,8 @@ TEST_F(CalculationTest, WithConstant) {
   std::copy(constant.begin(), constant.end(), &expected_buf[8]);
   std::copy(&pkt_buf[12], &pkt_buf[16], &expected_buf[10]);
 
-  hash_t expected = hash::xxh64<hash_t>((const char *) expected_buf,
-					sizeof(expected_buf));
-  hash_t actual = calc.output(pkt);
+  auto expected = hash::xxh64((const char *) expected_buf, sizeof(expected_buf));
+  auto actual = calc.output(pkt);
 
   ASSERT_EQ(expected, actual);
 }
@@ -192,9 +181,7 @@ TEST_F(CalculationTest, WithPayload) {
   builder.push_back_header(testHeader2);
   builder.append_payload();
 
-  Calculation<hash_t> calc(builder);
-
-  calc.set_compute_fn(hash::xxh64<hash_t>);
+  Calculation calc(builder, "xxh64");
 
   unsigned char pkt_buf[2 * header_size + 196];
 
@@ -213,9 +200,28 @@ TEST_F(CalculationTest, WithPayload) {
   std::copy(&pkt_buf[header_size], &pkt_buf[sizeof(pkt_buf)],
 	    &expected_buf[12]);
 
-  hash_t expected = hash::xxh64<hash_t>((const char *) expected_buf,
-					sizeof(expected_buf));
-  hash_t actual = calc.output(pkt);
+  auto expected = hash::xxh64((const char *) expected_buf, sizeof(expected_buf));
+  auto actual = calc.output(pkt);
 
   ASSERT_EQ(expected, actual);
+}
+
+
+namespace {
+
+struct Hash {
+  uint32_t operator()(const char *buffer, size_t s) const {
+    (void) buffer; (void) s;
+    return 0u;
+  }
+};
+
+REGISTER_HASH(Hash);
+
+}
+
+TEST(CalculationsMap, Test) {
+  ASSERT_NE(nullptr, CalculationsMap::get_instance()->get_copy("Hash"));
+
+  ASSERT_EQ(nullptr, CalculationsMap::get_instance()->get_copy("Hash_Neg"));
 }

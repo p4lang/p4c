@@ -137,11 +137,16 @@ protected:
     tcp_cksum_engine_builder.append_payload();
 
     tcp_cksum_engine_calc = std::unique_ptr<NamedCalculation>(
-      new NamedCalculation("tcp_cksum_engine_calc", 0, tcp_cksum_engine_builder)
+      new NamedCalculation(
+        "tcp_cksum_engine_calc", 0,
+        tcp_cksum_engine_builder, "cksum16"
+      )
     );
-    tcp_cksum_engine_calc->set_compute_fn(hash::cksum16<uint64_t>);
     tcp_cksum_engine = std::unique_ptr<CalcBasedChecksum>(
-      new CalcBasedChecksum("tcp_cksum_engine", 1, tcpHeader, 8, tcp_cksum_engine_calc.get())
+      new CalcBasedChecksum(
+        "tcp_cksum_engine", 1, tcpHeader, 8,
+        tcp_cksum_engine_calc.get()
+      )
     );
   }
 
