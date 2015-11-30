@@ -121,6 +121,15 @@ TEST(P4Objects, UnknownPrimitive) {
   EXPECT_EQ(expected, os.str());
 }
 
+TEST(P4Objects, PrimitiveBadParamCount) {
+  std::istringstream is("{\"actions\":[{\"name\":\"_drop\",\"id\":2,\"runtime_data\":[],\"primitives\":[{\"op\":\"drop\",\"parameters\":[{\"type\":\"hexstr\",\"value\":\"0xab\"}]}]}]}");
+  std::stringstream os;
+  P4Objects objects(os);
+  std::string expected("Invalid number of parameters for primitive action drop: expected 0 but got 1\n");
+  ASSERT_NE(0, objects.init_objects(is));
+  EXPECT_EQ(expected, os.str());
+}
+
 TEST(P4Objects, UnknownHash) {
   std::istringstream is("{\"calculations\":[{\"name\":\"calc\",\"id\":0,\"input\":[],\"algo\":\"bad_hash_1\"}]}");
   std::stringstream os;

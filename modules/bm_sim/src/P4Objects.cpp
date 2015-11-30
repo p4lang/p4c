@@ -454,6 +454,18 @@ int P4Objects::init_objects(std::istream &is,
 
       const Json::Value &cfg_primitive_parameters =
 	cfg_primitive_call["parameters"];
+
+      // check number of parameters
+      const size_t num_params_expected = primitive->get_num_params();
+      const size_t num_params = cfg_primitive_parameters.size();
+      if(num_params != num_params_expected) {
+	// should not happen with a good compiler
+	outstream << "Invalid number of parameters for primitive action "
+                  << primitive_name << ": expected " << num_params_expected
+                  << " but got " << num_params << std::endl;
+	return 1;
+      }
+
       for(const auto &cfg_parameter : cfg_primitive_parameters) {
 	const string type = cfg_parameter["type"].asString();
 

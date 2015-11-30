@@ -279,7 +279,6 @@ public:
   }
 
   // cannot make it constexpr because it is virtual
-  // too slow? make it a return value for execute?
   size_t get_num_params() { return sizeof...(Args); }
 
   virtual void operator ()(Args...) = 0;
