@@ -579,7 +579,7 @@ public:
   void bm_dev_mgr_add_port(const std::string& iface_name, const int32_t port_num, const std::string& pcap_path) {
     printf("bm_dev_mgr_add_port\n");
     const char *pcap = NULL;
-    if(pcap_path == "") pcap = pcap_path.c_str();
+    if(pcap_path != "") pcap = pcap_path.c_str();
     DevMgr::ReturnCode error_code;
     error_code = switch_->port_add(iface_name, port_num, pcap, pcap);
     if(error_code != DevMgr::ReturnCode::SUCCESS) {

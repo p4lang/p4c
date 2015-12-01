@@ -549,6 +549,9 @@ def handle_bad_input(f):
         except InvalidSwapOperation as e:
             error = SwapOperationErrorCode._VALUES_TO_NAMES[e.code]
             print "Invalid swap operation (%s)" % error
+        except InvalidDevMgrOperation as e:
+            error = DevMgrErrorCode._VALUES_TO_NAMES[e.code]
+            print "Invalid device manager operation (%s)" % error
     return handle
 
 class RuntimeAPI(cmd.Cmd):
@@ -1485,6 +1488,32 @@ class RuntimeAPI(cmd.Cmd):
 
     def complete_table_dump(self, text, line, start_index, end_index):
         return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_port_add(self, line):
+        "Add a port to the switch (behavior depends on device manager used): port_add <iface_name> <port_num> [pcap_path]"
+        args = line.split()
+        self.at_least_n_args(args, 2)
+        iface_name = args[0]
+        try:
+            port_num = int(args[1])
+        except:
+            raise UIn_Error("Bad format for port_num, must be an integer")
+        pcap_path = ""
+        if len(args) > 2:
+            pcap_path = args[2]
+        self.client.bm_dev_mgr_add_port(iface_name, port_num, pcap_path)
+
+    @handle_bad_input
+    def do_port_remove(self, line):
+        "Removes a port from the switch (behavior depends on device manager used): port_remove <port_num>"
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        try:
+            port_num = int(args[0])
+        except:
+            raise UIn_Error("Bad format for port_num, must be an integer")
+        self.client.bm_dev_mgr_remove_port(port_num)
 
 def main():
     args = get_parser().parse_args()

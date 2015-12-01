@@ -26,6 +26,7 @@
 #define UNUSED(x) (void)(x)
 
 #include "bm_sim/dev_mgr.h"
+#include "bm_sim/logger.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -50,13 +51,15 @@ public:
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
 		      const char *in_pcap, const char*out_pcap)
   {
-     assert(!bmi_port_interface_add(port_mgr, iface_name.c_str(), port_num, in_pcap, out_pcap));
+    if(bmi_port_interface_add(port_mgr, iface_name.c_str(), port_num, in_pcap, out_pcap))
+      return ReturnCode::ERROR;
      return ReturnCode::SUCCESS;
   }
     
   ReturnCode port_remove(port_t port_num)
   {
-     assert(!bmi_port_interface_remove(port_mgr, port_num));
+    if(bmi_port_interface_remove(port_mgr, port_num))
+      return ReturnCode::ERROR;
      return ReturnCode::SUCCESS;
   }
 
@@ -171,7 +174,11 @@ DevMgr::port_add(const std::string &iface_name, port_t port_num,
 {
   // TODO: check if port is taken...
   assert(impl);
-  return impl->port_add(iface_name, port_num, pcap_in, pcap_out);
+  BMLOG_DEBUG("Adding interface {} as port {}", iface_name, port_num);
+  ReturnCode rc = impl->port_add(iface_name, port_num, pcap_in, pcap_out);
+  if(rc != ReturnCode::SUCCESS)
+    Logger::get()->error("Add port operation failed");
+  return rc;
 }
 
 void
@@ -185,7 +192,11 @@ PacketDispatcherInterface::ReturnCode
 DevMgr::port_remove(port_t port_num)
 {
   assert(impl);
-  return impl->port_remove(port_num);
+  BMLOG_DEBUG("Removing port {}", port_num);
+  ReturnCode rc = impl->port_remove(port_num);
+  if(rc != ReturnCode::SUCCESS)
+    Logger::get()->error("Remove port operation failed");
+  return rc;
 }
 
 PacketDispatcherInterface::ReturnCode
