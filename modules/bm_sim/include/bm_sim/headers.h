@@ -198,7 +198,7 @@ public:
     // cannot do that, would invalidate references
     // std::swap(fields, other.fields);
     for(size_t i = 0; i < fields.size(); i++) {
-      std::swap(fields[i], other.fields[i]);
+      fields[i].swap_values(other.fields[i]);
     }
   }
 

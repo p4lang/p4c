@@ -77,6 +77,12 @@ public:
     bignum::export_bytes(bytes.data(), nbytes, value);
   }
 
+  // useful for header stacks
+  void swap_values(Field &other) {
+    // just the value, nothing else (especially not .arith)
+    std::swap(value, other.value);
+  }
+
   /* returns the number of bits extracted */
   int extract(const char *data, int hdr_offset);
 
