@@ -55,7 +55,7 @@ information on the Ubuntu 12.04 dependencies.
 To enable logging, you probably want to use the following flags when running
 configure:
 
-    ./configure 'CPPFLAGS=-DENABLE_SIMPLELOG'
+    ./configure 'CPPFLAGS=-DBMLOG_DEBUG_ON'
 
 In 'debug mode', you probably want to also use the following as well:
 

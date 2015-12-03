@@ -35,9 +35,7 @@
 #include "bm_sim/event_logger.h"
 #include "bm_sim/simple_pre.h"
 
-#include "l2_switch.h"
 #include "primitives.h"
-#include "simplelog.h"
 
 #include "bm_runtime/bm_runtime.h"
 
@@ -84,7 +82,8 @@ void SimpleSwitch::transmit_thread() {
     std::unique_ptr<Packet> packet;
     output_buffer.pop_back(&packet);
     ELOGGER->packet_out(*packet);
-    SIMPLELOG << "transmitting packet " << packet->get_packet_id() << std::endl;
+    BMLOG_DEBUG_PKT(*packet, "Transmitting packet of size {} out of port {}",
+                    packet->get_data_size(), packet->get_egress_port());
     transmit_fn(packet->get_egress_port(), packet->data(), packet->get_data_size());
   }
 }
@@ -100,9 +99,11 @@ void SimpleSwitch::pipeline_thread() {
     std::unique_ptr<Packet> packet;
     input_buffer.pop_back(&packet);
     phv = packet->get_phv();
-    SIMPLELOG << "processing packet " << packet->get_packet_id() << std::endl;
 
     int ingress_port = packet->get_ingress_port();
+    BMLOG_DEBUG_PKT(*packet, "Processing packet received on port {}",
+                    ingress_port);
+
     phv->get_field("standard_metadata.ingress_port").set(ingress_port);
     ingress_port = phv->get_field("standard_metadata.ingress_port").get_int();
     std::cout << ingress_port << std::endl;
@@ -111,13 +112,13 @@ void SimpleSwitch::pipeline_thread() {
     ingress_mau->apply(packet.get());
 
     int egress_port = phv->get_field("standard_metadata.egress_port").get_int();
-    SIMPLELOG << "egress port is " << egress_port << std::endl;
+    BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
 
     int learn_id = phv->get_field("intrinsic_metadata.learn_id").get_int();
-    SIMPLELOG << "learn id is " << learn_id << std::endl;
+    BMLOG_DEBUG_PKT(*packet, "Learn id is {}", learn_id);
 
     unsigned int mgid = phv->get_field("intrinsic_metadata.mgid").get_uint();
-    SIMPLELOG << "mgid is " << mgid << std::endl;
+    BMLOG_DEBUG_PKT(*packet, "Mgid is {}", mgid);
 
     if(learn_id > 0) {
       get_learn_engine()->learn(learn_id, *packet.get());
@@ -125,7 +126,7 @@ void SimpleSwitch::pipeline_thread() {
     }
 
     if(egress_port == 511 && mgid == 0) {
-      SIMPLELOG << "dropping packet\n";
+      BMLOG_DEBUG_PKT(*packet, "Dropping packet");
       continue;
     }
 
@@ -137,8 +138,7 @@ void SimpleSwitch::pipeline_thread() {
       for(const auto &out : pre_out) {
 	egress_port = out.egress_port;
 	if(ingress_port == egress_port) continue; // pruning
-	SIMPLELOG << "replicating packet out of port " << egress_port
-		  << std::endl;
+        BMLOG_DEBUG_PKT(*packet, "Replicating packet on port {}", egress_port);
 	std::unique_ptr<Packet> packet_copy(new Packet());
 	*packet_copy = packet->clone(copy_id++);
 	packet_copy->set_egress_port(egress_port);

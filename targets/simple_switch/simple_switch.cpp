@@ -26,11 +26,10 @@
 
 #include "bm_sim/parser.h"
 #include "bm_sim/tables.h"
-
-#include "primitives.h"
-#include "simplelog.h"
+#include "bm_sim/logger.h"
 
 #include "simple_switch.h"
+#include "primitives.h"
 
 #include "bm_runtime/bm_runtime.h"
 
@@ -102,7 +101,8 @@ void SimpleSwitch::transmit_thread() {
     std::unique_ptr<Packet> packet;
     output_buffer.pop_back(&packet);
     ELOGGER->packet_out(*packet);
-    SIMPLELOG << "transmitting packet " << packet->get_packet_id() << std::endl;
+    BMLOG_DEBUG_PKT(*packet, "Transmitting packet of size {} out of port {}",
+                    packet->get_data_size(), packet->get_egress_port());
     transmit_fn(packet->get_egress_port(), packet->data(), packet->get_data_size());
   }
 }
@@ -138,8 +138,8 @@ void SimpleSwitch::ingress_thread() {
     phv = packet->get_phv();
 
     int ingress_port = packet->get_ingress_port();
-    SIMPLELOG << "processing packet " << packet->get_packet_id()
-	      << " received on port "<< ingress_port << std::endl;
+    BMLOG_DEBUG_PKT(*packet, "Processing packet received on port {}",
+                    ingress_port);
 
     if(phv->has_field("intrinsic_metadata.ingress_global_timestamp")) {
       phv->get_field("intrinsic_metadata.ingress_global_timestamp")
@@ -187,7 +187,7 @@ void SimpleSwitch::ingress_thread() {
 
     // INGRESS CLONING
     if(clone_spec) {
-      SIMPLELOG << "cloning packet at ingress" << std::endl;
+      BMLOG_DEBUG_PKT(*packet, "Cloning packet at ingress");
       egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
       if(egress_port >= 0) {
 	const Packet::buffer_state_t packet_out_state = packet->save_buffer_state();
@@ -222,14 +222,13 @@ void SimpleSwitch::ingress_thread() {
     // MULTICAST
     int instance_type = f_instance_type.get_int();
     if(mgid != 0) {
-      SIMPLELOG << "multicast\n";
+      BMLOG_DEBUG_PKT(*packet, "Multicast requested for packet");
       Field &f_rid = phv->get_field("intrinsic_metadata.egress_rid");
       const auto pre_out = pre->replicate({mgid});
       for(const auto &out : pre_out) {
 	egress_port = out.egress_port;
 	// if(ingress_port == egress_port) continue; // pruning
-	SIMPLELOG << "replicating packet out of port " << egress_port
-		  << std::endl;
+        BMLOG_DEBUG_PKT(*packet, "Replicating packet on port {}", egress_port);
 	f_rid.set(out.rid);
 	f_instance_type.set(PKT_INSTANCE_TYPE_REPLICATION);
 	copy_id = copy_id_dis(gen);
@@ -243,10 +242,10 @@ void SimpleSwitch::ingress_thread() {
     }
 
     egress_port = egress_spec;
-    SIMPLELOG << "egress port is " << egress_port << std::endl;    
+    BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
 
     if(egress_port == 511) {  // drop packet
-      SIMPLELOG << "dropping packet\n";
+      BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of ingress");
       continue;
     }
 
@@ -287,7 +286,7 @@ void SimpleSwitch::egress_thread(int port) {
 
     // EGRESS CLONING
     if(clone_spec) {
-      SIMPLELOG << "cloning packet at egress" << std::endl;
+      BMLOG_DEBUG_PKT(*packet, "Cloning packet at egress");
       int egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
       if(egress_port >= 0) {
 	f_instance_type.set(PKT_INSTANCE_TYPE_EGRESS_CLONE);
@@ -309,7 +308,7 @@ void SimpleSwitch::egress_thread(int port) {
     // TODO: should not be done like this in egress pipeline
     int egress_spec = f_egress_spec.get_int();
     if(egress_spec == 511) {  // drop packet
-      SIMPLELOG << "dropping packet\n";
+      BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of egress");
       continue;
     }
 
