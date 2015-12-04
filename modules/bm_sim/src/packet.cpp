@@ -24,6 +24,8 @@
 
 #include "xxhash.h"
 
+typedef Debugger::PacketId PacketId;
+
 void
 Packet::update_signature(uint64_t seed) {
   signature = XXH64(buffer.start(), buffer.get_data_size(), seed);
@@ -46,6 +48,8 @@ Packet::Packet(size_t cxt_id, int ingress_port, packet_id_t id,
   update_signature();
   set_ingress_ts();
   phv = phv_source->get(cxt_id);
+  phv->set_packet_id(packet_id, copy_id);
+  DEBUGGER_PACKET_IN(PacketId::make(packet_id, copy_id), ingress_port);
 }
 
 Packet::~Packet() {
@@ -55,6 +59,7 @@ Packet::~Packet() {
   phv->reset();
   phv->reset_header_stacks();
   phv_source->release(cxt_id, std::move(phv));
+  DEBUGGER_PACKET_OUT(PacketId::make(packet_id, copy_id), egress_port);
 }
 
 void

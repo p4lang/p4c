@@ -321,6 +321,9 @@ class ParseState : public NamedP4Object {
                                size_t *bytes_parsed) const;
 
  private:
+  const ParseState *find_next_state(Packet *pkt, const char *data,
+                                    size_t *bytes_parsed) const;
+
   std::vector<std::unique_ptr<ParserOp> > parser_ops{};
   bool has_switch;
   ParseSwitchKeyBuilder key_builder{};

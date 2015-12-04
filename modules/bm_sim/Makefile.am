@@ -18,6 +18,7 @@ src/checksums.cpp \
 src/conditionals.cpp \
 src/context.cpp \
 src/counters.cpp \
+src/debugger.cpp \
 src/deparser.cpp \
 src/dev_mgr.cpp \
 src/dev_mgr_bmi.cpp \
@@ -58,6 +59,7 @@ include/bm_sim/context.h \
 include/bm_sim/control_flow.h \
 include/bm_sim/counters.h \
 include/bm_sim/data.h \
+include/bm_sim/debugger.h \
 include/bm_sim/deparser.h \
 include/bm_sim/dev_mgr.h \
 include/bm_sim/entries.h \

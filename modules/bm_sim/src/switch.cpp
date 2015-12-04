@@ -28,6 +28,7 @@
 #include "bm_sim/P4Objects.h"
 #include "bm_sim/options_parse.h"
 #include "bm_sim/logger.h"
+#include "bm_sim/debugger.h"
 
 static void
 packet_handler(int port_num, const char *buffer, int len, void *cookie) {
@@ -99,6 +100,15 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[]) {
   auto transport = std::make_shared<TransportNanomsg>();
   transport->open(notifications_addr);
 
+#ifdef BMDEBUG_ON
+  // has to be before init_objects because forces arith
+  if (parser.debugger) {
+    for (Context &c : contexts)
+      c.set_force_arith(true);
+    Debugger::init_debugger();
+  }
+#endif
+
   int status = init_objects(parser.config_file_path, parser.device_id,
                             transport);
   if (status != 0) return status;
@@ -146,6 +156,7 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[]) {
   // TODO(unknown): is this the right place to do this?
   set_packet_handler(packet_handler, static_cast<void *>(this));
   start();
+
   return status;
 }
 

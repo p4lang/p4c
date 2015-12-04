@@ -275,6 +275,8 @@ class Context final {
 
   void set_cxt_id(int cxt_id);
 
+  void set_force_arith(bool force_arith);
+
   typedef P4Objects::header_field_pair header_field_pair;
   int init_objects(std::istream *is,
                    const std::set<header_field_pair> &required_fields =
@@ -312,6 +314,8 @@ class Context final {
   mutable boost::shared_mutex request_mutex{};
 
   std::atomic<bool> swap_ordered{false};
+
+  bool force_arith{false};
 };
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_CONTEXT_H_

@@ -61,6 +61,8 @@ In 'debug mode', you probably want to also use the following as well:
 
     'CXXFLAGS=-O0 -g'
 
+The new bmv2 debugger can be enabled by adding `-DBMDEBUG_ON` to the `CPPFLAGS`.
+
 ## Running the tests
 
 To run the unit tests, simply do:
@@ -122,6 +124,17 @@ You can take a look at the *commands.txt* file for
 [*l2_switch*](targets/l2_switch/commands.txt) and 
 [*simple_router*](targets/simple_router/commands.txt) to see how the CLI can be
 used.
+
+## Using the debugger
+
+To enable the debugger, make sure that you added `-DBMDEBUG_ON` to the
+`CPPFLAGS` when running `./configure`. You will also need to use the
+`--debugger` command line flag when starting the switch.
+
+Use [tools/p4dbg.py](tools/p4dbg.py) as follows when the switch is running to
+attach the debugger to the switch:
+
+    sudo ./p4dbg.py --json <path to JSON file>
 
 ## Displaying the event logging messages
 

@@ -28,6 +28,7 @@
 #include "data.h"
 #include "bytecontainer.h"
 #include "bignum.h"
+#include "debugger.h"
 
 class Field : public Data {
  public:
@@ -50,6 +51,7 @@ class Field : public Data {
 
   void sync_value() {
     bignum::import_bytes(&value, bytes.data(), nbytes);
+    DEBUGGER_NOTIFY_UPDATE(*packet_id, my_id, bytes.data(), nbits);
   }
 
   const ByteContainer &get_bytes() const {
@@ -74,6 +76,7 @@ class Field : public Data {
     // is this efficient enough:
     value &= mask;
     bignum::export_bytes(bytes.data(), nbytes, value);
+    DEBUGGER_NOTIFY_UPDATE(*packet_id, my_id, bytes.data(), nbits);
   }
 
   // useful for header stacks
@@ -91,11 +94,16 @@ class Field : public Data {
   /* returns the number of bits deparsed */
   int deparse(char *data, int hdr_offset) const;
 
+  void set_id(uint64_t id) { my_id = id; }
+  void set_packet_id(const Debugger::PacketId *id) { packet_id = id; }
+
  private:
   int nbits;
   int nbytes;
   ByteContainer bytes;
   Bignum mask{1};
+  uint64_t my_id{};
+  const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
 };
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_FIELDS_H_

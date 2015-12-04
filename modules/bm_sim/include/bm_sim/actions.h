@@ -27,6 +27,7 @@
 #include <unordered_map>
 #include <string>
 #include <iostream>
+#include <limits>
 
 #include <cassert>
 
@@ -39,6 +40,7 @@
 #include "counters.h"
 #include "stateful.h"
 #include "expressions.h"
+#include "debugger.h"
 
 // forward declaration of ActionPrimitive_
 class ActionPrimitive_;
@@ -353,6 +355,7 @@ class ActionFn :  public NamedP4Object {
 };
 
 
+// TODO(antonin): move implementation to actions.cpp
 class ActionFnEntry {
  public:
   ActionFnEntry() { }
@@ -367,6 +370,11 @@ class ActionFnEntry {
     // happens when no default action specified... TODO(antonin)
     if (!action_fn) return;
     ELOGGER->action_execute(*pkt, *action_fn, action_data);
+    // TODO(antonin)
+    // this is temporary while we experiment with the debugger
+    DEBUGGER_NOTIFY_CTR(
+        Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+        DBG_CTR_ACTION | action_fn->get_id());
     ActionEngineState state(pkt, action_data, action_fn->const_values);
     auto &primitives = action_fn->primitives;
     size_t param_offset = 0;
@@ -376,6 +384,9 @@ class ActionFnEntry {
       (*primitive_it)->execute(&state, &(action_fn->params[param_offset]));
       param_offset += (*primitive_it)->get_num_params();
     }
+    DEBUGGER_NOTIFY_CTR(
+        Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+        DBG_CTR_EXIT(DBG_CTR_ACTION) | action_fn->get_id());
   }
 
   void push_back_action_data(const Data &data) {
@@ -392,7 +403,7 @@ class ActionFnEntry {
 
   size_t action_data_size() const { return action_data.size(); }
 
-  const Data&get_action_data(int offset) const {
+  const Data &get_action_data(int offset) const {
     return action_data.get(offset);
   }
 
@@ -407,6 +418,11 @@ class ActionFnEntry {
     for (const Data &d : action_data.action_data)
       (*stream) << std::hex << d << ",";
     stream->flags(ff);
+  }
+
+  p4object_id_t get_action_id() const {
+    if (!action_fn) return std::numeric_limits<p4object_id_t>::max();
+    return action_fn->get_id();
   }
 
   ActionFnEntry(const ActionFnEntry &other) = default;

@@ -70,6 +70,10 @@ MatchTableAbstract::apply_action(Packet *pkt) {
     BMLOG_DEBUG_PKT(*pkt, "Table '{}': miss", get_name());
   }
 
+  DEBUGGER_NOTIFY_UPDATE_V(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      Debugger::FIELD_ACTION, action_entry.action_fn.get_action_id());
+
   BMLOG_DEBUG_PKT(*pkt, "Action entry is {}", action_entry);
 
   action_entry.action_fn(pkt);

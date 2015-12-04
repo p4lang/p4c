@@ -19,6 +19,7 @@
  */
 
 #include "bm_sim/deparser.h"
+#include "bm_sim/debugger.h"
 
 size_t
 Deparser::get_headers_size(const PHV &phv) const {
@@ -36,6 +37,11 @@ void
 Deparser::deparse(Packet *pkt) const {
   PHV *phv = pkt->get_phv();
   ELOGGER->deparser_start(*pkt, *this);
+  // TODO(antonin)
+  // this is temporary while we experiment with the debugger
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_DEPARSER | get_id());
   update_checksums(pkt);
   char *data = pkt->prepend(get_headers_size(*phv));
   int bytes_parsed = 0;
@@ -52,6 +58,9 @@ Deparser::deparse(Packet *pkt) const {
   }
   // phv->reset_header_stacks();
   ELOGGER->deparser_done(*pkt, *this);
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_EXIT(DBG_CTR_DEPARSER) | get_id());
 }
 
 void

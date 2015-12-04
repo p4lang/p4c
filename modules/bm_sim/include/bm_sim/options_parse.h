@@ -70,6 +70,7 @@ class OptionsParser {
   std::string file_logger{};
   bool console_logging{false};
   std::string notifications_addr{};
+  bool debugger{false};
 };
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_OPTIONS_PARSE_H_
