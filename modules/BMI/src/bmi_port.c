@@ -28,6 +28,9 @@
 #include "bmi_interface.h"
 #include "BMI/bmi_port.h"
 
+#include <fcntl.h>
+#include <sys/stat.h>
+
 typedef struct bmi_port_s {
   bmi_interface_t *bmi;
   int port_num;
@@ -92,13 +95,13 @@ static void *run_select(void *data) {
     for(i = 0; n && i < PORT_COUNT_MAX; i++) {
       port_info = get_port(port_mgr, i);
       if(FD_ISSET(port_info->fd, &fds) && port_info->bmi) {
-	--n;
-	pkt_len = bmi_interface_recv(port_info->bmi, &pkt_data);
-	if(pkt_len < 0) continue;
-	/* printf("Received pkt of len %d on port %d\n", pkt_len, i); */
-	if(port_mgr->packet_handler) {
-	  port_mgr->packet_handler(i, pkt_data, pkt_len, port_mgr->cookie);
-	}
+        --n;
+        pkt_len = bmi_interface_recv(port_info->bmi, &pkt_data);
+        if(pkt_len < 0) continue;
+        /* printf("Received pkt of len %d on port %d\n", pkt_len, i); */
+        if(port_mgr->packet_handler) {
+          port_mgr->packet_handler(i, pkt_data, pkt_len, port_mgr->cookie);
+        }
       }
     }
 
@@ -131,15 +134,15 @@ int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
 }
 
 int bmi_set_packet_handler(bmi_port_mgr_t *port_mgr,
-			   bmi_packet_handler_t packet_handler,
-			   void *cookie) {
+                           bmi_packet_handler_t packet_handler,
+                           void *cookie) {
   port_mgr->packet_handler = packet_handler;
   port_mgr->cookie = cookie;
   return 0;
 }
 
 int bmi_port_send(bmi_port_mgr_t *port_mgr,
-		  int port_num, const char *buffer, int len) {
+                  int port_num, const char *buffer, int len) {
   if(!port_num_valid(port_num)) return -1;
   bmi_port_t *port = get_port(port_mgr, port_num);
   if(!port_in_use(port)) return -1;
@@ -192,7 +195,6 @@ int bmi_port_interface_remove(bmi_port_mgr_t *port_mgr, int port_num) {
   free(port->ifname);
 
   pthread_mutex_lock(&port_mgr->lock);
-  
   if(bmi_interface_destroy(port->bmi) != 0) return -1;
 
   FD_CLR(port->fd, &port_mgr->fds);
@@ -216,8 +218,35 @@ int bmi_port_destroy_mgr(bmi_port_mgr_t *port_mgr) {
   pthread_join(port_mgr->select_thread, NULL);
 
   pthread_mutex_destroy(&port_mgr->lock);
-      
   free(port_mgr);
 
   return 0;
+}
+
+int bmi_port_interface_is_up(bmi_port_mgr_t* port_mgr, int port_num, bool *is_up) {
+  if (!port_num_valid(port_num)) return -1;
+
+  bmi_port_t *port = get_port(port_mgr, port_num);
+  if (!port_in_use(port)) return -1;
+
+  char c = 0;
+  char path[1024] = {0};
+
+  sprintf(path, "/sys/class/net/%s/operstate", port->ifname);
+
+  int fd = open(path, O_RDONLY);
+  if (-1 == fd) {
+    perror("open");
+    return -1;
+  }
+
+  if (read(fd, &c, 1) != 1) {
+    perror("read");
+    return -1;
+
+  }
+  close(fd);
+  *is_up = (c == 'u')?true:false;
+  return 0;
+
 }

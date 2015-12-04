@@ -40,7 +40,8 @@ src/options_parse.cpp \
 src/ageing.cpp \
 src/expressions.cpp \
 src/pcap_file.cpp \
-src/logger.cpp
+src/logger.cpp \
+src/port_monitor.cpp
 
 common_include = \
 include/bm_sim/actions.h \
@@ -83,7 +84,8 @@ include/bm_sim/tables.h \
 include/bm_sim/learning.h \
 include/bm_sim/simple_pre.h \
 include/bm_sim/simple_pre_lag.h \
-include/bm_sim/transport.h
+include/bm_sim/transport.h \
+include/bm_sim/port_monitor.h
 
 libbmsim_la_SOURCES = $(common_source) $(common_include)
 
