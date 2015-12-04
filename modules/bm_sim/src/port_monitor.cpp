@@ -1,7 +1,7 @@
 #include "bm_sim/port_monitor.h"
 
-PortMonitor::PortMonitor()
-    : run_monitor{false}, p_monitor{nullptr}, peer{nullptr} {}
+PortMonitor::PortMonitor(uint32_t msec_dur)
+    : ms_sleep{msec_dur}, run_monitor{false}, p_monitor{nullptr}, peer{nullptr} {}
 
 PortMonitor::~PortMonitor() { stop(); }
 
@@ -58,7 +58,7 @@ void PortMonitor::port_handler(DevMgrInterface::port_t port,
 void PortMonitor::monitor(void) {
   bool is_up = false;
   while (run_monitor) {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms_sleep));
     {
       std::lock_guard<std::mutex> lock(port_mutex);
       for (auto port_elem : curr_ports) {

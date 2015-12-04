@@ -7,7 +7,7 @@
 
 class PortMonitor {
 public:
-  PortMonitor();
+  PortMonitor(uint32_t sleep_dur = 1000);
   void notify(DevMgrInterface::port_t port_num,
               const DevMgrInterface::PortStatus &evt);
   void register_cb(const DevMgrInterface::PortStatus &evt,
@@ -20,7 +20,7 @@ private:
   void port_handler(DevMgrInterface::port_t port,
                     const DevMgrInterface::PortStatus &evt);
   void monitor(void);
-
+  uint32_t ms_sleep;
   bool run_monitor;
   std::unique_ptr<std::thread> p_monitor;
   std::unordered_multimap<unsigned int, const DevMgrInterface::PortStatusCB &>

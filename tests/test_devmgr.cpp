@@ -36,7 +36,7 @@ public:
                        (it->second == PortStatus::PORT_UP)));
   }
 
-  virtual ~TestDevMgrImplementation() {
+   ~TestDevMgrImplementation() {
     p_monitor.stop();
     port_status.clear();
   }
