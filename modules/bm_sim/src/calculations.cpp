@@ -166,6 +166,19 @@ struct csum16 {
 
 REGISTER_HASH(csum16);
 
+struct identity {
+  uint64_t operator()(const char *buf, size_t len) const {
+    uint64_t res = 0ULL;
+    for(size_t i = 0; i < std::min(sizeof(res), len); i++) {
+      if(i > 0) res <<= 8;
+      res += static_cast<uint8_t>(buf[i]);
+    }
+    return res;
+  }
+};
+
+REGISTER_HASH(identity);
+
 }
 
 CalculationsMap * CalculationsMap::get_instance() {

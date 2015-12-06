@@ -225,3 +225,16 @@ TEST(CalculationsMap, Test) {
 
   ASSERT_EQ(nullptr, CalculationsMap::get_instance()->get_copy("Hash_Neg"));
 }
+
+
+TEST(HashTest, Identity) {
+  const auto ptr = CalculationsMap::get_instance()->get_copy("identity");
+  ASSERT_NE(nullptr, ptr);
+
+  const char input_buffer[5] = {1, 2, 3, 4, 5};
+  const uint64_t expected = 0x0102030405;
+
+  const uint64_t output = ptr->output(input_buffer, sizeof(input_buffer));
+
+  ASSERT_EQ(expected, output);
+}
