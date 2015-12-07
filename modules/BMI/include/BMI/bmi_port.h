@@ -20,6 +20,7 @@
 
 #ifndef _BMI_PORT_
 #define _BMI_PORT_
+#include <stdbool.h>
 
 typedef struct bmi_port_s bmi_port_t;
 
@@ -50,5 +51,7 @@ int bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
 int bmi_port_interface_remove(bmi_port_mgr_t *port_mgr, int port_num);
 
 int bmi_port_destroy_mgr(bmi_port_mgr_t *port_mgr);
+
+int bmi_port_interface_is_up(bmi_port_mgr_t *port_mgr, int port_num, bool *is_up);
 
 #endif

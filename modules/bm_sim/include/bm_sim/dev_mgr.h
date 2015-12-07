@@ -21,23 +21,22 @@
 #ifndef _BM_DEV_MGR_H_
 #define _BM_DEV_MGR_H_
 
-#include <string>
 #include <functional>
-#include "bm_sim/pcap_file.h"
+#include <string>
+
 #include "bm_sim/packet_handler.h"
+#include "bm_sim/pcap_file.h"
 
-extern "C" {
-#include "BMI/bmi_port.h"
-}
-
-class DevMgrInterface
-    : public PacketDispatcherInterface
-{
+class DevMgrInterface : public PacketDispatcherInterface {
 public:
+  enum class PortStatus { PORT_ADDED, PORT_REMOVED, PORT_UP, PORT_DOWN };
+
   typedef unsigned int port_t;
+  typedef std::function<void(port_t port_num, const PortStatus &status)>
+      PortStatusCB;
 
   virtual ReturnCode port_add(const std::string &iface_name, port_t port_num,
-		      const char *in_pcap, const char*out_pcap) = 0;
+                              const char *in_pcap, const char *out_pcap) = 0;
 
   virtual ReturnCode port_remove(port_t port_num) = 0;
 
@@ -45,16 +44,18 @@ public:
 
   // start the thread that performs packet processing
   virtual void start() = 0;
+  virtual ReturnCode register_status_cb(const PortStatus &status,
+                                        const PortStatusCB &cb) = 0;
 
-  virtual ReturnCode set_packet_handler(PacketHandler handler, void* cookie) = 0;
+  virtual ReturnCode set_packet_handler(PacketHandler handler,
+                                        void *cookie) = 0;
+
+  virtual bool port_is_up(port_t port_num) = 0;
 
   virtual ~DevMgrInterface() {}
 };
 
-
-class DevMgr :
-    public DevMgrInterface
-{
+class DevMgr : public DevMgrInterface {
 public:
   DevMgr();
 
@@ -64,17 +65,21 @@ public:
   // wait_time_in_seconds indicate how long the starting thread should
   // wait before starting to process packets.
   void setUseFiles(bool useFiles, unsigned wait_time_in_seconds);
-  
+
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
-		      const char *in_pcap, const char*out_pcap);
+                      const char *in_pcap, const char *out_pcap);
 
   ReturnCode port_remove(port_t port_num);
+
+  bool port_is_up(port_t port_num) override;
 
   void transmit_fn(int port_num, const char *buffer, int len);
 
   // start the thread that performs packet processing
   void start();
-  
+  ReturnCode register_status_cb(const PortStatus &status,
+                                const PortStatusCB &cb) override;
+
   DevMgr(const DevMgr &other) = delete;
   DevMgr &operator=(const DevMgr &other) = delete;
 
@@ -82,9 +87,8 @@ public:
   DevMgr &operator=(DevMgr &&other) = delete;
 
 protected:
-  ~DevMgr() {}
-
-  ReturnCode set_packet_handler(PacketHandler handler, void* cookie);
+  virtual ~DevMgr() {}
+  ReturnCode set_packet_handler(PacketHandler handler, void *cookie);
 
 private:
   // Actual implementation (private)

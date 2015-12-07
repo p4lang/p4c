@@ -30,7 +30,9 @@ test_meters \
 test_ageing \
 test_counters \
 test_pcap \
-test_fields
+test_fields \
+test_devmgr
+
 check_PROGRAMS = $(TESTS) test_all
 
 # Sources for tests
@@ -53,6 +55,7 @@ test_ageing_SOURCES        = $(common_source) test_ageing.cpp
 test_counters_SOURCES      = $(common_source) test_counters.cpp
 test_fields_SOURCES   	   = $(common_source) test_fields.cpp
 test_pcap_SOURCES          = $(common_source) test_pcap.cpp
+test_devmgr_SOURCES        = $(common_source) test_devmgr.cpp
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
 test_checksums.cpp \
@@ -72,4 +75,5 @@ test_meters.cpp \
 test_ageing.cpp \
 test_counters.cpp \
 test_pcap.cpp \
-test_fields.cpp
+test_fields.cpp \
+test_devmgr.cpp

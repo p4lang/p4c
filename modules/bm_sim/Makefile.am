@@ -12,35 +12,36 @@ noinst_LTLIBRARIES = libbmsim.la
 
 common_source = \
 src/actions.cpp \
+src/ageing.cpp \
+src/calculations.cpp \
 src/checksums.cpp \
+src/conditionals.cpp \
+src/counters.cpp \
 src/deparser.cpp \
+src/dev_mgr.cpp \
+src/event_logger.cpp \
+src/expressions.cpp \
 src/fields.cpp \
-src/P4Objects.cpp \
-src/parser.cpp \
-src/pipeline.cpp \
+src/headers.cpp \
+src/learning.cpp \
+src/logger.cpp \
 src/match_units.cpp \
 src/match_tables.cpp \
-src/xxhash.h \
-src/conditionals.cpp \
-src/event_logger.cpp \
-src/headers.cpp \
+src/meters.cpp \
+src/options_parse.cpp \
+src/P4Objects.cpp \
 src/packet.cpp \
+src/parser.cpp \
+src/pcap_file.cpp \
+src/pipeline.cpp \
+src/port_monitor.cpp \
 src/phv.cpp \
 src/switch.cpp \
-src/xxhash.c \
-src/learning.cpp \
 src/simple_pre.cpp \
 src/simple_pre_lag.cpp \
 src/transport.cpp \
-src/calculations.cpp \
-src/meters.cpp \
-src/counters.cpp \
-src/dev_mgr.cpp \
-src/options_parse.cpp \
-src/ageing.cpp \
-src/expressions.cpp \
-src/pcap_file.cpp \
-src/logger.cpp
+src/xxhash.c \
+src/xxhash.h
 
 common_include = \
 include/bm_sim/actions.h \
@@ -61,6 +62,7 @@ include/bm_sim/fields.h \
 include/bm_sim/field_lists.h \
 include/bm_sim/handle_mgr.h \
 include/bm_sim/headers.h \
+include/bm_sim/learning.h \
 include/bm_sim/logger.h \
 include/bm_sim/lpm_trie.h \
 include/bm_sim/meters.h \
@@ -75,14 +77,14 @@ include/bm_sim/pcap_file.h \
 include/bm_sim/phv.h \
 include/bm_sim/phv_forward.h \
 include/bm_sim/pipeline.h \
+include/bm_sim/port_monitor.h \
 include/bm_sim/queue.h \
 include/bm_sim/runtime_interface.h \
 include/bm_sim/stateful.h \
 include/bm_sim/switch.h \
-include/bm_sim/tables.h \
-include/bm_sim/learning.h \
 include/bm_sim/simple_pre.h \
 include/bm_sim/simple_pre_lag.h \
+include/bm_sim/tables.h \
 include/bm_sim/transport.h
 
 libbmsim_la_SOURCES = $(common_source) $(common_include)

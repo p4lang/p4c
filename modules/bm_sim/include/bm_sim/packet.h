@@ -56,6 +56,7 @@ public:
   int get_ingress_port() const { return ingress_port; }
 
   void set_egress_port(int port) { egress_port = port; }
+  void set_ingress_port(int port) { ingress_port = port; }
 
   packet_id_t get_copy_id() const { return copy_id; }
 
@@ -85,12 +86,12 @@ public:
     buffer.restore_state(state);
   }
 
-  char *payload() { 
+  char *payload() {
     assert(payload_size > 0);
     return buffer.end() - payload_size;
   }
 
-  const char *payload() const { 
+  const char *payload() const {
     assert(payload_size > 0);
     return buffer.end() - payload_size;
   }
@@ -105,7 +106,6 @@ public:
   unsigned long long get_signature() const {
     return signature;
   }
-
   const PacketBuffer &get_packet_buffer() const { return buffer; }
 
   uint64_t get_ingress_ts_ms() const { return ingress_ts_ms; }
