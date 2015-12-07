@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_PHV_FORWARD_H_
-#define _BM_PHV_FORWARD_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_PHV_FORWARD_H_
+#define BM_SIM_INCLUDE_BM_SIM_PHV_FORWARD_H_
 
 typedef int header_id_t;
 
@@ -27,4 +27,4 @@ class PHV;
 class Header;
 class Field;
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_PHV_FORWARD_H_

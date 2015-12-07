@@ -20,6 +20,9 @@
 
 #include <netinet/in.h>
 
+#include <string>
+#include <algorithm>
+
 #include "bm_sim/calculations.h"
 
 #include "xxhash.h"
@@ -31,7 +34,7 @@ uint64_t xxh64(const char *buffer, size_t s) {
   return XXH64(buffer, s, 0);
 }
 
-}
+}  // namespace hash
 
 namespace {
 
@@ -66,7 +69,7 @@ struct crc16 {
   uint16_t operator()(const char *buf, size_t len) const {
     uint16_t remainder = 0x0000;
     uint16_t final_xor_value = 0x0000;
-    for(unsigned int byte = 0; byte < len; byte++) {
+    for (unsigned int byte = 0; byte < len; byte++) {
       int data = reflect(buf[byte], 8) ^ (remainder >> 8);
       remainder = table_crc16[data] ^ (remainder << 8);
     }
@@ -86,7 +89,7 @@ struct crc32 {
   uint32_t operator()(const char *buf, size_t len) const {
     uint32_t remainder = 0xFFFFFFFF;
     uint32_t final_xor_value = 0xFFFFFFFF;
-    for(unsigned int byte = 0; byte < len; byte++) {
+    for (unsigned int byte = 0; byte < len; byte++) {
       int data = reflect(buf[byte], 8) ^ (remainder >> 24);
       remainder = table_crc16[data] ^ (remainder << 8);
     }
@@ -100,7 +103,7 @@ struct crcCCITT {
   uint16_t operator()(const char *buf, size_t len) const {
     uint16_t remainder = 0xFFFF;
     uint16_t final_xor_value = 0x0000;
-    for(unsigned int byte = 0; byte < len; byte++) {
+    for (unsigned int byte = 0; byte < len; byte++) {
       int data = buf[byte] ^ (remainder >> 8);
       remainder = table_crcCCITT[data] ^ (remainder << 8);
     }
@@ -113,10 +116,10 @@ REGISTER_HASH(crcCCITT);
 struct cksum16 {
   uint16_t operator()(const char *buf, size_t len) const {
     uint64_t sum = 0;
-    uint64_t *b = (uint64_t *) buf;
+    const uint64_t *b = reinterpret_cast<const uint64_t *>(buf);
     uint32_t t1, t2;
     uint16_t t3, t4;
-    uint8_t *tail;
+    const uint8_t *tail;
     /* Main loop - 8 bytes at a time */
     while (len >= sizeof(uint64_t)) {
       uint64_t s = *b++;
@@ -125,21 +128,21 @@ struct cksum16 {
       len -= 8;
     }
     /* Handle tail less than 8-bytes long */
-    tail = (uint8_t *) b;
+    tail = reinterpret_cast<const uint8_t *>(b);
     if (len & 4) {
-      uint32_t s = *(uint32_t *)tail;
+      uint32_t s = *reinterpret_cast<const uint32_t *>(tail);
       sum += s;
       if (sum < s) sum++;
       tail += 4;
     }
     if (len & 2) {
-      uint16_t s = *(uint16_t *) tail;
+      uint16_t s = *reinterpret_cast<const uint16_t *>(tail);
       sum += s;
       if (sum < s) sum++;
       tail += 2;
     }
     if (len & 1) {
-      uint8_t s = *(uint8_t *) tail;
+      uint8_t s = *reinterpret_cast<const uint8_t *>(tail);
       sum += s;
       if (sum < s) sum++;
     }
@@ -169,8 +172,8 @@ REGISTER_HASH(csum16);
 struct identity {
   uint64_t operator()(const char *buf, size_t len) const {
     uint64_t res = 0ULL;
-    for(size_t i = 0; i < std::min(sizeof(res), len); i++) {
-      if(i > 0) res <<= 8;
+    for (size_t i = 0; i < std::min(sizeof(res), len); i++) {
+      if (i > 0) res <<= 8;
       res += static_cast<uint8_t>(buf[i]);
     }
     return res;
@@ -179,7 +182,7 @@ struct identity {
 
 REGISTER_HASH(identity);
 
-}
+}  // namespace
 
 CalculationsMap * CalculationsMap::get_instance() {
   static CalculationsMap map;
@@ -189,7 +192,7 @@ CalculationsMap * CalculationsMap::get_instance() {
 bool CalculationsMap::register_one(const char *name, std::unique_ptr<MyC> c) {
   const std::string str_name = std::string(name);
   auto it = map_.find(str_name);
-  if(it != map_.end()) return false;
+  if (it != map_.end()) return false;
   map_[str_name] = std::move(c);
   return true;
 }
@@ -197,6 +200,6 @@ bool CalculationsMap::register_one(const char *name, std::unique_ptr<MyC> c) {
 std::unique_ptr<CalculationsMap::MyC>
 CalculationsMap::get_copy(const std::string &name) {
   auto it = map_.find(name);
-  if(it == map_.end()) return nullptr;
+  if (it == map_.end()) return nullptr;
   return it->second->clone();
 }

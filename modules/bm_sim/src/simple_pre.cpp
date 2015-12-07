@@ -19,6 +19,9 @@
  *
  */
 
+#include <string>
+#include <vector>
+
 #include "bm_sim/simple_pre.h"
 
 using std::vector;
@@ -26,8 +29,7 @@ using std::copy;
 using std::string;
 
 McSimplePre::McReturnCode
-McSimplePre::mc_mgrp_create(const mgrp_t mgid, mgrp_hdl_t *mgrp_hdl)
-{
+McSimplePre::mc_mgrp_create(const mgrp_t mgid, mgrp_hdl_t *mgrp_hdl) {
   boost::unique_lock<boost::shared_mutex> lock(mgid_lock);
   size_t num_entries = mgid_entries.size();
   if (num_entries >= MGID_TABLE_SIZE) {
@@ -44,8 +46,7 @@ McSimplePre::mc_mgrp_create(const mgrp_t mgid, mgrp_hdl_t *mgrp_hdl)
 }
 
 McSimplePre::McReturnCode
-McSimplePre::mc_mgrp_destroy(mgrp_hdl_t mgrp_hdl)
-{
+McSimplePre::mc_mgrp_destroy(mgrp_hdl_t mgrp_hdl) {
   boost::unique_lock<boost::shared_mutex> lock(mgid_lock);
   mgid_entries.erase(mgrp_hdl);
   if (pre_debug) {
@@ -57,19 +58,18 @@ McSimplePre::mc_mgrp_destroy(mgrp_hdl_t mgrp_hdl)
 McSimplePre::McReturnCode
 McSimplePre::mc_node_create(const rid_t rid,
                             const PortMap &portmap,
-                            l1_hdl_t *l1_hdl)
-{
+                            l1_hdl_t *l1_hdl) {
   boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
   l2_hdl_t l2_hdl;
   size_t num_l1_entries = l1_entries.size();
   size_t num_l2_entries = l2_entries.size();
   if (num_l1_entries >= L1_MAX_ENTRIES) {
-    std::cout << "node create failed. l1 table full!\n"; 
+    std::cout << "node create failed. l1 table full!\n";
     return TABLE_FULL;
   }
   if (num_l2_entries >= L2_MAX_ENTRIES) {
-    std::cout << "node create failed. l2 table full!\n"; 
+    std::cout << "node create failed. l2 table full!\n";
     return TABLE_FULL;
   }
   if (l1_handles.get_handle(l1_hdl)) {
@@ -91,8 +91,8 @@ McSimplePre::mc_node_create(const rid_t rid,
 }
 
 McSimplePre::McReturnCode
-McSimplePre::mc_node_associate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
-{
+McSimplePre::mc_node_associate(const mgrp_hdl_t mgrp_hdl,
+                               const l1_hdl_t l1_hdl) {
   boost::unique_lock<boost::shared_mutex> lock1(mgid_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l1_lock);
   if (!l1_handles.valid_handle(l1_hdl)) {
@@ -110,8 +110,8 @@ McSimplePre::mc_node_associate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
 }
 
 McSimplePre::McReturnCode
-McSimplePre::mc_node_dissociate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl)
-{
+McSimplePre::mc_node_dissociate(const mgrp_hdl_t mgrp_hdl,
+                                const l1_hdl_t l1_hdl) {
   boost::unique_lock<boost::shared_mutex> lock1(mgid_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l1_lock);
   if (!l1_handles.valid_handle(l1_hdl)) {
@@ -132,8 +132,7 @@ McSimplePre::mc_node_dissociate(const mgrp_hdl_t mgrp_hdl, const l1_hdl_t l1_hdl
 }
 
 McSimplePre::McReturnCode
-McSimplePre::mc_node_destroy(const l1_hdl_t l1_hdl)
-{
+McSimplePre::mc_node_destroy(const l1_hdl_t l1_hdl) {
   boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
   rid_t rid;
@@ -161,8 +160,7 @@ McSimplePre::mc_node_destroy(const l1_hdl_t l1_hdl)
 
 McSimplePre::McReturnCode
 McSimplePre::mc_node_update(const l1_hdl_t l1_hdl,
-			    const PortMap &port_map)
-{
+                            const PortMap &port_map) {
   boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
   if (!l1_handles.valid_handle(l1_hdl)) {
@@ -180,8 +178,7 @@ McSimplePre::mc_node_update(const l1_hdl_t l1_hdl,
 }
 
 std::vector<McSimplePre::McOut>
-McSimplePre::replicate(const McSimplePre::McIn ingress_info) const
-{
+McSimplePre::replicate(const McSimplePre::McIn ingress_info) const {
   std::vector<McSimplePre::McOut> egress_info_list;
   egress_port_t port_id;
   McSimplePre::McOut egress_info;
@@ -196,13 +193,14 @@ McSimplePre::replicate(const McSimplePre::McIn ingress_info) const
     // Port replication
     for (port_id = 0; port_id < l2_entry.port_map.size(); port_id++) {
       if (l2_entry.port_map[port_id]) {
-	egress_info.egress_port = port_id;
-	egress_info_list.push_back(egress_info);
+        egress_info.egress_port = port_id;
+        egress_info_list.push_back(egress_info);
       }
     }
   }
   if (pre_debug) {
-    std::cout << "number of packets replicated : " << egress_info_list.size() << "\n";
+    std::cout << "number of packets replicated : "
+              << egress_info_list.size() << "\n";
   }
   return egress_info_list;
 }

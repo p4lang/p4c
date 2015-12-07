@@ -18,15 +18,15 @@
  *
  */
 
-#ifndef _BM_CONTROL_FLOW_H_
-#define _BM_CONTROL_FLOW_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_CONTROL_FLOW_H_
+#define BM_SIM_INCLUDE_BM_SIM_CONTROL_FLOW_H_
 
 #include "packet.h"
 
 class ControlFlowNode {
-public:
-  virtual ~ControlFlowNode() { };
+ public:
+  virtual ~ControlFlowNode() { }
   virtual const ControlFlowNode *operator()(Packet *pkt) const = 0;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_CONTROL_FLOW_H_

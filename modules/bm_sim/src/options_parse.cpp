@@ -18,14 +18,14 @@
  *
  */
 
+#include <boost/program_options.hpp>
+
 #include <vector>
-#include <list>
+#include <string>
 #include <iostream>
 #include <sstream>
 
 #include <cassert>
-
-#include <boost/program_options.hpp>
 
 #include "bm_sim/options_parse.h"
 #include "bm_sim/event_logger.h"
@@ -38,11 +38,10 @@ struct interface {
   int port{};
 };
 
-void validate(boost::any& v, 
-              std::vector<std::string> const& values,
+void validate(boost::any& v,  // NOLINT(runtime/references)
+              const std::vector<std::string> &values,
               interface* /* target_type */,
-              int)
-{
+              int) {
   namespace po = boost::program_options;
 
   // Make sure no previous assignment to 'v' was made.
@@ -61,19 +60,18 @@ void validate(boost::any& v,
   }
   catch (...) {
     throw po::validation_error(po::validation_error::invalid_option_value,
-			       "interface");
+                               "interface");
   }
-  if(tok == s) {
+  if (tok == s) {
     throw po::validation_error(po::validation_error::invalid_option_value,
-			       "interface");
+                               "interface");
   }
   std::getline(stream, tok);
   v = boost::any(interface(tok, port));
 }
 
 void
-OptionsParser::parse(int argc, char *argv[])
-{
+OptionsParser::parse(int argc, char *argv[]) {
   namespace po = boost::program_options;
 
   po::options_description description("Options");
@@ -112,8 +110,8 @@ OptionsParser::parse(int argc, char *argv[])
   po::variables_map vm;
   try {
     po::store(po::command_line_parser(argc, argv).
-	      options(options).
-	      positional(positional).run(), vm);
+              options(options).
+              positional(positional).run(), vm);
     po::notify(vm);
   }
   catch(...) {
@@ -123,13 +121,13 @@ OptionsParser::parse(int argc, char *argv[])
     exit(1);
   }
 
-  if(vm.count("help")) {
+  if (vm.count("help")) {
     std::cout << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
     std::cout << description;
     exit(0);
   }
 
-  if(!vm.count("input-config")) {
+  if (!vm.count("input-config")) {
     std::cout << "Error: please specify an input JSON configuration file\n";
     std::cout << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
     std::cout << description;
@@ -137,45 +135,43 @@ OptionsParser::parse(int argc, char *argv[])
   }
 
   device_id = 0;
-  if(vm.count("device-id")) {
+  if (vm.count("device-id")) {
     device_id = vm["device-id"].as<int>();
   }
 
   // event_logger_addr = std::string("ipc:///tmp/bm-")
   //   .append(std::to_string(device_id))
   //   .append("-log.ipc");
-  if(vm.count("nanolog")) {
+  if (vm.count("nanolog")) {
     event_logger_addr = vm["nanolog"].as<std::string>();
     event_logger = new EventLogger(
-      TransportIface::create_instance<TransportNanomsg>(event_logger_addr)
-    );
+      TransportIface::create_instance<TransportNanomsg>(event_logger_addr));
   }
 
-  if(vm.count("log-console") && vm.count("log-file")) {
+  if (vm.count("log-console") && vm.count("log-file")) {
     std::cout << "Error: --log-console and --log-file are exclusive\n";
     exit(1);
   }
 
-  if(vm.count("log-console")) {
+  if (vm.count("log-console")) {
     console_logging = true;
   }
 
-  if(vm.count("log-file")) {
+  if (vm.count("log-file")) {
     file_logger = vm["log-file"].as<std::string>();
   }
 
-  if(vm.count("interface")) {
+  if (vm.count("interface")) {
     for (const auto &iface : vm["interface"].as<std::vector<interface> >()) {
       ifaces.add(iface.port, iface.name);
     }
   }
 
-  if(vm.count("pcap")) {
+  if (vm.count("pcap")) {
     pcap = true;
   }
 
-  if(vm.count("useFiles"))
-  {
+  if (vm.count("useFiles")) {
     useFiles = true;
     waitTime = vm["useFiles"].as<int>();
     if (waitTime < 0)
@@ -186,13 +182,12 @@ OptionsParser::parse(int argc, char *argv[])
   config_file_path = vm["input-config"].as<std::string>();
 
   int default_thrift_port = 9090;
-  if(vm.count("thrift-port")) {
+  if (vm.count("thrift-port")) {
     thrift_port = vm["thrift-port"].as<int>();
-  }
-  else {
+  } else {
     std::cout << "Thrift port was not specified, will use "
-	      << default_thrift_port
-	      << std::endl;
+              << default_thrift_port
+              << std::endl;
     thrift_port = default_thrift_port;
   }
 }

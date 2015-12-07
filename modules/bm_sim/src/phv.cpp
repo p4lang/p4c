@@ -18,63 +18,67 @@
  *
  */
 
+#include <string>
+#include <vector>
+#include <set>
+
 #include "bm_sim/phv.h"
 
-void PHV::reset() {
-  for(auto &h : headers)
+void
+PHV::reset() {
+  for (auto &h : headers)
     h.mark_invalid();
 }
 
-void PHV::reset_header_stacks() {
-  for(auto &hs : header_stacks)
+void
+PHV::reset_header_stacks() {
+  for (auto &hs : header_stacks)
     hs.reset();
 }
 
 // so slow I want to die, but optional for a target...
 // I need to find a better way of doing this
-void PHV::reset_metadata() {
-  for(auto &h : headers) {
-    if(h.is_metadata())
+void
+PHV::reset_metadata() {
+  for (auto &h : headers) {
+    if (h.is_metadata())
       h.reset();
   }
 }
 
-void PHV::push_back_header(
-  const std::string &header_name,
-  header_id_t header_index,
-  const HeaderType &header_type,
-  const std::set<int> &arith_offsets,
-  const bool metadata
-) {
-  assert(header_index < (int) capacity);
-  assert(header_index == (int) headers.size());
+void
+PHV::push_back_header(const std::string &header_name,
+                      header_id_t header_index,
+                      const HeaderType &header_type,
+                      const std::set<int> &arith_offsets,
+                      const bool metadata) {
+  assert(header_index < static_cast<int>(capacity));
+  assert(header_index == static_cast<int>(headers.size()));
   headers.push_back(
-    Header(header_name, header_index, header_type, arith_offsets, metadata)
-  );
+    Header(header_name, header_index, header_type, arith_offsets, metadata));
 
   headers_map.emplace(header_name, get_header(header_index));
 
-  for(int i = 0; i < header_type.get_num_fields(); i++) {
+  for (int i = 0; i < header_type.get_num_fields(); i++) {
     const std::string name = header_name + "." + header_type.get_field_name(i);
     // std::cout << header_index << " " << i << " " << name << std::endl;
     fields_map.emplace(name, get_field(header_index, i));
   }
 
-  if(header_type.is_VL_header()) {
+  if (header_type.is_VL_header()) {
     headers.back().VL_expr = header_type.resolve_VL_expr(header_index);
   }
 }
 
-void PHV::push_back_header_stack(
-  const std::string &header_stack_name,
-  header_stack_id_t header_stack_index,
-  const HeaderType &header_type,
-  const std::vector<header_id_t> &header_ids
-) {
-  assert(header_stack_index < (int) capacity_stacks);
-  assert(header_stack_index == (int) header_stacks.size());
+void
+PHV::push_back_header_stack(const std::string &header_stack_name,
+                            header_stack_id_t header_stack_index,
+                            const HeaderType &header_type,
+                            const std::vector<header_id_t> &header_ids) {
+  assert(header_stack_index < static_cast<int>(capacity_stacks));
+  assert(header_stack_index == static_cast<int>(header_stacks.size()));
   HeaderStack header_stack(header_stack_name, header_stack_index, header_type);
-  for(header_id_t header_id : header_ids) {
+  for (header_id_t header_id : header_ids) {
     header_stack.set_next_header(get_header(header_id));
   }
   header_stacks.push_back(std::move(header_stack));

@@ -19,6 +19,8 @@
  */
 
 #include <stack>
+#include <string>
+#include <vector>
 
 #include <cassert>
 
@@ -115,20 +117,20 @@ void Expression::build() {
    instead of dynamic allocation at each call. Maybe it would be better to just
    try to use a stack allocator */
 void Expression::eval_(const PHV &phv, ExprType expr_type,
-		       const std::vector<Data> &locals,
-		       bool *b_res, Data *d_res) const {
+                       const std::vector<Data> &locals,
+                       bool *b_res, Data *d_res) const {
   assert(built);
 
   static thread_local int data_temps_size = 4;
   // std::vector<Data> data_temps(data_registers_cnt);
   static thread_local std::vector<Data> data_temps(data_temps_size);
-  while(data_temps_size < data_registers_cnt) {
+  while (data_temps_size < data_registers_cnt) {
     data_temps.emplace_back();
     data_temps_size++;
   }
 
   /* Logically, I am using these as stacks but experiments showed that using
-     vectors directly was more efficient (also I can call reserve to avoid 
+     vectors directly was more efficient (also I can call reserve to avoid
      multiple calls to malloc */
 
   /* 4 is arbitrary, it is possible to do an analysis on the Expression to find
@@ -149,11 +151,11 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
   bool lb, rb;
   const Data *ld, *rd;
 
-  for(const auto &op : ops) {
-    switch(op.opcode) {
+  for (const auto &op : ops) {
+    switch (op.opcode) {
     case ExprOpcode::LOAD_FIELD:
       data_temps_stack.push_back(&(phv.get_field(op.field.header,
-						 op.field.field_offset)));
+                                                 op.field.field_offset)));
       break;
 
     case ExprOpcode::LOAD_HEADER:
@@ -298,7 +300,7 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
     }
   }
 
-  switch(expr_type) {
+  switch (expr_type) {
   case ExprType::EXPR_BOOL:
     *b_res = bool_temps_stack.back();
     break;
@@ -333,8 +335,8 @@ void Expression::eval_arith(
 int Expression::assign_dest_registers() {
   int registers_cnt = 0;
   std::stack<int> new_registers;
-  for(auto &op : ops) {
-    switch(op.opcode) {
+  for (auto &op : ops) {
+    switch (op.opcode) {
     case ExprOpcode::ADD:
     case ExprOpcode::SUB:
     case ExprOpcode::MOD:
@@ -370,7 +372,7 @@ int Expression::assign_dest_registers() {
     case ExprOpcode::LOAD_FIELD:
       new_registers.push(0);
       break;
-      
+
     default:
       break;
     }
@@ -382,9 +384,9 @@ ArithExpression VLHeaderExpression::resolve(header_id_t header_id) {
   assert(expr.built);
 
   std::vector<Op> &ops = expr.ops;
-  for(size_t i = 0; i < ops.size(); i++) {
+  for (size_t i = 0; i < ops.size(); i++) {
     Op &op = ops[i];
-    if(op.opcode == ExprOpcode::LOAD_LOCAL) {
+    if (op.opcode == ExprOpcode::LOAD_LOCAL) {
       op.opcode = ExprOpcode::LOAD_FIELD;
       op.field.field_offset = op.local_offset;
       op.field.header = header_id;

@@ -603,7 +603,7 @@ public:
   void bm_dump_table(std::string& _return, const std::string& table_name) {
     printf("dump_table\n");
     std::ostringstream stream;
-    switch_->dump_table(table_name, stream);
+    switch_->dump_table(table_name, &stream);
     _return.append(stream.str());
   }
 

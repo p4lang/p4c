@@ -277,14 +277,14 @@ TEST_F(ActionsTest, CopyHeader) {
   ASSERT_FALSE(hdr1.is_valid());
   ASSERT_FALSE(hdr2.is_valid());
   for(unsigned int i = 0; i < hdr2.size(); i++) {
-    ASSERT_EQ(0, hdr1[i]);
+    ASSERT_EQ(0u, hdr1[i].get_uint());
   }
 
   hdr2.mark_valid();
   testActionFnEntry(pkt.get());
   ASSERT_TRUE(hdr1.is_valid());
   for(unsigned int i = 0; i < hdr1.size(); i++) {
-    ASSERT_EQ(i + 1, hdr1[i]);
+    ASSERT_EQ(i + 1, hdr1[i].get_uint());
   }
 }
 

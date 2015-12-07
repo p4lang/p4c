@@ -18,23 +18,22 @@
  *
  */
 
-#ifndef _BM_BYTECONTAINER_H_
-#define _BM_BYTECONTAINER_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_BYTECONTAINER_H_
+#define BM_SIM_INCLUDE_BM_SIM_BYTECONTAINER_H_
+
+#include <boost/functional/hash.hpp>
 
 #include <vector>
 #include <iterator>
 #include <string>
 #include <iostream>
-#include <sstream> 
+#include <sstream>
 #include <iomanip>
-
-#include <boost/functional/hash.hpp>
 
 using std::vector;
 
-class ByteContainer
-{
-public:
+class ByteContainer {
+ public:
   typedef vector<char>::iterator iterator;
   typedef vector<char>::const_iterator const_iterator;
   // typedef std::reverse_iterator<iterator> reverse_iterator;
@@ -43,48 +42,48 @@ public:
   typedef vector<char>::const_reference const_reference;
   typedef size_t size_type;
 
-public:
+ public:
   ByteContainer()
-    : bytes() {}
+    : bytes() { }
 
-  ByteContainer(int nbytes)
-    : bytes(vector<char>(nbytes)) {}
+  explicit ByteContainer(int nbytes)
+    : bytes(vector<char>(nbytes)) { }
 
-  ByteContainer(const vector<char> &bytes)
-    : bytes(bytes) {}
+  explicit ByteContainer(const vector<char> &bytes)
+    : bytes(bytes) { }
 
   ByteContainer(const char *bytes, size_t nbytes)
-    : bytes(vector<char>(bytes, bytes + nbytes)) {}
+    : bytes(vector<char>(bytes, bytes + nbytes)) { }
 
   static char char2digit(char c) {
-    if(c >= '0' && c <= '9')
+    if (c >= '0' && c <= '9')
       return (c - '0');
-    if(c >= 'A' && c <= 'F')
+    if (c >= 'A' && c <= 'F')
       return (c - 'A' + 10);
-    if(c >= 'a' && c <= 'f')
+    if (c >= 'a' && c <= 'f')
       return (c - 'a' + 10);
     assert(0);
     return 0;
   }
 
-  ByteContainer(const std::string &hexstring)
+  explicit ByteContainer(const std::string &hexstring)
     : bytes() {
     size_t idx = 0;
 
     assert(hexstring[idx] != '-');
 
-    if(hexstring[idx] == '0' && hexstring[idx + 1] == 'x') {
+    if (hexstring[idx] == '0' && hexstring[idx + 1] == 'x') {
       idx += 2;
     }
     size_t size = hexstring.size();
     assert((size - idx) > 0);
 
-    if((size - idx) % 2 != 0) {
+    if ((size - idx) % 2 != 0) {
       char c = char2digit(hexstring[idx++]);
       bytes.push_back(c);
     }
 
-    for(; idx < size; ) {
+    for (; idx < size; ) {
       char c = char2digit(hexstring[idx++]) << 4;
       c += char2digit(hexstring[idx++]);
       bytes.push_back(c);
@@ -194,14 +193,14 @@ public:
 
     for (std::string::size_type i = 0; i < size(); i++) {
       ret << std::setw(2) << std::setfill('0') << std::hex
-	  << (upper_case ? std::uppercase : std::nouppercase)
-	  << (int) static_cast<unsigned char>(bytes[i]);
+          << (upper_case ? std::uppercase : std::nouppercase)
+          << static_cast<int>(bytes[i]);
     }
 
     return ret.str();
   }
 
-private:
+ private:
   vector<char> bytes;
 };
 
@@ -212,4 +211,4 @@ struct ByteContainerKeyHash {
   }
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_BYTECONTAINER_H_

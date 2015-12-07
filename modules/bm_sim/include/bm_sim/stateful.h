@@ -18,25 +18,26 @@
  *
  */
 
-#ifndef _BM_STATEFUL_H_
-#define _BM_STATEFUL_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_STATEFUL_H_
+#define BM_SIM_INCLUDE_BM_SIM_STATEFUL_H_
 
 #include <array>
+#include <string>
+#include <vector>
 
 #include "data.h"
 #include "bignum.h"
 
-class Register : public Data
-{
-public:
+class Register : public Data {
+ public:
   enum RegisterErrorCode {
     SUCCESS = 0,
     INVALID_INDEX,
     ERROR
   };
 
-public:
-  Register(int nbits)
+ public:
+  explicit Register(int nbits)
     : nbits(nbits) {
     mask <<= nbits; mask -= 1;
   }
@@ -45,12 +46,13 @@ public:
     value &= mask;
   }
 
-private:
+ private:
   typedef std::unique_lock<std::mutex> UniqueLock;
   UniqueLock unique_lock() const { return UniqueLock(*m_mutex); }
+  // NOLINTNEXTLINE(runtime/references)
   void unlock(UniqueLock &lock) const { lock.unlock(); }
 
-private:
+ private:
   int nbits;
   Bignum mask{1};
   // mutexes are not movable, extra indirection bad?
@@ -60,15 +62,15 @@ private:
 typedef p4object_id_t register_array_id_t;
 
 class RegisterArray : public NamedP4Object {
-public:
+ public:
   typedef vector<Register>::iterator iterator;
   typedef vector<Register>::const_iterator const_iterator;
 
   RegisterArray(const std::string &name, p4object_id_t id,
-		size_t size, int bitwidth)
+                size_t size, int bitwidth)
     : NamedP4Object(name, id) {
     registers.reserve(size);
-    for(size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
       registers.emplace_back(bitwidth);
   }
 
@@ -93,8 +95,8 @@ public:
 
   size_t size() const { return registers.size(); }
 
-private:
+ private:
     std::vector<Register> registers;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_STATEFUL_H_

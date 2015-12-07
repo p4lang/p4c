@@ -19,43 +19,44 @@
  */
 
 #include <cstdint>
+#include <string>
 
 #include "bm_sim/checksums.h"
 
 namespace checksum {
 
-// TODO: remove this ? it is duplicated in calculations.cpp
-static inline unsigned short cksum16(char *buf, size_t len) {
+// TODO(antonin): remove this ? it is duplicated in calculations.cpp
+static inline uint16_t cksum16(char *buf, size_t len) {
   uint64_t sum = 0;
-  uint64_t *b = (uint64_t *) buf;
+  uint64_t *b = reinterpret_cast<uint64_t *>(buf);
   uint32_t t1, t2;
   uint16_t t3, t4;
   uint8_t *tail;
   /* Main loop - 8 bytes at a time */
   while (len >= sizeof(uint64_t)) {
-      uint64_t s = *b++;
-      sum += s;
-      if (sum < s) sum++;
-      len -= 8;
+    uint64_t s = *b++;
+    sum += s;
+    if (sum < s) sum++;
+    len -= 8;
   }
   /* Handle tail less than 8-bytes long */
-  tail = (uint8_t *) b;
+  tail = reinterpret_cast<uint8_t *>(b);
   if (len & 4) {
-      uint32_t s = *(uint32_t *)tail;
-      sum += s;
-      if (sum < s) sum++;
-      tail += 4;
+    uint32_t s = *reinterpret_cast<uint32_t *>(tail);
+    sum += s;
+    if (sum < s) sum++;
+    tail += 4;
   }
   if (len & 2) {
-      uint16_t s = *(uint16_t *) tail;
-      sum += s;
-      if (sum < s) sum++;
-      tail += 2;
+    uint16_t s = *reinterpret_cast<uint16_t *>(tail);
+    sum += s;
+    if (sum < s) sum++;
+    tail += 2;
   }
   if (len & 1) {
-      uint8_t s = *(uint8_t *) tail;
-      sum += s;
-      if (sum < s) sum++;
+    uint8_t s = *reinterpret_cast<uint8_t *>(tail);
+    sum += s;
+    if (sum < s) sum++;
   }
   /* Fold down to 16 bits */
   t1 = sum;
@@ -69,65 +70,67 @@ static inline unsigned short cksum16(char *buf, size_t len) {
   return ~t3;
 }
 
-}
+}  // namespace checksum
 
 Checksum::Checksum(const std::string &name, p4object_id_t id,
-		   header_id_t header_id, int field_offset)
+                   header_id_t header_id, int field_offset)
   : NamedP4Object(name, id),
-    header_id(header_id), field_offset(field_offset) {}
+    header_id(header_id), field_offset(field_offset) { }
 
-CalcBasedChecksum::CalcBasedChecksum(
-  const std::string &name, p4object_id_t id,
-  header_id_t header_id, int field_offset,
-  const NamedCalculation *calculation
-)
+CalcBasedChecksum::CalcBasedChecksum(const std::string &name, p4object_id_t id,
+                                     header_id_t header_id, int field_offset,
+                                     const NamedCalculation *calculation)
   : Checksum(name, id, header_id, field_offset),
     calculation(calculation) { }
 
-void CalcBasedChecksum::update_(Packet *pkt) const
-{
+void
+CalcBasedChecksum::update_(Packet *pkt) const {
   const uint64_t cksum = calculation->output(*pkt);
   Field &f_cksum = pkt->get_phv()->get_field(header_id, field_offset);
   f_cksum.set(cksum);
 }
 
-bool CalcBasedChecksum::verify_(const Packet &pkt) const
-{
+bool
+CalcBasedChecksum::verify_(const Packet &pkt) const {
   const uint64_t cksum = calculation->output(pkt);
   const Field &f_cksum = pkt.get_phv()->get_field(header_id, field_offset);
   return (cksum == f_cksum.get<uint64_t>());
 }
 
 IPv4Checksum::IPv4Checksum(const std::string &name, p4object_id_t id,
-			   header_id_t header_id, int field_offset)
-  : Checksum(name, id, header_id, field_offset) {}
+                           header_id_t header_id, int field_offset)
+  : Checksum(name, id, header_id, field_offset) { }
 
 #define IPV4_HDR_MAX_LEN 60
-#define IPV4_CKSUM_OFFSET 10 // byte offset
+#define IPV4_CKSUM_OFFSET 10  // byte offset
+
 void IPv4Checksum::update_(Packet *pkt) const {
   char buffer[60];
   PHV *phv = pkt->get_phv();
   Header &ipv4_hdr = phv->get_header(header_id);
-  if(!ipv4_hdr.is_valid()) return;
+  if (!ipv4_hdr.is_valid()) return;
   Field &ipv4_cksum = ipv4_hdr[field_offset];
   ipv4_hdr.deparse(buffer);
   buffer[IPV4_CKSUM_OFFSET] = 0; buffer[IPV4_CKSUM_OFFSET + 1] = 0;
-  unsigned short cksum = checksum::cksum16(buffer, ipv4_hdr.get_nbytes_packet());
+  uint16_t cksum = checksum::cksum16(buffer, ipv4_hdr.get_nbytes_packet());
   // cksum is in network byte order
-  ipv4_cksum.set_bytes((char *) &cksum, 2);
+  ipv4_cksum.set_bytes(reinterpret_cast<char *>(&cksum), 2);
 }
 
-bool IPv4Checksum::verify_(const Packet &pkt) const {
+bool
+IPv4Checksum::verify_(const Packet &pkt) const {
   char buffer[60];
   const PHV &phv = *(pkt.get_phv());
   const Header &ipv4_hdr = phv.get_header(header_id);
-  if(!ipv4_hdr.is_valid()) return true; // return true if no header... TODO ?
+  if (!ipv4_hdr.is_valid()) return true;  // return true if no header... TODO ?
   const Field &ipv4_cksum = ipv4_hdr[field_offset];
   ipv4_hdr.deparse(buffer);
   buffer[IPV4_CKSUM_OFFSET] = 0; buffer[IPV4_CKSUM_OFFSET + 1] = 0;
-  unsigned short cksum = checksum::cksum16(buffer, ipv4_hdr.get_nbytes_packet());
-  // TODO: improve this?
-  return (!memcmp((char *) &cksum, ipv4_cksum.get_bytes().data(), 2));
+  uint16_t cksum = checksum::cksum16(buffer, ipv4_hdr.get_nbytes_packet());
+  // TODO(antonin): improve this?
+  return !memcmp(reinterpret_cast<char *>(&cksum),
+                 ipv4_cksum.get_bytes().data(), 2);
 }
+
 #undef IPV4_HDR_MAX_LEN
 #undef IPV4_CKSUM_OFFSET

@@ -19,14 +19,16 @@
  *
  */
 
-#ifndef _BM_SIMPLE_PRE_LAG_H_
-#define _BM_SIMPLE_PRE_LAG_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_SIMPLE_PRE_LAG_H_
+#define BM_SIM_INCLUDE_BM_SIM_SIMPLE_PRE_LAG_H_
+
+#include <vector>
 
 #include "pre.h"
 #include "simple_pre.h"
 
 class McSimplePreLAG : public McSimplePre {
-public:
+ public:
   static constexpr int LAG_MAX_ENTRIES = 256;
   typedef uint16_t lag_id_t;
 
@@ -43,12 +45,11 @@ public:
 
   std::vector<McOut> replicate(const McIn) const;
 
-private:
-
+ private:
   struct LagEntry {
     uint16_t member_count;
     PortMap port_map{};
-    
+
     LagEntry() {}
     LagEntry(uint16_t member_count,
             const PortMap &port_map) :
@@ -60,4 +61,4 @@ private:
   mutable boost::shared_mutex lag_lock{};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_SIMPLE_PRE_LAG_H_

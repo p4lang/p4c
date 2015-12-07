@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_ENTRIES_H_
-#define _BM_ENTRIES_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_ENTRIES_H_
+#define BM_SIM_INCLUDE_BM_SIM_ENTRIES_H_
 
 #include <memory>
 
@@ -29,17 +29,16 @@
 
 class ControlFlowNode;
 
-struct MatchEntry
-{
+struct MatchEntry {
   ByteContainer key{};
-  ActionFnEntry action_entry{}; // includes action data
+  ActionFnEntry action_entry{};  // includes action data
   const ControlFlowNode *next_table{nullptr};
 
   MatchEntry() {}
 
   MatchEntry(ByteContainer key,
-	     ActionFnEntry action_entry,
-	     const ControlFlowNode *next_table)
+             ActionFnEntry action_entry,
+             const ControlFlowNode *next_table)
   : key(std::move(key)), action_entry(std::move(action_entry)),
     next_table(next_table) {}
 
@@ -50,44 +49,41 @@ struct MatchEntry
   MatchEntry &operator=(MatchEntry &&other) = default;
 };
 
-struct ExactMatchEntry: MatchEntry
-{
+struct ExactMatchEntry: MatchEntry {
   ExactMatchEntry()
     : MatchEntry() {}
 
   ExactMatchEntry(ByteContainer key,
-		  ActionFnEntry action_entry,
-		  const ControlFlowNode *next_table)
+                  ActionFnEntry action_entry,
+                  const ControlFlowNode *next_table)
     : MatchEntry(std::move(key), std::move(action_entry), next_table) {}
 };
 
-struct LongestPrefixMatchEntry : MatchEntry
-{
+struct LongestPrefixMatchEntry : MatchEntry {
   int prefix_length{0};
 
   LongestPrefixMatchEntry()
     : MatchEntry() {}
 
   LongestPrefixMatchEntry(ByteContainer key,
-			  ActionFnEntry action_entry,
-			  unsigned int prefix_length,
-			  const ControlFlowNode *next_table)
+                          ActionFnEntry action_entry,
+                          unsigned int prefix_length,
+                          const ControlFlowNode *next_table)
     : MatchEntry(std::move(key), std::move(action_entry), next_table),
     prefix_length(prefix_length) {
     unsigned byte_index = prefix_length / 8;
     unsigned mod = prefix_length % 8;
-    if(mod > 0) {
+    if (mod > 0) {
       byte_index++;
       this->key[byte_index] &= ~(0xFF >> mod);
     }
-    for(; byte_index < key.size(); byte_index++) {
+    for (; byte_index < key.size(); byte_index++) {
       this->key[byte_index] = 0;
     }
   }
 };
 
-struct TernaryMatchEntry : MatchEntry
-{
+struct TernaryMatchEntry : MatchEntry {
   ByteContainer mask{};
   int priority{0};
 
@@ -95,14 +91,14 @@ struct TernaryMatchEntry : MatchEntry
     : MatchEntry() {}
 
   TernaryMatchEntry(ByteContainer key, ActionFnEntry action_entry,
-		    ByteContainer mask, int priority,
-		    const ControlFlowNode *next_table)
+                    ByteContainer mask, int priority,
+                    const ControlFlowNode *next_table)
     : MatchEntry(std::move(key), std::move(action_entry), next_table),
     mask(std::move(mask)), priority(priority) {
-    for(unsigned byte_index = 0; byte_index < key.size(); byte_index++) {
+    for (unsigned byte_index = 0; byte_index < key.size(); byte_index++) {
       this->key[byte_index] &= mask[byte_index];
     }
   }
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_ENTRIES_H_

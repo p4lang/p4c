@@ -18,47 +18,49 @@
  *
  */
 
-#ifndef _BM_DATA_H_
-#define _BM_DATA_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_DATA_H_
+#define BM_SIM_INCLUDE_BM_SIM_DATA_H_
 
 #include <iostream>
+#include <type_traits>
+#include <string>
+#include <vector>
+
 #include <cstring>
 #include <cassert>
-#include <type_traits>
 
 #include "bignum.h"
 #include "bytecontainer.h"
 
 using bignum::Bignum;
 
-class Data
-{  
-public:
+class Data {
+ public:
   Data() {}
 
   template<typename T,
-	   typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-  Data(T i)
+           typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+  explicit Data(T i)
     : value(i) {}
 
   Data(const char *bytes, int nbytes) {
-    bignum::import_bytes(value, bytes, nbytes);
+    bignum::import_bytes(&value, bytes, nbytes);
   }
-  
-  virtual ~Data() { };
+
+  virtual ~Data() { }
 
   static char char2digit(char c) {
-    if(c >= '0' && c <= '9')
+    if (c >= '0' && c <= '9')
       return (c - '0');
-    if(c >= 'A' && c <= 'F')
+    if (c >= 'A' && c <= 'F')
       return (c - 'A' + 10);
-    if(c >= 'a' && c <= 'f')
+    if (c >= 'a' && c <= 'f')
       return (c - 'a' + 10);
     assert(0);
     return 0;
   }
 
-  Data(const std::string &hexstring) {
+  explicit Data(const std::string &hexstring) {
     set(hexstring);
   }
 
@@ -66,21 +68,21 @@ public:
 
   // need to figure out what to do with signed values
   template<typename T,
-	   typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+           typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
   void set(T i) {
     value = i;
     export_bytes();
   }
 
   template<typename T,
-	   typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+           typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
   void set(T i) {
-    value = (int) i;
+    value = static_cast<int>(i);
     export_bytes();
   }
-  
+
   void set(const char *bytes, int nbytes) {
-    bignum::import_bytes(value, bytes, nbytes);
+    bignum::import_bytes(&value, bytes, nbytes);
     export_bytes();
   }
 
@@ -95,7 +97,7 @@ public:
   }
 
   void set(const ByteContainer &bc) {
-    bignum::import_bytes(value, bc.data(), bc.size());
+    bignum::import_bytes(&value, bc.data(), bc.size());
     export_bytes();
   }
 
@@ -104,34 +106,34 @@ public:
     size_t idx = 0;
     bool neg = false;
 
-    if(hexstring[idx] == '-') {
+    if (hexstring[idx] == '-') {
       neg = true;
       ++idx;
     }
-    if(hexstring[idx] == '0' && hexstring[idx + 1] == 'x') {
+    if (hexstring[idx] == '0' && hexstring[idx + 1] == 'x') {
       idx += 2;
     }
     size_t size = hexstring.size();
     assert((size - idx) > 0);
 
-    if((size - idx) % 2 != 0) {
+    if ((size - idx) % 2 != 0) {
       char c = char2digit(hexstring[idx++]);
       bytes.push_back(c);
     }
 
-    for(; idx < size; ) {
+    for (; idx < size; ) {
       char c = char2digit(hexstring[idx++]) << 4;
       c += char2digit(hexstring[idx++]);
       bytes.push_back(c);
     }
 
-    bignum::import_bytes(value, bytes.data(), bytes.size());
-    if(neg) value = -value;
-    export_bytes(); // not very efficient for fields, we import then export...
+    bignum::import_bytes(&value, bytes.data(), bytes.size());
+    if (neg) value = -value;
+    export_bytes();  // not very efficient for fields, we import then export...
   }
 
   template<typename T,
-	   typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+           typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
   T get() const {
     assert(arith);
     return static_cast<T>(value);
@@ -140,24 +142,24 @@ public:
   unsigned int get_uint() const {
     assert(arith);
     // Bad ?
-    return (unsigned) value;
+    return static_cast<unsigned int>(value);
   }
 
   uint64_t get_uint64() const {
     assert(arith);
     // Bad ?
-    return (uint64_t) value;
+    return static_cast<uint64_t>(value);
   }
 
   int get_int() const {
     assert(arith);
     // Bad ?
-    return (int) value;
+    return static_cast<int>(value);
   }
 
   bool get_arith() const { return arith; }
 
-  // TODO: overload operators for those ?
+  // TODO(antonin): overload operators for those ?
 
   void add(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
@@ -263,7 +265,7 @@ public:
     return lhs.value <= rhs.value;
   }
 
-  friend std::ostream& operator<<( std::ostream &out, const Data &d ) {
+  friend std::ostream& operator<<(std::ostream &out, const Data &d) {
     assert(d.arith);
     out << d.value;
     return out;
@@ -275,13 +277,13 @@ public:
      copied */
   Data(const Data &other)
     : arith(other.arith) {
-    if(other.arith) value = other.value;
+    if (other.arith) value = other.value;
   }
 
   /* Copy assignment operator */
   Data &operator=(const Data &other) {
-    Data tmp(other); // re-use copy-constructor
-    *this = std::move(tmp); // re-use move-assignment
+    Data tmp(other);  // re-use copy-constructor
+    *this = std::move(tmp);  // re-use move-assignment
     return *this;
   }
 
@@ -289,9 +291,9 @@ public:
 
   Data &operator=(Data &&other) = default;
 
-protected:
+ protected:
   Bignum value{0};
   bool arith{true};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_DATA_H_

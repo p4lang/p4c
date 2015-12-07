@@ -18,32 +18,38 @@
  *
  */
 
+#include <string>
+
 #include "bm_sim/actions.h"
 
 size_t ActionFn::nb_data_tmps = 0;
 
-void ActionFn::parameter_push_back_field(header_id_t header, int field_offset) {
+void
+ActionFn::parameter_push_back_field(header_id_t header, int field_offset) {
   ActionParam param;
   param.tag = ActionParam::FIELD;
   param.field = {header, field_offset};
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_header(header_id_t header) {
+void
+ActionFn::parameter_push_back_header(header_id_t header) {
   ActionParam param;
   param.tag = ActionParam::HEADER;
   param.header = header;
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_header_stack(header_stack_id_t header_stack) {
+void
+ActionFn::parameter_push_back_header_stack(header_stack_id_t header_stack) {
   ActionParam param;
   param.tag = ActionParam::HEADER_STACK;
   param.header_stack = header_stack;
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_const(const Data &data) {
+void
+ActionFn::parameter_push_back_const(const Data &data) {
   const_values.push_back(data);
   ActionParam param;
   param.tag = ActionParam::CONST;
@@ -51,66 +57,74 @@ void ActionFn::parameter_push_back_const(const Data &data) {
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_action_data(int action_data_offset) {
+void
+ActionFn::parameter_push_back_action_data(int action_data_offset) {
   ActionParam param;
   param.tag = ActionParam::ACTION_DATA;
   param.action_data_offset = action_data_offset;
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_calculation(const NamedCalculation *calculation) {
+void
+ActionFn::parameter_push_back_calculation(const NamedCalculation *calculation) {
   ActionParam param;
   param.tag = ActionParam::CALCULATION;
   param.calculation = calculation;
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_meter_array(MeterArray *meter_array) {
+void
+ActionFn::parameter_push_back_meter_array(MeterArray *meter_array) {
   ActionParam param;
   param.tag = ActionParam::METER_ARRAY;
   param.meter_array = meter_array;
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_counter_array(CounterArray *counter_array) {
+void
+ActionFn::parameter_push_back_counter_array(CounterArray *counter_array) {
   ActionParam param;
   param.tag = ActionParam::COUNTER_ARRAY;
   param.counter_array = counter_array;
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_register_array(RegisterArray *register_array) {
+void
+ActionFn::parameter_push_back_register_array(RegisterArray *register_array) {
   ActionParam param;
   param.tag = ActionParam::REGISTER_ARRAY;
   param.register_array = register_array;
   params.push_back(param);
 }
 
-void ActionFn::parameter_push_back_expression(
+void
+ActionFn::parameter_push_back_expression(
   std::unique_ptr<ArithExpression> expr
 ) {
   size_t nb_expression_params = 0;
-  for(const ActionParam &p : params)
-    if(p.tag == ActionParam::EXPRESSION) nb_expression_params += 1;
+  for (const ActionParam &p : params)
+    if (p.tag == ActionParam::EXPRESSION) nb_expression_params += 1;
 
   assert(nb_expression_params <= ActionFn::nb_data_tmps);
-  if(nb_expression_params == ActionFn::nb_data_tmps)
+  if (nb_expression_params == ActionFn::nb_data_tmps)
     ActionFn::nb_data_tmps += 1;
 
   expressions.push_back(std::move(expr));
   ActionParam param;
   param.tag = ActionParam::EXPRESSION;
   param.expression = {static_cast<unsigned int>(nb_expression_params),
-		      expressions.back().get()};
+                      expressions.back().get()};
   params.push_back(param);
 }
 
-void ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
+void
+ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
   primitives.push_back(primitive);
 }
 
 
-bool ActionOpcodesMap::register_primitive(
+bool
+ActionOpcodesMap::register_primitive(
     const char *name,
     std::unique_ptr<ActionPrimitive_> primitive) {
   const std::string str_name = std::string(name);
@@ -120,11 +134,13 @@ bool ActionOpcodesMap::register_primitive(
   return true;
 }
 
-ActionPrimitive_ *ActionOpcodesMap::get_primitive(const std::string &name) {
+ActionPrimitive_ *
+ActionOpcodesMap::get_primitive(const std::string &name) {
   return map_[name].get();
 }
 
-ActionOpcodesMap *ActionOpcodesMap::get_instance() {
+ActionOpcodesMap *
+ActionOpcodesMap::get_instance() {
   static ActionOpcodesMap instance;
   return &instance;
 }

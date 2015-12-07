@@ -18,41 +18,41 @@
  *
  */
 
-#ifndef _EXTRACT_H_
-#define _EXTRACT_H_
+#ifndef BM_SIM_SRC_EXTRACT_H_
+#define BM_SIM_SRC_EXTRACT_H_
 
-namespace {
+namespace extract {
 
-void generic_extract(const char *data, int bit_offset, int bitwidth, char *dst) {
+static void generic_extract(const char *data, int bit_offset,
+                            int bitwidth, char *dst) {
   int nbytes = (bitwidth + 7) / 8;
 
-  if(bit_offset == 0 && bitwidth % 8 == 0) {
-    std::copy(data, data + nbytes, dst);
+  if (bit_offset == 0 && bitwidth % 8 == 0) {
+    memcpy(dst, data, nbytes);
     return;
   }
 
   int dst_offset = (nbytes << 3) - bitwidth;
   int i;
-  
-  // necessary to ensure correct behavior when shifting right (no sign extension)
+
+  // necessary to ensure correct behavior when shifting right (no sign
+  // extension)
   unsigned char *udata = (unsigned char *) data;
-  
+
   int offset = bit_offset - dst_offset;
   if (offset == 0) {
-    std::copy(udata, udata + nbytes, dst);
+    memcpy(dst, udata, nbytes);
     dst[0] &= (0xFF >> dst_offset);
-  }
-  else if (offset > 0) { /* shift left */
+  } else if (offset > 0) {  // shift left
     for (i = 0; i < nbytes - 1; i++) {
       dst[i] = (udata[i] << offset) | (udata[i + 1] >> (8 - offset));
     }
     dst[0] &= (0xFF >> dst_offset);
     dst[i] = udata[i] << offset;
-    if((bit_offset + bitwidth) > (nbytes << 3)) {
+    if ((bit_offset + bitwidth) > (nbytes << 3)) {
       dst[i] |= (udata[i + 1] >> (8 - offset));
     }
-  }
-  else { /* shift right */
+  } else {  // shift right
     offset = -offset;
     dst[0] = udata[0] >> offset;
     dst[0] &= (0xFF >> dst_offset);
@@ -60,9 +60,8 @@ void generic_extract(const char *data, int bit_offset, int bitwidth, char *dst) 
       dst[i] = (udata[i - 1] << (8 - offset)) | (udata[i] >> offset);
     }
   }
-
 }
 
-}
+}  // namespace extract
 
-#endif
+#endif  // BM_SIM_SRC_EXTRACT_H_

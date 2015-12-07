@@ -18,12 +18,13 @@
  *
  */
 
-#ifndef _BM_METERS_H_
-#define _BM_METERS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_METERS_H_
+#define BM_SIM_INCLUDE_BM_SIM_METERS_H_
 
 #include <vector>
 #include <mutex>
 #include <memory>
+#include <string>
 
 #include "named_p4object.h"
 #include "packet.h"
@@ -42,9 +43,8 @@
    Maybe I will change this later, but meters are not used that much so for now
    I am going for simplicity */
 
-class Meter
-{
-public:
+class Meter {
+ public:
   typedef unsigned int color_t;
   typedef size_t rate_idx_t;
   struct rate_config_t {
@@ -57,7 +57,7 @@ public:
   };
   typedef std::chrono::steady_clock clock;
 
-public:
+ public:
   enum class MeterType {
     BYTES,
     PACKETS
@@ -72,34 +72,36 @@ public:
     ERROR
   };
 
-public:
+ public:
   Meter(MeterType type, size_t rate_count)
     : type(type), rates(rate_count) { }
 
   // the rate configs must be sorted from smaller rate to higher rate
   // in the 2 rate meter case: {CIR, PIR}
-  
+
   /* this is probably a total overkill, but I am entitled to my fun. set_rates
      accepts a vector, an initializer list, or any Random Accces Iterator pair.
   */
   template<typename RAIt>
   MeterErrorCode set_rates(const RAIt first, const RAIt last) {
     // I think using static asserts is cleaner than using SFINAE / enable_if
-    static_assert(std::is_same<std::random_access_iterator_tag,
-		  typename std::iterator_traits<RAIt>::iterator_category>::value,
-		  "wrong iterator category");
-    static_assert(std::is_same<rate_config_t,
-		  typename std::iterator_traits<RAIt>::value_type>::value,
-		  "wrong iterator value type");
+    static_assert(
+        std::is_same<std::random_access_iterator_tag,
+        typename std::iterator_traits<RAIt>::iterator_category>::value,
+        "wrong iterator category");
+    static_assert(
+        std::is_same<rate_config_t,
+        typename std::iterator_traits<RAIt>::value_type>::value,
+        "wrong iterator value type");
     typename std::iterator_traits<RAIt>::difference_type n =
       std::distance(first, last);
     assert(n >= 0);
     auto lock = unique_lock();
-    if(static_cast<size_t>(n) != rates.size()) return BAD_RATES_LIST;
+    if (static_cast<size_t>(n) != rates.size()) return BAD_RATES_LIST;
     size_t idx = 0;
-    for(auto it = first; it < last; ++it) {
+    for (auto it = first; it < last; ++it) {
       MeterErrorCode rc = set_rate(idx++, *it);
-      if(rc != SUCCESS) return rc;
+      if (rc != SUCCESS) return rc;
     }
     std::reverse(rates.begin(), rates.end());
     configured = true;
@@ -110,7 +112,8 @@ public:
     return set_rates(configs.begin(), configs.end());
   }
 
-  MeterErrorCode set_rates(const std::initializer_list<rate_config_t> &configs) {
+  MeterErrorCode set_rates(
+      const std::initializer_list<rate_config_t> &configs) {
     return set_rates(configs.begin(), configs.end());
   }
 
@@ -118,29 +121,29 @@ public:
 
   color_t execute(const Packet &pkt);
 
-public:
+ public:
   /* This is for testing purposes only, for more accurate tests */
   static void reset_global_clock();
 
-private:
+ private:
   typedef std::unique_lock<std::mutex> UniqueLock;
   UniqueLock unique_lock() const { return UniqueLock(*m_mutex); }
-  void unlock(UniqueLock &lock) const { lock.unlock(); }
+  void unlock(UniqueLock &lock) const { lock.unlock(); }  // NOLINT
 
-private:
+ private:
   struct MeterRate {
-    bool valid{}; // TODO: get rid of this?
-    double info_rate{}; // in bytes / packets per microsecond
+    bool valid{};  // TODO(antonin): get rid of this?
+    double info_rate{};  // in bytes / packets per microsecond
     size_t burst_size{};
     size_t tokens{};
     uint64_t tokens_last{};
     color_t color{};
   };
 
-private:
+ private:
   MeterErrorCode set_rate(size_t idx, const rate_config_t &config);
 
-private:
+ private:
   MeterType type;
   // I decided to take the easy route and wrap the m_mutex into a
   // unique_ptr. Mutexes are not movable and that would be a problem with the
@@ -154,7 +157,7 @@ private:
 typedef p4object_id_t meter_array_id_t;
 
 class MeterArray : public NamedP4Object {
-public:
+ public:
   typedef Meter::MeterErrorCode MeterErrorCode;
   typedef Meter::color_t color_t;
   typedef Meter::MeterType MeterType;
@@ -163,12 +166,12 @@ public:
   typedef vector<Meter>::iterator iterator;
   typedef vector<Meter>::const_iterator const_iterator;
 
-public:
+ public:
   MeterArray(const std::string &name, p4object_id_t id,
-	     MeterType type, size_t rate_count, size_t size)
+             MeterType type, size_t rate_count, size_t size)
     : NamedP4Object(name, id) {
     meters.reserve(size);
-    for(size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
       meters.emplace_back(type, rate_count);
   }
 
@@ -181,9 +184,9 @@ public:
   MeterErrorCode set_rates(const RAIt first, const RAIt last) {
     // check validity of rates here?
     MeterErrorCode rc;
-    for(Meter &m : meters) {
+    for (Meter &m : meters) {
       rc = m.set_rates(first, last);
-      if(rc != MeterErrorCode::SUCCESS) return rc;
+      if (rc != MeterErrorCode::SUCCESS) return rc;
     }
     return MeterErrorCode::SUCCESS;
   }
@@ -192,7 +195,8 @@ public:
     return set_rates(configs.begin(), configs.end());
   }
 
-  MeterErrorCode set_rates(const std::initializer_list<rate_config_t> &configs) {
+  MeterErrorCode set_rates(
+      const std::initializer_list<rate_config_t> &configs) {
     return set_rates(configs.begin(), configs.end());
   }
 
@@ -225,8 +229,8 @@ public:
 
   size_t size() const { return meters.size(); }
 
-private:
+ private:
   std::vector<Meter> meters{};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_METERS_H_

@@ -23,8 +23,8 @@
 #include "bm_sim/conditionals.h"
 #include "bm_sim/event_logger.h"
 
-const ControlFlowNode *Conditional::operator()(Packet *pkt) const
-{
+const ControlFlowNode *
+Conditional::operator()(Packet *pkt) const {
   PHV *phv = pkt->get_phv();
   bool result = eval(*phv);
   ELOGGER->condition_eval(*pkt, *this, result);

@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_DEPARSER_H_
-#define _BM_DEPARSER_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_DEPARSER_H_
+#define BM_SIM_INCLUDE_BM_SIM_DEPARSER_H_
 
 #include <vector>
 #include <string>
@@ -30,8 +30,8 @@
 #include "named_p4object.h"
 #include "checksums.h"
 
-class Deparser : public NamedP4Object {  
-public:
+class Deparser : public NamedP4Object {
+ public:
   Deparser(const std::string &name, p4object_id_t id)
     : NamedP4Object(name, id) {}
 
@@ -47,12 +47,12 @@ public:
 
   void deparse(Packet *pkt) const;
 
-private:
+ private:
   void update_checksums(Packet *pkt) const;
 
-private:
+ private:
   std::vector<header_id_t> headers{};
   std::vector<const Checksum *> checksums{};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_DEPARSER_H_

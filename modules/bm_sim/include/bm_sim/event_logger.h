@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_EVENT_LOGGER_H_
-#define _BM_EVENT_LOGGER_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_EVENT_LOGGER_H_
+#define BM_SIM_INCLUDE_BM_SIM_EVENT_LOGGER_H_
 
 #include <string>
 #include <memory>
@@ -47,8 +47,8 @@ class ActionFn;
 typedef uint64_t entry_handle_t;
 
 class EventLogger {
-public:
-  EventLogger(std::unique_ptr<TransportIface> transport)
+ public:
+  explicit EventLogger(std::unique_ptr<TransportIface> transport)
     : transport_instance(std::move(transport)) { }
 
   // we need the ingress / egress ports, but they are part of the Packet
@@ -69,15 +69,15 @@ public:
   void pipeline_done(const Packet &packet, const Pipeline &pipeline);
 
   void condition_eval(const Packet &packet,
-		      const Conditional &cond, bool result);
+                      const Conditional &cond, bool result);
   void table_hit(const Packet &packet,
-		 const MatchTableAbstract &table, entry_handle_t handle);
+                 const MatchTableAbstract &table, entry_handle_t handle);
   void table_miss(const Packet &packet, const MatchTableAbstract &table);
 
   void action_execute(const Packet &packet,
-		      const ActionFn &action_fn, const ActionData &action_data);
+                      const ActionFn &action_fn, const ActionData &action_data);
 
-private:
+ private:
   std::unique_ptr<TransportIface> transport_instance;
 };
 
@@ -85,4 +85,4 @@ extern EventLogger *event_logger;
 
 #define ELOGGER event_logger
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_EVENT_LOGGER_H_

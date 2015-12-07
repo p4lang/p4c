@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_PHV_H_
-#define _BM_PHV_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_PHV_H_
+#define BM_SIM_INCLUDE_BM_SIM_PHV_H_
 
 #include <vector>
 #include <unordered_map>
@@ -42,16 +42,15 @@ typedef p4object_id_t header_id_t;
 // forward declaration
 class PHVFactory;
 
-class PHV
-{
-public:
+class PHV {
+ public:
   friend class PHVFactory;
 
-private:
+ private:
   typedef std::reference_wrapper<Header> HeaderRef;
   typedef std::reference_wrapper<Field> FieldRef;
 
-public:
+ public:
   PHV() {}
 
   PHV(size_t num_headers, size_t num_header_stacks)
@@ -107,11 +106,12 @@ public:
     return header_stacks[header_stack_index];
   }
 
-  const HeaderStack &get_header_stack(header_stack_id_t header_stack_index) const {
+  const HeaderStack &get_header_stack(
+      header_stack_id_t header_stack_index) const {
     return header_stacks[header_stack_index];
   }
 
-  void reset(); // mark all headers as invalid
+  void reset();  // mark all headers as invalid
 
   void reset_header_stacks();
 
@@ -124,34 +124,30 @@ public:
   PHV &operator=(PHV &&other) = default;
 
   void copy_headers(const PHV &src) {
-    for(unsigned int h = 0; h < headers.size(); h++) {
+    for (unsigned int h = 0; h < headers.size(); h++) {
       headers[h].valid = src.headers[h].valid;
       headers[h].metadata = src.headers[h].metadata;
-      if(headers[h].valid || headers[h].metadata)
-	headers[h].fields = src.headers[h].fields;
+      if (headers[h].valid || headers[h].metadata)
+        headers[h].fields = src.headers[h].fields;
     }
   }
 
-private:
+ private:
   // To  be used only by PHVFactory
   // all headers need to be pushed back in order (according to header_index) !!!
-  // TODO: remove this constraint?
-  void push_back_header(
-      const std::string &header_name,
-      header_id_t header_index,
-      const HeaderType &header_type,
-      const std::set<int> &arith_offsets,
-      const bool metadata
-  );
+  // TODO(antonin): remove this constraint?
+  void push_back_header(const std::string &header_name,
+                        header_id_t header_index,
+                        const HeaderType &header_type,
+                        const std::set<int> &arith_offsets,
+                        const bool metadata);
 
-  void push_back_header_stack(
-      const std::string &header_stack_name,
-      header_stack_id_t header_stack_index,
-      const HeaderType &header_type,
-      const std::vector<header_id_t> &header_ids
-  );
+  void push_back_header_stack(const std::string &header_stack_name,
+                              header_stack_id_t header_stack_index,
+                              const HeaderType &header_type,
+                              const std::vector<header_id_t> &header_ids);
 
-private:
+ private:
   std::vector<Header> headers{};
   std::vector<HeaderStack> header_stacks{};
   std::unordered_map<std::string, HeaderRef> headers_map{};
@@ -160,9 +156,8 @@ private:
   size_t capacity_stacks{0};
 };
 
-class PHVFactory
-{
-private:
+class PHVFactory {
+ private:
   struct HeaderDesc {
     const std::string name;
     header_id_t index;
@@ -171,10 +166,10 @@ private:
     bool metadata;
 
     HeaderDesc(const std::string &name, const header_id_t index,
-	       const HeaderType &header_type, const bool metadata)
+               const HeaderType &header_type, const bool metadata)
       : name(name), index(index), header_type(header_type), metadata(metadata) {
-      for(int offset = 0; offset < header_type.get_num_fields(); offset++) {
-	arith_offsets.insert(offset);
+      for (int offset = 0; offset < header_type.get_num_fields(); offset++) {
+        arith_offsets.insert(offset);
       }
     }
   };
@@ -186,28 +181,28 @@ private:
     std::vector<header_id_t> headers;
 
     HeaderStackDesc(const std::string &name, const header_stack_id_t index,
-		    const HeaderType &header_type,
-		    const std::vector<header_id_t> &headers)
+                    const HeaderType &header_type,
+                    const std::vector<header_id_t> &headers)
       : name(name), index(index), header_type(header_type), headers(headers) { }
   };
 
-public:
+ public:
   void push_back_header(const std::string &header_name,
-			const header_id_t header_index,
-			const HeaderType &header_type,
-			const bool metadata = false) {
-    HeaderDesc desc = HeaderDesc(header_name, header_index, header_type, metadata);
+                        const header_id_t header_index,
+                        const HeaderType &header_type,
+                        const bool metadata = false) {
+    HeaderDesc desc = HeaderDesc(header_name, header_index,
+                                 header_type, metadata);
     // cannot use operator[] because it requires default constructibility
     header_descs.insert(std::make_pair(header_index, desc));
   }
 
   void push_back_header_stack(const std::string &header_stack_name,
-			      const header_stack_id_t header_stack_index,
-			      const HeaderType &header_type,
-			      const std::vector<header_id_t> &headers) {
+                              const header_stack_id_t header_stack_index,
+                              const HeaderType &header_type,
+                              const std::vector<header_id_t> &headers) {
     HeaderStackDesc desc = HeaderStackDesc(
-      header_stack_name, header_stack_index, header_type, headers
-    );
+      header_stack_name, header_stack_index, header_type, headers);
     // cannot use operator[] because it requires default constructibility
     header_stack_descs.insert(std::make_pair(header_stack_index, desc));
   }
@@ -223,7 +218,7 @@ public:
 
   void enable_all_field_arith(header_id_t header_id) {
     HeaderDesc &desc = header_descs.at(header_id);
-    for(int offset = 0; offset < desc.header_type.get_num_fields(); offset++) {
+    for (int offset = 0; offset < desc.header_type.get_num_fields(); offset++) {
       desc.arith_offsets.insert(offset);
     }
   }
@@ -240,27 +235,27 @@ public:
 
   std::unique_ptr<PHV> create() const {
     std::unique_ptr<PHV> phv(new PHV(header_descs.size(),
-				     header_stack_descs.size()));
+                                     header_stack_descs.size()));
 
-    for(const auto &e : header_descs) {
+    for (const auto &e : header_descs) {
       const HeaderDesc &desc = e.second;
       phv->push_back_header(desc.name, desc.index,
-			    desc.header_type, desc.arith_offsets,
-			    desc.metadata);
+                            desc.header_type, desc.arith_offsets,
+                            desc.metadata);
     }
 
-    for(const auto &e : header_stack_descs) {
+    for (const auto &e : header_stack_descs) {
       const HeaderStackDesc &desc = e.second;
       phv->push_back_header_stack(desc.name, desc.index,
-				  desc.header_type, desc.headers);
+                                  desc.header_type, desc.headers);
     }
 
     return phv;
   }
 
-private:
-  std::map<header_id_t, HeaderDesc> header_descs{}; // sorted by header id
+ private:
+  std::map<header_id_t, HeaderDesc> header_descs{};  // sorted by header id
   std::map<header_stack_id_t, HeaderStackDesc> header_stack_descs{};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_PHV_H_

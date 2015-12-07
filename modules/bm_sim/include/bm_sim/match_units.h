@@ -18,17 +18,18 @@
  *
  */
 
-#ifndef _BM_MATCH_UNITS_H_
-#define _BM_MATCH_UNITS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_MATCH_UNITS_H_
+#define BM_SIM_INCLUDE_BM_SIM_MATCH_UNITS_H_
+
+// shared_mutex will only be available in C++-14, so for now I'm using boost
+#include <boost/thread/shared_mutex.hpp>
 
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <iostream>
 #include <atomic>
-
-// shared_mutex will only be available in C++-14, so for now I'm using boost
-#include <boost/thread/shared_mutex.hpp>
+#include <utility>  // for pair<>
 
 #include "match_error_codes.h"
 #include "bytecontainer.h"
@@ -61,12 +62,11 @@ struct MatchKeyParam {
 
   Type type;
   std::string key;
-  std::string mask{}; // optional
-  int prefix_length{0}; // optional
+  std::string mask{};  // optional
+  int prefix_length{0};  // optional
 };
 
-struct MatchKeyBuilder
-{
+struct MatchKeyBuilder {
   std::vector<header_id_t> valid_headers{};
   std::vector<std::pair<header_id_t, int> > fields{};
   size_t nbytes_key{0};
@@ -81,24 +81,22 @@ struct MatchKeyBuilder
     nbytes_key++;
   }
 
-  void operator()(const PHV &phv, ByteContainer &key) const
-  {
-    for(const auto &h : valid_headers) {
-      key.push_back(phv.get_header(h).is_valid() ? '\x01' : '\x00');
+  void operator()(const PHV &phv, ByteContainer *key) const {
+    for (const auto &h : valid_headers) {
+      key->push_back(phv.get_header(h).is_valid() ? '\x01' : '\x00');
     }
-    for(const auto &p : fields) {
+    for (const auto &p : fields) {
       // we do not reset all fields to 0 in between packets
       // so I need this hack if the P4 programmer assumed that:
       // field not valid => field set to 0
       // const Field &field = phv.get_field(p.first, p.second);
-      // key.append(field.get_bytes());
+      // key->append(field.get_bytes());
       const Header &header = phv.get_header(p.first);
       const Field &field = header[p.second];
-      if(header.is_valid()) {
-	key.append(field.get_bytes());
-      }
-      else {
-	key.append(std::string(field.get_nbytes(), '\x00'));
+      if (header.is_valid()) {
+        key->append(field.get_bytes());
+      } else {
+        key->append(std::string(field.get_nbytes(), '\x00'));
       }
     }
   }
@@ -114,26 +112,24 @@ struct AtomicTimestamp {
   AtomicTimestamp() { }
 
   template <typename T>
-  AtomicTimestamp(const T &tp) {
+  explicit AtomicTimestamp(const T &tp) {
     ms_ = std::chrono::duration_cast<std::chrono::milliseconds>(
-      tp.time_since_epoch()
-    ).count();
+      tp.time_since_epoch()).count();
   }
 
-  AtomicTimestamp(uint64_t ms)
+  explicit AtomicTimestamp(uint64_t ms)
     : ms_(ms) { }
 
   template <typename T>
   void set(const T &tp) {
     ms_ = std::chrono::duration_cast<std::chrono::milliseconds>(
-      tp.time_since_epoch()
-    ).count();
+      tp.time_since_epoch()).count();
   }
 
   void set(uint64_t ms) {
     ms_ = ms;
   }
-    
+
   uint64_t get_ms() const {
     return ms_;
   }
@@ -141,7 +137,7 @@ struct AtomicTimestamp {
   /* don't need these (for now?), so remove them */
   AtomicTimestamp(const AtomicTimestamp &other) = delete;
   AtomicTimestamp &operator=(const AtomicTimestamp &other) = delete;
-  
+
   /* std::atomic<T> is non-movable so I have to define this myself */
   AtomicTimestamp(AtomicTimestamp &&other)
     : ms_(other.ms_.load()) { }
@@ -165,11 +161,10 @@ struct EntryMeta {
   }
 };
 
-}
+}  // namespace MatchUnit
 
-class MatchUnitAbstract_ 
-{
-public:
+class MatchUnitAbstract_ {
+ public:
   MatchUnitAbstract_(size_t size, const MatchKeyBuilder &match_key_builder)
     : size(size),
       nbytes_key(match_key_builder.get_nbytes_key()),
@@ -191,30 +186,29 @@ public:
 
   MatchErrorCode set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms);
 
-  void sweep_entries(std::vector<entry_handle_t> &entries) const;
+  void sweep_entries(std::vector<entry_handle_t> *entries) const;
 
-protected:
+ protected:
   MatchErrorCode get_and_set_handle(internal_handle_t *handle);
   MatchErrorCode unset_handle(internal_handle_t handle);
   bool valid_handle_(internal_handle_t handle) const;
 
-  // TODO: change key to pointer
-  void build_key(const PHV &phv, ByteContainer &key) const {
+  void build_key(const PHV &phv, ByteContainer *key) const {
     match_key_builder(phv, key);
   }
 
-  void update_counters(Counter &c, const Packet &pkt) {
-    c.increment_counter(pkt);
+  void update_counters(Counter *c, const Packet &pkt) {
+    c->increment_counter(pkt);
   }
 
-  void update_ts(MatchUnit::AtomicTimestamp &ts, const Packet &pkt) {
-    ts.set(pkt.get_ingress_ts_ms());
+  void update_ts(MatchUnit::AtomicTimestamp *ts, const Packet &pkt) {
+    ts->set(pkt.get_ingress_ts_ms());
   }
 
-protected:
+ protected:
   ~MatchUnitAbstract_() { }
 
-protected:
+ protected:
   size_t size{0};
   size_t num_entries{0};
   size_t nbytes_key;
@@ -224,9 +218,8 @@ protected:
 };
 
 template <typename V>
-class MatchUnitAbstract : public MatchUnitAbstract_
-{
-public:
+class MatchUnitAbstract : public MatchUnitAbstract_ {
+ public:
   struct MatchUnitLookup {
     MatchUnitLookup(entry_handle_t handle, const V *value)
       : handle(handle), value(value) { }
@@ -239,7 +232,7 @@ public:
     const V *value{nullptr};
   };
 
-public:
+ public:
   MatchUnitAbstract(size_t size, const MatchKeyBuilder &match_key_builder)
     : MatchUnitAbstract_(size, match_key_builder) { }
 
@@ -248,9 +241,9 @@ public:
   MatchUnitLookup lookup(const Packet &pkt);
 
   MatchErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
-			   V value, // by value for possible std::move
-			   entry_handle_t *handle,
-			   int priority = -1);
+                           V value,  // by value for possible std::move
+                           entry_handle_t *handle,
+                           int priority = -1);
 
   MatchErrorCode delete_entry(entry_handle_t handle);
 
@@ -258,17 +251,17 @@ public:
 
   MatchErrorCode get_value(entry_handle_t handle, const V **value);
 
-  void dump(std::ostream &stream) const {
+  void dump(std::ostream *stream) const {
     return dump_(stream);
   }
 
   void reset_state();
 
-private:
+ private:
   virtual MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
-				    V value, // by value for possible std::move
-				    entry_handle_t *handle,
-				    int priority) = 0;
+                                    V value,  // by value for possible std::move
+                                    entry_handle_t *handle,
+                                    int priority) = 0;
 
   virtual MatchErrorCode delete_entry_(entry_handle_t handle) = 0;
 
@@ -276,7 +269,7 @@ private:
 
   virtual MatchErrorCode get_value_(entry_handle_t handle, const V **value) = 0;
 
-  virtual void dump_(std::ostream &stream) const = 0;
+  virtual void dump_(std::ostream *stream) const = 0;
 
   virtual void reset_state_() = 0;
 
@@ -284,19 +277,18 @@ private:
 };
 
 template <typename V>
-class MatchUnitExact : public MatchUnitAbstract<V>
-{
-public:
+class MatchUnitExact : public MatchUnitAbstract<V> {
+ public:
   typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
 
-public:
+ public:
   MatchUnitExact(size_t size, const MatchKeyBuilder &match_key_builder)
     : MatchUnitAbstract<V>(size, match_key_builder),
       entries(size) {
     entries_map.reserve(size);
   }
 
-private:
+ private:
   struct Entry {
     Entry() { }
 
@@ -308,11 +300,11 @@ private:
     uint32_t version{0};
   };
 
-private:
+ private:
   MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
-			    V value, // by value for possible std::move
-			    entry_handle_t *handle,
-			    int priority) override;
+                            V value,  // by value for possible std::move
+                            entry_handle_t *handle,
+                            int priority) override;
 
   MatchErrorCode delete_entry_(entry_handle_t handle) override;
 
@@ -320,37 +312,36 @@ private:
 
   MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
 
-  void dump_(std::ostream &stream) const override;
+  void dump_(std::ostream *stream) const override;
 
   void reset_state_() override;
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
-private:
+ private:
   std::vector<Entry> entries{};
   std::unordered_map<ByteContainer, entry_handle_t, ByteContainerKeyHash>
   entries_map{};
 };
 
 template <typename V>
-class MatchUnitLPM : public MatchUnitAbstract<V>
-{
-public:
+class MatchUnitLPM : public MatchUnitAbstract<V> {
+ public:
   typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
 
-public:
+ public:
   MatchUnitLPM(size_t size, const MatchKeyBuilder &match_key_builder)
     : MatchUnitAbstract<V>(size, match_key_builder),
       entries(size),
       entries_trie(this->nbytes_key) { }
 
-private:
+ private:
   struct Entry {
     Entry() { }
 
     Entry(ByteContainer key, int prefix_length, V value, uint32_t version)
       : key(std::move(key)), prefix_length(prefix_length),
-	value(std::move(value)), version(version) { }
+        value(std::move(value)), version(version) { }
 
     ByteContainer key{};
     int prefix_length{0};
@@ -358,11 +349,11 @@ private:
     uint32_t version{0};
   };
 
-private:
+ private:
   MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
-			    V value, // by value for possible std::move
-			    entry_handle_t *handle,
-			    int priority) override;
+                            V value,  // by value for possible std::move
+                            entry_handle_t *handle,
+                            int priority) override;
 
   MatchErrorCode delete_entry_(entry_handle_t handle) override;
 
@@ -370,36 +361,35 @@ private:
 
   MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
 
-  void dump_(std::ostream &stream) const override;
+  void dump_(std::ostream *stream) const override;
 
   void reset_state_() override;
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
-private:
+ private:
   std::vector<Entry> entries{};
   LPMTrie entries_trie;
 };
 
 template <typename V>
-class MatchUnitTernary : public MatchUnitAbstract<V>
-{
-public:
+class MatchUnitTernary : public MatchUnitAbstract<V> {
+ public:
   typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
 
-public:
+ public:
   MatchUnitTernary(size_t size, const MatchKeyBuilder &match_key_builder)
     : MatchUnitAbstract<V>(size, match_key_builder),
       entries(size) { }
 
-private:
+ private:
   struct Entry {
     Entry() { }
 
     Entry(ByteContainer key, ByteContainer mask, int priority, V value,
-	  uint32_t version)
+          uint32_t version)
       : key(std::move(key)), mask(std::move(mask)), priority(priority),
-	value(std::move(value)), version(version) { }
+        value(std::move(value)), version(version) { }
 
     ByteContainer key{};
     ByteContainer mask{};
@@ -408,11 +398,11 @@ private:
     uint32_t version{0};
   };
 
-private:
+ private:
   MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
-			    V value, // by value for possible std::move
-			    entry_handle_t *handle,
-			    int priority) override;
+                            V value,  // by value for possible std::move
+                            entry_handle_t *handle,
+                            int priority) override;
 
   MatchErrorCode delete_entry_(entry_handle_t handle) override;
 
@@ -420,17 +410,17 @@ private:
 
   MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
 
-  void dump_(std::ostream &stream) const override;
+  void dump_(std::ostream *stream) const override;
 
   void reset_state_() override;
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
 
   bool has_rule(const ByteContainer &key, const ByteContainer &mask,
-		int priority) const;
+                int priority) const;
 
-private:
+ private:
   std::vector<Entry> entries{};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_MATCH_UNITS_H_

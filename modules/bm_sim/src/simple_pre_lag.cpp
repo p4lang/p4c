@@ -19,18 +19,17 @@
  *
  */
 
+#include <vector>
+
 #include "bm_sim/simple_pre_lag.h"
 
 using std::vector;
-using std::copy;
-using std::string;
 
 McSimplePre::McReturnCode
 McSimplePreLAG::mc_node_create(const rid_t rid,
                                const PortMap &port_map,
                                const LagMap &lag_map,
-                               l1_hdl_t *l1_hdl)
-{
+                               l1_hdl_t *l1_hdl) {
   boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
   l2_hdl_t l2_hdl;
@@ -55,7 +54,8 @@ McSimplePreLAG::mc_node_create(const rid_t rid,
   l1_entries.insert(std::make_pair(*l1_hdl, L1Entry(rid)));
   L1Entry &l1_entry = l1_entries[*l1_hdl];
   l1_entry.l2_hdl = l2_hdl;
-  l2_entries.insert(std::make_pair(l2_hdl, L2Entry(*l1_hdl, port_map, lag_map)));
+  l2_entries.insert(
+    std::make_pair(l2_hdl, L2Entry(*l1_hdl, port_map, lag_map)));
   if (pre_debug) {
     std::cout << "node created for rid : " << rid << "\n";
   }
@@ -64,9 +64,8 @@ McSimplePreLAG::mc_node_create(const rid_t rid,
 
 McSimplePre::McReturnCode
 McSimplePreLAG::mc_node_update(const l1_hdl_t l1_hdl,
-			       const PortMap &port_map,
-                               const LagMap &lag_map)
-{
+                               const PortMap &port_map,
+                               const LagMap &lag_map) {
   boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
   boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
   if (!l1_handles.valid_handle(l1_hdl)) {
@@ -86,8 +85,7 @@ McSimplePreLAG::mc_node_update(const l1_hdl_t l1_hdl,
 
 McSimplePre::McReturnCode
 McSimplePreLAG::mc_set_lag_membership(const lag_id_t lag_index,
-                                      const PortMap &port_map)
-{
+                                      const PortMap &port_map) {
   boost::unique_lock<boost::shared_mutex> lock(lag_lock);
   uint16_t member_count = 0;
   if (lag_index > LAG_MAX_ENTRIES) {
@@ -109,13 +107,12 @@ McSimplePreLAG::mc_set_lag_membership(const lag_id_t lag_index,
 }
 
 std::vector<McSimplePre::McOut>
-McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const
-{
+McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const {
   std::vector<McSimplePre::McOut> egress_info_list;
   egress_port_t port_id;
   PortMap port_map;
   lag_id_t lag_index;
-  int lag_hash = 0xFF; // TODO: get lag hash from metadata
+  int lag_hash = 0xFF;  // TODO(unknown): get lag hash from metadata
   int port_count1 = 0, port_count2 = 0;
   McSimplePre::McOut egress_info;
   LagEntry lag_entry;
@@ -130,8 +127,8 @@ McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const
     const L2Entry l2_entry = l2_entries.at(l1_entry.l2_hdl);
     for (port_id = 0; port_id < l2_entry.port_map.size(); port_id++) {
       if (l2_entry.port_map[port_id]) {
-	egress_info.egress_port = port_id;
-	egress_info_list.push_back(egress_info);
+        egress_info.egress_port = port_id;
+        egress_info_list.push_back(egress_info);
       }
     }
     // Lag replication
@@ -155,6 +152,6 @@ McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const
     }
   }
   // std::cout << "number of packets replicated : "
-  // 	    << egress_info_list.size() << "\n";
+  //        << egress_info_list.size() << "\n";
   return egress_info_list;
 }
