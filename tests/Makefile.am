@@ -1,14 +1,12 @@
 AM_CPPFLAGS += \
--isystem $(top_srcdir)/third_party/ \
--I$(top_srcdir)/modules/bm_sim/include/ \
--I$(top_srcdir)/modules/BMI/include \
+-isystem $(top_srcdir)/third_party \
+-I$(top_srcdir)/modules/bm_sim/include \
 -I$(top_srcdir)/modules/bm_sim/src # need to include pcap_file.cc, because it contains a private class implementation needed for tests
 AM_CXXFLAGS = -pthread
 LDADD = \
 $(top_srcdir)/third_party/gtest/libgtest.la \
 $(top_srcdir)/modules/bm_sim/libbmsim.la \
 $(top_srcdir)/modules/bf_lpm_trie/libbflpmtrie.la \
-$(top_srcdir)/modules/libbmi.la \
 $(top_srcdir)/third_party/jsoncpp/libjson.la \
 -lboost_system -lboost_thread
 
