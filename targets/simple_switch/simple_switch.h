@@ -18,12 +18,13 @@
  *
  */
 
-#ifndef _BM_SIMPLE_SWITCH_SIMPLE_SWITCH_H_
-#define _BM_SIMPLE_SWITCH_SIMPLE_SWITCH_H_
+#ifndef SIMPLE_SWITCH_SIMPLE_SWITCH_H_
+#define SIMPLE_SWITCH_SIMPLE_SWITCH_H_
 
 #include <memory>
 #include <chrono>
 #include <thread>
+#include <vector>
 
 #include "bm_sim/queue.h"
 #include "bm_sim/packet.h"
@@ -35,19 +36,18 @@ using ts_res = std::chrono::microseconds;
 using std::chrono::duration_cast;
 using ticks = std::chrono::nanoseconds;
 
-class PacketQueue : public Queue<std::unique_ptr<Packet> >
-{
-private:
+class PacketQueue : public Queue<std::unique_ptr<Packet> > {
+ private:
   typedef std::chrono::high_resolution_clock clock;
 
-public:
+ public:
   PacketQueue()
     : Queue<std::unique_ptr<Packet> >(1024, WriteReturn, ReadBlock),
       last_sent(clock::now()), pkt_delay_ticks(0) { }
 
   void set_queue_rate(const uint64_t pps) {
     using std::chrono::duration;
-    if(pps == 0) {
+    if (pps == 0) {
       pkt_delay_ticks = ticks::zero();
       return;
     }
@@ -63,21 +63,21 @@ public:
     last_sent = clock::now();
   }
 
-private:
+ private:
   uint64_t queue_rate_pps;
   clock::time_point last_sent;
   ticks pkt_delay_ticks{};
 };
 
 class SimpleSwitch : public Switch {
-public:
+ public:
   typedef int mirror_id_t;
 
-private:
+ private:
   typedef std::chrono::high_resolution_clock clock;
 
-public:
-  SimpleSwitch(int max_port = 256);
+ public:
+  explicit SimpleSwitch(int max_port = 256);
 
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
@@ -107,20 +107,20 @@ public:
   }
 
   int set_egress_queue_depth(const size_t depth_pkts) {
-    for(int i = 0; i < max_port; i++) {
+    for (int i = 0; i < max_port; i++) {
       egress_buffers[i].set_capacity(depth_pkts);
     }
     return 0;
   }
 
   int set_egress_queue_rate(const uint64_t rate_pps) {
-    for(int i = 0; i < max_port; i++) {
+    for (int i = 0; i < max_port; i++) {
       egress_buffers[i].set_queue_rate(rate_pps);
     }
     return 0;
   }
 
-private:
+ private:
   enum PktInstanceType {
     PKT_INSTANCE_TYPE_NORMAL,
     PKT_INSTANCE_TYPE_INGRESS_CLONE,
@@ -131,14 +131,14 @@ private:
     PKT_INSTANCE_TYPE_RESUBMIT,
   };
 
-private:
+ private:
   void ingress_thread();
   void egress_thread(int port);
   void transmit_thread();
 
   int get_mirroring_mapping(mirror_id_t mirror_id) const {
     const auto it = mirroring_map.find(mirror_id);
-    if(it == mirroring_map.end()) return -1;
+    if (it == mirroring_map.end()) return -1;
     return it->second;
   }
 
@@ -146,7 +146,7 @@ private:
 
   void enqueue(int egress_port, std::unique_ptr<Packet> &&pkt);
 
-private:
+ private:
   int max_port;
   Queue<std::unique_ptr<Packet> > input_buffer;
   std::vector<PacketQueue> egress_buffers{};
@@ -158,4 +158,4 @@ private:
   std::uniform_int_distribution<packet_id_t> copy_id_dis{};
 };
 
-#endif
+#endif  // SIMPLE_SWITCH_SIMPLE_SWITCH_H_

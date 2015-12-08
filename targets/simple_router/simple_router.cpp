@@ -18,14 +18,14 @@
  *
  */
 
+#include <unistd.h>
+
 #include <iostream>
 #include <memory>
 #include <thread>
 #include <fstream>
 #include <string>
 #include <chrono>
-
-#include <unistd.h>
 
 #include "bm_sim/queue.h"
 #include "bm_sim/packet.h"
@@ -38,12 +38,10 @@
 
 #include "bm_runtime/bm_runtime.h"
 
-// #define PCAP_DUMP
-
 class SimpleSwitch : public Switch {
-public:
+ public:
   SimpleSwitch()
-    : Switch(true), // enable_switch = true
+    : Switch(true),  // enable_switch = true
       input_buffer(1024), output_buffer(128) { }
 
   int receive(int port_num, const char *buffer, int len) {
@@ -65,23 +63,24 @@ public:
     t2.detach();
   }
 
-private:
+ private:
   void pipeline_thread();
   void transmit_thread();
 
-private:
+ private:
   Queue<std::unique_ptr<Packet> > input_buffer;
   Queue<std::unique_ptr<Packet> > output_buffer;
 };
 
 void SimpleSwitch::transmit_thread() {
-  while(1) {
+  while (1) {
     std::unique_ptr<Packet> packet;
     output_buffer.pop_back(&packet);
     ELOGGER->packet_out(*packet);
     BMLOG_DEBUG_PKT(*packet, "Transmitting packet of size {} out of port {}",
                     packet->get_data_size(), packet->get_egress_port());
-    transmit_fn(packet->get_egress_port(), packet->data(), packet->get_data_size());
+    transmit_fn(packet->get_egress_port(),
+                packet->data(), packet->get_data_size());
   }
 }
 
@@ -92,7 +91,7 @@ void SimpleSwitch::pipeline_thread() {
   Deparser *deparser = this->get_deparser("deparser");
   PHV *phv;
 
-  while(1) {
+  while (1) {
     std::unique_ptr<Packet> packet;
     input_buffer.pop_back(&packet);
     phv = packet->get_phv();
@@ -102,23 +101,22 @@ void SimpleSwitch::pipeline_thread() {
                     ingress_port);
 
     // swap is enabled, so update pointers if needed
-    if(this->do_swap() == 0) { // a swap took place
+    if (this->do_swap() == 0) {  // a swap took place
       ingress_mau = this->get_pipeline("ingress");
       egress_mau = this->get_pipeline("egress");
       parser = this->get_parser("parser");
       deparser = this->get_deparser("deparser");
     }
-    
+
     parser->parse(packet.get());
     ingress_mau->apply(packet.get());
 
     int egress_port = phv->get_field("standard_metadata.egress_port").get_int();
     BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
 
-    if(egress_port == 511) {
+    if (egress_port == 511) {
       BMLOG_DEBUG_PKT(*packet, "Dropping packet");
-    }
-    else {
+    } else {
       packet->set_egress_port(egress_port);
       egress_mau->apply(packet.get());
       deparser->deparse(packet.get());
@@ -132,12 +130,11 @@ void SimpleSwitch::pipeline_thread() {
 static SimpleSwitch *simple_switch;
 
 
-int 
-main(int argc, char* argv[])
-{
+int
+main(int argc, char* argv[]) {
   simple_switch = new SimpleSwitch();
   int status = simple_switch->init_from_command_line_options(argc, argv);
-  if(status != 0) std::exit(status);
+  if (status != 0) std::exit(status);
 
   // should this be done by the call to init_from_command_line_options
   int thrift_port = simple_switch->get_runtime_port();
@@ -145,7 +142,7 @@ main(int argc, char* argv[])
 
   simple_switch->start_and_return();
 
-  while(1) std::this_thread::sleep_for(std::chrono::seconds(100));
-  
-  return 0; 
+  while (true) std::this_thread::sleep_for(std::chrono::seconds(100));
+
+  return 0;
 }
