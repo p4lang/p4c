@@ -18,33 +18,34 @@
  *
  */
 
-#ifndef _BM_PACKET_BUFFER_H_
-#define _BM_PACKET_BUFFER_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_PACKET_BUFFER_H_
+#define BM_SIM_INCLUDE_BM_SIM_PACKET_BUFFER_H_
 
 #include <memory>
+#include <algorithm>  // for std::copy
 
 #include <cassert>
 
 class PacketBuffer {
-public:
+ public:
   struct state_t {
     char *head;
     size_t data_size;
   };
 
-public:
+ public:
   PacketBuffer() {}
 
-  PacketBuffer(size_t size)
+  explicit PacketBuffer(size_t size)
     : size(size),
       data_size(0),
-      buffer(std::unique_ptr<char []>(new char[size])),
+      buffer(std::unique_ptr<char[]>(new char[size])),
       head(buffer.get() + size) {}
 
   PacketBuffer(size_t size, const char *data, size_t data_size)
     : size(size),
       data_size(0),
-      buffer(std::unique_ptr<char []>(new char[size])),
+      buffer(std::unique_ptr<char[]>(new char[size])),
       head(buffer.get() + size) {
     std::copy(data, data + data_size, push(data_size));
   }
@@ -52,7 +53,7 @@ public:
   char *start() const { return head; }
 
   char *end() const { return buffer.get() + size; }
-  
+
   char *push(size_t bytes) {
     assert(data_size + bytes <= size);
     data_size += bytes;
@@ -75,7 +76,7 @@ public:
     head = state.head;
     data_size = state.data_size;
   }
-  
+
   size_t get_data_size() const { return data_size; }
 
   PacketBuffer clone(size_t end_bytes) const {
@@ -91,11 +92,11 @@ public:
   PacketBuffer(PacketBuffer &&other) /*noexcept*/ = default;
   PacketBuffer &operator=(PacketBuffer &&other) /*noexcept*/ = default;
 
-private:
+ private:
   size_t size{0};
   size_t data_size{0};
-  std::unique_ptr<char []> buffer{nullptr};
+  std::unique_ptr<char[]> buffer{nullptr};
   char *head{nullptr};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_PACKET_BUFFER_H_

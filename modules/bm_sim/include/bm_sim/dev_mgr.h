@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_DEV_MGR_H_
-#define _BM_DEV_MGR_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_DEV_MGR_H_
+#define BM_SIM_INCLUDE_BM_SIM_DEV_MGR_H_
 
 #include <functional>
 #include <string>
@@ -28,7 +28,7 @@
 #include "bm_sim/pcap_file.h"
 
 class DevMgrInterface : public PacketDispatcherInterface {
-public:
+ public:
   enum class PortStatus { PORT_ADDED, PORT_REMOVED, PORT_UP, PORT_DOWN };
 
   typedef unsigned int port_t;
@@ -56,7 +56,7 @@ public:
 };
 
 class DevMgr : public DevMgrInterface {
-public:
+ public:
   DevMgr();
 
   // If useFiles is true I/O is performed from PCAP files.
@@ -86,13 +86,13 @@ public:
   DevMgr(DevMgr &&other) = delete;
   DevMgr &operator=(DevMgr &&other) = delete;
 
-protected:
+ protected:
   virtual ~DevMgr() {}
   ReturnCode set_packet_handler(PacketHandler handler, void *cookie);
 
-private:
+ private:
   // Actual implementation (private)
   std::unique_ptr<DevMgrInterface> impl;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_DEV_MGR_H_

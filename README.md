@@ -222,3 +222,12 @@ send us an email (p4-dev@p4.org).
 All developers must sign the [P4.org](http://p4.org) CLA and return it to
 (membership@p4.org) before making contributions. The CLA is available
 [here](http://p4.org/wp-content/uploads/2015/07/P4_Language_Consortium_Membership_Agreement.pdf).
+
+Any contribution to the C++ core code (in particular the [bm_sim]
+(modules/bm_sim) module) must respect the coding guidelines. We rely heavily on
+the [Google C++ Style Guide]
+(https://google.github.io/styleguide/cppguide.html), with some differences
+listed in this repository's [wiki]
+(https://github.com/p4lang/behavioral-model/wiki/Coding-guidelines). Every
+submitted pull request will go through our Travis tests, which include running
+`cpplint.py` to ensure correct style and formatting.

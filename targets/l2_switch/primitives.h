@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_SIMPLE_SWITCH_PRIMITIVES_H_
-#define _BM_SIMPLE_SWITCH_PRIMITIVES_H_
+#ifndef L2_SWITCH_PRIMITIVES_H_
+#define L2_SWITCH_PRIMITIVES_H_
 
 class modify_field : public ActionPrimitive<Field &, const Data &> {
   void operator ()(Field &f, const Data &d) {
@@ -54,4 +54,4 @@ class generate_digest : public ActionPrimitive<const Data &, const Data &> {
 
 REGISTER_PRIMITIVE(generate_digest);
 
-#endif
+#endif  // L2_SWITCH_PRIMITIVES_H_

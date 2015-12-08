@@ -18,9 +18,10 @@
  *
  */
 
-#ifndef _BM_HANDLE_MGR_H_
-#define _BM_HANDLE_MGR_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_HANDLE_MGR_H_
+#define BM_SIM_INCLUDE_BM_SIM_HANDLE_MGR_H_
 
+#include <algorithm>  // for swap
 #include <type_traits>
 
 #include <Judy.h>
@@ -28,66 +29,62 @@
 typedef uintptr_t handle_t;
 
 class HandleMgr {
-public:
-
+ public:
   // iterators: since they are very simple, I did not mind duplicating the
   // code. Maybe it would be a good idea to condition the const'ness of the
-  // iterator with a boolean template, to unify the 2 iterators. See :
-  // www.sj-vs.net/c-implementing-const_iterator-and-non-const-iterator-without-code-duplication/
+  // iterator with a boolean template, to unify the 2 iterators.
 
   class const_iterator;
 
-  class iterator
-  {
+  class iterator {
     friend class const_iterator;
-  
-  public:
+
+   public:
     iterator(HandleMgr *handle_mgr, handle_t index)
       : handle_mgr(handle_mgr), index(index) {}
-    
+
     handle_t &operator*() {return index;}
     handle_t *operator->() {return &index;}
-    
+
     bool operator==(const iterator &other) const {
       return (handle_mgr == other.handle_mgr) && (index == other.index);
     }
-    
+
     bool operator!=(const iterator &other) const {
       return !(*this == other);
     }
-    
+
     iterator& operator++() {
       int Rc_int;
       Word_t jindex = index;;
       J1N(Rc_int, handle_mgr->handles, jindex);
-      if(!Rc_int)
-	index = -1;
+      if (!Rc_int)
+        index = -1;
       else
-	index = jindex;
+        index = jindex;
       return *this;
     }
 
-    iterator operator++(int){
+    iterator operator++(int) {
       // Use operator++()
       const iterator old(*this);
       ++(*this);
       return old;
     }
 
-  private:
+   private:
     HandleMgr *handle_mgr;
     handle_t index;
   };
 
-  class const_iterator
-  {
-  public:
+  class const_iterator {
+   public:
     const_iterator(const HandleMgr *handle_mgr, handle_t index)
       : handle_mgr(handle_mgr), index(index) {}
 
-    const_iterator(const iterator &other)
+    const_iterator(const iterator &other)  // NOLINT(runtime/explicit)
       : handle_mgr(other.handle_mgr), index(other.index) {}
-    
+
     const handle_t &operator*() const {return index;}
     const handle_t *operator->() const {return &index;}
 
@@ -100,36 +97,36 @@ public:
     bool operator==(const const_iterator &other) const {
       return (handle_mgr == other.handle_mgr) && (index == other.index);
     }
-  
+
     bool operator!=(const const_iterator &other) const {
       return !(*this == other);
     }
 
-    const const_iterator& operator++(){
+    const const_iterator& operator++() {
       int Rc_int;
       Word_t jindex = index;
       J1N(Rc_int, handle_mgr->handles, jindex);
-      if(!Rc_int)
-	index = -1;
+      if (!Rc_int)
+        index = -1;
       else
-	index = jindex;
+        index = jindex;
       return *this;
     }
 
-    const const_iterator operator++(int){
+    const const_iterator operator++(int) {
       // Use operator++()
       const const_iterator old(*this);
       ++(*this);
       return old;
     }
 
-  private:
+   private:
     const HandleMgr *handle_mgr;
     handle_t index;
   };
 
 
-public:
+ public:
   HandleMgr()
     : handles((Pvoid_t) NULL) {}
 
@@ -139,7 +136,7 @@ public:
     int Rc_iter, Rc_set;
     Word_t index = 0;
     J1F(Rc_iter, other.handles, index);
-    while(Rc_iter) {
+    while (Rc_iter) {
       J1S(Rc_set, handles, index);
       J1N(Rc_iter, other.handles, index);
     }
@@ -155,16 +152,16 @@ public:
   }
 
   /* Copy assignment operator */
-  HandleMgr &operator=(const HandleMgr &other) {    
-    HandleMgr tmp(other); // re-use copy-constructor
-    *this = std::move(tmp); // re-use move-assignment
+  HandleMgr &operator=(const HandleMgr &other) {
+    HandleMgr tmp(other);  // re-use copy-constructor
+    *this = std::move(tmp);  // re-use move-assignment
     return *this;
   }
- 
+
   /* Move assignment operator */
   HandleMgr &operator=(HandleMgr &&other) noexcept {
     // simplified move-constructor that also protects against move-to-self.
-    std::swap(handles, other.handles); // repeat for all elements
+    std::swap(handles, other.handles);  // repeat for all elements
     return *this;
   }
 
@@ -182,10 +179,10 @@ public:
     Word_t jhandle = 0;
     int Rc;
 
-    J1FE(Rc, handles, jhandle); // Judy1FirstEmpty()
-    if(!Rc) return -1;
-    J1S(Rc, handles, jhandle); // Judy1Set()
-    if(!Rc) return -1;
+    J1FE(Rc, handles, jhandle);  // Judy1FirstEmpty()
+    if (!Rc) return -1;
+    J1S(Rc, handles, jhandle);  // Judy1Set()
+    if (!Rc) return -1;
 
     *handle = jhandle;
 
@@ -194,7 +191,7 @@ public:
 
   int release_handle(handle_t handle) {
     int Rc;
-    J1U(Rc, handles, handle); // Judy1Unset()
+    J1U(Rc, handles, handle);  // Judy1Unset()
     return Rc ? 0 : -1;
   }
 
@@ -206,7 +203,7 @@ public:
 
   bool valid_handle(handle_t handle) const {
     int Rc;
-    J1T(Rc, handles, handle); // Judy1Test()
+    J1T(Rc, handles, handle);  // Judy1Test()
     return (Rc == 1);
   }
 
@@ -221,7 +218,7 @@ public:
     Word_t index = 0;
     int Rc_int;
     J1F(Rc_int, handles, index);
-    if(!Rc_int) index = -1;
+    if (!Rc_int) index = -1;
     return iterator(this, index);
   }
 
@@ -229,7 +226,7 @@ public:
     Word_t index = 0;
     int Rc_int;
     J1F(Rc_int, handles, index);
-    if(!Rc_int) index = -1;
+    if (!Rc_int) index = -1;
     return const_iterator(this, index);
   }
 
@@ -247,11 +244,8 @@ public:
     return const_iterator(this, index);
   }
 
-private:
+ private:
   Pvoid_t handles;
 };
 
-
-
-
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_HANDLE_MGR_H_

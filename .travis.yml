@@ -50,6 +50,7 @@ install:
 script:
   - python build/travis/check-nnpy.py
   - make check
+  - bash tools/check_style.sh
 
 # code coverage
 after_success:

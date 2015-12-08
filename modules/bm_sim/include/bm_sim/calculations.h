@@ -18,13 +18,16 @@
  *
  */
 
-#ifndef _BM_CALCULATIONS_H_
-#define _BM_CALCULATIONS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_CALCULATIONS_H_
+#define BM_SIM_INCLUDE_BM_SIM_CALCULATIONS_H_
 
 #include <memory>
 #include <type_traits>
 #include <string>
 #include <unordered_map>
+#include <tuple>
+#include <vector>
+#include <algorithm>   // for std::copy
 
 #include "boost/variant.hpp"
 
@@ -34,8 +37,7 @@
 
 /* Used to determine whether a class overloads the '()' operator */
 template <typename T>
-struct defines_functor_operator
-{
+struct defines_functor_operator {
   typedef char (& yes)[1];
   typedef char (& no)[2];
 
@@ -51,8 +53,7 @@ struct defines_functor_operator
 namespace detail {
 
 template <class ReturnType, class... Args>
-struct callable_traits_base
-{
+struct callable_traits_base {
   using return_type = ReturnType;
   using argument_type = std::tuple<Args...>;
 
@@ -60,28 +61,25 @@ struct callable_traits_base
   using arg = typename std::tuple_element<I, argument_type>::type;
 };
 
-}
+}  // namespace detail
 
 /* Used to determine the return type and argument type of the '()' operator */
 template <class T>
-struct callable_traits : callable_traits<decltype(&T::operator())>
-{ };
+struct callable_traits : callable_traits<decltype(&T::operator())> { };
 
 /* lambda / functor */
 template <class ClassType, class ReturnType, class... Args>
 struct callable_traits<ReturnType(ClassType::*)(Args...) const>
-  : detail::callable_traits_base<ReturnType, Args...>
-{ };
+  : detail::callable_traits_base<ReturnType, Args...> { };
 
 /* non-const case */
 template <class ClassType, class ReturnType, class... Args>
 struct callable_traits<ReturnType(ClassType::*)(Args...)>
-  : detail::callable_traits_base<ReturnType, Args...>
-{ };
+  : detail::callable_traits_base<ReturnType, Args...> { };
 
 template <bool functor, typename H>
 struct HashChecker {
-protected:
+ protected:
   static bool constexpr valid_hash = false;
 
   ~HashChecker() { }
@@ -90,9 +88,10 @@ protected:
 /* specific to hash algorithms
    checks that the signature of the '()' operator is what we want */
 template<typename T, typename Return>
-struct check_functor_signature
-{
-  template<typename U, Return (U::*)(const char *, size_t) const> struct SFINAE {};
+struct check_functor_signature {
+  template<typename U, Return (U::*)(const char *, size_t) const>
+  struct SFINAE {};
+
   template<typename U> static char Test(SFINAE<U, &U::operator()>*);
   template<typename U> static int Test(...);
   static const bool value = sizeof(Test<T>(0)) == sizeof(char);
@@ -102,7 +101,7 @@ struct check_functor_signature
    correctly */
 template <typename H>
 struct HashChecker<true, H> {
-private:
+ private:
   typedef typename callable_traits<H>::return_type return_type;
   typedef typename callable_traits<H>::argument_type argument_type;
 
@@ -116,7 +115,7 @@ private:
   static bool constexpr v3 = check_functor_signature<H, return_type>::value;
   static_assert(!(v1 && v2) || v3, "HashFn is not const");
 
-protected:
+ protected:
   static bool constexpr valid_hash = v1 && v2 && v3;
 
   ~HashChecker() { }
@@ -124,9 +123,9 @@ protected:
 
 
 template <typename U,
-	  typename std::enable_if<std::is_unsigned<U>::value, int>::type = 0>
+          typename std::enable_if<std::is_unsigned<U>::value, int>::type = 0>
 class RawCalculationIface {
-public:
+ public:
   U output(const char *buffer, size_t s) const {
     return output_(buffer, s);
   }
@@ -137,7 +136,7 @@ public:
 
   virtual ~RawCalculationIface() { }
 
-private:
+ private:
   virtual U output_(const char *buffer, size_t s) const = 0;
 
   virtual RawCalculationIface<U> *clone_() const = 0;
@@ -145,19 +144,18 @@ private:
 
 
 template <typename T, typename HashFn,
-	  typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
+          typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
 class RawCalculation
   : HashChecker<defines_functor_operator<HashFn>::value, HashFn>,
-    public RawCalculationIface<T>
-{
-public:
-  RawCalculation(const HashFn &hash) : hash(hash) { }
+    public RawCalculationIface<T> {
+ public:
+  explicit RawCalculation(const HashFn &hash) : hash(hash) { }
 
   std::unique_ptr<RawCalculation<T, HashFn> > clone() const {
     return std::unique_ptr<RawCalculation<T, HashFn> > (clone_());
   }
 
-private:
+ private:
   T output_(const char *buffer, size_t s) const override {
     return output__(buffer, s);
   }
@@ -170,17 +168,17 @@ private:
   typedef HashChecker<defines_functor_operator<HashFn>::value, HashFn> HC;
 
   static_assert(defines_functor_operator<HashFn>::value,
-		"HashFn needs to overload '()' operator");
+                "HashFn needs to overload '()' operator");
 
   template <typename U = T,
-	    typename std::enable_if<std::is_unsigned<U>::value, int>::type = 0>
+            typename std::enable_if<std::is_unsigned<U>::value, int>::type = 0>
   typename std::enable_if<HC::valid_hash, U>::type
   output__(const char *buffer, size_t s) const {
     return static_cast<U>(hash(buffer, s));
   }
 
   template <typename U = T,
-	    typename std::enable_if<std::is_unsigned<U>::value, int>::type = 0>
+            typename std::enable_if<std::is_unsigned<U>::value, int>::type = 0>
   typename std::enable_if<!HC::valid_hash, U>::type
   output__(const char *buffer, size_t s) const {
     (void) buffer; (void) s;
@@ -191,8 +189,7 @@ private:
 };
 
 
-struct BufBuilder
-{
+struct BufBuilder {
   struct field_t {
     header_id_t header;
     int field_offset;
@@ -216,7 +213,7 @@ struct BufBuilder
   }
 
   void push_back_constant(const ByteContainer &v, size_t nbits) {
-    // TODO: general case
+    // TODO(antonin): general case
     assert(nbits % 8 == 0);
     constant_t c = {v, nbits};
     entries.emplace_back(c);
@@ -241,17 +238,17 @@ struct BufBuilder
       char *ptr = buf->data() + (nbits / 8);
       nbits = nbits_;
       // needed ?
-      // if(new_bytes > 0) buf->back() = '\x00';
+      // if (new_bytes > 0) buf->back() = '\x00';
       return ptr;
     }
 
     int get_offset() const {
       return nbits % 8;
     }
-    
+
     void operator()(const field_t &f) {
       const Header &header = phv.get_header(f.header);
-      if(!header.is_valid()) return;
+      if (!header.is_valid()) return;
       const Field &field = header.get_field(f.field_offset);
       // taken from headers.cpp::deparse
       field.deparse(extend(field.get_nbits()), get_offset());
@@ -265,8 +262,8 @@ struct BufBuilder
     void operator()(const header_t &h) {
       assert(get_offset() == 0);
       const Header &header = phv.get_header(h.header);
-      if(header.is_valid()) {
-	header.deparse(extend(header.get_nbytes_packet() * 8));
+      if (header.is_valid()) {
+        header.deparse(extend(header.get_nbytes_packet() * 8));
       }
     }
 
@@ -281,13 +278,13 @@ struct BufBuilder
     int nbits{0};
   };
 
-  void operator()(const Packet &pkt, ByteContainer *buf) const
-  {
+  void operator()(const Packet &pkt, ByteContainer *buf) const {
     buf->clear();
     const PHV *phv = pkt.get_phv();
     Deparse visitor(*phv, buf);
-    std::for_each(entries.begin(), entries.end(), boost::apply_visitor(visitor));
-    if(with_payload) {
+    std::for_each(entries.begin(), entries.end(),
+                  boost::apply_visitor(visitor));
+    if (with_payload) {
       size_t curr = buf->size();
       size_t psize = pkt.get_data_size();
       buf->resize(curr + psize);
@@ -298,11 +295,11 @@ struct BufBuilder
 
 
 template <typename T,
-	  typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
+          typename std::enable_if<std::is_unsigned<T>::value, int>::type = 0>
 class Calculation_ {
-public:
+ public:
   Calculation_(const BufBuilder &builder,
-	       std::unique_ptr<RawCalculationIface<T> > c)
+               std::unique_ptr<RawCalculationIface<T> > c)
     : builder(builder), c(std::move(c)) { }
 
   T output(const Packet &pkt) const {
@@ -311,32 +308,32 @@ public:
     return c->output(key.data(), key.size());
   }
 
-protected:
+ protected:
   ~Calculation_() { }
 
-private:
+ private:
   BufBuilder builder;
   std::unique_ptr<RawCalculationIface<T> > c;
 };
 
 
 class CalculationsMap {
-public:
+ public:
   typedef RawCalculationIface<uint64_t> MyC;
 
   static CalculationsMap *get_instance();
   bool register_one(const char *name, std::unique_ptr<MyC> c);
   std::unique_ptr<MyC> get_copy(const std::string &name);
 
-private:
+ private:
   std::unordered_map<std::string, std::unique_ptr<MyC> > map_{};
 };
 
 
 class Calculation : public Calculation_<uint64_t> {
-public:
+ public:
   Calculation(const BufBuilder &builder,
-	      std::unique_ptr<RawCalculationIface<uint64_t> > c)
+              std::unique_ptr<RawCalculationIface<uint64_t> > c)
     : Calculation_(builder, std::move(c)) { }
 
   Calculation(const BufBuilder &builder, const std::string &hash_name)
@@ -347,15 +344,15 @@ public:
 
 
 class NamedCalculation : public NamedP4Object, public Calculation_<uint64_t> {
-public:
+ public:
   NamedCalculation(const std::string &name, p4object_id_t id,
-		   const BufBuilder &builder,
-		   std::unique_ptr<RawCalculationIface<uint64_t> > c)
+                   const BufBuilder &builder,
+                   std::unique_ptr<RawCalculationIface<uint64_t> > c)
     : NamedP4Object(name, id),
       Calculation_(builder, std::move(c)) { }
 
   NamedCalculation(const std::string &name, p4object_id_t id,
-		   const BufBuilder &builder, const std::string &hash_name)
+                   const BufBuilder &builder, const std::string &hash_name)
     : NamedP4Object(name, id),
       Calculation_(
         builder, CalculationsMap::get_instance()->get_copy(hash_name)
@@ -366,8 +363,9 @@ public:
 #define REGISTER_HASH(hash_name)\
   bool hash_name##_create_ =\
     CalculationsMap::get_instance()->register_one(\
-        #hash_name,\
-	std::unique_ptr<CalculationsMap::MyC>(new RawCalculation<uint64_t, hash_name>(hash_name())));
+        #hash_name, \
+        std::unique_ptr<CalculationsMap::MyC>(\
+          new RawCalculation<uint64_t, hash_name>(hash_name())));
 
 
 namespace hash {
@@ -376,4 +374,4 @@ uint64_t xxh64(const char *buffer, size_t s);
 
 }
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_CALCULATIONS_H_

@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <thread>
 #include <unordered_map>
+#include <string>
 
 #define UNUSED(x) (void)(x)
 
@@ -34,7 +35,7 @@ extern "C" {
 #include "BMI/bmi_port.h"
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 // These are private implementations
 
@@ -42,7 +43,7 @@ extern "C" {
 // from true interfaces
 
 class BmiDevMgrImplementation : public DevMgrInterface {
-public:
+ public:
   BmiDevMgrImplementation() {
     assert(!bmi_port_create_mgr(&port_mgr));
     p_monitor.start(this);
@@ -103,16 +104,16 @@ public:
     return is_up;
   }
 
-private:
+ private:
   bmi_port_mgr_t *port_mgr{nullptr};
   PortMonitor p_monitor;
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 // Implementation which uses Pcap files to read/write packets
 class FilesDevMgrImplementation : public DevMgrInterface {
-public:
+ public:
   FilesDevMgrImplementation(bool respectTiming, unsigned wait_time_in_seconds)
       : reader(respectTiming, wait_time_in_seconds) {}
 
@@ -127,7 +128,7 @@ public:
   ReturnCode port_remove(port_t port_num) {
     UNUSED(port_num);
     bm_fatal_error("Removing ports not implemented when reading pcap files");
-    return ReturnCode::ERROR; // unreachable
+    return ReturnCode::ERROR;  // unreachable
   }
 
   void transmit_fn(int port_num, const char *buffer, int len) {
@@ -149,43 +150,46 @@ public:
     UNUSED(port_cb);
     bm_fatal_error(
         "Port Status Callback not implemented when reading pcap files");
-    return ReturnCode::ERROR; // unreachable
+    return ReturnCode::ERROR;  // unreachable
   }
   bool port_is_up(port_t port) {
     UNUSED(port);
     bm_fatal_error(
         "Port monitoring callback not implemented when reading pcap files");
-    return false; // unreachable
+    return false;  // unreachable
   }
 
-private:
+ private:
   PcapFilesReader reader;
   PcapFilesWriter writer;
   std::thread reader_thread;
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 DevMgr::DevMgr() : impl(nullptr) {}
 
-void DevMgr::start() {
+void
+DevMgr::start() {
   assert(impl);
   impl->start();
 }
 
-void DevMgr::setUseFiles(bool useFiles, unsigned wait_time_in_seconds) {
+void
+DevMgr::setUseFiles(bool useFiles, unsigned wait_time_in_seconds) {
   assert(!impl);
   if (useFiles) {
     impl = std::unique_ptr<DevMgrInterface>(new FilesDevMgrImplementation(
         false /* no real-time packet replay */, wait_time_in_seconds));
-  } else
+  } else {
     impl = std::unique_ptr<DevMgrInterface>(new BmiDevMgrImplementation());
+  }
 }
 
 PacketDispatcherInterface::ReturnCode
 DevMgr::port_add(const std::string &iface_name, port_t port_num,
                  const char *pcap_in, const char *pcap_out) {
-  // TODO: check if port is taken...
+  // TODO(antonin): check if port is taken...
   assert(impl);
   BMLOG_DEBUG("Adding interface {} as port {}", iface_name, port_num);
   ReturnCode rc = impl->port_add(iface_name, port_num, pcap_in, pcap_out);
@@ -194,12 +198,14 @@ DevMgr::port_add(const std::string &iface_name, port_t port_num,
   return rc;
 }
 
-void DevMgr::transmit_fn(int port_num, const char *buffer, int len) {
+void
+DevMgr::transmit_fn(int port_num, const char *buffer, int len) {
   assert(impl);
   impl->transmit_fn(port_num, buffer, len);
 }
 
-PacketDispatcherInterface::ReturnCode DevMgr::port_remove(port_t port_num) {
+PacketDispatcherInterface::ReturnCode
+DevMgr::port_remove(port_t port_num) {
   assert(impl);
   BMLOG_DEBUG("Removing port {}", port_num);
   ReturnCode rc = impl->port_remove(port_num);
@@ -221,7 +227,8 @@ DevMgr::register_status_cb(const PortStatus &type,
   return impl->register_status_cb(type, port_cb);
 }
 
-bool DevMgr::port_is_up(port_t port_num) {
+bool
+DevMgr::port_is_up(port_t port_num) {
   assert(impl);
   return impl->port_is_up(port_num);
 }

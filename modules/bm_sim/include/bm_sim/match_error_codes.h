@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_MATCH_ERROR_CODES_H_
-#define _BM_MATCH_ERROR_CODES_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_MATCH_ERROR_CODES_H_
+#define BM_SIM_INCLUDE_BM_SIM_MATCH_ERROR_CODES_H_
 
 enum class MatchErrorCode {
   SUCCESS = 0,
@@ -43,4 +43,4 @@ enum class MatchErrorCode {
   ERROR,
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_MATCH_ERROR_CODES_H_

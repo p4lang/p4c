@@ -18,8 +18,10 @@
  *
  */
 
-#ifndef _BM_CHECKSUMS_H_
-#define _BM_CHECKSUMS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_CHECKSUMS_H_
+#define BM_SIM_INCLUDE_BM_SIM_CHECKSUMS_H_
+
+#include <string>
 
 #include "phv.h"
 #include "named_p4object.h"
@@ -27,12 +29,12 @@
 #include "logger.h"
 
 class Checksum : public NamedP4Object{
-public:
+ public:
   Checksum(const std::string &name, p4object_id_t id,
-	   header_id_t header_id, int field_offset);
+           header_id_t header_id, int field_offset);
   virtual ~Checksum() { }
 
-public:
+ public:
   void update(Packet *pkt) const {
     BMLOG_DEBUG_PKT(*pkt, "Updating checksum '{}'", get_name());
     update_(pkt);
@@ -44,20 +46,20 @@ public:
     return valid;
   }
 
-private:
+ private:
   virtual void update_(Packet *pkt) const = 0;
   virtual bool verify_(const Packet &pkt) const = 0;
 
-protected:
+ protected:
   header_id_t header_id;
   int field_offset;
 };
 
 class CalcBasedChecksum : public Checksum {
-public:
+ public:
   CalcBasedChecksum(const std::string &name, p4object_id_t id,
-		    header_id_t header_id, int field_offset,
-		    const NamedCalculation *calculation);
+                    header_id_t header_id, int field_offset,
+                    const NamedCalculation *calculation);
 
   CalcBasedChecksum(const CalcBasedChecksum &other) = delete;
   CalcBasedChecksum &operator=(const CalcBasedChecksum &other) = delete;
@@ -65,22 +67,22 @@ public:
   CalcBasedChecksum(CalcBasedChecksum &&other) = default;
   CalcBasedChecksum &operator=(CalcBasedChecksum &&other) = default;
 
-private:
+ private:
   void update_(Packet *pkt) const override;
   bool verify_(const Packet &pkt) const override;
 
-private:
+ private:
   const NamedCalculation *calculation{nullptr};
 };
 
 class IPv4Checksum : public Checksum {
-public:
+ public:
   IPv4Checksum(const std::string &name, p4object_id_t id,
-	       header_id_t header_id, int field_offset);
+               header_id_t header_id, int field_offset);
 
-private:
+ private:
   void update_(Packet *pkt) const override;
   bool verify_(const Packet &pkt) const override;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_CHECKSUMS_H_

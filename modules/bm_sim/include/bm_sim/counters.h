@@ -18,20 +18,20 @@
  *
  */
 
-#ifndef _BM_COUNTERS_H_
-#define _BM_COUNTERS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_COUNTERS_H_
+#define BM_SIM_INCLUDE_BM_SIM_COUNTERS_H_
 
 #include <vector>
 #include <atomic>
+#include <string>
 
 #include "named_p4object.h"
 #include "packet.h"
 
 /* This is a very basic counter for now: data plane can only increment the
    counters, control plane only can query values and reset */
-class Counter
-{
-public:
+class Counter {
+ public:
   typedef uint64_t counter_value_t;
 
   enum CounterErrorCode {
@@ -44,32 +44,31 @@ public:
     bytes += pkt.get_ingress_length();
     packets += 1;
   }
-  
+
   CounterErrorCode query_counter(counter_value_t *bytes,
-				 counter_value_t *packets) const;
+                                 counter_value_t *packets) const;
 
   CounterErrorCode reset_counter();
 
   // in case something more general than reset is needed
   CounterErrorCode write_counter(counter_value_t bytes,
-				 counter_value_t packets);
+                                 counter_value_t packets);
 
-private:
+ private:
   std::atomic<std::uint_fast64_t> bytes{0u};
   std::atomic<std::uint_fast64_t> packets{0u};
 };
 
 typedef p4object_id_t meter_array_id_t;
 
-class CounterArray : public NamedP4Object
-{
-public:
+class CounterArray : public NamedP4Object {
+ public:
   typedef Counter::CounterErrorCode CounterErrorCode;
 
   typedef vector<Counter>::iterator iterator;
   typedef vector<Counter>::const_iterator const_iterator;
 
-public:
+ public:
   CounterArray(const std::string &name, p4object_id_t id, size_t size)
     : NamedP4Object(name, id), counters(size) { }
 
@@ -104,8 +103,8 @@ public:
 
   size_t size() const { return counters.size(); }
 
-private:
+ private:
     std::vector<Counter> counters;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_COUNTERS_H_

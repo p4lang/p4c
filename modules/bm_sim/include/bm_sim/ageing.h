@@ -18,45 +18,45 @@
  *
  */
 
-#ifndef _BM_AGEING_H_
-#define _BM_AGEING_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_AGEING_H_
+#define BM_SIM_INCLUDE_BM_SIM_AGEING_H_
 
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <map>
 #include <unordered_set>
+#include <string>
+#include <vector>
 
 #include "match_tables.h"
 #include "packet.h"
 #include "transport.h"
 
 class AgeingWriter {
-public:
+ public:
   virtual ~AgeingWriter() { }
 
   virtual int send(const char *buffer, size_t len) const = 0;
   virtual int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs
-  ) const = 0;
+      const std::initializer_list<TransportIface::MsgBuf> &msgs) const = 0;
 };
 
 template <typename Transport>
 class AgeingWriterImpl : public AgeingWriter {
-public:
-  AgeingWriterImpl(const std::string &transport_name);
+ public:
+  explicit AgeingWriterImpl(const std::string &transport_name);
 
   int send(const char *buffer, size_t len) const override;
   int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs
-  ) const override;
+      const std::initializer_list<TransportIface::MsgBuf> &msgs) const override;
 
-private:
+ private:
   std::unique_ptr<Transport> transport_instance;
 };
 
 class AgeingMonitor {
-public:
+ public:
   typedef uint64_t buffer_id_t;
   typedef Packet::clock clock;
 
@@ -68,7 +68,7 @@ public:
   } __attribute__((packed)) msg_hdr_t;
 
   AgeingMonitor(std::shared_ptr<AgeingWriter> writer,
-		unsigned int sweep_interval_ms = 1000u);
+                unsigned int sweep_interval_ms = 1000u);
 
   ~AgeingMonitor();
 
@@ -78,18 +78,18 @@ public:
 
   void reset_state();
 
-private:
+ private:
   void sweep_loop();
   void do_sweep();
 
-private:
+ private:
   struct TableData {
-    TableData(MatchTableAbstract *table)
+    explicit TableData(MatchTableAbstract *table)
       : table(table) { }
 
     TableData(const TableData &other) = delete;
     TableData &operator=(const TableData &other) = delete;
-    
+
     TableData(TableData &&other) /*noexcept*/ = default;
     TableData &operator=(TableData &&other) /*noexcept*/ = default;
 
@@ -97,11 +97,11 @@ private:
     std::unordered_set<entry_handle_t> prev_sweep_entries{};
   };
 
-private:
+ private:
   mutable std::mutex mutex{};
 
   std::map<p4object_id_t, TableData> tables_with_ageing{};
-  
+
   std::shared_ptr<AgeingWriter> writer{nullptr};
 
   std::atomic<unsigned int> sweep_interval_ms{0};
@@ -115,4 +115,4 @@ private:
   mutable std::condition_variable stop_condvar{};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_AGEING_H_

@@ -24,7 +24,7 @@
 
 typedef Meter::MeterErrorCode MeterErrorCode;
 
-using ticks = std::chrono::microseconds; // better with nanoseconds ?
+using ticks = std::chrono::microseconds;  // better with nanoseconds ?
 using std::chrono::duration_cast;
 
 namespace {
@@ -40,17 +40,17 @@ Meter::set_rate(size_t idx, const rate_config_t &config) {
   rate.tokens = config.burst_size;
   rate.tokens_last = 0u;
   rate.color = (idx + 1);
-  if(idx > 0) {
+  if (idx > 0) {
     MeterRate &prev_rate = rates[idx - 1];
-    if(prev_rate.info_rate > rate.info_rate) return INVALID_INFO_RATE_VALUE;
+    if (prev_rate.info_rate > rate.info_rate) return INVALID_INFO_RATE_VALUE;
   }
   return SUCCESS;
 }
 
 MeterErrorCode
-Meter::reset_rates(){
+Meter::reset_rates() {
   auto lock = unique_lock();
-  for(MeterRate &rate : rates) {
+  for (MeterRate &rate : rates) {
     rate.valid = false;
   }
   configured = false;
@@ -61,7 +61,7 @@ Meter::color_t
 Meter::execute(const Packet &pkt) {
   color_t packet_color = 0;
 
-  if(!configured) return packet_color;
+  if (!configured) return packet_color;
 
   clock::time_point now = clock::now();
   int64_t micros_since_init = duration_cast<ticks>(now - time_init).count();
@@ -85,11 +85,10 @@ Meter::execute(const Packet &pkt) {
 
     size_t input = (type == MeterType::PACKETS) ? 1u : pkt.get_ingress_length();
 
-    if(rate.tokens < input) {
+    if (rate.tokens < input) {
       packet_color = rate.color;
       break;
-    }
-    else {
+    } else {
       rate.tokens -= input;
     }
   }
@@ -99,5 +98,5 @@ Meter::execute(const Packet &pkt) {
 
 void
 Meter::reset_global_clock() {
-  time_init = Meter::clock::now(); 
+  time_init = Meter::clock::now();
 }

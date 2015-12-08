@@ -18,33 +18,33 @@
  *
  */
 
-#ifndef _BM_QUEUE_H_
-#define _BM_QUEUE_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_QUEUE_H_
+#define BM_SIM_INCLUDE_BM_SIM_QUEUE_H_
 
 #include <deque>
 #include <mutex>
 #include <condition_variable>
 
-/* TODO: implement non blocking behavior */
+/* TODO(antonin): implement non blocking behavior */
 
 template <class T>
 class Queue {
-public:
+ public:
   enum WriteBehavior { WriteBlock, WriteReturn };
   enum ReadBehavior { ReadBlock, ReadReturn };
 
-public:
- Queue()
-   : capacity(1024), wb(WriteBlock), rb(ReadBlock) { }
+ public:
+  Queue()
+    : capacity(1024), wb(WriteBlock), rb(ReadBlock) { }
 
   Queue(size_t capacity,
-	WriteBehavior wb = WriteBlock, ReadBehavior rb = ReadBlock)
+        WriteBehavior wb = WriteBlock, ReadBehavior rb = ReadBlock)
     : capacity(capacity), wb(wb), rb(rb) {}
 
   void push_front(const T &item) {
     std::unique_lock<std::mutex> lock(q_mutex);
-    while(!is_not_full()) {
-      if(wb == WriteReturn) return;
+    while (!is_not_full()) {
+      if (wb == WriteReturn) return;
       q_not_full.wait(lock);
     }
     queue.push_front(item);
@@ -54,8 +54,8 @@ public:
 
   void push_front(T &&item) {
     std::unique_lock<std::mutex> lock(q_mutex);
-    while(!is_not_full()) {
-      if(wb == WriteReturn) return;
+    while (!is_not_full()) {
+      if (wb == WriteReturn) return;
       q_not_full.wait(lock);
     }
     queue.push_front(std::move(item));
@@ -65,7 +65,7 @@ public:
 
   void pop_back(T* pItem) {
     std::unique_lock<std::mutex> lock(q_mutex);
-    while(!is_not_empty())
+    while (!is_not_empty())
       q_not_empty.wait(lock);
     *pItem = std::move(queue.back());
     queue.pop_back();
@@ -73,7 +73,7 @@ public:
     q_not_full.notify_one();
   }
 
-  size_t size() {
+  size_t size() const {
     std::unique_lock<std::mutex> lock(q_mutex);
     return queue.size();
   }
@@ -87,7 +87,7 @@ public:
   Queue(const Queue &) = delete;
   Queue &operator =(const Queue &) = delete;
 
-private:
+ private:
   bool is_not_empty() const { return queue.size() > 0; }
   bool is_not_full() const { return queue.size() < capacity; }
 
@@ -96,9 +96,9 @@ private:
   WriteBehavior wb;
   ReadBehavior rb;
 
-  std::mutex q_mutex;
-  std::condition_variable q_not_empty;
-  std::condition_variable q_not_full;
+  mutable std::mutex q_mutex;
+  mutable std::condition_variable q_not_empty;
+  mutable std::condition_variable q_not_full;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_QUEUE_H_

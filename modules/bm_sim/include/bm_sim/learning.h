@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_LEARNING_H_
-#define _BM_LEARNING_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_LEARNING_H_
+#define BM_SIM_INCLUDE_BM_SIM_LEARNING_H_
 
 #include <string>
 #include <unordered_map>
@@ -38,55 +38,54 @@
 #include "transport.h"
 
 class LearnWriter {
-public:
+ public:
   virtual ~LearnWriter() { }
 
   virtual int send(const char *buffer, size_t len) const = 0;
   virtual int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs
-  ) const = 0;
+      const std::initializer_list<TransportIface::MsgBuf> &msgs) const = 0;
 };
 
 template <typename Transport>
 class LearnWriterImpl : public LearnWriter {
-public:
-  LearnWriterImpl(const std::string &transport_name);
+ public:
+  explicit LearnWriterImpl(const std::string &transport_name);
 
   int send(const char *buffer, size_t len) const override;
   int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs
-  ) const override;
+      const std::initializer_list<TransportIface::MsgBuf> &msgs) const override;
 
-private:
+ private:
   std::unique_ptr<Transport> transport_instance;
 };
 
 class LearnEngine {
-public:
+ public:
   typedef int list_id_t;
-  typedef unsigned long long buffer_id_t;
+  typedef uint64_t buffer_id_t;
 
   typedef struct {
     int switch_id;
     int list_id;
-    unsigned long long buffer_id;
+    uint64_t buffer_id;
     unsigned int num_samples;
   } __attribute__((packed)) msg_hdr_t;
 
-  typedef std::function<void(const msg_hdr_t &, size_t, std::unique_ptr<char []>, void *)> LearnCb;
+  typedef std::function<void(const msg_hdr_t &, size_t,
+                             std::unique_ptr<char[]>, void *)> LearnCb;
 
   void list_create(list_id_t list_id,
-		   size_t max_samples = 1, unsigned int timeout_ms = 1000);
+                   size_t max_samples = 1, unsigned int timeout_ms = 1000);
 
   void list_set_learn_writer(list_id_t list_id,
-			     std::shared_ptr<LearnWriter> learn_writer);
+                             std::shared_ptr<LearnWriter> learn_writer);
   void list_set_learn_cb(list_id_t list_id,
-			 const LearnCb &learn_cb, void * cookie);
+                         const LearnCb &learn_cb, void * cookie);
 
   void list_push_back_field(list_id_t list_id,
-			    header_id_t header_id, int field_offset);
+                            header_id_t header_id, int field_offset);
   void list_push_back_constant(list_id_t list_id,
-			       const std::string &hexstring);
+                               const std::string &hexstring);
 
   void list_init(list_id_t list_id);
 
@@ -94,56 +93,56 @@ public:
 
   void ack(list_id_t list_id, buffer_id_t buffer_id, int sample_id);
   void ack(list_id_t list_id, buffer_id_t buffer_id,
-	   const std::vector<int> &sample_ids);
+           const std::vector<int> &sample_ids);
   void ack_buffer(list_id_t list_id, buffer_id_t buffer_id);
 
   void reset_state();
 
-private:
+ private:
   class LearnSampleBuilder {
-  public:
+   public:
     void push_back_constant(const ByteContainer &constant);
     void push_back_field(header_id_t header_id, int field_offset);
 
     void operator()(const PHV &phv, ByteContainer *sample) const;
 
-  private:
+   private:
     struct LearnSampleEntry {
       enum {FIELD, CONSTANT} tag;
-      
+
       union {
-	struct {
-	  header_id_t header;
-	  int offset;
-	} field;
-	
-	struct {
-	  unsigned int offset;
-	} constant;
+        struct {
+          header_id_t header;
+          int offset;
+        } field;
+
+        struct {
+          unsigned int offset;
+        } constant;
       };
     };
 
-  private:
+   private:
     std::vector<LearnSampleEntry> entries{};
     std::vector<ByteContainer> constants{};
   };
 
   typedef std::chrono::high_resolution_clock clock;
   typedef std::chrono::milliseconds milliseconds;
-  
+
   typedef std::unordered_set<ByteContainer, ByteContainerKeyHash> LearnFilter;
 
-  private:
+ private:
   struct FilterPtrs {
     size_t unacked_count{0};
     std::vector<LearnFilter::iterator> buffer{0};
   };
 
   class LearnList {
-  public:
+   public:
     enum class LearnMode {NONE, WRITER, CB};
 
-  public:
+   public:
     LearnList(list_id_t list_id, size_t max_samples, unsigned int timeout);
     void init();
 
@@ -167,12 +166,12 @@ private:
     LearnList(LearnList &&other) = delete;
     LearnList &operator=(LearnList &&other) = delete;
 
-  private:
+   private:
     void swap_buffers();
     void buffer_transmit_loop();
     void buffer_transmit();
 
-  private:
+   private:
     mutable std::mutex mutex{};
 
     list_id_t list_id;
@@ -208,9 +207,9 @@ private:
     mutable std::condition_variable can_change_writer{};
   };
 
-private:
+ private:
   // LearnList is not movable because of the mutex, I am using pointers
   std::unordered_map<list_id_t, std::unique_ptr<LearnList> > learn_lists{};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_LEARNING_H_

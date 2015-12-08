@@ -18,20 +18,23 @@
  *
  */
 
+#include <string>
+#include <set>
+
 #include "bm_sim/headers.h"
 #include "bm_sim/phv.h"
 #include "bm_sim/expressions.h"
 
 Header::Header(const std::string &name, p4object_id_t id,
-	       const HeaderType &header_type,
-	       const std::set<int> &arith_offsets,
-	       const bool metadata)
+               const HeaderType &header_type,
+               const std::set<int> &arith_offsets,
+               const bool metadata)
   : NamedP4Object(name, id), header_type(header_type), metadata(metadata) {
   // header_type_id = header_type.get_type_id();
-  for(int i = 0; i < header_type.get_num_fields(); i++) {
+  for (int i = 0; i < header_type.get_num_fields(); i++) {
     // use emplace_back instead?
     bool arith_flag = true;
-    if(arith_offsets.find(i) == arith_offsets.end()) {
+    if (arith_offsets.find(i) == arith_offsets.end()) {
       arith_flag = false;
     }
     fields.push_back(Field(header_type.get_bit_width(i), arith_flag));
@@ -43,9 +46,9 @@ Header::Header(const std::string &name, p4object_id_t id,
 }
 
 void Header::extract(const char *data, const PHV &phv) {
-  if(is_VL_header()) return extract_VL(data, phv);
+  if (is_VL_header()) return extract_VL(data, phv);
   int hdr_offset = 0;
-  for(Field &f : fields) {
+  for (Field &f : fields) {
     hdr_offset += f.extract(data, hdr_offset);
     data += hdr_offset / 8;
     hdr_offset = hdr_offset % 8;
@@ -59,13 +62,12 @@ void Header::extract_VL(const char *data, const PHV &phv) {
   int hdr_offset = 0;
   // Should I take care of nbytes_phv? I don't think it is being used anymore
   nbytes_packet = 0;
-  for(int i = 0; i < header_type.get_num_fields(); i++) {
+  for (int i = 0; i < header_type.get_num_fields(); i++) {
     Field &f = fields[i];
-    if(VL_offset == i) {
+    if (VL_offset == i) {
       VL_expr->eval(phv, &computed_nbits);
       hdr_offset += f.extract_VL(data, hdr_offset, computed_nbits.get_int());
-    }
-    else {
+    } else {
       hdr_offset += f.extract(data, hdr_offset);
     }
     data += hdr_offset / 8;
@@ -78,9 +80,9 @@ void Header::extract_VL(const char *data, const PHV &phv) {
 }
 
 void Header::deparse(char *data) const {
-  // TODO: special case for VL header ?
+  // TODO(antonin): special case for VL header ?
   int hdr_offset = 0;
-  for(const Field &f : fields) {
+  for (const Field &f : fields) {
     hdr_offset += f.deparse(data, hdr_offset);
     data += hdr_offset / 8;
     hdr_offset = hdr_offset % 8;

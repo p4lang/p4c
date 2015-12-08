@@ -62,7 +62,8 @@ public:
     printf("bm_mc_node_create\n");
     McSimplePre::l1_hdl_t l1_hdl;
     McSimplePre::McReturnCode error_code =
-      pre->mc_node_create(rid, port_map, lag_map, &l1_hdl);
+      pre->mc_node_create(rid, McSimplePre::PortMap(port_map),
+                          McSimplePre::PortMap(lag_map), &l1_hdl);
     if(error_code != McSimplePre::SUCCESS) {
       InvalidMcOperation imo;
       imo.code = (McOperationErrorCode::type) error_code;

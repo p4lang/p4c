@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_EXPRESSIONS_H_
-#define _BM_EXPRESSIONS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_EXPRESSIONS_H_
+#define BM_SIM_INCLUDE_BM_SIM_EXPRESSIONS_H_
 
 #include <unordered_map>
 #include <string>
@@ -38,15 +38,15 @@ enum class ExprOpcode {
 };
 
 class ExprOpcodesMap {
-public:
+ public:
   static ExprOpcode get_opcode(std::string expr_name);
 
-private:
+ private:
   static ExprOpcodesMap *get_instance();
 
   ExprOpcodesMap();
 
-private:
+ private:
   std::unordered_map<std::string, ExprOpcode> opcodes_map{};
 };
 
@@ -55,7 +55,7 @@ struct Op {
 
   union {
     int data_dest_index;
-    
+
     struct {
       header_id_t header;
       int field_offset;
@@ -71,9 +71,8 @@ struct Op {
   };
 };
 
-class Expression
-{
-public:
+class Expression {
+ public:
   Expression() { }
 
   void push_back_load_field(header_id_t header, int field_offset);
@@ -88,8 +87,8 @@ public:
   bool eval_bool(const PHV &phv, const std::vector<Data> &locals = {}) const;
   Data eval_arith(const PHV &phv, const std::vector<Data> &locals = {}) const;
   void eval_arith(const PHV &phv, Data *data,
-		  const std::vector<Data> &locals = {}) const;
-  
+                  const std::vector<Data> &locals = {}) const;
+
   // I am authorizing copy for this object
   Expression(const Expression &other) = default;
   Expression &operator=(const Expression &other) = default;
@@ -97,16 +96,16 @@ public:
   Expression(Expression &&other) /*noexcept*/ = default;
   Expression &operator=(Expression &&other) /*noexcept*/ = default;
 
-private:
+ private:
   enum class ExprType {EXPR_BOOL, EXPR_DATA};
 
-private:
+ private:
   int assign_dest_registers();
   void eval_(const PHV &phv, ExprType expr_type,
-	     const std::vector<Data> &locals,
-	     bool *b_res, Data *d_res) const;
-  
-private:
+             const std::vector<Data> &locals,
+             bool *b_res, Data *d_res) const;
+
+ private:
   std::vector<Op> ops{};
   std::vector<Data> const_values{};
   int data_registers_cnt{0};
@@ -116,25 +115,23 @@ private:
 };
 
 
-class ArithExpression : public Expression
-{
-public:
+class ArithExpression : public Expression {
+ public:
   void eval(const PHV &phv, Data *data,
-	    const std::vector<Data> &locals = {}) const {
+            const std::vector<Data> &locals = {}) const {
     eval_arith(phv, data, locals);
   }
 };
 
-class VLHeaderExpression
-{
-public:
-  VLHeaderExpression(const ArithExpression &expr)
+class VLHeaderExpression {
+ public:
+  explicit VLHeaderExpression(const ArithExpression &expr)
     : expr(expr) {}
 
   ArithExpression resolve(header_id_t header_id);
 
-private:
+ private:
   ArithExpression expr;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_EXPRESSIONS_H_

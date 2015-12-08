@@ -18,9 +18,10 @@
  *
  */
 
-#ifndef _BM_HEADERS_H_
-#define _BM_HEADERS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_HEADERS_H_
+#define BM_SIM_INCLUDE_BM_SIM_HEADERS_H_
 
+#include <algorithm>  // for std::swap
 #include <vector>
 #include <string>
 #include <set>
@@ -34,7 +35,7 @@ typedef p4object_id_t header_type_id_t;
 class PHV;
 
 class HeaderType : public NamedP4Object {
-public:
+ public:
   HeaderType(const std::string &name, p4object_id_t id)
     : NamedP4Object(name, id) {}
 
@@ -45,10 +46,11 @@ public:
     return fields_bit_width.size() - 1;
   }
 
-  int push_back_VL_field(const std::string &field_name,
-			 std::unique_ptr<VLHeaderExpression> field_length_expr) {
+  int push_back_VL_field(
+      const std::string &field_name,
+      std::unique_ptr<VLHeaderExpression> field_length_expr) {
     int offset = push_back_field(field_name, 0);
-    // TODO
+    // TODO(antonin)
     assert(!is_VL_header() && "header can only have one VL field");
     VL_expr_raw = std::move(field_length_expr);
     VL_offset = offset;
@@ -61,7 +63,7 @@ public:
 
   int get_bit_width() const {
     int bitwidth = 0;
-    for(int i : fields_bit_width)
+    for (int i : fields_bit_width)
       bitwidth += i;
     return bitwidth;
   }
@@ -79,8 +81,8 @@ public:
   }
 
   int get_field_offset(const std::string &field_name) const {
-    for(unsigned int res = 0; res < fields_name.size(); res++) {
-      if(field_name == fields_name[res]) return res;
+    for (unsigned int res = 0; res < fields_name.size(); res++) {
+      if (field_name == fields_name[res]) return res;
     }
     return -1;
   }
@@ -89,8 +91,9 @@ public:
     return (VL_expr_raw != nullptr);
   }
 
-  std::unique_ptr<ArithExpression> resolve_VL_expr(header_id_t header_id) const {
-    if(!is_VL_header()) return nullptr;
+  std::unique_ptr<ArithExpression> resolve_VL_expr(
+      header_id_t header_id) const {
+    if (!is_VL_header()) return nullptr;
     std::unique_ptr<ArithExpression> expr(new ArithExpression());
     *expr = VL_expr_raw->resolve(header_id);
     return expr;
@@ -100,7 +103,7 @@ public:
     return VL_offset;
   }
 
-private:
+ private:
   std::vector<int> fields_bit_width{};
   std::vector<std::string> fields_name{};
   // used for VL headers only
@@ -108,9 +111,8 @@ private:
   int VL_offset{-1};
 };
 
-class Header : public NamedP4Object
-{
-public:
+class Header : public NamedP4Object {
+ public:
   typedef std::vector<Field>::iterator iterator;
   typedef std::vector<Field>::const_iterator const_iterator;
   typedef std::vector<Field>::reference reference;
@@ -119,10 +121,10 @@ public:
 
   friend class PHV;
 
-public:
+ public:
   Header(const std::string &name, p4object_id_t id,
-	 const HeaderType &header_type, const std::set<int> &arith_offsets,
-	 const bool metadata = false);
+         const HeaderType &header_type, const std::set<int> &arith_offsets,
+         const bool metadata = false);
 
   int get_nbytes_packet() const {
     return nbytes_packet;
@@ -145,7 +147,7 @@ public:
   }
 
   void reset() {
-    for(Field &f : fields)
+    for (Field &f : fields)
       f.set(0);
   }
 
@@ -158,7 +160,7 @@ public:
   }
 
   const HeaderType &get_header_type() const { return header_type; }
-  
+
   header_type_id_t get_header_type_id() const {
     return header_type.get_type_id();
   }
@@ -193,26 +195,27 @@ public:
   }
 
   // useful for header stacks
-  void swap_values(Header &other) {
-    std::swap(valid, other.valid);
+  void swap_values(Header *other) {
+    std::swap(valid, other->valid);
     // cannot do that, would invalidate references
     // std::swap(fields, other.fields);
-    for(size_t i = 0; i < fields.size(); i++) {
-      fields[i].swap_values(other.fields[i]);
+    for (size_t i = 0; i < fields.size(); i++) {
+      fields[i].swap_values(&other->fields[i]);
     }
   }
 
   Header(const Header &other) = delete;
   Header &operator=(const Header &other) = delete;
 
-  // TODO: this may as well be delete's I think, class a a reference member
+  // TODO(antonin): this may as well be delete I think, class has a reference
+  // member
   Header(Header &&other) = default;
   Header &operator=(Header &&other) = default;
 
-private:
+ private:
   void extract_VL(const char *data, const PHV &phv);
 
-private:
+ private:
   const HeaderType &header_type;
   std::vector<Field> fields{};
   bool valid{false};
@@ -222,4 +225,4 @@ private:
   std::unique_ptr<ArithExpression> VL_expr{nullptr};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_HEADERS_H_

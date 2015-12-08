@@ -18,14 +18,19 @@
  *
  */
 
-#ifndef _BM_LPM_TRIE_H_
-#define _BM_LPM_TRIE_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_LPM_TRIE_H_
+#define BM_SIM_INCLUDE_BM_SIM_LPM_TRIE_H_
 
 #include <bf_lpm_trie/bf_lpm_trie.h>
 
+#include <algorithm>  // for std::swap
+
+static_assert(sizeof(value_t) == sizeof(uintptr_t),
+              "Invalid type sizes");
+
 class LPMTrie {
-public:
-  LPMTrie(size_t key_width_bytes)
+ public:
+  explicit LPMTrie(size_t key_width_bytes)
     : key_width_bytes(key_width_bytes) {
     trie = bf_lpm_trie_create(key_width_bytes, true);
   }
@@ -43,7 +48,7 @@ public:
 
   /* Copy assignment operator */
   LPMTrie &operator=(const LPMTrie &other) = delete;
- 
+
   /* Move assignment operator */
   LPMTrie &operator=(LPMTrie &&other) noexcept {
     key_width_bytes = other.key_width_bytes;
@@ -52,7 +57,7 @@ public:
   }
 
   void insert_prefix(const ByteContainer &prefix, int prefix_length,
-		     uintptr_t value) {
+                     uintptr_t value) {
     bf_lpm_trie_insert(trie, prefix.data(), prefix_length, (value_t) value);
   }
 
@@ -65,7 +70,8 @@ public:
   }
 
   bool lookup(const ByteContainer &key, uintptr_t *value) const {
-    return bf_lpm_trie_lookup(trie, key.data(), (value_t *) value);
+    return bf_lpm_trie_lookup(trie, key.data(),
+                              reinterpret_cast<value_t *>(value));
   }
 
   void clear() {
@@ -73,12 +79,9 @@ public:
     trie = bf_lpm_trie_create(key_width_bytes, true);
   }
 
-private:
+ private:
   size_t key_width_bytes{0};
   bf_lpm_trie_t *trie{nullptr};
 };
 
-
-
-
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_LPM_TRIE_H_

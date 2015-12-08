@@ -18,34 +18,36 @@
  *
  */
 
-#ifndef _BM_PACKET_H_
-#define _BM_PACKET_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_PACKET_H_
+#define BM_SIM_INCLUDE_BM_SIM_PACKET_H_
 
 #include <memory>
 #include <mutex>
 #include <chrono>
+#include <string>
+#include <vector>
 
 #include <cassert>
 
 #include "packet_buffer.h"
 #include "phv.h"
 
-typedef unsigned long long packet_id_t;
+typedef uint64_t packet_id_t;
 
 class Packet {
-public:
+ public:
   typedef std::chrono::system_clock clock;
 
   typedef PacketBuffer::state_t buffer_state_t;
 
-public:
+ public:
   Packet();
 
   Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
-	 int ingress_length, PacketBuffer &&buffer);
+         int ingress_length, PacketBuffer &&buffer);
 
   Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
-	 int ingress_length, PacketBuffer &&buffer, const PHV &src_phv);
+         int ingress_length, PacketBuffer &&buffer, const PHV &src_phv);
 
   ~Packet();
 
@@ -103,14 +105,14 @@ public:
     return buffer.pop(bytes);
   }
 
-  unsigned long long get_signature() const {
+  uint64_t get_signature() const {
     return signature;
   }
   const PacketBuffer &get_packet_buffer() const { return buffer; }
 
   uint64_t get_ingress_ts_ms() const { return ingress_ts_ms; }
 
-  // TODO: use references instead?
+  // TODO(antonin): use references instead?
   PHV *get_phv() { return phv.get(); }
   const PHV *get_phv() const { return phv.get(); }
 
@@ -124,18 +126,18 @@ public:
   Packet(Packet &&other) noexcept;
   Packet &operator=(Packet &&other) noexcept;
 
-private:
-  void update_signature(unsigned long long seed = 0);
+ private:
+  void update_signature(uint64_t seed = 0);
   void set_ingress_ts();
 
-private:
+ private:
   int ingress_port{-1};
   int egress_port{-1};
   packet_id_t packet_id{0};
   packet_id_t copy_id{0};
   int ingress_length{0};
 
-  unsigned long long signature{0};
+  uint64_t signature{0};
 
   PacketBuffer buffer{};
 
@@ -146,29 +148,29 @@ private:
 
   std::unique_ptr<PHV> phv{nullptr};
 
-private:
+ private:
   class PHVPool {
-  public:
-    PHVPool(const PHVFactory &phv_factory);
+   public:
+    explicit PHVPool(const PHVFactory &phv_factory);
     std::unique_ptr<PHV> get();
     void release(std::unique_ptr<PHV> phv);
 
-  private:
+   private:
     mutable std::mutex mutex{};
     std::vector<std::unique_ptr<PHV> > phvs{};
     const PHVFactory &phv_factory;
   };
 
-public:
+ public:
   static void set_phv_factory(const PHVFactory &phv_factory);
   static void unset_phv_factory();
   static void swap_phv_factory(const PHVFactory &phv_factory);
 
-private:
+ private:
   // static variable
   // Google style guidelines stipulate that we have to use a raw pointer and
   // leak the memory
   static PHVPool *phv_pool;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_PACKET_H_

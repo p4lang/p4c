@@ -19,6 +19,7 @@
  */
 
 #include <memory>
+#include <string>
 
 #include "bm_sim/logger.h"
 
@@ -39,7 +40,7 @@ void
 Logger::set_logger_file(const std::string &filename) {
   unset_logger();
   auto logger_ = spdlog::rotating_logger_mt("bmv2", filename,
-					    1024 * 1024 * 5, 3);
+                                            1024 * 1024 * 5, 3);
   logger = logger_.get();
   set_pattern();
   logger_->set_level(to_spd_level(LogLevel::DEBUG));
@@ -57,7 +58,7 @@ Logger::unset_logger() {
 
 spdlog::logger *
 Logger::init_logger() {
-  if(logger != nullptr) return logger;
+  if (logger != nullptr) return logger;
   auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
   auto null_logger = std::make_shared<spdlog::logger>("bmv2", null_sink);
   spdlog::register_logger(null_logger);
@@ -73,18 +74,18 @@ Logger::set_log_level(LogLevel level) {
 
 spdlog::level::level_enum
 Logger::to_spd_level(LogLevel level) {
-  using namespace spdlog::level;
-  switch(level) {
-  case LogLevel::TRACE: return trace;
-  case LogLevel::DEBUG: return debug;
-  case LogLevel::INFO: return info;
-  case LogLevel::NOTICE: return notice;
-  case LogLevel::WARN: return warn;
-  case LogLevel::ERROR: return err;
-  case LogLevel::CRITICAL: return critical;
-  case LogLevel::ALERT: return alert;
-  case LogLevel::EMERG: return emerg;
-  case LogLevel::OFF: return off;
-  default: return off;
+  namespace spdL = spdlog::level;
+  switch (level) {
+  case LogLevel::TRACE: return spdL::trace;
+  case LogLevel::DEBUG: return spdL::debug;
+  case LogLevel::INFO: return spdL::info;
+  case LogLevel::NOTICE: return spdL::notice;
+  case LogLevel::WARN: return spdL::warn;
+  case LogLevel::ERROR: return spdL::err;
+  case LogLevel::CRITICAL: return spdL::critical;
+  case LogLevel::ALERT: return spdL::alert;
+  case LogLevel::EMERG: return spdL::emerg;
+  case LogLevel::OFF: return spdL::off;
+  default: return spdL::off;
   }
 }

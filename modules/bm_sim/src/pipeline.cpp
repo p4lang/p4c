@@ -27,8 +27,8 @@ Pipeline::apply(Packet *pkt) {
   ELOGGER->pipeline_start(*pkt, *this);
   BMLOG_DEBUG_PKT(*pkt, "Pipeline '{}': start", get_name());
   const ControlFlowNode *node = first_node;
-  while(node) {
-    node = (*node)(pkt); 
+  while (node) {
+    node = (*node)(pkt);
   }
   ELOGGER->pipeline_done(*pkt, *this);
   BMLOG_DEBUG_PKT(*pkt, "Pipeline '{}': end", get_name());

@@ -18,20 +18,24 @@
  *
  */
 
+#ifndef BM_SIM_INCLUDE_BM_SIM_FIELD_LISTS_H_
+#define BM_SIM_INCLUDE_BM_SIM_FIELD_LISTS_H_
+
+#include <utility>  // for pair<>
 #include <vector>
 
 #include "phv.h"
 
-class FieldList
-{
-public:
-  typedef std::vector<std::pair<header_id_t, int> >::iterator iterator;
-  typedef std::vector<std::pair<header_id_t, int> >::const_iterator const_iterator;
-  typedef std::vector<std::pair<header_id_t, int> >::reference reference;
-  typedef std::vector<std::pair<header_id_t, int> >::const_reference const_reference;
+class FieldList {
+ public:
+  typedef std::pair<header_id_t, int> mpair_t;
+  typedef std::vector<mpair_t >::iterator iterator;
+  typedef std::vector<mpair_t >::const_iterator const_iterator;
+  typedef std::vector<mpair_t >::reference reference;
+  typedef std::vector<mpair_t >::const_reference const_reference;
   typedef size_t size_type;
 
-public:
+ public:
   void push_back_field(header_id_t header, int field_offset) {
     fields.push_back(std::make_pair(header, field_offset));
   }
@@ -45,6 +49,8 @@ public:
 
   const_iterator end() const { return fields.end(); }
 
-private:
-  std::vector<std::pair<header_id_t, int> > fields;
+ private:
+  std::vector<std::pair<header_id_t, int> > fields{};
 };
+
+#endif  // BM_SIM_INCLUDE_BM_SIM_FIELD_LISTS_H_

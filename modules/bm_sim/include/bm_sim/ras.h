@@ -18,74 +18,74 @@
  *
  */
 
-#ifndef _BM_RAS_H_
-#define _BM_RAS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_RAS_H_
+#define BM_SIM_INCLUDE_BM_SIM_RAS_H_
+
+#include <algorithm>  // for std::swap
 
 #include <cassert>
 
 #include <Judy.h>
 
 class RandAccessUIntSet {
-public:
+ public:
   typedef uintptr_t mbr_t;
 
-public:
+ public:
   /* this code is basically copied from handle_mgr.h, maybe I should just write
      a wrapper for Judy once and for all */
 
   class const_iterator;
 
-  class iterator
-  {
+  class iterator {
     friend class const_iterator;
-  
-  public:
+
+   public:
     iterator(RandAccessUIntSet *ras_mgr, mbr_t index)
-      : ras_mgr(ras_mgr), index(index) {}
-    
+      : ras_mgr(ras_mgr), index(index) { }
+
     mbr_t &operator*() {return index;}
     mbr_t *operator->() {return &index;}
-    
+
     bool operator==(const iterator &other) const {
       return (ras_mgr == other.ras_mgr) && (index == other.index);
     }
-    
+
     bool operator!=(const iterator &other) const {
       return !(*this == other);
     }
-    
+
     iterator& operator++() {
       int Rc_int;
       Word_t jindex = index;;
       J1N(Rc_int, ras_mgr->members, jindex);
-      if(!Rc_int)
-	index = -1;
+      if (!Rc_int)
+        index = -1;
       else
-	index = jindex;
+        index = jindex;
       return *this;
     }
 
-    iterator operator++(int){
+    iterator operator++(int) {
       // Use operator++()
       const iterator old(*this);
       ++(*this);
       return old;
     }
 
-  private:
+   private:
     RandAccessUIntSet *ras_mgr;
     mbr_t index;
   };
 
-  class const_iterator
-  {
-  public:
+  class const_iterator {
+   public:
     const_iterator(const RandAccessUIntSet *ras_mgr, mbr_t index)
-      : ras_mgr(ras_mgr), index(index) {}
+      : ras_mgr(ras_mgr), index(index) { }
 
-    const_iterator(const iterator &other)
-      : ras_mgr(other.ras_mgr), index(other.index) {}
-    
+    explicit const_iterator(const iterator &other)
+      : ras_mgr(other.ras_mgr), index(other.index) { }
+
     const mbr_t &operator*() const {return index;}
     const mbr_t *operator->() const {return &index;}
 
@@ -98,36 +98,36 @@ public:
     bool operator==(const const_iterator &other) const {
       return (ras_mgr == other.ras_mgr) && (index == other.index);
     }
-  
+
     bool operator!=(const const_iterator &other) const {
       return !(*this == other);
     }
 
-    const const_iterator& operator++(){
+    const const_iterator& operator++() {
       int Rc_int;
       Word_t jindex = index;
       J1N(Rc_int, ras_mgr->members, jindex);
-      if(!Rc_int)
-	index = -1;
+      if (!Rc_int)
+        index = -1;
       else
-	index = jindex;
+        index = jindex;
       return *this;
     }
 
-    const const_iterator operator++(int){
+    const const_iterator operator++(int) {
       // Use operator++()
       const const_iterator old(*this);
       ++(*this);
       return old;
     }
 
-  private:
+   private:
     const RandAccessUIntSet *ras_mgr;
     mbr_t index;
   };
 
 
-public:
+ public:
   RandAccessUIntSet()
     : members((Pvoid_t) NULL) { }
 
@@ -191,7 +191,7 @@ public:
     Word_t index = 0;
     int Rc_int;
     J1F(Rc_int, members, index);
-    if(!Rc_int) index = -1;
+    if (!Rc_int) index = -1;
     return iterator(this, index);
   }
 
@@ -199,7 +199,7 @@ public:
     Word_t index = 0;
     int Rc_int;
     J1F(Rc_int, members, index);
-    if(!Rc_int) index = -1;
+    if (!Rc_int) index = -1;
     return const_iterator(this, index);
   }
 
@@ -213,8 +213,8 @@ public:
     return const_iterator(this, index);
   }
 
-private:
+ private:
   Pvoid_t members;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_RAS_H_

@@ -20,18 +20,20 @@
 
 #include "bm_sim/deparser.h"
 
-size_t Deparser::get_headers_size(const PHV &phv) const {
+size_t
+Deparser::get_headers_size(const PHV &phv) const {
   size_t headers_size = 0;
-  for(auto it = headers.begin(); it != headers.end(); ++it) {
+  for (auto it = headers.begin(); it != headers.end(); ++it) {
     const Header &header = phv.get_header(*it);
-    if(header.is_valid()){
+    if (header.is_valid()) {
       headers_size += header.get_nbytes_packet();
     }
   }
   return headers_size;
 }
 
-void Deparser::deparse(Packet *pkt) const {
+void
+Deparser::deparse(Packet *pkt) const {
   PHV *phv = pkt->get_phv();
   ELOGGER->deparser_start(*pkt, *this);
   update_checksums(pkt);
@@ -39,9 +41,9 @@ void Deparser::deparse(Packet *pkt) const {
   int bytes_parsed = 0;
   // invalidating headers, and resetting header stacks is done in the Packet
   // destructor, when the PHV is released
-  for(auto it = headers.begin(); it != headers.end(); ++it) {
+  for (auto it = headers.begin(); it != headers.end(); ++it) {
     Header &header = phv->get_header(*it);
-    if(header.is_valid()){
+    if (header.is_valid()) {
       ELOGGER->deparser_emit(*pkt, *it);
       header.deparse(data + bytes_parsed);
       bytes_parsed += header.get_nbytes_packet();
@@ -52,9 +54,10 @@ void Deparser::deparse(Packet *pkt) const {
   ELOGGER->deparser_done(*pkt, *this);
 }
 
-void Deparser::update_checksums(Packet *pkt) const {
-  for(const Checksum *checksum : checksums) {
+void
+Deparser::update_checksums(Packet *pkt) const {
+  for (const Checksum *checksum : checksums) {
     checksum->update(pkt);
     ELOGGER->checksum_update(*pkt, *checksum);
-  } 
+  }
 }

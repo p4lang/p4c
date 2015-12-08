@@ -21,33 +21,29 @@
 #include "bm_sim/counters.h"
 
 Counter::CounterErrorCode
-Counter::query_counter(counter_value_t *bytes, counter_value_t *packets) const
-{
+Counter::query_counter(counter_value_t *bytes, counter_value_t *packets) const {
   *bytes = this->bytes;
   *packets = this->packets;
   return SUCCESS;
 }
 
 Counter::CounterErrorCode
-Counter::reset_counter()
-{
+Counter::reset_counter() {
   bytes = 0u;
   packets = 0u;
   return SUCCESS;
 }
 
 Counter::CounterErrorCode
-Counter::write_counter(counter_value_t bytes, counter_value_t packets)
-{
+Counter::write_counter(counter_value_t bytes, counter_value_t packets) {
   this->bytes = bytes;
   this->packets = packets;
   return SUCCESS;
 }
 
 Counter::CounterErrorCode
-CounterArray::reset_counters()
-{
-  for(Counter &c : counters)
+CounterArray::reset_counters() {
+  for (Counter &c : counters)
     c.reset_counter();
   return Counter::SUCCESS;
 }

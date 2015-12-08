@@ -309,32 +309,32 @@ TEST(LookAhead, Peek) {
   const char *data = (char *) data_;
 
   ParserLookAhead lookahead1(0, 16);
-  lookahead1.peek(data, res);
+  lookahead1.peek(data, &res);
   ASSERT_EQ(ByteContainer("0xb59d"), res);
   res.clear();
 
   ParserLookAhead lookahead2(3, 16);
-  lookahead2.peek(data, res);
+  lookahead2.peek(data, &res);
   // 1010 1100, 1110 1111
   ASSERT_EQ(ByteContainer("0xacef"), res);
   res.clear();
 
   ParserLookAhead lookahead3(0, 21);
-  lookahead3.peek(data, res);
+  lookahead3.peek(data, &res);
   // 0001 0110, 1011 0011, 1011 1111
   ASSERT_EQ(ByteContainer("0x16b3bf"), res);
   res.clear();
 
   ParserLookAhead lookahead4(18, 15);
-  lookahead4.peek(data, res);
+  lookahead4.peek(data, &res);
   // 0111 1010, 0010 1111
   ASSERT_EQ(ByteContainer("0x7a2f"), res);
   res.clear();
 
   ParserLookAhead lookahead5_1(0, 16);
-  lookahead5_1.peek(data, res);
+  lookahead5_1.peek(data, &res);
   ParserLookAhead lookahead5_2(16, 16);
-  lookahead5_2.peek(data, res);
+  lookahead5_2.peek(data, &res);
   ASSERT_EQ(ByteContainer("0xb59dfd17"), res);
 }
 
@@ -507,7 +507,7 @@ TEST_F(ParseSwitchKeyBuilderTest, Mix) {
   // aabbccddeeff b59d 1122 00ababab fd17d5d7 0d17d5 44332211
   ByteContainer expected("0xaabbccddeeffb59d112200abababfd17d5d70d17d544332211");
   ByteContainer res;
-  builder(*phv, data, res);
+  builder(*phv, data, &res);
   ASSERT_EQ(expected, res);
 }
 
@@ -634,9 +634,9 @@ TEST_F(MPLSParserTest, ParseEthernetMPLS3) {
   const Header &MPLS_hdr_4 = phv->get_header(MPLSHeader4);
   ASSERT_FALSE(MPLS_hdr_4.is_valid());
 
-  ASSERT_EQ(1u, MPLS_hdr_1.get_field(0)); // label
-  ASSERT_EQ(2u, MPLS_hdr_2.get_field(0)); // label
-  ASSERT_EQ(3u, MPLS_hdr_3.get_field(0)); // label
+  ASSERT_EQ(1u, MPLS_hdr_1.get_field(0).get_uint()); // label
+  ASSERT_EQ(2u, MPLS_hdr_2.get_field(0).get_uint()); // label
+  ASSERT_EQ(3u, MPLS_hdr_3.get_field(0).get_uint()); // label
 }
 
 class SwitchCaseTest : public ::testing::Test {

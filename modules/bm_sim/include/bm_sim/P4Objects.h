@@ -18,8 +18,10 @@
  *
  */
 
-#ifndef _BM_P4OBJECTS_H_
-#define _BM_P4OBJECTS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_P4OBJECTS_H_
+#define BM_SIM_INCLUDE_BM_SIM_P4OBJECTS_H_
+
+#include <jsoncpp/json.h>
 
 #include <istream>
 #include <ostream>
@@ -29,8 +31,7 @@
 #include <memory>
 #include <set>
 #include <tuple>
-
-#include <jsoncpp/json.h>
+#include <utility>  // for pair<>
 
 #include "tables.h"
 #include "headers.h"
@@ -48,22 +49,26 @@
 #include "field_lists.h"
 
 class P4Objects {
-public:
+ public:
   typedef std::pair<std::string, std::string> header_field_pair;
 
-public:
-  P4Objects(std::ostream &outstream = std::cout)
+ public:
+  // A reference works great here, but should I switch to a pointer?
+  // NOLINTNEXTLINE(runtime/references)
+  explicit P4Objects(std::ostream &outstream = std::cout)
     : outstream(outstream) { }
 
   int init_objects(std::istream &is,
-		   const std::set<header_field_pair> &required_fields = std::set<header_field_pair>(),
-		   const std::set<header_field_pair> &arith_fields = std::set<header_field_pair>());
+                   const std::set<header_field_pair> &required_fields =
+                     std::set<header_field_pair>(),
+                   const std::set<header_field_pair> &arith_fields =
+                     std::set<header_field_pair>());
   void destroy_objects();
 
   P4Objects(const P4Objects &other) = delete;
   P4Objects &operator=(const P4Objects &) = delete;
 
-public:
+ public:
   PHVFactory &get_phv_factory() { return phv_factory; }
 
   LearnEngine *get_learn_engine() { return learn_engine.get(); }
@@ -124,8 +129,9 @@ public:
     return field_lists[field_list_id].get();
   }
 
-private:
-  void add_header_type(const std::string &name, std::unique_ptr<HeaderType> header_type) {
+ private:
+  void add_header_type(const std::string &name,
+                         std::unique_ptr<HeaderType> header_type) {
     header_types_map[name] = std::move(header_type);
   }
 
@@ -138,7 +144,7 @@ private:
   }
 
   void add_header_stack_id(const std::string &name,
-			   header_stack_id_t header_stack_id) {
+                           header_stack_id_t header_stack_id) {
     header_stack_ids_map[name] = header_stack_id;
   }
 
@@ -158,18 +164,19 @@ private:
     parsers[name] = std::move(parser);
   }
 
-  void add_deparser(const std::string &name, std::unique_ptr<Deparser> deparser) {
+  void add_deparser(const std::string &name,
+                    std::unique_ptr<Deparser> deparser) {
     deparsers[name] = std::move(deparser);
   }
 
   void add_match_action_table(const std::string &name,
-			      std::unique_ptr<MatchActionTable> table) {
+                              std::unique_ptr<MatchActionTable> table) {
     add_control_node(name, table.get());
     match_action_tables_map[name] = std::move(table);
   }
 
   void add_conditional(const std::string &name,
-		       std::unique_ptr<Conditional> conditional) {
+                       std::unique_ptr<Conditional> conditional) {
     add_control_node(name, conditional.get());
     conditionals_map[name] = std::move(conditional);
   }
@@ -178,54 +185,58 @@ private:
     control_nodes_map[name] = node;
   }
 
-  void add_pipeline(const std::string &name, std::unique_ptr<Pipeline> pipeline) {
+  void add_pipeline(const std::string &name,
+                    std::unique_ptr<Pipeline> pipeline) {
     pipelines_map[name] = std::move(pipeline);
   }
 
   void add_meter_array(const std::string &name,
-		       std::unique_ptr<MeterArray> meter_array) {
+                       std::unique_ptr<MeterArray> meter_array) {
     meter_arrays[name] = std::move(meter_array);
   }
 
   void add_counter_array(const std::string &name,
-			 std::unique_ptr<CounterArray> counter_array) {
+                         std::unique_ptr<CounterArray> counter_array) {
     counter_arrays[name] = std::move(counter_array);
   }
 
   void add_register_array(const std::string &name,
-			  std::unique_ptr<RegisterArray> register_array) {
+                          std::unique_ptr<RegisterArray> register_array) {
     register_arrays[name] = std::move(register_array);
   }
 
   void add_named_calculation(const std::string &name,
-			     std::unique_ptr<NamedCalculation> calculation) {
+                             std::unique_ptr<NamedCalculation> calculation) {
     calculations[name] = std::move(calculation);
   }
 
   void add_field_list(const p4object_id_t field_list_id,
-		      std::unique_ptr<FieldList> field_list) {
+                      std::unique_ptr<FieldList> field_list) {
     field_lists[field_list_id] = std::move(field_list);
   }
 
   void build_expression(const Json::Value &json_expression, Expression *expr);
 
   std::set<int> build_arith_offsets(const Json::Value &json_actions,
-				    const std::string &header_name);
+                                    const std::string &header_name);
 
-private:
-  PHVFactory phv_factory{}; /* this is probably temporary */
+ private:
+  PHVFactory phv_factory{};  // this is probably temporary
 
   std::unordered_map<std::string, header_id_t> header_ids_map{};
   std::unordered_map<std::string, header_stack_id_t> header_stack_ids_map{};
   std::unordered_map<std::string, HeaderType *> header_to_type_map{};
   std::unordered_map<std::string, HeaderType *> header_stack_to_type_map{};
 
-  std::unordered_map<std::string, std::unique_ptr<HeaderType> > header_types_map{};
+  std::unordered_map<std::string, std::unique_ptr<HeaderType> >
+  header_types_map{};
 
   // tables
-  std::unordered_map<std::string, std::unique_ptr<MatchActionTable> > match_action_tables_map{};
+  std::unordered_map<std::string, std::unique_ptr<MatchActionTable> >
+    match_action_tables_map{};
 
-  std::unordered_map<std::string, std::unique_ptr<Conditional> > conditionals_map{};
+  std::unordered_map<std::string, std::unique_ptr<Conditional> >
+    conditionals_map{};
 
   std::unordered_map<std::string, ControlFlowNode *> control_nodes_map{};
 
@@ -253,34 +264,39 @@ private:
   std::unordered_map<std::string, std::unique_ptr<MeterArray> > meter_arrays{};
 
   // counter arrays
-  std::unordered_map<std::string, std::unique_ptr<CounterArray> > counter_arrays{};
+  std::unordered_map<std::string, std::unique_ptr<CounterArray> >
+    counter_arrays{};
 
   // register arrays
-  std::unordered_map<std::string, std::unique_ptr<RegisterArray> > register_arrays{};
+  std::unordered_map<std::string, std::unique_ptr<RegisterArray> >
+    register_arrays{};
 
   // calculations
-  std::unordered_map<std::string, std::unique_ptr<NamedCalculation> > calculations{};
+  std::unordered_map<std::string, std::unique_ptr<NamedCalculation> >
+    calculations{};
 
   // field lists
   std::unordered_map<p4object_id_t, std::unique_ptr<FieldList> > field_lists;
 
-public:
+ public:
   // public to be accessed by test class
   std::ostream &outstream;
 
-private:
+ private:
   int get_field_offset(header_id_t header_id, const std::string &field_name);
   size_t get_field_bytes(header_id_t header_id, int field_offset);
   size_t get_field_bits(header_id_t header_id, int field_offset);
   size_t get_header_bits(header_id_t header_id);
   std::tuple<header_id_t, int> field_info(const std::string &header_name,
-					  const std::string &field_name);
+                                          const std::string &field_name);
   bool field_exists(const std::string &header_name,
-		    const std::string &field_name);
-  bool check_required_fields(const std::set<header_field_pair> &required_fields);
+                    const std::string &field_name);
+  bool check_required_fields(
+      const std::set<header_field_pair> &required_fields);
 
-  std::unique_ptr<CalculationsMap::MyC> check_hash(const std::string &name) const;
+  std::unique_ptr<CalculationsMap::MyC> check_hash(
+      const std::string &name) const;
 };
 
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_P4OBJECTS_H_

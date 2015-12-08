@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef _BM_PRE_H_
-#define _BM_PRE_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_PRE_H_
+#define BM_SIM_INCLUDE_BM_SIM_PRE_H_
 
 #include <string>
 #include <bitset>
@@ -28,25 +28,25 @@
 namespace McPre {
 
 template <size_t set_size>
-class Set {  
-public:
+class Set {
+ public:
   typedef typename std::bitset<set_size>::reference reference;
-  
-public:
+
+ public:
   constexpr Set() noexcept { }
-  
-  Set(const std::string &str)
+
+  explicit Set(const std::string &str)
     : port_map(str) { }
-  
+
   bool operator[] (size_t pos) const { return port_map[pos]; }
   reference operator[] (size_t pos) { return port_map[pos]; }
-  
+
   constexpr size_t size() noexcept { return port_map.size(); }
-  
-private:
+
+ private:
   std::bitset<set_size> port_map{};
 };
 
-}
+}  // namespace McPre
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_PRE_H_

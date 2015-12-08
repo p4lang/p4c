@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_CONDITIONALS_H_
-#define _BM_CONDITIONALS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_CONDITIONALS_H_
+#define BM_SIM_INCLUDE_BM_SIM_CONDITIONALS_H_
 
 #include <string>
 
@@ -29,9 +29,8 @@
 #include "expressions.h"
 
 class Conditional
-  : public ControlFlowNode, public NamedP4Object, public Expression
-{
-public:
+  : public ControlFlowNode, public NamedP4Object, public Expression {
+ public:
   Conditional(const std::string &name, p4object_id_t id)
     : NamedP4Object(name, id) {}
 
@@ -56,9 +55,9 @@ public:
   Conditional(Conditional &&other) /*noexcept*/ = default;
   Conditional &operator=(Conditional &&other) /*noexcept*/ = default;
 
-private:
+ private:
   ControlFlowNode *true_next{nullptr};
   ControlFlowNode *false_next{nullptr};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_CONDITIONALS_H_

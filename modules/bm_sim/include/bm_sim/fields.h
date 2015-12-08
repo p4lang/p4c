@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_FIELDS_H_
-#define _BM_FIELDS_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_FIELDS_H_
+#define BM_SIM_INCLUDE_BM_SIM_FIELDS_H_
 
 #include <algorithm>
 
@@ -29,14 +29,13 @@
 #include "bytecontainer.h"
 #include "bignum.h"
 
-class Field : public Data
-{
-public:
+class Field : public Data {
+ public:
   // Data() is called automatically
-  Field(int nbits, bool arith_flag = true)
-    : nbits(nbits), nbytes( (nbits + 7) / 8 ), bytes(nbytes) {
+  explicit Field(int nbits, bool arith_flag = true)
+    : nbits(nbits), nbytes((nbits + 7) / 8), bytes(nbytes) {
     arith = arith_flag;
-    // TODO ?
+    // TODO(antonin) ?
     // should I only do that for arith fields ?
     mask <<= nbits; mask -= 1;
   }
@@ -46,11 +45,11 @@ public:
   void set_bytes(const char *src_bytes, int len) {
     assert(len == nbytes);
     std::copy(src_bytes, src_bytes + len, bytes.begin());
-    if(arith) sync_value();
+    if (arith) sync_value();
   }
-  
+
   void sync_value() {
-    bignum::import_bytes(value, bytes.data(), nbytes);
+    bignum::import_bytes(&value, bytes.data(), nbytes);
   }
 
   const ByteContainer &get_bytes() const {
@@ -68,8 +67,8 @@ public:
   void set_arith(bool arith_flag) { arith = arith_flag; }
 
   void export_bytes() {
-    std::fill(bytes.begin(), bytes.end(), 0); // very important !
-    // TODO: this can overflow !!!
+    std::fill(bytes.begin(), bytes.end(), 0);  // very important !
+    // TODO(antonin): this can overflow !!!
     // maybe bytes is not large enough !!!
     // I am supposed to mask off extra bits...
     // is this efficient enough:
@@ -78,9 +77,9 @@ public:
   }
 
   // useful for header stacks
-  void swap_values(Field &other) {
+  void swap_values(Field *other) {
     // just the value, nothing else (especially not .arith)
-    std::swap(value, other.value);
+    std::swap(value, other->value);
   }
 
   /* returns the number of bits extracted */
@@ -91,11 +90,11 @@ public:
   /* returns the number of bits deparsed */
   int deparse(char *data, int hdr_offset) const;
 
-private:
+ private:
   int nbits;
   int nbytes;
   ByteContainer bytes;
   Bignum mask{1};
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_FIELDS_H_

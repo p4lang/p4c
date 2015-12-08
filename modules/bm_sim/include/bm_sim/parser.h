@@ -18,11 +18,12 @@
  *
  */
 
-#ifndef _BM_PARSER_H_
-#define _BM_PARSER_H_
+#ifndef BM_SIM_INCLUDE_BM_SIM_PARSER_H_
+#define BM_SIM_INCLUDE_BM_SIM_PARSER_H_
 
 #include <utility>
 #include <string>
+#include <vector>
 
 #include <cassert>
 
@@ -36,7 +37,7 @@
 struct field_t {
   header_id_t header;
   int offset;
-  
+
   static field_t make(header_id_t header, int offset) {
     field_t field = {header, offset};
     return field;
@@ -45,30 +46,29 @@ struct field_t {
 
 struct ParserLookAhead {
   int byte_offset;
-  int bit_offset;  
+  int bit_offset;
   int bitwidth;
   size_t nbytes;
 
   ParserLookAhead(int offset, int bitwidth);
 
-  void peek(const char *data, ByteContainer &res) const;
+  void peek(const char *data, ByteContainer *res) const;
 };
 
 struct ParserOp {
-  virtual ~ParserOp() {};
+  virtual ~ParserOp() {}
   virtual void operator()(Packet *pkt, const char *data,
-			  size_t *bytes_parsed) const = 0;
+                          size_t *bytes_parsed) const = 0;
 };
 
 struct ParserOpExtract : ParserOp {
   header_id_t header;
 
-  ParserOpExtract(header_id_t header)
+  explicit ParserOpExtract(header_id_t header)
     : header(header) {}
 
   void operator()(Packet *pkt, const char *data,
-		  size_t *bytes_parsed) const override
-  {
+                  size_t *bytes_parsed) const override {
     PHV *phv = pkt->get_phv();
     ELOGGER->parser_extract(*pkt, header);
     BMLOG_DEBUG_PKT(*pkt, "Extracting header {}", header);
@@ -79,25 +79,25 @@ struct ParserOpExtract : ParserOp {
 };
 
 // push back a header on a tag stack
-// TODO: probably room for improvement here
+// TODO(antonin): probably room for improvement here
 struct ParserOpExtractStack : ParserOp {
   header_stack_id_t header_stack;
 
-  ParserOpExtractStack(header_stack_id_t header_stack)
+  explicit ParserOpExtractStack(header_stack_id_t header_stack)
     : header_stack(header_stack) {}
 
   void operator()(Packet *pkt, const char *data,
-		  size_t *bytes_parsed) const override
-  {
+                  size_t *bytes_parsed) const override {
     PHV *phv = pkt->get_phv();
     HeaderStack &stack = phv->get_header_stack(header_stack);
-    Header &next_hdr = stack.get_next(); // TODO: will assert if full
+    Header &next_hdr = stack.get_next();  // TODO(antonin): will assert if full
     ELOGGER->parser_extract(*pkt, next_hdr.get_id());
     BMLOG_DEBUG_PKT(*pkt, "Extracting to header stack {}, next header is {}",
-		    header_stack, next_hdr.get_id());
+                    header_stack, next_hdr.get_id());
     next_hdr.extract(data, *phv);
     *bytes_parsed += next_hdr.get_nbytes_packet();
-    stack.push_back(); // should I have a HeaderStack::extract() method instead?
+    // should I have a HeaderStack::extract() method instead?
+    stack.push_back();
   }
 };
 
@@ -105,18 +105,17 @@ template <typename T>
 struct ParserOpSet : ParserOp {
   field_t dst;
   T src;
-  
+
   ParserOpSet(header_id_t header, int offset, const T &src)
-    : dst({header, offset}), src(src) { 
+    : dst({header, offset}), src(src) {
     // dst = {header, offset};
   }
 
   void operator()(Packet *pkt, const char *data,
-		  size_t *bytes_parsed) const override;
+                  size_t *bytes_parsed) const override;
 };
 
-struct ParseSwitchKeyBuilder
-{
+struct ParseSwitchKeyBuilder {
   struct Entry {
     // I could use a union, but I only have 2 choices, and they are both quite
     // small. Plus I make a point of not using unions for non POD data. So I
@@ -170,20 +169,20 @@ struct ParseSwitchKeyBuilder
   void push_back_lookahead(int offset, int bitwidth) {
     entries.push_back(Entry::make_lookahead(offset, bitwidth));
   }
-  
-  void operator()(const PHV &phv, const char *data, ByteContainer &key) const
-  {
-    for(const Entry &e : entries) {
-      switch(e.tag) {
+
+  void operator()(const PHV &phv, const char *data, ByteContainer *key) const {
+    for (const Entry &e : entries) {
+      switch (e.tag) {
       case Entry::FIELD:
-	key.append(phv.get_field(e.field.header, e.field.offset).get_bytes());
-	break;
+        key->append(phv.get_field(e.field.header, e.field.offset).get_bytes());
+        break;
       case Entry::STACK_FIELD:
-	key.append(phv.get_header_stack(e.field.header).get_last().get_field(e.field.offset).get_bytes());
-	break;
+        key->append(phv.get_header_stack(e.field.header).get_last()
+                    .get_field(e.field.offset).get_bytes());
+        break;
       case Entry::LOOKAHEAD:
-	e.lookahead.peek(data, key);
-	break;
+        e.lookahead.peek(data, key);
+        break;
       }
     }
   }
@@ -192,7 +191,7 @@ struct ParseSwitchKeyBuilder
 class ParseState;
 
 class ParseSwitchCase {
-public:
+ public:
   ParseSwitchCase(const ByteContainer &key, const ParseState *next_state)
     : key(key), with_mask(false), next_state(next_state) {
   }
@@ -201,17 +200,17 @@ public:
     : key(ByteContainer(key, nbytes_key)),
       with_mask(false), next_state(next_state) {
   }
-  
+
   ParseSwitchCase(const ByteContainer &key,
-		  const ByteContainer &mask,
-		  const ParseState *next_state)
+                  const ByteContainer &mask,
+                  const ParseState *next_state)
     : key(key), mask(mask), with_mask(true), next_state(next_state) {
     assert(key.size() == mask.size());
     mask_key();
   }
 
   ParseSwitchCase(int nbytes_key, const char *key, const char *mask,
-		  const ParseState *next_state)
+                  const ParseState *next_state)
     : key(ByteContainer(key, nbytes_key)),
       mask(ByteContainer(mask, nbytes_key)),
       with_mask(true), next_state(next_state) {
@@ -226,10 +225,10 @@ public:
   ParseSwitchCase(ParseSwitchCase &&other) /*noexcept*/ = default;
   ParseSwitchCase &operator=(ParseSwitchCase &&other) /*noexcept*/ = default;
 
-private:
+ private:
   void mask_key();
 
-private:
+ private:
   ByteContainer key;
   ByteContainer mask{};
   bool with_mask;
@@ -237,7 +236,7 @@ private:
 };
 
 class ParseState : public NamedP4Object {
-public:
+ public:
   ParseState(const std::string &name, p4object_id_t id)
     : NamedP4Object(name, id),
       has_switch(false) {}
@@ -251,33 +250,29 @@ public:
   }
 
   void add_set_from_field(header_id_t dst_header, int dst_offset,
-			  header_id_t src_header, int src_offset) {
+                          header_id_t src_header, int src_offset) {
     parser_ops.emplace_back(
       new ParserOpSet<field_t>(dst_header, dst_offset,
-			       field_t::make(src_header, src_offset))
-    );
+                               field_t::make(src_header, src_offset)));
   }
 
   void add_set_from_data(header_id_t dst_header, int dst_offset,
-			 const Data &src) {
+                         const Data &src) {
     parser_ops.emplace_back(
-      new ParserOpSet<Data>(dst_header, dst_offset, src)
-    );
+      new ParserOpSet<Data>(dst_header, dst_offset, src));
   }
 
   void add_set_from_lookahead(header_id_t dst_header, int dst_offset,
-			      int src_offset, int src_bitwidth) {
-    parser_ops.emplace_back(
-      new ParserOpSet<ParserLookAhead>(dst_header, dst_offset,
-				       ParserLookAhead(src_offset, src_bitwidth))
-    );
+                              int src_offset, int src_bitwidth) {
+    parser_ops.emplace_back(new ParserOpSet<ParserLookAhead>(
+        dst_header, dst_offset,
+        ParserLookAhead(src_offset, src_bitwidth)));
   }
 
   void add_set_from_expression(header_id_t dst_header, int dst_offset,
-			       const ArithExpression &expr) {
+                               const ArithExpression &expr) {
     parser_ops.emplace_back(
-      new ParserOpSet<ArithExpression>(dst_header, dst_offset, expr)
-    );
+      new ParserOpSet<ArithExpression>(dst_header, dst_offset, expr));
   }
 
   void set_key_builder(const ParseSwitchKeyBuilder &builder) {
@@ -286,24 +281,24 @@ public:
   }
 
   void add_switch_case(const ByteContainer &key, const ParseState *next_state) {
-    parser_switch.push_back( ParseSwitchCase(key, next_state) );
+    parser_switch.push_back(ParseSwitchCase(key, next_state));
   }
 
   void add_switch_case(int nbytes_key, const char *key,
-		       const ParseState *next_state) {
-    parser_switch.push_back( ParseSwitchCase(nbytes_key, key, next_state) );
+                       const ParseState *next_state) {
+    parser_switch.push_back(ParseSwitchCase(nbytes_key, key, next_state));
   }
 
   void add_switch_case_with_mask(const ByteContainer &key,
-				 const ByteContainer &mask,
-				 const ParseState *next_state) {
-    parser_switch.push_back( ParseSwitchCase(key, mask, next_state) );
+                                 const ByteContainer &mask,
+                                 const ParseState *next_state) {
+    parser_switch.push_back(ParseSwitchCase(key, mask, next_state));
   }
 
   void add_switch_case_with_mask(int nbytes_key, const char *key,
-				 const char *mask,
-				 const ParseState *next_state) {
-    parser_switch.push_back( ParseSwitchCase(nbytes_key, key, mask, next_state) );
+                                 const char *mask,
+                                 const ParseState *next_state) {
+    parser_switch.push_back(ParseSwitchCase(nbytes_key, key, mask, next_state));
   }
 
   void set_default_switch_case(const ParseState *default_next) {
@@ -315,17 +310,17 @@ public:
 
   // Copy assignment operator
   ParseState &operator =(const ParseState& other) = delete;
- 
+
   // Move constructor
   ParseState(ParseState&& other)= default;
- 
+
   // Move assignment operator
   ParseState &operator =(ParseState &&other) = default;
 
   const ParseState *operator()(Packet *pkt, const char *data,
-			       size_t *bytes_parsed) const;
+                               size_t *bytes_parsed) const;
 
-private:
+ private:
   std::vector<std::unique_ptr<ParserOp> > parser_ops{};
   bool has_switch;
   ParseSwitchKeyBuilder key_builder{};
@@ -334,9 +329,9 @@ private:
 };
 
 class Parser : public NamedP4Object {
-public:
- Parser(const std::string &name, p4object_id_t id)
-   : NamedP4Object(name, id), init_state(NULL) {}
+ public:
+  Parser(const std::string &name, p4object_id_t id)
+    : NamedP4Object(name, id), init_state(nullptr) { }
 
   void set_init_state(const ParseState *state) {
     init_state = state;
@@ -350,8 +345,8 @@ public:
   Parser(Parser &&other) /*noexcept*/ = default;
   Parser &operator=(Parser &&other) /*noexcept*/ = default;
 
-private:
+ private:
   const ParseState *init_state;
 };
 
-#endif
+#endif  // BM_SIM_INCLUDE_BM_SIM_PARSER_H_

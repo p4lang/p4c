@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _BM_SIMPLE_SWITCH_PRIMITIVES_H_
-#define _BM_SIMPLE_SWITCH_PRIMITIVES_H_
+#ifndef SIMPLE_SWITCH_PRIMITIVES_H_
+#define SIMPLE_SWITCH_PRIMITIVES_H_
 
 class modify_field : public ActionPrimitive<Field &, const Data &> {
   void operator ()(Field &f, const Data &d) {
@@ -32,7 +32,8 @@ REGISTER_PRIMITIVE(modify_field);
 class modify_field_rng_uniform
   : public ActionPrimitive<Field &, const Data &, const Data &> {
   void operator ()(Field &f, const Data &b, const Data &e) {
-    // TODO: a little hacky, fix later if there is a need using GMP random fns
+    // TODO(antonin): a little hacky, fix later if there is a need using GMP
+    // random fns
     using engine = std::default_random_engine;
     using hash = std::hash<std::thread::id>;
     static thread_local engine generator(hash()(std::this_thread::get_id()));
@@ -100,7 +101,8 @@ class bit_and : public ActionPrimitive<Field &, const Data &, const Data &> {
 
 REGISTER_PRIMITIVE(bit_and);
 
-class shift_left : public ActionPrimitive<Field &, const Data &, const Data &> {
+class shift_left :
+  public ActionPrimitive<Field &, const Data &, const Data &> {
   void operator ()(Field &f, const Data &d1, const Data &d2) {
     f.shift_left(d1, d2);
   }
@@ -108,7 +110,8 @@ class shift_left : public ActionPrimitive<Field &, const Data &, const Data &> {
 
 REGISTER_PRIMITIVE(shift_left);
 
-class shift_right : public ActionPrimitive<Field &, const Data &, const Data &> {
+class shift_right :
+  public ActionPrimitive<Field &, const Data &, const Data &> {
   void operator ()(Field &f, const Data &d1, const Data &d2) {
     f.shift_right(d1, d2);
   }
@@ -119,7 +122,7 @@ REGISTER_PRIMITIVE(shift_right);
 class drop : public ActionPrimitive<> {
   void operator ()() {
     get_field("standard_metadata.egress_spec").set(511);
-    if(get_phv().has_header("intrinsic_metadata")) {
+    if (get_phv().has_header("intrinsic_metadata")) {
       get_field("intrinsic_metadata.mcast_grp").set(0);
     }
   }
@@ -138,8 +141,8 @@ REGISTER_PRIMITIVE(generate_digest);
 
 class add_header : public ActionPrimitive<Header &> {
   void operator ()(Header &hdr) {
-    // TODO: reset header to 0?
-    if(!hdr.is_valid()) {
+    // TODO(antonin): reset header to 0?
+    if (!hdr.is_valid()) {
       hdr.reset();
       hdr.mark_valid();
     }
@@ -166,10 +169,10 @@ REGISTER_PRIMITIVE(remove_header);
 
 class copy_header : public ActionPrimitive<Header &, const Header &> {
   void operator ()(Header &dst, const Header &src) {
-    if(!src.is_valid()) return;
+    if (!src.is_valid()) return;
     dst.mark_valid();
     assert(dst.get_header_type_id() == src.get_header_type_id());
-    for(unsigned int i = 0; i < dst.size(); i++) {
+    for (unsigned int i = 0; i < dst.size(); i++) {
       dst[i].set(src[i]);
     }
   }
@@ -179,7 +182,8 @@ REGISTER_PRIMITIVE(copy_header);
 
 /* standard_metadata.clone_spec will contain the mirror id (16 LSB) and the
    field list id to copy (16 MSB) */
-class clone_ingress_pkt_to_egress : public ActionPrimitive<const Data &, const Data &> {
+class clone_ingress_pkt_to_egress
+  : public ActionPrimitive<const Data &, const Data &> {
   void operator ()(const Data &clone_spec, const Data &field_list_id) {
     Field &f_clone_spec = get_field("standard_metadata.clone_spec");
     f_clone_spec.shift_left(field_list_id, 16);
@@ -189,7 +193,8 @@ class clone_ingress_pkt_to_egress : public ActionPrimitive<const Data &, const D
 
 REGISTER_PRIMITIVE(clone_ingress_pkt_to_egress);
 
-class clone_egress_pkt_to_egress : public ActionPrimitive<const Data &, const Data &> {
+class clone_egress_pkt_to_egress
+  : public ActionPrimitive<const Data &, const Data &> {
   void operator ()(const Data &clone_spec, const Data &field_list_id) {
     Field &f_clone_spec = get_field("standard_metadata.clone_spec");
     f_clone_spec.shift_left(field_list_id, 16);
@@ -201,9 +206,9 @@ REGISTER_PRIMITIVE(clone_egress_pkt_to_egress);
 
 class modify_field_with_hash_based_offset
   : public ActionPrimitive<Field &, const Data &,
-			   const NamedCalculation &, const Data &> {
+                           const NamedCalculation &, const Data &> {
   void operator ()(Field &dst, const Data &base,
-		   const NamedCalculation &hash, const Data &size) {
+                   const NamedCalculation &hash, const Data &size) {
     uint64_t v =
       (hash.output(get_packet()) % size.get<uint64_t>()) + base.get<uint64_t>();
     dst.set(v);
@@ -214,13 +219,14 @@ REGISTER_PRIMITIVE(modify_field_with_hash_based_offset);
 
 class no_op : public ActionPrimitive<> {
   void operator ()() {
-
+    // nothing
   }
 };
 
 REGISTER_PRIMITIVE(no_op);
 
-class execute_meter : public ActionPrimitive<MeterArray &, const Data &, Field &> {
+class execute_meter
+  : public ActionPrimitive<MeterArray &, const Data &, Field &> {
   void operator ()(MeterArray &meter_array, const Data &idx, Field &dst) {
     dst.set(meter_array.execute_meter(get_packet(), idx.get_uint()));
   }
@@ -236,7 +242,8 @@ class count : public ActionPrimitive<CounterArray &, const Data &> {
 
 REGISTER_PRIMITIVE(count);
 
-class register_read : public ActionPrimitive<Field &, const RegisterArray &, const Data &> {
+class register_read
+  : public ActionPrimitive<Field &, const RegisterArray &, const Data &> {
   void operator ()(Field &dst, const RegisterArray &src, const Data &idx) {
     dst.set(src[idx.get_uint()]);
   }
@@ -244,7 +251,8 @@ class register_read : public ActionPrimitive<Field &, const RegisterArray &, con
 
 REGISTER_PRIMITIVE(register_read);
 
-class register_write : public ActionPrimitive<RegisterArray &, const Data &, const Data &> {
+class register_write
+  : public ActionPrimitive<RegisterArray &, const Data &, const Data &> {
   void operator ()(RegisterArray &dst, const Data &idx, const Data &src) {
     dst[idx.get_uint()].set(src);
   }
@@ -268,4 +276,4 @@ class pop : public ActionPrimitive<HeaderStack &, const Data &> {
 
 REGISTER_PRIMITIVE(pop);
 
-#endif
+#endif  // SIMPLE_SWITCH_PRIMITIVES_H_
