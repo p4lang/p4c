@@ -82,8 +82,8 @@ class SimpleSwitch : public Switch {
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
 
-    Packet *packet =
-      new Packet(port_num, pkt_id++, 0, len, PacketBuffer(2048, buffer, len));
+    Packet *packet = new Packet(Packet::make_new(
+        port_num, pkt_id++, len, PacketBuffer(2048, buffer, len)));
 
     ELOGGER->packet_in(*packet);
 
@@ -154,8 +154,6 @@ class SimpleSwitch : public Switch {
   std::shared_ptr<McSimplePreLAG> pre;
   clock::time_point start;
   std::unordered_map<mirror_id_t, int> mirroring_map;
-  std::mt19937 gen;
-  std::uniform_int_distribution<packet_id_t> copy_id_dis{};
 };
 
 #endif  // SIMPLE_SWITCH_SIMPLE_SWITCH_H_

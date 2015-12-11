@@ -51,7 +51,7 @@ protected:
 
   Packet get_pkt(size_t pkt_size) {
     // dummy packet, won't be parsed
-    return Packet(0, 0, 0, pkt_size, PacketBuffer(pkt_size * 2));
+    return Packet::make_new(0, 0, pkt_size, PacketBuffer(pkt_size * 2));
   }
 };
 

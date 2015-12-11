@@ -49,8 +49,8 @@ class SimpleSwitch : public Switch {
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
 
-    Packet *packet =
-      new Packet(port_num, pkt_id++, 0, len, PacketBuffer(2048, buffer, len));
+    Packet *packet = new Packet(Packet::make_new(
+        port_num, pkt_id++, len, PacketBuffer(2048, buffer, len)));
 
     ELOGGER->packet_in(*packet);
 
@@ -138,8 +138,8 @@ void SimpleSwitch::pipeline_thread() {
         egress_port = out.egress_port;
         if (ingress_port == egress_port) continue;  // pruning
         BMLOG_DEBUG_PKT(*packet, "Replicating packet on port {}", egress_port);
-        std::unique_ptr<Packet> packet_copy(new Packet());
-        *packet_copy = packet->clone(copy_id++);
+        std::unique_ptr<Packet> packet_copy(new Packet(packet->clone()));
+        *packet_copy = packet->clone();
         packet_copy->set_egress_port(egress_port);
         egress_mau->apply(packet_copy.get());
         deparser->deparse(packet_copy.get());

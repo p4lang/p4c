@@ -60,8 +60,8 @@ protected:
 
   Packet get_pkt(const char *data, size_t data_size) {
     // dummy packet, won't be parsed
-    return Packet(0, 0, 0, data_size,
-		  PacketBuffer(data_size * 2, data, data_size));
+    return Packet::make_new(0, 0, data_size,
+                            PacketBuffer(data_size * 2, data, data_size));
   }
 
   virtual void SetUp() {

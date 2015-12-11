@@ -164,7 +164,7 @@ protected:
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    Packet packet(0, 0, 0, 128, PacketBuffer(256));
+    Packet packet = Packet::make_new(0, 0, 128, PacketBuffer(256));
     packet.get_phv()->get_header(testHeader1).mark_valid();
     packet.get_phv()->get_header(testHeader2).mark_valid();
     return packet;

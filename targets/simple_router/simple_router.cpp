@@ -47,8 +47,8 @@ class SimpleSwitch : public Switch {
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
 
-    Packet *packet =
-      new Packet(port_num, pkt_id++, 0, len, PacketBuffer(2048, buffer, len));
+    Packet *packet = new Packet(Packet::make_new(
+        port_num, pkt_id++, len, PacketBuffer(2048, buffer, len)));
 
     ELOGGER->packet_in(*packet);
 

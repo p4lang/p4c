@@ -21,11 +21,13 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_PACKET_H_
 #define BM_SIM_INCLUDE_BM_SIM_PACKET_H_
 
+#include <array>
 #include <memory>
 #include <mutex>
 #include <chrono>
 #include <string>
 #include <vector>
+#include <atomic>
 
 #include <cassert>
 
@@ -33,6 +35,36 @@
 #include "phv.h"
 
 typedef uint64_t packet_id_t;
+typedef uint64_t copy_id_t;
+
+class CopyIdGenerator {
+ private:
+  static constexpr size_t W = 4096;
+
+ public:
+  copy_id_t add_one(packet_id_t packet_id) {
+    int idx = static_cast<int>(packet_id % W);
+    return ++arr[idx];
+  }
+
+  void remove_one(packet_id_t packet_id) {
+    int idx = static_cast<int>(packet_id % W);
+    --arr[idx];
+  }
+
+  copy_id_t get(packet_id_t packet_id) {
+    int idx = static_cast<int>(packet_id % W);
+    return arr[idx];
+  }
+
+  void reset(packet_id_t packet_id) {
+    int idx = static_cast<int>(packet_id % W);
+    arr[idx] = 0;
+  }
+
+ private:
+  std::array<std::atomic<int>, W> arr{{}};
+};
 
 class Packet {
  public:
@@ -41,14 +73,6 @@ class Packet {
   typedef PacketBuffer::state_t buffer_state_t;
 
  public:
-  Packet();
-
-  Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
-         int ingress_length, PacketBuffer &&buffer);
-
-  Packet(int ingress_port, packet_id_t id, packet_id_t copy_id,
-         int ingress_length, PacketBuffer &&buffer, const PHV &src_phv);
-
   ~Packet();
 
   packet_id_t get_packet_id() const { return packet_id; }
@@ -60,13 +84,13 @@ class Packet {
   void set_egress_port(int port) { egress_port = port; }
   void set_ingress_port(int port) { ingress_port = port; }
 
-  packet_id_t get_copy_id() const { return copy_id; }
+  copy_id_t get_copy_id() const { return copy_id; }
 
   const std::string get_unique_id() const {
     return std::to_string(packet_id) + "." + std::to_string(copy_id);
   }
 
-  void set_copy_id(packet_id_t id) { copy_id = id; }
+  void set_copy_id(copy_id_t id) { copy_id = id; }
 
   int get_ingress_length() const { return ingress_length; }
 
@@ -116,9 +140,9 @@ class Packet {
   PHV *get_phv() { return phv.get(); }
   const PHV *get_phv() const { return phv.get(); }
 
-  Packet clone(packet_id_t new_copy_id) const;
-  Packet clone_and_reset_metadata(packet_id_t new_copy_id) const;
-  Packet clone_no_phv(packet_id_t new_copy_id) const;
+  Packet clone() const;
+  Packet clone_and_reset_metadata() const;
+  Packet clone_no_phv() const;
 
   Packet(const Packet &other) = delete;
   Packet &operator=(const Packet &other) = delete;
@@ -126,7 +150,27 @@ class Packet {
   Packet(Packet &&other) noexcept;
   Packet &operator=(Packet &&other) noexcept;
 
+ public:
+  // cpplint false positive for rvalue references
+  static Packet make_new(int ingress_port, packet_id_t id, int ingress_length,
+  // NOLINTNEXTLINE(whitespace/operators)
+                         PacketBuffer &&buffer);
+  static Packet make_new(int ingress_port, packet_id_t id, int ingress_length,
+  // NOLINTNEXTLINE(whitespace/operators)
+                         PacketBuffer &&buffer,
+                         const PHV &src_phv);
+  // for testing
+  static Packet make_new(packet_id_t id = 0);
+
  private:
+  Packet(int ingress_port, packet_id_t id, copy_id_t copy_id,
+         int ingress_length, PacketBuffer &&buffer);
+
+  Packet(int ingress_port, packet_id_t id, copy_id_t copy_id,
+         int ingress_length, PacketBuffer &&buffer, const PHV &src_phv);
+
+  explicit Packet(packet_id_t id);
+
   void update_signature(uint64_t seed = 0);
   void set_ingress_ts();
 
@@ -134,7 +178,7 @@ class Packet {
   int ingress_port{-1};
   int egress_port{-1};
   packet_id_t packet_id{0};
-  packet_id_t copy_id{0};
+  copy_id_t copy_id{0};
   int ingress_length{0};
 
   uint64_t signature{0};
@@ -171,6 +215,8 @@ class Packet {
   // Google style guidelines stipulate that we have to use a raw pointer and
   // leak the memory
   static PHVPool *phv_pool;
+
+  static CopyIdGenerator *copy_id_gen;
 };
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PACKET_H_

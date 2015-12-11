@@ -186,8 +186,8 @@ protected:
   }
 
   void get_ipv4_pkt(Packet *pkt, unsigned short *cksum) {
-    *pkt = Packet(
-        0, 0, 0, sizeof(raw_tcp_pkt),
+    *pkt = Packet::make_new(
+        0, 0, sizeof(raw_tcp_pkt),
 	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt))
     );
     *cksum = 0x3508; // big endian
@@ -205,7 +205,7 @@ protected:
 };
 
 TEST_F(ChecksumTest, IPv4ChecksumVerify) {
-  Packet packet;
+  Packet packet = Packet::make_new();
   unsigned short cksum;
   get_ipv4_pkt(&packet, &cksum);
   PHV *phv = packet.get_phv();
@@ -220,7 +220,7 @@ TEST_F(ChecksumTest, IPv4ChecksumVerify) {
 }
 
 TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
-  Packet packet;
+  Packet packet = Packet::make_new();
   unsigned short cksum;
   get_ipv4_pkt(&packet, &cksum);
   PHV *phv = packet.get_phv();
@@ -238,7 +238,7 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
 }
 
 TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
-  Packet packet;
+  Packet packet = Packet::make_new();
   unsigned short cksum;
   get_ipv4_pkt(&packet, &cksum);
   PHV *phv = packet.get_phv();
@@ -259,7 +259,7 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
 
 // actually more general than just TCP: CalcBasedChecksum test
 TEST_F(ChecksumTest, TCPChecksumVerify) {
-  Packet packet;
+  Packet packet = Packet::make_new();
   unsigned short cksum;
   unsigned short tcp_len;
   get_tcp_pkt(&packet, &cksum, &tcp_len);
@@ -276,7 +276,7 @@ TEST_F(ChecksumTest, TCPChecksumVerify) {
 }
 
 TEST_F(ChecksumTest, TCPChecksumUpdate) {
-  Packet packet;
+  Packet packet = Packet::make_new();
   unsigned short cksum;
   unsigned short tcp_len;
   get_tcp_pkt(&packet, &cksum, &tcp_len);

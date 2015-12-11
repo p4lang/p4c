@@ -137,6 +137,7 @@ void SimpleSwitch::ingress_thread() {
     input_buffer.pop_back(&packet);
 
     phv = packet->get_phv();
+    packet_id_t packet_id = packet->get_packet_id();
 
     int ingress_port = packet->get_ingress_port();
     BMLOG_DEBUG_PKT(*packet, "Processing packet received on port {}",
@@ -183,7 +184,6 @@ void SimpleSwitch::ingress_thread() {
       mgid = f_mgid.get_uint();
     }
 
-    packet_id_t copy_id;
     int egress_port;
 
     // INGRESS CLONING
@@ -197,9 +197,8 @@ void SimpleSwitch::ingress_thread() {
         f_instance_type.set(PKT_INSTANCE_TYPE_INGRESS_CLONE);
         f_clone_spec.set(0);
         p4object_id_t field_list_id = clone_spec >> 16;
-        copy_id = copy_id_dis(gen);
-        std::unique_ptr<Packet> packet_copy(
-          new Packet(packet->clone_no_phv(copy_id)));
+        std::unique_ptr<Packet> packet_copy(new Packet(
+            packet->clone_no_phv()));
         PHV *phv_copy = packet_copy->get_phv();
         phv_copy->reset_metadata();
         FieldList *field_list = this->get_field_list(field_list_id);
@@ -234,9 +233,8 @@ void SimpleSwitch::ingress_thread() {
         BMLOG_DEBUG_PKT(*packet, "Replicating packet on port {}", egress_port);
         f_rid.set(out.rid);
         f_instance_type.set(PKT_INSTANCE_TYPE_REPLICATION);
-        copy_id = copy_id_dis(gen);
-        std::unique_ptr<Packet> packet_copy(
-          new Packet(packet->clone(copy_id++)));
+        std::unique_ptr<Packet> packet_copy(new Packet(
+            packet->clone()));
         enqueue(egress_port, std::move(packet_copy));
       }
       f_instance_type.set(instance_type);
@@ -267,6 +265,7 @@ void SimpleSwitch::egress_thread(int port) {
     egress_buffers[port].pop_back(&packet);
 
     phv = packet->get_phv();
+    packet_id_t packet_id = packet->get_packet_id();
 
     if (phv->has_header("queueing_metadata")) {
       phv->get_field("queueing_metadata.deq_timestamp").set(get_ts().count());
@@ -286,8 +285,6 @@ void SimpleSwitch::egress_thread(int port) {
     Field &f_clone_spec = phv->get_field("standard_metadata.clone_spec");
     unsigned int clone_spec = f_clone_spec.get_uint();
 
-    packet_id_t copy_id;
-
     // EGRESS CLONING
     if (clone_spec) {
       BMLOG_DEBUG_PKT(*packet, "Cloning packet at egress");
@@ -296,9 +293,8 @@ void SimpleSwitch::egress_thread(int port) {
         f_instance_type.set(PKT_INSTANCE_TYPE_EGRESS_CLONE);
         f_clone_spec.set(0);
         p4object_id_t field_list_id = clone_spec >> 16;
-        copy_id = copy_id_dis(gen);
-        std::unique_ptr<Packet> packet_copy(
-          new Packet(packet->clone_and_reset_metadata(copy_id++)));
+        std::unique_ptr<Packet> packet_copy(new Packet(
+            packet->clone_and_reset_metadata()));
         PHV *phv_copy = packet_copy->get_phv();
         FieldList *field_list = this->get_field_list(field_list_id);
         for (const auto &p : *field_list) {

@@ -153,16 +153,16 @@ protected:
   }
 
   Packet get_tcp_pkt() {
-    Packet pkt = Packet(
-	0, 0, 0, sizeof(raw_tcp_pkt),
+    Packet pkt = Packet::make_new(
+	0, 0, sizeof(raw_tcp_pkt),
 	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt))
     );
     return pkt;
   }
 
   Packet get_udp_pkt() {
-    Packet pkt = Packet(
-	0, 0, 0, sizeof(raw_udp_pkt),
+    Packet pkt = Packet::make_new(
+	0, 0, sizeof(raw_udp_pkt),
 	PacketBuffer(256, (const char *) raw_udp_pkt, sizeof(raw_udp_pkt))
     );
     return pkt;
@@ -283,7 +283,7 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
   const char *ref_pkt;
   size_t size;
 
-  Packet packet;
+  Packet packet = Packet::make_new();
   for(int t = 0; t < 10000; t++) {
     if(t % 2 == 0) {
       packet = get_tcp_pkt();
@@ -359,7 +359,7 @@ protected:
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    return Packet(0, 0, 0, 64, PacketBuffer(128));
+    return Packet::make_new(0, 0, 64, PacketBuffer(128));
   }
 
   virtual void SetUp() {
@@ -463,7 +463,7 @@ protected:
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    return Packet(0, 0, 0, 64, PacketBuffer(128));
+    return Packet::make_new(0, 0, 64, PacketBuffer(128));
   }
 
   virtual void SetUp() {
@@ -605,8 +605,8 @@ protected:
   }
 
   Packet get_mpls_pkt() {
-    Packet pkt = Packet(
-	0, 0, 0, sizeof(raw_mpls_pkt),
+    Packet pkt = Packet::make_new(
+	0, 0, sizeof(raw_mpls_pkt),
 	PacketBuffer(256, (const char *) raw_mpls_pkt, sizeof(raw_mpls_pkt))
     );
     return pkt;
@@ -647,7 +647,7 @@ protected:
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    return Packet(0, 0, 0, 64, PacketBuffer(128));
+    return Packet::make_new(0, 0, 64, PacketBuffer(128));
   }
 
   unsigned int bc_as_uint(const ByteContainer &bc) {
@@ -1001,8 +1001,8 @@ protected:
     // make the parser simpler) and Valgrind complains
     ByteContainer buf_(buf);
     buf_.push_back('\xab');
-    Packet pkt = Packet(
-	0, 0, 0, buf_.size(),
+    Packet pkt = Packet::make_new(
+	0, 0, buf_.size(),
         PacketBuffer(512, buf_.data(), buf_.size())
     );
     return pkt;
@@ -1186,8 +1186,8 @@ protected:
   }
 
   Packet get_pkt(const ByteContainer &buf) const {
-    Packet pkt = Packet(
-        0, 0, 0, buf.size(),
+    Packet pkt = Packet::make_new(
+        0, 0, buf.size(),
         PacketBuffer(512, buf.data(), buf.size())
     );
     return pkt;

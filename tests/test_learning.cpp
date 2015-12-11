@@ -157,7 +157,7 @@ protected:
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    return Packet(0, 0, 0, 128, PacketBuffer(256));
+    return Packet::make_new(0, 0, 128, PacketBuffer(256));
   }
 
   void learn_cb_(LearnEngine::msg_hdr_t msg_hdr, size_t size,

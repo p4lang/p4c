@@ -31,7 +31,8 @@ test_ageing \
 test_counters \
 test_pcap \
 test_fields \
-test_devmgr
+test_devmgr \
+test_packet
 
 check_PROGRAMS = $(TESTS) test_all
 
@@ -56,6 +57,7 @@ test_counters_SOURCES      = $(common_source) test_counters.cpp
 test_fields_SOURCES   	   = $(common_source) test_fields.cpp
 test_pcap_SOURCES          = $(common_source) test_pcap.cpp
 test_devmgr_SOURCES        = $(common_source) test_devmgr.cpp
+test_packet_SOURCES        = $(common_source) test_packet.cpp
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
 test_checksums.cpp \
@@ -76,4 +78,5 @@ test_ageing.cpp \
 test_counters.cpp \
 test_pcap.cpp \
 test_fields.cpp \
-test_devmgr.cpp
+test_devmgr.cpp \
+test_packet.cpp

@@ -148,7 +148,7 @@ protected:
 
   virtual void SetUp() {
     Packet::set_phv_factory(phv_factory);
-    pkt = std::unique_ptr<Packet>(new Packet());
+    pkt = std::unique_ptr<Packet>(new Packet(Packet::make_new()));
     phv = pkt->get_phv();
   }
 
