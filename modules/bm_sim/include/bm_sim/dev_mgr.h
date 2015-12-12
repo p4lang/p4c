@@ -82,6 +82,8 @@ class DevMgr : public DevMgrInterface {
 
   void transmit_fn(int port_num, const char *buffer, int len);
 
+  ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie);
+
   // start the thread that performs packet processing
   void start();
   ReturnCode register_status_cb(const PortStatus &status,
@@ -95,8 +97,6 @@ class DevMgr : public DevMgrInterface {
 
  protected:
   ~DevMgr() {}
-
-  ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie);
 
  private:
   // Actual implementation (private)

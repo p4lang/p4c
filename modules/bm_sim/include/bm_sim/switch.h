@@ -238,6 +238,15 @@ class Switch :  public RuntimeInterface,  public DevMgr {
 
   AgeingMonitor *get_ageing_monitor();
 
+  // Added for testing, other "object types" can be added if needed
+  p4object_id_t get_table_id(const std::string &name) {
+    return p4objects->get_match_action_table(name)->get_id();
+  }
+
+  p4object_id_t get_action_id(const std::string &name) {
+    return p4objects->get_action(name)->get_id();
+  }
+
  protected:
   int swap_requested() { return swap_ordered; }
   // TODO(antonin): should I return shared_ptrs instead of raw_ptrs?
@@ -251,7 +260,7 @@ class Switch :  public RuntimeInterface,  public DevMgr {
     return r.second;
   }
 
-  // do these methods need any  protection
+  // do these methods need any protection?
   Pipeline *get_pipeline(const std::string &name) {
     return p4objects->get_pipeline(name);
   }

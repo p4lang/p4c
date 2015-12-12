@@ -1,3 +1,5 @@
+SUBDIRS = . tests
+
 simple_switch_thrift_files = \
 gen-py/sswitch_runtime/__init__.py \
 gen-cpp/simple_switch_constants.cpp \
@@ -14,16 +16,29 @@ AM_CPPFLAGS += \
 -I$(top_srcdir)/modules/bm_runtime/include \
 -I$(srcdir)/thrift/src/ \
 -I$(srcdir)/gen-cpp
-bin_PROGRAMS = simple_switch
-simple_switch_SOURCES = simple_switch.cpp simple_switch.h primitives.h $(BUILT_SOURCES)
-simple_switch_LDADD = \
-$(top_srcdir)/modules/bm_runtime/libbmruntime.la \
+
+libsimpleswitch_la_LIBADD = \
 $(top_srcdir)/modules/bm_sim/libbmsim.la \
 $(top_srcdir)/modules/bf_lpm_trie/libbflpmtrie.la \
-$(top_srcdir)/thrift_src/libruntimestubs.la \
 $(top_srcdir)/modules/BMI/libbmi.la \
-$(top_srcdir)/third_party/jsoncpp/libjson.la -lboost_system -lboost_thread -lthrift -lboost_program_options
-simple_switch_LDFLAGS = -pthread
+$(top_srcdir)/third_party/jsoncpp/libjson.la \
+-lboost_system -lboost_thread -lthrift -lboost_program_options
+
+libsimpleswitch_la_LDFLAGS = -pthread
+
+noinst_LTLIBRARIES = libsimpleswitch.la
+
+libsimpleswitch_la_SOURCES = \
+simple_switch.cpp simple_switch.h primitives.h
+
+bin_PROGRAMS = simple_switch
+
+simple_switch_LDADD = \
+$(top_srcdir)/modules/bm_runtime/libbmruntime.la \
+$(top_srcdir)/thrift_src/libruntimestubs.la \
+libsimpleswitch.la
+
+simple_switch_SOURCES = main.cpp $(BUILT_SOURCES)
 
 # See http://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
 

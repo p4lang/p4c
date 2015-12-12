@@ -102,14 +102,14 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
     std::string outFile;
 
     if (parser.use_files) {
-        inFile = iface.second + "_in.pcap";
-        inFileName = inFile.c_str();
-        outFile = iface.second + "_out.pcap";
-        outFileName = outFile.c_str();
+      inFile = iface.second + "_in.pcap";
+      inFileName = inFile.c_str();
+      outFile = iface.second + "_out.pcap";
+      outFileName = outFile.c_str();
     } else if (parser.pcap) {
-        inFile = iface.second + ".pcap";
-        inFileName = inFile.c_str();
-        outFileName = inFileName;
+      inFile = iface.second + ".pcap";
+      inFileName = inFile.c_str();
+      outFileName = inFileName;
     }
 
     port_add(iface.second, iface.first, inFileName, outFileName);

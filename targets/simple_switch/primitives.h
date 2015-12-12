@@ -204,6 +204,28 @@ class clone_egress_pkt_to_egress
 
 REGISTER_PRIMITIVE(clone_egress_pkt_to_egress);
 
+class resubmit : public ActionPrimitive<const Data &> {
+  void operator ()(const Data &field_list_id) {
+    if (get_phv().has_field("intrinsic_metadata.resubmit_flag")) {
+      get_phv().get_field("intrinsic_metadata.resubmit_flag")
+          .set(field_list_id);
+    }
+  }
+};
+
+REGISTER_PRIMITIVE(resubmit);
+
+class recirculate : public ActionPrimitive<const Data &> {
+  void operator ()(const Data &field_list_id) {
+    if (get_phv().has_field("intrinsic_metadata.recirculate_flag")) {
+      get_phv().get_field("intrinsic_metadata.recirculate_flag")
+          .set(field_list_id);
+    }
+  }
+};
+
+REGISTER_PRIMITIVE(recirculate);
+
 class modify_field_with_hash_based_offset
   : public ActionPrimitive<Field &, const Data &,
                            const NamedCalculation &, const Data &> {
