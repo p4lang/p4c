@@ -18,6 +18,7 @@
 #include "bm_apps/packet_pipe.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <gtest/gtest.h>
@@ -25,7 +26,6 @@
 #include <map>
 #include <thread>
 #include <mutex>
-#include <thread>
 #include <condition_variable>
 
 class TestDevMgrImplementation : public DevMgrInterface {
@@ -34,6 +34,7 @@ public:
   TestDevMgrImplementation() { p_monitor.start(this); }
 
   bool port_is_up(port_t port) {
+    std::lock_guard<std::mutex> lock(status_mutex);
     auto it = port_status.find(port);
     bool exists = (it != port_status.end());
 
@@ -54,39 +55,42 @@ public:
 
   // Not part of public interface, just for testing
   void set_port_status(port_t port, const PortStatus &status) {
-    auto it = port_status.find(port);
-    bool exists = (it != port_status.end());
-    std::string portname = "dummy";
-    if (!exists && status == PortStatus::PORT_ADDED) {
-      port_add(portname, port, NULL, NULL);
-    } else if (exists && status == PortStatus::PORT_REMOVED) {
-      port_remove(port);
-    } else if (exists && ((it->second == PortStatus::PORT_ADDED) ||
-                          (it->second == PortStatus::PORT_DOWN)) &&
-               status == PortStatus::PORT_UP) {
-      port_status[port] = PortStatus::PORT_UP;
-    } else if (exists && ((it->second == PortStatus::PORT_ADDED ||
-                           it->second == PortStatus::PORT_UP)) &&
-               status == PortStatus::PORT_DOWN) {
-      port_status[port] = PortStatus::PORT_DOWN;
-    } else {
-      ASSERT_TRUE(false) << "Incorrect op sequence on port: " << port
-                         << std::endl;
+    {
+      std::lock_guard<std::mutex> lock(status_mutex);
+      auto it = port_status.find(port);
+      bool exists = (it != port_status.end());
+      std::string portname = "dummy";
+      if (!exists && status == PortStatus::PORT_ADDED) {
+        port_status.insert(
+            std::pair<port_t, PortStatus>(port, PortStatus::PORT_ADDED));
+      } else if (exists && status == PortStatus::PORT_REMOVED) {
+        port_status.erase(it);
+      } else if (exists && ((it->second == PortStatus::PORT_ADDED) ||
+                            (it->second == PortStatus::PORT_DOWN)) &&
+                 status == PortStatus::PORT_UP) {
+        port_status[port] = PortStatus::PORT_UP;
+      } else if (exists && ((it->second == PortStatus::PORT_ADDED ||
+                             it->second == PortStatus::PORT_UP)) &&
+                 status == PortStatus::PORT_DOWN) {
+        port_status[port] = PortStatus::PORT_DOWN;
+      } else {
+        ASSERT_TRUE(false) << "Incorrect op sequence on port: " << port
+                           << std::endl;
+      }
+    }
+    if ((status == PortStatus::PORT_ADDED) ||
+        (status == PortStatus::PORT_REMOVED)) {
+      p_monitor.notify(port, status);
     }
   }
 
 private:
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
                       const char *in_pcap, const char *out_pcap) {
-    port_status.insert(
-        std::pair<port_t, PortStatus>(port_num, PortStatus::PORT_ADDED));
-    p_monitor.notify(port_num, PortStatus::PORT_ADDED);
     return ReturnCode::SUCCESS;
   }
   ReturnCode port_remove(port_t port_num) {
-    auto it = port_status.find(port_num);
-    port_status.erase(it);
-    p_monitor.notify(port_num, PortStatus::PORT_REMOVED);
+    return ReturnCode::SUCCESS;
   }
   ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie) {
     return ReturnCode::SUCCESS;
@@ -96,6 +100,7 @@ private:
 
   std::map<port_t, PortStatus> port_status;
   PortMonitor p_monitor;
+  mutable std::mutex status_mutex;
 };
 
 class DevMgrTest : public ::testing::Test {
@@ -124,7 +129,7 @@ protected:
     }
   }
   DevMgrInterface::PortStatusCB port_cb;
-  std::map<DevMgrInterface::PortStatus, uint32_t> cb_counts;
+  std::map<DevMgrInterface::PortStatus, std::atomic_uint> cb_counts;
   std::unique_ptr<TestDevMgrImplementation> g_mgr;
 };
 
