@@ -145,7 +145,7 @@ class PcapFilesReader :
 
   // Invoked every time a packet is read
   PacketDispatcherInterface::ReturnCode set_packet_handler(
-      PacketHandler handler, void *cookie);
+      const PacketHandler &handler, void *cookie);
 
  private:
   std::vector<std::unique_ptr<PcapFileIn>> files;

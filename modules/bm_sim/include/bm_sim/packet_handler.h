@@ -25,7 +25,7 @@ class PacketDispatcherInterface {
     ERROR
   };
 
-  virtual ReturnCode set_packet_handler(PacketHandler handler,
+  virtual ReturnCode set_packet_handler(const PacketHandler &handler,
                                         void* cookie) = 0;
 };
 
