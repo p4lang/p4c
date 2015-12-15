@@ -18,7 +18,6 @@
 #include "bm_apps/packet_pipe.h"
 
 #include <algorithm>
-#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <gtest/gtest.h>
@@ -108,6 +107,7 @@ public:
 
   void port_status(DevMgrInterface::port_t port_num,
                    const DevMgrInterface::PortStatus &status) {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
     cb_counts[status]++;
   }
 
@@ -124,12 +124,14 @@ protected:
   }
 
   void reset_counts(void) {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
     for (auto &kv : cb_counts) {
       kv.second = 0;
     }
   }
   DevMgrInterface::PortStatusCB port_cb;
-  std::map<DevMgrInterface::PortStatus, std::atomic_uint> cb_counts;
+  std::map<DevMgrInterface::PortStatus, uint32_t> cb_counts;
+  mutable std::mutex cnt_mutex;
   std::unique_ptr<TestDevMgrImplementation> g_mgr;
 };
 
@@ -141,28 +143,39 @@ TEST_F(DevMgrTest, cb_test) {
     g_mgr->set_port_status(i, DevMgrInterface::PortStatus::PORT_ADDED);
   }
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_ADDED], NPORTS) << "Port add callbacks incorrect"
-                                    << std::endl;
+  {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
+    ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_ADDED], NPORTS)
+        << "Port add callbacks incorrect" << std::endl;
+  }
   reset_counts();
   for (int i = 0; i < NPORTS; i++) {
     g_mgr->set_port_status(i, DevMgrInterface::PortStatus::PORT_DOWN);
   }
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_DOWN], NPORTS) << "Port down callbacks incorrect"
-                                    << std::endl;
-
+  {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
+    ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_DOWN], NPORTS)
+        << "Port down callbacks incorrect" << std::endl;
+  }
   for (int i = 0; i < NPORTS; i++) {
     g_mgr->set_port_status(i, DevMgrInterface::PortStatus::PORT_UP);
   }
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_UP], NPORTS) << "Port up callbacks incorrect"
-                                    << std::endl;
+  {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
+    ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_UP], NPORTS)
+        << "Port up callbacks incorrect" << std::endl;
+  }
   for (int i = 0; i < NPORTS; i++) {
     g_mgr->set_port_status(i, DevMgrInterface::PortStatus::PORT_REMOVED);
   }
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  ASSERT_EQ(NPORTS, cb_counts[DevMgrInterface::PortStatus::PORT_REMOVED])
-      << "Number of port remove callbacks incorrect" << std::endl;
+  {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
+    ASSERT_EQ(NPORTS, cb_counts[DevMgrInterface::PortStatus::PORT_REMOVED])
+        << "Number of port remove callbacks incorrect" << std::endl;
+  }
 }
 
 class PacketInReceiver {
