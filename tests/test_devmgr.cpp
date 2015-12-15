@@ -25,7 +25,6 @@
 #include <map>
 #include <thread>
 #include <mutex>
-#include <thread>
 #include <condition_variable>
 
 class TestDevMgrImplementation : public DevMgrInterface {
@@ -34,6 +33,7 @@ public:
   TestDevMgrImplementation() { p_monitor.start(this); }
 
   bool port_is_up(port_t port) {
+    std::lock_guard<std::mutex> lock(status_mutex);
     auto it = port_status.find(port);
     bool exists = (it != port_status.end());
 
@@ -54,39 +54,42 @@ public:
 
   // Not part of public interface, just for testing
   void set_port_status(port_t port, const PortStatus &status) {
-    auto it = port_status.find(port);
-    bool exists = (it != port_status.end());
-    std::string portname = "dummy";
-    if (!exists && status == PortStatus::PORT_ADDED) {
-      port_add(portname, port, NULL, NULL);
-    } else if (exists && status == PortStatus::PORT_REMOVED) {
-      port_remove(port);
-    } else if (exists && ((it->second == PortStatus::PORT_ADDED) ||
-                          (it->second == PortStatus::PORT_DOWN)) &&
-               status == PortStatus::PORT_UP) {
-      port_status[port] = PortStatus::PORT_UP;
-    } else if (exists && ((it->second == PortStatus::PORT_ADDED ||
-                           it->second == PortStatus::PORT_UP)) &&
-               status == PortStatus::PORT_DOWN) {
-      port_status[port] = PortStatus::PORT_DOWN;
-    } else {
-      ASSERT_TRUE(false) << "Incorrect op sequence on port: " << port
-                         << std::endl;
+    {
+      std::lock_guard<std::mutex> lock(status_mutex);
+      auto it = port_status.find(port);
+      bool exists = (it != port_status.end());
+      std::string portname = "dummy";
+      if (!exists && status == PortStatus::PORT_ADDED) {
+        port_status.insert(
+            std::pair<port_t, PortStatus>(port, PortStatus::PORT_ADDED));
+      } else if (exists && status == PortStatus::PORT_REMOVED) {
+        port_status.erase(it);
+      } else if (exists && ((it->second == PortStatus::PORT_ADDED) ||
+                            (it->second == PortStatus::PORT_DOWN)) &&
+                 status == PortStatus::PORT_UP) {
+        port_status[port] = PortStatus::PORT_UP;
+      } else if (exists && ((it->second == PortStatus::PORT_ADDED ||
+                             it->second == PortStatus::PORT_UP)) &&
+                 status == PortStatus::PORT_DOWN) {
+        port_status[port] = PortStatus::PORT_DOWN;
+      } else {
+        ASSERT_TRUE(false) << "Incorrect op sequence on port: " << port
+                           << std::endl;
+      }
+    }
+    if ((status == PortStatus::PORT_ADDED) ||
+        (status == PortStatus::PORT_REMOVED)) {
+      p_monitor.notify(port, status);
     }
   }
 
 private:
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
                       const char *in_pcap, const char *out_pcap) {
-    port_status.insert(
-        std::pair<port_t, PortStatus>(port_num, PortStatus::PORT_ADDED));
-    p_monitor.notify(port_num, PortStatus::PORT_ADDED);
     return ReturnCode::SUCCESS;
   }
   ReturnCode port_remove(port_t port_num) {
-    auto it = port_status.find(port_num);
-    port_status.erase(it);
-    p_monitor.notify(port_num, PortStatus::PORT_REMOVED);
+    return ReturnCode::SUCCESS;
   }
   ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie) {
     return ReturnCode::SUCCESS;
@@ -96,6 +99,7 @@ private:
 
   std::map<port_t, PortStatus> port_status;
   PortMonitor p_monitor;
+  mutable std::mutex status_mutex;
 };
 
 class DevMgrTest : public ::testing::Test {
@@ -103,6 +107,7 @@ public:
 
   void port_status(DevMgrInterface::port_t port_num,
                    const DevMgrInterface::PortStatus &status) {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
     cb_counts[status]++;
   }
 
@@ -119,12 +124,14 @@ protected:
   }
 
   void reset_counts(void) {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
     for (auto &kv : cb_counts) {
       kv.second = 0;
     }
   }
   DevMgrInterface::PortStatusCB port_cb;
   std::map<DevMgrInterface::PortStatus, uint32_t> cb_counts;
+  mutable std::mutex cnt_mutex;
   std::unique_ptr<TestDevMgrImplementation> g_mgr;
 };
 
@@ -136,28 +143,39 @@ TEST_F(DevMgrTest, cb_test) {
     g_mgr->set_port_status(i, DevMgrInterface::PortStatus::PORT_ADDED);
   }
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_ADDED], NPORTS) << "Port add callbacks incorrect"
-                                    << std::endl;
+  {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
+    ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_ADDED], NPORTS)
+        << "Port add callbacks incorrect" << std::endl;
+  }
   reset_counts();
   for (int i = 0; i < NPORTS; i++) {
     g_mgr->set_port_status(i, DevMgrInterface::PortStatus::PORT_DOWN);
   }
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_DOWN], NPORTS) << "Port down callbacks incorrect"
-                                    << std::endl;
-
+  {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
+    ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_DOWN], NPORTS)
+        << "Port down callbacks incorrect" << std::endl;
+  }
   for (int i = 0; i < NPORTS; i++) {
     g_mgr->set_port_status(i, DevMgrInterface::PortStatus::PORT_UP);
   }
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_UP], NPORTS) << "Port up callbacks incorrect"
-                                    << std::endl;
+  {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
+    ASSERT_EQ(cb_counts[DevMgrInterface::PortStatus::PORT_UP], NPORTS)
+        << "Port up callbacks incorrect" << std::endl;
+  }
   for (int i = 0; i < NPORTS; i++) {
     g_mgr->set_port_status(i, DevMgrInterface::PortStatus::PORT_REMOVED);
   }
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  ASSERT_EQ(NPORTS, cb_counts[DevMgrInterface::PortStatus::PORT_REMOVED])
-      << "Number of port remove callbacks incorrect" << std::endl;
+  {
+    std::lock_guard<std::mutex> lock(cnt_mutex);
+    ASSERT_EQ(NPORTS, cb_counts[DevMgrInterface::PortStatus::PORT_REMOVED])
+        << "Number of port remove callbacks incorrect" << std::endl;
+  }
 }
 
 class PacketInReceiver {
