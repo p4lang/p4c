@@ -14,6 +14,7 @@ function run_cpplint() {
 }
 
 run_cpplint $ROOT_DIR/modules/bm_sim/ modules
+run_cpplint $ROOT_DIR/modules/bm_apps/ modules
 run_cpplint $ROOT_DIR/targets/simple_switch targets
 run_cpplint $ROOT_DIR/targets/l2_switch targets
 run_cpplint $ROOT_DIR/targets/simple_router targets

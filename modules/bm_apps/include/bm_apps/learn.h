@@ -18,16 +18,16 @@
  *
  */
 
-#ifndef _BM_APPS_LEARN_H_
-#define _BM_APPS_LEARN_H_
+#ifndef BM_APPS_INCLUDE_BM_APPS_LEARN_H_
+#define BM_APPS_INCLUDE_BM_APPS_LEARN_H_
+
+#include <boost/shared_ptr.hpp>
 
 #include <string>
 #include <functional>
 #include <memory>
 #include <thread>
 #include <mutex>
-
-#include <boost/shared_ptr.hpp>
 
 namespace bm_runtime {
 namespace standard {
@@ -37,9 +37,11 @@ class StandardClient;
 }
 }
 
+namespace bm_apps {
+
 class LearnListener {
-public:
-  typedef unsigned long long buffer_id_t;
+ public:
+  typedef uint64_t buffer_id_t;
   typedef int switch_id_t;
   typedef int list_id_t;
 
@@ -51,14 +53,13 @@ public:
   };
 
   typedef std::function<void(const MsgInfo &msg_info,
-			     const char *, void *)> LearnCb;
+                             const char *, void *)> LearnCb;
 
-public:
+ public:
   LearnListener(
     const std::string &learn_socket = "ipc:///tmp/test_bm_learning.ipc",
     const std::string &thrift_addr = "localhost",
-    const int thrift_port = 9090
-  );
+    const int thrift_port = 9090);
 
   ~LearnListener();
 
@@ -72,11 +73,10 @@ public:
     return bm_client;
   }
 
-private:
+ private:
   void listen_loop();
-  void listen();
 
-private:
+ private:
   std::string socket_name{};
   std::string thrift_addr{};
   int thrift_port{};
@@ -88,4 +88,6 @@ private:
   boost::shared_ptr<bm_runtime::standard::StandardClient> bm_client{nullptr};
 };
 
-#endif
+}  // namespace bm_apps
+
+#endif  // BM_APPS_INCLUDE_BM_APPS_LEARN_H_

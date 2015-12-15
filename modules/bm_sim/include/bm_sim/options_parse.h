@@ -36,6 +36,7 @@ class InterfaceList {
     ifaces[port] = iface;
   }
   bool empty() { return ifaces.empty(); }
+  void clear() { ifaces.clear(); }
   // iterators
   iterator begin() { return ifaces.begin(); }
   const_iterator begin() const { return ifaces.begin(); }
@@ -59,9 +60,12 @@ class OptionsParser {
   int thrift_port{};
   int device_id{};
   // if true read/write packets from files instead of interfaces
-  bool useFiles{false};
+  bool use_files{false};
   // time to wait (in seconds) before starting packet processing
-  int waitTime{0};
+  int wait_time{0};
+  // if true read/write packets from nanomsg socket instead of interfaces
+  bool packet_in{false};
+  std::string packet_in_addr{};
   std::string event_logger_addr{};
   std::string file_logger{};
   bool console_logging{false};

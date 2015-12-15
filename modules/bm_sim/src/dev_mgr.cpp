@@ -18,6 +18,8 @@
  *
  */
 
+#include <nanomsg/pair.h>
+
 #include <cassert>
 #include <iostream>
 #include <mutex>
@@ -25,91 +27,18 @@
 #include <thread>
 #include <unordered_map>
 #include <string>
+#include <atomic>
 
 #define UNUSED(x) (void)(x)
 
 #include "bm_sim/dev_mgr.h"
 #include "bm_sim/logger.h"
-#include "bm_sim/port_monitor.h"
-extern "C" {
-#include "BMI/bmi_port.h"
-}
+
+#include "bm_sim/nn.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // These are private implementations
-
-// Implementation that uses the BMI to send/receive packets
-// from true interfaces
-
-class BmiDevMgrImplementation : public DevMgrInterface {
- public:
-  BmiDevMgrImplementation() {
-    assert(!bmi_port_create_mgr(&port_mgr));
-    p_monitor.start(this);
-  }
-
-  ~BmiDevMgrImplementation() {
-    p_monitor.stop();
-    bmi_port_destroy_mgr(port_mgr);
-  }
-
-  ReturnCode port_add(const std::string &iface_name, port_t port_num,
-                      const char *in_pcap, const char *out_pcap) {
-    if (bmi_port_interface_add(port_mgr, iface_name.c_str(), port_num, in_pcap,
-                               out_pcap))
-      return ReturnCode::ERROR;
-    p_monitor.notify(port_num, PortStatus::PORT_ADDED);
-    return ReturnCode::SUCCESS;
-  }
-
-  ReturnCode port_remove(port_t port_num) {
-    if (bmi_port_interface_remove(port_mgr, port_num))
-      return ReturnCode::ERROR;
-    p_monitor.notify(port_num, PortStatus::PORT_REMOVED);
-    return ReturnCode::SUCCESS;
-  }
-
-  void transmit_fn(int port_num, const char *buffer, int len) {
-    bmi_port_send(port_mgr, port_num, buffer, len);
-  }
-
-  void start() {
-    assert(port_mgr);
-    int exitCode = bmi_start_mgr(port_mgr);
-    if (exitCode != 0)
-      bm_fatal_error("Could not start thread receiving packets");
-  }
-
-  ReturnCode register_status_cb(const PortStatus &type,
-                                const PortStatusCB &port_cb) {
-    p_monitor.register_cb(type, port_cb);
-    return ReturnCode::SUCCESS;
-  }
-
-  ReturnCode set_packet_handler(PacketHandler handler, void *cookie) {
-    typedef void function_t(int, const char *, int, void *);
-    function_t **ptr_fun = handler.target<function_t *>();
-    assert(ptr_fun);
-    assert(*ptr_fun);
-    assert(!bmi_set_packet_handler(port_mgr, *ptr_fun, cookie));
-    return ReturnCode::SUCCESS;
-  }
-
-  bool port_is_up(port_t port) {
-    bool is_up = false;
-    assert(port_mgr);
-    int rval = bmi_port_interface_is_up(port_mgr, port, &is_up);
-    is_up &= !(rval);
-    return is_up;
-  }
-
- private:
-  bmi_port_mgr_t *port_mgr{nullptr};
-  PortMonitor p_monitor;
-};
-
-////////////////////////////////////////////////////////////////////////////////
 
 // Implementation which uses Pcap files to read/write packets
 class FilesDevMgrImplementation : public DevMgrInterface {
@@ -140,7 +69,7 @@ class FilesDevMgrImplementation : public DevMgrInterface {
     reader_thread.detach();
   }
 
-  ReturnCode set_packet_handler(PacketHandler handler, void *cookie) {
+  ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie) {
     reader.set_packet_handler(handler, cookie);
     return ReturnCode::SUCCESS;
   }
@@ -167,23 +96,169 @@ class FilesDevMgrImplementation : public DevMgrInterface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Implementation which uses a nanomsg PAIR socket to receive / send packets
+// TODO(antonin): moved lower-level NN code to separate class ?
+class PacketInDevMgrImplementation : public DevMgrInterface {
+ public:
+  explicit PacketInDevMgrImplementation(const std::string &addr)
+      : addr(addr), s(AF_SP, NN_PAIR) {
+    s.bind(addr.c_str());
+    int rcv_timeout_ms = 100;
+    s.setsockopt(NN_SOL_SOCKET, NN_RCVTIMEO,
+                 &rcv_timeout_ms, sizeof(rcv_timeout_ms));
+  }
+
+  ~PacketInDevMgrImplementation() {
+    stop_receive_thread = true;
+    receive_thread.join();
+  }
+
+  ReturnCode port_add(const std::string &iface_name, port_t port_num,
+                      const char *in_pcap, const char *out_pcap) {
+    // TODO(antonin): add a special message to add ports
+    UNUSED(iface_name);
+    UNUSED(port_num);
+    UNUSED(in_pcap);
+    UNUSED(out_pcap);
+    return ReturnCode::SUCCESS;
+  }
+
+  ReturnCode port_remove(port_t port_num) {
+    // TODO(antonin): add a special message to remove ports
+    UNUSED(port_num);
+    return ReturnCode::SUCCESS;
+  }
+
+  void transmit_fn(int port_num, const char *buffer, int len);
+
+  void start() {
+    if (started || stop_receive_thread)
+      return;
+    receive_thread = std::thread(
+        &PacketInDevMgrImplementation::receive_loop, this);
+    started = true;
+  }
+
+  ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie) {
+    pkt_handler = handler;
+    pkt_cookie = cookie;
+    return ReturnCode::SUCCESS;
+  }
+
+  ReturnCode register_status_cb(const PortStatus &type,
+                                const PortStatusCB &port_cb) {
+    // TODO(antonin)
+    UNUSED(type);
+    UNUSED(port_cb);
+    return ReturnCode::SUCCESS;
+  }
+
+  bool port_is_up(port_t port) {
+    // TODO(antonin)
+    UNUSED(port);
+    return true;
+  }
+
+ private:
+  void receive_loop();
+
+ private:
+  struct packet_hdr_t {
+    int port;
+    int len;
+  } __attribute__((packed));
+
+ private:
+  std::string addr{};
+  nn::socket s;
+  PacketHandler pkt_handler{};
+  void *pkt_cookie{nullptr};
+  std::thread receive_thread{};
+  std::atomic<bool> stop_receive_thread{false};
+  std::atomic<bool> started{false};
+};
+
+void
+PacketInDevMgrImplementation::transmit_fn(int port_num,
+                                          const char *buffer, int len) {
+  struct nn_msghdr msghdr;
+  std::memset(&msghdr, 0, sizeof(msghdr));
+  struct nn_iovec iov;
+
+  packet_hdr_t packet_hdr;
+  packet_hdr.port = port_num;
+  packet_hdr.len = len;
+
+  // not sure I can do better than this here
+  void *msg = nn::allocmsg(sizeof(packet_hdr) + len, 0);
+  std::memcpy(msg, &packet_hdr, sizeof(packet_hdr));
+  std::memcpy(static_cast<char *>(msg) + sizeof(packet_hdr), buffer, len);
+  iov.iov_base = &msg;
+  iov.iov_len = NN_MSG;
+
+  msghdr.msg_iov = &iov;
+  msghdr.msg_iovlen = 1;
+
+  s.sendmsg(&msghdr, 0);
+  std::cout << "packet send for port " << port_num << std::endl;
+}
+
+void
+PacketInDevMgrImplementation::receive_loop() {
+  struct nn_msghdr msghdr;
+  struct nn_iovec iov;
+  packet_hdr_t packet_hdr;
+  void *msg = nullptr;
+  iov.iov_base = &msg;
+  iov.iov_len = NN_MSG;
+  std::memset(&msghdr, 0, sizeof(msghdr));
+  msghdr.msg_iov = &iov;
+  msghdr.msg_iovlen = 1;
+  while (!stop_receive_thread) {
+    int rc = s.recvmsg(&msghdr, 0);
+    if (rc < 0) continue;
+    assert(msg);
+    if (pkt_handler) {
+      std::memcpy(&packet_hdr, msg, sizeof(packet_hdr));
+      char *data = static_cast<char *>(msg) + sizeof(packet_hdr);
+      std::cout << "packet in received on port " << packet_hdr.port
+                << std::endl;
+      pkt_handler(packet_hdr.port, data, packet_hdr.len, pkt_cookie);
+    }
+    nn::freemsg(msg);
+    msg = nullptr;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 DevMgr::DevMgr() : impl(nullptr) {}
+
+void
+DevMgr::set_dev_mgr(std::unique_ptr<DevMgrInterface> my_impl) {
+  assert(!impl);
+  impl = std::move(my_impl);
+}
+
+void
+DevMgr::set_dev_mgr_files(unsigned wait_time_in_seconds) {
+  assert(!impl);
+  impl = std::unique_ptr<DevMgrInterface>(new FilesDevMgrImplementation(
+      false /* no real-time packet replay */, wait_time_in_seconds));
+}
+
+void
+DevMgr::set_dev_mgr_packet_in(const std::string &addr) {
+  assert(!impl);
+  (void) addr;
+  impl = std::unique_ptr<DevMgrInterface>(
+      new PacketInDevMgrImplementation(addr));
+}
 
 void
 DevMgr::start() {
   assert(impl);
   impl->start();
-}
-
-void
-DevMgr::setUseFiles(bool useFiles, unsigned wait_time_in_seconds) {
-  assert(!impl);
-  if (useFiles) {
-    impl = std::unique_ptr<DevMgrInterface>(new FilesDevMgrImplementation(
-        false /* no real-time packet replay */, wait_time_in_seconds));
-  } else {
-    impl = std::unique_ptr<DevMgrInterface>(new BmiDevMgrImplementation());
-  }
 }
 
 PacketDispatcherInterface::ReturnCode
@@ -215,7 +290,7 @@ DevMgr::port_remove(port_t port_num) {
 }
 
 PacketDispatcherInterface::ReturnCode
-DevMgr::set_packet_handler(PacketHandler handler, void *cookie) {
+DevMgr::set_packet_handler(const PacketHandler &handler, void *cookie) {
   assert(impl);
   return impl->set_packet_handler(handler, cookie);
 }

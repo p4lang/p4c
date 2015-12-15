@@ -77,25 +77,30 @@ OptionsParser::parse(int argc, char *argv[]) {
   po::options_description description("Options");
 
   description.add_options()
-    ("help,h", "Display this help message")
-    ("interface,i", po::value<std::vector<interface> >()->composing(),
-     "<port-num>@<interface-name>: "
-     "Attach network interface <interface-name> as port <port-num> at startup. "
-     "Can appear multiple times")
-    ("pcap", "Generate pcap files for interfaces")
-    ("useFiles", po::value<int>(), "Read/write packets from files (interface X "
-     "corresponds to two files X_in.pcap and X_out.pcap).  Argument is the time"
-     "to wait (in seconds) before starting to process the packet files.")
-    ("thrift-port", po::value<int>(),
-     "TCP port on which to run the Thrift runtime server")
-    ("device-id", po::value<int>(),
-     "Device ID, used to identify the device in IPC messages (default 0)")
-    ("nanolog", po::value<std::string>(),
-     "IPC socket to use for nanomsg pub/sub logs (default: no nanomsg logging")
-    ("log-console",
-     "Enable logging on stdout")
-    ("log-file", po::value<std::string>(),
-     "Enable logging to given file");
+      ("help,h", "Display this help message")
+      ("interface,i", po::value<std::vector<interface> >()->composing(),
+       "<port-num>@<interface-name>: "
+       "Attach network interface <interface-name> as port <port-num> at "
+       "startup. Can appear multiple times")
+      ("pcap", "Generate pcap files for interfaces")
+      ("use-files", po::value<int>(), "Read/write packets from files "
+       "(interface X corresponds to two files X_in.pcap and X_out.pcap).  "
+       "Argument is the time to wait (in seconds) before starting to process "
+       "the packet files.")
+      ("packet-in", po::value<std::string>(),
+       "Enable receiving packet on this (nanomsg) socket. "
+       "The --interface options will be ignored.")
+      ("thrift-port", po::value<int>(),
+       "TCP port on which to run the Thrift runtime server")
+      ("device-id", po::value<int>(),
+       "Device ID, used to identify the device in IPC messages (default 0)")
+      ("nanolog", po::value<std::string>(),
+       "IPC socket to use for nanomsg pub/sub logs "
+       "(default: no nanomsg logging")
+      ("log-console",
+       "Enable logging on stdout")
+      ("log-file", po::value<std::string>(),
+       "Enable logging to given file");
 
   po::options_description hidden;
   hidden.add_options()
@@ -171,11 +176,23 @@ OptionsParser::parse(int argc, char *argv[]) {
     pcap = true;
   }
 
-  if (vm.count("useFiles")) {
-    useFiles = true;
-    waitTime = vm["useFiles"].as<int>();
-    if (waitTime < 0)
-      waitTime = 0;
+  if (vm.count("use-files")) {
+    use_files = true;
+    wait_time = vm["use-files"].as<int>();
+    if (wait_time < 0)
+      wait_time = 0;
+  }
+
+  if (vm.count("packet-in")) {
+    packet_in = true;
+    packet_in_addr = vm["packet-in"].as<std::string>();
+    // very important to clear interface list
+    ifaces.clear();
+  }
+
+  if (use_files && packet_in) {
+    std::cout << "Error: --use-files and --packet-in are exclusive\n";
+    exit(1);
   }
 
   assert(vm.count("input-config"));

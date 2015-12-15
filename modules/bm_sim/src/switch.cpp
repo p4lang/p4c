@@ -82,12 +82,17 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
   if (parser.file_logger != "")
     Logger::set_logger_file(parser.file_logger);
 
-  setUseFiles(parser.useFiles, parser.waitTime);
+  if (parser.use_files)
+    set_dev_mgr_files(parser.wait_time);
+  else if (parser.packet_in)
+    set_dev_mgr_packet_in(parser.packet_in_addr);
+  else
+    set_dev_mgr_bmi();
 
   for (const auto &iface : parser.ifaces) {
     std::cout << "Adding interface " << iface.second
               << " as port " << iface.first
-              << (parser.useFiles ? " (files)" : "")
+              << (parser.use_files ? " (files)" : "")
               << std::endl;
 
     const char* inFileName = NULL;
@@ -96,7 +101,7 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
     std::string inFile;
     std::string outFile;
 
-    if (parser.useFiles) {
+    if (parser.use_files) {
         inFile = iface.second + "_in.pcap";
         inFileName = inFile.c_str();
         outFile = iface.second + "_out.pcap";

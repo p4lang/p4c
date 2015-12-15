@@ -31,7 +31,7 @@
 
 namespace {
 
-LearnListener *listener;
+bm_apps::LearnListener *listener;
 
 typedef struct {
   char src_addr[6];
@@ -44,7 +44,7 @@ namespace runtime = bm_runtime::standard;
 
 namespace {
 
-void learn_cb(const LearnListener::MsgInfo &msg_info,
+void learn_cb(const bm_apps::LearnListener::MsgInfo &msg_info,
               const char *data, void *cookie) {
   std::cout << "CB with " << msg_info.num_samples << " samples\n";
 
@@ -84,7 +84,7 @@ void learn_cb(const LearnListener::MsgInfo &msg_info,
 }  // namespace
 
 int main() {
-  listener = new LearnListener();
+  listener = new bm_apps::LearnListener();
   listener->register_cb(learn_cb, nullptr);
   listener->start();
 

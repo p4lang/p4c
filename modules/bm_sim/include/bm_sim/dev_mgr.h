@@ -47,7 +47,7 @@ class DevMgrInterface : public PacketDispatcherInterface {
   virtual ReturnCode register_status_cb(const PortStatus &status,
                                         const PortStatusCB &cb) = 0;
 
-  virtual ReturnCode set_packet_handler(PacketHandler handler,
+  virtual ReturnCode set_packet_handler(const PacketHandler &handler,
                                         void *cookie) = 0;
 
   virtual bool port_is_up(port_t port_num) = 0;
@@ -59,12 +59,19 @@ class DevMgr : public DevMgrInterface {
  public:
   DevMgr();
 
-  // If useFiles is true I/O is performed from PCAP files.
+  // set_dev_* : should be called before port_add and port_remove.
+
+  // meant for testing
+  void set_dev_mgr(std::unique_ptr<DevMgrInterface> my_impl);
+
+  void set_dev_mgr_bmi();
+
   // The interface names are instead interpreted as file names.
-  // Should be called before port_add and port_remove.
   // wait_time_in_seconds indicate how long the starting thread should
   // wait before starting to process packets.
-  void setUseFiles(bool useFiles, unsigned wait_time_in_seconds);
+  void set_dev_mgr_files(unsigned wait_time_in_seconds);
+
+  void set_dev_mgr_packet_in(const std::string &addr);
 
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
                       const char *in_pcap, const char *out_pcap);
@@ -87,8 +94,9 @@ class DevMgr : public DevMgrInterface {
   DevMgr &operator=(DevMgr &&other) = delete;
 
  protected:
-  virtual ~DevMgr() {}
-  ReturnCode set_packet_handler(PacketHandler handler, void *cookie);
+  ~DevMgr() {}
+
+  ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie);
 
  private:
   // Actual implementation (private)

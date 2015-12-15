@@ -15,6 +15,8 @@
 
 #include "bm_sim/dev_mgr.h"
 #include "bm_sim/port_monitor.h"
+#include "bm_apps/packet_pipe.h"
+
 #include <algorithm>
 #include <cassert>
 #include <chrono>
@@ -22,6 +24,9 @@
 #include <iostream>
 #include <map>
 #include <thread>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
 class TestDevMgrImplementation : public DevMgrInterface {
 
@@ -83,7 +88,7 @@ private:
     port_status.erase(it);
     p_monitor.notify(port_num, PortStatus::PORT_REMOVED);
   }
-  ReturnCode set_packet_handler(PacketHandler handler, void *cookie) {
+  ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie) {
     return ReturnCode::SUCCESS;
   }
   void transmit_fn(int port_num, const char *buffer, int len) {}
@@ -153,4 +158,123 @@ TEST_F(DevMgrTest, cb_test) {
   std::this_thread::sleep_for(std::chrono::seconds(3));
   ASSERT_EQ(NPORTS, cb_counts[DevMgrInterface::PortStatus::PORT_REMOVED])
       << "Number of port remove callbacks incorrect" << std::endl;
+}
+
+class PacketInReceiver {
+ public:
+  enum class Status { CAN_READ, CAN_RECEIVE };
+
+  PacketInReceiver(size_t max_size)
+      : max_size(max_size) {
+    buffer_.reserve(max_size);
+  }
+
+  void receive(int port_num, const char *buffer, int len, void *cookie) {
+    (void) cookie;
+    if(len > max_size) return;
+    std::unique_lock<std::mutex> lock(mutex);
+    while (status != Status::CAN_RECEIVE) {
+      can_receive.wait(lock);
+    }
+    buffer_.insert(buffer_.end(), buffer, buffer + len);
+    port = port_num;
+    status = Status::CAN_READ;
+    can_read.notify_one();
+  }
+
+  void read(char *dst, size_t len, int *recv_port) {
+    len = (len > max_size) ? max_size : len;
+    std::unique_lock<std::mutex> lock(mutex);
+    while(status != Status::CAN_READ) {
+      can_read.wait(lock);
+    }
+    std::copy(buffer_.begin(), buffer_.begin() + len, dst);
+    buffer_.clear();
+    *recv_port = port;
+    status = Status::CAN_RECEIVE;
+    can_receive.notify_one();
+  }
+
+  Status check_status() {
+    std::unique_lock<std::mutex> lock(mutex);
+    return status;
+  }
+
+ private:
+  size_t max_size;
+  std::vector<char> buffer_;
+  int port;
+  Status status{Status::CAN_RECEIVE};
+  mutable std::mutex mutex{};
+  mutable std::condition_variable can_receive{};
+  mutable std::condition_variable can_read{};
+};
+
+// is here because DevMgr has a protected destructor
+class PacketInSwitch : public DevMgr {
+ public:
+  void set_handler(const PacketHandler &handler, void *cookie) {
+    set_packet_handler(handler, cookie);
+  }
+};
+
+class PacketInDevMgrTest : public ::testing::Test {
+ protected:
+  static constexpr size_t max_buffer_size = 512;
+
+  PacketInDevMgrTest()
+      : packet_inject(addr) { }
+
+  virtual void SetUp() {
+    sw.set_dev_mgr_packet_in(addr);
+    sw.start();
+    auto cb_switch = std::bind(&PacketInReceiver::receive, &recv_switch,
+                               std::placeholders::_1, std::placeholders::_2,
+                               std::placeholders::_3, std::placeholders::_4);
+    sw.set_handler(cb_switch, nullptr);
+
+    packet_inject.start();
+    auto cb_lib = std::bind(&PacketInReceiver::receive, &recv_lib,
+                            std::placeholders::_1, std::placeholders::_2,
+                            std::placeholders::_3, std::placeholders::_4);
+    packet_inject.set_packet_receiver(cb_lib, nullptr);
+  }
+
+  virtual void TearDown() {
+  }
+
+  bool check_recv(PacketInReceiver *receiver,
+                  int send_port, const char *send_buffer, size_t size) {
+    char recv_buffer[max_buffer_size];
+    memset(recv_buffer, 0, sizeof(recv_buffer));
+    if (size > sizeof(recv_buffer)) return false;
+    int recv_port = -1;
+    receiver->read(recv_buffer, size, &recv_port);
+    if (recv_port != send_port) return false;
+    return !memcmp(recv_buffer, send_buffer, size);
+  }
+
+  const std::string addr = "ipc:///tmp/test_packet_in_abc123";
+
+  PacketInReceiver recv_switch{max_buffer_size};
+  PacketInReceiver recv_lib{max_buffer_size};
+
+  PacketInSwitch sw;
+
+  bm_apps::PacketInject packet_inject;
+};
+
+TEST_F(PacketInDevMgrTest, PacketInTest) {
+  constexpr int port = 2;
+  const char pkt[] = {'\x0a', '\xba'};
+  ASSERT_EQ(PacketInReceiver::Status::CAN_RECEIVE, recv_switch.check_status());
+  ASSERT_EQ(PacketInReceiver::Status::CAN_RECEIVE, recv_lib.check_status());
+  // switch -> lib
+  sw.transmit_fn(port, pkt, sizeof(pkt));
+  ASSERT_TRUE(check_recv(&recv_lib, port, pkt, sizeof(pkt)));
+  ASSERT_EQ(PacketInReceiver::Status::CAN_RECEIVE, recv_switch.check_status());
+  ASSERT_EQ(PacketInReceiver::Status::CAN_RECEIVE, recv_lib.check_status());
+  // lib -> switch
+  packet_inject.send(port, pkt, sizeof(pkt));
+  ASSERT_TRUE(check_recv(&recv_switch, port, pkt, sizeof(pkt)));
 }
