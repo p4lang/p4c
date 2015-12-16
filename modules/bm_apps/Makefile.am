@@ -1,4 +1,4 @@
-SUBDIRS = include
+SUBDIRS = include . examples
 
 AM_CPPFLAGS += \
 -I$(top_srcdir)/modules/bm_sim/include \

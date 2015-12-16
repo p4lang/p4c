@@ -98,6 +98,7 @@ AC_CONFIG_FILES([Makefile
 		modules/BMI/Makefile
 		modules/bm_apps/Makefile
 		modules/bm_apps/include/Makefile
+		modules/bm_apps/examples/Makefile
 		targets/Makefile
 		targets/simple_router/Makefile
 		targets/l2_switch/Makefile
