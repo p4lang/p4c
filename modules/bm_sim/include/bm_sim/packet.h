@@ -72,8 +72,7 @@ class Packet {
 
   typedef PacketBuffer::state_t buffer_state_t;
 
- public:
-  ~Packet();
+  virtual ~Packet();
 
   packet_id_t get_packet_id() const { return packet_id; }
 
@@ -150,7 +149,6 @@ class Packet {
   Packet(Packet &&other) noexcept;
   Packet &operator=(Packet &&other) noexcept;
 
- public:
   // cpplint false positive for rvalue references
   static Packet make_new(int ingress_port, packet_id_t id, int ingress_length,
   // NOLINTNEXTLINE(whitespace/operators)
@@ -162,7 +160,7 @@ class Packet {
   // for testing
   static Packet make_new(packet_id_t id = 0);
 
- private:
+ protected:
   Packet(int ingress_port, packet_id_t id, copy_id_t copy_id,
          int ingress_length, PacketBuffer &&buffer);
 
@@ -174,7 +172,6 @@ class Packet {
   void update_signature(uint64_t seed = 0);
   void set_ingress_ts();
 
- private:
   int ingress_port{-1};
   int egress_port{-1};
   packet_id_t packet_id{0};
