@@ -61,8 +61,10 @@ class PacketInjectImp final {
   }
 
   void stop() {
-    std::unique_lock<std::mutex> lock(mutex);
-    stop_receive_thread = true;
+    {
+      std::unique_lock<std::mutex> lock(mutex);
+      stop_receive_thread = true;
+    }
     receive_thread.join();
   }
 
@@ -121,16 +123,30 @@ PacketInjectImp::receive_loop() {
   std::memset(&msghdr, 0, sizeof(msghdr));
   msghdr.msg_iov = &iov;
   msghdr.msg_iovlen = 1;
-  while (!stop_receive_thread) {
-    int rc = s.recvmsg(&msghdr, 0);
-    if (rc < 0) continue;
+  while (true) {
+    if (s.recvmsg(&msghdr, 0) <= 0) {
+      std::unique_lock<std::mutex> lock(mutex);
+      if (stop_receive_thread) return;
+      continue;
+    }
     assert(msg);
-    if (cb_fn) {
+
+    // I choose to make copies instead of holding the lock for the callback
+    PacketReceiveCb cb_fn_;
+    void *cb_cookie_;
+    {
+      std::unique_lock<std::mutex> lock(mutex);
+      // I don't believe this is expensive
+      cb_fn_ = cb_fn;
+      cb_cookie_ = cb_cookie;
+    }
+
+    if (cb_fn_) {
       std::memcpy(&packet_hdr, msg, sizeof(packet_hdr));
       char *data = static_cast<char *>(msg) + sizeof(packet_hdr);
       std::cout << "packet in received on port " << packet_hdr.port
                 << std::endl;
-      cb_fn(packet_hdr.port, data, packet_hdr.len, cb_cookie);
+      cb_fn_(packet_hdr.port, data, packet_hdr.len, cb_cookie_);
     }
     nn::freemsg(msg);
     msg = nullptr;
