@@ -67,6 +67,9 @@ PHV::push_back_header(const std::string &header_name,
 
   if (header_type.is_VL_header()) {
     headers.back().VL_expr = header_type.resolve_VL_expr(header_index);
+
+    for (const int offset : header_type.get_VL_input_offsets())
+      headers.back()[offset].set_arith(true);
   }
 }
 

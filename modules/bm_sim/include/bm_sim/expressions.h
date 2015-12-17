@@ -125,13 +125,15 @@ class ArithExpression : public Expression {
 
 class VLHeaderExpression {
  public:
-  explicit VLHeaderExpression(const ArithExpression &expr)
-    : expr(expr) {}
+  explicit VLHeaderExpression(const ArithExpression &expr);
 
   ArithExpression resolve(header_id_t header_id);
 
+  const std::vector<int> &get_input_offsets() const;
+
  private:
   ArithExpression expr;
+  std::vector<int> offsets{};
 };
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_EXPRESSIONS_H_

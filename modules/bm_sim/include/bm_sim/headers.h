@@ -99,6 +99,10 @@ class HeaderType : public NamedP4Object {
     return expr;
   }
 
+  const std::vector<int> &get_VL_input_offsets() const {
+    return VL_expr_raw->get_input_offsets();
+  }
+
   int get_VL_offset() const {
     return VL_offset;
   }

@@ -380,10 +380,26 @@ int Expression::assign_dest_registers() {
   return registers_cnt;
 }
 
+VLHeaderExpression::VLHeaderExpression(const ArithExpression &expr)
+    : expr(expr) {
+  for (const Op &op : expr.ops) {
+    if (op.opcode == ExprOpcode::LOAD_LOCAL) {
+      offsets.push_back(op.local_offset);
+    }
+  }
+}
+
+const std::vector<int> &
+VLHeaderExpression::get_input_offsets() const {
+  return offsets;
+}
+
 ArithExpression VLHeaderExpression::resolve(header_id_t header_id) {
   assert(expr.built);
 
-  std::vector<Op> &ops = expr.ops;
+  ArithExpression new_expr = expr;
+
+  std::vector<Op> &ops = new_expr.ops;
   for (size_t i = 0; i < ops.size(); i++) {
     Op &op = ops[i];
     if (op.opcode == ExprOpcode::LOAD_LOCAL) {
@@ -392,5 +408,5 @@ ArithExpression VLHeaderExpression::resolve(header_id_t header_id) {
       op.field.header = header_id;
     }
   }
-  return expr;
+  return std::move(new_expr);
 }
