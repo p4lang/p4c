@@ -173,7 +173,9 @@ NNEventListener::receive_loop() {
     std::string pid =
         std::to_string(msg_hdr->id) + "." + std::to_string(msg_hdr->copy_id);
 
+    std::unique_lock<std::mutex> lock(mutex);
     events[pid].push_back({static_cast<NNEventType>(msg_hdr->type), object_id});
+    cond_new_event.notify_all();
   }
 }
 
@@ -246,7 +248,7 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
   // We make the switch a shared resource for all tests. This is mainly because
   // the simple_switch target detaches threads
   static void SetUpTestCase() {
-    Logger::set_logger_console();
+    // Logger::set_logger_console();
     // TODO(antonin): remove when event-logger cleaned-up
     delete event_logger;
     event_logger = new EventLogger(
