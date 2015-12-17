@@ -144,13 +144,14 @@ OptionsParser::parse(int argc, char *argv[]) {
     device_id = vm["device-id"].as<int>();
   }
 
+  // TODO(antonin): clean this up
   // event_logger_addr = std::string("ipc:///tmp/bm-")
   //   .append(std::to_string(device_id))
   //   .append("-log.ipc");
   if (vm.count("nanolog")) {
     event_logger_addr = vm["nanolog"].as<std::string>();
     event_logger = new EventLogger(
-      TransportIface::create_instance<TransportNanomsg>(event_logger_addr));
+        TransportIface::create_instance<TransportNanomsg>(event_logger_addr));
   }
 
   if (vm.count("log-console") && vm.count("log-file")) {

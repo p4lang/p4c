@@ -87,9 +87,21 @@ class SimpleSwitch : public Switch {
 
     ELOGGER->packet_in(*packet);
 
+    PHV *phv = packet->get_phv();
     // many current P4 programs assume this
     // it is also part of the original P4 spec
-    packet->get_phv()->reset_metadata();
+    phv->reset_metadata();
+
+    // setting standard metadata
+    phv->get_field("standard_metadata.ingress_port").set(port_num);
+    phv->get_field("standard_metadata.packet_length").set(len);
+    Field &f_instance_type = phv->get_field("standard_metadata.instance_type");
+    f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
+
+    if (phv->has_field("intrinsic_metadata.ingress_global_timestamp")) {
+      phv->get_field("intrinsic_metadata.ingress_global_timestamp")
+        .set(get_ts().count());
+    }
 
     input_buffer.push_front(std::unique_ptr<Packet>(packet));
     return 0;
@@ -126,7 +138,7 @@ class SimpleSwitch : public Switch {
     PKT_INSTANCE_TYPE_INGRESS_CLONE,
     PKT_INSTANCE_TYPE_EGRESS_CLONE,
     PKT_INSTANCE_TYPE_COALESCED,
-    PKT_INSTANCE_TYPE_INGRESS_RECIRC,
+    PKT_INSTANCE_TYPE_RECIRC,
     PKT_INSTANCE_TYPE_REPLICATION,
     PKT_INSTANCE_TYPE_RESUBMIT,
   };
@@ -144,7 +156,12 @@ class SimpleSwitch : public Switch {
 
   ts_res get_ts() const;
 
+  // TODO(antonin): switch to pass by value?
   void enqueue(int egress_port, std::unique_ptr<Packet> &&pkt);
+
+  std::unique_ptr<Packet> copy_ingress_pkt(
+      const std::unique_ptr<Packet> &pkt,
+      PktInstanceType copy_type, p4object_id_t field_list_id);
 
  private:
   int max_port;

@@ -109,8 +109,10 @@ class PacketInDevMgrImplementation : public DevMgrInterface {
   }
 
   ~PacketInDevMgrImplementation() {
-    stop_receive_thread = true;
-    receive_thread.join();
+    if (started) {
+      stop_receive_thread = true;
+      receive_thread.join();
+    }
   }
 
   ReturnCode port_add(const std::string &iface_name, port_t port_num,

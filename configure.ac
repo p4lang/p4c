@@ -75,6 +75,7 @@ AC_CHECK_HEADER([boost/thread.hpp], [], [AC_MSG_ERROR([Boost threading headers n
 AC_CHECK_HEADER([boost/multiprecision/gmp.hpp], [], [AC_MSG_ERROR([Missing boost Multiprecision headers])])
 AC_CHECK_HEADER([boost/program_options.hpp], [], [AC_MSG_ERROR([Missing boost program options header])])
 AC_CHECK_HEADER([boost/functional/hash.hpp], [], [AC_MSG_ERROR([Missing boost functional hash header])])
+AC_CHECK_HEADER([boost/filesystem.hpp], [], [AC_MSG_ERROR([Missing boost filesystem header])])
 AC_CHECK_HEADER([thrift/Thrift.h], [], [AC_MSG_ERROR([Thrift headers not found. Install Thrift from http://thrift.apache.org/docs/install/])])
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -104,5 +105,6 @@ AC_CONFIG_FILES([Makefile
 		targets/l2_switch/Makefile
 		targets/l2_switch/learn_client/Makefile
 		targets/simple_switch/Makefile
+		targets/simple_switch/tests/Makefile
 		tests/Makefile])
 AC_OUTPUT

@@ -230,10 +230,6 @@ class PacketInReceiver {
 
 // is here because DevMgr has a protected destructor
 class PacketInSwitch : public DevMgr {
- public:
-  void set_handler(const PacketHandler &handler, void *cookie) {
-    set_packet_handler(handler, cookie);
-  }
 };
 
 class PacketInDevMgrTest : public ::testing::Test {
@@ -249,7 +245,7 @@ class PacketInDevMgrTest : public ::testing::Test {
     auto cb_switch = std::bind(&PacketInReceiver::receive, &recv_switch,
                                std::placeholders::_1, std::placeholders::_2,
                                std::placeholders::_3, std::placeholders::_4);
-    sw.set_handler(cb_switch, nullptr);
+    sw.set_packet_handler(cb_switch, nullptr);
 
     packet_inject.start();
     auto cb_lib = std::bind(&PacketInReceiver::receive, &recv_lib,
