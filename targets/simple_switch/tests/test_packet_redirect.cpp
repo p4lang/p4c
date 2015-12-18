@@ -270,7 +270,6 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
 
   // Per-test-case tear-down.
   static void TearDownTestCase() {
-    Packet::unset_phv_factory();
     delete event_logger;
     event_logger = nullptr;
     delete test_switch;
@@ -288,9 +287,9 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
     events.start();
 
     // default actions for all tables
-    test_switch->mt_set_default_action("t_ingress_1", "_nop", ActionData());
-    test_switch->mt_set_default_action("t_ingress_2", "_nop", ActionData());
-    test_switch->mt_set_default_action("t_egress", "_nop", ActionData());
+    test_switch->mt_set_default_action(0, "t_ingress_1", "_nop", ActionData());
+    test_switch->mt_set_default_action(0, "t_ingress_2", "_nop", ActionData());
+    test_switch->mt_set_default_action(0, "t_egress", "_nop", ActionData());
   }
 
   virtual void TearDown() {
@@ -350,7 +349,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Baseline) {
   ActionData data;
   data.push_back_action_data(port_out);
   entry_handle_t handle;
-  MatchErrorCode rc = test_switch->mt_add_entry("t_ingress_1", match_key,
+  MatchErrorCode rc = test_switch->mt_add_entry(0, "t_ingress_1", match_key,
                                                 "_set_port", std::move(data),
                                                 &handle);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
@@ -383,7 +382,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
   ActionData data;
   data.push_back_action_data(mgrp);
   entry_handle_t handle;
-  MatchErrorCode rc = test_switch->mt_add_entry("t_ingress_1", match_key,
+  MatchErrorCode rc = test_switch->mt_add_entry(0, "t_ingress_1", match_key,
                                                 "_multicast", std::move(data),
                                                 &handle);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
@@ -462,7 +461,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneI2E) {
   data_1.push_back_action_data(port_out);
   entry_handle_t h_1;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_ingress_1", match_key_1,
+            test_switch->mt_add_entry(0, "t_ingress_1", match_key_1,
                                       "_set_port", std::move(data_1), &h_1));
 
   std::vector<MatchKeyParam> match_key_2;
@@ -473,8 +472,9 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneI2E) {
   data_2.push_back_action_data(mirror_id);
   entry_handle_t h_2;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_ingress_2", match_key_2, "_clone_i2e",
-                                      std::move(data_2), &h_2, 1));
+            test_switch->mt_add_entry(0, "t_ingress_2", match_key_2,
+                                      "_clone_i2e", std::move(data_2),
+                                      &h_2, 1));
 
   test_switch->mirroring_mapping_add(mirror_id, port_out_copy);
 
@@ -522,7 +522,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneE2E) {
   data_1.push_back_action_data(port_out);
   entry_handle_t h_1;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_ingress_1", match_key_1,
+            test_switch->mt_add_entry(0, "t_ingress_1", match_key_1,
                                       "_set_port", std::move(data_1), &h_1));
 
   std::vector<MatchKeyParam> match_key_2;
@@ -534,7 +534,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneE2E) {
   data_2.push_back_action_data(mirror_id);
   entry_handle_t h_2;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_egress", match_key_2, "_clone_e2e",
+            test_switch->mt_add_entry(0, "t_egress", match_key_2, "_clone_e2e",
                                       std::move(data_2), &h_2, 1));
 
   test_switch->mirroring_mapping_add(mirror_id, port_out_copy);
@@ -585,7 +585,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
   data_1.push_back_action_data(port_out_1);
   entry_handle_t h_1;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_ingress_1", match_key_1,
+            test_switch->mt_add_entry(0, "t_ingress_1", match_key_1,
                                       "_set_port", std::move(data_1), &h_1));
 
   std::vector<MatchKeyParam> match_key_2;
@@ -595,7 +595,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
   data_2.push_back_action_data(port_out_2);
   entry_handle_t h_2;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_ingress_1", match_key_2,
+            test_switch->mt_add_entry(0, "t_ingress_1", match_key_2,
                                       "_set_port", std::move(data_2), &h_2));
 
   std::vector<MatchKeyParam> match_key_3;
@@ -606,8 +606,8 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
   ActionData data_3;
   entry_handle_t h_3;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_ingress_2", match_key_3, "_resubmit",
-                                      std::move(data_3), &h_3, 1));
+            test_switch->mt_add_entry(0, "t_ingress_2", match_key_3,
+                                      "_resubmit", std::move(data_3), &h_3, 1));
 
   const char pkt[] = {'\x05', '\x00'};
   packet_inject.send(port_in, pkt, sizeof(pkt));
@@ -650,7 +650,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
   data_1.push_back_action_data(port_out_1);
   entry_handle_t h_1;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_ingress_1", match_key_1,
+            test_switch->mt_add_entry(0, "t_ingress_1", match_key_1,
                                       "_set_port", std::move(data_1), &h_1));
 
   std::vector<MatchKeyParam> match_key_2;
@@ -660,7 +660,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
   data_2.push_back_action_data(port_out_2);
   entry_handle_t h_2;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_ingress_1", match_key_2,
+            test_switch->mt_add_entry(0, "t_ingress_1", match_key_2,
                                       "_set_port", std::move(data_2), &h_2));
 
   std::vector<MatchKeyParam> match_key_3;
@@ -671,8 +671,9 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
   ActionData data_3;
   entry_handle_t h_3;
   ASSERT_EQ(MatchErrorCode::SUCCESS,
-            test_switch->mt_add_entry("t_egress", match_key_3, "_recirculate",
-                                      std::move(data_3), &h_3, 1));
+            test_switch->mt_add_entry(0, "t_egress", match_key_3,
+                                      "_recirculate", std::move(data_3),
+                                      &h_3, 1));
 
   const char pkt[] = {'\x06', '\x00'};
   packet_inject.send(port_in, pkt, sizeof(pkt));

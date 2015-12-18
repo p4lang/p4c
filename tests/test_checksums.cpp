@@ -53,8 +53,7 @@ static const unsigned char raw_udp_pkt[82] = {
 
 // Google Test fixture for checksums tests
 class ChecksumTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
   HeaderType ethernetHeaderType, ipv4HeaderType, udpHeaderType, tcpHeaderType;
   HeaderType metaHeaderType;
@@ -67,15 +66,18 @@ protected:
   std::unique_ptr<NamedCalculation> tcp_cksum_engine_calc{nullptr};
   std::unique_ptr<CalcBasedChecksum> tcp_cksum_engine{nullptr};
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   ChecksumTest()
-    : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
-      udpHeaderType("udp_t", 2), tcpHeaderType("tcp_t", 3),
-      metaHeaderType("meta_t", 4),
-      ethernetParseState("parse_ethernet", 0),
-      ipv4ParseState("parse_ipv4", 1),
-      udpParseState("parse_udp", 2),
-      tcpParseState("parse_tcp", 3),
-      parser("test_parser", 0) {
+      : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
+        udpHeaderType("udp_t", 2), tcpHeaderType("tcp_t", 3),
+        metaHeaderType("meta_t", 4),
+        ethernetParseState("parse_ethernet", 0),
+        ipv4ParseState("parse_ipv4", 1),
+        udpParseState("parse_udp", 2),
+        tcpParseState("parse_tcp", 3),
+        parser("test_parser", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
     ethernetHeaderType.push_back_field("ethertype", 16);
@@ -151,7 +153,7 @@ protected:
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
 
     ParseSwitchKeyBuilder ethernetKeyBuilder;
     ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
@@ -185,29 +187,29 @@ protected:
     parser.set_init_state(&ethernetParseState);
   }
 
-  void get_ipv4_pkt(Packet *pkt, unsigned short *cksum) {
-    *pkt = Packet::make_new(
-        0, 0, sizeof(raw_tcp_pkt),
-	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt))
-    );
+  Packet get_ipv4_pkt(unsigned short *cksum) {
     *cksum = 0x3508; // big endian
+    return Packet::make_new(
+        sizeof(raw_tcp_pkt),
+	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt)),
+        phv_source.get());
   }
 
-  void get_tcp_pkt(Packet *pkt, unsigned short *cksum, unsigned short *tcp_len) {
-    get_ipv4_pkt(pkt, cksum);
+  Packet get_tcp_pkt(unsigned short *cksum, unsigned short *tcp_len) {
+    auto pkt = get_ipv4_pkt(cksum);
     *cksum = 0x13cd; // big endian
     *tcp_len = sizeof(raw_tcp_pkt) - 14 - 20; // - ethernet and ipv4
+    // return std::move(pkt);
+    // enable NVRO
+    return pkt;
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(ChecksumTest, IPv4ChecksumVerify) {
-  Packet packet = Packet::make_new();
   unsigned short cksum;
-  get_ipv4_pkt(&packet, &cksum);
+  Packet packet = get_ipv4_pkt(&cksum);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
   
@@ -220,9 +222,8 @@ TEST_F(ChecksumTest, IPv4ChecksumVerify) {
 }
 
 TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
-  Packet packet = Packet::make_new();
   unsigned short cksum;
-  get_ipv4_pkt(&packet, &cksum);
+  Packet packet = get_ipv4_pkt(&cksum);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
 
@@ -238,9 +239,8 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
 }
 
 TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
-  Packet packet = Packet::make_new();
   unsigned short cksum;
-  get_ipv4_pkt(&packet, &cksum);
+  Packet packet = get_ipv4_pkt(&cksum);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
 
@@ -259,10 +259,9 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
 
 // actually more general than just TCP: CalcBasedChecksum test
 TEST_F(ChecksumTest, TCPChecksumVerify) {
-  Packet packet = Packet::make_new();
   unsigned short cksum;
   unsigned short tcp_len;
-  get_tcp_pkt(&packet, &cksum, &tcp_len);
+  Packet packet = get_tcp_pkt(&cksum, &tcp_len);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
 
@@ -276,10 +275,9 @@ TEST_F(ChecksumTest, TCPChecksumVerify) {
 }
 
 TEST_F(ChecksumTest, TCPChecksumUpdate) {
-  Packet packet = Packet::make_new();
   unsigned short cksum;
   unsigned short tcp_len;
-  get_tcp_pkt(&packet, &cksum, &tcp_len);
+  Packet packet = get_tcp_pkt(&cksum, &tcp_len);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
 

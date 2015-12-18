@@ -48,7 +48,7 @@ class InterfaceList {
 };
 
 class OptionsParser {
-  friend class Switch;
+  friend class SwitchWContexts;
 
  public:
   void parse(int argc, char *argv[]);

@@ -69,7 +69,7 @@ const std::string JSON_TEST_STRING_2 =
 TEST(P4Objects, LoadFromJSON1) {
   std::istringstream is(JSON_TEST_STRING_1);
   P4Objects objects;
-  ASSERT_EQ(0, objects.init_objects(is));
+  ASSERT_EQ(0, objects.init_objects(&is));
 
   ASSERT_NE(nullptr, objects.get_pipeline("ingress"));
   ASSERT_NE(nullptr, objects.get_action("_drop"));
@@ -92,7 +92,7 @@ TEST(P4Objects, LoadFromJSON1) {
 TEST(P4Objects, LoadFromJSON2) {
   std::istringstream is(JSON_TEST_STRING_2);
   P4Objects objects;
-  ASSERT_EQ(0, objects.init_objects(is));
+  ASSERT_EQ(0, objects.init_objects(&is));
 
   // this second test just checks that learn lists and indirect tables get
   // parsed correctly
@@ -109,7 +109,7 @@ TEST(P4Objects, LoadFromJSON2) {
 TEST(P4Objects, Empty) {
   std::istringstream is("{}");
   P4Objects objects;
-  ASSERT_EQ(0, objects.init_objects(is));
+  ASSERT_EQ(0, objects.init_objects(&is));
 }
 
 TEST(P4Objects, UnknownPrimitive) {
@@ -117,7 +117,7 @@ TEST(P4Objects, UnknownPrimitive) {
   std::stringstream os;
   P4Objects objects(os);
   std::string expected("Unknown primitive action: bad_primitive\n");
-  ASSERT_NE(0, objects.init_objects(is));
+  ASSERT_NE(0, objects.init_objects(&is));
   EXPECT_EQ(expected, os.str());
 }
 
@@ -126,7 +126,7 @@ TEST(P4Objects, PrimitiveBadParamCount) {
   std::stringstream os;
   P4Objects objects(os);
   std::string expected("Invalid number of parameters for primitive action drop: expected 0 but got 1\n");
-  ASSERT_NE(0, objects.init_objects(is));
+  ASSERT_NE(0, objects.init_objects(&is));
   EXPECT_EQ(expected, os.str());
 }
 
@@ -135,7 +135,7 @@ TEST(P4Objects, UnknownHash) {
   std::stringstream os;
   P4Objects objects(os);
   std::string expected("Unknown hash algorithm: bad_hash_1\n");
-  ASSERT_NE(0, objects.init_objects(is));
+  ASSERT_NE(0, objects.init_objects(&is));
   EXPECT_EQ(expected, os.str());
 }
 
@@ -144,7 +144,7 @@ TEST(P4Objects, UnknownHashSelector) {
   std::stringstream os;
   P4Objects objects(os);
   std::string expected("Unknown hash algorithm: bad_hash_2\n");
-  ASSERT_NE(0, objects.init_objects(is));
+  ASSERT_NE(0, objects.init_objects(&is));
   EXPECT_EQ(expected, os.str());
 }
 
@@ -155,7 +155,7 @@ TEST(P4Objects, RequiredField) {
   std::stringstream os;
   P4Objects objects(os);
   std::string expected("Field standard_metadata.egress_port is required by switch target but is not defined\n");
-  // 0 for device_id, nullptr for transport
-  ASSERT_NE(0, objects.init_objects(is, 0, nullptr, required_fields));
+  // 0 for device_id, 0 for cxt_id, nullptr for transport
+  ASSERT_NE(0, objects.init_objects(&is, 0, 0, nullptr, required_fields));
   EXPECT_EQ(expected, os.str());
 }

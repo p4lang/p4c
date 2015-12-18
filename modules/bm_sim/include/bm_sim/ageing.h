@@ -41,13 +41,15 @@ class AgeingMonitor {
   typedef struct {
     char sub_topic[4];
     int switch_id;
+    int cxt_id;
     uint64_t buffer_id;
     int table_id;
     unsigned int num_entries;
-    char _padding[8];  // the header size for notifications is always 32 bytes
+    char _padding[4];  // the header size for notifications is always 32 bytes
   } __attribute__((packed)) msg_hdr_t;
 
-  AgeingMonitor(int device_id, std::shared_ptr<TransportIface> writer,
+  AgeingMonitor(int device_id, int cxt_id,
+                std::shared_ptr<TransportIface> writer,
                 unsigned int sweep_interval_ms = 1000u);
 
   ~AgeingMonitor();
@@ -83,6 +85,7 @@ class AgeingMonitor {
   std::map<p4object_id_t, TableData> tables_with_ageing{};
 
   int device_id{};
+  int cxt_id{};
 
   std::shared_ptr<TransportIface> writer{nullptr};
 

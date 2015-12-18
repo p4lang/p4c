@@ -69,12 +69,12 @@ P4Objects::build_expression(const Json::Value &json_expression,
 }
 
 int
-P4Objects::init_objects(std::istream &is, int device_id,
+P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
                         std::shared_ptr<TransportIface> notifications_transport,
                         const std::set<header_field_pair> &required_fields,
                         const std::set<header_field_pair> &arith_fields) {
   Json::Value cfg_root;
-  is >> cfg_root;
+  (*is) >> cfg_root;
 
   if (!notifications_transport) {
     notifications_transport = std::make_shared<TransportNULL>();
@@ -512,7 +512,7 @@ P4Objects::init_objects(std::istream &is, int device_id,
   // pipelines
 
   ageing_monitor = std::unique_ptr<AgeingMonitor>(
-      new AgeingMonitor(device_id, notifications_transport));
+      new AgeingMonitor(device_id, cxt_id, notifications_transport));
 
   const Json::Value &cfg_pipelines = cfg_root["pipelines"];
   for (const auto &cfg_pipeline : cfg_pipelines) {
@@ -709,7 +709,8 @@ P4Objects::init_objects(std::istream &is, int device_id,
 
   // learn lists
 
-  learn_engine = std::unique_ptr<LearnEngine>(new LearnEngine(device_id));
+  learn_engine = std::unique_ptr<LearnEngine>(
+      new LearnEngine(device_id, cxt_id));
 
   const Json::Value &cfg_learn_lists = cfg_root["learn_lists"];
 
@@ -792,11 +793,6 @@ P4Objects::init_objects(std::istream &is, int device_id,
   return 0;
   // obviously this function is very long, but it is doing a very dumb job...
   // NOLINTNEXTLINE(readability/fn_size)
-}
-
-void
-P4Objects::destroy_objects() {
-  Packet::unset_phv_factory();
 }
 
 void

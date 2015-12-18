@@ -86,3 +86,23 @@ PHV::push_back_header_stack(const std::string &header_stack_name,
   }
   header_stacks.push_back(std::move(header_stack));
 }
+
+// void
+// Packet::set_phv_factory(const PHVFactory &phv_factory) {
+//   assert(!phv_pool);
+//   phv_pool = new PHVPool(phv_factory);
+// }
+
+// void
+// Packet::unset_phv_factory() {
+//   assert(phv_pool);
+//   delete phv_pool;
+//   phv_pool = nullptr;
+// }
+
+// void
+// Packet::swap_phv_factory(const PHVFactory &phv_factory) {
+//   assert(phv_pool);
+//   delete phv_pool;
+//   phv_pool = new PHVPool(phv_factory);
+// }

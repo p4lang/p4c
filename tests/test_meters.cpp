@@ -32,28 +32,29 @@ using std::this_thread::sleep_until;
 
 // Google Test fixture for meters tests
 class MetersTest : public ::testing::Test {
-protected:
+ protected:
   typedef std::chrono::high_resolution_clock clock;
   typedef Meter::MeterType MeterType;
   typedef Meter::color_t color_t;
 
-protected:
+ protected:
   PHVFactory phv_factory;
 
-  MetersTest() {
-  }
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  MetersTest()
+      : phv_source(PHVSourceIface::make_phv_source()) { }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 
   Packet get_pkt(size_t pkt_size) {
     // dummy packet, won't be parsed
-    return Packet::make_new(0, 0, pkt_size, PacketBuffer(pkt_size * 2));
+    return Packet::make_new(pkt_size, PacketBuffer(pkt_size * 2),
+                            phv_source.get());
   }
 };
 

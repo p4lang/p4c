@@ -36,86 +36,132 @@ Packet::set_ingress_ts() {
     ingress_ts.time_since_epoch()).count();
 }
 
-Packet::Packet(packet_id_t id)
-    : packet_id(id) {
-  assert(phv_pool);
-  phv = phv_pool->get();  // needed ?
-}
-
-Packet::Packet(int ingress_port, packet_id_t id, copy_id_t copy_id,
-               int ingress_length, PacketBuffer &&buffer)
-  : ingress_port(ingress_port), packet_id(id), copy_id(copy_id),
-    ingress_length(ingress_length), buffer(std::move(buffer)) {
-  assert(phv_pool);
+Packet::Packet(size_t cxt_id, int ingress_port, packet_id_t id,
+               copy_id_t copy_id, int ingress_length, PacketBuffer &&buffer,
+               PHVSourceIface *phv_source)
+    : cxt_id(cxt_id), ingress_port(ingress_port), packet_id(id),
+      copy_id(copy_id), ingress_length(ingress_length),
+      buffer(std::move(buffer)), phv_source(phv_source) {
+  assert(phv_source);
   update_signature();
   set_ingress_ts();
-  phv = phv_pool->get();
-}
-
-Packet::Packet(int ingress_port, packet_id_t id, copy_id_t copy_id,
-               int ingress_length, PacketBuffer &&buffer, const PHV &src_phv)
-  : ingress_port(ingress_port), packet_id(id), copy_id(copy_id),
-    ingress_length(ingress_length), buffer(std::move(buffer)) {
-  assert(phv_pool);
-  update_signature();
-  set_ingress_ts();
-  phv = phv_pool->get();
-  phv->copy_headers(src_phv);
+  phv = phv_source->get(cxt_id);
 }
 
 Packet::~Packet() {
   copy_id_gen->remove_one(packet_id);
+  assert(phv_source);
   assert(phv);
-  // corner case: phv_pool has already been destroyed
-  if (phv_pool) {
-    phv->reset();
-    phv->reset_header_stacks();
-    phv_pool->release(std::move(phv));
-  }
+  phv->reset();
+  phv->reset_header_stacks();
+  phv_source->release(cxt_id, std::move(phv));
 }
 
+void
+Packet::change_context(size_t new_cxt) {
+  if (cxt_id == new_cxt) return;
+  assert(phv);
+  phv->reset();
+  phv->reset_header_stacks();
+  phv_source->release(cxt_id, std::move(phv));
+  phv = phv_source->get(new_cxt);
+  cxt_id = new_cxt;
+}
+
+/* It is important to understand that with NRVO, the following are "equivalent"
+   and both generate only a call to the constructor:
+
+   A make() {
+     A a;
+     return a;
+   }
+
+   std::unique_ptr<A> c1() {
+     return std::unique_ptr<A>(new A(build()));
+   }
+
+   std::unique_ptr<A> c2() {
+     std::unique_ptr<A> a(new A());
+     return a;
+   }
+*/
+
 Packet
-Packet::clone() const {
+Packet::clone_with_phv() const {
   copy_id_t new_copy_id = copy_id_gen->add_one(packet_id);
-  Packet pkt(ingress_port, packet_id, new_copy_id, ingress_length,
-             buffer.clone(buffer.get_data_size()));
+  Packet pkt(cxt_id, ingress_port, packet_id, new_copy_id, ingress_length,
+             buffer.clone(buffer.get_data_size()), phv_source);
   pkt.phv->copy_headers(*phv);
+  // return std::move(pkt);
+  // Enable NRVO
   return pkt;
 }
 
+std::unique_ptr<Packet>
+Packet::clone_with_phv_ptr() const {
+  return std::unique_ptr<Packet>(new Packet(clone_with_phv()));
+}
+
 Packet
-Packet::clone_and_reset_metadata() const {
+Packet::clone_with_phv_reset_metadata() const {
   copy_id_t new_copy_id = copy_id_gen->add_one(packet_id);
-  Packet pkt(ingress_port, packet_id, new_copy_id, ingress_length,
-             buffer.clone(buffer.get_data_size()));
+  Packet pkt(cxt_id, ingress_port, packet_id, new_copy_id, ingress_length,
+             buffer.clone(buffer.get_data_size()), phv_source);
   // TODO(antonin): optimize this
   pkt.phv->copy_headers(*phv);
   pkt.phv->reset_metadata();
+  // return std::move(pkt);
+  // Enable NRVO
   return pkt;
+}
+
+std::unique_ptr<Packet>
+Packet::clone_with_phv_reset_metadata_ptr() const {
+  return std::unique_ptr<Packet>(new Packet(clone_with_phv_reset_metadata()));
+}
+
+Packet
+Packet::clone_choose_context(size_t new_cxt) const {
+  copy_id_t new_copy_id = copy_id_gen->add_one(packet_id);
+  Packet pkt(new_cxt, ingress_port, packet_id, new_copy_id, ingress_length,
+             buffer.clone(buffer.get_data_size()), phv_source);
+  // return std::move(pkt);
+  // Enable NRVO
+  return pkt;
+}
+
+std::unique_ptr<Packet>
+Packet::clone_choose_context_ptr(size_t new_cxt) const {
+  return std::unique_ptr<Packet>(new Packet(clone_choose_context(new_cxt)));
 }
 
 Packet
 Packet::clone_no_phv() const {
-  copy_id_t new_copy_id = copy_id_gen->add_one(packet_id);
-  Packet pkt(ingress_port, packet_id, new_copy_id, ingress_length,
-             buffer.clone(buffer.get_data_size()));
-  return pkt;
+  return clone_choose_context(cxt_id);
+}
+
+std::unique_ptr<Packet>
+Packet::clone_no_phv_ptr() const {
+  return clone_choose_context_ptr(cxt_id);
 }
 
 /* Cannot get away with defaults here, we need to swap the phvs, otherwise we
    could "leak" the old phv (i.e. not put it back into the pool) */
 
 Packet::Packet(Packet &&other) noexcept
-  : ingress_port(other.ingress_port), egress_port(other.egress_port),
-    packet_id(other.packet_id), copy_id(other.copy_id),
-    ingress_length(other.ingress_length),
-    signature(other.signature), payload_size(other.payload_size) {
-  buffer = std::move(buffer);
-  std::swap(phv, other.phv);
+    : cxt_id(other.cxt_id), ingress_port(other.ingress_port),
+      egress_port(other.egress_port), packet_id(other.packet_id),
+      copy_id(other.copy_id), ingress_length(other.ingress_length),
+      signature(other.signature), payload_size(other.payload_size),
+      ingress_ts(other.ingress_ts), ingress_ts_ms(other.ingress_ts_ms),
+      phv_source(other.phv_source) {
+  buffer = std::move(other.buffer);
+  phv = std::move(other.phv);
 }
 
 Packet &
 Packet::operator=(Packet &&other) noexcept {
+  cxt_id = other.cxt_id;
   ingress_port = other.ingress_port;
   egress_port = other.egress_port;
   packet_id = other.packet_id;
@@ -123,6 +169,9 @@ Packet::operator=(Packet &&other) noexcept {
   ingress_length = other.ingress_length;
   signature = other.signature;
   payload_size = other.payload_size;
+  ingress_ts = other.ingress_ts;
+  ingress_ts_ms = other.ingress_ts_ms;
+  phv_source = other.phv_source;
 
   std::swap(buffer, other.buffer);
   std::swap(phv, other.phv);
@@ -131,66 +180,22 @@ Packet::operator=(Packet &&other) noexcept {
 }
 
 Packet
-Packet::make_new(int ingress_port, packet_id_t id, int ingress_length,
-                 PacketBuffer &&buffer) {
-  return Packet(ingress_port, id, 0, ingress_length, std::move(buffer));
+Packet::make_new(PHVSourceIface *phv_source) {
+  return Packet(0, 0, 0, 0, 0, PacketBuffer(), phv_source);
 }
 
 Packet
-Packet::make_new(int ingress_port, packet_id_t id, int ingress_length,
-                 PacketBuffer &&buffer, const PHV &src_phv) {
-  return Packet(ingress_port, id, 0, ingress_length,
-                std::move(buffer), src_phv);
+Packet::make_new(int ingress_length, PacketBuffer &&buffer,
+                 PHVSourceIface *phv_source) {
+  return Packet(0, 0, 0, 0, ingress_length, std::move(buffer), phv_source);
 }
 
 Packet
-Packet::make_new(packet_id_t id) {
-  return Packet(id);
-}
-
-Packet::PHVPool *Packet::phv_pool = nullptr;
-
-void
-Packet::set_phv_factory(const PHVFactory &phv_factory) {
-  assert(!phv_pool);
-  phv_pool = new PHVPool(phv_factory);
-}
-
-void
-Packet::unset_phv_factory() {
-  assert(phv_pool);
-  delete phv_pool;
-  phv_pool = nullptr;
-}
-
-void
-Packet::swap_phv_factory(const PHVFactory &phv_factory) {
-  assert(phv_pool);
-  delete phv_pool;
-  phv_pool = new PHVPool(phv_factory);
-}
-
-Packet::PHVPool::PHVPool(const PHVFactory &phv_factory)
-  : phv_factory(phv_factory) {
-  phvs.push_back(std::move(phv_factory.create()));
-}
-
-std::unique_ptr<PHV>
-Packet::PHVPool::get() {
-  std::unique_lock<std::mutex> lock(mutex);
-  if (phvs.size() == 0) {
-    lock.unlock();
-    return phv_factory.create();
-  }
-  std::unique_ptr<PHV> phv = std::move(phvs.back());
-  phvs.pop_back();
-  return phv;
-}
-
-void
-Packet::PHVPool::release(std::unique_ptr<PHV> phv) {
-  std::unique_lock<std::mutex> lock(mutex);
-  phvs.push_back(std::move(phv));
+Packet::make_new(size_t cxt, int ingress_port, packet_id_t id,
+                 copy_id_t copy_id, int ingress_length,
+                 PacketBuffer &&buffer, PHVSourceIface *phv_source) {
+  return Packet(cxt, ingress_port, id, copy_id, ingress_length,
+                std::move(buffer), phv_source);
 }
 
 CopyIdGenerator *Packet::copy_id_gen = new CopyIdGenerator();

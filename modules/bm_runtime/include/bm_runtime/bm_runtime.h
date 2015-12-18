@@ -13,16 +13,17 @@ using namespace ::apache::thrift::transport;
 using boost::shared_ptr;
 
 extern TMultiplexedProcessor *processor_;
-extern Switch *switch_;
+extern SwitchWContexts *switch_;
 
-template <typename Handler, typename Processor>
+template <typename Handler, typename Processor, typename S>
 int add_service(const std::string &service_name) {
-  shared_ptr<Handler> handler(new Handler(switch_));
+  // TODO(antonin): static_cast too error prone here?
+  shared_ptr<Handler> handler(new Handler(static_cast<S *>(switch_)));
   processor_->registerProcessor(service_name,
 				shared_ptr<TProcessor>(new Processor(handler)));
 }
 
-int start_server(Switch *sw, int port);
+int start_server(SwitchWContexts *sw, int port);
 
 }
 

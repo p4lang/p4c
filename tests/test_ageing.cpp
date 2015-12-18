@@ -46,6 +46,7 @@ protected:
   PHVFactory phv_factory;
 
   const int device_id = 0;
+  const int cxt_id = 0;
 
   MatchKeyBuilder key_builder;
   std::unique_ptr<MatchTable> table;
@@ -61,10 +62,13 @@ protected:
 
   clock::time_point start;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   AgeingTest()
-    : testHeaderType("test_t", 0),
-      action_fn("actionA", 0),
-      ageing_writer(new MemoryAccessor(4096)) {
+      : testHeaderType("test_t", 0),
+        action_fn("actionA", 0),
+        ageing_writer(new MemoryAccessor(4096)),
+        phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
@@ -85,19 +89,19 @@ protected:
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
     start = clock::now();
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    Packet packet = Packet::make_new(0, 0, 128, PacketBuffer(256));
+    Packet packet = Packet::make_new(128, PacketBuffer(256), phv_source.get());
     packet.get_phv()->get_header(testHeader1).mark_valid();
     packet.get_phv()->get_header(testHeader2).mark_valid();
+    // return std::move(packet);
+    // enable NVRO
     return packet;
   }
 
@@ -129,7 +133,7 @@ protected:
 
   void init_monitor(unsigned int sweep_int) {
     ageing_monitor = std::unique_ptr<AgeingMonitor>(
-        new AgeingMonitor(device_id, ageing_writer, sweep_int));
+        new AgeingMonitor(device_id, cxt_id, ageing_writer, sweep_int));
     ageing_monitor->add_table(table.get());
   }
 };

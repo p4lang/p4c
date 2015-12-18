@@ -26,32 +26,34 @@
 
 // Google Test fixture for counter tests
 class CountersTest : public ::testing::Test {
-protected:
+ protected:
   typedef Counter::counter_value_t counter_value_t;
 
-protected:
+ protected:
   PHVFactory phv_factory;
 
   std::mt19937 gen;
   std::uniform_int_distribution<size_t> dis;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   static constexpr size_t min_pkt_size = 64;
   static constexpr size_t max_pkt_size = 4096;
 
   CountersTest()
-    : dis(min_pkt_size, max_pkt_size) { }
+      : dis(min_pkt_size, max_pkt_size),
+        phv_source(PHVSourceIface::make_phv_source()) { }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 
   Packet get_pkt(size_t pkt_size) {
     // dummy packet, won't be parsed
-    return Packet::make_new(0, 0, pkt_size, PacketBuffer(pkt_size * 2));
+    return Packet::make_new(pkt_size, PacketBuffer(pkt_size * 2),
+                            phv_source.get());
   }
 };
 

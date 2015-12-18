@@ -45,16 +45,17 @@ class LearnEngine {
   typedef struct {
     char sub_topic[4];
     int switch_id;
+    int cxt_id;
     int list_id;
     uint64_t buffer_id;
     unsigned int num_samples;
-    char _padding[8];  // the header size for notifications is always 32 bytes
+    char _padding[4];  // the header size for notifications is always 32 bytes
   } __attribute__((packed)) msg_hdr_t;
 
   typedef std::function<void(const msg_hdr_t &, size_t,
                              std::unique_ptr<char[]>, void *)> LearnCb;
 
-  explicit LearnEngine(int device_id = 0);
+  explicit LearnEngine(int device_id = 0, int cxt_id = 0);
 
   void list_create(list_id_t list_id,
                    size_t max_samples = 1, unsigned int timeout_ms = 1000);
@@ -125,7 +126,7 @@ class LearnEngine {
     enum class LearnMode {NONE, WRITER, CB};
 
    public:
-    LearnList(list_id_t list_id, int device_id,
+    LearnList(list_id_t list_id, int device_id, int cxt_id,
               size_t max_samples, unsigned int timeout);
 
     void init();
@@ -161,6 +162,7 @@ class LearnEngine {
     list_id_t list_id;
 
     int device_id;
+    int cxt_id;
 
     LearnSampleBuilder builder{};
     std::vector<char> buffer{};
@@ -195,6 +197,7 @@ class LearnEngine {
 
  private:
   int device_id{};
+  int cxt_id{};
   // LearnList is not movable because of the mutex, I am using pointers
   std::unordered_map<list_id_t, std::unique_ptr<LearnList> > learn_lists{};
 };

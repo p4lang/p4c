@@ -47,12 +47,12 @@ class SimpleSwitch : public Switch {
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
 
-    Packet *packet = new Packet(Packet::make_new(
-        port_num, pkt_id++, len, PacketBuffer(2048, buffer, len)));
+    auto packet = new_packet_ptr(port_num, pkt_id++, len,
+                                 PacketBuffer(2048, buffer, len));
 
     ELOGGER->packet_in(*packet);
 
-    input_buffer.push_front(std::unique_ptr<Packet>(packet));
+    input_buffer.push_front(std::move(packet));
     return 0;
   }
 

@@ -163,170 +163,198 @@ service Standard {
   // table operations
 
   BmEntryHandle bm_mt_add_entry(
-    1:string table_name,
-    2:BmMatchParams match_key,
-    3:string action_name,
-    4:BmActionData action_data,
-    5:BmAddEntryOptions options
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmMatchParams match_key,
+    4:string action_name,
+    5:BmActionData action_data,
+    6:BmAddEntryOptions options
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_set_default_action(
-    1:string table_name,
-    2:string action_name,
-    3:BmActionData action_data
-  ) throws (1:InvalidTableOperation ouch),
-
-  void bm_mt_delete_entry(
-    1:string table_name,
-    2:BmEntryHandle entry_handle
-  ) throws (1:InvalidTableOperation ouch),
-
-  void bm_mt_modify_entry(
-    1:string table_name,
-    2:BmEntryHandle entry_handle,
+    1:i32 cxt_id,
+    2:string table_name,
     3:string action_name,
     4:BmActionData action_data
   ) throws (1:InvalidTableOperation ouch),
 
+  void bm_mt_delete_entry(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_modify_entry(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle,
+    4:string action_name,
+    5:BmActionData action_data
+  ) throws (1:InvalidTableOperation ouch),
+
   void bm_mt_set_entry_ttl(
-    1:string table_name
-    2:BmEntryHandle entry_handle,
-    3:i32 timeout_ms
+    1:i32 cxt_id,
+    2:string table_name
+    3:BmEntryHandle entry_handle,
+    4:i32 timeout_ms
   ) throws (1:InvalidTableOperation ouch),
 
   // indirect tables
 
   BmMemberHandle bm_mt_indirect_add_member(
-    1:string table_name,
-    2:string action_name,
-    3:BmActionData action_data
-  ) throws (1:InvalidTableOperation ouch),
-
-  void bm_mt_indirect_delete_member(
-    1:string table_name,
-    2:BmMemberHandle mbr_handle
-  ) throws (1:InvalidTableOperation ouch),
-
-  void bm_mt_indirect_modify_member(
-    1:string table_name,
-    2:BmMemberHandle mbr_handle,
+    1:i32 cxt_id,
+    2:string table_name,
     3:string action_name,
     4:BmActionData action_data
   ) throws (1:InvalidTableOperation ouch),
 
-  BmEntryHandle bm_mt_indirect_add_entry(
-    1:string table_name,
-    2:BmMatchParams match_key,
-    3:BmMemberHandle mbr_handle,
-    4:BmAddEntryOptions options
-  ) throws (1:InvalidTableOperation ouch),
-
-  void bm_mt_indirect_modify_entry(
-    1:string table_name,
-    2:BmEntryHandle entry_handle,
+  void bm_mt_indirect_delete_member(
+    1:i32 cxt_id,
+    2:string table_name,
     3:BmMemberHandle mbr_handle
   ) throws (1:InvalidTableOperation ouch),
 
+  void bm_mt_indirect_modify_member(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmMemberHandle mbr_handle,
+    4:string action_name,
+    5:BmActionData action_data
+  ) throws (1:InvalidTableOperation ouch),
+
+  BmEntryHandle bm_mt_indirect_add_entry(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmMatchParams match_key,
+    4:BmMemberHandle mbr_handle,
+    5:BmAddEntryOptions options
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_indirect_modify_entry(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle,
+    4:BmMemberHandle mbr_handle
+  ) throws (1:InvalidTableOperation ouch),
+
   void bm_mt_indirect_delete_entry(
-    1:string table_name,
-    2:BmEntryHandle entry_handle
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_indirect_set_entry_ttl(
-    1:string table_name
-    2:BmEntryHandle entry_handle,
-    3:i32 timeout_ms
+    1:i32 cxt_id,
+    2:string table_name
+    3:BmEntryHandle entry_handle,
+    4:i32 timeout_ms
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_indirect_set_default_member(
-    1:string table_name,
-    2:BmMemberHandle mbr_handle
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmMemberHandle mbr_handle
   ) throws (1:InvalidTableOperation ouch),
 
   // indirect tables with selector
 
   BmGroupHandle bm_mt_indirect_ws_create_group(
-    1:string table_name
+    1:i32 cxt_id,
+    2:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_indirect_ws_delete_group(
-    1:string table_name,
-    2:BmGroupHandle grp_handle
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmGroupHandle grp_handle
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_indirect_ws_add_member_to_group(
-    1:string table_name,
-    2:BmMemberHandle mbr_handle,
-    3:BmGroupHandle grp_handle
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmMemberHandle mbr_handle,
+    4:BmGroupHandle grp_handle
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_indirect_ws_remove_member_from_group(
-    1:string table_name,
-    2:BmMemberHandle mbr_handle,
-    3:BmGroupHandle grp_handle
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmMemberHandle mbr_handle,
+    4:BmGroupHandle grp_handle
   ) throws (1:InvalidTableOperation ouch),
 
   BmEntryHandle bm_mt_indirect_ws_add_entry(
-    1:string table_name,
-    2:BmMatchParams match_key,
-    3:BmGroupHandle grp_handle
-    4:BmAddEntryOptions options
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmMatchParams match_key,
+    4:BmGroupHandle grp_handle
+    5:BmAddEntryOptions options
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_indirect_ws_modify_entry(
-    1:string table_name,
-    2:BmEntryHandle entry_handle,
-    3:BmGroupHandle grp_handle
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle,
+    4:BmGroupHandle grp_handle
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_indirect_ws_set_default_group(
-    1:string table_name,
-    2:BmGroupHandle grp_handle
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmGroupHandle grp_handle
   ) throws (1:InvalidTableOperation ouch),
 
   BmCounterValue bm_mt_read_counter(
-    1:string table_name,
-    2:BmEntryHandle entry_handle
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_reset_counters(
-    1:string table_name
+    1:i32 cxt_id,
+    2:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
   void bm_mt_write_counter(
-    1:string table_name,
-    2:BmEntryHandle entry_handle,
-    3:BmCounterValue value,
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle,
+    4:BmCounterValue value,
   ) throws (1:InvalidTableOperation ouch),
 
   // indirect counters
 
   BmCounterValue bm_counter_read(
-    1:string counter_name,
-    2:i32 index
+    1:i32 cxt_id,
+    2:string counter_name,
+    3:i32 index
   ) throws (1:InvalidCounterOperation ouch),
 
   void bm_counter_reset_all(
-    1:string counter_name
+    1:i32 cxt_id,
+    2:string counter_name
   ) throws (1:InvalidCounterOperation ouch),
 
   void bm_counter_write(
-    1:string counter_name,
-    2:i32 index,
-    3:BmCounterValue value
+    1:i32 cxt_id,
+    2:string counter_name,
+    3:i32 index,
+    4:BmCounterValue value
   ) throws (1:InvalidCounterOperation ouch),
 
   // learning acks
 
   void bm_learning_ack(
-    1:BmLearningListId list_id,
-    2:BmLearningBufferId buffer_id,
-    3:list<BmLearningSampleId> sample_ids
+    1:i32 cxt_id,
+    2:BmLearningListId list_id,
+    3:BmLearningBufferId buffer_id,
+    4:list<BmLearningSampleId> sample_ids
   ),
 
   void bm_learning_ack_buffer(
-    1:BmLearningListId list_id,
-    2:BmLearningBufferId buffer_id
+    1:i32 cxt_id,
+    2:BmLearningListId list_id,
+    3:BmLearningBufferId buffer_id
   ),
 
   // swap configs
@@ -341,28 +369,32 @@ service Standard {
   // meters
 
   void bm_meter_array_set_rates(
-    1:string meter_array_name,
-    2:list<BmMeterRateConfig> rates
+    1:i32 cxt_id,
+    2:string meter_array_name,
+    3:list<BmMeterRateConfig> rates
   ) throws (1:InvalidMeterOperation ouch)
 
   void bm_meter_set_rates(
-    1:string meter_array_name,
-    2:i32 index,
-    3:list<BmMeterRateConfig> rates
+    1:i32 cxt_id,
+    2:string meter_array_name,
+    3:i32 index,
+    4:list<BmMeterRateConfig> rates
   ) throws (1:InvalidMeterOperation ouch)
 
 
   // registers
 
   BmRegisterValue bm_register_read(
-    1:string register_array_name,
-    2:i32 idx
+    1:i32 cxt_id,
+    2:string register_array_name,
+    3:i32 idx
   ) throws (1:InvalidRegisterOperation ouch)
 
   void bm_register_write(
-    1:string register_array_name,
-    2:i32 index,
-    3:BmRegisterValue value
+    1:i32 cxt_id,
+    2:string register_array_name,
+    3:i32 index,
+    4:BmRegisterValue value
   ) throws (1:InvalidRegisterOperation ouch)
 
 
@@ -381,7 +413,8 @@ service Standard {
   // debug functions
 
   string bm_dump_table(
-    1:string table_name
+    1:i32 cxt_id,
+    2:string table_name
   )
 
   void bm_reset_state()

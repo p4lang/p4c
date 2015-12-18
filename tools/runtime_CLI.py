@@ -701,7 +701,7 @@ class RuntimeAPI(cmd.Cmd):
 
         self.print_set_default(table_name, action_name, runtime_data)
 
-        self.client.bm_mt_set_default_action(table_name, action_name, runtime_data)
+        self.client.bm_mt_set_default_action(0, table_name, action_name, runtime_data)
 
     def complete_table_set_default(self, text, line, start_index, end_index):
         return self._complete_table_and_action(text, line)
@@ -773,7 +773,7 @@ class RuntimeAPI(cmd.Cmd):
         self.print_table_add(match_key, action_name, runtime_data)
 
         entry_handle = self.client.bm_mt_add_entry(
-            table_name, match_key, action_name, runtime_data,
+            0, table_name, match_key, action_name, runtime_data,
             BmAddEntryOptions(priority = priority)
         )
 
@@ -813,7 +813,7 @@ class RuntimeAPI(cmd.Cmd):
         print "Modifying entry", entry_handle, "for", MatchType.to_str(table.match_type), "match table", table_name
 
         entry_handle = self.client.bm_mt_modify_entry(
-            table_name, entry_handle, action_name, runtime_data
+            0, table_name, entry_handle, action_name, runtime_data
         )
 
     def complete_table_modify(self, text, line, start_index, end_index):
@@ -836,7 +836,7 @@ class RuntimeAPI(cmd.Cmd):
 
         print "Deleting entry", entry_handle, "from", table_name
 
-        self.client.bm_mt_delete_entry(table_name, entry_handle)
+        self.client.bm_mt_delete_entry(0, table_name, entry_handle)
 
     def complete_table_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -874,7 +874,7 @@ class RuntimeAPI(cmd.Cmd):
         runtime_data = self.parse_runtime_data(action, action_params)
 
         mbr_handle = self.client.bm_mt_indirect_add_member(
-            table_name, action_name, runtime_data
+            0, table_name, action_name, runtime_data
         )
 
         print "Member has been created with handle", mbr_handle
@@ -900,7 +900,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for member handle")
 
-        self.client.bm_mt_indirect_delete_member(table_name, mbr_handle)
+        self.client.bm_mt_indirect_delete_member(0, table_name, mbr_handle)
 
     def complete_table_indirect_delete_member(self, text, line, start_index, end_index):
         # TODO: only show indirect tables
@@ -936,7 +936,7 @@ class RuntimeAPI(cmd.Cmd):
         runtime_data = self.parse_runtime_data(action, action_params)
 
         mbr_handle = self.client.bm_mt_indirect_modify_member(
-            table_name, action_name, mbr_handle, runtime_data
+            0, table_name, action_name, mbr_handle, runtime_data
         )
 
     def complete_table_indirect_modify_member(self, text, line, start_index, end_index):
@@ -992,7 +992,7 @@ class RuntimeAPI(cmd.Cmd):
         table_name, match_key, handle, options = self.indirect_add_common(line)
 
         entry_handle = self.client.bm_mt_indirect_add_entry(
-            table_name, match_key, handle, options
+            0, table_name, match_key, handle, options
         )
 
         print "Entry has been added with handle", entry_handle
@@ -1007,7 +1007,7 @@ class RuntimeAPI(cmd.Cmd):
         table_name, match_key, handle, options = self.indirect_add_common(line, ws=True)
 
         entry_handle = self.client.bm_mt_indirect_ws_add_entry(
-            table_name, match_key, handle, options
+            0, table_name, match_key, handle, options
         )
 
         print "Entry has been added with handle", entry_handle
@@ -1033,7 +1033,7 @@ class RuntimeAPI(cmd.Cmd):
 
         print "Deleting entry", entry_handle, "from", table_name
 
-        self.client.bm_mt_indirect_delete_entry(table_name, entry_handle)
+        self.client.bm_mt_indirect_delete_entry(0, table_name, entry_handle)
 
     def complete_table_indirect_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1064,7 +1064,7 @@ class RuntimeAPI(cmd.Cmd):
 
         table_name, handle = self.indirect_set_default_common(line)
 
-        self.client.bm_mt_indirect_set_default_member(table_name, handle)
+        self.client.bm_mt_indirect_set_default_member(0, table_name, handle)
 
     def complete_table_indirect_set_default(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1075,7 +1075,7 @@ class RuntimeAPI(cmd.Cmd):
 
         table_name, handle = self.indirect_set_default_common(line, ws=True)
 
-        self.client.bm_mt_indirect_ws_set_default_group(table_name, handle)
+        self.client.bm_mt_indirect_ws_set_default_group(0, table_name, handle)
 
     def complete_table_indirect_set_default_with_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1092,7 +1092,7 @@ class RuntimeAPI(cmd.Cmd):
 
         self.check_indirect_ws(table)
 
-        grp_handle = self.client.bm_mt_indirect_ws_create_group(table_name)
+        grp_handle = self.client.bm_mt_indirect_ws_create_group(0, table_name)
 
         print "Group has been created with handle", grp_handle
 
@@ -1117,7 +1117,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for group handle")
 
-        self.client.bm_mt_indirect_ws_delete_group(table_name, grp_handle)
+        self.client.bm_mt_indirect_ws_delete_group(0, table_name, grp_handle)
 
     def complete_table_indirect_delete_group(self, text, line, start_index, end_index):
         # TODO: only show indirect_ws tables
@@ -1146,7 +1146,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for group handle")
 
         self.client.bm_mt_indirect_ws_add_member_to_group(
-            table_name, mbr_handle, grp_handle
+            0, table_name, mbr_handle, grp_handle
         )
 
     def complete_table_indirect_add_member_to_group(self, text, line, start_index, end_index):
@@ -1176,7 +1176,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for group handle")
 
         self.client.bm_mt_indirect_ws_remove_member_from_group(
-            table_name, mbr_handle, grp_handle
+            0, table_name, mbr_handle, grp_handle
         )
 
     def complete_table_indirect_remove_member_from_group(self, text, line, start_index, end_index):
@@ -1204,7 +1204,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
         mgrp = self.get_mgrp(args[0])
         print "Creating multicast group", mgrp
-        mgrp_hdl = self.mc_client.bm_mc_mgrp_create(mgrp)
+        mgrp_hdl = self.mc_client.bm_mc_mgrp_create(0, mgrp)
         assert(mgrp == mgrp_hdl)
 
     @handle_bad_input
@@ -1215,7 +1215,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
         mgrp = self.get_mgrp(args[0])
         print "Destroying multicast group", mgrp
-        self.mc_client.bm_mc_mgrp_destroy(mgrp)
+        self.mc_client.bm_mc_mgrp_destroy(0, mgrp)
 
     def ports_to_port_map_str(self, ports):
         last_port_num = 0
@@ -1261,10 +1261,10 @@ class RuntimeAPI(cmd.Cmd):
         port_map_str, lag_map_str = self.parse_ports_and_lags(args)
         if self.pre_type == PreType.SimplePre:
             print "Creating node with rid", rid, "and with port map", port_map_str
-            l1_hdl = self.mc_client.bm_mc_node_create(rid, port_map_str)
+            l1_hdl = self.mc_client.bm_mc_node_create(0, rid, port_map_str)
         else:
             print "Creating node with rid", rid, ", port map", port_map_str, "and lag map", lag_map_str
-            l1_hdl = self.mc_client.bm_mc_node_create(rid, port_map_str, lag_map_str)
+            l1_hdl = self.mc_client.bm_mc_node_create(0, rid, port_map_str, lag_map_str)
         print "node was created with handle", l1_hdl
 
     def get_node_handle(self, s):
@@ -1283,10 +1283,10 @@ class RuntimeAPI(cmd.Cmd):
         port_map_str, lag_map_str = self.parse_ports_and_lags(args)
         if self.pre_type == PreType.SimplePre:
             print "Updating node", l1_hdl, "with port map", port_map_str
-            self.mc_client.bm_mc_node_update(l1_hdl, port_map_str)
+            self.mc_client.bm_mc_node_update(0, l1_hdl, port_map_str)
         else:
             print "Updating node", l1_hdl, "with port map", port_map_str, "and lag map", lag_map_str
-            self.mc_client.bm_mc_node_update(l1_hdl, port_map_str, lag_map_str)
+            self.mc_client.bm_mc_node_update(0, l1_hdl, port_map_str, lag_map_str)
 
     @handle_bad_input
     def do_mc_node_associate(self, line):
@@ -1297,7 +1297,7 @@ class RuntimeAPI(cmd.Cmd):
         mgrp = self.get_mgrp(args[0])
         l1_hdl = self.get_node_handle(args[1])
         print "Associating node", l1_hdl, "to multicast group", mgrp
-        self.mc_client.bm_mc_node_associate(mgrp, l1_hdl)
+        self.mc_client.bm_mc_node_associate(0, mgrp, l1_hdl)
 
     @handle_bad_input
     def do_mc_node_dissociate(self, line):
@@ -1308,7 +1308,7 @@ class RuntimeAPI(cmd.Cmd):
         mgrp = self.get_mgrp(args[0])
         l1_hdl = self.get_node_handle(args[1])
         print "Dissociating node", l1_hdl, "from multicast group", mgrp
-        self.mc_client.bm_mc_node_dissociate(mgrp, l1_hdl)
+        self.mc_client.bm_mc_node_dissociate(0, mgrp, l1_hdl)
 
     @handle_bad_input
     def do_mc_node_destroy(self, line):
@@ -1318,7 +1318,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
         l1_hdl = int(line.split()[0])
         print "Destroying node", l1_hdl
-        self.mc_client.bm_mc_node_destroy(l1_hdl)
+        self.mc_client.bm_mc_node_destroy(0, l1_hdl)
 
     @handle_bad_input
     def do_mc_set_lag_membership(self, line):
@@ -1337,7 +1337,7 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for lag index")
         port_map_str = self.ports_to_port_map_str(args[1:])
         print "Setting lag membership:", lag_index, "<-", port_map_str
-        self.mc_client.bm_mc_set_lag_membership(lag_index, port_map_str)
+        self.mc_client.bm_mc_set_lag_membership(0, lag_index, port_map_str)
 
     @handle_bad_input
     def do_load_new_config_file(self, line):
@@ -1382,7 +1382,7 @@ class RuntimeAPI(cmd.Cmd):
                 new_rates.append(BmMeterRateConfig(r, b))
             except:
                 raise UIn_Error("Error while parsing rates")
-        self.client.bm_meter_array_set_rates(meter_name, new_rates)
+        self.client.bm_meter_array_set_rates(0, meter_name, new_rates)
 
     def complete_meter_set_rates(self, text, line, start_index, end_index):
         return self._complete_meters(text)
@@ -1406,9 +1406,9 @@ class RuntimeAPI(cmd.Cmd):
             table_name = counter.binding
             print "this is the direct counter for table", table_name
             index = index & 0xffffffff
-            value = self.client.bm_mt_read_counter(table_name, index)
+            value = self.client.bm_mt_read_counter(0, table_name, index)
         else:
-            value = self.client.bm_counter_read(counter_name, index)
+            value = self.client.bm_counter_read(0, counter_name, index)
         print "%s[%d]= " % (counter_name, index), value
 
     def complete_counter_read(self, text, line, start_index, end_index):
@@ -1424,9 +1424,9 @@ class RuntimeAPI(cmd.Cmd):
         if counter.is_direct:
             table_name = counter.binding
             print "this is the direct counter for table", table_name
-            value = self.client.bm_mt_reset_counters(table_name)
+            value = self.client.bm_mt_reset_counters(0, table_name)
         else:
-            value = self.client.bm_counter_reset_all(counter_name)
+            value = self.client.bm_counter_reset_all(0, counter_name)
 
     def complete_counter_reset(self, text, line, start_index, end_index):
         return self._complete_counters(text)
@@ -1446,7 +1446,7 @@ class RuntimeAPI(cmd.Cmd):
             index = int(index)
         except:
             raise UIn_Error("Bad format for index")
-        value = self.client.bm_register_read(register_name, index)
+        value = self.client.bm_register_read(0, register_name, index)
         print "%s[%d]= " % (register_name, index), value
 
     def complete_register_read(self, text, line, start_index, end_index):
@@ -1469,7 +1469,7 @@ class RuntimeAPI(cmd.Cmd):
             value = int(value)
         except:
             raise UIn_Error("Bad format for value, must be an integer")
-        self.client.bm_register_write(register_name, index, value)
+        self.client.bm_register_write(0, register_name, index, value)
 
     def complete_register_write(self, text, line, start_index, end_index):
         return self._complete_registers(text)
@@ -1484,7 +1484,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
         table_name = args[0]
         self.get_res("table", table_name, TABLES)
-        print self.client.bm_dump_table(table_name)
+        print self.client.bm_dump_table(0, table_name)
 
     def complete_table_dump(self, text, line, start_index, end_index):
         return self._complete_tables(text)
