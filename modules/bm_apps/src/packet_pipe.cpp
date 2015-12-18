@@ -35,8 +35,9 @@ namespace bm_apps {
 namespace {
 
 struct packet_hdr_t {
+  int type;
   int port;
-  int len;
+  int more;
 } __attribute__((packed));
 
 }  // namespace
@@ -80,8 +81,9 @@ class PacketInjectImp final {
     struct nn_iovec iov;
 
     packet_hdr_t packet_hdr;
+    packet_hdr.type = MSG_TYPE_PACKET_IN;
     packet_hdr.port = port_num;
-    packet_hdr.len = len;
+    packet_hdr.more = len;
 
     // not sure I can do better than this here
     void *msg = nn::allocmsg(sizeof(packet_hdr) + len, 0);
@@ -97,8 +99,56 @@ class PacketInjectImp final {
     std::cout << "packet send for port " << port_num << std::endl;
   }
 
+  // these 4 port_* functions are optional, depending on receiver configuration
+  void port_add(int port_num) {
+    send_port_msg(MSG_TYPE_PORT_ADD, port_num, 0);
+  }
+
+  void port_remove(int port_num) {
+    send_port_msg(MSG_TYPE_PORT_REMOVE, port_num, 0);
+  }
+
+  void port_bring_up(int port_num) {
+    send_port_msg(MSG_TYPE_PORT_SET_STATUS, port_num, MSG_PORT_STATUS_UP);
+  }
+
+  void port_bring_down(int port_num) {
+    send_port_msg(MSG_TYPE_PORT_SET_STATUS, port_num, MSG_PORT_STATUS_DOWN);
+  }
+
  private:
+  enum MsgType {
+    MSG_TYPE_PORT_ADD = 0,
+    MSG_TYPE_PORT_REMOVE,
+    MSG_TYPE_PORT_SET_STATUS,
+    MSG_TYPE_PACKET_IN,
+    MSG_TYPE_PACKET_OUT
+  };
+
+  enum MsgPortStatus {
+    MSG_PORT_STATUS_DOWN = 0,
+    MSG_PORT_STATUS_UP
+  };
+
   void receive_loop();
+
+  void send_port_msg(MsgType type, int port_num, int more) {
+    struct nn_msghdr msghdr;
+    std::memset(&msghdr, 0, sizeof(msghdr));
+    struct nn_iovec iov;
+
+    packet_hdr_t packet_hdr;
+    packet_hdr.type = type;
+    packet_hdr.port = port_num;
+    packet_hdr.more = more;
+
+    iov.iov_base = static_cast<void *>(&packet_hdr);
+    iov.iov_len = sizeof(packet_hdr);
+    msghdr.msg_iov = &iov;
+    msghdr.msg_iovlen = 1;
+
+    s.sendmsg(&msghdr, 0);
+  }
 
  private:
   std::string addr;
@@ -143,10 +193,13 @@ PacketInjectImp::receive_loop() {
 
     if (cb_fn_) {
       std::memcpy(&packet_hdr, msg, sizeof(packet_hdr));
-      char *data = static_cast<char *>(msg) + sizeof(packet_hdr);
-      std::cout << "packet in received on port " << packet_hdr.port
-                << std::endl;
-      cb_fn_(packet_hdr.port, data, packet_hdr.len, cb_cookie_);
+      // others are ignored
+      if (packet_hdr.type == MSG_TYPE_PACKET_OUT) {
+        char *data = static_cast<char *>(msg) + sizeof(packet_hdr);
+        std::cout << "packet in received on port " << packet_hdr.port
+                  << std::endl;
+        cb_fn_(packet_hdr.port, data, packet_hdr.more, cb_cookie_);
+      }
     }
     nn::freemsg(msg);
     msg = nullptr;
@@ -173,6 +226,26 @@ PacketInject::set_packet_receiver(const PacketReceiveCb &cb, void *cookie) {
 void
 PacketInject::send(int port_num, const char *buffer, int len) {
   pimp->send(port_num, buffer, len);
+}
+
+void
+PacketInject::port_add(int port_num) {
+  pimp->port_add(port_num);
+}
+
+void
+PacketInject::port_remove(int port_num) {
+  pimp->port_remove(port_num);
+}
+
+void
+PacketInject::port_bring_up(int port_num) {
+  pimp->port_bring_up(port_num);
+}
+
+void
+PacketInject::port_bring_down(int port_num) {
+  pimp->port_bring_down(port_num);
 }
 
 }  // namespace bm_apps

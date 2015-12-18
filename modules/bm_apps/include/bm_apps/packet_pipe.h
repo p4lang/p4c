@@ -46,6 +46,15 @@ class PacketInject {
 
   void send(int port_num, const char *buffer, int len);
 
+  // these 4 port_* functions are optional, depending on receiver configuration
+  void port_add(int port_num);
+
+  void port_remove(int port_num);
+
+  void port_bring_up(int port_num);
+
+  void port_bring_down(int port_num);
+
  private:
   // cannot use {nullptr} with pimpl
   std::unique_ptr<PacketInjectImp> pimp;

@@ -321,7 +321,7 @@ void PcapFilesReader::start() {
 }
 
 
-PacketDispatcherInterface::ReturnCode
+PacketDispatcherIface::ReturnCode
 PcapFilesReader::set_packet_handler(const PacketHandler &hnd, void* ck) {
   assert(hnd);
   assert(ck);

@@ -16,7 +16,7 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_PACKET_HANDLER_H_
 #define BM_SIM_INCLUDE_BM_SIM_PACKET_HANDLER_H_
 
-class PacketDispatcherInterface {
+class PacketDispatcherIface {
  public:
   typedef std::function<void(int port_num, const char *buffer,
                              int len, void* cookie)> PacketHandler;
@@ -30,7 +30,7 @@ class PacketDispatcherInterface {
                                         void* cookie) = 0;
 };
 
-class PacketReceiverInterface {
+class PacketReceiverIface {
  public:
   virtual void send_packet(int port_num, const char* buffer, int len) = 0;
 };

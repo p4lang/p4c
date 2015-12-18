@@ -127,7 +127,7 @@ class PcapFileOut :
 // Reads data from a set of Pcap files; returns packets in order
 // of their timestamps.
 class PcapFilesReader :
-    public PacketDispatcherInterface {
+    public PacketDispatcherIface {
  public:
   // Read packets from a set of files in timestamp order.  Each file is
   // associated to a port number corresponding to its index in the files vector.
@@ -142,7 +142,7 @@ class PcapFilesReader :
   void start();  // start processing the pcap files
 
   // Invoked every time a packet is read
-  PacketDispatcherInterface::ReturnCode set_packet_handler(
+  PacketDispatcherIface::ReturnCode set_packet_handler(
       const PacketHandler &handler, void *cookie);
 
  private:
@@ -176,7 +176,7 @@ class PcapFilesReader :
 
 
 // Writes data to a set of Pcap files.
-class PcapFilesWriter : public PacketReceiverInterface {
+class PcapFilesWriter : public PacketReceiverIface {
  public:
   PcapFilesWriter();
   // Add a file corresponding to the specified port.
