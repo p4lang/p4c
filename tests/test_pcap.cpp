@@ -44,7 +44,7 @@ protected:
     return testDataFolder + "/" + tmpfile;
   }
 
-  void setReceiver(PacketReceiverInterface* recv) {
+  void setReceiver(PacketReceiverIface* recv) {
     receiver = recv;
   }
   
@@ -56,7 +56,7 @@ public:
   }
 
 protected:
-  PacketReceiverInterface* receiver;
+  PacketReceiverIface* receiver;
   int received;
   std::string testDataFolder;
   std::string testfile1;
@@ -84,18 +84,23 @@ private:
     return Status::DIFFERENT;
   }
 
-  Status comparePackets(std::unique_ptr<PcapPacket> p1, std::unique_ptr<PcapPacket> p2) {
+  Status comparePackets(std::unique_ptr<PcapPacket> p1,
+                        std::unique_ptr<PcapPacket> p2) {
     unsigned p1len = p1->getLength();
     unsigned p2len = p2->getLength();
 
     if (p1len != p2len)
-      return this->reportDifference(std::string("Packet with index ") + std::to_string(this->packetIndex) + " differs in length");
+      return this->reportDifference(
+          std::string("Packet with index ") +
+          std::to_string(this->packetIndex) + " differs in length");
     const char* p1d = p1->getData();
     const char* p2d = p2->getData();
 
     int cmp = memcmp(p1d, p2d, p1len);
     if (cmp != 0) {
-      return this->reportDifference(std::string("Packet with index ") + std::to_string(this->packetIndex) + " differs ");
+      return this->reportDifference(
+          std::string("Packet with index ") +
+          std::to_string(this->packetIndex) + " differs ");
     }
 
     return Status::OK;
@@ -138,7 +143,8 @@ public:
 };
 
 TEST_F(PcapTest, ReadOneFile) {
-  std::unique_ptr<PcapFileIn> file = std::unique_ptr<PcapFileIn>(new PcapFileIn(0, getFile1()));
+  std::unique_ptr<PcapFileIn> file =
+      std::unique_ptr<PcapFileIn>(new PcapFileIn(0, getFile1()));
 
   unsigned packetsRead = 0;
   unsigned packetsSize = 0;
