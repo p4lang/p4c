@@ -25,15 +25,13 @@
 #include <string>
 
 #include "bm_sim/packet_handler.h"
-#include "bm_sim/pcap_file.h"
+#include "bm_sim/port_monitor.h"
 
 class DevMgrInterface : public PacketDispatcherInterface {
  public:
-  enum class PortStatus { PORT_ADDED, PORT_REMOVED, PORT_UP, PORT_DOWN };
-
-  typedef unsigned int port_t;
-  typedef std::function<void(port_t port_num, const PortStatus &status)>
-      PortStatusCB;
+  typedef PortMonitorIface::port_t port_t;
+  typedef PortMonitorIface::PortStatus PortStatus;
+  typedef PortMonitorIface::PortStatusCb PortStatusCb;
 
   virtual ReturnCode port_add(const std::string &iface_name, port_t port_num,
                               const char *in_pcap, const char *out_pcap) = 0;
@@ -44,8 +42,6 @@ class DevMgrInterface : public PacketDispatcherInterface {
 
   // start the thread that performs packet processing
   virtual void start() = 0;
-  virtual ReturnCode register_status_cb(const PortStatus &status,
-                                        const PortStatusCB &cb) = 0;
 
   virtual ReturnCode set_packet_handler(const PacketHandler &handler,
                                         void *cookie) = 0;
@@ -55,6 +51,7 @@ class DevMgrInterface : public PacketDispatcherInterface {
   virtual ~DevMgrInterface() {}
 };
 
+// TODO(antonin): leave inheritance?
 class DevMgr : public DevMgrInterface {
  public:
   DevMgr();
@@ -62,7 +59,8 @@ class DevMgr : public DevMgrInterface {
   // set_dev_* : should be called before port_add and port_remove.
 
   // meant for testing
-  void set_dev_mgr(std::unique_ptr<DevMgrInterface> my_impl);
+  void set_dev_mgr(std::unique_ptr<DevMgrInterface> my_pimp,
+                   std::unique_ptr<PortMonitorIface> my_p_monitor);
 
   void set_dev_mgr_bmi();
 
@@ -74,20 +72,28 @@ class DevMgr : public DevMgrInterface {
   void set_dev_mgr_packet_in(const std::string &addr);
 
   ReturnCode port_add(const std::string &iface_name, port_t port_num,
-                      const char *in_pcap, const char *out_pcap);
+                      const char *in_pcap, const char *out_pcap) override;
 
-  ReturnCode port_remove(port_t port_num);
+  ReturnCode port_remove(port_t port_num) override;
 
   bool port_is_up(port_t port_num) override;
 
-  void transmit_fn(int port_num, const char *buffer, int len);
+  void transmit_fn(int port_num, const char *buffer, int len) override;
 
-  ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie);
+  ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie)
+      override;
+
+  ReturnCode register_status_cb(const PortStatus &type,
+                                const PortStatusCb &port_cb);
 
   // start the thread that performs packet processing
-  void start();
-  ReturnCode register_status_cb(const PortStatus &status,
-                                const PortStatusCB &cb) override;
+  void start() override;
+
+  // for testing purposes
+  // TODO(antonin): think of better solution?
+  DevMgrInterface *get_dev_mgr() {
+    return pimp.get();
+  }
 
   DevMgr(const DevMgr &other) = delete;
   DevMgr &operator=(const DevMgr &other) = delete;
@@ -96,11 +102,13 @@ class DevMgr : public DevMgrInterface {
   DevMgr &operator=(DevMgr &&other) = delete;
 
  protected:
-  ~DevMgr() {}
+  ~DevMgr();
 
  private:
   // Actual implementation (private)
-  std::unique_ptr<DevMgrInterface> impl;
+  std::unique_ptr<DevMgrInterface> pimp{nullptr};
+
+  std::unique_ptr<PortMonitorIface> p_monitor{nullptr};
 };
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_DEV_MGR_H_

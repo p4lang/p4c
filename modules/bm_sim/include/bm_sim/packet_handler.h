@@ -22,6 +22,7 @@ class PacketDispatcherInterface {
                              int len, void* cookie)> PacketHandler;
   enum class ReturnCode {
     SUCCESS,
+    UNSUPPORTED,
     ERROR
   };
 

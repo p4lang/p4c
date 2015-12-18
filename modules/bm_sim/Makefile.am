@@ -13,13 +13,14 @@ noinst_LTLIBRARIES = libbmsim.la
 common_source = \
 src/actions.cpp \
 src/ageing.cpp \
-src/bmi_dev_mgr.cpp \
 src/calculations.cpp \
 src/checksums.cpp \
 src/conditionals.cpp \
 src/counters.cpp \
 src/deparser.cpp \
 src/dev_mgr.cpp \
+src/dev_mgr_bmi.cpp \
+src/dev_mgr_packet_in.cpp \
 src/event_logger.cpp \
 src/expressions.cpp \
 src/fields.cpp \

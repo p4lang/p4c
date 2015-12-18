@@ -28,8 +28,6 @@
 #include <unordered_map>
 #include "bm_sim/packet_handler.h"
 
-void bm_fatal_error(std::string message);
-
 // A PcapPacket is a packet that has been read from a Pcap file.
 // These packets can only be created by the PcapFileIn class.
 class PcapPacket {
