@@ -57,7 +57,7 @@ class LearnListener {
 
  public:
   LearnListener(
-    const std::string &learn_socket = "ipc:///tmp/test_bm_learning.ipc",
+    const std::string &learn_socket = "ipc:///tmp/bmv2-0-notifications.ipc",
     const std::string &thrift_addr = "localhost",
     const int thrift_port = 9090);
 

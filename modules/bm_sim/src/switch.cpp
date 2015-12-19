@@ -35,6 +35,7 @@ packet_handler(int port_num, const char *buffer, int len, void *cookie) {
   static_cast<Switch *>(cookie)->receive(port_num, buffer, len);
 }
 
+// TODO(antonin): maybe a factory method would be more appropriate for Switch
 Switch::Switch(bool enable_swap)
   : DevMgr(),
     enable_swap(enable_swap) {
@@ -55,14 +56,25 @@ Switch::force_arith_field(const std::string &header_name,
 }
 
 int
-Switch::init_objects(const std::string &json_path) {
+Switch::init_objects(const std::string &json_path, int dev_id,
+                     std::shared_ptr<TransportIface> transport) {
+  device_id = dev_id;
+
+  if (!transport) {
+    notifications_transport = std::make_shared<TransportNULL>();
+    notifications_transport->open("dummy");
+  } else {
+    notifications_transport = transport;
+  }
+
   std::ifstream fs(json_path, std::ios::in);
   if (!fs) {
     std::cout << "JSON input file " << json_path << " cannot be opened\n";
     return 1;
   }
 
-  int status = p4objects->init_objects(fs, required_fields, arith_fields);
+  int status = p4objects->init_objects(fs, device_id, notifications_transport,
+                                       required_fields, arith_fields);
   if (status != 0) return status;
   Packet::set_phv_factory(p4objects->get_phv_factory());
 
@@ -73,7 +85,13 @@ int
 Switch::init_from_command_line_options(int argc, char *argv[]) {
   OptionsParser parser;
   parser.parse(argc, argv);
-  int status = init_objects(parser.config_file_path);
+
+  notifications_addr = parser.notifications_addr;
+  auto transport = std::make_shared<TransportNanomsg>();
+  transport->open(notifications_addr);
+
+  int status = init_objects(parser.config_file_path, parser.device_id,
+                            transport);
   if (status != 0) return status;
 
   if (parser.console_logging)
@@ -115,7 +133,6 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
     port_add(iface.second, iface.first, inFileName, outFileName);
   }
   thrift_port = parser.thrift_port;
-  device_id = parser.device_id;
 
   // TODO(unknown): is this the right place to do this?
   set_packet_handler(packet_handler, static_cast<void *>(this));
@@ -511,7 +528,8 @@ Switch::load_new_config(const std::string &new_config) {
   if (p4objects != p4objects_rt) return ONGOING_SWAP;
   p4objects_rt = std::make_shared<P4Objects>();
   std::istringstream ss(new_config);
-  p4objects_rt->init_objects(ss, required_fields, arith_fields);
+  p4objects_rt->init_objects(ss, device_id, notifications_transport,
+                             required_fields, arith_fields);
   return SUCCESS;
 }
 

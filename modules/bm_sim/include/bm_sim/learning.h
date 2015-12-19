@@ -37,34 +37,13 @@
 #include "bytecontainer.h"
 #include "transport.h"
 
-class LearnWriter {
- public:
-  virtual ~LearnWriter() { }
-
-  virtual int send(const char *buffer, size_t len) const = 0;
-  virtual int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs) const = 0;
-};
-
-template <typename Transport>
-class LearnWriterImpl : public LearnWriter {
- public:
-  explicit LearnWriterImpl(const std::string &transport_name);
-
-  int send(const char *buffer, size_t len) const override;
-  int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs) const override;
-
- private:
-  std::unique_ptr<Transport> transport_instance;
-};
-
 class LearnEngine {
  public:
   typedef int list_id_t;
   typedef uint64_t buffer_id_t;
 
   typedef struct {
+    char sub_topic[4];
     int switch_id;
     int list_id;
     uint64_t buffer_id;
@@ -74,11 +53,13 @@ class LearnEngine {
   typedef std::function<void(const msg_hdr_t &, size_t,
                              std::unique_ptr<char[]>, void *)> LearnCb;
 
+  explicit LearnEngine(int device_id = 0);
+
   void list_create(list_id_t list_id,
                    size_t max_samples = 1, unsigned int timeout_ms = 1000);
 
   void list_set_learn_writer(list_id_t list_id,
-                             std::shared_ptr<LearnWriter> learn_writer);
+                             std::shared_ptr<TransportIface> learn_writer);
   void list_set_learn_cb(list_id_t list_id,
                          const LearnCb &learn_cb, void * cookie);
 
@@ -143,12 +124,14 @@ class LearnEngine {
     enum class LearnMode {NONE, WRITER, CB};
 
    public:
-    LearnList(list_id_t list_id, size_t max_samples, unsigned int timeout);
+    LearnList(list_id_t list_id, int device_id,
+              size_t max_samples, unsigned int timeout);
+
     void init();
 
     ~LearnList();
 
-    void set_learn_writer(std::shared_ptr<LearnWriter> learn_writer);
+    void set_learn_writer(std::shared_ptr<TransportIface> learn_writer);
     void set_learn_cb(const LearnCb &learn_cb, void *cookie);
 
     void push_back_field(header_id_t header_id, int field_offset);
@@ -176,6 +159,8 @@ class LearnEngine {
 
     list_id_t list_id;
 
+    int device_id;
+
     LearnSampleBuilder builder{};
     std::vector<char> buffer{};
     buffer_id_t buffer_id{0};
@@ -199,7 +184,7 @@ class LearnEngine {
     LearnMode learn_mode{LearnMode::NONE};
 
     // should I use a union here? or is it not worth the trouble?
-    std::shared_ptr<LearnWriter> writer{nullptr};
+    std::shared_ptr<TransportIface> writer{nullptr};
     LearnCb cb_fn{};
     void *cb_cookie{nullptr};
 
@@ -208,6 +193,7 @@ class LearnEngine {
   };
 
  private:
+  int device_id{};
   // LearnList is not movable because of the mutex, I am using pointers
   std::unordered_map<list_id_t, std::unique_ptr<LearnList> > learn_lists{};
 };

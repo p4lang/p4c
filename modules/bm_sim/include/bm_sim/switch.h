@@ -51,7 +51,8 @@ class Switch :  public RuntimeInterface,  public DevMgr {
   void force_arith_field(const std::string &header_name,
                          const std::string &field_name);
 
-  int init_objects(const std::string &json_path);
+  int init_objects(const std::string &json_path, int device_id = 0,
+                   std::shared_ptr<TransportIface> notif_transport = nullptr);
 
   int init_from_command_line_options(int argc, char *argv[]);
 
@@ -304,6 +305,11 @@ class Switch :  public RuntimeInterface,  public DevMgr {
   int thrift_port{};
 
   int device_id{};
+
+  // same transport used for all notifications, irrespective of the thread, made
+  // possible by multi-threading support in nanomsg
+  std::string notifications_addr{};
+  std::shared_ptr<TransportIface> notifications_transport{nullptr};
 };
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_SWITCH_H_

@@ -33,41 +33,20 @@
 #include "packet.h"
 #include "transport.h"
 
-class AgeingWriter {
- public:
-  virtual ~AgeingWriter() { }
-
-  virtual int send(const char *buffer, size_t len) const = 0;
-  virtual int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs) const = 0;
-};
-
-template <typename Transport>
-class AgeingWriterImpl : public AgeingWriter {
- public:
-  explicit AgeingWriterImpl(const std::string &transport_name);
-
-  int send(const char *buffer, size_t len) const override;
-  int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs) const override;
-
- private:
-  std::unique_ptr<Transport> transport_instance;
-};
-
 class AgeingMonitor {
  public:
   typedef uint64_t buffer_id_t;
   typedef Packet::clock clock;
 
   typedef struct {
+    char sub_topic[4];
     int switch_id;
     uint64_t buffer_id;
     int table_id;
     unsigned int num_entries;
   } __attribute__((packed)) msg_hdr_t;
 
-  AgeingMonitor(std::shared_ptr<AgeingWriter> writer,
+  AgeingMonitor(int device_id, std::shared_ptr<TransportIface> writer,
                 unsigned int sweep_interval_ms = 1000u);
 
   ~AgeingMonitor();
@@ -102,7 +81,9 @@ class AgeingMonitor {
 
   std::map<p4object_id_t, TableData> tables_with_ageing{};
 
-  std::shared_ptr<AgeingWriter> writer{nullptr};
+  int device_id{};
+
+  std::shared_ptr<TransportIface> writer{nullptr};
 
   std::atomic<unsigned int> sweep_interval_ms{0};
 

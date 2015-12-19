@@ -84,7 +84,7 @@ void learn_cb(const bm_apps::LearnListener::MsgInfo &msg_info,
 }  // namespace
 
 int main() {
-  listener = new bm_apps::LearnListener();
+  listener = new bm_apps::LearnListener("ipc:///tmp/bmv2-0-notifications.ipc");
   listener->register_cb(learn_cb, nullptr);
   listener->start();
 
