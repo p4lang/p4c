@@ -26,6 +26,9 @@
 
 #include "bm_sim/learning.h"
 
+static_assert(sizeof(LearnEngine::msg_hdr_t) == 32u,
+              "Invalid size for learning notification header");
+
 void
 LearnEngine::LearnSampleBuilder::push_back_constant(
     const ByteContainer &constant) {
@@ -191,9 +194,14 @@ LearnEngine::LearnList::buffer_transmit() {
 
   lock.unlock();
 
-  msg_hdr_t msg_hdr = {{'L', 'E', 'A', '|'},
-                       device_id, list_id, buffer_id - 1,
-                       (unsigned int) num_samples_to_send};
+  msg_hdr_t msg_hdr;
+  char *msg_hdr_ = reinterpret_cast<char *>(&msg_hdr);
+  memset(msg_hdr_, 0, sizeof(msg_hdr));
+  memcpy(msg_hdr_, "LEA|", 4);
+  msg_hdr.switch_id = device_id;
+  msg_hdr.list_id = list_id;
+  msg_hdr.buffer_id = buffer_id - 1;
+  msg_hdr.num_samples = static_cast<unsigned int>(num_samples_to_send);
 
   if (learn_mode == LearnMode::WRITER) {
     // do not forget the -1 !!!

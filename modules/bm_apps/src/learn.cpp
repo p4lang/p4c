@@ -49,6 +49,7 @@ typedef struct {
   int list_id;
   uint64_t buffer_id;
   unsigned int num_samples;
+  char _padding[8];
 } __attribute__((packed)) learn_hdr_t;
 
 }  // namespace

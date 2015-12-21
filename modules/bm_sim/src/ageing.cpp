@@ -22,6 +22,9 @@
 
 #include "bm_sim/ageing.h"
 
+static_assert(sizeof(AgeingMonitor::msg_hdr_t) == 32u,
+              "Invalid size for ageing notification header");
+
 AgeingMonitor::AgeingMonitor(int device_id,
                              std::shared_ptr<TransportIface> writer,
                              unsigned int sweep_interval_ms)
@@ -103,8 +106,16 @@ AgeingMonitor::do_sweep() {
     unsigned int num_entries = static_cast<unsigned int>(entries.size());
     unsigned int size =
       static_cast<unsigned int>(num_entries * sizeof(entry_handle_t));
-    msg_hdr_t msg_hdr = {{'A', 'G', 'E', '|'},
-                         device_id, buffer_id++, entry.first, num_entries};
+
+    msg_hdr_t msg_hdr;
+    char *msg_hdr_ = reinterpret_cast<char *>(&msg_hdr);
+    memset(msg_hdr_, 0, sizeof(msg_hdr));
+    memcpy(msg_hdr_, "AGE|", 4);
+    msg_hdr.switch_id = device_id;
+    msg_hdr.buffer_id = buffer_id++;
+    msg_hdr.table_id = entry.first;
+    msg_hdr.num_entries = num_entries;
+
     TransportIface::MsgBuf buf_hdr =
       {reinterpret_cast<char *>(&msg_hdr), sizeof(msg_hdr)};
     TransportIface::MsgBuf buf_entries =
