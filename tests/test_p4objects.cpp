@@ -155,6 +155,7 @@ TEST(P4Objects, RequiredField) {
   std::stringstream os;
   P4Objects objects(os);
   std::string expected("Field standard_metadata.egress_port is required by switch target but is not defined\n");
-  ASSERT_NE(0, objects.init_objects(is, required_fields));
+  // 0 for device_id, nullptr for transport
+  ASSERT_NE(0, objects.init_objects(is, 0, nullptr, required_fields));
   EXPECT_EQ(expected, os.str());
 }

@@ -26,29 +26,6 @@
 
 #include "bm_sim/learning.h"
 
-template <typename Transport>
-LearnWriterImpl<Transport>::LearnWriterImpl(const std::string &transport_name)
-  : transport_instance(std::unique_ptr<Transport>(new Transport())) {
-  // should not be doing this in the constructor ?
-  transport_instance->open(transport_name);
-}
-
-template <typename Transport>
-int
-LearnWriterImpl<Transport>::send(const char *buffer, size_t len) const {
-  return transport_instance->send(buffer, len);
-}
-
-template <typename Transport>
-int
-LearnWriterImpl<Transport>::send_msgs(
-    const std::initializer_list<TransportIface::MsgBuf> &msgs) const {
-  return transport_instance->send_msgs(msgs);
-}
-
-// explicit template instantiation
-template class LearnWriterImpl<TransportNanomsg>;
-
 void
 LearnEngine::LearnSampleBuilder::push_back_constant(
     const ByteContainer &constant) {
@@ -89,10 +66,10 @@ LearnEngine::LearnSampleBuilder::operator()(const PHV &phv,
   }
 }
 
-LearnEngine::LearnList::LearnList(list_id_t list_id, size_t max_samples,
-                                  unsigned int timeout)
-  : list_id(list_id), max_samples(max_samples),
-    timeout(timeout), with_timeout(timeout > 0) { }
+LearnEngine::LearnList::LearnList(list_id_t list_id, int device_id,
+                                  size_t max_samples, unsigned int timeout)
+    : list_id(list_id), device_id(device_id), max_samples(max_samples),
+      timeout(timeout), with_timeout(timeout > 0) { }
 
 void
 LearnEngine::LearnList::init() {
@@ -111,7 +88,7 @@ LearnEngine::LearnList::~LearnList() {
 
 void
 LearnEngine::LearnList::set_learn_writer(
-    std::shared_ptr<LearnWriter> learn_writer) {
+    std::shared_ptr<TransportIface> learn_writer) {
   std::unique_lock<std::mutex> lock(mutex);
   while (writer_busy) {
     can_change_writer.wait(lock);
@@ -214,7 +191,8 @@ LearnEngine::LearnList::buffer_transmit() {
 
   lock.unlock();
 
-  msg_hdr_t msg_hdr = {0, list_id, buffer_id - 1,
+  msg_hdr_t msg_hdr = {{'L', 'E', 'A', '|'},
+                       device_id, list_id, buffer_id - 1,
                        (unsigned int) num_samples_to_send};
 
   if (learn_mode == LearnMode::WRITER) {
@@ -305,17 +283,21 @@ LearnEngine::LearnList::reset_state() {
   buffer_tmp.clear();
 }
 
+LearnEngine::LearnEngine(int device_id)
+    : device_id(device_id) { }
+
 void
 LearnEngine::list_create(list_id_t list_id, size_t max_samples,
                          unsigned int timeout_ms) {
   assert(learn_lists.find(list_id) == learn_lists.end());
   learn_lists[list_id] =
-    std::unique_ptr<LearnList>(new LearnList(list_id, max_samples, timeout_ms));
+    std::unique_ptr<LearnList>(
+        new LearnList(list_id, device_id, max_samples, timeout_ms));
 }
 
 void
-LearnEngine::list_set_learn_writer(list_id_t list_id,
-                                   std::shared_ptr<LearnWriter> learn_writer) {
+LearnEngine::list_set_learn_writer(
+    list_id_t list_id, std::shared_ptr<TransportIface> learn_writer) {
   auto it = learn_lists.find(list_id);
   assert(it != learn_lists.end());
   LearnList *list = it->second.get();

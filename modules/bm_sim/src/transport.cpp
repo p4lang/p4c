@@ -27,26 +27,26 @@
 #include "bm_sim/transport.h"
 
 int
-TransportSTDOUT::open(const std::string &name) {
+TransportSTDOUT::open_(const std::string &name) {
   (void) name;  // compiler warning
   return 0;
 }
 
 int
-TransportSTDOUT::send(const std::string &msg) const {
+TransportSTDOUT::send_(const std::string &msg) const {
   std::cout << msg << std::endl;
   return 0;
 }
 
 int
-TransportSTDOUT::send(const char *msg, int len) const {
+TransportSTDOUT::send_(const char *msg, int len) const {
   (void) len;  // compiler warning
   std::cout << msg << std::endl;
 return 0;
 }
 
 int
-TransportSTDOUT::send_msgs(
+TransportSTDOUT::send_msgs_(
     const std::initializer_list<std::string> &msgs) const {
   for (const auto &msg : msgs) {
     send(msg);
@@ -55,7 +55,7 @@ TransportSTDOUT::send_msgs(
 }
 
 int
-TransportSTDOUT::send_msgs(const std::initializer_list<MsgBuf> &msgs) const {
+TransportSTDOUT::send_msgs_(const std::initializer_list<MsgBuf> &msgs) const {
   for (const auto &msg : msgs) {
     send(msg.buf, msg.len);
   }
@@ -66,7 +66,7 @@ TransportNanomsg::TransportNanomsg()
   : s(AF_SP, NN_PUB) {}
 
 int
-TransportNanomsg::open(const std::string &name) {
+TransportNanomsg::open_(const std::string &name) {
   // TODO(antonin): catch exception
   s.bind(name.c_str());
   int linger = 0;
@@ -75,22 +75,21 @@ TransportNanomsg::open(const std::string &name) {
 }
 
 int
-TransportNanomsg::send(const std::string &msg) const {
+TransportNanomsg::send_(const std::string &msg) const {
   s.send(msg.data(), msg.size(), 0);
   return 0;
 }
 
 int
-TransportNanomsg::send(const char *msg, int len) const {
+TransportNanomsg::send_(const char *msg, int len) const {
   s.send(msg, len, 0);
   return 0;
 }
 
 // do not use this function, I think I should just remove it...
 int
-TransportNanomsg::send_msgs(
-    const std::initializer_list<std::string> &msgs
-) const {
+TransportNanomsg::send_msgs_(
+    const std::initializer_list<std::string> &msgs) const {
   size_t num_msgs = msgs.size();
   if (num_msgs == 0) return 0;
   struct nn_msghdr msghdr;
@@ -113,7 +112,7 @@ TransportNanomsg::send_msgs(
 }
 
 int
-TransportNanomsg::send_msgs(const std::initializer_list<MsgBuf> &msgs) const {
+TransportNanomsg::send_msgs_(const std::initializer_list<MsgBuf> &msgs) const {
   size_t num_msgs = msgs.size();
   if (num_msgs == 0) return 0;
   struct nn_msghdr msghdr;

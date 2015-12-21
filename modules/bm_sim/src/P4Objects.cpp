@@ -30,8 +30,9 @@ using std::string;
 
 typedef unsigned char opcode_t;
 
-void P4Objects::build_expression(const Json::Value &json_expression,
-                                 Expression *expr) {
+void
+P4Objects::build_expression(const Json::Value &json_expression,
+                            Expression *expr) {
   if (json_expression.isNull()) return;
   const string type = json_expression["type"].asString();
   const Json::Value json_value = json_expression["value"];
@@ -67,11 +68,18 @@ void P4Objects::build_expression(const Json::Value &json_expression,
   }
 }
 
-int P4Objects::init_objects(std::istream &is,
-                            const std::set<header_field_pair> &required_fields,
-                            const std::set<header_field_pair> &arith_fields) {
+int
+P4Objects::init_objects(std::istream &is, int device_id,
+                        std::shared_ptr<TransportIface> notifications_transport,
+                        const std::set<header_field_pair> &required_fields,
+                        const std::set<header_field_pair> &arith_fields) {
   Json::Value cfg_root;
   is >> cfg_root;
+
+  if (!notifications_transport) {
+    notifications_transport = std::make_shared<TransportNULL>();
+    notifications_transport->open("dummy");
+  }
 
   // header types
 
@@ -501,12 +509,8 @@ int P4Objects::init_objects(std::istream &is,
 
   // pipelines
 
-  typedef AgeingWriterImpl<TransportNanomsg> MyAgeingWriter;
-  const string ageing_ipc_name = "ipc:///tmp/test_bm_ageing.ipc";
-  std::shared_ptr<MyAgeingWriter> ageing_writer(
-    new MyAgeingWriter(ageing_ipc_name));
   ageing_monitor = std::unique_ptr<AgeingMonitor>(
-    new AgeingMonitor(ageing_writer));
+      new AgeingMonitor(device_id, notifications_transport));
 
   const Json::Value &cfg_pipelines = cfg_root["pipelines"];
   for (const auto &cfg_pipeline : cfg_pipelines) {
@@ -703,23 +707,18 @@ int P4Objects::init_objects(std::istream &is,
 
   // learn lists
 
-  learn_engine = std::unique_ptr<LearnEngine>(new LearnEngine());
-
-  typedef LearnWriterImpl<TransportNanomsg> MyLearnWriter;
-  const string learning_ipc_name = "ipc:///tmp/test_bm_learning.ipc";
-  std::shared_ptr<MyLearnWriter> learn_writer;
+  learn_engine = std::unique_ptr<LearnEngine>(new LearnEngine(device_id));
 
   const Json::Value &cfg_learn_lists = cfg_root["learn_lists"];
 
   if (cfg_learn_lists.size() > 0) {
-    learn_writer = std::shared_ptr<MyLearnWriter>(
-      new MyLearnWriter(learning_ipc_name));
+    assert(notifications_transport);
   }
 
   for (const auto &cfg_learn_list : cfg_learn_lists) {
     LearnEngine::list_id_t list_id = cfg_learn_list["id"].asInt();
     learn_engine->list_create(list_id, 16);  // 16 is max nb of samples
-    learn_engine->list_set_learn_writer(list_id, learn_writer);
+    learn_engine->list_set_learn_writer(list_id, notifications_transport);
 
     const Json::Value &cfg_learn_elements = cfg_learn_list["elements"];
     for (const auto &cfg_learn_element : cfg_learn_elements) {
@@ -793,11 +792,13 @@ int P4Objects::init_objects(std::istream &is,
   // NOLINTNEXTLINE(readability/fn_size)
 }
 
-void P4Objects::destroy_objects() {
+void
+P4Objects::destroy_objects() {
   Packet::unset_phv_factory();
 }
 
-void P4Objects::reset_state() {
+void
+P4Objects::reset_state() {
   // TODO(antonin): is this robust?
   for (auto &table : match_action_tables_map) {
     table.second->get_match_table()->reset_state();
@@ -806,29 +807,32 @@ void P4Objects::reset_state() {
   ageing_monitor->reset_state();
 }
 
-int P4Objects::get_field_offset(header_id_t header_id,
-                                const string &field_name) {
+int
+P4Objects::get_field_offset(header_id_t header_id, const string &field_name) {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_field_offset(field_name);
 }
 
-size_t P4Objects::get_field_bytes(header_id_t header_id, int field_offset) {
+size_t
+P4Objects::get_field_bytes(header_id_t header_id, int field_offset) {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return (header_type.get_bit_width(field_offset) + 7) / 8;
 }
 
-size_t P4Objects::get_field_bits(header_id_t header_id, int field_offset) {
+size_t
+P4Objects::get_field_bits(header_id_t header_id, int field_offset) {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_bit_width(field_offset);
 }
 
-size_t P4Objects::get_header_bits(header_id_t header_id) {
+size_t
+P4Objects::get_header_bits(header_id_t header_id) {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_bit_width();
 }
 
-std::tuple<header_id_t, int> P4Objects::field_info(const string &header_name,
-                                                   const string &field_name) {
+std::tuple<header_id_t, int>
+P4Objects::field_info(const string &header_name, const string &field_name) {
   header_id_t header_id = get_header_id(header_name);
   return std::make_tuple(header_id, get_field_offset(header_id, field_name));
 }
@@ -842,7 +846,8 @@ P4Objects::field_exists(const string &header_name,
   return (header_type->get_field_offset(field_name) != -1);
 }
 
-bool P4Objects::check_required_fields(
+bool
+P4Objects::check_required_fields(
     const std::set<header_field_pair> &required_fields) {
   bool res = true;
   for (const auto &p : required_fields) {

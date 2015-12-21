@@ -31,82 +31,11 @@
 
 #include "bm_sim/ageing.h"
 
+#include "utils.h"
+
 using std::chrono::milliseconds;
 using std::chrono::duration_cast;
 using std::this_thread::sleep_for;
-
-/* Exactly the same as the MemoryAccessor for the learning tests, I need to
-   unify LearnWriter and AgeingWriter soon */
-
-class MemoryAccessor : public AgeingWriter {
-public:
-  enum class Status { CAN_READ, CAN_WRITE };
-public:
-  MemoryAccessor(size_t max_size)
-    : max_size(max_size), status(Status::CAN_WRITE) {
-    buffer_.reserve(max_size);
-  }
-
-  int send(const char *buffer, size_t len) const override {
-    if(len > max_size) return -1;
-    std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_WRITE) {
-      can_write.wait(lock);
-    }
-    buffer_.insert(buffer_.end(), buffer, buffer + len);
-    status = Status::CAN_READ;
-    can_read.notify_one();
-    return 0;
-  }
-
-  int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs
-  ) const override
-  {
-    size_t len = 0;
-    for(const auto &msg : msgs) {
-      len += msg.len;
-    }
-    if(len > max_size) return -1;
-    std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_WRITE) {
-      can_write.wait(lock);
-    }
-    for(const auto &msg : msgs) {
-      buffer_.insert(buffer_.end(), msg.buf, msg.buf + msg.len);
-    }
-    status = Status::CAN_READ;
-    can_read.notify_one();
-    return 0;
-  }
-
-  int read(char *dst, size_t len) const {
-    len = (len > max_size) ? max_size : len;
-    std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_READ) {
-      can_read.wait(lock);
-    }
-    std::copy(buffer_.begin(), buffer_.begin() + len, dst);
-    buffer_.clear();
-    status = Status::CAN_WRITE;
-    can_write.notify_one();
-    return 0;
-  }
-
-  Status check_status() {
-    std::unique_lock<std::mutex> lock(mutex);
-    return status;
-  }
-
-private:
-  // dirty trick (mutable) to make sure that send() const is override
-  mutable std::vector<char> buffer_;
-  size_t max_size;
-  mutable Status status;
-  mutable std::mutex mutex;
-  mutable std::condition_variable can_write;
-  mutable std::condition_variable can_read;
-};
 
 // Google Test fixture for learning tests
 class AgeingTest : public ::testing::Test {
@@ -115,6 +44,8 @@ protected:
 
 protected:
   PHVFactory phv_factory;
+
+  const int device_id = 0;
 
   MatchKeyBuilder key_builder;
   std::unique_ptr<MatchTable> table;
@@ -198,8 +129,7 @@ protected:
 
   void init_monitor(unsigned int sweep_int) {
     ageing_monitor = std::unique_ptr<AgeingMonitor>(
-      new AgeingMonitor(ageing_writer, sweep_int)
-    );
+        new AgeingMonitor(device_id, ageing_writer, sweep_int));
     ageing_monitor->add_table(table.get());
   }
 };

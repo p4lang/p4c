@@ -56,13 +56,15 @@ class P4Objects {
   // A reference works great here, but should I switch to a pointer?
   // NOLINTNEXTLINE(runtime/references)
   explicit P4Objects(std::ostream &outstream = std::cout)
-    : outstream(outstream) { }
+      : outstream(outstream) { }
 
-  int init_objects(std::istream &is,
+  int init_objects(std::istream &is, int device_id = 0,
+                   std::shared_ptr<TransportIface> transport = nullptr,
                    const std::set<header_field_pair> &required_fields =
                      std::set<header_field_pair>(),
                    const std::set<header_field_pair> &arith_fields =
                      std::set<header_field_pair>());
+
   void destroy_objects();
 
   P4Objects(const P4Objects &other) = delete;

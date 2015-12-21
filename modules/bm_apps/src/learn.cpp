@@ -44,13 +44,14 @@ namespace runtime = bm_runtime::standard;
 namespace {
 
 typedef struct {
+  char sub_topic[4];
   int switch_id;
   int list_id;
   uint64_t buffer_id;
   unsigned int num_samples;
 } __attribute__((packed)) learn_hdr_t;
 
-}
+}  // namespace
 
 LearnListener::LearnListener(const std::string &learn_socket,
                              const std::string &thrift_addr,
@@ -102,7 +103,8 @@ void LearnListener::start() {
 
 void LearnListener::listen_loop() {
   nn::socket s(AF_SP, NN_SUB);
-  s.setsockopt(NN_SUB, NN_SUB_SUBSCRIBE, "", 0);
+  // only subscribe to learn notifications
+  s.setsockopt(NN_SUB, NN_SUB_SUBSCRIBE, "LEA", 3);
   int to = 200;
   s.setsockopt(NN_SOL_SOCKET, NN_RCVTIMEO, &to, sizeof(to));
   s.connect(socket_name.c_str());

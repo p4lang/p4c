@@ -22,31 +22,11 @@
 
 #include "bm_sim/ageing.h"
 
-template <typename Transport>
-AgeingWriterImpl<Transport>::AgeingWriterImpl(const std::string &transport_name)
-  : transport_instance(std::unique_ptr<Transport>(new Transport())) {
-  // should not be doing this in the constructor ?
-  transport_instance->open(transport_name);
-}
-
-template <typename Transport>
-int AgeingWriterImpl<Transport>::send(const char *buffer, size_t len) const {
-  return transport_instance->send(buffer, len);
-}
-
-template <typename Transport>
-int AgeingWriterImpl<Transport>::send_msgs(
-    const std::initializer_list<TransportIface::MsgBuf> &msgs
-) const {
-  return transport_instance->send_msgs(msgs);
-}
-
-// explicit template instantiation
-template class AgeingWriterImpl<TransportNanomsg>;
-
-AgeingMonitor::AgeingMonitor(std::shared_ptr<AgeingWriter> writer,
+AgeingMonitor::AgeingMonitor(int device_id,
+                             std::shared_ptr<TransportIface> writer,
                              unsigned int sweep_interval_ms)
-  : writer(writer), sweep_interval_ms(sweep_interval_ms) {
+    : device_id(device_id), writer(writer),
+      sweep_interval_ms(sweep_interval_ms) {
   sweep_thread = std::thread(&AgeingMonitor::sweep_loop, this);
 }
 
@@ -123,7 +103,8 @@ AgeingMonitor::do_sweep() {
     unsigned int num_entries = static_cast<unsigned int>(entries.size());
     unsigned int size =
       static_cast<unsigned int>(num_entries * sizeof(entry_handle_t));
-    msg_hdr_t msg_hdr = {0, buffer_id++, entry.first, num_entries};
+    msg_hdr_t msg_hdr = {{'A', 'G', 'E', '|'},
+                         device_id, buffer_id++, entry.first, num_entries};
     TransportIface::MsgBuf buf_hdr =
       {reinterpret_cast<char *>(&msg_hdr), sizeof(msg_hdr)};
     TransportIface::MsgBuf buf_entries =

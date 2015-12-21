@@ -31,87 +31,21 @@
 
 #include "bm_sim/learning.h"
 
+#include "utils.h"
+
 using std::chrono::milliseconds;
 using std::chrono::duration_cast;
 using std::this_thread::sleep_for;
 
-class MemoryAccessor : public LearnWriter {
-public:
-  enum class Status { CAN_READ, CAN_WRITE };
-public:
-  MemoryAccessor(size_t max_size)
-    : max_size(max_size), status(Status::CAN_WRITE) {
-    buffer_.reserve(max_size);
-  }
-
-  int send(const char *buffer, size_t len) const override {
-    if(len > max_size) return -1;
-    std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_WRITE) {
-      can_write.wait(lock);
-    }
-    buffer_.insert(buffer_.end(), buffer, buffer + len);
-    status = Status::CAN_READ;
-    can_read.notify_one();
-    return 0;
-  }
-
-  int send_msgs(
-      const std::initializer_list<TransportIface::MsgBuf> &msgs
-  ) const override
-  {
-    size_t len = 0;
-    for(const auto &msg : msgs) {
-      len += msg.len;
-    }
-    if(len > max_size) return -1;
-    std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_WRITE) {
-      can_write.wait(lock);
-    }
-    for(const auto &msg : msgs) {
-      buffer_.insert(buffer_.end(), msg.buf, msg.buf + msg.len);
-    }
-    status = Status::CAN_READ;
-    can_read.notify_one();
-    return 0;
-  }
-
-  int read(char *dst, size_t len) const {
-    len = (len > max_size) ? max_size : len;
-    std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_READ) {
-      can_read.wait(lock);
-    }
-    std::copy(buffer_.begin(), buffer_.begin() + len, dst);
-    buffer_.clear();
-    status = Status::CAN_WRITE;
-    can_write.notify_one();
-    return 0;
-  }
-
-  Status check_status() {
-    std::unique_lock<std::mutex> lock(mutex);
-    return status;
-  }
-
-private:
-  // dirty trick (mutable) to make sure that send() const is override
-  mutable std::vector<char> buffer_;
-  size_t max_size;
-  mutable Status status;
-  mutable std::mutex mutex;
-  mutable std::condition_variable can_write;
-  mutable std::condition_variable can_read;
-};
-
 // Google Test fixture for learning tests
 class LearningTest : public ::testing::Test {
-protected:
+ protected:
   typedef std::chrono::high_resolution_clock clock;
 
-protected:
+ protected:
   PHVFactory phv_factory;
+
+  const int device_id = 0;
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
@@ -192,7 +126,8 @@ TEST_F(LearningTest, OneSample) {
   LearnEngine::msg_hdr_t *msg_hdr = (LearnEngine::msg_hdr_t *) buffer;
   const char *data = buffer + sizeof(LearnEngine::msg_hdr_t);
 
-  ASSERT_EQ(0, msg_hdr->switch_id);
+  ASSERT_EQ(0, memcmp("LEA|", msg_hdr->sub_topic, sizeof(msg_hdr->sub_topic)));
+  ASSERT_EQ(device_id, msg_hdr->switch_id);
   ASSERT_EQ(list_id, msg_hdr->list_id);
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
@@ -219,7 +154,8 @@ TEST_F(LearningTest, OneSampleTimeout) {
   LearnEngine::msg_hdr_t *msg_hdr = (LearnEngine::msg_hdr_t *) buffer;
   const char *data = buffer + sizeof(LearnEngine::msg_hdr_t);
 
-  ASSERT_EQ(0, msg_hdr->switch_id);
+  ASSERT_EQ(0, memcmp("LEA|", msg_hdr->sub_topic, sizeof(msg_hdr->sub_topic)));
+  ASSERT_EQ(device_id, msg_hdr->switch_id);
   ASSERT_EQ(list_id, msg_hdr->list_id);
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
@@ -273,7 +209,8 @@ TEST_F(LearningTest, OneSampleConstData) {
   LearnEngine::msg_hdr_t *msg_hdr = (LearnEngine::msg_hdr_t *) buffer;
   const char *data = buffer + sizeof(LearnEngine::msg_hdr_t);
 
-  ASSERT_EQ(0, msg_hdr->switch_id);
+  ASSERT_EQ(0, memcmp("LEA|", msg_hdr->sub_topic, sizeof(msg_hdr->sub_topic)));
+  ASSERT_EQ(device_id, msg_hdr->switch_id);
   ASSERT_EQ(list_id, msg_hdr->list_id);
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
@@ -478,7 +415,7 @@ TEST_F(LearningTest, OneSampleCbMode) {
 
   const char *data = buffer;
 
-  ASSERT_EQ(0, cb_hdr.switch_id);
+  ASSERT_EQ(device_id, cb_hdr.switch_id);
   ASSERT_EQ(list_id, cb_hdr.list_id);
   ASSERT_EQ(0u, cb_hdr.buffer_id);
   ASSERT_EQ(1u, cb_hdr.num_samples);

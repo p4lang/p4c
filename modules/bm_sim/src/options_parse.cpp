@@ -100,7 +100,11 @@ OptionsParser::parse(int argc, char *argv[]) {
       ("log-console",
        "Enable logging on stdout")
       ("log-file", po::value<std::string>(),
-       "Enable logging to given file");
+       "Enable logging to given file")
+      ("notifications-addr", po::value<std::string>(),
+       "Specify the nanomsg address to use for notifications "
+       "(e.g. learning, ageing, ...); "
+       "default is ipc:///tmp/bmv2-<device-id>-notifications.ipc");
 
   po::options_description hidden;
   hidden.add_options()
@@ -142,6 +146,13 @@ OptionsParser::parse(int argc, char *argv[]) {
   device_id = 0;
   if (vm.count("device-id")) {
     device_id = vm["device-id"].as<int>();
+  }
+
+  if (vm.count("notifications-addr")) {
+    notifications_addr = vm["notifications-addr"].as<std::string>();
+  } else {
+    notifications_addr = std::string("ipc:///tmp/bmv2-")
+        + std::to_string(device_id) + std::string("-notifications.ipc");
   }
 
   // TODO(antonin): clean this up
