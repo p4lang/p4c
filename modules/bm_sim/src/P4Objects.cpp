@@ -208,6 +208,7 @@ P4Objects::init_objects(std::istream &is, int device_id,
           assert(dest_type == "field");
           const auto dest = field_info(cfg_dest["value"][0].asString(),
                                        cfg_dest["value"][1].asString());
+          phv_factory.enable_field_arith(std::get<0>(dest), std::get<1>(dest));
 
           const string &src_type = cfg_src["type"].asString();
           if (src_type == "field") {
@@ -216,6 +217,7 @@ P4Objects::init_objects(std::istream &is, int device_id,
             parse_state->add_set_from_field(
               std::get<0>(dest), std::get<1>(dest),
               std::get<0>(src), std::get<1>(src));
+            phv_factory.enable_field_arith(std::get<0>(src), std::get<1>(src));
           } else if (src_type == "hexstr") {
             parse_state->add_set_from_data(
               std::get<0>(dest), std::get<1>(dest),
