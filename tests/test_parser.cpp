@@ -53,8 +53,7 @@ static const unsigned char raw_udp_pkt[82] = {
 
 // Google Test fixture for parser tests
 class ParserTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
 
   HeaderType ethernetHeaderType, ipv4HeaderType, udpHeaderType, tcpHeaderType;
@@ -65,14 +64,17 @@ protected:
 
   Deparser deparser;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   ParserTest()
-    : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
-      udpHeaderType("udp_t", 2), tcpHeaderType("tcp_t", 3),
-      ethernetParseState("parse_ethernet", 0),
-      ipv4ParseState("parse_ipv4", 1),
-      udpParseState("parse_udp", 2),
-      tcpParseState("parse_tcp", 3),
-      parser("test_parser", 0), deparser("test_deparser", 0) {
+      : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
+        udpHeaderType("udp_t", 2), tcpHeaderType("tcp_t", 3),
+        ethernetParseState("parse_ethernet", 0),
+        ipv4ParseState("parse_ipv4", 1),
+        udpParseState("parse_udp", 2),
+        tcpParseState("parse_tcp", 3),
+        parser("test_parser", 0), deparser("test_deparser", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
     ethernetHeaderType.push_back_field("ethertype", 16);
@@ -113,7 +115,7 @@ protected:
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
 
     ParseSwitchKeyBuilder ethernetKeyBuilder;
     ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
@@ -153,24 +155,20 @@ protected:
   }
 
   Packet get_tcp_pkt() {
-    Packet pkt = Packet::make_new(
-	0, 0, sizeof(raw_tcp_pkt),
-	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt))
-    );
-    return pkt;
+    return Packet::make_new(
+	sizeof(raw_tcp_pkt),
+	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt)),
+        phv_source.get());
   }
 
   Packet get_udp_pkt() {
-    Packet pkt = Packet::make_new(
-	0, 0, sizeof(raw_udp_pkt),
-	PacketBuffer(256, (const char *) raw_udp_pkt, sizeof(raw_udp_pkt))
-    );
-    return pkt;
+    return Packet::make_new(
+	sizeof(raw_udp_pkt),
+	PacketBuffer(256, (const char *) raw_udp_pkt, sizeof(raw_udp_pkt)),
+        phv_source.get());
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(ParserTest, ParseEthernetIPv4TCP) {
@@ -283,7 +281,7 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
   const char *ref_pkt;
   size_t size;
 
-  Packet packet = Packet::make_new();
+  Packet packet = Packet::make_new(phv_source.get());
   for(int t = 0; t < 10000; t++) {
     if(t % 2 == 0) {
       packet = get_tcp_pkt();
@@ -340,15 +338,17 @@ TEST(LookAhead, Peek) {
 
 // Google Test fixture for ParserOpSet tests
 class ParserOpSetTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   ParserOpSetTest()
-    : testHeaderType("test_t", 0) {
+      : testHeaderType("test_t", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f32", 32);
     testHeaderType.push_back_field("f48", 48);
@@ -359,16 +359,14 @@ protected:
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    return Packet::make_new(0, 0, 64, PacketBuffer(128));
+    return Packet::make_new(64, PacketBuffer(128), phv_source.get());
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(ParserOpSetTest, SetFromData) {
@@ -437,8 +435,7 @@ TEST_F(ParserOpSetTest, SetFromExpression) {
 
 // Google Test fixture for ParseSwitchKeyBuilder tests
 class ParseSwitchKeyBuilderTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
 
   HeaderType testHeaderType;
@@ -446,8 +443,11 @@ protected:
   header_id_t testHeaderStack1{2}, testHeaderStack2{3};
   header_stack_id_t testHeaderStack{0};
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   ParseSwitchKeyBuilderTest()
-    : testHeaderType("test_t", 0) {
+      : testHeaderType("test_t", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f32", 32);
     testHeaderType.push_back_field("f48", 48);
@@ -463,16 +463,14 @@ protected:
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    return Packet::make_new(0, 0, 64, PacketBuffer(128));
+    return Packet::make_new(64, PacketBuffer(128), phv_source.get());
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(ParseSwitchKeyBuilderTest, Mix) {
@@ -529,8 +527,7 @@ static const unsigned char raw_mpls_pkt[93] = {
 // Google Test fixture for special MPLS test
 // This test complements the ParserTest by using header stacks
 class MPLSParserTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
 
   HeaderType ethernetHeaderType, MPLSHeaderType;
@@ -544,11 +541,14 @@ protected:
 
   Deparser deparser;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   MPLSParserTest()
-    : ethernetHeaderType("ethernet_t", 0), MPLSHeaderType("mpls_t", 1),
-      ethernetParseState("parse_ethernet", 0),
-      MPLSParseState("parse_mpls", 1),
-      parser("test_parser", 0), deparser("test_deparser", 0) {
+      : ethernetHeaderType("ethernet_t", 0), MPLSHeaderType("mpls_t", 1),
+        ethernetParseState("parse_ethernet", 0),
+        MPLSParseState("parse_mpls", 1),
+        parser("test_parser", 0), deparser("test_deparser", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
     ethernetHeaderType.push_back_field("ethertype", 16);
@@ -569,7 +569,7 @@ protected:
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
 
     ParseSwitchKeyBuilder ethernetKeyBuilder;
     ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
@@ -605,16 +605,13 @@ protected:
   }
 
   Packet get_mpls_pkt() {
-    Packet pkt = Packet::make_new(
-	0, 0, sizeof(raw_mpls_pkt),
-	PacketBuffer(256, (const char *) raw_mpls_pkt, sizeof(raw_mpls_pkt))
-    );
-    return pkt;
+    return Packet::make_new(
+	sizeof(raw_mpls_pkt),
+	PacketBuffer(256, (const char *) raw_mpls_pkt, sizeof(raw_mpls_pkt)),
+        phv_source.get());
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(MPLSParserTest, ParseEthernetMPLS3) {
@@ -640,14 +637,17 @@ TEST_F(MPLSParserTest, ParseEthernetMPLS3) {
 }
 
 class SwitchCaseTest : public ::testing::Test {
-protected:
+ protected:
   PHVFactory phv_factory;
 
-  SwitchCaseTest() { }
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  SwitchCaseTest()
+      : phv_source(PHVSourceIface::make_phv_source()) { }
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    return Packet::make_new(0, 0, 64, PacketBuffer(128));
+    return Packet::make_new(64, PacketBuffer(128), phv_source.get());
   }
 
   unsigned int bc_as_uint(const ByteContainer &bc) {
@@ -658,12 +658,10 @@ protected:
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(SwitchCaseTest, NoSwitch) {
@@ -732,8 +730,7 @@ TEST_F(SwitchCaseTest, Mask) {
 // This test is targetted a TLV parsing but covers many aspects of the parser
 // (e.g. header stacks)
 class IPv4TLVParsingTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
 
   HeaderType ethernetHeaderType, ipv4HeaderType;
@@ -752,19 +749,22 @@ protected:
 
   Parser parser;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   IPv4TLVParsingTest()
-    : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
-      ipv4OptionAHeaderType("ipv4_optionA_t", 2),
-      ipv4OptionBHeaderType("ipv4_optionB_t", 3),
-      ipv4PaddingHeaderType("ipv4_padding_t", 4),
-      pMetaType("pmeta_t", 5),
-      ethernetParseState("parse_ethernet", 0),
-      ipv4ParseState("parse_ipv4", 1),
-      ipv4OptionsParseState("parse_ipv4_options", 2),
-      ipv4OptionAParseState("parse_ipv4_optionA", 3),
-      ipv4OptionBParseState("parse_ipv4_optionB", 4),
-      ipv4PaddingParseState("parse_ipv4_padding", 5),
-      parser("test_parser", 0) {
+      : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
+        ipv4OptionAHeaderType("ipv4_optionA_t", 2),
+        ipv4OptionBHeaderType("ipv4_optionB_t", 3),
+        ipv4PaddingHeaderType("ipv4_padding_t", 4),
+        pMetaType("pmeta_t", 5),
+        ethernetParseState("parse_ethernet", 0),
+        ipv4ParseState("parse_ipv4", 1),
+        ipv4OptionsParseState("parse_ipv4_options", 2),
+        ipv4OptionAParseState("parse_ipv4_optionA", 3),
+        ipv4OptionBParseState("parse_ipv4_optionB", 4),
+        ipv4PaddingParseState("parse_ipv4_padding", 5),
+        parser("test_parser", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
 
     pMetaType.push_back_field("byte_counter", 8);
 
@@ -820,7 +820,7 @@ protected:
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
 
     // parse_ethernet
     ethernetParseState.add_extract(ethernetHeader);
@@ -1001,16 +1001,12 @@ protected:
     // make the parser simpler) and Valgrind complains
     ByteContainer buf_(buf);
     buf_.push_back('\xab');
-    Packet pkt = Packet::make_new(
-	0, 0, buf_.size(),
-        PacketBuffer(512, buf_.data(), buf_.size())
-    );
-    return pkt;
+    return Packet::make_new(buf_.size(),
+                            PacketBuffer(512, buf_.data(), buf_.size()),
+                            phv_source.get());
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(IPv4TLVParsingTest, NoOption) {
@@ -1091,8 +1087,7 @@ TEST_F(IPv4TLVParsingTest, BothOptions) {
 // Google Test fixture for IPv4 Variable Length parsing test
 // This test parses the options as one VL field
 class IPv4VLParsingTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
 
   HeaderType ethernetHeaderType, ipv4HeaderType;
@@ -1103,11 +1098,14 @@ protected:
 
   Deparser deparser;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   IPv4VLParsingTest()
-    : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
-      ethernetParseState("parse_ethernet", 0),
-      ipv4ParseState("parse_ipv4", 1),
-      parser("test_parser", 0), deparser("test_deparser", 0) {
+      : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
+        ethernetParseState("parse_ethernet", 0),
+        ipv4ParseState("parse_ipv4", 1),
+        parser("test_parser", 0), deparser("test_deparser", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
 
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
@@ -1143,7 +1141,7 @@ protected:
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
 
     // parse_ethernet
     ethernetParseState.add_extract(ethernetHeader);
@@ -1186,11 +1184,9 @@ protected:
   }
 
   Packet get_pkt(const ByteContainer &buf) const {
-    Packet pkt = Packet::make_new(
-        0, 0, buf.size(),
-        PacketBuffer(512, buf.data(), buf.size())
-    );
-    return pkt;
+    return Packet::make_new(buf.size(),
+                            PacketBuffer(512, buf.data(), buf.size()),
+                            phv_source.get());
   }
 
   void check_base(const PHV &phv, size_t option_words) {
@@ -1224,9 +1220,7 @@ protected:
     check_option(phv, OptionWords, expected_value);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(IPv4VLParsingTest, NoOption) {

@@ -32,6 +32,7 @@
 #include <cassert>
 
 #include "packet_buffer.h"
+#include "phv_source.h"
 #include "phv.h"
 
 typedef uint64_t packet_id_t;
@@ -66,7 +67,12 @@ class CopyIdGenerator {
   std::array<std::atomic<int>, W> arr{{}};
 };
 
-class Packet {
+// If the "Packet" class needs to be extended for your target, use composition
+// not inheritance
+class Packet final {
+  friend class SwitchWContexts;
+  friend class Switch;
+
  public:
   typedef std::chrono::system_clock clock;
 
@@ -139,9 +145,21 @@ class Packet {
   PHV *get_phv() { return phv.get(); }
   const PHV *get_phv() const { return phv.get(); }
 
-  Packet clone() const;
-  Packet clone_and_reset_metadata() const;
+  // if new_cxt == cxt_id, then this is a no-op
+  // otherwise, release the old PHV and replace it with a new one, compatible
+  // with the newt context
+  void change_context(size_t new_cxt);
+
+  // the *_ptr function are just here for convenience, the same can be achieved
+  // by the client by constructing a unique_ptr
+  Packet clone_with_phv() const;
+  std::unique_ptr<Packet> clone_with_phv_ptr() const;
+  Packet clone_with_phv_reset_metadata() const;
+  std::unique_ptr<Packet> clone_with_phv_reset_metadata_ptr() const;
   Packet clone_no_phv() const;
+  std::unique_ptr<Packet> clone_no_phv_ptr() const;
+  Packet clone_choose_context(size_t new_cxt) const;
+  std::unique_ptr<Packet> clone_choose_context_ptr(size_t new_cxt) const;
 
   Packet(const Packet &other) = delete;
   Packet &operator=(const Packet &other) = delete;
@@ -149,29 +167,27 @@ class Packet {
   Packet(Packet &&other) noexcept;
   Packet &operator=(Packet &&other) noexcept;
 
-  // cpplint false positive for rvalue references
-  static Packet make_new(int ingress_port, packet_id_t id, int ingress_length,
+  // for tests
+  // TODO(antonin): find a better solution, no-one is supposed to use these
+  static Packet make_new(PHVSourceIface *phv_source);
+  // cpplint false positive
   // NOLINTNEXTLINE(whitespace/operators)
-                         PacketBuffer &&buffer);
-  static Packet make_new(int ingress_port, packet_id_t id, int ingress_length,
-  // NOLINTNEXTLINE(whitespace/operators)
-                         PacketBuffer &&buffer,
-                         const PHV &src_phv);
-  // for testing
-  static Packet make_new(packet_id_t id = 0);
+  static Packet make_new(int ingress_length, PacketBuffer &&buffer,
+                         PHVSourceIface *phv_source);
+  static Packet make_new(size_t cxt, int ingress_port, packet_id_t id,
+                         copy_id_t copy_id, int ingress_length,
+                         // cpplint false positive
+                         // NOLINTNEXTLINE(whitespace/operators)
+                         PacketBuffer &&buffer, PHVSourceIface *phv_source);
 
- protected:
-  Packet(int ingress_port, packet_id_t id, copy_id_t copy_id,
-         int ingress_length, PacketBuffer &&buffer);
-
-  Packet(int ingress_port, packet_id_t id, copy_id_t copy_id,
-         int ingress_length, PacketBuffer &&buffer, const PHV &src_phv);
-
-  explicit Packet(packet_id_t id);
+ private:
+  Packet(size_t cxt, int ingress_port, packet_id_t id, copy_id_t copy_id,
+         int ingress_length, PacketBuffer &&buffer, PHVSourceIface *phv_source);
 
   void update_signature(uint64_t seed = 0);
   void set_ingress_ts();
 
+  size_t cxt_id{0};
   int ingress_port{-1};
   int egress_port{-1};
   packet_id_t packet_id{0};
@@ -189,30 +205,9 @@ class Packet {
 
   std::unique_ptr<PHV> phv{nullptr};
 
- private:
-  class PHVPool {
-   public:
-    explicit PHVPool(const PHVFactory &phv_factory);
-    std::unique_ptr<PHV> get();
-    void release(std::unique_ptr<PHV> phv);
-
-   private:
-    mutable std::mutex mutex{};
-    std::vector<std::unique_ptr<PHV> > phvs{};
-    const PHVFactory &phv_factory;
-  };
-
- public:
-  static void set_phv_factory(const PHVFactory &phv_factory);
-  static void unset_phv_factory();
-  static void swap_phv_factory(const PHVFactory &phv_factory);
+  PHVSourceIface *phv_source{nullptr};
 
  private:
-  // static variable
-  // Google style guidelines stipulate that we have to use a raw pointer and
-  // leak the memory
-  static PHVPool *phv_pool;
-
   static CopyIdGenerator *copy_id_gen;
 };
 

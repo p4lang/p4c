@@ -111,10 +111,8 @@ REGISTER_PRIMITIVE(ExecuteMeter);
 
 // Google Test fixture for actions tests
 class ActionsTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
-  std::unique_ptr<Packet> pkt;
   PHV *phv{nullptr};
 
   HeaderType testHeaderType;
@@ -126,10 +124,17 @@ protected:
   ActionFn testActionFn;
   ActionFnEntry testActionFnEntry;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  // pkt needs to be destroyed BEFOR phv_source, otherwise segfault
+  // not a very clean design...
+  std::unique_ptr<Packet> pkt{nullptr};
+
   ActionsTest()
-    : testHeaderType("test_t", 0),
-      testActionFn("test_action", 0),
-      testActionFnEntry(&testActionFn) {
+      : testHeaderType("test_t", 0),
+        testActionFn("test_action", 0),
+        testActionFnEntry(&testActionFn),
+        phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f32", 32);
     testHeaderType.push_back_field("f48", 48);
     testHeaderType.push_back_field("f8", 8);
@@ -147,14 +152,13 @@ protected:
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
-    pkt = std::unique_ptr<Packet>(new Packet(Packet::make_new()));
+    phv_source->set_phv_factory(0, &phv_factory);
+    pkt = std::unique_ptr<Packet>(new Packet(
+        Packet::make_new(phv_source.get())));
     phv = pkt->get_phv();
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  virtual void TearDown() { }
 };
 
 TEST_F(ActionsTest, SetFromConst) {

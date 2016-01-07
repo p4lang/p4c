@@ -24,29 +24,24 @@
 #include <string>
 #include <vector>
 
-#include "match_tables.h"
+#include "context.h"
 
 class RuntimeInterface {
  public:
-  typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
-  typedef MatchTableIndirectWS::grp_hdl_t grp_hdl_t;
+  typedef Context::mbr_hdl_t mbr_hdl_t;
+  typedef Context::grp_hdl_t grp_hdl_t;
 
-  typedef Meter::MeterErrorCode MeterErrorCode;
-  typedef Register::RegisterErrorCode RegisterErrorCode;
+  typedef Context::MeterErrorCode MeterErrorCode;
+  typedef Context::RegisterErrorCode RegisterErrorCode;
 
- public:
-  enum ErrorCode {
-    SUCCESS = 0,
-    CONFIG_SWAP_DISABLED,
-    ONGOING_SWAP,
-    NO_ONGOING_SWAP
-  };
+  typedef Context::ErrorCode ErrorCode;
 
  public:
   virtual ~RuntimeInterface() { }
 
   virtual MatchErrorCode
-  mt_add_entry(const std::string &table_name,
+  mt_add_entry(size_t cxt_id,
+               const std::string &table_name,
                const std::vector<MatchKeyParam> &match_key,
                const std::string &action_name,
                ActionData action_data,  // will be moved
@@ -54,134 +49,173 @@ class RuntimeInterface {
                int priority = -1  /*only used for ternary*/) = 0;
 
   virtual MatchErrorCode
-  mt_set_default_action(const std::string &table_name,
+  mt_set_default_action(size_t cxt_id,
+                        const std::string &table_name,
                         const std::string &action_name,
                         ActionData action_data) = 0;
 
   virtual MatchErrorCode
-  mt_delete_entry(const std::string &table_name,
+  mt_delete_entry(size_t cxt_id,
+                  const std::string &table_name,
                   entry_handle_t handle) = 0;
 
   virtual MatchErrorCode
-  mt_modify_entry(const std::string &table_name,
+  mt_modify_entry(size_t cxt_id,
+                  const std::string &table_name,
                   entry_handle_t handle,
                   const std::string &action_name,
                   ActionData action_data) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_add_member(const std::string &table_name,
+  mt_set_entry_ttl(size_t cxt_id,
+                   const std::string &table_name,
+                   entry_handle_t handle,
+                   unsigned int ttl_ms) = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_add_member(size_t cxt_id,
+                         const std::string &table_name,
                          const std::string &action_name,
                          ActionData action_data,
                          mbr_hdl_t *mbr) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_delete_member(const std::string &table_name,
+  mt_indirect_delete_member(size_t cxt_id,
+                            const std::string &table_name,
                             mbr_hdl_t mbr) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_modify_member(const std::string &table_name,
+  mt_indirect_modify_member(size_t cxt_id,
+                            const std::string &table_name,
                             mbr_hdl_t mbr_hdl,
                             const std::string &action_name,
                             ActionData action_data) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_add_entry(const std::string &table_name,
+  mt_indirect_add_entry(size_t cxt_id,
+                        const std::string &table_name,
                         const std::vector<MatchKeyParam> &match_key,
                         mbr_hdl_t mbr,
                         entry_handle_t *handle,
                         int priority = 1) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_modify_entry(const std::string &table_name,
+  mt_indirect_modify_entry(size_t cxt_id,
+                           const std::string &table_name,
                            entry_handle_t handle,
                            mbr_hdl_t mbr) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_delete_entry(const std::string &table_name,
+  mt_indirect_delete_entry(size_t cxt_id,
+                           const std::string &table_name,
                            entry_handle_t handle) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_set_default_member(const std::string &table_name,
+  mt_indirect_set_entry_ttl(size_t cxt_id,
+                            const std::string &table_name,
+                            entry_handle_t handle,
+                            unsigned int ttl_ms) = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_set_default_member(size_t cxt_id,
+                                 const std::string &table_name,
                                  mbr_hdl_t mbr) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_ws_create_group(const std::string &table_name,
+  mt_indirect_ws_create_group(size_t cxt_id,
+                              const std::string &table_name,
                               grp_hdl_t *grp) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_ws_delete_group(const std::string &table_name,
+  mt_indirect_ws_delete_group(size_t cxt_id,
+                              const std::string &table_name,
                               grp_hdl_t grp) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_ws_add_member_to_group(const std::string &table_name,
+  mt_indirect_ws_add_member_to_group(size_t cxt_id,
+                                     const std::string &table_name,
                                      mbr_hdl_t mbr, grp_hdl_t grp) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_ws_remove_member_from_group(const std::string &table_name,
+  mt_indirect_ws_remove_member_from_group(size_t cxt_id,
+                                          const std::string &table_name,
                                           mbr_hdl_t mbr, grp_hdl_t grp) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_ws_add_entry(const std::string &table_name,
+  mt_indirect_ws_add_entry(size_t cxt_id,
+                           const std::string &table_name,
                            const std::vector<MatchKeyParam> &match_key,
                            grp_hdl_t grp,
                            entry_handle_t *handle,
                            int priority = 1) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_ws_modify_entry(const std::string &table_name,
+  mt_indirect_ws_modify_entry(size_t cxt_id,
+                              const std::string &table_name,
                               entry_handle_t handle,
                               grp_hdl_t grp) = 0;
 
   virtual MatchErrorCode
-  mt_indirect_ws_set_default_group(const std::string &table_name,
+  mt_indirect_ws_set_default_group(size_t cxt_id,
+                                   const std::string &table_name,
                                    grp_hdl_t grp) = 0;
 
 
   virtual MatchErrorCode
-  mt_read_counters(const std::string &table_name,
+  mt_read_counters(size_t cxt_id,
+                   const std::string &table_name,
                    entry_handle_t handle,
                    MatchTableAbstract::counter_value_t *bytes,
                    MatchTableAbstract::counter_value_t *packets) = 0;
 
   virtual MatchErrorCode
-  mt_reset_counters(const std::string &table_name) = 0;
+  mt_reset_counters(size_t cxt_id,
+                    const std::string &table_name) = 0;
 
   virtual MatchErrorCode
-  mt_write_counters(const std::string &table_name,
+  mt_write_counters(size_t cxt_id,
+                    const std::string &table_name,
                     entry_handle_t handle,
                     MatchTableAbstract::counter_value_t bytes,
                     MatchTableAbstract::counter_value_t packets) = 0;
 
   virtual Counter::CounterErrorCode
-  read_counters(const std::string &counter_name,
+  read_counters(size_t cxt_id,
+                const std::string &counter_name,
                 size_t index,
                 MatchTableAbstract::counter_value_t *bytes,
                 MatchTableAbstract::counter_value_t *packets) = 0;
 
   virtual Counter::CounterErrorCode
-  reset_counters(const std::string &counter_name) = 0;
+  reset_counters(size_t cxt_id,
+                 const std::string &counter_name) = 0;
 
   virtual Counter::CounterErrorCode
-  write_counters(const std::string &counter_name,
+  write_counters(size_t cxt_id,
+                 const std::string &counter_name,
                  size_t index,
                  MatchTableAbstract::counter_value_t bytes,
                  MatchTableAbstract::counter_value_t packets) = 0;
 
 
   virtual MeterErrorCode
-  meter_array_set_rates(const std::string &meter_name,
+  meter_array_set_rates(size_t cxt_id,
+                        const std::string &meter_name,
                         const std::vector<Meter::rate_config_t> &configs) = 0;
 
   virtual MeterErrorCode
-  meter_set_rates(const std::string &meter_name, size_t idx,
+  meter_set_rates(size_t cxt_id,
+                  const std::string &meter_name, size_t idx,
                   const std::vector<Meter::rate_config_t> &configs) = 0;
 
   virtual RegisterErrorCode
-  register_read(const std::string &register_name,
+  register_read(size_t cxt_id,
+                const std::string &register_name,
                 const size_t idx, Data *value) = 0;
 
   virtual RegisterErrorCode
-  register_write(const std::string &meter_name,
+  register_write(size_t cxt_id,
+                 const std::string &register_name,
                  const size_t idx, Data value) = 0;  // to be moved
 
   virtual ErrorCode
@@ -194,7 +228,8 @@ class RuntimeInterface {
   reset_state() = 0;
 
   virtual MatchErrorCode
-  dump_table(const std::string& table_name,
+  dump_table(size_t cxt_id,
+             const std::string& table_name,
              std::ostream *stream) const = 0;
 };
 

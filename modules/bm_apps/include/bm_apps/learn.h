@@ -43,10 +43,12 @@ class LearnListener {
  public:
   typedef uint64_t buffer_id_t;
   typedef int switch_id_t;
+  typedef int cxt_id_t;
   typedef int list_id_t;
 
   struct MsgInfo {
     switch_id_t switch_id;
+    cxt_id_t cxt_id;
     list_id_t list_id;
     buffer_id_t buffer_id;
     unsigned int num_samples;
@@ -67,7 +69,7 @@ class LearnListener {
 
   void register_cb(const LearnCb &cb, void *cookie);
 
-  void ack_buffer(list_id_t list_id, buffer_id_t buffer_id);
+  void ack_buffer(cxt_id_t cxt_id, list_id_t list_id, buffer_id_t buffer_id);
 
   boost::shared_ptr<bm_runtime::standard::StandardClient> get_client() {
     return bm_client;

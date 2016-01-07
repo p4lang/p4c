@@ -46,6 +46,7 @@ class LearningTest : public ::testing::Test {
   PHVFactory phv_factory;
 
   const int device_id = 0;
+  const int cxt_id = 0;
 
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
@@ -63,9 +64,12 @@ class LearningTest : public ::testing::Test {
 
   clock::time_point start;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   LearningTest()
-    : testHeaderType("test_t", 0),
-      learn_writer(new MemoryAccessor(4096)) {
+      : testHeaderType("test_t", 0),
+        learn_writer(new MemoryAccessor(4096)),
+        phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
@@ -73,13 +77,11 @@ class LearningTest : public ::testing::Test {
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
     start = clock::now();
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 
   void learn_on_test1_f16(LearnEngine::list_id_t list_id,
 			  size_t max_samples, unsigned timeout_ms) {
@@ -91,7 +93,7 @@ class LearningTest : public ::testing::Test {
 
   Packet get_pkt() {
     // dummy packet, won't be parsed
-    return Packet::make_new(0, 0, 128, PacketBuffer(256));
+    return Packet::make_new(128, PacketBuffer(256), phv_source.get());
   }
 
   void learn_cb_(LearnEngine::msg_hdr_t msg_hdr, size_t size,
@@ -128,6 +130,7 @@ TEST_F(LearningTest, OneSample) {
 
   ASSERT_EQ(0, memcmp("LEA|", msg_hdr->sub_topic, sizeof(msg_hdr->sub_topic)));
   ASSERT_EQ(device_id, msg_hdr->switch_id);
+  ASSERT_EQ(cxt_id, msg_hdr->cxt_id);
   ASSERT_EQ(list_id, msg_hdr->list_id);
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
@@ -156,6 +159,7 @@ TEST_F(LearningTest, OneSampleTimeout) {
 
   ASSERT_EQ(0, memcmp("LEA|", msg_hdr->sub_topic, sizeof(msg_hdr->sub_topic)));
   ASSERT_EQ(device_id, msg_hdr->switch_id);
+  ASSERT_EQ(cxt_id, msg_hdr->cxt_id);
   ASSERT_EQ(list_id, msg_hdr->list_id);
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
@@ -211,6 +215,7 @@ TEST_F(LearningTest, OneSampleConstData) {
 
   ASSERT_EQ(0, memcmp("LEA|", msg_hdr->sub_topic, sizeof(msg_hdr->sub_topic)));
   ASSERT_EQ(device_id, msg_hdr->switch_id);
+  ASSERT_EQ(cxt_id, msg_hdr->cxt_id);
   ASSERT_EQ(list_id, msg_hdr->list_id);
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(1u, msg_hdr->num_samples);
@@ -416,6 +421,7 @@ TEST_F(LearningTest, OneSampleCbMode) {
   const char *data = buffer;
 
   ASSERT_EQ(device_id, cb_hdr.switch_id);
+  ASSERT_EQ(cxt_id, cb_hdr.cxt_id);
   ASSERT_EQ(list_id, cb_hdr.list_id);
   ASSERT_EQ(0u, cb_hdr.buffer_id);
   ASSERT_EQ(1u, cb_hdr.num_samples);

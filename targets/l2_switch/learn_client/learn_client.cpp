@@ -66,19 +66,19 @@ void learn_cb(const bm_apps::LearnListener::MsgInfo &msg_info,
 
     runtime::BmAddEntryOptions options;
 
-    client->bm_mt_add_entry("smac", {match_param},
+    client->bm_mt_add_entry(0, "smac", {match_param},
                             "_nop", std::vector<std::string>(),
                             options);
 
     std::vector<std::string> action_data =
       {std::string(reinterpret_cast<const char *>(&sample->ingress_port), 2)};
 
-    client->bm_mt_add_entry("dmac", {match_param},
+    client->bm_mt_add_entry(0, "dmac", {match_param},
                             "forward", std::move(action_data),
                             options);
   }
 
-  client->bm_learning_ack_buffer(msg_info.list_id, msg_info.buffer_id);
+  client->bm_learning_ack_buffer(0, msg_info.list_id, msg_info.buffer_id);
 }
 
 }  // namespace

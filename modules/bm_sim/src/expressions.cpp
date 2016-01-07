@@ -408,5 +408,5 @@ ArithExpression VLHeaderExpression::resolve(header_id_t header_id) {
       op.field.header = header_id;
     }
   }
-  return std::move(new_expr);
+  return new_expr;
 }

@@ -69,10 +69,10 @@ LearnEngine::LearnSampleBuilder::operator()(const PHV &phv,
   }
 }
 
-LearnEngine::LearnList::LearnList(list_id_t list_id, int device_id,
+LearnEngine::LearnList::LearnList(list_id_t list_id, int device_id, int cxt_id,
                                   size_t max_samples, unsigned int timeout)
-    : list_id(list_id), device_id(device_id), max_samples(max_samples),
-      timeout(timeout), with_timeout(timeout > 0) { }
+    : list_id(list_id), device_id(device_id), cxt_id(cxt_id),
+      max_samples(max_samples), timeout(timeout), with_timeout(timeout > 0) { }
 
 void
 LearnEngine::LearnList::init() {
@@ -199,6 +199,7 @@ LearnEngine::LearnList::buffer_transmit() {
   memset(msg_hdr_, 0, sizeof(msg_hdr));
   memcpy(msg_hdr_, "LEA|", 4);
   msg_hdr.switch_id = device_id;
+  msg_hdr.cxt_id = cxt_id;
   msg_hdr.list_id = list_id;
   msg_hdr.buffer_id = buffer_id - 1;
   msg_hdr.num_samples = static_cast<unsigned int>(num_samples_to_send);
@@ -291,8 +292,8 @@ LearnEngine::LearnList::reset_state() {
   buffer_tmp.clear();
 }
 
-LearnEngine::LearnEngine(int device_id)
-    : device_id(device_id) { }
+LearnEngine::LearnEngine(int device_id, int cxt_id)
+    : device_id(device_id), cxt_id(cxt_id) { }
 
 void
 LearnEngine::list_create(list_id_t list_id, size_t max_samples,
@@ -300,7 +301,7 @@ LearnEngine::list_create(list_id_t list_id, size_t max_samples,
   assert(learn_lists.find(list_id) == learn_lists.end());
   learn_lists[list_id] =
     std::unique_ptr<LearnList>(
-        new LearnList(list_id, device_id, max_samples, timeout_ms));
+        new LearnList(list_id, device_id, cxt_id, max_samples, timeout_ms));
 }
 
 void

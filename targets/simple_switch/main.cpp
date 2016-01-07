@@ -36,7 +36,8 @@ main(int argc, char* argv[]) {
 
   int thrift_port = simple_switch->get_runtime_port();
   bm_runtime::start_server(simple_switch, thrift_port);
-  bm_runtime::add_service<SimpleSwitchHandler, SimpleSwitchProcessor>(
+  // 3rd template argument could just as well be SimpleSwitch
+  bm_runtime::add_service<SimpleSwitchHandler, SimpleSwitchProcessor, Switch>(
     "simple_switch");
   simple_switch->start_and_return();
 

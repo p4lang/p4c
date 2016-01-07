@@ -27,7 +27,7 @@
 
 // Google Test fixture for calculations tests
 class CalculationTest : public ::testing::Test {
-protected:
+ protected:
   PHVFactory phv_factory;
 
   HeaderType testHeaderType;
@@ -36,6 +36,8 @@ protected:
   ParseState oneParseState;
   Parser parser;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   // I am not seeding this on purpose, at least for now
   std::mt19937 gen;
   std::uniform_int_distribution<unsigned char> dis;
@@ -43,10 +45,10 @@ protected:
   static constexpr size_t header_size = 19;
 
   CalculationTest()
-    : testHeaderType("test_t", 0),
-      oneParseState("parse_state", 0),
-      parser("test_parser", 0)
-  {
+      : testHeaderType("test_t", 0),
+        oneParseState("parse_state", 0),
+        parser("test_parser", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
     testHeaderType.push_back_field("f32_1", 32);
@@ -60,21 +62,20 @@ protected:
 
   Packet get_pkt(const char *data, size_t data_size) {
     // dummy packet, won't be parsed
-    return Packet::make_new(0, 0, data_size,
-                            PacketBuffer(data_size * 2, data, data_size));
+    return Packet::make_new(
+        data_size, PacketBuffer(data_size * 2, data, data_size),
+        phv_source.get());
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
 
     oneParseState.add_extract(testHeader1);
     oneParseState.add_extract(testHeader2);
     parser.set_init_state(&oneParseState);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(CalculationTest, SimpleTest) {

@@ -16,6 +16,7 @@ src/ageing.cpp \
 src/calculations.cpp \
 src/checksums.cpp \
 src/conditionals.cpp \
+src/context.cpp \
 src/counters.cpp \
 src/deparser.cpp \
 src/dev_mgr.cpp \
@@ -38,6 +39,7 @@ src/pcap_file.cpp \
 src/pipeline.cpp \
 src/port_monitor.cpp \
 src/phv.cpp \
+src/phv_source.cpp \
 src/switch.cpp \
 src/simple_pre.cpp \
 src/simple_pre_lag.cpp \
@@ -52,6 +54,7 @@ include/bm_sim/bignum.h \
 include/bm_sim/bytecontainer.h \
 include/bm_sim/checksums.h \
 include/bm_sim/conditionals.h \
+include/bm_sim/context.h \
 include/bm_sim/control_flow.h \
 include/bm_sim/counters.h \
 include/bm_sim/data.h \
@@ -78,6 +81,7 @@ include/bm_sim/parser.h \
 include/bm_sim/pcap_file.h \
 include/bm_sim/phv.h \
 include/bm_sim/phv_forward.h \
+include/bm_sim/phv_source.h \
 include/bm_sim/pipeline.h \
 include/bm_sim/port_monitor.h \
 include/bm_sim/queue.h \

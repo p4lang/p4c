@@ -22,6 +22,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "bm_sim/switch.h"
 #include "bm_sim/P4Objects.h"
@@ -36,28 +37,36 @@ packet_handler(int port_num, const char *buffer, int len, void *cookie) {
 }
 
 // TODO(antonin): maybe a factory method would be more appropriate for Switch
-Switch::Switch(bool enable_swap)
+SwitchWContexts::SwitchWContexts(size_t nb_cxts, bool enable_swap)
   : DevMgr(),
-    enable_swap(enable_swap) {
-  p4objects = std::make_shared<P4Objects>();
-  p4objects_rt = p4objects;
+    nb_cxts(nb_cxts), contexts(nb_cxts), enable_swap(enable_swap),
+    phv_source(std::move(PHVSourceIface::make_phv_source(nb_cxts))) {
+  for (size_t i = 0; i < nb_cxts; i++) {
+    contexts.at(i).set_cxt_id(i);
+  }
 }
 
 void
-Switch::add_required_field(const std::string &header_name,
-                           const std::string &field_name) {
+SwitchWContexts::add_required_field(const std::string &header_name,
+                                  const std::string &field_name) {
   required_fields.insert(std::make_pair(header_name, field_name));
 }
 
 void
-Switch::force_arith_field(const std::string &header_name,
-                          const std::string &field_name) {
+SwitchWContexts::force_arith_field(const std::string &header_name,
+                                 const std::string &field_name) {
   arith_fields.insert(std::make_pair(header_name, field_name));
 }
 
 int
-Switch::init_objects(const std::string &json_path, int dev_id,
-                     std::shared_ptr<TransportIface> transport) {
+SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
+                            std::shared_ptr<TransportIface> transport) {
+  std::ifstream fs(json_path, std::ios::in);
+  if (!fs) {
+    std::cout << "JSON input file " << json_path << " cannot be opened\n";
+    return 1;
+  }
+
   device_id = dev_id;
 
   if (!transport) {
@@ -67,22 +76,22 @@ Switch::init_objects(const std::string &json_path, int dev_id,
     notifications_transport = transport;
   }
 
-  std::ifstream fs(json_path, std::ios::in);
-  if (!fs) {
-    std::cout << "JSON input file " << json_path << " cannot be opened\n";
-    return 1;
+  for (size_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
+    auto &cxt = contexts.at(cxt_id);
+    cxt.set_device_id(device_id);
+    cxt.set_notifications_transport(notifications_transport);
+    int status = cxt.init_objects(&fs, required_fields, arith_fields);
+    fs.clear();
+    fs.seekg(0, std::ios::beg);
+    if (status != 0) return status;
+    phv_source->set_phv_factory(cxt_id, &cxt.get_phv_factory());
   }
 
-  int status = p4objects->init_objects(fs, device_id, notifications_transport,
-                                       required_fields, arith_fields);
-  if (status != 0) return status;
-  Packet::set_phv_factory(p4objects->get_phv_factory());
-
-  return status;
+  return 0;
 }
 
 int
-Switch::init_from_command_line_options(int argc, char *argv[]) {
+SwitchWContexts::init_from_command_line_options(int argc, char *argv[]) {
   OptionsParser parser;
   parser.parse(argc, argv);
 
@@ -140,442 +149,69 @@ Switch::init_from_command_line_options(int argc, char *argv[]) {
   return status;
 }
 
-MatchErrorCode
-Switch::mt_add_entry(const std::string &table_name,
-                     const std::vector<MatchKeyParam> &match_key,
-                     const std::string &action_name,
-                     ActionData action_data,
-                     entry_handle_t *handle,
-                     int priority) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
-  if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
-  assert(action);
-  return table->add_entry(
-    match_key, action, std::move(action_data), handle, priority);
-}
+// TODO(antonin)
+// I wonder if the correct thing to do would be to lock all contexts' mutex
+// simultaneously for a swap. My first intuition is that it is not necessary. If
+// a second load_new_config (for e.g.) happens before the first call terminates,
+// we will return a ONGOING_SWAP error, since we always call
+// Context::load_new_config in the same order. Still, need to think about it
+// some more.
 
-MatchErrorCode
-Switch::mt_set_default_action(const std::string &table_name,
-                              const std::string &action_name,
-                              ActionData action_data) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
-  if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
-  assert(action);
-  return table->set_default_action(action, std::move(action_data));
-}
-
-MatchErrorCode
-Switch::mt_delete_entry(const std::string &table_name,
-                        entry_handle_t handle) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
-  if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  return table->delete_entry(handle);
-}
-
-MatchErrorCode
-Switch::mt_modify_entry(const std::string &table_name,
-                        entry_handle_t handle,
-                        const std::string &action_name,
-                        const ActionData action_data) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
-  if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
-  assert(action);
-  return table->modify_entry(handle, action, std::move(action_data));
-}
-
-MatchErrorCode
-Switch::mt_set_entry_ttl(const std::string &table_name,
-                         entry_handle_t handle,
-                         unsigned int ttl_ms) {
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
-  return abstract_table->set_entry_ttl(handle, ttl_ms);
-}
-
-MatchErrorCode
-Switch::get_mt_indirect(
-    const std::string &table_name, MatchTableIndirect **table
-) {
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
-  *table = dynamic_cast<MatchTableIndirect *>(abstract_table);
-  if (!(*table)) return MatchErrorCode::WRONG_TABLE_TYPE;
-  return MatchErrorCode::SUCCESS;
-}
-
-MatchErrorCode
-Switch::mt_indirect_add_member(
-    const std::string &table_name, const std::string &action_name,
-    ActionData action_data, mbr_hdl_t *mbr) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
-  if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
-  return table->add_member(action, std::move(action_data), mbr);
-}
-
-MatchErrorCode
-Switch::mt_indirect_delete_member(const std::string &table_name,
-                                  mbr_hdl_t mbr) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->delete_member(mbr);
-}
-
-MatchErrorCode
-Switch::mt_indirect_modify_member(const std::string &table_name,
-                                  mbr_hdl_t mbr,
-                                  const std::string &action_name,
-                                  ActionData action_data) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
-  if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
-  return table->modify_member(mbr, action, std::move(action_data));
-}
-
-MatchErrorCode
-Switch::mt_indirect_add_entry(const std::string &table_name,
-                              const std::vector<MatchKeyParam> &match_key,
-                              mbr_hdl_t mbr,
-                              entry_handle_t *handle,
-                              int priority) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->add_entry(match_key, mbr, handle, priority);
-}
-
-MatchErrorCode
-Switch::mt_indirect_modify_entry(const std::string &table_name,
-                                 entry_handle_t handle,
-                                 mbr_hdl_t mbr) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->modify_entry(handle, mbr);
-}
-
-MatchErrorCode
-Switch::mt_indirect_delete_entry(const std::string &table_name,
-                                 entry_handle_t handle) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->delete_entry(handle);
-}
-
-MatchErrorCode
-Switch::mt_indirect_set_entry_ttl(const std::string &table_name,
-                                  entry_handle_t handle,
-                                  unsigned int ttl_ms) {
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
-  return abstract_table->set_entry_ttl(handle, ttl_ms);
-}
-
-MatchErrorCode
-Switch::mt_indirect_set_default_member(const std::string &table_name,
-                                       mbr_hdl_t mbr) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->set_default_member(mbr);
-}
-
-MatchErrorCode
-Switch::get_mt_indirect_ws(const std::string &table_name,
-                           MatchTableIndirectWS **table) {
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
-  *table = dynamic_cast<MatchTableIndirectWS *>(abstract_table);
-  if (!(*table)) return MatchErrorCode::WRONG_TABLE_TYPE;
-  return MatchErrorCode::SUCCESS;
-}
-
-MatchErrorCode
-Switch::mt_indirect_ws_create_group(const std::string &table_name,
-                                    grp_hdl_t *grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->create_group(grp);
-}
-
-MatchErrorCode
-Switch::mt_indirect_ws_delete_group(const std::string &table_name,
-                                    grp_hdl_t grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->delete_group(grp);
-}
-
-MatchErrorCode
-Switch::mt_indirect_ws_add_member_to_group(const std::string &table_name,
-                                           mbr_hdl_t mbr, grp_hdl_t grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->add_member_to_group(mbr, grp);
-}
-
-MatchErrorCode
-Switch::mt_indirect_ws_remove_member_from_group(const std::string &table_name,
-                                                mbr_hdl_t mbr, grp_hdl_t grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->remove_member_from_group(mbr, grp);
-}
-
-MatchErrorCode
-Switch::mt_indirect_ws_add_entry(const std::string &table_name,
-                                 const std::vector<MatchKeyParam> &match_key,
-                                 grp_hdl_t grp,
-                                 entry_handle_t *handle,
-                                 int priority) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->add_entry_ws(match_key, grp, handle, priority);
-}
-
-MatchErrorCode
-Switch::mt_indirect_ws_modify_entry(const std::string &table_name,
-                                    entry_handle_t handle,
-                                    grp_hdl_t grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->modify_entry_ws(handle, grp);
-}
-
-MatchErrorCode
-Switch::mt_indirect_ws_set_default_group(const std::string &table_name,
-                                         grp_hdl_t grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->set_default_group(grp);
-}
-
-MatchErrorCode
-Switch::mt_read_counters(const std::string &table_name,
-                         entry_handle_t handle,
-                         MatchTableAbstract::counter_value_t *bytes,
-                         MatchTableAbstract::counter_value_t *packets) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  return abstract_table->query_counters(handle, bytes, packets);
-}
-
-MatchErrorCode
-Switch::mt_reset_counters(const std::string &table_name) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  return abstract_table->reset_counters();
-}
-
-MatchErrorCode
-Switch::mt_write_counters(const std::string &table_name,
-                          entry_handle_t handle,
-                          MatchTableAbstract::counter_value_t bytes,
-                          MatchTableAbstract::counter_value_t packets) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  return abstract_table->write_counters(handle, bytes, packets);
-}
-
-Counter::CounterErrorCode
-Switch::read_counters(const std::string &counter_name,
-                      size_t index,
-                      MatchTableAbstract::counter_value_t *bytes,
-                      MatchTableAbstract::counter_value_t *packets) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  CounterArray *counter_array = p4objects_rt->get_counter_array(counter_name);
-  assert(counter_array);
-  return (*counter_array)[index].query_counter(bytes, packets);
-}
-
-Counter::CounterErrorCode
-Switch::reset_counters(const std::string &counter_name) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  CounterArray *counter_array = p4objects_rt->get_counter_array(counter_name);
-  assert(counter_array);
-  return counter_array->reset_counters();
-}
-
-Counter::CounterErrorCode
-Switch::write_counters(const std::string &counter_name,
-                       size_t index,
-                       MatchTableAbstract::counter_value_t bytes,
-                       MatchTableAbstract::counter_value_t packets) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  CounterArray *counter_array = p4objects_rt->get_counter_array(counter_name);
-  assert(counter_array);
-  return (*counter_array)[index].write_counter(bytes, packets);
-}
-
-RuntimeInterface::MeterErrorCode
-Switch::meter_array_set_rates(
-    const std::string &meter_name,
-    const std::vector<Meter::rate_config_t> &configs) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MeterArray *meter_array = p4objects_rt->get_meter_array(meter_name);
-  assert(meter_array);
-  return meter_array->set_rates(configs);
-}
-
-RuntimeInterface::MeterErrorCode
-Switch::meter_set_rates(const std::string &meter_name, size_t idx,
-                        const std::vector<Meter::rate_config_t> &configs) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MeterArray *meter_array = p4objects_rt->get_meter_array(meter_name);
-  assert(meter_array);
-  return meter_array->get_meter(idx).set_rates(configs);
-}
-
-RuntimeInterface::RegisterErrorCode
-Switch::register_read(const std::string &register_name,
-                      const size_t idx, Data *value) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  RegisterArray *register_array =
-    p4objects_rt->get_register_array(register_name);
-  if (!register_array) return Register::ERROR;
-  if (idx >= register_array->size()) return Register::INVALID_INDEX;
-  value->set((*register_array)[idx]);
-  return Register::SUCCESS;
-}
-
-RuntimeInterface::RegisterErrorCode
-Switch::register_write(const std::string &register_name,
-                       const size_t idx, Data value) {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  RegisterArray *register_array =
-    p4objects_rt->get_register_array(register_name);
-  if (!register_array) return Register::ERROR;
-  if (idx >= register_array->size()) return Register::INVALID_INDEX;
-  (*register_array)[idx].set(std::move(value));
-  return Register::SUCCESS;
-}
-
+// for now, swap as to be done switch-wide, cannot be done on a per context
+// basis, but this could easily be changed
 RuntimeInterface::ErrorCode
-Switch::load_new_config(const std::string &new_config) {
-  if (!enable_swap) return CONFIG_SWAP_DISABLED;
-  boost::unique_lock<boost::shared_mutex> lock(request_mutex);
-  // check that there is no ongoing config swap
-  if (p4objects != p4objects_rt) return ONGOING_SWAP;
-  p4objects_rt = std::make_shared<P4Objects>();
+SwitchWContexts::load_new_config(const std::string &new_config) {
+  if (!enable_swap) return ErrorCode::CONFIG_SWAP_DISABLED;
   std::istringstream ss(new_config);
-  p4objects_rt->init_objects(ss, device_id, notifications_transport,
-                             required_fields, arith_fields);
-  return SUCCESS;
+  for (auto &cxt : contexts) {
+    ErrorCode rc = cxt.load_new_config(&ss, required_fields, arith_fields);
+    if (rc != ErrorCode::SUCCESS) return rc;
+    ss.clear();
+    ss.seekg(0, std::ios::beg);
+  }
+  return ErrorCode::SUCCESS;
 }
 
 RuntimeInterface::ErrorCode
-Switch::swap_configs() {
-  if (!enable_swap) return CONFIG_SWAP_DISABLED;
-  boost::unique_lock<boost::shared_mutex> lock(request_mutex);
-  // no ongoing swap
-  if (p4objects == p4objects_rt) return NO_ONGOING_SWAP;
-  swap_ordered = true;
-  return SUCCESS;
+SwitchWContexts::swap_configs() {
+  if (!enable_swap) return ErrorCode::CONFIG_SWAP_DISABLED;
+  for (auto &cxt : contexts) {
+    ErrorCode rc = cxt.swap_configs();
+    if (rc != ErrorCode::SUCCESS) return rc;
+  }
+  return ErrorCode::SUCCESS;
 }
 
 RuntimeInterface::ErrorCode
-Switch::reset_state() {
-  boost::unique_lock<boost::shared_mutex> lock(request_mutex);
-  p4objects_rt->reset_state();
-  return SUCCESS;
-}
-
-MatchErrorCode
-Switch::dump_table(const std::string& table_name, std::ostream *stream) const {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  abstract_table->dump(stream);
-  return MatchErrorCode::SUCCESS;
+SwitchWContexts::reset_state() {
+  for (auto &cxt : contexts) {
+    ErrorCode rc = cxt.reset_state();
+    if (rc != ErrorCode::SUCCESS) return rc;
+  }
+  return ErrorCode::SUCCESS;
 }
 
 int
-Switch::do_swap() {
-  if (!swap_ordered) return 1;
-  boost::unique_lock<boost::shared_mutex> lock(request_mutex);
-  p4objects = p4objects_rt;
-  Packet::swap_phv_factory(p4objects->get_phv_factory());
-  swap_ordered = false;
-  return 0;
+SwitchWContexts::swap_requested() {
+  for (auto &cxt : contexts) {
+    if (cxt.swap_requested()) return true;
+  }
+  return false;
 }
 
-LearnEngine *
-Switch::get_learn_engine() {
-  return p4objects->get_learn_engine();
+// we assume no concurrent calls to do_swap()
+int
+SwitchWContexts::do_swap() {
+  int rc = 1;
+  for (auto &cxt : contexts) {
+    // we only confirm that a swap has been requested once all contexts are
+    // ready
+    rc &= cxt.do_swap();
+  }
+  return rc;
 }
 
-AgeingMonitor *
-Switch::get_ageing_monitor() {
-  return p4objects->get_ageing_monitor();
-}
+// Switch convenience class
+
+Switch::Switch(bool enable_swap)
+    : SwitchWContexts(1u, enable_swap) { }

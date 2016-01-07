@@ -46,10 +46,11 @@ namespace {
 typedef struct {
   char sub_topic[4];
   int switch_id;
+  int cxt_id;
   int list_id;
   uint64_t buffer_id;
   unsigned int num_samples;
-  char _padding[8];
+  char _padding[4];
 } __attribute__((packed)) learn_hdr_t;
 
 }  // namespace
@@ -68,18 +69,22 @@ LearnListener::~LearnListener() {
   listen_thread.join();
 }
 
-void LearnListener::register_cb(const LearnCb &cb, void *cookie) {
+void
+LearnListener::register_cb(const LearnCb &cb, void *cookie) {
   std::unique_lock<std::mutex> lock(mutex);
   cb_fn = cb;
   cb_cookie = cookie;
 }
 
-void LearnListener::ack_buffer(list_id_t list_id, buffer_id_t buffer_id) {
+void
+LearnListener::ack_buffer(cxt_id_t cxt_id, list_id_t list_id,
+                          buffer_id_t buffer_id) {
   assert(bm_client);
-  bm_client->bm_learning_ack_buffer(list_id, buffer_id);
+  bm_client->bm_learning_ack_buffer(cxt_id, list_id, buffer_id);
 }
 
-void LearnListener::start() {
+void
+LearnListener::start() {
   using apache::thrift::protocol::TProtocol;
   using apache::thrift::protocol::TBinaryProtocol;
   using apache::thrift::protocol::TMultiplexedProtocol;
@@ -102,7 +107,8 @@ void LearnListener::start() {
   listen_thread = std::thread(&LearnListener::listen_loop, this);
 }
 
-void LearnListener::listen_loop() {
+void
+LearnListener::listen_loop() {
   nn::socket s(AF_SP, NN_SUB);
   // only subscribe to learn notifications
   s.setsockopt(NN_SUB, NN_SUB_SUBSCRIBE, "LEA", 3);
@@ -146,7 +152,7 @@ void LearnListener::listen_loop() {
     }
 
     std::cout << "Calling callback function\n";
-    MsgInfo info = {learn_hdr.switch_id, learn_hdr.list_id,
+    MsgInfo info = {learn_hdr.switch_id, learn_hdr.cxt_id, learn_hdr.list_id,
                     learn_hdr.buffer_id, learn_hdr.num_samples};
     cb_fn_(info, data, cb_cookie_);
   }

@@ -45,6 +45,7 @@ class PHVFactory;
 class PHV {
  public:
   friend class PHVFactory;
+  friend class Packet;
 
  private:
   typedef std::reference_wrapper<Header> HeaderRef;

@@ -58,14 +58,12 @@ class P4Objects {
   explicit P4Objects(std::ostream &outstream = std::cout)
       : outstream(outstream) { }
 
-  int init_objects(std::istream &is, int device_id = 0,
+  int init_objects(std::istream *is, int device_id = 0, size_t cxt_id = 0,
                    std::shared_ptr<TransportIface> transport = nullptr,
                    const std::set<header_field_pair> &required_fields =
                      std::set<header_field_pair>(),
                    const std::set<header_field_pair> &arith_fields =
                      std::set<header_field_pair>());
-
-  void destroy_objects();
 
   P4Objects(const P4Objects &other) = delete;
   P4Objects &operator=(const P4Objects &) = delete;

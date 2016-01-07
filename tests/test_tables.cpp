@@ -35,7 +35,7 @@ typedef MatchUnitTernary<ActionEntry> MUTernary;
 
 template <typename MUType>
 class TableSizeTwo : public ::testing::Test {
-protected:
+ protected:
   PHVFactory phv_factory;
 
   MatchKeyBuilder key_builder;
@@ -48,8 +48,11 @@ protected:
   header_id_t testHeader1{0}, testHeader2{1};
   ActionFn action_fn;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   TableSizeTwo()
-    : testHeaderType("test_t", 0), action_fn("actionA", 0) {
+      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
@@ -85,19 +88,20 @@ protected:
 
   Packet get_pkt(int length) {
     // dummy packet, won't be parsed
-    Packet packet = Packet::make_new(0, 0, length, PacketBuffer(length * 2));
+    Packet packet = Packet::make_new(
+        length, PacketBuffer(length * 2), phv_source.get());
     packet.get_phv()->get_header(testHeader1).mark_valid();
     packet.get_phv()->get_header(testHeader2).mark_valid();
+    // return std::move(packet);
+    // enable NVRO
     return packet;
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 template<>
@@ -428,10 +432,10 @@ TYPED_TEST(TableSizeTwo, ResetState) {
 
 
 class TableIndirect : public ::testing::Test {
-protected:
+ protected:
   typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
 
-protected:
+ protected:
   PHVFactory phv_factory;
 
   MatchKeyBuilder key_builder;
@@ -441,10 +445,13 @@ protected:
   header_id_t testHeader1{0}, testHeader2{1};
   ActionFn action_fn;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   static const size_t table_size = 128;
 
   TableIndirect() 
-    : testHeaderType("test_t", 0), action_fn("actionA", 0) {
+      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
@@ -481,19 +488,20 @@ protected:
 
   Packet get_pkt(int length) {
     // dummy packet, won't be parsed
-    Packet packet = Packet::make_new(0, 0, length, PacketBuffer(length * 2));
+    Packet packet = Packet::make_new(
+        length, PacketBuffer(length * 2), phv_source.get());
     packet.get_phv()->get_header(testHeader1).mark_valid();
     packet.get_phv()->get_header(testHeader2).mark_valid();
+    // return std::move(packet);
+    // enable NVRO
     return packet;
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(TableIndirect, AddMember) {
@@ -708,11 +716,11 @@ TEST_F(TableIndirect, ResetState) {
 
 
 class TableIndirectWS : public ::testing::Test {
-protected:
+ protected:
   typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
   typedef MatchTableIndirectWS::grp_hdl_t grp_hdl_t;
 
-protected:
+ protected:
   PHVFactory phv_factory;
 
   MatchKeyBuilder key_builder;
@@ -722,6 +730,8 @@ protected:
   header_id_t testHeader1{0}, testHeader2{1};
   ActionFn action_fn;
 
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
   // I am not seeding this on purpose, at least for now
   std::mt19937 gen;
   std::uniform_int_distribution<unsigned int> dis;
@@ -729,7 +739,8 @@ protected:
   static const size_t table_size = 128;
 
   TableIndirectWS() 
-    : testHeaderType("test_t", 0), action_fn("actionA", 0) {
+      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
@@ -778,19 +789,20 @@ protected:
 
   Packet get_pkt(int length) {
     // dummy packet, won't be parsed
-    Packet packet = Packet::make_new(0, 0, length, PacketBuffer(length * 2));
+    Packet packet = Packet::make_new(
+        length, PacketBuffer(length * 2), phv_source.get());
     packet.get_phv()->get_header(testHeader1).mark_valid();
     packet.get_phv()->get_header(testHeader2).mark_valid();
+    // return std::move(packet);
+    // enable NVRO
     return packet;
   }
 
   virtual void SetUp() {
-    Packet::set_phv_factory(phv_factory);
+    phv_source->set_phv_factory(0, &phv_factory);
   }
 
-  virtual void TearDown() {
-    Packet::unset_phv_factory();
-  }
+  // virtual void TearDown() { }
 };
 
 TEST_F(TableIndirectWS, Group) {
