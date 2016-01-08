@@ -119,6 +119,7 @@ NNEventListener::receive_loop() {
   struct msg_hdr_t {
     int type;
     int switch_id;
+    int cxt_id;
     uint64_t sig;
     uint64_t id;
     uint64_t copy_id;

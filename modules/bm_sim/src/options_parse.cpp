@@ -162,7 +162,8 @@ OptionsParser::parse(int argc, char *argv[]) {
   if (vm.count("nanolog")) {
     event_logger_addr = vm["nanolog"].as<std::string>();
     event_logger = new EventLogger(
-        TransportIface::create_instance<TransportNanomsg>(event_logger_addr));
+        TransportIface::create_instance<TransportNanomsg>(event_logger_addr),
+        device_id);
   }
 
   if (vm.count("log-console") && vm.count("log-file")) {

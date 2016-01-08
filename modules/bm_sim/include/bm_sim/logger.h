@@ -69,9 +69,11 @@ class Logger {
 #define BMLOG_TRACE(...) SPDLOG_TRACE(Logger::get(), __VA_ARGS__)
 
 #define BMLOG_DEBUG_PKT(pkt, s, ...) \
-  SPDLOG_DEBUG(Logger::get(), "[{}] " s, (pkt).get_unique_id(), ##__VA_ARGS__)
+  SPDLOG_DEBUG(Logger::get(), "[{}] [cxt {}] " s, (pkt).get_unique_id(), \
+               (pkt).get_context(), ##__VA_ARGS__)
 #define BMLOG_TRACE_PKT(pkt, s, ...) \
-  SPDLOG_TRACE(Logger::get(), "[{}] " s, (pkt).get_unique_id(), ##__VA_ARGS__)
+  SPDLOG_TRACE(Logger::get(), "[{}] [cxt {}] " s, (pkt).get_unique_id(), \
+               (pkt).get_context(), ##__VA_ARGS__)
 
 #undef SPDLOG_DEBUG_ON
 #undef SPDLOG_TRACE_ON

@@ -150,6 +150,8 @@ class Packet final {
   // with the newt context
   void change_context(size_t new_cxt);
 
+  size_t get_context() const { return cxt_id; }
+
   // the *_ptr function are just here for convenience, the same can be achieved
   // by the client by constructing a unique_ptr
   Packet clone_with_phv() const;

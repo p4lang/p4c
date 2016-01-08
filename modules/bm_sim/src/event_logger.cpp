@@ -40,16 +40,19 @@ enum EventType {
 
 typedef struct __attribute__((packed)) {
   int type;
-  int switch_id;  // TODO(antonin)
+  int switch_id;
+  int cxt_id;
   uint64_t sig;
   uint64_t id;
   uint64_t copy_id;
 } msg_hdr_t;
 
 static inline void
-fill_msg_hdr(EventType type, const Packet &packet, msg_hdr_t *msg_hdr) {
+fill_msg_hdr(EventType type, int device_id,
+             const Packet &packet, msg_hdr_t *msg_hdr) {
   msg_hdr->type = static_cast<int>(type);
-  msg_hdr->switch_id = 0;
+  msg_hdr->switch_id = device_id;
+  msg_hdr->cxt_id = packet.get_context();
   msg_hdr->sig = packet.get_signature();
   msg_hdr->id = packet.get_packet_id();
   msg_hdr->copy_id = packet.get_copy_id();
@@ -62,7 +65,7 @@ EventLogger::packet_in(const Packet &packet) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::PACKET_IN, packet, &msg);
+  fill_msg_hdr(EventType::PACKET_IN, device_id, packet, &msg);
   msg.port_in = packet.get_ingress_port();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -74,7 +77,7 @@ EventLogger::packet_out(const Packet &packet) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::PACKET_OUT, packet, &msg);
+  fill_msg_hdr(EventType::PACKET_OUT, device_id, packet, &msg);
   msg.port_out = packet.get_egress_port();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -86,7 +89,7 @@ EventLogger::parser_start(const Packet &packet, const Parser &parser) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::PARSER_START, packet, &msg);
+  fill_msg_hdr(EventType::PARSER_START, device_id, packet, &msg);
   msg.parser_id = parser.get_id();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -98,7 +101,7 @@ EventLogger::parser_done(const Packet &packet, const Parser &parser) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::PARSER_DONE, packet, &msg);
+  fill_msg_hdr(EventType::PARSER_DONE, device_id, packet, &msg);
   msg.parser_id = parser.get_id();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -110,7 +113,7 @@ EventLogger::parser_extract(const Packet &packet, header_id_t header) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::PARSER_EXTRACT, packet, &msg);
+  fill_msg_hdr(EventType::PARSER_EXTRACT, device_id, packet, &msg);
   msg.header_id = header;
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -122,7 +125,7 @@ EventLogger::deparser_start(const Packet &packet, const Deparser &deparser) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::DEPARSER_START, packet, &msg);
+  fill_msg_hdr(EventType::DEPARSER_START, device_id, packet, &msg);
   msg.deparser_id = deparser.get_id();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -134,7 +137,7 @@ EventLogger::deparser_done(const Packet &packet, const Deparser &deparser) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::DEPARSER_DONE, packet, &msg);
+  fill_msg_hdr(EventType::DEPARSER_DONE, device_id, packet, &msg);
   msg.deparser_id = deparser.get_id();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -146,7 +149,7 @@ EventLogger::deparser_emit(const Packet &packet, header_id_t header) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::DEPARSER_EMIT, packet, &msg);
+  fill_msg_hdr(EventType::DEPARSER_EMIT, device_id, packet, &msg);
   msg.header_id = header;
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -158,7 +161,7 @@ EventLogger::checksum_update(const Packet &packet, const Checksum &checksum) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::CHECKSUM_UPDATE, packet, &msg);
+  fill_msg_hdr(EventType::CHECKSUM_UPDATE, device_id, packet, &msg);
   msg.checksum_id = checksum.get_id();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -170,7 +173,7 @@ EventLogger::pipeline_start(const Packet &packet, const Pipeline &pipeline) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::PIPELINE_START, packet, &msg);
+  fill_msg_hdr(EventType::PIPELINE_START, device_id, packet, &msg);
   msg.pipeline_id = pipeline.get_id();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -182,7 +185,7 @@ EventLogger::pipeline_done(const Packet &packet, const Pipeline &pipeline) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::PIPELINE_DONE, packet, &msg);
+  fill_msg_hdr(EventType::PIPELINE_DONE, device_id, packet, &msg);
   msg.pipeline_id = pipeline.get_id();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -196,7 +199,7 @@ EventLogger::condition_eval(const Packet &packet,
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::CONDITION_EVAL, packet, &msg);
+  fill_msg_hdr(EventType::CONDITION_EVAL, device_id, packet, &msg);
   msg.condition_id = cond.get_id();
   msg.result = result;
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
@@ -221,7 +224,7 @@ EventLogger::table_hit(const Packet &packet, const MatchTableAbstract &table,
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::TABLE_HIT, packet, &msg);
+  fill_msg_hdr(EventType::TABLE_HIT, device_id, packet, &msg);
   msg.table_id = table.get_id();
   msg.entry_hdl = static_cast<int>(handle);
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
@@ -234,7 +237,7 @@ EventLogger::table_miss(const Packet &packet, const MatchTableAbstract &table) {
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::TABLE_MISS, packet, &msg);
+  fill_msg_hdr(EventType::TABLE_MISS, device_id, packet, &msg);
   msg.table_id = table.get_id();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
@@ -248,7 +251,7 @@ EventLogger::action_execute(const Packet &packet,
   } __attribute__((packed)) msg_t;
 
   msg_t msg;
-  fill_msg_hdr(EventType::ACTION_EXECUTE, packet, &msg);
+  fill_msg_hdr(EventType::ACTION_EXECUTE, device_id, packet, &msg);
   msg.action_id = action_fn.get_id();
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
   // to costly to send action data?

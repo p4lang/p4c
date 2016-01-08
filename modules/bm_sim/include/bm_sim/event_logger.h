@@ -48,8 +48,9 @@ typedef uint64_t entry_handle_t;
 
 class EventLogger {
  public:
-  explicit EventLogger(std::unique_ptr<TransportIface> transport)
-    : transport_instance(std::move(transport)) { }
+  explicit EventLogger(std::unique_ptr<TransportIface> transport,
+                       int device_id = 0)
+      : transport_instance(std::move(transport)), device_id(device_id) { }
 
   // we need the ingress / egress ports, but they are part of the Packet
   void packet_in(const Packet &packet);
@@ -78,7 +79,8 @@ class EventLogger {
                       const ActionFn &action_fn, const ActionData &action_data);
 
  private:
-  std::unique_ptr<TransportIface> transport_instance;
+  std::unique_ptr<TransportIface> transport_instance{nullptr};
+  int device_id{};
 };
 
 extern EventLogger *event_logger;

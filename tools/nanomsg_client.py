@@ -122,8 +122,9 @@ class Msg(object):
         self.msg = msg
 
     def extract_hdr(self):
-        struct_ = struct.Struct("iiQQQ")
-        (_, self.switch_id,
+        # < required to prevent 8-byte alignment
+        struct_ = struct.Struct("<iiiQQQ")
+        (_, self.switch_id, self.cxt_id,
          self.sig, self.id_, self.copy_id) = struct_.unpack_from(self.msg)
         return struct_.size
 
@@ -133,8 +134,9 @@ class Msg(object):
         return self.struct_.unpack(msg_remainder)
 
     def __str__(self):
-        return "type: %s, switch_id: %d, sig: %d, id: %d, copy_id: %d" %\
-            (self.type_str, self.switch_id,
+        return "type: %s, switch_id: %d, cxt_id : %d, sig: %d, " \
+            "id: %d, copy_id: %d" %\
+            (self.type_str, self.switch_id, self.cxt_id,
              self.sig, self.id_, self.copy_id)
 
 class PacketIn(Msg):
