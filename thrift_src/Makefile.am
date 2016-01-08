@@ -32,22 +32,32 @@ $(simple_pre_lag_thrift_files)
 
 AUTOMAKE_OPTIONS = foreign no-dependencies subdir-objects
 
-noinst_LTLIBRARIES = libruntimestubs.la
+lib_LTLIBRARIES = libruntimestubs.la
 libruntimestubs_la_SOURCES = \
 	$(BUILT_SOURCES)
 
+pkginclude_HEADERS = \
+       gen-cpp/standard_constants.h \
+       gen-cpp/Standard.h \
+       gen-cpp/standard_types.h \
+       gen-cpp/simple_pre_constants.h \
+       gen-cpp/SimplePre.h \
+       gen-cpp/simple_pre_types.h \
+       gen-cpp/simple_pre_lag_constants.h \
+       gen-cpp/SimplePreLAG.h \
+       gen-cpp/simple_pre_lag_types.h
 
 # See http://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
 
 thrift_files.ts: standard.thrift simple_pre.thrift simple_pre_lag.thrift
 	@rm -f thrift_files.tmp
 	@touch thrift_files.tmp
-	$(THRIFT) --gen cpp -r standard.thrift
-	$(THRIFT) --gen py -r standard.thrift
-	$(THRIFT) --gen cpp -r simple_pre.thrift
-	$(THRIFT) --gen py -r simple_pre.thrift
-	$(THRIFT) --gen cpp -r simple_pre_lag.thrift
-	$(THRIFT) --gen py -r simple_pre_lag.thrift
+	$(THRIFT) --gen cpp -r $(srcdir)/standard.thrift
+	$(THRIFT) --gen py -r $(srcdir)/standard.thrift
+	$(THRIFT) --gen cpp -r $(srcdir)/simple_pre.thrift
+	$(THRIFT) --gen py -r $(srcdir)/simple_pre.thrift
+	$(THRIFT) --gen cpp -r $(srcdir)/simple_pre_lag.thrift
+	$(THRIFT) --gen py -r $(srcdir)/simple_pre_lag.thrift
 	rm -rf $(srcdir)/../tools/bm_runtime/
 	cp -r gen-py/bm_runtime/ $(srcdir)/../tools/
 	@mv -f thrift_files.tmp $@
