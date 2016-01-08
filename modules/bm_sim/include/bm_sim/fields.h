@@ -78,8 +78,9 @@ class Field : public Data {
 
   // useful for header stacks
   void swap_values(Field *other) {
-    // just the value, nothing else (especially not .arith)
+    // just the values, nothing else (especially not .arith)
     std::swap(value, other->value);
+    std::swap(bytes, other->bytes);
   }
 
   /* returns the number of bits extracted */

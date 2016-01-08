@@ -199,7 +199,8 @@ TEST_F(HeaderStackTest, PopFront) {
   Field &f1_0 = h1.get_field(0);
   Field &f2_0 = h2.get_field(0);
 
-  unsigned int v0 = 10u; unsigned int v1 = 11u;
+  const unsigned int v0 = 10u; const unsigned int v1 = 11u;
+  const std::string v1_hex("0x000b");
   f0_0.set(v0); f1_0.set(v1);
 
   ASSERT_EQ(2u, stack.get_count());
@@ -209,6 +210,7 @@ TEST_F(HeaderStackTest, PopFront) {
   ASSERT_FALSE(h2.is_valid());
   ASSERT_FALSE(h1.is_valid());
   ASSERT_EQ(v1, f0_0.get_uint());
+  ASSERT_EQ(ByteContainer(v1_hex), f0_0.get_bytes());
 
   ASSERT_EQ(1u, stack.pop_front());
   ASSERT_EQ(0u, stack.get_count());
