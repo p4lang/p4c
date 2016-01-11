@@ -59,7 +59,8 @@ bool ready = false;
 
 template<typename T>
 bool switch_has_component() {
-  return (switch_->get_component<T>() != nullptr);
+  // TODO(antonin): do something more resilient (i.e. per context)
+  return (switch_->get_cxt_component<T>(0) != nullptr);
 }
 
 int serve(int port) {
