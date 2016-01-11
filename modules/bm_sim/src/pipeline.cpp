@@ -21,15 +21,24 @@
 #include "bm_sim/pipeline.h"
 #include "bm_sim/event_logger.h"
 #include "bm_sim/logger.h"
+#include "bm_sim/debugger.h"
 
 void
 Pipeline::apply(Packet *pkt) {
   ELOGGER->pipeline_start(*pkt, *this);
+  // TODO(antonin)
+  // this is temporary while we experiment with the debugger
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_CONTROL | get_id());
   BMLOG_DEBUG_PKT(*pkt, "Pipeline '{}': start", get_name());
   const ControlFlowNode *node = first_node;
   while (node) {
     node = (*node)(pkt);
   }
   ELOGGER->pipeline_done(*pkt, *this);
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_EXIT(DBG_CTR_CONTROL) | get_id());
   BMLOG_DEBUG_PKT(*pkt, "Pipeline '{}': end", get_name());
 }

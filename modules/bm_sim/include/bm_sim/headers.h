@@ -208,6 +208,8 @@ class Header : public NamedP4Object {
     }
   }
 
+  void set_packet_id(const Debugger::PacketId *id);
+
   Header(const Header &other) = delete;
   Header &operator=(const Header &other) = delete;
 
@@ -227,6 +229,7 @@ class Header : public NamedP4Object {
   int nbytes_phv{0};
   int nbytes_packet{0};
   std::unique_ptr<ArithExpression> VL_expr{nullptr};
+  const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
 };
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_HEADERS_H_

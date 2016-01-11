@@ -25,9 +25,20 @@
 
 const ControlFlowNode *
 Conditional::operator()(Packet *pkt) const {
+  // TODO(antonin)
+  // this is temporary while we experiment with the debugger
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_CONDITION | get_id());
   PHV *phv = pkt->get_phv();
   bool result = eval(*phv);
   ELOGGER->condition_eval(*pkt, *this, result);
+  DEBUGGER_NOTIFY_UPDATE_V(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      Debugger::FIELD_COND, result);
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_EXIT(DBG_CTR_CONDITION) | get_id());
   return result ? true_next : false_next;
 }
 

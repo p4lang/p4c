@@ -104,7 +104,8 @@ OptionsParser::parse(int argc, char *argv[]) {
       ("notifications-addr", po::value<std::string>(),
        "Specify the nanomsg address to use for notifications "
        "(e.g. learning, ageing, ...); "
-       "default is ipc:///tmp/bmv2-<device-id>-notifications.ipc");
+       "default is ipc:///tmp/bmv2-<device-id>-notifications.ipc")
+      ("debugger", "Activate debugger");
 
   po::options_description hidden;
   hidden.add_options()
@@ -206,6 +207,10 @@ OptionsParser::parse(int argc, char *argv[]) {
   if (use_files && packet_in) {
     std::cout << "Error: --use-files and --packet-in are exclusive\n";
     exit(1);
+  }
+
+  if (vm.count("debugger")) {
+    debugger = true;
   }
 
   assert(vm.count("input-config"));

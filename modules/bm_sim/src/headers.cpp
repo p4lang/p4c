@@ -38,6 +38,10 @@ Header::Header(const std::string &name, p4object_id_t id,
       arith_flag = false;
     }
     fields.push_back(Field(header_type.get_bit_width(i), arith_flag));
+    uint64_t field_unique_id = id;
+    field_unique_id <<= 32;
+    field_unique_id |= i;
+    fields.back().set_id(field_unique_id);
     nbytes_phv += fields.back().get_nbytes();
     nbytes_packet += fields.back().get_nbits();
   }
@@ -87,4 +91,8 @@ void Header::deparse(char *data) const {
     data += hdr_offset / 8;
     hdr_offset = hdr_offset % 8;
   }
+}
+
+void Header::set_packet_id(const Debugger::PacketId *id) {
+  for (Field &f : fields) f.set_packet_id(id);
 }

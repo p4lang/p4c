@@ -133,6 +133,10 @@ class PHV {
     }
   }
 
+  void set_packet_id(const uint64_t id1, const uint64_t id2) {
+    packet_id = {id1, id2};
+  }
+
  private:
   // To  be used only by PHVFactory
   // all headers need to be pushed back in order (according to header_index) !!!
@@ -155,6 +159,7 @@ class PHV {
   std::unordered_map<std::string, FieldRef> fields_map{};
   size_t capacity{0};
   size_t capacity_stacks{0};
+  Debugger::PacketId packet_id;
 };
 
 class PHVFactory {
@@ -232,6 +237,11 @@ class PHVFactory {
   void disable_all_field_arith(header_id_t header_id) {
     HeaderDesc &desc = header_descs.at(header_id);
     desc.arith_offsets.clear();
+  }
+
+  void enable_all_arith() {
+    for (auto it : header_descs)
+      enable_all_field_arith(it.first);
   }
 
   std::unique_ptr<PHV> create() const {

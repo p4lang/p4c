@@ -455,12 +455,22 @@ Context::set_cxt_id(int id) {
   cxt_id = id;
 }
 
+void
+Context::set_force_arith(bool v) {
+  force_arith = v;
+}
+
 int
 Context::init_objects(std::istream *is,
                       const std::set<header_field_pair> &required_fields,
                       const std::set<header_field_pair> &arith_fields) {
-  return p4objects->init_objects(is, device_id, cxt_id, notifications_transport,
-                                 required_fields, arith_fields);
+  int status = p4objects->init_objects(is, device_id, cxt_id,
+                                       notifications_transport,
+                                       required_fields, arith_fields);
+  if (status) return status;
+  if (force_arith)
+    get_phv_factory().enable_all_arith();
+  return 0;
 }
 
 Context::ErrorCode

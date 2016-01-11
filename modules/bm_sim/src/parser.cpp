@@ -19,6 +19,7 @@
  */
 
 #include "bm_sim/parser.h"
+#include "bm_sim/debugger.h"
 #include "extract.h"
 
 ParserLookAhead::ParserLookAhead(int offset, int bitwidth)
@@ -131,10 +132,9 @@ ParseSwitchCase::mask_key() {
     key[byte_index] = key[byte_index] & mask[byte_index];
 }
 
-
 const ParseState *
-ParseState::operator()(Packet *pkt, const char *data,
-                       size_t *bytes_parsed) const {
+ParseState::find_next_state(Packet *pkt, const char *data,
+                            size_t *bytes_parsed) const {
   // execute parser ops
   PHV *phv = pkt->get_phv();
   for (auto &parser_op : parser_ops)
@@ -164,9 +164,32 @@ ParseState::operator()(Packet *pkt, const char *data,
   return default_next_state;
 }
 
+const ParseState *
+ParseState::operator()(Packet *pkt, const char *data,
+                       size_t *bytes_parsed) const {
+  // TODO(antonin)
+  // this is temporary while we experiment with the debugger
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_PARSE_STATE | get_id());
+
+  auto next_state = find_next_state(pkt, data, bytes_parsed);
+
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_EXIT(DBG_CTR_PARSE_STATE) | get_id());
+
+  return next_state;
+}
+
 void
 Parser::parse(Packet *pkt) const {
   ELOGGER->parser_start(*pkt, *this);
+  // TODO(antonin)
+  // this is temporary while we experiment with the debugger
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_PARSER | get_id());
   BMLOG_DEBUG_PKT(*pkt, "Parser '{}': start", get_name());
   const char *data = pkt->data();
   if (!init_state) return;
@@ -178,5 +201,8 @@ Parser::parse(Packet *pkt) const {
   }
   pkt->remove(bytes_parsed);
   ELOGGER->parser_done(*pkt, *this);
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_EXIT(DBG_CTR_PARSER) | get_id());
   BMLOG_DEBUG_PKT(*pkt, "Parser '{}': end", get_name());
 }

@@ -56,6 +56,7 @@ PHV::push_back_header(const std::string &header_name,
   assert(header_index == static_cast<int>(headers.size()));
   headers.push_back(
     Header(header_name, header_index, header_type, arith_offsets, metadata));
+  headers.back().set_packet_id(&packet_id);
 
   headers_map.emplace(header_name, get_header(header_index));
 
