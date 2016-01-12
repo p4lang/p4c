@@ -46,8 +46,8 @@ class ByteContainer {
   ByteContainer()
     : bytes() { }
 
-  explicit ByteContainer(int nbytes)
-    : bytes(vector<char>(nbytes)) { }
+  explicit ByteContainer(const size_t nbytes, const char c = '\x00')
+      : bytes(vector<char>(nbytes, c)) { }
 
   explicit ByteContainer(const vector<char> &bytes)
     : bytes(bytes) { }
@@ -186,6 +186,12 @@ class ByteContainer {
 
   void resize(size_t n) {
     bytes.resize(n);
+  }
+
+  void apply_mask(const ByteContainer &mask) {
+    assert(size() == mask.size());
+    for (size_t i = 0; i < size(); i++)
+      bytes[i] &= mask[i];
   }
 
   std::string to_hex(bool upper_case = false) const {
