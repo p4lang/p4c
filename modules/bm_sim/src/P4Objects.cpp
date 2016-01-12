@@ -529,6 +529,38 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
 
       MatchKeyBuilder key_builder;
       const Json::Value &cfg_match_key = cfg_table["key"];
+
+      auto add_f = [this, &key_builder](const Json::Value &cfg_f) {
+        const Json::Value &cfg_key_field = cfg_f["target"];
+        const string header_name = cfg_key_field[0].asString();
+        header_id_t header_id = get_header_id(header_name);
+        const string field_name = cfg_key_field[1].asString();
+        int field_offset = get_field_offset(header_id, field_name);
+        if ((!cfg_f.isMember("mask")) || cfg_f["mask"].isNull()) {
+          key_builder.push_back_field(header_id, field_offset,
+                                      get_field_bits(header_id, field_offset));
+        } else {
+          const Json::Value &cfg_key_mask = cfg_f["mask"];
+          key_builder.push_back_field(header_id, field_offset,
+                                      get_field_bits(header_id, field_offset),
+                                      ByteContainer(cfg_key_mask.asString()));
+        }
+      };
+
+      bool has_lpm = false;
+      for (const auto &cfg_key_entry : cfg_match_key) {
+        const string match_type = cfg_key_entry["match_type"].asString();
+        if (match_type == "lpm") {
+          if (has_lpm) {
+            outstream << "Table " << table_name << "features 2 LPM match fields"
+                      << std::endl;
+            return 1;
+          }
+          add_f(cfg_key_entry);
+          has_lpm = true;
+        }
+      }
+
       for (const auto &cfg_key_entry : cfg_match_key) {
         const string match_type = cfg_key_entry["match_type"].asString();
         const Json::Value &cfg_key_field = cfg_key_entry["target"];
@@ -536,13 +568,8 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
           const string header_name = cfg_key_field.asString();
           header_id_t header_id = get_header_id(header_name);
           key_builder.push_back_valid_header(header_id);
-        } else {
-          const string header_name = cfg_key_field[0].asString();
-          header_id_t header_id = get_header_id(header_name);
-          const string field_name = cfg_key_field[1].asString();
-          int field_offset = get_field_offset(header_id, field_name);
-          key_builder.push_back_field(header_id, field_offset,
-                                      get_field_bits(header_id, field_offset));
+        } else if (match_type != "lpm") {
+          add_f(cfg_key_entry);
         }
       }
 
