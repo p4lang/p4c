@@ -208,6 +208,14 @@ class MeterArray : public NamedP4Object {
     return meters[idx];
   }
 
+  Meter &at(size_t idx) {
+    return meters.at(idx);
+  }
+
+  const Meter &at(size_t idx) const {
+    return meters.at(idx);
+  }
+
   Meter &operator[](size_t idx) {
     assert(idx < size());
     return meters[idx];

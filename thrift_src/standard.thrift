@@ -86,20 +86,22 @@ enum TableOperationErrorCode {
   INVALID_HANDLE = 2,
   EXPIRED_HANDLE = 3,
   COUNTERS_DISABLED = 4,
-  AGEING_DISABLED = 5,
-  INVALID_TABLE_NAME = 6,
-  INVALID_ACTION_NAME = 7,
-  WRONG_TABLE_TYPE = 8,
-  INVALID_MBR_HANDLE = 9,
-  MBR_STILL_USED = 10,
-  MBR_ALREADY_IN_GRP = 11,
-  MBR_NOT_IN_GRP = 12,
-  INVALID_GRP_HANDLE = 13,
-  GRP_STILL_USED = 14,
-  EMPTY_GRP = 15,
-  DUPLICATE_ENTRY = 16,
-  BAD_MATCH_KEY = 17,
-  ERROR = 18,
+  METERS_DISABLED = 5,
+  AGEING_DISABLED = 6,
+  INVALID_TABLE_NAME = 7,
+  INVALID_ACTION_NAME = 8,
+  WRONG_TABLE_TYPE = 9,
+  INVALID_MBR_HANDLE = 10,
+  MBR_STILL_USED = 11,
+  MBR_ALREADY_IN_GRP = 12,
+  MBR_NOT_IN_GRP = 13,
+  INVALID_GRP_HANDLE = 14,
+  GRP_STILL_USED = 15,
+  EMPTY_GRP = 16,
+  DUPLICATE_ENTRY = 17,
+  BAD_MATCH_KEY = 18,
+  INVALID_METER_OPERATION = 19,
+  ERROR = 20,
 }
 
 exception InvalidTableOperation {
@@ -319,7 +321,14 @@ service Standard {
     1:i32 cxt_id,
     2:string table_name,
     3:BmEntryHandle entry_handle,
-    4:BmCounterValue value,
+    4:BmCounterValue value
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_set_meter_rates(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle,
+    4:list<BmMeterRateConfig> rates
   ) throws (1:InvalidTableOperation ouch),
 
   // indirect counters

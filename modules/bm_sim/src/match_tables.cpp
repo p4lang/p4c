@@ -60,6 +60,14 @@ MatchTableAbstract::apply_action(Packet *pkt) {
 
   const ActionEntry &action_entry = lookup(*pkt, &hit, &handle);
 
+  if (hit && with_meters) {
+    // we only execute the direct meter if hit, should we have a miss meter?
+    Field &target_f = pkt->get_phv()->get_field(
+        meter_target_header, meter_target_offset);
+    Meter &meter = match_unit_->get_meter(handle);
+    target_f.set(meter.execute(*pkt));
+  }
+
   // we're holding the lock for this...
   if (hit) {
     ELOGGER->table_hit(*pkt, *this, handle);
@@ -87,6 +95,17 @@ void
 MatchTableAbstract::reset_state() {
   WriteLock lock = lock_write();
   reset_state_();
+}
+
+void
+MatchTableAbstract::set_direct_meters(MeterArray *meter_array,
+                                      header_id_t target_header,
+                                      int target_offset) {
+  WriteLock lock = lock_write();
+  match_unit_->set_direct_meters(meter_array);
+  meter_target_header = target_header;
+  meter_target_offset = target_offset;
+  with_meters = true;
 }
 
 MatchErrorCode
@@ -121,6 +140,19 @@ MatchTableAbstract::write_counters(entry_handle_t handle,
   // should I hide counter implementation more?
   meta.counter.write_counter(bytes, packets);
   return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableAbstract::set_meter_rates(
+    entry_handle_t handle,
+    const std::vector<Meter::rate_config_t> &configs) const {
+  if (!with_meters) return MatchErrorCode::METERS_DISABLED;
+  WriteLock lock = lock_write();
+  if (!is_valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
+  Meter &meter = match_unit_->get_meter(handle);
+  Meter::MeterErrorCode rc = meter.set_rates(configs);
+  return (rc == Meter::MeterErrorCode::SUCCESS) ?
+      MatchErrorCode::SUCCESS : MatchErrorCode::ERROR;
 }
 
 MatchErrorCode

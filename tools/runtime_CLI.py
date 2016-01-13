@@ -1361,8 +1361,8 @@ class RuntimeAPI(cmd.Cmd):
         self.client.bm_swap_configs()
 
     @handle_bad_input
-    def do_meter_set_rates(self, line):
-        "Configure rates for meter: meter_set_rates <name> <rate_1>:<burst_1> <rate_2>:<burst_2> ..."
+    def do_meter_array_set_rates(self, line):
+        "Configure rates for an entire meter array: meter_array_set_rates <name> <rate_1>:<burst_1> <rate_2>:<burst_2> ..."
         args = line.split()
         self.at_least_n_args(args, 1)
         meter_name = args[0]
@@ -1383,6 +1383,40 @@ class RuntimeAPI(cmd.Cmd):
             except:
                 raise UIn_Error("Error while parsing rates")
         self.client.bm_meter_array_set_rates(0, meter_name, new_rates)
+
+    def complete_meter_array_set_rates(self, text, line, start_index, end_index):
+        return self._complete_meters(text)
+
+    @handle_bad_input
+    def do_meter_set_rates(self, line):
+        "Configure rates for a meter: meter_set_rates <name> <index> <rate_1>:<burst_1> <rate_2>:<burst_2> ..."
+        args = line.split()
+        self.at_least_n_args(args, 2)
+        meter_name = args[0]
+        meter = self.get_res("meter", meter_name, METER_ARRAYS)
+        index = args[1]
+        rates = args[2:]
+        if len(rates) != meter.rate_count:
+            raise UIn_Error(
+                "Invalid number of rates, expected %d but got %d"\
+                % (meter.rate_count, len(rates))
+            )
+        new_rates = []
+        for rate in rates:
+            try:
+                r, b = rate.split(':')
+                r = float(r)
+                b = int(b)
+                new_rates.append(BmMeterRateConfig(r, b))
+            except:
+                raise UIn_Error("Error while parsing rates")
+        if meter.is_direct:
+            table_name = meter.binding
+            print "this is the direct meter for table", table_name
+            value = self.client.bm_mt_set_meter_rates(
+                0, table_name, index, new_rates)
+        else:
+            self.client.bm_meter_set_rates(0, meter_name, index, new_rates)
 
     def complete_meter_set_rates(self, text, line, start_index, end_index):
         return self._complete_meters(text)
@@ -1405,7 +1439,7 @@ class RuntimeAPI(cmd.Cmd):
         if counter.is_direct:
             table_name = counter.binding
             print "this is the direct counter for table", table_name
-            index = index & 0xffffffff
+            # index = index & 0xffffffff
             value = self.client.bm_mt_read_counter(0, table_name, index)
         else:
             value = self.client.bm_counter_read(0, counter_name, index)

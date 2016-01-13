@@ -359,7 +359,32 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
     add_named_calculation(name, unique_ptr<NamedCalculation>(calculation));
   }
 
+  // counter arrays
+
+  const Json::Value &cfg_counter_arrays = cfg_root["counter_arrays"];
+  for (const auto &cfg_counter_array : cfg_counter_arrays) {
+    const string name = cfg_counter_array["name"].asString();
+    const p4object_id_t id = cfg_counter_array["id"].asInt();
+    const size_t size = cfg_counter_array["size"].asUInt();
+    const Json::Value false_value(false);
+    const bool is_direct =
+      cfg_counter_array.get("is_direct", false_value).asBool();
+    if (is_direct) continue;
+
+    CounterArray *counter_array = new CounterArray(name, id, size);
+    add_counter_array(name, unique_ptr<CounterArray>(counter_array));
+  }
+
   // meter arrays
+
+  // store direct meter info until the table gets created
+  struct DirectMeterArray {
+    MeterArray *meter;
+    header_id_t header;
+    int offset;
+  };
+
+  std::unordered_map<std::string, DirectMeterArray> direct_meters;
 
   const Json::Value &cfg_meter_arrays = cfg_root["meter_arrays"];
   for (const auto &cfg_meter_array : cfg_meter_arrays) {
@@ -380,22 +405,20 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
     MeterArray *meter_array = new MeterArray(name, id,
                                              meter_type, rate_count, size);
     add_meter_array(name, unique_ptr<MeterArray>(meter_array));
-  }
 
-  // counter arrays
-
-  const Json::Value &cfg_counter_arrays = cfg_root["counter_arrays"];
-  for (const auto &cfg_counter_array : cfg_counter_arrays) {
-    const string name = cfg_counter_array["name"].asString();
-    const p4object_id_t id = cfg_counter_array["id"].asInt();
-    const size_t size = cfg_counter_array["size"].asUInt();
-    const Json::Value false_value(false);
     const bool is_direct =
-      cfg_counter_array.get("is_direct", false_value).asBool();
-    if (is_direct) continue;
+        cfg_meter_array.get("is_direct", Json::Value(false)).asBool();
+    if (is_direct) {
+      const Json::Value &cfg_target_field = cfg_meter_array["result_target"];
+      const string header_name = cfg_target_field[0].asString();
+      header_id_t header_id = get_header_id(header_name);
+      const string field_name = cfg_target_field[1].asString();
+      int field_offset = get_field_offset(header_id, field_name);
 
-    CounterArray *counter_array = new CounterArray(name, id, size);
-    add_counter_array(name, unique_ptr<CounterArray>(counter_array));
+      DirectMeterArray direct_meter =
+          {get_meter_array(name), header_id, field_offset};
+      direct_meters.emplace(name, direct_meter);
+    }
   }
 
   // register arrays
@@ -633,6 +656,15 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
         mt_indirect_ws->set_hash(std::move(calc));
       } else {
         assert(0 && "invalid table type");
+      }
+
+      // maintains backwards compatibility
+      if (cfg_table.isMember("direct_meters") &&
+          !cfg_table["direct_meters"].isNull()) {
+        const std::string meter_name = cfg_table["direct_meters"].asString();
+        const DirectMeterArray &direct_meter = direct_meters[meter_name];
+        table->get_match_table()->set_direct_meters(
+            direct_meter.meter, direct_meter.header, direct_meter.offset);
       }
 
       if (with_ageing) ageing_monitor->add_table(table->get_match_table());

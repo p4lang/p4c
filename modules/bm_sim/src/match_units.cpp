@@ -81,6 +81,18 @@ MatchUnitAbstract_::reset_counters() {
   }
 }
 
+void
+MatchUnitAbstract_::set_direct_meters(MeterArray *meter_array) {
+  assert(meter_array);
+  assert(size == meter_array->size());
+  direct_meters = meter_array;
+}
+
+Meter &
+MatchUnitAbstract_::get_meter(entry_handle_t handle) {
+  return direct_meters->at(HANDLE_INTERNAL(handle));
+}
+
 MatchErrorCode
 MatchUnitAbstract_::set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms) {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);

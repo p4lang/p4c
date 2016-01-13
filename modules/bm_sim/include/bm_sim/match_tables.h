@@ -88,6 +88,10 @@ class MatchTableAbstract : public NamedP4Object {
     next_nodes[action_id] = next_node;
   }
 
+  void set_direct_meters(MeterArray *meter_array,
+                         header_id_t target_header,
+                         int target_offset);
+
   MatchErrorCode query_counters(entry_handle_t handle,
                                 counter_value_t *bytes,
                                 counter_value_t *packets) const;
@@ -95,6 +99,10 @@ class MatchTableAbstract : public NamedP4Object {
   MatchErrorCode write_counters(entry_handle_t handle,
                                 counter_value_t bytes,
                                 counter_value_t packets);
+
+  MatchErrorCode set_meter_rates(
+      entry_handle_t handle,
+      const std::vector<Meter::rate_config_t> &configs) const;
 
   MatchErrorCode set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms);
 
@@ -123,10 +131,16 @@ class MatchTableAbstract : public NamedP4Object {
  protected:
   size_t size{0};
 
+  // Not sure these guys need to be atomic with the current code
+  // TODO(antonin): check
   std::atomic_bool with_counters{false};
+  std::atomic_bool with_meters{false};
   std::atomic_bool with_ageing{false};
 
   std::unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
+
+  header_id_t meter_target_header{};
+  int meter_target_offset{};
 
  private:
   virtual void reset_state_() = 0;
