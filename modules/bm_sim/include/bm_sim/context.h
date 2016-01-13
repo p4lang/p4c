@@ -213,6 +213,10 @@ class Context final {
                     MatchTableAbstract::counter_value_t bytes,
                     MatchTableAbstract::counter_value_t packets);
 
+  MatchErrorCode
+  mt_set_meter_rates(const std::string &table_name, entry_handle_t handle,
+                     const std::vector<Meter::rate_config_t> &configs);
+
   Counter::CounterErrorCode
   read_counters(const std::string &counter_name,
                 size_t index,

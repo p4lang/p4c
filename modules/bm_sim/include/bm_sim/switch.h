@@ -323,6 +323,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
         table_name, handle, bytes, packets);
   }
 
+  MatchErrorCode
+  mt_set_meter_rates(
+      size_t cxt_id, const std::string &table_name, entry_handle_t handle,
+      const std::vector<Meter::rate_config_t> &configs) override {
+    return contexts.at(cxt_id).mt_set_meter_rates(table_name, handle, configs);
+  }
+
   Counter::CounterErrorCode
   read_counters(size_t cxt_id,
                 const std::string &counter_name,

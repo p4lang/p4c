@@ -38,6 +38,7 @@
 #include "handle_mgr.h"
 #include "lpm_trie.h"
 #include "counters.h"
+#include "meters.h"
 
 typedef uintptr_t internal_handle_t;
 typedef uint64_t entry_handle_t;
@@ -208,6 +209,10 @@ class MatchUnitAbstract_ {
 
   void reset_counters();
 
+  void set_direct_meters(MeterArray *meter_array);
+
+  Meter &get_meter(entry_handle_t handle);
+
   MatchErrorCode set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms);
 
   void sweep_entries(std::vector<entry_handle_t> *entries) const;
@@ -239,6 +244,8 @@ class MatchUnitAbstract_ {
   HandleMgr handles{};
   MatchKeyBuilder match_key_builder;
   std::vector<MatchUnit::EntryMeta> entry_meta{};
+  // non-owning pointer, the meter array still belongs to P4Objects
+  MeterArray *direct_meters{nullptr};
 };
 
 template <typename V>

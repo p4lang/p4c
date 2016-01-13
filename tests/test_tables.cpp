@@ -28,6 +28,9 @@ using testing::Types;
 using std::string;
 using std::to_string;
 
+using std::chrono::milliseconds;
+using std::this_thread::sleep_until;
+
 typedef MatchTableAbstract::ActionEntry ActionEntry;
 typedef MatchUnitExact<ActionEntry> MUExact;
 typedef MatchUnitLPM<ActionEntry> MULPM;
@@ -36,6 +39,8 @@ typedef MatchUnitTernary<ActionEntry> MUTernary;
 template <typename MUType>
 class TableSizeTwo : public ::testing::Test {
  protected:
+  static constexpr size_t t_size = 2u;
+
   PHVFactory phv_factory;
 
   MatchKeyBuilder key_builder;
@@ -66,13 +71,13 @@ class TableSizeTwo : public ::testing::Test {
     std::unique_ptr<MUType> match_unit;
 
     // true enables counters
-    match_unit = std::unique_ptr<MUType>(new MUType(2, key_builder));
+    match_unit = std::unique_ptr<MUType>(new MUType(t_size, key_builder));
     table = std::unique_ptr<MatchTable>(
       new MatchTable("test_table", 0, std::move(match_unit), true)
     );
     table->set_next_node(0, nullptr);
 
-    match_unit = std::unique_ptr<MUType>(new MUType(2, key_builder_w_valid));
+    match_unit = std::unique_ptr<MUType>(new MUType(t_size, key_builder_w_valid));
     table_w_valid = std::unique_ptr<MatchTable>(
       new MatchTable("test_table", 0, std::move(match_unit))
     );
@@ -369,6 +374,87 @@ TYPED_TEST(TableSizeTwo, Counters) {
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
   ASSERT_EQ(64u, counter_bytes);
   ASSERT_EQ(1u, counter_packets);
+}
+
+TYPED_TEST(TableSizeTwo, Meters) {
+  typedef std::chrono::high_resolution_clock clock;
+
+  std::string key_ = "\x0a\xba";
+  ByteContainer key("0x0aba");
+  entry_handle_t handle;
+  entry_handle_t bad_handle = 999u;
+  MatchErrorCode rc;
+
+  Packet pkt = this->get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+  f.set("0xaba");
+
+  const Field &f_c = pkt.get_phv()->get_field(this->testHeader2, 0);
+
+  const Meter::color_t GREEN = 0;
+  const Meter::color_t RED = 1;
+
+  // 1 rate, same size as table
+  MeterArray meters("meter_test", 0, Meter::MeterType::PACKETS, 1,
+                    this->t_size);
+
+  rc = this->add_entry(key_, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(1u, this->table->get_num_entries());
+
+  std::vector<Meter::rate_config_t> rates = {};
+  rc = this->table->set_meter_rates(handle, rates);
+  ASSERT_EQ(MatchErrorCode::METERS_DISABLED, rc);
+  this->table->set_direct_meters(&meters, this->testHeader2, 0);
+
+  std::vector<Meter::color_t> output;
+  output.reserve(32);
+
+  Meter::reset_global_clock();
+
+  clock::time_point next_stop = clock::now();
+
+  // meter rates not configured yet, all packets should be 'GREEN'
+
+  for (size_t i = 0; i < 20; i++) {
+    this->table->apply_action(&pkt);
+    Meter::color_t color = f_c.get_int();
+    output.push_back(color);
+    next_stop += milliseconds(100);
+    sleep_until(next_stop);
+  }
+
+  std::vector<Meter::color_t> expected(20, GREEN);
+  ASSERT_EQ(expected, output);
+
+  rc = this->table->set_meter_rates(handle, rates);
+  ASSERT_EQ(MatchErrorCode::ERROR, rc);  // because rates vector empty
+
+  // 1 packet per second, burst size of 2 packets
+  Meter::rate_config_t one_rate = {0.000001, 2};
+  rates.push_back(one_rate);
+  rc = this->table->set_meter_rates(handle, rates);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  Meter::reset_global_clock();
+
+  output.clear();
+
+  std::vector<int> int_ms = {10, 10, 1100, 0};
+
+  for (int ms : int_ms) {
+    this->table->apply_action(&pkt);
+    Meter::color_t color = f_c.get_int();
+    output.push_back(color);
+    next_stop += milliseconds(ms);
+    sleep_until(next_stop);
+  }
+
+  expected = {GREEN, GREEN, RED, GREEN};
+  ASSERT_EQ(expected, output);
+
+  rc = this->table->set_meter_rates(bad_handle, rates);
+  ASSERT_EQ(MatchErrorCode::INVALID_HANDLE, rc);
 }
 
 TYPED_TEST(TableSizeTwo, Valid) {

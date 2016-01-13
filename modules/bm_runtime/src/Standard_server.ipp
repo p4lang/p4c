@@ -42,6 +42,8 @@ public:
       return TableOperationErrorCode::EXPIRED_HANDLE;
     case MatchErrorCode::COUNTERS_DISABLED:
       return TableOperationErrorCode::COUNTERS_DISABLED;
+    case MatchErrorCode::METERS_DISABLED:
+      return TableOperationErrorCode::METERS_DISABLED;
     case MatchErrorCode::AGEING_DISABLED:
       return TableOperationErrorCode::AGEING_DISABLED;
     case MatchErrorCode::INVALID_TABLE_NAME:
@@ -68,6 +70,8 @@ public:
       return TableOperationErrorCode::DUPLICATE_ENTRY;
     case MatchErrorCode::BAD_MATCH_KEY:
       return TableOperationErrorCode::BAD_MATCH_KEY;
+    case MatchErrorCode::INVALID_METER_OPERATION:
+      return TableOperationErrorCode::INVALID_METER_OPERATION;
     case MatchErrorCode::ERROR:
       return TableOperationErrorCode::ERROR;
     default:
@@ -395,6 +399,24 @@ public:
     MatchTable::counter_value_t packets = (uint64_t) value.packets;
     MatchErrorCode error_code = switch_->mt_write_counters(
         cxt_id, table_name, entry_handle, bytes, packets);
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
+  void bm_mt_set_meter_rates(const int32_t cxt_id, const std::string& table_name, const BmEntryHandle entry_handle, const std::vector<BmMeterRateConfig> & rates) {
+    printf("bm_mt_set_meter_rates\n");
+    std::vector<Meter::rate_config_t> rates_;
+    rates_.reserve(rates.size());
+    for(const auto &rate : rates) {
+      rates_.push_back(
+        {rate.units_per_micros, static_cast<size_t>(rate.burst_size)}
+      );
+    }
+    MatchErrorCode error_code = switch_->mt_set_meter_rates(
+        cxt_id, table_name, entry_handle, rates_);
     if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
       ito.code = get_exception_code(error_code);

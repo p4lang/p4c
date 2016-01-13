@@ -337,6 +337,17 @@ Context::mt_write_counters(const std::string &table_name,
   return abstract_table->write_counters(handle, bytes, packets);
 }
 
+MatchErrorCode
+Context::mt_set_meter_rates(const std::string &table_name,
+                            entry_handle_t handle,
+                            const std::vector<Meter::rate_config_t> &configs) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MatchTableAbstract *abstract_table =
+    p4objects_rt->get_abstract_match_table(table_name);
+  assert(abstract_table);
+  return abstract_table->set_meter_rates(handle, configs);
+}
+
 Counter::CounterErrorCode
 Context::read_counters(const std::string &counter_name,
                        size_t index,

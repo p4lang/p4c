@@ -83,7 +83,6 @@ TEST_F(MetersTest, trTCM) {
 
   Meter::reset_global_clock();
 
-  clock::time_point start = clock::now();
   clock::time_point next_stop = clock::now();
 
   color_t color;

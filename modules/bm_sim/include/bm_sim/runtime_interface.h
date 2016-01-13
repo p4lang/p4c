@@ -179,6 +179,12 @@ class RuntimeInterface {
                     MatchTableAbstract::counter_value_t bytes,
                     MatchTableAbstract::counter_value_t packets) = 0;
 
+  virtual MatchErrorCode
+  mt_set_meter_rates(size_t cxt_id,
+                     const std::string &table_name,
+                     entry_handle_t handle,
+                     const std::vector<Meter::rate_config_t> &configs) = 0;
+
   virtual Counter::CounterErrorCode
   read_counters(size_t cxt_id,
                 const std::string &counter_name,
