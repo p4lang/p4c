@@ -209,12 +209,8 @@ document with detailed information.
 
 ### Are all features supported yet ?
 
-No. Some features described in the P4 spec are missing compared to the original
-behavioral model:
-
-- resubmit
-- direct meters
-- parse value sets
+At this time, the only missing feature that we are aware of is *parse value
+sets*. This P4 feature was scarcely used in bmv1 and is not present in bmv2.
 
 If you find more missing features or if you would like to request that a
 specific feature be added, please send us an email (p4-dev@p4.org) or submit an
