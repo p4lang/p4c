@@ -28,6 +28,8 @@ using std::vector;
 using std::copy;
 using std::string;
 
+namespace bm {
+
 McSimplePre::McReturnCode
 McSimplePre::mc_mgrp_create(const mgrp_t mgid, mgrp_hdl_t *mgrp_hdl) {
   boost::unique_lock<boost::shared_mutex> lock(mgid_lock);
@@ -204,3 +206,5 @@ McSimplePre::replicate(const McSimplePre::McIn ingress_info) const {
   }
   return egress_info_list;
 }
+
+}  // namespace bm

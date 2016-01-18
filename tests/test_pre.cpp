@@ -23,6 +23,8 @@
 #include "bm_sim/simple_pre_lag.h"
 #include <bitset>
 
+using namespace bm;
+
 TEST(McSimplePre, Replicate)
 {
   McSimplePre pre;

@@ -40,6 +40,8 @@
 #include "counters.h"
 #include "meters.h"
 
+namespace bm {
+
 typedef uintptr_t internal_handle_t;
 typedef uint64_t entry_handle_t;
 
@@ -453,5 +455,7 @@ class MatchUnitTernary : public MatchUnitAbstract<V> {
  private:
   std::vector<Entry> entries{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_MATCH_UNITS_H_

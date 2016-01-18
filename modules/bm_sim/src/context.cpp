@@ -24,6 +24,8 @@
 #include <vector>
 #include <set>
 
+namespace bm {
+
 Context::Context() {
   p4objects = std::make_shared<P4Objects>();
   p4objects_rt = p4objects;
@@ -521,3 +523,5 @@ Context::do_swap() {
   swap_ordered = false;
   return 0;
 }
+
+}  // namespace bm

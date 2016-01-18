@@ -35,6 +35,8 @@
 #include "phv_source.h"
 #include "phv.h"
 
+namespace bm {
+
 typedef uint64_t packet_id_t;
 typedef uint64_t copy_id_t;
 
@@ -212,5 +214,7 @@ class Packet final {
  private:
   static CopyIdGenerator *copy_id_gen;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PACKET_H_

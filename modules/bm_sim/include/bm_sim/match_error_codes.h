@@ -21,6 +21,8 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_MATCH_ERROR_CODES_H_
 #define BM_SIM_INCLUDE_BM_SIM_MATCH_ERROR_CODES_H_
 
+namespace bm {
+
 enum class MatchErrorCode {
   SUCCESS = 0,
   TABLE_FULL,
@@ -44,5 +46,7 @@ enum class MatchErrorCode {
   INVALID_METER_OPERATION,
   ERROR,
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_MATCH_ERROR_CODES_H_

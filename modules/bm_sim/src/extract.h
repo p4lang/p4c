@@ -21,6 +21,8 @@
 #ifndef BM_SIM_SRC_EXTRACT_H_
 #define BM_SIM_SRC_EXTRACT_H_
 
+namespace bm {
+
 namespace extract {
 
 static void generic_extract(const char *data, int bit_offset,
@@ -63,5 +65,7 @@ static void generic_extract(const char *data, int bit_offset,
 }
 
 }  // namespace extract
+
+}  // namespace bm
 
 #endif  // BM_SIM_SRC_EXTRACT_H_

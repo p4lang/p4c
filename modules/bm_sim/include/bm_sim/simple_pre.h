@@ -30,6 +30,8 @@
 #include "handle_mgr.h"
 #include "pre.h"
 
+namespace bm {
+
 class McSimplePre {
  public:
   typedef unsigned int mgrp_t;
@@ -135,5 +137,7 @@ class McSimplePre {
   mutable boost::shared_mutex l1_lock{};
   mutable boost::shared_mutex l2_lock{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_SIMPLE_PRE_H_

@@ -27,6 +27,8 @@ extern "C" {
 #include "BMI/bmi_port.h"
 }
 
+namespace bm {
+
 // These are private implementations
 
 // Implementation that uses the BMI to send/receive packets
@@ -98,3 +100,5 @@ DevMgr::set_dev_mgr_bmi() {
   assert(!pimp);
   pimp = std::unique_ptr<DevMgrIface>(new BmiDevMgrImp());
 }
+
+}  // namespace bm

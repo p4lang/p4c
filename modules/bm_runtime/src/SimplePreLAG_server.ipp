@@ -24,6 +24,8 @@
 
 namespace bm_runtime { namespace simple_pre_lag {
 
+using namespace bm;
+
 class SimplePreLAGHandler : virtual public SimplePreLAGIf {
 public:
   SimplePreLAGHandler(SwitchWContexts *sw) 

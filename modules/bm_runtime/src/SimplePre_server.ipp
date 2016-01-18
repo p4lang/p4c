@@ -24,6 +24,8 @@
 
 namespace bm_runtime { namespace simple_pre {
 
+using namespace bm;
+
 class SimplePreHandler : virtual public SimplePreIf {
 public:
   SimplePreHandler(SwitchWContexts *sw) 

@@ -21,10 +21,14 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_PHV_FORWARD_H_
 #define BM_SIM_INCLUDE_BM_SIM_PHV_FORWARD_H_
 
+namespace bm {
+
 typedef int header_id_t;
 
 class PHV;
 class Header;
 class Field;
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PHV_FORWARD_H_

@@ -13,7 +13,7 @@ using namespace ::apache::thrift::transport;
 using boost::shared_ptr;
 
 extern TMultiplexedProcessor *processor_;
-extern SwitchWContexts *switch_;
+extern bm::SwitchWContexts *switch_;
 
 template <typename Handler, typename Processor, typename S>
 int add_service(const std::string &service_name) {
@@ -23,7 +23,7 @@ int add_service(const std::string &service_name) {
 				shared_ptr<TProcessor>(new Processor(handler)));
 }
 
-int start_server(SwitchWContexts *sw, int port);
+int start_server(bm::SwitchWContexts *sw, int port);
 
 }
 

@@ -30,6 +30,8 @@
 #include "bignum.h"
 #include "debugger.h"
 
+namespace bm {
+
 class Field : public Data {
  public:
   // Data() is called automatically
@@ -105,5 +107,7 @@ class Field : public Data {
   uint64_t my_id{};
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_FIELDS_H_

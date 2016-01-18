@@ -27,6 +27,8 @@
 
 #include "bm_sim/actions.h"
 
+using namespace bm;
+
 using std::string;
 
 // some primitive definitions for testing

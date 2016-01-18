@@ -25,6 +25,8 @@
 #include <string>
 #include <bitset>
 
+namespace bm {
+
 namespace McPre {
 
 template <size_t set_size>
@@ -48,5 +50,7 @@ class Set {
 };
 
 }  // namespace McPre
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PRE_H_

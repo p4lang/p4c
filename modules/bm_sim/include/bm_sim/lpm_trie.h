@@ -25,6 +25,8 @@
 
 #include <algorithm>  // for std::swap
 
+namespace bm {
+
 static_assert(sizeof(value_t) == sizeof(uintptr_t),
               "Invalid type sizes");
 
@@ -83,5 +85,7 @@ class LPMTrie {
   size_t key_width_bytes{0};
   bf_lpm_trie_t *trie{nullptr};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_LPM_TRIE_H_

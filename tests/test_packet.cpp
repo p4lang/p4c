@@ -24,6 +24,8 @@
 
 #include "bm_sim/packet.h"
 
+using namespace bm;
+
 TEST(CopyIdGenerator, Test) {
   CopyIdGenerator gen;
   packet_id_t packet_id = 0;

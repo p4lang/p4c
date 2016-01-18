@@ -31,6 +31,8 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_CONTEXT_H_
 #define BM_SIM_INCLUDE_BM_SIM_CONTEXT_H_
 
+namespace bm {
+
 class Context final {
   friend class SwitchWContexts;
 
@@ -321,5 +323,7 @@ class Context final {
 
   bool force_arith{false};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_CONTEXT_H_

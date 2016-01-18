@@ -36,6 +36,11 @@
 
 namespace fs = boost::filesystem;
 
+using bm::MatchErrorCode;
+using bm::ActionData;
+using bm::MatchKeyParam;
+using bm::entry_handle_t;
+
 namespace {
 
 class NNEventListener {
@@ -251,9 +256,10 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
   static void SetUpTestCase() {
     // Logger::set_logger_console();
     // TODO(antonin): remove when event-logger cleaned-up
-    delete event_logger;
-    event_logger = new EventLogger(
-        TransportIface::create_instance<TransportNanomsg>(event_logger_addr));
+    delete bm::event_logger;
+    bm::event_logger = new bm::EventLogger(
+        bm::TransportIface::create_instance<bm::TransportNanomsg>(
+            event_logger_addr));
 
     test_switch = new SimpleSwitch(8);  // 8 ports
 
@@ -271,8 +277,8 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
 
   // Per-test-case tear-down.
   static void TearDownTestCase() {
-    delete event_logger;
-    event_logger = nullptr;
+    delete bm::event_logger;
+    bm::event_logger = nullptr;
     delete test_switch;
   }
 

@@ -26,6 +26,8 @@
 
 #include <gmp.h>
 
+namespace bm {
+
 namespace bignum {
 
   using boost::multiprecision::gmp_int;
@@ -44,5 +46,7 @@ namespace bignum {
   }
 
 }  // namespace bignum
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_BIGNUM_H_

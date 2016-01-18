@@ -23,6 +23,8 @@
 
 #include "bm_sim/simple_pre_lag.h"
 
+namespace bm {
+
 using std::vector;
 
 McSimplePre::McReturnCode
@@ -155,3 +157,5 @@ McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const {
   //        << egress_info_list.size() << "\n";
   return egress_info_list;
 }
+
+}  // namespace bm

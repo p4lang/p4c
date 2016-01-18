@@ -23,6 +23,8 @@
 #include "bm_sim/parser.h"
 #include "bm_sim/deparser.h"
 
+using namespace bm;
+
 /* Frame (66 bytes) */
 static const unsigned char raw_tcp_pkt[66] = {
   0x00, 0x18, 0x0a, 0x05, 0x5a, 0x10, 0xa0, 0x88, /* ....Z... */

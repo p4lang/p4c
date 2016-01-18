@@ -30,6 +30,8 @@
 #include "bm_sim/logger.h"
 #include "bm_sim/nn.h"
 
+namespace bm {
+
 // private implementation
 
 // Implementation which uses a nanomsg PAIR socket to receive / send packets
@@ -263,3 +265,5 @@ DevMgr::set_dev_mgr_packet_in(const std::string &addr, bool enforce_ports) {
   pimp = std::unique_ptr<DevMgrIface>(
       new PacketInDevMgrImp(addr, enforce_ports));
 }
+
+}  // namespace bm

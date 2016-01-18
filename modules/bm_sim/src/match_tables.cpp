@@ -25,6 +25,8 @@
 #include "bm_sim/logger.h"
 #include "bm_sim/event_logger.h"
 
+namespace bm {
+
 namespace {
 
 template <typename V>
@@ -659,3 +661,5 @@ MatchTableIndirectWS::reset_state_() {
   num_groups = 0;
   group_entries.clear();
 }
+
+}  // namespace bm

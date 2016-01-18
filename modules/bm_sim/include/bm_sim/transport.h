@@ -27,6 +27,8 @@
 
 #include "nn.h"
 
+namespace bm {
+
 class TransportIface {
  public:
   struct MsgBuf {
@@ -143,5 +145,7 @@ class TransportNULL : public TransportIface {
     return 0;
   }
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_TRANSPORT_H_

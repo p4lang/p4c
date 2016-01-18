@@ -29,6 +29,8 @@
 #include "bm_sim/port_monitor.h"
 #include "bm_sim/logger.h"
 
+namespace bm {
+
 class PortMonitorDummy : public PortMonitorIface {
  private:
   void notify_(port_t port_num, const PortStatus evt) override {
@@ -178,3 +180,5 @@ std::unique_ptr<PortMonitorIface>
 PortMonitorIface::make_active() {
   return std::unique_ptr<PortMonitorIface>(new PortMonitorActive());
 }
+
+}  // namespace bm

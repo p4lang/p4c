@@ -24,6 +24,8 @@
 
 #include "bm_sim/data.h"
 
+using bm::Data;
+
 TEST(Data, ConstructorFromUInt) {
   const Data d(0xaba);
   EXPECT_EQ((unsigned) 0xaba, d.get_uint());

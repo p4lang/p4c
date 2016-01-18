@@ -22,14 +22,18 @@
 
 #include "bm_sim/meters.h"
 
+namespace bm {
+
 typedef Meter::MeterErrorCode MeterErrorCode;
 
 using ticks = std::chrono::microseconds;  // better with nanoseconds ?
 using std::chrono::duration_cast;
 
 namespace {
+
 Meter::clock::time_point time_init = Meter::clock::now();
-}
+
+}  // namespace
 
 MeterErrorCode
 Meter::set_rate(size_t idx, const rate_config_t &config) {
@@ -100,3 +104,5 @@ void
 Meter::reset_global_clock() {
   time_init = Meter::clock::now();
 }
+
+}  // namespace bm

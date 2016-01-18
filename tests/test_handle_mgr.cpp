@@ -22,6 +22,9 @@
 
 #include "bm_sim/handle_mgr.h"
 
+using bm::HandleMgr;
+using bm::handle_t;
+
 using testing::Types;
 
 template <typename IteratorType>

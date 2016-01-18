@@ -34,6 +34,8 @@
 #include "logger.h"
 #include "expressions.h"
 
+namespace bm {
+
 struct field_t {
   header_id_t header;
   int offset;
@@ -351,5 +353,7 @@ class Parser : public NamedP4Object {
  private:
   const ParseState *init_state;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PARSER_H_

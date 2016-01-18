@@ -24,6 +24,8 @@
 
 #include "xxhash.h"
 
+namespace bm {
+
 typedef Debugger::PacketId PacketId;
 
 void
@@ -204,3 +206,5 @@ Packet::make_new(size_t cxt, int ingress_port, packet_id_t id,
 }
 
 CopyIdGenerator *Packet::copy_id_gen = new CopyIdGenerator();
+
+}  // namespace bm

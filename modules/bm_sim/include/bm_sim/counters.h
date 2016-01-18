@@ -28,6 +28,8 @@
 #include "named_p4object.h"
 #include "packet.h"
 
+namespace bm {
+
 /* This is a very basic counter for now: data plane can only increment the
    counters, control plane only can query values and reset */
 class Counter {
@@ -65,8 +67,8 @@ class CounterArray : public NamedP4Object {
  public:
   typedef Counter::CounterErrorCode CounterErrorCode;
 
-  typedef vector<Counter>::iterator iterator;
-  typedef vector<Counter>::const_iterator const_iterator;
+  typedef std::vector<Counter>::iterator iterator;
+  typedef std::vector<Counter>::const_iterator const_iterator;
 
  public:
   CounterArray(const std::string &name, p4object_id_t id, size_t size)
@@ -106,5 +108,7 @@ class CounterArray : public NamedP4Object {
  private:
     std::vector<Counter> counters;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_COUNTERS_H_

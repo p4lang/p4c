@@ -25,6 +25,9 @@
 
 #include "bm_sim/fields.h"
 
+using bm::ByteContainer;
+using bm::Field;
+
 using ::testing::TestWithParam;
 using ::testing::Range;
 using ::testing::Combine;

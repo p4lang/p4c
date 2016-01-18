@@ -48,6 +48,8 @@
 #include "ageing.h"
 #include "field_lists.h"
 
+namespace bm {
+
 class P4Objects {
  public:
   typedef std::pair<std::string, std::string> header_field_pair;
@@ -298,5 +300,6 @@ class P4Objects {
       const std::string &name) const;
 };
 
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_P4OBJECTS_H_

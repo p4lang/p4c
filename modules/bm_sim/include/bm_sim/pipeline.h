@@ -26,6 +26,8 @@
 #include "control_flow.h"
 #include "named_p4object.h"
 
+namespace bm {
+
 class Pipeline : public NamedP4Object {
  public:
   Pipeline(const std::string &name, p4object_id_t id,
@@ -43,5 +45,7 @@ class Pipeline : public NamedP4Object {
  private:
   ControlFlowNode *first_node;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PIPELINE_H_

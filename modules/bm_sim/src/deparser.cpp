@@ -21,6 +21,8 @@
 #include "bm_sim/deparser.h"
 #include "bm_sim/debugger.h"
 
+namespace bm {
+
 size_t
 Deparser::get_headers_size(const PHV &phv) const {
   size_t headers_size = 0;
@@ -70,3 +72,5 @@ Deparser::update_checksums(Packet *pkt) const {
     ELOGGER->checksum_update(*pkt, *checksum);
   }
 }
+
+}  // namespace bm

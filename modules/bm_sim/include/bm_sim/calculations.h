@@ -34,6 +34,7 @@
 #include "phv.h"
 #include "packet.h"
 
+namespace bm {
 
 /* Used to determine whether a class overloads the '()' operator */
 template <typename T>
@@ -360,18 +361,20 @@ class NamedCalculation : public NamedP4Object, public Calculation_<uint64_t> {
 };
 
 
-#define REGISTER_HASH(hash_name)\
-  bool hash_name##_create_ =\
-    CalculationsMap::get_instance()->register_one(\
-        #hash_name, \
-        std::unique_ptr<CalculationsMap::MyC>(\
-          new RawCalculation<uint64_t, hash_name>(hash_name())));
+#define REGISTER_HASH(hash_name)                                        \
+  bool hash_name##_create_ =                                            \
+      bm::CalculationsMap::get_instance()->register_one(                \
+          #hash_name,                                                   \
+          std::unique_ptr<bm::CalculationsMap::MyC>(                    \
+              new bm::RawCalculation<uint64_t, hash_name>(hash_name())));
 
 
 namespace hash {
 
 uint64_t xxh64(const char *buffer, size_t s);
 
-}
+}  // namespace hash
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_CALCULATIONS_H_

@@ -25,6 +25,8 @@
 #include <mutex>
 #include <condition_variable>
 
+namespace bm {
+
 /* TODO(antonin): implement non blocking behavior */
 
 template <class T>
@@ -100,5 +102,7 @@ class Queue {
   mutable std::condition_variable q_not_empty;
   mutable std::condition_variable q_not_full;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_QUEUE_H_

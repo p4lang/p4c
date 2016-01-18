@@ -28,6 +28,8 @@
 #include <unordered_map>
 #include "bm_sim/packet_handler.h"
 
+namespace bm {
+
 // A PcapPacket is a packet that has been read from a Pcap file.
 // These packets can only be created by the PcapFileIn class.
 class PcapPacket {
@@ -189,5 +191,7 @@ class PcapFilesWriter : public PacketReceiverIface {
   PcapFilesWriter(PcapFilesWriter const& ) = delete;
   PcapFilesWriter& operator=(PcapFilesWriter const&) = delete;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PCAP_FILE_H_

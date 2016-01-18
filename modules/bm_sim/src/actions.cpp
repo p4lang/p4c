@@ -24,6 +24,8 @@
 #include "bm_sim/debugger.h"
 #include "bm_sim/event_logger.h"
 
+namespace bm {
+
 size_t ActionFn::nb_data_tmps = 0;
 
 void
@@ -198,3 +200,5 @@ ActionFnEntry::dump(std::ostream *stream) const {
     (*stream) << std::hex << d << ",";
   stream->flags(ff);
 }
+
+}  // namespace bm

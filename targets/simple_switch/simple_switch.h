@@ -36,6 +36,19 @@ using ts_res = std::chrono::microseconds;
 using std::chrono::duration_cast;
 using ticks = std::chrono::nanoseconds;
 
+using bm::Switch;
+using bm::Queue;
+using bm::Packet;
+using bm::PHV;
+using bm::Parser;
+using bm::Deparser;
+using bm::Pipeline;
+using bm::McSimplePreLAG;
+using bm::Field;
+using bm::FieldList;
+using bm::packet_id_t;
+using bm::p4object_id_t;
+
 class PacketQueue : public Queue<std::unique_ptr<Packet> > {
  private:
   typedef std::chrono::high_resolution_clock clock;
@@ -83,7 +96,7 @@ class SimpleSwitch : public Switch {
     static int pkt_id = 0;
 
     auto packet = new_packet_ptr(port_num, pkt_id++, len,
-                                 PacketBuffer(2048, buffer, len));
+                                 bm::PacketBuffer(2048, buffer, len));
 
     ELOGGER->packet_in(*packet);
 

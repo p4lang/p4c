@@ -23,6 +23,8 @@
 #include "bm_sim/fields.h"
 #include "extract.h"
 
+namespace bm {
+
 int Field::extract(const char *data, int hdr_offset) {
   extract::generic_extract(data, hdr_offset, nbits, bytes.data());
 
@@ -87,3 +89,5 @@ int Field::deparse(char *data, int hdr_offset) const {
 
   return nbits;
 }
+
+}  // namespace bm

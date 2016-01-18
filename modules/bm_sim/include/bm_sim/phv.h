@@ -37,6 +37,8 @@
 #include "named_p4object.h"
 #include "expressions.h"
 
+namespace bm {
+
 typedef p4object_id_t header_id_t;
 
 // forward declaration
@@ -268,5 +270,7 @@ class PHVFactory {
   std::map<header_id_t, HeaderDesc> header_descs{};  // sorted by header id
   std::map<header_stack_id_t, HeaderStackDesc> header_stack_descs{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PHV_H_

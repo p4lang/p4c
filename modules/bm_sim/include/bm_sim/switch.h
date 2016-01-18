@@ -38,6 +38,8 @@
 #include "dev_mgr.h"
 #include "phv_source.h"
 
+namespace bm {
+
 // multiple inheritance in accordance with Google C++ guidelines:
 // "Multiple inheritance is allowed only when all superclasses, with the
 // possible exception of the first one, are pure interfaces. In order to ensure
@@ -522,5 +524,7 @@ class Switch : public SwitchWContexts {
     return get_cxt_component<T>(0);
   }
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_SWITCH_H_

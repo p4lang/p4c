@@ -25,6 +25,8 @@
 
 #include "phv.h"
 
+namespace bm {
+
 class PHVSourceIface {
  public:
   virtual ~PHVSourceIface() { }
@@ -50,5 +52,7 @@ class PHVSourceIface {
 
   virtual void set_phv_factory_(size_t cxt, const PHVFactory *factory) = 0;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PHV_SOURCE_H_

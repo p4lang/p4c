@@ -34,9 +34,15 @@
 #include "bm_sim/switch.h"
 #include "bm_sim/event_logger.h"
 
-#include "primitives.h"
-
 #include "bm_runtime/bm_runtime.h"
+
+using bm::Switch;
+using bm::Queue;
+using bm::Packet;
+using bm::PHV;
+using bm::Parser;
+using bm::Deparser;
+using bm::Pipeline;
 
 class SimpleSwitch : public Switch {
  public:
@@ -48,7 +54,7 @@ class SimpleSwitch : public Switch {
     static int pkt_id = 0;
 
     auto packet = new_packet_ptr(port_num, pkt_id++, len,
-                                 PacketBuffer(2048, buffer, len));
+                                 bm::PacketBuffer(2048, buffer, len));
 
     ELOGGER->packet_in(*packet);
 

@@ -18,8 +18,14 @@
  *
  */
 
-#ifndef SIMPLE_ROUTER_PRIMITIVES_H_
-#define SIMPLE_ROUTER_PRIMITIVES_H_
+#include "bm_sim/actions.h"
+
+template <typename... Args>
+using ActionPrimitive = bm::ActionPrimitive<Args...>;
+
+using bm::Data;
+using bm::Field;
+using bm::Header;
 
 class modify_field : public ActionPrimitive<Field &, const Data &> {
   void operator ()(Field &f, const Data &d) {
@@ -44,5 +50,3 @@ class drop : public ActionPrimitive<> {
 };
 
 REGISTER_PRIMITIVE(drop);
-
-#endif  // SIMPLE_ROUTER_PRIMITIVES_H_

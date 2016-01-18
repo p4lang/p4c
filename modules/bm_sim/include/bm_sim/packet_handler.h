@@ -16,6 +16,8 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_PACKET_HANDLER_H_
 #define BM_SIM_INCLUDE_BM_SIM_PACKET_HANDLER_H_
 
+namespace bm {
+
 class PacketDispatcherIface {
  public:
   typedef std::function<void(int port_num, const char *buffer,
@@ -34,5 +36,7 @@ class PacketReceiverIface {
  public:
   virtual void send_packet(int port_num, const char* buffer, int len) = 0;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PACKET_HANDLER_H_

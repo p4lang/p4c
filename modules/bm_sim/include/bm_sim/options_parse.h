@@ -26,6 +26,8 @@
 #include <string>
 #include <map>
 
+namespace bm {
+
 class InterfaceList {
  public:
   typedef std::map<int, std::string>::iterator iterator;
@@ -72,5 +74,7 @@ class OptionsParser {
   std::string notifications_addr{};
   bool debugger{false};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_OPTIONS_PARSE_H_

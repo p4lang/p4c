@@ -23,10 +23,14 @@
 
 #include "packet.h"
 
+namespace bm {
+
 class ControlFlowNode {
  public:
   virtual ~ControlFlowNode() { }
   virtual const ControlFlowNode *operator()(Packet *pkt) const = 0;
 };
+
+}
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_CONTROL_FLOW_H_

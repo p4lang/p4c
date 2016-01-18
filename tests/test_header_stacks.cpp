@@ -22,6 +22,8 @@
 
 #include "bm_sim/phv.h"
 
+using namespace bm;
+
 // Google Test fixture for header stack tests
 class HeaderStackTest : public ::testing::Test {
 protected:

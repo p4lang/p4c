@@ -28,6 +28,8 @@ using std::unique_ptr;
 
 using std::thread;
 
+using bm::Queue;
+
 using ::testing::TestWithParam;
 using ::testing::Values;
 using ::testing::Combine;

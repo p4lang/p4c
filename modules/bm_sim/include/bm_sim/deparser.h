@@ -30,6 +30,8 @@
 #include "named_p4object.h"
 #include "checksums.h"
 
+namespace bm {
+
 class Deparser : public NamedP4Object {
  public:
   Deparser(const std::string &name, p4object_id_t id)
@@ -54,5 +56,7 @@ class Deparser : public NamedP4Object {
   std::vector<header_id_t> headers{};
   std::vector<const Checksum *> checksums{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_DEPARSER_H_

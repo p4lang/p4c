@@ -27,6 +27,8 @@
 #include "bytecontainer.h"
 #include "control_flow.h"
 
+namespace bm {
+
 class ControlFlowNode;
 
 struct MatchEntry {
@@ -100,5 +102,7 @@ struct TernaryMatchEntry : MatchEntry {
     }
   }
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_ENTRIES_H_

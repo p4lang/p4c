@@ -26,6 +26,8 @@
 
 #include "bm_sim/transport.h"
 
+namespace bm {
+
 int
 TransportSTDOUT::open_(const std::string &name) {
   (void) name;  // compiler warning
@@ -129,3 +131,5 @@ TransportNanomsg::send_msgs_(const std::initializer_list<MsgBuf> &msgs) const {
   s.sendmsg(&msghdr, 0);
   return 0;
 }
+
+}  // namespace bm

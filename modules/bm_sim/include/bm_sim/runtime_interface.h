@@ -26,6 +26,8 @@
 
 #include "context.h"
 
+namespace bm {
+
 class RuntimeInterface {
  public:
   typedef Context::mbr_hdl_t mbr_hdl_t;
@@ -238,5 +240,7 @@ class RuntimeInterface {
              const std::string& table_name,
              std::ostream *stream) const = 0;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_RUNTIME_INTERFACE_H_

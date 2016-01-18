@@ -30,6 +30,8 @@
 #include "headers.h"
 #include "phv.h"
 
+namespace bm {
+
 typedef p4object_id_t header_stack_id_t;
 
 class HeaderStack : public NamedP4Object {
@@ -156,5 +158,7 @@ class HeaderStack : public NamedP4Object {
   // first empty index; if next == headers.size(), stack is full
   size_t next{0};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_HEADER_STACKS_H_

@@ -25,6 +25,8 @@
 
 // #define BMDEBUG_ON
 
+namespace bm {
+
 /* This whole code if for a proof of concept and is temporary */
 
 // forward declaration
@@ -124,7 +126,6 @@ class DebuggerIface {
   virtual void packet_out_(const PacketId &packet_id, int port) = 0;
 };
 
-
 #ifdef BMDEBUG_ON
 #define DEBUGGER_NOTIFY_UPDATE(packet_id, id, bytes, nbits) \
   Debugger::get()->notify_update(packet_id, id, bytes, nbits);
@@ -143,5 +144,7 @@ class DebuggerIface {
 #define DEBUGGER_PACKET_IN(packet_id, port)
 #define DEBUGGER_PACKET_OUT(packet_id, port)
 #endif
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_DEBUGGER_H_

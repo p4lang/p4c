@@ -28,6 +28,8 @@
 #include "data.h"
 #include "phv_forward.h"
 
+namespace bm {
+
 enum class ExprOpcode {
   LOAD_FIELD, LOAD_HEADER, LOAD_BOOL, LOAD_CONST, LOAD_LOCAL,
   ADD, SUB, MOD, MUL, SHIFT_LEFT, SHIFT_RIGHT,
@@ -135,5 +137,7 @@ class VLHeaderExpression {
   ArithExpression expr;
   std::vector<int> offsets{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_EXPRESSIONS_H_

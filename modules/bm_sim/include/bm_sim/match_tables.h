@@ -32,6 +32,8 @@
 #include "calculations.h"
 #include "control_flow.h"
 
+namespace bm {
+
 class MatchTableAbstract : public NamedP4Object {
  public:
   typedef Counter::counter_value_t counter_value_t;
@@ -471,5 +473,7 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   std::vector<GroupInfo> group_entries{};
   std::unique_ptr<Calculation> hash{nullptr};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_MATCH_TABLES_H_

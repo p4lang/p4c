@@ -25,6 +25,8 @@
 #include "bm_sim/phv.h"
 #include "bm_sim/expressions.h"
 
+namespace bm {
+
 Header::Header(const std::string &name, p4object_id_t id,
                const HeaderType &header_type,
                const std::set<int> &arith_offsets,
@@ -96,3 +98,5 @@ void Header::deparse(char *data) const {
 void Header::set_packet_id(const Debugger::PacketId *id) {
   for (Field &f : fields) f.set_packet_id(id);
 }
+
+}  // namespace bm

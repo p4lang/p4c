@@ -30,6 +30,8 @@
 #include "checksums.h"
 #include "transport.h"
 
+namespace bm {
+
 /* Forward declarations of P4 object classes. This is ugly, but:
    1) I don't have to worry about circular dependencies
    2) If I decide to switch from id to name for msgs, I won't have to modify the
@@ -85,6 +87,8 @@ class EventLogger {
 
 extern EventLogger *event_logger;
 
-#define ELOGGER event_logger
+}  // namespace bm
+
+#define ELOGGER bm::event_logger
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_EVENT_LOGGER_H_

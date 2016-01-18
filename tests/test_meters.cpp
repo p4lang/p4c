@@ -25,6 +25,8 @@
 
 #include "bm_sim/meters.h"
 
+using namespace bm;
+
 using std::chrono::milliseconds;
 using std::chrono::duration_cast;
 using std::this_thread::sleep_for;

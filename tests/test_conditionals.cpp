@@ -22,6 +22,8 @@
 
 #include "bm_sim/conditionals.h"
 
+using namespace bm;
+
 TEST(ExprOpcodesMap, GetOpcode) {
   ASSERT_EQ(ExprOpcode::LOAD_FIELD, ExprOpcodesMap::get_opcode("load_field"));
   ASSERT_EQ(ExprOpcode::ADD, ExprOpcodesMap::get_opcode("+"));
