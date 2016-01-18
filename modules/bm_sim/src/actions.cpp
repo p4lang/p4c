@@ -21,6 +21,8 @@
 #include <string>
 
 #include "bm_sim/actions.h"
+#include "bm_sim/debugger.h"
+#include "bm_sim/event_logger.h"
 
 size_t ActionFn::nb_data_tmps = 0;
 
@@ -143,4 +145,56 @@ ActionOpcodesMap *
 ActionOpcodesMap::get_instance() {
   static ActionOpcodesMap instance;
   return &instance;
+}
+
+void
+ActionFnEntry::push_back_action_data(const Data &data) {
+  action_data.push_back_action_data(data);
+}
+
+void
+ActionFnEntry::push_back_action_data(unsigned int data) {
+  action_data.push_back_action_data(data);
+}
+
+void
+ActionFnEntry::push_back_action_data(const char *bytes, int nbytes) {
+  action_data.push_back_action_data(bytes, nbytes);
+}
+
+void
+ActionFnEntry::operator()(Packet *pkt) const {
+  // happens when no default action specified... TODO(antonin)
+  if (!action_fn) return;
+  ELOGGER->action_execute(*pkt, *action_fn, action_data);
+  // TODO(antonin)
+  // this is temporary while we experiment with the debugger
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_ACTION | action_fn->get_id());
+  ActionEngineState state(pkt, action_data, action_fn->const_values);
+  auto &primitives = action_fn->primitives;
+  size_t param_offset = 0;
+  // primitives is a vector of pointers
+  for (auto primitive : primitives) {
+    primitive->execute(&state, &(action_fn->params[param_offset]));
+    param_offset += primitive->get_num_params();
+  }
+  DEBUGGER_NOTIFY_CTR(
+      Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
+      DBG_CTR_EXIT(DBG_CTR_ACTION) | action_fn->get_id());
+}
+
+void
+ActionFnEntry::dump(std::ostream *stream) const {
+  if (action_fn == nullptr) {
+    (*stream) << "NULL";
+    return;
+  }
+  (*stream) << action_fn->name << " - ";
+  std::ios_base::fmtflags ff;
+  ff = std::cout.flags();
+  for (const Data &d : action_data.action_data)
+    (*stream) << std::hex << d << ",";
+  stream->flags(ff);
 }

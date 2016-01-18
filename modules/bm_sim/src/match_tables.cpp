@@ -23,6 +23,7 @@
 
 #include "bm_sim/match_tables.h"
 #include "bm_sim/logger.h"
+#include "bm_sim/event_logger.h"
 
 namespace {
 

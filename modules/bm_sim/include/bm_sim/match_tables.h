@@ -30,6 +30,7 @@
 #include "actions.h"
 #include "ras.h"
 #include "calculations.h"
+#include "control_flow.h"
 
 class MatchTableAbstract : public NamedP4Object {
  public:
