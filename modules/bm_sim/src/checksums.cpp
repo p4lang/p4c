@@ -23,10 +23,12 @@
 
 #include "bm_sim/checksums.h"
 
-namespace checksum {
+namespace bm {
+
+namespace {
 
 // TODO(antonin): remove this ? it is duplicated in calculations.cpp
-static inline uint16_t cksum16(char *buf, size_t len) {
+uint16_t cksum16(char *buf, size_t len) {
   uint64_t sum = 0;
   uint64_t *b = reinterpret_cast<uint64_t *>(buf);
   uint32_t t1, t2;
@@ -70,7 +72,7 @@ static inline uint16_t cksum16(char *buf, size_t len) {
   return ~t3;
 }
 
-}  // namespace checksum
+}  // namespace
 
 Checksum::Checksum(const std::string &name, p4object_id_t id,
                    header_id_t header_id, int field_offset)
@@ -112,7 +114,7 @@ void IPv4Checksum::update_(Packet *pkt) const {
   Field &ipv4_cksum = ipv4_hdr[field_offset];
   ipv4_hdr.deparse(buffer);
   buffer[IPV4_CKSUM_OFFSET] = 0; buffer[IPV4_CKSUM_OFFSET + 1] = 0;
-  uint16_t cksum = checksum::cksum16(buffer, ipv4_hdr.get_nbytes_packet());
+  uint16_t cksum = cksum16(buffer, ipv4_hdr.get_nbytes_packet());
   // cksum is in network byte order
   ipv4_cksum.set_bytes(reinterpret_cast<char *>(&cksum), 2);
 }
@@ -126,7 +128,7 @@ IPv4Checksum::verify_(const Packet &pkt) const {
   const Field &ipv4_cksum = ipv4_hdr[field_offset];
   ipv4_hdr.deparse(buffer);
   buffer[IPV4_CKSUM_OFFSET] = 0; buffer[IPV4_CKSUM_OFFSET + 1] = 0;
-  uint16_t cksum = checksum::cksum16(buffer, ipv4_hdr.get_nbytes_packet());
+  uint16_t cksum = cksum16(buffer, ipv4_hdr.get_nbytes_packet());
   // TODO(antonin): improve this?
   return !memcmp(reinterpret_cast<char *>(&cksum),
                  ipv4_cksum.get_bytes().data(), 2);
@@ -134,3 +136,5 @@ IPv4Checksum::verify_(const Packet &pkt) const {
 
 #undef IPV4_HDR_MAX_LEN
 #undef IPV4_CKSUM_OFFSET
+
+}  // namespace bm

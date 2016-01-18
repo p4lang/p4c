@@ -30,6 +30,8 @@
 #include "named_p4object.h"
 #include "expressions.h"
 
+namespace bm {
+
 typedef p4object_id_t header_type_id_t;
 
 class PHV;
@@ -231,5 +233,7 @@ class Header : public NamedP4Object {
   std::unique_ptr<ArithExpression> VL_expr{nullptr};
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_HEADERS_H_

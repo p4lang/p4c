@@ -27,6 +27,8 @@
 #include "bm_sim/packet_handler.h"
 #include "bm_sim/port_monitor.h"
 
+namespace bm {
+
 class DevMgrIface : public PacketDispatcherIface {
  public:
   typedef PortMonitorIface::port_t port_t;
@@ -134,5 +136,7 @@ class DevMgr : public PacketDispatcherIface {
   // Actual implementation (private)
   std::unique_ptr<DevMgrIface> pimp{nullptr};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_DEV_MGR_H_

@@ -25,6 +25,8 @@
 
 #include "bm_sim/P4Objects.h"
 
+using namespace bm;
+
 class modify_field : public ActionPrimitive<Field &, const Data &> {
   void operator ()(Field &f, const Data &d) {
     f.set(d);

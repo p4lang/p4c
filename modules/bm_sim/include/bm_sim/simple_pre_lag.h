@@ -27,6 +27,8 @@
 #include "pre.h"
 #include "simple_pre.h"
 
+namespace bm {
+
 class McSimplePreLAG : public McSimplePre {
  public:
   static constexpr int LAG_MAX_ENTRIES = 256;
@@ -60,5 +62,7 @@ class McSimplePreLAG : public McSimplePre {
   std::unordered_map<lag_id_t, LagEntry> lag_entries{};
   mutable boost::shared_mutex lag_lock{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_SIMPLE_PRE_LAG_H_

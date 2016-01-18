@@ -30,16 +30,16 @@
 #include <sstream>
 #include <iomanip>
 
-using std::vector;
+namespace bm {
 
 class ByteContainer {
  public:
-  typedef vector<char>::iterator iterator;
-  typedef vector<char>::const_iterator const_iterator;
+  typedef std::vector<char>::iterator iterator;
+  typedef std::vector<char>::const_iterator const_iterator;
   // typedef std::reverse_iterator<iterator> reverse_iterator;
   // typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-  typedef vector<char>::reference reference;
-  typedef vector<char>::const_reference const_reference;
+  typedef std::vector<char>::reference reference;
+  typedef std::vector<char>::const_reference const_reference;
   typedef size_t size_type;
 
  public:
@@ -47,13 +47,13 @@ class ByteContainer {
     : bytes() { }
 
   explicit ByteContainer(const size_t nbytes, const char c = '\x00')
-      : bytes(vector<char>(nbytes, c)) { }
+      : bytes(std::vector<char>(nbytes, c)) { }
 
-  explicit ByteContainer(const vector<char> &bytes)
+  explicit ByteContainer(const std::vector<char> &bytes)
     : bytes(bytes) { }
 
   ByteContainer(const char *bytes, size_t nbytes)
-    : bytes(vector<char>(bytes, bytes + nbytes)) { }
+    : bytes(std::vector<char>(bytes, bytes + nbytes)) { }
 
   static char char2digit(char c) {
     if (c >= '0' && c <= '9')
@@ -207,7 +207,7 @@ class ByteContainer {
   }
 
  private:
-  vector<char> bytes;
+  std::vector<char> bytes;
 };
 
 struct ByteContainerKeyHash {
@@ -216,5 +216,7 @@ struct ByteContainerKeyHash {
     return boost::hash_range(b.begin(), b.end());
   }
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_BYTECONTAINER_H_

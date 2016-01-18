@@ -26,6 +26,8 @@
 
 #include <Judy.h>
 
+namespace bm {
+
 typedef uintptr_t handle_t;
 
 class HandleMgr {
@@ -247,5 +249,7 @@ class HandleMgr {
  private:
   Pvoid_t handles;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_HANDLE_MGR_H_

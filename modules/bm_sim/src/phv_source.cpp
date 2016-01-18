@@ -23,6 +23,8 @@
 
 #include "bm_sim/phv_source.h"
 
+namespace bm {
+
 class PHVSourceContextPools : public PHVSourceIface {
  public:
   explicit PHVSourceContextPools(size_t size)
@@ -78,3 +80,5 @@ PHVSourceIface::make_phv_source(size_t size) {
   return std::unique_ptr<PHVSourceContextPools>(
       new PHVSourceContextPools(size));
 }
+
+}  // namespace bm

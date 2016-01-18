@@ -25,6 +25,8 @@
 #include "bm_sim/calculations.h"
 #include "bm_sim/parser.h"
 
+using namespace bm;
+
 // Google Test fixture for calculations tests
 class CalculationTest : public ::testing::Test {
  protected:

@@ -30,6 +30,8 @@
 #include "packet.h"
 #include "logger.h"
 
+namespace bm {
+
 /* I initially implemented this with template values: meter type and rate
    count. I thought it would potentially speed up operations. However, it meant
    I also had to use a virtual interface (e.g. to store in p4 objects / use in
@@ -163,8 +165,8 @@ class MeterArray : public NamedP4Object {
   typedef Meter::MeterType MeterType;
   typedef Meter::rate_config_t rate_config_t;
 
-  typedef vector<Meter>::iterator iterator;
-  typedef vector<Meter>::const_iterator const_iterator;
+  typedef std::vector<Meter>::iterator iterator;
+  typedef std::vector<Meter>::const_iterator const_iterator;
 
  public:
   MeterArray(const std::string &name, p4object_id_t id,
@@ -240,5 +242,7 @@ class MeterArray : public NamedP4Object {
  private:
   std::vector<Meter> meters{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_METERS_H_

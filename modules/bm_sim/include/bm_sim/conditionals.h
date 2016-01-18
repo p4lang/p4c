@@ -28,6 +28,8 @@
 #include "named_p4object.h"
 #include "expressions.h"
 
+namespace bm {
+
 class Conditional
   : public ControlFlowNode, public NamedP4Object, public Expression {
  public:
@@ -59,5 +61,7 @@ class Conditional
   ControlFlowNode *true_next{nullptr};
   ControlFlowNode *false_next{nullptr};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_CONDITIONALS_H_

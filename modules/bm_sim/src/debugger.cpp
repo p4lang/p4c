@@ -39,6 +39,8 @@
 #include "bm_sim/debugger.h"
 #include "bm_sim/nn.h"
 
+namespace bm {
+
 static_assert(std::is_pod<Debugger::PacketId>::value,
               "Debugger::PacketId must be a POD type.");
 
@@ -891,3 +893,5 @@ Debugger::init_debugger() {
   debugger_nn->open();
   debugger = debugger_nn;
 }
+
+}  // namespace bm

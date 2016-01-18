@@ -27,6 +27,8 @@
 
 #include <Judy.h>
 
+namespace bm {
+
 class RandAccessUIntSet {
  public:
   typedef uintptr_t mbr_t;
@@ -216,5 +218,7 @@ class RandAccessUIntSet {
  private:
   Pvoid_t members;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_RAS_H_

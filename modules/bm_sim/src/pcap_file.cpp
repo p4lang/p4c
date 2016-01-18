@@ -28,14 +28,19 @@
 
 #define DEBUG_TIMING 0
 
+namespace bm {
+
+namespace {
+
+// TODO(antonin): remove
 void bm_fatal_error(std::string message) {
   std::cerr << "FATAL: " << message << std::endl;
   exit(1);
 }
 
+}  // namespace
+
 ////////////////////////////////////////////////////////////////////////////////
-
-
 
 // This method should be in some separate C library
 // Converts a timeval into a string.
@@ -387,3 +392,5 @@ PcapFilesWriter::send_packet(int port_num, const char* buffer, int len) {
   auto file = files.at(idx).get();
   file->writePacket(buffer, len);
 }
+
+}  // namespace bm

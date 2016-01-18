@@ -29,7 +29,6 @@
 #include "bm_sim/logger.h"
 
 #include "simple_switch.h"
-#include "primitives.h"
 
 namespace {
 
@@ -54,13 +53,15 @@ REGISTER_HASH(hash_ex);
 
 struct bmv2_hash {
   uint64_t operator()(const char *buf, size_t s) const {
-    return hash::xxh64(buf, s);
+    return bm::hash::xxh64(buf, s);
   }
 };
 
 REGISTER_HASH(bmv2_hash);
 
 }  // namespace
+
+extern int import_primitives();
 
 SimpleSwitch::SimpleSwitch(int max_port)
   : Switch(false),  // enable_switch = false
@@ -79,6 +80,8 @@ SimpleSwitch::SimpleSwitch(int max_port)
   add_required_field("standard_metadata", "instance_type");
   add_required_field("standard_metadata", "egress_spec");
   add_required_field("standard_metadata", "clone_spec");
+
+  import_primitives();
 }
 
 void

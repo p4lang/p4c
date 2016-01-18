@@ -26,6 +26,8 @@
 
 #include "bm_sim/learning.h"
 
+namespace bm {
+
 static_assert(sizeof(LearnEngine::msg_hdr_t) == 32u,
               "Invalid size for learning notification header");
 
@@ -390,3 +392,5 @@ LearnEngine::reset_state() {
   for (auto &p : learn_lists)
     p.second->reset_state();
 }
+
+}  // namespace bm

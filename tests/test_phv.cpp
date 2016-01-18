@@ -27,6 +27,8 @@
 
 #include "bm_sim/phv.h"
 
+using namespace bm;
+
 // Google Test fixture for PHV tests
 class PHVTest : public ::testing::Test {
 protected:

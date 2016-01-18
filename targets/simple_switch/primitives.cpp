@@ -18,8 +18,19 @@
  *
  */
 
-#ifndef SIMPLE_SWITCH_PRIMITIVES_H_
-#define SIMPLE_SWITCH_PRIMITIVES_H_
+#include "bm_sim/actions.h"
+
+template <typename... Args>
+using ActionPrimitive = bm::ActionPrimitive<Args...>;
+
+using bm::Data;
+using bm::Field;
+using bm::Header;
+using bm::MeterArray;
+using bm::CounterArray;
+using bm::RegisterArray;
+using bm::NamedCalculation;
+using bm::HeaderStack;
 
 class modify_field : public ActionPrimitive<Field &, const Data &> {
   void operator ()(Field &f, const Data &d) {
@@ -298,4 +309,9 @@ class pop : public ActionPrimitive<HeaderStack &, const Data &> {
 
 REGISTER_PRIMITIVE(pop);
 
-#endif  // SIMPLE_SWITCH_PRIMITIVES_H_
+// dummy function, which ensures that this unit is not discarded by the linker
+// it is being called by the constructor of SimpleSwitch
+// the previous alternative was to have all the primitives in a header file (the
+// primitives could also be placed in simple_switch.cpp directly), but I need
+// this dummy function if I want to keep the primitives in their own file
+int import_primitives() { }

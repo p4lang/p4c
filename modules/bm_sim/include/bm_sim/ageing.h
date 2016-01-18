@@ -33,6 +33,8 @@
 #include "packet.h"
 #include "transport.h"
 
+namespace bm {
+
 class AgeingMonitor {
  public:
   typedef uint64_t buffer_id_t;
@@ -99,5 +101,7 @@ class AgeingMonitor {
   bool stop_sweep_thread{false};
   mutable std::condition_variable stop_condvar{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_AGEING_H_

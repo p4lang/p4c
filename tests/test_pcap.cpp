@@ -18,6 +18,8 @@
 #include "bm_sim/pcap_file.h"
 #include <stdio.h>
 
+using namespace bm;
+
 // Google Test fixture for pcap tests
 class PcapTest : public ::testing::Test {
 protected:

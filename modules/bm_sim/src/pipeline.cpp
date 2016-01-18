@@ -23,6 +23,8 @@
 #include "bm_sim/logger.h"
 #include "bm_sim/debugger.h"
 
+namespace bm {
+
 void
 Pipeline::apply(Packet *pkt) {
   ELOGGER->pipeline_start(*pkt, *this);
@@ -42,3 +44,5 @@ Pipeline::apply(Packet *pkt) {
       DBG_CTR_EXIT(DBG_CTR_CONTROL) | get_id());
   BMLOG_DEBUG_PKT(*pkt, "Pipeline '{}': end", get_name());
 }
+
+}  // namespace bm

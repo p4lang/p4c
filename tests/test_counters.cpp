@@ -24,6 +24,8 @@
 
 #include "bm_sim/counters.h"
 
+using namespace bm;
+
 // Google Test fixture for counter tests
 class CountersTest : public ::testing::Test {
  protected:

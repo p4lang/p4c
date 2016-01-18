@@ -20,6 +20,8 @@
 
 #include "bm_sim/counters.h"
 
+namespace bm {
+
 Counter::CounterErrorCode
 Counter::query_counter(counter_value_t *bytes, counter_value_t *packets) const {
   *bytes = this->bytes;
@@ -47,3 +49,5 @@ CounterArray::reset_counters() {
     c.reset_counter();
   return Counter::SUCCESS;
 }
+
+}  // namespace bm

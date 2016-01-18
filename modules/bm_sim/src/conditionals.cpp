@@ -23,6 +23,8 @@
 #include "bm_sim/conditionals.h"
 #include "bm_sim/event_logger.h"
 
+namespace bm {
+
 const ControlFlowNode *
 Conditional::operator()(Packet *pkt) const {
   // TODO(antonin)
@@ -42,3 +44,4 @@ Conditional::operator()(Packet *pkt) const {
   return result ? true_next : false_next;
 }
 
+}  // namespace bm

@@ -30,6 +30,8 @@
 #include "bm_sim/logger.h"
 #include "bm_sim/debugger.h"
 
+namespace bm {
+
 static void
 packet_handler(int port_num, const char *buffer, int len, void *cookie) {
   // static_cast<Switch *> if okay here because cookie was obtained by casting a
@@ -226,3 +228,5 @@ SwitchWContexts::do_swap() {
 
 Switch::Switch(bool enable_swap)
     : SwitchWContexts(1u, enable_swap) { }
+
+}  // namespace bm

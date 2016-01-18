@@ -30,6 +30,8 @@
 #include "logger.h"
 #include "debugger.h"
 
+namespace bm {
+
 // from http://stackoverflow.com/questions/87372/check-if-a-class-has-a-member-function-of-a-given-signature
 
 template<typename T>
@@ -94,5 +96,7 @@ class MatchActionTable : public ControlFlowNode, public NamedP4Object {
  private:
   std::unique_ptr<MatchTableAbstract> match_table;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_TABLES_H_

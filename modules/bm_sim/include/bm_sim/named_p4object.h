@@ -23,6 +23,8 @@
 
 #include <string>
 
+namespace bm {
+
 typedef int p4object_id_t;
 
 class NamedP4Object {
@@ -40,5 +42,7 @@ class NamedP4Object {
   const std::string name;
   p4object_id_t id;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_NAMED_P4OBJECT_H_

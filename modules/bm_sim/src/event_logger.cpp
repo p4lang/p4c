@@ -27,6 +27,8 @@
 #include "bm_sim/conditionals.h"
 #include "bm_sim/actions.h"
 
+namespace bm {
+
 enum EventType {
   PACKET_IN = 0, PACKET_OUT,
   PARSER_START, PARSER_DONE, PARSER_EXTRACT,
@@ -37,7 +39,6 @@ enum EventType {
   ACTION_EXECUTE
 };
 
-
 typedef struct __attribute__((packed)) {
   int type;
   int switch_id;
@@ -47,7 +48,9 @@ typedef struct __attribute__((packed)) {
   uint64_t copy_id;
 } msg_hdr_t;
 
-static inline void
+namespace {
+
+void
 fill_msg_hdr(EventType type, int device_id,
              const Packet &packet, msg_hdr_t *msg_hdr) {
   msg_hdr->type = static_cast<int>(type);
@@ -57,6 +60,8 @@ fill_msg_hdr(EventType type, int device_id,
   msg_hdr->id = packet.get_packet_id();
   msg_hdr->copy_id = packet.get_copy_id();
 }
+
+}  // namespace
 
 void
 EventLogger::packet_in(const Packet &packet) {
@@ -262,3 +267,5 @@ EventLogger::action_execute(const Packet &packet,
 EventLogger *event_logger =
   new EventLogger(
     std::move(TransportIface::create_instance<TransportNULL>("")));
+
+}  // namespace bm

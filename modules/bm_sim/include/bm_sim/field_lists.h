@@ -29,6 +29,8 @@
 
 #include "phv.h"
 
+namespace bm {
+
 class FieldList {
  public:
   struct field_t {
@@ -86,5 +88,7 @@ class FieldList {
   std::vector<field_t> fields{};
   std::unordered_set<field_t, FieldKeyHash> fields_set{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_FIELD_LISTS_H_

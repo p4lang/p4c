@@ -26,6 +26,8 @@
 
 #include <cassert>
 
+namespace bm {
+
 class PacketBuffer {
  public:
   struct state_t {
@@ -98,5 +100,7 @@ class PacketBuffer {
   std::unique_ptr<char[]> buffer{nullptr};
   char *head{nullptr};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PACKET_BUFFER_H_

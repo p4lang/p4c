@@ -27,6 +27,8 @@
 #include <mutex>
 #include <condition_variable>
 
+using namespace bm;
+
 class TestDevMgrImp : public DevMgrIface {
 
 public:

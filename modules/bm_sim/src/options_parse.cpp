@@ -30,6 +30,8 @@
 #include "bm_sim/options_parse.h"
 #include "bm_sim/event_logger.h"
 
+namespace bm {
+
 struct interface {
   interface(const std::string &name, int port)
     : name(name), port(port) { }
@@ -226,3 +228,5 @@ OptionsParser::parse(int argc, char *argv[]) {
     thrift_port = default_thrift_port;
   }
 }
+
+}  // namespace bm

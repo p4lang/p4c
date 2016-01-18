@@ -24,6 +24,8 @@
 
 #include <memory>
 
+namespace bm {
+
 class PortMonitorIface {
  public:
   typedef unsigned int port_t;
@@ -70,5 +72,7 @@ class PortMonitorIface {
 
   virtual void stop_() = 0;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_PORT_MONITOR_H_

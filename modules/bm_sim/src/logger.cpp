@@ -25,6 +25,8 @@
 
 #include "spdlog/sinks/null_sink.h"
 
+namespace bm {
+
 spdlog::logger *Logger::logger = nullptr;
 
 void
@@ -89,3 +91,5 @@ Logger::to_spd_level(LogLevel level) {
   default: return spdL::off;
   }
 }
+
+}  // namespace bm

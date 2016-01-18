@@ -22,6 +22,8 @@
 
 #include "bm_sim/ageing.h"
 
+namespace bm {
+
 static_assert(sizeof(AgeingMonitor::msg_hdr_t) == 32u,
               "Invalid size for ageing notification header");
 
@@ -125,3 +127,5 @@ AgeingMonitor::do_sweep() {
     entries.clear();
   }
 }
+
+}  // namespace bm

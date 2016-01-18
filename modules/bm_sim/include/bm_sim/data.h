@@ -32,6 +32,8 @@
 #include "bignum.h"
 #include "bytecontainer.h"
 
+namespace bm {
+
 using bignum::Bignum;
 
 class Data {
@@ -295,5 +297,7 @@ class Data {
   Bignum value{0};
   bool arith{true};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_DATA_H_

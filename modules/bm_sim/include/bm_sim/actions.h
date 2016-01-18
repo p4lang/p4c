@@ -40,6 +40,8 @@
 #include "stateful.h"
 #include "expressions.h"
 
+namespace bm {
+
 // forward declaration of ActionPrimitive_
 class ActionPrimitive_;
 
@@ -57,9 +59,9 @@ class ActionOpcodesMap {
 
 #define REGISTER_PRIMITIVE(primitive_name)\
   bool primitive_name##_create_ =\
-    ActionOpcodesMap::get_instance()->register_primitive(\
-        #primitive_name, \
-        std::unique_ptr<ActionPrimitive_>(new primitive_name()));
+      bm::ActionOpcodesMap::get_instance()->register_primitive( \
+          #primitive_name, \
+          std::unique_ptr<bm::ActionPrimitive_>(new primitive_name()));
 
 struct ActionParam {
   // some old P4 primitives take a calculation as a parameter, I don't know if I
@@ -394,5 +396,7 @@ class ActionFnEntry {
   const ActionFn *action_fn{nullptr};
   ActionData action_data{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_ACTIONS_H_

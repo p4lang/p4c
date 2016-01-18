@@ -23,6 +23,8 @@
 #include <memory>
 #include "bm_sim/tables.h"
 
+using namespace bm;
+
 using testing::Types;
 
 using std::string;

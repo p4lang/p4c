@@ -26,6 +26,8 @@
 #include "bm_sim/match_tables.h"
 #include "bm_sim/logger.h"
 
+namespace bm {
+
 #define HANDLE_VERSION(h) (h >> 32)
 #define HANDLE_INTERNAL(h) (h & 0xffffffff)
 #define HANDLE_SET(v, i) ((((uint64_t) v) << 32) | i)
@@ -652,3 +654,5 @@ template class MatchUnitLPM<MatchTableIndirect::IndirectIndex>;
 
 template class MatchUnitTernary<MatchTableAbstract::ActionEntry>;
 template class MatchUnitTernary<MatchTableIndirect::IndirectIndex>;
+
+}  // namespace bm

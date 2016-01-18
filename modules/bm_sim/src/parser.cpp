@@ -22,6 +22,8 @@
 #include "bm_sim/debugger.h"
 #include "extract.h"
 
+namespace bm {
+
 ParserLookAhead::ParserLookAhead(int offset, int bitwidth)
   : byte_offset(offset / 8), bit_offset(offset % 8),
     bitwidth(bitwidth), nbytes((bitwidth + 7) / 8) { }
@@ -206,3 +208,5 @@ Parser::parse(Packet *pkt) const {
       DBG_CTR_EXIT(DBG_CTR_PARSER) | get_id());
   BMLOG_DEBUG_PKT(*pkt, "Parser '{}': end", get_name());
 }
+
+}  // namespace bm

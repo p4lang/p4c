@@ -25,6 +25,8 @@
 #include <vector>
 #include <set>
 
+namespace bm {
+
 using std::unique_ptr;
 using std::string;
 
@@ -923,3 +925,5 @@ P4Objects::check_hash(const std::string &name) const {
   if (!h) outstream << "Unknown hash algorithm: " << name  << std::endl;
   return h;
 }
+
+}  // namespace bm

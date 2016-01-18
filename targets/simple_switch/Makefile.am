@@ -29,7 +29,7 @@ libsimpleswitch_la_LDFLAGS = -pthread
 noinst_LTLIBRARIES = libsimpleswitch.la
 
 libsimpleswitch_la_SOURCES = \
-simple_switch.cpp simple_switch.h primitives.h
+simple_switch.cpp simple_switch.h primitives.cpp
 
 bin_PROGRAMS = simple_switch
 

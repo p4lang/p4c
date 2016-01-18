@@ -28,6 +28,8 @@
 #include "calculations.h"
 #include "logger.h"
 
+namespace bm {
+
 class Checksum : public NamedP4Object{
  public:
   Checksum(const std::string &name, p4object_id_t id,
@@ -84,5 +86,7 @@ class IPv4Checksum : public Checksum {
   void update_(Packet *pkt) const override;
   bool verify_(const Packet &pkt) const override;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_CHECKSUMS_H_

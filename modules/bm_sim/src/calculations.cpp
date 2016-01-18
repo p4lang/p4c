@@ -28,6 +28,8 @@
 #include "xxhash.h"
 #include "crc_tables.h"
 
+namespace bm {
+
 namespace hash {
 
 uint64_t xxh64(const char *buffer, size_t s) {
@@ -203,3 +205,5 @@ CalculationsMap::get_copy(const std::string &name) {
   if (it == map_.end()) return nullptr;
   return it->second->clone();
 }
+
+}  // namespace bm

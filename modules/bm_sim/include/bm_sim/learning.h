@@ -37,6 +37,8 @@
 #include "bytecontainer.h"
 #include "transport.h"
 
+namespace bm {
+
 class LearnEngine {
  public:
   typedef int list_id_t;
@@ -201,5 +203,7 @@ class LearnEngine {
   // LearnList is not movable because of the mutex, I am using pointers
   std::unordered_map<list_id_t, std::unique_ptr<LearnList> > learn_lists{};
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_LEARNING_H_

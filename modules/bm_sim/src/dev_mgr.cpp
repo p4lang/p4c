@@ -30,6 +30,8 @@
 #include "bm_sim/pcap_file.h"
 #include "bm_sim/nn.h"
 
+namespace bm {
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Implementation which uses Pcap files to read/write packets
@@ -200,3 +202,5 @@ DevMgr::port_is_up(port_t port_num) {
   assert(pimp);
   return pimp->port_is_up(port_num);
 }
+
+}  // namespace bm

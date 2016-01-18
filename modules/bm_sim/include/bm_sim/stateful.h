@@ -28,6 +28,8 @@
 #include "data.h"
 #include "bignum.h"
 
+namespace bm {
+
 class Register : public Data {
  public:
   enum RegisterErrorCode {
@@ -63,8 +65,8 @@ typedef p4object_id_t register_array_id_t;
 
 class RegisterArray : public NamedP4Object {
  public:
-  typedef vector<Register>::iterator iterator;
-  typedef vector<Register>::const_iterator const_iterator;
+  typedef std::vector<Register>::iterator iterator;
+  typedef std::vector<Register>::const_iterator const_iterator;
 
   RegisterArray(const std::string &name, p4object_id_t id,
                 size_t size, int bitwidth)
@@ -98,5 +100,7 @@ class RegisterArray : public NamedP4Object {
  private:
     std::vector<Register> registers;
 };
+
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_STATEFUL_H_
