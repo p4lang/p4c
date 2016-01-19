@@ -16,6 +16,12 @@ AS_IF([test "x$enable_coverage" = "xyes"], [
 
 AC_SUBST([COVERAGE_FLAGS])
 
+AC_ARG_WITH([targets],
+    AS_HELP_STRING([--without-targets], [Do not build targets]),
+    [], [want_targets=yes])
+
+AM_CONDITIONAL([COND_TARGETS], [test "$want_targets" = yes])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
