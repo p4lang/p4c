@@ -309,6 +309,30 @@ class pop : public ActionPrimitive<HeaderStack &, const Data &> {
 
 REGISTER_PRIMITIVE(pop);
 
+// I cannot name this "truncate" and register it with the usual
+// REGISTER_PRIMITIVE macro, because of a name conflict:
+//
+// In file included from /usr/include/boost/config/stdlib/libstdcpp3.hpp:77:0,
+//   from /usr/include/boost/config.hpp:44,
+//   from /usr/include/boost/cstdint.hpp:36,
+//   from /usr/include/boost/multiprecision/number.hpp:9,
+//   from /usr/include/boost/multiprecision/gmp.hpp:9,
+//   from ../../modules/bm_sim/include/bm_sim/bignum.h:25,
+//   from ../../modules/bm_sim/include/bm_sim/data.h:32,
+//   from ../../modules/bm_sim/include/bm_sim/fields.h:28,
+//   from ../../modules/bm_sim/include/bm_sim/phv.h:34,
+//   from ../../modules/bm_sim/include/bm_sim/actions.h:34,
+//   from primitives.cpp:21:
+//     /usr/include/unistd.h:993:12: note: declared here
+//     extern int truncate (const char *__file, __off_t __length)
+class truncate_ : public ActionPrimitive<const Data &> {
+  void operator ()(const Data &truncated_length) {
+    get_packet().truncate(truncated_length.get<size_t>());
+  }
+};
+
+REGISTER_PRIMITIVE_W_NAME("truncate", truncate_);
+
 // dummy function, which ensures that this unit is not discarded by the linker
 // it is being called by the constructor of SimpleSwitch
 // the previous alternative was to have all the primitives in a header file (the

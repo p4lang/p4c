@@ -57,11 +57,17 @@ class ActionOpcodesMap {
   std::unordered_map<std::string, std::unique_ptr<ActionPrimitive_> > map_{};
 };
 
-#define REGISTER_PRIMITIVE(primitive_name)\
-  bool primitive_name##_create_ =\
-      bm::ActionOpcodesMap::get_instance()->register_primitive( \
-          #primitive_name, \
+#define REGISTER_PRIMITIVE(primitive_name)                              \
+  bool primitive_name##_create_ =                                       \
+      bm::ActionOpcodesMap::get_instance()->register_primitive(         \
+          #primitive_name,                                              \
           std::unique_ptr<bm::ActionPrimitive_>(new primitive_name()));
+
+#define REGISTER_PRIMITIVE_W_NAME(primitive_name, primitive)            \
+  bool primitive##_create_ =                                            \
+      bm::ActionOpcodesMap::get_instance()->register_primitive(         \
+          primitive_name,                                               \
+          std::unique_ptr<bm::ActionPrimitive_>(new primitive()));
 
 struct ActionParam {
   // some old P4 primitives take a calculation as a parameter, I don't know if I

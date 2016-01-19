@@ -28,6 +28,8 @@
 #include <string>
 #include <vector>
 #include <atomic>
+#include <algorithm>  // for std::min
+#include <limits>
 
 #include <cassert>
 
@@ -105,7 +107,9 @@ class Packet final {
 
   size_t get_payload_size() const { return payload_size; }
 
-  size_t get_data_size() const { return buffer.get_data_size(); }
+  size_t get_data_size() const {
+    return std::min(buffer.get_data_size(), truncated_length);
+  }
 
   char *data() { return buffer.start(); }
 
@@ -127,6 +131,10 @@ class Packet final {
   const char *payload() const {
     assert(payload_size > 0);
     return buffer.end() - payload_size;
+  }
+
+  void truncate(size_t length) {
+    truncated_length = std::min(length, truncated_length);
   }
 
   char *prepend(size_t bytes) { return buffer.push(bytes); }
@@ -203,6 +211,8 @@ class Packet final {
   PacketBuffer buffer{};
 
   size_t payload_size{0};
+
+  size_t truncated_length{std::numeric_limits<size_t>::max()};
 
   clock::time_point ingress_ts{};
   uint64_t ingress_ts_ms{};
