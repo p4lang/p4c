@@ -56,7 +56,7 @@ class SimpleSwitch : public Switch {
     auto packet = new_packet_ptr(port_num, pkt_id++, len,
                                  bm::PacketBuffer(2048, buffer, len));
 
-    ELOGGER->packet_in(*packet);
+    BMELOG(packet_in, *packet);
 
     input_buffer.push_front(std::move(packet));
     return 0;
@@ -82,7 +82,7 @@ void SimpleSwitch::transmit_thread() {
   while (1) {
     std::unique_ptr<Packet> packet;
     output_buffer.pop_back(&packet);
-    ELOGGER->packet_out(*packet);
+    BMELOG(packet_out, *packet);
     BMLOG_DEBUG_PKT(*packet, "Transmitting packet of size {} out of port {}",
                     packet->get_data_size(), packet->get_egress_port());
     transmit_fn(packet->get_egress_port(),

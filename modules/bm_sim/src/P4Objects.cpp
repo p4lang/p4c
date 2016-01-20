@@ -79,8 +79,8 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
   (*is) >> cfg_root;
 
   if (!notifications_transport) {
-    notifications_transport = std::make_shared<TransportNULL>();
-    notifications_transport->open("dummy");
+    notifications_transport = std::shared_ptr<TransportIface>(
+        TransportIface::make_dummy());
   }
 
   // header types

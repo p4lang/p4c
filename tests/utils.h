@@ -51,8 +51,7 @@ class MemoryAccessor : public bm::TransportIface {
   }
 
  private:
-  int open_(const std::string &name) override {
-    (void) name;
+  int open_() override {
     return 0;
   }
 

@@ -61,11 +61,9 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
   // the simple_switch target detaches threads
   static void SetUpTestCase() {
     // bm::Logger::set_logger_console();
-    // TODO(antonin): remove when event-logger cleaned-up
-    delete bm::event_logger;
-    bm::event_logger = new bm::EventLogger(
-        bm::TransportIface::create_instance<bm::TransportNanomsg>(
-            event_logger_addr));
+    auto event_transport = bm::TransportIface::make_nanomsg(event_logger_addr);
+    event_transport->open();
+    bm::EventLogger::init(std::move(event_transport));
 
     test_switch = new SimpleSwitch(8);  // 8 ports
 
@@ -83,8 +81,6 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
 
   // Per-test-case tear-down.
   static void TearDownTestCase() {
-    delete bm::event_logger;
-    bm::event_logger = nullptr;
     delete test_switch;
   }
 
@@ -141,6 +137,12 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
   static const std::string test_json;
 };
 
+// In theory, I could be using an 'inproc' transport here. However, I observe a
+// high number of packet drops when switching to 'inproc', which is obviosuly
+// causing the tests to fail. PUB/SUB is not a reliable protocol and therefore
+// packet drops are to be expected when the phblisher is faster than the
+// consummer. However, I do not believe my consummer is that slow and I never
+// observe the drops with 'ipc'
 const std::string SimpleSwitch_PacketRedirectP4::event_logger_addr =
     "ipc:///tmp/test_events_abc123";
 const std::string SimpleSwitch_PacketRedirectP4::packet_in_addr =
@@ -173,6 +175,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Baseline) {
   receiver.read(recv_buffer, sizeof(pkt), &recv_port);
   ASSERT_EQ(port_out, recv_port);
 
+#ifdef BMELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
   events.get_and_remove_events("0.0", &pevents, 6u);
@@ -183,6 +186,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Baseline) {
   ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
   ASSERT_TRUE(check_event_table_miss(pevents[4], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[5], "_nop"));
+#endif
 }
 
 TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
@@ -235,6 +239,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
   ASSERT_TRUE((recv_port_1 == 1 && recv_port_2 == 2) ||
               (recv_port_1 == 2 && recv_port_2 == 1));
 
+#ifdef BMELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -254,6 +259,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
   ASSERT_EQ(2u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "_nop"));
+#endif
 
   // reset PRE
   ASSERT_EQ(McSimplePreLAG::SUCCESS, pre_ptr->mc_node_destroy(node_1));
@@ -304,6 +310,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneI2E) {
 
   test_switch->mirroring_mapping_delete(mirror_id);
 
+#ifdef BMELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -320,6 +327,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneI2E) {
   ASSERT_EQ(2u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "_nop"));
+#endif
 }
 
 TEST_F(SimpleSwitch_PacketRedirectP4, CloneE2E) {
@@ -365,6 +373,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneE2E) {
 
   test_switch->mirroring_mapping_delete(mirror_id);
 
+#ifdef BMELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -381,6 +390,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneE2E) {
   ASSERT_EQ(2u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[1], "_nop"));
+#endif
 }
 
 TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
@@ -429,6 +439,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
   receiver.read(recv_buffer, sizeof(pkt), &recv_port);
   ASSERT_EQ(port_out_2, recv_port);
 
+#ifdef BMELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -449,6 +460,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
   ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
   ASSERT_TRUE(check_event_table_miss(pevents[4], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[5], "_nop"));
+#endif
 }
 
 TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
@@ -495,6 +507,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
   receiver.read(recv_buffer, sizeof(pkt), &recv_port);
   ASSERT_EQ(port_out_2, recv_port);
 
+#ifdef BMELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -517,4 +530,5 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
   ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
   ASSERT_TRUE(check_event_table_miss(pevents[4], "t_egress"));
   ASSERT_TRUE(check_event_action_execute(pevents[5], "_nop"));
+#endif
 }

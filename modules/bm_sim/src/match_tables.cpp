@@ -73,11 +73,11 @@ MatchTableAbstract::apply_action(Packet *pkt) {
 
   // we're holding the lock for this...
   if (hit) {
-    ELOGGER->table_hit(*pkt, *this, handle);
+    BMELOG(table_hit, *pkt, *this, handle);
     BMLOG_DEBUG_PKT(*pkt, "Table '{}': hit with handle {}",
                     get_name(), handle);
   } else {
-    ELOGGER->table_miss(*pkt, *this);
+    BMELOG(table_miss, *pkt, *this);
     BMLOG_DEBUG_PKT(*pkt, "Table '{}': miss", get_name());
   }
 

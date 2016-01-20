@@ -104,7 +104,7 @@ class SimpleSwitch_TruncateP4 : public ::testing::Test {
 };
 
 const std::string SimpleSwitch_TruncateP4::packet_in_addr =
-    "ipc:///tmp/test_packet_in_abc123";
+    "inproc://packets";
 
 SimpleSwitch *SimpleSwitch_TruncateP4::test_switch = nullptr;
 

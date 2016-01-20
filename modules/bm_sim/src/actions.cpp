@@ -168,7 +168,7 @@ void
 ActionFnEntry::operator()(Packet *pkt) const {
   // happens when no default action specified... TODO(antonin)
   if (!action_fn) return;
-  ELOGGER->action_execute(*pkt, *action_fn, action_data);
+  BMELOG(action_execute, *pkt, *action_fn, action_data);
   // TODO(antonin)
   // this is temporary while we experiment with the debugger
   DEBUGGER_NOTIFY_CTR(

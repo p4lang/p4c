@@ -27,7 +27,7 @@ namespace bm {
 
 void
 Pipeline::apply(Packet *pkt) {
-  ELOGGER->pipeline_start(*pkt, *this);
+  BMELOG(pipeline_start, *pkt, *this);
   // TODO(antonin)
   // this is temporary while we experiment with the debugger
   DEBUGGER_NOTIFY_CTR(
@@ -38,7 +38,7 @@ Pipeline::apply(Packet *pkt) {
   while (node) {
     node = (*node)(pkt);
   }
-  ELOGGER->pipeline_done(*pkt, *this);
+  BMELOG(pipeline_done, *pkt, *this);
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
       DBG_CTR_EXIT(DBG_CTR_CONTROL) | get_id());

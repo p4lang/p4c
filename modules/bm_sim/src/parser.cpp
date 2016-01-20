@@ -186,7 +186,7 @@ ParseState::operator()(Packet *pkt, const char *data,
 
 void
 Parser::parse(Packet *pkt) const {
-  ELOGGER->parser_start(*pkt, *this);
+  BMELOG(parser_start, *pkt, *this);
   // TODO(antonin)
   // this is temporary while we experiment with the debugger
   DEBUGGER_NOTIFY_CTR(
@@ -202,7 +202,7 @@ Parser::parse(Packet *pkt) const {
     BMLOG_TRACE("Bytes parsed: {}", bytes_parsed);
   }
   pkt->remove(bytes_parsed);
-  ELOGGER->parser_done(*pkt, *this);
+  BMELOG(parser_done, *pkt, *this);
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
       DBG_CTR_EXIT(DBG_CTR_PARSER) | get_id());

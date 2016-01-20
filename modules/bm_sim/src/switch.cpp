@@ -63,7 +63,7 @@ SwitchWContexts::force_arith_field(const std::string &header_name,
 
 int
 SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
-                            std::shared_ptr<TransportIface> transport) {
+                              std::shared_ptr<TransportIface> transport) {
   std::ifstream fs(json_path, std::ios::in);
   if (!fs) {
     std::cout << "JSON input file " << json_path << " cannot be opened\n";
@@ -73,10 +73,10 @@ SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
   device_id = dev_id;
 
   if (!transport) {
-    notifications_transport = std::make_shared<TransportNULL>();
-    notifications_transport->open("dummy");
+    notifications_transport = std::shared_ptr<TransportIface>(
+        TransportIface::make_dummy());
   } else {
-    notifications_transport = transport;
+    notifications_transport = std::move(transport);
   }
 
   for (size_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
@@ -99,8 +99,9 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[]) {
   parser.parse(argc, argv);
 
   notifications_addr = parser.notifications_addr;
-  auto transport = std::make_shared<TransportNanomsg>();
-  transport->open(notifications_addr);
+  auto transport = std::shared_ptr<TransportIface>(
+      TransportIface::make_nanomsg(notifications_addr));
+  transport->open();
 
 #ifdef BMDEBUG_ON
   // has to be before init_objects because forces arith

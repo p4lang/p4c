@@ -158,15 +158,17 @@ OptionsParser::parse(int argc, char *argv[]) {
         + std::to_string(device_id) + std::string("-notifications.ipc");
   }
 
-  // TODO(antonin): clean this up
-  // event_logger_addr = std::string("ipc:///tmp/bm-")
-  //   .append(std::to_string(device_id))
-  //   .append("-log.ipc");
   if (vm.count("nanolog")) {
+#ifndef BMELOG_ON
+    std::cout << "Warning: you requested the nanomsg event logger, but bmv2 "
+              << "was compiled without -DBMELOG, and the event logger cannot "
+              << "be activated\n";
+#else
     event_logger_addr = vm["nanolog"].as<std::string>();
-    event_logger = new EventLogger(
-        TransportIface::create_instance<TransportNanomsg>(event_logger_addr),
-        device_id);
+    auto event_transport = TransportIface::make_nanomsg(event_logger_addr);
+    event_transport->open();
+    EventLogger::init(std::move(event_transport), device_id);
+#endif
   }
 
   if (vm.count("log-console") && vm.count("log-file")) {

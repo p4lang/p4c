@@ -61,11 +61,14 @@ NNEventListener::get_and_remove_events(const std::string &pid,
   clock::time_point tp_end = tp_start + std::chrono::milliseconds(timeout_ms);
   std::unique_lock<std::mutex> lock(mutex);
   while (true) {
+    auto it = events.find(pid);
     if (clock::now() > tp_end) {
-      *pevents = {};
+      if (it != events.end()) {
+        *pevents = it->second;
+        events.erase(it);
+      }
       return;
     }
-    auto it = events.find(pid);
     if (it == events.end() || it->second.size() < num_events) {
       cond_new_event.wait_until(lock, tp_end);
     } else {

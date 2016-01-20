@@ -44,7 +44,9 @@ AC_SUBST([PICKY_CXXFLAGS])
 AC_SUBST([PICKY_CFLAGS])
 AC_SUBST([DEBUG_CPPFLAGS])
 
-AC_SUBST([AM_CPPFLAGS], ["-I\$(top_srcdir)/modules/bf_lpm_trie/include \
+# for now, BMELOG_ON is defined by default, since it is required for some tests
+AC_SUBST([AM_CPPFLAGS], ["-DBMELOG_ON \
+                          -I\$(top_srcdir)/modules/bf_lpm_trie/include \
                           -isystem\$(top_srcdir)/third_party/jsoncpp/include \
                           -isystem\$(top_srcdir)/third_party/spdlog/include \
                           -I\$(top_srcdir)/modules/BMI/include"])

@@ -98,7 +98,7 @@ class SimpleSwitch : public Switch {
     auto packet = new_packet_ptr(port_num, pkt_id++, len,
                                  bm::PacketBuffer(2048, buffer, len));
 
-    ELOGGER->packet_in(*packet);
+    BMELOG(packet_in, *packet);
 
     PHV *phv = packet->get_phv();
     // many current P4 programs assume this

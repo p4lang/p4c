@@ -72,7 +72,7 @@ struct ParserOpExtract : ParserOp {
   void operator()(Packet *pkt, const char *data,
                   size_t *bytes_parsed) const override {
     PHV *phv = pkt->get_phv();
-    ELOGGER->parser_extract(*pkt, header);
+    BMELOG(parser_extract, *pkt, header);
     BMLOG_DEBUG_PKT(*pkt, "Extracting header {}", header);
     Header &hdr = phv->get_header(header);
     hdr.extract(data, *phv);
@@ -93,7 +93,7 @@ struct ParserOpExtractStack : ParserOp {
     PHV *phv = pkt->get_phv();
     HeaderStack &stack = phv->get_header_stack(header_stack);
     Header &next_hdr = stack.get_next();  // TODO(antonin): will assert if full
-    ELOGGER->parser_extract(*pkt, next_hdr.get_id());
+    BMELOG(parser_extract, *pkt, next_hdr.get_id());
     BMLOG_DEBUG_PKT(*pkt, "Extracting to header stack {}, next header is {}",
                     header_stack, next_hdr.get_id());
     next_hdr.extract(data, *phv);

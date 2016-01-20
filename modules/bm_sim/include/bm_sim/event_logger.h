@@ -80,15 +80,28 @@ class EventLogger {
   void action_execute(const Packet &packet,
                       const ActionFn &action_fn, const ActionData &action_data);
 
+  static EventLogger *get() {
+    static EventLogger event_logger(TransportIface::make_dummy());
+    return &event_logger;
+  }
+
+  static void init(std::unique_ptr<TransportIface> transport,
+                   int device_id = 0) {
+    get()->transport_instance = std::move(transport);
+    get()->device_id = device_id;
+  }
+
  private:
   std::unique_ptr<TransportIface> transport_instance{nullptr};
   int device_id{};
 };
 
-extern EventLogger *event_logger;
-
 }  // namespace bm
 
-#define ELOGGER bm::event_logger
+#ifdef BMELOG_ON
+#define BMELOG(fn, ...) bm::EventLogger::get()->fn(__VA_ARGS__)
+#else
+#define BMELOG(fn, ...)
+#endif
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_EVENT_LOGGER_H_

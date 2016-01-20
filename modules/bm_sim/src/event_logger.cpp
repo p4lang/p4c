@@ -265,7 +265,6 @@ EventLogger::action_execute(const Packet &packet,
 
 // TODO(antonin): move this?
 EventLogger *event_logger =
-  new EventLogger(
-    std::move(TransportIface::create_instance<TransportNULL>("")));
+    new EventLogger(TransportIface::make_dummy());
 
 }  // namespace bm
