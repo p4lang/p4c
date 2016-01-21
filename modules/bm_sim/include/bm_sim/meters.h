@@ -18,6 +18,20 @@
  *
  */
 
+//! @file meters.h
+//! Includes both the Meter and MeterArray classes. MeterArray is exposed
+//! in P4 v1.0.2 as the `meter` object. Action primitives can take a
+//! MeterArray reference as a parameter (but not a Meter though). Here is a
+//! possible implementation of the `execute_meter()` P4 primitive:
+//! @code
+//! class execute_meter
+//!   : public ActionPrimitive<MeterArray &, const Data &, Field &> {
+//!   void operator ()(MeterArray &meter_array, const Data &idx, Field &dst) {
+//!     dst.set(meter_array.execute_meter(get_packet(), idx.get_uint()));
+//!   }
+//! };
+//! @endcode
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_METERS_H_
 #define BM_SIM_INCLUDE_BM_SIM_METERS_H_
 
@@ -32,19 +46,24 @@
 
 namespace bm {
 
-/* I initially implemented this with template values: meter type and rate
-   count. I thought it would potentially speed up operations. However, it meant
-   I also had to use a virtual interface (e.g. to store in p4 objects / use in
-   action primitives). After some separate benchmarking, I decided against using
-   templates (not really worth it). The only time I observed a real speed up was
-   without using virtual functions (which is not really possible here anyway)
-   and for a certain rate count (for which the compiler was doing loop
-   unrolling, probably was a more cache friendly value too). I think I can live
-   with the extra overhead of having a vector (vs an array) and having to test
-   for the meter type.
-   Maybe I will change this later, but meters are not used that much so for now
-   I am going for simplicity */
+// I initially implemented this with template values: meter type and rate
+// count. I thought it would potentially speed up operations. However, it meant
+// I also had to use a virtual interface (e.g. to store in p4 objects / use in
+// action primitives). After some separate benchmarking, I decided against using
+// templates (not really worth it). The only time I observed a real speed up was
+// without using virtual functions (which is not really possible here anyway)
+// and for a certain rate count (for which the compiler was doing loop
+// unrolling, probably was a more cache friendly value too). I think I can live
+// with the extra overhead of having a vector (vs an array) and having to test
+// for the meter type.  Maybe I will change this later, but meters are not used
+// that much so for now I am going for simplicity.
 
+//! Implementation of a general non-color aware `N` rate `N+1` color marker. For
+//! P4 we will use 2 rate 3 color meters, as per
+//! <a href="https://tools.ietf.org/html/rfc2698">this rfc</a>.
+//!
+//! Note that a Meter operates on either bytes or packets (not both, unlike a
+//! Counter).
 class Meter {
  public:
   typedef unsigned int color_t;
@@ -81,9 +100,8 @@ class Meter {
   // the rate configs must be sorted from smaller rate to higher rate
   // in the 2 rate meter case: {CIR, PIR}
 
-  /* this is probably a total overkill, but I am entitled to my fun. set_rates
-     accepts a vector, an initializer list, or any Random Accces Iterator pair.
-  */
+  // this is probably a total overkill, but I am entitled to my fun. set_rates
+  // accepts a vector, an initializer list, or any Random Accces Iterator pair.
   template<typename RAIt>
   MeterErrorCode set_rates(const RAIt first, const RAIt last) {
     // I think using static asserts is cleaner than using SFINAE / enable_if
@@ -121,6 +139,12 @@ class Meter {
 
   MeterErrorCode reset_rates();
 
+  //! Executes the meter on the given packet. Returns an integral value in the
+  //! range [0, N] (where N is the number of rates for this meter). A higher
+  //! value means that the meter is "busier". For a classic trTCM:
+  //!   - `0 <-> GREEN`
+  //!   - `1 <-> YELLOW`
+  //!   - `2 <-> RED`
   color_t execute(const Packet &pkt);
 
  public:
@@ -158,6 +182,16 @@ class Meter {
 
 typedef p4object_id_t meter_array_id_t;
 
+//! MeterArray corresponds to the `meter` standard P4 v1.02 object. A
+//! MeterArray reference can be used as a P4 primitive parameter. For example:
+//! @code
+//! class execute_meter
+//!   : public ActionPrimitive<MeterArray &, const Data &, Field &> {
+//!   void operator ()(MeterArray &meter_array, const Data &idx, Field &dst) {
+//!     dst.set(meter_array.execute_meter(get_packet(), idx.get_uint()));
+//!   }
+//! };
+//! @endcode
 class MeterArray : public NamedP4Object {
  public:
   typedef Meter::MeterErrorCode MeterErrorCode;
@@ -177,6 +211,9 @@ class MeterArray : public NamedP4Object {
       meters.emplace_back(type, rate_count);
   }
 
+  //! Executes the meter at index \p idx on the given packet and returns the
+  //! correct integral color value.
+  //! See Meter::execute() for more information.
   color_t execute_meter(const Packet &pkt, size_t idx) {
     BMLOG_DEBUG_PKT(pkt, "Executing meter {}[{}]", get_name(), idx);
     return meters[idx].execute(pkt);
@@ -202,41 +239,55 @@ class MeterArray : public NamedP4Object {
     return set_rates(configs.begin(), configs.end());
   }
 
+  //! Access the meter at position \p idx, asserts if bad \p idx
   Meter &get_meter(size_t idx) {
     return meters[idx];
   }
 
+  //! @copydoc get_meter
   const Meter &get_meter(size_t idx) const {
     return meters[idx];
   }
 
+  //! Access the meter at position \p idx, with bound-checking. If pos not
+  //! within the range of the array, an exception of type std::out_of_range is
+  //! thrown.
   Meter &at(size_t idx) {
     return meters.at(idx);
   }
 
+  //! @copydoc at
   const Meter &at(size_t idx) const {
     return meters.at(idx);
   }
 
+  //! Access the meter at position \p idx, asserts if bad \p idx
   Meter &operator[](size_t idx) {
     assert(idx < size());
     return meters[idx];
   }
 
+  //! @copydoc operator[]
   const Meter &operator[](size_t idx) const {
     assert(idx < size());
     return meters[idx];
   }
 
   // iterators
+
+  //! NC
   iterator begin() { return meters.begin(); }
 
+  //! NC
   const_iterator begin() const { return meters.begin(); }
 
+  //! NC
   iterator end() { return meters.end(); }
 
+  //! NC
   const_iterator end() const { return meters.end(); }
 
+  //! Returns the size of the MeterArray (i.e. number of meters it includes)
   size_t size() const { return meters.size(); }
 
  private:

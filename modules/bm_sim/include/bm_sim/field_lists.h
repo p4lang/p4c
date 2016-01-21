@@ -18,6 +18,8 @@
  *
  */
 
+//! @file field_lists.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_FIELD_LISTS_H_
 #define BM_SIM_INCLUDE_BM_SIM_FIELD_LISTS_H_
 
@@ -31,6 +33,10 @@
 
 namespace bm {
 
+//! Corresponds to a `field_list` object in P4 v1.0.2. Some targets -this is the
+//! case for the simple switch target- need to access FieldList instances (using
+//! Context::get_field_list() or Switch::get_field_list()). The simple switch
+//! target uses this to implement metadata carry when cloning a packet.
 class FieldList {
  public:
   struct field_t {
@@ -60,14 +66,21 @@ class FieldList {
   }
 
   // iterators
+
+  //! NC
   iterator begin() { return fields.begin(); }
 
+  //! NC
   const_iterator begin() const { return fields.begin(); }
 
+  //! NC
   iterator end() { return fields.end(); }
 
+  //! NC
   const_iterator end() const { return fields.end(); }
 
+  //! Returns true if the FieldList contains the given field, identified by the
+  //! header id and the offset of the field in the header
   bool contains(header_id_t header, int field_offset) const {
     auto it = fields_set.find({header, field_offset});
     return it != fields_set.end();

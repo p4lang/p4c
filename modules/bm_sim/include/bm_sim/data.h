@@ -18,6 +18,8 @@
  *
  */
 
+//! @file deparser.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_DATA_H_
 #define BM_SIM_INCLUDE_BM_SIM_DATA_H_
 
@@ -36,15 +38,34 @@ namespace bm {
 
 using bignum::Bignum;
 
+//! Data is a very important class in bmv2. It can be used to represent an
+//! arbitrarily large number. It is also the base class for the Field and
+//! Register classes. Arithmetic expressions are evaluated using Data as
+//! temporaries and the result is stored in a Data instance.
+//!
+//! All base operations are supported, although not (yet?) by operator
+//! overloading.
+//! For example:
+//! @code
+//! Data d1(6574);
+//! Data d2("0xabcd");
+//! d1.add(d1, d2);  // d1 = d1 + d2
+//! @endcode
+//!
+//! Note that Data includes a Bignum (for arbitrary arithmetic). Therefore,
+//! operations involving Data can be rather costly. In particular, constructing
+//! a Data instance involves a heap memory allocation.
 class Data {
  public:
   Data() {}
 
+  //! Constructs a Data instance from any integral type
   template<typename T,
            typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
   explicit Data(T i)
     : value(i) {}
 
+  //! Constructs a Data instance from a byte array. There is no sign support.
   Data(const char *bytes, int nbytes) {
     bignum::import_bytes(&value, bytes, nbytes);
   }
@@ -62,13 +83,18 @@ class Data {
     return 0;
   }
 
+  //! Constructs a Data instance from a hexadecimal string. The string can start
+  //! with a "-", for negative values, and can optionally include the `0x`
+  //! prefix. `Data("0xab")` is equivalent to `Data("ab")`. For negative values,
+  //! the sign needs to come before the prefix (if present).
   explicit Data(const std::string &hexstring) {
     set(hexstring);
   }
 
   virtual void export_bytes() {}
 
-  // need to figure out what to do with signed values
+  // TODO(Antonin): need to figure out what to do with signed values
+  //! Set the value of Data from any integral type
   template<typename T,
            typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
   void set(T i) {
@@ -76,6 +102,7 @@ class Data {
     export_bytes();
   }
 
+  //! Set the value of Data from an enum member
   template<typename T,
            typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
   void set(T i) {
@@ -83,11 +110,13 @@ class Data {
     export_bytes();
   }
 
+  //! Set the value of Data from a byte array
   void set(const char *bytes, int nbytes) {
     bignum::import_bytes(&value, bytes, nbytes);
     export_bytes();
   }
 
+  //! Set the value of Data from another data instance
   void set(const Data &data) {
     value = data.value;
     export_bytes();
@@ -103,6 +132,8 @@ class Data {
     export_bytes();
   }
 
+  //! Set the value of Data from a hexadecimal string. See
+  //! Data(const std::string &hexstring) for more information on \p hexstring
   void set(const std::string &hexstring) {
     std::vector<char> bytes;
     size_t idx = 0;
@@ -134,6 +165,7 @@ class Data {
     export_bytes();  // not very efficient for fields, we import then export...
   }
 
+  //! Convert the value of Data to any inegral type
   template<typename T,
            typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
   T get() const {
@@ -141,18 +173,21 @@ class Data {
     return static_cast<T>(value);
   }
 
+  //! Get the value of Data has an unsigned integer
   unsigned int get_uint() const {
     assert(arith);
     // Bad ?
     return static_cast<unsigned int>(value);
   }
 
+  //! Get the value of Data has a `uint64_t`
   uint64_t get_uint64() const {
     assert(arith);
     // Bad ?
     return static_cast<uint64_t>(value);
   }
 
+  //! get the value of Data has an integer
   int get_int() const {
     assert(arith);
     // Bad ?
@@ -163,30 +198,35 @@ class Data {
 
   // TODO(antonin): overload operators for those ?
 
+  //! NC
   void add(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value + src2.value;
     export_bytes();
   }
 
+  //! NC
   void sub(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value - src2.value;
     export_bytes();
   }
 
+  //! Performs a modulo operation
   void mod(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value % src2.value;
     export_bytes();
   }
 
+  //! NC
   void multiply(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value * src2.value;
     export_bytes();
   }
 
+  //! NC
   void shift_left(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     assert(src2.value >= 0);
@@ -194,6 +234,7 @@ class Data {
     export_bytes();
   }
 
+  //! NC
   void shift_right(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     assert(src2.value >= 0);
@@ -201,96 +242,110 @@ class Data {
     export_bytes();
   }
 
+  //! NC
   void shift_left(const Data &src1, unsigned int src2) {
     assert(src1.arith);
     value = src1.value << src2;
     export_bytes();
   }
 
+  //! NC
   void shift_right(const Data &src1, unsigned int src2) {
     assert(src1.arith);
     value = src1.value >> src2;
     export_bytes();
   }
 
+  //! NC
   void bit_and(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value & src2.value;
     export_bytes();
   }
 
+  //! NC
   void bit_or(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value | src2.value;
     export_bytes();
   }
 
+  //! NC
   void bit_xor(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value ^ src2.value;
     export_bytes();
   }
 
+  //! NC
   void bit_neg(const Data &src) {
     assert(src.arith);
     value = ~src.value;
     export_bytes();
   }
 
+  //! NC
   friend bool operator==(const Data &lhs, const Data &rhs) {
     assert(lhs.arith && rhs.arith);
     return lhs.value == rhs.value;
   }
 
+  //! NC
   friend bool operator!=(const Data &lhs, const Data &rhs) {
     assert(lhs.arith && rhs.arith);
     return !(lhs == rhs);
   }
 
+  //! NC
   friend bool operator>(const Data &lhs, const Data &rhs) {
     assert(lhs.arith && rhs.arith);
     return lhs.value > rhs.value;
   }
 
+  //! NC
   friend bool operator>=(const Data &lhs, const Data &rhs) {
     assert(lhs.arith && rhs.arith);
     return lhs.value >= rhs.value;
   }
 
+  //! NC
   friend bool operator<(const Data &lhs, const Data &rhs) {
     assert(lhs.arith && rhs.arith);
     return lhs.value < rhs.value;
   }
 
+  //! NC
   friend bool operator<=(const Data &lhs, const Data &rhs) {
     assert(lhs.arith && rhs.arith);
     return lhs.value <= rhs.value;
   }
 
+  //! NC
   friend std::ostream& operator<<(std::ostream &out, const Data &d) {
     assert(d.arith);
     out << d.value;
     return out;
   }
 
-  /* Copy constructor
-     I know it is considered a style exception by many to define this manually.
-     However, I need to be able to check whether the bignum value needs to be
-     copied */
+  // Copy constructor
+  //! NC
   Data(const Data &other)
     : arith(other.arith) {
     if (other.arith) value = other.value;
   }
 
-  /* Copy assignment operator */
+  // Copy assignment operator
+  //! NC
   Data &operator=(const Data &other) {
     Data tmp(other);  // re-use copy-constructor
     *this = std::move(tmp);  // re-use move-assignment
     return *this;
   }
 
+  //! NC
   Data(Data &&other) = default;
 
+  //! NC
   Data &operator=(Data &&other) = default;
 
  protected:

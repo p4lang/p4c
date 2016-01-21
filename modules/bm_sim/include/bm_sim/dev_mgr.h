@@ -13,10 +13,24 @@
  * limitations under the License.
  */
 
-/* -*-c++-*-
+/*
  * Antonin Bas (antonin@barefootnetworks.com)
  *
  */
+
+//! @file dev_mgr.h
+//! Includes the definitions for the DevMgrIface and DevMgr classes. DevMgr is a
+//! base class for SwitchWContexts (and by extension Switch). It provides
+//! facilities to send and receive packets, as well as manage ports. DevMgr
+//! follows the pimpl design. Different implementations are available as
+//! `backend` and they all implements the DevMgrIface interface. The different
+//! implementations are:
+//!   - BmiDevMgrImp: uses the BMI library (a libpcap wrapper) to send and
+//! receive packets
+//!   - PacketInDevMgrImp: uses a nanomsg PAIR socket to send and receive
+//! packets
+//!   - FilesDevMgrImp: reads incoming packets from pcap files and writes
+//! outgoing packet to different pcap files
 
 #ifndef BM_SIM_INCLUDE_BM_SIM_DEV_MGR_H_
 #define BM_SIM_INCLUDE_BM_SIM_DEV_MGR_H_
@@ -80,10 +94,16 @@ class DevMgrIface : public PacketDispatcherIface {
 
 // TODO(antonin): should DevMgr and DevMgrIface somehow inherit from a common
 // interface, or is it not worth the trouble?
+
+//! Base class for SwitchWContexts (and by extension Switch). It provides
+//! facilities to send and receive packets, as well as manage ports.
 class DevMgr : public PacketDispatcherIface {
  public:
+  //! @copydoc PortMonitorIface::port_t
   typedef PortMonitorIface::port_t port_t;
+  //! @copydoc PortMonitorIface::PortStatus
   typedef PortMonitorIface::PortStatus PortStatus;
+  //! @copydoc PortMonitorIface::PortStatusCb
   typedef PortMonitorIface::PortStatusCb PortStatusCb;
 
   DevMgr();
@@ -112,11 +132,14 @@ class DevMgr : public PacketDispatcherIface {
 
   bool port_is_up(port_t port_num);
 
+  //! Transmits a data packet out of port \p port_num
   void transmit_fn(int port_num, const char *buffer, int len);
 
   ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie)
       override;
 
+  //! Register a callback function to be called every time the status of a port
+  //! changes.
   ReturnCode register_status_cb(const PortStatus &type,
                                 const PortStatusCb &port_cb);
 

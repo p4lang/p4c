@@ -18,6 +18,49 @@
  *
  */
 
+//! @file actions.h
+//!
+//! Each action primitive supported by the target needs to be declared as a
+//! functor. This is how you declare one:
+//! @code
+//! class SetField :  public ActionPrimitive<Field &, const Data &> {
+//!   void operator ()(Field &f, const Data &d) {
+//!     f.set(d);
+//!   }
+//! };
+//!
+//! class Add :  public ActionPrimitive<Field &, const Data &, const Data &> {
+//!   void operator ()(Field &f, const Data &d1, const Data &d2) {
+//!     f.add(d1, d2);
+//!   }
+//! };
+//! @endcode
+//!
+//! You can then register them like this:
+//! @code
+//! REGISTER_PRIMITIVE(SetField)
+//! REGISTER_PRIMITIVE(Add)
+//! @endcode
+//! And use them by their name in the P4 program / JSON file:
+//! @code
+//! e.g. SetField(hdrA.f1, 99);
+//! @endcode
+//!
+//! Valid functor parameters for an action primitive include:
+//!   - `const Data &` for any P4 numerical values (it can be a P4 constant, a
+//! field, action data or the result of an expression). Note that `Data &` is
+//! not a valid parameter for a primitive.
+//!   - `[const] Field &` for P4 field references
+//!   - `[const] Header &` for P4 header references
+//!   - `const NamedCalculation &` for P4 field list calculations
+//!   - `[const] MeterArray &`
+//!   - `[const] CounterArray &`
+//!   - `[const] RegisterArray &`
+//!
+//! You can declare and register primitives anywhere in your switch target C++
+//! code.
+
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_ACTIONS_H_
 #define BM_SIM_INCLUDE_BM_SIM_ACTIONS_H_
 
@@ -45,6 +88,9 @@ namespace bm {
 // forward declaration of ActionPrimitive_
 class ActionPrimitive_;
 
+// Maps primitive names to primitive implementations (functors).
+// Targets are responsible for defining their own primitives and registering
+// them in this map using the REGISTER_PRIMITIVE(primitive_name) macro.
 class ActionOpcodesMap {
  public:
   static ActionOpcodesMap *get_instance();
@@ -54,21 +100,34 @@ class ActionOpcodesMap {
 
   ActionPrimitive_ *get_primitive(const std::string &name);
  private:
+  // Maps primitive names to their implementation.
+  // The same pointer is used system-wide, even if a primitive is called from
+  // different actions. As such, one has to be careful if some state is
+  // maintained byt the primitive functor.
   std::unordered_map<std::string, std::unique_ptr<ActionPrimitive_> > map_{};
 };
 
+//! When implementing an action primitive for a target, this macro needs to be
+//! called to make this module aware of the primitive existence.
 #define REGISTER_PRIMITIVE(primitive_name)                              \
   bool primitive_name##_create_ =                                       \
       bm::ActionOpcodesMap::get_instance()->register_primitive(         \
           #primitive_name,                                              \
           std::unique_ptr<bm::ActionPrimitive_>(new primitive_name()));
 
+//! This macro can also be called when registering a primitive for a target, in
+//! case you want to register the primitive under a different name than its
+//! functor name
 #define REGISTER_PRIMITIVE_W_NAME(primitive_name, primitive)            \
   bool primitive##_create_ =                                            \
       bm::ActionOpcodesMap::get_instance()->register_primitive(         \
           primitive_name,                                               \
           std::unique_ptr<bm::ActionPrimitive_>(new primitive()));
 
+// A simple tagged union, which holds the definition of an action parameter. For
+// example, if an action parameter is a field, this struct will hold the header
+// id and the offset for this field. If an action parameter is a meter array,
+// the struct will hold a raw, non-owning pointer to the MeterArray object.
 struct ActionParam {
   // some old P4 primitives take a calculation as a parameter, I don't know if I
   // will keep it around but for now I need it
@@ -273,6 +332,9 @@ class ActionPrimitive_ {
   virtual size_t get_num_params() = 0;
 };
 
+//! This acts as the base class for all target-specific action primitives. It
+//! provides some useful functionality, like access to a header by name, or
+//! access to the Packet on which the primitive is executed.
 template <typename... Args>
 class ActionPrimitive :  public ActionPrimitive_ {
  public:
@@ -288,10 +350,13 @@ class ActionPrimitive :  public ActionPrimitive_ {
   virtual void operator ()(Args...) = 0;
 
  protected:
+  //! Returns a reference to the Field with name \p name. \p name must follow
+  //! the usual format `"hdrA.f1"`.
   Field &get_field(std::string name) {
     return phv->get_field(name);
   }
 
+  //! Returns a reference to the Header with name \p name.
   Header &get_header(std::string name) {
     return phv->get_header(name);
   }
@@ -302,6 +367,8 @@ class ActionPrimitive :  public ActionPrimitive_ {
   }
 
   // so far used only for meter arrays and counter arrays
+  //! Returns a reference to the Packet instance on which the action primitive
+  //! is being executed.
   Packet &get_packet() {
     return *pkt;
   }
@@ -311,19 +378,6 @@ class ActionPrimitive :  public ActionPrimitive_ {
   PHV *phv;
   Packet *pkt;
 };
-
-// This is how you declare a primitive:
-// class SetField :  public ActionPrimitive<Field &, Data &> {
-//   void operator ()(Field &f, Data &d) {
-//     f.set(d);
-//   }
-// };
-
-// class Add :  public ActionPrimitive<Field &, Data &, Data &> {
-//   void operator ()(Field &f, Data &d1, Data &d2) {
-//     f.add(d1, d2);
-//   }
-// };
 
 
 // forward declaration

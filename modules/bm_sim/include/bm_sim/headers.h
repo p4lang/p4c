@@ -18,6 +18,8 @@
  *
  */
 
+//! @file headers.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_HEADERS_H_
 #define BM_SIM_INCLUDE_BM_SIM_HEADERS_H_
 
@@ -117,6 +119,8 @@ class HeaderType : public NamedP4Object {
   int VL_offset{-1};
 };
 
+//! Used to represent P4 header instances. It includes a vector of Field
+//! objects.
 class Header : public NamedP4Object {
  public:
   typedef std::vector<Field>::iterator iterator;
@@ -132,45 +136,62 @@ class Header : public NamedP4Object {
          const HeaderType &header_type, const std::set<int> &arith_offsets,
          const bool metadata = false);
 
+  //! Returns the number of byte occupied by this header when it is deserialized
+  //! in the packet
   int get_nbytes_packet() const {
     return nbytes_packet;
   }
 
+  //! Returns true if this header is marked valid
   bool is_valid() const {
     return (metadata || valid);
   }
 
+  //! Returns true if this header represents metadata
   bool is_metadata() const {
     return metadata;
   }
 
+  //! Marks the header as valid
   void mark_valid() {
     valid = true;
   }
 
+  //! Marks the header as not-valid
   void mark_invalid() {
     valid = false;
   }
 
+  //! Sets all the fields in the header to value `0`
   void reset() {
     for (Field &f : fields)
       f.set(0);
   }
 
-  // prefer operator [] to those functions
+  //! Returns a reference to the Field at the specified offset, with bounds
+  //! checking. If pos not within the range of the container, an exception of
+  //! type std::out_of_range is thrown.
   Field &get_field(int field_offset) {
-    return fields[field_offset];
+    return fields.at(field_offset);
   }
+
+  //! @copydoc get_field
   const Field &get_field(int field_offset) const {
-    return fields[field_offset];
+    return fields.at(field_offset);
   }
 
   const HeaderType &get_header_type() const { return header_type; }
 
+  //! Returns an integral id which represents the header type of the
+  //! header. This id can be used to compare whether 2 Header instances have the
+  //! same header type.
   header_type_id_t get_header_type_id() const {
     return header_type.get_type_id();
   }
 
+  //! Returns true if this header is an instance of a Variable-Length header
+  //! type, i.e. contains a field whose length is determined when the header is
+  //! extracted from the packet data.
   bool is_VL_header() const { return VL_expr != nullptr; }
 
   // phv needed for variable length extraction
@@ -178,23 +199,31 @@ class Header : public NamedP4Object {
 
   void deparse(char *data) const;
 
-  // return the number of fields
+  //! Returns the number of fields in the header
   size_type size() const noexcept { return fields.size(); }
 
   // iterators
+
+  //! NC
   iterator begin() { return fields.begin(); }
 
+  //! NC
   const_iterator begin() const { return fields.begin(); }
 
+  //! NC
   iterator end() { return fields.end(); }
 
+  //! NC
   const_iterator end() const { return fields.end(); }
 
+  //! Access the character at position \p n. Will assert if \p n is greater or
+  //! equal than the number of fields in the header.
   reference operator[](size_type n) {
     assert(n < fields.size());
     return fields[n];
   }
 
+  //! @copydoc operator[]
   const_reference operator[](size_type n) const {
     assert(n < fields.size());
     return fields[n];
@@ -215,10 +244,9 @@ class Header : public NamedP4Object {
   Header(const Header &other) = delete;
   Header &operator=(const Header &other) = delete;
 
-  // TODO(antonin): this may as well be delete I think, class has a reference
-  // member
   Header(Header &&other) = default;
-  Header &operator=(Header &&other) = default;
+  // because of reference member, this is not possible
+  Header &operator=(Header &&other) = delete;
 
  private:
   void extract_VL(const char *data, const PHV &phv);

@@ -18,6 +18,8 @@
  *
  */
 
+//! @file named_p4object.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_NAMED_P4OBJECT_H_
 #define BM_SIM_INCLUDE_BM_SIM_NAMED_P4OBJECT_H_
 
@@ -27,6 +29,10 @@ namespace bm {
 
 typedef int p4object_id_t;
 
+//! NamedP4Object is used as a base class for all the bmv2 classes with are used
+//! to represent named P4 objects (e.g. Parser for P4 `parser` objects). It
+//! just stores the name of the P4 instance and a compiler-provided id, which is
+//! different from the id of other objects of the same class.
 class NamedP4Object {
  public:
   NamedP4Object(const std::string &name, p4object_id_t id)
@@ -34,8 +40,10 @@ class NamedP4Object {
 
   virtual ~NamedP4Object() { }
 
+  //! Get the name of the P4 instance
   const std::string &get_name() const { return name; }
 
+  //! Get the compiler-provided id
   p4object_id_t get_id() const { return id; }
 
  protected:

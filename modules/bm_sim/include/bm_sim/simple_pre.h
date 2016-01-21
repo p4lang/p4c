@@ -19,6 +19,8 @@
  *
  */
 
+//! @file simple_pre.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_SIMPLE_PRE_H_
 #define BM_SIM_INCLUDE_BM_SIM_SIMPLE_PRE_H_
 
@@ -32,11 +34,17 @@
 
 namespace bm {
 
+//! A simple, 2-level, packet replication engine, configurable by the control
+//! plane. See replicate() for more information.
 class McSimplePre {
  public:
+  //! NC
   typedef unsigned int mgrp_t;
+  //! NC
   typedef unsigned int rid_t;
+  //! NC
   typedef unsigned int egress_port_t;
+
   typedef uintptr_t mgrp_hdl_t;
   typedef uintptr_t l1_hdl_t;
   typedef uintptr_t l2_hdl_t;
@@ -51,12 +59,17 @@ class McSimplePre {
     ERROR
   };
 
+  //! Input to replicate() method
   struct McIn {
+    //! Multicast group id to use for replication
     mgrp_t mgid;
   };
 
+  //! Output of replicate() method
   struct McOut {
+    //! replication id of multicast copy
     rid_t rid;
+    //! egress port of multicast copy
     egress_port_t egress_port;
   };
 
@@ -79,11 +92,39 @@ class McSimplePre {
   McReturnCode mc_node_destroy(const l1_hdl_t);
   McReturnCode mc_node_update(const l1_hdl_t l1_hdl,
                               const PortMap &port_map);
+
+  //! This is the only "dataplane" method for this class. It takes as input a
+  //! multicast group id (set during pipeline processing) and returns a vector
+  //! of McOut instances (rid + egress port).
+  //!
+  //! The mgid (multicast group id) points to a L1 (level 1) node. Each L1 node
+  //! has a unique rid and points to a L2 node. The L2 node includes a list of
+  //! ports which we return in a vector (along with thr L1 node rid). It is the
+  //! target responsibility to use this information to properly "clone" the
+  //! packet. For example:
+  //! @code
+  //! Field &f_mgid = phv->get_field("intrinsic_metadata.mcast_grp");
+  //! unsigned int mgid = f_mgid.get_uint();
+  //! if (mgid != 0) {
+  //!   const auto pre_out = pre->replicate({mgid});
+  //!   for (const auto &out : pre_out) {
+  //!     egress_port = out.egress_port;
+  //!     std::unique_ptr<Packet> packet_copy = packet->clone_with_phv_ptr();
+  //!     // ...
+  //!     // send packet_copy to egress_port
+  //!   }
+  //! }
+  //! @endcode
   std::vector<McOut> replicate(const McIn) const;
 
+  //! Deleted copy constructor
   McSimplePre(const McSimplePre &other) = delete;
+  //! Deleted move assignment operator
   McSimplePre &operator=(const McSimplePre &other) = delete;
+
+  //! Deleted move constructor
   McSimplePre(McSimplePre &&other) = delete;
+  //! Deleted move assignment operator
   McSimplePre &operator=(McSimplePre &&other) = delete;
 
  protected:

@@ -18,6 +18,8 @@
  *
  */
 
+//! @file learning.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_LEARNING_H_
 #define BM_SIM_INCLUDE_BM_SIM_LEARNING_H_
 
@@ -39,6 +41,11 @@
 
 namespace bm {
 
+// TODO(antonin): automate learning (i.e. make it target-independent)?
+
+//! Enables learning in the switch. For now it is the responsibility of the
+//! switch (look at the simple switch target for an example) to invoke the
+//! learn() method, which will send out the learning notifications.
 class LearnEngine {
  public:
   typedef int list_id_t;
@@ -74,6 +81,13 @@ class LearnEngine {
 
   void list_init(list_id_t list_id);
 
+  //! Performs learning on the packet. Needs to be called by the target after a
+  //! learning-enabled pipeline has been applied on the packet. See the simple
+  //! switch implementation for an example.
+  //!
+  //! The \p list_id should be mapped to a field list in the JSON fed into the
+  //! switch. Since learning is still not well-standardized in P4, this process
+  //! is a little bit hacky for now.
   void learn(list_id_t list_id, const Packet &pkt);
 
   void ack(list_id_t list_id, buffer_id_t buffer_id, int sample_id);
