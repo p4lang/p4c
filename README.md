@@ -194,8 +194,13 @@ Now the switch is running and the tables have been populated. You can run
 
 ### How do program my own target / switch architecture using bmv2 ?
 
-You can take a look at the targets/ directory. We will soon publish a separate
-document with detailed information.
+You can take a look at the `targets/ directory` first. We have also started
+writing some doxygen documentation specifically targetted at programmers who
+want to implement their own switch model using the bmv2 building blocks. You can
+generate this documentation yourself (if you have doxygen installed) by running
+`doxygen Doxyfile`. The output can be found under the `doxygen-out`
+directory. You can also browse this documentation [online]
+(http://104.236.137.35/).
 
 ### What else is new in bmv2 ?
 
