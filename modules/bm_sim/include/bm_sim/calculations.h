@@ -18,6 +18,39 @@
  *
  */
 
+//! @file calculations.h
+//!
+//! Each hash algorithm supported by the target needs to be declared as a
+//! functor. This is how you declare one:
+//! @code
+//! struct hash_ex {
+//!   uint32_t operator()(const char *buf, size_t s) const {
+//!     const int p = 16777619;
+//!     int hash = 2166136261;
+
+//!     for (size_t i = 0; i < s; i++)
+//!       hash = (hash ^ buf[i]) * p;
+
+//!     hash += hash << 13;
+//!     hash ^= hash >> 7;
+//!     hash += hash << 3;
+//!     hash ^= hash >> 17;
+//!     hash += hash << 5;
+//!     return static_cast<uint32_t>(hash);
+//!   }
+//! };
+//! @endcode
+//! Note that the signature of the functor must exactly match the one of the
+//! example: `uint32_t(const char *buf, size_t s) const`. Otherwise, you will
+//! get a compilation error.
+//!
+//! You can then register your hash function like this:
+//! @code
+//! REGISTER_HASH(hash_ex)
+//! @endcode
+//! In P4 v1.0.2, hash algorithms are used by `field_list_calculation` objects
+
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_CALCULATIONS_H_
 #define BM_SIM_INCLUDE_BM_SIM_CALCULATIONS_H_
 
@@ -361,6 +394,8 @@ class NamedCalculation : public NamedP4Object, public Calculation_<uint64_t> {
 };
 
 
+//! When implementing an hash operation for a target, this macro needs to be
+//! called to make this module aware of the hash existence.
 #define REGISTER_HASH(hash_name)                                        \
   bool hash_name##_create_ =                                            \
       bm::CalculationsMap::get_instance()->register_one(                \

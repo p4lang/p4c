@@ -18,6 +18,20 @@
  *
  */
 
+//! @file counters.h
+//! Includes both the Counter and CounterArray classes. CounterArray is exposed
+//! in P4 v1.0.2 as the `counter` object. Action primitives can take a
+//! CounterArray reference as a parameter (but not a Counter though). Here is a
+//! possible implementation of the `count()` P4 primitive:
+//! @code
+//! class count : public ActionPrimitive<CounterArray &, const Data &> {
+//!   void operator ()(CounterArray &counter_array, const Data &idx) {
+//!     counter_array.get_counter(idx.get_uint()).increment_counter(
+//!       get_packet());
+//!   }
+//! };
+//! @endcode
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_COUNTERS_H_
 #define BM_SIM_INCLUDE_BM_SIM_COUNTERS_H_
 
@@ -30,10 +44,13 @@
 
 namespace bm {
 
-/* This is a very basic counter for now: data plane can only increment the
-   counters, control plane only can query values and reset */
+//! Very basic counter implementation. Every Counter instance counts both bytes
+//! and packets. The data plane is in charge of incrementing the counters
+//! (e.g. through an action primitive), the control plane can query or write
+//! a given value to the counters.
 class Counter {
  public:
+  //! A counter value (measuring bytes or packets) is a `uint64_t`.
   typedef uint64_t counter_value_t;
 
   enum CounterErrorCode {
@@ -42,6 +59,7 @@ class Counter {
     ERROR
   };
 
+  //! Increments both counter values (bytes and packets)
   void increment_counter(const Packet &pkt) {
     bytes += pkt.get_ingress_length();
     packets += 1;
@@ -63,6 +81,16 @@ class Counter {
 
 typedef p4object_id_t meter_array_id_t;
 
+//! CounterArray corresponds to the `counter` standard P4 v1.02 object. A
+//! CounterArray reference can be used as a P4 primitive parameter. For example:
+//! @code
+//! class count : public ActionPrimitive<CounterArray &, const Data &> {
+//!   void operator ()(CounterArray &counter_array, const Data &idx) {
+//!     counter_array.get_counter(idx.get_uint()).increment_counter(
+//!       get_packet());
+//!   }
+//! };
+//! @endcode
 class CounterArray : public NamedP4Object {
  public:
   typedef Counter::CounterErrorCode CounterErrorCode;
@@ -76,33 +104,43 @@ class CounterArray : public NamedP4Object {
 
   CounterErrorCode reset_counters();
 
+  //! Access the counter at position \p idx, asserts if bad \p idx
   Counter &get_counter(size_t idx) {
     return counters[idx];
   }
 
+  //! @copydoc get_counter
   const Counter &get_counter(size_t idx) const {
     return counters[idx];
   }
 
+  //! Access the counter at position \p idx, asserts if bad \p idx
   Counter &operator[](size_t idx) {
     assert(idx < size());
     return counters[idx];
   }
 
+  //! @copydoc operator[]
   const Counter &operator[](size_t idx) const {
     assert(idx < size());
     return counters[idx];
   }
 
   // iterators
+
+  //! NC
   iterator begin() { return counters.begin(); }
 
+  //! NC
   const_iterator begin() const { return counters.begin(); }
 
+  //! NC
   iterator end() { return counters.end(); }
 
+  //! NC
   const_iterator end() const { return counters.end(); }
 
+  //! Return the size of the CounterArray (i.e. number of counters it includes)
   size_t size() const { return counters.size(); }
 
  private:

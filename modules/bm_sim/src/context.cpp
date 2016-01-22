@@ -493,26 +493,26 @@ Context::load_new_config(
     const std::set<header_field_pair> &arith_fields) {
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);
   // check that there is no ongoing config swap
-  if (p4objects != p4objects_rt) return ONGOING_SWAP;
+  if (p4objects != p4objects_rt) return ErrorCode::ONGOING_SWAP;
   p4objects_rt = std::make_shared<P4Objects>();
   init_objects(is, required_fields, arith_fields);
-  return SUCCESS;
+  return ErrorCode::SUCCESS;
 }
 
 Context::ErrorCode
 Context::swap_configs() {
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);
   // no ongoing swap
-  if (p4objects == p4objects_rt) return NO_ONGOING_SWAP;
+  if (p4objects == p4objects_rt) return ErrorCode::NO_ONGOING_SWAP;
   swap_ordered = true;
-  return SUCCESS;
+  return ErrorCode::SUCCESS;
 }
 
 Context::ErrorCode
 Context::reset_state() {
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);
   p4objects_rt->reset_state();
-  return SUCCESS;
+  return ErrorCode::SUCCESS;
 }
 
 int

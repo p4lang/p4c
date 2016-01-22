@@ -18,6 +18,37 @@
  *
  */
 
+//! @file context.h
+//!
+//! A Context instance is essentially a switch within a Switch instance. That
+//! just gave you a headache, right? :) Let's picture a simple example: a
+//! hardware P4-programmable switch, with a parser, a match-action pipeline and
+//! a deparser. Now let's make the picture a little bit more complex and let's
+//! say that our hardware switch can actually be split into 2 parts, each of
+//! which can be programmed with a different P4 program. So our switch
+//! essentially has parser1, pipeline1 and deparser1 which can be programmed by
+//! prog1.p4, and parser2, pipeline2 and deparser2 which can be programmed by
+//! prog2.p4. Maybe prog1.p4 only handles IPv4 packets, while prog2.p4 only
+//! handles IPv6 packets. This is what the Context class is trying to capture:
+//! different entities within the same switch, which can be programmed with
+//! their own P4 objects. Each context even has its own learning engine and can
+//! have its own packet replication engine, so they are very much independent.
+//!
+//! We can remark that the same could be achieved by instantiating several
+//! 1-context Switch and doing some tweaking. However, we believe that contexts
+//! are slightly more general and slightly more convenient to use. They are also
+//! totally optional. When creating your target switch class, you can inherit
+//! from Switch instead of SwitchWContexts, and your switch will only have one
+//! context.
+//!
+//! IMPORTANT: Context support has not yet been added to the bmv2
+//! compiler. While you can already implemet multi-contexts target switches,
+//! they will all have to be programmed with the same P4 logic. We are planning
+//! to add support soon.
+
+#ifndef BM_SIM_INCLUDE_BM_SIM_CONTEXT_H_
+#define BM_SIM_INCLUDE_BM_SIM_CONTEXT_H_
+
 #include <mutex>
 #include <atomic>
 #include <string>
@@ -28,32 +59,40 @@
 #include "match_tables.h"
 #include "runtime_interface.h"
 
-#ifndef BM_SIM_INCLUDE_BM_SIM_CONTEXT_H_
-#define BM_SIM_INCLUDE_BM_SIM_CONTEXT_H_
-
 namespace bm {
 
+//! Implements a switch within a switch.
+//!
+//! See context.h description for more information.
 class Context final {
   friend class SwitchWContexts;
 
  public:
-  typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
-  typedef MatchTableIndirectWS::grp_hdl_t grp_hdl_t;
+  typedef RuntimeInterface::mbr_hdl_t mbr_hdl_t;
+  typedef RuntimeInterface::grp_hdl_t grp_hdl_t;
 
-  typedef Meter::MeterErrorCode MeterErrorCode;
-  typedef Register::RegisterErrorCode RegisterErrorCode;
+  typedef RuntimeInterface::MeterErrorCode MeterErrorCode;
+  typedef RuntimeInterface::RegisterErrorCode RegisterErrorCode;
 
-  enum ErrorCode {
-    SUCCESS = 0,
-    CONFIG_SWAP_DISABLED,
-    ONGOING_SWAP,
-    NO_ONGOING_SWAP
-  };
+  typedef RuntimeInterface::ErrorCode ErrorCode;
 
  public:
   // needs to be default constructible if I want to put it in a std::vector
   Context();
 
+  //! Add a component to this Context. Each Context maintains a map `T` ->
+  //! `shared_ptr<T>`, which maps a type (using `typeid`) to a shared pointer to
+  //! an object of the same type. The pointer can be retrieved at a later time
+  //! by using get_component().
+  template<typename T>
+  bool add_component(std::shared_ptr<T> ptr) {
+    std::shared_ptr<void> ptr_ = std::static_pointer_cast<void>(ptr);
+    const auto &r = components.insert({std::type_index(typeid(T)), ptr_});
+    return r.second;
+  }
+
+  //! Retrieve the shared pointer to an object of type `T` previously added to
+  //! the Context using add_component().
   template<typename T>
   std::shared_ptr<T> get_component() {
     const auto &search = components.find(std::type_index(typeid(T)));
@@ -63,18 +102,24 @@ class Context final {
 
   // do these methods need any protection?
   // TODO(antonin): should I return shared_ptrs instead of raw_ptrs?
+
+  //! Get a raw, non-owning pointer to the Pipeline object with P4 name \p name
   Pipeline *get_pipeline(const std::string &name) {
     return p4objects->get_pipeline(name);
   }
 
+  //! Get a raw, non-owning pointer to the Parser object with P4 name \p name
   Parser *get_parser(const std::string &name) {
     return p4objects->get_parser(name);
   }
 
+  //! Get a raw, non-owning pointer to the Deparser object with P4 name \p name
   Deparser *get_deparser(const std::string &name) {
     return p4objects->get_deparser(name);
   }
 
+  //! Get a raw, non-owning pointer to the FieldList object with id
+  //! \p field_list_id
   FieldList *get_field_list(const p4object_id_t field_list_id) {
     return p4objects->get_field_list(field_list_id);
   }
@@ -86,13 +131,6 @@ class Context final {
 
   p4object_id_t get_action_id(const std::string &name) {
     return p4objects->get_action(name)->get_id();
-  }
-
-  template<typename T>
-  bool add_component(std::shared_ptr<T> ptr) {
-    std::shared_ptr<void> ptr_ = std::static_pointer_cast<void>(ptr);
-    const auto &r = components.insert({std::type_index(typeid(T)), ptr_});
-    return r.second;
   }
 
  private:

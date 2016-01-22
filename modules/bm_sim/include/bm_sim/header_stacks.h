@@ -18,6 +18,8 @@
  *
  */
 
+//! @file header_stacks.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_HEADER_STACKS_H_
 #define BM_SIM_INCLUDE_BM_SIM_HEADER_STACKS_H_
 
@@ -34,6 +36,19 @@ namespace bm {
 
 typedef p4object_id_t header_stack_id_t;
 
+//! HeaderStack is used to reprsent header stacks in P4. The HeaderStack class
+//! does not store any header / field data itself, but stores references to
+//! the Header instances which constitute the stack, as well as the stack
+//! internal state (e.g. number of valid headers in the stack).
+//!
+//! A HeaderStack reference can be used in an action primitive. For example:
+//! @code
+//! class pop : public ActionPrimitive<HeaderStack &, const Data &> {
+//!   void operator ()(HeaderStack &stack, const Data &num) {
+//!     stack.pop_front(num.get_uint());
+//!   }
+//! };
+//! @endcode
 class HeaderStack : public NamedP4Object {
  public:
   friend class PHV;
@@ -44,6 +59,9 @@ class HeaderStack : public NamedP4Object {
     : NamedP4Object(name, id),
       header_type(header_type) { }
 
+  //! Removes the first element of the stack. Returns the number of elements
+  //! removed, which is `0` if the stack is empty and `1` otherwise. The second
+  //! element of the stack becomes the first element, and so on...
   size_t pop_front() {
     if (next == 0) return 0u;
     next--;
@@ -54,7 +72,9 @@ class HeaderStack : public NamedP4Object {
     return 1u;
   }
 
-  // more efficient than calling pop_front() multiple times
+  //! Removes the first \p num element of the stack. Returns the number of
+  //! elements removed, which is `0` if the stack is empty. Calling this
+  //! function is more efficient than calling pop_front() multiple times.
   size_t pop_front(size_t num) {
     if (num == 0) return 0;
     size_t popped = std::min(next, num);
@@ -68,6 +88,11 @@ class HeaderStack : public NamedP4Object {
     return popped;
   }
 
+  //! Pushes an element to the front of the stack. If the stack is already full,
+  //! the last header of the stack will be discarded. This function returns the
+  //! number of elements pushed, which is guaranteed to be always 1. The first
+  //! header of the stack is marked valid (note that it was already valid, if
+  //! the stack was not empty).
   size_t push_front() {
     if (next < headers.size()) next++;
     for (size_t i = next - 1; i > 0; i--) {
@@ -79,6 +104,12 @@ class HeaderStack : public NamedP4Object {
     return 1u;
   }
 
+  //! Pushes \p num elements to the front of the stack. If the stack becomes
+  //! full, the extra headers at the bottom of the stack will be discarded. This
+  //! function returns the number of elements pushed, which is guaranteed to be
+  //! min(get_depth(), \p num)`. All inserted headers are guaranteed to be
+  //! marked valid. Calling this function is more efficient that calling
+  //! push_front() multiple times.
   size_t push_front(size_t num) {
     if (num == 0) return 0;
     next = std::min(headers.size(), next + num);
@@ -109,8 +140,10 @@ class HeaderStack : public NamedP4Object {
     return 1u;
   }
 
+  //! Returns the maximum capacity of the stack
   size_t get_depth() const { return headers.size(); }
 
+  //! Returns the current occupancy of the stack
   size_t get_count() const { return next; }
 
   // TODO(antonin): do we really need those, or will the compiler do loop

@@ -18,6 +18,8 @@
  *
  */
 
+//! @file phv.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_PHV_H_
 #define BM_SIM_INCLUDE_BM_SIM_PHV_H_
 
@@ -44,6 +46,23 @@ typedef p4object_id_t header_id_t;
 // forward declaration
 class PHVFactory;
 
+//! Each Packet instance owns a PHV instance, used to store all the data
+//! extracted from the packet by parsing. It essentially consists of a vector of
+//! Header instances, each one of these Header instance itself consisting of a
+//! vector of Field instances. The PHV also owns the HeaderStack instances for
+//! the packet.
+//!
+//! Because PHV objects are expensive to construct, we maintain a pool of
+//! them. Every time a new Packet is constructed, we retrieve one PHV from the
+//! pool (construct a new one if the pool is empty). When the Packet is
+//! destroyed, we release its PHV to the pool. Because the PHV depends on the P4
+//! Context, there is actually one PHV pool per Contex. If the Context of a
+//! Packet changes, its current PHV is released to the old pool and a new PHV is
+//! obtained from the new pool.
+//! Because we use a pool system, a Packet may receive a PHV which still
+//! contains "state" (e.g. field values) from its previous Packet owner. This is
+//! why we expose methods like reset(), reset_header_stacks() and
+//! reset_metadata().
 class PHV {
  public:
   friend class PHVFactory;
@@ -63,69 +82,107 @@ class PHV {
     header_stacks.reserve(num_header_stacks);
   }
 
+  //! Access the Header with id \p header_index, with no bound checking.
   Header &get_header(header_id_t header_index) {
     return headers[header_index];
   }
 
+  //! @copydoc get_header(header_id_t header_index)
   const Header &get_header(header_id_t header_index) const {
     return headers[header_index];
   }
 
+  //! Access the Header with name \p header_name. If \p header_name does not
+  //! match any known headers, an std::out_of_range exception will be
+  //! thrown.
   Header &get_header(const std::string &header_name) {
     return headers_map.at(header_name);
   }
 
+  //! @copydoc get_header(const std::string &header_name)
   const Header &get_header(const std::string &header_name) const {
     return headers_map.at(header_name);
   }
 
+  //! Returns true if there exists a Header with name \p header_name in this PHV
   bool has_header(const std::string &header_name) const {
     auto it = headers_map.find(header_name);
     return (it != headers_map.end());
   }
 
+  //! Access the Field at offset \p field_offset in the Header with id \p
+  //! header_index.
+  //! See PHV::get_header(header_id_t header_index) and
+  //! Header::get_field(int field_offset) for more information.
   Field &get_field(header_id_t header_index, int field_offset) {
     return headers[header_index].get_field(field_offset);
   }
 
+  //! @copydoc get_field(header_id_t header_index, int field_offset)
   const Field &get_field(header_id_t header_index, int field_offset) const {
     return headers[header_index].get_field(field_offset);
   }
 
+  //! Access the Field with name \p field_name. If \p field_name does not match
+  //! any known fields, an std::out_of_range exception will be thrown. \p
+  //! field_name must follow the `"hdr.f"` format.
   Field &get_field(const std::string &field_name) {
     return fields_map.at(field_name);
   }
 
+  //! @copydoc get_field(const std::string &field_name)
   const Field &get_field(const std::string &field_name) const {
     return fields_map.at(field_name);
   }
 
+  //! Returns true if there exists a Field with name \p field_name in this
+  //! PHV. \p field_name must follow the `"hdr.f"` format.
   bool has_field(const std::string &field_name) const {
     auto it = fields_map.find(field_name);
     return (it != fields_map.end());
   }
 
+  //! Access the HeaderStack with id \p header_stack_index, with no bound
+  //! checking.
   HeaderStack &get_header_stack(header_stack_id_t header_stack_index) {
     return header_stacks[header_stack_index];
   }
 
+  //! @copydoc get_header_stack(header_stack_id_t header_stack_index)
   const HeaderStack &get_header_stack(
       header_stack_id_t header_stack_index) const {
     return header_stacks[header_stack_index];
   }
 
-  void reset();  // mark all headers as invalid
+  //! Mark all Header instances in the PHV as invalid.
+  void reset();
 
+  //! Reset the state (i.e. make them empty) of all HeaderStack instances in the
+  //! PHV.
   void reset_header_stacks();
 
+  //! Reset all metadata fields to `0`. If your target assumes that metadata
+  //! fields are zero-initialized for every incoming packet, you will need to
+  //! call this on the PHV member of every new Packet you create.
   void reset_metadata();
 
+  //! Deleted copy constructor
   PHV(const PHV &other) = delete;
+  //! Deleted copy assignment operator
   PHV &operator=(const PHV &other) = delete;
 
+  //! Default move constructor
   PHV(PHV &&other) = default;
+  //! Default move assignment operator
   PHV &operator=(PHV &&other) = default;
 
+  //! Copy the headers of \p src PHV to this PHV. The two PHV instances need to
+  //! belong to the same Context.
+  //! Every header:
+  //!   - is marked valid iff the corresponding \p src header is valid
+  //!   - is marked as metadata iff the corresponding \p src header is metadata
+  //!   - receives the same field values as the corresponding \p src header iff
+  //! it is a valid packet header or a metadata header
   void copy_headers(const PHV &src) {
     for (unsigned int h = 0; h < headers.size(); h++) {
       headers[h].valid = src.headers[h].valid;

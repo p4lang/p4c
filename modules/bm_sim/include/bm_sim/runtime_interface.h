@@ -24,19 +24,24 @@
 #include <string>
 #include <vector>
 
-#include "context.h"
+#include "match_tables.h"
 
 namespace bm {
 
 class RuntimeInterface {
  public:
-  typedef Context::mbr_hdl_t mbr_hdl_t;
-  typedef Context::grp_hdl_t grp_hdl_t;
+  typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
+  typedef MatchTableIndirectWS::grp_hdl_t grp_hdl_t;
 
-  typedef Context::MeterErrorCode MeterErrorCode;
-  typedef Context::RegisterErrorCode RegisterErrorCode;
+  typedef Meter::MeterErrorCode MeterErrorCode;
+  typedef Register::RegisterErrorCode RegisterErrorCode;
 
-  typedef Context::ErrorCode ErrorCode;
+  enum ErrorCode {
+    SUCCESS = 0,
+    CONFIG_SWAP_DISABLED,
+    ONGOING_SWAP,
+    NO_ONGOING_SWAP
+  };
 
  public:
   virtual ~RuntimeInterface() { }

@@ -18,6 +18,8 @@
  *
  */
 
+//! @file parser.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_PARSER_H_
 #define BM_SIM_INCLUDE_BM_SIM_PARSER_H_
 
@@ -333,6 +335,7 @@ class ParseState : public NamedP4Object {
   const ParseState *default_next_state{nullptr};
 };
 
+//! Implements a P4 parser.
 class Parser : public NamedP4Object {
  public:
   Parser(const std::string &name, p4object_id_t id)
@@ -342,12 +345,21 @@ class Parser : public NamedP4Object {
     init_state = state;
   }
 
+  //! Extracts Packet headers as specified by the parse graph. When the parser
+  //! extracts a header to the PHV, the header is marked as valid. After parsing
+  //! a packet, you can send it to the appropriate match-action Pipeline for
+  //! processing. Depending on how your target is organized, you could also
+  //! send it to another Parser for deeper parsing.
   void parse(Packet *pkt) const;
 
+  //! Deleted copy constructor
   Parser(const Parser &other) = delete;
+  //! Deleted copy assignment operator
   Parser &operator=(const Parser &other) = delete;
 
+  //! Default move constructor
   Parser(Parser &&other) /*noexcept*/ = default;
+  //! Default move assignment operator
   Parser &operator=(Parser &&other) /*noexcept*/ = default;
 
  private:

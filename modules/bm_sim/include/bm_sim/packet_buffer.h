@@ -18,6 +18,8 @@
  *
  */
 
+//! @file packet_buffer.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_PACKET_BUFFER_H_
 #define BM_SIM_INCLUDE_BM_SIM_PACKET_BUFFER_H_
 
@@ -28,6 +30,21 @@
 
 namespace bm {
 
+//! This acts as a recipient for the packet data. A PacketBuffer instance will
+//! belong to a Packet instance and the same PacketBuffer is used to hold 1) the
+//! unparsed packet when the packet is first received 2) the packet payload
+//! (i.e. data that was not extracted) while the packet is being processed by
+//! the match-action tables 3) the deparsed packet ready to be transmitted.
+//! As a target switch programmer, you will only encounter PacketBuffer when
+//! creating a new Packet instance:
+//! @code
+//! // A new packet was received on port_num, its ingress length is len, we
+//! // assign pkt_id as its packet id (and increment the counter for the next
+//! // incoming packet). We provide a PacketBuffer with capacity 2048 and
+//! // initialize it with the incoming packet data.
+//! auto packet = new_packet_ptr(port_num, pkt_id++, len,
+//!                              PacketBuffer(2048, buffer, len));
+//! @endcode
 class PacketBuffer {
  public:
   struct state_t {
@@ -44,6 +61,19 @@ class PacketBuffer {
       buffer(std::unique_ptr<char[]>(new char[size])),
       head(buffer.get() + size) {}
 
+  //! Construct a PacketBuffer instance with capacity \p size, and copy the
+  //! bytes `[data; data + data_size)` to the new buffer. The \p data is
+  //! actually copied to the end of the buffer. This is because while we never
+  //! need to append data at the end of a packet, the header size of the
+  //! outgoing packet may be larger than the header size of the incoming
+  //! packet. By copying the initial \p data at the end of the buffer, we
+  //! preserve space at the beginning of the buffer for potential new
+  //! headers.
+  //!
+  //! The capacity \p size of the PacketBuffer needs to be at least as big as \p
+  //! data_size. If new headers are going to be added to the pakcet during
+  //! processing, \p size needs to be at least as big as the size of the
+  //! outgoing packet.
   PacketBuffer(size_t size, const char *data, size_t data_size)
     : size(size),
       data_size(0),

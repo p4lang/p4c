@@ -18,6 +18,8 @@
  *
  */
 
+//! @file deparser.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_DEPARSER_H_
 #define BM_SIM_INCLUDE_BM_SIM_DEPARSER_H_
 
@@ -32,6 +34,9 @@
 
 namespace bm {
 
+//! Implements a P4 deparser. Since there are no deparser objects per se in the
+//! P4 language yet, the deparser logic is obtained by generating a topological
+//! sorting of the parse graph.
 class Deparser : public NamedP4Object {
  public:
   Deparser(const std::string &name, p4object_id_t id)
@@ -45,11 +50,18 @@ class Deparser : public NamedP4Object {
     checksums.push_back(checksum);
   }
 
-  size_t get_headers_size(const PHV &phv) const;
-
+  //! Deparse all valid headers (including headers in stacks) in the correct
+  //! order, in front of the packet data; the packet data being everything that
+  //! was not extracted by the parser. This function also updates
+  //! checksums. After calling this method, the packet data consists of header
+  //! data + payload, and you can transmit the packet. You can get the packet
+  //! data and data size by calling respectively Packet::data() and
+  //! Packet::get_data_size().
   void deparse(Packet *pkt) const;
 
  private:
+  size_t get_headers_size(const PHV &phv) const;
+
   void update_checksums(Packet *pkt) const;
 
  private:

@@ -18,6 +18,52 @@
  *
  */
 
+//! @file switch.h
+//! This file contains 2 classes: bm::SwitchWContexts and bm::Switch. When
+//! implementing your target, you need to subclass one of them. By subclassing
+//! bm::SwitchWContexts, you will be able to write a target containing an
+//! arbitary number of bm::Context objects. For a detailed description of what a
+//! bm::Context is, please read the context.h documentation. However, many
+//! targets don't require the notion of bm::Context, which is why we also
+//! provide the bm::Switch class. The bm::Switch class inherits from
+//! bm::SwitchWContexts. Because it assumes that your switch will only use a
+//! single bm::Context, the very notion of context can be removed from the
+//! bm::Switch class and its dataplane APIs. However, because we offer unified
+//! runtime APIs, you will have to use a context id of `0` when programming the
+//! tables, even when your switch class inherits from bm::Switch and not
+//! bm::SwitchWContexts.
+//! The simple switch target only supports one bm::Context and inherits from
+//! bm::Switch.
+//!
+//! When subclassing on of these two classes, you need to remember to implement
+//! the two pure virtual functions:
+//! bm::SwitchWContexts::receive(int port_num, const char *buffer, int len) and
+//! bm::SwitchWContexts::start_and_return(). Your receive() implementation will
+//! be called for you every time a new packet is received by the device. In your
+//! start_and_return() function, you are supposed to start the different
+//! processing threads of your target switch and return immediately. Note that
+//! start_and_return() should not be mandatory per se (the target designer could
+//! do the initialization any way he wants, even potentially in the
+//! constructor). However, we have decided to keep it around for now.
+//!
+//! Both switch classes support live swapping of P4-JSON configurations. To
+//! enable it you need to provide the correct flag to the constructor (see
+//! bm::SwitchWContexts::SwitchWContexts()). Swaps are ordered through the
+//! runtime interfaces. However, it is the target switch responsibility to
+//! decide when to "commit" the swap. This is because swapping configurations
+//! invalidate certain pointers that you may still be using. We plan on trying
+//! to make this more target-friendly in the future but it is not trivial. Here
+//! is an example of how the simple router target implements swapping:
+//! @code
+//! // swap is enabled, so update pointers if needed
+//! if (this->do_swap() == 0) {  // a swap took place
+//!   ingress_mau = this->get_pipeline("ingress");
+//!   egress_mau = this->get_pipeline("egress");
+//!   parser = this->get_parser("parser");
+//!   deparser = this->get_deparser("deparser");
+//! }
+//! @endcode
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_SWITCH_H_
 #define BM_SIM_INCLUDE_BM_SIM_SWITCH_H_
 
@@ -44,40 +90,82 @@ namespace bm {
 // "Multiple inheritance is allowed only when all superclasses, with the
 // possible exception of the first one, are pure interfaces. In order to ensure
 // that they remain pure interfaces, they must end with the Interface suffix."
+//
+//! Base class for a switch implemenattion where multi-context support is
+//! required.
 class SwitchWContexts : public DevMgr, public RuntimeInterface {
   friend class Switch;
 
  public:
+  //! To enable live swapping of P4-JSON configurations, enable_swap needs to be
+  //! set to `true`. See switch.h documentation for more information on
+  //! configuration swap.
   explicit SwitchWContexts(size_t nb_cxts = 1u, bool enable_swap = false);
 
+  // TODO(antonin): return reference instead?
+  //! Access a Context by context id, throws a std::out_of_range exception if
+  //! \p cxt_id is invalid.
   Context *get_context(size_t cxt_id = 0u) {
     return &contexts.at(cxt_id);
   }
 
+  //! Your implementation will be called every time a new packet is received by
+  //! the device.
   virtual int receive(int port_num, const char *buffer, int len) = 0;
 
+  //! Do all your initialization in this function (e.g. start processing
+  //! threads) and call this function when you are ready to process packets.
   virtual void start_and_return() = 0;
 
-  // returns the Thrift port if one was specified on the command line
+  //! Returns the Thrift port used for the runtime RPC server.
   int get_runtime_port() { return thrift_port; }
 
-  /* Specify that the field is required for this target switch, i.e. the field
-     needs to be defined in the input json */
+  //! Specify that the field is required for this target switch, i.e. the field
+  //! needs to be defined in the input JSON. This function is purely meant as a
+  //! safeguard and you should use it for error checking. For example, the
+  //! following can be found in the simple switch target constructor:
+  //! @code
+  //! add_required_field("standard_metadata", "ingress_port");
+  //! add_required_field("standard_metadata", "packet_length");
+  //! add_required_field("standard_metadata", "instance_type");
+  //! add_required_field("standard_metadata", "egress_spec");
+  //! add_required_field("standard_metadata", "clone_spec");
+  //! @endcode
   void add_required_field(const std::string &header_name,
                           const std::string &field_name);
 
-  /* Force arithmetic on field. No effect if field is not defined in the
-     input json */
+  //! Force arithmetic on field. No effect if field is not defined in the input
+  //! JSON. For optimization reasons, only fields on which arithmetic will be
+  //! performed receive the ability to perform arithmetic operations. These
+  //! special fields are determined by analyzing the P4 program / the JSON
+  //! input. For example, if a field is used in a primitive action call,
+  //! arithmetic will be automatically enabled for this field in bmv2. Calling
+  //! Field::get() on a Field instance for which arithmetic has not been abled
+  //! will result in a segfault or an assert. If your target needs to enable
+  //! arithmetic on a field for which arithmetic was not automatically enabled
+  //! (could happen in some rare cases), you can enable it manually by calling
+  //! this method.
   void force_arith_field(const std::string &header_name,
                          const std::string &field_name);
 
+  //! Get the number of contexts included in this switch
   size_t get_nb_cxts() { return nb_cxts; }
 
   int init_objects(const std::string &json_path, int device_id = 0,
                    std::shared_ptr<TransportIface> notif_transport = nullptr);
 
+  //! Initialize the switch using command line options. This function is meant
+  //! to be called right after your switch instance has been constructed. For
+  //! example, in the case of the standard simple switch target:
+  //! @code
+  //! simple_switch = new SimpleSwitch();
+  //! int status = simple_switch->init_from_command_line_options(argc, argv);
+  //! if (status != 0) std::exit(status);
+  //! @endcode
   int init_from_command_line_options(int argc, char *argv[]);
 
+  //! Retrieve the shared pointer to an object of type `T` previously added to
+  //! the switch using add_component().
   template<typename T>
   std::shared_ptr<T> get_component() {
     const auto &search = components.find(std::type_index(typeid(T)));
@@ -85,16 +173,25 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return std::static_pointer_cast<T>(search->second);
   }
 
+  //! Retrieve the shared pointer to an object of type `T` previously added to
+  //! one of the switch contexts using add_cxt_component().
   template<typename T>
   std::shared_ptr<T> get_cxt_component(size_t cxt_id) {
     return contexts.at(cxt_id).get_component<T>();
   }
 
+  //! Returns true if a configuration swap was requested by the control
+  //! plane. See switch.h documentation for more information.
   int swap_requested();
 
-  // invalidates all pointers obtained with get_pipeline(), get_parser(),...
+  //! Performs a configuration swap if one was requested by the control
+  //! plane. Returns `0` if a swap had indeed been requested, `1`
+  //! otherwise. Care should be taken when using this function, as it
+  //! invalidates some pointers that your target may still be using. See
+  //! switch.h documentation for more information.
   int do_swap();
 
+  //! Construct and return a Packet instance for the given \p cxt_id.
   std::unique_ptr<Packet> new_packet_ptr(size_t cxt_id, int ingress_port,
                                          packet_id_t id, int ingress_length,
                                          // cpplint false positive
@@ -105,6 +202,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
         phv_source.get()));
   }
 
+  //! @copydoc new_packet_ptr
   Packet new_packet(size_t cxt_id, int ingress_port, packet_id_t id,
                     // cpplint false positive
                     // NOLINTNEXTLINE(whitespace/operators)
@@ -113,6 +211,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
                   std::move(buffer), phv_source.get());
   }
 
+  //! Obtain a pointer to the LearnEngine for a given Context
   LearnEngine *get_learn_engine(size_t cxt_id) {
     return contexts.at(cxt_id).get_learn_engine();
   }
@@ -416,6 +515,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return arith_fields;
   }
 
+  //! Add a component to this switch. Each switch maintains a map `T` ->
+  //! `shared_ptr<T>`, which maps a type (using `typeid`) to a shared pointer to
+  //! an object of the same type. The pointer can be retrieved at a later time
+  //! by using get_component(). This method should be used for components which
+  //! are global to the switch and not specific to a Context of the switch,
+  //! otherwise you can use add_cxt_component(). The pointer can be retrieved at
+  //! a later time by using get_component().
   template<typename T>
   bool add_component(std::shared_ptr<T> ptr) {
     std::shared_ptr<void> ptr_ = std::static_pointer_cast<void>(ptr);
@@ -423,6 +529,12 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return r.second;
   }
 
+  //! Add a component to a context of the switch. Essentially calls
+  //! Context::add_component() for the correct context. This method should be
+  //! used for components which are specific to a Context (e.g. you can have one
+  //! packet replication engine instance per context) and not global to the
+  //! switch, otherwise you can use add_component(). The pointer can be
+  //! retrieved at a later time by using get_cxt_component().
   template<typename T>
   bool add_cxt_component(size_t cxt_id, std::shared_ptr<T> ptr) {
     return contexts.at(cxt_id).add_component<T>(ptr);
@@ -454,11 +566,17 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   std::shared_ptr<TransportIface> notifications_transport{nullptr};
 };
 
-// convenience class for targets with a single "context"
+
+//! Convenience subclass of SwitchWContexts for targets with a single
+//! Context. This is the base class for the standard simple switch target
+//! implementation.
 class Switch : public SwitchWContexts {
  public:
+  //! See SwitchWContexts::SwitchWContexts()
   explicit Switch(bool enable_swap = false);
 
+  //! Convenience wrapper around SwitchWContexts::new_packet_ptr() for a single
+  //! context switch.
   std::unique_ptr<Packet> new_packet_ptr(int ingress_port,
                                          packet_id_t id, int ingress_length,
                                          // cpplint false positive
@@ -469,6 +587,8 @@ class Switch : public SwitchWContexts {
         phv_source.get()));
   }
 
+  //! Convenience wrapper around SwitchWContexts::new_packet() for a single
+  //! context switch.
   Packet new_packet(int ingress_port, packet_id_t id, int ingress_length,
                     // cpplint false positive
                     // NOLINTNEXTLINE(whitespace/operators)
@@ -477,18 +597,30 @@ class Switch : public SwitchWContexts {
                   phv_source.get());
   }
 
+  //! Return a raw, non-owning pointer to Pipeline \p name. This pointer will be
+  //! invalidated if a configuration swap is performed by the target. See
+  //! switch.h documentation for details.
   Pipeline *get_pipeline(const std::string &name) {
     return get_context(0)->get_pipeline(name);
   }
 
+  //! Return a raw, non-owning pointer to Parser \p name. This pointer will be
+  //! invalidated if a configuration swap is performed by the target. See
+  //! switch.h documentation for details.
   Parser *get_parser(const std::string &name) {
     return get_context(0)->get_parser(name);
   }
 
+  //! Return a raw, non-owning pointer to Deparser \p name. This pointer will be
+  //! invalidated if a configuration swap is performed by the target. See
+  //! switch.h documentation for details.
   Deparser *get_deparser(const std::string &name) {
     return get_context(0)->get_deparser(name);
   }
 
+  //! Return a raw, non-owning pointer to the FieldList with id \p
+  //! field_list_id. This pointer will be invalidated if a configuration swap is
+  //! performed by the target. See switch.h documentation for details.
   FieldList *get_field_list(const p4object_id_t field_list_id) {
     return get_context(0)->get_field_list(field_list_id);
   }
@@ -504,6 +636,7 @@ class Switch : public SwitchWContexts {
 
   // to avoid C++ name hiding
   using SwitchWContexts::get_learn_engine;
+  //! Obtain a pointer to the LearnEngine for this Switch instance
   LearnEngine *get_learn_engine() {
     return get_learn_engine(0);
   }
@@ -514,11 +647,17 @@ class Switch : public SwitchWContexts {
     return get_ageing_monitor(0);
   }
 
+  //! Add a component to this Switch. Each Switch maintains a map `T` ->
+  //! `shared_ptr<T>`, which maps a type (using `typeid`) to a shared pointer to
+  //! an object of the same type. The pointer can be retrieved at a later time
+  //! by using get_component().
   template<typename T>
   bool add_component(std::shared_ptr<T> ptr) {
     return add_cxt_component<T>(0, std::move(ptr));
   }
 
+  //! Retrieve the shared pointer to an object of type `T` previously added to
+  //! the Switch using add_component().
   template<typename T>
   std::shared_ptr<T> get_component() {
     return get_cxt_component<T>(0);

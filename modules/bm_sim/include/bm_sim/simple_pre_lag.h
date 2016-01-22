@@ -19,6 +19,8 @@
  *
  */
 
+//! @file simple_pre_lag.h
+
 #ifndef BM_SIM_INCLUDE_BM_SIM_SIMPLE_PRE_LAG_H_
 #define BM_SIM_INCLUDE_BM_SIM_SIMPLE_PRE_LAG_H_
 
@@ -29,6 +31,7 @@
 
 namespace bm {
 
+//! Enhances McSimplePre with LAG (link aggregation) support.
 class McSimplePreLAG : public McSimplePre {
  public:
   static constexpr int LAG_MAX_ENTRIES = 256;
@@ -45,6 +48,7 @@ class McSimplePreLAG : public McSimplePre {
   McReturnCode mc_set_lag_membership(const lag_id_t lag_index,
                                      const PortMap &port_map);
 
+  //! TODO(unknown)
   std::vector<McOut> replicate(const McIn) const;
 
  private:
