@@ -581,19 +581,20 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
                       << std::endl;
             return 1;
           }
-          add_f(cfg_key_entry);
           has_lpm = true;
+        } else if (match_type == "valid") {
+          const Json::Value &cfg_key_field = cfg_key_entry["target"];
+          const string header_name = cfg_key_field.asString();
+          header_id_t header_id = get_header_id(header_name);
+          key_builder.push_back_valid_header(header_id);
+        } else {
+          add_f(cfg_key_entry);
         }
       }
 
       for (const auto &cfg_key_entry : cfg_match_key) {
         const string match_type = cfg_key_entry["match_type"].asString();
-        const Json::Value &cfg_key_field = cfg_key_entry["target"];
-        if (match_type == "valid") {
-          const string header_name = cfg_key_field.asString();
-          header_id_t header_id = get_header_id(header_name);
-          key_builder.push_back_valid_header(header_id);
-        } else if (match_type != "lpm") {
+        if (match_type == "lpm") {
           add_f(cfg_key_entry);
         }
       }
