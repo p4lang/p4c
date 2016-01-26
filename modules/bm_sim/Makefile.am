@@ -87,6 +87,7 @@ include/bm_sim/phv_source.h \
 include/bm_sim/pipeline.h \
 include/bm_sim/port_monitor.h \
 include/bm_sim/queue.h \
+include/bm_sim/queueing.h \
 include/bm_sim/runtime_interface.h \
 include/bm_sim/stateful.h \
 include/bm_sim/switch.h \
