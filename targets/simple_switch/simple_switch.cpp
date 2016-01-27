@@ -66,13 +66,12 @@ extern int import_primitives();
 SimpleSwitch::SimpleSwitch(int max_port)
   : Switch(false),  // enable_switch = false
     max_port(max_port),
-    input_buffer(1024), egress_buffers(max_port), output_buffer(128),
+    input_buffer(1024),
+    egress_buffers(max_port, nb_egress_threads,
+                   64, EgressThreadMapper(nb_egress_threads)),
+    output_buffer(128),
     pre(new McSimplePreLAG()),
     start(clock::now()) {
-  for (int i = 0; i < max_port; i++) {
-    egress_buffers[i].set_capacity(64);
-  }
-
   add_component<McSimplePreLAG>(pre);
 
   add_required_field("standard_metadata", "ingress_port");
@@ -88,7 +87,7 @@ void
 SimpleSwitch::start_and_return() {
   std::thread t1(&SimpleSwitch::ingress_thread, this);
   t1.detach();
-  for (int i = 0; i < max_port; i++) {
+  for (size_t i = 0; i < nb_egress_threads; i++) {
     std::thread t2(&SimpleSwitch::egress_thread, this, i);
     t2.detach();
   }
@@ -123,10 +122,10 @@ SimpleSwitch::enqueue(int egress_port, std::unique_ptr<Packet> &&packet) {
     if (phv->has_header("queueing_metadata")) {
       phv->get_field("queueing_metadata.enq_timestamp").set(get_ts().count());
       phv->get_field("queueing_metadata.enq_qdepth")
-        .set(egress_buffers[egress_port].size());
+        .set(egress_buffers.size(egress_port));
     }
 
-    egress_buffers[egress_port].push_front(std::move(packet));
+    egress_buffers.push_front(egress_port, std::move(packet));
 }
 
 // used for ingress cloning, resubmit
@@ -277,14 +276,15 @@ SimpleSwitch::ingress_thread() {
 }
 
 void
-SimpleSwitch::egress_thread(int port) {
+SimpleSwitch::egress_thread(size_t worker_id) {
   Deparser *deparser = this->get_deparser("deparser");
   Pipeline *egress_mau = this->get_pipeline("egress");
   PHV *phv;
 
   while (1) {
     std::unique_ptr<Packet> packet;
-    egress_buffers[port].pop_back(&packet);
+    size_t port;
+    egress_buffers.pop_back(worker_id, &port, &packet);
 
     phv = packet->get_phv();
     packet_id_t packet_id = packet->get_packet_id();
@@ -292,7 +292,7 @@ SimpleSwitch::egress_thread(int port) {
     if (phv->has_header("queueing_metadata")) {
       phv->get_field("queueing_metadata.deq_timestamp").set(get_ts().count());
       phv->get_field("queueing_metadata.deq_qdepth")
-        .set(egress_buffers[port].size());
+        .set(egress_buffers.size(port));
     }
 
     phv->get_field("standard_metadata.egress_port").set(port);
