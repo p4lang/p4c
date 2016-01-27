@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "bm_sim/queue.h"
+#include "bm_sim/queueing.h"
 #include "bm_sim/packet.h"
 #include "bm_sim/switch.h"
 #include "bm_sim/event_logger.h"
@@ -49,38 +50,6 @@ using bm::FieldList;
 using bm::packet_id_t;
 using bm::p4object_id_t;
 
-class PacketQueue : public Queue<std::unique_ptr<Packet> > {
- private:
-  typedef std::chrono::high_resolution_clock clock;
-
- public:
-  PacketQueue()
-    : Queue<std::unique_ptr<Packet> >(1024, WriteReturn, ReadBlock),
-      last_sent(clock::now()), pkt_delay_ticks(0) { }
-
-  void set_queue_rate(const uint64_t pps) {
-    using std::chrono::duration;
-    if (pps == 0) {
-      pkt_delay_ticks = ticks::zero();
-      return;
-    }
-    queue_rate_pps = pps;
-    pkt_delay_ticks = duration_cast<ticks>(duration<double>(1. / pps));
-  }
-
-  void pop_back(std::unique_ptr<Packet> *pkt) {
-    Queue<std::unique_ptr<Packet> >::pop_back(pkt);
-    // enforce rate
-    clock::time_point next_send = last_sent + pkt_delay_ticks;
-    std::this_thread::sleep_until(next_send);
-    last_sent = clock::now();
-  }
-
- private:
-  uint64_t queue_rate_pps;
-  clock::time_point last_sent;
-  ticks pkt_delay_ticks{};
-};
 
 class SimpleSwitch : public Switch {
  public:
@@ -133,19 +102,21 @@ class SimpleSwitch : public Switch {
 
   int set_egress_queue_depth(const size_t depth_pkts) {
     for (int i = 0; i < max_port; i++) {
-      egress_buffers[i].set_capacity(depth_pkts);
+      egress_buffers.set_capacity(i, depth_pkts);
     }
     return 0;
   }
 
   int set_egress_queue_rate(const uint64_t rate_pps) {
     for (int i = 0; i < max_port; i++) {
-      egress_buffers[i].set_queue_rate(rate_pps);
+      egress_buffers.set_rate(i, rate_pps);
     }
     return 0;
   }
 
  private:
+  static constexpr size_t nb_egress_threads = 4u;
+
   enum PktInstanceType {
     PKT_INSTANCE_TYPE_NORMAL,
     PKT_INSTANCE_TYPE_INGRESS_CLONE,
@@ -156,9 +127,20 @@ class SimpleSwitch : public Switch {
     PKT_INSTANCE_TYPE_RESUBMIT,
   };
 
+  struct EgressThreadMapper {
+    explicit EgressThreadMapper(size_t nb_threads)
+        : nb_threads(nb_threads) { }
+
+    size_t operator()(size_t egress_port) const {
+      return egress_port % nb_threads;
+    }
+
+    size_t nb_threads;
+  };
+
  private:
   void ingress_thread();
-  void egress_thread(int port);
+  void egress_thread(size_t worker_id);
   void transmit_thread();
 
   int get_mirroring_mapping(mirror_id_t mirror_id) const {
@@ -179,7 +161,8 @@ class SimpleSwitch : public Switch {
  private:
   int max_port;
   Queue<std::unique_ptr<Packet> > input_buffer;
-  std::vector<PacketQueue> egress_buffers{};
+  bm::QueueingLogicRL<std::unique_ptr<Packet>, EgressThreadMapper>
+  egress_buffers;
   Queue<std::unique_ptr<Packet> > output_buffer;
   std::shared_ptr<McSimplePreLAG> pre;
   clock::time_point start;

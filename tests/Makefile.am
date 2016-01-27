@@ -22,6 +22,7 @@ test_p4objects \
 test_parser \
 test_phv \
 test_queue \
+test_queueing \
 test_tables \
 test_learning \
 test_pre \
@@ -47,6 +48,7 @@ test_p4objects_SOURCES     = $(common_source) test_p4objects.cpp
 test_parser_SOURCES        = $(common_source) test_parser.cpp
 test_phv_SOURCES           = $(common_source) test_phv.cpp
 test_queue_SOURCES         = $(common_source) test_queue.cpp
+test_queueing_SOURCES      = $(common_source) test_queueing.cpp
 test_tables_SOURCES        = $(common_source) test_tables.cpp
 test_learning_SOURCES      = $(common_source) test_learning.cpp
 test_pre_SOURCES           = $(common_source) test_pre.cpp
@@ -69,6 +71,7 @@ test_p4objects.cpp \
 test_parser.cpp \
 test_phv.cpp \
 test_queue.cpp \
+test_queueing.cpp \
 test_tables.cpp \
 test_learning.cpp \
 test_pre.cpp \
