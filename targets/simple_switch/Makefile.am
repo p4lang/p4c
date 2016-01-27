@@ -36,10 +36,10 @@ bin_PROGRAMS = simple_switch
 simple_switch_LDADD = \
 $(top_builddir)/modules/bm_runtime/libbmruntime.la \
 $(top_builddir)/thrift_src/libruntimestubs.la \
-libsimpleswitch.la
+libsimpleswitch.la \
+libsimpleswitch_thrift.la
 
 simple_switch_SOURCES = main.cpp
-simple_switch_LDFLAGS = -lsimpleswitch_thrift
 
 lib_LTLIBRARIES = libsimpleswitch_thrift.la
 
