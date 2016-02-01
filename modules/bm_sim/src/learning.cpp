@@ -25,6 +25,7 @@
 #include <cassert>
 
 #include "bm_sim/learning.h"
+#include "bm_sim/logger.h"
 
 namespace bm {
 
@@ -84,7 +85,7 @@ LearnEngine::LearnList::init() {
 
 LearnEngine::LearnList::~LearnList() {
   {
-    std::unique_lock<std::mutex> lock(mutex);
+    LockType lock(mutex);
     stop_transmit_thread = true;
   }
   b_can_send.notify_all();
@@ -94,7 +95,7 @@ LearnEngine::LearnList::~LearnList() {
 void
 LearnEngine::LearnList::set_learn_writer(
     std::shared_ptr<TransportIface> learn_writer) {
-  std::unique_lock<std::mutex> lock(mutex);
+  LockType lock(mutex);
   while (writer_busy) {
     can_change_writer.wait(lock);
   }
@@ -104,7 +105,7 @@ LearnEngine::LearnList::set_learn_writer(
 
 void
 LearnEngine::LearnList::set_learn_cb(const LearnCb &learn_cb, void *cookie) {
-  std::unique_lock<std::mutex> lock(mutex);
+  LockType lock(mutex);
   while (writer_busy) {
     can_change_writer.wait(lock);
   }
@@ -125,10 +126,37 @@ LearnEngine::LearnList::push_back_constant(const std::string &hexstring) {
 }
 
 void
+LearnEngine::LearnList::set_timeout(unsigned int timeout_ms) {
+  LockType lock(mutex);
+  timeout = milliseconds(timeout_ms);
+  with_timeout = (timeout_ms > 0);
+}
+
+void
+LearnEngine::LearnList::set_max_samples(size_t nb_samples) {
+  LockType lock(mutex);
+  max_samples = nb_samples;
+  if (num_samples > 0 && num_samples >= max_samples) {
+    process_full_buffer(lock);
+  }
+}
+
+void
 LearnEngine::LearnList::swap_buffers() {
   buffer_tmp.swap(buffer);
+  num_samples_tmp = num_samples;
   num_samples = 0;
   buffer_id++;
+}
+
+void
+LearnEngine::LearnList::process_full_buffer(LockType &lock) {
+  while (buffer_tmp.size() != 0) {
+    b_can_swap.wait(lock);
+  }
+  swap_buffers();
+
+  b_can_send.notify_one();
 }
 
 void
@@ -137,7 +165,7 @@ LearnEngine::LearnList::add_sample(const PHV &phv) {
   sample.clear();
   builder(phv, &sample);
 
-  std::unique_lock<std::mutex> lock(mutex);
+  LockType lock(mutex);
 
   const auto it = filter.find(sample);
   if (it != filter.end()) return;
@@ -154,12 +182,7 @@ LearnEngine::LearnList::add_sample(const PHV &phv) {
     // wake transmit thread to update cond var wait time
     b_can_send.notify_one();
   } else if (num_samples >= max_samples) {
-    while (buffer_tmp.size() != 0) {
-      b_can_swap.wait(lock);
-    }
-    swap_buffers();
-
-    b_can_send.notify_one();
+    process_full_buffer(lock);
   }
 }
 
@@ -167,7 +190,7 @@ void
 LearnEngine::LearnList::buffer_transmit() {
   milliseconds time_to_sleep;
   size_t num_samples_to_send;
-  std::unique_lock<std::mutex> lock(mutex);
+  LockType lock(mutex);
   clock::time_point now = clock::now();
   while (!stop_transmit_thread &&
          buffer_tmp.size() == 0 &&
@@ -188,7 +211,10 @@ LearnEngine::LearnList::buffer_transmit() {
     num_samples_to_send = num_samples;
     swap_buffers();
   } else {  // buffer full -> swapping was already done
-    num_samples_to_send = max_samples;
+    // maybe max_samples was modified in between, so it would not be safe to do
+    // this
+    // num_samples_to_send = max_samples;
+    num_samples_to_send = num_samples_tmp;
   }
 
   last_sent = now;
@@ -244,7 +270,7 @@ LearnEngine::LearnList::buffer_transmit_loop() {
 void
 LearnEngine::LearnList::ack(buffer_id_t buffer_id,
                             const std::vector<int> &sample_ids) {
-  std::unique_lock<std::mutex> lock(mutex);
+  LockType lock(mutex);
   auto it = old_buffers.find(buffer_id);
   // assert(it != old_buffers.end());
   // we assume that this was acked already, and simply return
@@ -262,7 +288,7 @@ LearnEngine::LearnList::ack(buffer_id_t buffer_id,
 
 void
 LearnEngine::LearnList::ack_buffer(buffer_id_t buffer_id) {
-  std::unique_lock<std::mutex> lock(mutex);
+  LockType lock(mutex);
   auto it = old_buffers.find(buffer_id);
   // assert(it != old_buffers.end());
   // we assume that this was acked already, and simply return
@@ -283,7 +309,7 @@ LearnEngine::LearnList::ack_buffer(buffer_id_t buffer_id) {
 
 void
 LearnEngine::LearnList::reset_state() {
-  std::unique_lock<std::mutex> lock(mutex);
+  LockType lock(mutex);
   // TODO(antonin): need to make this robust, what if an unexpected ack comes
   // later?
   buffer.clear();
@@ -297,94 +323,136 @@ LearnEngine::LearnList::reset_state() {
 LearnEngine::LearnEngine(int device_id, int cxt_id)
     : device_id(device_id), cxt_id(cxt_id) { }
 
+LearnEngine::LearnList *
+LearnEngine::get_learn_list(list_id_t list_id) {
+  auto it = learn_lists.find(list_id);
+  return it == learn_lists.end() ? nullptr : it->second.get();
+}
+
 void
 LearnEngine::list_create(list_id_t list_id, size_t max_samples,
                          unsigned int timeout_ms) {
-  assert(learn_lists.find(list_id) == learn_lists.end());
-  learn_lists[list_id] =
-    std::unique_ptr<LearnList>(
-        new LearnList(list_id, device_id, cxt_id, max_samples, timeout_ms));
+  if (learn_lists.find(list_id) != learn_lists.end()) {
+    BMLOG_ERROR("Trying to create learn list with id {} "
+                "but a list with the same id already exists", list_id);
+        return;
+  }
+  learn_lists[list_id] = std::unique_ptr<LearnList>(
+      new LearnList(list_id, device_id, cxt_id, max_samples, timeout_ms));
 }
 
 void
 LearnEngine::list_set_learn_writer(
     list_id_t list_id, std::shared_ptr<TransportIface> learn_writer) {
-  auto it = learn_lists.find(list_id);
-  assert(it != learn_lists.end());
-  LearnList *list = it->second.get();
+  LearnList *list = get_learn_list(list_id);
+  if (!list) {
+    BMLOG_ERROR("Trying to set learn writer for invalid learn list id {}",
+                list_id);
+    return;
+  }
   list->set_learn_writer(learn_writer);
 }
 
 void
 LearnEngine::list_set_learn_cb(list_id_t list_id,
                                const LearnCb &learn_cb, void *cookie) {
-  auto it = learn_lists.find(list_id);
-  assert(it != learn_lists.end());
-  LearnList *list = it->second.get();
+  LearnList *list = get_learn_list(list_id);
+  if (!list) {
+    BMLOG_ERROR("Trying to set learn callback for invalid learn list id {}",
+                list_id);
+    return;
+  }
   list->set_learn_cb(learn_cb, cookie);
 }
 
 void
 LearnEngine::list_push_back_field(list_id_t list_id,
                                   header_id_t header_id, int field_offset) {
-  auto it = learn_lists.find(list_id);
-  assert(it != learn_lists.end());
-  LearnList *list = it->second.get();
+  LearnList *list = get_learn_list(list_id);
+  if (!list) {
+    BMLOG_ERROR(
+        "Trying to push back field ({}, {}) to invalid learn list id {}",
+        header_id, field_offset, list_id);
+    return;
+  }
   list->push_back_field(header_id, field_offset);
 }
 
 void
 LearnEngine::list_push_back_constant(list_id_t list_id,
                                      const std::string &hexstring) {
-  auto it = learn_lists.find(list_id);
-  assert(it != learn_lists.end());
-  LearnList *list = it->second.get();
+  LearnList *list = get_learn_list(list_id);
+  if (!list) {
+    BMLOG_ERROR("Trying to push back constant {} to invalid learn list id {}",
+                hexstring, list_id);
+    return;
+  }
   list->push_back_constant(hexstring);
 }
 
 void
 LearnEngine::list_init(list_id_t list_id) {
-  auto it = learn_lists.find(list_id);
-  assert(it != learn_lists.end());
-  LearnList *list = it->second.get();
+  LearnList *list = get_learn_list(list_id);
+  if (!list) {
+    BMLOG_ERROR("Trying to init learn list for invalid id {}", list_id);
+    return;
+  }
   list->init();
+}
+
+LearnEngine::LearnErrorCode
+LearnEngine::list_set_timeout(list_id_t list_id, unsigned int timeout_ms) {
+  LearnList *list = get_learn_list(list_id);
+  if (!list) return INVALID_LIST_ID;
+  list->set_timeout(timeout_ms);
+  return SUCCESS;
+}
+
+LearnEngine::LearnErrorCode
+LearnEngine::list_set_max_samples(list_id_t list_id, size_t max_samples) {
+  LearnList *list = get_learn_list(list_id);
+  if (!list) return INVALID_LIST_ID;
+  list->set_max_samples(max_samples);
+  return SUCCESS;
 }
 
 void
 LearnEngine::learn(list_id_t list_id, const Packet &pkt) {
   // TODO(antonin) : event logging
-  auto it = learn_lists.find(list_id);
-  assert(it != learn_lists.end());
-  LearnList *list = it->second.get();
+  LearnList *list = get_learn_list(list_id);
+  if (!list) {
+    BMLOG_ERROR_PKT(pkt, "Trying to learn for invalid list id {}", list_id);
+    return;
+  }
   list->add_sample(*pkt.get_phv());
 }
 
-void
+LearnEngine::LearnErrorCode
 LearnEngine::ack(list_id_t list_id, buffer_id_t buffer_id, int sample_id) {
   // TODO(antonin) : event logging
-  auto it = learn_lists.find(list_id);
-  assert(it != learn_lists.end());
-  LearnList *list = it->second.get();
+  LearnList *list = get_learn_list(list_id);
+  if (!list) return INVALID_LIST_ID;
   list->ack(buffer_id, {sample_id});
+  return SUCCESS;
 }
 
-void
+LearnEngine::LearnErrorCode
 LearnEngine::ack(list_id_t list_id, buffer_id_t buffer_id,
                  const std::vector<int> &sample_ids) {
   // TODO(antonin) : event logging
-  auto it = learn_lists.find(list_id);
-  assert(it != learn_lists.end());
-  LearnList *list = it->second.get();
+  LearnList *list = get_learn_list(list_id);
+  if (!list) return INVALID_LIST_ID;
   list->ack(buffer_id, sample_ids);
+  return SUCCESS;
 }
 
-void
+LearnEngine::LearnErrorCode
 LearnEngine::ack_buffer(list_id_t list_id, buffer_id_t buffer_id) {
   // TODO(antonin) : event logging
-  auto it = learn_lists.find(list_id);
-  assert(it != learn_lists.end());
-  LearnList *list = it->second.get();
+  LearnList *list = get_learn_list(list_id);
+  if (!list) return INVALID_LIST_ID;
   list->ack_buffer(buffer_id);
+  return SUCCESS;
 }
 
 void

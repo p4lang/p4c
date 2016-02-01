@@ -151,6 +151,15 @@ exception InvalidRegisterOperation {
  1:RegisterOperationErrorCode code
 }
 
+enum LearnOperationErrorCode {
+  INVALID_LIST_ID = 1,
+  ERROR = 2
+}
+
+exception InvalidLearnOperation {
+ 1:LearnOperationErrorCode code
+}
+
 // TODO
 enum DevMgrErrorCode {
   ERROR = 1
@@ -358,13 +367,25 @@ service Standard {
     2:BmLearningListId list_id,
     3:BmLearningBufferId buffer_id,
     4:list<BmLearningSampleId> sample_ids
-  ),
+  ) throws (1:InvalidLearnOperation ouch),
 
   void bm_learning_ack_buffer(
     1:i32 cxt_id,
     2:BmLearningListId list_id,
     3:BmLearningBufferId buffer_id
-  ),
+  ) throws (1:InvalidLearnOperation ouch),
+
+  void bm_learning_set_timeout(
+    1:i32 cxt_id,
+    2:BmLearningListId list_id,
+    3:i32 timeout_ms
+  ) throws (1:InvalidLearnOperation ouch),
+
+  void bm_learning_set_buffer_size(
+    1:i32 cxt_id,
+    2:BmLearningListId list_id,
+    3:i32 nb_samples
+  ) throws (1:InvalidLearnOperation ouch),
 
   // swap configs
 
@@ -373,7 +394,6 @@ service Standard {
   ) throws (1:InvalidSwapOperation ouch),
 
   void bm_swap_configs() throws (1:InvalidSwapOperation ouch),
-
   
   // meters
 

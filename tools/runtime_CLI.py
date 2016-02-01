@@ -545,7 +545,10 @@ def handle_bad_input(f):
             print "Invalid meter operation (%s)" % error
         except InvalidRegisterOperation as e:
             error = RegisterOperationErrorCode._VALUES_TO_NAMES[e.code]
-            print "Invalid meter operation (%s)" % error
+            print "Invalid register operation (%s)" % error
+        except InvalidLearnOperation as e:
+            error = LearnOperationErrorCode._VALUES_TO_NAMES[e.code]
+            print "Invalid learn operation (%s)" % error
         except InvalidSwapOperation as e:
             error = SwapOperationErrorCode._VALUES_TO_NAMES[e.code]
             print "Invalid swap operation (%s)" % error

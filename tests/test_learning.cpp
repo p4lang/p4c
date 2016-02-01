@@ -316,7 +316,8 @@ TEST_F(LearningTest, FilterAck) {
   sleep_for(milliseconds(100));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, learn_writer->check_status());
 
-  learn_engine.ack(list_id, 0, 0); // ack and learn again
+  // ack and learn again
+  ASSERT_EQ(LearnEngine::SUCCESS, learn_engine.ack(list_id, 0, 0));
   learn_engine.learn(list_id, pkt);
   learn_writer->read(buffer, sizeof(buffer));
   ASSERT_EQ(1u, msg_hdr->buffer_id); // buffer id was incremented
@@ -349,7 +350,8 @@ TEST_F(LearningTest, FilterAcks) {
   sleep_for(milliseconds(100));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, learn_writer->check_status());
 
-  learn_engine.ack(list_id, 0, {0, 1}); // ack both samples and learn again
+  // ack both samples and learn again
+  ASSERT_EQ(LearnEngine::SUCCESS, learn_engine.ack(list_id, 0, {0, 1}));
 
   f.set("0xaba");
   learn_engine.learn(list_id, pkt);
@@ -386,7 +388,8 @@ TEST_F(LearningTest, FilterAckBuffer) {
   sleep_for(milliseconds(100));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, learn_writer->check_status());
 
-  learn_engine.ack_buffer(list_id, 0); // ack whole buffer
+  // ack whole buffer
+  ASSERT_EQ(LearnEngine::SUCCESS, learn_engine.ack_buffer(list_id, 0));
 
   f.set("0xaba");
   learn_engine.learn(list_id, pkt);
@@ -397,6 +400,119 @@ TEST_F(LearningTest, FilterAckBuffer) {
   learn_writer->read(buffer, sizeof(buffer));
   ASSERT_EQ(1u, msg_hdr->buffer_id); // buffer id was incremented
   ASSERT_EQ(2u, msg_hdr->num_samples);
+}
+
+TEST_F(LearningTest, TimeoutChange) {
+  LearnEngine::list_id_t list_id = 1;
+  size_t max_samples = 2; unsigned timeout_ms = 100;
+  learn_on_test1_f16(list_id, max_samples, timeout_ms);
+
+  Packet pkt = get_pkt();
+  Field &f = pkt.get_phv()->get_field(testHeader1, 0);
+  f.set("0xaba");
+
+  auto learn_and_ack = [this, list_id, &pkt](unsigned int tm) {
+    clock::time_point s = clock::now();
+    learn_engine.learn(list_id, pkt);
+    learn_writer->read(buffer, sizeof(buffer));
+    clock::time_point e = clock::now();
+    unsigned int d = duration_cast<milliseconds>(e - s).count();
+    ASSERT_GT(d, tm - 20u);
+    ASSERT_LT(d, tm + 20u);
+    LearnEngine::msg_hdr_t *msg_hdr = (LearnEngine::msg_hdr_t *) buffer;
+    // ack to be able to learn on the same packet
+    ASSERT_EQ(LearnEngine::SUCCESS,
+              learn_engine.ack_buffer(list_id, msg_hdr->buffer_id));
+  };
+
+  auto change_timeout = [this, list_id](unsigned int tm) {
+    ASSERT_EQ(LearnEngine::SUCCESS,
+              learn_engine.list_set_timeout(list_id, tm));
+  };
+
+  learn_and_ack(timeout_ms);
+
+  timeout_ms = 200;
+  change_timeout(timeout_ms);
+  learn_and_ack(timeout_ms);
+
+  timeout_ms = 100;
+  change_timeout(timeout_ms);
+  learn_and_ack(timeout_ms);
+}
+
+TEST_F(LearningTest, TimeoutChangeBadList) {
+  LearnEngine::list_id_t list_id = 1;
+  LearnEngine::list_id_t bad_list_id = 2;
+  ASSERT_NE(list_id, bad_list_id);
+  size_t max_samples = 2; unsigned timeout_ms = 100;
+  learn_on_test1_f16(list_id, max_samples, timeout_ms);
+  ASSERT_EQ(LearnEngine::INVALID_LIST_ID,
+            learn_engine.list_set_timeout(bad_list_id, timeout_ms));
+}
+
+TEST_F(LearningTest, MaxSamplesChange) {
+  LearnEngine::list_id_t list_id = 1;
+  size_t max_samples = 2; unsigned timeout_ms = 0;
+  learn_on_test1_f16(list_id, max_samples, timeout_ms);
+
+  auto check_recv = [this, list_id](size_t s) {
+    learn_writer->read(buffer, sizeof(buffer));
+    LearnEngine::msg_hdr_t *msg_hdr = (LearnEngine::msg_hdr_t *) buffer;
+    ASSERT_EQ(s, msg_hdr->num_samples);
+    // ack to be able to learn on the same packet
+    ASSERT_EQ(LearnEngine::SUCCESS,
+              learn_engine.ack_buffer(list_id, msg_hdr->buffer_id));
+  };
+
+  auto check_not_ready = [this](size_t d = 0u) {
+    sleep_for(milliseconds(d));
+    ASSERT_NE(MemoryAccessor::Status::CAN_READ, learn_writer->check_status());
+  };
+
+  auto do_send = [this, list_id](size_t s, size_t start) {
+    Packet pkt = get_pkt();
+    Field &f = pkt.get_phv()->get_field(testHeader1, 0);
+    for (size_t c = start; c < start + s; c++) {
+      f.set(std::to_string(c));
+      learn_engine.learn(list_id, pkt);
+    }
+  };
+
+  auto change_max_samples = [this, list_id](size_t s) {
+    ASSERT_EQ(LearnEngine::SUCCESS,
+              learn_engine.list_set_max_samples(list_id, s));
+  };
+
+  check_not_ready();
+  do_send(1, 0);
+  check_not_ready(300);
+  do_send(1, 1);
+  check_recv(2);
+
+  check_not_ready(300);
+  change_max_samples(1);
+  check_not_ready(300);
+  do_send(1, 0);
+  check_recv(1);
+
+  change_max_samples(2);
+  do_send(1, 0);
+  check_not_ready(300);
+  // we're changing the buffer size to 1, because there is already 1 sample
+  // waiting, the learn notification should be ready right away
+  change_max_samples(1);
+  check_recv(1);
+}
+
+TEST_F(LearningTest, MaxSamplesChangeBadList) {
+  LearnEngine::list_id_t list_id = 1;
+  LearnEngine::list_id_t bad_list_id = 2;
+  ASSERT_NE(list_id, bad_list_id);
+  size_t max_samples = 2; unsigned timeout_ms = 100;
+  learn_on_test1_f16(list_id, max_samples, timeout_ms);
+  ASSERT_EQ(LearnEngine::INVALID_LIST_ID,
+            learn_engine.list_set_max_samples(bad_list_id, max_samples));
 }
 
 TEST_F(LearningTest, OneSampleCbMode) {
