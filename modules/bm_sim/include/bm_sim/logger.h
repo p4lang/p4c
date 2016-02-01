@@ -132,6 +132,12 @@ class Logger {
   SPDLOG_TRACE(bm::Logger::get(), "[{}] [cxt {}] " s, (pkt).get_unique_id(), \
                (pkt).get_context(), ##__VA_ARGS__)
 
+#define BMLOG_ERROR(...) bm::Logger::get()->error(__VA_ARGS__)
+
+#define BMLOG_ERROR_PKT(pkt, s, ...) \
+  bm::Logger::get()->error("[{}] [cxt {}] " s, (pkt).get_unique_id(), \
+                           (pkt).get_context(), ##__VA_ARGS__)
+
 #undef SPDLOG_DEBUG_ON
 #undef SPDLOG_TRACE_ON
 
