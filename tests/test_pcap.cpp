@@ -15,10 +15,14 @@
 
 #include <gtest/gtest.h>
 
+#include <boost/filesystem.hpp>
+
 #include "bm_sim/pcap_file.h"
 #include <stdio.h>
 
 using namespace bm;
+
+namespace fs = boost::filesystem;
 
 // Google Test fixture for pcap tests
 class PcapTest : public ::testing::Test {
@@ -35,15 +39,18 @@ protected:
   }
 
   std::string getFile1() {
-    return testDataFolder + "/" + testfile1;
+    fs::path path = fs::path(testDataFolder) / fs::path(testfile1);
+    return path.string();
   }
 
   std::string getFile2() {
-    return testDataFolder + "/" + testfile2;
+    fs::path path = fs::path(testDataFolder) / fs::path(testfile2);
+    return path.string();
   }
 
   std::string getTmpFile() {
-    return testDataFolder + "/" + tmpfile;
+    fs::path path = fs::path(testDataFolder) / fs::path(tmpfile);
+    return path.string();
   }
 
   void setReceiver(PacketReceiverIface* recv) {

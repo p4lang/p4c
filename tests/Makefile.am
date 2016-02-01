@@ -9,7 +9,7 @@ $(top_srcdir)/modules/bm_sim/libbmsim.la \
 $(top_srcdir)/modules/bf_lpm_trie/libbflpmtrie.la \
 $(top_srcdir)/modules/bm_apps/libbmapps.la \
 $(top_srcdir)/third_party/jsoncpp/libjson.la \
--lboost_system -lboost_thread
+-lboost_system -lboost_thread -lboost_filesystem
 
 # Define unit tests
 common_source = main.cpp
