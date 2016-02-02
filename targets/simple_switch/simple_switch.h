@@ -33,6 +33,19 @@
 #include "bm_sim/event_logger.h"
 #include "bm_sim/simple_pre_lag.h"
 
+// TODO(antonin)
+// experimental support for priority queueing
+// to enable it, uncomment this flag
+// you can also choose the field from which the priority value will be read, as
+// well as the number of priority queues per port
+// PRIORITY 0 IS THE HIGHEST PRIORITY
+// #define SSWITCH_PRIORITY_QUEUEING_ON
+
+#ifdef SSWITCH_PRIORITY_QUEUEING_ON
+#define SSWITCH_PRIORITY_QUEUEING_NB_QUEUES 2
+#define SSWITCH_PRIORITY_QUEUEING_SRC "intrinsic_metadata.priority"
+#endif
+
 using ts_res = std::chrono::microseconds;
 using std::chrono::duration_cast;
 using ticks = std::chrono::nanoseconds;
@@ -161,7 +174,11 @@ class SimpleSwitch : public Switch {
  private:
   int max_port;
   Queue<std::unique_ptr<Packet> > input_buffer;
+#ifdef SSWITCH_PRIORITY_QUEUEING_ON
+  bm::QueueingLogicPriRL<std::unique_ptr<Packet>, EgressThreadMapper>
+#else
   bm::QueueingLogicRL<std::unique_ptr<Packet>, EgressThreadMapper>
+#endif
   egress_buffers;
   Queue<std::unique_ptr<Packet> > output_buffer;
   std::shared_ptr<McSimplePreLAG> pre;

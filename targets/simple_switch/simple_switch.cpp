@@ -67,8 +67,14 @@ SimpleSwitch::SimpleSwitch(int max_port)
   : Switch(false),  // enable_switch = false
     max_port(max_port),
     input_buffer(1024),
+#ifdef SSWITCH_PRIORITY_QUEUEING_ON
+    egress_buffers(max_port, nb_egress_threads,
+                   64, EgressThreadMapper(nb_egress_threads),
+                   SSWITCH_PRIORITY_QUEUEING_NB_QUEUES),
+#else
     egress_buffers(max_port, nb_egress_threads,
                    64, EgressThreadMapper(nb_egress_threads)),
+#endif
     output_buffer(128),
     pre(new McSimplePreLAG()),
     start(clock::now()) {
@@ -122,10 +128,20 @@ SimpleSwitch::enqueue(int egress_port, std::unique_ptr<Packet> &&packet) {
     if (phv->has_header("queueing_metadata")) {
       phv->get_field("queueing_metadata.enq_timestamp").set(get_ts().count());
       phv->get_field("queueing_metadata.enq_qdepth")
-        .set(egress_buffers.size(egress_port));
+          .set(egress_buffers.size(egress_port));
     }
 
+#ifdef SSWITCH_PRIORITY_QUEUEING_ON
+    size_t priority =
+        phv->get_field(SSWITCH_PRIORITY_QUEUEING_SRC).get<size_t>();
+    if (priority >= SSWITCH_PRIORITY_QUEUEING_NB_QUEUES) {
+      bm::Logger::get()->error("Priority out of range, dropping packet");
+      return;
+    }
+    egress_buffers.push_front(egress_port, priority, std::move(packet));
+#else
     egress_buffers.push_front(egress_port, std::move(packet));
+#endif
 }
 
 // used for ingress cloning, resubmit
