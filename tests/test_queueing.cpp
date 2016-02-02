@@ -23,6 +23,7 @@
 #include <thread>
 #include <memory>
 #include <vector>
+#include <algorithm>  // for std::count
 
 #include "bm_sim/queueing.h"
 
@@ -32,6 +33,7 @@ using std::thread;
 
 using bm::QueueingLogic;
 using bm::QueueingLogicRL;
+using bm::QueueingLogicPriRL;
 
 struct WorkerMapper {
   WorkerMapper(size_t nb_workers)
@@ -86,11 +88,13 @@ void QueueingTest<QType>::produce() {
   }
 }
 
-template <>
-void QueueingTest<QueueingLogicRL<QEm, WorkerMapper> >::produce() {
+namespace {
+
+template <typename Q>
+void produce_if_dropping(Q &queue, size_t iterations, size_t capacity,
+                         const std::vector<RndInput> &values) {
   for(size_t i = 0; i < iterations; i++) {
     size_t queue_id = values[i].queue_id;
-    // we have a dropping behavior for QueueingLogicRL when the queue is full
     // this is to avoid drops
     // kind of makes me question if using type parameterization is really useful
     // for this
@@ -102,10 +106,23 @@ void QueueingTest<QueueingLogicRL<QEm, WorkerMapper> >::produce() {
   }
 }
 
+}  // namespace
+
+template <>
+void QueueingTest<QueueingLogicRL<QEm, WorkerMapper> >::produce() {
+  produce_if_dropping(queue, iterations, capacity, values);
+}
+
+template <>
+void QueueingTest<QueueingLogicPriRL<QEm, WorkerMapper> >::produce() {
+  produce_if_dropping(queue, iterations, capacity, values);
+}
+
 using testing::Types;
 
 typedef Types<QueueingLogic<QEm, WorkerMapper>,
-              QueueingLogicRL<QEm, WorkerMapper> > QueueingTypes;
+              QueueingLogicRL<QEm, WorkerMapper>,
+              QueueingLogicPriRL<QEm, WorkerMapper> > QueueingTypes;
 
 TYPED_TEST_CASE(QueueingTest, QueueingTypes);
 
@@ -197,4 +214,109 @@ TEST_F(QueueingRLTest, RateLimiter) {
   ASSERT_LT(elapsed, expected * 1.1);
 
   // TODO(antonin): better check of times vector?
+}
+
+struct RndInputPri {
+  size_t queue_id;
+  int v;
+  size_t priority;
+};
+
+class QueueingPriRLTest : public ::testing::Test {
+protected:
+  typedef std::unique_ptr<int> T;
+  static constexpr size_t nb_queues = 1u;
+  static constexpr size_t nb_workers = 1u;
+  static constexpr size_t nb_priorities = 2u;
+  static constexpr size_t capacity = 200u;
+  static constexpr size_t iterations = 1500u;
+  static constexpr uint64_t consummer_pps = 100u;
+  static constexpr uint64_t producer_pps = 200u;
+  QueueingLogicPriRL<T, WorkerMapper> queue;
+  std::vector<RndInputPri> values;
+
+  QueueingPriRLTest()
+      : queue(nb_queues, nb_workers, capacity, WorkerMapper(nb_workers),
+              nb_priorities),
+        values(iterations) { }
+
+
+  virtual void SetUp() {
+    for(size_t i = 0; i < iterations; i++) {
+      values[i] = {rand() % nb_queues, rand(), rand() % nb_priorities};
+    }
+  }
+
+  std::vector<size_t> receive_all() {
+    using std::chrono::duration;
+
+    std::vector<size_t> priorities;
+    priorities.reserve(iterations);
+
+    while (priorities.size() < capacity || queue.size(0u) > 0) {
+      size_t queue_id, priority;
+      unique_ptr<int> v;
+      this->queue.pop_back(0u, &queue_id, &priority, &v);
+      std::this_thread::sleep_for(duration<double>(1. / consummer_pps));
+      priorities.push_back(priority);
+    }
+
+    return priorities;
+  }
+
+ public:
+  void produce() {
+    using std::chrono::duration;
+    for(size_t i = 0; i < iterations; i++) {
+      queue.push_front(values[i].queue_id, values[i].priority,
+                       unique_ptr<int>(new int(values[i].v)));
+      std::this_thread::sleep_for(duration<double>(1. / producer_pps));
+    }
+  }
+
+  // virtual void TearDown() {}
+};
+
+TEST_F(QueueingPriRLTest, Pri) {
+  thread producer_thread(&QueueingPriRLTest::produce, this);
+
+  auto priorities = receive_all();
+
+  producer_thread.join();
+
+  size_t priority_0 = std::count(priorities.begin(), priorities.end(), 0);
+  size_t priority_1 = priorities.size() - priority_0;
+
+  // if removed, g++ complains that capacity was not defined
+  const size_t c = capacity;
+
+  // we have to receive at least capacity P1 elements (they are buffered and
+  // dequeued at the end...)
+  ASSERT_LT(c, priority_1);
+
+  // most elements should be P0
+  ASSERT_GT(0.1, (priority_1 - c) / static_cast<double>(priority_0));
+}
+
+TEST_F(QueueingPriRLTest, PriRateLimiter) {
+  static constexpr size_t rate_pps = consummer_pps / 2u;
+  queue.set_rate(0u, rate_pps);
+
+  thread producer_thread(&QueueingPriRLTest::produce, this);
+
+  auto priorities = receive_all();
+
+  producer_thread.join();
+
+  size_t priority_0 = std::count(priorities.begin(), priorities.end(), 0);
+  size_t priority_1 = priorities.size() - priority_0;
+
+  size_t diff;
+  if (priority_0 < priority_1)
+    diff = priority_1 - priority_0;
+  else
+    diff = priority_0 - priority_1;
+
+  ASSERT_LT(diff,  priority_0 * 0.1);
+  ASSERT_LT(diff,  priority_1 * 0.1);
 }
