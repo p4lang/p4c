@@ -65,6 +65,11 @@ P4Objects::build_expression(const Json::Value &json_expression,
     expr->push_back_load_const(Data(json_value.asString()));
   } else if (type == "local") {  // runtime data for expressions in actions
     expr->push_back_load_local(json_value.asInt());
+  } else if (type == "register") {
+    const string register_array_name = json_value[0].asString();
+    const unsigned int idx = json_value[1].asUInt();
+    expr->push_back_load_register_ref(
+        get_register_array(register_array_name), idx);
   } else {
     assert(0);
   }
@@ -526,6 +531,12 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
           expr->build();
           action_fn->parameter_push_back_expression(
             std::unique_ptr<ArithExpression>(expr));
+        } else if (type == "register") {
+          const Json::Value &cfg_register = cfg_parameter["value"];
+          const string register_array_name = cfg_register[0].asString();
+          const unsigned int idx = cfg_register[1].asUInt();
+          action_fn->parameter_push_back_register_ref(
+              get_register_array(register_array_name), idx);
         } else {
           assert(0 && "parameter not supported");
         }
