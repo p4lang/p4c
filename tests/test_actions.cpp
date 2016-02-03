@@ -41,6 +41,15 @@ class SetField : public ActionPrimitive<Field &, const Data &> {
 
 REGISTER_PRIMITIVE(SetField);
 
+// more general Set operation, which can take any writable Data type
+class Set : public ActionPrimitive<Data &, const Data &> {
+  void operator ()(Data &f, const Data &d) {
+    f.set(d);
+  }
+};
+
+REGISTER_PRIMITIVE(Set);
+
 class Add : public ActionPrimitive<Field &, const Data &, const Data &> {
   void operator ()(Field &f, const Data &d1, const Data &d2) {
     f.add(d1, d2);
@@ -257,6 +266,22 @@ TEST_F(ActionsTest, SetFromConstStress) {
     testActionFnEntry(pkt.get());
     ASSERT_EQ((unsigned) 0xaba, f.get_uint());
   }
+}
+
+TEST_F(ActionsTest, Set) {
+  unsigned int value_i(0xaba);
+  Data value(value_i);
+  Set primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_const(value);
+
+  Field &f = phv->get_field(testHeader1, 3); // f16
+
+  f.set(0);
+  ASSERT_EQ(0u, f.get_uint());
+  testActionFnEntry(pkt.get());
+  ASSERT_EQ(value_i, f.get_uint());
 }
 
 TEST_F(ActionsTest, CopyHeader) {
