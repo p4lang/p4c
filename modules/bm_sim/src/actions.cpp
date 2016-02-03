@@ -70,6 +70,16 @@ ActionFn::parameter_push_back_action_data(int action_data_offset) {
 }
 
 void
+ActionFn::parameter_push_back_register_ref(RegisterArray *register_array,
+                                           unsigned int idx) {
+  ActionParam param;
+  param.tag = ActionParam::REGISTER_REF;
+  param.register_ref.array = register_array;
+  param.register_ref.idx = idx;
+  params.push_back(param);
+}
+
+void
 ActionFn::parameter_push_back_calculation(const NamedCalculation *calculation) {
   ActionParam param;
   param.tag = ActionParam::CALCULATION;

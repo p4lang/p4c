@@ -165,7 +165,7 @@ struct ActionEngineState {
 struct ActionParam {
   // some old P4 primitives take a calculation as a parameter, I don't know if I
   // will keep it around but for now I need it
-  enum {CONST, FIELD, HEADER, ACTION_DATA,
+  enum {CONST, FIELD, HEADER, ACTION_DATA, REGISTER_REF,
         HEADER_STACK, CALCULATION,
         METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY,
         EXPRESSION} tag;
@@ -181,6 +181,15 @@ struct ActionParam {
     header_id_t header;
 
     unsigned int action_data_offset;
+
+    // In theory, if registers cannot be resized, I could directly store a
+    // pointer to the correct register cell, i.e. &(*array)[idx]. However, this
+    // gives me more flexibility in case I want to be able to resize the
+    // registers arbitrarily in the future.
+    struct {
+      RegisterArray *array;
+      unsigned int idx;
+    } register_ref;
 
     header_stack_id_t header_stack;
 
@@ -221,6 +230,8 @@ Data &ActionParam::to<Data &>(ActionEngineState *state) const {
   switch (tag) {
     case ActionParam::FIELD:
       return state->phv.get_field(field.header, field.field_offset);
+    case ActionParam::REGISTER_REF:
+      return register_ref.array->at(register_ref.idx);
     default:
       assert(0);
   }
@@ -242,6 +253,8 @@ const Data &ActionParam::to<const Data &>(ActionEngineState *state) const {
       return state->phv.get_field(field.header, field.field_offset);
     case ActionParam::ACTION_DATA:
       return state->action_data.get(action_data_offset);
+    case ActionParam::REGISTER_REF:
+      return register_ref.array->at(register_ref.idx);
     case ActionParam::EXPRESSION:
       while (data_temps_size <= expression.offset) {
         data_temps.emplace_back();
@@ -457,6 +470,8 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_header_stack(header_stack_id_t header_stack);
   void parameter_push_back_const(const Data &data);
   void parameter_push_back_action_data(int action_data_offset);
+  void parameter_push_back_register_ref(RegisterArray *register_array,
+                                        unsigned int idx);
   void parameter_push_back_calculation(const NamedCalculation *calculation);
   void parameter_push_back_meter_array(MeterArray *meter_array);
   void parameter_push_back_counter_array(CounterArray *counter_array);

@@ -226,6 +226,29 @@ TEST_F(ActionsTest, SetFromField) {
   ASSERT_EQ((unsigned) 0xaba, dst.get_uint());
 }
 
+TEST_F(ActionsTest, SetFromRegister) {
+  constexpr size_t register_size = 1024;
+  constexpr int register_bw = 16;
+  RegisterArray register_array("register_test", 0, register_size, register_bw);
+  unsigned int value_i(0xaba);
+  const unsigned int register_idx = 68;
+  SetField primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_register_ref(&register_array, register_idx);
+
+  Field &dst = phv->get_field(testHeader1, 3); // f16
+  dst.set(0);
+
+  register_array.at(register_idx).set(value_i);
+
+  ASSERT_EQ(0u, dst.get_uint());
+
+  testActionFnEntry(pkt.get());
+
+  ASSERT_EQ(value_i, dst.get_uint());
+}
+
 TEST_F(ActionsTest, SetFromExpression) {
   std::unique_ptr<ArithExpression> expr(new ArithExpression());
   expr->push_back_load_field(testHeader1, 0); // f32
@@ -282,6 +305,22 @@ TEST_F(ActionsTest, Set) {
   ASSERT_EQ(0u, f.get_uint());
   testActionFnEntry(pkt.get());
   ASSERT_EQ(value_i, f.get_uint());
+}
+
+TEST_F(ActionsTest, SetRegister) {
+  constexpr size_t register_size = 1024;
+  constexpr int register_bw = 16;
+  RegisterArray register_array("register_test", 0, register_size, register_bw);
+  unsigned int value_i(0xaba);
+  Data value(value_i);
+  const unsigned int register_idx = 68;
+  Set primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_register_ref(&register_array, register_idx);
+  testActionFn.parameter_push_back_const(value);
+
+  testActionFnEntry(pkt.get());
+  ASSERT_EQ(value_i, register_array.at(register_idx).get_uint());
 }
 
 TEST_F(ActionsTest, CopyHeader) {
