@@ -21,6 +21,7 @@
 #include <stack>
 #include <string>
 #include <vector>
+#include <algorithm>  // for std::max
 
 #include <cassert>
 
@@ -364,6 +365,7 @@ void Expression::eval_arith(
 
 int Expression::assign_dest_registers() {
   int registers_cnt = 0;
+  int registers_curr = 0;
   std::stack<int> new_registers;
   for (auto &op : ops) {
     switch (op.opcode) {
@@ -376,25 +378,25 @@ int Expression::assign_dest_registers() {
     case ExprOpcode::BIT_AND:
     case ExprOpcode::BIT_OR:
     case ExprOpcode::BIT_XOR:
-      registers_cnt -= new_registers.top();
+      registers_curr -= new_registers.top();
       new_registers.pop();
-      registers_cnt -= new_registers.top();
+      registers_curr -= new_registers.top();
       new_registers.pop();
 
-      op.data_dest_index = registers_cnt;
+      op.data_dest_index = registers_curr;
 
       new_registers.push(1);
-      registers_cnt += 1;
+      registers_curr += 1;
       break;
 
     case ExprOpcode::BIT_NEG:
-      registers_cnt -= new_registers.top();
+      registers_curr -= new_registers.top();
       new_registers.pop();
 
-      op.data_dest_index = registers_cnt;
+      op.data_dest_index = registers_curr;
 
       new_registers.push(1);
-      registers_cnt += 1;
+      registers_curr += 1;
       break;
 
     case ExprOpcode::LOAD_CONST:
@@ -405,7 +407,7 @@ int Expression::assign_dest_registers() {
       break;
 
     case ExprOpcode::LOAD_REGISTER_GEN:
-      registers_cnt -= new_registers.top();
+      registers_curr -= new_registers.top();
       new_registers.pop();
 
       new_registers.push(0);
@@ -414,7 +416,10 @@ int Expression::assign_dest_registers() {
     default:
       break;
     }
+
+    registers_cnt = std::max(registers_cnt, registers_curr);
   }
+
   return registers_cnt;
 }
 
