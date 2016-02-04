@@ -222,180 +222,180 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
   for (size_t i = 0; i < ops.size(); i++) {
     const auto &op = ops[i];
     switch (op.opcode) {
-    case ExprOpcode::LOAD_FIELD:
-      data_temps_stack.push_back(
-          &(phv.get_field(op.field.header, op.field.field_offset)));
-      break;
+      case ExprOpcode::LOAD_FIELD:
+        data_temps_stack.push_back(
+            &(phv.get_field(op.field.header, op.field.field_offset)));
+        break;
 
-    case ExprOpcode::LOAD_HEADER:
-      header_temps_stack.push_back(&(phv.get_header(op.header)));
-      break;
+      case ExprOpcode::LOAD_HEADER:
+        header_temps_stack.push_back(&(phv.get_header(op.header)));
+        break;
 
-    case ExprOpcode::LOAD_BOOL:
-      bool_temps_stack.push_back(op.bool_value);
-      break;
+      case ExprOpcode::LOAD_BOOL:
+        bool_temps_stack.push_back(op.bool_value);
+        break;
 
-    case ExprOpcode::LOAD_CONST:
-      data_temps_stack.push_back(&const_values[op.const_offset]);
-      break;
+      case ExprOpcode::LOAD_CONST:
+        data_temps_stack.push_back(&const_values[op.const_offset]);
+        break;
 
-    case ExprOpcode::LOAD_LOCAL:
-      data_temps_stack.push_back(&locals[op.local_offset]);
-      break;
+      case ExprOpcode::LOAD_LOCAL:
+        data_temps_stack.push_back(&locals[op.local_offset]);
+        break;
 
-    case ExprOpcode::LOAD_REGISTER_REF:
-      data_temps_stack.push_back(
-          &op.register_ref.array->at(op.register_ref.idx));
-      break;
+      case ExprOpcode::LOAD_REGISTER_REF:
+        data_temps_stack.push_back(
+            &op.register_ref.array->at(op.register_ref.idx));
+        break;
 
-    case ExprOpcode::LOAD_REGISTER_GEN:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps_stack.push_back(&op.register_array->at(rd->get<size_t>()));
-      break;
+      case ExprOpcode::LOAD_REGISTER_GEN:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps_stack.push_back(&op.register_array->at(rd->get<size_t>()));
+        break;
 
-    case ExprOpcode::ADD:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps[op.data_dest_index].add(*ld, *rd);
-      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
-      break;
+      case ExprOpcode::ADD:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].add(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
 
-    case ExprOpcode::SUB:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps[op.data_dest_index].sub(*ld, *rd);
-      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
-      break;
+      case ExprOpcode::SUB:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].sub(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
 
-    case ExprOpcode::MUL:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps[op.data_dest_index].multiply(*ld, *rd);
-      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
-      break;
+      case ExprOpcode::MUL:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].multiply(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
 
-    case ExprOpcode::SHIFT_LEFT:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps[op.data_dest_index].shift_left(*ld, *rd);
-      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
-      break;
+      case ExprOpcode::SHIFT_LEFT:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].shift_left(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
 
-    case ExprOpcode::SHIFT_RIGHT:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps[op.data_dest_index].shift_right(*ld, *rd);
-      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
-      break;
+      case ExprOpcode::SHIFT_RIGHT:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].shift_right(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
 
-    case ExprOpcode::EQ_DATA:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      bool_temps_stack.push_back(*ld == *rd);
-      break;
+      case ExprOpcode::EQ_DATA:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        bool_temps_stack.push_back(*ld == *rd);
+        break;
 
-    case ExprOpcode::NEQ_DATA:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      bool_temps_stack.push_back(*ld != *rd);
-      break;
+      case ExprOpcode::NEQ_DATA:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        bool_temps_stack.push_back(*ld != *rd);
+        break;
 
-    case ExprOpcode::GT_DATA:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      bool_temps_stack.push_back(*ld > *rd);
-      break;
+      case ExprOpcode::GT_DATA:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        bool_temps_stack.push_back(*ld > *rd);
+        break;
 
-    case ExprOpcode::LT_DATA:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      bool_temps_stack.push_back(*ld < *rd);
-      break;
+      case ExprOpcode::LT_DATA:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        bool_temps_stack.push_back(*ld < *rd);
+        break;
 
-    case ExprOpcode::GET_DATA:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      bool_temps_stack.push_back(*ld >= *rd);
-      break;
+      case ExprOpcode::GET_DATA:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        bool_temps_stack.push_back(*ld >= *rd);
+        break;
 
-    case ExprOpcode::LET_DATA:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      bool_temps_stack.push_back(*ld <= *rd);
-      break;
+      case ExprOpcode::LET_DATA:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        bool_temps_stack.push_back(*ld <= *rd);
+        break;
 
-    case ExprOpcode::AND:
-      rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-      lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-      bool_temps_stack.push_back(lb && rb);
-      break;
+      case ExprOpcode::AND:
+        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        bool_temps_stack.push_back(lb && rb);
+        break;
 
-    case ExprOpcode::OR:
-      rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-      lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-      bool_temps_stack.push_back(lb || rb);
-      break;
+      case ExprOpcode::OR:
+        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        bool_temps_stack.push_back(lb || rb);
+        break;
 
-    case ExprOpcode::NOT:
-      rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-      bool_temps_stack.push_back(!rb);
-      break;
+      case ExprOpcode::NOT:
+        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        bool_temps_stack.push_back(!rb);
+        break;
 
-    case ExprOpcode::BIT_AND:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps[op.data_dest_index].bit_and(*ld, *rd);
-      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
-      break;
+      case ExprOpcode::BIT_AND:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].bit_and(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
 
-    case ExprOpcode::BIT_OR:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps[op.data_dest_index].bit_or(*ld, *rd);
-      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
-      break;
+      case ExprOpcode::BIT_OR:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].bit_or(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
 
-    case ExprOpcode::BIT_XOR:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      ld = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps[op.data_dest_index].bit_xor(*ld, *rd);
-      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
-      break;
+      case ExprOpcode::BIT_XOR:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].bit_xor(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
 
-    case ExprOpcode::BIT_NEG:
-      rd = data_temps_stack.back(); data_temps_stack.pop_back();
-      data_temps[op.data_dest_index].bit_neg(*rd);
-      data_temps_stack.push_back(&data_temps[op.data_dest_index]);
-      break;
+      case ExprOpcode::BIT_NEG:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].bit_neg(*rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
 
-    case ExprOpcode::VALID_HEADER:
-      bool_temps_stack.push_back(header_temps_stack.back()->is_valid());
-      header_temps_stack.pop_back();
-      break;
+      case ExprOpcode::VALID_HEADER:
+        bool_temps_stack.push_back(header_temps_stack.back()->is_valid());
+        header_temps_stack.pop_back();
+        break;
 
-    case ExprOpcode::TERNARY_OP:
-      if (bool_temps_stack.back())
-        i += 1;
-      bool_temps_stack.pop_back();
-      break;
+      case ExprOpcode::TERNARY_OP:
+        if (bool_temps_stack.back())
+          i += 1;
+        bool_temps_stack.pop_back();
+        break;
 
-    case ExprOpcode::SKIP:
-      i += op.skip_num;
-      break;
+      case ExprOpcode::SKIP:
+        i += op.skip_num;
+        break;
 
-    default:
-      assert(0 && "invalid operand");
-      break;
+      default:
+        assert(0 && "invalid operand");
+        break;
     }
   }
 
   switch (expr_type) {
-  case ExprType::EXPR_BOOL:
-    *b_res = bool_temps_stack.back();
-    break;
-  case ExprType::EXPR_DATA:
-    d_res->set(*(data_temps_stack.back()));
-    break;
+    case ExprType::EXPR_BOOL:
+      *b_res = bool_temps_stack.back();
+      break;
+    case ExprType::EXPR_DATA:
+      d_res->set(*(data_temps_stack.back()));
+      break;
   }
 }
 
@@ -429,57 +429,57 @@ int Expression::assign_dest_registers() {
   std::stack<int> new_registers;
   for (auto &op : ops) {
     switch (op.opcode) {
-    case ExprOpcode::ADD:
-    case ExprOpcode::SUB:
-    case ExprOpcode::MOD:
-    case ExprOpcode::MUL:
-    case ExprOpcode::SHIFT_LEFT:
-    case ExprOpcode::SHIFT_RIGHT:
-    case ExprOpcode::BIT_AND:
-    case ExprOpcode::BIT_OR:
-    case ExprOpcode::BIT_XOR:
-      registers_curr -= new_registers.top();
-      new_registers.pop();
-      registers_curr -= new_registers.top();
-      new_registers.pop();
+      case ExprOpcode::ADD:
+      case ExprOpcode::SUB:
+      case ExprOpcode::MOD:
+      case ExprOpcode::MUL:
+      case ExprOpcode::SHIFT_LEFT:
+      case ExprOpcode::SHIFT_RIGHT:
+      case ExprOpcode::BIT_AND:
+      case ExprOpcode::BIT_OR:
+      case ExprOpcode::BIT_XOR:
+        registers_curr -= new_registers.top();
+        new_registers.pop();
+        registers_curr -= new_registers.top();
+        new_registers.pop();
 
-      op.data_dest_index = registers_curr;
+        op.data_dest_index = registers_curr;
 
-      new_registers.push(1);
-      registers_curr += 1;
-      break;
+        new_registers.push(1);
+        registers_curr += 1;
+        break;
 
-    case ExprOpcode::BIT_NEG:
-      registers_curr -= new_registers.top();
-      new_registers.pop();
+      case ExprOpcode::BIT_NEG:
+        registers_curr -= new_registers.top();
+        new_registers.pop();
 
-      op.data_dest_index = registers_curr;
+        op.data_dest_index = registers_curr;
 
-      new_registers.push(1);
-      registers_curr += 1;
-      break;
+        new_registers.push(1);
+        registers_curr += 1;
+        break;
 
-    case ExprOpcode::LOAD_CONST:
-    case ExprOpcode::LOAD_LOCAL:
-    case ExprOpcode::LOAD_FIELD:
-    case ExprOpcode::LOAD_REGISTER_REF:
-      new_registers.push(0);
-      break;
+      case ExprOpcode::LOAD_CONST:
+      case ExprOpcode::LOAD_LOCAL:
+      case ExprOpcode::LOAD_FIELD:
+      case ExprOpcode::LOAD_REGISTER_REF:
+        new_registers.push(0);
+        break;
 
-    case ExprOpcode::LOAD_REGISTER_GEN:
-      registers_curr -= new_registers.top();
-      new_registers.pop();
+      case ExprOpcode::LOAD_REGISTER_GEN:
+        registers_curr -= new_registers.top();
+        new_registers.pop();
 
-      new_registers.push(0);
-      break;
+        new_registers.push(0);
+        break;
 
-    // here to emphasize the fact that with my skip implementation choice,
-    // nothing special needs to be done here
-    case ExprOpcode::TERNARY_OP:
-      break;
+      // here to emphasize the fact that with my skip implementation choice,
+      // nothing special needs to be done here
+      case ExprOpcode::TERNARY_OP:
+        break;
 
-    default:
-      break;
+      default:
+        break;
     }
 
     registers_cnt = std::max(registers_cnt, registers_curr);
