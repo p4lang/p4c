@@ -38,9 +38,11 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "data.h"
 #include "bignum.h"
+#include "named_p4object.h"
 
 namespace bm {
 

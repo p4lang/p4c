@@ -22,6 +22,9 @@
 
 #include "bm_sim/conditionals.h"
 
+// This is where expressions are tested (essentially the same thing as
+// conditionals)
+
 using namespace bm;
 
 TEST(ExprOpcodesMap, GetOpcode) {
@@ -311,6 +314,55 @@ TEST_F(ConditionalsTest, ValidHeader) {
 
   hdr1.mark_invalid();
 
+  ASSERT_FALSE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsTest, RegisterRef) {
+  Conditional c("ctest", 0);
+  constexpr size_t register_size = 1024;
+  constexpr int register_bw = 16;
+  RegisterArray register_array("register_test", 0, register_size, register_bw);
+  const unsigned int register_idx = 68;
+  const unsigned int value_start = 0x33;
+  const unsigned int value_add = 0xa5;
+  c.push_back_load_register_ref(&register_array, register_idx);
+  c.push_back_load_const(Data(value_add));
+  c.push_back_op(ExprOpcode::ADD);
+  c.push_back_load_const(Data(value_start + value_add));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  Data &reg = register_array.at(register_idx);
+
+  reg.set(value_start);
+  ASSERT_TRUE(c.eval(*phv));
+
+  reg.set(value_start + 1);
+  ASSERT_FALSE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsTest, RegisterGen) {
+  Conditional c("ctest", 0);
+  constexpr size_t register_size = 1024;
+  constexpr int register_bw = 16;
+  RegisterArray register_array("register_test", 0, register_size, register_bw);
+  const unsigned int register_idx = 68;
+  const unsigned int value_start = 0x33;
+  const unsigned int value_add = 0xa5;
+  c.push_back_load_const(Data(register_idx));
+  c.push_back_load_register_gen(&register_array);
+  c.push_back_load_const(Data(value_add));
+  c.push_back_op(ExprOpcode::ADD);
+  c.push_back_load_const(Data(value_start + value_add));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  Data &reg = register_array.at(register_idx);
+
+  reg.set(value_start);
+  ASSERT_TRUE(c.eval(*phv));
+
+  reg.set(value_start + 1);
   ASSERT_FALSE(c.eval(*phv));
 }
 

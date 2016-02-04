@@ -27,11 +27,13 @@
 
 #include "data.h"
 #include "phv_forward.h"
+#include "stateful.h"
 
 namespace bm {
 
 enum class ExprOpcode {
   LOAD_FIELD, LOAD_HEADER, LOAD_BOOL, LOAD_CONST, LOAD_LOCAL,
+  LOAD_REGISTER_REF, LOAD_REGISTER_GEN,
   ADD, SUB, MOD, MUL, SHIFT_LEFT, SHIFT_RIGHT,
   EQ_DATA, NEQ_DATA, GT_DATA, LT_DATA, GET_DATA, LET_DATA,
   AND, OR, NOT,
@@ -70,6 +72,17 @@ struct Op {
     int const_offset;
 
     int local_offset;
+
+    // In theory, if registers cannot be resized, I could directly store a
+    // pointer to the correct register cell, i.e. &(*array)[idx]. However, this
+    // gives me more flexibility in case I want to be able to resize the
+    // registers arbitrarily in the future.
+    struct {
+      RegisterArray *array;
+      unsigned int idx;
+    } register_ref;
+
+    RegisterArray *register_array;
   };
 };
 
@@ -82,6 +95,9 @@ class Expression {
   void push_back_load_header(header_id_t header);
   void push_back_load_const(const Data &data);
   void push_back_load_local(const int offset);
+  void push_back_load_register_ref(RegisterArray *register_array,
+                                   unsigned int idx);
+  void push_back_load_register_gen(RegisterArray *register_array);
   void push_back_op(ExprOpcode opcode);
 
   void build();
@@ -124,6 +140,7 @@ class ArithExpression : public Expression {
     eval_arith(phv, data, locals);
   }
 };
+
 
 class VLHeaderExpression {
  public:

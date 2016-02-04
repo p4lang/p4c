@@ -36,6 +36,8 @@ ExprOpcodesMap::ExprOpcodesMap() {
     {"load_bool", ExprOpcode::LOAD_BOOL},
     {"load_const", ExprOpcode::LOAD_CONST},
     {"load_local", ExprOpcode::LOAD_LOCAL},
+    {"load_register_ref", ExprOpcode::LOAD_REGISTER_REF},
+    {"load_register_gen", ExprOpcode::LOAD_REGISTER_GEN},
     {"+", ExprOpcode::ADD},
     {"-", ExprOpcode::SUB},
     {"*", ExprOpcode::MUL},
@@ -104,6 +106,22 @@ void Expression::push_back_load_local(const int offset) {
   ops.push_back(op);
 }
 
+void Expression::push_back_load_register_ref(RegisterArray *register_array,
+                                             unsigned int idx) {
+  Op op;
+  op.opcode = ExprOpcode::LOAD_REGISTER_REF;
+  op.register_ref.array = register_array;
+  op.register_ref.idx = idx;
+  ops.push_back(op);
+}
+
+void Expression::push_back_load_register_gen(RegisterArray *register_array) {
+  Op op;
+  op.opcode = ExprOpcode::LOAD_REGISTER_GEN;
+  op.register_array = register_array;
+  ops.push_back(op);
+}
+
 void Expression::push_back_op(ExprOpcode opcode) {
   Op op;
   op.opcode = opcode;
@@ -156,8 +174,8 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
   for (const auto &op : ops) {
     switch (op.opcode) {
     case ExprOpcode::LOAD_FIELD:
-      data_temps_stack.push_back(&(phv.get_field(op.field.header,
-                                                 op.field.field_offset)));
+      data_temps_stack.push_back(
+          &(phv.get_field(op.field.header, op.field.field_offset)));
       break;
 
     case ExprOpcode::LOAD_HEADER:
@@ -174,6 +192,16 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
 
     case ExprOpcode::LOAD_LOCAL:
       data_temps_stack.push_back(&locals[op.local_offset]);
+      break;
+
+    case ExprOpcode::LOAD_REGISTER_REF:
+      data_temps_stack.push_back(
+          &op.register_ref.array->at(op.register_ref.idx));
+      break;
+
+    case ExprOpcode::LOAD_REGISTER_GEN:
+      rd = data_temps_stack.back(); data_temps_stack.pop_back();
+      data_temps_stack.push_back(&op.register_array->at(rd->get<size_t>()));
       break;
 
     case ExprOpcode::ADD:
@@ -372,6 +400,14 @@ int Expression::assign_dest_registers() {
     case ExprOpcode::LOAD_CONST:
     case ExprOpcode::LOAD_LOCAL:
     case ExprOpcode::LOAD_FIELD:
+    case ExprOpcode::LOAD_REGISTER_REF:
+      new_registers.push(0);
+      break;
+
+    case ExprOpcode::LOAD_REGISTER_GEN:
+      registers_cnt -= new_registers.top();
+      new_registers.pop();
+
       new_registers.push(0);
       break;
 
