@@ -38,7 +38,8 @@ enum class ExprOpcode {
   EQ_DATA, NEQ_DATA, GT_DATA, LT_DATA, GET_DATA, LET_DATA,
   AND, OR, NOT,
   BIT_AND, BIT_OR, BIT_XOR, BIT_NEG,
-  VALID_HEADER
+  VALID_HEADER,
+  TERNARY_OP, SKIP
 };
 
 class ExprOpcodesMap {
@@ -83,6 +84,8 @@ struct Op {
     } register_ref;
 
     RegisterArray *register_array;
+
+    int skip_num;
   };
 };
 
@@ -99,6 +102,7 @@ class Expression {
                                    unsigned int idx);
   void push_back_load_register_gen(RegisterArray *register_array);
   void push_back_op(ExprOpcode opcode);
+  void push_back_ternary_op(const Expression &e1, const Expression &e2);
 
   void build();
 
@@ -122,6 +126,8 @@ class Expression {
   void eval_(const PHV &phv, ExprType expr_type,
              const std::vector<Data> &locals,
              bool *b_res, Data *d_res) const;
+  size_t get_num_ops() const;
+  void append_expression(const Expression &e);
 
  private:
   std::vector<Op> ops{};

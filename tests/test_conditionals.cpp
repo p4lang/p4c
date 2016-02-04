@@ -395,6 +395,42 @@ TEST_F(ConditionalsTest, Add2) {
   ASSERT_TRUE(c.eval(*phv));
 }
 
+TEST_F(ConditionalsTest, TernaryOp) {
+  // testHeader1.f16 == ((testHeader2.f16 == 0x33) ? (0xab + 1) : 0xcd)
+  Conditional c("ctest", 0);
+
+  const unsigned int value_ternary_test = 0x33;
+  const unsigned int value_ternary_1_0 = 0xab;
+  const unsigned int value_ternary_1 = value_ternary_1_0 + 1;
+  const unsigned int value_ternary_2 = 0xcd;
+
+  Expression ternary_e1;
+  ternary_e1.push_back_load_const(Data(value_ternary_1_0));
+  ternary_e1.push_back_load_const(Data(1));
+  ternary_e1.push_back_op(ExprOpcode::ADD);
+  // build not necessary for "sub-expressions"
+  // ternary_e1.build();
+
+  Expression ternary_e2;
+  ternary_e2.push_back_load_const(Data(value_ternary_2));
+  // ternary_e2.build();
+
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader2, 3); // f16
+  c.push_back_load_const(Data(value_ternary_test));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.push_back_ternary_op(ternary_e1, ternary_e2);
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  Field &testHeader1_f16 = phv->get_field(testHeader1, 3); // f16
+  Field &testHeader2_f16 = phv->get_field(testHeader2, 3); // f16
+  testHeader1_f16.set(value_ternary_1);
+  testHeader2_f16.set(value_ternary_test);
+
+  ASSERT_TRUE(c.eval(*phv));
+}
+
 TEST_F(ConditionalsTest, Stress) {
   Conditional c("ctest", 0);
   // (valid(testHeader1) && (false || (testHeader1.f16 + 1 == 2))) && !valid(testHeader2)

@@ -58,6 +58,7 @@ ExprOpcodesMap::ExprOpcodesMap() {
     {"^", ExprOpcode::BIT_XOR},
     {"~", ExprOpcode::BIT_NEG},
     {"valid", ExprOpcode::VALID_HEADER},
+    {"?", ExprOpcode::TERNARY_OP},
   };
 }
 
@@ -69,6 +70,10 @@ ExprOpcodesMap *ExprOpcodesMap::get_instance() {
 ExprOpcode ExprOpcodesMap::get_opcode(std::string expr_name) {
   ExprOpcodesMap *instance = get_instance();
   return instance->opcodes_map[expr_name];
+}
+
+size_t Expression::get_num_ops() const {
+  return ops.size();
 }
 
 void Expression::push_back_load_field(header_id_t header, int field_offset) {
@@ -129,6 +134,48 @@ void Expression::push_back_op(ExprOpcode opcode) {
   ops.push_back(op);
 }
 
+void Expression::append_expression(const Expression &e) {
+  int offset_consts = const_values.size();
+  // the tricky part: update the const data offsets in the expression we are
+  // appending
+  for (auto &op : e.ops) {
+    ops.push_back(op);
+    if (op.opcode == ExprOpcode::LOAD_CONST)
+      ops.back().const_offset += offset_consts;
+  }
+  const_values.insert(const_values.end(),
+                      e.const_values.begin(), e.const_values.end());
+}
+
+// A note on the implementation of the ternary operator:
+// The difficulty here is that the second and third expression are conditionally
+// evaluated based on the result of the first expression (which evaluates to a
+// boolean).
+// I considered many different solutions, but in the end I decided to flatten
+// the second and third expression ops into the main ops vector. For this, I had
+// to introduce the special SKIP opcode. SKIP lets the action egine skip a
+// pre-determined number of operations. For each ternary op, 2 SKIP ops are
+// inserted, one before the second expression op sequence, and one before the
+// third expression op sequence. When the condition evaluates to true, we leap
+// over the first SKIP, execute all of the second expression ops, then reach the
+// second SKIP which makes us skip all of the third expression ops. On the other
+// hand, when the condition evaluates to false, we skip all of the second
+// expression ops to go directly to the third expression ops.
+
+void Expression::push_back_ternary_op(const Expression &e1,
+                                      const Expression &e2) {
+  Op op;
+  op.opcode = ExprOpcode::TERNARY_OP;
+  ops.push_back(op);
+  op.opcode = ExprOpcode::SKIP;
+  op.skip_num = e1.get_num_ops() + 1;
+  ops.push_back(op);
+  append_expression(e1);
+  op.skip_num = e2.get_num_ops();
+  ops.push_back(op);
+  append_expression(e2);
+}
+
 void Expression::build() {
   data_registers_cnt = assign_dest_registers();
   built = true;
@@ -172,7 +219,8 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
   bool lb, rb;
   const Data *ld, *rd;
 
-  for (const auto &op : ops) {
+  for (size_t i = 0; i < ops.size(); i++) {
+    const auto &op = ops[i];
     switch (op.opcode) {
     case ExprOpcode::LOAD_FIELD:
       data_temps_stack.push_back(
@@ -325,6 +373,16 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
       header_temps_stack.pop_back();
       break;
 
+    case ExprOpcode::TERNARY_OP:
+      if (bool_temps_stack.back())
+        i += 1;
+      bool_temps_stack.pop_back();
+      break;
+
+    case ExprOpcode::SKIP:
+      i += op.skip_num;
+      break;
+
     default:
       assert(0 && "invalid operand");
       break;
@@ -363,6 +421,8 @@ void Expression::eval_arith(
   eval_(phv, ExprType::EXPR_DATA, locals, nullptr, data);
 }
 
+// TODO(antonin): If there is a ternary op, we will over-estimate this number,
+// see if there is an easy fix
 int Expression::assign_dest_registers() {
   int registers_cnt = 0;
   int registers_curr = 0;
@@ -411,6 +471,11 @@ int Expression::assign_dest_registers() {
       new_registers.pop();
 
       new_registers.push(0);
+      break;
+
+    // here to emphasize the fact that with my skip implementation choice,
+    // nothing special needs to be done here
+    case ExprOpcode::TERNARY_OP:
       break;
 
     default:

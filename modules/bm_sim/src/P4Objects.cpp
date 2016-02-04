@@ -54,11 +54,21 @@ P4Objects::build_expression(const Json::Value &json_expression,
     const Json::Value json_left = json_value["left"];
     const Json::Value json_right = json_value["right"];
 
-    build_expression(json_left, expr);
-    build_expression(json_right, expr);
+    if (op == "?") {
+      const Json::Value json_cond = json_value["cond"];
+      build_expression(json_cond, expr);
 
-    ExprOpcode opcode = ExprOpcodesMap::get_opcode(op);
-    expr->push_back_op(opcode);
+      Expression e1, e2;
+      build_expression(json_left, &e1);
+      build_expression(json_right, &e2);
+      expr->push_back_ternary_op(e1, e2);
+    } else {
+      build_expression(json_left, expr);
+      build_expression(json_right, expr);
+
+      ExprOpcode opcode = ExprOpcodesMap::get_opcode(op);
+      expr->push_back_op(opcode);
+    }
   } else if (type == "header") {
     header_id_t header_id = get_header_id(json_value.asString());
     expr->push_back_load_header(header_id);
