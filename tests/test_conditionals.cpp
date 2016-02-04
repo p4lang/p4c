@@ -429,6 +429,14 @@ TEST_F(ConditionalsTest, TernaryOp) {
   testHeader2_f16.set(value_ternary_test);
 
   ASSERT_TRUE(c.eval(*phv));
+
+  testHeader2_f16.set(value_ternary_test + 1);
+
+  ASSERT_FALSE(c.eval(*phv));
+
+  testHeader1_f16.set(value_ternary_2);
+
+  ASSERT_TRUE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, Stress) {
