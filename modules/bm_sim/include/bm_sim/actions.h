@@ -230,8 +230,6 @@ struct ActionParam {
 // can only be a field or a register reference
 template <> inline
 Data &ActionParam::to<Data &>(ActionEngineState *state) const {
-  /* Should probably be able to return a register reference here, but not
-     needed right now */
   static thread_local Data data_temp;
 
   switch (tag) {
@@ -255,8 +253,6 @@ const Data &ActionParam::to<const Data &>(ActionEngineState *state) const {
   static thread_local unsigned int data_temps_size = 4;
   static thread_local std::vector<Data> data_temps(data_temps_size);
 
-  /* Should probably be able to return a register reference here, but not
-     needed right now */
   switch (tag) {
     case ActionParam::CONST:
       return state->const_values[const_offset];
