@@ -165,7 +165,7 @@ struct ActionEngineState {
 struct ActionParam {
   // some old P4 primitives take a calculation as a parameter, I don't know if I
   // will keep it around but for now I need it
-  enum {CONST, FIELD, HEADER, ACTION_DATA, REGISTER_REF,
+  enum {CONST, FIELD, HEADER, ACTION_DATA, REGISTER_REF, REGISTER_GEN,
         HEADER_STACK, CALCULATION,
         METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY,
         EXPRESSION} tag;
@@ -190,6 +190,11 @@ struct ActionParam {
       RegisterArray *array;
       unsigned int idx;
     } register_ref;
+
+    struct {
+      RegisterArray *array;
+      ArithExpression *idx;
+    } register_gen;
 
     header_stack_id_t header_stack;
 
@@ -227,11 +232,17 @@ template <> inline
 Data &ActionParam::to<Data &>(ActionEngineState *state) const {
   /* Should probably be able to return a register reference here, but not
      needed right now */
+  static thread_local Data data_temp;
+
   switch (tag) {
     case ActionParam::FIELD:
       return state->phv.get_field(field.header, field.field_offset);
     case ActionParam::REGISTER_REF:
       return register_ref.array->at(register_ref.idx);
+    case ActionParam::REGISTER_GEN:
+      register_gen.idx->eval(state->phv, &data_temp,
+                             state->action_data.action_data);
+      return register_ref.array->at(data_temp.get<size_t>());
     default:
       assert(0);
   }
@@ -255,6 +266,10 @@ const Data &ActionParam::to<const Data &>(ActionEngineState *state) const {
       return state->action_data.get(action_data_offset);
     case ActionParam::REGISTER_REF:
       return register_ref.array->at(register_ref.idx);
+    case ActionParam::REGISTER_GEN:
+      register_gen.idx->eval(state->phv, &data_temps[0],
+                             state->action_data.action_data);
+      return register_ref.array->at(data_temps[0].get<size_t>());
     case ActionParam::EXPRESSION:
       while (data_temps_size <= expression.offset) {
         data_temps.emplace_back();
@@ -472,6 +487,8 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_action_data(int action_data_offset);
   void parameter_push_back_register_ref(RegisterArray *register_array,
                                         unsigned int idx);
+  void parameter_push_back_register_gen(RegisterArray *register_array,
+                                        std::unique_ptr<ArithExpression> idx);
   void parameter_push_back_calculation(const NamedCalculation *calculation);
   void parameter_push_back_meter_array(MeterArray *meter_array);
   void parameter_push_back_counter_array(CounterArray *counter_array);

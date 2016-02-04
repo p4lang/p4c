@@ -37,6 +37,7 @@ ExprOpcodesMap::ExprOpcodesMap() {
     {"load_const", ExprOpcode::LOAD_CONST},
     {"load_local", ExprOpcode::LOAD_LOCAL},
     {"load_register_ref", ExprOpcode::LOAD_REGISTER_REF},
+    {"load_register_gen", ExprOpcode::LOAD_REGISTER_GEN},
     {"+", ExprOpcode::ADD},
     {"-", ExprOpcode::SUB},
     {"*", ExprOpcode::MUL},
@@ -111,6 +112,13 @@ void Expression::push_back_load_register_ref(RegisterArray *register_array,
   op.opcode = ExprOpcode::LOAD_REGISTER_REF;
   op.register_ref.array = register_array;
   op.register_ref.idx = idx;
+  ops.push_back(op);
+}
+
+void Expression::push_back_load_register_gen(RegisterArray *register_array) {
+  Op op;
+  op.opcode = ExprOpcode::LOAD_REGISTER_GEN;
+  op.register_array = register_array;
   ops.push_back(op);
 }
 
@@ -189,6 +197,11 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
     case ExprOpcode::LOAD_REGISTER_REF:
       data_temps_stack.push_back(
           &op.register_ref.array->at(op.register_ref.idx));
+      break;
+
+    case ExprOpcode::LOAD_REGISTER_GEN:
+      rd = data_temps_stack.back(); data_temps_stack.pop_back();
+      data_temps_stack.push_back(&op.register_array->at(rd->get<size_t>()));
       break;
 
     case ExprOpcode::ADD:
@@ -388,6 +401,13 @@ int Expression::assign_dest_registers() {
     case ExprOpcode::LOAD_LOCAL:
     case ExprOpcode::LOAD_FIELD:
     case ExprOpcode::LOAD_REGISTER_REF:
+      new_registers.push(0);
+      break;
+
+    case ExprOpcode::LOAD_REGISTER_GEN:
+      registers_cnt -= new_registers.top();
+      new_registers.pop();
+
       new_registers.push(0);
       break;
 

@@ -26,7 +26,9 @@
 
 namespace bm {
 
-size_t ActionFn::nb_data_tmps = 0;
+// the first tmp data register is reserved for internal engine use (register
+// index evaluation)
+size_t ActionFn::nb_data_tmps = 1;
 
 void
 ActionFn::parameter_push_back_field(header_id_t header, int field_offset) {
@@ -80,6 +82,17 @@ ActionFn::parameter_push_back_register_ref(RegisterArray *register_array,
 }
 
 void
+ActionFn::parameter_push_back_register_gen(
+    RegisterArray *register_array, std::unique_ptr<ArithExpression> idx) {
+  ActionParam param;
+  param.tag = ActionParam::REGISTER_GEN;
+  param.register_gen.array = register_array;
+  expressions.push_back(std::move(idx));
+  param.register_gen.idx = expressions.back().get();
+  params.push_back(param);
+}
+
+void
 ActionFn::parameter_push_back_calculation(const NamedCalculation *calculation) {
   ActionParam param;
   param.tag = ActionParam::CALCULATION;
@@ -115,7 +128,7 @@ void
 ActionFn::parameter_push_back_expression(
   std::unique_ptr<ArithExpression> expr
 ) {
-  size_t nb_expression_params = 0;
+  size_t nb_expression_params = 1;
   for (const ActionParam &p : params)
     if (p.tag == ActionParam::EXPRESSION) nb_expression_params += 1;
 
