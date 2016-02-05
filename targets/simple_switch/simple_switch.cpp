@@ -318,8 +318,6 @@ SimpleSwitch::egress_thread(size_t worker_id) {
 
     egress_mau->apply(packet.get());
 
-    Field &f_instance_type = phv->get_field("standard_metadata.instance_type");
-
     Field &f_clone_spec = phv->get_field("standard_metadata.clone_spec");
     unsigned int clone_spec = f_clone_spec.get_uint();
 
@@ -328,8 +326,6 @@ SimpleSwitch::egress_thread(size_t worker_id) {
       BMLOG_DEBUG_PKT(*packet, "Cloning packet at egress");
       int egress_port = get_mirroring_mapping(clone_spec & 0xFFFF);
       if (egress_port >= 0) {
-        int instance_type = f_instance_type.get_int();
-        f_instance_type.set(PKT_INSTANCE_TYPE_EGRESS_CLONE);
         f_clone_spec.set(0);
         p4object_id_t field_list_id = clone_spec >> 16;
         std::unique_ptr<Packet> packet_copy =
@@ -340,8 +336,9 @@ SimpleSwitch::egress_thread(size_t worker_id) {
           phv_copy->get_field(p.header, p.offset)
             .set(phv->get_field(p.header, p.offset));
         }
+        phv_copy->get_field("standard_metadata.instance_type")
+            .set(PKT_INSTANCE_TYPE_EGRESS_CLONE);
         enqueue(egress_port, std::move(packet_copy));
-        f_instance_type.set(instance_type);
       }
     }
 
@@ -361,7 +358,6 @@ SimpleSwitch::egress_thread(size_t worker_id) {
         BMLOG_DEBUG_PKT(*packet, "Recirculating packet");
         p4object_id_t field_list_id = f_recirc.get_int();
         f_recirc.set(0);
-        f_instance_type.set(PKT_INSTANCE_TYPE_RECIRC);
         FieldList *field_list = this->get_field_list(field_list_id);
         // TODO(antonin): just like for resubmit, there is no need for a copy
         // here, but it is more convenient for this first prototype
@@ -372,6 +368,8 @@ SimpleSwitch::egress_thread(size_t worker_id) {
           phv_copy->get_field(p.header, p.offset)
               .set(phv->get_field(p.header, p.offset));
         }
+        phv_copy->get_field("standard_metadata.instance_type")
+            .set(PKT_INSTANCE_TYPE_RECIRC);
         input_buffer.push_front(std::move(packet_copy));
         continue;
       }
