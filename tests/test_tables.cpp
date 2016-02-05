@@ -38,6 +38,17 @@ typedef MatchUnitExact<ActionEntry> MUExact;
 typedef MatchUnitLPM<ActionEntry> MULPM;
 typedef MatchUnitTernary<ActionEntry> MUTernary;
 
+namespace {
+
+// used for hit / miss next node selection tests (NextNodeHitMiss)
+struct DummyNode: public ControlFlowNode {
+  const ControlFlowNode *operator()(Packet *pkt) const {
+    return nullptr;
+  }
+};
+
+}  // namespace
+
 template <typename MUType>
 class TableSizeTwo : public ::testing::Test {
  protected:
@@ -298,6 +309,51 @@ TYPED_TEST(TableSizeTwo, LookupEntry) {
   f.set("0xaba");
   this->table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_FALSE(hit);
+}
+
+TYPED_TEST(TableSizeTwo, NextNodeHitMiss) {
+  std::string key = "\x0a\xba";
+  entry_handle_t handle;
+  MatchErrorCode rc;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  Packet pkt = this->get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+
+  rc = this->add_entry(key, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  // we call apply_action, even though no action has been set
+
+  // base case
+  f.set("0xaba");
+  ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
+  f.set("0xabb");
+  ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
+
+  // need to remove entry because the node pointer is inserted in the entry when
+  // the entry is added
+  rc = this->table->delete_entry(handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  DummyNode dummy_node_hit, dummy_node_miss;
+  this->table->set_next_node_hit(&dummy_node_hit);
+  this->table->set_next_node_miss(&dummy_node_miss);
+
+  rc = this->add_entry(key, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  f.set("0xaba");
+  ASSERT_EQ(&dummy_node_hit, this->table->apply_action(&pkt));
+  f.set("0xabb");
+  ASSERT_EQ(&dummy_node_miss, this->table->apply_action(&pkt));
+
+  rc = this->table->delete_entry(handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  f.set("0xaba");
+  ASSERT_EQ(&dummy_node_miss, this->table->apply_action(&pkt));
 }
 
 TYPED_TEST(TableSizeTwo, ModifyEntry) {
@@ -731,6 +787,61 @@ TEST_F(TableIndirect, LookupEntry) {
   f.set("0xaba");
   table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_FALSE(hit);
+}
+
+// this test can probbaly be improved quite a lot by set a default member
+// properly
+TEST_F(TableIndirect, NextNodeHitMiss) {
+  std::string key = "\x0a\xba";
+  unsigned int data = 666u;
+  mbr_hdl_t mbr;
+  entry_handle_t handle;
+  bool hit;
+
+  Packet pkt = get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(testHeader1, 0);
+
+  auto add_member_and_entry = [this, &mbr, &handle](const std::string &key,
+                                                    unsigned int data) {
+    MatchErrorCode rc;
+    rc = add_member(data, &mbr);
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+    rc = add_entry(key, mbr, &handle);
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  };
+
+  auto delete_entry_and_member = [this, &mbr, &handle]() {
+    MatchErrorCode rc;
+    rc = table->delete_entry(handle);
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+    rc = table->delete_member(mbr);
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  };
+
+  add_member_and_entry(key, data);
+
+  // base case
+  f.set("0xaba");
+  ASSERT_EQ(nullptr, table->apply_action(&pkt));
+  f.set("0xabb");
+  ASSERT_EQ(nullptr, table->apply_action(&pkt));
+
+  // need to remove entry because the node pointer is inserted in the entry when
+  // the entry is added
+  delete_entry_and_member();
+
+  DummyNode dummy_node_hit, dummy_node_miss;
+  table->set_next_node_hit(&dummy_node_hit);
+  table->set_next_node_miss(&dummy_node_miss);
+
+  add_member_and_entry(key, data);
+
+  f.set("0xaba");
+  ASSERT_EQ(&dummy_node_hit, table->apply_action(&pkt));
+  f.set("0xabb");
+  ASSERT_EQ(&dummy_node_miss, table->apply_action(&pkt));
+
+  delete_entry_and_member();
 }
 
 TEST_F(TableIndirect, ModifyMember) {
@@ -1195,8 +1306,6 @@ typedef Types<MUExact,
 
 TYPED_TEST_CASE(TableBigMask, TableTypes);
 
-
-  // ByteContainer big_mask("0x00ff0000ff0000ff");
 TYPED_TEST(TableBigMask, HitMiss) {
   const std::string key_1 = "\x11\x22";
   const std::string key_2 = "\x33\x44\x55\x66\x77\x88";
