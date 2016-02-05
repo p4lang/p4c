@@ -86,10 +86,9 @@ class MatchTableAbstract : public NamedP4Object {
 
   void reset_state();
 
-  void set_next_node(p4object_id_t action_id,
-                     const ControlFlowNode *next_node) {
-    next_nodes[action_id] = next_node;
-  }
+  void set_next_node(p4object_id_t action_id, const ControlFlowNode *next_node);
+  void set_next_node_hit(const ControlFlowNode *next_node);
+  void set_next_node_miss(const ControlFlowNode *next_node);
 
   void set_direct_meters(MeterArray *meter_array,
                          header_id_t target_header,
@@ -122,9 +121,8 @@ class MatchTableAbstract : public NamedP4Object {
   typedef boost::unique_lock<boost::shared_mutex> WriteLock;
 
  protected:
-  const ControlFlowNode *get_next_node(p4object_id_t action_id) const {
-    return next_nodes.at(action_id);
-  }
+  const ControlFlowNode *get_next_node(p4object_id_t action_id) const;
+  const ControlFlowNode *get_next_node_default(p4object_id_t action_id) const;
 
   ReadLock lock_read() const { return ReadLock(t_mutex); }
   WriteLock lock_write() const { return WriteLock(t_mutex); }
@@ -141,6 +139,10 @@ class MatchTableAbstract : public NamedP4Object {
   std::atomic_bool with_ageing{false};
 
   std::unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
+  const ControlFlowNode *next_node_hit{nullptr};
+  const ControlFlowNode *next_node_miss{nullptr};
+  bool has_next_node_hit{false};
+  bool has_next_node_miss{false};
 
   header_id_t meter_target_header{};
   int meter_target_offset{};

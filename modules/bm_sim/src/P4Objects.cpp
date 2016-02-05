@@ -757,14 +757,25 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
       const Json::Value &cfg_next_nodes = cfg_table["next_tables"];
       const Json::Value &cfg_actions = cfg_table["actions"];
 
+      auto get_next_node = [this](const Json::Value &cfg_next_node)
+          -> const ControlFlowNode *{
+        if (cfg_next_node.isNull())
+          return nullptr;
+        return get_control_node(cfg_next_node.asString());
+      };
+
       for (const auto &cfg_action : cfg_actions) {
         const string action_name = cfg_action.asString();
+        // note that operator[] creates a null member if action_name does not
+        // exist
         const Json::Value &cfg_next_node = cfg_next_nodes[action_name];
-        const ControlFlowNode *next_node = nullptr;
-        if (!cfg_next_node.isNull()) {
-          next_node = get_control_node(cfg_next_node.asString());
-        }
+        const ControlFlowNode *next_node = get_next_node(cfg_next_node);
         table->set_next_node(get_action(action_name)->get_id(), next_node);
+      }
+
+      for (const auto &spec_next : {"__HIT__", "__MISS__"}) {
+        if (cfg_next_nodes.isMember(spec_next))
+          table->set_next_node_hit(get_next_node(cfg_next_nodes[spec_next]));
       }
     }
 

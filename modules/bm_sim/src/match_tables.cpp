@@ -89,15 +89,38 @@ MatchTableAbstract::apply_action(Packet *pkt) {
 
   action_entry.action_fn(pkt);
 
-  const ControlFlowNode *next_node = action_entry.next_node;
-
-  return next_node;
+  // For regular Matchtable's, this is useless because action_entry.next_node
+  // has already been set to next_node_miss. However, for indirect tables, a
+  // member can be used both by a regular entry and as the default / miss
+  // member. Assuming next_node_miss has been set, the next node pointer in the
+  // member is therefore only valid if the member is picked by a hit. It does
+  // look like a hack, but hit / miss selection is still part of the P4 language
+  // and needs to be supported.
+  return (hit || !has_next_node_miss) ? action_entry.next_node : next_node_miss;
 }
 
 void
 MatchTableAbstract::reset_state() {
   WriteLock lock = lock_write();
   reset_state_();
+}
+
+void
+MatchTableAbstract::set_next_node(p4object_id_t action_id,
+                                  const ControlFlowNode *next_node) {
+  next_nodes[action_id] = next_node;
+}
+
+void
+MatchTableAbstract::set_next_node_hit(const ControlFlowNode *next_node) {
+  has_next_node_hit = true;
+  next_node_hit = next_node;
+}
+
+void
+MatchTableAbstract::set_next_node_miss(const ControlFlowNode *next_node) {
+  has_next_node_miss = true;
+  next_node_miss = next_node;
 }
 
 void
@@ -171,6 +194,20 @@ MatchTableAbstract::sweep_entries(std::vector<entry_handle_t> *entries) const {
   match_unit_->sweep_entries(entries);
 }
 
+const ControlFlowNode *
+MatchTableAbstract::get_next_node(p4object_id_t action_id) const {
+  if (has_next_node_hit)
+    return next_node_hit;
+  return next_nodes.at(action_id);
+}
+
+const ControlFlowNode *
+MatchTableAbstract::get_next_node_default(p4object_id_t action_id) const {
+  if (has_next_node_miss)
+    return next_node_miss;
+  return next_nodes.at(action_id);
+}
+
 const ActionEntry &
 MatchTable::lookup(const Packet &pkt, bool *hit, entry_handle_t *handle) {
   MatchUnitAbstract<ActionEntry>::MatchUnitLookup res = match_unit->lookup(pkt);
@@ -217,7 +254,7 @@ MatchErrorCode
 MatchTable::set_default_action(const ActionFn *action_fn,
                                ActionData action_data) {
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
-  const ControlFlowNode *next_node = get_next_node(action_fn->get_id());
+  const ControlFlowNode *next_node = get_next_node_default(action_fn->get_id());
 
   WriteLock lock = lock_write();
 
