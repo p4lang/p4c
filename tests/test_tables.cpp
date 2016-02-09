@@ -1426,3 +1426,131 @@ TEST_F(MatchKeyBuilderTest, KeyToString) {
   std::string s = key_builder.key_to_string(key, " ");
   ASSERT_EQ("abcd 010044 7001 01", s);
 }
+
+// was added after I discovered a bug in LPM match (when a table contains both a
+// LPM match field and a valid match field)
+class AdvancedLPMTest : public ::testing::Test {
+ protected:
+  static constexpr size_t t_size = 128u;
+
+  PHVFactory phv_factory;
+
+  MatchKeyBuilder key_builder;
+  std::unique_ptr<MatchTable> table;
+
+  HeaderType testHeaderType;
+  header_id_t testHeader1{0}, testHeader2{1}, testHeader3{2};
+  ActionFn action_fn;
+
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  AdvancedLPMTest()
+      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
+    testHeaderType.push_back_field("f16", 16);
+    testHeaderType.push_back_field("f48", 48);
+    testHeaderType.push_back_field("f17", 17);
+    testHeaderType.push_back_field("f7", 7);
+    phv_factory.push_back_header("test1", testHeader1, testHeaderType);
+    phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+    phv_factory.push_back_header("test3", testHeader3, testHeaderType);
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+  }
+
+  // virtual void TearDown() { }
+};
+
+class AdvancedLPMTest1 : public AdvancedLPMTest {
+ protected:
+  AdvancedLPMTest1()
+      : AdvancedLPMTest() {
+    key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::LPM);
+    key_builder.push_back_field(testHeader2, 0, 16, MatchKeyParam::Type::EXACT);
+    key_builder.push_back_valid_header(testHeader3);
+
+    std::unique_ptr<MULPM> match_unit;
+    match_unit = std::unique_ptr<MULPM>(new MULPM(t_size, key_builder));
+    table = std::unique_ptr<MatchTable>(
+      new MatchTable("test_table", 0, std::move(match_unit), false)
+    );
+    table->set_next_node(0, nullptr);
+  }
+
+  virtual void SetUp() {
+    AdvancedLPMTest::SetUp();
+  }
+
+  MatchErrorCode add_entry(entry_handle_t *handle) {
+    std::vector<MatchKeyParam> match_key;
+    //10.00/12
+    match_key.emplace_back(MatchKeyParam::Type::LPM,
+                           std::string("\x0a\x00", 2), 12);
+    match_key.emplace_back(MatchKeyParam::Type::EXACT,
+                           std::string("\xab\xcd", 2));
+    match_key.emplace_back(MatchKeyParam::Type::VALID, std::string("\x01", 1));
+    return table->add_entry(match_key, &action_fn, ActionData(), handle);
+  }
+
+  Packet get_pkt() const {
+    // dummy packet, won't be parsed
+    Packet packet = Packet::make_new(
+        128, PacketBuffer(256), phv_source.get());
+    packet.get_phv()->get_header(testHeader1).mark_valid();
+    packet.get_phv()->get_header(testHeader2).mark_valid();
+    packet.get_phv()->get_header(testHeader3).mark_valid();
+    return packet;
+  }
+
+  Packet gen_pkt(const std::string &h1_f16_v,
+                 const std::string &h2_f16_v) const {
+    Packet packet = get_pkt();
+    PHV *phv = packet.get_phv();
+    Field &h1_f16 = phv->get_field(testHeader1, 0);
+    Field &h2_f16 = phv->get_field(testHeader2, 0);
+
+    h1_f16.set(h1_f16_v);
+    h2_f16.set(h2_f16_v);
+
+    return packet;
+  }
+};
+
+// TODO(antonin): use value-parametrized test to cover every case?
+TEST_F(AdvancedLPMTest1, Lookup1) {
+  entry_handle_t handle;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  ASSERT_EQ(MatchErrorCode::SUCCESS, add_entry(&handle));
+
+  Packet pkt = gen_pkt("0x0a00", "0xabcd");
+  table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+}
+
+TEST_F(AdvancedLPMTest1, Lookup2) {
+  entry_handle_t handle;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  ASSERT_EQ(MatchErrorCode::SUCCESS, add_entry(&handle));
+
+  Packet pkt = gen_pkt("0x0a0d", "0xabcd");
+  table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_TRUE(hit);
+}
+
+TEST_F(AdvancedLPMTest1, Lookup3) {
+  entry_handle_t handle;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  ASSERT_EQ(MatchErrorCode::SUCCESS, add_entry(&handle));
+
+  Packet pkt = gen_pkt("0x0ad0", "0xabcd");
+  table->lookup(pkt, &hit, &lookup_handle);
+  ASSERT_FALSE(hit);
+}

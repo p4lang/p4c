@@ -456,8 +456,10 @@ MatchUnitLPM<V>::add_entry_(const std::vector<MatchKeyParam> &match_key,
   const MatchKeyParam *lpm_param = nullptr;
 
   for (const MatchKeyParam &param : match_key) {
-    if (param.type == MatchKeyParam::Type::VALID)
+    if (param.type == MatchKeyParam::Type::VALID) {
       new_key.append(param.key);
+      prefix_length += 8;
+    }
   }
 
   for (const MatchKeyParam &param : match_key) {
