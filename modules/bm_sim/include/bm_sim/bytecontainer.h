@@ -155,6 +155,15 @@ class ByteContainer {
     return *this;
   }
 
+  //! Inserts another ByteContainer object into this container, before \p pos
+  // issue with g++-4.8, insert has a non-conforming signature, fixed in g++-4.9
+  // and g++-5.0. However, this signature works for "all" versions
+  // iterator insert(const_iterator pos, const ByteContainer& other) {
+  void insert(iterator pos, const ByteContainer& other) {
+    // return bytes.insert(pos, other.begin(), other.end());
+    bytes.insert(pos, other.begin(), other.end());
+  }
+
   //! Appends a character at the end of the container
   void push_back(char c) {
     bytes.push_back(c);
@@ -235,17 +244,27 @@ class ByteContainer {
       bytes[i] &= mask[i];
   }
 
-  //! Returns the hexadecimal representation of the byte container as a string
-  std::string to_hex(bool upper_case = false) const {
+  //! Returns the hexadecimal representation of the bytes with a position in the
+  //! range [start, start + s) as a string
+  std::string to_hex(size_t start, size_t s, bool upper_case = false) const {
+    assert(start + s <= size());
+
     std::ostringstream ret;
 
-    for (std::string::size_type i = 0; i < size(); i++) {
+    for (std::string::size_type i = start; i < start + s; i++) {
       ret << std::setw(2) << std::setfill('0') << std::hex
           << (upper_case ? std::uppercase : std::nouppercase)
-          << static_cast<int>(bytes[i]);
+          // the int cast was not sufficient 0xab -> 0xffffffab
+          // << static_cast<int>(bytes[i]);
+          << static_cast<int>(static_cast<unsigned char>(bytes[i]));
     }
 
     return ret.str();
+  }
+
+  //! Returns the hexadecimal representation of the byte container as a string
+  std::string to_hex(bool upper_case = false) const {
+    return to_hex(0, size(), upper_case);
   }
 
  private:

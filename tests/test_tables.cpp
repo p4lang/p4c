@@ -47,6 +47,23 @@ struct DummyNode: public ControlFlowNode {
   }
 };
 
+template <typename MUType>
+struct match_type_test {
+
+};
+template <>
+struct match_type_test<MUExact> {
+  static constexpr MatchKeyParam::Type type = MatchKeyParam::Type::EXACT;
+};
+template <>
+struct match_type_test<MULPM> {
+  static constexpr MatchKeyParam::Type type = MatchKeyParam::Type::LPM;
+};
+template <>
+struct match_type_test<MUTernary> {
+  static constexpr MatchKeyParam::Type type = MatchKeyParam::Type::TERNARY;
+};
+
 }  // namespace
 
 template <typename MUType>
@@ -76,9 +93,11 @@ class TableSizeTwo : public ::testing::Test {
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
 
-    key_builder.push_back_field(testHeader1, 0, 16);
+    key_builder.push_back_field(testHeader1, 0, 16,
+                                match_type_test<MUType>::type);
 
-    key_builder_w_valid.push_back_field(testHeader1, 0, 16);
+    key_builder_w_valid.push_back_field(testHeader1, 0, 16,
+                                        match_type_test<MUType>::type);
     key_builder_w_valid.push_back_valid_header(testHeader2);
 
     std::unique_ptr<MUType> match_unit;
@@ -601,7 +620,7 @@ class TableIndirect : public ::testing::Test {
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
 
-    key_builder.push_back_field(testHeader1, 0, 16);
+    key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::EXACT);
 
     // with counters, without ageing
     table = MatchTableIndirect::create("exact", "test_table", 0,
@@ -945,7 +964,7 @@ class TableIndirectWS : public ::testing::Test {
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
 
-    key_builder.push_back_field(testHeader1, 0, 16);
+    key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::EXACT);
 
     // with counters, without ageing
     table = MatchTableIndirectWS::create("exact", "test_table", 0,
@@ -1255,8 +1274,9 @@ TableBigMask<MUExact>::add_entry(const std::string &key_1,
 template<>
 void
 TableBigMask<MUExact>::make_key_builder() {
-  key_builder.push_back_field(testHeader1, 0, 16);
-  key_builder.push_back_field(testHeader2, 1, 48, mask_2);
+  key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::EXACT);
+  key_builder.push_back_field(testHeader2, 1, 48, mask_2,
+                              MatchKeyParam::Type::EXACT);
 }
 
 template<>
@@ -1274,8 +1294,9 @@ TableBigMask<MULPM>::add_entry(const std::string &key_1,
 template<>
 void
 TableBigMask<MULPM>::make_key_builder() {
-  key_builder.push_back_field(testHeader2, 1, 48, mask_2);
-  key_builder.push_back_field(testHeader1, 0, 16);
+  key_builder.push_back_field(testHeader2, 1, 48, mask_2,
+                              MatchKeyParam::Type::LPM);
+  key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::LPM);
 }
 
 template<>
@@ -1296,8 +1317,9 @@ TableBigMask<MUTernary>::add_entry(const std::string &key_1,
 template<>
 void
 TableBigMask<MUTernary>::make_key_builder() {
-  key_builder.push_back_field(testHeader1, 0, 16);
-  key_builder.push_back_field(testHeader2, 1, 48, mask_2);
+  key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::TERNARY);
+  key_builder.push_back_field(testHeader2, 1, 48, mask_2,
+                              MatchKeyParam::Type::TERNARY);
 }
 
 typedef Types<MUExact,
@@ -1336,4 +1358,71 @@ TYPED_TEST(TableBigMask, HitMiss) {
   f_2.set(key_2_miss.c_str(), key_2_miss.size());
   this->table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_FALSE(hit);
+}
+
+class MatchKeyBuilderTest : public ::testing::Test {
+ protected:
+  PHVFactory phv_factory;
+
+  MatchKeyBuilder key_builder;
+
+  HeaderType testHeaderType;
+  header_id_t testHeader1{0}, testHeader2{1}, testHeader3{2};
+
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  MatchKeyBuilderTest()
+      : testHeaderType("test_t", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
+    testHeaderType.push_back_field("f16", 16);
+    testHeaderType.push_back_field("f48", 48);
+    testHeaderType.push_back_field("f17", 17);
+    // the code requires headers to be byte aligned, thus f7
+    testHeaderType.push_back_field("f7", 7);
+    phv_factory.push_back_header("test1", testHeader1, testHeaderType);
+    phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+    phv_factory.push_back_header("test3", testHeader3, testHeaderType);
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+  }
+
+  Packet get_pkt() {
+    // dummy packet, won't be parsed
+    Packet packet = Packet::make_new(
+        128, PacketBuffer(256), phv_source.get());
+    packet.get_phv()->get_header(testHeader1).mark_valid();
+    packet.get_phv()->get_header(testHeader2).mark_valid();
+    packet.get_phv()->get_header(testHeader3).mark_valid();
+    return packet;
+  }
+
+  // virtual void TearDown() { }
+};
+
+TEST_F(MatchKeyBuilderTest, KeyToString) {
+  key_builder.push_back_field(testHeader1, 0, 16,
+                              MatchKeyParam::Type::EXACT);  // h1.f16
+  key_builder.push_back_field(testHeader2, 2, 17,
+                              MatchKeyParam::Type::LPM);  // h2.f17
+  key_builder.push_back_field(testHeader2, 0, 16,
+                              MatchKeyParam::Type::TERNARY);  // h2.f16
+  key_builder.push_back_valid_header(testHeader3);
+
+  Packet pkt = get_pkt();
+  PHV *phv = pkt.get_phv();
+  Field &h1_f16 = phv->get_field(testHeader1, 0);
+  Field &h2_f17 = phv->get_field(testHeader2, 2);
+  Field &h2_f16 = phv->get_field(testHeader2, 0);
+
+  h1_f16.set("0xabcd");
+  h2_f17.set("0x10044");
+  h2_f16.set("0x7001");
+
+  ByteContainer key;
+  key_builder(*phv, &key);
+
+  std::string s = key_builder.key_to_string(key, " ");
+  ASSERT_EQ("abcd 010044 7001 01", s);
 }

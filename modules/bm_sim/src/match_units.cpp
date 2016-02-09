@@ -34,6 +34,134 @@ namespace bm {
 
 using MatchUnit::EntryMeta;
 
+namespace {
+
+size_t nbits_to_nbytes(size_t nbits) {
+  return (nbits + 7) / 8;
+}
+
+}
+
+// This function is in charge of re-organizing the input key on the fly to
+// satisfy the implementation requirements (e.g. LPM matches last...). At the
+// same time we keep track of the original order thanks to raw_key_mapping (for
+// debugging).
+void
+MatchKeyBuilder::push_back(KeyF &&input, const ByteContainer &mask) {
+  size_t f_nbytes = nbits_to_nbytes(input.nbits);
+
+  auto it = key_input.begin();
+  auto end = key_input.end();
+  if (input.mtype == MatchKeyParam::Type::VALID) {
+    for (; it != end && it->mtype == MatchKeyParam::Type::VALID; it++) continue;
+  } else if (input.mtype == MatchKeyParam::Type::LPM) {
+    it = key_input.end();
+  } else {
+    for (; it != end && it->mtype != MatchKeyParam::Type::LPM; it++) continue;
+  }
+  size_t pos = it - key_input.begin();
+
+  key_input.insert(it, std::move(input));
+
+  assert(raw_key_mapping.size() == raw_key_offsets.size());
+  size_t new_offset = nbytes_key;
+  for (size_t i = 0; i < raw_key_mapping.size(); i++) {
+    if (raw_key_mapping[i] == pos) {
+      new_offset = raw_key_offsets[i];
+    }
+    if (raw_key_mapping[i] >= pos) {
+      raw_key_mapping[i]++;
+      raw_key_offsets[i] += f_nbytes;
+    }
+  }
+  raw_key_mapping.push_back(pos);
+  raw_key_offsets.push_back(new_offset);
+
+  nbytes_key += f_nbytes;
+
+  auto it_big_mask = big_mask.begin();
+  for (size_t i = 0; i < pos; i++) {
+    it_big_mask += nbits_to_nbytes(key_input[i].nbits);
+  }
+  big_mask.insert(it_big_mask, mask);
+}
+
+void
+MatchKeyBuilder::push_back_field(header_id_t header, int field_offset,
+                                 size_t nbits, MatchKeyParam::Type mtype) {
+  push_back({header, field_offset, mtype, nbits},
+            ByteContainer(nbits_to_nbytes(nbits), '\xff'));
+}
+
+void
+MatchKeyBuilder::push_back_field(header_id_t header, int field_offset,
+                                 size_t nbits, const ByteContainer &mask,
+                                 MatchKeyParam::Type mtype) {
+  assert(mask.size() == nbits_to_nbytes(nbits));
+  push_back({header, field_offset, mtype, nbits}, mask);
+  has_big_mask = true;
+}
+
+void
+MatchKeyBuilder::push_back_valid_header(header_id_t header) {
+  // set "nbits" to 8 (i.e. 1 byte); it is kind of a hack but ensure that most
+  // of the code can be the same...
+  push_back({header, 0, MatchKeyParam::Type::VALID, 8},
+            ByteContainer(1, '\xff'));
+}
+
+void
+MatchKeyBuilder::apply_big_mask(ByteContainer *key) const {
+  if (has_big_mask)
+    key->apply_mask(big_mask);
+}
+
+void
+MatchKeyBuilder::operator()(const PHV &phv, ByteContainer *key) const {
+  for (const auto &in : key_input) {
+    const Header &header = phv.get_header(in.header);
+    // if speed is an issue here, I can probably come up with something faster
+    // (with a switch statement maybe)
+    if (in.mtype == MatchKeyParam::Type::VALID) {
+      key->push_back(header.is_valid() ? '\x01' : '\x00');
+    } else {
+      // we do not reset all fields to 0 in between packets
+      // so I need this hack if the P4 programmer assumed that:
+      // field not valid => field set to 0
+      // const Field &field = phv.get_field(p.first, p.second);
+      // key->append(field.get_bytes());
+      const Field &field = header[in.f_offset];
+      if (header.is_valid()) {
+        key->append(field.get_bytes());
+      } else {
+        key->append(std::string(field.get_nbytes(), '\x00'));
+      }
+    }
+  }
+  if (has_big_mask)
+    key->apply_mask(big_mask);
+}
+
+std::string
+MatchKeyBuilder::key_to_string(const ByteContainer &key, std::string separator,
+                               bool upper_case) const {
+  std::ostringstream ret;
+
+  size_t nfields = raw_key_mapping.size();
+  bool first = true;
+  for (size_t i = 0; i < nfields; i++) {
+    const size_t imp_idx = raw_key_mapping.at(i);
+    const auto &f_info = key_input.at(imp_idx);
+    const size_t byte_offset = raw_key_offsets.at(i);
+    if (!first)
+      ret << separator;
+    ret << key.to_hex(byte_offset, nbits_to_nbytes(f_info.nbits), upper_case);
+    first = false;
+  }
+  return ret.str();
+}
+
+
 MatchErrorCode
 MatchUnitAbstract_::get_and_set_handle(internal_handle_t *handle) {
   if (num_entries >= size) {  // table is full
@@ -127,7 +255,7 @@ MatchUnitAbstract<V>::lookup(const Packet &pkt) {
   key.clear();
   build_key(*pkt.get_phv(), &key);
 
-  BMLOG_DEBUG_PKT(pkt, "Looking up key {}", key.to_hex());
+  BMLOG_DEBUG_PKT(pkt, "Looking up key {}", key_to_string(key));
 
   MatchUnitLookup res = lookup_key(key);
   if (res.found()) {

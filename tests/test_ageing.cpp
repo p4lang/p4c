@@ -76,7 +76,7 @@ protected:
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
 
-    key_builder.push_back_field(testHeader1, 0, 16);
+    key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::EXACT);
 
     typedef MatchTableAbstract::ActionEntry ActionEntry;
     typedef MatchUnitExact<ActionEntry> MUExact;
