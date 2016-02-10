@@ -77,6 +77,8 @@ MatchTableAbstract::apply_action(Packet *pkt) {
     BMELOG(table_hit, *pkt, *this, handle);
     BMLOG_DEBUG_PKT(*pkt, "Table '{}': hit with handle {}",
                     get_name(), handle);
+    // TODO(antonin): change to trace?
+    BMLOG_DEBUG_PKT(*pkt, "{}", dump_entry_string(handle));
   } else {
     BMELOG(table_miss, *pkt, *this);
     BMLOG_DEBUG_PKT(*pkt, "Table '{}': miss", get_name());
@@ -634,6 +636,8 @@ MatchTableIndirectWS::lookup(const Packet &pkt, bool *hit,
     grp_hdl_t grp = index.get_grp();
     assert(is_valid_grp(grp));
     mbr = choose_from_group(grp, pkt);
+    // TODO(antonin): change to trace?
+    BMLOG_DEBUG_PKT(pkt, "Choosing member {} from group {}", mbr, grp);
   }
   assert(is_valid_mbr(mbr));
 
@@ -838,7 +842,7 @@ MatchTableIndirectWS::dump_entry(std::ostream *out,
   } else {
     *out << "Group members:\n";
     for (const auto mbr : group_entries[index->get_grp()])
-      *out << "  " << "mbr " << action_entries[mbr] << "\n";
+      *out << "  " << "mbr " << mbr << ": " << action_entries[mbr] << "\n";
   }
   return MatchErrorCode::SUCCESS;
 }
