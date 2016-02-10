@@ -525,8 +525,12 @@ class ActionFnEntry {
 
   size_t action_data_size() const { return action_data.size(); }
 
-  const Data &get_action_data(int offset) const {
+  const Data &get_action_data_at(int offset) const {
     return action_data.get(offset);
+  }
+
+  const ActionData &get_action_data() const {
+    return action_data;
   }
 
   void dump(std::ostream *stream) const;
@@ -534,6 +538,10 @@ class ActionFnEntry {
   p4object_id_t get_action_id() const {
     if (!action_fn) return std::numeric_limits<p4object_id_t>::max();
     return action_fn->get_id();
+  }
+
+  const ActionFn *get_action_fn() const {
+    return action_fn;
   }
 
   ActionFnEntry(const ActionFnEntry &other) = default;

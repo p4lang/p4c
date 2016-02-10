@@ -28,8 +28,6 @@
 #include <vector>
 #include <iterator>
 #include <string>
-#include <iostream>
-#include <sstream>
 #include <iomanip>
 
 namespace bm {
@@ -246,21 +244,7 @@ class ByteContainer {
 
   //! Returns the hexadecimal representation of the bytes with a position in the
   //! range [start, start + s) as a string
-  std::string to_hex(size_t start, size_t s, bool upper_case = false) const {
-    assert(start + s <= size());
-
-    std::ostringstream ret;
-
-    for (std::string::size_type i = start; i < start + s; i++) {
-      ret << std::setw(2) << std::setfill('0') << std::hex
-          << (upper_case ? std::uppercase : std::nouppercase)
-          // the int cast was not sufficient 0xab -> 0xffffffab
-          // << static_cast<int>(bytes[i]);
-          << static_cast<int>(static_cast<unsigned char>(bytes[i]));
-    }
-
-    return ret.str();
-  }
+  std::string to_hex(size_t start, size_t s, bool upper_case = false) const;
 
   //! Returns the hexadecimal representation of the byte container as a string
   std::string to_hex(bool upper_case = false) const {

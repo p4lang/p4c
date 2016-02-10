@@ -84,6 +84,11 @@ class MatchTableAbstract : public NamedP4Object {
 
   virtual void dump(std::ostream *stream) const = 0;
 
+  virtual MatchErrorCode dump_entry(std::ostream *out,
+                                    entry_handle_t handle) const = 0;
+
+  std::string dump_entry_string(entry_handle_t handle) const;
+
   void reset_state();
 
   void set_next_node(p4object_id_t action_id, const ControlFlowNode *next_node);
@@ -185,6 +190,12 @@ class MatchTable : public MatchTableAbstract {
   MatchErrorCode set_default_action(const ActionFn *action_fn,
                                     ActionData action_data);
 
+  MatchErrorCode get_entry(entry_handle_t handle,
+                           std::vector<MatchKeyParam> *match_key,
+                           const ActionFn **action_fn,
+                           ActionData *action_data,
+                           int *priority = nullptr) const;
+
   const ActionEntry &lookup(const Packet &pkt, bool *hit,
                             entry_handle_t *handle) override;
 
@@ -197,6 +208,9 @@ class MatchTable : public MatchTableAbstract {
   }
 
   void dump(std::ostream *stream) const override;
+
+  MatchErrorCode dump_entry(std::ostream *out,
+                            entry_handle_t handle) const override;
 
  public:
   static std::unique_ptr<MatchTable> create(
@@ -235,6 +249,11 @@ class MatchTableIndirect : public MatchTableAbstract {
         (*stream) << "group(" << get() << ")";
       else
         (*stream) << "member(" << get() << ")";
+    }
+
+    friend std::ostream& operator<<(std::ostream &out, const IndirectIndex &i) {
+      i.dump(&out);
+      return out;
     }
 
     static IndirectIndex make_mbr_index(unsigned int index) {
@@ -329,6 +348,14 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   MatchErrorCode set_default_member(mbr_hdl_t mbr);
 
+  MatchErrorCode get_entry(entry_handle_t handle,
+                           std::vector<MatchKeyParam> *match_key,
+                           mbr_hdl_t *mbr,
+                           int *priority = nullptr) const;
+
+  MatchErrorCode get_member(mbr_hdl_t mbr, const ActionFn **action_fn,
+                            ActionData *action_data) const;
+
   const ActionEntry &lookup(const Packet &pkt, bool *hit,
                             entry_handle_t *handle) override;
 
@@ -341,6 +368,9 @@ class MatchTableIndirect : public MatchTableAbstract {
   }
 
   void dump(std::ostream *stream) const override;
+
+  MatchErrorCode dump_entry(std::ostream *out,
+                            entry_handle_t handle) const override;
 
   size_t get_num_members() const {
     return num_members;
@@ -361,6 +391,9 @@ class MatchTableIndirect : public MatchTableAbstract {
   void reset_state_() override;
 
   void dump_(std::ostream *stream) const;
+
+  MatchErrorCode dump_entry_(std::ostream *stream, entry_handle_t handle,
+                             const IndirectIndex **index) const;
 
  protected:
   IndirectIndex default_index{};
@@ -411,6 +444,16 @@ class MatchTableIndirectWS : public MatchTableIndirect {
 
   MatchErrorCode set_default_group(grp_hdl_t grp);
 
+  // If the entry points to a member, grp will be set to its maximum possible
+  // value, i.e. std::numeric_limits<grp_hdl_t>::max(). If the entry points to a
+  // group, it will be mbr that will be set to its max possible value.
+  MatchErrorCode get_entry(entry_handle_t handle,
+                           std::vector<MatchKeyParam> *match_key,
+                           mbr_hdl_t *mbr, grp_hdl_t *grp,
+                           int *priority = nullptr) const;
+
+  MatchErrorCode get_group(grp_hdl_t grp, std::vector<mbr_hdl_t> *mbrs) const;
+
   const ActionEntry &lookup(const Packet &pkt, bool *hit,
                             entry_handle_t *handle) override;
 
@@ -421,6 +464,9 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   MatchErrorCode get_num_members_in_group(grp_hdl_t grp, size_t *nb) const;
 
   void dump(std::ostream *stream) const override;
+
+  MatchErrorCode dump_entry(std::ostream *out,
+                            entry_handle_t handle) const override;
 
  public:
   static std::unique_ptr<MatchTableIndirectWS> create(

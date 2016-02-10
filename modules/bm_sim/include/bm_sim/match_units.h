@@ -47,11 +47,13 @@ typedef uint64_t entry_handle_t;
 
 // using string and not ByteContainer for efficiency
 struct MatchKeyParam {
+  // order is important, implementation sorts match fields according to their
+  // match type based on this order
   enum class Type {
+    VALID,
     EXACT,
     LPM,
-    TERNARY,
-    VALID
+    TERNARY
   };
 
   MatchKeyParam(const Type &type, std::string key)
@@ -63,15 +65,31 @@ struct MatchKeyParam {
   MatchKeyParam(const Type &type, std::string key, int prefix_length)
     : type(type), key(std::move(key)), prefix_length(prefix_length) { }
 
+  friend std::ostream& operator<<(std::ostream &out, const MatchKeyParam &p);
+
+  static std::string type_to_string(Type t);
+
   Type type;
   std::string key;
   std::string mask{};  // optional
   int prefix_length{0};  // optional
 };
 
+enum class MatchUnitType {
+  EXACT, LPM, TERNARY
+};
+
+
+namespace detail {
+
+class MatchKeyBuilderHelper;
+
+}  // namespace detail
+
 // Fields should be pushed in the P4 program (i.e. JSON) order. Internally, they
 // will be re-ordered for a more efficient implementation.
-struct MatchKeyBuilder {
+class MatchKeyBuilder {
+  friend class detail::MatchKeyBuilderHelper;
  public:
   void push_back_field(header_id_t header, int field_offset, size_t nbits,
                        MatchKeyParam::Type mtype);
@@ -85,9 +103,22 @@ struct MatchKeyBuilder {
 
   void operator()(const PHV &phv, ByteContainer *key) const;
 
+  std::vector<std::string> key_to_fields(const ByteContainer &key) const;
+
   std::string key_to_string(const ByteContainer &key,
                             std::string separator = "",
                             bool upper_case = false) const;
+
+  void build();
+
+  template <typename E>
+  std::vector<MatchKeyParam> entry_to_match_params(const E &entry) const;
+
+  template <typename E>
+  E match_params_to_entry(const std::vector<MatchKeyParam> &params) const;
+
+  bool match_params_sanity_check(
+      const std::vector<MatchKeyParam> &params) const;
 
   size_t get_nbytes_key() const { return nbytes_key; }
 
@@ -107,11 +138,14 @@ struct MatchKeyBuilder {
   bool has_big_mask{false};
   ByteContainer big_mask{};
   // maps the position of the field in the original P4 key to its actual
-  // position in the implementation-specific key. For example, in "key_input"
-  // (i.e. implementation-specific key), valid matches always come first and LPM
-  // matches come last
-  std::vector<size_t> raw_key_mapping{};
-  std::vector<size_t> raw_key_offsets{};
+  // position in the implementation-specific key. In the implementation, VALID
+  // match keys come first, followed by EXACT, then LPM and TERNARY.
+  std::vector<size_t> key_mapping{};
+  // inverse of key_mapping, could be handy
+  std::vector<size_t> inv_mapping{};
+  std::vector<size_t> key_offsets{};
+  bool built{false};
+  std::vector<ByteContainer> masks{};
 };
 
 namespace MatchUnit {
@@ -175,11 +209,11 @@ struct EntryMeta {
 
 class MatchUnitAbstract_ {
  public:
-  MatchUnitAbstract_(size_t size, const MatchKeyBuilder &match_key_builder)
-    : size(size),
-      nbytes_key(match_key_builder.get_nbytes_key()),
-      match_key_builder(match_key_builder),
-      entry_meta(size) { }
+  MatchUnitAbstract_(size_t size, const MatchKeyBuilder &key_builder)
+    : size(size), nbytes_key(key_builder.get_nbytes_key()),
+      match_key_builder(key_builder), entry_meta(size) {
+    match_key_builder.build();
+  }
 
   size_t get_num_entries() const { return num_entries; }
 
@@ -271,6 +305,24 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
 
   MatchErrorCode get_value(entry_handle_t handle, const V **value);
 
+  MatchErrorCode get_entry(entry_handle_t handle,
+                           std::vector<MatchKeyParam> *match_key,
+                           const V **value, int *priority = nullptr) const;
+
+  // TODO(antonin): move this one level up in class hierarchy?
+  // will return an empty string if the handle is not valid
+  // otherwise will return a dump of the match entry in a nice format
+  // Dumping entry <handle>
+  // Match key:
+  //   param_1
+  //   param_2 ...
+  // [Priority: ...]
+  // Does not print anything related to the stored value
+  std::string entry_to_string(entry_handle_t handle) const;
+
+  MatchErrorCode dump_match_entry(std::ostream *out,
+                                  entry_handle_t handle) const;
+
   void dump(std::ostream *stream) const {
     return dump_(stream);
   }
@@ -288,6 +340,13 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
   virtual MatchErrorCode modify_entry_(entry_handle_t handle, V value) = 0;
 
   virtual MatchErrorCode get_value_(entry_handle_t handle, const V **value) = 0;
+
+  virtual MatchErrorCode get_entry_(entry_handle_t handle,
+                                    std::vector<MatchKeyParam> *match_key,
+                                    const V **value, int *priority) const = 0;
+
+  virtual void dump_match_entry_(std::ostream *out,
+                                 entry_handle_t handle) const = 0;
 
   virtual void dump_(std::ostream *stream) const = 0;
 
@@ -309,6 +368,7 @@ class MatchUnitExact : public MatchUnitAbstract<V> {
   }
 
  private:
+  // TODO(antonin): have all Entry structs inherit from a common base?
   struct Entry {
     Entry() { }
 
@@ -318,6 +378,8 @@ class MatchUnitExact : public MatchUnitAbstract<V> {
     ByteContainer key{};
     V value{};
     uint32_t version{0};
+
+    static constexpr MatchUnitType mut = MatchUnitType::EXACT;
   };
 
  private:
@@ -331,6 +393,13 @@ class MatchUnitExact : public MatchUnitAbstract<V> {
   MatchErrorCode modify_entry_(entry_handle_t handle, V value) override;
 
   MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
+
+  MatchErrorCode get_entry_(entry_handle_t handle,
+                            std::vector<MatchKeyParam> *match_key,
+                            const V **value, int *priority) const override;
+
+  void dump_match_entry_(std::ostream *out,
+                         entry_handle_t handle) const override;
 
   void dump_(std::ostream *stream) const override;
 
@@ -367,6 +436,8 @@ class MatchUnitLPM : public MatchUnitAbstract<V> {
     int prefix_length{0};
     V value{};
     uint32_t version{0};
+
+    static constexpr MatchUnitType mut = MatchUnitType::LPM;
   };
 
  private:
@@ -380,6 +451,13 @@ class MatchUnitLPM : public MatchUnitAbstract<V> {
   MatchErrorCode modify_entry_(entry_handle_t handle, V value) override;
 
   MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
+
+  MatchErrorCode get_entry_(entry_handle_t handle,
+                            std::vector<MatchKeyParam> *match_key,
+                            const V **value, int *priority) const override;
+
+  void dump_match_entry_(std::ostream *out,
+                         entry_handle_t handle) const override;
 
   void dump_(std::ostream *stream) const override;
 
@@ -416,6 +494,8 @@ class MatchUnitTernary : public MatchUnitAbstract<V> {
     int priority{0};
     V value{};
     uint32_t version{0};
+
+    static constexpr MatchUnitType mut = MatchUnitType::TERNARY;
   };
 
  private:
@@ -429,6 +509,13 @@ class MatchUnitTernary : public MatchUnitAbstract<V> {
   MatchErrorCode modify_entry_(entry_handle_t handle, V value) override;
 
   MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
+
+  MatchErrorCode get_entry_(entry_handle_t handle,
+                            std::vector<MatchKeyParam> *match_key,
+                            const V **value, int *priority) const override;
+
+  void dump_match_entry_(std::ostream *out,
+                         entry_handle_t handle) const override;
 
   void dump_(std::ostream *stream) const override;
 
