@@ -24,6 +24,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 
 #include <cassert>
 
@@ -103,6 +104,9 @@ OptionsParser::parse(int argc, char *argv[]) {
        "Enable logging on stdout")
       ("log-file", po::value<std::string>(),
        "Enable logging to given file")
+      ("log-level,L", po::value<std::string>(),
+       "Set log level, supported values are "
+       "'trace', 'debug', 'info', 'warn', 'error', off'")
       ("notifications-addr", po::value<std::string>(),
        "Specify the nanomsg address to use for notifications "
        "(e.g. learning, ageing, ...); "
@@ -182,6 +186,23 @@ OptionsParser::parse(int argc, char *argv[]) {
 
   if (vm.count("log-file")) {
     file_logger = vm["log-file"].as<std::string>();
+  }
+
+  if (vm.count("log-level")) {
+    const std::string log_level_str = vm["log-level"].as<std::string>();
+    std::unordered_map<std::string, Logger::LogLevel> levels_map = {
+      {"trace", Logger::LogLevel::TRACE},
+      {"debug", Logger::LogLevel::DEBUG},
+      {"info", Logger::LogLevel::INFO},
+      {"warn", Logger::LogLevel::WARN},
+      {"error", Logger::LogLevel::ERROR},
+      {"off", Logger::LogLevel::OFF} };
+    if (!levels_map.count(log_level_str)) {
+      std::cout << "Invalid value " << log_level_str << " for --log-level\n"
+                << "Run with -h to see possible values\n";
+      exit(1);
+    }
+    log_level = levels_map[log_level_str];
   }
 
   if (vm.count("interface")) {

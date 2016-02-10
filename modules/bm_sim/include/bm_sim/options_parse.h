@@ -26,6 +26,8 @@
 #include <string>
 #include <map>
 
+#include "logger.h"
+
 namespace bm {
 
 class InterfaceList {
@@ -71,6 +73,8 @@ class OptionsParser {
   std::string event_logger_addr{};
   std::string file_logger{};
   bool console_logging{false};
+  // by default everything is logged
+  Logger::LogLevel log_level{Logger::LogLevel::TRACE};
   std::string notifications_addr{};
   bool debugger{false};
 };

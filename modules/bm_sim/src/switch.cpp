@@ -122,6 +122,8 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[]) {
   if (parser.file_logger != "")
     Logger::set_logger_file(parser.file_logger);
 
+  Logger::set_log_level(parser.log_level);
+
   if (parser.use_files)
     set_dev_mgr_files(parser.wait_time);
   else if (parser.packet_in)
