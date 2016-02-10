@@ -13,6 +13,7 @@ noinst_LTLIBRARIES = libbmsim.la
 common_source = \
 src/actions.cpp \
 src/ageing.cpp \
+src/bytecontainer.cpp \
 src/calculations.cpp \
 src/checksums.cpp \
 src/conditionals.cpp \
@@ -45,6 +46,7 @@ src/switch.cpp \
 src/simple_pre.cpp \
 src/simple_pre_lag.cpp \
 src/transport.cpp \
+src/utils.h \
 src/xxhash.c \
 src/xxhash.h
 

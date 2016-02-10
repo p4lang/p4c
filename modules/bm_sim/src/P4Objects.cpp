@@ -596,6 +596,12 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
   ageing_monitor = std::unique_ptr<AgeingMonitor>(
       new AgeingMonitor(device_id, cxt_id, notifications_transport));
 
+  std::unordered_map<std::string, MatchKeyParam::Type> map_name_to_match_type =
+      { {"exact", MatchKeyParam::Type::EXACT},
+        {"lpm", MatchKeyParam::Type::LPM},
+        {"ternary", MatchKeyParam::Type::TERNARY},
+        {"valid", MatchKeyParam::Type::VALID} };
+
   const Json::Value &cfg_pipelines = cfg_root["pipelines"];
   for (const auto &cfg_pipeline : cfg_pipelines) {
     const string pipeline_name = cfg_pipeline["name"].asString();
@@ -612,23 +618,29 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
       MatchKeyBuilder key_builder;
       const Json::Value &cfg_match_key = cfg_table["key"];
 
-      auto add_f = [this, &key_builder](const Json::Value &cfg_f) {
+      auto add_f = [this, &key_builder, &map_name_to_match_type](
+          const Json::Value &cfg_f) {
         const Json::Value &cfg_key_field = cfg_f["target"];
         const string header_name = cfg_key_field[0].asString();
         header_id_t header_id = get_header_id(header_name);
         const string field_name = cfg_key_field[1].asString();
         int field_offset = get_field_offset(header_id, field_name);
+        const auto mtype = map_name_to_match_type.at(
+            cfg_f["match_type"].asString());
         if ((!cfg_f.isMember("mask")) || cfg_f["mask"].isNull()) {
           key_builder.push_back_field(header_id, field_offset,
-                                      get_field_bits(header_id, field_offset));
+                                      get_field_bits(header_id, field_offset),
+                                      mtype);
         } else {
           const Json::Value &cfg_key_mask = cfg_f["mask"];
           key_builder.push_back_field(header_id, field_offset,
                                       get_field_bits(header_id, field_offset),
-                                      ByteContainer(cfg_key_mask.asString()));
+                                      ByteContainer(cfg_key_mask.asString()),
+                                      mtype);
         }
       };
 
+      // sanity checking, really necessary?
       bool has_lpm = false;
       for (const auto &cfg_key_entry : cfg_match_key) {
         const string match_type = cfg_key_entry["match_type"].asString();
@@ -639,19 +651,17 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
             return 1;
           }
           has_lpm = true;
-        } else if (match_type == "valid") {
-          const Json::Value &cfg_key_field = cfg_key_entry["target"];
-          const string header_name = cfg_key_field.asString();
-          header_id_t header_id = get_header_id(header_name);
-          key_builder.push_back_valid_header(header_id);
-        } else {
-          add_f(cfg_key_entry);
         }
       }
 
       for (const auto &cfg_key_entry : cfg_match_key) {
         const string match_type = cfg_key_entry["match_type"].asString();
-        if (match_type == "lpm") {
+        if (match_type == "valid") {
+          const Json::Value &cfg_key_field = cfg_key_entry["target"];
+          const string header_name = cfg_key_field.asString();
+          header_id_t header_id = get_header_id(header_name);
+          key_builder.push_back_valid_header(header_id);
+        } else {
           add_f(cfg_key_entry);
         }
       }
