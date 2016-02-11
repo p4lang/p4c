@@ -21,7 +21,7 @@
 #include <limits>
 #include <string>
 #include <vector>
-#include <algorithm>  // for std::copy
+#include <algorithm>  // for std::copy, std::max
 
 #include "bm_sim/match_units.h"
 #include "bm_sim/match_tables.h"
@@ -143,35 +143,40 @@ MatchKeyBuilder::build() {
 // same time we keep track of the original order thanks to key_mapping (for
 // debugging).
 void
-MatchKeyBuilder::push_back(KeyF &&input, const ByteContainer &mask) {
+MatchKeyBuilder::push_back(KeyF &&input, const ByteContainer &mask,
+                           const std::string &name) {
   key_input.push_back(std::move(input));
   size_t f_nbytes = nbits_to_nbytes(input.nbits);
   nbytes_key += f_nbytes;
   masks.push_back(mask);
+  name_map.push_back(name);
 }
 
 void
 MatchKeyBuilder::push_back_field(header_id_t header, int field_offset,
-                                 size_t nbits, MatchKeyParam::Type mtype) {
+                                 size_t nbits, MatchKeyParam::Type mtype,
+                                 const std::string &name) {
   push_back({header, field_offset, mtype, nbits},
-            ByteContainer(nbits_to_nbytes(nbits), '\xff'));
+            ByteContainer(nbits_to_nbytes(nbits), '\xff'), name);
 }
 
 void
 MatchKeyBuilder::push_back_field(header_id_t header, int field_offset,
                                  size_t nbits, const ByteContainer &mask,
-                                 MatchKeyParam::Type mtype) {
+                                 MatchKeyParam::Type mtype,
+                                 const std::string &name) {
   assert(mask.size() == nbits_to_nbytes(nbits));
-  push_back({header, field_offset, mtype, nbits}, mask);
+  push_back({header, field_offset, mtype, nbits}, mask, name);
   has_big_mask = true;
 }
 
 void
-MatchKeyBuilder::push_back_valid_header(header_id_t header) {
+MatchKeyBuilder::push_back_valid_header(header_id_t header,
+                                        const std::string &name) {
   // set "nbits" to 8 (i.e. 1 byte); it is kind of a hack but ensure that most
   // of the code can be the same...
   push_back({header, 0, MatchKeyParam::Type::VALID, 8},
-            ByteContainer(1, '\xff'));
+            ByteContainer(1, '\xff'), name);
 }
 
 void
@@ -515,6 +520,22 @@ MatchKeyBuilder::match_params_sanity_check(
   return true;
 }
 
+void
+MatchKeyBuilder::NameMap::push_back(const std::string &name) {
+  names.push_back(name);
+  max_s = std::max(max_s, name.size());
+}
+
+const std::string &
+MatchKeyBuilder::NameMap::get(size_t idx) const {
+  return names.at(idx);
+}
+
+size_t
+MatchKeyBuilder::NameMap::max_size() const {
+  return max_s;
+}
+
 
 MatchErrorCode
 MatchUnitAbstract_::get_and_set_handle(internal_handle_t *handle) {
@@ -799,6 +820,24 @@ MatchUnitExact<V>::get_entry_(entry_handle_t handle,
   return MatchErrorCode::SUCCESS;
 }
 
+namespace {
+
+template <typename E>
+void
+dump_entry(std::ostream *out, const E &entry, const MatchKeyBuilder &kb) {
+  *out << "Match key:\n";
+  const auto params = kb.entry_to_match_params(entry);
+  const size_t out_name_w = std::max(size_t(20), kb.max_name_size());
+  for (size_t i = 0; i < params.size(); i++) {
+    const auto &name = kb.get_name(i);
+    *out << "  ";
+    if (name != "") *out << std::setw(out_name_w) << std::left << name << ": ";
+    *out << params[i] << "\n";
+  }
+}
+
+}  // namespace
+
 template<typename V>
 void
 MatchUnitExact<V>::dump_match_entry_(std::ostream *out,
@@ -807,9 +846,7 @@ MatchUnitExact<V>::dump_match_entry_(std::ostream *out,
   const Entry &entry = entries[handle_];
 
   *out << "Dumping entry " << handle << "\n";
-  *out << "Match key:\n";
-  for (const auto &param : this->match_key_builder.entry_to_match_params(entry))
-    *out << "  " << param << "\n";
+  dump_entry(out, entry, this->match_key_builder);
 }
 
 template<typename V>
@@ -948,9 +985,7 @@ MatchUnitLPM<V>::dump_match_entry_(std::ostream *out,
   // TODO(antonin): avoid duplicate code, this is basically the same as for
   // exact
   *out << "Dumping entry " << handle << "\n";
-  *out << "Match key:\n";
-  for (const auto &param : this->match_key_builder.entry_to_match_params(entry))
-    *out << "  " << param << "\n";
+  dump_entry(out, entry, this->match_key_builder);
 }
 
 template<typename V>
@@ -1129,9 +1164,7 @@ MatchUnitTernary<V>::dump_match_entry_(std::ostream *out,
   const Entry &entry = entries[handle_];
 
   *out << "Dumping entry " << handle << "\n";
-  *out << "Match key:\n";
-  for (const auto &param : this->match_key_builder.entry_to_match_params(entry))
-    *out << "  " << param << "\n";
+  dump_entry(out, entry, this->match_key_builder);
   *out << "Priority: " << entry.priority << "\n";
 }
 

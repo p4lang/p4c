@@ -92,12 +92,13 @@ class MatchKeyBuilder {
   friend class detail::MatchKeyBuilderHelper;
  public:
   void push_back_field(header_id_t header, int field_offset, size_t nbits,
-                       MatchKeyParam::Type mtype);
+                       MatchKeyParam::Type mtype, const std::string &name = "");
 
   void push_back_field(header_id_t header, int field_offset, size_t nbits,
-                       const ByteContainer &mask, MatchKeyParam::Type mtype);
+                       const ByteContainer &mask, MatchKeyParam::Type mtype,
+                       const std::string &name = "");
 
-  void push_back_valid_header(header_id_t header);
+  void push_back_valid_header(header_id_t header, const std::string &name = "");
 
   void apply_big_mask(ByteContainer *key) const;
 
@@ -122,6 +123,10 @@ class MatchKeyBuilder {
 
   size_t get_nbytes_key() const { return nbytes_key; }
 
+  const std::string &get_name(size_t idx) const { return name_map.get(idx); }
+
+  size_t max_name_size() const { return name_map.max_size(); }
+
  private:
   struct KeyF {
     header_id_t header;
@@ -130,8 +135,18 @@ class MatchKeyBuilder {
     size_t nbits;
   };
 
+  struct NameMap {
+    void push_back(const std::string &name);
+    const std::string &get(size_t idx) const;
+    size_t max_size() const;
+
+    std::vector<std::string> names{};
+    size_t max_s{0};
+  };
+
   // takes ownership of input
-  void push_back(KeyF &&input, const ByteContainer &mask);
+  void push_back(KeyF &&input, const ByteContainer &mask,
+                 const std::string &name);
 
   std::vector<KeyF> key_input{};
   size_t nbytes_key{0};
@@ -144,6 +159,7 @@ class MatchKeyBuilder {
   // inverse of key_mapping, could be handy
   std::vector<size_t> inv_mapping{};
   std::vector<size_t> key_offsets{};
+  NameMap name_map{};
   bool built{false};
   std::vector<ByteContainer> masks{};
 };
@@ -354,6 +370,10 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
 
   virtual MatchUnitLookup lookup_key(const ByteContainer &key) const = 0;
 };
+
+// TODO(antonin):
+// It seems that with the recent additions, these classes would really benefit
+// from inheriting from a common ancestor templatized by the entry type
 
 template <typename V>
 class MatchUnitExact : public MatchUnitAbstract<V> {

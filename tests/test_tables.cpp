@@ -1704,23 +1704,29 @@ class TableEntryDebug : public ::testing::Test {
 
 template <>
 void TableEntryDebug<MUExact>::set_key_builder() {
-  key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::EXACT);
-  key_builder.push_back_field(testHeader2, 0, 16, MatchKeyParam::Type::EXACT);
-  key_builder.push_back_valid_header(testHeader3);
+  key_builder.push_back_field(testHeader1, 0, 16,
+                              MatchKeyParam::Type::EXACT, "h1.f0");
+  key_builder.push_back_field(testHeader2, 0, 16,
+                              MatchKeyParam::Type::EXACT, "h2.f0");
+  key_builder.push_back_valid_header(testHeader3, "h3");
 }
 
 template <>
 void TableEntryDebug<MULPM>::set_key_builder() {
-  key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::LPM);
-  key_builder.push_back_field(testHeader2, 0, 16, MatchKeyParam::Type::EXACT);
-  key_builder.push_back_valid_header(testHeader3);
+  key_builder.push_back_field(testHeader1, 0, 16,
+                              MatchKeyParam::Type::LPM, "h1.f0");
+  key_builder.push_back_field(testHeader2, 0, 16,
+                              MatchKeyParam::Type::EXACT, "h2.f0");
+  key_builder.push_back_valid_header(testHeader3, "h3");
 }
 
 template <>
 void TableEntryDebug<MUTernary>::set_key_builder() {
-  key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::LPM);
-  key_builder.push_back_field(testHeader2, 0, 16, MatchKeyParam::Type::TERNARY);
-  key_builder.push_back_valid_header(testHeader3);
+  key_builder.push_back_field(testHeader1, 0, 16,
+                              MatchKeyParam::Type::LPM, "h1.f0");
+  key_builder.push_back_field(testHeader2, 0, 16,
+                              MatchKeyParam::Type::TERNARY, "h2.f0");
+  key_builder.push_back_valid_header(testHeader3, "h3");
 }
 
 template <>
@@ -1763,9 +1769,9 @@ std::string TableEntryDebug<MUExact>::gen_entry_string() const {
   return std::string(
       "Dumping entry 0\n"
       "Match key:\n"
-      "  EXACT     1234\n"
-      "  EXACT     abcd\n"
-      "  VALID     10\n"
+      "  h1.f0               : EXACT     1234\n"
+      "  h2.f0               : EXACT     abcd\n"
+      "  h3                  : VALID     10\n"
       "Action entry: actionA - aba,\n");
 }
 
@@ -1774,9 +1780,9 @@ std::string TableEntryDebug<MULPM>::gen_entry_string() const {
   return std::string(
       "Dumping entry 0\n"
       "Match key:\n"
-      "  LPM       1234/12\n"
-      "  EXACT     abcd\n"
-      "  VALID     10\n"
+      "  h1.f0               : LPM       1234/12\n"
+      "  h2.f0               : EXACT     abcd\n"
+      "  h3                  : VALID     10\n"
       "Action entry: actionA - aba,\n");
 }
 
@@ -1785,9 +1791,9 @@ std::string TableEntryDebug<MUTernary>::gen_entry_string() const {
   return std::string(
       "Dumping entry 0\n"
       "Match key:\n"
-      "  LPM       1230/12\n"
-      "  TERNARY   b0c0 &&& f0f0\n"
-      "  VALID     10\n"
+      "  h1.f0               : LPM       1230/12\n"
+      "  h2.f0               : TERNARY   b0c0 &&& f0f0\n"
+      "  h3                  : VALID     10\n"
       "Priority: 12\n"
       "Action entry: actionA - aba,\n");
 }

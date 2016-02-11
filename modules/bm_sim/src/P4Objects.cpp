@@ -627,16 +627,17 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
         int field_offset = get_field_offset(header_id, field_name);
         const auto mtype = map_name_to_match_type.at(
             cfg_f["match_type"].asString());
+        const std::string name = header_name + "." + field_name;
         if ((!cfg_f.isMember("mask")) || cfg_f["mask"].isNull()) {
           key_builder.push_back_field(header_id, field_offset,
                                       get_field_bits(header_id, field_offset),
-                                      mtype);
+                                      mtype, name);
         } else {
           const Json::Value &cfg_key_mask = cfg_f["mask"];
           key_builder.push_back_field(header_id, field_offset,
                                       get_field_bits(header_id, field_offset),
                                       ByteContainer(cfg_key_mask.asString()),
-                                      mtype);
+                                      mtype, name);
         }
       };
 
@@ -660,7 +661,7 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
           const Json::Value &cfg_key_field = cfg_key_entry["target"];
           const string header_name = cfg_key_field.asString();
           header_id_t header_id = get_header_id(header_name);
-          key_builder.push_back_valid_header(header_id);
+          key_builder.push_back_valid_header(header_id, header_name);
         } else {
           add_f(cfg_key_entry);
         }
