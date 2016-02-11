@@ -49,17 +49,18 @@ struct hash_ex {
   }
 };
 
-REGISTER_HASH(hash_ex);
-
 struct bmv2_hash {
   uint64_t operator()(const char *buf, size_t s) const {
     return bm::hash::xxh64(buf, s);
   }
 };
 
-REGISTER_HASH(bmv2_hash);
-
 }  // namespace
+
+// if REGISTER_HASH calls placed in the anonymous namespace, some compiler can
+// give an unused variable warning
+REGISTER_HASH(hash_ex);
+REGISTER_HASH(bmv2_hash);
 
 extern int import_primitives();
 

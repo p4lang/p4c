@@ -396,6 +396,8 @@ class NamedCalculation : public NamedP4Object, public Calculation_<uint64_t> {
 
 //! When implementing an hash operation for a target, this macro needs to be
 //! called to make this module aware of the hash existence.
+//! When calling this macro from an anonymous namespace, some compiler may give
+//! you a warning.
 #define REGISTER_HASH(hash_name)                                        \
   bool hash_name##_create_ =                                            \
       bm::CalculationsMap::get_instance()->register_one(                \
