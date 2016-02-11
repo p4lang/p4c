@@ -22,6 +22,16 @@ AC_ARG_WITH([targets],
 
 AM_CONDITIONAL([COND_TARGETS], [test "$want_targets" = yes])
 
+MY_CPPFLAGS=""
+
+AC_ARG_ENABLE([debugger],
+    AS_HELP_STRING([--enable-debugger], [Enable bmv2 remote debugger]))
+AS_IF([test "x$enable_debugger" = "xyes"], [
+    MY_CPPFLAGS="$MY_CPPFLAGS -DBMDEBUG_ON"
+])
+
+AC_SUBST([COVERAGE_FLAGS])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
@@ -33,19 +43,17 @@ AC_CONFIG_MACRO_DIR([m4])
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 
 # Add picky flags
-# Do not include -pedantic because it reject long long
 PICKY_CXXFLAGS="-Wall -Werror -Wextra"
 PICKY_CFLAGS=""
 # I do not want work to use AC_DEFINE cause I do not want to include config.h
 # It interfers with Thrift's config.h and it's too much work to do that cleanly
-DEBUG_CPPFLAGS=""
-# DEBUG_CPPFLAGS="$DEBUG_CPPFLAGS -g"
 AC_SUBST([PICKY_CXXFLAGS])
 AC_SUBST([PICKY_CFLAGS])
-AC_SUBST([DEBUG_CPPFLAGS])
 
 # for now, BMELOG_ON is defined by default, since it is required for some tests
-AC_SUBST([AM_CPPFLAGS], ["-DBMELOG_ON \
+MY_CPPFLAGS="$MY_CPPFLAGS -DBMELOG_ON"
+
+AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS \
                           -I\$(top_srcdir)/modules/bf_lpm_trie/include \
                           -isystem\$(top_srcdir)/third_party/jsoncpp/include \
                           -isystem\$(top_srcdir)/third_party/spdlog/include \

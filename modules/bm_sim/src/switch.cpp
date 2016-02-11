@@ -108,7 +108,7 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[]) {
   if (parser.debugger) {
     for (Context &c : contexts)
       c.set_force_arith(true);
-    Debugger::init_debugger();
+    Debugger::init_debugger(parser.debugger_addr);
   }
 #endif
 

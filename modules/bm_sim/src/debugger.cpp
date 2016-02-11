@@ -87,7 +87,7 @@ class DebuggerNN final : public DebuggerIface {
 
   ~DebuggerNN();
 
-  void open();
+  void open(const std::string &addr);
 
  private:
   typedef std::unique_lock<std::mutex> UniqueLock;
@@ -257,8 +257,8 @@ DebuggerNN::~DebuggerNN() {
 }
 
 void
-DebuggerNN::open() {
-  s.bind("ipc:///tmp/debug_bus_1.ipc");
+DebuggerNN::open(const std::string &addr) {
+  s.bind(addr.c_str());
   int to = 100;
   s.setsockopt(NN_SOL_SOCKET, NN_RCVTIMEO, &to, sizeof (to));
 }
@@ -883,14 +883,14 @@ DebuggerIface *Debugger::debugger = new DebuggerDummy();
 bool Debugger::is_init = false;
 
 void
-Debugger::init_debugger() {
+Debugger::init_debugger(const std::string &addr) {
   if (is_init) return;
   is_init = true;
   DebuggerDummy *dummy = dynamic_cast<DebuggerDummy *>(debugger);
   assert(dummy);
   delete dummy;
   DebuggerNN *debugger_nn = new DebuggerNN();
-  debugger_nn->open();
+  debugger_nn->open(addr);
   debugger = debugger_nn;
 }
 

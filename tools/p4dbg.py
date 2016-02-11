@@ -36,8 +36,8 @@ except:
     with_runtime_CLI = False
 
 parser = argparse.ArgumentParser(description='BM nanomsg debugger')
-# parser.add_argument('--socket', help='IPC socket',
-#                     action="store", default="ipc:///tmp/debug_reqrep.ipc")
+parser.add_argument('--socket', help='Nanomsg socket to which to subscribe',
+                    action="store", default="ipc:///tmp/bmv2-0-debug.ipc")
 parser.add_argument('--thrift-port', help='Thrift server port for table updates',
                     type=int, action="store", default=9090)
 parser.add_argument('--thrift-ip', help='Thrift IP address for table updates',
@@ -521,11 +521,15 @@ class DebuggerAPI(cmd.Cmd):
     prompt = 'P4DBG: '
     intro = "Prototype for Debugger UI"
 
-    def __init__(self):
+    def __init__(self, addr):
         cmd.Cmd.__init__(self)
-        self.addr = "ipc:///tmp/debug_bus_1.ipc"
+        self.addr = addr
         self.sok = nnpy.Socket(nnpy.AF_SP, nnpy.REQ)
-        self.sok.connect(self.addr)
+        try:
+            self.sok.connect(self.addr)
+        except:
+            print "Impossible to connect to provided socket (bad format?)"
+            sys.exit(1)
         self.req_id = 0
         self.switch_id = 0
         self.break_packet_in = False
@@ -1069,7 +1073,7 @@ def main():
         field_map.load_names(json_src)
         obj_map.load_names(json_src)
 
-    c = DebuggerAPI()
+    c = DebuggerAPI(args.socket)
     try:
         c.attach()
         c.cmdloop()

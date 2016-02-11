@@ -77,6 +77,7 @@ class OptionsParser {
   Logger::LogLevel log_level{Logger::LogLevel::TRACE};
   std::string notifications_addr{};
   bool debugger{false};
+  std::string debugger_addr{};
 };
 
 }  // namespace bm

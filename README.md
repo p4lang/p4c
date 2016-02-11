@@ -61,7 +61,8 @@ In 'debug mode', you probably want to also use the following as well:
 
     'CXXFLAGS=-O0 -g'
 
-The new bmv2 debugger can be enabled by adding `-DBMDEBUG_ON` to the `CPPFLAGS`.
+The new bmv2 debugger can be enabled by adding `-DBMDEBUG_ON` to the `CPPFLAGS`
+or simply by passing `--enable-debugger` to `configure`.
 
 ## Running the tests
 
@@ -128,7 +129,8 @@ used.
 ## Using the debugger
 
 To enable the debugger, make sure that you added `-DBMDEBUG_ON` to the
-`CPPFLAGS` when running `./configure`. You will also need to use the
+`CPPFLAGS` when running `./configure`, or that you passed the
+`--enable-debugger` flag to `configure`. You will also need to use the
 `--debugger` command line flag when starting the switch.
 
 Use [tools/p4dbg.py](tools/p4dbg.py) as follows when the switch is running to

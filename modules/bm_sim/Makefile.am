@@ -1,6 +1,5 @@
 AM_CPPFLAGS += \
 -I$(srcdir)/include/
-AM_CPPFLAGS += $(DEBUG_CPPFLAGS)
 # I used to have -Weffc++ for this module. I felt that most of it was excessively
 # pedantic (like constructior initializers for non POD data), but it was
 # useful. However in some versions of g++, it warns for non-virtual destructors

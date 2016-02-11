@@ -111,7 +111,14 @@ OptionsParser::parse(int argc, char *argv[]) {
        "Specify the nanomsg address to use for notifications "
        "(e.g. learning, ageing, ...); "
        "default is ipc:///tmp/bmv2-<device-id>-notifications.ipc")
-      ("debugger", "Activate debugger");
+#ifdef BMDEBUG_ON
+      ("debugger", "Activate debugger")
+      ("debugger-addr", po::value<std::string>(),
+       "Specify the nanomsg address to use for debugger communication; "
+       "there is no need to use --debugger in addition to this option; "
+       "default is ipc:///tmp/bmv2-<device-id>-debug.ipc")
+#endif
+      ;  // NOLINT(whitespace/semicolon)
 
   po::options_description hidden;
   hidden.add_options()
@@ -234,8 +241,13 @@ OptionsParser::parse(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (vm.count("debugger")) {
+  if (vm.count("debugger-addr")) {
     debugger = true;
+    debugger_addr = vm["debugger-addr"].as<std::string>();
+  } else if (vm.count("debugger")) {
+    debugger = true;
+    debugger_addr = std::string("ipc:///tmp/bmv2-")
+        + std::to_string(device_id) + std::string("-debug.ipc");
   }
 
   assert(vm.count("input-config"));

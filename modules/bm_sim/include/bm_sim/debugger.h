@@ -22,6 +22,7 @@
 #define BM_SIM_INCLUDE_BM_SIM_DEBUGGER_H_
 
 #include <limits>
+#include <string>
 
 // #define BMDEBUG_ON
 
@@ -69,7 +70,7 @@ class Debugger {
     }
   };
 
-  static void init_debugger();
+  static void init_debugger(const std::string &addr);
 
   static DebuggerIface *get() {
     return debugger;
