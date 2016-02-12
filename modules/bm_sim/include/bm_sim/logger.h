@@ -33,14 +33,6 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_LOGGER_H_
 #define BM_SIM_INCLUDE_BM_SIM_LOGGER_H_
 
-#ifdef BMLOG_DEBUG_ON
-#define SPDLOG_DEBUG_ON
-#endif
-
-#ifdef BMLOG_TRACE_ON
-#define SPDLOG_TRACE_ON
-#endif
-
 #include <string>
 
 #include "spdlog/spdlog.h"
@@ -112,33 +104,39 @@ class Logger {
 
 }  // namespace bm
 
+#ifdef BMLOG_DEBUG_ON
 //! Preferred way (because can be disabled at compile time) to log a debug
 //! message. Is enabled by preprocessor BMLOG_DEBUG_ON.
-#define BMLOG_DEBUG(...) SPDLOG_DEBUG(bm::Logger::get(), __VA_ARGS__)
+#define BMLOG_DEBUG(...) bm::Logger::get()->debug(__VA_ARGS__);
+#else
+#define BMLOG_DEBUG(...)
+#endif
+
+#ifdef BMLOG_TRACE_ON
 //! Preferred way (because can be disabled at compile time) to log a trace
 //! message. Is enabled by preprocessor BMLOG_TRACE_ON.
-#define BMLOG_TRACE(...) SPDLOG_TRACE(bm::Logger::get(), __VA_ARGS__)
+#define BMLOG_TRACE(...) bm::Logger::get()->trace(__VA_ARGS__);
+#else
+#define BMLOG_TRACE(...)
+#endif
 
 //! Same as for BMLOG_DEBUG but for messages regarding a specific packet. Will
 //! automatically print the packet id and packet context, along with your
 //! message.
-#define BMLOG_DEBUG_PKT(pkt, s, ...) \
-  SPDLOG_DEBUG(bm::Logger::get(), "[{}] [cxt {}] " s, (pkt).get_unique_id(), \
-               (pkt).get_context(), ##__VA_ARGS__)
+#define BMLOG_DEBUG_PKT(pkt, s, ...)                     \
+  BMLOG_DEBUG("[{}] [cxt {}] " s, (pkt).get_unique_id(), \
+              (pkt).get_context(), ##__VA_ARGS__)
 //! Same as for BMLOG_TRACE but for messages regarding a specific packet. Will
 //! automatically print the packet id and packet context, along with your
 //! message.
-#define BMLOG_TRACE_PKT(pkt, s, ...) \
-  SPDLOG_TRACE(bm::Logger::get(), "[{}] [cxt {}] " s, (pkt).get_unique_id(), \
-               (pkt).get_context(), ##__VA_ARGS__)
+#define BMLOG_TRACE_PKT(pkt, s, ...)                     \
+  BMLOG_TRACE("[{}] [cxt {}] " s, (pkt).get_unique_id(), \
+              (pkt).get_context(), ##__VA_ARGS__)
 
 #define BMLOG_ERROR(...) bm::Logger::get()->error(__VA_ARGS__)
 
-#define BMLOG_ERROR_PKT(pkt, s, ...) \
-  bm::Logger::get()->error("[{}] [cxt {}] " s, (pkt).get_unique_id(), \
+#define BMLOG_ERROR_PKT(pkt, s, ...)                                    \
+  bm::Logger::get()->error("[{}] [cxt {}] " s, (pkt).get_unique_id(),   \
                            (pkt).get_context(), ##__VA_ARGS__)
-
-#undef SPDLOG_DEBUG_ON
-#undef SPDLOG_TRACE_ON
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_LOGGER_H_
