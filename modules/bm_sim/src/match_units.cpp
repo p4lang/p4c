@@ -623,6 +623,24 @@ MatchUnitAbstract_::sweep_entries(std::vector<entry_handle_t> *entries) const {
   }
 }
 
+std::string
+MatchUnitAbstract_::key_to_string_with_names(const ByteContainer &key) const {
+  std::ostringstream ret;
+
+  auto values = match_key_builder.key_to_fields(key);
+  const size_t out_name_w = std::max(size_t(20),
+                                     match_key_builder.max_name_size());
+  for (size_t i = 0; i < values.size(); i++) {
+    const auto &name = match_key_builder.get_name(i);
+    ret << "* ";
+    if (name != "") ret << std::setw(out_name_w) << std::left << name << ": ";
+    dump_hexstring(ret, values[i]);
+    ret << "\n";
+  }
+
+  return ret.str();
+}
+
 template<typename V>
 typename MatchUnitAbstract<V>::MatchUnitLookup
 MatchUnitAbstract<V>::lookup(const Packet &pkt) {
@@ -630,7 +648,8 @@ MatchUnitAbstract<V>::lookup(const Packet &pkt) {
   key.clear();
   build_key(*pkt.get_phv(), &key);
 
-  BMLOG_DEBUG_PKT(pkt, "Looking up key {}", key_to_string(key));
+  // BMLOG_DEBUG_PKT(pkt, "Looking up key {}", key_to_string(key));
+  BMLOG_DEBUG_PKT(pkt, "Looking up key:\n{}", key_to_string_with_names(key));
 
   MatchUnitLookup res = lookup_key(key);
   if (res.found()) {
@@ -830,7 +849,7 @@ dump_entry(std::ostream *out, const E &entry, const MatchKeyBuilder &kb) {
   const size_t out_name_w = std::max(size_t(20), kb.max_name_size());
   for (size_t i = 0; i < params.size(); i++) {
     const auto &name = kb.get_name(i);
-    *out << "  ";
+    *out << "* ";
     if (name != "") *out << std::setw(out_name_w) << std::left << name << ": ";
     *out << params[i] << "\n";
   }

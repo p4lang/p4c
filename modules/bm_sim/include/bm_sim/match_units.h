@@ -265,6 +265,8 @@ class MatchUnitAbstract_ {
     return match_key_builder.key_to_string(key);
   }
 
+  std::string key_to_string_with_names(const ByteContainer &key) const;
+
   void update_counters(Counter *c, const Packet &pkt) {
     c->increment_counter(pkt);
   }
