@@ -137,7 +137,7 @@ class ActionsTest : public ::testing::Test {
 
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
-  // pkt needs to be destroyed BEFOR phv_source, otherwise segfault
+  // pkt needs to be destroyed BEFORE phv_source, otherwise segfault
   // not a very clean design...
   std::unique_ptr<Packet> pkt{nullptr};
 

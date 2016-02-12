@@ -55,13 +55,19 @@ Packet::Packet(size_t cxt_id, int ingress_port, packet_id_t id,
 }
 
 Packet::~Packet() {
-  copy_id_gen->remove_one(packet_id);
   assert(phv_source);
-  assert(phv);
-  phv->reset();
-  phv->reset_header_stacks();
-  phv_source->release(cxt_id, std::move(phv));
-  DEBUGGER_PACKET_OUT(PacketId::make(packet_id, copy_id), egress_port);
+  // Compiling and running the tests with g++5 exposed this issue
+  // When the move constructor is called from a temporary, the PHV is stolen
+  // from the temporary and then the temporary is destroyed
+  // I don't know why this was not observed with g++-4.8 / g++-4.9
+  // assert(phv);
+  if (phv) {
+    copy_id_gen->remove_one(packet_id);
+    phv->reset();
+    phv->reset_header_stacks();
+    phv_source->release(cxt_id, std::move(phv));
+    DEBUGGER_PACKET_OUT(PacketId::make(packet_id, copy_id), egress_port);
+  }
 }
 
 void
