@@ -23,7 +23,6 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_DATA_H_
 #define BM_SIM_INCLUDE_BM_SIM_DATA_H_
 
-#include <iostream>
 #include <type_traits>
 #include <string>
 #include <vector>
@@ -134,7 +133,17 @@ class Data {
 
   //! Set the value of Data from a hexadecimal string. See
   //! Data(const std::string &hexstring) for more information on \p hexstring
-  void set(const std::string &hexstring) {
+  void
+#if __GNUC__ == 5 && __GNUC_MINOR__ <= 2
+  // With g++-5.2, and when compiling with -O2, I sometimes get a segfault in
+  // this function (after calling mpz_import). I do not see anything wrong with
+  // this code and g++-4.8/9, as well as g++5.3, do not have this issue. I was
+  // not able to reproduce this bug with a simpler code sample (one without the
+  // bignum) and the assembly is too difficult for me to look at, so I am just
+  // going to blame it on the compiler and move on...
+  __attribute__((optimize("O0")))
+#endif
+  set(const std::string &hexstring) {
     std::vector<char> bytes;
     size_t idx = 0;
     bool neg = false;

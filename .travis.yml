@@ -4,6 +4,16 @@ sudo: required
 
 language: cpp
 
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+      env: COMPILER=g++-4.8 GCOV=gcov-4.8
+
+    - os: linux
+      compiler: gcc
+      env: COMPILER=g++-5 GCOV=gcov-5
+
 addons:
   apt:
     sources:
@@ -26,13 +36,10 @@ addons:
       - bison
       - pkg-config
       - g++-4.8
+      - g++-5
       - libssl-dev
 
 before_install:
-  - g++ -v
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 99
-  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 99
-  - g++ -v
   - wget https://s3-us-west-2.amazonaws.com/p4lang/thrift_bin.tar.gz
   - tar -xzvf thrift_bin.tar.gz -C $HOME/
   - export PATH=$PATH:$HOME/thrift/bin/
@@ -44,7 +51,7 @@ before_install:
   - bash build/travis/install-nnpy.sh
 
 install:
-  - ./autogen.sh && ./configure --enable-coverage && make all -j2
+  - ./autogen.sh && ./configure CXX=$COMPILER --enable-coverage && make all -j2
 
 # command to run tests, e.g. python setup.py test
 script:
@@ -54,5 +61,5 @@ script:
 
 # code coverage
 after_success:
-  - cd modules/bm_sim/src; gcov -r -o .libs/ *.cpp; cd -
+  - cd modules/bm_sim/src; $GCOV -r -o .libs/ *.cpp; cd -
   - bash <(curl -s https://codecov.io/bash)
