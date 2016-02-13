@@ -5,6 +5,7 @@
 #include <thrift/transport/TBufferTransports.h>
 
 #include <bm_sim/switch.h>
+#include <bm_sim/logger.h>
 
 #include "simple_switch.h"
 
@@ -23,26 +24,26 @@ class SimpleSwitchHandler : virtual public SimpleSwitchIf {
     : switch_(dynamic_cast<SimpleSwitch *>(sw)) { }
 
   int32_t mirroring_mapping_add(const int32_t mirror_id, const int32_t egress_port) {
-    printf("mirroring_mapping_add\n");
+    bm::Logger::get()->trace("mirroring_mapping_add");
     return switch_->mirroring_mapping_add(mirror_id, egress_port);
   }
 
   int32_t mirroring_mapping_delete(const int32_t mirror_id) {
-    printf("mirroring_mapping_delete\n");
+    bm::Logger::get()->trace("mirroring_mapping_delete");
     return switch_->mirroring_mapping_delete(mirror_id);
   }
 
   int32_t mirroring_mapping_get_egress_port(const int32_t mirror_id) {
-    printf("mirroring_mapping_get_egress_port\n");
+    bm::Logger::get()->trace("mirroring_mapping_get_egress_port");
   }
 
   int32_t set_egress_queue_depth(const int32_t depth_pkts) {
-    printf("set_egress_queue_depth\n");
+    bm::Logger::get()->trace("set_egress_queue_depth");
     return switch_->set_egress_queue_depth(static_cast<size_t>(depth_pkts));
   }
 
   int32_t set_egress_queue_rate(const int64_t rate_pps) {
-    printf("set_egress_queue_rate\n");
+    bm::Logger::get()->trace("set_egress_queue_rate");
     return switch_->set_egress_queue_rate(static_cast<uint64_t>(rate_pps));
   }
 

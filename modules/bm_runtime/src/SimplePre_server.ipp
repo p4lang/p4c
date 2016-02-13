@@ -21,6 +21,7 @@
 #include "SimplePre.h"
 
 #include <bm_sim/simple_pre.h>
+#include <bm_sim/logger.h>
 
 namespace bm_runtime { namespace simple_pre {
 
@@ -38,7 +39,7 @@ public:
   }
 
   BmMcMgrpHandle bm_mc_mgrp_create(const int32_t cxt_id, const BmMcMgrp mgrp) {
-    printf("bm_mc_mgrp_create\n");
+    Logger::get()->trace("bm_mc_mgrp_create");
     McSimplePre::mgrp_hdl_t mgrp_hdl;
     McSimplePre::McReturnCode error_code = pres.at(cxt_id)->mc_mgrp_create(
         mgrp, &mgrp_hdl);
@@ -51,7 +52,7 @@ public:
   }
 
   void bm_mc_mgrp_destroy(const int32_t cxt_id, const BmMcMgrpHandle mgrp_handle) {
-    printf("bm_mc_mgrp_destroy\n");
+    Logger::get()->trace("bm_mc_mgrp_destroy");
     McSimplePre::McReturnCode error_code = pres.at(cxt_id)->mc_mgrp_destroy(
         mgrp_handle);
     if(error_code != McSimplePre::SUCCESS) {
@@ -62,7 +63,7 @@ public:
   }
 
   BmMcL1Handle bm_mc_node_create(const int32_t cxt_id, const BmMcRid rid, const BmMcPortMap& port_map) {
-    printf("bm_mc_node_create\n");
+    Logger::get()->trace("bm_mc_node_create");
     McSimplePre::l1_hdl_t l1_hdl;
     McSimplePre::McReturnCode error_code = pres.at(cxt_id)->mc_node_create(
         rid, McSimplePre::PortMap(port_map), &l1_hdl);
@@ -75,7 +76,7 @@ public:
   }
 
   void bm_mc_node_associate(const int32_t cxt_id, const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
-    printf("bm_mc_node_associate\n");
+    Logger::get()->trace("bm_mc_node_associate");
     McSimplePre::McReturnCode error_code = pres.at(cxt_id)->mc_node_associate(
         mgrp_handle, l1_handle);
     if(error_code != McSimplePre::SUCCESS) {
@@ -86,7 +87,7 @@ public:
   }
 
   void bm_mc_node_dissociate(const int32_t cxt_id, const BmMcMgrpHandle mgrp_handle, const BmMcL1Handle l1_handle) {
-    printf("bm_mc_node_dissociate\n");
+    Logger::get()->trace("bm_mc_node_dissociate");
     McSimplePre::McReturnCode error_code = pres.at(cxt_id)->mc_node_dissociate(
         mgrp_handle, l1_handle);
     if(error_code != McSimplePre::SUCCESS) {
@@ -97,7 +98,7 @@ public:
   }
 
   void bm_mc_node_destroy(const int32_t cxt_id, const BmMcL1Handle l1_handle) {
-    printf("bm_mc_node_destroy\n");
+    Logger::get()->trace("bm_mc_node_destroy");
     McSimplePre::McReturnCode error_code = pres.at(cxt_id)->mc_node_destroy(
         l1_handle);
     if(error_code != McSimplePre::SUCCESS) {
@@ -108,7 +109,7 @@ public:
   }
 
   void bm_mc_node_update(const int32_t cxt_id, const BmMcL1Handle l1_handle, const BmMcPortMap& port_map) {
-    printf("bm_mc_node_update\n");
+    Logger::get()->trace("bm_mc_node_update");
     McSimplePre::McReturnCode error_code = pres.at(cxt_id)->mc_node_update(
         l1_handle, McSimplePre::PortMap(port_map));
     if(error_code != McSimplePre::SUCCESS) {
