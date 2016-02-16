@@ -623,6 +623,23 @@ MatchUnitAbstract_::sweep_entries(std::vector<entry_handle_t> *entries) const {
   }
 }
 
+void
+MatchUnitAbstract_::dump_key_params(
+    std::ostream *out, const std::vector<MatchKeyParam> &params,
+    int priority) const {
+  const auto &kb = match_key_builder;
+  *out << "Match key:\n";
+  const size_t out_name_w = std::max(size_t(20), kb.max_name_size());
+  for (size_t i = 0; i < params.size(); i++) {
+    const auto &name = kb.get_name(i);
+    *out << "* ";
+    if (name != "") *out << std::setw(out_name_w) << std::left << name << ": ";
+    *out << params[i] << "\n";
+  }
+  if (priority >= 0)
+    *out << "Priority: " << priority << "\n";
+}
+
 std::string
 MatchUnitAbstract_::key_to_string_with_names(const ByteContainer &key) const {
   std::ostringstream ret;
@@ -716,8 +733,7 @@ MatchUnitAbstract<V>::dump_match_entry(std::ostream *out,
                                        entry_handle_t handle) const {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   if (!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
-  dump_match_entry_(out, handle);
-  return MatchErrorCode::SUCCESS;
+  return dump_match_entry_(out, handle);
 }
 
 template<typename V>
@@ -839,33 +855,19 @@ MatchUnitExact<V>::get_entry_(entry_handle_t handle,
   return MatchErrorCode::SUCCESS;
 }
 
-namespace {
-
-template <typename E>
-void
-dump_entry(std::ostream *out, const E &entry, const MatchKeyBuilder &kb) {
-  *out << "Match key:\n";
-  const auto params = kb.entry_to_match_params(entry);
-  const size_t out_name_w = std::max(size_t(20), kb.max_name_size());
-  for (size_t i = 0; i < params.size(); i++) {
-    const auto &name = kb.get_name(i);
-    *out << "* ";
-    if (name != "") *out << std::setw(out_name_w) << std::left << name << ": ";
-    *out << params[i] << "\n";
-  }
-}
-
-}  // namespace
-
 template<typename V>
-void
+MatchErrorCode
 MatchUnitExact<V>::dump_match_entry_(std::ostream *out,
                                      entry_handle_t handle) const {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   const Entry &entry = entries[handle_];
+  if (HANDLE_VERSION(handle) != entry.version)
+    return MatchErrorCode::EXPIRED_HANDLE;
 
   *out << "Dumping entry " << handle << "\n";
-  dump_entry(out, entry, this->match_key_builder);
+  this->dump_key_params(
+      out, this->match_key_builder.entry_to_match_params(entry));
+  return MatchErrorCode::SUCCESS;
 }
 
 template<typename V>
@@ -995,16 +997,20 @@ MatchUnitLPM<V>::get_entry_(entry_handle_t handle,
 }
 
 template<typename V>
-void
+MatchErrorCode
 MatchUnitLPM<V>::dump_match_entry_(std::ostream *out,
                                    entry_handle_t handle) const {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   const Entry &entry = entries[handle_];
+  if (HANDLE_VERSION(handle) != entry.version)
+    return MatchErrorCode::EXPIRED_HANDLE;
 
   // TODO(antonin): avoid duplicate code, this is basically the same as for
   // exact
   *out << "Dumping entry " << handle << "\n";
-  dump_entry(out, entry, this->match_key_builder);
+  this->dump_key_params(
+      out, this->match_key_builder.entry_to_match_params(entry));
+  return MatchErrorCode::SUCCESS;
 }
 
 template<typename V>
@@ -1176,15 +1182,19 @@ MatchUnitTernary<V>::get_entry_(entry_handle_t handle,
 }
 
 template<typename V>
-void
+MatchErrorCode
 MatchUnitTernary<V>::dump_match_entry_(std::ostream *out,
                                        entry_handle_t handle) const {
   internal_handle_t handle_ = HANDLE_INTERNAL(handle);
   const Entry &entry = entries[handle_];
+  if (HANDLE_VERSION(handle) != entry.version)
+    return MatchErrorCode::EXPIRED_HANDLE;
 
   *out << "Dumping entry " << handle << "\n";
-  dump_entry(out, entry, this->match_key_builder);
-  *out << "Priority: " << entry.priority << "\n";
+  this->dump_key_params(
+      out, this->match_key_builder.entry_to_match_params(entry),
+      entry.priority);
+  return MatchErrorCode::SUCCESS;
 }
 
 template<typename V>

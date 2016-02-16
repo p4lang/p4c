@@ -78,7 +78,7 @@ MatchTableAbstract::apply_action(Packet *pkt) {
     BMLOG_DEBUG_PKT(*pkt, "Table '{}': hit with handle {}",
                     get_name(), handle);
     // TODO(antonin): change to trace?
-    BMLOG_DEBUG_PKT(*pkt, "{}", dump_entry_string(handle));
+    BMLOG_DEBUG_PKT(*pkt, "{}", dump_entry_string_int(handle));
   } else {
     BMELOG(table_miss, *pkt, *this);
     BMLOG_DEBUG_PKT(*pkt, "Table '{}': miss", get_name());
@@ -213,10 +213,14 @@ MatchTableAbstract::get_next_node_default(p4object_id_t action_id) const {
 
 std::string
 MatchTableAbstract::dump_entry_string(entry_handle_t handle) const {
+  ReadLock lock = lock_read();
+  return dump_entry_string_int(handle);
+}
+
+std::string
+MatchTableAbstract::dump_entry_string_int(entry_handle_t handle) const {
   std::ostringstream ret;
   if (dump_entry(&ret, handle) != MatchErrorCode::SUCCESS) {
-    Logger::get()->error("dump_entry_string() called on invalid handle, "
-                         "returning empty string");
     return "";
   }
   return ret.str();
@@ -238,30 +242,77 @@ MatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
   const ControlFlowNode *next_node = get_next_node(action_fn->get_id());
 
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  return match_unit->add_entry(
-    match_key,
-    ActionEntry(std::move(action_fn_entry), next_node),
-    handle, priority);
+  {
+    WriteLock lock = lock_write();
+
+    rc = match_unit->add_entry(
+        match_key,
+        ActionEntry(std::move(action_fn_entry), next_node),
+        handle, priority);
+  }
+
+  // because we let go of the lock, there is a possibility of the entry being
+  // removed
+  // TODO(antonin): we can try to solve this by using an boost upgrade lock, but
+  // I don't want to make things to complicated for logging. Maybe ideally, we
+  // would print the parameters passed to the function, and not dump the entry,
+  // but it is convenient to be able to print the entry in exactly the same
+  // format as for a lookup
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Entry {} added to table '{}'", *handle, get_name());
+    BMLOG_DEBUG(dump_entry_string(*handle));
+  } else {
+    BMLOG_ERROR("Error when trying to add entry to table '{}'", get_name());
+  }
+
+  return rc;
 }
 
 MatchErrorCode
 MatchTable::delete_entry(entry_handle_t handle) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  return match_unit->delete_entry(handle);
+  {
+    WriteLock lock = lock_write();
+    rc = match_unit->delete_entry(handle);
+  }
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Removed entry {} from table '{}'", handle, get_name());
+  } else {
+    BMLOG_ERROR("Error when trying to remove entry {} from table '{}'",
+                handle, get_name());
+  }
+
+  return rc;
 }
 
 MatchErrorCode
 MatchTable::modify_entry(entry_handle_t handle,
                          const ActionFn *action_fn, ActionData action_data) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
-  const ControlFlowNode *next_node = get_next_node(action_fn->get_id());
-  return match_unit->modify_entry(
-    handle, ActionEntry(std::move(action_fn_entry), next_node));
+  {
+    WriteLock lock = lock_write();
+
+    ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
+    const ControlFlowNode *next_node = get_next_node(action_fn->get_id());
+    rc = match_unit->modify_entry(
+        handle, ActionEntry(std::move(action_fn_entry), next_node));
+  }
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Modified entry {} in table '{}'", handle, get_name());
+    BMLOG_DEBUG(dump_entry_string(handle));
+  } else {
+    BMLOG_ERROR("Error when trying to modify entry {} in table '{}'",
+                handle, get_name());
+  }
+
+  return rc;
 }
 
 MatchErrorCode
@@ -270,9 +321,13 @@ MatchTable::set_default_action(const ActionFn *action_fn,
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
   const ControlFlowNode *next_node = get_next_node_default(action_fn->get_id());
 
-  WriteLock lock = lock_write();
+  {
+    WriteLock lock = lock_write();
+    default_entry = ActionEntry(std::move(action_fn_entry), next_node);
+  }
 
-  default_entry = ActionEntry(std::move(action_fn_entry), next_node);
+  BMLOG_DEBUG("Set default entry for table '{}': {}",
+              get_name(), default_entry);
 
   return MatchErrorCode::SUCCESS;
 }
@@ -379,100 +434,196 @@ MatchErrorCode
 MatchTableIndirect::add_member(const ActionFn *action_fn,
                                ActionData action_data,
                                mbr_hdl_t *mbr) {
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
+
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
   const ControlFlowNode *next_node = get_next_node(action_fn->get_id());
 
-  WriteLock lock = lock_write();
+  {
+    WriteLock lock = lock_write();
 
-  if (mbr_handles.get_handle(mbr)) return MatchErrorCode::ERROR;
+    if (mbr_handles.get_handle(mbr)) {
+      rc = MatchErrorCode::ERROR;
+    } else {
+      entries_insert(*mbr, ActionEntry(std::move(action_fn_entry), next_node));
+      num_members++;
+    }
+  }
 
-  entries_insert(*mbr, ActionEntry(std::move(action_fn_entry), next_node));
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Added member {} to table '{}'", *mbr, get_name());
+  } else {
+    BMLOG_ERROR("Error when trying to add member to table '{}'", get_name());
+  }
 
-  num_members++;
-
-  return MatchErrorCode::SUCCESS;
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirect::delete_member(mbr_hdl_t mbr) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  if (!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+  {
+    WriteLock lock = lock_write();
 
-  if (index_ref_count.get(IndirectIndex::make_mbr_index(mbr)) > 0)
-    return MatchErrorCode::MBR_STILL_USED;
+    if (!is_valid_mbr(mbr)) {
+      rc = MatchErrorCode::INVALID_MBR_HANDLE;
+    } else if (index_ref_count.get(IndirectIndex::make_mbr_index(mbr)) > 0) {
+      rc = MatchErrorCode::MBR_STILL_USED;
+    } else {
+      assert(!mbr_handles.release_handle(mbr));
+      num_members--;
+    }
+  }
 
-  assert(!mbr_handles.release_handle(mbr));
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Removed member {} from table '{}'", mbr, get_name());
+  } else {
+    BMLOG_ERROR("Error when trying to remove member {} from table '{}'",
+                mbr, get_name());
+  }
 
-  num_members--;
-
-  return MatchErrorCode::SUCCESS;
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirect::modify_member(mbr_hdl_t mbr, const ActionFn *action_fn,
                                   ActionData action_data) {
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
+
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
   const ControlFlowNode *next_node = get_next_node(action_fn->get_id());
 
-  WriteLock lock = lock_write();
+  {
+    WriteLock lock = lock_write();
 
-  if (!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+    if (!is_valid_mbr(mbr))
+      rc = MatchErrorCode::INVALID_MBR_HANDLE;
+    else
+      action_entries[mbr] = ActionEntry(std::move(action_fn_entry), next_node);
+  }
 
-  action_entries[mbr] = ActionEntry(std::move(action_fn_entry), next_node);
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Modified member {} from table '{}'", mbr, get_name());
+  } else {
+    BMLOG_ERROR("Error when trying to modify member {} from table '{}'",
+                mbr, get_name());
+  }
 
-  return MatchErrorCode::SUCCESS;
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirect::add_entry(const std::vector<MatchKeyParam> &match_key,
                               mbr_hdl_t mbr, entry_handle_t *handle,
                               int priority) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  if (!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
-  IndirectIndex index = IndirectIndex::make_mbr_index(mbr);
-  index_ref_count.increase(index);
-  return match_unit->add_entry(match_key, std::move(index), handle, priority);
+  {
+    WriteLock lock = lock_write();
+
+    if (!is_valid_mbr(mbr)) {
+      rc = MatchErrorCode::INVALID_MBR_HANDLE;
+    } else {
+      IndirectIndex index = IndirectIndex::make_mbr_index(mbr);
+      index_ref_count.increase(index);
+      rc = match_unit->add_entry(match_key, std::move(index), handle, priority);
+    }
+  }
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Entry {} added to table '{}'", *handle, get_name());
+    BMLOG_DEBUG(dump_entry_string(*handle));
+  } else {
+    BMLOG_ERROR("Error when trying to add entry to table '{}'", get_name());
+  }
+
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirect::delete_entry(entry_handle_t handle) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  const IndirectIndex *index;
-  MatchErrorCode rc = match_unit->get_value(handle, &index);
-  if (rc != MatchErrorCode::SUCCESS) return rc;
-  index_ref_count.decrease(*index);
+  {
+    WriteLock lock = lock_write();
 
-  return match_unit->delete_entry(handle);
+    const IndirectIndex *index;
+    rc = match_unit->get_value(handle, &index);
+
+    if (rc == MatchErrorCode::SUCCESS) {
+      index_ref_count.decrease(*index);
+
+      rc = match_unit->delete_entry(handle);
+    }
+  }
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Entry {} removed from table '{}'", handle, get_name());
+  } else {
+    BMLOG_ERROR("Error when trying to remove entry {} from table '{}'",
+                handle, get_name());
+  }
+
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirect::modify_entry(entry_handle_t handle, mbr_hdl_t mbr) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  const IndirectIndex *index;
-  MatchErrorCode rc = match_unit->get_value(handle, &index);
-  if (rc != MatchErrorCode::SUCCESS) return rc;
-  index_ref_count.decrease(*index);
+  {
+    WriteLock lock = lock_write();
 
-  if (!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+    const IndirectIndex *index;
+    rc = match_unit->get_value(handle, &index);
 
-  IndirectIndex new_index = IndirectIndex::make_mbr_index(mbr);
-  index_ref_count.increase(new_index);
+    if (rc == MatchErrorCode::SUCCESS)
+      index_ref_count.decrease(*index);
 
-  return match_unit->modify_entry(handle, std::move(new_index));
+    if (rc == MatchErrorCode::SUCCESS && !is_valid_mbr(mbr))
+      rc = MatchErrorCode::INVALID_MBR_HANDLE;
+
+    if (rc == MatchErrorCode::SUCCESS) {
+      IndirectIndex new_index = IndirectIndex::make_mbr_index(mbr);
+      index_ref_count.increase(new_index);
+
+      rc = match_unit->modify_entry(handle, std::move(new_index));
+    }
+  }
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Modified entry {} in table '{}'", handle, get_name());
+    BMLOG_DEBUG(dump_entry_string(handle));
+  } else {
+    BMLOG_ERROR("Error when trying to modify entry {} in table '{}'",
+                handle, get_name());
+  }
+
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirect::set_default_member(mbr_hdl_t mbr) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  if (!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
-  default_index = IndirectIndex::make_mbr_index(mbr);
+  {
+    WriteLock lock = lock_write();
 
-  return MatchErrorCode::SUCCESS;
+    if (!is_valid_mbr(mbr))
+      rc = MatchErrorCode::INVALID_MBR_HANDLE;
+    else
+      default_index = IndirectIndex::make_mbr_index(mbr);
+  }
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Set default member for table '{}' to {}", get_name(), mbr);
+  } else {
+    BMLOG_ERROR("Error when trying to set default member for table '{}' to {}",
+                get_name(), mbr);
+  }
+
+  return rc;
 }
 
 MatchErrorCode
@@ -658,114 +809,214 @@ MatchTableIndirectWS::groups_insert(grp_hdl_t grp) {
 
 MatchErrorCode
 MatchTableIndirectWS::create_group(grp_hdl_t *grp) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  if (grp_handles.get_handle(grp)) return MatchErrorCode::ERROR;
+  {
+    WriteLock lock = lock_write();
 
-  groups_insert(*grp);
+    if (grp_handles.get_handle(grp)) {
+      rc = MatchErrorCode::ERROR;
+    } else {
+      groups_insert(*grp);
+      num_groups++;
+    }
+  }
 
-  num_groups++;
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Created group {} in table '{}'", *grp, get_name());
+  } else {
+    BMLOG_ERROR("Error when trying to create group in table '{}'", get_name());
+  }
 
-  return MatchErrorCode::SUCCESS;
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirectWS::delete_group(grp_hdl_t grp) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  if (!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+  {
+    WriteLock lock = lock_write();
 
-  if (index_ref_count.get(IndirectIndex::make_grp_index(grp)) > 0)
-    return MatchErrorCode::GRP_STILL_USED;
+    if (!is_valid_grp(grp)) {
+      rc = MatchErrorCode::INVALID_GRP_HANDLE;
+    } else if (index_ref_count.get(IndirectIndex::make_grp_index(grp)) > 0) {
+      rc = MatchErrorCode::GRP_STILL_USED;
+    } else {
+      // we allow deletion of non-empty groups, but we must remember to decrease
+      // the ref count for the members. Note that we do not allow deletion of a
+      // member which is in a group
+      GroupInfo &group_info = group_entries[grp];
+      for (auto mbr : group_info)
+        index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
 
-  /* we allow deletion of non-empty groups, but we must remember to decrease the
-     ref count for the members. Note that we do not allow deletion of a member
-     which is in a group */
-  GroupInfo &group_info = group_entries[grp];
-  for (auto mbr : group_info)
-    index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
+      assert(!grp_handles.release_handle(grp));
 
-  assert(!grp_handles.release_handle(grp));
+      num_groups--;
+    }
+  }
 
-  num_groups--;
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Removed group {} from table '{}'", grp, get_name());
+  } else {
+    BMLOG_ERROR("Error when trying to remove group {} from table '{}'",
+                grp, get_name());
+  }
 
-  return MatchErrorCode::SUCCESS;
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirectWS::add_member_to_group(mbr_hdl_t mbr, grp_hdl_t grp) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  if (!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
-  if (!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+  {
+    WriteLock lock = lock_write();
 
-  GroupInfo &group_info = group_entries[grp];
-  MatchErrorCode rc = group_info.add_member(mbr);
-  if (rc != MatchErrorCode::SUCCESS) return rc;
+    if (!is_valid_mbr(mbr)) {
+      rc = MatchErrorCode::INVALID_MBR_HANDLE;
+    } else if (!is_valid_grp(grp)) {
+      rc = MatchErrorCode::INVALID_GRP_HANDLE;
+    } else {
+      GroupInfo &group_info = group_entries[grp];
+      rc = group_info.add_member(mbr);
+      if (rc == MatchErrorCode::SUCCESS)
+        index_ref_count.increase(IndirectIndex::make_mbr_index(mbr));
+    }
+  }
 
-  index_ref_count.increase(IndirectIndex::make_mbr_index(mbr));
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Added member {} to group {} in table '{}'",
+                mbr, grp, get_name());
+  } else {
+    BMLOG_ERROR("Error when trying to add member {} to group {} in table '{}'",
+                mbr, grp, get_name());
+  }
 
-  return MatchErrorCode::SUCCESS;
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirectWS::remove_member_from_group(mbr_hdl_t mbr, grp_hdl_t grp) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  if (!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
-  if (!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+  {
+    WriteLock lock = lock_write();
 
-  GroupInfo &group_info = group_entries[grp];
-  MatchErrorCode rc = group_info.delete_member(mbr);
-  if (rc != MatchErrorCode::SUCCESS) return rc;
+    if (!is_valid_mbr(mbr)) {
+      rc = MatchErrorCode::INVALID_MBR_HANDLE;
+    } else if (!is_valid_grp(grp)) {
+      rc = MatchErrorCode::INVALID_GRP_HANDLE;
+    } else {
+      GroupInfo &group_info = group_entries[grp];
+      rc = group_info.delete_member(mbr);
+      if (rc == MatchErrorCode::SUCCESS)
+        index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
+    }
+  }
 
-  index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Removed member {} from group {} in table '{}'",
+                mbr, grp, get_name());
+  } else {
+    BMLOG_ERROR("Error when trying to remove member {} from group {} "
+                "in table '{}'", mbr, grp, get_name());
+  }
 
-  return MatchErrorCode::SUCCESS;
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirectWS::add_entry_ws(const std::vector<MatchKeyParam> &match_key,
                                    grp_hdl_t grp, entry_handle_t *handle,
                                    int priority ) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  if (!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+  {
+    WriteLock lock = lock_write();
 
-  if (get_grp_size(grp) == 0) return MatchErrorCode::EMPTY_GRP;
+    if (!is_valid_grp(grp))
+      rc = MatchErrorCode::INVALID_GRP_HANDLE;
 
-  IndirectIndex index = IndirectIndex::make_grp_index(grp);
-  index_ref_count.increase(index);
-  return match_unit->add_entry(match_key, std::move(index), handle, priority);
+    if (rc == MatchErrorCode::SUCCESS && get_grp_size(grp) == 0)
+      rc = MatchErrorCode::EMPTY_GRP;
+
+    if (rc == MatchErrorCode::SUCCESS) {
+      IndirectIndex index = IndirectIndex::make_grp_index(grp);
+      index_ref_count.increase(index);
+      rc = match_unit->add_entry(match_key, std::move(index), handle, priority);
+    }
+  }
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Entry {} added to table '{}'", *handle, get_name());
+    BMLOG_DEBUG(dump_entry_string(*handle));
+  } else {
+    BMLOG_ERROR("Error when trying to add entry to table '{}'", get_name());
+  }
+
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirectWS::modify_entry_ws(entry_handle_t handle, grp_hdl_t grp) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc;
 
-  const IndirectIndex *index;
-  MatchErrorCode rc = match_unit->get_value(handle, &index);
-  if (rc != MatchErrorCode::SUCCESS) return rc;
-  index_ref_count.decrease(*index);
+  {
+    WriteLock lock = lock_write();
 
-  if (!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+    const IndirectIndex *index;
+    rc = match_unit->get_value(handle, &index);
 
-  if (get_grp_size(grp) == 0) return MatchErrorCode::EMPTY_GRP;
+    if (rc == MatchErrorCode::SUCCESS)
+      index_ref_count.decrease(*index);
 
-  IndirectIndex new_index = IndirectIndex::make_grp_index(grp);
-  index_ref_count.increase(new_index);
+    if (rc == MatchErrorCode::SUCCESS && !is_valid_grp(grp))
+      rc = MatchErrorCode::INVALID_GRP_HANDLE;
 
-  return match_unit->modify_entry(handle, std::move(new_index));
+    if (rc == MatchErrorCode::SUCCESS && get_grp_size(grp) == 0)
+      rc = MatchErrorCode::EMPTY_GRP;
+
+    if (rc == MatchErrorCode::SUCCESS) {
+      IndirectIndex new_index = IndirectIndex::make_grp_index(grp);
+      index_ref_count.increase(new_index);
+
+      rc = match_unit->modify_entry(handle, std::move(new_index));
+    }
+  }
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Modified entry {} in table '{}'", handle, get_name());
+    BMLOG_DEBUG(dump_entry_string(handle));
+  } else {
+    BMLOG_ERROR("Error when trying to modify entry {} in table '{}'",
+                handle, get_name());
+  }
+
+  return rc;
 }
 
 MatchErrorCode
 MatchTableIndirectWS::set_default_group(grp_hdl_t grp) {
-  WriteLock lock = lock_write();
+  MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
-  if (!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
-  default_index = IndirectIndex::make_grp_index(grp);
+  {
+    WriteLock lock = lock_write();
 
-  return MatchErrorCode::SUCCESS;
+    if (!is_valid_grp(grp))
+      rc = MatchErrorCode::INVALID_GRP_HANDLE;
+    else
+      default_index = IndirectIndex::make_grp_index(grp);
+  }
+
+  if (rc == MatchErrorCode::SUCCESS) {
+    BMLOG_DEBUG("Set default group for table '{}' to {}", get_name(), grp);
+  } else {
+    BMLOG_ERROR("Error when trying to set default group for table '{}' to {}",
+                get_name(), grp);
+  }
+
+  return rc;
 }
 
 MatchErrorCode
