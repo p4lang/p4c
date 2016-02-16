@@ -84,9 +84,6 @@ class MatchTableAbstract : public NamedP4Object {
 
   virtual void dump(std::ostream *stream) const = 0;
 
-  virtual MatchErrorCode dump_entry(std::ostream *out,
-                                    entry_handle_t handle) const = 0;
-
   std::string dump_entry_string(entry_handle_t handle) const;
 
   void reset_state();
@@ -154,6 +151,12 @@ class MatchTableAbstract : public NamedP4Object {
 
  private:
   virtual void reset_state_() = 0;
+
+  virtual MatchErrorCode dump_entry(std::ostream *out,
+                                    entry_handle_t handle) const = 0;
+
+  // the internal (_int) version does not acquire the lock
+  std::string dump_entry_string_int(entry_handle_t handle) const;
 
  private:
   mutable boost::shared_mutex t_mutex{};

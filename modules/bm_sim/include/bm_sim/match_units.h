@@ -252,6 +252,10 @@ class MatchUnitAbstract_ {
 
   void sweep_entries(std::vector<entry_handle_t> *entries) const;
 
+  void dump_key_params(std::ostream *out,
+                       const std::vector<MatchKeyParam> &params,
+                       int priority = -1) const;
+
  protected:
   MatchErrorCode get_and_set_handle(internal_handle_t *handle);
   MatchErrorCode unset_handle(internal_handle_t handle);
@@ -363,8 +367,8 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
                                     std::vector<MatchKeyParam> *match_key,
                                     const V **value, int *priority) const = 0;
 
-  virtual void dump_match_entry_(std::ostream *out,
-                                 entry_handle_t handle) const = 0;
+  virtual MatchErrorCode dump_match_entry_(std::ostream *out,
+                                           entry_handle_t handle) const = 0;
 
   virtual void dump_(std::ostream *stream) const = 0;
 
@@ -420,8 +424,8 @@ class MatchUnitExact : public MatchUnitAbstract<V> {
                             std::vector<MatchKeyParam> *match_key,
                             const V **value, int *priority) const override;
 
-  void dump_match_entry_(std::ostream *out,
-                         entry_handle_t handle) const override;
+  MatchErrorCode dump_match_entry_(std::ostream *out,
+                                   entry_handle_t handle) const override;
 
   void dump_(std::ostream *stream) const override;
 
@@ -478,8 +482,8 @@ class MatchUnitLPM : public MatchUnitAbstract<V> {
                             std::vector<MatchKeyParam> *match_key,
                             const V **value, int *priority) const override;
 
-  void dump_match_entry_(std::ostream *out,
-                         entry_handle_t handle) const override;
+  MatchErrorCode dump_match_entry_(std::ostream *out,
+                                   entry_handle_t handle) const override;
 
   void dump_(std::ostream *stream) const override;
 
@@ -536,8 +540,8 @@ class MatchUnitTernary : public MatchUnitAbstract<V> {
                             std::vector<MatchKeyParam> *match_key,
                             const V **value, int *priority) const override;
 
-  void dump_match_entry_(std::ostream *out,
-                         entry_handle_t handle) const override;
+  MatchErrorCode dump_match_entry_(std::ostream *out,
+                                   entry_handle_t handle) const override;
 
   void dump_(std::ostream *stream) const override;
 
