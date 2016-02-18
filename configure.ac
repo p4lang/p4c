@@ -7,9 +7,11 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_SRCDIR([modules/bm_sim/src/checksums.cpp])
 AC_CONFIG_HEADERS([config.h])
 
+coverage_enabled=no
 AC_ARG_ENABLE([coverage],
     AS_HELP_STRING([--enable-coverage], [Enable code coverage tracking]))
 AS_IF([test "x$enable_coverage" = "xyes"], [
+    coverage_enabled=yes
     AC_DEFINE([COVERAGE], [], ["Link with gcov."])
     COVERAGE_FLAGS="-coverage"
 ])
@@ -24,13 +26,22 @@ AM_CONDITIONAL([COND_TARGETS], [test "$want_targets" = yes])
 
 MY_CPPFLAGS=""
 
+debugger_enabled=no
 AC_ARG_ENABLE([debugger],
     AS_HELP_STRING([--enable-debugger], [Enable bmv2 remote debugger]))
 AS_IF([test "x$enable_debugger" = "xyes"], [
+    debugger_enabled=yes
     MY_CPPFLAGS="$MY_CPPFLAGS -DBMDEBUG_ON"
 ])
 
-AC_SUBST([COVERAGE_FLAGS])
+logging_macros_enabled=no
+AC_ARG_ENABLE([logging_macros],
+    AS_HELP_STRING([--disable-logging-macros],
+                   [Disable compile time debug and trace logging macros]))
+AS_IF([test "x$enable_logging_macros" != "xno"], [
+    logging_macros_enabled=yes
+    MY_CPPFLAGS="$MY_CPPFLAGS -DBMLOG_DEBUG_ON -DBMLOG_TRACE_ON"
+])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -123,4 +134,11 @@ AC_CONFIG_FILES([Makefile
 		targets/simple_switch/Makefile
 		targets/simple_switch/tests/Makefile
 		tests/Makefile])
+
 AC_OUTPUT
+
+AS_ECHO("")
+AS_ECHO("Features recap ......................")
+AS_ECHO("Coverage enabled .............. : $coverage_enabled")
+AS_ECHO("Debugger enabled .............. : $debugger_enabled")
+AS_ECHO("Logging macros enabled ........ : $logging_macros_enabled")

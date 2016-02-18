@@ -52,17 +52,16 @@ information on the Ubuntu 12.04 dependencies.
     2. ./configure
     3. make
 
-To enable logging, you probably want to use the following flags when running
-configure:
+Debug logging is enabled by default. If you want to disable it for performance
+reasons, you can pass `--disable-logging-macros` to the `configure` script.
 
-    ./configure 'CPPFLAGS=-DBMLOG_DEBUG_ON'
+In 'debug mode', you probably want to disable compiler optimization and enable
+symbols in the binary:
 
-In 'debug mode', you probably want to also use the following as well:
+    ./configure 'CXXFLAGS=-O0 -g'
 
-    'CXXFLAGS=-O0 -g'
-
-The new bmv2 debugger can be enabled by adding `-DBMDEBUG_ON` to the `CPPFLAGS`
-or simply by passing `--enable-debugger` to `configure`.
+The new bmv2 debugger can be enabled by passing `--enable-debugger` to
+`configure`.
 
 ## Running the tests
 
@@ -128,10 +127,9 @@ used.
 
 ## Using the debugger
 
-To enable the debugger, make sure that you added `-DBMDEBUG_ON` to the
-`CPPFLAGS` when running `./configure`, or that you passed the
-`--enable-debugger` flag to `configure`. You will also need to use the
-`--debugger` command line flag when starting the switch.
+To enable the debugger, make sure that you passed the `--enable-debugger` flag
+to `configure`. You will also need to use the `--debugger` command line flag
+when starting the switch.
 
 Use [tools/p4dbg.py](tools/p4dbg.py) as follows when the switch is running to
 attach the debugger to the switch:
