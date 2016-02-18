@@ -60,13 +60,18 @@ public:
   }
 
 private:
-  bool port_is_up_(port_t port) override {
+  bool port_is_up_(port_t port) const override {
     std::lock_guard<std::mutex> lock(status_mutex);
     auto it = port_status.find(port);
     bool exists = (it != port_status.end());
 
     return (exists && ((it->second == PortStatus::PORT_ADDED) ||
                        (it->second == PortStatus::PORT_UP)));
+  }
+
+  std::map<port_t, PortInfo> get_port_info_() const override {
+    // TODO(antonin): add test
+    return {};
   }
 
   ReturnCode port_add_(const std::string &iface_name, port_t port_num,

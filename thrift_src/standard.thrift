@@ -169,6 +169,13 @@ exception InvalidDevMgrOperation {
  1:DevMgrErrorCode code
 }
 
+struct DevMgrPortInfo {
+  1:i32 port_num;
+  2:string iface_name;
+  3:bool is_up;
+  4:map<string, string> extra;
+}
+
 service Standard {
 	
   // table operations
@@ -437,6 +444,9 @@ service Standard {
 
   void bm_dev_mgr_remove_port(
     1:i32 port_num
+  ) throws (1:InvalidDevMgrOperation ouch)
+
+  list<DevMgrPortInfo> bm_dev_mgr_show_ports(
   ) throws (1:InvalidDevMgrOperation ouch)
 
   // debug functions
