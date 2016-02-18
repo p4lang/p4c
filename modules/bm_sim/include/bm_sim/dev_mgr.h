@@ -37,6 +37,7 @@
 
 #include <functional>
 #include <string>
+#include <map>
 
 #include "bm_sim/packet_handler.h"
 #include "bm_sim/port_monitor.h"
@@ -48,6 +49,24 @@ class DevMgrIface : public PacketDispatcherIface {
   typedef PortMonitorIface::port_t port_t;
   typedef PortMonitorIface::PortStatus PortStatus;
   typedef PortMonitorIface::PortStatusCb PortStatusCb;
+
+  struct PortInfo {
+    PortInfo(port_t port_num, const std::string &iface_name)
+        : port_num(port_num), iface_name(iface_name) { }
+
+    void set_is_up(bool status) {
+      is_up = status;
+    }
+
+    void add_extra(const std::string &key, const std::string &value) {
+      extra.emplace(key, value);
+    }
+
+    port_t port_num{};
+    std::string iface_name{};
+    bool is_up{true};
+    std::map<std::string, std::string> extra{};
+  };
 
   virtual ~DevMgrIface();
 
@@ -68,10 +87,12 @@ class DevMgrIface : public PacketDispatcherIface {
 
   ReturnCode set_packet_handler(const PacketHandler &handler, void *cookie);
 
-  bool port_is_up(port_t port_num);
+  bool port_is_up(port_t port_num) const;
 
   ReturnCode register_status_cb(const PortStatus &type,
                                 const PortStatusCb &port_cb);
+
+  std::map<port_t, PortInfo> get_port_info() const;
 
  protected:
   std::unique_ptr<PortMonitorIface> p_monitor{nullptr};
@@ -89,7 +110,9 @@ class DevMgrIface : public PacketDispatcherIface {
   virtual ReturnCode set_packet_handler_(const PacketHandler &handler,
                                          void *cookie) = 0;
 
-  virtual bool port_is_up_(port_t port_num) = 0;
+  virtual bool port_is_up_(port_t port_num) const = 0;
+
+  virtual std::map<port_t, PortInfo> get_port_info_() const = 0;
 };
 
 // TODO(antonin): should DevMgr and DevMgrIface somehow inherit from a common
@@ -130,7 +153,9 @@ class DevMgr : public PacketDispatcherIface {
 
   ReturnCode port_remove(port_t port_num);
 
-  bool port_is_up(port_t port_num);
+  bool port_is_up(port_t port_num) const;
+
+  std::map<port_t, DevMgrIface::PortInfo> get_port_info() const;
 
   //! Transmits a data packet out of port \p port_num
   void transmit_fn(int port_num, const char *buffer, int len);

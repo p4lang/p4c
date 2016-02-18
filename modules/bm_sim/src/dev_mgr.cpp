@@ -20,8 +20,9 @@
 
 #include <cassert>
 #include <thread>
+#include <mutex>
 #include <string>
-#include <unordered_set>
+#include <map>
 
 #define UNUSED(x) (void)(x)
 
@@ -48,7 +49,14 @@ class FilesDevMgrImp : public DevMgrIface {
     UNUSED(iface_name);
     reader.addFile(port_num, std::string(in_pcap));
     writer.addFile(port_num, std::string(out_pcap));
-    ports.insert(port_num);
+
+    PortInfo p_info(port_num, iface_name);
+    if (in_pcap) p_info.add_extra("in_pcap", std::string(in_pcap));
+    if (out_pcap) p_info.add_extra("out_pcap", std::string(out_pcap));
+
+    Lock lock(mutex);
+    port_info.emplace(port_num, std::move(p_info));
+
     return ReturnCode::SUCCESS;
   }
 
@@ -73,16 +81,25 @@ class FilesDevMgrImp : public DevMgrIface {
     return ReturnCode::SUCCESS;
   }
 
-  bool port_is_up_(port_t port)
-      override {
-    return ports.find(port) != ports.end();
+  bool port_is_up_(port_t port) const override {
+    Lock lock(mutex);
+    return port_info.find(port) != port_info.end();
+  }
+
+  std::map<port_t, PortInfo> get_port_info_() const override {
+    Lock lock(mutex);
+    return port_info;
   }
 
  private:
+  using Mutex = std::mutex;
+  using Lock = std::lock_guard<std::mutex>;
+
   PcapFilesReader reader;
   PcapFilesWriter writer;
   std::thread reader_thread;
-  std::unordered_set<port_t> ports{};
+  mutable Mutex mutex;
+  std::map<port_t, DevMgrIface::PortInfo> port_info;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,8 +137,13 @@ DevMgrIface::set_packet_handler(const PacketHandler &handler, void *cookie) {
 }
 
 bool
-DevMgrIface::port_is_up(port_t port_num) {
+DevMgrIface::port_is_up(port_t port_num) const {
   return port_is_up_(port_num);
+}
+
+std::map<DevMgrIface::port_t, DevMgrIface::PortInfo>
+DevMgrIface::get_port_info() const {
+  return get_port_info_();
 }
 
 PacketDispatcherIface::ReturnCode
@@ -198,9 +220,15 @@ DevMgr::register_status_cb(const PortStatus &type,
 }
 
 bool
-DevMgr::port_is_up(port_t port_num) {
+DevMgr::port_is_up(port_t port_num) const {
   assert(pimp);
   return pimp->port_is_up(port_num);
+}
+
+std::map<DevMgrIface::port_t, DevMgrIface::PortInfo>
+DevMgr::get_port_info() const {
+  assert(pimp);
+  return pimp->get_port_info();
 }
 
 }  // namespace bm

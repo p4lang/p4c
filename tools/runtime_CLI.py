@@ -1552,6 +1552,23 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for port_num, must be an integer")
         self.client.bm_dev_mgr_remove_port(port_num)
 
+    @handle_bad_input
+    def do_show_ports(self, line):
+        "Shows the ports connected to the switch: show_ports"
+        args = line.split()
+        self.exactly_n_args(args, 0)
+        ports = self.client.bm_dev_mgr_show_ports()
+        print "{:^10}{:^20}{:^10}{}".format(
+            "port #", "iface name", "status", "extra info")
+        print "=" * 50
+        for port_info in ports:
+            status = "UP" if port_info.is_up else "DOWN"
+            extra_info = "; ".join(
+                [k + "=" + v for k, v in port_info.extra.items()])
+            print "{:^10}{:^20}{:^10}{}".format(
+                port_info.port_num, port_info.iface_name, status, extra_info)
+            # print port_info
+
 def main():
     args = get_parser().parse_args()
 

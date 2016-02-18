@@ -618,6 +618,20 @@ public:
     }
   }
 
+  void bm_dev_mgr_show_ports(std::vector<DevMgrPortInfo> & _return) {
+    Logger::get()->trace("bm_dev_mgr_show_ports");
+    _return.clear();
+    for (auto &e : switch_->get_port_info()) {
+      DevMgrIface::PortInfo &p_i = e.second;
+      DevMgrPortInfo p_i_;
+      p_i_.port_num = p_i.port_num;
+      p_i_.iface_name = std::move(p_i.iface_name);
+      p_i_.is_up = p_i.is_up;
+      p_i_.extra = std::move(p_i.extra);
+      _return.push_back(std::move(p_i_));
+    }
+  }
+
   void bm_dump_table(std::string& _return, const int32_t cxt_id, const std::string& table_name) {
     Logger::get()->trace("dump_table");
     std::ostringstream stream;

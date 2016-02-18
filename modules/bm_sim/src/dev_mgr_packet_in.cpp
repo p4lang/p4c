@@ -24,7 +24,7 @@
 #include <thread>
 #include <mutex>
 #include <string>
-#include <unordered_map>
+#include <map>
 
 #include "bm_sim/dev_mgr.h"
 #include "bm_sim/logger.h"
@@ -94,10 +94,16 @@ class PacketInDevMgrImp : public DevMgrIface {
     return ReturnCode::SUCCESS;
   }
 
-  bool port_is_up_(port_t port) override {
+  bool port_is_up_(port_t port) const override {
     if (!enforce_ports) return true;
-    const auto it = added_ports.find(port);
-    return (it != added_ports.end() && it->second == PortStatus::PORT_UP);
+    Lock lock(mutex);
+    auto it = port_info.find(port);
+    return (it != port_info.end() && it->second.is_up);
+  }
+
+  std::map<port_t, PortInfo> get_port_info_() const override {
+    Lock lock(mutex);
+    return port_info;
   }
 
  private:
@@ -117,31 +123,42 @@ class PacketInDevMgrImp : public DevMgrIface {
   };
 
   void do_port_add(port_t port) {
-    if (!enforce_ports) return;
-    auto it = added_ports.find(port);
-    if (it == added_ports.end()) {
-      added_ports.insert(it, std::make_pair(port, PortStatus::PORT_UP));
-      p_monitor->notify(port, PortStatus::PORT_ADDED);
-      p_monitor->notify(port, PortStatus::PORT_UP);
+    {
+      Lock lock(mutex);
+      auto it = port_info.find(port);
+      if (it != port_info.end()) return;
+      PortInfo p_info(port, "N/A");
+      p_info.add_extra("socket_addr", addr);
+      port_info.emplace(port, std::move(p_info));
     }
+
+    if (!enforce_ports) return;
+    p_monitor->notify(port, PortStatus::PORT_ADDED);
+    p_monitor->notify(port, PortStatus::PORT_UP);
   }
 
   void do_port_remove(port_t port) {
-    if (!enforce_ports) return;
-    auto it = added_ports.find(port);
-    if (it != added_ports.end()) {
-      added_ports.erase(it);
-      p_monitor->notify(port, PortStatus::PORT_REMOVED);
+    {
+      Lock lock(mutex);
+      auto it = port_info.find(port);
+      if (it == port_info.end()) return;
+      port_info.erase(it);
     }
+
+    if (!enforce_ports) return;
+    p_monitor->notify(port, PortStatus::PORT_REMOVED);
   }
 
   void do_port_set_status(port_t port, PortStatus status) {
-    if (!enforce_ports) return;
-    auto it = added_ports.find(port);
-    if (it != added_ports.end() && it->second != status) {
-      it->second = status;
-      p_monitor->notify(port, status);
+    {
+      Lock lock(mutex);
+      auto it = port_info.find(port);
+      if (it == port_info.end()) return;
+      it->second.set_is_up(status == PortStatus::PORT_UP);
     }
+
+    if (!enforce_ports) return;
+    p_monitor->notify(port, status);
   }
 
   struct packet_hdr_t {
@@ -156,6 +173,9 @@ class PacketInDevMgrImp : public DevMgrIface {
   void handle_msg(void *msg);
 
  private:
+  using Mutex = std::mutex;
+  using Lock = std::lock_guard<std::mutex>;
+
   std::string addr{};
   nn::socket s;
   PacketHandler pkt_handler{};
@@ -164,7 +184,10 @@ class PacketInDevMgrImp : public DevMgrIface {
   std::atomic<bool> stop_receive_thread{false};
   std::atomic<bool> started{false};
   bool enforce_ports{false};
-  std::unordered_map<port_t, PortStatus> added_ports{};
+  // std::unordered_map<port_t, PortStatus> added_ports{};
+  mutable Mutex mutex;
+  // map fast enough?
+  std::map<port_t, DevMgrIface::PortInfo> port_info;
 };
 
 void
@@ -219,8 +242,8 @@ PacketInDevMgrImp::handle_msg(void *msg) {
       break;
     case MSG_TYPE_PACKET_IN:
       if (enforce_ports) {
-        auto it = added_ports.find(packet_hdr.port);
-        if (it == added_ports.end() || it->second != PortStatus::PORT_UP)
+        auto it = port_info.find(packet_hdr.port);
+        if (it == port_info.end() || !it->second.is_up)
           break;
       }
       if (pkt_handler) {
