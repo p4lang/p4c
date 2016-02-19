@@ -1771,7 +1771,7 @@ std::string TableEntryDebug<MUExact>::gen_entry_string() const {
       "Match key:\n"
       "* h1.f0               : EXACT     1234\n"
       "* h2.f0               : EXACT     abcd\n"
-      "* h3                  : VALID     10\n"
+      "* h3                  : VALID     01\n"
       "Action entry: actionA - aba,\n");
 }
 
@@ -1782,7 +1782,7 @@ std::string TableEntryDebug<MULPM>::gen_entry_string() const {
       "Match key:\n"
       "* h1.f0               : LPM       1234/12\n"
       "* h2.f0               : EXACT     abcd\n"
-      "* h3                  : VALID     10\n"
+      "* h3                  : VALID     01\n"
       "Action entry: actionA - aba,\n");
 }
 
@@ -1792,8 +1792,8 @@ std::string TableEntryDebug<MUTernary>::gen_entry_string() const {
       "Dumping entry 0\n"
       "Match key:\n"
       "* h1.f0               : LPM       1230/12\n"
-      "* h2.f0               : TERNARY   b0c0 &&& f0f0\n"
-      "* h3                  : VALID     10\n"
+      "* h2.f0               : TERNARY   0bc0 &&& 0ff0\n"
+      "* h3                  : VALID     01\n"
       "Priority: 12\n"
       "Action entry: actionA - aba,\n");
 }

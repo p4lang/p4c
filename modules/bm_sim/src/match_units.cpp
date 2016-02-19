@@ -77,9 +77,13 @@ dump_hexstring(std::ostream &out, const std::string &s,
 }  // namespace
 
 std::ostream& operator<<(std::ostream &out, const MatchKeyParam &p) {
-  utils::StreamStateSaver state_saver(out);
-  // type column is 10 chars wide
-  out << std::setw(10) << std::left << MatchKeyParam::type_to_string(p.type);
+  // need to restore the state right away (thus the additional scope), otherwise
+  // dump_hexstring() can give strange results
+  {
+    utils::StreamStateSaver state_saver(out);
+    // type column is 10 chars wide
+    out << std::setw(10) << std::left << MatchKeyParam::type_to_string(p.type);
+  }
   dump_hexstring(out, p.key);
   switch (p.type) {
     case MatchKeyParam::Type::LPM:
@@ -633,7 +637,10 @@ MatchUnitAbstract_::dump_key_params(
   for (size_t i = 0; i < params.size(); i++) {
     const auto &name = kb.get_name(i);
     *out << "* ";
-    if (name != "") *out << std::setw(out_name_w) << std::left << name << ": ";
+    if (name != "") {
+      utils::StreamStateSaver state_saver(*out);
+      *out << std::setw(out_name_w) << std::left << name << ": ";
+    }
     *out << params[i] << "\n";
   }
   if (priority >= 0)
@@ -650,7 +657,10 @@ MatchUnitAbstract_::key_to_string_with_names(const ByteContainer &key) const {
   for (size_t i = 0; i < values.size(); i++) {
     const auto &name = match_key_builder.get_name(i);
     ret << "* ";
-    if (name != "") ret << std::setw(out_name_w) << std::left << name << ": ";
+    if (name != "") {
+      utils::StreamStateSaver state_saver(ret);
+      ret << std::setw(out_name_w) << std::left << name << ": ";
+    }
     dump_hexstring(ret, values[i]);
     ret << "\n";
   }
