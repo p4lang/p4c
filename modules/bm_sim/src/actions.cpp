@@ -190,7 +190,10 @@ ActionFnEntry::push_back_action_data(const char *bytes, int nbytes) {
 void
 ActionFnEntry::operator()(Packet *pkt) const {
   // happens when no default action specified... TODO(antonin)
-  if (!action_fn) return;
+  if (!action_fn) {
+    BMLOG_ERROR_PKT(*pkt, "No default action set, exiting pipeline");
+    return;
+  }
   BMELOG(action_execute, *pkt, *action_fn, action_data);
   // TODO(antonin)
   // this is temporary while we experiment with the debugger
