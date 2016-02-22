@@ -199,6 +199,20 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
     add_header_stack_id(header_stack_name, header_stack_id);
   }
 
+  if (cfg_root.isMember("field_aliases")) {
+    const Json::Value &cfg_field_aliases = cfg_root["field_aliases"];
+
+    for (const auto &cfg_alias : cfg_field_aliases) {
+      const auto from = cfg_alias[0].asString();
+      const auto tgt = cfg_alias[1];
+      const auto header_name = tgt[0].asString();
+      const auto field_name = tgt[1].asString();
+      assert(field_exists(header_name, field_name));
+      const auto to = header_name + "." + field_name;
+      phv_factory.add_field_alias(from, to);
+    }
+  }
+
   // parsers
 
   const Json::Value &cfg_parsers = cfg_root["parsers"];

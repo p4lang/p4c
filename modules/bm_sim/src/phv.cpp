@@ -90,4 +90,93 @@ PHV::push_back_header_stack(const std::string &header_stack_name,
   header_stacks.push_back(std::move(header_stack));
 }
 
+void
+PHV::add_field_alias(const std::string &from, const std::string &to) {
+  fields_map.emplace(from, get_field(to));
+}
+
+
+void
+PHVFactory::push_back_header(const std::string &header_name,
+                             const header_id_t header_index,
+                             const HeaderType &header_type,
+                             const bool metadata) {
+  HeaderDesc desc = HeaderDesc(header_name, header_index,
+                               header_type, metadata);
+  // cannot use operator[] because it requires default constructibility
+  header_descs.insert(std::make_pair(header_index, desc));
+}
+
+void
+PHVFactory::push_back_header_stack(const std::string &header_stack_name,
+                                   const header_stack_id_t header_stack_index,
+                                   const HeaderType &header_type,
+                                   const std::vector<header_id_t> &headers) {
+  HeaderStackDesc desc = HeaderStackDesc(
+      header_stack_name, header_stack_index, header_type, headers);
+  // cannot use operator[] because it requires default constructibility
+  header_stack_descs.insert(std::make_pair(header_stack_index, desc));
+}
+
+void
+PHVFactory::add_field_alias(const std::string &from, const std::string &to) {
+  field_aliases[from] = to;
+}
+
+void
+PHVFactory::enable_field_arith(header_id_t header_id, int field_offset) {
+  HeaderDesc &desc = header_descs.at(header_id);
+  desc.arith_offsets.insert(field_offset);
+}
+
+void
+PHVFactory::enable_all_field_arith(header_id_t header_id) {
+  HeaderDesc &desc = header_descs.at(header_id);
+  for (int offset = 0; offset < desc.header_type.get_num_fields(); offset++) {
+    desc.arith_offsets.insert(offset);
+  }
+}
+
+void
+PHVFactory::disable_field_arith(header_id_t header_id, int field_offset) {
+  HeaderDesc &desc = header_descs.at(header_id);
+  desc.arith_offsets.erase(field_offset);
+}
+
+void
+PHVFactory::disable_all_field_arith(header_id_t header_id) {
+  HeaderDesc &desc = header_descs.at(header_id);
+  desc.arith_offsets.clear();
+}
+
+void
+PHVFactory::enable_all_arith() {
+  for (auto it : header_descs)
+    enable_all_field_arith(it.first);
+}
+
+std::unique_ptr<PHV>
+PHVFactory::create() const {
+  std::unique_ptr<PHV> phv(new PHV(header_descs.size(),
+                                   header_stack_descs.size()));
+
+  for (const auto &e : header_descs) {
+    const HeaderDesc &desc = e.second;
+    phv->push_back_header(desc.name, desc.index,
+                          desc.header_type, desc.arith_offsets,
+                          desc.metadata);
+  }
+
+  for (const auto &e : header_stack_descs) {
+    const HeaderStackDesc &desc = e.second;
+    phv->push_back_header_stack(desc.name, desc.index,
+                                desc.header_type, desc.headers);
+  }
+
+  for (const auto &e : field_aliases)
+    phv->add_field_alias(e.first, e.second);
+
+  return phv;
+}
+
 }  // namespace bm

@@ -86,3 +86,16 @@ TEST_F(PHVTest, CopyHeaders) {
   ASSERT_EQ(f48, f48_2);
 }
 
+TEST_F(PHVTest, FieldAlias) {
+  phv_factory.add_field_alias("best.alias.ever", "test1.f16");
+  std::unique_ptr<PHV> phv_2 = phv_factory.create();
+
+  const Field &f = phv_2->get_field("test1.f16");
+  const Field &f_alias = phv_2->get_field("best.alias.ever");
+  const Field &f_other = phv_2->get_field("test1.f48");
+
+  ASSERT_NE(&f_other, &f);
+  ASSERT_NE(&f_other, &f_alias);
+
+  ASSERT_EQ(&f, &f_alias);
+}
