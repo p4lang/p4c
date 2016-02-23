@@ -92,14 +92,7 @@ MatchTableAbstract::apply_action(Packet *pkt) {
 
   action_entry.action_fn(pkt);
 
-  // For regular Matchtable's, this is useless because action_entry.next_node
-  // has already been set to next_node_miss. However, for indirect tables, a
-  // member can be used both by a regular entry and as the default / miss
-  // member. Assuming next_node_miss has been set, the next node pointer in the
-  // member is therefore only valid if the member is picked by a hit. It does
-  // look like a hack, but hit / miss selection is still part of the P4 language
-  // and needs to be supported.
-  return (hit || !has_next_node_miss) ? action_entry.next_node : next_node_miss;
+  return hit ? action_entry.next_node : next_node_miss;
 }
 
 void
@@ -124,6 +117,15 @@ void
 MatchTableAbstract::set_next_node_miss(const ControlFlowNode *next_node) {
   has_next_node_miss = true;
   next_node_miss = next_node;
+  next_node_miss_default = next_node;
+}
+
+void
+MatchTableAbstract::set_next_node_miss_default(
+    const ControlFlowNode *next_node) {
+  if (has_next_node_miss) return;
+  next_node_miss = next_node;
+  next_node_miss_default = next_node;
 }
 
 void
@@ -320,6 +322,7 @@ MatchTable::set_default_action(const ActionFn *action_fn,
                                ActionData action_data) {
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
   const ControlFlowNode *next_node = get_next_node_default(action_fn->get_id());
+  next_node_miss = next_node;
 
   {
     WriteLock lock = lock_write();
