@@ -180,7 +180,10 @@ REGISTER_PRIMITIVE(remove_header);
 
 class copy_header : public ActionPrimitive<Header &, const Header &> {
   void operator ()(Header &dst, const Header &src) {
-    if (!src.is_valid()) return;
+    if (!src.is_valid()) {
+      dst.mark_invalid();
+      return;
+    }
     dst.mark_valid();
     assert(dst.get_header_type_id() == src.get_header_type_id());
     for (unsigned int i = 0; i < dst.size(); i++) {
