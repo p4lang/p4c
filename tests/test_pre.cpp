@@ -38,7 +38,7 @@ TEST(McSimplePre, Replicate)
   McSimplePre::McIn ingress_info;
   std::vector<McSimplePre::McOut> egress_info;
   unsigned int count = 0;
-  unsigned int nodes = 3;
+  constexpr size_t nodes = 3;
 
   rc = pre.mc_mgrp_create(mgid, &mgrp_hdl);
   ASSERT_EQ(rc, McSimplePre::SUCCESS);
@@ -155,7 +155,7 @@ TEST(McSimplePreLAG, Replicate)
   std::vector<McSimplePre::McOut> egress_info;
   unsigned int count = 0;
   unsigned int member_count = 0;
-  unsigned int nodes = 3;
+  constexpr unsigned int nodes = 3;
 
   rc = pre.mc_mgrp_create(mgid, &mgrp_hdl);
   ASSERT_EQ(rc, McSimplePre::SUCCESS);

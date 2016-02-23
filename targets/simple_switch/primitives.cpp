@@ -341,4 +341,6 @@ REGISTER_PRIMITIVE_W_NAME("truncate", truncate_);
 // the previous alternative was to have all the primitives in a header file (the
 // primitives could also be placed in simple_switch.cpp directly), but I need
 // this dummy function if I want to keep the primitives in their own file
-int import_primitives() { }
+int import_primitives() {
+  return 0;
+}

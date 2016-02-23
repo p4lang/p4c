@@ -135,7 +135,14 @@ class RandAccessUIntSet {
 
   ~RandAccessUIntSet() {
     Word_t bytes_freed;
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare"
+#endif
     J1FA(bytes_freed, members);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
   }
 
   RandAccessUIntSet(const RandAccessUIntSet &other) = delete;

@@ -54,6 +54,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <typeindex>
 
 #include "P4Objects.h"
 #include "match_tables.h"

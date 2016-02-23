@@ -43,7 +43,7 @@ class Set {
   bool operator[] (size_t pos) const { return port_map[pos]; }
   reference operator[] (size_t pos) { return port_map[pos]; }
 
-  constexpr size_t size() noexcept { return port_map.size(); }
+  constexpr size_t size() const noexcept { return port_map.size(); }
 
  private:
   std::bitset<set_size> port_map{};

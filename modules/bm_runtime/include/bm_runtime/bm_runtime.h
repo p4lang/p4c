@@ -21,6 +21,7 @@ int add_service(const std::string &service_name) {
   shared_ptr<Handler> handler(new Handler(static_cast<S *>(switch_)));
   processor_->registerProcessor(service_name,
 				shared_ptr<TProcessor>(new Processor(handler)));
+  return 0;
 }
 
 int start_server(bm::SwitchWContexts *sw, int port);

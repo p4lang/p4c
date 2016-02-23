@@ -268,7 +268,7 @@ struct BufBuilder {
 
     char *extend(int more_bits) {
       int nbits_ = nbits + more_bits;
-      buf->resize((nbits_ + 7) / 8);
+      buf->resize((nbits_ + 7) / 8, '\x00');
       char *ptr = buf->data() + (nbits / 8);
       nbits = nbits_;
       // needed ?
@@ -285,7 +285,8 @@ struct BufBuilder {
       if (!header.is_valid()) return;
       const Field &field = header.get_field(f.field_offset);
       // taken from headers.cpp::deparse
-      field.deparse(extend(field.get_nbits()), get_offset());
+      const int offset = get_offset();
+      field.deparse(extend(field.get_nbits()), offset);
     }
 
     void operator()(const constant_t &c) {

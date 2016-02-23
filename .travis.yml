@@ -14,11 +14,15 @@ matrix:
       compiler: gcc
       env: COMPILER=g++-5 GCOV=gcov-5
 
+    - os: linux
+      env: COMPILER=clang++-3.6
+
 addons:
   apt:
     sources:
       - boost-latest
       - ubuntu-toolchain-r-test
+      - llvm-toolchain-precise-3.6
     packages:
       - libjudy-dev
       - libgmp-dev
@@ -37,6 +41,7 @@ addons:
       - pkg-config
       - g++-4.8
       - g++-5
+      - clang-3.6
       - libssl-dev
 
 before_install:
@@ -51,7 +56,10 @@ before_install:
   - bash build/travis/install-nnpy.sh
 
 install:
-  - ./autogen.sh && ./configure CXX=$COMPILER --enable-coverage && make all -j2
+  - ./autogen.sh
+  - if [ "$GCOV" != "" ]; then ./configure CXX=$COMPILER --enable-coverage; fi
+  - if [ "$GCOV" = "" ]; then ./configure CXX=$COMPILER; fi
+  - make all -j2
 
 # command to run tests, e.g. python setup.py test
 script:
@@ -61,5 +69,5 @@ script:
 
 # code coverage
 after_success:
-  - cd modules/bm_sim/src; $GCOV -r -o .libs/ *.cpp; cd -
-  - bash <(curl -s https://codecov.io/bash)
+  - if [ "$GCOV" != "" ]; then (cd modules/bm_sim/src; $GCOV -r -o .libs/ *.cpp); fi
+  - if [ "$GCOV" != "" ]; then bash <(curl -s https://codecov.io/bash); fi

@@ -1060,10 +1060,12 @@ TEST_F(IPv4TLVParsingTest, BothOptions) {
   const ByteContainer f1("0x00a1");
   const ByteContainer f2("0x000000a2");
 
-  for(const auto order: {"AB", "BA"}) {
+  enum class Order { AB, BA };
+
+  for(const auto order: {Order::AB, Order::BA}) {
     ByteContainer buf = get_ipv4_base();
 
-    if(order == "AB") {
+    if(order == Order::AB) {
       add_optionA(&buf, f1, f2);
       add_optionB(&buf);
     }

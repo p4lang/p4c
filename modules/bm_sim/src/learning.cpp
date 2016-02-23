@@ -188,7 +188,6 @@ LearnEngine::LearnList::add_sample(const PHV &phv) {
 
 void
 LearnEngine::LearnList::buffer_transmit() {
-  milliseconds time_to_sleep;
   size_t num_samples_to_send;
   LockType lock(mutex);
   clock::time_point now = clock::now();
