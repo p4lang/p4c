@@ -798,9 +798,14 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
         table->set_next_node(get_action(action_name)->get_id(), next_node);
       }
 
-      for (const auto &spec_next : {"__HIT__", "__MISS__"}) {
-        if (cfg_next_nodes.isMember(spec_next))
-          table->set_next_node_hit(get_next_node(cfg_next_nodes[spec_next]));
+      if (cfg_next_nodes.isMember("__HIT__"))
+        table->set_next_node_hit(get_next_node(cfg_next_nodes["__HIT__"]));
+      if (cfg_next_nodes.isMember("__MISS__"))
+        table->set_next_node_miss(get_next_node(cfg_next_nodes["__MISS__"]));
+
+      if (cfg_table.isMember("base_default_next")) {
+        table->set_next_node_miss_default(
+            get_next_node(cfg_table["base_default_next"]));
       }
     }
 

@@ -90,7 +90,13 @@ class MatchTableAbstract : public NamedP4Object {
 
   void set_next_node(p4object_id_t action_id, const ControlFlowNode *next_node);
   void set_next_node_hit(const ControlFlowNode *next_node);
+  // one of set_next_node_miss / set_next_node_miss_default has to be called
+  // set_next_node_miss: if the P4 program has a table-action switch statement
+  // with a 'miss' case
+  // set_next_node_miss_default: in the general case
+  // it is ok to call both, in which case set_next_node_miss will take priority
   void set_next_node_miss(const ControlFlowNode *next_node);
+  void set_next_node_miss_default(const ControlFlowNode *next_node);
 
   void set_direct_meters(MeterArray *meter_array,
                          header_id_t target_header,
@@ -142,9 +148,15 @@ class MatchTableAbstract : public NamedP4Object {
 
   std::unordered_map<p4object_id_t, const ControlFlowNode *> next_nodes{};
   const ControlFlowNode *next_node_hit{nullptr};
+  // next node if table is a miss
   const ControlFlowNode *next_node_miss{nullptr};
+  // true if the P4 program explictly specified a table switch statement with a
+  // "miss" case
   bool has_next_node_hit{false};
   bool has_next_node_miss{false};
+  // stores default next node for miss case, used in case we want to reset a
+  // table miss behavior
+  const ControlFlowNode *next_node_miss_default{nullptr};
 
   header_id_t meter_target_header{};
   int meter_target_offset{};

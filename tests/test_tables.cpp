@@ -85,6 +85,8 @@ class TableSizeTwo : public ::testing::Test {
 
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
+  DummyNode node_miss_default{};
+
   TableSizeTwo()
       : testHeaderType("test_t", 0), action_fn("actionA", 0),
         phv_source(PHVSourceIface::make_phv_source()) {
@@ -108,12 +110,14 @@ class TableSizeTwo : public ::testing::Test {
       new MatchTable("test_table", 0, std::move(match_unit), true)
     );
     table->set_next_node(0, nullptr);
+    table->set_next_node_miss_default(&node_miss_default);
 
     match_unit = std::unique_ptr<MUType>(new MUType(t_size, key_builder_w_valid));
     table_w_valid = std::unique_ptr<MatchTable>(
       new MatchTable("test_table", 0, std::move(match_unit))
     );
     table_w_valid->set_next_node(0, nullptr);
+    table_w_valid->set_next_node_miss_default(&node_miss_default);
   }
 
   MatchErrorCode add_entry(const std::string &key,
@@ -346,10 +350,12 @@ TYPED_TEST(TableSizeTwo, NextNodeHitMiss) {
   // we call apply_action, even though no action has been set
 
   // base case
+  // hit, next node set to nullptr
   f.set("0xaba");
   ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
+  // miss, next node is default one (as per the P4 program)
   f.set("0xabb");
-  ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
+  ASSERT_EQ(&this->node_miss_default, this->table->apply_action(&pkt));
 
   // need to remove entry because the node pointer is inserted in the entry when
   // the entry is added
@@ -611,6 +617,8 @@ class TableIndirect : public ::testing::Test {
 
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
+  DummyNode node_miss_default{};
+
   static const size_t table_size = 128;
 
   TableIndirect()
@@ -628,6 +636,7 @@ class TableIndirect : public ::testing::Test {
 				       table_size, key_builder,
 				       true, false);
     table->set_next_node(0, nullptr);
+    table->set_next_node_miss_default(&node_miss_default);
   }
 
   MatchErrorCode add_entry(const std::string &key,
@@ -841,10 +850,12 @@ TEST_F(TableIndirect, NextNodeHitMiss) {
   add_member_and_entry(key, data);
 
   // base case
+  // hit, next node set to nullptr
   f.set("0xaba");
   ASSERT_EQ(nullptr, table->apply_action(&pkt));
+  // miss, next node is default one (as per the P4 program)
   f.set("0xabb");
-  ASSERT_EQ(nullptr, table->apply_action(&pkt));
+  ASSERT_EQ(&node_miss_default, table->apply_action(&pkt));
 
   // need to remove entry because the node pointer is inserted in the entry when
   // the entry is added
