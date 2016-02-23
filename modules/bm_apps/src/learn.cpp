@@ -59,7 +59,9 @@ LearnListener::LearnListener(const std::string &learn_socket,
                              const std::string &thrift_addr,
                              const int thrift_port)
   : socket_name(learn_socket),
-    thrift_addr(thrift_addr), thrift_port(thrift_port) { }
+    thrift_addr(thrift_addr), thrift_port(thrift_port) {
+  (void) this->thrift_port;  // clang unused private field warning
+}
 
 LearnListener::~LearnListener() {
   {

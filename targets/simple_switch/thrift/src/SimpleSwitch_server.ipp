@@ -35,6 +35,7 @@ class SimpleSwitchHandler : virtual public SimpleSwitchIf {
 
   int32_t mirroring_mapping_get_egress_port(const int32_t mirror_id) {
     bm::Logger::get()->trace("mirroring_mapping_get_egress_port");
+    return switch_->mirroring_mapping_get(mirror_id);
   }
 
   int32_t set_egress_queue_depth(const int32_t depth_pkts) {

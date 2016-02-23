@@ -62,6 +62,7 @@ public:
     received++;
     if (receiver != nullptr)
       receiver->send_packet(port_num, buffer, len);
+    return received;
   }
 
 protected:

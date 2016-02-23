@@ -43,7 +43,7 @@ class Deparser;
 class MatchTableAbstract;
 class MatchEntry;
 class ActionFn;
-class ActionData;
+struct ActionData;
 class Conditional;
 class Checksum;
 class ActionFn;

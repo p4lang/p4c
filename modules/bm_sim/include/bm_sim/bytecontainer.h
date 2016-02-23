@@ -234,6 +234,12 @@ class ByteContainer {
     bytes.resize(n);
   }
 
+  //! Resizes the container to contain \p bytes, initializing the new bytes to
+  //! \p c
+  void resize(size_t n, char c) {
+    bytes.resize(n, c);
+  }
+
   //! Perform a byte-by-byte masking of the container.
   //! Will assert if `size() != mask.size()`.
   void apply_mask(const ByteContainer &mask) {

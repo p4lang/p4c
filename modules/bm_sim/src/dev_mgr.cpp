@@ -45,7 +45,7 @@ class FilesDevMgrImp : public DevMgrIface {
 
  private:
   ReturnCode port_add_(const std::string &iface_name, port_t port_num,
-                       const char *in_pcap, const char *out_pcap) {
+                       const char *in_pcap, const char *out_pcap) override {
     UNUSED(iface_name);
     reader.addFile(port_num, std::string(in_pcap));
     writer.addFile(port_num, std::string(out_pcap));

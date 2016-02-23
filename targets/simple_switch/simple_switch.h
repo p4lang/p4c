@@ -113,6 +113,10 @@ class SimpleSwitch : public Switch {
     return mirroring_map.erase(mirror_id);
   }
 
+  int mirroring_mapping_get(mirror_id_t mirror_id) const {
+    return get_mirroring_mapping(mirror_id);
+  }
+
   int set_egress_queue_depth(const size_t depth_pkts) {
     for (int i = 0; i < max_port; i++) {
       egress_buffers.set_capacity(i, depth_pkts);

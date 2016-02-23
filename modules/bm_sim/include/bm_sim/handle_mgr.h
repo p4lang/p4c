@@ -149,8 +149,7 @@ class HandleMgr {
   : handles(other.handles) {}
 
   ~HandleMgr() {
-    Word_t bytes_freed;
-    J1FA(bytes_freed, handles);
+    clear();
   }
 
   /* Copy assignment operator */
@@ -211,7 +210,15 @@ class HandleMgr {
 
   void clear() {
     Word_t Rc_word;
+    // only clang complains, not gcc
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-compare"
+#endif
     J1FA(Rc_word, handles);
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
   }
 
   // iterators
