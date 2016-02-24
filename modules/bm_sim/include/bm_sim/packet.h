@@ -103,6 +103,9 @@ class Packet final {
 
   typedef PacketBuffer::state_t buffer_state_t;
 
+  //! Number of general purpose registers per packet
+  static constexpr size_t nb_registers = 2u;
+
   ~Packet();
 
   //! Obtain the packet_id. The packet_id is the one assigned by the target when
@@ -214,6 +217,11 @@ class Packet final {
   //! @copydoc get_phv
   const PHV *get_phv() const { return phv.get(); }
 
+  //! Write to general purpose register at index \p idx
+  void set_register(size_t idx, uint64_t v) { registers.at(idx) = v; }
+  //! Read general purpose register at index \p idx
+  uint64_t get_register(size_t idx) { return registers.at(idx); }
+
   //! Changes the context of the packet. You will only need to call this
   //! function if you target switch leverages the Context class and if your
   //! Packet instance changes contexts during its lifetime. This is needed
@@ -315,6 +323,10 @@ class Packet final {
   std::unique_ptr<PHV> phv{nullptr};
 
   PHVSourceIface *phv_source{nullptr};
+
+  // General purpose registers available to a target, they can be written with
+  // Packet::set_register and read with Packet::get_register
+  std::array<uint64_t, nb_registers> registers;
 
  private:
   static CopyIdGenerator *copy_id_gen;

@@ -28,6 +28,8 @@ namespace bm {
 
 typedef Debugger::PacketId PacketId;
 
+constexpr size_t Packet::nb_registers;
+
 void
 Packet::update_signature(uint64_t seed) {
   signature = XXH64(buffer.start(), buffer.get_data_size(), seed);

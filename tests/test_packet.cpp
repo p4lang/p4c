@@ -153,3 +153,15 @@ TEST_F(PacketTest, Truncate) {
   ASSERT_TRUE(std::equal(
       data.begin(), data.begin() + pkt_2.get_data_size(), pkt_2.data()));
 }
+
+TEST_F(PacketTest, PacketRegisters) {
+  const uint64_t v1 = 0u;
+  const uint64_t v2 = 6789u;
+  const size_t idx = 0u;
+  ASSERT_LT(idx, Packet::nb_registers);
+  auto packet = get_packet(0);
+  packet.set_register(idx, v1);
+  ASSERT_EQ(v1, packet.get_register(idx));
+  packet.set_register(idx, v2);
+  ASSERT_EQ(v2, packet.get_register(idx));
+}

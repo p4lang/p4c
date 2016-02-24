@@ -120,6 +120,15 @@ class ExecuteMeter : public ActionPrimitive<Field &, MeterArray &, const Data &>
 
 REGISTER_PRIMITIVE(ExecuteMeter);
 
+// illustrates how a packet general purpose register can be used in a primitive
+class WritePacketRegister : public ActionPrimitive<const Data &> {
+  void operator ()(const Data &v) {
+    get_packet().set_register(0, v.get<uint64_t>());
+  }
+};
+
+REGISTER_PRIMITIVE(WritePacketRegister);
+
 // Google Test fixture for actions tests
 class ActionsTest : public ::testing::Test {
  protected:
@@ -504,6 +513,22 @@ TEST_F(ActionsTest, ExecuteMeter) {
       testActionFnEntry(pkt.get());
       ASSERT_EQ(RED, fdst.get_uint());
   }
+}
+
+TEST_F(ActionsTest, WritePacketRegister) {
+  const uint64_t v = 12345u;
+  const size_t idx = 0u;
+
+  WritePacketRegister primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_const(Data(v));
+
+  pkt->set_register(idx, 0u);
+  ASSERT_EQ(0u, pkt->get_register(idx));
+
+  testActionFnEntry(pkt.get());
+
+  ASSERT_EQ(v, pkt->get_register(idx));
 }
 
 TEST_F(ActionsTest, TwoPrimitives) {
