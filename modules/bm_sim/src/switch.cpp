@@ -218,7 +218,7 @@ SwitchWContexts::swap_requested() {
 int
 SwitchWContexts::do_swap() {
   int rc = 1;
-  if (!swap_requested()) return rc;
+  if (!enable_swap || !swap_requested()) return rc;
   boost::unique_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
   for (size_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
     auto &cxt = contexts[cxt_id];
