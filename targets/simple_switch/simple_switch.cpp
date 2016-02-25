@@ -64,8 +64,8 @@ REGISTER_HASH(bmv2_hash);
 
 extern int import_primitives();
 
-SimpleSwitch::SimpleSwitch(int max_port)
-  : Switch(false),  // enable_switch = false
+SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
+  : Switch(enable_swap),
     max_port(max_port),
     input_buffer(1024),
 #ifdef SSWITCH_PRIORITY_QUEUEING_ON
@@ -165,14 +165,15 @@ SimpleSwitch::copy_ingress_pkt(
 
 void
 SimpleSwitch::ingress_thread() {
-  Parser *parser = this->get_parser("parser");
-  Pipeline *ingress_mau = this->get_pipeline("ingress");
-
   PHV *phv;
 
   while (1) {
     std::unique_ptr<Packet> packet;
     input_buffer.pop_back(&packet);
+
+    // TODO(antonin): only update these if swapping actually happened?
+    Parser *parser = this->get_parser("parser");
+    Pipeline *ingress_mau = this->get_pipeline("ingress");
 
     phv = packet->get_phv();
     packet_id_t packet_id = packet->get_packet_id();
@@ -294,14 +295,15 @@ SimpleSwitch::ingress_thread() {
 
 void
 SimpleSwitch::egress_thread(size_t worker_id) {
-  Deparser *deparser = this->get_deparser("deparser");
-  Pipeline *egress_mau = this->get_pipeline("egress");
   PHV *phv;
 
   while (1) {
     std::unique_ptr<Packet> packet;
     size_t port;
     egress_buffers.pop_back(worker_id, &port, &packet);
+
+    Deparser *deparser = this->get_deparser("deparser");
+    Pipeline *egress_mau = this->get_pipeline("egress");
 
     phv = packet->get_phv();
     packet_id_t packet_id = packet->get_packet_id();

@@ -477,9 +477,10 @@ int
 Context::init_objects(std::istream *is,
                       const std::set<header_field_pair> &required_fields,
                       const std::set<header_field_pair> &arith_fields) {
-  int status = p4objects->init_objects(is, device_id, cxt_id,
-                                       notifications_transport,
-                                       required_fields, arith_fields);
+  // initally p4objects_rt == p4objects, so this works
+  int status = p4objects_rt->init_objects(is, device_id, cxt_id,
+                                          notifications_transport,
+                                          required_fields, arith_fields);
   if (status) return status;
   if (force_arith)
     get_phv_factory().enable_all_arith();

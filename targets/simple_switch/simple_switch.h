@@ -72,10 +72,15 @@ class SimpleSwitch : public Switch {
   typedef std::chrono::high_resolution_clock clock;
 
  public:
-  explicit SimpleSwitch(int max_port = 256);
+  // by default, swapping is off
+  explicit SimpleSwitch(int max_port = 256, bool enable_swap = false);
 
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
+
+    // this is a good place to call this, because blocking this thread will not
+    // block the processing of existing packet instances, which is a requirement
+    do_swap();
 
     auto packet = new_packet_ptr(port_num, pkt_id++, len,
                                  bm::PacketBuffer(2048, buffer, len));
