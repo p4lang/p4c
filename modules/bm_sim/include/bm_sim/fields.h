@@ -113,6 +113,13 @@ class Field : public Data {
   void set_id(uint64_t id) { my_id = id; }
   void set_packet_id(const Debugger::PacketId *id) { packet_id = id; }
 
+  void copy_value(const Field &src) {
+    // it's important to have a way of copying a field value without the
+    // packet_id pointer. This is used by PHV::copy_headers().
+    value = src.value;
+    bytes = src.bytes;
+  }
+
  private:
   int nbits;
   int nbytes;

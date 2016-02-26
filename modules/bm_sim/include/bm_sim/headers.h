@@ -239,6 +239,11 @@ class Header : public NamedP4Object {
     }
   }
 
+  void copy_fields(const Header &src) {
+    for (size_t f = 0; f < fields.size(); f++)
+      fields[f].copy_value(src.fields[f]);
+  }
+
   void set_packet_id(const Debugger::PacketId *id);
 
   Header(const Header &other) = delete;
