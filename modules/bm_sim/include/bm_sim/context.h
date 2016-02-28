@@ -308,6 +308,11 @@ class Context final {
   MatchErrorCode get_mt_indirect_ws(const std::string &table_name,
                                     MatchTableIndirectWS **table);
 
+  bool field_exists(const std::string &header_name,
+                    const std::string &field_name) const {
+    return p4objects->field_exists(header_name, field_name);
+  }
+
   PHVFactory &get_phv_factory();
 
   LearnEngine *get_learn_engine();

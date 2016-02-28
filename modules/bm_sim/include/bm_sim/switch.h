@@ -134,6 +134,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   void add_required_field(const std::string &header_name,
                           const std::string &field_name);
 
+  //! Checks that the given field exists for context \p cxt_id, i.e. checks that
+  //! the field was defined in the input JSON used to configure that context.
+  bool field_exists(size_t cxt_id, const std::string &header_name,
+                    const std::string &field_name) const {
+    return contexts.at(cxt_id).field_exists(header_name, field_name);
+  }
+
   //! Force arithmetic on field. No effect if field is not defined in the input
   //! JSON. For optimization reasons, only fields on which arithmetic will be
   //! performed receive the ability to perform arithmetic operations. These
@@ -580,6 +587,15 @@ class Switch : public SwitchWContexts {
  public:
   //! See SwitchWContexts::SwitchWContexts()
   explicit Switch(bool enable_swap = false);
+
+  // to avoid C++ name hiding
+  using SwitchWContexts::field_exists;
+  //! Checks that the given field was defined in the input JSON used to
+  //! configure the switch
+  bool field_exists(const std::string &header_name,
+                    const std::string &field_name) const {
+    return field_exists(0, header_name, field_name);
+  }
 
   // to avoid C++ name hiding
   using SwitchWContexts::new_packet_ptr;

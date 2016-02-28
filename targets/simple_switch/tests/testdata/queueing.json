@@ -1,0 +1,430 @@
+{
+    "header_types": [
+        {
+            "name": "standard_metadata_t",
+            "id": 0,
+            "fields": [
+                [
+                    "ingress_port",
+                    9
+                ],
+                [
+                    "packet_length",
+                    32
+                ],
+                [
+                    "egress_spec",
+                    9
+                ],
+                [
+                    "egress_port",
+                    9
+                ],
+                [
+                    "egress_instance",
+                    32
+                ],
+                [
+                    "instance_type",
+                    32
+                ],
+                [
+                    "clone_spec",
+                    32
+                ],
+                [
+                    "_padding",
+                    5
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "hdr1_t",
+            "id": 1,
+            "fields": [
+                [
+                    "f1",
+                    8
+                ],
+                [
+                    "f2",
+                    8
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "queueing_metadata_t",
+            "id": 2,
+            "fields": [
+                [
+                    "enq_timestamp",
+                    48
+                ],
+                [
+                    "enq_qdepth",
+                    24
+                ],
+                [
+                    "deq_timedelta",
+                    32
+                ],
+                [
+                    "deq_qdepth",
+                    24
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        }
+    ],
+    "headers": [
+        {
+            "name": "standard_metadata",
+            "id": 0,
+            "header_type": "standard_metadata_t",
+            "metadata": true
+        },
+        {
+            "name": "hdr1",
+            "id": 1,
+            "header_type": "hdr1_t",
+            "metadata": false
+        },
+        {
+            "name": "queueing_metadata",
+            "id": 2,
+            "header_type": "queueing_metadata_t",
+            "metadata": true
+        },
+        {
+            "name": "queueing_hdr",
+            "id": 3,
+            "header_type": "queueing_metadata_t",
+            "metadata": false
+        }
+    ],
+    "header_stacks": [],
+    "parsers": [
+        {
+            "name": "parser",
+            "id": 0,
+            "init_state": "start",
+            "parse_states": [
+                {
+                    "name": "start",
+                    "id": 0,
+                    "parser_ops": [
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "regular",
+                                    "value": "hdr1"
+                                }
+                            ]
+                        }
+                    ],
+                    "transition_key": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "packet_length"
+                            ]
+                        }
+                    ],
+                    "transitions": [
+                        {
+                            "value": "0x00000000",
+                            "mask": null,
+                            "next_state": "queueing_dummy"
+                        },
+                        {
+                            "value": "default",
+                            "mask": null,
+                            "next_state": null
+                        }
+                    ]
+                },
+                {
+                    "name": "queueing_dummy",
+                    "id": 1,
+                    "parser_ops": [
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "regular",
+                                    "value": "queueing_hdr"
+                                }
+                            ]
+                        }
+                    ],
+                    "transition_key": [],
+                    "transitions": [
+                        {
+                            "value": "default",
+                            "mask": null,
+                            "next_state": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "deparsers": [
+        {
+            "name": "deparser",
+            "id": 0,
+            "order": [
+                "hdr1",
+                "queueing_hdr"
+            ]
+        }
+    ],
+    "meter_arrays": [],
+    "actions": [
+        {
+            "name": "set_port",
+            "id": 0,
+            "runtime_data": [
+                {
+                    "name": "port",
+                    "bitwidth": 9
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_spec"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "_drop",
+            "id": 1,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "drop",
+                    "parameters": []
+                }
+            ]
+        },
+        {
+            "name": "copy_queueing_data",
+            "id": 2,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "add_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "queueing_hdr"
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_hdr",
+                                "enq_timestamp"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_timestamp"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_hdr",
+                                "enq_qdepth"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "enq_qdepth"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_hdr",
+                                "deq_timedelta"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_timedelta"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_hdr",
+                                "deq_qdepth"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "queueing_metadata",
+                                "deq_qdepth"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "pipelines": [
+        {
+            "name": "ingress",
+            "id": 0,
+            "init_table": "t_ingress",
+            "tables": [
+                {
+                    "name": "t_ingress",
+                    "id": 0,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 128,
+                    "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
+                    "key": [
+                        {
+                            "match_type": "exact",
+                            "target": [
+                                "hdr1",
+                                "f1"
+                            ],
+                            "mask": null
+                        }
+                    ],
+                    "actions": [
+                        "set_port",
+                        "_drop"
+                    ],
+                    "next_tables": {
+                        "set_port": null,
+                        "_drop": null
+                    },
+                    "default_action": null,
+                    "base_default_next": null
+                }
+            ],
+            "conditionals": []
+        },
+        {
+            "name": "egress",
+            "id": 1,
+            "init_table": "t_egress",
+            "tables": [
+                {
+                    "name": "t_egress",
+                    "id": 1,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 16384,
+                    "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
+                    "key": [],
+                    "actions": [
+                        "copy_queueing_data"
+                    ],
+                    "next_tables": {
+                        "copy_queueing_data": null
+                    },
+                    "default_action": null,
+                    "base_default_next": null
+                }
+            ],
+            "conditionals": []
+        }
+    ],
+    "calculations": [],
+    "checksums": [],
+    "learn_lists": [],
+    "field_lists": [],
+    "counter_arrays": [],
+    "register_arrays": [],
+    "force_arith": [
+        [
+            "standard_metadata",
+            "ingress_port"
+        ],
+        [
+            "standard_metadata",
+            "packet_length"
+        ],
+        [
+            "standard_metadata",
+            "egress_spec"
+        ],
+        [
+            "standard_metadata",
+            "egress_port"
+        ],
+        [
+            "standard_metadata",
+            "egress_instance"
+        ],
+        [
+            "standard_metadata",
+            "instance_type"
+        ],
+        [
+            "standard_metadata",
+            "clone_spec"
+        ],
+        [
+            "standard_metadata",
+            "_padding"
+        ]
+    ]
+}
