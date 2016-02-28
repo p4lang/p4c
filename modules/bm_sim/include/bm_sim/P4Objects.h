@@ -27,6 +27,7 @@
 #include <ostream>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <string>
 #include <memory>
 #include <set>
@@ -130,6 +131,9 @@ class P4Objects {
   FieldList *get_field_list(const p4object_id_t field_list_id) {
     return field_lists[field_list_id].get();
   }
+
+  bool field_exists(const std::string &header_name,
+                    const std::string &field_name) const;
 
  private:
   void add_header_type(const std::string &name,
@@ -278,7 +282,9 @@ class P4Objects {
     calculations{};
 
   // field lists
-  std::unordered_map<p4object_id_t, std::unique_ptr<FieldList> > field_lists;
+  std::unordered_map<p4object_id_t, std::unique_ptr<FieldList> > field_lists{};
+
+  std::unordered_set<std::string> field_aliases{};
 
  public:
   // public to be accessed by test class
@@ -291,8 +297,6 @@ class P4Objects {
   size_t get_header_bits(header_id_t header_id);
   std::tuple<header_id_t, int> field_info(const std::string &header_name,
                                           const std::string &field_name);
-  bool field_exists(const std::string &header_name,
-                    const std::string &field_name);
   bool check_required_fields(
       const std::set<header_field_pair> &required_fields);
 

@@ -75,40 +75,7 @@ class SimpleSwitch : public Switch {
   // by default, swapping is off
   explicit SimpleSwitch(int max_port = 256, bool enable_swap = false);
 
-  int receive(int port_num, const char *buffer, int len) {
-    static int pkt_id = 0;
-
-    // this is a good place to call this, because blocking this thread will not
-    // block the processing of existing packet instances, which is a requirement
-    do_swap();
-
-    // we limit the packet buffer to original size + 512 bytes, which means we
-    // cannot add more than 512 bytes of header data to the packet, which should
-    // be more than enough
-    auto packet = new_packet_ptr(port_num, pkt_id++, len,
-                                 bm::PacketBuffer(len + 512, buffer, len));
-
-    BMELOG(packet_in, *packet);
-
-    PHV *phv = packet->get_phv();
-    // many current P4 programs assume this
-    // it is also part of the original P4 spec
-    phv->reset_metadata();
-
-    // setting standard metadata
-    phv->get_field("standard_metadata.ingress_port").set(port_num);
-    phv->get_field("standard_metadata.packet_length").set(len);
-    Field &f_instance_type = phv->get_field("standard_metadata.instance_type");
-    f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
-
-    if (phv->has_field("intrinsic_metadata.ingress_global_timestamp")) {
-      phv->get_field("intrinsic_metadata.ingress_global_timestamp")
-        .set(get_ts().count());
-    }
-
-    input_buffer.push_front(std::move(packet));
-    return 0;
-  }
+  int receive(int port_num, const char *buffer, int len);
 
   void start_and_return();
 
@@ -183,6 +150,8 @@ class SimpleSwitch : public Switch {
       const std::unique_ptr<Packet> &pkt,
       PktInstanceType copy_type, p4object_id_t field_list_id);
 
+  void check_queueing_metadata();
+
  private:
   int max_port;
   Queue<std::unique_ptr<Packet> > input_buffer;
@@ -196,6 +165,7 @@ class SimpleSwitch : public Switch {
   std::shared_ptr<McSimplePreLAG> pre;
   clock::time_point start;
   std::unordered_map<mirror_id_t, int> mirroring_map;
+  bool with_queueing_metadata{false};
 };
 
 #endif  // SIMPLE_SWITCH_SIMPLE_SWITCH_H_

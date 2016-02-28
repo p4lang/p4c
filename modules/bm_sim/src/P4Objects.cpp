@@ -210,6 +210,8 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
       assert(field_exists(header_name, field_name));
       const auto to = header_name + "." + field_name;
       phv_factory.add_field_alias(from, to);
+
+      field_aliases.insert(from);
     }
   }
 
@@ -942,8 +944,11 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
 
   for (const auto &p : arith_fields) {
     if (!field_exists(p.first, p.second)) {
-      outstream << "field " << p.first << "." << p.second
-                << " does not exist but required for arith, ignoring\n";
+      continue;
+      // TODO(antonin): skipping warning for now, but maybe it would be nice to
+      // leave the choice to the person calling force_arith_field
+      // outstream << "field " << p.first << "." << p.second
+      //           << " does not exist but required for arith, ignoring\n";
     } else {
       const auto field = field_info(p.first, p.second);
       phv_factory.enable_field_arith(std::get<0>(field), std::get<1>(field));
@@ -997,7 +1002,11 @@ P4Objects::field_info(const string &header_name, const string &field_name) {
 
 bool
 P4Objects::field_exists(const string &header_name,
-                        const string &field_name) {
+                        const string &field_name) const {
+  // TODO(antonin): the alias feature, while correcty-handled during packet
+  // processing in phv.cpp is kind of hacky here and needs to be improved.
+  if (field_aliases.find(header_name + "." + field_name) != field_aliases.end())
+    return true;
   const auto it = header_to_type_map.find(header_name);
   if (it == header_to_type_map.end()) return false;
   const HeaderType *header_type = it->second;
