@@ -55,6 +55,14 @@ create_match_unit(const std::string match_type, const size_t size,
 
 typedef MatchTableAbstract::ActionEntry ActionEntry;
 
+MatchTableAbstract::MatchTableAbstract(
+    const std::string &name, p4object_id_t id,
+    size_t size, bool with_counters, bool with_ageing,
+    MatchUnitAbstract_ *mu)
+    : NamedP4Object(name, id), size(size),
+      with_counters(with_counters), with_ageing(with_ageing),
+      match_unit_(mu) { }
+
 const ControlFlowNode *
 MatchTableAbstract::apply_action(Packet *pkt) {
   entry_handle_t handle;
@@ -228,6 +236,15 @@ MatchTableAbstract::dump_entry_string_int(entry_handle_t handle) const {
   return ret.str();
 }
 
+MatchTable::MatchTable(
+    const std::string &name, p4object_id_t id,
+    std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit,
+    bool with_counters, bool with_ageing)
+    : MatchTableAbstract(name, id, match_unit->get_size(),
+                         with_counters, with_ageing,
+                         match_unit.get()),
+      match_unit(std::move(match_unit)) { }
+
 const ActionEntry &
 MatchTable::lookup(const Packet &pkt, bool *hit, entry_handle_t *handle) {
   MatchUnitAbstract<ActionEntry>::MatchUnitLookup res = match_unit->lookup(pkt);
@@ -392,6 +409,15 @@ MatchTable::create(const std::string &match_type,
                    with_counters, with_ageing));
 }
 
+MatchTableIndirect::MatchTableIndirect(
+    const std::string &name, p4object_id_t id,
+    std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit,
+    bool with_counters, bool with_ageing)
+    : MatchTableAbstract(name, id, match_unit->get_size(),
+                         with_counters, with_ageing,
+                         match_unit.get()),
+      match_unit(std::move(match_unit)) { }
+
 std::unique_ptr<MatchTableIndirect>
 MatchTableIndirect::create(const std::string &match_type,
                            const std::string &name, p4object_id_t id,
@@ -413,6 +439,11 @@ MatchTableIndirect::lookup(const Packet &pkt,
     match_unit->lookup(pkt);
   *hit = res.found();
   *handle = res.handle;
+
+  // could avoid the if statement, by reserving an empty action in
+  // action_entries and making sure default_index points to it, but it seems
+  // more error-prone and probably not worth the trouble
+  if (!(*hit) && !default_set) return empty_action;
 
   const IndirectIndex &index = (*hit) ? *res.value : default_index;
   mbr_hdl_t mbr = index.get_mbr();
@@ -613,10 +644,12 @@ MatchTableIndirect::set_default_member(mbr_hdl_t mbr) {
   {
     WriteLock lock = lock_write();
 
-    if (!is_valid_mbr(mbr))
+    if (!is_valid_mbr(mbr)) {
       rc = MatchErrorCode::INVALID_MBR_HANDLE;
-    else
+    } else {
       default_index = IndirectIndex::make_mbr_index(mbr);
+      default_set = true;
+    }
   }
 
   if (rc == MatchErrorCode::SUCCESS) {
@@ -712,6 +745,13 @@ MatchTableIndirect::reset_state_() {
 }
 
 
+MatchTableIndirectWS::MatchTableIndirectWS(
+    const std::string &name, p4object_id_t id,
+    std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit,
+    bool with_counters, bool with_ageing)
+    : MatchTableIndirect(name, id, std::move(match_unit),
+                         with_counters, with_ageing) { }
+
 MatchErrorCode
 MatchTableIndirectWS::GroupInfo::add_member(mbr_hdl_t mbr) {
   if (!mbrs.add(mbr)) return MatchErrorCode::MBR_ALREADY_IN_GRP;
@@ -780,6 +820,8 @@ MatchTableIndirectWS::lookup(const Packet &pkt, bool *hit,
     match_unit->lookup(pkt);
   *hit = res.found();
   *handle = res.handle;
+
+  if (!(*hit) && !default_set) return empty_action;
 
   const IndirectIndex &index = (*hit) ? *res.value : default_index;
 
@@ -1006,10 +1048,12 @@ MatchTableIndirectWS::set_default_group(grp_hdl_t grp) {
   {
     WriteLock lock = lock_write();
 
-    if (!is_valid_grp(grp))
+    if (!is_valid_grp(grp)) {
       rc = MatchErrorCode::INVALID_GRP_HANDLE;
-    else
+    } else {
       default_index = IndirectIndex::make_grp_index(grp);
+      default_set = true;
+    }
   }
 
   if (rc == MatchErrorCode::SUCCESS) {
