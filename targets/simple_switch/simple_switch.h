@@ -82,8 +82,11 @@ class SimpleSwitch : public Switch {
     // block the processing of existing packet instances, which is a requirement
     do_swap();
 
+    // we limit the packet buffer to original size + 512 bytes, which means we
+    // cannot add more than 512 bytes of header data to the packet, which should
+    // be more than enough
     auto packet = new_packet_ptr(port_num, pkt_id++, len,
-                                 bm::PacketBuffer(2048, buffer, len));
+                                 bm::PacketBuffer(len + 512, buffer, len));
 
     BMELOG(packet_in, *packet);
 
