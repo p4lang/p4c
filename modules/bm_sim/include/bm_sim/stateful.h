@@ -144,7 +144,7 @@ class RegisterArray : public NamedP4Object {
   //! includes)
   size_t size() const { return registers.size(); }
 
-  void reset_state() { }
+  void reset_state();
 
   //! Request exclusive access to this register array. This method needs to be
   //! called when the target needs to read or write a register. Note that it is

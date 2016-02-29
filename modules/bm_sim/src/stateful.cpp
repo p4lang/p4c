@@ -23,6 +23,15 @@
 namespace bm {
 
 void
+RegisterArray::reset_state() {
+  auto lock = UniqueLock();
+  for (auto &r : registers) {
+    r.set(0);
+  }
+}
+
+
+void
 RegisterSync::add_register_array(RegisterArray *register_array) {
   if (register_arrays.insert(register_array).second)
     locks.push_back(UniqueLock(register_array->m_mutex, std::defer_lock));

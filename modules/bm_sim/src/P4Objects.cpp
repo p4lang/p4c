@@ -963,8 +963,17 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
 void
 P4Objects::reset_state() {
   // TODO(antonin): is this robust?
-  for (auto &table : match_action_tables_map) {
-    table.second->get_match_table()->reset_state();
+  for (const auto &e : match_action_tables_map) {
+    e.second->get_match_table()->reset_state();
+  }
+  for (const auto &e : meter_arrays) {
+    e.second->reset_state();
+  }
+  for (const auto &e : counter_arrays) {
+    e.second->reset_state();
+  }
+  for (const auto &e : register_arrays) {
+    e.second->reset_state();
   }
   learn_engine->reset_state();
   ageing_monitor->reset_state();
