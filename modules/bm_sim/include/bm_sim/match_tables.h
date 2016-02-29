@@ -66,10 +66,7 @@ class MatchTableAbstract : public NamedP4Object {
  public:
   MatchTableAbstract(const std::string &name, p4object_id_t id,
                      size_t size, bool with_counters, bool with_ageing,
-                     MatchUnitAbstract_ *mu)
-    : NamedP4Object(name, id), size(size),
-      with_counters(with_counters), with_ageing(with_ageing),
-      match_unit_(mu) { }
+                     MatchUnitAbstract_ *mu);
 
   virtual ~MatchTableAbstract() { }
 
@@ -184,11 +181,7 @@ class MatchTable : public MatchTableAbstract {
  public:
   MatchTable(const std::string &name, p4object_id_t id,
              std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit,
-             bool with_counters = false, bool with_ageing = false)
-    : MatchTableAbstract(name, id, match_unit->get_size(),
-                         with_counters, with_ageing,
-                         match_unit.get()),
-      match_unit(std::move(match_unit)) { }
+             bool with_counters = false, bool with_ageing = false);
 
   MatchErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
                            const ActionFn *action_fn,
@@ -336,11 +329,7 @@ class MatchTableIndirect : public MatchTableAbstract {
   MatchTableIndirect(
       const std::string &name, p4object_id_t id,
       std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit,
-      bool with_counters = false, bool with_ageing = false)
-    : MatchTableAbstract(name, id, match_unit->get_size(),
-                         with_counters, with_ageing,
-                         match_unit.get()),
-      match_unit(std::move(match_unit)) { }
+      bool with_counters = false, bool with_ageing = false);
 
   MatchErrorCode add_member(const ActionFn *action_fn,
                             ActionData action_data,  // move it
@@ -416,6 +405,8 @@ class MatchTableIndirect : public MatchTableAbstract {
   HandleMgr mbr_handles{};
   std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit;
   std::vector<ActionEntry> action_entries{};
+  bool default_set{false};
+  ActionEntry empty_action{};
 
  private:
   void entries_insert(mbr_hdl_t mbr, ActionEntry &&entry);
@@ -434,9 +425,7 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   MatchTableIndirectWS(
       const std::string &name, p4object_id_t id,
       std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit,
-      bool with_counters = false, bool with_ageing = false)
-    : MatchTableIndirect(name, id, std::move(match_unit),
-                         with_counters, with_ageing) { }
+      bool with_counters = false, bool with_ageing = false);
 
   void set_hash(std::unique_ptr<Calculation> h) {
     hash = std::move(h);

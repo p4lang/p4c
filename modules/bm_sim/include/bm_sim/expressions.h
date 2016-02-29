@@ -106,6 +106,8 @@ class Expression {
 
   void build();
 
+  void grab_register_accesses(RegisterSync *register_sync) const;
+
   bool eval_bool(const PHV &phv, const std::vector<Data> &locals = {}) const;
   Data eval_arith(const PHV &phv, const std::vector<Data> &locals = {}) const;
   void eval_arith(const PHV &phv, Data *data,

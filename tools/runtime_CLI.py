@@ -1569,6 +1569,13 @@ class RuntimeAPI(cmd.Cmd):
                 port_info.port_num, port_info.iface_name, status, extra_info)
             # print port_info
 
+    @handle_bad_input
+    def do_reset_state(self, line):
+        "Reset all state in the switch (table entries, registers, ...), but P4 config is preserved: reset_state"
+        args = line.split()
+        self.exactly_n_args(args, 0)
+        self.client.bm_reset_state()
+
 def main():
     args = get_parser().parse_args()
 

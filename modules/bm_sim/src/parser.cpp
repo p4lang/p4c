@@ -139,8 +139,13 @@ ParseState::find_next_state(Packet *pkt, const char *data,
                             size_t *bytes_parsed) const {
   // execute parser ops
   PHV *phv = pkt->get_phv();
+
+  register_sync.lock_registers();
+
   for (auto &parser_op : parser_ops)
     (*parser_op)(pkt, data + *bytes_parsed, bytes_parsed);
+
+  register_sync.unlock_registers();
 
   if (!has_switch) {
     BMLOG_DEBUG_PKT(

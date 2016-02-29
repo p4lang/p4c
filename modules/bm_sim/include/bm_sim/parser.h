@@ -35,6 +35,7 @@
 #include "event_logger.h"
 #include "logger.h"
 #include "expressions.h"
+#include "stateful.h"
 
 namespace bm {
 
@@ -275,6 +276,8 @@ class ParseState : public NamedP4Object {
 
   void add_set_from_expression(header_id_t dst_header, int dst_offset,
                                const ArithExpression &expr) {
+    expr.grab_register_accesses(&register_sync);
+
     parser_ops.emplace_back(
       new ParserOpSet<ArithExpression>(dst_header, dst_offset, expr));
   }
@@ -329,6 +332,7 @@ class ParseState : public NamedP4Object {
                                     size_t *bytes_parsed) const;
 
   std::vector<std::unique_ptr<ParserOp> > parser_ops{};
+  RegisterSync register_sync{};
   bool has_switch;
   ParseSwitchKeyBuilder key_builder{};
   std::vector<ParseSwitchCase> parser_switch{};

@@ -344,6 +344,11 @@ TYPED_TEST(TableSizeTwo, NextNodeHitMiss) {
   Packet pkt = this->get_pkt(64);
   Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
 
+  // before even adding entry
+  // miss, next node is default one (as per the P4 program)
+  f.set("0xaba");
+  ASSERT_EQ(&this->node_miss_default, this->table->apply_action(&pkt));
+
   rc = this->add_entry(key, &handle);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
@@ -846,6 +851,11 @@ TEST_F(TableIndirect, NextNodeHitMiss) {
     rc = table->delete_member(mbr);
     ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   };
+
+  // before adding member
+  // miss, next node is default one (as per the P4 program)
+  f.set("0xaba");
+  ASSERT_EQ(&node_miss_default, table->apply_action(&pkt));
 
   add_member_and_entry(key, data);
 

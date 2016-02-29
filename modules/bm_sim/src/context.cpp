@@ -408,6 +408,7 @@ Context::register_read(const std::string &register_name,
     p4objects_rt->get_register_array(register_name);
   if (!register_array) return Register::ERROR;
   if (idx >= register_array->size()) return Register::INVALID_INDEX;
+  auto register_lock = register_array->unique_lock();
   value->set((*register_array)[idx]);
   return Register::SUCCESS;
 }
@@ -420,6 +421,7 @@ Context::register_write(const std::string &register_name,
     p4objects_rt->get_register_array(register_name);
   if (!register_array) return Register::ERROR;
   if (idx >= register_array->size()) return Register::INVALID_INDEX;
+  auto register_lock = register_array->unique_lock();
   (*register_array)[idx].set(std::move(value));
   return Register::SUCCESS;
 }
@@ -477,9 +479,10 @@ int
 Context::init_objects(std::istream *is,
                       const std::set<header_field_pair> &required_fields,
                       const std::set<header_field_pair> &arith_fields) {
-  int status = p4objects->init_objects(is, device_id, cxt_id,
-                                       notifications_transport,
-                                       required_fields, arith_fields);
+  // initally p4objects_rt == p4objects, so this works
+  int status = p4objects_rt->init_objects(is, device_id, cxt_id,
+                                          notifications_transport,
+                                          required_fields, arith_fields);
   if (status) return status;
   if (force_arith)
     get_phv_factory().enable_all_arith();

@@ -55,6 +55,7 @@ class PHVSourceTest : public PHVSourceIface {
  private:
   std::unique_ptr<PHV> get_(size_t cxt) override {
     assert(phv_factories[cxt]);
+    ++count;
     ++created.at(cxt);
     return phv_factories[cxt]->create();
   }
@@ -62,6 +63,7 @@ class PHVSourceTest : public PHVSourceIface {
   void release_(size_t cxt, std::unique_ptr<PHV> phv) override {
     // let the PHV be destroyed
     (void) cxt; (void) phv;
+    --count;
     ++destroyed.at(cxt);
   }
 
@@ -69,7 +71,12 @@ class PHVSourceTest : public PHVSourceIface {
     phv_factories.at(cxt) = factory;
   }
 
+  size_t phvs_in_use_(size_t cxt) override {
+    return count;
+  }
+
   std::vector<const PHVFactory *> phv_factories;
+  size_t count{0};
   std::vector<size_t> created;
   std::vector<size_t> destroyed;
 };

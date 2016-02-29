@@ -184,11 +184,11 @@ class PHV {
   //!   - receives the same field values as the corresponding \p src header iff
   //! it is a valid packet header or a metadata header
   void copy_headers(const PHV &src) {
-    for (unsigned int h = 0; h < headers.size(); h++) {
+    for (size_t h = 0; h < headers.size(); h++) {
       headers[h].valid = src.headers[h].valid;
       headers[h].metadata = src.headers[h].metadata;
       if (headers[h].valid || headers[h].metadata)
-        headers[h].fields = src.headers[h].fields;
+        headers[h].copy_fields(src.headers[h]);
     }
   }
 

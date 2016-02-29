@@ -134,6 +134,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   void add_required_field(const std::string &header_name,
                           const std::string &field_name);
 
+  //! Checks that the given field exists for context \p cxt_id, i.e. checks that
+  //! the field was defined in the input JSON used to configure that context.
+  bool field_exists(size_t cxt_id, const std::string &header_name,
+                    const std::string &field_name) const {
+    return contexts.at(cxt_id).field_exists(header_name, field_name);
+  }
+
   //! Force arithmetic on field. No effect if field is not defined in the input
   //! JSON. For optimization reasons, only fields on which arithmetic will be
   //! performed receive the ability to perform arithmetic operations. These
@@ -185,10 +192,12 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   int swap_requested();
 
   //! Performs a configuration swap if one was requested by the control
-  //! plane. Returns `0` if a swap had indeed been requested, `1`
-  //! otherwise. Care should be taken when using this function, as it
-  //! invalidates some pointers that your target may still be using. See
-  //! switch.h documentation for more information.
+  //! plane. Returns `0` if a swap had indeed been requested, `1` otherwise. If
+  //! a swap was requested, the method will prevent new Packet instances from
+  //! being created and will block until all existing instances have been
+  //! destroyed. It will then perform the swap. Care should be taken when using
+  //! this function, as it invalidates some pointers that your target may still
+  //! be using. See switch.h documentation for more information.
   int do_swap();
 
   //! Construct and return a Packet instance for the given \p cxt_id.
@@ -197,6 +206,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
                                          // cpplint false positive
                                          // NOLINTNEXTLINE(whitespace/operators)
                                          PacketBuffer &&buffer) {
+    boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
     return std::unique_ptr<Packet>(new Packet(
         cxt_id, ingress_port, id, 0u, ingress_length, std::move(buffer),
         phv_source.get()));
@@ -207,6 +217,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
                     // cpplint false positive
                     // NOLINTNEXTLINE(whitespace/operators)
                     int ingress_length, PacketBuffer &&buffer) {
+    boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
     return Packet(cxt_id, ingress_port, id, 0u, ingress_length,
                   std::move(buffer), phv_source.get());
   }
@@ -564,6 +575,8 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   // possible by multi-threading support in nanomsg
   std::string notifications_addr{};
   std::shared_ptr<TransportIface> notifications_transport{nullptr};
+
+  mutable boost::shared_mutex ongoing_swap_mutex{};
 };
 
 
@@ -575,6 +588,17 @@ class Switch : public SwitchWContexts {
   //! See SwitchWContexts::SwitchWContexts()
   explicit Switch(bool enable_swap = false);
 
+  // to avoid C++ name hiding
+  using SwitchWContexts::field_exists;
+  //! Checks that the given field was defined in the input JSON used to
+  //! configure the switch
+  bool field_exists(const std::string &header_name,
+                    const std::string &field_name) const {
+    return field_exists(0, header_name, field_name);
+  }
+
+  // to avoid C++ name hiding
+  using SwitchWContexts::new_packet_ptr;
   //! Convenience wrapper around SwitchWContexts::new_packet_ptr() for a single
   //! context switch.
   std::unique_ptr<Packet> new_packet_ptr(int ingress_port,
@@ -582,19 +606,19 @@ class Switch : public SwitchWContexts {
                                          // cpplint false positive
                                          // NOLINTNEXTLINE(whitespace/operators)
                                          PacketBuffer &&buffer) {
-    return std::unique_ptr<Packet>(new Packet(
-        0u, ingress_port, id, 0u, ingress_length, std::move(buffer),
-        phv_source.get()));
+    return new_packet_ptr(0u, ingress_port, id, ingress_length,
+                          std::move(buffer));
   }
 
+  // to avoid C++ name hiding
+  using SwitchWContexts::new_packet;
   //! Convenience wrapper around SwitchWContexts::new_packet() for a single
   //! context switch.
   Packet new_packet(int ingress_port, packet_id_t id, int ingress_length,
                     // cpplint false positive
                     // NOLINTNEXTLINE(whitespace/operators)
                     PacketBuffer &&buffer) {
-    return Packet(0u, ingress_port, id, 0u, ingress_length, std::move(buffer),
-                  phv_source.get());
+    return new_packet(0u, ingress_port, id, ingress_length, std::move(buffer));
   }
 
   //! Return a raw, non-owning pointer to Pipeline \p name. This pointer will be

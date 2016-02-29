@@ -215,14 +215,21 @@ SwitchWContexts::swap_requested() {
   return false;
 }
 
-// we assume no concurrent calls to do_swap()
 int
 SwitchWContexts::do_swap() {
   int rc = 1;
-  for (auto &cxt : contexts) {
-    // we only confirm that a swap has been requested once all contexts are
-    // ready
-    rc &= cxt.do_swap();
+  if (!enable_swap || !swap_requested()) return rc;
+  boost::unique_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
+  for (size_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
+    auto &cxt = contexts[cxt_id];
+    if (!cxt.swap_requested()) continue;
+    // TODO(antonin): we spin until no more packets exist for this context, is
+    // there a better way of doing this?
+    while (phv_source->phvs_in_use(cxt_id) > 0) { }
+    int swap_done = cxt.do_swap();
+    if (swap_done == 0)
+      phv_source->set_phv_factory(cxt_id, &cxt.get_phv_factory());
+    rc &= swap_done;
   }
   return rc;
 }

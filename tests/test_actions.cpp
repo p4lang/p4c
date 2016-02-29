@@ -21,15 +21,15 @@
 #include <gtest/gtest.h>
 
 #include <memory>
-#include <string>
+#include <chrono>
+#include <thread>
+#include <functional>
 
 #include <cassert>
 
 #include "bm_sim/actions.h"
 
 using namespace bm;
-
-using std::string;
 
 // some primitive definitions for testing
 
@@ -555,4 +555,157 @@ TEST_F(ActionsTest, TwoPrimitives) {
 
   ASSERT_EQ((unsigned) 0xaba, dst1.get_uint());
   ASSERT_EQ((unsigned) 0xaba, dst2.get_uint());
+}
+
+class RegisterSpin : public ActionPrimitive<RegisterArray &, const Data &> {
+  void operator ()(RegisterArray &register_array, const Data &ts) {
+    register_array.at(0).set(ts);
+    std::this_thread::sleep_for(std::chrono::milliseconds(ts.get_uint()));
+  }
+};
+
+REGISTER_PRIMITIVE(RegisterSpin);
+
+class ActionsTestRegisterProtection : public ActionsTest {
+ protected:
+  static constexpr unsigned int msecs_to_sleep = 1000u;
+
+  static constexpr size_t register_size = 1024;
+  static constexpr int register_bw = 16;
+
+  RegisterArray register_array_1;
+
+  RegisterSpin primitive_spin;
+
+  ActionFn testActionFn_2;
+  ActionFnEntry testActionFnEntry_2;
+
+  ActionsTestRegisterProtection()
+      : ActionsTest(),
+        testActionFn_2("test_action_2", 1),
+        testActionFnEntry_2(&testActionFn_2),
+        register_array_1("register_test_1", 0, register_size, register_bw) {
+    configure_one_action(&testActionFn, &register_array_1);
+  }
+
+  virtual void SetUp() {
+    ActionsTest::SetUp();
+  }
+
+  // virtual void TearDown() { }
+
+  void configure_one_action(ActionFn *action_fn,
+                            RegisterArray *register_array) {
+    action_fn->push_back_primitive(&primitive_spin);
+    action_fn->parameter_push_back_register_array(register_array);
+    action_fn->parameter_push_back_const(Data(msecs_to_sleep));
+  }
+
+  std::chrono::milliseconds::rep execute_both_actions() {
+    using clock = std::chrono::system_clock;
+    clock::time_point start = clock::now();
+
+    std::thread t(&ActionFnEntry::operator(), &testActionFnEntry, pkt.get());
+    testActionFnEntry_2(pkt.get());
+    t.join();
+
+    clock::time_point end = clock::now();
+
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+        .count();
+  }
+};
+
+constexpr unsigned int ActionsTestRegisterProtection::msecs_to_sleep;
+
+// both actions reference the same register so sequential execution
+TEST_F(ActionsTestRegisterProtection, Sequential) {
+  configure_one_action(&testActionFn_2, &register_array_1);
+
+  auto timedelta = execute_both_actions();
+
+  constexpr unsigned int expected_timedelta = msecs_to_sleep * 2;
+
+  ASSERT_LT(expected_timedelta * 0.95, timedelta);
+  ASSERT_GT(expected_timedelta * 1.2, timedelta);
+}
+
+// the actions referenced different registers so parallel execution
+TEST_F(ActionsTestRegisterProtection, Parallel) {
+  RegisterArray register_array_2("register_test_2", 1,
+                                 register_size, register_bw);
+  configure_one_action(&testActionFn_2, &register_array_2);
+
+  auto timedelta = execute_both_actions();
+
+  constexpr unsigned int expected_timedelta = msecs_to_sleep;
+
+  ASSERT_LT(expected_timedelta * 0.95, timedelta);
+  ASSERT_GT(expected_timedelta * 1.2, timedelta);
+}
+
+class SetAndSpin : public ActionPrimitive<Data &, const Data &, const Data &> {
+  void operator ()(Data &dst, const Data &src, const Data &ts) {
+    dst.set(src);
+    std::this_thread::sleep_for(std::chrono::milliseconds(ts.get_uint()));
+  }
+};
+
+REGISTER_PRIMITIVE(SetAndSpin);
+
+TEST_F(ActionsTestRegisterProtection, SequentialAdvanced) {
+  RegisterArray register_array_2("register_test_2", 1,
+                                 register_size, register_bw);
+
+  // this test is more tricky
+  // we execute reg_2[reg_1[3] + 1] = 0xab and in parallel we access reg_1. The
+  // actions need to be executed sequentially
+  // we initialize reg_1[3] to 1, so at the end reg_2[2] must be equal to 0xab
+
+  SetAndSpin primitive;
+
+  // the register index is an expression
+  std::unique_ptr<ArithExpression> expr_idx(new ArithExpression());
+  expr_idx->push_back_load_const(Data(1));
+  expr_idx->push_back_load_register_ref(&register_array_1, 3);
+  expr_idx->push_back_op(ExprOpcode::ADD);
+  expr_idx->build();
+
+  testActionFn_2.push_back_primitive(&primitive);
+  testActionFn_2.parameter_push_back_register_gen(&register_array_2,
+                                                  std::move(expr_idx));
+  testActionFn_2.parameter_push_back_const(Data(0xab));
+  testActionFn_2.parameter_push_back_const(Data(msecs_to_sleep));
+
+  register_array_1.at(0).set(0);
+  register_array_1.at(3).set(1);
+  register_array_2.at(2).set(0);
+
+  using clock = std::chrono::system_clock;
+  clock::time_point start = clock::now();
+
+  std::thread t_1(&ActionFnEntry::operator(), &testActionFnEntry, pkt.get());
+  std::thread t_2(&ActionFnEntry::operator(), &testActionFnEntry_2, pkt.get());
+  {
+    // just for the sake of an extra access
+    auto lock = register_array_1.unique_lock();
+    unsigned int v1 = register_array_1.at(0).get_uint();
+    std::this_thread::sleep_for(std::chrono::milliseconds(msecs_to_sleep));
+    unsigned int v2 = register_array_1.at(0).get_uint();
+    ASSERT_EQ(v1, v2);
+  }
+  t_1.join();
+  t_2.join();
+
+  clock::time_point end = clock::now();
+
+  auto timedelta = std::chrono::duration_cast<std::chrono::milliseconds>(
+      end - start).count();
+
+  ASSERT_EQ(0xabu, register_array_2.at(2).get_uint());
+
+  constexpr unsigned int expected_timedelta = msecs_to_sleep * 3;
+
+  ASSERT_LT(expected_timedelta * 0.95, timedelta);
+  ASSERT_GT(expected_timedelta * 1.2, timedelta);
 }

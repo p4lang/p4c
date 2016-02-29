@@ -79,6 +79,8 @@ ActionFn::parameter_push_back_register_ref(RegisterArray *register_array,
   param.register_ref.array = register_array;
   param.register_ref.idx = idx;
   params.push_back(param);
+
+  register_sync.add_register_array(register_array);
 }
 
 void
@@ -87,9 +89,14 @@ ActionFn::parameter_push_back_register_gen(
   ActionParam param;
   param.tag = ActionParam::REGISTER_GEN;
   param.register_gen.array = register_array;
+
+  idx->grab_register_accesses(&register_sync);
+
   expressions.push_back(std::move(idx));
   param.register_gen.idx = expressions.back().get();
   params.push_back(param);
+
+  register_sync.add_register_array(register_array);
 }
 
 void
@@ -122,6 +129,8 @@ ActionFn::parameter_push_back_register_array(RegisterArray *register_array) {
   param.tag = ActionParam::REGISTER_ARRAY;
   param.register_array = register_array;
   params.push_back(param);
+
+  register_sync.add_register_array(register_array);
 }
 
 void
@@ -135,6 +144,8 @@ ActionFn::parameter_push_back_expression(
   assert(nb_expression_params <= ActionFn::nb_data_tmps);
   if (nb_expression_params == ActionFn::nb_data_tmps)
     ActionFn::nb_data_tmps += 1;
+
+  expr->grab_register_accesses(&register_sync);
 
   expressions.push_back(std::move(expr));
   ActionParam param;
@@ -197,6 +208,9 @@ ActionFnEntry::operator()(Packet *pkt) const {
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
       DBG_CTR_ACTION | action_fn->get_id());
   ActionEngineState state(pkt, action_data, action_fn->const_values);
+
+  action_fn->register_sync.lock_registers();
+
   auto &primitives = action_fn->primitives;
   size_t param_offset = 0;
   // primitives is a vector of pointers
@@ -204,6 +218,9 @@ ActionFnEntry::operator()(Packet *pkt) const {
     primitive->execute(&state, &(action_fn->params[param_offset]));
     param_offset += primitive->get_num_params();
   }
+
+  action_fn->register_sync.unlock_registers();
+
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
       DBG_CTR_EXIT(DBG_CTR_ACTION) | action_fn->get_id());

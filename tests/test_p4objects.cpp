@@ -161,3 +161,26 @@ TEST(P4Objects, RequiredField) {
   ASSERT_NE(0, objects.init_objects(&is, 0, 0, nullptr, required_fields));
   EXPECT_EQ(expected, os.str());
 }
+
+TEST(P4Objects, FieldAlias) {
+  std::istringstream is("{\"header_types\":[{\"name\":\"hdrA_t\",\"id\":0,\"fields\":[[\"f1\",8],[\"f2\",8]]}],\"headers\":[{\"name\":\"hdrA\",\"id\":0,\"header_type\":\"hdrA_t\"}],\"field_aliases\":[[\"this_is.my_alias\",[\"hdrA\",\"f1\"]]]}");
+  P4Objects objects;
+  ASSERT_EQ(0, objects.init_objects(&is));
+
+  ASSERT_TRUE(objects.field_exists("hdrA", "f1"));
+  ASSERT_TRUE(objects.field_exists("this_is", "my_alias"));
+
+  ASSERT_FALSE(objects.field_exists("hdrA", "fbad"));
+  ASSERT_FALSE(objects.field_exists("hdrBad", "f1"));
+  ASSERT_FALSE(objects.field_exists("this_is_not", "my_alias"));
+  ASSERT_FALSE(objects.field_exists("this_is", "not_my_alias"));
+}
+
+TEST(P4Objects, Reset) {
+  std::istringstream is(JSON_TEST_STRING_1);
+  P4Objects objects;
+  ASSERT_EQ(0, objects.init_objects(&is));
+  // TODO(antonin): this test is not doing anything useful, but it is pretty
+  // hard to test for reset
+  objects.reset_state();
+}
