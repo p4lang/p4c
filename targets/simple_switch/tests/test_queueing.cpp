@@ -54,6 +54,8 @@ class SimpleSwitch_QueueingP4 : public ::testing::Test {
  protected:
   static constexpr size_t kQueueingHdrSize = (48u + 24u + 32u + 24u) / 8u;
 
+  static constexpr int device_id{0};
+
   SimpleSwitch_QueueingP4()
       : packet_inject(packet_in_addr) { }
 
@@ -70,7 +72,7 @@ class SimpleSwitch_QueueingP4 : public ::testing::Test {
     test_switch->init_objects(json_path.string());
 
     // packet in - packet out
-    test_switch->set_dev_mgr_packet_in(packet_in_addr);
+    test_switch->set_dev_mgr_packet_in(device_id, packet_in_addr, nullptr);
     test_switch->Switch::start();  // there is a start member in SimpleSwitch
     test_switch->set_packet_handler(packet_handler,
                                     static_cast<void *>(test_switch));

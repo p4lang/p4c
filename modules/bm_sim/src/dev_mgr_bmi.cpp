@@ -41,10 +41,12 @@ namespace bm {
 
 class BmiDevMgrImp : public DevMgrIface {
  public:
-  BmiDevMgrImp() {
+  BmiDevMgrImp(int device_id,
+               std::shared_ptr<TransportIface> notifications_transport) {
     assert(!bmi_port_create_mgr(&port_mgr));
 
-    p_monitor = PortMonitorIface::make_active();
+    p_monitor = PortMonitorIface::make_active(device_id,
+                                              notifications_transport);
   }
 
  private:
@@ -127,9 +129,11 @@ class BmiDevMgrImp : public DevMgrIface {
 };
 
 void
-DevMgr::set_dev_mgr_bmi() {
+DevMgr::set_dev_mgr_bmi(
+    int device_id, std::shared_ptr<TransportIface> notifications_transport) {
   assert(!pimp);
-  pimp = std::unique_ptr<DevMgrIface>(new BmiDevMgrImp());
+  pimp = std::unique_ptr<DevMgrIface>(
+      new BmiDevMgrImp(device_id, notifications_transport));
 }
 
 }  // namespace bm
