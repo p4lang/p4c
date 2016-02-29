@@ -22,12 +22,14 @@
 #include <mutex>
 #include <thread>
 #include <unordered_map>
+#include <vector>
 #include <map>
 #include <atomic>
 #include <utility>  // for pair<>
 
 #include "bm_sim/port_monitor.h"
 #include "bm_sim/logger.h"
+#include "bm_sim/transport.h"
 
 namespace bm {
 
@@ -51,8 +53,12 @@ class PortMonitorDummy : public PortMonitorIface {
 };
 
 class PortMonitorPassive : public PortMonitorIface {
+ public:
+  PortMonitorPassive(int device_id,
+                     std::shared_ptr<TransportIface> notifications_writer)
+      : device_id(device_id), notifications_writer(notifications_writer) { }
+
  protected:
-  // call with cb_map_mutex locked
   void event_handler(port_t port, const PortStatus type) {
     std::lock_guard<std::mutex> lock(cb_map_mutex);
     auto range = cb_map.equal_range(static_cast<unsigned int>(type));
@@ -61,10 +67,36 @@ class PortMonitorPassive : public PortMonitorIface {
     }
   }
 
+  // originally I was sending one message per status, but this is probably less
+  // likely to overrun a nanomsg subscriber
+  void send_notifications(std::vector<one_status_t> *statuses) const {
+    if (!notifications_writer || statuses->empty()) return;
+
+    msg_hdr_t msg_hdr;
+    char *msg_hdr_ = reinterpret_cast<char *>(&msg_hdr);
+    memset(msg_hdr_, 0, sizeof(msg_hdr));
+    memcpy(msg_hdr_, "PRT|", 4);
+    msg_hdr.switch_id = device_id;
+    msg_hdr.num_statuses = statuses->size();
+
+    unsigned int size = static_cast<unsigned int>(
+        statuses->size() * sizeof(one_status_t));
+    TransportIface::MsgBuf buf_hdr = {msg_hdr_, sizeof(msg_hdr)};
+    TransportIface::MsgBuf buf_statuses =
+      {reinterpret_cast<char *>(statuses->data()), size};
+    notifications_writer->send_msgs({buf_hdr, buf_statuses});
+  }
+
+  static one_status_t make_one_status(int port, PortStatus evt) {
+    return {port, (evt == PortStatus::PORT_UP)};
+  }
+
   std::unordered_multimap<unsigned int, const PortStatusCb &> cb_map{};
-  mutable std::mutex cb_map_mutex;
-  std::unordered_map<port_t, bool> curr_ports;
-  mutable std::mutex port_mutex;
+  mutable std::mutex cb_map_mutex{};
+  std::unordered_map<port_t, bool> curr_ports{};
+  mutable std::mutex port_mutex{};
+  int device_id{};
+  std::shared_ptr<TransportIface> notifications_writer{nullptr};
 
  private:
   void notify_(port_t port_num, const PortStatus evt) override {
@@ -87,6 +119,11 @@ class PortMonitorPassive : public PortMonitorIface {
       }
     }
     event_handler(port_num, evt);
+
+    if (evt == PortStatus::PORT_UP || evt == PortStatus::PORT_DOWN) {
+      std::vector<one_status_t> v = {make_one_status(port_num, evt)};
+      send_notifications(&v);
+    }
   }
 
   void register_cb_(const PortStatus evt, const PortStatusCb &cb) override {
@@ -105,19 +142,15 @@ class PortMonitorPassive : public PortMonitorIface {
 };
 
 class PortMonitorActive : public PortMonitorPassive {
+ public:
+  PortMonitorActive(int device_id,
+                    std::shared_ptr<TransportIface> notifications_writer)
+      : PortMonitorPassive(device_id, notifications_writer) { }
+
  private:
   ~PortMonitorActive() {
     stop_();
   }
-
-  // same as PortMonitorPassive
-  // void notify_(port_t port_num, const PortStatus evt) override {
-  //   PortMonitorPassive::notify_(port_num, evt);
-  // }
-
-  // void register_cb_(const PortStatus evt, const PortStatusCb &cb) override {
-  //   PortMonitorPassive::notify_(evt, cb);
-  // }
 
   void start_(const PortStatusFn &fn) override {
     p_status_fn = fn;
@@ -156,6 +189,16 @@ class PortMonitorActive : public PortMonitorPassive {
       for (const auto &cb_todo : cbs_todo) {
         event_handler(cb_todo.first, cb_todo.second);
       }
+      if (notifications_writer) {
+        std::vector<one_status_t> v;
+        for (const auto &cb_todo : cbs_todo) {
+          if (cb_todo.second == PortStatus::PORT_UP ||
+              cb_todo.second == PortStatus::PORT_DOWN) {
+            v.push_back(make_one_status(cb_todo.first, cb_todo.second));
+          }
+        }
+        send_notifications(&v);
+      }
       cbs_todo.clear();
     }
   }
@@ -172,13 +215,17 @@ PortMonitorIface::make_dummy() {
 }
 
 std::unique_ptr<PortMonitorIface>
-PortMonitorIface::make_passive() {
-  return std::unique_ptr<PortMonitorIface>(new PortMonitorPassive());
+PortMonitorIface::make_passive(
+    int device_id, std::shared_ptr<TransportIface> notifications_writer) {
+  return std::unique_ptr<PortMonitorIface>(
+      new PortMonitorPassive(device_id, notifications_writer));
 }
 
 std::unique_ptr<PortMonitorIface>
-PortMonitorIface::make_active() {
-  return std::unique_ptr<PortMonitorIface>(new PortMonitorActive());
+PortMonitorIface::make_active(
+    int device_id, std::shared_ptr<TransportIface> notifications_writer) {
+  return std::unique_ptr<PortMonitorIface>(
+      new PortMonitorActive(device_id, notifications_writer));
 }
 
 }  // namespace bm

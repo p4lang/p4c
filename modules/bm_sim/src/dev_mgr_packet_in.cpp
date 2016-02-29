@@ -38,15 +38,18 @@ namespace bm {
 // TODO(antonin): moved lower-level NN code to separate class ?
 class PacketInDevMgrImp : public DevMgrIface {
  public:
-  explicit PacketInDevMgrImp(const std::string &addr,
-                             bool enforce_ports = false)
+  explicit PacketInDevMgrImp(
+      int device_id, const std::string &addr,
+      std::shared_ptr<TransportIface> notifications_transport,
+      bool enforce_ports = false)
       : addr(addr), s(AF_SP, NN_PAIR), enforce_ports(enforce_ports) {
     s.bind(addr.c_str());
     int rcv_timeout_ms = 100;
     s.setsockopt(NN_SOL_SOCKET, NN_RCVTIMEO,
                  &rcv_timeout_ms, sizeof(rcv_timeout_ms));
 
-    p_monitor = PortMonitorIface::make_passive();
+    p_monitor = PortMonitorIface::make_passive(device_id,
+                                               notifications_transport);
   }
 
  private:
@@ -283,10 +286,14 @@ PacketInDevMgrImp::receive_loop() {
 }
 
 void
-DevMgr::set_dev_mgr_packet_in(const std::string &addr, bool enforce_ports) {
+DevMgr::set_dev_mgr_packet_in(
+    int device_id, const std::string &addr,
+    std::shared_ptr<TransportIface> notifications_transport,
+    bool enforce_ports) {
   assert(!pimp);
   pimp = std::unique_ptr<DevMgrIface>(
-      new PacketInDevMgrImp(addr, enforce_ports));
+      new PacketInDevMgrImp(device_id, addr, notifications_transport,
+                            enforce_ports));
 }
 
 }  // namespace bm

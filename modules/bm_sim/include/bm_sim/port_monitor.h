@@ -28,6 +28,8 @@
 
 namespace bm {
 
+class TransportIface;
+
 //! Used by DevMgr to monitor the ports attached to the switch
 class PortMonitorIface {
  public:
@@ -42,6 +44,19 @@ class PortMonitorIface {
       PortStatusCb;
 
   typedef std::function<bool(port_t port_num)> PortStatusFn;
+
+  // putting it in TransportIface so that it is visible (e.g. for tests)
+  typedef struct {
+    char sub_topic[4];
+    int switch_id;
+    unsigned int num_statuses;
+    char _padding[20];  // the header size for notifications is always 32 bytes
+  } __attribute__((packed)) msg_hdr_t;
+
+  typedef struct {
+    int port;
+    int status;
+  } __attribute__((packed)) one_status_t;
 
   void notify(port_t port_num, const PortStatus evt) {
     notify_(port_num, evt);
@@ -64,10 +79,14 @@ class PortMonitorIface {
   // all calls are no-op
   static std::unique_ptr<PortMonitorIface> make_dummy();
   // a passive monitor does not periodically query the port status
-  static std::unique_ptr<PortMonitorIface> make_passive();
+  static std::unique_ptr<PortMonitorIface> make_passive(
+      int device_id,
+      std::shared_ptr<TransportIface> notifications_writer = nullptr);
   // an active monitor periodically queries the port status (using separate
   // thread)
-  static std::unique_ptr<PortMonitorIface> make_active();
+  static std::unique_ptr<PortMonitorIface> make_active(
+      int device_id,
+      std::shared_ptr<TransportIface> notifications_writer = nullptr);
 
  private:
   virtual void notify_(port_t port_num, const PortStatus evt) = 0;
