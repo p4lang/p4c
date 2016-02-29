@@ -41,6 +41,7 @@ src/pipeline.cpp \
 src/port_monitor.cpp \
 src/phv.cpp \
 src/phv_source.cpp \
+src/stateful.cpp \
 src/switch.cpp \
 src/simple_pre.cpp \
 src/simple_pre_lag.cpp \

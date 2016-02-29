@@ -67,37 +67,43 @@ ExprOpcodesMap *ExprOpcodesMap::get_instance() {
   return &instance;
 }
 
-ExprOpcode ExprOpcodesMap::get_opcode(std::string expr_name) {
+ExprOpcode
+ExprOpcodesMap::get_opcode(std::string expr_name) {
   ExprOpcodesMap *instance = get_instance();
   return instance->opcodes_map[expr_name];
 }
 
-size_t Expression::get_num_ops() const {
+size_t
+Expression::get_num_ops() const {
   return ops.size();
 }
 
-void Expression::push_back_load_field(header_id_t header, int field_offset) {
+void
+Expression::push_back_load_field(header_id_t header, int field_offset) {
   Op op;
   op.opcode = ExprOpcode::LOAD_FIELD;
   op.field = {header, field_offset};
   ops.push_back(op);
 }
 
-void Expression::push_back_load_bool(bool value) {
+void
+Expression::push_back_load_bool(bool value) {
   Op op;
   op.opcode = ExprOpcode::LOAD_BOOL;
   op.bool_value = value;
   ops.push_back(op);
 }
 
-void Expression::push_back_load_header(header_id_t header) {
+void
+Expression::push_back_load_header(header_id_t header) {
   Op op;
   op.opcode = ExprOpcode::LOAD_HEADER;
   op.header = header;
   ops.push_back(op);
 }
 
-void Expression::push_back_load_const(const Data &data) {
+void
+Expression::push_back_load_const(const Data &data) {
   const_values.push_back(data);
   Op op;
   op.opcode = ExprOpcode::LOAD_CONST;
@@ -105,15 +111,17 @@ void Expression::push_back_load_const(const Data &data) {
   ops.push_back(op);
 }
 
-void Expression::push_back_load_local(const int offset) {
+void
+Expression::push_back_load_local(const int offset) {
   Op op;
   op.opcode = ExprOpcode::LOAD_LOCAL;
   op.local_offset = offset;
   ops.push_back(op);
 }
 
-void Expression::push_back_load_register_ref(RegisterArray *register_array,
-                                             unsigned int idx) {
+void
+Expression::push_back_load_register_ref(RegisterArray *register_array,
+                                        unsigned int idx) {
   Op op;
   op.opcode = ExprOpcode::LOAD_REGISTER_REF;
   op.register_ref.array = register_array;
@@ -121,20 +129,23 @@ void Expression::push_back_load_register_ref(RegisterArray *register_array,
   ops.push_back(op);
 }
 
-void Expression::push_back_load_register_gen(RegisterArray *register_array) {
+void
+Expression::push_back_load_register_gen(RegisterArray *register_array) {
   Op op;
   op.opcode = ExprOpcode::LOAD_REGISTER_GEN;
   op.register_array = register_array;
   ops.push_back(op);
 }
 
-void Expression::push_back_op(ExprOpcode opcode) {
+void
+Expression::push_back_op(ExprOpcode opcode) {
   Op op;
   op.opcode = opcode;
   ops.push_back(op);
 }
 
-void Expression::append_expression(const Expression &e) {
+void
+Expression::append_expression(const Expression &e) {
   int offset_consts = const_values.size();
   // the tricky part: update the const data offsets in the expression we are
   // appending
@@ -162,8 +173,8 @@ void Expression::append_expression(const Expression &e) {
 // hand, when the condition evaluates to false, we skip all of the second
 // expression ops to go directly to the third expression ops.
 
-void Expression::push_back_ternary_op(const Expression &e1,
-                                      const Expression &e2) {
+void
+Expression::push_back_ternary_op(const Expression &e1, const Expression &e2) {
   Op op;
   op.opcode = ExprOpcode::TERNARY_OP;
   ops.push_back(op);
@@ -176,17 +187,33 @@ void Expression::push_back_ternary_op(const Expression &e1,
   append_expression(e2);
 }
 
-void Expression::build() {
+void
+Expression::build() {
   data_registers_cnt = assign_dest_registers();
   built = true;
+}
+
+void
+Expression::grab_register_accesses(RegisterSync *register_sync) const {
+  for (auto &op : ops) {
+    switch (op.opcode) {
+      case ExprOpcode::LOAD_REGISTER_REF:
+      case ExprOpcode::LOAD_REGISTER_GEN:
+        register_sync->add_register_array(op.register_array);
+        break;
+      default:
+        continue;
+    }
+  }
 }
 
 /* I have made this function more efficient by using thread_local variables
    instead of dynamic allocation at each call. Maybe it would be better to just
    try to use a stack allocator */
-void Expression::eval_(const PHV &phv, ExprType expr_type,
-                       const std::vector<Data> &locals,
-                       bool *b_res, Data *d_res) const {
+void
+Expression::eval_(const PHV &phv, ExprType expr_type,
+                  const std::vector<Data> &locals,
+                  bool *b_res, Data *d_res) const {
   assert(built);
 
   static thread_local int data_temps_size = 4;
@@ -399,31 +426,30 @@ void Expression::eval_(const PHV &phv, ExprType expr_type,
   }
 }
 
-bool Expression::eval_bool(
-  const PHV &phv, const std::vector<Data> &locals
-) const {
+bool
+Expression::eval_bool(const PHV &phv, const std::vector<Data> &locals) const {
   bool result;
   eval_(phv, ExprType::EXPR_BOOL, locals, &result, nullptr);
   return result;
 }
 
-Data Expression::eval_arith(
-  const PHV &phv, const std::vector<Data> &locals
-) const {
+Data
+Expression::eval_arith(const PHV &phv, const std::vector<Data> &locals) const {
   Data result_ptr;
   eval_(phv, ExprType::EXPR_DATA, locals, nullptr, &result_ptr);
   return result_ptr;
 }
 
-void Expression::eval_arith(
-  const PHV &phv, Data *data, const std::vector<Data> &locals
-) const {
+void
+Expression::eval_arith(const PHV &phv, Data *data,
+                       const std::vector<Data> &locals) const {
   eval_(phv, ExprType::EXPR_DATA, locals, nullptr, data);
 }
 
 // TODO(antonin): If there is a ternary op, we will over-estimate this number,
 // see if there is an easy fix
-int Expression::assign_dest_registers() {
+int
+Expression::assign_dest_registers() {
   int registers_cnt = 0;
   int registers_curr = 0;
   std::stack<int> new_registers;
@@ -502,7 +528,8 @@ VLHeaderExpression::get_input_offsets() const {
   return offsets;
 }
 
-ArithExpression VLHeaderExpression::resolve(header_id_t header_id) {
+ArithExpression
+VLHeaderExpression::resolve(header_id_t header_id) {
   assert(expr.built);
 
   ArithExpression new_expr = expr;

@@ -408,6 +408,7 @@ Context::register_read(const std::string &register_name,
     p4objects_rt->get_register_array(register_name);
   if (!register_array) return Register::ERROR;
   if (idx >= register_array->size()) return Register::INVALID_INDEX;
+  auto register_lock = register_array->unique_lock();
   value->set((*register_array)[idx]);
   return Register::SUCCESS;
 }
@@ -420,6 +421,7 @@ Context::register_write(const std::string &register_name,
     p4objects_rt->get_register_array(register_name);
   if (!register_array) return Register::ERROR;
   if (idx >= register_array->size()) return Register::INVALID_INDEX;
+  auto register_lock = register_array->unique_lock();
   (*register_array)[idx].set(std::move(value));
   return Register::SUCCESS;
 }

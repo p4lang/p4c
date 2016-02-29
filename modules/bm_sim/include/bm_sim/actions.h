@@ -496,6 +496,7 @@ class ActionFn :  public NamedP4Object {
  private:
   std::vector<ActionPrimitive_ *> primitives{};
   std::vector<ActionParam> params{};
+  RegisterSync register_sync{};
   std::vector<Data> const_values{};
   // should I store the objects in the vector, instead of pointers?
   std::vector<std::unique_ptr<ArithExpression> > expressions{};
