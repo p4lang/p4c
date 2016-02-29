@@ -175,3 +175,12 @@ TEST(P4Objects, FieldAlias) {
   ASSERT_FALSE(objects.field_exists("this_is_not", "my_alias"));
   ASSERT_FALSE(objects.field_exists("this_is", "not_my_alias"));
 }
+
+TEST(P4Objects, Reset) {
+  std::istringstream is(JSON_TEST_STRING_1);
+  P4Objects objects;
+  ASSERT_EQ(0, objects.init_objects(&is));
+  // TODO(antonin): this test is not doing anything useful, but it is pretty
+  // hard to test for reset
+  objects.reset_state();
+}

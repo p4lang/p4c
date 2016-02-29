@@ -143,6 +143,8 @@ class CounterArray : public NamedP4Object {
   //! Return the size of the CounterArray (i.e. number of counters it includes)
   size_t size() const { return counters.size(); }
 
+  void reset_state() { reset_counters(); }
+
  private:
     std::vector<Counter> counters;
 };

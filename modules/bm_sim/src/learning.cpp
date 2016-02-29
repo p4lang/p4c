@@ -309,11 +309,10 @@ LearnEngine::LearnList::ack_buffer(buffer_id_t buffer_id) {
 void
 LearnEngine::LearnList::reset_state() {
   LockType lock(mutex);
-  // TODO(antonin): need to make this robust, what if an unexpected ack comes
-  // later?
   buffer.clear();
   buffer_id = 0;
   num_samples = 0;
+  num_samples_tmp = 0;
   filter.clear();
   old_buffers.clear();
   buffer_tmp.clear();

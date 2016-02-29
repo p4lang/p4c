@@ -105,4 +105,10 @@ Meter::reset_global_clock() {
   time_init = Meter::clock::now();
 }
 
+
+void
+MeterArray::reset_state() {
+  for (auto &m : meters) m.reset_rates();
+}
+
 }  // namespace bm

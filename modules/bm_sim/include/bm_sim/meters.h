@@ -290,6 +290,8 @@ class MeterArray : public NamedP4Object {
   //! Returns the size of the MeterArray (i.e. number of meters it includes)
   size_t size() const { return meters.size(); }
 
+  void reset_state();
+
  private:
   std::vector<Meter> meters{};
 };

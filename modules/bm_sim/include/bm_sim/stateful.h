@@ -35,10 +35,12 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_STATEFUL_H_
 #define BM_SIM_INCLUDE_BM_SIM_STATEFUL_H_
 
-#include <array>
+#include <boost/thread/locks.hpp>  // for boost::lock
+
 #include <string>
 #include <vector>
 #include <mutex>
+#include <unordered_set>
 
 #include "data.h"
 #include "bignum.h"
@@ -67,16 +69,8 @@ class Register : public Data {
   }
 
  private:
-  typedef std::unique_lock<std::mutex> UniqueLock;
-  UniqueLock unique_lock() const { return UniqueLock(*m_mutex); }
-  // NOLINTNEXTLINE(runtime/references)
-  void unlock(UniqueLock &lock) const { lock.unlock(); }
-
- private:
   int nbits;
   Bignum mask{1};
-  // mutexes are not movable, extra indirection bad?
-  std::unique_ptr<std::mutex> m_mutex{new std::mutex()};
 };
 
 typedef p4object_id_t register_array_id_t;
@@ -93,9 +87,13 @@ typedef p4object_id_t register_array_id_t;
 //! };
 //! @endcode
 class RegisterArray : public NamedP4Object {
+  friend class RegisterSync;
+
  public:
   typedef std::vector<Register>::iterator iterator;
   typedef std::vector<Register>::const_iterator const_iterator;
+
+  typedef std::unique_lock<std::mutex> UniqueLock;
 
   RegisterArray(const std::string &name, p4object_id_t id,
                 size_t size, int bitwidth)
@@ -146,8 +144,44 @@ class RegisterArray : public NamedP4Object {
   //! includes)
   size_t size() const { return registers.size(); }
 
+  void reset_state();
+
+  //! Request exclusive access to this register array. This method needs to be
+  //! called when the target needs to read or write a register. Note that it is
+  //! never necessary to call this method in a primitive action, since when an
+  //! action is executed, it is guaranteed exclusive access to all the register
+  //! arrays it reads or writes.
+  UniqueLock unique_lock() const { return UniqueLock(m_mutex); }
+  // NOLINTNEXTLINE(runtime/references)
+  void unlock(UniqueLock &lock) const { lock.unlock(); }
+
  private:
-    std::vector<Register> registers;
+  std::vector<Register> registers;
+
+  mutable std::mutex m_mutex{};
+};
+
+
+// This class was added to provide some measure of concurrency support for
+// register accesses. Every time an action is executed, this action is given
+// exclusive access to all the registers it is referring to. Same thing for a
+// parse state.
+class RegisterSync {
+ public:
+  void add_register_array(RegisterArray *register_array);
+
+  void lock_registers() const {
+    boost::lock(locks.begin(), locks.end());
+  }
+
+  void unlock_registers() const {
+    for (auto &lock : locks) lock.unlock();
+  }
+
+ private:
+  using UniqueLock = RegisterArray::UniqueLock;
+  mutable std::vector<UniqueLock> locks;
+  std::unordered_set<const RegisterArray *> register_arrays{};
 };
 
 }  // namespace bm
