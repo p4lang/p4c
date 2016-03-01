@@ -211,7 +211,7 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
       const auto to = header_name + "." + field_name;
       phv_factory.add_field_alias(from, to);
 
-      field_aliases.insert(from);
+      field_aliases[from] = header_field_pair(header_name, field_name);
     }
   }
 
@@ -1005,6 +1005,9 @@ P4Objects::get_header_bits(header_id_t header_id) {
 
 std::tuple<header_id_t, int>
 P4Objects::field_info(const string &header_name, const string &field_name) {
+  auto it = field_aliases.find(header_name + "." + field_name);
+  if (it != field_aliases.end())
+    return field_info(std::get<0>(it->second), std::get<1>(it->second));
   header_id_t header_id = get_header_id(header_name);
   return std::make_tuple(header_id, get_field_offset(header_id, field_name));
 }
