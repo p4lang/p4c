@@ -43,6 +43,16 @@ AS_IF([test "x$enable_logging_macros" != "xno"], [
     MY_CPPFLAGS="$MY_CPPFLAGS -DBMLOG_DEBUG_ON -DBMLOG_TRACE_ON"
 ])
 
+# BMELOG_ON is defined by default, since it is required for some tests
+elogger_enabled=no
+AC_ARG_ENABLE([elogger],
+    AS_HELP_STRING([--disable-elogger],
+                   [Disable nanomsg event logger (some unit tests may fail)]))
+AS_IF([test "x$enable_elogger" != "xno"], [
+    elogger_enabled=yes
+    MY_CPPFLAGS="$MY_CPPFLAGS -DBMELOG_ON"
+])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
@@ -60,9 +70,6 @@ PICKY_CFLAGS=""
 # It interfers with Thrift's config.h and it's too much work to do that cleanly
 AC_SUBST([PICKY_CXXFLAGS])
 AC_SUBST([PICKY_CFLAGS])
-
-# for now, BMELOG_ON is defined by default, since it is required for some tests
-MY_CPPFLAGS="$MY_CPPFLAGS -DBMELOG_ON"
 
 AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS \
                           -I\$(top_srcdir)/modules/bf_lpm_trie/include \
@@ -142,3 +149,4 @@ AS_ECHO("Features recap ......................")
 AS_ECHO("Coverage enabled .............. : $coverage_enabled")
 AS_ECHO("Debugger enabled .............. : $debugger_enabled")
 AS_ECHO("Logging macros enabled ........ : $logging_macros_enabled")
+AS_ECHO("Event logger enabled .......... : $elogger_enabled")
