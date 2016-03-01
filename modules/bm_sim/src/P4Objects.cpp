@@ -622,7 +622,6 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
   for (const auto &cfg_pipeline : cfg_pipelines) {
     const string pipeline_name = cfg_pipeline["name"].asString();
     p4object_id_t pipeline_id = cfg_pipeline["id"].asInt();
-    const string first_node_name = cfg_pipeline["init_table"].asString();
 
     // pipelines -> tables
 
@@ -831,7 +830,12 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
       }
     }
 
-    ControlFlowNode *first_node = get_control_node(first_node_name);
+    ControlFlowNode *first_node = nullptr;
+    if (!cfg_pipeline["init_table"].isNull()) {
+      const string first_node_name = cfg_pipeline["init_table"].asString();
+      first_node = get_control_node(first_node_name);
+    }
+
     Pipeline *pipeline = new Pipeline(pipeline_name, pipeline_id, first_node);
     add_pipeline(pipeline_name, unique_ptr<Pipeline>(pipeline));
   }
