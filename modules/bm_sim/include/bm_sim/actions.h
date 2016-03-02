@@ -416,6 +416,15 @@ class ActionPrimitive_ {
       const ActionParam *args) = 0;
 
   virtual size_t get_num_params() = 0;
+
+ protected:
+  // This used to be regular members in ActionPrimitive, but there could be a
+  // race condition. Making them thread_local solves the issue. I moved these
+  // from ActionPrimitive because g++4.8 has a bug when using thread_local class
+  // variables with templates
+  // (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60056).
+  static thread_local Packet *pkt;
+  static thread_local PHV *phv;
 };
 
 //! This acts as the base class for all target-specific action primitives. It
@@ -461,8 +470,9 @@ class ActionPrimitive :  public ActionPrimitive_ {
 
  private:
   unpack_caller<Args...> caller;
-  PHV *phv;
-  Packet *pkt;
+  // See thread_local members in ActionPrimitive_ class
+  // PHV *phv;
+  // Packet *pkt;
 };
 
 
