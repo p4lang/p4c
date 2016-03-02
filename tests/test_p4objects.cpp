@@ -184,3 +184,82 @@ TEST(P4Objects, Reset) {
   // hard to test for reset
   objects.reset_state();
 }
+
+class my_extern_type : public ExternType {
+ public:
+  BM_EXTERN_ATTRIBUTES {
+    BM_EXTERN_ATTRIBUTE_ADD(attr1);
+  }
+
+  void methodA() { }
+
+  void init() override { }
+
+ private:
+  Data attr1{0};
+};
+
+BM_REGISTER_EXTERN(my_extern_type);
+BM_REGISTER_EXTERN_METHOD(my_extern_type, methodA);
+
+namespace {
+
+void create_extern_instance_json(std::ostream *ss,
+                                 const std::string &instance_name,
+                                 const std::string &type_name,
+                                 const std::string &attr_name,
+                                 const std::string &attr_type) {
+  *ss << "{\"extern_instances\":[{\"name\":\""
+      << instance_name
+      << "\",\"id\":22,\"type\":\""
+      << type_name
+      << "\",\"attribute_values\":[{\"name\":\""
+      << attr_name
+      << "\",\"type\":\""
+      << attr_type
+      << "\",\"value\":\"0xab\"}]}]}";
+}
+
+}  // namespace
+
+TEST(P4Objects, ExternInstanceDeclaration) {
+  std::stringstream is;
+
+  {
+    std::stringstream os;
+    P4Objects objects(os);
+    create_extern_instance_json(&is, "my_extern_instance", "my_extern_type",
+                                "attr1", "hexstr");
+    ASSERT_EQ(0, objects.init_objects(&is));
+  }
+
+  {
+    std::stringstream os;
+    P4Objects objects(os);
+    create_extern_instance_json(&is, "my_extern_instance", "bad_type",
+                                "attr1", "hexstr");
+    std::string expected_error_msg = "Invalid reference to extern type 'bad_type'\n";
+    ASSERT_NE(0, objects.init_objects(&is));
+    EXPECT_EQ(expected_error_msg, os.str());
+  }
+
+  {
+    std::stringstream os;
+    P4Objects objects(os);
+    create_extern_instance_json(&is, "my_extern_instance", "my_extern_type",
+                                "bad_attr", "hexstr");
+    std::string expected_error_msg = "Extern type 'my_extern_type' has no attribute 'bad_attr'\n";
+    ASSERT_NE(0, objects.init_objects(&is));
+    EXPECT_EQ(expected_error_msg, os.str());
+  }
+
+  {
+    std::stringstream os;
+    P4Objects objects(os);
+    create_extern_instance_json(&is, "my_extern_instance", "my_extern_type",
+                                "attr1", "unsupported_type");
+    std::string expected_error_msg = "Only attributes of type 'hexstr' are supported for extern instance attribute initialization\n";
+    ASSERT_NE(0, objects.init_objects(&is));
+    EXPECT_EQ(expected_error_msg, os.str());
+  }
+}

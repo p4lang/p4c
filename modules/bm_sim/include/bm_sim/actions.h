@@ -158,6 +158,8 @@ struct ActionEngineState {
       action_data(action_data), const_values(const_values) {}
 };
 
+class ExternType;
+
 // A simple tagged union, which holds the definition of an action parameter. For
 // example, if an action parameter is a field, this struct will hold the header
 // id and the offset for this field. If an action parameter is a meter array,
@@ -168,7 +170,8 @@ struct ActionParam {
   enum {CONST, FIELD, HEADER, ACTION_DATA, REGISTER_REF, REGISTER_GEN,
         HEADER_STACK, CALCULATION,
         METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY,
-        EXPRESSION} tag;
+        EXPRESSION,
+        EXTERN_INSTANCE} tag;
 
   union {
     unsigned int const_offset;
@@ -217,6 +220,8 @@ struct ActionParam {
       // complicated, so instead the ActionFn keeps a vector of owning pointers
       ArithExpression *ptr;
     } expression;
+
+    ExternType *extern_instance;
   };
 
   // convert to the correct type when calling a primitive
@@ -364,6 +369,13 @@ const RegisterArray &ActionParam::to<const RegisterArray &>(
   return ActionParam::to<RegisterArray &>(state);
 }
 
+template <> inline
+ExternType *ActionParam::to<ExternType *>(ActionEngineState *state) const {
+  (void) state;
+  assert(tag == ActionParam::EXTERN_INSTANCE);
+  return extern_instance;
+}
+
 /* This is adapted from stack overflow code:
    http://stackoverflow.com/questions/11044504/any-solution-to-unpack-a-vector-to-function-arguments-in-c
 */
@@ -500,6 +512,7 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_counter_array(CounterArray *counter_array);
   void parameter_push_back_register_array(RegisterArray *register_array);
   void parameter_push_back_expression(std::unique_ptr<ArithExpression> expr);
+  void parameter_push_back_extern_instance(ExternType *extern_instance);
 
   void push_back_primitive(ActionPrimitive_ *primitive);
 

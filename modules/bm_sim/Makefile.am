@@ -25,6 +25,7 @@ src/dev_mgr_bmi.cpp \
 src/dev_mgr_packet_in.cpp \
 src/event_logger.cpp \
 src/expressions.cpp \
+src/extern.cpp \
 src/fields.cpp \
 src/headers.cpp \
 src/learning.cpp \
@@ -67,6 +68,7 @@ include/bm_sim/dev_mgr.h \
 include/bm_sim/entries.h \
 include/bm_sim/event_logger.h \
 include/bm_sim/expressions.h \
+include/bm_sim/extern.h \
 include/bm_sim/fields.h \
 include/bm_sim/field_lists.h \
 include/bm_sim/handle_mgr.h \
