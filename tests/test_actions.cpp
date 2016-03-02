@@ -590,7 +590,7 @@ TEST_F(ActionsTest, ConcurrentPrimitiveExecution) {
     }
   };
 
-  const size_t iterations = WITH_VALGRIND ? 10000u : 1000000u;
+  const size_t iterations = WITH_VALGRIND ? 50000u : 1000000u;
 
   std::thread t1(action_loop, iterations, std::ref(testActionFnEntry));
   std::thread t2(action_loop, iterations, std::ref(testActionFnEntry));

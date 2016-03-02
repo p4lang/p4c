@@ -60,13 +60,8 @@ class MetersTest : public ::testing::Test {
   }
 };
 
-extern bool WITH_VALGRIND; // defined in main.cpp
-
 // 2 rate 3 color marker
 TEST_F(MetersTest, trTCM) {
-  // Valgrind screws up the timing and cause the test to fail
-  if(WITH_VALGRIND) {SUCCEED(); return;}
-
   const color_t GREEN = 0;
   const color_t YELLOW = 1;
   const color_t RED = 2;
