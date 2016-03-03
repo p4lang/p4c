@@ -64,13 +64,26 @@ class PHVFactory;
 //! why we expose methods like reset(), reset_header_stacks() and
 //! reset_metadata().
 class PHV {
+  typedef std::reference_wrapper<Header> HeaderRef;
+  typedef std::reference_wrapper<Field> FieldRef;
+
  public:
   friend class PHVFactory;
   friend class Packet;
 
- private:
-  typedef std::reference_wrapper<Header> HeaderRef;
-  typedef std::reference_wrapper<Field> FieldRef;
+  typedef std::unordered_map<std::string, HeaderRef> HeaderNamesMap;
+  //! Used to iterate over headers and access their names. The order may be
+  //! different from the header id order.
+  typedef HeaderNamesMap::iterator header_name_iterator;
+  //! @copydoc header_name_iterator
+  typedef HeaderNamesMap::const_iterator const_header_name_iterator;
+
+  typedef std::unordered_map<std::string, FieldRef> FieldNamesMap;
+
+  //! Used to iterate over headers in ascending id order.
+  typedef std::vector<Header>::iterator header_iterator;
+  //! @copydoc header_iterator
+  typedef std::vector<Header>::const_iterator const_header_iterator;
 
  public:
   PHV() {}
@@ -196,6 +209,54 @@ class PHV {
     packet_id = {id1, id2};
   }
 
+  // iterators
+
+  //! Returns an iterator to the first header in the "name -> header reference"
+  //! map maintained by the PHV.
+  //! @code
+  //! auto it = phv.header_name_begin();
+  //! const std::string &header = it->first;
+  //! const Header &header = it->second;
+  //! @endcode
+  header_name_iterator header_name_begin() {
+    return headers_map.begin();
+  }
+
+  //! @copydoc header_name_begin
+  const_header_name_iterator header_name_begin() const {
+    return headers_map.begin();
+  }
+
+  //! Returns an iterator to the last element in the "name -> header reference"
+  //! map maintained by the PHV. See header_name_begin() for more information.
+  header_name_iterator header_name_end() {
+    return headers_map.end();
+  }
+
+  //! @copydoc header_name_end
+  const_header_name_iterator header_name_end() const {
+    return headers_map.end();
+  }
+
+  //! Returns an iterator to the first header in the PHV.
+  //! @code
+  //! auto it = phv.header_begin();
+  //! const Header &header = *it;
+  //! @endcode
+  header_iterator header_begin() { return headers.begin(); }
+
+  //! @copydoc header_begin
+  const_header_iterator header_begin() const { return headers.begin(); }
+
+  //! Returns an iterator to the last element in the PHV. See header_begin().
+  header_iterator header_end() { return headers.end(); }
+
+  //! @copydoc header_end
+  const_header_iterator header_end() const { return headers.end(); }
+
+  //! Returns the number of headers included in the PHV
+  size_t num_headers() const { return headers.size(); }
+
  private:
   // To  be used only by PHVFactory
   // all headers need to be pushed back in order (according to header_index) !!!
@@ -219,8 +280,8 @@ class PHV {
  private:
   std::vector<Header> headers{};
   std::vector<HeaderStack> header_stacks{};
-  std::unordered_map<std::string, HeaderRef> headers_map{};
-  std::unordered_map<std::string, FieldRef> fields_map{};
+  HeaderNamesMap headers_map{};
+  FieldNamesMap fields_map{};
   size_t capacity{0};
   size_t capacity_stacks{0};
   Debugger::PacketId packet_id;
