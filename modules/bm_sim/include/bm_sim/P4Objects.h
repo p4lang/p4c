@@ -47,6 +47,7 @@
 #include "stateful.h"
 #include "ageing.h"
 #include "field_lists.h"
+#include "extern.h"
 
 namespace bm {
 
@@ -129,6 +130,10 @@ class P4Objects {
 
   FieldList *get_field_list(const p4object_id_t field_list_id) {
     return field_lists.at(field_list_id).get();
+  }
+
+  ExternType *get_extern_instance(const std::string &name) {
+    return extern_instances.at(name).get();
   }
 
   bool field_exists(const std::string &header_name,
@@ -220,6 +225,11 @@ class P4Objects {
     field_lists[field_list_id] = std::move(field_list);
   }
 
+  void add_extern_instance(const std::string &name,
+                           std::unique_ptr<ExternType> extern_instance) {
+    extern_instances[name] = std::move(extern_instance);
+  }
+
   void build_expression(const Json::Value &json_expression, Expression *expr);
 
   std::set<int> build_arith_offsets(const Json::Value &json_actions,
@@ -282,6 +292,10 @@ class P4Objects {
 
   // field lists
   std::unordered_map<p4object_id_t, std::unique_ptr<FieldList> > field_lists{};
+
+  // extern instances
+  std::unordered_map<std::string, std::unique_ptr<ExternType> >
+    extern_instances{};
 
   std::unordered_map<std::string, header_field_pair> field_aliases{};
 

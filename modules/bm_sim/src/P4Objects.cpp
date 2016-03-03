@@ -215,6 +215,54 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
     }
   }
 
+  // extern instances
+
+  const Json::Value &cfg_extern_instances = cfg_root["extern_instances"];
+  for (const auto &cfg_extern_instance : cfg_extern_instances) {
+    const string extern_instance_name = cfg_extern_instance["name"].asString();
+    const p4object_id_t extern_instance_id = cfg_extern_instance["id"].asInt();
+
+    const string extern_type_name = cfg_extern_instance["type"].asString();
+    auto instance = ExternFactoryMap::get_instance()->get_extern_instance(
+        extern_type_name);
+    if (instance == nullptr) {
+      outstream << "Invalid reference to extern type '"
+                << extern_type_name << "'\n";
+      return 1;
+    }
+
+    instance->_register_attributes();
+
+    instance->_set_name_and_id(extern_instance_name, extern_instance_id);
+
+    const Json::Value &cfg_extern_attributes =
+        cfg_extern_instance["attribute_values"];
+    for (const auto &cfg_extern_attribute : cfg_extern_attributes) {
+      // only hexstring accepted
+      const string name = cfg_extern_attribute["name"].asString();
+      const string type = cfg_extern_attribute["type"].asString();
+
+      if (!instance->_has_attribute(name)) {
+        outstream << "Extern type '" << extern_type_name
+                  << "' has no attribute '" << name << "'\n";
+        return 1;
+      }
+
+      if (type == "hexstr") {
+        const string value_hexstr = cfg_extern_attribute["value"].asString();
+        instance->_set_attribute<Data>(name, Data(value_hexstr));
+      } else {
+        outstream << "Only attributes of type 'hexstr' are supported for extern"
+                  << " instance attribute initialization\n";
+        return 1;
+      }
+    }
+
+    instance->init();
+
+    add_extern_instance(extern_instance_name, std::move(instance));
+  }
+
   // parsers
 
   const Json::Value &cfg_parsers = cfg_root["parsers"];
@@ -599,6 +647,10 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
                 get_register_array(register_array_name),
                 std::unique_ptr<ArithExpression>(idx_expr));
           }
+        } else if (type == "extern") {
+          const string name = cfg_parameter["value"].asString();
+          ExternType *extern_instance = get_extern_instance(name);
+          action_fn->parameter_push_back_extern_instance(extern_instance);
         } else {
           assert(0 && "parameter not supported");
         }

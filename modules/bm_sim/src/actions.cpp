@@ -156,6 +156,14 @@ ActionFn::parameter_push_back_expression(
 }
 
 void
+ActionFn::parameter_push_back_extern_instance(ExternType *extern_instance) {
+  ActionParam param;
+  param.tag = ActionParam::EXTERN_INSTANCE;
+  param.extern_instance = extern_instance;
+  params.push_back(param);
+}
+
+void
 ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
   primitives.push_back(primitive);
 }

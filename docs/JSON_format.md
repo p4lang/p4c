@@ -188,10 +188,20 @@ call, with the following attributes:
   object with the following attributes:
     - `type`: one of `hexstr`, `runtime_data`, `header`, `field`, `calculation`,
     `meter_array`, `counter_array`, `register_array`, `header_stack`,
-    `expression`
+    `expression`, `extern`
     - `value`: the appropriate parameter value. If `type` is `runtime_data`,
     this is an integer representing an index into the `runtime_data` (attribute
-    of action) array. See [here] (#the-type-value-object) for other types.
+    of action) array. If `type` is `extern`, this is the name of the extern
+    instance. See [here] (#the-type-value-object) for other types.
+
+*Important note about extern instance methods*: even though in P4 these are
+invoked using object-oriented style, bmv2 treats them as regular primitives for
+which the first parameter is the extern instance. For example, if the P4 call is
+`extern1.methodA(x, y)`, where `extern1` is an extern instance of type
+`my_extern_type`, the bmv2 compiler needs to translate this into a call to
+primitive `_my_extern_type_methodA`, with the first parameter being `{"type":
+"extern", "value": "extern1"}` and the second parameter being the appropriate
+representation for `x` and `y`.
 
 ### `pipelines`
 
@@ -286,3 +296,16 @@ the following attributes:
 
 Not documented yet, use empty JSON array.
 
+### `extern_instances`
+
+It is a JSON array of all the extern instances in the P4 program. Each array
+item has the following attributes:
+- `name`
+- `id`: a unique integer (unique with respect to other extern instances)
+- `type`: the name of the extern type, the target switch needs to support this
+type
+- `attribute_values`: a JSON array with the initial values for the attributes of
+this extern instance. Each array item has the following attributes:
+- `name`: the name of the attribute
+- `type`: the type of the attribute, only `hexstr` is supported for now
+- `value`: the initial value for the attribute

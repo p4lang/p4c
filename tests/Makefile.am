@@ -34,7 +34,8 @@ test_counters \
 test_pcap \
 test_fields \
 test_devmgr \
-test_packet
+test_packet \
+test_extern
 
 check_PROGRAMS = $(TESTS) test_all
 
@@ -61,6 +62,7 @@ test_fields_SOURCES   	   = $(common_source) test_fields.cpp
 test_pcap_SOURCES          = $(common_source) test_pcap.cpp
 test_devmgr_SOURCES        = $(common_source) test_devmgr.cpp
 test_packet_SOURCES        = $(common_source) test_packet.cpp
+test_extern_SOURCES        = $(common_source) test_extern.cpp
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
 test_checksums.cpp \
@@ -83,4 +85,5 @@ test_counters.cpp \
 test_pcap.cpp \
 test_fields.cpp \
 test_devmgr.cpp \
-test_packet.cpp
+test_packet.cpp \
+test_extern.cpp
