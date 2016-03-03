@@ -557,6 +557,46 @@ TEST_F(ActionsTest, TwoPrimitives) {
   ASSERT_EQ((unsigned) 0xaba, dst2.get_uint());
 }
 
+extern bool WITH_VALGRIND; // defined in main.cpp
+
+// added this test after I found a race condition when the same action primitive
+// is executed by 2 different threads
+TEST_F(ActionsTest, ConcurrentPrimitiveExecution) {
+  uint64_t base = 100;
+  uint64_t size = 65536; // 16 bits
+
+  BufBuilder builder;
+  builder.push_back_field(testHeader1, 0);
+  builder.push_back_field(testHeader1, 4);
+  NamedCalculation calculation("test_calculation", 0, builder, "xxh64");
+
+  auto primitive = ActionOpcodesMap::get_instance()->get_primitive(
+      "ModifyFieldWithHashBasedOffset");
+
+  testActionFn.push_back_primitive(primitive);
+  testActionFn.parameter_push_back_field(testHeader2, 3); // f16
+  testActionFn.parameter_push_back_const(Data(base));
+  testActionFn.parameter_push_back_calculation(&calculation);
+  testActionFn.parameter_push_back_const(Data(size));
+
+  unsigned int expected = (base + calculation.output(*pkt)) % size;
+
+  auto action_loop = [this, expected](size_t iters, ActionFnEntry &entry) {
+    for (size_t i = 0; i < iters; i++) {
+      auto pkt = std::unique_ptr<Packet>(new Packet(
+          Packet::make_new(phv_source.get())));
+      entry(pkt.get());
+      ASSERT_EQ(expected, pkt->get_phv()->get_field(testHeader2, 3).get_uint());
+    }
+  };
+
+  const size_t iterations = WITH_VALGRIND ? 50000u : 1000000u;
+
+  std::thread t1(action_loop, iterations, std::ref(testActionFnEntry));
+  std::thread t2(action_loop, iterations, std::ref(testActionFnEntry));
+  t1.join(); t2.join();
+}
+
 class RegisterSpin : public ActionPrimitive<RegisterArray &, const Data &> {
   void operator ()(RegisterArray &register_array, const Data &ts) {
     register_array.at(0).set(ts);

@@ -240,4 +240,7 @@ ActionFnEntry::dump(std::ostream *stream) const {
   stream->flags(ff);
 }
 
+thread_local Packet *ActionPrimitive_::pkt = nullptr;
+thread_local PHV *ActionPrimitive_::phv = nullptr;
+
 }  // namespace bm
