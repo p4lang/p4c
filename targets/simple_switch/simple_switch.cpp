@@ -263,10 +263,14 @@ SimpleSwitch::ingress_thread() {
     int learn_id = 0;
     unsigned int mgid = 0u;
 
-    if (phv->has_header("intrinsic_metadata")) {
+    if (phv->has_field("intrinsic_metadata.lf_field_list")) {
       Field &f_learn_id = phv->get_field("intrinsic_metadata.lf_field_list");
       learn_id = f_learn_id.get_int();
+    }
 
+    // detect mcast support, if this is true we assume that other fields needed
+    // for mcast are also defined
+    if (phv->has_field("intrinsic_metadata.mcast_grp")) {
       Field &f_mgid = phv->get_field("intrinsic_metadata.mcast_grp");
       mgid = f_mgid.get_uint();
     }
