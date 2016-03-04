@@ -8,7 +8,9 @@ AM_CPPFLAGS += \
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 AM_CFLAGS = $(PICKY_CFLAGS)
 
-libbmapps_la_LIBADD = -lnanomsg -lthrift $(top_builddir)/thrift_src/libruntimestubs.la
+libbmapps_la_LIBADD = \
+$(top_builddir)/thrift_src/libruntimestubs.la \
+-lnanomsg -lthrift
 libbmapps_la_LDFLAGS = -pthread
 
 noinst_LTLIBRARIES = libbmapps.la

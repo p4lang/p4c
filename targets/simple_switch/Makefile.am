@@ -93,7 +93,10 @@ gen-cpp/simple_switch_types.h
 
 
 CLEANFILES = $(BUILT_SOURCES) \
-thrift_files.ts
+thrift_files.ts \
+gen-cpp/SimpleSwitch_server.skeleton.cpp
 
+# I used to do a rm on gen-cpp, but it was removing a .deps directory, instead I
+# am adding the skeleton file to CLEANFILES
 clean-local:
-	rm -rf gen-cpp gen-py
+	rm -rf gen-py
