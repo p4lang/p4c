@@ -1,18 +1,19 @@
 AM_CPPFLAGS += \
 -isystem $(top_srcdir)/third_party \
 -I$(top_srcdir)/modules/bm_sim/include \
--I$(top_srcdir)/modules/bm_apps/include
+-I$(top_srcdir)/modules/bm_apps/include \
+-DTESTDATADIR=\"$(srcdir)/testdata\"
 AM_CXXFLAGS = -pthread
 LDADD = \
-$(top_srcdir)/third_party/gtest/libgtest.la \
-$(top_srcdir)/modules/bm_sim/libbmsim.la \
-$(top_srcdir)/modules/bf_lpm_trie/libbflpmtrie.la \
-$(top_srcdir)/modules/bm_apps/libbmapps.la \
-$(top_srcdir)/third_party/jsoncpp/libjson.la \
+$(top_builddir)/third_party/gtest/libgtest.la \
+$(top_builddir)/modules/bm_sim/libbmsim.la \
+$(top_builddir)/modules/bf_lpm_trie/libbflpmtrie.la \
+$(top_builddir)/modules/bm_apps/libbmapps.la \
+$(top_builddir)/third_party/jsoncpp/libjson.la \
 -lboost_system -lboost_thread -lboost_filesystem
 
 # Define unit tests
-common_source = main.cpp
+common_source = main.cpp utils.h
 TESTS = test_actions \
 test_checksums \
 test_conditionals \
@@ -87,3 +88,7 @@ test_fields.cpp \
 test_devmgr.cpp \
 test_packet.cpp \
 test_extern.cpp
+
+EXTRA_DIST = \
+testdata/en0.pcap \
+testdata/lo0.pcap

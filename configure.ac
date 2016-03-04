@@ -7,6 +7,9 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_SRCDIR([modules/bm_sim/src/checksums.cpp])
 AC_CONFIG_HEADERS([config.h])
 
+# Pyhton is optional to the package
+AM_PATH_PYTHON([2.7],, [:])
+
 coverage_enabled=no
 AC_ARG_ENABLE([coverage],
     AS_HELP_STRING([--enable-coverage], [Enable code coverage tracking]))

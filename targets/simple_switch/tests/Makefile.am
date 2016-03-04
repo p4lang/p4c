@@ -3,11 +3,12 @@ AM_CPPFLAGS += \
 -I$(top_srcdir)/modules/bm_sim/include \
 -I$(top_srcdir)/modules/bm_apps/include \
 -I$(srcdir)/.. \
--I$(srcdir)/
+-I$(srcdir)/ \
+-DTESTDATADIR=\"$(srcdir)/testdata\"
 AM_CXXFLAGS = -pthread
-LDADD = $(srcdir)/../libsimpleswitch.la \
-$(top_srcdir)/third_party/gtest/libgtest.la \
-$(top_srcdir)/modules/bm_apps/libbmapps.la \
+LDADD = $(builddir)/../libsimpleswitch.la \
+$(top_builddir)/third_party/gtest/libgtest.la \
+$(top_builddir)/modules/bm_apps/libbmapps.la \
 -lboost_filesystem
 
 # Define unit tests
@@ -30,3 +31,10 @@ test_packet_redirect.cpp \
 test_truncate.cpp \
 test_swap.cpp \
 test_queueing.cpp
+
+EXTRA_DIST = \
+testdata/packet_redirect.json \
+testdata/truncate.json \
+testdata/swap_1.json \
+testdata/swap_2.json \
+testdata/queueing.json

@@ -152,7 +152,7 @@ const std::string SimpleSwitch_PacketRedirectP4::packet_in_addr =
 
 SimpleSwitch *SimpleSwitch_PacketRedirectP4::test_switch = nullptr;
 
-const std::string SimpleSwitch_PacketRedirectP4::testdata_dir = "testdata";
+const std::string SimpleSwitch_PacketRedirectP4::testdata_dir = TESTDATADIR;
 const std::string SimpleSwitch_PacketRedirectP4::test_json =
     "packet_redirect.json";
 

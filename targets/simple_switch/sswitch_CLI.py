@@ -2,8 +2,6 @@ import runtime_CLI
 
 import sys
 import os
-_THIS_DIR = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(_THIS_DIR, "gen-py"))
 
 from sswitch_runtime import SimpleSwitch
 
