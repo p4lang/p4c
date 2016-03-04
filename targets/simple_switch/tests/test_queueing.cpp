@@ -139,7 +139,7 @@ const std::string SimpleSwitch_QueueingP4::packet_in_addr =
 
 SimpleSwitch *SimpleSwitch_QueueingP4::test_switch = nullptr;
 
-const std::string SimpleSwitch_QueueingP4::testdata_dir = "testdata";
+const std::string SimpleSwitch_QueueingP4::testdata_dir = TESTDATADIR;
 const std::string SimpleSwitch_QueueingP4::test_json =
     "queueing.json";
 

@@ -137,7 +137,7 @@ const std::string SimpleSwitch_SwapP4::packet_in_addr =
 
 SimpleSwitch *SimpleSwitch_SwapP4::test_switch = nullptr;
 
-const std::string SimpleSwitch_SwapP4::testdata_dir = "testdata";
+const std::string SimpleSwitch_SwapP4::testdata_dir = TESTDATADIR;
 const std::string SimpleSwitch_SwapP4::test_json_1 = "swap_1.json";
 const std::string SimpleSwitch_SwapP4::test_json_2 = "swap_2.json";
 

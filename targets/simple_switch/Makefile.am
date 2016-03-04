@@ -1,7 +1,11 @@
 SUBDIRS = . tests
 
-simple_switch_thrift_files = \
+simple_switch_thrift_py_files = \
+gen-py/sswitch_runtime/constants.py \
 gen-py/sswitch_runtime/__init__.py \
+gen-py/sswitch_runtime/SimpleSwitch.py \
+gen-py/sswitch_runtime/ttypes.py
+simple_switch_thrift_files = \
 gen-cpp/simple_switch_constants.cpp \
 gen-cpp/simple_switch_constants.h \
 gen-cpp/SimpleSwitch.cpp \
@@ -9,7 +13,10 @@ gen-cpp/SimpleSwitch.h \
 gen-cpp/simple_switch_types.cpp \
 gen-cpp/simple_switch_types.h
 
-BUILT_SOURCES = $(simple_switch_thrift_files)
+BUILT_SOURCES = $(simple_switch_thrift_files) $(simple_switch_thrift_py_files)
+
+sswitchpydir = $(pythondir)/sswitch_runtime
+sswitchpy_PYTHON = $(simple_switch_thrift_py_files)
 
 AM_CPPFLAGS += \
 -I$(top_srcdir)/modules/bm_sim/include \
@@ -29,7 +36,8 @@ libsimpleswitch_la_LDFLAGS = -pthread
 noinst_LTLIBRARIES = libsimpleswitch.la
 
 libsimpleswitch_la_SOURCES = \
-simple_switch.cpp simple_switch.h primitives.cpp
+simple_switch.cpp simple_switch.h primitives.cpp \
+thrift/src/SimpleSwitch_server.ipp
 
 bin_PROGRAMS = simple_switch
 
@@ -50,11 +58,13 @@ libsimpleswitch_thrift_la_SOURCES = \
 
 THRIFT_IDL = $(srcdir)/thrift/simple_switch.thrift
 
+EXTRA_DIST = $(THRIFT_IDL)
+
 thrift_files.ts: $(THRIFT_IDL)
 	@rm -f thrift_files.tmp
 	@touch thrift_files.tmp
-	$(THRIFT) --gen cpp -r $(THRIFT_IDL)
-	$(THRIFT) --gen py -r $(THRIFT_IDL)
+	$(THRIFT) -o $(builddir) --gen cpp -r $(THRIFT_IDL)
+	$(THRIFT) -o $(builddir) --gen py -r $(THRIFT_IDL)
 	@mv -f thrift_files.tmp $@
 
 $(BUILT_SOURCES): thrift_files.ts
@@ -84,3 +94,6 @@ gen-cpp/simple_switch_types.h
 
 CLEANFILES = $(BUILT_SOURCES) \
 thrift_files.ts
+
+clean-local:
+	rm -rf gen-cpp gen-py

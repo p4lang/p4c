@@ -1,5 +1,9 @@
+standard_thrift_py_files = \
+gen-py/bm_runtime/standard/constants.py \
+gen-py/bm_runtime/standard/__init__.py \
+gen-py/bm_runtime/standard/Standard.py \
+gen-py/bm_runtime/standard/ttypes.py
 standard_thrift_files = \
-$(srcdir)/../tools/bm_runtime/standard/__init__.py \
 gen-cpp/standard_constants.cpp \
 gen-cpp/standard_constants.h \
 gen-cpp/Standard.cpp \
@@ -7,8 +11,12 @@ gen-cpp/Standard.h \
 gen-cpp/standard_types.cpp \
 gen-cpp/standard_types.h
 
+simple_pre_thrift_py_files = \
+gen-py/bm_runtime/simple_pre/constants.py \
+gen-py/bm_runtime/simple_pre/__init__.py \
+gen-py/bm_runtime/simple_pre/SimplePre.py \
+gen-py/bm_runtime/simple_pre/ttypes.py
 simple_pre_thrift_files = \
-$(srcdir)/../tools/bm_runtime/simple_pre/__init__.py \
 gen-cpp/simple_pre_constants.cpp \
 gen-cpp/simple_pre_constants.h \
 gen-cpp/SimplePre.cpp \
@@ -16,8 +24,12 @@ gen-cpp/SimplePre.h \
 gen-cpp/simple_pre_types.cpp \
 gen-cpp/simple_pre_types.h
 
+simple_pre_lag_thrift_py_files = \
+gen-py/bm_runtime/simple_pre_lag/constants.py \
+gen-py/bm_runtime/simple_pre_lag/__init__.py \
+gen-py/bm_runtime/simple_pre_lag/SimplePreLAG.py \
+gen-py/bm_runtime/simple_pre_lag/ttypes.py
 simple_pre_lag_thrift_files = \
-$(srcdir)/../tools/bm_runtime/simple_pre_lag/__init__.py \
 gen-cpp/simple_pre_lag_constants.cpp \
 gen-cpp/simple_pre_lag_constants.h \
 gen-cpp/SimplePreLAG.cpp \
@@ -27,40 +39,67 @@ gen-cpp/simple_pre_lag_types.h
 
 BUILT_SOURCES = \
 $(standard_thrift_files) \
+$(standard_thrift_py_files) \
 $(simple_pre_thrift_files) \
-$(simple_pre_lag_thrift_files)
+$(simple_pre_thrift_py_files) \
+$(simple_pre_lag_thrift_files) \
+$(simple_pre_lag_thrift_py_files) \
+gen-py/bm_runtime/__init__.py
+
+rootpydir = $(pythondir)/bm_runtime/
+rootpy_PYTHON = gen-py/bm_runtime/__init__.py
+
+standardpydir = $(pythondir)/bm_runtime/standard
+standardpy_PYTHON = $(standard_thrift_py_files)
+
+simple_prepydir = $(pythondir)/bm_runtime/simple_pre
+simple_prepy_PYTHON = $(simple_pre_thrift_py_files)
+
+simple_pre_lagpydir = $(pythondir)/bm_runtime/simple_pre_lag
+simple_pre_lagpy_PYTHON = $(simple_pre_lag_thrift_py_files)
 
 AUTOMAKE_OPTIONS = foreign no-dependencies subdir-objects
 
 lib_LTLIBRARIES = libruntimestubs.la
 libruntimestubs_la_SOURCES = \
-	$(BUILT_SOURCES)
+$(BUILT_SOURCES)
 
 pkginclude_HEADERS = \
-       gen-cpp/standard_constants.h \
-       gen-cpp/Standard.h \
-       gen-cpp/standard_types.h \
-       gen-cpp/simple_pre_constants.h \
-       gen-cpp/SimplePre.h \
-       gen-cpp/simple_pre_types.h \
-       gen-cpp/simple_pre_lag_constants.h \
-       gen-cpp/SimplePreLAG.h \
-       gen-cpp/simple_pre_lag_types.h
+gen-cpp/standard_constants.h \
+gen-cpp/Standard.h \
+gen-cpp/standard_types.h \
+gen-cpp/simple_pre_constants.h \
+gen-cpp/SimplePre.h \
+gen-cpp/simple_pre_types.h \
+gen-cpp/simple_pre_lag_constants.h \
+gen-cpp/SimplePreLAG.h \
+gen-cpp/simple_pre_lag_types.h
 
 # See http://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
 
-thrift_files.ts: standard.thrift simple_pre.thrift simple_pre_lag.thrift
+# We copy the generated Python code to tools/ if we have permissions (i.e. not
+# for 'make distcheck'). This is to ensure we can run the Python scripts in
+# tools easily. Maybe I will think of a better solution later.
+thrift_files.ts: $(srcdir)/standard.thrift $(srcdir)/simple_pre.thrift $(srcdir)/simple_pre_lag.thrift
 	@rm -f thrift_files.tmp
 	@touch thrift_files.tmp
-	$(THRIFT) --gen cpp -r $(srcdir)/standard.thrift
-	$(THRIFT) --gen py -r $(srcdir)/standard.thrift
-	$(THRIFT) --gen cpp -r $(srcdir)/simple_pre.thrift
-	$(THRIFT) --gen py -r $(srcdir)/simple_pre.thrift
-	$(THRIFT) --gen cpp -r $(srcdir)/simple_pre_lag.thrift
-	$(THRIFT) --gen py -r $(srcdir)/simple_pre_lag.thrift
-	rm -rf $(srcdir)/../tools/bm_runtime/
-	cp -r gen-py/bm_runtime/ $(srcdir)/../tools/
+	$(THRIFT) -o $(builddir) --gen cpp -r $(srcdir)/standard.thrift
+	$(THRIFT) -o $(builddir) --gen py -r $(srcdir)/standard.thrift
+	$(THRIFT) -o $(builddir) --gen cpp -r $(srcdir)/simple_pre.thrift
+	$(THRIFT) -o $(builddir) --gen py -r $(srcdir)/simple_pre.thrift
+	$(THRIFT) -o $(builddir) --gen cpp -r $(srcdir)/simple_pre_lag.thrift
+	$(THRIFT) -o $(builddir) --gen py -r $(srcdir)/simple_pre_lag.thrift
+	if mkdir $(top_srcdir)/tools/bm_runtime.test 2>/dev/null; then \
+	  rm -rf $(top_srcdir)/tools/bm_runtime/; \
+	  cp -r $(builddir)/gen-py/bm_runtime/ $(top_srcdir)/tools/; \
+	  rm -rf $(top_srcdir)/tools/bm_runtime.test; else :; \
+        fi
 	@mv -f thrift_files.tmp $@
+
+EXTRA_DIST = \
+$(srcdir)/standard.thrift \
+$(srcdir)/simple_pre.thrift \
+$(srcdir)/simple_pre_lag.thrift
 
 $(BUILT_SOURCES): thrift_files.ts
 ## Recover from the removal of $@
