@@ -18,6 +18,17 @@ BUILT_SOURCES = $(simple_switch_thrift_files) $(simple_switch_thrift_py_files)
 sswitchpydir = $(pythondir)/sswitch_runtime
 sswitchpy_PYTHON = $(simple_switch_thrift_py_files)
 
+simple_switch_CLI: sswitch_CLI.py
+	cp $< $@
+	chmod +x $@
+
+EXTRA_DIST = \
+sswitch_CLI.py \
+sswitch_CLI
+
+dist_bin_SCRIPTS = \
+simple_switch_CLI
+
 AM_CPPFLAGS += \
 -I$(top_srcdir)/modules/bm_sim/include \
 -I$(top_srcdir)/modules/bm_runtime/include \
@@ -58,13 +69,21 @@ libsimpleswitch_thrift_la_SOURCES = \
 
 THRIFT_IDL = $(srcdir)/thrift/simple_switch.thrift
 
-EXTRA_DIST = $(THRIFT_IDL)
+EXTRA_DIST += $(THRIFT_IDL)
 
+# We copy the generated Python code to srcdir/ if we have permissions (i.e. not
+# for 'make distcheck'). This is to ensure we can run the CLI easily. Maybe I
+# will think of a better solution later.
 thrift_files.ts: $(THRIFT_IDL)
 	@rm -f thrift_files.tmp
 	@touch thrift_files.tmp
 	$(THRIFT) -o $(builddir) --gen cpp -r $(THRIFT_IDL)
 	$(THRIFT) -o $(builddir) --gen py -r $(THRIFT_IDL)
+	if mkdir $(srcdir)/sswitch_runtime.test 2>/dev/null; then \
+	  rm -rf $(srcdir)/sswitch_runtime/; \
+	  cp -r $(builddir)/gen-py/sswitch_runtime/ $(srcdir)/; \
+	  rm -rf $(srcdir)/sswitch_runtime.test; else :; \
+        fi
 	@mv -f thrift_files.tmp $@
 
 $(BUILT_SOURCES): thrift_files.ts
@@ -94,7 +113,8 @@ gen-cpp/simple_switch_types.h
 
 CLEANFILES = $(BUILT_SOURCES) \
 thrift_files.ts \
-gen-cpp/SimpleSwitch_server.skeleton.cpp
+gen-cpp/SimpleSwitch_server.skeleton.cpp \
+$(dist_bin_SCRIPTS)
 
 # I used to do a rm on gen-cpp, but it was removing a .deps directory, instead I
 # am adding the skeleton file to CLEANFILES
