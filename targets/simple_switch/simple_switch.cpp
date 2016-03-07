@@ -92,6 +92,13 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
   force_arith_field("queueing_metadata", "deq_timedelta");
   force_arith_field("queueing_metadata", "deq_qdepth");
 
+  force_arith_field("intrinsic_metadata", "ingress_global_timestamp");
+  force_arith_field("intrinsic_metadata", "lf_field_list");
+  force_arith_field("intrinsic_metadata", "mcast_grp");
+  force_arith_field("intrinsic_metadata", "resubmit_flag");
+  force_arith_field("intrinsic_metadata", "egress_rid");
+  force_arith_field("intrinsic_metadata", "recirculate_flag");
+
   import_primitives();
 }
 
