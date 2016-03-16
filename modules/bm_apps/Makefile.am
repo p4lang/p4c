@@ -5,12 +5,16 @@ AM_CPPFLAGS += \
 -I$(srcdir)/include \
 -I$(top_builddir)/thrift_src/gen-cpp
 
+if P4THRIFT
+  AM_CPPFLAGS += -DP4THRIFT 
+endif
+
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 AM_CFLAGS = $(PICKY_CFLAGS)
 
 libbmapps_la_LIBADD = \
 $(top_builddir)/thrift_src/libruntimestubs.la \
--lnanomsg -lthrift
+-lnanomsg $(THRIFT_LIB) 
 libbmapps_la_LDFLAGS = -pthread
 
 noinst_LTLIBRARIES = libbmapps.la

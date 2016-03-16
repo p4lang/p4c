@@ -18,14 +18,25 @@
  *
  */
 
-#include "bm_apps/learn.h"
+#ifdef P4THRIFT
+#include <p4thrift/protocol/TBinaryProtocol.h>
+#include <p4thrift/transport/TSocket.h>
+#include <p4thrift/transport/TTransportUtils.h>
+#include <p4thrift/protocol/TMultiplexedProtocol.h>
 
-#include <nanomsg/pubsub.h>
-
+namespace thrift_provider = p4::thrift;
+#else
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
 #include <thrift/protocol/TMultiplexedProtocol.h>
+
+namespace thrift_provider = apache::thrift;
+#endif
+
+#include "bm_apps/learn.h"
+
+#include <nanomsg/pubsub.h>
 
 #include <iostream>
 #include <string>
@@ -87,12 +98,12 @@ LearnListener::ack_buffer(cxt_id_t cxt_id, list_id_t list_id,
 
 void
 LearnListener::start() {
-  using apache::thrift::protocol::TProtocol;
-  using apache::thrift::protocol::TBinaryProtocol;
-  using apache::thrift::protocol::TMultiplexedProtocol;
-  using apache::thrift::transport::TSocket;
-  using apache::thrift::transport::TTransport;
-  using apache::thrift::transport::TBufferedTransport;
+  using thrift_provider::protocol::TProtocol;
+  using thrift_provider::protocol::TBinaryProtocol;
+  using thrift_provider::protocol::TMultiplexedProtocol;
+  using thrift_provider::transport::TSocket;
+  using thrift_provider::transport::TTransport;
+  using thrift_provider::transport::TBufferedTransport;
 
   boost::shared_ptr<TTransport> tsocket(new TSocket("localhost", 9090));
   boost::shared_ptr<TTransport> transport(new TBufferedTransport(tsocket));

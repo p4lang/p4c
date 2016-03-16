@@ -1,15 +1,24 @@
 #ifndef _BM_RUNTIME_BM_RUNTIME_H_
 #define _BM_RUNTIME_BM_RUNTIME_H_
 
+#ifdef P4THRIFT
+#include <p4thrift/processor/TMultiplexedProcessor.h>
+
+namespace thrift_provider = p4::thrift;
+#else
 #include <thrift/processor/TMultiplexedProcessor.h>
+
+namespace thrift_provider = apache::thrift;
+#endif
 
 #include <bm_sim/switch.h>
 
+using namespace thrift_provider;
+using namespace thrift_provider::transport;
+using namespace thrift_provider::protocol;
+
 namespace bm_runtime {
 
-using namespace ::apache::thrift;
-using namespace ::apache::thrift::protocol;
-using namespace ::apache::thrift::transport;
 using boost::shared_ptr;
 
 extern TMultiplexedProcessor *processor_;

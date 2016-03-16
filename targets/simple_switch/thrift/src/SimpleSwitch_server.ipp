@@ -1,18 +1,30 @@
 #include "SimpleSwitch.h"
+
+#ifdef P4THRIFT
+#include <p4thrift/protocol/TBinaryProtocol.h>
+#include <p4thrift/server/TThreadedServer.h>
+#include <p4thrift/transport/TServerSocket.h>
+#include <p4thrift/transport/TBufferTransports.h>
+
+namespace thrift_provider = p4::thrift;
+#else
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
+
+namespace thrift_provider = apache::thrift;
+#endif
 
 #include <bm_sim/switch.h>
 #include <bm_sim/logger.h>
 
 #include "simple_switch.h"
 
-using namespace ::apache::thrift;
-using namespace ::apache::thrift::protocol;
-using namespace ::apache::thrift::transport;
-using namespace ::apache::thrift::server;
+using namespace ::thrift_provider;
+using namespace ::thrift_provider::protocol;
+using namespace ::thrift_provider::transport;
+using namespace ::thrift_provider::server;
 
 using boost::shared_ptr;
 
