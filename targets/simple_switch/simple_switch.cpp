@@ -87,6 +87,12 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
   add_required_field("standard_metadata", "egress_spec");
   add_required_field("standard_metadata", "clone_spec");
 
+  force_arith_field("standard_metadata", "ingress_port");
+  force_arith_field("standard_metadata", "packet_length");
+  force_arith_field("standard_metadata", "instance_type");
+  force_arith_field("standard_metadata", "egress_spec");
+  force_arith_field("standard_metadata", "clone_spec");
+
   force_arith_field("queueing_metadata", "enq_timestamp");
   force_arith_field("queueing_metadata", "enq_qdepth");
   force_arith_field("queueing_metadata", "deq_timedelta");
