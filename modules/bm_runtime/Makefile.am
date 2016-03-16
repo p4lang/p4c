@@ -1,6 +1,11 @@
 AM_CPPFLAGS += \
 -I$(top_srcdir)/modules/bm_sim/include \
 -I$(top_builddir)/thrift_src/gen-cpp
+
+if P4THRIFT
+  AM_CPPFLAGS += -DP4THRIFT 
+endif
+
 AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 AM_CFLAGS = $(PICKY_CFLAGS)
 noinst_LTLIBRARIES = libbmruntime.la

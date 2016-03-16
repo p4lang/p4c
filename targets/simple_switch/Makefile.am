@@ -1,5 +1,9 @@
 SUBDIRS = . tests
 
+if P4THRIFT
+  AM_CPPFLAGS += -DP4THRIFT 
+endif
+
 simple_switch_thrift_py_files = \
 gen-py/sswitch_runtime/constants.py \
 gen-py/sswitch_runtime/__init__.py \
@@ -40,7 +44,7 @@ $(top_builddir)/modules/bm_sim/libbmsim.la \
 $(top_builddir)/modules/bf_lpm_trie/libbflpmtrie.la \
 $(top_builddir)/modules/BMI/libbmi.la \
 $(top_builddir)/third_party/jsoncpp/libjson.la \
--lboost_system -lboost_thread -lthrift -lboost_program_options
+-lboost_system -lboost_thread $(THRIFT_LIB) -lboost_program_options
 
 libsimpleswitch_la_LDFLAGS = -pthread
 

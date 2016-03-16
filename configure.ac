@@ -80,19 +80,31 @@ AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS \
                           -isystem\$(top_srcdir)/third_party/spdlog/include \
                           -I\$(top_srcdir)/modules/BMI/include"])
 
-
 # Checks for header files.
 AC_LANG_PUSH(C)
 AC_LANG_PUSH(C++)
 
+# Thrift
+AC_WITH([p4thrift],
+    [
+        AC_PATH_PROG([THRIFT], [p4thrift], [])
+        AC_SUBST([THRIFT_LIB], ["-lp4thrift"])
+        WITH_P4THRIFT="true"
+        AC_CHECK_HEADER([p4thrift/P4Thrift.h], [], [AC_MSG_ERROR([P4Thrift headers not found. Install P4Thrift from http://github.com/p4lang/thrift/])])
+    ],
+    [
+        AC_PATH_PROG([THRIFT], [thrift], [])
+        AC_SUBST([THRIFT_LIB], ["-lthrift"])
+        AC_CHECK_HEADER([thrift/Thrift.h], [], [AC_MSG_ERROR([Thrift headers not found. Install Thrift from http://thrift.apache.org/docs/install/])])
+    ])
+AM_CONDITIONAL([P4THRIFT], [test "x$WITH_P4THRIFT" != "x"])
+AS_IF([test x"$THRIFT" = x],
+[AC_MSG_ERROR([cannot find thrift])])
+
+
 AC_CHECK_HEADERS([algorithm array cassert cmath queue \
 cstdio string sys/stat.h sys/types.h ctime tuple unistd.h unordered_map \
 utility vector], [], [AC_MSG_ERROR([Missing header file])])
-
-# Check for thrift support (Facebook's Thrift RPC library)
-AC_PATH_PROG([THRIFT], [thrift], [])
-AS_IF([test x"$THRIFT" = x],
-[AC_MSG_ERROR([cannot find thrift])])
 
 # Check for libjudy, libgmp, libnanomsg, libpcap
 AC_CHECK_LIB([Judy], [Judy1Next], [], [AC_MSG_ERROR([Missing libJudy])])
@@ -113,7 +125,6 @@ AC_CHECK_HEADER([boost/multiprecision/gmp.hpp], [], [AC_MSG_ERROR([Missing boost
 AC_CHECK_HEADER([boost/program_options.hpp], [], [AC_MSG_ERROR([Missing boost program options header])])
 AC_CHECK_HEADER([boost/functional/hash.hpp], [], [AC_MSG_ERROR([Missing boost functional hash header])])
 AC_CHECK_HEADER([boost/filesystem.hpp], [], [AC_MSG_ERROR([Missing boost filesystem header])])
-AC_CHECK_HEADER([thrift/Thrift.h], [], [AC_MSG_ERROR([Thrift headers not found. Install Thrift from http://thrift.apache.org/docs/install/])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 # not supported by autoconf 2.68, add to m4/ ?
