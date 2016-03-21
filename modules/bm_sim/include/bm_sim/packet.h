@@ -222,6 +222,23 @@ class Packet final {
   //! Read general purpose register at index \p idx
   uint64_t get_register(size_t idx) { return registers.at(idx); }
 
+  //! Mark the packet for exit by setting an exit flag. If this is called from
+  //! an action, the current pipeline will be interrupted as soon as the current
+  //! table is done processing the packet. This effectively skips the rest of
+  //! the pipeline. Do not forget to call reset_exit() at the end of the
+  //! pipeline, if you intend the packet to go through another pipeline
+  //! afterwards; otherwise this other pipeline will just be skipped as well. If
+  //! this method is called from outside of an action, the flag will take effect
+  //! at the next pipeline, which will be skipped entirely (not a single table
+  //! will be applied).
+  void mark_for_exit() { flags |= 1 << FLAGS_EXIT; }
+  //! Clear the exit flag, which may have been set by an earlier call to
+  //! mark_for_exit().
+  void reset_exit() { flags &= ~(1 << FLAGS_EXIT); }
+  //! Returns true iff the packet is marked for exit (i.e. mark_for_exit() was
+  //! called on the packet).
+  bool is_marked_for_exit() const { return flags & (1 << FLAGS_EXIT); }
+
   //! Changes the context of the packet. You will only need to call this
   //! function if you target switch leverages the Context class and if your
   //! Packet instance changes contexts during its lifetime. This is needed
@@ -308,6 +325,11 @@ class Packet final {
   packet_id_t packet_id{0};
   copy_id_t copy_id{0};
   int ingress_length{0};
+
+  enum PacketFlags {
+    FLAGS_EXIT = 0
+  };
+  int flags{0};
 
   uint64_t signature{0};
 

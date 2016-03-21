@@ -141,6 +141,14 @@ class drop : public ActionPrimitive<> {
 
 REGISTER_PRIMITIVE(drop);
 
+class exit_ : public ActionPrimitive<> {
+  void operator ()() {
+    get_packet().mark_for_exit();
+  }
+};
+
+REGISTER_PRIMITIVE_W_NAME("exit", exit_);
+
 class generate_digest : public ActionPrimitive<const Data &, const Data &> {
   void operator ()(const Data &receiver, const Data &learn_id) {
     // discared receiver for now

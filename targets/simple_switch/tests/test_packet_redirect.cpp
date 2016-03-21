@@ -534,3 +534,36 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
   ASSERT_TRUE(check_event_action_execute(pevents[5], "_nop"));
 #endif
 }
+
+TEST_F(SimpleSwitch_PacketRedirectP4, ExitIngress) {
+  static constexpr int port_in = 1;
+  static constexpr int port_out = 0;
+
+  std::vector<MatchKeyParam> match_key_1;
+  match_key_1.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x07"));
+  match_key_1.emplace_back(MatchKeyParam::Type::EXACT, std::string("\x00", 1));
+  ActionData data_1;
+  entry_handle_t h_1;
+  ASSERT_EQ(MatchErrorCode::SUCCESS,
+            test_switch->mt_add_entry(0, "t_ingress_1", match_key_1,
+                                      "_exit", std::move(data_1), &h_1));
+
+  const char pkt[] = {'\x07', '\x00'};
+  packet_inject.send(port_in, pkt, sizeof(pkt));
+  char recv_buffer[kMaxBufSize];
+  int recv_port = -1;
+  receiver.read(recv_buffer, sizeof(pkt), &recv_port);
+  ASSERT_EQ(port_out, recv_port);
+
+#ifdef BMELOG_ON
+  // event check
+  std::vector<NNEventListener::NNEvent> pevents;
+
+  events.get_and_remove_events("6.0", &pevents, 4u);
+  ASSERT_EQ(4u, pevents.size());
+  ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "_exit"));
+  ASSERT_TRUE(check_event_table_miss(pevents[2], "t_egress"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
+#endif
+}

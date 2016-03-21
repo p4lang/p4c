@@ -318,10 +318,15 @@
             ]
         },
         {
-            "name": "_nop",
+            "name": "_exit",
             "id": 5,
             "runtime_data": [],
-            "primitives": []
+            "primitives": [
+                {
+                    "op": "exit",
+                    "parameters": []
+                }
+            ]
         },
         {
             "name": "_resubmit",
@@ -338,6 +343,12 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "_nop",
+            "id": 7,
+            "runtime_data": [],
+            "primitives": []
         }
     ],
     "pipelines": [
@@ -353,6 +364,7 @@
                     "type": "simple",
                     "max_size": 128,
                     "with_counters": false,
+                    "direct_meters": null,
                     "support_timeout": false,
                     "key": [
                         {
@@ -360,27 +372,32 @@
                             "target": [
                                 "hdrA",
                                 "f1"
-                            ]
+                            ],
+                            "mask": null
                         },
                         {
                             "match_type": "exact",
                             "target": [
                                 "metaA",
                                 "f1"
-                            ]
+                            ],
+                            "mask": null
                         }
                     ],
                     "actions": [
                         "_nop",
                         "_set_port",
-                        "_multicast"
+                        "_multicast",
+                        "_exit"
                     ],
                     "next_tables": {
                         "_nop": "t_ingress_2",
                         "_set_port": "t_ingress_2",
-                        "_multicast": "t_ingress_2"
+                        "_multicast": "t_ingress_2",
+                        "_exit": "t_ingress_2"
                     },
-                    "default_action": null
+                    "default_action": null,
+                    "base_default_next": "t_ingress_2"
                 },
                 {
                     "name": "t_ingress_2",
@@ -389,6 +406,7 @@
                     "type": "simple",
                     "max_size": 128,
                     "with_counters": false,
+                    "direct_meters": null,
                     "support_timeout": false,
                     "key": [
                         {
@@ -396,14 +414,16 @@
                             "target": [
                                 "hdrA",
                                 "f1"
-                            ]
+                            ],
+                            "mask": null
                         },
                         {
                             "match_type": "ternary",
                             "target": [
                                 "standard_metadata",
                                 "instance_type"
-                            ]
+                            ],
+                            "mask": null
                         }
                     ],
                     "actions": [
@@ -416,7 +436,8 @@
                         "_resubmit": null,
                         "_clone_i2e": null
                     },
-                    "default_action": null
+                    "default_action": null,
+                    "base_default_next": null
                 }
             ],
             "conditionals": []
@@ -433,6 +454,7 @@
                     "type": "simple",
                     "max_size": 128,
                     "with_counters": false,
+                    "direct_meters": null,
                     "support_timeout": false,
                     "key": [
                         {
@@ -440,14 +462,16 @@
                             "target": [
                                 "hdrA",
                                 "f1"
-                            ]
+                            ],
+                            "mask": null
                         },
                         {
                             "match_type": "ternary",
                             "target": [
                                 "standard_metadata",
                                 "instance_type"
-                            ]
+                            ],
+                            "mask": null
                         }
                     ],
                     "actions": [
@@ -460,7 +484,8 @@
                         "_recirculate": null,
                         "_clone_e2e": null
                     },
-                    "default_action": null
+                    "default_action": null,
+                    "base_default_next": null
                 }
             ],
             "conditionals": []
