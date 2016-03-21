@@ -172,3 +172,12 @@ TEST_F(PacketTest, PacketRegisters) {
   packet.set_register(idx, v2);
   ASSERT_EQ(v2, packet.get_register(idx));
 }
+
+TEST_F(PacketTest, Exit) {
+  auto packet = get_packet(0);
+  ASSERT_FALSE(packet.is_marked_for_exit());
+  packet.mark_for_exit();
+  ASSERT_TRUE(packet.is_marked_for_exit());
+  packet.reset_exit();
+  ASSERT_FALSE(packet.is_marked_for_exit());
+}

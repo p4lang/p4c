@@ -91,13 +91,17 @@ action _set_port(port) {
     modify_field(metaA.f1, 1);
 }
 
+action _exit() {
+    exit();
+}
+
 table t_ingress_1 {
     reads {
         hdrA.f1 : exact;
         metaA.f1 : exact;
     }
     actions {
-        _nop; _set_port; _multicast;
+        _nop; _set_port; _multicast; _exit;
     }
     size : 128;
 }

@@ -36,6 +36,10 @@ Pipeline::apply(Packet *pkt) {
   BMLOG_DEBUG_PKT(*pkt, "Pipeline '{}': start", get_name());
   const ControlFlowNode *node = first_node;
   while (node) {
+    if (pkt->is_marked_for_exit()) {
+      BMLOG_DEBUG_PKT(*pkt, "Packet is marked for exit, interrupting pipeline");
+      break;
+    }
     node = (*node)(pkt);
   }
   BMELOG(pipeline_done, *pkt, *this);
