@@ -81,7 +81,16 @@ class MatchTableAbstract : public NamedP4Object {
 
   virtual void dump(std::ostream *stream) const = 0;
 
-  std::string dump_entry_string(entry_handle_t handle) const;
+  MatchErrorCode dump_entry(std::ostream *out,
+                            entry_handle_t handle) const {
+    ReadLock lock = lock_read();
+    return dump_entry_(out, handle);
+  }
+
+  std::string dump_entry_string(entry_handle_t handle) const {
+    ReadLock lock = lock_read();
+    return dump_entry_string_(handle);
+  }
 
   void reset_state();
 
@@ -161,11 +170,11 @@ class MatchTableAbstract : public NamedP4Object {
  private:
   virtual void reset_state_() = 0;
 
-  virtual MatchErrorCode dump_entry(std::ostream *out,
-                                    entry_handle_t handle) const = 0;
+  virtual MatchErrorCode dump_entry_(std::ostream *out,
+                                     entry_handle_t handle) const = 0;
 
-  // the internal (_int) version does not acquire the lock
-  std::string dump_entry_string_int(entry_handle_t handle) const;
+  // the internal version does not acquire the lock
+  std::string dump_entry_string_(entry_handle_t handle) const;
 
  private:
   mutable boost::shared_mutex t_mutex{};
@@ -217,9 +226,6 @@ class MatchTable : public MatchTableAbstract {
 
   void dump(std::ostream *stream) const override;
 
-  MatchErrorCode dump_entry(std::ostream *out,
-                            entry_handle_t handle) const override;
-
  public:
   static std::unique_ptr<MatchTable> create(
       const std::string &match_type,
@@ -230,6 +236,9 @@ class MatchTable : public MatchTableAbstract {
 
  private:
   void reset_state_() override;
+
+  MatchErrorCode dump_entry_(std::ostream *out,
+                             entry_handle_t handle) const override;
 
  private:
   ActionEntry default_entry{};
@@ -373,9 +382,6 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   void dump(std::ostream *stream) const override;
 
-  MatchErrorCode dump_entry(std::ostream *out,
-                            entry_handle_t handle) const override;
-
   size_t get_num_members() const {
     return num_members;
   }
@@ -396,8 +402,8 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   void dump_(std::ostream *stream) const;
 
-  MatchErrorCode dump_entry_(std::ostream *stream, entry_handle_t handle,
-                             const IndirectIndex **index) const;
+  MatchErrorCode dump_entry_common(std::ostream *stream, entry_handle_t handle,
+                                   const IndirectIndex **index) const;
 
  protected:
   IndirectIndex default_index{};
@@ -410,6 +416,9 @@ class MatchTableIndirect : public MatchTableAbstract {
 
  private:
   void entries_insert(mbr_hdl_t mbr, ActionEntry &&entry);
+
+  MatchErrorCode dump_entry_(std::ostream *out,
+                             entry_handle_t handle) const override;
 
  private:
   size_t num_members{0};
@@ -469,9 +478,6 @@ class MatchTableIndirectWS : public MatchTableIndirect {
 
   void dump(std::ostream *stream) const override;
 
-  MatchErrorCode dump_entry(std::ostream *out,
-                            entry_handle_t handle) const override;
-
  public:
   static std::unique_ptr<MatchTableIndirectWS> create(
     const std::string &match_type,
@@ -494,6 +500,9 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   mbr_hdl_t choose_from_group(grp_hdl_t grp, const Packet &pkt) const;
 
   void reset_state_() override;
+
+  MatchErrorCode dump_entry_(std::ostream *out,
+                            entry_handle_t handle) const override;
 
  private:
   class GroupInfo {
