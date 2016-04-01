@@ -121,9 +121,10 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
   }
 
   bool check_event_action_execute(const NNEventListener::NNEvent &event,
-                                  const std::string &name) {
+                                  const std::string &t_name,
+                                  const std::string &a_name) {
     return (event.type == NNEventListener::ACTION_EXECUTE) &&
-        (event.id == test_switch->get_action_id(name));
+        (event.id == test_switch->get_action_id(t_name, a_name));
   }
 
  protected:
@@ -183,11 +184,12 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Baseline) {
   events.get_and_remove_events("0.0", &pevents, 6u);
   ASSERT_EQ(6u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_set_port"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_set_port"));
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_ingress_2"));
-  ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2", "_nop"));
   ASSERT_TRUE(check_event_table_miss(pevents[4], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[5], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[5], "t_egress", "_nop"));
 #endif
 }
 
@@ -248,19 +250,20 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
   events.get_and_remove_events("1.0", &pevents, 4u);
   ASSERT_EQ(4u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_multicast"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_multicast"));
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_ingress_2"));
-  ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2", "_nop"));
 
   events.get_and_remove_events("1.1", &pevents, 2u);
   ASSERT_EQ(2u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
 
   events.get_and_remove_events("1.2", &pevents, 2u);
   ASSERT_EQ(2u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
 #endif
 
   // reset PRE
@@ -319,16 +322,18 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneI2E) {
   events.get_and_remove_events("2.0", &pevents, 6u);
   ASSERT_EQ(6u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_set_port"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_set_port"));
   ASSERT_TRUE(check_event_table_hit(pevents[2], "t_ingress_2"));
-  ASSERT_TRUE(check_event_action_execute(pevents[3], "_clone_i2e"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2",
+                                         "_clone_i2e"));
   ASSERT_TRUE(check_event_table_miss(pevents[4], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[5], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[5], "t_egress", "_nop"));
 
   events.get_and_remove_events("2.1", &pevents, 2u);
   ASSERT_EQ(2u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
 #endif
 }
 
@@ -382,16 +387,17 @@ TEST_F(SimpleSwitch_PacketRedirectP4, CloneE2E) {
   events.get_and_remove_events("3.0", &pevents, 6u);
   ASSERT_EQ(6u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_set_port"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_set_port"));
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_ingress_2"));
-  ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2", "_nop"));
   ASSERT_TRUE(check_event_table_hit(pevents[4], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[5], "_clone_e2e"));
+  ASSERT_TRUE(check_event_action_execute(pevents[5], "t_egress", "_clone_e2e"));
 
   events.get_and_remove_events("3.1", &pevents, 2u);
   ASSERT_EQ(2u, pevents.size());
   ASSERT_TRUE(check_event_table_miss(pevents[0], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_egress", "_nop"));
 #endif
 }
 
@@ -448,20 +454,23 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
   events.get_and_remove_events("4.0", &pevents, 4u);
   ASSERT_EQ(4u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_set_port"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_set_port"));
   ASSERT_TRUE(check_event_table_hit(pevents[2], "t_ingress_2"));
-  ASSERT_TRUE(check_event_action_execute(pevents[3], "_resubmit"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2",
+                                         "_resubmit"));
 
   // TODO(antonin): if we consider that it is the same packet, then the copy_id
   // should be the same? Update this if this changes in simple_switch
   events.get_and_remove_events("4.1", &pevents, 6u);
   ASSERT_EQ(6u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_set_port"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_set_port"));
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_ingress_2"));
-  ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2", "_nop"));
   ASSERT_TRUE(check_event_table_miss(pevents[4], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[5], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[5], "t_egress", "_nop"));
 #endif
 }
 
@@ -516,22 +525,25 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
   events.get_and_remove_events("5.0", &pevents, 6u);
   ASSERT_EQ(6u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_set_port"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_set_port"));
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_ingress_2"));
-  ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2", "_nop"));
   ASSERT_TRUE(check_event_table_hit(pevents[4], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[5], "_recirculate"));
+  ASSERT_TRUE(check_event_action_execute(pevents[5], "t_egress",
+                                         "_recirculate"));
 
   // TODO(antonin): if we consider that it is the same packet, then the copy_id
   // should be the same? Update this if this changes in simple_switch
   events.get_and_remove_events("5.1", &pevents, 6u);
   ASSERT_EQ(6u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_set_port"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1",
+                                         "_set_port"));
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_ingress_2"));
-  ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_ingress_2", "_nop"));
   ASSERT_TRUE(check_event_table_miss(pevents[4], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[5], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[5], "t_egress", "_nop"));
 #endif
 }
 
@@ -562,8 +574,8 @@ TEST_F(SimpleSwitch_PacketRedirectP4, ExitIngress) {
   events.get_and_remove_events("6.0", &pevents, 4u);
   ASSERT_EQ(4u, pevents.size());
   ASSERT_TRUE(check_event_table_hit(pevents[0], "t_ingress_1"));
-  ASSERT_TRUE(check_event_action_execute(pevents[1], "_exit"));
+  ASSERT_TRUE(check_event_action_execute(pevents[1], "t_ingress_1", "_exit"));
   ASSERT_TRUE(check_event_table_miss(pevents[2], "t_egress"));
-  ASSERT_TRUE(check_event_action_execute(pevents[3], "_nop"));
+  ASSERT_TRUE(check_event_action_execute(pevents[3], "t_egress", "_nop"));
 #endif
 }

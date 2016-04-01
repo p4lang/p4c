@@ -130,8 +130,9 @@ class Context final {
     return p4objects->get_match_action_table(name)->get_id();
   }
 
-  p4object_id_t get_action_id(const std::string &name) {
-    return p4objects->get_action(name)->get_id();
+  p4object_id_t get_action_id(const std::string &table_name,
+                              const std::string &action_name) {
+    return p4objects->get_action(table_name, action_name)->get_id();
   }
 
  private:

@@ -46,7 +46,7 @@ Context::mt_add_entry(const std::string &table_name,
   assert(abstract_table);
   MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
+  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
   assert(action);
   return table->add_entry(
     match_key, action, std::move(action_data), handle, priority);
@@ -62,7 +62,7 @@ Context::mt_set_default_action(const std::string &table_name,
   assert(abstract_table);
   MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
+  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
   assert(action);
   return table->set_default_action(action, std::move(action_data));
 }
@@ -90,7 +90,7 @@ Context::mt_modify_entry(const std::string &table_name,
   assert(abstract_table);
   MatchTable *table = dynamic_cast<MatchTable *>(abstract_table);
   if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
+  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
   assert(action);
   return table->modify_entry(handle, action, std::move(action_data));
 }
@@ -126,7 +126,7 @@ Context::mt_indirect_add_member(
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
     return rc;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
+  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
   if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
   return table->add_member(action, std::move(action_data), mbr);
 }
@@ -152,7 +152,7 @@ Context::mt_indirect_modify_member(const std::string &table_name,
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
     return rc;
-  const ActionFn *action = p4objects_rt->get_action(action_name);
+  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
   if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
   return table->modify_member(mbr, action, std::move(action_data));
 }

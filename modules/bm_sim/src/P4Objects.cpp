@@ -656,7 +656,7 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
         }
       }
     }
-    add_action(action_name, std::move(action_fn));
+    add_action(action_id, std::move(action_fn));
   }
 
   // pipelines
@@ -833,7 +833,6 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
       MatchTableAbstract *table = get_abstract_match_table(table_name);
 
       const Json::Value &cfg_next_nodes = cfg_table["next_tables"];
-      const Json::Value &cfg_actions = cfg_table["actions"];
 
       auto get_next_node = [this](const Json::Value &cfg_next_node)
           -> const ControlFlowNode *{
@@ -842,13 +841,27 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
         return get_control_node(cfg_next_node.asString());
       };
 
+      std::string actions_key = cfg_table.isMember("action_ids") ? "action_ids"
+          : "actions";
+      const Json::Value &cfg_actions = cfg_table[actions_key];
       for (const auto &cfg_action : cfg_actions) {
-        const string action_name = cfg_action.asString();
-        // note that operator[] creates a null member if action_name does not
-        // exist
+        p4object_id_t action_id = 0;
+        string action_name = "";
+        ActionFn *action = nullptr;
+        if (actions_key == "action_ids") {
+          p4object_id_t action_id = cfg_action.asInt();
+          action = get_action_by_id(action_id); assert(action);
+          action_name = action->get_name();
+        } else {
+          action_name = cfg_action.asString();
+          action = get_one_action_with_name(action_name); assert(action);
+          action_id = action->get_id();
+        }
+
         const Json::Value &cfg_next_node = cfg_next_nodes[action_name];
         const ControlFlowNode *next_node = get_next_node(cfg_next_node);
-        table->set_next_node(get_action(action_name)->get_id(), next_node);
+        table->set_next_node(action_id, next_node);
+        add_action_to_table(table_name, action_name, action);
       }
 
       if (cfg_next_nodes.isMember("__HIT__"))
