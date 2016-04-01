@@ -74,7 +74,7 @@ TEST(P4Objects, LoadFromJSON1) {
   ASSERT_EQ(0, objects.init_objects(&is));
 
   ASSERT_NE(nullptr, objects.get_pipeline("ingress"));
-  ASSERT_NE(nullptr, objects.get_action("_drop"));
+  ASSERT_NE(nullptr, objects.get_action("ipv4_lpm", "_drop"));
   ASSERT_NE(nullptr, objects.get_parser("parser"));
   ASSERT_NE(nullptr, objects.get_deparser("deparser"));
   MatchTableAbstract *table;

@@ -654,8 +654,9 @@ class Switch : public SwitchWContexts {
     return get_context(0)->get_table_id(name);
   }
 
-  p4object_id_t get_action_id(const std::string &name) {
-    return get_context(0)->get_action_id(name);
+  p4object_id_t get_action_id(const std::string &table_name,
+                              const std::string &action_name) {
+    return get_context(0)->get_action_id(table_name, action_name);
   }
 
   // to avoid C++ name hiding

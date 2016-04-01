@@ -80,8 +80,21 @@ class P4Objects {
 
   void reset_state();
 
-  ActionFn *get_action(const std::string &name) {
-    return actions_map.at(name).get();
+  ActionFn *get_action_by_id(p4object_id_t id) {
+    return actions_map.at(id).get();
+  }
+
+  // TODO(antonin): temporary function to ensure backwards compat of JSON
+  ActionFn *get_one_action_with_name(const std::string &name) {
+    for (auto it = actions_map.begin(); it != actions_map.end(); it++) {
+      if (it->second->get_name() == name) return it->second.get();
+    }
+    return nullptr;
+  }
+
+  ActionFn *get_action(const std::string &table_name,
+                       const std::string &action_name) {
+    return t_actions_map.at(std::make_pair(table_name, action_name));
   }
 
   Parser *get_parser(const std::string &name) {
@@ -166,8 +179,13 @@ class P4Objects {
     return header_stack_ids_map.at(name);
   }
 
-  void add_action(const std::string &name, std::unique_ptr<ActionFn> action) {
-    actions_map[name] = std::move(action);
+  void add_action(p4object_id_t id, std::unique_ptr<ActionFn> action) {
+    actions_map[id] = std::move(action);
+  }
+
+  void add_action_to_table(const std::string &table_name,
+                           const std::string &action_name, ActionFn *action) {
+    t_actions_map[std::make_pair(table_name, action_name)] = action;
   }
 
   void add_parser(const std::string &name, std::unique_ptr<Parser> parser) {
@@ -259,7 +277,21 @@ class P4Objects {
   std::unordered_map<std::string, std::unique_ptr<Pipeline> > pipelines_map{};
 
   // actions
-  std::unordered_map<std::string, std::unique_ptr<ActionFn> > actions_map{};
+  // TODO(antonin): make this a vector?
+  std::unordered_map<p4object_id_t, std::unique_ptr<ActionFn> > actions_map{};
+  typedef std::pair<std::string, std::string> table_action_pair;
+  struct TableActionPairKeyHash {
+    std::size_t operator()(const table_action_pair& p) const {
+      std::size_t seed = 0;
+      boost::hash_combine(seed, p.first);
+      boost::hash_combine(seed, p.second);
+
+      return seed;
+    }
+  };
+  std::unordered_map<table_action_pair, ActionFn *, TableActionPairKeyHash>
+  t_actions_map{};
+  // std::unordered_map<std::string, std::unique_ptr<ActionFn> > actions_map{};
 
   // parsers
   std::unordered_map<std::string, std::unique_ptr<Parser> > parsers{};
