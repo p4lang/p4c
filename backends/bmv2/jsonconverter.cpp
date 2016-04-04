@@ -398,6 +398,17 @@ static Util::IJson* wrapExpression(Util::IJson* json) {
     return json;
 }
 
+void JsonConverter::setDirectMeterDestination(const IR::IDeclaration* decl,
+                                              const IR::Expression* dest)  {
+    auto prev = ::get(directMeterDest, decl);
+    if (prev == nullptr)
+        directMeterDest.emplace(decl, dest);
+    else {
+        // CHECK it's the same destination
+        // TODO
+    }
+}
+
 void
 JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                                  Util::JsonArray* result, Util::JsonArray* fieldLists,
@@ -525,6 +536,14 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         parameters->append(index);
                         auto value = conv->convert(mc->arguments->at(1));
                         parameters->append(value);
+                        continue;
+                    }
+                } else if (em->type->name == v1model.directMeter.name) {
+                    if (em->method->name == v1model.directMeter.read.name) {
+                        BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
+                        auto dest = mc->arguments->at(0);
+                        setDirectMeterDestination(em->object, dest);
+                        // Do not generate any code for this operation
                         continue;
                     }
                 }
@@ -899,19 +918,51 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
         }
     }
     result->emplace("support_timeout", sup_to);
-    result->emplace("direct_meters", Util::JsonValue::null);
+
+    auto dm = table->properties->getProperty(v1model.tableAttributes.directMeter.name);
+    if (dm != nullptr) {
+        if (dm->value->is<IR::ExpressionValue>()) {
+            auto expr = dm->value->to<IR::ExpressionValue>()->expression;
+            if (!expr->is<IR::PathExpression>()) {
+                ::error("%1%: expected a reference to a meter declaration", expr);
+            } else {
+                auto pe = expr->to<IR::PathExpression>();
+                auto decl = refMap->getDeclaration(pe->path, true);
+                auto prev = ::get(directMeterTable, decl);
+                if (prev != nullptr)
+                    ::error("%1%: Direct meters cannot be attached two multiple tables %2% and %3%",
+                            dm, table, prev);
+                directMeterTable.emplace(decl, table);
+                BUG_CHECK(decl->is<IR::Declaration_Instance>(),
+                          "%1%: expected an instance", decl->getNode());
+                cstring dmname = nameFromAnnotation(decl->to<IR::Declaration_Instance>()->annotations,
+                                                    decl->getName());
+                result->emplace("direct_meters", dmname);
+            }
+        } else {
+            ::error("%1%: expected a Boolean", timeout);
+        }
+    } else {
+        result->emplace("direct_meters", Util::JsonValue::null);
+    }
+
     auto action_ids = mkArrayField(result, "action_ids");
     auto actions = mkArrayField(result, "actions");
     auto al = table->getActionList();
+
+    std::map<cstring, cstring> useActionName;
     for (auto a : *al->actionList) {
         if (a->arguments != nullptr && a->arguments->size() > 0)
             ::error("%1%: Actions in action list with arguments not supported", a);
-        auto action = refMap->getDeclaration(a->name->path);
-        CHECK_NULL(action);
-        BUG_CHECK(action->is<IR::ActionContainer>(), "%1%: should be an action name", a);
-        unsigned id = get(structure.ids, action->to<IR::ActionContainer>());
+        auto decl = refMap->getDeclaration(a->name->path);
+        CHECK_NULL(decl);
+        BUG_CHECK(decl->is<IR::ActionContainer>(), "%1%: should be an action name", a);
+        auto action = decl->to<IR::ActionContainer>();
+        unsigned id = get(structure.ids, action);
         action_ids->append(id);
-        actions->append(a->name->path->name);
+        auto name = nameFromAnnotation(action->annotations, action->name);
+        actions->append(name);
+        useActionName.emplace(action->name, name);
     }
 
     auto next_tables = new Util::JsonObject();
@@ -949,6 +1000,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
             if (label == IR::SwitchStatement::default_label)
                 continue;
         }
+        label = ::get(useActionName, label);
         next_tables->emplace(label, nodeName(s->endpoint));
         labelsDone.emplace(label);
     }
@@ -963,8 +1015,9 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     } else {
         for (auto a : *al->actionList) {
             cstring name = a->name->path->name;
-            if (labelsDone.find(name) == labelsDone.end())
-                next_tables->emplace(name, nextLabel);
+            cstring label = ::get(useActionName, name);
+            if (labelsDone.find(label) == labelsDone.end())
+                next_tables->emplace(label, nextLabel);
         }
     }
 
@@ -1094,6 +1147,40 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                         ::error("%1%: unknown width", st->arguments->at(0));
                     jreg->emplace("bitwidth", width);
                     registers->append(jreg);
+                    continue;
+                } else if (eb->type->name == v1model.directMeter.name) {
+                    auto jmtr = new Util::JsonObject();
+                    jmtr->emplace("name", c->name);
+                    jmtr->emplace("id", nextId("meter_arrays"));
+                    jmtr->emplace("is_direct", true);
+                    jmtr->emplace("rate_count", 2);
+                    auto mkind = eb->getParameterValue(v1model.directMeter.typeParam.name);
+                    CHECK_NULL(mkind);
+                    BUG_CHECK(mkind->is<IR::Declaration_ID>(), "%1%: expected a member", mkind);
+                    cstring name = mkind->to<IR::Declaration_ID>()->name;
+                    cstring type;
+                    if (name == v1model.meter.counterType.packets.name)
+                        type = "packets";
+                    else if (name == v1model.meter.counterType.bytes.name)
+                        type = "bytes";
+                    else
+                        type = "both";
+                    jmtr->emplace("type", type);
+                    jmtr->emplace("size", 1);  // this should be inherited from the table anyway
+                    auto tbl = ::get(directMeterTable, c);
+                    if (tbl == nullptr)
+                        continue;
+
+                    cstring tblname = nameFromAnnotation(tbl->annotations, tbl->name);
+                    jmtr->emplace("binding", tblname);
+                    auto dest = ::get(directMeterDest, c);
+                    if (dest == nullptr)
+                        ::error("%1%: Could not determine destination for direct meter", c);
+                    else {
+                        auto result = conv->convert(dest);
+                        jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
+                    }
+                    meters->append(jmtr);
                     continue;
                 }
             }

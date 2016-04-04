@@ -35,5 +35,4 @@ XFAIL_TESTS += \
     bmv2/testdata/v1_samples/hitmiss.p4.test \
     bmv2/testdata/v1_samples/packet_redirect.p4.test \
     bmv2/testdata/v1_samples/TLV_parsing.p4.test \
-    bmv2/testdata/v1_samples/truncate.p4.test \
-    bmv2/testdata/v1_samples/meter1.p4.test 
+    bmv2/testdata/v1_samples/truncate.p4.test

@@ -28,6 +28,11 @@ class JsonConverter {
     cstring                dropAction = ".drop";
     P4::BlockMap*          blockMap;
     ExpressionConverter*   conv;
+    
+    // Field written by a direct meter (indexed with meter declaration).
+    std::map<const IR::IDeclaration*, const IR::Expression*> directMeterDest;
+    // Table that uses a direct meter.
+    std::map<const IR::IDeclaration*, const IR::TableContainer*> directMeterTable;
 
  protected:
     Util::IJson* typeToJson(const IR::Type_StructLike* type);
@@ -58,6 +63,7 @@ class JsonConverter {
     Util::IJson* nodeName(const CFG::Node* node) const;
     void createForceArith(const IR::Type* stdMetaType, cstring name,
                           Util::JsonArray* force_list) const;
+    void setDirectMeterDestination(const IR::IDeclaration* decl, const IR::Expression* dest);
     cstring convertHashAlgorithm(cstring algorithm) const;
     void handleTableImplementation(const IR::TableProperty* implementation,
                                    const IR::Key* key,
