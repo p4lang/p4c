@@ -76,7 +76,7 @@ clean-local:
 	-rm -f $(BUILT_SOURCES) $(CLEANFILES)
 
 cpplint:
-	cd $(srcdir); tools/cpplint.py --root=$(srcdir) --extensions=h,hpp,c,cpp,ypp,l $(sort $(cpplint_FILES))
+	cd $(srcdir); tools/cpplint.py --extensions=h,hpp,c,cpp,ypp,l $(sort $(cpplint_FILES))
 
 tags:
 	cd $(srcdir); ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp \

@@ -1,11 +1,7 @@
 set -e
 ./find-makefiles.sh
 echo "Running autoconf/configure tools"
-libtoolize
-aclocal 
-autoconf
-autoheader
-automake --add-missing
+autoreconf -i
 mkdir -p build
 cd build
 # TODO: the "prefix" is needed for finding the p4include folder.
