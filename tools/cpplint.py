@@ -1733,7 +1733,7 @@ def CheckForHeaderGuard(filename, clean_lines, error):
     error_level = 0
     if ifndef != cppvar + '_':
       error_level = 5
-    if ifndef == cppvar[-len(ifndef):]:
+    if ifndef == ('P4C_' + cppvar)[-len(ifndef):]:
       error_level = 0
 
     ParseNolintSuppressions(filename, raw_lines[ifndef_linenum], ifndef_linenum,
