@@ -1,10 +1,10 @@
 # Makefile for a backend that generates code for the Behavioral Model version 2 (BMv2)
 # To be included in the main P4C compiler makefile
 
-bin_PROGRAMS += p4c-bmv2
-p4c_bmv2_LDADD = -lgc libfrontend.a libp4ctoolkit.a
+bin_PROGRAMS += p4c-bm2
+p4c_bm2_LDADD = -lgc libfrontend.a libp4ctoolkit.a
 
-p4c_bmv2_SOURCES = \
+p4c_bm2_SOURCES = \
 	backends/bmv2/bmv2.cpp \
 	backends/bmv2/analyzer.h \
 	backends/bmv2/analyzer.cpp \

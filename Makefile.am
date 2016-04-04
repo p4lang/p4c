@@ -11,10 +11,11 @@ GENTESTS=$(TOOLSDIR)/gen-tests.py
 
 # Variables that are appended to in sub-Makefiles
 # Please use += to add values to these variables
-# The first 6 are standard automake variables
+# The first 7 are standard automake variables
 CLEANFILES =                   # Files to remove on clean
 bin_PROGRAMS =                 # Binaries built
-noinst_LIBRARIES =             # Static libraries built 
+noinst_LIBRARIES =             # Static libraries built
+noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
 TESTS =                        # Tests to execute
 XFAIL_TESTS =                  # Tests that are supposed to fail

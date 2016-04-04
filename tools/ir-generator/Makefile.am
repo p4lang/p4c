@@ -10,6 +10,6 @@ irgenerator_LDADD = -lgc libp4ctoolkit.a
 BUILT_SOURCES += \
 	tools/ir-generator/ir-generator-lex.c
 
-bin_PROGRAMS += irgenerator
+noinst_PROGRAMS += irgenerator
 
 cpplint_FILES += $(irgenerator_SOURCES)

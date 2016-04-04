@@ -24,7 +24,7 @@ TAGS
 tags
 
 extensions/*
-backendMakefiles.am
+otherMakefiles.am
 *.d
 *.output
 

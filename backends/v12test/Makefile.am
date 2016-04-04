@@ -1,7 +1,7 @@
 # Makefile for a fake backend that is used for testing the P4 v1.2 front-end.
 # To be included in the main P4C compiler makefile
 
-bin_PROGRAMS += v12test
+noinst_PROGRAMS += v12test
 v12test_LDADD = -lgc libfrontend.a libp4ctoolkit.a
 
 v12test_SOURCES = backends/v12test/v12test.cpp ir/dump.cpp
