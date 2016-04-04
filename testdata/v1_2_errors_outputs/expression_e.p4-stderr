@@ -1,0 +1,4 @@
+../testdata/v1_2_errors/expression_e.p4(6):syntax error, unexpected ';', expecting '('
+        b = 32w0 & _;
+                    ^
+error: 1 errors ecountered, aborting compilation

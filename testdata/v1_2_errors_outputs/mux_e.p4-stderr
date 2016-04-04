@@ -1,0 +1,11 @@
+error: Selector of ?: must be bool, not bit<1>
+../testdata/v1_2_errors/mux_e.p4(9): error: Could not find type of ?:
+        a = a ? b : c;
+            ^^^^^^^^^
+../testdata/v1_2_errors/mux_e.p4(10): error: ?:: Cannot unify bool to bit<1>
+        d = d ? a : d;
+            ^^^^^^^^^
+../testdata/v1_2_errors/mux_e.p4(10): error: Could not find type of ?:
+        d = d ? a : d;
+            ^^^^^^^^^
+error: 4 errors ecountered, aborting compilation

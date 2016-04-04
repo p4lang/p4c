@@ -1,0 +1,4 @@
+../testdata/v1_2_errors/underscore2_e.p4(4):syntax error, unexpected DONTCARE
+        bit _
+            ^
+error: 1 errors ecountered, aborting compilation

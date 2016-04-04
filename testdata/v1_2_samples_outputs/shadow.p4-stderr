@@ -1,0 +1,7 @@
+../testdata/v1_2_samples/shadow.p4(6): warning: x shadows x
+            bit x;
+                ^
+../testdata/v1_2_samples/shadow.p4(4)
+        bit x;
+            ^
+warning: Program does not contain a `main' module

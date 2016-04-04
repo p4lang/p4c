@@ -274,7 +274,7 @@ class ExpressionConverter : public Inspector {
         auto c = get(expression->e0);
         e->emplace("cond", fixLocal(c));
     }
-    
+
     void postorder(const IR::Operation_Binary* expression) override {
         auto result = new Util::JsonObject();
         map.emplace(expression, result);
@@ -590,9 +590,11 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     if (mc->typeArguments->size() == 1) {
                         auto typeArg = mc->typeArguments->at(0);
                         if (typeArg->is<IR::Type_Name>()) {
-                            auto origType = refMap->getDeclaration(typeArg->to<IR::Type_Name>()->path);
+                            auto origType = refMap->getDeclaration(
+                                typeArg->to<IR::Type_Name>()->path);
                             CHECK_NULL(origType);
-                            BUG_CHECK(origType->is<IR::Type_Struct>(), "%1%: expected a struct type", origType);
+                            BUG_CHECK(origType->is<IR::Type_Struct>(),
+                                      "%1%: expected a struct type", origType);
                             auto st = origType->to<IR::Type_Struct>();
                             listName = nameFromAnnotation(st->annotations, st->name);
                         }
@@ -672,7 +674,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
                 ::warning("Removing unused action parameter %1% for compatibility reasons", p);
                 continue;
             }
-            
+
             auto param = new Util::JsonObject();
             param->emplace("name", p->name);
             auto type = typeMap->getType(p, true);

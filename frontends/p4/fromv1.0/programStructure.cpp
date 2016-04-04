@@ -722,7 +722,7 @@ ProgramStructure::convertTable(
             IR::Annotations::empty, propvalue, false);
         propvec->addUnique(prop->name, prop);
     }
-    
+
     auto props = new IR::TableProperties(Util::SourceInfo(), std::move(*propvec));
     auto annos = addNameAnnotation(table->name);
     auto result = new IR::TableContainer(table->srcInfo, newName, annos, params, props);
@@ -804,7 +804,7 @@ const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* e
     auto result = conv.convert(fl);
     return result;
 }
-        
+
 
 const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* primitive) {
     ExpressionConverter conv(this);
@@ -1189,7 +1189,8 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
 }
 
 const IR::ActionContainer*
-ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newName, const IR::Meter* meterToAccess) {
+ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newName,
+                                const IR::Meter* meterToAccess) {
     LOG1("Converting action " << action->name);
     auto body = new IR::Vector<IR::StatOrDecl>();
     auto params = new IR::ParameterList();
@@ -1229,11 +1230,12 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
         auto arg = conv.convert(meterToAccess->result);
         if (arg != nullptr)
             args->push_back(arg);
-        auto mc = new IR::MethodCallExpression(Util::SourceInfo(), method, emptyTypeArguments, args);
+        auto mc = new IR::MethodCallExpression(Util::SourceInfo(), method,
+                                               emptyTypeArguments, args);
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
         body->push_back(stat);
     }
-    
+
     // Save the original action name in an annotation
     auto annos = addNameAnnotation(action->name);
     auto result = new IR::ActionContainer(action->srcInfo, newName, annos, params, body);

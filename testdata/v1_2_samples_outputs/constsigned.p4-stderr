@@ -1,0 +1,22 @@
+../testdata/v1_2_samples/constsigned.p4(6): warning: -129: signed value does not fit in 8 bits
+const int<8> f = -129;
+                  ^^^
+../testdata/v1_2_samples/constsigned.p4(7): warning: -255: signed value does not fit in 8 bits
+const int<8> g = -255;
+                  ^^^
+../testdata/v1_2_samples/constsigned.p4(8): warning: -256: signed value does not fit in 8 bits
+const int<8> h = -256;
+                  ^^^
+../testdata/v1_2_samples/constsigned.p4(12): warning: 128: signed value does not fit in 8 bits
+const int<8> l = 128;
+                 ^^^
+../testdata/v1_2_samples/constsigned.p4(13): warning: 129: signed value does not fit in 8 bits
+const int<8> m = 129;
+                 ^^^
+../testdata/v1_2_samples/constsigned.p4(14): warning: 255: signed value does not fit in 8 bits
+const int<8> n = 255;
+                 ^^^
+../testdata/v1_2_samples/constsigned.p4(15): warning: 256: signed value does not fit in 8 bits
+const int<8> o = 256;
+                 ^^^
+warning: Program does not contain a `main' module

@@ -1,0 +1,7 @@
+../testdata/v1_2_errors/const1_e.p4(4): error: +: operands have different types: bit<32> and bit<16>
+    x = 32w5 + 16w3;
+        ^^^^^^^^^^^
+../testdata/v1_2_errors/const1_e.p4(6): error: /: Division by zero
+    x = 5 / 0;
+        ^^^^^
+error: 2 errors ecountered, aborting compilation

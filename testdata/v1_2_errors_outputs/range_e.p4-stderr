@@ -1,0 +1,7 @@
+../testdata/v1_2_errors/range_e.p4(5): error: ..: Cannot operate on values with different types bit<2> and bit<3>
+            2w2 .. 3w3 : reject;
+            ^^^^^^^^^^
+../testdata/v1_2_errors/range_e.p4(5): error: Could not find type of ..
+            2w2 .. 3w3 : reject;
+            ^^^^^^^^^^
+error: 2 errors ecountered, aborting compilation

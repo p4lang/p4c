@@ -1,0 +1,12 @@
+../testdata/v1_samples/mac_rewrite.p4(108): warning: -1: negative value with unsigned type
+    add_to_field(ipv4.ttl, -1);
+                            ^
+../testdata/v1_samples/mac_rewrite.p4(114): warning: -1: negative value with unsigned type
+    add_to_field(ipv4.ttl, -1);
+                            ^
+../testdata/v1_samples/mac_rewrite.p4(120): warning: -1: negative value with unsigned type
+    add_to_field(ipv6.hopLimit, -1);
+                                 ^
+../testdata/v1_samples/mac_rewrite.p4(126): warning: -1: negative value with unsigned type
+    add_to_field(ipv6.hopLimit, -1);
+                                 ^

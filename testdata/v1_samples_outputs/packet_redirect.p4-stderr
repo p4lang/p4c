@@ -1,0 +1,6 @@
+../testdata/v1_samples/packet_redirect.p4(85): warning: Could not infer type for mirror_id, using bit<8>
+action _clone_e2e(mirror_id) {
+                  ^^^^^^^^^
+../testdata/v1_samples/packet_redirect.p4(81): warning: Could not infer type for mirror_id, using bit<8>
+action _clone_i2e(mirror_id) {
+                  ^^^^^^^^^

@@ -1,0 +1,13 @@
+../testdata/v1_2_errors/div0.p4(3): error: /: Division by zero
+    a = a / 0;
+        ^^^^^
+../testdata/v1_2_errors/div0.p4(4): error: %: Modulo by zero
+    a = a % 0;
+        ^^^^^
+../testdata/v1_2_errors/div0.p4(5): error: /: Division by zero
+    a = a / 8w0;
+        ^^^^^^^
+../testdata/v1_2_errors/div0.p4(6): error: %: Modulo by zero
+    a = a % 8w0;
+        ^^^^^^^
+error: 4 errors ecountered, aborting compilation

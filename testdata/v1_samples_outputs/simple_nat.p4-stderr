@@ -1,0 +1,6 @@
+../testdata/v1_samples/simple_nat.p4:148:10: warning: missing terminating ' character [enabled by default]
+         8'0;
+          ^
+../testdata/v1_samples/simple_nat.p4(280): warning: -1: negative value with unsigned type
+    add_to_field(ipv4.ttl, -1);
+                            ^

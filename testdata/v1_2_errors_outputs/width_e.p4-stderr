@@ -1,0 +1,4 @@
+../testdata/v1_2_errors/width_e.p4(1): error: 12301923123132: Value too large
+const bit<12301923123132>
+          ^^^^^^^^^^^^^^
+error: 1 errors ecountered, aborting compilation

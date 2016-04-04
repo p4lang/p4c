@@ -147,7 +147,8 @@ class ProgramStructure {
     const IR::TableContainer*
     convertTable(const IR::Table* table, cstring newName,
                  IR::NameMap<IR::Declaration, ordered_map>* stateful);
-    const IR::ActionContainer* convertAction(const IR::ActionFunction* action, cstring newName, const IR::Meter* meterToAccess);
+    const IR::ActionContainer* convertAction(const IR::ActionFunction* action, cstring newName,
+                                             const IR::Meter* meterToAccess);
     const IR::Type_Control* controlType(IR::ID name);
     const IR::PathExpression* getState(IR::ID dest);
     const IR::Declaration_Instance* checksumUnit(const IR::FieldListCalculation* flc);
@@ -175,7 +176,7 @@ class ProgramStructure {
 
     const IR::Control* ingress;
     IR::ID ingressReference;
-    
+
     const IR::ControlContainer* verifyChecksums;
     const IR::ControlContainer* updateChecksums;
     const IR::ControlContainer* deparser;

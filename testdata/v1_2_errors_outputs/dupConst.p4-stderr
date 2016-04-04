@@ -1,0 +1,7 @@
+../testdata/v1_2_errors/dupConst.p4(2): error: Duplicate declaration of a: previous declaration at 
+const bit<4> a = 2;
+             ^
+../testdata/v1_2_errors/dupConst.p4(1)
+const bit<4> a = 1;
+             ^
+error: 1 errors ecountered, aborting compilation

@@ -10,7 +10,7 @@
 #   (The files in the "extensions" directory are not part of the compiler source tree;
 #   they are expected to be symlinks to custom back-ends.)
 
-resultMakefile="backendMakefiles.am"
+resultMakefile="otherMakefiles.am"
 dirsToSearch="backends extensions"
 
 echo "Creating $resultMakefile"

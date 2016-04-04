@@ -1,0 +1,4 @@
+../testdata/v1_2_errors/functors2_e.p4(5):syntax error, unexpected '.'
+        p.
+         ^
+error: 1 errors ecountered, aborting compilation

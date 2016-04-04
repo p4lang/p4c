@@ -1,0 +1,4 @@
+../testdata/v1_2_errors/constructor_e.p4(3):syntax error, unexpected TYPE
+    void X
+         ^
+error: 1 errors ecountered, aborting compilation

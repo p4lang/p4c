@@ -27,6 +27,7 @@ CLEANFILES += $(srcdir)/bmv2tests.am
 $(srcdir)/bmv2tests.am: $(srcdir)/testdata/v1_samples/*.p4 
 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@
 
+# These tests exhibit P4 v1.0 features still unimplemented
 XFAIL_TESTS += \
     bmv2/testdata/v1_samples/09-IPv4OptionsUnparsed.p4.test \
     bmv2/testdata/v1_samples/action_profile.p4.test \
@@ -34,4 +35,5 @@ XFAIL_TESTS += \
     bmv2/testdata/v1_samples/hitmiss.p4.test \
     bmv2/testdata/v1_samples/packet_redirect.p4.test \
     bmv2/testdata/v1_samples/TLV_parsing.p4.test \
-    bmv2/testdata/v1_samples/truncate.p4.test
+    bmv2/testdata/v1_samples/truncate.p4.test \
+    bmv2/testdata/v1_samples/meter1.p4.test 
