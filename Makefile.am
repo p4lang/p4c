@@ -69,6 +69,9 @@ include $(srcdir)/test/Makefile.am
 
 ################ Misc custom targets
 
+install:
+	echo "Installation not yet supported."
+
 clean-local:
 	-rm -f $(BUILT_SOURCES) $(CLEANFILES)
 

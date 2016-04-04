@@ -1,6 +1,7 @@
 # Repository
 
-[TODO]
+This folder contains documentation for the P4 v1.2 prototype compiler.
+The code and documentation are hosted in the following repository: https://github.com/p4lang/p4c
 
 # Compiler source code organization
 
