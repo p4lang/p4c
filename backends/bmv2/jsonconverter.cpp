@@ -623,6 +623,32 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     auto jcst = conv->convert(cst);
                     parameters->append(jcst);
                     continue;
+                } else if (ef->method->name == v1model.resubmit.name ||
+                           ef->method->name == v1model.recirculate.name) {
+                    BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
+                    cstring prim = (ef->method->name == v1model.resubmit.name) ? "resubmit" : "recirculate";
+                    auto primitive = mkPrimitive(prim, result);
+                    auto parameters = mkParameters(primitive);
+                    cstring listName = prim;
+                    // If we are supplied a type argument that is a named type use
+                    // that for the list name.
+                    if (mc->typeArguments->size() == 1) {
+                        auto typeArg = mc->typeArguments->at(0);
+                        if (typeArg->is<IR::Type_Name>()) {
+                            auto origType = refMap->getDeclaration(
+                                typeArg->to<IR::Type_Name>()->path);
+                            CHECK_NULL(origType);
+                            BUG_CHECK(origType->is<IR::Type_Struct>(),
+                                      "%1%: expected a struct type", origType);
+                            auto st = origType->to<IR::Type_Struct>();
+                            listName = nameFromAnnotation(st->annotations, st->name);
+                        }
+                    }
+                    int id = createFieldList(mc->arguments->at(0), listName, fieldLists);
+                    auto cst = new IR::Constant(id);
+                    auto jcst = conv->convert(cst);
+                    parameters->append(jcst);
+                    continue;
                 } else if (ef->method->name == v1model.drop.name) {
                     BUG_CHECK(mc->arguments->size() == 0, "Expected 0 arguments for %1%", mc);
                     auto primitive = mkPrimitive("drop", result);
