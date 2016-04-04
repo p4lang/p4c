@@ -1,0 +1,805 @@
+/* -*-C++-*- */
+
+/*
+  P4 compiler IR definition file.
+  To understand this you really have to understand the shape of the generated IR code.
+
+  The IR builder "knows" the following methods for a class T:
+
+  cstring toString() const override;
+  void dbprint(std::ostream &out) const override;
+  bool operator==(const T &a) const;
+  void validate() const;
+  const char *node_type_name() const;
+  void visit_children(Visitor &v);
+  void dump_fields(std::ostream& out) const;
+
+  C comments are ignored.
+  C++ line comments can appear in some places and are emitted in the output.
+
+  #emit/#end   -> copy text literally to output
+  #noXXX       -> do not emit the specified implementation for the XXX method
+                  e.g., #noconstructor, #nodbprint, #novisit_children
+  #apply       -> generate apply overload for visitors
+  method{ ... } -> specifies an implementation for a default method
+                   method can be 'operator=='
+
+  Some assignments are turned into methods returning constant values:
+  stringOp     -> cstring getStringOp() const
+  precedence   -> int getPrecedence() const
+ */
+
+#emit
+namespace IR {
+enum class CounterType { NONE, PACKETS, BYTES, BOTH };
+}
+
+inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
+    switch (d) {
+        case IR::CounterType::NONE:
+            out << "NONE";
+            break;
+        case IR::CounterType::PACKETS:
+            out << "PACKETS";
+            break;
+        case IR::CounterType::BYTES:
+            out << "BYTES";
+            break;
+        case IR::CounterType::BOTH:
+            out << "BOTH";
+            break;
+        default:
+            BUG("Unhandled case");
+    }
+    return out;
+}
+#end
+
+class SelectCase {
+    Expression     keyset;
+    PathExpression state;
+#nodbprint
+}
+
+class ParserState : IGeneralNamespace, Declaration {
+    Annotations              annotations;
+    Vector<StatOrDecl>       components;
+    // selectExpression can be a SelectExpression, or a PathExpression representing a state
+    NullOK Expression        selectExpression;
+#emit
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return components->only<IDeclaration>(); }
+
+    static const ID accept;
+    static const ID reject;
+    static const ID start;
+    bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
+#end
+#nodbprint
+    validate{ components->check_null(); }
+}
+
+// A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)
+class ParserContainer : Type_Declaration, IGeneralNamespace, IApply, IContainer {
+    Type_Parser          type;
+    ParameterList        constructorParams;
+    Vector<Declaration>  stateful;
+    Vector<ParserState>  states;
+#emit
+    const TypeParameters* getTypeParameters() const { return type->getTypeParameters(); }
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return stateful->getEnumerator()->
+                       as<const IDeclaration*>()->
+                       concat(states->only<IDeclaration>()); }
+    const Type_Method* getApplyMethodType() const { return type->getApplyMethodType(); }
+    const Type_Method* getConstructorMethodType() const override;
+#end
+#apply
+#nodbprint
+    validate {
+        if (!(name == type->name))
+            BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
+        stateful->check_null();
+        states->check_null();
+    }
+    toString { return cstring("parser ") + name; }
+}
+
+class ControlContainer : Type_Declaration, ISimpleNamespace, IApply, IContainer {
+    Type_Control         type;
+    ParameterList        constructorParams;
+    inline NameMap<Declaration, ordered_map>  stateful;
+    BlockStatement       body;
+#emit
+    Util::Enumerator<const Declaration*>* statefulEnumerator() const
+    { return stateful.valueEnumerator(); }
+    const TypeParameters* getTypeParameters() const { return type->getTypeParameters(); }
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const;
+    const Type_Method* getApplyMethodType() const { return type->getApplyMethodType(); }
+    const Type_Method* getConstructorMethodType() const override;
+    const IDeclaration* getDeclByName(cstring name) const
+    { return stateful.getUnique(name); }
+#end
+#apply
+#nodbprint
+    validate {
+        if (!(name == type->name))
+            BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
+        stateful.check_null();
+    }
+    toString { return cstring("control ") + name; }
+}
+
+// For uniform naming with Container; this is just a v1.2 action
+class ActionContainer : Declaration, IGeneralNamespace {
+    Annotations        annotations;
+    ParameterList      parameters;
+    Vector<StatOrDecl> body;
+#emit
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return body->only<IDeclaration>(); }
+#end
+#nodbprint
+    validate{ body->check_null(); }
+}
+
+class Declaration_Errors : Declaration, ISimpleNamespace {
+    inline NameMap<Declaration_ID, ordered_map> members;
+#emit
+    static const ID EID;
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return getEnumerator()->as<const IDeclaration*>(); }
+    Util::Enumerator<const Declaration_ID*>* getEnumerator() const
+    { return members.valueEnumerator(); }
+    const IDeclaration* getDeclByName(cstring name) const
+    { return members.getUnique(name); }
+#end
+#nodbprint
+    validate{ members.check_null(); }
+}
+
+class Declaration_MatchKind : Declaration, ISimpleNamespace {
+    inline NameMap<Declaration_ID, ordered_map> members;
+#emit
+    static const ID MKID;
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return getEnumerator()->as<const IDeclaration*>(); }
+    Util::Enumerator<const Declaration_ID*>* getEnumerator() const
+    { return members.valueEnumerator(); }
+    const IDeclaration* getDeclByName(cstring name) const
+    { return members.getUnique(name); }
+#end
+#nodbprint
+    validate{ members.check_null(); }
+}
+
+// Table property value abstract base class
+abstract PropertyValue {
+#nodbprint
+}
+
+class ExpressionValue : PropertyValue {
+    Expression expression;
+#nodbprint
+}
+
+// An element in a table actions list
+class ActionListElement {
+    Annotations               annotations;
+    PathExpression            name;
+    NullOK Vector<Expression> arguments;
+#nodbprint
+#emit
+    ID getName() const { return name->path->name; }
+#end
+}
+
+// A list of actions (in a table)
+class ActionList : PropertyValue {
+    Vector<ActionListElement> actionList;
+#emit
+    void checkDuplicates() const;
+#end
+#nodbprint
+    validate{ checkDuplicates(); actionList->check_null(); }
+}
+
+class KeyElement {
+    Expression      expression;
+    PathExpression  matchType;
+    dbprint{ Node::dbprint(out); out << "_:" << matchType; }
+}
+
+// Value of a table key property
+class Key : PropertyValue {
+    Vector<KeyElement> keyElements;
+#nodbprint
+    validate { keyElements->check_null(); }
+}
+
+class TableProperty : Declaration {
+    Annotations   annotations;
+    PropertyValue value;
+    bool          isConstant;
+#nodbprint
+}
+
+class TableProperties : ISimpleNamespace {
+    inline NameMap<TableProperty, ordered_map> properties;
+    toString{ return "TableProperties(" + Util::toString(properties.size()) + ")"; }
+#emit
+    TableProperties() {}
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return getEnumerator()->as<const IDeclaration*>(); }
+    const TableProperty* getProperty(cstring name) const
+    { return properties.getUnique(name); }
+    Util::Enumerator<const TableProperty*>* getEnumerator() const
+    { return properties.valueEnumerator(); }
+    const IDeclaration* getDeclByName(cstring name) const
+    { return properties.getUnique(name); }
+
+    static const cstring actionsPropertyName;
+    static const cstring keyPropertyName;
+    static const cstring defaultActionPropertyName;
+#end
+#nodbprint
+    validate{ properties.check_null(); }
+}
+
+class TableContainer : Declaration {
+    Annotations     annotations;
+    ParameterList   parameters;
+    TableProperties properties;
+#emit
+    const ActionList* getActionList() const {
+        auto ap = properties->getProperty(TableProperties::actionsPropertyName);
+        if (ap == nullptr)
+            return nullptr;
+        if (!ap->value->is<IR::ActionList>()) {
+            ::error("%1% must be an action list", ap);
+            return nullptr;
+        }
+        return ap->value->to<IR::ActionList>();
+    }
+    const Key* getKey() const {
+        auto kp = properties->getProperty(TableProperties::keyPropertyName);
+        if (kp == nullptr)
+            return nullptr;
+        if (!kp->value->is<IR::Key>()) {
+            ::error("%1% must be a key", kp);
+            return nullptr;
+        }
+        return kp->value->to<IR::Key>();
+    }
+#end
+#nodbprint
+}
+
+class Declaration_Variable : Declaration {
+    Annotations        annotations;
+    Type               type;
+    NullOK Expression  initializer;
+#nodbprint
+}
+
+class Declaration_Constant : Declaration {
+    Annotations        annotations;
+    Type               type;
+    Expression         initializer;
+#nodbprint
+    toString { return Declaration::toString(); }
+}
+
+// Like a variable, but for a statically allocated instance
+class Declaration_Instance : Declaration {
+    Type               type;
+    Vector<Expression> arguments;
+    Annotations        annotations;
+#nodbprint
+    validate{ arguments->check_null(); }
+}
+
+// Toplevel program representation
+class P4Program : IGeneralNamespace {
+    Vector<Node> declarations;
+    validate{ checkDeclarations(); }
+#emit
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return declarations->getEnumerator()->as<const IDeclaration*>(); }
+    void checkDeclarations() const;
+    static const cstring main;
+#end
+#apply
+#nodbprint
+}
+
+abstract Statement : StatOrDecl {
+#nodbprint
+}
+
+class ReturnStatement : Statement {
+    NullOK Expression expr;
+    toString{ return "return"; }
+#nodbprint
+}
+
+class EmptyStatement : Statement {
+#nodbprint
+}
+
+class AssignmentStatement : Statement {
+    Expression left;
+    Expression right;
+    dbprint{ out << left << " = " << right; }
+}
+
+class IfStatement : Statement {
+    Expression       condition;
+    Statement        ifTrue;
+    NullOK Statement ifFalse;
+#nodbprint
+}
+
+class BlockStatement : Statement, IGeneralNamespace {
+    Vector<StatOrDecl> components;
+#emit
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return components->only<IDeclaration>(); }
+#end
+#nodbprint
+}
+
+class MethodCallStatement : Statement {
+    MethodCallExpression methodCall;
+}
+
+class SwitchCase {
+    ID        label;
+    NullOK Statement statement;  // If missing then it's a fall-through
+#nodbprint
+}
+
+// The type system will enforce the fact that
+// expression is IR::Member(IR::MethodCallExpression(table_apply), Type_Table::action_run)
+class SwitchStatement : Statement {
+    Expression expression;
+    Vector<SwitchCase> cases;
+#nodbprint
+#emit
+    // 'default': a legal label for a switch statement
+    static const cstring default_label;
+#end
+}
+
+/* FIXME -- following v1.0 specific IR classes need to be unified with preceding v1.2
+ * FIXME -- specific IR classes */
+
+abstract HeaderOrMetadata {
+    IR::ID                      type_name;
+    IR::ID                      name;
+    NullOK Type_StructLike      type;
+#emit
+    HeaderOrMetadata(IR::ID n, const Type_StructLike *t) : type_name(t->name), name(n), type(t) {}
+#end
+    dbprint { out << type_name << ' ' << name; }
+}
+
+class Header : HeaderOrMetadata {
+#emit
+    Header(IR::ID n, const Type_Header *t) : HeaderOrMetadata(n, t) {}
+#end
+#nodbprint
+}
+
+class HeaderStack : HeaderOrMetadata {
+    int size;
+#emit
+    HeaderStack(IR::ID n, const Type_Header *t, int sz) : HeaderOrMetadata(n, t), size(sz) {}
+#end
+#nodbprint
+}
+
+class Metadata : HeaderOrMetadata {
+#emit
+    Metadata(IR::ID n, const Type_Struct *t) : HeaderOrMetadata(n, t) {}
+#end
+#nodbprint
+}
+
+abstract HeaderRef : Expression {
+#noconstructor
+#emit
+    HeaderRef() {}
+    HeaderRef(Util::SourceInfo si) : Expression(si) {}
+    HeaderRef(Util::SourceInfo si, const Type_StructLike *ht) : Expression(si, ht) {}
+#end
+}
+
+class ConcreteHeaderRef : HeaderRef {
+    HeaderOrMetadata    ref;
+#noconstructor
+#emit
+    ConcreteHeaderRef(Util::SourceInfo si, const HeaderOrMetadata *r)
+    : HeaderRef(si, r->type), ref(r) {}
+    ConcreteHeaderRef(const HeaderOrMetadata *r) : HeaderRef(Util::SourceInfo(), r->type), ref(r) {}
+#end
+    toString{ return ref->name; }
+    dbprint{ out << ref->name; }
+}
+
+class HeaderSliceRef : Slice {
+#nodbprint
+#noconstructor
+#emit
+  HeaderSliceRef(Util::SourceInfo si, const IR::HeaderRef* header_ref,
+                 const int &msb, const int &lsb) :
+    Slice(si, header_ref, new IR::Constant(msb), new IR::Constant(lsb)) {
+    assert(lsb <= msb);
+    type = Type_Bits::get(si, msb - lsb + 1); }
+  HeaderSliceRef(const Member *fr) :
+    Slice(fr->srcInfo, fr->expr, new Constant(fr->msb()), new Constant(fr->lsb())) {
+    assert(fr->lsb() <= fr->msb());
+    type = Type_Bits::get(fr->srcInfo, fr->msb() - fr->lsb() + 1); }
+  const HeaderRef* header_ref() const {
+    return e0->to<const HeaderRef>(); }
+  Vector<Member> fields() const {
+    Vector<Member> rv;
+    for (auto field : *header_ref()->type->to<IR::Type_StructLike>()->getEnumerator()) {
+      const IR::Member fr(srcInfo, field->type, header_ref(), field->name);
+      if (fr.lsb() >= lsb() && fr.msb() <= msb())
+        rv.push_back(new Member(fr));
+    }
+    return rv; }
+  int offset_bits() const { return e2->to<const Constant>()->asInt(); }
+  int lsb() const { return offset_bits(); }
+  int msb() const { return offset_bits() + type->width_bits() - 1; }
+#end
+}
+
+class HeaderStackItemRef : HeaderRef {
+    Expression      base_;
+    Expression      index_;
+#noconstructor
+#emit
+    HeaderStackItemRef(Util::SourceInfo si, const Type_Header *t, const Expression *b,
+                       const Expression *i)
+    : HeaderRef(si, t), base_(b), index_(i) {}
+    HeaderStackItemRef(Util::SourceInfo si, const Expression *b, const Expression *i)
+    : HeaderRef(si), base_(b), index_(i) {}
+    const Expression* base() const { return base_; }
+    const Expression* index() const { return index_; }
+    void set_base(const Expression *b) { base_ = b; }
+#end
+    toString{ return base_->toString() + "[" + index_->toString() + "]"; }
+}
+
+class FieldList {
+    ID                          name;
+    bool                        payload;
+    inline Vector<Expression>   fields;
+#noconstructor
+#emit
+    FieldList() = default;
+#end
+}
+
+class FieldListCalculation {
+    ID                  name;
+    NameList            input;
+    ID                  algorithm;
+    int                 output_width;
+#noconstructor
+#emit
+    FieldListCalculation() = default;
+#end
+}
+
+class CalculatedField {
+    Expression            field;
+#noconstructor
+#emit
+    CalculatedField() = default;
+    struct update_or_verify {
+        Util::SourceInfo        srcInfo;
+        bool                    update;
+        ID                      name;
+        const Expression       *cond;
+        update_or_verify(Util::SourceInfo si, bool u, ID n, const Expression *c)
+        : srcInfo(si), update(u), name(n), cond(c) {}
+        bool operator==(const update_or_verify &a) const { return update == a.update &&
+            name == a.name && cond == a.cond; }
+    };
+#end
+    vector<update_or_verify>    specs;
+    visit_children { v.visit(field, "field"); for (auto &s : specs) v.visit(s.cond, s.name.name); }
+}
+
+class CaseEntry {
+    vector<std::pair<Constant, Constant>>       values;
+    ID                                          action;
+#emit
+    CaseEntry() = default;
+#end
+}
+
+class Parser {
+    ID                          name;
+    inline Vector<Expression>   stmts;
+    NullOK Vector<Expression>   select;
+    NullOK Vector<CaseEntry>    cases;
+    ID                          default_return;
+    ID                          parse_error;
+    bool                        drop;
+#noconstructor
+#emit
+    Parser() = default;
+#end
+    toString { return node_type_name() + " " + name; }
+}
+
+class ParserException {}
+
+abstract Attached {
+    ID     name;
+#emit
+    Attached() = default;
+    virtual const char *kind() const = 0;
+    virtual bool indexed() const { return false; }
+    Attached *clone_rename(const char *ext) const {
+        Attached *rv = clone();
+        rv->name = IR::ID(Util::SourceInfo(), rv->name.name + ext);
+        return rv; }
+#end
+    dbprint { out << node_type_name() << " " << name; }
+    toString { return node_type_name() + " " + name; }
+}
+
+abstract Stateful : Attached {
+    ID          table;
+    bool        direct;
+    bool        saturating;
+    int         instance_count = -1;
+#emit
+    Stateful() = default;
+    virtual bool indexed() const { return !direct; }
+#end
+}
+
+abstract CounterOrMeter : Stateful {
+    CounterType   type;
+#emit
+    CounterOrMeter() = default;
+    void settype(cstring t) {
+        if (t == "packets") type = CounterType::PACKETS;
+        else if (t == "bytes") type = CounterType::BYTES;
+        else if (t == "packets_and_bytes") type = CounterType::BOTH;
+        else error("%s: Unknown type %s", srcInfo, t); }  // NOLINT
+#end
+}
+
+class Counter : CounterOrMeter {
+    int         max_width = -1;
+    int         min_width = -1;
+#emit
+    Counter() = default;
+    const char *kind() const { return "stats"; }
+#end
+}
+
+class Meter : CounterOrMeter {
+    NullOK Expression   result;
+    NullOK Expression   pre_color;
+    ID                  implementation;
+#emit
+    Meter() = default;
+    const char *kind() const { return "meter"; }
+#end
+}
+
+class Register : Stateful {
+    ID          layout;
+    int         width = -1;
+    bool        signed_;
+ /* bool        saturating; */
+#emit
+    Register() = default;
+    const char *kind() const { return "register"; }
+#end
+}
+
+class PrimitiveAction {}
+
+class NameList {
+    vector<ID>          names;
+#emit
+    NameList() = default;
+    NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
+#end
+}
+
+class ActionArg : Expression {
+    ID             name;
+    bool           read = false;
+    bool           write = false;
+#emit
+    explicit ActionArg(const ID &n) : Expression(n.srcInfo), name(n) {}
+    ActionArg(Util::SourceInfo si, const Type *t, const ID &n) : Expression(si, t), name(n) {}
+#end
+    dbprint{ out << name; }
+    toString{ return name.name; }
+}
+
+class ActionFunction {
+    ID                          name;
+    inline Vector<Primitive>    action;
+    vector<ActionArg>           args;
+#noconstructor
+#emit
+    ActionFunction() = default;
+    ActionFunction(const ActionContainer *, const Vector<Expression> *);
+    const ActionArg     *arg(cstring n) const {
+        for (auto a : args)
+            if (a->name == n)
+                return a;
+        return nullptr; }
+#end
+    visit_children {
+        action.visit_children(v);
+        // DANGER -- visiting action first so type inferencing will push types to
+        // DANGER -- action args based on use.  This is immoral.
+        for (auto &a : args) v.visit(a);
+    }
+    toString {
+        return cstring("action ") + name + " {\n" +
+                 cstring::join(action.begin(), action.end(), ";\n") +
+                 " }"; }
+}
+
+class ActionProfile : Attached {
+    ID          selector;
+    vector<ID>  actions;
+    int         size;
+#noconstructor
+#emit
+    const char *kind() const { return "action_profile"; }
+    bool indexed() const { return true; }
+#end
+}
+
+class ActionSelector : Attached {
+    ID key;
+    ID mode;
+    ID type;
+#noconstructor
+#emit
+    const char *kind() const { return "action_selector"; }
+#end
+}
+
+class Table {
+    ID                          name;
+    Vector<Expression>          reads = 0;
+    vector<ID>                  reads_types;
+    int                         min_size = 0;
+    int                         max_size = 0;
+    int                         size = 0;
+    ID                          action_profile;
+    vector<ID>                  actions;
+    ID                          default_action;
+    NullOK Vector<Expression>   default_action_args = 0;
+    inline TableProperties      properties;  // non-standard properties
+#noconstructor
+#emit
+    Table() {}
+    Table(const TableContainer *);
+#end
+    toString { return node_type_name() + " " + name; }
+}
+
+class Control {
+    ID                            name;
+    Vector<Expression>            code;
+#emit
+    explicit Control(ID n) : name(n), code(new Vector<Expression>()) {}
+    Control(Util::SourceInfo si, ID n) : Node(si), name(n), code(new Vector<Expression>()) {}
+#end
+#apply
+    toString { return node_type_name() + " " + name; }
+}
+
+#emit
+class CompilerOptions;
+#end
+
+class Global {
+    inline NameMap<Node, std::multimap>         scope;
+#noconstructor
+#emit
+    Global(const CompilerOptions &);
+    template<class T> const T *get(cstring name) const { return scope.get<T>(name); }
+    void add(cstring name, const Node *n) { scope.add(name, n); }
+#end
+#apply
+}
+
+abstract Block : CompileTimeValue {
+    Node node;  // Node that evaluates to this block.
+    // It's either a Declaration_Instance or a ConstructorCallExpression.
+#emit
+    // One value for each Node inside that evaluates to a compile-time constant.
+    // This includes all constructor parameters.
+    std::map<const Node*, const CompileTimeValue*> constantValue;
+
+    virtual void dbprint(std::ostream& out) const;
+    virtual void dbprint_recursive(std::ostream& out) const;
+    void setValue(const Node* node, const CompileTimeValue* value) {
+        CHECK_NULL(node); CHECK_NULL(value);
+        auto v = get(constantValue, node);
+        BUG_CHECK(v == nullptr, "%1% already set", node);
+        constantValue.emplace(node, value);
+    }
+    const CompileTimeValue* getValue(const Node* node) const {
+        CHECK_NULL(node);
+        return ::get(constantValue, node);
+    }
+#end
+    visit_children { (void)v; }
+}
+
+class TableBlock : Block {
+    TableContainer container;
+#nodbprint
+}
+
+// An object that has been instantiated
+// The substitution holds the constructor arguments.
+abstract InstantiatedBlock : Block {
+    Type instanceType;  // May be a SpecializedType
+#emit
+    virtual const IR::ParameterList* getConstructorParameters() const = 0;
+    void instantiate(std::vector<const IR::CompileTimeValue*> *args);
+    const CompileTimeValue* getParameterValue(cstring paramName) const;
+    virtual void dbprint(std::ostream& out) const;
+#end
+}
+
+class ParserBlock : InstantiatedBlock {
+    ParserContainer container;
+#emit
+    const IR::ParameterList* getConstructorParameters() const override
+    { return container->constructorParams; }
+#end
+#nodbprint
+}
+
+class ControlBlock : InstantiatedBlock {
+    ControlContainer container;
+#emit
+    const IR::ParameterList* getConstructorParameters() const override
+    { return container->constructorParams; }
+#end
+#nodbprint
+}
+
+class PackageBlock : InstantiatedBlock {
+    Type_Package type;
+#emit
+    const IR::ParameterList* getConstructorParameters() const override
+    { return type->constructorParams; }
+#end
+#nodbprint
+}
+
+class ExternBlock : InstantiatedBlock {
+    Type_Extern type;
+    Method      constructor;  // used to instantiate this block
+#emit
+    const IR::ParameterList* getConstructorParameters() const override
+    { return constructor->type->parameters; }
+#end
+#nodbprint
+}
+
+class ToplevelBlock : Block {
+#nodbprint
+}

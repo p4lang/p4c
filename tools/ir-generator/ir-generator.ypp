@@ -1,0 +1,252 @@
+%{ /* -*-C++-*- */
+// some of these includes are needed by lex-generated file
+
+#include <assert.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+
+#include <iostream>
+#include <cerrno>
+#include <vector>
+
+#include "lib/cstring.h"
+#include "lib/stringref.h"
+#include "lib/source_file.h"
+#include "lib/error.h"
+#include "tools/ir-generator/irclass.h"
+
+#ifndef YYDEBUG
+#define YYDEBUG 1
+#endif
+
+#define YYLTYPE Util::SourceInfo
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                                     \
+    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                  \
+                 : Util::SourceInfo(YYRHSLOC(Rhs, 0).getEnd()))
+
+static void yyerror(const char *fmt, ...);
+static std::vector<IrElement*> global;
+
+namespace {  // anonymous namespace
+static int yylex();
+
+static IrNamespace *current_namespace = LookupScope().resolve(0);
+
+%}
+
+%union {
+    YYSTYPE() {}
+    cstring                     str;
+    IrClass                     *irClass;
+    IrElement                   *irElement;
+    IrField                     *irField;
+    IrMethod                    *irMethod;
+    IrNamespace                 *irNamespace;
+    ConstFieldInitializer       *constFieldInit;
+    LookupScope                 *lookup;
+    std::vector<IrElement *>    *elems;
+    std::vector<const Type *>   *types;
+    Type                        *type;
+    NodeKind                    kind;
+    struct {
+        bool                    impl;
+        cstring                 block;
+    }                           emit;
+}
+
+%token          ABSTRACT APPLY CLASS DBLCOL INLINE INTERFACE NULLOK OPERATOR
+%token<str>     BLOCK IDENTIFIER INTEGER NAMESPACE NO STRING
+%token<emit>    EMITBLOCK
+
+%type<type>                     type
+%type<irClass>                  irclass;
+%type<irElement>                part
+%type<irField>                  irField
+%type<irMethod>                 methodBody
+%type<irNamespace>              scope
+%type<constFieldInit>           constFieldInit
+%type<kind>                     kind
+%type<elems>                    partList
+%type<types>                    parentList nonEmptyParentList type_args
+%type<str>                      expression optInitializer
+%type<lookup>                   lookup_scope
+
+%error-verbose
+%locations
+
+%{
+static void
+symbol_print(FILE* file, int type, YYSTYPE value)
+{
+    switch (type)
+    {
+    case EMITBLOCK:
+        fprintf(file, "%s%s", value.emit.impl ? "/*impl*/ " : "", value.emit.block.c_str());
+        break;
+    case BLOCK:
+    case IDENTIFIER:
+    case STRING:
+    case NO:
+    case INTEGER:
+        fprintf(file, "%s", value.str.c_str());
+        break;
+    default:
+        break;
+    }
+}
+
+#define YYPRINT(file, type, value)   symbol_print(file, type, value)
+
+#include "ir-generator-lex.c"
+
+static cstring canon_name(cstring name) {
+    /* canonical method names for backwards compatibility */
+    if (name == "visitchildren") return "visit_children";
+    return name;
+}
+
+%}
+
+%%
+
+input
+    : /* empty */
+    | input element
+    ;
+
+element
+    : irclass           { global.push_back($1); }
+    | EMITBLOCK         { global.push_back(new EmitBlock(@1, $1.impl, $1.block)); }
+    | NAMESPACE { BEGIN(PARSE_BRACKET); }
+      IDENTIFIER { current_namespace = IrNamespace::get(current_namespace, $3); }
+      '{' input '}' { current_namespace = current_namespace->parent; }
+    | ';' /* ignore */
+    ;
+
+scope
+    : /* empty */       { $$ = current_namespace; }
+    | DBLCOL            { $$ = nullptr; }
+    | scope IDENTIFIER DBLCOL   { $$ = IrNamespace::get($1, $2); }
+    ;
+
+irclass
+    : kind scope IDENTIFIER parentList '{' partList '}'
+                        { $$ = new IrClass(@3, $2, $1, $3, $4, $6); }
+    ;
+
+parentList
+    :  /* emtpy */              { $$ = nullptr; }
+    | ':' nonEmptyParentList    { $$ = $2; }
+    ;
+
+nonEmptyParentList
+    : type              { ($$ = new std::vector<const Type *>())->push_back($1); }
+    | nonEmptyParentList ',' type       { ($$ = $1)->push_back($3); }
+    ;
+
+kind
+    : INTERFACE         { $$ = NodeKind::Interface; BEGIN(PARSE_BRACKET); }
+    | ABSTRACT          { $$ = NodeKind::Abstract; BEGIN(PARSE_BRACKET); }
+    | CLASS             { $$ = NodeKind::Concrete; BEGIN(PARSE_BRACKET); }
+    ;
+
+partList
+    : /* emtpy */       { $$ = new std::vector<IrElement*>(); }
+    | partList part     { ($$ = $1)->push_back($2); }
+    ;
+
+part
+    : EMITBLOCK         { $$ = new EmitBlock(@1, $1.impl, $1.block); }
+    | NO                { $$ = new IrNo(@1, $1); }
+    | methodBody        { $$ = $1; }
+    | irField           { $$ = $1; }
+    | constFieldInit    { $$ = $1; }
+    | APPLY             { $$ = new IrApply(@1); }
+    ;
+
+methodBody
+    : IDENTIFIER BLOCK          { $$ = new IrMethod(@1, canon_name($1), $2); }
+    | OPERATOR '=' '=' BLOCK    { $$ = new IrMethod(@1, "operator==", $4); }
+    ;
+
+irField
+    : type IDENTIFIER optInitializer ';'
+      { $$ = new IrField(@2, $1, $2, $3, false, false); }
+    | NULLOK type IDENTIFIER optInitializer ';'
+      { $$ = new IrField(@3, $2, $3, $4, true, false); }
+    | INLINE type IDENTIFIER optInitializer ';'
+      { $$ = new IrField(@3, $2, $3, $4, false, true); }
+    ;
+
+optInitializer
+    : /* empty */       { $$ = nullptr; }
+    | '=' expression    { $$ = $2; }
+    ;
+
+lookup_scope
+    : DBLCOL                            { $$ = new LookupScope(); }
+    | IDENTIFIER DBLCOL                 { $$ = new LookupScope(0, $1); }
+    | lookup_scope IDENTIFIER DBLCOL    { $$ = new LookupScope($1, $2); }
+
+type
+    : IDENTIFIER                        { $$ = new NamedType(@1, 0, $1); }
+    | lookup_scope IDENTIFIER           { $$ = new NamedType(@2, $1, $2); }
+    | type '<' type_args '>'            { $$ = new TemplateInstantiation(@1, $1, *$3); }
+    ;
+
+type_args
+    : type                              { $$ = new std::vector<const Type *>{$1}; }
+    | type_args ',' type                { ($$ = $1)->push_back($3); }
+    ;
+
+constFieldInit
+    : IDENTIFIER '=' expression ';'     { $$ = new ConstFieldInitializer(@1, $1, $3); }
+    ;
+
+expression
+    : IDENTIFIER | STRING | INTEGER
+    | IDENTIFIER DBLCOL IDENTIFIER      { $$ = $1 + "::" + $3; }
+    ;
+
+/*****************************************************************************/
+
+%%
+}  // end anonymous namespace
+
+void yyerror(const char *fmt, ...) {
+    if (!strcmp(fmt, "syntax error, unexpected IDENTIFIER")) {
+        ErrorReporter::instance.parser_error("syntax error, unexpected IDENTIFIER \"%s\"",
+                                             yylval.str.c_str());
+        return;
+    }
+    va_list args;
+    va_start(args, fmt);
+    ErrorReporter::instance.parser_error(fmt, args);
+    va_end(args);
+}
+
+IrDefinitions *parse(char** files, int count) {
+    int errors = 0;
+#ifdef YYDEBUG
+    if (const char *p = getenv("YYDEBUG"))
+        yydebug = atoi(p);
+#endif
+    if (count <= 0) {
+        ::error("No input files specified");
+        errors = 1; }
+
+    for (int i = 0; i < count; i++) {
+        if (FILE *fp = fopen(files[i], "r")) {
+            Util::InputSources::instance->mapLine(files[i], 1);
+            yyrestart(fp);
+            BEGIN(NORMAL);
+            errors |= yyparse();
+        } else {
+            ::error("Cannot open file %s", files[i]);
+            perror("");
+            errors |= 1; } }
+
+    return errors ? nullptr : new IrDefinitions(global);
+}

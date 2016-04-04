@@ -1,0 +1,273 @@
+/* -*-c++-*- */
+
+/* Source-level information for a P4 program */
+
+#ifndef P4C_LIB_SOURCE_FILE_H_
+#define P4C_LIB_SOURCE_FILE_H_
+
+#include <vector>
+
+#include "cstring.h"
+#include "stringref.h"
+#include "map.h"
+
+namespace Test { class TestSourceFile; }
+
+namespace Util {
+struct SourceFileLine;
+/* A character position within some InputSources: a pair of
+   line/column positions.  Can only be interpreted in the context
+   of some InputSources.
+
+   In files line numbering starts at 1, so 0 is reserved for
+   "invalid" source positions.  As a consequence, invalid source
+   position are the "smallest", which is a reasonable choice.
+*/
+class SourcePosition final {
+ public:
+    // Creates an invalid source position
+    SourcePosition()
+            : lineNumber(0),
+              columnNumber(0) {}
+
+    SourcePosition(unsigned lineNumber, unsigned columnNumber);
+
+    SourcePosition(const SourcePosition& other)
+            : lineNumber(other.lineNumber),
+              columnNumber(other.columnNumber) {}
+
+    inline bool operator==(const SourcePosition& rhs) const {
+        return this->columnNumber == rhs.columnNumber &&
+                this->lineNumber == rhs.columnNumber;
+    }
+    inline bool operator!=(const SourcePosition& rhs) const
+    {return !this->operator==(rhs);}
+
+    inline bool operator< (const SourcePosition& rhs) const {
+        return (this->lineNumber < rhs.lineNumber) ||
+                (this->lineNumber == rhs.lineNumber &&
+                 this->columnNumber < rhs.columnNumber);
+    }
+    inline bool operator> (const SourcePosition& rhs) const
+    {return rhs.operator< (*this);}
+    inline bool operator<=(const SourcePosition& rhs) const
+    {return !this->operator> (rhs);}
+    inline bool operator>=(const SourcePosition& rhs) const
+    {return !this->operator< (rhs);}
+
+    // Move one column back.  This never moves one line back.
+    SourcePosition& operator--() {
+        if (this->columnNumber > 0)
+            this->columnNumber--;
+        return *this;
+    }
+    SourcePosition operator--(int) {
+        SourcePosition tmp(*this);
+        this->operator--();
+        return tmp;
+    }
+
+    inline const SourcePosition& min(const SourcePosition& rhs) const {
+        if (this->operator<(rhs))
+            return *this;
+        return rhs;
+    }
+
+    inline const SourcePosition& max(const SourcePosition& rhs) const {
+        if (this->operator>(rhs))
+            return *this;
+        return rhs;
+    }
+
+    cstring toString() const;
+
+    bool isValid() const {
+        return this->lineNumber != 0;
+    }
+
+    unsigned getLineNumber() const {
+        return this->lineNumber;
+    }
+
+    unsigned getColumnNumber() const {
+        return this->columnNumber;
+    }
+
+ private:
+    // Input sources where this character position is interpreted.
+    unsigned      lineNumber;
+    unsigned      columnNumber;
+};
+
+/* Information about the source position of a language element -
+   a range of position within an InputSources.   Can only be
+   interpreted relative to some InputSources.
+
+   For a program element, the start is inclusive and the end is
+   exclusive (the first position after the language element).
+
+   SourceInfo can also be "invalid"
+*/
+class SourceInfo final {
+ public:
+    // Creates an "invalid" SourceInfo
+    SourceInfo()
+            : start(SourcePosition()),
+              end(SourcePosition()) {}
+    // Creates a SourceInfo for a 'point' in the source, or invalid
+    explicit SourceInfo(SourcePosition point) : start(point), end(point) {}
+
+    SourceInfo(SourcePosition start, SourcePosition end);
+
+    SourceInfo(const SourceInfo& other) = default;
+    ~SourceInfo() = default;
+    SourceInfo& operator=(const SourceInfo& other) = default;
+
+    // A SourceInfo that spans both this and rhs.
+    // However, if this or rhs is invalid, it is not taken into account
+    const SourceInfo operator+(const SourceInfo& rhs) const {
+        if (!this->isValid())
+            return rhs;
+        if (!rhs.isValid())
+            return *this;
+        SourcePosition s = start.min(rhs.start);
+        SourcePosition e = end.max(rhs.end);
+        return SourceInfo(s, e);
+    }
+    SourceInfo &operator+=(const SourceInfo& rhs) {
+        if (!isValid()) {
+            *this = rhs;
+        } else if (rhs.isValid()) {
+            start = start.min(rhs.start);
+            end = end.max(rhs.end);
+        }
+        return *this;
+    }
+
+    bool operator==(const SourceInfo &rhs) const
+    { return start == rhs.start && end == rhs.end; }
+
+    cstring toDebugString() const;
+
+    void dbprint(std::ostream& out) const
+    { out << this->toDebugString(); }
+
+    cstring toSourceFragment() const;
+    cstring toPositionString() const;
+    SourceFileLine toPosition() const;
+
+    bool isValid() const
+    { return this->start.isValid(); }
+
+    const SourcePosition& getStart() const
+    { return this->start; }
+
+    const SourcePosition& getEnd() const
+    { return this->end; }
+
+    // True if this comes 'before' this source position
+    // 'invalid' source positions come first.
+    // This is true if the start of other is strictly before
+    // the start of this.
+    bool operator< (const SourceInfo& rhs) const {
+        if (!rhs.isValid()) return false;
+        if (!isValid()) return true;
+        return this->start < rhs.start;
+    }
+    inline bool operator> (const SourceInfo& rhs) const
+    { return rhs.operator< (*this); }
+    inline bool operator<=(const SourceInfo& rhs) const
+    { return !this->operator> (rhs); }
+    inline bool operator>=(const SourceInfo& rhs) const
+    { return !this->operator< (rhs); }
+
+ private:
+    SourcePosition start;
+    SourcePosition end;
+};
+
+class IHasDbPrint {
+ public:
+    virtual void dbprint(std::ostream& out) const = 0;
+};
+
+class IHasSourceInfo {
+ public:
+    virtual SourceInfo getSourceInfo() const = 0;
+    virtual cstring toString() const = 0;
+};
+
+/* A line in a source file */
+struct SourceFileLine {
+    // an empty filename indicates stdin
+    cstring   fileName;
+    unsigned  sourceLine;
+
+    SourceFileLine(cstring file, unsigned line) :
+            fileName(file),
+            sourceLine(line) {}
+
+    cstring toString() const;
+};
+
+/*
+  Information about all the input sources that comprise a P4 program that is being compiled.
+  The inputSources can be seen as a simple file produced by the preprocessor,
+  but also as a set of fragments of input files which were stitched by the preprocessor.
+
+  The mutable part of the API is tailored for interaction with the lexer.
+  After the lexer is done this object can be "sealed" and never changes again.
+
+  This class implements a singleton pattern: there is a single instance of this class.
+*/
+class InputSources final {
+    friend class Test::TestSourceFile;
+
+ public:
+    cstring getLine(unsigned lineNumber) const;
+    // Original source line that produced the line with the specified number
+    SourceFileLine getSourceLine(unsigned line) const;
+
+    unsigned lineCount() const;
+    SourcePosition getCurrentPosition() const;
+    unsigned getCurrentLineNumber() const;
+
+    // prevent further changes; currently not used
+    void seal();
+
+    // Append this text; it is either a newline or a text with no newlines
+    void appendText(const char* text);
+
+    // Map the next line in the file to the line with number 'originalSourceLine'
+    // from file 'file'.
+    void mapLine(cstring file, unsigned originalSourceLineNo);
+
+    // The following return a nice (multi-line, newline-terminated)
+    // string describing a position in the sources, e.g.:
+    // int<32> variable;
+    //         ^^^^^^^^
+    cstring getSourceFragment(const SourcePosition &position) const;
+    cstring getSourceFragment(const SourceInfo &position) const;
+
+    cstring toDebugString() const;
+
+    static InputSources* instance;
+
+ private:
+    InputSources();
+
+    // Append this text to the last line; must not contain newlines
+    void appendToLastLine(StringRef text);
+    // Append a newline and start a new line
+    void appendNewline(StringRef newline);
+
+    // Input program that is being currently compiled; there can be only one.
+    bool sealed;
+
+    std::map<unsigned, SourceFileLine> line_file_map;
+    // Each line also stores the end-of-line character(s)
+    std::vector<cstring> contents;
+};
+
+}  // namespace Util
+#endif /* P4C_LIB_SOURCE_FILE_H_ */

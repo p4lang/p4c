@@ -1,0 +1,3 @@
+#!/usr/bin/awk -f
+/^#$/ { printf "#line %d \"%s/%s\"\n", NR+1, ENVIRON["PWD"], FILENAME; next; }
+{ print; }

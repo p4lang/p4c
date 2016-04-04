@@ -1,0 +1,650 @@
+/* -*-C++-*- */
+/* This file containts types and declarations */
+
+#emit
+namespace IR {
+enum class Direction {
+    None,
+    In,
+    Out,
+    InOut
+};
+}
+
+inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
+    switch (d) {
+        case IR::Direction::None:
+            break;
+        case IR::Direction::In:
+            out << "in";
+            break;
+        case IR::Direction::Out:
+            out << "out";
+            break;
+        case IR::Direction::InOut:
+            out << "inout";
+            break;
+        default:
+            BUG("Unhandled case");
+    }
+    return out;
+}
+#end
+
+// Implemented by all types that may be generic
+interface IMayBeGenericType {
+#emit
+    virtual const TypeParameters* getTypeParameters() const = 0;
+    const Type* toType() const { return getNode()->to<Type>(); }
+    const Type* specialize(const Vector<Type>* arguments) const;
+#end
+}
+
+abstract Type {
+#emit
+    typedef Type_Unknown        Unknown;
+    typedef Type_Boolean        Boolean;
+    typedef Type_Bits           Bits;
+    typedef Type_Varbits        Varbits;
+    virtual int width_bits() const { return 0; }
+#end
+#nodbprint
+}
+
+abstract Type_Base : Type {}
+
+// TODO: is this type needed?
+class Type_Unknown : Type_Base {
+#nodbprint
+#emit
+    static const Type::Unknown *get();
+#end
+    toString{ return "Unknown type"; }
+}
+
+// Infinite precision integer
+class Type_InfInt : Type_Base {
+#nodbprint
+#emit
+    static const Type_InfInt *get();
+#end
+    toString{ return "int"; }
+}
+
+class Type_Boolean : Type_Base {
+#nodbprint
+#emit
+    static const Type::Boolean *get();
+    int width_bits() const { return 1; }
+#end
+    toString{ return "bool"; }
+}
+
+// The type of a parser state
+class Type_State : Type_Base {
+#nodbprint
+#emit
+    static const Type_State *get();
+#end
+    toString{ return "state"; }
+}
+
+// Represents both bit<> and int<> types in P4 v1.1+
+class Type_Bits : Type_Base {
+    int size;
+    bool isSigned;
+#emit
+    static const Type::Bits *get(Util::SourceInfo si, int sz, bool isSigned = false);
+    static const Type::Bits *get(int sz, bool isSigned = false) {
+        return get(Util::SourceInfo(), sz, isSigned); }
+    cstring baseName() const { return isSigned ? "int" : "bit"; }
+    int width_bits() const { return size; }
+#end
+    toString{ return baseName() + "<" + Util::toString(size) + ">"; }
+}
+
+class Type_Varbits : Type_Base {
+    int         size;   // if zero it means "unknown"
+#nodbprint
+#emit
+    static const Type::Varbits *get(Util::SourceInfo si, int size = 0);
+    static const Type::Varbits *get();
+#end
+    toString{ return cstring("varbit<") + Util::toString(size) + ">"; }
+}
+
+// a value that can be evaluated at compile-time
+interface CompileTimeValue {}
+
+// Implemented by objects with an 'apply' method
+interface IApply {
+#emit
+    static const cstring applyMethodName;
+    virtual const Type_Method* getApplyMethodType() const = 0;
+#end
+}
+
+interface IDeclaration {
+#emit
+    // name of the declared object
+    virtual ID getName() const = 0;
+#end
+}
+
+interface INamespace {
+#emit
+    virtual Util::Enumerator<const IDeclaration*>* getDeclarations() const = 0;
+#end
+}
+
+// No two declarations with the same name
+interface ISimpleNamespace : INamespace {
+#emit
+    virtual const IDeclaration* getDeclByName(cstring name) const = 0;
+#end
+}
+
+interface IGeneralNamespace : INamespace {
+#emit
+    virtual Util::Enumerator<const IDeclaration*>* getDeclsByName(cstring name) const;
+    void checkDuplicateDeclarations() const;
+#end
+    validate{ checkDuplicateDeclarations(); }
+}
+
+// A statement or a declaration
+abstract StatOrDecl {}
+
+// Two declarations wit the same name are not necessarily the same declaration
+abstract Declaration : StatOrDecl, IDeclaration {
+    ID name;
+#noconstructor
+#emit
+    ID getName() const { return name; }
+ private:
+    static int nextId;
+ public:
+    int declid;
+    Declaration(Util::SourceInfo si, ID name) : StatOrDecl(si), name(name), declid(nextId++) {}
+#end
+    dbprint { Node::dbprint(out); out << name << "/" << declid; }
+    toString { return name.name; }
+    operator== { return StatOrDecl::operator==(a) && name == a.name && declid == a.declid; }
+}
+
+// A declaration that consists of just an identifier, e.g., an enum member
+class Declaration_ID : Declaration, CompileTimeValue {
+#nodbprint
+}
+
+class Parameter : Declaration {
+    Annotations         annotations;
+    Direction           direction;
+    Type                type;
+}   
+    
+class ParameterList : ISimpleNamespace {
+    inline NameMap<Parameter, ordered_map> parameters;
+    validate{ parameters.check_null(); }
+#emit
+    ParameterList() {}
+    Util::Enumerator<const Parameter*>* getEnumerator() const
+    { return parameters.valueEnumerator(); }
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return getEnumerator()->as<const IDeclaration*>(); }
+    size_t size() const { return parameters.size(); }
+    const IR::Parameter* getParameter(cstring name) const
+    { return parameters.getUnique(name); }
+    void add(const Parameter* param)
+    { parameters.addUnique(param->name, param); }
+    const IR::IDeclaration* getDeclByName(cstring name) const
+    { return getParameter(name); }
+#end
+}   
+
+class PathPrefix {
+    bool absolute;
+    std::vector<ID> components;
+#noconstructor
+#emit
+    PathPrefix() : absolute(false) {}
+    PathPrefix(Util::SourceInfo si, PathPrefix* start, ID end)
+            : Node(si), absolute(start->absolute) {
+        CHECK_NULL(start);
+        std::copy(start->components.begin(), start->components.end(), components.begin());
+        components.push_back(end);
+    }
+    void setAbsolute() { absolute = true; }
+#end
+    toString{
+        std::stringstream result;
+        bool first = true;
+        if (absolute)
+            result << ".";
+        for (auto a : components) {
+            if (!first)
+                result << ".";
+            first = false;
+            result << a.name.c_str();
+        }
+        return cstring(result.str());
+    }
+#nodbprint
+}
+
+class Path {
+    NullOK PathPrefix prefix;
+    ID                name;
+#noconstructor
+#emit
+    Path(const PathPrefix* prefix, ID name) :
+    Node(prefix != nullptr ? prefix->srcInfo + name.srcInfo : name.srcInfo),
+            prefix(prefix),
+            name(name) {}
+    explicit Path(ID name) :
+            Node(name.srcInfo),
+            prefix(nullptr),
+            name(name) {}
+    bool isDontCare() const { return prefix == nullptr && name.isDontCare(); }
+#end
+    toString{
+        std::stringstream str;
+        if (prefix == nullptr) {
+            str << name;
+        } else {
+            cstring ps = prefix->toString();
+            str << ps << "." << name;
+        }
+        return cstring(str.str());
+    }
+    dbprint{ Node::dbprint(out); out << ":" << toString(); }
+}
+
+// Two declarations with the same name are not the same declaration
+abstract Type_Declaration : Type, IDeclaration {
+    ID name;
+#noconstructor
+#emit
+    ID getName() const { return name; }
+ private:
+    static int nextId;
+ public:
+    int declid;
+    Type_Declaration(Util::SourceInfo si, ID name) : Type(si), name(name), declid(nextId++) {}
+#end
+    toString { return name.name; }
+    operator== { return Type::operator==(a) && name == a.name && declid == a.declid; }
+    dbprint { Node::dbprint(out); out << name << "/" << declid; }
+}
+
+abstract Type_VarBase : Type_Declaration {}
+
+// Represents a type variable
+class Type_Var : Type_VarBase {}
+
+// A special type variable that represents the type of a Constant with unknown width.
+// Type unification can be used to return the correct type for the Constant.
+class Type_VarInfInt : Type_VarBase {
+#noconstructor
+#emit
+    Type_VarInfInt(Util::SourceInfo si) : Type_VarBase(si, IR::ID("varInfInt")) {}
+#end
+    dbprint { Node::dbprint(out); }
+}
+    
+class Type_Dontcare : Type_Base {
+    toString{ return "_"; }
+#emit
+    static const Type_Dontcare* get();
+#end
+#nodbprint
+}
+
+class Type_Void : Type_Base {
+    toString{ return "void"; }
+#emit
+    static const Type_Void* get();
+#end
+#nodbprint
+}
+
+class Type_Error : Type_Base {
+    toString{ return "error"; }
+#emit
+    static const Type_Error* get();
+#end
+#nodbprint
+}
+
+class Type_MatchKind : Type_Base {
+    toString{ return "match_kind"; }
+#emit
+    static const Type_MatchKind* get();
+#end
+#nodbprint
+}
+    
+class TypeParameters : ISimpleNamespace {
+    inline NameMap<Type_Var, ordered_map> parameters;
+#emit
+    TypeParameters() : Node(Util::SourceInfo()) {}
+    TypeParameters(Util::SourceInfo &si, NameMap<Type_Var, ordered_map> &&p)
+            : Node(si), parameters(std::move(p)) {}
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return parameters.valueEnumerator()->as<const IDeclaration*>(); }
+    bool empty() const { return parameters.empty(); }
+    size_t size() const { return parameters.size(); }
+    Util::Enumerator<const Type_Var*>* getEnumerator() const
+    { return parameters.valueEnumerator(); }
+    const IR::IDeclaration* getDeclByName(cstring name) const
+    { return parameters.getUnique(name); }
+#end
+    validate{ parameters.check_null(); }
+}
+
+class StructField : Declaration {
+    Annotations annotations;
+    Type        type;
+#nodbprint
+#emit
+    StructField(Util::SourceInfo si, ID name, const Type *type);
+    StructField(ID name, const Type *type);
+#end
+}
+
+abstract Type_StructLike : Type_Declaration, ISimpleNamespace {
+    Annotations         annotations;
+    inline NameMap<StructField, ordered_map> fields;
+#emit
+    Util::Enumerator<const StructField*>* getEnumerator() const
+    { return fields.valueEnumerator(); }
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
+    { return getEnumerator()->as<const IDeclaration*>(); }
+    const StructField* getField(cstring name) const
+    { return fields.getUnique(name); }
+    int width_bits() const override {
+        // TODO: cache this value
+        int rv = 0;
+        for (auto f : *getEnumerator())
+            rv += f->type->width_bits();
+        return rv; }
+    const IR::IDeclaration* getDeclByName(cstring name) const
+    { return getField(name); }
+#end
+    dbprint{ Node::dbprint(out); out << toString(); }
+    validate{ fields.check_null(); }
+}
+
+class Type_Struct : Type_StructLike {
+#nodbprint
+    toString{ return cstring("struct ") + getName(); }
+#emit
+    Type_Struct(cstring name, const NameMap<StructField, ordered_map> &&fields);
+#end
+}
+
+class Type_Union : Type_StructLike {
+#nodbprint
+    toString{ return cstring("header_union ") + getName(); }
+#emit
+    int width_bits() const override {
+        int rv = 0;
+        for (auto f : *getEnumerator())
+            rv = std::max(rv, f->type->width_bits());
+        return rv; }
+#end
+}
+
+class Type_Header : Type_StructLike {
+#emit
+    const static cstring setValid;
+    const static cstring valid;
+#end
+#nodbprint
+    toString{ return cstring("header ") + getName(); }
+}
+
+// The type of an expressionList
+class Type_Tuple : Type {
+    Vector<Type> components;
+#nodbprint
+    toString{ return "Tuple(" + Util::toString(components->size()) + ")"; }
+    validate{ components->check_null(); }
+}
+
+// The type of an architectural block.
+// Abstract base for control and parser types.
+abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType {
+    Annotations    annotations;
+    TypeParameters typeParams;
+#emit
+    const TypeParameters* getTypeParameters() const override { return typeParams; }
+#end
+}
+
+interface IContainer : IMayBeGenericType {
+#emit
+    // The type of the constructor as a method
+    virtual const Type_Method* getConstructorMethodType() const = 0;
+#end
+}
+    
+class Type_Package : Type_ArchBlock, IContainer {
+    ParameterList constructorParams;
+#emit
+    const Type_Method* getConstructorMethodType() const override;
+#end
+    toString{ return cstring("package ") + name; }
+}
+
+class Type_Parser : Type_ArchBlock, IApply {
+    ParameterList applyParams;
+#emit
+    const Type_Method* getApplyMethodType() const override;
+#end
+    toString { return cstring("parser ") + name; }
+}
+
+class Type_Control : Type_ArchBlock, IApply {
+    ParameterList applyParams;
+#emit
+    const Type_Method* getApplyMethodType() const override;
+#end
+    toString { return cstring("control ") + name; }
+}
+
+// A type referred by name
+class Type_Name : Type {
+#emit
+    explicit Type_Name(const Path* path)
+        : Type(path->srcInfo), path(path)
+    { CHECK_NULL(path); }
+    explicit Type_Name(IR::ID id)
+        : Type(id.srcInfo), path(new IR::Path(id)) {}
+#end
+    Path path;
+    toString{ return path->name; }
+    dbprint{ Type::dbprint(out); out << ":" << path->toString(); }
+}
+
+class Type_Stack : Type {
+    Type        baseType;
+    Expression  size;
+    toString{ return baseType->toString() + "[]"; }
+    dbprint{ Type::dbprint(out); out << baseType << "[" << size << "]"; }
+#emit
+    bool sizeKnown() const;
+    int getSize() const;
+    static const cstring next;
+    static const cstring last;
+    static const cstring push_front;
+    static const cstring pop_front;
+    static const cstring full;
+    static const cstring empty;
+#end
+}
+
+/* Given a declaration
+   extern E<T> { ... }
+   Type_Specialized represents a type such 
+   E<bit<32>>
+   baseType is Type_Extern E, arguments is a vector containing Type_Bits(32) */
+class Type_Specialized : Type {
+    Type baseType;  // can be a Type_Name, but resolves to an IMayBeGenericType
+    Vector<Type> arguments;
+    dbprint{ Node::dbprint(out); out << baseType; }
+    toString{ return baseType->toString() + "<...>"; }
+    validate{ arguments->check_null(); }
+}
+
+/* Canonical representation of a Type_Specialized */
+class Type_SpecializedCanonical : Type {
+    Type              baseType;     // canonical baseType
+    Vector<Type>      arguments;    // canonical type arguments
+    // In 'substituted' all arguments have been substituted
+    // for the type variables of the baseType.
+    Type              substituted;  
+#nodbprint
+    validate{
+        arguments->check_null();
+        BUG_CHECK(baseType->is<IMayBeGenericType>(), "base type %1% is not generic", baseType);
+    }
+}
+    
+class Type_Enum : Type_Declaration, ISimpleNamespace {
+    inline NameMap<Declaration_ID, ordered_map> members;
+#emit
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return members.valueEnumerator()->as<const IDeclaration*>(); }
+    Util::Enumerator<const Declaration_ID*>* getEnumerator() const
+    { return members.valueEnumerator(); }
+    const IDeclaration* getDeclByName(cstring name) const
+    { return members.getUnique(name); }
+#end
+#nodbprint
+    validate{ members.check_null(); }
+}
+
+class Type_Table : Type, IApply {
+    TableContainer  container;
+#emit
+    mutable const Type_Method* applyMethod; // type of the apply method cached here
+    const Type_Method* getApplyMethodType() const;
+    // names for the fields of the struct returned
+    // by applying a table
+    static const ID hit;
+    static const ID action_run;
+#end
+}
+
+// A special enum-like anonymous type that
+// represents all actions in a table's action list.
+// Used for 'switch' statements.
+class Type_ActionEnum : Type {
+    ActionList actionList;
+#emit
+    bool contains(cstring name) const;
+#end
+}
+    
+class Type_MethodBase : Type, IMayBeGenericType {
+    TypeParameters typeParameters; // we generally want these visited first
+    NullOK Type returnType;   // null for constructors or functors
+    ParameterList parameters;
+#emit
+    size_t getParameterCount() const { return parameters->size(); }
+    virtual const TypeParameters* getTypeParameters() const { return typeParameters; }
+#end
+}
+
+// Type for a method or function.
+class Type_Method : Type_MethodBase {
+#nodbprint
+}
+
+// Describes an argument of a MethodCall    
+class ArgumentInfo {
+    bool leftValue;
+    Type type;
+}
+ 
+// Used to represent the type of a MethodCallExpression
+// for unification.
+class Type_MethodCall : Type {
+    Vector<Type>         typeArguments; 
+    Type_Var             returnType;
+    Vector<ArgumentInfo> arguments;
+    validate{ typeArguments->check_null(); arguments->check_null(); }
+}
+    
+// Actions look a lot like methods in many respects.
+// However, invoking an action returns another action
+class Type_Action : Type_MethodBase {
+#nodbprint
+}
+    
+class Method : Declaration {
+    Type_Method type;
+#emit
+    size_t getParameterCount() const { return type->getParameterCount(); }
+#end
+}
+    
+class Type_Typedef : Type_Declaration {
+    Type        type;
+    Annotations annotations;
+#nodbprint
+}
+
+// An 'extern' black-box (not a function)
+class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
+    TypeParameters typeParameters;
+    Vector<Method> methods;
+#emit
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    { return methods->getEnumerator()->as<const IDeclaration*>(); }
+    virtual const TypeParameters* getTypeParameters() const { return typeParameters; }
+    const Method* lookupMethod(cstring name, int argCount) const;
+#end
+    validate{ methods->check_null(); }
+}
+
+class Annotation {
+    ID name;
+    NullOK Expression expr;
+#emit
+    Annotation(cstring n, const Expression *e) : name(n), expr(e) {}
+    Annotation(cstring n, intmax_t v);
+    // Predefined annotations used by the compiler
+    static const cstring nameAnnotation;
+#end
+#emit_impl
+    IR::Annotation::Annotation(cstring n, intmax_t v) : name(n), expr(new IR::Constant(v)) {}
+#end
+    toString{ return cstring("@") + name; }
+#nodbprint
+    validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
+}
+
+class Annotations {
+    Vector<Annotation> annotations;
+#nodbprint
+#emit
+    Annotations(const Vector<Annotation>* annotations) :
+            Node(annotations->srcInfo), annotations(annotations) {}
+    static Annotations *empty;
+    size_t size() const { return annotations->size(); }
+    // Get the annotation with the specified name or nullptr.
+    // There should be at most one annotation with this name.
+    const Annotation* getSingle(cstring name) const
+    { return get(annotations, name); }
+    Annotations* addAnnotation(cstring name, const Expression* expr) const {
+        auto vec = new Vector<Annotation>(*annotations);
+        vec->push_back(new Annotation(name, expr));
+        return new Annotations(vec);
+    }
+#end
+    validate{ annotations->check_null(); }
+}
+
+        

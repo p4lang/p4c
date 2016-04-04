@@ -1,0 +1,73 @@
+/* -*-C++-*- */
+
+#ifndef _P4_SYMBOL_TABLE_H_
+#define _P4_SYMBOL_TABLE_H_
+
+/* A very simple symbol table that recognizes types; necessary because
+   the v1.2 grammar is ambiguous without type information */
+
+#include <unordered_map>
+#include <vector>
+
+#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/source_file.h"
+
+namespace Util {
+class NamedSymbol;
+class Namespace;
+
+// Maintains a high-level representation of the program structure
+// built on the fly during parsing.  Used by the lexer to
+// disambiguate identifiers.
+class ProgramStructure final {
+ private:
+    bool debug;
+    FILE* debugStream;
+    Namespace* rootNamespace;
+    Namespace* currentNamespace;
+
+    struct PathContext {
+        std::vector<cstring> components;
+        Namespace* lookupContext;
+
+        PathContext() : lookupContext(nullptr) {}
+    } identifierContext;
+
+    void push(Namespace* ns);
+    NamedSymbol* lookup(const cstring identifier) const;
+    void declare(NamedSymbol* symbol);
+
+ public:
+    enum class SymbolKind {
+        Identifier,
+        Type,
+        Namespace
+    };
+
+    ProgramStructure();
+
+    void setDebug(bool debug) { this->debug = debug; }
+    void pushNamespace(cstring name, SourceInfo info, bool allowDuplicates);
+    void pushContainerType(IR::ID id, bool allowDuplicates);
+    void declareType(IR::ID id);
+
+    // the last namespace has been exited
+    void pop();
+    // Declares these types in the current scope
+    void declareTypes(Util::Enumerator<const IR::Type_Var*>* typeVars);
+    SymbolKind lookupIdentifier(cstring identifier) const;
+
+    // Manipulate path prefix in which next identifier is looked-up
+    void startAbsolutePath();
+    void startRelativePath();
+    void clearPath();
+    void pathAppendNamespace(cstring ns);
+
+    void endParse();
+
+    cstring toString() const;
+};
+
+}  // namespace Util
+#endif /* _P4_SYMBOL_TABLE_H_ */

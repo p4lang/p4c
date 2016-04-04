@@ -1,0 +1,10 @@
+/* -*-c++-*- */
+/* Information about the setup of the P4 compiler tools */
+
+#ifndef _SETUP_H_
+#define _SETUP_H_
+
+#define P4_SYSTEM_INCLUDE_PATH "@P4INCLUDE@"
+extern const char* p4includePath;
+
+#endif /* _SETUP_H_ */

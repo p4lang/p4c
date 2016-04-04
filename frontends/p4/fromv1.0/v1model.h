@@ -1,0 +1,254 @@
+#ifndef _FRONTENDS_P4_FROMV1_0_V1MODEL_H_
+#define _FRONTENDS_P4_FROMV1_0_V1MODEL_H_
+
+#include "lib/cstring.h"
+#include "frontends/common/model.h"
+#include "frontends/p4/coreLibrary.h"
+#include "ir/ir.h"
+
+namespace P4V1 {
+
+// This should be kept in sync with p4includes/v1model.p4
+// In a perfect world this would be generated automatically from
+// p4includes/v1model.p4
+
+struct Parser_Model : public ::Model::Elem {
+    Parser_Model(Model::Type_Model headersType, Model::Type_Model userMetaType) :
+            Model::Elem("ParserImpl"),
+            packetParam("packet", P4::P4CoreLibrary::instance.packetIn),
+            headersParam("hdr", headersType),
+            metadataParam("meta", userMetaType)
+    {}
+    ::Model::Param_Model packetParam;
+    ::Model::Param_Model headersParam;
+    ::Model::Param_Model metadataParam;
+};
+
+struct Deparser_Model : public ::Model::Elem {
+    explicit Deparser_Model(Model::Type_Model headersType) :
+            Model::Elem("DeparserImpl"),
+            packetParam("packet", P4::P4CoreLibrary::instance.packetOut),
+            headersParam("hdr", headersType)
+    {}
+    ::Model::Param_Model packetParam;
+    ::Model::Param_Model headersParam;
+};
+
+// Models ingress and egress
+struct Control_Model : public ::Model::Elem {
+    Control_Model(cstring name, Model::Type_Model headersType, Model::Type_Model metadataType,
+                 Model::Type_Model standardMetadataType) :
+            Model::Elem(name),
+            headersParam("hdr", headersType),
+            metadataParam("meta", metadataType),
+            standardMetadataParam("standard_metadata", standardMetadataType) {}
+    ::Model::Param_Model headersParam;
+    ::Model::Param_Model metadataParam;
+    ::Model::Param_Model standardMetadataParam;
+};
+
+struct VerifyUpdate_Model : public ::Model::Elem {
+    VerifyUpdate_Model(cstring name, Model::Type_Model headersType) :
+            Model::Elem(name),
+            headersParam("hdr", headersType) {}
+    ::Model::Param_Model headersParam;
+};
+
+struct CounterType_Model : public ::Model::Enum_Model {
+    CounterType_Model() : ::Model::Enum_Model("CounterType"),
+        packets("Packets"), bytes("Bytes"), both("Both") {}
+    ::Model::Elem packets;
+    ::Model::Elem bytes;
+    ::Model::Elem both;
+};
+
+struct Checksum16_Model : public ::Model::Extern_Model {
+    Checksum16_Model() : Extern_Model("Checksum16"), get("get"),
+                         resultType(IR::Type_Bits::get(32)) {}
+    ::Model::Elem get;
+    const IR::Type* resultType;
+};
+
+struct ActionProfile_Model : public ::Model::Extern_Model {
+    ActionProfile_Model() : Extern_Model("ActionProfile"), sizeType(IR::Type_Bits::get(32)) {}
+    const IR::Type* sizeType;
+};
+
+struct ActionSelector_Model : public ::Model::Extern_Model {
+    ActionSelector_Model() : Extern_Model("ActionSelector"),
+                             sizeType(IR::Type_Bits::get(32)), widthType(IR::Type_Bits::get(32)) {}
+    const IR::Type* sizeType;
+    const IR::Type* widthType;
+};
+
+struct Random_Model : public ::Model::Elem {
+    Random_Model() : Elem("random"),
+                    resultType(IR::Type_Bits::get(32)), logRangeType(IR::Type_Bits::get(5)) {}
+    const IR::Type* resultType;
+    const IR::Type* logRangeType;
+};
+
+struct CounterOrMeter_Model : public ::Model::Extern_Model {
+    explicit CounterOrMeter_Model(cstring name) : Extern_Model(name),
+                      sizeParam("size"), typeParam("type"),
+                      size_type(IR::Type_Bits::get(32)),
+                      index_type(IR::Type_Bits::get(32)), counterType() {}
+    ::Model::Elem sizeParam;
+    ::Model::Elem typeParam;
+    const IR::Type* size_type;
+    const IR::Type* index_type;
+    CounterType_Model counterType;
+};
+
+struct Register_Model : public ::Model::Extern_Model {
+    Register_Model() : Extern_Model("Register"),
+                       sizeParam("size"), read("read"), write("write"),
+                       size_type(IR::Type_Bits::get(32)),
+                       index_type(IR::Type_Bits::get(32)) {}
+    ::Model::Elem sizeParam;
+    ::Model::Elem read;
+    ::Model::Elem write;
+    const IR::Type* size_type;
+    const IR::Type* index_type;
+};
+
+struct DigestReceiver_Model : public ::Model::Elem {
+    DigestReceiver_Model() : Elem("digest"), receiverType(IR::Type_Bits::get(32)) {}
+    const IR::Type* receiverType;
+};
+
+struct Counter_Model : public CounterOrMeter_Model {
+    Counter_Model() : CounterOrMeter_Model("Counter"), increment("increment") {}
+    ::Model::Elem increment;
+};
+
+struct Meter_Model : public CounterOrMeter_Model {
+    Meter_Model() : CounterOrMeter_Model("Meter"), executeMeter("meter") {}
+    ::Model::Elem executeMeter;
+};
+
+struct DirectMeter_Model : public CounterOrMeter_Model {
+    DirectMeter_Model() : CounterOrMeter_Model("DirectMeter"), read("read") {}
+    ::Model::Elem read;
+};
+
+struct StandardMetadataType_Model : public ::Model::Type_Model {
+    explicit StandardMetadataType_Model(cstring name) :
+            ::Model::Type_Model(name), dropBit("drop"), recirculate("recirculate_port"),
+            egress_spec("egress_spec") {}
+    ::Model::Elem dropBit;
+    ::Model::Elem recirculate;
+    ::Model::Elem egress_spec;
+};
+
+struct CloneType_Model : public ::Model::Enum_Model {
+    CloneType_Model() : ::Model::Enum_Model("CloneType"),
+                        i2e("I2E"), e2e("E2E") {}
+    ::Model::Elem i2e;
+    ::Model::Elem e2e;
+};
+
+struct Algorithm_Model : public ::Model::Enum_Model {
+    Algorithm_Model() : ::Model::Enum_Model("HashAlgorithm"),
+                        crc32("crc32"), crc16("crc16"), random("random"), identity("identity") {}
+    ::Model::Elem crc32;
+    ::Model::Elem crc16;
+    ::Model::Elem random;
+    ::Model::Elem identity;
+};
+
+struct Hash_Model : public ::Model::Elem {
+    Hash_Model() : ::Model::Elem("hash") {}
+};
+
+struct Cloner_Model : public ::Model::Extern_Model {
+    Cloner_Model() : Extern_Model("clone"), clone3("clone3"), cloneType(),
+                     sessionType(IR::Type_Bits::get(32)) {}
+    ::Model::Elem   clone3;
+    CloneType_Model cloneType;
+    const IR::Type* sessionType;
+};
+
+struct Switch_Model : public ::Model::Elem {
+    Switch_Model() : Model::Elem("V1Switch"),
+                     parser("p"), verify("vr"), ingress("ig"),
+                     egress("eg"), update("ck"), deparser("dep") {}
+    ::Model::Elem parser;  // names of the package arguments
+    ::Model::Elem verify;
+    ::Model::Elem ingress;
+    ::Model::Elem egress;
+    ::Model::Elem update;
+    ::Model::Elem deparser;
+};
+
+struct TableAttributes_Model {
+    TableAttributes_Model() : tableImplementation("implementation"),
+                              directCounter("counters"),
+                              directMeter("meters"), size("size"),
+                              supportTimeout("support_timeout") {}
+    ::Model::Elem       tableImplementation;
+    ::Model::Elem       directCounter;
+    ::Model::Elem       directMeter;
+    ::Model::Elem       size;
+    ::Model::Elem       supportTimeout;
+    const unsigned defaultTableSize = 1024;
+};
+
+class V1Model : public ::Model::Model {
+ protected:
+    V1Model() :
+            Model::Model("0.1"),
+            standardMetadata("standard_metadata"),
+            headersType("headers"),
+            metadataType("metadata"),
+            standardMetadataType("standard_metadata_t"),
+            parser(headersType, metadataType), deparser(headersType),
+            egress("egress", headersType, metadataType, standardMetadataType),
+            ingress("ingress", headersType, metadataType, standardMetadataType),
+            sw(), counterOrMeter("$"), counter(), meter(), random(), action_profile(),
+            action_selector(), clone(), resubmit("resubmit"),
+            tableAttributes(), selectorMatchType("selector"),
+            verify("verifyChecksum", headersType), update("computeChecksum", headersType),
+            ck16(), digest_receiver(), hash(), algorithm(),
+            directCounter("DirectCounter"), registers(), drop("mark_to_drop"),
+            recirculate("recirculate"), directMeter()
+    {}
+
+ public:
+    ::Model::Elem       standardMetadata;
+    ::Model::Type_Model headersType;
+    ::Model::Type_Model metadataType;
+    StandardMetadataType_Model standardMetadataType;
+    Parser_Model        parser;
+    Deparser_Model      deparser;
+    Control_Model       egress;
+    Control_Model       ingress;
+    Switch_Model        sw;
+    CounterOrMeter_Model counterOrMeter;
+    Counter_Model       counter;
+    Meter_Model         meter;
+    Random_Model        random;
+    ActionProfile_Model action_profile;
+    ActionSelector_Model action_selector;
+    Cloner_Model        clone;
+    ::Model::Elem       resubmit;
+    TableAttributes_Model tableAttributes;
+    ::Model::Elem       selectorMatchType;
+    VerifyUpdate_Model  verify;
+    VerifyUpdate_Model  update;
+    Checksum16_Model    ck16;
+    DigestReceiver_Model digest_receiver;
+    Hash_Model          hash;
+    Algorithm_Model     algorithm;
+    ::Model::Elem       directCounter;
+    Register_Model      registers;
+    ::Model::Elem       drop;
+    ::Model::Elem       recirculate;
+    DirectMeter_Model   directMeter;
+
+    static V1Model instance;
+};
+
+}  // namespace P4V1
+
+#endif /* _FRONTENDS_P4_FROMV1_0_V1MODEL_H_ */

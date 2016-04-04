@@ -1,0 +1,496 @@
+/* -*-C++-*- */
+
+abstract Expression {
+#emit
+    const Type* type = Type::Unknown::get();
+    Expression() : type(Type::Unknown::get()) {}
+    explicit Expression(const Type *t) : type(t) { }
+    Expression(Util::SourceInfo srcInfo, const Type *t) : Node(srcInfo), type(t) { }
+#end
+    visit_children { v.visit(type, "type"); }
+    operator== { return typeid(*this) == typeid(a) && type == a.type; }
+}
+
+abstract Operation : Expression {
+#emit
+    virtual int getPrecedence() const = 0;
+    virtual cstring getStringOp() const = 0;
+    Operation(Util::SourceInfo si, const Type *t) : Expression(si, t) {}
+    explicit Operation(const Type *t) : Expression(t) {}
+    Operation() : Expression() {}
+    typedef Operation_Unary Unary;
+    typedef Operation_Binary Binary;
+    typedef Operation_Relation Relation;
+#end
+    toString{ return getStringOp(); }
+}
+
+abstract Operation_Unary : Operation {
+    Expression expr;
+    precedence = DBPrint::Prec_Prefix;
+#emit
+    Operation_Unary(Util::SourceInfo si, const Type *t, const Expression *e)
+    : Operation(si, t), expr(e) {}
+    Operation_Unary(const Type *t, const Expression *e) : Operation(t), expr(e) {}
+    Operation_Unary(const Expression *e) : expr(e) {}
+#end
+}
+
+class Neg : Operation_Unary {
+    stringOp = "-";
+#emit
+    Neg(const Expression *e) : Operation_Unary(e) {}
+#end
+}
+
+class Cmpl : Operation_Unary {
+    stringOp = "~";
+#emit
+    Cmpl(const Expression *e) : Operation_Unary(e) {}
+#end
+}
+
+class LNot : Operation_Unary {
+    stringOp = "!";
+#emit
+    LNot(const Expression *e) : Operation_Unary(e) {}
+#end
+}
+
+abstract Operation_Binary : Operation {
+    Expression left;
+    Expression right;
+#emit
+    Operation_Binary(const Expression *l, const Expression *r) : left(l), right(r) {}
+#end
+}
+
+abstract Operation_Ternary : Operation {
+    Expression e0;
+    Expression e1;
+    Expression e2;
+#emit
+    Operation_Ternary(const Expression *e0, const Expression *e1, const Expression *e2)
+    : e0(e0), e1(e1), e2(e2) {}
+#end
+}
+
+abstract Operation_Relation : Operation_Binary {
+#emit
+    Operation_Relation(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+
+class Mul : Operation_Binary {
+    stringOp = "*";
+    precedence = DBPrint::Prec_Mul;
+#emit
+    Mul(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+
+class Div : Operation_Binary {
+    stringOp = "/";
+    precedence = DBPrint::Prec_Div;
+#emit
+    Div(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class Mod : Operation_Binary {
+    stringOp = "%";
+    precedence = DBPrint::Prec_Mod;
+#emit
+    Mod(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class Add : Operation_Binary {
+    stringOp = "+";
+    precedence = DBPrint::Prec_Add;
+#emit
+    Add(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class Sub : Operation_Binary {
+    stringOp = "-";
+    precedence = DBPrint::Prec_Sub;
+#emit
+    Sub(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class Shl : Operation_Binary {
+    stringOp = "<<";
+    precedence = DBPrint::Prec_Shl;
+#emit
+    Shl(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class Shr : Operation_Binary {
+    stringOp = ">>";
+    precedence = DBPrint::Prec_Shr;
+#emit
+    Shr(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class Equ : Operation_Relation {
+    stringOp = "==";
+    precedence = DBPrint::Prec_Equ;
+#emit
+    Equ(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
+#end
+}
+class Neq : Operation_Relation {
+    stringOp = "!=";
+    precedence = DBPrint::Prec_Neq;
+#emit
+    Neq(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
+#end
+}
+class Lss : Operation_Relation {
+    stringOp = "<";
+    precedence = DBPrint::Prec_Lss;
+#emit
+    Lss(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
+#end
+}
+class Leq : Operation_Relation {
+    stringOp = "<=";
+    precedence = DBPrint::Prec_Leq;
+#emit
+    Leq(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
+#end
+}
+class Grt : Operation_Relation {
+    stringOp = ">";
+    precedence = DBPrint::Prec_Grt;
+#emit
+    Grt(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
+#end
+}
+class Geq : Operation_Relation {
+    stringOp = ">=";
+    precedence = DBPrint::Prec_Geq;
+#emit
+    Geq(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
+#end
+}
+class BAnd : Operation_Binary {
+    stringOp = "&";
+    precedence = DBPrint::Prec_BAnd;
+#emit
+    BAnd(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class BOr : Operation_Binary {
+    stringOp = "|";
+    precedence = DBPrint::Prec_BOr;
+#emit
+    BOr(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class BXor : Operation_Binary {
+    stringOp = "^";
+    precedence = DBPrint::Prec_BXor;
+#emit
+    BXor(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class LAnd : Operation_Binary {
+    stringOp = "&&";
+    precedence = DBPrint::Prec_LAnd;
+#emit
+    LAnd(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+class LOr : Operation_Binary {
+    stringOp = "||";
+    precedence = DBPrint::Prec_LOr;
+#emit
+    LOr(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
+#end
+}
+
+class Constant : Expression, CompileTimeValue {
+    mpz_class value;
+    unsigned  base;  // base used when reading/writing
+#noconstructor
+#emit
+    // if noWarning is true, no warning is emitted
+    void handleOverflow(bool noWarning);
+    explicit Constant(intmax_t v, unsigned base = 10) :
+            Expression(Type_InfInt::get()), value(v), base(base) {}
+    explicit Constant(mpz_class v, unsigned base = 10) :
+            Expression(Type_InfInt::get()), value(v), base(base) {}
+    Constant(Util::SourceInfo si, mpz_class v, unsigned base = 10) :
+            Expression(si, Type_InfInt::get()), value(v), base(base) {}
+    Constant(const Type *t, mpz_class v, unsigned base = 10, bool noWarning = false) :
+            Expression(t), value(v), base(base) { handleOverflow(noWarning); }
+    Constant(Util::SourceInfo si, const Type *t, mpz_class v,
+             unsigned base = 10, bool noWarning = false) :
+            Expression(si, t), value(v), base(base) { handleOverflow(noWarning); }
+    static Constant GetMask(unsigned width);
+    bool fitsInt() const { return value.fits_sint_p(); }
+    bool fitsLong() const { return value.fits_slong_p(); }
+    long asLong() const {
+        if (!fitsLong())
+            ::error("%1%: Value too large", this);
+        return value.get_si(); }
+    int asInt() const {
+        if (!fitsInt())
+            ::error("%1%: Value too large", this);
+        return value.get_si(); }
+    // The following operators are only used in special circumstances.
+    // They do not look at the type when operating.  There are separate
+    // implementations of these computations when doing proper constant folding.
+    Constant operator<<(const unsigned &shift) const;
+    Constant operator>>(const unsigned &shift) const;
+    Constant operator&(const Constant &c) const;
+    Constant operator-(const Constant &c) const;
+#end
+    toString { return Util::toString(&value); }
+}
+
+class NamedRef : Expression {
+    ID     name;
+#emit
+    explicit NamedRef(ID n) : name(n) {}
+    NamedRef(const Type *t, ID n) : Expression(t), name(n) {}
+#end
+    toString{ return name; }
+}
+
+class If :  Expression {
+    Expression            pred;
+    NullOK Vector<Expression>    ifTrue;
+    NullOK Vector<Expression>    ifFalse;
+#emit
+    If(const Expression *p, const Vector<Expression> *T, const Vector<Expression> *F)
+            : pred(p), ifTrue(T), ifFalse(F) { validate(); }
+#end
+    visit_children {
+        v.visit(pred, "pred");
+        auto &clone(v.flow_clone());
+        v.visit(ifTrue, "ifTrue");
+        clone.visit(ifFalse, "ifFalse");
+        v.flow_merge(clone);
+        Expression::visit_children(v);
+    }
+}
+
+// an if condition tagged with a name so we can refer to it
+class NamedCond : If {
+    cstring  name;
+#emit
+    static cstring unique_name();
+    NamedCond(const Expression *p, const Vector<Expression> *T,
+       const Vector<Expression> *F) : If(p, T, F), name(unique_name()) {}
+    explicit NamedCond(const If &i) : If(i), name(unique_name()) {}
+#end
+    operator== { return If::operator==(a); }
+#noconstructor
+#nodbprint
+}
+
+class Apply : Expression {
+    ID                                  name;
+    inline NameMap<Vector<Expression>>  actions;
+#emit
+    Apply() = default;
+    explicit Apply(ID n) : name(n) {}
+    Apply(const Util::SourceInfo &si, ID n) : Expression(si), name(n) {}
+#end
+#noconstructor
+    visit_children {
+        auto &clone(v.flow_clone());
+        // HACK -- temp sort actions into program (source) order, so that condition names are
+        // generated in the same order as p4-hlir
+        typedef std::remove_reference<decltype(actions.at("any"))>::type action_t;
+        vector<action_t *> sort_actions;
+        for (auto &p : Values(actions)) sort_actions.push_back(&p);
+        std::sort(sort_actions.begin(), sort_actions.end(),
+            [](action_t *a, action_t *b) {
+                return (*a)->srcInfo.getStart() < (*b)->srcInfo.getStart(); });
+        for (auto p : sort_actions) {
+            auto &clone2(clone.flow_clone());
+            clone2.visit(*p);
+            v.flow_merge(clone2); }
+        Expression::visit_children(v);
+    }
+}
+
+class Primitive : Operation {
+    cstring name;
+    inline Vector<Expression> operands;
+#emit
+    explicit Primitive(cstring n) : name(n) {}
+    Primitive(Util::SourceInfo si, cstring n) : Operation(si), name(n) {}
+    Primitive(cstring n, const Vector<Expression> *l) : name(n) {
+        if (l) for (auto e : *l) operands.push_back(e); }
+    Primitive(Util::SourceInfo si, cstring n, const Vector<Expression> *l)
+    : Operation(si), name(n) {
+        if (l) for (auto e : *l) operands.push_back(e); }
+    Primitive(cstring n, const Expression *a1) : name(n) {
+        operands.push_back(a1); }
+    Primitive(Util::SourceInfo si, cstring n, const Expression *a1) : Operation(si), name(n) {
+        operands.push_back(a1); }
+    Primitive(cstring n, const Expression *a1, const Expression *a2) : name(n) {
+        operands.push_back(a1); operands.push_back(a2); }
+    Primitive(Util::SourceInfo si, cstring n, const Expression *a1, const Expression *a2)
+    : Operation(si), name(n) {
+        operands.push_back(a1); operands.push_back(a2); }
+    Primitive(cstring n, const Expression *a1, const Vector<Expression> *a2) : name(n) {
+        operands.push_back(a1);
+        if (a2) for (auto e : *a2) operands.push_back(e); }
+    Primitive(Util::SourceInfo si, cstring n, const Expression *a1, const Vector<Expression> *a2)
+    : Operation(si), name(n) {
+        operands.push_back(a1);
+        if (a2) for (auto e : *a2) operands.push_back(e); }
+    Primitive(cstring n, const Expression *a1, const Expression *a2, const Expression *a3)
+    : name(n) {
+        operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
+    Primitive(Util::SourceInfo si, cstring n, const Expression *a1, const Expression *a2,
+              const Expression *a3) : Operation(si), name(n) {
+        operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
+    virtual bool isOutput(int operand_index) const;
+    virtual unsigned inferOperandTypes() const;
+    virtual void typecheck() const;
+#end
+#apply
+    stringOp = name;
+    precedence = DBPrint::Prec_Postfix;
+}
+
+class BoolLiteral : Expression, CompileTimeValue {
+    bool value;
+    toString{ return value ? "true" : "false"; }
+}
+
+class StringLiteral : Expression {
+    cstring value;
+    validate{ if (value.isNull()) BUG("null StringLiteral"); }
+    toString{ return cstring("\"") + value + "\""; }
+}
+    
+class PathExpression : Expression {
+    Path path;
+#noconstructor
+#emit
+    explicit PathExpression(IR::ID id) :
+            Expression(id.srcInfo), path(new IR::Path(id)) {}
+    explicit PathExpression(const Path* path)
+        : Expression(path->srcInfo), path(path)
+    { CHECK_NULL(path); }
+#end
+    toString{ return path->toString(); }
+}
+
+// enum X { a }
+// X.a
+// The 'X' portion is a TypeNameExpression
+class TypeNameExpression : Expression {
+    Type_Name type;
+#emit
+    TypeNameExpression(ID id) : type(new IR::Type_Name(new IR::Path(id))) {}
+#end
+    dbprint{ Node::dbprint(out); out << type; }
+    toString { return type->toString(); }
+}
+
+class Slice : Operation_Ternary {
+    precedence = DBPrint::Prec_Postfix;
+    stringOp = "[:]";
+    toString{ return e0->toString() + "[" + e1->toString() + ":" + e2->toString() + "]"; }
+    // After type checking e1 and e2 will be constants
+#emit
+    int getH() const { return e1->to<IR::Constant>()->asInt(); }
+    int getL() const { return e2->to<IR::Constant>()->asInt(); }
+    Slice(const Expression *a, int hi, int lo)
+    : Operation_Ternary(a, new Constant(hi), new Constant(lo)) {}
+    Slice(const Util::SourceInfo &si, const Expression *a, int hi, int lo)
+    : Operation_Ternary(si, a, new Constant(hi), new Constant(lo)) {}
+#end
+}
+
+class Member : Operation_Unary {
+    ID member;
+#emit
+    Member(Util::SourceInfo si, const Type *t, const Expression *b, cstring n)
+    : Operation_Unary(si, t, b), member(n) {}
+    Member(const Expression *b, ID n) : Operation_Unary(b), member(n) {}
+    Member(const Type *t, const Expression *b, cstring n) : Operation_Unary(t, b), member(n) {}
+    virtual int offset_bits() const;
+    int lsb() const;
+    int msb() const;
+#end
+    stringOp = ".";
+    toString{ return expr->toString() + "." + member; }
+}
+
+class Concat : Operation_Binary {
+    stringOp = "++";
+    precedence = DBPrint::Prec_Add;
+}
+
+class ArrayIndex : Operation_Binary {
+    stringOp = "[]";
+    precedence = DBPrint::Prec_Postfix;
+}
+
+class Range : Operation_Binary {
+    stringOp = "..";
+    precedence = DBPrint::Prec_Low;
+}
+
+class Mask : Operation_Binary {
+    stringOp = "&&&";
+    precedence = DBPrint::Prec_Low;
+}
+
+class Mux : Operation_Ternary {
+    stringOp = "?:";
+    precedence = DBPrint::Prec_Low;
+}
+
+class DefaultExpression : Expression {}
+
+class Cast : Operation_Unary {
+#emit
+    Cast(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Expression *expression) :
+            Operation_Unary(srcInfo, type, expression) {}
+#end
+    precedence = DBPrint::Prec_Prefix;
+    stringOp = "(cast)";
+    toString{ return "cast"; }
+    validate{ if (type->is<Type_Unknown>()) BUG("%1%: Cannot cast to unknown type", this); }
+}
+
+class SelectExpression : Expression {
+    ListExpression select;
+    Vector<SelectCase> selectCases;
+#nodbprint
+    validate{ selectCases->check_null(); }
+}
+
+class MethodCallExpression : Expression {
+    Expression method;
+    Vector<Type> typeArguments;
+    Vector<Expression> arguments;
+    toString{ return method->toString(); }
+    validate{ typeArguments->check_null(); arguments->check_null(); }
+}
+
+class ConstructorCallExpression : Expression {
+    Type type;
+    Vector<Expression> arguments;
+    toString{ return type->toString(); }
+    validate{ arguments->check_null(); }
+}
+
+// Represents a list of expressions separated by commas
+class ListExpression : Expression {
+    Vector<Expression> components;
+    validate {
+        if (components->empty()) BUG("List expression with no components");
+        components->check_null();
+    }
+}
+
