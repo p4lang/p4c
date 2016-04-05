@@ -29,6 +29,21 @@ void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::TableCont
     info->table = table;
 }
 
+static bool checkSame(const IR::Expression* expr0, const IR::Expression* expr1) {
+    if (expr0->node_type_name() != expr1->node_type_name())
+        return false;
+    if (expr0->is<IR::PathExpression>()) {
+        auto pe0 = expr0->to<IR::PathExpression>();
+        auto pe1 = expr1->to<IR::PathExpression>();
+        return pe0->path == pe1->path;
+    } else if (expr0->is<IR::Member>()) {
+        auto mem0 = expr0->to<IR::Member>();
+        auto mem1 = expr1->to<IR::Member>();
+        return checkSame(mem0->expr, mem1->expr) && mem0->member == mem1->member;
+    }
+    BUG("%1%: unexpected expression for meter destination", expr0);
+}
+
 void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
                                     const IR::Expression* destination) {
     auto info = getInfo(meter);
@@ -37,8 +52,10 @@ void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
     if (info->destinationField == nullptr) {
         info->destinationField = destination;
     } else {
-        // CHECK it's the same destination
-        // TODO
+        bool same = checkSame(destination, info->destination);
+        if (!same)
+            ::error("On this target all meter operations must write to the same destination ",
+                    "but %1% and %2% different", destination, info->destination);
     }
 }
 
