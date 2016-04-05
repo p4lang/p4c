@@ -1,5 +1,5 @@
-set -e
 ./find-makefiles.sh
+mkdir -p extensions
 echo "Running autoconf/configure tools"
 autoreconf -i
 mkdir -p build

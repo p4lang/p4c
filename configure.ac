@@ -54,4 +54,12 @@ AC_CHECK_LIB([gmpxx], [__gmpz_init], [], [AC_MSG_ERROR([GNU MP not found])])
 AC_SUBST(P4INCLUDE, $prefix/p4include)
 
 AC_CONFIG_FILES([Makefile setup.h])
+
+m4_foreach_w([ac_file],m4_esyscmd([echo backends/*/addconfig.ac extensions/*/addconfig.ac]),
+[[#]] config from ac_file
+[sinclude(]ac_file[)]
+[[#]] end of ac_file
+)
+
+
 AC_OUTPUT
