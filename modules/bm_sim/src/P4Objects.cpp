@@ -849,7 +849,7 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
         string action_name = "";
         ActionFn *action = nullptr;
         if (actions_key == "action_ids") {
-          p4object_id_t action_id = cfg_action.asInt();
+          action_id = cfg_action.asInt();
           action = get_action_by_id(action_id); assert(action);
           action_name = action->get_name();
         } else {
