@@ -17,7 +17,7 @@ p4c_bm2_SOURCES = \
 	backends/bmv2/lower.h \
 	backends/bmv2/lower.cpp
 
-cpplint_FILES += $(p4c_bmv2_SOURCES)
+cpplint_FILES += $(p4c_bm2_SOURCES)
 
 # Tests
 -include $(srcdir)/bmv2tests.am
@@ -30,6 +30,5 @@ $(srcdir)/bmv2tests.am: $(srcdir)/testdata/v1_samples/*.p4
 # These tests exhibit P4 v1.0 features still unimplemented
 XFAIL_TESTS += \
     bmv2/testdata/v1_samples/09-IPv4OptionsUnparsed.p4.test \
-    bmv2/testdata/v1_samples/hitmiss.p4.test \
     bmv2/testdata/v1_samples/TLV_parsing.p4.test \
     bmv2/testdata/v1_samples/truncate.p4.test
