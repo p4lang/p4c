@@ -115,21 +115,24 @@ class CFGBuilder : public Inspector {
             return false;
         }
         auto tc = am->object->to<IR::TableContainer>();
-        auto node = cfg->makeNode(tc, statement);
+        auto node = cfg->makeNode(tc, statement->methodCall);
         node->addPredecessors(current);
         setAfter(statement, new CFG::EdgeSet(new CFG::Edge(node)));
         return false;
     }
     bool preorder(const IR::IfStatement* statement) override {
-        // TODO: handle table hit/miss case
-        // We only allow expressions of the form t.apply().hit
+        // We only allow expressions of the form t.apply().hit currently.
+        // If the expression is more complex it should have been
+        // simplified by prior passes.
         auto tc = P4::TableApplySolver::isHit(statement->condition, refMap, typeMap);
+        CFG::Node* node;
         if (tc != nullptr) {
-            // hit-miss case
-            BUG("%1%: not yet handled", statement);
+            // hit-miss case.
+            node = cfg->makeNode(tc, statement->condition);
+        } else {
+            node = cfg->makeNode(statement);
         }
 
-        auto node = cfg->makeNode(statement);
         node->addPredecessors(current);
         // If branch
         current = new CFG::EdgeSet(new CFG::Edge(node, true));
@@ -165,7 +168,7 @@ class CFGBuilder : public Inspector {
         auto tc = P4::TableApplySolver::isActionRun(statement->expression, refMap, typeMap);
         BUG_CHECK(tc != nullptr, "%1%: unexpected switch statement expression",
                   statement->expression);
-        auto node = cfg->makeNode(tc, statement);
+        auto node = cfg->makeNode(tc, statement->expression);
         node->addPredecessors(current);
         auto result = new CFG::EdgeSet(new CFG::Edge(node));  // In case no label matches
         auto labels = new CFG::EdgeSet();

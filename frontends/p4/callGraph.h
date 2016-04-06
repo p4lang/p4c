@@ -104,7 +104,7 @@ class CallGraph {
 
     bool strongConnect(T node, sccInfo& helper, std::vector<T>& out) {
         bool loop = false;
-        
+
         LOG1("scc " << node);
         helper.index.emplace(node, helper.crtIndex);
         helper.setLowLink(node, helper.crtIndex);
@@ -150,4 +150,4 @@ class CallGraph {
 
 }  // namespace P4
 
-#endif
+#endif  /* _FRONTENDS_P4_CALLGRAPH_H_ */

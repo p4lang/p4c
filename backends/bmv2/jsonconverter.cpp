@@ -8,6 +8,63 @@
 
 namespace BMV2 {
 
+DirectMeterMap::DirectMeterInfo* DirectMeterMap::createInfo(const IR::IDeclaration* meter) {
+    auto prev = ::get(directMeter, meter);
+    BUG_CHECK(prev == nullptr, "Already created");
+    auto result = new DirectMeterMap::DirectMeterInfo();
+    directMeter.emplace(meter, result);
+    return result;
+}
+
+DirectMeterMap::DirectMeterInfo* DirectMeterMap::getInfo(const IR::IDeclaration* meter) {
+    return ::get(directMeter, meter);
+}
+
+void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::TableContainer* table) {
+    auto info = getInfo(meter);
+    CHECK_NULL(info);
+    if (info->table != nullptr)
+        ::error("%1%: Direct meters cannot be attached to multiple tables %2% and %3%",
+                meter, table, info->table);
+    info->table = table;
+}
+
+static bool checkSame(const IR::Expression* expr0, const IR::Expression* expr1) {
+    if (expr0->node_type_name() != expr1->node_type_name())
+        return false;
+    if (expr0->is<IR::PathExpression>()) {
+        auto pe0 = expr0->to<IR::PathExpression>();
+        auto pe1 = expr1->to<IR::PathExpression>();
+        return pe0->path == pe1->path;
+    } else if (expr0->is<IR::Member>()) {
+        auto mem0 = expr0->to<IR::Member>();
+        auto mem1 = expr1->to<IR::Member>();
+        return checkSame(mem0->expr, mem1->expr) && mem0->member == mem1->member;
+    }
+    BUG("%1%: unexpected expression for meter destination", expr0);
+}
+
+void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
+                                    const IR::Expression* destination) {
+    auto info = getInfo(meter);
+    if (info == nullptr)
+        info = createInfo(meter);
+    if (info->destinationField == nullptr) {
+        info->destinationField = destination;
+    } else {
+        bool same = checkSame(destination, info->destinationField);
+        if (!same)
+            ::error("On this target all meter operations must write to the same destination ",
+                    "but %1% and %2% different", destination, info->destinationField);
+    }
+}
+
+void DirectMeterMap::setSize(const IR::IDeclaration* meter, unsigned size) {
+    auto info = getInfo(meter);
+    CHECK_NULL(info);
+    info->tableSize = size;
+}
+
 static cstring stringRepr(mpz_class value, unsigned bytes = 0) {
     cstring sign = "";
     const char* r;
@@ -398,17 +455,6 @@ static Util::IJson* wrapExpression(Util::IJson* json) {
     return json;
 }
 
-void JsonConverter::setDirectMeterDestination(const IR::IDeclaration* decl,
-                                              const IR::Expression* dest)  {
-    auto prev = ::get(directMeterDest, decl);
-    if (prev == nullptr)
-        directMeterDest.emplace(decl, dest);
-    else {
-        // CHECK it's the same destination
-        // TODO
-    }
-}
-
 void
 JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                                  Util::JsonArray* result, Util::JsonArray* fieldLists,
@@ -542,7 +588,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     if (em->method->name == v1model.directMeter.read.name) {
                         BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
                         auto dest = mc->arguments->at(0);
-                        setDirectMeterDestination(em->object, dest);
+                        meterMap.setDestination(em->object, dest);
                         // Do not generate any code for this operation
                         continue;
                     }
@@ -557,7 +603,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     } else {
                         BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
                         cstring name = refMap->newName("fl");
-                        id = createFieldList(mc->arguments->at(2), name, fieldLists);
+                        id = createFieldList(mc->arguments->at(2), "field_lists", name, fieldLists);
                     }
                     auto cloneType = mc->arguments->at(0);
                     auto ei = P4::EnumInstance::resolve(cloneType, typeMap);
@@ -618,7 +664,36 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                             listName = nameFromAnnotation(st->annotations, st->name);
                         }
                     }
-                    int id = createFieldList(mc->arguments->at(1), listName, learn_lists);
+                    int id = createFieldList(mc->arguments->at(1), "learn_lists",
+                                             listName, learn_lists);
+                    auto cst = new IR::Constant(id);
+                    auto jcst = conv->convert(cst);
+                    parameters->append(jcst);
+                    continue;
+                } else if (ef->method->name == v1model.resubmit.name ||
+                           ef->method->name == v1model.recirculate.name) {
+                    BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
+                    cstring prim = (ef->method->name == v1model.resubmit.name) ?
+                            "resubmit" : "recirculate";
+                    auto primitive = mkPrimitive(prim, result);
+                    auto parameters = mkParameters(primitive);
+                    cstring listName = prim;
+                    // If we are supplied a type argument that is a named type use
+                    // that for the list name.
+                    if (mc->typeArguments->size() == 1) {
+                        auto typeArg = mc->typeArguments->at(0);
+                        if (typeArg->is<IR::Type_Name>()) {
+                            auto origType = refMap->getDeclaration(
+                                typeArg->to<IR::Type_Name>()->path);
+                            CHECK_NULL(origType);
+                            BUG_CHECK(origType->is<IR::Type_Struct>(),
+                                      "%1%: expected a struct type", origType);
+                            auto st = origType->to<IR::Type_Struct>();
+                            listName = nameFromAnnotation(st->annotations, st->name);
+                        }
+                    }
+                    int id = createFieldList(mc->arguments->at(0), "field_lists",
+                                             listName, fieldLists);
                     auto cst = new IR::Constant(id);
                     auto jcst = conv->convert(cst);
                     parameters->append(jcst);
@@ -661,11 +736,11 @@ void JsonConverter::addToFieldList(const IR::Expression* expr, Util::JsonArray* 
 }
 
 // returns id of created field list
-int JsonConverter::createFieldList(const IR::Expression* expr, cstring listName,
+int JsonConverter::createFieldList(const IR::Expression* expr, cstring group, cstring listName,
                                    Util::JsonArray* fieldLists) {
     auto fl = new Util::JsonObject();
     fieldLists->append(fl);
-    int id = nextId(listName);
+    int id = nextId(group);
     fl->emplace("id", id);
     fl->emplace("name", listName);
     auto elements = mkArrayField(fl, "elements");
@@ -928,15 +1003,12 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
             } else {
                 auto pe = expr->to<IR::PathExpression>();
                 auto decl = refMap->getDeclaration(pe->path, true);
-                auto prev = ::get(directMeterTable, decl);
-                if (prev != nullptr)
-                    ::error("%1%: Direct meters cannot be attached two multiple tables %2% and %3%",
-                            dm, table, prev);
-                directMeterTable.emplace(decl, table);
+                meterMap.setTable(decl, table);
+                meterMap.setSize(decl, size);
                 BUG_CHECK(decl->is<IR::Declaration_Instance>(),
                           "%1%: expected an instance", decl->getNode());
-                cstring dmname = nameFromAnnotation(decl->to<IR::Declaration_Instance>()->annotations,
-                                                    decl->getName());
+                cstring dmname = nameFromAnnotation(
+                    decl->to<IR::Declaration_Instance>()->annotations, decl->getName());
                 result->emplace("direct_meters", dmname);
             }
         } else {
@@ -979,14 +1051,19 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
         else if (s->label == IR::SwitchStatement::default_label)
             defaultLabelDestination = s->endpoint;
     }
-    BUG_CHECK(nextDestination, "Could not find default destination for %1%", node->invocation);
-    auto nextLabel = nodeName(nextDestination);
-    result->emplace("base_default_next", nextLabel);
 
-    if (defaultLabelDestination != nullptr)
-        nextLabel = nodeName(defaultLabelDestination);
-    // So if a "default:" switch case exists we set the nextLabel
-    // to be the destination of the default: label.
+    Util::IJson* nextLabel = nullptr;
+    if (!hitMiss) {
+        BUG_CHECK(nextDestination, "Could not find default destination for %1%", node->invocation);
+        nextLabel = nodeName(nextDestination);
+        result->emplace("base_default_next", nextLabel);
+        // So if a "default:" switch case exists we set the nextLabel
+        // to be the destination of the default: label.
+        if (defaultLabelDestination != nullptr)
+            nextLabel = nodeName(defaultLabelDestination);
+    } else {
+        result->emplace("base_default_next", Util::JsonValue::null);
+    }
 
     std::set<cstring> labelsDone;
     for (auto s : node->successors.edges) {
@@ -999,20 +1076,15 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
             label = s->label.name;
             if (label == IR::SwitchStatement::default_label)
                 continue;
+            label = ::get(useActionName, label);
         }
-        label = ::get(useActionName, label);
         next_tables->emplace(label, nodeName(s->endpoint));
         labelsDone.emplace(label);
     }
 
     // Generate labels which don't show up and send them to
     // the nextLabel.
-    if (hitMiss) {
-        if (labelsDone.find("__HIT__") == labelsDone.end())
-            next_tables->emplace("__HIT__", nextLabel);
-        if (labelsDone.find("__MISS__") == labelsDone.end())
-            next_tables->emplace("__MISS__", nextLabel);
-    } else {
+    if (!hitMiss) {
         for (auto a : *al->actionList) {
             cstring name = a->name->path->name;
             cstring label = ::get(useActionName, name);
@@ -1022,7 +1094,10 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     }
 
     result->emplace("next_tables", next_tables);
-    // TODO: default_action
+    result->emplace("default_action", Util::JsonValue::null);
+    auto defact = table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
+    if (defact != nullptr)
+        ::warning("%1%: setting default action currently not supported", defact);
     return result;
 }
 
@@ -1149,6 +1224,11 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     registers->append(jreg);
                     continue;
                 } else if (eb->type->name == v1model.directMeter.name) {
+                    auto info = meterMap.getInfo(c);
+                    CHECK_NULL(info);
+                    CHECK_NULL(info->table);
+                    CHECK_NULL(info->destinationField);
+
                     auto jmtr = new Util::JsonObject();
                     jmtr->emplace("name", c->name);
                     jmtr->emplace("id", nextId("meter_arrays"));
@@ -1166,20 +1246,12 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     else
                         type = "both";
                     jmtr->emplace("type", type);
-                    jmtr->emplace("size", 1);  // this should be inherited from the table anyway
-                    auto tbl = ::get(directMeterTable, c);
-                    if (tbl == nullptr)
-                        continue;
-
-                    cstring tblname = nameFromAnnotation(tbl->annotations, tbl->name);
+                    jmtr->emplace("size", info->tableSize);
+                    cstring tblname = nameFromAnnotation(info->table->annotations,
+                                                         info->table->name);
                     jmtr->emplace("binding", tblname);
-                    auto dest = ::get(directMeterDest, c);
-                    if (dest == nullptr)
-                        ::error("%1%: Could not determine destination for direct meter", c);
-                    else {
-                        auto result = conv->convert(dest);
-                        jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
-                    }
+                    auto result = conv->convert(info->destinationField);
+                    jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
                     meters->append(jmtr);
                     continue;
                 }
