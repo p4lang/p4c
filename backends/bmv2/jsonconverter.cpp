@@ -288,27 +288,13 @@ class ExpressionConverter : public Inspector {
             if (!done) {
                 auto l = get(expression->expr);
                 CHECK_NULL(l);
-#if 0
-                auto etype = converter->typeMap->getType(expression->expr, true);
-                if (etype->is<IR::Type_Header>() &&
-                    expression->member.name == IR::Type_Header::valid) {
-                    result->emplace("type", "expression");
-                    auto e = new Util::JsonObject();
-                    result->emplace("value", e);
-                    e->emplace("op", "valid");
-                    e->emplace("left", Util::JsonValue::null);
-                    e->emplace("right", l);
-                } else
-#endif
-                {
-                    result->emplace("type", "field");
-                    auto e = mkArrayField(result, "value");
-                    if (l->is<Util::JsonObject>())
-                        e->append(l->to<Util::JsonObject>()->get("value"));
-                    else
-                        e->append(l);
-                    e->append(expression->member.name);
-                }
+                result->emplace("type", "field");
+                auto e = mkArrayField(result, "value");
+                if (l->is<Util::JsonObject>())
+                    e->append(l->to<Util::JsonObject>()->get("value"));
+                else
+                    e->append(l);
+                e->append(expression->member.name);
             }
         }
         map.emplace(expression, result);
