@@ -10,10 +10,10 @@ $(top_builddir)/modules/bm_sim/libbmsim.la \
 $(top_builddir)/modules/bf_lpm_trie/libbflpmtrie.la \
 $(top_builddir)/modules/bm_apps/libbmapps.la \
 $(top_builddir)/third_party/jsoncpp/libjson.la \
--lboost_system -lboost_thread -lboost_filesystem
+-lboost_system -lboost_thread -lboost_filesystem -lboost_program_options
 
 # Define unit tests
-common_source = main.cpp utils.h
+common_source = main.cpp utils.h bmi_stubs.c
 TESTS = test_actions \
 test_checksums \
 test_conditionals \
@@ -36,7 +36,8 @@ test_pcap \
 test_fields \
 test_devmgr \
 test_packet \
-test_extern
+test_extern \
+test_switch
 
 check_PROGRAMS = $(TESTS) test_all
 
@@ -64,6 +65,7 @@ test_pcap_SOURCES          = $(common_source) test_pcap.cpp
 test_devmgr_SOURCES        = $(common_source) test_devmgr.cpp
 test_packet_SOURCES        = $(common_source) test_packet.cpp
 test_extern_SOURCES        = $(common_source) test_extern.cpp
+test_switch_SOURCES        = $(common_source) test_switch.cpp
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
 test_checksums.cpp \
@@ -87,7 +89,8 @@ test_pcap.cpp \
 test_fields.cpp \
 test_devmgr.cpp \
 test_packet.cpp \
-test_extern.cpp
+test_extern.cpp \
+test_switch.cpp
 
 EXTRA_DIST = \
 testdata/en0.pcap \

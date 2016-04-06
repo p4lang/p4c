@@ -457,4 +457,7 @@ service Standard {
   )
 
   void bm_reset_state()
+
+  string bm_get_config()
+  string bm_get_config_md5()
 }

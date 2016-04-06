@@ -237,6 +237,12 @@ class RuntimeInterface {
   virtual ErrorCode
   swap_configs() = 0;
 
+  virtual std::string
+  get_config() = 0;
+
+  virtual std::string
+  get_config_md5() = 0;
+
   virtual ErrorCode
   reset_state() = 0;
 
