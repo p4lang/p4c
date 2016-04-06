@@ -124,36 +124,31 @@ void EmitBlock::generate_impl(std::ostream &out) const {
 ////////////////////////////////////////////////////////////////////////////////////
 
 void IrMethod::generate_hdr(std::ostream &out) const {
-    cstring proto = getPrototype(name, clss->name);
-    if (name == "visit_children") {
-        out << IrClass::indent << proto << " override;" << std::endl;
-        out << IrClass::indent << proto << " const override;" << std::endl;
-    } else if (name == "dump_fields") {
-        out << IrClass::indent << proto << " override;" << std::endl;
+    if (inImpl) {
+        out << IrClass::indent << rtype << " " << name << args << (isOverride ? " override" : "")
+            << ";" << std::endl;
+        if (name == "visit_children")
+            out << IrClass::indent << rtype << " " << name << args << " const"
+                << (isOverride ? " override" : "") << ";" << std::endl;
     } else {
-        out << LineDirective(srcInfo) << IrClass::indent << proto << ' ' << body << std::endl;
+        out << LineDirective(srcInfo) << IrClass::indent << rtype << " " << name << args
+            << (isOverride ? " override" : "") << " " << body << std::endl;
         if (name == "node_type_name")
-            out << LineDirective(srcInfo) << IrClass::indent
-                << "static cstring static_type_name() " << body << std::endl;
+            out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype
+                << " static_type_name() " << body << std::endl;
         if (srcInfo.isValid())
             out << LineDirective(); }
 }
 
 void IrMethod::generate_impl(std::ostream &out) const {
-    if (name == "visit_children") {
-        out << LineDirective(srcInfo) << "void IR::" << clss->containedIn << clss->name
-            << "::visit_children(Visitor &v) " << body << std::endl;
-        out << LineDirective(srcInfo) << "void IR::" << clss->containedIn << clss->name
-            << "::visit_children(Visitor &v) const " << body << std::endl;
-        if (srcInfo.isValid())
-            out << LineDirective();
-    } else if (name == "dump_fields") {
-        out << LineDirective(srcInfo)<< "void IR::" << clss->containedIn
-            << clss->name << "::dump_fields(std::ostream& out) const"
-            << body << std::endl;
-        if (srcInfo.isValid())
-            out << LineDirective();
-    }
+    if (!inImpl) return;
+    out << LineDirective(srcInfo) << rtype << " IR::" << clss->containedIn << clss->name
+        << "::" << name << args << " " << body << std::endl;
+    if (name == "visit_children")
+        out << LineDirective(srcInfo) << rtype << " IR::" << clss->containedIn << clss->name
+            << "::" << name << args << " const " << body << std::endl;
+    if (srcInfo.isValid())
+        out << LineDirective();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -230,96 +225,6 @@ void IrClass::generate_impl(std::ostream &out) const {
     for (auto e : elements)
         e->generate_impl(out);
     out << std::endl;
-}
-
-void IrClass::generateMethods() {
-    // equality test
-    if (!shouldSkip("operator==")) {
-        std::stringstream buf;
-        buf << "{" << std::endl << indent << indent << "return ";
-        if (getParent()->name == "Node")
-            buf << "typeid(*this) == typeid(a)";
-        else
-            buf << getParent()->name << "::operator==(a)";
-        for (auto f : *getFields()) {
-            buf << std::endl;
-            buf << indent << indent << "&& " << f->name << " == a." << f->name; }
-        buf << ";" << std::endl;
-        buf << indent << "}";
-        elements.push_back(new IrMethod("operator==", buf.str())); }
-
-    // visitors
-    if (!shouldSkip("visit_children")) {
-        bool needed = false;
-        std::stringstream buf;
-        buf << "{" << std::endl;
-        buf << indent << getParent()->name << "::visit_children(v);" << std::endl;
-        for (auto f : *getFields()) {
-            if (f->type->resolve(containedIn) == nullptr)
-                // This is not an IR pointer
-                continue;
-            if (f->isInline)
-                buf << indent << f->name << ".visit_children(v);" << std::endl;
-            else
-                buf << indent << "v.visit(" << f->name << ", \"" << f->name << "\");" << std::endl;
-            needed = true; }
-        buf << "}";
-        if (needed)
-            elements.push_back(new IrMethod("visit_children", buf.str())); }
-
-    // validate
-    if (!shouldSkip("validate")) {
-        auto it = std::find_if(elements.begin(), elements.end(), [](IrElement *el)->bool {
-            auto *m = el->to<IrMethod>();
-            return m && m->name == "validate"; });
-        IrMethod *validateMethod = (it == elements.end()) ? nullptr : (*it)->to<IrMethod>();
-        bool needed = false;
-        std::stringstream buf;
-        buf << "{";
-        for (auto f : *getFields()) {
-            if (f->type->resolve(containedIn) == nullptr)
-                // This is not an IR pointer
-                continue;
-            if (f->isInline)
-                buf << std::endl << indent << indent << f->name << ".validate();";
-            else if (!f->nullOK)
-                buf << std::endl << indent << indent << "CHECK_NULL(" << f->name << ");";
-            else
-                continue;
-            needed = true; }
-        if (validateMethod) buf << validateMethod->body;
-        buf << " }";
-        if (needed) {
-            if (validateMethod)
-                validateMethod->body = buf.str();
-            else
-                elements.push_back(new IrMethod("validate", buf.str())); } }
-
-    if (!shouldSkip("node_type_name")) {
-        std::stringstream buf;
-        buf << " { return \"" << containedIn << name << "\"; }";
-        elements.push_back(new IrMethod("node_type_name", buf.str())); }
-
-    // dbprint declaration
-    if (!shouldSkip("dbprint") && kind == NodeKind::Concrete)
-        elements.push_back(new IrMethod("dbprint", ";"));
-
-    if (!shouldSkip("dump_fields")) {
-        std::stringstream buf;
-        buf << "{" << std::endl;
-        buf << indent << getParent()->name << "::dump_fields(out);" << std::endl;
-        bool needed = false;
-        for (auto f : *getFields()) {
-            if (f->type->resolve(containedIn) == nullptr &&
-                !dynamic_cast<const TemplateInstantiation*>(f->type)) {
-                // not an IR pointer
-                buf << indent << indent << "out << \" " << f->name << "=\" << " << f->name
-                    << ";" << std::endl;
-                needed = true; } }
-        buf << "}";
-        if (needed)
-            elements.push_back(new IrMethod("dump_fields", buf.str()));
-    }
 }
 
 void IrClass::computeConstructorArguments(IrClass::ctor_args_t &args) const {
@@ -436,31 +341,9 @@ void IrClass::resolve() {
                     "Class %1% has more than 1 non-interface parent: %2% and %3%",
                     this, concreteParent, p); }
         parentClasses.push_back(p); }
-    if (kind != NodeKind::Interface && kind != NodeKind::Template && this != nodeClass)
-        generateMethods();
+    generateMethods();
     for (auto e : elements)
         e->set_class(this);
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-
-cstring IrMethod::getPrototype(cstring name, cstring className) {
-    if (name == "toString")
-        return "cstring toString() const override";
-    else if (name == "dbprint")
-        return "void dbprint(std::ostream &out) const override";
-    else if (name == "operator==")
-        return "bool operator==(const " + className + "&a) const";
-    else if (name == "validate")
-        return "void validate() const override";
-    else if (name == "node_type_name")
-        return "cstring node_type_name() const override";
-    else if (name == "visit_children")
-        return "void visit_children(Visitor &v)";
-    else if (name == "dump_fields")
-        return "void dump_fields(std::ostream& out) const";
-    else
-        throw Util::CompilationError("%1%: Unknown method name %2%", className, name);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
