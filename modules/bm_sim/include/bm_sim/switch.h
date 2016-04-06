@@ -513,6 +513,9 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   RuntimeInterface::ErrorCode
   swap_configs() override;
 
+  std::string get_config() override;
+  std::string get_config_md5() override;
+
   // ---------- End RuntimeInterface ----------
 
  protected:
@@ -577,6 +580,9 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   std::shared_ptr<TransportIface> notifications_transport{nullptr};
 
   mutable boost::shared_mutex ongoing_swap_mutex{};
+
+  std::string current_config{};
+  mutable std::mutex config_mutex{};
 };
 
 

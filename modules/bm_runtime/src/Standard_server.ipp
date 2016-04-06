@@ -644,6 +644,16 @@ public:
     switch_->reset_state();
   }
 
+  void bm_get_config(std::string& _return) {
+    Logger::get()->trace("bm_get_config");
+    _return.append(switch_->get_config());
+  }
+
+  void bm_get_config_md5(std::string& _return) {
+    Logger::get()->trace("bm_get_config_md5");
+    _return.append(switch_->get_config_md5());
+  }
+
 private:
   SwitchWContexts *switch_;
 };

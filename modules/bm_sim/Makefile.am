@@ -34,6 +34,8 @@ src/learning.cpp \
 src/logger.cpp \
 src/match_units.cpp \
 src/match_tables.cpp \
+src/md5.c \
+src/md5.h \
 src/meters.cpp \
 src/options_parse.cpp \
 src/P4Objects.cpp \

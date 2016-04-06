@@ -63,14 +63,14 @@ def main():
 
     args.pre = runtime_CLI.PreType.SimplePreLAG
 
-    runtime_CLI.load_json(args.json)
-
     services = runtime_CLI.RuntimeAPI.get_thrift_services(args.pre)
     services.extend(SimpleSwitchAPI.get_thrift_services())
 
     standard_client, mc_client, sswitch_client = runtime_CLI.thrift_connect(
         args.thrift_ip, args.thrift_port, services
     )
+
+    runtime_CLI.load_json_config(standard_client, args.json)
 
     SimpleSwitchAPI(args.pre, standard_client, mc_client, sswitch_client).cmdloop()
 

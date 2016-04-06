@@ -27,6 +27,7 @@ import sys
 import struct
 import json
 from functools import wraps
+import md5
 
 from thrift import Thrift
 from thrift.transport import TSocket
@@ -93,7 +94,7 @@ def get_parser():
                         type=str, action="store", default='localhost')
 
     parser.add_argument('--json', help='JSON description of P4 program',
-                        type=str, action="store", required=True)
+                        type=str, action="store", required=False)
 
     parser.add_argument('--pre', help='Packet Replication Engine used by target',
                         type=str, choices=['None', 'SimplePre', 'SimplePreLAG'],
@@ -198,7 +199,14 @@ class RegisterArray:
     def register_str(self):
         return "{0:30} [{1}]".format(self.name, self.size)
 
-def load_json(json_src):
+def reset_config():
+    TABLES.clear()
+    ACTIONS.clear()
+    METER_ARRAYS.clear()
+    COUNTER_ARRAYS.clear()
+    REGISTER_ARRAYS.clear()
+
+def load_json_str(json_str):
     def get_header_type(header_name, j_headers):
         for h in j_headers:
             if h["name"] == header_name:
@@ -213,58 +221,61 @@ def load_json(json_src):
                     return bw
         assert(0)
 
-    with open(json_src, 'r') as f:
-        json_ = json.load(f)
+    reset_config()
+    json_ = json.loads(json_str)
 
-        for j_action in json_["actions"]:
-            action = Action(j_action["name"], j_action["id"])
-            for j_param in j_action["runtime_data"]:
-                action.runtime_data += [(j_param["name"], j_param["bitwidth"])]
+    for j_action in json_["actions"]:
+        action = Action(j_action["name"], j_action["id"])
+        for j_param in j_action["runtime_data"]:
+            action.runtime_data += [(j_param["name"], j_param["bitwidth"])]
 
-        for j_pipeline in json_["pipelines"]:
-            for j_table in j_pipeline["tables"]:
-                table = Table(j_table["name"], j_table["id"])
-                table.match_type = MatchType.from_str(j_table["match_type"])
-                table.type_ = TableType.from_str(j_table["type"])
-                for action in j_table["actions"]:
-                    table.actions[action] = ACTIONS[action]
-                for j_key in j_table["key"]:
-                    target = j_key["target"]
-                    match_type = MatchType.from_str(j_key["match_type"])
-                    if match_type == MatchType.VALID:
-                        field_name = target + "_valid"
-                        bitwidth = 1
-                    else:
-                        field_name = ".".join(target)
-                        header_type = get_header_type(target[0],
-                                                      json_["headers"])
-                        bitwidth = get_field_bitwidth(header_type, target[1],
-                                                      json_["header_types"])
+    for j_pipeline in json_["pipelines"]:
+        for j_table in j_pipeline["tables"]:
+            table = Table(j_table["name"], j_table["id"])
+            table.match_type = MatchType.from_str(j_table["match_type"])
+            table.type_ = TableType.from_str(j_table["type"])
+            for action in j_table["actions"]:
+                table.actions[action] = ACTIONS[action]
+            for j_key in j_table["key"]:
+                target = j_key["target"]
+                match_type = MatchType.from_str(j_key["match_type"])
+                if match_type == MatchType.VALID:
+                    field_name = target + "_valid"
+                    bitwidth = 1
+                else:
+                    field_name = ".".join(target)
+                    header_type = get_header_type(target[0],
+                                                  json_["headers"])
+                    bitwidth = get_field_bitwidth(header_type, target[1],
+                                                  json_["header_types"])
                     table.key += [(field_name, match_type, bitwidth)]
 
-        if "meter_arrays" in json_:
-            for j_meter in json_["meter_arrays"]:
-                meter_array = MeterArray(j_meter["name"], j_meter["id"])
-                meter_array.size = j_meter["size"]
-                meter_array.type_ = MeterType.from_str(j_meter["type"])
-                meter_array.rate_count = j_meter["rate_count"]
+    if "meter_arrays" in json_:
+        for j_meter in json_["meter_arrays"]:
+            meter_array = MeterArray(j_meter["name"], j_meter["id"])
+            meter_array.size = j_meter["size"]
+            meter_array.type_ = MeterType.from_str(j_meter["type"])
+            meter_array.rate_count = j_meter["rate_count"]
 
-        if "counter_arrays" in json_:
-            for j_counter in json_["counter_arrays"]:
-                counter_array = CounterArray(j_counter["name"], j_counter["id"])
-                counter_array.is_direct = j_counter["is_direct"]
-                if counter_array.is_direct:
-                    counter_array.binding = j_counter["binding"]
-                else:
-                    counter_array.size = j_counter["size"]
+    if "counter_arrays" in json_:
+        for j_counter in json_["counter_arrays"]:
+            counter_array = CounterArray(j_counter["name"], j_counter["id"])
+            counter_array.is_direct = j_counter["is_direct"]
+            if counter_array.is_direct:
+                counter_array.binding = j_counter["binding"]
+            else:
+                counter_array.size = j_counter["size"]
 
-        if "register_arrays" in json_:
-            for j_register in json_["register_arrays"]:
-                register_array = RegisterArray(j_register["name"],
-                                               j_register["id"])
-                register_array.size = j_register["size"]
-                register_array.width = j_register["bitwidth"]
+    if "register_arrays" in json_:
+        for j_register in json_["register_arrays"]:
+            register_array = RegisterArray(j_register["name"],
+                                           j_register["id"])
+            register_array.size = j_register["size"]
+            register_array.width = j_register["bitwidth"]
 
+def load_json(json_src):
+    with open(json_src, 'r') as f:
+        load_json_str(f.read())
 
 class UIn_Error(Exception):
     def __init__(self, info=""):
@@ -1345,7 +1356,9 @@ class RuntimeAPI(cmd.Cmd):
     @handle_bad_input
     def do_load_new_config_file(self, line):
         "Load new json config: load_new_config_file <path to .json file>"
-        filename = line
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        filename = args[0]
         if not os.path.isfile(filename):
             raise UIn_Error("Not a valid filename")
         print "Loading new Json config"
@@ -1356,6 +1369,7 @@ class RuntimeAPI(cmd.Cmd):
             except:
                 raise UIn_Error("Not a valid JSON file")
             self.client.bm_load_new_config(json_str)
+        load_json(filename)
 
     @handle_bad_input
     def do_swap_configs(self, line):
@@ -1576,15 +1590,65 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 0)
         self.client.bm_reset_state()
 
+    @handle_bad_input
+    def do_write_config_to_file(self, line):
+        "Retrieves the JSON config currently used by the switch and dumps it to user-specified file"
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        filename = args[0]
+        json_cfg = self.client.bm_get_config()
+        with open(filename, 'w') as f:
+            f.write(json_cfg)
+
+def check_JSON_md5(client, json_src):
+    with open(json_src, 'r') as f:
+        m = md5.new()
+        for L in f:
+            m.update(L)
+        md5sum = m.digest()
+
+    try:
+        bm_md5sum = client.bm_get_config_md5()
+    except:
+        print "Error when requesting config md5 sum from switch"
+        sys.exit(1)
+
+    if md5sum != bm_md5sum:
+        print "**********"
+        print "WARNING: the JSON files loaded into the switch and the one you",
+        print "just provided to this CLI don't have the same md5 sum.",
+        print "Are you sure they describe the same program?"
+        bm_md5sum_str = "".join("{:02x}".format(ord(c)) for c in bm_md5sum)
+        md5sum_str = "".join("{:02x}".format(ord(c)) for c in md5sum)
+        print "{:<15}: {}".format("switch md5", bm_md5sum_str)
+        print "{:<15}: {}".format("CLI input md5", md5sum_str)
+        print "**********"
+
+def load_json_config(standard_client = None, json_path = None):
+    if json_path:
+        load_json(json_path)
+        if standard_client is not None:
+            check_JSON_md5(standard_client, json_path)
+    else:
+        assert(standard_client is not None)
+        try:
+            print "Obtaining JSON from switch..."
+            json_cfg = standard_client.bm_get_config()
+            print "Done"
+        except:
+            print "Error when requesting JSON config from switch"
+            sys.exit(1)
+        load_json_str(json_cfg)
+
 def main():
     args = get_parser().parse_args()
-
-    load_json(args.json)
 
     standard_client, mc_client = thrift_connect(
         args.thrift_ip, args.thrift_port,
         RuntimeAPI.get_thrift_services(args.pre)
     )
+
+    load_json_config(standard_client, args.json)
 
     RuntimeAPI(args.pre, standard_client, mc_client).cmdloop()
 
