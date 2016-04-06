@@ -18,6 +18,7 @@ CLEANFILES += \
 	$(srcdir)/v12tests.am \
 	$(srcdir)/v1to12tests.am
 
+# Unfortunately this does not rerun if a test is deleted.
 $(srcdir)/v12tests.am: $(srcdir)/testdata/v1_2_samples/*.p4 $(srcdir)/testdata/v1_2_errors/*.p4
 	@$(GENTESTS) $(srcdir) v12 $(srcdir)/backends/v12test/run-v12-sample.py $^ >$@
 
@@ -31,5 +32,4 @@ V12BUGS = \
 
 XFAIL_TESTS += \
     $(V12BUGS) \
-    v12/testdata/v1_2_samples/cast-call.p4.test \
-    v1to12/testdata/v1_samples/action_profile.p4.test
+    v12/testdata/v1_2_samples/cast-call.p4.test 

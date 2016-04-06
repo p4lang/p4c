@@ -15,7 +15,28 @@ namespace BMV2 {
 
 class ExpressionConverter;
 
-class JsonConverter {
+class DirectMeterMap final {
+ public:
+    struct DirectMeterInfo {
+        const IR::Expression* destinationField;
+        const IR::TableContainer* table;
+        unsigned tableSize;
+
+        DirectMeterInfo() : destinationField(nullptr), table(nullptr), tableSize(0) {}
+    };
+
+ private:
+    // key is declaration of direct meter
+    std::map<const IR::IDeclaration*, DirectMeterInfo*> directMeter;
+    DirectMeterInfo* createInfo(const IR::IDeclaration* meter);
+ public:
+    DirectMeterInfo* getInfo(const IR::IDeclaration* meter);
+    void setDestination(const IR::IDeclaration* meter, const IR::Expression* destination);
+    void setTable(const IR::IDeclaration* meter, const IR::TableContainer* table);
+    void setSize(const IR::IDeclaration* meter, unsigned size);
+};
+
+class JsonConverter final {
     friend class ExpressionConverter;
 
     const CompilerOptions& options;
@@ -28,11 +49,7 @@ class JsonConverter {
     cstring                dropAction = ".drop";
     P4::BlockMap*          blockMap;
     ExpressionConverter*   conv;
-    
-    // Field written by a direct meter (indexed with meter declaration).
-    std::map<const IR::IDeclaration*, const IR::Expression*> directMeterDest;
-    // Table that uses a direct meter.
-    std::map<const IR::IDeclaration*, const IR::TableContainer*> directMeterTable;
+    DirectMeterMap         meterMap;
 
  protected:
     Util::IJson* typeToJson(const IR::Type_StructLike* type);
@@ -63,14 +80,14 @@ class JsonConverter {
     Util::IJson* nodeName(const CFG::Node* node) const;
     void createForceArith(const IR::Type* stdMetaType, cstring name,
                           Util::JsonArray* force_list) const;
-    void setDirectMeterDestination(const IR::IDeclaration* decl, const IR::Expression* dest);
     cstring convertHashAlgorithm(cstring algorithm) const;
     void handleTableImplementation(const IR::TableProperty* implementation,
                                    const IR::Key* key,
                                    Util::JsonObject* table);
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
     // returns id of created field list
-    int createFieldList(const IR::Expression* expr, cstring listName, Util::JsonArray* fieldLists);
+    int createFieldList(const IR::Expression* expr, cstring group,
+                        cstring listName, Util::JsonArray* fieldLists);
     void generateUpdate(const IR::ControlContainer* cont,
                         Util::JsonArray* checksums, Util::JsonArray* calculations);
 

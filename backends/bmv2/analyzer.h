@@ -57,8 +57,8 @@ class CFG {
     class TableNode : public Node {
      public:
         const IR::TableContainer* table;
-        const IR::Statement*      invocation;
-        explicit TableNode(const IR::TableContainer* table, const IR::Statement* invocation) :
+        const IR::Expression*      invocation;
+        explicit TableNode(const IR::TableContainer* table, const IR::Expression* invocation) :
                 Node(nameFromAnnotation(table->annotations, table->name)),
                 table(table), invocation(invocation) {}
     };
@@ -119,7 +119,7 @@ class CFG {
     std::set<Node*> allNodes;
 
     CFG() : entryPoint(nullptr), container(nullptr) {}
-    Node* makeNode(const IR::TableContainer* table, const IR::Statement* invocation) {
+    Node* makeNode(const IR::TableContainer* table, const IR::Expression* invocation) {
         auto result = new TableNode(table, invocation);
         allNodes.emplace(result);
         return result;
@@ -158,7 +158,7 @@ class ProgramParts {
     std::set<const IR::Parameter*> nonActionParameters;
     // for each action its json id
     std::map<const IR::ActionContainer*, unsigned> ids;
-    
+
     ProgramParts() {}
     void analyze(P4::BlockMap* blockMap);
 };
