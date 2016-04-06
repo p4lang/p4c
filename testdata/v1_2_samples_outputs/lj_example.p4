@@ -41,7 +41,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     }
 
     apply {
-        if (p.arpa_pak.valid) 
+        if (p.arpa_pak.isValid()) 
             Enet_lkup.apply();
     }
 }

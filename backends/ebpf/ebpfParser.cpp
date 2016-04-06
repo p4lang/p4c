@@ -237,7 +237,7 @@ StateTranslationVisitor::compileExtract(const IR::Vector<IR::Expression>* args) 
 
     builder->emitIndent();
     visit(expr);
-    builder->appendLine(".valid = 1;");
+    builder->appendLine(".ebpf_valid = 1;");
     return;
 }
 

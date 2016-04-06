@@ -323,7 +323,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             }
             else {
                 virtual_router.apply();
-                if (hdr.ipv4.valid && meta.ingress_metadata.v4_enable != 1w0) {
+                if (hdr.ipv4.isValid() && meta.ingress_metadata.v4_enable != 1w0) {
                     route.apply();
                 }
                 next_hop.apply();

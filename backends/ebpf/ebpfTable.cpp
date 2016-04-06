@@ -342,7 +342,7 @@ void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
 }
 
 void
-EBPFCounterTable::emitMethodInvocation(CodeBuilder* builder, P4::ExternMethod* method) {
+EBPFCounterTable::emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method) {
     if (method->method->name.name == program->model.counterArray.increment.name) {
         emitCounterIncrement(builder, method->expr);
         return;

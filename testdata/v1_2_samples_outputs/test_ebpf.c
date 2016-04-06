@@ -25,7 +25,7 @@ struct Ethernet_h {
     char dstAddr[6]; /* EthernetAddress */
     char srcAddr[6]; /* EthernetAddress */
     u16 etherType; /* bit<16> */
-    u8 valid;
+    u8 ebpf_valid;
 };
 
 struct IPv4_h {
@@ -41,7 +41,7 @@ struct IPv4_h {
     u16 hdrChecksum; /* bit<16> */
     u32 srcAddr; /* IPv4Address */
     u32 dstAddr; /* IPv4Address */
-    u8 valid;
+    u8 ebpf_valid;
 };
 
 struct Headers_t {
@@ -72,10 +72,10 @@ BPF_TABLE("array", size_t, struct Check_src_ip_value, Check_src_ip_defaultAction
 int ebpf_filter(struct __sk_buff* skb) {
     struct Headers_t headers = {
         .ethernet = {
-            .valid = 0
+            .ebpf_valid = 0
         },
         .ipv4 = {
-            .valid = 0
+            .ebpf_valid = 0
         },
     };
     unsigned ebpf_packetOffsetInBits = 0;
@@ -117,7 +117,7 @@ int ebpf_filter(struct __sk_buff* skb) {
         headers.ethernet.etherType = (u16)((load_half(skb, BYTES(ebpf_packetOffsetInBits))));
         ebpf_packetOffsetInBits += 16;
 
-        headers.ethernet.valid = 1;
+        headers.ethernet.ebpf_valid = 1;
 
         switch (headers.ethernet.etherType) {
             case 2048: goto ip;
@@ -210,7 +210,7 @@ int ebpf_filter(struct __sk_buff* skb) {
         headers.ipv4.dstAddr = (u32)((load_word(skb, BYTES(ebpf_packetOffsetInBits))));
         ebpf_packetOffsetInBits += 32;
 
-        headers.ipv4.valid = 1;
+        headers.ipv4.ebpf_valid = 1;
 
         goto accept;
     }
@@ -220,7 +220,7 @@ int ebpf_filter(struct __sk_buff* skb) {
     accept:
     {
         pass = true;
-        if ((!headers.ipv4.valid)) {
+        if ((!headers.ipv4.ebpf_valid)) {
             pass = false;
             goto ebpf_end;
         }

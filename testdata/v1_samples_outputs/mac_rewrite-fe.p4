@@ -117,8 +117,8 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         }
         key = {
             meta.egress_metadata.smac_idx: exact;
-            hdr.ipv4.valid               : exact;
-            hdr.ipv6.valid               : exact;
+            hdr.ipv4.isValid()           : exact;
+            hdr.ipv6.isValid()           : exact;
         }
         size = 512;
     }
@@ -140,7 +140,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             do_setup;
         }
         key = {
-            hdr.ethernet.valid: exact;
+            hdr.ethernet.isValid(): exact;
         }
     }
 
