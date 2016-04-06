@@ -165,9 +165,11 @@ class Modifier : public virtual Visitor {
     const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override;
     virtual bool preorder(IR::Node *) { return true; }
     virtual void postorder(IR::Node *) {}
+    virtual void revisit(const IR::Node *, const IR::Node *) {}
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                            \
     virtual bool preorder(IR::CLASS *);                                 \
-    virtual void postorder(IR::CLASS *);
+    virtual void postorder(IR::CLASS *);                                \
+    virtual void revisit(const IR::CLASS *, const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
@@ -181,9 +183,11 @@ class Inspector : public virtual Visitor {
     const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
     virtual bool preorder(const IR::Node *) { return true; }  // return 'false' to prune
     virtual void postorder(const IR::Node *) {}
+    virtual void revisit(const IR::Node *) {}
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                            \
     virtual bool preorder(const IR::CLASS *);                           \
-    virtual void postorder(const IR::CLASS *);
+    virtual void postorder(const IR::CLASS *);                          \
+    virtual void revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
@@ -198,9 +202,11 @@ class Transform : public virtual Visitor {
     const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
     virtual const IR::Node *preorder(IR::Node *n) {return n;}
     virtual const IR::Node *postorder(IR::Node *n) {return n;}
+    virtual void revisit(const IR::Node *, const IR::Node *) {}
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                            \
     virtual const IR::Node *preorder(IR::CLASS *);                      \
-    virtual const IR::Node *postorder(IR::CLASS *);
+    virtual const IR::Node *postorder(IR::CLASS *);                     \
+    virtual void revisit(const IR::CLASS *, const IR::Node *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();

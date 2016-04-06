@@ -58,10 +58,13 @@ class Node : public virtual INode {
  public:
     virtual bool apply_visitor_preorder(Modifier &v);
     virtual void apply_visitor_postorder(Modifier &v);
+    virtual void apply_visitor_revisit(Modifier &v, const Node *n) const;
     virtual bool apply_visitor_preorder(Inspector &v) const;
     virtual void apply_visitor_postorder(Inspector &v) const;
+    virtual void apply_visitor_revisit(Inspector &v) const;
     virtual const Node *apply_visitor_preorder(Transform &v);
     virtual const Node *apply_visitor_postorder(Transform &v);
+    virtual void apply_visitor_revisit(Transform &v, const Node *n) const;
 
  protected:
     static int currentId;
@@ -127,15 +130,18 @@ inline bool equal(const INode *a, const INode *b) {
  public:                                                                \
     T *clone() const override = 0;                                      \
     IRNODE_COMMON_SUBCLASS(T)
-#define IRNODE_COMMON_SUBCLASS(T)                                       \
- public:                                                                \
-    using Node::operator==;                                             \
-    bool apply_visitor_preorder(Modifier &v) override;                  \
-    void apply_visitor_postorder(Modifier &v) override;                 \
-    bool apply_visitor_preorder(Inspector &v) const override;           \
-    void apply_visitor_postorder(Inspector &v) const override;          \
-    const Node *apply_visitor_preorder(Transform &v) override;          \
-    const Node *apply_visitor_postorder(Transform &v) override;         \
+#define IRNODE_COMMON_SUBCLASS(T)                                           \
+ public:                                                                    \
+    using Node::operator==;                                                 \
+    bool apply_visitor_preorder(Modifier &v) override;                      \
+    void apply_visitor_postorder(Modifier &v) override;                     \
+    void apply_visitor_revisit(Modifier &v, const Node *n) const override;  \
+    bool apply_visitor_preorder(Inspector &v) const override;               \
+    void apply_visitor_postorder(Inspector &v) const override;              \
+    void apply_visitor_revisit(Inspector &v) const override;                \
+    const Node *apply_visitor_preorder(Transform &v) override;              \
+    const Node *apply_visitor_postorder(Transform &v) override;             \
+    void apply_visitor_revisit(Transform &v, const Node *n) const override; \
 
 /* only define 'apply' for a limited number of classes (those we want to call
  * visitors directly on), as defining it and making it virtual would mean that

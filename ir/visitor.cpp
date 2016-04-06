@@ -35,6 +35,7 @@ class Visitor::ChangeTracker {
                     BUG("IR loop detected "); }
         explicit operator bool() { return valid; }
         bool done() { return !state.second; }
+        const IR::Node *orig() { return state.first->first; }
         const IR::Node *result() { return state.first->second.second; }
     };
     bool done(const IR::Node *n) const { return visited.count(n) && visited.at(n).first; }
@@ -173,6 +174,7 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
         PushContext local(ctxt, n);
         auto track = visited->track(n);
         if (track.done() && visitDagOnce) {
+            track.orig()->apply_visitor_revisit(*this, track.result());
             n = track.result();
         } else {
             visited->start(track);
@@ -201,7 +203,7 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
         if (!vp.second && !vp.first->second)
             BUG("IR loop detected");
         if (!vp.second && visitDagOnce) {
-            // do nothing
+            n->apply_visitor_revisit(*this);
         } else {
             vp.first->second = false;
             if (n->apply_visitor_preorder(*this)) {
@@ -224,6 +226,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
         PushContext local(ctxt, n);
         auto track = visited->track(n);
         if (track.done() && visitDagOnce) {
+            track.orig()->apply_visitor_revisit(*this, track.result());
             n = track.result();
         } else {
             visited->start(track);
@@ -285,14 +288,20 @@ bool Modifier::preorder(IR::CLASS *n) {                                         
     return preorder(static_cast<IR::BASE *>(n)); }                                      \
 void Modifier::postorder(IR::CLASS *n) {                                                \
     postorder(static_cast<IR::BASE *>(n)); }                                            \
+void Modifier::revisit(const IR::CLASS *o, const IR::CLASS *n) {                        \
+    revisit(static_cast<const IR::BASE *>(o), static_cast<const IR::BASE *>(n)); }      \
 bool Inspector::preorder(const IR::CLASS *n) {                                          \
     return preorder(static_cast<const IR::BASE *>(n)); }                                \
 void Inspector::postorder(const IR::CLASS *n) {                                         \
     postorder(static_cast<const IR::BASE *>(n)); }                                      \
+void Inspector::revisit(const IR::CLASS *n) {                                           \
+    revisit(static_cast<const IR::BASE *>(n)); }                                        \
 const IR::Node *Transform::preorder(IR::CLASS *n) {                                     \
     return preorder(static_cast<IR::BASE *>(n)); }                                      \
 const IR::Node *Transform::postorder(IR::CLASS *n) {                                    \
     return postorder(static_cast<IR::BASE *>(n)); }                                     \
+void Transform::revisit(const IR::CLASS *o, const IR::Node *n) {                        \
+    return revisit(static_cast<const IR::BASE *>(o), n); }                              \
 
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 
