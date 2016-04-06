@@ -19,7 +19,7 @@ p4c
 ├── frontends
 │   ├── common                -- common front-end utilities
 │   ├── p4v1                  -- P4 v1.0 front-end (placeholder)
-│   └── p4v1.2                -- P4 v1.2 front-end
+│   └── p4                    -- P4 v1.2 front-end
 ├── ir                        -- core internal representation
 ├── lib                       -- common utilities (libp4toolkit.a)
 ├── midend                    -- code that may be useful for writing mid-ends
@@ -116,10 +116,10 @@ compilation and simplifying debugging.
 * the compiler intermediate representation (IR) is briefly described
   in [IR](IR.md)
 
-* A [Powerpoint file](migration-guide.pptx) describes how P4 v1.0
+* The [migration guide](migration-guide.pptx) describes how P4 v1.0
   programs are translated into P4 v1.2 programs
 
-* A [Powerpoint file](compiler-design.pptx) describes the salient
+* The [compiler design](compiler-design.pptx) describes the salient
   features of the compiler design and implementation
   
 * specific back-ends may have their own README files; check the
@@ -217,17 +217,15 @@ git rebase -i master
 git push origin your-branch-name  # push only to your branch, never to master
 ```
 
-* create a pull request and assign it to Chris (`cdodd`)
+* create a pull request and assign it to ChrisDodd
   (seems to require interacting with the github web site)
 
-* only Chris can merge branches into master
+* only ChrisDodd can merge branches into master
 
 * Incorporate all review comments.
 
 * Squash extra commits, push, rebasing your branch against
   origin/master if necessary.
-
-* Wait on Chris to merge.
 
 # Debugging
 

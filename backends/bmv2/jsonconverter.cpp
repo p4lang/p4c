@@ -55,7 +55,7 @@ void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
         bool same = checkSame(destination, info->destinationField);
         if (!same)
             ::error("On this target all meter operations must write to the same destination ",
-                    "but %1% and %2% different", destination, info->destinationField);
+                    "but %1% and %2% are different", destination, info->destinationField);
     }
 }
 
