@@ -1538,10 +1538,14 @@ const IR::Node* TypeChecker::postorder(IR::Member* expression) {
         setType(expression, methodType);
     } else if (type->is<IR::Type_StructLike>()) {
         if (type->is<IR::Type_Header>()) {
-            if (expression->member.name == IR::Type_Header::valid) {
-                setType(getOriginal(), IR::Type_Boolean::get());
-                setType(expression, IR::Type_Boolean::get());
-                // not a left value
+            if (expression->member.name == IR::Type_Header::isValid) {
+                // Built-in method
+                auto type = new IR::Type_Method(
+                    Util::SourceInfo(), new IR::TypeParameters(),
+                    IR::Type_Boolean::get(), new IR::ParameterList());
+                auto ctype = canonicalize(type);
+                setType(getOriginal(), ctype);
+                setType(expression, ctype);
                 return expression;
             } else if (expression->member.name == IR::Type_Header::setValid) {
                 // Built-in method

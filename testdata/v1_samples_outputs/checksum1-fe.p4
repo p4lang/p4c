@@ -91,7 +91,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             do_setup;
         }
         key = {
-            hdr.ethernet.valid: exact;
+            hdr.ethernet.isValid(): exact;
         }
     }
 

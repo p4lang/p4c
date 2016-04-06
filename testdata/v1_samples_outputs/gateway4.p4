@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        if (hdr.data2.valid) {
+        if (hdr.data2.isValid()) {
             test1.apply();
         }
         test2.apply();

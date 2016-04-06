@@ -27,8 +27,8 @@ class ControlTranslationVisitor : public CodeGenInspector {
     // bool preorder(const IR::IfStatement* stat) override;  // TODO
     bool preorder(const IR::MethodCallExpression* expression) override;
     bool preorder(const IR::ReturnStatement* stat) override;
-    void processMethod(P4::ExternMethod* method);
-    void processApply(P4::ApplyMethod* method);
+    void processMethod(const P4::ExternMethod* method);
+    void processApply(const P4::ApplyMethod* method);
 };
 
 bool ControlTranslationVisitor::preorder(const IR::PathExpression* expression) {
@@ -42,16 +42,22 @@ bool ControlTranslationVisitor::preorder(const IR::PathExpression* expression) {
 
 bool ControlTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
     auto mi = P4::MethodInstance::resolve(expression,
-                                             control->program->refMap,
-                                             control->program->typeMap);
-    auto apply = dynamic_cast<P4::ApplyMethod*>(mi);
+                                          control->program->refMap,
+                                          control->program->typeMap);
+    auto apply = mi->to<P4::ApplyMethod>();
     if (apply != nullptr) {
         processApply(apply);
         return false;
     }
-    auto ext = dynamic_cast<P4::ExternMethod*>(mi);
+    auto ext = mi->to<P4::ExternMethod>();
     if (ext != nullptr) {
         processMethod(ext);
+        return false;
+    }
+    auto bim = mi->to<P4::BuiltInMethod>();
+    if (bim != nullptr && bim->name == IR::Type_Header::isValid) {
+        visit(bim->appliedTo);
+        builder->append(".ebpf_valid");
         return false;
     }
 
@@ -59,7 +65,7 @@ bool ControlTranslationVisitor::preorder(const IR::MethodCallExpression* express
     return false;
 }
 
-void ControlTranslationVisitor::processMethod(P4::ExternMethod* method) {
+void ControlTranslationVisitor::processMethod(const P4::ExternMethod* method) {
     auto block = control->controlBlock->getValue(method->object->getNode());
     BUG_CHECK(block != nullptr, "Cannot locate block for %1%", method->object);
     auto extblock = block->to<IR::ExternBlock>();
@@ -77,7 +83,7 @@ void ControlTranslationVisitor::processMethod(P4::ExternMethod* method) {
     builder->blockEnd(true);
 }
 
-void ControlTranslationVisitor::processApply(P4::ApplyMethod* method) {
+void ControlTranslationVisitor::processApply(const P4::ApplyMethod* method) {
     auto table = control->getTable(method->object->getName().name);
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 

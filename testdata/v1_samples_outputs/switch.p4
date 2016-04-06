@@ -1326,8 +1326,8 @@ control process_vlan_decap(inout headers hdr, inout metadata meta, inout standar
             remove_vlan_double_tagged;
         }
         key = {
-            hdr.vlan_tag_[0].valid: exact;
-            hdr.vlan_tag_[1].valid: exact;
+            hdr.vlan_tag_[0].isValid(): exact;
+            hdr.vlan_tag_[1].isValid(): exact;
         }
         size = 1024;
     }
@@ -1554,9 +1554,9 @@ control process_tunnel_decap(inout headers hdr, inout metadata meta, inout stand
             decap_inner_unknown;
         }
         key = {
-            hdr.inner_tcp.valid : exact;
-            hdr.inner_udp.valid : exact;
-            hdr.inner_icmp.valid: exact;
+            hdr.inner_tcp.isValid() : exact;
+            hdr.inner_udp.isValid() : exact;
+            hdr.inner_icmp.isValid(): exact;
         }
         size = 1024;
     }
@@ -1592,8 +1592,8 @@ control process_tunnel_decap(inout headers hdr, inout metadata meta, inout stand
         }
         key = {
             meta.tunnel_metadata.ingress_tunnel_type: exact;
-            hdr.inner_ipv4.valid                    : exact;
-            hdr.inner_ipv6.valid                    : exact;
+            hdr.inner_ipv4.isValid()                : exact;
+            hdr.inner_ipv6.isValid()                : exact;
         }
         size = 1024;
     }
@@ -1955,7 +1955,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         key = {
             meta.int_metadata_i2e.source: ternary;
             meta.int_metadata_i2e.sink  : ternary;
-            hdr.int_header.valid        : exact;
+            hdr.int_header.isValid()    : exact;
         }
         size = 2;
     }
@@ -2097,9 +2097,9 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         }
         key = {
             meta.egress_metadata.smac_idx: exact;
-            hdr.ipv4.valid               : exact;
-            hdr.ipv6.valid               : exact;
-            hdr.mpls[0].valid            : exact;
+            hdr.ipv4.isValid()           : exact;
+            hdr.ipv6.isValid()           : exact;
+            hdr.mpls[0].isValid()        : exact;
         }
         size = 512;
     }
@@ -2527,11 +2527,11 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
             inner_non_ip_rewrite;
         }
         key = {
-            hdr.ipv4.valid: exact;
-            hdr.ipv6.valid: exact;
-            hdr.tcp.valid : exact;
-            hdr.udp.valid : exact;
-            hdr.icmp.valid: exact;
+            hdr.ipv4.isValid(): exact;
+            hdr.ipv6.isValid(): exact;
+            hdr.tcp.isValid() : exact;
+            hdr.udp.isValid() : exact;
+            hdr.icmp.isValid(): exact;
         }
         size = 1024;
     }
@@ -2639,8 +2639,8 @@ control process_int_outer_encap(inout headers hdr, inout metadata meta, inout st
             nop;
         }
         key = {
-            hdr.ipv4.valid                         : exact;
-            hdr.vxlan_gpe.valid                    : exact;
+            hdr.ipv4.isValid()                     : exact;
+            hdr.vxlan_gpe.isValid()                : exact;
             meta.int_metadata_i2e.source           : exact;
             meta.tunnel_metadata.egress_tunnel_type: ternary;
         }
@@ -2948,15 +2948,15 @@ control validate_mpls_header(inout headers hdr, inout metadata meta, inout stand
             set_valid_mpls_label3;
         }
         key = {
-            hdr.mpls[0].label: ternary;
-            hdr.mpls[0].bos  : ternary;
-            hdr.mpls[0].valid: exact;
-            hdr.mpls[1].label: ternary;
-            hdr.mpls[1].bos  : ternary;
-            hdr.mpls[1].valid: exact;
-            hdr.mpls[2].label: ternary;
-            hdr.mpls[2].bos  : ternary;
-            hdr.mpls[2].valid: exact;
+            hdr.mpls[0].label    : ternary;
+            hdr.mpls[0].bos      : ternary;
+            hdr.mpls[0].isValid(): exact;
+            hdr.mpls[1].label    : ternary;
+            hdr.mpls[1].bos      : ternary;
+            hdr.mpls[1].isValid(): exact;
+            hdr.mpls[2].label    : ternary;
+            hdr.mpls[2].bos      : ternary;
+            hdr.mpls[2].isValid(): exact;
         }
         size = 512;
     }
@@ -3088,8 +3088,8 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         key = {
             meta.l2_metadata.lkp_mac_sa: ternary;
             meta.l2_metadata.lkp_mac_da: ternary;
-            hdr.vlan_tag_[0].valid     : exact;
-            hdr.vlan_tag_[1].valid     : exact;
+            hdr.vlan_tag_[0].isValid() : exact;
+            hdr.vlan_tag_[1].isValid() : exact;
         }
         size = 512;
     }
@@ -3100,15 +3100,15 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
     apply {
         switch (validate_outer_ethernet.apply().action_run) {
             default: {
-                if (hdr.ipv4.valid) {
+                if (hdr.ipv4.isValid()) {
                     validate_outer_ipv4_header_0.apply(hdr, meta, standard_metadata);
                 }
                 else {
-                    if (hdr.ipv6.valid) {
+                    if (hdr.ipv6.isValid()) {
                         validate_outer_ipv6_header_0.apply(hdr, meta, standard_metadata);
                     }
                     else {
-                        if (hdr.mpls[0].valid) {
+                        if (hdr.mpls[0].isValid()) {
                             validate_mpls_header_0.apply(hdr, meta, standard_metadata);
                         }
                     }
@@ -3172,9 +3172,9 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
         }
         key = {
             meta.ingress_metadata.ifindex: exact;
-            hdr.vlan_tag_[0].valid       : exact;
+            hdr.vlan_tag_[0].isValid()   : exact;
             hdr.vlan_tag_[0].vid         : exact;
-            hdr.vlan_tag_[1].valid       : exact;
+            hdr.vlan_tag_[1].isValid()   : exact;
             hdr.vlan_tag_[1].vid         : exact;
         }
         size = 4096;
@@ -3412,8 +3412,8 @@ control process_mpls(inout headers hdr, inout metadata meta, inout standard_meta
         }
         key = {
             meta.tunnel_metadata.mpls_label: exact;
-            hdr.inner_ipv4.valid           : exact;
-            hdr.inner_ipv6.valid           : exact;
+            hdr.inner_ipv4.isValid()       : exact;
+            hdr.inner_ipv6.isValid()       : exact;
         }
         size = 1024;
     }
@@ -3547,8 +3547,8 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
         key = {
             meta.tunnel_metadata.tunnel_vni         : exact;
             meta.tunnel_metadata.ingress_tunnel_type: exact;
-            hdr.inner_ipv4.valid                    : exact;
-            hdr.inner_ipv6.valid                    : exact;
+            hdr.inner_ipv4.isValid()                : exact;
+            hdr.inner_ipv6.isValid()                : exact;
         }
         size = 1024;
     }
@@ -3559,15 +3559,15 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
     apply {
         switch (outer_rmac.apply().action_run) {
             outer_rmac_hit: {
-                if (hdr.ipv4.valid) {
+                if (hdr.ipv4.isValid()) {
                     process_ipv4_vtep_0.apply(hdr, meta, standard_metadata);
                 }
                 else {
-                    if (hdr.ipv6.valid) {
+                    if (hdr.ipv6.isValid()) {
                         process_ipv6_vtep_0.apply(hdr, meta, standard_metadata);
                     }
                     else {
-                        if (hdr.mpls[0].valid) {
+                        if (hdr.mpls[0].isValid()) {
                             process_mpls_0.apply(hdr, meta, standard_metadata);
                         }
                     }
@@ -4331,15 +4331,15 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
         }
         key = {
             meta.tunnel_metadata.ingress_tunnel_type: exact;
-            hdr.inner_ipv4.valid                    : exact;
-            hdr.inner_ipv6.valid                    : exact;
+            hdr.inner_ipv4.isValid()                : exact;
+            hdr.inner_ipv6.isValid()                : exact;
         }
         size = 1024;
     }
 
     apply {
         fabric_ingress_dst_lkp.apply();
-        if (hdr.fabric_header_multicast.valid) {
+        if (hdr.fabric_header_multicast.isValid()) {
             fabric_ingress_src_lkp.apply();
         }
         if (meta.tunnel_metadata.tunnel_terminate == 1w1) {
@@ -4407,11 +4407,11 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
     }
 
     apply {
-        if (meta.tunnel_metadata.tunnel_terminate == 1w0 && hdr.ipv4.valid || meta.tunnel_metadata.tunnel_terminate == 1w1 && hdr.inner_ipv4.valid) {
+        if (meta.tunnel_metadata.tunnel_terminate == 1w0 && hdr.ipv4.isValid() || meta.tunnel_metadata.tunnel_terminate == 1w1 && hdr.inner_ipv4.isValid()) {
             compute_ipv4_hashes.apply();
         }
         else {
-            if (meta.tunnel_metadata.tunnel_terminate == 1w0 && hdr.ipv6.valid || meta.tunnel_metadata.tunnel_terminate == 1w1 && hdr.inner_ipv6.valid) {
+            if (meta.tunnel_metadata.tunnel_terminate == 1w0 && hdr.ipv6.isValid() || meta.tunnel_metadata.tunnel_terminate == 1w1 && hdr.inner_ipv6.isValid()) {
                 compute_ipv6_hashes.apply();
             }
             else {
@@ -4840,7 +4840,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             process_ip_sourceguard_0.apply(hdr, meta, standard_metadata);
             process_int_endpoint_0.apply(hdr, meta, standard_metadata);
             process_tunnel_0.apply(hdr, meta, standard_metadata);
-            if (!hdr.mpls[0].valid || hdr.mpls[0].valid && meta.tunnel_metadata.tunnel_terminate == 1w1) {
+            if (!hdr.mpls[0].isValid() || hdr.mpls[0].isValid() && meta.tunnel_metadata.tunnel_terminate == 1w1) {
                 process_validate_packet_0.apply(hdr, meta, standard_metadata);
                 process_mac_0.apply(hdr, meta, standard_metadata);
                 if (meta.l3_metadata.lkp_ip_type == 2w0) {

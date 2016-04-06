@@ -152,7 +152,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        if (hdr.ipv4.valid) {
+        if (hdr.ipv4.isValid()) {
             port_mapping.apply();
             bd.apply();
             switch (ipv4_fib.apply().action_run) {

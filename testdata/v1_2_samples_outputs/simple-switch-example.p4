@@ -45,11 +45,11 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     }
     state parse_ipv4 {
         b.extract(p.ip);
-        assert(p.ip.version == 4w4, IPv4IncorrectVersion);
-        assert(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
+        verify(p.ip.version == 4w4, IPv4IncorrectVersion);
+        verify(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
         ck.clear();
         ck.update(p.ip);
-        assert(ck.get() == 16w0, IPv4ChecksumError);
+        verify(ck.get() == 16w0, IPv4ChecksumError);
         transition accept;
     }
 }
@@ -141,7 +141,7 @@ control TopDeparser(inout Parsed_packet p, packet_out b) {
     Checksum16() ck;
     apply {
         b.emit(p.ethernet);
-        if (p.ip.valid) {
+        if (p.ip.isValid()) {
             ck.clear();
             p.ip.hdrChecksum = 16w0;
             ck.update(p.ip);

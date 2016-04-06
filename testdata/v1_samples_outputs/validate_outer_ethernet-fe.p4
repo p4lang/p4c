@@ -148,9 +148,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_valid_outer_broadcast_packet_qinq_tagged;
         }
         key = {
-            hdr.ethernet.dstAddr  : ternary;
-            hdr.vlan_tag_[0].valid: exact;
-            hdr.vlan_tag_[1].valid: exact;
+            hdr.ethernet.dstAddr      : ternary;
+            hdr.vlan_tag_[0].isValid(): exact;
+            hdr.vlan_tag_[1].isValid(): exact;
         }
         size = 64;
     }

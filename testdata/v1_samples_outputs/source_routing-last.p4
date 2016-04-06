@@ -60,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             route;
         }
         key = {
-            hdr.easyroute_port.valid: exact;
+            hdr.easyroute_port.isValid(): exact;
         }
         size = 1;
     }

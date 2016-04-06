@@ -35,7 +35,7 @@ extern packet_out {
     void emit<T>(in T hdr);
 }
 
-extern void assert(in bool check, in error toSignal);
+extern void verify(in bool check, in error toSignal);
 
 action NoAction() {}
 

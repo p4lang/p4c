@@ -151,6 +151,20 @@ class ExpressionConverter : public Inspector {
                 map.emplace(expression, j);
                 return;
             }
+        } else if (instance->is<P4::BuiltInMethod>()) {
+            auto bim = instance->to<P4::BuiltInMethod>();
+            if (bim->name == IR::Type_Header::isValid) {
+                auto result = new Util::JsonObject();
+                result->emplace("type", "expression");
+                auto e = new Util::JsonObject();
+                result->emplace("value", e);
+                e->emplace("op", "valid");
+                e->emplace("left", Util::JsonValue::null);
+                auto l = get(bim->appliedTo);
+                e->emplace("right", l);
+                map.emplace(expression, result);
+                return;
+            }
         }
         BUG("%1%: unhandled case", expression);
     }
@@ -272,9 +286,10 @@ class ExpressionConverter : public Inspector {
             }
 
             if (!done) {
-                auto etype = converter->typeMap->getType(expression->expr, true);
                 auto l = get(expression->expr);
                 CHECK_NULL(l);
+#if 0
+                auto etype = converter->typeMap->getType(expression->expr, true);
                 if (etype->is<IR::Type_Header>() &&
                     expression->member.name == IR::Type_Header::valid) {
                     result->emplace("type", "expression");
@@ -283,7 +298,9 @@ class ExpressionConverter : public Inspector {
                     e->emplace("op", "valid");
                     e->emplace("left", Util::JsonValue::null);
                     e->emplace("right", l);
-                } else {
+                } else
+#endif
+                {
                     result->emplace("type", "field");
                     auto e = mkArrayField(result, "value");
                     if (l->is<Util::JsonObject>())
@@ -908,12 +925,15 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
 
             cstring match_type = mt->name.name;
             if (mt->name.name == corelib.exactMatch.name) {
-                if (expr->is<IR::Member>()) {
-                    auto member = expr->to<IR::Member>();
-                    if (member->member.name == IR::Type_Header::valid &&
-                        typeMap->getType(member->expr, true)->is<IR::Type_Header>()) {
-                        expr = member->expr;
-                        match_type = "valid";
+                if (expr->is<IR::MethodCallExpression>()) {
+                    auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
+                                                          refMap, typeMap);
+                    if (mi->is<P4::BuiltInMethod>()) {
+                        auto bim = mi->to<P4::BuiltInMethod>();
+                        if (bim->name == IR::Type_Header::isValid) {
+                            expr = bim->appliedTo;
+                            match_type = "valid";
+                        }
                     }
                 }
             } else if (mt->name.name == corelib.ternaryMatch.name) {
