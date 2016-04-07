@@ -39,7 +39,8 @@ p4c
 
 # Dependences
 
-We have tested the compiler on U*X systems (OS X and Ubuntu).
+We have tested the compiler on U*X systems (OS X and Ubuntu).  The
+following tools are required to build and run the compiler and tests:
 
 - A C++11 compiler
   E.g., gcc 4.8 or later, or clang++
@@ -55,6 +56,10 @@ We have tested the compiler on U*X systems (OS X and Ubuntu).
 - Gnu multiple precision library GMP
 
 - C++ boost library (minimally used)
+
+- Python 2.7 for scripting (especially for running tests)
+
+Note that each back-end may have additional dependences.
 
 ## Ubuntu dependences
 

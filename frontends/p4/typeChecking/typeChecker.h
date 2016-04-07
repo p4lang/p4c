@@ -164,7 +164,6 @@ class TypeChecker final : public Transform {
     const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* postorder(IR::DefaultExpression* expression) override;
 
-    // const IR::Node* postorder(IR::ReturnStatement* stat) override; // TODO
     const IR::Node* postorder(IR::IfStatement* stat) override;
     const IR::Node* postorder(IR::SwitchStatement* stat) override;
     const IR::Node* postorder(IR::AssignmentStatement* stat) override;

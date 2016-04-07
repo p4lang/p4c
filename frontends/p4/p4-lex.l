@@ -72,6 +72,7 @@ void parseLineNumber(const char* text)
 "else"          { BEGIN(NORMAL); return ELSE; }
 "enum"          { BEGIN(NORMAL); return ENUM; }
 "error"         { BEGIN(NORMAL); return T_ERROR; }
+"exit"          { BEGIN(NORMAL); return EXIT; }
 "extern"        { BEGIN(NORMAL); return EXTERN; }
 "false"         { BEGIN(NORMAL); return FALSE; }
 "header"        { BEGIN(NORMAL); return HEADER; }

@@ -317,8 +317,12 @@ abstract Statement : StatOrDecl {
 #nodbprint
 }
 
+class ExitStatement : Statement {
+    toString{ return "exit"; }
+#nodbprint
+}
+
 class ReturnStatement : Statement {
-    NullOK Expression expr;
     toString{ return "return"; }
 #nodbprint
 }

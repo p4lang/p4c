@@ -125,7 +125,7 @@ StateTranslationVisitor::compileExtractField(
 
     if (widthToExtract <= 32) {
         unsigned lastBitIndex = widthToExtract + alignment - 1;
-        unsigned lastWordIndex = lastWordIndex = lastBitIndex / 8;
+        unsigned lastWordIndex = lastBitIndex / 8;
         unsigned wordsToRead = lastWordIndex + 1;
         unsigned loadSize;
 

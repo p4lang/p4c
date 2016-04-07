@@ -100,6 +100,11 @@ class CFGBuilder : public Inspector {
         setAfter(statement, new CFG::EdgeSet());  // empty successor set
         return false;
     }
+    bool preorder(const IR::ExitStatement* statement) override {
+        cfg->exitPoint->addPredecessors(current);
+        setAfter(statement, new CFG::EdgeSet());  // empty successor set
+        return false;
+    }
     bool preorder(const IR::EmptyStatement* statement) override {
         // unchanged 'current'
         setAfter(statement, current);

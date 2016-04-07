@@ -98,7 +98,7 @@ static int yylex();
 %token      TRUE FALSE
 %token      ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA
             DEFAULT DONTCARE ELSE ENUM T_ERROR  // There is an ERROR macro elsewhere
-            EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
+            EXIT EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
             PACKAGE PARSER RANGE RETURN STATE STRUCT SWITCH TABLE TRANSITION
             TYPEDEF VARBIT VOID
 %token<str> IDENTIFIER TYPE NAMESPACE STRING_LITERAL
@@ -125,7 +125,7 @@ static int yylex();
 %type<id>               member switchLabel
 %type<SelectCase>       selectCase
 %type<selectCases>      selectCaseList
-%type<Statement>        statement emptyStatement returnStatement switchStatement
+%type<Statement>        statement emptyStatement returnStatement switchStatement exitStatement
                         assignmentOrMethodCallStatement conditionalStatement
 %type<BlockStatement>   blockStatement actionBlockStatement controlBody
 %type<StatOrDecl>       statementOrDeclaration parserStatement actionElement variableDeclaration
@@ -627,8 +627,12 @@ emptyStatement
     : ';'                              { $$ = new IR::EmptyStatement(@1); }
     ;
 
+exitStatement
+    : EXIT ';'                         { $$ = new IR::ExitStatement(@1); }
+    ;
+
 returnStatement
-    : RETURN ';'                       { $$ = new IR::ReturnStatement(@1, nullptr); }
+    : RETURN ';'                       { $$ = new IR::ReturnStatement(@1); }
     ;
 
 conditionalStatement
@@ -644,6 +648,7 @@ statement
     | emptyStatement                   { $$ = $1; }
     | blockStatement                   { $$ = $1; }
     | returnStatement                  { $$ = $1; }
+    | exitStatement                    { $$ = $1; }
     | switchStatement                  { $$ = $1; }
     ;
 

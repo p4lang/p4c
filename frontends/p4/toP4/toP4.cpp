@@ -675,12 +675,14 @@ bool ToP4::preorder(const IR::BlockStatement* s) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ReturnStatement* s) {
+bool ToP4::preorder(const IR::ExitStatement*) {
+    builder.append("exit");
+    builder.endOfStatement();
+    return false;
+}
+
+bool ToP4::preorder(const IR::ReturnStatement*) {
     builder.append("return");
-    if (s->expr != nullptr) {
-        builder.spc();
-        visit(s->expr);
-    }
     builder.endOfStatement();
     return false;
 }

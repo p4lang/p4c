@@ -12,6 +12,8 @@ import stat
 import tempfile
 import shutil
 import difflib
+import subprocess
+import scapy.all as scapy
 
 SUCCESS = 0
 FAILURE = 1
@@ -37,6 +39,18 @@ def usage(options):
     print("          -v: verbose operation")
     print("          -f: replace reference outputs with newly generated ones")
 
+def ByteToHex( byteStr ):
+    # from http://code.activestate.com/recipes/510399-byte-to-hex-and-hex-to-byte-string-conversion/
+    return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
+
+def HexToByte( hexStr ):
+    # from http://code.activestate.com/recipes/510399-byte-to-hex-and-hex-to-byte-string-conversion/
+    bytes = []
+    hexStr = ''.join( hexStr.split(" ") )
+    for i in range(0, len(hexStr), 2):
+        bytes.append( chr( int (hexStr[i:i+2], 16 ) ) )
+    return ''.join( bytes )
+    
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
     return "_errors" in p4filename
@@ -125,14 +139,7 @@ def check_generated_files(options, tmpdir, expecteddir):
                 return result
     return SUCCESS
 
-def generate_packets(stffile):
-    # TODO
-    pass
-
 def makeKey(key):
-    # TODO
-    if key.find("*") < 0:
-        return key;
     if key.startswith("0x"):
         mask = "F"
     elif key.startswith("0b"):
@@ -180,33 +187,102 @@ def translate_command(cmd):
     command = "table_add " + tableName + " " + action + " " + " ".join(key) + " => " + " ".join(actionArgs) + " " + prio
     return command
 
-# Translate STF commands into simple_switch_CLI commands
-def generate_cli_commands(stffile, outfile):
-    with open(stffile) as i:
-        with open(outfile, 'w') as o:
-            for line in i:
-                cmd = translate_command(line)
-                if cmd is not None:
-                    print(cmd)
-                    o.write(cmd)
+def createEmptyPcapFile(fname):
+    os.system("cp empty.pcap " + fname);
 
+class OutFiles(object):
+    def __init__(self, cmdfile, folder, pcapPrefix):
+        self.cmdfile = open(folder + "/" + cmdfile, "w")
+        self.folder = folder
+        self.pcapPrefix = pcapPrefix
+        self.packets = {}
+    def writeCommand(self, line):
+        self.cmdfile.write(line + "\n")
+    def filename(self, interface, direction):
+        return self.folder + "/" + self.pcapPrefix + interface + "_" + direction + ".pcap"
+    def close(self):
+        self.cmdfile.close()
+        for interface, v in self.packets.iteritems():
+            for direction in ["in", "out-expected"]:
+                file = self.filename(interface, direction)
+                if direction in v:
+                    packets = v[direction]
+                    print("Creating", file)
+                    scapy.wrpcap(file, packets)
+                else:
+                    print("Empty", file)
+                    createEmptyPcapFile(file)
+                    
+    def writePacket(self, inout, interface, data):
+        data = data.replace("*", "0")  # TODO: this is not right
+        hexstr = HexToByte(data)
+        packet = scapy.Ether(_pkt = hexstr)
+        if not interface in self.packets:
+            self.packets[interface] = {}
+        if not inout in self.packets[interface]:
+            self.packets[interface][inout] = []
+        self.packets[interface][inout].append(packet)        
+    def interfaces(self):
+        # return list of interface names suitable for bmv2
+        result = []
+        for interface, v in self.packets.iteritems():
+            result.append("-i " + interface + "@" + self.pcapPrefix + interface)
+        return result
+        
+def translate_packet(line, outfiles):
+    assert isinstance(outfiles, OutFiles)
+    cmd, line = nextWord(line)
+    if cmd == "expect":
+        direction = "out-expected"
+    elif cmd == "packet":
+        direction = "in"
+    else:
+        return
+    interface, line = nextWord(line)
+    outfiles.writePacket(direction, interface, line)
+    
+def generate_model_inputs(stffile, outfiles):
+    assert isinstance(outfiles, OutFiles)
+    with open(stffile) as i:
+        for line in i:
+            cmd = translate_command(line)
+            if cmd is not None:
+                outfiles.writeCommand(cmd)
+            else:
+                translate_packet(line, outfiles)
+            
 def run_model(options, tmpdir, jsonfile):
     # We can do this if an *.stf file is present
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
-
+    jsonfile = os.path.basename(jsonfile)
+    
     file = dirname + "/" + base + ".stf"
     print("Check for ", file)
     if not os.path.isfile(file):
         return SUCCESS
 
     if options.verbose:
-        print("Running model")
+        print("Generating model inputs and commands")
+        
+    clifile = "cli.txt"
+    outfiles = OutFiles(clifile, tmpdir, "pcap")
+    generate_model_inputs(file, outfiles)
+    outfiles.close()
 
-    clifile = tmpdir + "/" + "cli.txt"
-    generate_cli_commands(file, clifile)
-    generate_packets(file)
+    if options.verbose:
+        print("Running model")
+    interfaces = outfiles.interfaces()
+    wait = 2
+
+    runswitch = ["cd", tmpdir, ";", "simple_switch", "--use-files", str(wait)] + interfaces + [jsonfile]
+    runcli = ["simple_switch_CLI", "--json", jsonfile, "<" + clifile]
+    if options.verbose:
+        command = runswitch + ["&", "sleep", "1", ";"] + runcli
+        cmd = " ".join(command)
+        print("Running", cmd)
+        os.system(cmd)
     return SUCCESS
 
 def process_file(options, argv):

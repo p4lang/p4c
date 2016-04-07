@@ -472,6 +472,10 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             continue;
         } else if (s->is<IR::ReturnStatement>()) {
             break;
+        } else if (s->is<IR::ExitStatement>()) {
+            auto primitive = mkPrimitive("exit", result);
+            (void)mkParameters(primitive);
+            break;
         } else if (s->is<IR::AssignmentStatement>()) {
             const IR::Expression* l, *r;
             auto assign = s->to<IR::AssignmentStatement>();
@@ -1556,7 +1560,7 @@ void JsonConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
         if (s->is<IR::BlockStatement>()) {
             convertDeparserBody(s->to<IR::BlockStatement>()->components, result);
             continue;
-        } else if (s->is<IR::ReturnStatement>()) {
+        } else if (s->is<IR::ReturnStatement>() || s->is<IR::ExitStatement>()) {
             break;
         } else if (s->is<IR::EmptyStatement>()) {
             continue;
