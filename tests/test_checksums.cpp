@@ -20,6 +20,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cstring>
+
 #include "bm_sim/checksums.h"
 #include "bm_sim/parser.h"
 
@@ -293,4 +295,114 @@ TEST_F(ChecksumTest, TCPChecksumUpdate) {
 
   tcp_cksum_engine->update(&packet);
   ASSERT_EQ(cksum, tcp_checksum.get_uint());
+}
+
+
+class ChecksumConditionTest : public ::testing::Test {
+ protected:
+  PHVFactory phv_factory;
+  HeaderType testHeaderType, metaHeaderType;
+  header_id_t testHeader{0}, metaHeader{1};
+
+  std::unique_ptr<NamedCalculation> cksum_engine_calc{nullptr};
+  std::unique_ptr<Checksum> cksum_engine{nullptr};
+
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  ChecksumConditionTest()
+      : testHeaderType("test_t", 0),
+        metaHeaderType("meta_t", 1),
+        phv_source(PHVSourceIface::make_phv_source()) {
+    testHeaderType.push_back_field("f48", 48);
+    testHeaderType.push_back_field("f16", 16);
+    testHeaderType.push_back_field("f32", 32);
+    testHeaderType.push_back_field("f64", 64);
+
+    metaHeaderType.push_back_field("f64", 64);
+
+    phv_factory.push_back_header("test", testHeader, testHeaderType);
+    phv_factory.push_back_header("meta", metaHeader, metaHeaderType, true);
+
+    BufBuilder cksum_engine_builder;
+    cksum_engine_builder.push_back_header(testHeader);
+    cksum_engine_calc = std::unique_ptr<NamedCalculation>(
+        new NamedCalculation("cksum_engine_calc", 0,
+                             cksum_engine_builder, "xxh64"));
+    cksum_engine = std::unique_ptr<CalcBasedChecksum>(
+        new CalcBasedChecksum("cksum_engine", 1, metaHeader, 0,
+                              cksum_engine_calc.get()));
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+  }
+
+  // virtual void TearDown() { }
+
+  Packet get_pkt() {
+    // dummy packet, won't be parsed
+    Packet packet = Packet::make_new(128, PacketBuffer(256), phv_source.get());
+    packet.get_phv()->get_header(testHeader).mark_valid();
+    return packet;
+  }
+
+  void run_test(std::unique_ptr<Expression> condition, bool cond_res) {
+    cksum_engine->set_checksum_condition(std::move(condition));
+    auto packet = get_pkt();
+    PHV *phv = packet.get_phv();
+    phv->get_field(testHeader, 0).set(0xab);
+    phv->get_field(testHeader, 1).set(0xcd);
+    phv->get_field(testHeader, 2).set(0xef);
+    phv->get_field(testHeader, 3).set(0xaa);
+    uint64_t expected = cksum_engine_calc->output(packet);
+    uint64_t bad_v = 0u;
+    phv->get_field(metaHeader, 0).set(bad_v);
+    assert(expected != bad_v);
+
+    if (cond_res)
+      ASSERT_FALSE(cksum_engine->verify(packet));
+    else
+      ASSERT_TRUE(cksum_engine->verify(packet));
+
+    cksum_engine->update(&packet);
+    if (cond_res)
+      ASSERT_EQ(expected, phv->get_field(metaHeader, 0).get<uint64_t>());
+    else
+      ASSERT_EQ(bad_v, phv->get_field(metaHeader, 0).get<uint64_t>());
+  }
+};
+
+TEST_F(ChecksumConditionTest, True) {
+  auto condition = std::unique_ptr<Expression>(new Expression);
+  condition->push_back_load_bool(true);
+  condition->build();
+  run_test(std::move(condition), true);
+}
+
+TEST_F(ChecksumConditionTest, False) {
+  auto condition = std::unique_ptr<Expression>(new Expression);
+  condition->push_back_load_bool(false);
+  condition->build();
+  run_test(std::move(condition), false);
+}
+
+TEST_F(ChecksumConditionTest, Valid) {
+  auto condition = std::unique_ptr<Expression>(new Expression);
+  condition->push_back_load_header(testHeader);
+  condition->push_back_op(ExprOpcode::VALID_HEADER);
+  condition->build();
+  run_test(std::move(condition), true);
+}
+
+TEST_F(ChecksumConditionTest, Complex) {
+  auto condition = std::unique_ptr<Expression>(new Expression);
+  condition->push_back_load_header(testHeader);
+  condition->push_back_op(ExprOpcode::VALID_HEADER);
+  condition->push_back_op(ExprOpcode::NOT);
+  condition->push_back_load_const(Data(1));
+  condition->push_back_load_const(Data(2));
+  condition->push_back_op(ExprOpcode::EQ_DATA);
+  condition->push_back_op(ExprOpcode::OR);
+  condition->build();
+  run_test(std::move(condition), false);
 }
