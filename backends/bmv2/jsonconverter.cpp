@@ -1163,6 +1163,8 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
         exitTable->emplace("direct_meters", Util::JsonValue::null);
         auto actions = mkArrayField(exitTable, "actions");
         actions->append(dropAction);
+        auto action_ids = mkArrayField(exitTable, "action_ids");
+        action_ids->append(dropActionId);
         auto next_tables = new Util::JsonObject();
         next_tables->emplace(dropAction, Util::JsonValue::null);
         exitTable->emplace("next_tables", next_tables);
@@ -1391,7 +1393,8 @@ void JsonConverter::convert(P4::BlockMap* bm) {
         // synthesize a "drop" action
         auto drop = new Util::JsonObject();
         drop->emplace("name", dropAction);
-        drop->emplace("id", nextId("actions"));
+        dropActionId = nextId("actions");
+        drop->emplace("id", dropActionId);
         drop->emplace("runtime_data", new Util::JsonArray());
         auto body = mkArrayField(drop, "primitives");
         auto call = new Util::JsonObject();

@@ -47,6 +47,7 @@ class JsonConverter final {
     P4::TypeMap*           typeMap;
     ProgramParts           structure;
     cstring                dropAction = ".drop";
+    unsigned               dropActionId;
     P4::BlockMap*          blockMap;
     ExpressionConverter*   conv;
     DirectMeterMap         meterMap;
