@@ -22,11 +22,12 @@
 #define BM_SIM_INCLUDE_BM_SIM_CHECKSUMS_H_
 
 #include <string>
+#include <memory>
 
 #include "phv.h"
 #include "named_p4object.h"
 #include "calculations.h"
-#include "logger.h"
+#include "expressions.h"
 
 namespace bm {
 
@@ -34,27 +35,27 @@ class Checksum : public NamedP4Object{
  public:
   Checksum(const std::string &name, p4object_id_t id,
            header_id_t header_id, int field_offset);
+
   virtual ~Checksum() { }
 
- public:
-  void update(Packet *pkt) const {
-    BMLOG_DEBUG_PKT(*pkt, "Updating checksum '{}'", get_name());
-    update_(pkt);
-  }
+  void update(Packet *pkt) const;
 
-  bool verify(const Packet &pkt) const {
-    bool valid = verify_(pkt);
-    BMLOG_DEBUG_PKT(pkt, "Verifying checksum '{}': {}", get_name(), valid);
-    return valid;
-  }
+  bool verify(const Packet &pkt) const;
+
+  void set_checksum_condition(std::unique_ptr<Expression> cksum_condition);
 
  private:
   virtual void update_(Packet *pkt) const = 0;
   virtual bool verify_(const Packet &pkt) const = 0;
 
+  bool is_checksum_condition_met(const Packet &pkt) const;
+
  protected:
   header_id_t header_id;
   int field_offset;
+
+ private:
+  std::unique_ptr<Expression> condition{nullptr};
 };
 
 class CalcBasedChecksum : public Checksum {

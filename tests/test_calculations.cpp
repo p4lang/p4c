@@ -108,7 +108,8 @@ TEST_F(CalculationTest, SimpleTest) {
   std::copy(&pkt_buf[header_size + 8], &pkt_buf[header_size + 12],
 	    &expected_buf[12]);
 
-  auto expected = hash::xxh64((const char *) expected_buf, sizeof(expected_buf));
+  auto expected = hash::xxh64(
+      reinterpret_cast<const char *>(expected_buf), sizeof(expected_buf));
   auto actual = calc.output(pkt);
 
   ASSERT_EQ(expected, actual);

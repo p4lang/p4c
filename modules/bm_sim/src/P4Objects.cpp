@@ -931,6 +931,13 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
                                        header_id, field_offset, calculation);
     }
 
+    if (cfg_checksum.isMember("if_cond") && !cfg_checksum["if_cond"].isNull()) {
+      auto cksum_condition = std::unique_ptr<Expression>(new Expression());
+      build_expression(cfg_checksum["if_cond"], cksum_condition.get());
+      cksum_condition->build();
+      checksum->set_checksum_condition(std::move(cksum_condition));
+    }
+
     checksums.push_back(unique_ptr<Checksum>(checksum));
 
     for (auto it = deparsers.begin(); it != deparsers.end(); ++it) {

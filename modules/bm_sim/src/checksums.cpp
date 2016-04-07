@@ -22,6 +22,7 @@
 #include <string>
 
 #include "bm_sim/checksums.h"
+#include "bm_sim/logger.h"
 
 namespace bm {
 
@@ -78,6 +79,44 @@ Checksum::Checksum(const std::string &name, p4object_id_t id,
                    header_id_t header_id, int field_offset)
   : NamedP4Object(name, id),
     header_id(header_id), field_offset(field_offset) { }
+
+void
+Checksum::update(Packet *pkt) const {
+  // is it a good idea to put this in the implementation; should the deparser be
+  // aware that nothing was updated?
+  if (!is_checksum_condition_met(*pkt)) {
+    BMLOG_TRACE_PKT(
+        *pkt, "Skipping checksum '{}' update because condition not met",
+        get_name());
+  } else {
+    BMLOG_DEBUG_PKT(*pkt, "Updating checksum '{}'", get_name());
+    update_(pkt);
+  }
+}
+
+bool
+Checksum::verify(const Packet &pkt) const {
+  if (!is_checksum_condition_met(pkt)) {
+    BMLOG_TRACE_PKT(
+        pkt, "Skipping checksum '{}' verification because condition not met",
+        get_name());
+    return true;
+  } else {
+    bool valid = verify_(pkt);
+    BMLOG_DEBUG_PKT(pkt, "Verifying checksum '{}': {}", get_name(), valid);
+    return valid;
+  }
+}
+
+void
+Checksum::set_checksum_condition(std::unique_ptr<Expression> cksum_condition) {
+  condition = std::move(cksum_condition);
+}
+
+bool
+Checksum::is_checksum_condition_met(const Packet &pkt) const {
+  return (!condition) || (condition->eval_bool(*pkt.get_phv()));
+}
 
 CalcBasedChecksum::CalcBasedChecksum(const std::string &name, p4object_id_t id,
                                      header_id_t header_id, int field_offset,

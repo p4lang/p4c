@@ -291,6 +291,10 @@ the following attributes:
 - `target`: the field where the checksum result is written
 - `type`: always set to `generic`
 - `calculation`: the name of the calculation to use to compute the checksum
+- `if_cond`: null if the checksum needs to be updated unconditionally, otherwise
+a boolean expression, which will determine whether or not the checksum gets
+updated. See [here]
+    (#the-type-value-object) for more information on expressions format.
 
 ### `learn_lists`
 
