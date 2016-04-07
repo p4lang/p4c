@@ -1525,6 +1525,17 @@ class RuntimeAPI(cmd.Cmd):
     def complete_register_write(self, text, line, start_index, end_index):
         return self._complete_registers(text)
 
+    @handle_bad_input
+    def do_register_reset(self, line):
+        "Reset all the cells in the register array to 0: register_reset <name>"
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        register_name = args[0]
+        self.client.bm_register_reset(0, register_name)
+
+    def complete_register_reset(self, text, line, start_index, end_index):
+        return self._complete_registers(text)
+
     def _complete_registers(self, text):
         return self._complete_res(REGISTER_ARRAYS, text)
 

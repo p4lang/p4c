@@ -291,6 +291,13 @@ class Context final {
   register_write(const std::string &register_name,
                  const size_t idx, Data value);
 
+  RegisterErrorCode
+  register_write_range(const std::string &register_name,
+                       const size_t start, const size_t end, Data value);
+
+  RegisterErrorCode
+  register_reset(const std::string &register_name);
+
   MatchErrorCode
   dump_table(const std::string& table_name,
              std::ostream *stream) const;

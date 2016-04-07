@@ -497,6 +497,20 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
         register_name, idx, std::move(value));
   }
 
+  RegisterErrorCode
+  register_write_range(size_t cxt_id,
+                       const std::string &register_name,
+                       const size_t start, const size_t end,
+                       Data value) override {
+    return contexts.at(cxt_id).register_write_range(
+        register_name, start, end, std::move(value));
+  }
+
+  RegisterErrorCode
+  register_reset(size_t cxt_id, const std::string &register_name) override {
+    return contexts.at(cxt_id).register_reset(register_name);
+  }
+
   RuntimeInterface::ErrorCode
   reset_state() override;
 

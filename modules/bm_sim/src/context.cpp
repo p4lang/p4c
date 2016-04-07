@@ -426,6 +426,32 @@ Context::register_write(const std::string &register_name,
   return Register::SUCCESS;
 }
 
+Context::RegisterErrorCode
+Context::register_write_range(const std::string &register_name,
+                              const size_t start, const size_t end,
+                              Data value) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  RegisterArray *register_array =
+    p4objects_rt->get_register_array(register_name);
+  if (!register_array) return Register::ERROR;
+  if (end > register_array->size() || start > end)
+    return Register::INVALID_INDEX;
+  auto register_lock = register_array->unique_lock();
+  for (size_t idx = start; idx < end; idx++)
+    register_array->at(idx).set(value);
+  return Register::SUCCESS;
+}
+
+Context::RegisterErrorCode
+Context::register_reset(const std::string &register_name) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  RegisterArray *register_array =
+    p4objects_rt->get_register_array(register_name);
+  if (!register_array) return Register::ERROR;
+  register_array->reset_state();
+  return Register::SUCCESS;
+}
+
 MatchErrorCode
 Context::dump_table(const std::string& table_name,
                     std::ostream *stream) const {
