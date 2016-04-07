@@ -231,6 +231,15 @@ class RuntimeInterface {
                  const std::string &register_name,
                  const size_t idx, Data value) = 0;  // to be moved
 
+  virtual RegisterErrorCode
+  register_write_range(size_t cxt_id,
+                       const std::string &register_name,
+                       const size_t start, const size_t end,
+                       Data value) = 0;
+
+  virtual RegisterErrorCode
+  register_reset(size_t cxt_id, const std::string &register_name) = 0;
+
   virtual ErrorCode
   load_new_config(const std::string &new_config) = 0;
 

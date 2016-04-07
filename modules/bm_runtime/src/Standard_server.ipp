@@ -570,11 +570,11 @@ public:
     }
   }
 
-  BmRegisterValue bm_register_read(const int32_t cxt_id, const std::string& register_name, const int32_t index) {
+  BmRegisterValue bm_register_read(const int32_t cxt_id, const std::string& register_array_name, const int32_t index) {
     Logger::get()->trace("bm_register_read");
     Data value; // make it thread_local ?
     Register::RegisterErrorCode error_code = switch_->register_read(
-        cxt_id, register_name, (size_t) index, &value);
+        cxt_id, register_array_name, static_cast<size_t>(index), &value);
     if(error_code != Register::RegisterErrorCode::SUCCESS) {
       InvalidRegisterOperation iro;
       iro.code = (RegisterOperationErrorCode::type) error_code;
@@ -583,10 +583,33 @@ public:
     return value.get<int64_t>();
   }
 
-  void bm_register_write(const int32_t cxt_id, const std::string& register_name, const int32_t index, const BmRegisterValue value) {
+  void bm_register_write(const int32_t cxt_id, const std::string& register_array_name, const int32_t index, const BmRegisterValue value) {
     Logger::get()->trace("bm_register_write");
     Register::RegisterErrorCode error_code = switch_->register_write(
-        cxt_id, register_name, (size_t) index, Data(value));
+        cxt_id, register_array_name, static_cast<size_t>(index), Data(value));
+    if(error_code != Register::RegisterErrorCode::SUCCESS) {
+      InvalidRegisterOperation iro;
+      iro.code = (RegisterOperationErrorCode::type) error_code;
+      throw iro;
+    }
+  }
+
+  void bm_register_write_range(const int32_t cxt_id, const std::string& register_array_name, const int32_t from, const int32_t to, const BmRegisterValue value) {
+    Logger::get()->trace("bm_register_write_range");
+    Register::RegisterErrorCode error_code = switch_->register_write_range(
+        cxt_id, register_array_name, static_cast<size_t>(from),
+        static_cast<size_t>(to), Data(value));
+    if(error_code != Register::RegisterErrorCode::SUCCESS) {
+      InvalidRegisterOperation iro;
+      iro.code = (RegisterOperationErrorCode::type) error_code;
+      throw iro;
+    }
+  }
+
+  void bm_register_reset(const int32_t cxt_id, const std::string& register_array_name) {
+    Logger::get()->trace("bm_register_reset");
+    Register::RegisterErrorCode error_code = switch_->register_reset(
+        cxt_id, register_array_name);
     if(error_code != Register::RegisterErrorCode::SUCCESS) {
       InvalidRegisterOperation iro;
       iro.code = (RegisterOperationErrorCode::type) error_code;
