@@ -436,8 +436,8 @@ service Standard {
   void bm_register_write_range(
     1:i32 cxt_id,
     2:string register_array_name,
-    3:i32 from,
-    4:i32 to,
+    3:i32 start_index,
+    4:i32 end_index,
     5:BmRegisterValue value
   ) throws (1:InvalidRegisterOperation ouch)
 

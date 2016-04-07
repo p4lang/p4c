@@ -594,11 +594,11 @@ public:
     }
   }
 
-  void bm_register_write_range(const int32_t cxt_id, const std::string& register_array_name, const int32_t from, const int32_t to, const BmRegisterValue value) {
+  void bm_register_write_range(const int32_t cxt_id, const std::string& register_array_name, const int32_t start_index, const int32_t end_index, const BmRegisterValue value) {
     Logger::get()->trace("bm_register_write_range");
     Register::RegisterErrorCode error_code = switch_->register_write_range(
-        cxt_id, register_array_name, static_cast<size_t>(from),
-        static_cast<size_t>(to), Data(value));
+        cxt_id, register_array_name, static_cast<size_t>(start_index),
+        static_cast<size_t>(end_index), Data(value));
     if(error_code != Register::RegisterErrorCode::SUCCESS) {
       InvalidRegisterOperation iro;
       iro.code = (RegisterOperationErrorCode::type) error_code;
