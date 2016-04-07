@@ -93,7 +93,10 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
     } else if (primitive->name == "valid") {
         BUG_CHECK(primitive->operands.size() == 1, "Expected 1 operand for %1%", primitive);
         auto base = primitive->operands.at(0);
-        auto result = new IR::Member(primitive->srcInfo, base, IR::ID(IR::Type_Header::valid));
+        auto method = new IR::Member(primitive->srcInfo, base, IR::ID(IR::Type_Header::isValid));
+        auto result = new IR::MethodCallExpression(
+            primitive->srcInfo, method, new IR::Vector<IR::Type>(),
+            new IR::Vector<IR::Expression>());
         return result;
     }
     BUG("Unexpected primitive %1%", primitive);

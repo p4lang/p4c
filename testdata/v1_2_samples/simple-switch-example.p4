@@ -64,12 +64,12 @@ parser TopParser(packet_in b, out Parsed_packet p)
     state parse_ipv4
     {
         b.extract(p.ip);
-        assert(p.ip.version == 4w4, IPv4IncorrectVersion);
-        assert(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
+        verify(p.ip.version == 4w4, IPv4IncorrectVersion);
+        verify(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
         ck.clear();
         ck.update(p.ip);
         // Verify that packet checksum is zero
-        assert(ck.get() == 16w0, IPv4ChecksumError);
+        verify(ck.get() == 16w0, IPv4ChecksumError);
         transition accept;
     }
 }
@@ -91,8 +91,9 @@ control Pipe(
     
     /**
      * Set the next hop and the output port
-     * @param ivp4_dest ipv4 address of next hop
-     * @param port output port
+     * @param nextHop   ipv4 address of next nop
+     * @param ivp4_dest ipv4 address of next hop (set by the control-plane)
+     * @param port output port (set by the control-plane)
      */
     action Set_nhop(out IPv4Address nextHop,
                     IPv4Address ipv4_dest,
@@ -226,7 +227,7 @@ control TopDeparser(inout Parsed_packet p, packet_out b)
 
     apply {
         b.emit(p.ethernet);
-        if (p.ip.valid) {
+        if (p.ip.isValid()) {
             ck.clear();       // prepare checksum unit
             p.ip.hdrChecksum = 16w0; // clear checksum
             ck.update(p.ip);  // compute new checksum.

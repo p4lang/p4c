@@ -722,7 +722,7 @@ keyElementList
     ;
 
 keyElement
-    : lvalue ':' name ';'                { auto expr = new IR::PathExpression(*$3);
+    : expression ':' name ';'            { auto expr = new IR::PathExpression(*$3);
                                            $$ = new IR::KeyElement(@1 + @3, $1, expr); }
     ;
 

@@ -137,7 +137,7 @@ void EBPFStructType::emitInitializer(CodeBuilder* builder) {
         }
     } else if (type->is<IR::Type_Header>()) {
         builder->emitIndent();
-        builder->appendLine(".valid = 0");
+        builder->appendLine(".ebpf_valid = 0");
     } else {
         BUG("Unexpected type %1%", type);
     }
@@ -167,7 +167,7 @@ void EBPFStructType::emit(CodeBuilder* builder) {
     if (type->is<IR::Type_Header>()) {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(IR::Type_Boolean::get());
-        type->declare(builder, "valid", false);
+        type->declare(builder, "ebpf_valid", false);
         builder->endOfStatement(true);
     }
 

@@ -398,7 +398,7 @@ class Type_Union : Type_StructLike {
 class Type_Header : Type_StructLike {
 #emit
     const static cstring setValid;
-    const static cstring valid;
+    const static cstring isValid;
 #end
 #nodbprint
     toString{ return cstring("header ") + getName(); }

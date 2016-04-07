@@ -52,7 +52,7 @@ class EBPFCounterTable final : public EBPFTableBase {
     void emit(CodeBuilder* builder) override;
     void emitCounterIncrement(CodeBuilder* builder,
                               const IR::MethodCallExpression* expression);
-    void emitMethodInvocation(CodeBuilder* builder, P4::ExternMethod* method);
+    void emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method);
 };
 
 }  // namespace EBPF

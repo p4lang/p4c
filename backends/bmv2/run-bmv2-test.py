@@ -125,6 +125,90 @@ def check_generated_files(options, tmpdir, expecteddir):
                 return result
     return SUCCESS
 
+def generate_packets(stffile):
+    # TODO
+    pass
+
+def makeKey(key):
+    # TODO
+    if key.find("*") < 0:
+        return key;
+    if key.startswith("0x"):
+        mask = "F"
+    elif key.startswith("0b"):
+        mask = "1"
+    elif key.startswith("0o"):
+        mask = "7"
+    m = key.replace("*", mask)
+    return key.replace("*", "0") + "&&&" + m
+
+def nextWord(text, sep = " "):
+    space = text.find(sep)
+    if space < 0:
+        return text, ""
+    l, r = text[0:space].strip(), text[space+1:len(text)].strip()
+    # print(text, "/", sep, "->", l, "#", r)
+    return l, r
+
+def translate_command(cmd):
+    first, cmd = nextWord(cmd)
+    if first != "add":
+        return None
+    tableName, cmd = nextWord(cmd)
+    prio, cmd = nextWord(cmd)
+    key = []
+    actionArgs = []
+    action = None
+    while cmd != "":
+        if action != None:
+            # parsing action arguments
+            word, cmd = nextWord(cmd, ",")
+            k, v = nextWord(word, ":")
+            actionArgs.append(v)
+        else:
+            # parsing table key
+            word, cmd = nextWord(cmd)
+            if word.find("(") >= 0:
+                # found action
+                action, arg = nextWord(word, "(")
+                cmd = arg + cmd
+                cmd = cmd.strip("()")
+            else:
+                k, v = nextWord(word, ":")
+                key.append(makeKey(v))
+            
+    command = "table_add " + tableName + " " + action + " " + " ".join(key) + " => " + " ".join(actionArgs) + " " + prio
+    return command
+
+# Translate STF commands into simple_switch_CLI commands
+def generate_cli_commands(stffile, outfile):
+    with open(stffile) as i:
+        with open(outfile, 'w') as o:
+            for line in i:
+                cmd = translate_command(line)
+                if cmd is not None:
+                    print(cmd)
+                    o.write(cmd)
+
+def run_model(options, tmpdir, jsonfile):
+    # We can do this if an *.stf file is present
+    basename = os.path.basename(options.p4filename)
+    base, ext = os.path.splitext(basename)
+    dirname = os.path.dirname(options.p4filename)
+
+    file = dirname + "/" + base + ".stf"
+    print("Check for ", file)
+    if not os.path.isfile(file):
+        return SUCCESS
+
+    if options.verbose:
+        print("Running model")
+
+    clifile = tmpdir + "/" + "cli.txt"
+    generate_cli_commands(file, clifile)
+    generate_packets(file)
+    return SUCCESS
+
 def process_file(options, argv):
     assert isinstance(options, Options)
 
@@ -144,7 +228,7 @@ def process_file(options, argv):
     args = ["./p4c-bm2", "-o", jsonfile] + options.compilerOptions
     if "v1_samples" in options.p4filename:
         args.extend(["--p4v", "1.0"]);
-    args.extend(argv)
+    args.extend(argv)  # includes p4filename
 
     result = run_timeout(options, args, v12_timeout, stderr)
     if result != SUCCESS:
@@ -159,9 +243,12 @@ def process_file(options, argv):
         else:
             result = SUCCESS
 
-    #if (result == SUCCESS):
+    #if result == SUCCESS:
     #    result = check_generated_files(options, tmpdir, expected_dirname);
 
+    if result == SUCCESS:
+        result = run_model(options, tmpdir, jsonfile);
+            
     if options.cleanupTmp:
         if options.verbose:
             print("Removing", tmpdir)
