@@ -248,7 +248,7 @@ def load_json_str(json_str):
                                                   json_["headers"])
                     bitwidth = get_field_bitwidth(header_type, target[1],
                                                   json_["header_types"])
-                    table.key += [(field_name, match_type, bitwidth)]
+                table.key += [(field_name, match_type, bitwidth)]
 
     if "meter_arrays" in json_:
         for j_meter in json_["meter_arrays"]:
