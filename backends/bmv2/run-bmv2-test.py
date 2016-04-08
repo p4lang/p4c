@@ -307,7 +307,7 @@ class RunBMV2(object):
         for t in self.json["pipelines"][1]["tables"]:
             self.tables.append(BMV2Table(t))
     def createEmptyPcapFile(self, fname):
-        os.system("cp empty.pcap " + fname);
+        os.system("cp " + options.compilerSrcDir + "/tools/empty.pcap " + fname);
     def writeCommand(self, line):
         self.clifd.write(line + "\n")
     def filename(self, interface, direction):
