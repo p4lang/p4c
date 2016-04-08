@@ -53,8 +53,8 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const P4::Reference
             auto methodType = mt->to<IR::Type_Method>();
             CHECK_NULL(methodType);
             return new ExternFunction(mce, decl->to<IR::Method>(), methodType);
-        } else if (decl->is<IR::ActionContainer>()) {
-            return new ActionCall(mce, decl->to<IR::ActionContainer>());
+        } else if (decl->is<IR::P4Action>()) {
+            return new ActionCall(mce, decl->to<IR::P4Action>());
         }
     }
 

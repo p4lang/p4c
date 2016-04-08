@@ -5,8 +5,8 @@
 #include "lib/source_file.h"
 #include "frontends/common/options.h"
 
-namespace IR { class Global; }
+namespace IR { class V1Program; }
 
-const IR::Global *parse_p4v1_file(const CompilerOptions &, FILE *in);
+const IR::V1Program *parse_p4v1_file(const CompilerOptions &, FILE *in);
 
 #endif /* _p4_parse_h_ */

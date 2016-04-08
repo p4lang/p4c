@@ -17,7 +17,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_Enum* type) {
     return type;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::ControlContainer* cont) {
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
         LOG1("Removing " << cont);
         prune();
@@ -30,7 +30,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ControlContainer* cont) {
     return cont;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserContainer* cont) {
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* cont) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
         LOG1("Removing " << cont);
         prune();
@@ -43,7 +43,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserContainer* cont) {
     return cont;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::TableContainer* cont) {
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Table* cont) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
         ::warning("Table %1% is not used; removing", cont);
         LOG1("Removing " << cont);

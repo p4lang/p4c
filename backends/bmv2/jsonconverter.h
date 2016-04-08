@@ -19,7 +19,7 @@ class DirectMeterMap final {
  public:
     struct DirectMeterInfo {
         const IR::Expression* destinationField;
-        const IR::TableContainer* table;
+        const IR::P4Table* table;
         unsigned tableSize;
 
         DirectMeterInfo() : destinationField(nullptr), table(nullptr), tableSize(0) {}
@@ -32,7 +32,7 @@ class DirectMeterMap final {
  public:
     DirectMeterInfo* getInfo(const IR::IDeclaration* meter);
     void setDestination(const IR::IDeclaration* meter, const IR::Expression* destination);
-    void setTable(const IR::IDeclaration* meter, const IR::TableContainer* table);
+    void setTable(const IR::IDeclaration* meter, const IR::P4Table* table);
     void setSize(const IR::IDeclaration* meter, unsigned size);
 };
 
@@ -68,10 +68,10 @@ class JsonConverter final {
     Util::IJson* convertIf(const CFG::IfNode* node, cstring parent);
     Util::JsonArray* createActions(Util::JsonArray* fieldLists, Util::JsonArray* calculations,
                                    Util::JsonArray* learn_lists);
-    Util::IJson* toJson(const IR::ParserContainer* cont);
+    Util::IJson* toJson(const IR::P4Parser* cont);
     Util::IJson* toJson(const IR::ParserState* state);
     void convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
-    Util::IJson* convertDeparser(const IR::ControlContainer* state);
+    Util::IJson* convertDeparser(const IR::P4Control* state);
     Util::IJson* convertParserStatement(const IR::StatOrDecl* stat);
     Util::IJson* convertControl(const IR::ControlBlock* block, cstring name,
                                 Util::JsonArray* counters, Util::JsonArray* meters,
@@ -89,7 +89,7 @@ class JsonConverter final {
     // returns id of created field list
     int createFieldList(const IR::Expression* expr, cstring group,
                         cstring listName, Util::JsonArray* fieldLists);
-    void generateUpdate(const IR::ControlContainer* cont,
+    void generateUpdate(const IR::P4Control* cont,
                         Util::JsonArray* checksums, Util::JsonArray* calculations);
 
     // Operates on a select keyset
@@ -98,7 +98,7 @@ class JsonConverter final {
     unsigned combine(const IR::Expression* keySet,
                      const IR::ListExpression* select,
                      mpz_class& value, mpz_class& mask) const;
-    void buildCfg(IR::ControlContainer* cont);
+    void buildCfg(IR::P4Control* cont);
 
  public:
     explicit JsonConverter(const CompilerOptions& options);

@@ -318,7 +318,7 @@ parserDeclaration
       '{' parserStatefulElements parserStates '}'
                              { structure.pop();
                                auto pl = new IR::ParameterList(@2, std::move(*$2));
-                               $$ = new IR::ParserContainer($1->name.srcInfo, $1->name,
+                               $$ = new IR::P4Parser($1->name.srcInfo, $1->name,
                                                             $1, pl, $4, $5);}
     ;
 
@@ -415,7 +415,7 @@ controlDeclaration
     : controlTypeDeclaration optCompileParameters '{' stateListDeclaration APPLY controlBody '}'
                             { structure.pop();
                               auto pl = new IR::ParameterList(@2, std::move(*$2));
-                              $$ = new IR::ControlContainer($1->name.srcInfo, $1->name, $1,
+                              $$ = new IR::P4Control($1->name.srcInfo, $1->name, $1,
                                                             pl, std::move(*$4), $6);}
     ;
 
@@ -691,7 +691,7 @@ statementOrDeclaration
 
 tableDeclaration
     : optAnnotations TABLE name '(' parameterList ')' '{' tablePropertyList '}'
-                                         { $$ = new IR::TableContainer(@3, *$3, $1,
+                                         { $$ = new IR::P4Table(@3, *$3, $1,
                                                      new IR::ParameterList(@5, std::move(*$5)),
                                                      new IR::TableProperties(@8, std::move(*$8))); }
     ;
@@ -750,7 +750,7 @@ actionRef
 actionDeclaration
     : optAnnotations ACTION name '(' parameterList ')' '{' actionElementList '}'
                                          { auto pl = new IR::ParameterList(@5, std::move(*$5));
-                                           $$ = new IR::ActionContainer(@3, *$3, $1, pl, $8); }
+                                           $$ = new IR::P4Action(@3, *$3, $1, pl, $8); }
     ;
 
 actionElementList

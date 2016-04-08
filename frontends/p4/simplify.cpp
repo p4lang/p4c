@@ -5,7 +5,7 @@ namespace P4 {
 const IR::Node* SimplifyControlFlow::postorder(IR::BlockStatement* statement) {
     auto parent = findContext<IR::Statement>();
     if (parent == nullptr)
-        // This is the toplevel body of something, e.g., a ControlContainer
+        // This is the toplevel body of something, e.g., a P4Container
         return statement;
     if (parent->is<IR::BlockStatement>()) {
         // if there are no local declarations we can remove this block
@@ -42,7 +42,7 @@ const IR::Node* SimplifyControlFlow::postorder(IR::IfStatement* statement)  {
 
 const IR::Node* SimplifyControlFlow::postorder(IR::EmptyStatement* statement)  {
     auto parent = findContext<IR::Statement>();
-    if (parent == nullptr ||  // in a ParserState or ActionContainer
+    if (parent == nullptr ||  // in a ParserState or P4Action
         parent->is<IR::BlockStatement>())
         // remove it from blocks
         return nullptr;

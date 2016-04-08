@@ -76,11 +76,11 @@ class ExternFunction final : public MethodInstance {
 // Calling an action directly
 class ActionCall final : public MethodInstance {
     ActionCall(const IR::MethodCallExpression* expr,
-               const IR::ActionContainer* action) :
+               const IR::P4Action* action) :
             MethodInstance(expr, nullptr), action(action) { CHECK_NULL(action); }
     friend class MethodInstance;
  public:
-    const IR::ActionContainer* action;
+    const IR::P4Action* action;
 };
 
 // A built-in method, such as

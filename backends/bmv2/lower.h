@@ -14,7 +14,7 @@ class LowerExpressions : public Transform {
 
     const IR::Node* postorder(IR::Slice* expression) override;
     const IR::Node* postorder(IR::Concat* expression) override;
-    const IR::Node* preorder(IR::TableContainer* table) override
+    const IR::Node* preorder(IR::P4Table* table) override
     { prune(); return table; }  // don't simplify expressions in table
     const IR::Node* preorder(IR::SelectExpression* expression) override
     { prune(); return expression; }  // don't simplify selectExpression

@@ -19,7 +19,7 @@
 #endif
 
 static map<int, std::pair<std::string, int>> line_file_map;
-static IR::Global *global;
+static IR::V1Program *global;
 static void yyerror(const char *fmt);
 static IR::Constant *constantFold(IR::Expression *);
 
@@ -53,9 +53,9 @@ static int yylex();
     IR::NameList                *NameList;
     IR::Member                  *Member;
     IR::Meter                   *Meter;
-    IR::Parser                  *Parser;
+    IR::V1Parser                *Parser;
     IR::Register                *Register;
-    IR::Table                   *Table;
+    IR::V1Table                 *Table;
     const IR::Type              *Type;
     struct {
         IR::Vector<IR::Annotation>      *annotations;
@@ -320,7 +320,7 @@ parser_function_declaration:
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; global->add($2, $4); }
 ;
 
-parser_statement_list: /* epsilon */ { $$ = new IR::Parser; }
+parser_statement_list: /* epsilon */ { $$ = new IR::V1Parser; }
     | parser_statement_list EXTRACT '(' header_ref ')' ';'
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@5, $2, $4)); }
     | parser_statement_list SET_METADATA '(' field_ref ',' expression ')' ';'
@@ -548,7 +548,7 @@ table_declaration: TABLE name '{' table_body '}'
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; global->add($2, $4); }
 ;
 
-table_body: /* epsilon */ { $$ = new IR::Table; }
+table_body: /* epsilon */ { $$ = new IR::V1Table; }
     | table_body READS '{' field_match_list '}'
       { ($$=$1)->reads = $4; }
     | table_body ACTIONS '{' action_list '}'
@@ -603,7 +603,7 @@ action_list: /* epsilon */ { $$ = new IR::NameList(); }
 /*****************************************/
 
 control_function_declaration: CONTROL name '{' control_statement_list '}'
-      { global->add($2, new IR::Control(@1+@5, IR::ID(@2, $2), $4)); }
+      { global->add($2, new IR::V1Control(@1+@5, IR::ID(@2, $2), $4)); }
 ;
 
 control_statement_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>; }
@@ -778,7 +778,7 @@ void yyerror(const char *msg) {
         error("%s: %s", yylloc, msg);
 }
 
-const IR::Global *parse_p4v1_file(const CompilerOptions &options, FILE *in) {
+const IR::V1Program *parse_p4v1_file(const CompilerOptions &options, FILE *in) {
     extern int verbose;
     if (verbose)
         std::cout << "Parsing P4 v1 program " << options.file << std::endl;
@@ -786,7 +786,7 @@ const IR::Global *parse_p4v1_file(const CompilerOptions &options, FILE *in) {
     if (const char *p = getenv("YYDEBUG"))
         yydebug = atoi(p);
 #endif
-    global = new IR::Global(options);
+    global = new IR::V1Program(options);
     parsing = true;
     yyrestart(in);
     Util::InputSources::instance->mapLine(options.file, 1);

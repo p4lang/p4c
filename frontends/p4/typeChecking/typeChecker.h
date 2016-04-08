@@ -102,8 +102,8 @@ class TypeChecker final : public Transform {
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* constant) override;
     const IR::Node* postorder(IR::Declaration_Instance* decl) override;
-    const IR::Node* postorder(IR::ControlContainer* cont) override;
-    const IR::Node* postorder(IR::ParserContainer* cont) override;
+    const IR::Node* postorder(IR::P4Control* cont) override;
+    const IR::Node* postorder(IR::P4Parser* cont) override;
     const IR::Node* postorder(IR::Method* method) override;
 
     const IR::Node* postorder(IR::Type_Method* type) override;
@@ -125,8 +125,8 @@ class TypeChecker final : public Transform {
     const IR::Node* postorder(IR::Type_ArchBlock* type) override;
     const IR::Node* postorder(IR::Type_Package* type) override;
     const IR::Node* postorder(IR::Type_ActionEnum* type) override;
-    const IR::Node* postorder(IR::TableContainer* type) override;
-    const IR::Node* postorder(IR::ActionContainer* type) override;
+    const IR::Node* postorder(IR::P4Table* type) override;
+    const IR::Node* postorder(IR::P4Action* type) override;
 
     const IR::Node* postorder(IR::Parameter* param) override;
     const IR::Node* postorder(IR::Constant* expression) override;

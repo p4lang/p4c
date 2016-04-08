@@ -87,11 +87,11 @@ class ResolveReferences : public Inspector {
     void postorder(const IR::TYPE* t) override; \
 
     DECLARE(P4Program)
-    DECLARE(ControlContainer)
-    DECLARE(ParserContainer)
-    DECLARE(ActionContainer)
+    DECLARE(P4Control)
+    DECLARE(P4Parser)
+    DECLARE(P4Action)
     DECLARE(TableProperties)
-    DECLARE(TableContainer)
+    DECLARE(P4Table)
     DECLARE(Type_Method)
     DECLARE(ParserState)
     DECLARE(Type_Extern)

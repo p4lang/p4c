@@ -781,7 +781,7 @@ bool ToP4::preorder(const IR::Parameter* p) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ControlContainer * c) {
+bool ToP4::preorder(const IR::P4Control * c) {
     bool decl = isDeclaration;
     isDeclaration = false;
     visit(c->type);
@@ -817,7 +817,7 @@ bool ToP4::preorder(const IR::ParameterList* p) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ActionContainer * c) {
+bool ToP4::preorder(const IR::P4Action * c) {
     visit(c->annotations);
     builder.append("action ");
     builder.append(c->name);
@@ -856,7 +856,7 @@ bool ToP4::preorder(const IR::ParserState* s) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ParserContainer * c) {
+bool ToP4::preorder(const IR::P4Parser * c) {
     bool decl = isDeclaration;
     isDeclaration = false;
     visit(c->type);
@@ -956,7 +956,7 @@ bool ToP4::preorder(const IR::TableProperties* t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::TableContainer* c) {
+bool ToP4::preorder(const IR::P4Table* c) {
     visit(c->annotations);
     builder.append("table ");
     builder.append(c->name);

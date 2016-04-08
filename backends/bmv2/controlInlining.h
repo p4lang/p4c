@@ -9,13 +9,13 @@ namespace BMV2 {
 // An inliner that only works for programs imported from P4 v1.0
 
 struct ControlsCallInfo {
-    const IR::ControlContainer* caller;
-    const IR::ControlContainer* callee;
+    const IR::P4Control* caller;
+    const IR::P4Control* callee;
     const IR::Declaration_Instance* instantiation;
     // each instantiation may be invoked multiple times
     std::set<const IR::MethodCallStatement*> invocations;
 
-    ControlsCallInfo(const IR::ControlContainer* caller, const IR::ControlContainer* callee,
+    ControlsCallInfo(const IR::P4Control* caller, const IR::P4Control* callee,
                        const IR::Declaration_Instance* instantiation) :
             caller(caller), callee(callee), instantiation(instantiation)
     { CHECK_NULL(caller); CHECK_NULL(callee); CHECK_NULL(instantiation); }
@@ -27,10 +27,10 @@ struct ControlsCallInfo {
 
 struct CInlineWorkList {
     struct PerCaller {
-        std::map<const IR::Declaration_Instance*, const IR::ControlContainer*> declToCallee;
+        std::map<const IR::Declaration_Instance*, const IR::P4Control*> declToCallee;
         std::map<const IR::MethodCallStatement*, const IR::Declaration_Instance*> callToinstance;
     };
-    std::map<const IR::ControlContainer*, PerCaller> callerToWork;
+    std::map<const IR::P4Control*, PerCaller> callerToWork;
 
     void add(ControlsCallInfo* cci);
 };
@@ -41,7 +41,7 @@ class ControlsInlineList {
 
  public:
     CInlineWorkList* next();
-    void addInstantiation(const IR::ControlContainer* caller, const IR::ControlContainer* callee,
+    void addInstantiation(const IR::P4Control* caller, const IR::P4Control* callee,
                           const IR::Declaration_Instance* instantiation) {
         CHECK_NULL(caller); CHECK_NULL(callee); CHECK_NULL(instantiation);
         LOG1("Inline instantiation " << instantiation);
@@ -58,7 +58,7 @@ class ControlsInlineList {
         info->addInvocation(statement);
     }
 
-    void replace(const IR::ControlContainer* container, const IR::ControlContainer* replacement) {
+    void replace(const IR::P4Control* container, const IR::P4Control* replacement) {
         CHECK_NULL(container); CHECK_NULL(replacement);
         LOG1("Replacing " << container << " with " << replacement);
         for (auto e : toInline) {

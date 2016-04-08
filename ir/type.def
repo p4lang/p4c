@@ -1,5 +1,9 @@
 /* -*-C++-*- */
-/* This file containts types and declarations */
+/* 
+   This file contains IR related to representating the type hierarchy. 
+   Some of these classes never appear in the IR tree, they are just
+   synthesized by the type-checker.
+*/
 
 #emit
 namespace IR {
@@ -30,37 +34,6 @@ inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
     return out;
 }
 #end
-
-// Implemented by all types that may be generic
-interface IMayBeGenericType {
-#emit
-    virtual const TypeParameters* getTypeParameters() const = 0;
-    const Type* toType() const { return getNode()->to<Type>(); }
-    const Type* specialize(const Vector<Type>* arguments) const;
-#end
-}
-
-abstract Type {
-#emit
-    typedef Type_Unknown        Unknown;
-    typedef Type_Boolean        Boolean;
-    typedef Type_Bits           Bits;
-    typedef Type_Varbits        Varbits;
-    virtual int width_bits() const { return 0; }
-#end
-#nodbprint
-}
-
-abstract Type_Base : Type {}
-
-// TODO: is this type needed?
-class Type_Unknown : Type_Base {
-#nodbprint
-#emit
-    static const Type::Unknown *get();
-#end
-    toString{ return "Unknown type"; }
-}
 
 // Infinite precision integer
 class Type_InfInt : Type_Base {
@@ -113,76 +86,12 @@ class Type_Varbits : Type_Base {
     toString{ return cstring("varbit<") + Util::toString(size) + ">"; }
 }
 
-// a value that can be evaluated at compile-time
-interface CompileTimeValue {}
-
-// Implemented by objects with an 'apply' method
-interface IApply {
-#emit
-    static const cstring applyMethodName;
-    virtual const Type_Method* getApplyMethodType() const = 0;
-#end
-}
-
-interface IDeclaration {
-#emit
-    // name of the declared object
-    virtual ID getName() const = 0;
-#end
-}
-
-interface INamespace {
-#emit
-    virtual Util::Enumerator<const IDeclaration*>* getDeclarations() const = 0;
-#end
-}
-
-// No two declarations with the same name
-interface ISimpleNamespace : INamespace {
-#emit
-    virtual const IDeclaration* getDeclByName(cstring name) const = 0;
-#end
-}
-
-interface IGeneralNamespace : INamespace {
-#emit
-    virtual Util::Enumerator<const IDeclaration*>* getDeclsByName(cstring name) const;
-    void checkDuplicateDeclarations() const;
-#end
-    validate{ checkDuplicateDeclarations(); }
-}
-
-// A statement or a declaration
-abstract StatOrDecl {}
-
-// Two declarations wit the same name are not necessarily the same declaration
-abstract Declaration : StatOrDecl, IDeclaration {
-    ID name;
-#noconstructor
-#emit
-    ID getName() const { return name; }
- private:
-    static int nextId;
- public:
-    int declid;
-    Declaration(Util::SourceInfo si, ID name) : StatOrDecl(si), name(name), declid(nextId++) {}
-#end
-    dbprint { Node::dbprint(out); out << name << "/" << declid; }
-    toString { return name.name; }
-    operator== { return StatOrDecl::operator==(a) && name == a.name && declid == a.declid; }
-}
-
-// A declaration that consists of just an identifier, e.g., an enum member
-class Declaration_ID : Declaration, CompileTimeValue {
-#nodbprint
-}
-
 class Parameter : Declaration {
     Annotations         annotations;
     Direction           direction;
     Type                type;
-}   
-    
+}
+
 class ParameterList : ISimpleNamespace {
     inline NameMap<Parameter, ordered_map> parameters;
     validate{ parameters.check_null(); }
@@ -200,81 +109,6 @@ class ParameterList : ISimpleNamespace {
     const IR::IDeclaration* getDeclByName(cstring name) const
     { return getParameter(name); }
 #end
-}   
-
-class PathPrefix {
-    bool absolute;
-    std::vector<ID> components;
-#noconstructor
-#emit
-    PathPrefix() : absolute(false) {}
-    PathPrefix(Util::SourceInfo si, PathPrefix* start, ID end)
-            : Node(si), absolute(start->absolute) {
-        CHECK_NULL(start);
-        std::copy(start->components.begin(), start->components.end(), components.begin());
-        components.push_back(end);
-    }
-    void setAbsolute() { absolute = true; }
-#end
-    toString{
-        std::stringstream result;
-        bool first = true;
-        if (absolute)
-            result << ".";
-        for (auto a : components) {
-            if (!first)
-                result << ".";
-            first = false;
-            result << a.name.c_str();
-        }
-        return cstring(result.str());
-    }
-#nodbprint
-}
-
-class Path {
-    NullOK PathPrefix prefix;
-    ID                name;
-#noconstructor
-#emit
-    Path(const PathPrefix* prefix, ID name) :
-    Node(prefix != nullptr ? prefix->srcInfo + name.srcInfo : name.srcInfo),
-            prefix(prefix),
-            name(name) {}
-    explicit Path(ID name) :
-            Node(name.srcInfo),
-            prefix(nullptr),
-            name(name) {}
-    bool isDontCare() const { return prefix == nullptr && name.isDontCare(); }
-#end
-    toString{
-        std::stringstream str;
-        if (prefix == nullptr) {
-            str << name;
-        } else {
-            cstring ps = prefix->toString();
-            str << ps << "." << name;
-        }
-        return cstring(str.str());
-    }
-    dbprint{ Node::dbprint(out); out << ":" << toString(); }
-}
-
-// Two declarations with the same name are not the same declaration
-abstract Type_Declaration : Type, IDeclaration {
-    ID name;
-#noconstructor
-#emit
-    ID getName() const { return name; }
- private:
-    static int nextId;
- public:
-    int declid;
-    Type_Declaration(Util::SourceInfo si, ID name) : Type(si), name(name), declid(nextId++) {}
-#end
-    toString { return name.name; }
-    operator== { return Type::operator==(a) && name == a.name && declid == a.declid; }
-    dbprint { Node::dbprint(out); out << name << "/" << declid; }
 }
 
 abstract Type_VarBase : Type_Declaration {}
@@ -291,7 +125,7 @@ class Type_VarInfInt : Type_VarBase {
 #end
     dbprint { Node::dbprint(out); }
 }
-    
+
 class Type_Dontcare : Type_Base {
     toString{ return "_"; }
 #emit
@@ -323,7 +157,7 @@ class Type_MatchKind : Type_Base {
 #end
 #nodbprint
 }
-    
+
 class TypeParameters : ISimpleNamespace {
     inline NameMap<Type_Var, ordered_map> parameters;
 #emit
@@ -422,13 +256,6 @@ abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType {
 #end
 }
 
-interface IContainer : IMayBeGenericType {
-#emit
-    // The type of the constructor as a method
-    virtual const Type_Method* getConstructorMethodType() const = 0;
-#end
-}
-    
 class Type_Package : Type_ArchBlock, IContainer {
     ParameterList constructorParams;
 #emit
@@ -486,7 +313,7 @@ class Type_Stack : Type {
 
 /* Given a declaration
    extern E<T> { ... }
-   Type_Specialized represents a type such 
+   Type_Specialized represents a type such
    E<bit<32>>
    baseType is Type_Extern E, arguments is a vector containing Type_Bits(32) */
 class Type_Specialized : Type {
@@ -503,14 +330,19 @@ class Type_SpecializedCanonical : Type {
     Vector<Type>      arguments;    // canonical type arguments
     // In 'substituted' all arguments have been substituted
     // for the type variables of the baseType.
-    Type              substituted;  
+    Type              substituted;
 #nodbprint
     validate{
         arguments->check_null();
         BUG_CHECK(baseType->is<IMayBeGenericType>(), "base type %1% is not generic", baseType);
     }
 }
-    
+
+// A declaration that consists of just an identifier, e.g., an enum member
+class Declaration_ID : Declaration, CompileTimeValue {
+#nodbprint
+}
+
 class Type_Enum : Type_Declaration, ISimpleNamespace {
     inline NameMap<Declaration_ID, ordered_map> members;
 #emit
@@ -526,7 +358,7 @@ class Type_Enum : Type_Declaration, ISimpleNamespace {
 }
 
 class Type_Table : Type, IApply {
-    TableContainer  container;
+    P4Table  container;
 #emit
     mutable const Type_Method* applyMethod; // type of the apply method cached here
     const Type_Method* getApplyMethodType() const;
@@ -546,7 +378,7 @@ class Type_ActionEnum : Type {
     bool contains(cstring name) const;
 #end
 }
-    
+
 class Type_MethodBase : Type, IMayBeGenericType {
     TypeParameters typeParameters; // we generally want these visited first
     NullOK Type returnType;   // null for constructors or functors
@@ -562,34 +394,34 @@ class Type_Method : Type_MethodBase {
 #nodbprint
 }
 
-// Describes an argument of a MethodCall    
+// Describes an argument of a MethodCall
 class ArgumentInfo {
     bool leftValue;
     Type type;
 }
- 
+
 // Used to represent the type of a MethodCallExpression
 // for unification.
 class Type_MethodCall : Type {
-    Vector<Type>         typeArguments; 
+    Vector<Type>         typeArguments;
     Type_Var             returnType;
     Vector<ArgumentInfo> arguments;
     validate{ typeArguments->check_null(); arguments->check_null(); }
 }
-    
+
 // Actions look a lot like methods in many respects.
 // However, invoking an action returns another action
 class Type_Action : Type_MethodBase {
 #nodbprint
 }
-    
+
 class Method : Declaration {
     Type_Method type;
 #emit
     size_t getParameterCount() const { return type->getParameterCount(); }
 #end
 }
-    
+
 class Type_Typedef : Type_Declaration {
     Type        type;
     Annotations annotations;
@@ -608,43 +440,3 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
 #end
     validate{ methods->check_null(); }
 }
-
-class Annotation {
-    ID name;
-    NullOK Expression expr;
-#emit
-    Annotation(cstring n, const Expression *e) : name(n), expr(e) {}
-    Annotation(cstring n, intmax_t v);
-    // Predefined annotations used by the compiler
-    static const cstring nameAnnotation;
-#end
-#emit_impl
-    IR::Annotation::Annotation(cstring n, intmax_t v) : name(n), expr(new IR::Constant(v)) {}
-#end
-    toString{ return cstring("@") + name; }
-#nodbprint
-    validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
-}
-
-class Annotations {
-    Vector<Annotation> annotations;
-#nodbprint
-#emit
-    Annotations(const Vector<Annotation>* annotations) :
-            Node(annotations->srcInfo), annotations(annotations) {}
-    static Annotations *empty;
-    size_t size() const { return annotations->size(); }
-    // Get the annotation with the specified name or nullptr.
-    // There should be at most one annotation with this name.
-    const Annotation* getSingle(cstring name) const
-    { return get(annotations, name); }
-    Annotations* addAnnotation(cstring name, const Expression* expr) const {
-        auto vec = new Vector<Annotation>(*annotations);
-        vec->push_back(new Annotation(name, expr));
-        return new Annotations(vec);
-    }
-#end
-    validate{ annotations->check_null(); }
-}
-
-        

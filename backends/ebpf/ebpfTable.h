@@ -36,7 +36,7 @@ class EBPFTable final : public EBPFTableBase {
 
     EBPFTable(const EBPFProgram* program, const IR::TableBlock* table);
     void emit(CodeBuilder* builder) override;
-    void emitActionArguments(CodeBuilder* builder, const IR::ActionContainer* action,
+    void emitActionArguments(CodeBuilder* builder, const IR::P4Action* action,
                              cstring name);
     void emitKeyType(CodeBuilder* builder);
     void emitValueType(CodeBuilder* builder);

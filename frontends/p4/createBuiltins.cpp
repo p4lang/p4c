@@ -2,7 +2,7 @@
 #include "ir/ir.h"
 
 namespace P4 {
-void CreateBuiltins::postorder(IR::ParserContainer* parser) {
+void CreateBuiltins::postorder(IR::P4Parser* parser) {
     IR::Vector<IR::ParserState> *newStates = new IR::Vector<IR::ParserState>(*parser->states);
     IR::ParserState* ac = new IR::ParserState(Util::SourceInfo(),
                                               IR::ParserState::accept,

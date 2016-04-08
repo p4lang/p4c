@@ -99,7 +99,7 @@ FindBlocksToSpecialize::processNode(const IR::Node* node,
     while (ctx != nullptr) {
         // Check if declaration is within another parameterized container.
         // If so we won't specialize it.
-        if (ctx->node->is<IR::ControlContainer>() || ctx->node->is<IR::ParserContainer>()) {
+        if (ctx->node->is<IR::P4Control>() || ctx->node->is<IR::P4Parser>()) {
             auto cont = ctx->node->to<IR::IContainer>();
             auto mt = cont->getConstructorMethodType();
             if (mt->parameters->size() != 0 || mt->typeParameters->size() != 0) {
@@ -138,7 +138,7 @@ const IR::Node* SpecializeBlocks::postorder(IR::P4Program* prog) {
     return prog;
 }
 
-const IR::Node* SpecializeBlocks::postorder(IR::ParserContainer* cont) {
+const IR::Node* SpecializeBlocks::postorder(IR::P4Parser* cont) {
     LOG1("Checking " << getOriginal());
     auto replacements = blocks->findReplacements(getOriginal<IR::IContainer>());
     if (replacements == nullptr)
@@ -149,7 +149,7 @@ const IR::Node* SpecializeBlocks::postorder(IR::ParserContainer* cont) {
     auto result = new IR::Vector<IR::Node>();
     result->push_back(cont);
     // This will be interpolated in the parent Vector.
-    // ParserContainers are always children of a P4Program,
+    // Parsers are always children of a P4Program,
     // in the 'declarations' field.  It is unpleasant to rely on this fact,
     // but I don't know how to do better at this point.
 
@@ -164,21 +164,21 @@ const IR::Node* SpecializeBlocks::postorder(IR::ParserContainer* cont) {
         if (clone == nullptr)
             return cont;
 
-        auto specialized = clone->to<IR::ParserContainer>();
+        auto specialized = clone->to<IR::P4Parser>();
         auto newtype = new IR::Type_Parser(specialized->type->srcInfo, bs->cloneId,
                                            specialized->type->annotations,
                                            specialized->type->typeParams,
                                            specialized->type->applyParams);
-        auto newcont = new IR::ParserContainer(specialized->srcInfo, bs->cloneId, newtype,
-                                               new IR::ParameterList(), specialized->stateful,
-                                               specialized->states);
+        auto newcont = new IR::P4Parser(specialized->srcInfo, bs->cloneId, newtype,
+                                        new IR::ParameterList(), specialized->stateful,
+                                        specialized->states);
         LOG1("Synthesized " << newcont);
         result->push_back(newcont);
     }
     return result;
 }
 
-const IR::Node* SpecializeBlocks::postorder(IR::ControlContainer* cont) {
+const IR::Node* SpecializeBlocks::postorder(IR::P4Control* cont) {
     auto replacements = blocks->findReplacements(getOriginal<IR::IContainer>());
     if (replacements == nullptr)
         return cont;
@@ -196,12 +196,12 @@ const IR::Node* SpecializeBlocks::postorder(IR::ControlContainer* cont) {
         if (clone == nullptr)
             return cont;
 
-        auto specialized = clone->to<IR::ControlContainer>();
+        auto specialized = clone->to<IR::P4Control>();
         auto newtype = new IR::Type_Control(specialized->type->srcInfo, bs->cloneId,
                                             specialized->type->annotations,
                                             specialized->type->typeParams,
                                             specialized->type->applyParams);
-        auto newcont = new IR::ControlContainer(specialized->srcInfo, bs->cloneId, newtype,
+        auto newcont = new IR::P4Control(specialized->srcInfo, bs->cloneId, newtype,
                                                new IR::ParameterList(), specialized->stateful,
                                                specialized->body);
         LOG1("Synthesized " << newcont);

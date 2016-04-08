@@ -17,14 +17,14 @@ const cstring P4Program::main = "main";
 
 int IR::Declaration::nextId = 0;
 
-Util::Enumerator<const IR::IDeclaration*>* ControlContainer::getDeclarations() const
+Util::Enumerator<const IR::IDeclaration*>* P4Control::getDeclarations() const
 { return stateful.valueEnumerator()->as<const IDeclaration*>(); }
 
-const Type_Method* ControlContainer::getConstructorMethodType() const {
+const Type_Method* P4Control::getConstructorMethodType() const {
     return new Type_Method(Util::SourceInfo(), getTypeParameters(), type, constructorParams);
 }
 
-const Type_Method* ParserContainer::getConstructorMethodType() const {
+const Type_Method* P4Parser::getConstructorMethodType() const {
     return new Type_Method(Util::SourceInfo(), getTypeParameters(), type, constructorParams);
 }
 
@@ -171,7 +171,7 @@ class ActionArgSetup : public Transform {
     void add_arg(cstring name, const IR::Expression *e) { args[name] = e; }
 };
 
-ActionFunction::ActionFunction(const ActionContainer *ac, const Vector<Expression> *args) {
+ActionFunction::ActionFunction(const P4Action *ac, const Vector<Expression> *args) {
     srcInfo = ac->srcInfo;
     name = ac->name;
     ActionArgSetup setup;
@@ -198,7 +198,7 @@ ActionFunction::ActionFunction(const ActionContainer *ac, const Vector<Expressio
             BUG("un-handled statment %1% in action", stmt); }
 }
 
-Table::Table(const TableContainer *tc) {
+V1Table::V1Table(const P4Table *tc) {
     srcInfo = tc->srcInfo;
     name = tc->name;
     for (auto prop : *tc->properties->getEnumerator()) {

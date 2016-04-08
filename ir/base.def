@@ -1,0 +1,242 @@
+/*
+   This file contains the base classes needed for the compiler IR:
+   - all interfaces
+   - most basic abstract classes
+   - some simple leaf classes used frequently
+*/
+
+// a value that can be evaluated at compile-time
+interface CompileTimeValue {}
+
+abstract Type {
+#emit
+    typedef Type_Unknown        Unknown;
+    typedef Type_Boolean        Boolean;
+    typedef Type_Bits           Bits;
+    typedef Type_Varbits        Varbits;
+    virtual int width_bits() const { return 0; }
+#end
+#nodbprint
+}
+
+// Implemented by all types that may be generic
+interface IMayBeGenericType {
+#emit
+    virtual const TypeParameters* getTypeParameters() const = 0;
+    const Type* toType() const { return getNode()->to<Type>(); }
+    const Type* specialize(const Vector<Type>* arguments) const;
+#end
+}
+
+// Implemented by objects with an 'apply' method
+interface IApply {
+#emit
+    static const cstring applyMethodName;
+    virtual const Type_Method* getApplyMethodType() const = 0;
+#end
+}
+
+interface IDeclaration {
+#emit
+    // name of the declared object
+    virtual ID getName() const = 0;
+#end
+}
+
+interface INamespace {
+#emit
+    virtual Util::Enumerator<const IDeclaration*>* getDeclarations() const = 0;
+#end
+}
+
+// No two declarations with the same name
+interface ISimpleNamespace : INamespace {
+#emit
+    virtual const IDeclaration* getDeclByName(cstring name) const = 0;
+#end
+}
+
+interface IGeneralNamespace : INamespace {
+#emit
+    virtual Util::Enumerator<const IDeclaration*>* getDeclsByName(cstring name) const;
+    void checkDuplicateDeclarations() const;
+#end
+    validate{ checkDuplicateDeclarations(); }
+}
+
+interface IContainer : IMayBeGenericType {
+#emit
+    // The type of the constructor as a method
+    virtual const Type_Method* getConstructorMethodType() const = 0;
+#end
+}
+    
+abstract Type_Base : Type {}
+
+// This is needed by Expression
+class Type_Unknown : Type_Base {
+#nodbprint
+#emit
+    static const Type::Unknown *get();
+#end
+    toString{ return "Unknown type"; }
+}
+
+// A statement or a declaration
+abstract StatOrDecl {}
+
+// Two declarations wit the same name are not necessarily the same declaration
+abstract Declaration : StatOrDecl, IDeclaration {
+    ID name;
+#noconstructor
+#emit
+    ID getName() const { return name; }
+ private:
+    static int nextId;
+ public:
+    int declid;
+    Declaration(Util::SourceInfo si, ID name) : StatOrDecl(si), name(name), declid(nextId++) {}
+#end
+    dbprint { Node::dbprint(out); out << name << "/" << declid; }
+    toString { return name.name; }
+    operator== { return StatOrDecl::operator==(a) && name == a.name && declid == a.declid; }
+}
+
+// Two declarations with the same name are not the same declaration
+abstract Type_Declaration : Type, IDeclaration {
+    ID name;
+#noconstructor
+#emit
+    ID getName() const { return name; }
+ private:
+    static int nextId;
+ public:
+    int declid;
+    Type_Declaration(Util::SourceInfo si, ID name) : Type(si), name(name), declid(nextId++) {}
+#end
+    toString { return name.name; }
+    operator== { return Type::operator==(a) && name == a.name && declid == a.declid; }
+    dbprint { Node::dbprint(out); out << name << "/" << declid; }
+}
+
+abstract Expression {
+#emit
+    // The P4 v1.2 front-end does not use the type field
+    const Type* type = Type::Unknown::get();
+    Expression() : type(Type::Unknown::get()) {}
+    explicit Expression(const Type *t) : type(t) { }
+    Expression(Util::SourceInfo srcInfo, const Type *t) : Node(srcInfo), type(t) { }
+#end
+    visit_children { v.visit(type, "type"); }
+    operator== { return typeid(*this) == typeid(a) && type == a.type; }
+}
+
+abstract Operation : Expression {
+#emit
+    virtual int getPrecedence() const = 0;
+    virtual cstring getStringOp() const = 0;
+    Operation(Util::SourceInfo si, const Type *t) : Expression(si, t) {}
+    explicit Operation(const Type *t) : Expression(t) {}
+    Operation() : Expression() {}
+    typedef Operation_Unary Unary;
+    typedef Operation_Binary Binary;
+    typedef Operation_Relation Relation;
+#end
+    toString{ return getStringOp(); }
+}
+
+class PathPrefix {
+    bool absolute;
+    std::vector<ID> components;
+#noconstructor
+#emit
+    PathPrefix() : absolute(false) {}
+    PathPrefix(Util::SourceInfo si, PathPrefix* start, ID end)
+            : Node(si), absolute(start->absolute) {
+        CHECK_NULL(start);
+        std::copy(start->components.begin(), start->components.end(), components.begin());
+        components.push_back(end);
+    }
+    void setAbsolute() { absolute = true; }
+#end
+    toString{
+        std::stringstream result;
+        bool first = true;
+        if (absolute)
+            result << ".";
+        for (auto a : components) {
+            if (!first)
+                result << ".";
+            first = false;
+            result << a.name.c_str();
+        }
+        return cstring(result.str());
+    }
+#nodbprint
+}
+
+class Path {
+    NullOK PathPrefix prefix;
+    ID                name;
+#noconstructor
+#emit
+    Path(const PathPrefix* prefix, ID name) :
+    Node(prefix != nullptr ? prefix->srcInfo + name.srcInfo : name.srcInfo),
+            prefix(prefix),
+            name(name) {}
+    explicit Path(ID name) :
+            Node(name.srcInfo),
+            prefix(nullptr),
+            name(name) {}
+    bool isDontCare() const { return prefix == nullptr && name.isDontCare(); }
+#end
+    toString{
+        std::stringstream str;
+        if (prefix == nullptr) {
+            str << name;
+        } else {
+            cstring ps = prefix->toString();
+            str << ps << "." << name;
+        }
+        return cstring(str.str());
+    }
+    dbprint{ Node::dbprint(out); out << ":" << toString(); }
+}
+
+class Annotation {
+    ID name;
+    NullOK Expression expr;
+#emit
+    Annotation(cstring n, const Expression *e) : name(n), expr(e) {}
+    Annotation(cstring n, intmax_t v);
+    // Predefined annotations used by the compiler
+    static const cstring nameAnnotation;
+#end
+#emit_impl
+    IR::Annotation::Annotation(cstring n, intmax_t v) : name(n), expr(new IR::Constant(v)) {}
+#end
+    toString{ return cstring("@") + name; }
+#nodbprint
+    validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
+}
+
+class Annotations {
+    Vector<Annotation> annotations;
+#nodbprint
+#emit
+    Annotations(const Vector<Annotation>* annotations) :
+            Node(annotations->srcInfo), annotations(annotations) {}
+    static Annotations *empty;
+    size_t size() const { return annotations->size(); }
+    // Get the annotation with the specified name or nullptr.
+    // There should be at most one annotation with this name.
+    const Annotation* getSingle(cstring name) const
+    { return get(annotations, name); }
+    Annotations* addAnnotation(cstring name, const Expression* expr) const {
+        auto vec = new Vector<Annotation>(*annotations);
+        vec->push_back(new Annotation(name, expr));
+        return new Annotations(vec);
+    }
+#end
+    validate{ annotations->check_null(); }
+}

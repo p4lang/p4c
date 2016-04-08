@@ -9,8 +9,8 @@
 //   expressions that link directly to them.
 // - set type for Member and HeaderStackItemRefs
 class TypeCheck::Pass1 : public Transform {
-    const IR::Global      *global = nullptr;
-    const IR::Node *preorder(IR::Global *glob) { global = glob; return glob; }
+    const IR::V1Program   *global = nullptr;
+    const IR::Node *preorder(IR::V1Program *glob) { global = glob; return glob; }
     const IR::Node *preorder(IR::NamedRef *ref) override {
         if (auto af = findContext<IR::ActionFunction>())
             if (auto arg = af->arg(ref->name))
@@ -76,9 +76,9 @@ static const IR::Type *combine(const Util::SourceInfo &loc, const IR::Type *a, c
 // - also records types of operands to action function calls for Pass3 to use
 class TypeCheck::Pass2 : public Modifier {
     TypeCheck           &self;
-    const IR::Global    *global = nullptr;
+    const IR::V1Program *global = nullptr;
     profile_t init_apply(const IR::Node *root) {
-        global = root->to<IR::Global>();
+        global = root->to<IR::V1Program>();
         self.actionArgUseTypes.clear();
         self.iterCounter++;
         return Modifier::init_apply(root); }
@@ -120,9 +120,9 @@ class TypeCheck::Pass2 : public Modifier {
 // top down type inferencing -- set the type of expression nodes based on their uses.
 class TypeCheck::Pass3 : public Modifier {
     TypeCheck           &self;
-    const IR::Global    *global = nullptr;
+    const IR::V1Program *global = nullptr;
     profile_t init_apply(const IR::Node *root) {
-        global = root->to<IR::Global>();
+        global = root->to<IR::V1Program>();
         return Modifier::init_apply(root); }
     const IR::Type *ctxtType() {
         const IR::Type *rv = IR::Type::Unknown::get();

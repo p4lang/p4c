@@ -1,7 +1,7 @@
 #include "ir/ir.h"
 #include "frontends/common/options.h"
 
-IR::Global::Global(const CompilerOptions &opt) {
+IR::V1Program::V1Program(const CompilerOptions &opt) {
     const IR::Type *port_t = IR::Type::Bits::get(9);
     if (opt.target == "tofino")
         port_t = IR::Type::Bits::get(16);

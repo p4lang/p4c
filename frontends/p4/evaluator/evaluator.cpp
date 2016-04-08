@@ -100,8 +100,8 @@ Evaluator::processConstructor(const IR::Node* node, const IR::Type* type,
         block->instantiate(values);
         blockStack.pop_back();
         return block;
-    } else if (type->is<IR::ControlContainer>()) {
-        auto cont = blockMap->typeMap->getContainerFromType(type)->to<IR::ControlContainer>();
+    } else if (type->is<IR::P4Control>()) {
+        auto cont = blockMap->typeMap->getContainerFromType(type)->to<IR::P4Control>();
         BUG_CHECK(cont != nullptr, "Could not locate container for %1%", type);
         auto block = new IR::ControlBlock(node->srcInfo, node, instanceType, cont);
         auto values = evaluateArguments(arguments);
@@ -113,8 +113,8 @@ Evaluator::processConstructor(const IR::Node* node, const IR::Type* type,
             visit(a);
         blockStack.pop_back();
         return block;
-    } else if (type->is<IR::ParserContainer>()) {
-        auto cont = blockMap->typeMap->getContainerFromType(type)->to<IR::ParserContainer>();
+    } else if (type->is<IR::P4Parser>()) {
+        auto cont = blockMap->typeMap->getContainerFromType(type)->to<IR::P4Parser>();
         BUG_CHECK(cont != nullptr, "Could not locate container for %1%", type);
         auto block = new IR::ParserBlock(node->srcInfo, node, instanceType, cont);
         blockStack.push_back(block);
@@ -188,7 +188,7 @@ bool Evaluator::preorder(const IR::ConstructorCallExpression* expr) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::TableContainer* table) {
+bool Evaluator::preorder(const IR::P4Table* table) {
     LOG1("Evaluating " << table);
     auto block = new IR::TableBlock(table->srcInfo, table, table);
     setValue(table, block);
