@@ -307,7 +307,7 @@ class RunBMV2(object):
         for t in self.json["pipelines"][1]["tables"]:
             self.tables.append(BMV2Table(t))
     def createEmptyPcapFile(self, fname):
-        os.system("cp " + options.compilerSrcDir + "/tools/empty.pcap " + fname);
+        os.system("cp " + self.options.compilerSrcDir + "/tools/empty.pcap " + fname);
     def writeCommand(self, line):
         self.clifd.write(line + "\n")
     def filename(self, interface, direction):
@@ -567,10 +567,10 @@ def main(argv):
         usage(options)
         return FAILURE
 
-    options.compilerSrcdir = argv[1]
+    options.compilerSrcDir = argv[1]
     argv = argv[2:]
-    if not os.path.isdir(options.compilerSrcdir):
-        print(options.compilerSrcdir + " is not a folder", file=sys.stderr)
+    if not os.path.isdir(options.compilerSrcDir):
+        print(options.compilerSrcDir + " is not a folder", file=sys.stderr)
         usage(options)
         return FAILURE
 
@@ -596,8 +596,8 @@ def main(argv):
 
     options.p4filename=argv[-1]
     options.testName = None
-    if options.p4filename.startswith(options.compilerSrcdir):
-        options.testName = options.p4filename[len(options.compilerSrcdir):];
+    if options.p4filename.startswith(options.compilerSrcDir):
+        options.testName = options.p4filename[len(options.compilerSrcDir):];
         if options.testName.startswith('/'):
             options.testName = options.testName[1:]
         if options.testName.endswith('.p4'):
