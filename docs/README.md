@@ -126,9 +126,15 @@ compilation and simplifying debugging.
 
 * The [compiler design](compiler-design.pptx) describes the salient
   features of the compiler design and implementation
-  
+
+* The [open issues](TODO.md) document describes work that is still to
+  be performed
+
 * specific back-ends may have their own README files; check the
-  `backends` and `extensions` sub-folders.
+  `extensions` sub-folders.
+
+  * [BMv2](../backends/bmv2/README.md)
+  * [eBPF](../backends/ebpf/README.md)
 
 # Coding conventions
 
