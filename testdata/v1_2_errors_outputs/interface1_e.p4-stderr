@@ -10,4 +10,4 @@ extern X
 ../testdata/v1_2_errors/interface1_e.p4(10): error: Could not find type of x.f
         x.f();
         ^^^
-error: 2 errors ecountered, aborting compilation
+error: 2 errors encountered, aborting compilation

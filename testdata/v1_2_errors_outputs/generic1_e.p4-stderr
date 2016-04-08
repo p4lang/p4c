@@ -13,4 +13,4 @@ extern If<T>
 ../testdata/v1_2_errors/generic1_e.p4(16)
 header h {}
        ^
-error: 3 errors ecountered, aborting compilation
+error: 3 errors encountered, aborting compilation

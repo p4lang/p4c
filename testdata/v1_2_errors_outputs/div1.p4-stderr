@@ -22,4 +22,4 @@
 ../testdata/v1_2_errors/div1.p4(6): error: Could not find type of %
     a = -5 % a;
         ^^^^^^
-error: 8 errors ecountered, aborting compilation
+error: 8 errors encountered, aborting compilation

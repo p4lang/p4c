@@ -5,4 +5,4 @@ error: Ambiguous method append with 1 parameters
 ../testdata/v1_2_errors/duplicateMethod_e.p4(8): error: Candidate is append
     void append(in packet_in b);
     ^^^^^^^^^^^^^^^^^^^^^^^^^^
-error: 3 errors ecountered, aborting compilation
+error: 3 errors encountered, aborting compilation

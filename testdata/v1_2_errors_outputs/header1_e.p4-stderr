@@ -16,4 +16,4 @@ parser p();
 ../testdata/v1_2_errors/header1_e.p4(1)
 struct s {}
        ^
-error: 3 errors ecountered, aborting compilation
+error: 3 errors encountered, aborting compilation

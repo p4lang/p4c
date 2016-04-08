@@ -4,4 +4,4 @@ parser g(in bit x)
 ../testdata/v1_2_errors/module_e.p4(1)
 parser Filter(out bool filter);
               ^^^^^^^^^^^^^^^
-error: 1 errors ecountered, aborting compilation
+error: 1 errors encountered, aborting compilation

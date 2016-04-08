@@ -7,4 +7,4 @@
 ../testdata/v1_2_errors/scope.p4(10): error: Could not find type of q.x.get
         bit<8> y = .q.x.get();
                    ^^^^^^^^^^
-error: 3 errors ecountered, aborting compilation
+error: 3 errors encountered, aborting compilation
