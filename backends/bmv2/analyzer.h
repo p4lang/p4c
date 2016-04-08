@@ -118,7 +118,7 @@ class CFG {
     const IR::ControlContainer* container;
     std::set<Node*> allNodes;
 
-    CFG() : entryPoint(nullptr), container(nullptr) {}
+    CFG() : entryPoint(nullptr), exitPoint(nullptr), container(nullptr) {}
     Node* makeNode(const IR::TableContainer* table, const IR::Expression* invocation) {
         auto result = new TableNode(table, invocation);
         allNodes.emplace(result);

@@ -23,7 +23,7 @@ bootstrap, as described in [README](README.md).
 7. Create a new C++ project from File -> New -> Project
   * Select C/C++ -> Makefile Project with Existing Code, click Next
   * For the Project Name enter something like `p4c`
-  * Navigate to the directory that contains the `p4c` directory, something like `/home/mike/Barefoot/P4/p4c`
+  * Navigate to the directory that contains the `p4c` directory, something like `/home/mike/p4c`
   * Check the C and C++ boxes
   * Select `GNU Autotools Toolchain` as the Toolchain for Indexer Settings
 
@@ -44,6 +44,11 @@ bootstrap, as described in [README](README.md).
   * Highlight `CDT GCC Built-in Compiler Settings [Shared]` 
   * In the box labeled `Command to get compiler specs`, add `-std=c++11`
   * Click `Apply`
+
+9.5. Change the build location
+  * Project -> Properties
+  * Select C/C++ build
+  * In the build location choose "FileSystem" and browse to the p4c/build folder.
 
 10. Add additional include files needed by your sub-project to include path
   * Right click your project and click Properties

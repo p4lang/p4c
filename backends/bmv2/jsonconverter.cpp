@@ -427,7 +427,8 @@ class ExpressionConverter : public Inspector {
 JsonConverter::JsonConverter(const CompilerOptions& options) :
         options(options), v1model(P4V1::V1Model::instance),
         corelib(P4::P4CoreLibrary::instance),
-        refMap(nullptr), typeMap(nullptr), conv(new ExpressionConverter(this)) {}
+        refMap(nullptr), typeMap(nullptr), dropActionId(0), blockMap(nullptr),
+		conv(new ExpressionConverter(this)) {}
 
 // return calculation name
 cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fields,

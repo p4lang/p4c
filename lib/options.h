@@ -62,7 +62,7 @@ class Options {
         optionOrder.push_back(option);
     }
 
-    explicit Options(cstring message) : message(message) {}
+    explicit Options(cstring message) : binaryName(nullptr), message(message) {}
 
  public:
     // Process options; return list of remaining options.

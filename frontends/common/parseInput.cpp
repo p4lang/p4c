@@ -33,7 +33,7 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     }
     options.closeInput(in);
     if (::errorCount() > 0) {
-        ::error("%1% errors ecountered, aborting compilation", ::errorCount());
+        ::error("%1% errors encountered, aborting compilation", ::errorCount());
         return nullptr;
     }
     return result;

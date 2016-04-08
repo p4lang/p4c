@@ -41,7 +41,8 @@ class ConstantTypeSubstitution : public Transform {
 };
 
 TypeChecker::TypeChecker(ReferenceMap* refMap, TypeMap* typeMap, bool clearMap, bool readOnly) :
-        refMap(refMap), typeMap(typeMap), clearMap(clearMap), readOnly(readOnly) {
+        refMap(refMap), typeMap(typeMap), clearMap(clearMap), readOnly(readOnly),
+		initialNode(nullptr) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = true;

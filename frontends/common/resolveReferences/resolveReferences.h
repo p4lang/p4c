@@ -43,7 +43,7 @@ class ResolutionContext {
 
     // Resolve a reference for the specified name.
     // The reference is restricted to be to an object of the specified type
-    // If previousOnly is true, the refence must preced the point of the 'name' in the program
+    // If previousOnly is true, the reference must precede the point of the 'name' in the program
     std::vector<const IR::IDeclaration*>*
     resolve(IR::ID name, ResolutionType type, bool previousOnly) const;
 

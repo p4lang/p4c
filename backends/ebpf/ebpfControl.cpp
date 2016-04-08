@@ -212,7 +212,7 @@ bool ControlTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
 
 EBPFControl::EBPFControl(const EBPFProgram* program,
                          const IR::ControlBlock* block) :
-        program(program), controlBlock(block) {}
+        program(program), controlBlock(block), headers(nullptr), accept(nullptr) {}
 
 bool EBPFControl::build() {
     auto pl = controlBlock->container->type->applyParams;

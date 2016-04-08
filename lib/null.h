@@ -5,7 +5,7 @@
 
 #include "error.h"  // for BUG macro
 
-// Typical C contorsions to transform something into a string
+// Typical C contortions to transform something into a string
 #define LIB_STRINGIFY(x) #x
 #define LIB_TOSTRING(x) LIB_STRINGIFY(x)
 

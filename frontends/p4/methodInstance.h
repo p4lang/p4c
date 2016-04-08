@@ -18,6 +18,7 @@ class MethodInstance {
     const IR::IDeclaration* object;  // Object that method is applied to.
                                      // May be null for plain functions.
     virtual bool isApply() const { return false; }
+    virtual ~MethodInstance() {}
 
     static MethodInstance* resolve(const IR::MethodCallExpression* mce,
                                    const P4::ReferenceMap* refMap,

@@ -189,12 +189,14 @@ class SourceInfo final {
 class IHasDbPrint {
  public:
     virtual void dbprint(std::ostream& out) const = 0;
+    virtual ~IHasDbPrint() {}
 };
 
 class IHasSourceInfo {
  public:
     virtual SourceInfo getSourceInfo() const = 0;
     virtual cstring toString() const = 0;
+    virtual ~IHasSourceInfo() {}
 };
 
 /* A line in a source file */

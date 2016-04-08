@@ -22,7 +22,9 @@ ProgramStructure::ProgramStructure() :
         action_profiles(nullptr), field_lists(nullptr), field_list_calculations(&allNames),
         action_selectors(nullptr), calledActions("actions"), calledControls("controls"),
         calledCounters("counters"), calledMeters("meters"), calledRegisters("registers"),
-        parsers("parsers") {
+        parsers("parsers"), parserPacketIn(nullptr), parserHeadersOut(nullptr),
+		verifyChecksums(nullptr), updateChecksums(nullptr),
+		deparser(nullptr), latest(nullptr) {
     ingress = nullptr;
     declarations = new IR::Vector<IR::Node>();
     emptyTypeArguments = new IR::Vector<IR::Type>();

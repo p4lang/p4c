@@ -116,7 +116,8 @@ compilation and simplifying debugging.
   http://p4.org/wp-content/uploads/2015/04/p4-latest.pdf
 
 * the P4 v1.2 draft language is described in [this Word
-  document](P4v1.2-spec.docx).  This language is still under design.
+  document](https://github.com/p4lang/p4-spec/tree/master/v1.2/P4v1.2-spec.docx).
+  This language is still under design.
 
 * the compiler intermediate representation (IR) is briefly described
   in [IR](IR.md)
