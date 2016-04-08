@@ -81,7 +81,9 @@ protected:
     typedef MatchTableAbstract::ActionEntry ActionEntry;
     typedef MatchUnitExact<ActionEntry> MUExact;
 
-    std::unique_ptr<MUExact> match_unit(new MUExact(1, key_builder));
+    LookupStructureFactory factory;
+
+    std::unique_ptr<MUExact> match_unit(new MUExact(1, key_builder, &factory));
 
     // counters disabled, ageing enabled
     table = std::unique_ptr<MatchTable>(
@@ -151,7 +153,7 @@ TEST_F(AgeingTest, OneNotification) {
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, ageing_writer->check_status());
   sleep_for(milliseconds(150));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, ageing_writer->check_status());
-  
+
   auto tp1 = clock::now();
   ASSERT_TRUE(send_pkt(key, &lookup_handle));
   ageing_writer->read(buffer, sizeof(buffer));

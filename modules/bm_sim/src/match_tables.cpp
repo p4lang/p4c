@@ -25,6 +25,7 @@
 #include "bm_sim/match_tables.h"
 #include "bm_sim/logger.h"
 #include "bm_sim/event_logger.h"
+#include "bm_sim/lookup_structures.h"
 
 namespace bm {
 
@@ -33,19 +34,22 @@ namespace {
 template <typename V>
 std::unique_ptr<MatchUnitAbstract<V> >
 create_match_unit(const std::string match_type, const size_t size,
-                  const MatchKeyBuilder &match_key_builder) {
+                  const MatchKeyBuilder &match_key_builder,
+                  LookupStructureFactory *lookup_factory) {
   typedef MatchUnitExact<V> MUExact;
   typedef MatchUnitLPM<V> MULPM;
   typedef MatchUnitTernary<V> MUTernary;
 
   std::unique_ptr<MatchUnitAbstract<V> > match_unit;
   if (match_type == "exact")
-    match_unit = std::unique_ptr<MUExact>(new MUExact(size, match_key_builder));
+    match_unit = std::unique_ptr<MUExact>(
+        new MUExact(size, match_key_builder, lookup_factory));
   else if (match_type == "lpm")
-    match_unit = std::unique_ptr<MULPM>(new MULPM(size, match_key_builder));
+    match_unit = std::unique_ptr<MULPM>(
+        new MULPM(size, match_key_builder, lookup_factory));
   else if (match_type == "ternary")
     match_unit = std::unique_ptr<MUTernary>(
-      new MUTernary(size, match_key_builder));
+        new MUTernary(size, match_key_builder, lookup_factory));
   else
     assert(0 && "invalid match type");
   return match_unit;
@@ -393,9 +397,11 @@ std::unique_ptr<MatchTable>
 MatchTable::create(const std::string &match_type,
                    const std::string &name, p4object_id_t id,
                    size_t size, const MatchKeyBuilder &match_key_builder,
+                   LookupStructureFactory *lookup_factory,
                    bool with_counters, bool with_ageing) {
   std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit =
-    create_match_unit<ActionEntry>(match_type, size, match_key_builder);
+    create_match_unit<ActionEntry>(match_type, size, match_key_builder,
+                                   lookup_factory);
 
   return std::unique_ptr<MatchTable>(
     new MatchTable(name, id, std::move(match_unit),
@@ -416,9 +422,11 @@ MatchTableIndirect::create(const std::string &match_type,
                            const std::string &name, p4object_id_t id,
                            size_t size,
                            const MatchKeyBuilder &match_key_builder,
+                           LookupStructureFactory *lookup_factory,
                            bool with_counters, bool with_ageing) {
   std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit =
-    create_match_unit<IndirectIndex>(match_type, size, match_key_builder);
+    create_match_unit<IndirectIndex>(match_type, size, match_key_builder,
+                                     lookup_factory);
 
   return std::unique_ptr<MatchTableIndirect>(
     new MatchTableIndirect(name, id, std::move(match_unit),
@@ -786,9 +794,11 @@ MatchTableIndirectWS::create(const std::string &match_type,
                              const std::string &name, p4object_id_t id,
                              size_t size,
                              const MatchKeyBuilder &match_key_builder,
+                             LookupStructureFactory *lookup_factory,
                              bool with_counters, bool with_ageing) {
   std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit =
-    create_match_unit<IndirectIndex>(match_type, size, match_key_builder);
+    create_match_unit<IndirectIndex>(match_type, size, match_key_builder,
+                                     lookup_factory);
 
   return std::unique_ptr<MatchTableIndirectWS>(
     new MatchTableIndirectWS(name, id, std::move(match_unit),

@@ -30,20 +30,19 @@
 #include <iostream>
 #include <atomic>
 #include <utility>  // for pair<>
+#include <memory>
 
+#include "match_key_types.h"
 #include "match_error_codes.h"
+#include "lookup_structures.h"
 #include "bytecontainer.h"
 #include "phv.h"
 #include "packet.h"
 #include "handle_mgr.h"
-#include "lpm_trie.h"
 #include "counters.h"
 #include "meters.h"
 
 namespace bm {
-
-typedef uintptr_t internal_handle_t;
-typedef uint64_t entry_handle_t;
 
 // using string and not ByteContainer for efficiency
 struct MatchKeyParam {
@@ -73,10 +72,6 @@ struct MatchKeyParam {
   std::string key;
   std::string mask{};  // optional
   int prefix_length{0};  // optional
-};
-
-enum class MatchUnitType {
-  EXACT, LPM, TERNARY
 };
 
 
@@ -377,36 +372,26 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
   virtual MatchUnitLookup lookup_key(const ByteContainer &key) const = 0;
 };
 
-// TODO(antonin):
-// It seems that with the recent additions, these classes would really benefit
-// from inheriting from a common ancestor templatized by the entry type
 
-template <typename V>
-class MatchUnitExact : public MatchUnitAbstract<V> {
+template <typename K, typename V>
+class MatchUnitGeneric : public MatchUnitAbstract<V> {
  public:
   typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
+  struct Entry {
+    Entry() {}
+    Entry(K key, V value)
+      : key(std::move(key)), value(std::move(value)) {}
+    K key;
+    V value;
+  };
 
  public:
-  MatchUnitExact(size_t size, const MatchKeyBuilder &match_key_builder)
-    : MatchUnitAbstract<V>(size, match_key_builder),
-      entries(size) {
-    entries_map.reserve(size);
-  }
-
- private:
-  // TODO(antonin): have all Entry structs inherit from a common base?
-  struct Entry {
-    Entry() { }
-
-    Entry(ByteContainer key, V value, uint32_t version)
-      : key(std::move(key)), value(std::move(value)), version(version) { }
-
-    ByteContainer key{};
-    V value{};
-    uint32_t version{0};
-
-    static constexpr MatchUnitType mut = MatchUnitType::EXACT;
-  };
+  MatchUnitGeneric(size_t size, const MatchKeyBuilder &match_key_builder,
+                   LookupStructureFactory *lookup_factory)
+    : MatchUnitAbstract<V>(size, match_key_builder), entries(size),
+      lookup_structure(
+        LookupStructureFactory::create<K>(
+          lookup_factory, size, match_key_builder.get_nbytes_key())) {}
 
  private:
   MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
@@ -435,126 +420,21 @@ class MatchUnitExact : public MatchUnitAbstract<V> {
 
  private:
   std::vector<Entry> entries{};
-  std::unordered_map<ByteContainer, entry_handle_t, ByteContainerKeyHash>
-  entries_map{};
+  std::unique_ptr<LookupStructure<K>> lookup_structure{nullptr};
 };
+
+// Alias all of our concrete MatchUnit types for convenience
+// when using them elsewhere.
 
 template <typename V>
-class MatchUnitLPM : public MatchUnitAbstract<V> {
- public:
-  typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
-
- public:
-  MatchUnitLPM(size_t size, const MatchKeyBuilder &match_key_builder)
-    : MatchUnitAbstract<V>(size, match_key_builder),
-      entries(size),
-      entries_trie(this->nbytes_key) { }
-
- private:
-  struct Entry {
-    Entry() { }
-
-    Entry(ByteContainer key, int prefix_length, V value, uint32_t version)
-      : key(std::move(key)), prefix_length(prefix_length),
-        value(std::move(value)), version(version) { }
-
-    ByteContainer key{};
-    int prefix_length{0};
-    V value{};
-    uint32_t version{0};
-
-    static constexpr MatchUnitType mut = MatchUnitType::LPM;
-  };
-
- private:
-  MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
-                            V value,  // by value for possible std::move
-                            entry_handle_t *handle,
-                            int priority) override;
-
-  MatchErrorCode delete_entry_(entry_handle_t handle) override;
-
-  MatchErrorCode modify_entry_(entry_handle_t handle, V value) override;
-
-  MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
-
-  MatchErrorCode get_entry_(entry_handle_t handle,
-                            std::vector<MatchKeyParam> *match_key,
-                            const V **value, int *priority) const override;
-
-  MatchErrorCode dump_match_entry_(std::ostream *out,
-                                   entry_handle_t handle) const override;
-
-  void dump_(std::ostream *stream) const override;
-
-  void reset_state_() override;
-
-  MatchUnitLookup lookup_key(const ByteContainer &key) const override;
-
- private:
-  std::vector<Entry> entries{};
-  LPMTrie entries_trie;
-};
+using MatchUnitExact = MatchUnitGeneric<ExactMatchKey, V>;
 
 template <typename V>
-class MatchUnitTernary : public MatchUnitAbstract<V> {
- public:
-  typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
+using MatchUnitLPM = MatchUnitGeneric<LPMMatchKey, V>;
 
- public:
-  MatchUnitTernary(size_t size, const MatchKeyBuilder &match_key_builder)
-    : MatchUnitAbstract<V>(size, match_key_builder),
-      entries(size) { }
+template <typename V>
+using MatchUnitTernary = MatchUnitGeneric<TernaryMatchKey, V>;
 
- private:
-  struct Entry {
-    Entry() { }
-
-    Entry(ByteContainer key, ByteContainer mask, int priority, V value,
-          uint32_t version)
-      : key(std::move(key)), mask(std::move(mask)), priority(priority),
-        value(std::move(value)), version(version) { }
-
-    ByteContainer key{};
-    ByteContainer mask{};
-    int priority{0};
-    V value{};
-    uint32_t version{0};
-
-    static constexpr MatchUnitType mut = MatchUnitType::TERNARY;
-  };
-
- private:
-  MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
-                            V value,  // by value for possible std::move
-                            entry_handle_t *handle,
-                            int priority) override;
-
-  MatchErrorCode delete_entry_(entry_handle_t handle) override;
-
-  MatchErrorCode modify_entry_(entry_handle_t handle, V value) override;
-
-  MatchErrorCode get_value_(entry_handle_t handle, const V **value) override;
-
-  MatchErrorCode get_entry_(entry_handle_t handle,
-                            std::vector<MatchKeyParam> *match_key,
-                            const V **value, int *priority) const override;
-
-  MatchErrorCode dump_match_entry_(std::ostream *out,
-                                   entry_handle_t handle) const override;
-
-  void dump_(std::ostream *stream) const override;
-
-  void reset_state_() override;
-
-  MatchUnitLookup lookup_key(const ByteContainer &key) const override;
-
-  bool has_rule(const ByteContainer &key, const ByteContainer &mask,
-                int priority) const;
-
- private:
-  std::vector<Entry> entries{};
-};
 
 }  // namespace bm
 
