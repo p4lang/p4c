@@ -503,10 +503,11 @@ Context::set_force_arith(bool v) {
 
 int
 Context::init_objects(std::istream *is,
+                      LookupStructureFactory *lookup_factory,
                       const std::set<header_field_pair> &required_fields,
                       const std::set<header_field_pair> &arith_fields) {
   // initally p4objects_rt == p4objects, so this works
-  int status = p4objects_rt->init_objects(is, device_id, cxt_id,
+  int status = p4objects_rt->init_objects(is, lookup_factory, device_id, cxt_id,
                                           notifications_transport,
                                           required_fields, arith_fields);
   if (status) return status;
@@ -518,13 +519,14 @@ Context::init_objects(std::istream *is,
 Context::ErrorCode
 Context::load_new_config(
     std::istream *is,
+    LookupStructureFactory *lookup_factory,
     const std::set<header_field_pair> &required_fields,
     const std::set<header_field_pair> &arith_fields) {
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);
   // check that there is no ongoing config swap
   if (p4objects != p4objects_rt) return ErrorCode::ONGOING_SWAP;
   p4objects_rt = std::make_shared<P4Objects>();
-  init_objects(is, required_fields, arith_fields);
+  init_objects(is, lookup_factory, required_fields, arith_fields);
   return ErrorCode::SUCCESS;
 }
 

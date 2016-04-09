@@ -39,6 +39,7 @@ struct HasFactoryMethod {
   typedef std::unique_ptr<T> (*Signature)(
     const std::string &, const std::string &,
     p4object_id_t, size_t, const MatchKeyBuilder &,
+    LookupStructureFactory *,
     bool, bool);
 
   template <typename U, Signature> struct SFINAE {};
@@ -76,7 +77,8 @@ class MatchActionTable : public ControlFlowNode, public NamedP4Object {
       const std::string &match_type,
       const std::string &name, p4object_id_t id,
       size_t size, const MatchKeyBuilder &match_key_builder,
-      bool with_counters, bool with_ageing) {
+      bool with_counters, bool with_ageing,
+      LookupStructureFactory *lookup_factory) {
     static_assert(
         std::is_base_of<MatchTableAbstract, MT>::value,
         "incorrect template, needs to be a subclass of MatchTableAbstract");
@@ -87,7 +89,7 @@ class MatchActionTable : public ControlFlowNode, public NamedP4Object {
 
     std::unique_ptr<MT> match_table = MT::create(
       match_type, name, id, size, match_key_builder,
-      with_counters, with_ageing);
+      lookup_factory, with_counters, with_ageing);
 
     return std::unique_ptr<MatchActionTable>(
       new MatchActionTable(name, id, std::move(match_table)));

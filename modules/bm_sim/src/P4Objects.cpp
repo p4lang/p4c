@@ -108,7 +108,9 @@ P4Objects::build_expression(const Json::Value &json_expression,
 }
 
 int
-P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
+P4Objects::init_objects(std::istream *is,
+                        LookupStructureFactory *lookup_factory,
+                        int device_id, size_t cxt_id,
                         std::shared_ptr<TransportIface> notifications_transport,
                         const std::set<header_field_pair> &required_fields,
                         const std::set<header_field_pair> &arith_fields) {
@@ -750,16 +752,16 @@ P4Objects::init_objects(std::istream *is, int device_id, size_t cxt_id,
       if (table_type == "simple") {
         table = MatchActionTable::create_match_action_table<MatchTable>(
           match_type, table_name, table_id, table_size, key_builder,
-          with_counters, with_ageing);
+          with_counters, with_ageing, lookup_factory);
       } else if (table_type == "indirect") {
         table = MatchActionTable::create_match_action_table<MatchTableIndirect>(
           match_type, table_name, table_id, table_size, key_builder,
-          with_counters, with_ageing);
+          with_counters, with_ageing, lookup_factory);
       } else if (table_type == "indirect_ws") {
         table =
           MatchActionTable::create_match_action_table<MatchTableIndirectWS>(
             match_type, table_name, table_id, table_size, key_builder,
-            with_counters, with_ageing);
+            with_counters, with_ageing, lookup_factory);
 
         if (!cfg_table.isMember("selector")) {
           assert(0 && "indirect_ws tables need to specify a selector");
