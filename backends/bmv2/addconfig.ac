@@ -10,4 +10,6 @@ if test x"$ss" != x"yes"; then
 fi
 
 AX_PYTHON_MODULE([scapy], [fatal], [python])
+dnl ipaddr is needed by simple_switch_CLI, but is not listed as a dependence there
+AX_PYTHON_MODULE([ipaddr], [fatal], [python])
 

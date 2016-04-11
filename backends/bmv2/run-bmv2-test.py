@@ -208,7 +208,6 @@ class TableKeyInstance(object):
         found = False
         for i in self.key.fields:
             if key == i:
-                print("Field found", key)
                 found = True
         if not found:
             raise Exception("Unexpected key field " + key)
@@ -250,7 +249,6 @@ class BMV2ActionArguments(object):
         found = False
         for i in self.action.args:
             if key == i.name:
-                print("Key found", key)
                 found = True
         if not found:
             raise Exception("Unexpected action arg " + key)
@@ -433,7 +431,7 @@ class RunBMV2(object):
         if self.options.verbose:
             print("Running model")
         interfaces = self.interfaces()
-        wait = 1
+        wait = 1  # Time to wait before model starts running
 
         concurrent = ConcurrentInteger(os.getcwd(), 1000)
         rand = concurrent.generate()
@@ -452,8 +450,13 @@ class RunBMV2(object):
             if self.options.verbose:
                 print("Running", " ".join(runcli))
             i = open(self.clifile, 'r')
+            # The CLI has to run before the model starts running; so this is a little race.
             cli = subprocess.Popen(runcli, cwd=self.folder, stdin=i)
             cli.wait()
+            if cli.returncode != 0:
+                print("CLI process failed with exit code", cli.returncode)
+                return FAILURE
+            # Give time to the model to execute
             time.sleep(3)
             sw.terminate()
         finally:

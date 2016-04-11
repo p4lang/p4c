@@ -7,6 +7,9 @@ The back-end accepts code written for the v1model.p4 switch model.
 
 To run and test this back-end you need some additional tools:
 
-- the BMv2 behavioral model itself
+- the BMv2 behavioral model itself.  Installation instructions are available at
+  https://github.com/p4lang/behavioral-model.git
 
-- the Python scapy library for manipulating network packets
+- the Python scapy library for manipulating network packets `sudo pip instsall scapy`
+
+- the Python ipaddr library `sudo pip install ipaddr`
