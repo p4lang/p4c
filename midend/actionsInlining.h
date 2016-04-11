@@ -9,11 +9,11 @@
 namespace P4 {
 
 struct ActionCallInfo {
-    const IR::ActionContainer* caller;
-    const IR::ActionContainer* callee;
+    const IR::P4Action* caller;
+    const IR::P4Action* callee;
     const IR::MethodCallStatement* call;
 
-    ActionCallInfo(const IR::ActionContainer* caller, const IR::ActionContainer* callee,
+    ActionCallInfo(const IR::P4Action* caller, const IR::P4Action* callee,
                    const IR::MethodCallStatement* call) :
             caller(caller), callee(callee), call(call)
     { CHECK_NULL(caller); CHECK_NULL(callee); CHECK_NULL(call); }
@@ -23,8 +23,8 @@ struct ActionCallInfo {
 
 struct InlineWorkList {
     // Map caller -> statement -> callee
-    std::map<const IR::ActionContainer*,
-             std::map<const IR::MethodCallStatement*, const IR::ActionContainer*>> sites;
+    std::map<const IR::P4Action*,
+             std::map<const IR::MethodCallStatement*, const IR::P4Action*>> sites;
     void add(ActionCallInfo* info) {
         CHECK_NULL(info);
         sites[info->caller][info->call] = info->callee;
@@ -43,7 +43,7 @@ class ActionsInlineList {
     void add(ActionCallInfo* aci)
     { toInline.push_back(aci); }
 
-    void replace(const IR::ActionContainer* container, const IR::ActionContainer* replacement) {
+    void replace(const IR::P4Action* container, const IR::P4Action* replacement) {
         LOG1("Substituting " << container << " with " << replacement);
         for (auto e : inlineOrder) {
             if (e->callee == container)
@@ -63,7 +63,7 @@ class DiscoverActionsInlining : public Inspector {
                             P4::ReferenceMap* refMap,
                             P4::TypeMap* typeMap) :
             toInline(toInline), refMap(refMap), typeMap(typeMap) {}
-    bool preorder(const IR::ParserContainer*) override { return false; }  // skip
+    bool preorder(const IR::P4Parser*) override { return false; }  // skip
     void postorder(const IR::MethodCallStatement* mcs) override;
 };
 
@@ -85,7 +85,7 @@ class InlineActionsDriver : public Transform {
 namespace P4v1 {
 
 class InlineActions : public Transform {
-    const IR::Global    *global;
+    const IR::V1Program    *global;
     class SubstActionArgs : public Transform {
         const IR::ActionFunction *function;
         const IR::Primitive *callsite;
@@ -99,7 +99,7 @@ class InlineActions : public Transform {
         SubstActionArgs(const IR::ActionFunction *f, const IR::Primitive *c)
         : function(f), callsite(c) {}
     };
-    const IR::Global *preorder(IR::Global *gl) { return global = gl; }
+    const IR::V1Program *preorder(IR::V1Program *gl) { return global = gl; }
     const IR::Node *preorder(IR::Primitive *p) {
         if (auto af = global->get<IR::ActionFunction>(p->name))
             return af->action.clone()->apply(SubstActionArgs(af, p));

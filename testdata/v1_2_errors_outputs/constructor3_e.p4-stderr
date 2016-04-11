@@ -1,4 +1,4 @@
 ../testdata/v1_2_errors/constructor3_e.p4(7): error: e: Cannot unify bool to bit<1>
     E(true) e;
     ^^^^^^^^^
-error: 1 errors ecountered, aborting compilation
+error: 1 errors encountered, aborting compilation

@@ -66,6 +66,8 @@ bool JsonValue::operator==(const JsonValue& other) const {
         case Kind::False:
         case Kind::Null:
             return true;
+        default:
+            throw std::logic_error("Unexpected json tag");
     }
 }
 

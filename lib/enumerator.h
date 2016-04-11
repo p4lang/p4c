@@ -41,7 +41,7 @@ class EnumeratorHandle {
 template <class T>
 class Enumerator {
  protected:
-    EnumeratorState state;
+    EnumeratorState state = EnumeratorState::NotStarted;
 
     // This is a weird oddity of C++: this class is a friend of itself with different templates
     template <class S> friend class Enumerator;
@@ -50,6 +50,7 @@ class Enumerator {
 
  public:
     Enumerator();
+    virtual ~Enumerator() {}
 
     /* move to next element in the collection;
        return false if the next element does not exist */

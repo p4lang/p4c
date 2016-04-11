@@ -98,7 +98,7 @@ static int yylex();
 %token      TRUE FALSE
 %token      ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA
             DEFAULT DONTCARE ELSE ENUM T_ERROR  // There is an ERROR macro elsewhere
-            EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
+            EXIT EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
             PACKAGE PARSER RANGE RETURN STATE STRUCT SWITCH TABLE TRANSITION
             TYPEDEF VARBIT VOID
 %token<str> IDENTIFIER TYPE NAMESPACE STRING_LITERAL
@@ -125,7 +125,7 @@ static int yylex();
 %type<id>               member switchLabel
 %type<SelectCase>       selectCase
 %type<selectCases>      selectCaseList
-%type<Statement>        statement emptyStatement returnStatement switchStatement
+%type<Statement>        statement emptyStatement returnStatement switchStatement exitStatement
                         assignmentOrMethodCallStatement conditionalStatement
 %type<BlockStatement>   blockStatement actionBlockStatement controlBody
 %type<StatOrDecl>       statementOrDeclaration parserStatement actionElement variableDeclaration
@@ -318,7 +318,7 @@ parserDeclaration
       '{' parserStatefulElements parserStates '}'
                              { structure.pop();
                                auto pl = new IR::ParameterList(@2, std::move(*$2));
-                               $$ = new IR::ParserContainer($1->name.srcInfo, $1->name,
+                               $$ = new IR::P4Parser($1->name.srcInfo, $1->name,
                                                             $1, pl, $4, $5);}
     ;
 
@@ -415,7 +415,7 @@ controlDeclaration
     : controlTypeDeclaration optCompileParameters '{' stateListDeclaration APPLY controlBody '}'
                             { structure.pop();
                               auto pl = new IR::ParameterList(@2, std::move(*$2));
-                              $$ = new IR::ControlContainer($1->name.srcInfo, $1->name, $1,
+                              $$ = new IR::P4Control($1->name.srcInfo, $1->name, $1,
                                                             pl, std::move(*$4), $6);}
     ;
 
@@ -627,8 +627,12 @@ emptyStatement
     : ';'                              { $$ = new IR::EmptyStatement(@1); }
     ;
 
+exitStatement
+    : EXIT ';'                         { $$ = new IR::ExitStatement(@1); }
+    ;
+
 returnStatement
-    : RETURN ';'                       { $$ = new IR::ReturnStatement(@1, nullptr); }
+    : RETURN ';'                       { $$ = new IR::ReturnStatement(@1); }
     ;
 
 conditionalStatement
@@ -644,6 +648,7 @@ statement
     | emptyStatement                   { $$ = $1; }
     | blockStatement                   { $$ = $1; }
     | returnStatement                  { $$ = $1; }
+    | exitStatement                    { $$ = $1; }
     | switchStatement                  { $$ = $1; }
     ;
 
@@ -686,7 +691,7 @@ statementOrDeclaration
 
 tableDeclaration
     : optAnnotations TABLE name '(' parameterList ')' '{' tablePropertyList '}'
-                                         { $$ = new IR::TableContainer(@3, *$3, $1,
+                                         { $$ = new IR::P4Table(@3, *$3, $1,
                                                      new IR::ParameterList(@5, std::move(*$5)),
                                                      new IR::TableProperties(@8, std::move(*$8))); }
     ;
@@ -745,7 +750,7 @@ actionRef
 actionDeclaration
     : optAnnotations ACTION name '(' parameterList ')' '{' actionElementList '}'
                                          { auto pl = new IR::ParameterList(@5, std::move(*$5));
-                                           $$ = new IR::ActionContainer(@3, *$3, $1, pl, $8); }
+                                           $$ = new IR::P4Action(@3, *$3, $1, pl, $8); }
     ;
 
 actionElementList

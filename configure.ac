@@ -54,6 +54,14 @@ AC_CHECK_LIB([gmpxx], [__gmpz_init], [], [AC_MSG_ERROR([GNU MP not found])])
 AC_SUBST(P4INCLUDE, $prefix/p4include)
 
 AC_CONFIG_FILES([Makefile setup.h])
+AX_PYTHON_MODULE([difflib], [fatal], [python])
+AX_PYTHON_MODULE([shutil], [fatal], [python])
+AX_PYTHON_MODULE([tempfile], [fatal], [python])
+AX_PYTHON_MODULE([subprocess], [fatal], [python])
+AX_PYTHON_MODULE([re], [fatal], [python])
+
+dnl The following lines are just including all "addconfig.ac" files
+dnl found in the backends/* and extensions/* folders
 
 m4_foreach_w([ac_file],m4_esyscmd([echo backends/*/addconfig.ac extensions/*/addconfig.ac]),
 [[#]] config from ac_file

@@ -38,7 +38,7 @@ std::ostream &operator<<(std::ostream &, IrNamespace *);
 class IrElement  : public Util::IHasSourceInfo {
  protected:
     Util::SourceInfo srcInfo;
-    const IrClass *clss;
+    const IrClass *clss = nullptr;
 
  public:
     IrElement() = default;

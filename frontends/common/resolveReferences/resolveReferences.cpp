@@ -274,7 +274,7 @@ bool ResolveReferences::preorder(const IR::PathExpression* path) {
 bool ResolveReferences::preorder(const IR::Type_Name* type) {
     resolvePath(type->path, true); return true; }
 
-bool ResolveReferences::preorder(const IR::ControlContainer *c) {
+bool ResolveReferences::preorder(const IR::P4Control *c) {
     addToContext(c);
     addToContext(c->type->typeParams);
     addToContext(c->type->applyParams);
@@ -282,7 +282,7 @@ bool ResolveReferences::preorder(const IR::ControlContainer *c) {
     return true;
 }
 
-void ResolveReferences::postorder(const IR::ControlContainer *c) {
+void ResolveReferences::postorder(const IR::P4Control *c) {
     removeFromContext(c->constructorParams);
     removeFromContext(c->type->applyParams);
     removeFromContext(c->type->typeParams);
@@ -290,7 +290,7 @@ void ResolveReferences::postorder(const IR::ControlContainer *c) {
     checkShadowing(c);
 }
 
-bool ResolveReferences::preorder(const IR::ParserContainer *c) {
+bool ResolveReferences::preorder(const IR::P4Parser *c) {
     addToContext(c);
     addToContext(c->type->typeParams);
     addToContext(c->type->applyParams);
@@ -298,7 +298,7 @@ bool ResolveReferences::preorder(const IR::ParserContainer *c) {
     return true;
 }
 
-void ResolveReferences::postorder(const IR::ParserContainer *c) {
+void ResolveReferences::postorder(const IR::P4Parser *c) {
     removeFromContext(c->constructorParams);
     removeFromContext(c->type->applyParams);
     removeFromContext(c->type->typeParams);
@@ -306,12 +306,12 @@ void ResolveReferences::postorder(const IR::ParserContainer *c) {
     checkShadowing(c);
 }
 
-bool ResolveReferences::preorder(const IR::TableContainer* t) {
+bool ResolveReferences::preorder(const IR::P4Table* t) {
     addToContext(t->parameters);
     return true;
 }
 
-void ResolveReferences::postorder(const IR::TableContainer* t) {
+void ResolveReferences::postorder(const IR::P4Table* t) {
     removeFromContext(t->parameters);
 }
 
@@ -324,13 +324,13 @@ void ResolveReferences::postorder(const IR::TableProperties *p) {
     removeFromContext(p);
 }
 
-bool ResolveReferences::preorder(const IR::ActionContainer *c) {
+bool ResolveReferences::preorder(const IR::P4Action *c) {
     addToContext(c);
     addToContext(c->parameters);
     return true;
 }
 
-void ResolveReferences::postorder(const IR::ActionContainer *c) {
+void ResolveReferences::postorder(const IR::P4Action *c) {
     removeFromContext(c->parameters);
     removeFromContext(c);
     checkShadowing(c);

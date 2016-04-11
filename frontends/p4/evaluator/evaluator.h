@@ -28,7 +28,7 @@ class Evaluator final : public Inspector {
     // The traversal order is controlled very explicitly
     bool preorder(const IR::P4Program* program) override;
     bool preorder(const IR::Declaration_Constant* decl) override;
-    bool preorder(const IR::TableContainer* table) override;
+    bool preorder(const IR::P4Table* table) override;
     bool preorder(const IR::Declaration_Instance* inst) override;
     bool preorder(const IR::ConstructorCallExpression* inst) override;
     bool preorder(const IR::PathExpression* expression) override;

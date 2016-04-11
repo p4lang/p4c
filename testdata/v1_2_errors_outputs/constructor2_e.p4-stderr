@@ -1,4 +1,4 @@
 ../testdata/v1_2_errors/constructor2_e.p4(3):syntax error, unexpected '('
     m(
      ^
-error: 1 errors ecountered, aborting compilation
+error: 1 errors encountered, aborting compilation

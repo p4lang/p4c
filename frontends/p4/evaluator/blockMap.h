@@ -21,7 +21,7 @@ class BlockMap final {
     TypeMap* typeMap;
 
     BlockMap(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap) {}
+            toplevelBlock(nullptr), program(nullptr), refMap(refMap), typeMap(typeMap) {}
     const IR::PackageBlock* getMain() const;
     const IR::Block* getBlockBoundToParameter(const IR::InstantiatedBlock* block,
                                               cstring paramName) const;

@@ -4,4 +4,4 @@ s() s1;
 ../testdata/v1_2_errors/functors3_e.p4(1)
 struct s {}
        ^
-error: 1 errors ecountered, aborting compilation
+error: 1 errors encountered, aborting compilation

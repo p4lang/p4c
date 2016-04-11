@@ -3,7 +3,7 @@
 
 namespace P4 {
 
-const IR::TableContainer*
+const IR::P4Table*
 TableApplySolver::isHit(const IR::Expression* expression,
                         const P4::ReferenceMap* refMap,
                         const P4::TypeMap* typeMap) {
@@ -20,12 +20,12 @@ TableApplySolver::isHit(const IR::Expression* expression,
         return nullptr;
 
     auto am = mi->to<P4::ApplyMethod>();
-    if (!am->object->is<IR::TableContainer>())
+    if (!am->object->is<IR::P4Table>())
         return nullptr;
-    return am->object->to<IR::TableContainer>();
+    return am->object->to<IR::P4Table>();
 }
 
-const IR::TableContainer*
+const IR::P4Table*
 TableApplySolver::isActionRun(const IR::Expression* expression,
                               const P4::ReferenceMap* refMap,
                               const P4::TypeMap* typeMap) {
@@ -41,9 +41,9 @@ TableApplySolver::isActionRun(const IR::Expression* expression,
     if (!instance->is<P4::ApplyMethod>())
         return nullptr;
     auto am = instance->to<P4::ApplyMethod>();
-    if (!am->object->is<IR::TableContainer>())
+    if (!am->object->is<IR::P4Table>())
         return nullptr;
-    return am->object->to<IR::TableContainer>();
+    return am->object->to<IR::P4Table>();
 }
 
 }  // namespace P4

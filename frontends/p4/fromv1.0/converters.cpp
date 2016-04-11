@@ -268,11 +268,11 @@ class DiscoverStructure : public Inspector {
     void postorder(const IR::Header* hd) override {
         structure->headers.emplace(hd);
         structure->types.emplace(hd->type); }
-    void postorder(const IR::Control* control) override
+    void postorder(const IR::V1Control* control) override
     { structure->controls.emplace(control); }
-    void postorder(const IR::Parser* parser) override
+    void postorder(const IR::V1Parser* parser) override
     { structure->parserStates.emplace(parser); }
-    void postorder(const IR::Table* table) override
+    void postorder(const IR::V1Table* table) override
     { structure->tables.emplace(table); }
     void postorder(const IR::ActionFunction* action) override
     { structure->actions.emplace(action); }
@@ -313,7 +313,7 @@ class ComputeCallGraph : public Inspector {
         auto tbl = structure->tables.get(apply->name.name);
         if (tbl == nullptr)
             ::error("Could not find table %1%", apply->name);
-        auto parent = findContext<IR::Control>();
+        auto parent = findContext<IR::V1Control>();
         BUG_CHECK(parent != nullptr, "%1%: Apply not within a control block?", apply);
         auto ctrl = get(structure->tableMapping, tbl);
         if (ctrl != nullptr && ctrl != parent) {
@@ -325,7 +325,7 @@ class ComputeCallGraph : public Inspector {
         structure->tableMapping.emplace(tbl, parent);
         structure->tableInvocation.emplace(tbl, apply);
     }
-    void postorder(const IR::Parser* parser) override {
+    void postorder(const IR::V1Parser* parser) override {
         LOG1("Scanning parser " << parser->name);
         structure->parsers.add(parser->name);
         if (!parser->default_return.name.isNullOrEmpty())
@@ -399,7 +399,7 @@ class ComputeCallGraph : public Inspector {
             BUG_CHECK(parent != nullptr, "%1%: Action call not within action", primitive);
             structure->calledActions.add(parent->name, name);
         } else if (structure->controls.contains(name)) {
-            auto parent = findContext<IR::Control>();
+            auto parent = findContext<IR::V1Control>();
             BUG_CHECK(parent != nullptr, "%1%: Control call not within control", primitive);
             structure->calledControls.add(parent->name, name);
         }
@@ -412,7 +412,7 @@ class Rewriter : public Transform {
     explicit Rewriter(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); }
 
-    const IR::Node* preorder(IR::Global* global) override {
+    const IR::Node* preorder(IR::V1Program* global) override {
         if (verbose > 1)
             dump(global);
         prune();
@@ -436,7 +436,7 @@ Converter::Converter() {
 }
 
 Visitor::profile_t Converter::init_apply(const IR::Node* node) {
-    if (!node->is<IR::Global>())
+    if (!node->is<IR::V1Program>())
         BUG("Converter only accepts IR::Globals, not %1%", node);
     return PassManager::init_apply(node);
 }

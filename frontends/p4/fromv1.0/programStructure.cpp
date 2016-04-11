@@ -22,7 +22,9 @@ ProgramStructure::ProgramStructure() :
         action_profiles(nullptr), field_lists(nullptr), field_list_calculations(&allNames),
         action_selectors(nullptr), calledActions("actions"), calledControls("controls"),
         calledCounters("counters"), calledMeters("meters"), calledRegisters("registers"),
-        parsers("parsers") {
+        parsers("parsers"), parserPacketIn(nullptr), parserHeadersOut(nullptr),
+		verifyChecksums(nullptr), updateChecksums(nullptr),
+		deparser(nullptr), latest(nullptr) {
     ingress = nullptr;
     declarations = new IR::Vector<IR::Node>();
     emptyTypeArguments = new IR::Vector<IR::Type>();
@@ -299,7 +301,7 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     return new IR::ListExpression(value->srcInfo, vec);
 }
 
-const IR::ParserState* ProgramStructure::convertParser(const IR::Parser* parser) {
+const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parser) {
     ExpressionConverter conv(this);
 
     latest = nullptr;
@@ -382,7 +384,7 @@ void ProgramStructure::createParser() {
         auto ps = convertParser(p.first);
         states->push_back(ps);
     }
-    auto result = new IR::ParserContainer(Util::SourceInfo(), v1model.parser.Id(), type,
+    auto result = new IR::P4Parser(Util::SourceInfo(), v1model.parser.Id(), type,
                                           new IR::ParameterList(), stateful, states);
     declarations->push_back(result);
     conversionContext.clear();
@@ -542,14 +544,14 @@ void ProgramStructure::createDeparser() {
         components->push_back(stat);
     }
     auto body = new IR::BlockStatement(Util::SourceInfo(), components);
-    deparser = new IR::ControlContainer(Util::SourceInfo(), v1model.deparser.Id(), type,
+    deparser = new IR::P4Control(Util::SourceInfo(), v1model.deparser.Id(), type,
                                         new IR::ParameterList(), std::move(*stateful), body);
     declarations->push_back(deparser);
 }
 
-const IR::TableContainer*
+const IR::P4Table*
 ProgramStructure::convertTable(
-    const IR::Table* table, cstring newName, IR::NameMap<IR::Declaration, ordered_map>* stateful) {
+    const IR::V1Table* table, cstring newName, IR::NameMap<IR::Declaration, ordered_map>* stateful) {
     ExpressionConverter conv(this);
 
     auto params = new IR::ParameterList();
@@ -725,7 +727,7 @@ ProgramStructure::convertTable(
 
     auto props = new IR::TableProperties(Util::SourceInfo(), std::move(*propvec));
     auto annos = addNameAnnotation(table->name);
-    auto result = new IR::TableContainer(table->srcInfo, newName, annos, params, props);
+    auto result = new IR::P4Table(table->srcInfo, newName, annos, params, props);
     return result;
 }
 
@@ -1188,7 +1190,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
     return nullptr;
 }
 
-const IR::ActionContainer*
+const IR::P4Action*
 ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newName,
                                 const IR::Meter* meterToAccess) {
     LOG1("Converting action " << action->name);
@@ -1238,7 +1240,7 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
 
     // Save the original action name in an annotation
     auto annos = addNameAnnotation(action->name);
-    auto result = new IR::ActionContainer(action->srcInfo, newName, annos, params, body);
+    auto result = new IR::P4Action(action->srcInfo, newName, annos, params, body);
     return result;
 }
 
@@ -1357,14 +1359,14 @@ ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     return decl;
 }
 
-const IR::ControlContainer*
-ProgramStructure::convertControl(const IR::Control* control, cstring newName) {
+const IR::P4Control*
+ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) {
     IR::ID name = newName;
     auto type = controlType(name);
     std::vector<cstring> actionsInTables;
     auto stateful = new IR::NameMap<IR::Declaration, ordered_map>();
 
-    std::vector<const IR::Table*> usedTables;
+    std::vector<const IR::V1Table*> usedTables;
     tablesReferred(control, usedTables);
     for (auto t : usedTables) {
         for (auto a : t->actions)
@@ -1491,7 +1493,7 @@ ProgramStructure::convertControl(const IR::Control* control, cstring newName) {
     }
 
     auto body = new IR::BlockStatement(Util::SourceInfo(), components);
-    auto result = new IR::ControlContainer(Util::SourceInfo(), name, type,
+    auto result = new IR::P4Control(Util::SourceInfo(), name, type,
                                            new IR::ParameterList(), std::move(*stateful), body);
     conversionContext.clear();
     return result;
@@ -1518,7 +1520,7 @@ void ProgramStructure::createControls() {
         auto stateful = new IR::NameMap<IR::Declaration, ordered_map>();
         auto components = new IR::Vector<IR::StatOrDecl>();
         auto body = new IR::BlockStatement(Util::SourceInfo(), components);
-        auto egressControl = new IR::ControlContainer(Util::SourceInfo(), name, type,
+        auto egressControl = new IR::P4Control(Util::SourceInfo(), name, type,
                                                       new IR::ParameterList(),
                                                       std::move(*stateful), body);
         declarations->push_back(egressControl);
@@ -1708,7 +1710,7 @@ void ProgramStructure::createChecksumVerifications() {
         }
     }
     auto body = new IR::BlockStatement(Util::SourceInfo(), components);
-    verifyChecksums = new IR::ControlContainer(Util::SourceInfo(), v1model.verify.Id(), type,
+    verifyChecksums = new IR::P4Control(Util::SourceInfo(), v1model.verify.Id(), type,
                                                new IR::ParameterList(), std::move(*stateful), body);
     declarations->push_back(verifyChecksums);
     conversionContext.clear();
@@ -1787,7 +1789,7 @@ void ProgramStructure::createChecksumUpdates() {
         }
     }
     auto body = new IR::BlockStatement(Util::SourceInfo(), components);
-    updateChecksums = new IR::ControlContainer(Util::SourceInfo(), v1model.update.Id(), type,
+    updateChecksums = new IR::P4Control(Util::SourceInfo(), v1model.update.Id(), type,
                                                new IR::ParameterList(), std::move(*stateful), body);
     declarations->push_back(updateChecksums);
     conversionContext.clear();
@@ -1809,7 +1811,8 @@ const IR::P4Program* ProgramStructure::create(Util::SourceInfo info) {
 }
 
 void
-ProgramStructure::tablesReferred(const IR::Control* control, std::vector<const IR::Table*> &out) {
+ProgramStructure::tablesReferred(const IR::V1Control* control,
+                                 std::vector<const IR::V1Table*> &out) {
     LOG1("Inspecting " << control->name);
     for (auto it : tableMapping) {
         if (it.second == control)
@@ -1817,7 +1820,7 @@ ProgramStructure::tablesReferred(const IR::Control* control, std::vector<const I
     }
     // sort alphabetically to have a deterministic order
     std::sort(out.begin(), out.end(),
-              [](const IR::Table* left, const IR::Table* right) {
+              [](const IR::V1Table* left, const IR::V1Table* right) {
                   return left->name.name < right->name.name; });
 }
 

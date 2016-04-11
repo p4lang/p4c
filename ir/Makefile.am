@@ -26,8 +26,10 @@ ir_SOURCES += \
 	ir/parameterSubstitution.h
 
 ir_DEF_FILES += \
-    $(srcdir)/ir/typedecl.def \
+    $(srcdir)/ir/base.def \
+    $(srcdir)/ir/type.def \
     $(srcdir)/ir/expression.def \
-    $(srcdir)/ir/ir.def
+    $(srcdir)/ir/ir.def \
+    $(srcdir)/ir/v1.def
 
 cpplint_FILES += $(ir_SOURCES)

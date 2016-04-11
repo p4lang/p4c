@@ -8,7 +8,7 @@ namespace EBPF {
 class ActionTranslationVisitor : public CodeGenInspector {
  protected:
     const EBPFProgram*         program;
-    const IR::ActionContainer* action;
+    const IR::P4Action* action;
     cstring                    valueName;
 
  public:
@@ -33,7 +33,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
         return false;
     }
 
-    bool preorder(const IR::ActionContainer* act) {
+    bool preorder(const IR::P4Action* act) {
         action = act;
         setVecSep("\n", "\n");
         visit(action->body);
@@ -79,7 +79,7 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
-void EBPFTable::emitActionArguments(CodeBuilder* builder, const IR::ActionContainer* action,
+void EBPFTable::emitActionArguments(CodeBuilder* builder, const IR::P4Action* action,
                                     cstring name) {
     builder->emitIndent();
     builder->append("struct ");
@@ -132,7 +132,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
 
     for (auto a : *actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->name->path, true);
-        auto action = adecl->getNode()->to<IR::ActionContainer>();
+        auto action = adecl->getNode()->to<IR::P4Action>();
         emitActionArguments(builder, action, a->name->path->name);
     }
 
@@ -231,7 +231,7 @@ void EBPFTable::runAction(CodeBuilder* builder, cstring valueName) {
 
     for (auto a : *actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->name->path, true);
-        auto action = adecl->getNode()->to<IR::ActionContainer>();
+        auto action = adecl->getNode()->to<IR::P4Action>();
         builder->emitIndent();
         builder->appendFormat("case %s: ", action->name.name);
         builder->newline();

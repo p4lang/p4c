@@ -14,12 +14,12 @@ namespace P4 {
 // These
 class TableApplySolver {
  public:
-    static const IR::TableContainer* isHit(const IR::Expression* expression,
-                                           const P4::ReferenceMap* refMap,
-                                           const P4::TypeMap* typeMap);
-    static const IR::TableContainer* isActionRun(const IR::Expression* expression,
-                                                 const P4::ReferenceMap* refMap,
-                                                 const P4::TypeMap* typeMap);
+    static const IR::P4Table* isHit(const IR::Expression* expression,
+                                    const P4::ReferenceMap* refMap,
+                                    const P4::TypeMap* typeMap);
+    static const IR::P4Table* isActionRun(const IR::Expression* expression,
+                                          const P4::ReferenceMap* refMap,
+                                          const P4::TypeMap* typeMap);
 };
 
 }  // namespace P4

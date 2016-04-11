@@ -41,7 +41,8 @@ class ConstantTypeSubstitution : public Transform {
 };
 
 TypeChecker::TypeChecker(ReferenceMap* refMap, TypeMap* typeMap, bool clearMap, bool readOnly) :
-        refMap(refMap), typeMap(typeMap), clearMap(clearMap), readOnly(readOnly) {
+        refMap(refMap), typeMap(typeMap), clearMap(clearMap), readOnly(readOnly),
+		initialNode(nullptr) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = true;
@@ -201,21 +202,21 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
         if (pl != tp->constructorParams || tps != tp->typeParams)
             return new IR::Type_Package(tp->srcInfo, tp->name, tp->annotations, tps, pl);
         return type;
-    } else if (type->is<IR::ControlContainer>()) {
-        auto cont = type->to<IR::ControlContainer>();
+    } else if (type->is<IR::P4Control>()) {
+        auto cont = type->to<IR::P4Control>();
         auto ctype = canonicalize(cont->type)->to<IR::Type_Control>();
         auto pl = canonicalize(cont->constructorParams);
         if (ctype != cont->type || pl != cont->constructorParams)
-            return new IR::ControlContainer(cont->srcInfo, cont->name,
-                                            ctype, pl, cont->stateful, cont->body);
+            return new IR::P4Control(cont->srcInfo, cont->name,
+                                     ctype, pl, cont->stateful, cont->body);
         return type;
-    } else if (type->is<IR::ParserContainer>()) {
-        auto cont = type->to<IR::ParserContainer>();
+    } else if (type->is<IR::P4Parser>()) {
+        auto cont = type->to<IR::P4Parser>();
         auto ctype = canonicalize(cont->type)->to<IR::Type_Parser>();
         auto pl = canonicalize(cont->constructorParams);
         if (ctype != cont->type || pl != cont->constructorParams)
-            return new IR::ParserContainer(cont->srcInfo, cont->name, ctype,
-                                           pl, cont->stateful, cont->states);
+            return new IR::P4Parser(cont->srcInfo, cont->name, ctype,
+                                    pl, cont->stateful, cont->states);
         return type;
     } else if (type->is<IR::Type_Extern>()) {
         auto te = type->to<IR::Type_Extern>();
@@ -355,7 +356,7 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_MatchKind* decl) {
     return decl;
 }
 
-const IR::Node* TypeChecker::postorder(IR::ControlContainer* cont) {
+const IR::Node* TypeChecker::postorder(IR::P4Control* cont) {
     if (done())
         return cont;
 
@@ -365,7 +366,7 @@ const IR::Node* TypeChecker::postorder(IR::ControlContainer* cont) {
     return cont;
 }
 
-const IR::Node* TypeChecker::postorder(IR::ParserContainer* cont) {
+const IR::Node* TypeChecker::postorder(IR::P4Parser* cont) {
     if (done())
         return cont;
 
@@ -375,7 +376,7 @@ const IR::Node* TypeChecker::postorder(IR::ParserContainer* cont) {
     return cont;
 }
 
-const IR::Node* TypeChecker::postorder(IR::TableContainer* cont) {
+const IR::Node* TypeChecker::postorder(IR::P4Table* cont) {
     if (done())
         return cont;
     auto type = new IR::Type_Table(Util::SourceInfo(), cont);
@@ -384,7 +385,7 @@ const IR::Node* TypeChecker::postorder(IR::TableContainer* cont) {
     return cont;
 }
 
-const IR::Node* TypeChecker::postorder(IR::ActionContainer* cont) {
+const IR::Node* TypeChecker::postorder(IR::P4Action* cont) {
     if (done())
         return cont;
     auto pl = canonicalize(cont->parameters);

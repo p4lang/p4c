@@ -4,8 +4,8 @@
 #include "ir/ir.h"
 
 class CheckHeaderTypes : public Modifier {
-    const IR::Global    *global;
-    bool preorder(IR::Global *glob) override { global = glob; return true; }
+    const IR::V1Program    *global;
+    bool preorder(IR::V1Program *glob) override { global = glob; return true; }
     bool preorder(IR::Metadata *meta) override {
         if (auto type = global->get<IR::v1HeaderType>(meta->type_name))
             meta->type = type->as_metadata;

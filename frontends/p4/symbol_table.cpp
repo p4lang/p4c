@@ -18,6 +18,7 @@ class NamedSymbol {
             sourceInfo(si),
             parent(nullptr),
             name(name) {}
+    virtual ~NamedSymbol() {}
 
     void setParent(Namespace* ns) {
         BUG_CHECK(parent == nullptr, "Parent already set");

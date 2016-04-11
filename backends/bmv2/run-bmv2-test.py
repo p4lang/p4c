@@ -5,6 +5,7 @@
 from __future__ import print_function
 from subprocess import Popen
 from threading import Thread
+import json
 import sys
 import re
 import os
@@ -12,6 +13,13 @@ import stat
 import tempfile
 import shutil
 import difflib
+import subprocess
+import time
+import random
+import errno
+from string import maketrans
+from scapy.layers.all import *
+from scapy.utils import *
 
 SUCCESS = 0
 FAILURE = 1
@@ -36,6 +44,16 @@ def usage(options):
     print("          -b: do not remove temporary results for failing tests")
     print("          -v: verbose operation")
     print("          -f: replace reference outputs with newly generated ones")
+
+def ByteToHex(byteStr):
+    return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
+
+def HexToByte(hexStr):
+    bytes = []
+    hexStr = ''.join( hexStr.split(" ") )
+    for i in range(0, len(hexStr), 2):
+        bytes.append( chr( int (hexStr[i:i+2], 16 ) ) )
+    return ''.join( bytes )
 
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
@@ -96,7 +114,7 @@ def compare_files(options, produced, expected):
             continue
         if ignoreNextMarker:
             ignoreNextMarker = False
-            if marker.match(l): 
+            if marker.match(l):
                 continue
         if l[0] == ' ': continue
         result = FAILURE
@@ -108,6 +126,33 @@ def compare_files(options, produced, expected):
 
     return result
 
+class ConcurrentInteger(object):
+    # Generates exclusive integers in a range 0-max
+    # in a way which is safe across multiple processes.
+    # It uses a simple form of locking using folder names.
+    # This is necessary because this script may be invoked
+    # concurrently many times by make, and we need the many simulator instances
+    # to use different port numbers.
+    def __init__(self, folder, max):
+        self.folder = folder
+        self.max = max
+    def lockName(self, value):
+        return "lock_" + str(value)
+    def release(self, value):
+        os.rmdir(self.lockName(value))
+    def generate(self):
+        # try 10 times
+        for i in range(0, 10):
+            index = random.randint(0, self.max)
+            file = self.lockName(index)
+            try:
+                os.makedirs(file)
+                return index
+            except:
+                time.sleep(1)
+                continue
+        return None
+            
 def check_generated_files(options, tmpdir, expecteddir):
     files = os.listdir(tmpdir)
     for file in files:
@@ -125,23 +170,6 @@ def check_generated_files(options, tmpdir, expecteddir):
                 return result
     return SUCCESS
 
-def generate_packets(stffile):
-    # TODO
-    pass
-
-def makeKey(key):
-    # TODO
-    if key.find("*") < 0:
-        return key;
-    if key.startswith("0x"):
-        mask = "F"
-    elif key.startswith("0b"):
-        mask = "1"
-    elif key.startswith("0o"):
-        mask = "7"
-    m = key.replace("*", mask)
-    return key.replace("*", "0") + "&&&" + m
-
 def nextWord(text, sep = " "):
     space = text.find(sep)
     if space < 0:
@@ -150,64 +178,352 @@ def nextWord(text, sep = " "):
     # print(text, "/", sep, "->", l, "#", r)
     return l, r
 
-def translate_command(cmd):
-    first, cmd = nextWord(cmd)
-    if first != "add":
-        return None
-    tableName, cmd = nextWord(cmd)
-    prio, cmd = nextWord(cmd)
-    key = []
-    actionArgs = []
-    action = None
-    while cmd != "":
-        if action != None:
-            # parsing action arguments
-            word, cmd = nextWord(cmd, ",")
-            k, v = nextWord(word, ":")
-            actionArgs.append(v)
-        else:
-            # parsing table key
-            word, cmd = nextWord(cmd)
-            if word.find("(") >= 0:
-                # found action
-                action, arg = nextWord(word, "(")
-                cmd = arg + cmd
-                cmd = cmd.strip("()")
-            else:
-                k, v = nextWord(word, ":")
-                key.append(makeKey(v))
-            
-    command = "table_add " + tableName + " " + action + " " + " ".join(key) + " => " + " ".join(actionArgs) + " " + prio
-    return command
+class BMV2ActionArg(object):
+    def __init__(self, name, width):
+        # assert isinstance(name, str)
+        # assert isinstance(width, int)
+        self.name = name
+        self.width = width
 
-# Translate STF commands into simple_switch_CLI commands
-def generate_cli_commands(stffile, outfile):
-    with open(stffile) as i:
-        with open(outfile, 'w') as o:
+class TableKey(object):
+    def __init__(self, ternary):
+        self.fields = []
+        self.ternary = ternary
+    def append(self, name):
+        self.fields.append(name)
+        
+class TableKeyInstance(object):
+    def __init__(self, tableKey):
+        assert isinstance(tableKey, TableKey)
+        self.values = {}
+        self.key = tableKey
+        for f in tableKey.fields:
+            self.values[f] = self.makeMask("0x*", tableKey.ternary)
+    def set(self, key, value, ternary):
+        array = re.compile("(.*)\$([0-9]+)(.*)");
+        m = array.match(key)
+        if m:
+            key = m.group(1) + "[" + m.group(2) + "]" + m.group(3)
+        
+        found = False
+        for i in self.key.fields:
+            if key == i:
+                print("Field found", key)
+                found = True
+        if not found:
+            raise Exception("Unexpected key field " + key)
+        self.values[key] = self.makeMask(value, ternary)
+    def makeMask(self, value, ternary):
+        if not ternary:
+            return value
+        if value.startswith("0x"):
+            mask = "F"
+            value = value[2:]
+            prefix = "0x"
+        elif value.startswith("0b"):
+            mask = "1"
+            value = value[2:]
+            prefix = "0b"
+        elif value.startswith("0o"):
+            mask = "7"
+            value = value[2:]
+            prefix = "0o"
+        values = "0123456789*"
+        replacements = (mask * 10) + "0"
+        trans = maketrans(values, replacements)
+        m = value.translate(trans)
+        return prefix + value.replace("*", "0") + "&&&" + prefix + m
+    def __str__(self):
+        result = ""
+        for f in self.key.fields:
+            if result != "":
+                result += " "
+            result += self.values[f]
+        return result
+
+class BMV2ActionArguments(object):
+    def __init__(self, action):
+        assert isinstance(action, BMV2Action)
+        self.action = action
+        self.values = {}
+    def set(self, key, value):
+        found = False
+        for i in self.action.args:
+            if key == i.name:
+                print("Key found", key)
+                found = True
+        if not found:
+            raise Exception("Unexpected action arg " + key)
+        self.values[key] = value
+    def __str__(self):
+        result = ""
+        for f in self.action.args:
+            if result != "":
+                result += " "
+            result += self.values[f.name]
+        return result
+    
+class BMV2Action(object):
+    def __init__(self, jsonAction):
+        self.name = jsonAction["name"]
+        self.args = []
+        for a in jsonAction["runtime_data"]:
+            arg = BMV2ActionArg(a["name"], a["bitwidth"])
+            self.args.append(arg)
+    def __str__(self):
+        return self.name
+    def makeArgsInstance(self):
+        return BMV2ActionArguments(self)
+
+class BMV2Table(object):
+    def __init__(self, jsonTable):
+        self.match_type = jsonTable["match_type"]
+        self.name = jsonTable["name"]
+        self.key = TableKey(self.match_type == "ternary")
+        self.actions = {}
+        for k in jsonTable["key"]:
+            name = ""
+            for t in k["target"]:
+                if name != "":
+                    name += "."
+                name += t
+            self.key.append(name)
+        actions = jsonTable["actions"]
+        action_ids = jsonTable["action_ids"]
+        for i in range(0, len(actions)):
+            actionName = actions[i]
+            actionId = action_ids[i]
+            self.actions[actionName] = actionId
+    def __str__(self):
+        return self.name
+    def makeKeyInstance(self):
+        return TableKeyInstance(self.key)
+
+# Represents enough about the program executed to be
+# able to invoke the BMV2 simulator, create a CLI file
+# and test packets in pcap files.
+class RunBMV2(object):
+    def __init__(self, folder, options, jsonfile):
+        self.clifile = folder + "/cli.txt"
+        self.jsonfile = jsonfile
+        self.clifd = open(self.clifile, "w")
+        self.folder = folder
+        self.pcapPrefix = "pcap"
+        self.packets = {}
+        self.options = options
+        self.json = None
+        self.tables = []
+        self.actions = []
+        self.readJson()
+        # print(self.actions, self.tables)
+    def readJson(self):
+        with open(self.folder + "/" + self.jsonfile) as jf:
+            self.json = json.load(jf)
+        for a in self.json["actions"]:
+            self.actions.append(BMV2Action(a))
+        for t in self.json["pipelines"][0]["tables"]:
+            self.tables.append(BMV2Table(t))
+        for t in self.json["pipelines"][1]["tables"]:
+            self.tables.append(BMV2Table(t))
+    def createEmptyPcapFile(self, fname):
+        os.system("cp " + self.options.compilerSrcDir + "/tools/empty.pcap " + fname);
+    def writeCommand(self, line):
+        self.clifd.write(line + "\n")
+    def filename(self, interface, direction):
+        return self.folder + "/" + self.pcapPrefix + interface + "_" + direction + ".pcap"
+    def translate_command(self, cmd):
+        first, cmd = nextWord(cmd)
+        if first != "add":
+            return None
+        tableName, cmd = nextWord(cmd)
+        table = self.tableByName(tableName)
+        key = table.makeKeyInstance()
+        actionArgs = None
+        actionName = None
+        prio, cmd = nextWord(cmd)
+        ternary = True
+        number = re.compile("[0-9]+")
+        if not number.match(prio):
+            # not a priority; push back
+            cmd = prio + " " + cmd
+            prio = ""
+            ternary = False
+        while cmd != "":
+            if actionName != None:
+                # parsing action arguments
+                word, cmd = nextWord(cmd, ",")
+                k, v = nextWord(word, ":")
+                actionArgs.set(k, v)
+            else:
+                # parsing table key
+                word, cmd = nextWord(cmd)
+                if word.find("(") >= 0:
+                    # found action
+                    actionName, arg = nextWord(word, "(")
+                    action = self.actionByName(table, actionName)
+                    actionArgs = action.makeArgsInstance()
+                    cmd = arg + cmd
+                    cmd = cmd.strip("()")
+                else:
+                    k, v = nextWord(word, ":")
+                    key.set(k, v, ternary)
+
+        if prio != "":
+            # Priorities in BMV2 seem to be reversed with respect to the stf file
+            # Hopefully 10000 is large enough
+            prio = str(10000 - int(prio))
+        command = "table_add " + tableName + " " + actionName + " " + str(key) + " => " + str(actionArgs) + " " + prio
+        return command
+    def actionByName(self, table, actionName):
+        id = table.actions[actionName]
+        action = self.actions[id]
+        return action
+    def tableByName(self, tableName):
+        for t in self.tables:
+            if t.name == tableName:
+                return t
+        raise Exception("Could not find table" + tableName)
+    def writePacket(self, inout, interface, data):
+        if not interface in self.packets:
+            self.packets[interface] = {}
+        if not inout in self.packets[interface]:
+            self.packets[interface][inout] = []
+        self.packets[interface][inout].append(data)
+    def interfaces(self):
+        # return list of interface names suitable for bmv2
+        result = []
+        for interface, v in self.packets.iteritems():
+            result.append("-i " + interface + "@" + self.pcapPrefix + interface)
+        return result
+    def translate_packet(self, line):
+        cmd, line = nextWord(line)
+        if cmd == "expect":
+            direction = "out"
+        elif cmd == "packet":
+            direction = "in"
+        else:
+            return
+        interface, line = nextWord(line)
+        self.writePacket(direction, interface, line)
+    def generate_model_inputs(self, stffile):
+        with open(stffile) as i:
             for line in i:
-                cmd = translate_command(line)
+                cmd = self.translate_command(line)
                 if cmd is not None:
-                    print(cmd)
-                    o.write(cmd)
+                    if self.options.verbose:
+                        print(cmd)
+                    self.writeCommand(cmd)
+                else:
+                    self.translate_packet(line)
+        # Write the data to the files
+        self.clifd.close()
+        for interface, v in self.packets.iteritems():
+            direction ="in"
+            file = self.filename(interface, direction)
+            if direction in v:
+                packets = v[direction]
+                data = [Ether(_pkt=HexToByte(hx)) for hx in packets]
+                print("Creating", file)
+                wrpcap(file, data)
+            else:
+                print("Empty", file)
+                self.createEmptyPcapFile(file)
+        return SUCCESS
+    def run(self):
+        if self.options.verbose:
+            print("Running model")
+        interfaces = self.interfaces()
+        wait = 1
+
+        concurrent = ConcurrentInteger(os.getcwd(), 1000)
+        rand = concurrent.generate()
+        if rand is None:
+            print("Could not find a free port for Thrift")
+            return FAILURE
+        thriftPort = str(9090 + rand)
+
+        try:
+            runswitch = ["simple_switch", "--log-file", "switch.log", "--use-files", str(wait), "--thrift-port", thriftPort] + interfaces + [self.jsonfile]
+            if self.options.verbose:
+                print("Running", " ".join(runswitch))
+            sw = subprocess.Popen(runswitch, cwd=self.folder)
+                
+            runcli = ["simple_switch_CLI", "--json", self.jsonfile, "--thrift-port", thriftPort]
+            if self.options.verbose:
+                print("Running", " ".join(runcli))
+            i = open(self.clifile, 'r')
+            cli = subprocess.Popen(runcli, cwd=self.folder, stdin=i)
+            cli.wait()
+            time.sleep(3)
+            sw.terminate()
+        finally:
+            concurrent.release(rand)
+        if self.options.verbose:
+            print("Execution completed")
+        return SUCCESS
+    def comparePacket(self, expected, received):
+        received = ByteToHex(str(received)).replace(" ", "").upper()
+        expected = expected.replace(" ", "").upper()
+        # print(expected, received)
+        if len(received) < len(expected):
+            print("Length too short", len(received), "vs", len(expected))
+            return FAILURE
+        for i in range(0, len(expected)):
+            if expected[i] == "*":
+                continue;
+            if expected[i] != received[i]:
+                print("Different at position", i, ": expected", expected[i], "vs", received[i])
+                return FAILURE
+        return SUCCESS
+    def checkOutputs(self):
+        if self.options.verbose:
+            print("Comparing outputs")
+        for interface, v in self.packets.iteritems():
+            direction = "out"
+            file = self.filename(interface, direction)
+            if os.stat(file).st_size == 0:
+                packets = []
+            else:
+                try:
+                    packets = rdpcap(file)
+                except:
+                    print("*** Corrupt pcap file", file)
+                    return FAILURE
+            if direction in v:
+                expected = v[direction]
+                if len(expected) != len(packets):
+                    print("*** Expected", len(expected), "packets on port", interface, "got", len(packets))
+                    return FAILURE
+                for i in range(0, len(expected)):
+                    cmp = self.comparePacket(expected[i], packets[i])
+                    if cmp != SUCCESS:
+                        print("*** Packet", i, "on port", interface, "differs")
+                        return FAILURE
+            else:
+                pass
+        return SUCCESS
 
 def run_model(options, tmpdir, jsonfile):
     # We can do this if an *.stf file is present
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
+    jsonfile = os.path.basename(jsonfile)
 
-    file = dirname + "/" + base + ".stf"
-    print("Check for ", file)
-    if not os.path.isfile(file):
+    testfile = dirname + "/" + base + ".stf"
+    print("Check for ", testfile)
+    if not os.path.isfile(testfile):
         return SUCCESS
 
-    if options.verbose:
-        print("Running model")
-
-    clifile = tmpdir + "/" + "cli.txt"
-    generate_cli_commands(file, clifile)
-    generate_packets(file)
-    return SUCCESS
+    bmv2 = RunBMV2(tmpdir, options, jsonfile)
+    result = bmv2.generate_model_inputs(testfile)
+    if result != SUCCESS:
+        return result
+    result = bmv2.run()
+    if result != SUCCESS:
+        return result
+    result = bmv2.checkOutputs()
+    return result
 
 def process_file(options, argv):
     assert isinstance(options, Options)
@@ -217,7 +533,7 @@ def process_file(options, argv):
     base, ext = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
     expected_dirname = dirname + "_outputs"  # expected outputs are here
-    
+
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     jsonfile = tmpdir + "/" + base + ".json"
@@ -248,7 +564,7 @@ def process_file(options, argv):
 
     if result == SUCCESS:
         result = run_model(options, tmpdir, jsonfile);
-            
+
     if options.cleanupTmp:
         if options.verbose:
             print("Removing", tmpdir)
@@ -271,10 +587,10 @@ def main(argv):
         usage(options)
         return FAILURE
 
-    options.compilerSrcdir = argv[1]
+    options.compilerSrcDir = argv[1]
     argv = argv[2:]
-    if not os.path.isdir(options.compilerSrcdir):
-        print(options.compilerSrcdir + " is not a folder", file=sys.stderr)
+    if not os.path.isdir(options.compilerSrcDir):
+        print(options.compilerSrcDir + " is not a folder", file=sys.stderr)
         usage(options)
         return FAILURE
 
@@ -300,8 +616,8 @@ def main(argv):
 
     options.p4filename=argv[-1]
     options.testName = None
-    if options.p4filename.startswith(options.compilerSrcdir):
-        options.testName = options.p4filename[len(options.compilerSrcdir):];
+    if options.p4filename.startswith(options.compilerSrcDir):
+        options.testName = options.p4filename[len(options.compilerSrcDir):];
         if options.testName.startswith('/'):
             options.testName = options.testName[1:]
         if options.testName.endswith('.p4'):

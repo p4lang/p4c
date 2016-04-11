@@ -29,32 +29,6 @@
   precedence   -> int getPrecedence() const
  */
 
-#emit
-namespace IR {
-enum class CounterType { NONE, PACKETS, BYTES, BOTH };
-}
-
-inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
-    switch (d) {
-        case IR::CounterType::NONE:
-            out << "NONE";
-            break;
-        case IR::CounterType::PACKETS:
-            out << "PACKETS";
-            break;
-        case IR::CounterType::BYTES:
-            out << "BYTES";
-            break;
-        case IR::CounterType::BOTH:
-            out << "BOTH";
-            break;
-        default:
-            BUG("Unhandled case");
-    }
-    return out;
-}
-#end
-
 class SelectCase {
     Expression     keyset;
     PathExpression state;
@@ -80,7 +54,7 @@ class ParserState : IGeneralNamespace, Declaration {
 }
 
 // A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)
-class ParserContainer : Type_Declaration, IGeneralNamespace, IApply, IContainer {
+class P4Parser : Type_Declaration, IGeneralNamespace, IApply, IContainer {
     Type_Parser          type;
     ParameterList        constructorParams;
     Vector<Declaration>  stateful;
@@ -105,7 +79,7 @@ class ParserContainer : Type_Declaration, IGeneralNamespace, IApply, IContainer 
     toString { return cstring("parser ") + name; }
 }
 
-class ControlContainer : Type_Declaration, ISimpleNamespace, IApply, IContainer {
+class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     Type_Control         type;
     ParameterList        constructorParams;
     inline NameMap<Declaration, ordered_map>  stateful;
@@ -130,8 +104,7 @@ class ControlContainer : Type_Declaration, ISimpleNamespace, IApply, IContainer 
     toString { return cstring("control ") + name; }
 }
 
-// For uniform naming with Container; this is just a v1.2 action
-class ActionContainer : Declaration, IGeneralNamespace {
+class P4Action : Declaration, IGeneralNamespace {
     Annotations        annotations;
     ParameterList      parameters;
     Vector<StatOrDecl> body;
@@ -178,6 +151,7 @@ abstract PropertyValue {
 #nodbprint
 }
 
+// A property whose value is an expression
 class ExpressionValue : PropertyValue {
     Expression expression;
 #nodbprint
@@ -246,7 +220,7 @@ class TableProperties : ISimpleNamespace {
     validate{ properties.check_null(); }
 }
 
-class TableContainer : Declaration {
+class P4Table : Declaration {
     Annotations     annotations;
     ParameterList   parameters;
     TableProperties properties;
@@ -317,8 +291,12 @@ abstract Statement : StatOrDecl {
 #nodbprint
 }
 
+class ExitStatement : Statement {
+    toString{ return "exit"; }
+#nodbprint
+}
+
 class ReturnStatement : Statement {
-    NullOK Expression expr;
     toString{ return "return"; }
 #nodbprint
 }
@@ -371,357 +349,10 @@ class SwitchStatement : Statement {
 #end
 }
 
-/* FIXME -- following v1.0 specific IR classes need to be unified with preceding v1.2
- * FIXME -- specific IR classes */
+/////////////////////////////////////////////////////////////
 
-abstract HeaderOrMetadata {
-    IR::ID                      type_name;
-    IR::ID                      name;
-    NullOK Type_StructLike      type;
-#emit
-    HeaderOrMetadata(IR::ID n, const Type_StructLike *t) : type_name(t->name), name(n), type(t) {}
-#end
-    dbprint { out << type_name << ' ' << name; }
-}
-
-class Header : HeaderOrMetadata {
-#emit
-    Header(IR::ID n, const Type_Header *t) : HeaderOrMetadata(n, t) {}
-#end
-#nodbprint
-}
-
-class HeaderStack : HeaderOrMetadata {
-    int size;
-#emit
-    HeaderStack(IR::ID n, const Type_Header *t, int sz) : HeaderOrMetadata(n, t), size(sz) {}
-#end
-#nodbprint
-}
-
-class Metadata : HeaderOrMetadata {
-#emit
-    Metadata(IR::ID n, const Type_Struct *t) : HeaderOrMetadata(n, t) {}
-#end
-#nodbprint
-}
-
-abstract HeaderRef : Expression {
-#noconstructor
-#emit
-    HeaderRef() {}
-    HeaderRef(Util::SourceInfo si) : Expression(si) {}
-    HeaderRef(Util::SourceInfo si, const Type_StructLike *ht) : Expression(si, ht) {}
-#end
-}
-
-class ConcreteHeaderRef : HeaderRef {
-    HeaderOrMetadata    ref;
-#noconstructor
-#emit
-    ConcreteHeaderRef(Util::SourceInfo si, const HeaderOrMetadata *r)
-    : HeaderRef(si, r->type), ref(r) {}
-    ConcreteHeaderRef(const HeaderOrMetadata *r) : HeaderRef(Util::SourceInfo(), r->type), ref(r) {}
-#end
-    toString{ return ref->name; }
-    dbprint{ out << ref->name; }
-}
-
-class HeaderSliceRef : Slice {
-#nodbprint
-#noconstructor
-#emit
-  HeaderSliceRef(Util::SourceInfo si, const IR::HeaderRef* header_ref,
-                 const int &msb, const int &lsb) :
-    Slice(si, header_ref, new IR::Constant(msb), new IR::Constant(lsb)) {
-    assert(lsb <= msb);
-    type = Type_Bits::get(si, msb - lsb + 1); }
-  HeaderSliceRef(const Member *fr) :
-    Slice(fr->srcInfo, fr->expr, new Constant(fr->msb()), new Constant(fr->lsb())) {
-    assert(fr->lsb() <= fr->msb());
-    type = Type_Bits::get(fr->srcInfo, fr->msb() - fr->lsb() + 1); }
-  const HeaderRef* header_ref() const {
-    return e0->to<const HeaderRef>(); }
-  Vector<Member> fields() const {
-    Vector<Member> rv;
-    for (auto field : *header_ref()->type->to<IR::Type_StructLike>()->getEnumerator()) {
-      const IR::Member fr(srcInfo, field->type, header_ref(), field->name);
-      if (fr.lsb() >= lsb() && fr.msb() <= msb())
-        rv.push_back(new Member(fr));
-    }
-    return rv; }
-  int offset_bits() const { return e2->to<const Constant>()->asInt(); }
-  int lsb() const { return offset_bits(); }
-  int msb() const { return offset_bits() + type->width_bits() - 1; }
-#end
-}
-
-class HeaderStackItemRef : HeaderRef {
-    Expression      base_;
-    Expression      index_;
-#noconstructor
-#emit
-    HeaderStackItemRef(Util::SourceInfo si, const Type_Header *t, const Expression *b,
-                       const Expression *i)
-    : HeaderRef(si, t), base_(b), index_(i) {}
-    HeaderStackItemRef(Util::SourceInfo si, const Expression *b, const Expression *i)
-    : HeaderRef(si), base_(b), index_(i) {}
-    const Expression* base() const { return base_; }
-    const Expression* index() const { return index_; }
-    void set_base(const Expression *b) { base_ = b; }
-#end
-    toString{ return base_->toString() + "[" + index_->toString() + "]"; }
-}
-
-class FieldList {
-    ID                          name;
-    bool                        payload;
-    inline Vector<Expression>   fields;
-#noconstructor
-#emit
-    FieldList() = default;
-#end
-}
-
-class FieldListCalculation {
-    ID                  name;
-    NameList            input;
-    ID                  algorithm;
-    int                 output_width;
-#noconstructor
-#emit
-    FieldListCalculation() = default;
-#end
-}
-
-class CalculatedField {
-    Expression            field;
-#noconstructor
-#emit
-    CalculatedField() = default;
-    struct update_or_verify {
-        Util::SourceInfo        srcInfo;
-        bool                    update;
-        ID                      name;
-        const Expression       *cond;
-        update_or_verify(Util::SourceInfo si, bool u, ID n, const Expression *c)
-        : srcInfo(si), update(u), name(n), cond(c) {}
-        bool operator==(const update_or_verify &a) const { return update == a.update &&
-            name == a.name && cond == a.cond; }
-    };
-#end
-    vector<update_or_verify>    specs;
-    visit_children { v.visit(field, "field"); for (auto &s : specs) v.visit(s.cond, s.name.name); }
-}
-
-class CaseEntry {
-    vector<std::pair<Constant, Constant>>       values;
-    ID                                          action;
-#emit
-    CaseEntry() = default;
-#end
-}
-
-class Parser {
-    ID                          name;
-    inline Vector<Expression>   stmts;
-    NullOK Vector<Expression>   select;
-    NullOK Vector<CaseEntry>    cases;
-    ID                          default_return;
-    ID                          parse_error;
-    bool                        drop;
-#noconstructor
-#emit
-    Parser() = default;
-#end
-    toString { return node_type_name() + " " + name; }
-}
-
-class ParserException {}
-
-abstract Attached {
-    ID     name;
-#emit
-    Attached() = default;
-    virtual const char *kind() const = 0;
-    virtual bool indexed() const { return false; }
-    Attached *clone_rename(const char *ext) const {
-        Attached *rv = clone();
-        rv->name = IR::ID(Util::SourceInfo(), rv->name.name + ext);
-        return rv; }
-#end
-    dbprint { out << node_type_name() << " " << name; }
-    toString { return node_type_name() + " " + name; }
-}
-
-abstract Stateful : Attached {
-    ID          table;
-    bool        direct;
-    bool        saturating;
-    int         instance_count = -1;
-#emit
-    Stateful() = default;
-    virtual bool indexed() const { return !direct; }
-#end
-}
-
-abstract CounterOrMeter : Stateful {
-    CounterType   type;
-#emit
-    CounterOrMeter() = default;
-    void settype(cstring t) {
-        if (t == "packets") type = CounterType::PACKETS;
-        else if (t == "bytes") type = CounterType::BYTES;
-        else if (t == "packets_and_bytes") type = CounterType::BOTH;
-        else error("%s: Unknown type %s", srcInfo, t); }  // NOLINT
-#end
-}
-
-class Counter : CounterOrMeter {
-    int         max_width = -1;
-    int         min_width = -1;
-#emit
-    Counter() = default;
-    const char *kind() const { return "stats"; }
-#end
-}
-
-class Meter : CounterOrMeter {
-    NullOK Expression   result;
-    NullOK Expression   pre_color;
-    ID                  implementation;
-#emit
-    Meter() = default;
-    const char *kind() const { return "meter"; }
-#end
-}
-
-class Register : Stateful {
-    ID          layout;
-    int         width = -1;
-    bool        signed_;
- /* bool        saturating; */
-#emit
-    Register() = default;
-    const char *kind() const { return "register"; }
-#end
-}
-
-class PrimitiveAction {}
-
-class NameList {
-    vector<ID>          names;
-#emit
-    NameList() = default;
-    NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
-#end
-}
-
-class ActionArg : Expression {
-    ID             name;
-    bool           read = false;
-    bool           write = false;
-#emit
-    explicit ActionArg(const ID &n) : Expression(n.srcInfo), name(n) {}
-    ActionArg(Util::SourceInfo si, const Type *t, const ID &n) : Expression(si, t), name(n) {}
-#end
-    dbprint{ out << name; }
-    toString{ return name.name; }
-}
-
-class ActionFunction {
-    ID                          name;
-    inline Vector<Primitive>    action;
-    vector<ActionArg>           args;
-#noconstructor
-#emit
-    ActionFunction() = default;
-    ActionFunction(const ActionContainer *, const Vector<Expression> *);
-    const ActionArg     *arg(cstring n) const {
-        for (auto a : args)
-            if (a->name == n)
-                return a;
-        return nullptr; }
-#end
-    visit_children {
-        action.visit_children(v);
-        // DANGER -- visiting action first so type inferencing will push types to
-        // DANGER -- action args based on use.  This is immoral.
-        for (auto &a : args) v.visit(a);
-    }
-    toString {
-        return cstring("action ") + name + " {\n" +
-                 cstring::join(action.begin(), action.end(), ";\n") +
-                 " }"; }
-}
-
-class ActionProfile : Attached {
-    ID          selector;
-    vector<ID>  actions;
-    int         size;
-#noconstructor
-#emit
-    const char *kind() const { return "action_profile"; }
-    bool indexed() const { return true; }
-#end
-}
-
-class ActionSelector : Attached {
-    ID key;
-    ID mode;
-    ID type;
-#noconstructor
-#emit
-    const char *kind() const { return "action_selector"; }
-#end
-}
-
-class Table {
-    ID                          name;
-    Vector<Expression>          reads = 0;
-    vector<ID>                  reads_types;
-    int                         min_size = 0;
-    int                         max_size = 0;
-    int                         size = 0;
-    ID                          action_profile;
-    vector<ID>                  actions;
-    ID                          default_action;
-    NullOK Vector<Expression>   default_action_args = 0;
-    inline TableProperties      properties;  // non-standard properties
-#noconstructor
-#emit
-    Table() {}
-    Table(const TableContainer *);
-#end
-    toString { return node_type_name() + " " + name; }
-}
-
-class Control {
-    ID                            name;
-    Vector<Expression>            code;
-#emit
-    explicit Control(ID n) : name(n), code(new Vector<Expression>()) {}
-    Control(Util::SourceInfo si, ID n) : Node(si), name(n), code(new Vector<Expression>()) {}
-#end
-#apply
-    toString { return node_type_name() + " " + name; }
-}
-
-#emit
-class CompilerOptions;
-#end
-
-class Global {
-    inline NameMap<Node, std::multimap>         scope;
-#noconstructor
-#emit
-    Global(const CompilerOptions &);
-    template<class T> const T *get(cstring name) const { return scope.get<T>(name); }
-    void add(cstring name, const Node *n) { scope.add(name, n); }
-#end
-#apply
-}
-
+// Block is the base class for IR nodes produced by the evaluator.
+// A block represents a compile-time allocated resource.
 abstract Block : CompileTimeValue {
     Node node;  // Node that evaluates to this block.
     // It's either a Declaration_Instance or a ConstructorCallExpression.
@@ -747,7 +378,7 @@ abstract Block : CompileTimeValue {
 }
 
 class TableBlock : Block {
-    TableContainer container;
+    P4Table container;
 #nodbprint
 }
 
@@ -764,7 +395,7 @@ abstract InstantiatedBlock : Block {
 }
 
 class ParserBlock : InstantiatedBlock {
-    ParserContainer container;
+    P4Parser container;
 #emit
     const IR::ParameterList* getConstructorParameters() const override
     { return container->constructorParams; }
@@ -773,7 +404,7 @@ class ParserBlock : InstantiatedBlock {
 }
 
 class ControlBlock : InstantiatedBlock {
-    ControlContainer container;
+    P4Control container;
 #emit
     const IR::ParameterList* getConstructorParameters() const override
     { return container->constructorParams; }
@@ -800,6 +431,7 @@ class ExternBlock : InstantiatedBlock {
 #nodbprint
 }
 
+// Represents the program as a whole
 class ToplevelBlock : Block {
 #nodbprint
 }

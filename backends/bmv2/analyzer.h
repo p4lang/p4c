@@ -56,9 +56,9 @@ class CFG {
  public:
     class TableNode : public Node {
      public:
-        const IR::TableContainer* table;
+        const IR::P4Table* table;
         const IR::Expression*      invocation;
-        explicit TableNode(const IR::TableContainer* table, const IR::Expression* invocation) :
+        explicit TableNode(const IR::P4Table* table, const IR::Expression* invocation) :
                 Node(nameFromAnnotation(table->annotations, table->name)),
                 table(table), invocation(invocation) {}
     };
@@ -115,11 +115,11 @@ class CFG {
  public:
     Node* entryPoint;
     Node* exitPoint;
-    const IR::ControlContainer* container;
+    const IR::P4Control* container;
     std::set<Node*> allNodes;
 
-    CFG() : entryPoint(nullptr), container(nullptr) {}
-    Node* makeNode(const IR::TableContainer* table, const IR::Expression* invocation) {
+    CFG() : entryPoint(nullptr), exitPoint(nullptr), container(nullptr) {}
+    Node* makeNode(const IR::P4Table* table, const IR::Expression* invocation) {
         auto result = new TableNode(table, invocation);
         allNodes.emplace(result);
         return result;
@@ -134,7 +134,7 @@ class CFG {
         allNodes.emplace(result);
         return result;
     }
-    void build(const IR::ControlContainer* cc,
+    void build(const IR::P4Control* cc,
                const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap);
     void setEntry(Node* entry) {
         BUG_CHECK(entryPoint == nullptr, "Entry already set");
@@ -150,14 +150,14 @@ class CFG {
 class ProgramParts {
  public:
     // map action to parent
-    std::map<const IR::ActionContainer*, const IR::ControlContainer*> actions;
+    std::map<const IR::P4Action*, const IR::P4Control*> actions;
     // Maps each Parameter of an action to its positional index.
     // Needed to generate code for actions.
     std::map<const IR::Parameter*, unsigned> index;
     // Parameters of controls/parsers
     std::set<const IR::Parameter*> nonActionParameters;
     // for each action its json id
-    std::map<const IR::ActionContainer*, unsigned> ids;
+    std::map<const IR::P4Action*, unsigned> ids;
 
     ProgramParts() {}
     void analyze(P4::BlockMap* blockMap);

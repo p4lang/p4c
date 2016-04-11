@@ -15,6 +15,7 @@ class Target {
     cstring name;
     explicit Target(cstring name) : name(name) {}
     Target() = delete;
+    virtual ~Target() {}
 
  public:
     virtual void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const = 0;

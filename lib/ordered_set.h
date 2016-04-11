@@ -6,6 +6,7 @@
 #include <set>
 #include <utility>
 
+// Remembers items intertion order
 template <class T, class COMP = std::less<T>, class ALLOC = std::allocator<T>>
 class ordered_set {
  public:
@@ -52,7 +53,7 @@ class ordered_set {
     ordered_set() {}
     ordered_set(const ordered_set &a) : data(a.data) { init_data_map(); }
     ordered_set(ordered_set &&a) = default; /* move is ok? */
-    ordered_set &operator=(const ordered_set &a) { data = a.data; init_data_map(); }
+    ordered_set &operator=(const ordered_set &a) { data = a.data; init_data_map(); return *this; }
     ordered_set &operator=(ordered_set &&a) = default; /* move is ok? */
     // FIXME add allocator and comparator ctors...
 

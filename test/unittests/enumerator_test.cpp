@@ -158,7 +158,7 @@ class TestEnumerator : public TestBase {
                 e->next();
                 UNREACHABLE();
             }
-            catch (std::logic_error) {}
+            catch (std::logic_error&) {}
         }
 
         {
@@ -170,7 +170,7 @@ class TestEnumerator : public TestBase {
                 e->single();
                 UNREACHABLE();
             }
-            catch (std::logic_error) {}
+            catch (std::logic_error&) {}
         }
 
         return SUCCESS;
@@ -198,14 +198,14 @@ class TestEnumerator : public TestBase {
             elem = enumerator->getCurrent();
             UNREACHABLE();
         }
-        catch (std::logic_error) {}
+        catch (std::logic_error&) {}
 
         enumerator->reset();
         try {
             elem = enumerator->getCurrent();
             UNREACHABLE();
         }
-        catch (std::logic_error) {}
+        catch (std::logic_error&) {}
 
         more = enumerator->moveNext();
         ASSERT_EQ(more, true);

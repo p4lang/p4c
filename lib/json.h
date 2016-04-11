@@ -16,6 +16,7 @@ namespace Util {
 
 class IJson {
  public:
+	virtual ~IJson() {}
     virtual void serialize(std::ostream& out) const = 0;
     cstring toString() const;
     template<typename T> bool is() const { return to<T>() != nullptr; }

@@ -1,4 +1,4 @@
 ../testdata/v1_2_errors/globalVar_e.p4(1):syntax error, unexpected IDENTIFIER, expecting '('
 bit x
     ^
-error: 1 errors ecountered, aborting compilation
+error: 1 errors encountered, aborting compilation

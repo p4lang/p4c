@@ -10,4 +10,4 @@
 ../testdata/v1_2_errors/function_e.p4(10): error: g has 1 type parameters, but is invoked with 2 type arguments
         g<bit, bit>();
         ^^^^^^^^^^^^^
-error: 4 errors ecountered, aborting compilation
+error: 4 errors encountered, aborting compilation

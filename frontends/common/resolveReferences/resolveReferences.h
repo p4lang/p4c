@@ -43,7 +43,7 @@ class ResolutionContext {
 
     // Resolve a reference for the specified name.
     // The reference is restricted to be to an object of the specified type
-    // If previousOnly is true, the refence must preced the point of the 'name' in the program
+    // If previousOnly is true, the reference must precede the point of the 'name' in the program
     std::vector<const IR::IDeclaration*>*
     resolve(IR::ID name, ResolutionType type, bool previousOnly) const;
 
@@ -87,11 +87,11 @@ class ResolveReferences : public Inspector {
     void postorder(const IR::TYPE* t) override; \
 
     DECLARE(P4Program)
-    DECLARE(ControlContainer)
-    DECLARE(ParserContainer)
-    DECLARE(ActionContainer)
+    DECLARE(P4Control)
+    DECLARE(P4Parser)
+    DECLARE(P4Action)
     DECLARE(TableProperties)
-    DECLARE(TableContainer)
+    DECLARE(P4Table)
     DECLARE(Type_Method)
     DECLARE(ParserState)
     DECLARE(Type_Extern)

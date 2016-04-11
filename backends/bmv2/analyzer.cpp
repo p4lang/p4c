@@ -100,6 +100,11 @@ class CFGBuilder : public Inspector {
         setAfter(statement, new CFG::EdgeSet());  // empty successor set
         return false;
     }
+    bool preorder(const IR::ExitStatement* statement) override {
+        cfg->exitPoint->addPredecessors(current);
+        setAfter(statement, new CFG::EdgeSet());  // empty successor set
+        return false;
+    }
     bool preorder(const IR::EmptyStatement* statement) override {
         // unchanged 'current'
         setAfter(statement, current);
@@ -110,11 +115,11 @@ class CFGBuilder : public Inspector {
         if (!instance->is<P4::ApplyMethod>())
             return false;
         auto am = instance->to<P4::ApplyMethod>();
-        if (!am->object->is<IR::TableContainer>()) {
+        if (!am->object->is<IR::P4Table>()) {
             ::error("%1%: apply method must be on a table", statement);
             return false;
         }
-        auto tc = am->object->to<IR::TableContainer>();
+        auto tc = am->object->to<IR::P4Table>();
         auto node = cfg->makeNode(tc, statement->methodCall);
         node->addPredecessors(current);
         setAfter(statement, new CFG::EdgeSet(new CFG::Edge(node)));
@@ -196,7 +201,7 @@ class CFGBuilder : public Inspector {
     }
 };
 
-void CFG::build(const IR::ControlContainer* cc,
+void CFG::build(const IR::P4Control* cc,
                 const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap) {
     container = cc;
     entryPoint = makeNode(cc->name + ".entry");
@@ -220,7 +225,7 @@ class DiscoverStructure : public Inspector {
     explicit DiscoverStructure(ProgramParts* structure) : structure(structure) {}
 
     void postorder(const IR::ParameterList* paramList) override {
-        bool inAction = findContext<IR::ActionContainer>() != nullptr;
+        bool inAction = findContext<IR::P4Action>() != nullptr;
         unsigned index = 0;
         for (auto p : *paramList->getEnumerator()) {
             structure->index.emplace(p, index);
@@ -229,8 +234,8 @@ class DiscoverStructure : public Inspector {
             index++;
         }
     }
-    void postorder(const IR::ActionContainer* action) override {
-        auto control = findContext<IR::ControlContainer>();
+    void postorder(const IR::P4Action* action) override {
+        auto control = findContext<IR::P4Control>();
         structure->actions.emplace(action, control);
     }
 };

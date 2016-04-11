@@ -19,9 +19,9 @@ class RemoveUnusedDeclarations : public Transform {
 
     Visitor::profile_t init_apply(const IR::Node *root) override;
 
-    const IR::Node* preorder(IR::ControlContainer* cont) override;
-    const IR::Node* preorder(IR::ParserContainer* cont) override;
-    const IR::Node* preorder(IR::TableContainer* cont) override;
+    const IR::Node* preorder(IR::P4Control* cont) override;
+    const IR::Node* preorder(IR::P4Parser* cont) override;
+    const IR::Node* preorder(IR::P4Table* cont) override;
     const IR::Node* preorder(IR::ParserState* state)  override;
     const IR::Node* preorder(IR::Type_Enum* type)  override;
 

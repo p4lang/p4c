@@ -6,27 +6,27 @@
 
 class InlineControlFlow : public Transform {
 public:
-    InlineControlFlow(const IR::Global *gl) : global(gl), blockMap(nullptr) {}
+    InlineControlFlow(const IR::V1Program *gl) : global(gl), blockMap(nullptr) {}
     InlineControlFlow(const P4::BlockMap *bm) : global(nullptr), blockMap(bm) {}
 private:
-    const IR::Global    *global;
+    const IR::V1Program *global;
     const P4::BlockMap *blockMap;
 
     const IR::Node *preorder(IR::Apply *a) override {
-        if (!global->get<IR::Table>(a->name))
+        if (!global->get<IR::V1Table>(a->name))
             error("%s: No table named %s", a->srcInfo, a->name);
         return a;
     }
     const IR::Node *preorder(IR::Primitive *p) override {
-        if (auto cf = global->get<IR::Control>(p->name)) {
-            const IR::Control *control;
+        if (auto cf = global->get<IR::V1Control>(p->name)) {
+            const IR::V1Control *control;
             if (auto act = findContext<IR::ActionFunction>())
                 error("%s: Trying to call control flow %s in action %s", p->srcInfo,
                       p->name, act->name);
-            else if (auto table = findContext<IR::Table>())
+            else if (auto table = findContext<IR::V1Table>())
                 error("%s: Trying to call control flow %s in table %s", p->srcInfo,
                       p->name, table->name);
-            else if ((control = findContext<IR::Control>()) && control->name == p->name)
+            else if ((control = findContext<IR::V1Control>()) && control->name == p->name)
                 error("%s: Recursive call to control flow %s", p->srcInfo, p->name);
             else
                 return cf->code; }

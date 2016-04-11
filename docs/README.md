@@ -39,7 +39,8 @@ p4c
 
 # Dependences
 
-We have tested the compiler on U*X systems (OS X and Ubuntu).
+We have tested the compiler on U*X systems (OS X and Ubuntu).  The
+following tools are required to build and run the compiler and tests:
 
 - A C++11 compiler
   E.g., gcc 4.8 or later, or clang++
@@ -55,6 +56,10 @@ We have tested the compiler on U*X systems (OS X and Ubuntu).
 - Gnu multiple precision library GMP
 
 - C++ boost library (minimally used)
+
+- Python 2.7 for scripting (especially for running tests)
+
+Note that each back-end may have additional dependences.
 
 ## Ubuntu dependences
 
@@ -111,7 +116,8 @@ compilation and simplifying debugging.
   http://p4.org/wp-content/uploads/2015/04/p4-latest.pdf
 
 * the P4 v1.2 draft language is described in [this Word
-  document](P4v1.2-spec.docx).  This language is still under design.
+  document](https://github.com/p4lang/p4-spec/tree/master/v1.2/P4v1.2-spec.docx).
+  This language is still under design.
 
 * the compiler intermediate representation (IR) is briefly described
   in [IR](IR.md)
@@ -121,9 +127,15 @@ compilation and simplifying debugging.
 
 * The [compiler design](compiler-design.pptx) describes the salient
   features of the compiler design and implementation
-  
+
+* The [open issues](TODO.md) document describes work that is still to
+  be performed
+
 * specific back-ends may have their own README files; check the
-  `backends` and `extensions` sub-folders.
+  `extensions` sub-folders.
+
+  * [BMv2](../backends/bmv2/README.md)
+  * [eBPF](../backends/ebpf/README.md)
 
 # Coding conventions
 

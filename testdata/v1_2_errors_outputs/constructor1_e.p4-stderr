@@ -1,4 +1,4 @@
 ../testdata/v1_2_errors/constructor1_e.p4(3): error: TypeParameters: Constructors cannot have type parameters
     Y<T>(in T arg);
      ^^^
-error: 1 errors ecountered, aborting compilation
+error: 1 errors encountered, aborting compilation

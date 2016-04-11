@@ -165,12 +165,15 @@ bool CodeGenInspector::preorder(const IR::BlockStatement* s) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::ReturnStatement* s) {
+// This is correct only after inlining
+bool CodeGenInspector::preorder(const IR::ExitStatement*) {
     builder->append("return");
-    if (s->expr != nullptr) {
-        builder->spc();
-        visit(s->expr);
-    }
+    builder->endOfStatement();
+    return false;
+}
+
+bool CodeGenInspector::preorder(const IR::ReturnStatement*) {
+    builder->append("return");
     builder->endOfStatement();
     return false;
 }

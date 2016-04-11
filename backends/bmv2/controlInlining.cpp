@@ -11,7 +11,7 @@ CInlineWorkList* ControlsInlineList::next() {
     if (toInline.size() == 0)
         return nullptr;
     auto result = new CInlineWorkList();
-    std::set<const IR::ControlContainer*> processing;
+    std::set<const IR::P4Control*> processing;
     while (!toInline.empty()) {
         auto toadd = toInline.back();
         if (processing.find(toadd->callee) != processing.end())
@@ -49,12 +49,12 @@ class SimpleControlsInliner : public Transform {
     }
 
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
-    const IR::Node* preorder(IR::ControlContainer* caller) override;
+    const IR::Node* preorder(IR::P4Control* caller) override;
 };
 
-const IR::Node* SimpleControlsInliner::preorder(IR::ControlContainer* caller) {
+const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
     prune();
-    auto orig = getOriginal<IR::ControlContainer>();
+    auto orig = getOriginal<IR::P4Control>();
     if (toInline->callerToWork.find(orig) == toInline->callerToWork.end())
         return caller;
 
@@ -96,7 +96,7 @@ const IR::Node* SimpleControlsInliner::preorder(IR::ControlContainer* caller) {
     }
 
     visit(caller->body);
-    auto result = new IR::ControlContainer(caller->srcInfo, caller->name, caller->type,
+    auto result = new IR::P4Control(caller->srcInfo, caller->name, caller->type,
                                            caller->constructorParams, std::move(*stateful),
                                            caller->body);
     list->replace(orig, result);
@@ -193,7 +193,7 @@ const IR::Node* InlineControlsDriver::preorder(IR::P4Program* program) {
 }
 
 void ControlsInlineList::analyze() {
-    P4::CallGraph<const IR::ControlContainer*> cg("Control call-graph");
+    P4::CallGraph<const IR::P4Control*> cg("Control call-graph");
 
     for (auto m : inlineMap) {
         auto inl = m.second;
@@ -211,7 +211,7 @@ void ControlsInlineList::analyze() {
     }
 
     // must inline from leaves up
-    std::vector<const IR::ControlContainer*> order;
+    std::vector<const IR::P4Control*> order;
     cg.sort(order);
     for (auto c : order) {
         // This is quadratic, but hopefully the call graph is not too large

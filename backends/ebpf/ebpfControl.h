@@ -18,6 +18,7 @@ class EBPFControl : public EBPFObject {
     std::map<cstring, EBPFCounterTable*>  counters;
 
     explicit EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block);
+    virtual ~EBPFControl() {}
     void emit(CodeBuilder* builder);
     void emitTables(CodeBuilder* builder);
     bool build();

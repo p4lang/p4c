@@ -27,6 +27,7 @@ class ControlTranslationVisitor : public CodeGenInspector {
     // bool preorder(const IR::IfStatement* stat) override;  // TODO
     bool preorder(const IR::MethodCallExpression* expression) override;
     bool preorder(const IR::ReturnStatement* stat) override;
+    bool preorder(const IR::ExitStatement* stat) override;
     void processMethod(const P4::ExternMethod* method);
     void processApply(const P4::ApplyMethod* method);
 };
@@ -166,8 +167,12 @@ void ControlTranslationVisitor::processApply(const P4::ApplyMethod* method) {
     builder->blockEnd(true);
 }
 
-bool ControlTranslationVisitor::preorder(const IR::ReturnStatement* stat) {
-    BUG_CHECK(stat->expr == nullptr, "%1%: Return statement should have no expression", stat);
+bool ControlTranslationVisitor::preorder(const IR::ExitStatement*) {
+    builder->appendFormat("goto %s;", control->program->endLabel.c_str());
+    return false;
+}
+
+bool ControlTranslationVisitor::preorder(const IR::ReturnStatement*) {
     builder->appendFormat("goto %s;", control->program->endLabel.c_str());
     return false;
 }
@@ -207,7 +212,7 @@ bool ControlTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
 
 EBPFControl::EBPFControl(const EBPFProgram* program,
                          const IR::ControlBlock* block) :
-        program(program), controlBlock(block) {}
+        program(program), controlBlock(block), headers(nullptr), accept(nullptr) {}
 
 bool EBPFControl::build() {
     auto pl = controlBlock->container->type->applyParams;

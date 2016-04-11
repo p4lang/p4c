@@ -12,7 +12,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 program = program->apply(**it);
                 int errors = ErrorReporter::instance.getErrorCount();
                 if (stop_on_error && errors > 0) {
-                    ::error("%1% errors ecountered, aborting compilation", errors);
+                    ::error("%1% errors encountered, aborting compilation", errors);
                     program = nullptr;
                 }
                 if (program == nullptr) break;

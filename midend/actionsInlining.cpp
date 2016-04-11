@@ -17,13 +17,13 @@ void InlineWorkList::dbprint(std::ostream& out) const {
 }
 
 void ActionsInlineList::analyze() {
-    P4::CallGraph<const IR::ActionContainer*> cg("Actions call-graph");
+    P4::CallGraph<const IR::P4Action*> cg("Actions call-graph");
 
     for (auto c : toInline)
         cg.add(c->caller, c->callee);
 
     // must inline from leaves up
-    std::vector<const IR::ActionContainer*> order;
+    std::vector<const IR::P4Action*> order;
     cg.sort(order);
     for (auto c : order) {
         // This is quadratic, but hopefully the call graph is not too large
@@ -40,7 +40,7 @@ InlineWorkList* ActionsInlineList::next() {
     if (inlineOrder.size() == 0)
         return nullptr;
 
-    std::set<const IR::ActionContainer*> callers;
+    std::set<const IR::P4Action*> callers;
     auto result = new InlineWorkList();
 
     // Find actions that can be inlined simultaneously.
@@ -65,11 +65,11 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
     auto ac = mi->to<P4::ActionCall>();
     if (ac == nullptr)
         return;
-    auto caller = findContext<IR::ActionContainer>();
+    auto caller = findContext<IR::P4Action>();
     if (caller == nullptr) {
-        if (findContext<IR::ParserContainer>() != nullptr)
+        if (findContext<IR::P4Parser>() != nullptr)
             ::error("%1%: action invocation in parser not supported", mcs);
-        else if (findContext<IR::ControlContainer>() != nullptr)
+        else if (findContext<IR::P4Control>() != nullptr)
             BUG("%1%: direct action invocation not yet implemented", mcs);
         BUG("%1%: unexpected action invocation", mcs);
         return;
@@ -84,7 +84,7 @@ class ActionsInliner : public Transform {
     ActionsInlineList* list;
     InlineWorkList*    toInline;
 
-    std::map<const IR::MethodCallStatement*, const IR::ActionContainer*>* replMap;
+    std::map<const IR::MethodCallStatement*, const IR::P4Action*>* replMap;
 
  public:
     ActionsInliner(P4::ReferenceMap* refMap, ActionsInlineList* list,
@@ -97,18 +97,18 @@ class ActionsInliner : public Transform {
         return Transform::init_apply(node);
     }
 
-    const IR::Node* preorder(IR::ParserContainer* cont) override
+    const IR::Node* preorder(IR::P4Parser* cont) override
     { prune(); return cont; }  // skip
-    const IR::Node* preorder(IR::ActionContainer* action) override {
-        if (toInline->sites.count(getOriginal<IR::ActionContainer>()) == 0)
+    const IR::Node* preorder(IR::P4Action* action) override {
+        if (toInline->sites.count(getOriginal<IR::P4Action>()) == 0)
             prune();
-        replMap = &toInline->sites[getOriginal<IR::ActionContainer>()];
+        replMap = &toInline->sites[getOriginal<IR::P4Action>()];
         LOG1("Visiting: " << getOriginal());
         return action;
     }
-    const IR::Node* postorder(IR::ActionContainer* action) override {
-        if (toInline->sites.count(getOriginal<IR::ActionContainer>()) > 0)
-            list->replace(getOriginal<IR::ActionContainer>(), action);
+    const IR::Node* postorder(IR::P4Action* action) override {
+        if (toInline->sites.count(getOriginal<IR::P4Action>()) > 0)
+            list->replace(getOriginal<IR::P4Action>(), action);
         replMap = nullptr;
         return action;
     }
@@ -130,7 +130,7 @@ class ActionsInliner : public Transform {
         if (::errorCount() > 0)
             return statement;
         CHECK_NULL(clone);
-        auto result = clone->to<IR::ActionContainer>()->body;
+        auto result = clone->to<IR::P4Action>()->body;
         LOG1("Replacing " << statement << " with " << result);
         return result;
     }

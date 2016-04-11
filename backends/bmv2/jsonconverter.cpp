@@ -20,7 +20,7 @@ DirectMeterMap::DirectMeterInfo* DirectMeterMap::getInfo(const IR::IDeclaration*
     return ::get(directMeter, meter);
 }
 
-void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::TableContainer* table) {
+void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::P4Table* table) {
     auto info = getInfo(meter);
     CHECK_NULL(info);
     if (info->table != nullptr)
@@ -427,7 +427,8 @@ class ExpressionConverter : public Inspector {
 JsonConverter::JsonConverter(const CompilerOptions& options) :
         options(options), v1model(P4V1::V1Model::instance),
         corelib(P4::P4CoreLibrary::instance),
-        refMap(nullptr), typeMap(nullptr), conv(new ExpressionConverter(this)) {}
+        refMap(nullptr), typeMap(nullptr), dropActionId(0), blockMap(nullptr),
+		conv(new ExpressionConverter(this)) {}
 
 // return calculation name
 cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fields,
@@ -471,6 +472,10 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                               calculations, learn_lists);
             continue;
         } else if (s->is<IR::ReturnStatement>()) {
+            break;
+        } else if (s->is<IR::ExitStatement>()) {
+            auto primitive = mkPrimitive("exit", result);
+            (void)mkParameters(primitive);
             break;
         } else if (s->is<IR::AssignmentStatement>()) {
             const IR::Expression* l, *r;
@@ -1034,8 +1039,8 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
             ::error("%1%: Actions in action list with arguments not supported", a);
         auto decl = refMap->getDeclaration(a->name->path);
         CHECK_NULL(decl);
-        BUG_CHECK(decl->is<IR::ActionContainer>(), "%1%: should be an action name", a);
-        auto action = decl->to<IR::ActionContainer>();
+        BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
+        auto action = decl->to<IR::P4Action>();
         unsigned id = get(structure.ids, action);
         action_ids->append(id);
         auto name = nameFromAnnotation(action->annotations, action->name);
@@ -1110,7 +1115,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
 Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstring name,
                                            Util::JsonArray *counters, Util::JsonArray* meters,
                                            Util::JsonArray* registers) {
-    const IR::ControlContainer* cont = block->container;
+    const IR::P4Control* cont = block->container;
     LOG1("Processing " << cont);
     auto result = new Util::JsonObject();
     result->emplace("name", name);
@@ -1159,6 +1164,8 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
         exitTable->emplace("direct_meters", Util::JsonValue::null);
         auto actions = mkArrayField(exitTable, "actions");
         actions->append(dropAction);
+        auto action_ids = mkArrayField(exitTable, "action_ids");
+        action_ids->append(dropActionId);
         auto next_tables = new Util::JsonObject();
         next_tables->emplace(dropAction, Util::JsonValue::null);
         exitTable->emplace("next_tables", next_tables);
@@ -1168,8 +1175,8 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
     for (auto c : *cont->statefulEnumerator()) {
         if (c->is<IR::Declaration_Constant>() ||
             c->is<IR::Declaration_Variable>() ||
-            c->is<IR::ActionContainer>() ||
-            c->is<IR::TableContainer>())
+            c->is<IR::P4Action>() ||
+            c->is<IR::P4Table>())
             continue;
         if (c->is<IR::Declaration_Instance>()) {
             auto bl = block->getValue(c);
@@ -1387,7 +1394,8 @@ void JsonConverter::convert(P4::BlockMap* bm) {
         // synthesize a "drop" action
         auto drop = new Util::JsonObject();
         drop->emplace("name", dropAction);
-        drop->emplace("id", nextId("actions"));
+        dropActionId = nextId("actions");
+        drop->emplace("id", dropActionId);
         drop->emplace("runtime_data", new Util::JsonArray());
         auto body = mkArrayField(drop, "primitives");
         auto call = new Util::JsonObject();
@@ -1454,7 +1462,7 @@ void JsonConverter::createForceArith(const IR::Type* meta, cstring name,
     }
 }
 
-void JsonConverter::generateUpdate(const IR::ControlContainer* cont,
+void JsonConverter::generateUpdate(const IR::P4Control* cont,
                                    Util::JsonArray* checksums, Util::JsonArray* calculations) {
     // Currently this is very hacky to target the very limited support for checksums in BMv2
     // This will work much better with an extern.
@@ -1556,7 +1564,7 @@ void JsonConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
         if (s->is<IR::BlockStatement>()) {
             convertDeparserBody(s->to<IR::BlockStatement>()->components, result);
             continue;
-        } else if (s->is<IR::ReturnStatement>()) {
+        } else if (s->is<IR::ReturnStatement>() || s->is<IR::ExitStatement>()) {
             break;
         } else if (s->is<IR::EmptyStatement>()) {
             continue;
@@ -1596,7 +1604,7 @@ void JsonConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
     conv->simpleExpressionsOnly = false;
 }
 
-Util::IJson* JsonConverter::convertDeparser(const IR::ControlContainer* ctrl) {
+Util::IJson* JsonConverter::convertDeparser(const IR::P4Control* ctrl) {
     auto result = new Util::JsonObject();
     result->emplace("name", "deparser");  // at least in simple_router this name is hardwired
     result->emplace("id", nextId("deparser"));
@@ -1605,7 +1613,7 @@ Util::IJson* JsonConverter::convertDeparser(const IR::ControlContainer* ctrl) {
     return result;
 }
 
-Util::IJson* JsonConverter::toJson(const IR::ParserContainer* parser) {
+Util::IJson* JsonConverter::toJson(const IR::P4Parser* parser) {
     auto result = new Util::JsonObject();
     if (parser->stateful->size() != 0) {
         ::error("%1%: Stateful elements not yet supported in parser for this target", parser);

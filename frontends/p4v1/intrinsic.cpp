@@ -1,7 +1,7 @@
 #include "ir/ir.h"
 #include "frontends/common/options.h"
 
-IR::Global::Global(const CompilerOptions &) {
+IR::V1Program::V1Program(const CompilerOptions &) {
     // This should be kept in sync with v1model.p4
     auto fields = new NameMap<StructField, ordered_map>;
 #define ADDF(name, type) do { \

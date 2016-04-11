@@ -116,8 +116,8 @@ class SpecializeBlocks final : public Transform {
     using Transform::preorder;
 
     profile_t init_apply(const IR::Node* node) override;
-    const IR::Node* postorder(IR::ControlContainer* cont) override;
-    const IR::Node* postorder(IR::ParserContainer* cont) override;
+    const IR::Node* postorder(IR::P4Control* cont) override;
+    const IR::Node* postorder(IR::P4Parser* cont) override;
     const IR::Node* postorder(IR::Declaration_Instance* inst) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expr) override;
     const IR::Node* postorder(IR::P4Program* prog) override;

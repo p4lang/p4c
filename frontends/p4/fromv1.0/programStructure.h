@@ -85,9 +85,9 @@ class ProgramStructure {
     NamedObjectInfo<const IR::Metadata*>        metadata;
     NamedObjectInfo<const IR::Header*>          headers;
     NamedObjectInfo<const IR::HeaderStack*>     stacks;
-    NamedObjectInfo<const IR::Control*>         controls;
-    NamedObjectInfo<const IR::Parser*>          parserStates;
-    NamedObjectInfo<const IR::Table*>           tables;
+    NamedObjectInfo<const IR::V1Control*>       controls;
+    NamedObjectInfo<const IR::V1Parser*>        parserStates;
+    NamedObjectInfo<const IR::V1Table*>         tables;
     NamedObjectInfo<const IR::ActionFunction*>  actions;
     NamedObjectInfo<const IR::Counter*>         counters;
     NamedObjectInfo<const IR::Register*>        registers;
@@ -109,8 +109,8 @@ class ProgramStructure {
     std::map<cstring, const IR::Meter*> directMeters;
     std::map<const IR::Meter*, const IR::Declaration_Instance*> meterMap;
 
-    std::map<const IR::Table*, const IR::Control*> tableMapping;
-    std::map<const IR::Table*, const IR::Apply*> tableInvocation;
+    std::map<const IR::V1Table*, const IR::V1Control*> tableMapping;
+    std::map<const IR::V1Table*, const IR::Apply*> tableInvocation;
 
     struct ConversionContext {
         const IR::Expression* header;
@@ -138,16 +138,16 @@ class ProgramStructure {
     const IR::Statement* convertPrimitive(const IR::Primitive* primitive);
     void checkHeaderType(const IR::Type_StructLike* hrd, bool toStruct);
     const IR::Annotations* addNameAnnotation(cstring name, const IR::Annotations* annos = nullptr);
-    const IR::ParserState* convertParser(const IR::Parser* prs);
+    const IR::ParserState* convertParser(const IR::V1Parser* prs);
     const IR::Statement* convertParserStatement(const IR::Expression* expr);
-    const IR::ControlContainer* convertControl(const IR::Control* control, cstring newName);
+    const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
     const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
     const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
     const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName);
-    const IR::TableContainer*
-    convertTable(const IR::Table* table, cstring newName,
+    const IR::P4Table*
+    convertTable(const IR::V1Table* table, cstring newName,
                  IR::NameMap<IR::Declaration, ordered_map>* stateful);
-    const IR::ActionContainer* convertAction(const IR::ActionFunction* action, cstring newName,
+    const IR::P4Action* convertAction(const IR::ActionFunction* action, cstring newName,
                                              const IR::Meter* meterToAccess);
     const IR::Type_Control* controlType(IR::ID name);
     const IR::PathExpression* getState(IR::ID dest);
@@ -171,15 +171,15 @@ class ProgramStructure {
 
  public:
     const IR::Expression* paramReference(const IR::Parameter* param);
-    void tablesReferred(const IR::Control* control, std::vector<const IR::Table*> &out);
+    void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
 
-    const IR::Control* ingress;
+    const IR::V1Control* ingress;
     IR::ID ingressReference;
 
-    const IR::ControlContainer* verifyChecksums;
-    const IR::ControlContainer* updateChecksums;
-    const IR::ControlContainer* deparser;
+    const IR::P4Control* verifyChecksums;
+    const IR::P4Control* updateChecksums;
+    const IR::P4Control* deparser;
     // Latest extraction
     const IR::Expression* latest;
     const int defaultRegisterWidth = 32;

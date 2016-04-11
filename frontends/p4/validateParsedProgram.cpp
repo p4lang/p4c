@@ -38,7 +38,7 @@ void ValidateParsedProgram::postorder(const IR::ParserState* s) {
         ::error("%1%: parser state should not be implemented, it is built-in", s->name);
 }
 
-void ValidateParsedProgram::postorder(const IR::TableContainer* t) {
+void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     auto ac = t->properties->getProperty(IR::TableProperties::actionsPropertyName);
     if (ac == nullptr)
         ::error("Table %1% does not have an `%2%' property",
