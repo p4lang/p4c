@@ -200,6 +200,18 @@ class TableKeyInstance(object):
         for f in tableKey.fields:
             self.values[f] = self.makeMask("0x*", tableKey.ternary)
     def set(self, key, value, ternary):
+        array = re.compile("(.*)\$([0-9]+)(.*)");
+        m = array.match(key)
+        if m:
+            key = m.group(1) + "[" + m.group(2) + "]" + m.group(3)
+        
+        found = False
+        for i in self.key.fields:
+            if key == i:
+                print("Field found", key)
+                found = True
+        if not found:
+            raise Exception("Unexpected key field " + key)
         self.values[key] = self.makeMask(value, ternary)
     def makeMask(self, value, ternary):
         if not ternary:
@@ -235,6 +247,13 @@ class BMV2ActionArguments(object):
         self.action = action
         self.values = {}
     def set(self, key, value):
+        found = False
+        for i in self.action.args:
+            if key == i.name:
+                print("Key found", key)
+                found = True
+        if not found:
+            raise Exception("Unexpected action arg " + key)
         self.values[key] = value
     def __str__(self):
         result = ""
@@ -479,6 +498,7 @@ class RunBMV2(object):
                     cmp = self.comparePacket(expected[i], packets[i])
                     if cmp != SUCCESS:
                         print("*** Packet", i, "on port", interface, "differs")
+                        return FAILURE
             else:
                 pass
         return SUCCESS
