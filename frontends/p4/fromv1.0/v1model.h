@@ -13,22 +13,25 @@ namespace P4V1 {
 // p4includes/v1model.p4
 
 struct Parser_Model : public ::Model::Elem {
-    Parser_Model(Model::Type_Model headersType, Model::Type_Model userMetaType) :
+    Parser_Model(Model::Type_Model headersType, Model::Type_Model userMetaType,
+                 Model::Type_Model standardMetadataType) :
             Model::Elem("ParserImpl"),
-            packetParam("packet", P4::P4CoreLibrary::instance.packetIn),
-            headersParam("hdr", headersType),
-            metadataParam("meta", userMetaType)
+            packetParam("packet", P4::P4CoreLibrary::instance.packetIn, 0),
+            headersParam("hdr", headersType, 1),
+            metadataParam("meta", userMetaType, 2),
+            standardMetadataParam("stdMeta", standardMetadataType, 3)
     {}
     ::Model::Param_Model packetParam;
     ::Model::Param_Model headersParam;
     ::Model::Param_Model metadataParam;
+    ::Model::Param_Model standardMetadataParam;
 };
 
 struct Deparser_Model : public ::Model::Elem {
     explicit Deparser_Model(Model::Type_Model headersType) :
             Model::Elem("DeparserImpl"),
-            packetParam("packet", P4::P4CoreLibrary::instance.packetOut),
-            headersParam("hdr", headersType)
+            packetParam("packet", P4::P4CoreLibrary::instance.packetOut, 0),
+            headersParam("hdr", headersType, 1)
     {}
     ::Model::Param_Model packetParam;
     ::Model::Param_Model headersParam;
@@ -39,9 +42,9 @@ struct Control_Model : public ::Model::Elem {
     Control_Model(cstring name, Model::Type_Model headersType, Model::Type_Model metadataType,
                  Model::Type_Model standardMetadataType) :
             Model::Elem(name),
-            headersParam("hdr", headersType),
-            metadataParam("meta", metadataType),
-            standardMetadataParam("standard_metadata", standardMetadataType) {}
+            headersParam("hdr", headersType, 0),
+            metadataParam("meta", metadataType, 1),
+            standardMetadataParam("standard_metadata", standardMetadataType, 2) {}
     ::Model::Param_Model headersParam;
     ::Model::Param_Model metadataParam;
     ::Model::Param_Model standardMetadataParam;
@@ -50,7 +53,7 @@ struct Control_Model : public ::Model::Elem {
 struct VerifyUpdate_Model : public ::Model::Elem {
     VerifyUpdate_Model(cstring name, Model::Type_Model headersType) :
             Model::Elem(name),
-            headersParam("hdr", headersType) {}
+            headersParam("hdr", headersType, 0) {}
     ::Model::Param_Model headersParam;
 };
 
@@ -202,7 +205,7 @@ class V1Model : public ::Model::Model {
             headersType("headers"),
             metadataType("metadata"),
             standardMetadataType("standard_metadata_t"),
-            parser(headersType, metadataType), deparser(headersType),
+            parser(headersType, metadataType, standardMetadataType), deparser(headersType),
             egress("egress", headersType, metadataType, standardMetadataType),
             ingress("ingress", headersType, metadataType, standardMetadataType),
             sw(), counterOrMeter("$"), counter(), meter(), random(), action_profile(),

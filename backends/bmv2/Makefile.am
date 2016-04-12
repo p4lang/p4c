@@ -24,7 +24,7 @@ cpplint_FILES += $(p4c_bm2_SOURCES)
 
 CLEANFILES += $(srcdir)/bmv2tests.am
 
-$(srcdir)/bmv2tests.am: $(srcdir)/testdata/v1_samples/*.p4 
+$(srcdir)/bmv2tests.am: $(srcdir)/testdata/v1_samples/*.p4 $(srcdir)/testdata/v1_2_samples/*-bmv2.p4 
 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@
 
 # These tests exhibit P4 v1.0 features still unimplemented

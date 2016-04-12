@@ -238,33 +238,42 @@ class ExpressionConverter : public Inspector {
         map.emplace(expression, result);
     }
 
-    bool isParamReference(const IR::Expression* expression) {
+    // Non-null if the expression refers to a parameter from the enclosing control
+    const IR::Parameter* enclosingParamReference(const IR::Expression* expression) {
         CHECK_NULL(expression);
         if (!expression->is<IR::PathExpression>())
-            return false;
+            return nullptr;
 
         auto pe = expression->to<IR::PathExpression>();
         auto decl = converter->refMap->getDeclaration(pe->path, true);
         auto param = decl->to<IR::Parameter>();
         if (param == nullptr)
-            return false;
-        if (param->name.name == converter->v1model.standardMetadata.name)
-            // Treat 'standard_metadata' specially
-            return false;
-        return converter->structure.nonActionParameters.count(param) > 0;
+            return param;
+        if (converter->structure.nonActionParameters.count(param) > 0)
+            return param;
+        return nullptr;
     }
 
     void postorder(const IR::Member* expression) override {
         auto result = new Util::JsonObject();
-        if (isParamReference(expression->expr)) {
+        auto param = enclosingParamReference(expression->expr);
+        if (param != nullptr) {
             auto type = converter->typeMap->getType(expression, true);
-            if (type->is<IR::Type_Stack>())
-                result->emplace("type", "header_stack");
-            else
-                // This may be wrong, but the caller will handle it properly
-                // (e.g., this can be a method, such as packet.lookahead)
-                result->emplace("type", "header");
-            result->emplace("value", expression->member.name);
+            if (param == converter->stdMetadataParameter) {
+                result->emplace("type", "field");
+                auto e = mkArrayField(result, "value");
+                e->append("standard_metadata");
+                e->append(expression->member);
+            } else {
+                if (type->is<IR::Type_Stack>()) {
+                    result->emplace("type", "header_stack");
+                } else {
+                    // This may be wrong, but the caller will handle it properly
+                    // (e.g., this can be a method, such as packet.lookahead)
+                    result->emplace("type", "header");
+                }
+                result->emplace("value", expression->member.name);
+            }
         } else {
             bool done = false;
             if (expression->expr->is<IR::Member>()) {
@@ -428,7 +437,9 @@ JsonConverter::JsonConverter(const CompilerOptions& options) :
         options(options), v1model(P4V1::V1Model::instance),
         corelib(P4::P4CoreLibrary::instance),
         refMap(nullptr), typeMap(nullptr), dropActionId(0), blockMap(nullptr),
-		conv(new ExpressionConverter(this)) {}
+        conv(new ExpressionConverter(this)),
+        headerParameter(nullptr), userMetadataParameter(nullptr), stdMetadataParameter(nullptr)
+{}
 
 // return calculation name
 cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fields,
@@ -762,6 +773,12 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
     auto result = new Util::JsonArray();
     for (auto it : structure.actions) {
         auto action = it.first;
+        auto control = it.second;
+        stdMetadataParameter = control->type->applyParams->getParameter(
+            v1model.ingress.standardMetadataParam.index);
+        userMetadataParameter = control->type->applyParams->getParameter(
+            v1model.ingress.metadataParam.index);
+        
         cstring name = nameFromAnnotation(action->annotations, action->name);
         auto jact = new Util::JsonObject();
         jact->emplace("name", name);
@@ -1116,6 +1133,12 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                                            Util::JsonArray *counters, Util::JsonArray* meters,
                                            Util::JsonArray* registers) {
     const IR::P4Control* cont = block->container;
+    // the index is the same for ingress and egress
+    stdMetadataParameter = cont->type->applyParams->getParameter(
+        v1model.ingress.standardMetadataParam.index);
+    userMetadataParameter = cont->type->applyParams->getParameter(
+        v1model.ingress.metadataParam.index);
+                                                                     
     LOG1("Processing " << cont);
     auto result = new Util::JsonObject();
     result->emplace("name", name);
@@ -1341,7 +1364,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     auto parserBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.parser.name);
     CHECK_NULL(parserBlock);
     auto parser = parserBlock->to<IR::ParserBlock>()->container;
-    auto hdr = parser->type->applyParams->getParameter(v1model.parser.headersParam.name);
+    auto hdr = parser->type->applyParams->getParameter(v1model.parser.headersParam.index);
     auto headersType = blockMap->typeMap->getType(hdr->getNode(), true);
     auto ht = headersType->to<IR::Type_Struct>();
     if (ht == nullptr) {
@@ -1361,8 +1384,11 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     addTypesAndInstances(ht, false, headerTypes, headers, headerTypesCreated);
     addHeaderStacks(ht, headers, headerTypes, headerStacks, headerTypesCreated);
 
-    auto md = parser->type->applyParams->getParameter(v1model.parser.metadataParam.name);
-    auto mdType = blockMap->typeMap->getType(md->getNode(), true);
+    userMetadataParameter = parser->type->applyParams->getParameter(
+        v1model.parser.metadataParam.index);
+    stdMetadataParameter = parser->type->applyParams->getParameter(
+        v1model.parser.standardMetadataParam.index);
+    auto mdType = blockMap->typeMap->getType(userMetadataParameter, true);
     auto mt = mdType->to<IR::Type_Struct>();
     if (mt == nullptr) {
         ::error("Expected metadata %1% to be a struct", mdType);
@@ -1417,9 +1443,9 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     pipelines->append(egress);
 
     // standard metadata type and instance
-    auto stdmeta = ingressControl->container->type->applyParams->getParameter(
-        v1model.ingress.standardMetadataParam.name);
-    auto stdMetaType = blockMap->typeMap->getType(stdmeta->getNode(), true);
+    stdMetadataParameter = ingressControl->container->type->applyParams->getParameter(
+        v1model.ingress.standardMetadataParam.index);
+    auto stdMetaType = blockMap->typeMap->getType(stdMetadataParameter, true);
     auto json = typeToJson(stdMetaType->to<IR::Type_StructLike>());
     headerTypes->append(json);
 

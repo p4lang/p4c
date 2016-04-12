@@ -33,7 +33,9 @@ struct Extern_Model : public Type_Model {
 
 struct Param_Model : public Elem {
     Type_Model type;
-    Param_Model(cstring name, Type_Model type) : Elem(name), type(type) {}
+    unsigned   index;
+    Param_Model(cstring name, Type_Model type, unsigned index) :
+            Elem(name), type(type), index(index) {}
 };
 
 class Model {

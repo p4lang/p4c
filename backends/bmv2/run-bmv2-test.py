@@ -260,6 +260,8 @@ class BMV2ActionArguments(object):
                 result += " "
             result += self.values[f.name]
         return result
+    def size(self):
+        return len(self.action.args)
     
 class BMV2Action(object):
     def __init__(self, jsonAction):
@@ -331,8 +333,28 @@ class RunBMV2(object):
         return self.folder + "/" + self.pcapPrefix + interface + "_" + direction + ".pcap"
     def translate_command(self, cmd):
         first, cmd = nextWord(cmd)
-        if first != "add":
+        if first == "add":
+            return self.parse_table_add(cmd)
+        elif first == "setdefault":
+            return self.parse_table_set_default(cmd)
+        else:
             return None
+    def parse_table_set_default(self, cmd):
+        tableName, cmd = nextWord(cmd)
+        table = self.tableByName(tableName)
+        actionName, cmd = nextWord(cmd, "(")
+        action = self.actionByName(table, actionName)
+        actionArgs = action.makeArgsInstance()
+        cmd = cmd.strip(")")
+        while cmd != "":
+            word, cmd = nextWord(cmd, ",")
+            k, v = nextWord(word, ":")
+            actionArgs.set(k, v)
+        command = "table_set_default " + tableName + " " + actionName
+        if actionArgs.size(): 
+            command += " => " + str(actionArgs)
+        return command
+    def parse_table_add(self, cmd):
         tableName, cmd = nextWord(cmd)
         table = self.tableByName(tableName)
         key = table.makeKeyInstance()
@@ -420,7 +442,8 @@ class RunBMV2(object):
             file = self.filename(interface, direction)
             if direction in v:
                 packets = v[direction]
-                data = [Ether(_pkt=HexToByte(hx)) for hx in packets]
+#                data = [Ether(_pkt=HexToByte(hx)) for hx in packets]
+                data = [Packet(_pkt=HexToByte(hx)) for hx in packets]
                 print("Creating", file)
                 wrpcap(file, data)
             else:

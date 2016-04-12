@@ -19,7 +19,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
             } catch (Backtrack::trigger::type_t trig_type) {
                 throw Backtrack::trigger(trig_type);
             }
-        } catch (Backtrack::trigger trig) {
+        } catch (Backtrack::trigger &trig) {
             while (!backup.empty()) {
                 if (backup.back().first == it) {
                     backup.pop_back();

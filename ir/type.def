@@ -104,6 +104,14 @@ class ParameterList : ISimpleNamespace {
     size_t size() const { return parameters.size(); }
     const IR::Parameter* getParameter(cstring name) const
     { return parameters.getUnique(name); }
+    const IR::Parameter* getParameter(unsigned index) const {
+        BUG_CHECK(index <= size(), "Only %1% parameters; %2% requested", size(), index);
+        unsigned ix = 0;
+        auto it = parameters.begin();
+        for (; ix != index; it++)
+            ++ix;
+        return it->second;
+    }
     void add(const Parameter* param)
     { parameters.addUnique(param->name, param); }
     const IR::IDeclaration* getDeclByName(cstring name) const

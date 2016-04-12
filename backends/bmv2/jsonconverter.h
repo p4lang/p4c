@@ -51,7 +51,10 @@ class JsonConverter final {
     P4::BlockMap*          blockMap;
     ExpressionConverter*   conv;
     DirectMeterMap         meterMap;
-
+    const IR::Parameter*   headerParameter;
+    const IR::Parameter*   userMetadataParameter;
+    const IR::Parameter*   stdMetadataParameter;
+    
  protected:
     Util::IJson* typeToJson(const IR::Type_StructLike* type);
     unsigned nextId(cstring group);
