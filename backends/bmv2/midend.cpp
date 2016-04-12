@@ -43,7 +43,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
             return nullptr;
     }
 
-    // TODO: add separate inlining pass for v1.2 programs
+    // TODO: add separate inlining passes for v1.2 programs
 
     auto evaluator1 = new P4::EvaluatorPass(isv1);
     PassManager midEnd = {

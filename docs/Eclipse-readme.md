@@ -67,7 +67,11 @@ bootstrap, as described in [README](README.md).
 13. Close Eclipse and then open it again.
 
 14. Setup build
-.. * This seemed to "just work" for me.  I clicked build, and it ran make.
+  * This seemed to "just work" for me.  I clicked build, and it ran make.
 
 15. Setup Run
-.. * Under `Run Configurations` I was able to navigate to this file and add command arguments.
+  * Under `Run Configurations` I was able to navigate to this file and add command arguments.
+
+16. Setup editor
+   * Window/Preferences/Text editor -> insert spaces for tabs
+   

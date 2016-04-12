@@ -42,7 +42,7 @@ class ConstantTypeSubstitution : public Transform {
 
 TypeChecker::TypeChecker(ReferenceMap* refMap, TypeMap* typeMap, bool clearMap, bool readOnly) :
         refMap(refMap), typeMap(typeMap), clearMap(clearMap), readOnly(readOnly),
-		initialNode(nullptr) {
+        initialNode(nullptr) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = true;
@@ -174,12 +174,21 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
                type->is<IR::Type_MatchKind>()) {
         return type;
     } else if (type->is<IR::Type_Tuple>()) {
+        auto tuple = type->to<IR::Type_Tuple>();
         auto fields = new IR::Vector<IR::Type>();
-        for (auto t : *(type->to<IR::Type_Tuple>()->components)) {
+        // tuple<set<a>, b> = set<tuple<a, b>>
+        bool anySet = false;
+        for (auto t : *tuple->components) {
+            if (t->is<IR::Type_Set>()) {
+                anySet = true;
+                t = t->to<IR::Type_Set>()->elementType;
+            }
             t = canonicalize(t);
             fields->push_back(t);
         }
-        auto canon = new IR::Type_Tuple(type->srcInfo, fields);
+        const IR::Type* canon = new IR::Type_Tuple(type->srcInfo, fields);
+        if (anySet)
+            canon = new IR::Type_Set(type->srcInfo, canon);
         return canon;
     } else if (type->is<IR::Type_Parser>()) {
         auto tp = type->to<IR::Type_Parser>();
@@ -1024,8 +1033,10 @@ const IR::Node* TypeChecker::postorder(IR::ListExpression* expression) {
     }
 
     auto tupleType = new IR::Type_Tuple(expression->srcInfo, components);
-    setType(getOriginal(), tupleType);
-    setType(expression, tupleType);
+    auto type = canonicalize(tupleType);
+    CHECK_NULL(type);
+    setType(getOriginal(), type);
+    setType(expression, type);
     return expression;
 }
 
@@ -1280,6 +1291,56 @@ const IR::Node* TypeChecker::bitwise(const IR::Operation_Binary* expression) {
         setType(expression, resultType);
     }
     setType(getOriginal(), resultType);
+    return expression;
+}
+
+const IR::Node* TypeChecker::typeSet(const IR::Operation_Binary* expression) {
+    if (done())
+        return expression;
+    auto ltype = getType(expression->left);
+    auto rtype = getType(expression->right);
+    if (ltype == nullptr || rtype == nullptr)
+        return expression;
+
+    // The following section is very similar to "binary()" above
+    const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
+    const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
+    if (bl == nullptr && !ltype->is<IR::Type_InfInt>()) {
+        ::error("%1%: cannot be applied to %2% of type %3%",
+                expression->getStringOp(), expression->left, ltype->toString());
+        return expression;
+    } else if (br == nullptr && !rtype->is<IR::Type_InfInt>()) {
+        ::error("%1%: cannot be applied to %2% of type %3%",
+                expression->getStringOp(), expression->right, rtype->toString());
+        return expression;
+    }
+
+    const IR::Type* sameType = ltype;
+    if (bl != nullptr && br != nullptr) {
+        if (!(*bl == *br)) {
+            ::error("%1%: Cannot operate on values with different types %2% and %3%",
+                    expression, bl->toString(), br->toString());
+            return expression;
+        }
+    } else if (bl == nullptr && br != nullptr) {
+        auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
+        auto e = expression->clone();
+        e->left = cast;
+        expression = e;
+        sameType = rtype;
+        setType(cast, sameType);
+    } else if (bl != nullptr && br == nullptr) {
+        auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
+        auto e = expression->clone();
+        e->right = cast;
+        expression = e;
+        sameType = ltype;
+        setType(cast, sameType);
+    }
+
+    auto resultType = new IR::Type_Set(sameType->srcInfo, sameType);
+    typeMap->setType(expression, resultType);
+    typeMap->setType(getOriginal(), resultType);
     return expression;
 }
 
@@ -1804,20 +1865,23 @@ const IR::SelectCase*
 TypeChecker::matchCase(const IR::SelectExpression* select, const IR::Type_Tuple* selectType,
                        const IR::SelectCase* selectCase, const IR::Type* caseType) const {
     // The selectType is always a tuple
+    // If the caseType is a set type, we unify the type of the set elements
+    if (caseType->is<IR::Type_Set>())
+        caseType = caseType->to<IR::Type_Set>()->elementType;
     // The caseType may be a simple type, and then we have to unwrap the selectType
     if (caseType->is<IR::Type_Dontcare>())
         return selectCase;
-    IR::TypeVariableSubstitution* tsv;
+
+    const IR::Type* useSelType = selectType;
     if (!caseType->is<IR::Type_Tuple>()) {
         if (selectType->components->size() != 1) {
             ::error("Type mismatch %1% (%2%) vs %3% (%4%)",
                     select->select, selectType->toString(), selectCase, caseType->toString());
             return nullptr;
         }
-        tsv = unify(select, selectType->components->at(0), caseType, true);
-    } else {
-        tsv = unify(select, selectType, caseType, true);
+        useSelType = selectType->components->at(0);
     }
+    auto tsv = unify(select, useSelType, caseType, true);
     if (tsv == nullptr)
         return nullptr;
     ConstantTypeSubstitution cts(tsv, typeMap);

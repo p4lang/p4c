@@ -81,6 +81,7 @@ class TypeChecker final : public Transform {
     const IR::Node* unsBinaryArith(const IR::Operation_Binary* op);
     const IR::Node* shift(const IR::Operation_Binary* op);
     const IR::Node* bitwise(const IR::Operation_Binary* op);
+    const IR::Node* typeSet(const IR::Operation_Binary* op);
     const IR::Type* containerInstantiation(const IR::Node* node,
                                            const IR::Vector<IR::Expression>* args,
                                            const IR::IContainer* container);
@@ -146,8 +147,8 @@ class TypeChecker final : public Transform {
     const IR::Node* postorder(IR::BXor* expression) override { return bitwise(expression); }
     const IR::Node* postorder(IR::BAnd* expression) override { return bitwise(expression); }
     const IR::Node* postorder(IR::BOr* expression) override { return bitwise(expression); }
-    const IR::Node* postorder(IR::Mask* expression) override { return bitwise(expression); }
-    const IR::Node* postorder(IR::Range* expression) override { return bitwise(expression); }
+    const IR::Node* postorder(IR::Mask* expression) override { return typeSet(expression); }
+    const IR::Node* postorder(IR::Range* expression) override { return typeSet(expression); }
     const IR::Node* postorder(IR::LNot* expression) override;
     const IR::Node* postorder(IR::Neg* expression) override;
     const IR::Node* postorder(IR::Cmpl* expression) override;

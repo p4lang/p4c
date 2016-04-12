@@ -5,8 +5,68 @@
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/enumInstance.h"
 #include "analyzer.h"
+#include "lower.h"
 
 namespace BMV2 {
+
+// BMv2 does not do arithmetic operations according to the P4 v1.1 and later spec.
+// So we have to do it in the compiler.
+class ArithmeticFixup : public Transform {
+    P4::TypeMap* typeMap;
+ public:
+    explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap) {}
+
+    const IR::Expression* fix(const IR::Expression* expr, const IR::Type_Bits* type) {
+        unsigned width = type->size;
+        if (!type->isSigned) {
+            auto mask = new IR::Constant(Util::SourceInfo(), type, Util::mask(width), 16);
+            typeMap->setType(mask, type);
+            auto result = new IR::BAnd(expr->srcInfo, expr, mask);
+            typeMap->setType(result, type);
+            return result;
+        } else {
+            auto result = new IR::Clamp(expr->srcInfo, expr, width);
+            typeMap->setType(result, type);
+            return result;
+        }
+        return expr;
+    }
+
+    const IR::Node* updateType(const IR::Expression* expression) {
+        if (*expression != *getOriginal()) {
+            auto type = typeMap->getType(getOriginal(), true);
+            typeMap->setType(expression, type);
+        }
+        return expression;
+    }
+    
+    const IR::Node* postorder(IR::Expression* expression) override {
+        return updateType(expression);
+    }
+    const IR::Node* postorder(IR::Operation_Binary* expression) override {
+        auto type = typeMap->getType(getOriginal(), true);
+        if (expression->is<IR::BAnd>() || expression->is<IR::BOr>() ||
+            expression->is<IR::BXor>())
+            // no need to clamp these
+            return updateType(expression);
+        if (type->is<IR::Type_Bits>())
+            return fix(expression, type->to<IR::Type_Bits>());
+        return updateType(expression);
+    }
+    const IR::Node* postorder(IR::Neg* expression) override {
+        auto type = typeMap->getType(getOriginal(), true);
+        if (type->is<IR::Type_Bits>())
+            return fix(expression, type->to<IR::Type_Bits>());
+        return updateType(expression);
+    }
+    const IR::Node* postorder(IR::Cast* expression) override {
+        auto type = typeMap->getType(getOriginal(), true);
+        if (type->is<IR::Type_Bits>())
+            return fix(expression, type->to<IR::Type_Bits>());
+        return updateType(expression);
+    }
+};
+
 
 DirectMeterMap::DirectMeterInfo* DirectMeterMap::createInfo(const IR::IDeclaration* meter) {
     auto prev = ::get(directMeter, meter);
@@ -170,6 +230,7 @@ class ExpressionConverter : public Inspector {
     }
 
     void postorder(const IR::Cast* expression) override {
+#if 0
         auto desttype = converter->typeMap->getType(expression->type, true);
         auto srctype = converter->typeMap->getType(expression->expr, true);
         // some casts just "work" without doing anything
@@ -181,6 +242,8 @@ class ExpressionConverter : public Inspector {
                 ::warning("%1%: Casts not supported on this target; will do best-effort conversion",
                           expression);
         }
+#endif
+        // nothing to do for casts - the ArithmeticFixup pass should have handled them already
         auto j = get(expression->expr);
         map.emplace(expression, j);
     }
@@ -344,6 +407,22 @@ class ExpressionConverter : public Inspector {
         e->emplace("cond", fixLocal(c));
     }
 
+    void postorder(const IR::Clamp* expression) override {
+        auto result = new Util::JsonObject();
+        map.emplace(expression, result);
+        result->emplace("type", "expression");
+        auto e = new Util::JsonObject();
+        result->emplace("value", e);
+        e->emplace("op", "clamp");
+        auto l = get(expression->expr);
+        e->emplace("left", fixLocal(l));
+        auto r = new Util::JsonObject();
+        r->emplace("type", "hexstr");
+        cstring repr = stringRepr(expression->width);
+        r->emplace("value", repr);
+        e->emplace("right", r);
+    }
+    
     void postorder(const IR::Operation_Binary* expression) override {
         auto result = new Util::JsonObject();
         map.emplace(expression, result);
@@ -425,11 +504,14 @@ class ExpressionConverter : public Inspector {
     }
 
     Util::IJson* convert(const IR::Expression* e) {
-        e->apply(*this);
-        auto result = ::get(map, e);
+        ArithmeticFixup af(converter->typeMap);
+        auto expr = e->apply(af);
+        CHECK_NULL(expr);
+        expr->apply(*this);
+        auto result = ::get(map, expr->to<IR::Expression>());
         if (result != nullptr)
             return result;
-        BUG("%1%: Error in conversion", e);
+        BUG("%1%: Could not convert expression", e);
     }
 };
 
@@ -778,7 +860,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
             v1model.ingress.standardMetadataParam.index);
         userMetadataParameter = control->type->applyParams->getParameter(
             v1model.ingress.metadataParam.index);
-        
+
         cstring name = nameFromAnnotation(action->annotations, action->name);
         auto jact = new Util::JsonObject();
         jact->emplace("name", name);
@@ -1138,7 +1220,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
         v1model.ingress.standardMetadataParam.index);
     userMetadataParameter = cont->type->applyParams->getParameter(
         v1model.ingress.metadataParam.index);
-                                                                     
+
     LOG1("Processing " << cont);
     auto result = new Util::JsonObject();
     result->emplace("name", name);
@@ -1713,7 +1795,7 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
 
 // Operates on a select keyset
 void JsonConverter::convertSimpleKey(const IR::Expression* keySet,
-                                         mpz_class& value, mpz_class& mask) const {
+                                     mpz_class& value, mpz_class& mask) const {
     if (keySet->is<IR::Mask>()) {
         auto mk = keySet->to<IR::Mask>();
         if (!mk->left->is<IR::Constant>()) {
@@ -1737,8 +1819,8 @@ void JsonConverter::convertSimpleKey(const IR::Expression* keySet,
 }
 
 unsigned JsonConverter::combine(const IR::Expression* keySet,
-                            const IR::ListExpression* select,
-                            mpz_class& value, mpz_class& mask) const {
+                                const IR::ListExpression* select,
+                                mpz_class& value, mpz_class& mask) const {
     // From the BMv2 spec: For values and masks, make sure that you
     // use the correct format. They need to be the concatenation (in
     // the right order) of all byte padded fields (padded with 0

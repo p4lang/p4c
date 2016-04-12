@@ -1,5 +1,6 @@
 #include "ir.h"
 #include "dbprint.h"
+#include "lib/gmputil.h"
 
 cstring IR::NamedCond::unique_name() {
     static int unique_counter = 0;
@@ -44,7 +45,7 @@ IR::Constant::handleOverflow(bool noWarning) {
 
     int width = tb->size;
     mpz_class one = 1;
-    mpz_class mask = (one << width) - 1;
+    mpz_class mask = Util::mask(width);
 
     if (tb->isSigned) {
         mpz_class max = (one << (width - 1)) - 1;
@@ -52,9 +53,9 @@ IR::Constant::handleOverflow(bool noWarning) {
         if (value < min || value > max) {
             if (!noWarning)
                 ::warning("%1%: signed value does not fit in %2% bits", this, width);
-            LOG1("value=" << value << ", min=" << min <<
+            LOG2("value=" << value << ", min=" << min <<
                  ", max=" << max << ", masked=" << (value & mask) <<
-                 ", adj=" << ((value & mask)- (one << width)));
+                 ", adj=" << ((value & mask) - (one << width)));
             value = value & mask;
             if (value > max)
                 value -= (one << width);

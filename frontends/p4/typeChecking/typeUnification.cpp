@@ -143,7 +143,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
     if (dest->is<IR::Type_ArchBlock>()) {
         if (!src->is<IR::Type_ArchBlock>()) {
             if (reportErrors)
-                ::error("%1%: Cannot unify type %2% to type %3%",
+                ::error("%1%: Cannot unify %2% to %3%",
                         errorPosition, dest->toString(), src->toString());
             return false;
         }

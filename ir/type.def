@@ -225,6 +225,12 @@ class Type_Struct : Type_StructLike {
 #end
 }
 
+class Type_Set : Type {
+    Type elementType;
+    dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
+    toString { return cstring("set<") + elementType->toString() + ">"; }
+}
+    
 class Type_Union : Type_StructLike {
 #nodbprint
     toString{ return cstring("header_union ") + getName(); }

@@ -11,18 +11,30 @@ namespace P4 {
 
 // A list of equality constraints on types.
 class TypeConstraints final {
-    // Requires two types to be equal.
-    class EqualityConstraint {
+    class IConstraint {
+     public:
+        virtual ~IConstraint() {}
+    };
+
+    class TwoTypeConstraint : public IConstraint {
      public:
         const IR::Type* left;
         const IR::Type* right;
 
-        EqualityConstraint(const IR::Type* left, const IR::Type* right) :
+     protected:
+        TwoTypeConstraint(const IR::Type* left, const IR::Type* right) :
                 left(left), right(right) {
+            CHECK_NULL(left); CHECK_NULL(right);
             if (left->is<IR::Type_Name>() || right->is<IR::Type_Name>())
                 BUG("Unifying type names %1% and %2%", left, right);
         }
-
+    };
+    
+    // Requires two types to be equal.
+    class EqualityConstraint : public TwoTypeConstraint {
+     public:
+        EqualityConstraint(const IR::Type* left, const IR::Type* right)
+                : TwoTypeConstraint(left, right) {}
         void dbprint(std::ostream& out) const
         { out << "Constraint:" << left << " = " << right; }
     };
@@ -41,7 +53,7 @@ class TypeConstraints final {
      * While typechecking the f(data) call, T is not a type variable that can be unified.
      */
     std::set<const IR::Type_VarBase*> unifiableTypeVariables;
-    std::vector<EqualityConstraint*> constraints;
+    std::vector<IConstraint*> constraints;
     TypeUnification *unification;
 
  public:
@@ -62,10 +74,9 @@ class TypeConstraints final {
     }
 
     void addEqualityConstraint(const IR::Type* left, const IR::Type* right) {
-        CHECK_NULL(left); CHECK_NULL(right);
-        LOG1("Constraint: " << left << " = " << right);
-        EqualityConstraint* eqc = new EqualityConstraint(left, right);
-        constraints.push_back(eqc);
+        auto c = new EqualityConstraint(left, right);
+        LOG1(c);
+        constraints.push_back(c);
     }
 
     /*
@@ -76,7 +87,15 @@ class TypeConstraints final {
      * @param reportErrors If true report errors.
      * @return           True on success.
      */
-    bool solve(const IR::Node* root, EqualityConstraint* constraint,
+    bool solve(const IR::Node* root, IConstraint* constraint,
+               IR::TypeVariableSubstitution *subst, bool reportErrors) {
+        auto eq = dynamic_cast<EqualityConstraint*>(constraint);
+        if (eq != nullptr)
+            return solve(root, eq, subst, reportErrors);
+        BUG("unexpected type constraint");
+    }
+
+    bool solve(const IR::Node* root, EqualityConstraint *constraint,
                IR::TypeVariableSubstitution *subst, bool reportErrors);
 
     IR::TypeVariableSubstitution* solve(const IR::Node* root, bool reportErrors) {
@@ -84,7 +103,7 @@ class TypeConstraints final {
 
         IR::TypeVariableSubstitution *tvs = new IR::TypeVariableSubstitution();
         while (!constraints.empty()) {
-            EqualityConstraint *last = constraints.back();
+            auto last = constraints.back();
             constraints.pop_back();
             bool success = solve(root, last, tvs, reportErrors);
             if (!success)

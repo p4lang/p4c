@@ -23,8 +23,8 @@ ProgramStructure::ProgramStructure() :
         action_selectors(nullptr), calledActions("actions"), calledControls("controls"),
         calledCounters("counters"), calledMeters("meters"), calledRegisters("registers"),
         parsers("parsers"), parserPacketIn(nullptr), parserHeadersOut(nullptr),
-		verifyChecksums(nullptr), updateChecksums(nullptr),
-		deparser(nullptr), latest(nullptr) {
+        verifyChecksums(nullptr), updateChecksums(nullptr),
+        deparser(nullptr), latest(nullptr) {
     ingress = nullptr;
     declarations = new IR::Vector<IR::Node>();
     emptyTypeArguments = new IR::Vector<IR::Type>();
@@ -550,8 +550,8 @@ void ProgramStructure::createDeparser() {
 }
 
 const IR::P4Table*
-ProgramStructure::convertTable(
-    const IR::V1Table* table, cstring newName, IR::NameMap<IR::Declaration, ordered_map>* stateful) {
+ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
+                               IR::NameMap<IR::Declaration, ordered_map>* stateful) {
     ExpressionConverter conv(this);
 
     auto params = new IR::ParameterList();

@@ -19,7 +19,7 @@ class EBPFType;
 // Base class for EBPF objects
 class EBPFObject {
  public:
-	virtual ~EBPFObject() {}
+    virtual ~EBPFObject() {}
     virtual void emit(CodeBuilder* builder) = 0;
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const {
@@ -54,7 +54,7 @@ class EBPFProgram : public EBPFObject {
     EBPFProgram(const IR::P4Program* program, const P4::BlockMap* blockMap) :
             program(program), blockMap(blockMap),
             refMap(blockMap->refMap), typeMap(blockMap->typeMap),
-			parser(nullptr), control(nullptr), model(EBPFModel::instance) {
+                   parser(nullptr), control(nullptr), model(EBPFModel::instance) {
         offsetVar = EBPFModel::reserved("packetOffsetInBits");
         zeroKey = EBPFModel::reserved("zero");
         functionName = EBPFModel::reserved("filter");

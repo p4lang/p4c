@@ -303,7 +303,7 @@ void EBPFParserState::emit(CodeBuilder* builder) {
 EBPFParser::EBPFParser(const EBPFProgram* program,
                        const IR::ParserBlock* block, const P4::TypeMap* typeMap) :
         program(program), typeMap(typeMap), parserBlock(block), packet(nullptr),
-		headers(nullptr), headerType(nullptr) {}
+        headers(nullptr), headerType(nullptr) {}
 
 void EBPFParser::emit(CodeBuilder *builder) {
     for (auto s : states)

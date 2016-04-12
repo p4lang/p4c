@@ -26,7 +26,7 @@ class EBPFType : public EBPFObject {
 
 class IHasWidth {
  public:
-	virtual ~IHasWidth() {}
+    virtual ~IHasWidth() {}
     // P4 width
     virtual unsigned widthInBits() = 0;
     // Width in the target implementation.

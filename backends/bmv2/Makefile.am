@@ -1,10 +1,11 @@
 # Makefile for a backend that generates code for the Behavioral Model version 2 (BMv2)
+# compiling for the simple_switch target.
 # To be included in the main P4C compiler makefile
 
-bin_PROGRAMS += p4c-bm2
-p4c_bm2_LDADD = -lgc libfrontend.a libp4ctoolkit.a
+bin_PROGRAMS += p4c-bm2-ss
+p4c_bm2_ss_LDADD = -lgc libfrontend.a libp4ctoolkit.a
 
-p4c_bm2_SOURCES = \
+p4c_bm2_ss_SOURCES = \
 	backends/bmv2/bmv2.cpp \
 	backends/bmv2/analyzer.h \
 	backends/bmv2/analyzer.cpp \
@@ -17,7 +18,9 @@ p4c_bm2_SOURCES = \
 	backends/bmv2/lower.h \
 	backends/bmv2/lower.cpp
 
-cpplint_FILES += $(p4c_bm2_SOURCES)
+cpplint_FILES += $(p4c_bm2_ss_SOURCES)
+
+ir_DEF_FILES += $(srcdir)/backends/bmv2/bmv2.def
 
 # Tests
 -include $(srcdir)/bmv2tests.am

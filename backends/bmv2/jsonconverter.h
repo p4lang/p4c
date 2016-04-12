@@ -54,7 +54,7 @@ class JsonConverter final {
     const IR::Parameter*   headerParameter;
     const IR::Parameter*   userMetadataParameter;
     const IR::Parameter*   stdMetadataParameter;
-    
+
  protected:
     Util::IJson* typeToJson(const IR::Type_StructLike* type);
     unsigned nextId(cstring group);
