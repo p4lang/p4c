@@ -197,7 +197,9 @@ SimpleSwitch::enqueue(int egress_port, std::unique_ptr<Packet> &&packet) {
       bm::Logger::get()->error("Priority out of range, dropping packet");
       return;
     }
-    egress_buffers.push_front(egress_port, priority, std::move(packet));
+    egress_buffers.push_front(
+        egress_port, SSWITCH_PRIORITY_QUEUEING_NB_QUEUES - 1 - priority,
+        std::move(packet));
 #else
     egress_buffers.push_front(egress_port, std::move(packet));
 #endif
