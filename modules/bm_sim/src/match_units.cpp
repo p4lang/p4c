@@ -294,6 +294,12 @@ format_ternary_key(ByteContainer *key, const ByteContainer &mask) {
   }
 }
 
+char get_byte0_mask(size_t bitwidth) {
+  if (bitwidth % 8 == 0) return 0xff;
+  int nbits = bitwidth % 8;
+  return ((1 << nbits) - 1);
+}
+
 }  // namespace
 
 class MatchKeyBuilderHelper {
@@ -398,6 +404,15 @@ class MatchKeyBuilderHelper {
     return params;
   }
 
+  // TODO(antonin):
+  // We recently added automatic masking of the first byte of each match
+  // param. For example, if a match field is 14 bit wide and we receive value
+  // 0xffff from the client (instead of the correct 0x3fff), we will
+  // automatically do the conversion. Before that change, we would not perform
+  // any checks and simply use the user-provided value, which would cause
+  // unexpected dataplane behavior. But is this silent conversion better than
+  // returning an error to the client?
+
   template <typename E, typename std::enable_if<
               decltype(E::key)::mut == MatchUnitType::EXACT, int>::type = 0>
   static E
@@ -406,8 +421,13 @@ class MatchKeyBuilderHelper {
     E entry;
     entry.key.data.reserve(kb.nbytes_key);
 
-    for (const auto i : kb.inv_mapping)
-      entry.key.data.append(params.at(i).key);
+    size_t first_byte = 0;
+    for (size_t i = 0; i < kb.inv_mapping.size(); i++) {
+      const auto &param = params.at(kb.inv_mapping[i]);
+      entry.key.data.append(param.key);
+      entry.key.data[first_byte] &= get_byte0_mask(kb.key_input[i].nbits);
+      first_byte += param.key.size();
+    }
 
     return entry;
   }
@@ -421,9 +441,11 @@ class MatchKeyBuilderHelper {
     entry.key.data.reserve(kb.nbytes_key);
     entry.key.prefix_length = 0;
 
-    for (const auto i : kb.inv_mapping) {
-      const auto &param = params.at(i);
+    size_t first_byte = 0;
+    for (size_t i = 0; i < kb.inv_mapping.size(); i++) {
+      const auto &param = params.at(kb.inv_mapping[i]);
       entry.key.data.append(param.key);
+      entry.key.data[first_byte] &= get_byte0_mask(kb.key_input[i].nbits);
       switch (param.type) {
         case MatchKeyParam::Type::VALID:
           entry.key.prefix_length += 8;
@@ -437,6 +459,7 @@ class MatchKeyBuilderHelper {
         case MatchKeyParam::Type::TERNARY:
           assert(0);
       }
+      first_byte += param.key.size();
     }
 
     return entry;
@@ -451,12 +474,13 @@ class MatchKeyBuilderHelper {
     entry.key.data.reserve(kb.nbytes_key);
     entry.key.mask.reserve(kb.nbytes_key);
 
-    for (const auto i : kb.inv_mapping) {
-      const auto &param = params.at(i);
+    size_t first_byte = 0;
+    for (size_t i = 0; i < kb.inv_mapping.size(); i++) {
+      const auto &param = params.at(kb.inv_mapping[i]);
       entry.key.data.append(param.key);
+      entry.key.data[first_byte] &= get_byte0_mask(kb.key_input[i].nbits);
       switch (param.type) {
         case MatchKeyParam::Type::VALID:
-          // TODO(gordon) is this a typo of '\xff' ?
           entry.key.mask.append("\xff");
           break;
         case MatchKeyParam::Type::EXACT:
@@ -470,6 +494,7 @@ class MatchKeyBuilderHelper {
           entry.key.mask.append(param.mask);
           break;
       }
+      first_byte += param.key.size();
     }
 
     format_ternary_key(&entry.key.data, entry.key.mask);
