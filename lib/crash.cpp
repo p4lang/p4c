@@ -67,14 +67,16 @@ const char *addr2line(void *addr, const char *text) {
     while (shift >= 0) {
         *p++ = "0123456789abcdef"[(a >> shift) & 0xf];
         shift -= 4; }
-    strcpy(p, " -fsipe $(which "); p += strlen(p);    // NOLINT
-    if (text && (t = strchr(text, '('))) {
-        strncpy(p, text, t-text);
-        p += t-text;
-    } else {
-        strcpy(p, program_name);  // NOLINT
-        p += strlen(p); }
-    strcpy(p, ") | c++filt");  // NOLINT
+    strcpy(p, " -fsipe "); p += strlen(p);    // NOLINT
+    if (!text || !(t = strchr(text, '('))) {
+        text = program_name;
+        t = text + strlen(text); }
+    if (!memchr(text, '/', t-text)) {
+        strcpy(p, "$(which "); p += strlen(p); }        // NOLINT
+    strncpy(p, text, t-text);
+    p += t-text;
+    if (!memchr(text, '/', t-text)) *p++ = ')';
+    strcpy(p, " | c++filt");  // NOLINT
     p += strlen(p);
     if (pipe2(pfd, O_CLOEXEC) < 0) return 0;
     while ((child = fork()) == -1 && errno == EAGAIN) {}

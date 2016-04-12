@@ -52,9 +52,11 @@ class Visitor {
     void visit(const IR::Node *const &n, const char *name = 0) {
         auto t = apply_visitor(n, name);
         if (t != n) visitor_const_error(); }
+    void visit(IR::Node *&, const char * = 0) { BUG("Can't visit non-const pointer"); }
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                            \
     void visit(const IR::CLASS *&n, const char *name = 0);              \
-    void visit(const IR::CLASS *const &n, const char *name = 0);
+    void visit(const IR::CLASS *const &n, const char *name = 0);        \
+    void visit(IR::CLASS *&, const char * = 0) { BUG("Can't visit non-const pointer"); }
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
 
