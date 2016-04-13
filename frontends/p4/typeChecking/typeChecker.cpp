@@ -2,7 +2,6 @@
 #include "typeUnification.h"
 #include "ir/substitution.h"
 #include "typeConstraints.h"
-#include "ir/configuration.h"
 #include "ir/dump.h"
 
 namespace P4 {
