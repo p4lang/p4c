@@ -216,7 +216,9 @@ def load_json_str(json_str):
     def get_field_bitwidth(header_type, field_name, j_header_types):
         for h in j_header_types:
             if h["name"] != header_type: continue
-            for f, bw in h["fields"]:
+            for t in h["fields"]:
+                # t can have a third element (field signedness)
+                f, bw = t[0], t[1]
                 if f == field_name:
                     return bw
         assert(0)
