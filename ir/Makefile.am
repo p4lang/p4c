@@ -5,6 +5,7 @@ ir_SOURCES += \
 	ir/dbprint-p4.cpp \
 	ir/dump.cpp \
 	ir/expression.cpp \
+	ir/v1.cpp \
 	ir/ir.h \
 	ir/id.h \
 	ir/ir-generated.cpp \
@@ -23,7 +24,8 @@ ir_SOURCES += \
 	ir/substitution.cpp \
 	ir/substitutionVisitor.h \
 	ir/substitutionVisitor.cpp \
-	ir/parameterSubstitution.h
+	ir/parameterSubstitution.h \
+	ir/configuration.h
 
 ir_DEF_FILES += \
     $(srcdir)/ir/base.def \

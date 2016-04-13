@@ -36,7 +36,7 @@ inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
 #end
 
 // Infinite precision integer
-class Type_InfInt : Type_Base {
+class Type_InfInt : Type_Base, InfInt {
 #nodbprint
 #emit
     static const Type_InfInt *get();
@@ -126,7 +126,7 @@ class Type_Var : Type_VarBase {}
 
 // A special type variable that represents the type of a Constant with unknown width.
 // Type unification can be used to return the correct type for the Constant.
-class Type_VarInfInt : Type_VarBase {
+class Type_VarInfInt : Type_VarBase, InfInt {
 #noconstructor
 #emit
     Type_VarInfInt(Util::SourceInfo si) : Type_VarBase(si, IR::ID("varInfInt")) {}

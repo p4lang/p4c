@@ -23,6 +23,9 @@ boilerplate removed, which the ir-generator generates.
 ##### ir.def ir.cpp
    Miscelaneous front-end IR classes.
 
+##### v1.def, v1.cpp
+   IR classes only needed to process P4 v1.0 / v1.1 programs
+
 ##### expression.def expression.cpp
   IR classes related to expressions.  The `Expression` abstract class is
   base for all expressions, and contains a `type` field.  Abstract subclasses

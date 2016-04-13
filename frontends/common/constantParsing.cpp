@@ -1,4 +1,4 @@
-#include "ir/parameters.h"
+#include "ir/configuration.h"
 #include "lib/gmputil.h"
 #include "constantParsing.h"
 
@@ -10,7 +10,7 @@ IR::Constant* cvtCst(Util::SourceInfo srcInfo, const char* s, unsigned skip, uns
     if (size <= 0) {
         ::error("%1%: Non-positive size %2%", srcInfo, size);
         return nullptr; }
-    if (size > P4CParameters::MaximumWidthSupported) {
+    if (size > P4CConfiguration::MaximumWidthSupported) {
         ::error("%1%: %2% size too large", srcInfo, size);
         return nullptr; }
 

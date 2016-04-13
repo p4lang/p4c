@@ -31,6 +31,17 @@ control update(inout Headers h, inout Meta m) {
     }
 }
 
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h.h);
+    }
+}
+
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action add() {
         h.h.c = (bit<64>)(h.h.a + h.h.b);
@@ -44,17 +55,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
     apply {
         t.apply();
-    }
-}
-
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {
-    }
-}
-
-control deparser(packet_out b, in Headers h) {
-    apply {
-        b.emit(h.h);
     }
 }
 

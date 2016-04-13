@@ -6,7 +6,7 @@
 #include <iostream>
 #include <map>
 #include "ir/ir.h"
-#include "ir/parameters.h"
+#include "ir/configuration.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/source_file.h"

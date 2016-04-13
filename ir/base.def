@@ -43,6 +43,8 @@ interface IDeclaration {
 #end
 }
 
+interface InfInt {}
+
 interface INamespace {
 #emit
     virtual Util::Enumerator<const IDeclaration*>* getDeclarations() const = 0;

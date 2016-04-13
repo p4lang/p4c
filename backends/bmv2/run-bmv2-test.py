@@ -59,6 +59,9 @@ def isError(p4filename):
     # True if the filename represents a p4 program that should fail
     return "_errors" in p4filename
 
+def reportError(*message):
+    print("***", *message)
+
 class Local(object):
     # object to hold local vars accessable to nested functions
     pass
@@ -83,8 +86,7 @@ def run_timeout(options, args, timeout, stderr):
         thread.join()
     if local.process is None:
         # never even started
-        if options.verbose:
-            print("Process failed to start")
+        reportError("Process failed to start")
         return -1
     if options.verbose:
         print("Exit code ", local.process.returncode)
@@ -314,8 +316,8 @@ class RunBMV2(object):
         self.json = None
         self.tables = []
         self.actions = []
+        self.switchLogFile = "switch.log"  # .txt is added by BMv2
         self.readJson()
-        # print(self.actions, self.tables)
     def readJson(self):
         with open(self.folder + "/" + self.jsonfile) as jf:
             self.json = json.load(jf)
@@ -408,7 +410,12 @@ class RunBMV2(object):
             self.packets[interface] = {}
         if not inout in self.packets[interface]:
             self.packets[interface][inout] = []
+        data = data.replace(" ", "")
+        if len(data) % 2 == 1:
+            reportError("Packet data is not integral number of bytes:", len(data), "hex digits:", data)
+            return FAILURE
         self.packets[interface][inout].append(data)
+        return SUCCESS
     def interfaces(self):
         # return list of interface names suitable for bmv2
         result = []
@@ -422,9 +429,9 @@ class RunBMV2(object):
         elif cmd == "packet":
             direction = "in"
         else:
-            return
+            return SUCCESS
         interface, line = nextWord(line)
-        self.writePacket(direction, interface, line)
+        return self.writePacket(direction, interface, line)
     def generate_model_inputs(self, stffile):
         with open(stffile) as i:
             for line in i:
@@ -434,7 +441,9 @@ class RunBMV2(object):
                         print(cmd)
                     self.writeCommand(cmd)
                 else:
-                    self.translate_packet(line)
+                    success = self.translate_packet(line)
+                    if success != SUCCESS:
+                        return success
         # Write the data to the files
         self.clifd.close()
         for interface, v in self.packets.iteritems():
@@ -442,7 +451,6 @@ class RunBMV2(object):
             file = self.filename(interface, direction)
             if direction in v:
                 packets = v[direction]
-#                data = [Ether(_pkt=HexToByte(hx)) for hx in packets]
                 data = [Packet(_pkt=HexToByte(hx)) for hx in packets]
                 print("Creating", file)
                 wrpcap(file, data)
@@ -459,17 +467,18 @@ class RunBMV2(object):
         concurrent = ConcurrentInteger(os.getcwd(), 1000)
         rand = concurrent.generate()
         if rand is None:
-            print("Could not find a free port for Thrift")
+            reportError("Could not find a free port for Thrift")
             return FAILURE
         thriftPort = str(9090 + rand)
 
         try:
-            runswitch = ["simple_switch", "--log-file", "switch.log", "--use-files", str(wait), "--thrift-port", thriftPort] + interfaces + [self.jsonfile]
+            runswitch = ["simple_switch", "--log-file", self.switchLogFile, "--use-files",
+                         str(wait), "--thrift-port", thriftPort] + interfaces + [self.jsonfile]
             if self.options.verbose:
                 print("Running", " ".join(runswitch))
             sw = subprocess.Popen(runswitch, cwd=self.folder)
                 
-            runcli = ["simple_switch_CLI", "--json", self.jsonfile, "--thrift-port", thriftPort]
+            runcli = ["simple_switch_CLI", "--thrift-port", thriftPort]
             if self.options.verbose:
                 print("Running", " ".join(runcli))
             i = open(self.clifile, 'r')
@@ -477,11 +486,18 @@ class RunBMV2(object):
             cli = subprocess.Popen(runcli, cwd=self.folder, stdin=i)
             cli.wait()
             if cli.returncode != 0:
-                print("CLI process failed with exit code", cli.returncode)
+                reportError("CLI process failed with exit code", cli.returncode)
                 return FAILURE
             # Give time to the model to execute
             time.sleep(3)
             sw.terminate()
+            sw.wait()
+            # This only works on Unix: negative returncode is
+            # minus the signal number that killed the process.
+            if sw.returncode != -15:  # 15 is SIGTERM
+                reportError("simple_switch died with return code", sw.returncode);
+            elif self.options.verbose:
+                print("simple_switch exit code", sw.returncode)
         finally:
             concurrent.release(rand)
         if self.options.verbose:
@@ -490,17 +506,21 @@ class RunBMV2(object):
     def comparePacket(self, expected, received):
         received = ByteToHex(str(received)).replace(" ", "").upper()
         expected = expected.replace(" ", "").upper()
-        # print(expected, received)
         if len(received) < len(expected):
-            print("Length too short", len(received), "vs", len(expected))
+            reportError("Received packet too short", len(received), "vs", len(expected))
             return FAILURE
         for i in range(0, len(expected)):
             if expected[i] == "*":
                 continue;
             if expected[i] != received[i]:
-                print("Different at position", i, ": expected", expected[i], "vs", received[i])
+                reportError("Packet different at position", i, ": expected", expected[i], ", received", received[i])
                 return FAILURE
         return SUCCESS
+    def showLog(self):
+        with open(self.folder + "/" + self.switchLogFile + ".txt") as a:
+            log = a.read()
+            print("Log file:")
+            print(log)
     def checkOutputs(self):
         if self.options.verbose:
             print("Comparing outputs")
@@ -513,17 +533,19 @@ class RunBMV2(object):
                 try:
                     packets = rdpcap(file)
                 except:
-                    print("*** Corrupt pcap file", file)
+                    reportError("Corrupt pcap file", file)
+                    self.showLog()
                     return FAILURE
             if direction in v:
                 expected = v[direction]
                 if len(expected) != len(packets):
-                    print("*** Expected", len(expected), "packets on port", interface, "got", len(packets))
+                    reportError("Expected", len(expected), "packets on port", interface, "got", len(packets))
+                    self.showLog()
                     return FAILURE
                 for i in range(0, len(expected)):
                     cmp = self.comparePacket(expected[i], packets[i])
                     if cmp != SUCCESS:
-                        print("*** Packet", i, "on port", interface, "differs")
+                        reportError("Packet", i, "on port", interface, "differs")
                         return FAILURE
             else:
                 pass
@@ -629,14 +651,14 @@ def main(argv):
             options.replace = True
         elif argv[0] == "-a":
             if len(argv) == 0:
-                print("Missing argument for -a option")
+                reportError("Missing argument for -a option")
                 usage(options)
                 sys.exit(1)
             else:
                 options.compilerOptions += argv[1].split();
                 argv = argv[1:]
         else:
-            print("Uknown option ", argv[0], file=sys.stderr)
+            reportError("Uknown option ", argv[0], file=sys.stderr)
             usage(options)
         argv = argv[1:]
 
@@ -650,6 +672,8 @@ def main(argv):
             options.testName = options.testName[:-3]
 
     result = process_file(options, argv)
+    if result != SUCCESS:
+        reportError("Test failed")
     sys.exit(result)
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 
-// Clamp a signed integer value to width bits
+// Represent a signed integer value using just 'width' bits.
 // Special operation provided by BMv2
-class Clamp : Operation_Unary {
+class IntMod : Operation_Unary {
       unsigned width;
       stringOp = "><";
       precedence = DBPrint::Prec_Low;

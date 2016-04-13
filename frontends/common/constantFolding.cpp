@@ -1,5 +1,5 @@
 #include "constantFolding.h"
-#include "ir/parameters.h"
+#include "ir/configuration.h"
 #include "lib/gmputil.h"
 
 namespace P4 {
@@ -411,10 +411,10 @@ const IR::Node* ConstantFolding::postorder(IR::Slice* e) {
         ::error("%1%: bit slicing should be specified as [msb:lsb]", e);
         return e;
     }
-    if (m > P4CParameters::MaximumWidthSupported ||
-        l > P4CParameters::MaximumWidthSupported) {
+    if (m > P4CConfiguration::MaximumWidthSupported ||
+        l > P4CConfiguration::MaximumWidthSupported) {
         ::error("%1%: Compiler only supports widths up to %2%",
-                e, P4CParameters::MaximumWidthSupported);
+                e, P4CConfiguration::MaximumWidthSupported);
         return e;
     }
     mpz_class value = cbase->value >> l;

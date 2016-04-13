@@ -2,9 +2,9 @@
 #include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 header hdr {
-    bit<32> a;
-    bit<32> b;
-    bit<64> c;
+    int<32> a;
+    bit<8>  b;
+    int<64> c;
 }
 
 struct Headers {
@@ -43,13 +43,13 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    action add() {
-        h.h.c = (bit<64>)(h.h.a + h.h.b);
+    action shift() {
+        h.h.c = (int<64>)(h.h.a >> h.h.b);
         sm.egress_spec = 9w0;
     }
     table t() {
         actions = {
-            add;
+            shift;
         }
     }
 

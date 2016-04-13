@@ -25,7 +25,7 @@ class ArithmeticFixup : public Transform {
             typeMap->setType(result, type);
             return result;
         } else {
-            auto result = new IR::Clamp(expr->srcInfo, expr, width);
+            auto result = new IR::IntMod(expr->srcInfo, expr, width);
             typeMap->setType(result, type);
             return result;
         }
@@ -407,13 +407,13 @@ class ExpressionConverter : public Inspector {
         e->emplace("cond", fixLocal(c));
     }
 
-    void postorder(const IR::Clamp* expression) override {
+    void postorder(const IR::IntMod* expression) override {
         auto result = new Util::JsonObject();
         map.emplace(expression, result);
         result->emplace("type", "expression");
         auto e = new Util::JsonObject();
         result->emplace("value", e);
-        e->emplace("op", "clamp");
+        e->emplace("op", "two_comp_mod");
         auto l = get(expression->expr);
         e->emplace("left", fixLocal(l));
         auto r = new Util::JsonObject();
@@ -1651,7 +1651,10 @@ Util::IJson* JsonConverter::typeToJson(const IR::Type_StructLike* st) {
         auto field = pushNewArray(fields);
         field->append(f->name.name);
         auto ftype = typeMap->getType(f->type, true);
-        field->append(ftype->width_bits());
+        BUG_CHECK(ftype->is<IR::Type_Bits>(), "%1%: expected a bit<> or int<> type", ftype);
+        auto type = ftype->to<IR::Type_Bits>();
+        field->append(type->size);
+        field->append(type->isSigned);
     }
     // must add padding
     unsigned width = st->width_bits();
@@ -1661,6 +1664,7 @@ Util::IJson* JsonConverter::typeToJson(const IR::Type_StructLike* st) {
         auto field = pushNewArray(fields);
         field->append(name);
         field->append(8 - padding);
+        field->append(false);
     }
     return result;
 }
