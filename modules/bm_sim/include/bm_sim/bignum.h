@@ -45,6 +45,14 @@ namespace bignum {
     mpz_import(dst->backend().data(), 1, 1, size, 1, 0, src);
   }
 
+  inline int test_bit(const Bignum &v, size_t index) {
+    return mpz_tstbit(v.backend().data(), index);
+  }
+
+  inline void clear_bit(Bignum *v, size_t index) {
+    return mpz_clrbit(v->backend().data(), index);
+  }
+
 }  // namespace bignum
 
 }  // namespace bm

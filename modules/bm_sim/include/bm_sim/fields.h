@@ -42,12 +42,22 @@ namespace bm {
 class Field : public Data {
  public:
   // Data() is called automatically
-  explicit Field(int nbits, bool arith_flag = true)
-    : nbits(nbits), nbytes((nbits + 7) / 8), bytes(nbytes) {
+  // I wanted to have a separate class for signed fields, inheriting from
+  // Field. Unfortunately that would require adding an extra level of
+  // indirection in Header (for the field vector), so I am sticking to this for
+  // now.
+  explicit Field(int nbits, bool arith_flag = true, bool is_signed = false)
+      : nbits(nbits), nbytes((nbits + 7) / 8), bytes(nbytes),
+        is_signed(is_signed) {
     arith = arith_flag;
     // TODO(antonin) ?
     // should I only do that for arith fields ?
     mask <<= nbits; mask -= 1;
+    if (is_signed) {
+      assert(nbits > 1);
+      max <<= (nbits - 1); max -= 1;
+      min <<= (nbits - 1); min *= -1;
+    }
   }
 
   // Overload set? Make it more generic (arbitary length) ?
@@ -60,6 +70,10 @@ class Field : public Data {
 
   void sync_value() {
     bignum::import_bytes(&value, bytes.data(), nbytes);
+    if (is_signed && bignum::test_bit(value, nbits - 1)) {
+      bignum::clear_bit(&value, nbits - 1);
+      value += min;
+    }
     DEBUGGER_NOTIFY_UPDATE(*packet_id, my_id, bytes.data(), nbits);
   }
 
@@ -86,12 +100,25 @@ class Field : public Data {
 
   void export_bytes() {
     std::fill(bytes.begin(), bytes.end(), 0);  // very important !
-    // TODO(antonin): this can overflow !!!
-    // maybe bytes is not large enough !!!
-    // I am supposed to mask off extra bits...
-    // is this efficient enough:
-    value &= mask;
-    bignum::export_bytes(bytes.data(), nbytes, value);
+
+    if (!is_signed) {
+      // is this efficient enough?
+      value &= mask;
+      bignum::export_bytes(bytes.data(), nbytes, value);
+    } else {
+      if (value < min || value > mask) {
+        value &= mask;
+        if (value > max) value -= (mask + 1);
+      }
+      if (value >= 0) {
+        bignum::export_bytes(bytes.data(), nbytes, value);
+      } else {
+        // e.g. if width is 8 and value is -127 (1000 0001), subtracting min
+        // (-128) one time gives us 1, a second time gives us 129, 129 has a
+        // bignum representation of 1000 0001, which is what we wanted
+        bignum::export_bytes(bytes.data(), nbytes, value - min - min);
+      }
+    }
     DEBUGGER_NOTIFY_UPDATE(*packet_id, my_id, bytes.data(), nbits);
   }
 
@@ -124,7 +151,10 @@ class Field : public Data {
   int nbits;
   int nbytes;
   ByteContainer bytes;
+  bool is_signed{false};
   Bignum mask{1};
+  Bignum max{1};
+  Bignum min{1};
   uint64_t my_id{};
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
 };

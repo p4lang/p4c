@@ -39,7 +39,9 @@ enum class ExprOpcode {
   AND, OR, NOT,
   BIT_AND, BIT_OR, BIT_XOR, BIT_NEG,
   VALID_HEADER,
-  TERNARY_OP, SKIP
+  TERNARY_OP, SKIP,
+  TWO_COMP_MOD,
+  DATA_TO_BOOL, BOOL_TO_DATA
 };
 
 class ExprOpcodesMap {

@@ -294,6 +294,29 @@ class Data {
   }
 
   //! NC
+  void two_comp_mod(const Data &src, const Data &width) {
+    static Bignum one(1);
+    unsigned int uwidth = width.get_uint();
+    Bignum mask = (one << uwidth) - 1;
+    Bignum max = (one << (uwidth - 1)) - 1;
+    Bignum min = -(one << (uwidth - 1));
+    if (src.value < min || src.value > max) {
+      value = src.value & mask;
+      if (value > max)
+        value -= (one << uwidth);
+    } else {
+      value = src.value;
+    }
+  }
+
+  //! NC
+  template<typename T,
+           typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+  bool test_eq(T i) const {
+    return (value == i);
+  }
+
+  //! NC
   friend bool operator==(const Data &lhs, const Data &rhs) {
     assert(lhs.arith && rhs.arith);
     return lhs.value == rhs.value;

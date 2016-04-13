@@ -288,6 +288,22 @@ TEST_F(ConditionalsTest, BitXor) {
   ASSERT_TRUE(c.eval(*phv));
 }
 
+TEST_F(ConditionalsTest, TwoCompMod) {
+  int v1 = -129;
+  int v2 = 8;
+  int res = 127;
+
+  Conditional c("ctest", 0);
+  c.push_back_load_const(Data(v1));
+  c.push_back_load_const(Data(v2));
+  c.push_back_op(ExprOpcode::TWO_COMP_MOD);
+  c.push_back_load_const(Data(res));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  ASSERT_TRUE(c.eval(*phv));
+}
+
 TEST_F(ConditionalsTest, BitNeg) {
   int v = 0xababa;
 
@@ -437,6 +453,84 @@ TEST_F(ConditionalsTest, TernaryOp) {
   testHeader1_f16.set(value_ternary_2);
 
   ASSERT_TRUE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsTest, TernaryOp2) {
+  // 1 == (((testHeader1.f16 < testHeader2.f16) ? 1 : 0) & 0x1) & 0xff
+  Conditional c("ctest", 0);
+
+  Expression ternary_e1;
+  ternary_e1.push_back_load_const(Data(1));
+
+  Expression ternary_e2;
+  ternary_e2.push_back_load_const(Data(0));
+
+  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader2, 3); // f16
+  c.push_back_op(ExprOpcode::LT_DATA);
+  c.push_back_ternary_op(ternary_e1, ternary_e2);
+  c.push_back_load_const(Data(0x1));
+  c.push_back_op(ExprOpcode::BIT_AND);
+  c.push_back_load_const(Data(0xff));
+  c.push_back_op(ExprOpcode::BIT_AND);
+  c.push_back_load_const(Data(1));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  Field &testHeader1_f16 = phv->get_field(testHeader1, 3); // f16
+  Field &testHeader2_f16 = phv->get_field(testHeader2, 3); // f16
+  testHeader1_f16.set(3);
+  testHeader2_f16.set(3);
+
+  ASSERT_FALSE(c.eval(*phv));
+
+  testHeader1_f16.set(1);
+
+  ASSERT_TRUE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsTest, D2B) {
+  Conditional c("ctest", 0);
+  c.push_back_load_field(testHeader1, 3);  // f16
+  c.push_back_op(ExprOpcode::DATA_TO_BOOL);
+  c.build();
+
+  Field &testHeader1_f16 = phv->get_field(testHeader1, 3);
+
+  testHeader1_f16.set(0);
+  ASSERT_FALSE(c.eval(*phv));
+
+  testHeader1_f16.set(1);
+  ASSERT_TRUE(c.eval(*phv));
+
+  testHeader1_f16.set(7);
+  ASSERT_TRUE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsTest, B2D) {
+  auto build_condition = [](const std::string &name, int id, bool bool_v,
+                            int data_v) {
+    Conditional c(name, id);
+    c.push_back_load_bool(bool_v);
+    c.push_back_op(ExprOpcode::BOOL_TO_DATA);
+    c.push_back_load_const(Data(data_v));
+    c.push_back_op(ExprOpcode::EQ_DATA);
+    c.build();
+    return c;
+  };
+
+  Conditional c1 = build_condition("c1", 0, true, 0);
+  ASSERT_FALSE(c1.eval(*phv));
+  Conditional c2 = build_condition("c2", 1, true, 1);
+  ASSERT_TRUE(c2.eval(*phv));
+  Conditional c3 = build_condition("c3", 2, true, 7);
+  ASSERT_FALSE(c3.eval(*phv));
+  Conditional c4 = build_condition("c4", 3, false, 0);
+  ASSERT_TRUE(c4.eval(*phv));
+  Conditional c5 = build_condition("c5", 4, false, 1);
+  ASSERT_FALSE(c5.eval(*phv));
+  Conditional c6 = build_condition("c6", 5, false, 7);
+  ASSERT_FALSE(c6.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, Stress) {

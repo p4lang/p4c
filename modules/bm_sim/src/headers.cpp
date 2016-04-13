@@ -39,7 +39,8 @@ Header::Header(const std::string &name, p4object_id_t id,
     if (arith_offsets.find(i) == arith_offsets.end()) {
       arith_flag = false;
     }
-    fields.push_back(Field(header_type.get_bit_width(i), arith_flag));
+    fields.push_back(Field(header_type.get_bit_width(i), arith_flag,
+                           header_type.is_field_signed(i)));
     uint64_t field_unique_id = id;
     field_unique_id <<= 32;
     field_unique_id |= i;
