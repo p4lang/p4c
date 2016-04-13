@@ -59,6 +59,9 @@ ExprOpcodesMap::ExprOpcodesMap() {
     {"~", ExprOpcode::BIT_NEG},
     {"valid", ExprOpcode::VALID_HEADER},
     {"?", ExprOpcode::TERNARY_OP},
+    {"two_comp_mod", ExprOpcode::TWO_COMP_MOD},
+    {"d2b", ExprOpcode::DATA_TO_BOOL},
+    {"b2d", ExprOpcode::BOOL_TO_DATA},
   };
 }
 
@@ -410,6 +413,24 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
         i += op.skip_num;
         break;
 
+      case ExprOpcode::TWO_COMP_MOD:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].two_comp_mod(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
+
+      case ExprOpcode::DATA_TO_BOOL:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        bool_temps_stack.push_back(!rd->test_eq(0));
+        break;
+
+      case ExprOpcode::BOOL_TO_DATA:
+        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        data_temps[op.data_dest_index].set(static_cast<int>(rb));
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
+
       default:
         assert(0 && "invalid operand");
         break;
@@ -464,6 +485,7 @@ Expression::assign_dest_registers() {
       case ExprOpcode::BIT_AND:
       case ExprOpcode::BIT_OR:
       case ExprOpcode::BIT_XOR:
+      case ExprOpcode::TWO_COMP_MOD:
         registers_curr -= new_registers.top();
         new_registers.pop();
         registers_curr -= new_registers.top();
@@ -483,6 +505,31 @@ Expression::assign_dest_registers() {
 
         new_registers.push(1);
         registers_curr += 1;
+        break;
+
+      case ExprOpcode::BOOL_TO_DATA:
+        op.data_dest_index = registers_curr;
+
+        new_registers.push(1);
+        registers_curr += 1;
+        break;
+
+      // added recently; not necessary but could decrease number of registers
+      case ExprOpcode::EQ_DATA:
+      case ExprOpcode::NEQ_DATA:
+      case ExprOpcode::GT_DATA:
+      case ExprOpcode::LT_DATA:
+      case ExprOpcode::GET_DATA:
+      case ExprOpcode::LET_DATA:
+        registers_curr -= new_registers.top();
+        new_registers.pop();
+        registers_curr -= new_registers.top();
+        new_registers.pop();
+        break;
+
+      case ExprOpcode::DATA_TO_BOOL:
+        registers_curr -= new_registers.top();
+        new_registers.pop();
         break;
 
       case ExprOpcode::LOAD_CONST:

@@ -32,8 +32,10 @@ using ::testing::TestWithParam;
 using ::testing::Range;
 using ::testing::Combine;
 
+namespace {
+
 class BitInStream {
-public:
+ public:
   void append_one(bool bit) {
     int offset = nbits_ % 8;
     if(offset == 0)
@@ -64,13 +66,15 @@ public:
     nbits_ = 0;
   }
 
-private:
+ private:
   ByteContainer bits_{};
   int nbits_{0};
 };
 
+}  // namespace
+
 class FieldSerializeTest : public TestWithParam< std::tuple<int, int> > {
-protected:
+ protected:
   // I wanted to use size_t, but GTest Range() was complaining
   int bitwidth{0};
   int hdr_offset{0};
@@ -129,3 +133,74 @@ TEST_P(FieldSerializeTest, Deparse) {
 INSTANTIATE_TEST_CASE_P(TestParameters,
                         FieldSerializeTest,
                         Combine(Range(1, 17), Range(0, 8)));
+
+
+namespace {
+
+class TwoCompV {
+ public:
+  TwoCompV(int v, int bitwidth)
+      : nbits_(bitwidth) {
+    assert(bitwidth <= 24);
+    const char *v_ = reinterpret_cast<char *>(&v);
+    if (bitwidth > 16)
+      bits_.push_back(v_[2]);
+    if (bitwidth > 8)
+      bits_.push_back(v_[1]);
+    bits_.push_back(v_[0]);
+    int sign_bit = (bitwidth % 8 == 0) ? 7 : ((bitwidth % 8) - 1);
+    if (v < 0) {
+      bits_[0] &= (1 << sign_bit) - 1;
+      bits_[0] |= 1 << sign_bit;
+    }
+  }
+
+  ByteContainer &bytes() {
+    return bits_;
+  }
+
+  const ByteContainer &bytes() const {
+    return bits_;
+  }
+
+ private:
+  ByteContainer bits_{};
+  int nbits_{0};
+};
+
+}  // namespace
+
+class SignedFieldTest : public TestWithParam<int> {
+ protected:
+  int bitwidth{0};
+  Field signed_f;
+
+  SignedFieldTest()
+      : bitwidth(GetParam()), signed_f(bitwidth, true, true) { }
+};
+
+TEST_P(SignedFieldTest, SyncValue) {
+  assert(bitwidth > 1);
+  int max = (1 << (bitwidth - 1)) - 1;
+  int min = -(1 << (bitwidth - 1));
+  for(int v = min; v <= max; v++) {
+    TwoCompV input(v, bitwidth);
+    signed_f.set_bytes(input.bytes().data(), input.bytes().size());
+    ASSERT_EQ(v, signed_f.get_int());
+  }
+}
+
+TEST_P(SignedFieldTest, ExportBytes) {
+  assert(bitwidth > 1);
+  int max = (1 << (bitwidth - 1)) - 1;
+  int min = -(1 << (bitwidth - 1));
+  for(int v = min; v <= max; v++) {
+    TwoCompV expected(v, bitwidth);
+    signed_f.set(v);
+    ASSERT_EQ(expected.bytes(), signed_f.get_bytes());
+  }
+}
+
+INSTANTIATE_TEST_CASE_P(TestParameters,
+                        SignedFieldTest,
+                        Range(2, 17));

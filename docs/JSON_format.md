@@ -11,8 +11,10 @@ per [this specification] (http://json-schema.org/).
 
 ## General information
 
-Signed fields are not supported in bmv2, although signed constants (in
-expressions, or as primitive arguments) are.
+Tentative support for signed fields (with a 2 complement representation) has
+been added to bmv2, although they are not supported in P4 1.0 or by the [p4c-bm
+compiler] (https://github.com/p4lang/p4c-bm). However, signed constants (in
+expressions, or as primitive arguments) are always supported.
 Arithmetic is done with infinite precision, but when a value is copied into a
 field, it is truncated based on the field's bitwidth.
 
@@ -44,6 +46,25 @@ For an expression, `left` and `right` will themselves be JSON objects, where the
 `value` attribute can be one of `field`, `hexstr`, `header`, `expression`,
 `bool`.
 
+bmv2 also supports these recently-added operations:
+  - data-to-bool conversion (`op` is `d2b`): unary operation which can be used
+to explicitly convert a data value (i.e. a value that can be read from /
+written to a field, or a value obtained from runtime action data, or a value
+obtained from a JSON `hexstr`) to a boolean value. Note that implicit
+conversions are not supported.
+  - bool-to-data conversion (`op` is `b2d`): unary operation which can be used
+to explicitly convert a boolean value to a data value. Note that implicit
+conversions are not supported.
+  - 2-complement modulo (`op` is `two_comp_mod`): given a source data value and
+a width data value, produces a third data value which is the signed value of the
+source given a 2-complement representation with that width. For example,
+`two_comp_mod(257, 8) == 1` and `two_comp_mod(-129, 8) == 127`.
+  - ternary operator (`op` is `?`): in addition to `left` and `right`, the JSON
+object has a fourth attribute, `cond` (condition), which is itself an
+expression. For example, in `(hA.f1 == 9) ? 3 : 4`, `cond` would be the JSON
+representation of `(hA.f1 == 9)`, `left` would be the JSON representation of `3`
+and `right` would be the JSON representation of `4`.
+
 
 The attributes of the root JSON dictionary are:
 
@@ -54,7 +75,10 @@ item has the following attributes:
 - `name`: fully qualified P4 name of the header type
 - `id`: a unique integer (unique with respect to other header types)
 - `fields`: a JSON array of JSON 2-tuples (field member name, field width in
-bits)
+bits). Note that the JSON 2-tuples can optionally be JSON 3-tuples if you want
+to experiment with signed fields support. In this case, the third element of the
+tuples is a boolean value, which is `true` iff the field is signed. A signed
+field needs to have a bitwidth of at least 2!
 
 ### `headers`
 

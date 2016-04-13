@@ -44,16 +44,17 @@ class HeaderType : public NamedP4Object {
     : NamedP4Object(name, id) {}
 
   // returns field offset
-  int push_back_field(const std::string &field_name, int field_bit_width) {
-    fields_bit_width.push_back(field_bit_width);
-    fields_name.push_back(field_name);
-    return fields_bit_width.size() - 1;
+  int push_back_field(const std::string &field_name, int field_bit_width,
+                      bool is_signed = false) {
+    fields_info.push_back({field_name, field_bit_width, is_signed});
+    return fields_info.size() - 1;
   }
 
   int push_back_VL_field(
       const std::string &field_name,
-      std::unique_ptr<VLHeaderExpression> field_length_expr) {
-    int offset = push_back_field(field_name, 0);
+      std::unique_ptr<VLHeaderExpression> field_length_expr,
+      bool is_signed = false) {
+    int offset = push_back_field(field_name, 0, is_signed);
     // TODO(antonin)
     assert(!is_VL_header() && "header can only have one VL field");
     VL_expr_raw = std::move(field_length_expr);
@@ -62,18 +63,22 @@ class HeaderType : public NamedP4Object {
   }
 
   int get_bit_width(int field_offset) const {
-    return fields_bit_width[field_offset];
+    return fields_info.at(field_offset).bitwidth;
   }
 
   int get_bit_width() const {
     int bitwidth = 0;
-    for (int i : fields_bit_width)
-      bitwidth += i;
+    for (const auto &f_info : fields_info)
+      bitwidth += f_info.bitwidth;
     return bitwidth;
   }
 
   const std::string &get_field_name(int field_offset) const {
-    return fields_name[field_offset];
+    return fields_info.at(field_offset).name;
+  }
+
+  bool is_field_signed(int field_offset) const {
+    return fields_info.at(field_offset).is_signed;
   }
 
   header_type_id_t get_type_id() const {
@@ -81,12 +86,12 @@ class HeaderType : public NamedP4Object {
   }
 
   int get_num_fields() const {
-    return fields_bit_width.size();
+    return fields_info.size();
   }
 
   int get_field_offset(const std::string &field_name) const {
-    for (unsigned int res = 0; res < fields_name.size(); res++) {
-      if (field_name == fields_name[res]) return res;
+    for (size_t res = 0; res < fields_info.size(); res++) {
+      if (field_name == fields_info[res].name) return res;
     }
     return -1;
   }
@@ -112,8 +117,12 @@ class HeaderType : public NamedP4Object {
   }
 
  private:
-  std::vector<int> fields_bit_width{};
-  std::vector<std::string> fields_name{};
+  struct FInfo {
+    std::string name;
+    int bitwidth;
+    bool is_signed;
+  };
+  std::vector<FInfo> fields_info;
   // used for VL headers only
   std::unique_ptr<VLHeaderExpression> VL_expr_raw{nullptr};
   int VL_offset{-1};

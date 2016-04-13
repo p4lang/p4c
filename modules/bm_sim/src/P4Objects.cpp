@@ -134,6 +134,9 @@ P4Objects::init_objects(std::istream *is,
     const Json::Value &cfg_fields = cfg_header_type["fields"];
     for (const auto cfg_field : cfg_fields) {
       const string field_name = cfg_field[0].asString();
+      bool is_signed = false;
+      if (cfg_field.size() > 2)
+        is_signed = cfg_field[2].asBool();
       if (cfg_field[1].asString() == "*") {  // VL field
         ArithExpression raw_expr;
         assert(cfg_header_type.isMember("length_exp"));
@@ -143,10 +146,11 @@ P4Objects::init_objects(std::istream *is,
         raw_expr.build();
         std::unique_ptr<VLHeaderExpression> VL_expr(
           new VLHeaderExpression(raw_expr));
-        header_type->push_back_VL_field(field_name, std::move(VL_expr));
+        header_type->push_back_VL_field(field_name, std::move(VL_expr),
+                                        is_signed);
       } else {
         int field_bit_width = cfg_field[1].asInt();
-        header_type->push_back_field(field_name, field_bit_width);
+        header_type->push_back_field(field_name, field_bit_width, is_signed);
       }
     }
 
