@@ -78,6 +78,9 @@ m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
 py-compile
+.libs
+
+*.ts
 
 # gcov
 *.gcno
@@ -86,3 +89,7 @@ py-compile
 
 # doxygen
 doxygen-out
+
+# thrift
+gen-cpp
+gen-py

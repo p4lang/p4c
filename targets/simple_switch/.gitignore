@@ -1,3 +1,5 @@
 /build
 /simple_switch
 /*.pcap
+sswitch_runtime
+simple_switch_CLI
