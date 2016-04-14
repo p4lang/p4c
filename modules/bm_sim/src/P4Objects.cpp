@@ -63,7 +63,11 @@ P4Objects::build_expression(const Json::Value &json_expression,
       build_expression(json_right, &e2);
       expr->push_back_ternary_op(e1, e2);
     } else {
-      build_expression(json_left, expr);
+      // special handling for unary + and -, we set the left operand to 0
+      if ((op == "+" || op == "-") && json_left.isNull())
+        expr->push_back_load_const(Data(0));
+      else
+        build_expression(json_left, expr);
       build_expression(json_right, expr);
 
       ExprOpcode opcode = ExprOpcodesMap::get_opcode(op);
