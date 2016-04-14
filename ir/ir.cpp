@@ -153,6 +153,7 @@ void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue*> *args) 
     CHECK_NULL(args);
     auto it = args->begin();
     for (auto p : *getConstructorParameters()->getEnumerator()) {
+        LOG1("Set " << p << " to " << *it << " in " << id);
         constantValue.emplace(p, *it);
         ++it;
     }

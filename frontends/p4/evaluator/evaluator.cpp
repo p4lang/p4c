@@ -8,6 +8,7 @@ namespace P4 {
 Visitor::profile_t Evaluator::init_apply(const IR::Node* node) {
     BUG_CHECK(node->is<IR::P4Program>(),
               "Evaluation should be invoked on a program, not a %1%", node);
+    // dump(node);
     return Inspector::init_apply(node);
 }
 
@@ -16,18 +17,33 @@ IR::Block* Evaluator::currentBlock() const {
     return blockStack.back();
 }
 
+void Evaluator::pushBlock(IR::Block* block) {
+    LOG1("Set current block to " << block);
+    blockStack.push_back(block);
+}
+
+void Evaluator::popBlock(IR::Block* block) {
+    LOG1("Remove current block " << block);
+    BUG_CHECK(!blockStack.empty(), "Empty stack");
+    BUG_CHECK(blockStack.back() == block, "%1%: incorrect block popped from stack: %2%",
+              block, blockStack.back());
+    blockStack.pop_back();
+}
+
 void Evaluator::setValue(const IR::Node* node, const IR::CompileTimeValue* constant) {
     CHECK_NULL(node);
     CHECK_NULL(constant);
     auto block = currentBlock();
-    LOG2("Value of " << node << " is " << constant << " in block " << block->id);
+    LOG2("Set " << node << " to " << constant << " in " << block);
     block->setValue(node, constant);
 }
 
 const IR::CompileTimeValue* Evaluator::getValue(const IR::Node* node) const {
     CHECK_NULL(node);
     auto block = currentBlock();
-    return block->getValue(node);
+    auto result = block->getValue(node);
+    LOG2("Looked up " << node << " in " << block << " got " << result);
+    return result;
 }
 
 ////////////////////////////// visitor methods ////////////////////////////////////
@@ -38,14 +54,14 @@ bool Evaluator::preorder(const IR::P4Program* program) {
     auto toplevel = new IR::ToplevelBlock(program->srcInfo, program);
     blockMap->toplevelBlock = toplevel;
 
-    blockStack.push_back(toplevel);
+    pushBlock(toplevel);
     for (auto d : *program->declarations) {
         if (d->is<IR::Type_Declaration>())
             // we will visit various containers and externs only when we instantiated them
             continue;
         visit(d);
     }
-    blockStack.pop_back();
+    popBlock(toplevel);
     LOG1("BlockMap:" << std::endl << blockMap);
     return false;
 }
@@ -60,9 +76,10 @@ bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
 }
 
 std::vector<const IR::CompileTimeValue*>*
-Evaluator::evaluateArguments(const IR::Vector<IR::Expression>* arguments) {
+Evaluator::evaluateArguments(const IR::Vector<IR::Expression>* arguments, IR::Block* context) {
     P4::ConstantFolding cf(blockMap->refMap, nullptr);
     auto values = new std::vector<const IR::CompileTimeValue*>();
+    pushBlock(context);
     for (auto e : *arguments) {
         auto folded = e->apply(cf);  // constant fold argument
         CHECK_NULL(folded);
@@ -70,73 +87,90 @@ Evaluator::evaluateArguments(const IR::Vector<IR::Expression>* arguments) {
         auto value = getValue(folded);
         if (value == nullptr) {
             ::error("%1%: Cannot evaluate to a compile-time constant", e);
+            popBlock(context);
             return nullptr;
         } else {
             values->push_back(value);
         }
     }
+    popBlock(context);
     return values;
 }
 
 const IR::Block*
-Evaluator::processConstructor(const IR::Node* node, const IR::Type* type,
-                              const IR::Type* instanceType,  // type may be specialized
-                              const IR::Vector<IR::Expression>* arguments) {
+Evaluator::processConstructor(
+    const IR::Node* node,  // Node that invokes constructor:
+                           // could be a Declaration_Instance or a ConstructorCallExpression.
+    const IR::Type* type,  // Type that appears in the program that is instantiated.
+    const IR::Type* instanceType,  // Actual canonical type of generated instance.
+    const IR::Vector<IR::Expression>* arguments) {  // Constructor arguments
     LOG1("Evaluating constructor " << type);
-    if (type->is<IR::Type_SpecializedCanonical>())
-        type = type->to<IR::Type_SpecializedCanonical>()->substituted;
+    if (type->is<IR::Type_Specialized>())
+        type = type->to<IR::Type_Specialized>()->baseType;
+    const IR::IDeclaration* decl;
+    if (type->is<IR::Type_Name>()) {
+        auto tn = type->to<IR::Type_Name>();
+        decl = blockMap->refMap->getDeclaration(tn->path, true);
+    } else {
+        BUG_CHECK(type->is<IR::IDeclaration>(), "%1%: expected a type declaration", type);
+        decl = type->to<IR::IDeclaration>();
+    }
 
-    if (type->is<IR::Type_Extern>()) {
-        auto exttype = type->to<IR::Type_Extern>();
-        auto constructor = exttype->lookupMethod(exttype->name.name, arguments->size());
+    auto current = currentBlock();
+    if (decl->is<IR::Type_Extern>()) {
+        auto exttype = decl->to<IR::Type_Extern>();
+        // We lookup the method in the instanceType, because it may contain compiler-synthesized
+        // constructors with zero arguments that may not appear in the original extern declaration.
+        auto canon = instanceType;
+        if (canon->is<IR::Type_SpecializedCanonical>())
+            canon = canon->to<IR::Type_SpecializedCanonical>()->substituted;
+        BUG_CHECK(canon->is<IR::Type_Extern>(), "%1%: expected an extern", canon);
+        auto constructor = canon->to<IR::Type_Extern>()->lookupMethod(exttype->name.name,
+                                                                      arguments->size());
         BUG_CHECK(constructor != nullptr,
                   "Type %1% has no constructor with %2% arguments",
                   exttype, arguments->size());
         auto block = new IR::ExternBlock(node->srcInfo, node, instanceType, exttype, constructor);
-        blockStack.push_back(block);
-        auto values = evaluateArguments(arguments);
-        if (values == nullptr)
-            return nullptr;
-        block->instantiate(values);
-        blockStack.pop_back();
+        pushBlock(block);
+        auto values = evaluateArguments(arguments, current);
+        if (values != nullptr)
+            block->instantiate(values);
+        popBlock(block);
         return block;
-    } else if (type->is<IR::P4Control>()) {
-        auto cont = blockMap->typeMap->getContainerFromType(type)->to<IR::P4Control>();
-        BUG_CHECK(cont != nullptr, "Could not locate container for %1%", type);
+    } else if (decl->is<IR::P4Control>()) {
+        auto cont = decl->to<IR::P4Control>();
         auto block = new IR::ControlBlock(node->srcInfo, node, instanceType, cont);
-        auto values = evaluateArguments(arguments);
-        if (values == nullptr)
-            return nullptr;
-        block->instantiate(values);
-        blockStack.push_back(block);
-        for (auto a : *cont->statefulEnumerator())
-            visit(a);
-        blockStack.pop_back();
+        pushBlock(block);
+        auto values = evaluateArguments(arguments, current);
+        if (values != nullptr) {
+            block->instantiate(values);
+            for (auto a : *cont->statefulEnumerator())
+                visit(a);
+        }
+        popBlock(block);
         return block;
-    } else if (type->is<IR::P4Parser>()) {
-        auto cont = blockMap->typeMap->getContainerFromType(type)->to<IR::P4Parser>();
-        BUG_CHECK(cont != nullptr, "Could not locate container for %1%", type);
+    } else if (decl->is<IR::P4Parser>()) {
+        auto cont = decl->to<IR::P4Parser>();
         auto block = new IR::ParserBlock(node->srcInfo, node, instanceType, cont);
-        blockStack.push_back(block);
-        auto values = evaluateArguments(arguments);
-        if (values == nullptr)
-            return nullptr;
-        block->instantiate(values);
-        for (auto a : *cont->stateful)
-            visit(a);
-        for (auto a : *cont->states)
-            visit(a);
-        blockStack.pop_back();
+        pushBlock(block);
+        auto values = evaluateArguments(arguments, current);
+        if (values != nullptr) {
+            block->instantiate(values);
+            for (auto a : *cont->stateful)
+                visit(a);
+            for (auto a : *cont->states)
+                visit(a);
+        }
+        popBlock(block);
         return block;
-    } else if (type->is<IR::Type_Package>()) {
+    } else if (decl->is<IR::Type_Package>()) {
         auto block = new IR::PackageBlock(node->srcInfo, node, instanceType,
-                                          type->to<IR::Type_Package>());
-        blockStack.push_back(block);
-        auto values = evaluateArguments(arguments);
-        if (values == nullptr)
-            return nullptr;
-        block->instantiate(values);
-        blockStack.pop_back();
+                                          decl->to<IR::Type_Package>());
+        pushBlock(block);
+        auto values = evaluateArguments(arguments, current);
+        if (values != nullptr)
+            block->instantiate(values);
+        popBlock(block);
         return block;
     }
 
@@ -172,29 +206,30 @@ bool Evaluator::preorder(const IR::PathExpression* expression) {
 
 bool Evaluator::preorder(const IR::Declaration_Instance* inst) {
     LOG1("Evaluating " << inst);
-    auto type = blockMap->typeMap->getType(inst->type, true);
-    auto instanceType = blockMap->typeMap->getType(inst, true);
-    auto block = processConstructor(inst, type, instanceType, inst->arguments);
-    setValue(inst, block);
+    auto type = blockMap->typeMap->getType(inst, true);
+    auto block = processConstructor(inst, inst->type, type, inst->arguments);
+    if (block != nullptr)
+        setValue(inst, block);
     return false;
 }
 
 bool Evaluator::preorder(const IR::ConstructorCallExpression* expr) {
     LOG1("Evaluating " << expr);
-    auto type = blockMap->typeMap->getType(expr->type, true);
-    auto instanceType = blockMap->typeMap->getType(expr, true);
-    auto block = processConstructor(expr, type, instanceType, expr->arguments);
-    setValue(expr, block);
+    auto type = blockMap->typeMap->getType(expr, true);
+    auto block = processConstructor(expr, expr->type, type, expr->arguments);
+    if (block != nullptr)
+        setValue(expr, block);
     return false;
 }
 
 bool Evaluator::preorder(const IR::P4Table* table) {
     LOG1("Evaluating " << table);
     auto block = new IR::TableBlock(table->srcInfo, table, table);
-    setValue(table, block);
-    blockStack.push_back(block);
+    if (block != nullptr)
+        setValue(table, block);
+    pushBlock(block);
     visit(table->properties);
-    blockStack.pop_back();
+    popBlock(block);
     return false;
 }
 

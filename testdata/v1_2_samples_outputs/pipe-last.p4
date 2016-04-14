@@ -34,7 +34,7 @@ struct Packet_data {
 
 action NoAction() {
 }
-control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
+control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     action B_action(out bit<9> barg, BParamType bData) {
         barg = (bit<9>)bData;
     }
@@ -50,7 +50,7 @@ control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
             B_action(tArg1.field1);
             C_action;
         }
-        size = 32w5;
+        size = t2Size;
         const default_action = C_action(9w5);
     }
 
@@ -75,7 +75,7 @@ control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    P_pipe_0() p1;
+    P_pipe(32w5) p1;
     apply {
         p1.apply(qArg1, qArg2);
     }

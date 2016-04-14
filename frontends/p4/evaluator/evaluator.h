@@ -12,6 +12,9 @@ class Evaluator final : public Inspector {
     BlockMap*                blockMap;
     std::vector<IR::Block*>  blockStack;
 
+ protected:
+    void pushBlock(IR::Block* block);
+    void popBlock(IR::Block* block);
  public:
     explicit Evaluator(BlockMap* blockMap) : blockMap(blockMap) {}
     BlockMap* getBlockMap() { return blockMap; }
@@ -21,7 +24,8 @@ class Evaluator final : public Inspector {
     const IR::CompileTimeValue* getValue(const IR::Node* node) const;
 
     std::vector<const IR::CompileTimeValue*>*
-            evaluateArguments(const IR::Vector<IR::Expression>* arguments);
+            evaluateArguments(const IR::Vector<IR::Expression>* arguments,
+                              IR::Block* context);
 
     profile_t init_apply(const IR::Node* node) override;
 

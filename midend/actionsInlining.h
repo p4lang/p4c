@@ -92,7 +92,7 @@ class InlineActions : public Transform {
     class SubstActionArgs : public Transform {
         const IR::ActionFunction *function;
         const IR::Primitive *callsite;
-        const IR::Expression *postorder(IR::ActionArg *arg) {
+        const IR::Node *postorder(IR::ActionArg *arg) override {
             for (unsigned i = 0; i < function->args.size(); ++i)
                 if (function->args[i] == getOriginal())
                     return callsite->operands[i];
@@ -102,8 +102,8 @@ class InlineActions : public Transform {
         SubstActionArgs(const IR::ActionFunction *f, const IR::Primitive *c)
         : function(f), callsite(c) {}
     };
-    const IR::V1Program *preorder(IR::V1Program *gl) { return global = gl; }
-    const IR::Node *preorder(IR::Primitive *p) {
+    const IR::V1Program *preorder(IR::V1Program *gl) override { return global = gl; }
+    const IR::Node *preorder(IR::Primitive *p) override {
         if (auto af = global->get<IR::ActionFunction>(p->name))
             return af->action.clone()->apply(SubstActionArgs(af, p));
         return p; }

@@ -23,8 +23,6 @@ class TypeMap final {
  protected:
     // Map each node to its canonical type
     std::map<const IR::Node*, const IR::Type*> typeMap;
-    // reverse map just for containers
-    std::map<const IR::Type*, const IR::IContainer*> container;
     // All left-values in the program.
     std::set<const IR::Expression*> leftValues;
 
@@ -34,9 +32,6 @@ class TypeMap final {
     void setType(const IR::Node* element, const IR::Type* type);
     bool contains(const IR::Node* element) { return typeMap.count(element) != 0; }
     const IR::Type* getType(const IR::Node* element, bool notNull = false) const;
-    // reverse lookup, just for containers
-    const IR::IContainer* getContainerFromType(const IR::Type* type)
-    { return get(container, type); }
     void dbprint(std::ostream& out) const;
     void clear();
     void setLeftValue(const IR::Expression* expression);

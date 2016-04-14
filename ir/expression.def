@@ -347,7 +347,7 @@ class MethodCallExpression : Expression {
 }
 
 class ConstructorCallExpression : Expression {
-    Type type;
+    Type type;  // Could be a specialized type
     Vector<Expression> arguments;
     toString{ return type->toString(); }
     validate{ arguments->check_null(); }

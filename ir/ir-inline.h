@@ -34,7 +34,7 @@
         auto t = apply_visitor(n, name);                                                \
         n = dynamic_cast<const IR::CLASS *>(t);                                         \
         if (t && !n)                                                                    \
-            BUG("visitor returned non-" #CLASS " type"); }                              \
+            BUG("visitor returned non-" #CLASS " type: %1%", t); }                      \
     inline void Visitor::visit(const IR::CLASS *const &n, const char *name) {           \
         /* This function needed solely due to order of declaration issues */            \
         visit(static_cast<const IR::Node *const &>(n), name); }

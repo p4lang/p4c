@@ -129,14 +129,14 @@ static int yylex();
 %type<Statement>        statement emptyStatement returnStatement switchStatement exitStatement
                         assignmentOrMethodCallStatement conditionalStatement
 %type<BlockStatement>   blockStatement actionBlockStatement controlBody
-%type<StatOrDecl>       statementOrDeclaration parserStatement actionElement variableDeclaration
+%type<StatOrDecl>       statementOrDeclaration parserStatement actionElement 
 %type<statOrDecls>      statOrDeclList actionElementList parserStatements
 %type<SwitchCase>       switchCase
 %type<switchCases>      switchCases
 %type<types>            typeArgumentList
 %type<ParserState>      parserState
 %type<parserStates>     parserStates
-%type<Declaration>      constantDeclaration actionDeclaration
+%type<Declaration>      constantDeclaration actionDeclaration variableDeclaration
                         instantiation errorDeclaration matchKindDeclaration
                         tableDeclaration stateElementDeclaration parserStatefulElement
 %type<Type_Declaration> headerTypeDeclaration structTypeDeclaration headerUnionDeclaration
@@ -331,6 +331,7 @@ parserStatefulElements
 parserStatefulElement
     : constantDeclaration             { $$ = $1; }
     | instantiation                   { $$ = $1; }
+    | variableDeclaration             { $$ = $1; }
     ;
 
 parserTypeDeclaration
@@ -438,6 +439,7 @@ stateElementDeclaration
     | actionDeclaration        { $$ = $1; }
     | tableDeclaration         { $$ = $1; }
     | instantiation            { $$ = $1; }
+    | variableDeclaration      { $$ = $1; }                           
     ;
 
 controlBody

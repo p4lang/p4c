@@ -39,9 +39,6 @@ void TypeMap::setType(const IR::Node* element, const IR::Type* type) {
     }
     LOG1("setType " << element << " => " << type);
     typeMap.emplace(element, type);
-
-    if (element->is<IR::IContainer>())
-        container.emplace(type, element->to<IR::IContainer>());
 }
 
 const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
