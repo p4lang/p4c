@@ -1,4 +1,4 @@
-/*
+/* -*-C++-*- 
    This file contains the base classes needed for the compiler IR:
    - all interfaces
    - most basic abstract classes
@@ -70,6 +70,7 @@ interface IContainer : IMayBeGenericType {
 #emit
     // The type of the constructor as a method
     virtual const Type_Method* getConstructorMethodType() const = 0;
+    virtual const ParameterList* getConstructorParameters() const = 0;
 #end
 }
     

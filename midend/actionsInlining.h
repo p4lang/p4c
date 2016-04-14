@@ -21,7 +21,7 @@ struct ActionCallInfo {
     { out << callee << " into " << caller << " at " << call; }
 };
 
-struct InlineWorkList {
+struct AInlineWorkList {
     // Map caller -> statement -> callee
     std::map<const IR::P4Action*,
              std::map<const IR::MethodCallStatement*, const IR::P4Action*>> sites;
@@ -39,7 +39,7 @@ class ActionsInlineList {
     std::vector<ActionCallInfo*> inlineOrder;  // sorted in inlining order
  public:
     void analyze();  // generate the inlining order
-    InlineWorkList* next();
+    AInlineWorkList* next();
     void add(ActionCallInfo* aci)
     { toInline.push_back(aci); }
 
