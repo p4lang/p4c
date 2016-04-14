@@ -60,6 +60,7 @@ Visitor::profile_t Transform::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = new ChangeTracker();
     return rv; }
+void Visitor::end_apply() {}
 
 static indent_t profile_indent;
 Visitor::profile_t::profile_t(Visitor &v_) : v(v_) {

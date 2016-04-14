@@ -1,4 +1,6 @@
 /* -*-C++-*- */
+/* This file contains the IR classes for all expressions. 
+   The base classes are in base.def */
 
 abstract Operation_Unary : Operation {
     Expression expr;

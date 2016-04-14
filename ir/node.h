@@ -116,6 +116,7 @@ template<typename T> const T* INode::to() const { return getNode()->to<T>(); }
         const CLASS *tmp = this;                                        \
         auto prof = v.init_apply(tmp);                                  \
         v.visit(tmp);                                                   \
+        v.end_apply();                                                  \
         return tmp; }
 
 }  // namespace IR

@@ -62,7 +62,8 @@ class DiscoverActionsInlining : public Inspector {
     DiscoverActionsInlining(ActionsInlineList* toInline,
                             P4::ReferenceMap* refMap,
                             P4::TypeMap* typeMap) :
-            toInline(toInline), refMap(refMap), typeMap(typeMap) {}
+            toInline(toInline), refMap(refMap), typeMap(typeMap)
+    { CHECK_NULL(toInline); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     bool preorder(const IR::P4Parser*) override { return false; }  // skip
     void postorder(const IR::MethodCallStatement* mcs) override;
 };
@@ -73,7 +74,8 @@ class InlineActionsDriver : public Transform {
     bool isv1;
  public:
     InlineActionsDriver(ActionsInlineList* toInline, P4::ReferenceMap* refMap, bool isv1) :
-            toInline(toInline), refMap(refMap), isv1(isv1) {}
+            toInline(toInline), refMap(refMap), isv1(isv1)
+    { CHECK_NULL(toInline); CHECK_NULL(refMap); }
 
     // Not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.
@@ -84,6 +86,7 @@ class InlineActionsDriver : public Transform {
 
 namespace P4v1 {
 
+// Special inliner which works directly on P4 v1.0 representation
 class InlineActions : public Transform {
     const IR::V1Program    *global;
     class SubstActionArgs : public Transform {

@@ -7,6 +7,8 @@
 
 namespace DBPrint {
 
+// Support for debug print, needed by the LOG* macros.
+// TODO: These should be part of a def file
 enum dbprint_flags {
     Precedence = 0xf,
     Prec_Postfix = 15,
