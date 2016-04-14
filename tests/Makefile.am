@@ -94,4 +94,6 @@ test_switch.cpp
 
 EXTRA_DIST = \
 testdata/en0.pcap \
-testdata/lo0.pcap
+testdata/lo0.pcap \
+testdata/empty_config.json \
+testdata/empty_config.md5
