@@ -22,15 +22,27 @@ BUILT_SOURCES = $(simple_switch_thrift_files) $(simple_switch_thrift_py_files)
 sswitchpydir = $(pythondir)/sswitch_runtime
 sswitchpy_PYTHON = $(simple_switch_thrift_py_files)
 
-simple_switch_CLI: sswitch_CLI.py
-	cp $< $@
-	chmod +x $@
+python_PYTHON = sswitch_CLI.py
+
+# See
+# http://www.gnu.org/software/autoconf/manual/autoconf-2.69/html_node/Installation-Directory-Variables.html
+edit = sed \
+	-e 's|@pythondir[@]|$(pythondir)|g'
+
+simple_switch_CLI: Makefile
+	rm -f $@ $@.tmp
+	$(edit) $(srcdir)/$@.in >$@.tmp
+	chmod +x $@.tmp
+	chmod a-w $@.tmp
+	mv $@.tmp $@
+
+simple_switch_CLI: simple_switch_CLI.in
 
 EXTRA_DIST = \
-sswitch_CLI.py \
+simple_switch_CLI.in \
 sswitch_CLI
 
-dist_bin_SCRIPTS = \
+bin_SCRIPTS = \
 simple_switch_CLI
 
 AM_CPPFLAGS += \
@@ -118,7 +130,7 @@ gen-cpp/simple_switch_types.h
 CLEANFILES = $(BUILT_SOURCES) \
 thrift_files.ts \
 gen-cpp/SimpleSwitch_server.skeleton.cpp \
-$(dist_bin_SCRIPTS)
+$(bin_SCRIPTS)
 
 # I used to do a rm on gen-cpp, but it was removing a .deps directory, instead I
 # am adding the skeleton file to CLEANFILES

@@ -154,7 +154,8 @@ AC_CONFIG_FILES([Makefile
 		targets/l2_switch/learn_client/Makefile
 		targets/simple_switch/Makefile
 		targets/simple_switch/tests/Makefile
-		tests/Makefile])
+		tests/Makefile
+                tools/Makefile])
 
 AC_OUTPUT
 
