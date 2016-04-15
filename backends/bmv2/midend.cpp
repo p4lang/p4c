@@ -1,6 +1,6 @@
 #include "midend.h"
 #include "lower.h"
-#include "controlInlining.h"
+#include "inlining.h"
 #include "midend/actionsInlining.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -27,38 +27,47 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     P4::TypeMap typeMap;
 
     if (isv1) {
+        // Inlining is simpler for P4 v1.0/1.1 programs,
+        // so we have a specialized code path, which also
+        // generates slighly nicer human-readable results.
+        // Maybe this path will be removed when we have a
+        // all fully general P4 v1.2 lowering passes
+        // implemented.
         P4::InlineWorkList controlsToInline;
-        auto inliner = new SimpleControlsInliner(&refMap);
+        P4::ActionsInlineList actionsToInline;
+
         auto find = new P4::DiscoverInlining(&controlsToInline, evaluator0->getBlockMap());
-        find->allowParsers = false;  // this should not be necessary
+        find->allowParsers = false;
+        // this last assignment is not necessary, since P4 v1.0 programs have no parser calls
         
         PassManager inlinerPasses = {
             find,
-            new P4::InlineDriver(&controlsToInline, inliner),
+            new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap), isv1),
             new PassRepeated {
                 // remove useless callees
                 new P4::ResolveReferences(&refMap, isv1),
                 new P4::RemoveUnusedDeclarations(&refMap),
             },
+            new P4::ResolveReferences(&refMap, isv1),
+            new P4::TypeChecker(&refMap, &typeMap, true, true),
+            new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
+            new P4::InlineActionsDriver(&actionsToInline, new SimpleActionsInliner(&refMap), isv1),
+            new PassRepeated {
+                new P4::ResolveReferences(&refMap, isv1),
+                new P4::RemoveUnusedDeclarations(&refMap),
+            }
         };
+        inlinerPasses.setStopOnError(true);
         program = program->apply(inlinerPasses);
         if (::errorCount() > 0)
             return nullptr;
     }
 
-    // TODO: add separate inlining passes for v1.2 programs
+    // TODO: add separate inlining passes for v1.2 programs.
+    // Today such programs that require inlining will fail to compile.
 
-    P4::ActionsInlineList actionsToInline;
     auto evaluator1 = new P4::EvaluatorPass(isv1);
     PassManager midEnd = {
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap, true, true),
-        new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
-        new P4::InlineActionsDriver(&actionsToInline, &refMap, isv1),
-        new PassRepeated {
-            new P4::ResolveReferences(&refMap, isv1),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        },
         new P4::SimplifyControlFlow(),
         new P4::ToP4(inlineStream, options.file),
         new P4::ResolveReferences(&refMap, isv1),
@@ -73,6 +82,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         evaluator1
     };
 
+    midEnd.setStopOnError(true);
     (void)program->apply(midEnd);
     if (::errorCount() > 0)
         return nullptr;

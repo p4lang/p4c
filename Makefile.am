@@ -84,12 +84,12 @@ cpplint:
 
 tags:
 	cd $(srcdir); ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp \
-	    backends extensions frontends ir lib tools
+	    backends extensions frontends ir lib tools midend
 	cd $(srcdir)/tools/ir-generator; ctags -R --langmap=Flex:+.l,YACC:+.ypp \
 	    . ../../lib
 etags:
 	cd $(srcdir); ctags -e -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp \
-	    backends extensions frontends ir lib tools
+	    backends extensions frontends ir lib tools midend
 	cd $(srcdir)/tools/ir-generator; ctags -e -R --langmap=Flex:+.l,YACC:+.ypp \
 	    . ../../lib
 

@@ -59,6 +59,8 @@ class DiscoverActionsInlining : public Inspector {
     P4::ReferenceMap*  refMap;    // input
     P4::TypeMap*       typeMap;   // input
  public:
+    bool allowDirectActionCalls = false;
+
     DiscoverActionsInlining(ActionsInlineList* toInline,
                             P4::ReferenceMap* refMap,
                             P4::TypeMap* typeMap) :
@@ -68,14 +70,35 @@ class DiscoverActionsInlining : public Inspector {
     void postorder(const IR::MethodCallStatement* mcs) override;
 };
 
-class InlineActionsDriver : public Transform {
-    ActionsInlineList* toInline;
-    P4::ReferenceMap*  refMap;
-    bool isv1;
+// Base class for an inliner that processes actions.
+class AbstractActionInliner : public Transform {
+ protected:
+    ActionsInlineList* list;
+    AInlineWorkList*   toInline;
+    bool               p4v1;
+    AbstractActionInliner() : list(nullptr), toInline(nullptr), p4v1(false) {}
  public:
-    InlineActionsDriver(ActionsInlineList* toInline, P4::ReferenceMap* refMap, bool isv1) :
-            toInline(toInline), refMap(refMap), isv1(isv1)
-    { CHECK_NULL(toInline); CHECK_NULL(refMap); }
+    void prepare(ActionsInlineList* list, AInlineWorkList* toInline, bool p4v1) {
+        CHECK_NULL(list); CHECK_NULL(toInline);
+        this->list = list;
+        this->toInline = toInline;
+        this->p4v1 = p4v1;
+    }
+    Visitor::profile_t init_apply(const IR::Node* node) {
+        LOG1("AbstractActionInliner " << toInline);
+        return Transform::init_apply(node);
+    }
+    virtual ~AbstractActionInliner() {}
+};
+
+class InlineActionsDriver : public Transform {
+    ActionsInlineList*     toInline;
+    AbstractActionInliner* inliner;
+    bool                   p4v1;
+ public:
+    InlineActionsDriver(ActionsInlineList* toInline, AbstractActionInliner *inliner, bool p4v1) :
+            toInline(toInline), inliner(inliner), p4v1(p4v1)
+    { CHECK_NULL(toInline); CHECK_NULL(inliner); }
 
     // Not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.

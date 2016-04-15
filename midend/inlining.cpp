@@ -60,7 +60,7 @@ const IR::Node* InlineDriver::preorder(IR::P4Program* program) {
 
     while (auto todo = toInline->next()) {
         LOG1("Processing " << todo);
-        inliner->prepare(toInline, todo);
+        inliner->prepare(toInline, todo, p4v1);
         prog = prog->apply(*inliner);
         if (::errorCount() > 0)
             return prog;

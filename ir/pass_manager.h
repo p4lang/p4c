@@ -6,7 +6,8 @@
 class PassManager : virtual public Visitor {
  protected:
     vector<Visitor *>   passes;
-    bool                stop_on_error = false;  // stops compilation at first error if set
+    // if true stops compilation after first pass that signals an error
+    bool                stop_on_error = false; 
  public:
     PassManager() = default;
     PassManager(const std::initializer_list<Visitor *> &init) :
@@ -21,7 +22,7 @@ class PassRepeated : virtual public PassManager {
     unsigned            repeats;  // 0 = until convergence
  public:
     PassRepeated(const std::initializer_list<Visitor *> &init) :
-            PassManager(init), repeats(0) {}
+            PassManager(init), repeats(0) { setStopOnError(true); }
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
     void setRepeats(unsigned repeats) { this->repeats = repeats; }
 };

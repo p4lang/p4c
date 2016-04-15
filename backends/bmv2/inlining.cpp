@@ -1,4 +1,4 @@
-#include "controlInlining.h"
+#include "inlining.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -74,6 +74,54 @@ const IR::Node* SimpleControlsInliner::preorder(IR::MethodCallStatement* stateme
     auto decl = workToDo->callToinstance[orig];
     CHECK_NULL(decl);
     return workToDo->declToCallee[decl]->to<IR::P4Control>()->body;
+}
+
+
+Visitor::profile_t SimpleActionsInliner::init_apply(const IR::Node* node) {
+    P4::ResolveReferences solver(refMap, true);
+    node->apply(solver);
+    LOG1("SimpleActionsInliner " << toInline);
+    return Transform::init_apply(node);
+}
+
+const IR::Node* SimpleActionsInliner::preorder(IR::P4Action* action) {
+    if (toInline->sites.count(getOriginal<IR::P4Action>()) == 0)
+        prune();
+    replMap = &toInline->sites[getOriginal<IR::P4Action>()];
+    LOG1("Visiting: " << getOriginal());
+    return action;
+}
+
+const IR::Node* SimpleActionsInliner::postorder(IR::P4Action* action) {
+    if (toInline->sites.count(getOriginal<IR::P4Action>()) > 0)
+        list->replace(getOriginal<IR::P4Action>(), action);
+    replMap = nullptr;
+    return action;
+}
+
+const IR::Node* SimpleActionsInliner::preorder(IR::MethodCallStatement* statement) {
+    LOG1("Visiting " << getOriginal());
+    if (replMap == nullptr)
+        return statement;
+    
+    auto callee = get(*replMap, getOriginal<IR::MethodCallStatement>());
+    if (callee == nullptr)
+        return statement;
+    
+    LOG1("Inlining: " << toInline);
+    IR::ParameterSubstitution subst;
+    subst.populate(callee->parameters, statement->methodCall->arguments);
+    IR::TypeVariableSubstitution tvs;  // empty
+    P4::SubstituteParameters sp(refMap, &subst, &tvs);
+    auto clone = callee->apply(sp);
+    if (::errorCount() > 0)
+        return statement;
+    CHECK_NULL(clone);
+    BUG_CHECK(clone->is<IR::P4Action>(), "%1%: not an action", clone);
+    auto actclone = clone->to<IR::P4Action>();
+    auto result = new IR::BlockStatement(actclone->body->srcInfo, actclone->body);
+    LOG1("Replacing " << statement << " with " << result);
+    return result;
 }
 
 }  // namespace BMV2

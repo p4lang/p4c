@@ -4,7 +4,10 @@
 noinst_PROGRAMS += v12test
 v12test_LDADD = -lgc libfrontend.a libp4ctoolkit.a
 
-v12test_SOURCES = backends/v12test/v12test.cpp ir/dump.cpp
+v12test_SOURCES = \
+    backends/v12test/v12test.cpp \
+    backends/v12test/midend.h \
+    backends/v12test/midend.cpp
 
 cpplint_FILES += $(v12test_SOURCES)
 
