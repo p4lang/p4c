@@ -10,7 +10,7 @@
 // - set type for Member and HeaderStackItemRefs
 class TypeCheck::Pass1 : public Transform {
     const IR::V1Program   *global = nullptr;
-    const IR::Node *preorder(IR::V1Program *glob) { global = glob; return glob; }
+    const IR::Node *preorder(IR::V1Program *glob) override { global = glob; return glob; }
     const IR::Node *preorder(IR::NamedRef *ref) override {
         if (auto af = findContext<IR::ActionFunction>())
             if (auto arg = af->arg(ref->name))
