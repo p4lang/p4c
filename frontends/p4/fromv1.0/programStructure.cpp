@@ -1301,15 +1301,15 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName) {
     auto regElementType = IR::Type_Bits::get(width);
     IR::ID ext = v1model.registers.Id();
     auto typepath = new IR::Path(ext);
-    const IR::Type* type = new IR::Type_Name(typepath);
+    auto type = new IR::Type_Name(typepath);
     auto typeargs = new IR::Vector<IR::Type>();
     typeargs->push_back(regElementType);
-    type = new IR::Type_Specialized(Util::SourceInfo(), type, typeargs);
+    auto spectype = new IR::Type_Specialized(Util::SourceInfo(), type, typeargs);
     auto args = new IR::Vector<IR::Expression>();
     args->push_back(new IR::Constant(v1model.registers.size_type, reg->instance_count));
     auto annos = addNameAnnotation(reg->name);
     auto decl = new IR::Declaration_Instance(
-        Util::SourceInfo(), newName, type, args, annos);
+        Util::SourceInfo(), newName, spectype, args, annos);
     return decl;
 }
 

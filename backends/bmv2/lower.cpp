@@ -45,6 +45,15 @@ const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expres
     return expression;
 }
 
+const IR::Node* LowerExpressions::postorder(IR::Neg* expression) {
+    auto type = typeMap->getType(expression, true);
+    auto zero = new IR::Constant(type, 0);
+    auto sub = new IR::Sub(expression->srcInfo, zero, expression->expr);
+    typeMap->setType(zero, type);
+    typeMap->setType(sub, type);
+    return sub;
+}
+
 const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
     // handle bool <-> bit casts
     auto destType = typeMap->getType(getOriginal(), true);

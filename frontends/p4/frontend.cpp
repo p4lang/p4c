@@ -16,7 +16,6 @@
 #include "unusedDeclarations.h"
 #include "typeChecking/typeChecker.h"
 #include "evaluator/evaluator.h"
-#include "evaluator/specializeBlocks.h"
 #include "strengthReduction.h"
 #include "simplify.h"
 
@@ -36,7 +35,6 @@ run_frontend(const CompilerOptions &options, const IR::P4Program* v12_program, b
 
     P4::ReferenceMap  refMap;  // This is reused many times, since every analysis clear it
     P4::TypeMap       typeMap1, typeMap2, typeMap3;
-    P4::BlockSpecList specBlocks;
 
     PassManager frontend = {
         new P4::ToP4(ppStream, options.file),
@@ -57,20 +55,6 @@ run_frontend(const CompilerOptions &options, const IR::P4Program* v12_program, b
         new P4::ResolveReferences(&refMap, p4v10),
         new P4::ConstantFolding(&refMap, &typeMap1),
         new P4::StrengthReduction(),
-        // TODO: add more
-
-        new PassRepeated{
-            // specialization
-            new P4::ResolveReferences(&refMap, p4v10),
-            new P4::TypeChecker(&refMap, &typeMap1, true, true),
-            new P4::FindBlocksToSpecialize(&refMap, &typeMap1, &specBlocks),
-            new P4::SpecializeBlocks(&refMap, &specBlocks),
-
-            // constant folding
-            new P4::ResolveReferences(&refMap, p4v10),
-            new P4::TypeChecker(&refMap, &typeMap2, true, true),
-            new P4::ConstantFolding(&refMap, &typeMap2),
-        },
 
         // Print program in the middle
         new P4::ToP4(midStream, options.file),

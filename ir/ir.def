@@ -60,13 +60,14 @@ class P4Parser : Type_Declaration, IGeneralNamespace, IApply, IContainer {
     Vector<Declaration>  stateful;
     Vector<ParserState>  states;
 #emit
-    const TypeParameters* getTypeParameters() const { return type->getTypeParameters(); }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    const TypeParameters* getTypeParameters() const override { return type->getTypeParameters(); }
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return stateful->getEnumerator()->
                        as<const IDeclaration*>()->
                        concat(states->only<IDeclaration>()); }
-    const Type_Method* getApplyMethodType() const { return type->getApplyMethodType(); }
+    const Type_Method* getApplyMethodType() const override { return type->getApplyMethodType(); }
     const Type_Method* getConstructorMethodType() const override;
+    const ParameterList* getConstructorParameters() const override { return constructorParams; }
 #end
 #apply
 #nodbprint
@@ -88,11 +89,12 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     Util::Enumerator<const Declaration*>* statefulEnumerator() const
     { return stateful.valueEnumerator(); }
     const TypeParameters* getTypeParameters() const { return type->getTypeParameters(); }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const;
-    const Type_Method* getApplyMethodType() const { return type->getApplyMethodType(); }
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override;
+    const Type_Method* getApplyMethodType() const override { return type->getApplyMethodType(); }
     const Type_Method* getConstructorMethodType() const override;
-    const IDeclaration* getDeclByName(cstring name) const
+    const IDeclaration* getDeclByName(cstring name) const override
     { return stateful.getUnique(name); }
+    const ParameterList* getConstructorParameters() const override { return constructorParams; }
 #end
 #apply
 #nodbprint

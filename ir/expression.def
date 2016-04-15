@@ -1,4 +1,6 @@
 /* -*-C++-*- */
+/* This file contains the IR classes for all expressions. 
+   The base classes are in base.def */
 
 abstract Operation_Unary : Operation {
     Expression expr;
@@ -345,7 +347,7 @@ class MethodCallExpression : Expression {
 }
 
 class ConstructorCallExpression : Expression {
-    Type type;
+    Type type;  // Could be a specialized type
     Vector<Expression> arguments;
     toString{ return type->toString(); }
     validate{ arguments->check_null(); }

@@ -22,6 +22,7 @@ class LowerExpressions : public Transform {
     const IR::Node* postorder(IR::Shr* expression) override
     { return shift(expression); }
     const IR::Node* postorder(IR::Cast* expression) override;
+    const IR::Node* postorder(IR::Neg* expression) override;
     const IR::Node* postorder(IR::Slice* expression) override;
     const IR::Node* postorder(IR::Concat* expression) override;
     const IR::Node* preorder(IR::P4Table* table) override

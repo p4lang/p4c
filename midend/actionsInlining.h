@@ -21,7 +21,7 @@ struct ActionCallInfo {
     { out << callee << " into " << caller << " at " << call; }
 };
 
-struct InlineWorkList {
+struct AInlineWorkList {
     // Map caller -> statement -> callee
     std::map<const IR::P4Action*,
              std::map<const IR::MethodCallStatement*, const IR::P4Action*>> sites;
@@ -39,7 +39,7 @@ class ActionsInlineList {
     std::vector<ActionCallInfo*> inlineOrder;  // sorted in inlining order
  public:
     void analyze();  // generate the inlining order
-    InlineWorkList* next();
+    AInlineWorkList* next();
     void add(ActionCallInfo* aci)
     { toInline.push_back(aci); }
 
@@ -62,7 +62,8 @@ class DiscoverActionsInlining : public Inspector {
     DiscoverActionsInlining(ActionsInlineList* toInline,
                             P4::ReferenceMap* refMap,
                             P4::TypeMap* typeMap) :
-            toInline(toInline), refMap(refMap), typeMap(typeMap) {}
+            toInline(toInline), refMap(refMap), typeMap(typeMap)
+    { CHECK_NULL(toInline); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     bool preorder(const IR::P4Parser*) override { return false; }  // skip
     void postorder(const IR::MethodCallStatement* mcs) override;
 };
@@ -73,7 +74,8 @@ class InlineActionsDriver : public Transform {
     bool isv1;
  public:
     InlineActionsDriver(ActionsInlineList* toInline, P4::ReferenceMap* refMap, bool isv1) :
-            toInline(toInline), refMap(refMap), isv1(isv1) {}
+            toInline(toInline), refMap(refMap), isv1(isv1)
+    { CHECK_NULL(toInline); CHECK_NULL(refMap); }
 
     // Not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.
@@ -84,12 +86,13 @@ class InlineActionsDriver : public Transform {
 
 namespace P4v1 {
 
+// Special inliner which works directly on P4 v1.0 representation
 class InlineActions : public Transform {
     const IR::V1Program    *global;
     class SubstActionArgs : public Transform {
         const IR::ActionFunction *function;
         const IR::Primitive *callsite;
-        const IR::Expression *postorder(IR::ActionArg *arg) {
+        const IR::Node *postorder(IR::ActionArg *arg) override {
             for (unsigned i = 0; i < function->args.size(); ++i)
                 if (function->args[i] == getOriginal())
                     return callsite->operands[i];
@@ -99,8 +102,8 @@ class InlineActions : public Transform {
         SubstActionArgs(const IR::ActionFunction *f, const IR::Primitive *c)
         : function(f), callsite(c) {}
     };
-    const IR::V1Program *preorder(IR::V1Program *gl) { return global = gl; }
-    const IR::Node *preorder(IR::Primitive *p) {
+    const IR::V1Program *preorder(IR::V1Program *gl) override { return global = gl; }
+    const IR::Node *preorder(IR::Primitive *p) override {
         if (auto af = global->get<IR::ActionFunction>(p->name))
             return af->action.clone()->apply(SubstActionArgs(af, p));
         return p; }

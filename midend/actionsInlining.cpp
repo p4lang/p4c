@@ -7,7 +7,7 @@
 
 namespace P4 {
 
-void InlineWorkList::dbprint(std::ostream& out) const {
+void AInlineWorkList::dbprint(std::ostream& out) const {
     for (auto t : sites) {
         out << t.first;
         for (auto c : t.second) {
@@ -36,12 +36,12 @@ void ActionsInlineList::analyze() {
     std::reverse(inlineOrder.begin(), inlineOrder.end());
 }
 
-InlineWorkList* ActionsInlineList::next() {
+AInlineWorkList* ActionsInlineList::next() {
     if (inlineOrder.size() == 0)
         return nullptr;
 
     std::set<const IR::P4Action*> callers;
-    auto result = new InlineWorkList();
+    auto result = new AInlineWorkList();
 
     // Find actions that can be inlined simultaneously.
     // This traversal is in topological order starting from leaf callees.
@@ -82,13 +82,13 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
 class ActionsInliner : public Transform {
     P4::ReferenceMap* refMap;
     ActionsInlineList* list;
-    InlineWorkList*    toInline;
+    AInlineWorkList*    toInline;
 
     std::map<const IR::MethodCallStatement*, const IR::P4Action*>* replMap;
 
  public:
     ActionsInliner(P4::ReferenceMap* refMap, ActionsInlineList* list,
-                         InlineWorkList* toInline) :
+                   AInlineWorkList* toInline) :
             refMap(refMap), list(list), toInline(toInline), replMap(nullptr)
     { CHECK_NULL(refMap); CHECK_NULL(list); CHECK_NULL(toInline); }
 

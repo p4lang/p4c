@@ -1,22 +1,12 @@
-parser p1_0() {
+parser p1()(bit<2> a) {
     state start {
     }
 }
 
-parser p1_1() {
-    state start {
-    }
-}
-
-parser p1_2() {
-    state start {
-    }
-}
-
-parser p2_0() {
-    p1_0() p1a;
-    p1_1() p1b;
-    p1_2() p1c;
+parser p2()(bit<2> b, bit<2> c) {
+    p1(2w0) p1a;
+    p1(b) p1b;
+    p1(c) p1c;
     state start {
         p1a.apply();
         p1b.apply();
@@ -26,4 +16,4 @@ parser p2_0() {
 
 parser nothing();
 package m(nothing n);
-m(p2_0()) main;
+m(p2(2w1, 2w2)) main;

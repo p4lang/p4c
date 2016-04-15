@@ -76,49 +76,8 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     }
 }
 
-control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
-    action B_action(out bit<9> barg, BParamType bData) {
-        barg = (bit<9>)bData;
-    }
-    action C_action(bit<9> cData) {
-        pArg1.field1 = cData;
-    }
-    table T(inout TArg1 tArg1, in TArg2 aArg2) {
-        key = {
-            tArg1.field1: ternary;
-            aArg2.field2: exact;
-        }
-        actions = {
-            B_action(tArg1.field1);
-            C_action;
-        }
-        size = 32w5;
-        const default_action = C_action(9w5);
-    }
-
-    action Drop() {
-        pArg1.drop = true;
-    }
-    table Tinner() {
-        key = {
-            pArg1.field1: ternary;
-        }
-        actions = {
-            Drop;
-        }
-        const default_action = NoAction;
-    }
-
-    apply {
-        bit<9> dt;
-        T.apply(pArg1, pArg2);
-        T.apply(pArg1, pArg2);
-        Tinner.apply();
-    }
-}
-
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    P_pipe_0() p1;
+    P_pipe(32w5) p1;
     apply {
         p1.apply(qArg1, qArg2);
     }

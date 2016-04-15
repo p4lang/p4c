@@ -1,5 +1,6 @@
 %{ /* -*-C++-*- */
 // some of these includes are needed by lex-generated file
+// which is #included below (p4-lex.c)
 
 #include <assert.h>
 #include <limits.h>
@@ -32,7 +33,7 @@
                  : Util::SourceInfo(YYRHSLOC(Rhs, 0).getEnd()))
 
 // Program IR built here
-static IR::Vector<IR::Node> *global;
+static IR::Vector<IR::Node> *declarations;
 static void yyerror(const char *fmt, ...);
 static void checkShift(Util::SourceInfo f, Util::SourceInfo r);
 
@@ -128,14 +129,14 @@ static int yylex();
 %type<Statement>        statement emptyStatement returnStatement switchStatement exitStatement
                         assignmentOrMethodCallStatement conditionalStatement
 %type<BlockStatement>   blockStatement actionBlockStatement controlBody
-%type<StatOrDecl>       statementOrDeclaration parserStatement actionElement variableDeclaration
+%type<StatOrDecl>       statementOrDeclaration parserStatement actionElement 
 %type<statOrDecls>      statOrDeclList actionElementList parserStatements
 %type<SwitchCase>       switchCase
 %type<switchCases>      switchCases
 %type<types>            typeArgumentList
 %type<ParserState>      parserState
 %type<parserStates>     parserStates
-%type<Declaration>      constantDeclaration actionDeclaration
+%type<Declaration>      constantDeclaration actionDeclaration variableDeclaration
                         instantiation errorDeclaration matchKindDeclaration
                         tableDeclaration stateElementDeclaration parserStatefulElement
 %type<Type_Declaration> headerTypeDeclaration structTypeDeclaration headerUnionDeclaration
@@ -214,7 +215,7 @@ symbol_print(FILE* file, int type, YYSTYPE value)
 
 input
     : /* epsilon */
-    | input declaration       { global->push_back($2->getNode()); }
+    | input declaration       { declarations->push_back($2->getNode()); }
     ;
 
 declaration
@@ -330,6 +331,7 @@ parserStatefulElements
 parserStatefulElement
     : constantDeclaration             { $$ = $1; }
     | instantiation                   { $$ = $1; }
+    | variableDeclaration             { $$ = $1; }
     ;
 
 parserTypeDeclaration
@@ -437,6 +439,7 @@ stateElementDeclaration
     | actionDeclaration        { $$ = $1; }
     | tableDeclaration         { $$ = $1; }
     | instantiation            { $$ = $1; }
+    | variableDeclaration      { $$ = $1; }                           
     ;
 
 controlBody
@@ -912,7 +915,7 @@ const IR::P4Program *parse_p4v1_2_file(const char *name, FILE *in) {
         yydebug = atoi(p);
     structure.setDebug(yydebug != 0);
 #endif
-    global = new IR::Vector<IR::Node>();
+    declarations = new IR::Vector<IR::Node>();
     parsing = true;
     yyrestart(in);
     errors |= yyparse();
@@ -922,7 +925,7 @@ const IR::P4Program *parse_p4v1_2_file(const char *name, FILE *in) {
     } else {
         structure.endParse();
     }
-    return new IR::P4Program(Util::SourceInfo(), global);
+    return new IR::P4Program(Util::SourceInfo(), declarations);
 }
 
 // check that right shift >>
