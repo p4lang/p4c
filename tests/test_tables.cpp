@@ -610,6 +610,22 @@ TYPED_TEST(TableSizeTwo, ResetState) {
   ASSERT_TRUE(hit);
 }
 
+TYPED_TEST(TableSizeTwo, HandleIterator) {
+  entry_handle_t handle_1, handle_2;
+  MatchErrorCode rc;
+
+  rc = this->add_entry("\x0a\xba", &handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = this->add_entry("\x12\x34", &handle_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  auto it = this->table->handles_begin();
+  ASSERT_EQ(handle_1, *it);
+  ASSERT_EQ(handle_1, *it++);
+  ASSERT_EQ(handle_2, *it);
+  ASSERT_EQ(this->table->handles_end(), ++it);
+}
+
 
 class TableIndirect : public ::testing::Test {
  protected:

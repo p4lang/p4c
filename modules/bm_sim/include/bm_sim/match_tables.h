@@ -38,6 +38,7 @@ namespace bm {
 class MatchTableAbstract : public NamedP4Object {
  public:
   typedef Counter::counter_value_t counter_value_t;
+  typedef MatchUnitAbstract_::handle_iterator handle_iterator;
 
   struct ActionEntry {
     ActionEntry() { }
@@ -124,6 +125,9 @@ class MatchTableAbstract : public NamedP4Object {
   MatchErrorCode set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms);
 
   void sweep_entries(std::vector<entry_handle_t> *entries) const;
+
+  handle_iterator handles_begin() const { return match_unit_->handles_begin(); }
+  handle_iterator handles_end() const { return match_unit_->handles_end(); }
 
   MatchTableAbstract(const MatchTableAbstract &other) = delete;
   MatchTableAbstract &operator=(const MatchTableAbstract &other) = delete;

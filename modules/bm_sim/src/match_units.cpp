@@ -566,6 +566,31 @@ MatchKeyBuilder::NameMap::max_size() const {
 }
 
 
+MatchUnitAbstract_::handle_iterator::handle_iterator(
+    const MatchUnitAbstract_ *mu, HandleMgr::const_iterator it)
+    : mu(mu), it(it) {
+  if (it != mu->handles.end())
+    handle = HANDLE_SET(mu->entry_meta.at(*it).version, *it);
+}
+
+MatchUnitAbstract_::handle_iterator &
+MatchUnitAbstract_::handle_iterator::operator++() {
+  assert(it != mu->handles.end() && "Out-of-bounds iterator increment.");
+  if (++it != mu->handles.end())
+    handle = HANDLE_SET(mu->entry_meta.at(*it).version, *it);
+  return *this;
+}
+
+MatchUnitAbstract_::handle_iterator
+MatchUnitAbstract_::handles_begin() const {
+  return handle_iterator(this, handles.begin());
+}
+
+MatchUnitAbstract_::handle_iterator
+MatchUnitAbstract_::handles_end() const {
+  return handle_iterator(this, handles.end());
+}
+
 MatchErrorCode
 MatchUnitAbstract_::get_and_set_handle(internal_handle_t *handle) {
   if (num_entries >= size) {  // table is full
