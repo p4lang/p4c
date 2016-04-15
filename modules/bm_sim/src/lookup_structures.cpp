@@ -131,37 +131,40 @@ class ExactMap : public ExactLookupStructure {
 class TernaryMap : public TernaryLookupStructure {
  public:
   explicit TernaryMap(size_t size, size_t nbytes_key)
-    : keys(size), nbytes_key(nbytes_key) {}
+    : entries(size), nbytes_key(nbytes_key) {}
 
   bool lookup(const ByteContainer &key_data,
               internal_handle_t *handle) const override {
-    auto min_priority = std::numeric_limits<
-                          decltype(TernaryMatchKey::priority)>::max();
+    auto min_priority =
+        std::numeric_limits<decltype(VectorEntry::priority)>::max();
     bool match;
 
-    const TernaryMatchKey *min_key = nullptr;
+    const VectorEntry *min_entry = nullptr;
     internal_handle_t min_handle = 0;
 
-    for (auto it = keys.begin(); it != keys.end(); ++it) {
-      if (it->priority >= min_priority) continue;
+    for (const VectorEntry *entry = head; entry; entry = entry->next) {
+      if (entry->priority >= min_priority) continue;
 
       match = true;
       for (size_t byte_index = 0; byte_index < nbytes_key; byte_index++) {
-        if (it->data[byte_index] !=
-            (key_data[byte_index] & it->mask[byte_index])) {
+        if (entry->key->data[byte_index] !=
+            (key_data[byte_index] & entry->key->mask[byte_index])) {
           match = false;
           break;
         }
       }
 
       if (match) {
-        min_priority = it->priority;
-        min_key      = &*it;
-        min_handle   = std::distance(keys.begin(), it);
+        min_priority = entry->priority;
+        min_entry = entry;
+        // a bit sad that this cast is needed, almost makes me want to do the
+        // pointer arithmetic by hand
+        min_handle = std::distance(const_cast<const VectorEntry *>(head),
+                                   entry);
       }
     }
 
-    if (min_key) {
+    if (min_entry) {
       *handle = min_handle;
       return true;
     }
@@ -170,48 +173,69 @@ class TernaryMap : public TernaryLookupStructure {
   }
 
   bool entry_exists(const TernaryMatchKey &key) const override {
-    auto handle = find_handle(key);
-
-    return handle != keys.size();
+    const VectorEntry *entry = find_vec_entry(key);
+    return (entry != nullptr);
   }
 
   void add_entry(const TernaryMatchKey &key,
                  internal_handle_t handle) override {
-    keys.at(handle) = key;
+    VectorEntry &entry = entries.at(handle);
+    entry.priority = key.priority;
+    entry.key = &key;
+
+    if (handle == 0) {
+      entry.prev = nullptr;
+      entry.next = head;
+      head = &entry;
+      if (entry.next) entry.next->prev = &entry;
+    } else {
+      assert(&entry != head);
+      // this uses knowledge about how the match unit allocates handles;
+      // basically if a handle is allocated, in means all handles before it have
+      // already been allocated.
+      VectorEntry &prev_entry = entries[handle - 1];
+      entry.prev = &prev_entry;
+      entry.next = prev_entry.next;
+      prev_entry.next = &entry;
+      if (entry.next) entry.next->prev = &entry;
+    }
   }
 
   void delete_entry(const TernaryMatchKey &key) override {
-    auto handle = find_handle(key);
-
-    // Mark this entry as empty by setting its priority to the maximum
-    // possible value.
-    keys.at(handle).priority = std::numeric_limits<
-                              decltype(keys[handle].priority)>::max();
+    const VectorEntry *entry = find_vec_entry(key);
+    assert(entry);
+    if (entry->prev)
+      entry->prev->next = entry->next;
+    else
+      head = entry->next;
+    if (entry->next) entry->next->prev = entry->prev;
   }
 
   void clear() override {
-    // Quickly mark every entry as empty. This should be faster than doing
-    // `clear()` followed by `resize()`, as clear is already O(n)
-    for (auto &k : keys) {
-      k.priority = std::numeric_limits<decltype(k.priority)>::max();
-    }
+    head = nullptr;
   }
 
  private:
-  std::vector<TernaryMatchKey> keys;
+  struct VectorEntry {
+    int priority;  // duplicated on purpose (for efficiency although debatable)
+    const TernaryMatchKey *key;
+    VectorEntry *prev;
+    VectorEntry *next;
+  };
+
+  VectorEntry *head{nullptr};
+  std::vector<VectorEntry> entries;
   size_t nbytes_key;
 
-  internal_handle_t find_handle(const TernaryMatchKey &key) const {
-    auto it  = keys.begin();
-    auto end = keys.end();
-    for (; it != end; ++it) {
-      if (it->priority == key.priority &&
-          it->data == key.data &&
-          it->mask == key.mask) {
-        break;
+  VectorEntry *find_vec_entry(const TernaryMatchKey &key) const {
+    for (VectorEntry *entry = head; entry; entry = entry->next) {
+      if (entry->priority == key.priority &&
+          entry->key->data == key.data &&
+          entry->key->mask == key.mask) {
+        return entry;
       }
     }
-    return std::distance(keys.begin(), it);
+    return nullptr;
   }
 };
 

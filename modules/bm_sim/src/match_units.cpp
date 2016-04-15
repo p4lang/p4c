@@ -781,8 +781,6 @@ MatchUnitAbstract<V>::reset_state() {
 }
 
 
-
-
 namespace {
   // Utility to transparently either get the real priority value from a
   // ternary entry or simply return -1 for other types of entries
@@ -857,11 +855,15 @@ MatchUnitGeneric<K, V>::add_entry_(const std::vector<MatchKeyParam> &match_key,
   uint32_t version = entries[handle_].key.version;
   *handle = HANDLE_SET(version, handle_);
 
-  // key is copied, which is not great
-  lookup_structure->add_entry(entry.key, handle_);
   entry.value = std::move(value);
   entry.key.version = version;
   entries[handle_] = std::move(entry);
+
+  // calling this after copying the entry into the entries vector, which means
+  // that the lookup structure can use a pointer to the entry if it wants to
+  // avoid making a copy. This works because the entries vector is NEVER
+  // resized, which means the pointer will remain valid.
+  lookup_structure->add_entry(entries[handle_].key, handle_);
 
   return MatchErrorCode::SUCCESS;
 }
@@ -977,8 +979,8 @@ MatchUnitGeneric<K, V>::dump_(std::ostream *stream) const {
 template <typename K, typename V>
 void
 MatchUnitGeneric<K, V>::reset_state_() {
-  entries = std::vector<Entry>(this->size);
   lookup_structure->clear();
+  entries = std::vector<Entry>(this->size);
 }
 
 // explicit template instantiation
