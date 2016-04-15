@@ -234,23 +234,23 @@ TYPED_TEST(TableSizeTwo, AddEntry) {
   std::string key_1 = "\xaa\xaa";
   std::string key_2 = "\xbb\xbb";
   std::string key_3 = "\xcc\xcc";
-  entry_handle_t handle_1, handle_2;
+  entry_handle_t handle;
   MatchErrorCode rc;
 
-  rc = this->add_entry(key_1, &handle_1);
-  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+  rc = this->add_entry(key_1, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   ASSERT_EQ(1u, this->table->get_num_entries());
 
-  rc = this->add_entry(key_1, &handle_2);
+  rc = this->add_entry(key_1, &handle);
   ASSERT_EQ(MatchErrorCode::DUPLICATE_ENTRY, rc);
   ASSERT_EQ(1u, this->table->get_num_entries());
 
-  rc = this->add_entry(key_2, &handle_1);
-  ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
+  rc = this->add_entry(key_2, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   ASSERT_EQ(2u, this->table->get_num_entries());
 
-  rc = this->add_entry(key_3, &handle_1);
-  ASSERT_EQ(rc, MatchErrorCode::TABLE_FULL);
+  rc = this->add_entry(key_3, &handle);
+  ASSERT_EQ(MatchErrorCode::TABLE_FULL, rc);
   ASSERT_EQ(2u, this->table->get_num_entries());
 }
 
