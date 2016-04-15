@@ -38,10 +38,14 @@ enum class MatchUnitType {
 struct MatchKey {
   MatchKey() {}
   MatchKey(ByteContainer data, uint32_t version)
-    : data(std::move(data)), version(version) {}
+      : data(std::move(data)), version(version) {}
 
   ByteContainer data{};
   uint32_t version{0};
+
+ protected:
+  // disabling polymorphic deletion by making the destructor protected
+  ~MatchKey() { }
 };
 
 struct ExactMatchKey : public MatchKey {
@@ -53,7 +57,7 @@ struct ExactMatchKey : public MatchKey {
 struct LPMMatchKey : public MatchKey {
   LPMMatchKey() {}
   LPMMatchKey(ByteContainer data, int prefix_length, uint32_t version)
-    : MatchKey(data, version), prefix_length(prefix_length) {}
+      : MatchKey(data, version), prefix_length(prefix_length) {}
 
   int prefix_length{0};
 
@@ -63,9 +67,8 @@ struct LPMMatchKey : public MatchKey {
 struct TernaryMatchKey : public MatchKey {
   TernaryMatchKey() {}
   TernaryMatchKey(ByteContainer data, ByteContainer mask, int priority,
-      uint32_t version)
-    : MatchKey(data, version), mask(std::move(mask)),
-    priority(priority) {}
+                  uint32_t version)
+      : MatchKey(data, version), mask(std::move(mask)), priority(priority) {}
 
   ByteContainer mask{};
   // This is initialized to `max` because lookups search for the matching
