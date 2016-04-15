@@ -29,7 +29,7 @@ class TypeConstraints final {
                 BUG("Unifying type names %1% and %2%", left, right);
         }
     };
-    
+
     // Requires two types to be equal.
     class EqualityConstraint : public TwoTypeConstraint {
      public:

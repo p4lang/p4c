@@ -36,7 +36,7 @@ class TestJson : public TestBase {
         ASSERT_EQ(obj->toString(), "{\n  \"x\" : \"x\"\n}");
         obj->emplace("y", arr);
         ASSERT_EQ(obj->toString(), "{\n  \"x\" : \"x\",\n  \"y\" : [\n    5,\n    \"5\",\n    [true]\n  ]\n}");
-        
+
         return SUCCESS;
     }
  public:

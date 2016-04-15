@@ -110,7 +110,6 @@ class InlineDriver : public Transform {
     P4::InlineWorkList*  toInline;
     AbstractInliner*     inliner;
     bool                 p4v1;
-    
  public:
     explicit InlineDriver(P4::InlineWorkList* toInline, AbstractInliner* inliner, bool p4v1) :
             toInline(toInline), inliner(inliner), p4v1(p4v1)

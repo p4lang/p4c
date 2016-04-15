@@ -16,7 +16,7 @@ namespace V12Test {
 P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
 
-    std::ostream *inlineStream = options.dumpStream("-inline");
+    //std::ostream *inlineStream = options.dumpStream("-inline");
     auto evaluator0 = new P4::EvaluatorPass(isv1);
 
     program = program->apply(*evaluator0);

@@ -1,11 +1,9 @@
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
+#include "/home/cdodd/p4c/build/../p4include/core.p4"
+#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
 
 header data_t {
     bit<32> f1;
     bit<32> f2;
-    bit<32> f3;
-    bit<32> f4;
     bit<8>  b1;
     bit<8>  b2;
     bit<8>  b3;
@@ -28,8 +26,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("setb1") action setb1(bit<8> val) {
+    @name("setb1") action setb1(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
+        standard_metadata.egress_spec = port;
     }
     @name("noop") action noop() {
     }
