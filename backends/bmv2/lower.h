@@ -12,7 +12,7 @@ class LowerExpressions : public Transform {
 
     // Cannot shift with a value larger than 8 bits
     const int maxShiftWidth = 8;
-    
+
     const IR::Expression* shift(const IR::Operation_Binary* expression) const;
  public:
     explicit LowerExpressions(P4::TypeMap* typeMap) : typeMap(typeMap) {}

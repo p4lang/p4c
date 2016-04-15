@@ -6,7 +6,7 @@ namespace P4 {
 
 void InlineWorkList::analyze(bool allowMultipleCalls) {
     P4::CallGraph<const IR::IContainer*> cg("Call-graph");
-        
+
     for (auto m : inlineMap) {
         auto inl = m.second;
         if (inl->invocations.size() == 0) continue;
@@ -21,7 +21,7 @@ void InlineWorkList::analyze(bool allowMultipleCalls) {
         }
         cg.add(inl->caller, inl->callee);
     }
-        
+
     // must inline from leaves up
     std::vector<const IR::IContainer*> order;
     cg.sort(order);
@@ -33,7 +33,7 @@ void InlineWorkList::analyze(bool allowMultipleCalls) {
                 toInline.push_back(inl);
         }
     }
-        
+
     std::reverse(toInline.begin(), toInline.end());
 }
 

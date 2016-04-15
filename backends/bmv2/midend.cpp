@@ -31,7 +31,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         auto inliner = new SimpleControlsInliner(&refMap);
         auto find = new P4::DiscoverInlining(&controlsToInline, evaluator0->getBlockMap());
         find->allowParsers = false;  // this should not be necessary
-        
+
         PassManager inlinerPasses = {
             find,
             new P4::InlineDriver(&controlsToInline, inliner),

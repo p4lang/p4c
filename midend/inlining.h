@@ -107,7 +107,7 @@ class AbstractInliner : public Transform {
 class InlineDriver : public Transform {
     P4::InlineWorkList*  toInline;
     AbstractInliner*  inliner;
-    
+
  public:
     explicit InlineDriver(P4::InlineWorkList* toInline, AbstractInliner* inliner) :
             toInline(toInline), inliner(inliner)

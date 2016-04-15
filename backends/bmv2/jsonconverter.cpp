@@ -39,7 +39,7 @@ class ArithmeticFixup : public Transform {
         }
         return expression;
     }
-    
+
     const IR::Node* postorder(IR::Expression* expression) override {
         return updateType(expression);
     }
@@ -422,7 +422,7 @@ class ExpressionConverter : public Inspector {
         r->emplace("value", repr);
         e->emplace("right", r);
     }
-    
+
     void postorder(const IR::Operation_Binary* expression) override {
         auto result = new Util::JsonObject();
         map.emplace(expression, result);

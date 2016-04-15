@@ -10,7 +10,7 @@ class TestPath : public TestBase {
     int testPath() {
 #if _WIN32
         throw std::logic_error("Tests for WIN32 not yet written");
-#endif        
+#endif
         {
             PathName path = "/usr/local/bin/file.exe";
             StringRef ext = path.getExtension();
@@ -70,7 +70,7 @@ class TestPath : public TestBase {
             grow = path.join("y");
             ASSERT_EQ(grow.toString(), "x/y");
         }
-        
+
         return SUCCESS;
     }
 
