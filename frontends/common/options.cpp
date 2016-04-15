@@ -13,9 +13,11 @@ const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
 CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("-h", nullptr,
-                   [this](const char*) { usage(); return false; }, "Print this help message");
+                   [this](const char*) { usage(); exit(0); return false; },
+                   "Print this help message");
     registerOption("--help", nullptr,
-                   [this](const char*) { usage(); return false; }, "Print this help message");
+                   [this](const char*) { usage(); exit(0); return false; },
+                   "Print this help message");
     registerOption("--version", nullptr,
                    [this](const char*) {
                        std::cerr << binaryName << std::endl;
