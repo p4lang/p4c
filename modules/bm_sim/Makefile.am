@@ -108,6 +108,7 @@ include/bm_sim/queue.h \
 include/bm_sim/queueing.h \
 include/bm_sim/ras.h \
 include/bm_sim/runtime_interface.h \
+include/bm_sim/short_alloc.h \
 include/bm_sim/stateful.h \
 include/bm_sim/switch.h \
 include/bm_sim/simple_pre.h \
