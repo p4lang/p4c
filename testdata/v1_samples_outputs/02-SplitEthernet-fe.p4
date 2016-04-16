@@ -49,10 +49,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("t2") table t2() {
         actions = {
             nop;
+            NoAction;
         }
         key = {
             hdr.mac_sa.mac: exact;
         }
+        default_action = NoAction();
     }
 
     apply {
@@ -66,11 +68,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t1") table t1() {
         actions = {
             nop;
+            NoAction;
         }
         key = {
             hdr.mac_da.mac       : exact;
             hdr.len_or_type.value: exact;
         }
+        default_action = NoAction();
     }
 
     apply {

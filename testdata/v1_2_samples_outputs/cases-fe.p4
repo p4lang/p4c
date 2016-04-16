@@ -11,6 +11,7 @@ control ctrl() {
             b;
             c;
         }
+        default_action = a;
     }
 
     apply {

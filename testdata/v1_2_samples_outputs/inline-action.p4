@@ -10,6 +10,7 @@ control p(inout bit<1> bt) {
         actions = {
             b;
         }
+        default_action = b;
     }
 
     apply {

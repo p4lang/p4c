@@ -36,11 +36,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("tab1") table tab1() {
         actions = {
             act;
+            NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
         size = 160000;
+        default_action = NoAction();
     }
 
     apply {

@@ -35,11 +35,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("tab1") table tab1() {
         actions = {
             act;
+            NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: ternary;
         }
         size = 128;
+        default_action = NoAction();
         @name("cnt") counters = DirectCounter(CounterType.Packets);
     }
 

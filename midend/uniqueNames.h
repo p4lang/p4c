@@ -7,21 +7,24 @@
 namespace P4 {
 
 class RenameMap {
-    std::map<const IR::IDeclaration*, IR::ID> newName;
+    std::map<const IR::IDeclaration*, cstring> newName;
  public:
     void setNewName(const IR::IDeclaration* decl, cstring name) {
         CHECK_NULL(decl);
         LOG1("Renaming " << decl << " to " << name);
-        IR::ID id(decl->getNode()->srcInfo, name);
         if (newName.find(decl) != newName.end())
             BUG("%1%: already renamed", decl);
         newName.emplace(decl, name);
     }
-    IR::ID getName(const IR::IDeclaration* decl) const {
+    cstring getName(const IR::IDeclaration* decl) const {
         CHECK_NULL(decl);
         BUG_CHECK(newName.find(decl) != newName.end(), "%1%: no new name", decl);
         auto result = ::get(newName, decl);
         return result;
+    }
+    bool toRename(const IR::IDeclaration* decl) const {
+        CHECK_NULL(decl);
+        return newName.find(decl) != newName.end();
     }
 };
 

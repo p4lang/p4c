@@ -51,6 +51,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         actions = {
             shift;
         }
+        const default_action = shift;
     }
 
     apply {

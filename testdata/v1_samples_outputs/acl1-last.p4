@@ -190,8 +190,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("drop_stats") table drop_stats_0() {
         actions = {
             drop_stats_update;
+            NoAction;
         }
         size = 256;
+        default_action = NoAction();
     }
 
     @name("system_acl") table system_acl() {
@@ -203,6 +205,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_packet_with_reason;
             negative_mirror;
             congestion_mirror_set;
+            NoAction;
         }
         key = {
             meta.acl_metadata.if_label               : ternary;
@@ -234,6 +237,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.ingress_metadata.enable_dod         : ternary;
         }
         size = 512;
+        default_action = NoAction();
     }
 
     apply {

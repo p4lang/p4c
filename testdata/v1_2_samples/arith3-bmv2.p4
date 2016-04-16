@@ -14,7 +14,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     { h.h.c = h.h.a << h.h.b; sm.egress_spec = 0; }
     table t() {
         actions = { shift; }
-        // const default_action = add;  // not yet supported by BMv2
+        const default_action = shift;
     }
     apply { t.apply(); }
 }

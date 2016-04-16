@@ -43,6 +43,10 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     if (ac == nullptr)
         ::error("Table %1% does not have an `%2%' property",
                 t->name, IR::TableProperties::actionsPropertyName);
+    auto da = t->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
+    if (!p4v1 && da == nullptr)
+        ::warning("Table %1% does not have an `%2%' property",
+                t->name, IR::TableProperties::defaultActionPropertyName);
 }
 
 }  // namespace P4

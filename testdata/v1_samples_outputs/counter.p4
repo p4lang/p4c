@@ -57,11 +57,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             m_action;
             _nop;
+            NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
         size = 16384;
+        default_action = NoAction();
         @name("my_direct_counter") counters = DirectCounter(CounterType.Bytes);
     }
 

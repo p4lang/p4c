@@ -1,4 +1,4 @@
-../testdata/v1_2_samples/cases.p4(14): warning: SwitchCase: fallthrough with no statement
+../testdata/v1_2_samples/cases.p4(15): warning: SwitchCase: fallthrough with no statement
             c:
             ^
 warning: Program does not contain a `main' module

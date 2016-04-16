@@ -1,4 +1,7 @@
 ../testdata/v1_2_errors/missing_actions.p4(5): error: Table t does not have an `actions' property
     table t()
           ^
+../testdata/v1_2_errors/missing_actions.p4(5): warning: Table t does not have an `default_action' property
+    table t()
+          ^
 error: 1 errors encountered, aborting compilation

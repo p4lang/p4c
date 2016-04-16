@@ -240,6 +240,13 @@ class Annotations {
         vec->push_back(new Annotation(name, expr));
         return new Annotations(vec);
     }
+    // Add annotation if another annotation with the same name is not
+    // already present.
+    const Annotations* addAnnotationIfNew(cstring name, const Expression* expr) const {
+        if (getSingle(name) != nullptr)
+            return this;
+        return addAnnotation(name, expr);
+    }
 #end
     validate{ annotations->check_null(); }
 }

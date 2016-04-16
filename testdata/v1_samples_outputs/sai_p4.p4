@@ -224,52 +224,62 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("fdb") table fdb() {
         actions = {
             fdb_set;
+            NoAction;
         }
         key = {
             meta.ingress_metadata.vlan_id: exact;
             hdr.eth.dstAddr              : exact;
         }
+        default_action = NoAction();
     }
 
     @name("learn_notify") table learn_notify() {
         actions = {
             nop;
             generate_learn_notify;
+            NoAction;
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact;
             meta.ingress_metadata.vlan_id       : exact;
             hdr.eth.srcAddr                     : exact;
         }
+        default_action = NoAction();
     }
 
     @name("neighbor") table neighbor() {
         actions = {
             set_dmac;
+            NoAction;
         }
         key = {
             meta.ingress_metadata.vrf        : exact;
             meta.ingress_metadata.ip_dest    : exact;
             meta.ingress_metadata.router_intf: exact;
         }
+        default_action = NoAction();
     }
 
     @name("next_hop") table next_hop() {
         actions = {
             set_next_hop;
+            NoAction;
         }
         key = {
             meta.ingress_metadata.nhop: exact;
         }
+        default_action = NoAction();
     }
 
     @name("port") table port() {
         actions = {
             set_in_port;
+            NoAction;
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact;
         }
+        default_action = NoAction();
         @name("port_counters") counters = DirectCounter(CounterType.Packets);
     }
 
@@ -278,36 +288,44 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             route_set_trap;
             route_set_nexthop;
             route_set_nexthop_group;
+            NoAction;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
             hdr.ipv4.dstAddr         : lpm;
         }
+        default_action = NoAction();
     }
 
     @name("router_interface") table router_interface() {
         actions = {
             set_router_interface;
             router_interface_miss;
+            NoAction;
         }
         key = {
             hdr.eth.dstAddr: exact;
         }
+        default_action = NoAction();
     }
 
     @name("switch") table switch_0() {
         actions = {
             set_switch;
+            NoAction;
         }
+        default_action = NoAction();
     }
 
     @name("virtual_router") table virtual_router() {
         actions = {
             set_router;
+            NoAction;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
         }
+        default_action = NoAction();
     }
 
     apply {

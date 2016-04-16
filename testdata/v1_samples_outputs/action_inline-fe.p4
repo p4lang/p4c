@@ -30,7 +30,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t") table t() {
         actions = {
             b;
+            NoAction;
         }
+        default_action = NoAction();
     }
 
     apply {

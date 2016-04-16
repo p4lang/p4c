@@ -14,7 +14,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     { h.h.c = (bit<8>)(bit<1>)(h.h.a < h.h.b); sm.egress_spec = 0; }
     table t() {
         actions = { compare; }
-        // const default_action = add;  // not yet supported by BMv2
+        const default_action = compare;
     }
     apply { t.apply(); }
 }
