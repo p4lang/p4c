@@ -34,7 +34,7 @@ RegisterArray::reset_state() {
 void
 RegisterSync::add_register_array(RegisterArray *register_array) {
   if (register_arrays.insert(register_array).second)
-    locks.push_back(UniqueLock(register_array->m_mutex, std::defer_lock));
+    mutexes.push_back(&register_array->m_mutex);
 }
 
 }  // namespace bm

@@ -597,6 +597,37 @@ TEST_F(ActionsTest, ConcurrentPrimitiveExecution) {
   t1.join(); t2.join();
 }
 
+// added this test after I found a deadlock when an action function accessing a
+// register was executed by 2 different threads (the std::unique_lock was
+// accessed by the 2 threads...)
+// the register tests below were not enough to detect this because they use 2
+// different action functions
+TEST_F(ActionsTest, ConcurrentRegisterPrimitiveExecution) {
+  constexpr size_t register_size = 256;
+  constexpr int register_bw = 128;
+  RegisterArray register_array("register_test", 0, register_size, register_bw);
+
+  auto primitive = ActionOpcodesMap::get_instance()->get_primitive("Set");
+
+  testActionFn.push_back_primitive(primitive);
+  testActionFn.parameter_push_back_register_ref(&register_array, 12);
+  testActionFn.parameter_push_back_const(Data(0xabababab));
+
+  auto action_loop = [this](size_t iters, ActionFnEntry &entry) {
+    for (size_t i = 0; i < iters; i++) {
+      auto pkt = std::unique_ptr<Packet>(new Packet(
+          Packet::make_new(phv_source.get())));
+      entry(pkt.get());
+    }
+  };
+
+  const size_t iterations = WITH_VALGRIND ? 50000u : 1000000u;
+
+  std::thread t1(action_loop, iterations, std::ref(testActionFnEntry));
+  std::thread t2(action_loop, iterations, std::ref(testActionFnEntry));
+  t1.join(); t2.join();
+}
+
 class RegisterSpin : public ActionPrimitive<RegisterArray &, const Data &> {
   void operator ()(RegisterArray &register_array, const Data &ts) {
     register_array.at(0).set(ts);
