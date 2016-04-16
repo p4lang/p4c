@@ -217,17 +217,18 @@ ActionFnEntry::operator()(Packet *pkt) const {
       DBG_CTR_ACTION | action_fn->get_id());
   ActionEngineState state(pkt, action_data, action_fn->const_values);
 
-  action_fn->register_sync.lock_registers();
+  {
+    RegisterSync::RegisterLocks RL;
+    action_fn->register_sync.lock(&RL);
 
-  auto &primitives = action_fn->primitives;
-  size_t param_offset = 0;
-  // primitives is a vector of pointers
-  for (auto primitive : primitives) {
-    primitive->execute(&state, &(action_fn->params[param_offset]));
-    param_offset += primitive->get_num_params();
+    auto &primitives = action_fn->primitives;
+    size_t param_offset = 0;
+    // primitives is a vector of pointers
+    for (auto primitive : primitives) {
+      primitive->execute(&state, &(action_fn->params[param_offset]));
+      param_offset += primitive->get_num_params();
+    }
   }
-
-  action_fn->register_sync.unlock_registers();
 
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),

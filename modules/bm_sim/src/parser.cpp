@@ -140,12 +140,13 @@ ParseState::find_next_state(Packet *pkt, const char *data,
   // execute parser ops
   PHV *phv = pkt->get_phv();
 
-  register_sync.lock_registers();
+  {
+    RegisterSync::RegisterLocks RL;
+    register_sync.lock(&RL);
 
-  for (auto &parser_op : parser_ops)
-    (*parser_op)(pkt, data + *bytes_parsed, bytes_parsed);
-
-  register_sync.unlock_registers();
+    for (auto &parser_op : parser_ops)
+      (*parser_op)(pkt, data + *bytes_parsed, bytes_parsed);
+  }
 
   if (!has_switch) {
     BMLOG_DEBUG_PKT(

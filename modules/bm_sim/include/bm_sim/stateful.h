@@ -45,6 +45,7 @@
 #include "data.h"
 #include "bignum.h"
 #include "named_p4object.h"
+#include "short_alloc.h"
 
 namespace bm {
 
@@ -168,19 +169,27 @@ class RegisterArray : public NamedP4Object {
 // parse state.
 class RegisterSync {
  public:
+  using Lock = RegisterArray::UniqueLock;
+
+  template <size_t NumLocks = 4>
+  using LockVector = std::vector<
+    Lock, detail::short_alloc<Lock, NumLocks * sizeof(Lock), alignof(Lock)> >;
+
+  struct RegisterLocks {
+    LockVector<>::allocator_type::arena_type a;
+    LockVector<> v{a};
+  };
+
   void add_register_array(RegisterArray *register_array);
 
-  void lock_registers() const {
-    boost::lock(locks.begin(), locks.end());
-  }
-
-  void unlock_registers() const {
-    for (auto &lock : locks) lock.unlock();
+  // tried NRVO, but RegisterLocks not movable
+  void lock(RegisterLocks *RL) const {
+    for (auto m : mutexes) RL->v.emplace_back(*m, std::defer_lock);
+    boost::lock(RL->v.begin(), RL->v.end());
   }
 
  private:
-  using UniqueLock = RegisterArray::UniqueLock;
-  mutable std::vector<UniqueLock> locks;
+  mutable std::vector<std::mutex *> mutexes;
   std::unordered_set<const RegisterArray *> register_arrays{};
 };
 
