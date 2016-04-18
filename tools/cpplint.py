@@ -217,6 +217,7 @@ _ERROR_CATEGORIES = [
     'runtime/member_string_references',
     'runtime/memset',
     'runtime/indentation_namespace',
+    'runtime/override',
     'runtime/operator',
     'runtime/printf',
     'runtime/printf_format',
@@ -1671,6 +1672,8 @@ def GetHeaderGuardCPPVariable(filename):
   
   fileinfo = FileInfo(filename)
   file_path_from_root = fileinfo.RepositoryName()
+  if _root == '.':
+    file_path_from_root = filename
   if _root:
     file_path_from_root = re.sub('^' + _root + os.sep, '', file_path_from_root)
   return re.sub(r'[^a-zA-Z0-9]', '_', file_path_from_root).upper() + '_'
@@ -5844,8 +5847,28 @@ def CheckRedundantOverrideOrFinal(filename, clean_lines, linenum, error):
           ('"override" is redundant since function is '
            'already declared as "final"'))
 
+def CheckMissingOverrideOrFinal(filename, clean_lines, linenum, nesting_state, error):
+  """Check if a line is missing a required "override" or "final" virt-specifier.
 
-
+  Args:
+    filename: The name of the current file.
+    clean_lines: A CleansedLines instance containing the file.
+    linenum: The number of the line to check.
+    nesting_state: The _NestingState object that contains info about our state.
+    error: The function to call with any errors found.
+  """
+  if not nesting_state.InClassDeclaration():
+    return
+  line = clean_lines.elided[linenum]
+  if Search(r'\bvirtual\b', line):
+    # assuming if there's a 'virtual' this is the base class.
+    return
+  if Search(r'\bpreorder\b *\(', line) and not Search(r'\boverride\b', line):
+    error(filename, linenum, 'runtime/override', 4,
+          ('missing "override" on preorder function'))
+  if Search(r'\bpostorder\b *\(', line) and not Search(r'\boverride\b', line):
+    error(filename, linenum, 'runtime/override', 4,
+          ('missing "override" on postorder function'))
 
 # Returns true if we are at a new block, and it is directly
 # inside of a namespace.
@@ -5953,6 +5976,7 @@ def ProcessLine(filename, file_extension, clean_lines, line,
   CheckDefaultLambdaCaptures(filename, clean_lines, line, error)
   CheckRedundantVirtual(filename, clean_lines, line, error)
   CheckRedundantOverrideOrFinal(filename, clean_lines, line, error)
+  CheckMissingOverrideOrFinal(filename, clean_lines, line, nesting_state, error)
   for check_fn in extra_check_functions:
     check_fn(filename, clean_lines, line, error)
 

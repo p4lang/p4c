@@ -1,0 +1,99 @@
+#include "/home/cdodd/p4c/build/../p4include/core.p4"
+#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+
+header easyroute_head_t {
+    bit<64> preamble;
+    bit<32> num_valid;
+}
+
+header easyroute_port_t {
+    bit<8> port;
+}
+
+struct metadata {
+}
+
+struct headers {
+    @name("easyroute_head") 
+    easyroute_head_t easyroute_head;
+    @name("easyroute_port") 
+    easyroute_port_t easyroute_port;
+}
+
+parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("parse_head") state parse_head {
+        packet.extract(hdr.easyroute_head);
+        transition select(hdr.easyroute_head.num_valid) {
+            32w0: accept;
+            default: parse_port;
+        }
+    }
+    @name("parse_port") state parse_port {
+        packet.extract(hdr.easyroute_port);
+        transition accept;
+    }
+    @name("start") state start {
+        transition select(packet.lookahead<bit<64>>()[63:0]) {
+            64w0: parse_head;
+            default: accept;
+        }
+    }
+}
+
+control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    apply {
+        bool hasReturned_0 = false;
+    }
+}
+
+control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("_drop") action _drop() {
+        bool hasReturned_2 = false;
+        mark_to_drop();
+    }
+    @name("route") action route() {
+        bool hasReturned_3 = false;
+        standard_metadata.egress_spec = (bit<9>)hdr.easyroute_port.port;
+        hdr.easyroute_head.num_valid = hdr.easyroute_head.num_valid + 32w4294967295;
+        hdr.easyroute_port.setValid(false);
+    }
+    @name("route_pkt") table route_pkt() {
+        actions = {
+            _drop;
+            route;
+            NoAction;
+        }
+        key = {
+            hdr.easyroute_port.isValid(): exact;
+        }
+        size = 1;
+        default_action = NoAction();
+    }
+
+    apply {
+        bool hasReturned_1 = false;
+        route_pkt.apply();
+    }
+}
+
+control DeparserImpl(packet_out packet, in headers hdr) {
+    apply {
+        bool hasReturned_4 = false;
+        packet.emit(hdr.easyroute_head);
+        packet.emit(hdr.easyroute_port);
+    }
+}
+
+control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    apply {
+        bool hasReturned_5 = false;
+    }
+}
+
+control computeChecksum(inout headers hdr, inout metadata meta) {
+    apply {
+        bool hasReturned_6 = false;
+    }
+}
+
+V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
