@@ -18,6 +18,8 @@
  *
  */
 
+#include <iostream>
+
 #include "bm_sim/counters.h"
 
 namespace bm {
@@ -41,6 +43,19 @@ Counter::write_counter(counter_value_t bytes, counter_value_t packets) {
   this->bytes = bytes;
   this->packets = packets;
   return SUCCESS;
+}
+
+void
+Counter::serialize(std::ostream *out) const {
+  (*out) << bytes << " " << packets << "\n";
+}
+
+void
+Counter::deserialize(std::istream *in) {
+  uint64_t b, p;
+  (*in) >> b >> p;
+  bytes = b;
+  packets = p;
 }
 
 Counter::CounterErrorCode

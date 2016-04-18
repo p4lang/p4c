@@ -86,6 +86,8 @@
 
 namespace bm {
 
+class P4Objects;  // forward declaration for deserialize
+
 // forward declaration of ActionPrimitive_
 class ActionPrimitive_;
 
@@ -558,6 +560,9 @@ class ActionFnEntry {
   }
 
   void dump(std::ostream *stream) const;
+
+  void serialize(std::ostream *out) const;
+  void deserialize(std::istream *in, const P4Objects &objs);
 
   p4object_id_t get_action_id() const {
     if (!action_fn) return std::numeric_limits<p4object_id_t>::max();

@@ -247,13 +247,16 @@ class RuntimeInterface {
   swap_configs() = 0;
 
   virtual std::string
-  get_config() = 0;
+  get_config() const = 0;
 
   virtual std::string
-  get_config_md5() = 0;
+  get_config_md5() const = 0;
 
   virtual ErrorCode
   reset_state() = 0;
+
+  virtual ErrorCode
+  serialize(std::ostream *out) = 0;
 
   virtual MatchErrorCode
   dump_table(size_t cxt_id,

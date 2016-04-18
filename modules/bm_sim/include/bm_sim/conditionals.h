@@ -25,16 +25,15 @@
 
 #include "phv.h"
 #include "control_flow.h"
-#include "named_p4object.h"
 #include "expressions.h"
 
 namespace bm {
 
 class Conditional
-  : public ControlFlowNode, public NamedP4Object, public Expression {
+  : public ControlFlowNode, public Expression {
  public:
   Conditional(const std::string &name, p4object_id_t id)
-    : NamedP4Object(name, id) {}
+    : ControlFlowNode(name, id) {}
 
   bool eval(const PHV &phv) const {
     return eval_bool(phv);

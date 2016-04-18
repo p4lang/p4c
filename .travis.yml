@@ -43,6 +43,7 @@ addons:
       - g++-5
       - clang-3.6
       - libssl-dev
+      - python-pip
 
 before_install:
   - wget https://s3-us-west-2.amazonaws.com/p4lang/thrift_bin.tar.gz
@@ -51,6 +52,7 @@ before_install:
   - export LDFLAGS="$LDFLAGS -L$HOME/thrift/lib"
   - export CPPFLAGS="$CPPFLAGS -I$HOME/thrift/include"
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/thrift/lib
+  - sudo pip install --upgrade thrift
   - bash build/travis/install-nanomsg.sh
   - sudo ldconfig
   - bash build/travis/install-nnpy.sh

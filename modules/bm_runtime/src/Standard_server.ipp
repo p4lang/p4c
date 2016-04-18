@@ -677,6 +677,13 @@ public:
     _return.append(switch_->get_config_md5());
   }
 
+  void bm_serialize_state(std::string& _return) {
+    Logger::get()->trace("bm_serialize_state");
+    std::ostringstream stream;
+    switch_->serialize(&stream);
+    _return.append(stream.str());
+  }
+
 private:
   SwitchWContexts *switch_;
 };

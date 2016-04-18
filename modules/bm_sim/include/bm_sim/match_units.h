@@ -44,6 +44,8 @@
 
 namespace bm {
 
+class P4Objects;  // forward declaration for deserialize
+
 // using string and not ByteContainer for efficiency
 struct MatchKeyParam {
   // order is important, implementation sorts match fields according to their
@@ -220,6 +222,49 @@ struct EntryMeta {
 
 class MatchUnitAbstract_ {
  public:
+  friend class handle_iterator;
+  // Iterator for entry handles
+  // having a const / non-const flavor would not make sense here: handles cannot
+  // be modified
+  class handle_iterator
+      : public std::iterator<std::forward_iterator_tag, handle_t> {
+   public:
+    handle_iterator(const MatchUnitAbstract_ *mu, HandleMgr::const_iterator it);
+
+    const entry_handle_t &operator*() const {
+      assert(it != mu->handles.end() && "Invalid iterator dereference.");
+      return handle;
+    }
+
+    const entry_handle_t *operator->() const {
+      assert(it != mu->handles.end() && "Invalid iterator dereference.");
+      return &handle;
+    }
+
+    bool operator==(const handle_iterator &other) const {
+      return (mu == other.mu) && (it == other.it);
+    }
+
+    bool operator!=(const handle_iterator &other) const {
+      return !(*this == other);
+    }
+
+    handle_iterator &operator++();
+
+    const handle_iterator operator++(int) {
+      // Use operator++()
+      const handle_iterator old(*this);
+      ++(*this);
+      return old;
+    }
+
+   private:
+    const MatchUnitAbstract_ *mu{nullptr};
+    HandleMgr::const_iterator it;
+    entry_handle_t handle{};
+  };
+
+ public:
   MatchUnitAbstract_(size_t size, const MatchKeyBuilder &key_builder)
     : size(size), nbytes_key(key_builder.get_nbytes_key()),
       match_key_builder(key_builder), entry_meta(size) {
@@ -250,6 +295,10 @@ class MatchUnitAbstract_ {
   void dump_key_params(std::ostream *out,
                        const std::vector<MatchKeyParam> &params,
                        int priority = -1) const;
+
+  // TODO(antonin): add an iterator for entries to MatchUnitGeneric<K, V> ?
+  handle_iterator handles_begin() const;
+  handle_iterator handles_end() const;
 
  protected:
   MatchErrorCode get_and_set_handle(internal_handle_t *handle);
@@ -346,6 +395,14 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
 
   void reset_state();
 
+  void serialize(std::ostream *out) const {
+    serialize_(out);
+  }
+
+  void deserialize(std::istream *in, const P4Objects &objs) {
+    deserialize_(in, objs);
+  }
+
  private:
   virtual MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
                                     V value,  // by value for possible std::move
@@ -370,6 +427,9 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
   virtual void reset_state_() = 0;
 
   virtual MatchUnitLookup lookup_key(const ByteContainer &key) const = 0;
+
+  virtual void serialize_(std::ostream *out) const = 0;
+  virtual void deserialize_(std::istream *in, const P4Objects &objs) = 0;
 };
 
 
@@ -417,6 +477,9 @@ class MatchUnitGeneric : public MatchUnitAbstract<V> {
   void reset_state_() override;
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
+
+  void serialize_(std::ostream *out) const override;
+  void deserialize_(std::istream *in, const P4Objects &objs) override;
 
  private:
   std::vector<Entry> entries{};

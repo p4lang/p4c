@@ -30,8 +30,8 @@
 #include "bm_sim/match_key_types.h"
 #include "bm_sim/lpm_trie.h"
 
-
 namespace bm {
+
 namespace {  // anonymous
 
 static_assert(sizeof(uintptr_t) == sizeof(internal_handle_t),
@@ -239,7 +239,7 @@ class TernaryMap : public TernaryLookupStructure {
   }
 };
 
-}  // anonymous namespace
+}  // namespace
 
 template <>
 std::unique_ptr<LookupStructure<ExactMatchKey> >

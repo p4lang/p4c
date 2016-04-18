@@ -44,6 +44,9 @@ namespace {
 
 // used for hit / miss next node selection tests (NextNodeHitMiss)
 struct DummyNode: public ControlFlowNode {
+  DummyNode()
+      : ControlFlowNode("", 0) { }
+
   const ControlFlowNode *operator()(Packet *pkt) const {
     return nullptr;
   }
@@ -608,6 +611,22 @@ TYPED_TEST(TableSizeTwo, ResetState) {
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   this->table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_TRUE(hit);
+}
+
+TYPED_TEST(TableSizeTwo, HandleIterator) {
+  entry_handle_t handle_1, handle_2;
+  MatchErrorCode rc;
+
+  rc = this->add_entry("\x0a\xba", &handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = this->add_entry("\x12\x34", &handle_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  auto it = this->table->handles_begin();
+  ASSERT_EQ(handle_1, *it);
+  ASSERT_EQ(handle_1, *it++);
+  ASSERT_EQ(handle_2, *it);
+  ASSERT_EQ(this->table->handles_end(), ++it);
 }
 
 

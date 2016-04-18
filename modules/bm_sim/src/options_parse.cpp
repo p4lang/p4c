@@ -118,6 +118,8 @@ OptionsParser::parse(int argc, char *argv[]) {
        "there is no need to use --debugger in addition to this option; "
        "default is ipc:///tmp/bmv2-<device-id>-debug.ipc")
 #endif
+      ("restore-state", po::value<std::string>(),
+       "Restore state from file")
       ;  // NOLINT(whitespace/semicolon)
 
   po::options_description hidden;
@@ -261,6 +263,10 @@ OptionsParser::parse(int argc, char *argv[]) {
               << default_thrift_port
               << std::endl;
     thrift_port = default_thrift_port;
+  }
+
+  if (vm.count("restore-state")) {
+    state_file_path = vm["restore-state"].as<std::string>();
   }
 }
 

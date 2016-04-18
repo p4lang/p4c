@@ -23,6 +23,8 @@
 #include "bm_sim/actions.h"
 #include "bm_sim/debugger.h"
 #include "bm_sim/event_logger.h"
+#include "bm_sim/P4Objects.h"
+#include "utils.h"
 
 namespace bm {
 
@@ -242,11 +244,41 @@ ActionFnEntry::dump(std::ostream *stream) const {
     return;
   }
   (*stream) << action_fn->name << " - ";
+  // TODO(antonin): use utils::StreamStateSaver?
   std::ios_base::fmtflags ff;
   ff = std::cout.flags();
   for (const Data &d : action_data.action_data)
     (*stream) << std::hex << d << ",";
   stream->flags(ff);
+}
+
+void
+ActionFnEntry::serialize(std::ostream *out) const {
+  if (action_fn == nullptr) {
+    (*out) << -1 << "\n";
+    return;
+  }
+  (*out) << action_fn->id << "\n";
+  (*out) << action_data.size() << "\n";
+  utils::StreamStateSaver state_saver(*out);
+  for (const Data &d : action_data.action_data)
+    (*out) << std::hex << d << "\n";
+}
+
+void
+ActionFnEntry::deserialize(std::istream *in, const P4Objects &objs) {
+  p4object_id_t id; (*in) >> id;
+  if (id == -1) {
+    action_fn = nullptr;
+    return;
+  }
+  action_fn = objs.get_action_by_id(id);
+  assert(action_fn);
+  size_t s; (*in) >> s;
+  for (size_t i = 0; i < s; i++) {
+    std::string data_hex; (*in) >> data_hex;
+    push_back_action_data(Data(data_hex));
+  }
 }
 
 thread_local Packet *ActionPrimitive_::pkt = nullptr;

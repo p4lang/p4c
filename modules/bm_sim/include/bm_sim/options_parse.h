@@ -78,6 +78,7 @@ class OptionsParser {
   std::string notifications_addr{};
   bool debugger{false};
   std::string debugger_addr{};
+  std::string state_file_path{};
 };
 
 }  // namespace bm

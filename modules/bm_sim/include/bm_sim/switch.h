@@ -515,6 +515,9 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   RuntimeInterface::ErrorCode
   reset_state() override;
 
+  RuntimeInterface::ErrorCode
+  serialize(std::ostream *out) override;
+
   MatchErrorCode
   dump_table(size_t cxt_id,
              const std::string& table_name,
@@ -528,8 +531,8 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   RuntimeInterface::ErrorCode
   swap_configs() override;
 
-  std::string get_config() override;
-  std::string get_config_md5() override;
+  std::string get_config() const override;
+  std::string get_config_md5() const override;
 
   // ---------- End RuntimeInterface ----------
 
@@ -575,6 +578,9 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     lookup_factory = new_factory;
   }
 
+  int deserialize(std::istream *in);
+  int deserialize_from_file(const std::string &state_dump_path);
+
  private:
   size_t nb_cxts{};
   // TODO(antonin)
@@ -585,6 +591,9 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   LookupStructureFactory *get_lookup_factory() const {
     return lookup_factory ? lookup_factory.get() : &default_lookup_factory;
   }
+
+  // internal version of get_config_md5(), which does not acquire config_lock
+  std::string get_config_md5_() const;
 
   // Create an instance of the default lookup factory
   static LookupStructureFactory default_lookup_factory;

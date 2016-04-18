@@ -473,4 +473,6 @@ service Standard {
 
   string bm_get_config()
   string bm_get_config_md5()
+
+  string bm_serialize_state()
 }

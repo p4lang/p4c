@@ -74,6 +74,9 @@ class Counter {
   CounterErrorCode write_counter(counter_value_t bytes,
                                  counter_value_t packets);
 
+  void serialize(std::ostream *out) const;
+  void deserialize(std::istream *in);
+
  private:
   std::atomic<std::uint_fast64_t> bytes{0u};
   std::atomic<std::uint_fast64_t> packets{0u};

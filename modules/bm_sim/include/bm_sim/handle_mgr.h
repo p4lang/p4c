@@ -196,6 +196,12 @@ class HandleMgr {
     return Rc ? 0 : -1;
   }
 
+  int set_handle(handle_t handle) {
+    int Rc;
+    J1S(Rc, handles, handle);
+    return Rc ? 0 : -1;
+  }
+
   size_t size() const {
     Word_t size;
     J1C(size, handles, 0, -1);

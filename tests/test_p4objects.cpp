@@ -27,38 +27,6 @@
 
 using namespace bm;
 
-class modify_field : public ActionPrimitive<Field &, const Data &> {
-  void operator ()(Field &f, const Data &d) {
-    f.set(d);
-  }
-};
-
-REGISTER_PRIMITIVE(modify_field);
-
-class drop : public ActionPrimitive<> {
-  void operator ()() {
-
-  }
-};
-
-REGISTER_PRIMITIVE(drop);
-
-class add_to_field : public ActionPrimitive<Field &, const Data &> {
-  void operator ()(Field &f, const Data &d) {
-    f.add(f, d);
-  }
-};
-
-REGISTER_PRIMITIVE(add_to_field);
-
-class generate_digest : public ActionPrimitive<const Data &, const Data &> {
-  void operator ()(const Data &receiver, const Data &learn_id) {
-    // stub only
-  }
-};
-
-REGISTER_PRIMITIVE(generate_digest);
-
 /* I need to find a better way to test the json parser, maybe I could simply
    read from the target files... */
 

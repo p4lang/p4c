@@ -169,6 +169,11 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[]) {
   }
   thrift_port = parser.thrift_port;
 
+  if (parser.state_file_path != "") {
+    status = deserialize_from_file(parser.state_file_path);
+    if (status != 0) return status;
+  }
+
   // TODO(unknown): is this the right place to do this?
   set_packet_handler(packet_handler, static_cast<void *>(this));
   start();
@@ -223,6 +228,60 @@ SwitchWContexts::reset_state() {
   return ErrorCode::SUCCESS;
 }
 
+namespace {
+
+const char serialization_format_version_str[] = "04182016_0";
+
+}  // namespace
+
+RuntimeInterface::ErrorCode
+SwitchWContexts::serialize(std::ostream *out) {
+  std::unique_lock<std::mutex> config_lock(config_mutex);
+  (*out) << serialization_format_version_str << "\n";
+  std::string md5sum = get_config_md5_();
+  (*out) << md5sum << "\n";
+  for (auto &cxt : contexts) {
+    ErrorCode rc = cxt.serialize(out);
+    if (rc != ErrorCode::SUCCESS) return rc;
+  }
+  return ErrorCode::SUCCESS;
+}
+
+// we assume that this is not a "runtime" function, but is called when the
+// switch is starting. Thus no lock...
+int
+SwitchWContexts::deserialize(std::istream *in) {
+  std::string md5sum_expected = get_config_md5();
+  // TODO(antonin): use logger functions?
+  std::string version_str; (*in) >> version_str;
+  if (version_str != std::string(serialization_format_version_str)) {
+    std::cout << "state dump has an incompatible version\n";
+    return 1;
+  }
+  std::string md5sum; (*in) >> md5sum;
+  if (md5sum != md5sum_expected) {
+    std::cout << "state dump input does not match JSON config input\n";
+    return 1;
+  }
+  for (auto &cxt : contexts) {
+    ErrorCode rc = cxt.deserialize(in);
+    if (rc != ErrorCode::SUCCESS) return 1;
+  }
+  return 0;
+}
+
+int
+SwitchWContexts::deserialize_from_file(const std::string &state_dump_path) {
+  std::ifstream fs(state_dump_path, std::ios::in);
+  // TODO(antonin): use logger functions?
+  if (!fs) {
+    std::cout << "state dump input file " << state_dump_path
+              << " cannot be opened\n";
+    return 1;
+  }
+  return deserialize(&fs);
+}
+
 int
 SwitchWContexts::swap_requested() {
   for (auto &cxt : contexts) {
@@ -251,20 +310,25 @@ SwitchWContexts::do_swap() {
 }
 
 std::string
-SwitchWContexts::get_config() {
+SwitchWContexts::get_config() const {
   std::unique_lock<std::mutex> config_lock(config_mutex);
   return current_config;
 }
 
 std::string
-SwitchWContexts::get_config_md5() {
-  std::unique_lock<std::mutex> config_lock(config_mutex);
+SwitchWContexts::get_config_md5_() const {
   MD5_CTX cxt;
   MD5_Init(&cxt);
   MD5_Update(&cxt, current_config.data(), current_config.size());
   unsigned char md5[16];
   MD5_Final(md5, &cxt);
   return std::string(reinterpret_cast<char *>(md5), sizeof(md5));
+}
+
+std::string
+SwitchWContexts::get_config_md5() const {
+  std::unique_lock<std::mutex> config_lock(config_mutex);
+  return get_config_md5_();
 }
 
 // Switch convenience class

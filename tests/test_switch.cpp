@@ -28,6 +28,9 @@
 #include <boost/filesystem.hpp>
 
 #include "bm_sim/switch.h"
+#include "utils.h"
+
+#include "bm_runtime/bm_runtime.h"
 
 using namespace bm;
 
@@ -49,6 +52,7 @@ char char2digit(char c) {
 }  // namespace
 
 class SwitchTest : public Switch {
+ public:
   int receive(int port_num, const char *buffer, int len) override {
     (void) port_num; (void) buffer; (void) len;
     return 0;
@@ -56,9 +60,12 @@ class SwitchTest : public Switch {
 
   void start_and_return() override {
   }
-};
 
-#include <iostream>
+  // needed because the method is protected
+  int deserialize(std::istream *in) {
+    return Switch::deserialize(in);
+  }
+};
 
 TEST(Switch, GetConfig) {
   fs::path config_path = fs::path(TESTDATADIR) / fs::path("empty_config.json");
@@ -84,4 +91,51 @@ TEST(Switch, GetConfig) {
   ASSERT_EQ(config_buffer.str(), sw.get_config());
 
   ASSERT_EQ(std::string(md5.begin(), md5.end()), sw.get_config_md5());
+}
+
+TEST(Switch, SerializeState1) {
+  fs::path config_path = fs::path(TESTDATADIR) / fs::path("serialize.json");
+  SwitchTest sw;
+  sw.init_objects(config_path.string(), 0, nullptr);
+  std::stringstream s1, s2;
+  sw.mt_set_default_action(0, "send_frame", "_drop", ActionData());
+  sw.mt_set_default_action(0, "forward", "_drop", ActionData());
+  sw.mt_set_default_action(0, "ipv4_lpm", "_drop", ActionData());
+  sw.serialize(&s1);
+  sw.reset_state();
+  sw.deserialize(&s1);
+  sw.serialize(&s2);
+  ASSERT_EQ(s1.str(), s2.str());
+}
+
+extern bool WITH_VALGRIND; // defined in main.cpp
+
+TEST(Switch, SerializeState2) {
+  if (WITH_VALGRIND) {
+    SUCCEED();
+    return;
+  }
+  fs::path config_path = fs::path(TESTDATADIR) / fs::path("serialize.json");
+  SwitchTest sw;
+  sw.init_objects(config_path.string(), 0, nullptr);
+  int thrift_port = 10999;
+  bm_runtime::start_server(&sw, thrift_port);
+  std::stringstream s1, s2;
+  CLIWrapper CLI(thrift_port, true);
+  CLI.send_cmd("table_set_default send_frame _drop");
+  CLI.send_cmd("table_set_default forward _drop");
+  CLI.send_cmd("table_set_default ipv4_lpm _drop");
+  CLI.send_cmd("table_add send_frame rewrite_mac 1 => 00:aa:bb:00:00:00");
+  CLI.send_cmd("table_add send_frame rewrite_mac 2 => 00:aa:bb:00:00:01");
+  CLI.send_cmd("table_add forward set_dmac 10.0.0.10 => 00:04:00:00:00:00");
+  CLI.send_cmd("table_add forward set_dmac 10.0.1.10 => 00:04:00:00:00:01");
+  CLI.send_cmd("table_add ipv4_lpm set_nhop 10.0.0.10/32 => 10.0.0.10 1");
+  CLI.send_cmd("table_add ipv4_lpm set_nhop 10.0.1.10/32 => 10.0.1.10 2");
+  CLI.send_cmd("meter_array_set_rates ipv4_lpm_meter 10000:5000 100000:20000");
+  CLI.send_cmd("meter_set_rates port_meter 8 2:5 10:25");
+  sw.serialize(&s1);
+  sw.reset_state();
+  sw.deserialize(&s1);
+  sw.serialize(&s2);
+  ASSERT_EQ(s1.str(), s2.str());
 }

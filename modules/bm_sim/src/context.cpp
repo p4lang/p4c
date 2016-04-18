@@ -546,6 +546,25 @@ Context::reset_state() {
   return ErrorCode::SUCCESS;
 }
 
+Context::ErrorCode
+Context::serialize(std::ostream *out) {
+  boost::unique_lock<boost::shared_mutex> lock(request_mutex);
+  p4objects_rt->serialize(out);
+  return ErrorCode::SUCCESS;
+}
+
+// we assume this is called when the switch is started, just after loading the
+// JSON, so no traffic yet
+Context::ErrorCode
+Context::deserialize(std::istream *in) {
+  boost::unique_lock<boost::shared_mutex> lock(request_mutex);
+  // not really necessary for now (if done before traffic and before RPC server
+  // running)
+  // p4objects_rt->reset_state();
+  p4objects_rt->deserialize(in);
+  return ErrorCode::SUCCESS;
+}
+
 int
 Context::do_swap() {
   if (!swap_ordered) return 1;
