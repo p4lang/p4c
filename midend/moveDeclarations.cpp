@@ -32,8 +32,18 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Parser* parser)  {
 }
 
 const IR::Node* MoveDeclarations::postorder(IR::Declaration_Variable* decl) {
-    toMove.push_back(decl);
-    return nullptr;
+    // We must keep the initializer here
+    if (decl->initializer != nullptr) {
+        auto move = new IR::Declaration_Variable(decl->srcInfo, decl->name,
+                                                 decl->annotations, decl->type, nullptr);
+        toMove.push_back(move);
+        auto varRef = new IR::PathExpression(decl->name);
+        auto keep = new IR::AssignmentStatement(decl->srcInfo, varRef, decl->initializer);
+        return keep;
+    } else {
+        toMove.push_back(decl);
+        return nullptr;
+    }
 }
 
 const IR::Node* MoveDeclarations::postorder(IR::Declaration_Constant* decl) {
