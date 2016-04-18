@@ -26,7 +26,7 @@ class SimpleActionsInliner : public P4::AbstractActionInliner {
     Visitor::profile_t init_apply(const IR::Node* node) override;
     const IR::Node* preorder(IR::P4Parser* cont) override
     { prune(); return cont; }  // skip
-    const IR::Node* preorder(IR::P4Action* action);
+    const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
 };

@@ -76,7 +76,6 @@ const IR::Node* SimpleControlsInliner::preorder(IR::MethodCallStatement* stateme
     return workToDo->declToCallee[decl]->to<IR::P4Control>()->body;
 }
 
-
 Visitor::profile_t SimpleActionsInliner::init_apply(const IR::Node* node) {
     P4::ResolveReferences solver(refMap, true);
     node->apply(solver);

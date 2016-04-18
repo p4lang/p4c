@@ -27,6 +27,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::MoveDeclarations(),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap, true),
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::RemoveUnusedDeclarations(&refMap),
         evaluator0,
     };
 
@@ -49,6 +51,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     auto actInl = new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap);
     actInl->allowDirectActionCalls = true;
     
+    std::ostream *inlineStream = options.dumpStream("-inline");
     PassManager midEnd = {
         find,
         new P4::InlineDriver(&toInline, inliner, isv1),
@@ -57,27 +60,26 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
             new P4::ResolveReferences(&refMap, isv1),
             new P4::RemoveUnusedDeclarations(&refMap),
         },
-#if 0
         new P4::ResolveReferences(&refMap, isv1),
         new P4::TypeChecker(&refMap, &typeMap, true, true),
         actInl,
-        new P4::InlineActionsDriver(&actionsToInline, &refMap, isv1),
+        new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(&refMap), isv1),
+        new P4::ToP4(inlineStream, options.file),
         new PassRepeated {
             new P4::ResolveReferences(&refMap, isv1),
             new P4::RemoveUnusedDeclarations(&refMap),
         },
-#endif
         new P4::SimplifyControlFlow(),
         evaluator1
     };
     midEnd.setStopOnError(true);
 
-    (void)program->apply(midEnd);
+    program = program->apply(midEnd);
     if (::errorCount() > 0)
         return nullptr;
 
-    std::ostream *inlineStream = options.dumpStream("-midend");
-    P4::ToP4 top4(inlineStream, options.file);
+    std::ostream *midendStream = options.dumpStream("-midend");
+    P4::ToP4 top4(midendStream, options.file);
     program->apply(top4);
     
     blockMap = evaluator1->getBlockMap();
