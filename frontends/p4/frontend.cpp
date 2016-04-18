@@ -39,7 +39,7 @@ run_frontend(const CompilerOptions &options, const IR::P4Program* v12_program, b
     PassManager frontend = {
         new P4::ToP4(ppStream, options.file),
         // Simple checks on parsed program
-        new P4::ValidateParsedProgram(),
+        new P4::ValidateParsedProgram(p4v10),
         // Synthesize some built-in constructs
         new P4::CreateBuiltins(),
         // First pass of constant folding, before types are known

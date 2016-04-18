@@ -88,12 +88,14 @@ class AbstractInliner : public Transform {
  protected:
     P4::InlineWorkList* list;
     P4::InlineSummary*  toInline;
-    AbstractInliner() : list(nullptr), toInline(nullptr) {}
+    bool                p4v1;
+    AbstractInliner() : list(nullptr), toInline(nullptr), p4v1(false) {}
  public:
-    void prepare(P4::InlineWorkList* list, P4::InlineSummary* toInline) {
+    void prepare(P4::InlineWorkList* list, P4::InlineSummary* toInline, bool p4v1) {
         CHECK_NULL(list); CHECK_NULL(toInline);
         this->list = list;
         this->toInline = toInline;
+        this->p4v1 = p4v1;
     }
 
     Visitor::profile_t init_apply(const IR::Node* node) {
@@ -106,11 +108,11 @@ class AbstractInliner : public Transform {
 // Repeatedly invokes an abstract inliner with work from the worklist
 class InlineDriver : public Transform {
     P4::InlineWorkList*  toInline;
-    AbstractInliner*  inliner;
-
+    AbstractInliner*     inliner;
+    bool                 p4v1;
  public:
-    explicit InlineDriver(P4::InlineWorkList* toInline, AbstractInliner* inliner) :
-            toInline(toInline), inliner(inliner)
+    explicit InlineDriver(P4::InlineWorkList* toInline, AbstractInliner* inliner, bool p4v1) :
+            toInline(toInline), inliner(inliner), p4v1(p4v1)
     { CHECK_NULL(toInline); CHECK_NULL(inliner); }
 
     // Not really a visitor, but we want to embed it into a PassManager,
@@ -143,6 +145,9 @@ class DiscoverInlining : public Inspector {
     { visit_all(blockMap->toplevelBlock); return false; }
 };
 
+class GeneralInliner : public AbstractInliner {
+    // TODO
+};
 
 }  // namespace P4
 

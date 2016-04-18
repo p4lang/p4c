@@ -37,8 +37,8 @@ const IR::Annotations*
 ProgramStructure::addNameAnnotation(cstring name, const IR::Annotations* annos) {
     if (annos == nullptr)
         annos = IR::Annotations::empty;
-    return annos->addAnnotation(IR::Annotation::nameAnnotation,
-                                new IR::StringLiteral(Util::SourceInfo(), name));
+    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral(Util::SourceInfo(), name));
 }
 
 cstring ProgramStructure::makeUniqueName(cstring base) {
@@ -590,12 +590,17 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                                              new IR::PathExpression(newname), nullptr);
         actVect->push_back(ale);
     }
+    auto nop = new IR::ActionListElement(Util::SourceInfo(), IR::Annotations::empty,
+                                         new IR::PathExpression(p4lib.noAction.Id()), nullptr);
+    actVect->push_back(nop);
     propvec->addUnique(IR::TableProperties::actionsPropertyName,
                        new IR::TableProperty(Util::SourceInfo(),
                                              IR::ID(IR::TableProperties::actionsPropertyName),
                                              IR::Annotations::empty,
                                              actionList, false));
 
+    
+    
     if (table->reads != nullptr) {
         auto keyVec = new IR::Vector<IR::KeyElement>();
         auto key = new IR::Key(Util::SourceInfo(), keyVec);
@@ -655,8 +660,13 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         propvec->addUnique(prop->name, prop);
     }
 
-    if (!table->default_action.name.isNullOrEmpty()) {
-        auto act = new IR::PathExpression(table->default_action);
+    IR::ID defaction;
+    if (!table->default_action.name.isNullOrEmpty()) 
+        defaction = table->default_action;
+    else
+        defaction = p4lib.noAction.Id();
+    {
+        auto act = new IR::PathExpression(defaction);       
         auto args = table->default_action_args != nullptr ?
                 table->default_action_args : new IR::Vector<IR::Expression>();
         auto methodCall = new IR::MethodCallExpression(Util::SourceInfo(), act,
@@ -665,7 +675,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
             Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName),
             IR::Annotations::empty, new IR::ExpressionValue(Util::SourceInfo(), methodCall), false);
         propvec->addUnique(prop->name, prop);
-    }
+    } 
 
     if (action_selector != nullptr) {
         auto type = new IR::Type_Name(new IR::Path(v1model.action_selector.Id()));

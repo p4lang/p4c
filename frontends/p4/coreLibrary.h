@@ -30,22 +30,16 @@ class PacketOut : public Model::Extern_Model {
 // To be kept in sync with corelib.p4
 class P4CoreLibrary : public ::Model::Model {
  protected:
-    P4CoreLibrary() : Model("0.2"),
-            exactMatch("exact"),
-            ternaryMatch("ternary"),
-            lpmMatch("lpm"),
-            packetIn(PacketIn()),
-            packetOut(PacketOut()),
-            noError("NoError"),
-            packetTooShort("PacketTooShort"),
-            noMatch("NoMatch"),
-            emptyStack("EmptyStack"),
-            fullStack("FullStack"),
-            overwritingHeader("OverwritingHeader")
-    {}
+    P4CoreLibrary() :
+            Model("0.2"), noAction("NoAction"), exactMatch("exact"),
+            ternaryMatch("ternary"), lpmMatch("lpm"), packetIn(PacketIn()),
+            packetOut(PacketOut()), noError("NoError"), packetTooShort("PacketTooShort"),
+            noMatch("NoMatch"), emptyStack("EmptyStack"), fullStack("FullStack"),
+            overwritingHeader("OverwritingHeader") {}
 
  public:
     static P4CoreLibrary instance;
+    ::Model::Elem noAction;
 
     ::Model::Elem exactMatch;
     ::Model::Elem ternaryMatch;

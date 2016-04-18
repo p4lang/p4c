@@ -856,11 +856,14 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
     for (auto it : structure.actions) {
         auto action = it.first;
         auto control = it.second;
-        stdMetadataParameter = control->type->applyParams->getParameter(
-            v1model.ingress.standardMetadataParam.index);
-        userMetadataParameter = control->type->applyParams->getParameter(
-            v1model.ingress.metadataParam.index);
-
+        if (control != nullptr) {
+            // It's null for the NoAction action
+            stdMetadataParameter = control->type->applyParams->getParameter(
+                v1model.ingress.standardMetadataParam.index);
+            userMetadataParameter = control->type->applyParams->getParameter(
+                v1model.ingress.metadataParam.index);
+        }
+        
         cstring name = nameFromAnnotation(action->annotations, action->name);
         auto jact = new Util::JsonObject();
         jact->emplace("name", name);

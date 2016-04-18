@@ -4,6 +4,8 @@
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/toP4/toP4.h"
+#include "lib/nullstream.h"
 
 namespace P4 {
 
@@ -67,11 +69,14 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
         return;
     auto caller = findContext<IR::P4Action>();
     if (caller == nullptr) {
-        if (findContext<IR::P4Parser>() != nullptr)
+        if (findContext<IR::P4Parser>() != nullptr) {
             ::error("%1%: action invocation in parser not supported", mcs);
-        else if (findContext<IR::P4Control>() != nullptr)
-            BUG("%1%: direct action invocation not yet implemented", mcs);
-        BUG("%1%: unexpected action invocation", mcs);
+        } else if (findContext<IR::P4Control>() != nullptr) {
+            if (!allowDirectActionCalls)
+                BUG("%1%: direct action invocation not yet implemented", mcs);
+        } else {
+            BUG("%1%: unexpected action invocation", mcs);
+        }
         return;
     }
 
@@ -79,78 +84,16 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
     toInline->add(aci);
 }
 
-class ActionsInliner : public Transform {
-    P4::ReferenceMap* refMap;
-    ActionsInlineList* list;
-    AInlineWorkList*    toInline;
-
-    std::map<const IR::MethodCallStatement*, const IR::P4Action*>* replMap;
-
- public:
-    ActionsInliner(P4::ReferenceMap* refMap, ActionsInlineList* list,
-                   AInlineWorkList* toInline) :
-            refMap(refMap), list(list), toInline(toInline), replMap(nullptr)
-    { CHECK_NULL(refMap); CHECK_NULL(list); CHECK_NULL(toInline); }
-
-    Visitor::profile_t init_apply(const IR::Node* node) {
-        LOG1("SimpleActionsInliner " << toInline);
-        return Transform::init_apply(node);
-    }
-
-    const IR::Node* preorder(IR::P4Parser* cont) override
-    { prune(); return cont; }  // skip
-    const IR::Node* preorder(IR::P4Action* action) override {
-        if (toInline->sites.count(getOriginal<IR::P4Action>()) == 0)
-            prune();
-        replMap = &toInline->sites[getOriginal<IR::P4Action>()];
-        LOG1("Visiting: " << getOriginal());
-        return action;
-    }
-    const IR::Node* postorder(IR::P4Action* action) override {
-        if (toInline->sites.count(getOriginal<IR::P4Action>()) > 0)
-            list->replace(getOriginal<IR::P4Action>(), action);
-        replMap = nullptr;
-        return action;
-    }
-    const IR::Node* preorder(IR::MethodCallStatement* statement) override {
-        LOG1("Visiting " << getOriginal());
-        if (replMap == nullptr)
-            return statement;
-
-        auto callee = get(*replMap, getOriginal<IR::MethodCallStatement>());
-        if (callee == nullptr)
-            return statement;
-
-        LOG1("Inlining: " << toInline);
-        IR::ParameterSubstitution subst;
-        subst.populate(callee->parameters, statement->methodCall->arguments);
-        IR::TypeVariableSubstitution tvs;  // empty
-        P4::SubstituteParameters sp(refMap, &subst, &tvs);
-        auto clone = callee->apply(sp);
-        if (::errorCount() > 0)
-            return statement;
-        CHECK_NULL(clone);
-        auto result = clone->to<IR::P4Action>()->body;
-        LOG1("Replacing " << statement << " with " << result);
-        return result;
-    }
-};
-
 const IR::Node* InlineActionsDriver::preorder(IR::P4Program* program) {
     LOG1("Inline actions driver");
     const IR::P4Program* prog = program;
-    P4::ResolveReferences solver(refMap, isv1);
-
     toInline->analyze();
     while (auto todo = toInline->next()) {
         LOG1("Processing " << todo);
-        ActionsInliner si(refMap, toInline, todo);
-        prog = prog->apply(si);
+        inliner->prepare(toInline, todo, p4v1);
+        prog = prog->apply(*inliner);
         if (::errorCount() > 0)
             return prog;
-        // Must re-resolve references
-        // TODO: this is too slow; should update references incrementally
-        prog->apply(solver);
     }
 
     prune();

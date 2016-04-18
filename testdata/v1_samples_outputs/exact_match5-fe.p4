@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 header data_t {
     bit<128> f4;
@@ -63,6 +63,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1;
             noop;
+            NoAction;
         }
         key = {
             hdr.data1.f1: exact;
@@ -70,6 +71,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data3.f3: exact;
         }
         size = 100000;
+        default_action = NoAction();
     }
 
     apply {

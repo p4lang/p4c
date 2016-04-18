@@ -25,6 +25,7 @@ control Pipe(inout Parsed_packet headers,
         }
         key = { inCtrl.inputPort : exact; }
         implementation = tbl();
+        default_action = drop;
     }
         
     apply {

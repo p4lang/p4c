@@ -2,8 +2,8 @@
 #define _EVALUATOR_EVALUATOR_H_
 
 #include "ir/ir.h"
-#include "../../common/typeMap.h"
-#include "../../common/resolveReferences/resolveReferences.h"
+#include "frontends/common/typeMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "blockMap.h"
 
 namespace P4 {

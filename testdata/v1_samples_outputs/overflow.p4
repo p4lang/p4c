@@ -33,9 +33,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("dmac") table dmac() {
         actions = {
             action_1_1;
+            NoAction;
         }
         key = {
         }
+        default_action = NoAction();
     }
 
     apply {

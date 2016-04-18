@@ -8,6 +8,7 @@ control test() {
             @tableOnly Set_dmac;
             @defaultOnly drop;
         }
+        default_action = drop;
     }
 
     apply {

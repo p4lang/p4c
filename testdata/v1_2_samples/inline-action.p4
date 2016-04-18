@@ -9,6 +9,7 @@ control p(inout bit bt) {
 
     table t() {
         actions = { b; }
+        default_action = b;
     }
     
     apply {

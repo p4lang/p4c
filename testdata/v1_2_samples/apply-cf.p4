@@ -5,6 +5,7 @@ control x()
     table t()
     {
         actions = { nop; }
+        default_action = nop;
     }
 
     apply {

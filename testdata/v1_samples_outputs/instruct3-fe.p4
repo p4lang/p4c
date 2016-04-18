@@ -36,10 +36,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setx;
             noop;
+            NoAction;
         }
         key = {
             hdr.data.f1: exact;
         }
+        default_action = NoAction();
     }
 
     apply {

@@ -5,6 +5,7 @@ control qp() {
         actions = {
             drop;
         }
+        default_action = drop;
     }
 
     apply {

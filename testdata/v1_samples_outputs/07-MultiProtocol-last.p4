@@ -177,40 +177,48 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv6_packet;
             mpls_packet;
             mim_packet;
+            NoAction;
         }
         key = {
             hdr.ethernet.etherType: exact;
         }
+        default_action = NoAction();
     }
 
     @name("ipv4_match") table ipv4_match() {
         actions = {
             nop;
             set_egress_port;
+            NoAction;
         }
         key = {
             hdr.ipv4.srcAddr: exact;
         }
+        default_action = NoAction();
     }
 
     @name("ipv6_match") table ipv6_match() {
         actions = {
             nop;
             set_egress_port;
+            NoAction;
         }
         key = {
             hdr.ipv6.srcAddr: exact;
         }
+        default_action = NoAction();
     }
 
     @name("l2_match") table l2_match() {
         actions = {
             nop;
             set_egress_port;
+            NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
+        default_action = NoAction();
     }
 
     apply {

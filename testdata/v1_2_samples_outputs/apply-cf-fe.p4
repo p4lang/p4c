@@ -5,6 +5,7 @@ control x() {
         actions = {
             nop;
         }
+        default_action = nop;
     }
 
     apply {

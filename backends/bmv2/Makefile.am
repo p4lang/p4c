@@ -11,8 +11,8 @@ p4c_bm2_ss_SOURCES = \
 	backends/bmv2/analyzer.cpp \
 	backends/bmv2/jsonconverter.h \
 	backends/bmv2/jsonconverter.cpp \
-	backends/bmv2/controlInlining.h \
-	backends/bmv2/controlInlining.cpp \
+	backends/bmv2/inlining.h \
+	backends/bmv2/inlining.cpp \
 	backends/bmv2/midend.h \
 	backends/bmv2/midend.cpp \
 	backends/bmv2/lower.h \

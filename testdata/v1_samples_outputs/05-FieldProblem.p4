@@ -36,10 +36,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("e_t1") table e_t1() {
         actions = {
             nop;
+            NoAction;
         }
         key = {
             hdr.vag.f1: exact;
         }
+        default_action = NoAction();
     }
 
     apply {
@@ -57,11 +59,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             set_f1;
+            NoAction;
         }
         key = {
             hdr.vag.f1: exact;
         }
         size = 1024;
+        default_action = NoAction();
     }
 
     apply {

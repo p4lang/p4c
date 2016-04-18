@@ -159,30 +159,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             set_egress_port;
+            NoAction;
         }
         key = {
             hdr.ipv4.srcAddr: exact;
         }
+        default_action = NoAction();
     }
 
     @name("ipv6_match") table ipv6_match() {
         actions = {
             nop;
             set_egress_port;
+            NoAction;
         }
         key = {
             hdr.ipv6.srcAddr: exact;
         }
+        default_action = NoAction();
     }
 
     @name("l2_match") table l2_match() {
         actions = {
             nop;
             set_egress_port;
+            NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
+        default_action = NoAction();
     }
 
     apply {

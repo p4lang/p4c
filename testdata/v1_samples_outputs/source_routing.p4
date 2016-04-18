@@ -58,11 +58,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop;
             route;
+            NoAction;
         }
         key = {
             hdr.easyroute_port.isValid(): exact;
         }
         size = 1;
+        default_action = NoAction();
     }
 
     apply {

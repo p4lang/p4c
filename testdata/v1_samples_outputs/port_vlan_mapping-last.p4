@@ -836,6 +836,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags;
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags;
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags;
+            NoAction;
         }
         key = {
             meta.ingress_metadata.ifindex: exact;
@@ -845,6 +846,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.vlan_tag_[1].vid         : exact;
         }
         size = 32768;
+        default_action = NoAction();
         @name("outer_bd_action_profile") implementation = ActionProfile(32w256);
     }
 
