@@ -49,8 +49,6 @@ struct MatchKey {
 };
 
 struct ExactMatchKey : public MatchKey {
-  using MatchKey::MatchKey;
-
   static constexpr MatchUnitType mut = MatchUnitType::EXACT;
 };
 

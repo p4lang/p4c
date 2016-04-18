@@ -21,6 +21,9 @@
 #ifndef TESTS_UTILS_H_
 #define TESTS_UTILS_H_
 
+#include <mutex>
+#include <condition_variable>
+
 #include "bm_sim/transport.h"
 
 class MemoryAccessor : public bm::TransportIface {
@@ -107,6 +110,19 @@ class MemoryAccessor : public bm::TransportIface {
   mutable std::mutex mutex;
   mutable std::condition_variable can_write;
   mutable std::condition_variable can_read;
+};
+
+class CLIWrapperImp;
+
+class CLIWrapper {
+ public:
+  CLIWrapper(int thrift_port, bool silent = false);
+  ~CLIWrapper();
+
+  void send_cmd(const std::string &cmd);
+
+ private:
+  std::unique_ptr<CLIWrapperImp> imp;
 };
 
 #endif  // TEST_UTILS_H_

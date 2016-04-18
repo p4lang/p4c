@@ -44,6 +44,8 @@
 
 namespace bm {
 
+class P4Objects;  // forward declaration for deserialize
+
 // using string and not ByteContainer for efficiency
 struct MatchKeyParam {
   // order is important, implementation sorts match fields according to their
@@ -393,6 +395,14 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
 
   void reset_state();
 
+  void serialize(std::ostream *out) const {
+    serialize_(out);
+  }
+
+  void deserialize(std::istream *in, const P4Objects &objs) {
+    deserialize_(in, objs);
+  }
+
  private:
   virtual MatchErrorCode add_entry_(const std::vector<MatchKeyParam> &match_key,
                                     V value,  // by value for possible std::move
@@ -417,6 +427,9 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
   virtual void reset_state_() = 0;
 
   virtual MatchUnitLookup lookup_key(const ByteContainer &key) const = 0;
+
+  virtual void serialize_(std::ostream *out) const = 0;
+  virtual void deserialize_(std::istream *in, const P4Objects &objs) = 0;
 };
 
 
@@ -464,6 +477,9 @@ class MatchUnitGeneric : public MatchUnitAbstract<V> {
   void reset_state_() override;
 
   MatchUnitLookup lookup_key(const ByteContainer &key) const override;
+
+  void serialize_(std::ostream *out) const override;
+  void deserialize_(std::istream *in, const P4Objects &objs) override;
 
  private:
   std::vector<Entry> entries{};

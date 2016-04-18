@@ -101,6 +101,30 @@ Meter::execute(const Packet &pkt) {
 }
 
 void
+Meter::serialize(std::ostream *out) const {
+  auto lock = unique_lock();
+  (*out) << configured << "\n";
+  if (configured) {
+    for (const auto &rate : rates)
+      (*out) << rate.info_rate << " " << rate.burst_size << "\n";
+  }
+}
+
+void
+Meter::deserialize(std::istream *in) {
+  auto lock = unique_lock();
+  (*in) >> configured;
+  if (configured) {
+    for (size_t i = 0; i < rates.size(); i++) {
+      rate_config_t config;
+      (*in) >> config.info_rate;
+      (*in) >> config.burst_size;
+      set_rate(i, config);
+    }
+  }
+}
+
+void
 Meter::reset_global_clock() {
   time_init = Meter::clock::now();
 }
@@ -109,6 +133,16 @@ Meter::reset_global_clock() {
 void
 MeterArray::reset_state() {
   for (auto &m : meters) m.reset_rates();
+}
+
+void
+MeterArray::serialize(std::ostream *out) const {
+  for (const auto &m : meters) m.serialize(out);
+}
+
+void
+MeterArray::deserialize(std::istream *in) {
+  for (auto &m : meters) m.deserialize(in);
 }
 
 }  // namespace bm

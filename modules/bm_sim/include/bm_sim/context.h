@@ -356,6 +356,9 @@ class Context final {
 
   ErrorCode reset_state();
 
+  ErrorCode serialize(std::ostream *out);
+  ErrorCode deserialize(std::istream *in);
+
   int do_swap();
 
   int swap_requested() { return swap_ordered; }

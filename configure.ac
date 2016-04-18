@@ -157,6 +157,9 @@ AC_CONFIG_FILES([Makefile
 		tests/Makefile
                 tools/Makefile])
 
+# Generate other files
+AC_CONFIG_FILES([tests/utils.cpp])
+
 AC_OUTPUT
 
 AS_ECHO("")

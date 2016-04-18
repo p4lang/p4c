@@ -165,7 +165,9 @@ class MeterArray:
         self.name = name
         self.id_ = id_
         self.type_ = None
+        self.is_direct = None
         self.size = None
+        self.binding = None
         self.rate_count = None
 
         METER_ARRAYS[name] = self
@@ -255,7 +257,12 @@ def load_json_str(json_str):
     if "meter_arrays" in json_:
         for j_meter in json_["meter_arrays"]:
             meter_array = MeterArray(j_meter["name"], j_meter["id"])
-            meter_array.size = j_meter["size"]
+            if "is_direct" in j_meter and j_meter["is_direct"]:
+                meter_array.is_direct = True
+                meter_array.binding = j_meter["binding"]
+            else:
+                meter_array.is_direct = False
+                meter_array.size = j_meter["size"]
             meter_array.type_ = MeterType.from_str(j_meter["type"])
             meter_array.rate_count = j_meter["rate_count"]
 
@@ -1413,7 +1420,10 @@ class RuntimeAPI(cmd.Cmd):
         self.at_least_n_args(args, 2)
         meter_name = args[0]
         meter = self.get_res("meter", meter_name, METER_ARRAYS)
-        index = args[1]
+        try:
+            index = int(args[1])
+        except:
+            raise UIn_Error("Bad format for index")
         rates = args[2:]
         if len(rates) != meter.rate_count:
             raise UIn_Error(
@@ -1431,9 +1441,7 @@ class RuntimeAPI(cmd.Cmd):
                 raise UIn_Error("Error while parsing rates")
         if meter.is_direct:
             table_name = meter.binding
-            print "this is the direct meter for table", table_name
-            value = self.client.bm_mt_set_meter_rates(
-                0, table_name, index, new_rates)
+            self.client.bm_mt_set_meter_rates(0, table_name, index, new_rates)
         else:
             self.client.bm_meter_set_rates(0, meter_name, index, new_rates)
 
@@ -1612,6 +1620,16 @@ class RuntimeAPI(cmd.Cmd):
         json_cfg = self.client.bm_get_config()
         with open(filename, 'w') as f:
             f.write(json_cfg)
+
+    @handle_bad_input
+    def do_serialize_state(self, line):
+        "Serialize the switch state and dumps it to user-specified file"
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        filename = args[0]
+        state = self.client.bm_serialize_state()
+        with open(filename, 'w') as f:
+            f.write(state)
 
 def check_JSON_md5(client, json_src):
     with open(json_src, 'r') as f:

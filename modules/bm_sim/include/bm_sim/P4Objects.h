@@ -82,12 +82,15 @@ class P4Objects {
 
   void reset_state();
 
-  ActionFn *get_action_by_id(p4object_id_t id) {
+  void serialize(std::ostream *out) const;
+  void deserialize(std::istream *in);
+
+  ActionFn *get_action_by_id(p4object_id_t id) const {
     return actions_map.at(id).get();
   }
 
   // TODO(antonin): temporary function to ensure backwards compat of JSON
-  ActionFn *get_one_action_with_name(const std::string &name) {
+  ActionFn *get_one_action_with_name(const std::string &name) const {
     for (auto it = actions_map.begin(); it != actions_map.end(); it++) {
       if (it->second->get_name() == name) return it->second.get();
     }
@@ -95,59 +98,59 @@ class P4Objects {
   }
 
   ActionFn *get_action(const std::string &table_name,
-                       const std::string &action_name) {
+                       const std::string &action_name) const {
     return t_actions_map.at(std::make_pair(table_name, action_name));
   }
 
-  Parser *get_parser(const std::string &name) {
+  Parser *get_parser(const std::string &name) const {
     return parsers.at(name).get();
   }
 
-  Deparser *get_deparser(const std::string &name) {
+  Deparser *get_deparser(const std::string &name) const {
     return deparsers.at(name).get();
   }
 
-  MatchTableAbstract *get_abstract_match_table(const std::string &name) {
+  MatchTableAbstract *get_abstract_match_table(const std::string &name) const {
     return match_action_tables_map.at(name)->get_match_table();
   }
 
-  MatchActionTable *get_match_action_table(const std::string &name) {
+  MatchActionTable *get_match_action_table(const std::string &name) const {
     return match_action_tables_map.at(name).get();
   }
 
-  Conditional *get_conditional(const std::string &name) {
+  Conditional *get_conditional(const std::string &name) const {
     return conditionals_map.at(name).get();
   }
 
-  ControlFlowNode *get_control_node(const std::string &name) {
+  ControlFlowNode *get_control_node(const std::string &name) const {
     return control_nodes_map.at(name);
   }
 
-  Pipeline *get_pipeline(const std::string &name) {
+  Pipeline *get_pipeline(const std::string &name) const {
     return pipelines_map.at(name).get();
   }
 
-  MeterArray *get_meter_array(const std::string &name) {
+  MeterArray *get_meter_array(const std::string &name) const {
     return meter_arrays.at(name).get();
   }
 
-  CounterArray *get_counter_array(const std::string &name) {
+  CounterArray *get_counter_array(const std::string &name) const {
     return counter_arrays.at(name).get();
   }
 
-  RegisterArray *get_register_array(const std::string &name) {
+  RegisterArray *get_register_array(const std::string &name) const {
     return register_arrays.at(name).get();
   }
 
-  NamedCalculation *get_named_calculation(const std::string &name) {
+  NamedCalculation *get_named_calculation(const std::string &name) const {
     return calculations.at(name).get();
   }
 
-  FieldList *get_field_list(const p4object_id_t field_list_id) {
+  FieldList *get_field_list(const p4object_id_t field_list_id) const {
     return field_lists.at(field_list_id).get();
   }
 
-  ExternType *get_extern_instance(const std::string &name) {
+  ExternType *get_extern_instance(const std::string &name) const {
     return extern_instances.at(name).get();
   }
 

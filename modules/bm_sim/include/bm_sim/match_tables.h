@@ -50,6 +50,9 @@ class MatchTableAbstract : public NamedP4Object {
       action_fn.dump(stream);
     }
 
+    void serialize(std::ostream *out) const;
+    void deserialize(std::istream *in, const P4Objects &objs);
+
     friend std::ostream& operator<<(std::ostream &out, const ActionEntry &e) {
       e.dump(&out);
       return out;
@@ -95,6 +98,9 @@ class MatchTableAbstract : public NamedP4Object {
   }
 
   void reset_state();
+
+  void serialize(std::ostream *out) const;
+  void deserialize(std::istream *in, const P4Objects &objs);
 
   void set_next_node(p4object_id_t action_id, const ControlFlowNode *next_node);
   void set_next_node_hit(const ControlFlowNode *next_node);
@@ -175,6 +181,9 @@ class MatchTableAbstract : public NamedP4Object {
  private:
   virtual void reset_state_() = 0;
 
+  virtual void serialize_(std::ostream *out) const = 0;
+  virtual void deserialize_(std::istream *in, const P4Objects &objs) = 0;
+
   virtual MatchErrorCode dump_entry_(std::ostream *out,
                                      entry_handle_t handle) const = 0;
 
@@ -243,6 +252,9 @@ class MatchTable : public MatchTableAbstract {
  private:
   void reset_state_() override;
 
+  void serialize_(std::ostream *out) const override;
+  void deserialize_(std::istream *in, const P4Objects &objs) override;
+
   MatchErrorCode dump_entry_(std::ostream *out,
                              entry_handle_t handle) const override;
 
@@ -278,6 +290,9 @@ class MatchTableIndirect : public MatchTableAbstract {
       i.dump(&out);
       return out;
     }
+
+    void serialize(std::ostream *out) const;
+    void deserialize(std::istream *in, const P4Objects &objs);
 
     static IndirectIndex make_mbr_index(unsigned int index) {
       assert(index <= _index_mask);
@@ -334,6 +349,9 @@ class MatchTableIndirect : public MatchTableAbstract {
       else
         grp_count[i]--;
     }
+
+    void serialize(std::ostream *out) const;
+    void deserialize(std::istream *in);
 
    private:
     std::vector<count_t> mbr_count{};
@@ -406,6 +424,9 @@ class MatchTableIndirect : public MatchTableAbstract {
   }
 
   void reset_state_() override;
+
+  void serialize_(std::ostream *out) const override;
+  void deserialize_(std::istream *in, const P4Objects &objs) override;
 
   void dump_(std::ostream *stream) const;
 
@@ -509,6 +530,9 @@ class MatchTableIndirectWS : public MatchTableIndirect {
 
   void reset_state_() override;
 
+  void serialize_(std::ostream *out) const override;
+  void deserialize_(std::istream *in, const P4Objects &objs) override;
+
   MatchErrorCode dump_entry_(std::ostream *out,
                             entry_handle_t handle) const override;
 
@@ -531,6 +555,9 @@ class MatchTableIndirectWS : public MatchTableIndirect {
     const_iterator end() const { return mbrs.end(); }
 
     void dump(std::ostream *stream) const;
+
+    void serialize(std::ostream *out) const;
+    void deserialize(std::istream *in);
 
    private:
     RandAccessUIntSet mbrs{};

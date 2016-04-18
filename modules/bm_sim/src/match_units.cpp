@@ -1008,6 +1008,88 @@ MatchUnitGeneric<K, V>::reset_state_() {
   entries = std::vector<Entry>(this->size);
 }
 
+namespace {
+
+void serialize_key(const ExactMatchKey &key, std::ostream *out) {
+  (void) key; (void) out;
+}
+
+void serialize_key(const LPMMatchKey &key, std::ostream *out) {
+  (*out) << key.prefix_length << "\n";
+}
+
+void serialize_key(const TernaryMatchKey &key, std::ostream *out) {
+  (*out) << key.mask.to_hex() << "\n";
+  (*out) << key.priority << "\n";
+}
+
+}  // namespace
+
+template <typename K, typename V>
+void
+MatchUnitGeneric<K, V>::serialize_(std::ostream *out) const {
+  (*out) << this->num_entries << "\n";
+  for (internal_handle_t handle_ : this->handles) {
+    const Entry &entry = entries[handle_];
+    // dump entry handle to be able to have the exact same one when
+    // deserializing
+    (*out) << handle_ << "\n";
+    (*out) << entry.key.version << "\n";
+    (*out) << entry.key.data.to_hex() << "\n";
+    serialize_key(entry.key, out);
+    entry.value.serialize(out);
+    const EntryMeta &meta = this->entry_meta[handle_];
+    (*out) << meta.timeout_ms << "\n";
+    // not a runtime configuration, should be serialized anyway?
+    // meta.counter.serialize(out);
+    assert(meta.version == entry.key.version);
+  }
+  if (this->direct_meters) this->direct_meters->serialize(out);
+}
+
+namespace {
+
+void deserialize_key(ExactMatchKey *key, std::istream *in) {
+  (void) key; (void) in;
+}
+
+void deserialize_key(LPMMatchKey *key, std::istream *in) {
+  (*in) >> key->prefix_length;
+}
+
+void deserialize_key(TernaryMatchKey *key, std::istream *in) {
+  std::string mask_hex; (*in) >> mask_hex;
+  key->mask = ByteContainer(mask_hex);
+  (*in) >> key->priority;
+}
+
+}  // namespace
+
+template <typename K, typename V>
+void
+MatchUnitGeneric<K, V>::deserialize_(std::istream *in, const P4Objects &objs) {
+  (*in) >> this->num_entries;
+  for (size_t i = 0; i < this->num_entries; i++) {
+    Entry entry;
+    internal_handle_t handle_; (*in) >> handle_;
+    assert(!this->handles.set_handle(handle_));
+    uint32_t version; (*in) >> version;
+    std::string key_hex; (*in) >> key_hex;
+    entry.key.data = ByteContainer(key_hex);
+    deserialize_key(&entry.key, in);
+    entry.value.deserialize(in, objs);
+    entry.key.version = version;
+    entries[handle_] = std::move(entry);
+    lookup_structure->add_entry(entry.key, handle_);
+    EntryMeta &meta = this->entry_meta[handle_];
+    meta.reset();
+    meta.version = version;
+    (*in) >> meta.timeout_ms;
+    // meta.counter.deserialize(in);
+  }
+  if (this->direct_meters) this->direct_meters->deserialize(in);
+}
+
 // explicit template instantiation
 
 // I did not think I had to explicitly instantiate MatchUnitAbstract, because it

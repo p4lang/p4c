@@ -25,7 +25,6 @@
 #include <string>
 
 #include "control_flow.h"
-#include "named_p4object.h"
 #include "match_tables.h"
 #include "logger.h"
 #include "debugger.h"
@@ -48,11 +47,11 @@ struct HasFactoryMethod {
   static const bool value = sizeof(Test<T>(nullptr)) == sizeof(char);
 };
 
-class MatchActionTable : public ControlFlowNode, public NamedP4Object {
+class MatchActionTable : public ControlFlowNode {
  public:
   MatchActionTable(const std::string &name, p4object_id_t id,
                    std::unique_ptr<MatchTableAbstract> match_table)
-    : NamedP4Object(name, id),
+    : ControlFlowNode(name, id),
       match_table(std::move(match_table)) { }
 
   const ControlFlowNode *operator()(Packet *pkt) const override {

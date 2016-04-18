@@ -21,16 +21,21 @@
 #ifndef BM_SIM_INCLUDE_BM_SIM_CONTROL_FLOW_H_
 #define BM_SIM_INCLUDE_BM_SIM_CONTROL_FLOW_H_
 
+#include <string>
+
 #include "packet.h"
+#include "named_p4object.h"
 
 namespace bm {
 
-class ControlFlowNode {
+class ControlFlowNode : public NamedP4Object {
  public:
+  ControlFlowNode(const std::string &name, p4object_id_t id)
+      : NamedP4Object(name, id) { }
   virtual ~ControlFlowNode() { }
   virtual const ControlFlowNode *operator()(Packet *pkt) const = 0;
 };
 
-}
+}  // namespace bm
 
 #endif  // BM_SIM_INCLUDE_BM_SIM_CONTROL_FLOW_H_

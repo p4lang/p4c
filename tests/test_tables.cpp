@@ -44,6 +44,9 @@ namespace {
 
 // used for hit / miss next node selection tests (NextNodeHitMiss)
 struct DummyNode: public ControlFlowNode {
+  DummyNode()
+      : ControlFlowNode("", 0) { }
+
   const ControlFlowNode *operator()(Packet *pkt) const {
     return nullptr;
   }

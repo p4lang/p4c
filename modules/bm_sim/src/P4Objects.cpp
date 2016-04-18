@@ -1065,6 +1065,26 @@ P4Objects::reset_state() {
   ageing_monitor->reset_state();
 }
 
+void
+P4Objects::serialize(std::ostream *out) const {
+  for (const auto &e : match_action_tables_map) {
+    e.second->get_match_table()->serialize(out);
+  }
+  for (const auto &e : meter_arrays) {
+    e.second->serialize(out);
+  }
+}
+
+void
+P4Objects::deserialize(std::istream *in) {
+  for (const auto &e : match_action_tables_map) {
+    e.second->get_match_table()->deserialize(in, *this);
+  }
+  for (const auto &e : meter_arrays) {
+    e.second->deserialize(in);
+  }
+}
+
 int
 P4Objects::get_field_offset(header_id_t header_id, const string &field_name) {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);

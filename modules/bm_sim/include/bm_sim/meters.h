@@ -147,6 +147,9 @@ class Meter {
   //!   - `2 <-> RED`
   color_t execute(const Packet &pkt);
 
+  void serialize(std::ostream *out) const;
+  void deserialize(std::istream *in);
+
  public:
   /* This is for testing purposes only, for more accurate tests */
   static void reset_global_clock();
@@ -291,6 +294,9 @@ class MeterArray : public NamedP4Object {
   size_t size() const { return meters.size(); }
 
   void reset_state();
+
+  void serialize(std::ostream *out) const;
+  void deserialize(std::istream *in);
 
  private:
   std::vector<Meter> meters{};

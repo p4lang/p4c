@@ -26,6 +26,7 @@
 #include "bm_sim/logger.h"
 #include "bm_sim/event_logger.h"
 #include "bm_sim/lookup_structures.h"
+#include "bm_sim/P4Objects.h"
 
 namespace bm {
 
@@ -58,6 +59,25 @@ create_match_unit(const std::string match_type, const size_t size,
 }  // namespace
 
 typedef MatchTableAbstract::ActionEntry ActionEntry;
+
+void
+ActionEntry::serialize(std::ostream *out) const {
+  action_fn.serialize(out);
+  if (!next_node)
+    (*out) << "__NULL__" << "\n";
+  else
+    (*out) << next_node->get_name() << "\n";
+}
+
+void
+ActionEntry::deserialize(std::istream *in, const P4Objects &objs) {
+  action_fn.deserialize(in, objs);
+  std::string next_node_name; (*in) >> next_node_name;
+  if (next_node_name != "__NULL__") {
+    next_node = objs.get_control_node(next_node_name);
+    assert(next_node);
+  }
+}
 
 MatchTableAbstract::MatchTableAbstract(
     const std::string &name, p4object_id_t id,
@@ -111,6 +131,30 @@ void
 MatchTableAbstract::reset_state() {
   WriteLock lock = lock_write();
   reset_state_();
+}
+
+void
+MatchTableAbstract::serialize(std::ostream *out) const {
+  ReadLock lock = lock_read();
+  (*out) << name << "\n";
+  if (!next_node_miss)
+    (*out) << "__NULL__" << "\n";
+  else
+    (*out) << next_node_miss->get_name() << "\n";
+  serialize_(out);
+}
+
+void
+MatchTableAbstract::deserialize(std::istream *in, const P4Objects &objs) {
+  WriteLock lock = lock_write();
+  std::string name_sentinel; (*in) >> name_sentinel;
+  assert(name_sentinel == name);
+  std::string next_node_miss_name; (*in) >> next_node_miss_name;
+  if (next_node_miss_name != "__NULL__") {
+    next_node_miss = objs.get_control_node(next_node_miss_name);
+    assert(next_node_miss);
+  }
+  deserialize_(in, objs);
 }
 
 void
@@ -392,6 +436,19 @@ MatchTable::reset_state_() {
   // reset default_entry ?
   match_unit->reset_state();
 }
+
+void
+MatchTable::serialize_(std::ostream *out) const {
+  match_unit->serialize(out);
+  default_entry.serialize(out);
+}
+
+void
+MatchTable::deserialize_(std::istream *in, const P4Objects &objs) {
+  match_unit->deserialize(in , objs);
+  default_entry.deserialize(in, objs);
+}
+
 
 std::unique_ptr<MatchTable>
 MatchTable::create(const std::string &match_type,
@@ -745,6 +802,69 @@ MatchTableIndirect::reset_state_() {
   match_unit->reset_state();
 }
 
+void
+MatchTableIndirect::serialize_(std::ostream *out) const {
+  match_unit->serialize(out);
+  (*out) << default_set << "\n";
+  if (default_set) default_index.serialize(out);
+  (*out) << action_entries.size() << "\n";
+  (*out) << num_members << "\n";
+  for (const auto h : mbr_handles) {
+    (*out) << h << "\n";
+    action_entries.at(h).serialize(out);
+  }
+  index_ref_count.serialize(out);
+}
+
+void
+MatchTableIndirect::deserialize_(std::istream *in, const P4Objects &objs) {
+  match_unit->deserialize(in , objs);
+  (*in) >> default_set;
+  if (default_set) default_index.deserialize(in, objs);
+  size_t action_entries_size; (*in) >> action_entries_size;
+  action_entries.resize(action_entries_size);
+  (*in) >> num_members;
+  for (size_t i = 0; i < num_members; i++) {
+    mbr_hdl_t mbr_hdl; (*in) >> mbr_hdl;
+    assert(!mbr_handles.set_handle(mbr_hdl));
+    action_entries.at(mbr_hdl).deserialize(in, objs);
+  }
+  index_ref_count.deserialize(in);
+}
+
+
+void
+MatchTableIndirect::IndirectIndexRefCount::serialize(std::ostream *out) const {
+  (*out) << mbr_count.size() << "\n";
+  for (const auto c : mbr_count) (*out) << c << "\n";
+  (*out) << grp_count.size() << "\n";
+  for (const auto c : grp_count) (*out) << c << "\n";
+}
+
+void
+MatchTableIndirect::IndirectIndexRefCount::deserialize(std::istream *in) {
+  size_t s;
+  (*in) >> s;
+  mbr_count.resize(s);
+  for (auto &c : mbr_count) (*in) >> c;
+  (*in) >> s;
+  grp_count.resize(s);
+  for (auto &c : grp_count) (*in) >> c;
+}
+
+
+void
+MatchTableIndirect::IndirectIndex::serialize(std::ostream *out) const {
+  (*out) << index << "\n";
+}
+
+void
+MatchTableIndirect::IndirectIndex::deserialize(std::istream *in,
+                                               const P4Objects &objs) {
+  (void) objs;
+  (*in) >> index;
+}
+
 
 MatchTableIndirectWS::MatchTableIndirectWS(
     const std::string &name, p4object_id_t id,
@@ -786,6 +906,21 @@ MatchTableIndirectWS::GroupInfo::dump(std::ostream *stream) const {
   for (const auto &mbr : mbrs)
     (*stream) << mbr << ", ";
   (*stream) << "}";
+}
+
+void
+MatchTableIndirectWS::GroupInfo::serialize(std::ostream *out) const {
+  (*out) << size() << "\n";
+  for (const auto mbr : mbrs) (*out) << mbr << "\n";
+}
+
+void
+MatchTableIndirectWS::GroupInfo::deserialize(std::istream *in) {
+  size_t s; (*in) >> s;
+  for (size_t i = 0; i < s; i++) {
+    mbr_hdl_t mbr; (*in) >> mbr;
+    add_member(mbr);
+  }
 }
 
 
@@ -1152,6 +1287,28 @@ MatchTableIndirectWS::reset_state_() {
   MatchTableIndirect::reset_state_();
   num_groups = 0;
   group_entries.clear();
+}
+
+void
+MatchTableIndirectWS::serialize_(std::ostream *out) const {
+  MatchTableIndirect::serialize_(out);
+  (*out) << num_groups << "\n";
+  for (const auto h : grp_handles) {
+    (*out) << h << "\n";
+    group_entries.at(h).serialize(out);
+  }
+}
+
+void
+MatchTableIndirectWS::deserialize_(std::istream *in, const P4Objects &objs) {
+  MatchTableIndirect::deserialize_(in, objs);
+  (*in) >> num_groups;
+  group_entries.resize(num_groups);
+  for (size_t i = 0; i < num_groups; i++) {
+    grp_hdl_t grp_hdl; (*in) >> grp_hdl;
+    assert(!grp_handles.set_handle(grp_hdl));
+    group_entries.at(grp_hdl).deserialize(in);
+  }
 }
 
 }  // namespace bm
