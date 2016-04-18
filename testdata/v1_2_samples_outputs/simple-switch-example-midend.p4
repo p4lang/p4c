@@ -56,9 +56,11 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 
 control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     action Drop_action() {
+        bool hasReturned_0 = false;
         outCtrl.outputPort = 4w0xf;
     }
     action Set_nhop(out IPv4Address nextHop, IPv4Address ipv4_dest, PortId_t port) {
+        bool hasReturned_1 = false;
         nextHop = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
@@ -76,6 +78,7 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
 
     action Send_to_cpu() {
+        bool hasReturned_2 = false;
         outCtrl.outputPort = 4w0xe;
     }
     table check_ttl() {
@@ -89,6 +92,7 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
 
     action Set_dmac(EthernetAddress dmac) {
+        bool hasReturned_3 = false;
         headers.ethernet.dstAddr = dmac;
     }
     table dmac(in IPv4Address nextHop) {
@@ -104,6 +108,7 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
 
     action Rewrite_smac(EthernetAddress sourceMac) {
+        bool hasReturned_4 = false;
         headers.ethernet.srcAddr = sourceMac;
     }
     table smac() {
@@ -119,39 +124,39 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
 
     apply {
-        bool hasReturned_0 = false;
-        @name("nextHop") IPv4Address nextHop_0;
+        bool hasExited = false;
+        @name("hasReturned_0") bool hasReturned_0_0;
+        @name("nextHop") IPv4Address nextHop_0_0;
+        hasReturned_0_0 = false;
         if (parseError != NoError) {
             Drop_action();
-            hasReturned_0 = true;
-            if (!hasReturned_0) {
-            }
+            hasReturned_0_0 = true;
+            ;
         }
-        if (!hasReturned_0) {
-            ipv4_match.apply(nextHop_0);
+        if (!hasReturned_0_0) {
+            ipv4_match.apply(nextHop_0_0);
             if (outCtrl.outputPort == 4w0xf) 
-                hasReturned_0 = true;
+                hasReturned_0_0 = true;
         }
-        if (!hasReturned_0) {
+        if (!hasReturned_0_0) {
             check_ttl.apply();
             if (outCtrl.outputPort == 4w0xe) 
-                hasReturned_0 = true;
+                hasReturned_0_0 = true;
         }
-        if (!hasReturned_0) {
-            dmac.apply(nextHop_0);
+        if (!hasReturned_0_0) {
+            dmac.apply(nextHop_0_0);
             if (outCtrl.outputPort == 4w0xf) 
-                hasReturned_0 = true;
+                hasReturned_0_0 = true;
         }
-        if (!hasReturned_0) {
+        if (!hasReturned_0_0) 
             smac.apply();
-        }
     }
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     Checksum16() ck;
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         b.emit(p.ethernet);
         if (p.ip.isValid()) {
             ck.clear();

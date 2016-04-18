@@ -42,21 +42,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     Meter(32w16384, CounterType.Packets) @name("my_meter") my_meter;
     @name("_drop") action _drop() {
-        bool hasReturned_2 = false;
+        bool hasReturned_0 = false;
         mark_to_drop();
     }
     @name("_nop") action _nop() {
-        bool hasReturned_3 = false;
+        bool hasReturned_1 = false;
     }
     @name("m_action") action m_action(bit<8> meter_idx) {
-        bool hasReturned_4 = false;
+        bool hasReturned_2 = false;
         my_meter.meter((bit<32>)meter_idx, meta.meta.meter_tag);
         standard_metadata.egress_spec = 9w1;
     }
@@ -87,7 +87,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         m_table.apply();
         m_filter.apply();
     }
@@ -95,20 +95,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_7 = false;
+        bool hasExited_3 = false;
     }
 }
 

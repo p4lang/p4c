@@ -21,7 +21,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control c(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("x") action x() {
-        bool hasReturned_1 = false;
+        bool hasReturned_0 = false;
     }
     @name("t") table t() {
         actions = {
@@ -32,7 +32,7 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         if (meta.m.b == 1w1) 
             t.apply();
     }
@@ -41,7 +41,7 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
 control d(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     c() c_0;
     apply {
-        bool hasReturned_2 = false;
+        bool hasExited_0 = false;
         c_0.apply(hdr, meta, standard_metadata);
     }
 }
@@ -49,32 +49,32 @@ control d(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     d() d_0;
     apply {
-        bool hasReturned_3 = false;
+        bool hasExited_1 = false;
         d_0.apply(hdr, meta, standard_metadata);
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_3 = false;
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_4 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_7 = false;
+        bool hasExited_5 = false;
     }
 }
 

@@ -722,7 +722,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("set_bd") action set_bd(bit<16> outer_vlan_bd, bit<12> vrf, bit<10> rmac_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> igmp_snooping_enabled, bit<10> stp_group) {
-        bool hasReturned_1 = false;
+        bool hasReturned_0 = false;
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.ipv4_unicast_enabled = ipv4_unicast_enabled;
         meta.ingress_metadata.igmp_snooping_enabled = igmp_snooping_enabled;
@@ -735,7 +735,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.stp_group = stp_group;
     }
     @name("set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags") action set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
-        bool hasReturned_2 = false;
+        bool hasReturned_1 = false;
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.bd = bd;
         meta.ingress_metadata.outer_bd = (bit<8>)bd;
@@ -760,7 +760,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.stp_group = stp_group;
     }
     @name("set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags") action set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
-        bool hasReturned_3 = false;
+        bool hasReturned_2 = false;
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.bd = bd;
         meta.ingress_metadata.outer_bd = (bit<8>)bd;
@@ -785,7 +785,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.stp_group = stp_group;
     }
     @name("set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags") action set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
-        bool hasReturned_4 = false;
+        bool hasReturned_3 = false;
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.bd = bd;
         meta.ingress_metadata.outer_bd = (bit<8>)bd;
@@ -810,7 +810,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.stp_group = stp_group;
     }
     @name("set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags") action set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags(bit<16> bd, bit<12> vrf, bit<10> rmac_group, bit<16> mrpf_group, bit<16> bd_label, bit<16> uuc_mc_index, bit<16> bcast_mc_index, bit<16> umc_mc_index, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_multicast_mode, bit<2> ipv6_multicast_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<10> stp_group) {
-        bool hasReturned_5 = false;
+        bool hasReturned_4 = false;
         meta.ingress_metadata.vrf = vrf;
         meta.ingress_metadata.bd = bd;
         meta.ingress_metadata.outer_bd = (bit<8>)bd;
@@ -856,20 +856,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         port_vlan_mapping.apply();
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_7 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.input_port_hdr);
         packet.emit(hdr.ethernet);
         packet.emit(hdr.cpu_header);
@@ -911,7 +911,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     Checksum16() inner_ipv4_checksum;
     Checksum16() ipv4_checksum;
     apply {
-        bool hasReturned_8 = false;
+        bool hasExited_2 = false;
         if (hdr.ipv4.isValid() && hdr.inner_ipv4.hdrChecksum == inner_ipv4_checksum.get({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr })) 
             standard_metadata.drop = 1w1;
         if (hdr.ipv4.ihl == 4w5 && hdr.ipv4.hdrChecksum == ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })) 
@@ -923,7 +923,7 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() inner_ipv4_checksum;
     Checksum16() ipv4_checksum;
     apply {
-        bool hasReturned_9 = false;
+        bool hasExited_3 = false;
         if (hdr.ipv4.isValid()) 
             hdr.inner_ipv4.hdrChecksum = inner_ipv4_checksum.get({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
         if (hdr.ipv4.ihl == 4w5) 

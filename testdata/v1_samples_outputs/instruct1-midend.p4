@@ -52,12 +52,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("decap") action decap() {
-        bool hasReturned_1 = false;
+        bool hasReturned_0 = false;
         hdr.hdr1 = hdr.hdr2;
         hdr.hdr2.setValid(false);
     }
     @name("noop") action noop() {
-        bool hasReturned_2 = false;
+        bool hasReturned_1 = false;
     }
     @name("test1") table test1() {
         actions = {
@@ -72,20 +72,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         test1.apply();
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_3 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.data);
         packet.emit(hdr.hdr1);
         packet.emit(hdr.hdr2);
@@ -94,13 +94,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_3 = false;
     }
 }
 

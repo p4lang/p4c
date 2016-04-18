@@ -45,6 +45,7 @@ parser prs(packet_in p, out Headers_t headers) {
 
 control pipe(inout Headers_t headers, out bool pass) {
     action Reject() {
+        bool hasReturned_0 = false;
         pass = false;
     }
     table Check_ip(in IPv4Address address) {
@@ -60,15 +61,16 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
+        @name("hasReturned_0") bool hasReturned_0_0;
+        hasReturned_0_0 = false;
         pass = true;
         if (!headers.ipv4.isValid()) {
             pass = false;
-            hasReturned_0 = true;
-            if (!hasReturned_0) {
-            }
+            hasReturned_0_0 = true;
+            ;
         }
-        if (!hasReturned_0) {
+        if (!hasReturned_0_0) {
             Check_ip.apply(headers.ipv4.srcAddr);
             Check_ip.apply(headers.ipv4.dstAddr);
         }

@@ -61,7 +61,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("set1") action set1(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
-        bool hasReturned_1 = false;
+        bool hasReturned_0 = false;
         hdr.data.f1_1 = v1;
         hdr.data.f1_2 = v2;
         hdr.data.f1_3 = v3;
@@ -69,10 +69,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f1_5 = v5;
     }
     @name("noop") action noop() {
-        bool hasReturned_2 = false;
+        bool hasReturned_1 = false;
     }
     @name("set2") action set2(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
-        bool hasReturned_3 = false;
+        bool hasReturned_2 = false;
         hdr.data.f2_1 = v1;
         hdr.data.f2_2 = v2;
         hdr.data.f2_3 = v3;
@@ -80,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f2_5 = v5;
     }
     @name("set3") action set3(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
-        bool hasReturned_4 = false;
+        bool hasReturned_3 = false;
         hdr.data.f3_1 = v1;
         hdr.data.f3_2 = v2;
         hdr.data.f3_3 = v3;
@@ -88,7 +88,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f3_5 = v5;
     }
     @name("set4") action set4(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
-        bool hasReturned_5 = false;
+        bool hasReturned_4 = false;
         hdr.data.f4_1 = v1;
         hdr.data.f4_2 = v2;
         hdr.data.f4_3 = v3;
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f4_5 = v5;
     }
     @name("set5") action set5(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
-        bool hasReturned_6 = false;
+        bool hasReturned_5 = false;
         hdr.data.f5_1 = v1;
         hdr.data.f5_2 = v2;
         hdr.data.f5_3 = v3;
@@ -104,7 +104,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f5_5 = v5;
     }
     @name("set6") action set6(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
-        bool hasReturned_7 = false;
+        bool hasReturned_6 = false;
         hdr.data.f6_1 = v1;
         hdr.data.f6_2 = v2;
         hdr.data.f6_3 = v3;
@@ -112,7 +112,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f6_5 = v5;
     }
     @name("set7") action set7(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
-        bool hasReturned_8 = false;
+        bool hasReturned_7 = false;
         hdr.data.f7_1 = v1;
         hdr.data.f7_2 = v2;
         hdr.data.f7_3 = v3;
@@ -120,7 +120,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.f7_5 = v5;
     }
     @name("set8") action set8(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
-        bool hasReturned_9 = false;
+        bool hasReturned_8 = false;
         hdr.data.f8_1 = v1;
         hdr.data.f8_2 = v2;
         hdr.data.f8_3 = v3;
@@ -224,7 +224,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         tbl1.apply();
         tbl2.apply();
         tbl3.apply();
@@ -238,26 +238,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_11 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.data);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_12 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_13 = false;
+        bool hasExited_3 = false;
     }
 }
 

@@ -49,14 +49,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("_nop") action _nop() {
-        bool hasReturned_1 = false;
+        bool hasReturned_0 = false;
     }
     @name("_recirculate") action _recirculate() {
-        bool hasReturned_2 = false;
+        bool hasReturned_1 = false;
         recirculate({ standard_metadata, meta.metaA });
     }
     @name("_clone_e2e") action _clone_e2e(bit<8> mirror_id) {
-        bool hasReturned_3 = false;
+        bool hasReturned_2 = false;
         clone3(CloneType.E2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
     @name("t_egress") table t_egress() {
@@ -75,30 +75,30 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         t_egress.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("_nop") action _nop() {
-        bool hasReturned_5 = false;
+        bool hasReturned_3 = false;
     }
     @name("_set_port") action _set_port(bit<9> port) {
-        bool hasReturned_6 = false;
+        bool hasReturned_4 = false;
         standard_metadata.egress_spec = port;
         meta.metaA.f1 = 8w1;
     }
     @name("_multicast") action _multicast(bit<4> mgrp) {
-        bool hasReturned_7 = false;
+        bool hasReturned_5 = false;
         meta.intrinsic_metadata.mcast_grp = mgrp;
     }
     @name("_resubmit") action _resubmit() {
-        bool hasReturned_8 = false;
+        bool hasReturned_6 = false;
         resubmit({ standard_metadata, meta.metaA });
     }
     @name("_clone_i2e") action _clone_i2e(bit<8> mirror_id) {
-        bool hasReturned_9 = false;
+        bool hasReturned_7 = false;
         clone3(CloneType.I2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
     @name("t_ingress_1") table t_ingress_1() {
@@ -132,7 +132,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_0 = false;
         t_ingress_1.apply();
         t_ingress_2.apply();
     }
@@ -140,20 +140,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.hdrA);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_11 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_12 = false;
+        bool hasExited_3 = false;
     }
 }
 

@@ -50,16 +50,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("do_drop") action do_drop() {
-        bool hasReturned_2 = false;
+        bool hasReturned_0 = false;
     }
     @name("route_ipv4") action route_ipv4(bit<9> egress_spec) {
-        bool hasReturned_3 = false;
+        bool hasReturned_1 = false;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
         standard_metadata.egress_spec = egress_spec;
     }
@@ -77,14 +77,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         routing.apply();
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
     }
@@ -92,13 +92,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_3 = false;
     }
 }
 

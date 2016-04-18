@@ -10,7 +10,7 @@ parser P(packet_in b, out bit<32> d) {
 
 control Map1(in bit<32> d) {
     apply {
-        bool hasReturned = false;
+        bool hasExited = false;
     }
 }
 

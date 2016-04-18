@@ -24,17 +24,17 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("a21") action a21() {
-        bool hasReturned_2 = false;
+        bool hasReturned_0 = false;
         standard_metadata.egress_spec = 9w3;
     }
     @name("a22") action a22() {
-        bool hasReturned_3 = false;
+        bool hasReturned_1 = false;
         standard_metadata.egress_spec = 9w4;
     }
     @name("t_ingress_2") table t_ingress_2() {
@@ -51,27 +51,27 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         t_ingress_2.apply();
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.hdr2);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_3 = false;
     }
 }
 

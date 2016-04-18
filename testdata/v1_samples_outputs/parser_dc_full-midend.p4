@@ -604,7 +604,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("do_noop") action do_noop() {
-        bool hasReturned_1 = false;
+        bool hasReturned_0 = false;
     }
     @name("do_nothing") table do_nothing() {
         actions = {
@@ -618,20 +618,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         do_nothing.apply();
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_2 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_3 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.input_port_hdr);
         packet.emit(hdr.ethernet);
         packet.emit(hdr.cpu_header);
@@ -673,7 +673,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     Checksum16() inner_ipv4_checksum;
     Checksum16() ipv4_checksum;
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_2 = false;
         if (hdr.ipv4.isValid() && hdr.inner_ipv4.hdrChecksum == inner_ipv4_checksum.get({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr })) 
             standard_metadata.drop = 1w1;
         if (hdr.ipv4.ihl == 4w5 && hdr.ipv4.hdrChecksum == ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })) 
@@ -685,7 +685,7 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() inner_ipv4_checksum;
     Checksum16() ipv4_checksum;
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_3 = false;
         if (hdr.ipv4.isValid()) 
             hdr.inner_ipv4.hdrChecksum = inner_ipv4_checksum.get({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
         if (hdr.ipv4.ihl == 4w5) 

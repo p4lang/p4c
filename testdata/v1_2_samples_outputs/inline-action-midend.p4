@@ -1,12 +1,18 @@
 control p(inout bit<1> bt) {
-    action a(inout bit<1> y0) {
-        bool hasReturned_0 = false;
-        y0 = y0 | 1w1;
-    }
     action b() {
-        bool hasReturned_1 = false;
-        a(bt);
-        a(bt);
+        bool hasReturned = false;
+        @name("y0_0") bit<1> y0_0_0;
+        @name("y0_1") bit<1> y0_1_0;
+        {
+            y0_0_0 = bt;
+            y0_0_0 = y0_0_0 | 1w1;
+            bt = y0_0_0;
+        }
+        {
+            y0_1_0 = bt;
+            y0_1_0 = y0_1_0 | 1w1;
+            bt = y0_1_0;
+        }
     }
     table t() {
         actions = {
@@ -16,7 +22,9 @@ control p(inout bit<1> bt) {
     }
 
     apply {
-        bool hasReturned = false;
+        bool hasExited = false;
+        @name("y0_0") bit<1> y0_0_0;
+        @name("y0_1") bit<1> y0_1_0;
         t.apply();
     }
 }

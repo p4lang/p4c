@@ -322,13 +322,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("a1") action a1() {
-        bool hasReturned_2 = false;
+        bool hasReturned_0 = false;
         meta.m.field_8_01 = 8w1;
         meta.m.field_8_02 = 8w2;
         meta.m.field_8_03 = 8w3;
@@ -522,7 +522,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_32_63 = 32w63;
     }
     @name("set_egress_spec") action set_egress_spec(bit<9> port) {
-        bool hasReturned_3 = false;
+        bool hasReturned_1 = false;
         standard_metadata.egress_spec = port;
     }
     @name("t1") table t1() {
@@ -775,7 +775,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         t1.apply();
         use_8bit_fields.apply();
         use_16bit_fields_1.apply();
@@ -787,20 +787,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.h);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_3 = false;
     }
 }
 

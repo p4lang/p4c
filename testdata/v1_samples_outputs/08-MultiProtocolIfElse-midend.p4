@@ -146,16 +146,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
-        bool hasReturned_2 = false;
+        bool hasReturned_0 = false;
     }
     @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
-        bool hasReturned_3 = false;
+        bool hasReturned_1 = false;
         meta.ing_metadata.egress_port = egress_port;
     }
     @name("ipv4_match") table ipv4_match() {
@@ -195,7 +195,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         if (hdr.ethernet.etherType == 16w0x800) 
             ipv4_match.apply();
         else 
@@ -208,7 +208,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.vlan_tag);
         packet.emit(hdr.ipv6);
@@ -221,13 +221,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_3 = false;
     }
 }
 

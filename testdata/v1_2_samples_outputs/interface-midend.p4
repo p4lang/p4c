@@ -8,7 +8,7 @@ extern Crc16<T> {
 
 control p() {
     apply {
-        bool hasReturned = false;
+        bool hasExited = false;
     }
 }
 

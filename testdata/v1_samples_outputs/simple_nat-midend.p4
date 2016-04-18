@@ -121,7 +121,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("do_rewrites") action do_rewrites(bit<48> smac) {
-        bool hasReturned_1 = false;
+        bool hasReturned_0 = false;
         hdr.cpu_header.setValid(false);
         hdr.ethernet.srcAddr = smac;
         hdr.ipv4.srcAddr = meta.meta.ipv4_sa;
@@ -130,11 +130,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.tcp.dstPort = meta.meta.tcp_dp;
     }
     @name("_drop") action _drop() {
-        bool hasReturned_2 = false;
+        bool hasReturned_1 = false;
         mark_to_drop();
     }
     @name("do_cpu_encap") action do_cpu_encap() {
-        bool hasReturned_3 = false;
+        bool hasReturned_2 = false;
         hdr.cpu_header.setValid(true);
         hdr.cpu_header.preamble = 64w0;
         hdr.cpu_header.device = 8w0;
@@ -163,7 +163,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         if (standard_metadata.instance_type == 32w0) 
             send_frame.apply();
         else 
@@ -173,48 +173,48 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("set_dmac") action set_dmac(bit<48> dmac) {
-        bool hasReturned_5 = false;
+        bool hasReturned_3 = false;
         hdr.ethernet.dstAddr = dmac;
     }
     @name("_drop") action _drop() {
-        bool hasReturned_6 = false;
+        bool hasReturned_4 = false;
         mark_to_drop();
     }
     @name("set_if_info") action set_if_info(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
-        bool hasReturned_7 = false;
+        bool hasReturned_5 = false;
         meta.meta.if_ipv4_addr = ipv4_addr;
         meta.meta.if_mac_addr = mac_addr;
         meta.meta.is_ext_if = is_ext;
     }
     @name("set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        bool hasReturned_8 = false;
+        bool hasReturned_6 = false;
         meta.meta.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("nat_miss_int_to_ext") action nat_miss_int_to_ext() {
-        bool hasReturned_9 = false;
+        bool hasReturned_7 = false;
         clone3(CloneType.I2E, 32w250, { standard_metadata });
     }
     @name("nat_miss_ext_to_int") action nat_miss_ext_to_int() {
-        bool hasReturned_10 = false;
+        bool hasReturned_8 = false;
         meta.meta.do_forward = 1w0;
         mark_to_drop();
     }
     @name("nat_hit_int_to_ext") action nat_hit_int_to_ext(bit<32> srcAddr, bit<16> srcPort) {
-        bool hasReturned_11 = false;
+        bool hasReturned_9 = false;
         meta.meta.do_forward = 1w1;
         meta.meta.ipv4_sa = srcAddr;
         meta.meta.tcp_sp = srcPort;
     }
     @name("nat_hit_ext_to_int") action nat_hit_ext_to_int(bit<32> dstAddr, bit<16> dstPort) {
-        bool hasReturned_12 = false;
+        bool hasReturned_10 = false;
         meta.meta.do_forward = 1w1;
         meta.meta.ipv4_da = dstAddr;
         meta.meta.tcp_dp = dstPort;
     }
     @name("nat_no_nat") action nat_no_nat() {
-        bool hasReturned_13 = false;
+        bool hasReturned_11 = false;
         meta.meta.do_forward = 1w1;
     }
     @name("forward") table forward() {
@@ -279,7 +279,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_0 = false;
         if_info.apply();
         nat.apply();
         if (meta.meta.do_forward == 1w1 && hdr.ipv4.ttl > 8w0) {
@@ -291,7 +291,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_14 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.cpu_header);
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
@@ -303,7 +303,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     Checksum16() ipv4_checksum;
     Checksum16() tcp_checksum;
     apply {
-        bool hasReturned_15 = false;
+        bool hasExited_2 = false;
         if (hdr.ipv4.hdrChecksum == ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })) 
             standard_metadata.drop = 1w1;
         if (hdr.tcp.isValid() && hdr.tcp.checksum == tcp_checksum.get({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr })) 
@@ -315,7 +315,7 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     Checksum16() tcp_checksum;
     apply {
-        bool hasReturned_16 = false;
+        bool hasExited_3 = false;
         hdr.ipv4.hdrChecksum = ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         if (hdr.tcp.isValid()) 
             hdr.tcp.checksum = tcp_checksum.get({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr });

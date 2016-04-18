@@ -37,11 +37,11 @@ action NoAction() {
 }
 control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     action B_action(out bit<9> barg, BParamType bData) {
-        bool hasReturned_1 = false;
+        bool hasReturned_0 = false;
         barg = (bit<9>)bData;
     }
     action C_action(bit<9> cData) {
-        bool hasReturned_2 = false;
+        bool hasReturned_1 = false;
         pArg1.field1 = cData;
     }
     table T(inout TArg1 tArg1, in TArg2 aArg2) {
@@ -58,7 +58,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     }
 
     action Drop() {
-        bool hasReturned_3 = false;
+        bool hasReturned_2 = false;
         pArg1.drop = true;
     }
     table Tinner() {
@@ -72,7 +72,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         T.apply(pArg1, pArg2);
         T.apply(pArg1, pArg2);
         Tinner.apply();
@@ -82,7 +82,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     P_pipe(32w5) p1;
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_0 = false;
         p1.apply(qArg1, qArg2);
     }
 }

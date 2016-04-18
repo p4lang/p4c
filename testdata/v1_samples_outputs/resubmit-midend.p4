@@ -43,20 +43,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("_nop") action _nop() {
-        bool hasReturned_2 = false;
+        bool hasReturned_0 = false;
     }
     @name("set_port") action set_port(bit<9> port) {
-        bool hasReturned_3 = false;
+        bool hasReturned_1 = false;
         standard_metadata.egress_spec = port;
     }
     @name("_resubmit") action _resubmit() {
-        bool hasReturned_4 = false;
+        bool hasReturned_2 = false;
         meta.mymeta.f1 = 8w1;
         resubmit({ standard_metadata, meta.mymeta });
     }
@@ -87,7 +87,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         t_ingress_1.apply();
         t_ingress_2.apply();
     }
@@ -95,20 +95,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_7 = false;
+        bool hasExited_3 = false;
     }
 }
 

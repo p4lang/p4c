@@ -59,10 +59,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("on_miss") action on_miss() {
-        bool hasReturned_1 = false;
+        bool hasReturned_0 = false;
     }
     @name("rewrite_src_dst_mac") action rewrite_src_dst_mac(bit<48> smac, bit<48> dmac) {
-        bool hasReturned_2 = false;
+        bool hasReturned_1 = false;
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = dmac;
     }
@@ -80,30 +80,30 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         rewrite_mac.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("set_vrf") action set_vrf(bit<12> vrf) {
-        bool hasReturned_4 = false;
+        bool hasReturned_2 = false;
         meta.ingress_metadata.vrf = vrf;
     }
     @name("on_miss") action on_miss() {
-        bool hasReturned_5 = false;
+        bool hasReturned_3 = false;
     }
     @name("fib_hit_nexthop") action fib_hit_nexthop(bit<16> nexthop_index) {
-        bool hasReturned_6 = false;
+        bool hasReturned_4 = false;
         meta.ingress_metadata.nexthop_index = nexthop_index;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("set_egress_details") action set_egress_details(bit<9> egress_spec) {
-        bool hasReturned_7 = false;
+        bool hasReturned_5 = false;
         standard_metadata.egress_spec = egress_spec;
     }
     @name("set_bd") action set_bd(bit<16> bd) {
-        bool hasReturned_8 = false;
+        bool hasReturned_6 = false;
         meta.ingress_metadata.bd = bd;
     }
     @name("bd") table bd() {
@@ -172,7 +172,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_3 = false;
+        bool hasExited_0 = false;
         if (hdr.ipv4.isValid()) {
             port_mapping.apply();
             bd.apply();
@@ -189,7 +189,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_9 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
     }
@@ -198,7 +198,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     Checksum16() ipv4_checksum;
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_2 = false;
         if (hdr.ipv4.hdrChecksum == ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })) 
             standard_metadata.drop = 1w1;
     }
@@ -207,7 +207,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
 control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     apply {
-        bool hasReturned_11 = false;
+        bool hasExited_3 = false;
         hdr.ipv4.hdrChecksum = ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
     }
 }

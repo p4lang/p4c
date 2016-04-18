@@ -61,7 +61,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         pass = true;
         switch (Check_src_ip.apply().action_run) {
             Reject: {
