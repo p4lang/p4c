@@ -12,6 +12,7 @@
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "frontends/common/constantFolding.h"
+#include "frontends/p4/strengthReduction.h"
 
 namespace V12Test {
 
@@ -70,6 +71,14 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
             new P4::RemoveUnusedDeclarations(&refMap),
         },
         new P4::SimplifyControlFlow(),
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::StrengthReduction(),
+        new P4::UniqueNames(isv1),
+        new P4::MoveDeclarations(),
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::RemoveReturns(&refMap, false),  // remove exits
         evaluator1
     };
     midEnd.setStopOnError(true);
