@@ -49,4 +49,10 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
                 t->name, IR::TableProperties::defaultActionPropertyName);
 }
 
+void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression* expression) {
+    auto inAction = findContext<IR::P4Action>();
+    if (inAction != nullptr)
+        ::error("%1%: Constructor calls not allowed in actions", expression);
+}
+
 }  // namespace P4

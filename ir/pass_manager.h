@@ -7,7 +7,7 @@ class PassManager : virtual public Visitor {
  protected:
     vector<Visitor *>   passes;
     // if true stops compilation after first pass that signals an error
-    bool                stop_on_error = false; 
+    bool                stop_on_error = false;
  public:
     PassManager() = default;
     PassManager(const std::initializer_list<Visitor *> &init) :

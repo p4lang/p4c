@@ -16,7 +16,7 @@ UniqueNames::UniqueNames(bool anyOrder) :
     passes.emplace_back(new ResolveReferences(refMap, anyOrder));
     passes.emplace_back(new FindSymbols(refMap, renameMap));
     passes.emplace_back(new RenameSymbols(refMap, renameMap));
-};
+}
 
 void FindSymbols::postorder(const IR::Declaration_Variable* decl) {
     cstring newName = refMap->newName(decl->getName());

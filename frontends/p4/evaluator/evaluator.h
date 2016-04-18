@@ -15,6 +15,7 @@ class Evaluator final : public Inspector {
  protected:
     void pushBlock(IR::Block* block);
     void popBlock(IR::Block* block);
+
  public:
     explicit Evaluator(BlockMap* blockMap) : blockMap(blockMap) {}
     BlockMap* getBlockMap() { return blockMap; }

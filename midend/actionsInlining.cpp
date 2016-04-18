@@ -93,11 +93,105 @@ const IR::Node* InlineActionsDriver::preorder(IR::P4Program* program) {
         inliner->prepare(toInline, todo, p4v1);
         prog = prog->apply(*inliner);
         if (::errorCount() > 0)
-            return prog;
+            break;
     }
 
     prune();
     return prog;
+}
+
+Visitor::profile_t ActionsInliner::init_apply(const IR::Node* node) {
+    P4::ResolveReferences solver(refMap, true);
+    node->apply(solver);
+    LOG1("ActionsInliner " << toInline);
+    return Transform::init_apply(node);
+}
+
+const IR::Node* ActionsInliner::preorder(IR::P4Action* action) {
+    if (toInline->sites.count(getOriginal<IR::P4Action>()) == 0)
+        prune();
+    replMap = &toInline->sites[getOriginal<IR::P4Action>()];
+    LOG1("Visiting: " << getOriginal());
+    return action;
+}
+
+const IR::Node* ActionsInliner::postorder(IR::P4Action* action) {
+    if (toInline->sites.count(getOriginal<IR::P4Action>()) > 0)
+        list->replace(getOriginal<IR::P4Action>(), action);
+    replMap = nullptr;
+    return action;
+}
+
+const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
+    auto orig = getOriginal<IR::MethodCallStatement>();
+    LOG1("Visiting " << orig);
+    if (replMap == nullptr)
+        return statement;
+
+    auto callee = get(*replMap, orig);
+    if (callee == nullptr)
+        return statement;
+
+    LOG1("Inlining: " << toInline);
+    auto body = new IR::Vector<IR::StatOrDecl>();
+    IR::ParameterSubstitution subst;
+    IR::TypeVariableSubstitution tvs;  // empty
+
+    std::map<const IR::Parameter*, cstring> paramRename;
+
+    // evaluate in and inout parameters in order
+    auto it = statement->methodCall->arguments->begin();
+    for (auto p : callee->parameters->parameters) {
+        auto initializer = *it;
+        auto param = p.second;
+        cstring newName = refMap->newName(param->name);
+        paramRename.emplace(param, newName);
+        if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
+            auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
+                                                        param->annotations, param->type,
+                                                        initializer);
+            body->push_back(vardecl);
+            subst.add(param, new IR::PathExpression(newName));
+        } else if (param->direction == IR::Direction::None) {
+            // This works because there can be no side-effects in the evaluation of this
+            // argument.
+            subst.add(param, initializer);
+        } else if (param->direction == IR::Direction::Out) {
+            // uninitialized variable
+            auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
+                                                        param->annotations, param->type, nullptr);
+            subst.add(param, new IR::PathExpression(newName));
+            body->push_back(vardecl);
+        }
+        ++it;
+    }
+
+    P4::SubstituteParameters sp(refMap, &subst, &tvs);
+    auto clone = callee->apply(sp);
+    if (::errorCount() > 0)
+        return statement;
+    CHECK_NULL(clone);
+    BUG_CHECK(clone->is<IR::P4Action>(), "%1%: not an action", clone);
+    auto actclone = clone->to<IR::P4Action>();
+    body->append(*actclone->body);
+
+    // copy out and inout parameters
+    it = statement->methodCall->arguments->begin();
+    for (auto p : callee->parameters->parameters) {
+        auto param = p.second;
+        auto left = *it;
+        if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
+            cstring newName = ::get(paramRename, param);
+            auto right = new IR::PathExpression(newName);
+            auto copyout = new IR::AssignmentStatement(Util::SourceInfo(), left, right);
+            body->push_back(copyout);
+        }
+        ++it;
+    }
+
+    auto result = new IR::BlockStatement(statement->srcInfo, body);
+    LOG1("Replacing " << orig << " with " << result);
+    return result;
 }
 
 }  // namespace P4

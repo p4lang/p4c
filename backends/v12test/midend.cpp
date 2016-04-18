@@ -12,6 +12,7 @@
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "frontends/common/constantFolding.h"
+#include "frontends/p4/strengthReduction.h"
 
 namespace V12Test {
 
@@ -27,6 +28,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::MoveDeclarations(),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap, true),
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::RemoveUnusedDeclarations(&refMap),
         evaluator0,
     };
 
@@ -38,7 +41,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     if (blockMap->getMain() == nullptr)
         // nothing further to do
         return nullptr;
-    
+
     P4::TypeMap typeMap;
     P4::InlineWorkList toInline;
     P4::ActionsInlineList actionsToInline;
@@ -48,7 +51,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     auto evaluator1 = new P4::EvaluatorPass(isv1);
     auto actInl = new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap);
     actInl->allowDirectActionCalls = true;
-    
+
+    // std::ostream *inlineStream = options.dumpStream("-inline");
     PassManager midEnd = {
         find,
         new P4::InlineDriver(&toInline, inliner, isv1),
@@ -57,29 +61,36 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
             new P4::ResolveReferences(&refMap, isv1),
             new P4::RemoveUnusedDeclarations(&refMap),
         },
-#if 0
         new P4::ResolveReferences(&refMap, isv1),
         new P4::TypeChecker(&refMap, &typeMap, true, true),
         actInl,
-        new P4::InlineActionsDriver(&actionsToInline, &refMap, isv1),
+        new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(&refMap), isv1),
+        // new P4::ToP4(inlineStream, options.file),
         new PassRepeated {
             new P4::ResolveReferences(&refMap, isv1),
             new P4::RemoveUnusedDeclarations(&refMap),
         },
-#endif
         new P4::SimplifyControlFlow(),
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::StrengthReduction(),
+        new P4::UniqueNames(isv1),
+        new P4::MoveDeclarations(),
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::RemoveReturns(&refMap, false),  // remove exits
         evaluator1
     };
     midEnd.setStopOnError(true);
 
-    (void)program->apply(midEnd);
+    program = program->apply(midEnd);
     if (::errorCount() > 0)
         return nullptr;
 
-    std::ostream *inlineStream = options.dumpStream("-midend");
-    P4::ToP4 top4(inlineStream, options.file);
+    std::ostream *midendStream = options.dumpStream("-midend");
+    P4::ToP4 top4(midendStream, options.file);
     program->apply(top4);
-    
+
     blockMap = evaluator1->getBlockMap();
     return blockMap;
 }

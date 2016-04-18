@@ -76,7 +76,6 @@ const IR::Node* SimpleControlsInliner::preorder(IR::MethodCallStatement* stateme
     return workToDo->declToCallee[decl]->to<IR::P4Control>()->body;
 }
 
-
 Visitor::profile_t SimpleActionsInliner::init_apply(const IR::Node* node) {
     P4::ResolveReferences solver(refMap, true);
     node->apply(solver);
@@ -103,11 +102,11 @@ const IR::Node* SimpleActionsInliner::preorder(IR::MethodCallStatement* statemen
     LOG1("Visiting " << getOriginal());
     if (replMap == nullptr)
         return statement;
-    
+
     auto callee = get(*replMap, getOriginal<IR::MethodCallStatement>());
     if (callee == nullptr)
         return statement;
-    
+
     LOG1("Inlining: " << toInline);
     IR::ParameterSubstitution subst;
     subst.populate(callee->parameters, statement->methodCall->arguments);

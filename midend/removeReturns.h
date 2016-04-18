@@ -18,7 +18,7 @@ class RemoveReturns : public Transform {
     void setReturned() { stack.back() = true; }
     bool mayHaveReturned() { return stack.back(); }
  public:
-    RemoveReturns(P4::ReferenceMap* refMap, bool removeReturns = true) :
+    explicit RemoveReturns(P4::ReferenceMap* refMap, bool removeReturns = true) :
             refMap(refMap), removeReturns(removeReturns) {}
 
     const IR::Node* preorder(IR::BlockStatement* statement) override;

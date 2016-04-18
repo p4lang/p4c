@@ -598,9 +598,6 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                                              IR::ID(IR::TableProperties::actionsPropertyName),
                                              IR::Annotations::empty,
                                              actionList, false));
-
-    
-    
     if (table->reads != nullptr) {
         auto keyVec = new IR::Vector<IR::KeyElement>();
         auto key = new IR::Key(Util::SourceInfo(), keyVec);
@@ -661,12 +658,12 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     }
 
     IR::ID defaction;
-    if (!table->default_action.name.isNullOrEmpty()) 
+    if (!table->default_action.name.isNullOrEmpty())
         defaction = table->default_action;
     else
         defaction = p4lib.noAction.Id();
     {
-        auto act = new IR::PathExpression(defaction);       
+        auto act = new IR::PathExpression(defaction);
         auto args = table->default_action_args != nullptr ?
                 table->default_action_args : new IR::Vector<IR::Expression>();
         auto methodCall = new IR::MethodCallExpression(Util::SourceInfo(), act,
@@ -675,7 +672,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
             Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName),
             IR::Annotations::empty, new IR::ExpressionValue(Util::SourceInfo(), methodCall), false);
         propvec->addUnique(prop->name, prop);
-    } 
+    }
 
     if (action_selector != nullptr) {
         auto type = new IR::Type_Name(new IR::Path(v1model.action_selector.Id()));

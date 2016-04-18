@@ -13,6 +13,7 @@ namespace BMV2 {
 // So we have to do it in the compiler.
 class ArithmeticFixup : public Transform {
     P4::TypeMap* typeMap;
+
  public:
     explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap) {}
 
@@ -863,7 +864,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
             userMetadataParameter = control->type->applyParams->getParameter(
                 v1model.ingress.metadataParam.index);
         }
-        
+
         cstring name = nameFromAnnotation(action->annotations, action->name);
         auto jact = new Util::JsonObject();
         jact->emplace("name", name);
