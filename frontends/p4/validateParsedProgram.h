@@ -12,7 +12,7 @@ class ValidateParsedProgram final : public Inspector {
     using Inspector::postorder;
 
  public:
-    ValidateParsedProgram(bool p4v1) : p4v1(p4v1) {}
+    explicit ValidateParsedProgram(bool p4v1) : p4v1(p4v1) {}
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::Method* t) override;
     void postorder(const IR::StructField* f) override;

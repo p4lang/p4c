@@ -34,7 +34,7 @@ class UniqueNames : public PassManager {
     ReferenceMap *refMap;
     RenameMap    *renameMap;
  public:
-    UniqueNames(bool anyOrder);
+    explicit UniqueNames(bool anyOrder);
 };
 
 class FindSymbols : public Inspector {

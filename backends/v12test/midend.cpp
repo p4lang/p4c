@@ -41,7 +41,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     if (blockMap->getMain() == nullptr)
         // nothing further to do
         return nullptr;
-    
+
     P4::TypeMap typeMap;
     P4::InlineWorkList toInline;
     P4::ActionsInlineList actionsToInline;
@@ -51,7 +51,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     auto evaluator1 = new P4::EvaluatorPass(isv1);
     auto actInl = new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap);
     actInl->allowDirectActionCalls = true;
-    
+
     // std::ostream *inlineStream = options.dumpStream("-inline");
     PassManager midEnd = {
         find,
@@ -90,7 +90,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     std::ostream *midendStream = options.dumpStream("-midend");
     P4::ToP4 top4(midendStream, options.file);
     program->apply(top4);
-    
+
     blockMap = evaluator1->getBlockMap();
     return blockMap;
 }

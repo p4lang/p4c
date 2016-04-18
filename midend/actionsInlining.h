@@ -94,15 +94,14 @@ class AbstractActionInliner : public Transform {
 class ActionsInliner : public AbstractActionInliner {
     P4::ReferenceMap* refMap;
     std::map<const IR::MethodCallStatement*, const IR::P4Action*>* replMap;
- public: 
-    ActionsInliner(P4::ReferenceMap* refMap) : refMap(refMap), replMap(nullptr) {}
+ public:
+    explicit ActionsInliner(P4::ReferenceMap* refMap) : refMap(refMap), replMap(nullptr) {}
     Visitor::profile_t init_apply(const IR::Node* node) override;
     const IR::Node* preorder(IR::P4Parser* cont) override
     { prune(); return cont; }  // skip
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
- public:
 };
 
 class InlineActionsDriver : public Transform {

@@ -127,18 +127,18 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     LOG1("Visiting " << orig);
     if (replMap == nullptr)
         return statement;
-    
+
     auto callee = get(*replMap, orig);
     if (callee == nullptr)
         return statement;
-    
+
     LOG1("Inlining: " << toInline);
     auto body = new IR::Vector<IR::StatOrDecl>();
     IR::ParameterSubstitution subst;
     IR::TypeVariableSubstitution tvs;  // empty
 
     std::map<const IR::Parameter*, cstring> paramRename;
-    
+
     // evaluate in and inout parameters in order
     auto it = statement->methodCall->arguments->begin();
     for (auto p : callee->parameters->parameters) {
@@ -165,7 +165,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         }
         ++it;
     }
-    
+
     P4::SubstituteParameters sp(refMap, &subst, &tvs);
     auto clone = callee->apply(sp);
     if (::errorCount() > 0)

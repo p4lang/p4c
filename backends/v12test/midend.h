@@ -1,4 +1,5 @@
 #ifndef _BACKENDS_V12TEST_MIDEND_H_
+#define _BACKENDS_V12TEST_MIDEND_H_
 
 #include "ir/ir.h"
 #include "frontends/common/options.h"
