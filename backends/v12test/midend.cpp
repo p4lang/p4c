@@ -51,7 +51,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     auto actInl = new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap);
     actInl->allowDirectActionCalls = true;
     
-    std::ostream *inlineStream = options.dumpStream("-inline");
+    // std::ostream *inlineStream = options.dumpStream("-inline");
     PassManager midEnd = {
         find,
         new P4::InlineDriver(&toInline, inliner, isv1),
@@ -64,7 +64,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::TypeChecker(&refMap, &typeMap, true, true),
         actInl,
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(&refMap), isv1),
-        new P4::ToP4(inlineStream, options.file),
+        // new P4::ToP4(inlineStream, options.file),
         new PassRepeated {
             new P4::ResolveReferences(&refMap, isv1),
             new P4::RemoveUnusedDeclarations(&refMap),
