@@ -141,7 +141,7 @@ namespace nn
       {
 	int rc = nn_send (s, buf, len, flags);
 	if (nn_slow (rc < 0)) {
-	  if (nn_slow (nn_errno () != EAGAIN))
+          if (nn_slow (nn_errno () != EAGAIN && nn_errno () != ETIMEDOUT))
 	    throw nn::exception ();
 	  return -1;
 	}
@@ -152,7 +152,7 @@ namespace nn
       {
 	int rc = nn_recv (s, buf, len, flags);
 	if (nn_slow (rc < 0)) {
-	  if (nn_slow (nn_errno () != EAGAIN))
+          if (nn_slow (nn_errno () != EAGAIN && nn_errno () != ETIMEDOUT))
 	    throw nn::exception ();
 	  return -1;
 	}
@@ -163,7 +163,7 @@ namespace nn
       {
 	int rc = nn_sendmsg (s, msghdr, flags);
 	if (nn_slow (rc < 0)) {
-	  if (nn_slow (nn_errno () != EAGAIN))
+          if (nn_slow (nn_errno () != EAGAIN && nn_errno () != ETIMEDOUT))
 	    throw nn::exception ();
 	  return -1;
 	}
@@ -174,7 +174,7 @@ namespace nn
       {
 	int rc = nn_recvmsg (s, msghdr, flags);
 	if (nn_slow (rc < 0)) {
-	  if (nn_slow (nn_errno () != EAGAIN))
+          if (nn_slow (nn_errno () != EAGAIN && nn_errno () != ETIMEDOUT))
 	    throw nn::exception ();
 	  return -1;
 	}
@@ -183,7 +183,7 @@ namespace nn
 
     private:
 
-      int s;
+      int s{0};
 
       /*  Prevent making copies of the socket by accident. */
       socket (const socket&);
