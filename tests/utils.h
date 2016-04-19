@@ -125,4 +125,4 @@ class CLIWrapper {
   std::unique_ptr<CLIWrapperImp> imp;
 };
 
-#endif  // TEST_UTILS_H_
+#endif  // TESTS_UTILS_H_
