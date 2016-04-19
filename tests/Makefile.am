@@ -1,3 +1,9 @@
+if COND_STRESS_TESTS
+    MAYBE_STRESS_TESTS = stress_tests
+endif
+
+SUBDIRS = . $(MAYBE_STRESS_TESTS)
+
 AM_CPPFLAGS += \
 -isystem $(top_srcdir)/third_party \
 -I$(top_srcdir)/modules/bm_sim/include \

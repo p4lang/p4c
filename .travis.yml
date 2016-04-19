@@ -59,8 +59,8 @@ before_install:
 
 install:
   - ./autogen.sh
-  - if [ "$GCOV" != "" ]; then ./configure CXX=$COMPILER --enable-coverage; fi
-  - if [ "$GCOV" = "" ]; then ./configure CXX=$COMPILER; fi
+  - if [ "$GCOV" != "" ]; then ./configure CXX=$COMPILER --with-stress-tests --enable-coverage; fi
+  - if [ "$GCOV" = "" ]; then ./configure CXX=$COMPILER --with-stress-tests; fi
   - make all -j2
 
 # command to run tests, e.g. python setup.py test

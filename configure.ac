@@ -27,6 +27,13 @@ AC_ARG_WITH([targets],
 
 AM_CONDITIONAL([COND_TARGETS], [test "$want_targets" = yes])
 
+want_stress_tests=no
+AC_ARG_WITH([stress_tests],
+    AS_HELP_STRING([--with-stress-tests], [Include stress tests]),
+    [want_stress_tests=yes], [])
+
+AM_CONDITIONAL([COND_STRESS_TESTS], [test "$want_stress_tests" = yes])
+
 MY_CPPFLAGS=""
 
 debugger_enabled=no
@@ -155,6 +162,7 @@ AC_CONFIG_FILES([Makefile
 		targets/simple_switch/Makefile
 		targets/simple_switch/tests/Makefile
 		tests/Makefile
+		tests/stress_tests/Makefile
                 tools/Makefile])
 
 # Generate other files

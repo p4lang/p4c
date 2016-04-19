@@ -1,3 +1,5 @@
 build/
-test
+test*
+!test*.cpp
+!stress_tests*
 utils.cpp
