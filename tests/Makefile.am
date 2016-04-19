@@ -100,4 +100,6 @@ EXTRA_DIST = \
 testdata/en0.pcap \
 testdata/lo0.pcap \
 testdata/empty_config.json \
-testdata/empty_config.md5
+testdata/empty_config.md5 \
+testdata/serialize.p4 \
+testdata/serialize.json
