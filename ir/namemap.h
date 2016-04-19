@@ -5,7 +5,7 @@ namespace IR {
 
 template<class T, template<class K, class V, class COMP, class ALLOC> class MAP = std::map,
          class COMP = std::less<cstring>,
-         class ALLOC = std::allocator<std::pair<cstring, const T*>>>
+         class ALLOC = std::allocator<std::pair<const cstring, const T*>>>
 class NameMap : public Node {
     typedef MAP<cstring, const T *, COMP, ALLOC>        map_t;
     map_t       symbols;
