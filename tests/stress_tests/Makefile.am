@@ -20,16 +20,22 @@ common_source = ../bmi_stubs.c stress_utils.h stress_utils.cpp
 TESTS = \
 test_parser_deparser_1 \
 test_exact_match_1 \
-test_LPM_match_1
+test_LPM_match_1 \
+test_ternary_match_1
 
 check_PROGRAMS = $(TESTS)
 
 test_parser_deparser_1_SOURCES = $(common_source) test_parser_deparser_1.cpp
 test_exact_match_1_SOURCES = $(common_source) test_exact_match_1.cpp
 test_LPM_match_1_SOURCES = $(common_source) test_LPM_match_1.cpp
+test_ternary_match_1_SOURCES = $(common_source) test_ternary_match_1.cpp
 
 EXTRA_DIST = \
 testdata/parser_deparser_1.p4 \
 testdata/parser_deparser_1.json \
 testdata/exact_match_1.p4 \
-testdata/exact_match_1.json
+testdata/exact_match_1.json \
+testdata/LPM_match_1.p4 \
+testdata/LPM_match_1.json \
+testdata/ternary_match_1.p4 \
+testdata/ternary_match_1.json

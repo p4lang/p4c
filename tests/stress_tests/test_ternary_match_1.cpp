@@ -39,6 +39,8 @@ namespace fs = boost::filesystem;
 
 namespace {
 
+constexpr double p_add = 0.9;
+
 RandomGen *rgen_ptr;
 
 struct ethernet_t {
@@ -47,51 +49,44 @@ struct ethernet_t {
   uint16_t etherType;
 } __attribute__((packed));
 
-// not sure how good these entries are...
-
-// we want to favor small prefixes, minimum prefix length is 4
-int get_pLen() {
-  int pLen = 4;
-  while (pLen <= 40) {
-    int r = rgen_ptr->get_int(0, 12);
-    if (r <= 8) {
-      pLen += r;
-      return pLen;
-    }
-    pLen += 8;
-  }
-  return pLen;
+std::string get_mask() {
+  constexpr size_t s = sizeof(((ethernet_t *)0)->dstAddr);
+  std::string mask;
+  for (size_t i = 0; i < s; i++)
+    mask.push_back(rgen_ptr->get_bool(0.5) ? '\xff' : '\x00');
+  return mask;
 }
 
 bm::MatchErrorCode add_entry_1(SwitchTest *sw, const ethernet_t &hdr) {
   bm::entry_handle_t handle;
   std::vector<bm::MatchKeyParam> match_key;
-  match_key.emplace_back(bm::MatchKeyParam::Type::LPM,
+  match_key.emplace_back(bm::MatchKeyParam::Type::TERNARY,
                          std::string(hdr.dstAddr, sizeof(hdr.dstAddr)),
-                         get_pLen());
-  return sw->mt_add_entry(0, "LPM_1", match_key, "_nop", bm::ActionData(),
+                         get_mask());
+  return sw->mt_add_entry(0, "ternary_1", match_key, "_nop", bm::ActionData(),
                           &handle);
 }
 
 bm::MatchErrorCode add_entry_2(SwitchTest *sw, const ethernet_t &hdr) {
   bm::entry_handle_t handle;
   std::vector<bm::MatchKeyParam> match_key;
-  match_key.emplace_back(bm::MatchKeyParam::Type::LPM,
+  match_key.emplace_back(bm::MatchKeyParam::Type::TERNARY,
                          std::string(hdr.srcAddr, sizeof(hdr.srcAddr)),
-                         get_pLen());
-  return sw->mt_add_entry(0, "LPM_2", match_key, "_nop", bm::ActionData(),
+                         get_mask());
+  return sw->mt_add_entry(0, "ternary_2", match_key, "_nop", bm::ActionData(),
                           &handle);
 }
 
 bm::MatchErrorCode add_entry_3(SwitchTest *sw, const ethernet_t &hdr) {
   bm::entry_handle_t handle;
   std::vector<bm::MatchKeyParam> match_key;
-  match_key.emplace_back(bm::MatchKeyParam::Type::LPM,
+  match_key.emplace_back(bm::MatchKeyParam::Type::TERNARY,
                          std::string(hdr.srcAddr, sizeof(hdr.srcAddr)),
-                         get_pLen());
-  match_key.emplace_back(bm::MatchKeyParam::Type::EXACT,
-                         std::string(hdr.dstAddr, sizeof(hdr.dstAddr)));
-  return sw->mt_add_entry(0, "LPM_3", match_key, "_nop", bm::ActionData(),
+                         get_mask());
+  match_key.emplace_back(bm::MatchKeyParam::Type::TERNARY,
+                         std::string(hdr.dstAddr, sizeof(hdr.dstAddr)),
+                         get_mask());
+  return sw->mt_add_entry(0, "ternary_3", match_key, "_nop", bm::ActionData(),
                           &handle);
 }
 
@@ -103,12 +98,12 @@ bool check_rc(bm::MatchErrorCode rc) {
 }  // namespace
 
 int main(int argc, char* argv[]) {
-  size_t num_repeats = 1000;
+  size_t num_repeats = 100;
   if (argc > 1) num_repeats = std::stoul(argv[1]);
 
   SwitchTest sw;
   fs::path config_path =
-      fs::path(TESTDATADIR) / fs::path("LPM_match_1.json");
+      fs::path(TESTDATADIR) / fs::path("ternary_match_1.json");
   sw.init_objects(config_path.string());
 
   fs::path traffic_path =
@@ -121,9 +116,9 @@ int main(int argc, char* argv[]) {
   for (const auto &pkt : packets) {
     ethernet_t *hdr = reinterpret_cast<ethernet_t *>(pkt->data());
     assert(ntohs(hdr->etherType) == 0x0800);  // check for IPv4 ethertype
-    assert(check_rc(add_entry_1(&sw, *hdr)));
-    assert(check_rc(add_entry_2(&sw, *hdr)));
-    assert(check_rc(add_entry_3(&sw, *hdr)));
+    if (rgen.get_bool(p_add)) assert(check_rc(add_entry_1(&sw, *hdr)));
+    if (rgen.get_bool(p_add)) assert(check_rc(add_entry_2(&sw, *hdr)));
+    if (rgen.get_bool(p_add)) assert(check_rc(add_entry_3(&sw, *hdr)));
   }
 
   auto parser = sw.get_parser("parser");
