@@ -25,7 +25,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include "utils.h"
+#include "stress_utils.h"
 
 using ::stress_tests_utils::SwitchTest;
 using ::stress_tests_utils::TestChrono;

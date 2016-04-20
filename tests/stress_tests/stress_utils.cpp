@@ -20,12 +20,39 @@
 
 #include <iostream>
 #include <fstream>
+#include <random>
 
 #include <cassert>
 
-#include "utils.h"
+#include "stress_utils.h"
 
 namespace stress_tests_utils {
+
+class RandomGenImp {
+ public:
+  RandomGenImp() { }
+
+  bool get_bool(double p_true) {
+    std::uniform_real_distribution<double> distribution(0.0,1.0);
+    double number = distribution(generator);
+    return (number < p_true);
+  }
+
+ private:
+  std::default_random_engine generator{};
+};
+
+RandomGen::RandomGen() {
+  imp = std::unique_ptr<RandomGenImp>(new RandomGenImp());
+}
+
+RandomGen::~RandomGen() { }
+
+bool
+RandomGen::get_bool(double p_true) {
+  return imp->get_bool(p_true);
+}
+
 
 std::vector<std::unique_ptr<bm::Packet> >
 SwitchTest::read_traffic(const std::string &path) {

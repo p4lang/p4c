@@ -33,6 +33,19 @@ using std::chrono::duration_cast;
 
 namespace stress_tests_utils {
 
+class RandomGenImp;
+
+class RandomGen {
+ public:
+  RandomGen();
+  ~RandomGen();
+
+  bool get_bool(double p_true);
+
+ private:
+  std::unique_ptr<RandomGenImp> imp;
+};
+
 class SwitchTest : public bm::Switch {
  public:
   int receive(int port_num, const char *buffer, int len) override {
