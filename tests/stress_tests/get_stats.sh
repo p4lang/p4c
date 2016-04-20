@@ -2,7 +2,7 @@
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-TESTS="test_parser_deparser_1 test_exact_match_1"
+TESTS="test_parser_deparser_1 test_exact_match_1 test_LPM_match_1"
 
 nruns=5
 if [ $# -eq 1 ]; then

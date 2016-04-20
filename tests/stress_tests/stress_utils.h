@@ -41,6 +41,7 @@ class RandomGen {
   ~RandomGen();
 
   bool get_bool(double p_true);
+  int get_int(int a, int b);
 
  private:
   std::unique_ptr<RandomGenImp> imp;

@@ -33,12 +33,19 @@ class RandomGenImp {
   RandomGenImp() { }
 
   bool get_bool(double p_true) {
-    std::uniform_real_distribution<double> distribution(0.0,1.0);
+    std::uniform_real_distribution<double> distribution(0.0, 1.0);
     double number = distribution(generator);
     return (number < p_true);
   }
 
+  int get_int(int a, int b) {
+    std::uniform_int_distribution<int> distribution(a, b);
+    int number = distribution(generator);
+    return number;
+  }
+
  private:
+  // TODO(antonin): seed needed?
   std::default_random_engine generator{};
 };
 
@@ -51,6 +58,11 @@ RandomGen::~RandomGen() { }
 bool
 RandomGen::get_bool(double p_true) {
   return imp->get_bool(p_true);
+}
+
+int
+RandomGen::get_int(int a, int b) {
+  return imp->get_int(a, b);
 }
 
 
