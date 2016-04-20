@@ -19,7 +19,11 @@ install_deps.sh
 # mininet directory
 EXTRA_DIST += \
 mininet/1sw_demo.py \
-mininet/p4_mininet.py
+mininet/p4_mininet.py \
+mininet/stress_test_ipv4.py.in \
+mininet/simple_router.p4 \
+mininet/simple_router.json \
+mininet/stress_test_commands.txt
 
 # docs directory
 EXTRA_DIST += \

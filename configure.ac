@@ -166,7 +166,8 @@ AC_CONFIG_FILES([Makefile
                 tools/Makefile])
 
 # Generate other files
-AC_CONFIG_FILES([tests/utils.cpp])
+AC_CONFIG_FILES([tests/utils.cpp
+                 mininet/stress_test_ipv4.py])
 
 AC_OUTPUT
 
