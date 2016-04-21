@@ -255,12 +255,12 @@ class PathExpression : Expression {
 // X.a
 // The 'X' portion is a TypeNameExpression
 class TypeNameExpression : Expression {
-    Type_Name type;
+    Type_Name typeName;
 #emit
-    TypeNameExpression(ID id) : type(new IR::Type_Name(new IR::Path(id))) {}
+    TypeNameExpression(ID id) : typeName(new IR::Type_Name(new IR::Path(id))) {}
 #end
-    dbprint{ Node::dbprint(out); out << type; }
-    toString { return type->toString(); }
+    dbprint{ Node::dbprint(out); out << typeName; }
+    toString { return typeName->toString(); }
 }
 
 class Slice : Operation_Ternary {
@@ -347,7 +347,12 @@ class MethodCallExpression : Expression {
 }
 
 class ConstructorCallExpression : Expression {
-    Type type;  // Could be a specialized type
+#noconstructor
+#emit
+    ConstructorCallExpression(Util::SourceInfo srcInfo, const Type* type,
+                              const Vector<Expression> *arguments) :
+            Expression(srcInfo, type), arguments(arguments) {}
+#end
     Vector<Expression> arguments;
     toString{ return type->toString(); }
     validate{ arguments->check_null(); }

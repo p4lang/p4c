@@ -124,7 +124,10 @@ abstract Type_Declaration : Type, IDeclaration {
 
 abstract Expression {
 #emit
-    // The P4 v1.2 front-end does not use the type field
+    // Most P4 v1.2 front-end passes do not use this field.
+    // However, when the field is used, it should contain
+    // the type of the expression evaluation.
+    // TODO: surface this field as a regular field.
     const Type* type = Type::Unknown::get();
     Expression() : type(Type::Unknown::get()) {}
     explicit Expression(const Type *t) : type(t) { }

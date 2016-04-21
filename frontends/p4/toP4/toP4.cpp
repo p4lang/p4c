@@ -467,7 +467,7 @@ bool ToP4::preorder(const IR::PathExpression* p) {
 }
 
 bool ToP4::preorder(const IR::TypeNameExpression* e) {
-    visit(e->type);
+    visit(e->typeName);
     return false;
 }
 

@@ -44,7 +44,7 @@ TypeChecker::TypeChecker(ReferenceMap* refMap, TypeMap* typeMap, bool clearMap, 
         initialNode(nullptr) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
-    visitDagOnce = true;
+    visitDagOnce = false;  // the done() method will take care of this
 }
 
 Visitor::profile_t TypeChecker::init_apply(const IR::Node* node) {
@@ -56,12 +56,18 @@ Visitor::profile_t TypeChecker::init_apply(const IR::Node* node) {
 }
 
 const IR::Node* TypeChecker::postorder(IR::P4Program* program) {
-    // dump(program);
     if (initialNode->is<IR::P4Program>() && readOnly) {
         if (!(*program == *(initialNode->to<IR::P4Program>())))
             BUG("%1%: typechecker mutated program", program);
     }
     return program;
+}
+
+bool TypeChecker::done() const {
+    auto orig = getOriginal();
+    if (typeMap->contains(orig))
+        return true;
+    return false;
 }
 
 const IR::Type* TypeChecker::getType(const IR::Node* element) const {
@@ -347,6 +353,32 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
 }
 
 ///////////////////////////////////// Visitor methods
+
+// This method is here to avoid visiting the Expression::type field;
+// this field is not used by the P4 v1.2 front-end, but may be populated
+// by the P4 v1.0 front-end.
+const IR::Node* TypeChecker::preorder(IR::Type* type) {
+    auto ctx = getContext();
+    if (ctx == nullptr)
+        // This happens when recursively calling the type checker on a new type object
+        return type;
+    if (!ctx->node->is<IR::Expression>())
+        return type;
+    // We do want to visit the type of some nodes...
+    // Some passes may store here the canonical type, and we don't
+    // want to typecheck that.
+    if (ctx->node->is<IR::Constant>() ||
+        ctx->node->is<IR::Cast>() ||
+        ctx->node->is<IR::ConstructorCallExpression>())
+        return type;
+    // Expression::type is the 0-th child of an expression
+    if (ctx->child_index != 0)
+        return type;
+    // Don't visit Expression::type
+    LOG1("Skipping " << type << " child of " << ctx->node);
+    prune();
+    return type;
+}
 
 const IR::Node* TypeChecker::postorder(IR::Declaration_Errors* decl) {
     if (done())
@@ -1558,7 +1590,7 @@ const IR::Node* TypeChecker::postorder(IR::Mux* expression) {
 const IR::Node* TypeChecker::postorder(IR::TypeNameExpression* expression) {
     if (done())
         return expression;
-    auto type = getType(expression->type);
+    auto type = getType(expression->typeName);
     if (type == nullptr)
         return expression;
     setType(getOriginal(), type);

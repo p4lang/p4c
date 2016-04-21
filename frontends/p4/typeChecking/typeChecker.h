@@ -49,7 +49,7 @@ class TypeChecker final : public Transform {
 
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.
     // (visitDagOnce cannot take care of this).
-    bool done() const { return typeMap->contains(getOriginal()); }
+    bool done() const;
     IR::TypeVariableSubstitution* unify(
         const IR::Node* errorPosition, const IR::Type* destType,
         const IR::Type* srcType, bool reportErrors) const;
@@ -98,6 +98,8 @@ class TypeChecker final : public Transform {
     using Transform::postorder;
     using Transform::preorder;
 
+    const IR::Node* preorder(IR::Type* type) override;
+    
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Errors* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
