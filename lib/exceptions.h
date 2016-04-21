@@ -18,8 +18,13 @@ class P4CExceptionBase : public std::exception {
  public:
     template <typename... T>
     P4CExceptionBase(const char* format, T... args) {
-        // TODO: use bug_helper; but today it's broken
+#if 0
         this->message = ErrorReporter::instance.format_message(format, std::forward<T>(args)...);
+#else
+        // TODO: use bug_helper; but today it's broken
+        boost::format fmt(format);
+        this->message = ::bug_helper(fmt, "", "", "", std::forward<T>(args)...);
+#endif
     }
 
     const char* what() const noexcept

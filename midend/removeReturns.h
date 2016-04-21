@@ -12,11 +12,17 @@ class RemoveReturns : public Transform {
     bool              removeReturns;  // if true remote returns, else remove exits
     IR::ID            returnVar;  // one for each context
 
-    std::vector<bool> stack;
-    void push() { stack.push_back(false); }
+    enum class Returns {
+        Yes,
+        No,
+        Maybe
+    };
+    
+    std::vector<Returns> stack;
+    void push() { stack.push_back(Returns::No); }
     void pop() { stack.pop_back(); }
-    void setReturned() { stack.back() = true; }
-    bool mayHaveReturned() { return stack.back(); }
+    void set(Returns r) { BUG_CHECK(!stack.empty(), "Empty stack"); stack.back() = r; }
+    Returns hasReturned() { BUG_CHECK(!stack.empty(), "Empty stack"); return stack.back(); }
  public:
     explicit RemoveReturns(P4::ReferenceMap* refMap, bool removeReturns = true) :
             refMap(refMap), removeReturns(removeReturns) {}

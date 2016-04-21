@@ -37,14 +37,14 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
 }
 
 control d(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    c() c_0;
+    c() @name("c") c_0;
     apply {
         c_0.apply(hdr, meta, standard_metadata);
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    d() d_0;
+    d() @name("d") d_0;
     apply {
         d_0.apply(hdr, meta, standard_metadata);
     }

@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 header hdr {
     bit<32> a;
@@ -23,32 +23,31 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 
 control vrfy(in Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        bool hasReturned = false;
+        bool hasExited = false;
     }
 }
 
 control update(inout Headers h, inout Meta m) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_1 = false;
     }
 }
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        bool hasReturned_2 = false;
+        bool hasExited_2 = false;
         b.emit(h.h);
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action compare() {
-        bool hasReturned_4 = false;
         h.h.c = (bit<8>)(bit<1>)(h.h.a < h.h.b);
         sm.egress_spec = 9w0;
     }
@@ -60,7 +59,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 
     apply {
-        bool hasReturned_3 = false;
+        bool hasExited_3 = false;
         t.apply();
     }
 }

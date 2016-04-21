@@ -18,7 +18,7 @@ p4c
 ├── docs                      -- documentation
 ├── frontends
 │   ├── common                -- common front-end utilities
-│   ├── p4v1                  -- P4 v1.0 front-end (placeholder)
+│   ├── p4v1                  -- P4 v1.0 front-end
 │   └── p4                    -- P4 v1.2 front-end
 ├── ir                        -- core internal representation
 ├── lib                       -- common utilities (libp4toolkit.a)

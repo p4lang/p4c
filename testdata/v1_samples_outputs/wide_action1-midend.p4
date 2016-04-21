@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct metadata_t {
     bit<32> m0;
@@ -49,7 +49,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("setmeta") action setmeta(bit<32> v0, bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<16> v5, bit<16> v6) {
-        bool hasReturned_1 = false;
         meta.m.m0 = v0;
         meta.m.m1 = v1;
         meta.m.m2 = v2;
@@ -70,33 +69,33 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         test1.apply();
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_2 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_3 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.data);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_3 = false;
     }
 }
 

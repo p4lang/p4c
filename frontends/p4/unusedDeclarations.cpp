@@ -1,9 +1,10 @@
 #include "unusedDeclarations.h"
+#include "simplify.h"
 
 namespace P4 {
 
 Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node* node) {
-    LOG1("Reference map " << refMap);
+    LOG2("Reference map " << refMap);
     return Transform::init_apply(node);
 }
 
@@ -53,7 +54,17 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Table* cont) {
     return cont;
 }
 
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Variable* decl) {
+    prune();
+    if (decl->initializer == nullptr)
+        return process(decl);
+    if (!SideEffects::check(decl->initializer))
+        return process(decl);
+    return decl;
+}
+
 const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) {
+    LOG1("Visiting " << decl);
     auto ctx = getContext();
     if (decl->getName().name == IR::P4Program::main &&
         ctx->parent->node->is<IR::P4Program>())

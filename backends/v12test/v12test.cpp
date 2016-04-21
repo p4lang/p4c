@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <gc/gc_cpp.h>
-
 #include <string>
 #include <iostream>
 
@@ -9,6 +7,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
+#include "lib/crash.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/frontend.h"
@@ -16,6 +15,7 @@
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
+    setup_signals();
 
     CompilerOptions options;
     options.langVersion = CompilerOptions::FrontendVersion::P4v1_2;

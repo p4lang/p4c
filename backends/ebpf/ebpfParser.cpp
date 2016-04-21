@@ -6,6 +6,7 @@
 
 namespace EBPF {
 
+namespace {
 class StateTranslationVisitor : public CodeGenInspector {
     bool hasDefault;
     P4::P4CoreLibrary& p4lib;
@@ -28,6 +29,7 @@ class StateTranslationVisitor : public CodeGenInspector {
     bool preorder(const IR::MethodCallStatement* stat) override
     { visit(stat->methodCall); return false; }
 };
+}
 
 bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     if (parserState->isBuiltin()) return false;

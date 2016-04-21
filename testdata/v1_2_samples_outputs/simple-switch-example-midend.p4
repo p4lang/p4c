@@ -1,4 +1,4 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
 #include "../testdata/v1_2_samples/simple_model.p4"
 
 typedef bit<48> @ethernetaddress EthernetAddress;
@@ -55,6 +55,8 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 }
 
 control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
+    @name("nextHop") IPv4Address nextHop_0_0;
+    @name("hasReturned_0") bool hasReturned_0_0;
     action Drop_action() {
         outCtrl.outputPort = 4w0xf;
     }
@@ -119,39 +121,36 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
 
     apply {
-        bool hasReturned_0 = false;
-        @name("nextHop") IPv4Address nextHop_0;
+        bool hasExited = false;
+        hasReturned_0_0 = false;
         if (parseError != NoError) {
             Drop_action();
-            hasReturned_0 = true;
-            if (!hasReturned_0) {
-            }
+            hasReturned_0_0 = true;
         }
-        if (!hasReturned_0) {
-            ipv4_match.apply(nextHop_0);
+        if (!hasReturned_0_0) {
+            ipv4_match.apply(nextHop_0_0);
             if (outCtrl.outputPort == 4w0xf) 
-                hasReturned_0 = true;
+                hasReturned_0_0 = true;
         }
-        if (!hasReturned_0) {
+        if (!hasReturned_0_0) {
             check_ttl.apply();
             if (outCtrl.outputPort == 4w0xe) 
-                hasReturned_0 = true;
+                hasReturned_0_0 = true;
         }
-        if (!hasReturned_0) {
-            dmac.apply(nextHop_0);
+        if (!hasReturned_0_0) {
+            dmac.apply(nextHop_0_0);
             if (outCtrl.outputPort == 4w0xf) 
-                hasReturned_0 = true;
+                hasReturned_0_0 = true;
         }
-        if (!hasReturned_0) {
+        if (!hasReturned_0_0) 
             smac.apply();
-        }
     }
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     Checksum16() ck;
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         b.emit(p.ethernet);
         if (p.ip.isValid()) {
             ck.clear();

@@ -1,4 +1,5 @@
 #include "indent.h"
+#include "config.h"
 #include <gc/gc_cpp.h>
 
 int indent_t::tabsz = 2;
@@ -19,9 +20,12 @@ indent_t &indent_t::getindent(std::ostream &out) {
      * using here.  So to ensure that these indent_t objects are not prematurely
      * collected, we mark them as non-collectable, and delete them explicitly with
      * a callback */
+#ifdef HAVE_LIBGC
     if (!p) {
         p = new(NoGC, 0, 0) indent_t();
-        out.register_callback(delete_indent, indentctl_index); }
+        out.register_callback(delete_indent, indentctl_index);
+    }
+#endif
     return *static_cast<indent_t *>(p);
 }
 

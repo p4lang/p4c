@@ -1,6 +1,7 @@
 #ifndef _MIDEND_INLINING_H_
 #define _MIDEND_INLINING_H_
 
+#include "lib/ordered_map.h"
 #include "ir/ir.h"
 #include "frontends/p4/evaluator/blockMap.h"
 
@@ -29,22 +30,28 @@ struct CallInfo {
 // Summarizes all inline operations to be performed.
 struct InlineSummary {
     struct PerCaller {  // information for each caller
+        // For each key instance the container that is intantiated.
         std::map<const IR::Declaration_Instance*, const IR::IContainer*> declToCallee;
+        // For each key instance the apply parameters are replaced with fresh variables.
+        std::map<const IR::Declaration_Instance*, std::map<cstring, cstring>*> paramRename;
+        // For each key call the instance that is invoked.
         std::map<const IR::MethodCallStatement*, const IR::Declaration_Instance*> callToinstance;
     };
     std::map<const IR::IContainer*, PerCaller> callerToWork;
 
     void add(const CallInfo *cci) {
         callerToWork[cci->caller].declToCallee[cci->instantiation] = cci->callee;
-        for (auto mcs : cci->invocations) {
+        for (auto mcs : cci->invocations) 
             callerToWork[cci->caller].callToinstance[mcs] = cci->instantiation;
-        }
     }
+    void dbprint(std::ostream& out) const
+    { out << "Inline " << callerToWork.size() << " call sites"; }
 };
 
 // Inling information constructed here.
 class InlineWorkList {
-    std::map<const IR::Declaration_Instance*, CallInfo*> inlineMap;
+    // We use an ordered map to make the iterator deterministic
+    ordered_map<const IR::Declaration_Instance*, CallInfo*> inlineMap;
     std::vector<CallInfo*> toInline;  // sorted in order of inlining
 
  public:
@@ -53,14 +60,14 @@ class InlineWorkList {
         CHECK_NULL(caller); CHECK_NULL(callee); CHECK_NULL(instantiation);
         LOG1("Inline instantiation " << instantiation);
         auto inst = new CallInfo(caller, callee, instantiation);
-        inlineMap.emplace(instantiation, inst);
+        inlineMap[instantiation] = inst;
     }
 
     void addInvocation(const IR::Declaration_Instance* instance,
                        const IR::MethodCallStatement* statement) {
         CHECK_NULL(instance); CHECK_NULL(statement);
         LOG1("Inline invocation " << instance);
-        auto info = ::get(inlineMap, instance);
+        auto info = inlineMap[instance];
         BUG_CHECK(info, "Could not locate instance %1% invoked by %2%", instance, statement);
         info->addInvocation(statement);
     }
@@ -123,7 +130,7 @@ class InlineDriver : public Transform {
 // Must be run after an evaluator; uses the blockMap to discover caller/callee relationships.
 class DiscoverInlining : public Inspector {
     P4::InlineWorkList* inlineList;  // deposit result here
-    P4::BlockMap* blockMap;
+    P4::BlockMap* blockMap;          // input
  public:
     bool allowParsers = true;
     bool allowControls = true;
@@ -145,8 +152,16 @@ class DiscoverInlining : public Inspector {
     { visit_all(blockMap->toplevelBlock); return false; }
 };
 
+// Performs actual inlining work
 class GeneralInliner : public AbstractInliner {
-    // TODO
+    P4::ReferenceMap* refMap;
+    P4::InlineSummary::PerCaller* workToDo;
+ public:
+    explicit GeneralInliner() : refMap(new P4::ReferenceMap()), workToDo(nullptr) {}
+    const IR::Node* preorder(IR::MethodCallStatement* statement) override;
+    const IR::Node* preorder(IR::P4Control* caller) override;
+    const IR::Node* preorder(IR::P4Parser* caller) override;
+    Visitor::profile_t init_apply(const IR::Node* node) override;
 };
 
 }  // namespace P4

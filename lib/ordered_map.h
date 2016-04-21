@@ -6,6 +6,7 @@
 #include <map>
 #include <utility>
 
+// Map is ordered by order of element insertion.
 template <class K, class V, class COMP = std::less<K>,
           class ALLOC = std::allocator<std::pair<const K, V>>>
 class ordered_map {
@@ -90,6 +91,7 @@ public:
     size_type   max_size() const noexcept { return data_map.max_size(); }
     bool operator==(const ordered_map &a) const { return data == a.data; }
     bool operator!=(const ordered_map &a) const { return data != a.data; }
+    void clear() { data.clear(); data_map.clear(); }
 
     iterator        find(const key_type &a) { return tr_iter(data_map.find(&a)); }
     const_iterator  find(const key_type &a) const { return tr_iter(data_map.find(&a)); }

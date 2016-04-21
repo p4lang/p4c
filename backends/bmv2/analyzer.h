@@ -86,18 +86,18 @@ class CFG {
     class Edge {
      protected:
         EdgeType type;
-        Edge(Node* node, EdgeType type, IR::ID label) : type(type), endpoint(node), label(label) {}
+        Edge(Node* node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
 
      public:
         Node*    endpoint;
-        IR::ID   label;  // only present if type == Label
+        cstring  label;  // only present if type == Label
 
         explicit Edge(Node* node) : type(EdgeType::Unconditional), endpoint(node)
         { CHECK_NULL(node); }
         Edge(Node* node, bool b) :
                 type(b ? EdgeType::True : EdgeType::False), endpoint(node)
         { CHECK_NULL(node); }
-        Edge(Node* node, IR::ID label) :
+        Edge(Node* node, cstring label) :
                 type(EdgeType::Label), endpoint(node), label(label)
         { CHECK_NULL(node); }
         void dbprint(std::ostream& out) const;

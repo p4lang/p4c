@@ -7,10 +7,12 @@
 namespace P4 {
 
 class RenameMap {
+    // Internal declaration name
     std::map<const IR::IDeclaration*, cstring> newName;
  public:
     void setNewName(const IR::IDeclaration* decl, cstring name) {
         CHECK_NULL(decl);
+        BUG_CHECK(!name.isNullOrEmpty(), "Empty name");
         LOG1("Renaming " << decl << " to " << name);
         if (newName.find(decl) != newName.end())
             BUG("%1%: already renamed", decl);
@@ -55,6 +57,7 @@ class RenameSymbols : public Transform {
     RenameSymbols(ReferenceMap *refMap, RenameMap *renameMap) :
             refMap(refMap), renameMap(renameMap)
     { CHECK_NULL(refMap); CHECK_NULL(renameMap); }
+    const IR::Node* preorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* decl) override;
     const IR::Node* postorder(IR::PathExpression* expression) override;

@@ -1,4 +1,3 @@
-#include <gc/gc_cpp.h>
 #include "ir.h"
 #include "dbprint.h"
 #include "lib/hex.h"

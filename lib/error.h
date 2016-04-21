@@ -175,7 +175,7 @@ auto error_helper(boost::format& f, std::string message, std::string position,
 /***********************************************************************************/
 
 static inline std::string bug_helper(boost::format& f, std::string message,
-                                       std::string position, std::string tail) {
+                                     std::string position, std::string tail) {
     std::string text = boost::str(f);
     std::string result = position;
     if (!position.empty())
@@ -218,47 +218,47 @@ std::string bug_helper(boost::format& f, std::string message, std::string positi
 template<typename T, class... Args>
 auto
 bug_helper(boost::format& f, std::string message,
-             std::string position, std::string tail,
-             const T& t, Args... args) ->
+           std::string position, std::string tail,
+           const T& t, Args... args) ->
     typename std::enable_if<std::is_arithmetic<T>::value, std::string>::type;
 
 // actual implementations
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const char* t, Args... args) {
+                       std::string tail, const char* t, Args... args) {
     return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const cstring& t, Args... args) {
+                       std::string tail, const cstring& t, Args... args) {
     return bug_helper(f % t.c_str(), message, position, tail, std::forward<Args>(args)...);
 }
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class *t, Args... args) {
+                       std::string tail, const mpz_class *t, Args... args) {
     return bug_helper(f % t->get_str(), message, position, tail, std::forward<Args>(args)...);
 }
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class &t, Args... args) {
+                       std::string tail, const mpz_class &t, Args... args) {
     return bug_helper(f % t.get_str(), message, position, tail, std::forward<Args>(args)...);
 }
 
 template<typename T, class... Args>
 auto
 bug_helper(boost::format& f, std::string message, std::string position,
-             std::string tail, const T& t, Args... args) ->
+           std::string tail, const T& t, Args... args) ->
     typename std::enable_if<std::is_arithmetic<T>::value, std::string>::type {
     return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const Util::SourceInfo &info, Args... args) {
+                       std::string tail, const Util::SourceInfo &info, Args... args) {
     cstring posString = info.toPositionString();
     if (position.empty()) {
         position = posString;
@@ -273,7 +273,7 @@ std::string bug_helper(boost::format& f, std::string message, std::string positi
 
 template<typename T, class... Args>
 auto bug_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T *t, Args... args) ->
+                std::string tail, const T *t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
     cstring posString = t->getSourceInfo().toPositionString();
     if (position.empty()) {
@@ -292,7 +292,7 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
 
 template<typename T, class... Args>
 auto bug_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T &t, Args... args) ->
+                std::string tail, const T &t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
     cstring posString = t.getSourceInfo().toPositionString();
     if (position.empty()) {

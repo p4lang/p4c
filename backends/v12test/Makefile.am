@@ -2,7 +2,7 @@
 # To be included in the main P4C compiler makefile
 
 noinst_PROGRAMS += v12test
-v12test_LDADD = -lgc libfrontend.a libp4ctoolkit.a
+v12test_LDADD = libfrontend.a libp4ctoolkit.a
 
 v12test_SOURCES = \
     backends/v12test/v12test.cpp \

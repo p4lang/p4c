@@ -21,6 +21,8 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::Type_Union* type) override;
     void postorder(const IR::Type_Bits* type) override;
     void postorder(const IR::ConstructorCallExpression* expression) override;
+    void postorder(const IR::Declaration_Variable* decl) override;
+    void postorder(const IR::Declaration_Constant* decl) override;
 };
 
 }  // namespace P4

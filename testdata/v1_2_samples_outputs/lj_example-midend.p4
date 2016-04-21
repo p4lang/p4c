@@ -1,4 +1,4 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
 #include "../testdata/v1_2_samples/simple_model.p4"
 
 header ARPA_hdr {
@@ -20,15 +20,12 @@ parser LJparse(packet_in b, out Parsed_rep p) {
 
 control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     action Drop_action(out PortId_t port) {
-        bool hasReturned_0 = false;
         port = 4w0xf;
     }
     action Drop_1() {
-        bool hasReturned_1 = false;
         outCtrl.outputPort = 4w0xf;
     }
     action Forward(PortId_t outPort) {
-        bool hasReturned_2 = false;
         outCtrl.outputPort = outPort;
     }
     table Enet_lkup() {
@@ -44,7 +41,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     }
 
     apply {
-        bool hasReturned = false;
+        bool hasExited = false;
         if (p.arpa_pak.isValid()) 
             Enet_lkup.apply();
     }
@@ -52,7 +49,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
 
 control LJdeparse(inout Parsed_rep p, packet_out b) {
     apply {
-        bool hasReturned_3 = false;
+        bool hasExited_0 = false;
         b.emit<ARPA_hdr>(p.arpa_pak);
     }
 }

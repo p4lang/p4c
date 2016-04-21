@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct ingress_metadata_t {
     bit<1>  drop;
@@ -45,7 +45,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
-        bool hasReturned_1 = false;
     }
     @name("e_t1") table e_t1() {
         actions = {
@@ -59,37 +58,30 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         e_t1.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
-        bool hasReturned_3 = false;
     }
     @name("ing_drop") action ing_drop() {
-        bool hasReturned_4 = false;
         meta.ing_metadata.drop = 1w1;
     }
     @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
-        bool hasReturned_5 = false;
         meta.ing_metadata.egress_port = egress_port;
     }
     @name("set_f1") action set_f1(bit<8> f1) {
-        bool hasReturned_6 = false;
         meta.ing_metadata.f1 = f1;
     }
     @name("set_f2") action set_f2(bit<16> f2) {
-        bool hasReturned_7 = false;
         meta.ing_metadata.f2 = f2;
     }
     @name("set_f3") action set_f3(bit<32> f3) {
-        bool hasReturned_8 = false;
         meta.ing_metadata.f3 = f3;
     }
     @name("set_f4") action set_f4(bit<64> f4) {
-        bool hasReturned_9 = false;
         meta.ing_metadata.f4 = f4;
     }
     @name("i_t1") table i_t1() {
@@ -147,7 +139,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_2 = false;
+        bool hasExited_0 = false;
         i_t1.apply();
         if (meta.ing_metadata.f1 == hdr.vag.f1) {
             i_t2.apply();
@@ -161,7 +153,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.vag);
     }
@@ -169,13 +161,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_11 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_12 = false;
+        bool hasExited_3 = false;
     }
 }
 

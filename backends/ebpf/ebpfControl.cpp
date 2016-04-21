@@ -7,6 +7,7 @@
 
 namespace EBPF {
 
+namespace {
 // TODO: table applys should be compiled into separate inline functions,
 // and then we can generate calls as proper expressions.
 // Since then if (table.apply().hit) { ... }
@@ -31,6 +32,7 @@ class ControlTranslationVisitor : public CodeGenInspector {
     void processMethod(const P4::ExternMethod* method);
     void processApply(const P4::ApplyMethod* method);
 };
+}
 
 bool ControlTranslationVisitor::preorder(const IR::PathExpression* expression) {
     auto decl = control->program->refMap->getDeclaration(expression->path, true);
@@ -193,9 +195,12 @@ bool ControlTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
     builder->blockStart();
     for (auto c : *statement->cases) {
         builder->emitIndent();
-        if (c->label != IR::SwitchStatement::default_label)
+        if (c->label->is<IR::DefaultExpression>()) {
+            builder->append("default");
+        } else {
             builder->append("case ");
-        builder->append(c->label);
+            visit(c->label);
+        }
         builder->append(":");
         builder->newline();
         builder->emitIndent();

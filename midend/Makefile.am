@@ -10,6 +10,8 @@ midend_SOURCES = \
 	midend/uniqueNames.h \
 	midend/uniqueNames.cpp \
 	midend/moveDeclarations.h \
-	midend/moveDeclarations.cpp
+	midend/moveDeclarations.cpp \
+	midend/moveConstructors.h \
+	midend/moveConstructors.cpp
 
 cpplint_FILES += $(midend_SOURCES)

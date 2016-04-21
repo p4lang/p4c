@@ -54,7 +54,7 @@ class Node : public virtual INode {
  public:
     Util::SourceInfo    srcInfo;
     int id;  // unique id for each node
-    void traceCreation() const { LOG5("Created node " << id); }
+    void traceCreation() const;
     Node() : id(currentId++) { traceCreation(); }
     explicit Node(Util::SourceInfo si) : srcInfo(si), id(currentId++)
     { traceCreation(); }
@@ -116,7 +116,7 @@ template<typename T> const T* INode::to() const { return getNode()->to<T>(); }
         const CLASS *tmp = this;                                        \
         auto prof = v.init_apply(tmp);                                  \
         v.visit(tmp);                                                   \
-        v.end_apply();                                                  \
+        v.end_apply(tmp);                                               \
         return tmp; }
 
 }  // namespace IR

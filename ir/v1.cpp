@@ -91,6 +91,7 @@ void IR::ActionList::checkDuplicates() const {
     }
 }
 
+namespace {
 class ActionArgSetup : public Transform {
     /* FIXME -- use ParameterSubstitution for this somehow? */
     std::map<cstring, const IR::Expression *>    args;
@@ -103,6 +104,7 @@ class ActionArgSetup : public Transform {
     void add_arg(const IR::ActionArg *a) { args[a->name] = a; }
     void add_arg(cstring name, const IR::Expression *e) { args[name] = e; }
 };
+}
 
 IR::ActionFunction::ActionFunction(const P4Action *ac, const Vector<Expression> *args) {
     srcInfo = ac->srcInfo;

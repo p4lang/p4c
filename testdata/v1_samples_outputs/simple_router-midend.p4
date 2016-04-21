@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct routing_metadata_t {
     bit<32> nhop_ipv4;
@@ -57,11 +57,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("rewrite_mac") action rewrite_mac(bit<48> smac) {
-        bool hasReturned_1 = false;
         hdr.ethernet.srcAddr = smac;
     }
     @name("_drop") action _drop() {
-        bool hasReturned_2 = false;
         mark_to_drop();
     }
     @name("send_frame") table send_frame() {
@@ -78,22 +76,19 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         send_frame.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("set_dmac") action set_dmac(bit<48> dmac) {
-        bool hasReturned_4 = false;
         hdr.ethernet.dstAddr = dmac;
     }
     @name("_drop") action _drop() {
-        bool hasReturned_5 = false;
         mark_to_drop();
     }
     @name("set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        bool hasReturned_6 = false;
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_port = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
@@ -125,7 +120,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_3 = false;
+        bool hasExited_0 = false;
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {
             ipv4_lpm.apply();
             forward.apply();
@@ -135,7 +130,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_7 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
     }
@@ -144,7 +139,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     Checksum16() ipv4_checksum;
     apply {
-        bool hasReturned_8 = false;
+        bool hasExited_2 = false;
         if (hdr.ipv4.hdrChecksum == ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })) 
             standard_metadata.drop = 1w1;
     }
@@ -153,7 +148,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
 control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     apply {
-        bool hasReturned_9 = false;
+        bool hasExited_3 = false;
         hdr.ipv4.hdrChecksum = ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
     }
 }

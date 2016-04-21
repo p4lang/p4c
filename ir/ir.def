@@ -336,7 +336,7 @@ class MethodCallStatement : Statement {
 }
 
 class SwitchCase {
-    ID        label;
+    Expression       label;  // Can be DefaultExpression or 
     NullOK Statement statement;  // If missing then it's a fall-through
 #nodbprint
 }
@@ -347,35 +347,37 @@ class SwitchStatement : Statement {
     Expression expression;
     Vector<SwitchCase> cases;
 #nodbprint
-#emit
-    // 'default': a legal label for a switch statement
-    static const cstring default_label;
-#end
 }
 
 /////////////////////////////////////////////////////////////
 
 // Block is the base class for IR nodes produced by the evaluator.
 // A block represents a compile-time allocated resource.
+// Blocks are not visited using visitors, so the visit_children()
+// method is empty.  Users have to write custom visitors to
+// traverse the constantValue map.
 abstract Block : CompileTimeValue {
     Node node;  // Node that evaluates to this block.
     // It's either a Declaration_Instance or a ConstructorCallExpression.
 #emit
     // One value for each Node inside that evaluates to a compile-time constant.
-    // This includes all constructor parameters.
-    std::map<const Node*, const CompileTimeValue*> constantValue;
+    // This includes all constructor parameters, and all inner nested blocks.
+    ordered_map<const Node*, const CompileTimeValue*> constantValue;
 
     virtual void dbprint(std::ostream& out) const;
     virtual void dbprint_recursive(std::ostream& out) const;
     void setValue(const Node* node, const CompileTimeValue* value) {
         CHECK_NULL(node); CHECK_NULL(value);
-        auto v = get(constantValue, node);
-        BUG_CHECK(v == nullptr, "%1% already set", node);
-        constantValue.emplace(node, value);
+        auto it = constantValue.find(node);
+        BUG_CHECK(it == constantValue.end(), "%1% already set", node);
+        constantValue[node] = value;
     }
     const CompileTimeValue* getValue(const Node* node) const {
         CHECK_NULL(node);
-        return ::get(constantValue, node);
+        auto it = constantValue.find(node);
+        if (it == constantValue.end())
+            return nullptr;
+        return it->second;
     }
 #end
     visit_children { (void)v; }

@@ -13,6 +13,7 @@ class SideEffects : public Inspector {
     { hasSideEffects = true; }
     SideEffects() : hasSideEffects(false) {}
  public:
+    // Returns true if the expression may have side-effects.
     static bool check(const IR::Expression* expression) {
         SideEffects se;
         expression->apply(se);

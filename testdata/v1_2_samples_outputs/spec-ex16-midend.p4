@@ -1,4 +1,4 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
 
 parser Prs<T>(packet_in b, out T result);
 control Map<T>(in T d);
@@ -10,7 +10,7 @@ parser P(packet_in b, out bit<32> d) {
 
 control Map1(in bit<32> d) {
     apply {
-        bool hasReturned = false;
+        bool hasExited = false;
     }
 }
 

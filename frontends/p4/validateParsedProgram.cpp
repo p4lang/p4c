@@ -55,4 +55,14 @@ void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression* expre
         ::error("%1%: Constructor calls not allowed in actions", expression);
 }
 
+void ValidateParsedProgram::postorder(const IR::Declaration_Variable* decl) {
+    if (decl->name.isDontCare())
+        ::error("%1%: illegal variable name", decl);
+}
+
+void ValidateParsedProgram::postorder(const IR::Declaration_Constant* decl) {
+    if (decl->name.isDontCare())
+        ::error("%1%: illegal constant name", decl);
+}
+
 }  // namespace P4

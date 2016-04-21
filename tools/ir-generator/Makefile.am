@@ -5,7 +5,7 @@ irgenerator_SOURCES = \
 	tools/ir-generator/irclass.h \
 	tools/ir-generator/type.cpp \
 	tools/ir-generator/type.h
-irgenerator_LDADD = -lgc libp4ctoolkit.a
+irgenerator_LDADD = libp4ctoolkit.a
 
 BUILT_SOURCES += \
 	tools/ir-generator/ir-generator-lex.c

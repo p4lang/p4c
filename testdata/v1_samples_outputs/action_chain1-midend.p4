@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 header data_t {
     bit<32> f1;
@@ -41,38 +41,29 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("set0b1") action set0b1(bit<8> val) {
-        bool hasReturned_1 = false;
         hdr.extra[0].b1 = val;
     }
     @name("act1") action act1(bit<8> val) {
-        bool hasReturned_2 = false;
         hdr.extra[0].b1 = val;
     }
     @name("act2") action act2(bit<8> val) {
-        bool hasReturned_3 = false;
         hdr.extra[0].b1 = val;
     }
     @name("act3") action act3(bit<8> val) {
-        bool hasReturned_4 = false;
         hdr.extra[0].b1 = val;
     }
     @name("noop") action noop() {
-        bool hasReturned_5 = false;
     }
     @name("setb2") action setb2(bit<8> val) {
-        bool hasReturned_6 = false;
         hdr.data.b2 = val;
     }
     @name("set1b1") action set1b1(bit<8> val) {
-        bool hasReturned_7 = false;
         hdr.extra[1].b1 = val;
     }
     @name("set2b2") action set2b2(bit<8> val) {
-        bool hasReturned_8 = false;
         hdr.extra[2].b2 = val;
     }
     @name("setb1") action setb1(bit<9> port, bit<8> val) {
-        bool hasReturned_9 = false;
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
@@ -140,7 +131,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         test1.apply();
         switch (ex1.apply().action_run) {
             act1: {
@@ -159,13 +150,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_11 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.data);
         packet.emit(hdr.extra);
     }
@@ -173,13 +164,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_12 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_13 = false;
+        bool hasExited_3 = false;
     }
 }
 

@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <gc/gc_cpp.h>
-
 #include <string>
 #include <iostream>
 

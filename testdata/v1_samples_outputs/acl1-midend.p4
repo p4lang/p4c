@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct acl_metadata_t {
     bit<1>  acl_deny;
@@ -168,32 +168,28 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     Counter(32w256, CounterType.Packets) @name("drop_stats") drop_stats;
     Counter(32w256, CounterType.Packets) @name("drop_stats_2") drop_stats_2;
     @name("drop_stats_update") action drop_stats_update() {
-        bool hasReturned_1 = false;
         drop_stats_2.increment((bit<32>)meta.ingress_metadata.drop_reason);
     }
     @name("nop") action nop() {
-        bool hasReturned_2 = false;
     }
     @name("copy_to_cpu") action copy_to_cpu(in bit<16> reason_code) {
-        bool hasReturned_3 = false;
         meta.fabric_metadata.reason_code = reason_code;
     }
     @name("redirect_to_cpu") action redirect_to_cpu(bit<16> reason_code) {
-        bool hasReturned_4 = false;
-        copy_to_cpu(reason_code);
+        @name("reason_code_0") bit<16> reason_code_0_0;
+        {
+            reason_code_0_0 = reason_code;
+            meta.fabric_metadata.reason_code = reason_code_0_0;
+        }
     }
     @name("drop_packet") action drop_packet() {
-        bool hasReturned_5 = false;
     }
     @name("drop_packet_with_reason") action drop_packet_with_reason(bit<8> drop_reason) {
-        bool hasReturned_6 = false;
         drop_stats.increment((bit<32>)drop_reason);
     }
     @name("negative_mirror") action negative_mirror(bit<8> session_id) {
-        bool hasReturned_7 = false;
     }
     @name("congestion_mirror_set") action congestion_mirror_set() {
-        bool hasReturned_8 = false;
     }
     @name("drop_stats") table drop_stats_0() {
         actions = {
@@ -249,7 +245,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         system_acl.apply();
         if (meta.ingress_metadata.drop_flag == 1w1) 
             drop_stats_0.apply();
@@ -258,26 +254,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_9 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.data);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_11 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_12 = false;
+        bool hasExited_3 = false;
     }
 }
 

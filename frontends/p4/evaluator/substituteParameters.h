@@ -10,8 +10,13 @@
 
 namespace P4 {
 
-class SubstituteParameters final : public IR::TypeVariableSubstitutionVisitor {
-    ReferenceMap*          refMap;  // input
+class SubstituteParameters : public IR::TypeVariableSubstitutionVisitor {
+ protected:
+    // When a PathExpression is cloned, it is added to the RefMap.
+    // It is set to point to the same declaration as the original path.
+    // But running this pass may change some declaration nodes - so
+    // in general the refMap won't be up-to-date at the end.
+    ReferenceMap*              refMap;  // input and output
     IR::ParameterSubstitution* subst;   // input
  public:
     SubstituteParameters(ReferenceMap* refMap,

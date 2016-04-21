@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct ingress_metadata_t {
     bit<1> drop;
@@ -146,36 +146,29 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("l2_packet") action l2_packet() {
-        bool hasReturned_2 = false;
         meta.ing_metadata.packet_type = 4w0;
     }
     @name("ipv4_packet") action ipv4_packet() {
-        bool hasReturned_3 = false;
         meta.ing_metadata.packet_type = 4w1;
     }
     @name("ipv6_packet") action ipv6_packet() {
-        bool hasReturned_4 = false;
         meta.ing_metadata.packet_type = 4w2;
     }
     @name("mpls_packet") action mpls_packet() {
-        bool hasReturned_5 = false;
         meta.ing_metadata.packet_type = 4w3;
     }
     @name("mim_packet") action mim_packet() {
-        bool hasReturned_6 = false;
         meta.ing_metadata.packet_type = 4w4;
     }
     @name("nop") action nop() {
-        bool hasReturned_7 = false;
     }
     @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
-        bool hasReturned_8 = false;
         meta.ing_metadata.egress_port = egress_port;
     }
     @name("ethertype_match") table ethertype_match() {
@@ -230,7 +223,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         switch (ethertype_match.apply().action_run) {
             default: {
                 l2_match.apply();
@@ -251,7 +244,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_9 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.vlan_tag);
         packet.emit(hdr.ipv6);
@@ -264,13 +257,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_11 = false;
+        bool hasExited_3 = false;
     }
 }
 

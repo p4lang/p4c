@@ -45,7 +45,7 @@ class Visitor {
     virtual profile_t init_apply(const IR::Node *root);
     // End_apply is called symmetrically with init_apply, after the visit
     // is completed.
-    virtual void end_apply();
+    virtual void end_apply(const IR::Node* root);
 
     // apply_visitor is the main traversal function that manages the
     // depth-first recursive traversal.  `visit` is a convenience function

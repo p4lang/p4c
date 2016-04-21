@@ -2867,18 +2867,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction();
     }
 
-    process_replication() process_replication_0;
-    process_vlan_decap() process_vlan_decap_0;
-    process_tunnel_decap() process_tunnel_decap_0;
-    process_egress_bd() process_egress_bd_0;
-    process_rewrite() process_rewrite_0;
-    process_int_insertion() process_int_insertion_0;
-    process_mac_rewrite() process_mac_rewrite_0;
-    process_tunnel_encap() process_tunnel_encap_0;
-    process_int_outer_encap() process_int_outer_encap_0;
-    process_vlan_xlate() process_vlan_xlate_0;
-    process_egress_filter() process_egress_filter_0;
-    process_egress_acl() process_egress_acl_0;
+    process_replication() @name("process_replication") process_replication_0;
+    process_vlan_decap() @name("process_vlan_decap") process_vlan_decap_0;
+    process_tunnel_decap() @name("process_tunnel_decap") process_tunnel_decap_0;
+    process_egress_bd() @name("process_egress_bd") process_egress_bd_0;
+    process_rewrite() @name("process_rewrite") process_rewrite_0;
+    process_int_insertion() @name("process_int_insertion") process_int_insertion_0;
+    process_mac_rewrite() @name("process_mac_rewrite") process_mac_rewrite_0;
+    process_tunnel_encap() @name("process_tunnel_encap") process_tunnel_encap_0;
+    process_int_outer_encap() @name("process_int_outer_encap") process_int_outer_encap_0;
+    process_vlan_xlate() @name("process_vlan_xlate") process_vlan_xlate_0;
+    process_egress_filter() @name("process_egress_filter") process_egress_filter_0;
+    process_egress_acl() @name("process_egress_acl") process_egress_acl_0;
     apply {
         if (meta.intrinsic_metadata.deflection_flag == 1w0 && meta.egress_metadata.bypass == 1w0) {
             if (standard_metadata.instance_type != 32w0 && standard_metadata.instance_type != 32w5) {
@@ -3164,9 +3164,9 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         default_action = NoAction();
     }
 
-    validate_outer_ipv4_header() validate_outer_ipv4_header_0;
-    validate_outer_ipv6_header() validate_outer_ipv6_header_0;
-    validate_mpls_header() validate_mpls_header_0;
+    validate_outer_ipv4_header() @name("validate_outer_ipv4_header") validate_outer_ipv4_header_0;
+    validate_outer_ipv6_header() @name("validate_outer_ipv6_header") validate_outer_ipv6_header_0;
+    validate_mpls_header() @name("validate_mpls_header") validate_mpls_header_0;
     apply {
         switch (validate_outer_ethernet.apply().action_run) {
             default: {
@@ -3647,9 +3647,9 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
         default_action = NoAction();
     }
 
-    process_ipv4_vtep() process_ipv4_vtep_0;
-    process_ipv6_vtep() process_ipv6_vtep_0;
-    process_mpls() process_mpls_0;
+    process_ipv4_vtep() @name("process_ipv4_vtep") process_ipv4_vtep_0;
+    process_ipv6_vtep() @name("process_ipv6_vtep") process_ipv6_vtep_0;
+    process_mpls() @name("process_mpls") process_mpls_0;
     apply {
         switch (outer_rmac.apply().action_run) {
             outer_rmac_hit: {
@@ -4967,37 +4967,37 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
 
-    process_ingress_port_mapping() process_ingress_port_mapping_0;
-    process_validate_outer_header() process_validate_outer_header_0;
-    process_storm_control() process_storm_control_0;
-    process_port_vlan_mapping() process_port_vlan_mapping_0;
-    process_spanning_tree() process_spanning_tree_0;
-    process_ip_sourceguard() process_ip_sourceguard_0;
-    process_int_endpoint() process_int_endpoint_0;
-    process_tunnel() process_tunnel_0;
-    process_validate_packet() process_validate_packet_0;
-    process_mac() process_mac_0;
-    process_mac_acl() process_mac_acl_0;
-    process_ip_acl() process_ip_acl_0;
-    process_qos() process_qos_0;
-    process_ipv4_racl() process_ipv4_racl_0;
-    process_ipv4_urpf() process_ipv4_urpf_0;
-    process_ipv4_fib() process_ipv4_fib_0;
-    process_ipv6_racl() process_ipv6_racl_0;
-    process_ipv6_urpf() process_ipv6_urpf_0;
-    process_ipv6_fib() process_ipv6_fib_0;
-    process_urpf_bd() process_urpf_bd_0;
-    process_ingress_fabric() process_ingress_fabric_0;
-    process_hashes() process_hashes_0;
-    process_ingress_bd_stats() process_ingress_bd_stats_0;
-    process_ingress_acl_stats() process_ingress_acl_stats_0;
-    process_fwd_results() process_fwd_results_0;
-    process_nexthop() process_nexthop_0;
-    process_multicast_flooding() process_multicast_flooding_0;
-    process_lag() process_lag_0;
-    process_mac_learning() process_mac_learning_0;
-    process_fabric_lag() process_fabric_lag_0;
-    process_system_acl() process_system_acl_0;
+    process_ingress_port_mapping() @name("process_ingress_port_mapping") process_ingress_port_mapping_0;
+    process_validate_outer_header() @name("process_validate_outer_header") process_validate_outer_header_0;
+    process_storm_control() @name("process_storm_control") process_storm_control_0;
+    process_port_vlan_mapping() @name("process_port_vlan_mapping") process_port_vlan_mapping_0;
+    process_spanning_tree() @name("process_spanning_tree") process_spanning_tree_0;
+    process_ip_sourceguard() @name("process_ip_sourceguard") process_ip_sourceguard_0;
+    process_int_endpoint() @name("process_int_endpoint") process_int_endpoint_0;
+    process_tunnel() @name("process_tunnel") process_tunnel_0;
+    process_validate_packet() @name("process_validate_packet") process_validate_packet_0;
+    process_mac() @name("process_mac") process_mac_0;
+    process_mac_acl() @name("process_mac_acl") process_mac_acl_0;
+    process_ip_acl() @name("process_ip_acl") process_ip_acl_0;
+    process_qos() @name("process_qos") process_qos_0;
+    process_ipv4_racl() @name("process_ipv4_racl") process_ipv4_racl_0;
+    process_ipv4_urpf() @name("process_ipv4_urpf") process_ipv4_urpf_0;
+    process_ipv4_fib() @name("process_ipv4_fib") process_ipv4_fib_0;
+    process_ipv6_racl() @name("process_ipv6_racl") process_ipv6_racl_0;
+    process_ipv6_urpf() @name("process_ipv6_urpf") process_ipv6_urpf_0;
+    process_ipv6_fib() @name("process_ipv6_fib") process_ipv6_fib_0;
+    process_urpf_bd() @name("process_urpf_bd") process_urpf_bd_0;
+    process_ingress_fabric() @name("process_ingress_fabric") process_ingress_fabric_0;
+    process_hashes() @name("process_hashes") process_hashes_0;
+    process_ingress_bd_stats() @name("process_ingress_bd_stats") process_ingress_bd_stats_0;
+    process_ingress_acl_stats() @name("process_ingress_acl_stats") process_ingress_acl_stats_0;
+    process_fwd_results() @name("process_fwd_results") process_fwd_results_0;
+    process_nexthop() @name("process_nexthop") process_nexthop_0;
+    process_multicast_flooding() @name("process_multicast_flooding") process_multicast_flooding_0;
+    process_lag() @name("process_lag") process_lag_0;
+    process_mac_learning() @name("process_mac_learning") process_mac_learning_0;
+    process_fabric_lag() @name("process_fabric_lag") process_fabric_lag_0;
+    process_system_acl() @name("process_system_acl") process_system_acl_0;
     apply {
         process_ingress_port_mapping_0.apply(hdr, meta, standard_metadata);
         process_validate_outer_header_0.apply(hdr, meta, standard_metadata);

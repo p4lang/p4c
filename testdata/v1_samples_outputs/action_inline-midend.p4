@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct ht {
     bit<1> b;
@@ -20,14 +20,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("a") action a(inout bit<1> y0) {
-        bool hasReturned_1 = false;
-        y0 = y0 + 1w1;
-    }
     @name("b") action b() {
-        bool hasReturned_2 = false;
-        a(meta.md.b);
-        a(meta.md.b);
+        @name("y0_0") bit<1> y0_0_0;
+        @name("y0_1") bit<1> y0_1_0;
+        {
+            y0_0_0 = meta.md.b;
+            y0_0_0 = y0_0_0 + 1w1;
+            meta.md.b = y0_0_0;
+        }
+        {
+            y0_1_0 = meta.md.b;
+            y0_1_0 = y0_1_0 + 1w1;
+            meta.md.b = y0_1_0;
+        }
     }
     @name("t") table t() {
         actions = {
@@ -38,32 +43,32 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         t.apply();
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_3 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_4 = false;
+        bool hasExited_1 = false;
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_5 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_3 = false;
     }
 }
 

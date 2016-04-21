@@ -12,10 +12,11 @@ Visitor::profile_t SimpleControlsInliner::init_apply(const IR::Node* node) {
 }
 
 const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
-    prune();
     auto orig = getOriginal<IR::P4Control>();
-    if (toInline->callerToWork.find(orig) == toInline->callerToWork.end())
+    if (toInline->callerToWork.find(orig) == toInline->callerToWork.end()) {
+        prune();
         return caller;
+    }
 
     workToDo = &toInline->callerToWork[orig];
     LOG1("Simple inliner " << caller);
@@ -33,7 +34,7 @@ const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
             auto callee = workToDo->declToCallee[inst];
             CHECK_NULL(callee);
             IR::ParameterSubstitution subst;
-            // TODO: this is correct only if the arguments have no side-effects.
+            // This is correct only if the arguments have no side-effects.
             // There should be a prior pass to ensure this fact.  This is
             // true for programs that come out of the P4 v1.0 front-end.
             subst.populate(callee->getConstructorParameters(), inst->arguments);
@@ -60,6 +61,7 @@ const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
                                     caller->body);
     list->replace(orig, result);
     workToDo = nullptr;
+    prune();
     return result;
 }
 
@@ -70,9 +72,9 @@ const IR::Node* SimpleControlsInliner::preorder(IR::MethodCallStatement* stateme
     if (workToDo->callToinstance.find(orig) == workToDo->callToinstance.end())
         return statement;
     LOG1("Inlining invocation " << orig);
-    prune();
     auto decl = workToDo->callToinstance[orig];
     CHECK_NULL(decl);
+    prune();
     return workToDo->declToCallee[decl]->to<IR::P4Control>()->body;
 }
 

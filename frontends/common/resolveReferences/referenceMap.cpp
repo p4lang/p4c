@@ -20,7 +20,7 @@ const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::Path* path, bool 
     auto result = get(pathToDeclaration, path);
     LOG1("Looking up " << path << " found " << result->getNode());
     if (notNull)
-        CHECK_NULL(result);
+        BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", path);
     return result;
 }
 

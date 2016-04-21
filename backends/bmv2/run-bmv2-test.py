@@ -462,7 +462,7 @@ class RunBMV2(object):
         if self.options.verbose:
             print("Running model")
         interfaces = self.interfaces()
-        wait = 1  # Time to wait before model starts running
+        wait = 2  # Time to wait before model starts running
 
         concurrent = ConcurrentInteger(os.getcwd(), 1000)
         rand = concurrent.generate()
@@ -483,6 +483,8 @@ class RunBMV2(object):
                 print("Running", " ".join(runcli))
             i = open(self.clifile, 'r')
             # The CLI has to run before the model starts running; so this is a little race.
+            # If the race turns out wrong the test will fail, which is unfortunate.
+            # This should be fixed by improving the CLI/simple_switch programs.
             cli = subprocess.Popen(runcli, cwd=self.folder, stdin=i)
             cli.wait()
             if cli.returncode != 0:

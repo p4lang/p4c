@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 header data_t {
     bit<32> f1;
@@ -29,28 +29,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("setb1") action setb1(bit<32> val) {
-        bool hasReturned_1 = false;
         hdr.data.b1 = val;
     }
     @name("noop") action noop() {
-        bool hasReturned_2 = false;
     }
     @name("setb3") action setb3(bit<32> val) {
-        bool hasReturned_3 = false;
         hdr.data.b3 = val;
     }
     @name("on_hit") action on_hit() {
-        bool hasReturned_4 = false;
     }
     @name("on_miss") action on_miss() {
-        bool hasReturned_5 = false;
     }
     @name("setb2") action setb2(bit<32> val) {
-        bool hasReturned_6 = false;
         hdr.data.b2 = val;
     }
     @name("setb4") action setb4(bit<32> val) {
-        bool hasReturned_7 = false;
         hdr.data.b4 = val;
     }
     @name("A1") table A1() {
@@ -126,7 +119,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         if (hdr.data.b1 == 32w0) {
             A1.apply();
             A2.apply();
@@ -145,26 +138,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_8 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_9 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.data);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_11 = false;
+        bool hasExited_3 = false;
     }
 }
 

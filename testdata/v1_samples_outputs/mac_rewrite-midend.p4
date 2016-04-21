@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct egress_metadata_t {
     bit<16> payload_length;
@@ -84,62 +84,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
-        bool hasReturned_1 = false;
-    }
-    @name("rewrite_ipv4_unicast_mac") action rewrite_ipv4_unicast_mac(bit<48> smac) {
-        bool hasReturned_2 = false;
-        hdr.ethernet.srcAddr = smac;
-        hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
-    }
-    @name("rewrite_ipv4_multicast_mac") action rewrite_ipv4_multicast_mac(bit<48> smac) {
-        bool hasReturned_3 = false;
-        hdr.ethernet.srcAddr = smac;
-        hdr.ethernet.dstAddr[47:23] = 25w0x0;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
-    }
-    @name("rewrite_ipv6_unicast_mac") action rewrite_ipv6_unicast_mac(bit<48> smac) {
-        bool hasReturned_4 = false;
-        hdr.ethernet.srcAddr = smac;
-        hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
-        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
-    }
-    @name("rewrite_ipv6_multicast_mac") action rewrite_ipv6_multicast_mac(bit<48> smac) {
-        bool hasReturned_5 = false;
-        hdr.ethernet.srcAddr = smac;
-        hdr.ethernet.dstAddr[47:32] = 16w0x0;
-        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
-    }
-    @name("mac_rewrite") table mac_rewrite() {
-        actions = {
-            nop;
-            rewrite_ipv4_unicast_mac;
-            rewrite_ipv4_multicast_mac;
-            rewrite_ipv6_unicast_mac;
-            rewrite_ipv6_multicast_mac;
-            NoAction;
-        }
-        key = {
-            meta.egress_metadata.smac_idx: exact;
-            hdr.ipv4.isValid()           : exact;
-            hdr.ipv6.isValid()           : exact;
-        }
-        size = 512;
-        default_action = NoAction();
-    }
-
-    apply {
-        bool hasReturned_0 = false;
-        if (meta.egress_metadata.routed == 1w1) 
-            mac_rewrite.apply();
-    }
-}
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("hdr_0") headers hdr_0_0;
+    @name("meta_0") metadata meta_0_0;
+    @name("standard_metadata_0") standard_metadata_t standard_metadata_0_0;
     @name("do_setup") action do_setup(bit<9> idx, bit<1> routed) {
-        bool hasReturned_7 = false;
         meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;
         meta.egress_metadata.smac_idx = idx;
         meta.egress_metadata.routed = routed;
@@ -155,23 +104,69 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
 
-    process_mac_rewrite() process_mac_rewrite_0;
+    @name("nop") action process_mac_rewrite_nop() {
+    }
+    @name("rewrite_ipv4_unicast_mac") action process_mac_rewrite_rewrite_ipv4_unicast_mac(bit<48> smac) {
+        hdr_0_0.ethernet.srcAddr = smac;
+        hdr_0_0.ethernet.dstAddr = meta_0_0.egress_metadata.mac_da;
+        hdr_0_0.ipv4.ttl = hdr_0_0.ipv4.ttl + 8w255;
+    }
+    @name("rewrite_ipv4_multicast_mac") action process_mac_rewrite_rewrite_ipv4_multicast_mac(bit<48> smac) {
+        hdr_0_0.ethernet.srcAddr = smac;
+        hdr_0_0.ethernet.dstAddr[47:23] = 25w0x0;
+        hdr_0_0.ipv4.ttl = hdr_0_0.ipv4.ttl + 8w255;
+    }
+    @name("rewrite_ipv6_unicast_mac") action process_mac_rewrite_rewrite_ipv6_unicast_mac(bit<48> smac) {
+        hdr_0_0.ethernet.srcAddr = smac;
+        hdr_0_0.ethernet.dstAddr = meta_0_0.egress_metadata.mac_da;
+        hdr_0_0.ipv6.hopLimit = hdr_0_0.ipv6.hopLimit + 8w255;
+    }
+    @name("rewrite_ipv6_multicast_mac") action process_mac_rewrite_rewrite_ipv6_multicast_mac(bit<48> smac) {
+        hdr_0_0.ethernet.srcAddr = smac;
+        hdr_0_0.ethernet.dstAddr[47:32] = 16w0x0;
+        hdr_0_0.ipv6.hopLimit = hdr_0_0.ipv6.hopLimit + 8w255;
+    }
+    @name("mac_rewrite") table process_mac_rewrite_mac_rewrite() {
+        actions = {
+            process_mac_rewrite_nop;
+            process_mac_rewrite_rewrite_ipv4_unicast_mac;
+            process_mac_rewrite_rewrite_ipv4_multicast_mac;
+            process_mac_rewrite_rewrite_ipv6_unicast_mac;
+            process_mac_rewrite_rewrite_ipv6_multicast_mac;
+            NoAction;
+        }
+        key = {
+            meta_0_0.egress_metadata.smac_idx: exact;
+            hdr_0_0.ipv4.isValid()           : exact;
+            hdr_0_0.ipv6.isValid()           : exact;
+        }
+        size = 512;
+        default_action = NoAction();
+    }
+
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited = false;
         setup.apply();
-        process_mac_rewrite_0.apply(hdr, meta, standard_metadata);
+        hdr_0_0 = hdr;
+        meta_0_0 = meta;
+        standard_metadata_0_0 = standard_metadata;
+        if (meta_0_0.egress_metadata.routed == 1w1) 
+            process_mac_rewrite_mac_rewrite.apply();
+        hdr = hdr_0_0;
+        meta = meta_0_0;
+        standard_metadata = standard_metadata_0_0;
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_8 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_9 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv6);
         packet.emit(hdr.ipv4);
@@ -180,13 +175,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_11 = false;
+        bool hasExited_3 = false;
     }
 }
 

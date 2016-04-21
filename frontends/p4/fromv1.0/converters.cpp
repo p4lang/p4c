@@ -148,7 +148,6 @@ const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
 }
 
 const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
-    prune();
     auto table = structure->tables.get(apply->name);
     auto newname = structure->tables.get(table);
     auto tbl = new IR::PathExpression(newname);
@@ -188,17 +187,24 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
             auto misscase = miss ? conv.convert(miss) : nullptr;
             auto check = new IR::Member(Util::SourceInfo(), call, IR::Type_Table::hit);
             auto ifstat = new IR::IfStatement(apply->srcInfo, check, hitcase, misscase);
+            prune();
             return ifstat;
         } else {
             auto cases = new IR::Vector<IR::SwitchCase>();
             for (auto a : apply->actions) {
                 StatementConverter conv(structure, renameMap);
                 auto stat = conv.convert(a.second);
-                auto swcase = new IR::SwitchCase(a.second->srcInfo, IR::ID(a.first), stat);
+                const IR::Expression* destination;
+                if (a.first == "default")
+                    destination = new IR::DefaultExpression(Util::SourceInfo());
+                else
+                    destination = new IR::PathExpression(IR::ID(a.first));
+                auto swcase = new IR::SwitchCase(a.second->srcInfo, destination, stat);
                 cases->push_back(swcase);
             }
             auto check = new IR::Member(Util::SourceInfo(), call, IR::Type_Table::action_run);
             auto sw = new IR::SwitchStatement(apply->srcInfo, check, cases);
+            prune();
             return sw;
         }
     }
@@ -255,6 +261,7 @@ const IR::Statement* StatementConverter::convert(const IR::Vector<IR::Expression
 
 ///////////////////////////////////////////////////////////////
 
+namespace {
 class DiscoverStructure : public Inspector {
     ProgramStructure* structure;
 
@@ -419,6 +426,7 @@ class Rewriter : public Transform {
         return structure->create(global->srcInfo);
     }
 };
+}
 
 ///////////////////////////////////////////////////////////////
 

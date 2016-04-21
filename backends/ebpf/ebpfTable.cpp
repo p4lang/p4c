@@ -5,6 +5,7 @@
 
 namespace EBPF {
 
+namespace {
 class ActionTranslationVisitor : public CodeGenInspector {
  protected:
     const EBPFProgram*         program;
@@ -41,6 +42,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
         return false;
     }
 };  // ActionTranslationVisitor
+}
 
 ////////////////////////////////////////////////////////////////
 

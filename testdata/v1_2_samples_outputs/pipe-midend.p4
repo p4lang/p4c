@@ -35,55 +35,50 @@ struct Packet_data {
 action NoAction() {
     bool hasReturned = false;
 }
-control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
-    action B_action(out bit<9> barg, BParamType bData) {
-        bool hasReturned_1 = false;
+control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
+    @name("pArg1_0") TArg1 pArg1_0_0;
+    @name("pArg2_0") TArg2 pArg2_0_0;
+    @name("p1.B_action") action p1_B_action(out bit<9> barg, BParamType bData) {
         barg = (bit<9>)bData;
     }
-    action C_action(bit<9> cData) {
-        bool hasReturned_2 = false;
-        pArg1.field1 = cData;
+    @name("p1.C_action") action p1_C_action(bit<9> cData) {
+        pArg1_0_0.field1 = cData;
     }
-    table T(inout TArg1 tArg1, in TArg2 aArg2) {
+    @name("p1.T") table p1_T(inout TArg1 tArg1, in TArg2 aArg2) {
         key = {
             tArg1.field1: ternary;
             aArg2.field2: exact;
         }
         actions = {
-            B_action(tArg1.field1);
-            C_action;
+            p1_B_action(tArg1.field1);
+            p1_C_action;
         }
-        size = t2Size;
-        const default_action = C_action(9w5);
+        size = 32w5;
+        const default_action = p1_C_action(9w5);
     }
 
-    action Drop() {
-        bool hasReturned_3 = false;
-        pArg1.drop = true;
+    @name("p1.Drop") action p1_Drop() {
+        pArg1_0_0.drop = true;
     }
-    table Tinner() {
+    @name("p1.Tinner") table p1_Tinner() {
         key = {
-            pArg1.field1: ternary;
+            pArg1_0_0.field1: ternary;
         }
         actions = {
-            Drop;
+            p1_Drop;
         }
         const default_action = NoAction;
     }
 
     apply {
-        bool hasReturned_0 = false;
-        T.apply(pArg1, pArg2);
-        T.apply(pArg1, pArg2);
-        Tinner.apply();
-    }
-}
-
-control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    P_pipe(32w5) p1;
-    apply {
-        bool hasReturned_4 = false;
-        p1.apply(qArg1, qArg2);
+        bool hasExited = false;
+        pArg1_0_0 = qArg1;
+        pArg2_0_0 = qArg2;
+        p1_T.apply(pArg1_0_0, pArg2_0_0);
+        p1_T.apply(pArg1_0_0, pArg2_0_0);
+        p1_Tinner.apply();
+        qArg1 = pArg1_0_0;
+        qArg2 = pArg2_0_0;
     }
 }
 

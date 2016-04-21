@@ -1,11 +1,10 @@
 #include <stdio.h>
-#include <gc/gc_cpp.h>
-
 #include <string>
 #include <iostream>
 
 #include "ir/ir.h"
 #include "lib/log.h"
+#include "lib/crash.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
 
@@ -33,6 +32,7 @@ void compile(EbpfOptions& options, FILE* in) {
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
+    setup_signals();
 
     EbpfOptions options;
     if (options.process(argc, argv) != nullptr)

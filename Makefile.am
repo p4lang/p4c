@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(srcdir)/frontends -I$(srcdir)/backends -I$(srcdir)/extensions -Wall -Wextra \
-    -Wno-deprecated-register -Wno-overloaded-virtual -Wno-deprecated
+    -Wno-deprecated-register -Wno-overloaded-virtual -Wno-deprecated -Wuninitialized -Wsometimes-uninitialized
 AM_YFLAGS = -v
 
 TOOLSDIR=$(srcdir)/tools

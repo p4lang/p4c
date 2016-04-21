@@ -951,14 +951,16 @@ const IR::Node* TypeChecker::postorder(IR::Operation_Relation* expression) {
 
     bool equTest = expression->is<IR::Equ>() || expression->is<IR::Neq>();
 
-    if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
+    if (ltype->is<IR::Type_VarInfInt>() && rtype->is<IR::Type_Bits>()) {
         auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
+        setType(cast, rtype);
         auto e = expression->clone();
         e->left = cast;
         expression = e;
         ltype = rtype;
-    } else if (rtype->is<IR::Type_InfInt>() && ltype->is<IR::Type_Bits>()) {
+    } else if (rtype->is<IR::Type_VarInfInt>() && ltype->is<IR::Type_Bits>()) {
         auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
+        setType(cast, ltype);
         auto e = expression->clone();
         e->right = cast;
         expression = e;
@@ -1961,12 +1963,15 @@ const IR::Node* TypeChecker::postorder(IR::SwitchStatement* stat) {
     auto ae = type->to<IR::Type_ActionEnum>();
     std::set<cstring> foundLabels;
     for (auto c : *stat->cases) {
-        if (foundLabels.find(c->label.name) != foundLabels.end())
-            ::error("%1%: duplicate switch label", c->label.name);
-        foundLabels.emplace(c->label.name);
-        if (c->label.name == IR::SwitchStatement::default_label)
+        if (c->label->is<IR::DefaultExpression>())
             continue;
-        if (!ae->contains(c->label.name))
+        auto pe = c->label->to<IR::PathExpression>();
+        CHECK_NULL(pe);
+        cstring label = pe->path->name.name;
+        if (foundLabels.find(label) != foundLabels.end())
+            ::error("%1%: duplicate switch label", c->label);
+        foundLabels.emplace(label);
+        if (!ae->contains(label))
             ::error("%1% is not a legal label", c->label);
     }
     return stat;

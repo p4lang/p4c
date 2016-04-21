@@ -70,6 +70,7 @@ void CFG::Node::computeSuccessors() {
         e->getNode()->successors.emplace(e->clone(this));
 }
 
+namespace {
 // This visitor "converts" IR::Node* into EdgeSets
 // Since we cannot return EdgeSets, we place them in the 'after' map.
 class CFGBuilder : public Inspector {
@@ -178,7 +179,15 @@ class CFGBuilder : public Inspector {
         auto result = new CFG::EdgeSet(new CFG::Edge(node));  // In case no label matches
         auto labels = new CFG::EdgeSet();
         for (auto sw : *statement->cases) {
-            labels->mergeWith(new CFG::EdgeSet(new CFG::Edge(node, sw->label)));
+            cstring label;
+            if (sw->label->is<IR::DefaultExpression>())
+                label = "default";
+            else {
+                auto pe = sw->label->to<IR::PathExpression>();
+                CHECK_NULL(pe);
+                label = pe->path->name.name;
+            }
+            labels->mergeWith(new CFG::EdgeSet(new CFG::Edge(node, label)));
             if (sw->statement != nullptr) {
                 current = labels;
                 visit(sw->statement);
@@ -200,6 +209,7 @@ class CFGBuilder : public Inspector {
         return current;
     }
 };
+}  // end anonymous namespace
 
 void CFG::build(const IR::P4Control* cc,
                 const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap) {
@@ -218,6 +228,7 @@ void CFG::build(const IR::P4Control* cc,
     }
 }
 
+namespace {
 class DiscoverStructure : public Inspector {
     ProgramParts*           structure;
 
@@ -239,6 +250,7 @@ class DiscoverStructure : public Inspector {
         structure->actions.emplace(action, control);
     }
 };
+}
 
 void ProgramParts::analyze(P4::BlockMap* blockMap) {
     DiscoverStructure disc(this);

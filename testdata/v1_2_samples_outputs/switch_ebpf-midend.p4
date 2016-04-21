@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/ebpf_model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/ebpf_model.p4"
 
 typedef bit<48> @ethernetaddress EthernetAddress;
 typedef bit<32> @ipv4address IPv4Address;
@@ -61,7 +61,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         pass = true;
         switch (Check_src_ip.apply().action_run) {
             Reject: {

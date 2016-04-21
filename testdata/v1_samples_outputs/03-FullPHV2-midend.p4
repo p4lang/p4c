@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct m_t {
     bit<8>  field_8_01;
@@ -253,13 +253,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("a1") action a1() {
-        bool hasReturned_2 = false;
         meta.m.field_8_01 = 8w1;
         meta.m.field_8_02 = 8w2;
         meta.m.field_8_03 = 8w3;
@@ -358,7 +357,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_32_64 = 32w64;
     }
     @name("a2_1") action a2_1() {
-        bool hasReturned_3 = false;
         meta.m.field_16_01 = 16w1;
         meta.m.field_16_02 = 16w2;
         meta.m.field_16_03 = 16w3;
@@ -409,7 +407,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_48 = 16w48;
     }
     @name("a2_2") action a2_2() {
-        bool hasReturned_4 = false;
         meta.m.field_16_49 = 16w49;
         meta.m.field_16_50 = 16w50;
         meta.m.field_16_51 = 16w51;
@@ -435,7 +432,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_72 = 16w72;
     }
     @name("a2_3") action a2_3() {
-        bool hasReturned_5 = false;
         meta.m.field_16_73 = 16w73;
         meta.m.field_16_74 = 16w74;
         meta.m.field_16_75 = 16w75;
@@ -462,10 +458,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_16_96 = 16w96;
     }
     @name("a3_1") action a3_1() {
-        bool hasReturned_6 = false;
     }
     @name("a4_1") action a4_1() {
-        bool hasReturned_7 = false;
     }
     @name("t1") table t1() {
         actions = {
@@ -667,7 +661,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         t1.apply();
         t2_1.apply();
         t2_2.apply();
@@ -679,20 +673,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_8 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_9 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_10 = false;
+        bool hasExited_3 = false;
     }
 }
 

@@ -4,11 +4,12 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
     vector<std::pair<vector<Visitor *>::iterator, const IR::Node *>> backup;
 
     for (auto it = passes.begin(); it != passes.end();) {
-        if (dynamic_cast<Backtrack *>(*it))
+        Visitor* v = *it;
+        if (dynamic_cast<Backtrack *>(v))
             backup.emplace_back(it, program);
         try {
             try {
-                LOG1("Invoking " << (*it)->name());
+                LOG1("Invoking " << v->name());
                 program = program->apply(**it);
                 int errors = ErrorReporter::instance.getErrorCount();
                 if (stop_on_error && errors > 0) {
@@ -16,7 +17,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                     program = nullptr;
                 }
                 if (program == nullptr) break;
-            } catch (Backtrack::trigger::type_t trig_type) {
+            } catch (Backtrack::trigger::type_t &trig_type) {
                 throw Backtrack::trigger(trig_type);
             }
         } catch (Backtrack::trigger &trig) {

@@ -1,13 +1,18 @@
 #ifndef _FRONTENDS_P4_CALLGRAPH_H_
 #define _FRONTENDS_P4_CALLGRAPH_H_
 
+#include <vector>
+#include "lib/log.h"
+#include "lib/ordered_map.h"
+
 namespace P4 {
 
 template <class T>
 class CallGraph {
  protected:
     cstring name;
-    std::map<T, std::vector<T>*> calls;  // map caller to list of callees
+    // Use an ordered map to make this deterministic
+    ordered_map<T, std::vector<T>*> calls;  // map caller to list of callees
     std::set<T> callees;                 // all callees
 
     void sort(T el, std::vector<T> &out, std::set<T> &done)  {
@@ -23,14 +28,14 @@ class CallGraph {
     }
 
  public:
-    typedef typename std::map<T, std::vector<T>*>::iterator iterator;
+    typedef typename ordered_map<T, std::vector<T>*>::iterator iterator;
 
     explicit CallGraph(cstring name) : name(name) {}
     void add(T caller) {
         if (isCaller(caller))
             return;
         LOG1(name << ": " << caller);
-        calls.emplace(caller, new std::vector<T>());
+        calls[caller] = new std::vector<T>();
     }
     void add(T caller, T callee) {
         LOG1(name << ": " << callee << " is called by " << caller);

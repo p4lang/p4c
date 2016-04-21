@@ -727,7 +727,7 @@ bool ToP4::preorder(const IR::MethodCallStatement* s) {
 }
 
 bool ToP4::preorder(const IR::SwitchCase* s) {
-    builder.append(s->label);
+    visit(s->label);
     builder.append(": ");
     visit(s->statement);
     return false;

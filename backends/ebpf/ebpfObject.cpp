@@ -84,6 +84,7 @@ void EBPFProgram::emitTypes(CodeBuilder* builder) {
     }
 }
 
+namespace {
 class ErrorCodesVisitor : public Inspector {
     CodeBuilder* builder;
  public:
@@ -96,6 +97,7 @@ class ErrorCodesVisitor : public Inspector {
         return false;
     }
 };
+}
 
 void EBPFProgram::emitPreamble(CodeBuilder* builder) {
     builder->emitIndent();

@@ -37,8 +37,7 @@ class DirectMeterMap final {
 };
 
 class JsonConverter final {
-    friend class ExpressionConverter;
-
+ public:
     const CompilerOptions& options;
     Util::JsonObject       toplevel;  // output is constructed here
     P4V1::V1Model&         v1model;

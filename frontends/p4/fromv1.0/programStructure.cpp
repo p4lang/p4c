@@ -412,6 +412,7 @@ void ProgramStructure::loadModel() {
     include("v1model.p4");
 }
 
+namespace {
 // Must return a 'canonical' representation of each header.
 // If a header appears twice this must return the SAME expression.
 class HeaderRepresentation {
@@ -457,6 +458,7 @@ class HeaderRepresentation {
         return fakeHeader[state];
     }
 };
+}
 
 void ProgramStructure::createDeparser() {
     auto headpath = new IR::Path(v1model.headersType.Id());
@@ -1485,9 +1487,10 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
             cstring newname = controls.get(control);
             auto typepath = new IR::Path(IR::ID(newname));
             auto type = new IR::Type_Name(typepath);
+            auto annos = addNameAnnotation(cc);
             auto decl = new IR::Declaration_Instance(
                 Util::SourceInfo(), IR::ID(iname), type,
-                new IR::Vector<IR::Expression>(), IR::Annotations::empty);
+                new IR::Vector<IR::Expression>(), annos);
             stateful->addUnique(decl->name, decl);
         }
     }

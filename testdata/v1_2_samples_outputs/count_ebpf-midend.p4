@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/ebpf_model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/ebpf_model.p4"
 
 typedef bit<48> @ethernetaddress EthernetAddress;
 typedef bit<32> @ipv4address IPv4Address;
@@ -46,7 +46,7 @@ parser prs(packet_in p, out Headers_t headers) {
 control pipe(inout Headers_t headers, out bool pass) {
     CounterArray(32w10, true) counters;
     apply {
-        bool hasReturned = false;
+        bool hasExited = false;
         if (headers.ipv4.isValid()) {
             counters.increment((bit<32>)headers.ipv4.dstAddr);
             pass = true;

@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct ingress_metadata_t {
     bit<3>  lkp_pkt_type;
@@ -61,84 +61,72 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("set_valid_outer_unicast_packet_untagged") action set_valid_outer_unicast_packet_untagged() {
-        bool hasReturned_1 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w1;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name("set_valid_outer_unicast_packet_single_tagged") action set_valid_outer_unicast_packet_single_tagged() {
-        bool hasReturned_2 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w1;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
     }
     @name("set_valid_outer_unicast_packet_double_tagged") action set_valid_outer_unicast_packet_double_tagged() {
-        bool hasReturned_3 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w1;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
     }
     @name("set_valid_outer_unicast_packet_qinq_tagged") action set_valid_outer_unicast_packet_qinq_tagged() {
-        bool hasReturned_4 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w1;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name("set_valid_outer_multicast_packet_untagged") action set_valid_outer_multicast_packet_untagged() {
-        bool hasReturned_5 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w2;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name("set_valid_outer_multicast_packet_single_tagged") action set_valid_outer_multicast_packet_single_tagged() {
-        bool hasReturned_6 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w2;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
     }
     @name("set_valid_outer_multicast_packet_double_tagged") action set_valid_outer_multicast_packet_double_tagged() {
-        bool hasReturned_7 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w2;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
     }
     @name("set_valid_outer_multicast_packet_qinq_tagged") action set_valid_outer_multicast_packet_qinq_tagged() {
-        bool hasReturned_8 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w2;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name("set_valid_outer_broadcast_packet_untagged") action set_valid_outer_broadcast_packet_untagged() {
-        bool hasReturned_9 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w4;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.ethernet.etherType;
     }
     @name("set_valid_outer_broadcast_packet_single_tagged") action set_valid_outer_broadcast_packet_single_tagged() {
-        bool hasReturned_10 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w4;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
     }
     @name("set_valid_outer_broadcast_packet_double_tagged") action set_valid_outer_broadcast_packet_double_tagged() {
-        bool hasReturned_11 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w4;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
         meta.ingress_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
     }
     @name("set_valid_outer_broadcast_packet_qinq_tagged") action set_valid_outer_broadcast_packet_qinq_tagged() {
-        bool hasReturned_12 = false;
         meta.ingress_metadata.lkp_pkt_type = 3w4;
         meta.ingress_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
         meta.ingress_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
@@ -170,20 +158,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
         validate_outer_ethernet.apply();
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_13 = false;
+        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_14 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.vlan_tag_);
     }
@@ -191,13 +179,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_15 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_16 = false;
+        bool hasExited_3 = false;
     }
 }
 

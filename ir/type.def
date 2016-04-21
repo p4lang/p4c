@@ -375,7 +375,7 @@ class Type_Enum : Type_Declaration, ISimpleNamespace {
 class Type_Table : Type, IApply {
     P4Table  container;
 #emit
-    mutable const Type_Method* applyMethod; // type of the apply method cached here
+    mutable const Type_Method* applyMethod = nullptr; // type of the apply method cached here
     const Type_Method* getApplyMethodType() const;
     // names for the fields of the struct returned
     // by applying a table

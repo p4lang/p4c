@@ -149,7 +149,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
 
-    process_mac_rewrite() process_mac_rewrite_0;
+    process_mac_rewrite() @name("process_mac_rewrite") process_mac_rewrite_0;
     apply {
         setup.apply();
         process_mac_rewrite_0.apply(hdr, meta, standard_metadata);

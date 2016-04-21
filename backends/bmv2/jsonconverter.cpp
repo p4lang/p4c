@@ -9,6 +9,7 @@
 
 namespace BMV2 {
 
+namespace {
 // BMv2 does not do arithmetic operations according to the P4 v1.1 and later spec.
 // So we have to do it in the compiler.
 class ArithmeticFixup : public Transform {
@@ -67,7 +68,7 @@ class ArithmeticFixup : public Transform {
         return updateType(expression);
     }
 };
-
+}
 
 DirectMeterMap::DirectMeterInfo* DirectMeterMap::createInfo(const IR::IDeclaration* meter) {
     auto prev = ::get(directMeter, meter);
@@ -231,19 +232,6 @@ class ExpressionConverter : public Inspector {
     }
 
     void postorder(const IR::Cast* expression) override {
-#if 0
-        auto desttype = converter->typeMap->getType(expression->type, true);
-        auto srctype = converter->typeMap->getType(expression->expr, true);
-        // some casts just "work" without doing anything
-        if (desttype->is<IR::Type_Bits>() && srctype->is<IR::Type_Bits>()) {
-            auto db = desttype->to<IR::Type_Bits>();
-            auto sb = srctype->to<IR::Type_Bits>();
-            if (db->isSigned != sb->isSigned ||
-                (db->isSigned && sb->isSigned && db->size > sb->size))
-                ::warning("%1%: Casts not supported on this target; will do best-effort conversion",
-                          expression);
-        }
-#endif
         // nothing to do for casts - the ArithmeticFixup pass should have handled them already
         auto j = get(expression->expr);
         map.emplace(expression, j);
@@ -1162,7 +1150,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
             nextDestination = s->endpoint;
         else if (s->isBool())
             hitMiss = true;
-        else if (s->label == IR::SwitchStatement::default_label)
+        else if (s->label == "default")
             defaultLabelDestination = s->endpoint;
     }
 
@@ -1187,8 +1175,8 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
         } else if (s->isUnconditional()) {
             continue;
         } else {
-            label = s->label.name;
-            if (label == IR::SwitchStatement::default_label)
+            label = s->label;
+            if (label == "default")
                 continue;
             label = ::get(useActionName, label);
         }

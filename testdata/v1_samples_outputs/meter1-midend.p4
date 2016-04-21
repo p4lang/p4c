@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/build/../p4include/core.p4"
-#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
 
 struct intrinsic_metadata_t {
     bit<4>  mcast_grp;
@@ -42,18 +42,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_0 = false;
+        bool hasExited = false;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     DirectMeter<bit<32>>(CounterType.Packets) @name("my_meter") my_meter;
     @name("_drop") action _drop() {
-        bool hasReturned_2 = false;
         mark_to_drop();
     }
     @name("_nop") action _nop() {
-        bool hasReturned_3 = false;
     }
     @name("m_filter") table m_filter() {
         actions = {
@@ -69,13 +67,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     @name("m_action") action m_action_0(bit<9> meter_idx) {
-        bool hasReturned_4 = false;
         standard_metadata.egress_spec = meter_idx;
         standard_metadata.egress_spec = 9w1;
         my_meter.read(meta.meta.meter_tag);
     }
     @name("_nop") action _nop_0() {
-        bool hasReturned_5 = false;
         my_meter.read(meta.meta.meter_tag);
     }
     @name("m_table") table m_table() {
@@ -93,7 +89,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 
     apply {
-        bool hasReturned_1 = false;
+        bool hasExited_0 = false;
         m_table.apply();
         m_filter.apply();
     }
@@ -101,20 +97,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasReturned_6 = false;
+        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasReturned_7 = false;
+        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasReturned_8 = false;
+        bool hasExited_3 = false;
     }
 }
 

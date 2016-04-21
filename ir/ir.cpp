@@ -12,7 +12,6 @@ const cstring TableProperties::actionsPropertyName = "actions";
 const cstring TableProperties::keyPropertyName = "key";
 const cstring TableProperties::defaultActionPropertyName = "default_action";
 const cstring IApply::applyMethodName = "apply";
-const cstring SwitchStatement::default_label = "default";
 const cstring P4Program::main = "main";
 
 int IR::Declaration::nextId = 0;
@@ -154,7 +153,7 @@ void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue*> *args) 
     auto it = args->begin();
     for (auto p : *getConstructorParameters()->getEnumerator()) {
         LOG1("Set " << p << " to " << *it << " in " << id);
-        constantValue.emplace(p, *it);
+        setValue(p, *it);
         ++it;
     }
 }
