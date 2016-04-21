@@ -1,12 +1,14 @@
 
 AC_CHECK_PROG([cli], [simple_switch_CLI],[yes],[no])
 if test x"$cli" != x"yes"; then
-   AC_MSG_ERROR([Required program 'simple_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found.])
-fi
-
-AC_CHECK_PROG([ss],[simple_switch],[yes],[no])
-if test x"$ss" != x"yes"; then
-   AC_MSG_ERROR([Required program 'simple_switch' (https://github.com/p4lang/behavioral-model.git) not found.])
+   AC_MSG_WARN([Program 'simple_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found; will not run BMv2 tests.])
+else
+   AC_CHECK_PROG([ss],[simple_switch],[yes],[no])
+   if test x"$ss" != x"yes"; then
+      AC_MSG_WARN([Program 'simple_switch' (https://github.com/p4lang/behavioral-model.git) not found; will not run BMv2 tests.])
+   else
+      AC_DEFINE(HAVE_SIMPLE_SWITCH, 1, "BMv2 programs found")
+   fi
 fi
 
 AX_PYTHON_MODULE([scapy], [fatal], [python])

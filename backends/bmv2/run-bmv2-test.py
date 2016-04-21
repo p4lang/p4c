@@ -33,7 +33,52 @@ class Options(object):
         self.verbose = False
         self.replace = False            # replace previous outputs
         self.compilerOptions = []
+        self.hasBMv2 = False            # Is the behavioral model installed?
 
+def nextWord(text, sep = " "):
+    # Split a text at the indicated separator. 
+    # Note that the separator can be a string.
+    # Separator is discarded.
+    pos = text.find(sep)
+    if pos < 0:
+        return text, ""
+    l, r = text[0:pos].strip(), text[pos+len(sep):len(text)].strip()
+    # print(text, "/", sep, "->", l, "#", r)
+    return l, r
+
+class ConfigH(object):
+    # Represents an autoconf config.h file
+    # fortunately the structure of these files is very constrained
+    def __init__(self, file):
+        self.file = file
+        self.vars = {}
+        with open(file) as a:
+            self.text = a.read()
+        self.ok = False
+        self.parse()
+    def parse(self):
+        while self.text != "":
+            self.text = self.text.strip()
+            if self.text.startswith("/*"):
+                end = self.text.find("*/")
+                if end < 1:
+                    reportError("Unterminated comment in config file")
+                    return
+                self.text = self.text[end+2:len(self.text)]
+            elif self.text.startswith("#define"):
+                define, self.text = nextWord(self.text)
+                macro, self.text = nextWord(self.text)
+                value, self.text = nextWord(self.text, "\n")
+                self.vars[macro] = value
+            elif self.text.startswith("#ifndef"):
+                junk, self.text = nextWord(self.text, "#endif")
+            else:
+                reportError("Unexpected text:", self.text)
+                return
+        self.ok = True
+    def __str__(self):
+        return str(self.vars)
+        
 def usage(options):
     name = options.binary
     print(name, "usage:")
@@ -171,14 +216,6 @@ def check_generated_files(options, tmpdir, expecteddir):
             if result != SUCCESS:
                 return result
     return SUCCESS
-
-def nextWord(text, sep = " "):
-    space = text.find(sep)
-    if space < 0:
-        return text, ""
-    l, r = text[0:space].strip(), text[space+1:len(text)].strip()
-    # print(text, "/", sep, "->", l, "#", r)
-    return l, r
 
 class BMV2ActionArg(object):
     def __init__(self, name, width):
@@ -554,6 +591,9 @@ class RunBMV2(object):
         return SUCCESS
 
 def run_model(options, tmpdir, jsonfile):
+    if not options.hasBMv2:
+        return SUCCESS
+    
     # We can do this if an *.stf file is present
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
@@ -664,6 +704,15 @@ def main(argv):
             usage(options)
         argv = argv[1:]
 
+    config = ConfigH("config.h")
+    if not config.ok:
+        print("Error parsing config.h")
+        return FAILURE
+
+    options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
+    if not options.hasBMv2:
+        reportError("config.h indicates that BMv2 is not installed; will skip running BMv2 tests")
+    
     options.p4filename=argv[-1]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcDir):
