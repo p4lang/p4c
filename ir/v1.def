@@ -83,35 +83,6 @@ class ConcreteHeaderRef : HeaderRef {
     dbprint{ out << ref->name; }
 }
 
-class HeaderSliceRef : Slice {
-#nodbprint
-#noconstructor
-#emit
-  HeaderSliceRef(Util::SourceInfo si, const IR::HeaderRef* header_ref,
-                 const int &msb, const int &lsb) :
-    Slice(si, header_ref, new IR::Constant(msb), new IR::Constant(lsb)) {
-    assert(lsb <= msb);
-    type = Type_Bits::get(si, msb - lsb + 1); }
-  HeaderSliceRef(const Member *fr) :
-    Slice(fr->srcInfo, fr->expr, new Constant(fr->msb()), new Constant(fr->lsb())) {
-    assert(fr->lsb() <= fr->msb());
-    type = Type_Bits::get(fr->srcInfo, fr->msb() - fr->lsb() + 1); }
-  const HeaderRef* header_ref() const {
-    return e0->to<const HeaderRef>(); }
-  Vector<Member> fields() const {
-    Vector<Member> rv;
-    for (auto field : *header_ref()->type->to<IR::Type_StructLike>()->getEnumerator()) {
-      const IR::Member fr(srcInfo, field->type, header_ref(), field->name);
-      if (fr.lsb() >= lsb() && fr.msb() <= msb())
-        rv.push_back(new Member(fr));
-    }
-    return rv; }
-  int offset_bits() const { return e2->to<const Constant>()->asInt(); }
-  int lsb() const { return offset_bits(); }
-  int msb() const { return offset_bits() + type->width_bits() - 1; }
-#end
-}
-
 class HeaderStackItemRef : HeaderRef {
     Expression      base_;
     Expression      index_;
