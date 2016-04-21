@@ -69,6 +69,10 @@ template<class T> class Alloc2Dbase {
     rowref<const T> operator[](int i) const {
         if (i < 0 || i >= nrows) throw std::out_of_range("Alloc2D");
         return rowref<const T>(data+i*ncols, ncols); }
+    T &at(int i, int j) {
+        if (i < 0 || i >= nrows || j < 0 || j >= ncols)
+            throw std::out_of_range("Alloc2D");
+        return data[i*ncols + j]; }
     const T &at(int i, int j) const {
         if (i < 0 || i >= nrows || j < 0 || j >= ncols)
             throw std::out_of_range("Alloc2D");

@@ -76,9 +76,35 @@ std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v)
 inline std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v) {
     return v ? out << *v : out << "<null>"; }
 
+#include "lib/ordered_map.h"
+template <class MAP> static inline void
+namemap_insert_helper(typename MAP::iterator, typename MAP::key_type k,
+                      typename MAP::mapped_type v, MAP &, MAP &new_symbols) {
+    new_symbols.emplace(std::move(k), std::move(v));
+}
+
+template <class MAP, class InputIterator> static inline void
+namemap_insert_helper(typename MAP::iterator, InputIterator b, InputIterator e,
+                      MAP &, MAP &new_symbols) {
+    new_symbols.insert(b, e);
+}
+
+template <class T> static inline void
+namemap_insert_helper(typename ordered_map<cstring, T>::iterator it, cstring k, T v,
+                      ordered_map<cstring, T> &symbols, ordered_map<cstring, T> &) {
+    symbols.emplace_hint(it, std::move(k), std::move(v));
+}
+
+template <class T, class InputIterator> static inline void
+namemap_insert_helper(typename ordered_map<cstring, T>::iterator it,
+                      InputIterator b, InputIterator e,
+                      ordered_map<cstring, T> &symbols, ordered_map<cstring, T> &) {
+    symbols.insert(it, b, e);
+}
+
 template<class T, template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
          class COMP /*= std::less<cstring>*/,
-         class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
+         class ALLOC /*= std::allocator<std::pair<const cstring, const T*>>*/>
 void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
     map_t   new_symbols;
     for (auto i = symbols.begin(); i != symbols.end();) {
@@ -88,14 +114,14 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
         } else if (n == i->second) {
             i++;
         } else if (auto m = dynamic_cast<const NameMap *>(n)) {
-            new_symbols.insert(m->symbols.begin(), m->symbols.end());
+            namemap_insert_helper(i, m->symbols.begin(), m->symbols.end(), symbols, new_symbols);
             i = symbols.erase(i);
         } else if (auto s = dynamic_cast<const T *>(n)) {
             if (match_name(i->first, s)) {
                 i->second = s;
                 i++;
             } else {
-                new_symbols.emplace(obj_name(s), std::move(s));
+                namemap_insert_helper(i, cstring(obj_name(s)), std::move(s), symbols, new_symbols);
                 i = symbols.erase(i); }
         } else {
             BUG("visitor returned invalid type %s for NameMap<%s>",

@@ -2,6 +2,7 @@
 #define P4C_LIB_LOG_H_
 
 #include <iostream>
+#include <set>
 #include <vector>
 
 #ifndef __GNUC__
@@ -63,6 +64,15 @@ template<class T> std::ostream &operator<<(std::ostream &out, const std::vector<
         out << sep << el;
         sep = ", "; }
     out << (sep+1) << ']';
+    return out; }
+
+template<class T> std::ostream &operator<<(std::ostream &out, const std::set<T> &vec) {
+    const char *sep = " ";
+    out << '(';
+    for (auto &el : vec) {
+        out << sep << el;
+        sep = ", "; }
+    out << (sep+1) << ')';
     return out; }
 
 #endif /* P4C_LIB_LOG_H_ */

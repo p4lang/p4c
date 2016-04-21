@@ -132,13 +132,6 @@ public:
         if (it == data.end()) throw std::out_of_range("ordered_map");
         return it->second; }
 
-    std::pair<iterator, bool> insert(const value_type &v) {
-        auto it = find(v.first);
-        if (it == data.end()) {
-            it = data.insert(data.end(), v);
-            data_map.emplace(&it->first, it);
-            return std::make_pair(it, true); }
-        return std::make_pair(it, false); }
     std::pair<iterator, bool> emplace(K &&k, V &&v) {
         auto it = find(k);
         if (it == data.end()) {
@@ -146,8 +139,36 @@ public:
             data_map.emplace(&it->first, it);
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
+    std::pair<iterator, bool> emplace_hint(iterator pos, K &&k, V &&v) {
+        /* should be const_iterator pos, but glibc++ std::list is broken */
+        auto it = find(k);
+        if (it == data.end()) {
+            it = data.emplace(pos, std::move(k), std::move(v));
+            data_map.emplace(&it->first, it);
+            return std::make_pair(it, true); }
+        return std::make_pair(it, false); }
+
+    std::pair<iterator, bool> insert(const value_type &v) {
+        auto it = find(v.first);
+        if (it == data.end()) {
+            it = data.insert(data.end(), v);
+            data_map.emplace(&it->first, it);
+            return std::make_pair(it, true); }
+        return std::make_pair(it, false); }
+    std::pair<iterator, bool> insert(iterator pos, const value_type &v) {
+        /* should be const_iterator pos, but glibc++ std::list is broken */
+        auto it = find(v.first);
+        if (it == data.end()) {
+            it = data.insert(pos, v);
+            data_map.emplace(&it->first, it);
+            return std::make_pair(it, true); }
+        return std::make_pair(it, false); }
     template<class InputIterator> void insert(InputIterator b, InputIterator e) {
         while (b != e) insert(*b++); }
+    template<class InputIterator>
+    void insert(iterator pos, InputIterator b, InputIterator e) {
+        /* should be const_iterator pos, but glibc++ std::list is broken */
+        while (b != e) insert(pos, *b++); }
 
     /* should be erase(const_iterator), but glibc++ std::list::erase is broken */
     iterator erase(iterator pos) {
