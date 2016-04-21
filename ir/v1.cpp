@@ -104,7 +104,30 @@ class ActionArgSetup : public Transform {
     void add_arg(const IR::ActionArg *a) { args[a->name] = a; }
     void add_arg(cstring name, const IR::Expression *e) { args[name] = e; }
 };
-}
+
+class ActionBodySetup : public Inspector {
+    IR::ActionFunction      *af;
+    ActionArgSetup          &setup;
+    bool preorder(const IR::Vector<IR::StatOrDecl> *) override { return true; }
+    bool preorder(const IR::BlockStatement *) override { return true; }
+    bool preorder(const IR::AssignmentStatement *assign) override {
+        cstring pname = "modify_field";
+        if (assign->left->type->is<IR::Type_Header>())
+            pname = "copy_header";
+        auto prim = new IR::Primitive(assign->srcInfo, pname, assign->left, assign->right);
+        af->action.push_back(prim->apply(setup));
+        return false; }
+    bool preorder(const IR::MethodCallStatement *mc) override {
+        ERROR("extern method call " << mc << " not yet implemented");
+        return false; }
+    bool preorder(const IR::Node *n) override {
+        BUG("un-handled node %1% in action", n);
+        return false; }
+
+ public:
+    ActionBodySetup(IR::ActionFunction *af, ActionArgSetup &setup) : af(af), setup(setup) {}
+};
+}  // anonymous namespace
 
 IR::ActionFunction::ActionFunction(const P4Action *ac, const Vector<Expression> *args) {
     srcInfo = ac->srcInfo;
@@ -123,27 +146,34 @@ IR::ActionFunction::ActionFunction(const P4Action *ac, const Vector<Expression> 
                 setup.add_arg(param->name, args->at(arg_idx++)); } }
     if (arg_idx != (args ? args->size(): 0))
         error("%s: Too many args for %s", args->srcInfo, ac);
-    for (auto stmt : *ac->body)
-        if (auto assign = stmt->to<IR::AssignmentStatement>()) {
-            auto prim = new IR::Primitive("modify_field", assign->left, assign->right);
-            action.push_back(prim->apply(setup));
-        } else if (auto mc = stmt->to<IR::MethodCallStatement>()) {
-            BUG("extern method call %1% not yet implemented", mc);
-        } else {
-            BUG("un-handled statment %1% in action", stmt); }
+    ac->body->apply(ActionBodySetup(this, setup));
+}
+
+static void setIntProperty(cstring name, int *val, const IR::PropertyValue *pval) {
+    if (auto *ev = pval->to<IR::ExpressionValue>()) {
+        if (auto *cv = ev->expression->to<IR::Constant>()) {
+            *val = cv->asInt();
+            return; } }
+    error("%s: %s property must be a constant", pval->srcInfo, name);
 }
 
 IR::V1Table::V1Table(const P4Table *tc) {
     srcInfo = tc->srcInfo;
     name = tc->name;
     for (auto prop : *tc->properties->getEnumerator()) {
-        if (auto key = prop->value->to<Key>()) {
+        if (prop->name == "key") {
             auto reads = new IR::Vector<IR::Expression>();
-            for (auto el : *key->keyElements) {
+            for (auto el : *prop->value->to<Key>()->keyElements) {
                 reads->push_back(el->expression);
                 reads_types.push_back(el->matchType->path->name); }
             this->reads = reads;
-        } else if (auto actions = prop->value->to<ActionList>()) {
-            for (auto el : *actions->actionList)
-                this->actions.push_back(el->name->path->name); } }
+        } else if (prop->name == "actions") {
+            for (auto el : *prop->value->to<ActionList>()->actionList)
+                this->actions.push_back(el->name->path->name);
+        } else if (prop->name == "size") {
+            setIntProperty(prop->name, &size, prop->value);
+        } else if (prop->name == "min_size") {
+            setIntProperty(prop->name, &min_size, prop->value);
+        } else if (prop->name == "max_size") {
+            setIntProperty(prop->name, &max_size, prop->value); } }
 }

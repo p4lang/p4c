@@ -8,6 +8,8 @@ class PassManager : virtual public Visitor {
     vector<Visitor *>   passes;
     // if true stops compilation after first pass that signals an error
     bool                stop_on_error = false;
+    void addPasses(const std::initializer_list<Visitor *> &init) {
+        for (auto p : init) if (p) passes.emplace_back(p); }
  public:
     PassManager() = default;
     PassManager(const std::initializer_list<Visitor *> &init) :
@@ -33,6 +35,22 @@ class VisitFunctor : virtual public Visitor {
         fn(); return n; }
  public:
     explicit VisitFunctor(std::function<void()> f) : fn(f) {}
+};
+
+class DynamicVisitor : virtual public Visitor {
+    Visitor     *visitor;
+    profile_t init_apply(const IR::Node *root) {
+        if (visitor) return visitor->init_apply(root);
+        return Visitor::init_apply(root); }
+    void end_apply(const IR::Node *root) {
+        if (visitor) visitor->end_apply(root); }
+    const IR::Node *apply_visitor(const IR::Node *root, const char *name = 0) override {
+        if (visitor) return visitor->apply_visitor(root, name);
+        return root; }
+ public:
+    DynamicVisitor() : visitor(nullptr) {}
+    explicit DynamicVisitor(Visitor *v) : visitor(v) {}
+    void setVisitor(Visitor *v) { visitor = v; }
 };
 
 #endif /* _IR_PASS_MANAGER_H_ */

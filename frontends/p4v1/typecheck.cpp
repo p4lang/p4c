@@ -50,15 +50,14 @@ class TypeCheck::Pass1 : public Transform {
             error("%s: %s is not a header", ref->base()->srcInfo, ref->base()->toString());
         return ref; }
     const IR::Node *postorder(IR::Member *ref) override {
-        if (ref->member.name[0] == '$') {
+        if (ref->member == "$valid") {
+            ref->type = IR::Type::Boolean::get();
         } else if (auto ht = ref->expr->type->to<IR::Type_StructLike>()) {
             auto f = ht->getField(ref->member);
             if (f != nullptr) {
                 ref->type = f->type;
                 return ref; }
-            error("%s: No field named %s in %s", ref->srcInfo, ref->member, ht->name);
-        } else if (ref->expr->toString() != "latest") {
-            error("%s: %s is not a header", ref->expr->srcInfo, ref->expr->toString()); }
+            error("%s: No field named %s in %s", ref->srcInfo, ref->member, ht->name); }
         return ref; }
 };
 
