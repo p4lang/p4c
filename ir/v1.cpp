@@ -120,6 +120,9 @@ class ActionBodySetup : public Inspector {
     bool preorder(const IR::MethodCallStatement *mc) override {
         ERROR("extern method call " << mc << " not yet implemented");
         return false; }
+    bool preorder(const IR::Declaration *) override {
+        // FIXME -- for now, ignoring local variables?  Need copy prop + dead code elim
+        return false; }
     bool preorder(const IR::Node *n) override {
         BUG("un-handled node %1% in action", n);
         return false; }

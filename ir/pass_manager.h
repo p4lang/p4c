@@ -37,11 +37,12 @@ class PassRepeated : virtual public PassManager {
 };
 
 class VisitFunctor : virtual public Visitor {
-    std::function<void()>       fn;
-    const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override {
-        fn(); return n; }
+    std::function<const IR::Node *(const IR::Node *)>       fn;
+    const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override { return fn(n); }
  public:
-    explicit VisitFunctor(std::function<void()> f) : fn(f) {}
+    explicit VisitFunctor(std::function<const IR::Node *(const IR::Node *)> f) : fn(f) {}
+    explicit VisitFunctor(std::function<void()> f)
+    : fn([f](const IR::Node *n)->const IR::Node *{ f(); return n; }) {}
 };
 
 class DynamicVisitor : virtual public Visitor {
