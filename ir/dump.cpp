@@ -31,7 +31,7 @@ class IRDumper : public Inspector {
     IRDumper(std::ostream &o, unsigned m, cstring ign) : out(o), maxdepth(m), ignore(ign)
     { visitDagOnce = false; }
 };
-}
+}  // namespace
 
 void dump(std::ostream &out, const IR::Node *n, unsigned maxdepth) {
     n->apply(IRDumper(out, maxdepth, nullptr)); }

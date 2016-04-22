@@ -33,7 +33,7 @@ class TypeMap final {
     static std::map<int, const IR::Type_Bits*> signedTypes;
     static std::map<int, const IR::Type_Bits*> unsignedTypes;
     static const IR::Type_InfInt* canonInfInt;
-    
+
  public:
     bool contains(const IR::Node* element) { return typeMap.count(element) != 0; }
     void setType(const IR::Node* element, const IR::Type* type);
@@ -48,7 +48,6 @@ class TypeMap final {
     const IR::Type_Bits* canonicalType(unsigned width, bool isSigned);
     const IR::Type_InfInt* canonicalInfInt() const
     { return TypeMap::canonInfInt; }
-
 };
 }  // namespace P4
 

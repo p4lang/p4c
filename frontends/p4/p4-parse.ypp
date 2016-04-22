@@ -123,7 +123,7 @@ static int yylex();
 %type<exprs>            argumentList nonEmptyArgList expressionList simpleExpressionList
                         tupleKeysetExpression
 %type<ids>              identifierList
-%type<id>               member 
+%type<id>               member
 %type<SelectCase>       selectCase
 %type<selectCases>      selectCaseList
 %type<Statement>        statement emptyStatement returnStatement switchStatement exitStatement

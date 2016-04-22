@@ -4,7 +4,7 @@
 #include <unordered_set>
 
 cstring &cstring::operator=(const char *p) {
-#if HAVE_LIBGV    
+#if HAVE_LIBGC
     /* DANGER -- on OSX, can't safely call the garbage collector allocation
      * routines from a static global constructor without manually initializing
      * it first.  Since we have a couple of global static cstrings, we need

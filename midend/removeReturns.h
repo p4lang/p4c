@@ -17,12 +17,13 @@ class RemoveReturns : public Transform {
         No,
         Maybe
     };
-    
+
     std::vector<Returns> stack;
     void push() { stack.push_back(Returns::No); }
     void pop() { stack.pop_back(); }
     void set(Returns r) { BUG_CHECK(!stack.empty(), "Empty stack"); stack.back() = r; }
     Returns hasReturned() { BUG_CHECK(!stack.empty(), "Empty stack"); return stack.back(); }
+
  public:
     explicit RemoveReturns(P4::ReferenceMap* refMap, bool removeReturns = true) :
             refMap(refMap), removeReturns(removeReturns) {}

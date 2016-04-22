@@ -5865,10 +5865,10 @@ def CheckMissingOverrideOrFinal(filename, clean_lines, linenum, nesting_state, e
     return
   if Search(r'\bpreorder\b *\(', line) and not Search(r'\boverride\b', line):
     error(filename, linenum, 'runtime/override', 4,
-          ('missing "override" on preorder function'))
+          ('missing "override" on visitor preorder function'))
   if Search(r'\bpostorder\b *\(', line) and not Search(r'\boverride\b', line):
     error(filename, linenum, 'runtime/override', 4,
-          ('missing "override" on postorder function'))
+          ('missing "override" on visitor postorder function'))
 
 # Returns true if we are at a new block, and it is directly
 # inside of a namespace.

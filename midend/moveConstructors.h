@@ -7,7 +7,7 @@ namespace P4 {
 
 class MoveConstructors : public PassManager {
  public:
-    MoveConstructors(bool isv1);
+    explicit MoveConstructors(bool isv1);
 };
 
 }  // namespace P4

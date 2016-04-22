@@ -9,7 +9,7 @@ bool TypeOccursVisitor::preorder(const IR::Type_Var* typeVariable) {
 }
 
 bool TypeOccursVisitor::preorder(const IR::Type_InfInt* typeVariable) {
-    if (*typeVariable == *(toFind->asType())) 
+    if (*typeVariable == *(toFind->asType()))
         occurs = true;
     return occurs;
 }

@@ -29,7 +29,7 @@ class StateTranslationVisitor : public CodeGenInspector {
     bool preorder(const IR::MethodCallStatement* stat) override
     { visit(stat->methodCall); return false; }
 };
-}
+}  // namespace
 
 bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     if (parserState->isBuiltin()) return false;

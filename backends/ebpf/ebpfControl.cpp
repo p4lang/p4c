@@ -10,7 +10,7 @@ namespace EBPF {
 namespace {
 // TODO: table applys should be compiled into separate inline functions,
 // and then we can generate calls as proper expressions.
-// Since then if (table.apply().hit) { ... }
+// Right now "if (table.apply().hit) { ... }"
 // is broken.
 class ControlTranslationVisitor : public CodeGenInspector {
     const EBPFControl* control;
@@ -32,7 +32,7 @@ class ControlTranslationVisitor : public CodeGenInspector {
     void processMethod(const P4::ExternMethod* method);
     void processApply(const P4::ApplyMethod* method);
 };
-}
+}  // namespace
 
 bool ControlTranslationVisitor::preorder(const IR::PathExpression* expression) {
     auto decl = control->program->refMap->getDeclaration(expression->path, true);

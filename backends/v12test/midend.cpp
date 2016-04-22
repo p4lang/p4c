@@ -23,7 +23,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     P4::ReferenceMap refMap;
 
     // std::ostream *debugStream = options.dumpStream("-debug");
-    
+
     PassManager simplify = {
         // Give each local declaration a unique internal name
         new P4::UniqueNames(isv1),

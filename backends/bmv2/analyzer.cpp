@@ -180,9 +180,9 @@ class CFGBuilder : public Inspector {
         auto labels = new CFG::EdgeSet();
         for (auto sw : *statement->cases) {
             cstring label;
-            if (sw->label->is<IR::DefaultExpression>())
+            if (sw->label->is<IR::DefaultExpression>()) {
                 label = "default";
-            else {
+            } else {
                 auto pe = sw->label->to<IR::PathExpression>();
                 CHECK_NULL(pe);
                 label = pe->path->name.name;
@@ -250,7 +250,7 @@ class DiscoverStructure : public Inspector {
         structure->actions.emplace(action, control);
     }
 };
-}
+}  // namespace
 
 void ProgramParts::analyze(P4::BlockMap* blockMap) {
     DiscoverStructure disc(this);

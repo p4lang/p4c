@@ -68,7 +68,7 @@ class ArithmeticFixup : public Transform {
         return updateType(expression);
     }
 };
-}
+}  // namespace
 
 DirectMeterMap::DirectMeterInfo* DirectMeterMap::createInfo(const IR::IDeclaration* meter) {
     auto prev = ::get(directMeter, meter);

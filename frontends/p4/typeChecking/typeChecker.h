@@ -102,7 +102,7 @@ class TypeChecker : public Transform {
     using Transform::preorder;
 
     const IR::Node* preorder(IR::Type* type) override;
-    
+
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Errors* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;

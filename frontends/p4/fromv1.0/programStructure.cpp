@@ -458,7 +458,7 @@ class HeaderRepresentation {
         return fakeHeader[state];
     }
 };
-}
+}  // namespace
 
 void ProgramStructure::createDeparser() {
     auto headpath = new IR::Path(v1model.headersType.Id());

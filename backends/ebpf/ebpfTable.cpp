@@ -42,7 +42,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
         return false;
     }
 };  // ActionTranslationVisitor
-}
+}  // namespace
 
 ////////////////////////////////////////////////////////////////
 

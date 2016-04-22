@@ -1,6 +1,6 @@
+#include <gc/gc_cpp.h>
 #include "indent.h"
 #include "config.h"
-#include <gc/gc_cpp.h>
 
 int indent_t::tabsz = 2;
 

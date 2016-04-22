@@ -136,12 +136,13 @@ bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
     return false;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace {
 class SymRenameMap {
     std::map<const IR::IDeclaration*, cstring> internalName;
     std::map<const IR::IDeclaration*, cstring> externalName;
+
  public:
     void setNewName(const IR::IDeclaration* decl, cstring name, cstring extName) {
         CHECK_NULL(decl);
@@ -191,7 +192,7 @@ class ComputeNewNames : public Inspector {
     void postorder(const IR::P4Action* action) override { rename(action); }
     void postorder(const IR::Declaration_Instance* instance) override { rename(instance); }
 };
-}
+}  // namespace
 
 // Add a @name annotation ONLY if it does not already exist.
 // Otherwise do nothing.
@@ -224,9 +225,9 @@ namespace {
 class Substitutions : public SubstituteParameters {
     P4::ReferenceMap* refMap;  // updated
     const SymRenameMap*  renameMap;
-    
+
  public:
-    Substitutions(P4::ReferenceMap* refMap, 
+    Substitutions(P4::ReferenceMap* refMap,
                   IR::ParameterSubstitution* subst,
                   IR::TypeVariableSubstitution* tvs,
                   const SymRenameMap* renameMap) :
@@ -287,7 +288,7 @@ class Substitutions : public SubstituteParameters {
         return result;
     }
 };
-}
+}  // namespace
 
 Visitor::profile_t GeneralInliner::init_apply(const IR::Node* node) {
     P4::ResolveReferences solver(refMap, true);
@@ -347,7 +348,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                 }
                 ++it;
             }
-            
+
             // Must rename all stateful declarations in the callee so that
             // they do not clash with stateful declarations in the caller
             // (variables and constants should already have unique names).
@@ -360,7 +361,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
             Substitutions rename(refMap, &subst, &tvs, &renameMap);
             clone = clone->apply(rename);
             CHECK_NULL(clone);
-            
+
             for (auto i : *clone->to<IR::P4Control>()->statefulEnumerator())
                 stateful->addUnique(i->name, i);
             workToDo->declToCallee[inst] = clone->to<IR::IContainer>();
@@ -408,7 +409,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
 
     // inline actual body
     body->append(*callee->body->components);
-    
+
     // Copy back out and inout parameters
     it = statement->methodCall->arguments->begin();
     for (auto p : callee->type->applyParams->parameters) {

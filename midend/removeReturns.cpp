@@ -75,7 +75,7 @@ const IR::Node* RemoveReturns::preorder(IR::BlockStatement* statement) {
         Returns r = hasReturned();
         pop();
         if (r == Returns::Yes) {
-            ret = r; 
+            ret = r;
             break;
         } else if (r == Returns::Maybe) {
             auto newBody = new IR::Vector<IR::StatOrDecl>();
@@ -86,7 +86,7 @@ const IR::Node* RemoveReturns::preorder(IR::BlockStatement* statement) {
             body->push_back(ifstat);
             currentBody = newBody;
             ret = r;
-        } 
+        }
     }
     set(ret);
     prune();

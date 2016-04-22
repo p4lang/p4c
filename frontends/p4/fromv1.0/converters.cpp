@@ -426,7 +426,7 @@ class Rewriter : public Transform {
         return structure->create(global->srcInfo);
     }
 };
-}
+}  // namespace
 
 ///////////////////////////////////////////////////////////////
 

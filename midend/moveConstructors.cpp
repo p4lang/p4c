@@ -29,9 +29,9 @@ class MoveConstructorsImpl : public Transform {
     ReferenceMap*   refMap;
     ConstructorMap  cmap;
     Region          convert;
-    
+
  public:
-    MoveConstructorsImpl(ReferenceMap* refMap) :
+    explicit MoveConstructorsImpl(ReferenceMap* refMap) :
             refMap(refMap), convert(Region::Outside) {}
 
     const IR::Node* preorder(IR::P4Parser* parser) override {
@@ -52,7 +52,7 @@ class MoveConstructorsImpl : public Transform {
         bool changes = false;
         auto result = new IR::Vector<IR::Declaration>();
         for (auto s : *declarations) {
-            visit(s); 
+            visit(s);
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto decl = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->type,
@@ -68,7 +68,7 @@ class MoveConstructorsImpl : public Transform {
             return result;
         return declarations;
     }
-    
+
     const IR::Node* postorder(IR::P4Parser* parser) override {
         if (cmap.empty())
             return parser;
@@ -92,7 +92,7 @@ class MoveConstructorsImpl : public Transform {
         bool changes = false;
         for (auto s : control->stateful) {
             auto decl = s.second;
-            visit(decl); 
+            visit(decl);
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto inst = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->type,
@@ -146,11 +146,11 @@ class MoveConstructorsImpl : public Transform {
         return tmpref;
     }
 };
-}
+}  // namespace
 
 MoveConstructors::MoveConstructors(bool isv1) {
     ReferenceMap* refMap = new ReferenceMap();
-    
+
     passes.emplace_back(new P4::ResolveReferences(refMap, isv1));
     passes.emplace_back(new MoveConstructorsImpl(refMap));
 }

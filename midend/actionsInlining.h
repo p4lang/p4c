@@ -96,7 +96,7 @@ class ActionsInliner : public AbstractActionInliner {
     P4::ReferenceMap* refMap;
     std::map<const IR::MethodCallStatement*, const IR::P4Action*>* replMap;
  public:
-    explicit ActionsInliner() : refMap(new P4::ReferenceMap()), replMap(nullptr) {}
+    ActionsInliner() : refMap(new P4::ReferenceMap()), replMap(nullptr) {}
     Visitor::profile_t init_apply(const IR::Node* node) override;
     const IR::Node* preorder(IR::P4Parser* cont) override
     { prune(); return cont; }  // skip

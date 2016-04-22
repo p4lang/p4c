@@ -58,11 +58,11 @@ const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
 
 const IR::Type_Bits* TypeMap::canonicalType(unsigned width, bool isSigned) {
     std::map<int, const IR::Type_Bits*> *map;
-    if (isSigned) 
+    if (isSigned)
         map = &signedTypes;
     else
         map = &unsignedTypes;
-    
+
     auto it = map->find(width);
     if (it != map->end())
         return it->second;

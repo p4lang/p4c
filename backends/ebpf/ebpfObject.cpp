@@ -97,7 +97,7 @@ class ErrorCodesVisitor : public Inspector {
         return false;
     }
 };
-}
+}  // namespace
 
 void EBPFProgram::emitPreamble(CodeBuilder* builder) {
     builder->emitIndent();

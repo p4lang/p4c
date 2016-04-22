@@ -41,7 +41,7 @@ struct InlineSummary {
 
     void add(const CallInfo *cci) {
         callerToWork[cci->caller].declToCallee[cci->instantiation] = cci->callee;
-        for (auto mcs : cci->invocations) 
+        for (auto mcs : cci->invocations)
             callerToWork[cci->caller].callToinstance[mcs] = cci->instantiation;
     }
     void dbprint(std::ostream& out) const
@@ -157,7 +157,7 @@ class GeneralInliner : public AbstractInliner {
     P4::ReferenceMap* refMap;
     P4::InlineSummary::PerCaller* workToDo;
  public:
-    explicit GeneralInliner() : refMap(new P4::ReferenceMap()), workToDo(nullptr) {}
+    GeneralInliner() : refMap(new P4::ReferenceMap()), workToDo(nullptr) {}
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
     const IR::Node* preorder(IR::P4Control* caller) override;
     const IR::Node* preorder(IR::P4Parser* caller) override;
