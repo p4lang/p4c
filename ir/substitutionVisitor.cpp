@@ -2,10 +2,15 @@
 
 namespace IR {
 
-bool TypeOccursVisitor::preorder(const IR::Type_VarBase* typeVariable) {
-    if (*typeVariable == *toFind) {
+bool TypeOccursVisitor::preorder(const IR::Type_Var* typeVariable) {
+    if (*typeVariable == *(toFind->asType()))
         occurs = true;
-    }
+    return occurs;
+}
+
+bool TypeOccursVisitor::preorder(const IR::Type_InfInt* typeVariable) {
+    if (*typeVariable == *(toFind->asType())) 
+        occurs = true;
     return occurs;
 }
 
@@ -22,9 +27,18 @@ const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::TypeParameters *tp
     return tps;
 }
 
-const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::Type_VarBase* typeVariable) {
+const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::Type_Var* typeVariable) {
     LOG1("Visiting " << getOriginal());
     const IR::Type* type = bindings->lookup(getOriginal<IR::Type_Var>());
+    if (type == nullptr)
+        return typeVariable;
+    LOG1("Replacing " << getOriginal() << " with " << type);
+    return type;
+}
+
+const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::Type_InfInt* typeVariable) {
+    LOG1("Visiting " << getOriginal());
+    const IR::Type* type = bindings->lookup(getOriginal<IR::Type_InfInt>());
     if (type == nullptr)
         return typeVariable;
     LOG1("Replacing " << getOriginal() << " with " << type);

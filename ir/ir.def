@@ -336,7 +336,7 @@ class MethodCallStatement : Statement {
 }
 
 class SwitchCase {
-    Expression       label;  // Can be DefaultExpression or 
+    Expression       label;  // Can be DefaultExpression or a PathExpression
     NullOK Statement statement;  // If missing then it's a fall-through
 #nodbprint
 }

@@ -23,10 +23,10 @@ class ConstantTypeSubstitution : public Transform {
     }
     const IR::Node* postorder(IR::Constant* cst) override {
         auto cstType = typeMap->getType(getOriginal(), true);
-        if (!cstType->is<IR::Type_VarBase>())
+        if (!cstType->is<IR::ITypeVar>())
             return cst;
-        auto repl = subst->get(cstType->to<IR::Type_VarBase>());
-        if (repl != nullptr && !repl->is<IR::Type_VarBase>()) {
+        auto repl = subst->get(cstType->to<IR::ITypeVar>());
+        if (repl != nullptr && !repl->is<IR::ITypeVar>()) {
             // maybe the substitution could not infer a width...
             LOG1("Inferred type " << repl << " for " << cst);
             cst = new IR::Constant(cst->srcInfo, repl, cst->value, cst->base);
@@ -156,24 +156,15 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
     if (typeMap->contains(type))
         return typeMap->getType(type, true);
 
-    if (type->is<IR::Type_Base>()) {
+    if (type->is<IR::Type_InfInt>()) {
+        return typeMap->canonicalInfInt();
+    } else if (type->is<IR::Type_Base>()) {
         if (!type->is<IR::Type_Bits>())
             // all other base types are singletons
             return type;
         auto tb = type->to<IR::Type_Bits>();
-        if (tb->isSigned) {
-            auto it = signedTypes.find(tb->size);
-            if (it != signedTypes.end())
-                return it->second;
-            signedTypes.emplace(tb->size, tb);
-            return tb;
-        } else {
-            auto it = unsignedTypes.find(tb->size);
-            if (it != unsignedTypes.end())
-                return it->second;
-            unsignedTypes.emplace(tb->size, tb);
-            return tb;
-        }
+        auto canon = typeMap->canonicalType(tb->size, tb->isSigned);
+        return canon;
     } else if (type->is<IR::Type_Enum>() ||
                type->is<IR::Type_ActionEnum>() ||
                type->is<IR::Type_MatchKind>()) {
@@ -678,6 +669,11 @@ const IR::Node* TypeChecker::postorder(IR::Method* method) {
 
 //////////////////////////////////////////////  Types
 
+const IR::Node* TypeChecker::postorder(IR::Type_InfInt* type) {
+    setType(getOriginal(), typeMap->canonicalInfInt());
+    return type;
+}
+
 const IR::Node* TypeChecker::postorder(IR::Type_ArchBlock* decl) {
     if (done())
         return decl;
@@ -958,8 +954,6 @@ const IR::Node* TypeChecker::postorder(IR::Constant* expression) {
     auto type = getType(expression->type);
     if (type == nullptr)
         return expression;
-    if (type->is<IR::Type_InfInt>())
-        type = new IR::Type_VarInfInt(type->srcInfo);
     setType(getOriginal(), type);
     setType(expression, type);
     return expression;
@@ -983,14 +977,14 @@ const IR::Node* TypeChecker::postorder(IR::Operation_Relation* expression) {
 
     bool equTest = expression->is<IR::Equ>() || expression->is<IR::Neq>();
 
-    if (ltype->is<IR::Type_VarInfInt>() && rtype->is<IR::Type_Bits>()) {
+    if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
         auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
         setType(cast, rtype);
         auto e = expression->clone();
         e->left = cast;
         expression = e;
         ltype = rtype;
-    } else if (rtype->is<IR::Type_VarInfInt>() && ltype->is<IR::Type_Bits>()) {
+    } else if (rtype->is<IR::Type_InfInt>() && ltype->is<IR::Type_Bits>()) {
         auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
         setType(cast, ltype);
         auto e = expression->clone();
@@ -1153,11 +1147,11 @@ const IR::Node* TypeChecker::binaryArith(const IR::Operation_Binary* expression)
 
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
-    if (bl == nullptr && !ltype->is<IR::Type_VarInfInt>()) {
+    if (bl == nullptr && !ltype->is<IR::Type_InfInt>()) {
         ::error("%1%: cannot be applied to %2% of type %3%",
                 expression->getStringOp(), expression->left, ltype->toString());
         return expression;
-    } else if (br == nullptr && !rtype->is<IR::Type_VarInfInt>()) {
+    } else if (br == nullptr && !rtype->is<IR::Type_InfInt>()) {
         ::error("%1%: cannot be applied to %2% of type %3%",
                 expression->getStringOp(), expression->right, rtype->toString());
         return expression;
@@ -1712,7 +1706,7 @@ const IR::Node* TypeChecker::postorder(IR::Member* expression) {
             auto params = new IR::NameMap<IR::Parameter, ordered_map>();
             params->addUnique("count", new IR::Parameter(Util::SourceInfo(), IR::ID("count"),
                                                          IR::Annotations::empty, IR::Direction::In,
-                                                         IR::Type_InfInt::get()));
+                                                         new IR::Type_InfInt()));
             auto type = new IR::Type_Method(Util::SourceInfo(), new IR::TypeParameters(),
                                             IR::Type_Void::get(),
                                             new IR::ParameterList(Util::SourceInfo(),
@@ -1945,7 +1939,7 @@ const IR::Node* TypeChecker::postorder(IR::SelectExpression* expression) {
             expression, selectType);
     auto tuple = selectType->to<IR::Type_Tuple>();
     for (auto ct : *tuple->components) {
-        if (ct->is<IR::Type_InfInt>() || ct->is<IR::Type_VarBase>()) {
+        if (ct->is<IR::ITypeVar>()) {
             ::error("Cannot infer type for %1%", ct);
             return expression;
         }

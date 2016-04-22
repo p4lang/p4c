@@ -43,8 +43,6 @@ interface IDeclaration {
 #end
 }
 
-interface InfInt {}
-
 interface INamespace {
 #emit
     virtual Util::Enumerator<const IDeclaration*>* getDeclarations() const = 0;
@@ -66,6 +64,14 @@ interface IGeneralNamespace : INamespace {
     validate{ checkDuplicateDeclarations(); }
 }
 
+// Implemented by things that look like type variables
+interface ITypeVar {
+#emit
+    virtual cstring getVarName() const = 0;
+    const Type* asType() const { return to<Type>(); }
+#end
+}
+
 interface IContainer : IMayBeGenericType {
 #emit
     // The type of the constructor as a method
@@ -73,7 +79,9 @@ interface IContainer : IMayBeGenericType {
     virtual const ParameterList* getConstructorParameters() const = 0;
 #end
 }
-    
+
+// This represents a primitive type
+// (called base type in the spec)
 abstract Type_Base : Type {}
 
 // This is needed by Expression
@@ -127,11 +135,12 @@ abstract Expression {
     // Most P4 v1.2 front-end passes do not use this field.
     // However, when the field is used, it should contain
     // the type of the expression evaluation.
+    // Some classes do use it explicitly: Casts, ConstructorCallExpression and Constant.
     // TODO: surface this field as a regular field.
     const Type* type = Type::Unknown::get();
     Expression() : type(Type::Unknown::get()) {}
-    explicit Expression(const Type *t) : type(t) { }
-    Expression(Util::SourceInfo srcInfo, const Type *t) : Node(srcInfo), type(t) { }
+    explicit Expression(const Type *t) : type(t) {}
+    Expression(Util::SourceInfo srcInfo, const Type *t) : Node(srcInfo), type(t) {}
 #end
     visit_children { v.visit(type, "type"); }
     operator== { return typeid(*this) == typeid(a) && type == a.type; }

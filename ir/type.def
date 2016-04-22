@@ -35,15 +35,6 @@ inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
 }
 #end
 
-// Infinite precision integer
-class Type_InfInt : Type_Base, InfInt {
-#nodbprint
-#emit
-    static const Type_InfInt *get();
-#end
-    toString{ return "int"; }
-}
-
 class Type_Boolean : Type_Base {
 #nodbprint
 #emit
@@ -119,19 +110,30 @@ class ParameterList : ISimpleNamespace {
 #end
 }
 
-abstract Type_VarBase : Type_Declaration {}
+// Represents a type variable written by the user
+class Type_Var : Type_Declaration, ITypeVar {
+#emit
+    cstring getVarName() const { return getName(); }
+#end
+}
 
-// Represents a type variable
-class Type_Var : Type_VarBase {}
-
-// A special type variable that represents the type of a Constant with unknown width.
-// Type unification can be used to return the correct type for the Constant.
-class Type_VarInfInt : Type_VarBase, InfInt {
+// This stands for the 'int' type: infinite precision constant
+// However, we represent it as a type variable, because we use
+// type unification to discover the correct type for the constants
+// in some contexts.
+class Type_InfInt : Type, ITypeVar {
 #noconstructor
 #emit
-    Type_VarInfInt(Util::SourceInfo si) : Type_VarBase(si, IR::ID("varInfInt")) {}
+ private:
+    static int nextId;
+ public:
+    int declid;
+    Type_InfInt() : Type(Util::SourceInfo()), declid(nextId++) {}
+    cstring getVarName() const { return "int_" + Util::toString(declid); }
 #end
-    dbprint { Node::dbprint(out); }
+    dbprint { Node::dbprint(out); out << declid; }
+    toString { return "int"; }
+    operator== { return declid == a.declid; }
 }
 
 class Type_Dontcare : Type_Base {

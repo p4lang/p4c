@@ -20,6 +20,7 @@ const IR::ID IR::Type_Table::action_run = ID("action_run");
 const cstring IR::Annotation::nameAnnotation = "name";
 
 int Type_Declaration::nextId = 0;
+int Type_InfInt::nextId = 0;
 
 Annotations* Annotations::empty = new Annotations(new Vector<Annotation>());
 
@@ -35,13 +36,6 @@ StructField::StructField(Util::SourceInfo si, ID name, const Type *type)
 
 StructField::StructField(ID name, const Type *type)
         : StructField(Util::SourceInfo(), name, Annotations::empty, type) {}
-
-const Type_InfInt *Type_InfInt::get() {
-    static const Type_InfInt *singleton;
-    if (!singleton)
-        singleton = (new Type_InfInt(Util::SourceInfo()));
-    return singleton;
-}
 
 const Type::Boolean *Type::Boolean::get() {
     static const Type::Boolean *singleton;

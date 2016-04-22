@@ -2,7 +2,7 @@
 #include "substitutionVisitor.h"
 
 namespace IR {
-bool TypeVariableSubstitution::compose(const IR::Type_VarBase* var, const IR::Type* substitution) {
+bool TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* substitution) {
     LOG1("Adding " << var->toString() << "->" << substitution->toString() << "to substitution");
 
     // First check whether the substitution is legal.

@@ -57,11 +57,11 @@ class TypeSubstitution {
     void clear() { binding.clear(); }
 };
 
-class TypeVariableSubstitution final : public TypeSubstitution<const IR::Type_VarBase*> {
+class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVar*> {
  private:
-    const IR::Type_VarBase* lookupKey(cstring name) const {
+    const IR::ITypeVar* lookupKey(cstring name) const {
         for (auto it : binding)
-            if (it.first->name == name)
+            if (it.first->getVarName() == name)
                 return it.first;
         return nullptr;
     }
@@ -71,8 +71,8 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::Type_Va
      * @param name  Name of variable to lookup.
      * @return      The type variable value associated with that name in this map,
      *              or nullptr if there is no such binding. */
-    bool setBinding(const IR::Type_VarBase* id, const IR::Type* type) {
-        auto t = lookupKey(id->name.name);
+    bool setBinding(const IR::ITypeVar* id, const IR::Type* type) {
+        auto t = lookupKey(id->getVarName());
         if (t != nullptr)
             BUG("Two variables with the same name in a binding");
 
@@ -96,7 +96,7 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::Type_Va
      * @param debug         If true print debugging messages.
      * @param reporter      Used to report errors.
      * @return              True on success.     */
-    bool compose(const IR::Type_VarBase* var, const IR::Type* substitution);
+    bool compose(const IR::ITypeVar* var, const IR::Type* substitution);
 };
 
 class TypeNameSubstitution final : public TypeSubstitution<const IR::Type_Name*> {};

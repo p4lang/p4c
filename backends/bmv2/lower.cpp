@@ -30,7 +30,7 @@ const IR::Node* RemoveLeftSlices::postorder(IR::AssignmentStatement* stat) {
 const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expression) const {
     auto rhs = expression->right;
     auto rhstype = typeMap->getType(rhs, true);
-    if (rhstype->is<IR::InfInt>()) {
+    if (rhstype->is<IR::Type_InfInt>()) {
         auto cst = rhs->to<IR::Constant>();
         mpz_class maxShift = Util::shift_left(1, LowerExpressions::maxShiftWidth);
         if (cst->value > maxShift)

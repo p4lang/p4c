@@ -6,7 +6,7 @@ namespace P4 {
 bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint,
                             IR::TypeVariableSubstitution *subst, bool reportErrors) {
     if (isUnifiableTypeVariable(constraint->left)) {
-        auto leftTv = constraint->left->to<IR::Type_VarBase>();
+        auto leftTv = constraint->left->to<IR::ITypeVar>();
         if (constraint->left == constraint->right)
             return true;
 
@@ -22,7 +22,7 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
     }
 
     if (isUnifiableTypeVariable(constraint->right)) {
-        auto rightTv = constraint->right->to<IR::Type_VarBase>();
+        auto rightTv = constraint->right->to<IR::ITypeVar>();
         const IR::Type* rightSubst = subst->lookup(rightTv);
         if (rightSubst == nullptr) {
             LOG1("Binding " << rightTv << " => " << constraint->left);

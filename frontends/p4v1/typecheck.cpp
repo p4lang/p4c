@@ -64,8 +64,8 @@ class TypeCheck::Pass1 : public Transform {
 static const IR::Type *combine(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) {
     if (!a || a == IR::Type::Unknown::get()) return b;
     if (!b || b == IR::Type::Unknown::get()) return a;
-    if (a == IR::Type_InfInt::get()) return b;
-    if (b == IR::Type_InfInt::get()) return a;
+    if (a->is<IR::Type_InfInt>()) return b;
+    if (b->is<IR::Type_InfInt>()) return a;
     if (*a == *b) return a;
     error("%s: Incompatible types %s and %s", loc, a->toString(), b->toString());
     return a;
@@ -85,9 +85,9 @@ class TypeCheck::Pass2 : public Modifier {
     void postorder(IR::Operation_Unary *op) override {
         op->type = op->expr->type; }
     void postorder(IR::Operation_Binary *op) override {
-        if (op->left->type == IR::Type_InfInt::get())
+        if (op->left->type->is<IR::Type_InfInt>())
             op->type = op->right->type;
-        else if (op->right->type == IR::Type_InfInt::get())
+        else if (op->right->type->is<IR::Type_InfInt>())
             op->type = op->left->type;
         else if (op->left->type == op->right->type)
             op->type = op->left->type; }
@@ -150,7 +150,7 @@ class TypeCheck::Pass3 : public Modifier {
                             infer >>= 1; } } } } }
         return rv; }
     bool preorder(IR::Expression *op) override {
-        if (op->type == IR::Type::Unknown::get() || op->type == IR::Type_InfInt::get()) {
+        if (op->type == IR::Type::Unknown::get() || op->type->is<IR::Type_InfInt>()) {
             auto *type = ctxtType();
             if (type != IR::Type::Unknown::get())
                 op->type = type; }

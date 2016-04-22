@@ -28,15 +28,27 @@ class TypeMap final {
 
     // checks some preconditions before setting the type
     void checkPrecondition(const IR::Node* element, const IR::Type* type) const;
+
+    // canonical types are kept here
+    static std::map<int, const IR::Type_Bits*> signedTypes;
+    static std::map<int, const IR::Type_Bits*> unsignedTypes;
+    static const IR::Type_InfInt* canonInfInt;
+    
  public:
-    void setType(const IR::Node* element, const IR::Type* type);
     bool contains(const IR::Node* element) { return typeMap.count(element) != 0; }
+    void setType(const IR::Node* element, const IR::Type* type);
     const IR::Type* getType(const IR::Node* element, bool notNull = false) const;
     void dbprint(std::ostream& out) const;
     void clear();
-    void setLeftValue(const IR::Expression* expression);
     bool isLeftValue(const IR::Expression* expression) const
     { return leftValues.count(expression) > 0; }
+
+    // The following are only used by the type-checker
+    void setLeftValue(const IR::Expression* expression);
+    const IR::Type_Bits* canonicalType(unsigned width, bool isSigned);
+    const IR::Type_InfInt* canonicalInfInt() const
+    { return TypeMap::canonInfInt; }
+
 };
 }  // namespace P4
 

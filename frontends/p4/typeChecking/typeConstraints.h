@@ -52,22 +52,22 @@ class TypeConstraints final {
      * This example should not typecheck: because T cannot be constrained in the invocation of f.
      * While typechecking the f(data) call, T is not a type variable that can be unified.
      */
-    std::set<const IR::Type_VarBase*> unifiableTypeVariables;
+    std::set<const IR::ITypeVar*> unifiableTypeVariables;
     std::vector<IConstraint*> constraints;
     TypeUnification *unification;
 
  public:
     TypeConstraints() : unification(new TypeUnification(this)) {}
 
-    void addUnifiableTypeVariable(const IR::Type_VarBase* typeVariable)
+    void addUnifiableTypeVariable(const IR::ITypeVar* typeVariable)
     { unifiableTypeVariables.insert(typeVariable); }
 
     // True if type is a type variable that can be unified.
     bool isUnifiableTypeVariable(const IR::Type* type) {
-        auto tv = type->to<IR::Type_VarBase>();
+        auto tv = type->to<IR::ITypeVar>();
         if (tv == nullptr)
             return false;
-        if (tv->is<IR::Type_VarInfInt>())
+        if (tv->is<IR::Type_InfInt>())
             // These are always unifiable
             return true;
         return unifiableTypeVariables.count(tv) > 0;

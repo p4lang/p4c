@@ -15,8 +15,11 @@ namespace P4 {
 
 // Type checking algorithm.
 // It is a transform because it may convert implicit casts into explicit casts.
-// TODO: insert type arguments where inferred
-class TypeChecker final : public Transform {
+// But in general it operates like an Inspector; in fact, if it is instantiated
+// with readOnly = true, it will assert that the program is not changed.
+// It is expected that once a program has been type-checked and all casts have
+// been inserted it will not need to change ever again during type-checking.
+class TypeChecker : public Transform {
     // Input: reference map
     ReferenceMap* refMap;
     // Output: type map
@@ -26,9 +29,6 @@ class TypeChecker final : public Transform {
     // If true we expect to leave the program unchanged
     bool readOnly;
 
-    // canonical type memoization maps
-    std::map<int, const IR::Type_Bits*> signedTypes;
-    std::map<int, const IR::Type_Bits*> unsignedTypes;
     // Stack: Save here method arguments count on each method visit.
     // They are used in type resolution.
     std::vector<int> methodArguments;
@@ -36,6 +36,9 @@ class TypeChecker final : public Transform {
     const IR::Node* initialNode;
 
  public:
+    // If readOnly=true it will assert that it behaves like
+    // an Inspector.
+    // clearMap=true will clear the typeMap on start.
     TypeChecker(ReferenceMap* refMap, TypeMap* typeMap,
                 bool clearMap = false, bool readOnly = false);
 
@@ -109,6 +112,7 @@ class TypeChecker final : public Transform {
     const IR::Node* postorder(IR::P4Parser* cont) override;
     const IR::Node* postorder(IR::Method* method) override;
 
+    const IR::Node* postorder(IR::Type_InfInt* type) override;
     const IR::Node* postorder(IR::Type_Method* type) override;
     const IR::Node* postorder(IR::Type_Action* type) override;
     const IR::Node* postorder(IR::Type_Name* type) override;

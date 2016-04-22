@@ -12,11 +12,14 @@ namespace IR {
  */
 class TypeOccursVisitor : public Inspector {
  public:
-    const IR::Type_VarBase* toFind;
+    const IR::ITypeVar* toFind;
     bool occurs;
 
-    explicit TypeOccursVisitor(const IR::Type_VarBase* toFind) : toFind(toFind), occurs(false) {}
-    bool preorder(const IR::Type_VarBase* typeVariable) override;
+    using Inspector::preorder;
+
+    explicit TypeOccursVisitor(const IR::ITypeVar* toFind) : toFind(toFind), occurs(false) {}
+    bool preorder(const IR::Type_Var* typeVariable) override;
+    bool preorder(const IR::Type_InfInt* infint) override;
 };
 
 /* Replaces TypeVariables with other types. */
@@ -29,7 +32,8 @@ class TypeVariableSubstitutionVisitor : public Transform {
 
     using Transform::preorder;
     const IR::Node* preorder(IR::TypeParameters *tps) override;
-    const IR::Node* preorder(IR::Type_VarBase* typeVariable) override;
+    const IR::Node* preorder(IR::Type_Var* typeVariable) override;
+    const IR::Node* preorder(IR::Type_InfInt* typeVariable) override;
 };
 
 /* Replaces TypeNames with other Types. */

@@ -195,16 +195,16 @@ class Constant : Expression, CompileTimeValue {
     // if noWarning is true, no warning is emitted
     void handleOverflow(bool noWarning);
     explicit Constant(intmax_t v, unsigned base = 10) :
-            Expression(Type_InfInt::get()), value(v), base(base) {}
+            Expression(new Type_InfInt()), value(v), base(base) {}
     explicit Constant(mpz_class v, unsigned base = 10) :
-            Expression(Type_InfInt::get()), value(v), base(base) {}
+            Expression(new Type_InfInt()), value(v), base(base) {}
     Constant(Util::SourceInfo si, mpz_class v, unsigned base = 10) :
-            Expression(si, Type_InfInt::get()), value(v), base(base) {}
+            Expression(si, new Type_InfInt()), value(v), base(base) {}
     Constant(const Type *t, mpz_class v, unsigned base = 10, bool noWarning = false) :
-            Expression(t), value(v), base(base) { handleOverflow(noWarning); }
+            Expression(t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
     Constant(Util::SourceInfo si, const Type *t, mpz_class v,
              unsigned base = 10, bool noWarning = false) :
-            Expression(si, t), value(v), base(base) { handleOverflow(noWarning); }
+            Expression(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
     static Constant GetMask(unsigned width);
     bool fitsInt() const { return value.fits_sint_p(); }
     bool fitsLong() const { return value.fits_slong_p(); }

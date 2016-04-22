@@ -3,6 +3,10 @@
 
 namespace P4 {
 
+std::map<int, const IR::Type_Bits*> TypeMap::signedTypes;
+std::map<int, const IR::Type_Bits*> TypeMap::unsignedTypes;
+const IR::Type_InfInt* TypeMap::canonInfInt = new IR::Type_InfInt();
+
 void TypeMap::dbprint(std::ostream& out) const {
     for (auto it : typeMap)
         out << it.first << "->" << it.second << std::endl;
@@ -49,6 +53,21 @@ const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
         BUG("Could not find type for %1%", element);
     if (result != nullptr && result->is<IR::Type_Name>())
         BUG("%1% in map", result);
+    return result;
+}
+
+const IR::Type_Bits* TypeMap::canonicalType(unsigned width, bool isSigned) {
+    std::map<int, const IR::Type_Bits*> *map;
+    if (isSigned) 
+        map = &signedTypes;
+    else
+        map = &unsignedTypes;
+    
+    auto it = map->find(width);
+    if (it != map->end())
+        return it->second;
+    auto result = new IR::Type_Bits(Util::SourceInfo(), width, isSigned);
+    map->emplace(width, result);
     return result;
 }
 
