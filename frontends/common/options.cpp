@@ -35,15 +35,9 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) {
                        preprocessor_options += std::string(" -U") + arg; return true; },
                    "Undefine macro (passed to preprocessor)");
-    registerOption("-v", nullptr,
-                   [this](const char*) { ::verbose++; return true; },
-                   "Increase verbosity level (can be repeated)");
     registerOption("-E", nullptr,
                    [this](const char*) { doNotCompile = true; return true; },
                    "Preprocess only, do not compile (prints program on stdout)");
-    registerOption("-T", "loglevel",
-                    [](const char* arg) { ::add_debug_spec(arg); return true; },
-                   "Adjust logging level per file (see below)");
     registerOption("--p4v", "lang",
                    [this](const char* arg) {
                        if (!strcmp(arg, "1.0")) {
@@ -64,10 +58,16 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) { prettyPrintFile = arg; return true; },
                    "Pretty-print the program in the\n"
                    "specified file (output is always in P4 v1.2).");
+    registerOption("-T", "loglevel",
+                    [](const char* arg) { ::add_debug_spec(arg); return true; },
+                   "[Compiler debugging] Adjust logging level per file (see below)");
     registerOption("--dump", "folder",
                    [this](const char* arg) { dumpFolder = arg; return true; },
-                    "Dump the program after various passes in P4 files\n"
-                   "in the specified folder.");
+                    "[Compiler debugging] Dump the program after various passes in\n"
+                   "P4 files in the specified folder.");
+    registerOption("-v", nullptr,
+                   [this](const char*) { ::verbose++; return true; },
+                   "[Compiler debugging] Increase verbosity level (can be repeated)");
     registerUsage("loglevel format is (higher level is more verbose):\n"
                   "  file:level,...,file:level");
     registerOption("-o", "outfile",

@@ -18,7 +18,7 @@ class P4CExceptionBase : public std::exception {
  public:
     template <typename... T>
     P4CExceptionBase(const char* format, T... args) {
-#if 1
+#if 0
         this->message = ErrorReporter::instance.format_message(format, std::forward<T>(args)...);
 #else
         // TODO: use bug_helper; but today it's broken

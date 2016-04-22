@@ -59,10 +59,13 @@ class Type_Bits : Type_Base {
     bool isSigned;
 #emit
     static const Type::Bits *get(Util::SourceInfo si, int sz, bool isSigned = false);
-    static const Type::Bits *get(int sz, bool isSigned = false) {
-        return get(Util::SourceInfo(), sz, isSigned); }
+    static const Type::Bits *get(int sz, bool isSigned = false);
     cstring baseName() const { return isSigned ? "int" : "bit"; }
     int width_bits() const { return size; }
+
+    // canonical types: no source-level information
+    static std::map<int, const IR::Type_Bits*> *signedTypes;
+    static std::map<int, const IR::Type_Bits*> *unsignedTypes;
 #end
     toString{ return baseName() + "<" + Util::toString(size) + ">"; }
 }

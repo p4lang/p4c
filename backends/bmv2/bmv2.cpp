@@ -26,11 +26,11 @@ int main(int argc, char *const argv[]) {
 
     // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
-    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
     auto program = parseP4File(options);
     if (program == nullptr || ::errorCount() > 0)
         return 1;
-    program = run_frontend(options, program, isv1);
+    FrontEnd frontend; 
+    program = frontend.run(options, program);
     if (program == nullptr || ::errorCount() > 0)
         return 1;
 

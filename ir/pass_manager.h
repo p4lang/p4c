@@ -3,20 +3,27 @@
 
 #include "visitor.h"
 
+typedef std::function<void(const char* manager, unsigned seqNo, const char* pass, const IR::Node* node)> DebugHook;
+
 class PassManager : virtual public Visitor {
  protected:
+    const char* managerName = nullptr;
+    vector<DebugHook>   debugHooks;  // called after each pass
     vector<Visitor *>   passes;
     // if true stops compilation after first pass that signals an error
     bool                stop_on_error = false;
+    unsigned            seqNo = 0;
     void addPasses(const std::initializer_list<Visitor *> &init) {
         for (auto p : init) if (p) passes.emplace_back(p); }
+    void runDebugHooks(const char* visitorName, const IR::Node* node);
  public:
+    void setName(const char* name) { managerName = name; }
     PassManager() = default;
-    PassManager(const std::initializer_list<Visitor *> &init) :
-        stop_on_error(false) {
-        for (auto p : init) if (p) passes.emplace_back(p); }
+    PassManager(const std::initializer_list<Visitor *> &init) : stop_on_error(false)
+    { addPasses(init); }
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
     void setStopOnError(bool stop) { stop_on_error = stop; }
+    void addDebugHook(DebugHook h) { debugHooks.push_back(h); }
 };
 
 // Repeat a pass until convergence (or up to a fixed number of repeats)

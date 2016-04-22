@@ -8,7 +8,10 @@
 namespace V12Test {
 
 class MidEnd {
+    std::vector<DebugHook> hooks;
  public:
+    MidEnd() = default;
+    void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     P4::BlockMap* process(CompilerOptions& options, const IR::P4Program* program);
 };
 

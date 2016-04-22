@@ -29,9 +29,6 @@ class TypeMap final {
     // checks some preconditions before setting the type
     void checkPrecondition(const IR::Node* element, const IR::Type* type) const;
 
-    // canonical types are kept here
-    static std::map<int, const IR::Type_Bits*> signedTypes;
-    static std::map<int, const IR::Type_Bits*> unsignedTypes;
     static const IR::Type_InfInt* canonInfInt;
 
  public:
@@ -45,7 +42,6 @@ class TypeMap final {
 
     // The following are only used by the type-checker
     void setLeftValue(const IR::Expression* expression);
-    const IR::Type_Bits* canonicalType(unsigned width, bool isSigned);
     const IR::Type_InfInt* canonicalInfInt() const
     { return TypeMap::canonInfInt; }
 };

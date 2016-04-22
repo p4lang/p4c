@@ -26,7 +26,8 @@ void compile(EbpfOptions& options, FILE* in) {
                 ErrorReporter::instance.getErrorCount());
         return;
     }
-    v12 = run_frontend(options, v12, !isv1);
+    FrontEnd frontend;
+    v12 = frontend.run(options, v12);
     EBPF::run_ebpf_backend(options, v12);
 }
 

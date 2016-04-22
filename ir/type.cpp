@@ -19,10 +19,34 @@ const IR::ID IR::Type_Table::action_run = ID("action_run");
 
 const cstring IR::Annotation::nameAnnotation = "name";
 
+std::map<int, const IR::Type_Bits*> *Type_Bits::signedTypes = nullptr;
+std::map<int, const IR::Type_Bits*> *Type_Bits::unsignedTypes = nullptr;
+
 int Type_Declaration::nextId = 0;
 int Type_InfInt::nextId = 0;
 
 Annotations* Annotations::empty = new Annotations(new Vector<Annotation>());
+
+const IR::Type_Bits* Type_Bits::get(int width, bool isSigned) {
+    std::map<int, const IR::Type_Bits*> *map;
+    if (isSigned) {
+        if (signedTypes == nullptr)
+            signedTypes = new std::map<int, const IR::Type_Bits*>();
+        map = signedTypes;
+    }
+    else {
+        if (unsignedTypes == nullptr)
+            unsignedTypes = new std::map<int, const IR::Type_Bits*>();
+        map = unsignedTypes;
+    }
+
+    auto it = map->find(width);
+    if (it != map->end())
+        return it->second;
+    auto result = IR::Type_Bits::get(Util::SourceInfo(), width, isSigned);
+    map->emplace(width, result);
+    return result;
+}
 
 const Type::Unknown *Type::Unknown::get() {
     static const Type::Unknown *singleton;

@@ -163,7 +163,7 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
             // all other base types are singletons
             return type;
         auto tb = type->to<IR::Type_Bits>();
-        auto canon = typeMap->canonicalType(tb->size, tb->isSigned);
+        auto canon = IR::Type_Bits::get(tb->size, tb->isSigned);
         return canon;
     } else if (type->is<IR::Type_Enum>() ||
                type->is<IR::Type_ActionEnum>() ||
@@ -1040,8 +1040,8 @@ const IR::Node* TypeChecker::postorder(IR::Concat* expression) {
     }
     auto bl = ltype->to<IR::Type_Bits>();
     auto br = rtype->to<IR::Type_Bits>();
-    const IR::Type* resultType = new IR::Type_Bits(Util::SourceInfo(),
-                                                   bl->size + br->size, bl->isSigned);
+    const IR::Type* resultType = IR::Type_Bits::get(Util::SourceInfo(),
+                                                    bl->size + br->size, bl->isSigned);
     resultType = canonicalize(resultType);
     setType(getOriginal(), resultType);
     setType(expression, resultType);
@@ -1534,7 +1534,7 @@ const IR::Node* TypeChecker::postorder(IR::Slice* expression) {
         return expression;
     }
 
-    const IR::Type* result = new IR::Type_Bits(bst->srcInfo, m - l + 1, bst->isSigned);
+    const IR::Type* result = IR::Type_Bits::get(bst->srcInfo, m - l + 1, bst->isSigned);
     result = canonicalize(result);
     setType(getOriginal(), result);
     setType(expression, result);

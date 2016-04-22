@@ -13,6 +13,9 @@
 #include "frontends/p4/frontend.h"
 #include "midend.h"
 
+void printPass(const char* manager, unsigned seq, const char* pass, const IR::Node*)
+{ std::cout << manager << ", pass #" << seq << ": " << pass << std::endl; }
+
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
@@ -25,12 +28,16 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    bool v1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
     auto program = parseP4File(options);
     if (program != nullptr && ::errorCount() == 0) {
-        program = run_frontend(options, program, v1);
+        FrontEnd fe;
+        if (::verbose)
+            fe.addDebugHook(printPass);
+        program = fe.run(options, program);
         if (program != nullptr && ::errorCount() == 0) {
             V12Test::MidEnd midEnd;
+            if (::verbose)
+                midEnd.addDebugHook(printPass);
             (void)midEnd.process(options, program);
         }
     }

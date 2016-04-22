@@ -8,6 +8,8 @@
 namespace BMV2 {
 
 class MidEnd {
+    const IR::P4Program* processV1(CompilerOptions& options, const IR::P4Program* program);
+    const IR::P4Program* processV1_2(CompilerOptions& options, const IR::P4Program* program);
  public:
     P4::BlockMap* process(CompilerOptions& options, const IR::P4Program* program);
 };

@@ -22,6 +22,7 @@ class SideEffects : public Inspector {
 };
 
 class SimplifyControlFlow : public Transform {
+ public:
     const IR::Node* postorder(IR::BlockStatement* statement) override;
     const IR::Node* postorder(IR::IfStatement* statement) override;
     const IR::Node* postorder(IR::EmptyStatement* statement) override;

@@ -207,6 +207,11 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
                 std::string tail, const T *t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
 
+template<typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position,
+                std::string tail, const T *t, Args... args) ->
+    typename std::enable_if<! std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
+
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
                        std::string tail, const mpz_class *t, Args... args);
@@ -234,6 +239,15 @@ template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
                        std::string tail, const cstring& t, Args... args) {
     return bug_helper(f % t.c_str(), message, position, tail, std::forward<Args>(args)...);
+}
+
+template<typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position,
+                std::string tail, const T *t, Args... args) ->
+        typename std::enable_if<! std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
+    std::stringstream str;
+    str << t;
+    return bug_helper(f % str.str(), message, position, tail, std::forward<Args>(args)...);
 }
 
 template<class... Args>
@@ -286,8 +300,8 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
     std::stringstream str;
     str << t;
     return bug_helper(f % str.str(), message, position,
-                        tail + posString + t->getSourceInfo().toSourceFragment(),
-                        std::forward<Args>(args)...);
+                      tail + posString + t->getSourceInfo().toSourceFragment(),
+                      std::forward<Args>(args)...);
 }
 
 template<typename T, class... Args>

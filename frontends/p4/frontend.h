@@ -4,7 +4,12 @@
 #include "ir/ir.h"
 #include "../common/options.h"
 
-const IR::P4Program*
-run_frontend(const CompilerOptions& options, const IR::P4Program* program, bool anyDeclOrder);
+class FrontEnd {
+    std::vector<DebugHook> hooks;
+ public:
+    FrontEnd() = default;
+    void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
+    const IR::P4Program* run(const CompilerOptions& options, const IR::P4Program* program);
+};
 
 #endif /* _P4_FRONTEND_H_ */

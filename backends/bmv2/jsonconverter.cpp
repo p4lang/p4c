@@ -17,7 +17,6 @@ class ArithmeticFixup : public Transform {
 
  public:
     explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap) {}
-
     const IR::Expression* fix(const IR::Expression* expr, const IR::Type_Bits* type) {
         unsigned width = type->size;
         if (!type->isSigned) {
@@ -1425,6 +1424,11 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     typeMap = blockMap->typeMap;
 
     auto package = blockMap->getMain();
+    if (package == nullptr) {
+        ::error("No output to generate");
+        return;
+    }
+    
     if (package->type->name != v1model.sw.name) {
         ::error("This back-end requires the program to be compiled for the %1% model",
                 v1model.sw.name);

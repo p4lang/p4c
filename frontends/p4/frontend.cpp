@@ -5,6 +5,7 @@
 #include "../common/options.h"
 #include "lib/nullstream.h"
 #include "lib/path.h"
+#include "frontend.h"
 
 #include "../common/typeMap.h"
 #include "../common/resolveReferences/resolveReferences.h"
@@ -19,15 +20,13 @@
 #include "strengthReduction.h"
 #include "simplify.h"
 
-// The pv10 flag is necessary because the converter 1.2 -> 1.0 synthesizes some program
-// fragments which have no source position (i.e., the position is invalid, or line 0).
-// For these the reference resolution that tries to find declarations before uses
-// fails.
 const IR::P4Program*
-run_frontend(const CompilerOptions &options, const IR::P4Program* v12_program, bool p4v10) {
+FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) {
     if (v12_program == nullptr)
         return nullptr;
 
+    bool p4v10 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
+    
     Util::PathName path(options.prettyPrintFile);
     std::ostream *ppStream = openFile(path.toString(), true);
     std::ostream *midStream = options.dumpStream("-fe");
@@ -36,7 +35,7 @@ run_frontend(const CompilerOptions &options, const IR::P4Program* v12_program, b
     P4::ReferenceMap  refMap;  // This is reused many times, since every analysis clear it
     P4::TypeMap       typeMap1, typeMap2, typeMap3;
 
-    PassManager frontend = {
+    PassManager passes = {
         new P4::ToP4(ppStream, options.file),
         // Simple checks on parsed program
         new P4::ValidateParsedProgram(p4v10),
@@ -67,7 +66,10 @@ run_frontend(const CompilerOptions &options, const IR::P4Program* v12_program, b
         new P4::ToP4(endStream, options.file),
     };
 
-    frontend.setStopOnError(true);
-    const IR::P4Program* result = v12_program->apply(frontend);
+    passes.setName("Front end");
+    passes.setStopOnError(true);
+    for (auto h : hooks)
+        passes.addDebugHook(h);
+    const IR::P4Program* result = v12_program->apply(passes);
     return result;
 }
