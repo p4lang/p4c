@@ -8,11 +8,12 @@ AM_SILENT_RULES([yes])
 
 LT_INIT
 AC_CONFIG_MACRO_DIR([m4])
-AC_PROG_CXX
+AC_PROG_CXX(clang++ g++ c++)
 AC_PROG_CC
 AC_PROG_LEX
 AC_PROG_YACC
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
+AC_LANG(C++)
 
 AC_CHECK_FUNCS([clock_gettime])
 AC_CHECK_FUNCS([memchr])
@@ -44,6 +45,20 @@ AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_UINT8_T
+
+AC_MSG_CHECKING([if compiling with clang])
+AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([], [[
+#if !defined(__clang__)
+#error
+#endif
+]])],
+[CLANG=yes], [CLANG=no])
+AC_MSG_RESULT([$CLANG])
+
+if test "x$CLANG" = "xyes"; then
+   CXXFLAGS="$CXXFLAGS -Wno-deprecated-register -Wuninitialized -Wsometimes-uninitialized"
+fi
 
 AC_CHECK_HEADERS([constraint_solver/constraint_solver.h])
 AC_CHECK_LIB([gc], [GC_malloc], [], [AC_MSG_ERROR([Missing GC library])])
