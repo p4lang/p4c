@@ -30,36 +30,43 @@
 #include <string>
 #include <iomanip>
 
+#include "short_alloc.h"
+
 namespace bm {
 
 //! This class is used everytime a vector of bytes is needed in bmv2. It is most
 //! notably used by the Field class (to store the byte representation of a
 //! field) as well as to store match keys in tables.
 class ByteContainer {
+  static constexpr size_t S = 16u;
+  static_assert(sizeof(char) == 1, "");
+  static_assert(alignof(char) == 1, "");
+  using _vector = std::vector<char, detail::short_alloc<char, S, 1> >;
+
  public:
-  typedef std::vector<char>::iterator iterator;
-  typedef std::vector<char>::const_iterator const_iterator;
-  // typedef std::reverse_iterator<iterator> reverse_iterator;
-  // typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-  typedef std::vector<char>::reference reference;
-  typedef std::vector<char>::const_reference const_reference;
+  typedef _vector::iterator iterator;
+  typedef _vector::const_iterator const_iterator;
+  typedef _vector::reference reference;
+  typedef _vector::const_reference const_reference;
   typedef size_t size_type;
 
  public:
   ByteContainer()
-    : bytes() { }
+      : bytes(_a) {
+    bytes.reserve(S);
+  }
 
   //! Constructs the container with \p nbytes copies of elements with value \p c
   explicit ByteContainer(const size_t nbytes, const char c = '\x00')
-      : bytes(std::vector<char>(nbytes, c)) { }
+      : bytes(nbytes, c, _a) { }
 
   //! Constructs the container by copying the bytes in vector \p bytes
   explicit ByteContainer(const std::vector<char> &bytes)
-    : bytes(bytes) { }
+      : bytes(bytes.begin(), bytes.end(), _a) { }
 
   //! Constructs the container by copying the bytes in this byte array
   ByteContainer(const char *bytes, size_t nbytes)
-    : bytes(std::vector<char>(bytes, bytes + nbytes)) { }
+      : bytes(bytes, bytes + nbytes, _a) { }
 
   static char char2digit(char c) {
     if (c >= '0' && c <= '9')
@@ -75,7 +82,8 @@ class ByteContainer {
   //! Constructs the container from a hexadecimal string. Parameter \p hexstring
   //! can optionally include the `0x` prefix.
   explicit ByteContainer(const std::string &hexstring)
-    : bytes() {
+      : bytes(_a) {
+    bytes.reserve(S);
     size_t idx = 0;
 
     assert(hexstring[idx] != '-');
@@ -96,6 +104,14 @@ class ByteContainer {
       c += char2digit(hexstring[idx++]);
       bytes.push_back(c);
     }
+  }
+
+  ByteContainer(const ByteContainer &other)
+      : bytes(other.bytes, _a) { }
+
+  ByteContainer &operator=(const ByteContainer &other) {
+    bytes.assign(other.begin(), other.end());
+    return *this;
   }
 
   //! Returns the number of bytes in the container
@@ -258,7 +274,8 @@ class ByteContainer {
   }
 
  private:
-  std::vector<char> bytes;
+  _vector::allocator_type::arena_type _a;
+  _vector bytes;
 };
 
 struct ByteContainerKeyHash {
