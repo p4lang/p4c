@@ -12,6 +12,8 @@ midend_SOURCES = \
 	midend/moveDeclarations.h \
 	midend/moveDeclarations.cpp \
 	midend/moveConstructors.h \
-	midend/moveConstructors.cpp
+	midend/moveConstructors.cpp \
+	midend/moveActionsToTables.h \
+	midend/moveActionsToTables.cpp
 
 cpplint_FILES += $(midend_SOURCES)

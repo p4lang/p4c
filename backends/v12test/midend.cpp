@@ -5,6 +5,7 @@
 #include "midend/uniqueNames.h"
 #include "midend/removeReturns.h"
 #include "midend/moveConstructors.h"
+#include "midend/moveActionsToTables.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -82,6 +83,10 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::MoveDeclarations(),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap, false),  // remove exits
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::TypeChecker(&refMap, &typeMap),
+        // Move all stand-alone actions to custom tables
+        new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator1
     };
     midEnd.setName("Prototype mid end");

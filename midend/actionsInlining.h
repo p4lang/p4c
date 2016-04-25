@@ -59,6 +59,9 @@ class DiscoverActionsInlining : public Inspector {
     P4::ReferenceMap*  refMap;    // input
     P4::TypeMap*       typeMap;   // input
  public:
+    // Policy variable: if set to 'false' the visitor generates
+    // an error every time it visits an action which is invoked
+    // directly in a control block.
     bool allowDirectActionCalls = false;
 
     DiscoverActionsInlining(ActionsInlineList* toInline,
