@@ -8,6 +8,9 @@
 namespace IR {
 enum class CounterType { NONE, PACKETS, BYTES, BOTH };
 }
+namespace P4 {
+class ReferenceMap;
+}
 
 inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
     switch (d) {
@@ -429,7 +432,7 @@ class V1Table {
 #noconstructor
 #emit
     V1Table() {}
-    V1Table(const P4Table *);
+    V1Table(const P4Table *, const P4::ReferenceMap *);
 #end
     toString { return node_type_name() + " " + name; }
 }

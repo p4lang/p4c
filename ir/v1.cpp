@@ -1,6 +1,7 @@
 #include "ir.h"
 #include "dbprint.h"
 #include "lib/gmputil.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 
 cstring IR::NamedCond::unique_name() {
     static int unique_counter = 0;
@@ -91,6 +92,12 @@ void IR::ActionList::checkDuplicates() const {
     }
 }
 
+/***********************************************************************\
+* v1.2->v1 lowering code.  These routines transform v1.2 IR for tables  *
+* and actions to the simpler v1 IR, so that backends written with v1    *
+* in mind can continue to use the v1 IR and still work with v1.2 input  *
+\***********************************************************************/
+
 namespace {
 class ActionArgSetup : public Transform {
     /* FIXME -- use ParameterSubstitution for this somehow? */
@@ -160,7 +167,7 @@ static void setIntProperty(cstring name, int *val, const IR::PropertyValue *pval
     error("%s: %s property must be a constant", pval->srcInfo, name);
 }
 
-IR::V1Table::V1Table(const P4Table *tc) {
+IR::V1Table::V1Table(const P4Table *tc, const P4::ReferenceMap *refMap) {
     srcInfo = tc->srcInfo;
     name = tc->externName();
     for (auto prop : *tc->properties->getEnumerator()) {
@@ -172,7 +179,21 @@ IR::V1Table::V1Table(const P4Table *tc) {
             this->reads = reads;
         } else if (prop->name == "actions") {
             for (auto el : *prop->value->to<ActionList>()->actionList)
-                this->actions.push_back(el->name->path->name);
+                this->actions.push_back(refMap->getDeclaration(el->name->path)->externName());
+        } else if (prop->name == "default_action") {
+            auto v = prop->value->to<ExpressionValue>();
+            if (!v) {
+            } else if (auto pe = v->expression->to<PathExpression>()) {
+                default_action = refMap->getDeclaration(pe->path)->externName();
+                default_action.srcInfo = pe->srcInfo;
+                continue;
+            } else if (auto mc = v->expression->to<MethodCallExpression>()) {
+                if (auto pe = mc->method->to<PathExpression>()) {
+                    default_action = refMap->getDeclaration(pe->path)->externName();
+                    default_action.srcInfo = mc->srcInfo;
+                    default_action_args = mc->arguments;
+                    continue; } }
+            BUG("default action %1% is not an action or call", prop->value);
         } else if (prop->name == "size") {
             setIntProperty(prop->name, &size, prop->value);
         } else if (prop->name == "min_size") {
