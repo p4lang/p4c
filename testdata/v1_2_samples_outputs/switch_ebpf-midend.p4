@@ -59,13 +59,29 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction;
     }
-
-    apply {
-        bool hasExited = false;
+    action act() {
+        pass = false;
+    }
+    action act_0() {
         pass = true;
+    }
+    table tbl_act_0() {
+        actions = {
+            act_0;
+        }
+        const default_action = act_0();
+    }
+    table tbl_act() {
+        actions = {
+            act;
+        }
+        const default_action = act();
+    }
+    apply {
+        tbl_act_0.apply();
         switch (Check_src_ip.apply().action_run) {
             Reject: {
-                pass = false;
+                tbl_act.apply();
             }
             NoAction: {
             }

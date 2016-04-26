@@ -69,9 +69,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 16;
         default_action = NoAction();
     }
-
     apply {
-        bool hasExited = false;
         redirect.apply();
     }
 }
@@ -88,16 +86,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1;
         default_action = NoAction();
     }
-
     apply {
-        bool hasExited_0 = false;
         copy_to_cpu.apply();
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasExited_1 = false;
         packet.emit(hdr.cpu_header);
         packet.emit(hdr.ethernet);
     }
@@ -105,13 +100,11 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasExited_3 = false;
     }
 }
 

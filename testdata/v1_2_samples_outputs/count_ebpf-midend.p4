@@ -45,14 +45,31 @@ parser prs(packet_in p, out Headers_t headers) {
 
 control pipe(inout Headers_t headers, out bool pass) {
     CounterArray(32w10, true) counters;
+    action act() {
+        counters.increment((bit<32>)headers.ipv4.dstAddr);
+        pass = true;
+    }
+    action act_0() {
+        pass = false;
+    }
+    table tbl_act() {
+        actions = {
+            act;
+        }
+        const default_action = act();
+    }
+    table tbl_act_0() {
+        actions = {
+            act_0;
+        }
+        const default_action = act_0();
+    }
     apply {
-        bool hasExited = false;
         if (headers.ipv4.isValid()) {
-            counters.increment((bit<32>)headers.ipv4.dstAddr);
-            pass = true;
+            tbl_act.apply();
         }
         else 
-            pass = false;
+            tbl_act_0.apply();
     }
 }
 

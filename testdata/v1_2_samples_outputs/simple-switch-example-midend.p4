@@ -76,7 +76,6 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         size = 1024;
         default_action = Drop_action;
     }
-
     action Send_to_cpu() {
         outCtrl.outputPort = 4w0xe;
     }
@@ -89,7 +88,6 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         }
         const default_action = NoAction;
     }
-
     action Set_dmac(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
@@ -104,7 +102,6 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         size = 1024;
         default_action = Drop_action;
     }
-
     action Rewrite_smac(EthernetAddress sourceMac) {
         headers.ethernet.srcAddr = sourceMac;
     }
@@ -119,28 +116,77 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         size = 16;
         default_action = Drop_action;
     }
-
-    apply {
-        bool hasExited = false;
+    action act() {
+        hasReturned_0_0 = true;
+    }
+    action act_0() {
         hasReturned_0_0 = false;
+    }
+    action act_1() {
+        hasReturned_0_0 = true;
+    }
+    action act_2() {
+        hasReturned_0_0 = true;
+    }
+    action act_3() {
+        hasReturned_0_0 = true;
+    }
+    table tbl_act_0() {
+        actions = {
+            act_0;
+        }
+        const default_action = act_0();
+    }
+    table tbl_Drop_action() {
+        actions = {
+            Drop_action;
+        }
+        const default_action = Drop_action();
+    }
+    table tbl_act() {
+        actions = {
+            act;
+        }
+        const default_action = act();
+    }
+    table tbl_act_1() {
+        actions = {
+            act_1;
+        }
+        const default_action = act_1();
+    }
+    table tbl_act_2() {
+        actions = {
+            act_2;
+        }
+        const default_action = act_2();
+    }
+    table tbl_act_3() {
+        actions = {
+            act_3;
+        }
+        const default_action = act_3();
+    }
+    apply {
+        tbl_act_0.apply();
         if (parseError != NoError) {
-            Drop_action();
-            hasReturned_0_0 = true;
+            tbl_Drop_action.apply();
+            tbl_act.apply();
         }
         if (!hasReturned_0_0) {
             ipv4_match.apply(nextHop_0_0);
             if (outCtrl.outputPort == 4w0xf) 
-                hasReturned_0_0 = true;
+                tbl_act_1.apply();
         }
         if (!hasReturned_0_0) {
             check_ttl.apply();
             if (outCtrl.outputPort == 4w0xe) 
-                hasReturned_0_0 = true;
+                tbl_act_2.apply();
         }
         if (!hasReturned_0_0) {
             dmac.apply(nextHop_0_0);
             if (outCtrl.outputPort == 4w0xf) 
-                hasReturned_0_0 = true;
+                tbl_act_3.apply();
         }
         if (!hasReturned_0_0) 
             smac.apply();
@@ -149,14 +195,22 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     Checksum16() ck;
+    action act_4() {
+        ck.clear();
+        p.ip.hdrChecksum = 16w0;
+        ck.update(p.ip);
+        p.ip.hdrChecksum = ck.get();
+    }
+    table tbl_act_4() {
+        actions = {
+            act_4;
+        }
+        const default_action = act_4();
+    }
     apply {
-        bool hasExited_0 = false;
         b.emit(p.ethernet);
         if (p.ip.isValid()) {
-            ck.clear();
-            p.ip.hdrChecksum = 16w0;
-            ck.update(p.ip);
-            p.ip.hdrChecksum = ck.get();
+            tbl_act_4.apply();
             b.emit(p.ip);
         }
     }

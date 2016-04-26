@@ -103,7 +103,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("nop") action process_mac_rewrite_nop() {
     }
     @name("rewrite_ipv4_unicast_mac") action process_mac_rewrite_rewrite_ipv4_unicast_mac(bit<48> smac) {
@@ -143,30 +142,44 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction();
     }
-
-    apply {
-        bool hasExited = false;
-        setup.apply();
+    action act() {
         hdr_0_0 = hdr;
         meta_0_0 = meta;
         standard_metadata_0_0 = standard_metadata;
-        if (meta_0_0.egress_metadata.routed == 1w1) 
-            process_mac_rewrite_mac_rewrite.apply();
+    }
+    action act_0() {
         hdr = hdr_0_0;
         meta = meta_0_0;
         standard_metadata = standard_metadata_0_0;
+    }
+    table tbl_act() {
+        actions = {
+            act;
+        }
+        const default_action = act();
+    }
+    table tbl_act_0() {
+        actions = {
+            act_0;
+        }
+        const default_action = act_0();
+    }
+    apply {
+        setup.apply();
+        tbl_act.apply();
+        if (meta_0_0.egress_metadata.routed == 1w1) 
+            process_mac_rewrite_mac_rewrite.apply();
+        tbl_act_0.apply();
     }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv6);
         packet.emit(hdr.ipv4);
@@ -175,13 +188,11 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasExited_3 = false;
     }
 }
 

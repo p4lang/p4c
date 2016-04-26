@@ -33,7 +33,8 @@ struct Packet_data {
 }
 
 action NoAction() {
-    bool hasReturned = false;
+    @name("hasReturned") bool hasReturned;
+    hasReturned = false;
 }
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     @name("pArg1_0") TArg1 pArg1_0_0;
@@ -56,7 +57,6 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         size = 32w5;
         const default_action = p1_C_action(9w5);
     }
-
     @name("p1.Drop") action p1_Drop() {
         pArg1_0_0.drop = true;
     }
@@ -69,16 +69,32 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         }
         const default_action = NoAction;
     }
-
-    apply {
-        bool hasExited = false;
+    action act() {
         pArg1_0_0 = qArg1;
         pArg2_0_0 = qArg2;
+    }
+    action act_0() {
+        qArg1 = pArg1_0_0;
+        qArg2 = pArg2_0_0;
+    }
+    table tbl_act() {
+        actions = {
+            act;
+        }
+        const default_action = act();
+    }
+    table tbl_act_0() {
+        actions = {
+            act_0;
+        }
+        const default_action = act_0();
+    }
+    apply {
+        tbl_act.apply();
         p1_T.apply(pArg1_0_0, pArg2_0_0);
         p1_T.apply(pArg1_0_0, pArg2_0_0);
         p1_Tinner.apply();
-        qArg1 = pArg1_0_0;
-        qArg2 = pArg2_0_0;
+        tbl_act_0.apply();
     }
 }
 

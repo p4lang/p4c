@@ -9,7 +9,7 @@ namespace P4 {
 // This replaces 'returns' and/or 'exits' by ifs
 class RemoveReturns : public Transform {
     P4::ReferenceMap* refMap;
-    bool              removeReturns;  // if true remote returns, else remove exits
+    bool              removeReturns;  // if true remove returns, else remove exits
     IR::ID            returnVar;  // one for each context
 
     enum class Returns {

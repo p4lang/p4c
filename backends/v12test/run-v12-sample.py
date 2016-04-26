@@ -87,7 +87,7 @@ def compare_files(options, produced, expected):
 
     # unfortunately difflib has no option to compare ignoring whitespace,
     # so we invoke diff for this purpose
-    cmd = "diff -q -w -I \"#include\" " + produced + " " + expected
+    cmd = "diff -B -q -w -I \"#include\" " + produced + " " + expected
     exitcode = subprocess.call(cmd, shell=True);
     if exitcode == 0:
         return SUCCESS

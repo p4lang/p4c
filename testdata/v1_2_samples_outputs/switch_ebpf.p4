@@ -59,7 +59,6 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(1024);
         const default_action = NoAction;
     }
-
     apply {
         pass = true;
         switch (Check_src_ip.apply().action_run) {

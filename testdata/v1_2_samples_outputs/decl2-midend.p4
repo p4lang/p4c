@@ -9,9 +9,14 @@ control p() {
             z_0_0 = x & x_0_0_0;
         }
     }
+    table tbl_b() {
+        actions = {
+            b;
+        }
+        const default_action = b(x_1_0_0, y_0_0_0);
+    }
     apply {
-        bool hasExited = false;
-        b(x_1_0_0, y_0_0_0);
+        tbl_b.apply();
     }
 }
 

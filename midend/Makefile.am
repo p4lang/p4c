@@ -13,7 +13,7 @@ midend_SOURCES = \
 	midend/moveDeclarations.cpp \
 	midend/moveConstructors.h \
 	midend/moveConstructors.cpp \
-	midend/moveActionsToTables.h \
-	midend/moveActionsToTables.cpp
+	midend/actionSynthesis.h \
+	midend/actionSynthesis.cpp
 
 cpplint_FILES += $(midend_SOURCES)

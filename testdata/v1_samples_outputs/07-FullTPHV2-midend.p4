@@ -322,7 +322,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasExited = false;
     }
 }
 
@@ -563,7 +562,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("use_16bit_fields_1") table use_16bit_fields_1() {
         actions = {
             set_egress_spec;
@@ -574,7 +572,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("use_16bit_fields_2") table use_16bit_fields_2() {
         actions = {
             set_egress_spec;
@@ -616,7 +613,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("use_32bit_fields_1") table use_32bit_fields_1() {
         actions = {
             set_egress_spec;
@@ -658,7 +654,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("use_32bit_fields_2") table use_32bit_fields_2() {
         actions = {
             set_egress_spec;
@@ -700,7 +695,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("use_8bit_fields") table use_8bit_fields() {
         actions = {
             set_egress_spec;
@@ -774,9 +768,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
-        bool hasExited_0 = false;
         t1.apply();
         use_8bit_fields.apply();
         use_16bit_fields_1.apply();
@@ -788,20 +780,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasExited_1 = false;
         packet.emit(hdr.h);
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasExited_3 = false;
     }
 }
 

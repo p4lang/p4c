@@ -39,9 +39,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
         }
         default_action = Drop_1;
     }
-
     apply {
-        bool hasExited = false;
         if (p.arpa_pak.isValid()) 
             Enet_lkup.apply();
     }
@@ -49,7 +47,6 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
 
 control LJdeparse(inout Parsed_rep p, packet_out b) {
     apply {
-        bool hasExited_0 = false;
         b.emit<ARPA_hdr>(p.arpa_pak);
     }
 }

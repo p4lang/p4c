@@ -705,11 +705,13 @@ tablePropertyList
 
 tableProperty
     : KEY '=' '{' keyElementList '}'     { auto v = new IR::Key(@4, $4);
-                                           auto id = IR::ID(@1, "key");
+                                           auto id = IR::ID(
+                                               @1, IR::TableProperties::keyPropertyName);
                                            $$ = new IR::TableProperty(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
     | ACTIONS '=' '{' actionList '}'     { auto v = new IR::ActionList(@4, $4);
-                                           auto id = IR::ID(@1, "actions");
+                                           auto id = IR::ID(
+                                               @1, IR::TableProperties::actionsPropertyName);
                                            $$ = new IR::TableProperty(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
     | optAnnotations CONST IDENTIFIER '=' initializer ';'

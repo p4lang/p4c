@@ -74,7 +74,6 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         size = 1024;
         default_action = Drop_action;
     }
-
     action Send_to_cpu() {
         outCtrl.outputPort = 4w0xe;
     }
@@ -87,7 +86,6 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         }
         const default_action = NoAction;
     }
-
     action Set_dmac(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
@@ -102,7 +100,6 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         size = 1024;
         default_action = Drop_action;
     }
-
     action Rewrite_smac(EthernetAddress sourceMac) {
         headers.ethernet.srcAddr = sourceMac;
     }
@@ -117,7 +114,6 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         size = 16;
         default_action = Drop_action;
     }
-
     apply {
         if (parseError != NoError) {
             Drop_action();

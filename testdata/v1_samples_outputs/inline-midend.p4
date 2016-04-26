@@ -35,17 +35,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
-    apply {
-        bool hasExited = false;
+    action act() {
         hdr_1_0 = hdr;
         meta_1_0 = meta;
         standard_metadata_1_0 = standard_metadata;
         hdr_0_0 = hdr_1_0;
         meta_0_0 = meta_1_0;
         standard_metadata_0_0 = standard_metadata_1_0;
-        if (meta_0_0.m.b == 1w1) 
-            d_c_t.apply();
+    }
+    action act_0() {
         hdr_1_0 = hdr_0_0;
         meta_1_0 = meta_0_0;
         standard_metadata_1_0 = standard_metadata_0_0;
@@ -53,29 +51,43 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta = meta_1_0;
         standard_metadata = standard_metadata_1_0;
     }
+    table tbl_act() {
+        actions = {
+            act;
+        }
+        const default_action = act();
+    }
+    table tbl_act_0() {
+        actions = {
+            act_0;
+        }
+        const default_action = act_0();
+    }
+    apply {
+        tbl_act.apply();
+        if (meta_0_0.m.b == 1w1) 
+            d_c_t.apply();
+        tbl_act_0.apply();
+    }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasExited_0 = false;
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasExited_1 = false;
     }
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        bool hasExited_2 = false;
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        bool hasExited_3 = false;
     }
 }
 

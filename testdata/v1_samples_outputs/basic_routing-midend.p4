@@ -76,9 +76,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 32768;
         default_action = NoAction();
     }
-
     apply {
-        bool hasExited = false;
         rewrite_mac.apply();
     }
 }
@@ -110,7 +108,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 65536;
         default_action = NoAction();
     }
-
     @name("ipv4_fib") table ipv4_fib() {
         actions = {
             on_miss;
@@ -124,7 +121,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 131072;
         default_action = NoAction();
     }
-
     @name("ipv4_fib_lpm") table ipv4_fib_lpm() {
         actions = {
             on_miss;
@@ -138,7 +134,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16384;
         default_action = NoAction();
     }
-
     @name("nexthop") table nexthop() {
         actions = {
             on_miss;
@@ -151,7 +146,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 32768;
         default_action = NoAction();
     }
-
     @name("port_mapping") table port_mapping() {
         actions = {
             set_bd;
@@ -163,9 +157,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 32768;
         default_action = NoAction();
     }
-
     apply {
-        bool hasExited_0 = false;
         if (hdr.ipv4.isValid()) {
             port_mapping.apply();
             bd.apply();
@@ -182,7 +174,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        bool hasExited_1 = false;
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
     }
@@ -190,18 +181,34 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     Checksum16() ipv4_checksum;
+    action act() {
+        standard_metadata.drop = 1w1;
+    }
+    table tbl_act() {
+        actions = {
+            act;
+        }
+        const default_action = act();
+    }
     apply {
-        bool hasExited_2 = false;
         if (hdr.ipv4.hdrChecksum == ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })) 
-            standard_metadata.drop = 1w1;
+            tbl_act.apply();
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
-    apply {
-        bool hasExited_3 = false;
+    action act_0() {
         hdr.ipv4.hdrChecksum = ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+    }
+    table tbl_act_0() {
+        actions = {
+            act_0;
+        }
+        const default_action = act_0();
+    }
+    apply {
+        tbl_act_0.apply();
     }
 }
 

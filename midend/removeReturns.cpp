@@ -2,6 +2,19 @@
 
 namespace P4 {
 
+namespace {
+class HasExits : public Inspector {
+ public:
+    bool hasExits;
+    bool hasReturns;
+    HasExits() : hasExits(false), hasReturns(false) {}
+    void postorder(const IR::ExitStatement*) override
+    { hasExits = true; }
+    void postorder(const IR::ReturnStatement*) override
+    { hasReturns = true; }
+};
+}  // namespace
+
 const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
     cstring var = refMap->newName("hasReturned");
     returnVar = IR::ID(var);
@@ -23,6 +36,15 @@ const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
 }
 
 const IR::Node* RemoveReturns::preorder(IR::P4Control* control) {
+    HasExits he;
+    (void)control->apply(he);
+    if ((removeReturns && !he.hasReturns) ||
+        (!removeReturns && !he.hasExits)) {
+        // don't pollute the code unnecessarily
+        prune();
+        return control;
+    }
+    
     cstring base = removeReturns ? "hasReturned" : "hasExited";
     cstring var = refMap->newName(base);
     returnVar = IR::ID(var);
@@ -55,7 +77,7 @@ const IR::Node* RemoveReturns::preorder(IR::ReturnStatement* statement) {
 }
 
 const IR::Node* RemoveReturns::preorder(IR::ExitStatement* statement) {
-    set(Returns::Yes);
+    set(Returns::Yes);  // exit implies return
     if (!removeReturns) {
         auto left = new IR::PathExpression(returnVar);
         return new IR::AssignmentStatement(statement->srcInfo, left,

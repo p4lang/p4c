@@ -58,7 +58,6 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction;
     }
-
     apply {
         pass = true;
         if (!headers.ipv4.isValid()) {

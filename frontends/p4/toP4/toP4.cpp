@@ -966,7 +966,7 @@ bool ToP4::preorder(const IR::P4Table* c) {
     setVecSep("\n", "\n");
     visit(c->properties);
     doneVec();
-    builder.blockEnd(true);
+    builder.blockEnd(false);
     return false;
 }
 

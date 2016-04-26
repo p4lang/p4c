@@ -1,7 +1,6 @@
 control noargs();
 control q() {
     apply {
-        bool hasExited = false;
     }
 }
 

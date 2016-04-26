@@ -76,7 +76,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 32768;
         default_action = NoAction();
     }
-
     apply {
         rewrite_mac.apply();
     }
@@ -109,7 +108,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 65536;
         default_action = NoAction();
     }
-
     @name("ipv4_fib") table ipv4_fib() {
         actions = {
             on_miss;
@@ -123,7 +121,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 131072;
         default_action = NoAction();
     }
-
     @name("ipv4_fib_lpm") table ipv4_fib_lpm() {
         actions = {
             on_miss;
@@ -137,7 +134,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16384;
         default_action = NoAction();
     }
-
     @name("nexthop") table nexthop() {
         actions = {
             on_miss;
@@ -150,7 +146,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 32768;
         default_action = NoAction();
     }
-
     @name("port_mapping") table port_mapping() {
         actions = {
             set_bd;
@@ -162,7 +157,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 32768;
         default_action = NoAction();
     }
-
     apply {
         if (hdr.ipv4.isValid()) {
             port_mapping.apply();

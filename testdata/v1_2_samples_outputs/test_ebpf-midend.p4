@@ -60,14 +60,30 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction;
     }
-
-    apply {
-        bool hasExited = false;
+    action act() {
+        pass = false;
+        hasReturned_0_0 = true;
+    }
+    action act_0() {
         hasReturned_0_0 = false;
         pass = true;
+    }
+    table tbl_act_0() {
+        actions = {
+            act_0;
+        }
+        const default_action = act_0();
+    }
+    table tbl_act() {
+        actions = {
+            act;
+        }
+        const default_action = act();
+    }
+    apply {
+        tbl_act_0.apply();
         if (!headers.ipv4.isValid()) {
-            pass = false;
-            hasReturned_0_0 = true;
+            tbl_act.apply();
         }
         if (!hasReturned_0_0) 
             Check_src_ip.apply();

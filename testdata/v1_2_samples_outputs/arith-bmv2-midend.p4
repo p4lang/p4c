@@ -23,25 +23,21 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 
 control vrfy(in Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        bool hasExited = false;
     }
 }
 
 control update(inout Headers h, inout Meta m) {
     apply {
-        bool hasExited_0 = false;
     }
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        bool hasExited_1 = false;
     }
 }
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        bool hasExited_2 = false;
         b.emit(h.h);
     }
 }
@@ -57,9 +53,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = add;
     }
-
     apply {
-        bool hasExited_3 = false;
         t.apply();
     }
 }
