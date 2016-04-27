@@ -34,8 +34,9 @@ AC_ARG_WITH([stress_tests],
 
 AM_CONDITIONAL([COND_STRESS_TESTS], [test "$want_stress_tests" = yes])
 
+want_pdfixed=no
 AC_ARG_WITH([pdfixed],
-    AS_HELP_STRING([--with-pdfixed], [Build pdfixed for bmv2])
+    AS_HELP_STRING([--with-pdfixed], [Build pdfixed for bmv2]),
     [want_pdfixed=yes], [])
 
 AM_CONDITIONAL([COND_PDFIXED], [test "$want_pdfixed" = yes])
@@ -164,7 +165,9 @@ AC_CONFIG_FILES([Makefile
 		targets/simple_switch/tests/Makefile
 		tests/Makefile
 		tests/stress_tests/Makefile
-                tools/Makefile])
+                tools/Makefile
+                pdfixed/Makefile
+                pdfixed/include/Makefile])
 
 # Generate other files
 AC_CONFIG_FILES([tests/utils.cpp
@@ -178,3 +181,4 @@ AS_ECHO("Coverage enabled .............. : $coverage_enabled")
 AS_ECHO("Debugger enabled .............. : $debugger_enabled")
 AS_ECHO("Logging macros enabled ........ : $logging_macros_enabled")
 AS_ECHO("Event logger enabled .......... : $elogger_enabled")
+AS_ECHO("With pdfixed .................. : $want_pdfixed")
