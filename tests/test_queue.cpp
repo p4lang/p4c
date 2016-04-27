@@ -22,7 +22,7 @@
 
 #include <thread>
 
-#include "bm_sim/queue.h"
+#include <bm/bm_sim/queue.h>
 
 using std::unique_ptr;
 

@@ -22,7 +22,7 @@
 
 #include <vector>
 
-#include "bm_sim/packet.h"
+#include <bm/bm_sim/packet.h>
 
 using namespace bm;
 

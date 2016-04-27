@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-#include "bm_sim/handle_mgr.h"
+#include <bm/bm_sim/handle_mgr.h>
 
 using bm::HandleMgr;
 using bm::handle_t;

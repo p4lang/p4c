@@ -18,7 +18,7 @@
  *
  */
 
-#include "bm_sim/actions.h"
+#include <bm/bm_sim/actions.h>
 
 template <typename... Args>
 using ActionPrimitive = bm::ActionPrimitive<Args...>;

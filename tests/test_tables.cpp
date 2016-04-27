@@ -23,7 +23,7 @@
 #include <memory>
 #include <thread>
 #include <future>
-#include "bm_sim/tables.h"
+#include <bm/bm_sim/tables.h>
 
 using namespace bm;
 

@@ -2,9 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.68])
-AC_INIT([bm_sim], [0.1], [antonin@barefootnetworks.com])
+AC_INIT([bm], [0.1], [antonin@barefootnetworks.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
-AC_CONFIG_SRCDIR([modules/bm_sim/src/checksums.cpp])
+AC_CONFIG_SRCDIR([src/bm_sim/checksums.cpp])
 AC_CONFIG_HEADERS([config.h])
 
 # Pyhton is optional to the package
@@ -33,6 +33,12 @@ AC_ARG_WITH([stress_tests],
     [want_stress_tests=yes], [])
 
 AM_CONDITIONAL([COND_STRESS_TESTS], [test "$want_stress_tests" = yes])
+
+AC_ARG_WITH([pdfixed],
+    AS_HELP_STRING([--with-pdfixed], [Build pdfixed for bmv2])
+    [want_pdfixed=yes], [])
+
+AM_CONDITIONAL([COND_PDFIXED], [test "$want_pdfixed" = yes])
 
 MY_CPPFLAGS=""
 
@@ -73,20 +79,6 @@ AC_CONFIG_MACRO_DIR([m4])
 # enforce -std=c++11
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 
-# Add picky flags
-PICKY_CXXFLAGS="-Wall -Werror -Wextra"
-PICKY_CFLAGS=""
-# I do not want work to use AC_DEFINE cause I do not want to include config.h
-# It interfers with Thrift's config.h and it's too much work to do that cleanly
-AC_SUBST([PICKY_CXXFLAGS])
-AC_SUBST([PICKY_CFLAGS])
-
-AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS \
-                          -I\$(top_srcdir)/modules/bf_lpm_trie/include \
-                          -isystem\$(top_srcdir)/third_party/jsoncpp/include \
-                          -isystem\$(top_srcdir)/third_party/spdlog/include \
-                          -I\$(top_srcdir)/modules/BMI/include"])
-
 # Checks for header files.
 AC_LANG_PUSH(C)
 AC_LANG_PUSH(C++)
@@ -97,6 +89,7 @@ AC_WITH([p4thrift],
         AC_PATH_PROG([THRIFT], [p4thrift], [])
         AC_SUBST([THRIFT_LIB], ["-lp4thrift"])
         WITH_P4THRIFT="true"
+        MY_CPPFLAGS="$MY_CPPFLAGS -DP4THRIFT"
         AC_CHECK_HEADER([p4thrift/P4Thrift.h], [], [AC_MSG_ERROR([P4Thrift headers not found. Install P4Thrift from http://github.com/p4lang/thrift/])])
     ],
     [
@@ -133,6 +126,14 @@ AC_CHECK_HEADER([boost/program_options.hpp], [], [AC_MSG_ERROR([Missing boost pr
 AC_CHECK_HEADER([boost/functional/hash.hpp], [], [AC_MSG_ERROR([Missing boost functional hash header])])
 AC_CHECK_HEADER([boost/filesystem.hpp], [], [AC_MSG_ERROR([Missing boost filesystem header])])
 
+AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS \
+                          -I\$(top_srcdir)/include \
+                          -isystem\$(top_srcdir)/third_party/jsoncpp/include \
+                          -isystem\$(top_srcdir)/third_party/spdlog/include"])
+
+AC_SUBST([AM_CXXFLAGS], ["-Wall -Werror -Wextra"])
+AC_SUBST([AM_CFLAGS], [""])
+
 # Checks for typedefs, structures, and compiler characteristics.
 # not supported by autoconf 2.68, add to m4/ ?
 # AC_CHECK_HEADER_STDBOOL
@@ -147,14 +148,14 @@ AC_CONFIG_FILES([Makefile
 		third_party/gtest/Makefile
 		third_party/jsoncpp/Makefile
 		third_party/spdlog/Makefile
-		modules/Makefile
-		modules/bf_lpm_trie/Makefile
-		modules/bm_sim/Makefile
-		modules/bm_runtime/Makefile
-		modules/BMI/Makefile
-		modules/bm_apps/Makefile
-		modules/bm_apps/include/Makefile
-		modules/bm_apps/examples/Makefile
+                include/Makefile
+                src/Makefile
+                src/bf_lpm_trie/Makefile
+		src/bm_sim/Makefile
+		src/bm_runtime/Makefile
+		src/BMI/Makefile
+		src/bm_apps/Makefile
+		src/bm_apps/examples/Makefile
 		targets/Makefile
 		targets/simple_router/Makefile
 		targets/l2_switch/Makefile

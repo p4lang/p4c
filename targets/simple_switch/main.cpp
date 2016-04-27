@@ -20,9 +20,9 @@
 
 /* Switch instance */
 
-#include "simple_switch.h"
+#include <bm/bm_runtime/bm_runtime.h>
 
-#include "bm_runtime/bm_runtime.h"
+#include "simple_switch.h"
 
 #include "SimpleSwitch_server.ipp"
 

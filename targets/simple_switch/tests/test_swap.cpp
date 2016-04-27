@@ -15,6 +15,8 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_apps/packet_pipe.h>
+
 #include <boost/filesystem.hpp>
 
 #include <string>
@@ -23,8 +25,6 @@
 #include <algorithm>  // for std::fill_n
 #include <fstream>
 #include <streambuf>
-
-#include "bm_apps/packet_pipe.h"
 
 #include "simple_switch.h"
 

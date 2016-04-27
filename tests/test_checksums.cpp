@@ -22,8 +22,8 @@
 
 #include <cstring>
 
-#include "bm_sim/checksums.h"
-#include "bm_sim/parser.h"
+#include <bm/bm_sim/checksums.h>
+#include <bm/bm_sim/parser.h>
 
 using namespace bm;
 

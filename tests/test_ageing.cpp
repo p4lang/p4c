@@ -29,7 +29,7 @@
 
 #include <cassert>
 
-#include "bm_sim/ageing.h"
+#include <bm/bm_sim/ageing.h>
 
 #include "utils.h"
 

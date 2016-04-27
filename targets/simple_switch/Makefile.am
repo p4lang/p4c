@@ -1,21 +1,17 @@
 SUBDIRS = . tests
 
-if P4THRIFT
-  AM_CPPFLAGS += -DP4THRIFT 
-endif
-
 simple_switch_thrift_py_files = \
 gen-py/sswitch_runtime/constants.py \
 gen-py/sswitch_runtime/__init__.py \
 gen-py/sswitch_runtime/SimpleSwitch.py \
 gen-py/sswitch_runtime/ttypes.py
 simple_switch_thrift_files = \
-gen-cpp/simple_switch_constants.cpp \
-gen-cpp/simple_switch_constants.h \
-gen-cpp/SimpleSwitch.cpp \
-gen-cpp/SimpleSwitch.h \
-gen-cpp/simple_switch_types.cpp \
-gen-cpp/simple_switch_types.h
+gen-cpp/bm/simple_switch_constants.cpp \
+gen-cpp/bm/simple_switch_constants.h \
+gen-cpp/bm/SimpleSwitch.cpp \
+gen-cpp/bm/SimpleSwitch.h \
+gen-cpp/bm/simple_switch_types.cpp \
+gen-cpp/bm/simple_switch_types.h
 
 BUILT_SOURCES = $(simple_switch_thrift_files) $(simple_switch_thrift_py_files)
 
@@ -46,15 +42,13 @@ bin_SCRIPTS = \
 simple_switch_CLI
 
 AM_CPPFLAGS += \
--I$(top_srcdir)/modules/bm_sim/include \
--I$(top_srcdir)/modules/bm_runtime/include \
 -I$(srcdir)/thrift/src/ \
 -I$(builddir)/gen-cpp
 
 libsimpleswitch_la_LIBADD = \
-$(top_builddir)/modules/bm_sim/libbmsim.la \
-$(top_builddir)/modules/bf_lpm_trie/libbflpmtrie.la \
-$(top_builddir)/modules/BMI/libbmi.la \
+$(top_builddir)/src/bm_sim/libbmsim.la \
+$(top_builddir)/src/bf_lpm_trie/libbflpmtrie.la \
+$(top_builddir)/src/BMI/libbmi.la \
 $(top_builddir)/third_party/jsoncpp/libjson.la \
 -lboost_system -lboost_thread $(THRIFT_LIB) -lboost_program_options
 
@@ -69,7 +63,7 @@ thrift/src/SimpleSwitch_server.ipp
 bin_PROGRAMS = simple_switch
 
 simple_switch_LDADD = \
-$(top_builddir)/modules/bm_runtime/libbmruntime.la \
+$(top_builddir)/src/bm_runtime/libbmruntime.la \
 $(top_builddir)/thrift_src/libruntimestubs.la \
 libsimpleswitch.la \
 libsimpleswitch_thrift.la
@@ -93,7 +87,8 @@ EXTRA_DIST += $(THRIFT_IDL)
 thrift_files.ts: $(THRIFT_IDL)
 	@rm -f thrift_files.tmp
 	@touch thrift_files.tmp
-	$(THRIFT) -o $(builddir) --gen cpp -r $(THRIFT_IDL)
+	@mkdir -p $(builddir)/gen-cpp/bm
+	$(THRIFT) -out $(builddir)/gen-cpp/bm --gen cpp -r $(THRIFT_IDL)
 	$(THRIFT) -o $(builddir) --gen py -r $(THRIFT_IDL)
 	if mkdir $(srcdir)/sswitch_runtime.test 2>/dev/null; then \
 	  rm -rf $(srcdir)/sswitch_runtime/; \
@@ -122,14 +117,14 @@ $(BUILT_SOURCES): thrift_files.ts
 	fi
 
 pkginclude_HEADERS = \
-gen-cpp/simple_switch_constants.h \
-gen-cpp/SimpleSwitch.h \
-gen-cpp/simple_switch_types.h
+gen-cpp/bm/simple_switch_constants.h \
+gen-cpp/bm/SimpleSwitch.h \
+gen-cpp/bm/simple_switch_types.h
 
 
 CLEANFILES = $(BUILT_SOURCES) \
 thrift_files.ts \
-gen-cpp/SimpleSwitch_server.skeleton.cpp \
+gen-cpp/bm/SimpleSwitch_server.skeleton.cpp \
 $(bin_SCRIPTS)
 
 # I used to do a rm on gen-cpp, but it was removing a .deps directory, instead I

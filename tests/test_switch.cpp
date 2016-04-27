@@ -27,10 +27,10 @@
 
 #include <boost/filesystem.hpp>
 
-#include "bm_sim/switch.h"
+#include <bm/bm_sim/switch.h>
 #include "utils.h"
 
-#include "bm_runtime/bm_runtime.h"
+#include <bm/bm_runtime/bm_runtime.h>
 
 using namespace bm;
 

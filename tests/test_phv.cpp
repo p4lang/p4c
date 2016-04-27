@@ -25,7 +25,7 @@
 
 #include <cassert>
 
-#include "bm_sim/phv.h"
+#include <bm/bm_sim/phv.h>
 
 using namespace bm;
 

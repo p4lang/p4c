@@ -25,7 +25,7 @@
 #include <vector>
 #include <algorithm>  // for std::count, std::max
 
-#include "bm_sim/queueing.h"
+#include <bm/bm_sim/queueing.h>
 
 using std::unique_ptr;
 

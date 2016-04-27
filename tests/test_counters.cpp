@@ -22,7 +22,7 @@
 
 #include <random>
 
-#include "bm_sim/counters.h"
+#include <bm/bm_sim/counters.h>
 
 using namespace bm;
 

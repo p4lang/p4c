@@ -18,7 +18,7 @@
  *
  */
 
-#include "bm_sim/actions.h"
+#include <bm/bm_sim/actions.h>
 
 template <typename... Args>
 using ActionPrimitive = bm::ActionPrimitive<Args...>;
@@ -152,6 +152,7 @@ REGISTER_PRIMITIVE_W_NAME("exit", exit_);
 class generate_digest : public ActionPrimitive<const Data &, const Data &> {
   void operator ()(const Data &receiver, const Data &learn_id) {
     // discared receiver for now
+    (void) receiver;
     get_field("intrinsic_metadata.lf_field_list").set(learn_id);
   }
 };
@@ -328,11 +329,11 @@ REGISTER_PRIMITIVE(pop);
 //   from /usr/include/boost/cstdint.hpp:36,
 //   from /usr/include/boost/multiprecision/number.hpp:9,
 //   from /usr/include/boost/multiprecision/gmp.hpp:9,
-//   from ../../modules/bm_sim/include/bm_sim/bignum.h:25,
-//   from ../../modules/bm_sim/include/bm_sim/data.h:32,
-//   from ../../modules/bm_sim/include/bm_sim/fields.h:28,
-//   from ../../modules/bm_sim/include/bm_sim/phv.h:34,
-//   from ../../modules/bm_sim/include/bm_sim/actions.h:34,
+//   from ../../src/bm_sim/include/bm_sim/bignum.h:25,
+//   from ../../src/bm_sim/include/bm_sim/data.h:32,
+//   from ../../src/bm_sim/include/bm_sim/fields.h:28,
+//   from ../../src/bm_sim/include/bm_sim/phv.h:34,
+//   from ../../src/bm_sim/include/bm_sim/actions.h:34,
 //   from primitives.cpp:21:
 //     /usr/include/unistd.h:993:12: note: declared here
 //     extern int truncate (const char *__file, __off_t __length)

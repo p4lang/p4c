@@ -238,7 +238,7 @@ All developers must sign the [P4.org](http://p4.org) CLA and return it to
 [here](http://p4.org/wp-content/uploads/2015/07/P4_Language_Consortium_Membership_Agreement.pdf).
 
 Any contribution to the C++ core code (in particular the [bm_sim]
-(modules/bm_sim) module) must respect the coding guidelines. We rely heavily on
+(src/bm_sim) module) must respect the coding guidelines. We rely heavily on
 the [Google C++ Style Guide]
 (https://google.github.io/styleguide/cppguide.html), with some differences
 listed in this repository's [wiki]

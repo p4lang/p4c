@@ -4,7 +4,11 @@ if COND_TARGETS
     MAYBE_TARGETS = targets
 endif
 
-SUBDIRS = thrift_src third_party modules tests $(MAYBE_TARGETS) tools
+# if COND_PDFIXED
+#     MAYBE_PDFIXED = pdfixed
+# endif
+
+SUBDIRS = thrift_src third_party src include tests $(MAYBE_TARGETS) tools
 
 # I am leaving all style-related files (cpplint) out of dist on purpose, maybe
 # will add them later if needed

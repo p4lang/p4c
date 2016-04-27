@@ -20,8 +20,8 @@
 
 #include <gtest/gtest.h>
 
-#include "bm_sim/parser.h"
-#include "bm_sim/deparser.h"
+#include <bm/bm_sim/parser.h>
+#include <bm/bm_sim/deparser.h>
 
 using namespace bm;
 

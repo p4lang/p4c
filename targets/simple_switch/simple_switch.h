@@ -21,17 +21,17 @@
 #ifndef SIMPLE_SWITCH_SIMPLE_SWITCH_H_
 #define SIMPLE_SWITCH_SIMPLE_SWITCH_H_
 
+#include <bm/bm_sim/queue.h>
+#include <bm/bm_sim/queueing.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/switch.h>
+#include <bm/bm_sim/event_logger.h>
+#include <bm/bm_sim/simple_pre_lag.h>
+
 #include <memory>
 #include <chrono>
 #include <thread>
 #include <vector>
-
-#include "bm_sim/queue.h"
-#include "bm_sim/queueing.h"
-#include "bm_sim/packet.h"
-#include "bm_sim/switch.h"
-#include "bm_sim/event_logger.h"
-#include "bm_sim/simple_pre_lag.h"
 
 // TODO(antonin)
 // experimental support for priority queueing

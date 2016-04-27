@@ -18,15 +18,15 @@
  *
  */
 
+#include <bm/bm_sim/parser.h>
+#include <bm/bm_sim/tables.h>
+#include <bm/bm_sim/logger.h>
+
 #include <unistd.h>
 
 #include <iostream>
 #include <fstream>
 #include <string>
-
-#include "bm_sim/parser.h"
-#include "bm_sim/tables.h"
-#include "bm_sim/logger.h"
 
 #include "simple_switch.h"
 
@@ -251,7 +251,6 @@ SimpleSwitch::ingress_thread() {
     Pipeline *ingress_mau = this->get_pipeline("ingress");
 
     phv = packet->get_phv();
-    packet_id_t packet_id = packet->get_packet_id();
 
     int ingress_port = packet->get_ingress_port();
     BMLOG_DEBUG_PKT(*packet, "Processing packet received on port {}",
@@ -387,7 +386,6 @@ SimpleSwitch::egress_thread(size_t worker_id) {
     Pipeline *egress_mau = this->get_pipeline("egress");
 
     phv = packet->get_phv();
-    packet_id_t packet_id = packet->get_packet_id();
 
     if (with_queueing_metadata) {
       auto enq_timestamp =

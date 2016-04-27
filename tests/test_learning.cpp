@@ -29,7 +29,7 @@
 
 #include <cassert>
 
-#include "bm_sim/learning.h"
+#include <bm/bm_sim/learning.h>
 
 #include "utils.h"
 

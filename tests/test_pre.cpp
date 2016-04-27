@@ -19,8 +19,8 @@
  */
 
 #include <gtest/gtest.h>
-#include "bm_sim/simple_pre.h"
-#include "bm_sim/simple_pre_lag.h"
+#include <bm/bm_sim/simple_pre.h>
+#include <bm/bm_sim/simple_pre_lag.h>
 #include <bitset>
 
 using namespace bm;

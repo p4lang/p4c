@@ -24,7 +24,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "bm_sim/transport.h"
+#include <bm/bm_sim/transport.h>
 
 class MemoryAccessor : public bm::TransportIface {
  public:
