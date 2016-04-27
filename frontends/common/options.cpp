@@ -146,12 +146,17 @@ static cstring makeFileName(cstring folder, cstring name, cstring baseSuffix) {
     return result.toString();
 }
 
-std::ostream* CompilerOptions::dumpStream(cstring suffix) const {
+cstring CompilerOptions::dumpFileName(cstring suffix) const {
     if (dumpFolder.isNullOrEmpty())
-        return new nullstream();
-
+        return nullptr;
     cstring filename = file;
     if (filename == "-")
         filename = "tmp.p4";
-    return openFile(makeFileName(dumpFolder, filename, suffix), true);
+    return makeFileName(dumpFolder, filename, suffix);
+}
+
+std::ostream* CompilerOptions::dumpStream(cstring suffix) const {
+    if (dumpFolder.isNullOrEmpty())
+        return new nullstream();
+    return openFile(dumpFileName(suffix), true);
 }

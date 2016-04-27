@@ -441,7 +441,7 @@ class RunBMV2(object):
         for t in self.tables:
             if t.name == tableName:
                 return t
-        raise Exception("Could not find table" + tableName)
+        raise Exception("Could not find table " + tableName)
     def writePacket(self, inout, interface, data):
         if not interface in self.packets:
             self.packets[interface] = {}

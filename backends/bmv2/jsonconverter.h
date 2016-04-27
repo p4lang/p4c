@@ -46,6 +46,7 @@ class JsonConverter final {
     P4::TypeMap*           typeMap;
     ProgramParts           structure;
     cstring                dropAction = ".drop";
+    cstring                scalarsName;  // name of struct in JSON holding all scalars
     unsigned               dropActionId;
     P4::BlockMap*          blockMap;
     ExpressionConverter*   conv;
@@ -60,6 +61,8 @@ class JsonConverter final {
     void addHeaderStacks(const IR::Type_Struct* headersStruct,
                          Util::JsonArray* headers, Util::JsonArray* headerTypes,
                          Util::JsonArray* stacks, std::set<cstring> &headerTypesCreated);
+    void addLocals(Util::JsonArray* headerTYpes, Util::JsonArray* instances,
+                   Util::JsonArray* stacks, std::set<cstring> &headerTypesCreated);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta,
                               Util::JsonArray* headerTypes, Util::JsonArray* instances,
                               std::set<cstring> &headerTypesCreated);

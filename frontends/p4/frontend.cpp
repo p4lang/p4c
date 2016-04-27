@@ -66,7 +66,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
         new P4::ToP4(endStream, options.file),
     };
 
-    passes.setName("Front end");
+    passes.setName("FrontEnd");
     passes.setStopOnError(true);
     for (auto h : hooks)
         passes.addDebugHook(h);

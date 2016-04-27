@@ -249,6 +249,9 @@ class DiscoverStructure : public Inspector {
         auto control = findContext<IR::P4Control>();
         structure->actions.emplace(action, control);
     }
+    void postorder(const IR::Declaration_Variable* decl) override {
+        structure->variables.push_back(decl);
+    }
 };
 }  // namespace
 

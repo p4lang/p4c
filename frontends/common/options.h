@@ -53,6 +53,8 @@ class CompilerOptions : public Util::Options {
     // based on the dumpFolder.  If dumpFolder is not set,
     // returns a nullstream, i.e., /dev/null.
     std::ostream* dumpStream(cstring suffix) const;
+    // Name of file that is used for dumpStream(suffix)
+    cstring dumpFileName(cstring suffix) const;
 };
 
 #endif /* FRONTENDS_COMMON_OPTIONS_H_ */

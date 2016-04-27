@@ -237,18 +237,5 @@ control TopDeparser(inout Parsed_packet p, packet_out b)
     }
 }
 
-#if 0
-// Switch declaration section
-// use TopParser for the declared switch Parser, etc.
-Simple<Parsed_packet> main()
-{
-    TopParser() prs;
-    Pipe() pipe;
-    TopDeparser() dep;
+Simple(TopParser(), Pipe(), TopDeparser()) main;
 
-    Simple<Parsed_packet>(prs, pipe, dep) result;
-    return result;
-}
-#else
-    Simple(TopParser(), Pipe(), TopDeparser()) main;
-#endif

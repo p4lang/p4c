@@ -41,6 +41,15 @@ class MoveActionsToTables : public Transform {
 };
 
 // Convert some statements into action invocations by synthesizing new actions.
+// E.g.
+// control c(inout bit x) {
+//    apply { x = 1; }
+// }
+// is converted to:
+// control c(inout bit x) {
+//    action act() { x = 1; }
+//    apply { act(); }
+// }
 // For this to work all variable declarations must have been moved to the beginning.
 class SynthesizeActions : public Transform {
     ReferenceMap* refMap;

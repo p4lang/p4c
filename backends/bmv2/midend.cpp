@@ -6,6 +6,7 @@
 #include "midend/moveDeclarations.h"
 #include "midend/removeReturns.h"
 #include "midend/moveConstructors.h"
+#include "midend/actionSynthesis.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -114,10 +115,14 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         new P4::StrengthReduction(),
         new P4::UniqueNames(isv1),
         new P4::MoveDeclarations(),
-
-        // TODO: this is not sufficient.
-        // For example, we do not create new actions for statements in
-        // the control-flow.
+        // Create actions for statements that can't be done in control blocks.
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::SynthesizeActions(&refMap, &typeMap),
+        // Move all stand-alone actions to custom tables
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::MoveActionsToTables(&refMap, &typeMap),
     };
 
     midEnd.setName("Mid end");

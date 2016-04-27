@@ -7,7 +7,9 @@ v12test_LDADD = libfrontend.a libp4ctoolkit.a
 v12test_SOURCES = \
     backends/v12test/v12test.cpp \
     backends/v12test/midend.h \
-    backends/v12test/midend.cpp
+    backends/v12test/midend.cpp \
+    backends/v12test/options.h \
+    backends/v12test/options.cpp
 
 cpplint_FILES += $(v12test_SOURCES)
 

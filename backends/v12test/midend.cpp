@@ -96,8 +96,10 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator1
     };
-    midEnd.setName("Prototype mid end");
+    midEnd.setName("MidEnd");
     midEnd.setStopOnError(true);
+    for (auto h : hooks)
+        midEnd.addDebugHook(h);
     program = program->apply(midEnd);
     if (::errorCount() > 0)
         return nullptr;

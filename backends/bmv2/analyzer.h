@@ -158,6 +158,8 @@ class ProgramParts {
     std::set<const IR::Parameter*> nonActionParameters;
     // for each action its json id
     std::map<const IR::P4Action*, unsigned> ids;
+    // All local variables
+    std::vector<const IR::Declaration_Variable*> variables;
 
     ProgramParts() {}
     void analyze(P4::BlockMap* blockMap);

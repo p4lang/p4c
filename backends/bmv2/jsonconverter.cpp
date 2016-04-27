@@ -484,6 +484,22 @@ class ExpressionConverter : public Inspector {
             unsigned paramIndex = ::get(converter->structure.index, param);
             result->emplace("value", paramIndex);
             map.emplace(expression, result);
+        } else if (decl->is<IR::Declaration_Variable>()) {
+            auto result = new Util::JsonObject();
+            auto var = decl->to<IR::Declaration_Variable>();
+            auto type = converter->typeMap->getType(var, true);
+            if (type->is<IR::Type_StructLike>()) {
+                result->emplace("type", "header");
+                result->emplace("value", var->name);
+            } else if (type->is<IR::Type_Bits>()) {
+                result->emplace("type", "field");
+                auto e = mkArrayField(result, "value");
+                e->append(converter->scalarsName);
+                e->append(var->name);
+            } else {
+                BUG("%1%: type not yet handled", type);
+            }
+            map.emplace(expression, result);
         }
     }
 
@@ -1418,6 +1434,72 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct,
     }
 }
 
+void JsonConverter::addLocals(Util::JsonArray* headerTypes, Util::JsonArray* instances,
+                              Util::JsonArray* stacks, std::set<cstring> &headerTypesCreated) {
+    // We synthesize a "header_type" for each local which has a struct type
+    // and we pack all the scalar-typed locals into a scalarsStruct
+    auto scalarsStruct = new Util::JsonObject();
+    scalarsName = refMap->newName("scalars");
+    scalarsStruct->emplace("name", scalarsName);
+    scalarsStruct->emplace("id", nextId("header_types"));
+    unsigned scalars_width = 0;
+    auto scalarFields = mkArrayField(scalarsStruct, "fields");
+
+    for (auto v : structure.variables) {
+        LOG1("Creating local " << v);
+        auto type = typeMap->getType(v, true);
+        if (type->is<IR::Type_StructLike>()) {
+            auto st = type->to<IR::Type_StructLike>();
+            
+            if (!headerTypesCreated.count(st->name)) {
+                auto tjson = typeToJson(st);
+                headerTypes->append(tjson);
+                headerTypesCreated.emplace(st->name);
+            }
+
+            auto json = new Util::JsonObject();
+            json->emplace("name", v->name);
+            json->emplace("id", nextId("headers"));
+            json->emplace("header_type", st->name.name);
+            json->emplace("metadata", true);
+            instances->append(json);
+        } else if (type->is<IR::Type_Bits>()) {
+            auto tb = type->to<IR::Type_Bits>();
+            auto field = pushNewArray(scalarFields);
+            field->append(v->name.name);
+            field->append(tb->size);
+            field->append(tb->isSigned);
+            scalars_width += tb->size;
+        } else {
+            BUG("%1%: type not yet handled on this target", type);
+        }
+    }
+
+    if (scalars_width != 0) {
+        // pad the scalars
+        unsigned padding = scalars_width % 8;
+        if (padding != 0) {
+            cstring name = refMap->newName("_padding");
+            auto field = pushNewArray(scalarFields);
+            field->append(name);
+            field->append(8 - padding);
+            field->append(false);
+        }
+
+        // insert the scalars type
+        headerTypesCreated.emplace(scalarsName);
+        headerTypes->append(scalarsStruct);
+
+        // insert the scalars instance
+        auto json = new Util::JsonObject();
+        json->emplace("name", scalarsName);
+        json->emplace("id", nextId("headers"));
+        json->emplace("header_type", scalarsName);
+        json->emplace("metadata", true);
+        instances->append(json);
+    }
+}
+
 void JsonConverter::convert(P4::BlockMap* bm) {
     blockMap = bm;
     refMap = blockMap->refMap;
@@ -1473,7 +1555,8 @@ void JsonConverter::convert(P4::BlockMap* bm) {
         return;
     }
     addTypesAndInstances(mt, true, headerTypes, headers, headerTypesCreated);
-
+    addLocals(headerTypes, headers, headerStacks, headerTypesCreated);
+    
     auto prsrs = mkArrayField(&toplevel, "parsers");
     auto parserJson = toJson(parser);
     prsrs->append(parserJson);
@@ -1631,6 +1714,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
             json->emplace("metadata", meta);
             instances->append(json);
         } else if (ft->is<IR::Type_Stack>()) {
+            // Done elsewhere
             continue;
         } else {
             BUG("%1%: Unexpected header type", ft);
