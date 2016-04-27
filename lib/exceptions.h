@@ -21,7 +21,6 @@ class P4CExceptionBase : public std::exception {
 #if 0
         this->message = ErrorReporter::instance.format_message(format, std::forward<T>(args)...);
 #else
-        // TODO: use bug_helper; but today it's broken
         boost::format fmt(format);
         this->message = ::bug_helper(fmt, "", "", "", std::forward<T>(args)...);
 #endif
@@ -46,6 +45,7 @@ class CompilerBug final : public P4CExceptionBase {
 
 // This class indicates a compilation error that we do not want to recover from.
 // This may be due to a malformed input program.
+// TODO: this class is very seldom used, perhaps we can remove it.
 class CompilationError : public P4CExceptionBase {
  public:
     template <typename... T>

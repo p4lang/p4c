@@ -69,9 +69,6 @@ class ToP4 : public Inspector {
             outStream(nullptr),
             mainFile(mainFile)
     { visitDagOnce = false; }
-
-    // TODO: this works correctly only if called on a P4Program
-    // because the builder is only flushed after processing a program.
     explicit ToP4(std::ostream* outStream, cstring mainFile = nullptr) :
             expressionPrecedence(DBPrint::Prec_Low),
             isDeclaration(true),
@@ -83,6 +80,7 @@ class ToP4 : public Inspector {
     using Inspector::preorder;
 
     Visitor::profile_t init_apply(const IR::Node* node) override;
+    void end_apply(const IR::Node* node) override;
 
     bool process(const IR::Type_StructLike* t, const char* name);
     // types

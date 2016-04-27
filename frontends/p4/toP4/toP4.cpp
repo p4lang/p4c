@@ -45,13 +45,15 @@ bool ToP4::preorder(const IR::P4Program* program) {
     }
     if (!program->declarations->empty())
         builder.newline();
+    return false;
+}
 
+void ToP4::end_apply(const IR::Node*) {
     if (outStream != nullptr) {
         cstring result = builder.toString();
         *outStream << result.c_str();
         outStream->flush();
     }
-    return false;
 }
 
 bool ToP4::preorder(const IR::Type_Bits* t) {

@@ -337,7 +337,7 @@ class Type_Stack : Type {
    E<bit<32>>
    baseType is Type_Extern E, arguments is a vector containing Type_Bits(32) */
 class Type_Specialized : Type {
-    Type baseType;  // TODO: change this to Type_Name
+    Type baseType;
     Vector<Type> arguments;
     dbprint{ Node::dbprint(out); out << baseType; }
     toString{ return baseType->toString() + "<...>"; }

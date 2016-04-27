@@ -1435,9 +1435,10 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct,
 }
 
 void JsonConverter::addLocals(Util::JsonArray* headerTypes, Util::JsonArray* instances,
-                              Util::JsonArray* stacks, std::set<cstring> &headerTypesCreated) {
+                              Util::JsonArray* /*stacks*/, std::set<cstring> &headerTypesCreated) {
     // We synthesize a "header_type" for each local which has a struct type
     // and we pack all the scalar-typed locals into a scalarsStruct
+    // TODO: synthesize stacks
     auto scalarsStruct = new Util::JsonObject();
     scalarsName = refMap->newName("scalars");
     scalarsStruct->emplace("name", scalarsName);
