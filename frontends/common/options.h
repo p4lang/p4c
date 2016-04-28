@@ -55,6 +55,8 @@ class CompilerOptions : public Util::Options {
     std::ostream* dumpStream(cstring suffix) const;
     // Name of file that is used for dumpStream(suffix)
     cstring dumpFileName(cstring suffix) const;
+    // True if we are compiling a P4 v1.0 or v1.1 program
+    bool isv1() const;
 };
 
 #endif /* FRONTENDS_COMMON_OPTIONS_H_ */

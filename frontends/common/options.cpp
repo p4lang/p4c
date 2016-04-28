@@ -160,3 +160,7 @@ std::ostream* CompilerOptions::dumpStream(cstring suffix) const {
         return new nullstream();
     return openFile(dumpFileName(suffix), true);
 }
+
+bool CompilerOptions::isv1() const {
+    return langVersion == CompilerOptions::FrontendVersion::P4v1;
+}

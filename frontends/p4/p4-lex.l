@@ -96,6 +96,7 @@ void parseLineNumber(const char* text)
 "true"          { BEGIN(NORMAL); return TRUE; }
 "typedef"       { BEGIN(NORMAL); return TYPEDEF; }
 "varbit"        { BEGIN(NORMAL); return VARBIT; }
+"virtual"       { BEGIN(NORMAL); return VIRTUAL; }
 "void"          { BEGIN(NORMAL); return VOID; }
 "_"             { BEGIN(NORMAL); return DONTCARE; }
 [A-Za-z_][A-Za-z0-9_]* {

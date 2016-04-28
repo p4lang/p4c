@@ -443,8 +443,10 @@ class Type_Action : Type_MethodBase {
 
 class Method : Declaration {
     Type_Method type;
+    bool        isVirtual;
 #emit
     size_t getParameterCount() const { return type->getParameterCount(); }
+    void setVirtual() { isVirtual = true; }
 #end
 }
 

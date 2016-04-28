@@ -237,7 +237,7 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
 
             if (fpType != method->type) {
                 method = new IR::Method(method->srcInfo, method->name,
-                                        fpType->to<IR::Type_Method>());
+                                        fpType->to<IR::Type_Method>(), method->isVirtual);
                 changes = true;
                 setType(method, fpType);
             }
@@ -248,7 +248,7 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
             // synthesize a default constructor if and only if none given
             auto ct = new IR::Type_Method(Util::SourceInfo(), new IR::TypeParameters(),
                                           nullptr, new IR::ParameterList());
-            auto constructor = new IR::Method(Util::SourceInfo(), te->name, ct);
+            auto constructor = new IR::Method(Util::SourceInfo(), te->name, ct, false);
             setType(constructor, ct);
             methods->push_back(constructor);
             changes = true;
@@ -605,7 +605,7 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_Instance* decl) {
             return decl;
         if (args != decl->arguments)
             decl = new IR::Declaration_Instance(decl->srcInfo, decl->name, decl->type,
-                                                args, decl->annotations);
+                                                args, decl->annotations, decl->initializer);
         setType(orig, type);
         setType(decl, type);
     } else if (simpleType->is<IR::IContainer>()) {

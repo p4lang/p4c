@@ -1318,7 +1318,7 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName) {
     args->push_back(new IR::Constant(v1model.registers.size_type, reg->instance_count));
     auto annos = addNameAnnotation(reg->name);
     auto decl = new IR::Declaration_Instance(
-        Util::SourceInfo(), newName, spectype, args, annos);
+        Util::SourceInfo(), newName, spectype, args, annos, nullptr);
     return decl;
 }
 
@@ -1338,7 +1338,7 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
     args->push_back(kindarg);
     auto annos = addNameAnnotation(cm->name);
     auto decl = new IR::Declaration_Instance(
-        Util::SourceInfo(), newName, type, args, annos);
+        Util::SourceInfo(), newName, type, args, annos, nullptr);
     return decl;
 }
 
@@ -1364,7 +1364,7 @@ ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     args->push_back(kindarg);
     auto annos = addNameAnnotation(m->name);
     auto decl = new IR::Declaration_Instance(
-        Util::SourceInfo(), newName, specType, args, annos);
+        Util::SourceInfo(), newName, specType, args, annos, nullptr);
     return decl;
 }
 
@@ -1490,7 +1490,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
             auto annos = addNameAnnotation(cc);
             auto decl = new IR::Declaration_Instance(
                 Util::SourceInfo(), IR::ID(iname), type,
-                new IR::Vector<IR::Expression>(), annos);
+                new IR::Vector<IR::Expression>(), annos, nullptr);
             stateful->addUnique(decl->name, decl);
         }
     }
@@ -1582,7 +1582,7 @@ void ProgramStructure::createMain() {
     args->push_back(deparserConstruct);
 
     auto result = new IR::Declaration_Instance(Util::SourceInfo(), name, type,
-                                               args, IR::Annotations::empty);
+                                               args, IR::Annotations::empty, nullptr);
     declarations->push_back(result);
 }
 
@@ -1603,7 +1603,7 @@ ProgramStructure::checksumUnit(const IR::FieldListCalculation* flc) {
     auto newName = field_list_calculations.get(flc);
     auto inst = new IR::Declaration_Instance(
         flc->srcInfo, newName, extType,
-        new IR::Vector<IR::Expression>(), IR::Annotations::empty);
+        new IR::Vector<IR::Expression>(), IR::Annotations::empty, nullptr);
     return inst;
 }
 

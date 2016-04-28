@@ -25,7 +25,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
     if (v12_program == nullptr)
         return nullptr;
 
-    bool p4v10 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
+    bool p4v10 = options.isv1();
     
     Util::PathName path(options.prettyPrintFile);
     std::ostream *ppStream = openFile(path.toString(), true);

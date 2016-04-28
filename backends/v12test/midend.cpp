@@ -23,6 +23,12 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     auto evaluator0 = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
 
+    // TODO: duplicate actions that are used by multiple tables
+    // TODO: duplicate global actions into the controls that are using them
+    // TODO: remove table parameters if possible
+    // TODO: remove action parameters if possible
+    // TODO: remove expressions in table key
+    
     PassManager simplify = {
         // Give each local declaration a unique internal name
         new P4::UniqueNames(isv1),
@@ -57,11 +63,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
 
     auto inliner = new P4::GeneralInliner();
     auto actInl = new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap);
-    auto evaluator1 = new P4::EvaluatorPass(isv1);
     actInl->allowDirectActionCalls = true;
 
-    // TODO: copy global actions into the controls that are using them?
-    
     PassManager midEnd = {
         new P4::DiscoverInlining(&toInline, blockMap),
         new P4::InlineDriver(&toInline, inliner, isv1),
@@ -97,7 +100,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::ResolveReferences(&refMap, isv1),
         new P4::TypeChecker(&refMap, &typeMap),
         new P4::MoveActionsToTables(&refMap, &typeMap),
-        evaluator1
+        evaluator0
     };
     midEnd.setName("MidEnd");
     midEnd.setStopOnError(true);
@@ -111,7 +114,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     P4::ToP4 top4(midendStream, options.file);
     program->apply(top4);
 
-    blockMap = evaluator1->getBlockMap();
+    blockMap = evaluator0->getBlockMap();
     return blockMap;
 }
 

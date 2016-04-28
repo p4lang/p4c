@@ -16,6 +16,8 @@ class HasExits : public Inspector {
 }  // namespace
 
 const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
+    // FIXME: this is incorrect for exits: the
+    // 'hasExits' variable should be in the calling control.
     HasExits he;
     (void)action->apply(he);
     if ((removeReturns && !he.hasReturns) ||
@@ -24,7 +26,8 @@ const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
         prune();
         return action;
     }
-    cstring var = refMap->newName("hasReturned");
+    cstring base = removeReturns ? "hasReturned" : "hasExited";
+    cstring var = refMap->newName(base);
     returnVar = IR::ID(var);
     auto f = new IR::BoolLiteral(Util::SourceInfo(), false);
     auto decl = new IR::Declaration_Variable(Util::SourceInfo(), returnVar,

@@ -56,7 +56,7 @@ class MoveConstructorsImpl : public Transform {
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto decl = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->type,
-                                                         cce->arguments, IR::Annotations::empty);
+                                                         cce->arguments, IR::Annotations::empty, nullptr);
                 result->push_back(decl);
                 changes = true;
             }
@@ -76,7 +76,7 @@ class MoveConstructorsImpl : public Transform {
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->type,
-                                                     cce->arguments, IR::Annotations::empty);
+                                                     cce->arguments, IR::Annotations::empty, nullptr);
             newDecls->push_back(decl);
         }
         newDecls->append(*parser->stateful);
@@ -96,7 +96,7 @@ class MoveConstructorsImpl : public Transform {
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto inst = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->type,
-                                                         cce->arguments, IR::Annotations::empty);
+                                                         cce->arguments, IR::Annotations::empty, nullptr);
                 newDecls->addUnique(e.second, inst);
                 changes = true;
             }
@@ -123,7 +123,7 @@ class MoveConstructorsImpl : public Transform {
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(cce->srcInfo, e.second, cce->type,
-                                                     cce->arguments, IR::Annotations::empty);
+                                                     cce->arguments, IR::Annotations::empty, nullptr);
             newDecls->addUnique(e.second, decl);
         }
         for (auto s : control->stateful)

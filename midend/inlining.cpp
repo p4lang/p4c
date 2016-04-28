@@ -277,9 +277,9 @@ class Substitutions : public SubstituteParameters {
         cstring extName = renameMap->getExtName(orig);
         LOG1("Renaming " << orig << " to " << newName << "(" << extName << ")");
         auto annos = setNameAnnotation(extName, instance->annotations);
-        auto result = new IR::Declaration_Instance(instance->srcInfo, newName, instance->type,
-                                                   instance->arguments, annos);
-        return result;
+        instance->name = newName;
+        instance->annotations = annos;
+        return instance;
     }
     const IR::Node* postorder(IR::PathExpression* expression) override {
         LOG1("Visiting (AddNamePrefix) " << expression);

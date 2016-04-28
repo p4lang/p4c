@@ -284,6 +284,7 @@ class Declaration_Instance : Declaration, IAnnotated {
     Type               type;
     Vector<Expression> arguments;
     Annotations        annotations;
+    NullOK Vector<Declaration> initializer;  // experimental only
 #emit
     const Annotations* getAnnotations() const override { return annotations; }
 #end
@@ -317,6 +318,7 @@ class ExitStatement : Statement {
 }
 
 class ReturnStatement : Statement {
+    NullOK Expression expression;
     toString{ return "return"; }
 #nodbprint
 }
@@ -365,6 +367,12 @@ class SwitchStatement : Statement {
 #nodbprint
 }
 
+class Function : Declaration {
+    Type_Method    type;
+    BlockStatement body;
+#nodbprint
+}
+    
 /////////////////////////////////////////////////////////////
 
 // Block is the base class for IR nodes produced by the evaluator.
