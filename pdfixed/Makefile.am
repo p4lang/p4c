@@ -15,7 +15,7 @@ pd_thrift_gen/gen-py/conn_mgr_pd_rpc/__init__.py \
 pd_thrift_gen/gen-py/conn_mgr_pd_rpc/ttypes.py \
 pd_thrift_gen/gen-py/conn_mgr_pd_rpc/conn_mgr.py \
 pd_thrift_gen/gen-py/conn_mgr_pd_rpc/conn_mgr-remote
-connmgrpkgpythondir = $(pkgpythondir)/pdfixed
+connmgrpkgpythondir = $(pkgpythondir)/pdfixed/conn_mgr_pd_rpc
 connmgrpkgpython_PYTHON = $(pd_conn_mgr_thrift_py)
 
 pd_mc_thrift_cxx = \
@@ -31,7 +31,7 @@ pd_thrift_gen/gen-py/mc_pd_rpc/__init__.py \
 pd_thrift_gen/gen-py/mc_pd_rpc/ttypes.py \
 pd_thrift_gen/gen-py/mc_pd_rpc/mc.py \
 pd_thrift_gen/gen-py/mc_pd_rpc/mc-remote
-mcpkgpythondir = $(pkgpythondir)/pdfixed
+mcpkgpythondir = $(pkgpythondir)/pdfixed/mc_pd_rpc
 mcpkgpython_PYTHON = $(pd_mc_thrift_py)
 
 pd_res_thrift_cxx = \
@@ -43,7 +43,7 @@ pd_res_thrift_py = \
 pd_thrift_gen/gen-py/res_pd_rpc/constants.py \
 pd_thrift_gen/gen-py/res_pd_rpc/__init__.py \
 pd_thrift_gen/gen-py/res_pd_rpc/ttypes.py
-respkgpythondir = $(pkgpythondir)/pdfixed
+respkgpythondir = $(pkgpythondir)/pdfixed/res_pd_rpc
 respkgpython_PYTHON = $(pd_res_thrift_py)
 
 pd_conn_mgr_IDL = $(srcdir)/thrift/conn_mgr_pd_rpc.thrift
