@@ -132,25 +132,9 @@ class ActionBodySetup : public Inspector {
 };
 }  // anonymous namespace
 
-static cstring nameFromAnnotation(const IR::Node*node) {
-    CHECK_NULL(node);
-    BUG_CHECK(node->is<IR::IAnnotated>(), "%1%: can have no annotations", node);
-    BUG_CHECK(node->is<IR::IDeclaration>(), "%1%: not a declaration", node);
-    auto annotations = node->to<IR::IAnnotated>()->getAnnotations();
-    auto defaultValue = node->to<IR::IDeclaration>()->getName().name;
-    auto anno = annotations->getSingle(IR::Annotation::nameAnnotation);
-    if (anno != nullptr) {
-        CHECK_NULL(anno->expr);
-        auto str = anno->expr->to<IR::StringLiteral>();
-        CHECK_NULL(str);
-        return str->value;
-    }
-    return defaultValue;
-}
-
 IR::ActionFunction::ActionFunction(const P4Action *ac, const Vector<Expression> *args) {
     srcInfo = ac->srcInfo;
-    name = nameFromAnnotation(ac);
+    name = ac->externName();
     ActionArgSetup setup;
     size_t arg_idx = 0;
     for (auto param : *ac->parameters->getEnumerator()) {
@@ -178,7 +162,7 @@ static void setIntProperty(cstring name, int *val, const IR::PropertyValue *pval
 
 IR::V1Table::V1Table(const P4Table *tc) {
     srcInfo = tc->srcInfo;
-    name = nameFromAnnotation(tc);
+    name = tc->externName();
     for (auto prop : *tc->properties->getEnumerator()) {
         if (prop->name == "key") {
             auto reads = new IR::Vector<IR::Expression>();
