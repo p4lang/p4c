@@ -98,7 +98,7 @@ abstract StatOrDecl {}
 
 // Two declarations wit the same name are not necessarily the same declaration
 abstract Declaration : StatOrDecl, IDeclaration {
-    ID name;
+    ID          name;
 #noconstructor
 #emit
     ID getName() const { return name; }
@@ -235,6 +235,7 @@ class Annotation {
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 }
 
+// There can be several annotations with the same "name", so this is a vector.
 class Annotations {
     Vector<Annotation> annotations;
 #nodbprint
@@ -259,6 +260,24 @@ class Annotations {
             return this;
         return addAnnotation(name, expr);
     }
+    // If annotations with the same name are already present, remove them.
+    // Add this annotation.
+    const Annotations* addOrReplace(cstring name, const Expression* expr) const {
+        auto vec = new Vector<Annotation>();
+        for (auto a : *annotations) {
+            if (a->name.name != name)
+                vec->push_back(new Annotation(name, expr));
+        }
+        vec->push_back(new Annotation(name, expr));
+        return new Annotations(vec);
+    }
 #end
     validate{ annotations->check_null(); }
 }
+
+interface IAnnotated {
+#emit
+    virtual const Annotations* getAnnotations() const = 0;
+#end
+}
+

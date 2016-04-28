@@ -8,6 +8,7 @@
 #include "lib/exceptions.h"
 #include "lib/gc.h"
 
+#include "midend.h"
 #include "ebpfOptions.h"
 #include "ebpfBackend.h"
 #include "frontends/p4/p4-parse.h"
@@ -28,6 +29,10 @@ void compile(EbpfOptions& options, FILE* in) {
     }
     FrontEnd frontend;
     v12 = frontend.run(options, v12);
+
+    EBPF::MidEnd midend;
+    v12 = midend.run(options, v12);
+
     EBPF::run_ebpf_backend(options, v12);
 }
 

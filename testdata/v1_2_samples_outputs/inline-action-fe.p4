@@ -12,7 +12,6 @@ control p(inout bit<1> bt) {
         }
         default_action = b;
     }
-
     apply {
         t.apply();
     }

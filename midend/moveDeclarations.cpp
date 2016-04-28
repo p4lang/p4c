@@ -3,14 +3,18 @@
 namespace P4 {
 
 const IR::Node* MoveDeclarations::postorder(IR::P4Action* action)  {
-    auto body = new IR::Vector<IR::StatOrDecl>();
-    auto m = getMoves();
-    body->insert(body->end(), m->begin(), m->end());
-    body->append(*action->body);
-    auto result = new IR::P4Action(action->srcInfo, action->name, action->annotations,
-                                   action->parameters, body);
-    pop();
-    return result;
+    if (findContext<IR::P4Control>() == nullptr) {
+        // Else let the parent control get these
+        auto body = new IR::Vector<IR::StatOrDecl>();
+        auto m = getMoves();
+        body->insert(body->end(), m->begin(), m->end());
+        body->append(*action->body);
+        auto result = new IR::P4Action(action->srcInfo, action->name, action->annotations,
+                                       action->parameters, body);
+        pop();
+        return result;
+    }
+    return action;
 }
 
 const IR::Node* MoveDeclarations::postorder(IR::P4Control* control)  {

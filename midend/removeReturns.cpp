@@ -16,6 +16,14 @@ class HasExits : public Inspector {
 }  // namespace
 
 const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
+    HasExits he;
+    (void)action->apply(he);
+    if ((removeReturns && !he.hasReturns) ||
+        (!removeReturns && !he.hasExits)) {
+        // don't pollute the code unnecessarily
+        prune();
+        return action;
+    }
     cstring var = refMap->newName("hasReturned");
     returnVar = IR::ID(var);
     auto f = new IR::BoolLiteral(Util::SourceInfo(), false);
@@ -37,7 +45,7 @@ const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
 
 const IR::Node* RemoveReturns::preorder(IR::P4Control* control) {
     HasExits he;
-    (void)control->apply(he);
+    (void)control->body->apply(he);
     if ((removeReturns && !he.hasReturns) ||
         (!removeReturns && !he.hasExits)) {
         // don't pollute the code unnecessarily

@@ -7,7 +7,6 @@ control x() {
         }
         default_action = nop;
     }
-
     apply {
         if (t.apply().hit) 
             ;

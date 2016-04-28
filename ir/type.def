@@ -80,10 +80,13 @@ class Type_Varbits : Type_Base {
     toString{ return cstring("varbit<") + Util::toString(size) + ">"; }
 }
 
-class Parameter : Declaration {
+class Parameter : Declaration, IAnnotated {
     Annotations         annotations;
     Direction           direction;
     Type                type;
+#emit
+    const Annotations* getAnnotations() const override { return annotations; }
+#end
 }
 
 class ParameterList : ISimpleNamespace {
@@ -189,20 +192,22 @@ class TypeParameters : ISimpleNamespace {
     validate{ parameters.check_null(); }
 }
 
-class StructField : Declaration {
+class StructField : Declaration, IAnnotated {
     Annotations annotations;
     Type        type;
 #nodbprint
 #emit
     StructField(Util::SourceInfo si, ID name, const Type *type);
     StructField(ID name, const Type *type);
+    const Annotations* getAnnotations() const override { return annotations; }
 #end
 }
 
-abstract Type_StructLike : Type_Declaration, ISimpleNamespace {
+abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
     Annotations         annotations;
     inline NameMap<StructField, ordered_map> fields;
 #emit
+    const Annotations* getAnnotations() const override { return annotations; }
     Util::Enumerator<const StructField*>* getEnumerator() const
     { return fields.valueEnumerator(); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const override
@@ -267,10 +272,11 @@ class Type_Tuple : Type {
 
 // The type of an architectural block.
 // Abstract base for control and parser types.
-abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType {
+abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated {
     Annotations    annotations;
     TypeParameters typeParams;
 #emit
+    const Annotations* getAnnotations() const override { return annotations; }
     const TypeParameters* getTypeParameters() const override { return typeParams; }
 #end
 }
@@ -442,9 +448,12 @@ class Method : Declaration {
 #end
 }
 
-class Type_Typedef : Type_Declaration {
+class Type_Typedef : Type_Declaration, IAnnotated {
     Type        type;
     Annotations annotations;
+#emit
+    const Annotations* getAnnotations() const override { return annotations; }
+#end
 #nodbprint
 }
 

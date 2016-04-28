@@ -35,12 +35,13 @@ class SelectCase {
 #nodbprint
 }
 
-class ParserState : IGeneralNamespace, Declaration {
-    Annotations              annotations;
-    Vector<StatOrDecl>       components;
+class ParserState : IGeneralNamespace, Declaration, IAnnotated {
+    Annotations        annotations;
+    Vector<StatOrDecl> components;
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
-    NullOK Expression        selectExpression;
+    NullOK Expression  selectExpression;
 #emit
+    const Annotations* getAnnotations() const override { return annotations; }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
     { return components->only<IDeclaration>(); }
 
@@ -106,13 +107,14 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     toString { return cstring("control ") + name; }
 }
 
-class P4Action : Declaration, IGeneralNamespace {
+class P4Action : Declaration, IGeneralNamespace, IAnnotated {
     Annotations        annotations;
     ParameterList      parameters;
     Vector<StatOrDecl> body;
 #emit
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
     { return body->only<IDeclaration>(); }
+    const Annotations* getAnnotations() const override { return annotations; }
 #end
 #nodbprint
     validate{ body->check_null(); }
@@ -160,13 +162,14 @@ class ExpressionValue : PropertyValue {
 }
 
 // An element in a table actions list
-class ActionListElement {
+class ActionListElement : IAnnotated{
     Annotations               annotations;
     PathExpression            name;
     NullOK Vector<Expression> arguments;
 #nodbprint
 #emit
     ID getName() const { return name->path->name; }
+    const Annotations* getAnnotations() const override { return annotations; }
 #end
 }
 
@@ -193,10 +196,13 @@ class Key : PropertyValue {
     validate { keyElements->check_null(); }
 }
 
-class TableProperty : Declaration {
+class TableProperty : Declaration, IAnnotated {
     Annotations   annotations;
     PropertyValue value;
     bool          isConstant;
+#emit
+    const Annotations* getAnnotations() const override { return annotations; }
+#end
 #nodbprint
 }
 
@@ -222,11 +228,12 @@ class TableProperties : ISimpleNamespace {
     validate{ properties.check_null(); }
 }
 
-class P4Table : Declaration {
+class P4Table : Declaration, IAnnotated {
     Annotations     annotations;
     ParameterList   parameters;
     TableProperties properties;
 #emit
+    const Annotations* getAnnotations() const override { return annotations; }
     const ActionList* getActionList() const {
         auto ap = properties->getProperty(TableProperties::actionsPropertyName);
         if (ap == nullptr)
@@ -251,26 +258,35 @@ class P4Table : Declaration {
 #nodbprint
 }
 
-class Declaration_Variable : Declaration {
+class Declaration_Variable : Declaration, IAnnotated {
     Annotations        annotations;
     Type               type;
     NullOK Expression  initializer;
+#emit
+    const Annotations* getAnnotations() const override { return annotations; }
+#end
 #nodbprint
 }
 
-class Declaration_Constant : Declaration {
+class Declaration_Constant : Declaration, IAnnotated {
     Annotations        annotations;
     Type               type;
     Expression         initializer;
+#emit
+    const Annotations* getAnnotations() const override { return annotations; }
+#end
 #nodbprint
     toString { return Declaration::toString(); }
 }
 
 // Like a variable, but for a statically allocated instance
-class Declaration_Instance : Declaration {
+class Declaration_Instance : Declaration, IAnnotated {
     Type               type;
     Vector<Expression> arguments;
     Annotations        annotations;
+#emit
+    const Annotations* getAnnotations() const override { return annotations; }
+#end
 #nodbprint
     validate{ arguments->check_null(); }
 }

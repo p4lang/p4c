@@ -1,19 +1,17 @@
 control p() {
-    @name("x_1") bit<1> x_1_0_0;
-    @name("y_0") bit<1> y_0_0_0;
-    action b(in bit<1> x, out bit<1> y) {
-        @name("z") bit<1> z_0_0;
-        @name("x_0") bit<1> x_0_0_0;
-        {
-            x_0_0_0 = x;
-            z_0_0 = x & x_0_0_0;
-        }
+    bit<1> z_0;
+    bit<1> x_2;
+    bit<1> x_3;
+    bit<1> y;
+    @name("b") action b_0(in bit<1> x, out bit<1> y) {
+        x_2 = x;
+        z_0 = x & x_2;
     }
     table tbl_b() {
         actions = {
-            b;
+            b_0;
         }
-        const default_action = b(x_1_0_0, y_0_0_0);
+        const default_action = b_0(x_3, y);
     }
     apply {
         tbl_b.apply();

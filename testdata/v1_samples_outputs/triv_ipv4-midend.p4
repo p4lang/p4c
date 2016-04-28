@@ -54,16 +54,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("do_drop") action do_drop() {
+    @name("do_drop") action do_drop_0() {
     }
-    @name("route_ipv4") action route_ipv4(bit<9> egress_spec) {
+    @name("route_ipv4") action route_ipv4_0(bit<9> egress_spec) {
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
         standard_metadata.egress_spec = egress_spec;
     }
-    @name("routing") table routing() {
+    @name("routing") table routing_0() {
         actions = {
-            do_drop;
-            route_ipv4;
+            do_drop_0;
+            route_ipv4_0;
             NoAction;
         }
         key = {
@@ -73,7 +73,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        routing.apply();
+        routing_0.apply();
     }
 }
 

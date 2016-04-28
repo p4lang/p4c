@@ -13,7 +13,6 @@ control ctrl() {
         }
         default_action = a;
     }
-
     apply {
         switch (t.apply().action_run) {
             a: 

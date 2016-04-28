@@ -16,9 +16,12 @@
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/strengthReduction.h"
 
-namespace V12Test {
+namespace EBPF {
 
-P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
+const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* program) {
+    if (program == nullptr)
+        return program;
+    
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
     auto evaluator0 = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
@@ -27,11 +30,9 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         // Give each local declaration a unique internal name
         new P4::UniqueNames(isv1),
         // Move all local declarations to the beginning
-        // TODO: this is not sufficient for parser states.
-        // Local headers have to be "uninitialized" on entry.
         new P4::MoveDeclarations(),
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::RemoveReturns(&refMap, true),
+        new P4::RemoveReturns(&refMap, true),  // necessary for inlining
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
         new P4::ResolveReferences(&refMap, isv1),
@@ -41,8 +42,6 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
 
     simplify.setName("Simplify");
     simplify.setStopOnError(true);
-    for (auto h : hooks)
-        simplify.addDebugHook(h);
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
@@ -57,11 +56,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
 
     auto inliner = new P4::GeneralInliner();
     auto actInl = new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap);
-    auto evaluator1 = new P4::EvaluatorPass(isv1);
     actInl->allowDirectActionCalls = true;
 
-    // TODO: copy global actions into the controls that are using them?
-    
     PassManager midEnd = {
         new P4::DiscoverInlining(&toInline, blockMap),
         new P4::InlineDriver(&toInline, inliner, isv1),
@@ -78,8 +74,6 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
             new P4::ResolveReferences(&refMap, isv1),
             new P4::RemoveUnusedDeclarations(&refMap),
         },
-        // TODO: inlining introduces lots of copies,
-        // so perhaps a copy-propagation step would be useful
         new P4::SimplifyControlFlow(),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap, false),  // remove exits
@@ -87,32 +81,22 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::TypeChecker(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
-        new P4::MoveDeclarations(),  // more may have been introduced
-        new P4::SimplifyControlFlow(),
-        // Create actions for statements that can't be done in control blocks.
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
-        new P4::SynthesizeActions(&refMap, &typeMap),
         // Move all stand-alone action invocations to custom tables
         new P4::ResolveReferences(&refMap, isv1),
         new P4::TypeChecker(&refMap, &typeMap),
         new P4::MoveActionsToTables(&refMap, &typeMap),
-        evaluator1
     };
     midEnd.setName("MidEnd");
     midEnd.setStopOnError(true);
-    for (auto h : hooks)
-        midEnd.addDebugHook(h);
     program = program->apply(midEnd);
     if (::errorCount() > 0)
         return nullptr;
-
+    
     std::ostream *midendStream = options.dumpStream("-midend");
     P4::ToP4 top4(midendStream, options.file);
     program->apply(top4);
 
-    blockMap = evaluator1->getBlockMap();
-    return blockMap;
+    return program;
 }
 
-}  // namespace V12Test
+}  // namespace EBPF

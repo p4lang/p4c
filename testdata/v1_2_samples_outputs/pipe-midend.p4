@@ -33,17 +33,15 @@ struct Packet_data {
 }
 
 action NoAction() {
-    @name("hasReturned") bool hasReturned;
-    hasReturned = false;
 }
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    @name("pArg1_0") TArg1 pArg1_0_0;
-    @name("pArg2_0") TArg2 pArg2_0_0;
+    TArg1 pArg1_0;
+    TArg2 pArg2_0;
     @name("p1.B_action") action p1_B_action(out bit<9> barg, BParamType bData) {
         barg = (bit<9>)bData;
     }
     @name("p1.C_action") action p1_C_action(bit<9> cData) {
-        pArg1_0_0.field1 = cData;
+        pArg1_0.field1 = cData;
     }
     @name("p1.T") table p1_T(inout TArg1 tArg1, in TArg2 aArg2) {
         key = {
@@ -58,11 +56,11 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         const default_action = p1_C_action(9w5);
     }
     @name("p1.Drop") action p1_Drop() {
-        pArg1_0_0.drop = true;
+        pArg1_0.drop = true;
     }
     @name("p1.Tinner") table p1_Tinner() {
         key = {
-            pArg1_0_0.field1: ternary;
+            pArg1_0.field1: ternary;
         }
         actions = {
             p1_Drop;
@@ -70,12 +68,12 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         const default_action = NoAction;
     }
     action act() {
-        pArg1_0_0 = qArg1;
-        pArg2_0_0 = qArg2;
+        pArg1_0 = qArg1;
+        pArg2_0 = qArg2;
     }
     action act_0() {
-        qArg1 = pArg1_0_0;
-        qArg2 = pArg2_0_0;
+        qArg1 = pArg1_0;
+        qArg2 = pArg2_0;
     }
     table tbl_act() {
         actions = {
@@ -91,8 +89,8 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     apply {
         tbl_act.apply();
-        p1_T.apply(pArg1_0_0, pArg2_0_0);
-        p1_T.apply(pArg1_0_0, pArg2_0_0);
+        p1_T.apply(pArg1_0, pArg2_0);
+        p1_T.apply(pArg1_0, pArg2_0);
         p1_Tinner.apply();
         tbl_act_0.apply();
     }

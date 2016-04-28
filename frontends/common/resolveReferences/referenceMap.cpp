@@ -34,6 +34,17 @@ void ReferenceMap::dbprint(std::ostream &out) const {
 cstring ReferenceMap::newName(cstring base) {
     // Maybe in the future we'll maintain information with per-scope identifiers,
     // but today we are content to generate globally-unique identifiers.
+
+    // If base has a suffix of the form _(\d+), then we discard the suffix.
+    // under the assumption that it is probably a generated suffix.
+    // This will not impact correctness.
+    unsigned len = base.size();
+    const char digits[] = "0123456789";
+    const char* s = base.c_str();
+    while (len > 0 && strchr(digits, s[len-1])) len--;
+    if (len > 0 && base[len - 1] == '_')
+        base = base.substr(0, len - 1);
+    
     cstring name = cstring::make_unique(usedNames, base, '_');
     usedNames.insert(name);
     return name;

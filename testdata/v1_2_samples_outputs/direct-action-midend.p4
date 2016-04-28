@@ -1,13 +1,13 @@
 control c(inout bit<16> y) {
-    @name("x") bit<32> x_0_0;
-    action a(bit<32> arg) {
+    bit<32> x_0;
+    @name("a") action a_0(bit<32> arg) {
         y = (bit<16>)arg;
     }
     table tbl_a() {
         actions = {
-            a;
+            a_0;
         }
-        const default_action = a(x_0_0);
+        const default_action = a_0(x_0);
     }
     apply {
         tbl_a.apply();

@@ -4,9 +4,9 @@ parser p1()(bit<2> a) {
 }
 
 parser p2()(bit<2> a) {
-    p1(a) x;
+    p1(a) @name("x") x_0;
     state start {
-        x.apply();
+        x_0.apply();
     }
 }
 

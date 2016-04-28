@@ -7,6 +7,19 @@
 
 namespace EBPF {
 
+cstring nameFromAnnotation(const IR::Annotations* annotations,
+                           cstring defaultValue) {
+    CHECK_NULL(annotations); CHECK_NULL(defaultValue);
+    auto anno = annotations->getSingle(IR::Annotation::nameAnnotation);
+    if (anno != nullptr) {
+        CHECK_NULL(anno->expr);
+        auto str = anno->expr->to<IR::StringLiteral>();
+        CHECK_NULL(str);
+        return str->value;
+    }
+    return defaultValue;
+}
+
 bool EBPFProgram::build() {
     auto pack = blockMap->getMain();
     if (pack->getConstructorParameters()->size() != 2) {

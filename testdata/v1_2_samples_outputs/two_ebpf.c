@@ -52,12 +52,12 @@ struct Headers_t {
 struct Check_ip_key {
     u32 field;
 };
-enum Check_ip_actions {
+enum Check_ip_0_actions {
     Reject,
     NoAction,
 };
 struct Check_ip_value {
-    enum Check_ip_actions action;
+    enum Check_ip_0_actions action;
     union {
         struct {
         } Reject;
@@ -218,73 +218,76 @@ int ebpf_filter(struct __sk_buff* skb) {
 
     accept:
     {
+        u8 hasReturned = false;
         pass = true;
         if ((!headers.ipv4.ebpf_valid)) {
             pass = false;
-            goto ebpf_end;
+            hasReturned = true;
         }
-        {
-            /* bind parameters */
-            u32 address = headers.ipv4.srcAddr;
+        if ((!hasReturned)) {
+            {
+                /* bind parameters */
+                u32 address = headers.ipv4.srcAddr;
 
-            /* construct key */
-            struct Check_ip_key key;
-            key.field0 = address;
-            /* value */
-            struct Check_ip_value *value;
-            /* perform lookup */
-            value = Check_ip_0.lookup(&key);
-            if (value == NULL) {
-                /* miss; find default action */
-                value = Check_ip_defaultAction.lookup(&ebpf_zero);
-            }
-            if (value != NULL) {
-                /* run action */
-                switch (value->action) {
-                    case Reject: 
-                    {
-                        pass = false;
+                /* construct key */
+                struct Check_ip_key key;
+                key.field0 = address;
+                /* value */
+                struct Check_ip_value *value;
+                /* perform lookup */
+                value = Check_ip.lookup(&key);
+                if (value == NULL) {
+                    /* miss; find default action */
+                    value = Check_ip_defaultAction.lookup(&ebpf_zero);
+                }
+                if (value != NULL) {
+                    /* run action */
+                    switch (value->action) {
+                        case Reject: 
+                        {
+                            pass = false;
+                        }
+                        break;
+                        case NoAction: 
+                        {
+                        }
+                        break;
                     }
-                    break;
-                    case NoAction: 
-                    {
-                    }
-                    break;
                 }
             }
-        }
 
-        {
-            /* bind parameters */
-            u32 address = headers.ipv4.dstAddr;
+            {
+                /* bind parameters */
+                u32 address = headers.ipv4.dstAddr;
 
-            /* construct key */
-            struct Check_ip_key key;
-            key.field0 = address;
-            /* value */
-            struct Check_ip_value *value;
-            /* perform lookup */
-            value = Check_ip_0.lookup(&key);
-            if (value == NULL) {
-                /* miss; find default action */
-                value = Check_ip_defaultAction.lookup(&ebpf_zero);
-            }
-            if (value != NULL) {
-                /* run action */
-                switch (value->action) {
-                    case Reject: 
-                    {
-                        pass = false;
+                /* construct key */
+                struct Check_ip_key key;
+                key.field0 = address;
+                /* value */
+                struct Check_ip_value *value;
+                /* perform lookup */
+                value = Check_ip.lookup(&key);
+                if (value == NULL) {
+                    /* miss; find default action */
+                    value = Check_ip_defaultAction.lookup(&ebpf_zero);
+                }
+                if (value != NULL) {
+                    /* run action */
+                    switch (value->action) {
+                        case Reject: 
+                        {
+                            pass = false;
+                        }
+                        break;
+                        case NoAction: 
+                        {
+                        }
+                        break;
                     }
-                    break;
-                    case NoAction: 
-                    {
-                    }
-                    break;
                 }
             }
-        }
 
+        }
     }
     ebpf_end:
     return pass;

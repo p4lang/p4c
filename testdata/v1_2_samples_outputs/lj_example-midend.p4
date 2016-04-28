@@ -19,29 +19,29 @@ parser LJparse(packet_in b, out Parsed_rep p) {
 }
 
 control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    action Drop_action(out PortId_t port) {
+    @name("Drop_action") action Drop_action_0(out PortId_t port) {
         port = 4w0xf;
     }
-    action Drop_1() {
+    @name("Drop_1") action Drop() {
         outCtrl.outputPort = 4w0xf;
     }
-    action Forward(PortId_t outPort) {
+    @name("Forward") action Forward_0(PortId_t outPort) {
         outCtrl.outputPort = outPort;
     }
-    table Enet_lkup() {
+    @name("Enet_lkup") table Enet_lkup_0() {
         key = {
             p.arpa_pak.dest: exact;
         }
         actions = {
-            Drop_action(outCtrl.outputPort);
-            Drop_1;
-            Forward;
+            Drop_action_0(outCtrl.outputPort);
+            Drop;
+            Forward_0;
         }
-        default_action = Drop_1;
+        default_action = Drop;
     }
     apply {
         if (p.arpa_pak.isValid()) 
-            Enet_lkup.apply();
+            Enet_lkup_0.apply();
     }
 }
 

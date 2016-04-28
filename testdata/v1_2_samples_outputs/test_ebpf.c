@@ -52,12 +52,12 @@ struct Headers_t {
 struct Check_src_ip_key {
     u32 field;
 };
-enum Check_src_ip_actions {
+enum Check_src_ip_0_actions {
     Reject,
     NoAction,
 };
 struct Check_src_ip_value {
-    enum Check_src_ip_actions action;
+    enum Check_src_ip_0_actions action;
     union {
         struct {
             u32 add;
@@ -219,39 +219,41 @@ int ebpf_filter(struct __sk_buff* skb) {
 
     accept:
     {
+        u8 hasReturned = false;
         pass = true;
         if ((!headers.ipv4.ebpf_valid)) {
             pass = false;
-            goto ebpf_end;
+            hasReturned = true;
         }
-        {
-            /* construct key */
-            struct Check_src_ip_key key;
-            key.field0 = headers.ipv4.srcAddr;
-            /* value */
-            struct Check_src_ip_value *value;
-            /* perform lookup */
-            value = Check_src_ip_0.lookup(&key);
-            if (value == NULL) {
-                /* miss; find default action */
-                value = Check_src_ip_defaultAction.lookup(&ebpf_zero);
-            }
-            if (value != NULL) {
-                /* run action */
-                switch (value->action) {
-                    case Reject: 
-                    {
-                        pass = false;
-                        headers.ipv4.srcAddr = value->u.Reject.add;
+        if ((!hasReturned)) 
+            {
+                /* construct key */
+                struct Check_src_ip_key key;
+                key.field0 = headers.ipv4.srcAddr;
+                /* value */
+                struct Check_src_ip_value *value;
+                /* perform lookup */
+                value = Check_src_ip.lookup(&key);
+                if (value == NULL) {
+                    /* miss; find default action */
+                    value = Check_src_ip_defaultAction.lookup(&ebpf_zero);
+                }
+                if (value != NULL) {
+                    /* run action */
+                    switch (value->action) {
+                        case Reject: 
+                        {
+                            pass = false;
+                            headers.ipv4.srcAddr = value->u.Reject.add;
+                        }
+                        break;
+                        case NoAction: 
+                        {
+                        }
+                        break;
                     }
-                    break;
-                    case NoAction: 
-                    {
-                    }
-                    break;
                 }
             }
-        }
 
     }
     ebpf_end:

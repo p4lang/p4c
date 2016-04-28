@@ -43,9 +43,9 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("h_0") hdr h_0_0;
+    hdr h_0;
     @name("c.add") action c_add() {
-        h_0_0.c = (bit<64>)(h_0_0.a + h_0_0.b);
+        h_0.c = (bit<64>)(h_0.a + h_0.b);
     }
     @name("c.t") table c_t() {
         actions = {
@@ -54,10 +54,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = c_add;
     }
     action act() {
-        h_0_0 = h.h;
+        h_0 = h.h;
     }
     action act_0() {
-        h.h = h_0_0;
+        h.h = h_0;
         sm.egress_spec = 9w0;
     }
     table tbl_act() {

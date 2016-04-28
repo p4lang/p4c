@@ -3,11 +3,16 @@
 namespace P4 {
 
 const IR::Node* SimplifyControlFlow::postorder(IR::BlockStatement* statement) {
-    auto parent = findContext<IR::Statement>();
-    if (parent == nullptr)
-        // This is the toplevel body of something, e.g., a P4Container
+    LOG1("Visiting " << statement);
+    auto parent = getContext()->node;
+    auto statancestor = findContext<IR::Statement>();
+    if (parent->is<IR::SwitchCase>() || parent->is<IR::P4Control>()) {
+        LOG1("Skip");
+        // Cannot remove block from switch or toplevel control block
         return statement;
-    if (parent->is<IR::BlockStatement>()) {
+    }
+    if ((statancestor && statancestor->is<IR::BlockStatement>()) ||
+        findContext<IR::P4Action>() != nullptr) {  // directly within an action
         // if there are no local declarations we can remove this block
         bool hasDeclarations = false;
         for (auto c : *statement->components)
@@ -18,9 +23,6 @@ const IR::Node* SimplifyControlFlow::postorder(IR::BlockStatement* statement) {
         if (!hasDeclarations)
             return statement->components;
     }
-    if (parent->is<IR::SwitchStatement>())
-        // Cannot remove block from switch
-        return statement;
     if (statement->components->empty())
         return new IR::EmptyStatement(statement->srcInfo);
     if (statement->components->size() == 1) {

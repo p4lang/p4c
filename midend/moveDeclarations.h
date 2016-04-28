@@ -17,8 +17,12 @@ class MoveDeclarations : public Transform {
     void addMove(const IR::Declaration* decl)
     { getMoves()->push_back(decl); }
  public:
-    const IR::Node* preorder(IR::P4Action* action) override
-    { push(); return action; }
+    const IR::Node* preorder(IR::P4Action* action) override {
+        if (findContext<IR::P4Control>() == nullptr)
+            // If we are not in a control, move to the beginning.
+            // Otherwise move to the control's beginning.
+            push();
+        return action; }
     const IR::Node* preorder(IR::P4Control* control) override
     { push(); return control; }
     const IR::Node* preorder(IR::P4Parser* parser) override

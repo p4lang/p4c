@@ -8,9 +8,9 @@ namespace EBPF {
 namespace {
 class ActionTranslationVisitor : public CodeGenInspector {
  protected:
-    const EBPFProgram*         program;
+    const EBPFProgram*  program;
     const IR::P4Action* action;
-    cstring                    valueName;
+    cstring             valueName;
 
  public:
     ActionTranslationVisitor(CodeBuilder* builder, cstring valueName, const EBPFProgram* program):
@@ -26,7 +26,8 @@ class ActionTranslationVisitor : public CodeGenInspector {
             if (isParam) {
                 builder->append(valueName);
                 builder->append("->u.");
-                builder->append(action->name);
+                cstring name = nameFromAnnotation(action->annotations, action->name);
+                builder->append(name);
                 builder->append(".");
             }
         }
@@ -47,7 +48,8 @@ class ActionTranslationVisitor : public CodeGenInspector {
 ////////////////////////////////////////////////////////////////
 
 EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table) :
-        EBPFTableBase(program, table->container->name.name), table(table) {
+        EBPFTableBase(program, nameFromAnnotation(table->container->annotations,
+                                                  table->container->name.name)), table(table) {
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = program->refMap->newName(base);
 
@@ -109,7 +111,9 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     builder->blockStart();
 
     for (auto a : *actionList->actionList) {
-        cstring name = a->name->path->name;
+        auto adecl = program->refMap->getDeclaration(a->name->path, true);
+        auto action = adecl->getNode()->to<IR::P4Action>();
+        cstring name = nameFromAnnotation(action->annotations, action->name);
         builder->emitIndent();
         builder->append(name);
         builder->append(",");
@@ -135,7 +139,8 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     for (auto a : *actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->name->path, true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        emitActionArguments(builder, action, a->name->path->name);
+        cstring name = nameFromAnnotation(action->annotations, action->name);
+        emitActionArguments(builder, action, name);
     }
 
     builder->blockEnd(false);
@@ -203,7 +208,8 @@ void EBPFTable::emit(CodeBuilder* builder) {
     }
 
     builder->emitIndent();
-    builder->target->emitTableDecl(builder, table->container->name.name, isHash,
+    cstring name = nameFromAnnotation(table->container->annotations, table->container->name.name);
+    builder->target->emitTableDecl(builder, name, isHash,
                                    cstring("struct ") + keyTypeName,
                                    cstring("struct ") + valueTypeName, size);
     builder->target->emitTableDecl(builder, defaultActionMapName, false,
@@ -235,7 +241,8 @@ void EBPFTable::runAction(CodeBuilder* builder, cstring valueName) {
         auto adecl = program->refMap->getDeclaration(a->name->path, true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         builder->emitIndent();
-        builder->appendFormat("case %s: ", action->name.name);
+        cstring name = nameFromAnnotation(action->annotations, action->name);
+        builder->appendFormat("case %s: ", name);
         builder->newline();
         builder->emitIndent();
         builder->blockStart();

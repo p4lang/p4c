@@ -36,7 +36,7 @@ struct Parsed_packet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    Checksum16() ck;
+    Checksum16() @name("ck") ck_0;
     state start {
         b.extract(p.ethernet);
         transition select(p.ethernet.etherType) {
@@ -47,91 +47,91 @@ parser TopParser(packet_in b, out Parsed_packet p) {
         b.extract(p.ip);
         verify(p.ip.version == 4w4, IPv4IncorrectVersion);
         verify(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
-        ck.clear();
-        ck.update(p.ip);
-        verify(ck.get() == 16w0, IPv4ChecksumError);
+        ck_0.clear();
+        ck_0.update(p.ip);
+        verify(ck_0.get() == 16w0, IPv4ChecksumError);
         transition accept;
     }
 }
 
 control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @name("nextHop") IPv4Address nextHop_0_0;
-    @name("hasReturned_0") bool hasReturned_0_0;
-    action Drop_action() {
+    IPv4Address nextHop_0;
+    bool hasReturned;
+    @name("Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;
     }
-    action Set_nhop(out IPv4Address nextHop, IPv4Address ipv4_dest, PortId_t port) {
+    @name("Set_nhop") action Set_nhop_0(out IPv4Address nextHop, IPv4Address ipv4_dest, PortId_t port) {
         nextHop = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
     }
-    table ipv4_match(out IPv4Address nextHop) {
+    @name("ipv4_match") table ipv4_match_0(out IPv4Address nextHop) {
         key = {
             headers.ip.dstAddr: lpm;
         }
         actions = {
-            Set_nhop(nextHop);
-            Drop_action;
+            Set_nhop_0(nextHop);
+            Drop_action_0;
         }
         size = 1024;
-        default_action = Drop_action;
+        default_action = Drop_action_0;
     }
-    action Send_to_cpu() {
+    @name("Send_to_cpu") action Send_to_cpu_0() {
         outCtrl.outputPort = 4w0xe;
     }
-    table check_ttl() {
+    @name("check_ttl") table check_ttl_0() {
         key = {
             headers.ip.ttl: exact;
         }
         actions = {
-            Send_to_cpu;
+            Send_to_cpu_0;
         }
         const default_action = NoAction;
     }
-    action Set_dmac(EthernetAddress dmac) {
+    @name("Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
-    table dmac(in IPv4Address nextHop) {
+    @name("dmac") table dmac_0(in IPv4Address nextHop) {
         key = {
             nextHop: exact;
         }
         actions = {
-            Set_dmac;
-            Drop_action;
+            Set_dmac_0;
+            Drop_action_0;
         }
         size = 1024;
-        default_action = Drop_action;
+        default_action = Drop_action_0;
     }
-    action Rewrite_smac(EthernetAddress sourceMac) {
+    @name("Rewrite_smac") action Rewrite_smac_0(EthernetAddress sourceMac) {
         headers.ethernet.srcAddr = sourceMac;
     }
-    table smac() {
+    @name("smac") table smac_0() {
         key = {
             outCtrl.outputPort: exact;
         }
         actions = {
-            Drop_action;
-            Rewrite_smac;
+            Drop_action_0;
+            Rewrite_smac_0;
         }
         size = 16;
-        default_action = Drop_action;
+        default_action = Drop_action_0;
     }
     action act() {
-        hasReturned_0_0 = true;
+        hasReturned = true;
     }
     action act_0() {
-        hasReturned_0_0 = false;
+        hasReturned = false;
     }
     action act_1() {
-        hasReturned_0_0 = true;
+        hasReturned = true;
     }
     action act_2() {
-        hasReturned_0_0 = true;
+        hasReturned = true;
     }
     action act_3() {
-        hasReturned_0_0 = true;
+        hasReturned = true;
     }
-    table tbl_act_0() {
+    table tbl_act() {
         actions = {
             act_0;
         }
@@ -139,11 +139,11 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
     table tbl_Drop_action() {
         actions = {
-            Drop_action;
+            Drop_action_0;
         }
-        const default_action = Drop_action();
+        const default_action = Drop_action_0();
     }
-    table tbl_act() {
+    table tbl_act_0() {
         actions = {
             act;
         }
@@ -168,38 +168,38 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         const default_action = act_3();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_act.apply();
         if (parseError != NoError) {
             tbl_Drop_action.apply();
-            tbl_act.apply();
+            tbl_act_0.apply();
         }
-        if (!hasReturned_0_0) {
-            ipv4_match.apply(nextHop_0_0);
+        if (!hasReturned) {
+            ipv4_match_0.apply(nextHop_0);
             if (outCtrl.outputPort == 4w0xf) 
                 tbl_act_1.apply();
         }
-        if (!hasReturned_0_0) {
-            check_ttl.apply();
+        if (!hasReturned) {
+            check_ttl_0.apply();
             if (outCtrl.outputPort == 4w0xe) 
                 tbl_act_2.apply();
         }
-        if (!hasReturned_0_0) {
-            dmac.apply(nextHop_0_0);
+        if (!hasReturned) {
+            dmac_0.apply(nextHop_0);
             if (outCtrl.outputPort == 4w0xf) 
                 tbl_act_3.apply();
         }
-        if (!hasReturned_0_0) 
-            smac.apply();
+        if (!hasReturned) 
+            smac_0.apply();
     }
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
-    Checksum16() ck;
+    Checksum16() @name("ck") ck_1;
     action act_4() {
-        ck.clear();
+        ck_1.clear();
         p.ip.hdrChecksum = 16w0;
-        ck.update(p.ip);
-        p.ip.hdrChecksum = ck.get();
+        ck_1.update(p.ip);
+        p.ip.hdrChecksum = ck_1.get();
     }
     table tbl_act_4() {
         actions = {

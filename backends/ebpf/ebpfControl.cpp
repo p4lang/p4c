@@ -81,7 +81,8 @@ void ControlTranslationVisitor::processMethod(const P4::ExternMethod* method) {
 
     builder->blockStart();
     auto decl = extblock->node->to<IR::Declaration_Instance>();
-    auto counterMap = control->getCounter(decl->name);
+    cstring name = nameFromAnnotation(decl->annotations, decl->name);
+    auto counterMap = control->getCounter(name);
     counterMap->emitMethodInvocation(builder, method);
     builder->blockEnd(true);
 }
@@ -199,7 +200,12 @@ bool ControlTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
             builder->append("default");
         } else {
             builder->append("case ");
-            visit(c->label);
+            auto pe = c->label->to<IR::PathExpression>();
+            auto decl = control->program->blockMap->refMap->getDeclaration(pe->path, true);
+            BUG_CHECK(decl->is<IR::P4Action>(), "%1%: expected an action", pe);
+            auto act = decl->to<IR::P4Action>();
+            cstring name = nameFromAnnotation(act->annotations, act->name);
+            builder->append(name);
         }
         builder->append(":");
         builder->newline();
@@ -242,7 +248,8 @@ bool EBPFControl::build() {
             auto ctrblk = b->to<IR::ExternBlock>();
             auto node = ctrblk->node;
             if (node->is<IR::Declaration_Instance>()) {
-                cstring name = node->to<IR::Declaration_Instance>()->name;
+                auto di = node->to<IR::Declaration_Instance>();
+                cstring name = nameFromAnnotation(di->annotations, di->getName());
                 auto ctr = new EBPFCounterTable(program, ctrblk, name);
                 counters.emplace(name, ctr);
             }

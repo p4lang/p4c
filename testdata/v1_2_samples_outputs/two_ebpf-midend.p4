@@ -44,16 +44,16 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("hasReturned_0") bool hasReturned_0_0;
-    action Reject() {
+    bool hasReturned;
+    @name("Reject") action Reject_0() {
         pass = false;
     }
-    table Check_ip(in IPv4Address address) {
+    @name("Check_ip") table Check_ip_0(in IPv4Address address) {
         key = {
             address: exact;
         }
         actions = {
-            Reject;
+            Reject_0;
             NoAction;
         }
         implementation = hash_table(32w1024);
@@ -61,32 +61,32 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     action act() {
         pass = false;
-        hasReturned_0_0 = true;
+        hasReturned = true;
     }
     action act_0() {
-        hasReturned_0_0 = false;
+        hasReturned = false;
         pass = true;
     }
-    table tbl_act_0() {
+    table tbl_act() {
         actions = {
             act_0;
         }
         const default_action = act_0();
     }
-    table tbl_act() {
+    table tbl_act_0() {
         actions = {
             act;
         }
         const default_action = act();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_act.apply();
         if (!headers.ipv4.isValid()) {
-            tbl_act.apply();
+            tbl_act_0.apply();
         }
-        if (!hasReturned_0_0) {
-            Check_ip.apply(headers.ipv4.srcAddr);
-            Check_ip.apply(headers.ipv4.dstAddr);
+        if (!hasReturned) {
+            Check_ip_0.apply(headers.ipv4.srcAddr);
+            Check_ip_0.apply(headers.ipv4.dstAddr);
         }
     }
 }

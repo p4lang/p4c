@@ -53,7 +53,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = compare;
     }
-
     apply {
         t.apply();
     }

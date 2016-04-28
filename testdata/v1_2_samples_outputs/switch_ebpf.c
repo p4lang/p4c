@@ -52,12 +52,12 @@ struct Headers_t {
 struct Check_src_ip_key {
     u32 field;
 };
-enum Check_src_ip_actions {
+enum Check_src_ip_0_actions {
     Reject,
     NoAction,
 };
 struct Check_src_ip_value {
-    enum Check_src_ip_actions action;
+    enum Check_src_ip_0_actions action;
     union {
         struct {
             u32 add;
@@ -220,7 +220,7 @@ int ebpf_filter(struct __sk_buff* skb) {
     accept:
     {
         pass = true;
-        Check_src_ip_actions action_run;
+        Check_src_ip_0_actions action_run;
         {
             /* construct key */
             struct Check_src_ip_key key;
@@ -228,7 +228,7 @@ int ebpf_filter(struct __sk_buff* skb) {
             /* value */
             struct Check_src_ip_value *value;
             /* perform lookup */
-            value = Check_src_ip_0.lookup(&key);
+            value = Check_src_ip.lookup(&key);
             if (value == NULL) {
                 /* miss; find default action */
                 value = Check_src_ip_defaultAction.lookup(&ebpf_zero);

@@ -49,7 +49,7 @@ struct Headers_t {
     struct IPv4_h ipv4; /* IPv4_h */
 };
 
-BPF_TABLE("hash", u32, u32, counters_0, 10);
+BPF_TABLE("hash", u32, u32, counters, 10);
 
 int ebpf_filter(struct __sk_buff* skb) {
     struct Headers_t headers = {
@@ -206,11 +206,11 @@ int ebpf_filter(struct __sk_buff* skb) {
                 u32 *value;
                 u32 init_val = 1;
                 u32 key = ((u32)headers.ipv4.dstAddr);
-                value = counters_0.lookup(&key);
+                value = counters.lookup(&key);
                 if (value != NULL)
                     __sync_fetch_and_add(value, 1);
                 else
-                    counters_0.update(&key, &init_val);
+                    counters.update(&key, &init_val);
             }
 
             pass = true;

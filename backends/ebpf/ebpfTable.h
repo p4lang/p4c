@@ -20,7 +20,7 @@ class EBPFTableBase : public EBPFObject {
             program(program), instanceName(instanceName) {
         keyTypeName = program->refMap->newName(instanceName + "_key");
         valueTypeName = program->refMap->newName(instanceName + "_value");
-        dataMapName = program->refMap->newName(instanceName);
+        dataMapName = instanceName;
     }
 };
 

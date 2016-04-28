@@ -20,40 +20,29 @@ UniqueNames::UniqueNames(bool anyOrder) :
     passes.emplace_back(new RenameSymbols(refMap, renameMap));
 }
 
-void FindSymbols::postorder(const IR::Declaration_Variable* decl) {
-    cstring newName = refMap->newName(decl->getName());
-    renameMap->setNewName(decl, newName);
-}
-
-void FindSymbols::postorder(const IR::Declaration_Constant* decl) {
-    cstring newName = refMap->newName(decl->getName());
-    renameMap->setNewName(decl, newName);
-}
-
 /**************************************************************************/
 
-const IR::Node* RenameSymbols::postorder(IR::Declaration_Variable* decl) {
+IR::ID* RenameSymbols::getName() const {
     auto orig = getOriginal<IR::IDeclaration>();
     if (!renameMap->toRename(orig))
-        return decl;
+        return nullptr;
     auto newName = renameMap->getName(orig);
-    auto name = IR::ID(decl->name.srcInfo, newName);
-    auto annos = addNameAnnotation(decl->name, decl->annotations);
-    auto result = new IR::Declaration_Variable(decl->srcInfo, name, annos,
-                                               decl->type, decl->initializer);
-    return result;
+    auto name = new IR::ID(orig->getName().srcInfo, newName);
+    return name;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::Declaration_Variable* decl) {
+    auto name = getName();
+    if (name != nullptr)
+        decl->name = *name;
+    return decl;
 }
 
 const IR::Node* RenameSymbols::postorder(IR::Declaration_Constant* decl) {
-    auto orig = getOriginal<IR::IDeclaration>();
-    if (!renameMap->toRename(orig))
-        return decl;
-    auto newName = renameMap->getName(orig);
-    auto name = IR::ID(decl->name.srcInfo, newName);
-    auto annos = addNameAnnotation(decl->name, decl->annotations);
-    auto result = new IR::Declaration_Constant(decl->srcInfo, name, annos,
-                                               decl->type, decl->initializer);
-    return result;
+    auto name = getName();
+    if (name != nullptr)
+        decl->name = *name;
+    return decl;
 }
 
 const IR::Node* RenameSymbols::postorder(IR::PathExpression* expression) {
@@ -69,21 +58,34 @@ const IR::Node* RenameSymbols::postorder(IR::PathExpression* expression) {
     return result;
 }
 
-const IR::Node* RenameSymbols::preorder(IR::P4Control* control) {
-    // We must visit the NameMap manually, because today mutating an
-    // element inserts it at the end of the NameMap, and we care about the order.
-    auto stateful = new IR::NameMap<IR::Declaration, ordered_map>();
-    for (auto s : control->stateful) {
-        auto decl = s.second;
-        visit(decl);
-        stateful->addUnique(decl->name, decl);
+const IR::Node* RenameSymbols::postorder(IR::Declaration_Instance* decl) {
+    auto name = getName();
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
+        decl->name = *name;
+        decl->annotations = annos;
     }
-    visit(control->body);
-    auto result = new IR::P4Control(control->srcInfo, control->name, control->type,
-                                    control->constructorParams, std::move(*stateful),
-                                    control->body);
-    prune();
-    return result;
+    return decl;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::P4Table* decl) {
+    auto name = getName();
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
+        decl->name = *name;
+        decl->annotations = annos;
+    }
+    return decl;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::P4Action* decl) {
+    auto name = getName();
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
+        decl->name = *name;
+        decl->annotations = annos;
+    }
+    return decl;
 }
 
 }  // namespace P4

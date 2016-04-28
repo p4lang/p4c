@@ -10,14 +10,13 @@ bool CodeGenInspector::preorder(const IR::Constant* expression) {
 }
 
 bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
-    builder->emitIndent();
     auto type = EBPFTypeFactory::instance->create(decl->type);
     type->declare(builder, decl->name.name, false);
     if (decl->initializer != nullptr) {
         builder->append(" = ");
         visit(decl->initializer);
     }
-    builder->endOfStatement(true);
+    builder->endOfStatement();
     return false;
 }
 

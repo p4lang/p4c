@@ -12,7 +12,6 @@ control c(out bit<32> x) {
         }
         default_action = a1;
     }
-
     apply {
         switch (t.apply().action_run) {
             a1: 

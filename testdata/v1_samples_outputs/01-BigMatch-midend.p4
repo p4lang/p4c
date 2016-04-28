@@ -43,11 +43,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("e_t1") table e_t1() {
+    @name("e_t1") table e_t1_0() {
         actions = {
-            nop;
+            nop_0;
             NoAction;
         }
         key = {
@@ -56,29 +56,29 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction();
     }
     apply {
-        e_t1.apply();
+        e_t1_0.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
+    @name("nop") action nop_1() {
     }
-    @name("set_f1") action set_f1(bit<1024> f1) {
+    @name("set_f1") action set_f1_0(bit<1024> f1) {
         meta.ing_metadata.f1 = f1;
     }
-    @name("set_f2") action set_f2(bit<512> f2) {
+    @name("set_f2") action set_f2_0(bit<512> f2) {
         meta.ing_metadata.f2 = f2;
     }
-    @name("set_f3") action set_f3(bit<256> f3) {
+    @name("set_f3") action set_f3_0(bit<256> f3) {
         meta.ing_metadata.f3 = f3;
     }
-    @name("set_f4") action set_f4(bit<128> f4) {
+    @name("set_f4") action set_f4_0(bit<128> f4) {
         meta.ing_metadata.f4 = f4;
     }
-    @name("i_t1") table i_t1() {
+    @name("i_t1") table i_t1_0() {
         actions = {
-            nop;
-            set_f1;
+            nop_1;
+            set_f1_0;
             NoAction;
         }
         key = {
@@ -86,10 +86,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("i_t2") table i_t2() {
+    @name("i_t2") table i_t2_0() {
         actions = {
-            nop;
-            set_f2;
+            nop_1;
+            set_f2_0;
             NoAction;
         }
         key = {
@@ -97,10 +97,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("i_t3") table i_t3() {
+    @name("i_t3") table i_t3_0() {
         actions = {
-            nop;
-            set_f3;
+            nop_1;
+            set_f3_0;
             NoAction;
         }
         key = {
@@ -108,10 +108,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("i_t4") table i_t4() {
+    @name("i_t4") table i_t4_0() {
         actions = {
-            nop;
-            set_f4;
+            nop_1;
+            set_f4_0;
             NoAction;
         }
         key = {
@@ -120,10 +120,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        i_t1.apply();
-        i_t2.apply();
-        i_t3.apply();
-        i_t4.apply();
+        i_t1_0.apply();
+        i_t2_0.apply();
+        i_t3_0.apply();
+        i_t4_0.apply();
     }
 }
 

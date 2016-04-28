@@ -171,6 +171,35 @@ class SymRenameMap {
     }
 };
 
+static cstring nameFromAnnotation(const IR::Annotations* annotations,
+                                  const IR::IDeclaration* decl) {
+    CHECK_NULL(annotations); CHECK_NULL(decl);
+    auto anno = annotations->getSingle(IR::Annotation::nameAnnotation);
+    if (anno != nullptr) {
+        CHECK_NULL(anno->expr);
+        auto str = anno->expr->to<IR::StringLiteral>();
+        CHECK_NULL(str);
+        return str->value;
+    }
+    return decl->getName();
+}
+
+// This class computes new names for inlined objects.
+// An object's name is prefixed with the instance name that includes it.
+// For example:
+// control c() {
+//   table t() { ... }  apply { t.apply() }
+// }
+// control d() {
+//   c() cinst;
+//   apply { cinst.apply(); }
+// }
+// After inlining we will get:
+// control d() {
+//   @name("cinst.t") table t() { ... }  
+//   apply { t.apply(); }
+// }
+// So the externally visible name for the table is "cinst.t"
 class ComputeNewNames : public Inspector {
     cstring           prefix;
     P4::ReferenceMap* refMap;
@@ -183,8 +212,10 @@ class ComputeNewNames : public Inspector {
     }
 
     void rename(const IR::Declaration* decl) {
-        cstring extName = prefix + "." + decl->getName();
-        cstring baseName = prefix + "_" + decl->getName();
+        BUG_CHECK(decl->is<IR::IAnnotated>(), "%1%: no annotations", decl);
+        cstring name = nameFromAnnotation(decl->to<IR::IAnnotated>()->getAnnotations(), decl);
+        cstring extName = prefix + "." + name;
+        cstring baseName = prefix + "_" + name;
         cstring newName = refMap->newName(baseName);
         renameMap->setNewName(decl, newName, extName);
     }
@@ -194,27 +225,13 @@ class ComputeNewNames : public Inspector {
 };
 }  // namespace
 
-// Add a @name annotation ONLY if it does not already exist.
-// Otherwise do nothing.
+// Add a @name annotation ONLY.
 static const IR::Annotations*
-addNameAnnotation(cstring name, const IR::Annotations* annos) {
+setNameAnnotation(cstring name, const IR::Annotations* annos) {
     if (annos == nullptr)
         annos = IR::Annotations::empty;
-    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                     new IR::StringLiteral(Util::SourceInfo(), name));
-}
-
-static cstring nameFromAnnotation(const IR::Annotations* annotations,
-                                  const IR::IDeclaration* decl) {
-    CHECK_NULL(annotations); CHECK_NULL(decl);
-    auto anno = annotations->getSingle(IR::Annotation::nameAnnotation);
-    if (anno != nullptr) {
-        CHECK_NULL(anno->expr);
-        auto str = anno->expr->to<IR::StringLiteral>();
-        CHECK_NULL(str);
-        return str->value;
-    }
-    return decl->getName();
+    return annos->addOrReplace(IR::Annotation::nameAnnotation,
+                               new IR::StringLiteral(Util::SourceInfo(), name));
 }
 
 namespace {
@@ -239,7 +256,7 @@ class Substitutions : public SubstituteParameters {
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG1("Renaming " << orig << " to " << newName << " (" << extName << ")");
-        auto annos = addNameAnnotation(extName, table->annotations);
+        auto annos = setNameAnnotation(extName, table->annotations);
         auto result = new IR::P4Table(table->srcInfo, newName, annos,
                                       table->parameters, table->properties);
         return result;
@@ -249,7 +266,7 @@ class Substitutions : public SubstituteParameters {
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG1("Renaming " << orig << " to " << newName << "(" << extName << ")");
-        auto annos = addNameAnnotation(extName, action->annotations);
+        auto annos = setNameAnnotation(extName, action->annotations);
         auto result = new IR::P4Action(action->srcInfo, newName, annos,
                                        action->parameters, action->body);
         return result;
@@ -259,7 +276,7 @@ class Substitutions : public SubstituteParameters {
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG1("Renaming " << orig << " to " << newName << "(" << extName << ")");
-        auto annos = addNameAnnotation(extName, instance->annotations);
+        auto annos = setNameAnnotation(extName, instance->annotations);
         auto result = new IR::Declaration_Instance(instance->srcInfo, newName, instance->type,
                                                    instance->arguments, annos);
         return result;
@@ -349,9 +366,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                 ++it;
             }
 
-            // Must rename all stateful declarations in the callee so that
-            // they do not clash with stateful declarations in the caller
-            // (variables and constants should already have unique names).
+            // Must rename stateful objects prefixing them with their instance name.
             SymRenameMap renameMap;
             cstring prefix = nameFromAnnotation(inst->annotations, inst);
             ComputeNewNames cnn(prefix, refMap, &renameMap);

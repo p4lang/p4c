@@ -54,7 +54,6 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
         size = t2Size;
         const default_action = C_action(9w5);
     }
-
     action Drop() {
         pArg1.drop = true;
     }
@@ -67,7 +66,6 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
         }
         const default_action = NoAction;
     }
-
     apply {
         bit<9> dt;
         T.apply(pArg1, pArg2);

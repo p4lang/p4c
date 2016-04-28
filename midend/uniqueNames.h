@@ -43,24 +43,44 @@ class FindSymbols : public Inspector {
     ReferenceMap *refMap;
     RenameMap    *renameMap;
  public:
+    bool isTopLevel() const {
+        return findContext<IR::P4Parser>() == nullptr &&
+                findContext<IR::P4Control>() == nullptr;
+    }
     FindSymbols(ReferenceMap *refMap, RenameMap *renameMap) :
             refMap(refMap), renameMap(renameMap)
     { CHECK_NULL(refMap); CHECK_NULL(renameMap); }
-    void postorder(const IR::Declaration_Variable* decl) override;
-    void postorder(const IR::Declaration_Constant* decl) override;
+    void doDecl(const IR::Declaration* decl) {
+        cstring newName = refMap->newName(decl->getName());
+        renameMap->setNewName(decl, newName);
+    }
+    void postorder(const IR::Declaration_Variable* decl) override
+    { doDecl(decl); }
+    void postorder(const IR::Declaration_Constant* decl) override
+    { doDecl(decl); }
+    void postorder(const IR::Declaration_Instance* decl) override
+    { if (!isTopLevel()) doDecl(decl); }
+    void postorder(const IR::P4Table* decl) override
+    { doDecl(decl); }
+    void postorder(const IR::P4Action* decl) override
+    { if (!isTopLevel()) doDecl(decl); }
 };
 
 class RenameSymbols : public Transform {
     ReferenceMap *refMap;
     RenameMap    *renameMap;
+
+    IR::ID* getName() const;
  public:
     RenameSymbols(ReferenceMap *refMap, RenameMap *renameMap) :
             refMap(refMap), renameMap(renameMap)
     { CHECK_NULL(refMap); CHECK_NULL(renameMap); }
-    const IR::Node* preorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* decl) override;
     const IR::Node* postorder(IR::PathExpression* expression) override;
+    const IR::Node* postorder(IR::Declaration_Instance* decl) override;
+    const IR::Node* postorder(IR::P4Table* decl) override;
+    const IR::Node* postorder(IR::P4Action* decl) override;
 };
 
 }  // namespace P4

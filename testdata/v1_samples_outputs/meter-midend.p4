@@ -46,20 +46,20 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Meter(32w16384, CounterType.Packets) @name("my_meter") my_meter;
-    @name("_drop") action _drop() {
+    Meter(32w16384, CounterType.Packets) @name("my_meter") my_meter_0;
+    @name("_drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("_nop") action _nop() {
+    @name("_nop") action _nop_0() {
     }
-    @name("m_action") action m_action(bit<8> meter_idx) {
-        my_meter.meter((bit<32>)meter_idx, meta.meta.meter_tag);
+    @name("m_action") action m_action_0(bit<8> meter_idx) {
+        my_meter_0.meter((bit<32>)meter_idx, meta.meta.meter_tag);
         standard_metadata.egress_spec = 9w1;
     }
-    @name("m_filter") table m_filter() {
+    @name("m_filter") table m_filter_0() {
         actions = {
-            _drop;
-            _nop;
+            _drop_0;
+            _nop_0;
             NoAction;
         }
         key = {
@@ -68,10 +68,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16;
         default_action = NoAction();
     }
-    @name("m_table") table m_table() {
+    @name("m_table") table m_table_0() {
         actions = {
-            m_action;
-            _nop;
+            m_action_0;
+            _nop_0;
             NoAction;
         }
         key = {
@@ -81,8 +81,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        m_table.apply();
-        m_filter.apply();
+        m_table_0.apply();
+        m_filter_0.apply();
     }
 }
 

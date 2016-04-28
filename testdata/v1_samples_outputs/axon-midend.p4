@@ -80,10 +80,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("_drop") action _drop() {
+    @name("_drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("route") action route() {
+    @name("route") action route_0() {
         standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
         hdr.axon_head.fwdHopCount = hdr.axon_head.fwdHopCount + 8w255;
         hdr.axon_fwdHop.pop_front(1);
@@ -91,18 +91,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.axon_revHop.push_front(1);
         hdr.axon_revHop[0].port = (bit<8>)standard_metadata.ingress_port;
     }
-    @name("drop_pkt") table drop_pkt() {
+    @name("drop_pkt") table drop_pkt_0() {
         actions = {
-            _drop;
+            _drop_0;
             NoAction;
         }
         size = 1;
         default_action = NoAction();
     }
-    @name("route_pkt") table route_pkt() {
+    @name("route_pkt") table route_pkt_0() {
         actions = {
-            _drop;
-            route;
+            _drop_0;
+            route_0;
             NoAction;
         }
         key = {
@@ -114,9 +114,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) 
-            drop_pkt.apply();
+            drop_pkt_0.apply();
         else 
-            route_pkt.apply();
+            route_pkt_0.apply();
     }
 }
 

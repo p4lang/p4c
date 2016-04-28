@@ -44,16 +44,16 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    action Reject(IPv4Address add) {
+    @name("Reject") action Reject_0(IPv4Address add) {
         pass = false;
         headers.ipv4.srcAddr = add;
     }
-    table Check_src_ip() {
+    @name("Check_src_ip") table Check_src_ip_0() {
         key = {
             headers.ipv4.srcAddr: exact;
         }
         actions = {
-            Reject;
+            Reject_0;
             NoAction;
         }
         implementation = hash_table(32w1024);
@@ -65,23 +65,23 @@ control pipe(inout Headers_t headers, out bool pass) {
     action act_0() {
         pass = true;
     }
-    table tbl_act_0() {
+    table tbl_act() {
         actions = {
             act_0;
         }
         const default_action = act_0();
     }
-    table tbl_act() {
+    table tbl_act_0() {
         actions = {
             act;
         }
         const default_action = act();
     }
     apply {
-        tbl_act_0.apply();
-        switch (Check_src_ip.apply().action_run) {
-            Reject: {
-                tbl_act.apply();
+        tbl_act.apply();
+        switch (Check_src_ip_0.apply().action_run) {
+            Reject_0: {
+                tbl_act_0.apply();
             }
             NoAction: {
             }

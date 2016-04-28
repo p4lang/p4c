@@ -24,7 +24,9 @@ p4c_ebpf_SOURCES = \
 	backends/ebpf/codeGen.h \
 	backends/ebpf/codeGen.cpp \
 	backends/ebpf/ebpfModel.h \
-	backends/ebpf/ebpfModel.cpp
+	backends/ebpf/ebpfModel.cpp \
+	backends/ebpf/midend.h \
+	backends/ebpf/midend.cpp
 
 cpplint_FILES += $(p4c_ebpf_SOURCES)
 
