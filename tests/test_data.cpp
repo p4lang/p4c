@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include "bm_sim/data.h"
+#include <bm/bm_sim/data.h>
 
 using bm::Data;
 

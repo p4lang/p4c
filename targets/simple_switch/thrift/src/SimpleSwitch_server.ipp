@@ -1,4 +1,4 @@
-#include "SimpleSwitch.h"
+#include <bm/SimpleSwitch.h>
 
 #ifdef P4THRIFT
 #include <p4thrift/protocol/TBinaryProtocol.h>
@@ -16,8 +16,8 @@ namespace thrift_provider = p4::thrift;
 namespace thrift_provider = apache::thrift;
 #endif
 
-#include <bm_sim/switch.h>
-#include <bm_sim/logger.h>
+#include <bm/bm_sim/switch.h>
+#include <bm/bm_sim/logger.h>
 
 #include "simple_switch.h"
 

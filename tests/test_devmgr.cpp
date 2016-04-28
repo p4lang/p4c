@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "bm_sim/dev_mgr.h"
-#include "bm_sim/port_monitor.h"
-#include "bm_apps/packet_pipe.h"
+#include <bm/bm_sim/dev_mgr.h>
+#include <bm/bm_sim/port_monitor.h>
+#include <bm/bm_apps/packet_pipe.h>
 
 #include <algorithm>
 #include <cassert>

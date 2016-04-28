@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-#include "bm_sim/fields.h"
+#include <bm/bm_sim/fields.h>
 
 using bm::ByteContainer;
 using bm::Field;

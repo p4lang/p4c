@@ -21,6 +21,8 @@
 #ifndef SIMPLE_SWITCH_TESTS_UTILS_H_
 #define SIMPLE_SWITCH_TESTS_UTILS_H_
 
+#include <bm/bm_sim/nn.h>
+
 #include <nanomsg/pubsub.h>
 
 #include <vector>
@@ -29,8 +31,6 @@
 #include <thread>
 #include <condition_variable>
 #include <unordered_map>
-
-#include "bm_sim/nn.h"
 
 class NNEventListener {
  public:

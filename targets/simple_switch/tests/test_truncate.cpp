@@ -15,14 +15,14 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_apps/packet_pipe.h>
+
 #include <boost/filesystem.hpp>
 
 #include <string>
 #include <memory>
 #include <vector>
 #include <algorithm>  // for std::fill_n
-
-#include "bm_apps/packet_pipe.h"
 
 #include "simple_switch.h"
 

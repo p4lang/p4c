@@ -27,7 +27,7 @@
 
 #include <cassert>
 
-#include "bm_sim/actions.h"
+#include <bm/bm_sim/actions.h>
 
 using namespace bm;
 

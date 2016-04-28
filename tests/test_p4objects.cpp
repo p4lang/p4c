@@ -23,7 +23,7 @@
 #include <sstream>
 #include <string>
 
-#include "bm_sim/P4Objects.h"
+#include <bm/bm_sim/P4Objects.h>
 
 using namespace bm;
 

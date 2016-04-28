@@ -21,12 +21,12 @@
 #ifndef TESTS_STRESS_TESTS_UTILS_H_
 #define TESTS_STRESS_TESTS_UTILS_H_
 
+#include <bm/bm_sim/switch.h>
+
 #include <chrono>
 #include <vector>
 #include <memory>
 #include <string>
-
-#include "bm_sim/switch.h"
 
 using std::chrono::milliseconds;
 using std::chrono::duration_cast;

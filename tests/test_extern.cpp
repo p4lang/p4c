@@ -22,7 +22,7 @@
 
 #include <cassert>
 
-#include "bm_sim/extern.h"
+#include <bm/bm_sim/extern.h>
 
 using namespace bm;
 

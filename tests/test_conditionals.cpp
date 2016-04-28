@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-#include "bm_sim/conditionals.h"
+#include <bm/bm_sim/conditionals.h>
 
 // This is where expressions are tested (essentially the same thing as
 // conditionals)

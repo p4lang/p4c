@@ -17,7 +17,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include "bm_sim/pcap_file.h"
+#include <bm/bm_sim/pcap_file.h>
 #include <stdio.h>
 
 using namespace bm;

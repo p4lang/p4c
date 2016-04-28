@@ -18,16 +18,15 @@
  *
  */
 
+#include <bm/bm_apps/learn.h>
+#include <bm/Standard.h>
+#include <bm/SimplePre.h>
+
 #include <iostream>
 #include <string>
 #include <vector>
 
 #include <cassert>
-
-#include "bm_apps/learn.h"
-
-#include "Standard.h"
-#include "SimplePre.h"
 
 namespace {
 
@@ -46,6 +45,7 @@ namespace {
 
 void learn_cb(const bm_apps::LearnListener::MsgInfo &msg_info,
               const char *data, void *cookie) {
+  (void) cookie;
   std::cout << "CB with " << msg_info.num_samples << " samples\n";
 
   boost::shared_ptr<runtime::StandardClient> client = listener->get_client();

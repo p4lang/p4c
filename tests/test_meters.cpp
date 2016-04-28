@@ -23,7 +23,7 @@
 #include <thread>
 #include <chrono>
 
-#include "bm_sim/meters.h"
+#include <bm/bm_sim/meters.h>
 
 using namespace bm;
 

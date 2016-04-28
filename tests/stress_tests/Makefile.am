@@ -1,14 +1,12 @@
 AM_CPPFLAGS += \
 -isystem $(top_srcdir)/third_party \
--I$(top_srcdir)/modules/bm_sim/include \
--I$(top_srcdir)/modules/bm_apps/include \
 -DTESTDATADIR=\"$(abs_srcdir)/testdata\"
 AM_CXXFLAGS = -pthread
 LDADD = \
 $(top_builddir)/third_party/gtest/libgtest.la \
-$(top_builddir)/modules/bm_apps/libbmapps.la \
-$(top_builddir)/modules/bm_sim/libbmsim.la \
-$(top_builddir)/modules/bf_lpm_trie/libbflpmtrie.la \
+$(top_builddir)/src/bm_apps/libbmapps.la \
+$(top_builddir)/src/bm_sim/libbmsim.la \
+$(top_builddir)/src/bf_lpm_trie/libbflpmtrie.la \
 $(top_builddir)/third_party/jsoncpp/libjson.la \
 -lboost_system -lboost_thread -lboost_filesystem -lboost_program_options
 

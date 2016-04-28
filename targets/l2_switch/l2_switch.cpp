@@ -18,6 +18,16 @@
  *
  */
 
+#include <bm/bm_sim/queue.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/parser.h>
+#include <bm/bm_sim/tables.h>
+#include <bm/bm_sim/switch.h>
+#include <bm/bm_sim/event_logger.h>
+#include <bm/bm_sim/simple_pre.h>
+
+#include <bm/bm_runtime/bm_runtime.h>
+
 #include <unistd.h>
 
 #include <iostream>
@@ -26,16 +36,6 @@
 #include <fstream>
 #include <string>
 #include <chrono>
-
-#include "bm_sim/queue.h"
-#include "bm_sim/packet.h"
-#include "bm_sim/parser.h"
-#include "bm_sim/tables.h"
-#include "bm_sim/switch.h"
-#include "bm_sim/event_logger.h"
-#include "bm_sim/simple_pre.h"
-
-#include "bm_runtime/bm_runtime.h"
 
 using bm::Switch;
 using bm::Queue;

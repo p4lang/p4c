@@ -22,8 +22,8 @@
 
 #include <random>
 
-#include "bm_sim/calculations.h"
-#include "bm_sim/parser.h"
+#include <bm/bm_sim/calculations.h>
+#include <bm/bm_sim/parser.h>
 
 using namespace bm;
 
