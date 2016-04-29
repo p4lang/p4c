@@ -61,6 +61,7 @@ void parseLineNumber(const char* text)
                   yylval.str = cstring(yytext).substr(1, strlen(yytext) - 2);
                   return(STRING_LITERAL); }
 
+"abstract"      { BEGIN(NORMAL); return ABSTRACT; }
 "action"        { BEGIN(NORMAL); return ACTION; }
 "actions"       { BEGIN(NORMAL); return ACTIONS; }
 "apply"         { BEGIN(NORMAL); return APPLY; }
@@ -96,7 +97,6 @@ void parseLineNumber(const char* text)
 "true"          { BEGIN(NORMAL); return TRUE; }
 "typedef"       { BEGIN(NORMAL); return TYPEDEF; }
 "varbit"        { BEGIN(NORMAL); return VARBIT; }
-"virtual"       { BEGIN(NORMAL); return VIRTUAL; }
 "void"          { BEGIN(NORMAL); return VOID; }
 "_"             { BEGIN(NORMAL); return DONTCARE; }
 [A-Za-z_][A-Za-z0-9_]* {

@@ -235,12 +235,6 @@ class Type_Struct : Type_StructLike {
 #end
 }
 
-class Type_Set : Type {
-    Type elementType;
-    dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
-    toString { return cstring("set<") + elementType->toString() + ">"; }
-}
-    
 class Type_Union : Type_StructLike {
 #nodbprint
     toString{ return cstring("header_union ") + getName(); }
@@ -262,6 +256,12 @@ class Type_Header : Type_StructLike {
     toString{ return cstring("header ") + getName(); }
 }
 
+class Type_Set : Type {
+    Type elementType;
+    dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
+    toString { return cstring("set<") + elementType->toString() + ">"; }
+}
+    
 // The type of an expressionList
 class Type_Tuple : Type {
     Vector<Type> components;
@@ -350,7 +350,8 @@ class Type_Specialized : Type {
     validate{ arguments->check_null(); }
 }
 
-/* Canonical representation of a Type_Specialized */
+/* Canonical representation of a Type_Specialized;
+   only used by the type-checker, never in the IR tree. */
 class Type_SpecializedCanonical : Type {
     Type              baseType;     // canonical baseType
     Vector<Type>      arguments;    // canonical type arguments
@@ -405,13 +406,14 @@ class Type_ActionEnum : Type {
 #end
 }
 
-class Type_MethodBase : Type, IMayBeGenericType {
+abstract Type_MethodBase : Type, IMayBeGenericType {
     TypeParameters typeParameters; // we generally want these visited first
-    NullOK Type returnType;   // null for constructors or functors
+    NullOK Type returnType;   // nullptr for constructors or functors; nullptr is not void
     ParameterList parameters;
 #emit
     size_t getParameterCount() const { return parameters->size(); }
     virtual const TypeParameters* getTypeParameters() const { return typeParameters; }
+    void dbprint(std::ostream& out) const;
 #end
 }
 
@@ -421,6 +423,7 @@ class Type_Method : Type_MethodBase {
 }
 
 // Describes an argument of a MethodCall
+// Never used in the program IR; only used by typechecker.
 class ArgumentInfo {
     bool leftValue;
     Type type;
@@ -428,6 +431,7 @@ class ArgumentInfo {
 
 // Used to represent the type of a MethodCallExpression
 // for unification.
+// Never appears in the program IR; only used by the typechecker.    
 class Type_MethodCall : Type {
     Vector<Type>         typeArguments;
     Type_Var             returnType;
@@ -443,10 +447,10 @@ class Type_Action : Type_MethodBase {
 
 class Method : Declaration {
     Type_Method type;
-    bool        isVirtual;
+    bool        isAbstract;
 #emit
     size_t getParameterCount() const { return type->getParameterCount(); }
-    void setVirtual() { isVirtual = true; }
+    void setAbstract() { isAbstract = true; }
 #end
 }
 

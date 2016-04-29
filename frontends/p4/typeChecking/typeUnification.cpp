@@ -57,8 +57,8 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
 }
 
 bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
-                                     const IR::Type_Method* dest,
-                                     const IR::Type_Method* src,
+                                     const IR::Type_MethodBase* dest,
+                                     const IR::Type_MethodBase* src,
                                      bool reportErrors) {
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG1("Unifying functions " << dest << " to " << src);
@@ -152,14 +152,16 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
     } else if (dest->is<IR::Type_MethodBase>()) {
         auto destt = dest->to<IR::Type_MethodBase>();
         auto srct = src->to<IR::Type_MethodCall>();
-        if (srct == nullptr) {
-            if (reportErrors)
-                ::error("%1%: Cannot unify non-function type %2% to function type %3%",
-                        errorPosition, src->toString(), dest->toString());
-            return false;
-        }
-
-        return unifyFunctions(errorPosition, destt, srct, reportErrors);
+        if (srct != nullptr) 
+            return unifyFunctions(errorPosition, destt, srct, reportErrors);
+        auto srcf = src->to<IR::Type_MethodBase>();
+        if (srcf != nullptr)
+            return unifyFunctions(errorPosition, destt, srcf, reportErrors);
+        
+        if (reportErrors)
+            ::error("%1%: Cannot unify non-function type %2% to function type %3%",
+                    errorPosition, src->toString(), dest->toString());
+        return false;
     } else if (dest->is<IR::Type_Tuple>()) {
         if (src->is<IR::Type_Struct>()) {
             // swap and try again: handled below

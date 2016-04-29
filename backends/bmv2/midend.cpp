@@ -24,8 +24,8 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
 
-    auto evaluator0 = new P4::EvaluatorPass(true);
-    (void)program->apply(*evaluator0);
+    auto evaluator = new P4::EvaluatorPass(true);
+    (void)program->apply(*evaluator);
     if (::errorCount() > 0)
         return nullptr;
     
@@ -36,7 +36,7 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
     P4::ActionsInlineList actionsToInline;
     
     PassManager midend = {
-        new P4::DiscoverInlining(&controlsToInline, evaluator0->getBlockMap()),
+        new P4::DiscoverInlining(&controlsToInline, evaluator->getBlockMap()),
         new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap), isv1),
         new PassRepeated {
             // remove useless callees
@@ -44,7 +44,7 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
             new P4::RemoveUnusedDeclarations(&refMap),
         },
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap, true, true),
+        new P4::TypeChecker(&refMap, &typeMap),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new SimpleActionsInliner(&refMap), isv1),
         new PassRepeated {
@@ -62,7 +62,7 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
 
 const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* program) {
     bool isv1 = false;
-    auto evaluator0 = new P4::EvaluatorPass(isv1);
+    auto evaluator = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
 
     PassManager simplify = {
@@ -76,7 +76,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         new P4::MoveConstructors(isv1),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveUnusedDeclarations(&refMap),
-        evaluator0,
+        evaluator,
     };
 
     simplify.setName("Simplify");
@@ -84,7 +84,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
-    auto blockMap = evaluator0->getBlockMap();
+    auto blockMap = evaluator->getBlockMap();
     if (blockMap->getMain() == nullptr)
         // nothing further to do
         return nullptr;
@@ -101,7 +101,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
             new P4::RemoveUnusedDeclarations(&refMap),
         },
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap, true, true),
+        new P4::TypeChecker(&refMap, &typeMap),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new PassRepeated {
@@ -146,20 +146,20 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     // BMv2-specific passes
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
-    auto evaluator1 = new P4::EvaluatorPass(isv1);
+    auto evaluator = new P4::EvaluatorPass(isv1);
     PassManager backend = {
         new P4::ToP4(midendStream, options.file),
         new P4::SimplifyControlFlow(),
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap, true, true),
+        new P4::TypeChecker(&refMap, &typeMap),
         new RemoveLeftSlices(&typeMap),
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap, true, true),
+        new P4::TypeChecker(&refMap, &typeMap),
         new LowerExpressions(&typeMap),
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap, true, true),
+        new P4::TypeChecker(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
-        evaluator1
+        evaluator
     };
     
     backend.setName("Backend");
@@ -168,7 +168,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     if (::errorCount() > 0)
         return nullptr;
     
-    auto blockMap = evaluator1->getBlockMap();
+    auto blockMap = evaluator->getBlockMap();
     return blockMap;
 }
 

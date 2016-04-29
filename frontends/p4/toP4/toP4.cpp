@@ -161,6 +161,8 @@ bool ToP4::preorder(const IR::Method* m) {
     if (standaloneFunction)
         builder.append("extern ");
 
+    if (m->isAbstract)
+        builder.append("abstract ");
     auto t = m->type;
     BUG_CHECK(t != nullptr, "Method %1% has no type", m);
     if (t->returnType != nullptr) {
@@ -172,6 +174,21 @@ bool ToP4::preorder(const IR::Method* m) {
     visit(t->parameters);
     if (standaloneFunction)
         builder.endOfStatement();
+    return false;
+}
+
+bool ToP4::preorder(const IR::Function* function) {
+    auto t = function->type;
+    BUG_CHECK(t != nullptr, "Function %1% has no type", function);
+    if (t->returnType != nullptr) {
+        visit(t->returnType);
+        builder.spc();
+    }
+    builder.append(function->name);
+    visit(t->typeParameters);
+    visit(t->parameters);
+    builder.spc();
+    visit(function->body);
     return false;
 }
 
@@ -344,6 +361,14 @@ bool ToP4::preorder(const IR::Declaration_Instance* i) {
     builder.spc();
     visit(i->annotations);
     builder.append(i->name);
+    if (i->initializer != nullptr) {
+        builder.append(" = ");
+        builder.blockStart();
+        setVecSep("\n", "\n");
+        visit(i->initializer);
+        doneVec();
+        builder.blockEnd(false);
+    }
     builder.endOfStatement();
     return false;
 }
@@ -683,8 +708,12 @@ bool ToP4::preorder(const IR::ExitStatement*) {
     return false;
 }
 
-bool ToP4::preorder(const IR::ReturnStatement*) {
+bool ToP4::preorder(const IR::ReturnStatement* statement) {
     builder.append("return");
+    if (statement->expression != nullptr) {
+        builder.spc();
+        visit(statement->expression);
+    }
     builder.endOfStatement();
     return false;
 }

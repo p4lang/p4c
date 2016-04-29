@@ -172,6 +172,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::TypeParameters* p) override;
     bool preorder(const IR::ParameterList* p) override;
     bool preorder(const IR::Method* p) override;
+    bool preorder(const IR::Function* function) override;
 
     bool preorder(const IR::ExpressionValue* v) override;
     bool preorder(const IR::ActionListElement* ale) override;

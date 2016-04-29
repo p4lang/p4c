@@ -8,6 +8,9 @@ class HasExits : public Inspector {
     bool hasExits;
     bool hasReturns;
     HasExits() : hasExits(false), hasReturns(false) {}
+
+    bool preorder(const IR::Function*) override
+    { return false; }
     void postorder(const IR::ExitStatement*) override
     { hasExits = true; }
     void postorder(const IR::ReturnStatement*) override

@@ -58,6 +58,9 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) { prettyPrintFile = arg; return true; },
                    "Pretty-print the program in the\n"
                    "specified file (output is always in P4 v1.2).");
+    registerOption("-o", "outfile",
+                   [this](const char* arg) { outputFile = arg; return true; },
+                   "Write output program to outfile");
     registerOption("-T", "loglevel",
                     [](const char* arg) { ::add_debug_spec(arg); return true; },
                    "[Compiler debugging] Adjust logging level per file (see below)");
@@ -66,13 +69,12 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                     "[Compiler debugging] Dump the program after various passes in\n"
                    "P4 files in the specified folder.");
     registerOption("-v", nullptr,
-                   [this](const char*) { ::verbose++; return true; },
+                   [this](const char*) { ::verbose++; verbosity++; return true; },
                    "[Compiler debugging] Increase verbosity level (can be repeated)");
-    registerUsage("loglevel format is (higher level is more verbose):\n"
-                  "  file:level,...,file:level");
-    registerOption("-o", "outfile",
-                   [this](const char* arg) { outputFile = arg; return true; },
-                   "Write output program to outfile");
+    registerUsage("loglevel format is:\n"
+                  "  sourceFile:level,...,sourceFile:level\n"
+                  "where 'sourceFile' is a compiler source file and\n"
+                  "'level' is the verbosity level for LOG messages in that file");
 }
 
 void CompilerOptions::setInputFile() {

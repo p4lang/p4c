@@ -98,11 +98,11 @@ static int yylex();
 
 %token      LE GE SHL AND OR NE EQ
 %token      TRUE FALSE
-%token      ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA
+%token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA
             DEFAULT DONTCARE ELSE ENUM T_ERROR  // There is an ERROR macro elsewhere
             EXIT EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
             PACKAGE PARSER RANGE RETURN STATE STRUCT SWITCH TABLE TRANSITION
-            TYPEDEF VARBIT VIRTUAL VOID
+            TYPEDEF VARBIT VOID
 %token<str> IDENTIFIER TYPE NAMESPACE STRING_LITERAL
 %token<Constant>  INTEGER
 
@@ -472,7 +472,7 @@ externDeclaration
                             optTypeParameters { structure.declareTypes($4->getEnumerator()); }
                             '{' methodPrototypes '}'
                                        { structure.pop();
-                                         $$ = new IR::Type_Extern(@1 + @8, *$2, $4, $7); }
+                                         $$ = new IR::Type_Extern(@2, *$2, $4, $7); }
     | EXTERN functionPrototype ';'     { $$ = $2; }
     ;
 
@@ -486,19 +486,19 @@ functionPrototype
                      structure.declareTypes($3->getEnumerator()); }
                      '(' parameterList ')' { structure.pop(); }
                                         { auto params = new IR::ParameterList(@6, std::move(*$6));
-                                          auto mt = new IR::Type_Method(@1 + @6, $3, $1, params);
-                                          $$ = new IR::Method(@1 + @6, *$2, mt, false); }
+                                          auto mt = new IR::Type_Method(@2, $3, $1, params);
+                                          $$ = new IR::Method(@2, *$2, mt, false); }
     ;
 
 methodPrototype
     : functionPrototype ';' { $$ = $1; }
-    | VIRTUAL functionPrototype ';' { $$ = $2; $$->setVirtual(); }
+    | ABSTRACT functionPrototype ';' { $$ = $2; $$->setAbstract(); }
     | TYPE optTypeParameters { structure.pushNamespace("", @1, false);
                      structure.declareTypes($2->getEnumerator()); }  // constructor
                      '(' parameterList ')' ';'               { structure.pop(); }
                                         { auto par = new IR::ParameterList(@5, std::move(*$5));
-                                          auto mt = new IR::Type_Method(@1 + @6, $2, nullptr, par);
-                                          $$ = new IR::Method(@1 + @6, IR::ID(@1, $1), mt, false); }
+                                          auto mt = new IR::Type_Method(@1, $2, nullptr, par);
+                                          $$ = new IR::Method(@1, IR::ID(@1, $1), mt, false); }
     ;
 
 /************************** TYPES ****************************/

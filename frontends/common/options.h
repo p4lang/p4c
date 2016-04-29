@@ -37,9 +37,10 @@ class CompilerOptions : public Util::Options {
     cstring prettyPrintFile = nullptr;
     // file to output to
     cstring outputFile = nullptr;
-
+    // higher means more verbose
+    unsigned verbosity = 0;
     // Compiler target architecture
-    cstring target;
+    cstring target = nullptr;
 
     // Expect that the only remaining argument is the input file.
     void setInputFile();

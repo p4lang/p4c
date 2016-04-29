@@ -48,7 +48,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
         new P4::ResolveReferences(&refMap, p4v10),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
-        new P4::TypeChecker(&refMap, &typeMap1),
+        new P4::TypeChecker(&refMap, &typeMap1, true, false),
         // Another round of constant folding, using type information.
         new P4::SimplifyControlFlow(),
         new P4::ResolveReferences(&refMap, p4v10),

@@ -74,7 +74,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
             new P4::RemoveUnusedDeclarations(&refMap),
         },
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap, true, true),
+        new P4::TypeChecker(&refMap, &typeMap),
         actInl,
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new PassRepeated {

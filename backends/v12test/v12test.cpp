@@ -19,8 +19,9 @@
 class PrintDump {
     V12Test::V12TestOptions& options;
     std::regex* regex = nullptr;
+    bool verbose;
  public:
-    PrintDump(V12Test::V12TestOptions& options) : options(options) {
+    PrintDump(V12Test::V12TestOptions& options) : options(options), verbose(options.verbosity > 0) {
         if (options.top4 != nullptr) {
             cstring r = cstring(".*") + options.top4 + ".*";
             regex = new std::regex(r.c_str());
@@ -40,7 +41,7 @@ class PrintDump {
             bool match = std::regex_match(name.c_str(), *regex);
             if (match) {
                 auto stream = options.dumpStream(name);
-                if (::verbose)
+                if (verbose)
                     std::cerr << "Writing program to " << options.dumpFileName(name) << std::endl;
                 P4::ToP4 toP4(stream, options.file);
                 node->apply(toP4);

@@ -279,7 +279,8 @@ class Declaration_Constant : Declaration, IAnnotated {
     toString { return Declaration::toString(); }
 }
 
-// Like a variable, but for a statically allocated instance
+// Like a variable, but for a statically allocated instance.
+// The syntax is Contructor(args) name = initializer;
 class Declaration_Instance : Declaration, IAnnotated {
     Type               type;
     Vector<Expression> arguments;

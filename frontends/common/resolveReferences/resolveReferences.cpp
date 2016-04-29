@@ -306,6 +306,15 @@ void ResolveReferences::postorder(const IR::P4Parser *c) {
     checkShadowing(c);
 }
 
+bool ResolveReferences::preorder(const IR::Function* function) {
+    addToContext(function->type->parameters);
+    return true;
+}
+
+void ResolveReferences::postorder(const IR::Function* function) {
+    removeFromContext(function->type->parameters);
+}
+
 bool ResolveReferences::preorder(const IR::P4Table* t) {
     addToContext(t->parameters);
     return true;

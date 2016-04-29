@@ -40,7 +40,7 @@ class TypeChecker : public Transform {
     // an Inspector.
     // clearMap=true will clear the typeMap on start.
     TypeChecker(ReferenceMap* refMap, TypeMap* typeMap,
-                bool clearMap = false, bool readOnly = false);
+                bool clearMap = true, bool readOnly = true);
 
  protected:
     const IR::Type* getType(const IR::Node* element) const;
@@ -67,7 +67,8 @@ class TypeChecker : public Transform {
                                     const IR::SelectCase* selectCase,
                                     const IR::Type* caseType) const;
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
-
+    bool checkVirtualMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
+    
     // converts each type to a canonical pointer,
     // so we can check just pointer equality in the map
     const IR::Type* canonicalize(const IR::Type* type);
@@ -102,6 +103,9 @@ class TypeChecker : public Transform {
     using Transform::preorder;
 
     const IR::Node* preorder(IR::Type* type) override;
+    // do functions pre-order so we can check the prototype
+    // before the returns
+    const IR::Node* preorder(IR::Function* function) override;
 
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Errors* decl) override;
@@ -171,6 +175,7 @@ class TypeChecker : public Transform {
     const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* postorder(IR::DefaultExpression* expression) override;
 
+    const IR::Node* postorder(IR::ReturnStatement* stat) override;
     const IR::Node* postorder(IR::IfStatement* stat) override;
     const IR::Node* postorder(IR::SwitchStatement* stat) override;
     const IR::Node* postorder(IR::AssignmentStatement* stat) override;
@@ -179,9 +184,8 @@ class TypeChecker : public Transform {
     const IR::Node* postorder(IR::TableProperty* elem) override;
     const IR::Node* postorder(IR::SelectCase* elem) override;
 
-    const IR::Node* postorder(IR::P4Program* program) override;
-
     Visitor::profile_t init_apply(const IR::Node* node) override;
+    void end_apply(const IR::Node* Node) override;
 };
 
 }  // namespace P4

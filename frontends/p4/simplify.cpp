@@ -6,8 +6,9 @@ const IR::Node* SimplifyControlFlow::postorder(IR::BlockStatement* statement) {
     LOG1("Visiting " << statement);
     auto parent = getContext()->node;
     auto statancestor = findContext<IR::Statement>();
-    if (parent->is<IR::SwitchCase>() || parent->is<IR::P4Control>()) {
-        LOG1("Skip");
+    if (parent->is<IR::SwitchCase>() ||
+        parent->is<IR::P4Control>() ||
+        parent->is<IR::Function>()) {
         // Cannot remove block from switch or toplevel control block
         return statement;
     }

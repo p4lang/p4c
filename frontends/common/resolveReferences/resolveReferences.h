@@ -90,6 +90,7 @@ class ResolveReferences : public Inspector {
     DECLARE(P4Control)
     DECLARE(P4Parser)
     DECLARE(P4Action)
+    DECLARE(Function)
     DECLARE(TableProperties)
     DECLARE(P4Table)
     DECLARE(Type_Method)

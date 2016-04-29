@@ -25,8 +25,8 @@ class TypeUnification final {
                         const IR::Type_MethodCall* src,
                         bool reportErrors);
     bool unifyFunctions(const IR::Node* errorPosition,
-                        const IR::Type_Method* dest,
-                        const IR::Type_Method* src,
+                        const IR::Type_MethodBase* dest,
+                        const IR::Type_MethodBase* src,
                         bool reportErrors);
     bool unifyBlocks(const IR::Node* errorPosition,
                      const IR::Type_ArchBlock* dest,

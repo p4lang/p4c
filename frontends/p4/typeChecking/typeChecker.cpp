@@ -55,12 +55,9 @@ Visitor::profile_t TypeChecker::init_apply(const IR::Node* node) {
     return Transform::init_apply(node);
 }
 
-const IR::Node* TypeChecker::postorder(IR::P4Program* program) {
-    if (initialNode->is<IR::P4Program>() && readOnly) {
-        if (!(*program == *(initialNode->to<IR::P4Program>())))
-            BUG("%1%: typechecker mutated program", program);
-    }
-    return program;
+void TypeChecker::end_apply(const IR::Node* node) {
+    if (readOnly && !(*node == *initialNode))
+        BUG("%1%: typechecker mutated node", node);
 }
 
 bool TypeChecker::done() const {
@@ -237,7 +234,7 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
 
             if (fpType != method->type) {
                 method = new IR::Method(method->srcInfo, method->name,
-                                        fpType->to<IR::Type_Method>(), method->isVirtual);
+                                        fpType->to<IR::Type_Method>(), method->isAbstract);
                 changes = true;
                 setType(method, fpType);
             }
@@ -332,10 +329,8 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
             type->srcInfo, baseCanon, args, specialized);
         // learn the types of all components of the specialized type
         LOG1("Scanning the specialized type");
-        TypeChecker tc(refMap, typeMap);
-        auto l = result->apply(tc);
-        BUG_CHECK(l == result, "Scanning mutated the type tree %1% != %2%",
-                  l, result);
+        TypeChecker tc(refMap, typeMap, false, true);
+        (void)result->apply(tc);
         return result;
     }
     BUG("Unhandled type %1%", type);
@@ -447,8 +442,8 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_Variable* decl) {
     if (decl->initializer != nullptr) {
         auto init = assignment(decl, type, decl->initializer);
         if (decl->initializer != init) {
-            decl = new IR::Declaration_Variable(decl->srcInfo, decl->name,
-                                                decl->annotations, type, init);
+            decl->type = type;
+            decl->initializer = init;
             LOG1("Created new declaration " << decl);
         }
     }
@@ -587,6 +582,56 @@ TypeChecker::checkExternConstructor(const IR::Node* errorPosition,
         return arguments;
 }
 
+// Return true on success
+bool TypeChecker::checkVirtualMethods(const IR::Declaration_Instance* inst, 
+                                      const IR::Type_Extern* type) {
+    // Make a list of the virtual methods
+    IR::NameMap<IR::Method, ordered_map> virt;
+    for (auto m : *type->methods) 
+        if (m->isAbstract)
+            virt.addUnique(m->name, m);
+    if (virt.size() == 0 && inst->initializer == nullptr)
+        return true;
+    if (virt.size() == 0 && inst->initializer != nullptr) {
+        ::error("%1%: instance initializers for extern without virtual methods", inst->initializer);
+        return false;
+    } else if (virt.size() != 0 && inst->initializer == nullptr) {
+        ::error("%1%: must declare virtual methods for %2%", inst, type);
+        return false;
+    }
+
+    for (auto d : *inst->initializer) {
+        if (d->is<IR::Function>()) {
+            auto func = d->to<IR::Function>();
+            LOG1("Type checking " << func);
+            if (func->type->typeParameters->size() != 0) {
+                ::error("%1%: virtual method implementations cannot be generic", func);
+                return false;
+            }
+            auto ftype = getType(func);
+            if (virt.find(func->name.name) == virt.end()) {
+                ::error("%1%: no matching virtual method in %2%", func, type);
+                return false;
+            }
+            auto meth = virt[func->name.name];
+            auto methtype = getType(meth);
+            virt.erase(func->name.name);
+            auto tvs = unify(inst, methtype, ftype, true);
+            if (tvs == nullptr) 
+                return false;
+            BUG_CHECK(tvs->isIdentity(), "%1%: expected no type variables", tvs);
+        }
+    }
+
+    if (virt.size() != 0) {
+        ::error("%1%: %2% virtual method not implemented",
+                inst, virt.begin()->second);
+        return false;
+    }
+    return true;
+}
+
+
 const IR::Node* TypeChecker::postorder(IR::Declaration_Instance* decl) {
     if (done())
         return decl;
@@ -599,7 +644,10 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_Instance* decl) {
 
     if (simpleType->is<IR::Type_Extern>()) {
         auto et = simpleType->to<IR::Type_Extern>();
-
+        bool s = checkVirtualMethods(decl, et);
+        if (!s)
+            return decl;
+        
         auto args = checkExternConstructor(decl, et, decl->arguments);
         if (args == nullptr)
             return decl;
@@ -654,6 +702,20 @@ TypeChecker::containerInstantiation(
     auto returnType = result->lookup(rettype);
     BUG_CHECK(returnType != nullptr, "Cannot infer constructor result type %1%", node);
     return returnType;
+}
+
+const IR::Node* TypeChecker::preorder(IR::Function* function) {
+    if (done())
+        return function;
+    visit(function->type);
+    auto type = getType(function->type);
+    if (type == nullptr)
+        return function;
+    setType(getOriginal(), type);
+    setType(function, type);
+    visit(function->body);
+    prune();
+    return function;
 }
 
 const IR::Node* TypeChecker::postorder(IR::Method* method) {
@@ -1677,9 +1739,8 @@ const IR::Node* TypeChecker::postorder(IR::Member* expression) {
             auto methodType = type->to<IR::IApply>()->getApplyMethodType();
             methodType = canonicalize(methodType)->to<IR::Type_Method>();
             // sometimes this is a synthesized type, so we have to crawl it to understand it
-            TypeChecker learn(refMap, typeMap);
-            auto learned = methodType->apply(learn);
-            BUG_CHECK(learned == methodType, "Learning modified type %1%", learned);
+            TypeChecker learn(refMap, typeMap, false, true);
+            (void)methodType->apply(learn);
 
             setType(getOriginal(), methodType);
             setType(expression, methodType);
@@ -1812,9 +1873,8 @@ const IR::Node* TypeChecker::postorder(IR::MethodCallExpression* expression) {
 
     // construct types for the specMethodType, use a new typeChecker
     // that uses the same tables!
-    TypeChecker helper(refMap, typeMap);
-    auto learn = specMethodType->apply(helper);
-    BUG_CHECK(learn == specMethodType, "Learning specialized type mutated it");
+    TypeChecker helper(refMap, typeMap, false, true);
+    (void)specMethodType->apply(helper);
 
     auto canon = getType(specMethodType);
     if (canon == nullptr)
@@ -2003,6 +2063,42 @@ const IR::Node* TypeChecker::postorder(IR::SwitchStatement* stat) {
     return stat;
 }
 
+const IR::Node* TypeChecker::postorder(IR::ReturnStatement* statement) {
+    if (done())
+        return statement;
+    auto func = findContext<IR::Function>();
+    if (func == nullptr) {
+        if (statement->expression != nullptr) 
+            ::error("%1%: return with expression can only be used in a function", statement);
+        return statement;
+    }
+        
+    auto ftype = getType(func);
+    if (ftype == nullptr)
+        return statement;
+
+    BUG_CHECK(ftype->is<IR::Type_Method>(), "%1%: expected a method type for function", ftype);
+    auto mt = ftype->to<IR::Type_Method>();
+    auto returnType = mt->returnType;
+    CHECK_NULL(returnType);
+    if (returnType->is<IR::Type_Void>()) {
+        if (statement->expression != nullptr)
+            ::error("%1%: return expression in function with void return", statement);
+        return statement;
+    }
+
+    if (statement->expression == nullptr) {
+        ::error("%1%: return with no expression in a function returning %2%",
+                statement, returnType->toString());
+        return statement;
+    }
+
+    auto init = assignment(statement, returnType, statement->expression);
+    if (init != statement->expression) 
+        statement->expression = init;
+    return statement;
+}
+
 const IR::Node* TypeChecker::postorder(IR::AssignmentStatement* assign) {
     if (done())
         return assign;
@@ -2037,6 +2133,11 @@ const IR::Node* TypeChecker::postorder(IR::SelectCase* sc) {
 }
 
 const IR::Node* TypeChecker::postorder(IR::KeyElement* elem) {
+    auto ktype = getType(elem->expression);
+    if (!ktype->is<IR::Type_Bits>() && !ktype->is<IR::Type_Enum>() &&
+        !ktype->is<IR::Type_Error>() && !ktype->is<IR::Type_Boolean>())
+        ::error("Key %1% field type must be a scalar type; it cannot be %2%",
+                elem->expression, ktype->toString());
     auto type = getType(elem->matchType);
     if (type != nullptr && type != IR::Type_MatchKind::get())
         ::error("%1% must be a %2% value", elem->matchType, IR::Type_MatchKind::get()->toString());
