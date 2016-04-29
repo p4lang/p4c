@@ -1,4 +1,5 @@
 ir_SOURCES += \
+	ir/base.cpp \
 	ir/dbprint.cpp \
 	ir/dbprint-expression.cpp \
 	ir/dbprint.h \

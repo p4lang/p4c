@@ -40,6 +40,8 @@ interface IDeclaration {
 #emit
     // name of the declared object
     virtual ID getName() const = 0;
+    // externally visible name of the object;
+    virtual cstring externName() const;
 #end
 }
 
