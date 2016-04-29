@@ -40,8 +40,8 @@ interface IDeclaration {
 #emit
     // name of the declared object
     virtual ID getName() const = 0;
-    // externally visible name of the object;
-    virtual cstring externName() const;
+    // User-visible name of the object
+    virtual cstring externalName() const;
 #end
 }
 
@@ -111,7 +111,7 @@ abstract Declaration : StatOrDecl, IDeclaration {
     Declaration(Util::SourceInfo si, ID name) : StatOrDecl(si), name(name), declid(nextId++) {}
 #end
     dbprint { Node::dbprint(out); out << name << "/" << declid; }
-    toString { return name.name; }
+    toString { return externalName(); }
     operator== { return StatOrDecl::operator==(a) && name == a.name && declid == a.declid; }
 }
 
@@ -127,7 +127,7 @@ abstract Type_Declaration : Type, IDeclaration {
     int declid;
     Type_Declaration(Util::SourceInfo si, ID name) : Type(si), name(name), declid(nextId++) {}
 #end
-    toString { return name.name; }
+    toString { return externalName(); }
     operator== { return Type::operator==(a) && name == a.name && declid == a.declid; }
     dbprint { Node::dbprint(out); out << name << "/" << declid; }
 }

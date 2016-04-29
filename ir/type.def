@@ -229,7 +229,7 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
 
 class Type_Struct : Type_StructLike {
 #nodbprint
-    toString{ return cstring("struct ") + getName(); }
+    toString{ return cstring("struct ") + externalName(); }
 #emit
     Type_Struct(cstring name, const NameMap<StructField, ordered_map> &&fields);
 #end
@@ -237,7 +237,7 @@ class Type_Struct : Type_StructLike {
 
 class Type_Union : Type_StructLike {
 #nodbprint
-    toString{ return cstring("header_union ") + getName(); }
+    toString{ return cstring("header_union ") + externalName(); }
 #emit
     int width_bits() const override {
         int rv = 0;
@@ -253,7 +253,7 @@ class Type_Header : Type_StructLike {
     const static cstring isValid;
 #end
 #nodbprint
-    toString{ return cstring("header ") + getName(); }
+    toString{ return cstring("header ") + externalName(); }
 }
 
 class Type_Set : Type {
@@ -271,7 +271,7 @@ class Type_Tuple : Type {
 }
 
 // The type of an architectural block.
-// Abstract base for control and parser types.
+// Abstract base for control, parser and package types.
 abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated {
     Annotations    annotations;
     TypeParameters typeParams;
@@ -287,7 +287,7 @@ class Type_Package : Type_ArchBlock, IContainer {
     const Type_Method* getConstructorMethodType() const override;
     const ParameterList* getConstructorParameters() const override { return constructorParams; }
 #end
-    toString{ return cstring("package ") + name; }
+    toString{ return cstring("package ") + externalName(); }
 }
 
 class Type_Parser : Type_ArchBlock, IApply {
@@ -295,7 +295,7 @@ class Type_Parser : Type_ArchBlock, IApply {
 #emit
     const Type_Method* getApplyMethodType() const override;
 #end
-    toString { return cstring("parser ") + name; }
+    toString { return cstring("parser ") + externalName(); }
 }
 
 class Type_Control : Type_ArchBlock, IApply {
@@ -303,7 +303,7 @@ class Type_Control : Type_ArchBlock, IApply {
 #emit
     const Type_Method* getApplyMethodType() const override;
 #end
-    toString { return cstring("control ") + name; }
+    toString { return cstring("control ") + externalName(); }
 }
 
 // A type referred by name

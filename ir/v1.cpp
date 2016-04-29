@@ -134,7 +134,7 @@ class ActionBodySetup : public Inspector {
 
 IR::ActionFunction::ActionFunction(const P4Action *ac, const Vector<Expression> *args) {
     srcInfo = ac->srcInfo;
-    name = ac->externName();
+    name = ac->externalName();
     ActionArgSetup setup;
     size_t arg_idx = 0;
     for (auto param : *ac->parameters->getEnumerator()) {
@@ -162,7 +162,7 @@ static void setIntProperty(cstring name, int *val, const IR::PropertyValue *pval
 
 IR::V1Table::V1Table(const P4Table *tc) {
     srcInfo = tc->srcInfo;
-    name = tc->externName();
+    name = tc->externalName();
     for (auto prop : *tc->properties->getEnumerator()) {
         if (prop->name == "key") {
             auto reads = new IR::Vector<IR::Expression>();

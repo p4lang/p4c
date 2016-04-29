@@ -1,5 +1,4 @@
 #include "ir.h"
-
 #include "substitution.h"
 #include "substitutionVisitor.h"
 

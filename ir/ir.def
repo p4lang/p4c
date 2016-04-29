@@ -78,7 +78,7 @@ class P4Parser : Type_Declaration, IGeneralNamespace, IApply, IContainer {
         stateful->check_null();
         states->check_null();
     }
-    toString { return cstring("parser ") + name; }
+    toString { return cstring("parser ") + externalName(); }
 }
 
 class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
@@ -104,7 +104,7 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
             BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
         stateful.check_null();
     }
-    toString { return cstring("control ") + name; }
+    toString { return cstring("control ") + externalName(); }
 }
 
 class P4Action : Declaration, IGeneralNamespace, IAnnotated {
