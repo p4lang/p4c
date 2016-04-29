@@ -8,9 +8,6 @@
 namespace IR {
 enum class CounterType { NONE, PACKETS, BYTES, BOTH };
 }
-namespace P4 {
-class ReferenceMap;
-}
 
 inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
     switch (d) {
@@ -377,7 +374,6 @@ class ActionFunction {
 #noconstructor
 #emit
     ActionFunction() = default;
-    ActionFunction(const P4Action *, const Vector<Expression> *);
     const ActionArg     *arg(cstring n) const {
         for (auto a : args)
             if (a->name == n)
@@ -431,8 +427,7 @@ class V1Table {
     inline TableProperties      properties;  // non-standard properties
 #noconstructor
 #emit
-    V1Table() {}
-    V1Table(const P4Table *, const P4::ReferenceMap *);
+    V1Table() = default;
 #end
     toString { return node_type_name() + " " + name; }
 }
