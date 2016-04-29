@@ -3,7 +3,8 @@
 
 #include "visitor.h"
 
-typedef std::function<void(const char* manager, unsigned seqNo, const char* pass, const IR::Node* node)> DebugHook;
+typedef std::function<void(const char* manager, unsigned seqNo,
+                           const char* pass, const IR::Node* node)> DebugHook;
 
 class PassManager : virtual public Visitor {
  protected:

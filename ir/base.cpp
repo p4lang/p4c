@@ -5,7 +5,7 @@ namespace IR {
 cstring IDeclaration::externalName() const {
     if (!is<IAnnotated>())
         return getName();
-    
+
     auto anno = to<IAnnotated>()->getAnnotations()->getSingle(IR::Annotation::nameAnnotation);
     if (anno != nullptr) {
         if (anno->expr == nullptr) {
@@ -18,7 +18,7 @@ cstring IDeclaration::externalName() const {
                 return str->value;
         }
     }
-    return getName();
+    return getName().name;
 }
 
-}
+}  // namespace IR

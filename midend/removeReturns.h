@@ -29,7 +29,7 @@ class RemoveReturns : public Transform {
             refMap(refMap), removeReturns(removeReturns) {}
 
     const IR::Node* preorder(IR::Function* function) override
-    { prune(); return function; } // We leave returns in functions alone
+    { prune(); return function; }  // We leave returns in functions alone
     const IR::Node* preorder(IR::BlockStatement* statement) override;
     const IR::Node* preorder(IR::ReturnStatement* statement) override;
     const IR::Node* preorder(IR::ExitStatement* statement) override;

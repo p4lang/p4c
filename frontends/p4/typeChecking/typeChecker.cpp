@@ -583,11 +583,11 @@ TypeChecker::checkExternConstructor(const IR::Node* errorPosition,
 }
 
 // Return true on success
-bool TypeChecker::checkVirtualMethods(const IR::Declaration_Instance* inst, 
+bool TypeChecker::checkVirtualMethods(const IR::Declaration_Instance* inst,
                                       const IR::Type_Extern* type) {
     // Make a list of the virtual methods
     IR::NameMap<IR::Method, ordered_map> virt;
-    for (auto m : *type->methods) 
+    for (auto m : *type->methods)
         if (m->isAbstract)
             virt.addUnique(m->name, m);
     if (virt.size() == 0 && inst->initializer == nullptr)
@@ -617,7 +617,7 @@ bool TypeChecker::checkVirtualMethods(const IR::Declaration_Instance* inst,
             auto methtype = getType(meth);
             virt.erase(func->name.name);
             auto tvs = unify(inst, methtype, ftype, true);
-            if (tvs == nullptr) 
+            if (tvs == nullptr)
                 return false;
             BUG_CHECK(tvs->isIdentity(), "%1%: expected no type variables", tvs);
         }
@@ -647,7 +647,7 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_Instance* decl) {
         bool s = checkVirtualMethods(decl, et);
         if (!s)
             return decl;
-        
+
         auto args = checkExternConstructor(decl, et, decl->arguments);
         if (args == nullptr)
             return decl;
@@ -2068,11 +2068,11 @@ const IR::Node* TypeChecker::postorder(IR::ReturnStatement* statement) {
         return statement;
     auto func = findContext<IR::Function>();
     if (func == nullptr) {
-        if (statement->expression != nullptr) 
+        if (statement->expression != nullptr)
             ::error("%1%: return with expression can only be used in a function", statement);
         return statement;
     }
-        
+
     auto ftype = getType(func);
     if (ftype == nullptr)
         return statement;
@@ -2094,7 +2094,7 @@ const IR::Node* TypeChecker::postorder(IR::ReturnStatement* statement) {
     }
 
     auto init = assignment(statement, returnType, statement->expression);
-    if (init != statement->expression) 
+    if (init != statement->expression)
         statement->expression = init;
     return statement;
 }

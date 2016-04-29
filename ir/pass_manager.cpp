@@ -40,7 +40,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
 }
 
 void PassManager::runDebugHooks(const char* visitorName, const IR::Node* program) {
-    for (auto h : debugHooks) 
+    for (auto h : debugHooks)
         h(managerName, seqNo, visitorName, program);
 }
 

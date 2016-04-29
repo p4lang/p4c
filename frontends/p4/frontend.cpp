@@ -26,7 +26,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
         return nullptr;
 
     bool p4v10 = options.isv1();
-    
+
     Util::PathName path(options.prettyPrintFile);
     std::ostream *ppStream = openFile(path.toString(), true);
     std::ostream *midStream = options.dumpStream("-fe");

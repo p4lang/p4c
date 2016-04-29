@@ -68,7 +68,7 @@ class TypeChecker : public Transform {
                                     const IR::Type* caseType) const;
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
     bool checkVirtualMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
-    
+
     // converts each type to a canonical pointer,
     // so we can check just pointer equality in the map
     const IR::Type* canonicalize(const IR::Type* type);

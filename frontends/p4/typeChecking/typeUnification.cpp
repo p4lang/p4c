@@ -152,12 +152,12 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
     } else if (dest->is<IR::Type_MethodBase>()) {
         auto destt = dest->to<IR::Type_MethodBase>();
         auto srct = src->to<IR::Type_MethodCall>();
-        if (srct != nullptr) 
+        if (srct != nullptr)
             return unifyFunctions(errorPosition, destt, srct, reportErrors);
         auto srcf = src->to<IR::Type_MethodBase>();
         if (srcf != nullptr)
             return unifyFunctions(errorPosition, destt, srcf, reportErrors);
-        
+
         if (reportErrors)
             ::error("%1%: Cannot unify non-function type %2% to function type %3%",
                     errorPosition, src->toString(), dest->toString());

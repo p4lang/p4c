@@ -21,7 +21,7 @@ namespace EBPF {
 const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* program) {
     if (program == nullptr)
         return program;
-    
+
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
     auto evaluator0 = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
@@ -91,7 +91,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
     program = program->apply(midEnd);
     if (::errorCount() > 0)
         return nullptr;
-    
+
     std::ostream *midendStream = options.dumpStream("-midend");
     P4::ToP4 top4(midendStream, options.file);
     program->apply(top4);

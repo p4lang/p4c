@@ -32,8 +32,7 @@ const IR::Type_Bits* Type_Bits::get(int width, bool isSigned) {
         if (signedTypes == nullptr)
             signedTypes = new std::map<int, const IR::Type_Bits*>();
         map = signedTypes;
-    }
-    else {
+    } else {
         if (unsignedTypes == nullptr)
             unsignedTypes = new std::map<int, const IR::Type_Bits*>();
         map = unsignedTypes;

@@ -210,7 +210,7 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
 template<typename T, class... Args>
 auto bug_helper(boost::format& f, std::string message, std::string position,
                 std::string tail, const T *t, Args... args) ->
-    typename std::enable_if<! std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
+    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
 
 template<class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
@@ -244,7 +244,8 @@ std::string bug_helper(boost::format& f, std::string message, std::string positi
 template<typename T, class... Args>
 auto bug_helper(boost::format& f, std::string message, std::string position,
                 std::string tail, const T *t, Args... args) ->
-        typename std::enable_if<! std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
+        typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value,
+                                std::string>::type {
     std::stringstream str;
     str << t;
     return bug_helper(f % str.str(), message, position, tail, std::forward<Args>(args)...);

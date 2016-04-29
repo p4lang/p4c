@@ -58,7 +58,7 @@ const IR::Node* RemoveReturns::preorder(IR::P4Control* control) {
         prune();
         return control;
     }
-    
+
     cstring base = removeReturns ? "hasReturned" : "hasExited";
     cstring var = refMap->newName(base);
     returnVar = IR::ID(var);

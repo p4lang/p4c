@@ -28,13 +28,13 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
     (void)program->apply(*evaluator);
     if (::errorCount() > 0)
         return nullptr;
-    
+
     // Inlining is simpler for P4 v1.0/1.1 programs, so we have a
     // specialized code path, which also generates slighly nicer
-    // human-readable results.  
+    // human-readable results.
     P4::InlineWorkList controlsToInline;
     P4::ActionsInlineList actionsToInline;
-    
+
     PassManager midend = {
         new P4::DiscoverInlining(&controlsToInline, evaluator->getBlockMap()),
         new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap), isv1),
@@ -135,13 +135,13 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
 
 P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
-    if (isv1) 
+    if (isv1)
         program = processV1(options, program);
-    else 
+    else
         program = processV1_2(options, program);
     if (program == nullptr)
         return nullptr;
-    
+
     std::ostream *midendStream = options.dumpStream("-midend");
     // BMv2-specific passes
     P4::ReferenceMap refMap;
@@ -161,13 +161,13 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::ConstantFolding(&refMap, &typeMap),
         evaluator
     };
-    
+
     backend.setName("Backend");
     backend.setStopOnError(true);
     program = program->apply(backend);
     if (::errorCount() > 0)
         return nullptr;
-    
+
     auto blockMap = evaluator->getBlockMap();
     return blockMap;
 }

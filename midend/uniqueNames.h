@@ -42,6 +42,7 @@ class UniqueNames : public PassManager {
 class FindSymbols : public Inspector {
     ReferenceMap *refMap;
     RenameMap    *renameMap;
+
  public:
     bool isTopLevel() const {
         return findContext<IR::P4Parser>() == nullptr &&

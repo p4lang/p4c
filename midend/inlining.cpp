@@ -196,7 +196,7 @@ static cstring nameFromAnnotation(const IR::Annotations* annotations,
 // }
 // After inlining we will get:
 // control d() {
-//   @name("cinst.t") table t() { ... }  
+//   @name("cinst.t") table t() { ... }
 //   apply { t.apply(); }
 // }
 // So the externally visible name for the table is "cinst.t"

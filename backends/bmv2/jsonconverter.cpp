@@ -1451,7 +1451,7 @@ void JsonConverter::addLocals(Util::JsonArray* headerTypes, Util::JsonArray* ins
         auto type = typeMap->getType(v, true);
         if (type->is<IR::Type_StructLike>()) {
             auto st = type->to<IR::Type_StructLike>();
-            
+
             if (!headerTypesCreated.count(st->name)) {
                 auto tjson = typeToJson(st);
                 headerTypes->append(tjson);
@@ -1511,7 +1511,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
         ::error("No output to generate");
         return;
     }
-    
+
     if (package->type->name != v1model.sw.name) {
         ::error("This back-end requires the program to be compiled for the %1% model",
                 v1model.sw.name);
@@ -1557,7 +1557,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     }
     addTypesAndInstances(mt, true, headerTypes, headers, headerTypesCreated);
     addLocals(headerTypes, headers, headerStacks, headerTypesCreated);
-    
+
     auto prsrs = mkArrayField(&toplevel, "parsers");
     auto parserJson = toJson(parser);
     prsrs->append(parserJson);

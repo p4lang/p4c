@@ -12,7 +12,7 @@ namespace P4 {
 //   apply { x(e); }
 // }
 // turns into
-// control c() { 
+// control c() {
 //   action x(in bit b) { ... }
 //   table _tmp() {
 //     actions = { x; }
@@ -25,7 +25,7 @@ class MoveActionsToTables : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
     IR::Vector<IR::P4Table> tables;  // inserted tables
-    
+
  public:
     MoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap)
             : refMap(refMap), typeMap(typeMap)
@@ -57,10 +57,11 @@ class SynthesizeActions : public Transform {
     IR::Vector<IR::P4Action> actions;  // inserted actions
     bool moveEmits = false;
     bool changes = false;
+
  public:
     // If true the statement must be moved to an action
     bool mustMove(const IR::MethodCallStatement* statement);
-    
+
     // If moveEmits is true, move emit statements to actions, else
     // leave them in control blocks.
     SynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap, bool moveEmits = false) :
@@ -78,6 +79,7 @@ class SynthesizeActions : public Transform {
     const IR::Node* preorder(IR::BlockStatement* statement) override;
     const IR::Node* preorder(IR::AssignmentStatement* statement) override;
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
+
  protected:
     const IR::Statement* createAction(const IR::Statement* body);
 };

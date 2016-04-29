@@ -30,7 +30,7 @@ const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statemen
     auto defprop = new IR::TableProperty(
         Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName),
         IR::Annotations::empty, defactval, true);
-    
+
     // List of table properties
     auto nm = new IR::NameMap<IR::TableProperty, ordered_map>();
     nm->addUnique(prop->name, prop);
@@ -76,7 +76,7 @@ bool SynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
         auto em = mi->to<ExternMethod>();
         auto corelib = P4::P4CoreLibrary::instance;
         if (em->type->name.name == corelib.packetOut.name &&
-            em->method->name.name == corelib.packetOut.emit.name) 
+            em->method->name.name == corelib.packetOut.emit.name)
             return false;
     }
     return true;
@@ -112,7 +112,7 @@ const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
             // This may modify 'changes'
             visit(c);
         }
-        
+
         if (!actbody->empty()) {
             auto block = new IR::BlockStatement(Util::SourceInfo(), actbody);
             auto action = createAction(block);

@@ -29,7 +29,7 @@ int main(int argc, char *const argv[]) {
     auto program = parseP4File(options);
     if (program == nullptr || ::errorCount() > 0)
         return 1;
-    FrontEnd frontend; 
+    FrontEnd frontend;
     program = frontend.run(options, program);
     if (program == nullptr || ::errorCount() > 0)
         return 1;

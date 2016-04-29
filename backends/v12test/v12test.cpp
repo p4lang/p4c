@@ -20,8 +20,10 @@ class PrintDump {
     V12Test::V12TestOptions& options;
     std::regex* regex = nullptr;
     bool verbose;
+
  public:
-    PrintDump(V12Test::V12TestOptions& options) : options(options), verbose(options.verbosity > 0) {
+    explicit PrintDump(V12Test::V12TestOptions& options) :
+            options(options), verbose(options.verbosity > 0) {
         if (options.top4 != nullptr) {
             cstring r = cstring(".*") + options.top4 + ".*";
             regex = new std::regex(r.c_str());

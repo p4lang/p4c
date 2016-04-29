@@ -28,7 +28,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     // TODO: remove table parameters if possible
     // TODO: remove action parameters if possible
     // TODO: remove expressions in table key
-    
+
     PassManager simplify = {
         // Give each local declaration a unique internal name
         new P4::UniqueNames(isv1),

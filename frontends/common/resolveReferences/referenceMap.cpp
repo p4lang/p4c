@@ -44,7 +44,7 @@ cstring ReferenceMap::newName(cstring base) {
     while (len > 0 && strchr(digits, s[len-1])) len--;
     if (len > 0 && base[len - 1] == '_')
         base = base.substr(0, len - 1);
-    
+
     cstring name = cstring::make_unique(usedNames, base, '_');
     usedNames.insert(name);
     return name;
