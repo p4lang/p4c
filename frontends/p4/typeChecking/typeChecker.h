@@ -19,7 +19,7 @@ namespace P4 {
 // with readOnly = true, it will assert that the program is not changed.
 // It is expected that once a program has been type-checked and all casts have
 // been inserted it will not need to change ever again during type-checking.
-class TypeChecker : public Transform {
+class TypeInference : public Transform {
     // Input: reference map
     ReferenceMap* refMap;
     // Output: type map
@@ -39,7 +39,7 @@ class TypeChecker : public Transform {
     // If readOnly=true it will assert that it behaves like
     // an Inspector.
     // clearMap=true will clear the typeMap on start.
-    TypeChecker(ReferenceMap* refMap, TypeMap* typeMap,
+    TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
                 bool clearMap = true, bool readOnly = true);
 
  protected:
@@ -186,6 +186,13 @@ class TypeChecker : public Transform {
 
     Visitor::profile_t init_apply(const IR::Node* node) override;
     void end_apply(const IR::Node* Node) override;
+};
+
+// Performs together reference resolution and type checking.
+// Does not mutate the program.
+class TypeChecking : public PassManager {
+ public:
+    TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap, bool isv1);
 };
 
 }  // namespace P4

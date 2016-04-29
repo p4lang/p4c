@@ -38,19 +38,11 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
     PassManager midend = {
         new P4::DiscoverInlining(&controlsToInline, evaluator->getBlockMap()),
         new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap), isv1),
-        new PassRepeated {
-            // remove useless callees
-            new P4::ResolveReferences(&refMap, isv1),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        },
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new SimpleActionsInliner(&refMap), isv1),
-        new PassRepeated {
-            new P4::ResolveReferences(&refMap, isv1),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        }
+        new P4::RemoveAllUnusedDeclarations(isv1),
     };
     midend.setName("Mid end");
     midend.setStopOnError(true);
@@ -74,8 +66,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         new P4::RemoveReturns(&refMap, true),
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::RemoveUnusedDeclarations(&refMap),
+        new P4::RemoveAllUnusedDeclarations(isv1),
         evaluator,
     };
 
@@ -95,32 +86,21 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
     PassManager midEnd = {
         new P4::DiscoverInlining(&toInline, blockMap),
         new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
-        new PassRepeated {
-            // remove useless callees
-            new P4::ResolveReferences(&refMap, isv1),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        },
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
-        new PassRepeated {
-            new P4::ResolveReferences(&refMap, isv1),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        },
+        new P4::RemoveAllUnusedDeclarations(isv1),
         new P4::SimplifyControlFlow(),
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
         new P4::MoveDeclarations(),
         // Create actions for statements that can't be done in control blocks.
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SynthesizeActions(&refMap, &typeMap),
         // Move all stand-alone actions to custom tables
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::MoveActionsToTables(&refMap, &typeMap),
     };
 
@@ -148,16 +128,13 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     P4::TypeMap typeMap;
     auto evaluator = new P4::EvaluatorPass(isv1);
     PassManager backend = {
-        new P4::ToP4(midendStream, options.file),
+        new P4::ToP4(midendStream, false, options.file),
         new P4::SimplifyControlFlow(),
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new RemoveLeftSlices(&typeMap),
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new LowerExpressions(&typeMap),
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         evaluator
     };

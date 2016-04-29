@@ -60,12 +60,8 @@ class SourceCodeBuilder {
         va_end(ap);
         append(str);
     }
-    void append(unsigned u) {
-        appendFormat("%d", u);
-    }
-    void append(int u) {
-        appendFormat("%d", u);
-    }
+    void append(unsigned u) { appendFormat("%d", u); }
+    void append(int u) { appendFormat("%d", u); }
 
     void endOfStatement(bool addNl = false) {
         append(";");
@@ -91,9 +87,10 @@ class SourceCodeBuilder {
             newline();
     }
 
-    std::string toString() const {
-        return buffer.str();
-    }
+    std::string toString() const { return buffer.str(); }
+    void commentStart() { append("/* "); }
+    void commentEnd() { append(" */"); }
+    bool lastIsSpace() const { return endsInSpace; }
 };
 }  // namespace Util
 

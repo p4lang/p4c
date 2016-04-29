@@ -11,6 +11,7 @@ namespace P4 {
 class ToP4 : public Inspector {
     int expressionPrecedence;  // precedence of current IR::Operation
     bool isDeclaration;  // current type is a declaration
+    bool showIR;  // if true dump IR as comments
 
     struct VecPrint {
         cstring separator;
@@ -52,6 +53,8 @@ class ToP4 : public Inspector {
         listTerminators.pop_back();
     }
     bool isSystemFile(cstring file);
+    // dump node IR tree up to depth - in the form of a comment
+    void dump(unsigned depth, const IR::Node* node = nullptr);
 
  public:
     // Output is constructed here
@@ -62,16 +65,18 @@ class ToP4 : public Inspector {
     // emitted.
     cstring mainFile;
 
-    explicit ToP4(Util::SourceCodeBuilder& builder, cstring mainFile = nullptr) :
+    ToP4(Util::SourceCodeBuilder& builder, bool showIR, cstring mainFile = nullptr) :
             expressionPrecedence(DBPrint::Prec_Low),
             isDeclaration(true),
+            showIR(showIR),
             builder(builder),
             outStream(nullptr),
             mainFile(mainFile)
     { visitDagOnce = false; }
-    explicit ToP4(std::ostream* outStream, cstring mainFile = nullptr) :
+    ToP4(std::ostream* outStream, bool showIR, cstring mainFile = nullptr) :
             expressionPrecedence(DBPrint::Prec_Low),
             isDeclaration(true),
+            showIR(showIR),
             builder(* new Util::SourceCodeBuilder()),
             outStream(outStream),
             mainFile(mainFile)

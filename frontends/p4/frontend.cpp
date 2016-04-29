@@ -36,7 +36,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
     P4::TypeMap       typeMap1, typeMap2, typeMap3;
 
     PassManager passes = {
-        new P4::ToP4(ppStream, options.file),
+        new P4::ToP4(ppStream, false, options.file),
         // Simple checks on parsed program
         new P4::ValidateParsedProgram(p4v10),
         // Synthesize some built-in constructs
@@ -48,22 +48,17 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
         new P4::ResolveReferences(&refMap, p4v10),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
-        new P4::TypeChecker(&refMap, &typeMap1, true, false),
+        new P4::TypeInference(&refMap, &typeMap1, true, false),
         // Another round of constant folding, using type information.
         new P4::SimplifyControlFlow(),
         new P4::ResolveReferences(&refMap, p4v10),
         new P4::ConstantFolding(&refMap, &typeMap1),
         new P4::StrengthReduction(),
-
         // Print program in the middle
-        new P4::ToP4(midStream, options.file),
-        new PassRepeated{
-            // Remove unused declarations.
-            new P4::ResolveReferences(&refMap, p4v10),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        },
+        new P4::ToP4(midStream, false, options.file),
+        new P4::RemoveAllUnusedDeclarations(p4v10),
         // Print the program before the end.
-        new P4::ToP4(endStream, options.file),
+        new P4::ToP4(endStream, false, options.file),
     };
 
     passes.setName("FrontEnd");

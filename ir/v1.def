@@ -374,7 +374,6 @@ class ActionFunction {
 #noconstructor
 #emit
     ActionFunction() = default;
-    ActionFunction(const P4Action *, const Vector<Expression> *);
     const ActionArg     *arg(cstring n) const {
         for (auto a : args)
             if (a->name == n)
@@ -428,8 +427,7 @@ class V1Table {
     inline TableProperties      properties;  // non-standard properties
 #noconstructor
 #emit
-    V1Table() {}
-    V1Table(const P4Table *);
+    V1Table() = default;
 #end
     toString { return node_type_name() + " " + name; }
 }

@@ -2,7 +2,7 @@
 #define _P4_UNUSEDDECLARATIONS_H_
 
 #include "ir/ir.h"
-#include "../common/resolveReferences/referenceMap.h"
+#include "../common/resolveReferences/resolveReferences.h"
 
 namespace P4 {
 
@@ -43,6 +43,21 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* preorder(IR::Parameter* param) override { return param; }  // never dead
     const IR::Node* preorder(IR::Declaration* decl) override { return process(decl); }
     const IR::Node* preorder(IR::Type_Declaration* decl) override { return process(decl); }
+};
+
+// Iterates RemoveUnusedDeclarations until convergence.
+class RemoveAllUnusedDeclarations : public PassManager {
+    ReferenceMap *refMap;
+ public:
+    RemoveAllUnusedDeclarations(bool isv1) {
+        refMap = new P4::ReferenceMap();
+        passes.emplace_back(
+            new PassRepeated {
+                new P4::ResolveReferences(refMap, isv1),
+                new P4::RemoveUnusedDeclarations(refMap)
+             });
+        setName("RemoveAllUnusedDeclarations");
+    }
 };
 
 }  // namespace P4

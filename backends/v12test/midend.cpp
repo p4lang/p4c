@@ -20,7 +20,7 @@ namespace V12Test {
 
 P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
-    auto evaluator0 = new P4::EvaluatorPass(isv1);
+    auto evaluator = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
 
     // TODO: duplicate actions that are used by multiple tables
@@ -40,9 +40,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::RemoveReturns(&refMap, true),
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::RemoveUnusedDeclarations(&refMap),
-        evaluator0,
+        new P4::RemoveAllUnusedDeclarations(isv1),
+        evaluator,
     };
 
     simplify.setName("Simplify");
@@ -52,7 +51,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
-    auto blockMap = evaluator0->getBlockMap();
+    auto blockMap = evaluator->getBlockMap();
     if (blockMap->getMain() == nullptr)
         // nothing further to do
         return nullptr;
@@ -68,39 +67,28 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     PassManager midEnd = {
         new P4::DiscoverInlining(&toInline, blockMap),
         new P4::InlineDriver(&toInline, inliner, isv1),
-        new PassRepeated {
-            // remove useless callees
-            new P4::ResolveReferences(&refMap, isv1),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        },
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         actInl,
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
-        new PassRepeated {
-            new P4::ResolveReferences(&refMap, isv1),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        },
+        new P4::RemoveAllUnusedDeclarations(isv1),
         // TODO: inlining introduces lots of copies,
         // so perhaps a copy-propagation step would be useful
         new P4::SimplifyControlFlow(),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap, false),  // remove exits
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(),
         // Create actions for statements that can't be done in control blocks.
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SynthesizeActions(&refMap, &typeMap),
         // Move all stand-alone action invocations to custom tables
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::MoveActionsToTables(&refMap, &typeMap),
-        evaluator0
+        evaluator
     };
     midEnd.setName("MidEnd");
     midEnd.setStopOnError(true);
@@ -111,10 +99,10 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         return nullptr;
 
     std::ostream *midendStream = options.dumpStream("-midend");
-    P4::ToP4 top4(midendStream, options.file);
+    P4::ToP4 top4(midendStream, false, options.file);
     program->apply(top4);
 
-    blockMap = evaluator0->getBlockMap();
+    blockMap = evaluator->getBlockMap();
     return blockMap;
 }
 

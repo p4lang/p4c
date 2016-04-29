@@ -25,6 +25,8 @@ class PassManager : virtual public Visitor {
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
     void setStopOnError(bool stop) { stop_on_error = stop; }
     void addDebugHook(DebugHook h) { debugHooks.push_back(h); }
+    const char* name() const override
+    { return managerName != nullptr ? managerName : Visitor::name(); }
 };
 
 // Repeat a pass until convergence (or up to a fixed number of repeats)

@@ -67,7 +67,7 @@ class Visitor {
     virtual Visitor &flow_clone() { return *this; }
     virtual void flow_merge(Visitor &) { }
 
-    virtual const char *name() { return typeid(*this).name(); }
+    virtual const char *name() const { return typeid(*this).name(); }
     void print_context() const;  // for debugging; can be called from debugger
 
     // Context access/search functions.  getContext returns the context

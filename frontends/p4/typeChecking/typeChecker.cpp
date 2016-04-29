@@ -3,8 +3,15 @@
 #include "ir/substitution.h"
 #include "typeConstraints.h"
 #include "ir/dump.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace P4 {
+
+TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+    passes.emplace_back(new P4::ResolveReferences(refMap, isv1));
+    passes.emplace_back(new P4::TypeInference(refMap, typeMap, true, true));
+    setName("TypeAnalysis");
+}
 
 // Used to set the type of Constants after type inference
 class ConstantTypeSubstitution : public Transform {
@@ -39,7 +46,7 @@ class ConstantTypeSubstitution : public Transform {
     { return expr->apply(*this)->to<IR::Expression>(); }
 };
 
-TypeChecker::TypeChecker(ReferenceMap* refMap, TypeMap* typeMap, bool clearMap, bool readOnly) :
+TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool clearMap, bool readOnly) :
         refMap(refMap), typeMap(typeMap), clearMap(clearMap), readOnly(readOnly),
         initialNode(nullptr) {
     CHECK_NULL(typeMap);
@@ -47,7 +54,7 @@ TypeChecker::TypeChecker(ReferenceMap* refMap, TypeMap* typeMap, bool clearMap, 
     visitDagOnce = false;  // the done() method will take care of this
 }
 
-Visitor::profile_t TypeChecker::init_apply(const IR::Node* node) {
+Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
     LOG2("Reference map for type checker:" << std::endl << refMap);
     initialNode = node;
     if (clearMap)
@@ -55,19 +62,19 @@ Visitor::profile_t TypeChecker::init_apply(const IR::Node* node) {
     return Transform::init_apply(node);
 }
 
-void TypeChecker::end_apply(const IR::Node* node) {
+void TypeInference::end_apply(const IR::Node* node) {
     if (readOnly && !(*node == *initialNode))
         BUG("%1%: typechecker mutated node", node);
 }
 
-bool TypeChecker::done() const {
+bool TypeInference::done() const {
     auto orig = getOriginal();
     if (typeMap->contains(orig))
         return true;
     return false;
 }
 
-const IR::Type* TypeChecker::getType(const IR::Node* element) const {
+const IR::Type* TypeInference::getType(const IR::Node* element) const {
     const IR::Type* result = typeMap->getType(element);
     if (result == nullptr) {
         ::error("Could not find type of %1%", element);
@@ -76,14 +83,14 @@ const IR::Type* TypeChecker::getType(const IR::Node* element) const {
     return result;
 }
 
-void TypeChecker::setType(const IR::Node* element, const IR::Type* type) {
+void TypeInference::setType(const IR::Node* element, const IR::Type* type) {
     typeMap->setType(element, type);
     // mark each canonical type as pointing to itself.
     if (!typeMap->contains(type))
         typeMap->setType(type, type);
 }
 
-IR::TypeVariableSubstitution* TypeChecker::unify(const IR::Node* errorPosition,
+IR::TypeVariableSubstitution* TypeInference::unify(const IR::Node* errorPosition,
                                                  const IR::Type* destType,
                                                  const IR::Type* srcType,
                                                  bool reportErrors) const {
@@ -98,7 +105,7 @@ IR::TypeVariableSubstitution* TypeChecker::unify(const IR::Node* errorPosition,
 }
 
 const IR::NameMap<IR::StructField, ordered_map>*
-TypeChecker::canonicalizeFields(const IR::Type_StructLike* type) {
+TypeInference::canonicalizeFields(const IR::Type_StructLike* type) {
     bool changes = false;
     auto fields = new IR::NameMap<IR::StructField, ordered_map>();
     for (auto field : *type->getEnumerator()) {
@@ -114,7 +121,7 @@ TypeChecker::canonicalizeFields(const IR::Type_StructLike* type) {
         return &type->fields;
 }
 
-const IR::ParameterList* TypeChecker::canonicalize(const IR::ParameterList* params) {
+const IR::ParameterList* TypeInference::canonicalize(const IR::ParameterList* params) {
     if (params == nullptr)
         return params;
 
@@ -135,7 +142,7 @@ const IR::ParameterList* TypeChecker::canonicalize(const IR::ParameterList* para
         return params;
 }
 
-const IR::TypeParameters* TypeChecker::canonicalize(const IR::TypeParameters* params) {
+const IR::TypeParameters* TypeInference::canonicalize(const IR::TypeParameters* params) {
     auto copy = params->clone();
     for (auto &p : Values(copy->parameters))
         p = canonicalize(p)->to<IR::Type_Var>();
@@ -148,7 +155,7 @@ const IR::TypeParameters* TypeChecker::canonicalize(const IR::TypeParameters* pa
 // This function does not return nullptr,
 // but it may return the wrong type if typechecking fails.
 // This function could probably be rewritten as a visitor...
-const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
+const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     CHECK_NULL(type);
     if (typeMap->contains(type))
         return typeMap->getType(type, true);
@@ -329,7 +336,7 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
             type->srcInfo, baseCanon, args, specialized);
         // learn the types of all components of the specialized type
         LOG1("Scanning the specialized type");
-        TypeChecker tc(refMap, typeMap, false, true);
+        TypeInference tc(refMap, typeMap, false, true);
         (void)result->apply(tc);
         return result;
     }
@@ -343,7 +350,7 @@ const IR::Type* TypeChecker::canonicalize(const IR::Type* type) {
 // This method is here to avoid visiting the Expression::type field;
 // this field is not used by the P4 v1.2 front-end, but may be populated
 // by the P4 v1.0 front-end.
-const IR::Node* TypeChecker::preorder(IR::Type* type) {
+const IR::Node* TypeInference::preorder(IR::Type* type) {
     auto ctx = getContext();
     if (ctx == nullptr)
         // This happens when recursively calling the type checker on a new type object
@@ -366,7 +373,7 @@ const IR::Node* TypeChecker::preorder(IR::Type* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Declaration_Errors* decl) {
+const IR::Node* TypeInference::postorder(IR::Declaration_Errors* decl) {
     if (done())
         return decl;
     for (auto id : *decl->getEnumerator())
@@ -374,7 +381,7 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_Errors* decl) {
     return decl;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Declaration_MatchKind* decl) {
+const IR::Node* TypeInference::postorder(IR::Declaration_MatchKind* decl) {
     if (done())
         return decl;
     for (auto id : *decl->getEnumerator())
@@ -382,7 +389,7 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_MatchKind* decl) {
     return decl;
 }
 
-const IR::Node* TypeChecker::postorder(IR::P4Control* cont) {
+const IR::Node* TypeInference::postorder(IR::P4Control* cont) {
     if (done())
         return cont;
 
@@ -392,7 +399,7 @@ const IR::Node* TypeChecker::postorder(IR::P4Control* cont) {
     return cont;
 }
 
-const IR::Node* TypeChecker::postorder(IR::P4Parser* cont) {
+const IR::Node* TypeInference::postorder(IR::P4Parser* cont) {
     if (done())
         return cont;
 
@@ -402,7 +409,7 @@ const IR::Node* TypeChecker::postorder(IR::P4Parser* cont) {
     return cont;
 }
 
-const IR::Node* TypeChecker::postorder(IR::P4Table* cont) {
+const IR::Node* TypeInference::postorder(IR::P4Table* cont) {
     if (done())
         return cont;
     auto type = new IR::Type_Table(Util::SourceInfo(), cont);
@@ -411,7 +418,7 @@ const IR::Node* TypeChecker::postorder(IR::P4Table* cont) {
     return cont;
 }
 
-const IR::Node* TypeChecker::postorder(IR::P4Action* cont) {
+const IR::Node* TypeInference::postorder(IR::P4Action* cont) {
     if (done())
         return cont;
     auto pl = canonicalize(cont->parameters);
@@ -422,7 +429,7 @@ const IR::Node* TypeChecker::postorder(IR::P4Action* cont) {
     return cont;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Declaration_Variable* decl) {
+const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
     if (done())
         return decl;
     auto type = getType(decl->type);
@@ -452,7 +459,7 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_Variable* decl) {
     return decl;
 }
 
-bool TypeChecker::canCastBetween(const IR::Type* dest, const IR::Type* src) const {
+bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) const {
     if (src == dest)
         return true;
     if (src->is<IR::Type_Bits>()) {
@@ -476,7 +483,7 @@ bool TypeChecker::canCastBetween(const IR::Type* dest, const IR::Type* src) cons
 }
 
 const IR::Expression*
-TypeChecker::assignment(const IR::Node* errorPosition, const IR::Type* destType,
+TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destType,
                         const IR::Expression* sourceExpression) {
     if (destType->is<IR::Type_Unknown>())
         BUG("Unknown destination type");
@@ -507,7 +514,7 @@ TypeChecker::assignment(const IR::Node* errorPosition, const IR::Type* destType,
     return newInit;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Declaration_Constant* decl) {
+const IR::Node* TypeInference::postorder(IR::Declaration_Constant* decl) {
     if (done())
         return decl;
     auto type = getType(decl->type);
@@ -530,7 +537,7 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_Constant* decl) {
 }
 
 const IR::Vector<IR::Expression> *
-TypeChecker::checkExternConstructor(const IR::Node* errorPosition,
+TypeInference::checkExternConstructor(const IR::Node* errorPosition,
                                     const IR::Type_Extern* ext,
                                     const IR::Vector<IR::Expression> *arguments) {
     auto tp = ext->getTypeParameters();
@@ -583,7 +590,7 @@ TypeChecker::checkExternConstructor(const IR::Node* errorPosition,
 }
 
 // Return true on success
-bool TypeChecker::checkVirtualMethods(const IR::Declaration_Instance* inst,
+bool TypeInference::checkVirtualMethods(const IR::Declaration_Instance* inst,
                                       const IR::Type_Extern* type) {
     // Make a list of the virtual methods
     IR::NameMap<IR::Method, ordered_map> virt;
@@ -632,7 +639,7 @@ bool TypeChecker::checkVirtualMethods(const IR::Declaration_Instance* inst,
 }
 
 
-const IR::Node* TypeChecker::postorder(IR::Declaration_Instance* decl) {
+const IR::Node* TypeInference::postorder(IR::Declaration_Instance* decl) {
     if (done())
         return decl;
     auto type = canonicalize(decl->type);
@@ -669,7 +676,7 @@ const IR::Node* TypeChecker::postorder(IR::Declaration_Instance* decl) {
 }
 
 const IR::Type*
-TypeChecker::containerInstantiation(
+TypeInference::containerInstantiation(
     const IR::Node* node,  // can be Declaration_Instance or ConstructorCallExpression
     const IR::Vector<IR::Expression>* constructorArguments,
     const IR::IContainer* container) {
@@ -704,7 +711,7 @@ TypeChecker::containerInstantiation(
     return returnType;
 }
 
-const IR::Node* TypeChecker::preorder(IR::Function* function) {
+const IR::Node* TypeInference::preorder(IR::Function* function) {
     if (done())
         return function;
     visit(function->type);
@@ -718,7 +725,7 @@ const IR::Node* TypeChecker::preorder(IR::Function* function) {
     return function;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Method* method) {
+const IR::Node* TypeInference::postorder(IR::Method* method) {
     if (done())
         return method;
     auto type = getType(method->type);
@@ -731,12 +738,12 @@ const IR::Node* TypeChecker::postorder(IR::Method* method) {
 
 //////////////////////////////////////////////  Types
 
-const IR::Node* TypeChecker::postorder(IR::Type_InfInt* type) {
+const IR::Node* TypeInference::postorder(IR::Type_InfInt* type) {
     setType(getOriginal(), typeMap->canonicalInfInt());
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_ArchBlock* decl) {
+const IR::Node* TypeInference::postorder(IR::Type_ArchBlock* decl) {
     if (done())
         return decl;
     auto canon = canonicalize(getOriginal<IR::Type_ArchBlock>());
@@ -745,7 +752,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_ArchBlock* decl) {
     return decl;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Package* decl) {
+const IR::Node* TypeInference::postorder(IR::Type_Package* decl) {
     if (done())
         return decl;
     auto canon = canonicalize(getOriginal<IR::Type_Package>());
@@ -754,7 +761,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Package* decl) {
     return decl;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Specialized *type) {
+const IR::Node* TypeInference::postorder(IR::Type_Specialized *type) {
     if (done())
         return type;
     auto canon = canonicalize(type);
@@ -763,7 +770,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Specialized *type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_SpecializedCanonical *type) {
+const IR::Node* TypeInference::postorder(IR::Type_SpecializedCanonical *type) {
     // This is always canonical
     if (done())
         return type;
@@ -771,7 +778,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_SpecializedCanonical *type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Name* typeName) {
+const IR::Node* TypeInference::postorder(IR::Type_Name* typeName) {
     if (done())
         return typeName;
     const IR::Type* type;
@@ -793,7 +800,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Name* typeName) {
     return typeName;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_ActionEnum* type) {
+const IR::Node* TypeInference::postorder(IR::Type_ActionEnum* type) {
     if (done())
         return type;
     setType(getOriginal(), type);
@@ -801,7 +808,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_ActionEnum* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Enum* type) {
+const IR::Node* TypeInference::postorder(IR::Type_Enum* type) {
     if (done())
         return type;
     for (auto e : *type->getEnumerator())
@@ -811,7 +818,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Enum* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Var* typeVar) {
+const IR::Node* TypeInference::postorder(IR::Type_Var* typeVar) {
     if (done())
         return typeVar;
 
@@ -825,7 +832,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Var* typeVar) {
     return typeVar;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Tuple* type) {
+const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
     if (done())
         return type;
     auto canon = canonicalize(getOriginal<IR::Type_Tuple>());
@@ -834,7 +841,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Tuple* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Extern* type) {
+const IR::Node* TypeInference::postorder(IR::Type_Extern* type) {
     if (done())
         return type;
 
@@ -859,7 +866,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Extern* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Method* type) {
+const IR::Node* TypeInference::postorder(IR::Type_Method* type) {
     if (done())
         return type;
 
@@ -869,7 +876,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Method* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Action* type) {
+const IR::Node* TypeInference::postorder(IR::Type_Action* type) {
     if (done())
         return type;
 
@@ -879,7 +886,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Action* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Base* type) {
+const IR::Node* TypeInference::postorder(IR::Type_Base* type) {
     if (done())
         return type;
     auto canon = canonicalize(getOriginal<IR::Type_Base>());
@@ -888,7 +895,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Base* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Typedef* tdecl) {
+const IR::Node* TypeInference::postorder(IR::Type_Typedef* tdecl) {
     if (done())
         return tdecl;
     auto type = getType(tdecl->type);
@@ -899,7 +906,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Typedef* tdecl) {
     return tdecl;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Stack* type) {
+const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
     if (done())
         return type;
     if (!type->sizeKnown())
@@ -919,7 +926,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Stack* type) {
     return type;
 }
 
-bool TypeChecker::validateFields(const IR::Type_StructLike* type,
+bool TypeInference::validateFields(const IR::Type_StructLike* type,
                                  std::function<bool(const IR::Type*)> checker) const {
     for (auto field : *type->getEnumerator()) {
         if (!checker(field->type)) {
@@ -930,7 +937,7 @@ bool TypeChecker::validateFields(const IR::Type_StructLike* type,
     return true;
 }
 
-const IR::Node* TypeChecker::postorder(IR::StructField* field) {
+const IR::Node* TypeInference::postorder(IR::StructField* field) {
     if (done())
         return field;
     auto canon = getType(field->type);
@@ -942,7 +949,7 @@ const IR::Node* TypeChecker::postorder(IR::StructField* field) {
     return field;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Header* type) {
+const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     if (done())
         return type;
 
@@ -956,7 +963,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Header* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Struct* type) {
+const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     if (done())
         return type;
 
@@ -974,7 +981,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Struct* type) {
     return type;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Type_Union *type) {
+const IR::Node* TypeInference::postorder(IR::Type_Union *type) {
     if (done())
         return type;
 
@@ -989,7 +996,7 @@ const IR::Node* TypeChecker::postorder(IR::Type_Union *type) {
 
 ////////////////////////////////////////////////// expressions
 
-const IR::Node* TypeChecker::postorder(IR::Parameter* param) {
+const IR::Node* TypeInference::postorder(IR::Parameter* param) {
     if (done())
         return param;
     const IR::Type* paramType = getType(param->type);
@@ -1010,7 +1017,7 @@ const IR::Node* TypeChecker::postorder(IR::Parameter* param) {
     return param;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Constant* expression) {
+const IR::Node* TypeInference::postorder(IR::Constant* expression) {
     if (done())
         return expression;
     auto type = getType(expression->type);
@@ -1021,7 +1028,7 @@ const IR::Node* TypeChecker::postorder(IR::Constant* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::BoolLiteral* expression) {
+const IR::Node* TypeInference::postorder(IR::BoolLiteral* expression) {
     if (done())
         return expression;
     setType(getOriginal(), IR::Type_Boolean::get());
@@ -1029,7 +1036,7 @@ const IR::Node* TypeChecker::postorder(IR::BoolLiteral* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Operation_Relation* expression) {
+const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     if (done())
         return expression;
     auto ltype = getType(expression->left);
@@ -1079,7 +1086,7 @@ const IR::Node* TypeChecker::postorder(IR::Operation_Relation* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Concat* expression) {
+const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     if (done())
         return expression;
     auto ltype = getType(expression->left);
@@ -1110,7 +1117,7 @@ const IR::Node* TypeChecker::postorder(IR::Concat* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::ListExpression* expression) {
+const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
     if (done())
         return expression;
     auto components = new IR::Vector<IR::Type>();
@@ -1129,7 +1136,7 @@ const IR::Node* TypeChecker::postorder(IR::ListExpression* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::ArrayIndex* expression) {
+const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
     if (done())
         return expression;
     auto ltype = getType(expression->left);
@@ -1181,7 +1188,7 @@ const IR::Node* TypeChecker::postorder(IR::ArrayIndex* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::binaryBool(const IR::Operation_Binary* expression) {
+const IR::Node* TypeInference::binaryBool(const IR::Operation_Binary* expression) {
     if (done())
         return expression;
     auto ltype = getType(expression->left);
@@ -1199,7 +1206,7 @@ const IR::Node* TypeChecker::binaryBool(const IR::Operation_Binary* expression) 
     return expression;
 }
 
-const IR::Node* TypeChecker::binaryArith(const IR::Operation_Binary* expression) {
+const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expression) {
     if (done())
         return expression;
     auto ltype = getType(expression->left);
@@ -1253,7 +1260,7 @@ const IR::Node* TypeChecker::binaryArith(const IR::Operation_Binary* expression)
     return expression;
 }
 
-const IR::Node* TypeChecker::unsBinaryArith(const IR::Operation_Binary* expression) {
+const IR::Node* TypeInference::unsBinaryArith(const IR::Operation_Binary* expression) {
     if (done())
         return expression;
 
@@ -1291,7 +1298,7 @@ const IR::Node* TypeChecker::unsBinaryArith(const IR::Operation_Binary* expressi
     return binaryArith(expression);
 }
 
-const IR::Node* TypeChecker::shift(const IR::Operation_Binary* expression) {
+const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
     if (done())
         return expression;
     auto ltype = getType(expression->left);
@@ -1333,7 +1340,7 @@ const IR::Node* TypeChecker::shift(const IR::Operation_Binary* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::bitwise(const IR::Operation_Binary* expression) {
+const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
     if (done())
         return expression;
     auto ltype = getType(expression->left);
@@ -1383,7 +1390,7 @@ const IR::Node* TypeChecker::bitwise(const IR::Operation_Binary* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::typeSet(const IR::Operation_Binary* expression) {
+const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
     if (done())
         return expression;
     auto ltype = getType(expression->left);
@@ -1433,7 +1440,7 @@ const IR::Node* TypeChecker::typeSet(const IR::Operation_Binary* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::LNot* expression) {
+const IR::Node* TypeInference::postorder(IR::LNot* expression) {
     if (done())
         return expression;
     auto type = getType(expression->expr);
@@ -1449,7 +1456,7 @@ const IR::Node* TypeChecker::postorder(IR::LNot* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Neg* expression) {
+const IR::Node* TypeInference::postorder(IR::Neg* expression) {
     if (done())
         return expression;
     auto type = getType(expression->expr);
@@ -1469,7 +1476,7 @@ const IR::Node* TypeChecker::postorder(IR::Neg* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Cmpl* expression) {
+const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
     if (done())
         return expression;
     auto type = getType(expression->expr);
@@ -1488,7 +1495,7 @@ const IR::Node* TypeChecker::postorder(IR::Cmpl* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Cast* expression) {
+const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (done())
         return expression;
     const IR::Type* sourceType = getType(expression->expr);
@@ -1513,7 +1520,7 @@ const IR::Node* TypeChecker::postorder(IR::Cast* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::PathExpression* expression) {
+const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (done())
         return expression;
     auto edecl = refMap->getDeclaration(expression->path, true);
@@ -1545,7 +1552,7 @@ const IR::Node* TypeChecker::postorder(IR::PathExpression* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Slice* expression) {
+const IR::Node* TypeInference::postorder(IR::Slice* expression) {
     if (done())
         return expression;
     const IR::Type* type = getType(expression->e0);
@@ -1607,7 +1614,7 @@ const IR::Node* TypeChecker::postorder(IR::Slice* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Mux* expression) {
+const IR::Node* TypeInference::postorder(IR::Mux* expression) {
     if (done())
         return expression;
     const IR::Type* firstType = getType(expression->e0);
@@ -1643,7 +1650,7 @@ const IR::Node* TypeChecker::postorder(IR::Mux* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::TypeNameExpression* expression) {
+const IR::Node* TypeInference::postorder(IR::TypeNameExpression* expression) {
     if (done())
         return expression;
     auto type = getType(expression->typeName);
@@ -1654,7 +1661,7 @@ const IR::Node* TypeChecker::postorder(IR::TypeNameExpression* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::Member* expression) {
+const IR::Node* TypeInference::postorder(IR::Member* expression) {
     if (done())
         return expression;
     auto type = getType(expression->expr);
@@ -1739,7 +1746,7 @@ const IR::Node* TypeChecker::postorder(IR::Member* expression) {
             auto methodType = type->to<IR::IApply>()->getApplyMethodType();
             methodType = canonicalize(methodType)->to<IR::Type_Method>();
             // sometimes this is a synthesized type, so we have to crawl it to understand it
-            TypeChecker learn(refMap, typeMap, false, true);
+            TypeInference learn(refMap, typeMap, false, true);
             (void)methodType->apply(learn);
 
             setType(getOriginal(), methodType);
@@ -1804,13 +1811,13 @@ const IR::Node* TypeChecker::postorder(IR::Member* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::preorder(IR::MethodCallExpression* expression) {
+const IR::Node* TypeInference::preorder(IR::MethodCallExpression* expression) {
     // enable method resolution based on number of arguments
     methodArguments.push_back(expression->arguments->size());
     return expression;
 }
 
-const IR::Type_Action* TypeChecker::actionCallType(const IR::Type_Action* action,
+const IR::Type_Action* TypeInference::actionCallType(const IR::Type_Action* action,
                                                    size_t removedArguments) const {
     auto params = new IR::NameMap<IR::Parameter, ordered_map>();
     size_t i = 0;
@@ -1825,7 +1832,7 @@ const IR::Type_Action* TypeChecker::actionCallType(const IR::Type_Action* action
     return result;
 }
 
-const IR::Node* TypeChecker::postorder(IR::MethodCallExpression* expression) {
+const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     if (done())
         return expression;
     methodArguments.pop_back();
@@ -1873,7 +1880,7 @@ const IR::Node* TypeChecker::postorder(IR::MethodCallExpression* expression) {
 
     // construct types for the specMethodType, use a new typeChecker
     // that uses the same tables!
-    TypeChecker helper(refMap, typeMap, false, true);
+    TypeInference helper(refMap, typeMap, false, true);
     (void)specMethodType->apply(helper);
 
     auto canon = getType(specMethodType);
@@ -1906,7 +1913,7 @@ const IR::Node* TypeChecker::postorder(IR::MethodCallExpression* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::ConstructorCallExpression* expression) {
+const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expression) {
     if (done())
         return expression;
 
@@ -1949,7 +1956,7 @@ const IR::Node* TypeChecker::postorder(IR::ConstructorCallExpression* expression
 }
 
 const IR::SelectCase*
-TypeChecker::matchCase(const IR::SelectExpression* select, const IR::Type_Tuple* selectType,
+TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tuple* selectType,
                        const IR::SelectCase* selectCase, const IR::Type* caseType) const {
     // The selectType is always a tuple
     // If the caseType is a set type, we unify the type of the set elements
@@ -1978,7 +1985,7 @@ TypeChecker::matchCase(const IR::SelectExpression* select, const IR::Type_Tuple*
     return selectCase;
 }
 
-const IR::Node* TypeChecker::postorder(IR::DefaultExpression* expression) {
+const IR::Node* TypeInference::postorder(IR::DefaultExpression* expression) {
     if (!done()) {
         setType(expression, IR::Type_Dontcare::get());
         setType(getOriginal(), IR::Type_Dontcare::get());
@@ -1986,7 +1993,7 @@ const IR::Node* TypeChecker::postorder(IR::DefaultExpression* expression) {
     return expression;
 }
 
-const IR::Node* TypeChecker::postorder(IR::SelectExpression* expression) {
+const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
     if (done())
         return expression;
     auto selectType = getType(expression->select);
@@ -2024,7 +2031,7 @@ const IR::Node* TypeChecker::postorder(IR::SelectExpression* expression) {
 
 ///////////////////////////////////////// Statements et al.
 
-const IR::Node* TypeChecker::postorder(IR::IfStatement* conditional) {
+const IR::Node* TypeInference::postorder(IR::IfStatement* conditional) {
     if (done())
         return conditional;
     auto type = getType(conditional->condition);
@@ -2036,7 +2043,7 @@ const IR::Node* TypeChecker::postorder(IR::IfStatement* conditional) {
     return conditional;
 }
 
-const IR::Node* TypeChecker::postorder(IR::SwitchStatement* stat) {
+const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
     if (done())
         return stat;
     auto type = getType(stat->expression);
@@ -2063,7 +2070,7 @@ const IR::Node* TypeChecker::postorder(IR::SwitchStatement* stat) {
     return stat;
 }
 
-const IR::Node* TypeChecker::postorder(IR::ReturnStatement* statement) {
+const IR::Node* TypeInference::postorder(IR::ReturnStatement* statement) {
     if (done())
         return statement;
     auto func = findContext<IR::Function>();
@@ -2099,7 +2106,7 @@ const IR::Node* TypeChecker::postorder(IR::ReturnStatement* statement) {
     return statement;
 }
 
-const IR::Node* TypeChecker::postorder(IR::AssignmentStatement* assign) {
+const IR::Node* TypeInference::postorder(IR::AssignmentStatement* assign) {
     if (done())
         return assign;
     auto ltype = getType(assign->left);
@@ -2118,21 +2125,21 @@ const IR::Node* TypeChecker::postorder(IR::AssignmentStatement* assign) {
     return assign;
 }
 
-const IR::Node* TypeChecker::postorder(IR::ActionListElement* elem) {
+const IR::Node* TypeInference::postorder(IR::ActionListElement* elem) {
     auto type = getType(elem->name);
     if (type != nullptr && !type->is<IR::Type_Action>())
         ::error("%1% is not an action", elem);
     return elem;
 }
 
-const IR::Node* TypeChecker::postorder(IR::SelectCase* sc) {
+const IR::Node* TypeInference::postorder(IR::SelectCase* sc) {
     auto type = getType(sc->state);
     if (type != nullptr && type != IR::Type_State::get())
         ::error("%1% must be state", sc);
     return sc;
 }
 
-const IR::Node* TypeChecker::postorder(IR::KeyElement* elem) {
+const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     auto ktype = getType(elem->expression);
     if (!ktype->is<IR::Type_Bits>() && !ktype->is<IR::Type_Enum>() &&
         !ktype->is<IR::Type_Error>() && !ktype->is<IR::Type_Boolean>())
@@ -2144,7 +2151,7 @@ const IR::Node* TypeChecker::postorder(IR::KeyElement* elem) {
     return elem;
 }
 
-const IR::Node* TypeChecker::postorder(IR::TableProperty* prop) {
+const IR::Node* TypeInference::postorder(IR::TableProperty* prop) {
     if (prop->name == IR::TableProperties::defaultActionPropertyName) {
         auto pv = prop->value->to<IR::ExpressionValue>();
         if (pv == nullptr) {

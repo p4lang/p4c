@@ -23,7 +23,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         return program;
 
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
-    auto evaluator0 = new P4::EvaluatorPass(isv1);
+    auto evaluator = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
 
     PassManager simplify = {
@@ -37,7 +37,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         new P4::MoveConstructors(isv1),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveUnusedDeclarations(&refMap),
-        evaluator0,
+        evaluator,
     };
 
     simplify.setName("Simplify");
@@ -45,7 +45,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
-    auto blockMap = evaluator0->getBlockMap();
+    auto blockMap = evaluator->getBlockMap();
     if (blockMap->getMain() == nullptr)
         // nothing further to do
         return nullptr;
@@ -61,29 +61,19 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
     PassManager midEnd = {
         new P4::DiscoverInlining(&toInline, blockMap),
         new P4::InlineDriver(&toInline, inliner, isv1),
-        new PassRepeated {
-            // remove useless callees
-            new P4::ResolveReferences(&refMap, isv1),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        },
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         actInl,
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
-        new PassRepeated {
-            new P4::ResolveReferences(&refMap, isv1),
-            new P4::RemoveUnusedDeclarations(&refMap),
-        },
+        new P4::RemoveAllUnusedDeclarations(isv1),
         new P4::SimplifyControlFlow(),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap, false),  // remove exits
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
         // Move all stand-alone action invocations to custom tables
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::TypeChecker(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::MoveActionsToTables(&refMap, &typeMap),
     };
     midEnd.setName("MidEnd");
@@ -93,7 +83,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         return nullptr;
 
     std::ostream *midendStream = options.dumpStream("-midend");
-    P4::ToP4 top4(midendStream, options.file);
+    P4::ToP4 top4(midendStream, false, options.file);
     program->apply(top4);
 
     return program;

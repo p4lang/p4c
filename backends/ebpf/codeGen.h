@@ -27,7 +27,6 @@ class CodeGenInspector : public Inspector {
 
     using Inspector::preorder;
 
-    // TODO: this class shares a lot of code with ToP4
     bool preorder(const IR::Constant* expression) override;
     bool preorder(const IR::Declaration_Variable* decl) override;
     bool preorder(const IR::BoolLiteral* b) override;

@@ -9,10 +9,8 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Action* action)  {
         auto m = getMoves();
         body->insert(body->end(), m->begin(), m->end());
         body->append(*action->body);
-        auto result = new IR::P4Action(action->srcInfo, action->name, action->annotations,
-                                       action->parameters, body);
+        action->body = body;
         pop();
-        return result;
     }
     return action;
 }
@@ -26,20 +24,18 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Control* control)  {
     }
     for (auto stat : control->stateful)
         decls->addUnique(stat.first, stat.second);
-    auto result = new IR::P4Control(control->srcInfo, control->name, control->type,
-                                    control->constructorParams, std::move(*decls), control->body);
-    return result;
+    control->stateful = std::move(*decls);
+    pop();
+    return control;
 }
 
 const IR::Node* MoveDeclarations::postorder(IR::P4Parser* parser)  {
     auto newStateful = new IR::Vector<IR::Declaration>();
     newStateful->append(*getMoves());
     newStateful->append(*parser->stateful);
-    auto result = new IR::P4Parser(parser->srcInfo, parser->name, parser->type,
-                                   parser->constructorParams, newStateful,
-                                   parser->states);
-    toMove.clear();
-    return result;
+    parser->stateful = newStateful;
+    pop();
+    return parser;
 }
 
 const IR::Node* MoveDeclarations::postorder(IR::Declaration_Variable* decl) {
