@@ -38,6 +38,32 @@ void IR::ActionFunction::dbprint(std::ostream &out) const {
   out << unindent << " }";
 }
 
+void IR::P4Action::dbprint(std::ostream &out) const {
+  out << "action " << name << "(";
+  const char *sep = "";
+  for (auto &arg : parameters->parameters) {
+    out << sep << arg.second->direction << ' ' << arg.second->type << ' ' << arg.first;
+    sep = ", "; }
+  out << ") {" << indent;
+  if (body)
+    for (auto &p : *body)
+      out << endl << p;
+  out << unindent << " }";
+}
+
+void IR::BlockStatement::dbprint(std::ostream &out) const {
+  out << "{" << indent;
+  if (components) {
+    bool first = true;
+    for (auto &p : *components) {
+      if (first) {
+        out << ' ' << p;
+        first = false;
+      } else {
+        out << endl << p; } } }
+  out << unindent << " }";
+}
+
 void IR::ActionProfile::dbprint(std::ostream &out) const { out << "IR::ActionProfile"; }
 void IR::ActionSelector::dbprint(std::ostream &out) const { out << "IR::ActionSelector"; }
 void IR::V1Table::dbprint(std::ostream &out) const { out << "IR::V1Table " << name; }

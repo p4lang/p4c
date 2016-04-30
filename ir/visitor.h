@@ -189,9 +189,11 @@ class Backtrack : public virtual Visitor {
     virtual bool backtrack(trigger &trig) = 0;
 };
 
+namespace P4 { class TypeMap; }
+
 class P4WriteContext : public virtual Visitor {
  public:
-    bool isWrite();
+    bool isWrite(const P4::TypeMap *typeMap = nullptr);
 };
 
 #endif /* _IR_VISITOR_H_ */

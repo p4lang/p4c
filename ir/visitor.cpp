@@ -250,9 +250,3 @@ const IR::Node *Transform::postorder(IR::CLASS *n) {                            
 
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 
-bool P4WriteContext::isWrite() {
-    const Context *ctxt = getContext();
-    if (auto *prim = dynamic_cast<const IR::Primitive *>(ctxt->node))
-        return prim->isOutput(ctxt->child_index);
-    return false;
-}
