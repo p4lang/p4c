@@ -411,6 +411,16 @@ bool ResolveReferences::preorder(const IR::BlockStatement *b)
 void ResolveReferences::postorder(const IR::BlockStatement *b)
 { removeFromContext(b); checkShadowing(b); }
 
+bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
+    if (decl->initializer != nullptr)
+        addToContext(decl->initializer);
+    return true;
+}
+
+void ResolveReferences::postorder(const IR::Declaration_Instance *decl) {
+    if (decl->initializer != nullptr)
+        removeFromContext(decl->initializer);
+}
 
 #undef PROCESS_NAMESPACE
 

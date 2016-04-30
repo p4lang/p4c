@@ -20,6 +20,7 @@ class MoveDeclarations : public Transform {
     { BUG_CHECK(!toMove.empty(), "Empty move stack"); return toMove.back(); }
     void addMove(const IR::Declaration* decl)
     { getMoves()->push_back(decl); }
+
  public:
     void end_apply(const IR::Node*) override
     { BUG_CHECK(toMove.empty(), "Non empty move stack"); }

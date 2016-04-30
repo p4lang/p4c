@@ -607,7 +607,7 @@ bool TypeInference::checkVirtualMethods(const IR::Declaration_Instance* inst,
         return false;
     }
 
-    for (auto d : *inst->initializer) {
+    for (auto d : *inst->initializer->components) {
         if (d->is<IR::Function>()) {
             auto func = d->to<IR::Function>();
             LOG1("Type checking " << func);

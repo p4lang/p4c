@@ -186,7 +186,7 @@ class ActionList : PropertyValue {
 class KeyElement {
     Expression      expression;
     PathExpression  matchType;
-    dbprint{ Node::dbprint(out); out << "_:" << matchType; }
+#nodbprint
 }
 
 // Value of a table key property
@@ -282,10 +282,10 @@ class Declaration_Constant : Declaration, IAnnotated {
 // Like a variable, but for a statically allocated instance.
 // The syntax is Contructor(args) name = initializer;
 class Declaration_Instance : Declaration, IAnnotated {
-    Type               type;
-    Vector<Expression> arguments;
-    Annotations        annotations;
-    NullOK Vector<Declaration> initializer;  // experimental only
+    Type                  type;
+    Vector<Expression>    arguments;
+    Annotations           annotations;
+    NullOK BlockStatement initializer;  // experimental only; contains just declarations, no code
 #emit
     const Annotations* getAnnotations() const override { return annotations; }
 #end
@@ -308,7 +308,7 @@ class P4Program : IGeneralNamespace {
 }
 
 ///////////////////////////// Statements //////////////////////////
-    
+
 abstract Statement : StatOrDecl {
 #nodbprint
 }
@@ -373,7 +373,7 @@ class Function : Declaration {
     BlockStatement body;
 #nodbprint
 }
-    
+
 /////////////////////////////////////////////////////////////
 
 // Block is the base class for IR nodes produced by the evaluator.

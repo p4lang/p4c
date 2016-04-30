@@ -87,23 +87,6 @@ void IR::Type_Extern::dbprint(std::ostream& out) const {
     Node::dbprint(out);
     if (typeParameters != nullptr)
         out << typeParameters;
-#if 0
-    out << "{" << std::endl;
-    for (auto m : *methods)
-        out << "\t" << m << std::endl;
-    out << "}" << std::endl;
-#endif
-}
-
-void IR::ParameterList::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-    bool first = true;
-    for (auto p : *getEnumerator()) {
-        if (!first)
-            out << ", ";
-        out << p;
-        first = false;
-    }
 }
 
 void IR::Type_Var::dbprint(std::ostream& out) const {

@@ -49,7 +49,7 @@ class RemoveUnusedDeclarations : public Transform {
 class RemoveAllUnusedDeclarations : public PassManager {
     ReferenceMap *refMap;
  public:
-    RemoveAllUnusedDeclarations(bool isv1) {
+    explicit RemoveAllUnusedDeclarations(bool isv1) {
         refMap = new P4::ReferenceMap();
         passes.emplace_back(
             new PassRepeated {

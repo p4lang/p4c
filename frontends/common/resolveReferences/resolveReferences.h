@@ -99,6 +99,7 @@ class ResolveReferences : public Inspector {
     DECLARE(Type_ArchBlock)
     DECLARE(Type_StructLike)
     DECLARE(BlockStatement)
+    DECLARE(Declaration_Instance)
 #undef DECLARE
 
     bool preorder(const IR::Declaration_MatchKind* d) override;

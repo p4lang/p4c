@@ -54,7 +54,8 @@ class ToP4 : public Inspector {
     }
     bool isSystemFile(cstring file);
     // dump node IR tree up to depth - in the form of a comment
-    void dump(unsigned depth, const IR::Node* node = nullptr);
+    void dump(unsigned depth, const IR::Node* node = nullptr, unsigned adjDepth = 0);
+    unsigned curDepth() const;
 
  public:
     // Output is constructed here

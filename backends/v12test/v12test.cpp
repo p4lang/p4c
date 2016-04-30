@@ -45,7 +45,7 @@ class PrintDump {
                 auto stream = options.dumpStream(name);
                 if (verbose)
                     std::cerr << "Writing program to " << options.dumpFileName(name) << std::endl;
-                P4::ToP4 toP4(stream, true, options.file);
+                P4::ToP4 toP4(stream, true);
                 node->apply(toP4);
             }
         }

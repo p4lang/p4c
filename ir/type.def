@@ -1,6 +1,6 @@
 /* -*-C++-*- */
-/* 
-   This file contains IR related to representating the type hierarchy. 
+/*
+   This file contains IR related to representating the type hierarchy.
    Some of these classes never appear in the IR tree, they are just
    synthesized by the type-checker.
 */
@@ -92,6 +92,7 @@ class Parameter : Declaration, IAnnotated {
 class ParameterList : ISimpleNamespace {
     inline NameMap<Parameter, ordered_map> parameters;
     validate{ parameters.check_null(); }
+    dbprint { Node::dbprint(out); }
 #emit
     ParameterList() {}
     Util::Enumerator<const Parameter*>* getEnumerator() const
@@ -261,7 +262,7 @@ class Type_Set : Type {
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
     toString { return cstring("set<") + elementType->toString() + ">"; }
 }
-    
+
 // The type of an expressionList
 class Type_Tuple : Type {
     Vector<Type> components;
@@ -431,7 +432,7 @@ class ArgumentInfo {
 
 // Used to represent the type of a MethodCallExpression
 // for unification.
-// Never appears in the program IR; only used by the typechecker.    
+// Never appears in the program IR; only used by the typechecker.
 class Type_MethodCall : Type {
     Vector<Type>         typeArguments;
     Type_Var             returnType;
