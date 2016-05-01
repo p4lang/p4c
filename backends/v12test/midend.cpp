@@ -22,6 +22,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
     auto evaluator = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
 
     // TODO: duplicate actions that are used by multiple tables
     // TODO: duplicate global actions into the controls that are using them
@@ -30,11 +31,13 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     // TODO: remove expressions in table key
 
     PassManager simplify = {
+        // Proper semantics for uninitialzed local variables in parser states:
+        // headers must be invalidated
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::ResetHeaders(&typeMap),
         // Give each local declaration a unique internal name
         new P4::UniqueNames(isv1),
         // Move all local declarations to the beginning
-        // TODO: this is not sufficient for parser states.
-        // Local headers have to be "uninitialized" on entry.
         new P4::MoveDeclarations(),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap, true),
@@ -56,7 +59,6 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         // nothing further to do
         return nullptr;
 
-    P4::TypeMap typeMap;
     P4::InlineWorkList toInline;
     P4::ActionsInlineList actionsToInline;
 

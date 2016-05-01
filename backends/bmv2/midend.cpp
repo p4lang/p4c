@@ -56,8 +56,13 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
     bool isv1 = false;
     auto evaluator = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
 
     PassManager simplify = {
+        // Proper semantics for uninitialzed local variables in parser states:
+        // headers must be invalidated
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::ResetHeaders(&typeMap),
         // Give each local declaration a unique internal name
         new P4::UniqueNames(isv1),
         // Move all local declarations to the beginning
@@ -80,7 +85,6 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         // nothing further to do
         return nullptr;
 
-    P4::TypeMap typeMap;
     P4::InlineWorkList toInline;
     P4::ActionsInlineList actionsToInline;
     PassManager midEnd = {

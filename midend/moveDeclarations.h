@@ -2,8 +2,22 @@
 #define _MIDEND_MOVEDECLARATIONS_H_
 
 #include "ir/ir.h"
+#include "frontends/common/typeMap.h"
 
 namespace P4 {
+
+// A local uninitialized variable in a parser state that represents
+// a header must be invalid every time the parser state is entered.
+class ResetHeaders : public Transform {
+    TypeMap* typeMap;
+
+    void generateResets(const IR::Type* type, const IR::Expression* expr,
+                        IR::Vector<IR::StatOrDecl>* resets);
+ public:
+    ResetHeaders(TypeMap* typeMap) : typeMap(typeMap)
+    { CHECK_NULL(typeMap); }
+    const IR::Node* postorder(IR::Declaration_Variable* decl) override;
+};
 
 // Moves all local declarations to the "top".
 // This can only be done safely if all declarations have different names,
