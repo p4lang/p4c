@@ -1,5 +1,5 @@
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
+#include "/home/cdodd/p4c/build/../p4include/core.p4"
+#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
 
 struct acl_metadata_t {
     bit<1>  acl_deny;
@@ -1286,7 +1286,6 @@ control process_replication(inout headers hdr, inout metadata meta, inout standa
         size = 512;
         default_action = NoAction();
     }
-
     @name("rid") table rid() {
         actions = {
             nop;
@@ -1302,7 +1301,6 @@ control process_replication(inout headers hdr, inout metadata meta, inout standa
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         if (meta.intrinsic_metadata.egress_rid != 16w0) {
             rid.apply();
@@ -1337,7 +1335,6 @@ control process_vlan_decap(inout headers hdr, inout metadata meta, inout standar
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         vlan_decap.apply();
     }
@@ -1568,7 +1565,6 @@ control process_tunnel_decap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunnel_decap_process_outer") table tunnel_decap_process_outer() {
         actions = {
             decap_vxlan_inner_ipv4;
@@ -1607,7 +1603,6 @@ control process_tunnel_decap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         if (meta.tunnel_metadata.tunnel_terminate == 1w1) {
             if (meta.multicast_metadata.inner_replica == 1w1 || meta.multicast_metadata.replica == 1w0) {
@@ -1635,7 +1630,6 @@ control process_egress_bd(inout headers hdr, inout metadata meta, inout standard
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         egress_bd_map.apply();
     }
@@ -1726,7 +1720,6 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         rewrite.apply();
     }
@@ -1962,7 +1955,6 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         size = 16;
         default_action = NoAction();
     }
-
     @name("int_insert") table int_insert() {
         actions = {
             int_transit;
@@ -1977,7 +1969,6 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         size = 2;
         default_action = NoAction();
     }
-
     @name("int_inst_0003") table int_inst_0003() {
         actions = {
             int_set_header_0003_i0;
@@ -2004,7 +1995,6 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         size = 16;
         default_action = NoAction();
     }
-
     @name("int_inst_0407") table int_inst_0407() {
         actions = {
             int_set_header_0407_i0;
@@ -2031,7 +2021,6 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         size = 16;
         default_action = NoAction();
     }
-
     @name("int_inst_0811") table int_inst_0811() {
         actions = {
             nop;
@@ -2043,7 +2032,6 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         size = 16;
         default_action = NoAction();
     }
-
     @name("int_inst_1215") table int_inst_1215() {
         actions = {
             nop;
@@ -2055,7 +2043,6 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         size = 16;
         default_action = NoAction();
     }
-
     @name("int_meta_header_update") table int_meta_header_update() {
         actions = {
             int_set_e_bit;
@@ -2068,7 +2055,6 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         size = 1;
         default_action = NoAction();
     }
-
     apply {
         switch (int_insert.apply().action_run) {
             int_transit: {
@@ -2133,7 +2119,6 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         if (meta.egress_metadata.routed == 1w1) {
             mac_rewrite.apply();
@@ -2522,7 +2507,6 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunnel_dmac_rewrite") table tunnel_dmac_rewrite() {
         actions = {
             nop;
@@ -2535,7 +2519,6 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunnel_dst_rewrite") table tunnel_dst_rewrite() {
         actions = {
             nop;
@@ -2549,7 +2532,6 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunnel_encap_process_inner") table tunnel_encap_process_inner() {
         actions = {
             inner_ipv4_udp_rewrite;
@@ -2573,7 +2555,6 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunnel_encap_process_outer") table tunnel_encap_process_outer() {
         actions = {
             nop;
@@ -2608,7 +2589,6 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunnel_rewrite") table tunnel_rewrite() {
         actions = {
             nop;
@@ -2627,7 +2607,6 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunnel_smac_rewrite") table tunnel_smac_rewrite() {
         actions = {
             nop;
@@ -2640,7 +2619,6 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunnel_src_rewrite") table tunnel_src_rewrite() {
         actions = {
             nop;
@@ -2654,7 +2632,6 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         if (meta.fabric_metadata.fabric_header_present == 1w0 && meta.tunnel_metadata.egress_tunnel_type != 5w0) {
             egress_vni.apply();
@@ -2694,7 +2671,6 @@ control process_int_outer_encap(inout headers hdr, inout metadata meta, inout st
         size = 8;
         default_action = NoAction();
     }
-
     apply {
         if (meta.int_metadata.insert_cnt != 8w0) {
             int_outer_encap.apply();
@@ -2734,7 +2710,6 @@ control process_vlan_xlate(inout headers hdr, inout metadata meta, inout standar
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         egress_vlan_xlate.apply();
     }
@@ -2756,7 +2731,6 @@ control process_egress_filter(inout headers hdr, inout metadata meta, inout stan
         }
         default_action = NoAction();
     }
-
     @name("egress_lag") table egress_lag() {
         actions = {
             set_egress_ifindex;
@@ -2767,7 +2741,6 @@ control process_egress_filter(inout headers hdr, inout metadata meta, inout stan
         }
         default_action = NoAction();
     }
-
     apply {
         egress_lag.apply();
         if (meta.multicast_metadata.inner_replica == 1w1) {
@@ -2813,7 +2786,6 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         egress_acl.apply();
     }
@@ -2852,7 +2824,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 288;
         default_action = NoAction();
     }
-
     @name("mirror") table mirror() {
         actions = {
             nop;
@@ -2866,7 +2837,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 1024;
         default_action = NoAction();
     }
-
     process_replication() @name("process_replication") process_replication_0;
     process_vlan_decap() @name("process_vlan_decap") process_vlan_decap_0;
     process_tunnel_decap() @name("process_tunnel_decap") process_tunnel_decap_0;
@@ -2928,7 +2898,6 @@ control process_ingress_port_mapping(inout headers hdr, inout metadata meta, ino
         size = 288;
         default_action = NoAction();
     }
-
     apply {
         ingress_port_mapping.apply();
     }
@@ -2958,7 +2927,6 @@ control validate_outer_ipv4_header(inout headers hdr, inout metadata meta, inout
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         validate_outer_ipv4_packet.apply();
     }
@@ -2988,7 +2956,6 @@ control validate_outer_ipv6_header(inout headers hdr, inout metadata meta, inout
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         validate_outer_ipv6_packet.apply();
     }
@@ -3028,7 +2995,6 @@ control validate_mpls_header(inout headers hdr, inout metadata meta, inout stand
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         validate_mpls_packet.apply();
     }
@@ -3163,7 +3129,6 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         size = 512;
         default_action = NoAction();
     }
-
     validate_outer_ipv4_header() @name("validate_outer_ipv4_header") validate_outer_ipv4_header_0;
     validate_outer_ipv6_header() @name("validate_outer_ipv6_header") validate_outer_ipv6_header_0;
     validate_mpls_header() @name("validate_mpls_header") validate_mpls_header_0;
@@ -3211,7 +3176,6 @@ control process_storm_control(inout headers hdr, inout metadata meta, inout stan
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         storm_control.apply();
     }
@@ -3254,7 +3218,6 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
         default_action = NoAction();
         @name("bd_action_profile") implementation = ActionProfile(32w1024);
     }
-
     apply {
         port_vlan_mapping.apply();
     }
@@ -3276,7 +3239,6 @@ control process_spanning_tree(inout headers hdr, inout metadata meta, inout stan
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         if (meta.l2_metadata.stp_group != 10w0) {
             spanning_tree.apply();
@@ -3304,7 +3266,6 @@ control process_ip_sourceguard(inout headers hdr, inout metadata meta, inout sta
         size = 1024;
         default_action = NoAction();
     }
-
     @name("ipsg_permit_special") table ipsg_permit_special() {
         actions = {
             ipsg_miss;
@@ -3318,7 +3279,6 @@ control process_ip_sourceguard(inout headers hdr, inout metadata meta, inout sta
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         if (meta.security_metadata.ipsg_enabled == 1w1) {
             switch (ipsg.apply().action_run) {
@@ -3361,7 +3321,6 @@ control process_ipv4_vtep(inout headers hdr, inout metadata meta, inout standard
         size = 1024;
         default_action = NoAction();
     }
-
     @name("ipv4_src_vtep") table ipv4_src_vtep() {
         actions = {
             on_miss;
@@ -3375,7 +3334,6 @@ control process_ipv4_vtep(inout headers hdr, inout metadata meta, inout standard
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         switch (ipv4_src_vtep.apply().action_run) {
             src_vtep_hit: {
@@ -3411,7 +3369,6 @@ control process_ipv6_vtep(inout headers hdr, inout metadata meta, inout standard
         size = 1024;
         default_action = NoAction();
     }
-
     @name("ipv6_src_vtep") table ipv6_src_vtep() {
         actions = {
             on_miss;
@@ -3425,7 +3382,6 @@ control process_ipv6_vtep(inout headers hdr, inout metadata meta, inout standard
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         switch (ipv6_src_vtep.apply().action_run) {
             src_vtep_hit: {
@@ -3507,7 +3463,6 @@ control process_mpls(inout headers hdr, inout metadata meta, inout standard_meta
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         mpls_0.apply();
     }
@@ -3626,7 +3581,6 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunnel") table tunnel() {
         actions = {
             nop;
@@ -3646,7 +3600,6 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
         size = 1024;
         default_action = NoAction();
     }
-
     process_ipv4_vtep() @name("process_ipv4_vtep") process_ipv4_vtep_0;
     process_ipv6_vtep() @name("process_ipv6_vtep") process_ipv6_vtep_0;
     process_mpls() @name("process_mpls") process_mpls_0;
@@ -3725,7 +3678,6 @@ control process_validate_packet(inout headers hdr, inout metadata meta, inout st
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         if (meta.ingress_metadata.drop_flag == 1w0) {
             validate_packet.apply();
@@ -3786,7 +3738,6 @@ control process_mac(inout headers hdr, inout metadata meta, inout standard_metad
         size = 1024;
         default_action = NoAction();
     }
-
     @name("smac") table smac() {
         actions = {
             nop;
@@ -3801,7 +3752,6 @@ control process_mac(inout headers hdr, inout metadata meta, inout standard_metad
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         smac.apply();
         dmac.apply();
@@ -3850,7 +3800,6 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         mac_acl.apply();
     }
@@ -3922,7 +3871,6 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
         size = 512;
         default_action = NoAction();
     }
-
     @name("ipv6_acl") table ipv6_acl() {
         actions = {
             nop;
@@ -3948,7 +3896,6 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         if (meta.l3_metadata.lkp_ip_type == 2w1) {
             ip_acl.apply();
@@ -3993,7 +3940,6 @@ control process_qos(inout headers hdr, inout metadata meta, inout standard_metad
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         qos.apply();
     }
@@ -4045,7 +3991,6 @@ control process_ipv4_racl(inout headers hdr, inout metadata meta, inout standard
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         ipv4_racl.apply();
     }
@@ -4075,7 +4020,6 @@ control process_ipv4_urpf(inout headers hdr, inout metadata meta, inout standard
         size = 1024;
         default_action = NoAction();
     }
-
     @name("ipv4_urpf_lpm") table ipv4_urpf_lpm() {
         actions = {
             ipv4_urpf_hit;
@@ -4089,7 +4033,6 @@ control process_ipv4_urpf(inout headers hdr, inout metadata meta, inout standard
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         if (meta.ipv4_metadata.ipv4_urpf_mode != 2w0) {
             switch (ipv4_urpf.apply().action_run) {
@@ -4129,7 +4072,6 @@ control process_ipv4_fib(inout headers hdr, inout metadata meta, inout standard_
         size = 1024;
         default_action = NoAction();
     }
-
     @name("ipv4_fib_lpm") table ipv4_fib_lpm() {
         actions = {
             on_miss;
@@ -4144,7 +4086,6 @@ control process_ipv4_fib(inout headers hdr, inout metadata meta, inout standard_
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         switch (ipv4_fib.apply().action_run) {
             on_miss: {
@@ -4201,7 +4142,6 @@ control process_ipv6_racl(inout headers hdr, inout metadata meta, inout standard
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         ipv6_racl.apply();
     }
@@ -4231,7 +4171,6 @@ control process_ipv6_urpf(inout headers hdr, inout metadata meta, inout standard
         size = 1024;
         default_action = NoAction();
     }
-
     @name("ipv6_urpf_lpm") table ipv6_urpf_lpm() {
         actions = {
             ipv6_urpf_hit;
@@ -4245,7 +4184,6 @@ control process_ipv6_urpf(inout headers hdr, inout metadata meta, inout standard
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         if (meta.ipv6_metadata.ipv6_urpf_mode != 2w0) {
             switch (ipv6_urpf.apply().action_run) {
@@ -4285,7 +4223,6 @@ control process_ipv6_fib(inout headers hdr, inout metadata meta, inout standard_
         size = 1024;
         default_action = NoAction();
     }
-
     @name("ipv6_fib_lpm") table ipv6_fib_lpm() {
         actions = {
             on_miss;
@@ -4300,7 +4237,6 @@ control process_ipv6_fib(inout headers hdr, inout metadata meta, inout standard_
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         switch (ipv6_fib.apply().action_run) {
             on_miss: {
@@ -4330,7 +4266,6 @@ control process_urpf_bd(inout headers hdr, inout metadata meta, inout standard_m
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         if (meta.l3_metadata.urpf_mode == 2w2 && meta.l3_metadata.urpf_hit == 1w1) {
             urpf_bd.apply();
@@ -4441,7 +4376,6 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
         }
         default_action = NoAction();
     }
-
     @name("fabric_ingress_src_lkp") table fabric_ingress_src_lkp() {
         actions = {
             nop;
@@ -4454,7 +4388,6 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
         size = 1024;
         default_action = NoAction();
     }
-
     @name("tunneled_packet_over_fabric") table tunneled_packet_over_fabric() {
         actions = {
             terminate_inner_ethernet_non_ip_over_fabric;
@@ -4472,7 +4405,6 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         fabric_ingress_dst_lkp.apply();
         if (hdr.fabric_header_multicast.isValid()) {
@@ -4515,7 +4447,6 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
         }
         default_action = NoAction();
     }
-
     @name("compute_ipv6_hashes") table compute_ipv6_hashes() {
         actions = {
             compute_lkp_ipv6_hash;
@@ -4526,7 +4457,6 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
         }
         default_action = NoAction();
     }
-
     @name("compute_non_ip_hashes") table compute_non_ip_hashes() {
         actions = {
             compute_lkp_non_ip_hash;
@@ -4537,7 +4467,6 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
         }
         default_action = NoAction();
     }
-
     @name("compute_other_hashes") table compute_other_hashes() {
         actions = {
             computed_two_hashes;
@@ -4549,7 +4478,6 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
         }
         default_action = NoAction();
     }
-
     apply {
         if (meta.tunnel_metadata.tunnel_terminate == 1w0 && hdr.ipv4.isValid() || meta.tunnel_metadata.tunnel_terminate == 1w1 && hdr.inner_ipv4.isValid()) {
             compute_ipv4_hashes.apply();
@@ -4579,7 +4507,6 @@ control process_ingress_bd_stats(inout headers hdr, inout metadata meta, inout s
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         ingress_bd_stats_0.apply();
     }
@@ -4601,7 +4528,6 @@ control process_ingress_acl_stats(inout headers hdr, inout metadata meta, inout 
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         acl_stats_0.apply();
     }
@@ -4657,7 +4583,6 @@ control process_fwd_results(inout headers hdr, inout metadata meta, inout standa
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         fwd_result.apply();
     }
@@ -4707,7 +4632,6 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
         default_action = NoAction();
         @name("ecmp_action_profile") implementation = ActionSelector(HashAlgorithm.identity, 32w1024, 32w10);
     }
-
     @name("nexthop") table nexthop() {
         actions = {
             nop;
@@ -4721,7 +4645,6 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         if (meta.nexthop_metadata.nexthop_type == 1w1) {
             ecmp_group.apply();
@@ -4751,7 +4674,6 @@ control process_multicast_flooding(inout headers hdr, inout metadata meta, inout
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         bd_flood.apply();
     }
@@ -4782,7 +4704,6 @@ control process_lag(inout headers hdr, inout metadata meta, inout standard_metad
         default_action = NoAction();
         @name("lag_action_profile") implementation = ActionSelector(HashAlgorithm.identity, 32w1024, 32w8);
     }
-
     apply {
         lag_group.apply();
     }
@@ -4814,7 +4735,6 @@ control process_mac_learning(inout headers hdr, inout metadata meta, inout stand
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         if (meta.l2_metadata.learning_enabled == 1w1) {
             learn_notify.apply();
@@ -4845,7 +4765,6 @@ control process_fabric_lag(inout headers hdr, inout metadata meta, inout standar
         default_action = NoAction();
         @name("fabric_lag_action_profile") implementation = ActionSelector(HashAlgorithm.identity, 32w1024, 32w8);
     }
-
     apply {
         fabric_lag.apply();
     }
@@ -4893,7 +4812,6 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         size = 1024;
         default_action = NoAction();
     }
-
     @name("system_acl") table system_acl() {
         actions = {
             nop;
@@ -4937,7 +4855,6 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         system_acl.apply();
         if (meta.ingress_metadata.drop_flag == 1w1) {
@@ -4966,7 +4883,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-
     process_ingress_port_mapping() @name("process_ingress_port_mapping") process_ingress_port_mapping_0;
     process_validate_outer_header() @name("process_validate_outer_header") process_validate_outer_header_0;
     process_storm_control() @name("process_storm_control") process_storm_control_0;

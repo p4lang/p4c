@@ -1,5 +1,5 @@
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
+#include "/home/cdodd/p4c/build/../p4include/core.p4"
+#include "/home/cdodd/p4c/build/../p4include/v1model.p4"
 
 struct acl_metadata_t {
     bit<1>  acl_deny;
@@ -165,7 +165,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> reason_code_0;
     Counter(32w256, CounterType.Packets) @name("drop_stats") drop_stats_1;
     Counter(32w256, CounterType.Packets) @name("drop_stats_2") drop_stats_3;
     @name("drop_stats_update") action drop_stats_update_0() {
@@ -177,8 +176,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.fabric_metadata.reason_code = reason_code;
     }
     @name("redirect_to_cpu") action redirect_to_cpu_0(bit<16> reason_code) {
-        reason_code_0 = reason_code;
-        meta.fabric_metadata.reason_code = reason_code_0;
+        meta.fabric_metadata.reason_code = reason_code;
     }
     @name("drop_packet") action drop_packet_0() {
     }
