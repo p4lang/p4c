@@ -188,11 +188,33 @@ class TypeInference : public Transform {
     void end_apply(const IR::Node* Node) override;
 };
 
+// Copy types from the typeMap to expressions.  Updates the typeMap with newly created nodes
+class ApplyTypesToExpressions : public Transform {
+    TypeMap *typeMap;
+    IR::Node *postorder(IR::Node *n) override {
+        const IR::Node *orig = getOriginal();
+        if (auto type = typeMap->getType(orig)) {
+            if (*orig != *n)
+                typeMap->setType(n, type); }
+        return n; }
+    IR::Expression *postorder(IR::Expression *e) override {
+        const IR::Node *orig = getOriginal();
+        if (auto type = typeMap->getType(orig)) {
+            e->type = type;
+            if (*orig != *e)
+                typeMap->setType(e, type); }
+        return e; }
+
+ public:
+    explicit ApplyTypesToExpressions(TypeMap *typeMap) : typeMap(typeMap) {}
+};
+
 // Performs together reference resolution and type checking.
-// Does not mutate the program.
+// Only mutates the program if updateProgrgam is true.
 class TypeChecking : public PassManager {
  public:
-    TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap, bool isv1);
+    TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap, bool isv1,
+                 bool updateProgram = false);
 };
 
 }  // namespace P4

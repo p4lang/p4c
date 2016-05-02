@@ -7,8 +7,10 @@
 
 namespace P4 {
 
+/* Local copy propagation and dead code elimination within a single action function.
+ * - requires expression types be up-to-date with Typechecking(updateProgram = true)
+ */
 class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
-    const P4::TypeMap           *typeMap;
     bool                        in_action = false;
     struct Local {
         bool                    live = false;
@@ -30,7 +32,7 @@ class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContex
 
     LocalCopyPropagation(const LocalCopyPropagation &) = default;
  public:
-    explicit LocalCopyPropagation(const P4::TypeMap *);
+    LocalCopyPropagation() { visitDagOnce = false; }
 };
 
 }  // namespace P4

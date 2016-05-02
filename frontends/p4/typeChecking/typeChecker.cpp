@@ -7,9 +7,12 @@
 
 namespace P4 {
 
-TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-    passes.emplace_back(new P4::ResolveReferences(refMap, isv1));
-    passes.emplace_back(new P4::TypeInference(refMap, typeMap, true, true));
+TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap, bool isv1, bool updateProgram) {
+    addPasses({
+        new P4::ResolveReferences(refMap, isv1),
+        new P4::TypeInference(refMap, typeMap, true, true),
+        updateProgram ? new ApplyTypesToExpressions(typeMap) : nullptr,
+        updateProgram ? new P4::ResolveReferences(refMap, isv1) : nullptr });
     setName("TypeAnalysis");
 }
 
