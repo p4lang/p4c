@@ -6,6 +6,7 @@
 #include "midend/removeReturns.h"
 #include "midend/moveConstructors.h"
 #include "midend/actionSynthesis.h"
+#include "midend/local_copyprop.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -83,6 +84,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
+        new P4::TypeChecking(&refMap, &typeMap, isv1, true),
+        new P4::LocalCopyPropagation(),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
