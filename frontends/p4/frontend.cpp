@@ -25,7 +25,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
     if (v12_program == nullptr)
         return nullptr;
 
-    bool p4v10 = options.isv1();
+    bool isv1 = options.isv1();
 
     Util::PathName path(options.prettyPrintFile);
     std::ostream *ppStream = openFile(path.toString(), true);
@@ -33,30 +33,31 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
     std::ostream *endStream = options.dumpStream("-last");
 
     P4::ReferenceMap  refMap;  // This is reused many times, since every analysis clear it
-    P4::TypeMap       typeMap1, typeMap2, typeMap3;
+    P4::TypeMap       typeMap;
 
     PassManager passes = {
         new P4::ToP4(ppStream, false, options.file),
         // Simple checks on parsed program
-        new P4::ValidateParsedProgram(p4v10),
+        new P4::ValidateParsedProgram(isv1),
         // Synthesize some built-in constructs
         new P4::CreateBuiltins(),
         // First pass of constant folding, before types are known
         // May be needed to compute types
-        new P4::ResolveReferences(&refMap, p4v10, true),
+        new P4::ResolveReferences(&refMap, isv1, true),
         new P4::ConstantFolding(&refMap, nullptr),
-        new P4::ResolveReferences(&refMap, p4v10),
+        new P4::ResolveReferences(&refMap, isv1),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
-        new P4::TypeInference(&refMap, &typeMap1, true, false),
+        new P4::TypeInference(&refMap, &typeMap, true, false),
         // Another round of constant folding, using type information.
-        new P4::SimplifyControlFlow(),
-        new P4::ResolveReferences(&refMap, p4v10),
-        new P4::ConstantFolding(&refMap, &typeMap1),
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
         // Print program in the middle
         new P4::ToP4(midStream, false, options.file),
-        new P4::RemoveAllUnusedDeclarations(p4v10),
+        new P4::RemoveAllUnusedDeclarations(isv1),
         // Print the program before the end.
         new P4::ToP4(endStream, false, options.file),
     };

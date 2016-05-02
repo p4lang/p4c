@@ -58,7 +58,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Variable* dec
     prune();
     if (decl->initializer == nullptr)
         return process(decl);
-    if (!SideEffects::check(decl->initializer))
+    if (!SideEffects::check(decl->initializer, nullptr, nullptr))
         return process(decl);
     return decl;
 }

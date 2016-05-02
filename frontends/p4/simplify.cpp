@@ -35,7 +35,7 @@ const IR::Node* SimplifyControlFlow::postorder(IR::BlockStatement* statement) {
 }
 
 const IR::Node* SimplifyControlFlow::postorder(IR::IfStatement* statement)  {
-    if (SideEffects::check(statement->condition))
+    if (SideEffects::check(statement->condition, refMap, typeMap))
         return statement;
     if (statement->ifTrue->is<IR::EmptyStatement>() &&
         (statement->ifFalse == nullptr || statement->ifFalse->is<IR::EmptyStatement>()))
