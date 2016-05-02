@@ -18,7 +18,7 @@ const IR::Node* RemoveLeftSlices::postorder(IR::AssignmentStatement* stat) {
     auto cmpl = new IR::Cmpl(ls->srcInfo, mask);
     auto and1 = new IR::BAnd(ls->srcInfo, ls->e0, cmpl);
 
-    auto cast = new IR::Cast(right->srcInfo, type, stat->right);
+    auto cast = new IR::Cast(right->srcInfo, stat->right, type);
     auto sh = new IR::Shl(right->srcInfo, cast, new IR::Constant(l));
     auto and2 = new IR::BAnd(right->srcInfo, sh, mask);
     auto rhs = new IR::BOr(right->srcInfo, and1, and2);
@@ -81,7 +81,7 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     auto e0type = typeMap->getType(expression->e0, true);
     typeMap->setType(sh, e0type);
     auto type = IR::Type_Bits::get(h - l + 1);
-    auto result = new IR::Cast(expression->srcInfo, type, sh);
+    auto result = new IR::Cast(expression->srcInfo, sh, type);
     typeMap->setType(result, type);
     LOG1("Replaced " << expression << " with " << result);
     return result;
@@ -97,8 +97,8 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
               expression->right, type);
     unsigned sizeofb = type->to<IR::Type_Bits>()->size;
     unsigned sizeofresult = resulttype->to<IR::Type_Bits>()->size;
-    auto cast0 = new IR::Cast(expression->left->srcInfo, resulttype, expression->left);
-    auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, expression->right);
+    auto cast0 = new IR::Cast(expression->left->srcInfo, expression->left, resulttype);
+    auto cast1 = new IR::Cast(expression->right->srcInfo, expression->right, resulttype);
 
     auto sh = new IR::Shl(cast0->srcInfo, cast0, new IR::Constant(sizeofb));
     mpz_class m = Util::maskFromSlice(sizeofb, 0);

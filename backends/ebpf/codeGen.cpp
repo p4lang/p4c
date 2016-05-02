@@ -94,7 +94,7 @@ bool CodeGenInspector::preorder(const IR::Cast* c) {
     widthCheck(c);
     builder->append("(");
     builder->append("(");
-    auto et = EBPFTypeFactory::instance->create(c->type);
+    auto et = EBPFTypeFactory::instance->create(c->destType);
     et->emit(builder);
     builder->append(")");
     visit(c->expr);

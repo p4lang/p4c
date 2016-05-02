@@ -906,7 +906,7 @@ expression
                                                                   new IR::Vector<IR::Type>(), $3); }
     | typeRef '(' argumentList ')'       { $$ = new IR::ConstructorCallExpression(@1 + @4,
                                                                                   $1, $3); }
-    | '(' typeRef ')' expression %prec PREFIX  { $$ = new IR::Cast(@1 + @4, $2, $4); }
+    | '(' typeRef ')' expression %prec PREFIX  { $$ = new IR::Cast(@1 + @4, $4, $2); }
     ;
 
 /*****************************************************************************/

@@ -18,6 +18,21 @@ namespace {
 // into Declaration_Instance.  This is needed for implementing
 // copy-in/copy-out in inlining, since
 // constructed objects do not have assignment operations.
+// For example:
+// extern T {}
+// control c()(T t) {  apply { ... } }
+// control d() {
+//    c(T()) cinst;
+//    apply { ... }
+// }
+// is converted to
+// extern T {}
+// control c()(T t) {  apply { ... } }
+// control d() {
+//    T() tmp;
+//    c(tmp) cinst;
+//    apply { ... }
+// }
 class MoveConstructorsImpl : public Transform {
     enum class Region {
         InParserStateful,
@@ -56,7 +71,7 @@ class MoveConstructorsImpl : public Transform {
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto decl = new IR::Declaration_Instance(
-                    cce->srcInfo, e.second, cce->type,
+                    cce->srcInfo, e.second, cce->constructedType,
                     cce->arguments, IR::Annotations::empty, nullptr);
                 result->push_back(decl);
                 changes = true;
@@ -77,7 +92,7 @@ class MoveConstructorsImpl : public Transform {
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(
-                cce->srcInfo, e.second, cce->type,
+                cce->srcInfo, e.second, cce->constructedType,
                 cce->arguments, IR::Annotations::empty, nullptr);
             newDecls->push_back(decl);
         }
@@ -98,7 +113,7 @@ class MoveConstructorsImpl : public Transform {
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto inst = new IR::Declaration_Instance(
-                    cce->srcInfo, e.second, cce->type,
+                    cce->srcInfo, e.second, cce->constructedType,
                     cce->arguments, IR::Annotations::empty, nullptr);
                 newDecls->addUnique(e.second, inst);
                 changes = true;
@@ -126,7 +141,7 @@ class MoveConstructorsImpl : public Transform {
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(
-                cce->srcInfo, e.second, cce->type,
+                cce->srcInfo, e.second, cce->constructedType,
                 cce->arguments, IR::Annotations::empty, nullptr);
             newDecls->addUnique(e.second, decl);
         }

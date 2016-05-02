@@ -562,7 +562,6 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                                  Util::JsonArray* calculations, Util::JsonArray* learn_lists) {
     for (auto s : *body) {
         if (!s->is<IR::Statement>()) {
-            ::error("%1%: Declarations in actions are not supported on this target", s);
             continue;
         } else if (s->is<IR::BlockStatement>()) {
             convertActionBody(s->to<IR::BlockStatement>()->components, result, fieldLists,
@@ -1833,6 +1832,7 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
         result->emplace("op", "set");
         auto l = conv->convert(assign->left);
         auto r = conv->convert(assign->right);
+        r = wrapExpression(r);
         params->append(l);
         params->append(r);
         return result;

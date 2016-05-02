@@ -1,5 +1,5 @@
 /* -*-C++-*- */
-/* This file contains the IR classes for all expressions. 
+/* This file contains the IR classes for all expressions.
    The base classes are in base.def */
 
 abstract Operation_Unary : Operation {
@@ -321,14 +321,16 @@ class Mux : Operation_Ternary {
 class DefaultExpression : Expression {}
 
 class Cast : Operation_Unary {
+    Type destType;
 #emit
+    // We set both type and destType.
     Cast(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Expression *expression) :
-            Operation_Unary(srcInfo, type, expression) {}
+            Operation_Unary(srcInfo, type, expression), destType(type) {}
 #end
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
     toString{ return "cast"; }
-    validate{ if (type->is<Type_Unknown>()) BUG("%1%: Cannot cast to unknown type", this); }
+    validate{ if (destType->is<Type_Unknown>()) BUG("%1%: Cannot cast to unknown type", this); }
 }
 
 class SelectExpression : Expression {
@@ -347,14 +349,15 @@ class MethodCallExpression : Expression {
 }
 
 class ConstructorCallExpression : Expression {
+    Type               constructedType;
+    Vector<Expression> arguments;
 #noconstructor
 #emit
     ConstructorCallExpression(Util::SourceInfo srcInfo, const Type* type,
                               const Vector<Expression> *arguments) :
-            Expression(srcInfo, type), arguments(arguments) {}
+            Expression(srcInfo), constructedType(type), arguments(arguments) {}
 #end
-    Vector<Expression> arguments;
-    toString{ return type->toString(); }
+    toString{ return constructedType->toString(); }
     validate{ arguments->check_null(); }
 }
 

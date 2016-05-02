@@ -358,17 +358,12 @@ const IR::Node* TypeInference::preorder(IR::Type* type) {
     if (!ctx->node->is<IR::Expression>())
         return type;
     // We do want to visit the type of some nodes...
-    // Some passes may store here the canonical type, and we don't
-    // want to typecheck that.
-    if (ctx->node->is<IR::Constant>() ||
-        ctx->node->is<IR::Cast>() ||
-        ctx->node->is<IR::ConstructorCallExpression>())
+    if (ctx->node->is<IR::Constant>())
         return type;
     // Expression::type is the 0-th child of an expression
     if (ctx->child_index != 0)
         return type;
     // Don't visit Expression::type
-    LOG1("Skipping " << type << " child of " << ctx->node);
     prune();
     return type;
 }
@@ -466,10 +461,10 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         auto f = src->to<IR::Type_Bits>();
         if (dest->is<IR::Type_Bits>()) {
             auto t = dest->to<IR::Type_Bits>();
-            if (f->size != t->size || f->isSigned != t->isSigned) {
-                LOG1("Can cast between " << t << " and " << f);
+            if (f->size == t->size)
                 return true;
-            }
+            else if (f->isSigned == t->isSigned)
+                return true;
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
         }
@@ -496,7 +491,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
 
     if (canCastBetween(destType, initType)) {
         LOG1("Inserting cast in " << sourceExpression);
-        sourceExpression = new IR::Cast(sourceExpression->srcInfo, destType, sourceExpression);
+        sourceExpression = new IR::Cast(sourceExpression->srcInfo, sourceExpression, destType);
         setType(sourceExpression, destType);
         return sourceExpression;
     }
@@ -1047,14 +1042,14 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     bool equTest = expression->is<IR::Equ>() || expression->is<IR::Neq>();
 
     if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
-        auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
+        auto cast = new IR::Cast(Util::SourceInfo(), expression->left, rtype);
         setType(cast, rtype);
         auto e = expression->clone();
         e->left = cast;
         expression = e;
         ltype = rtype;
     } else if (rtype->is<IR::Type_InfInt>() && ltype->is<IR::Type_Bits>()) {
-        auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
+        auto cast = new IR::Cast(Util::SourceInfo(), expression->right, ltype);
         setType(cast, ltype);
         auto e = expression->clone();
         e->right = cast;
@@ -1238,7 +1233,7 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
             return expression;
         }
     } else if (bl == nullptr && br != nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
+        auto cast = new IR::Cast(Util::SourceInfo(), expression->left, rtype);
         auto e = expression->clone();
         e->left = cast;
         expression = e;
@@ -1246,7 +1241,7 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         setType(cast, resultType);
         setType(expression, resultType);
     } else if (bl != nullptr && br == nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
+        auto cast = new IR::Cast(Util::SourceInfo(), expression->right, ltype);
         auto e = expression->clone();
         e->right = cast;
         expression = e;
@@ -1368,7 +1363,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
             return expression;
         }
     } else if (bl == nullptr && br != nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
+        auto cast = new IR::Cast(Util::SourceInfo(), expression->left, rtype);
         auto e = expression->clone();
         e->left = cast;
         expression = e;
@@ -1376,7 +1371,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         setType(cast, resultType);
         setType(expression, resultType);
     } else if (bl != nullptr && br == nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
+        auto cast = new IR::Cast(Util::SourceInfo(), expression->right, ltype);
         auto e = expression->clone();
         e->right = cast;
         expression = e;
@@ -1419,14 +1414,14 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
             return expression;
         }
     } else if (bl == nullptr && br != nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
+        auto cast = new IR::Cast(Util::SourceInfo(), expression->left, rtype);
         auto e = expression->clone();
         e->left = cast;
         expression = e;
         sameType = rtype;
         setType(cast, sameType);
     } else if (bl != nullptr && br == nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
+        auto cast = new IR::Cast(Util::SourceInfo(), expression->right, ltype);
         auto e = expression->clone();
         e->right = cast;
         expression = e;
@@ -1499,7 +1494,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (done())
         return expression;
     const IR::Type* sourceType = getType(expression->expr);
-    const IR::Type* castType = getType(expression->type);
+    const IR::Type* castType = getType(expression->destType);
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
@@ -1507,13 +1502,16 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
         // This cast is not legal, but let's try to see whether
         // performing a substitution can help
         auto rhs = assignment(expression, castType, expression->expr);
+        if (rhs == nullptr)
+            // error
+            return expression;
         if (rhs != expression->expr) {
             // if we are here we have performed a substitution on the rhs
-            expression = new IR::Cast(expression->srcInfo, expression->type, rhs);
-            sourceType = getType(expression);
+            expression = new IR::Cast(expression->srcInfo, rhs, expression->destType);
+            sourceType = expression->destType;
         }
         if (!canCastBetween(castType, sourceType))
-            ::error("%1%: Illegal cast from %2%", expression, sourceType);
+            ::error("%1%: Illegal cast from %2% to %3%", expression, sourceType, castType);
     }
     setType(expression, castType);
     setType(getOriginal(), castType);
@@ -1917,7 +1915,7 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
     if (done())
         return expression;
 
-    auto type = getType(expression->type);
+    auto type = getType(expression->constructedType);
     if (type == nullptr)
         return expression;
 
@@ -1932,7 +1930,7 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
             return expression;
         if (args != expression->arguments)
             expression = new IR::ConstructorCallExpression(expression->srcInfo,
-                                                           expression->type, args);
+                                                           expression->constructedType, args);
         setType(getOriginal(), type);
         setType(expression, type);
     } else if (simpleType->is<IR::IContainer>()) {

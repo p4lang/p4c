@@ -14,6 +14,8 @@ midend_SOURCES = \
 	midend/moveConstructors.h \
 	midend/moveConstructors.cpp \
 	midend/actionSynthesis.h \
-	midend/actionSynthesis.cpp
+	midend/actionSynthesis.cpp \
+	midend/localizeActions.h \
+	midend/localizeActions.cpp
 
 cpplint_FILES += $(midend_SOURCES)

@@ -1,4 +1,4 @@
-/* -*-C++-*- 
+/* -*-C++-*-
    This file contains the base classes needed for the compiler IR:
    - all interfaces
    - most basic abstract classes
@@ -134,11 +134,8 @@ abstract Type_Declaration : Type, IDeclaration {
 
 abstract Expression {
 #emit
-    // Most P4 v1.2 front-end passes do not use this field.
-    // However, when the field is used, it should contain
-    // the type of the expression evaluation.
-    // Some classes do use it explicitly: Casts, ConstructorCallExpression and Constant.
-    // TODO: surface this field as a regular field.
+    // No P4 v1.2 front-end passes not use this field.
+    // It is used by the P4 v1.0 front-end and by some back-ends.
     const Type* type = Type::Unknown::get();
     Expression() : type(Type::Unknown::get()) {}
     explicit Expression(const Type *t) : type(t) {}
@@ -282,4 +279,3 @@ interface IAnnotated {
     virtual const Annotations* getAnnotations() const = 0;
 #end
 }
-
