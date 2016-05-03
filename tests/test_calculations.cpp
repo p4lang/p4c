@@ -230,15 +230,73 @@ TEST(CalculationsMap, Test) {
   ASSERT_EQ(nullptr, CalculationsMap::get_instance()->get_copy("Hash_Neg"));
 }
 
+// Could use a templatized test for this, but is it worth it?
 
 TEST(HashTest, Identity) {
   const auto ptr = CalculationsMap::get_instance()->get_copy("identity");
   ASSERT_NE(nullptr, ptr);
 
-  const char input_buffer[5] = {1, 2, 3, 4, 5};
+  const char input_buffer[] = {1, 2, 3, 4, 5};
   const uint64_t expected = 0x0102030405;
 
   const uint64_t output = ptr->output(input_buffer, sizeof(input_buffer));
+
+  ASSERT_EQ(expected, output);
+}
+
+TEST(HashTest, Cksum16) {
+  const auto ptr = CalculationsMap::get_instance()->get_copy("cksum16");
+  ASSERT_NE(nullptr, ptr);
+
+  // taken from wikipedia:
+  // https://en.wikipedia.org/wiki/IPv4_header_checksum
+  const unsigned char input_buffer[] = {0x45, 0x00, 0x00, 0x73, 0x00, 0x00,
+                                        0x40, 0x00, 0x40, 0x11, 0x00, 0x00,
+                                        0xc0, 0xa8, 0x00, 0x01, 0xc0, 0xa8,
+                                        0x00, 0xc7};
+  const uint16_t expected = 0xb861;
+
+  const uint16_t output = ptr->output(
+      reinterpret_cast<const char *>(input_buffer), sizeof(input_buffer));
+
+  ASSERT_EQ(expected, output);
+}
+
+TEST(HashTest, Crc16) {
+  const auto ptr = CalculationsMap::get_instance()->get_copy("crc16");
+  ASSERT_NE(nullptr, ptr);
+
+  const unsigned char input_buffer[] = {0x0b, 0xb8, 0x1f, 0x90};
+  const uint16_t expected = 0x5d8a;
+
+  const uint16_t output = ptr->output(
+      reinterpret_cast<const char *>(input_buffer), sizeof(input_buffer));
+
+  ASSERT_EQ(expected, output);
+}
+
+TEST(HashTest, CrcCCITT) {
+  const auto ptr = CalculationsMap::get_instance()->get_copy("crcCCITT");
+  ASSERT_NE(nullptr, ptr);
+
+  const unsigned char input_buffer[] = {0x0b, 0xb8, 0x1f, 0x90};
+  const uint16_t expected = 0x5d75;
+
+  const uint16_t output = ptr->output(
+      reinterpret_cast<const char *>(input_buffer), sizeof(input_buffer));
+
+  ASSERT_EQ(expected, output);
+}
+
+TEST(HashTest, Crc32) {
+  const auto ptr = CalculationsMap::get_instance()->get_copy("crc32");
+  ASSERT_NE(nullptr, ptr);
+
+  const unsigned char input_buffer[] = {0x0b, 0xb8, 0x1f, 0x90};
+  const uint32_t expected = 0x005d6a6f;
+
+  const uint32_t output = ptr->output(
+      reinterpret_cast<const char *>(input_buffer), sizeof(input_buffer));
 
   ASSERT_EQ(expected, output);
 }

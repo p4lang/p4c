@@ -253,6 +253,7 @@ SimpleSwitch::ingress_thread() {
     phv = packet->get_phv();
 
     int ingress_port = packet->get_ingress_port();
+    (void) ingress_port;
     BMLOG_DEBUG_PKT(*packet, "Processing packet received on port {}",
                     ingress_port);
 

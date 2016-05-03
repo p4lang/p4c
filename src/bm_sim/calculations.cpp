@@ -73,13 +73,7 @@ struct crc16 {
       int data = reflect(buf[byte], 8) ^ (remainder >> 8);
       remainder = table_crc16[data] ^ (remainder << 8);
     }
-    /* why is the ntohs() call needed?
-       the input buf is made of bytes, yet we return an integer value
-       so either I call this function, or I return bytes...
-       is returning an integer really the right thing to do?
-    */
-    uint16_t result = reflect(remainder, 16) ^ final_xor_value;
-    return ntohs(result);
+    return reflect(remainder, 16) ^ final_xor_value;
   }
 };
 
@@ -89,9 +83,9 @@ struct crc32 {
     uint32_t final_xor_value = 0xFFFFFFFF;
     for (unsigned int byte = 0; byte < len; byte++) {
       int data = reflect(buf[byte], 8) ^ (remainder >> 24);
-      remainder = table_crc16[data] ^ (remainder << 8);
+      remainder = table_crc32[data] ^ (remainder << 8);
     }
-    return ntohl(reflect(remainder, 32) ^ final_xor_value);
+    return reflect(remainder, 32) ^ final_xor_value;
   }
 };
 
@@ -100,10 +94,10 @@ struct crcCCITT {
     uint16_t remainder = 0xFFFF;
     uint16_t final_xor_value = 0x0000;
     for (unsigned int byte = 0; byte < len; byte++) {
-      int data = buf[byte] ^ (remainder >> 8);
+      int data = static_cast<unsigned char>(buf[byte]) ^ (remainder >> 8);
       remainder = table_crcCCITT[data] ^ (remainder << 8);
     }
-    return ntohs(remainder ^ final_xor_value);
+    return remainder ^ final_xor_value;
   }
 };
 
