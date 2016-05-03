@@ -95,7 +95,8 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(isv1),
-        new P4::SimplifyControlFlow(),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
@@ -133,7 +134,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     auto evaluator = new P4::EvaluatorPass(isv1);
     PassManager backend = {
         new P4::ToP4(midendStream, false, options.file),
-        new P4::SimplifyControlFlow(),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new RemoveLeftSlices(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),

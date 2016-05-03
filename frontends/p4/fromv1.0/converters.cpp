@@ -45,6 +45,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::FieldList* fl) {
+    // Field lists may contain other field lists
     return new IR::ListExpression(fl->srcInfo, &fl->fields);
 }
 
@@ -108,6 +109,11 @@ const IR::Node* ExpressionConverter::postorder(IR::NamedRef* ref) {
     }
     if (ref->name.name == "next") {
         return ref;
+    }
+    auto fl = structure->field_lists.get(ref->name);
+    if (fl != nullptr) {
+        ExpressionConverter conv(structure);
+        return conv.convert(fl);
     }
     BUG("Unexpected expression %1%", ref);
 }

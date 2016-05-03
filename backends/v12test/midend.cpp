@@ -76,14 +76,16 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::RemoveAllUnusedDeclarations(isv1),
         // TODO: inlining introduces lots of copies,
         // so perhaps a copy-propagation step would be useful
-        new P4::SimplifyControlFlow(),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap, false),  // remove exits
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
         new P4::MoveDeclarations(),  // more may have been introduced
-        new P4::SimplifyControlFlow(),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
         // Create actions for statements that can't be done in control blocks.
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SynthesizeActions(&refMap, &typeMap),

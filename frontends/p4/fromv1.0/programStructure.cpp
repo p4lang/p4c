@@ -973,7 +973,8 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
                                                emptyTypeArguments, args);
         return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "modify_field_from_rng") {
+    } else if (primitive->name == "modify_field_from_rng" ||
+               primitive->name == "modify_field_rng_uniform") {
         BUG_CHECK(primitive->operands.size() == 2 || primitive->operands.size() == 3,
                   "Expected 2 or 3 operands for %1%", primitive);
         auto field = conv.convert(primitive->operands.at(0));

@@ -605,7 +605,7 @@ bool ToP4::preorder(const IR::TypeNameExpression* e) {
 }
 
 bool ToP4::preorder(const IR::ConstructorCallExpression* e) {
-    visit(e->type);
+    visit(e->constructedType);
     builder.append("(");
     setVecSep(", ");
     int prec = expressionPrecedence;
@@ -780,7 +780,7 @@ bool ToP4::preorder(const IR::Cast* c) {
     if (useParens)
         builder.append("(");
     builder.append("(");
-    visit(c->type);
+    visit(c->destType);
     builder.append(")");
     expressionPrecedence = c->getPrecedence();
     visit(c->expr);

@@ -216,7 +216,7 @@ bool Evaluator::preorder(const IR::Declaration_Instance* inst) {
 bool Evaluator::preorder(const IR::ConstructorCallExpression* expr) {
     LOG1("Evaluating " << expr);
     auto type = blockMap->typeMap->getType(expr, true);
-    auto block = processConstructor(expr, expr->type, type, expr->arguments);
+    auto block = processConstructor(expr, expr->constructedType, type, expr->arguments);
     if (block != nullptr)
         setValue(expr, block);
     return false;

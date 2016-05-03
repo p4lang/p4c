@@ -9,6 +9,8 @@ midend_SOURCES = \
 	midend/inlining.h \
 	midend/local_copyprop.cpp \
 	midend/local_copyprop.h \
+	midend/localizeActions.cpp \
+	midend/localizeActions.h \
 	midend/moveConstructors.cpp \
 	midend/moveConstructors.h \
 	midend/moveDeclarations.cpp \

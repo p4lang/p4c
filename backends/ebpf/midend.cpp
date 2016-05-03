@@ -70,7 +70,8 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         actInl,
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(isv1),
-        new P4::SimplifyControlFlow(),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap, false),  // remove exits
         new P4::TypeChecking(&refMap, &typeMap, isv1),
