@@ -111,10 +111,15 @@ class Visitor {
     bool dontForwardChildrenBeforePreorder = false;
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
     class ChangeTracker;  // used by Modifier and Transform -- private to them
+    // This overrides visitDagOnce for a single node -- can only be called from
+    // preorder and postorder functions
+    void visitOnce() const { *visitCurrentOnce = true; }
+    void visitAgain() const { *visitCurrentOnce = false; }
 
  private:
     virtual void visitor_const_error();
     const Context *ctxt = nullptr;  // should be readonly to subclasses
+    bool *visitCurrentOnce = nullptr;
     friend class Inspector;
     friend class Modifier;
     friend class Transform;
@@ -137,7 +142,8 @@ class Modifier : public virtual Visitor {
 };
 
 class Inspector : public virtual Visitor {
-    typedef unordered_map<const IR::Node *, bool>       visited_t;
+    struct info_t { bool done, visitOnce; };
+    typedef unordered_map<const IR::Node *, info_t>       visited_t;
     visited_t   *visited = nullptr;
  public:
     profile_t init_apply(const IR::Node *root) override;
