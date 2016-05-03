@@ -198,10 +198,15 @@ class Visitor {
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
     class ChangeTracker;  // used by Modifier and Transform -- private to them
     virtual bool check_clone(const Visitor *) { return true; }
+    // This overrides visitDagOnce for a single node -- can only be called from
+    // preorder and postorder functions
+    void visitOnce() const { *visitCurrentOnce = true; }
+    void visitAgain() const { *visitCurrentOnce = false; }
 
  private:
     virtual void visitor_const_error();
     const Context *ctxt = nullptr;  // should be readonly to subclasses
+    bool *visitCurrentOnce = nullptr;
     friend class Inspector;
     friend class Modifier;
     friend class Transform;
@@ -228,7 +233,8 @@ class Modifier : public virtual Visitor {
 };
 
 class Inspector : public virtual Visitor {
-    typedef unordered_map<const IR::Node *, bool>       visited_t;
+    struct info_t { bool done, visitOnce; };
+    typedef unordered_map<const IR::Node *, info_t>       visited_t;
     visited_t   *visited = nullptr;
     bool check_clone(const Visitor *) override;
  public:

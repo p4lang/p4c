@@ -67,7 +67,9 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
 
     void visit_local_decl(const IR::Declaration_Variable *);
     const IR::Node *postorder(IR::Declaration_Variable *) override;
+    IR::Expression *preorder(IR::Expression *m) override;
     const IR::Expression *postorder(IR::PathExpression *) override;
+    IR::Statement *preorder(IR::Statement *) override;
     IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
     IR::IfStatement *postorder(IR::IfStatement *) override;
@@ -91,7 +93,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     DoLocalCopyPropagation() : tables(*new std::map<cstring, TableInfo>),
                                actions(*new std::map<cstring, FuncInfo>),
                                methods(*new std::map<cstring, FuncInfo>)
-    { visitDagOnce = false; setName("DoLocalCopyPropagation"); }
+    { setName("DoLocalCopyPropagation"); }
 };
 
 class LocalCopyPropagation : public PassManager {
