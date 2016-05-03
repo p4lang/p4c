@@ -100,13 +100,13 @@ class Visitor {
         return nullptr; }
     template <class T> inline const T *findOrigCtxt() const {
         const Context *c = ctxt;
-        return findContext<T>(c); }
+        return findOrigCtxt<T>(c); }
 
  protected:
     // if visitDagOnce is set to 'false' (usually in the derived Visitor
-    // class constructor), nodes that appear mulitple times in the tree
+    // class constructor), nodes that appear multiple times in the tree
     // will be visited repeatedly.  If this is done in a Modifier or Transform
-    // pass, this will result in them being duplicated if they are modified
+    // pass, this will result in them being duplicated if they are modified.
     bool visitDagOnce = true;
     bool dontForwardChildrenBeforePreorder = false;
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
@@ -189,9 +189,11 @@ class Backtrack : public virtual Visitor {
     virtual bool backtrack(trigger &trig) = 0;
 };
 
+namespace P4 { class TypeMap; }
+
 class P4WriteContext : public virtual Visitor {
  public:
-    bool isWrite();
+    bool isWrite(const P4::TypeMap *typeMap = nullptr);
 };
 
 #endif /* _IR_VISITOR_H_ */

@@ -76,6 +76,7 @@ class ResolveReferences : public Inspector {
                                bool checkShadow = false);
 
     Visitor::profile_t init_apply(const IR::Node* node) override;
+    void end_apply(const IR::Node* node) override;
     using Inspector::preorder;
     using Inspector::postorder;
 

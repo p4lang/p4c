@@ -207,8 +207,10 @@ class ExpressionConverter : public Inspector {
                 int width = typearg->width_bits();
                 BUG_CHECK(width > 0, "%1%: unknown width", targ);
                 auto j = new Util::JsonObject();
-                j->emplace("value", "lookahead");
-                j->emplace("size", width);
+                j->emplace("type", "lookahead");
+                auto v = mkArrayField(j, "value");
+                v->append(0);
+                v->append(width);
                 map.emplace(expression, j);
                 return;
             }
@@ -243,7 +245,7 @@ class ExpressionConverter : public Inspector {
         // since the caller invokes the converter directly with the select argument.
         auto m = get(expression->e0);
         if (m->is<Util::JsonObject>()) {
-            auto val = m->to<Util::JsonObject>()->get("value");
+            auto val = m->to<Util::JsonObject>()->get("type");
             if (val != nullptr && val->is<Util::JsonValue>() &&
                 *val->to<Util::JsonValue>() == "lookahead") {
                 int h = expression->getH();
@@ -507,15 +509,35 @@ class ExpressionConverter : public Inspector {
         BUG("%1%: Unhandled case", expression);
     }
 
-    Util::IJson* convert(const IR::Expression* e) {
-        ArithmeticFixup af(converter->typeMap);
-        auto expr = e->apply(af);
-        CHECK_NULL(expr);
+    // Due to limitations in BMv2, which does not support uniformly expressions,
+    // we cannot perform this conversion correctly everywhere.
+    Util::IJson* convert(const IR::Expression* e, bool doFixup = true, bool wrap = true) {
+        const IR::Expression *expr = e;
+        if (doFixup) {
+            ArithmeticFixup af(converter->typeMap);
+            auto r = e->apply(af);
+            CHECK_NULL(r);
+            expr = r->to<IR::Expression>();
+            CHECK_NULL(expr);
+        }
         expr->apply(*this);
         auto result = ::get(map, expr->to<IR::Expression>());
-        if (result != nullptr)
-            return result;
-        BUG("%1%: Could not convert expression", e);
+        if (result == nullptr)
+            BUG("%1%: Could not convert expression", e);
+
+        // This is weird, but that's how it is: expressions must
+        // be wrapped in another outer object.
+        if (wrap && result->is<Util::JsonObject>()) {
+            auto to = result->to<Util::JsonObject>()->get("type");
+            if (to != nullptr && to->to<Util::JsonValue>() != nullptr &&
+                (*to->to<Util::JsonValue>()) == "expression") {
+                auto rwrap = new Util::JsonObject();
+                rwrap->emplace("type", "expression");
+                rwrap->emplace("value", result);
+                result = rwrap;
+            }
+        }
+        return result;
     }
 };
 
@@ -539,21 +561,6 @@ cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fie
     calc->emplace("input", jright);
     calculations->append(calc);
     return calcName;
-}
-
-static Util::IJson* wrapExpression(Util::IJson* json) {
-    // This is weird, but that's how it is
-    if (json->is<Util::JsonObject>()) {
-        auto to = json->to<Util::JsonObject>()->get("type");
-        if (to != nullptr && to->to<Util::JsonValue>() != nullptr &&
-            (*to->to<Util::JsonValue>()) == "expression") {
-            auto rwrap = new Util::JsonObject();
-            rwrap->emplace("type", "expression");
-            rwrap->emplace("value", json);
-            json = rwrap;
-        }
-    }
-    return json;
 }
 
 void
@@ -588,10 +595,8 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
             auto left = conv->convert(l);
-            left = wrapExpression(left);
             parameters->append(left);
             auto right = conv->convert(r);
-            right = wrapExpression(right);
             parameters->append(right);
             continue;
         } else if (s->is<IR::EmptyStatement>()) {
@@ -904,7 +909,7 @@ Util::IJson* JsonConverter::convertIf(const CFG::IfNode* node, cstring) {
     auto result = new Util::JsonObject();
     result->emplace("name", node->name);
     result->emplace("id", nextId("conditionals"));
-    auto j = conv->convert(node->statement->condition);
+    auto j = conv->convert(node->statement->condition, true, false);
     CHECK_NULL(j);
     result->emplace("expression", j);
     for (auto e : node->successors.edges) {
@@ -1213,7 +1218,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     result->emplace("default_action", Util::JsonValue::null);
     auto defact = table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
     if (defact != nullptr)
-        ::warning("%1%: setting default action currently not supported", defact);
+        ::warning("%1%.%2%: setting default action currently not supported", table->name, defact);
     return result;
 }
 
@@ -1832,7 +1837,6 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
         result->emplace("op", "set");
         auto l = conv->convert(assign->left);
         auto r = conv->convert(assign->right);
-        r = wrapExpression(r);
         params->append(l);
         params->append(r);
         return result;
@@ -1990,7 +1994,7 @@ Util::IJson* JsonConverter::toJson(const IR::ParserState* state) {
     if (state->selectExpression != nullptr) {
         if (state->selectExpression->is<IR::SelectExpression>()) {
             auto se = state->selectExpression->to<IR::SelectExpression>();
-            key = conv->convert(se->select);
+            key = conv->convert(se->select, false);
             for (auto sc : *se->selectCases) {
                 auto trans = new Util::JsonObject();
                 mpz_class value, mask;

@@ -106,6 +106,7 @@ class TypeInference : public Transform {
     // do functions pre-order so we can check the prototype
     // before the returns
     const IR::Node* preorder(IR::Function* function) override;
+    const IR::Node* preorder(IR::P4Program* program) override;
 
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Errors* decl) override;

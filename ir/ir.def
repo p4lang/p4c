@@ -116,7 +116,6 @@ class P4Action : Declaration, IGeneralNamespace, IAnnotated {
     { return body->only<IDeclaration>(); }
     const Annotations* getAnnotations() const override { return annotations; }
 #end
-#nodbprint
     validate{ body->check_null(); }
 }
 
@@ -265,7 +264,8 @@ class Declaration_Variable : Declaration, IAnnotated {
 #emit
     const Annotations* getAnnotations() const override { return annotations; }
 #end
-#nodbprint
+    dbprint { Declaration::dbprint(out);
+        if (initializer) out << " = " << *initializer; }
 }
 
 class Declaration_Constant : Declaration, IAnnotated {
@@ -339,6 +339,13 @@ class IfStatement : Statement {
     Statement        ifTrue;
     NullOK Statement ifFalse;
 #nodbprint
+    visit_children {
+        v.visit(condition, "condition");
+        auto &clone(v.flow_clone());
+        v.visit(ifTrue, "ifTrue");
+        clone.visit(ifFalse, "ifFalse");
+        v.flow_merge(clone);
+    }
 }
 
 class BlockStatement : Statement, IGeneralNamespace {
@@ -347,7 +354,6 @@ class BlockStatement : Statement, IGeneralNamespace {
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
     { return components->only<IDeclaration>(); }
 #end
-#nodbprint
 }
 
 class MethodCallStatement : Statement {

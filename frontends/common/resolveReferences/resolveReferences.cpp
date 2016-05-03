@@ -240,14 +240,25 @@ void ResolveReferences::checkShadowing(const IR::INamespace*ns) const {
 }
 
 Visitor::profile_t ResolveReferences::init_apply(const IR::Node* node) {
-    refMap->clear();
+    if (!node->is<IR::P4Program>() || refMap->program != node->to<IR::P4Program>())
+        // Clear map only if program has not changed from last time
+        refMap->clear();
     return Inspector::init_apply(node);
+}
+
+void ResolveReferences::end_apply(const IR::Node* node) {
+    if (node->is<IR::P4Program>())
+        refMap->program = node->to<IR::P4Program>();
 }
 
 /////////////////// visitor methods ////////////////////////
 
 // visitor should be invoked here
 bool ResolveReferences::preorder(const IR::P4Program* program) {
+    if (refMap->program == program)
+        // program has not changed, we are done!
+        return false;
+
     if (!resolveForward.empty())
         BUG("Expected empty resolvePath");
     resolveForward.push_back(anyOrder);

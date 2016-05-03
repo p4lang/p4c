@@ -44,6 +44,8 @@ class TypeMap final {
     void setLeftValue(const IR::Expression* expression);
     const IR::Type_InfInt* canonicalInfInt() const
     { return TypeMap::canonInfInt; }
+
+    const IR::P4Program* program;  // program whose type map this is (if known)
 };
 }  // namespace P4
 

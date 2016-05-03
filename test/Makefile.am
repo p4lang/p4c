@@ -19,9 +19,9 @@ path_test_LDADD = libp4ctoolkit.a
 json_test_SOURCES = test/unittests/json_test.cpp
 json_test_LDADD = libp4ctoolkit.a
 unittest_transform1_SOURCES = $(ir_SOURCES) test/unittests/transform1.cpp
-unittest_transform1_LDADD = libp4ctoolkit.a
+unittest_transform1_LDADD = libfrontend.a libp4ctoolkit.a
 namemap_order_test_SOURCES = $(ir_SOURCES) test/unittests/namemap_order_test.cpp
-namemap_order_test_LDADD = libp4ctoolkit.a
+namemap_order_test_LDADD = libfrontend.a libp4ctoolkit.a
 
 # Compiler tests
 

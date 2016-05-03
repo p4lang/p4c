@@ -57,14 +57,19 @@ TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool clearM
 Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
     LOG2("Reference map for type checker:" << std::endl << refMap);
     initialNode = node;
-    if (clearMap)
-        typeMap->clear();
+    if (clearMap) {
+        // Clear map only if program has not changed from last time
+        if (!node->is<IR::P4Program>() || typeMap->program != node->to<IR::P4Program>())
+            typeMap->clear();
+    }
     return Transform::init_apply(node);
 }
 
 void TypeInference::end_apply(const IR::Node* node) {
     if (readOnly && !(*node == *initialNode))
         BUG("%1%: typechecker mutated node", node);
+    if (node->is<IR::P4Program>())
+        typeMap->program = node->to<IR::P4Program>();
 }
 
 bool TypeInference::done() const {
@@ -77,7 +82,10 @@ bool TypeInference::done() const {
 const IR::Type* TypeInference::getType(const IR::Node* element) const {
     const IR::Type* result = typeMap->getType(element);
     if (result == nullptr) {
-        ::error("Could not find type of %1%", element);
+        if (!readOnly)
+            ::error("Could not find type of %1%", element);
+        else
+            BUG("Could not find type of %1%", element);
         return nullptr;
     }
     return result;
@@ -347,6 +355,14 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
 
 ///////////////////////////////////// Visitor methods
 
+const IR::Node* TypeInference::preorder(IR::P4Program* program) {
+    if (typeMap->program == program && readOnly)
+        // we are done
+        prune();
+    return program;
+}
+
+
 // This method is here to avoid visiting the Expression::type field;
 // this field is not used by the P4 v1.2 front-end, but may be populated
 // by the P4 v1.0 front-end.
@@ -586,7 +602,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
 
 // Return true on success
 bool TypeInference::checkVirtualMethods(const IR::Declaration_Instance* inst,
-                                      const IR::Type_Extern* type) {
+                                        const IR::Type_Extern* type) {
     // Make a list of the virtual methods
     IR::NameMap<IR::Method, ordered_map> virt;
     for (auto m : *type->methods)
@@ -707,6 +723,7 @@ TypeInference::containerInstantiation(
 }
 
 const IR::Node* TypeInference::preorder(IR::Function* function) {
+    LOG1("Visiting " << function);
     if (done())
         return function;
     visit(function->type);
@@ -2071,7 +2088,7 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
 const IR::Node* TypeInference::postorder(IR::ReturnStatement* statement) {
     if (done())
         return statement;
-    auto func = findContext<IR::Function>();
+    auto func = findOrigCtxt<IR::Function>();
     if (func == nullptr) {
         if (statement->expression != nullptr)
             ::error("%1%: return with expression can only be used in a function", statement);

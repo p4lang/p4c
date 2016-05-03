@@ -9,20 +9,23 @@ namespace P4 {
 
 class ActionReplacements {
  public:
-    // For each global action and each control where the action is used
+    // For each control that uses an action and for each each global action
     // we create a replacement.
-    std::map<const IR::P4Action*, std::map<const IR::P4Control*, const IR::P4Action*>*> repl;
+    std::map<const IR::P4Control*, std::map<const IR::P4Action*, const IR::P4Action*>*> repl;
     CallGraph<const IR::P4Action*> calls;
 
-    bool isGlobal(const IR::P4Action* action) const
-    { return repl.find(action) != repl.end(); }
     bool hasReplacement(const IR::P4Action* action, const IR::P4Control* control) const {
-        auto map = ::get(repl, action);
-        return ::get(map, control) != nullptr;
+        auto map = ::get(repl, control);
+        if (map == nullptr)
+            return false;
+        return ::get(map, action) != nullptr;
     }
     void addReplacement(const IR::P4Action* action, const IR::P4Control* control,
                         const IR::P4Action* replacement) {
-        (*repl[action])[control] = replacement;
+        LOG1("Replacing global " << action << " with " << replacement);
+        if (repl.find(control) == repl.end())
+            repl[control] = new std::map<const IR::P4Action*, const IR::P4Action*>();
+        (*repl[control])[action] = replacement;
     }
 };
 
@@ -32,12 +35,6 @@ class FindActionUses : public Inspector {
  public:
     FindActionUses(ReferenceMap* refMap, ActionReplacements* repl) : refMap(refMap), repl(repl)
     { CHECK_NULL(refMap); CHECK_NULL(repl); }
-    // Global actions will be visited prior to their uses
-    bool preorder(const IR::P4Action* action) override {
-        if (findContext<IR::P4Control>() != nullptr)
-            repl->repl[action] = new std::map<const IR::P4Control*, const IR::P4Action*>();
-        return false;
-    }
     bool preorder(const IR::PathExpression* path) override;
 };
 

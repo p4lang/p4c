@@ -17,7 +17,7 @@ void TypeMap::setLeftValue(const IR::Expression* expression) {
 
 void TypeMap::clear() {
     LOG1("Clearing typeMap");
-    typeMap.clear(); leftValues.clear();
+    typeMap.clear(); leftValues.clear(); program = nullptr;
 }
 
 void TypeMap::checkPrecondition(const IR::Node* element, const IR::Type* type) const {
