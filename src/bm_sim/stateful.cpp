@@ -20,14 +20,23 @@
 
 #include <bm/bm_sim/stateful.h>
 
+#include <vector>
+
 namespace bm {
 
 void
 RegisterArray::reset_state() {
+  // we build a new vector of registers, then swap, to avoid holding the lock
+  // for too long
+  std::vector<Register> registers_new;
+  size_t s = size();
+  // TODO(antonin): is this actually better than
+  // std::vector<Register> registers_new(size, Register(bitwidth)); ?
+  registers_new.reserve(s);
+  for (size_t i = 0; i < s; i++)
+    registers_new.emplace_back(bitwidth);
   auto lock = UniqueLock();
-  for (auto &r : registers) {
-    r.set(0);
-  }
+  registers.swap(registers_new);
 }
 
 

@@ -98,7 +98,7 @@ class RegisterArray : public NamedP4Object {
 
   RegisterArray(const std::string &name, p4object_id_t id,
                 size_t size, int bitwidth)
-    : NamedP4Object(name, id) {
+      : NamedP4Object(name, id), bitwidth(bitwidth) {
     registers.reserve(size);
     for (size_t i = 0; i < size; i++)
       registers.emplace_back(bitwidth);
@@ -157,9 +157,9 @@ class RegisterArray : public NamedP4Object {
   void unlock(UniqueLock &lock) const { lock.unlock(); }
 
  private:
-  std::vector<Register> registers;
-
+  std::vector<Register> registers{};
   mutable std::mutex m_mutex{};
+  int bitwidth{};
 };
 
 
@@ -189,7 +189,7 @@ class RegisterSync {
   }
 
  private:
-  mutable std::vector<std::mutex *> mutexes;
+  mutable std::vector<std::mutex *> mutexes{};
   std::unordered_set<const RegisterArray *> register_arrays{};
 };
 
