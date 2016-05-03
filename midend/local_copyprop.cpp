@@ -100,7 +100,11 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
         BUG_CHECK(table == &self.tables[tbl->name], "corrupt internal state");
         table = nullptr;
         return tbl; }
+    IR::Expression *preorder(IR::Expression *exp) {
+        visitAgain();
+        return exp; }
     const IR::Expression *preorder(IR::PathExpression *path) {
+        visitAgain();
         if (table) {
             const Visitor::Context *ctxt = nullptr;
             if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1) {
@@ -162,6 +166,11 @@ const IR::Node *DoLocalCopyPropagation::postorder(IR::Declaration_Variable *var)
     return var;
 }
 
+IR::Expression *DoLocalCopyPropagation::preorder(IR::Expression *exp) {
+    visitAgain();
+    return exp;
+}
+
 const IR::Expression *DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
     if (inferForTable) {
         const Visitor::Context *ctxt = nullptr;
@@ -195,7 +204,13 @@ const IR::Expression *DoLocalCopyPropagation::postorder(IR::PathExpression *path
     return path;
 }
 
+IR::Statement *DoLocalCopyPropagation::preorder(IR::Statement *s) {
+    visitAgain();
+    return s;
+}
+
 IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatement *as) {
+    visitAgain();
     if (!working) return as;
     // visit the source subtree first, before the destination subtree
     // make sure child indexes are set properly so we can detect writes -- these are the
