@@ -32,7 +32,7 @@ class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContex
 
     LocalCopyPropagation(const LocalCopyPropagation &) = default;
  public:
-    LocalCopyPropagation() { visitDagOnce = false; }
+    LocalCopyPropagation() {}
 };
 
 }  // namespace P4

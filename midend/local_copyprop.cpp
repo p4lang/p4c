@@ -62,6 +62,7 @@ IR::Declaration_Variable *P4::LocalCopyPropagation::postorder(IR::Declaration_Va
 }
 
 const IR::Expression *P4::LocalCopyPropagation::postorder(IR::PathExpression *path) {
+    visitAgain();
     if (auto local = ::getref(locals, path->path->name)) {
         if (isWrite()) {
             return path;

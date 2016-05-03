@@ -5,42 +5,51 @@
 class Visitor::ChangeTracker {
     // FIXME -- this code is really incomprehensible due to all the pairs/first/second stuff
     // unfortunatelly maps use pairs all over the place, which is where they come from.
-    typedef unordered_map<const IR::Node *, std::pair<bool, const IR::Node *>>  visited_t;
+    struct info_t {
+        bool            done;   // not currently visiting this node or its children
+        bool            visitOnce;
+        const IR::Node  *changed;
+        info_t(bool d, bool v, const IR::Node *c) : done(d), visitOnce(v), changed(c) {} };
+    typedef unordered_map<const IR::Node *, info_t>  visited_t;
     visited_t           visited;
 
  public:
     struct change_t {
-        bool                                    valid;
-        std::pair<visited_t::iterator, bool>    state;  // result of visited.emplace
+        bool            valid;
+        info_t          *state;
         change_t() : valid(false) {}
-        change_t(visited_t *visited, const IR::Node *n) : valid(true),
-            state(visited->emplace(n, std::make_pair(false, n))) {
-                if (!state.second && !state.first->second.first)
-                    BUG("IR loop detected "); }
-        explicit operator bool() { return valid; }
-        bool done() { return !state.second; }
-        const IR::Node *result() { return state.first->second.second; }
+        change_t(visited_t *visited, bool visitOnce, const IR::Node *n) : valid(true) {
+            auto t = visited->emplace(n, info_t(false, visitOnce, n));
+            state = &t.first->second;
+            if (!t.second && !state->done)
+                BUG("IR loop detected "); }
+        explicit operator bool() const { return valid; }
+        bool *visitCurrentOnce() const { return &state->visitOnce; }
+        bool done() const { return state->done && state->visitOnce; }
+        const IR::Node *result() const { return state->changed; }
     };
-    bool done(const IR::Node *n) const { return visited.count(n) && visited.at(n).first; }
-    const IR::Node *result(IR::Node *n) const { return visited.at(n).second; }
-    change_t track(const IR::Node *n) { return change_t(&visited, n); }
-    void start(change_t &change) { change.state.first->second.first = false; }
+    bool done(const IR::Node *n) const {
+        auto it = visited.find(n);
+        return it != visited.end() && it->second.done && !it->second.visitOnce; }
+    const IR::Node *result(IR::Node *n) const { return visited.at(n).changed; }
+    change_t track(const IR::Node *n, bool visitOnce) { return change_t(&visited, visitOnce, n); }
+    void start(change_t &change) { change.state->done = false; }
     bool finish(change_t &change, const IR::Node *orig, const IR::Node *final) {
-        if (!change.valid || (change.state.first = visited.find(orig)) == visited.end())
+        if (!change.valid || change.state != &visited.find(orig)->second)
             BUG("visitor state tracker corrupted");
-        change.state.first->second.first = true;
+        change.state->done = true;
         if (!final || *final != *orig) {
-            change.state.first->second.second = final;
-            visited.emplace(final, std::make_pair(true, final));
+            change.state->changed = final;
+            visited.emplace(final, info_t(true, true, final));
             return true;
         } else {
             return false; } }
     const IR::Node *result(const IR::Node *n) const {
         auto it = visited.find(n);
-        if (it == visited.end())
+        if (it == visited.end() || !it->second.visitOnce)
             return n;
-        if (!it->second.first) BUG("IR loop detected");
-        return it->second.second; }
+        if (!it->second.done) BUG("IR loop detected");
+        return it->second.changed; }
 };
 
 Visitor::profile_t Visitor::init_apply(const IR::Node *) {
@@ -142,18 +151,20 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
-        auto track = visited->track(n);
-        if (track.done() && visitDagOnce) {
+        auto track = visited->track(n, visitDagOnce);
+        if (track.done()) {
             n = track.result();
         } else {
             visited->start(track);
             IR::Node *copy = n->clone();
             local.current.node = copy;
-            if (visitDagOnce && !dontForwardChildrenBeforePreorder) {
+            if (!dontForwardChildrenBeforePreorder) {
                 ForwardChildren forward_children(*visited);
                 copy->visit_children(forward_children); }
+            visitCurrentOnce = track.visitCurrentOnce();
             if (copy->apply_visitor_preorder(*this)) {
                 copy->visit_children(*this);
+                visitCurrentOnce = track.visitCurrentOnce();
                 copy->apply_visitor_postorder(*this); }
             if (visited->finish(track, n, copy))
                 (n = copy)->validate(); } }
@@ -168,20 +179,21 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
-        auto vp = visited->emplace(n, false);
-        if (!vp.second && !vp.first->second)
+        auto vp = visited->emplace(n, info_t{false, visitDagOnce});
+        if (!vp.second && !vp.first->second.done)
             BUG("IR loop detected");
-        if (!vp.second && visitDagOnce) {
+        if (!vp.second && vp.first->second.visitOnce) {
             // do nothing
         } else {
-            vp.first->second = false;
+            vp.first->second.done = false;
+            visitCurrentOnce = &vp.first->second.visitOnce;
             if (n->apply_visitor_preorder(*this)) {
                 n->visit_children(*this);
+                visitCurrentOnce = &vp.first->second.visitOnce;
                 n->apply_visitor_postorder(*this); }
-            vp.first = visited->find(n);  // iterator may have been invalidated
-            if (vp.first == visited->end())
+            if (vp.first != visited->find(n))
                 BUG("visitor state tracker corrupted");
-            vp.first->second = true; } }
+            vp.first->second.done = true; } }
     if (ctxt)
         ctxt->child_index++;
     else
@@ -193,17 +205,18 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
-        auto track = visited->track(n);
-        if (track.done() && visitDagOnce) {
+        auto track = visited->track(n, visitDagOnce);
+        if (track.done()) {
             n = track.result();
         } else {
             visited->start(track);
             auto copy = n->clone();
             local.current.node = copy;
-            if (visitDagOnce && !dontForwardChildrenBeforePreorder) {
+            if (!dontForwardChildrenBeforePreorder) {
                 ForwardChildren forward_children(*visited);
                 copy->visit_children(forward_children); }
             prune_flag = false;
+            visitCurrentOnce = track.visitCurrentOnce();
             auto preorder_result = copy->apply_visitor_preorder(*this);
             ChangeTracker::change_t preorder_result_track;
             assert(preorder_result != n);  // should never happen
@@ -211,15 +224,16 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
             if (!preorder_result) {
                 prune_flag = true;
             } else if (preorder_result != copy) {
-                if (visited->done(preorder_result) && visitDagOnce) {
+                if (visited->done(preorder_result)) {
                     final = visited->result(preorder_result);
                     prune_flag = true;
                 } else {
-                    preorder_result_track = visited->track(preorder_result);
+                    preorder_result_track = visited->track(preorder_result, visitDagOnce);
                     visited->start(preorder_result_track);
                     local.current.node = copy = preorder_result->clone(); } }
             if (!prune_flag) {
                 copy->visit_children(*this);
+                visitCurrentOnce = track.visitCurrentOnce();
                 final = copy->apply_visitor_postorder(*this); }
             if (final && final != preorder_result && *final == *preorder_result)
                 final = preorder_result;
