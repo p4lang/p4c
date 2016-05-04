@@ -39,7 +39,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("t2") table t2() {
         actions = {
             a2;
@@ -50,7 +49,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         t1.apply();
         t2.apply();

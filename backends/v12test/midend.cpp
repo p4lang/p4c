@@ -6,6 +6,7 @@
 #include "midend/removeReturns.h"
 #include "midend/moveConstructors.h"
 #include "midend/actionSynthesis.h"
+#include "midend/localizeActions.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -25,7 +26,6 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     P4::TypeMap typeMap;
 
     // TODO: duplicate actions that are used by multiple tables
-    // TODO: duplicate global actions into the controls that are using them
     // TODO: remove table parameters if possible
     // TODO: remove action parameters if possible
     // TODO: remove expressions in table key
@@ -43,7 +43,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::RemoveReturns(&refMap, true),
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         evaluator,
     };
 
@@ -69,11 +69,13 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     PassManager midEnd = {
         new P4::DiscoverInlining(&toInline, blockMap),
         new P4::InlineDriver(&toInline, inliner, isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         actInl,
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        new P4::LocalizeAllActions(&refMap, isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         // TODO: inlining introduces lots of copies,
         // so perhaps a copy-propagation step would be useful
         new P4::TypeChecking(&refMap, &typeMap, isv1),
@@ -83,6 +85,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
+        new P4::TypeChecking(&refMap, &typeMap, isv1, true),  //*
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),

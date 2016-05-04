@@ -28,6 +28,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("do_add") action do_add_0() {
         hdr.data.b3 = hdr.data.b1 + hdr.data.b2;
     }
@@ -46,12 +48,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             do_and_0;
             do_or_0;
             do_xor_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         test1_0.apply();

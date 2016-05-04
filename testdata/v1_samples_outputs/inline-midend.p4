@@ -26,14 +26,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     headers hdr_0;
     metadata meta_0;
     standard_metadata_t standard_metadata_0;
+    action NoAction_0() {
+    }
     @name("d.c.x") action d_c.x() {
     }
     @name("d.c.t") table d_c.t() {
         actions = {
             d_c.x;
-            NoAction;
+            NoAction_0;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     action act() {
         hdr_1 = hdr;

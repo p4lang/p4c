@@ -59,7 +59,9 @@ following tools are required to build and run the compiler and tests:
 
 - Python 2.7 for scripting (especially for running tests)
 
-Note that each back-end may have additional dependences.
+Note that each back-end may have additional dependences:
+  * [BMv2](../backends/bmv2/README.md)
+  * [eBPF](../backends/ebpf/README.md)
 
 ## Ubuntu dependences
 

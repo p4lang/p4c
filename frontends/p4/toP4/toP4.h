@@ -141,6 +141,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::ListExpression* e) override;
     bool preorder(const IR::MethodCallExpression* e) override;
     bool preorder(const IR::DefaultExpression* e) override;
+    bool preorder(const IR::This* e) override;
 
     // vectors
     bool preorder(const IR::Vector<IR::Annotation>* v) override;

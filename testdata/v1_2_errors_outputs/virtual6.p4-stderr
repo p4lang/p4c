@@ -1,19 +1,7 @@
-../testdata/v1_2_errors/virtual6.p4(7): error: cntr: g virtual method not implemented
+../testdata/v1_2_errors/virtual6.p4(7): error: cntr: g abstract method not implemented
     Virtual() cntr = {
     ^^^^^^^^^^^^^^
 ../testdata/v1_2_errors/virtual6.p4(3)
     abstract bit<16> g();
                      ^
-../testdata/v1_2_errors/virtual6.p4(7): error: Could not find type of cntr
-    Virtual() cntr = {
-    ^^^^^^^^^^^^^^
-../testdata/v1_2_errors/virtual6.p4(14): error: Could not find type of cntr
-        p = cntr.f(6);
-            ^^^^
-../testdata/v1_2_errors/virtual6.p4(14): error: Could not find type of cntr.f
-        p = cntr.f(6);
-            ^^^^^^
-../testdata/v1_2_errors/virtual6.p4(14): error: Could not find type of cntr.f
-        p = cntr.f(6);
-            ^^^^^^^^^
-error: 5 errors encountered, aborting compilation
+error: 1 errors encountered, aborting compilation

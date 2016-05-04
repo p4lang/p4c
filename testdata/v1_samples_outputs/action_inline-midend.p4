@@ -22,6 +22,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<1> y0_0;
     bit<1> y0_1;
+    action NoAction_0() {
+    }
     @name("b") action b_0() {
         y0_0 = meta.md.b;
         y0_0 = y0_0 + 1w1;
@@ -33,9 +35,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t") table t_0() {
         actions = {
             b_0;
-            NoAction;
+            NoAction_0;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         t_0.apply();

@@ -58,6 +58,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("on_miss") action on_miss_0() {
     }
     @name("rewrite_src_dst_mac") action rewrite_src_dst_mac_0(bit<48> smac, bit<48> dmac) {
@@ -68,13 +70,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             on_miss_0;
             rewrite_src_dst_mac_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
         }
         size = 32768;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         rewrite_mac_0.apply();
@@ -82,6 +84,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_1() {
+    }
     @name("set_vrf") action set_vrf_0(bit<12> vrf) {
         meta.ingress_metadata.vrf = vrf;
     }
@@ -100,62 +104,62 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("bd") table bd_0() {
         actions = {
             set_vrf_0;
-            NoAction;
+            NoAction_1;
         }
         key = {
             meta.ingress_metadata.bd: exact;
         }
         size = 65536;
-        default_action = NoAction();
+        default_action = NoAction_1();
     }
     @name("ipv4_fib") table ipv4_fib_0() {
         actions = {
             on_miss_1;
             fib_hit_nexthop_0;
-            NoAction;
+            NoAction_1;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
             hdr.ipv4.dstAddr         : exact;
         }
         size = 131072;
-        default_action = NoAction();
+        default_action = NoAction_1();
     }
     @name("ipv4_fib_lpm") table ipv4_fib_lpm_0() {
         actions = {
             on_miss_1;
             fib_hit_nexthop_0;
-            NoAction;
+            NoAction_1;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
             hdr.ipv4.dstAddr         : lpm;
         }
         size = 16384;
-        default_action = NoAction();
+        default_action = NoAction_1();
     }
     @name("nexthop") table nexthop_0() {
         actions = {
             on_miss_1;
             set_egress_details_0;
-            NoAction;
+            NoAction_1;
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
         }
         size = 32768;
-        default_action = NoAction();
+        default_action = NoAction_1();
     }
     @name("port_mapping") table port_mapping_0() {
         actions = {
             set_bd_0;
-            NoAction;
+            NoAction_1;
         }
         key = {
             standard_metadata.ingress_port: exact;
         }
         size = 32768;
-        default_action = NoAction();
+        default_action = NoAction_1();
     }
     apply {
         if (hdr.ipv4.isValid()) {

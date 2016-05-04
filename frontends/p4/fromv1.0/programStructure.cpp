@@ -59,7 +59,6 @@ bool ProgramStructure::isHeader(const IR::ConcreteHeaderRef* nhr) const {
     if (meta != nullptr)
         return false;
     BUG("Unexpected reference %1%", nhr);
-    return nullptr;
 }
 
 void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool metadata) {

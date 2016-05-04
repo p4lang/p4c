@@ -57,7 +57,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         // Print program in the middle
         new P4::ToP4(midStream, false, options.file),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         // Print the program before the end.
         new P4::ToP4(endStream, false, options.file),
     };

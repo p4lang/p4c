@@ -320,6 +320,8 @@ class Mux : Operation_Ternary {
 
 class DefaultExpression : Expression {}
 
+class This : Expression {}  // experimental
+
 class Cast : Operation_Unary {
     Type destType;
 #emit

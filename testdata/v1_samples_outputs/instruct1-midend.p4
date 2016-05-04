@@ -51,6 +51,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("decap") action decap_0() {
         hdr.hdr1 = hdr.hdr2;
         hdr.hdr2.setValid(false);
@@ -61,12 +63,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             decap_0;
             noop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         test1_0.apply();

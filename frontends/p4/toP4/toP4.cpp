@@ -594,6 +594,11 @@ bool ToP4::preorder(const IR::DefaultExpression*) {
     return false;
 }
 
+bool ToP4::preorder(const IR::This*) {
+    builder.append("this");
+    return false;
+}
+
 bool ToP4::preorder(const IR::PathExpression* p) {
     visit(p->path);
     return false;

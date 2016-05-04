@@ -46,6 +46,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     DirectMeter<bit<32>>(CounterType.Packets) @name("my_meter") my_meter_0;
     @name("_drop") action _drop_0() {
         mark_to_drop();
@@ -56,13 +58,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_0;
             _nop_1;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.meta.meter_tag: exact;
         }
         size = 16;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("m_action") action m_action(bit<9> meter_idx) {
         standard_metadata.egress_spec = meter_idx;
@@ -76,13 +78,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             m_action;
             _nop_2;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
         size = 16384;
-        default_action = NoAction();
+        default_action = NoAction_0();
         meters = my_meter_0;
     }
     apply {

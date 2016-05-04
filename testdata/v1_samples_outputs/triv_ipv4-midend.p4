@@ -54,6 +54,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("do_drop") action do_drop_0() {
     }
     @name("route_ipv4") action route_ipv4_0(bit<9> egress_spec) {
@@ -64,13 +66,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             do_drop_0;
             route_ipv4_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ipv4.dstAddr: lpm;
         }
         size = 2048;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         routing_0.apply();

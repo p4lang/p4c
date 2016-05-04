@@ -32,11 +32,11 @@ extern bs {
 struct Packet_data {
 }
 
-action NoAction() {
-}
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     TArg1 pArg1_0;
     TArg2 pArg2_0;
+    action NoAction_0() {
+    }
     @name("p1.B_action") action p1_B_action(out bit<9> barg, BParamType bData) {
         barg = (bit<9>)bData;
     }
@@ -65,7 +65,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         actions = {
             p1_Drop;
         }
-        const default_action = NoAction;
+        const default_action = NoAction_0;
     }
     action act() {
         pArg1_0 = qArg1;

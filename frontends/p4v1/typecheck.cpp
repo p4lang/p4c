@@ -183,7 +183,7 @@ TypeCheck::TypeCheck() : PassManager({
         new Pass2(*this),
         new Pass3(*this),
     })
-}) {}
+}) { setStopOnError(true); }
 
 const IR::Node *TypeCheck::apply_visitor(const IR::Node *n, const char *name) {
     return PassManager::apply_visitor(n, name);

@@ -57,6 +57,8 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     IPv4Address nextHop_0;
     bool hasReturned;
+    action NoAction_0() {
+    }
     @name("Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;
     }
@@ -86,7 +88,7 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         actions = {
             Send_to_cpu_0;
         }
-        const default_action = NoAction;
+        const default_action = NoAction_0;
     }
     @name("Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;

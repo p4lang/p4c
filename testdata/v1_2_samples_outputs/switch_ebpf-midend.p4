@@ -44,6 +44,8 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
+    action NoAction_0() {
+    }
     @name("Reject") action Reject_0(IPv4Address add) {
         pass = false;
         headers.ipv4.srcAddr = add;
@@ -54,10 +56,10 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         actions = {
             Reject_0;
-            NoAction;
+            NoAction_0;
         }
         implementation = hash_table(32w1024);
-        const default_action = NoAction;
+        const default_action = NoAction_0;
     }
     action act() {
         pass = false;
@@ -83,7 +85,7 @@ control pipe(inout Headers_t headers, out bool pass) {
             Reject_0: {
                 tbl_act_0.apply();
             }
-            NoAction: {
+            NoAction_0: {
             }
         }
 

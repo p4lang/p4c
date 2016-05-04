@@ -46,6 +46,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     Meter(32w16384, CounterType.Packets) @name("my_meter") my_meter_0;
     @name("_drop") action _drop_0() {
         mark_to_drop();
@@ -60,25 +62,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_0;
             _nop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.meta.meter_tag: exact;
         }
         size = 16;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("m_table") table m_table_0() {
         actions = {
             m_action_0;
             _nop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
         size = 16384;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         m_table_0.apply();

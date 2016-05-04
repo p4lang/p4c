@@ -135,6 +135,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("fdb_set") action fdb_set_0(bit<1> type_, bit<9> port_id) {
         meta.ingress_metadata.mac_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
@@ -219,58 +221,58 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("fdb") table fdb_0() {
         actions = {
             fdb_set_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.ingress_metadata.vlan_id: exact;
             hdr.eth.dstAddr              : exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("learn_notify") table learn_notify_0() {
         actions = {
             nop_0;
             generate_learn_notify_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact;
             meta.ingress_metadata.vlan_id       : exact;
             hdr.eth.srcAddr                     : exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("neighbor") table neighbor_0() {
         actions = {
             set_dmac_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.ingress_metadata.vrf        : exact;
             meta.ingress_metadata.ip_dest    : exact;
             meta.ingress_metadata.router_intf: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("next_hop") table next_hop_0() {
         actions = {
             set_next_hop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.ingress_metadata.nhop: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("port") table port_0() {
         actions = {
             set_in_port_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
         @name("port_counters") counters = DirectCounter(CounterType.Packets);
     }
     @name("route") table route_0() {
@@ -278,41 +280,41 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             route_set_trap_0;
             route_set_nexthop_0;
             route_set_nexthop_group_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
             hdr.ipv4.dstAddr         : lpm;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("router_interface") table router_interface_0() {
         actions = {
             set_router_interface_0;
             router_interface_miss_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.eth.dstAddr: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("switch") table switch() {
         actions = {
             set_switch_0;
-            NoAction;
+            NoAction_0;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("virtual_router") table virtual_router_0() {
         actions = {
             set_router_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         switch.apply();

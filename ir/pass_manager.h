@@ -12,7 +12,7 @@ class PassManager : virtual public Visitor {
     vector<DebugHook>   debugHooks;  // called after each pass
     vector<Visitor *>   passes;
     // if true stops compilation after first pass that signals an error
-    bool                stop_on_error = false;
+    bool                stop_on_error = true;
     unsigned            seqNo = 0;
     void addPasses(const std::initializer_list<Visitor *> &init) {
         for (auto p : init) if (p) passes.emplace_back(p); }

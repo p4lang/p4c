@@ -29,6 +29,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     Counter(32w70000, CounterType.Packets) @name("cntDum") cntDum_0;
     @name("act") action act_0(bit<8> idx) {
         cntDum_0.increment((bit<32>)idx);
@@ -36,13 +38,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("tab1") table tab1_0() {
         actions = {
             act_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
         size = 160000;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         tab1_0.apply();

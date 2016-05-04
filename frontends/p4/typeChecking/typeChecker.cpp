@@ -11,6 +11,7 @@ TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
     passes.emplace_back(new P4::ResolveReferences(refMap, isv1));
     passes.emplace_back(new P4::TypeInference(refMap, typeMap, true, true));
     setName("TypeAnalysis");
+    setStopOnError(true);
 }
 
 // Used to set the type of Constants after type inference
@@ -601,9 +602,9 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
 }
 
 // Return true on success
-bool TypeInference::checkVirtualMethods(const IR::Declaration_Instance* inst,
+bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance* inst,
                                         const IR::Type_Extern* type) {
-    // Make a list of the virtual methods
+    // Make a list of the abstract methods
     IR::NameMap<IR::Method, ordered_map> virt;
     for (auto m : *type->methods)
         if (m->isAbstract)
@@ -611,10 +612,10 @@ bool TypeInference::checkVirtualMethods(const IR::Declaration_Instance* inst,
     if (virt.size() == 0 && inst->initializer == nullptr)
         return true;
     if (virt.size() == 0 && inst->initializer != nullptr) {
-        ::error("%1%: instance initializers for extern without virtual methods", inst->initializer);
+        ::error("%1%: instance initializers for extern without abstract methods", inst->initializer);
         return false;
     } else if (virt.size() != 0 && inst->initializer == nullptr) {
-        ::error("%1%: must declare virtual methods for %2%", inst, type);
+        ::error("%1%: must declare abstract methods for %2%", inst, type);
         return false;
     }
 
@@ -623,12 +624,12 @@ bool TypeInference::checkVirtualMethods(const IR::Declaration_Instance* inst,
             auto func = d->to<IR::Function>();
             LOG1("Type checking " << func);
             if (func->type->typeParameters->size() != 0) {
-                ::error("%1%: virtual method implementations cannot be generic", func);
+                ::error("%1%: abstract method implementations cannot be generic", func);
                 return false;
             }
             auto ftype = getType(func);
             if (virt.find(func->name.name) == virt.end()) {
-                ::error("%1%: no matching virtual method in %2%", func, type);
+                ::error("%1%: no matching abstract method in %2%", func, type);
                 return false;
             }
             auto meth = virt[func->name.name];
@@ -642,17 +643,22 @@ bool TypeInference::checkVirtualMethods(const IR::Declaration_Instance* inst,
     }
 
     if (virt.size() != 0) {
-        ::error("%1%: %2% virtual method not implemented",
+        ::error("%1%: %2% abstract method not implemented",
                 inst, virt.begin()->second);
         return false;
     }
     return true;
 }
 
-
-const IR::Node* TypeInference::postorder(IR::Declaration_Instance* decl) {
+const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
+    // We need to control the order of the type-checking: we want to do first
+    // the declaration, and then typecheck the initializer if present.
     if (done())
         return decl;
+    visit(decl->type);
+    visit(decl->arguments);
+    prune();
+
     auto type = canonicalize(decl->type);
     auto orig = getOriginal<IR::Declaration_Instance>();
 
@@ -662,7 +668,13 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Instance* decl) {
 
     if (simpleType->is<IR::Type_Extern>()) {
         auto et = simpleType->to<IR::Type_Extern>();
-        bool s = checkVirtualMethods(decl, et);
+        setType(orig, type);
+        setType(decl, type);
+
+        if (decl->initializer != nullptr)
+            visit(decl->initializer);
+        // This will need the decl type to be already known
+        bool s = checkAbstractMethods(decl, et);
         if (!s)
             return decl;
 
@@ -670,11 +682,10 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Instance* decl) {
         if (args == nullptr)
             return decl;
         if (args != decl->arguments)
-            decl = new IR::Declaration_Instance(decl->srcInfo, decl->name, decl->type,
-                                                args, decl->annotations, decl->initializer);
-        setType(orig, type);
-        setType(decl, type);
+            decl->arguments = args;
     } else if (simpleType->is<IR::IContainer>()) {
+        if (decl->initializer != nullptr)
+            ::error("%1%: initializers only allowed for extern instances", decl->initializer);
         type = containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
         if (type == nullptr)
             return decl;
@@ -1998,6 +2009,18 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tupl
     if (ks != selectCase->keyset)
         selectCase = new IR::SelectCase(selectCase->srcInfo, ks, selectCase->state);
     return selectCase;
+}
+
+const IR::Node* TypeInference::postorder(IR::This* expression) {
+    if (done())
+        return expression;
+    auto decl = findContext<IR::Declaration_Instance>();
+    if (findContext<IR::Function>() == nullptr || decl == nullptr)
+        ::error("%1%: can only be used in the definition of an abstract method", expression);
+    auto type = getType(decl);
+    setType(expression, type);
+    setType(getOriginal(), type);
+    return expression;
 }
 
 const IR::Node* TypeInference::postorder(IR::DefaultExpression* expression) {

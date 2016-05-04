@@ -150,6 +150,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("l2_packet") action l2_packet_0() {
         meta.ing_metadata.packet_type = 4w0;
     }
@@ -177,45 +179,45 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv6_packet_0;
             mpls_packet_0;
             mim_packet_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ethernet.etherType: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("ipv4_match") table ipv4_match_0() {
         actions = {
             nop_0;
             set_egress_port_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ipv4.srcAddr: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("ipv6_match") table ipv6_match_0() {
         actions = {
             nop_0;
             set_egress_port_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ipv6.srcAddr: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("l2_match") table l2_match_0() {
         actions = {
             nop_0;
             set_egress_port_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         switch (ethertype_match_0.apply().action_run) {

@@ -93,6 +93,7 @@ void parseLineNumber(const char* text)
 "struct"        { BEGIN(NORMAL); return STRUCT; }
 "switch"        { BEGIN(NORMAL); return SWITCH; }
 "table"         { BEGIN(NORMAL); return TABLE; }
+"this"          { BEGIN(NORMAL); return THIS; }
 "transition"    { BEGIN(NORMAL); return TRANSITION; }
 "true"          { BEGIN(NORMAL); return TRUE; }
 "typedef"       { BEGIN(NORMAL); return TYPEDEF; }

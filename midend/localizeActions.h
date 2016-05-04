@@ -4,48 +4,68 @@
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/callGraph.h"
+#include "frontends/p4/toP4/toP4.h"
 
 namespace P4 {
 
-class ActionReplacements {
+class GlobalActionReplacements {
  public:
     // For each control that uses an action and for each each global action
     // we create a replacement.
-    std::map<const IR::P4Control*, std::map<const IR::P4Action*, const IR::P4Action*>*> repl;
-    CallGraph<const IR::P4Action*> calls;
+    std::map<const IR::P4Control*, ordered_map<const IR::P4Action*, const IR::P4Action*>*> repl;
 
-    bool hasReplacement(const IR::P4Action* action, const IR::P4Control* control) const {
+    const IR::P4Action* getReplacement(const IR::P4Action* action, const IR::P4Control* control) const {
         auto map = ::get(repl, control);
         if (map == nullptr)
-            return false;
-        return ::get(map, action) != nullptr;
+            return nullptr;
+        if (map->find(action) != map->end())
+            return (*map)[action];
+        return nullptr;
     }
     void addReplacement(const IR::P4Action* action, const IR::P4Control* control,
                         const IR::P4Action* replacement) {
-        LOG1("Replacing global " << action << " with " << replacement);
+        LOG1("Cloning global " << action << " into " << replacement << " for " << control);
         if (repl.find(control) == repl.end())
-            repl[control] = new std::map<const IR::P4Action*, const IR::P4Action*>();
+            repl[control] = new ordered_map<const IR::P4Action*, const IR::P4Action*>();
         (*repl[control])[action] = replacement;
     }
 };
 
-class FindActionUses : public Inspector {
+// Find global (i.e., declared at toplevel) actions and who uses them.
+class FindGlobalActionUses : public Inspector {
     ReferenceMap*       refMap;
-    ActionReplacements* repl;
+    GlobalActionReplacements* repl;
+    std::set<const IR::P4Action*> globalActions;
  public:
-    FindActionUses(ReferenceMap* refMap, ActionReplacements* repl) : refMap(refMap), repl(repl)
+    FindGlobalActionUses(ReferenceMap* refMap, GlobalActionReplacements* repl) : refMap(refMap), repl(repl)
     { CHECK_NULL(refMap); CHECK_NULL(repl); }
     bool preorder(const IR::PathExpression* path) override;
+    bool preorder(const IR::P4Action* action) override;
 };
 
 // Global actions are cloned into actions local to the
 // control using them.  One action can produce many copies.
 class LocalizeActions : public Transform {
     ReferenceMap*       refMap;
-    ActionReplacements* repl;
+    GlobalActionReplacements* repl;
  public:
+    LocalizeActions(ReferenceMap* refMap, GlobalActionReplacements* repl)  : refMap(refMap), repl(repl)
+    { CHECK_NULL(refMap); CHECK_NULL(repl); }
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::PathExpression* expression) override;
+};
+
+class LocalizeAllActions : public PassManager {
+    GlobalActionReplacements replacements;
+ public:
+    LocalizeAllActions(ReferenceMap* refMap, bool isv1) {
+        passes.emplace_back(new PassRepeated {
+            new ResolveReferences(refMap, isv1),
+            new FindGlobalActionUses(refMap, &replacements),
+            new LocalizeActions(refMap, &replacements),
+        });
+        setName("LocalizeAllActions");
+    }
 };
 
 }  // namespace P4

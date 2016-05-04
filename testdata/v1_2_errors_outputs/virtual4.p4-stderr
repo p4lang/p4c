@@ -1,19 +1,7 @@
-../testdata/v1_2_errors/virtual4.p4(7): error: g: no matching virtual method in Virtual
+../testdata/v1_2_errors/virtual4.p4(7): error: g: no matching abstract method in Virtual
         bit<16> g(in bit<16> ix) {
         ^
 ../testdata/v1_2_errors/virtual4.p4(1)
 extern Virtual {
        ^^^^^^^
-../testdata/v1_2_errors/virtual4.p4(6): error: Could not find type of cntr
-    Virtual() cntr = {
-    ^^^^^^^^^^^^^^
-../testdata/v1_2_errors/virtual4.p4(13): error: Could not find type of cntr
-        p = cntr.f(6);
-            ^^^^
-../testdata/v1_2_errors/virtual4.p4(13): error: Could not find type of cntr.f
-        p = cntr.f(6);
-            ^^^^^^
-../testdata/v1_2_errors/virtual4.p4(13): error: Could not find type of cntr.f
-        p = cntr.f(6);
-            ^^^^^^^^^
-error: 5 errors encountered, aborting compilation
+error: 1 errors encountered, aborting compilation

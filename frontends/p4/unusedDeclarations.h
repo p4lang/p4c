@@ -47,16 +47,16 @@ class RemoveUnusedDeclarations : public Transform {
 
 // Iterates RemoveUnusedDeclarations until convergence.
 class RemoveAllUnusedDeclarations : public PassManager {
-    ReferenceMap *refMap;
  public:
-    explicit RemoveAllUnusedDeclarations(bool isv1) {
-        refMap = new P4::ReferenceMap();
+    explicit RemoveAllUnusedDeclarations(ReferenceMap* refMap, bool isv1) {
+        CHECK_NULL(refMap);
         passes.emplace_back(
             new PassRepeated {
                 new P4::ResolveReferences(refMap, isv1),
                 new P4::RemoveUnusedDeclarations(refMap)
              });
         setName("RemoveAllUnusedDeclarations");
+        setStopOnError(true);
     }
 };
 

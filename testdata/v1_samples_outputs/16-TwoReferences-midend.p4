@@ -28,6 +28,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("do_b") action do_b_0() {
     }
     @name("do_d") action do_d_0() {
@@ -41,47 +43,47 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             do_b_0;
             do_d_0;
             do_e_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("B") table B_0() {
         actions = {
             nop_0;
-            NoAction;
+            NoAction_0;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("C") table C_0() {
         actions = {
             nop_0;
-            NoAction;
+            NoAction_0;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("D") table D_0() {
         actions = {
             nop_0;
-            NoAction;
+            NoAction_0;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("E") table E_0() {
         actions = {
             nop_0;
-            NoAction;
+            NoAction_0;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("F") table F_0() {
         actions = {
             nop_0;
-            NoAction;
+            NoAction_0;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         switch (A_0.apply().action_run) {

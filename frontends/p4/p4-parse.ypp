@@ -97,7 +97,7 @@ static int yylex();
 }
 
 %token      LE GE SHL AND OR NE EQ
-%token      TRUE FALSE
+%token      TRUE FALSE THIS
 %token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA
             DEFAULT DONTCARE ELSE ENUM T_ERROR  // There is an ERROR macro elsewhere
             EXIT EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
@@ -854,6 +854,7 @@ member
 
 lvalue
     : name                               { $$ = new IR::PathExpression(*$1); }
+    | THIS                               { $$ = new IR::This(@1); }
     | pathPrefix name                    { $$ = new IR::PathExpression(new IR::Path($1, *$2)); }
     | lvalue '.' member                  { $$ = new IR::Member(@1 + @3, $1, *$3); }
     | lvalue '[' expression ']'          { $$ = new IR::ArrayIndex(@1 + @3, $1, $3); }
@@ -864,6 +865,7 @@ expression
     : INTEGER                            { $$ = $1; }
     | TRUE                               { $$ = new IR::BoolLiteral(@1, true); }
     | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
+    | THIS                               { $$ = new IR::This(@1); }
     | name                               { $$ = new IR::PathExpression(*$1); }
     | pathPrefix name                    { $$ = new IR::PathExpression(new IR::Path($1, *$2)); }
     | expression '[' expression ']'      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }

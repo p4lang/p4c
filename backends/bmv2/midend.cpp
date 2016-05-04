@@ -38,11 +38,11 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
     PassManager midend = {
         new P4::DiscoverInlining(&controlsToInline, evaluator->getBlockMap()),
         new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap), isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new SimpleActionsInliner(&refMap), isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
     };
     midend.setName("Mid end");
     midend.setStopOnError(true);
@@ -71,7 +71,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         new P4::RemoveReturns(&refMap, true),
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         evaluator,
     };
 
@@ -90,11 +90,11 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
     PassManager midEnd = {
         new P4::DiscoverInlining(&toInline, blockMap),
         new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),

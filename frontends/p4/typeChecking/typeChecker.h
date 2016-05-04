@@ -67,7 +67,7 @@ class TypeInference : public Transform {
                                     const IR::SelectCase* selectCase,
                                     const IR::Type* caseType) const;
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
-    bool checkVirtualMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
+    bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
 
     // converts each type to a canonical pointer,
     // so we can check just pointer equality in the map
@@ -112,7 +112,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Declaration_Errors* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* constant) override;
-    const IR::Node* postorder(IR::Declaration_Instance* decl) override;
+    const IR::Node* preorder(IR::Declaration_Instance* decl) override;
     const IR::Node* postorder(IR::P4Control* cont) override;
     const IR::Node* postorder(IR::P4Parser* cont) override;
     const IR::Node* postorder(IR::Method* method) override;
@@ -175,6 +175,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
     const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* postorder(IR::DefaultExpression* expression) override;
+    const IR::Node* postorder(IR::This* expression) override;
 
     const IR::Node* postorder(IR::ReturnStatement* stat) override;
     const IR::Node* postorder(IR::IfStatement* stat) override;

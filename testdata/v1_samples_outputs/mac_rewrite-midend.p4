@@ -88,6 +88,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     headers hdr_0;
     metadata meta_0;
     standard_metadata_t standard_metadata_0;
+    action NoAction_0() {
+    }
     @name("do_setup") action do_setup_0(bit<9> idx, bit<1> routed) {
         meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;
         meta.egress_metadata.smac_idx = idx;
@@ -96,12 +98,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setup") table setup_0() {
         actions = {
             do_setup_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ethernet.isValid(): exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("process_mac_rewrite.nop") action process_mac_rewrite_nop() {
     }
@@ -132,7 +134,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             process_mac_rewrite_rewrite_ipv4_multicast_mac;
             process_mac_rewrite_rewrite_ipv6_unicast_mac;
             process_mac_rewrite_rewrite_ipv6_multicast_mac;
-            NoAction;
+            NoAction_0;
         }
         key = {
             meta_0.egress_metadata.smac_idx: exact;
@@ -140,7 +142,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr_0.ipv6.isValid()           : exact;
         }
         size = 512;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     action act() {
         hdr_0 = hdr;

@@ -68,6 +68,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("drop") action drop_0() {
     }
     @name("forward") action forward_0(bit<48> to) {
@@ -80,22 +82,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             drop_0;
             forward_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ipv4.dstAddr: ternary;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("setup") table setup_0() {
         actions = {
             do_setup_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.ethernet.isValid(): exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         setup_0.apply();

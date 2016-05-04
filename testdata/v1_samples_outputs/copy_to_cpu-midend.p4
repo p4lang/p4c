@@ -49,6 +49,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("_drop") action _drop_0() {
         mark_to_drop();
     }
@@ -61,13 +63,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             _drop_0;
             do_cpu_encap_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             standard_metadata.instance_type: exact;
         }
         size = 16;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         redirect_0.apply();
@@ -75,16 +77,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_1() {
+    }
     @name("do_copy_to_cpu") action do_copy_to_cpu_0() {
         clone3(CloneType.I2E, 32w250, { standard_metadata });
     }
     @name("copy_to_cpu") table copy_to_cpu_0() {
         actions = {
             do_copy_to_cpu_0;
-            NoAction;
+            NoAction_1;
         }
         size = 1;
-        default_action = NoAction();
+        default_action = NoAction_1();
     }
     apply {
         copy_to_cpu_0.apply();

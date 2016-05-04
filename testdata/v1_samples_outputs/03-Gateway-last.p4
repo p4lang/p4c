@@ -56,7 +56,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-
     apply {
         e_t1.apply();
     }
@@ -97,7 +96,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-
     @name("i_t2") table i_t2() {
         actions = {
             nop;
@@ -110,7 +108,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-
     @name("i_t3") table i_t3() {
         actions = {
             nop;
@@ -123,7 +120,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-
     @name("i_t4") table i_t4() {
         actions = {
             nop;
@@ -136,7 +132,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         i_t1.apply();
         if (meta.ing_metadata.f1 == hdr.vag.f1) {

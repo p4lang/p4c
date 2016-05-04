@@ -4,16 +4,4 @@
 ../testdata/v1_2_errors/virtual2.p4(6): error: cntr: Cannot unify void to bit<16>
     Virtual() cntr = {
     ^^^^^^^^^^^^^^
-../testdata/v1_2_errors/virtual2.p4(6): error: Could not find type of cntr
-    Virtual() cntr = {
-    ^^^^^^^^^^^^^^
-../testdata/v1_2_errors/virtual2.p4(13): error: Could not find type of cntr
-        p = cntr.f(6);
-            ^^^^
-../testdata/v1_2_errors/virtual2.p4(13): error: Could not find type of cntr.f
-        p = cntr.f(6);
-            ^^^^^^
-../testdata/v1_2_errors/virtual2.p4(13): error: Could not find type of cntr.f
-        p = cntr.f(6);
-            ^^^^^^^^^
-error: 6 errors encountered, aborting compilation
+error: 2 errors encountered, aborting compilation

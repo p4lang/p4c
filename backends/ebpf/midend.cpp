@@ -65,11 +65,11 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
     PassManager midEnd = {
         new P4::DiscoverInlining(&toInline, blockMap),
         new P4::InlineDriver(&toInline, inliner, isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         actInl,
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
-        new P4::RemoveAllUnusedDeclarations(isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::ResolveReferences(&refMap, isv1),

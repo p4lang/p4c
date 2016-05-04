@@ -7,6 +7,9 @@
 
 namespace P4 {
 
+// This pass is designed to be run after all declarations have received unique
+// internal names.  This is important because the locals map uses only the
+// declaration name, and not the full path.
 class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
     const P4::TypeMap           *typeMap;
     bool                        in_action = false;

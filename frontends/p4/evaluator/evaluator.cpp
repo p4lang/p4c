@@ -247,6 +247,7 @@ bool Evaluator::preorder(const IR::TableProperty* prop) {
 EvaluatorPass::EvaluatorPass(bool anyOrder) :
         refMap(new ReferenceMap), typeMap(new TypeMap()), blockMap(new BlockMap(refMap, typeMap)) {
     setName("Evaluator");
+    setStopOnError(true);
     passes.emplace_back(new P4::ResolveReferences(refMap, anyOrder));
     passes.emplace_back(new P4::TypeInference(refMap, typeMap));
     passes.emplace_back(new P4::Evaluator(blockMap));

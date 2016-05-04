@@ -60,6 +60,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    action NoAction_0() {
+    }
     @name("set1") action set1_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f1_1 = v1;
         hdr.data.f1_2 = v2;
@@ -122,89 +124,89 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set1_0;
             noop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f1_1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("tbl2") table tbl2_0() {
         actions = {
             set2_0;
             noop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f2_1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("tbl3") table tbl3_0() {
         actions = {
             set3_0;
             noop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f3_1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("tbl4") table tbl4_0() {
         actions = {
             set4_0;
             noop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f4_1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("tbl5") table tbl5_0() {
         actions = {
             set5_0;
             noop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f5_1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("tbl6") table tbl6_0() {
         actions = {
             set6_0;
             noop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f6_1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("tbl7") table tbl7_0() {
         actions = {
             set7_0;
             noop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f7_1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("tbl8") table tbl8_0() {
         actions = {
             set8_0;
             noop_0;
-            NoAction;
+            NoAction_0;
         }
         key = {
             hdr.data.f8_1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         tbl1_0.apply();
