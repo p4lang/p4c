@@ -128,9 +128,9 @@ class TypeCheck::Pass3 : public Modifier {
         const Context *ctxt = getContext();
         if (auto parent = ctxt->node->to<IR::Expression>()) {
             if (auto p = parent->to<IR::Operation_Relation>()) {
-                if (ctxt->child_index == 1)
+                if (ctxt->child_index == 0)
                     rv = p->right->type;
-                else if (ctxt->child_index == 2)
+                else if (ctxt->child_index == 1)
                     rv = p->left->type;
                 else
                     BUG("Unepxected child index");
@@ -139,10 +139,10 @@ class TypeCheck::Pass3 : public Modifier {
             } else if (!global) {
             } else if (auto prim = parent->to<IR::Primitive>()) {
                 if (auto af = global->get<IR::ActionFunction>(prim->name)) {
-                    if (size_t(ctxt->child_index-1) < af->args.size())
-                        rv = af->args[ctxt->child_index-1]->type;
+                    if (size_t(ctxt->child_index) < af->args.size())
+                        rv = af->args[ctxt->child_index]->type;
                 } else if (auto infer = prim->inferOperandTypes()) {
-                    if ((infer >> (ctxt->child_index-1)) & 1) {
+                    if ((infer >> (ctxt->child_index)) & 1) {
                         for (auto o : prim->operands) {
                             if ((infer & 1) && o->type != rv) {
                                 rv = o->type;
@@ -161,9 +161,9 @@ class TypeCheck::Pass3 : public Modifier {
         const Context *ctxt = getContext();
         if (auto *prim = ctxt->node->to<IR::Primitive>()) {
             if (auto af = global ? global->get<IR::ActionFunction>(prim->name) : nullptr) {
-                if (size_t(ctxt->child_index-1) < af->args.size()) {
-                    if (af->args[ctxt->child_index-1]->write) arg->write = true;
-                    if (af->args[ctxt->child_index-1]->read) arg->read = true; }
+                if (size_t(ctxt->child_index) < af->args.size()) {
+                    if (af->args[ctxt->child_index]->write) arg->write = true;
+                    if (af->args[ctxt->child_index]->read) arg->read = true; }
             } else if (prim->isOutput(ctxt->child_index)) {
                 arg->write = true;
             } else {

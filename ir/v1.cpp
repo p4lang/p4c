@@ -73,7 +73,7 @@ void IR::Primitive::typecheck() const {
 
 bool IR::Primitive::isOutput(int operand_index) const {
     if (prim_info.count(name))
-        return (prim_info.at(name).out_operands >> (operand_index-1)) & 1;
+        return (prim_info.at(name).out_operands >> operand_index) & 1;
     return false;
 }
 

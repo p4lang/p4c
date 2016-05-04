@@ -102,7 +102,7 @@ IR::MethodCallExpression *P4::LocalCopyPropagation::postorder(IR::MethodCallExpr
 IR::Primitive *P4::LocalCopyPropagation::postorder(IR::Primitive *prim) {
     if (!in_action) return prim;
     for (unsigned idx = 0; idx < prim->operands.size(); ++idx) {
-        if (prim->isOutput(idx+1)) {
+        if (prim->isOutput(idx)) {
             dropLocalsUsing(prim->operands.at(idx)->toString()); } }
     return prim;
 }

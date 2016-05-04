@@ -350,27 +350,6 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
 
 ///////////////////////////////////// Visitor methods
 
-// This method is here to avoid visiting the Expression::type field;
-// this field is not used by the P4 v1.2 front-end, but may be populated
-// by the P4 v1.0 front-end.
-const IR::Node* TypeInference::preorder(IR::Type* type) {
-    auto ctx = getContext();
-    if (ctx == nullptr)
-        // This happens when recursively calling the type checker on a new type object
-        return type;
-    if (!ctx->node->is<IR::Expression>())
-        return type;
-    // We do want to visit the type of some nodes...
-    if (ctx->node->is<IR::Constant>())
-        return type;
-    // Expression::type is the 0-th child of an expression
-    if (ctx->child_index != 0)
-        return type;
-    // Don't visit Expression::type
-    prune();
-    return type;
-}
-
 const IR::Node* TypeInference::postorder(IR::Declaration_Errors* decl) {
     if (done())
         return decl;

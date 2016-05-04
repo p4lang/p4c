@@ -136,12 +136,12 @@ abstract Expression {
 #emit
     // No P4 v1.2 front-end passes not use this field.
     // It is used by the P4 v1.0 front-end and by some back-ends.
+    // It is not visited by the visitors by default (can visit explicitly in the preorder)
     const Type* type = Type::Unknown::get();
     Expression() : type(Type::Unknown::get()) {}
     explicit Expression(const Type *t) : type(t) {}
     Expression(Util::SourceInfo srcInfo, const Type *t) : Node(srcInfo), type(t) {}
 #end
-    visit_children { v.visit(type, "type"); }
     operator== { return typeid(*this) == typeid(a) && type == a.type; }
 }
 
