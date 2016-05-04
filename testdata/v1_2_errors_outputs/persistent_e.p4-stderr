@@ -2,3 +2,4 @@
     p(z) p1;
       ^
 error: 1 errors encountered, aborting compilation
+error: 2 errors encountered, aborting compilation
