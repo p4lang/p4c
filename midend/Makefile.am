@@ -9,15 +9,15 @@ midend_SOURCES = \
 	midend/inlining.h \
 	midend/local_copyprop.cpp \
 	midend/local_copyprop.h \
-	midend/localizeActions.h \
 	midend/localizeActions.cpp \
+	midend/localizeActions.h \
 	midend/moveConstructors.cpp \
 	midend/moveConstructors.h \
 	midend/moveDeclarations.cpp \
 	midend/moveDeclarations.h \
 	midend/removeReturns.cpp \
 	midend/removeReturns.h \
-	midend/uniqueNames.h \
-	midend/uniqueNames.cpp
+	midend/uniqueNames.cpp \
+	midend/uniqueNames.h
 
 cpplint_FILES += $(midend_SOURCES)

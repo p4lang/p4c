@@ -128,9 +128,9 @@ class TypeCheck::Pass3 : public Modifier {
         const Context *ctxt = getContext();
         if (auto parent = ctxt->node->to<IR::Expression>()) {
             if (auto p = parent->to<IR::Operation_Relation>()) {
-                if (ctxt->child_index == 1)
+                if (ctxt->child_index == 0)
                     rv = p->right->type;
-                else if (ctxt->child_index == 2)
+                else if (ctxt->child_index == 1)
                     rv = p->left->type;
                 else
                     BUG("Unepxected child index");

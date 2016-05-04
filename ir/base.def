@@ -134,14 +134,16 @@ abstract Type_Declaration : Type, IDeclaration {
 
 abstract Expression {
 #emit
-    // No P4 v1.2 front-end passes not use this field.
+    // Note that the type field is not visited.
+    // Most P4 v1.2 passes don't use this field.
+    // It is a used to hold the "canonical" type of an object,
+    // which never changes.
     // It is used by the P4 v1.0 front-end and by some back-ends.
     const Type* type = Type::Unknown::get();
     Expression() : type(Type::Unknown::get()) {}
     explicit Expression(const Type *t) : type(t) {}
     Expression(Util::SourceInfo srcInfo, const Type *t) : Node(srcInfo), type(t) {}
 #end
-    visit_children { v.visit(type, "type"); }
     operator== { return typeid(*this) == typeid(a) && type == a.type; }
 }
 

@@ -2,7 +2,7 @@
 #include "lib/log.h"
 #include "frontends/common/typeMap.h"
 
-bool P4WriteContext::isWrite(const P4::TypeMap *typeMap) {
+bool P4WriteContext::isWrite() {
     const Context *ctxt = getContext();
     if (!ctxt || !ctxt->node)
         return false;
@@ -14,8 +14,7 @@ bool P4WriteContext::isWrite(const P4::TypeMap *typeMap) {
         if (!ctxt->parent || !ctxt->parent->node)
             return false;
         if (auto *mc = ctxt->parent->node->to<IR::MethodCallExpression>()) {
-            auto type = dynamic_cast<const IR::Type_Method *>(
-                typeMap ? typeMap->getType(mc->method) : mc->method->type);
+            auto type = mc->method->type->to<IR::Type_Method>();
             if (!type) {
                 /* FIXME -- can't find the type of the method -- should be a BUG? */
                 return true; }

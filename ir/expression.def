@@ -225,6 +225,7 @@ class Constant : Expression, CompileTimeValue {
     Constant operator-(const Constant &c) const;
 #end
     toString { return Util::toString(&value); }
+    visit_children{ v.visit(type); }
 }
 
 class BoolLiteral : Expression, CompileTimeValue {

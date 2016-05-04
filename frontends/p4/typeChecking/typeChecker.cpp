@@ -7,9 +7,12 @@
 
 namespace P4 {
 
-TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-    passes.emplace_back(new P4::ResolveReferences(refMap, isv1));
-    passes.emplace_back(new P4::TypeInference(refMap, typeMap, true, true));
+TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap, bool isv1, bool updateProgram) {
+    addPasses({
+        new P4::ResolveReferences(refMap, isv1),
+        new P4::TypeInference(refMap, typeMap, true, true),
+        updateProgram ? new ApplyTypesToExpressions(typeMap) : nullptr,
+        updateProgram ? new P4::ResolveReferences(refMap, isv1) : nullptr });
     setName("TypeAnalysis");
     setStopOnError(true);
 }
@@ -74,6 +77,7 @@ void TypeInference::end_apply(const IR::Node* node) {
 }
 
 bool TypeInference::done() const {
+    LOG3("Visiting " << getOriginal());
     auto orig = getOriginal();
     if (typeMap->contains(orig))
         return true;
@@ -364,27 +368,6 @@ const IR::Node* TypeInference::preorder(IR::P4Program* program) {
 }
 
 
-// This method is here to avoid visiting the Expression::type field;
-// this field is not used by the P4 v1.2 front-end, but may be populated
-// by the P4 v1.0 front-end.
-const IR::Node* TypeInference::preorder(IR::Type* type) {
-    auto ctx = getContext();
-    if (ctx == nullptr)
-        // This happens when recursively calling the type checker on a new type object
-        return type;
-    if (!ctx->node->is<IR::Expression>())
-        return type;
-    // We do want to visit the type of some nodes...
-    if (ctx->node->is<IR::Constant>())
-        return type;
-    // Expression::type is the 0-th child of an expression
-    if (ctx->child_index != 0)
-        return type;
-    // Don't visit Expression::type
-    prune();
-    return type;
-}
-
 const IR::Node* TypeInference::postorder(IR::Declaration_Errors* decl) {
     if (done())
         return decl;
@@ -550,8 +533,8 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Constant* decl) {
 
 const IR::Vector<IR::Expression> *
 TypeInference::checkExternConstructor(const IR::Node* errorPosition,
-                                    const IR::Type_Extern* ext,
-                                    const IR::Vector<IR::Expression> *arguments) {
+                                      const IR::Type_Extern* ext,
+                                      const IR::Vector<IR::Expression> *arguments) {
     auto tp = ext->getTypeParameters();
     if (!tp->empty()) {
         ::error("%1%: Type parameters must be supplied for constructor", errorPosition);
@@ -657,7 +640,6 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
         return decl;
     visit(decl->type);
     visit(decl->arguments);
-    prune();
 
     auto type = canonicalize(decl->type);
     auto orig = getOriginal<IR::Declaration_Instance>();
@@ -675,25 +657,32 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             visit(decl->initializer);
         // This will need the decl type to be already known
         bool s = checkAbstractMethods(decl, et);
-        if (!s)
+        if (!s) {
+            prune();
             return decl;
+        }
 
         auto args = checkExternConstructor(decl, et, decl->arguments);
-        if (args == nullptr)
+        if (args == nullptr) {
+            prune();
             return decl;
+        }
         if (args != decl->arguments)
             decl->arguments = args;
     } else if (simpleType->is<IR::IContainer>()) {
         if (decl->initializer != nullptr)
             ::error("%1%: initializers only allowed for extern instances", decl->initializer);
         type = containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
-        if (type == nullptr)
+        if (type == nullptr) {
+            prune();
             return decl;
+        }
         setType(decl, type);
         setType(orig, type);
     } else {
         ::error("%1%: cannot allocate objects of type %2%", decl, type);
     }
+    prune();
     return decl;
 }
 

@@ -47,10 +47,6 @@ void P4::LocalCopyPropagation::dropLocalsUsing(cstring name) {
             local.second.val = nullptr; } }
 }
 
-P4::LocalCopyPropagation::LocalCopyPropagation(const P4::TypeMap *typeMap) : typeMap(typeMap) { 
-    visitDagOnce = false;
-}
-
 IR::Declaration_Variable *P4::LocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
     if (!in_action) return var;
     if (locals.count(var->name))
@@ -67,7 +63,7 @@ IR::Declaration_Variable *P4::LocalCopyPropagation::postorder(IR::Declaration_Va
 
 const IR::Expression *P4::LocalCopyPropagation::postorder(IR::PathExpression *path) {
     if (auto local = ::getref(locals, path->path->name)) {
-        if (isWrite(typeMap)) {
+        if (isWrite()) {
             return path;
         } else if (local->val) {
             LOG3("  propagating value for " << path->path->name);
@@ -93,7 +89,7 @@ IR::AssignmentStatement *P4::LocalCopyPropagation::postorder(IR::AssignmentState
 
 IR::MethodCallExpression *P4::LocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
     if (!in_action) return mc;
-    auto type = typeMap->getType(mc->method)->to<IR::Type_Method>();
+    auto type = mc->method->type->to<IR::Type_Method>();
     int idx = 0;
     for (auto param : Values(type->parameters->parameters)) {
         if (param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) {

@@ -118,7 +118,7 @@ class TypeConstraints final {
         out << "Variables: ";
         for (auto tv : unifiableTypeVariables) {
             if (!first) out << ", ";
-            out << tv;
+            out << tv->getNode();
             first = false;
         }
         for (auto c : constraints)

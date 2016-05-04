@@ -7,11 +7,14 @@
 
 namespace P4 {
 
-// This pass is designed to be run after all declarations have received unique
-// internal names.  This is important because the locals map uses only the
-// declaration name, and not the full path.
+/* Local copy propagation and dead code elimination within a single action function.
+   This pass is designed to be run after all declarations have received unique
+   internal names.  This is important because the locals map uses only the
+   declaration name, and not the full path.
+   Requires expression types be stored inline in the expression
+   (obtained by running Typechecking(updateProgram = true)).
+ */
 class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
-    const P4::TypeMap           *typeMap;
     bool                        in_action = false;
     struct Local {
         bool                    live = false;
@@ -33,7 +36,7 @@ class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContex
 
     LocalCopyPropagation(const LocalCopyPropagation &) = default;
  public:
-    explicit LocalCopyPropagation(const P4::TypeMap *);
+    LocalCopyPropagation() { visitDagOnce = false; }
 };
 
 }  // namespace P4
