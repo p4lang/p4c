@@ -198,6 +198,10 @@ class ApplyTypesToExpressions : public Transform {
             if (*orig != *n)
                 typeMap->setType(n, type); }
         return n; }
+    IR::Node *postorder(IR::ConstructorCallExpression *cc) override {
+        // FIXME -- these get 'canonical' types in the typeMap, which can confuse
+        // later passes, so we don't put them into the Expression::type field
+        return postorder(static_cast<IR::Node *>(cc)); }
     IR::Expression *postorder(IR::Expression *e) override {
         const IR::Node *orig = getOriginal();
         if (auto type = typeMap->getType(orig)) {

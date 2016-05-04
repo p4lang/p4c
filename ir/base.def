@@ -139,6 +139,7 @@ abstract Expression {
     // It is a used to hold the "canonical" type of an object,
     // which never changes.
     // It is used by the P4 v1.0 front-end and by some back-ends.
+    // It is not visited by the visitors by default (can visit explicitly in the preorder)
     const Type* type = Type::Unknown::get();
     Expression() : type(Type::Unknown::get()) {}
     explicit Expression(const Type *t) : type(t) {}

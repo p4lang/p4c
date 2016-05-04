@@ -367,7 +367,6 @@ const IR::Node* TypeInference::preorder(IR::P4Program* program) {
     return program;
 }
 
-
 const IR::Node* TypeInference::postorder(IR::Declaration_Errors* decl) {
     if (done())
         return decl;
