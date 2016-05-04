@@ -1162,20 +1162,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     headers hdr_14;
     metadata meta_14;
     standard_metadata_t standard_metadata_14;
-    bit<8> proto_0;
-    bit<8> proto_1;
-    bit<8> proto_2;
-    bit<8> proto_3;
-    bit<8> proto_4;
-    bit<8> proto_5;
-    bit<8> proto_6;
-    bit<8> proto_7;
-    bit<8> proto_8;
-    bit<8> proto_9;
-    bit<8> proto_10;
-    bit<8> proto_11;
-    bit<8> proto_12;
-    bit<8> proto_13;
     headers hdr_15;
     metadata meta_15;
     standard_metadata_t standard_metadata_15;
@@ -1188,8 +1174,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     headers hdr_18;
     metadata meta_18;
     standard_metadata_t standard_metadata_18;
-    bit<16> session_id_0;
-    bit<16> reason_code_0;
     action NoAction_0() {
     }
     @name("egress_port_type_normal") action egress_port_type_normal_0() {
@@ -2182,9 +2166,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.vxlan.reserved = 24w0;
         hdr_14.vxlan.vni = meta_14.tunnel_metadata.vnid;
         hdr_14.vxlan.reserved2 = 8w0;
-        proto_0 = 8w17;
         hdr_14.ipv4.setValid(true);
-        hdr_14.ipv4.protocol = proto_0;
+        hdr_14.ipv4.protocol = 8w17;
         hdr_14.ipv4.ttl = 8w64;
         hdr_14.ipv4.version = 4w0x4;
         hdr_14.ipv4.ihl = 4w0x5;
@@ -2204,10 +2187,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.vxlan.reserved = 24w0;
         hdr_14.vxlan.vni = meta_14.tunnel_metadata.vnid;
         hdr_14.vxlan.reserved2 = 8w0;
-        proto_1 = 8w17;
         hdr_14.ipv6.setValid(true);
         hdr_14.ipv6.version = 4w0x6;
-        hdr_14.ipv6.nextHdr = proto_1;
+        hdr_14.ipv6.nextHdr = 8w17;
         hdr_14.ipv6.hopLimit = 8w64;
         hdr_14.ipv6.trafficClass = 8w0;
         hdr_14.ipv6.flowLabel = 20w0;
@@ -2230,9 +2212,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.genv.vni = meta_14.tunnel_metadata.vnid;
         hdr_14.genv.reserved = 6w0;
         hdr_14.genv.reserved2 = 8w0;
-        proto_2 = 8w17;
         hdr_14.ipv4.setValid(true);
-        hdr_14.ipv4.protocol = proto_2;
+        hdr_14.ipv4.protocol = 8w17;
         hdr_14.ipv4.ttl = 8w64;
         hdr_14.ipv4.version = 4w0x4;
         hdr_14.ipv4.ihl = 4w0x5;
@@ -2256,10 +2237,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.genv.vni = meta_14.tunnel_metadata.vnid;
         hdr_14.genv.reserved = 6w0;
         hdr_14.genv.reserved2 = 8w0;
-        proto_3 = 8w17;
         hdr_14.ipv6.setValid(true);
         hdr_14.ipv6.version = 4w0x6;
-        hdr_14.ipv6.nextHdr = proto_3;
+        hdr_14.ipv6.nextHdr = 8w17;
         hdr_14.ipv6.hopLimit = 8w64;
         hdr_14.ipv6.trafficClass = 8w0;
         hdr_14.ipv6.flowLabel = 20w0;
@@ -2281,9 +2261,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.gre.s = 1w0;
         hdr_14.nvgre.tni = meta_14.tunnel_metadata.vnid;
         hdr_14.nvgre.flow_id[7:0] = meta_14.hash_metadata.entropy_hash[7:0];
-        proto_4 = 8w47;
         hdr_14.ipv4.setValid(true);
-        hdr_14.ipv4.protocol = proto_4;
+        hdr_14.ipv4.protocol = 8w47;
         hdr_14.ipv4.ttl = 8w64;
         hdr_14.ipv4.version = 4w0x4;
         hdr_14.ipv4.ihl = 4w0x5;
@@ -2306,10 +2285,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.gre.s = 1w0;
         hdr_14.nvgre.tni = meta_14.tunnel_metadata.vnid;
         hdr_14.nvgre.flow_id[7:0] = meta_14.hash_metadata.entropy_hash[7:0];
-        proto_5 = 8w47;
         hdr_14.ipv6.setValid(true);
         hdr_14.ipv6.version = 4w0x6;
-        hdr_14.ipv6.nextHdr = proto_5;
+        hdr_14.ipv6.nextHdr = 8w47;
         hdr_14.ipv6.hopLimit = 8w64;
         hdr_14.ipv6.trafficClass = 8w0;
         hdr_14.ipv6.flowLabel = 20w0;
@@ -2319,9 +2297,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("process_tunnel_encap.ipv4_gre_rewrite") action process_tunnel_encap_ipv4_gre_rewrite() {
         hdr_14.gre.setValid(true);
         hdr_14.gre.proto = hdr_14.ethernet.etherType;
-        proto_6 = 8w47;
         hdr_14.ipv4.setValid(true);
-        hdr_14.ipv4.protocol = proto_6;
+        hdr_14.ipv4.protocol = 8w47;
         hdr_14.ipv4.ttl = 8w64;
         hdr_14.ipv4.version = 4w0x4;
         hdr_14.ipv4.ihl = 4w0x5;
@@ -2332,10 +2309,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("process_tunnel_encap.ipv6_gre_rewrite") action process_tunnel_encap_ipv6_gre_rewrite() {
         hdr_14.gre.setValid(true);
         hdr_14.gre.proto = 16w0x800;
-        proto_7 = 8w47;
         hdr_14.ipv6.setValid(true);
         hdr_14.ipv6.version = 4w0x6;
-        hdr_14.ipv6.nextHdr = proto_7;
+        hdr_14.ipv6.nextHdr = 8w47;
         hdr_14.ipv6.hopLimit = 8w64;
         hdr_14.ipv6.trafficClass = 8w0;
         hdr_14.ipv6.flowLabel = 20w0;
@@ -2343,9 +2319,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.ethernet.etherType = 16w0x86dd;
     }
     @name("process_tunnel_encap.ipv4_ipv4_rewrite") action process_tunnel_encap_ipv4_ipv4_rewrite() {
-        proto_8 = 8w4;
         hdr_14.ipv4.setValid(true);
-        hdr_14.ipv4.protocol = proto_8;
+        hdr_14.ipv4.protocol = 8w4;
         hdr_14.ipv4.ttl = 8w64;
         hdr_14.ipv4.version = 4w0x4;
         hdr_14.ipv4.ihl = 4w0x5;
@@ -2354,9 +2329,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.ethernet.etherType = 16w0x800;
     }
     @name("process_tunnel_encap.ipv4_ipv6_rewrite") action process_tunnel_encap_ipv4_ipv6_rewrite() {
-        proto_9 = 8w41;
         hdr_14.ipv4.setValid(true);
-        hdr_14.ipv4.protocol = proto_9;
+        hdr_14.ipv4.protocol = 8w41;
         hdr_14.ipv4.ttl = 8w64;
         hdr_14.ipv4.version = 4w0x4;
         hdr_14.ipv4.ihl = 4w0x5;
@@ -2365,10 +2339,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.ethernet.etherType = 16w0x800;
     }
     @name("process_tunnel_encap.ipv6_ipv4_rewrite") action process_tunnel_encap_ipv6_ipv4_rewrite() {
-        proto_10 = 8w4;
         hdr_14.ipv6.setValid(true);
         hdr_14.ipv6.version = 4w0x6;
-        hdr_14.ipv6.nextHdr = proto_10;
+        hdr_14.ipv6.nextHdr = 8w4;
         hdr_14.ipv6.hopLimit = 8w64;
         hdr_14.ipv6.trafficClass = 8w0;
         hdr_14.ipv6.flowLabel = 20w0;
@@ -2376,10 +2349,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.ethernet.etherType = 16w0x86dd;
     }
     @name("process_tunnel_encap.ipv6_ipv6_rewrite") action process_tunnel_encap_ipv6_ipv6_rewrite() {
-        proto_11 = 8w41;
         hdr_14.ipv6.setValid(true);
         hdr_14.ipv6.version = 4w0x6;
-        hdr_14.ipv6.nextHdr = proto_11;
+        hdr_14.ipv6.nextHdr = 8w41;
         hdr_14.ipv6.hopLimit = 8w64;
         hdr_14.ipv6.trafficClass = 8w0;
         hdr_14.ipv6.flowLabel = 20w0;
@@ -2403,9 +2375,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.erspan_t3_header.span_id = (bit<10>)meta_14.i2e_metadata.mirror_session_id;
         hdr_14.erspan_t3_header.version = 4w2;
         hdr_14.erspan_t3_header.sgt_other = 32w0;
-        proto_12 = 8w47;
         hdr_14.ipv4.setValid(true);
-        hdr_14.ipv4.protocol = proto_12;
+        hdr_14.ipv4.protocol = 8w47;
         hdr_14.ipv4.ttl = 8w64;
         hdr_14.ipv4.version = 4w0x4;
         hdr_14.ipv4.ihl = 4w0x5;
@@ -2429,10 +2400,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr_14.erspan_t3_header.span_id = (bit<10>)meta_14.i2e_metadata.mirror_session_id;
         hdr_14.erspan_t3_header.version = 4w2;
         hdr_14.erspan_t3_header.sgt_other = 32w0;
-        proto_13 = 8w47;
         hdr_14.ipv6.setValid(true);
         hdr_14.ipv6.version = 4w0x6;
-        hdr_14.ipv6.nextHdr = proto_13;
+        hdr_14.ipv6.nextHdr = 8w47;
         hdr_14.ipv6.hopLimit = 8w64;
         hdr_14.ipv6.trafficClass = 8w0;
         hdr_14.ipv6.flowLabel = 20w0;
@@ -2797,14 +2767,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         clone3(CloneType.E2E, (bit<32>)session_id, { meta_18.i2e_metadata.ingress_tstamp, meta_18.i2e_metadata.mirror_session_id });
     }
     @name("process_egress_acl.egress_mirror_drop") action process_egress_acl_egress_mirror_drop(bit<16> session_id) {
-        session_id_0 = session_id;
-        meta_18.i2e_metadata.mirror_session_id = session_id_0;
-        clone3(CloneType.E2E, (bit<32>)session_id_0, { meta_18.i2e_metadata.ingress_tstamp, meta_18.i2e_metadata.mirror_session_id });
+        meta_18.i2e_metadata.mirror_session_id = session_id;
+        clone3(CloneType.E2E, (bit<32>)session_id, { meta_18.i2e_metadata.ingress_tstamp, meta_18.i2e_metadata.mirror_session_id });
         mark_to_drop();
     }
     @name("process_egress_acl.egress_redirect_to_cpu") action process_egress_acl_egress_redirect_to_cpu(bit<16> reason_code) {
-        reason_code_0 = reason_code;
-        meta_18.fabric_metadata.reason_code = reason_code_0;
+        meta_18.fabric_metadata.reason_code = reason_code;
         clone3(CloneType.E2E, 32w250, { meta_18.ingress_metadata.bd, meta_18.ingress_metadata.ifindex, meta_18.fabric_metadata.reason_code, meta_18.ingress_metadata.ingress_port });
         mark_to_drop();
     }
@@ -3250,7 +3218,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     headers hdr_48;
     metadata meta_48;
     standard_metadata_t standard_metadata_48;
-    bit<16> reason_code_1;
     action NoAction_1() {
     }
     @name("rmac_hit") action rmac_hit_0() {
@@ -4828,8 +4795,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         clone3(CloneType.I2E, 32w250, { meta_48.ingress_metadata.bd, meta_48.ingress_metadata.ifindex, meta_48.fabric_metadata.reason_code, meta_48.ingress_metadata.ingress_port });
     }
     @name("process_system_acl.redirect_to_cpu") action process_system_acl_redirect_to_cpu(bit<16> reason_code) {
-        reason_code_1 = reason_code;
-        meta_48.fabric_metadata.reason_code = reason_code_1;
+        meta_48.fabric_metadata.reason_code = reason_code;
         clone3(CloneType.I2E, 32w250, { meta_48.ingress_metadata.bd, meta_48.ingress_metadata.ifindex, meta_48.fabric_metadata.reason_code, meta_48.ingress_metadata.ingress_port });
         mark_to_drop();
         meta_48.fabric_metadata.dst_device = 8w0;
