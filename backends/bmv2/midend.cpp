@@ -7,6 +7,7 @@
 #include "midend/removeReturns.h"
 #include "midend/moveConstructors.h"
 #include "midend/actionSynthesis.h"
+#include "midend/local_copyprop.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -100,6 +101,8 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
+        new P4::TypeChecking(&refMap, &typeMap, isv1, true),
+        new P4::LocalCopyPropagation(),
         new P4::MoveDeclarations(),
         // Create actions for statements that can't be done in control blocks.
         new P4::TypeChecking(&refMap, &typeMap, isv1),
