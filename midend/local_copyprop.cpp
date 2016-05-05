@@ -67,7 +67,7 @@ const IR::Expression *P4::LocalCopyPropagation::postorder(IR::PathExpression *pa
             return path;
         } else if (local->val) {
             LOG3("  propagating value for " << path->path->name);
-            return local->val; 
+            return local->val;
         } else {
             LOG4("  using " << path->path->name << " with no propagated value");
             local->live = true; } }
@@ -75,7 +75,7 @@ const IR::Expression *P4::LocalCopyPropagation::postorder(IR::PathExpression *pa
 }
 
 IR::AssignmentStatement *P4::LocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
-    if (as->left == as->right) { // FIXME -- need deep equals here?
+    if (as->left == as->right) {   // FIXME -- need deep equals here?
         LOG3("  removing noop assignment " << *as);
         return nullptr; }
     if (auto dest = as->left->to<IR::PathExpression>()) {

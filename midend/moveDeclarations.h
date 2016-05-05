@@ -14,8 +14,7 @@ class ResetHeaders : public Transform {
     void generateResets(const IR::Type* type, const IR::Expression* expr,
                         IR::Vector<IR::StatOrDecl>* resets);
  public:
-    ResetHeaders(TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); }
+    explicit ResetHeaders(TypeMap* typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
 };
 
