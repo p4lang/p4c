@@ -117,7 +117,7 @@ $(pd_res_thrift_cxx) \
 thrift-src/pdfixed_rpc_server.cpp
 
 AM_CXXFLAGS =
-AM_CPPFLAGS = -I$(top_srcdir)/thrift_src/gen-cpp
+AM_CPPFLAGS = -I$(top_builddir)/thrift_src/gen-cpp
 AM_CPPFLAGS += -I$(top_builddir)/targets/simple_switch/gen-cpp
 AM_CPPFLAGS += -I$(srcdir)/include
 AM_CPPFLAGS += -I$(top_srcdir)/include
