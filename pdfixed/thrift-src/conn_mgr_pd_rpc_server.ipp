@@ -71,14 +71,4 @@ public:
 
     return p4_pd_complete_operations(sess_hdl);
   }
-
-  void rmt_log_level_set(P4LogLevel_t::type log_level) {
-      std::cerr << "In ${name}\n";
-  }
-
-  P4LogLevel_t::type rmt_log_level_get() {
-      std::cerr << "In ${name}\n";
-      return (P4LogLevel_t::type) 0;
-  }
-
 };

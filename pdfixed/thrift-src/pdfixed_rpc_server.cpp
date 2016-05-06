@@ -29,6 +29,7 @@ using boost::shared_ptr;
 
 #include "conn_mgr_pd_rpc_server.ipp"
 #include "mc_pd_rpc_server.ipp"
+#include "sswitch_pd_rpc_server.ipp"
 
 static pthread_mutex_t cookie_mutex;
 static pthread_cond_t cookie_cv;
@@ -36,25 +37,26 @@ static void *cookie;
 
 #define BFN_PD_RPC_SERVER_PORT 9090
 
+namespace {
+
 /*
  * Thread wrapper for starting the server
  */
 
-static void *rpc_server_thread(void *) {
+void *rpc_server_thread(void *) {
   int port = BFN_PD_RPC_SERVER_PORT;
   
   shared_ptr<mcHandler> mc_handler(new mcHandler());
+  shared_ptr<sswitchHandler> sswitch_handler(new sswitchHandler());
   shared_ptr<conn_mgrHandler> conn_mgr_handler(new conn_mgrHandler());
   
   shared_ptr<TMultiplexedProcessor> processor(new TMultiplexedProcessor());
   processor->registerProcessor(
-			       "mc",
-			       shared_ptr<TProcessor>(new mcProcessor(mc_handler))
-			       );
+    "mc", shared_ptr<TProcessor>(new mcProcessor(mc_handler)));
   processor->registerProcessor(
-			       "conn_mgr",
-			       shared_ptr<TProcessor>(new conn_mgrProcessor(conn_mgr_handler))
-			       );
+    "sswitch", shared_ptr<TProcessor>(new sswitchProcessor(sswitch_handler)));
+  processor->registerProcessor(
+    "conn_mgr", shared_ptr<TProcessor>(new conn_mgrProcessor(conn_mgr_handler)));
 
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
   shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
@@ -72,8 +74,9 @@ static void *rpc_server_thread(void *) {
   return NULL;
 }
 
+pthread_t rpc_thread;
 
-static pthread_t rpc_thread;
+}  // namespace
 
 extern "C" {
 

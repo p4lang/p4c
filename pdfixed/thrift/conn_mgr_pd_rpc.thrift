@@ -25,8 +25,4 @@ service conn_mgr {
     i32 commit_txn(1:res.SessionHandle_t sess_hdl, 2:bool hwSynchronous);
 
     i32 complete_operations(1:res.SessionHandle_t sess_hdl);
-
-    # control logging
-    void rmt_log_level_set(1:res.P4LogLevel_t log_level);
-    res.P4LogLevel_t rmt_log_level_get();
 }
