@@ -370,16 +370,16 @@ const IR::Node* TypeInference::preorder(IR::P4Program* program) {
 const IR::Node* TypeInference::postorder(IR::Declaration_Errors* decl) {
     if (done())
         return decl;
-    for (auto id : *decl->getEnumerator())
-        setType(id, IR::Type_Error::get());
+    for (auto id : *decl->getDeclarations())
+        setType(id->getNode(), IR::Type_Error::get());
     return decl;
 }
 
 const IR::Node* TypeInference::postorder(IR::Declaration_MatchKind* decl) {
     if (done())
         return decl;
-    for (auto id : *decl->getEnumerator())
-        setType(id, IR::Type_MatchKind::get());
+    for (auto id : *decl->getDeclarations())
+        setType(id->getNode(), IR::Type_MatchKind::get());
     return decl;
 }
 
@@ -823,8 +823,8 @@ const IR::Node* TypeInference::postorder(IR::Type_ActionEnum* type) {
 const IR::Node* TypeInference::postorder(IR::Type_Enum* type) {
     if (done())
         return type;
-    for (auto e : *type->getEnumerator())
-        setType(e, type);
+    for (auto e : *type->getDeclarations())
+        setType(e->getNode(), type);
     setType(getOriginal(), type);
     setType(type, type);
     return type;

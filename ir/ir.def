@@ -35,15 +35,17 @@ class SelectCase {
 #nodbprint
 }
 
-class ParserState : IGeneralNamespace, Declaration, IAnnotated {
-    Annotations        annotations;
-    Vector<StatOrDecl> components;
+class ParserState : ISimpleNamespace, Declaration, IAnnotated {
+    Annotations               annotations;
+    IndexedVector<StatOrDecl> components;
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
-    NullOK Expression  selectExpression;
+    NullOK Expression         selectExpression;
 #emit
     const Annotations* getAnnotations() const override { return annotations; }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return components->only<IDeclaration>(); }
+    { return components->getDeclarations(); }
+    const IDeclaration* getDeclByName(cstring name) const override
+    { return components->getDeclaration(name); }
 
     static const ID accept;
     static const ID reject;
@@ -107,46 +109,44 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     toString { return cstring("control ") + externalName(); }
 }
 
-class P4Action : Declaration, IGeneralNamespace, IAnnotated {
+class P4Action : Declaration, ISimpleNamespace, IAnnotated {
     Annotations        annotations;
     ParameterList      parameters;
     IndexedVector<StatOrDecl> body;
 #emit
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return body->only<IDeclaration>(); }
+    { return body->getDeclarations(); }
+    const IDeclaration* getDeclByName(cstring name) const override
+    { return body->getDeclaration(name); }
     const Annotations* getAnnotations() const override { return annotations; }
 #end
     validate{ body->check_null(); }
 }
 
 class Declaration_Errors : Declaration, ISimpleNamespace {
-    inline NameMap<Declaration_ID, ordered_map> members;
+    IndexedVector<Declaration_ID> members;
 #emit
     static const ID EID;
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return getEnumerator()->as<const IDeclaration*>(); }
-    Util::Enumerator<const Declaration_ID*>* getEnumerator() const
-    { return members.valueEnumerator(); }
+    { return members->getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const
-    { return members.getUnique(name); }
+    { return members->getDeclaration(name); }
 #end
 #nodbprint
-    validate{ members.check_null(); }
+    validate{ members->check_null(); }
 }
 
 class Declaration_MatchKind : Declaration, ISimpleNamespace {
-    inline NameMap<Declaration_ID, ordered_map> members;
+    IndexedVector<Declaration_ID> members;
 #emit
     static const ID MKID;
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return getEnumerator()->as<const IDeclaration*>(); }
-    Util::Enumerator<const Declaration_ID*>* getEnumerator() const
-    { return members.valueEnumerator(); }
+    { return members->getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const
-    { return members.getUnique(name); }
+    { return members->getDeclaration(name); }
 #end
 #nodbprint
-    validate{ members.check_null(); }
+    validate{ members->check_null(); }
 }
 
 // Table property value abstract base class
@@ -161,9 +161,9 @@ class ExpressionValue : PropertyValue {
 }
 
 // An element in a table actions list
-class ActionListElement : IAnnotated{
+class ActionListElement : IAnnotated {
     Annotations               annotations;
-    PathExpression            name;
+    PathExpression            name;  // This can be real path
     NullOK Vector<Expression> arguments;
 #nodbprint
 #emit
@@ -295,6 +295,8 @@ class Declaration_Instance : Declaration, IAnnotated {
 
 // Toplevel program representation
 class P4Program : IGeneralNamespace {
+    // TODO: convert this to an IndexedVector.
+    // The only duplicates we have are error and match_kind
     Vector<Node> declarations;
     validate{ checkDeclarations(); }
 #emit

@@ -304,7 +304,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
     ExpressionConverter conv(this);
 
     latest = nullptr;
-    auto components = new IR::Vector<IR::StatOrDecl>();
+    auto components = new IR::IndexedVector<IR::StatOrDecl>();
     for (auto e : parser->stmts) {
         auto stmt = convertParserStatement(e);
         components->push_back(stmt);

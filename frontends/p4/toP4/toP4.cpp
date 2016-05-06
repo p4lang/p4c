@@ -216,8 +216,8 @@ bool ToP4::preorder(const IR::Type_Enum* t) {
     builder.spc();
     builder.blockStart();
     bool first = true;
-    for (auto a : *t->getEnumerator()) {
-        dump(2, a, 1);
+    for (auto a : *t->getDeclarations()) {
+        dump(2, a->getNode(), 1);
         if (!first)
             builder.append(",\n");
         first = false;
@@ -499,10 +499,10 @@ bool ToP4::preorder(const IR::Declaration_Errors* d) {
     builder.append("error ");
     builder.blockStart();
     bool first = true;
-    for (auto a : *d->getEnumerator()) {
+    for (auto a : *d->getDeclarations()) {
         if (!first)
             builder.append(",\n");
-        dump(1, a, 1);
+        dump(1, a->getNode(), 1);
         first = false;
         builder.emitIndent();
         builder.append(a->getName());
@@ -517,10 +517,10 @@ bool ToP4::preorder(const IR::Declaration_MatchKind* d) {
     builder.append("match_kind ");
     builder.blockStart();
     bool first = true;
-    for (auto a : *d->getEnumerator()) {
+    for (auto a : *d->getDeclarations()) {
         if (!first)
             builder.append(",\n");
-        dump(1, a, 1);
+        dump(1, a->getNode(), 1);
         first = false;
         builder.emitIndent();
         builder.append(a->getName());
@@ -552,7 +552,6 @@ VECTOR_VISIT(Vector, Type)
 VECTOR_VISIT(Vector, Expression)
 VECTOR_VISIT(Vector, Method)
 VECTOR_VISIT(Vector, SelectCase)
-VECTOR_VISIT(Vector, StatOrDecl)
 VECTOR_VISIT(IndexedVector, StatOrDecl)
 VECTOR_VISIT(Vector, SwitchCase)
 VECTOR_VISIT(Vector, Declaration)

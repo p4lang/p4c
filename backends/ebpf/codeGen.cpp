@@ -138,9 +138,9 @@ bool CodeGenInspector::preorder(const IR::Type_Enum* type) {
     builder->append(type->name);
     builder->spc();
     builder->blockStart();
-    for (auto e : *type->getEnumerator()) {
+    for (auto e : *type->getDeclarations()) {
         builder->emitIndent();
-        builder->append(e->name.name);
+        builder->append(e->getName().name);
         builder->appendLine(",");
     }
     builder->blockEnd(true);
@@ -233,22 +233,6 @@ void CodeGenInspector::widthCheck(const IR::Node* node) const {
         BUG("%1%: Computations on %2% bits not yet supported", node, tb->size);
     // We could argue that this may not be supported ever
     ::error("%1%: Computations on %2% bits not supported", node, tb->size);
-}
-
-bool CodeGenInspector::preorder(const IR::Vector<IR::StatOrDecl> *v) {
-    if (v == nullptr) return false;
-    bool first = true;
-    VecPrint sep = getSep();
-    for (auto a : *v) {
-        if (!first) {
-            builder->append(sep.separator); }
-        if (sep.separator.endsWith("\n")) {
-            builder->emitIndent(); }
-        first = false;
-        visit(a); }
-    if (!v->empty() && !sep.terminator.isNullOrEmpty()) {
-        builder->append(sep.terminator); }
-    return false;
 }
 
 bool CodeGenInspector::preorder(const IR::IndexedVector<IR::StatOrDecl> *v) {

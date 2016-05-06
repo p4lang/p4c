@@ -368,17 +368,15 @@ class Declaration_ID : Declaration, CompileTimeValue {
 }
 
 class Type_Enum : Type_Declaration, ISimpleNamespace {
-    inline NameMap<Declaration_ID, ordered_map> members;
+    IndexedVector<Declaration_ID> members;
 #emit
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return members.valueEnumerator()->as<const IDeclaration*>(); }
-    Util::Enumerator<const Declaration_ID*>* getEnumerator() const
-    { return members.valueEnumerator(); }
+    { return members->getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const
-    { return members.getUnique(name); }
+    { return members->getDeclaration(name); }
 #end
 #nodbprint
-    validate{ members.check_null(); }
+    validate{ members->check_null(); }
 }
 
 class Type_Table : Type, IApply {
@@ -463,7 +461,7 @@ class Type_Typedef : Type_Declaration, IAnnotated {
 // An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
     TypeParameters typeParameters;
-    Vector<Method> methods;
+    Vector<Method> methods;  // methods can be overloaded, so this is not IndexedVector
 #emit
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
     { return methods->getEnumerator()->as<const IDeclaration*>(); }
