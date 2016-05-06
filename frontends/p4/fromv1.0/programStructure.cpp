@@ -525,7 +525,7 @@ void ProgramStructure::createDeparser() {
                                      new IR::TypeParameters(), params);
 
     auto stateful = new IR::NameMap<IR::Declaration, ordered_map>();
-    auto components = new IR::Vector<IR::StatOrDecl>();
+    auto components = new IR::IndexedVector<IR::StatOrDecl>();
     ExpressionConverter conv(this);
 
     for (auto it = sortedHeaders.rbegin(); it != sortedHeaders.rend(); it++) {
@@ -995,7 +995,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
             auto decl = new IR::Declaration_Variable(Util::SourceInfo(), tmpvar,
                                                      IR::Annotations::empty,
                                                      v1model.random.resultType, mc);
-            auto components = new IR::Vector<IR::StatOrDecl>();
+            auto components = new IR::IndexedVector<IR::StatOrDecl>();
             auto assign = sliceAssign(primitive->srcInfo, field,
                                       new IR::PathExpression(IR::ID(tmpvar)), mask);
             components->push_back(decl);
@@ -1203,7 +1203,7 @@ const IR::P4Action*
 ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newName,
                                 const IR::Meter* meterToAccess) {
     LOG1("Converting action " << action->name);
-    auto body = new IR::Vector<IR::StatOrDecl>();
+    auto body = new IR::IndexedVector<IR::StatOrDecl>();
     auto params = new IR::ParameterList();
     bool isCalled = calledActions.isCallee(action->name.name);
     for (auto p : action->args) {
@@ -1496,7 +1496,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     }
 
     StatementConverter conv(this, &instanceNames);
-    auto components = new IR::Vector<IR::StatOrDecl>();
+    auto components = new IR::IndexedVector<IR::StatOrDecl>();
     for (auto e : *control->code) {
         auto s = conv.convert(e);
         components->push_back(s);
@@ -1528,7 +1528,7 @@ void ProgramStructure::createControls() {
         auto name = v1model.egress.Id();
         auto type = controlType(name);
         auto stateful = new IR::NameMap<IR::Declaration, ordered_map>();
-        auto components = new IR::Vector<IR::StatOrDecl>();
+        auto components = new IR::IndexedVector<IR::StatOrDecl>();
         auto body = new IR::BlockStatement(Util::SourceInfo(), components);
         auto egressControl = new IR::P4Control(Util::SourceInfo(), name, type,
                                                       new IR::ParameterList(),
@@ -1684,7 +1684,7 @@ void ProgramStructure::createChecksumVerifications() {
         }
     }
 
-    auto components = new IR::Vector<IR::StatOrDecl>();
+    auto components = new IR::IndexedVector<IR::StatOrDecl>();
     for (auto cf : calculated_fields) {
         LOG1("Converting " << cf);
         auto dest = conv.convert(cf->field);
@@ -1748,7 +1748,7 @@ void ProgramStructure::createChecksumUpdates() {
                                      new IR::TypeParameters(), params);
 
     auto stateful = new IR::NameMap<IR::Declaration, ordered_map>();
-    auto components = new IR::Vector<IR::StatOrDecl>();
+    auto components = new IR::IndexedVector<IR::StatOrDecl>();
 
     std::map<const IR::FieldListCalculation*, const IR::Declaration_Instance*> map;
     for (auto cf : calculated_fields) {

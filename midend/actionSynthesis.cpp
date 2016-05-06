@@ -96,8 +96,8 @@ const IR::Node* SynthesizeActions::postorder(IR::P4Control* control) {
 
 const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
     // Find a chain of statements to convert
-    auto actbody = new IR::Vector<IR::StatOrDecl>();  // build here new action
-    auto left = new IR::Vector<IR::StatOrDecl>();  // leftover statements
+    auto actbody = new IR::IndexedVector<IR::StatOrDecl>();  // build here new action
+    auto left = new IR::IndexedVector<IR::StatOrDecl>();  // leftover statements
 
     for (auto c : *statement->components) {
         if (c->is<IR::AssignmentStatement>()) {
@@ -117,7 +117,7 @@ const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
             auto block = new IR::BlockStatement(Util::SourceInfo(), actbody);
             auto action = createAction(block);
             left->push_back(action);
-            actbody = new IR::Vector<IR::StatOrDecl>();
+            actbody = new IR::IndexedVector<IR::StatOrDecl>();
         }
         left->push_back(c);
     }
@@ -140,11 +140,11 @@ const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
 const IR::Statement* SynthesizeActions::createAction(const IR::Statement* toAdd) {
     changes = true;
     auto name = refMap->newName("act");
-    const IR::Vector<IR::StatOrDecl>* body;
+    const IR::IndexedVector<IR::StatOrDecl>* body;
     if (toAdd->is<IR::BlockStatement>()) {
         body = toAdd->to<IR::BlockStatement>()->components;
     } else {
-        auto b = new IR::Vector<IR::StatOrDecl>();
+        auto b = new IR::IndexedVector<IR::StatOrDecl>();
         b->push_back(toAdd);
         body = b;
     }

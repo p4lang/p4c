@@ -132,7 +132,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         return statement;
 
     LOG1("Inlining: " << toInline);
-    auto body = new IR::Vector<IR::StatOrDecl>();
+    auto body = new IR::IndexedVector<IR::StatOrDecl>();
     IR::ParameterSubstitution subst;
     IR::TypeVariableSubstitution tvs;  // empty
 

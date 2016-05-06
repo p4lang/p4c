@@ -256,7 +256,7 @@ const IR::Node* StatementConverter::preorder(IR::If* cond) {
 }
 
 const IR::Statement* StatementConverter::convert(const IR::Vector<IR::Expression>* toConvert) {
-    auto stats = new IR::Vector<IR::StatOrDecl>();
+    auto stats = new IR::IndexedVector<IR::StatOrDecl>();
     for (auto e : *toConvert) {
         auto s = convert(e);
         stats->push_back(s);

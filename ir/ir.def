@@ -110,7 +110,7 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
 class P4Action : Declaration, IGeneralNamespace, IAnnotated {
     Annotations        annotations;
     ParameterList      parameters;
-    Vector<StatOrDecl> body;
+    IndexedVector<StatOrDecl> body;
 #emit
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
     { return body->only<IDeclaration>(); }
@@ -348,11 +348,13 @@ class IfStatement : Statement {
     }
 }
 
-class BlockStatement : Statement, IGeneralNamespace {
-    Vector<StatOrDecl> components;
+class BlockStatement : Statement, ISimpleNamespace {
+    IndexedVector<StatOrDecl> components;
 #emit
+    const IDeclaration* getDeclByName(cstring name) const
+    { return components->getDeclaration(name); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return components->only<IDeclaration>(); }
+    { return components->getDeclarations(); }
 #end
 }
 

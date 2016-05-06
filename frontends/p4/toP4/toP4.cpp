@@ -36,6 +36,7 @@ class DumpIR : public Inspector {
     }
     void display(const IR::Node* node) {
         str << IndentCtl::endl;
+        cstring tn = node->node_type_name();
         if (node->is<IR::Member>()) {
             node->Node::dbprint(str);
             str << node->to<IR::Member>()->member;
@@ -43,7 +44,10 @@ class DumpIR : public Inspector {
             node->Node::dbprint(str);
             str << " " << node;
         } else if (node->is<IR::Expression>() ||
-            node->is<IR::AssignmentStatement>()) {
+                   node->is<IR::AssignmentStatement>() ||
+                   node->is<IR::P4Action>() ||
+                   tn.startsWith("Vector") ||
+                   tn.startsWith("IndexedVector")) {
             node->Node::dbprint(str);
         } else {
             str << node;
@@ -528,8 +532,8 @@ bool ToP4::preorder(const IR::Declaration_MatchKind* d) {
 
 ///////////////////////////////////////////////////
 
-#define VECTOR_VISIT(T)                                   \
-    bool ToP4::preorder(const IR::Vector<IR::T> *v) {     \
+#define VECTOR_VISIT(V, T)                                \
+    bool ToP4::preorder(const IR:: V <IR::T> *v) {        \
     if (v == nullptr) return false;                       \
     bool first = true;                                    \
     VecPrint sep = getSep();                              \
@@ -544,16 +548,17 @@ bool ToP4::preorder(const IR::Declaration_MatchKind* d) {
         builder.append(sep.terminator); }                 \
 return false; }
 
-VECTOR_VISIT(Type)
-VECTOR_VISIT(Expression)
-VECTOR_VISIT(Method)
-VECTOR_VISIT(SelectCase)
-VECTOR_VISIT(StatOrDecl)
-VECTOR_VISIT(SwitchCase)
-VECTOR_VISIT(Declaration)
-VECTOR_VISIT(Node)
-VECTOR_VISIT(ParserState)
-VECTOR_VISIT(ActionListElement)
+VECTOR_VISIT(Vector, Type)
+VECTOR_VISIT(Vector, Expression)
+VECTOR_VISIT(Vector, Method)
+VECTOR_VISIT(Vector, SelectCase)
+VECTOR_VISIT(Vector, StatOrDecl)
+VECTOR_VISIT(IndexedVector, StatOrDecl)
+VECTOR_VISIT(Vector, SwitchCase)
+VECTOR_VISIT(Vector, Declaration)
+VECTOR_VISIT(Vector, Node)
+VECTOR_VISIT(Vector, ParserState)
+VECTOR_VISIT(Vector, ActionListElement)
 #undef VECTOR_VISIT
 
 bool ToP4::preorder(const IR::Vector<IR::Annotation> *v) {
@@ -807,7 +812,7 @@ bool ToP4::preorder(const IR::AssignmentStatement* a) {
 }
 
 bool ToP4::preorder(const IR::BlockStatement* s) {
-    dump(2);
+    dump(1);
     builder.blockStart();
     setVecSep("\n", "\n");
     visit(s->components);

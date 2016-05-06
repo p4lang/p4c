@@ -101,7 +101,7 @@ void Visitor::print_context() const {
     }
 
     while (ctx != nullptr) {
-        out << ctx->node << std::endl;
+        out << ctx->node << " (" << ctx->original << ")" << std::endl;
         ctx = ctx->parent;
     }
 }
@@ -249,4 +249,3 @@ const IR::Node *Transform::postorder(IR::CLASS *n) {                            
     return postorder(static_cast<IR::BASE *>(n)); }                                     \
 
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
-

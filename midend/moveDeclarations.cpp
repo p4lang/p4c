@@ -54,7 +54,7 @@ const IR::Node* ResetHeaders::postorder(IR::Declaration_Variable* decl) {
 const IR::Node* MoveDeclarations::postorder(IR::P4Action* action)  {
     if (findContext<IR::P4Control>() == nullptr) {
         // Else let the parent control get these
-        auto body = new IR::Vector<IR::StatOrDecl>();
+        auto body = new IR::IndexedVector<IR::StatOrDecl>();
         auto m = getMoves();
         body->insert(body->end(), m->begin(), m->end());
         body->append(*action->body);

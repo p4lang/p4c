@@ -404,7 +404,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
     CHECK_NULL(decl);
 
     auto callee = workToDo->declToCallee[decl]->to<IR::P4Control>();
-    auto body = new IR::Vector<IR::StatOrDecl>();
+    auto body = new IR::IndexedVector<IR::StatOrDecl>();
 
     // Evaluate in and inout parameters in order.
     std::map<cstring, cstring> *paramRename = workToDo->paramRename[decl];

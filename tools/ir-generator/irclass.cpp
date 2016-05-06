@@ -8,8 +8,10 @@ static const LookupScope utilScope(nullptr, "Util");
 static const NamedType srcInfoType(Util::SourceInfo(), &utilScope, "SourceInfo");
 IrField *IrField::srcInfoField = new IrField(Util::SourceInfo(), &srcInfoType,
                                              "srcInfo", nullptr, false, true);
+IrClass *IrClass::ideclaration = new IrClass(NodeKind::Interface, "IDeclaration");
 IrClass *IrClass::nodeClass = new IrClass(NodeKind::Abstract, "Node", {IrField::srcInfoField});
 IrClass *IrClass::vectorClass = new IrClass(NodeKind::Template, "Vector");
+IrClass *IrClass::indexedVectorClass = new IrClass(NodeKind::Template, "IndexedVector");
 IrClass *IrClass::namemapClass = new IrClass(NodeKind::Template, "NameMap");
 IrClass *IrClass::nodemapClass = new IrClass(NodeKind::Template, "NodeMap");
 bool LineDirective::inhibit = false;
@@ -81,6 +83,9 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     for (auto cls : *getClasses()) {
         if (cls->needVector)
             t << "T(Vector<IR::" << cls->containedIn << cls->name << ">, D(Node), "
+                 "##__VA_ARGS__) \\" << std::endl;
+        if (cls->needIndexedVector)
+            t << "T(IndexedVector<IR::" << cls->containedIn << cls->name << ">, D(Node), "
                  "##__VA_ARGS__) \\" << std::endl;
         if (cls->needNameMap)
             BUG("visitable (non-inline) NameMap not yet implemented");
@@ -472,6 +477,8 @@ void IrField::generate(std::ostream &out, bool asField) const {
                 if (auto acl = tmpl->args[i]->resolve(clss->containedIn)) {
                     if (cls == IrClass::vectorClass)
                         acl->needVector = true;
+                    else if (cls == IrClass::indexedVectorClass)
+                        acl->needIndexedVector = true;
                     else if (cls == IrClass::namemapClass && !isInline)
                         acl->needNameMap = true;
                     else if (cls == IrClass::nodemapClass && !isInline)

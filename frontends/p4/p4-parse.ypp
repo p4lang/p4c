@@ -52,6 +52,7 @@ static int yylex();
     IR::Vector<IR::Expression>  *exprs;
     IR::Vector<IR::SelectCase>  *selectCases;
     IR::Vector<IR::StatOrDecl>  *statOrDecls;
+    IR::IndexedVector<IR::StatOrDecl> *ixStatOrDecls;
     IR::Vector<IR::SwitchCase>  *switchCases;
     IR::Vector<IR::Declaration> *decls;
     IR::NameMap<IR::Declaration, ordered_map> *stateful;
@@ -131,7 +132,8 @@ static int yylex();
                         assignmentOrMethodCallStatement conditionalStatement
 %type<BlockStatement>   blockStatement actionBlockStatement controlBody objInitializer
 %type<StatOrDecl>       statementOrDeclaration parserStatement actionElement
-%type<statOrDecls>      statOrDeclList actionElementList parserStatements objDeclarations
+%type<statOrDecls>      parserStatements
+%type<ixStatOrDecls>    objDeclarations statOrDeclList actionElementList
 %type<SwitchCase>       switchCase
 %type<switchCases>      switchCases
 %type<types>            typeArgumentList
@@ -299,7 +301,7 @@ objInitializer
     ;
 
 objDeclarations
-    : /* empty */              { $$ = new IR::Vector<IR::StatOrDecl>(); }
+    : /* empty */              { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
     | objDeclarations objDeclaration { $$ = $1; $1->push_back($2); }
     ;
 
@@ -680,7 +682,7 @@ blockStatement
     ;
 
 statOrDeclList
-    : /* empty */                           { $$ = new IR::Vector<IR::StatOrDecl>(); }
+    : /* empty */                           { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
     | statOrDeclList statementOrDeclaration { $$ = $1; $$->push_back($2); }
     ;
 
@@ -779,7 +781,7 @@ actionDeclaration
     ;
 
 actionElementList
-    : /* empty */                     { $$ = new IR::Vector<IR::StatOrDecl>(); }
+    : /* empty */                     { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
     | actionElementList actionElement { $$ = $1; $$->push_back($2); }
     ;
 

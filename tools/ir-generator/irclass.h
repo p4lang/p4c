@@ -160,6 +160,7 @@ class IrClass : public IrElement {
     const NodeKind kind;
     const cstring name;
     bool needVector = false;  // using a Vector of this class
+    bool needIndexedVector = false;  // using an IndexedVecor of this class
     bool needNameMap = false;  // using a NameMap of this class
     bool needNodeMap = false;  // using a NodeMap of this class
 
@@ -185,7 +186,7 @@ class IrClass : public IrElement {
       kind(kind), name(name) {
         IrNamespace::add_class(this); }
 
-    static IrClass *nodeClass, *vectorClass, *namemapClass, *nodemapClass;
+    static IrClass *nodeClass, *vectorClass, *namemapClass, *nodemapClass, *ideclaration, *indexedVectorClass;
 
     void declare(std::ostream &out) const;
     void generate_hdr(std::ostream &out) const override;

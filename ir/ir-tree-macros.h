@@ -13,6 +13,7 @@
 
 #define IRNODE_ALL_TEMPLATES_AND_DIRECT_AND_INDIRECT_BASES(M, D, B, TDA, ...)                   \
     M(Vector, D(Node) B(Node), template<class T>, <T>, ##__VA_ARGS__)                           \
+    M(IndexedVector, D(Node) B(Node), template<class T>, <T>, ##__VA_ARGS__)                    \
     M(NameMap, D(Node) B(Node),                                                                 \
       COPY(template<class T, template<class, class, class, class> class MAP TDA(= std::map),    \
                     class COMP TDA(= std::less<cstring>),                                       \
