@@ -6,7 +6,7 @@ HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike *hdr_type) {
     auto *max_length = hdr_type->annotations->getSingle("max_length");
     if (!max_length) {
         unsigned len = 0;
-        for (auto field : *hdr_type->getEnumerator())
+        for (auto field : *hdr_type->fields)
             len += field->type->width_bits();
         max_length = new IR::Annotation("max_length", len);
         if (!annot) annot = hdr_type->annotations->annotations->clone();

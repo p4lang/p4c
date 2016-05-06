@@ -20,16 +20,16 @@ const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
 
     workToDo = &toInline->callerToWork[orig];
     LOG1("Simple inliner " << caller);
-    auto stateful = new IR::NameMap<IR::Declaration, ordered_map>();
-    for (auto s : *caller->statefulEnumerator()) {
+    auto stateful = new IR::IndexedVector<IR::Declaration>();
+    for (auto s : *caller->stateful) {
         auto inst = s->to<IR::Declaration_Instance>();
         if (inst == nullptr ||
             workToDo->declToCallee.find(inst) == workToDo->declToCallee.end()) {
             // If some element with the same name is already there we don't reinsert it
             // since this program is generated from a P4 v1.0 program by duplicating
             // elements.
-            if (stateful->getUnique(s->name) == nullptr)
-                stateful->addUnique(s->name, s);
+            if (stateful->getDeclaration(s->name) == nullptr)
+                stateful->push_back(s);
         } else {
             auto callee = workToDo->declToCallee[inst];
             CHECK_NULL(callee);
@@ -47,9 +47,9 @@ const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
             auto clone = callee->getNode()->apply(sp);
             if (clone == nullptr)
                 return caller;
-            for (auto i : *clone->to<IR::P4Control>()->statefulEnumerator()) {
-                if (stateful->getUnique(i->name) == nullptr)
-                    stateful->addUnique(i->name, i);
+            for (auto i : *clone->to<IR::P4Control>()->stateful) {
+                if (stateful->getDeclaration(i->name) == nullptr)
+                    stateful->push_back(i);
             }
             workToDo->declToCallee[inst] = clone->to<IR::IContainer>();
         }
@@ -57,7 +57,7 @@ const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
 
     visit(caller->body);
     auto result = new IR::P4Control(caller->srcInfo, caller->name, caller->type,
-                                    caller->constructorParams, std::move(*stateful),
+                                    caller->constructorParams, stateful,
                                     caller->body);
     list->replace(orig, result);
     workToDo = nullptr;

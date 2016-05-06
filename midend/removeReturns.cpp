@@ -38,7 +38,7 @@ const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
     BUG_CHECK(stack.empty(), "Non-empty stack");
     push();
     visit(action->body);
-    auto body = new IR::Vector<IR::StatOrDecl>();
+    auto body = new IR::IndexedVector<IR::StatOrDecl>();
     body->push_back(decl);
     body->append(*action->body);
     auto result = new IR::P4Action(action->srcInfo, action->name, action->annotations,
@@ -68,7 +68,7 @@ const IR::Node* RemoveReturns::preorder(IR::P4Control* control) {
     BUG_CHECK(stack.empty(), "Non-empty stack");
     push();
     visit(control->body);
-    auto bodyContents = new IR::Vector<IR::StatOrDecl>();
+    auto bodyContents = new IR::IndexedVector<IR::StatOrDecl>();
     bodyContents->push_back(decl);
     bodyContents->append(*control->body->components);
     auto body = new IR::BlockStatement(control->body->srcInfo, bodyContents);
@@ -101,7 +101,7 @@ const IR::Node* RemoveReturns::preorder(IR::ExitStatement* statement) {
 }
 
 const IR::Node* RemoveReturns::preorder(IR::BlockStatement* statement) {
-    auto body = new IR::Vector<IR::StatOrDecl>();
+    auto body = new IR::IndexedVector<IR::StatOrDecl>();
     auto currentBody = body;
     Returns ret = Returns::No;
     for (auto s : *statement->components) {
@@ -114,7 +114,7 @@ const IR::Node* RemoveReturns::preorder(IR::BlockStatement* statement) {
             ret = r;
             break;
         } else if (r == Returns::Maybe) {
-            auto newBody = new IR::Vector<IR::StatOrDecl>();
+            auto newBody = new IR::IndexedVector<IR::StatOrDecl>();
             auto path = new IR::PathExpression(returnVar);
             auto condition = new IR::LNot(Util::SourceInfo(), path);
             auto newBlock = new IR::BlockStatement(Util::SourceInfo(), newBody);

@@ -1,8 +1,7 @@
 # Unit tests
 
 check_PROGRAMS = exception_test format_test source_file_test path_test \
-		 enumerator_test default_test unittest_transform1 json_test \
-		 namemap_order_test
+		 enumerator_test default_test unittest_transform1 json_test
 
 default_test_SOURCES = test/unittests/default_test.cpp
 default_test_LDADD = libp4ctoolkit.a
@@ -20,9 +19,7 @@ json_test_SOURCES = test/unittests/json_test.cpp
 json_test_LDADD = libp4ctoolkit.a
 unittest_transform1_SOURCES = $(ir_SOURCES) test/unittests/transform1.cpp
 unittest_transform1_LDADD = libfrontend.a libp4ctoolkit.a
-namemap_order_test_SOURCES = $(ir_SOURCES) test/unittests/namemap_order_test.cpp
-namemap_order_test_LDADD = libfrontend.a libp4ctoolkit.a
 
 # Compiler tests
 
-TESTS += $(check_PROGRAMS) 
+TESTS += $(check_PROGRAMS)

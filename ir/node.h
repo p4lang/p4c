@@ -22,6 +22,7 @@ class Node;
 // node interface
 class INode : public Util::IHasSourceInfo, public Util::IHasDbPrint {
  public:
+    virtual ~INode() {}
     virtual const Node* getNode() const = 0;
     virtual Node* getNode() = 0;
     virtual void dbprint(std::ostream &out) const = 0;  // for debugging

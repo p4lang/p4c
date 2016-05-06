@@ -4,7 +4,7 @@
 
 class P4::LocalCopyPropagation::ElimDead : public Transform {
     LocalCopyPropagation &self;
-    IR::Declaration_Variable *preorder(IR::Declaration_Variable *var) override {
+    const IR::Node *preorder(IR::Declaration_Variable *var) override {
         if (auto local = ::getref(self.locals, var->name)) {
             if (!local->live) {
                 LOG3("  removing dead local " << var->name);
@@ -47,7 +47,8 @@ void P4::LocalCopyPropagation::dropLocalsUsing(cstring name) {
             local.second.val = nullptr; } }
 }
 
-IR::Declaration_Variable *P4::LocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
+const IR::Node *P4::LocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
+    LOG1("Visiting " << getOriginal());
     if (!in_action) return var;
     if (locals.count(var->name))
         BUG("duplicate var declaration for %s", var->name);
@@ -91,7 +92,7 @@ IR::MethodCallExpression *P4::LocalCopyPropagation::postorder(IR::MethodCallExpr
     if (!in_action) return mc;
     auto type = mc->method->type->to<IR::Type_Method>();
     int idx = 0;
-    for (auto param : Values(type->parameters->parameters)) {
+    for (auto param : *type->parameters->parameters) {
         if (param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) {
             if (auto arg = mc->arguments->at(idx)->to<IR::PathExpression>()) {
                 dropLocalsUsing(arg->path->name); } }

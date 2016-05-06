@@ -101,7 +101,7 @@ void Visitor::print_context() const {
     }
 
     while (ctx != nullptr) {
-        out << ctx->node << std::endl;
+        out << ctx->node << " (" << ctx->original << ")" << std::endl;
         ctx = ctx->parent;
     }
 }
@@ -110,10 +110,10 @@ void Visitor::visitor_const_error() {
     BUG("const Visitor wants to change IR"); }
 void Modifier::visitor_const_error() {
     BUG("Modifier called const visit function -- missing template "
-                            "instantiation in ir-tree-macro.h?"); }
+                            "instantiation in gen-tree-macro.h?"); }
 void Transform::visitor_const_error() {
     BUG("Transform called const visit function -- missing template "
-                            "instantiation in ir-tree-macro.h?"); }
+                            "instantiation in gen-tree-macro.h?"); }
 
 struct PushContext {
     Visitor::Context current;
@@ -249,4 +249,3 @@ const IR::Node *Transform::postorder(IR::CLASS *n) {                            
     return postorder(static_cast<IR::BASE *>(n)); }                                     \
 
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
-

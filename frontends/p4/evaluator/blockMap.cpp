@@ -6,13 +6,11 @@ namespace P4 {
 const IR::PackageBlock* BlockMap::getMain() const {
     CHECK_NULL(program);
 
-    auto m = program->getDeclsByName(IR::P4Program::main)->toVector();
-    BUG_CHECK(m->size() <= 1, "Program has %d %s symbols?", m->size(), IR::P4Program::main);
-    if (m->size() == 0) {
+    auto main = program->getDeclByName(IR::P4Program::main);
+    if (main == nullptr) {
         ::warning("Program does not contain a `%s' module", IR::P4Program::main);
         return nullptr;
     }
-    auto main = m->at(0);
     if (!main->is<IR::Declaration_Instance>()) {
         ::error("%s must be a package declaration", main->getNode());
         return nullptr;
@@ -34,4 +32,3 @@ BlockMap::getBlockBoundToParameter(const IR::InstantiatedBlock* block, cstring p
 
 
 }  // namespace P4
-

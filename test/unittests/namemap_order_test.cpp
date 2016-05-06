@@ -2,6 +2,8 @@
 #include "ir/visitor.h"
 #include <assert.h>
 
+// THIS TEST IS BROKEN, since TableProperties no longer uses a NameMap.
+
 class TestTrans : public Transform {
     IR::Node *preorder(IR::TableProperty *a) override {
         if (!a->isConstant)
@@ -10,8 +12,8 @@ class TestTrans : public Transform {
     }
     IR::Node *postorder(IR::TableProperties *p) override {
         int count = 0;
-        for (auto &prop : p->properties) {
-            if (prop.first == "$new$")
+        for (auto &prop : *p->properties) {
+            if (prop == "$new$")
                 assert(count == 0);
             else
                 assert(count == 1);

@@ -117,21 +117,21 @@ IR::TypeVariableSubstitution* TypeInference::unify(const IR::Node* errorPosition
     return result;
 }
 
-const IR::NameMap<IR::StructField, ordered_map>*
+const IR::IndexedVector<IR::StructField>*
 TypeInference::canonicalizeFields(const IR::Type_StructLike* type) {
     bool changes = false;
-    auto fields = new IR::NameMap<IR::StructField, ordered_map>();
-    for (auto field : *type->getEnumerator()) {
+    auto fields = new IR::IndexedVector<IR::StructField>();
+    for (auto field : *type->fields) {
         auto ftype = canonicalize(field->type);
         if (ftype != field->type)
             changes = true;
         auto newField = new IR::StructField(field->srcInfo, field->name, field->annotations, ftype);
-        fields->addUnique(newField->name, newField);
+        fields->push_back(newField);
     }
     if (changes)
         return fields;
     else
-        return &type->fields;
+        return type->fields;
 }
 
 const IR::ParameterList* TypeInference::canonicalize(const IR::ParameterList* params) {
@@ -139,7 +139,7 @@ const IR::ParameterList* TypeInference::canonicalize(const IR::ParameterList* pa
         return params;
 
     bool changes = false;
-    auto vec = new IR::NameMap<IR::Parameter, ordered_map>();
+    auto vec = new IR::IndexedVector<IR::Parameter>();
     for (auto p : *params->getEnumerator()) {
         auto paramType = canonicalize(p->type);
         if (paramType != p->type) {
@@ -147,20 +147,25 @@ const IR::ParameterList* TypeInference::canonicalize(const IR::ParameterList* pa
             changes = true;
         }
         setType(p, paramType);
-        vec->addUnique(p->name, p);
+        vec->push_back(p);
     }
     if (changes)
-        return new IR::ParameterList(params->srcInfo, std::move(*vec));
+        return new IR::ParameterList(params->srcInfo, vec);
     else
         return params;
 }
 
 const IR::TypeParameters* TypeInference::canonicalize(const IR::TypeParameters* params) {
-    auto copy = params->clone();
-    for (auto &p : Values(copy->parameters))
-        p = canonicalize(p)->to<IR::Type_Var>();
-    if (*copy != *params)
-        return copy;
+    auto newparams = new IR::IndexedVector<IR::Type_Var>();
+    bool changes = false;
+    for (auto p : *params->parameters) {
+        auto np = canonicalize(p)->to<IR::Type_Var>();
+        newparams->push_back(np);
+        if (np != p)
+            changes = true;
+    }
+    if (changes)
+        return new IR::TypeParameters(params->srcInfo, newparams);
     else
         return params;
 }
@@ -292,9 +297,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto hdr = type->to<IR::Type_Header>();
         auto fields = canonicalizeFields(hdr);
         const IR::Type* canon;
-        if (fields != &hdr->fields)
-            canon = new IR::Type_Header(hdr->srcInfo, hdr->name,
-                                        hdr->annotations, std::move(*fields));
+        if (fields != hdr->fields)
+            canon = new IR::Type_Header(hdr->srcInfo, hdr->name, hdr->annotations, fields);
         else
             canon = hdr;
         return canon;
@@ -302,9 +306,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto str = type->to<IR::Type_Struct>();
         auto fields = canonicalizeFields(str);
         const IR::Type* canon;
-        if (fields != &str->fields)
-            canon = new IR::Type_Struct(str->srcInfo, str->name,
-                                        str->annotations, std::move(*fields));
+        if (fields != str->fields)
+            canon = new IR::Type_Struct(str->srcInfo, str->name, str->annotations, fields);
         else
             canon = str;
         return canon;
@@ -312,9 +315,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto str = type->to<IR::Type_Union>();
         auto fields = canonicalizeFields(str);
         const IR::Type* canon;
-        if (fields != &str->fields)
-            canon = new IR::Type_Union(str->srcInfo, str->name,
-                                       str->annotations, std::move(*fields));
+        if (fields != str->fields)
+            canon = new IR::Type_Union(str->srcInfo, str->name, str->annotations, fields);
         else
             canon = str;
         return canon;
@@ -370,16 +372,16 @@ const IR::Node* TypeInference::preorder(IR::P4Program* program) {
 const IR::Node* TypeInference::postorder(IR::Declaration_Errors* decl) {
     if (done())
         return decl;
-    for (auto id : *decl->getEnumerator())
-        setType(id, IR::Type_Error::get());
+    for (auto id : *decl->getDeclarations())
+        setType(id->getNode(), IR::Type_Error::get());
     return decl;
 }
 
 const IR::Node* TypeInference::postorder(IR::Declaration_MatchKind* decl) {
     if (done())
         return decl;
-    for (auto id : *decl->getEnumerator())
-        setType(id, IR::Type_MatchKind::get());
+    for (auto id : *decl->getDeclarations())
+        setType(id->getNode(), IR::Type_MatchKind::get());
     return decl;
 }
 
@@ -823,8 +825,8 @@ const IR::Node* TypeInference::postorder(IR::Type_ActionEnum* type) {
 const IR::Node* TypeInference::postorder(IR::Type_Enum* type) {
     if (done())
         return type;
-    for (auto e : *type->getEnumerator())
-        setType(e, type);
+    for (auto e : *type->getDeclarations())
+        setType(e->getNode(), type);
     setType(getOriginal(), type);
     setType(type, type);
     return type;
@@ -940,7 +942,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
 
 bool TypeInference::validateFields(const IR::Type_StructLike* type,
                                  std::function<bool(const IR::Type*)> checker) const {
-    for (auto field : *type->getEnumerator()) {
+    for (auto field : *type->fields) {
         if (!checker(field->type)) {
             ::error("Field %1% of %2% cannot have type %3%", field, type->toString(), field->type);
             return false;
@@ -1722,13 +1724,13 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             } else if (expression->member.name == IR::Type_Header::setValid) {
                 // Built-in method
-                auto params = new IR::NameMap<IR::Parameter, ordered_map>();
-                params->addUnique("value", new IR::Parameter(
+                auto params = new IR::IndexedVector<IR::Parameter>();
+                params->push_back(new IR::Parameter(
                     Util::SourceInfo(), IR::ID("value"), IR::Annotations::empty,
                     IR::Direction::In, IR::Type_Boolean::get()));
                 auto type = new IR::Type_Method(
                     Util::SourceInfo(), new IR::TypeParameters(), IR::Type_Void::get(),
-                    new IR::ParameterList(Util::SourceInfo(), std::move(*params)));
+                    new IR::ParameterList(Util::SourceInfo(), params));
                 auto ctype = canonicalize(type);
                 setType(getOriginal(), ctype);
                 setType(expression, ctype);
@@ -1786,14 +1788,13 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             return expression;
         } else if (expression->member.name == IR::Type_Stack::push_front ||
                    expression->member.name == IR::Type_Stack::pop_front) {
-            auto params = new IR::NameMap<IR::Parameter, ordered_map>();
-            params->addUnique("count", new IR::Parameter(Util::SourceInfo(), IR::ID("count"),
-                                                         IR::Annotations::empty, IR::Direction::In,
-                                                         new IR::Type_InfInt()));
+            auto params = new IR::IndexedVector<IR::Parameter>();
+            params->push_back(new IR::Parameter(Util::SourceInfo(), IR::ID("count"),
+                                                IR::Annotations::empty, IR::Direction::In,
+                                                new IR::Type_InfInt()));
             auto type = new IR::Type_Method(Util::SourceInfo(), new IR::TypeParameters(),
                                             IR::Type_Void::get(),
-                                            new IR::ParameterList(Util::SourceInfo(),
-                                                                  std::move(*params)));
+                                            new IR::ParameterList(Util::SourceInfo(), params));
             auto canon = canonicalize(type);
             setType(getOriginal(), canon);
             setType(expression, canon);
@@ -1834,14 +1835,14 @@ const IR::Node* TypeInference::preorder(IR::MethodCallExpression* expression) {
 
 const IR::Type_Action* TypeInference::actionCallType(const IR::Type_Action* action,
                                                    size_t removedArguments) const {
-    auto params = new IR::NameMap<IR::Parameter, ordered_map>();
+    auto params = new IR::IndexedVector<IR::Parameter>();
     size_t i = 0;
     for (auto p : *action->parameters->getEnumerator()) {
         if (i >= removedArguments)
-            params->addUnique(p->name, p);
+            params->push_back(p);
         i++;
     }
-    auto pl = new IR::ParameterList(Util::SourceInfo(), std::move(*params));
+    auto pl = new IR::ParameterList(Util::SourceInfo(), params);
     auto result = new IR::Type_Action(action->srcInfo, action->typeParameters,
                                       action->returnType, pl);
     return result;

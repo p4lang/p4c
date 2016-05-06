@@ -33,7 +33,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
                                   new IR::StringLiteral(Util::SourceInfo(), action->name));
         auto replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
                                             annos, action->parameters,
-                                            replBody->to<IR::Vector<IR::StatOrDecl>>());
+                                            replBody->to<IR::IndexedVector<IR::StatOrDecl>>());
         repl->addReplacement(action, control, replacement);
     }
     return false;
@@ -43,16 +43,16 @@ const IR::Node* LocalizeActions::postorder(IR::P4Control* control) {
     auto actions = ::get(repl->repl, getOriginal<IR::P4Control>());
     if (actions == nullptr)
         return control;
-    auto newDecls = new IR::NameMap<IR::Declaration, ordered_map>();
+    auto newDecls = new IR::IndexedVector<IR::Declaration>();
     for (auto pair : *actions) {
         auto toInsert = pair.second;
         LOG1("Adding " << toInsert);
-        newDecls->addUnique(toInsert->name, toInsert);
+        newDecls->push_back(toInsert);
     }
 
-    for (auto d : control->stateful)
-        newDecls->addUnique(d.first, d.second);
-    control->stateful = std::move(*newDecls);
+    for (auto d : *control->stateful)
+        newDecls->push_back(d);
+    control->stateful = newDecls;
     return control;
 }
 

@@ -41,8 +41,8 @@ void IR::ActionFunction::dbprint(std::ostream &out) const {
 void IR::P4Action::dbprint(std::ostream &out) const {
   out << "action " << name << "(";
   const char *sep = "";
-  for (auto &arg : parameters->parameters) {
-    out << sep << arg.second->direction << ' ' << arg.second->type << ' ' << arg.first;
+  for (auto &arg : *parameters->parameters) {
+    out << sep << arg->direction << ' ' << arg->type << ' ' << arg->name;
     sep = ", "; }
   out << ") {" << indent;
   if (body)

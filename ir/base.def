@@ -36,15 +36,6 @@ interface IApply {
 #end
 }
 
-interface IDeclaration {
-#emit
-    // name of the declared object
-    virtual ID getName() const = 0;
-    // User-visible name of the object
-    virtual cstring externalName() const;
-#end
-}
-
 interface INamespace {
 #emit
     virtual Util::Enumerator<const IDeclaration*>* getDeclarations() const = 0;

@@ -25,6 +25,7 @@ ir_SOURCES += \
 	ir/type.cpp \
 	ir/v1.cpp \
 	ir/vector.h \
+	ir/indexed_vector.h \
 	ir/visitor.cpp \
 	ir/visitor.h \
 	ir/write_context.cpp

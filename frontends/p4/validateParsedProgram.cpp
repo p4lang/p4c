@@ -21,7 +21,7 @@ void ValidateParsedProgram::postorder(const IR::StructField* f) {
 }
 
 void ValidateParsedProgram::postorder(const IR::Type_Union* type) {
-    if (type->fields.size() == 0)
+    if (type->fields->size() == 0)
         ::error("%1%: empty union", type);
 }
 

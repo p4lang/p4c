@@ -13,17 +13,17 @@
 
 #define DEFINE_APPLY_FUNCTIONS(CLASS, BASE, TEMPLATE, TT)                               \
     TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Modifier &v)              \
-    { traceVisit("Mod pre"); return v.preorder(this); }                                 \
+    { Node::traceVisit("Mod pre"); return v.preorder(this); }                           \
     TEMPLATE inline void IR::CLASS TT::apply_visitor_postorder(Modifier &v)             \
-    { traceVisit("Mod post"); v.postorder(this); }                                      \
+    { Node::traceVisit("Mod post"); v.postorder(this); }                                \
     TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Inspector &v) const       \
-    { traceVisit("Insp pre"); return v.preorder(this); }                                \
+    { Node::traceVisit("Insp pre"); return v.preorder(this); }                          \
     TEMPLATE inline void IR::CLASS TT::apply_visitor_postorder(Inspector &v) const      \
-    { traceVisit("Insp post"); v.postorder(this); }                                     \
+    { Node::traceVisit("Insp post"); v.postorder(this); }                               \
     TEMPLATE inline const IR::Node *IR::CLASS TT::apply_visitor_preorder(Transform &v)  \
-    { traceVisit("Trans pre"); return v.preorder(this); }                               \
+    { Node::traceVisit("Trans pre"); return v.preorder(this); }                         \
     TEMPLATE inline const IR::Node *IR::CLASS TT::apply_visitor_postorder(Transform &v) \
-    { traceVisit("Trans post"); return v.postorder(this); }
+    { Node::traceVisit("Trans post"); return v.postorder(this); }
     IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DEFINE_APPLY_FUNCTIONS, , )
     IRNODE_ALL_TEMPLATES_AND_BASES(DEFINE_APPLY_FUNCTIONS)
     DEFINE_APPLY_FUNCTIONS(Node, , , )
@@ -75,6 +75,26 @@ IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template<class T>, <T>)
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v);
 inline std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v) {
     return v ? out << *v : out << "<null>"; }
+
+template<class T> void IR::IndexedVector<T>::visit_children(Visitor &v) {
+    for (auto i = begin(); i != end();) {
+        auto n = v.apply_visitor(*i);
+        if (!n) {
+            i = erase(i);
+        } else if (n == *i) {
+            i++;
+        } else if (auto l = dynamic_cast<const Vector<T> *>(n)) {
+            i = erase(i);
+            i = insert(i, l->begin(), l->end());
+            i += l->Vector<T>::size();
+        } else if (auto e = dynamic_cast<const T *>(n)) {
+            i = replace(i, e);
+        } else {
+            BUG("visitor returned invalid type %s for IndexedVector<%s>",
+                n->node_type_name(), T::static_type_name()); } } }
+template<class T> void IR::IndexedVector<T>::visit_children(Visitor &v) const {
+    for (auto &a : *this) v.visit(a); }
+IRNODE_DEFINE_APPLY_OVERLOAD(IndexedVector, template<class T>, <T>)
 
 #include "lib/ordered_map.h"
 template <class MAP> static inline void

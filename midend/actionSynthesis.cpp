@@ -32,10 +32,10 @@ const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statemen
         IR::Annotations::empty, defactval, true);
 
     // List of table properties
-    auto nm = new IR::NameMap<IR::TableProperty, ordered_map>();
-    nm->addUnique(prop->name, prop);
-    nm->addUnique(defprop->name, defprop);
-    auto props = new IR::TableProperties(Util::SourceInfo(), std::move(*nm));
+    auto nm = new IR::IndexedVector<IR::TableProperty>();
+    nm->push_back(prop);
+    nm->push_back(defprop);
+    auto props = new IR::TableProperties(Util::SourceInfo(), nm);
     // Synthesize a new table
     cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name));
     auto tbl = new IR::P4Table(Util::SourceInfo(), tblName, IR::Annotations::empty,
@@ -55,12 +55,12 @@ const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statemen
 const IR::Node* MoveActionsToTables::postorder(IR::P4Control* control) {
     if (tables.empty())
         return control;
-    auto nm = new IR::NameMap<IR::Declaration, ordered_map>(control->stateful);
+    auto nm = new IR::IndexedVector<IR::Declaration>(*control->stateful);
     for (auto t : tables)
-        nm->addUnique(t->name, t);
+        nm->push_back(t);
     auto result = new IR::P4Control(control->srcInfo, control->name,
                                     control->type, control->constructorParams,
-                                    std::move(*nm), control->body);
+                                    nm, control->body);
     return result;
 }
 
@@ -85,19 +85,19 @@ bool SynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
 const IR::Node* SynthesizeActions::postorder(IR::P4Control* control) {
     if (actions.empty())
         return control;
-    auto nm = new IR::NameMap<IR::Declaration, ordered_map>(control->stateful);
+    auto nm = new IR::IndexedVector<IR::Declaration>(*control->stateful);
     for (auto a : actions)
-        nm->addUnique(a->name, a);
+        nm->push_back(a);
     auto result = new IR::P4Control(control->srcInfo, control->name,
                                     control->type, control->constructorParams,
-                                    std::move(*nm), control->body);
+                                    nm, control->body);
     return result;
 }
 
 const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
     // Find a chain of statements to convert
-    auto actbody = new IR::Vector<IR::StatOrDecl>();  // build here new action
-    auto left = new IR::Vector<IR::StatOrDecl>();  // leftover statements
+    auto actbody = new IR::IndexedVector<IR::StatOrDecl>();  // build here new action
+    auto left = new IR::IndexedVector<IR::StatOrDecl>();  // leftover statements
 
     for (auto c : *statement->components) {
         if (c->is<IR::AssignmentStatement>()) {
@@ -117,7 +117,7 @@ const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
             auto block = new IR::BlockStatement(Util::SourceInfo(), actbody);
             auto action = createAction(block);
             left->push_back(action);
-            actbody = new IR::Vector<IR::StatOrDecl>();
+            actbody = new IR::IndexedVector<IR::StatOrDecl>();
         }
         left->push_back(c);
     }
@@ -140,11 +140,11 @@ const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
 const IR::Statement* SynthesizeActions::createAction(const IR::Statement* toAdd) {
     changes = true;
     auto name = refMap->newName("act");
-    const IR::Vector<IR::StatOrDecl>* body;
+    const IR::IndexedVector<IR::StatOrDecl>* body;
     if (toAdd->is<IR::BlockStatement>()) {
         body = toAdd->to<IR::BlockStatement>()->components;
     } else {
-        auto b = new IR::Vector<IR::StatOrDecl>();
+        auto b = new IR::IndexedVector<IR::StatOrDecl>();
         b->push_back(toAdd);
         body = b;
     }

@@ -60,7 +60,7 @@ class MoveConstructorsImpl : public Transform {
         return parser;
     }
 
-    const IR::Node* preorder(IR::Vector<IR::Declaration>* declarations) override {
+    const IR::Node* preorder(IR::IndexedVector<IR::Declaration>* declarations) override {
         if (convert != Region::InParserStateful)
             return declarations;
 
@@ -88,7 +88,7 @@ class MoveConstructorsImpl : public Transform {
     const IR::Node* postorder(IR::P4Parser* parser) override {
         if (cmap.empty())
             return parser;
-        auto newDecls = new IR::Vector<IR::Declaration>();
+        auto newDecls = new IR::IndexedVector<IR::Declaration>();
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(
@@ -105,20 +105,19 @@ class MoveConstructorsImpl : public Transform {
     const IR::Node* preorder(IR::P4Control* control) override {
         cmap.clear();
         convert = Region::InControlStateful;
-        auto newDecls = new IR::NameMap<IR::Declaration, ordered_map>();
+        auto newDecls = new IR::IndexedVector<IR::Declaration>();
         bool changes = false;
-        for (auto s : control->stateful) {
-            auto decl = s.second;
+        for (auto decl : *control->stateful) {
             visit(decl);
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
                 auto inst = new IR::Declaration_Instance(
                     cce->srcInfo, e.second, cce->constructedType,
                     cce->arguments, IR::Annotations::empty, nullptr);
-                newDecls->addUnique(e.second, inst);
+                newDecls->push_back(inst);
                 changes = true;
             }
-            newDecls->addUnique(decl->name, decl);
+            newDecls->push_back(decl);
             cmap.clear();
         }
         convert = Region::InBody;
@@ -127,7 +126,7 @@ class MoveConstructorsImpl : public Transform {
         prune();
         if (changes) {
             auto result = new IR::P4Control(control->srcInfo, control->name, control->type,
-                                            control->constructorParams, std::move(*newDecls),
+                                            control->constructorParams, newDecls,
                                             control->body);
             return result;
         }
@@ -137,18 +136,18 @@ class MoveConstructorsImpl : public Transform {
     const IR::Node* postorder(IR::P4Control* control) override {
         if (cmap.empty())
             return control;
-        auto newDecls = new IR::NameMap<IR::Declaration, ordered_map>();
+        auto newDecls = new IR::IndexedVector<IR::Declaration>();
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
             auto decl = new IR::Declaration_Instance(
                 cce->srcInfo, e.second, cce->constructedType,
                 cce->arguments, IR::Annotations::empty, nullptr);
-            newDecls->addUnique(e.second, decl);
+            newDecls->push_back(decl);
         }
-        for (auto s : control->stateful)
-            newDecls->addUnique(s.first, s.second);
+        for (auto s : *control->stateful)
+            newDecls->push_back(s);
         auto result = new IR::P4Control(control->srcInfo, control->name, control->type,
-                                        control->constructorParams, std::move(*newDecls),
+                                        control->constructorParams, newDecls,
                                         control->body);
         return result;
     }
