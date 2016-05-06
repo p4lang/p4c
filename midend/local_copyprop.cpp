@@ -76,7 +76,7 @@ const IR::Expression *P4::LocalCopyPropagation::postorder(IR::PathExpression *pa
 }
 
 IR::AssignmentStatement *P4::LocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
-    if (as->left == as->right) { // FIXME -- need deep equals here?
+    if (as->left == as->right) {   // FIXME -- need deep equals here?
         LOG3("  removing noop assignment " << *as);
         return nullptr; }
     if (auto dest = as->left->to<IR::PathExpression>()) {

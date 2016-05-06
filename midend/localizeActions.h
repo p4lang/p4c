@@ -14,7 +14,8 @@ class GlobalActionReplacements {
     // we create a replacement.
     std::map<const IR::P4Control*, ordered_map<const IR::P4Action*, const IR::P4Action*>*> repl;
 
-    const IR::P4Action* getReplacement(const IR::P4Action* action, const IR::P4Control* control) const {
+    const IR::P4Action* getReplacement(const IR::P4Action* action,
+                                       const IR::P4Control* control) const {
         auto map = ::get(repl, control);
         if (map == nullptr)
             return nullptr;
@@ -37,8 +38,8 @@ class FindGlobalActionUses : public Inspector {
     GlobalActionReplacements* repl;
     std::set<const IR::P4Action*> globalActions;
  public:
-    FindGlobalActionUses(ReferenceMap* refMap, GlobalActionReplacements* repl) : refMap(refMap), repl(repl)
-    { CHECK_NULL(refMap); CHECK_NULL(repl); }
+    FindGlobalActionUses(ReferenceMap* refMap, GlobalActionReplacements* repl)
+    : refMap(refMap), repl(repl) { CHECK_NULL(refMap); CHECK_NULL(repl); }
     bool preorder(const IR::PathExpression* path) override;
     bool preorder(const IR::P4Action* action) override;
 };
@@ -49,8 +50,8 @@ class LocalizeActions : public Transform {
     ReferenceMap*       refMap;
     GlobalActionReplacements* repl;
  public:
-    LocalizeActions(ReferenceMap* refMap, GlobalActionReplacements* repl)  : refMap(refMap), repl(repl)
-    { CHECK_NULL(refMap); CHECK_NULL(repl); }
+    LocalizeActions(ReferenceMap* refMap, GlobalActionReplacements* repl)
+    : refMap(refMap), repl(repl) { CHECK_NULL(refMap); CHECK_NULL(repl); }
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::PathExpression* expression) override;
 };

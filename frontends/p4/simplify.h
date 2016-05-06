@@ -35,8 +35,8 @@ class SideEffects : public Inspector {
     }
     // If you pass nullptr for these arguments the check will be more conservative
     SideEffects(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap), hasSideEffects(false)
-    {}
+            refMap(refMap), typeMap(typeMap), hasSideEffects(false) {}
+
  public:
     // Returns true if the expression may have side-effects.
     static bool check(const IR::Expression* expression, ReferenceMap* refMap, TypeMap* typeMap) {

@@ -594,7 +594,8 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance* inst,
     if (virt.size() == 0 && inst->initializer == nullptr)
         return true;
     if (virt.size() == 0 && inst->initializer != nullptr) {
-        ::error("%1%: instance initializers for extern without abstract methods", inst->initializer);
+        ::error("%1%: instance initializers for extern without abstract methods",
+                inst->initializer);
         return false;
     } else if (virt.size() != 0 && inst->initializer == nullptr) {
         ::error("%1%: must declare abstract methods for %2%", inst, type);
