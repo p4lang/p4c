@@ -224,7 +224,7 @@ StateTranslationVisitor::compileExtract(const IR::Vector<IR::Expression>* args) 
     }
 
     unsigned alignment = 0;
-    for (auto f : *ht->getEnumerator()) {
+    for (auto f : *ht->fields) {
         auto ftype = state->parser->typeMap->getType(f);
         auto etype = EBPFTypeFactory::instance->create(ftype);
         auto et = dynamic_cast<IHasWidth*>(etype);
@@ -327,9 +327,9 @@ bool EBPFParser::build() {
     }
 
     // TODO: more checks on these parameter types
-    auto it = pl->parameters.begin();
-    packet = it->second; ++it;
-    headers = it->second;
+    auto it = pl->parameters->begin();
+    packet = *it; ++it;
+    headers = *it;
     for (auto state : *parserBlock->container->states) {
         auto ps = new EBPFParserState(state, this);
         states.push_back(ps);

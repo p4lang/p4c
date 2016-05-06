@@ -832,7 +832,7 @@ void JsonConverter::addToFieldList(const IR::Expression* expr, Util::JsonArray* 
     if (type->is<IR::Type_StructLike>()) {
         // recursively add all fields
         auto st = type->to<IR::Type_StructLike>();
-        for (auto f : *st->getEnumerator()) {
+        for (auto f : *st->fields) {
             auto member = new IR::Member(Util::SourceInfo(), expr, f->name);
             typeMap->setType(member, typeMap->getType(f, true));
             addToFieldList(member, fl);
@@ -1288,7 +1288,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
         tables->append(exitTable);
     }
 
-    for (auto c : *cont->statefulEnumerator()) {
+    for (auto c : *cont->stateful) {
         if (c->is<IR::Declaration_Constant>() ||
             c->is<IR::Declaration_Variable>() ||
             c->is<IR::P4Action>() ||
@@ -1400,7 +1400,7 @@ unsigned JsonConverter::nextId(cstring group) {
 void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct,
                                     Util::JsonArray* headers, Util::JsonArray* headerTypes,
                                     Util::JsonArray* stacks, std::set<cstring> &headerTypesDone) {
-    for (auto f : *headersStruct->getEnumerator()) {
+    for (auto f : *headersStruct->fields) {
         auto ft = typeMap->getType(f->type, true);
         auto stack = ft->to<IR::Type_Stack>();
         if (stack == nullptr)
@@ -1647,7 +1647,7 @@ void JsonConverter::createForceArith(const IR::Type* meta, cstring name,
                                      Util::JsonArray* force) const {
     BUG_CHECK(meta->is<IR::Type_Struct>(), "Expected a struct type");
     auto st = meta->to<IR::Type_StructLike>();
-    for (auto f : *st->getEnumerator()) {
+    for (auto f : *st->fields) {
         auto field = pushNewArray(force);
         field->append(name);
         field->append(f->name.name);
@@ -1697,7 +1697,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
                                          Util::JsonArray* headerTypes, Util::JsonArray* instances,
                                          std::set<cstring> &headerTypesCreated) {
     // TODO: this is wrong if the structs are more deeply nested.
-    for (auto f : *type->getEnumerator()) {
+    for (auto f : *type->fields) {
         auto ft = typeMap->getType(f->type, true);
         if (ft->is<IR::Type_StructLike>()) {
             auto st = ft->to<IR::Type_StructLike>();
@@ -1709,7 +1709,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
         }
     }
 
-    for (auto f : *type->getEnumerator()) {
+    for (auto f : *type->fields) {
         auto ft = typeMap->getType(f->type, true);
         if (ft->is<IR::Type_StructLike>()) {
             auto json = new Util::JsonObject();
@@ -1732,7 +1732,7 @@ Util::IJson* JsonConverter::typeToJson(const IR::Type_StructLike* st) {
     result->emplace("name", nameFromAnnotation(st->annotations, st->name.name));
     result->emplace("id", nextId("header_types"));
     auto fields = mkArrayField(result, "fields");
-    for (auto f : *st->getEnumerator()) {
+    for (auto f : *st->fields) {
         auto field = pushNewArray(fields);
         field->append(f->name.name);
         auto ftype = typeMap->getType(f->type, true);

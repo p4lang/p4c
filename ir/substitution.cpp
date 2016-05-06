@@ -49,14 +49,14 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* root,
     if (params == nullptr || args == nullptr)
         BUG("Nullptr argument to setBindings");
 
-    if (params->parameters.size() != args->size()) {
+    if (params->parameters->size() != args->size()) {
         ::error("%1% has %2% type parameters, invoked with %3% %4%",
-                root, params->parameters.size(), args->size(), args);
+                root, params->parameters->size(), args->size(), args);
         return false;
     }
 
     auto it = args->begin();
-    for (auto tp : *params->getEnumerator()) {
+    for (auto tp : *params->parameters) {
         auto t = *it;
         ++it;
 
@@ -71,4 +71,3 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* root,
 }
 
 }  // namespace IR
-

@@ -366,7 +366,7 @@ class ActionArg : Expression {
     toString{ return name.name; }
 }
 
-// Represents a P4 v1.0 action    
+// Represents a P4 v1.0 action
 class ActionFunction {
     ID                          name;
     inline Vector<Primitive>    action;
@@ -428,6 +428,11 @@ class V1Table {
 #noconstructor
 #emit
     V1Table() = default;
+    // inefficient add
+    void addProperty(const TableProperty* prop) {
+        auto props = new IndexedVector<TableProperty>(*properties.properties);
+        props->push_back(prop);
+        properties = TableProperties(properties.srcInfo, props); }
 #end
     toString { return node_type_name() + " " + name; }
 }
@@ -457,5 +462,3 @@ class V1Program {
 #end
 #apply
 }
-
-

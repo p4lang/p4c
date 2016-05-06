@@ -6,8 +6,6 @@ namespace IR {
 const ID ParserState::accept = ID("accept");
 const ID ParserState::reject = ID("reject");
 const ID ParserState::start = ID("start");
-const ID Declaration_Errors::EID = ID("error");
-const ID Declaration_MatchKind::MKID = ID("match_kind");
 const cstring TableProperties::actionsPropertyName = "actions";
 const cstring TableProperties::keyPropertyName = "key";
 const cstring TableProperties::defaultActionPropertyName = "default_action";
@@ -15,9 +13,6 @@ const cstring IApply::applyMethodName = "apply";
 const cstring P4Program::main = "main";
 
 int IR::Declaration::nextId = 0;
-
-Util::Enumerator<const IR::IDeclaration*>* P4Control::getDeclarations() const
-{ return stateful.valueEnumerator()->as<const IDeclaration*>(); }
 
 const Type_Method* P4Control::getConstructorMethodType() const {
     return new Type_Method(Util::SourceInfo(), getTypeParameters(), type, constructorParams);
@@ -29,27 +24,6 @@ const Type_Method* P4Parser::getConstructorMethodType() const {
 
 const Type_Method* Type_Package::getConstructorMethodType() const {
     return new Type_Method(Util::SourceInfo(), getTypeParameters(), this, constructorParams);
-}
-
-void P4Program::checkDeclarations() const {
-    std::unordered_map<cstring, ID> seen;
-    for (auto decl : *declarations) {
-        CHECK_NULL(decl);
-        if (!decl->is<IDeclaration>())
-            BUG("Program element is not a declaration %1%", decl);
-        IR::ID name = decl->to<IR::IDeclaration>()->getName();
-
-        // allow duplicate declarations for 'error' and 'match_kind'
-        if (name == IR::Declaration_Errors::EID ||
-            name == IR::Declaration_MatchKind::MKID)
-            continue;
-        auto f = seen.find(name.name);
-        if (f != seen.end()) {
-            ::error("Duplicate declaration of %1%: previous declaration at %2%",
-                    name, f->second.srcInfo);
-        }
-        seen.emplace(name.name, name);
-    }
 }
 
 // TODO: this is a linear scan, which could be too slow.
@@ -132,16 +106,16 @@ Type_Table::getApplyMethodType() const {
             BUG("Action property is not an IR::ActionList, but %1%",
                                     actions);
         auto alv = actions->value->to<IR::ActionList>();
-        auto fields = new IR::NameMap<IR::StructField, ordered_map>();
+        auto fields = new IR::IndexedVector<IR::StructField>();
         auto hit = new IR::StructField(Util::SourceInfo(), IR::Type_Table::hit,
                                        IR::Annotations::empty, IR::Type_Boolean::get());
-        fields->addUnique(hit->name, hit);
+        fields->push_back(hit);
         auto label = new IR::StructField(Util::SourceInfo(), IR::Type_Table::action_run,
                                          IR::Annotations::empty,
                                          new IR::Type_ActionEnum(Util::SourceInfo(), alv));
-        fields->addUnique(label->name, label);
+        fields->push_back(label);
         auto rettype = new IR::Type_Struct(Util::SourceInfo(), ID(container->name),
-                                           IR::Annotations::empty, std::move(*fields));
+                                           IR::Annotations::empty, fields);
         applyMethod = new IR::Type_Method(Util::SourceInfo(), new TypeParameters(),
                                           rettype, container->parameters);
     }

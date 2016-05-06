@@ -14,7 +14,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     else
         constraints->addEqualityConstraint(dest->returnType, src->returnType);
 
-    for (auto tv : *dest->typeParameters->getEnumerator())
+    for (auto tv : *dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
     constraints->addUnifiableTypeVariable(src->returnType);  // always a type variable
 
@@ -27,7 +27,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         }
 
         size_t i = 0;
-        for (auto tv : *dest->typeParameters->getEnumerator()) {
+        for (auto tv : *dest->typeParameters->parameters) {
             auto type = src->typeArguments->at(i++);
             constraints->addEqualityConstraint(tv, type);
         }
@@ -63,9 +63,9 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG1("Unifying functions " << dest << " to " << src);
 
-    for (auto tv : *dest->typeParameters->getEnumerator())
+    for (auto tv : *dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
-    for (auto tv : *src->typeParameters->getEnumerator())
+    for (auto tv : *src->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
 
     if ((src->returnType == nullptr) != (dest->returnType == nullptr)) {
@@ -84,15 +84,15 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         return false;
     }
 
-    auto sit = src->parameters->parameters.begin();
+    auto sit = src->parameters->parameters->begin();
     for (auto dit : *dest->parameters->getEnumerator()) {
-        if (sit->second->direction != dit->direction) {
+        if ((*sit)->direction != dit->direction) {
             if (reportErrors)
                 ::error("Cannot unify parameter %1% with %2% "
-                        "because they have different directions", sit->second, dit);
+                        "because they have different directions", *sit, dit);
             return false;
         }
-        constraints->addEqualityConstraint(dit->type, sit->second->type);
+        constraints->addEqualityConstraint(dit->type, (*sit)->type);
         ++sit;
     }
 
@@ -193,17 +193,17 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         const IR::Type_Struct *strct = dest->to<IR::Type_Struct>();
         if (src->is<IR::Type_Tuple>()) {
             const IR::Type_Tuple* tpl = src->to<IR::Type_Tuple>();
-            if (strct->fields.size() != tpl->components->size()) {
+            if (strct->fields->size() != tpl->components->size()) {
                 if (reportErrors)
                     ::error("%1%: Number of fields %2% in initializer different "
                             "than number of fields in structure %3%: %4% to %5%",
                             errorPosition, tpl->components->size(),
-                            strct->fields.size(), tpl, strct);
+                            strct->fields->size(), tpl, strct);
                 return false;
             }
 
             int index = 0;
-            for (const IR::StructField* f : *strct->getEnumerator()) {
+            for (const IR::StructField* f : *strct->fields) {
                 const IR::Type* tplField = tpl->components->at(index);
                 const IR::Type* destt = f->type;
 

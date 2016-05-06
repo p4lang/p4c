@@ -209,7 +209,9 @@ ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifi
     return ProgramStructure::SymbolKind::Namespace;
 }
 
-void ProgramStructure::declareTypes(Util::Enumerator<const IR::Type_Var*>* typeVars) {
+void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var>* typeVars) {
+    if (typeVars == nullptr)
+        return;
     for (auto tv : *typeVars)
         declareType(IR::ID(tv->srcInfo, tv->name));
 }

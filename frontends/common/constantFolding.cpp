@@ -446,7 +446,7 @@ const IR::Node* ConstantFolding::postorder(IR::Member* e) {
 
     bool found = false;
     int index = 0;
-    for (auto f : *structType->getEnumerator()) {
+    for (auto f : *structType->fields) {
         if (f->name.name == e->member.name) {
             found = true;
             break;

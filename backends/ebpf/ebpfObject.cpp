@@ -103,9 +103,9 @@ class ErrorCodesVisitor : public Inspector {
  public:
     explicit ErrorCodesVisitor(CodeBuilder* builder) : builder(builder) {}
     bool preorder(const IR::Declaration_Errors* errors) override {
-        for (auto m : *errors->getEnumerator()) {
+        for (auto m : *errors->getDeclarations()) {
             builder->emitIndent();
-            builder->appendFormat("%s,\n", m->name.name.c_str());
+            builder->appendFormat("%s,\n", m->getName().name.c_str());
         }
         return false;
     }

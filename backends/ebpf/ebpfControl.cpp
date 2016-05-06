@@ -232,10 +232,10 @@ bool EBPFControl::build() {
         return false;
     }
 
-    auto it = pl->parameters.begin();
-    headers = it->second;
+    auto it = pl->parameters->begin();
+    headers = *it;
     ++it;
-    accept = it->second;
+    accept = *it;
 
     for (auto c : controlBlock->constantValue) {
         auto b = c.second;

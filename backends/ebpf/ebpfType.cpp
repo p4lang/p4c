@@ -103,7 +103,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
     width = 0;
     implWidth = 0;
 
-    for (auto f : *strct->getEnumerator()) {
+    for (auto f : *strct->fields) {
         auto type = EBPFTypeFactory::instance->create(f->type);
         auto wt = dynamic_cast<IHasWidth*>(type);
         if (wt == nullptr) {

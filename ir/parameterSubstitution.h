@@ -63,9 +63,9 @@ class ParameterSubstitution {
         BUG_CHECK(params->size() == args->size(),
                   "Incompatible number of arguments for parameter list");
 
-        auto it = params->parameters.begin();
+        auto it = params->parameters->begin();
         for (auto a : *args) {
-            add(it->second, a);
+            add(*it, a);
             ++it;
         }
     }

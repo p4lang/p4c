@@ -25,7 +25,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
         return nullptr;
     }
 
-    cont->stateful.visit_children(*this);
+    cont->stateful->visit_children(*this);
     visit(cont->body);
     prune();
     return cont;

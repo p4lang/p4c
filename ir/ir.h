@@ -20,6 +20,7 @@
 // Special IR classes and types
 #include "node.h"
 #include "vector.h"
+#include "indexed_vector.h"
 #include "dbprint.h"
 #include "namemap.h"
 #include "nodemap.h"

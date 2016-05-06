@@ -40,7 +40,7 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::Equ* e) override { return comparison(e); }
     bool preorder(const IR::Neq* e) override { return comparison(e); }
 
-    bool preorder(const IR::Vector<IR::StatOrDecl>* v) override;
+    bool preorder(const IR::IndexedVector<IR::StatOrDecl>* v) override;
     bool preorder(const IR::Path* path) override;
 
     bool preorder(const IR::Type_Typedef* type) override;

@@ -117,7 +117,7 @@ const Type_MatchKind *Type_MatchKind::get() {
     return singleton;
 }
 
-Type_Struct::Type_Struct(cstring name, const IR::NameMap<IR::StructField, ordered_map> &&fields)
+Type_Struct::Type_Struct(cstring name, const IR::IndexedVector<IR::StructField> *fields)
         : Type_Struct(Util::SourceInfo(), name, IR::Annotations::empty, fields) {}
 
 /**

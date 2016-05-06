@@ -65,6 +65,10 @@ boilerplate removed, which the ir-generator generates.
   postorder functions).  Automatically flattens any sub-`Vector` objects
   and removes null when transforms on elements of the vector return them.
 
+###### indexed_vector.h
+  IndexedVector: contains a Vector and also an index mapping cstrings
+  to IDeclarations for all objects in the vector that are IDeclarations.
+
 ##### dbprint.h dbprint.cpp dbprint-expression.cpp dbprint-p4.cpp 
   Debug printing routines.  Most IR classes declared a `dbprint` method,
   which are defined here.  The header contains flags and support that

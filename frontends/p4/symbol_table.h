@@ -55,7 +55,7 @@ class ProgramStructure final {
     // the last namespace has been exited
     void pop();
     // Declares these types in the current scope
-    void declareTypes(Util::Enumerator<const IR::Type_Var*>* typeVars);
+    void declareTypes(const IR::IndexedVector<IR::Type_Var>* typeVars);
     SymbolKind lookupIdentifier(cstring identifier) const;
 
     // Manipulate path prefix in which next identifier is looked-up

@@ -1,7 +1,13 @@
-../testdata/v1_2_errors/template_e.p4(1): error: T: duplicated name (T is previous instance)
+../testdata/v1_2_errors/template_e.p4(1): error: T: Duplicates declaration T
 package S<T, T
              ^
 ../testdata/v1_2_errors/template_e.p4(1)
 package S<T, T
           ^
-error: 1 errors encountered, aborting compilation
+../testdata/v1_2_errors/template_e.p4(1): error: Duplicate declaration of T; previous at 
+package S<T, T>
+             ^
+../testdata/v1_2_errors/template_e.p4(1)
+package S<T, T>
+          ^
+error: 2 errors encountered, aborting compilation

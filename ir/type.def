@@ -90,24 +90,24 @@ class Parameter : Declaration, IAnnotated {
 }
 
 class ParameterList : ISimpleNamespace {
-    inline NameMap<Parameter, ordered_map> parameters;
-    validate{ parameters.check_null(); }
+    IndexedVector<Parameter> parameters;
+    validate{ parameters->check_null(); }
     dbprint { Node::dbprint(out); }
 #emit
-    ParameterList() {}
+    ParameterList() { parameters = new IndexedVector<Parameter>(); }
+    explicit ParameterList(const IndexedVector<Parameter>* parameters) :
+            parameters(parameters) {}
     Util::Enumerator<const Parameter*>* getEnumerator() const
-    { return parameters.valueEnumerator(); }
+    { return parameters->getEnumerator(); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return getEnumerator()->as<const IDeclaration*>(); }
-    size_t size() const { return parameters.size(); }
+    { return parameters->getDeclarations(); }
+    size_t size() const { return parameters->size(); }
     const IR::Parameter* getParameter(cstring name) const
-    { return parameters.getUnique(name); }
+    { return parameters->getDeclaration<Parameter>(name); }
     const IR::Parameter* getParameter(unsigned index) const {
-        for (auto &param : parameters)
-            if (0 == index--) return param.second;
+        for (auto &param : *parameters)
+            if (0 == index--) return param;
         BUG("Only %1% parameters; %2% requested", size(), size()+index); }
-    void add(const Parameter* param)
-    { parameters.addUnique(param->name, param); }
     const IR::IDeclaration* getDeclByName(cstring name) const
     { return getParameter(name); }
 #end
@@ -172,21 +172,19 @@ class Type_MatchKind : Type_Base {
 }
 
 class TypeParameters : ISimpleNamespace {
-    inline NameMap<Type_Var, ordered_map> parameters;
+    IndexedVector<Type_Var> parameters;
 #emit
-    TypeParameters() : Node(Util::SourceInfo()) {}
-    TypeParameters(Util::SourceInfo &si, NameMap<Type_Var, ordered_map> &&p)
-            : Node(si), parameters(std::move(p)) {}
+    TypeParameters() : Node(Util::SourceInfo()), parameters(new IndexedVector<Type_Var>()) {}
+    TypeParameters(Util::SourceInfo &si, IndexedVector<Type_Var> *p)
+            : Node(si), parameters(p) { CHECK_NULL(p); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return parameters.valueEnumerator()->as<const IDeclaration*>(); }
-    bool empty() const { return parameters.empty(); }
-    size_t size() const { return parameters.size(); }
-    Util::Enumerator<const Type_Var*>* getEnumerator() const
-    { return parameters.valueEnumerator(); }
+    { return parameters->getDeclarations(); }
+    bool empty() const { return parameters->empty(); }
+    size_t size() const { return parameters->size(); }
     const IR::IDeclaration* getDeclByName(cstring name) const
-    { return parameters.getUnique(name); }
+    { return parameters->getDeclaration(name); }
 #end
-    validate{ parameters.check_null(); }
+    validate{ parameters->check_null(); }
 }
 
 class StructField : Declaration, IAnnotated {
@@ -201,34 +199,32 @@ class StructField : Declaration, IAnnotated {
 }
 
 abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
-    Annotations         annotations;
-    inline NameMap<StructField, ordered_map> fields;
+    Annotations                annotations;
+    IndexedVector<StructField> fields;
 #emit
     const Annotations* getAnnotations() const override { return annotations; }
-    Util::Enumerator<const StructField*>* getEnumerator() const
-    { return fields.valueEnumerator(); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return getEnumerator()->as<const IDeclaration*>(); }
+    { return fields->getDeclarations(); }
     const StructField* getField(cstring name) const
-    { return fields.getUnique(name); }
+    { return fields->getDeclaration<StructField>(name); }
     int width_bits() const override {
         // TODO: cache this value
         int rv = 0;
-        for (auto f : *getEnumerator())
+        for (auto f : *fields)
             rv += f->type->width_bits();
         return rv; }
     const IR::IDeclaration* getDeclByName(cstring name) const
-    { return getField(name); }
+    { return fields->getDeclaration(name); }
 #end
     dbprint{ Node::dbprint(out); out << toString(); }
-    validate{ fields.check_null(); }
+    validate{ fields->check_null(); }
 }
 
 class Type_Struct : Type_StructLike {
 #nodbprint
     toString{ return cstring("struct ") + externalName(); }
 #emit
-    Type_Struct(cstring name, const NameMap<StructField, ordered_map> &&fields);
+    Type_Struct(cstring name, const IndexedVector<StructField> *fields);
 #end
 }
 
@@ -236,9 +232,10 @@ class Type_Union : Type_StructLike {
 #nodbprint
     toString{ return cstring("header_union ") + externalName(); }
 #emit
+    // this makes some assumptions on padding
     int width_bits() const override {
         int rv = 0;
-        for (auto f : *getEnumerator())
+        for (auto f : *fields)
             rv = std::max(rv, f->type->width_bits());
         return rv; }
 #end
@@ -368,17 +365,15 @@ class Declaration_ID : Declaration, CompileTimeValue {
 }
 
 class Type_Enum : Type_Declaration, ISimpleNamespace {
-    inline NameMap<Declaration_ID, ordered_map> members;
+    IndexedVector<Declaration_ID> members;
 #emit
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return members.valueEnumerator()->as<const IDeclaration*>(); }
-    Util::Enumerator<const Declaration_ID*>* getEnumerator() const
-    { return members.valueEnumerator(); }
+    { return members->getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const
-    { return members.getUnique(name); }
+    { return members->getDeclaration(name); }
 #end
 #nodbprint
-    validate{ members.check_null(); }
+    validate{ members->check_null(); }
 }
 
 class Type_Table : Type, IApply {
@@ -463,7 +458,7 @@ class Type_Typedef : Type_Declaration, IAnnotated {
 // An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
     TypeParameters typeParameters;
-    Vector<Method> methods;
+    Vector<Method> methods;  // methods can be overloaded, so this is not IndexedVector
 #emit
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
     { return methods->getEnumerator()->as<const IDeclaration*>(); }
