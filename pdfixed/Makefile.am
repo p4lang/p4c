@@ -34,6 +34,22 @@ pd_thrift_gen/gen-py/mc_pd_rpc/mc-remote
 mcpkgpythondir = $(pkgpythondir)/pdfixed/mc_pd_rpc
 mcpkgpython_PYTHON = $(pd_mc_thrift_py)
 
+pd_sswitch_thrift_cxx = \
+pd_thrift_gen/gen-cpp/sswitch.cpp \
+pd_thrift_gen/gen-cpp/sswitch.h \
+pd_thrift_gen/gen-cpp/sswitch_pd_rpc_constants.cpp \
+pd_thrift_gen/gen-cpp/sswitch_pd_rpc_constants.h \
+pd_thrift_gen/gen-cpp/sswitch_pd_rpc_types.cpp \
+pd_thrift_gen/gen-cpp/sswitch_pd_rpc_types.h
+pd_sswitch_thrift_py = \
+pd_thrift_gen/gen-py/sswitch_pd_rpc/constants.py \
+pd_thrift_gen/gen-py/sswitch_pd_rpc/__init__.py \
+pd_thrift_gen/gen-py/sswitch_pd_rpc/ttypes.py \
+pd_thrift_gen/gen-py/sswitch_pd_rpc/sswitch.py \
+pd_thrift_gen/gen-py/sswitch_pd_rpc/sswitch-remote
+sswitchpkgpythondir = $(pkgpythondir)/pdfixed/sswitch_pd_rpc
+sswitchpkgpython_PYTHON = $(pd_sswitch_thrift_py)
+
 pd_res_thrift_cxx = \
 pd_thrift_gen/gen-cpp/res_constants.cpp \
 pd_thrift_gen/gen-cpp/res_constants.h \
@@ -48,14 +64,17 @@ respkgpython_PYTHON = $(pd_res_thrift_py)
 
 pd_conn_mgr_IDL = $(srcdir)/thrift/conn_mgr_pd_rpc.thrift
 pd_mc_IDL = $(srcdir)/thrift/mc_pd_rpc.thrift
+pd_sswitch_IDL = $(srcdir)/thrift/sswitch_pd_rpc.thrift
 pd_res_IDL = $(srcdir)/thrift/res.thrift
 
 pdfixed_thrift_files = \
 $(pd_conn_mgr_thrift_cxx) \
 $(pd_mc_thrift_cxx) \
+$(pd_sswitch_thrift_cxx) \
 $(pd_res_thrift_cxx) \
 $(pd_conn_mgr_thrift_py) \
 $(pd_mc_thrift_py) \
+$(pd_sswitch_thrift_py) \
 $(pd_res_thrift_py)
 
 pdfixed_thrift_files.ts: $(pd_conn_mgr_IDL) $(pd_mc_IDL) $(pd_res_IDL)
@@ -63,8 +82,10 @@ pdfixed_thrift_files.ts: $(pd_conn_mgr_IDL) $(pd_mc_IDL) $(pd_res_IDL)
 	@touch pdfixed_thrift_files.tmp
 	$(THRIFT) -o $(builddir)/pd_thrift_gen/ --gen cpp -r $(pd_conn_mgr_IDL)
 	$(THRIFT) -o $(builddir)/pd_thrift_gen/ --gen cpp -r $(pd_mc_IDL)
+	$(THRIFT) -o $(builddir)/pd_thrift_gen/ --gen cpp -r $(pd_sswitch_IDL)
 	$(THRIFT) -o $(builddir)/pd_thrift_gen/ --gen py -r $(pd_conn_mgr_IDL)
 	$(THRIFT) -o $(builddir)/pd_thrift_gen/ --gen py -r $(pd_mc_IDL)
+	$(THRIFT) -o $(builddir)/pd_thrift_gen/ --gen py -r $(pd_sswitch_IDL)
 	@mv -f pdfixed_thrift_files.tmp $@
 $(pdfixed_thrift_files): pdfixed_thrift_files.ts
 ## Recover from the removal of $@
@@ -88,11 +109,12 @@ $(pdfixed_thrift_files): pdfixed_thrift_files.ts
 BUILT_SOURCES = $(pdfixed_thrift_files)
 
 pdf_files = \
-src/pd_conn_mgr.cpp \
 src/pd_notifications.cpp \
 src/pd_helpers.cpp \
 src/pd_pre.cpp \
+src/pd_mirroring.cpp \
 src/pd_static.cpp \
+src/pd_swap.cpp \
 src/nn.h
 
 pdfixedpkgincludedir = $(pkgincludedir)/pdfixed
@@ -113,6 +135,7 @@ $(top_builddir)/targets/simple_switch/libsimpleswitch_thrift.la
 libbmpdfixedthrift_la_SOURCES = \
 $(pd_conn_mgr_thrift_cxx) \
 $(pd_mc_thrift_cxx) \
+$(pd_sswitch_thrift_cxx) \
 $(pd_res_thrift_cxx) \
 thrift-src/pdfixed_rpc_server.cpp
 

@@ -18,21 +18,24 @@
  *
  */
 
-#ifndef _P4_PD_HELPERS_H_
-#define _P4_PD_HELPERS_H_
-
-#include <bm/Standard.h>
+#ifndef _P4_PD_SWAP_H_
+#define _P4_PD_SWAP_H_
 
 #include <bm/pdfixed/pd_common.h>
 
-#include <vector>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-using namespace  ::bm_runtime::standard;
+p4_pd_status_t
+p4_pd_load_new_config(p4_pd_sess_hdl_t shdl, uint8_t dev_id,
+		      const char *config_str);
 
-std::vector<BmMeterRateConfig>
-pd_bytes_meter_spec_to_rates(p4_pd_bytes_meter_spec_t *meter_spec);
+p4_pd_status_t
+p4_pd_swap_configs(p4_pd_sess_hdl_t shdl, uint8_t dev_id);
 
-std::vector<BmMeterRateConfig>
-pd_packets_meter_spec_to_rates(p4_pd_packets_meter_spec_t *meter_spec);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

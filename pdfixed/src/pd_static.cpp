@@ -18,27 +18,34 @@
  *
  */
 
+#include <bm/Standard.h>
+#include <bm/SimplePreLAG.h>
+#include <bm/SimpleSwitch.h>
+
 #include <bm/pdfixed/pd_static.h>
 #include <bm/pdfixed/int/pd_conn_mgr.h>
 
-#include <cassert>
-#include <iostream>
+using namespace  ::bm_runtime::standard;
+using namespace  ::bm_runtime::simple_pre_lag;
+using namespace  ::sswitch_runtime;
 
 static uint64_t session_hdl = 0;
 
-pd_conn_mgr_t *conn_mgr_state;
+PdConnMgr *conn_mgr_state;
 
 extern "C" {
 
 p4_pd_status_t
 p4_pd_init(void) {
-  conn_mgr_state = pd_conn_mgr_create();
+  using ConnMgr = detail::PdConnMgr_<StandardClient, SimplePreLAGClient,
+                                     SimpleSwitchClient>;
+  conn_mgr_state = new ConnMgr("standard", "simple_pre_lag", "simple_switch");
   return 0;
 }
 
 void
 p4_pd_cleanup(void) {
-  
+  delete conn_mgr_state;
 }
 
 p4_pd_status_t
@@ -81,39 +88,6 @@ p4_pd_commit_txn(p4_pd_sess_hdl_t shdl, bool hwSynchronous, bool *sendRsp) {
 p4_pd_status_t
 p4_pd_complete_operations(p4_pd_sess_hdl_t shdl) {
   (void) shdl;
-  return 0;
-}
-
-p4_pd_status_t
-p4_pd_load_new_config(p4_pd_sess_hdl_t shdl, uint8_t dev_id,
-		      const char *config_str) {
-  (void) shdl;
-  auto client = pd_conn_mgr_client(conn_mgr_state, dev_id);
-  try {
-    client.c->bm_load_new_config(std::string(config_str));
-  } catch(InvalidSwapOperation &iso) {
-    const char *what =
-      _SwapOperationErrorCode_VALUES_TO_NAMES.find(iso.code)->second;
-    std::cout << "Invalid swap operation (" << iso.code << "): "
-	      << what << std::endl;
-    return iso.code;
-  }
-  return 0;
-}
-
-p4_pd_status_t
-p4_pd_swap_configs(p4_pd_sess_hdl_t shdl, uint8_t dev_id) {
-  (void) shdl;
-  auto client = pd_conn_mgr_client(conn_mgr_state, dev_id);
-  try {
-    client.c->bm_swap_configs();
-  } catch(InvalidSwapOperation &iso) {
-    const char *what =
-      _SwapOperationErrorCode_VALUES_TO_NAMES.find(iso.code)->second;
-    std::cout << "Invalid swap operation (" << iso.code << "): "
-	      << what << std::endl;
-    return iso.code;
-  }
   return 0;
 }
 

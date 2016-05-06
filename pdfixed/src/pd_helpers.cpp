@@ -18,10 +18,7 @@
  *
  */
 
-#ifndef _P4_PD_HELPERS_H_
-#define _P4_PD_HELPERS_H_
-
-#include <bm/pdfixed/pd_common.h>
+#include <bm/pdfixed/int/pd_helpers.h>
 #include <bm/pdfixed/int/pd_conn_mgr.h>
 
 #include <vector>
@@ -67,5 +64,3 @@ pd_packets_meter_spec_to_rates(p4_pd_packets_meter_spec_t *meter_spec) {
 
   return rates;
 }
-
-#endif

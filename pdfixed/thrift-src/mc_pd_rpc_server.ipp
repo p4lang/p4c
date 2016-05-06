@@ -1,7 +1,3 @@
-//:: pd_prefix = "p4_pd_" + p4_prefix + "_"
-//:: pd_static_prefix = "p4_pd_"
-//:: api_prefix = p4_prefix + "_"
-
 #include "mc.h"
 
 #include <iostream>
