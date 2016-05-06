@@ -80,7 +80,7 @@ struct ClientState {
 }  // namespace detail
 
 struct PdConnMgr {
-  virtual ~PdConnMgr();
+  virtual ~PdConnMgr() { };
 
   template <typename A>
   Client<A> get(int dev_id) {
@@ -119,7 +119,6 @@ struct Connector<A, Args...> {
     using namespace ::thrift_provider::protocol;
     using namespace ::thrift_provider::transport;
 
-    assert(cstate->ptrs.empty());
     boost::shared_ptr<TTransport> socket(new TSocket("localhost", thrift_port_num));
     boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
     boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
@@ -157,6 +156,7 @@ struct Cleaner<A, Args...> {
   static void clean(ClientState *cstate) {
     delete static_cast<A *>(cstate->ptrs.back());
     cstate->ptrs.pop_back();
+    Cleaner<Args...>::clean(cstate);
   }
 };
 
@@ -173,6 +173,7 @@ template <typename A, typename... Args>
 struct TypeMapping<A, Args...> {
   static void map(TypeMapper *mapper) {
     mapper->add<A>();
+    TypeMapping<Args...>::map(mapper);
   }
 };
 
@@ -189,6 +190,7 @@ struct PdConnMgr_ : public PdConnMgr {
   int client_init(int dev_id, int thrift_port_num) override {
     auto &cstate = clients[dev_id];
     cstate.dev_id = dev_id;
+    assert(cstate.ptrs.empty());
     return Connector<Args...>::connect(&cstate, thrift_port_num,
                                        names_.begin());
   }
