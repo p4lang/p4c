@@ -21,41 +21,194 @@
 #ifndef _P4_PD_CONN_MGR_H_
 #define _P4_PD_CONN_MGR_H_
 
-#include <bm/Standard.h>
-#include <bm/SimplePreLAG.h>
-#include <bm/SimpleSwitch.h>
+#ifdef P4THRIFT
+#include <p4thrift/protocol/TBinaryProtocol.h>
+#include <p4thrift/transport/TSocket.h>
+#include <p4thrift/transport/TTransportUtils.h>
+#include <p4thrift/protocol/TMultiplexedProtocol.h>
+
+namespace thrift_provider = p4::thrift;
+#else
+#include <thrift/protocol/TBinaryProtocol.h>
+#include <thrift/transport/TSocket.h>
+#include <thrift/transport/TTransportUtils.h>
+#include <thrift/protocol/TMultiplexedProtocol.h>
+
+namespace thrift_provider = apache::thrift;
+#endif
 
 #include <mutex>
+#include <iostream>
+#include <array>
+#include <vector>
+#include <unordered_map>
+#include <typeindex>
+#include <string>
 
-using namespace  ::bm_runtime::standard;
-using namespace  ::bm_runtime::simple_pre_lag;
-using namespace  ::sswitch_runtime;
+#define NUM_DEVICES 256
 
+template <typename A>
 struct Client {
-  StandardClient *c;
+  A *c;
   std::unique_lock<std::mutex> _lock;
 };
 
-struct McClient {
-  SimplePreLAGClient *c;
-  std::unique_lock<std::mutex> _lock;
+namespace detail {
+
+struct TypeMapper {
+  template <typename A>
+  void add() {
+    map.insert({std::type_index(typeid(A)), idx++});
+  };
+
+  template <typename A>
+  size_t get() const {
+    return map.at(std::type_index(typeid(A)));
+  }
+
+  size_t idx{0};
+  std::unordered_map<std::type_index, size_t> map{};
 };
 
-struct SSwitchClient {
-  SimpleSwitchClient *c;
-  std::unique_lock<std::mutex> _lock;
+struct ClientState {
+  std::mutex mutex{};
+  std::vector<void *> ptrs{};
+  int dev_id{};
+  boost::shared_ptr<::thrift_provider::protocol::TTransport> transport{nullptr};
 };
 
-struct pd_conn_mgr_t;
+}  // namespace detail
 
-pd_conn_mgr_t *pd_conn_mgr_create();
-void pd_conn_mgr_destroy(pd_conn_mgr_t *conn_mgr_state);
+struct PdConnMgr {
+  virtual ~PdConnMgr();
 
-Client pd_conn_mgr_client(pd_conn_mgr_t *, int dev_id);
-McClient pd_conn_mgr_mc_client(pd_conn_mgr_t *, int dev_id);
-SSwitchClient pd_conn_mgr_sswitch_client(pd_conn_mgr_t *, int dev_id);
+  template <typename A>
+  Client<A> get(int dev_id) {
+    static size_t idx = mapper.get<A>();
+    auto &cstate = clients[dev_id];
+    return {static_cast<A *>(cstate.ptrs[idx]),
+          std::unique_lock<std::mutex>(cstate.mutex)};
+  }
 
-int pd_conn_mgr_client_init(pd_conn_mgr_t *, int dev_id, int thrift_port_num);
-int pd_conn_mgr_client_close(pd_conn_mgr_t *, int dev_id);
+  virtual int client_init(int dev_id, int thrift_port_num) = 0;
+  virtual int client_close(int dev_id) = 0;
+
+ protected:
+  std::array<detail::ClientState, NUM_DEVICES> clients;
+  detail::TypeMapper mapper{};
+};
+
+namespace detail {
+
+template <typename... Args> struct Connector;
+
+template <>
+struct Connector<> {
+  static int connect(ClientState *cstate, int thrift_port_num,
+                     std::vector<std::string>::iterator it) {
+    (void) cstate; (void) thrift_port_num; (void) it;
+    return 0;
+  };
+};
+
+template <typename A, typename... Args>
+struct Connector<A, Args...> {
+  static int connect(ClientState *cstate, int thrift_port_num,
+                      std::vector<std::string>::iterator it) {
+    using namespace ::thrift_provider;
+    using namespace ::thrift_provider::protocol;
+    using namespace ::thrift_provider::transport;
+
+    assert(cstate->ptrs.empty());
+    boost::shared_ptr<TTransport> socket(new TSocket("localhost", thrift_port_num));
+    boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+    boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+
+    boost::shared_ptr<TMultiplexedProtocol> sub_protocol(
+        new TMultiplexedProtocol(protocol, *it));
+
+    cstate->transport = transport;
+    cstate->ptrs.push_back(static_cast<void *>(new A(sub_protocol)));
+
+    try {
+      transport->open();
+    }
+    catch (TException& tx) {
+      std::cout << "Could not connect to port " << thrift_port_num
+                << "(device " << cstate->dev_id << ")" << std::endl;
+      return 1;
+    }
+
+    return Connector<Args...>::connect(cstate, thrift_port_num, ++it);
+  };
+};
+
+template <typename... Args> struct Cleaner;
+
+template <>
+struct Cleaner<> {
+  static void clean(ClientState *cstate) {
+    assert(cstate->ptrs.empty());
+  }
+};
+
+template <typename A, typename... Args>
+struct Cleaner<A, Args...> {
+  static void clean(ClientState *cstate) {
+    delete static_cast<A *>(cstate->ptrs.back());
+    cstate->ptrs.pop_back();
+  }
+};
+
+template <typename... Args> struct TypeMapping;
+
+template <>
+struct TypeMapping<> {
+  static void map(TypeMapper *mapper) {
+    (void) mapper;
+  }
+};
+
+template <typename A, typename... Args>
+struct TypeMapping<A, Args...> {
+  static void map(TypeMapper *mapper) {
+    mapper->add<A>();
+  }
+};
+
+template<typename... Args>
+struct PdConnMgr_ : public PdConnMgr {
+  template <typename ...Names>
+  PdConnMgr_(Names&&... names) {
+    static_assert(sizeof...(Args) == sizeof...(Names),
+                  "You need to provide as many names as client types");
+    names_ = {names...};
+    TypeMapping<Args...>::map(&mapper);
+  }
+
+  int client_init(int dev_id, int thrift_port_num) override {
+    auto &cstate = clients[dev_id];
+    cstate.dev_id = dev_id;
+    return Connector<Args...>::connect(&cstate, thrift_port_num,
+                                       names_.begin());
+  }
+
+  int client_close(int dev_id) override {
+    auto &cstate = clients[dev_id];
+    assert(cstate.ptrs.size() == sizeof...(Args));
+    cstate.transport->close();
+    cstate.transport = nullptr;
+    Cleaner<Args...>::clean(&cstate);
+    assert(cstate.ptrs.empty());
+    return 0;
+  }
+
+ private:
+  std::vector<std::string> names_{};
+};
+
+}  // namespace detail
+
+#undef NUM_DEVICES
 
 #endif

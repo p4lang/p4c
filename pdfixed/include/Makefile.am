@@ -3,7 +3,8 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 pdf_headers = \
 bm/pdfixed/pd_pre.h \
 bm/pdfixed/pd_static.h \
-bm/pdfixed/pd_common.h
+bm/pdfixed/pd_common.h \
+bm/pdfixed/pd_swap.h
 
 # these are needed when compiling the P4-dependent PD
 pdf_int_headers = \

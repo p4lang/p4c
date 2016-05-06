@@ -88,11 +88,11 @@ $(pdfixed_thrift_files): pdfixed_thrift_files.ts
 BUILT_SOURCES = $(pdfixed_thrift_files)
 
 pdf_files = \
-src/pd_conn_mgr.cpp \
 src/pd_notifications.cpp \
 src/pd_helpers.cpp \
 src/pd_pre.cpp \
 src/pd_static.cpp \
+src/pd_swap.cpp \
 src/nn.h
 
 pdfixedpkgincludedir = $(pkgincludedir)/pdfixed
