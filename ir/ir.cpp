@@ -47,6 +47,14 @@ void IGeneralNamespace::checkDuplicateDeclarations() const {
     }
 }
 
+void P4Parser::checkDuplicates() const {
+    for (auto decl : *states) {
+        auto prev = stateful->getDeclaration(decl->getName().name);
+        if (prev != nullptr)
+            ::error("State %1% has same name as %2%", decl, prev);
+    }
+}
+
 bool Type_Stack::sizeKnown() const { return size->is<Constant>(); }
 
 int Type_Stack::getSize() const {

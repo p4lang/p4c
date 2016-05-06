@@ -81,8 +81,8 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 
     t << "T(Vector<IR::Node>, D(Node), ##__VA_ARGS__) \\" << std::endl;
     t << "T(IndexedVector<IR::Node>, "
-            //"D(Vector<IR::Node>) "
-            "D(Node), ##__VA_ARGS__) \\" << std::endl;
+            "D(Vector<IR::Node>) "
+            "B(Node), ##__VA_ARGS__) \\" << std::endl;
     for (auto cls : *getClasses()) {
         if (cls->needVector || cls->needIndexedVector)
             // IndexedVector is a subclass of Vector, so we need Vector in both cases
@@ -90,8 +90,8 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
                  "##__VA_ARGS__) \\" << std::endl;
         if (cls->needIndexedVector)
             t << "T(IndexedVector<IR::" << cls->containedIn << cls->name << ">, "
-                    //"D(Vector<IR::" << cls->containedIn << cls->name << ">) "
-                    "D(Node), ##__VA_ARGS__) \\" << std::endl;
+                    "D(Vector<IR::" << cls->containedIn << cls->name << ">) "
+                    "B(Node), ##__VA_ARGS__) \\" << std::endl;
         if (cls->needNameMap)
             BUG("visitable (non-inline) NameMap not yet implemented");
         if (cls->needNodeMap)

@@ -57,7 +57,7 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
 }
 
 // A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)
-class P4Parser : Type_Declaration, IGeneralNamespace, IApply, IContainer {
+class P4Parser : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     Type_Parser          type;
     ParameterList        constructorParams;
     IndexedVector<Declaration>  stateful;
@@ -66,9 +66,15 @@ class P4Parser : Type_Declaration, IGeneralNamespace, IApply, IContainer {
     const TypeParameters* getTypeParameters() const override { return type->getTypeParameters(); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return stateful->getDeclarations()->concat(states->getDeclarations()); }
+    const IDeclaration* getDeclByName(cstring name) const override {
+        auto decl = stateful->getDeclaration(name);
+        if (decl != nullptr)
+            return decl;
+        return states->getDeclaration(name); }
     const Type_Method* getApplyMethodType() const override { return type->getApplyMethodType(); }
     const Type_Method* getConstructorMethodType() const override;
     const ParameterList* getConstructorParameters() const override { return constructorParams; }
+    void checkDuplicates() const;
 #end
 #apply
 #nodbprint
@@ -77,6 +83,7 @@ class P4Parser : Type_Declaration, IGeneralNamespace, IApply, IContainer {
             BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
         stateful->check_null();
         states->check_null();
+        checkDuplicates();
     }
     toString { return cstring("parser ") + externalName(); }
 }

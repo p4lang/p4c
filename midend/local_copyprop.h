@@ -25,10 +25,6 @@ class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContex
     void flow_merge(Visitor &) override;
     void dropLocalsUsing(cstring);
 
-    Visitor::profile_t init_apply(const IR::Node* node) override {
-        dump(node);
-        return Transform::init_apply(node);
-    }
     const IR::Node *postorder(IR::Declaration_Variable *) override;
     const IR::Expression *postorder(IR::PathExpression *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
