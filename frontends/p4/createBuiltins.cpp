@@ -3,7 +3,7 @@
 
 namespace P4 {
 void CreateBuiltins::postorder(IR::P4Parser* parser) {
-    IR::Vector<IR::ParserState> *newStates = new IR::Vector<IR::ParserState>(*parser->states);
+    auto newStates = new IR::IndexedVector<IR::ParserState>(*parser->states);
     IR::ParserState* ac = new IR::ParserState(Util::SourceInfo(),
                                               IR::ParserState::accept,
                                               IR::Annotations::empty,

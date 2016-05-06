@@ -16,15 +16,14 @@ bool TypeOccursVisitor::preorder(const IR::Type_InfInt* typeVariable) {
 
 const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::TypeParameters *tps) {
     // remove all variables that were substituted
-    for (auto it = tps->parameters.begin(); it != tps->parameters.end();) {
-        if (bindings->containsKey(it->second)) {
-            LOG1("Removing from generic parameters " << it->second);
-            it = tps->parameters.erase(it);
-        } else {
-            ++it;
-        }
+    auto result = new IR::IndexedVector<IR::Type_Var>();
+    for (auto param : *tps->parameters) {
+        if (bindings->containsKey(param))
+            LOG1("Removing from generic parameters " << param);
+        else
+            result->push_back(param);
     }
-    return tps;
+    return new IR::TypeParameters(tps->srcInfo, result);
 }
 
 const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::Type_Var* typeVariable) {

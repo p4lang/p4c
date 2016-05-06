@@ -60,14 +60,12 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
 class P4Parser : Type_Declaration, IGeneralNamespace, IApply, IContainer {
     Type_Parser          type;
     ParameterList        constructorParams;
-    Vector<Declaration>  stateful;
-    Vector<ParserState>  states;
+    IndexedVector<Declaration>  stateful;
+    IndexedVector<ParserState>  states;
 #emit
     const TypeParameters* getTypeParameters() const override { return type->getTypeParameters(); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return stateful->getEnumerator()->
-                       as<const IDeclaration*>()->
-                       concat(states->only<IDeclaration>()); }
+    { return stateful->getDeclarations()->concat(states->getDeclarations()); }
     const Type_Method* getApplyMethodType() const override { return type->getApplyMethodType(); }
     const Type_Method* getConstructorMethodType() const override;
     const ParameterList* getConstructorParameters() const override { return constructorParams; }
@@ -86,17 +84,16 @@ class P4Parser : Type_Declaration, IGeneralNamespace, IApply, IContainer {
 class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     Type_Control         type;
     ParameterList        constructorParams;
-    inline NameMap<Declaration, ordered_map>  stateful;
+    IndexedVector<Declaration>  stateful;
     BlockStatement       body;
 #emit
-    Util::Enumerator<const Declaration*>* statefulEnumerator() const
-    { return stateful.valueEnumerator(); }
     const TypeParameters* getTypeParameters() const { return type->getTypeParameters(); }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override;
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
+    { return stateful->getDeclarations(); }
     const Type_Method* getApplyMethodType() const override { return type->getApplyMethodType(); }
     const Type_Method* getConstructorMethodType() const override;
     const IDeclaration* getDeclByName(cstring name) const override
-    { return stateful.getUnique(name); }
+    { return stateful->getDeclaration(name); }
     const ParameterList* getConstructorParameters() const override { return constructorParams; }
 #end
 #apply
@@ -104,7 +101,7 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     validate {
         if (!(name == type->name))
             BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
-        stateful.check_null();
+        stateful->check_null();
     }
     toString { return cstring("control ") + externalName(); }
 }
@@ -123,10 +120,10 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated {
     validate{ body->check_null(); }
 }
 
-class Declaration_Errors : Declaration, ISimpleNamespace {
+// Not a subclass of IDeclaration
+class Declaration_Errors : ISimpleNamespace {
     IndexedVector<Declaration_ID> members;
 #emit
-    static const ID EID;
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
     { return members->getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const
@@ -136,10 +133,10 @@ class Declaration_Errors : Declaration, ISimpleNamespace {
     validate{ members->check_null(); }
 }
 
-class Declaration_MatchKind : Declaration, ISimpleNamespace {
+// Not a subclass of IDeclaration
+class Declaration_MatchKind : ISimpleNamespace {
     IndexedVector<Declaration_ID> members;
 #emit
-    static const ID MKID;
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
     { return members->getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const
@@ -206,25 +203,23 @@ class TableProperty : Declaration, IAnnotated {
 }
 
 class TableProperties : ISimpleNamespace {
-    inline NameMap<TableProperty, ordered_map> properties;
-    toString{ return "TableProperties(" + Util::toString(properties.size()) + ")"; }
+    IndexedVector<TableProperty> properties;
+    toString{ return "TableProperties(" + Util::toString(properties->size()) + ")"; }
 #emit
-    TableProperties() {}
+    TableProperties() { properties = new IndexedVector<TableProperty>(); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return getEnumerator()->as<const IDeclaration*>(); }
+    { return properties->getDeclarations(); }
     const TableProperty* getProperty(cstring name) const
-    { return properties.getUnique(name); }
-    Util::Enumerator<const TableProperty*>* getEnumerator() const
-    { return properties.valueEnumerator(); }
+    { return properties->getDeclaration<TableProperty>(name); }
     const IDeclaration* getDeclByName(cstring name) const
-    { return properties.getUnique(name); }
+    { return properties->getDeclaration(name); }
 
     static const cstring actionsPropertyName;
     static const cstring keyPropertyName;
     static const cstring defaultActionPropertyName;
 #end
 #nodbprint
-    validate{ properties.check_null(); }
+    validate{ properties->check_null(); }
 }
 
 class P4Table : Declaration, IAnnotated {
@@ -294,15 +289,13 @@ class Declaration_Instance : Declaration, IAnnotated {
 }
 
 // Toplevel program representation
-class P4Program : IGeneralNamespace {
-    // TODO: convert this to an IndexedVector.
-    // The only duplicates we have are error and match_kind
-    Vector<Node> declarations;
-    validate{ checkDeclarations(); }
+class P4Program : ISimpleNamespace {
+    IndexedVector<Node> declarations;
 #emit
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return declarations->getEnumerator()->as<const IDeclaration*>(); }
-    void checkDeclarations() const;
+    { return declarations->getDeclarations(); }
+    const IDeclaration* getDeclByName(cstring name) const
+    { return declarations->getDeclaration(name); }
     static const cstring main;
 #end
 #apply

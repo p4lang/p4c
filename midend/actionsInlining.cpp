@@ -140,9 +140,8 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
 
     // evaluate in and inout parameters in order
     auto it = statement->methodCall->arguments->begin();
-    for (auto p : callee->parameters->parameters) {
+    for (auto param : *callee->parameters->parameters) {
         auto initializer = *it;
-        auto param = p.second;
         cstring newName = refMap->newName(param->name);
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
@@ -176,8 +175,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
 
     // copy out and inout parameters
     it = statement->methodCall->arguments->begin();
-    for (auto p : callee->parameters->parameters) {
-        auto param = p.second;
+    for (auto param : *callee->parameters->parameters) {
         auto left = *it;
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             cstring newName = ::get(paramRename, param);

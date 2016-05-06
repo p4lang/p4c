@@ -75,6 +75,13 @@ class IndexedVector : public Vector<T> {
             return nullptr;
         return it->second;
     }
+    template <class U>
+    const U* getDeclaration(cstring name) const {
+        auto it = declarations.find(name);
+        if (it == declarations.end())
+            return nullptr;
+        return it->second->template to<U>();
+    }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const
     { return Util::Enumerator<const IDeclaration*>::createEnumerator(
         Values(declarations).begin(), Values(declarations).end()); }

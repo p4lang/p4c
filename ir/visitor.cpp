@@ -110,10 +110,10 @@ void Visitor::visitor_const_error() {
     BUG("const Visitor wants to change IR"); }
 void Modifier::visitor_const_error() {
     BUG("Modifier called const visit function -- missing template "
-                            "instantiation in ir-tree-macro.h?"); }
+                            "instantiation in gen-tree-macro.h?"); }
 void Transform::visitor_const_error() {
     BUG("Transform called const visit function -- missing template "
-                            "instantiation in ir-tree-macro.h?"); }
+                            "instantiation in gen-tree-macro.h?"); }
 
 struct PushContext {
     Visitor::Context current;

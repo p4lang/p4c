@@ -72,8 +72,7 @@ class TypeInference : public Transform {
     // converts each type to a canonical pointer,
     // so we can check just pointer equality in the map
     const IR::Type* canonicalize(const IR::Type* type);
-    const IR::NameMap<IR::StructField, ordered_map>*
-            canonicalizeFields(const IR::Type_StructLike* type);
+    const IR::IndexedVector<IR::StructField>* canonicalizeFields(const IR::Type_StructLike* type);
     const IR::ParameterList* canonicalize(const IR::ParameterList* params);
     const IR::TypeParameters* canonicalize(const IR::TypeParameters* params);
 

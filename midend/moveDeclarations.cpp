@@ -6,9 +6,9 @@ void ResetHeaders::generateResets(const IR::Type* type, const IR::Expression* ex
                                   IR::Vector<IR::StatOrDecl>* resets) {
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
         auto sl = type->to<IR::Type_StructLike>();
-        for (auto f : sl->fields) {
-            auto ftype = typeMap->getType(f.second->type, true);
-            auto member = new IR::Member(Util::SourceInfo(), expr, f.second->name);
+        for (auto f : *sl->fields) {
+            auto ftype = typeMap->getType(f->type, true);
+            auto member = new IR::Member(Util::SourceInfo(), expr, f->name);
             generateResets(ftype, member, resets);
         }
     } else if (type->is<IR::Type_Header>()) {
@@ -66,20 +66,20 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Action* action)  {
 
 const IR::Node* MoveDeclarations::postorder(IR::P4Control* control)  {
     LOG1("Visiting " << control << " toMove " << toMove.size());
-    auto decls = new IR::NameMap<IR::Declaration, ordered_map>();
+    auto decls = new IR::IndexedVector<IR::Declaration>();
     for (auto decl : *getMoves()) {
         LOG1("Moved " << decl);
-        decls->addUnique(decl->name, decl);
+        decls->push_back(decl);
     }
-    for (auto stat : control->stateful)
-        decls->addUnique(stat.first, stat.second);
-    control->stateful = std::move(*decls);
+    for (auto stat : *control->stateful)
+        decls->push_back(stat);
+    control->stateful = decls;
     pop();
     return control;
 }
 
 const IR::Node* MoveDeclarations::postorder(IR::P4Parser* parser)  {
-    auto newStateful = new IR::Vector<IR::Declaration>();
+    auto newStateful = new IR::IndexedVector<IR::Declaration>();
     newStateful->append(*getMoves());
     newStateful->append(*parser->stateful);
     parser->stateful = newStateful;

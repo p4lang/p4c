@@ -144,7 +144,7 @@ Evaluator::processConstructor(
         auto values = evaluateArguments(arguments, current);
         if (values != nullptr) {
             block->instantiate(values);
-            for (auto a : *cont->statefulEnumerator())
+            for (auto a : *cont->stateful)
                 visit(a);
         }
         popBlock(block);

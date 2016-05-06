@@ -58,7 +58,7 @@ static int yylex();
     const IR::Type              *Type;
     struct {
         IR::Vector<IR::Annotation>      *annotations;
-        IR::NameMap<IR::StructField, ordered_map> *fields;
+        IR::IndexedVector<IR::StructField> *fields;
     }                           HeaderType;
 }
 
@@ -151,9 +151,9 @@ input: /* epsilon */
 header_type_declaration: HEADER_TYPE name '{' header_dec_body '}'
       { global->add($2, new IR::v1HeaderType(@1+@5, $2,
             new IR::Type_Struct(@1+@5, IR::ID(@2, $2),
-                                new IR::Annotations($4.annotations), *$4.fields),
+                                new IR::Annotations($4.annotations), $4.fields),
             new IR::Type_Header(@1+@5, IR::ID(@2, $2),
-                                new IR::Annotations($4.annotations), std::move(*$4.fields)))); }
+                                new IR::Annotations($4.annotations), $4.fields))); }
 ;
 
 header_dec_body: FIELDS '{' field_declarations '}' opt_length opt_max_length
@@ -162,11 +162,11 @@ header_dec_body: FIELDS '{' field_declarations '}' opt_length opt_max_length
 
 field_declarations: /* epsilon */
       { $$.annotations = new IR::Vector<IR::Annotation>;
-        $$.fields = new IR::NameMap<IR::StructField, ordered_map>; }
+        $$.fields = new IR::IndexedVector<IR::StructField>; }
     | field_declarations name ':' bit_width ';'
-      { ($$=$1).fields->addUnique($2, new IR::StructField(@2+@4, IR::ID(@2, $2), $4)); }
+      { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@2, $2), $4)); }
     | field_declarations type name ';'
-      { ($$=$1).fields->addUnique($3, new IR::StructField(@2+@4, IR::ID(@3, $3), $2)); }
+      { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@3, $3), $2)); }
 ;
 
 bit_width:
@@ -568,7 +568,7 @@ table_body: /* epsilon */ { $$ = new IR::V1Table; }
     | table_body IDENTIFIER ':' expression ';'
       { auto exp = new IR::ExpressionValue(@4, $4);
         auto prop = new IR::TableProperty(@2, IR::ID(@2, $2), IR::Annotations::empty, exp, false);
-        $1->properties.properties.addUnique(prop->name, prop);
+        $1->addProperty(prop);
         $$ = $1; }
     | table_body error ';' { $$=$1; }
     | table_body error { $$=$1; }

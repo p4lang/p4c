@@ -92,7 +92,7 @@ IR::MethodCallExpression *P4::LocalCopyPropagation::postorder(IR::MethodCallExpr
     if (!in_action) return mc;
     auto type = mc->method->type->to<IR::Type_Method>();
     int idx = 0;
-    for (auto param : Values(type->parameters->parameters)) {
+    for (auto param : *type->parameters->parameters) {
         if (param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) {
             if (auto arg = mc->arguments->at(idx)->to<IR::PathExpression>()) {
                 dropLocalsUsing(arg->path->name); } }

@@ -233,7 +233,7 @@ bool ToP4::preorder(const IR::TypeParameters* t) {
     if (!t->empty()) {
         builder.append("<");
         bool first = true;
-        for (auto a : *t->getEnumerator()) {
+        for (auto a : *t->parameters) {
             if (!first)
                 builder.append(", ");
             first = false;
@@ -341,7 +341,7 @@ bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
 
     std::map<const IR::StructField*, cstring> type;
     size_t len = 0;
-    for (auto f : *t->getEnumerator()) {
+    for (auto f : *t->fields) {
         Util::SourceCodeBuilder builder;
         ToP4 rec(builder, showIR);
 
@@ -352,7 +352,7 @@ bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
         type.emplace(f, t);
     }
 
-    for (auto f : *t->getEnumerator()) {
+    for (auto f : *t->fields) {
         dump(2, f, 1);
         if (f->annotations->size() > 0) {
             builder.emitIndent();
@@ -552,12 +552,13 @@ VECTOR_VISIT(Vector, Type)
 VECTOR_VISIT(Vector, Expression)
 VECTOR_VISIT(Vector, Method)
 VECTOR_VISIT(Vector, SelectCase)
-VECTOR_VISIT(IndexedVector, StatOrDecl)
 VECTOR_VISIT(Vector, SwitchCase)
-VECTOR_VISIT(Vector, Declaration)
 VECTOR_VISIT(Vector, Node)
-VECTOR_VISIT(Vector, ParserState)
 VECTOR_VISIT(Vector, ActionListElement)
+VECTOR_VISIT(IndexedVector, ParserState)
+VECTOR_VISIT(IndexedVector, StatOrDecl)
+VECTOR_VISIT(IndexedVector, Declaration)
+VECTOR_VISIT(IndexedVector, Node)
 #undef VECTOR_VISIT
 
 bool ToP4::preorder(const IR::Vector<IR::Annotation> *v) {
@@ -947,7 +948,7 @@ bool ToP4::preorder(const IR::P4Control * c) {
         visit(c->constructorParams);
     builder.spc();
     builder.blockStart();
-    for (auto s : *c->statefulEnumerator()) {
+    for (auto s : *c->stateful) {
         builder.emitIndent();
         visit(s);
         builder.newline();
@@ -1115,7 +1116,7 @@ bool ToP4::preorder(const IR::TableProperty* p) {
 }
 
 bool ToP4::preorder(const IR::TableProperties* t) {
-    for (auto p : *t->getEnumerator()) {
+    for (auto p : *t->properties) {
         builder.emitIndent();
         visit(p);
         builder.newline();

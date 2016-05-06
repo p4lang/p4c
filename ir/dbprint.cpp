@@ -103,7 +103,7 @@ void IR::TypeParameters::dbprint(std::ostream& out) const {
     Node::dbprint(out);
     out << "<";
     bool first = true;
-    for (auto p : *getEnumerator()) {
+    for (auto p : *parameters) {
         if (!first)
             out << ", ";
         out << p;

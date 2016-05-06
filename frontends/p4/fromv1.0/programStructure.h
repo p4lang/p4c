@@ -129,7 +129,7 @@ class ProgramStructure {
     const IR::Parameter* parserHeadersOut;
 
     // output is constructed here
-    IR::Vector<IR::Node>* declarations;
+    IR::IndexedVector<IR::Node>* declarations;
 
  protected:
     cstring makeUniqueName(cstring base);
@@ -146,7 +146,7 @@ class ProgramStructure {
     const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName);
     const IR::P4Table*
     convertTable(const IR::V1Table* table, cstring newName,
-                 IR::NameMap<IR::Declaration, ordered_map>* stateful);
+                 IR::IndexedVector<IR::Declaration>* stateful);
     const IR::P4Action* convertAction(const IR::ActionFunction* action, cstring newName,
                                              const IR::Meter* meterToAccess);
     const IR::Type_Control* controlType(IR::ID name);

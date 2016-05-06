@@ -322,13 +322,13 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
 
     workToDo = &toInline->callerToWork[orig];
     LOG1("Analyzing " << caller);
-    auto stateful = new IR::NameMap<IR::Declaration, ordered_map>();
-    for (auto s : *caller->statefulEnumerator()) {
+    auto stateful = new IR::IndexedVector<IR::Declaration>();
+    for (auto s : *caller->stateful) {
         auto inst = s->to<IR::Declaration_Instance>();
         if (inst == nullptr ||
             workToDo->declToCallee.find(inst) == workToDo->declToCallee.end()) {
             // not a call
-            stateful->addUnique(s->name, s);
+            stateful->push_back(s);
         } else {
             auto callee = workToDo->declToCallee[inst]->to<IR::P4Control>();
             CHECK_NULL(callee);
@@ -346,8 +346,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
             workToDo->paramRename[inst] = paramRename;
             // Substitute also applyParameters with fresh variable names.
             auto it = inst->arguments->begin();
-            for (auto p : callee->type->applyParams->parameters) {
-                auto param = p.second;
+            for (auto param : *callee->type->applyParams->parameters) {
                 cstring newName = refMap->newName(param->name);
                 paramRename->emplace(param->name, newName);
                 LOG1("Replacing " << param->name << " with " << newName);
@@ -358,7 +357,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                     auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
                                                                 param->annotations, param->type,
                                                                 nullptr);
-                    stateful->addUnique(newName, vardecl);
+                    stateful->push_back(vardecl);
                     auto path = new IR::PathExpression(newName);
                     refMap->setDeclaration(path->path, vardecl);
                     subst.add(param, path);
@@ -377,15 +376,15 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
             clone = clone->apply(rename);
             CHECK_NULL(clone);
 
-            for (auto i : *clone->to<IR::P4Control>()->statefulEnumerator())
-                stateful->addUnique(i->name, i);
+            for (auto i : *clone->to<IR::P4Control>()->stateful)
+                stateful->push_back(i);
             workToDo->declToCallee[inst] = clone->to<IR::IContainer>();
         }
     }
 
     visit(caller->body);
     auto result = new IR::P4Control(caller->srcInfo, caller->name, caller->type,
-                                    caller->constructorParams, std::move(*stateful),
+                                    caller->constructorParams, stateful,
                                     caller->body);
     list->replace(orig, result);
     workToDo = nullptr;
@@ -409,9 +408,8 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
     // Evaluate in and inout parameters in order.
     std::map<cstring, cstring> *paramRename = workToDo->paramRename[decl];
     auto it = statement->methodCall->arguments->begin();
-    for (auto p : callee->type->applyParams->parameters) {
+    for (auto param : *callee->type->applyParams->parameters) {
         auto initializer = *it;
-        auto param = p.second;
         LOG1("Looking for " << param->name);
         cstring newName = ::get(*paramRename, param->name);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
@@ -427,8 +425,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
 
     // Copy back out and inout parameters
     it = statement->methodCall->arguments->begin();
-    for (auto p : callee->type->applyParams->parameters) {
-        auto param = p.second;
+    for (auto param : *callee->type->applyParams->parameters) {
         auto left = *it;
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             cstring newName = ::get(paramRename, param->name);

@@ -3,9 +3,9 @@
 
 IR::V1Program::V1Program(const CompilerOptions &) {
     // This should be kept in sync with v1model.p4
-    auto fields = new NameMap<StructField, ordered_map>;
+    auto fields = new IndexedVector<StructField>;
 #define ADDF(name, type) do { \
-    fields->addUnique(name, new IR::StructField(IR::ID(name), type)); \
+    fields->push_back(new IR::StructField(IR::ID(name), type)); \
 } while (0)
 
     ADDF("ingress_port", IR::Type::Bits::get(9));
@@ -17,7 +17,7 @@ IR::V1Program::V1Program(const CompilerOptions &) {
     ADDF("parser_status", IR::Type::Bits::get(8));
     ADDF("parser_error_location", IR::Type::Bits::get(8));
 #undef ADDF
-    auto *standard_metadata_t = new IR::Type_Struct("standard_metadata_t", std::move(*fields));
+    auto *standard_metadata_t = new IR::Type_Struct("standard_metadata_t", fields);
 
     scope.add("standard_metadata_t", new IR::v1HeaderType(standard_metadata_t));
     scope.add("standard_metadata", new IR::Metadata("standard_metadata", standard_metadata_t));
