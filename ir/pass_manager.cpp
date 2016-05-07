@@ -48,6 +48,7 @@ const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char 
     bool done = false;
     unsigned iterations = 0;
     while (!done) {
+        LOG5("PassRepeated state is:\n" << dumpToString(program));
         auto newprogram = PassManager::apply_visitor(program, name);
         if (program == newprogram || newprogram == nullptr)
             done = true;

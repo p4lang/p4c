@@ -103,7 +103,8 @@ abstract Declaration : StatOrDecl, IDeclaration {
 #end
     dbprint { Node::dbprint(out); out << name << "/" << declid; }
     toString { return externalName(); }
-    operator== { return StatOrDecl::operator==(a) && name == a.name && declid == a.declid; }
+    operator== { return StatOrDecl::operator==(static_cast<const StatOrDecl&>(a)) &&
+                        name == a.name && declid == a.declid; }
 }
 
 // Two declarations with the same name are not the same declaration
@@ -119,7 +120,8 @@ abstract Type_Declaration : Type, IDeclaration {
     Type_Declaration(Util::SourceInfo si, ID name) : Type(si), name(name), declid(nextId++) {}
 #end
     toString { return externalName(); }
-    operator== { return Type::operator==(a) && name == a.name && declid == a.declid; }
+    operator== { return Type::operator==(static_cast<const Type&>(a)) &&
+                        name == a.name && declid == a.declid; }
     dbprint { Node::dbprint(out); out << name << "/" << declid; }
 }
 

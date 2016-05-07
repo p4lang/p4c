@@ -83,6 +83,7 @@ class NameMap : public Node {
     void check_null() const { for (auto &e : symbols) CHECK_NULL(e.second); }
 
     IRNODE_SUBCLASS(NameMap)
+    bool operator==(const Node &a) const override { return a == *this; }
     bool operator==(const NameMap &a) const { return symbols == a.symbols; }
     cstring node_type_name() const override {
         return "NameMap<" + T::static_type_name() + ">"; }

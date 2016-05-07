@@ -1,16 +1,6 @@
 #ifndef _IR_IR_INLINE_H_
 #define _IR_IR_INLINE_H_
 
-#define DEFINE_EQUALS_IMPL(CLASS, BASE, TEMPLATE, TT)   \
-    TEMPLATE                                                                                    \
-    inline bool IR::CLASS TT::operator ==(const IR::Node &n) const {                            \
-        if (this == &n) return true;                                                            \
-        if (typeid(*this) != typeid(n)) return false;                                           \
-        return *this == dynamic_cast<const CLASS&>(n); }
-    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DEFINE_EQUALS_IMPL, , )
-    IRNODE_ALL_TEMPLATES_AND_BASES(DEFINE_EQUALS_IMPL)
-#undef DEFINE_EQUALS_IMPL
-
 #define DEFINE_APPLY_FUNCTIONS(CLASS, BASE, TEMPLATE, TT)                               \
     TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Modifier &v)              \
     { Node::traceVisit("Mod pre"); return v.preorder(this); }                           \

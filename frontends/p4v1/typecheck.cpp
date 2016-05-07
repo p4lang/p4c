@@ -179,12 +179,15 @@ class TypeCheck::Pass3 : public Modifier {
 
 TypeCheck::TypeCheck() : PassManager({
     new Pass1,
-    new PassRepeated({
+    (new PassRepeated({
         new Pass2(*this),
         new Pass3(*this),
-    })
+    }))->setRepeats(25)
 }) { setStopOnError(true); }
 
 const IR::Node *TypeCheck::apply_visitor(const IR::Node *n, const char *name) {
-    return PassManager::apply_visitor(n, name);
+    LOG5("Before Typecheck:\n" << dumpToString(n));
+    auto *rv = PassManager::apply_visitor(n, name);
+    LOG5("After Typecheck:\n" << dumpToString(rv));
+    return rv;
 }

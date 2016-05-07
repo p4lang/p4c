@@ -98,6 +98,7 @@ class Vector : public VectorBase {
 
     IRNODE_SUBCLASS(Vector)
     IRNODE_DECLARE_APPLY_OVERLOAD(Vector)
+    bool operator==(const Node &a) const override { return a == *this; }
     bool operator==(const Vector &a) const { return vec == a.vec; }
     cstring node_type_name() const override {
         return "Vector<" + T::static_type_name() + ">"; }

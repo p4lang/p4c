@@ -55,16 +55,6 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     impl << "#include \"ir/visitor.h\"" << std::endl;
     impl << std::endl;
 
-    out << "namespace IR {" << std::endl;
-    for (auto cls : *getClasses()) {
-        for (auto p = cls->containedIn; p && p->name; p = p->parent)
-            out << "namespace " << p->name << " {" << std::endl;
-        cls->declare(out);
-        for (auto p = cls->containedIn; p && p->name; p = p->parent)
-            out << "}" << std::endl;
-    }
-    out << "}" << std::endl;
-
     for (auto e : elements) {
         e->generate_hdr(out);
         e->generate_impl(impl); }
@@ -97,6 +87,16 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         if (cls->needNodeMap)
             BUG("visitable (non-inline) NodeMap not yet implemented"); }
     t << std::endl;
+
+    t << "namespace IR {" << std::endl;
+    for (auto cls : *getClasses()) {
+        for (auto p = cls->containedIn; p && p->name; p = p->parent)
+            t << "namespace " << p->name << " {" << std::endl;
+        cls->declare(t);
+        for (auto p = cls->containedIn; p && p->name; p = p->parent)
+            t << "}" << std::endl;
+    }
+    t << "}" << std::endl;
 }
 
 void IrClass::generateTreeMacro(std::ostream &out) const {

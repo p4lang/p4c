@@ -10,7 +10,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         if (cl->getParent()->name == "Node")
             buf << "typeid(*this) == typeid(a)";
         else
-            buf << cl->getParent()->name << "::operator==(a)";
+            buf << cl->getParent()->name << "::operator==(static_cast<const "
+                << cl->getParent()->name << " &>(a))";
         for (auto f : *cl->getFields()) {
             buf << std::endl;
             buf << cl->indent << cl->indent << "&& " << f->name << " == a." << f->name; }
@@ -105,7 +106,14 @@ void IrClass::generateMethods() {
                 if (exist)
                     exist->body = body;
                 else
-                    elements.push_back(new IrMethod(def.first, body)); } } }
+                    elements.push_back(new IrMethod(def.first, body)); } }
+        for (auto *parent = getParent(); parent; parent = parent->getParent()) {
+            auto eq_overload = new IrMethod("operator==", "{ return a == *this; }");
+            eq_overload->isOverride = true;
+            eq_overload->rtype = "bool";
+            eq_overload->args =
+                Util::printf_format("(const IR::%s &a) const", parent->name.c_str());
+            elements.push_back(eq_overload); } }
     for (auto m : *getUserMethods()) {
         if (m->rtype) continue;
         if (!IrMethod::Generate.count(m->name))
@@ -117,4 +125,5 @@ void IrClass::generateMethods() {
             m->inImpl = true;
         if (info.flags & OVERRIDE)
             m->isOverride = true; }
+
 }

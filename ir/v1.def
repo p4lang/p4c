@@ -136,7 +136,7 @@ class NamedCond : If {
        const Vector<Expression> *F) : If(p, T, F), name(unique_name()) {}
     explicit NamedCond(const If &i) : If(i), name(unique_name()) {}
 #end
-    operator== { return If::operator==(a); }
+    operator== { return If::operator==(static_cast<const If &>(a)); }
 #noconstructor
 #nodbprint
 }

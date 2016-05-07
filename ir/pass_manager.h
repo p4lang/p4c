@@ -36,7 +36,7 @@ class PassRepeated : virtual public PassManager {
     PassRepeated(const std::initializer_list<Visitor *> &init) :
             PassManager(init), repeats(0) { setStopOnError(true); }
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
-    void setRepeats(unsigned repeats) { this->repeats = repeats; }
+    PassRepeated *setRepeats(unsigned repeats) { this->repeats = repeats; return this; }
 };
 
 class VisitFunctor : virtual public Visitor {
