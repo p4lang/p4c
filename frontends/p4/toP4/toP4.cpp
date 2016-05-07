@@ -36,7 +36,6 @@ class DumpIR : public Inspector {
     }
     void display(const IR::Node* node) {
         str << IndentCtl::endl;
-        cstring tn = node->node_type_name();
         if (node->is<IR::Member>()) {
             node->Node::dbprint(str);
             str << node->to<IR::Member>()->member;
@@ -48,8 +47,7 @@ class DumpIR : public Inspector {
             node->is<IR::Expression>() ||
             node->is<IR::AssignmentStatement>() ||
             node->is<IR::P4Action>() ||
-            tn.startsWith("Vector") ||
-            tn.startsWith("IndexedVector")) {
+            node->is<IR::VectorBase>()) {
             node->Node::dbprint(str);
         } else {
             str << node;
