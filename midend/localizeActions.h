@@ -106,8 +106,7 @@ class FindRepeatedActionUses : public Inspector {
 class DuplicateActions : public Transform {
     ActionReplacement* repl;
  public:
-    DuplicateActions(ActionReplacement* repl)
-            : repl(repl) { CHECK_NULL(repl); }
+    explicit DuplicateActions(ActionReplacement* repl) : repl(repl) { CHECK_NULL(repl); }
     const IR::Node* postorder(IR::PathExpression* expression) override;
     const IR::Node* postorder(IR::P4Control* control) override;
 };

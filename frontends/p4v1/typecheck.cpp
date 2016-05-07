@@ -182,7 +182,7 @@ TypeCheck::TypeCheck() : PassManager({
     (new PassRepeated({
         new Pass2(*this),
         new Pass3(*this),
-    }))->setRepeats(25)
+    }))->setRepeats(100)   // avoid infinite loop if there's a bug
 }) { setStopOnError(true); }
 
 const IR::Node *TypeCheck::apply_visitor(const IR::Node *n, const char *name) {

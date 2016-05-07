@@ -193,7 +193,8 @@ class IrClass : public IrElement {
       kind(kind), name(name) {
         IrNamespace::add_class(this); }
 
-    static IrClass *nodeClass, *vectorClass, *namemapClass, *nodemapClass, *ideclaration, *indexedVectorClass;
+    static IrClass *nodeClass, *vectorClass, *namemapClass, *nodemapClass,
+                   *ideclaration, *indexedVectorClass;
 
     void declare(std::ostream &out) const;
     void generate_hdr(std::ostream &out) const override;

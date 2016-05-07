@@ -125,5 +125,4 @@ void IrClass::generateMethods() {
             m->inImpl = true;
         if (info.flags & OVERRIDE)
             m->isOverride = true; }
-
 }
