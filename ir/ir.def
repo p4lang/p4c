@@ -174,6 +174,7 @@ class ActionListElement : IAnnotated {
     ID getName() const { return name->path->name; }
     const Annotations* getAnnotations() const override { return annotations; }
 #end
+    toString{ return name->toString(); }
 }
 
 // A list of actions (in a table)
@@ -183,7 +184,7 @@ class ActionList : PropertyValue {
     void checkDuplicates() const;
 #end
 #nodbprint
-    validate{ checkDuplicates(); actionList->check_null(); }
+    validate{ actionList->check_null(); checkDuplicates(); }
 }
 
 class KeyElement {

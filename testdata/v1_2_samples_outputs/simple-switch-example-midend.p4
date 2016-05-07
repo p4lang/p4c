@@ -62,6 +62,15 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     @name("Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;
     }
+    @name("Drop_action") action Drop_action() {
+        outCtrl.outputPort = 4w0xf;
+    }
+    @name("Drop_action") action Drop_action_1() {
+        outCtrl.outputPort = 4w0xf;
+    }
+    @name("Drop_action") action Drop_action_2() {
+        outCtrl.outputPort = 4w0xf;
+    }
     @name("Set_nhop") action Set_nhop_0(out IPv4Address nextHop, IPv4Address ipv4_dest, PortId_t port) {
         nextHop = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
@@ -99,7 +108,7 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         }
         actions = {
             Set_dmac_0;
-            Drop_action_0;
+            Drop_action;
         }
         size = 1024;
         default_action = Drop_action_0;
@@ -112,7 +121,7 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             outCtrl.outputPort: exact;
         }
         actions = {
-            Drop_action_0;
+            Drop_action_1;
             Rewrite_smac_0;
         }
         size = 16;
@@ -141,9 +150,9 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
     table tbl_Drop_action() {
         actions = {
-            Drop_action_0;
+            Drop_action_2;
         }
-        const default_action = Drop_action_0();
+        const default_action = Drop_action_2();
     }
     table tbl_act_0() {
         actions = {

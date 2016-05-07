@@ -147,4 +147,13 @@ const IR::CompileTimeValue* InstantiatedBlock::getParameterValue(cstring paramNa
     return getValue(param->getNode());
 }
 
+void IR::ActionList::checkDuplicates() const {
+    std::set<cstring> found;
+    for (auto ale : *actionList) {
+        if (found.count(ale->getName().name) > 0)
+            ::error("Duplicate action name in table: %1%", ale);
+        found.emplace(ale->getName().name);
+    }
+}
+
 }  // namespace IR

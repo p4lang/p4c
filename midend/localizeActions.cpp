@@ -72,4 +72,94 @@ const IR::Node* LocalizeActions::postorder(IR::PathExpression* expression) {
     return expression;
 }
 
+bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
+    auto decl = refMap->getDeclaration(expression->path, true);
+    if (!decl->is<IR::P4Action>())
+        return false;
+    auto action = decl->to<IR::P4Action>();
+    auto control = findContext<IR::P4Control>();
+    if (control == nullptr)
+        // not within a control; ignore.
+        return false;
+
+    const IR::Node* actionUser = findContext<IR::P4Table>();
+    if (actionUser == nullptr)
+        actionUser = findContext<IR::MethodCallExpression>();
+    if (actionUser == nullptr)
+        actionUser = findContext<IR::SwitchStatement>();
+    BUG_CHECK(actionUser != nullptr,
+              "%1%: action not within a table, method call or switch statement", expression);
+    if (actionUser->is<IR::SwitchStatement>()) {
+        auto swstat = actionUser->to<IR::SwitchStatement>();
+        // We must figure out which table is being invoked; that is the user
+        auto mem = swstat->expression->to<IR::Member>();
+        CHECK_NULL(mem);
+        BUG_CHECK(mem->member.name == IR::Type_Table::action_run,
+                  "%1%: unexpected expression", mem);
+        auto mce = mem->expr->to<IR::MethodCallExpression>();
+        CHECK_NULL(mce);
+        auto method = mce->method;
+        BUG_CHECK(method->is<IR::Member>(), "Unexpected method %1%", method);
+        auto methmem = method->to<IR::Member>();
+        BUG_CHECK(methmem->expr->is<IR::PathExpression>(), "Unexpected table %1%", methmem->expr);
+        auto pathe = methmem->expr->to<IR::PathExpression>();
+        auto tbl = refMap->getDeclaration(pathe->path, true);
+        BUG_CHECK(tbl->is<IR::P4Table>(), "%1%: expected a table", pathe);
+        actionUser = tbl->to<IR::P4Table>();
+    }
+
+    if (!repl->addActionUser(action, actionUser))
+        // no need to duplicate the action if this is the first user
+        return false;
+
+    auto newName = refMap->newName(action->name);
+    Cloner cloner;
+    auto replBody = cloner.clone(action->body);
+    BUG_CHECK(replBody->is<IR::Vector<IR::StatOrDecl>>(), "%1%: unexpected result", replBody);
+
+    auto annos = action->annotations;
+    if (annos == nullptr)
+        annos = IR::Annotations::empty;
+    annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                              new IR::StringLiteral(Util::SourceInfo(), action->name));
+    auto replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
+                                        annos, action->parameters,
+                                        replBody->to<IR::IndexedVector<IR::StatOrDecl>>());
+    repl->addReplacement(expression, action, replacement);
+    return false;
+}
+
+const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
+    bool changes = false;
+    auto newDecls = new IR::IndexedVector<IR::Declaration>();
+    for (auto d : *control->stateful) {
+        newDecls->push_back(d);
+        if (d->is<IR::P4Action>()) {
+            // The replacement are inserted in the same place
+            // as the original.
+            auto replacements = repl->toInsert[d->to<IR::P4Action>()];
+            if (replacements != nullptr) {
+                for (auto a : *replacements) {
+                    LOG1("Adding " << a);
+                    newDecls->push_back(a);
+                    changes = true;
+                }
+            }
+        }
+    }
+
+    if (changes)
+        control->stateful = newDecls;
+    return control;
+}
+
+const IR::Node* DuplicateActions::postorder(IR::PathExpression* expression) {
+    auto replacement = ::get(repl->repl, getOriginal<IR::PathExpression>());
+    if (replacement != nullptr) {
+        LOG1("Rewriting " << expression << " to " << replacement);
+        expression = new IR::PathExpression(IR::ID(expression->srcInfo, replacement->name));
+    }
+    return expression;
+}
+
 }  // namespace P4

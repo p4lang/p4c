@@ -121,9 +121,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_1() {
     }
+    action NoAction_2() {
+    }
+    action NoAction_3() {
+    }
+    action NoAction_4() {
+    }
+    action NoAction_5() {
+    }
     Register<bit<16>>(32w8192) @name("flowlet_id") flowlet_id_0;
     Register<bit<32>>(32w8192) @name("flowlet_lasttime") flowlet_lasttime_0;
     @name("_drop") action _drop_1() {
+        mark_to_drop();
+    }
+    @name("_drop") action _drop() {
+        mark_to_drop();
+    }
+    @name("_drop") action _drop_2() {
         mark_to_drop();
     }
     @name("set_ecmp_select") action set_ecmp_select_0(bit<8> ecmp_base, bit<8> ecmp_count) {
@@ -163,9 +177,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ecmp_nhop") table ecmp_nhop_0() {
         actions = {
-            _drop_1;
+            _drop;
             set_nhop_0;
-            NoAction_1;
+            NoAction_2;
         }
         key = {
             meta.ingress_metadata.ecmp_offset: exact;
@@ -176,15 +190,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("flowlet") table flowlet_0() {
         actions = {
             lookup_flowlet_map_0;
-            NoAction_1;
+            NoAction_3;
         }
         default_action = NoAction_1();
     }
     @name("forward") table forward_0() {
         actions = {
             set_dmac_0;
-            _drop_1;
-            NoAction_1;
+            _drop_2;
+            NoAction_4;
         }
         key = {
             meta.ingress_metadata.nhop_ipv4: exact;
@@ -195,7 +209,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("new_flowlet") table new_flowlet_0() {
         actions = {
             update_flowlet_id_0;
-            NoAction_1;
+            NoAction_5;
         }
         default_action = NoAction_1();
     }

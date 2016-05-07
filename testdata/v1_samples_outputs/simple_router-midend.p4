@@ -84,10 +84,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_1() {
     }
+    action NoAction_2() {
+    }
     @name("set_dmac") action set_dmac_0(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
     @name("_drop") action _drop_1() {
+        mark_to_drop();
+    }
+    @name("_drop") action _drop() {
         mark_to_drop();
     }
     @name("set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
@@ -110,8 +115,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ipv4_lpm") table ipv4_lpm_0() {
         actions = {
             set_nhop_0;
-            _drop_1;
-            NoAction_1;
+            _drop;
+            NoAction_2;
         }
         key = {
             hdr.ipv4.dstAddr: lpm;

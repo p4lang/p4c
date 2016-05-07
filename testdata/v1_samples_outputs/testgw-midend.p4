@@ -47,11 +47,19 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_0() {
     }
+    action NoAction_1() {
+    }
+    action NoAction_2() {
+    }
     @name("route_eth") action route_eth_0(bit<9> egress_spec, bit<48> src_addr) {
         standard_metadata.egress_spec = egress_spec;
         hdr.ethernet.src_addr = src_addr;
     }
     @name("noop") action noop_0() {
+    }
+    @name("noop") action noop() {
+    }
+    @name("noop") action noop_1() {
     }
     @name("setf2") action setf2_0(bit<32> val) {
         hdr.data.f2 = val;
@@ -73,8 +81,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("test1") table test1_0() {
         actions = {
             setf2_0;
-            noop_0;
-            NoAction_0;
+            noop;
+            NoAction_1;
         }
         key = {
             hdr.data.f1: exact;
@@ -84,8 +92,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("test2") table test2_0() {
         actions = {
             setf1_0;
-            noop_0;
-            NoAction_0;
+            noop_1;
+            NoAction_2;
         }
         key = {
             hdr.data.f2: exact;

@@ -56,7 +56,19 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_1() {
     }
+    action NoAction_2() {
+    }
+    action NoAction_3() {
+    }
+    action NoAction_4() {
+    }
     @name("nop") action nop_1() {
+    }
+    @name("nop") action nop() {
+    }
+    @name("nop") action nop_2() {
+    }
+    @name("nop") action nop_3() {
     }
     @name("ing_drop") action ing_drop_0() {
         meta.ing_metadata.drop = 8w1;
@@ -67,7 +79,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_f2") action set_f2_0(bit<16> f2) {
         meta.ing_metadata.f2 = f2;
     }
+    @name("set_f2") action set_f2(bit<16> f2) {
+        meta.ing_metadata.f2 = f2;
+    }
     @name("set_f3") action set_f3_0(bit<32> f3) {
+        meta.ing_metadata.f3 = f3;
+    }
+    @name("set_f3") action set_f3(bit<32> f3) {
         meta.ing_metadata.f3 = f3;
     }
     @name("set_egress_port") action set_egress_port_0(bit<8> egress_port) {
@@ -93,9 +111,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("i_t2") table i_t2_0() {
         actions = {
-            nop_1;
-            set_f2_0;
-            NoAction_1;
+            nop;
+            set_f2;
+            NoAction_2;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
@@ -104,9 +122,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("i_t3") table i_t3_0() {
         actions = {
-            nop_1;
-            set_f3_0;
-            NoAction_1;
+            nop_2;
+            set_f3;
+            NoAction_3;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
@@ -115,9 +133,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("i_t4") table i_t4_0() {
         actions = {
-            nop_1;
+            nop_3;
             set_f4_0;
-            NoAction_1;
+            NoAction_4;
         }
         key = {
             hdr.ethernet.dstAddr: exact;

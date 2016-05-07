@@ -167,6 +167,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_0() {
     }
+    action NoAction_1() {
+    }
     Counter(32w256, CounterType.Packets) @name("drop_stats") drop_stats_1;
     Counter(32w256, CounterType.Packets) @name("drop_stats_2") drop_stats_3;
     @name("drop_stats_update") action drop_stats_update_0() {
@@ -206,7 +208,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_packet_with_reason_0;
             negative_mirror_0;
             congestion_mirror_set_0;
-            NoAction_0;
+            NoAction_1;
         }
         key = {
             meta.acl_metadata.if_label               : ternary;

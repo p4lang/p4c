@@ -48,6 +48,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_0() {
     }
+    action NoAction_1() {
+    }
     DirectMeter<bit<32>>(CounterType.Packets) @name("my_meter") my_meter_0;
     @name("_drop") action _drop_0() {
         mark_to_drop();
@@ -78,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             m_action;
             _nop_2;
-            NoAction_0;
+            NoAction_1;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
