@@ -31,8 +31,8 @@ extern PdConnMgr *conn_mgr_state;
 
 namespace {
 
-SimpleSwitchClient *client(int device) {
-  return conn_mgr_state->get<SimpleSwitchClient>(device).c;
+Client<SimpleSwitchClient> client(int device) {
+  return conn_mgr_state->get<SimpleSwitchClient>(device);
 }
 
 }  // namespace
@@ -62,7 +62,7 @@ int p4_pd_mirror_session_create(p4_pd_sess_hdl_t shdl,
   (void) shdl; (void) type; (void) dir; (void) max_pkt_len; (void) cos;
   (void) c2c; (void) extract_len; (void) timeout_usec; (void) int_hdr;
   (void) int_hdr_len;
-  return client(dev_tgt.device_id)->mirroring_mapping_add(id, egr_port);
+  return client(dev_tgt.device_id).c->mirroring_mapping_add(id, egr_port);
 }
 
 int p4_pd_mirror_session_update(p4_pd_sess_hdl_t shdl,
@@ -82,7 +82,7 @@ int p4_pd_mirror_session_update(p4_pd_sess_hdl_t shdl,
   (void) shdl; (void) type; (void) dir; (void) max_pkt_len; (void) cos;
   (void) c2c; (void) extract_len; (void) timeout_usec; (void) int_hdr;
   (void) int_hdr_len; (void) enable;
-  return client(dev_tgt.device_id)->mirroring_mapping_add(id, egr_port);
+  return client(dev_tgt.device_id).c->mirroring_mapping_add(id, egr_port);
 }
 
 // TODO: remove
@@ -95,7 +95,7 @@ int p4_pd_mirror_session_delete(p4_pd_sess_hdl_t shdl,
                                 p4_pd_dev_target_t dev_tgt,
                                 p4_pd_mirror_id_t mirror_id) {
   (void) shdl;
-  return client(dev_tgt.device_id)->mirroring_mapping_delete(mirror_id);
+  return client(dev_tgt.device_id).c->mirroring_mapping_delete(mirror_id);
 }
 
 int p4_pd_mirroring_mapping_get_egress_port(int mirror_id) {

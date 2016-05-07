@@ -31,8 +31,8 @@ extern PdConnMgr *conn_mgr_state;
 
 namespace {
 
-StandardClient *client(int device) {
-  return conn_mgr_state->get<StandardClient>(device).c;
+Client<StandardClient> client(int device) {
+  return conn_mgr_state->get<StandardClient>(device);
 }
 
 }  // namespace
@@ -44,7 +44,7 @@ p4_pd_load_new_config(p4_pd_sess_hdl_t shdl, uint8_t dev_id,
 		      const char *config_str) {
   (void) shdl;
   try {
-    client(dev_id)->bm_load_new_config(std::string(config_str));
+    client(dev_id).c->bm_load_new_config(std::string(config_str));
   } catch(InvalidSwapOperation &iso) {
     const char *what =
       _SwapOperationErrorCode_VALUES_TO_NAMES.find(iso.code)->second;
@@ -59,7 +59,7 @@ p4_pd_status_t
 p4_pd_swap_configs(p4_pd_sess_hdl_t shdl, uint8_t dev_id) {
   (void) shdl;
   try {
-    client(dev_id)->bm_swap_configs();
+    client(dev_id).c->bm_swap_configs();
   } catch(InvalidSwapOperation &iso) {
     const char *what =
       _SwapOperationErrorCode_VALUES_TO_NAMES.find(iso.code)->second;
