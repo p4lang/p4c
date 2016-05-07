@@ -105,6 +105,10 @@ class ResolveReferences : public Inspector {
 
     bool preorder(const IR::Declaration_MatchKind* d) override;
     bool preorder(const IR::Declaration_Errors* d) override;
+    bool preorder(const IR::Declaration* d) override
+    { refMap->usedName(d->getName().name); return true; }
+    bool preorder(const IR::Type_Declaration* d) override
+    { refMap->usedName(d->getName().name); return true; }
 
     void checkShadowing(const IR::INamespace*ns) const;
 };

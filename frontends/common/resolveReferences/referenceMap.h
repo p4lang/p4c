@@ -26,6 +26,7 @@ class ReferenceMap final {
     cstring newName(cstring base);
     void clear() { program = nullptr; pathToDeclaration.clear(); usedNames.clear(); used.clear(); }
     bool isUsed(const IR::IDeclaration* decl) const { return used.count(decl) > 0; }
+    void usedName(cstring name) { usedNames.insert(name); }
 };
 
 }  // namespace P4
