@@ -26,10 +26,14 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
 
-    // TODO: duplicate actions that are used by multiple tables
     // TODO: remove table parameters if possible
     // TODO: remove action parameters if possible
     // TODO: remove expressions in table key
+    // TODO: break down expression into simple parts
+    // TODO: def-use analysis
+    // TODO: parser inlining
+    // TODO: parser loop unrolling
+    // TODO: simplify actions which are too complex
 
     PassManager simplify = {
         // Proper semantics for uninitialzed local variables in parser states:

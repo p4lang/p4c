@@ -122,6 +122,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_0() {
     }
+    action NoAction_2() {
+    }
     @name("do_rewrites") action do_rewrites_0(bit<48> smac) {
         hdr.cpu_header.setValid(false);
         hdr.ethernet.srcAddr = smac;
@@ -155,7 +157,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("send_to_cpu") table send_to_cpu_0() {
         actions = {
             do_cpu_encap_0;
-            NoAction_0;
+            NoAction_2;
         }
         default_action = NoAction_0();
     }
@@ -170,10 +172,25 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_1() {
     }
+    action NoAction_3() {
+    }
+    action NoAction_4() {
+    }
+    action NoAction_5() {
+    }
     @name("set_dmac") action set_dmac_0(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
     @name("_drop") action _drop_1() {
+        mark_to_drop();
+    }
+    @name("_drop") action _drop() {
+        mark_to_drop();
+    }
+    @name("_drop") action _drop_2() {
+        mark_to_drop();
+    }
+    @name("_drop") action _drop_3() {
         mark_to_drop();
     }
     @name("set_if_info") action set_if_info_0(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
@@ -220,9 +237,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("if_info") table if_info_0() {
         actions = {
-            _drop_1;
+            _drop;
             set_if_info_0;
-            NoAction_1;
+            NoAction_3;
         }
         key = {
             meta.meta.if_index: exact;
@@ -232,8 +249,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ipv4_lpm") table ipv4_lpm_0() {
         actions = {
             set_nhop_0;
-            _drop_1;
-            NoAction_1;
+            _drop_2;
+            NoAction_4;
         }
         key = {
             meta.meta.ipv4_da: lpm;
@@ -243,13 +260,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("nat") table nat_0() {
         actions = {
-            _drop_1;
+            _drop_3;
             nat_miss_int_to_ext_0;
             nat_miss_ext_to_int_0;
             nat_hit_int_to_ext_0;
             nat_hit_ext_to_int_0;
             nat_no_nat_0;
-            NoAction_1;
+            NoAction_5;
         }
         key = {
             meta.meta.is_ext_if: exact;

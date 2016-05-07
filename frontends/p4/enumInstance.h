@@ -17,14 +17,13 @@ class EnumInstance {
     // Returns nullptr if the expression is not a compile-time constant
     // referring to an enum
     static EnumInstance* resolve(const IR::Expression* expression, const P4::TypeMap* typeMap) {
-        auto type = typeMap->getType(expression);
-        CHECK_NULL(type);
-        if (!type->is<IR::Type_Enum>())
-            return nullptr;
         if (!expression->is<IR::Member>())
             return nullptr;
         auto member = expression->to<IR::Member>();
         if (!member->expr->is<IR::TypeNameExpression>())
+            return nullptr;
+        auto type = typeMap->getType(expression, true);
+        if (!type->is<IR::Type_Enum>())
             return nullptr;
         return new EnumInstance(type->to<IR::Type_Enum>(), member->member);
     }

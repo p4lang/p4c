@@ -1,6 +1,7 @@
 #ifndef _MIDEND_LOCALIZEACTIONS_H_
 #define _MIDEND_LOCALIZEACTIONS_H_
 
+#include "lib/ordered_set.h"
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/callGraph.h"
@@ -56,15 +57,74 @@ class LocalizeActions : public Transform {
     const IR::Node* postorder(IR::PathExpression* expression) override;
 };
 
+class ActionReplacement {
+ public:
+    // Where is this action used
+    // Node is either a P4Table or MethodCallExpression
+    std::map<const IR::P4Action*, std::set<const IR::Node*>> users;
+    std::map<const IR::PathExpression*, const IR::P4Action*> repl;
+    // For each action all replacements to insert
+    std::map<const IR::P4Action*, ordered_set<const IR::P4Action*>*> toInsert;
+
+    // Return true if this is a new user and not the first new user
+    bool addActionUser(const IR::P4Action* action, const IR::Node* user) {
+        bool isFirst = users.find(action) == users.end();
+        if (users[action].find(user) == users[action].end()) {
+            // new user
+            users[action].emplace(user);
+            return !isFirst;
+        }
+        // known user
+        return false;
+    }
+    // For 'user' in control use the replacement action instead of the original action.
+    void addReplacement(const IR::PathExpression* user,
+                        const IR::P4Action* original,
+                        const IR::P4Action* replacement) {
+        LOG1("Adding replacement " << replacement << " used by " << user << " for " << original);
+        repl[user] = replacement;
+        if (toInsert.find(original) == toInsert.end())
+            toInsert[original] = new ordered_set<const IR::P4Action*>();
+        toInsert[original]->emplace(replacement);
+    }
+};
+
+// Find actions that are invoked in multiple places; create a new
+// copy for each invocation and store it in the repl map.  Ignores
+// actions that are not in a control.
+class FindRepeatedActionUses : public Inspector {
+    ReferenceMap* refMap;
+    ActionReplacement* repl;
+ public:
+    FindRepeatedActionUses(ReferenceMap* refMap, ActionReplacement* repl)
+            : refMap(refMap), repl(repl) { CHECK_NULL(refMap); CHECK_NULL(repl); }
+    bool preorder(const IR::PathExpression* expression) override;
+};
+
+// Replicates actions for each different user.
+// Should be run after LocalizeActions.
+class DuplicateActions : public Transform {
+    ActionReplacement* repl;
+ public:
+    DuplicateActions(ActionReplacement* repl)
+            : repl(repl) { CHECK_NULL(repl); }
+    const IR::Node* postorder(IR::PathExpression* expression) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
+};
+
 class LocalizeAllActions : public PassManager {
-    GlobalActionReplacements replacements;
+    GlobalActionReplacements globalReplacements;
+    ActionReplacement        localReplacements;
  public:
     LocalizeAllActions(ReferenceMap* refMap, bool isv1) {
         passes.emplace_back(new PassRepeated {
             new ResolveReferences(refMap, isv1),
-            new FindGlobalActionUses(refMap, &replacements),
-            new LocalizeActions(refMap, &replacements),
+            new FindGlobalActionUses(refMap, &globalReplacements),
+            new LocalizeActions(refMap, &globalReplacements),
         });
+        passes.emplace_back(new ResolveReferences(refMap, isv1));
+        passes.emplace_back(new FindRepeatedActionUses(refMap, &localReplacements));
+        passes.emplace_back(new DuplicateActions(&localReplacements));
         setName("LocalizeAllActions");
     }
 };

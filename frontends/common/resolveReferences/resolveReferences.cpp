@@ -210,8 +210,10 @@ void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
     bool allowForward = resolveForward.back();
 
     const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, !allowForward);
-    if (decl == nullptr)
+    if (decl == nullptr) {
+        refMap->usedName(path->name.name);
         return;
+    }
 
     refMap->setDeclaration(path, decl);
 }
@@ -286,6 +288,7 @@ bool ResolveReferences::preorder(const IR::Type_Name* type) {
     resolvePath(type->path, true); return true; }
 
 bool ResolveReferences::preorder(const IR::P4Control *c) {
+    refMap->usedName(c->name.name);
     addToContext(c);
     addToContext(c->type->typeParams);
     addToContext(c->type->applyParams);
@@ -302,6 +305,7 @@ void ResolveReferences::postorder(const IR::P4Control *c) {
 }
 
 bool ResolveReferences::preorder(const IR::P4Parser *c) {
+    refMap->usedName(c->name.name);
     addToContext(c);
     addToContext(c->type->typeParams);
     addToContext(c->type->applyParams);
@@ -318,6 +322,7 @@ void ResolveReferences::postorder(const IR::P4Parser *c) {
 }
 
 bool ResolveReferences::preorder(const IR::Function* function) {
+    refMap->usedName(function->name.name);
     addToContext(function->type->parameters);
     return true;
 }
@@ -327,6 +332,7 @@ void ResolveReferences::postorder(const IR::Function* function) {
 }
 
 bool ResolveReferences::preorder(const IR::P4Table* t) {
+    refMap->usedName(t->name.name);
     addToContext(t->parameters);
     return true;
 }
@@ -345,6 +351,7 @@ void ResolveReferences::postorder(const IR::TableProperties *p) {
 }
 
 bool ResolveReferences::preorder(const IR::P4Action *c) {
+    refMap->usedName(c->name.name);
     addToContext(c);
     addToContext(c->parameters);
     return true;
@@ -375,12 +382,14 @@ void ResolveReferences::postorder(const IR::Type_Method *t) {
 }
 
 bool ResolveReferences::preorder(const IR::Type_Extern *t) {
+    refMap->usedName(t->name.name);
     addToContext(t->typeParameters); return true; }
 
 void ResolveReferences::postorder(const IR::Type_Extern *t) {
     removeFromContext(t->typeParameters); }
 
 bool ResolveReferences::preorder(const IR::ParserState *s) {
+    refMap->usedName(s->name.name);
     // State references may be resolved forward
     resolveForward.push_back(true);
     addToContext(s);
@@ -406,12 +415,13 @@ bool ResolveReferences::preorder(const IR::Type_ArchBlock *t) {
 }
 
 void ResolveReferences::postorder(const IR::Type_ArchBlock *t) {
+    refMap->usedName(t->name.name);
     removeFromContext(t->typeParams);
     resolveForward.pop_back();
 }
 
 bool ResolveReferences::preorder(const IR::Type_StructLike *t)
-{ addToContext(t); return true; }
+{ refMap->usedName(t->name.name); addToContext(t); return true; }
 
 void ResolveReferences::postorder(const IR::Type_StructLike *t)
 { removeFromContext(t); }
@@ -423,6 +433,7 @@ void ResolveReferences::postorder(const IR::BlockStatement *b)
 { removeFromContext(b); checkShadowing(b); }
 
 bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
+    refMap->usedName(decl->name.name);
     if (decl->initializer != nullptr)
         addToContext(decl->initializer);
     return true;

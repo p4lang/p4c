@@ -30,6 +30,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_0() {
     }
+    action NoAction_1() {
+    }
+    action NoAction_2() {
+    }
+    action NoAction_3() {
+    }
+    action NoAction_4() {
+    }
+    action NoAction_5() {
+    }
     @name("do_b") action do_b_0() {
     }
     @name("do_d") action do_d_0() {
@@ -37,6 +47,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("do_e") action do_e_0() {
     }
     @name("nop") action nop_0() {
+    }
+    @name("nop") action nop() {
+    }
+    @name("nop") action nop_1() {
+    }
+    @name("nop") action nop_2() {
+    }
+    @name("nop") action nop_3() {
     }
     @name("A") table A_0() {
         actions = {
@@ -53,35 +71,35 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("B") table B_0() {
         actions = {
             nop_0;
-            NoAction_0;
+            NoAction_1;
         }
         default_action = NoAction_0();
     }
     @name("C") table C_0() {
         actions = {
-            nop_0;
-            NoAction_0;
+            nop;
+            NoAction_2;
         }
         default_action = NoAction_0();
     }
     @name("D") table D_0() {
         actions = {
-            nop_0;
-            NoAction_0;
+            nop_1;
+            NoAction_3;
         }
         default_action = NoAction_0();
     }
     @name("E") table E_0() {
         actions = {
-            nop_0;
-            NoAction_0;
+            nop_2;
+            NoAction_4;
         }
         default_action = NoAction_0();
     }
     @name("F") table F_0() {
         actions = {
-            nop_0;
-            NoAction_0;
+            nop_3;
+            NoAction_5;
         }
         default_action = NoAction_0();
     }

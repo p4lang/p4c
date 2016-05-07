@@ -90,6 +90,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     standard_metadata_t standard_metadata_0;
     action NoAction_0() {
     }
+    action NoAction_1() {
+    }
     @name("do_setup") action do_setup_0(bit<9> idx, bit<1> routed) {
         meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;
         meta.egress_metadata.smac_idx = idx;
@@ -134,7 +136,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             process_mac_rewrite_rewrite_ipv4_multicast_mac;
             process_mac_rewrite_rewrite_ipv6_unicast_mac;
             process_mac_rewrite_rewrite_ipv6_multicast_mac;
-            NoAction_0;
+            NoAction_1;
         }
         key = {
             meta_0.egress_metadata.smac_idx: exact;

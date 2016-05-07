@@ -80,9 +80,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_0() {
     }
+    action NoAction_1() {
+    }
     @name("nop") action nop_0() {
     }
+    @name("nop") action nop() {
+    }
     @name("set_egress_port") action set_egress_port_0(bit<8> egress_port) {
+        meta.ing_metadata.egress_port = egress_port;
+    }
+    @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
     @name("ipv4_match") table ipv4_match_0() {
@@ -98,9 +105,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("l2_match") table l2_match_0() {
         actions = {
-            nop_0;
-            set_egress_port_0;
-            NoAction_0;
+            nop;
+            set_egress_port;
+            NoAction_1;
         }
         key = {
             hdr.ethernet.srcAddr: exact;

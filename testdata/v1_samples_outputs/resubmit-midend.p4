@@ -49,7 +49,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_0() {
     }
+    action NoAction_1() {
+    }
     @name("_nop") action _nop_0() {
+    }
+    @name("_nop") action _nop() {
     }
     @name("set_port") action set_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;
@@ -72,9 +76,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t_ingress_2") table t_ingress_0() {
         actions = {
-            _nop_0;
+            _nop;
             _resubmit_0;
-            NoAction_0;
+            NoAction_1;
         }
         key = {
             meta.mymeta.f1: exact;

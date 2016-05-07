@@ -3,10 +3,10 @@ extern e<T> {
 }
 
 parser p1<T>(in T a) {
-    T w;
+    T w_0;
     e<T>() @name("ei") ei_0;
     state start {
-        w = ei_0.get();
+        w_0 = ei_0.get();
     }
 }
 

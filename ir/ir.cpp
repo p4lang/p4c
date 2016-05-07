@@ -47,6 +47,14 @@ void IGeneralNamespace::checkDuplicateDeclarations() const {
     }
 }
 
+void P4Parser::checkDuplicates() const {
+    for (auto decl : *states) {
+        auto prev = stateful->getDeclaration(decl->getName().name);
+        if (prev != nullptr)
+            ::error("State %1% has same name as %2%", decl, prev);
+    }
+}
+
 bool Type_Stack::sizeKnown() const { return size->is<Constant>(); }
 
 int Type_Stack::getSize() const {
@@ -137,6 +145,15 @@ const IR::CompileTimeValue* InstantiatedBlock::getParameterValue(cstring paramNa
     BUG_CHECK(param != nullptr, "No parameter named %1%", paramName);
     BUG_CHECK(param->is<IR::Parameter>(), "No parameter named %1%", paramName);
     return getValue(param->getNode());
+}
+
+void IR::ActionList::checkDuplicates() const {
+    std::set<cstring> found;
+    for (auto ale : *actionList) {
+        if (found.count(ale->getName().name) > 0)
+            ::error("Duplicate action name in table: %1%", ale);
+        found.emplace(ale->getName().name);
+    }
 }
 
 }  // namespace IR

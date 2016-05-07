@@ -1,6 +1,7 @@
+#include "lib/gmputil.h"
 #include "constantFolding.h"
 #include "ir/configuration.h"
-#include "lib/gmputil.h"
+#include "frontends/p4/enumInstance.h"
 
 namespace P4 {
 
@@ -21,6 +22,11 @@ const IR::Expression* ConstantFolding::getConstant(const IR::Expression* expr) c
             if (getConstant(e) == nullptr)
                 return nullptr;
         return list;
+    }
+    if (typesKnown) {
+        auto ei = EnumInstance::resolve(expr, typeMap);
+        if (ei != nullptr)
+            return expr;
     }
 
     return nullptr;

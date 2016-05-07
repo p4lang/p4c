@@ -43,11 +43,13 @@ class DumpIR : public Inspector {
         } else if (node->is<IR::Constant>()) {
             node->Node::dbprint(str);
             str << " " << node;
-        } else if (node->is<IR::Expression>() ||
-                   node->is<IR::AssignmentStatement>() ||
-                   node->is<IR::P4Action>() ||
-                   tn.startsWith("Vector") ||
-                   tn.startsWith("IndexedVector")) {
+        } else if (
+            node->is<IR::BlockStatement>() ||
+            node->is<IR::Expression>() ||
+            node->is<IR::AssignmentStatement>() ||
+            node->is<IR::P4Action>() ||
+            tn.startsWith("Vector") ||
+            tn.startsWith("IndexedVector")) {
             node->Node::dbprint(str);
         } else {
             str << node;

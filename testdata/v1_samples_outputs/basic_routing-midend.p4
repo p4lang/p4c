@@ -86,12 +86,28 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action NoAction_1() {
     }
+    action NoAction_2() {
+    }
+    action NoAction_3() {
+    }
+    action NoAction_4() {
+    }
+    action NoAction_5() {
+    }
     @name("set_vrf") action set_vrf_0(bit<12> vrf) {
         meta.ingress_metadata.vrf = vrf;
     }
     @name("on_miss") action on_miss_1() {
     }
+    @name("on_miss") action on_miss() {
+    }
+    @name("on_miss") action on_miss_2() {
+    }
     @name("fib_hit_nexthop") action fib_hit_nexthop_0(bit<16> nexthop_index) {
+        meta.ingress_metadata.nexthop_index = nexthop_index;
+        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+    }
+    @name("fib_hit_nexthop") action fib_hit_nexthop(bit<16> nexthop_index) {
         meta.ingress_metadata.nexthop_index = nexthop_index;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
@@ -116,7 +132,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             on_miss_1;
             fib_hit_nexthop_0;
-            NoAction_1;
+            NoAction_2;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
@@ -127,9 +143,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv4_fib_lpm") table ipv4_fib_lpm_0() {
         actions = {
-            on_miss_1;
-            fib_hit_nexthop_0;
-            NoAction_1;
+            on_miss;
+            fib_hit_nexthop;
+            NoAction_3;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
@@ -140,9 +156,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("nexthop") table nexthop_0() {
         actions = {
-            on_miss_1;
+            on_miss_2;
             set_egress_details_0;
-            NoAction_1;
+            NoAction_4;
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
@@ -153,7 +169,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("port_mapping") table port_mapping_0() {
         actions = {
             set_bd_0;
-            NoAction_1;
+            NoAction_5;
         }
         key = {
             standard_metadata.ingress_port: exact;

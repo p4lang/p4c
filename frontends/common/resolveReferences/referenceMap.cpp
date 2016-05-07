@@ -11,7 +11,7 @@ void ReferenceMap::setDeclaration(const IR::Path* path, const IR::IDeclaration* 
         BUG("%1% already resolved to %2% instead of %3%",
                                 path, previous, decl);
     pathToDeclaration.emplace(path, decl);
-    usedNames.insert(path->name.name);
+    usedName(path->name.name);
     used.insert(decl);
 }
 
