@@ -1,5 +1,5 @@
-#ifndef _IR_INDEXED_VECTOR_H_
-#define _IR_INDEXED_VECTOR_H_
+#ifndef IR_INDEXED_VECTOR_H_
+#define IR_INDEXED_VECTOR_H_
 
 #include "dbprint.h"
 #include "lib/enumerator.h"
@@ -35,8 +35,7 @@ class IndexedVector : public Vector<T> {
         if (previous != declarations.end())
             ::error("%1%: Duplicates declaration %2%", a, previous->second);
         else
-            declarations[name] = decl;
-    }
+            declarations[name] = decl; }
     void removeFromMap(const T* a) {
         auto decl = a->template to<IDeclaration>();
         if (decl == nullptr)
@@ -45,8 +44,8 @@ class IndexedVector : public Vector<T> {
         auto it = declarations.find(name);
         if (it == declarations.end())
             BUG("%1% does not exist", a);
-        declarations.erase(it);
-    }
+        declarations.erase(it); }
+
  public:
     using Vector<T>::begin;
     using Vector<T>::end;
@@ -73,18 +72,16 @@ class IndexedVector : public Vector<T> {
         auto it = declarations.find(name);
         if (it == declarations.end())
             return nullptr;
-        return it->second;
-    }
+        return it->second; }
     template <class U>
     const U* getDeclaration(cstring name) const {
         auto it = declarations.find(name);
         if (it == declarations.end())
             return nullptr;
-        return it->second->template to<U>();
-    }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return Util::Enumerator<const IDeclaration*>::createEnumerator(
-        Values(declarations).begin(), Values(declarations).end()); }
+        return it->second->template to<U>(); }
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const {
+        return Util::Enumerator<const IDeclaration*>::createEnumerator(
+            Values(declarations).begin(), Values(declarations).end()); }
     iterator erase(iterator i) {
         removeFromMap(*i);
         return Vector<T>::erase(i); }
@@ -92,20 +89,17 @@ class IndexedVector : public Vector<T> {
     iterator insert(iterator i, ForwardIter b, ForwardIter e) {
         for (auto it = b; it != e; ++it)
             insertInMap(*it);
-        return Vector<T>::insert(i, b, e);
-    }
+        return Vector<T>::insert(i, b, e); }
     iterator replace(iterator i, const T* v) {
         removeFromMap(*i);
         *i = v;
         insertInMap(v);
-        return ++i;
-    }
-    iterator append(const Vector<T>& toAppend)
-    { return insert(Vector<T>::end(), toAppend.begin(), toAppend.end()); }
+        return ++i; }
+    iterator append(const Vector<T>& toAppend) {
+        return insert(Vector<T>::end(), toAppend.begin(), toAppend.end()); }
     iterator insert(iterator i, const T* v) {
         insertInMap(v);
-        return typename Vector<T>::insert(i, v);
-    }
+        return typename Vector<T>::insert(i, v); }
     template <class... Args> void emplace_back(Args&&... args) {
         auto el = new T(std::forward<Args>(args)...);
         insert(el); }
@@ -116,14 +110,15 @@ class IndexedVector : public Vector<T> {
             BUG("pop_back from empty IndexedVector");
         auto last = typename Vector<T>::back();
         removeFromMap(last);
-        typename Vector<T>::pop_back();
-    }
+        typename Vector<T>::pop_back(); }
     template<class U> void push_back(U &a) { Vector<T>::push_back(a); insertInMap(a); }
 
     IRNODE_SUBCLASS(IndexedVector)
     IRNODE_DECLARE_APPLY_OVERLOAD(IndexedVector)
-    bool operator==(const IndexedVector &a) const
-    { return this->Vector<T>::operator==(a); }
+    bool operator==(const Node &a) const override { return a == *this; }
+    bool operator==(const Vector<T> &a) const override { return a == *this; }
+    bool operator==(const IndexedVector &a) const {
+        return Vector<T>::operator==(static_cast<const Vector<T>&>(a)); }
     cstring node_type_name() const override {
         return "IndexedVector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() {
@@ -134,4 +129,4 @@ class IndexedVector : public Vector<T> {
 
 }  // namespace IR
 
-#endif /* _IR_VECTOR_H_ */
+#endif /* IR_INDEXED_VECTOR_H_ */

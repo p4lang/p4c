@@ -9,6 +9,7 @@
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 #include "lib/map.h"
+#include "lib/ordered_map.h"
 #include "lib/source_file.h"
 #include "type.h"
 
@@ -55,15 +56,21 @@ class IrElement  : public Util::IHasSourceInfo {
 class IrMethod : public IrElement {
  public:
     const cstring name;
-    cstring body;
+    cstring rtype, args, body;
+    bool inImpl = false, isOverride = false;
     IrMethod(Util::SourceInfo info, cstring name, cstring body)
     : IrElement(info), name(name), body(body) {}
     IrMethod(cstring name, cstring body) : name(name), body(body) {}
     cstring toString() const override { return name; }
 
-    static cstring getPrototype(cstring methodName, cstring className);
     void generate_hdr(std::ostream &) const override;
     void generate_impl(std::ostream &) const override;
+    struct info_t {
+        cstring rtype, args;
+        int flags;
+        std::function<cstring(IrClass *, cstring)>       create;
+    };
+    static const ordered_map<cstring, info_t> Generate;
 };
 
 class IrField : public IrElement {
@@ -149,13 +156,13 @@ class IrClass : public IrElement {
     bool shouldSkip(cstring feature) const;
 
     const IrClass *concreteParent;
+
+ public:
     const IrClass *getParent() const {
         if (concreteParent == nullptr && this != nodeClass)
             return IrClass::nodeClass;
-        return concreteParent;
-    }
+        return concreteParent; }
 
- public:
     IrNamespace *containedIn, local;
     const NodeKind kind;
     const cstring name;
@@ -186,7 +193,8 @@ class IrClass : public IrElement {
       kind(kind), name(name) {
         IrNamespace::add_class(this); }
 
-    static IrClass *nodeClass, *vectorClass, *namemapClass, *nodemapClass, *ideclaration, *indexedVectorClass;
+    static IrClass *nodeClass, *vectorClass, *namemapClass, *nodemapClass,
+                   *ideclaration, *indexedVectorClass;
 
     void declare(std::ostream &out) const;
     void generate_hdr(std::ostream &out) const override;

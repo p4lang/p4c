@@ -3,6 +3,7 @@ irgenerator_SOURCES = \
 	tools/ir-generator/generator.cpp \
 	tools/ir-generator/irclass.cpp \
 	tools/ir-generator/irclass.h \
+	tools/ir-generator/methods.cpp \
 	tools/ir-generator/type.cpp \
 	tools/ir-generator/type.h
 irgenerator_LDADD = libp4ctoolkit.a

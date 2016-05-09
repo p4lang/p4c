@@ -19,6 +19,9 @@ namespace IR {
 
 class Node;
 
+template<class T> class Vector;
+template<class T> class IndexedVector;
+
 // node interface
 class INode : public Util::IHasSourceInfo, public Util::IHasDbPrint {
  public:
@@ -78,7 +81,12 @@ class Node : public virtual INode {
         CHECK_NULL(this);
         return dynamic_cast<const T*>(this); }
     virtual cstring toString() const { return node_type_name(); }
-    virtual bool operator==(const Node &n) const = 0;
+    virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
+#define DEFINE_OPEQ_FUNC(CLASS, BASE) \
+    virtual bool operator==(const CLASS &) const { return false; }
+    IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)
+#undef DEFINE_OPEQ_FUNC
+
     bool operator!=(const Node &n) const { return !operator==(n); }
 };
 
@@ -97,7 +105,7 @@ template<typename T> const T* INode::to() const { return getNode()->to<T>(); }
     IRNODE_COMMON_SUBCLASS(T)
 #define IRNODE_COMMON_SUBCLASS(T)                                       \
  public:                                                                \
-    inline bool operator==(const Node &n) const override;               \
+    using Node::operator==;                                             \
     bool apply_visitor_preorder(Modifier &v) override;                  \
     void apply_visitor_postorder(Modifier &v) override;                 \
     bool apply_visitor_preorder(Inspector &v) const override;           \

@@ -53,6 +53,7 @@ class NodeMap : public Node {
     const VALUE *&at(const KEY *k) { return symbols.at(k); }
     const VALUE *const &at(const KEY *k) const { return symbols.at(k); }
     IRNODE_SUBCLASS(NodeMap)
+    bool operator==(const Node &a) const override { return a == *this; }
     bool operator==(const NodeMap &a) const { return symbols == a.symbols; }
     cstring node_type_name() const override {
         return "NodeMap<" + KEY::static_type_name() + "," + VALUE::static_type_name() + ">"; }
