@@ -99,7 +99,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1;
         default_action = NoAction();
     }
-
     @name("route_pkt") table route_pkt() {
         actions = {
             _drop;
@@ -113,7 +112,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1;
         default_action = NoAction();
     }
-
     apply {
         if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) {
             drop_pkt.apply();

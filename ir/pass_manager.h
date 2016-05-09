@@ -25,6 +25,8 @@ class PassManager : virtual public Visitor {
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
     void setStopOnError(bool stop) { stop_on_error = stop; }
     void addDebugHook(DebugHook h) { debugHooks.push_back(h); }
+    void addDebugHooks(std::vector<DebugHook> hooks)
+    { debugHooks.insert(debugHooks.end(), hooks.begin(), hooks.end()); }
     const char* name() const override
     { return managerName != nullptr ? managerName : Visitor::name(); }
 };
@@ -39,6 +41,7 @@ class PassRepeated : virtual public PassManager {
     void setRepeats(unsigned repeats) { this->repeats = repeats; }
 };
 
+// Converts a function Node* -> Node* into a visitor
 class VisitFunctor : virtual public Visitor {
     std::function<const IR::Node *(const IR::Node *)>       fn;
     const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override { return fn(n); }

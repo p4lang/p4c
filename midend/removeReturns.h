@@ -2,15 +2,17 @@
 #define _MIDEND_REMOVERETURNS_H_
 
 #include "ir/ir.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/typeMap.h"
 
 namespace P4 {
 
 // This replaces 'returns' and/or 'exits' by ifs
 class RemoveReturns : public Transform {
+ protected:
     P4::ReferenceMap* refMap;
-    bool              removeReturns;  // if true remove returns, else remove exits
     IR::ID            returnVar;  // one for each context
+    cstring           variableName;
 
     enum class Returns {
         Yes,
@@ -25,8 +27,8 @@ class RemoveReturns : public Transform {
     Returns hasReturned() { BUG_CHECK(!stack.empty(), "Empty stack"); return stack.back(); }
 
  public:
-    explicit RemoveReturns(P4::ReferenceMap* refMap, bool removeReturns = true) :
-            refMap(refMap), removeReturns(removeReturns) {}
+    explicit RemoveReturns(P4::ReferenceMap* refMap, cstring varName = "hasReturned") :
+            refMap(refMap), variableName(varName) { CHECK_NULL(refMap); }
 
     const IR::Node* preorder(IR::Function* function) override
     { prune(); return function; }  // We leave returns in functions alone
@@ -38,6 +40,17 @@ class RemoveReturns : public Transform {
 
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::P4Control* control) override;
+};
+
+class RemoveExits : public RemoveReturns {
+    std::set<const IR::Node*> callsExit;  // actions, tables
+    TypeMap* typeMap;
+ public:
+    explicit RemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :
+            RemoveReturns(refMap, "hasExited"), typeMap(typeMap) { CHECK_NULL(typeMap); }
+
+    const IR::Node* preorder(IR::ExitStatement* action) override;
+    const IR::Node* preorder(IR::P4Table* table) override;
 };
 
 }  // namespace P4

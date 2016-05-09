@@ -166,7 +166,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("ipv6_match") table ipv6_match() {
         actions = {
             nop;
@@ -178,7 +177,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("l2_match") table l2_match() {
         actions = {
             nop;
@@ -190,7 +188,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         if (hdr.ethernet.etherType == 16w0x800) {
             ipv4_match.apply();

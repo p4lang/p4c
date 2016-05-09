@@ -156,7 +156,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 64;
         default_action = NoAction();
     }
-
     apply {
         validate_outer_ethernet.apply();
     }

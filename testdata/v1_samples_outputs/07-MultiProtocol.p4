@@ -184,7 +184,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("ipv4_match") table ipv4_match() {
         actions = {
             nop;
@@ -196,7 +195,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("ipv6_match") table ipv6_match() {
         actions = {
             nop;
@@ -208,7 +206,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("l2_match") table l2_match() {
         actions = {
             nop;
@@ -220,7 +217,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         switch (ethertype_match.apply().action_run) {
             default: {

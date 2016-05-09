@@ -50,7 +50,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-
     @name("EA") table EA() {
         actions = {
             setb1;
@@ -62,7 +61,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-
     @name("EB") table EB() {
         actions = {
             setb2;
@@ -74,7 +72,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-
     apply {
         E1.apply();
         if (hdr.data.f1 == 32w0) {
@@ -112,7 +109,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("A2") table A2() {
         actions = {
             setb3;
@@ -124,7 +120,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("B1") table B1() {
         actions = {
             setb2;
@@ -136,7 +131,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("B2") table B2() {
         actions = {
             setb4;
@@ -148,7 +142,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         if (hdr.data.b1 == 32w0) {
             A1.apply();

@@ -44,7 +44,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("test2") table test2() {
         actions = {
             setb1;
@@ -56,7 +55,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("test4") table test4() {
         actions = {
             noop;
@@ -64,7 +62,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         if (test1.apply().hit) {
             test2.apply();

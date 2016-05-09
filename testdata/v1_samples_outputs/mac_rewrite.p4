@@ -124,7 +124,6 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         size = 512;
         default_action = NoAction();
     }
-
     apply {
         if (meta.egress_metadata.routed == 1w1) {
             mac_rewrite.apply();
@@ -148,7 +147,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     process_mac_rewrite() @name("process_mac_rewrite") process_mac_rewrite_0;
     apply {
         setup.apply();

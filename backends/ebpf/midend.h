@@ -7,7 +7,9 @@
 namespace EBPF {
 
 class MidEnd {
+    std::vector<DebugHook> hooks;
  public:
+    void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     const IR::P4Program* run(EbpfOptions& options, const IR::P4Program* program);
 };
 

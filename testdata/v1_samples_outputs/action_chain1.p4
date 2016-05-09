@@ -81,7 +81,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl1") table tbl1() {
         actions = {
             setb2;
@@ -93,7 +92,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl2") table tbl2() {
         actions = {
             set1b1;
@@ -105,7 +103,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl3") table tbl3() {
         actions = {
             set2b2;
@@ -117,7 +114,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("test1") table test1() {
         actions = {
             setb1;
@@ -129,7 +125,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         test1.apply();
         switch (ex1.apply().action_run) {

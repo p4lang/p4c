@@ -26,8 +26,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
 
-    // TODO: remove table parameters if possible
-    // TODO: remove action parameters if possible
+    // TODO: remove table parameters
+    // TODO: remove action in/out/inout parameters
     // TODO: remove expressions in table key
     // TODO: break down expression into simple parts
     // TODO: def-use analysis
@@ -45,7 +45,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         // Move all local declarations to the beginning
         new P4::MoveDeclarations(),
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::RemoveReturns(&refMap, true),
+        new P4::RemoveReturns(&refMap),
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
@@ -54,8 +54,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
 
     simplify.setName("Simplify");
     simplify.setStopOnError(true);
-    for (auto h : hooks)
-        simplify.addDebugHook(h);
+    simplify.addDebugHooks(hooks);
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
@@ -83,8 +82,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::RemoveReturns(&refMap, false),  // remove exits: FIXME: currently incorrect
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::RemoveExits(&refMap, &typeMap),  // FIXME: currently incorrect
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
@@ -103,15 +102,10 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     };
     midEnd.setName("MidEnd");
     midEnd.setStopOnError(true);
-    for (auto h : hooks)
-        midEnd.addDebugHook(h);
+    midEnd.addDebugHooks(hooks);
     program = program->apply(midEnd);
     if (::errorCount() > 0)
         return nullptr;
-
-    std::ostream *midendStream = options.dumpStream("-midend");
-    P4::ToP4 top4(midendStream, false, options.file);
-    program->apply(top4);
 
     blockMap = evaluator->getBlockMap();
     return blockMap;

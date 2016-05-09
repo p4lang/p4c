@@ -87,7 +87,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("setup") table setup() {
         actions = {
             do_setup;
@@ -98,7 +97,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         setup.apply();
         route.apply();

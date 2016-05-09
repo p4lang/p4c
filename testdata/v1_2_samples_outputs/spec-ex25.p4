@@ -22,7 +22,6 @@ control c(bit<1> x) {
         default_action = Set_dmac((EthernetAddress)48w0xaabbccddeeff);
         implementation = tbl();
     }
-
     apply {
     }
 }

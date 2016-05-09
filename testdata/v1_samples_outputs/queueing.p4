@@ -61,7 +61,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-
     apply {
         t_egress.apply();
     }
@@ -86,7 +85,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 128;
         default_action = NoAction();
     }
-
     apply {
         t_ingress.apply();
     }

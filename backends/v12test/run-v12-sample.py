@@ -106,7 +106,7 @@ def compare_files(options, produced, expected):
             continue
         if ignoreNextMarker:
             ignoreNextMarker = False
-            if marker.match(l): 
+            if marker.match(l):
                 continue
         if l[0] == ' ': continue
         result = FAILURE
@@ -154,16 +154,17 @@ def process_file(options, argv):
     base, ext = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
     expected_dirname = dirname + "_outputs"  # expected outputs are here
-    
+
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + basename                  # after parsing
-    lastfile = tmpdir + "/" + base + "-last" + ext    # last file produced
+    referenceOutputs = "FrontEnd_11,FrontEnd_12,MidEnd_25"
+    lastfile = tmpdir + "/" + base + "-FrontEnd_12_RemoveAllUnusedDeclarations" + ext    # last file produced by front-end
     stderr = tmpdir + "/" + basename + "-stderr"
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./v12test", "--pp", ppfile, "--dump", tmpdir] + options.compilerOptions
+    args = ["./v12test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs] + options.compilerOptions
     if "v1_samples" in options.p4filename:
         args.extend(["--p4v", "1.0"]);
     args.extend(argv)

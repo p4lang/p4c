@@ -37,7 +37,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         // Move all local declarations to the beginning
         new P4::MoveDeclarations(),
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::RemoveReturns(&refMap, true),  // necessary for inlining
+        new P4::RemoveReturns(&refMap),  // necessary for inlining
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
         new P4::ResolveReferences(&refMap, isv1),
@@ -46,7 +46,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
     };
 
     simplify.setName("Simplify");
-    simplify.setStopOnError(true);
+    simplify.addDebugHooks(hooks);
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
@@ -72,8 +72,8 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::RemoveReturns(&refMap, false),  // remove exits
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::RemoveExits(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
@@ -82,14 +82,10 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         new P4::MoveActionsToTables(&refMap, &typeMap),
     };
     midEnd.setName("MidEnd");
-    midEnd.setStopOnError(true);
+    midEnd.addDebugHooks(hooks);
     program = program->apply(midEnd);
     if (::errorCount() > 0)
         return nullptr;
-
-    std::ostream *midendStream = options.dumpStream("-midend");
-    P4::ToP4 top4(midendStream, false, options.file);
-    program->apply(top4);
 
     return program;
 }

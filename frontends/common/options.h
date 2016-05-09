@@ -3,8 +3,10 @@
 #ifndef FRONTENDS_COMMON_OPTIONS_H_
 #define FRONTENDS_COMMON_OPTIONS_H_
 
+#include <regex>
 #include "lib/cstring.h"
 #include "lib/options.h"
+#include "ir/ir.h"  // for DebugHook definition
 
 // Base class for compiler options.
 // This class contains the options for the front-ends.
@@ -12,6 +14,10 @@
 class CompilerOptions : public Util::Options {
     bool close_input = false;
     static const char* defaultMessage;
+
+ protected:
+    // Function that is returned by getDebugHook.
+    void dumpPass(const char* manager, unsigned seq, const char* pass, const IR::Node* node) const;
 
  public:
     CompilerOptions();
@@ -31,9 +37,9 @@ class CompilerOptions : public Util::Options {
     cstring file = nullptr;
     // if true preprocess only
     bool doNotCompile = false;
-    // (V1.2 only) dump program after each pass in the specified folder
-    cstring dumpFolder = nullptr;
-    // (V1.2 only) Pretty-print the program in the specified file
+    // debugging dumps of programs written in this folder
+    cstring dumpFolder = ".";
+    // Pretty-print the program in the specified file
     cstring prettyPrintFile = nullptr;
     // file to output to
     cstring outputFile = nullptr;
@@ -41,6 +47,8 @@ class CompilerOptions : public Util::Options {
     unsigned verbosity = 0;
     // Compiler target architecture
     cstring target = nullptr;
+    // substrings matched agains pass names
+    std::vector<cstring> top4;
 
     // Expect that the only remaining argument is the input file.
     void setInputFile();
@@ -50,14 +58,11 @@ class CompilerOptions : public Util::Options {
     // Closes the input stream returned by preprocess.
     void closeInput(FILE* input) const;
 
-    // Returns a stream for dumping some information
-    // based on the dumpFolder.  If dumpFolder is not set,
-    // returns a nullstream, i.e., /dev/null.
-    std::ostream* dumpStream(cstring suffix) const;
-    // Name of file that is used for dumpStream(suffix)
-    cstring dumpFileName(cstring suffix) const;
     // True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
+    // Get a debug hook function suitable for insertion
+    // in the pass managers that are executed.
+    DebugHook getDebugHook() const;
 };
 
 #endif /* FRONTENDS_COMMON_OPTIONS_H_ */

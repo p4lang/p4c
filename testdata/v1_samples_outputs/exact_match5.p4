@@ -73,7 +73,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 100000;
         default_action = NoAction();
     }
-
     apply {
         test1.apply();
     }

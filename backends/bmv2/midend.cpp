@@ -46,7 +46,7 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
     };
     midend.setName("Mid end");
-    midend.setStopOnError(true);
+    midend.addDebugHooks(hooks);
     program = program->apply(midend);
     if (::errorCount() > 0)
         return nullptr;
@@ -69,7 +69,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         // Move all local declarations to the beginning
         new P4::MoveDeclarations(),
         new P4::ResolveReferences(&refMap, isv1),
-        new P4::RemoveReturns(&refMap, true),
+        new P4::RemoveReturns(&refMap),
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
@@ -77,7 +77,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
     };
 
     simplify.setName("Simplify");
-    simplify.setStopOnError(true);
+    simplify.addDebugHooks(hooks);
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
@@ -113,7 +113,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
     };
 
     midEnd.setName("Mid end");
-    midEnd.setStopOnError(true);
+    midEnd.addDebugHooks(hooks);
     program = program->apply(midEnd);
     if (::errorCount() > 0)
         return nullptr;
@@ -130,13 +130,11 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     if (program == nullptr)
         return nullptr;
 
-    std::ostream *midendStream = options.dumpStream("-midend");
     // BMv2-specific passes
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
     auto evaluator = new P4::EvaluatorPass(isv1);
     PassManager backend = {
-        new P4::ToP4(midendStream, false, options.file),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
@@ -149,7 +147,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     };
 
     backend.setName("Backend");
-    backend.setStopOnError(true);
+    backend.addDebugHooks(hooks);
     program = program->apply(backend);
     if (::errorCount() > 0)
         return nullptr;

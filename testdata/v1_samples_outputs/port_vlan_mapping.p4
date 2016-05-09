@@ -857,7 +857,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
         @name("outer_bd_action_profile") implementation = ActionProfile(32w256);
     }
-
     apply {
         port_vlan_mapping.apply();
     }

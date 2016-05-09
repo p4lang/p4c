@@ -102,33 +102,34 @@ Type_Control::getApplyMethodType() const {
 }
 
 const Type_Method*
-Type_Table::getApplyMethodType() const {
-    if (applyMethod == nullptr) {
-        // Let's synthesize a new type for the return
-        auto actions = container->properties->getProperty(IR::TableProperties::actionsPropertyName);
-        if (actions == nullptr) {
-            ::error("Table %1% does not contain a list of actions", container);
-            return nullptr;
-        }
-        if (!actions->value->is<IR::ActionList>())
-            BUG("Action property is not an IR::ActionList, but %1%",
-                                    actions);
-        auto alv = actions->value->to<IR::ActionList>();
-        auto fields = new IR::IndexedVector<IR::StructField>();
-        auto hit = new IR::StructField(Util::SourceInfo(), IR::Type_Table::hit,
-                                       IR::Annotations::empty, IR::Type_Boolean::get());
-        fields->push_back(hit);
-        auto label = new IR::StructField(Util::SourceInfo(), IR::Type_Table::action_run,
-                                         IR::Annotations::empty,
-                                         new IR::Type_ActionEnum(Util::SourceInfo(), alv));
-        fields->push_back(label);
-        auto rettype = new IR::Type_Struct(Util::SourceInfo(), ID(container->name),
-                                           IR::Annotations::empty, fields);
-        applyMethod = new IR::Type_Method(Util::SourceInfo(), new TypeParameters(),
-                                          rettype, container->parameters);
+P4Table::getApplyMethodType() const {
+    // Synthesize a new type for the return
+    auto actions = properties->getProperty(IR::TableProperties::actionsPropertyName);
+    if (actions == nullptr) {
+        ::error("Table %1% does not contain a list of actions", this);
+        return nullptr;
     }
+    if (!actions->value->is<IR::ActionList>())
+        BUG("Action property is not an IR::ActionList, but %1%",
+            actions);
+    auto alv = actions->value->to<IR::ActionList>();
+    auto fields = new IR::IndexedVector<IR::StructField>();
+    auto hit = new IR::StructField(Util::SourceInfo(), IR::Type_Table::hit,
+                                   IR::Annotations::empty, IR::Type_Boolean::get());
+    fields->push_back(hit);
+    auto label = new IR::StructField(Util::SourceInfo(), IR::Type_Table::action_run,
+                                     IR::Annotations::empty,
+                                     new IR::Type_ActionEnum(Util::SourceInfo(), alv));
+    fields->push_back(label);
+    auto rettype = new IR::Type_Struct(Util::SourceInfo(), ID(name),
+                                       IR::Annotations::empty, fields);
+    auto applyMethod = new IR::Type_Method(Util::SourceInfo(), new TypeParameters(),
+                                           rettype, parameters);
     return applyMethod;
 }
+
+const Type_Method* Type_Table::getApplyMethodType() const
+{ return table->getApplyMethodType(); }
 
 void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue*> *args) {
     CHECK_NULL(args);

@@ -29,8 +29,6 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
 
     Util::PathName path(options.prettyPrintFile);
     std::ostream *ppStream = openFile(path.toString(), true);
-    std::ostream *midStream = options.dumpStream("-fe");
-    std::ostream *endStream = options.dumpStream("-last");
 
     P4::ReferenceMap  refMap;  // This is reused many times, since every analysis clear it
     P4::TypeMap       typeMap;
@@ -55,17 +53,12 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
         new P4::StrengthReduction(),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        // Print program in the middle
-        new P4::ToP4(midStream, false, options.file),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-        // Print the program before the end.
-        new P4::ToP4(endStream, false, options.file),
     };
 
     passes.setName("FrontEnd");
     passes.setStopOnError(true);
-    for (auto h : hooks)
-        passes.addDebugHook(h);
+    passes.addDebugHooks(hooks);
     const IR::P4Program* result = v12_program->apply(passes);
     return result;
 }

@@ -11,29 +11,32 @@
 #include "midend.h"
 #include "ebpfOptions.h"
 #include "ebpfBackend.h"
-#include "frontends/p4/p4-parse.h"
+#include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 
-void compile(EbpfOptions& options, FILE* in) {
+void compile(EbpfOptions& options) {
+    auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
     if (isv1) {
         ::error("This compiler only handles P4 v1.2");
         return;
     }
-    const IR::P4Program* v12 = parse_p4v1_2_file(options.file, in);
-    options.closeInput(in);
-    if (ErrorReporter::instance.getErrorCount() > 0) {
-        ::error("%1% errors ecountered, aborting compilation",
-                ErrorReporter::instance.getErrorCount());
+    auto program = parseP4File(options);
+    if (::errorCount() > 0)
         return;
-    }
     FrontEnd frontend;
-    v12 = frontend.run(options, v12);
+    frontend.addDebugHook(hook);
+    program = frontend.run(options, program);
+    if (::errorCount() > 0)
+        return;
 
     EBPF::MidEnd midend;
-    v12 = midend.run(options, v12);
+    midend.addDebugHook(hook);
+    program = midend.run(options, program);
+    if (::errorCount() > 0)
+        return;
 
-    EBPF::run_ebpf_backend(options, v12);
+    EBPF::run_ebpf_backend(options, program);
 }
 
 int main(int argc, char *const argv[]) {
@@ -43,17 +46,12 @@ int main(int argc, char *const argv[]) {
     EbpfOptions options;
     if (options.process(argc, argv) != nullptr)
         options.setInputFile();
-
-    if (ErrorReporter::instance.getErrorCount() > 0)
+    if (::errorCount() > 0)
         exit(1);
 
-    FILE* in = options.preprocess();
-    if (in != nullptr) {
-        compile(options, in);
-    }
+    compile(options);
 
-    if (verbose)
+    if (options.verbosity > 0)
         std::cerr << "Done." << std::endl;
-
-    return ErrorReporter::instance.getErrorCount() > 0;
+    return ::errorCount() > 0;
 }

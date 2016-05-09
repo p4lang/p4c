@@ -50,7 +50,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("test2") table test2() {
         actions = {
             setf4;
@@ -62,7 +61,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         if (hdr.data.x1 == 2w1 && hdr.data.x4 == 1w0) {
             test1.apply();

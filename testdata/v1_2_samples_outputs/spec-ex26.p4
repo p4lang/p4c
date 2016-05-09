@@ -24,7 +24,6 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         implementation = tbl();
         default_action = drop;
     }
-
     apply {
         if (parseError != NoError) {
             Drop_action(outCtrl.outputPort);

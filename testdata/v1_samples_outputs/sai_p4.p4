@@ -232,7 +232,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("learn_notify") table learn_notify() {
         actions = {
             nop;
@@ -246,7 +245,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("neighbor") table neighbor() {
         actions = {
             set_dmac;
@@ -259,7 +257,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("next_hop") table next_hop() {
         actions = {
             set_next_hop;
@@ -270,7 +267,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("port") table port() {
         actions = {
             set_in_port;
@@ -282,7 +278,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
         @name("port_counters") counters = DirectCounter(CounterType.Packets);
     }
-
     @name("route") table route() {
         actions = {
             route_set_trap;
@@ -296,7 +291,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("router_interface") table router_interface() {
         actions = {
             set_router_interface;
@@ -308,7 +302,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("switch") table switch_0() {
         actions = {
             set_switch;
@@ -316,7 +309,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("virtual_router") table virtual_router() {
         actions = {
             set_router;
@@ -327,7 +319,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         switch_0.apply();
         port.apply();

@@ -6,8 +6,9 @@
 #include "lib/exceptions.h"
 #include "lib/nullstream.h"
 #include "lib/path.h"
+#include "frontends/p4/toP4/toP4.h"
 
-static cstring version = "0.0.3";
+static cstring version = "0.0.4";
 extern int verbose;
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
@@ -45,8 +46,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        } else if (!strcmp(arg, "1.2")) {
                            langVersion = CompilerOptions::FrontendVersion::P4v1_2;
                        } else {
-                           std::cerr << "Illegal language version " << arg << std::endl;
-                           usage();
+                           ::error("Illegal language version %1%", arg);
                            return false;
                        }
                        return true; },
@@ -60,17 +60,36 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    "specified file (output is always in P4 v1.2).");
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
-                   "Write output program to outfile");
+                   "Write output to outfile");
     registerOption("-T", "loglevel",
                     [](const char* arg) { ::add_debug_spec(arg); return true; },
                    "[Compiler debugging] Adjust logging level per file (see below)");
-    registerOption("--dump", "folder",
-                   [this](const char* arg) { dumpFolder = arg; return true; },
-                    "[Compiler debugging] Dump the program after various passes in\n"
-                   "P4 files in the specified folder.");
     registerOption("-v", nullptr,
                    [this](const char*) { ::verbose++; verbosity++; return true; },
                    "[Compiler debugging] Increase verbosity level (can be repeated)");
+    registerOption("--top4", "pass1[,pass2]",
+                   [this](const char* arg) {
+                       auto copy = new char[strlen(arg)+1];
+                       strcpy(copy, arg);
+                       while (*copy) {
+                           char* next = strchr(copy, ',');
+                           if (next == nullptr) {
+                               top4.push_back(copy);
+                               break;
+                           } else {
+                               *next = 0;
+                               top4.push_back(copy);
+                               copy = next + 1;
+                           }
+                       }
+                       return true;
+                   },
+                   "[Compiler debugging] Dump the P4 representation after\n"
+                   "passes whose name contains one of `passX' substrings.\n"
+                   "When '-v' is used this will include the compiler IR.\n");
+    registerOption("--dump", "folder",
+                   [this](const char* arg) { dumpFolder = arg; return true; },
+                   "[Compiler debugging] Folder where P4 programs are dumped\n");
     registerUsage("loglevel format is:\n"
                   "  sourceFile:level,...,sourceFile:level\n"
                   "where 'sourceFile' is a compiler source file and\n"
@@ -148,21 +167,45 @@ static cstring makeFileName(cstring folder, cstring name, cstring baseSuffix) {
     return result.toString();
 }
 
-cstring CompilerOptions::dumpFileName(cstring suffix) const {
-    if (dumpFolder.isNullOrEmpty())
-        return nullptr;
-    cstring filename = file;
-    if (filename == "-")
-        filename = "tmp.p4";
-    return makeFileName(dumpFolder, filename, suffix);
-}
-
-std::ostream* CompilerOptions::dumpStream(cstring suffix) const {
-    if (dumpFolder.isNullOrEmpty())
-        return new nullstream();
-    return openFile(dumpFileName(suffix), true);
-}
-
 bool CompilerOptions::isv1() const {
     return langVersion == CompilerOptions::FrontendVersion::P4v1;
+}
+
+void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pass, const IR::Node* node) const {
+    // Pass names are currently C++ class names mangled; this is a weak attempt at making them
+    // more readable.
+    bool verbose = verbosity > 0;
+
+    std::string p = pass;
+    size_t last = p.find_last_of("0123456789", strlen(pass) - 3);
+    if (last != strlen(pass))
+        pass = pass + last + 1;
+    cstring name = cstring(manager) + "_" + Util::toString(seq) + "_" + pass;
+    if (verbose)
+        std::cerr << name << std::endl;
+
+    for (auto s : top4) {
+        if (strstr(name.c_str(), s.c_str()) != nullptr) {
+            cstring suffix = cstring("-") + name;
+            cstring filename = file;
+            if (filename == "-")
+                filename = "tmp.p4";
+
+            cstring fileName = makeFileName(dumpFolder, filename, suffix);
+            auto stream = openFile(fileName, true);
+            if (stream != nullptr) {
+                if (verbose)
+                    std::cerr << "Writing program to " << fileName << std::endl;
+                P4::ToP4 toP4(stream, verbose);
+                node->apply(toP4);
+            }
+        }
+    }
+}
+
+DebugHook CompilerOptions::getDebugHook() const {
+    auto dp = std::bind(&CompilerOptions::dumpPass, this,
+                        std::placeholders::_1, std::placeholders::_2,
+                        std::placeholders::_3, std::placeholders::_4);
+    return dp;
 }

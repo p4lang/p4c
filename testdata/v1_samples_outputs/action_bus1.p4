@@ -129,7 +129,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl2") table tbl2() {
         actions = {
             set2;
@@ -141,7 +140,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl3") table tbl3() {
         actions = {
             set3;
@@ -153,7 +151,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl4") table tbl4() {
         actions = {
             set4;
@@ -165,7 +162,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl5") table tbl5() {
         actions = {
             set5;
@@ -177,7 +173,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl6") table tbl6() {
         actions = {
             set6;
@@ -189,7 +184,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl7") table tbl7() {
         actions = {
             set7;
@@ -201,7 +195,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("tbl8") table tbl8() {
         actions = {
             set8;
@@ -213,7 +206,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         tbl1.apply();
         tbl2.apply();

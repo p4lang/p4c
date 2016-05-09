@@ -113,7 +113,7 @@ void IR::TypeParameters::dbprint(std::ostream& out) const {
 }
 
 void IR::Type_Table::dbprint(std::ostream& out) const
-{ Node::dbprint(out); out << container->name; }
+{ Node::dbprint(out); out << table->name; }
 
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v) {
     int prec = getprec(out);

@@ -69,7 +69,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 16;
         default_action = NoAction();
     }
-
     apply {
         redirect.apply();
     }
@@ -87,7 +86,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1;
         default_action = NoAction();
     }
-
     apply {
         copy_to_cpu.apply();
     }

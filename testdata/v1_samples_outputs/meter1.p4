@@ -68,7 +68,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16;
         default_action = NoAction();
     }
-
     @name("m_action") action m_action_0(bit<9> meter_idx) {
         standard_metadata.egress_spec = meter_idx;
         standard_metadata.egress_spec = 9w1;
@@ -90,7 +89,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
         meters = my_meter;
     }
-
     apply {
         m_table.apply();
         m_filter.apply();

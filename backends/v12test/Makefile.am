@@ -7,9 +7,7 @@ v12test_LDADD = libfrontend.a libp4ctoolkit.a
 v12test_SOURCES = \
     backends/v12test/v12test.cpp \
     backends/v12test/midend.h \
-    backends/v12test/midend.cpp \
-    backends/v12test/options.h \
-    backends/v12test/options.cpp
+    backends/v12test/midend.cpp
 
 cpplint_FILES += $(v12test_SOURCES)
 
@@ -27,7 +25,7 @@ CLEANFILES += \
 $(srcdir)/v12tests.am: $(srcdir)/testdata/v1_2_samples/*.p4 $(srcdir)/testdata/v1_2_errors/*.p4
 	@$(GENTESTS) $(srcdir) v12 $(srcdir)/backends/v12test/run-v12-sample.py $^ >$@
 
-$(srcdir)/v1to12tests.am: $(srcdir)/testdata/v1_samples/*.p4 
+$(srcdir)/v1to12tests.am: $(srcdir)/testdata/v1_samples/*.p4
 	@$(GENTESTS) $(srcdir) v1to12 $(srcdir)/backends/v12test/run-v12-sample.py $^ >$@
 
 V12BUGS = \
@@ -37,4 +35,4 @@ V12BUGS = \
 
 XFAIL_TESTS += \
     $(V12BUGS) \
-    v12/testdata/v1_2_samples/cast-call.p4.test 
+    v12/testdata/v1_2_samples/cast-call.p4.test

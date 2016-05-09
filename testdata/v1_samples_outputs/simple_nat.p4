@@ -150,7 +150,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 256;
         default_action = NoAction();
     }
-
     @name("send_to_cpu") table send_to_cpu() {
         actions = {
             do_cpu_encap;
@@ -158,7 +157,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-
     apply {
         if (standard_metadata.instance_type == 32w0) {
             send_frame.apply();
@@ -218,7 +216,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction();
     }
-
     @name("if_info") table if_info() {
         actions = {
             _drop;
@@ -230,7 +227,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("ipv4_lpm") table ipv4_lpm() {
         actions = {
             set_nhop;
@@ -243,7 +239,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-
     @name("nat") table nat() {
         actions = {
             _drop;
@@ -266,7 +261,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 128;
         default_action = NoAction();
     }
-
     apply {
         if_info.apply();
         nat.apply();

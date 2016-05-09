@@ -1,4 +1,5 @@
 #include "removeReturns.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
@@ -23,14 +24,12 @@ const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
     // 'hasExits' variable should be in the calling control.
     HasExits he;
     (void)action->apply(he);
-    if ((removeReturns && !he.hasReturns) ||
-        (!removeReturns && !he.hasExits)) {
+    if (!he.hasReturns) {
         // don't pollute the code unnecessarily
         prune();
         return action;
     }
-    cstring base = removeReturns ? "hasReturned" : "hasExited";
-    cstring var = refMap->newName(base);
+    cstring var = refMap->newName(variableName);
     returnVar = IR::ID(var);
     auto f = new IR::BoolLiteral(Util::SourceInfo(), false);
     auto decl = new IR::Declaration_Variable(Util::SourceInfo(), returnVar,
@@ -52,15 +51,13 @@ const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
 const IR::Node* RemoveReturns::preorder(IR::P4Control* control) {
     HasExits he;
     (void)control->body->apply(he);
-    if ((removeReturns && !he.hasReturns) ||
-        (!removeReturns && !he.hasExits)) {
+    if (!he.hasReturns) {
         // don't pollute the code unnecessarily
         prune();
         return control;
     }
 
-    cstring base = removeReturns ? "hasReturned" : "hasExited";
-    cstring var = refMap->newName(base);
+    cstring var = refMap->newName(variableName);
     returnVar = IR::ID(var);
     auto f = new IR::BoolLiteral(Util::SourceInfo(), false);
     auto decl = new IR::Declaration_Variable(Util::SourceInfo(), returnVar,
@@ -81,22 +78,15 @@ const IR::Node* RemoveReturns::preorder(IR::P4Control* control) {
 }
 
 const IR::Node* RemoveReturns::preorder(IR::ReturnStatement* statement) {
-    if (removeReturns) {
-        set(Returns::Yes);
-        auto left = new IR::PathExpression(returnVar);
-        return new IR::AssignmentStatement(statement->srcInfo, left,
-                                           new IR::BoolLiteral(Util::SourceInfo(), true));
-    }
+    set(Returns::Yes);
+    auto left = new IR::PathExpression(returnVar);
+    return new IR::AssignmentStatement(statement->srcInfo, left,
+                                       new IR::BoolLiteral(Util::SourceInfo(), true));
     return statement;
 }
 
 const IR::Node* RemoveReturns::preorder(IR::ExitStatement* statement) {
     set(Returns::Yes);  // exit implies return
-    if (!removeReturns) {
-        auto left = new IR::PathExpression(returnVar);
-        return new IR::AssignmentStatement(statement->srcInfo, left,
-                                           new IR::BoolLiteral(Util::SourceInfo(), true));
-    }
     return statement;
 }
 
@@ -166,6 +156,54 @@ const IR::Node* RemoveReturns::preorder(IR::SwitchStatement* statement) {
     set(r);
     prune();
     return statement;
+}
+
+////////////////////////////////////////////////////////////////
+
+namespace {
+class CallsExit : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+    std::set<const IR::Node*>* callers;
+
+ public:
+    bool callsExit = false;
+    CallsExit(ReferenceMap* refMap, TypeMap* typeMap, std::set<const IR::Node*>* callers) :
+            refMap(refMap), typeMap(typeMap), callers(callers) {}
+    void postorder(const IR::MethodCallExpression* expression) override {
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        if (!mi->isApply())
+            return;
+        auto am = mi->to<ApplyMethod>();
+        CHECK_NULL(am->object);
+        auto obj = am->object->getNode();
+        if (callers->find(obj) != callers->end())
+            callsExit = true;
+    }
+};
+}  // namespace
+
+const IR::Node* RemoveExits::preorder(IR::ExitStatement* statement) {
+    auto action = findOrigCtxt<IR::P4Action>();
+    if (action != nullptr) {
+        LOG4(getOriginal() << " calls exit");
+        callsExit.emplace(action);
+    }
+    return statement;
+}
+
+const IR::Node* RemoveExits::preorder(IR::P4Table* table) {
+    for (auto a : *table->getActionList()->actionList) {
+        auto path = a->name;
+        auto decl = refMap->getDeclaration(path->path, true);
+        BUG_CHECK(decl->is<IR::P4Action>(), "%1% is not an action", decl);
+        if (callsExit.find(decl->getNode()) != callsExit.end()) {
+            LOG4(getOriginal() << " calls exit");
+            callsExit.emplace(getOriginal());
+            break;
+        }
+    }
+    return table;
 }
 
 }  // namespace P4

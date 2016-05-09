@@ -24,17 +24,21 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
+    auto hook = options.getDebugHook();
+
     // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
     auto program = parseP4File(options);
     if (program == nullptr || ::errorCount() > 0)
         return 1;
     FrontEnd frontend;
+    frontend.addDebugHook(hook);
     program = frontend.run(options, program);
     if (program == nullptr || ::errorCount() > 0)
         return 1;
 
     BMV2::MidEnd midEnd;
+    midEnd.addDebugHook(hook);
     auto blockMap = midEnd.process(options, program);
     if (::errorCount() > 0 || blockMap == nullptr)
         return 1;

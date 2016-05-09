@@ -74,7 +74,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         size = 256;
         default_action = NoAction();
     }
-
     apply {
         send_frame.apply();
     }
@@ -104,7 +103,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction();
     }
-
     @name("ipv4_lpm") table ipv4_lpm() {
         actions = {
             set_nhop;
@@ -117,7 +115,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction();
     }
-
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {
             ipv4_lpm.apply();

@@ -568,7 +568,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("t2_1") table t2_1() {
         actions = {
             a2_1;
@@ -642,7 +641,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("t2_2") table t2_2() {
         actions = {
             a2_2;
@@ -668,7 +666,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("t2_3") table t2_3() {
         actions = {
             a2_3;
@@ -694,7 +691,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("t3_1") table t3_1() {
         actions = {
             a3_1;
@@ -721,7 +717,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         t1.apply();
         t2_1.apply();

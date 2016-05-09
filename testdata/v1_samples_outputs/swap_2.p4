@@ -46,7 +46,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 64;
         default_action = NoAction();
     }
-
     apply {
         t_ingress_2.apply();
     }

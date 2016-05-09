@@ -100,14 +100,19 @@ class Options {
                 remainingOptions.push_back(opt);
             } else {
                 if (option->argName != nullptr && arg == nullptr) {
-                    if (i == argc - 1)
-                        throw std::logic_error(std::string("Option ") + opt +
-                                               " is missing required argument " + option->argName);
+                    if (i == argc - 1) {
+                        ::error("Option %1% is missing required argument %2%",
+                                opt, option->argName);
+                        usage();
+                        return nullptr;
+                    }
                     arg = argv[++i];
                 }
                 bool success = option->processor(arg);
-                if (!success)
-                    break;
+                if (!success) {
+                    usage();
+                    return nullptr;
+                }
             }
         }
         return &remainingOptions;

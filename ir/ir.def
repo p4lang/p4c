@@ -230,12 +230,13 @@ class TableProperties : ISimpleNamespace {
     validate{ properties->check_null(); }
 }
 
-class P4Table : Declaration, IAnnotated {
+class P4Table : Declaration, IAnnotated, IApply {
     Annotations     annotations;
     ParameterList   parameters;
     TableProperties properties;
 #emit
     const Annotations* getAnnotations() const override { return annotations; }
+    const Type_Method* getApplyMethodType() const;
     const ActionList* getActionList() const {
         auto ap = properties->getProperty(TableProperties::actionsPropertyName);
         if (ap == nullptr)

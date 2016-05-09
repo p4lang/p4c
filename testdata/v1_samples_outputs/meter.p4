@@ -68,7 +68,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16;
         default_action = NoAction();
     }
-
     @name("m_table") table m_table() {
         actions = {
             m_action;
@@ -81,7 +80,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16384;
         default_action = NoAction();
     }
-
     apply {
         m_table.apply();
         m_filter.apply();

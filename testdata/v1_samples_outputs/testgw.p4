@@ -68,7 +68,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("test1") table test1() {
         actions = {
             setf2;
@@ -80,7 +79,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     @name("test2") table test2() {
         actions = {
             setf1;
@@ -92,7 +90,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-
     apply {
         routing.apply();
         if (hdr.data.f5 != hdr.data.f6) {
