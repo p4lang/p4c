@@ -19,6 +19,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const P4::Reference
             basetype = mem->expr->type;
         if (basetype->is<IR::Type_Header>()) {
             if (mem->member == IR::Type_Header::setValid ||
+                mem->member == IR::Type_Header::setInvalid ||
                 mem->member == IR::Type_Header::isValid)
                 return new BuiltInMethod(mce, mem->member, mem->expr);
         }

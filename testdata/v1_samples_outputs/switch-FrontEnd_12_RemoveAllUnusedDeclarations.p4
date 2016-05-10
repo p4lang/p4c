@@ -1335,12 +1335,12 @@ control process_vlan_decap(inout headers hdr, inout metadata meta, inout standar
     }
     @name("remove_vlan_single_tagged") action remove_vlan_single_tagged() {
         hdr.ethernet.etherType = hdr.vlan_tag_[0].etherType;
-        hdr.vlan_tag_[0].setValid(false);
+        hdr.vlan_tag_[0].setInvalid();
     }
     @name("remove_vlan_double_tagged") action remove_vlan_double_tagged() {
         hdr.ethernet.etherType = hdr.vlan_tag_[1].etherType;
-        hdr.vlan_tag_[0].setValid(false);
-        hdr.vlan_tag_[1].setValid(false);
+        hdr.vlan_tag_[0].setInvalid();
+        hdr.vlan_tag_[1].setInvalid();
     }
     @name("vlan_decap") table vlan_decap() {
         actions = {
@@ -1364,211 +1364,211 @@ control process_vlan_decap(inout headers hdr, inout metadata meta, inout standar
 control process_tunnel_decap(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("decap_inner_udp") action decap_inner_udp() {
         hdr.udp = hdr.inner_udp;
-        hdr.inner_udp.setValid(false);
+        hdr.inner_udp.setInvalid();
     }
     @name("decap_inner_tcp") action decap_inner_tcp() {
         hdr.tcp = hdr.inner_tcp;
-        hdr.inner_tcp.setValid(false);
-        hdr.udp.setValid(false);
+        hdr.inner_tcp.setInvalid();
+        hdr.udp.setInvalid();
     }
     @name("decap_inner_icmp") action decap_inner_icmp() {
         hdr.icmp = hdr.inner_icmp;
-        hdr.inner_icmp.setValid(false);
-        hdr.udp.setValid(false);
+        hdr.inner_icmp.setInvalid();
+        hdr.udp.setInvalid();
     }
     @name("decap_inner_unknown") action decap_inner_unknown() {
-        hdr.udp.setValid(false);
+        hdr.udp.setInvalid();
     }
     @name("decap_vxlan_inner_ipv4") action decap_vxlan_inner_ipv4() {
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.vxlan.setValid(false);
-        hdr.ipv6.setValid(false);
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv4.setValid(false);
+        hdr.vxlan.setInvalid();
+        hdr.ipv6.setInvalid();
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv4.setInvalid();
     }
     @name("decap_vxlan_inner_ipv6") action decap_vxlan_inner_ipv6() {
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.vxlan.setValid(false);
-        hdr.ipv4.setValid(false);
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv6.setValid(false);
+        hdr.vxlan.setInvalid();
+        hdr.ipv4.setInvalid();
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv6.setInvalid();
     }
     @name("decap_vxlan_inner_non_ip") action decap_vxlan_inner_non_ip() {
         hdr.ethernet = hdr.inner_ethernet;
-        hdr.vxlan.setValid(false);
-        hdr.ipv4.setValid(false);
-        hdr.ipv6.setValid(false);
+        hdr.vxlan.setInvalid();
+        hdr.ipv4.setInvalid();
+        hdr.ipv6.setInvalid();
     }
     @name("decap_genv_inner_ipv4") action decap_genv_inner_ipv4() {
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.genv.setValid(false);
-        hdr.ipv6.setValid(false);
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv4.setValid(false);
+        hdr.genv.setInvalid();
+        hdr.ipv6.setInvalid();
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv4.setInvalid();
     }
     @name("decap_genv_inner_ipv6") action decap_genv_inner_ipv6() {
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.genv.setValid(false);
-        hdr.ipv4.setValid(false);
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv6.setValid(false);
+        hdr.genv.setInvalid();
+        hdr.ipv4.setInvalid();
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv6.setInvalid();
     }
     @name("decap_genv_inner_non_ip") action decap_genv_inner_non_ip() {
         hdr.ethernet = hdr.inner_ethernet;
-        hdr.genv.setValid(false);
-        hdr.ipv4.setValid(false);
-        hdr.ipv6.setValid(false);
+        hdr.genv.setInvalid();
+        hdr.ipv4.setInvalid();
+        hdr.ipv6.setInvalid();
     }
     @name("decap_nvgre_inner_ipv4") action decap_nvgre_inner_ipv4() {
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.nvgre.setValid(false);
-        hdr.gre.setValid(false);
-        hdr.ipv6.setValid(false);
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv4.setValid(false);
+        hdr.nvgre.setInvalid();
+        hdr.gre.setInvalid();
+        hdr.ipv6.setInvalid();
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv4.setInvalid();
     }
     @name("decap_nvgre_inner_ipv6") action decap_nvgre_inner_ipv6() {
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.nvgre.setValid(false);
-        hdr.gre.setValid(false);
-        hdr.ipv4.setValid(false);
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv6.setValid(false);
+        hdr.nvgre.setInvalid();
+        hdr.gre.setInvalid();
+        hdr.ipv4.setInvalid();
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv6.setInvalid();
     }
     @name("decap_nvgre_inner_non_ip") action decap_nvgre_inner_non_ip() {
         hdr.ethernet = hdr.inner_ethernet;
-        hdr.nvgre.setValid(false);
-        hdr.gre.setValid(false);
-        hdr.ipv4.setValid(false);
-        hdr.ipv6.setValid(false);
+        hdr.nvgre.setInvalid();
+        hdr.gre.setInvalid();
+        hdr.ipv4.setInvalid();
+        hdr.ipv6.setInvalid();
     }
     @name("decap_ip_inner_ipv4") action decap_ip_inner_ipv4() {
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.gre.setValid(false);
-        hdr.ipv6.setValid(false);
-        hdr.inner_ipv4.setValid(false);
+        hdr.gre.setInvalid();
+        hdr.ipv6.setInvalid();
+        hdr.inner_ipv4.setInvalid();
         hdr.ethernet.etherType = 16w0x800;
     }
     @name("decap_ip_inner_ipv6") action decap_ip_inner_ipv6() {
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.gre.setValid(false);
-        hdr.ipv4.setValid(false);
-        hdr.inner_ipv6.setValid(false);
+        hdr.gre.setInvalid();
+        hdr.ipv4.setInvalid();
+        hdr.inner_ipv6.setInvalid();
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name("decap_mpls_inner_ipv4_pop1") action decap_mpls_inner_ipv4_pop1() {
-        hdr.mpls[0].setValid(false);
+        hdr.mpls[0].setInvalid();
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.inner_ipv4.setValid(false);
+        hdr.inner_ipv4.setInvalid();
         hdr.ethernet.etherType = 16w0x800;
     }
     @name("decap_mpls_inner_ipv6_pop1") action decap_mpls_inner_ipv6_pop1() {
-        hdr.mpls[0].setValid(false);
+        hdr.mpls[0].setInvalid();
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.inner_ipv6.setValid(false);
+        hdr.inner_ipv6.setInvalid();
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name("decap_mpls_inner_ethernet_ipv4_pop1") action decap_mpls_inner_ethernet_ipv4_pop1() {
-        hdr.mpls[0].setValid(false);
+        hdr.mpls[0].setInvalid();
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv4.setValid(false);
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv4.setInvalid();
     }
     @name("decap_mpls_inner_ethernet_ipv6_pop1") action decap_mpls_inner_ethernet_ipv6_pop1() {
-        hdr.mpls[0].setValid(false);
+        hdr.mpls[0].setInvalid();
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv6.setValid(false);
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv6.setInvalid();
     }
     @name("decap_mpls_inner_ethernet_non_ip_pop1") action decap_mpls_inner_ethernet_non_ip_pop1() {
-        hdr.mpls[0].setValid(false);
+        hdr.mpls[0].setInvalid();
         hdr.ethernet = hdr.inner_ethernet;
-        hdr.inner_ethernet.setValid(false);
+        hdr.inner_ethernet.setInvalid();
     }
     @name("decap_mpls_inner_ipv4_pop2") action decap_mpls_inner_ipv4_pop2() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.inner_ipv4.setValid(false);
+        hdr.inner_ipv4.setInvalid();
         hdr.ethernet.etherType = 16w0x800;
     }
     @name("decap_mpls_inner_ipv6_pop2") action decap_mpls_inner_ipv6_pop2() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.inner_ipv6.setValid(false);
+        hdr.inner_ipv6.setInvalid();
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name("decap_mpls_inner_ethernet_ipv4_pop2") action decap_mpls_inner_ethernet_ipv4_pop2() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv4.setValid(false);
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv4.setInvalid();
     }
     @name("decap_mpls_inner_ethernet_ipv6_pop2") action decap_mpls_inner_ethernet_ipv6_pop2() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv6.setValid(false);
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv6.setInvalid();
     }
     @name("decap_mpls_inner_ethernet_non_ip_pop2") action decap_mpls_inner_ethernet_non_ip_pop2() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
         hdr.ethernet = hdr.inner_ethernet;
-        hdr.inner_ethernet.setValid(false);
+        hdr.inner_ethernet.setInvalid();
     }
     @name("decap_mpls_inner_ipv4_pop3") action decap_mpls_inner_ipv4_pop3() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
-        hdr.mpls[2].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
+        hdr.mpls[2].setInvalid();
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.inner_ipv4.setValid(false);
+        hdr.inner_ipv4.setInvalid();
         hdr.ethernet.etherType = 16w0x800;
     }
     @name("decap_mpls_inner_ipv6_pop3") action decap_mpls_inner_ipv6_pop3() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
-        hdr.mpls[2].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
+        hdr.mpls[2].setInvalid();
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.inner_ipv6.setValid(false);
+        hdr.inner_ipv6.setInvalid();
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name("decap_mpls_inner_ethernet_ipv4_pop3") action decap_mpls_inner_ethernet_ipv4_pop3() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
-        hdr.mpls[2].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
+        hdr.mpls[2].setInvalid();
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv4 = hdr.inner_ipv4;
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv4.setValid(false);
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv4.setInvalid();
     }
     @name("decap_mpls_inner_ethernet_ipv6_pop3") action decap_mpls_inner_ethernet_ipv6_pop3() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
-        hdr.mpls[2].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
+        hdr.mpls[2].setInvalid();
         hdr.ethernet = hdr.inner_ethernet;
         hdr.ipv6 = hdr.inner_ipv6;
-        hdr.inner_ethernet.setValid(false);
-        hdr.inner_ipv6.setValid(false);
+        hdr.inner_ethernet.setInvalid();
+        hdr.inner_ipv6.setInvalid();
     }
     @name("decap_mpls_inner_ethernet_non_ip_pop3") action decap_mpls_inner_ethernet_non_ip_pop3() {
-        hdr.mpls[0].setValid(false);
-        hdr.mpls[1].setValid(false);
-        hdr.mpls[2].setValid(false);
+        hdr.mpls[0].setInvalid();
+        hdr.mpls[1].setInvalid();
+        hdr.mpls[2].setInvalid();
         hdr.ethernet = hdr.inner_ethernet;
-        hdr.inner_ethernet.setValid(false);
+        hdr.inner_ethernet.setInvalid();
     }
     @name("tunnel_decap_process_inner") table tunnel_decap_process_inner() {
         actions = {
@@ -1789,14 +1789,14 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
     @name("int_set_header_0003_i0") action int_set_header_0003_i0() {
     }
     @name("int_set_header_3") action int_set_header_3() {
-        hdr.int_q_occupancy_header.setValid(true);
+        hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy = (bit<31>)meta.intrinsic_metadata.enq_qdepth;
     }
     @name("int_set_header_0003_i1") action int_set_header_0003_i1() {
         int_set_header_3();
     }
     @name("int_set_header_2") action int_set_header_2() {
-        hdr.int_hop_latency_header.setValid(true);
+        hdr.int_hop_latency_header.setValid();
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.intrinsic_metadata.deq_timedelta;
     }
     @name("int_set_header_0003_i2") action int_set_header_0003_i2() {
@@ -1807,7 +1807,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         int_set_header_2();
     }
     @name("int_set_header_1") action int_set_header_1() {
-        hdr.int_ingress_port_id_header.setValid(true);
+        hdr.int_ingress_port_id_header.setValid();
         hdr.int_ingress_port_id_header.ingress_port_id = (bit<31>)meta.ingress_metadata.ifindex;
     }
     @name("int_set_header_0003_i4") action int_set_header_0003_i4() {
@@ -1827,7 +1827,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         int_set_header_1();
     }
     @name("int_set_header_0") action int_set_header_0() {
-        hdr.int_switch_id_header.setValid(true);
+        hdr.int_switch_id_header.setValid();
         hdr.int_switch_id_header.switch_id = (bit<31>)meta.int_metadata.switch_id;
     }
     @name("int_set_header_0003_i8") action int_set_header_0003_i8() {
@@ -1869,14 +1869,14 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
     @name("int_set_header_0407_i0") action int_set_header_0407_i0() {
     }
     @name("int_set_header_7") action int_set_header_7() {
-        hdr.int_egress_port_tx_utilization_header.setValid(true);
+        hdr.int_egress_port_tx_utilization_header.setValid();
         hdr.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
     }
     @name("int_set_header_0407_i1") action int_set_header_0407_i1() {
         int_set_header_7();
     }
     @name("int_set_header_6") action int_set_header_6() {
-        hdr.int_q_congestion_header.setValid(true);
+        hdr.int_q_congestion_header.setValid();
         hdr.int_q_congestion_header.q_congestion = 31w0x7fffffff;
     }
     @name("int_set_header_0407_i2") action int_set_header_0407_i2() {
@@ -1887,7 +1887,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         int_set_header_6();
     }
     @name("int_set_header_5") action int_set_header_5() {
-        hdr.int_egress_port_id_header.setValid(true);
+        hdr.int_egress_port_id_header.setValid();
         hdr.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata.egress_port;
     }
     @name("int_set_header_0407_i4") action int_set_header_0407_i4() {
@@ -1907,7 +1907,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         int_set_header_5();
     }
     @name("int_set_header_4") action int_set_header_4() {
-        hdr.int_ingress_tstamp_header.setValid(true);
+        hdr.int_ingress_tstamp_header.setValid();
         hdr.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta.i2e_metadata.ingress_tstamp;
     }
     @name("int_set_header_0407_i8") action int_set_header_0407_i8() {
@@ -2164,60 +2164,60 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.inner_ipv4 = hdr.ipv4;
         hdr.inner_udp = hdr.udp;
         meta.egress_metadata.payload_length = hdr.ipv4.totalLen;
-        hdr.udp.setValid(false);
-        hdr.ipv4.setValid(false);
+        hdr.udp.setInvalid();
+        hdr.ipv4.setInvalid();
     }
     @name("inner_ipv4_tcp_rewrite") action inner_ipv4_tcp_rewrite() {
         hdr.inner_ipv4 = hdr.ipv4;
         hdr.inner_tcp = hdr.tcp;
         meta.egress_metadata.payload_length = hdr.ipv4.totalLen;
-        hdr.tcp.setValid(false);
-        hdr.ipv4.setValid(false);
+        hdr.tcp.setInvalid();
+        hdr.ipv4.setInvalid();
     }
     @name("inner_ipv4_icmp_rewrite") action inner_ipv4_icmp_rewrite() {
         hdr.inner_ipv4 = hdr.ipv4;
         hdr.inner_icmp = hdr.icmp;
         meta.egress_metadata.payload_length = hdr.ipv4.totalLen;
-        hdr.icmp.setValid(false);
-        hdr.ipv4.setValid(false);
+        hdr.icmp.setInvalid();
+        hdr.ipv4.setInvalid();
     }
     @name("inner_ipv4_unknown_rewrite") action inner_ipv4_unknown_rewrite() {
         hdr.inner_ipv4 = hdr.ipv4;
         meta.egress_metadata.payload_length = hdr.ipv4.totalLen;
-        hdr.ipv4.setValid(false);
+        hdr.ipv4.setInvalid();
     }
     @name("inner_ipv6_udp_rewrite") action inner_ipv6_udp_rewrite() {
         hdr.inner_ipv6 = hdr.ipv6;
         hdr.inner_udp = hdr.udp;
         meta.egress_metadata.payload_length = hdr.ipv6.payloadLen + 16w40;
-        hdr.ipv6.setValid(false);
+        hdr.ipv6.setInvalid();
     }
     @name("inner_ipv6_tcp_rewrite") action inner_ipv6_tcp_rewrite() {
         hdr.inner_ipv6 = hdr.ipv6;
         hdr.inner_tcp = hdr.tcp;
         meta.egress_metadata.payload_length = hdr.ipv6.payloadLen + 16w40;
-        hdr.tcp.setValid(false);
-        hdr.ipv6.setValid(false);
+        hdr.tcp.setInvalid();
+        hdr.ipv6.setInvalid();
     }
     @name("inner_ipv6_icmp_rewrite") action inner_ipv6_icmp_rewrite() {
         hdr.inner_ipv6 = hdr.ipv6;
         hdr.inner_icmp = hdr.icmp;
         meta.egress_metadata.payload_length = hdr.ipv6.payloadLen + 16w40;
-        hdr.icmp.setValid(false);
-        hdr.ipv6.setValid(false);
+        hdr.icmp.setInvalid();
+        hdr.ipv6.setInvalid();
     }
     @name("inner_ipv6_unknown_rewrite") action inner_ipv6_unknown_rewrite() {
         hdr.inner_ipv6 = hdr.ipv6;
         meta.egress_metadata.payload_length = hdr.ipv6.payloadLen + 16w40;
-        hdr.ipv6.setValid(false);
+        hdr.ipv6.setInvalid();
     }
     @name("inner_non_ip_rewrite") action inner_non_ip_rewrite() {
         meta.egress_metadata.payload_length = (bit<16>)(standard_metadata.packet_length + 32w65522);
     }
     @name("f_insert_vxlan_header") action f_insert_vxlan_header() {
         hdr.inner_ethernet = hdr.ethernet;
-        hdr.udp.setValid(true);
-        hdr.vxlan.setValid(true);
+        hdr.udp.setValid();
+        hdr.vxlan.setValid();
         hdr.udp.srcPort = meta.hash_metadata.entropy_hash;
         hdr.udp.dstPort = 16w4789;
         hdr.udp.checksum = 16w0;
@@ -2228,7 +2228,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.vxlan.reserved2 = 8w0;
     }
     @name("f_insert_ipv4_header") action f_insert_ipv4_header(in bit<8> proto) {
-        hdr.ipv4.setValid(true);
+        hdr.ipv4.setValid();
         hdr.ipv4.protocol = proto;
         hdr.ipv4.ttl = 8w64;
         hdr.ipv4.version = 4w0x4;
@@ -2242,7 +2242,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.ethernet.etherType = 16w0x800;
     }
     @name("f_insert_ipv6_header") action f_insert_ipv6_header(in bit<8> proto) {
-        hdr.ipv6.setValid(true);
+        hdr.ipv6.setValid();
         hdr.ipv6.version = 4w0x6;
         hdr.ipv6.nextHdr = proto;
         hdr.ipv6.hopLimit = 8w64;
@@ -2257,8 +2257,8 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("f_insert_genv_header") action f_insert_genv_header() {
         hdr.inner_ethernet = hdr.ethernet;
-        hdr.udp.setValid(true);
-        hdr.genv.setValid(true);
+        hdr.udp.setValid();
+        hdr.genv.setValid();
         hdr.udp.srcPort = meta.hash_metadata.entropy_hash;
         hdr.udp.dstPort = 16w6081;
         hdr.udp.checksum = 16w0;
@@ -2286,8 +2286,8 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("f_insert_nvgre_header") action f_insert_nvgre_header() {
         hdr.inner_ethernet = hdr.ethernet;
-        hdr.gre.setValid(true);
-        hdr.nvgre.setValid(true);
+        hdr.gre.setValid();
+        hdr.nvgre.setValid();
         hdr.gre.proto = 16w0x6558;
         hdr.gre.recurse = 3w0;
         hdr.gre.flags = 5w0;
@@ -2313,7 +2313,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name("f_insert_gre_header") action f_insert_gre_header() {
-        hdr.gre.setValid(true);
+        hdr.gre.setValid();
     }
     @name("ipv4_gre_rewrite") action ipv4_gre_rewrite() {
         f_insert_gre_header();
@@ -2351,8 +2351,8 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name("f_insert_erspan_t3_header") action f_insert_erspan_t3_header() {
         hdr.inner_ethernet = hdr.ethernet;
-        hdr.gre.setValid(true);
-        hdr.erspan_t3_header.setValid(true);
+        hdr.gre.setValid();
+        hdr.erspan_t3_header.setValid();
         hdr.gre.C = 1w0;
         hdr.gre.R = 1w0;
         hdr.gre.K = 1w0;
@@ -2452,40 +2452,40 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         meta.tunnel_metadata.tunnel_dmac_index = dmac_idx;
     }
     @name("cpu_rx_rewrite") action cpu_rx_rewrite() {
-        hdr.fabric_header.setValid(true);
+        hdr.fabric_header.setValid();
         hdr.fabric_header.headerVersion = 2w0;
         hdr.fabric_header.packetVersion = 2w0;
         hdr.fabric_header.pad1 = 1w0;
         hdr.fabric_header.packetType = 3w5;
-        hdr.fabric_header_cpu.setValid(true);
+        hdr.fabric_header_cpu.setValid();
         hdr.fabric_header_cpu.ingressPort = (bit<16>)meta.ingress_metadata.ingress_port;
         hdr.fabric_header_cpu.ingressIfindex = meta.ingress_metadata.ifindex;
         hdr.fabric_header_cpu.ingressBd = meta.ingress_metadata.bd;
         hdr.fabric_header_cpu.reasonCode = meta.fabric_metadata.reason_code;
-        hdr.fabric_payload_header.setValid(true);
+        hdr.fabric_payload_header.setValid();
         hdr.fabric_payload_header.etherType = hdr.ethernet.etherType;
         hdr.ethernet.etherType = 16w0x9000;
     }
     @name("fabric_unicast_rewrite") action fabric_unicast_rewrite() {
-        hdr.fabric_header.setValid(true);
+        hdr.fabric_header.setValid();
         hdr.fabric_header.headerVersion = 2w0;
         hdr.fabric_header.packetVersion = 2w0;
         hdr.fabric_header.pad1 = 1w0;
         hdr.fabric_header.packetType = 3w1;
         hdr.fabric_header.dstDevice = meta.fabric_metadata.dst_device;
         hdr.fabric_header.dstPortOrGroup = meta.fabric_metadata.dst_port;
-        hdr.fabric_header_unicast.setValid(true);
+        hdr.fabric_header_unicast.setValid();
         hdr.fabric_header_unicast.tunnelTerminate = meta.tunnel_metadata.tunnel_terminate;
         hdr.fabric_header_unicast.routed = meta.l3_metadata.routed;
         hdr.fabric_header_unicast.outerRouted = meta.l3_metadata.outer_routed;
         hdr.fabric_header_unicast.ingressTunnelType = meta.tunnel_metadata.ingress_tunnel_type;
         hdr.fabric_header_unicast.nexthopIndex = meta.l3_metadata.nexthop_index;
-        hdr.fabric_payload_header.setValid(true);
+        hdr.fabric_payload_header.setValid();
         hdr.fabric_payload_header.etherType = hdr.ethernet.etherType;
         hdr.ethernet.etherType = 16w0x9000;
     }
     @name("fabric_multicast_rewrite") action fabric_multicast_rewrite(bit<16> fabric_mgid) {
-        hdr.fabric_header.setValid(true);
+        hdr.fabric_header.setValid();
         hdr.fabric_header.headerVersion = 2w0;
         hdr.fabric_header.packetVersion = 2w0;
         hdr.fabric_header.pad1 = 1w0;
@@ -2494,13 +2494,13 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.fabric_header.dstPortOrGroup = fabric_mgid;
         hdr.fabric_header_multicast.ingressIfindex = meta.ingress_metadata.ifindex;
         hdr.fabric_header_multicast.ingressBd = meta.ingress_metadata.bd;
-        hdr.fabric_header_multicast.setValid(true);
+        hdr.fabric_header_multicast.setValid();
         hdr.fabric_header_multicast.tunnelTerminate = meta.tunnel_metadata.tunnel_terminate;
         hdr.fabric_header_multicast.routed = meta.l3_metadata.routed;
         hdr.fabric_header_multicast.outerRouted = meta.l3_metadata.outer_routed;
         hdr.fabric_header_multicast.ingressTunnelType = meta.tunnel_metadata.ingress_tunnel_type;
         hdr.fabric_header_multicast.mcastGrp = meta.multicast_metadata.mcast_grp;
-        hdr.fabric_payload_header.setValid(true);
+        hdr.fabric_payload_header.setValid();
         hdr.fabric_payload_header.etherType = hdr.ethernet.etherType;
         hdr.ethernet.etherType = 16w0x9000;
     }
@@ -2699,14 +2699,14 @@ control process_vlan_xlate(inout headers hdr, inout metadata meta, inout standar
     @name("set_egress_packet_vlan_untagged") action set_egress_packet_vlan_untagged() {
     }
     @name("set_egress_packet_vlan_tagged") action set_egress_packet_vlan_tagged(bit<12> vlan_id) {
-        hdr.vlan_tag_[0].setValid(true);
+        hdr.vlan_tag_[0].setValid();
         hdr.vlan_tag_[0].etherType = hdr.ethernet.etherType;
         hdr.vlan_tag_[0].vid = vlan_id;
         hdr.ethernet.etherType = 16w0x8100;
     }
     @name("set_egress_packet_vlan_double_tagged") action set_egress_packet_vlan_double_tagged(bit<12> s_tag, bit<12> c_tag) {
-        hdr.vlan_tag_[1].setValid(true);
-        hdr.vlan_tag_[0].setValid(true);
+        hdr.vlan_tag_[1].setValid();
+        hdr.vlan_tag_[0].setValid();
         hdr.vlan_tag_[1].etherType = hdr.ethernet.etherType;
         hdr.vlan_tag_[1].vid = c_tag;
         hdr.vlan_tag_[0].etherType = 16w0x8100;
@@ -4271,9 +4271,9 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
         standard_metadata.egress_spec = (bit<9>)hdr.fabric_header.dstPortOrGroup;
         meta.egress_metadata.bypass = hdr.fabric_header_cpu.txBypass;
         hdr.ethernet.etherType = hdr.fabric_payload_header.etherType;
-        hdr.fabric_header.setValid(false);
-        hdr.fabric_header_cpu.setValid(false);
-        hdr.fabric_payload_header.setValid(false);
+        hdr.fabric_header.setInvalid();
+        hdr.fabric_header_cpu.setInvalid();
+        hdr.fabric_payload_header.setInvalid();
     }
     @name("switch_fabric_unicast_packet") action switch_fabric_unicast_packet() {
         meta.fabric_metadata.fabric_header_present = 1w1;
@@ -4288,9 +4288,9 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
         meta.l3_metadata.routed = hdr.fabric_header_unicast.routed;
         meta.l3_metadata.outer_routed = hdr.fabric_header_unicast.outerRouted;
         hdr.ethernet.etherType = hdr.fabric_payload_header.etherType;
-        hdr.fabric_header.setValid(false);
-        hdr.fabric_header_unicast.setValid(false);
-        hdr.fabric_payload_header.setValid(false);
+        hdr.fabric_header.setInvalid();
+        hdr.fabric_header_unicast.setInvalid();
+        hdr.fabric_payload_header.setInvalid();
     }
     @name("switch_fabric_multicast_packet") action switch_fabric_multicast_packet() {
         meta.fabric_metadata.fabric_header_present = 1w1;
@@ -4304,9 +4304,9 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
         meta.l3_metadata.outer_routed = hdr.fabric_header_multicast.outerRouted;
         meta.intrinsic_metadata.mcast_grp = hdr.fabric_header_multicast.mcastGrp;
         hdr.ethernet.etherType = hdr.fabric_payload_header.etherType;
-        hdr.fabric_header.setValid(false);
-        hdr.fabric_header_multicast.setValid(false);
-        hdr.fabric_payload_header.setValid(false);
+        hdr.fabric_header.setInvalid();
+        hdr.fabric_header_multicast.setInvalid();
+        hdr.fabric_payload_header.setInvalid();
     }
     @name("set_ingress_ifindex_properties") action set_ingress_ifindex_properties() {
     }

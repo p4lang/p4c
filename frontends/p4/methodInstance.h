@@ -85,7 +85,7 @@ class ActionCall final : public MethodInstance {
 
 // A built-in method.
 // These methods are:
-// header.setValid(bool), header.isValid(), stack.push(int), stack.pop(int)
+// header.setValid(), header.setInvalid(), header.isValid(), stack.push(int), stack.pop(int)
 class BuiltInMethod final : public MethodInstance {
     friend class MethodInstance;
     BuiltInMethod(const IR::MethodCallExpression* expr, IR::ID name,

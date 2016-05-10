@@ -157,7 +157,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("decap") action decap_0() {
         hdr.hdr1 = hdr.hdr2;
-        hdr.hdr2.setValid(false);
+        hdr.hdr2.setInvalid();
     }
     @name("noop") action noop_0() {
     }

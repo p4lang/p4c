@@ -612,25 +612,21 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
 
                 cstring prim;
                 auto parameters = new Util::JsonArray();
-                BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
-                auto arg = conv->convert(mc->arguments->at(0));
                 auto obj = conv->convert(builtin->appliedTo);
                 parameters->append(obj);
 
                 if (builtin->name == IR::Type_Header::setValid) {
-                    if (!mc->arguments->at(0)->is<IR::BoolLiteral>()) {
-                        ::error("%1%: argument must be a constant for this target", mc);
-                        continue;
-                    }
-                    auto bl = mc->arguments->at(0)->to<IR::BoolLiteral>();
-                    if (bl->value)
-                        prim = "add_header";
-                    else
-                        prim = "remove_header";
+                    prim = "add_header";
+                } else if (builtin->name == IR::Type_Header::setInvalid) {
+                    prim = "remove_header";
                 } else if (builtin->name == IR::Type_Stack::push_front) {
+                    BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
+                    auto arg = conv->convert(mc->arguments->at(0));
                     prim = "push";
                     parameters->append(arg);
                 } else if (builtin->name == IR::Type_Stack::pop_front) {
+                    BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
+                    auto arg = conv->convert(mc->arguments->at(0));
                     prim = "pop";
                     parameters->append(arg);
                 } else {

@@ -4,7 +4,7 @@ header h {
 
 control c(inout h hdr) {
     action a() {
-        hdr.setValid(false);
+        hdr.setInvalid();
     }
     apply {
     }

@@ -173,7 +173,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         mark_to_drop();
     }
     @name("do_cpu_encap") action do_cpu_encap() {
-        hdr.cpu_header.setValid(true);
+        hdr.cpu_header.setValid();
         hdr.cpu_header.device = 8w0;
         hdr.cpu_header.reason = 8w0xab;
     }

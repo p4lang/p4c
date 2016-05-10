@@ -12,9 +12,8 @@ void ResetHeaders::generateResets(const IR::Type* type, const IR::Expression* ex
             generateResets(ftype, member, resets);
         }
     } else if (type->is<IR::Type_Header>()) {
-        auto method = new IR::Member(expr->srcInfo, expr, IR::Type_Header::setValid);
+        auto method = new IR::Member(expr->srcInfo, expr, IR::Type_Header::setInvalid);
         auto args = new IR::Vector<IR::Expression>();
-        args->push_back(new IR::BoolLiteral(Util::SourceInfo(), false));
         auto mc = new IR::MethodCallExpression(expr->srcInfo, method,
                                                new IR::Vector<IR::Type>(), args);
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);

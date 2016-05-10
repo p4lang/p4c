@@ -905,13 +905,19 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         else
             op = new IR::Sub(primitive->srcInfo, left, right);
         return new IR::AssignmentStatement(primitive->srcInfo, left, op);
-    } else if (primitive->name == "remove_header" || primitive->name == "add_header") {
+    } else if (primitive->name == "remove_header") {
+        OPS_CK(primitive, 1);
+        auto hdr = conv.convert(primitive->operands.at(0));
+        auto method = new IR::Member(Util::SourceInfo(), hdr, IR::ID(IR::Type_Header::setInvalid));
+        auto args = new IR::Vector<IR::Expression>();
+        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
+                                               emptyTypeArguments, args);
+        return new IR::MethodCallStatement(mc->srcInfo, mc);
+    } else if (primitive->name == "add_header") {
         OPS_CK(primitive, 1);
         auto hdr = conv.convert(primitive->operands.at(0));
         auto method = new IR::Member(Util::SourceInfo(), hdr, IR::ID(IR::Type_Header::setValid));
         auto args = new IR::Vector<IR::Expression>();
-        bool value = primitive->name == "add_header";
-        args->push_back(new IR::BoolLiteral(Util::SourceInfo(), value));
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
                                                emptyTypeArguments, args);
         return new IR::MethodCallStatement(mc->srcInfo, mc);

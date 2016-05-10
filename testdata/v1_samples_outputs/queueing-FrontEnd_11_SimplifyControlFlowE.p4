@@ -168,7 +168,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("copy_queueing_data") action copy_queueing_data() {
-        hdr.queueing_hdr.setValid(true);
+        hdr.queueing_hdr.setValid();
         hdr.queueing_hdr.enq_timestamp = meta.queueing_metadata.enq_timestamp;
         hdr.queueing_hdr.enq_qdepth = meta.queueing_metadata.enq_qdepth;
         hdr.queueing_hdr.deq_timedelta = meta.queueing_metadata.deq_timedelta;

@@ -244,6 +244,7 @@ class Type_Union : Type_StructLike {
 class Type_Header : Type_StructLike {
 #emit
     const static cstring setValid;
+    const static cstring setInvalid;
     const static cstring isValid;
 #end
 #nodbprint

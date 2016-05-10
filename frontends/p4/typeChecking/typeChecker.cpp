@@ -1722,12 +1722,10 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 setType(getOriginal(), ctype);
                 setType(expression, ctype);
                 return expression;
-            } else if (expression->member.name == IR::Type_Header::setValid) {
+            } else if (expression->member.name == IR::Type_Header::setValid ||
+                       expression->member.name == IR::Type_Header::setInvalid) {
                 // Built-in method
                 auto params = new IR::IndexedVector<IR::Parameter>();
-                params->push_back(new IR::Parameter(
-                    Util::SourceInfo(), IR::ID("value"), IR::Annotations::empty,
-                    IR::Direction::In, IR::Type_Boolean::get()));
                 auto type = new IR::Type_Method(
                     Util::SourceInfo(), new IR::TypeParameters(), IR::Type_Void::get(),
                     new IR::ParameterList(Util::SourceInfo(), params));

@@ -719,8 +719,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_32_60 = 32w60;
         meta.m.field_32_61 = 32w61;
         meta.m.field_32_62 = 32w62;
-        hdr.h_8_2.setValid(false);
-        hdr.h_32_15.setValid(false);
+        hdr.h_8_2.setInvalid();
+        hdr.h_32_15.setInvalid();
     }
     @name("set_egress_spec") action set_egress_spec(bit<9> port) {
         standard_metadata.egress_spec = port;

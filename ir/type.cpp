@@ -12,6 +12,7 @@ const cstring IR::Type_Stack::push_front = "push_front";
 const cstring IR::Type_Stack::pop_front = "pop_front";
 const cstring IR::Type_Header::isValid = "isValid";
 const cstring IR::Type_Header::setValid = "setValid";
+const cstring IR::Type_Header::setInvalid = "setInvalid";
 
 const IR::ID IR::Type_Table::hit = ID("hit");
 const IR::ID IR::Type_Table::action_run = ID("action_run");

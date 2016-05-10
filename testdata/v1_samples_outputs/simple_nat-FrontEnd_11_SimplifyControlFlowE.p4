@@ -241,7 +241,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("do_rewrites") action do_rewrites(bit<48> smac) {
-        hdr.cpu_header.setValid(false);
+        hdr.cpu_header.setInvalid();
         hdr.ethernet.srcAddr = smac;
         hdr.ipv4.srcAddr = meta.meta.ipv4_sa;
         hdr.ipv4.dstAddr = meta.meta.ipv4_da;
@@ -252,7 +252,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         mark_to_drop();
     }
     @name("do_cpu_encap") action do_cpu_encap() {
-        hdr.cpu_header.setValid(true);
+        hdr.cpu_header.setValid();
         hdr.cpu_header.preamble = 64w0;
         hdr.cpu_header.device = 8w0;
         hdr.cpu_header.reason = 8w0xab;

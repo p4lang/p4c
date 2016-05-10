@@ -157,7 +157,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("decap") action decap() {
         hdr.hdr1 = hdr.hdr2;
-        hdr.hdr2.setValid(false);
+        hdr.hdr2.setInvalid();
     }
     @name("noop") action noop() {
     }
