@@ -178,6 +178,10 @@ class CallsExit : public Inspector {
         if (callers->find(obj) != callers->end())
             callsExit = true;
     }
+    void end_apply(const IR::Node* node) override {
+        if (callsExit)
+            LOG3("Exit called in " << node);
+    }
 };
 }  // namespace
 
@@ -283,11 +287,17 @@ const IR::Node* RemoveExits::preorder(IR::BlockStatement* statement) {
 
 const IR::Node* RemoveExits::preorder(IR::IfStatement* statement) {
     push();
+    auto rf = Returns::No;
+
+    CallsExit ce(refMap, typeMap, &callsExit);
+    (void)statement->condition->apply(ce);
+    if (ce.callsExit)
+        rf = Returns::Maybe;
+
     visit(statement->ifTrue);
     if (statement->ifTrue == nullptr)
         statement->ifTrue = new IR::EmptyStatement(Util::SourceInfo());
     auto rt = hasReturned();
-    auto rf = Returns::No;
     pop();
     if (statement->ifFalse != nullptr) {
         push();
@@ -307,6 +317,10 @@ const IR::Node* RemoveExits::preorder(IR::IfStatement* statement) {
 
 const IR::Node* RemoveExits::preorder(IR::SwitchStatement* statement) {
     auto r = Returns::No;
+    CallsExit ce(refMap, typeMap, &callsExit);
+    (void)statement->expression->apply(ce);
+    if (ce.callsExit)
+        r = Returns::Maybe;
     for (auto c : *statement->cases) {
         push();
         visit(c);
@@ -321,12 +335,18 @@ const IR::Node* RemoveExits::preorder(IR::SwitchStatement* statement) {
 }
 
 const IR::Node* RemoveExits::preorder(IR::AssignmentStatement* statement) {
-    // TODO
+    CallsExit ce(refMap, typeMap, &callsExit);
+    (void)statement->apply(ce);
+    if (ce.callsExit)
+        set(Returns::Maybe);
     return statement;
 }
 
 const IR::Node* RemoveExits::preorder(IR::MethodCallStatement* statement) {
-    // TODO
+    CallsExit ce(refMap, typeMap, &callsExit);
+    (void)statement->apply(ce);
+    if (ce.callsExit)
+        set(Returns::Maybe);
     return statement;
 }
 

@@ -68,6 +68,7 @@ class RemoveReturns : public Transform {
 class RemoveExits : public RemoveReturns {
     std::set<const IR::Node*> callsExit;  // actions, tables
     TypeMap* typeMap;
+    // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
  public:
     explicit RemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :
             RemoveReturns(refMap, "hasExited"), typeMap(typeMap) { CHECK_NULL(typeMap); }
