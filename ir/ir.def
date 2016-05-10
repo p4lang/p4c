@@ -114,17 +114,14 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
 }
 
 class P4Action : Declaration, ISimpleNamespace, IAnnotated {
-    Annotations        annotations;
-    ParameterList      parameters;
-    IndexedVector<StatOrDecl> body;
+    Annotations    annotations;
+    ParameterList  parameters;
+    BlockStatement body;
 #emit
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const
-    { return body->getDeclarations(); }
-    const IDeclaration* getDeclByName(cstring name) const override
-    { return body->getDeclaration(name); }
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const;
+    const IDeclaration* getDeclByName(cstring name) const override;
     const Annotations* getAnnotations() const override { return annotations; }
 #end
-    validate{ body->check_null(); }
 }
 
 // Not a subclass of IDeclaration

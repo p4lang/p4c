@@ -171,7 +171,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     CHECK_NULL(clone);
     BUG_CHECK(clone->is<IR::P4Action>(), "%1%: not an action", clone);
     auto actclone = clone->to<IR::P4Action>();
-    body->append(*actclone->body);
+    body->append(*actclone->body->components);
 
     // copy out and inout parameters
     it = statement->methodCall->arguments->begin();

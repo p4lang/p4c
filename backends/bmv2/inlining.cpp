@@ -120,7 +120,7 @@ const IR::Node* SimpleActionsInliner::preorder(IR::MethodCallStatement* statemen
     CHECK_NULL(clone);
     BUG_CHECK(clone->is<IR::P4Action>(), "%1%: not an action", clone);
     auto actclone = clone->to<IR::P4Action>();
-    auto result = new IR::BlockStatement(actclone->body->srcInfo, actclone->body);
+    auto result = actclone->body;
     LOG1("Replacing " << statement << " with " << result);
     return result;
 }

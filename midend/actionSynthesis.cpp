@@ -140,13 +140,13 @@ const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
 const IR::Statement* SynthesizeActions::createAction(const IR::Statement* toAdd) {
     changes = true;
     auto name = refMap->newName("act");
-    const IR::IndexedVector<IR::StatOrDecl>* body;
+    const IR::BlockStatement* body;
     if (toAdd->is<IR::BlockStatement>()) {
-        body = toAdd->to<IR::BlockStatement>()->components;
+        body = toAdd->to<IR::BlockStatement>();
     } else {
         auto b = new IR::IndexedVector<IR::StatOrDecl>();
         b->push_back(toAdd);
-        body = b;
+        body = new IR::BlockStatement(toAdd->srcInfo, b);
     }
     auto action = new IR::P4Action(Util::SourceInfo(), name,
                                    IR::Annotations::empty,

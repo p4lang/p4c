@@ -892,7 +892,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
             params->append(param);
         }
         auto body = mkArrayField(jact, "primitives");
-        convertActionBody(action->body, body, fieldLists, calculations, learn_lists);
+        convertActionBody(action->body->components, body, fieldLists, calculations, learn_lists);
         result->append(jact);
     }
     return result;

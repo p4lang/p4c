@@ -8,7 +8,8 @@ const IR::Node* SimplifyControlFlow::postorder(IR::BlockStatement* statement) {
     auto statancestor = findContext<IR::Statement>();
     if (parent->is<IR::SwitchCase>() ||
         parent->is<IR::P4Control>() ||
-        parent->is<IR::Function>()) {
+        parent->is<IR::Function>() ||
+        parent->is<IR::P4Action>()) {
         // Cannot remove block from switch or toplevel control block
         return statement;
     }

@@ -52,7 +52,8 @@ class LocalizeActions : public Transform {
     GlobalActionReplacements* repl;
  public:
     LocalizeActions(ReferenceMap* refMap, GlobalActionReplacements* repl)
-    : refMap(refMap), repl(repl) { CHECK_NULL(refMap); CHECK_NULL(repl); }
+            : refMap(refMap), repl(repl)
+    { visitDagOnce = false; CHECK_NULL(refMap); CHECK_NULL(repl); }
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::PathExpression* expression) override;
 };
@@ -106,7 +107,8 @@ class FindRepeatedActionUses : public Inspector {
 class DuplicateActions : public Transform {
     ActionReplacement* repl;
  public:
-    explicit DuplicateActions(ActionReplacement* repl) : repl(repl) { CHECK_NULL(repl); }
+    explicit DuplicateActions(ActionReplacement* repl) : repl(repl)
+    { visitDagOnce = false; CHECK_NULL(repl); }
     const IR::Node* postorder(IR::PathExpression* expression) override;
     const IR::Node* postorder(IR::P4Control* control) override;
 };

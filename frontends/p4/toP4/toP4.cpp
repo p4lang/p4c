@@ -982,11 +982,7 @@ bool ToP4::preorder(const IR::P4Action * c) {
     builder.append(c->name);
     visit(c->parameters);
     builder.spc();
-    builder.blockStart();
-    setVecSep("\n", "\n");
     visit(c->body);
-    doneVec();
-    builder.blockEnd(false);
     return false;
 }
 

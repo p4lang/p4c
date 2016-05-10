@@ -42,7 +42,7 @@ class RemoveReturns : public Transform {
 
  public:
     explicit RemoveReturns(P4::ReferenceMap* refMap, cstring varName = "hasReturned") :
-            refMap(refMap), variableName(varName) { CHECK_NULL(refMap); }
+            refMap(refMap), variableName(varName) { visitDagOnce = false; CHECK_NULL(refMap); }
 
     const IR::Node* preorder(IR::Function* function) override
     { prune(); return function; }  // We leave returns in functions alone
@@ -58,6 +58,27 @@ class RemoveReturns : public Transform {
     { prune(); return parser; }
 };
 
+#if 0
+class ExitMap {
+ protected:
+    std::set<const IR::Node*> callsExit;  // actions, tables, method calls
+ public:
+    void callsExit(const IR::Node* node);
+    bool doesCallExit(const IR::Node* node)
+    { return callsExit.find(node) != callsExit.end(); }
+};
+
+class FindExits : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+    ExitMap* exitMap;
+ public:
+    FindExits(ReferenceMap* refMap, TypeMap* typeMap, ExitMap* exitMap) :
+            refMap(refMap), typeMap(typeMap), exitMap(exitMap)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(exitMap); }
+};
+#endif
+
 // This removes "exit" calls.  It is significantly more involved than return removal,
 // since an exit in an action causes the calling control to terminate.
 // This pass assumes that each statement in a control block can
@@ -66,18 +87,19 @@ class RemoveReturns : public Transform {
 // (E.g., it does not handle:
 // if (t1.apply().hit && t2.apply().hit) { ... }
 class RemoveExits : public RemoveReturns {
-    std::set<const IR::Node*> callsExit;  // actions, tables
     TypeMap* typeMap;
     // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
+    std::set<const IR::Node*> callsExit;  // actions, tables, method calls
+    void callExit(const IR::Node* node);
  public:
-    explicit RemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :
-            RemoveReturns(refMap, "hasExited"), typeMap(typeMap) { CHECK_NULL(typeMap); }
+    RemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :
+            RemoveReturns(refMap, "hasExited"), typeMap(typeMap)
+    { visitDagOnce = false; CHECK_NULL(typeMap); }
 
     const IR::Node* preorder(IR::ExitStatement* action) override;
     const IR::Node* preorder(IR::P4Table* table) override;
 
     const IR::Node* preorder(IR::BlockStatement* statement) override;
-    const IR::Node* preorder(IR::ReturnStatement* statement) override;
     const IR::Node* preorder(IR::IfStatement* statement) override;
     const IR::Node* preorder(IR::SwitchStatement* statement) override;
     const IR::Node* preorder(IR::AssignmentStatement* statement) override;
@@ -86,6 +108,17 @@ class RemoveExits : public RemoveReturns {
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::P4Control* control) override;
 };
+
+#if 0
+class RemoveAllExists : public PassManager {
+    ExitMap exitMap;
+ public:
+    RemoveAllExits(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.emplace_back(new FindExits(refMap, typeMap, &exitMap));
+        passes.emplace_back(new RemoveExits(refMap, typeMap, &exitMap));
+    }
+};
+#endif
 
 }  // namespace P4
 

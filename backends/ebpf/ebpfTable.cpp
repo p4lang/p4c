@@ -37,9 +37,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
 
     bool preorder(const IR::P4Action* act) {
         action = act;
-        setVecSep("\n", "\n");
         visit(action->body);
-        doneVec();
         return false;
     }
 };  // ActionTranslationVisitor
@@ -245,11 +243,10 @@ void EBPFTable::runAction(CodeBuilder* builder, cstring valueName) {
         builder->appendFormat("case %s: ", name);
         builder->newline();
         builder->emitIndent();
-        builder->blockStart();
 
         ActionTranslationVisitor visitor(builder, valueName, program);
         action->apply(visitor);
-        builder->blockEnd(true);
+        builder->newline();
         builder->emitIndent();
         builder->appendLine("break;");
     }

@@ -157,4 +157,10 @@ void IR::ActionList::checkDuplicates() const {
     }
 }
 
+Util::Enumerator<const IDeclaration*>* P4Action::getDeclarations() const
+{ return body->getDeclarations(); }
+
+const IDeclaration* P4Action::getDeclByName(cstring name) const
+{ return body->components->getDeclaration(name); }
+
 }  // namespace IR
