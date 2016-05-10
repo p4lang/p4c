@@ -83,7 +83,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
-        new P4::RemoveExits(&refMap, &typeMap),  // FIXME: currently incorrect
+        new P4::RemoveExits(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),

@@ -293,29 +293,43 @@ const IR::Node* RemoveExits::preorder(IR::BlockStatement* statement) {
     return new IR::BlockStatement(statement->srcInfo, body);
 }
 
+// if (t.apply.hit()) stat1;
+// becomes
+// if (t.apply().hit()) if (!hasExited) stat1;
 const IR::Node* RemoveExits::preorder(IR::IfStatement* statement) {
     push();
-    auto rf = Returns::No;
 
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->condition->apply(ce);
-    if (ce.callsExit)
-        rf = Returns::Maybe;
+    auto rcond = ce.callsExit ? Returns::Maybe : Returns::No;
 
     visit(statement->ifTrue);
     if (statement->ifTrue == nullptr)
         statement->ifTrue = new IR::EmptyStatement(Util::SourceInfo());
+    if (ce.callsExit) {
+        auto path = new IR::PathExpression(returnVar);
+        auto condition = new IR::LNot(Util::SourceInfo(), path);
+        auto newif = new IR::IfStatement(Util::SourceInfo(), condition, statement->ifTrue, nullptr);
+        statement->ifTrue = newif;
+    }
     auto rt = hasReturned();
+    auto rf = Returns::No;
     pop();
     if (statement->ifFalse != nullptr) {
         push();
         visit(statement->ifFalse);
+        if (ce.callsExit && statement->ifFalse != nullptr) {
+            auto path = new IR::PathExpression(returnVar);
+            auto condition = new IR::LNot(Util::SourceInfo(), path);
+            auto newif = new IR::IfStatement(Util::SourceInfo(), condition, statement->ifFalse, nullptr);
+            statement->ifFalse = newif;
+        }
         rf = hasReturned();
         pop();
     }
-    if (rt == Returns::Yes && rf == Returns::Yes)
+    if (rcond == Returns::Yes || (rt == Returns::Yes && rf == Returns::Yes))
         set(Returns::Yes);
-    else if (rt == Returns::No && rf == Returns::No)
+    else if (rcond == Returns::No && rt == Returns::No && rf == Returns::No)
         set(Returns::No);
     else
         set(Returns::Maybe);
@@ -327,18 +341,38 @@ const IR::Node* RemoveExits::preorder(IR::SwitchStatement* statement) {
     auto r = Returns::No;
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->expression->apply(ce);
-    if (ce.callsExit)
+
+    IR::Vector<IR::SwitchCase> *cases = nullptr;
+    if (ce.callsExit) {
         r = Returns::Maybe;
+        cases = new IR::Vector<IR::SwitchCase>();
+    }
     for (auto c : *statement->cases) {
         push();
         visit(c);
         if (hasReturned() != Returns::No)
             // this is conservative: we don't check if we cover all labels.
             r = Returns::Maybe;
+        if (cases != nullptr) {
+            IR::Statement* stat = nullptr;
+            if (c->statement != nullptr) {
+                auto path = new IR::PathExpression(returnVar);
+                auto condition = new IR::LNot(Util::SourceInfo(), path);
+                auto newif = new IR::IfStatement(Util::SourceInfo(), condition,
+                                                 c->statement, nullptr);
+                auto vec = new IR::IndexedVector<IR::StatOrDecl>();
+                vec->push_back(newif);
+                stat = new IR::BlockStatement(newif->srcInfo, vec);
+            }
+            auto swcase = new IR::SwitchCase(c->srcInfo, c->label, stat);
+            cases->push_back(swcase);
+        }
         pop();
     }
     set(r);
     prune();
+    if (cases != nullptr)
+        statement->cases = cases;
     return statement;
 }
 
