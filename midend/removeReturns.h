@@ -58,27 +58,6 @@ class RemoveReturns : public Transform {
     { prune(); return parser; }
 };
 
-#if 0
-class ExitMap {
- protected:
-    std::set<const IR::Node*> callsExit;  // actions, tables, method calls
- public:
-    void callsExit(const IR::Node* node);
-    bool doesCallExit(const IR::Node* node)
-    { return callsExit.find(node) != callsExit.end(); }
-};
-
-class FindExits : public Inspector {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
-    ExitMap* exitMap;
- public:
-    FindExits(ReferenceMap* refMap, TypeMap* typeMap, ExitMap* exitMap) :
-            refMap(refMap), typeMap(typeMap), exitMap(exitMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(exitMap); }
-};
-#endif
-
 // This removes "exit" calls.  It is significantly more involved than return removal,
 // since an exit in an action causes the calling control to terminate.
 // This pass assumes that each statement in a control block can
@@ -108,17 +87,6 @@ class RemoveExits : public RemoveReturns {
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::P4Control* control) override;
 };
-
-#if 0
-class RemoveAllExists : public PassManager {
-    ExitMap exitMap;
- public:
-    RemoveAllExits(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.emplace_back(new FindExits(refMap, typeMap, &exitMap));
-        passes.emplace_back(new RemoveExits(refMap, typeMap, &exitMap));
-    }
-};
-#endif
 
 }  // namespace P4
 

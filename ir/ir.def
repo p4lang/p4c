@@ -118,7 +118,7 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated {
     ParameterList  parameters;
     BlockStatement body;
 #emit
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const;
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override;
     const IDeclaration* getDeclByName(cstring name) const override;
     const Annotations* getAnnotations() const override { return annotations; }
 #end
