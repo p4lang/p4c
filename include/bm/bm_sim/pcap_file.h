@@ -11,7 +11,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * -*-C++-*-
  */
 
 #ifndef BM_BM_SIM_PCAP_FILE_H_
@@ -36,13 +35,13 @@ namespace bm {
 class PcapPacket {
  private:
   unsigned port;  // port index where packet originated
-  const u_char* data;  // type defined in pcap.h
+  const u_char *data;  // type defined in pcap.h
   // The packet is only valid as long as the cursor
   // in the PcapFileIn is not changed, since the pcap_header*
   // points to a buffer returned by the pcap library.
-  const pcap_pkthdr* pcap_header;
+  const pcap_pkthdr *pcap_header;
 
-  PcapPacket(unsigned port, const u_char* data, const pcap_pkthdr* pcap_header)
+  PcapPacket(unsigned port, const u_char *data, const pcap_pkthdr *pcap_header)
     : port(port),
       data(data),
       pcap_header(pcap_header) { }
@@ -51,11 +50,11 @@ class PcapPacket {
   friend class PcapFileIn;
 
  public:
-  static std::string timevalToString(const struct timeval* tv);
+  static std::string timevalToString(const struct timeval *tv);
 
-  const char* getData() const { return (const char*)data; }
-  unsigned getLength() const { return (unsigned)pcap_header->len; }
-  const struct timeval* getTime() const { return &pcap_header->ts; }
+  const char *getData() const { return reinterpret_cast<const char *>(data); }
+  unsigned getLength() const { return static_cast<unsigned>(pcap_header->len); }
+  const struct timeval *getTime() const { return &pcap_header->ts; }
   unsigned getPort() const { return port; }
 };
 
@@ -67,10 +66,9 @@ class PcapFileBase {
   PcapFileBase(unsigned port, std::string filename);
 };
 
-/* C++ wrapper around a pcap file that is used for reading:
-   A stream-like abstraction of a PCAP (Packet capture) file.
-   Assumes that all packets in a file are sorted on time.
-*/
+// C++ wrapper around a pcap file that is used for reading:
+// A stream-like abstraction of a PCAP (Packet capture) file.
+// Assumes that all packets in a file are sorted on time.
 class PcapFileIn : public PcapFileBase {
  public:
   PcapFileIn(unsigned port, std::string filename);
@@ -87,9 +85,9 @@ class PcapFileIn : public PcapFileBase {
   bool atEOF() const;
 
  private:
-  pcap_t* pcap;
-  pcap_pkthdr* current_header;
-  const u_char* current_data;
+  pcap_t *pcap;
+  pcap_pkthdr *current_header;
+  const u_char *current_data;
 
   enum class State {
     Uninitialized,
@@ -116,11 +114,11 @@ class PcapFileOut :
   // port is not really used
   PcapFileOut(unsigned port, std::string filename);
   virtual ~PcapFileOut();
-  void writePacket(const char* data, unsigned length);
+  void writePacket(const char *data, unsigned length);
 
  private:
-  pcap_t* pcap;
-  pcap_dumper_t* dumper;
+  pcap_t *pcap;
+  pcap_dumper_t *dumper;
 
   PcapFileOut(PcapFileOut const& ) = delete;
   PcapFileOut& operator=(PcapFileOut const&) = delete;
@@ -157,8 +155,7 @@ class PcapFilesReader :
   struct timeval startTime;
   // Time of first packet across all files
   struct timeval firstPacketTime;
-  // constant zero (could be static, but it's easier to
-  // initialize it this way)
+  // constant zero (could be static, but it's easier to initialize it this way)
   struct timeval zero;
 
   // index of next file to read packet from
@@ -166,7 +163,7 @@ class PcapFilesReader :
   bool started;
 
   void scan();
-  void schedulePacket(unsigned index, const struct timeval* delay);
+  void schedulePacket(unsigned index, const struct timeval *delay);
   void timerFired();  // send a scheduled packet
 
   PcapFilesReader(PcapFilesReader const& ) = delete;
@@ -174,7 +171,7 @@ class PcapFilesReader :
 
   // Function to call when a packet is read
   PacketHandler handler;
-  void* cookie;
+  void *cookie;
 };
 
 
@@ -184,7 +181,7 @@ class PcapFilesWriter : public PacketReceiverIface {
   PcapFilesWriter();
   // Add a file corresponding to the specified port.
   void addFile(unsigned port, std::string file);
-  void send_packet(int port_num, const char* buffer, int len);
+  void send_packet(int port_num, const char *buffer, int len);
 
  private:
   std::unordered_map<unsigned, std::unique_ptr<PcapFileOut>> files;
