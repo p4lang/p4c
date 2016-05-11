@@ -2,7 +2,7 @@
 #define _BACKENDS_BMV2_LOWER_H_
 
 #include "ir/ir.h"
-#include "frontends/p4/evaluator/blockMap.h"
+#include "frontends/common/typeMap.h"
 
 namespace BMV2 {
 

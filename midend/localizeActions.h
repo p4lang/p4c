@@ -40,7 +40,8 @@ class FindGlobalActionUses : public Inspector {
     std::set<const IR::P4Action*> globalActions;
  public:
     FindGlobalActionUses(ReferenceMap* refMap, GlobalActionReplacements* repl)
-    : refMap(refMap), repl(repl) { CHECK_NULL(refMap); CHECK_NULL(repl); }
+    : refMap(refMap), repl(repl)
+    { CHECK_NULL(refMap); CHECK_NULL(repl); setName("FindGlobalActionUses"); }
     bool preorder(const IR::PathExpression* path) override;
     bool preorder(const IR::P4Action* action) override;
 };
@@ -52,7 +53,9 @@ class LocalizeActions : public Transform {
     GlobalActionReplacements* repl;
  public:
     LocalizeActions(ReferenceMap* refMap, GlobalActionReplacements* repl)
-    : refMap(refMap), repl(repl) { CHECK_NULL(refMap); CHECK_NULL(repl); }
+            : refMap(refMap), repl(repl) {
+        visitDagOnce = false; CHECK_NULL(refMap); CHECK_NULL(repl);
+        setName("LocalizeActions"); }
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::PathExpression* expression) override;
 };
@@ -97,7 +100,9 @@ class FindRepeatedActionUses : public Inspector {
     ActionReplacement* repl;
  public:
     FindRepeatedActionUses(ReferenceMap* refMap, ActionReplacement* repl)
-            : refMap(refMap), repl(repl) { CHECK_NULL(refMap); CHECK_NULL(repl); }
+            : refMap(refMap), repl(repl) {
+        CHECK_NULL(refMap); CHECK_NULL(repl);
+        setName("FindRepeatedActionUses"); }
     bool preorder(const IR::PathExpression* expression) override;
 };
 
@@ -106,7 +111,8 @@ class FindRepeatedActionUses : public Inspector {
 class DuplicateActions : public Transform {
     ActionReplacement* repl;
  public:
-    explicit DuplicateActions(ActionReplacement* repl) : repl(repl) { CHECK_NULL(repl); }
+    explicit DuplicateActions(ActionReplacement* repl) : repl(repl)
+    { visitDagOnce = false; CHECK_NULL(repl); setName("DuplicateActions"); }
     const IR::Node* postorder(IR::PathExpression* expression) override;
     const IR::Node* postorder(IR::P4Control* control) override;
 };

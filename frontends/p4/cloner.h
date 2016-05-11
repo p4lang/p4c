@@ -10,6 +10,7 @@ namespace P4 {
 // care of this.
 class Cloner : public Transform {
  public:
+    Cloner() { setName("Cloner"); }
     const IR::Node* clone(const IR::Node* node)
     { return node->apply(*this); }
     const IR::Node* postorder(IR::PathExpression* path) override

@@ -70,10 +70,7 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
     if (caller == nullptr) {
         if (findContext<IR::P4Parser>() != nullptr) {
             ::error("%1%: action invocation in parser not supported", mcs);
-        } else if (findContext<IR::P4Control>() != nullptr) {
-            if (!allowDirectActionCalls)
-                BUG("%1%: direct action invocation not yet implemented", mcs);
-        } else {
+        } else if (findContext<IR::P4Control>() == nullptr) {
             BUG("%1%: unexpected action invocation", mcs);
         }
         return;
@@ -171,7 +168,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     CHECK_NULL(clone);
     BUG_CHECK(clone->is<IR::P4Action>(), "%1%: not an action", clone);
     auto actclone = clone->to<IR::P4Action>();
-    body->append(*actclone->body);
+    body->append(*actclone->body->components);
 
     // copy out and inout parameters
     it = statement->methodCall->arguments->begin();

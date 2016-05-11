@@ -1,4 +1,3 @@
-#include "blockMap.h"
 #include "evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/constantFolding.h"
@@ -8,7 +7,9 @@ namespace P4 {
 Visitor::profile_t Evaluator::init_apply(const IR::Node* node) {
     BUG_CHECK(node->is<IR::P4Program>(),
               "Evaluation should be invoked on a program, not a %1%", node);
-    // dump(node);
+    // In fact, some passes are intentionally run with stale maps...
+    // refMap->validateMap(node);
+    // typeMap->validateMap(node);
     return Inspector::init_apply(node);
 }
 
@@ -50,19 +51,17 @@ const IR::CompileTimeValue* Evaluator::getValue(const IR::Node* node) const {
 
 bool Evaluator::preorder(const IR::P4Program* program) {
     LOG1("Evaluating " << program);
-    blockMap->setProgram(program);
-    auto toplevel = new IR::ToplevelBlock(program->srcInfo, program);
-    blockMap->toplevelBlock = toplevel;
+    toplevelBlock = new IR::ToplevelBlock(program->srcInfo, program);
 
-    pushBlock(toplevel);
+    pushBlock(toplevelBlock);
     for (auto d : *program->declarations) {
         if (d->is<IR::Type_Declaration>())
             // we will visit various containers and externs only when we instantiated them
             continue;
         visit(d);
     }
-    popBlock(toplevel);
-    LOG1("BlockMap:" << std::endl << blockMap);
+    popBlock(toplevelBlock);
+    LOG1(toplevelBlock);
     return false;
 }
 
@@ -77,7 +76,7 @@ bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
 
 std::vector<const IR::CompileTimeValue*>*
 Evaluator::evaluateArguments(const IR::Vector<IR::Expression>* arguments, IR::Block* context) {
-    P4::ConstantFolding cf(blockMap->refMap, nullptr);
+    P4::ConstantFolding cf(refMap, nullptr);
     auto values = new std::vector<const IR::CompileTimeValue*>();
     pushBlock(context);
     for (auto e : *arguments) {
@@ -110,7 +109,7 @@ Evaluator::processConstructor(
     const IR::IDeclaration* decl;
     if (type->is<IR::Type_Name>()) {
         auto tn = type->to<IR::Type_Name>();
-        decl = blockMap->refMap->getDeclaration(tn->path, true);
+        decl = refMap->getDeclaration(tn->path, true);
     } else {
         BUG_CHECK(type->is<IR::IDeclaration>(), "%1%: expected a type declaration", type);
         decl = type->to<IR::IDeclaration>();
@@ -180,7 +179,7 @@ Evaluator::processConstructor(
 
 bool Evaluator::preorder(const IR::Member* expression) {
     LOG1("Evaluating " << expression);
-    auto type = blockMap->typeMap->getType(expression->expr, true);
+    auto type = typeMap->getType(expression->expr, true);
     const IR::IDeclaration* decl = nullptr;
     if (type->is<IR::IGeneralNamespace>()) {
         auto ns = type->to<IR::IGeneralNamespace>();
@@ -197,7 +196,7 @@ bool Evaluator::preorder(const IR::Member* expression) {
 
 bool Evaluator::preorder(const IR::PathExpression* expression) {
     LOG1("Evaluating " << expression);
-    auto decl = blockMap->refMap->getDeclaration(expression->path, true);
+    auto decl = refMap->getDeclaration(expression->path, true);
     auto val = getValue(decl->getNode());
     if (val != nullptr)
         setValue(expression, val);
@@ -206,7 +205,7 @@ bool Evaluator::preorder(const IR::PathExpression* expression) {
 
 bool Evaluator::preorder(const IR::Declaration_Instance* inst) {
     LOG1("Evaluating " << inst);
-    auto type = blockMap->typeMap->getType(inst, true);
+    auto type = typeMap->getType(inst, true);
     auto block = processConstructor(inst, inst->type, type, inst->arguments);
     if (block != nullptr)
         setValue(inst, block);
@@ -215,7 +214,7 @@ bool Evaluator::preorder(const IR::Declaration_Instance* inst) {
 
 bool Evaluator::preorder(const IR::ConstructorCallExpression* expr) {
     LOG1("Evaluating " << expr);
-    auto type = blockMap->typeMap->getType(expr, true);
+    auto type = typeMap->getType(expr, true);
     auto block = processConstructor(expr, expr->constructedType, type, expr->arguments);
     if (block != nullptr)
         setValue(expr, block);
@@ -244,12 +243,12 @@ bool Evaluator::preorder(const IR::TableProperty* prop) {
 
 //////////////////////////////////////
 
-EvaluatorPass::EvaluatorPass(bool anyOrder) :
-        refMap(new ReferenceMap), typeMap(new TypeMap()), blockMap(new BlockMap(refMap, typeMap)) {
+EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
     setName("Evaluator");
+    evaluator = new P4::Evaluator(refMap, typeMap);
     setStopOnError(true);
-    passes.emplace_back(new P4::TypeChecking(refMap, typeMap, anyOrder));
-    passes.emplace_back(new P4::Evaluator(blockMap));
+    passes.emplace_back(new P4::TypeChecking(refMap, typeMap, isv1));
+    passes.emplace_back(evaluator);
 }
 
 }  // namespace P4

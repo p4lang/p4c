@@ -24,7 +24,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
         auto newName = refMap->newName(action->name);
         Cloner cloner;
         auto replBody = cloner.clone(action->body);
-        BUG_CHECK(replBody->is<IR::Vector<IR::StatOrDecl>>(), "%1%: unexpected result", replBody);
+        BUG_CHECK(replBody->is<IR::BlockStatement>(), "%1%: unexpected result", replBody);
 
         auto annos = action->annotations;
         if (annos == nullptr)
@@ -33,7 +33,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
                                   new IR::StringLiteral(Util::SourceInfo(), action->name));
         auto replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
                                             annos, action->parameters,
-                                            replBody->to<IR::IndexedVector<IR::StatOrDecl>>());
+                                            replBody->to<IR::BlockStatement>());
         repl->addReplacement(action, control, replacement);
     }
     return false;
@@ -115,7 +115,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
     auto newName = refMap->newName(action->name);
     Cloner cloner;
     auto replBody = cloner.clone(action->body);
-    BUG_CHECK(replBody->is<IR::Vector<IR::StatOrDecl>>(), "%1%: unexpected result", replBody);
+    BUG_CHECK(replBody->is<IR::BlockStatement>(), "%1%: unexpected result", replBody);
 
     auto annos = action->annotations;
     if (annos == nullptr)
@@ -124,7 +124,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
                               new IR::StringLiteral(Util::SourceInfo(), action->name));
     auto replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
                                         annos, action->parameters,
-                                        replBody->to<IR::IndexedVector<IR::StatOrDecl>>());
+                                        replBody->to<IR::BlockStatement>());
     repl->addReplacement(expression, action, replacement);
     return false;
 }

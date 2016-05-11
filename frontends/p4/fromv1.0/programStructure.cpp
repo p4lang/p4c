@@ -1254,7 +1254,8 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
     // Save the original action name in an annotation
     auto annos = addNameAnnotation(action->name);
     auto result = new IR::P4Action(action->srcInfo, newName, annos,
-                                   new IR::ParameterList(params), body);
+                                   new IR::ParameterList(params),
+                                   new IR::BlockStatement(body->srcInfo, body));
     return result;
 }
 

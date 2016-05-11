@@ -3,7 +3,9 @@
 
 #include "lib/ordered_map.h"
 #include "ir/ir.h"
-#include "frontends/p4/evaluator/blockMap.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/typeMap.h"
+#include "frontends/p4/evaluator/evaluator.h"
 
 // These are various data structures needed by the parser/parser and control/control inliners.
 
@@ -93,12 +95,12 @@ class InlineWorkList {
 // as inlining is performed (since callers change into new nodes).
 class AbstractInliner : public Transform {
  protected:
-    P4::InlineWorkList* list;
-    P4::InlineSummary*  toInline;
+    InlineWorkList* list;
+    InlineSummary*  toInline;
     bool                p4v1;
     AbstractInliner() : list(nullptr), toInline(nullptr), p4v1(false) {}
  public:
-    void prepare(P4::InlineWorkList* list, P4::InlineSummary* toInline, bool p4v1) {
+    void prepare(InlineWorkList* list, InlineSummary* toInline, bool p4v1) {
         CHECK_NULL(list); CHECK_NULL(toInline);
         this->list = list;
         this->toInline = toInline;
@@ -114,23 +116,26 @@ class AbstractInliner : public Transform {
 
 // Repeatedly invokes an abstract inliner with work from the worklist
 class InlineDriver : public Transform {
-    P4::InlineWorkList*  toInline;
+    InlineWorkList*  toInline;
     AbstractInliner*     inliner;
     bool                 p4v1;
  public:
-    explicit InlineDriver(P4::InlineWorkList* toInline, AbstractInliner* inliner, bool p4v1) :
+    explicit InlineDriver(InlineWorkList* toInline, AbstractInliner* inliner, bool p4v1) :
             toInline(toInline), inliner(inliner), p4v1(p4v1)
-    { CHECK_NULL(toInline); CHECK_NULL(inliner); }
+    { CHECK_NULL(toInline); CHECK_NULL(inliner); setName("InlineDriver"); }
 
     // Not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.
     const IR::Node* preorder(IR::P4Program* program) override;
 };
 
-// Must be run after an evaluator; uses the blockMap to discover caller/callee relationships.
+// Must be run after an evaluator; uses the blocks to discover caller/callee relationships.
 class DiscoverInlining : public Inspector {
-    P4::InlineWorkList* inlineList;  // deposit result here
-    P4::BlockMap* blockMap;          // input
+    InlineWorkList* inlineList;   // output: result is here
+    ReferenceMap*   refMap;       // input
+    TypeMap*        typeMap;      // input
+    P4::Evaluator*  evaluator;    // used to obtain the toplevel block
+    IR::ToplevelBlock* toplevel;
  public:
     bool allowParsers = true;
     bool allowControls = true;
@@ -138,9 +143,17 @@ class DiscoverInlining : public Inspector {
     bool allowParsersFromControls = false;
     bool allowControlsFromParsers = false;
 
-    DiscoverInlining(P4::InlineWorkList* inlineList, P4::BlockMap* blockMap) :
-            inlineList(inlineList), blockMap(blockMap)
-    { CHECK_NULL(inlineList); CHECK_NULL(blockMap); }
+    DiscoverInlining(InlineWorkList* inlineList, ReferenceMap* refMap,
+                     TypeMap* typeMap, P4::Evaluator* evaluator) :
+            inlineList(inlineList), refMap(refMap), typeMap(typeMap),
+            evaluator(evaluator), toplevel(nullptr) {
+        CHECK_NULL(inlineList); CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(evaluator);
+        setName("DiscoverInlining");
+    }
+    Visitor::profile_t init_apply(const IR::Node* node) override {
+        toplevel = evaluator->getToplevelBlock();
+        CHECK_NULL(toplevel);
+        return Inspector::init_apply(node); }
     void visit_all(const IR::Block* block);
     bool preorder(const IR::Block* block) override
     { visit_all(block); return false; }
@@ -149,15 +162,16 @@ class DiscoverInlining : public Inspector {
     void postorder(const IR::MethodCallStatement* statement) override;
     // We don't care to visit the program, we just visit the blocks.
     bool preorder(const IR::P4Program*) override
-    { visit_all(blockMap->toplevelBlock); return false; }
+    { visit_all(toplevel); return false; }
 };
 
 // Performs actual inlining work
 class GeneralInliner : public AbstractInliner {
-    P4::ReferenceMap* refMap;
-    P4::InlineSummary::PerCaller* workToDo;
+    ReferenceMap* refMap;
+    InlineSummary::PerCaller* workToDo;
  public:
-    GeneralInliner() : refMap(new P4::ReferenceMap()), workToDo(nullptr) {}
+    GeneralInliner() : refMap(new ReferenceMap()), workToDo(nullptr)
+    { setName("GeneralInliner"); }
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
     const IR::Node* preorder(IR::P4Control* caller) override;
     const IR::Node* preorder(IR::P4Parser* caller) override;

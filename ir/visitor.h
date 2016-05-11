@@ -37,6 +37,8 @@ class Visitor {
     };
     virtual ~Visitor() = default;
 
+    const char* internalName = nullptr;
+
     // init_apply is called (once) when apply is called on an IR tree
     // it expects to allocate a profile record which will be destroyed
     // when the traversal completes.  Visitor subclasses may extend this
@@ -67,7 +69,12 @@ class Visitor {
     virtual Visitor &flow_clone() { return *this; }
     virtual void flow_merge(Visitor &) { }
 
-    virtual const char *name() const { return typeid(*this).name(); }
+    virtual const char *name() const {
+        if (internalName != nullptr)
+            return internalName;
+        return typeid(*this).name();
+    }
+    void setName(const char* name) { internalName = name; }
     void print_context() const;  // for debugging; can be called from debugger
 
     // Context access/search functions.  getContext returns the context

@@ -35,7 +35,7 @@ class SideEffects : public Inspector {
     }
     // If you pass nullptr for these arguments the check will be more conservative
     SideEffects(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap), hasSideEffects(false) {}
+            refMap(refMap), typeMap(typeMap), hasSideEffects(false) { setName("SideEffects"); }
 
  public:
     // Returns true if the expression may have side-effects.
@@ -52,7 +52,7 @@ class SimplifyControlFlow : public Transform {
  public:
     SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("SimplifyControlFlow"); }
     const IR::Node* postorder(IR::BlockStatement* statement) override;
     const IR::Node* postorder(IR::IfStatement* statement) override;
     const IR::Node* postorder(IR::EmptyStatement* statement) override;

@@ -1,6 +1,5 @@
 control d(out bit<32> x) {
     bit<32> x_0;
-    bool hasExited;
     bool hasReturned;
     @name("cinst.a1") action cinst_a1() {
     }
@@ -14,39 +13,54 @@ control d(out bit<32> x) {
         default_action = cinst_a1;
     }
     action act() {
-        hasExited = false;
-        hasReturned = false;
+        hasReturned = true;
     }
     action act_0() {
+        hasReturned = true;
+    }
+    action act_1() {
+        hasReturned = false;
+    }
+    action act_2() {
         x = x_0;
     }
     table tbl_act() {
+        actions = {
+            act_1;
+        }
+        const default_action = act_1();
+    }
+    table tbl_act_0() {
         actions = {
             act;
         }
         const default_action = act();
     }
-    table tbl_act_0() {
+    table tbl_act_1() {
         actions = {
             act_0;
         }
         const default_action = act_0();
+    }
+    table tbl_act_2() {
+        actions = {
+            act_2;
+        }
+        const default_action = act_2();
     }
     apply {
         tbl_act.apply();
         switch (cinst_t.apply().action_run) {
             cinst_a1: 
             cinst_a2: {
-                return;
+                tbl_act_0.apply();
             }
             default: {
-                return;
+                tbl_act_1.apply();
             }
         }
 
-        if (!hasExited) 
-            tbl_act_0.apply();
-        ;
+        tbl_act_2.apply();
     }
 }
 

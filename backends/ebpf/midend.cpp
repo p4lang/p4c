@@ -18,14 +18,12 @@
 
 namespace EBPF {
 
-const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* program) {
+const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* program) {
     if (program == nullptr)
-        return program;
+        return nullptr;
 
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
-    auto evaluator = new P4::EvaluatorPass(isv1);
-    P4::ReferenceMap refMap;
-    P4::TypeMap typeMap;
+    auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     PassManager simplify = {
         // Proper semantics for uninitialzed local variables in parser states:
@@ -42,6 +40,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         new P4::MoveConstructors(isv1),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveUnusedDeclarations(&refMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         evaluator,
     };
 
@@ -50,24 +49,20 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
-    auto blockMap = evaluator->getBlockMap();
-    if (blockMap->getMain() == nullptr)
+    auto toplevel = evaluator->getToplevelBlock();
+    if (toplevel->getMain() == nullptr)
         // nothing further to do
         return nullptr;
 
     P4::InlineWorkList toInline;
     P4::ActionsInlineList actionsToInline;
 
-    auto inliner = new P4::GeneralInliner();
-    auto actInl = new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap);
-    actInl->allowDirectActionCalls = true;
-
     PassManager midEnd = {
-        new P4::DiscoverInlining(&toInline, blockMap),
-        new P4::InlineDriver(&toInline, inliner, isv1),
+        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
+        new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
-        actInl,
+        new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
@@ -77,9 +72,10 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
-        // Move all stand-alone action invocations to custom tables
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::MoveActionsToTables(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        evaluator,
     };
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);
@@ -87,7 +83,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
     if (::errorCount() > 0)
         return nullptr;
 
-    return program;
+    return evaluator->getToplevelBlock();
 }
 
 }  // namespace EBPF

@@ -28,11 +28,9 @@ class TypeInference : public Transform {
     bool clearMap;
     // If true we expect to leave the program unchanged
     bool readOnly;
-
     // Stack: Save here method arguments count on each method visit.
     // They are used in type resolution.
     std::vector<int> methodArguments;
-
     const IR::Node* initialNode;
 
  public:
@@ -40,7 +38,7 @@ class TypeInference : public Transform {
     // an Inspector.
     // clearMap=true will clear the typeMap on start.
     TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
-                bool clearMap = true, bool readOnly = true);
+                  bool clearMap = true, bool readOnly = true);
 
  protected:
     const IR::Type* getType(const IR::Node* element) const;
@@ -190,6 +188,7 @@ class TypeInference : public Transform {
 
 // Copy types from the typeMap to expressions.  Updates the typeMap with newly created nodes
 class ApplyTypesToExpressions : public Transform {
+    ApplyTypesToExpressions() { setName("ApplyTypesToExpressions"); }
     TypeMap *typeMap;
     IR::Node *postorder(IR::Node *n) override {
         const IR::Node *orig = getOriginal();

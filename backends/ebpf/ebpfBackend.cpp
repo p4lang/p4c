@@ -8,27 +8,18 @@
 
 namespace EBPF {
 
-void run_ebpf_backend(const EbpfOptions& options, const IR::P4Program* program) {
-    if (program == nullptr)
+void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
+                      P4::ReferenceMap* refMap, const P4::TypeMap* typeMap) {
+    if (toplevel == nullptr)
         return;
 
-    P4::EvaluatorPass evaluator(options.langVersion == CompilerOptions::FrontendVersion::P4v1);
-    auto outprog = program->apply(evaluator);
-
-    if (ErrorReporter::instance.getErrorCount() > 0) {
-        ::error("Errors encountered; no result will be produced");
-        return;
-    }
-    BUG_CHECK(outprog == program, "Evaluator changed program");
-    auto blockMap = evaluator.getBlockMap();
-    LOG2("Reference map" << std::endl << blockMap->refMap);
-    auto main = blockMap->getMain();
+    auto main = toplevel->getMain();
     if (main == nullptr) {
         ::error("Could not locate top-level block; is there a %1% module?", IR::P4Program::main);
         return;
     }
 
-    EBPFTypeFactory::createFactory(blockMap->typeMap);
+    EBPFTypeFactory::createFactory(typeMap);
 
     Target* target;
     if (options.target.isNullOrEmpty() || options.target == "bcc") {
@@ -39,7 +30,7 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::P4Program* program) 
         ::error("Unknown target %s; legal choices are 'bcc' and 'kernel'", options.target);
         return;
     }
-    auto ebpfprog = new EBPFProgram(outprog, blockMap);
+    auto ebpfprog = new EBPFProgram(toplevel->getProgram(), refMap, typeMap, toplevel);
     if (!ebpfprog->build())
         return;
 

@@ -29,7 +29,7 @@ class MoveActionsToTables : public Transform {
  public:
     MoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap)
             : refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("MoveActionsToTables"); }
     const IR::Node* preorder(IR::P4Parser* parser) override
     { prune(); return parser; }
     const IR::Node* postorder(IR::P4Control* control) override;
@@ -66,7 +66,7 @@ class SynthesizeActions : public Transform {
     // leave them in control blocks.
     SynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap, bool moveEmits = false) :
             refMap(refMap), typeMap(typeMap), moveEmits(moveEmits)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("SynthesizeActions"); }
     const IR::Node* preorder(IR::P4Parser* parser) override
     { prune(); return parser; }
     const IR::Node* postorder(IR::P4Control* control) override;

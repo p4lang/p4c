@@ -15,6 +15,7 @@ addNameAnnotation(cstring name, const IR::Annotations* annos) {
 UniqueNames::UniqueNames(bool anyOrder) :
         refMap(new ReferenceMap), renameMap(new RenameMap) {
     setStopOnError(true);
+    setName("UniqueNames");
     passes.emplace_back(new ResolveReferences(refMap, anyOrder));
     passes.emplace_back(new FindSymbols(refMap, renameMap));
     passes.emplace_back(new RenameSymbols(refMap, renameMap));

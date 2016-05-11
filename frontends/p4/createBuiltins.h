@@ -7,6 +7,7 @@ namespace P4 {
 class CreateBuiltins final : public Modifier {
  public:
     using Modifier::postorder;
+    CreateBuiltins() { setName("CreateBuiltins"); }
     void postorder(IR::P4Parser* parser) override;
 };
 }  // namespace P4

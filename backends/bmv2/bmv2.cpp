@@ -39,12 +39,12 @@ int main(int argc, char *const argv[]) {
 
     BMV2::MidEnd midEnd;
     midEnd.addDebugHook(hook);
-    auto blockMap = midEnd.process(options, program);
-    if (::errorCount() > 0 || blockMap == nullptr)
+    auto toplevel = midEnd.process(options, program);
+    if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
     BMV2::JsonConverter converter(options);
-    converter.convert(blockMap);
+    converter.convert(&midEnd.refMap, &midEnd.typeMap, toplevel);
     if (::errorCount() > 0)
         return 1;
 

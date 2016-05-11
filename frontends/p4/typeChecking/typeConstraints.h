@@ -14,6 +14,7 @@ class TypeConstraints final {
     class IConstraint {
      public:
         virtual ~IConstraint() {}
+        virtual void dbprint(std::ostream& out) const = 0;
     };
 
     class TwoTypeConstraint : public IConstraint {
@@ -35,7 +36,7 @@ class TypeConstraints final {
      public:
         EqualityConstraint(const IR::Type* left, const IR::Type* right)
                 : TwoTypeConstraint(left, right) {}
-        void dbprint(std::ostream& out) const
+        void dbprint(std::ostream& out) const override
         { out << "Constraint:" << left << " = " << right; }
     };
 
@@ -99,7 +100,7 @@ class TypeConstraints final {
                IR::TypeVariableSubstitution *subst, bool reportErrors);
 
     IR::TypeVariableSubstitution* solve(const IR::Node* root, bool reportErrors) {
-        LOG1("Solving constraints:\n" << this);
+        LOG1("Solving constraints:\n" << *this);
 
         IR::TypeVariableSubstitution *tvs = new IR::TypeVariableSubstitution();
         while (!constraints.empty()) {
@@ -112,18 +113,7 @@ class TypeConstraints final {
         LOG1("Constraint solution:\n" << tvs);
         return tvs;
     }
-
-    void dbprint(std::ostream& out) const {
-        bool first = true;
-        out << "Variables: ";
-        for (auto tv : unifiableTypeVariables) {
-            if (!first) out << ", ";
-            out << tv->getNode();
-            first = false;
-        }
-        for (auto c : constraints)
-            out << std::endl << c;
-    }
+    void dbprint(std::ostream& out) const;
 };
 }  // namespace P4
 

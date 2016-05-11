@@ -46,7 +46,7 @@ void IR::P4Action::dbprint(std::ostream &out) const {
     sep = ", "; }
   out << ") {" << indent;
   if (body)
-    for (auto &p : *body)
+    for (auto &p : *body->components)
       out << endl << p;
   out << unindent << " }";
 }

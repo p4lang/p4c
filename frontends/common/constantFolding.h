@@ -34,7 +34,7 @@ class ConstantFolding : public Transform {
  public:
     ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr) {
-        visitDagOnce = true;
+        visitDagOnce = true; setName("ConstantFolding");
     }
 
     using Transform::postorder;

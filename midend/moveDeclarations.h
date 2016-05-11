@@ -14,7 +14,8 @@ class ResetHeaders : public Transform {
     void generateResets(const IR::Type* type, const IR::Expression* expr,
                         IR::Vector<IR::StatOrDecl>* resets);
  public:
-    explicit ResetHeaders(TypeMap* typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
+    explicit ResetHeaders(TypeMap* typeMap) : typeMap(typeMap)
+    { CHECK_NULL(typeMap); setName("ResetHeaders"); }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
 };
 
@@ -35,6 +36,7 @@ class MoveDeclarations : public Transform {
     { getMoves()->push_back(decl); }
 
  public:
+    MoveDeclarations() { setName("MoveDeclarations"); }
     void end_apply(const IR::Node*) override
     { BUG_CHECK(toMove.empty(), "Non empty move stack"); }
     const IR::Node* preorder(IR::P4Action* action) override {

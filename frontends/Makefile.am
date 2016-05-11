@@ -22,8 +22,6 @@ v12_frontend_SOURCES = \
 	frontends/p4/strengthReduction.cpp \
 	frontends/p4/unusedDeclarations.h \
 	frontends/p4/unusedDeclarations.cpp \
-	frontends/p4/evaluator/blockMap.h \
-	frontends/p4/evaluator/blockMap.cpp \
 	frontends/p4/evaluator/evaluator.h \
 	frontends/p4/evaluator/evaluator.cpp \
 	frontends/p4/evaluator/substituteParameters.h \
@@ -52,6 +50,7 @@ common_frontend_SOURCES = \
 	frontends/common/options.cpp \
 	frontends/common/constantFolding.h \
 	frontends/common/constantFolding.cpp \
+	frontends/common/programMap.h  \
 	frontends/common/typeMap.h \
 	frontends/common/typeMap.cpp \
 	frontends/common/resolveReferences/referenceMap.cpp \
@@ -78,7 +77,7 @@ BUILT_SOURCES += \
         frontends/p4v1/p4v1-lex.c \
         frontends/p4/p4-lex.c \
 	frontends/p4v1/p4v1-parse.cpp \
-	frontends/p4/p4-parse.cpp 
+	frontends/p4/p4-parse.cpp
 
 frontend_SOURCES = \
 	$(v12_frontend_SOURCES) \

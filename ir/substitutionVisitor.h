@@ -17,7 +17,8 @@ class TypeOccursVisitor : public Inspector {
 
     using Inspector::preorder;
 
-    explicit TypeOccursVisitor(const IR::ITypeVar* toFind) : toFind(toFind), occurs(false) {}
+    explicit TypeOccursVisitor(const IR::ITypeVar* toFind) : toFind(toFind), occurs(false)
+    { setName("TypeOccurs"); }
     bool preorder(const IR::Type_Var* typeVariable) override;
     bool preorder(const IR::Type_InfInt* infint) override;
 };
@@ -28,7 +29,7 @@ class TypeVariableSubstitutionVisitor : public Transform {
     const TypeVariableSubstitution* bindings;
  public:
     explicit TypeVariableSubstitutionVisitor(TypeVariableSubstitution *bindings)
-            : bindings(bindings) {}
+            : bindings(bindings) { setName("TypeVariableSubstitution"); }
 
     using Transform::preorder;
     const IR::Node* preorder(IR::TypeParameters *tps) override;
@@ -42,7 +43,7 @@ class TypeNameSubstitutionVisitor : public Transform {
     const TypeNameSubstitution* bindings;
  public:
     explicit TypeNameSubstitutionVisitor(TypeNameSubstitution* bindings) :
-            bindings(bindings) {}
+            bindings(bindings) { setName("TypeNameSubstitution"); }
 
     using Transform::preorder;
     const IR::Node* preorder(IR::Type_Name* typeName) override;

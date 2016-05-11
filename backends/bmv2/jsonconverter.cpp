@@ -16,7 +16,8 @@ class ArithmeticFixup : public Transform {
     P4::TypeMap* typeMap;
 
  public:
-    explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap) {}
+    explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap)
+    { CHECK_NULL(typeMap); }
     const IR::Expression* fix(const IR::Expression* expr, const IR::Type_Bits* type) {
         unsigned width = type->size;
         if (!type->isSigned) {
@@ -544,7 +545,7 @@ class ExpressionConverter : public Inspector {
 JsonConverter::JsonConverter(const CompilerOptions& options) :
         options(options), v1model(P4V1::V1Model::instance),
         corelib(P4::P4CoreLibrary::instance),
-        refMap(nullptr), typeMap(nullptr), dropActionId(0), blockMap(nullptr),
+        refMap(nullptr), typeMap(nullptr), dropActionId(0), toplevelBlock(nullptr),
         conv(new ExpressionConverter(this)),
         headerParameter(nullptr), userMetadataParameter(nullptr), stdMetadataParameter(nullptr)
 {}
@@ -761,8 +762,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         auto typeArg = mc->typeArguments->at(0);
                         if (typeArg->is<IR::Type_Name>()) {
                             auto origType = refMap->getDeclaration(
-                                typeArg->to<IR::Type_Name>()->path);
-                            CHECK_NULL(origType);
+                                typeArg->to<IR::Type_Name>()->path, true);
                             BUG_CHECK(origType->is<IR::Type_Struct>(),
                                       "%1%: expected a struct type", origType);
                             auto st = origType->to<IR::Type_Struct>();
@@ -789,8 +789,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         auto typeArg = mc->typeArguments->at(0);
                         if (typeArg->is<IR::Type_Name>()) {
                             auto origType = refMap->getDeclaration(
-                                typeArg->to<IR::Type_Name>()->path);
-                            CHECK_NULL(origType);
+                                typeArg->to<IR::Type_Name>()->path, true);
                             BUG_CHECK(origType->is<IR::Type_Struct>(),
                                       "%1%: expected a struct type", origType);
                             auto st = origType->to<IR::Type_Struct>();
@@ -892,7 +891,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
             params->append(param);
         }
         auto body = mkArrayField(jact, "primitives");
-        convertActionBody(action->body, body, fieldLists, calculations, learn_lists);
+        convertActionBody(action->body->components, body, fieldLists, calculations, learn_lists);
         result->append(jact);
     }
     return result;
@@ -1143,8 +1142,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     for (auto a : *al->actionList) {
         if (a->arguments != nullptr && a->arguments->size() > 0)
             ::error("%1%: Actions in action list with arguments not supported", a);
-        auto decl = refMap->getDeclaration(a->name->path);
-        CHECK_NULL(decl);
+        auto decl = refMap->getDeclaration(a->name->path, true);
         BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
         auto action = decl->to<IR::P4Action>();
         unsigned id = get(structure.ids, action);
@@ -1211,10 +1209,49 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     }
 
     result->emplace("next_tables", next_tables);
-    result->emplace("default_action", Util::JsonValue::null);
     auto defact = table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
-    if (defact != nullptr)
-        ::warning("%1%.%2%: setting default action currently not supported", table->name, defact);
+    if (defact != nullptr) {
+        if (!defact->value->is<IR::ExpressionValue>()) {
+            ::error("%1%: expected an action", defact);
+            return result;
+        }
+        auto expr = defact->value->to<IR::ExpressionValue>()->expression;
+        const IR::P4Action* action = nullptr;
+        const IR::Vector<IR::Expression>* args = nullptr;
+
+        if (expr->is<IR::PathExpression>()) {
+            auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
+            BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", expr);
+            action = decl->to<IR::P4Action>();
+        } else if (expr->is<IR::MethodCallExpression>()) {
+            auto mce = expr->to<IR::MethodCallExpression>();
+            auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+            BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected an action", expr);
+            action = mi->to<P4::ActionCall>()->action;
+            args = mce->arguments;
+        } else {
+            BUG("%1%: unexpected expression", expr);
+        }
+
+        unsigned actionid = get(structure.ids, action);
+        auto entry = new Util::JsonObject();
+        entry->emplace("action_id", actionid);
+        entry->emplace("action_const", false);
+        auto fields = mkArrayField(entry, "action_data");
+        if (args != nullptr) {
+            for (auto a : *args) {
+                if (a->is<IR::Constant>()) {
+                    cstring repr = stringRepr(a->to<IR::Constant>()->value);
+                    fields->append(repr);
+                } else {
+                    ::error("%1%: argument must evaluate to a constant integer", a);
+                    return result;
+                }
+            }
+        }
+        entry->emplace("action_entry_const", defact->isConstant);
+        result->emplace("default_entry", entry);
+    }
     return result;
 }
 
@@ -1501,12 +1538,14 @@ void JsonConverter::addLocals(Util::JsonArray* headerTypes, Util::JsonArray* ins
     }
 }
 
-void JsonConverter::convert(P4::BlockMap* bm) {
-    blockMap = bm;
-    refMap = blockMap->refMap;
-    typeMap = blockMap->typeMap;
+void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, IR::ToplevelBlock* toplevelBlock) {
+    this->toplevelBlock = toplevelBlock;
+    this->refMap = refMap;
+    this->typeMap = typeMap;
+    CHECK_NULL(typeMap);
+    CHECK_NULL(refMap);
 
-    auto package = blockMap->getMain();
+    auto package = toplevelBlock->getMain();
     if (package == nullptr) {
         ::error("No output to generate");
         return;
@@ -1518,15 +1557,15 @@ void JsonConverter::convert(P4::BlockMap* bm) {
         return;
     }
 
-    structure.analyze(blockMap);
+    structure.analyze(toplevelBlock);
     if (::errorCount() > 0)
         return;
 
-    auto parserBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.parser.name);
+    auto parserBlock = package->getParameterValue(v1model.sw.parser.name);
     CHECK_NULL(parserBlock);
     auto parser = parserBlock->to<IR::ParserBlock>()->container;
     auto hdr = parser->type->applyParams->getParameter(v1model.parser.headersParam.index);
-    auto headersType = blockMap->typeMap->getType(hdr->getNode(), true);
+    auto headersType = typeMap->getType(hdr->getNode(), true);
     auto ht = headersType->to<IR::Type_Struct>();
     if (ht == nullptr) {
         ::error("Expected headers %1% to be a struct", headersType);
@@ -1549,7 +1588,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
         v1model.parser.metadataParam.index);
     stdMetadataParameter = parser->type->applyParams->getParameter(
         v1model.parser.standardMetadataParam.index);
-    auto mdType = blockMap->typeMap->getType(userMetadataParameter, true);
+    auto mdType = typeMap->getType(userMetadataParameter, true);
     auto mt = mdType->to<IR::Type_Struct>();
     if (mt == nullptr) {
         ::error("Expected metadata %1% to be a struct", mdType);
@@ -1562,7 +1601,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     auto parserJson = toJson(parser);
     prsrs->append(parserJson);
 
-    auto deparserBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.deparser.name);
+    auto deparserBlock = package->getParameterValue(v1model.sw.deparser.name);
     CHECK_NULL(deparserBlock);
     auto deparser = deparserBlock->to<IR::ControlBlock>()->container;
 
@@ -1594,12 +1633,12 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     }
 
     auto pipelines = mkArrayField(&toplevel, "pipelines");
-    auto ingressBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.ingress.name);
+    auto ingressBlock = package->getParameterValue(v1model.sw.ingress.name);
     auto ingressControl = ingressBlock->to<IR::ControlBlock>();
     auto ingress = convertControl(ingressControl, v1model.ingress.name,
                                   counters, meters, registers);
     pipelines->append(ingress);
-    auto egressBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.egress.name);
+    auto egressBlock = package->getParameterValue(v1model.sw.egress.name);
     auto egress = convertControl(egressBlock->to<IR::ControlBlock>(),
                                  v1model.egress.name, counters, meters, registers);
     pipelines->append(egress);
@@ -1607,7 +1646,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     // standard metadata type and instance
     stdMetadataParameter = ingressControl->container->type->applyParams->getParameter(
         v1model.ingress.standardMetadataParam.index);
-    auto stdMetaType = blockMap->typeMap->getType(stdMetadataParameter, true);
+    auto stdMetaType = typeMap->getType(stdMetadataParameter, true);
     auto json = typeToJson(stdMetaType->to<IR::Type_StructLike>());
     headerTypes->append(json);
 
@@ -1621,7 +1660,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     }
 
     auto checksums = mkArrayField(&toplevel, "checksums");
-    auto updateBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.update.name);
+    auto updateBlock = package->getParameterValue(v1model.sw.update.name);
     CHECK_NULL(updateBlock);
     generateUpdate(updateBlock->to<IR::ControlBlock>()->container, checksums, calculations);
 

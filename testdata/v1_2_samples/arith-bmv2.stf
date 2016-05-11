@@ -1,5 +1,3 @@
-setdefault t add()
-
 #       bit<32> A bit<32> B    bit<64> C
 # In the output C = (A + B) on 32 bits
 

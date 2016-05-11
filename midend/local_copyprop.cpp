@@ -119,7 +119,7 @@ IR::P4Action *P4::LocalCopyPropagation::preorder(IR::P4Action *act) {
 IR::P4Action *P4::LocalCopyPropagation::postorder(IR::P4Action *act) {
     LOG5("LocalCopyPropagation before ElimDead " << act->name);
     LOG5(act);
-    act->body = act->body->apply(ElimDead(*this));
+    act->body = act->body->apply(ElimDead(*this))->to<IR::BlockStatement>();
     in_action = false;
     locals.clear();
     LOG3("LocalCopyPropagation finished action " << act->name);

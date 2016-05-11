@@ -21,21 +21,21 @@ cstring nameFromAnnotation(const IR::Annotations* annotations,
 }
 
 bool EBPFProgram::build() {
-    auto pack = blockMap->getMain();
+    auto pack = toplevel->getMain();
     if (pack->getConstructorParameters()->size() != 2) {
         ::error("Expected toplevel package %1% to have 2 parameters", pack->type);
         return false;
     }
 
-    auto pb = blockMap->getBlockBoundToParameter(pack, model.filter.parser.name)
+    auto pb = pack->getParameterValue(model.filter.parser.name)
                       ->to<IR::ParserBlock>();
     BUG_CHECK(pb != nullptr, "No parser block found");
-    parser = new EBPFParser(this, pb, blockMap->typeMap);
+    parser = new EBPFParser(this, pb, typeMap);
     bool success = parser->build();
     if (!success)
         return success;
 
-    auto cb = blockMap->getBlockBoundToParameter(pack, model.filter.filter.name)
+    auto cb = pack->getParameterValue(model.filter.filter.name)
                       ->to<IR::ControlBlock>();
     BUG_CHECK(cb != nullptr, "No control block found");
     control = new EBPFControl(this, cb);

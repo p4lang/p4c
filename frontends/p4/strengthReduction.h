@@ -20,7 +20,7 @@ class StrengthReduction final : public Transform {
     int isPowerOf2(const IR::Expression* expr) const;
 
  public:
-    StrengthReduction() { visitDagOnce = true; }
+    StrengthReduction() { visitDagOnce = true; setName("StrengthReduction"); }
 
     using Transform::postorder;
 

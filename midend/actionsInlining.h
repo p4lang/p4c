@@ -3,7 +3,6 @@
 
 #include "ir/ir.h"
 #include "frontends/common/typeMap.h"
-#include "frontends/p4/evaluator/blockMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 
 namespace P4 {
@@ -59,16 +58,12 @@ class DiscoverActionsInlining : public Inspector {
     P4::ReferenceMap*  refMap;    // input
     P4::TypeMap*       typeMap;   // input
  public:
-    // Policy variable: if set to 'false' the visitor generates
-    // an error every time it visits an action which is invoked
-    // directly in a control block.
-    bool allowDirectActionCalls = false;
-
     DiscoverActionsInlining(ActionsInlineList* toInline,
                             P4::ReferenceMap* refMap,
                             P4::TypeMap* typeMap) :
-            toInline(toInline), refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(toInline); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+            toInline(toInline), refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(toInline); CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        setName("DiscoverActionsInlining"); }
     bool preorder(const IR::P4Parser*) override { return false; }  // skip
     void postorder(const IR::MethodCallStatement* mcs) override;
 };
@@ -115,7 +110,7 @@ class InlineActionsDriver : public Transform {
  public:
     InlineActionsDriver(ActionsInlineList* toInline, AbstractActionInliner *inliner, bool p4v1) :
             toInline(toInline), inliner(inliner), p4v1(p4v1)
-    { CHECK_NULL(toInline); CHECK_NULL(inliner); }
+    { CHECK_NULL(toInline); CHECK_NULL(inliner); setName("InlineActionsDriver"); }
 
     // Not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.

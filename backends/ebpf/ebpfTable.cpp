@@ -14,7 +14,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
 
  public:
     ActionTranslationVisitor(CodeBuilder* builder, cstring valueName, const EBPFProgram* program):
-            CodeGenInspector(builder, program->blockMap->typeMap), program(program),
+            CodeGenInspector(builder, program->typeMap), program(program),
             action(nullptr), valueName(valueName)
     { CHECK_NULL(program); }
 
@@ -37,9 +37,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
 
     bool preorder(const IR::P4Action* act) {
         action = act;
-        setVecSep("\n", "\n");
         visit(action->body);
-        doneVec();
         return false;
     }
 };  // ActionTranslationVisitor
@@ -226,7 +224,7 @@ void EBPFTable::createKey(CodeBuilder* builder, cstring keyName) {
         builder->append(fieldNumber);
         builder->append(" = ");
 
-        CodeGenInspector visitor(builder, program->blockMap->typeMap);
+        CodeGenInspector visitor(builder, program->typeMap);
         c->expression->apply(visitor);
         builder->endOfStatement(true);
     }
@@ -245,11 +243,10 @@ void EBPFTable::runAction(CodeBuilder* builder, cstring valueName) {
         builder->appendFormat("case %s: ", name);
         builder->newline();
         builder->emitIndent();
-        builder->blockStart();
 
         ActionTranslationVisitor visitor(builder, valueName, program);
         action->apply(visitor);
-        builder->blockEnd(true);
+        builder->newline();
         builder->emitIndent();
         builder->appendLine("break;");
     }
@@ -324,7 +321,7 @@ void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
     BUG_CHECK(expression->arguments->size() == 1, "Expected just 1 argument for %1%", expression);
     auto arg = expression->arguments->at(0);
 
-    CodeGenInspector visitor(builder, program->blockMap->typeMap);
+    CodeGenInspector visitor(builder, program->typeMap);
     arg->apply(visitor);
     builder->endOfStatement(true);
 

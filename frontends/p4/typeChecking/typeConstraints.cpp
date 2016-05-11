@@ -38,4 +38,22 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
     return success;
 }
 
+void TypeConstraints::dbprint(std::ostream& out) const {
+    bool first = true;
+    if (unifiableTypeVariables.size() != 0) {
+        out << "Variables: ";
+        for (auto tv : unifiableTypeVariables) {
+            if (!first) out << ", ";
+            auto node = tv->getNode();
+            out << dbp(node);
+            first = false;
+        }
+    }
+    if (constraints.size() != 0) {
+        out << "Constraints: ";
+        for (auto c : constraints)
+            out << std::endl << c;
+    }
+}
+
 }  // namespace P4

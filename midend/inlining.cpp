@@ -80,7 +80,7 @@ const IR::Node* InlineDriver::preorder(IR::P4Program* program) {
 
 void DiscoverInlining::postorder(const IR::MethodCallStatement* statement) {
     LOG2("Visiting " << statement);
-    auto mi = P4::MethodInstance::resolve(statement, blockMap->refMap, blockMap->typeMap);
+    auto mi = P4::MethodInstance::resolve(statement, refMap, typeMap);
     if (!mi->isApply())
         return;
     auto am = mi->to<P4::ApplyMethod>();

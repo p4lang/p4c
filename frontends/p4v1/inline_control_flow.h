@@ -6,11 +6,9 @@
 
 class InlineControlFlow : public Transform {
 public:
-    InlineControlFlow(const IR::V1Program *gl) : global(gl), blockMap(nullptr) {}
-    InlineControlFlow(const P4::BlockMap *bm) : global(nullptr), blockMap(bm) {}
+    InlineControlFlow(const IR::V1Program *gl) : global(gl) { setName("InlineControlFlow"); }
 private:
     const IR::V1Program *global;
-    const P4::BlockMap *blockMap;
 
     const IR::Node *preorder(IR::Apply *a) override {
         if (global && !global->get<IR::V1Table>(a->name))

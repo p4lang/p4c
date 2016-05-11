@@ -157,4 +157,28 @@ void IR::ActionList::checkDuplicates() const {
     }
 }
 
+Util::Enumerator<const IDeclaration*>* P4Action::getDeclarations() const
+{ return body->getDeclarations(); }
+
+const IDeclaration* P4Action::getDeclByName(cstring name) const
+{ return body->components->getDeclaration(name); }
+
+const IR::PackageBlock* ToplevelBlock::getMain() const {
+    auto program = getProgram();
+    auto main = program->getDeclByName(IR::P4Program::main);
+    if (main == nullptr) {
+        ::warning("Program does not contain a `%s' module", IR::P4Program::main);
+        return nullptr;
+    }
+    if (!main->is<IR::Declaration_Instance>()) {
+        ::error("%s must be a package declaration", main->getNode());
+        return nullptr;
+    }
+    auto block = getValue(main->getNode());
+    if (block == nullptr)
+        return nullptr;
+    BUG_CHECK(block->is<IR::PackageBlock>(), "%1%: toplevel block is not a package", block);
+    return block->to<IR::PackageBlock>();
+}
+
 }  // namespace IR
