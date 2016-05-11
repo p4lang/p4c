@@ -71,5 +71,5 @@ script:
 
 # code coverage
 after_success:
-  - if [ "$GCOV" != "" ]; then (cd modules/bm_sim/src; $GCOV -r -o .libs/ *.cpp); fi
+  - if [ "$GCOV" != "" ]; then (cd src/bm_sim; $GCOV -r -o .libs/ *.cpp); fi
   - if [ "$GCOV" != "" ]; then bash <(curl -s https://codecov.io/bash); fi
