@@ -22,10 +22,7 @@ namespace BMV2 {
 
 const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* program) {
     bool isv1 = true;
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
-    (void)program->apply(*evaluator);
-    if (::errorCount() > 0)
-        return nullptr;
+    auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     // Inlining is simpler for P4 v1.0/1.1 programs, so we have a
     // specialized code path, which also generates slighly nicer
@@ -34,7 +31,9 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
     P4::ActionsInlineList actionsToInline;
 
     PassManager midend = {
-        new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator->getBlockMap()),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        evaluator,
+        new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator),
         new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
@@ -52,7 +51,7 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
 
 const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* program) {
     bool isv1 = false;
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
+    auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     PassManager simplify = {
         // Proper semantics for uninitialzed local variables in parser states:
@@ -68,6 +67,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         evaluator,
     };
 
@@ -76,15 +76,15 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
-    auto blockMap = evaluator->getBlockMap();
-    if (blockMap->getMain() == nullptr)
+    auto toplevel = evaluator->getToplevelBlock();
+    if (toplevel->getMain() == nullptr)
         // nothing further to do
         return nullptr;
 
     P4::InlineWorkList toInline;
     P4::ActionsInlineList actionsToInline;
     PassManager midEnd = {
-        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, blockMap),
+        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
         new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
@@ -107,7 +107,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
         new P4::MoveActionsToTables(&refMap, &typeMap),
     };
 
-    midEnd.setName("Mid end");
+    midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);
     program = program->apply(midEnd);
     if (::errorCount() > 0)
@@ -116,7 +116,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
 }
 
 
-P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
+IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
     if (isv1)
         program = processV1(options, program);
@@ -126,7 +126,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         return nullptr;
 
     // BMv2-specific passes
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
+    auto evaluator = new P4::Evaluator(&refMap, &typeMap);
     PassManager backend = {
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
@@ -136,6 +136,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         new LowerExpressions(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         evaluator
     };
 
@@ -145,8 +146,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     if (::errorCount() > 0)
         return nullptr;
 
-    auto blockMap = evaluator->getBlockMap();
-    return blockMap;
+    auto toplevel = evaluator->getToplevelBlock();
+    return toplevel;
 }
 
 }  // namespace BMV2

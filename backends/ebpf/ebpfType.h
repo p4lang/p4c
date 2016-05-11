@@ -40,7 +40,7 @@ class EBPFTypeFactory {
     explicit EBPFTypeFactory(const P4::TypeMap* typeMap) : typeMap(typeMap) {}
  public:
     static EBPFTypeFactory* instance;
-    static void createFactory(P4::TypeMap* typeMap)
+    static void createFactory(const P4::TypeMap* typeMap)
     { EBPFTypeFactory::instance = new EBPFTypeFactory(typeMap); }
     EBPFType* create(const IR::Type* type);
 };

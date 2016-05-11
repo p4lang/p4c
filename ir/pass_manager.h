@@ -8,7 +8,6 @@ typedef std::function<void(const char* manager, unsigned seqNo,
 
 class PassManager : virtual public Visitor {
  protected:
-    const char* managerName = nullptr;
     vector<DebugHook>   debugHooks;  // called after each pass
     vector<Visitor *>   passes;
     // if true stops compilation after first pass that signals an error
@@ -18,7 +17,6 @@ class PassManager : virtual public Visitor {
         for (auto p : init) if (p) passes.emplace_back(p); }
     void runDebugHooks(const char* visitorName, const IR::Node* node);
  public:
-    void setName(const char* name) { managerName = name; }
     PassManager() = default;
     PassManager(const std::initializer_list<Visitor *> &init) : stop_on_error(false)
     { addPasses(init); }
@@ -27,8 +25,6 @@ class PassManager : virtual public Visitor {
     void addDebugHook(DebugHook h) { debugHooks.push_back(h); }
     void addDebugHooks(std::vector<DebugHook> hooks)
     { debugHooks.insert(debugHooks.end(), hooks.begin(), hooks.end()); }
-    const char* name() const override
-    { return managerName != nullptr ? managerName : Visitor::name(); }
 };
 
 // Repeat a pass until convergence (or up to a fixed number of repeats)

@@ -4,25 +4,24 @@
 #include "ir/ir.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "blockMap.h"
 
 namespace P4 {
 
 class Evaluator final : public Inspector {
     ReferenceMap*            refMap;
     TypeMap*                 typeMap;
-    BlockMap*                blockMap;
     std::vector<IR::Block*>  blockStack;
+    IR::ToplevelBlock*       toplevelBlock;
 
  protected:
     void pushBlock(IR::Block* block);
     void popBlock(IR::Block* block);
 
  public:
-    Evaluator(ReferenceMap* refMap, TypeMap* typeMap, BlockMap* blockMap) :
-            refMap(refMap), typeMap(typeMap), blockMap(blockMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(blockMap); }
-    BlockMap* getBlockMap() { return blockMap; }
+    Evaluator(ReferenceMap* refMap, TypeMap* typeMap) :
+            refMap(refMap), typeMap(typeMap), toplevelBlock(nullptr)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("Evaluator"); }
+    IR::ToplevelBlock* getToplevelBlock() { return toplevelBlock; }
 
     IR::Block* currentBlock() const;
     void setValue(const IR::Node* node, const IR::CompileTimeValue* constant);
@@ -57,11 +56,9 @@ class Evaluator final : public Inspector {
 
 // A pass which "evaluates" the program
 class EvaluatorPass final : public PassManager {
- private:
-    BlockMap     *blockMap;
-
+    P4::Evaluator* evaluator;
  public:
-    BlockMap* getBlockMap() { return blockMap; }
+    IR::ToplevelBlock* getToplevelBlock() { return evaluator->getToplevelBlock(); }
     EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool anyOrder);
 };
 

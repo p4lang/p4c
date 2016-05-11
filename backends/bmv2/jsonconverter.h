@@ -3,7 +3,6 @@
 
 #include "lib/json.h"
 #include "frontends/common/options.h"
-#include "frontends/p4/evaluator/blockMap.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "analyzer.h"
 // Currently we are requiring a v1model to be used
@@ -48,7 +47,7 @@ class JsonConverter final {
     cstring                dropAction = ".drop";
     cstring                scalarsName;  // name of struct in JSON holding all scalars
     unsigned               dropActionId;
-    P4::BlockMap*          blockMap;
+    IR::ToplevelBlock*     toplevelBlock;
     ExpressionConverter*   conv;
     DirectMeterMap         meterMap;
     const IR::Parameter*   headerParameter;
@@ -107,7 +106,7 @@ class JsonConverter final {
 
  public:
     explicit JsonConverter(const CompilerOptions& options);
-    void convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, P4::BlockMap *blockMap);
+    void convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, IR::ToplevelBlock *toplevel);
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }
 };

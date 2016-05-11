@@ -3,14 +3,19 @@
 
 #include "ir/ir.h"
 #include "ebpfOptions.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/typeMap.h"
 
 namespace EBPF {
 
 class MidEnd {
     std::vector<DebugHook> hooks;
  public:
+    P4::ReferenceMap       refMap;
+    P4::TypeMap            typeMap;
+
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
-    const IR::P4Program* run(EbpfOptions& options, const IR::P4Program* program);
+    const IR::ToplevelBlock* run(EbpfOptions& options, const IR::P4Program* program);
 };
 
 }  // namespace EBPF

@@ -50,7 +50,7 @@ class FindSymbols : public Inspector {
     }
     FindSymbols(ReferenceMap *refMap, RenameMap *renameMap) :
             refMap(refMap), renameMap(renameMap)
-    { CHECK_NULL(refMap); CHECK_NULL(renameMap); }
+    { CHECK_NULL(refMap); CHECK_NULL(renameMap); setName("FindSymbols"); }
     void doDecl(const IR::Declaration* decl) {
         cstring newName = refMap->newName(decl->getName());
         renameMap->setNewName(decl, newName);
@@ -75,7 +75,7 @@ class RenameSymbols : public Transform {
  public:
     RenameSymbols(ReferenceMap *refMap, RenameMap *renameMap) :
             refMap(refMap), renameMap(renameMap)
-    { CHECK_NULL(refMap); CHECK_NULL(renameMap); }
+    { CHECK_NULL(refMap); CHECK_NULL(renameMap); setName("RenameSymbols"); }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* decl) override;
     const IR::Node* postorder(IR::PathExpression* expression) override;

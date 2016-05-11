@@ -17,7 +17,7 @@ class ExpressionConverter : public Transform {
     bool replaceNextWithLast;  // if true p[next] becomes p.last
     explicit ExpressionConverter(ProgramStructure* structure)
             : structure(structure), p4lib(P4::P4CoreLibrary::instance),
-              replaceNextWithLast(false) {}
+              replaceNextWithLast(false) { setName("ExpressionConverter"); }
     const IR::Type* getFieldType(const IR::Type_StructLike* ht, cstring fieldName);
     const IR::Node* postorder(IR::Constant* expression) override;
     const IR::Node* postorder(IR::Member* field) override;

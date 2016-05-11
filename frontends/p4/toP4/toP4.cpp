@@ -33,6 +33,7 @@ class DumpIR : public Inspector {
             depth(depth) {
         for (unsigned i = 0; i < startDepth; i++)
             str << IndentCtl::indent;
+        setName("DumpIR");
     }
     void display(const IR::Node* node) {
         str << IndentCtl::endl;

@@ -70,10 +70,7 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
     if (caller == nullptr) {
         if (findContext<IR::P4Parser>() != nullptr) {
             ::error("%1%: action invocation in parser not supported", mcs);
-        } else if (findContext<IR::P4Control>() != nullptr) {
-            if (!allowDirectActionCalls)
-                BUG("%1%: direct action invocation not yet implemented", mcs);
-        } else {
+        } else if (findContext<IR::P4Control>() == nullptr) {
             BUG("%1%: unexpected action invocation", mcs);
         }
         return;

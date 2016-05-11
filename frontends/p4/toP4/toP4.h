@@ -73,7 +73,7 @@ class ToP4 : public Inspector {
             builder(builder),
             outStream(nullptr),
             mainFile(mainFile)
-    { visitDagOnce = false; }
+    { visitDagOnce = false; setName("ToP4"); }
     ToP4(std::ostream* outStream, bool showIR, cstring mainFile = nullptr) :
             expressionPrecedence(DBPrint::Prec_Low),
             isDeclaration(true),
@@ -81,7 +81,7 @@ class ToP4 : public Inspector {
             builder(* new Util::SourceCodeBuilder()),
             outStream(outStream),
             mainFile(mainFile)
-    { visitDagOnce = false; }
+    { visitDagOnce = false; setName("ToP4"); }
 
     using Inspector::preorder;
 

@@ -32,7 +32,8 @@ class ProgramMap {
         if (!node->is<IR::P4Program>() || program == nullptr)
             return;
         if (program != node->to<IR::P4Program>())
-            BUG("Invalid map: computed for %1%, used for %2%", dbp(program), dbp(node));
+            BUG("Invalid map %1%: computed for %2%, used for %3%",
+                mapKind, dbp(program), dbp(node));
     }
     void updateMap(const IR::Node* node) {
         if (!node->is<IR::P4Program>())

@@ -255,9 +255,9 @@ class DiscoverStructure : public Inspector {
 };
 }  // namespace
 
-void ProgramParts::analyze(P4::BlockMap* blockMap) {
+void ProgramParts::analyze(IR::ToplevelBlock* toplevel) {
     DiscoverStructure disc(this);
-    blockMap->program->apply(disc);
+    toplevel->getProgram()->apply(disc);
 }
 
 }  // namespace BMV2

@@ -153,6 +153,7 @@ ResolveReferences::ResolveReferences(ReferenceMap* refMap,
         anyOrder(anyOrder),
         checkShadow(checkShadow) {
     CHECK_NULL(refMap);
+    setName("ResolveReferences");
     visitDagOnce = false;
 }
 

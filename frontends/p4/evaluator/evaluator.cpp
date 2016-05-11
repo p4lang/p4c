@@ -1,4 +1,3 @@
-#include "blockMap.h"
 #include "evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/constantFolding.h"
@@ -8,7 +7,9 @@ namespace P4 {
 Visitor::profile_t Evaluator::init_apply(const IR::Node* node) {
     BUG_CHECK(node->is<IR::P4Program>(),
               "Evaluation should be invoked on a program, not a %1%", node);
-    // dump(node);
+    // In fact, some passes are intentionally run with stale maps...
+    // refMap->validateMap(node);
+    // typeMap->validateMap(node);
     return Inspector::init_apply(node);
 }
 
@@ -50,19 +51,17 @@ const IR::CompileTimeValue* Evaluator::getValue(const IR::Node* node) const {
 
 bool Evaluator::preorder(const IR::P4Program* program) {
     LOG1("Evaluating " << program);
-    blockMap->setProgram(program);
-    auto toplevel = new IR::ToplevelBlock(program->srcInfo, program);
-    blockMap->toplevelBlock = toplevel;
+    toplevelBlock = new IR::ToplevelBlock(program->srcInfo, program);
 
-    pushBlock(toplevel);
+    pushBlock(toplevelBlock);
     for (auto d : *program->declarations) {
         if (d->is<IR::Type_Declaration>())
             // we will visit various containers and externs only when we instantiated them
             continue;
         visit(d);
     }
-    popBlock(toplevel);
-    LOG1("BlockMap:" << std::endl << blockMap);
+    popBlock(toplevelBlock);
+    LOG1(toplevelBlock);
     return false;
 }
 
@@ -244,12 +243,12 @@ bool Evaluator::preorder(const IR::TableProperty* prop) {
 
 //////////////////////////////////////
 
-EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) :
-        blockMap(new BlockMap()) {
+EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
     setName("Evaluator");
+    evaluator = new P4::Evaluator(refMap, typeMap);
     setStopOnError(true);
     passes.emplace_back(new P4::TypeChecking(refMap, typeMap, isv1));
-    passes.emplace_back(new P4::Evaluator(refMap, typeMap, blockMap));
+    passes.emplace_back(evaluator);
 }
 
 }  // namespace P4

@@ -473,5 +473,11 @@ class ExternBlock : InstantiatedBlock {
 
 // Represents the program as a whole
 class ToplevelBlock : Block {
+#emit
+    const P4Program* getProgram() const
+    { return node->to<IR::P4Program>(); }
+    const IR::PackageBlock* getMain() const;
+#end
 #nodbprint
+    validate { BUG_CHECK(node->is<IR::P4Program>(), "%1%: expected a P4Program", node); }
 }

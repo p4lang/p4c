@@ -22,8 +22,6 @@ v12_frontend_SOURCES = \
 	frontends/p4/strengthReduction.cpp \
 	frontends/p4/unusedDeclarations.h \
 	frontends/p4/unusedDeclarations.cpp \
-	frontends/p4/evaluator/blockMap.h \
-	frontends/p4/evaluator/blockMap.cpp \
 	frontends/p4/evaluator/evaluator.h \
 	frontends/p4/evaluator/evaluator.cpp \
 	frontends/p4/evaluator/substituteParameters.h \

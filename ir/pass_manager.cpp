@@ -41,7 +41,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
 
 void PassManager::runDebugHooks(const char* visitorName, const IR::Node* program) {
     for (auto h : debugHooks)
-        h(managerName, seqNo, visitorName, program);
+        h(name(), seqNo, visitorName, program);
 }
 
 const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char *name) {

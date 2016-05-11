@@ -8,9 +8,9 @@
 
 namespace EBPF {
 
-void run_ebpf_backend(const EbpfOptions& options, const IR::P4Program* program);
+void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
+                      P4::ReferenceMap* refMap, const P4::TypeMap* typeMap);
 
 }  // namespace EBPF
 
 #endif /* _BACKENDS_EBPF_EBPFBACKEND_H_ */
-

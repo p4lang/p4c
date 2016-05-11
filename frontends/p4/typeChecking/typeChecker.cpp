@@ -13,7 +13,7 @@ TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap, bool isv1, bo
         new P4::TypeInference(refMap, typeMap, true, true),
         updateProgram ? new ApplyTypesToExpressions(typeMap) : nullptr,
         updateProgram ? new P4::ResolveReferences(refMap, isv1) : nullptr });
-    setName("TypeAnalysis");
+    setName("TypeChecking");
     setStopOnError(true);
 }
 
@@ -25,7 +25,7 @@ class ConstantTypeSubstitution : public Transform {
  public:
     ConstantTypeSubstitution(IR::TypeVariableSubstitution* subst,
                              TypeMap* typeMap) : subst(subst), typeMap(typeMap)
-    { CHECK_NULL(subst); CHECK_NULL(typeMap); }
+    { CHECK_NULL(subst); CHECK_NULL(typeMap); setName("ConstantTypeSubstitution"); }
     // Expressions may be created anew
     const IR::Node* postorder(IR::Expression* expression) override {
         auto type = typeMap->getType(getOriginal(), true);
@@ -56,6 +56,7 @@ TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool clearM
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = false;  // the done() method will take care of this
+    setName("TypeInference");
 }
 
 Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {

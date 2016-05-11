@@ -545,7 +545,7 @@ class ExpressionConverter : public Inspector {
 JsonConverter::JsonConverter(const CompilerOptions& options) :
         options(options), v1model(P4V1::V1Model::instance),
         corelib(P4::P4CoreLibrary::instance),
-        refMap(nullptr), typeMap(nullptr), dropActionId(0), blockMap(nullptr),
+        refMap(nullptr), typeMap(nullptr), dropActionId(0), toplevelBlock(nullptr),
         conv(new ExpressionConverter(this)),
         headerParameter(nullptr), userMetadataParameter(nullptr), stdMetadataParameter(nullptr)
 {}
@@ -1538,14 +1538,14 @@ void JsonConverter::addLocals(Util::JsonArray* headerTypes, Util::JsonArray* ins
     }
 }
 
-void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, P4::BlockMap* bm) {
-    blockMap = bm;
+void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, IR::ToplevelBlock* toplevelBlock) {
+    this->toplevelBlock = toplevelBlock;
     this->refMap = refMap;
     this->typeMap = typeMap;
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
 
-    auto package = blockMap->getMain();
+    auto package = toplevelBlock->getMain();
     if (package == nullptr) {
         ::error("No output to generate");
         return;
@@ -1557,11 +1557,11 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, P4::
         return;
     }
 
-    structure.analyze(blockMap);
+    structure.analyze(toplevelBlock);
     if (::errorCount() > 0)
         return;
 
-    auto parserBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.parser.name);
+    auto parserBlock = package->getParameterValue(v1model.sw.parser.name);
     CHECK_NULL(parserBlock);
     auto parser = parserBlock->to<IR::ParserBlock>()->container;
     auto hdr = parser->type->applyParams->getParameter(v1model.parser.headersParam.index);
@@ -1601,7 +1601,7 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, P4::
     auto parserJson = toJson(parser);
     prsrs->append(parserJson);
 
-    auto deparserBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.deparser.name);
+    auto deparserBlock = package->getParameterValue(v1model.sw.deparser.name);
     CHECK_NULL(deparserBlock);
     auto deparser = deparserBlock->to<IR::ControlBlock>()->container;
 
@@ -1633,12 +1633,12 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, P4::
     }
 
     auto pipelines = mkArrayField(&toplevel, "pipelines");
-    auto ingressBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.ingress.name);
+    auto ingressBlock = package->getParameterValue(v1model.sw.ingress.name);
     auto ingressControl = ingressBlock->to<IR::ControlBlock>();
     auto ingress = convertControl(ingressControl, v1model.ingress.name,
                                   counters, meters, registers);
     pipelines->append(ingress);
-    auto egressBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.egress.name);
+    auto egressBlock = package->getParameterValue(v1model.sw.egress.name);
     auto egress = convertControl(egressBlock->to<IR::ControlBlock>(),
                                  v1model.egress.name, counters, meters, registers);
     pipelines->append(egress);
@@ -1660,7 +1660,7 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, P4::
     }
 
     auto checksums = mkArrayField(&toplevel, "checksums");
-    auto updateBlock = blockMap->getBlockBoundToParameter(package, v1model.sw.update.name);
+    auto updateBlock = package->getParameterValue(v1model.sw.update.name);
     CHECK_NULL(updateBlock);
     generateUpdate(updateBlock->to<IR::ControlBlock>()->container, checksums, calculations);
 

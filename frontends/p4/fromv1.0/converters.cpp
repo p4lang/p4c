@@ -273,7 +273,7 @@ class DiscoverStructure : public Inspector {
 
  public:
     explicit DiscoverStructure(ProgramStructure* structure) : structure(structure)
-    { CHECK_NULL(structure); }
+    { CHECK_NULL(structure); setName("DiscoverStructure"); }
 
     void postorder(const IR::Metadata* md) override {
         structure->metadata.emplace(md);
@@ -320,7 +320,7 @@ class ComputeCallGraph : public Inspector {
 
  public:
     explicit ComputeCallGraph(ProgramStructure* structure) : structure(structure)
-    { CHECK_NULL(structure); }
+    { CHECK_NULL(structure); setName("ComputeCallGraph"); }
     void postorder(const IR::Apply* apply) override {
         LOG1("Scanning " << apply->name);
         auto tbl = structure->tables.get(apply->name.name);
@@ -423,7 +423,7 @@ class Rewriter : public Transform {
     ProgramStructure* structure;
  public:
     explicit Rewriter(ProgramStructure* structure) : structure(structure)
-    { CHECK_NULL(structure); }
+    { CHECK_NULL(structure); setName("Rewriter"); }
 
     const IR::Node* preorder(IR::V1Program* global) override {
         if (verbose > 1)

@@ -6,7 +6,7 @@
 
 class InlineControlFlow : public Transform {
 public:
-    InlineControlFlow(const IR::V1Program *gl) : global(gl) {}
+    InlineControlFlow(const IR::V1Program *gl) : global(gl) { setName("InlineControlFlow"); }
 private:
     const IR::V1Program *global;
 

@@ -4,7 +4,6 @@
 #include "ir/ir.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/evaluator/blockMap.h"
 
 namespace BMV2 {
 
@@ -162,7 +161,7 @@ class ProgramParts {
     std::vector<const IR::Declaration_Variable*> variables;
 
     ProgramParts() {}
-    void analyze(P4::BlockMap* blockMap);
+    void analyze(IR::ToplevelBlock* toplevel);
 };
 
 }  // namespace BMV2

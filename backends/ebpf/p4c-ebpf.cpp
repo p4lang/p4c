@@ -32,11 +32,11 @@ void compile(EbpfOptions& options) {
 
     EBPF::MidEnd midend;
     midend.addDebugHook(hook);
-    program = midend.run(options, program);
+    auto toplevel = midend.run(options, program);
     if (::errorCount() > 0)
         return;
 
-    EBPF::run_ebpf_backend(options, program);
+    EBPF::run_ebpf_backend(options, toplevel, &midend.refMap, &midend.typeMap);
 }
 
 int main(int argc, char *const argv[]) {

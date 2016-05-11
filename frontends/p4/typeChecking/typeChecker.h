@@ -188,6 +188,7 @@ class TypeInference : public Transform {
 
 // Copy types from the typeMap to expressions.  Updates the typeMap with newly created nodes
 class ApplyTypesToExpressions : public Transform {
+    ApplyTypesToExpressions() { setName("ApplyTypesToExpressions"); }
     TypeMap *typeMap;
     IR::Node *postorder(IR::Node *n) override {
         const IR::Node *orig = getOriginal();

@@ -20,11 +20,11 @@
 
 namespace V12Test {
 
-P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
+IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
+    auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     // TODO: remove table parameters
     // TODO: remove action in/out/inout parameters
@@ -49,6 +49,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         evaluator,
     };
 
@@ -58,24 +59,20 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     program = program->apply(simplify);
     if (::errorCount() > 0)
         return nullptr;
-    auto blockMap = evaluator->getBlockMap();
-    if (blockMap->getMain() == nullptr)
+    auto toplevel = evaluator->getToplevelBlock();
+    if (toplevel->getMain() == nullptr)
         // nothing further to do
         return nullptr;
 
     P4::InlineWorkList toInline;
     P4::ActionsInlineList actionsToInline;
 
-    auto inliner = new P4::GeneralInliner();
-    auto actInl = new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap);
-    actInl->allowDirectActionCalls = true;
-
     PassManager midEnd = {
-        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, blockMap),
-        new P4::InlineDriver(&toInline, inliner, isv1),
+        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
+        new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
-        actInl,
+        new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::LocalizeAllActions(&refMap, isv1),
@@ -107,8 +104,8 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     if (::errorCount() > 0)
         return nullptr;
 
-    blockMap = evaluator->getBlockMap();
-    return blockMap;
+    toplevel = evaluator->getToplevelBlock();
+    return toplevel;
 }
 
 }  // namespace V12Test

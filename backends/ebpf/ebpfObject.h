@@ -33,7 +33,7 @@ class EBPFObject {
 class EBPFProgram : public EBPFObject {
  public:
     const IR::P4Program* program;
-    const P4::BlockMap*  blockMap;
+    const IR::ToplevelBlock*  toplevel;
     P4::ReferenceMap*    refMap;
     const P4::TypeMap*   typeMap;
     EBPFParser*          parser;
@@ -54,8 +54,8 @@ class EBPFProgram : public EBPFObject {
     bool build();  // return 'true' on success
 
     EBPFProgram(const IR::P4Program* program, P4::ReferenceMap* refMap,
-                P4::TypeMap* typeMap, const P4::BlockMap* blockMap) :
-            program(program), blockMap(blockMap),
+                const P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
+            program(program), toplevel(toplevel),
             refMap(refMap), typeMap(typeMap),
             parser(nullptr), control(nullptr), model(EBPFModel::instance) {
         offsetVar = EBPFModel::reserved("packetOffsetInBits");

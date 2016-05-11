@@ -42,7 +42,8 @@ class RemoveReturns : public Transform {
 
  public:
     explicit RemoveReturns(P4::ReferenceMap* refMap, cstring varName = "hasReturned") :
-            refMap(refMap), variableName(varName) { visitDagOnce = false; CHECK_NULL(refMap); }
+            refMap(refMap), variableName(varName)
+    { visitDagOnce = false; CHECK_NULL(refMap); setName("RemoveReturns"); }
 
     const IR::Node* preorder(IR::Function* function) override
     { prune(); return function; }  // We leave returns in functions alone
@@ -73,7 +74,7 @@ class RemoveExits : public RemoveReturns {
  public:
     RemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :
             RemoveReturns(refMap, "hasExited"), typeMap(typeMap)
-    { visitDagOnce = false; CHECK_NULL(typeMap); }
+    { visitDagOnce = false; CHECK_NULL(typeMap); setName("RemoveExits"); }
 
     const IR::Node* preorder(IR::ExitStatement* action) override;
     const IR::Node* preorder(IR::P4Table* table) override;

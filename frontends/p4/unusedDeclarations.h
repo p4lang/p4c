@@ -11,7 +11,8 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* process(const IR::IDeclaration* decl);
 
  public:
-    explicit RemoveUnusedDeclarations(const ReferenceMap* refMap) : refMap(refMap) {}
+    explicit RemoveUnusedDeclarations(const ReferenceMap* refMap) : refMap(refMap)
+    { setName("RemoveUnusedDeclarations"); }
 
     using Transform::postorder;
     using Transform::preorder;
