@@ -762,8 +762,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         auto typeArg = mc->typeArguments->at(0);
                         if (typeArg->is<IR::Type_Name>()) {
                             auto origType = refMap->getDeclaration(
-                                typeArg->to<IR::Type_Name>()->path);
-                            CHECK_NULL(origType);
+                                typeArg->to<IR::Type_Name>()->path, true);
                             BUG_CHECK(origType->is<IR::Type_Struct>(),
                                       "%1%: expected a struct type", origType);
                             auto st = origType->to<IR::Type_Struct>();
@@ -790,8 +789,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         auto typeArg = mc->typeArguments->at(0);
                         if (typeArg->is<IR::Type_Name>()) {
                             auto origType = refMap->getDeclaration(
-                                typeArg->to<IR::Type_Name>()->path);
-                            CHECK_NULL(origType);
+                                typeArg->to<IR::Type_Name>()->path, true);
                             BUG_CHECK(origType->is<IR::Type_Struct>(),
                                       "%1%: expected a struct type", origType);
                             auto st = origType->to<IR::Type_Struct>();
@@ -1144,8 +1142,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     for (auto a : *al->actionList) {
         if (a->arguments != nullptr && a->arguments->size() > 0)
             ::error("%1%: Actions in action list with arguments not supported", a);
-        auto decl = refMap->getDeclaration(a->name->path);
-        CHECK_NULL(decl);
+        auto decl = refMap->getDeclaration(a->name->path, true);
         BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
         auto action = decl->to<IR::P4Action>();
         unsigned id = get(structure.ids, action);
@@ -1212,10 +1209,49 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     }
 
     result->emplace("next_tables", next_tables);
-    result->emplace("default_action", Util::JsonValue::null);
     auto defact = table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
-    if (defact != nullptr)
-        ::warning("%1%.%2%: setting default action currently not supported", table->name, defact);
+    if (defact != nullptr) {
+        if (!defact->value->is<IR::ExpressionValue>()) {
+            ::error("%1%: expected an action", defact);
+            return result;
+        }
+        auto expr = defact->value->to<IR::ExpressionValue>()->expression;
+        const IR::P4Action* action = nullptr;
+        const IR::Vector<IR::Expression>* args = nullptr;
+
+        if (expr->is<IR::PathExpression>()) {
+            auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
+            BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", expr);
+            action = decl->to<IR::P4Action>();
+        } else if (expr->is<IR::MethodCallExpression>()) {
+            auto mce = expr->to<IR::MethodCallExpression>();
+            auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+            BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected an action", expr);
+            action = mi->to<P4::ActionCall>()->action;
+            args = mce->arguments;
+        } else {
+            BUG("%1%: unexpected expression", expr);
+        }
+
+        unsigned actionid = get(structure.ids, action);
+        auto entry = new Util::JsonObject();
+        entry->emplace("action_id", actionid);
+        entry->emplace("action_const", false);
+        auto fields = mkArrayField(entry, "action_data");
+        if (args != nullptr) {
+            for (auto a : *args) {
+                if (a->is<IR::Constant>()) {
+                    cstring repr = stringRepr(a->to<IR::Constant>()->value);
+                    fields->append(repr);
+                } else {
+                    ::error("%1%: argument must evaluate to a constant integer", a);
+                    return result;
+                }
+            }
+        }
+        entry->emplace("action_entry_const", defact->isConstant);
+        result->emplace("default_entry", entry);
+    }
     return result;
 }
 

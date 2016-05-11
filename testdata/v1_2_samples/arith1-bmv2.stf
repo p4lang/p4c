@@ -1,5 +1,3 @@
-setdefault t compare()
-
 # header = { int<32> a; int<32> b; bit<8> c; }
 # In the output C = A < B
 
