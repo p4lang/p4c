@@ -196,7 +196,7 @@ TEST_F(SimpleSwitch_QueueingP4, QueueingAdvanced) {
   int recv_port = -1;
 
   // setting egress queue rate to 1 pps
-  test_switch->set_egress_queue_rate(1u);
+  test_switch->set_all_egress_queue_rates(1u);
 
   const size_t nb_packets = 16u;
   for (size_t i = 0; i < nb_packets; i++) {

@@ -43,9 +43,14 @@ class SimpleSwitchAPI(runtime_CLI.RuntimeAPI):
         self.sswitch_client.set_egress_queue_depth(depth)
 
     def do_set_queue_rate(self, line):
-        "Set rate of egress queue: set_queue_rate <rate_pps>"
-        rate = int(line)
-        self.sswitch_client.set_egress_queue_rate(rate)
+        "Set rate of one / all egress queue(s): set_queue_rate <rate_pps> [<egress_port>]"
+        args = line.split()
+        rate = int(args[0])
+        if len(args) > 1:
+            port = int(args[1])
+            self.sswitch_client.set_egress_queue_rate(port, rate)
+        else:
+            self.sswitch_client.set_all_egress_queue_rates(rate)
 
     def do_mirroring_add(self, line):
         "Add mirroring mapping: mirroring_add <mirror_id> <egress_port>"

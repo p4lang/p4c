@@ -55,9 +55,15 @@ class SimpleSwitchHandler : virtual public SimpleSwitchIf {
     return switch_->set_egress_queue_depth(static_cast<size_t>(depth_pkts));
   }
 
-  int32_t set_egress_queue_rate(const int64_t rate_pps) {
+  int32_t set_egress_queue_rate(const int32_t port_num, const int64_t rate_pps) {
     bm::Logger::get()->trace("set_egress_queue_rate");
-    return switch_->set_egress_queue_rate(static_cast<uint64_t>(rate_pps));
+    return switch_->set_egress_queue_rate(port_num,
+                                          static_cast<uint64_t>(rate_pps));
+  }
+
+  int32_t set_all_egress_queue_rates(const int64_t rate_pps) {
+    bm::Logger::get()->trace("set_all_egress_queue_rates");
+    return switch_->set_all_egress_queue_rates(static_cast<uint64_t>(rate_pps));
   }
 
 private:
