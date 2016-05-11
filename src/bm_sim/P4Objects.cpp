@@ -885,6 +885,58 @@ P4Objects::init_objects(std::istream *is,
         table->set_next_node_miss_default(
             get_next_node(cfg_table["base_default_next"]));
       }
+
+      // for 'simple' tables, it is possible to specify a default action or a
+      // default action with some default action data. It is also specify to
+      // choose if the default action is "const", meaning it cannot be changed
+      // by the control plane; or if the default entry (action + action data) is
+      // "const".
+      // note that this code has to be placed after setting the next nodes, as
+      // it may call MatchTable::set_default_action.
+      if (cfg_table.isMember("default_entry")) {
+        const string table_type = cfg_table["type"].asString();
+        if (table_type != "simple") {
+          outstream << "Table '" << table_name << "' does not have type "
+                    << "'simple' and therefore cannot specify a "
+                    << "'default_entry' attribute\n";
+          return 1;
+        }
+
+        auto simple_table = dynamic_cast<MatchTable *>(table);
+        assert(simple_table);
+
+        const Json::Value &cfg_default_entry = cfg_table["default_entry"];
+        const p4object_id_t action_id = cfg_default_entry["action_id"].asInt();
+        const ActionFn *action = get_action_by_id(action_id); assert(action);
+
+        const Json::Value false_value(false);
+        const bool is_action_const =
+            cfg_default_entry.get("action_const", false_value).asBool();
+        if (is_action_const) simple_table->set_const_default_action_fn(action);
+
+        if (cfg_default_entry.isMember("action_data")) {
+          const Json::Value &cfg_action_data = cfg_default_entry["action_data"];
+
+          // TODO(antonin)
+          // if (action->num_params() != cfg_action_data.size()) {
+          //   outstream << "Default entry specification for table '"
+          //             << table_name << "' incorrect: expected "
+          //             << action->num_params() << " args for action data "
+          //             << "but got " << cfg_action_data.size() << "\n";
+          //   return 1;
+          // }
+
+          ActionData adata;
+          for (const auto &d : cfg_action_data)
+            adata.push_back_action_data(Data(d.asString()));
+
+          const bool is_action_entry_const =
+              cfg_default_entry.get("action_entry_const", false_value).asBool();
+
+          simple_table->set_default_entry(action, std::move(adata),
+                                          is_action_entry_const);
+        }
+      }
     }
 
     // next node resolution for conditionals

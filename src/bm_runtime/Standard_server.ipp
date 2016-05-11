@@ -75,6 +75,10 @@ public:
       return TableOperationErrorCode::BAD_MATCH_KEY;
     case MatchErrorCode::INVALID_METER_OPERATION:
       return TableOperationErrorCode::INVALID_METER_OPERATION;
+    case MatchErrorCode::DEFAULT_ACTION_IS_CONST:
+      return TableOperationErrorCode::DEFAULT_ACTION_IS_CONST;
+    case MatchErrorCode::DEFAULT_ENTRY_IS_CONST:
+      return TableOperationErrorCode::DEFAULT_ENTRY_IS_CONST;
     case MatchErrorCode::ERROR:
       return TableOperationErrorCode::ERROR;
     default:

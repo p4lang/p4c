@@ -521,6 +521,9 @@ class ActionFn :  public NamedP4Object {
 
   void push_back_primitive(ActionPrimitive_ *primitive);
 
+  // TODO(antonin)
+  // size_t num_params() const { 0u; }
+
  private:
   std::vector<ActionPrimitive_ *> primitives{};
   std::vector<ActionParam> params{};

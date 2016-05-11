@@ -181,6 +181,17 @@ class ActionsTest : public ::testing::Test {
   virtual void TearDown() { }
 };
 
+// TODO(antonin)
+// TEST_F(ActionsTest, NumParams) {
+//   Data value(0xaba);
+//   SetField primitive;
+//   testActionFn.push_back_primitive(&primitive);
+//   testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+//   testActionFn.parameter_push_back_const(value);
+
+//   ASSERT_EQ(2u, testActionFn.num_params());
+// }
+
 TEST_F(ActionsTest, SetFromConst) {
   Data value(0xaba);
   SetField primitive;
