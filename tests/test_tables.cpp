@@ -394,6 +394,104 @@ TYPED_TEST(TableSizeTwo, NextNodeHitMiss) {
   ASSERT_EQ(&dummy_node_miss, this->table->apply_action(&pkt));
 }
 
+TYPED_TEST(TableSizeTwo, SetDefaultAction) {
+  std::string key = "\x0a\xba";
+  entry_handle_t handle;
+  MatchErrorCode rc;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  Packet pkt = this->get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+
+  // before even adding entry
+  // miss, next node is default one (as per the P4 program)
+  f.set("0xaba");
+  ASSERT_EQ(&this->node_miss_default, this->table->apply_action(&pkt));
+
+  rc = this->table->set_default_action(&this->action_fn, ActionData());
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
+}
+
+TYPED_TEST(TableSizeTwo, ConstDefaultActionFn) {
+  std::string key = "\x0a\xba";
+  entry_handle_t handle;
+  MatchErrorCode rc;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  Packet pkt = this->get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+  f.set("0xaba");
+
+  ActionFn bad_action_fn("bad_action", 1);
+  this->table->set_next_node(1, nullptr);
+
+  this->table->set_const_default_action_fn(&this->action_fn);
+
+  // try to set the default action function to something new, should fail
+  rc = this->table->set_default_action(&bad_action_fn, ActionData());
+  ASSERT_EQ(MatchErrorCode::DEFAULT_ACTION_IS_CONST, rc);
+
+  // no default entry, so next node is default one
+  ASSERT_EQ(&this->node_miss_default, this->table->apply_action(&pkt));
+
+  // setting the default entry succeeds if the action function matches the const
+  // specification
+  rc = this->table->set_default_action(&this->action_fn, ActionData());
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
+}
+
+TYPED_TEST(TableSizeTwo, ConstDefaultEntry) {
+  std::string key = "\x0a\xba";
+  entry_handle_t handle;
+  entry_handle_t lookup_handle;
+  bool hit;
+
+  Packet pkt = this->get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+  f.set("0xaba");
+
+  ActionFn bad_action_fn("bad_action", 1);
+  this->table->set_next_node(1, nullptr);
+
+  auto change_default_entry = [this, &bad_action_fn](
+      MatchErrorCode expected_rc_action_data,
+      MatchErrorCode expected_rc_action_fn) {
+    MatchErrorCode rc;
+
+    rc = this->table->set_default_action(&this->action_fn, ActionData());
+    ASSERT_EQ(expected_rc_action_data, rc);
+
+    rc = this->table->set_default_action(&bad_action_fn, ActionData());
+    ASSERT_EQ(expected_rc_action_fn, rc);
+  };
+
+  // false means non-const
+  this->table->set_default_entry(&this->action_fn, ActionData(), false);
+
+  // both changing action data and action fn should succeed
+  change_default_entry(MatchErrorCode::SUCCESS, MatchErrorCode::SUCCESS);
+
+  this->table->set_const_default_action_fn(&this->action_fn);
+
+  // can change the action data, not the action function
+  change_default_entry(MatchErrorCode::SUCCESS,
+                       MatchErrorCode::DEFAULT_ACTION_IS_CONST);
+
+  // true means const
+  this->table->set_default_entry(&this->action_fn, ActionData(), true);
+
+  // no change possible
+  change_default_entry(MatchErrorCode::DEFAULT_ENTRY_IS_CONST,
+                       MatchErrorCode::DEFAULT_ENTRY_IS_CONST);
+
+  ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
+}
+
 TYPED_TEST(TableSizeTwo, ModifyEntry) {
   std::string key_ = "\x0a\xba";
   ByteContainer key("0x0aba");

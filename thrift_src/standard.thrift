@@ -101,7 +101,9 @@ enum TableOperationErrorCode {
   DUPLICATE_ENTRY = 17,
   BAD_MATCH_KEY = 18,
   INVALID_METER_OPERATION = 19,
-  ERROR = 20,
+  DEFAULT_ACTION_IS_CONST = 20,
+  DEFAULT_ENTRY_IS_CONST = 21,
+  ERROR = 22,
 }
 
 exception InvalidTableOperation {

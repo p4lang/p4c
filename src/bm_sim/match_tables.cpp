@@ -379,6 +379,11 @@ MatchTable::modify_entry(entry_handle_t handle,
 MatchErrorCode
 MatchTable::set_default_action(const ActionFn *action_fn,
                                ActionData action_data) {
+  if (const_default_entry)
+    return MatchErrorCode::DEFAULT_ENTRY_IS_CONST;
+  if (const_default_action && (const_default_action != action_fn))
+    return MatchErrorCode::DEFAULT_ACTION_IS_CONST;
+
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
   const ControlFlowNode *next_node = get_next_node_default(action_fn->get_id());
   next_node_miss = next_node;
@@ -435,6 +440,22 @@ void
 MatchTable::reset_state_() {
   // reset default_entry ?
   match_unit->reset_state();
+}
+
+void
+MatchTable::set_const_default_action_fn(
+    const ActionFn *const_default_action_fn) {
+  assert(!const_default_action);
+  const_default_action = const_default_action_fn;
+}
+
+void
+MatchTable::set_default_entry(const ActionFn *action_fn,
+                              ActionData action_data, bool is_const) {
+  assert(!const_default_entry);
+  auto rc = set_default_action(action_fn, std::move(action_data));
+  assert(rc == MatchErrorCode::SUCCESS);
+  const_default_entry = is_const;
 }
 
 void

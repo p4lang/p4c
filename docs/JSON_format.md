@@ -261,6 +261,20 @@ attributes for these objects are:
   special string `__HIT__` and `__MISS__` to a next table name.
   - `direct_meters`: the name of the associated direct meter array, or null if
   the match table has no associated meter array
+  - `default_entry`: an optional JSON item which can force the default entry for
+  the table to be set when loading the JSON, without intervention from the
+  control plane. It has the following attributes:
+    - `action_id`: the id of the default action
+    - `action_const`: an optional boolean value which is `true` iff the control
+    plane is not allowed to change the default action function. Default value is
+    `false`.
+    - `action_data`: an optional JSON array where each entry is the hexstring
+    value for an action argument. The size of the array needs to match the
+    number of parameters expected by the action function with id `action_id`.
+    - `action_entry_const`: an optional boolean value which is `true` iff the
+    control plane is not allowed to modify the action entry (action function +
+    action data). Default value is `false`. This attribute is ignored if the
+    `action_data` attribute it missing.
 - `conditionals`: a JSON array of JSON objects. Each of these objects stores the
 information for a given P4 condition, which is used by the current pipeline. The
 attributes for these objects are:

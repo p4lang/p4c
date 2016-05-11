@@ -240,6 +240,16 @@ class MatchTable : public MatchTableAbstract {
 
   void dump(std::ostream *stream) const override;
 
+  // meant to be called by P4Objects when loading the JSON
+  // set_const_default_action_fn makes sure that the control plane cannot change
+  // the default action; note that the action data can still be changed
+  // set_default_entry sets a default entry obtained from the JSON. You can make
+  // sure that neither the default action function nor the default action data
+  // can be changed by the control plane by using the is_const parameter.
+  void set_const_default_action_fn(const ActionFn *const_default_action_fn);
+  void set_default_entry(const ActionFn *action_fn, ActionData action_data,
+                         bool is_const);
+
  public:
   static std::unique_ptr<MatchTable> create(
       const std::string &match_type,
@@ -261,6 +271,8 @@ class MatchTable : public MatchTableAbstract {
  private:
   ActionEntry default_entry{};
   std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit;
+  const ActionFn *const_default_action{nullptr};
+  bool const_default_entry{false};
 };
 
 class MatchTableIndirect : public MatchTableAbstract {

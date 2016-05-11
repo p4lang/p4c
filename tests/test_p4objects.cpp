@@ -245,3 +245,25 @@ TEST(P4Objects, ExternInstanceDeclaration) {
     EXPECT_EQ(expected_error_msg, os.str());
   }
 }
+
+TEST(P4Objects, TableDefaultEntry) {
+  std::stringstream is;
+  is << "{\"pipelines\":[{\"name\":\"ingress\",\"id\":0,\"init_table\":\"t0\","
+     << "\"tables\":[{\"name\":\"t0\",\"id\":0,\"match_type\":\"exact\","
+     << "\"type\":\"simple\",\"max_size\":1,\"with_counters\":false,"
+     << "\"key\":[],\"action_ids\":[0],\"next_tables\":{\"a0\":null},"
+     << "\"default_entry\":{\"action_id\":0,\"action_const\":true,"
+     << "\"action_data\":[\"0xab\"],\"action_entry_const\":true}}]}],"
+     << "\"actions\":[{\"name\":\"a0\",\"id\":0,\"runtime_data\":"
+     << "[{\"name\":\"p\",\"bitwidth\":32}],\"primitives\":[]}]}";
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  auto t_ = objects.get_abstract_match_table("t0");
+  auto t = dynamic_cast<MatchTable *>(t_);
+  ASSERT_NE(nullptr, t);
+  std::stringstream os;
+  t->dump(&os);
+  std::string expected_dump_str = "t0:\ndefault: a0 - ab,\n";
+  ASSERT_EQ(expected_dump_str, os.str());
+}
