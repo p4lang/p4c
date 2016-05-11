@@ -107,7 +107,7 @@ class JsonConverter final {
 
  public:
     explicit JsonConverter(const CompilerOptions& options);
-    void convert(P4::BlockMap *blockMap);
+    void convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, P4::BlockMap *blockMap);
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }
 };

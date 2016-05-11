@@ -90,6 +90,9 @@ class Node : public virtual INode {
     bool operator!=(const Node &n) const { return !operator==(n); }
 };
 
+// simple version of dbprint
+cstring dbp(const INode* node);
+
 template<typename T> bool INode::is() const { return getNode()->is<T>(); }
 template<typename T> const T* INode::to() const { return getNode()->to<T>(); }
 

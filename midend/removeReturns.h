@@ -62,13 +62,13 @@ class RemoveReturns : public Transform {
 // since an exit in an action causes the calling control to terminate.
 // This pass assumes that each statement in a control block can
 // exit only once - so it should be run after a pass that enforces this.
-// It also assumes that there are no global actions and that action calls have been inlined.
 // (E.g., it does not handle:
 // if (t1.apply().hit && t2.apply().hit) { ... }
+// It also assumes that there are no global actions and that action calls have been inlined.
 class RemoveExits : public RemoveReturns {
     TypeMap* typeMap;
     // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
-    std::set<const IR::Node*> callsExit;  // actions, tables, method calls
+    std::set<const IR::Node*> callsExit;  // actions, tables
     void callExit(const IR::Node* node);
  public:
     RemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :

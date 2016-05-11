@@ -22,10 +22,7 @@ namespace BMV2 {
 
 const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* program) {
     bool isv1 = true;
-    P4::ReferenceMap refMap;
-    P4::TypeMap typeMap;
-
-    auto evaluator = new P4::EvaluatorPass(true);
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
     (void)program->apply(*evaluator);
     if (::errorCount() > 0)
         return nullptr;
@@ -37,7 +34,7 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
     P4::ActionsInlineList actionsToInline;
 
     PassManager midend = {
-        new P4::DiscoverInlining(&controlsToInline, evaluator->getBlockMap()),
+        new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator->getBlockMap()),
         new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
@@ -55,9 +52,7 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
 
 const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* program) {
     bool isv1 = false;
-    auto evaluator = new P4::EvaluatorPass(isv1);
-    P4::ReferenceMap refMap;
-    P4::TypeMap typeMap;
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
 
     PassManager simplify = {
         // Proper semantics for uninitialzed local variables in parser states:
@@ -89,7 +84,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
     P4::InlineWorkList toInline;
     P4::ActionsInlineList actionsToInline;
     PassManager midEnd = {
-        new P4::DiscoverInlining(&toInline, blockMap),
+        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, blockMap),
         new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
@@ -131,9 +126,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
         return nullptr;
 
     // BMv2-specific passes
-    P4::ReferenceMap refMap;
-    P4::TypeMap typeMap;
-    auto evaluator = new P4::EvaluatorPass(isv1);
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
     PassManager backend = {
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),

@@ -14,7 +14,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
 
  public:
     ActionTranslationVisitor(CodeBuilder* builder, cstring valueName, const EBPFProgram* program):
-            CodeGenInspector(builder, program->blockMap->typeMap), program(program),
+            CodeGenInspector(builder, program->typeMap), program(program),
             action(nullptr), valueName(valueName)
     { CHECK_NULL(program); }
 
@@ -224,7 +224,7 @@ void EBPFTable::createKey(CodeBuilder* builder, cstring keyName) {
         builder->append(fieldNumber);
         builder->append(" = ");
 
-        CodeGenInspector visitor(builder, program->blockMap->typeMap);
+        CodeGenInspector visitor(builder, program->typeMap);
         c->expression->apply(visitor);
         builder->endOfStatement(true);
     }
@@ -321,7 +321,7 @@ void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
     BUG_CHECK(expression->arguments->size() == 1, "Expected just 1 argument for %1%", expression);
     auto arg = expression->arguments->at(0);
 
-    CodeGenInspector visitor(builder, program->blockMap->typeMap);
+    CodeGenInspector visitor(builder, program->typeMap);
     arg->apply(visitor);
     builder->endOfStatement(true);
 

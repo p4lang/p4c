@@ -18,11 +18,11 @@ class CodeBuilder : public Util::SourceCodeBuilder {
 // This visitor is invoked on various subtrees
 class CodeGenInspector : public Inspector {
  protected:
-    CodeBuilder*    builder;
-    P4::TypeMap* typeMap;
+    CodeBuilder*       builder;
+    const P4::TypeMap* typeMap;
 
  public:
-    explicit CodeGenInspector(CodeBuilder* builder, P4::TypeMap* typeMap) :
+    CodeGenInspector(CodeBuilder* builder, const P4::TypeMap* typeMap) :
             builder(builder), typeMap(typeMap) { visitDagOnce = false; }
 
     using Inspector::preorder;

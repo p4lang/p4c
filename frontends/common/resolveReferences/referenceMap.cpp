@@ -28,7 +28,7 @@ void ReferenceMap::dbprint(std::ostream &out) const {
     if (pathToDeclaration.empty())
         out << "Empty" << std::endl;
     for (auto e : pathToDeclaration)
-        out << e.first << "->" << e.second << std::endl;
+        out << dbp(e.first) << "->" << dbp(e.second) << std::endl;
 }
 
 cstring ReferenceMap::newName(cstring base) {

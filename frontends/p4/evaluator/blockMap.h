@@ -17,11 +17,8 @@ class BlockMap final {
  public:
     const IR::ToplevelBlock* toplevelBlock;
     const IR::P4Program* program;
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
 
-    BlockMap(ReferenceMap* refMap, TypeMap* typeMap) :
-            toplevelBlock(nullptr), program(nullptr), refMap(refMap), typeMap(typeMap) {}
+    BlockMap() : toplevelBlock(nullptr), program(nullptr) {}
     const IR::PackageBlock* getMain() const;
     const IR::Block* getBlockBoundToParameter(const IR::InstantiatedBlock* block,
                                               cstring paramName) const;

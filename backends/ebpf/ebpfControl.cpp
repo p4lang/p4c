@@ -19,7 +19,7 @@ class ControlTranslationVisitor : public CodeGenInspector {
 
  public:
     ControlTranslationVisitor(const EBPFControl* control, CodeBuilder* builder) :
-            CodeGenInspector(builder, control->program->blockMap->typeMap), control(control) {}
+            CodeGenInspector(builder, control->program->typeMap), control(control) {}
     using CodeGenInspector::preorder;
     bool preorder(const IR::PathExpression* expression) override;
     bool preorder(const IR::MethodCallStatement* stat) override
@@ -181,7 +181,7 @@ bool ControlTranslationVisitor::preorder(const IR::ReturnStatement*) {
 }
 
 bool ControlTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
-    cstring newName = control->program->blockMap->refMap->newName("action_run");
+    cstring newName = control->program->refMap->newName("action_run");
     saveAction.push_back(newName);
     // This must be a table.apply().action_run
     auto mem = statement->expression->to<IR::Member>();
@@ -201,7 +201,7 @@ bool ControlTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
         } else {
             builder->append("case ");
             auto pe = c->label->to<IR::PathExpression>();
-            auto decl = control->program->blockMap->refMap->getDeclaration(pe->path, true);
+            auto decl = control->program->refMap->getDeclaration(pe->path, true);
             BUG_CHECK(decl->is<IR::P4Action>(), "%1%: expected an action", pe);
             auto act = decl->to<IR::P4Action>();
             cstring name = nameFromAnnotation(act->annotations, act->name);

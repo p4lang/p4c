@@ -53,10 +53,11 @@ class EBPFProgram : public EBPFObject {
     void emit(CodeBuilder *builder) override;
     bool build();  // return 'true' on success
 
-    EBPFProgram(const IR::P4Program* program, const P4::BlockMap* blockMap) :
+    EBPFProgram(const IR::P4Program* program, P4::ReferenceMap* refMap,
+                P4::TypeMap* typeMap, const P4::BlockMap* blockMap) :
             program(program), blockMap(blockMap),
-            refMap(blockMap->refMap), typeMap(blockMap->typeMap),
-                   parser(nullptr), control(nullptr), model(EBPFModel::instance) {
+            refMap(refMap), typeMap(typeMap),
+            parser(nullptr), control(nullptr), model(EBPFModel::instance) {
         offsetVar = EBPFModel::reserved("packetOffsetInBits");
         zeroKey = EBPFModel::reserved("zero");
         functionName = EBPFModel::reserved("filter");

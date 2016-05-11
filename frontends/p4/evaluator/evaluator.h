@@ -9,6 +9,8 @@
 namespace P4 {
 
 class Evaluator final : public Inspector {
+    ReferenceMap*            refMap;
+    TypeMap*                 typeMap;
     BlockMap*                blockMap;
     std::vector<IR::Block*>  blockStack;
 
@@ -17,7 +19,9 @@ class Evaluator final : public Inspector {
     void popBlock(IR::Block* block);
 
  public:
-    explicit Evaluator(BlockMap* blockMap) : blockMap(blockMap) {}
+    Evaluator(ReferenceMap* refMap, TypeMap* typeMap, BlockMap* blockMap) :
+            refMap(refMap), typeMap(typeMap), blockMap(blockMap)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(blockMap); }
     BlockMap* getBlockMap() { return blockMap; }
 
     IR::Block* currentBlock() const;
@@ -54,13 +58,11 @@ class Evaluator final : public Inspector {
 // A pass which "evaluates" the program
 class EvaluatorPass final : public PassManager {
  private:
-    ReferenceMap *refMap;
-    TypeMap      *typeMap;
     BlockMap     *blockMap;
 
  public:
     BlockMap* getBlockMap() { return blockMap; }
-    explicit EvaluatorPass(bool anyOrder);
+    EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool anyOrder);
 };
 
 }  // namespace P4

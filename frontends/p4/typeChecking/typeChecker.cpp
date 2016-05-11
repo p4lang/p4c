@@ -60,10 +60,12 @@ TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool clearM
 
 Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
     LOG2("Reference map for type checker:" << std::endl << refMap);
+    LOG1("TypeInference for " << dbp(node));
     initialNode = node;
     if (clearMap) {
         // Clear map only if program has not changed from last time
-        if (!node->is<IR::P4Program>() || typeMap->program != node->to<IR::P4Program>())
+        // oterwise we can reuse it
+        if (!typeMap->checkMap(node))
             typeMap->clear();
     }
     return Transform::init_apply(node);
@@ -72,15 +74,16 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
 void TypeInference::end_apply(const IR::Node* node) {
     if (readOnly && !(*node == *initialNode))
         BUG("%1%: typechecker mutated node", node);
-    if (node->is<IR::P4Program>())
-        typeMap->program = node->to<IR::P4Program>();
+    typeMap->updateMap(node);
 }
 
 bool TypeInference::done() const {
     LOG3("Visiting " << getOriginal());
     auto orig = getOriginal();
-    if (typeMap->contains(orig))
+    if (typeMap->contains(orig)) {
+        LOG3("done");
         return true;
+    }
     return false;
 }
 
@@ -363,8 +366,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
 ///////////////////////////////////// Visitor methods
 
 const IR::Node* TypeInference::preorder(IR::P4Program* program) {
-    if (typeMap->program == program && readOnly)
-        // we are done
+    if (typeMap->checkMap(getOriginal()) && readOnly)
         prune();
     return program;
 }

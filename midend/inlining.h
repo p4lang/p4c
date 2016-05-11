@@ -93,12 +93,12 @@ class InlineWorkList {
 // as inlining is performed (since callers change into new nodes).
 class AbstractInliner : public Transform {
  protected:
-    P4::InlineWorkList* list;
-    P4::InlineSummary*  toInline;
+    InlineWorkList* list;
+    InlineSummary*  toInline;
     bool                p4v1;
     AbstractInliner() : list(nullptr), toInline(nullptr), p4v1(false) {}
  public:
-    void prepare(P4::InlineWorkList* list, P4::InlineSummary* toInline, bool p4v1) {
+    void prepare(InlineWorkList* list, InlineSummary* toInline, bool p4v1) {
         CHECK_NULL(list); CHECK_NULL(toInline);
         this->list = list;
         this->toInline = toInline;
@@ -114,11 +114,11 @@ class AbstractInliner : public Transform {
 
 // Repeatedly invokes an abstract inliner with work from the worklist
 class InlineDriver : public Transform {
-    P4::InlineWorkList*  toInline;
+    InlineWorkList*  toInline;
     AbstractInliner*     inliner;
     bool                 p4v1;
  public:
-    explicit InlineDriver(P4::InlineWorkList* toInline, AbstractInliner* inliner, bool p4v1) :
+    explicit InlineDriver(InlineWorkList* toInline, AbstractInliner* inliner, bool p4v1) :
             toInline(toInline), inliner(inliner), p4v1(p4v1)
     { CHECK_NULL(toInline); CHECK_NULL(inliner); }
 
@@ -129,8 +129,10 @@ class InlineDriver : public Transform {
 
 // Must be run after an evaluator; uses the blockMap to discover caller/callee relationships.
 class DiscoverInlining : public Inspector {
-    P4::InlineWorkList* inlineList;  // deposit result here
-    P4::BlockMap* blockMap;          // input
+    InlineWorkList* inlineList;  // output: result is here
+    ReferenceMap*   refMap;      // input
+    TypeMap*        typeMap;     // input
+    BlockMap*       blockMap;    // input
  public:
     bool allowParsers = true;
     bool allowControls = true;
@@ -138,9 +140,10 @@ class DiscoverInlining : public Inspector {
     bool allowParsersFromControls = false;
     bool allowControlsFromParsers = false;
 
-    DiscoverInlining(P4::InlineWorkList* inlineList, P4::BlockMap* blockMap) :
-            inlineList(inlineList), blockMap(blockMap)
-    { CHECK_NULL(inlineList); CHECK_NULL(blockMap); }
+    DiscoverInlining(InlineWorkList* inlineList, ReferenceMap* refMap,
+                     TypeMap* typeMap, BlockMap* blockMap) :
+            inlineList(inlineList), refMap(refMap), typeMap(typeMap), blockMap(blockMap)
+    { CHECK_NULL(inlineList); CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(blockMap); }
     void visit_all(const IR::Block* block);
     bool preorder(const IR::Block* block) override
     { visit_all(block); return false; }
@@ -154,10 +157,10 @@ class DiscoverInlining : public Inspector {
 
 // Performs actual inlining work
 class GeneralInliner : public AbstractInliner {
-    P4::ReferenceMap* refMap;
-    P4::InlineSummary::PerCaller* workToDo;
+    ReferenceMap* refMap;
+    InlineSummary::PerCaller* workToDo;
  public:
-    GeneralInliner() : refMap(new P4::ReferenceMap()), workToDo(nullptr) {}
+    GeneralInliner() : refMap(new ReferenceMap()), workToDo(nullptr) {}
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
     const IR::Node* preorder(IR::P4Control* caller) override;
     const IR::Node* preorder(IR::P4Parser* caller) override;

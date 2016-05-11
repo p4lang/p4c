@@ -2,6 +2,7 @@
 #define _FRONTENDS_COMMON_TYPEMAP_H_
 
 #include "ir/ir.h"
+#include "frontends/common/programMap.h"
 
 namespace P4 {
 /*
@@ -19,7 +20,7 @@ namespace P4 {
  * - error (pointing to the error type)
  * - prototypes (function and functor prototypes); map name to the actual type
  */
-class TypeMap final {
+class TypeMap final : public ProgramMap {
  protected:
     // Map each node to its canonical type
     std::map<const IR::Node*, const IR::Type*> typeMap;
@@ -32,6 +33,8 @@ class TypeMap final {
     static const IR::Type_InfInt* canonInfInt;
 
  public:
+    TypeMap() : ProgramMap("TypeMap") {}
+
     bool contains(const IR::Node* element) { return typeMap.count(element) != 0; }
     void setType(const IR::Node* element, const IR::Type* type);
     const IR::Type* getType(const IR::Node* element, bool notNull = false) const;
@@ -39,13 +42,13 @@ class TypeMap final {
     void clear();
     bool isLeftValue(const IR::Expression* expression) const
     { return leftValues.count(expression) > 0; }
+    size_t size() const
+    { return typeMap.size(); }
 
     // The following are only used by the type-checker
     void setLeftValue(const IR::Expression* expression);
     const IR::Type_InfInt* canonicalInfInt() const
     { return TypeMap::canonInfInt; }
-
-    const IR::P4Program* program;  // program whose type map this is (if known)
 };
 }  // namespace P4
 

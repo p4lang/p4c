@@ -4,10 +4,11 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/map.h"
+#include "frontends/common/programMap.h"
 
 namespace P4 {
 
-class ReferenceMap final {
+class ReferenceMap final : public ProgramMap {
     // Maps each path in the program to the corresponding declaration
     std::map<const IR::Path*, const IR::IDeclaration*> pathToDeclaration;
     std::set<const IR::IDeclaration*> used;
@@ -16,9 +17,7 @@ class ReferenceMap final {
     std::set<cstring> usedNames;
 
  public:
-    const IR::P4Program* program = nullptr;  // program whose map is represented
-
-    ReferenceMap() = default;
+    ReferenceMap() : ProgramMap("ReferenceMap") {}
     const IR::IDeclaration* getDeclaration(const IR::Path* path, bool notNull = false) const;
     void setDeclaration(const IR::Path* path, const IR::IDeclaration* decl);
     void print() const { dbprint(std::cout); }

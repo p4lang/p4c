@@ -22,9 +22,9 @@ namespace V12Test {
 
 P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
-    auto evaluator = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
 
     // TODO: remove table parameters
     // TODO: remove action in/out/inout parameters
@@ -71,7 +71,7 @@ P4::BlockMap* MidEnd::process(CompilerOptions& options, const IR::P4Program* pro
     actInl->allowDirectActionCalls = true;
 
     PassManager midEnd = {
-        new P4::DiscoverInlining(&toInline, blockMap),
+        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, blockMap),
         new P4::InlineDriver(&toInline, inliner, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),

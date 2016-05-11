@@ -23,9 +23,9 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
         return program;
 
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
-    auto evaluator = new P4::EvaluatorPass(isv1);
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
 
     PassManager simplify = {
         // Proper semantics for uninitialzed local variables in parser states:
@@ -63,7 +63,7 @@ const IR::P4Program* MidEnd::run(EbpfOptions& options, const IR::P4Program* prog
     actInl->allowDirectActionCalls = true;
 
     PassManager midEnd = {
-        new P4::DiscoverInlining(&toInline, blockMap),
+        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, blockMap),
         new P4::InlineDriver(&toInline, inliner, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),

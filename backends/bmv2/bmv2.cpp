@@ -44,7 +44,7 @@ int main(int argc, char *const argv[]) {
         return 1;
 
     BMV2::JsonConverter converter(options);
-    converter.convert(blockMap);
+    converter.convert(&midEnd.refMap, &midEnd.typeMap, blockMap);
     if (::errorCount() > 0)
         return 1;
 

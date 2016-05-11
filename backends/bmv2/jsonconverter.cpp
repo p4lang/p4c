@@ -16,7 +16,8 @@ class ArithmeticFixup : public Transform {
     P4::TypeMap* typeMap;
 
  public:
-    explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap) {}
+    explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap)
+    { CHECK_NULL(typeMap); }
     const IR::Expression* fix(const IR::Expression* expr, const IR::Type_Bits* type) {
         unsigned width = type->size;
         if (!type->isSigned) {
@@ -1501,10 +1502,12 @@ void JsonConverter::addLocals(Util::JsonArray* headerTypes, Util::JsonArray* ins
     }
 }
 
-void JsonConverter::convert(P4::BlockMap* bm) {
+void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, P4::BlockMap* bm) {
     blockMap = bm;
-    refMap = blockMap->refMap;
-    typeMap = blockMap->typeMap;
+    this->refMap = refMap;
+    this->typeMap = typeMap;
+    CHECK_NULL(typeMap);
+    CHECK_NULL(refMap);
 
     auto package = blockMap->getMain();
     if (package == nullptr) {
@@ -1526,7 +1529,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     CHECK_NULL(parserBlock);
     auto parser = parserBlock->to<IR::ParserBlock>()->container;
     auto hdr = parser->type->applyParams->getParameter(v1model.parser.headersParam.index);
-    auto headersType = blockMap->typeMap->getType(hdr->getNode(), true);
+    auto headersType = typeMap->getType(hdr->getNode(), true);
     auto ht = headersType->to<IR::Type_Struct>();
     if (ht == nullptr) {
         ::error("Expected headers %1% to be a struct", headersType);
@@ -1549,7 +1552,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
         v1model.parser.metadataParam.index);
     stdMetadataParameter = parser->type->applyParams->getParameter(
         v1model.parser.standardMetadataParam.index);
-    auto mdType = blockMap->typeMap->getType(userMetadataParameter, true);
+    auto mdType = typeMap->getType(userMetadataParameter, true);
     auto mt = mdType->to<IR::Type_Struct>();
     if (mt == nullptr) {
         ::error("Expected metadata %1% to be a struct", mdType);
@@ -1607,7 +1610,7 @@ void JsonConverter::convert(P4::BlockMap* bm) {
     // standard metadata type and instance
     stdMetadataParameter = ingressControl->container->type->applyParams->getParameter(
         v1model.ingress.standardMetadataParam.index);
-    auto stdMetaType = blockMap->typeMap->getType(stdMetadataParameter, true);
+    auto stdMetaType = typeMap->getType(stdMetadataParameter, true);
     auto json = typeToJson(stdMetaType->to<IR::Type_StructLike>());
     headerTypes->append(json);
 
