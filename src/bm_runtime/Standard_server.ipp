@@ -666,6 +666,38 @@ public:
     _return.append(stream.str());
   }
 
+  void bm_set_crc16_custom_parameters(const int32_t cxt_id, const std::string& calc_name, const BmCrc16Config& crc16_config) {
+    Logger::get()->trace("bm_set_crc16_custom_parameters");
+    CustomCrcMgr<uint16_t>::crc_config_t c;
+    c.polynomial = static_cast<uint16_t>(crc16_config.polynomial);
+    c.initial_remainder = static_cast<uint16_t>(crc16_config.initial_remainder);
+    c.final_xor_value = static_cast<uint16_t>(crc16_config.final_xor_value);
+    c.data_reflected = crc16_config.data_reflected;
+    c.remainder_reflected = crc16_config.remainder_reflected;
+    auto rc = switch_->set_crc16_custom_parameters(cxt_id, calc_name, c);
+    if(rc != CustomCrcErrorCode::SUCCESS) {
+      InvalidCrcOperation ico;
+      ico.code = static_cast<CrcErrorCode::type>(rc); // TODO
+      throw ico;
+    }
+  }
+
+  void bm_set_crc32_custom_parameters(const int32_t cxt_id, const std::string& calc_name, const BmCrc32Config& crc32_config) {
+    Logger::get()->trace("bm_set_crc32_custom_parameters");
+    CustomCrcMgr<uint32_t>::crc_config_t c;
+    c.polynomial = static_cast<uint32_t>(crc32_config.polynomial);
+    c.initial_remainder = static_cast<uint32_t>(crc32_config.initial_remainder);
+    c.final_xor_value = static_cast<uint32_t>(crc32_config.final_xor_value);
+    c.data_reflected = crc32_config.data_reflected;
+    c.remainder_reflected = crc32_config.remainder_reflected;
+    auto rc = switch_->set_crc32_custom_parameters(cxt_id, calc_name, c);
+    if(rc != CustomCrcErrorCode::SUCCESS) {
+      InvalidCrcOperation ico;
+      ico.code = static_cast<CrcErrorCode::type>(rc); // TODO
+      throw ico;
+    }
+  }
+
   void bm_reset_state() {
     Logger::get()->trace("bm_reset_state");
     switch_->reset_state();

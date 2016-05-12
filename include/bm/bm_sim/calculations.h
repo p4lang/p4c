@@ -61,6 +61,7 @@
 #include <tuple>
 #include <vector>
 #include <algorithm>   // for std::copy
+#include <ostream>
 
 #include "boost/variant.hpp"
 
@@ -183,11 +184,13 @@ class RawCalculation
   : HashChecker<defines_functor_operator<HashFn>::value, HashFn>,
     public RawCalculationIface<T> {
  public:
-  explicit RawCalculation(const HashFn &hash) : hash(hash) { }
+  // explicit RawCalculation(const HashFn &hash) : hash(hash) { }
 
   std::unique_ptr<RawCalculation<T, HashFn> > clone() const {
     return std::unique_ptr<RawCalculation<T, HashFn> > (clone_());
   }
+
+  HashFn &get_hash_fn() { return hash; }
 
  private:
   T output_(const char *buffer, size_t s) const override {
@@ -195,7 +198,7 @@ class RawCalculation
   }
 
   RawCalculation<T, HashFn> *clone_() const override {
-    RawCalculation<T, HashFn> *ptr = new RawCalculation<T, HashFn>(hash);
+    RawCalculation<T, HashFn> *ptr = new RawCalculation<T, HashFn>();
     return ptr;
   }
 
@@ -343,6 +346,8 @@ class Calculation_ {
     return c->output(key.data(), key.size());
   }
 
+  RawCalculationIface<T> *get_raw_calculation() { return c.get(); }
+
  protected:
   ~Calculation_() { }
 
@@ -404,7 +409,7 @@ class NamedCalculation : public NamedP4Object, public Calculation_<uint64_t> {
       bm::CalculationsMap::get_instance()->register_one(                \
           #hash_name,                                                   \
           std::unique_ptr<bm::CalculationsMap::MyC>(                    \
-              new bm::RawCalculation<uint64_t, hash_name>(hash_name())));
+              new bm::RawCalculation<uint64_t, hash_name>()));
 
 
 namespace hash {
@@ -412,6 +417,42 @@ namespace hash {
 uint64_t xxh64(const char *buffer, size_t s);
 
 }  // namespace hash
+
+
+enum class CustomCrcErrorCode {
+  SUCCESS = 0,
+  INVALID_CALCULATION_NAME,
+  WRONG_TYPE_CALCULATION,
+  INVALID_CONFIG,
+};
+
+// can be used for crc16, with T == uint16_t
+// can be used for crc32, with T uint32_t
+template <typename T>
+class CustomCrcMgr {
+ public:
+  struct crc_config_t {
+    T polynomial;
+    T initial_remainder;
+    T final_xor_value;
+    bool data_reflected;
+    bool remainder_reflected;
+
+    friend std::ostream &operator<<(std::ostream &out, const crc_config_t &c) {
+      out << "polynomial: " << c.polynomial << ", initial_remainder: "
+          << c.initial_remainder << ", final_xor_value: " << c.final_xor_value
+          << ", data_reflected: " << c.data_reflected
+          << ", remainder_reflected: " << c.remainder_reflected;
+      return out;
+    }
+  };
+
+  static CustomCrcErrorCode update_config(NamedCalculation *calculation,
+                                          const crc_config_t &config);
+
+  static CustomCrcErrorCode update_config(RawCalculationIface<uint64_t> *c,
+                                          const crc_config_t &config);
+};
 
 }  // namespace bm
 

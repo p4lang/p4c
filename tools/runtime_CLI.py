@@ -107,6 +107,7 @@ ACTIONS = {}
 METER_ARRAYS = {}
 COUNTER_ARRAYS = {}
 REGISTER_ARRAYS = {}
+CUSTOM_CRC_CALCS = {}
 
 class MatchType:
     EXACT = 0
@@ -207,6 +208,7 @@ def reset_config():
     METER_ARRAYS.clear()
     COUNTER_ARRAYS.clear()
     REGISTER_ARRAYS.clear()
+    CUSTOM_CRC_CALCS.clear()
 
 def load_json_str(json_str):
     def get_header_type(header_name, j_headers):
@@ -281,6 +283,14 @@ def load_json_str(json_str):
                                            j_register["id"])
             register_array.size = j_register["size"]
             register_array.width = j_register["bitwidth"]
+
+    if "calculations" in json_:
+        for j_calc in json_["calculations"]:
+            calc_name = j_calc["name"]
+            if j_calc["algo"] == "crc16_custom":
+                CUSTOM_CRC_CALCS[calc_name] = 16
+            elif j_calc["algo"] == "crc32_custom":
+                CUSTOM_CRC_CALCS[calc_name] = 32
 
 def load_json(json_src):
     with open(json_src, 'r') as f:
@@ -575,7 +585,44 @@ def handle_bad_input(f):
         except InvalidDevMgrOperation as e:
             error = DevMgrErrorCode._VALUES_TO_NAMES[e.code]
             print "Invalid device manager operation (%s)" % error
+        except InvalidCrcOperation as e:
+            error = CrcErrorCode._VALUES_TO_NAMES[e.code]
+            print "Invalid crc operation (%s)" % error
     return handle
+
+# thrift does not support unsigned integers
+def hex_to_i16(h):
+    x = int(h, 0)
+    if (x > 0xFFFF):
+        raise UIn_Error("Integer cannot fit within 16 bits")
+    if (x > 0x7FFF): x-= 0x10000
+    return x
+def i16_to_hex(h):
+    x = int(h)
+    if (x & 0x8000): x+= 0x10000
+    return x
+def hex_to_i32(h):
+    x = int(h, 0)
+    if (x > 0xFFFFFFFF):
+        raise UIn_Error("Integer cannot fit within 32 bits")
+    if (x > 0x7FFFFFFF): x-= 0x100000000
+    return x
+def i32_to_hex(h):
+    x = int(h)
+    if (x & 0x80000000): x+= 0x100000000
+    return x
+
+def parse_bool(s):
+    if s == "true" or s == "True":
+        return True
+    if s == "false" or s  == "False":
+        return False
+    try:
+        s = int(s, 0)
+        return bool(s)
+    except:
+        pass
+    raise UIn_Error("Invalid bool parameter")
 
 class RuntimeAPI(cmd.Cmd):
     prompt = 'RuntimeCmd: '
@@ -1630,6 +1677,44 @@ class RuntimeAPI(cmd.Cmd):
         state = self.client.bm_serialize_state()
         with open(filename, 'w') as f:
             f.write(state)
+
+    def set_crc_parameters_common(self, line, crc_width=16):
+        conversion_fn = {16: hex_to_i16, 32: hex_to_i32}[crc_width]
+        config_type = {16: BmCrc16Config, 32: BmCrc32Config}[crc_width]
+        thrift_fn = {16: self.client.bm_set_crc16_custom_parameters,
+                     32: self.client.bm_set_crc32_custom_parameters}[crc_width]
+        args = line.split()
+        self.exactly_n_args(args, 6)
+        name = args[0]
+        if name not in CUSTOM_CRC_CALCS or CUSTOM_CRC_CALCS[name] != crc_width:
+            raise UIn_ResourceError("crc{}_custom".format(crc_width), name)
+        config_args = [conversion_fn(a) for a in args[1:4]]
+        config_args += [parse_bool(a) for a in args[4:6]]
+        crc_config = config_type(*config_args)
+        thrift_fn(0, name, crc_config)
+
+    def _complete_crc(self, text, crc_width=16):
+        crcs = sorted(
+            [c for c, w in CUSTOM_CRC_CALCS.items() if w == crc_width])
+        if not text:
+            return crcs
+        return [c for c in crcs if c.startswith(text)]
+
+    @handle_bad_input
+    def do_set_crc16_parameters(self, line):
+        "Change the parameters for a custom crc16 hash: set_crc16_parameters <name> <polynomial> <initial remainder> <final xor value> <reflect data?> <reflect remainder?>"
+        self.set_crc_parameters_common(line, 16)
+
+    def complete_set_crc16_parameters(self, text, line, start_index, end_index):
+        return self._complete_crc(text, 16)
+
+    @handle_bad_input
+    def do_set_crc32_parameters(self, line):
+        "Change the parameters for a custom crc32 hash: set_crc32_parameters <name> <polynomial> <initial remainder> <final xor value> <reflect data?> <reflect remainder?>"
+        self.set_crc_parameters_common(line, 32)
+
+    def complete_set_crc32_parameters(self, text, line, start_index, end_index):
+        return self._complete_crc(text, 32)
 
 def check_JSON_md5(client, json_src):
     with open(json_src, 'r') as f:

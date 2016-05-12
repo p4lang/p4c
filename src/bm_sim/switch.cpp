@@ -333,6 +333,22 @@ SwitchWContexts::get_config_md5() const {
   return get_config_md5_();
 }
 
+CustomCrcErrorCode
+SwitchWContexts::set_crc16_custom_parameters(
+    size_t cxt_id, const std::string &calc_name,
+    const CustomCrcMgr<uint16_t>::crc_config_t &crc16_config) {
+  return contexts.at(cxt_id).set_crc_custom_parameters<uint16_t>(
+      calc_name, crc16_config);
+}
+
+CustomCrcErrorCode
+SwitchWContexts::set_crc32_custom_parameters(
+    size_t cxt_id, const std::string &calc_name,
+    const CustomCrcMgr<uint32_t>::crc_config_t &crc32_config) {
+  return contexts.at(cxt_id).set_crc_custom_parameters<uint32_t>(
+      calc_name, crc32_config);
+}
+
 // Switch convenience class
 
 Switch::Switch(bool enable_swap)

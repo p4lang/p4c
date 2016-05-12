@@ -303,6 +303,12 @@ class Context final {
   dump_table(const std::string& table_name,
              std::ostream *stream) const;
 
+  template <typename T>
+  CustomCrcErrorCode
+  set_crc_custom_parameters(
+      const std::string &calc_name,
+      const typename CustomCrcMgr<T>::crc_config_t &crc_config);
+
   // ---------- End runtime interfaces ----------
 
   using ReadLock = std::unique_lock<std::mutex>;

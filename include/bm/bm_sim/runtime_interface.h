@@ -252,6 +252,16 @@ class RuntimeInterface {
   virtual std::string
   get_config_md5() const = 0;
 
+  virtual CustomCrcErrorCode
+  set_crc16_custom_parameters(
+      size_t cxt_id, const std::string &calc_name,
+      const CustomCrcMgr<uint16_t>::crc_config_t &crc16_config) = 0;
+
+  virtual CustomCrcErrorCode
+  set_crc32_custom_parameters(
+      size_t cxt_id, const std::string &calc_name,
+      const CustomCrcMgr<uint32_t>::crc_config_t &crc32_config) = 0;
+
   virtual ErrorCode
   reset_state() = 0;
 

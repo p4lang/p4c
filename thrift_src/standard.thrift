@@ -178,6 +178,32 @@ struct DevMgrPortInfo {
   4:map<string, string> extra;
 }
 
+struct BmCrc16Config {
+  1:i16 polynomial;
+  2:i16 initial_remainder;
+  3:i16 final_xor_value;
+  4:bool data_reflected;
+  5:bool remainder_reflected;
+}
+
+struct BmCrc32Config {
+  1:i32 polynomial;
+  2:i32 initial_remainder;
+  3:i32 final_xor_value;
+  4:bool data_reflected;
+  5:bool remainder_reflected;
+}
+
+enum CrcErrorCode {
+  INVALID_CALCULATION_NAME = 1,
+  WRONG_TYPE_CALCULATION = 2,
+  INVALID_CONFIG = 3
+}
+
+exception InvalidCrcOperation {
+ 1:CrcErrorCode code
+}
+
 service Standard {
 	
   // table operations
@@ -470,6 +496,18 @@ service Standard {
     1:i32 cxt_id,
     2:string table_name
   )
+
+  void bm_set_crc16_custom_parameters(
+    1:i32 cxt_id,
+    2:string calc_name,
+    3:BmCrc16Config crc16_config
+  ) throws (1:InvalidCrcOperation ouch)
+
+  void bm_set_crc32_custom_parameters(
+    1:i32 cxt_id,
+    2:string calc_name,
+    3:BmCrc32Config crc32_config
+  ) throws (1:InvalidCrcOperation ouch)
 
   void bm_reset_state()
 
