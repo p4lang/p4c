@@ -927,19 +927,11 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto right = conv.convert(primitive->operands.at(1));
         return new IR::AssignmentStatement(primitive->srcInfo, left, right);
     } else if (primitive->name == "drop") {
-#if 0
-        // FIXME: this is the right way to do it
-        auto left = new IR::Member(Util::SourceInfo(), conversionContext.standardMetadata,
-                                   v1model.standardMetadataType.egressSpec.Id());
-        auto right = new IR::Constant(1);
-        return new IR::AssignmentStatement(primitive->srcInfo, left, right);
-#else
         auto method = new IR::PathExpression(v1model.drop.Id());
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
                                                emptyTypeArguments,
                                                new IR::Vector<IR::Expression>());
         return new IR::MethodCallStatement(mc->srcInfo, mc);
-#endif
     } else if (primitive->name == "push" || primitive->name == "pop") {
         OPS_CK(primitive, 2);
         auto hdr = conv.convert(primitive->operands.at(0));

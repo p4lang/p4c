@@ -86,7 +86,8 @@ class JsonConverter final {
     void createForceArith(const IR::Type* stdMetaType, cstring name,
                           Util::JsonArray* force_list) const;
     cstring convertHashAlgorithm(cstring algorithm) const;
-    void handleTableImplementation(const IR::TableProperty* implementation,
+    // Return 'true' if the table is 'simple'
+    bool handleTableImplementation(const IR::TableProperty* implementation,
                                    const IR::Key* key,
                                    Util::JsonObject* table);
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);

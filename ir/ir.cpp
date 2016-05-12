@@ -26,7 +26,6 @@ const Type_Method* Type_Package::getConstructorMethodType() const {
     return new Type_Method(Util::SourceInfo(), getTypeParameters(), this, constructorParams);
 }
 
-// TODO: this is a linear scan, which could be too slow.
 Util::Enumerator<const IR::IDeclaration*>* IGeneralNamespace::getDeclsByName(cstring name) const {
     std::function<bool(const IDeclaration*)> filter = [name](const IDeclaration* d)
             { return name == d->getName().name; };

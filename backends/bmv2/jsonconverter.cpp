@@ -916,14 +916,12 @@ Util::IJson* JsonConverter::convertIf(const CFG::IfNode* node, cstring) {
     return result;
 }
 
-void JsonConverter::handleTableImplementation(const IR::TableProperty* implementation,
+bool JsonConverter::handleTableImplementation(const IR::TableProperty* implementation,
                                               const IR::Key* key,
                                               Util::JsonObject* table) {
-    cstring actionProfiles;
     if (implementation == nullptr) {
-        actionProfiles = "simple";
-        table->emplace("type", actionProfiles);
-        return;
+        table->emplace("type", "simple");
+        return true;
     }
 
     cstring name = refMap->newName("action_profile");
@@ -931,23 +929,25 @@ void JsonConverter::handleTableImplementation(const IR::TableProperty* implement
     table->emplace("act_prof_name", name);
     if (!implementation->value->is<IR::ExpressionValue>()) {
         ::error("%1%: expected expression for property", implementation);
-        return;
+        return false;
     }
     auto propv = implementation->value->to<IR::ExpressionValue>();
     if (!propv->expression->is<IR::ConstructorCallExpression>()) {
         ::error("%1%: expected constructor call for property", implementation);
-        return;
+        return false;
     }
     auto cc = P4::ConstructorCall::resolve(
         propv->expression->to<IR::ConstructorCallExpression>(), typeMap);
     if (!cc->is<P4::ExternConstructorCall>()) {
         ::error("%1%: expected extern object for property", implementation);
-        return;
+        return false;
     }
+
+    bool isSimpleTable = true;
     auto ecc = cc->to<P4::ExternConstructorCall>();
     if (ecc->type->name == v1model.action_selector.name) {
         BUG_CHECK(ecc->cce->arguments->size() == 3, "%1%: expected 3 arguments", cc->cce);
-
+        isSimpleTable = false;
         auto selector = new Util::JsonObject();
         table->emplace("type", "indirect_ws");
         table->emplace("selector", selector);
@@ -971,10 +971,12 @@ void JsonConverter::handleTableImplementation(const IR::TableProperty* implement
             input->append(jk);
         }
     } else if (ecc->type->name == v1model.action_profile.name) {
+        isSimpleTable = false;
         table->emplace("type", "indirect");
     } else {
         ::error("%1%: unexpected value for property", propv);
     }
+    return isSimpleTable;
 }
 
 cstring JsonConverter::convertHashAlgorithm(cstring algorithm) const {
@@ -1059,7 +1061,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     conv->simpleExpressionsOnly = false;
 
     auto impl = table->properties->getProperty(v1model.tableAttributes.tableImplementation.name);
-    handleTableImplementation(impl, key, result);
+    bool simple = handleTableImplementation(impl, key, result);
 
     unsigned size = 0;
     auto sz = table->properties->getProperty(v1model.tableAttributes.size.name);
@@ -1211,6 +1213,12 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     result->emplace("next_tables", next_tables);
     auto defact = table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
     if (defact != nullptr) {
+        if (!simple) {
+            ::warning("Target does not support default_action for %1% (due to action profiles)",
+                      table);
+            return result;
+        }
+
         if (!defact->value->is<IR::ExpressionValue>()) {
             ::error("%1%: expected an action", defact);
             return result;

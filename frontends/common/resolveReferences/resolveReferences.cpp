@@ -3,7 +3,6 @@
 
 namespace P4 {
 
-// TODO: optimize further the return value to allocate less frequently
 std::vector<const IR::IDeclaration*>*
 ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOnly) const {
     static std::vector<const IR::IDeclaration*> empty;
