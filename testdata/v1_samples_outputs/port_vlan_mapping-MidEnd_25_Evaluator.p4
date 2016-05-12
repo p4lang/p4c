@@ -92,6 +92,7 @@ enum HashAlgorithm {
     identity
 }
 
+extern void mark_to_drop();
 extern ActionSelector {
     ActionSelector(HashAlgorithm algorithm, bit<32> size, bit<32> outputWidth);
 }
@@ -100,7 +101,7 @@ parser Parser<H, M>(packet_in b, out H parsedHdr, inout M meta, inout standard_m
 control VerifyChecksum<H, M>(in H hdr, inout M meta, inout standard_metadata_t standard_metadata);
 control Ingress<H, M>(inout H hdr, inout M meta, inout standard_metadata_t standard_metadata);
 control Egress<H, M>(inout H hdr, inout M meta, inout standard_metadata_t standard_metadata);
-control ComputeCkecksum<H, M>(inout H hdr, inout M meta);
+control ComputeCkecksum<H, M>(inout H hdr, inout M meta, inout standard_metadata_t standard_metadata);
 control Deparser<H>(packet_out b, in H hdr);
 package V1Switch<H, M>(Parser<H, M> p, VerifyChecksum<H, M> vr, Ingress<H, M> ig, Egress<H, M> eg, ComputeCkecksum<H, M> ck, Deparser<H> dep);
 struct ingress_metadata_t {
@@ -1006,10 +1007,10 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     Checksum16() @name("inner_ipv4_checksum") inner_ipv4_checksum_0;
     Checksum16() @name("ipv4_checksum") ipv4_checksum_0;
     action act() {
-        standard_metadata.drop = 1w1;
+        mark_to_drop();
     }
     action act_0() {
-        standard_metadata.drop = 1w1;
+        mark_to_drop();
     }
     table tbl_act() {
         actions = {
@@ -1031,7 +1032,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     Checksum16() @name("inner_ipv4_checksum") inner_ipv4_checksum_1;
     Checksum16() @name("ipv4_checksum") ipv4_checksum_1;
     action act_1() {

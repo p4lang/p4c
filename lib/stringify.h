@@ -4,8 +4,7 @@
 #define P4C_LIB_STRINGIFY_H_
 
 #include <stdint.h>
-#include <gmpxx.h>
-
+#include "gmputil.h"  // for mpz_class
 #include "cstring.h"
 #include "stringref.h"
 

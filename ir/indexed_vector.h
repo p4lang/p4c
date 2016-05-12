@@ -117,7 +117,7 @@ class IndexedVector : public Vector<T> {
     IRNODE_DECLARE_APPLY_OVERLOAD(IndexedVector)
     bool operator==(const Node &a) const override { return a == *this; }
     bool operator==(const Vector<T> &a) const override { return a == *this; }
-    bool operator==(const IndexedVector &a) const {
+    bool operator==(const IndexedVector &a) const override {
         return Vector<T>::operator==(static_cast<const Vector<T>&>(a)); }
     cstring node_type_name() const override {
         return "IndexedVector<" + T::static_type_name() + ">"; }

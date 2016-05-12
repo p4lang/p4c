@@ -1709,10 +1709,18 @@ void ProgramStructure::createChecksumVerifications() {
                 // cond2 is evaluated first
                 cond = new IR::LAnd(Util::SourceInfo(), cond2, cond);
             }
+#if 0
             auto left = new IR::Member(Util::SourceInfo(), conversionContext.standardMetadata,
                                        v1model.standardMetadataType.dropBit.Id());
             auto right = new IR::Constant(1);
             auto drop = new IR::AssignmentStatement(flc->srcInfo, left, right);
+#else
+            auto dropmethod = new IR::PathExpression(v1model.drop.Id());
+            auto dropmc = new IR::MethodCallExpression(Util::SourceInfo(), dropmethod,
+                                                       emptyTypeArguments,
+                                                       new IR::Vector<IR::Expression>());
+            auto drop = new IR::MethodCallStatement(mc->srcInfo, dropmc);
+#endif
             auto ifstate = new IR::IfStatement(Util::SourceInfo(), cond, drop, nullptr);
             components->push_back(ifstate);
             LOG1("Converted " << flc);
@@ -1741,6 +1749,14 @@ void ProgramStructure::createChecksumUpdates() {
                                   IR::Annotations::empty, IR::Direction::InOut, metatype);
     params->push_back(meta);
     conversionContext.userMetadata = paramReference(meta);
+
+    auto stdMetaPath = new IR::Path(v1model.standardMetadataType.Id());
+    auto stdMetaType = new IR::Type_Name(Util::SourceInfo(), stdMetaPath);
+    auto stdmeta = new IR::Parameter(
+        Util::SourceInfo(), v1model.ingress.standardMetadataParam.Id(),
+        IR::Annotations::empty, IR::Direction::InOut, stdMetaType);
+    params->push_back(stdmeta);
+    conversionContext.standardMetadata = paramReference(stdmeta);
 
     auto type = new IR::Type_Control(Util::SourceInfo(), v1model.update.Id(),
                                      IR::Annotations::empty,

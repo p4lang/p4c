@@ -41,7 +41,7 @@ control vrfy(in Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control update(inout Headers h, inout Meta m) {
+control update(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
     }
 }

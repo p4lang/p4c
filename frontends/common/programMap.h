@@ -12,8 +12,9 @@ class ProgramMap {
  protected:
     const IR::P4Program* program = nullptr;
     cstring mapKind;
-    ProgramMap(cstring kind) : mapKind(kind) {}
+    explicit ProgramMap(cstring kind) : mapKind(kind) {}
     virtual ~ProgramMap() {}
+
  public:
     // Check if map is up-to-date for the specified node; return true if it is
     bool checkMap(const IR::Node* node) const {
@@ -43,6 +44,6 @@ class ProgramMap {
     }
 };
 
-}
+}  // namespace P4
 
 #endif /* _FRONTENDS_COMMON_PROGRAMMAP_H_ */

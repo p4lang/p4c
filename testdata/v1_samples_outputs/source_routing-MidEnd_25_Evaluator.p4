@@ -101,7 +101,7 @@ parser Parser<H, M>(packet_in b, out H parsedHdr, inout M meta, inout standard_m
 control VerifyChecksum<H, M>(in H hdr, inout M meta, inout standard_metadata_t standard_metadata);
 control Ingress<H, M>(inout H hdr, inout M meta, inout standard_metadata_t standard_metadata);
 control Egress<H, M>(inout H hdr, inout M meta, inout standard_metadata_t standard_metadata);
-control ComputeCkecksum<H, M>(inout H hdr, inout M meta);
+control ComputeCkecksum<H, M>(inout H hdr, inout M meta, inout standard_metadata_t standard_metadata);
 control Deparser<H>(packet_out b, in H hdr);
 package V1Switch<H, M>(Parser<H, M> p, VerifyChecksum<H, M> vr, Ingress<H, M> ig, Egress<H, M> eg, ComputeCkecksum<H, M> ck, Deparser<H> dep);
 header easyroute_head_t {
@@ -188,7 +188,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta) {
+control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
     }
 }

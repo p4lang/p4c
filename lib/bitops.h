@@ -2,7 +2,7 @@
 #define P4C_LIB_BITOPS_H_
 
 #include <limits.h>
-#include <gmpxx.h>
+#include "gmputil.h"
 #include "exceptions.h"
 
 static inline unsigned bitcount(unsigned v) {

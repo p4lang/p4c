@@ -42,20 +42,20 @@ class Vector : public VectorBase {
     typedef typename vector<const T *>::const_iterator  const_iterator;
     iterator begin() { return vec.begin(); }
     const_iterator begin() const { return vec.begin(); }
-    VectorBase::iterator VectorBase_begin() const {
+    VectorBase::iterator VectorBase_begin() const override {
         /* DANGER -- works as long as IR::Node is the first ultimate base class of T */
         return reinterpret_cast<VectorBase::iterator>(&vec[0]); }
     iterator end() { return vec.end(); }
     const_iterator end() const { return vec.end(); }
-    VectorBase::iterator VectorBase_end() const {
+    VectorBase::iterator VectorBase_end() const override {
         /* DANGER -- works as long as IR::Node is the first ultimate base class of T */
         return reinterpret_cast<VectorBase::iterator>(&vec[0] + vec.size()); }
     std::reverse_iterator<iterator> rbegin() { return vec.rbegin(); }
     std::reverse_iterator<const_iterator> rbegin() const { return vec.rbegin(); }
     std::reverse_iterator<iterator> rend() { return vec.rend(); }
     std::reverse_iterator<const_iterator> rend() const { return vec.rend(); }
-    size_t size() const { return vec.size(); }
-    bool empty() const { return vec.empty(); }
+    size_t size() const override { return vec.size(); }
+    bool empty() const override { return vec.empty(); }
     const T* const & front() const { return vec.front(); }
     const T*& front() { return vec.front(); }
     void clear() { vec.clear(); }
@@ -99,7 +99,7 @@ class Vector : public VectorBase {
     IRNODE_SUBCLASS(Vector)
     IRNODE_DECLARE_APPLY_OVERLOAD(Vector)
     bool operator==(const Node &a) const override { return a == *this; }
-    bool operator==(const Vector &a) const { return vec == a.vec; }
+    bool operator==(const Vector &a) const override { return vec == a.vec; }
     cstring node_type_name() const override {
         return "Vector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() {

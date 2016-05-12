@@ -298,7 +298,7 @@ abstract Stateful : Attached {
     int         instance_count = -1;
 #emit
     Stateful() = default;
-    virtual bool indexed() const { return !direct; }
+    virtual bool indexed() const override { return !direct; }
 #end
 }
 
@@ -319,7 +319,7 @@ class Counter : CounterOrMeter {
     int         min_width = -1;
 #emit
     Counter() = default;
-    const char *kind() const { return "stats"; }
+    const char *kind() const override { return "stats"; }
 #end
 }
 
@@ -329,7 +329,7 @@ class Meter : CounterOrMeter {
     ID                  implementation;
 #emit
     Meter() = default;
-    const char *kind() const { return "meter"; }
+    const char *kind() const override { return "meter"; }
 #end
 }
 
@@ -340,7 +340,7 @@ class Register : Stateful {
  /* bool        saturating; */
 #emit
     Register() = default;
-    const char *kind() const { return "register"; }
+    const char *kind() const override { return "register"; }
 #end
 }
 
@@ -398,8 +398,8 @@ class ActionProfile : Attached {
     int         size;
 #noconstructor
 #emit
-    const char *kind() const { return "action_profile"; }
-    bool indexed() const { return true; }
+    const char *kind() const override { return "action_profile"; }
+    bool indexed() const override { return true; }
 #end
 }
 
@@ -409,7 +409,7 @@ class ActionSelector : Attached {
     ID type;
 #noconstructor
 #emit
-    const char *kind() const { return "action_selector"; }
+    const char *kind() const override { return "action_selector"; }
 #end
 }
 

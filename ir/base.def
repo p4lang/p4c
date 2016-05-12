@@ -94,7 +94,7 @@ abstract Declaration : StatOrDecl, IDeclaration {
     ID          name;
 #noconstructor
 #emit
-    ID getName() const { return name; }
+    ID getName() const override { return name; }
  private:
     static int nextId;
  public:
@@ -112,7 +112,7 @@ abstract Type_Declaration : Type, IDeclaration {
     ID name;
 #noconstructor
 #emit
-    ID getName() const { return name; }
+    ID getName() const override { return name; }
  private:
     static int nextId;
  public:

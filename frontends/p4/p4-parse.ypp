@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <gmpxx.h>
 
 #include <iostream>
 #include <map>
@@ -360,7 +359,8 @@ parserTypeDeclaration
     ;
 
 parserStates
-    : parserState                     { $$ = new IR::IndexedVector<IR::ParserState>(); $$->push_back($1); }
+    : parserState                     { $$ = new IR::IndexedVector<IR::ParserState>();
+                                        $$->push_back($1); }
     | parserStates parserState        { $$ = $1; $$->push_back($2); }
     ;
 

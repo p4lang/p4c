@@ -209,11 +209,13 @@ class ApplyTypesToExpressions : public Transform {
 };
 
 // Performs together reference resolution and type checking.
-// Only mutates the program if updateProgrgam is true.
+// If updateExpressions is true, after type checking it will
+// update all Expression objects, writing the result type
+// into the Expression::type field.
 class TypeChecking : public PassManager {
  public:
     TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap, bool isv1,
-                 bool updateProgram = false);
+                 bool updateExpressions = false);
 };
 
 }  // namespace P4

@@ -1,7 +1,8 @@
 #ifndef _LIB_GMPUTIL_H_
 #define _LIB_GMPUTIL_H_
 
-#include <gmpxx.h>
+#include <cstddef>  // needed because of a bug in gcc-4.9/libgmp
+#include <gmpxx.h>  // NOLINT: cstddef HAS to come first
 
 namespace Util {
 

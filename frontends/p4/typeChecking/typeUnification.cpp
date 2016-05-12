@@ -71,16 +71,15 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     if ((src->returnType == nullptr) != (dest->returnType == nullptr)) {
         if (reportErrors)
             ::error("%1%: Cannot unify functions with different return types"
-                    " %2% and %3%", errorPosition,
-                    dest, src);
+                    " %2% and %3%", errorPosition, dest, src);
         return false;
     }
     if (src->returnType != nullptr)
         constraints->addEqualityConstraint(dest->returnType, src->returnType);
     if (dest->parameters->size() != src->parameters->size()) {
         if (reportErrors)
-            ::error("Cannot unify functions with different number of arguments: %1% to %2%",
-                    src, dest);
+            ::error("%1%: Cannot unify functions with different number of arguments: %2% to %3%",
+                    errorPosition, src, dest);
         return false;
     }
 
@@ -88,8 +87,9 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     for (auto dit : *dest->parameters->getEnumerator()) {
         if ((*sit)->direction != dit->direction) {
             if (reportErrors)
-                ::error("Cannot unify parameter %1% with %2% "
-                        "because they have different directions", *sit, dit);
+                ::error("%1%: Cannot unify parameter %2% with %3% "
+                        "because they have different directions",
+                        errorPosition, *sit, dit);
             return false;
         }
         constraints->addEqualityConstraint(dit->type, (*sit)->type);

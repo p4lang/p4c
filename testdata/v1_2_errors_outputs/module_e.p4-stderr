@@ -1,4 +1,7 @@
-../testdata/v1_2_errors/module_e.p4(5): error: Cannot unify parameter x with filter because they have different directions
+../testdata/v1_2_errors/module_e.p4(10): error: main: Cannot unify parameter x with filter because they have different directions
+top(g()) main;
+^^^^^^^^^^^^^
+../testdata/v1_2_errors/module_e.p4(5)
 parser g(in bit x)
          ^^^^^^^^
 ../testdata/v1_2_errors/module_e.p4(1)

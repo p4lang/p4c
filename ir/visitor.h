@@ -130,7 +130,7 @@ class Visitor {
 
 class Modifier : public virtual Visitor {
     ChangeTracker       *visited = nullptr;
-    void visitor_const_error();
+    void visitor_const_error() override;
  public:
     profile_t init_apply(const IR::Node *root) override;
     const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override;
@@ -161,7 +161,7 @@ class Inspector : public virtual Visitor {
 class Transform : public virtual Visitor {
     ChangeTracker       *visited = nullptr;
     bool prune_flag = false;
-    void visitor_const_error();
+    void visitor_const_error() override;
  public:
     profile_t init_apply(const IR::Node *root) override;
     const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;

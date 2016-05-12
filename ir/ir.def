@@ -42,7 +42,7 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     NullOK Expression         selectExpression;
 #emit
     const Annotations* getAnnotations() const override { return annotations; }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return components->getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const override
     { return components->getDeclaration(name); }
@@ -94,7 +94,7 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     IndexedVector<Declaration>  stateful;
     BlockStatement       body;
 #emit
-    const TypeParameters* getTypeParameters() const { return type->getTypeParameters(); }
+    const TypeParameters* getTypeParameters() const override { return type->getTypeParameters(); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return stateful->getDeclarations(); }
     const Type_Method* getApplyMethodType() const override { return type->getApplyMethodType(); }
@@ -128,9 +128,9 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated {
 class Declaration_Errors : ISimpleNamespace {
     IndexedVector<Declaration_ID> members;
 #emit
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return members->getDeclarations(); }
-    const IDeclaration* getDeclByName(cstring name) const
+    const IDeclaration* getDeclByName(cstring name) const override
     { return members->getDeclaration(name); }
 #end
 #nodbprint
@@ -141,9 +141,9 @@ class Declaration_Errors : ISimpleNamespace {
 class Declaration_MatchKind : ISimpleNamespace {
     IndexedVector<Declaration_ID> members;
 #emit
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return members->getDeclarations(); }
-    const IDeclaration* getDeclByName(cstring name) const
+    const IDeclaration* getDeclByName(cstring name) const override
     { return members->getDeclaration(name); }
 #end
 #nodbprint
@@ -212,11 +212,11 @@ class TableProperties : ISimpleNamespace {
     toString{ return "TableProperties(" + Util::toString(properties->size()) + ")"; }
 #emit
     TableProperties() { properties = new IndexedVector<TableProperty>(); }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return properties->getDeclarations(); }
     const TableProperty* getProperty(cstring name) const
     { return properties->getDeclaration<TableProperty>(name); }
-    const IDeclaration* getDeclByName(cstring name) const
+    const IDeclaration* getDeclByName(cstring name) const override
     { return properties->getDeclaration(name); }
 
     static const cstring actionsPropertyName;
@@ -233,7 +233,7 @@ class P4Table : Declaration, IAnnotated, IApply {
     TableProperties properties;
 #emit
     const Annotations* getAnnotations() const override { return annotations; }
-    const Type_Method* getApplyMethodType() const;
+    const Type_Method* getApplyMethodType() const override;
     const ActionList* getActionList() const {
         auto ap = properties->getProperty(TableProperties::actionsPropertyName);
         if (ap == nullptr)
@@ -298,9 +298,9 @@ class Declaration_Instance : Declaration, IAnnotated {
 class P4Program : ISimpleNamespace {
     IndexedVector<Node> declarations;
 #emit
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return declarations->getDeclarations(); }
-    const IDeclaration* getDeclByName(cstring name) const
+    const IDeclaration* getDeclByName(cstring name) const override
     { return declarations->getDeclaration(name); }
     static const cstring main;
 #end
@@ -352,9 +352,9 @@ class IfStatement : Statement {
 class BlockStatement : Statement, ISimpleNamespace {
     IndexedVector<StatOrDecl> components;
 #emit
-    const IDeclaration* getDeclByName(cstring name) const
+    const IDeclaration* getDeclByName(cstring name) const override
     { return components->getDeclaration(name); }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const
+    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return components->getDeclarations(); }
 #end
 }
@@ -398,7 +398,7 @@ abstract Block : CompileTimeValue {
     // This includes all constructor parameters, and all inner nested blocks.
     ordered_map<const Node*, const CompileTimeValue*> constantValue;
 
-    virtual void dbprint(std::ostream& out) const;
+    virtual void dbprint(std::ostream& out) const override;
     virtual void dbprint_recursive(std::ostream& out) const;
     void setValue(const Node* node, const CompileTimeValue* value) {
         CHECK_NULL(node); CHECK_NULL(value);
@@ -430,7 +430,7 @@ abstract InstantiatedBlock : Block {
     virtual const IR::ParameterList* getConstructorParameters() const = 0;
     void instantiate(std::vector<const IR::CompileTimeValue*> *args);
     const CompileTimeValue* getParameterValue(cstring paramName) const;
-    virtual void dbprint(std::ostream& out) const;
+    virtual void dbprint(std::ostream& out) const override;
 #end
 }
 

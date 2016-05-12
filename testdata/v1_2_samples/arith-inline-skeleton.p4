@@ -17,7 +17,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 control vrfy(in Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
 

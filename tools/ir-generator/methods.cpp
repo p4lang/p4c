@@ -3,7 +3,7 @@
 enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ONLY = 16 };
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
-{ "operator==", { "bool", "(const %s &a) const", 0,
+{ "operator==", { "bool", "(const %s &a) const", OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl << cl->indent << cl->indent << "return ";

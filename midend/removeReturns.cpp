@@ -245,7 +245,8 @@ const IR::Node* RemoveExits::preorder(IR::P4Control* control) {
     visit(control->body);
     auto stateful = new IR::IndexedVector<IR::Declaration>();
     auto decl = new IR::Declaration_Variable(Util::SourceInfo(), returnVar,
-                                             IR::Annotations::empty, IR::Type_Boolean::get(), nullptr);
+                                             IR::Annotations::empty,
+                                             IR::Type_Boolean::get(), nullptr);
     stateful->push_back(decl);
     stateful->append(*control->stateful);
     control->stateful = stateful;
@@ -321,7 +322,8 @@ const IR::Node* RemoveExits::preorder(IR::IfStatement* statement) {
         if (ce.callsExit && statement->ifFalse != nullptr) {
             auto path = new IR::PathExpression(returnVar);
             auto condition = new IR::LNot(Util::SourceInfo(), path);
-            auto newif = new IR::IfStatement(Util::SourceInfo(), condition, statement->ifFalse, nullptr);
+            auto newif = new IR::IfStatement(Util::SourceInfo(), condition,
+                                             statement->ifFalse, nullptr);
             statement->ifFalse = newif;
         }
         rf = hasReturned();

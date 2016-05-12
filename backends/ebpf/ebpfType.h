@@ -86,7 +86,7 @@ class EBPFTypeName : public EBPFType, public IHasWidth {
  public:
     EBPFTypeName(const IR::Type_Name* type, EBPFType* canonical) :
             EBPFType(type), type(type), canonical(canonical) {}
-    void emit(CodeBuilder* builder) { canonical->emit(builder); }
+    void emit(CodeBuilder* builder) override { canonical->emit(builder); }
     void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
     void emitInitializer(CodeBuilder* builder) override;
     unsigned widthInBits() override;

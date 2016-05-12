@@ -21,7 +21,6 @@ cstring IR::dbp(const IR::INode* node) {
                  node->is<IR::Constant>() ||
                  node->is<IR::Type_Base>())
             str << " " << node->toString();
-
     }
     return str.str();
 }

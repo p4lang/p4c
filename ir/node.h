@@ -68,10 +68,10 @@ class Node : public virtual INode {
     const Node *apply(Visitor &v) const;
     const Node *apply(Visitor &&v) const { return apply(v); }
     virtual Node *clone() const = 0;
-    virtual void dbprint(std::ostream &out) const;
+    void dbprint(std::ostream &out) const override;
     virtual void dump_fields(std::ostream &) const { }
-    virtual const Node* getNode() const { return this; }
-    virtual Node* getNode() { return this; }
+    const Node* getNode() const override { return this; }
+    Node* getNode() override { return this; }
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring node_type_name() const override { return "Node"; }
     static cstring static_type_name() { return "Node"; }
@@ -80,7 +80,7 @@ class Node : public virtual INode {
     template<typename T> const T* to() const {
         CHECK_NULL(this);
         return dynamic_cast<const T*>(this); }
-    virtual cstring toString() const { return node_type_name(); }
+    cstring toString() const override { return node_type_name(); }
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }

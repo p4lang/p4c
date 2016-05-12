@@ -111,7 +111,8 @@ control Egress<H, M>(inout H hdr,
                      inout M meta,
                      inout standard_metadata_t standard_metadata);
 control ComputeCkecksum<H, M>(inout H hdr,
-                              inout M meta);
+                              inout M meta,
+                              inout standard_metadata_t standard_metadata);
 control Deparser<H>(packet_out b, in H hdr);
 
 package V1Switch<H, M>(Parser<H, M> p,

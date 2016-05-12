@@ -74,14 +74,15 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
             "D(Vector<IR::Node>) "
             "B(Node), ##__VA_ARGS__) \\" << std::endl;
     for (auto cls : *getClasses()) {
-        if (cls->needVector || cls->needIndexedVector)
-            // IndexedVector is a subclass of Vector, so we need Vector in both cases
-            t << "T(Vector<IR::" << cls->containedIn << cls->name << ">, D(Node), "
-                 "##__VA_ARGS__) \\" << std::endl;
-        if (cls->needIndexedVector)
+        t << "T(Vector<IR::" << cls->containedIn << cls->name << ">, D(Node), "
+                "##__VA_ARGS__) \\" << std::endl;
+        if (cls->needIndexedVector) {
+            // We generate IndexedVector only if needed; we expect users won't use
+            // these if they don't want to place them in fields.
             t << "T(IndexedVector<IR::" << cls->containedIn << cls->name << ">, "
                     "D(Vector<IR::" << cls->containedIn << cls->name << ">) "
                     "B(Node), ##__VA_ARGS__) \\" << std::endl;
+        }
         if (cls->needNameMap)
             BUG("visitable (non-inline) NameMap not yet implemented");
         if (cls->needNodeMap)
@@ -398,9 +399,9 @@ void IrField::generate(std::ostream &out, bool asField) const {
 void ConstFieldInitializer::generate_hdr(std::ostream &out) const {
     out << IrClass::indent;
     if (name == "precedence")
-        out << "int getPrecedence() const { return ";
+        out << "int getPrecedence() const override { return ";
     else if (name == "stringOp")
-        out << "cstring getStringOp() const { return ";
+        out << "cstring getStringOp() const override { return ";
     else
         throw Util::CompilationError("Unexpected constant field %1%", this);
     out << initializer << "; }" << std::endl;

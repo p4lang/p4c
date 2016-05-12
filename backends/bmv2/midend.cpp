@@ -41,7 +41,7 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
         new P4::InlineActionsDriver(&actionsToInline, new SimpleActionsInliner(&refMap), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
     };
-    midend.setName("Mid end");
+    midend.setName("V1MidEnd");
     midend.addDebugHooks(hooks);
     program = program->apply(midend);
     if (::errorCount() > 0)
@@ -49,8 +49,9 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
     return program;
 }
 
-const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* program) {
-    bool isv1 = false;
+const IR::P4Program* MidEnd::processV1_2(CompilerOptions& options, const IR::P4Program* program) {
+    // we may come through this path even if the program is actually a P4 v1.0 program
+    bool isv1 = options.isv1();
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     PassManager simplify = {
@@ -117,8 +118,10 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions&, const IR::P4Program* 
 
 
 IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
-    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
+    bool isv1 = options.isv1();
+
     if (isv1)
+        // TODO: This path should be eventually deprecated
         program = processV1(options, program);
     else
         program = processV1_2(options, program);

@@ -1,7 +1,6 @@
 #ifndef _IR_IR_H_
 #define _IR_IR_H_
 
-#include <gmpxx.h>
 #include <cassert>
 #include <sstream>
 
@@ -16,6 +15,7 @@
 #include "lib/source_file.h"
 #include "lib/ltbitmatrix.h"
 #include "lib/match.h"
+#include "lib/gmputil.h"
 
 // Special IR classes and types
 #include "node.h"

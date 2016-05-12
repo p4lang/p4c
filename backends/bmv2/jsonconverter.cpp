@@ -860,7 +860,7 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
         auto action = it.first;
         auto control = it.second;
         if (control != nullptr) {
-            // It's null for the NoAction action
+            // It could be nullptr for global actions
             stdMetadataParameter = control->type->applyParams->getParameter(
                 v1model.ingress.standardMetadataParam.index);
             userMetadataParameter = control->type->applyParams->getParameter(
@@ -1546,7 +1546,8 @@ void JsonConverter::addLocals(Util::JsonArray* headerTypes, Util::JsonArray* ins
     }
 }
 
-void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, IR::ToplevelBlock* toplevelBlock) {
+void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                            IR::ToplevelBlock* toplevelBlock) {
     this->toplevelBlock = toplevelBlock;
     this->refMap = refMap;
     this->typeMap = typeMap;
@@ -1697,11 +1698,11 @@ void JsonConverter::createForceArith(const IR::Type* meta, cstring name,
     }
 }
 
-void JsonConverter::generateUpdate(const IR::P4Control* cont,
+void JsonConverter::generateUpdate(const IR::P4Control* updateControl,
                                    Util::JsonArray* checksums, Util::JsonArray* calculations) {
     // Currently this is very hacky to target the very limited support for checksums in BMv2
-    // This will work much better with an extern.
-    for (auto stat : *cont->body->components) {
+    // This will work much better when BMv2 offers a checksum extern.
+    for (auto stat : *updateControl->body->components) {
         if (stat->is<IR::IfStatement>()) {
             // The way checksums work in Json, they always ignore the condition!
             stat = stat->to<IR::IfStatement>()->ifTrue;

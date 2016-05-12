@@ -21,7 +21,6 @@ class Type : public Util::IHasSourceInfo {
     virtual IrClass *resolve(const IrNamespace *) const = 0;
     virtual bool isResolved() const = 0;
     virtual bool templateArgResolved() const = 0;
-    virtual cstring toString() const = 0;
     virtual bool operator==(const Type &) const = 0;
     bool operator!=(const Type &t) const { return !operator==(t); }
 #define OP_EQUALS(T) virtual bool operator==(const T &) const { return false; }

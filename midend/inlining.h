@@ -136,6 +136,7 @@ class DiscoverInlining : public Inspector {
     TypeMap*        typeMap;      // input
     P4::Evaluator*  evaluator;    // used to obtain the toplevel block
     IR::ToplevelBlock* toplevel;
+
  public:
     bool allowParsers = true;
     bool allowControls = true;

@@ -69,8 +69,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    "[Compiler debugging] Increase verbosity level (can be repeated)");
     registerOption("--top4", "pass1[,pass2]",
                    [this](const char* arg) {
-                       auto copy = new char[strlen(arg)+1];
-                       strcpy(copy, arg);
+                       auto copy = strdup(arg);
                        while (*copy) {
                            char* next = strchr(copy, ',');
                            if (next == nullptr) {
@@ -171,9 +170,10 @@ bool CompilerOptions::isv1() const {
     return langVersion == CompilerOptions::FrontendVersion::P4v1;
 }
 
-void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pass, const IR::Node* node) const {
-    // Pass names are currently C++ class names mangled; this is a weak attempt at making them
-    // more readable.
+void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pass,
+                               const IR::Node* node) const {
+    // Some pass names are currently C++ class names mangled;
+    // this is a weak attempt at making them more readable.
     bool verbose = verbosity > 0;
 
     std::string p = pass;

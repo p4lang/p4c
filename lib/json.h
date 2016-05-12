@@ -1,12 +1,11 @@
 #ifndef _LIB_JSON_H_
 #define _LIB_JSON_H_
 
-#include <gmpxx.h>
-
 #include <iostream>
 #include <vector>
 #include <stdexcept>
 
+#include "lib/gmputil.h"
 #include "lib/cstring.h"
 #include "lib/map.h"
 

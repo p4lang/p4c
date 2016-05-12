@@ -76,7 +76,7 @@ static const IR::Type *combine(const Util::SourceInfo &loc, const IR::Type *a, c
 class TypeCheck::Pass2 : public Modifier {
     TypeCheck           &self;
     const IR::V1Program *global = nullptr;
-    profile_t init_apply(const IR::Node *root) {
+    profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
         self.actionArgUseTypes.clear();
         self.iterCounter++;
@@ -120,7 +120,7 @@ class TypeCheck::Pass2 : public Modifier {
 class TypeCheck::Pass3 : public Modifier {
     TypeCheck           &self;
     const IR::V1Program *global = nullptr;
-    profile_t init_apply(const IR::Node *root) {
+    profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
         return Modifier::init_apply(root); }
     const IR::Type *ctxtType() {

@@ -49,10 +49,10 @@ class VisitFunctor : virtual public Visitor {
 
 class DynamicVisitor : virtual public Visitor {
     Visitor     *visitor;
-    profile_t init_apply(const IR::Node *root) {
+    profile_t init_apply(const IR::Node *root) override {
         if (visitor) return visitor->init_apply(root);
         return Visitor::init_apply(root); }
-    void end_apply(const IR::Node *root) {
+    void end_apply(const IR::Node *root) override {
         if (visitor) visitor->end_apply(root); }
     const IR::Node *apply_visitor(const IR::Node *root, const char *name = 0) override {
         if (visitor) return visitor->apply_visitor(root, name);
