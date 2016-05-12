@@ -17,6 +17,8 @@ midend_SOURCES = \
 	midend/moveDeclarations.h \
 	midend/removeReturns.cpp \
 	midend/removeReturns.h \
+	midend/removeLeftSlices.cpp \
+	midend/removeLeftSlices.h \
 	midend/uniqueNames.cpp \
 	midend/uniqueNames.h
 

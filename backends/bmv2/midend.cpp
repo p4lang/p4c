@@ -8,6 +8,7 @@
 #include "midend/moveConstructors.h"
 #include "midend/actionSynthesis.h"
 #include "midend/local_copyprop.h"
+#include "midend/removeLeftSlices.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -134,7 +135,7 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
-        new RemoveLeftSlices(&typeMap),
+        new P4::RemoveLeftSlices(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new LowerExpressions(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),

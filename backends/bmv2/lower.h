@@ -29,14 +29,6 @@ class LowerExpressions : public Transform {
     { prune(); return table; }  // don't simplify expressions in table
 };
 
-// Remove Slices on the lhs of an assignment
-class RemoveLeftSlices : public Transform {
-    P4::TypeMap* typeMap;
- public:
-    explicit RemoveLeftSlices(P4::TypeMap* typeMap) : typeMap(typeMap) {}
-    const IR::Node* postorder(IR::AssignmentStatement* stat) override;
-};
-
 }  // namespace BMV2
 
 #endif /* _BACKENDS_BMV2_LOWER_H_ */
