@@ -12,9 +12,9 @@
 #include "ir/gen-tree-macro.h"
 
 #define IRNODE_ALL_TEMPLATES_AND_DIRECT_AND_INDIRECT_BASES(M, D, B, TDA, ...)                   \
-    M(Vector, D(Node) B(Node), template<class T>, <T>, ##__VA_ARGS__)                           \
-    M(IndexedVector, D(Node) B(Node), template<class T>, <T>, ##__VA_ARGS__)                    \
-    M(NameMap, D(Node) B(Node),                                                                 \
+    M(Vector, D(Node), template<class T>, <T>, ##__VA_ARGS__)                                   \
+    M(IndexedVector, D(Vector<T>) B(Node), template<class T>, <T>, ##__VA_ARGS__)               \
+    M(NameMap, D(Node),                                                                         \
       COPY(template<class T, template<class, class, class, class> class MAP TDA(= std::map),    \
                     class COMP TDA(= std::less<cstring>),                                       \
                     class ALLOC TDA(= std::allocator<std::pair<cstring, const T*>>) >),         \

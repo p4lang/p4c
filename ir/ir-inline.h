@@ -1,7 +1,7 @@
 #ifndef _IR_IR_INLINE_H_
 #define _IR_IR_INLINE_H_
 
-#define DEFINE_APPLY_FUNCTIONS(CLASS, BASE, TEMPLATE, TT)                               \
+#define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT)                               \
     TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Modifier &v)              \
     { Node::traceVisit("Mod pre"); return v.preorder(this); }                           \
     TEMPLATE inline void IR::CLASS TT::apply_visitor_postorder(Modifier &v)             \
@@ -14,9 +14,8 @@
     { Node::traceVisit("Trans pre"); return v.preorder(this); }                         \
     TEMPLATE inline const IR::Node *IR::CLASS TT::apply_visitor_postorder(Transform &v) \
     { Node::traceVisit("Trans post"); return v.postorder(this); }
-    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DEFINE_APPLY_FUNCTIONS, , )
-    IRNODE_ALL_TEMPLATES_AND_BASES(DEFINE_APPLY_FUNCTIONS)
-    DEFINE_APPLY_FUNCTIONS(Node, , , )
+    IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , )
+    IRNODE_ALL_TEMPLATES(DEFINE_APPLY_FUNCTIONS)
 #undef DEFINE_APPLY_FUNCTIONS
 
 #define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                             \
