@@ -2949,9 +2949,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("process_egress_acl.nop") action process_egress_acl_nop() {
     }
-    @name("process_egress_acl.egress_mirror") action process_egress_acl_egress_mirror(in bit<16> session_id) {
-        meta_18.i2e_metadata.mirror_session_id = session_id;
-        clone3(CloneType.E2E, (bit<32>)session_id, { meta_18.i2e_metadata.ingress_tstamp, meta_18.i2e_metadata.mirror_session_id });
+    @name("process_egress_acl.egress_mirror") action process_egress_acl_egress_mirror(in bit<16> session_id_1) {
+        meta_18.i2e_metadata.mirror_session_id = session_id_1;
+        clone3(CloneType.E2E, (bit<32>)session_id_1, { meta_18.i2e_metadata.ingress_tstamp, meta_18.i2e_metadata.mirror_session_id });
     }
     @name("process_egress_acl.egress_mirror_drop") action process_egress_acl_egress_mirror_drop(bit<16> session_id) {
         meta_18.i2e_metadata.mirror_session_id = session_id;
@@ -5159,8 +5159,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("process_system_acl.nop") action process_system_acl_nop() {
     }
-    @name("process_system_acl.copy_to_cpu") action process_system_acl_copy_to_cpu(in bit<16> reason_code) {
-        meta_48.fabric_metadata.reason_code = reason_code;
+    @name("process_system_acl.copy_to_cpu") action process_system_acl_copy_to_cpu(in bit<16> reason_code_2) {
+        meta_48.fabric_metadata.reason_code = reason_code_2;
         clone3(CloneType.I2E, 32w250, { meta_48.ingress_metadata.bd, meta_48.ingress_metadata.ifindex, meta_48.fabric_metadata.reason_code, meta_48.ingress_metadata.ingress_port });
     }
     @name("process_system_acl.redirect_to_cpu") action process_system_acl_redirect_to_cpu(bit<16> reason_code) {

@@ -158,7 +158,7 @@ def process_file(options, argv):
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + basename                  # after parsing
-    referenceOutputs = "FrontEnd_11,FrontEnd_12,MidEnd_25"
+    referenceOutputs = "FrontEnd_11,FrontEnd_12,MidEnd_26_Evaluator"
     lastfile = tmpdir + "/" + base + "-FrontEnd_12_RemoveAllUnusedDeclarations" + ext    # last file produced by front-end
     stderr = tmpdir + "/" + basename + "-stderr"
 

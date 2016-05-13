@@ -37,19 +37,19 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     TArg2 pArg2_0;
     action NoAction_0() {
     }
-    @name("p1.B_action") action p1_B_action(out bit<9> barg, BParamType bData) {
-        barg = (bit<9>)bData;
+    @name("p1.B_action") action p1_B_action(out bit<9> barg_0, BParamType bData) {
+        barg_0 = (bit<9>)bData;
     }
     @name("p1.C_action") action p1_C_action(bit<9> cData) {
         pArg1_0.field1 = cData;
     }
-    @name("p1.T") table p1_T(inout TArg1 tArg1, in TArg2 aArg2) {
+    @name("p1.T") table p1_T(inout TArg1 tArg1_0, in TArg2 aArg2_0) {
         key = {
-            tArg1.field1: ternary;
-            aArg2.field2: exact;
+            tArg1_0.field1: ternary;
+            aArg2_0.field2: exact;
         }
         actions = {
-            p1_B_action(tArg1.field1);
+            p1_B_action(tArg1_0.field1);
             p1_C_action;
         }
         size = 32w5;

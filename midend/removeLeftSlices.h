@@ -11,7 +11,7 @@ class RemoveLeftSlices : public Transform {
     P4::TypeMap* typeMap;
  public:
     explicit RemoveLeftSlices(P4::TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); }
+    { CHECK_NULL(typeMap); setName("RemoveLeftSlices"); }
     const IR::Node* postorder(IR::AssignmentStatement* stat) override;
 };
 

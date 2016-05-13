@@ -278,8 +278,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("nop") action nop_0() {
     }
-    @name("copy_to_cpu") action copy_to_cpu_0(in bit<16> reason_code) {
-        meta.fabric_metadata.reason_code = reason_code;
+    @name("copy_to_cpu") action copy_to_cpu_0(in bit<16> reason_code_1) {
+        meta.fabric_metadata.reason_code = reason_code_1;
     }
     @name("redirect_to_cpu") action redirect_to_cpu_0(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;

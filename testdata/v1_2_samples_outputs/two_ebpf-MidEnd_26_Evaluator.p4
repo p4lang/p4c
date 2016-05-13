@@ -95,9 +95,9 @@ control pipe(inout Headers_t headers, out bool pass) {
     @name("Reject") action Reject_0() {
         pass = false;
     }
-    @name("Check_ip") table Check_ip_0(in IPv4Address address) {
+    @name("Check_ip") table Check_ip_0(in IPv4Address address_0) {
         key = {
-            address: exact;
+            address_0: exact;
         }
         actions = {
             Reject_0;

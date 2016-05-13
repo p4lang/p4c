@@ -47,6 +47,10 @@ void ValidateParsedProgram::postorder(const IR::P4Table* t) {
     if (!p4v1 && da == nullptr)
         ::warning("Table %1% does not have an `%2%' property",
                 t->name, IR::TableProperties::defaultActionPropertyName);
+    for (auto p : *t->parameters->parameters) {
+        if (p->direction == IR::Direction::None)
+            ::error("%1%: Table parameters cannot be direction-less", p);
+    }
 }
 
 void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression* expression) {

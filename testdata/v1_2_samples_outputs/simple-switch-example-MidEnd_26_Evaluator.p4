@@ -121,17 +121,17 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     @name("Drop_action") action Drop_action_2() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("Set_nhop") action Set_nhop_0(out IPv4Address nextHop, IPv4Address ipv4_dest, PortId_t port) {
-        nextHop = ipv4_dest;
+    @name("Set_nhop") action Set_nhop_0(out IPv4Address nextHop_1, IPv4Address ipv4_dest, PortId_t port) {
+        nextHop_1 = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
     }
-    @name("ipv4_match") table ipv4_match_0(out IPv4Address nextHop) {
+    @name("ipv4_match") table ipv4_match_0(out IPv4Address nextHop_2) {
         key = {
             headers.ip.dstAddr: lpm;
         }
         actions = {
-            Set_nhop_0(nextHop);
+            Set_nhop_0(nextHop_2);
             Drop_action_0;
         }
         size = 1024;
@@ -152,9 +152,9 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     @name("Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
-    @name("dmac") table dmac_0(in IPv4Address nextHop) {
+    @name("dmac") table dmac_0(in IPv4Address nextHop_3) {
         key = {
-            nextHop: exact;
+            nextHop_3: exact;
         }
         actions = {
             Set_dmac_0;

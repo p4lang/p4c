@@ -12,12 +12,21 @@ addNameAnnotation(cstring name, const IR::Annotations* annos) {
                                      new IR::StringLiteral(Util::SourceInfo(), name));
 }
 
-UniqueNames::UniqueNames(bool anyOrder) :
-        refMap(new ReferenceMap), renameMap(new RenameMap) {
+UniqueNames::UniqueNames(ReferenceMap* refMap, bool anyOrder) : renameMap(new RenameMap) {
     setStopOnError(true);
     setName("UniqueNames");
+    CHECK_NULL(refMap);
     passes.emplace_back(new ResolveReferences(refMap, anyOrder));
     passes.emplace_back(new FindSymbols(refMap, renameMap));
+    passes.emplace_back(new RenameSymbols(refMap, renameMap));
+}
+
+UniqueParameters::UniqueParameters(ReferenceMap* refMap, bool anyOrder) : renameMap(new RenameMap) {
+    setStopOnError(true);
+    setName("UniqueParameters");
+    CHECK_NULL(refMap);
+    passes.emplace_back(new ResolveReferences(refMap, anyOrder));
+    passes.emplace_back(new FindParameters(refMap, renameMap));
     passes.emplace_back(new RenameSymbols(refMap, renameMap));
 }
 
@@ -44,6 +53,13 @@ const IR::Node* RenameSymbols::postorder(IR::Declaration_Constant* decl) {
     if (name != nullptr)
         decl->name = *name;
     return decl;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::Parameter* param) {
+    auto name = getName();
+    if (name != nullptr)
+        param->name = *name;
+    return param;
 }
 
 const IR::Node* RenameSymbols::postorder(IR::PathExpression* expression) {

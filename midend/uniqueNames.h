@@ -33,14 +33,16 @@ class RenameMap {
 // give unique names to various declarations to make it easier to inline
 class UniqueNames : public PassManager {
  private:
-    ReferenceMap *refMap;
     RenameMap    *renameMap;
  public:
-    explicit UniqueNames(bool anyOrder);
+    UniqueNames(ReferenceMap* refMap, bool anyOrder);
 };
 
+// Finds and allocates new names for some symbols:
+// Declaration_Variable, Declaration_Constant, Declaration_Instance,
+// P4Table, P4Action.
 class FindSymbols : public Inspector {
-    ReferenceMap *refMap;
+    ReferenceMap *refMap;  // used to generate new names
     RenameMap    *renameMap;
 
  public:
@@ -82,6 +84,37 @@ class RenameSymbols : public Transform {
     const IR::Node* postorder(IR::Declaration_Instance* decl) override;
     const IR::Node* postorder(IR::P4Table* decl) override;
     const IR::Node* postorder(IR::P4Action* decl) override;
+    const IR::Node* postorder(IR::Parameter* param) override;
+};
+
+// Finds parameters for tables and actions that will be given unique names
+class FindParameters : public Inspector {
+    ReferenceMap* refMap;  // used to generate new names
+    RenameMap*    renameMap;
+
+    void doParameters(const IR::ParameterList* pl) {
+        for (auto p : *pl->parameters) {
+            if (p->direction == IR::Direction::None)
+                continue;
+            cstring newName = refMap->newName(p->name);
+            renameMap->setNewName(p, newName);
+        }
+    }
+ public:
+    FindParameters(ReferenceMap* refMap, RenameMap* renameMap) :
+            refMap(refMap), renameMap(renameMap)
+    { CHECK_NULL(refMap); CHECK_NULL(renameMap); setName("FindParameters"); }
+    void postorder(const IR::P4Table* table) override
+    { doParameters(table->parameters); }
+    void postorder(const IR::P4Action* action) override
+    { doParameters(action->parameters); }
+};
+
+class UniqueParameters : public PassManager {
+ private:
+    RenameMap    *renameMap;
+ public:
+    UniqueParameters(ReferenceMap* refMap, bool anyOrder);
 };
 
 }  // namespace P4
