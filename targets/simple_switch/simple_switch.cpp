@@ -160,6 +160,34 @@ SimpleSwitch::start_and_return() {
   t3.detach();
 }
 
+int
+SimpleSwitch::set_egress_queue_depth(int port, const size_t depth_pkts) {
+  egress_buffers.set_capacity(port, depth_pkts);
+  return 0;
+}
+
+int
+SimpleSwitch::set_all_egress_queue_depths(const size_t depth_pkts) {
+  for (int i = 0; i < max_port; i++) {
+    set_egress_queue_depth(i, depth_pkts);
+  }
+  return 0;
+}
+
+int
+SimpleSwitch::set_egress_queue_rate(int port, const uint64_t rate_pps) {
+  egress_buffers.set_rate(port, rate_pps);
+  return 0;
+}
+
+int
+SimpleSwitch::set_all_egress_queue_rates(const uint64_t rate_pps) {
+  for (int i = 0; i < max_port; i++) {
+    set_egress_queue_rate(i, rate_pps);
+  }
+  return 0;
+}
+
 void
 SimpleSwitch::transmit_thread() {
   while (1) {

@@ -50,9 +50,16 @@ class SimpleSwitchHandler : virtual public SimpleSwitchIf {
     return switch_->mirroring_mapping_get(mirror_id);
   }
 
-  int32_t set_egress_queue_depth(const int32_t depth_pkts) {
+  int32_t set_egress_queue_depth(const int32_t port_num, const int32_t depth_pkts) {
     bm::Logger::get()->trace("set_egress_queue_depth");
-    return switch_->set_egress_queue_depth(static_cast<size_t>(depth_pkts));
+    return switch_->set_egress_queue_depth(port_num,
+                                           static_cast<uint32_t>(depth_pkts));
+  }
+
+  int32_t set_all_egress_queue_depths(const int32_t depth_pkts) {
+    bm::Logger::get()->trace("set_all_egress_queue_depths");
+    return switch_->set_all_egress_queue_depths(
+        static_cast<uint32_t>(depth_pkts));
   }
 
   int32_t set_egress_queue_rate(const int32_t port_num, const int64_t rate_pps) {

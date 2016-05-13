@@ -38,9 +38,14 @@ class SimpleSwitchAPI(runtime_CLI.RuntimeAPI):
         self.sswitch_client = sswitch_client
 
     def do_set_queue_depth(self, line):
-        "Set depth of egress queue: set_queue_depth <nb_pkts>"
-        depth = int(line)
-        self.sswitch_client.set_egress_queue_depth(depth)
+        "Set depth of one / all egress queue(s): set_queue_depth <nb_pkts> [<egress_port>]"
+        args = line.split()
+        depth = int(args[0])
+        if len(args) > 1:
+            port = int(args[1])
+            self.sswitch_client.set_egress_queue_depth(port, depth)
+        else:
+            self.sswitch_client.set_all_egress_queue_depths(depth)
 
     def do_set_queue_rate(self, line):
         "Set rate of one / all egress queue(s): set_queue_rate <rate_pps> [<egress_port>]"

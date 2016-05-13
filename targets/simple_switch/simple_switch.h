@@ -92,24 +92,11 @@ class SimpleSwitch : public Switch {
     return get_mirroring_mapping(mirror_id);
   }
 
-  int set_egress_queue_depth(const size_t depth_pkts) {
-    for (int i = 0; i < max_port; i++) {
-      egress_buffers.set_capacity(i, depth_pkts);
-    }
-    return 0;
-  }
+  int set_egress_queue_depth(int port, const size_t depth_pkts);
+  int set_all_egress_queue_depths(const size_t depth_pkts);
 
-  int set_egress_queue_rate(int port, const uint64_t rate_pps) {
-    egress_buffers.set_rate(port, rate_pps);
-    return 0;
-  }
-
-  int set_all_egress_queue_rates(const uint64_t rate_pps) {
-    for (int i = 0; i < max_port; i++) {
-      set_egress_queue_rate(i, rate_pps);
-    }
-    return 0;
-  }
+  int set_egress_queue_rate(int port, const uint64_t rate_pps);
+  int set_all_egress_queue_rates(const uint64_t rate_pps);
 
  private:
   static constexpr size_t nb_egress_threads = 4u;
