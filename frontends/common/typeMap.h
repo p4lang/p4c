@@ -26,11 +26,17 @@ class TypeMap final : public ProgramMap {
     std::map<const IR::Node*, const IR::Type*> typeMap;
     // All left-values in the program.
     std::set<const IR::Expression*> leftValues;
-
+    // All compile-time constants.  A compile-time constant
+    // is not necessarily a constant - it could be a directionless
+    // parameter as well.
+    std::set<const IR::Expression*> constants;
     // checks some preconditions before setting the type
     void checkPrecondition(const IR::Node* element, const IR::Type* type) const;
 
     static const IR::Type_InfInt* canonInfInt;
+
+    friend class TypeInference;
+    friend class ConstantTypeSubstitution;
 
  public:
     TypeMap() : ProgramMap("TypeMap") {}
@@ -42,11 +48,14 @@ class TypeMap final : public ProgramMap {
     void clear();
     bool isLeftValue(const IR::Expression* expression) const
     { return leftValues.count(expression) > 0; }
+    bool isCompileTimeConstant(const IR::Expression* expression) const;
     size_t size() const
     { return typeMap.size(); }
 
-    // The following are only used by the type-checker
+ private:
+    // The following are only used by TypeInference
     void setLeftValue(const IR::Expression* expression);
+    void setCompileTimeConstant(const IR::Expression* expression);
     const IR::Type_InfInt* canonicalInfInt() const
     { return TypeMap::canonInfInt; }
 };

@@ -48,6 +48,10 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
             if (reportErrors)
                 ::error("%1%: Read-only value used for out/inout parameter %2%", arg->srcInfo, dit);
             return false;
+        } else if (dit->direction == IR::Direction::None && !arg->compileTimeConstant) {
+            if (reportErrors)
+                ::error("%1%: not a compile-time constant when binding to %2%", arg->srcInfo, dit);
+            return false;
         }
         constraints->addEqualityConstraint(dit->type, arg->type);
         ++sit;

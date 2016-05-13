@@ -454,6 +454,7 @@ class Type_Method : Type_MethodBase {
 // Never used in the program IR; only used by typechecker.
 class ArgumentInfo {
     bool leftValue;
+    bool compileTimeConstant;
     Type type;
 }
 
