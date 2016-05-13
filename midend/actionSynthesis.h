@@ -24,7 +24,7 @@ namespace P4 {
 class MoveActionsToTables : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
-    IR::Vector<IR::P4Table> tables;  // inserted tables
+    std::vector<const IR::P4Table*> tables;  // inserted tables
 
  public:
     MoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap)
@@ -54,7 +54,7 @@ class MoveActionsToTables : public Transform {
 class SynthesizeActions : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
-    IR::Vector<IR::P4Action> actions;  // inserted actions
+    std::vector<const IR::P4Action*> actions;  // inserted actions
     bool moveEmits = false;
     bool changes = false;
 

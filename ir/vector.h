@@ -11,7 +11,6 @@ namespace IR {
 // Specialization of vector which
 // - only stores const IR::Node* objects inside (T should derive from Node)
 // - inherits from IR::Node itself
-
 class VectorBase : public Node {
  public:
     typedef const Node * const *iterator;
@@ -23,6 +22,8 @@ class VectorBase : public Node {
     iterator end() const { return VectorBase_end(); }
 };
 
+// This class should only be used in the IR.
+// User-level code should use regular std::vector
 template<class T>
 class Vector : public VectorBase {
     vector<const T *>   vec;
@@ -99,6 +100,8 @@ class Vector : public VectorBase {
     IRNODE_SUBCLASS(Vector)
     IRNODE_DECLARE_APPLY_OVERLOAD(Vector)
     bool operator==(const Node &a) const override { return a == *this; }
+    // If you get an error about this method not being overridden
+    // you are probably using a Vector where you should be using an std::vector.
     bool operator==(const Vector &a) const override { return vec == a.vec; }
     cstring node_type_name() const override {
         return "Vector<" + T::static_type_name() + ">"; }

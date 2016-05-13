@@ -74,15 +74,15 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
             "D(Vector<IR::Node>) "
             "B(Node), ##__VA_ARGS__) \\" << std::endl;
     for (auto cls : *getClasses()) {
-        t << "T(Vector<IR::" << cls->containedIn << cls->name << ">, D(Node), "
-                "##__VA_ARGS__) \\" << std::endl;
-        if (cls->needIndexedVector) {
+        if (cls->needVector || cls->needIndexedVector)
+            t << "T(Vector<IR::" << cls->containedIn << cls->name << ">, D(Node), "
+                    "##__VA_ARGS__) \\" << std::endl;
+        if (cls->needIndexedVector)
             // We generate IndexedVector only if needed; we expect users won't use
             // these if they don't want to place them in fields.
             t << "T(IndexedVector<IR::" << cls->containedIn << cls->name << ">, "
                     "D(Vector<IR::" << cls->containedIn << cls->name << ">) "
                     "B(Node), ##__VA_ARGS__) \\" << std::endl;
-        }
         if (cls->needNameMap)
             BUG("visitable (non-inline) NameMap not yet implemented");
         if (cls->needNodeMap)
