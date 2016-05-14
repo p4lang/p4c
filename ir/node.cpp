@@ -12,15 +12,21 @@ cstring IR::dbp(const IR::INode* node) {
     if (node == nullptr) {
         str << "<nullptr>";
     } else {
-        node->getNode()->Node::dbprint(str);
-        if (node->is<IR::IDeclaration>())
+        if (node->is<IR::IDeclaration>()) {
+            node->getNode()->Node::dbprint(str);
             str << " " << node->to<IR::IDeclaration>()->getName();
-        else if (node->is<IR::PathExpression>() ||
+        } else if (node->is<IR::Type_MethodBase>()) {
+            str << node;
+        } else if (node->is<IR::PathExpression>() ||
                  node->is<IR::Path>() ||
                  node->is<IR::TypeNameExpression>() ||
                  node->is<IR::Constant>() ||
-                 node->is<IR::Type_Base>())
+                   node->is<IR::Type_Base>()) {
+            node->getNode()->Node::dbprint(str);
             str << " " << node->toString();
+        } else {
+            node->getNode()->Node::dbprint(str);
+        }
     }
     return str.str();
 }

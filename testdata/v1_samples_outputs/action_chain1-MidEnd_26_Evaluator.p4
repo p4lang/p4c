@@ -142,8 +142,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
-    }
     action NoAction_1() {
     }
     action NoAction_2() {
@@ -152,19 +150,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     action NoAction_4() {
     }
-    @name("set0b1") action set0b1_0(bit<8> val) {
+    action NoAction_5() {
+    }
+    @name("set0b1") action set0b1(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("act1") action act1_0(bit<8> val) {
+    @name("act1") action act1(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("act2") action act2_0(bit<8> val) {
+    @name("act2") action act2(bit<8> val) {
         hdr.extra[0].b1 = val;
     }
-    @name("act3") action act3_0(bit<8> val) {
+    @name("act3") action act3(bit<8> val) {
         hdr.extra[0].b1 = val;
-    }
-    @name("noop") action noop_0() {
     }
     @name("noop") action noop() {
     }
@@ -174,87 +172,89 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop_3() {
     }
-    @name("setb2") action setb2_0(bit<8> val) {
+    @name("noop") action noop_4() {
+    }
+    @name("setb2") action setb2(bit<8> val) {
         hdr.data.b2 = val;
     }
-    @name("set1b1") action set1b1_0(bit<8> val) {
+    @name("set1b1") action set1b1(bit<8> val) {
         hdr.extra[1].b1 = val;
     }
-    @name("set2b2") action set2b2_0(bit<8> val) {
+    @name("set2b2") action set2b2(bit<8> val) {
         hdr.extra[2].b2 = val;
     }
-    @name("setb1") action setb1_0(bit<9> port, bit<8> val) {
+    @name("setb1") action setb1(bit<9> port, bit<8> val) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
     @name("ex1") table ex1_0() {
         actions = {
-            set0b1_0;
-            act1_0;
-            act2_0;
-            act3_0;
-            noop_0;
-            NoAction_0;
-        }
-        key = {
-            hdr.extra[0].h: ternary;
-        }
-        default_action = NoAction_0();
-    }
-    @name("tbl1") table tbl1_0() {
-        actions = {
-            setb2_0;
+            set0b1;
+            act1;
+            act2;
+            act3;
             noop;
             NoAction_1;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.extra[0].h: ternary;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
-    @name("tbl2") table tbl2_0() {
+    @name("tbl1") table tbl1_0() {
         actions = {
-            set1b1_0;
+            setb2;
             noop_1;
             NoAction_2;
         }
         key = {
             hdr.data.f2: ternary;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
-    @name("tbl3") table tbl3_0() {
+    @name("tbl2") table tbl2_0() {
         actions = {
-            set2b2_0;
+            set1b1;
             noop_2;
             NoAction_3;
         }
         key = {
             hdr.data.f2: ternary;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_3();
     }
-    @name("test1") table test1_0() {
+    @name("tbl3") table tbl3_0() {
         actions = {
-            setb1_0;
+            set2b2;
             noop_3;
             NoAction_4;
         }
         key = {
+            hdr.data.f2: ternary;
+        }
+        default_action = NoAction_4();
+    }
+    @name("test1") table test1_0() {
+        actions = {
+            setb1;
+            noop_4;
+            NoAction_5;
+        }
+        key = {
             hdr.data.f1: ternary;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_5();
     }
     apply {
         test1_0.apply();
         switch (ex1_0.apply().action_run) {
-            act1_0: {
+            act1: {
                 tbl1_0.apply();
             }
-            act2_0: {
+            act2: {
                 tbl2_0.apply();
             }
-            act3_0: {
+            act3: {
                 tbl3_0.apply();
             }
         }

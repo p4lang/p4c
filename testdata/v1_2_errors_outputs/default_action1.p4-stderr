@@ -1,0 +1,19 @@
+../testdata/v1_2_errors/default_action1.p4(5): warning: b shadows b
+    action b() {}
+           ^
+../testdata/v1_2_errors/default_action1.p4(1)
+action b() {}
+       ^
+../testdata/v1_2_errors/default_action1.p4(8): error: .b and b refer to different actions
+        default_action = .b();
+                          ^
+../testdata/v1_2_errors/default_action1.p4(7)
+        actions = { a; b; }
+                       ^
+../testdata/v1_2_errors/default_action1.p4(8): error: Could not find type of .b
+        default_action = .b();
+                          ^
+../testdata/v1_2_errors/default_action1.p4(8): error: Could not find type of .b
+        default_action = .b();
+                         ^^^^
+error: 3 errors encountered, aborting compilation

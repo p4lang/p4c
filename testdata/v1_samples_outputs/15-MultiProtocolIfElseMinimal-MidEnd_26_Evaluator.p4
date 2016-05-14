@@ -180,41 +180,41 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
-    }
     action NoAction_1() {
     }
-    @name("nop") action nop_0() {
+    action NoAction_2() {
     }
     @name("nop") action nop() {
     }
-    @name("set_egress_port") action set_egress_port_0(bit<8> egress_port) {
-        meta.ing_metadata.egress_port = egress_port;
+    @name("nop") action nop_1() {
     }
     @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("ipv4_match") table ipv4_match_0() {
-        actions = {
-            nop_0;
-            set_egress_port_0;
-            NoAction_0;
-        }
-        key = {
-            hdr.ipv4.srcAddr: exact;
-        }
-        default_action = NoAction_0();
+    @name("set_egress_port") action set_egress_port_1(bit<8> egress_port) {
+        meta.ing_metadata.egress_port = egress_port;
     }
-    @name("l2_match") table l2_match_0() {
+    @name("ipv4_match") table ipv4_match_0() {
         actions = {
             nop;
             set_egress_port;
             NoAction_1;
         }
         key = {
+            hdr.ipv4.srcAddr: exact;
+        }
+        default_action = NoAction_1();
+    }
+    @name("l2_match") table l2_match_0() {
+        actions = {
+            nop_1;
+            set_egress_port_1;
+            NoAction_2;
+        }
+        key = {
             hdr.ethernet.srcAddr: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         if (hdr.ethernet.etherType == 16w0x800) 

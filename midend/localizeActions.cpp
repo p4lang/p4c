@@ -46,7 +46,7 @@ const IR::Node* LocalizeActions::postorder(IR::P4Control* control) {
     auto newDecls = new IR::IndexedVector<IR::Declaration>();
     for (auto pair : *actions) {
         auto toInsert = pair.second;
-        LOG1("Adding " << toInsert);
+        LOG1("Adding " << dbp(toInsert));
         newDecls->push_back(toInsert);
     }
 
@@ -66,7 +66,7 @@ const IR::Node* LocalizeActions::postorder(IR::PathExpression* expression) {
     auto action = decl->to<IR::P4Action>();
     auto replacement = repl->getReplacement(action, control);
     if (replacement != nullptr) {
-        LOG1("Rewriting " << expression << " to " << replacement);
+        LOG1("Rewriting " << dbp(expression) << " to " << dbp(replacement));
         expression = new IR::PathExpression(IR::ID(expression->srcInfo, replacement->name));
     }
     return expression;
@@ -108,24 +108,25 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
         actionUser = tbl->to<IR::P4Table>();
     }
 
-    if (!repl->addActionUser(action, actionUser))
-        // no need to duplicate the action if this is the first user
-        return false;
+    LOG1(dbp(expression) << " used by " << dbp(actionUser));
+    auto replacement = repl->getActionUser(action, actionUser);
+    if (replacement == nullptr) {
+        auto newName = refMap->newName(action->name);
+        Cloner cloner;
+        auto replBody = cloner.clone(action->body);
+        BUG_CHECK(replBody->is<IR::BlockStatement>(), "%1%: unexpected result", replBody);
 
-    auto newName = refMap->newName(action->name);
-    Cloner cloner;
-    auto replBody = cloner.clone(action->body);
-    BUG_CHECK(replBody->is<IR::BlockStatement>(), "%1%: unexpected result", replBody);
-
-    auto annos = action->annotations;
-    if (annos == nullptr)
-        annos = IR::Annotations::empty;
-    annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                              new IR::StringLiteral(Util::SourceInfo(), action->name));
-    auto replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
-                                        annos, action->parameters,
-                                        replBody->to<IR::BlockStatement>());
-    repl->addReplacement(expression, action, replacement);
+        auto annos = action->annotations;
+        if (annos == nullptr)
+            annos = IR::Annotations::empty;
+        annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                  new IR::StringLiteral(Util::SourceInfo(), action->name));
+        replacement = new IR::P4Action(action->srcInfo, IR::ID(action->name.srcInfo, newName),
+                                       annos, action->parameters,
+                                       replBody->to<IR::BlockStatement>());
+        repl->createReplacement(action, actionUser, replacement);
+    }
+    repl->setRefReplacement(expression, replacement);
     return false;
 }
 
@@ -139,9 +140,9 @@ const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
             // as the original.
             auto replacements = repl->toInsert[d->to<IR::P4Action>()];
             if (replacements != nullptr) {
-                for (auto a : *replacements) {
-                    LOG1("Adding " << a);
-                    newDecls->push_back(a);
+                for (auto action : Values(*replacements)) {
+                    LOG1("Adding " << dbp(action));
+                    newDecls->push_back(action);
                     changes = true;
                 }
             }
@@ -156,7 +157,7 @@ const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
 const IR::Node* DuplicateActions::postorder(IR::PathExpression* expression) {
     auto replacement = ::get(repl->repl, getOriginal<IR::PathExpression>());
     if (replacement != nullptr) {
-        LOG1("Rewriting " << expression << " to " << replacement);
+        LOG1("Rewriting " << dbp(expression) << " to " << dbp(replacement));
         expression = new IR::PathExpression(IR::ID(expression->srcInfo, replacement->name));
     }
     return expression;

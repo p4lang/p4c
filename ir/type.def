@@ -92,7 +92,7 @@ class Parameter : Declaration, IAnnotated {
 class ParameterList : ISimpleNamespace {
     IndexedVector<Parameter> parameters;
     validate{ parameters->check_null(); }
-    dbprint { Node::dbprint(out); }
+    dbprint { Node::dbprint(out); out << "[" << size() << "]"; }
 #emit
     ParameterList() { parameters = new IndexedVector<Parameter>(); }
     explicit ParameterList(const IndexedVector<Parameter>* parameters) :

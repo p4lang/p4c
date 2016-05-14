@@ -161,25 +161,25 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
+    action NoAction_2() {
     }
-    @name("on_miss") action on_miss_0() {
+    @name("on_miss") action on_miss() {
     }
-    @name("rewrite_src_dst_mac") action rewrite_src_dst_mac_0(bit<48> smac, bit<48> dmac) {
+    @name("rewrite_src_dst_mac") action rewrite_src_dst_mac(bit<48> smac, bit<48> dmac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = dmac;
     }
     @name("rewrite_mac") table rewrite_mac_0() {
         actions = {
-            on_miss_0;
-            rewrite_src_dst_mac_0;
-            NoAction_0;
+            on_miss;
+            rewrite_src_dst_mac;
+            NoAction_2;
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
         }
         size = 32768;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         rewrite_mac_0.apply();
@@ -187,105 +187,105 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
-    }
-    action NoAction_2() {
-    }
     action NoAction_3() {
     }
     action NoAction_4() {
     }
     action NoAction_5() {
     }
-    @name("set_vrf") action set_vrf_0(bit<12> vrf) {
+    action NoAction_6() {
+    }
+    action NoAction_7() {
+    }
+    @name("set_vrf") action set_vrf(bit<12> vrf) {
         meta.ingress_metadata.vrf = vrf;
-    }
-    @name("on_miss") action on_miss_1() {
-    }
-    @name("on_miss") action on_miss() {
     }
     @name("on_miss") action on_miss_2() {
     }
-    @name("fib_hit_nexthop") action fib_hit_nexthop_0(bit<16> nexthop_index) {
-        meta.ingress_metadata.nexthop_index = nexthop_index;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+    @name("on_miss") action on_miss_3() {
+    }
+    @name("on_miss") action on_miss_4() {
     }
     @name("fib_hit_nexthop") action fib_hit_nexthop(bit<16> nexthop_index) {
         meta.ingress_metadata.nexthop_index = nexthop_index;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("set_egress_details") action set_egress_details_0(bit<9> egress_spec) {
+    @name("fib_hit_nexthop") action fib_hit_nexthop_1(bit<16> nexthop_index) {
+        meta.ingress_metadata.nexthop_index = nexthop_index;
+        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+    }
+    @name("set_egress_details") action set_egress_details(bit<9> egress_spec) {
         standard_metadata.egress_spec = egress_spec;
     }
-    @name("set_bd") action set_bd_0(bit<16> bd) {
+    @name("set_bd") action set_bd(bit<16> bd) {
         meta.ingress_metadata.bd = bd;
     }
     @name("bd") table bd_0() {
         actions = {
-            set_vrf_0;
-            NoAction_1;
+            set_vrf;
+            NoAction_3;
         }
         key = {
             meta.ingress_metadata.bd: exact;
         }
         size = 65536;
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     @name("ipv4_fib") table ipv4_fib_0() {
         actions = {
-            on_miss_1;
-            fib_hit_nexthop_0;
-            NoAction_2;
+            on_miss_2;
+            fib_hit_nexthop;
+            NoAction_4;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
             hdr.ipv4.dstAddr         : exact;
         }
         size = 131072;
-        default_action = NoAction_1();
+        default_action = NoAction_4();
     }
     @name("ipv4_fib_lpm") table ipv4_fib_lpm_0() {
         actions = {
-            on_miss;
-            fib_hit_nexthop;
-            NoAction_3;
+            on_miss_3;
+            fib_hit_nexthop_1;
+            NoAction_5;
         }
         key = {
             meta.ingress_metadata.vrf: exact;
             hdr.ipv4.dstAddr         : lpm;
         }
         size = 16384;
-        default_action = NoAction_1();
+        default_action = NoAction_5();
     }
     @name("nexthop") table nexthop_0() {
         actions = {
-            on_miss_2;
-            set_egress_details_0;
-            NoAction_4;
+            on_miss_4;
+            set_egress_details;
+            NoAction_6;
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
         }
         size = 32768;
-        default_action = NoAction_1();
+        default_action = NoAction_6();
     }
     @name("port_mapping") table port_mapping_0() {
         actions = {
-            set_bd_0;
-            NoAction_5;
+            set_bd;
+            NoAction_7;
         }
         key = {
             standard_metadata.ingress_port: exact;
         }
         size = 32768;
-        default_action = NoAction_1();
+        default_action = NoAction_7();
     }
     apply {
         if (hdr.ipv4.isValid()) {
             port_mapping_0.apply();
             bd_0.apply();
             switch (ipv4_fib_0.apply().action_run) {
-                on_miss_1: {
+                on_miss_2: {
                     ipv4_fib_lpm_0.apply();
                 }
             }

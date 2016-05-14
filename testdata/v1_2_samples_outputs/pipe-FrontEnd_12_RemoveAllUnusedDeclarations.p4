@@ -62,6 +62,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
         }
         actions = {
             Drop;
+            NoAction;
         }
         const default_action = NoAction;
     }

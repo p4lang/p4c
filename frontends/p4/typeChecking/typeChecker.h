@@ -92,8 +92,11 @@ class TypeInference : public Transform {
     const IR::Type* containerInstantiation(const IR::Node* node,
                                            const IR::Vector<IR::Expression>* args,
                                            const IR::IContainer* container);
-    const IR::Type_Action* actionCallType(const IR::Type_Action* action,
-                                          size_t removedArguments) const;
+    const IR::Type_Action* actionCallType(
+        bool inActionList,   // if true this "call" is in the action list of a table
+        const IR::Node* errorPosition,
+        const IR::Type_Action* action,
+        const IR::Vector<IR::Expression>* boundArguments) const;
     const IR::Vector<IR::Expression>*
             checkExternConstructor(const IR::Node* errorPosition,
                                    const IR::Type_Extern* ext,

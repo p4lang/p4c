@@ -183,17 +183,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
-    }
     action NoAction_1() {
     }
-    @name("_drop") action _drop_0() {
-        mark_to_drop();
+    action NoAction_2() {
     }
     @name("_drop") action _drop() {
         mark_to_drop();
     }
-    @name("route") action route_0() {
+    @name("_drop") action _drop_1() {
+        mark_to_drop();
+    }
+    @name("route") action route() {
         standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
         hdr.axon_head.fwdHopCount = hdr.axon_head.fwdHopCount + 8w255;
         hdr.axon_fwdHop.pop_front(1);
@@ -203,24 +203,24 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("drop_pkt") table drop_pkt_0() {
         actions = {
-            _drop_0;
-            NoAction_0;
+            _drop;
+            NoAction_1;
         }
         size = 1;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("route_pkt") table route_pkt_0() {
         actions = {
-            _drop;
-            route_0;
-            NoAction_1;
+            _drop_1;
+            route;
+            NoAction_2;
         }
         key = {
             hdr.axon_head.isValid()     : exact;
             hdr.axon_fwdHop[0].isValid(): exact;
         }
         size = 1;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) 

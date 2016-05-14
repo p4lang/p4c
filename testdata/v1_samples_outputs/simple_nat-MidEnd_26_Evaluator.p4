@@ -229,11 +229,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
-    }
     action NoAction_2() {
     }
-    @name("do_rewrites") action do_rewrites_0(bit<48> smac) {
+    action NoAction_3() {
+    }
+    @name("do_rewrites") action do_rewrites(bit<48> smac) {
         hdr.cpu_header.setInvalid();
         hdr.ethernet.srcAddr = smac;
         hdr.ipv4.srcAddr = meta.meta.ipv4_sa;
@@ -241,10 +241,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.tcp.srcPort = meta.meta.tcp_sp;
         hdr.tcp.dstPort = meta.meta.tcp_dp;
     }
-    @name("_drop") action _drop_0() {
+    @name("_drop") action _drop() {
         mark_to_drop();
     }
-    @name("do_cpu_encap") action do_cpu_encap_0() {
+    @name("do_cpu_encap") action do_cpu_encap() {
         hdr.cpu_header.setValid();
         hdr.cpu_header.preamble = 64w0;
         hdr.cpu_header.device = 8w0;
@@ -253,22 +253,22 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("send_frame") table send_frame_0() {
         actions = {
-            do_rewrites_0;
-            _drop_0;
-            NoAction_0;
+            do_rewrites;
+            _drop;
+            NoAction_2;
         }
         key = {
             standard_metadata.egress_port: exact;
         }
         size = 256;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     @name("send_to_cpu") table send_to_cpu_0() {
         actions = {
-            do_cpu_encap_0;
-            NoAction_2;
+            do_cpu_encap;
+            NoAction_3;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_3();
     }
     apply {
         if (standard_metadata.instance_type == 32w0) 
@@ -279,22 +279,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
-    }
-    action NoAction_3() {
-    }
     action NoAction_4() {
     }
     action NoAction_5() {
     }
-    @name("set_dmac") action set_dmac_0(bit<48> dmac) {
+    action NoAction_6() {
+    }
+    action NoAction_7() {
+    }
+    @name("set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
-    }
-    @name("_drop") action _drop_1() {
-        mark_to_drop();
-    }
-    @name("_drop") action _drop() {
-        mark_to_drop();
     }
     @name("_drop") action _drop_2() {
         mark_to_drop();
@@ -302,80 +296,86 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("_drop") action _drop_3() {
         mark_to_drop();
     }
-    @name("set_if_info") action set_if_info_0(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
+    @name("_drop") action _drop_4() {
+        mark_to_drop();
+    }
+    @name("_drop") action _drop_5() {
+        mark_to_drop();
+    }
+    @name("set_if_info") action set_if_info(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
         meta.meta.if_ipv4_addr = ipv4_addr;
         meta.meta.if_mac_addr = mac_addr;
         meta.meta.is_ext_if = is_ext;
     }
-    @name("set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
+    @name("set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.meta.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("nat_miss_int_to_ext") action nat_miss_int_to_ext_0() {
+    @name("nat_miss_int_to_ext") action nat_miss_int_to_ext() {
         clone3(CloneType.I2E, 32w250, { standard_metadata });
     }
-    @name("nat_miss_ext_to_int") action nat_miss_ext_to_int_0() {
+    @name("nat_miss_ext_to_int") action nat_miss_ext_to_int() {
         meta.meta.do_forward = 1w0;
         mark_to_drop();
     }
-    @name("nat_hit_int_to_ext") action nat_hit_int_to_ext_0(bit<32> srcAddr, bit<16> srcPort) {
+    @name("nat_hit_int_to_ext") action nat_hit_int_to_ext(bit<32> srcAddr, bit<16> srcPort) {
         meta.meta.do_forward = 1w1;
         meta.meta.ipv4_sa = srcAddr;
         meta.meta.tcp_sp = srcPort;
     }
-    @name("nat_hit_ext_to_int") action nat_hit_ext_to_int_0(bit<32> dstAddr, bit<16> dstPort) {
+    @name("nat_hit_ext_to_int") action nat_hit_ext_to_int(bit<32> dstAddr, bit<16> dstPort) {
         meta.meta.do_forward = 1w1;
         meta.meta.ipv4_da = dstAddr;
         meta.meta.tcp_dp = dstPort;
     }
-    @name("nat_no_nat") action nat_no_nat_0() {
+    @name("nat_no_nat") action nat_no_nat() {
         meta.meta.do_forward = 1w1;
     }
     @name("forward") table forward_0() {
         actions = {
-            set_dmac_0;
-            _drop_1;
-            NoAction_1;
+            set_dmac;
+            _drop_2;
+            NoAction_4;
         }
         key = {
             meta.meta.nhop_ipv4: exact;
         }
         size = 512;
-        default_action = NoAction_1();
+        default_action = NoAction_4();
     }
     @name("if_info") table if_info_0() {
         actions = {
-            _drop;
-            set_if_info_0;
-            NoAction_3;
+            _drop_3;
+            set_if_info;
+            NoAction_5;
         }
         key = {
             meta.meta.if_index: exact;
         }
-        default_action = NoAction_1();
+        default_action = NoAction_5();
     }
     @name("ipv4_lpm") table ipv4_lpm_0() {
         actions = {
-            set_nhop_0;
-            _drop_2;
-            NoAction_4;
+            set_nhop;
+            _drop_4;
+            NoAction_6;
         }
         key = {
             meta.meta.ipv4_da: lpm;
         }
         size = 1024;
-        default_action = NoAction_1();
+        default_action = NoAction_6();
     }
     @name("nat") table nat_0() {
         actions = {
-            _drop_3;
-            nat_miss_int_to_ext_0;
-            nat_miss_ext_to_int_0;
-            nat_hit_int_to_ext_0;
-            nat_hit_ext_to_int_0;
-            nat_no_nat_0;
-            NoAction_5;
+            _drop_5;
+            nat_miss_int_to_ext;
+            nat_miss_ext_to_int;
+            nat_hit_int_to_ext;
+            nat_hit_ext_to_int;
+            nat_no_nat;
+            NoAction_7;
         }
         key = {
             meta.meta.is_ext_if: exact;
@@ -387,7 +387,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.tcp.dstPort    : ternary;
         }
         size = 128;
-        default_action = NoAction_1();
+        default_action = NoAction_7();
     }
     apply {
         if_info_0.apply();

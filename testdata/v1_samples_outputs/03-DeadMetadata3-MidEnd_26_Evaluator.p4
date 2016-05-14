@@ -128,32 +128,32 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
-    }
     action NoAction_1() {
     }
-    @name("a1") action a1_0() {
+    action NoAction_2() {
+    }
+    @name("a1") action a1() {
         meta.m.f1 = 32w1;
     }
-    @name("a2") action a2_0() {
+    @name("a2") action a2() {
         meta.m.f2 = 32w2;
     }
     @name("t1") table t1_0() {
         actions = {
-            a1_0;
-            NoAction_0;
+            a1;
+            NoAction_1;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("t2") table t2_0() {
         actions = {
-            a2_0;
-            NoAction_1;
+            a2;
+            NoAction_2;
         }
         key = {
             meta.m.f1: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         t1_0.apply();

@@ -142,6 +142,7 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         }
         actions = {
             Send_to_cpu;
+            NoAction;
         }
         const default_action = NoAction;
     }

@@ -1,11 +1,11 @@
 control c() {
-    action Global_0() {
+    action Global_1() {
     }
     @name("t") table t_0() {
         actions = {
-            Global_0;
+            Global_1;
         }
-        default_action = Global_0;
+        default_action = Global_1;
     }
     apply {
         t_0.apply();

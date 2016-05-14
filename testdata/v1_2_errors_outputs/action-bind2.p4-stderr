@@ -1,0 +1,13 @@
+../testdata/v1_2_errors/action-bind2.p4(6): error: a: parameter b must be bound
+        actions = { a; }
+                    ^
+../testdata/v1_2_errors/action-bind2.p4(2)
+    action a(inout bit<32> b, bit<32> d) {
+             ^^^^^^^^^^^^^^^
+../testdata/v1_2_errors/action-bind2.p4(7): error: a: Passing 1 arguments when 2 expected
+        default_action = a(0);
+                         ^^^^
+../testdata/v1_2_errors/action-bind2.p4(7): error: Could not find type of a
+        default_action = a(0);
+                         ^^^^
+error: 3 errors encountered, aborting compilation

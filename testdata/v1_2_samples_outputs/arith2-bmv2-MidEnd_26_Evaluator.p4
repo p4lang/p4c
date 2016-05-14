@@ -145,15 +145,15 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("compare") action compare_0() {
+    @name("compare") action compare() {
         h.h.c = (bit<8>)(bit<1>)(h.h.a < h.h.b);
         sm.egress_spec = 9w0;
     }
     @name("t") table t_0() {
         actions = {
-            compare_0;
+            compare;
         }
-        const default_action = compare_0;
+        const default_action = compare;
     }
     apply {
         t_0.apply();

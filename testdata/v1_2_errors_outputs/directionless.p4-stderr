@@ -1,0 +1,19 @@
+../testdata/v1_2_errors/directionless.p4(3): error: y0: direction-less action parameters have to be at the end
+    action a(bit x0, out bit y0)
+                    ^^^^^^^^^^^
+../testdata/v1_2_errors/directionless.p4(13): error: : not a compile-time constant when binding to x0
+        a(z & z, y);
+          ^^^^^
+../testdata/v1_2_errors/directionless.p4(3)
+    action a(bit x0, out bit y0)
+             ^^^^^^
+../testdata/v1_2_errors/directionless.p4(9): error: y: direction-less action parameters have to be at the end
+    action b(bit x, out bit y)
+                   ^^^^^^^^^^
+../testdata/v1_2_errors/directionless.p4(19): error: : not a compile-time constant when binding to x
+        b(x, y);
+          ^
+../testdata/v1_2_errors/directionless.p4(9)
+    action b(bit x, out bit y)
+             ^^^^^
+error: 4 errors encountered, aborting compilation

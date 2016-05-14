@@ -190,55 +190,55 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     headers hdr_0;
     metadata meta_0;
     standard_metadata_t standard_metadata_0;
-    action NoAction_0() {
-    }
     action NoAction_1() {
     }
-    @name("do_setup") action do_setup_0(bit<9> idx, bit<1> routed) {
+    action NoAction_2() {
+    }
+    @name("do_setup") action do_setup(bit<9> idx, bit<1> routed) {
         meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;
         meta.egress_metadata.smac_idx = idx;
         meta.egress_metadata.routed = routed;
     }
     @name("setup") table setup_0() {
         actions = {
-            do_setup_0;
-            NoAction_0;
+            do_setup;
+            NoAction_1;
         }
         key = {
             hdr.ethernet.isValid(): exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
-    @name("process_mac_rewrite.nop") action process_mac_rewrite_nop() {
+    @name("process_mac_rewrite.nop") action process_mac_rewrite_nop_0() {
     }
-    @name("process_mac_rewrite.rewrite_ipv4_unicast_mac") action process_mac_rewrite_rewrite_ipv4_unicast_mac(bit<48> smac) {
+    @name("process_mac_rewrite.rewrite_ipv4_unicast_mac") action process_mac_rewrite_rewrite_ipv4_unicast_mac_0(bit<48> smac) {
         hdr_0.ethernet.srcAddr = smac;
         hdr_0.ethernet.dstAddr = meta_0.egress_metadata.mac_da;
         hdr_0.ipv4.ttl = hdr_0.ipv4.ttl + 8w255;
     }
-    @name("process_mac_rewrite.rewrite_ipv4_multicast_mac") action process_mac_rewrite_rewrite_ipv4_multicast_mac(bit<48> smac) {
+    @name("process_mac_rewrite.rewrite_ipv4_multicast_mac") action process_mac_rewrite_rewrite_ipv4_multicast_mac_0(bit<48> smac) {
         hdr_0.ethernet.srcAddr = smac;
         hdr_0.ethernet.dstAddr[47:23] = 25w0x0;
         hdr_0.ipv4.ttl = hdr_0.ipv4.ttl + 8w255;
     }
-    @name("process_mac_rewrite.rewrite_ipv6_unicast_mac") action process_mac_rewrite_rewrite_ipv6_unicast_mac(bit<48> smac) {
+    @name("process_mac_rewrite.rewrite_ipv6_unicast_mac") action process_mac_rewrite_rewrite_ipv6_unicast_mac_0(bit<48> smac) {
         hdr_0.ethernet.srcAddr = smac;
         hdr_0.ethernet.dstAddr = meta_0.egress_metadata.mac_da;
         hdr_0.ipv6.hopLimit = hdr_0.ipv6.hopLimit + 8w255;
     }
-    @name("process_mac_rewrite.rewrite_ipv6_multicast_mac") action process_mac_rewrite_rewrite_ipv6_multicast_mac(bit<48> smac) {
+    @name("process_mac_rewrite.rewrite_ipv6_multicast_mac") action process_mac_rewrite_rewrite_ipv6_multicast_mac_0(bit<48> smac) {
         hdr_0.ethernet.srcAddr = smac;
         hdr_0.ethernet.dstAddr[47:32] = 16w0x0;
         hdr_0.ipv6.hopLimit = hdr_0.ipv6.hopLimit + 8w255;
     }
     @name("process_mac_rewrite.mac_rewrite") table process_mac_rewrite_mac_rewrite() {
         actions = {
-            process_mac_rewrite_nop;
-            process_mac_rewrite_rewrite_ipv4_unicast_mac;
-            process_mac_rewrite_rewrite_ipv4_multicast_mac;
-            process_mac_rewrite_rewrite_ipv6_unicast_mac;
-            process_mac_rewrite_rewrite_ipv6_multicast_mac;
-            NoAction_1;
+            process_mac_rewrite_nop_0;
+            process_mac_rewrite_rewrite_ipv4_unicast_mac_0;
+            process_mac_rewrite_rewrite_ipv4_multicast_mac_0;
+            process_mac_rewrite_rewrite_ipv6_unicast_mac_0;
+            process_mac_rewrite_rewrite_ipv6_multicast_mac_0;
+            NoAction_2;
         }
         key = {
             meta_0.egress_metadata.smac_idx: exact;
@@ -246,7 +246,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr_0.ipv6.isValid()           : exact;
         }
         size = 512;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     action act() {
         hdr_0 = hdr;

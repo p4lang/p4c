@@ -558,7 +558,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     auto params = new IR::ParameterList();
     auto propvec = new IR::IndexedVector<IR::TableProperty>(*table->properties.properties);
 
-    auto actVect = new IR::Vector<IR::ActionListElement>();
+    auto actVect = new IR::IndexedVector<IR::ActionListElement>();
     auto actionList = new IR::ActionList(Util::SourceInfo(), actVect);
 
     cstring profile = table->action_profile.name;
@@ -1207,7 +1207,7 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
         if (!isCalled)
             direction = IR::Direction::None;
         else
-            direction = p->write ? IR::Direction::InOut : IR::Direction::In;
+            direction = p->write ? IR::Direction::InOut : IR::Direction::None;
         auto type = p->type;
         if (type == IR::Type_Unknown::get()) {
             ::warning("Could not infer type for %1%, using bit<8>", p);

@@ -1,0 +1,7 @@
+../testdata/v1_2_errors/direct-action.p4(8): error: : not a compile-time constant when binding to arg
+        a(x);
+          ^
+../testdata/v1_2_errors/direct-action.p4(3)
+    action a(bit<32> arg) {
+             ^^^^^^^^^^^
+error: 1 errors encountered, aborting compilation

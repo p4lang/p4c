@@ -53,6 +53,7 @@ static int yylex();
     IR::IndexedVector<IR::StructField>    *structFields;
     IR::IndexedVector<IR::TableProperty>  *properties;
     IR::IndexedVector<IR::Declaration_ID> *ids;
+    IR::IndexedVector<IR::ActionListElement> *actions;
     IR::Vector<IR::Annotation>  *annoVec;
     IR::Vector<IR::Expression>  *exprs;
     IR::Vector<IR::SelectCase>  *selectCases;
@@ -60,7 +61,6 @@ static int yylex();
     IR::Vector<IR::Type>        *types;
     IR::Vector<IR::Method>      *methods;
     IR::Vector<IR::KeyElement>  *keyElements;
-    IR::Vector<IR::ActionListElement> *actions;
     IR::ID*                     id;
     cstring                     str;
     bool                        b;
@@ -733,11 +733,11 @@ tableProperty
     | optAnnotations CONST IDENTIFIER '=' initializer ';'
                                          { auto v = new IR::ExpressionValue(@5, $5);
                                             auto id = IR::ID(@3, $3);
-                                            $$ = new IR::TableProperty(@1 + @6, id, $1, v, true); }
+                                            $$ = new IR::TableProperty(@3, id, $1, v, true); }
     | optAnnotations IDENTIFIER '=' initializer ';'
-                                         { auto v = new IR::ExpressionValue(@5, $4);
+                                         { auto v = new IR::ExpressionValue(@4, $4);
                                            auto id = IR::ID(@2, $2);
-                                           $$ = new IR::TableProperty(@1 + @5, id, $1, v, false); }
+                                           $$ = new IR::TableProperty(@2, id, $1, v, false); }
     ;
 
 keyElementList
@@ -751,7 +751,7 @@ keyElement
     ;
 
 actionList
-    : actionRef ';'                      { $$ = new IR::Vector<IR::ActionListElement>();
+    : actionRef ';'                      { $$ = new IR::IndexedVector<IR::ActionListElement>();
                                            $$->push_back($1); }
     | actionList actionRef ';'           { $$ = $1; $$->push_back($2); }
     ;

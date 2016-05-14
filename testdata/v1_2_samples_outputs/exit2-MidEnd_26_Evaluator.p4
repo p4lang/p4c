@@ -4,10 +4,10 @@ control ctrl() {
     bit<32> a_0;
     bit<32> b_0;
     bit<32> c_0;
-    @name("e") action e_0() {
+    @name("e") action e() {
         hasExited = true;
     }
-    @name("e") action e() {
+    @name("e") action e_1() {
         hasExited = true;
     }
     action act() {
@@ -45,9 +45,9 @@ control ctrl() {
     }
     table tbl_e() {
         actions = {
-            e_0;
+            e;
         }
-        const default_action = e_0();
+        const default_action = e();
     }
     table tbl_act_1() {
         actions = {
@@ -63,9 +63,9 @@ control ctrl() {
     }
     table tbl_e_0() {
         actions = {
-            e;
+            e_1;
         }
-        const default_action = e();
+        const default_action = e_1();
     }
     table tbl_act_3() {
         actions = {

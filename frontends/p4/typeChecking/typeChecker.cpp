@@ -413,24 +413,32 @@ const IR::Node* TypeInference::postorder(IR::P4Parser* cont) {
     return cont;
 }
 
-const IR::Node* TypeInference::postorder(IR::P4Table* cont) {
+const IR::Node* TypeInference::postorder(IR::P4Table* table) {
     if (done())
-        return cont;
-    auto type = new IR::Type_Table(Util::SourceInfo(), cont);
+        return table;
+    auto type = new IR::Type_Table(Util::SourceInfo(), table);
     setType(getOriginal(), type);
-    setType(cont, type);
-    return cont;
+    setType(table, type);
+    return table;
 }
 
-const IR::Node* TypeInference::postorder(IR::P4Action* cont) {
+const IR::Node* TypeInference::postorder(IR::P4Action* action) {
     if (done())
-        return cont;
-    auto pl = canonicalize(cont->parameters);
+        return action;
+    auto pl = canonicalize(action->parameters);
     auto type = new IR::Type_Action(Util::SourceInfo(), new IR::TypeParameters(),
                                     IR::Type_Void::get(), pl);
+
+    bool foundDirectionless = false;
+    for (auto p : *action->parameters->parameters) {
+        if (p->direction == IR::Direction::None)
+            foundDirectionless = true;
+        else if (foundDirectionless)
+            ::error("%1%: direction-less action parameters have to be at the end", p);
+    }
     setType(getOriginal(), type);
-    setType(cont, type);
-    return cont;
+    setType(action, type);
+    return action;
 }
 
 const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
@@ -718,7 +726,7 @@ TypeInference::containerInstantiation(
     auto args = new IR::Vector<IR::ArgumentInfo>();
     for (auto arg : *constructorArguments) {
         if (!isCompileTimeConstant(arg))
-            ::error("%1%: cannot evaluate to a compile-time constant");
+            ::error("%1%: cannot evaluate to a compile-time constant", arg);
         auto argType = getType(arg);
         if (argType == nullptr)
             return nullptr;
@@ -1616,13 +1624,11 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
         return expression;
     auto edecl = refMap->getDeclaration(expression->path, true);
     auto decl = edecl->getNode();
-    if (decl->is<IR::ParserState>()) {
-        setType(getOriginal(), IR::Type_State::get());
-        setType(expression, IR::Type_State::get());
-        return expression;
-    }
+    const IR::Type* type = nullptr;
 
-    if (decl->is<IR::Declaration_Variable>()) {
+    if (decl->is<IR::ParserState>()) {
+        type = IR::Type_State::get();
+    } else if (decl->is<IR::Declaration_Variable>()) {
         setLeftValue(expression);
         setLeftValue(getOriginal<IR::Expression>());
     } else if (decl->is<IR::Parameter>()) {
@@ -1639,11 +1645,60 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
                decl->is<IR::Declaration_Instance>()) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
+    } else if (decl->is<IR::P4Action>()) {
+        // Special handling for actions referred inside tables
+        // action a(inout bit x, bit y) { ... }
+        // table t () {
+        //    actions = { a(z); }  << a typechecked as action a
+        //    default_action = a(2);  << a typechecked as specialized in the actions list
+        // }
+        // This works only if the actions property has already been visited
+        auto prop = findContext<IR::TableProperty>();
+        if (prop != nullptr) {
+            auto table = findContext<IR::P4Table>();
+            BUG_CHECK(table != nullptr, "%1%: property not within a table?", prop);
+            if (prop->name == IR::TableProperties::defaultActionPropertyName) {
+                LOG1("Handling default_action" << prop);
+                // Check that the default action appears in the list of actions.
+                BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
+                auto def = prop->value->to<IR::ExpressionValue>()->expression;
+                auto al = table->getActionList();
+                if (al == nullptr) {
+                    ::error("%1%: no action list, but %2% %3%",
+                            table, IR::TableProperties::defaultActionPropertyName, prop);
+                    return expression;
+                }
+                if (def->is<IR::MethodCallExpression>())
+                    def = def->to<IR::MethodCallExpression>()->method;
+                if (!def->is<IR::PathExpression>())
+                    BUG("%1%: unexpected expression", def);
+                auto pe = def->to<IR::PathExpression>();
+                auto defdecl = refMap->getDeclaration(pe->path, true);
+                auto ale = al->actionList->getDeclaration(defdecl->getName());
+                if (ale == nullptr) {
+                    ::error("%1% not present in action list", def);
+                    return expression;
+                }
+                BUG_CHECK(ale->is<IR::ActionListElement>(),
+                          "%1%: expected an ActionListElement", ale);
+                auto elem = ale->to<IR::ActionListElement>();
+                auto entrypath = elem->name;
+                auto entrydecl = refMap->getDeclaration(entrypath->path, true);
+                if (entrydecl != defdecl) {
+                    ::error("%1% and %2% refer to different actions", def, elem);
+                    return expression;
+                }
+                type = getType(elem);  // This Type_Action is already specialized with
+                                       // some arguments.
+            }
+        }
     }
 
-    const IR::Type* type = getType(decl);
-    if (type == nullptr)
-        return expression;
+    if (type == nullptr) {
+        type = getType(decl);
+        if (type == nullptr)
+            return expression;
+    }
 
     setType(getOriginal(), type);
     setType(expression, type);
@@ -1924,14 +1979,26 @@ const IR::Node* TypeInference::preorder(IR::MethodCallExpression* expression) {
     return expression;
 }
 
-const IR::Type_Action* TypeInference::actionCallType(const IR::Type_Action* action,
-                                                   size_t removedArguments) const {
+const IR::Type_Action*
+TypeInference::actionCallType(bool inActionList,
+                              const IR::Node* errorPosition,
+                              const IR::Type_Action* action,
+                              const IR::Vector<IR::Expression>* arguments) const {
     auto params = new IR::IndexedVector<IR::Parameter>();
-    size_t i = 0;
+    if (arguments == nullptr)
+        arguments = new IR::Vector<IR::Expression>();
+    auto it = arguments->begin();
     for (auto p : *action->parameters->getEnumerator()) {
-        if (i >= removedArguments)
+        if (it == arguments->end()) {
             params->push_back(p);
-        i++;
+            if (p->direction != IR::Direction::None)
+                ::error("%1%: parameter %2% must be bound", errorPosition, p);
+        } else {
+            if (inActionList && p->direction == IR::Direction::None)
+                ::error("%1%: parameter %2% cannot be bound, since it is set by the control plane",
+                        *it, p);
+            it++;
+        }
     }
     auto pl = new IR::ParameterList(Util::SourceInfo(), params);
     auto result = new IR::Type_Action(action->srcInfo, action->typeParameters,
@@ -2001,9 +2068,14 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
     // Handle differently methods and actions: action invocations return actions
     // with different signatures
-    if (functionType->is<IR::Type_Action>()) {
-        auto type = actionCallType(functionType->to<IR::Type_Action>(),
-                                   expression->arguments->size());
+    if (methodType->is<IR::Type_Action>()) {
+        bool inActionsList = false;
+        auto prop = findContext<IR::TableProperty>();
+        if (prop != nullptr && prop->name == IR::TableProperties::actionsPropertyName)
+            inActionsList = true;
+        auto type = actionCallType(inActionsList, expression,
+                                   methodType->to<IR::Type_Action>(),
+                                   expression->arguments);
         setType(getOriginal(), type);
         setType(expression, type);
     } else {
@@ -2250,9 +2322,18 @@ const IR::Node* TypeInference::postorder(IR::AssignmentStatement* assign) {
 }
 
 const IR::Node* TypeInference::postorder(IR::ActionListElement* elem) {
-    auto type = getType(elem->name);
-    if (type != nullptr && !type->is<IR::Type_Action>())
+    if (done())
+        return elem;
+    auto basetype = getType(elem->name);
+    if (basetype == nullptr)
+        return elem;
+    if (!basetype->is<IR::Type_Action>())
         ::error("%1% is not an action", elem);
+    auto type = actionCallType(false, elem, basetype->to<IR::Type_Action>(), elem->arguments);
+    if (type != nullptr) {
+        setType(elem, type);
+        setType(getOriginal(), type);
+    }
     return elem;
 }
 
@@ -2282,8 +2363,12 @@ const IR::Node* TypeInference::postorder(IR::TableProperty* prop) {
             ::error("%1% table property should be an action", prop);
         } else {
             auto type = getType(pv->expression);
-            if (type != nullptr && !type->is<IR::Type_Action>())
+            if (type == nullptr)
+                return prop;
+            if (!type->is<IR::Type_Action>()) {
                 ::error("%1% table property should be an action", prop);
+                return prop;
+            }
             auto at = type->to<IR::Type_Action>();
             if (at->parameters->size() != 0)
                 ::error("Action for %1% has some unbound arguments", prop);

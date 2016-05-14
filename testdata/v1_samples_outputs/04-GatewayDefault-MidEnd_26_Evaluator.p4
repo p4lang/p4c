@@ -136,19 +136,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
+    action NoAction_2() {
     }
-    @name("nop") action nop_0() {
+    @name("nop") action nop() {
     }
     @name("e_t1") table e_t1_0() {
         actions = {
-            nop_0;
-            NoAction_0;
+            nop;
+            NoAction_2;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         e_t1_0.apply();
@@ -156,103 +156,103 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
-    }
-    action NoAction_2() {
-    }
     action NoAction_3() {
     }
     action NoAction_4() {
     }
-    @name("nop") action nop_1() {
+    action NoAction_5() {
     }
-    @name("nop") action nop() {
+    action NoAction_6() {
     }
     @name("nop") action nop_2() {
     }
     @name("nop") action nop_3() {
     }
-    @name("ing_drop") action ing_drop_0() {
+    @name("nop") action nop_4() {
+    }
+    @name("nop") action nop_5() {
+    }
+    @name("ing_drop") action ing_drop() {
         meta.ing_metadata.drop = 8w1;
     }
-    @name("set_f1") action set_f1_0(bit<8> f1) {
+    @name("set_f1") action set_f1(bit<8> f1) {
         meta.ing_metadata.f1 = f1;
-    }
-    @name("set_f2") action set_f2_0(bit<16> f2) {
-        meta.ing_metadata.f2 = f2;
     }
     @name("set_f2") action set_f2(bit<16> f2) {
         meta.ing_metadata.f2 = f2;
     }
-    @name("set_f3") action set_f3_0(bit<32> f3) {
-        meta.ing_metadata.f3 = f3;
+    @name("set_f2") action set_f2_1(bit<16> f2) {
+        meta.ing_metadata.f2 = f2;
     }
     @name("set_f3") action set_f3(bit<32> f3) {
         meta.ing_metadata.f3 = f3;
     }
-    @name("set_egress_port") action set_egress_port_0(bit<8> egress_port) {
+    @name("set_f3") action set_f3_1(bit<32> f3) {
+        meta.ing_metadata.f3 = f3;
+    }
+    @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("set_f4") action set_f4_0(bit<64> f4) {
+    @name("set_f4") action set_f4(bit<64> f4) {
         meta.ing_metadata.f4 = f4;
     }
     @name("i_t1") table i_t1_0() {
         actions = {
-            nop_1;
-            ing_drop_0;
-            set_f1_0;
-            set_f2_0;
-            set_f3_0;
-            set_egress_port_0;
-            NoAction_1;
-        }
-        key = {
-            hdr.ethernet.dstAddr: exact;
-        }
-        default_action = NoAction_1();
-    }
-    @name("i_t2") table i_t2_0() {
-        actions = {
-            nop;
-            set_f2;
-            NoAction_2;
-        }
-        key = {
-            hdr.ethernet.dstAddr: exact;
-        }
-        default_action = NoAction_1();
-    }
-    @name("i_t3") table i_t3_0() {
-        actions = {
             nop_2;
+            ing_drop;
+            set_f1;
+            set_f2;
             set_f3;
+            set_egress_port;
             NoAction_3;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
-    @name("i_t4") table i_t4_0() {
+    @name("i_t2") table i_t2_0() {
         actions = {
             nop_3;
-            set_f4_0;
+            set_f2_1;
             NoAction_4;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
-        default_action = NoAction_1();
+        default_action = NoAction_4();
+    }
+    @name("i_t3") table i_t3_0() {
+        actions = {
+            nop_4;
+            set_f3_1;
+            NoAction_5;
+        }
+        key = {
+            hdr.ethernet.dstAddr: exact;
+        }
+        default_action = NoAction_5();
+    }
+    @name("i_t4") table i_t4_0() {
+        actions = {
+            nop_5;
+            set_f4;
+            NoAction_6;
+        }
+        key = {
+            hdr.ethernet.dstAddr: exact;
+        }
+        default_action = NoAction_6();
     }
     apply {
         switch (i_t1_0.apply().action_run) {
             default: {
                 i_t4_0.apply();
             }
-            nop_1: {
+            nop_2: {
                 i_t2_0.apply();
             }
-            set_egress_port_0: {
+            set_egress_port: {
                 i_t3_0.apply();
             }
         }

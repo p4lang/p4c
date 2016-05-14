@@ -3,17 +3,17 @@ control ctrl() {
     bit<32> a_0;
     bit<32> b_0;
     bit<32> c_0;
-    @name("e") action e_0() {
+    @name("e") action e() {
         hasExited = true;
     }
-    @name("f") action f_0() {
+    @name("f") action f() {
     }
     @name("t") table t_0() {
         actions = {
-            e_0;
-            f_0;
+            e;
+            f;
         }
-        default_action = e_0();
+        default_action = e();
     }
     action act() {
         b_0 = 32w2;
@@ -75,7 +75,7 @@ control ctrl() {
     apply {
         tbl_act.apply();
         switch (t_0.apply().action_run) {
-            e_0: {
+            e: {
                 if (!hasExited) {
                     tbl_act_0.apply();
                     t_0.apply();
@@ -83,7 +83,7 @@ control ctrl() {
                         tbl_act_1.apply();
                 }
             }
-            f_0: {
+            f: {
                 if (!hasExited) {
                     tbl_act_2.apply();
                     t_0.apply();

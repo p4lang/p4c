@@ -90,9 +90,9 @@ parser prs(packet_in p, out Headers_t headers) {
 
 control pipe(inout Headers_t headers, out bool pass) {
     bool hasReturned;
-    action NoAction_0() {
+    action NoAction_1() {
     }
-    @name("Reject") action Reject_0(IPv4Address add) {
+    @name("Reject") action Reject(IPv4Address add) {
         pass = false;
         headers.ipv4.srcAddr = add;
     }
@@ -101,11 +101,11 @@ control pipe(inout Headers_t headers, out bool pass) {
             headers.ipv4.srcAddr: exact;
         }
         actions = {
-            Reject_0;
-            NoAction_0;
+            Reject;
+            NoAction_1;
         }
         implementation = hash_table(32w1024);
-        const default_action = NoAction_0;
+        const default_action = NoAction_1;
     }
     action act() {
         pass = false;
