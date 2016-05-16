@@ -16,7 +16,7 @@ gen-cpp/bm/simple_switch_types.h
 BUILT_SOURCES = $(simple_switch_thrift_files) $(simple_switch_thrift_py_files)
 
 sswitchpydir = $(pythondir)/sswitch_runtime
-sswitchpy_PYTHON = $(simple_switch_thrift_py_files)
+nodist_sswitchpy_PYTHON = $(simple_switch_thrift_py_files)
 
 python_PYTHON = sswitch_CLI.py
 
@@ -72,8 +72,8 @@ simple_switch_SOURCES = main.cpp
 
 lib_LTLIBRARIES = libsimpleswitch_thrift.la
 
-libsimpleswitch_thrift_la_SOURCES = \
-	$(BUILT_SOURCES)
+nodist_libsimpleswitch_thrift_la_SOURCES = \
+$(simple_switch_thrift_files)
 
 # See http://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
 
@@ -116,7 +116,7 @@ $(BUILT_SOURCES): thrift_files.ts
 	  fi; \
 	fi
 
-pkginclude_HEADERS = \
+nodist_pkginclude_HEADERS = \
 gen-cpp/bm/simple_switch_constants.h \
 gen-cpp/bm/SimpleSwitch.h \
 gen-cpp/bm/simple_switch_types.h

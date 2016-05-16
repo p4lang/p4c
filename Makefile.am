@@ -33,3 +33,5 @@ mininet/stress_test_commands.txt
 # docs directory
 EXTRA_DIST += \
 docs/JSON_format.md
+
+AM_DISTCHECK_CONFIGURE_FLAGS = --with-pdfixed --with-stress-tests

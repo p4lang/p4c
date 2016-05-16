@@ -37,34 +37,38 @@ gen-cpp/bm/SimplePreLAG.h \
 gen-cpp/bm/simple_pre_lag_types.cpp \
 gen-cpp/bm/simple_pre_lag_types.h
 
-BUILT_SOURCES = \
+thrift_cxx_files = \
 $(standard_thrift_files) \
-$(standard_thrift_py_files) \
 $(simple_pre_thrift_files) \
+$(simple_pre_lag_thrift_files)
+
+BUILT_SOURCES = \
+$(thrift_cxx_files) \
+$(standard_thrift_py_files) \
 $(simple_pre_thrift_py_files) \
-$(simple_pre_lag_thrift_files) \
 $(simple_pre_lag_thrift_py_files) \
 gen-py/bm_runtime/__init__.py
 
 rootpydir = $(pythondir)/bm_runtime/
-rootpy_PYTHON = gen-py/bm_runtime/__init__.py
+nodist_rootpy_PYTHON = gen-py/bm_runtime/__init__.py
 
 standardpydir = $(pythondir)/bm_runtime/standard
-standardpy_PYTHON = $(standard_thrift_py_files)
+nodist_standardpy_PYTHON = $(standard_thrift_py_files)
 
 simple_prepydir = $(pythondir)/bm_runtime/simple_pre
-simple_prepy_PYTHON = $(simple_pre_thrift_py_files)
+nodist_simple_prepy_PYTHON = $(simple_pre_thrift_py_files)
 
 simple_pre_lagpydir = $(pythondir)/bm_runtime/simple_pre_lag
-simple_pre_lagpy_PYTHON = $(simple_pre_lag_thrift_py_files)
+nodist_simple_pre_lagpy_PYTHON = $(simple_pre_lag_thrift_py_files)
 
 AUTOMAKE_OPTIONS = foreign no-dependencies subdir-objects
 
 lib_LTLIBRARIES = libruntimestubs.la
-libruntimestubs_la_SOURCES = \
-$(BUILT_SOURCES)
 
-pkginclude_HEADERS = \
+nodist_libruntimestubs_la_SOURCES = \
+$(thrift_cxx_files)
+
+nodist_pkginclude_HEADERS = \
 gen-cpp/bm/standard_constants.h \
 gen-cpp/bm/Standard.h \
 gen-cpp/bm/standard_types.h \

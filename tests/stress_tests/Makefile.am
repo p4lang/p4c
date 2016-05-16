@@ -36,4 +36,5 @@ testdata/exact_match_1.json \
 testdata/LPM_match_1.p4 \
 testdata/LPM_match_1.json \
 testdata/ternary_match_1.p4 \
-testdata/ternary_match_1.json
+testdata/ternary_match_1.json \
+testdata/udp_tcp_traffic.bin
