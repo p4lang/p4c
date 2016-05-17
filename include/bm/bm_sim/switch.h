@@ -118,6 +118,11 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! threads) and call this function when you are ready to process packets.
   virtual void start_and_return() = 0;
 
+  //! You can override this method in your target. It will be called whenever
+  //! reset_state() is invoked by the control plane. For example, the
+  //! simple_switch target uses this to reset PRE state.
+  virtual void reset_target_state() { }
+
   //! Returns the Thrift port used for the runtime RPC server.
   int get_runtime_port() { return thrift_port; }
 

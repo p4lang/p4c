@@ -226,6 +226,7 @@ SwitchWContexts::reset_state() {
     ErrorCode rc = cxt.reset_state();
     if (rc != ErrorCode::SUCCESS) return rc;
   }
+  reset_target_state();
   return ErrorCode::SUCCESS;
 }
 
