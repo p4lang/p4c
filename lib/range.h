@@ -22,6 +22,8 @@ template<class T> class RangeIter {
 
 template<class T>
 static inline RangeIter<T> Range(T a, T b) { return RangeIter<T>(a, b); }
+template<class T>
+static inline RangeIter<T> Range(std::pair<T, T> p) { return RangeIter<T>(p.first, p.second); }
 
 template<class T>
 std::ostream &operator<<(std::ostream &out, const RangeIter<T> &r) {
