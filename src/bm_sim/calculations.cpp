@@ -19,11 +19,13 @@
  */
 
 #include <bm/bm_sim/calculations.h>
+#include <bm/bm_sim/logger.h>
 
 #include <netinet/in.h>
 
 #include <string>
 #include <algorithm>
+#include <mutex>
 
 #include "xxhash.h"
 #include "crc_tables.h"
@@ -75,6 +77,93 @@ struct crc16 {
     }
     return reflect(remainder, 16) ^ final_xor_value;
   }
+};
+
+template <typename T>
+struct crc_custom_init { };
+
+template <>
+struct crc_custom_init<uint16_t> {
+  static uint16_t *crc_table;
+  static CustomCrcMgr<uint16_t>::crc_config_t config;
+};
+
+uint16_t *crc_custom_init<uint16_t>::crc_table = table_crc16;
+CustomCrcMgr<uint16_t>::crc_config_t crc_custom_init<uint16_t>::config =
+{0x8005, 0x0000, 0x0000, true, true};
+
+template <>
+struct crc_custom_init<uint32_t> {
+  static uint32_t *crc_table;
+  static CustomCrcMgr<uint32_t>::crc_config_t config;
+};
+
+uint32_t *crc_custom_init<uint32_t>::crc_table = table_crc32;
+CustomCrcMgr<uint32_t>::crc_config_t crc_custom_init<uint32_t>::config =
+{0x04c11db7, 0xffffffff, 0xffffffff, true, true};
+
+template <typename T>
+struct crc_custom {
+  static constexpr size_t width = sizeof(T) * 8;
+  static constexpr size_t kTEntries = 256u;
+  typedef typename CustomCrcMgr<T>::crc_config_t crc_config_t;
+
+  crc_custom() {
+    std::memcpy(crc_table, crc_custom_init<T>::crc_table, sizeof(crc_table));
+    config = crc_custom_init<T>::config;
+  }
+
+  T operator()(const char *buf, size_t len) const {
+    // clearly not optimized (critical section may be made smaller), but we will
+    // try to do better if needed
+    std::unique_lock<std::mutex> lock(m);
+
+    T remainder = config.initial_remainder;
+    for (unsigned int byte = 0; byte < len; byte++) {
+      unsigned char uchar = static_cast<unsigned char>(buf[byte]);
+      int data = (config.data_reflected) ?
+          reflect(uchar, 8) ^ (remainder >> (width - 8)) :
+          uchar ^ (remainder >> (width - 8));
+      remainder = crc_table[data] ^ (remainder << 8);
+    }
+    return (config.remainder_reflected) ?
+        reflect(remainder, width) ^ config.final_xor_value :
+        remainder ^ config.final_xor_value;
+  }
+
+  void update_config(const crc_config_t &new_config) {
+    T crc_table_new[kTEntries];
+    recompute_crc_table(new_config, crc_table_new);
+
+    std::unique_lock<std::mutex> lock(m);
+    config = new_config;
+    std::memcpy(crc_table, crc_table_new, sizeof(crc_table));
+  }
+
+ private:
+  void recompute_crc_table(const crc_config_t &new_config, T *new_table) {
+    // Compute the remainder of each possible dividend
+    for (size_t dividend = 0; dividend < kTEntries; dividend++) {
+      // Start with the dividend followed by zeros
+      T remainder = dividend << (width - 8);
+      // Perform modulo-2 division, a bit at a time
+      for (unsigned char bit = 8; bit > 0; bit--) {
+        // Try to divide the current data bit
+        if (remainder & (1 << (width - 1))) {
+          remainder = (remainder << 1) ^ new_config.polynomial;
+        } else {
+          remainder = (remainder << 1);
+        }
+      }
+
+      // Compute the remainder of each possible dividend
+      new_table[dividend] = remainder;
+    }
+  }
+
+  T crc_table[kTEntries];
+  crc_config_t config;
+  mutable std::mutex m{};
 };
 
 struct crc32 {
@@ -175,6 +264,36 @@ REGISTER_HASH(crcCCITT);
 REGISTER_HASH(cksum16);
 REGISTER_HASH(csum16);
 REGISTER_HASH(identity);
+
+typedef crc_custom<uint16_t> crc16_custom;
+REGISTER_HASH(crc16_custom);
+typedef crc_custom<uint32_t> crc32_custom;
+REGISTER_HASH(crc32_custom);
+
+template <typename T>
+CustomCrcErrorCode
+CustomCrcMgr<T>::update_config(NamedCalculation *calculation,
+                               const crc_config_t &config) {
+  Logger::get()->info("Updating config of custom crc {}: {}",
+                      calculation->get_name(), config);
+  auto raw_c_iface = calculation->get_raw_calculation();
+  return update_config(raw_c_iface, config);
+}
+
+template <typename T>
+CustomCrcErrorCode
+CustomCrcMgr<T>::update_config(RawCalculationIface<uint64_t> *c,
+                               const crc_config_t &config) {
+  typedef RawCalculation<uint64_t, crc_custom<T> > ExpectedCType;
+  auto raw_c = dynamic_cast<ExpectedCType *>(c);
+  if (!raw_c) return CustomCrcErrorCode::WRONG_TYPE_CALCULATION;
+  raw_c->get_hash_fn().update_config(config);
+  return CustomCrcErrorCode::SUCCESS;
+}
+
+// explicit instantiation, should prevent implicit instantiation
+template class CustomCrcMgr<uint16_t>;
+template class CustomCrcMgr<uint32_t>;
 
 CalculationsMap * CalculationsMap::get_instance() {
   static CalculationsMap map;

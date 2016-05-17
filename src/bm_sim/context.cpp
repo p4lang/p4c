@@ -453,7 +453,7 @@ Context::register_reset(const std::string &register_name) {
 }
 
 MatchErrorCode
-Context::dump_table(const std::string& table_name,
+Context::dump_table(const std::string &table_name,
                     std::ostream *stream) const {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
   MatchTableAbstract *abstract_table =
@@ -462,6 +462,24 @@ Context::dump_table(const std::string& table_name,
   abstract_table->dump(stream);
   return MatchErrorCode::SUCCESS;
 }
+
+template <typename T>
+CustomCrcErrorCode
+Context::set_crc_custom_parameters(
+    const std::string &calc_name,
+    const typename CustomCrcMgr<T>::crc_config_t &crc_config) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto *named_calculation = p4objects_rt->get_named_calculation(calc_name);
+  if (!named_calculation) return CustomCrcErrorCode::INVALID_CALCULATION_NAME;
+  return CustomCrcMgr<T>::update_config(named_calculation, crc_config);
+}
+
+template CustomCrcErrorCode Context::set_crc_custom_parameters<uint16_t>(
+    const std::string &calc_name,
+    const CustomCrcMgr<uint16_t>::crc_config_t &crc_config);
+template CustomCrcErrorCode Context::set_crc_custom_parameters<uint32_t>(
+    const std::string &calc_name,
+    const CustomCrcMgr<uint32_t>::crc_config_t &crc_config);
 
 // ---------- End runtime interfaces ----------
 

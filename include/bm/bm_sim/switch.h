@@ -539,6 +539,17 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   std::string get_config() const override;
   std::string get_config_md5() const override;
 
+  // conscious choice not to use templates here (or could not use virtual)
+  CustomCrcErrorCode
+  set_crc16_custom_parameters(
+      size_t cxt_id, const std::string &calc_name,
+      const CustomCrcMgr<uint16_t>::crc_config_t &crc16_config) override;
+
+  CustomCrcErrorCode
+  set_crc32_custom_parameters(
+      size_t cxt_id, const std::string &calc_name,
+      const CustomCrcMgr<uint32_t>::crc_config_t &crc32_config) override;
+
   // ---------- End RuntimeInterface ----------
 
  protected:

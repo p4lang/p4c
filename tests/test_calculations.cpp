@@ -27,6 +27,8 @@
 
 using namespace bm;
 
+using testing::Types;
+
 // Google Test fixture for calculations tests
 class CalculationTest : public ::testing::Test {
  protected:
@@ -299,4 +301,86 @@ TEST(HashTest, Crc32) {
       reinterpret_cast<const char *>(input_buffer), sizeof(input_buffer));
 
   ASSERT_EQ(expected, output);
+}
+
+TEST(HashTest, Crc16Custom) {
+  typedef CustomCrcMgr<uint16_t>::crc_config_t crc16_config_t;
+
+  auto ptr = CalculationsMap::get_instance()->get_copy("crc16_custom");
+  ASSERT_NE(nullptr, ptr);
+
+  uint16_t output;
+
+  const unsigned char input_buffer[] = {0x0b, 0xb8, 0x1f, 0x90};
+  const char *buffer_ = reinterpret_cast<const char *>(input_buffer);
+
+  // by default, standard crc16
+  const uint16_t expected_crc16 = 0x5d8a;
+  output = ptr->output(buffer_, sizeof(input_buffer));
+  ASSERT_EQ(expected_crc16, output);
+
+  // set again to standard crc16, same result
+  ASSERT_EQ(CustomCrcErrorCode::SUCCESS,
+            CustomCrcMgr<uint16_t>::update_config(
+                ptr.get(), {0x8005, 0x0000, 0x0000, true, true}));
+  output = ptr->output(buffer_, sizeof(input_buffer));
+  ASSERT_EQ(expected_crc16, output);
+
+  // change to crcCCITT
+  const uint16_t expected_crcCCITT = 0x5d75;
+  ASSERT_EQ(CustomCrcErrorCode::SUCCESS,
+            CustomCrcMgr<uint16_t>::update_config(
+                ptr.get(), {0x1021, 0xffff, 0x0000, false, false}));
+  output = ptr->output(buffer_, sizeof(input_buffer));
+  ASSERT_EQ(expected_crcCCITT, output);
+
+  // change to crc16 xmodem
+  const uint16_t expected_crcXMODEM = 0xd9b5;
+  ASSERT_EQ(CustomCrcErrorCode::SUCCESS,
+            CustomCrcMgr<uint16_t>::update_config(
+                ptr.get(), {0x1021, 0x0000, 0x0000, false, false}));
+  output = ptr->output(buffer_, sizeof(input_buffer));
+  ASSERT_EQ(expected_crcXMODEM, output);
+
+  // trying to update a crc16 checksum as if it was a crc32 one fails
+  ASSERT_EQ(CustomCrcErrorCode::WRONG_TYPE_CALCULATION,
+            CustomCrcMgr<uint32_t>::update_config(
+                ptr.get(), {0, 0, 0, true, true}));
+}
+
+TEST(HashTest, Crc32Custom) {
+  typedef CustomCrcMgr<uint32_t>::crc_config_t crc32_config_t;
+
+  auto ptr = CalculationsMap::get_instance()->get_copy("crc32_custom");
+  ASSERT_NE(nullptr, ptr);
+
+  uint32_t output;
+
+  const unsigned char input_buffer[] = {0x0b, 0xb8, 0x1f, 0x90};
+  const char *buffer_ = reinterpret_cast<const char *>(input_buffer);
+
+  // by default, standard crc32
+  const uint32_t expected_crc32 = 0x005d6a6f;
+  output = ptr->output(buffer_, sizeof(input_buffer));
+  ASSERT_EQ(expected_crc32, output);
+
+  // set again to standard crc32, same result
+  ASSERT_EQ(CustomCrcErrorCode::SUCCESS,
+            CustomCrcMgr<uint32_t>::update_config(
+                ptr.get(), {0x4c11db7, 0xffffffff, 0xffffffff, true, true}));
+  output = ptr->output(buffer_, sizeof(input_buffer));
+  ASSERT_EQ(expected_crc32, output);
+
+  // change to crc32 mpeg2
+  const uint32_t expected_crcMPEG2 = 0x125e1592;
+  ASSERT_EQ(CustomCrcErrorCode::SUCCESS,
+            CustomCrcMgr<uint32_t>::update_config(
+                ptr.get(), {0x4c11db7, 0xffffffff, 0x00000000, false, false}));
+  output = ptr->output(buffer_, sizeof(input_buffer));
+  ASSERT_EQ(expected_crcMPEG2, output);
+
+  // trying to update a crc32 checksum as if it was a crc16 one fails
+  ASSERT_EQ(CustomCrcErrorCode::WRONG_TYPE_CALCULATION,
+            CustomCrcMgr<uint16_t>::update_config(
+                ptr.get(), {0, 0, 0, true, true}));
 }
