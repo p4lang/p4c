@@ -160,6 +160,12 @@ SimpleSwitch::start_and_return() {
   t3.detach();
 }
 
+void
+SimpleSwitch::reset_target_state() {
+  bm::Logger::get()->debug("Resetting simple_switch target-specific state");
+  get_component<McSimplePreLAG>()->reset_state();
+}
+
 int
 SimpleSwitch::set_egress_queue_depth(int port, const size_t depth_pkts) {
   egress_buffers.set_capacity(port, depth_pkts);

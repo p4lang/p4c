@@ -92,6 +92,7 @@ class McSimplePre {
   McReturnCode mc_node_destroy(const l1_hdl_t);
   McReturnCode mc_node_update(const l1_hdl_t l1_hdl,
                               const PortMap &port_map);
+  void reset_state();
 
   //! This is the only "dataplane" method for this class. It takes as input a
   //! multicast group id (set during pipeline processing) and returns a vector
@@ -131,7 +132,6 @@ class McSimplePre {
   static constexpr int MGID_TABLE_SIZE = 4096;
   static constexpr int L1_MAX_ENTRIES = 4096;
   static constexpr int L2_MAX_ENTRIES = 8192;
-  bool pre_debug{0};
 
   struct MgidEntry {
     mgrp_t mgid{};
@@ -169,14 +169,15 @@ class McSimplePre {
             lag_map(lag_map) {}
   };
 
+  // internal version, which does not acquire the lock
+  void reset_state_();
+
   std::unordered_map<mgrp_hdl_t, MgidEntry> mgid_entries{};
   std::unordered_map<l1_hdl_t, L1Entry> l1_entries{};
   std::unordered_map<l2_hdl_t, L2Entry> l2_entries{};
   HandleMgr l1_handles{};
   HandleMgr l2_handles{};
-  mutable boost::shared_mutex mgid_lock{};
-  mutable boost::shared_mutex l1_lock{};
-  mutable boost::shared_mutex l2_lock{};
+  mutable boost::shared_mutex mutex{};
 };
 
 }  // namespace bm

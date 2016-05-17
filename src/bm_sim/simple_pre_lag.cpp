@@ -20,6 +20,7 @@
  */
 
 #include <bm/bm_sim/simple_pre_lag.h>
+#include <bm/bm_sim/logger.h>
 
 #include <vector>
 
@@ -32,25 +33,24 @@ McSimplePreLAG::mc_node_create(const rid_t rid,
                                const PortMap &port_map,
                                const LagMap &lag_map,
                                l1_hdl_t *l1_hdl) {
-  boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
-  boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
+  boost::unique_lock<boost::shared_mutex> lock(mutex);
   l2_hdl_t l2_hdl;
   size_t num_l1_entries = l1_entries.size();
   size_t num_l2_entries = l2_entries.size();
   if (num_l1_entries >= L1_MAX_ENTRIES) {
-    std::cout << "node create failed. l1 table full!\n";
+    Logger::get()->error("node create failed, l1 table full");
     return TABLE_FULL;
   }
   if (num_l2_entries >= L2_MAX_ENTRIES) {
-    std::cout << "node create failed. l2 table full!\n";
+    Logger::get()->error("node create failed, l2 table full");
     return TABLE_FULL;
   }
   if (l1_handles.get_handle(l1_hdl)) {
-    std::cout << "node create failed. invalid l1 handle!\n";
+    Logger::get()->error("node create failed, failed to obtain l1 handle");
     return ERROR;
   }
   if (l2_handles.get_handle(&l2_hdl)) {
-    std::cout << "node create failed. invalid l2 handle!\n";
+    Logger::get()->error("node create failed, failed to obtain l2 handle");
     return ERROR;
   }
   l1_entries.insert(std::make_pair(*l1_hdl, L1Entry(rid)));
@@ -58,9 +58,7 @@ McSimplePreLAG::mc_node_create(const rid_t rid,
   l1_entry.l2_hdl = l2_hdl;
   l2_entries.insert(
     std::make_pair(l2_hdl, L2Entry(*l1_hdl, port_map, lag_map)));
-  if (pre_debug) {
-    std::cout << "node created for rid : " << rid << "\n";
-  }
+  Logger::get()->debug("node created for rid {}", rid);
   return SUCCESS;
 }
 
@@ -68,10 +66,9 @@ McSimplePre::McReturnCode
 McSimplePreLAG::mc_node_update(const l1_hdl_t l1_hdl,
                                const PortMap &port_map,
                                const LagMap &lag_map) {
-  boost::unique_lock<boost::shared_mutex> lock1(l1_lock);
-  boost::unique_lock<boost::shared_mutex> lock2(l2_lock);
+  boost::unique_lock<boost::shared_mutex> lock(mutex);
   if (!l1_handles.valid_handle(l1_hdl)) {
-    std::cout << "node update failed. invalid l1 handle!\n";
+    Logger::get()->error("node update failed, invalid l1 handle");
     return INVALID_L1_HANDLE;
   }
   L1Entry &l1_entry = l1_entries[l1_hdl];
@@ -79,19 +76,17 @@ McSimplePreLAG::mc_node_update(const l1_hdl_t l1_hdl,
   L2Entry &l2_entry = l2_entries[l2_hdl];
   l2_entry.port_map = port_map;
   l2_entry.lag_map = lag_map;
-  if (pre_debug) {
-    std::cout << "node updated for rid : " << l1_entry.rid << "\n";
-  }
+  Logger::get()->debug("node updated for rid {}", l1_entry.rid);
   return SUCCESS;
 }
 
 McSimplePre::McReturnCode
 McSimplePreLAG::mc_set_lag_membership(const lag_id_t lag_index,
                                       const PortMap &port_map) {
-  boost::unique_lock<boost::shared_mutex> lock(lag_lock);
+  boost::unique_lock<boost::shared_mutex> lock(mutex);
   uint16_t member_count = 0;
   if (lag_index > LAG_MAX_ENTRIES) {
-    std::cout << "lag membership set failed. invalid lag index!\n";
+    Logger::get()->error("lag membership set failed, invalid lag index");
     return ERROR;
   }
   for (unsigned int j = 0; j < port_map.size(); j++) {
@@ -102,10 +97,16 @@ McSimplePreLAG::mc_set_lag_membership(const lag_id_t lag_index,
   LagEntry &lag_entry = lag_entries[lag_index];
   lag_entry.member_count = member_count;
   lag_entry.port_map = port_map;
-  if (pre_debug) {
-    std::cout << "lag membership set for lag index : " << lag_index << "\n";
-  }
+  Logger::get()->debug("lag membership set for lag index {}", lag_index);
   return SUCCESS;
+}
+
+void
+McSimplePreLAG::reset_state() {
+  Logger::get()->debug("resetting PRE state");
+  boost::unique_lock<boost::shared_mutex> lock(mutex);
+  McSimplePre::reset_state_();
+  lag_entries.clear();
 }
 
 std::vector<McSimplePre::McOut>
@@ -118,15 +119,19 @@ McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const {
   int port_count1 = 0, port_count2 = 0;
   McSimplePre::McOut egress_info;
   LagEntry lag_entry;
-  boost::shared_lock<boost::shared_mutex> lock1(mgid_lock);
-  boost::shared_lock<boost::shared_mutex> lock2(l1_lock);
-  boost::shared_lock<boost::shared_mutex> lock3(l2_lock);
-  const MgidEntry mgid_entry = mgid_entries.at(ingress_info.mgid);
-  for (l1_hdl_t l1_hdl : mgid_entry.l1_list) {
-    const L1Entry l1_entry = l1_entries.at(l1_hdl);
+  boost::shared_lock<boost::shared_mutex> lock(mutex);
+  auto mgid_it = mgid_entries.find(ingress_info.mgid);
+  if (mgid_it == mgid_entries.end()) {
+    Logger::get()->warn("Replication requested for mgid {}, which is not known "
+                        "to the PRE", ingress_info.mgid);
+    return {};
+  }
+  const MgidEntry &mgid_entry = mgid_it->second;
+  for (const l1_hdl_t l1_hdl : mgid_entry.l1_list) {
+    const L1Entry &l1_entry = l1_entries.at(l1_hdl);
     egress_info.rid = l1_entry.rid;
     // Port replication
-    const L2Entry l2_entry = l2_entries.at(l1_entry.l2_hdl);
+    const L2Entry &l2_entry = l2_entries.at(l1_entry.l2_hdl);
     for (port_id = 0; port_id < l2_entry.port_map.size(); port_id++) {
       if (l2_entry.port_map[port_id]) {
         egress_info.egress_port = port_id;
@@ -153,8 +158,7 @@ McSimplePreLAG::replicate(const McSimplePre::McIn ingress_info) const {
       }
     }
   }
-  // std::cout << "number of packets replicated : "
-  //        << egress_info_list.size() << "\n";
+  BMLOG_DEBUG("number of packets replicated : {}", egress_info_list.size());
   return egress_info_list;
 }
 

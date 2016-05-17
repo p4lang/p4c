@@ -48,6 +48,8 @@ class McSimplePreLAG : public McSimplePre {
   McReturnCode mc_set_lag_membership(const lag_id_t lag_index,
                                      const PortMap &port_map);
 
+  void reset_state();
+
   //! TODO(unknown)
   std::vector<McOut> replicate(const McIn) const;
 
@@ -64,7 +66,6 @@ class McSimplePreLAG : public McSimplePre {
   };
 
   std::unordered_map<lag_id_t, LagEntry> lag_entries{};
-  mutable boost::shared_mutex lag_lock{};
 };
 
 }  // namespace bm
