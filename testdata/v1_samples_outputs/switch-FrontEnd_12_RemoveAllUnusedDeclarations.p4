@@ -2227,7 +2227,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.vxlan.vni = meta.tunnel_metadata.vnid;
         hdr.vxlan.reserved2 = 8w0;
     }
-    @name("f_insert_ipv4_header") action f_insert_ipv4_header(in bit<8> proto) {
+    @name("f_insert_ipv4_header") action f_insert_ipv4_header(bit<8> proto) {
         hdr.ipv4.setValid();
         hdr.ipv4.protocol = proto;
         hdr.ipv4.ttl = 8w64;
@@ -2241,7 +2241,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.ipv4.totalLen = meta.egress_metadata.payload_length + 16w50;
         hdr.ethernet.etherType = 16w0x800;
     }
-    @name("f_insert_ipv6_header") action f_insert_ipv6_header(in bit<8> proto) {
+    @name("f_insert_ipv6_header") action f_insert_ipv6_header(bit<8> proto) {
         hdr.ipv6.setValid();
         hdr.ipv6.version = 4w0x6;
         hdr.ipv6.nextHdr = proto;
@@ -2769,7 +2769,7 @@ control process_egress_filter(inout headers hdr, inout metadata meta, inout stan
 control process_egress_acl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("egress_mirror") action egress_mirror(in bit<16> session_id) {
+    @name("egress_mirror") action egress_mirror(bit<16> session_id) {
         meta.i2e_metadata.mirror_session_id = session_id;
         clone3(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
     }
@@ -2777,7 +2777,7 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
         egress_mirror(session_id);
         mark_to_drop();
     }
-    @name("egress_copy_to_cpu") action egress_copy_to_cpu(in bit<16> reason_code) {
+    @name("egress_copy_to_cpu") action egress_copy_to_cpu(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
         clone3(CloneType.E2E, 32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
     }
@@ -4760,7 +4760,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name("nop") action nop() {
     }
-    @name("copy_to_cpu") action copy_to_cpu(in bit<16> reason_code) {
+    @name("copy_to_cpu") action copy_to_cpu(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
         clone3(CloneType.I2E, 32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
     }

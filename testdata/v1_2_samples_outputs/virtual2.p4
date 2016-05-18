@@ -5,7 +5,7 @@ extern Virtual {
 
 extern State {
     State(int<16> size);
-    bit<16> get(bit<16> index);
+    bit<16> get(in bit<16> index);
 }
 
 control c(inout bit<16> p) {

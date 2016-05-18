@@ -16,9 +16,20 @@ void TypeMap::setLeftValue(const IR::Expression* expression) {
     LOG1("Left value " << dbp(expression));
 }
 
+void TypeMap::setCompileTimeConstant(const IR::Expression* expression) {
+    constants.insert(expression);
+    LOG1("Constant value " << dbp(expression));
+}
+
+bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
+    bool result = constants.find(expression) != constants.end();
+    LOG1(dbp(expression) << (result ? " constant" : " not constant"));
+    return result;
+}
+
 void TypeMap::clear() {
     LOG1("Clearing typeMap");
-    typeMap.clear(); leftValues.clear(); program = nullptr;
+    typeMap.clear(); leftValues.clear(); constants.clear(); program = nullptr;
 }
 
 void TypeMap::checkPrecondition(const IR::Node* element, const IR::Type* type) const {

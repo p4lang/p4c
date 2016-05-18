@@ -140,19 +140,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
+    action NoAction_2() {
     }
-    @name("nop") action nop_0() {
+    @name("nop") action nop() {
     }
     @name("e_t1") table e_t1_0() {
         actions = {
-            nop_0;
-            NoAction_0;
+            nop;
+            NoAction_2;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         e_t1_0.apply();
@@ -160,23 +160,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    action NoAction_3() {
     }
-    @name("nop") action nop_1() {
+    @name("nop") action nop_2() {
     }
-    @name("set_egress_port") action set_egress_port_0(bit<8> egress_port) {
+    @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
     @name("i_t1") table i_t1_0() {
         actions = {
-            nop_1;
-            set_egress_port_0;
-            NoAction_1;
+            nop_2;
+            set_egress_port;
+            NoAction_3;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     apply {
         i_t1_0.apply();

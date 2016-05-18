@@ -130,41 +130,41 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
-    }
     action NoAction_1() {
     }
-    @name("setb1") action setb1_0(bit<8> val) {
-        hdr.data.b1 = val;
+    action NoAction_2() {
     }
     @name("setb1") action setb1(bit<8> val) {
         hdr.data.b1 = val;
     }
-    @name("noop") action noop_0() {
+    @name("setb1") action setb1_1(bit<8> val) {
+        hdr.data.b1 = val;
     }
     @name("noop") action noop() {
     }
-    @name("test1") table test1_0() {
-        actions = {
-            setb1_0;
-            noop_0;
-            NoAction_0;
-        }
-        key = {
-            hdr.data.f1: exact;
-        }
-        default_action = NoAction_0();
+    @name("noop") action noop_1() {
     }
-    @name("test2") table test2_0() {
+    @name("test1") table test1_0() {
         actions = {
             setb1;
             noop;
             NoAction_1;
         }
         key = {
+            hdr.data.f1: exact;
+        }
+        default_action = NoAction_1();
+    }
+    @name("test2") table test2_0() {
+        actions = {
+            setb1_1;
+            noop_1;
+            NoAction_2;
+        }
+        key = {
             hdr.data.f2: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         if (hdr.data.b2 > 8w50) 

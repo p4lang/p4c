@@ -131,7 +131,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("setbyte") action setbyte(inout bit<8> dest, in bit<8> val) {
+    @name("setbyte") action setbyte(inout bit<8> dest, bit<8> val) {
         dest = val;
     }
     @name("setb1") action setb1(bit<8> val, bit<9> port) {

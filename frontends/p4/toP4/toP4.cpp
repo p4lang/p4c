@@ -1137,9 +1137,7 @@ bool ToP4::preorder(const IR::P4Table* c) {
 }
 
 bool ToP4::preorder(const IR::Path* p) {
-    if (p->prefix != nullptr)
-        builder.append(p->prefix->toString());
-    builder.append(p->name);
+    builder.append(p->toString());
     return false;
 }
 }  // namespace P4

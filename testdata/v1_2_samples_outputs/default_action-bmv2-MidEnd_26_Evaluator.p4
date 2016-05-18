@@ -145,14 +145,14 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     hdr h_0;
-    @name("c.add") action c_add(bit<32> data) {
+    @name("c.add") action c_add_0(bit<32> data) {
         h_0.b = h_0.a + data;
     }
     @name("c.t") table c_t() {
         actions = {
-            c_add;
+            c_add_0;
         }
-        const default_action = c_add(10);
+        const default_action = c_add_0(10);
     }
     action act() {
         h_0 = h.h;

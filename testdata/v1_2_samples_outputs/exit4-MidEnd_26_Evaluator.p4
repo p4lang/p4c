@@ -3,14 +3,14 @@ control ctrl() {
     bit<32> a_0;
     bit<32> b_0;
     bit<32> c_0;
-    @name("e") action e_0() {
+    @name("e") action e() {
         hasExited = true;
     }
     @name("t") table t_0() {
         actions = {
-            e_0;
+            e;
         }
-        default_action = e_0();
+        default_action = e();
     }
     action act() {
         b_0 = 32w2;

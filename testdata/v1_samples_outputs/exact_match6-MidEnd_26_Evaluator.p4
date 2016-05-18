@@ -136,23 +136,23 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
+    action NoAction_1() {
     }
-    @name("addf2") action addf2_0() {
+    @name("addf2") action addf2() {
         meta.meta.sum = hdr.data.f2 + 32w100;
     }
-    @name("noop") action noop_0() {
+    @name("noop") action noop() {
     }
     @name("test1") table test1_0() {
         actions = {
-            addf2_0;
-            noop_0;
-            NoAction_0;
+            addf2;
+            noop;
+            NoAction_1;
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         test1_0.apply();

@@ -137,7 +137,7 @@ control Pipe(
         key = { headers.ip.ttl : exact; }
         actions =
         {
-            Send_to_cpu;
+            Send_to_cpu; NoAction;
         }
 
         const default_action = NoAction;

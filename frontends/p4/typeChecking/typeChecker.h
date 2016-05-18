@@ -13,6 +13,8 @@
 
 namespace P4 {
 
+class ConstantTypeSubstitution;
+
 // Type checking algorithm.
 // It is a transform because it may convert implicit casts into explicit casts.
 // But in general it operates like an Inspector; in fact, if it is instantiated
@@ -47,6 +49,10 @@ class TypeInference : public Transform {
     { typeMap->setLeftValue(expression); }
     bool isLeftValue(const IR::Expression* expression) const
     { return typeMap->isLeftValue(expression); }
+    void setCompileTimeConstant(const IR::Expression* expression)
+    { typeMap->setCompileTimeConstant(expression); }
+    bool isCompileTimeConstant(const IR::Expression* expression) const
+    { return typeMap->isCompileTimeConstant(expression); }
 
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.
     // (visitDagOnce cannot take care of this).
@@ -86,8 +92,11 @@ class TypeInference : public Transform {
     const IR::Type* containerInstantiation(const IR::Node* node,
                                            const IR::Vector<IR::Expression>* args,
                                            const IR::IContainer* container);
-    const IR::Type_Action* actionCallType(const IR::Type_Action* action,
-                                          size_t removedArguments) const;
+    const IR::Type_Action* actionCallType(
+        bool inActionList,   // if true this "call" is in the action list of a table
+        const IR::Node* errorPosition,
+        const IR::Type_Action* action,
+        const IR::Vector<IR::Expression>* boundArguments) const;
     const IR::Vector<IR::Expression>*
             checkExternConstructor(const IR::Node* errorPosition,
                                    const IR::Type_Extern* ext,

@@ -169,10 +169,11 @@ class PathPrefix {
     void setAbsolute() { absolute = true; }
 #end
     toString{
+        // Prints path prefix without the trailing dot
         std::stringstream result;
         bool first = true;
         if (absolute)
-            result << ".";
+            first = false;
         for (auto a : components) {
             if (!first)
                 result << ".";

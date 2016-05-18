@@ -17,7 +17,7 @@ const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statemen
     auto actinst = new IR::ActionListElement(statement->srcInfo,
                                              IR::Annotations::empty,
                                              actionpath, nullptr);
-    auto actions = new IR::Vector<IR::ActionListElement>();
+    auto actions = new IR::IndexedVector<IR::ActionListElement>();
     actions->push_back(actinst);
     // Action list property
     auto actlist = new IR::ActionList(Util::SourceInfo(), actions);

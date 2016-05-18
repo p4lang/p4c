@@ -26,7 +26,8 @@ class GlobalActionReplacements {
     }
     void addReplacement(const IR::P4Action* action, const IR::P4Control* control,
                         const IR::P4Action* replacement) {
-        LOG1("Cloning global " << action << " into " << replacement << " for " << control);
+        LOG1("Cloning global " << dbp(action) << " into " <<
+             dbp(replacement) << " for " << dbp(control));
         if (repl.find(control) == repl.end())
             repl[control] = new ordered_map<const IR::P4Action*, const IR::P4Action*>();
         (*repl[control])[action] = replacement;
@@ -62,33 +63,35 @@ class LocalizeActions : public Transform {
 
 class ActionReplacement {
  public:
-    // Where is this action used
-    // Node is either a P4Table or MethodCallExpression
-    std::map<const IR::P4Action*, std::set<const IR::Node*>> users;
+    // For each action and each user the replacement action to use.
+    // Node is either a P4Table or MethodCallExpression.
+    std::map<const IR::P4Action*, ordered_map<const IR::Node*, const IR::P4Action*>*> toInsert;
     std::map<const IR::PathExpression*, const IR::P4Action*> repl;
     // For each action all replacements to insert
-    std::map<const IR::P4Action*, ordered_set<const IR::P4Action*>*> toInsert;
 
-    // Return true if this is a new user and not the first new user
-    bool addActionUser(const IR::P4Action* action, const IR::Node* user) {
-        bool isFirst = users.find(action) == users.end();
-        if (users[action].find(user) == users[action].end()) {
-            // new user
-            users[action].emplace(user);
-            return !isFirst;
-        }
-        // known user
-        return false;
+    const IR::P4Action* getActionUser(const IR::P4Action* action, const IR::Node* user) {
+        if (toInsert.find(action) == toInsert.end())
+            return nullptr;
+        auto map = toInsert[action];
+        CHECK_NULL(map);
+        if (map->find(user) == map->end())
+            return nullptr;
+        return (*map)[user];
     }
-    // For 'user' in control use the replacement action instead of the original action.
-    void addReplacement(const IR::PathExpression* user,
-                        const IR::P4Action* original,
-                        const IR::P4Action* replacement) {
-        LOG1("Adding replacement " << replacement << " used by " << user << " for " << original);
-        repl[user] = replacement;
-        if (toInsert.find(original) == toInsert.end())
-            toInsert[original] = new ordered_set<const IR::P4Action*>();
-        toInsert[original]->emplace(replacement);
+    void createReplacement(const IR::P4Action* original, const IR::Node* user,
+                           const IR::P4Action* replacement) {
+        auto map = toInsert[original];
+        if (map == nullptr) {
+            map = new ordered_map<const IR::Node*, const IR::P4Action*>();
+            toInsert[original] = map;
+        }
+        (*map)[user] = replacement;
+    }
+    // In the specified path replace the original with the replacement
+    void setRefReplacement(const IR::PathExpression* path,
+                           const IR::P4Action* replacement) {
+        LOG1("Adding replacement " << dbp(replacement) << " used by " << dbp(path));
+        repl[path] = replacement;
     }
 };
 

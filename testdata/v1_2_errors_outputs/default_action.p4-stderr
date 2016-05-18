@@ -1,0 +1,7 @@
+../testdata/v1_2_errors/default_action.p4(6): error: b not present in action list
+        default_action = b;
+                         ^
+../testdata/v1_2_errors/default_action.p4(6): error: Could not find type of b
+        default_action = b;
+                         ^
+error: 2 errors encountered, aborting compilation

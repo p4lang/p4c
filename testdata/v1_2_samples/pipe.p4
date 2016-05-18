@@ -72,7 +72,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size)
         key = { pArg1.field1 : ternary; }
         actions =
         {
-            Drop;
+            Drop; NoAction;
         }
         const default_action = NoAction;
     }

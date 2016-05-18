@@ -1,0 +1,7 @@
+../testdata/v1_2_errors/action-bind3.p4(7): error: a: Passing 1 arguments when 0 expected
+        default_action = a(0);
+                         ^^^^
+../testdata/v1_2_errors/action-bind3.p4(7): error: Could not find type of a
+        default_action = a(0);
+                         ^^^^
+error: 2 errors encountered, aborting compilation

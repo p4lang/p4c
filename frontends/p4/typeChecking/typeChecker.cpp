@@ -30,6 +30,8 @@ class ConstantTypeSubstitution : public Transform {
     // Expressions may be created anew
     const IR::Node* postorder(IR::Expression* expression) override {
         auto type = typeMap->getType(getOriginal(), true);
+        if (typeMap->isCompileTimeConstant(getOriginal<IR::Expression>()))
+            typeMap->setCompileTimeConstant(expression);
         typeMap->setType(expression, type);
         return expression;
     }
@@ -43,6 +45,7 @@ class ConstantTypeSubstitution : public Transform {
             LOG1("Inferred type " << repl << " for " << cst);
             cst = new IR::Constant(cst->srcInfo, repl, cst->value, cst->base);
             typeMap->setType(cst, repl);
+            typeMap->setCompileTimeConstant(cst);
         }
         return cst;
     }
@@ -64,6 +67,7 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
     LOG2("Reference map for type checker:" << std::endl << refMap);
     LOG1("TypeInference for " << dbp(node));
     initialNode = node;
+    refMap->validateMap(node);
     if (clearMap) {
         // Clear map only if program has not changed from last time
         // oterwise we can reuse it
@@ -409,24 +413,32 @@ const IR::Node* TypeInference::postorder(IR::P4Parser* cont) {
     return cont;
 }
 
-const IR::Node* TypeInference::postorder(IR::P4Table* cont) {
+const IR::Node* TypeInference::postorder(IR::P4Table* table) {
     if (done())
-        return cont;
-    auto type = new IR::Type_Table(Util::SourceInfo(), cont);
+        return table;
+    auto type = new IR::Type_Table(Util::SourceInfo(), table);
     setType(getOriginal(), type);
-    setType(cont, type);
-    return cont;
+    setType(table, type);
+    return table;
 }
 
-const IR::Node* TypeInference::postorder(IR::P4Action* cont) {
+const IR::Node* TypeInference::postorder(IR::P4Action* action) {
     if (done())
-        return cont;
-    auto pl = canonicalize(cont->parameters);
+        return action;
+    auto pl = canonicalize(action->parameters);
     auto type = new IR::Type_Action(Util::SourceInfo(), new IR::TypeParameters(),
                                     IR::Type_Void::get(), pl);
+
+    bool foundDirectionless = false;
+    for (auto p : *action->parameters->parameters) {
+        if (p->direction == IR::Direction::None)
+            foundDirectionless = true;
+        else if (foundDirectionless)
+            ::error("%1%: direction-less action parameters have to be at the end", p);
+    }
     setType(getOriginal(), type);
-    setType(cont, type);
-    return cont;
+    setType(action, type);
+    return action;
 }
 
 const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
@@ -484,7 +496,7 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
 
 const IR::Expression*
 TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destType,
-                        const IR::Expression* sourceExpression) {
+                          const IR::Expression* sourceExpression) {
     if (destType->is<IR::Type_Unknown>())
         BUG("Unknown destination type");
     const IR::Type* initType = getType(sourceExpression);
@@ -496,8 +508,11 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
 
     if (canCastBetween(destType, initType)) {
         LOG1("Inserting cast in " << sourceExpression);
+        bool isConst = isCompileTimeConstant(sourceExpression);
         sourceExpression = new IR::Cast(sourceExpression->srcInfo, sourceExpression, destType);
         setType(sourceExpression, destType);
+        if (isConst)
+            setCompileTimeConstant(sourceExpression);
         return sourceExpression;
     }
 
@@ -526,6 +541,8 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Constant* decl) {
         return decl;
     }
 
+    if (!isCompileTimeConstant(decl->initializer))
+        ::error("%1%: Cannot evaluate initializer to a compile-time constant", decl->initializer);
     auto orig = getOriginal<IR::Declaration_Constant>();
     auto newInit = assignment(decl, type, decl->initializer);
     if (newInit != decl->initializer)
@@ -536,6 +553,7 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Constant* decl) {
     return decl;
 }
 
+// Returns new arguments for constructor, which may have inserted casts
 const IR::Vector<IR::Expression> *
 TypeInference::checkExternConstructor(const IR::Node* errorPosition,
                                       const IR::Type_Extern* ext,
@@ -562,6 +580,8 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
         auto arg = arguments->at(i++);
+        if (!isCompileTimeConstant(arg))
+            ::error("%1%: cannot evaluate to a compile-time constant", arg);
         auto argType = getType(arg);
         auto paramType = getType(pi);
         if (argType == nullptr || paramType == nullptr)
@@ -705,10 +725,12 @@ TypeInference::containerInstantiation(
     // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
     auto args = new IR::Vector<IR::ArgumentInfo>();
     for (auto arg : *constructorArguments) {
+        if (!isCompileTimeConstant(arg))
+            ::error("%1%: cannot evaluate to a compile-time constant", arg);
         auto argType = getType(arg);
         if (argType == nullptr)
             return nullptr;
-        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, argType);
+        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType);
         args->push_back(argInfo);
     }
     auto rettype = new IR::Type_Var(Util::SourceInfo(), IR::ID(refMap->newName("R")));
@@ -1043,6 +1065,8 @@ const IR::Node* TypeInference::postorder(IR::Constant* expression) {
         return expression;
     setType(getOriginal(), type);
     setType(expression, type);
+    setCompileTimeConstant(getOriginal<IR::Expression>());
+    setCompileTimeConstant(expression);
     return expression;
 }
 
@@ -1051,6 +1075,8 @@ const IR::Node* TypeInference::postorder(IR::BoolLiteral* expression) {
         return expression;
     setType(getOriginal(), IR::Type_Boolean::get());
     setType(expression, IR::Type_Boolean::get());
+    setCompileTimeConstant(getOriginal<IR::Expression>());
+    setCompileTimeConstant(expression);
     return expression;
 }
 
@@ -1101,6 +1127,10 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     }
     setType(getOriginal(), IR::Type_Boolean::get());
     setType(expression, IR::Type_Boolean::get());
+    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
@@ -1132,14 +1162,21 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     resultType = canonicalize(resultType);
     setType(getOriginal(), resultType);
     setType(expression, resultType);
+    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
 const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
     if (done())
         return expression;
+    bool constant = true;
     auto components = new IR::Vector<IR::Type>();
     for (auto c : *expression->components) {
+        if (!isCompileTimeConstant(c))
+            constant = false;
         auto type = getType(c);
         if (type == nullptr)
             return expression;
@@ -1151,6 +1188,10 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
     CHECK_NULL(type);
     setType(getOriginal(), type);
     setType(expression, type);
+    if (constant) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
@@ -1221,6 +1262,10 @@ const IR::Node* TypeInference::binaryBool(const IR::Operation_Binary* expression
     }
     setType(getOriginal(), IR::Type_Boolean::get());
     setType(expression, IR::Type_Boolean::get());
+    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
@@ -1275,6 +1320,10 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         setType(expression, resultType);
     }
     setType(getOriginal(), resultType);
+    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
@@ -1313,6 +1362,10 @@ const IR::Node* TypeInference::unsBinaryArith(const IR::Operation_Binary* expres
         }
     }
 
+    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return binaryArith(expression);
 }
 
@@ -1355,6 +1408,10 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
 
     setType(expression, ltype);
     setType(getOriginal(), ltype);
+    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
@@ -1405,9 +1462,14 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         setType(expression, resultType);
     }
     setType(getOriginal(), resultType);
+    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
+// Handle .. and &&&
 const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
     if (done())
         return expression;
@@ -1471,6 +1533,10 @@ const IR::Node* TypeInference::postorder(IR::LNot* expression) {
         setType(expression, IR::Type_Boolean::get());
         setType(getOriginal(), IR::Type_Boolean::get());
     }
+    if (isCompileTimeConstant(expression->expr)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
@@ -1491,6 +1557,10 @@ const IR::Node* TypeInference::postorder(IR::Neg* expression) {
         ::error("Cannot apply %1% to value %2% of type %3%",
                 expression->getStringOp(), expression->expr, type->toString());
     }
+    if (isCompileTimeConstant(expression->expr)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
@@ -1509,6 +1579,10 @@ const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
     } else {
         ::error("Cannot apply %1% to value %2% of type %3%",
                 expression->getStringOp(), expression->expr, type->toString());
+    }
+    if (isCompileTimeConstant(expression->expr)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
     }
     return expression;
 }
@@ -1538,6 +1612,10 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     }
     setType(expression, castType);
     setType(getOriginal(), castType);
+    if (isCompileTimeConstant(expression->expr)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
@@ -1546,13 +1624,11 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
         return expression;
     auto edecl = refMap->getDeclaration(expression->path, true);
     auto decl = edecl->getNode();
-    if (decl->is<IR::ParserState>()) {
-        setType(getOriginal(), IR::Type_State::get());
-        setType(expression, IR::Type_State::get());
-        return expression;
-    }
+    const IR::Type* type = nullptr;
 
-    if (decl->is<IR::Declaration_Variable>()) {
+    if (decl->is<IR::ParserState>()) {
+        type = IR::Type_State::get();
+    } else if (decl->is<IR::Declaration_Variable>()) {
         setLeftValue(expression);
         setLeftValue(getOriginal<IR::Expression>());
     } else if (decl->is<IR::Parameter>()) {
@@ -1561,12 +1637,68 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
             paramDecl->direction == IR::Direction::Out) {
             setLeftValue(expression);
             setLeftValue(getOriginal<IR::Expression>());
+        } else if (paramDecl->direction == IR::Direction::None) {
+            setCompileTimeConstant(expression);
+            setCompileTimeConstant(getOriginal<IR::Expression>());
+        }
+    } else if (decl->is<IR::Declaration_Constant>() ||
+               decl->is<IR::Declaration_Instance>()) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    } else if (decl->is<IR::P4Action>()) {
+        // Special handling for actions referred inside tables
+        // action a(inout bit x, bit y) { ... }
+        // table t () {
+        //    actions = { a(z); }  << a typechecked as action a
+        //    default_action = a(2);  << a typechecked as specialized in the actions list
+        // }
+        // This works only if the actions property has already been visited
+        auto prop = findContext<IR::TableProperty>();
+        if (prop != nullptr) {
+            auto table = findContext<IR::P4Table>();
+            BUG_CHECK(table != nullptr, "%1%: property not within a table?", prop);
+            if (prop->name == IR::TableProperties::defaultActionPropertyName) {
+                LOG1("Handling default_action" << prop);
+                // Check that the default action appears in the list of actions.
+                BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
+                auto def = prop->value->to<IR::ExpressionValue>()->expression;
+                auto al = table->getActionList();
+                if (al == nullptr) {
+                    ::error("%1%: no action list, but %2% %3%",
+                            table, IR::TableProperties::defaultActionPropertyName, prop);
+                    return expression;
+                }
+                if (def->is<IR::MethodCallExpression>())
+                    def = def->to<IR::MethodCallExpression>()->method;
+                if (!def->is<IR::PathExpression>())
+                    BUG("%1%: unexpected expression", def);
+                auto pe = def->to<IR::PathExpression>();
+                auto defdecl = refMap->getDeclaration(pe->path, true);
+                auto ale = al->actionList->getDeclaration(defdecl->getName());
+                if (ale == nullptr) {
+                    ::error("%1% not present in action list", def);
+                    return expression;
+                }
+                BUG_CHECK(ale->is<IR::ActionListElement>(),
+                          "%1%: expected an ActionListElement", ale);
+                auto elem = ale->to<IR::ActionListElement>();
+                auto entrypath = elem->name;
+                auto entrydecl = refMap->getDeclaration(entrypath->path, true);
+                if (entrydecl != defdecl) {
+                    ::error("%1% and %2% refer to different actions", def, elem);
+                    return expression;
+                }
+                type = getType(elem);  // This Type_Action is already specialized with
+                                       // some arguments.
+            }
         }
     }
 
-    const IR::Type* type = getType(decl);
-    if (type == nullptr)
-        return expression;
+    if (type == nullptr) {
+        type = getType(decl);
+        if (type == nullptr)
+            return expression;
+    }
 
     setType(getOriginal(), type);
     setType(expression, type);
@@ -1632,6 +1764,10 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
         setLeftValue(expression);
         setLeftValue(getOriginal<IR::Expression>());
     }
+    if (isCompileTimeConstant(expression->e0)) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 
@@ -1667,6 +1803,12 @@ const IR::Node* TypeInference::postorder(IR::Mux* expression) {
         }
         setType(expression, secondType);
         setType(getOriginal(), secondType);
+        if (isCompileTimeConstant(expression->e0) &&
+            isCompileTimeConstant(expression->e1) &&
+            isCompileTimeConstant(expression->e2)) {
+            setCompileTimeConstant(expression);
+            setCompileTimeConstant(getOriginal<IR::Expression>());
+        }
     }
     return expression;
 }
@@ -1679,6 +1821,8 @@ const IR::Node* TypeInference::postorder(IR::TypeNameExpression* expression) {
         return expression;
     setType(getOriginal(), type);
     setType(expression, type);
+    setCompileTimeConstant(expression);
+    setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
 }
 
@@ -1715,6 +1859,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             return expression;
         setType(getOriginal(), methodType);
         setType(expression, methodType);
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
     } else if (type->is<IR::Type_StructLike>()) {
         if (type->is<IR::Type_Header>()) {
             if (expression->member.name == IR::Type_Header::isValid) {
@@ -1759,6 +1905,10 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         } else {
             LOG1("No left value " << expression->expr);
         }
+        if (isCompileTimeConstant(expression->expr)) {
+            setCompileTimeConstant(expression);
+            setCompileTimeConstant(getOriginal<IR::Expression>());
+        }
         return expression;
     } else if (type->is<IR::IApply>()) {
         if (expression->member.name == IR::IApply::applyMethodName) {
@@ -1801,16 +1951,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             setType(getOriginal(), canon);
             setType(expression, canon);
         }
-    } else if (type->is<IR::IGeneralNamespace>()) {
-        auto fbase = type->to<IR::IGeneralNamespace>();
-        auto decl = fbase->getDeclsByName(expression->member.name)->nextOrDefault();
-        if (decl == nullptr)
-            return expression;
-        auto ftype = getType(decl->getNode());
-        if (ftype == nullptr)
-            return expression;
-        setType(getOriginal(), ftype);
-        setType(expression, ftype);
     } else if (type->is<IR::ISimpleNamespace>()) {
         auto fbase = type->to<IR::ISimpleNamespace>();
         auto decl = fbase->getDeclByName(expression->member.name);
@@ -1819,6 +1959,10 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         auto ftype = getType(decl->getNode());
         if (ftype == nullptr)
             return expression;
+        if (isCompileTimeConstant(expression->expr)) {
+            setCompileTimeConstant(expression);
+            setCompileTimeConstant(getOriginal<IR::Expression>());
+        }
         setType(getOriginal(), ftype);
         setType(expression, ftype);
     } else {
@@ -1835,14 +1979,26 @@ const IR::Node* TypeInference::preorder(IR::MethodCallExpression* expression) {
     return expression;
 }
 
-const IR::Type_Action* TypeInference::actionCallType(const IR::Type_Action* action,
-                                                   size_t removedArguments) const {
+const IR::Type_Action*
+TypeInference::actionCallType(bool inActionList,
+                              const IR::Node* errorPosition,
+                              const IR::Type_Action* action,
+                              const IR::Vector<IR::Expression>* arguments) const {
     auto params = new IR::IndexedVector<IR::Parameter>();
-    size_t i = 0;
+    if (arguments == nullptr)
+        arguments = new IR::Vector<IR::Expression>();
+    auto it = arguments->begin();
     for (auto p : *action->parameters->getEnumerator()) {
-        if (i >= removedArguments)
+        if (it == arguments->end()) {
             params->push_back(p);
-        i++;
+            if (p->direction != IR::Direction::None)
+                ::error("%1%: parameter %2% must be bound", errorPosition, p);
+        } else {
+            if (inActionList && p->direction == IR::Direction::None)
+                ::error("%1%: parameter %2% cannot be bound, since it is set by the control plane",
+                        *it, p);
+            it++;
+        }
     }
     auto pl = new IR::ParameterList(Util::SourceInfo(), params);
     auto result = new IR::Type_Action(action->srcInfo, action->typeParameters,
@@ -1873,7 +2029,8 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto argType = getType(arg);
         if (argType == nullptr)
             return expression;
-        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, isLeftValue(arg), argType);
+        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, isLeftValue(arg),
+                                            isCompileTimeConstant(arg), argType);
         args->push_back(argInfo);
     }
     auto typeArgs = new IR::Vector<IR::Type>();
@@ -1911,9 +2068,14 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
     // Handle differently methods and actions: action invocations return actions
     // with different signatures
-    if (functionType->is<IR::Type_Action>()) {
-        auto type = actionCallType(functionType->to<IR::Type_Action>(),
-                                   expression->arguments->size());
+    if (methodType->is<IR::Type_Action>()) {
+        bool inActionsList = false;
+        auto prop = findContext<IR::TableProperty>();
+        if (prop != nullptr && prop->name == IR::TableProperties::actionsPropertyName)
+            inActionsList = true;
+        auto type = actionCallType(inActionsList, expression,
+                                   methodType->to<IR::Type_Action>(),
+                                   expression->arguments);
         setType(getOriginal(), type);
         setType(expression, type);
     } else {
@@ -1970,6 +2132,8 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
                 expression, type->toString());
     }
 
+    setCompileTimeConstant(expression);
+    setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
 }
 
@@ -2020,6 +2184,8 @@ const IR::Node* TypeInference::postorder(IR::DefaultExpression* expression) {
         setType(expression, IR::Type_Dontcare::get());
         setType(getOriginal(), IR::Type_Dontcare::get());
     }
+    setCompileTimeConstant(expression);
+    setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
 }
 
@@ -2156,9 +2322,18 @@ const IR::Node* TypeInference::postorder(IR::AssignmentStatement* assign) {
 }
 
 const IR::Node* TypeInference::postorder(IR::ActionListElement* elem) {
-    auto type = getType(elem->name);
-    if (type != nullptr && !type->is<IR::Type_Action>())
+    if (done())
+        return elem;
+    auto basetype = getType(elem->name);
+    if (basetype == nullptr)
+        return elem;
+    if (!basetype->is<IR::Type_Action>())
         ::error("%1% is not an action", elem);
+    auto type = actionCallType(false, elem, basetype->to<IR::Type_Action>(), elem->arguments);
+    if (type != nullptr) {
+        setType(elem, type);
+        setType(getOriginal(), type);
+    }
     return elem;
 }
 
@@ -2188,8 +2363,12 @@ const IR::Node* TypeInference::postorder(IR::TableProperty* prop) {
             ::error("%1% table property should be an action", prop);
         } else {
             auto type = getType(pv->expression);
-            if (type != nullptr && !type->is<IR::Type_Action>())
+            if (type == nullptr)
+                return prop;
+            if (!type->is<IR::Type_Action>()) {
                 ::error("%1% table property should be an action", prop);
+                return prop;
+            }
             auto at = type->to<IR::Type_Action>();
             if (at->parameters->size() != 0)
                 ::error("Action for %1% has some unbound arguments", prop);

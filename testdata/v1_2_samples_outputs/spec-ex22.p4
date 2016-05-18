@@ -1,5 +1,5 @@
 control c() {
-    action Forward_a(bit<9> port, out bit<9> outputPort) {
+    action Forward_a(out bit<9> outputPort, bit<9> port) {
         outputPort = port;
     }
     apply {

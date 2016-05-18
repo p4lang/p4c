@@ -1,4 +1,4 @@
-../testdata/v1_2_errors/persistent_e.p4(8): error: z: Cannot evaluate to a compile-time constant
+../testdata/v1_2_errors/persistent_e.p4(8): error: z: cannot evaluate to a compile-time constant
     p(z) p1;
       ^
 error: 1 errors encountered, aborting compilation

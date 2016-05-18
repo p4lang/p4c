@@ -107,10 +107,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     IPv4Address nextHop_0;
     bool hasReturned;
-    action NoAction_0() {
-    }
-    @name("Drop_action") action Drop_action_0() {
-        outCtrl.outputPort = 4w0xf;
+    action NoAction_1() {
     }
     @name("Drop_action") action Drop_action() {
         outCtrl.outputPort = 4w0xf;
@@ -121,7 +118,10 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     @name("Drop_action") action Drop_action_2() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("Set_nhop") action Set_nhop_0(out IPv4Address nextHop_1, IPv4Address ipv4_dest, PortId_t port) {
+    @name("Drop_action") action Drop_action_3() {
+        outCtrl.outputPort = 4w0xf;
+    }
+    @name("Set_nhop") action Set_nhop(out IPv4Address nextHop_1, IPv4Address ipv4_dest, PortId_t port) {
         nextHop_1 = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
@@ -131,13 +131,13 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             headers.ip.dstAddr: lpm;
         }
         actions = {
-            Set_nhop_0(nextHop_2);
-            Drop_action_0;
+            Set_nhop(nextHop_2);
+            Drop_action;
         }
         size = 1024;
-        default_action = Drop_action_0;
+        default_action = Drop_action;
     }
-    @name("Send_to_cpu") action Send_to_cpu_0() {
+    @name("Send_to_cpu") action Send_to_cpu() {
         outCtrl.outputPort = 4w0xe;
     }
     @name("check_ttl") table check_ttl_0() {
@@ -145,11 +145,12 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             headers.ip.ttl: exact;
         }
         actions = {
-            Send_to_cpu_0;
+            Send_to_cpu;
+            NoAction_1;
         }
-        const default_action = NoAction_0;
+        const default_action = NoAction_1;
     }
-    @name("Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
+    @name("Set_dmac") action Set_dmac(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
     @name("dmac") table dmac_0(in IPv4Address nextHop_3) {
@@ -157,13 +158,13 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             nextHop_3: exact;
         }
         actions = {
-            Set_dmac_0;
-            Drop_action;
+            Set_dmac;
+            Drop_action_1;
         }
         size = 1024;
-        default_action = Drop_action_0;
+        default_action = Drop_action_1;
     }
-    @name("Rewrite_smac") action Rewrite_smac_0(EthernetAddress sourceMac) {
+    @name("Rewrite_smac") action Rewrite_smac(EthernetAddress sourceMac) {
         headers.ethernet.srcAddr = sourceMac;
     }
     @name("smac") table smac_0() {
@@ -171,11 +172,11 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             outCtrl.outputPort: exact;
         }
         actions = {
-            Drop_action_1;
-            Rewrite_smac_0;
+            Drop_action_2;
+            Rewrite_smac;
         }
         size = 16;
-        default_action = Drop_action_0;
+        default_action = Drop_action_2;
     }
     action act() {
         hasReturned = true;
@@ -200,9 +201,9 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
     table tbl_Drop_action() {
         actions = {
-            Drop_action_2;
+            Drop_action_3;
         }
-        const default_action = Drop_action_2();
+        const default_action = Drop_action_3();
     }
     table tbl_act_0() {
         actions = {

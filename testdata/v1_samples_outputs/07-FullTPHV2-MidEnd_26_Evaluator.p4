@@ -428,8 +428,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
-    }
     action NoAction_1() {
     }
     action NoAction_2() {
@@ -440,7 +438,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     action NoAction_5() {
     }
-    @name("a1") action a1_0() {
+    action NoAction_6() {
+    }
+    @name("a1") action a1() {
         meta.m.field_8_01 = 8w1;
         meta.m.field_8_02 = 8w2;
         meta.m.field_8_03 = 8w3;
@@ -666,9 +666,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_32_63 = 32w63;
         meta.m.field_32_64 = 32w64;
     }
-    @name("set_egress_spec") action set_egress_spec_0(bit<9> port) {
-        standard_metadata.egress_spec = port;
-    }
     @name("set_egress_spec") action set_egress_spec(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
@@ -681,27 +678,30 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("set_egress_spec") action set_egress_spec_3(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
+    @name("set_egress_spec") action set_egress_spec_4(bit<9> port) {
+        standard_metadata.egress_spec = port;
+    }
     @name("t1") table t1_0() {
         actions = {
-            a1_0;
-            NoAction_0;
+            a1;
+            NoAction_1;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("use_16bit_fields_1") table use_16bit_fields() {
         actions = {
-            set_egress_spec_0;
-            NoAction_1;
+            set_egress_spec;
+            NoAction_2;
         }
         key = {
             meta.m.field_16_01: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     @name("use_16bit_fields_2") table use_16bit_fields_0() {
         actions = {
-            set_egress_spec;
-            NoAction_2;
+            set_egress_spec_1;
+            NoAction_3;
         }
         key = {
             meta.m.field_16_65: exact;
@@ -737,12 +737,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_16_95: exact;
             meta.m.field_16_96: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_3();
     }
     @name("use_32bit_fields_1") table use_32bit_fields() {
         actions = {
-            set_egress_spec_1;
-            NoAction_3;
+            set_egress_spec_2;
+            NoAction_4;
         }
         key = {
             meta.m.field_32_01: exact;
@@ -778,12 +778,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_31: exact;
             meta.m.field_32_32: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_4();
     }
     @name("use_32bit_fields_2") table use_32bit_fields_0() {
         actions = {
-            set_egress_spec_2;
-            NoAction_4;
+            set_egress_spec_3;
+            NoAction_5;
         }
         key = {
             meta.m.field_32_33: exact;
@@ -819,12 +819,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_32_63: exact;
             meta.m.field_32_64: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_5();
     }
     @name("use_8bit_fields") table use_8bit_fields_0() {
         actions = {
-            set_egress_spec_3;
-            NoAction_5;
+            set_egress_spec_4;
+            NoAction_6;
         }
         key = {
             meta.m.field_8_01: exact;
@@ -892,7 +892,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.m.field_8_63: exact;
             meta.m.field_8_64: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_6();
     }
     apply {
         t1_0.apply();

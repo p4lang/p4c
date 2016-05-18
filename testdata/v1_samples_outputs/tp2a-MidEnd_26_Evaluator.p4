@@ -130,18 +130,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
-    }
     action NoAction_1() {
     }
     action NoAction_2() {
     }
     action NoAction_3() {
     }
-    @name("setb1") action setb1_0(bit<32> val) {
-        hdr.data.b1 = val;
+    action NoAction_4() {
     }
-    @name("noop") action noop_0() {
+    @name("setb1") action setb1(bit<32> val) {
+        hdr.data.b1 = val;
     }
     @name("noop") action noop() {
     }
@@ -149,58 +147,60 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("noop") action noop_2() {
     }
-    @name("setb3") action setb3_0(bit<32> val) {
+    @name("noop") action noop_3() {
+    }
+    @name("setb3") action setb3(bit<32> val) {
         hdr.data.b3 = val;
     }
-    @name("setb2") action setb2_0(bit<32> val) {
+    @name("setb2") action setb2(bit<32> val) {
         hdr.data.b2 = val;
     }
-    @name("setb4") action setb4_0(bit<32> val) {
+    @name("setb4") action setb4(bit<32> val) {
         hdr.data.b4 = val;
     }
     @name("A1") table A1_0() {
         actions = {
-            setb1_0;
-            noop_0;
-            NoAction_0;
-        }
-        key = {
-            hdr.data.f1: ternary;
-        }
-        default_action = NoAction_0();
-    }
-    @name("A2") table A2_0() {
-        actions = {
-            setb3_0;
+            setb1;
             noop;
             NoAction_1;
         }
         key = {
-            hdr.data.b1: ternary;
+            hdr.data.f1: ternary;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
-    @name("B1") table B1_0() {
+    @name("A2") table A2_0() {
         actions = {
-            setb2_0;
+            setb3;
             noop_1;
             NoAction_2;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.b1: ternary;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
-    @name("B2") table B2_0() {
+    @name("B1") table B1_0() {
         actions = {
-            setb4_0;
+            setb2;
             noop_2;
             NoAction_3;
         }
         key = {
+            hdr.data.f2: ternary;
+        }
+        default_action = NoAction_3();
+    }
+    @name("B2") table B2_0() {
+        actions = {
+            setb4;
+            noop_3;
+            NoAction_4;
+        }
+        key = {
             hdr.data.b2: ternary;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_4();
     }
     apply {
         if (hdr.data.b1 == 32w0) {

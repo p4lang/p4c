@@ -162,7 +162,7 @@ class ExpressionValue : PropertyValue {
 }
 
 // An element in a table actions list
-class ActionListElement : IAnnotated {
+class ActionListElement : IAnnotated, IDeclaration {
     Annotations               annotations;
     PathExpression            name;  // This can be real path
     NullOK Vector<Expression> arguments;
@@ -176,12 +176,9 @@ class ActionListElement : IAnnotated {
 
 // A list of actions (in a table)
 class ActionList : PropertyValue {
-    Vector<ActionListElement> actionList;
-#emit
-    void checkDuplicates() const;
-#end
+    IndexedVector<ActionListElement> actionList;
 #nodbprint
-    validate{ actionList->check_null(); checkDuplicates(); }
+    validate{ actionList->check_null(); }
 }
 
 class KeyElement {
@@ -253,6 +250,16 @@ class P4Table : Declaration, IAnnotated, IApply {
             return nullptr;
         }
         return kp->value->to<IR::Key>();
+    }
+    const Expression* getDefaultAction() const {
+        auto d = properties->getProperty(TableProperties::defaultActionPropertyName);
+        if (d == nullptr)
+            return nullptr;
+        if (!d->value->is<IR::ExpressionValue>()) {
+            ::error("%1% must be an expression", d);
+            return nullptr;
+        }
+        return d->value->to<IR::ExpressionValue>()->expression;
     }
 #end
 #nodbprint

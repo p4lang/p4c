@@ -159,25 +159,25 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_0() {
+    action NoAction_2() {
     }
-    @name("rewrite_mac") action rewrite_mac_0(bit<48> smac) {
+    @name("rewrite_mac") action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("_drop") action _drop_0() {
+    @name("_drop") action _drop() {
         mark_to_drop();
     }
     @name("send_frame") table send_frame_0() {
         actions = {
-            rewrite_mac_0;
-            _drop_0;
-            NoAction_0;
+            rewrite_mac;
+            _drop;
+            NoAction_2;
         }
         key = {
             standard_metadata.egress_port: exact;
         }
         size = 256;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         send_frame_0.apply();
@@ -185,47 +185,47 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    action NoAction_3() {
     }
-    action NoAction_2() {
+    action NoAction_4() {
     }
-    @name("set_dmac") action set_dmac_0(bit<48> dmac) {
+    @name("set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
-    @name("_drop") action _drop_1() {
+    @name("_drop") action _drop_2() {
         mark_to_drop();
     }
-    @name("_drop") action _drop() {
+    @name("_drop") action _drop_3() {
         mark_to_drop();
     }
-    @name("set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
+    @name("set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_port = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("forward") table forward_0() {
         actions = {
-            set_dmac_0;
-            _drop_1;
-            NoAction_1;
+            set_dmac;
+            _drop_2;
+            NoAction_3;
         }
         key = {
             meta.routing_metadata.nhop_ipv4: exact;
         }
         size = 512;
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     @name("ipv4_lpm") table ipv4_lpm_0() {
         actions = {
-            set_nhop_0;
-            _drop;
-            NoAction_2;
+            set_nhop;
+            _drop_3;
+            NoAction_4;
         }
         key = {
             hdr.ipv4.dstAddr: lpm;
         }
         size = 1024;
-        default_action = NoAction_1();
+        default_action = NoAction_4();
     }
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {
