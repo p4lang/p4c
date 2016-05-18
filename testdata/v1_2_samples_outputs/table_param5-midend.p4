@@ -57,19 +57,19 @@ control c(inout bit<32> arg) {
     }
     table tbl_act() {
         actions = {
-            act_1;
+            act_1();
         }
         const default_action = act_1();
     }
     table tbl_act_0() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
     table tbl_act_1() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }

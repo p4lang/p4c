@@ -419,7 +419,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_7();
     }
-    @name("switch") table switch() {
+    @name("switch") table switch_1() {
         actions = {
             set_switch;
             NoAction_8;
@@ -437,7 +437,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_9();
     }
     apply {
-        switch.apply();
+        switch_1.apply();
         port_0.apply();
         if (meta.ingress_metadata.oper_status == 2w1) {
             router_interface_0.apply();
@@ -472,7 +472,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
     table tbl_act() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
@@ -489,7 +489,7 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
     table tbl_act_0() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }

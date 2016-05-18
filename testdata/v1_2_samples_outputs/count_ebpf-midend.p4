@@ -99,13 +99,13 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table tbl_act() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
     table tbl_act_0() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }

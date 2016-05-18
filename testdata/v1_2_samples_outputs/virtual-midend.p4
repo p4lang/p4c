@@ -13,7 +13,7 @@ control c(inout bit<16> p) {
     }
     table tbl_act() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }

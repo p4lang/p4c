@@ -3091,115 +3091,115 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     table tbl_act() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
     table tbl_act_0() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }
     table tbl_act_1() {
         actions = {
-            act_1;
+            act_1();
         }
         const default_action = act_1();
     }
     table tbl_act_2() {
         actions = {
-            act_2;
+            act_2();
         }
         const default_action = act_2();
     }
     table tbl_act_3() {
         actions = {
-            act_3;
+            act_3();
         }
         const default_action = act_3();
     }
     table tbl_act_4() {
         actions = {
-            act_4;
+            act_4();
         }
         const default_action = act_4();
     }
     table tbl_act_5() {
         actions = {
-            act_5;
+            act_5();
         }
         const default_action = act_5();
     }
     table tbl_act_6() {
         actions = {
-            act_6;
+            act_6();
         }
         const default_action = act_6();
     }
     table tbl_act_7() {
         actions = {
-            act_7;
+            act_7();
         }
         const default_action = act_7();
     }
     table tbl_act_8() {
         actions = {
-            act_8;
+            act_8();
         }
         const default_action = act_8();
     }
     table tbl_act_9() {
         actions = {
-            act_9;
+            act_9();
         }
         const default_action = act_9();
     }
     table tbl_act_10() {
         actions = {
-            act_10;
+            act_10();
         }
         const default_action = act_10();
     }
     table tbl_act_11() {
         actions = {
-            act_13;
+            act_13();
         }
         const default_action = act_13();
     }
     table tbl_act_12() {
         actions = {
-            act_11;
+            act_11();
         }
         const default_action = act_11();
     }
     table tbl_act_13() {
         actions = {
-            act_12;
+            act_12();
         }
         const default_action = act_12();
     }
     table tbl_act_14() {
         actions = {
-            act_14;
+            act_14();
         }
         const default_action = act_14();
     }
     table tbl_act_15() {
         actions = {
-            act_15;
+            act_15();
         }
         const default_action = act_15();
     }
     table tbl_act_16() {
         actions = {
-            act_16;
+            act_16();
         }
         const default_action = act_16();
     }
     table tbl_act_17() {
         actions = {
-            act_17;
+            act_17();
         }
         const default_action = act_17();
     }
@@ -3676,19 +3676,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_34();
     }
-    @name("process_validate_outer_header.validate_outer_ipv4_header.set_valid_outer_ipv4_packet") action process_validate_outer_header_validate_outer_ipv4_header.set_valid_outer_ipv4_packet_0() {
+    @name("process_validate_outer_header.validate_outer_ipv4_header.set_valid_outer_ipv4_packet") action process_validate_outer_header_validate_outer_ipv4_header_set_valid_outer_ipv4_packet_0() {
         meta_0.l3_metadata.lkp_ip_type = 2w1;
         meta_0.l3_metadata.lkp_ip_tc = hdr_0.ipv4.diffserv;
         meta_0.l3_metadata.lkp_ip_version = 4w4;
     }
-    @name("process_validate_outer_header.validate_outer_ipv4_header.set_malformed_outer_ipv4_packet") action process_validate_outer_header_validate_outer_ipv4_header.set_malformed_outer_ipv4_packet_0(bit<8> drop_reason) {
+    @name("process_validate_outer_header.validate_outer_ipv4_header.set_malformed_outer_ipv4_packet") action process_validate_outer_header_validate_outer_ipv4_header_set_malformed_outer_ipv4_packet_0(bit<8> drop_reason) {
         meta_0.ingress_metadata.drop_flag = 1w1;
         meta_0.ingress_metadata.drop_reason = drop_reason;
     }
-    @name("process_validate_outer_header.validate_outer_ipv4_header.validate_outer_ipv4_packet") table process_validate_outer_header_validate_outer_ipv4_header.validate_outer_ipv4_packet() {
+    @name("process_validate_outer_header.validate_outer_ipv4_header.validate_outer_ipv4_packet") table process_validate_outer_header_validate_outer_ipv4_header_validate_outer_ipv4_packet() {
         actions = {
-            process_validate_outer_header_validate_outer_ipv4_header.set_valid_outer_ipv4_packet_0;
-            process_validate_outer_header_validate_outer_ipv4_header.set_malformed_outer_ipv4_packet_0;
+            process_validate_outer_header_validate_outer_ipv4_header_set_valid_outer_ipv4_packet_0;
+            process_validate_outer_header_validate_outer_ipv4_header_set_malformed_outer_ipv4_packet_0;
             NoAction_35;
         }
         key = {
@@ -3699,19 +3699,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_35();
     }
-    @name("process_validate_outer_header.validate_outer_ipv6_header.set_valid_outer_ipv6_packet") action process_validate_outer_header_validate_outer_ipv6_header.set_valid_outer_ipv6_packet_0() {
+    @name("process_validate_outer_header.validate_outer_ipv6_header.set_valid_outer_ipv6_packet") action process_validate_outer_header_validate_outer_ipv6_header_set_valid_outer_ipv6_packet_0() {
         meta_1.l3_metadata.lkp_ip_type = 2w2;
         meta_1.l3_metadata.lkp_ip_tc = hdr_1.ipv6.trafficClass;
         meta_1.l3_metadata.lkp_ip_version = 4w6;
     }
-    @name("process_validate_outer_header.validate_outer_ipv6_header.set_malformed_outer_ipv6_packet") action process_validate_outer_header_validate_outer_ipv6_header.set_malformed_outer_ipv6_packet_0(bit<8> drop_reason) {
+    @name("process_validate_outer_header.validate_outer_ipv6_header.set_malformed_outer_ipv6_packet") action process_validate_outer_header_validate_outer_ipv6_header_set_malformed_outer_ipv6_packet_0(bit<8> drop_reason) {
         meta_1.ingress_metadata.drop_flag = 1w1;
         meta_1.ingress_metadata.drop_reason = drop_reason;
     }
-    @name("process_validate_outer_header.validate_outer_ipv6_header.validate_outer_ipv6_packet") table process_validate_outer_header_validate_outer_ipv6_header.validate_outer_ipv6_packet() {
+    @name("process_validate_outer_header.validate_outer_ipv6_header.validate_outer_ipv6_packet") table process_validate_outer_header_validate_outer_ipv6_header_validate_outer_ipv6_packet() {
         actions = {
-            process_validate_outer_header_validate_outer_ipv6_header.set_valid_outer_ipv6_packet_0;
-            process_validate_outer_header_validate_outer_ipv6_header.set_malformed_outer_ipv6_packet_0;
+            process_validate_outer_header_validate_outer_ipv6_header_set_valid_outer_ipv6_packet_0;
+            process_validate_outer_header_validate_outer_ipv6_header_set_malformed_outer_ipv6_packet_0;
             NoAction_36;
         }
         key = {
@@ -3722,23 +3722,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_36();
     }
-    @name("process_validate_outer_header.validate_mpls_header.set_valid_mpls_label1") action process_validate_outer_header_validate_mpls_header.set_valid_mpls_label1_0() {
+    @name("process_validate_outer_header.validate_mpls_header.set_valid_mpls_label1") action process_validate_outer_header_validate_mpls_header_set_valid_mpls_label1_0() {
         meta_2.tunnel_metadata.mpls_label = hdr_2.mpls[0].label;
         meta_2.tunnel_metadata.mpls_exp = hdr_2.mpls[0].exp;
     }
-    @name("process_validate_outer_header.validate_mpls_header.set_valid_mpls_label2") action process_validate_outer_header_validate_mpls_header.set_valid_mpls_label2_0() {
+    @name("process_validate_outer_header.validate_mpls_header.set_valid_mpls_label2") action process_validate_outer_header_validate_mpls_header_set_valid_mpls_label2_0() {
         meta_2.tunnel_metadata.mpls_label = hdr_2.mpls[1].label;
         meta_2.tunnel_metadata.mpls_exp = hdr_2.mpls[1].exp;
     }
-    @name("process_validate_outer_header.validate_mpls_header.set_valid_mpls_label3") action process_validate_outer_header_validate_mpls_header.set_valid_mpls_label3_0() {
+    @name("process_validate_outer_header.validate_mpls_header.set_valid_mpls_label3") action process_validate_outer_header_validate_mpls_header_set_valid_mpls_label3_0() {
         meta_2.tunnel_metadata.mpls_label = hdr_2.mpls[2].label;
         meta_2.tunnel_metadata.mpls_exp = hdr_2.mpls[2].exp;
     }
-    @name("process_validate_outer_header.validate_mpls_header.validate_mpls_packet") table process_validate_outer_header_validate_mpls_header.validate_mpls_packet() {
+    @name("process_validate_outer_header.validate_mpls_header.validate_mpls_packet") table process_validate_outer_header_validate_mpls_header_validate_mpls_packet() {
         actions = {
-            process_validate_outer_header_validate_mpls_header.set_valid_mpls_label1_0;
-            process_validate_outer_header_validate_mpls_header.set_valid_mpls_label2_0;
-            process_validate_outer_header_validate_mpls_header.set_valid_mpls_label3_0;
+            process_validate_outer_header_validate_mpls_header_set_valid_mpls_label1_0;
+            process_validate_outer_header_validate_mpls_header_set_valid_mpls_label2_0;
+            process_validate_outer_header_validate_mpls_header_set_valid_mpls_label3_0;
             NoAction_37;
         }
         key = {
@@ -3988,20 +3988,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_44();
     }
-    @name("process_tunnel.process_ipv4_vtep.nop") action process_tunnel_process_ipv4_vtep.nop_0() {
+    @name("process_tunnel.process_ipv4_vtep.nop") action process_tunnel_process_ipv4_vtep_nop_0() {
     }
-    @name("process_tunnel.process_ipv4_vtep.set_tunnel_termination_flag") action process_tunnel_process_ipv4_vtep.set_tunnel_termination_flag_0() {
+    @name("process_tunnel.process_ipv4_vtep.set_tunnel_termination_flag") action process_tunnel_process_ipv4_vtep_set_tunnel_termination_flag_0() {
         meta_3.tunnel_metadata.tunnel_terminate = 1w1;
     }
-    @name("process_tunnel.process_ipv4_vtep.on_miss") action process_tunnel_process_ipv4_vtep.on_miss_0() {
+    @name("process_tunnel.process_ipv4_vtep.on_miss") action process_tunnel_process_ipv4_vtep_on_miss_0() {
     }
-    @name("process_tunnel.process_ipv4_vtep.src_vtep_hit") action process_tunnel_process_ipv4_vtep.src_vtep_hit_0(bit<16> ifindex) {
+    @name("process_tunnel.process_ipv4_vtep.src_vtep_hit") action process_tunnel_process_ipv4_vtep_src_vtep_hit_0(bit<16> ifindex) {
         meta_3.ingress_metadata.ifindex = ifindex;
     }
-    @name("process_tunnel.process_ipv4_vtep.ipv4_dest_vtep") table process_tunnel_process_ipv4_vtep.ipv4_dest_vtep() {
+    @name("process_tunnel.process_ipv4_vtep.ipv4_dest_vtep") table process_tunnel_process_ipv4_vtep_ipv4_dest_vtep() {
         actions = {
-            process_tunnel_process_ipv4_vtep.nop_0;
-            process_tunnel_process_ipv4_vtep.set_tunnel_termination_flag_0;
+            process_tunnel_process_ipv4_vtep_nop_0;
+            process_tunnel_process_ipv4_vtep_set_tunnel_termination_flag_0;
             NoAction_45;
         }
         key = {
@@ -4012,10 +4012,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_45();
     }
-    @name("process_tunnel.process_ipv4_vtep.ipv4_src_vtep") table process_tunnel_process_ipv4_vtep.ipv4_src_vtep() {
+    @name("process_tunnel.process_ipv4_vtep.ipv4_src_vtep") table process_tunnel_process_ipv4_vtep_ipv4_src_vtep() {
         actions = {
-            process_tunnel_process_ipv4_vtep.on_miss_0;
-            process_tunnel_process_ipv4_vtep.src_vtep_hit_0;
+            process_tunnel_process_ipv4_vtep_on_miss_0;
+            process_tunnel_process_ipv4_vtep_src_vtep_hit_0;
             NoAction_46;
         }
         key = {
@@ -4025,20 +4025,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_46();
     }
-    @name("process_tunnel.process_ipv6_vtep.nop") action process_tunnel_process_ipv6_vtep.nop_0() {
+    @name("process_tunnel.process_ipv6_vtep.nop") action process_tunnel_process_ipv6_vtep_nop_0() {
     }
-    @name("process_tunnel.process_ipv6_vtep.set_tunnel_termination_flag") action process_tunnel_process_ipv6_vtep.set_tunnel_termination_flag_0() {
+    @name("process_tunnel.process_ipv6_vtep.set_tunnel_termination_flag") action process_tunnel_process_ipv6_vtep_set_tunnel_termination_flag_0() {
         meta_4.tunnel_metadata.tunnel_terminate = 1w1;
     }
-    @name("process_tunnel.process_ipv6_vtep.on_miss") action process_tunnel_process_ipv6_vtep.on_miss_0() {
+    @name("process_tunnel.process_ipv6_vtep.on_miss") action process_tunnel_process_ipv6_vtep_on_miss_0() {
     }
-    @name("process_tunnel.process_ipv6_vtep.src_vtep_hit") action process_tunnel_process_ipv6_vtep.src_vtep_hit_0(bit<16> ifindex) {
+    @name("process_tunnel.process_ipv6_vtep.src_vtep_hit") action process_tunnel_process_ipv6_vtep_src_vtep_hit_0(bit<16> ifindex) {
         meta_4.ingress_metadata.ifindex = ifindex;
     }
-    @name("process_tunnel.process_ipv6_vtep.ipv6_dest_vtep") table process_tunnel_process_ipv6_vtep.ipv6_dest_vtep() {
+    @name("process_tunnel.process_ipv6_vtep.ipv6_dest_vtep") table process_tunnel_process_ipv6_vtep_ipv6_dest_vtep() {
         actions = {
-            process_tunnel_process_ipv6_vtep.nop_0;
-            process_tunnel_process_ipv6_vtep.set_tunnel_termination_flag_0;
+            process_tunnel_process_ipv6_vtep_nop_0;
+            process_tunnel_process_ipv6_vtep_set_tunnel_termination_flag_0;
             NoAction_47;
         }
         key = {
@@ -4049,10 +4049,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_47();
     }
-    @name("process_tunnel.process_ipv6_vtep.ipv6_src_vtep") table process_tunnel_process_ipv6_vtep.ipv6_src_vtep() {
+    @name("process_tunnel.process_ipv6_vtep.ipv6_src_vtep") table process_tunnel_process_ipv6_vtep_ipv6_src_vtep() {
         actions = {
-            process_tunnel_process_ipv6_vtep.on_miss_0;
-            process_tunnel_process_ipv6_vtep.src_vtep_hit_0;
+            process_tunnel_process_ipv6_vtep_on_miss_0;
+            process_tunnel_process_ipv6_vtep_src_vtep_hit_0;
             NoAction_48;
         }
         key = {
@@ -4062,7 +4062,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_48();
     }
-    @name("process_tunnel.process_mpls.terminate_eompls") action process_tunnel_process_mpls.terminate_eompls_0(bit<16> bd, bit<5> tunnel_type) {
+    @name("process_tunnel.process_mpls.terminate_eompls") action process_tunnel_process_mpls_terminate_eompls_0(bit<16> bd, bit<5> tunnel_type) {
         meta_5.tunnel_metadata.tunnel_terminate = 1w1;
         meta_5.tunnel_metadata.ingress_tunnel_type = tunnel_type;
         meta_5.ingress_metadata.bd = bd;
@@ -4070,7 +4070,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta_5.l2_metadata.lkp_mac_da = hdr_5.inner_ethernet.dstAddr;
         meta_5.l2_metadata.lkp_mac_type = hdr_5.inner_ethernet.etherType;
     }
-    @name("process_tunnel.process_mpls.terminate_vpls") action process_tunnel_process_mpls.terminate_vpls_0(bit<16> bd, bit<5> tunnel_type) {
+    @name("process_tunnel.process_mpls.terminate_vpls") action process_tunnel_process_mpls_terminate_vpls_0(bit<16> bd, bit<5> tunnel_type) {
         meta_5.tunnel_metadata.tunnel_terminate = 1w1;
         meta_5.tunnel_metadata.ingress_tunnel_type = tunnel_type;
         meta_5.ingress_metadata.bd = bd;
@@ -4078,7 +4078,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta_5.l2_metadata.lkp_mac_da = hdr_5.inner_ethernet.dstAddr;
         meta_5.l2_metadata.lkp_mac_type = hdr_5.inner_ethernet.etherType;
     }
-    @name("process_tunnel.process_mpls.terminate_ipv4_over_mpls") action process_tunnel_process_mpls.terminate_ipv4_over_mpls_0(bit<12> vrf, bit<5> tunnel_type) {
+    @name("process_tunnel.process_mpls.terminate_ipv4_over_mpls") action process_tunnel_process_mpls_terminate_ipv4_over_mpls_0(bit<12> vrf, bit<5> tunnel_type) {
         meta_5.tunnel_metadata.tunnel_terminate = 1w1;
         meta_5.tunnel_metadata.ingress_tunnel_type = tunnel_type;
         meta_5.l3_metadata.vrf = vrf;
@@ -4092,7 +4092,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta_5.l3_metadata.lkp_l4_sport = meta_5.l3_metadata.lkp_inner_l4_sport;
         meta_5.l3_metadata.lkp_l4_dport = meta_5.l3_metadata.lkp_inner_l4_dport;
     }
-    @name("process_tunnel.process_mpls.terminate_ipv6_over_mpls") action process_tunnel_process_mpls.terminate_ipv6_over_mpls_0(bit<12> vrf, bit<5> tunnel_type) {
+    @name("process_tunnel.process_mpls.terminate_ipv6_over_mpls") action process_tunnel_process_mpls_terminate_ipv6_over_mpls_0(bit<12> vrf, bit<5> tunnel_type) {
         meta_5.tunnel_metadata.tunnel_terminate = 1w1;
         meta_5.tunnel_metadata.ingress_tunnel_type = tunnel_type;
         meta_5.l3_metadata.vrf = vrf;
@@ -4106,22 +4106,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta_5.l3_metadata.lkp_l4_sport = meta_5.l3_metadata.lkp_inner_l4_sport;
         meta_5.l3_metadata.lkp_l4_dport = meta_5.l3_metadata.lkp_inner_l4_dport;
     }
-    @name("process_tunnel.process_mpls.terminate_pw") action process_tunnel_process_mpls.terminate_pw_0(bit<16> ifindex) {
+    @name("process_tunnel.process_mpls.terminate_pw") action process_tunnel_process_mpls_terminate_pw_0(bit<16> ifindex) {
         meta_5.ingress_metadata.egress_ifindex = ifindex;
     }
-    @name("process_tunnel.process_mpls.forward_mpls") action process_tunnel_process_mpls.forward_mpls_0(bit<16> nexthop_index) {
+    @name("process_tunnel.process_mpls.forward_mpls") action process_tunnel_process_mpls_forward_mpls_0(bit<16> nexthop_index) {
         meta_5.l3_metadata.fib_nexthop = nexthop_index;
         meta_5.l3_metadata.fib_nexthop_type = 1w0;
         meta_5.l3_metadata.fib_hit = 1w1;
     }
-    @name("process_tunnel.process_mpls.mpls") table process_tunnel_process_mpls.mpls() {
+    @name("process_tunnel.process_mpls.mpls") table process_tunnel_process_mpls_mpls() {
         actions = {
-            process_tunnel_process_mpls.terminate_eompls_0;
-            process_tunnel_process_mpls.terminate_vpls_0;
-            process_tunnel_process_mpls.terminate_ipv4_over_mpls_0;
-            process_tunnel_process_mpls.terminate_ipv6_over_mpls_0;
-            process_tunnel_process_mpls.terminate_pw_0;
-            process_tunnel_process_mpls.forward_mpls_0;
+            process_tunnel_process_mpls_terminate_eompls_0;
+            process_tunnel_process_mpls_terminate_vpls_0;
+            process_tunnel_process_mpls_terminate_ipv4_over_mpls_0;
+            process_tunnel_process_mpls_terminate_ipv6_over_mpls_0;
+            process_tunnel_process_mpls_terminate_pw_0;
+            process_tunnel_process_mpls_forward_mpls_0;
             NoAction_49;
         }
         key = {
@@ -5574,349 +5574,349 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     table tbl_act_18() {
         actions = {
-            act_18;
+            act_18();
         }
         const default_action = act_18();
     }
     table tbl_act_19() {
         actions = {
-            act_25;
+            act_25();
         }
         const default_action = act_25();
     }
     table tbl_act_20() {
         actions = {
-            act_19;
+            act_19();
         }
         const default_action = act_19();
     }
     table tbl_act_21() {
         actions = {
-            act_20;
+            act_20();
         }
         const default_action = act_20();
     }
     table tbl_act_22() {
         actions = {
-            act_21;
+            act_21();
         }
         const default_action = act_21();
     }
     table tbl_act_23() {
         actions = {
-            act_22;
+            act_22();
         }
         const default_action = act_22();
     }
     table tbl_act_24() {
         actions = {
-            act_23;
+            act_23();
         }
         const default_action = act_23();
     }
     table tbl_act_25() {
         actions = {
-            act_24;
+            act_24();
         }
         const default_action = act_24();
     }
     table tbl_act_26() {
         actions = {
-            act_59;
+            act_59();
         }
         const default_action = act_59();
     }
     table tbl_act_27() {
         actions = {
-            act_26;
+            act_26();
         }
         const default_action = act_26();
     }
     table tbl_act_28() {
         actions = {
-            act_27;
+            act_27();
         }
         const default_action = act_27();
     }
     table tbl_act_29() {
         actions = {
-            act_28;
+            act_28();
         }
         const default_action = act_28();
     }
     table tbl_act_30() {
         actions = {
-            act_29;
+            act_29();
         }
         const default_action = act_29();
     }
     table tbl_act_31() {
         actions = {
-            act_36;
+            act_36();
         }
         const default_action = act_36();
     }
     table tbl_act_32() {
         actions = {
-            act_30;
+            act_30();
         }
         const default_action = act_30();
     }
     table tbl_act_33() {
         actions = {
-            act_31;
+            act_31();
         }
         const default_action = act_31();
     }
     table tbl_act_34() {
         actions = {
-            act_32;
+            act_32();
         }
         const default_action = act_32();
     }
     table tbl_act_35() {
         actions = {
-            act_33;
+            act_33();
         }
         const default_action = act_33();
     }
     table tbl_act_36() {
         actions = {
-            act_34;
+            act_34();
         }
         const default_action = act_34();
     }
     table tbl_act_37() {
         actions = {
-            act_35;
+            act_35();
         }
         const default_action = act_35();
     }
     table tbl_act_38() {
         actions = {
-            act_56;
+            act_56();
         }
         const default_action = act_56();
     }
     table tbl_act_39() {
         actions = {
-            act_37;
+            act_37();
         }
         const default_action = act_37();
     }
     table tbl_act_40() {
         actions = {
-            act_38;
+            act_38();
         }
         const default_action = act_38();
     }
     table tbl_act_41() {
         actions = {
-            act_43;
+            act_43();
         }
         const default_action = act_43();
     }
     table tbl_act_42() {
         actions = {
-            act_39;
+            act_39();
         }
         const default_action = act_39();
     }
     table tbl_act_43() {
         actions = {
-            act_40;
+            act_40();
         }
         const default_action = act_40();
     }
     table tbl_act_44() {
         actions = {
-            act_41;
+            act_41();
         }
         const default_action = act_41();
     }
     table tbl_act_45() {
         actions = {
-            act_42;
+            act_42();
         }
         const default_action = act_42();
     }
     table tbl_act_46() {
         actions = {
-            act_44;
+            act_44();
         }
         const default_action = act_44();
     }
     table tbl_act_47() {
         actions = {
-            act_55;
+            act_55();
         }
         const default_action = act_55();
     }
     table tbl_act_48() {
         actions = {
-            act_45;
+            act_45();
         }
         const default_action = act_45();
     }
     table tbl_act_49() {
         actions = {
-            act_46;
+            act_46();
         }
         const default_action = act_46();
     }
     table tbl_act_50() {
         actions = {
-            act_47;
+            act_47();
         }
         const default_action = act_47();
     }
     table tbl_act_51() {
         actions = {
-            act_48;
+            act_48();
         }
         const default_action = act_48();
     }
     table tbl_act_52() {
         actions = {
-            act_49;
+            act_49();
         }
         const default_action = act_49();
     }
     table tbl_act_53() {
         actions = {
-            act_50;
+            act_50();
         }
         const default_action = act_50();
     }
     table tbl_act_54() {
         actions = {
-            act_51;
+            act_51();
         }
         const default_action = act_51();
     }
     table tbl_act_55() {
         actions = {
-            act_52;
+            act_52();
         }
         const default_action = act_52();
     }
     table tbl_act_56() {
         actions = {
-            act_53;
+            act_53();
         }
         const default_action = act_53();
     }
     table tbl_act_57() {
         actions = {
-            act_54;
+            act_54();
         }
         const default_action = act_54();
     }
     table tbl_act_58() {
         actions = {
-            act_57;
+            act_57();
         }
         const default_action = act_57();
     }
     table tbl_act_59() {
         actions = {
-            act_58;
+            act_58();
         }
         const default_action = act_58();
     }
     table tbl_act_60() {
         actions = {
-            act_60;
+            act_60();
         }
         const default_action = act_60();
     }
     table tbl_act_61() {
         actions = {
-            act_72;
+            act_72();
         }
         const default_action = act_72();
     }
     table tbl_act_62() {
         actions = {
-            act_61;
+            act_61();
         }
         const default_action = act_61();
     }
     table tbl_act_63() {
         actions = {
-            act_62;
+            act_62();
         }
         const default_action = act_62();
     }
     table tbl_act_64() {
         actions = {
-            act_63;
+            act_63();
         }
         const default_action = act_63();
     }
     table tbl_act_65() {
         actions = {
-            act_64;
+            act_64();
         }
         const default_action = act_64();
     }
     table tbl_act_66() {
         actions = {
-            act_69;
+            act_69();
         }
         const default_action = act_69();
     }
     table tbl_act_67() {
         actions = {
-            act_65;
+            act_65();
         }
         const default_action = act_65();
     }
     table tbl_act_68() {
         actions = {
-            act_66;
+            act_66();
         }
         const default_action = act_66();
     }
     table tbl_act_69() {
         actions = {
-            act_67;
+            act_67();
         }
         const default_action = act_67();
     }
     table tbl_act_70() {
         actions = {
-            act_68;
+            act_68();
         }
         const default_action = act_68();
     }
     table tbl_act_71() {
         actions = {
-            act_70;
+            act_70();
         }
         const default_action = act_70();
     }
     table tbl_act_72() {
         actions = {
-            act_71;
+            act_71();
         }
         const default_action = act_71();
     }
     table tbl_act_73() {
         actions = {
-            act_73;
+            act_73();
         }
         const default_action = act_73();
     }
     table tbl_act_74() {
         actions = {
-            act_74;
+            act_74();
         }
         const default_action = act_74();
     }
     table tbl_act_75() {
         actions = {
-            act_75;
+            act_75();
         }
         const default_action = act_75();
     }
@@ -5928,19 +5928,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             default: {
                 if (hdr_19.ipv4.isValid()) {
                     tbl_act_20.apply();
-                    process_validate_outer_header_validate_outer_ipv4_header.validate_outer_ipv4_packet.apply();
+                    process_validate_outer_header_validate_outer_ipv4_header_validate_outer_ipv4_packet.apply();
                     tbl_act_21.apply();
                 }
                 else 
                     if (hdr_19.ipv6.isValid()) {
                         tbl_act_22.apply();
-                        process_validate_outer_header_validate_outer_ipv6_header.validate_outer_ipv6_packet.apply();
+                        process_validate_outer_header_validate_outer_ipv6_header_validate_outer_ipv6_packet.apply();
                         tbl_act_23.apply();
                     }
                     else 
                         if (hdr_19.mpls[0].isValid()) {
                             tbl_act_24.apply();
-                            process_validate_outer_header_validate_mpls_header.validate_mpls_packet.apply();
+                            process_validate_outer_header_validate_mpls_header_validate_mpls_packet.apply();
                             tbl_act_25.apply();
                         }
             }
@@ -5970,9 +5970,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 process_tunnel_outer_rmac_hit_0: {
                     if (hdr_25.ipv4.isValid()) {
                         tbl_act_32.apply();
-                        switch (process_tunnel_process_ipv4_vtep.ipv4_src_vtep.apply().action_run) {
-                            process_tunnel_process_ipv4_vtep.src_vtep_hit_0: {
-                                process_tunnel_process_ipv4_vtep.ipv4_dest_vtep.apply();
+                        switch (process_tunnel_process_ipv4_vtep_ipv4_src_vtep.apply().action_run) {
+                            process_tunnel_process_ipv4_vtep_src_vtep_hit_0: {
+                                process_tunnel_process_ipv4_vtep_ipv4_dest_vtep.apply();
                             }
                         }
 
@@ -5981,9 +5981,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                     else 
                         if (hdr_25.ipv6.isValid()) {
                             tbl_act_34.apply();
-                            switch (process_tunnel_process_ipv6_vtep.ipv6_src_vtep.apply().action_run) {
-                                process_tunnel_process_ipv6_vtep.src_vtep_hit_0: {
-                                    process_tunnel_process_ipv6_vtep.ipv6_dest_vtep.apply();
+                            switch (process_tunnel_process_ipv6_vtep_ipv6_src_vtep.apply().action_run) {
+                                process_tunnel_process_ipv6_vtep_src_vtep_hit_0: {
+                                    process_tunnel_process_ipv6_vtep_ipv6_dest_vtep.apply();
                                 }
                             }
 
@@ -5992,7 +5992,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                         else 
                             if (hdr_25.mpls[0].isValid()) {
                                 tbl_act_36.apply();
-                                process_tunnel_process_mpls.mpls.apply();
+                                process_tunnel_process_mpls_mpls.apply();
                                 tbl_act_37.apply();
                             }
                 }
@@ -6192,13 +6192,13 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
     table tbl_act_76() {
         actions = {
-            act_76;
+            act_76();
         }
         const default_action = act_76();
     }
     table tbl_act_77() {
         actions = {
-            act_77;
+            act_77();
         }
         const default_action = act_77();
     }
@@ -6221,13 +6221,13 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
     table tbl_act_78() {
         actions = {
-            act_78;
+            act_78();
         }
         const default_action = act_78();
     }
     table tbl_act_79() {
         actions = {
-            act_79;
+            act_79();
         }
         const default_action = act_79();
     }

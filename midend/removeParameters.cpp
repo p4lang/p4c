@@ -1,3 +1,19 @@
+/*
+Copyright 2016 VMware, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 #include "removeParameters.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
@@ -45,7 +61,8 @@ const IR::Node* RemoveTableParameters::postorder(IR::P4Table* table) {
               "%1%: unexpected parent %2%", getOriginal(), getContext()->node);
     auto result = new IR::IndexedVector<IR::Declaration>();
     for (auto p : *table->parameters->parameters) {
-        auto decl = new IR::Declaration_Variable(p->srcInfo, p->name, p->annotations, p->type, nullptr);
+        auto decl = new IR::Declaration_Variable(p->srcInfo, p->name,
+                                                 p->annotations, p->type, nullptr);
         result->push_back(decl);
     }
     original.emplace(getOriginal<IR::P4Table>());

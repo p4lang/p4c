@@ -51,13 +51,13 @@ control c(inout bit<32> arg) {
     }
     table tbl_act() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }
     table tbl_act_0() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }

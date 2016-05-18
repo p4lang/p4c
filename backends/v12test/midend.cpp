@@ -79,10 +79,10 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-	// TODO: simplify statements and expressions.
-	// This is required for the correctness of some of the following passes.
+        // TODO: simplify statements and expressions.
+        // This is required for the correctness of some of the following passes.
 
-	// Clone an action for each use, so we can specialize the action
+        // Clone an action for each use, so we can specialize the action
         // per user (e.g., for each table or direct invocation).
         new P4::LocalizeAllActions(&refMap, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),

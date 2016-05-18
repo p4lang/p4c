@@ -123,25 +123,25 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table tbl_act() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }
     table tbl_act_0() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
     table tbl_act_1() {
         actions = {
-            act_1;
+            act_1();
         }
         const default_action = act_1();
     }
     table tbl_act_2() {
         actions = {
-            act_2;
+            act_2();
         }
         const default_action = act_2();
     }

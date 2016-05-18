@@ -33,49 +33,49 @@ control ctrl() {
     }
     table tbl_act() {
         actions = {
-            act_3;
+            act_3();
         }
         const default_action = act_3();
     }
     table tbl_act_0() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
     table tbl_e() {
         actions = {
-            e;
+            e();
         }
         const default_action = e();
     }
     table tbl_act_1() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }
     table tbl_act_2() {
         actions = {
-            act_1;
+            act_1();
         }
         const default_action = act_1();
     }
     table tbl_e_0() {
         actions = {
-            e_1;
+            e_1();
         }
         const default_action = e_1();
     }
     table tbl_act_3() {
         actions = {
-            act_2;
+            act_2();
         }
         const default_action = act_2();
     }
     table tbl_act_4() {
         actions = {
-            act_4;
+            act_4();
         }
         const default_action = act_4();
     }

@@ -203,49 +203,49 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
     table tbl_act() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }
     table tbl_Drop_action() {
         actions = {
-            Drop_action_3;
+            Drop_action_3();
         }
         const default_action = Drop_action_3();
     }
     table tbl_act_0() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
     table tbl_act_1() {
         actions = {
-            act_2;
+            act_2();
         }
         const default_action = act_2();
     }
     table tbl_act_2() {
         actions = {
-            act_1;
+            act_1();
         }
         const default_action = act_1();
     }
     table tbl_act_3() {
         actions = {
-            act_3;
+            act_3();
         }
         const default_action = act_3();
     }
     table tbl_act_4() {
         actions = {
-            act_4;
+            act_4();
         }
         const default_action = act_4();
     }
     table tbl_act_5() {
         actions = {
-            act_5;
+            act_5();
         }
         const default_action = act_5();
     }
@@ -287,7 +287,7 @@ control TopDeparser(inout Parsed_packet p, packet_out b) {
     }
     table tbl_act_6() {
         actions = {
-            act_6;
+            act_6();
         }
         const default_action = act_6();
     }

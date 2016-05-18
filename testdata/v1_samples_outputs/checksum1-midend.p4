@@ -230,7 +230,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
     table tbl_act() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
@@ -247,7 +247,7 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
     table tbl_act_0() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }

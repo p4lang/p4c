@@ -157,13 +157,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     table tbl_act() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
     table tbl_act_0() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }

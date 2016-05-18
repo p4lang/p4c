@@ -12,7 +12,7 @@ control d(out bit<32> x) {
     }
     table tbl_act() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }

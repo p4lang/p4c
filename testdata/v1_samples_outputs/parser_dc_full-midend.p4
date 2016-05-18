@@ -780,13 +780,13 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
     table tbl_act() {
         actions = {
-            act;
+            act();
         }
         const default_action = act();
     }
     table tbl_act_0() {
         actions = {
-            act_0;
+            act_0();
         }
         const default_action = act_0();
     }
@@ -809,13 +809,13 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
     table tbl_act_1() {
         actions = {
-            act_1;
+            act_1();
         }
         const default_action = act_1();
     }
     table tbl_act_2() {
         actions = {
-            act_2;
+            act_2();
         }
         const default_action = act_2();
     }
