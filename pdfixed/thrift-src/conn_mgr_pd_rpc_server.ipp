@@ -29,8 +29,9 @@ public:
   SessionHandle_t client_init(const int32_t max_txn_size){
     std::cerr << "In client_init\n";
 
+    (void) max_txn_size;
     p4_pd_sess_hdl_t sess_hdl;
-    p4_pd_client_init(&sess_hdl, max_txn_size);
+    p4_pd_client_init(&sess_hdl);
     return sess_hdl;
   }
 
@@ -61,9 +62,7 @@ public:
   int32_t commit_txn(const SessionHandle_t sess_hdl, const bool hwSynchronous){
     std::cerr << "In commit_txn\n";
 
-    bool sendRsp;
-    // TODO: sendRsp discarded ...
-    return p4_pd_commit_txn(sess_hdl, hwSynchronous, &sendRsp);
+    return p4_pd_commit_txn(sess_hdl, hwSynchronous);
   }
 
   int32_t complete_operations(const SessionHandle_t sess_hdl){
