@@ -524,8 +524,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         return sourceExpression;
 
     ConstantTypeSubstitution cts(tsv, typeMap);
-    auto newInit = cts.convert(sourceExpression);
-    setType(newInit, destType);
+    auto newInit = cts.convert(sourceExpression);  // sets type
     return newInit;
 }
 
@@ -1925,6 +1924,10 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     } else if (type->is<IR::Type_Stack>()) {
         if (expression->member.name == IR::Type_Stack::next ||
             expression->member.name == IR::Type_Stack::last) {
+            auto control = findContext<IR::P4Control>();
+            if (control != nullptr)
+                ::error("%1%: 'last' and 'next' for stacks cannot be used in a control",
+                        expression);
             auto stack = type->to<IR::Type_Stack>();
             setType(getOriginal(), stack->baseType);
             setType(expression, stack->baseType);

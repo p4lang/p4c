@@ -27,7 +27,6 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
     P4::TypeMap typeMap;
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
-    // TODO: remove table parameters
     // TODO: remove action in/out/inout parameters
     // TODO: remove expressions in table key
     // TODO: break down expression into simple parts

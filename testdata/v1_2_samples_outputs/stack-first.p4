@@ -1,8 +1,8 @@
 header h {
 }
 
-control p() {
-    apply {
+parser p() {
+    state start {
         h[12] stack;
         h b = stack[3];
         b = stack.last;

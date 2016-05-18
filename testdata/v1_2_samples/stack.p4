@@ -1,10 +1,10 @@
 header h {}
 
-control p()
+parser p()
 {
-    apply {
+    state start {
         h[12] stack;
-        
+
         h b = stack[3];
         b = stack.last;
         b = stack.next;

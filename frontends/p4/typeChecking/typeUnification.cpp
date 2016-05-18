@@ -167,7 +167,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                     errorPosition, src->toString(), dest->toString());
         return false;
     } else if (dest->is<IR::Type_Tuple>()) {
-        if (src->is<IR::Type_Struct>()) {
+        if (src->is<IR::Type_Struct>() || src->is<IR::Type_Header>()) {
             // swap and try again: handled below
             return unify(errorPosition, src, dest, reportErrors);
         }
@@ -193,8 +193,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                 return false;
             return true;
         }
-    } else if (dest->is<IR::Type_Struct>()) {
-        const IR::Type_Struct *strct = dest->to<IR::Type_Struct>();
+    } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
+        auto strct = dest->to<IR::Type_StructLike>();
         if (src->is<IR::Type_Tuple>()) {
             const IR::Type_Tuple* tpl = src->to<IR::Type_Tuple>();
             if (strct->fields->size() != tpl->components->size()) {
@@ -224,12 +224,18 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                     errorPosition, src->toString(), dest->toString());
         return false;
     } else if (dest->is<IR::Type_Base>()) {
+        if (dest->is<IR::Type_Bits>() && src->is<IR::Type_InfInt>()) {
+            constraints->addUnifiableTypeVariable(src->to<IR::Type_InfInt>());
+            constraints->addEqualityConstraint(dest, src);
+            return true;
+        }
         if (!src->is<IR::Type_Base>()) {
             if (reportErrors)
                 ::error("%1%: Cannot unify %2% to %3%",
                         errorPosition, src->toString(), dest->toString());
             return false;
         }
+
         bool success = src == dest;
         if (!success) {
             if (reportErrors)
