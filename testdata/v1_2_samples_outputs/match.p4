@@ -1,4 +1,4 @@
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/git/p4c/build/../p4include/core.p4"
 
 header Ipv4_no_options_h {
     bit<4>  version;

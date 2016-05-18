@@ -20,6 +20,7 @@ class EBPFControl : public EBPFObject {
     explicit EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block);
     virtual ~EBPFControl() {}
     void emit(CodeBuilder* builder);
+    void emitDeclaration(const IR::Declaration* decl, CodeBuilder *builder);
     void emitTables(CodeBuilder* builder);
     bool build();
     EBPFTable* getTable(cstring name) const {

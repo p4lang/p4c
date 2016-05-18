@@ -12,13 +12,13 @@ namespace {
 // and then we can generate calls as proper expressions.
 // Right now "if (table.apply().hit) { ... }"
 // is broken.
-class ControlTranslationVisitor : public CodeGenInspector {
+class ControlBodyTranslationVisitor : public CodeGenInspector {
     const EBPFControl* control;
     std::set<const IR::Parameter*> toDereference;
     std::vector<cstring> saveAction;
 
  public:
-    ControlTranslationVisitor(const EBPFControl* control, CodeBuilder* builder) :
+    ControlBodyTranslationVisitor(const EBPFControl* control, CodeBuilder* builder) :
             CodeGenInspector(builder, control->program->typeMap), control(control) {}
     using CodeGenInspector::preorder;
     bool preorder(const IR::PathExpression* expression) override;
@@ -32,9 +32,8 @@ class ControlTranslationVisitor : public CodeGenInspector {
     void processMethod(const P4::ExternMethod* method);
     void processApply(const P4::ApplyMethod* method);
 };
-}  // namespace
 
-bool ControlTranslationVisitor::preorder(const IR::PathExpression* expression) {
+bool ControlBodyTranslationVisitor::preorder(const IR::PathExpression* expression) {
     auto decl = control->program->refMap->getDeclaration(expression->path, true);
     auto param = decl->getNode()->to<IR::Parameter>();
     if (param != nullptr && toDereference.count(param) > 0)
@@ -43,7 +42,7 @@ bool ControlTranslationVisitor::preorder(const IR::PathExpression* expression) {
     return false;
 }
 
-bool ControlTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
+bool ControlBodyTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
     auto mi = P4::MethodInstance::resolve(expression,
                                           control->program->refMap,
                                           control->program->typeMap);
@@ -68,7 +67,7 @@ bool ControlTranslationVisitor::preorder(const IR::MethodCallExpression* express
     return false;
 }
 
-void ControlTranslationVisitor::processMethod(const P4::ExternMethod* method) {
+void ControlBodyTranslationVisitor::processMethod(const P4::ExternMethod* method) {
     auto block = control->controlBlock->getValue(method->object->getNode());
     BUG_CHECK(block != nullptr, "Cannot locate block for %1%", method->object);
     auto extblock = block->to<IR::ExternBlock>();
@@ -87,7 +86,7 @@ void ControlTranslationVisitor::processMethod(const P4::ExternMethod* method) {
     builder->blockEnd(true);
 }
 
-void ControlTranslationVisitor::processApply(const P4::ApplyMethod* method) {
+void ControlBodyTranslationVisitor::processApply(const P4::ApplyMethod* method) {
     auto table = control->getTable(method->object->getName().name);
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
@@ -170,17 +169,17 @@ void ControlTranslationVisitor::processApply(const P4::ApplyMethod* method) {
     builder->blockEnd(true);
 }
 
-bool ControlTranslationVisitor::preorder(const IR::ExitStatement*) {
+bool ControlBodyTranslationVisitor::preorder(const IR::ExitStatement*) {
     builder->appendFormat("goto %s;", control->program->endLabel.c_str());
     return false;
 }
 
-bool ControlTranslationVisitor::preorder(const IR::ReturnStatement*) {
+bool ControlBodyTranslationVisitor::preorder(const IR::ReturnStatement*) {
     builder->appendFormat("goto %s;", control->program->endLabel.c_str());
     return false;
 }
 
-bool ControlTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
+bool ControlBodyTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
     cstring newName = control->program->refMap->newName("action_run");
     saveAction.push_back(newName);
     // This must be a table.apply().action_run
@@ -218,6 +217,7 @@ bool ControlTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
     builder->blockEnd(false);
     return false;
 }
+}  // namespace
 
 /////////////////////////////////////////////////
 
@@ -260,9 +260,29 @@ bool EBPFControl::build() {
     return true;
 }
 
+void EBPFControl::emitDeclaration(const IR::Declaration* decl, CodeBuilder* builder) {
+    if (decl->is<IR::Declaration_Variable>()) {
+        auto vd = decl->to<IR::Declaration_Variable>();
+        auto etype = EBPFTypeFactory::instance->create(vd->type);
+        builder->emitIndent();
+        etype->declare(builder, vd->name, false);
+        builder->endOfStatement(true);
+        BUG_CHECK(vd->initializer == nullptr,
+                  "%1%: declarations with initializers not supported", decl);
+        return;
+    } else if (decl->is<IR::P4Table>() ||
+               decl->is<IR::P4Action>() ||
+               decl->is<IR::Declaration_Instance>()) {
+        return;
+    }
+    BUG("%1%: not yet handled", decl);
+}
+
 void EBPFControl::emit(CodeBuilder* builder) {
+    for (auto a : *controlBlock->container->stateful)
+        emitDeclaration(a, builder);
     builder->emitIndent();
-    ControlTranslationVisitor psi(this, builder);
+    ControlBodyTranslationVisitor psi(this, builder);
     controlBlock->container->body->apply(psi);
     builder->newline();
 }

@@ -15,6 +15,8 @@ midend_SOURCES = \
 	midend/moveConstructors.h \
 	midend/moveDeclarations.cpp \
 	midend/moveDeclarations.h \
+	midend/removeParameters.cpp \
+	midend/removeParameters.h \
 	midend/removeReturns.cpp \
 	midend/removeReturns.h \
 	midend/removeLeftSlices.cpp \

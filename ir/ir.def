@@ -168,7 +168,7 @@ class ActionListElement : IAnnotated, IDeclaration {
     NullOK Vector<Expression> arguments;
 #nodbprint
 #emit
-    ID getName() const { return name->path->name; }
+    ID getName() const override { return name->path->name; }
     const Annotations* getAnnotations() const override { return annotations; }
 #end
     toString{ return name->toString(); }

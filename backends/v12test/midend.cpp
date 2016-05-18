@@ -4,6 +4,7 @@
 #include "midend/moveDeclarations.h"
 #include "midend/uniqueNames.h"
 #include "midend/removeReturns.h"
+#include "midend/removeParameters.h"
 #include "midend/moveConstructors.h"
 #include "midend/actionSynthesis.h"
 #include "midend/localizeActions.h"
@@ -34,6 +35,7 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
     // TODO: parser inlining
     // TODO: parser loop unrolling
     // TODO: simplify actions which are too complex
+    // TODO: lower enums and errors to integers
 
     PassManager simplify = {
         // Proper semantics for uninitialzed local variables in parser states:
@@ -77,7 +79,10 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-        // Clone an action for each use, so we can specialize the action
+	// TODO: simplify statements and expressions.
+	// This is required for the correctness of some of the following passes.
+
+	// Clone an action for each use, so we can specialize the action
         // per user (e.g., for each table or direct invocation).
         new P4::LocalizeAllActions(&refMap, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
@@ -86,7 +91,9 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::RemoveTableParameters(&refMap, &typeMap),
         // Exit statements are transformed into control-flow
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::RemoveExits(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),

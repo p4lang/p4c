@@ -1,5 +1,5 @@
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/git/p4c/build/../p4include/v1model.p4"
 
 header hdr {
     bit<32> a;

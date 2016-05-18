@@ -11,7 +11,7 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
         return nullptr;
 
     const IR::P4Program* result = nullptr;
-    bool compiling10 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
+    bool compiling10 = options.isv1();
     if (compiling10) {
         P4V1::Converter converter;
         converter.loadModel();

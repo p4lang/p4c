@@ -54,7 +54,7 @@ struct Check_ip_key {
 };
 enum Check_ip_0_actions {
     Reject,
-    NoAction,
+    NoAction_1,
 };
 struct Check_ip_value {
     enum Check_ip_0_actions action;
@@ -62,7 +62,7 @@ struct Check_ip_value {
         struct {
         } Reject;
         struct {
-        } NoAction;
+        } NoAction_1;
     } u;
 };
 BPF_TABLE("hash", struct Check_ip_key, struct Check_ip_value, Check_ip, 1024);
@@ -217,8 +217,10 @@ int ebpf_filter(struct __sk_buff* skb) {
     reject: { return 1; }
 
     accept:
+    u32 address_0;
+    u8 hasReturned;
     {
-        u8 hasReturned = false;
+        hasReturned = false;
         pass = true;
         if ((!headers.ipv4.ebpf_valid)) {
             pass = false;
@@ -226,67 +228,67 @@ int ebpf_filter(struct __sk_buff* skb) {
         }
         if ((!hasReturned)) {
             {
-                /* bind parameters */
-                u32 address = headers.ipv4.srcAddr;
-
-                /* construct key */
-                struct Check_ip_key key;
-                key.field0 = address;
-                /* value */
-                struct Check_ip_value *value;
-                /* perform lookup */
-                value = Check_ip.lookup(&key);
-                if (value == NULL) {
-                    /* miss; find default action */
-                    value = Check_ip_defaultAction.lookup(&ebpf_zero);
-                }
-                if (value != NULL) {
-                    /* run action */
-                    switch (value->action) {
-                        case Reject: 
-                        {
-                            pass = false;
+                address_0 = headers.ipv4.srcAddr;
+                {
+                    /* construct key */
+                    struct Check_ip_key key;
+                    key.field0 = address_0;
+                    /* value */
+                    struct Check_ip_value *value;
+                    /* perform lookup */
+                    value = Check_ip.lookup(&key);
+                    if (value == NULL) {
+                        /* miss; find default action */
+                        value = Check_ip_defaultAction.lookup(&ebpf_zero);
+                    }
+                    if (value != NULL) {
+                        /* run action */
+                        switch (value->action) {
+                            case Reject: 
+                            {
+                                pass = false;
+                            }
+                            break;
+                            case NoAction_1: 
+                            {
+                            }
+                            break;
                         }
-                        break;
-                        case NoAction: 
-                        {
-                        }
-                        break;
                     }
                 }
-            }
 
+            }
             {
-                /* bind parameters */
-                u32 address = headers.ipv4.dstAddr;
-
-                /* construct key */
-                struct Check_ip_key key;
-                key.field0 = address;
-                /* value */
-                struct Check_ip_value *value;
-                /* perform lookup */
-                value = Check_ip.lookup(&key);
-                if (value == NULL) {
-                    /* miss; find default action */
-                    value = Check_ip_defaultAction.lookup(&ebpf_zero);
-                }
-                if (value != NULL) {
-                    /* run action */
-                    switch (value->action) {
-                        case Reject: 
-                        {
-                            pass = false;
+                address_0 = headers.ipv4.dstAddr;
+                {
+                    /* construct key */
+                    struct Check_ip_key key;
+                    key.field0 = address_0;
+                    /* value */
+                    struct Check_ip_value *value;
+                    /* perform lookup */
+                    value = Check_ip.lookup(&key);
+                    if (value == NULL) {
+                        /* miss; find default action */
+                        value = Check_ip_defaultAction.lookup(&ebpf_zero);
+                    }
+                    if (value != NULL) {
+                        /* run action */
+                        switch (value->action) {
+                            case Reject: 
+                            {
+                                pass = false;
+                            }
+                            break;
+                            case NoAction_1: 
+                            {
+                            }
+                            break;
                         }
-                        break;
-                        case NoAction: 
-                        {
-                        }
-                        break;
                     }
                 }
-            }
 
+            }
         }
     }
     ebpf_end:

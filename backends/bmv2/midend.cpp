@@ -6,6 +6,8 @@
 #include "midend/moveDeclarations.h"
 #include "midend/removeReturns.h"
 #include "midend/moveConstructors.h"
+#include "midend/localizeActions.h"
+#include "midend/removeParameters.h"
 #include "midend/actionSynthesis.h"
 #include "midend/local_copyprop.h"
 #include "midend/removeLeftSlices.h"
@@ -86,6 +88,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions& options, const IR::P4P
     P4::InlineWorkList toInline;
     P4::ActionsInlineList actionsToInline;
     PassManager midEnd = {
+        // Inlining
         new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
         new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
@@ -93,6 +96,20 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions& options, const IR::P4P
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+	// TODO: simplify statements and expressions.
+	// This is required for the correctness of some of the following passes.
+
+	// Clone an action for each use, so we can specialize the action
+        // per user (e.g., for each table or direct invocation).
+        new P4::LocalizeAllActions(&refMap, isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        // Table and action parameters also get unique names
+        new P4::UniqueParameters(&refMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::RemoveTableParameters(&refMap, &typeMap),
+        // Final simplifications
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),

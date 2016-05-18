@@ -146,6 +146,9 @@ def check_generated_files(options, tmpdir, expecteddir):
                 return result
     return SUCCESS
 
+def file_name(tmpfolder, base, suffix, ext):
+    return tmpfolder + "/" + base + suffix + ext
+
 def process_file(options, argv):
     assert isinstance(options, Options)
 
@@ -158,8 +161,7 @@ def process_file(options, argv):
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + basename                  # after parsing
-    referenceOutputs = "FrontEnd_11,FrontEnd_12,MidEnd_26_Evaluator"
-    lastfile = tmpdir + "/" + base + "-FrontEnd_12_RemoveAllUnusedDeclarations" + ext    # last file produced by front-end
+    referenceOutputs = "FrontEnd_11,FrontEnd_12,MidEnd_28_Evaluator"
     stderr = tmpdir + "/" + basename + "-stderr"
 
     if not os.path.isfile(options.p4filename):
@@ -182,12 +184,30 @@ def process_file(options, argv):
         else:
             result = SUCCESS
 
+    # Canonicalize the generated file names
+    lastFile = None
+    firstFile = file_name(tmpdir, base, "-FrontEnd_11_SimplifyControlFlow", ext)
+    if os.path.isfile(firstFile):
+        newName = file_name(tmpdir, base, "-first", ext)
+        os.rename(firstFile, newName)
+        lastFile = newName
+    midFile = file_name(tmpdir, base, "-FrontEnd_12_RemoveAllUnusedDeclarations", ext)
+    if os.path.isfile(midFile):
+        newName = file_name(tmpdir, base, "-frontend", ext)
+        os.rename(midFile, newName)
+        lastFile = newName
+    endFile = file_name(tmpdir, base, "-MidEnd_28_Evaluator", ext)
+    if os.path.isfile(endFile):
+        newName = file_name(tmpdir, base, "-midend", ext)
+        os.rename(endFile, newName)
+        lastFile = newName
+
     if (result == SUCCESS):
         result = check_generated_files(options, tmpdir, expected_dirname);
     if (result == SUCCESS) and (not expected_error):
         result = recompile_file(options, ppfile, False)
-    if (result == SUCCESS) and (not expected_error):
-        result = recompile_file(options, lastfile, True)
+    if (result == SUCCESS) and (not expected_error) and (lastFile is not None):
+        result = recompile_file(options, lastFile, True)
 
     if options.cleanupTmp:
         if options.verbose:

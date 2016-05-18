@@ -44,3 +44,11 @@ cstring cstring::substr(size_t start, size_t length) const {
     std::string s = str;
     return s.substr(start, length);
 }
+
+cstring cstring::replace(char c, char with) const {
+    char* dup = strdup(c_str());
+    for (char* p = dup; *p; ++p)
+        if (*p == c)
+            *p = with;
+    return cstring(dup);
+}

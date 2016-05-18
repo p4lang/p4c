@@ -17,13 +17,13 @@ class ReferenceMap final : public ProgramMap {
     std::set<cstring> usedNames;
 
  public:
-    ReferenceMap() : ProgramMap("ReferenceMap") {}
+    ReferenceMap();
     const IR::IDeclaration* getDeclaration(const IR::Path* path, bool notNull = false) const;
     void setDeclaration(const IR::Path* path, const IR::IDeclaration* decl);
     void print() const { dbprint(std::cout); }
     void dbprint(std::ostream& cout) const;
     cstring newName(cstring base);
-    void clear() { program = nullptr; pathToDeclaration.clear(); usedNames.clear(); used.clear(); }
+    void clear();
     bool isUsed(const IR::IDeclaration* decl) const { return used.count(decl) > 0; }
     void usedName(cstring name) { usedNames.insert(name); }
 };

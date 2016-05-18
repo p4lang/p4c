@@ -15,8 +15,8 @@ namespace P4 {
 // control c() {
 //   action x(in bit b) { ... }
 //   table _tmp() {
-//     actions = { x; }
-//     const default_action = x(e);
+//     actions = { x(e); }
+//     const default_action = x();
 //   }
 //   apply { _tmp.apply(); }
 // }

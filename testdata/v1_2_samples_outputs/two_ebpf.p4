@@ -1,5 +1,5 @@
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/core.p4"
-#include "/home/mbudiu/barefoot/git/p4c/build/../p4include/ebpf_model.p4"
+#include "/home/mbudiu/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/git/p4c/build/../p4include/ebpf_model.p4"
 
 typedef bit<48> @ethernetaddress EthernetAddress;
 typedef bit<32> @ipv4address IPv4Address;

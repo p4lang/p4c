@@ -54,7 +54,7 @@ struct Check_src_ip_key {
 };
 enum Check_src_ip_0_actions {
     Reject,
-    NoAction,
+    NoAction_1,
 };
 struct Check_src_ip_value {
     enum Check_src_ip_0_actions action;
@@ -63,7 +63,7 @@ struct Check_src_ip_value {
             u32 add;
         } Reject;
         struct {
-        } NoAction;
+        } NoAction_1;
     } u;
 };
 BPF_TABLE("hash", struct Check_src_ip_key, struct Check_src_ip_value, Check_src_ip, 1024);
@@ -242,7 +242,7 @@ int ebpf_filter(struct __sk_buff* skb) {
                         headers.ipv4.srcAddr = value->u.Reject.add;
                     }
                     break;
-                    case NoAction: 
+                    case NoAction_1: 
                     {
                     }
                     break;
@@ -256,7 +256,7 @@ int ebpf_filter(struct __sk_buff* skb) {
                 pass = false;
             }
             break;
-            case NoAction:
+            case NoAction_1:
             {
             }
             break;

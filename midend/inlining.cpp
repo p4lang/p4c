@@ -215,7 +215,7 @@ class ComputeNewNames : public Inspector {
         BUG_CHECK(decl->is<IR::IAnnotated>(), "%1%: no annotations", decl);
         cstring name = nameFromAnnotation(decl->to<IR::IAnnotated>()->getAnnotations(), decl);
         cstring extName = prefix + "." + name;
-        cstring baseName = prefix + "_" + name;
+        cstring baseName = extName.replace('.', '_');
         cstring newName = refMap->newName(baseName);
         renameMap->setNewName(decl, newName, extName);
     }

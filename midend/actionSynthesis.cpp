@@ -10,13 +10,27 @@ const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statemen
         return statement;
     auto ac = mi->to<ActionCall>();
 
+    auto action = ac->action;
+    auto directionArgs = new IR::Vector<IR::Expression>();
+    auto mc = statement->methodCall;
+
+    auto it = action->parameters->parameters->begin();
+    auto arg = mc->arguments->begin();
+    for (; it != action->parameters->parameters->end(); ++it) {
+        auto p = *it;
+        if (p->direction == IR::Direction::None)
+            break;
+        directionArgs->push_back(*arg);
+        ++arg;
+    }
+
     // Action invocation
     BUG_CHECK(ac->expr->method->is<IR::PathExpression>(),
               "%1%: Expected a PathExpression", ac->expr->method);
     auto actionpath = new IR::PathExpression(ac->action->name);
     auto actinst = new IR::ActionListElement(statement->srcInfo,
                                              IR::Annotations::empty,
-                                             actionpath, nullptr);
+                                             actionpath, directionArgs);
     auto actions = new IR::IndexedVector<IR::ActionListElement>();
     actions->push_back(actinst);
     // Action list property
@@ -26,7 +40,14 @@ const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statemen
         IR::ID(IR::TableProperties::actionsPropertyName),
         IR::Annotations::empty, actlist, false);
     // default action property
-    auto defactval = new IR::ExpressionValue(Util::SourceInfo(), statement->methodCall);
+    auto otherArgs = new IR::Vector<IR::Expression>();
+    for (; it != action->parameters->parameters->end(); ++it) {
+        otherArgs->push_back(*arg);
+        ++arg;
+    }
+    BUG_CHECK(arg == mc->arguments->end(), "%1%: mismatched arguments", mc);
+    auto amce = new IR::MethodCallExpression(mc->srcInfo, mc->method, mc->typeArguments, otherArgs);
+    auto defactval = new IR::ExpressionValue(Util::SourceInfo(), amce);
     auto defprop = new IR::TableProperty(
         Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName),
         IR::Annotations::empty, defactval, true);

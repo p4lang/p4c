@@ -1,7 +1,18 @@
 #include "referenceMap.h"
+#include "frontends/p4/reservedWords.h"
 #include <sstream>
 
 namespace P4 {
+
+ReferenceMap::ReferenceMap() : ProgramMap("ReferenceMap") { clear(); }
+
+void ReferenceMap::clear() {
+    pathToDeclaration.clear();
+    usedNames.clear();
+    used.clear();
+    usedNames.insert(P4::reservedWords.begin(), P4::reservedWords.end());
+}
+
 void ReferenceMap::setDeclaration(const IR::Path* path, const IR::IDeclaration* decl) {
     CHECK_NULL(path);
     CHECK_NULL(decl);

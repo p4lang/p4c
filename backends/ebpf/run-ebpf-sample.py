@@ -125,8 +125,8 @@ def process_v1_2_file(options, argv):
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + base + ".c"
-    # stderr = tmpdir + "/" + basename + "-stderr"
-    stderr = None
+    stderr = tmpdir + "/" + basename + "-stderr"
+    #stderr = None
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
@@ -146,8 +146,8 @@ def process_v1_2_file(options, argv):
         else:
             result = SUCCESS
 
-    if (result == SUCCESS):
-        result = check_generated_files(options, tmpdir, expected_dirname);
+    #if (result == SUCCESS):
+    #    result = check_generated_files(options, tmpdir, expected_dirname);
 
     if options.cleanupTmp:
         if options.verbose:
