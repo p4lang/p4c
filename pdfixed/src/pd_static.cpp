@@ -49,8 +49,7 @@ p4_pd_cleanup(void) {
 }
 
 p4_pd_status_t
-p4_pd_client_init(p4_pd_sess_hdl_t *sess_hdl, uint32_t max_txn_size) {
-  (void) max_txn_size;
+p4_pd_client_init(p4_pd_sess_hdl_t *sess_hdl) {
   *sess_hdl = session_hdl++;
   return 0;
 }
@@ -80,8 +79,8 @@ p4_pd_abort_txn(p4_pd_sess_hdl_t shdl) {
 }
 
 p4_pd_status_t
-p4_pd_commit_txn(p4_pd_sess_hdl_t shdl, bool hwSynchronous, bool *sendRsp) {
-  (void) shdl; (void) hwSynchronous; (void) sendRsp;
+p4_pd_commit_txn(p4_pd_sess_hdl_t shdl, bool hwSynchronous) {
+  (void) shdl; (void) hwSynchronous;
   return 0;
 }
 

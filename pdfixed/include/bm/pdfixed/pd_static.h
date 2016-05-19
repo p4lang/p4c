@@ -34,7 +34,7 @@ void
 p4_pd_cleanup(void);
 
 p4_pd_status_t
-p4_pd_client_init(p4_pd_sess_hdl_t *sess_hdl, uint32_t max_txn_size);
+p4_pd_client_init(p4_pd_sess_hdl_t *sess_hdl);
 
 p4_pd_status_t
 p4_pd_client_cleanup(p4_pd_sess_hdl_t sess_hdl);
@@ -49,7 +49,7 @@ p4_pd_status_t
 p4_pd_abort_txn(p4_pd_sess_hdl_t shdl);
 
 p4_pd_status_t
-p4_pd_commit_txn(p4_pd_sess_hdl_t shdl, bool hwSynchronous, bool *sendRsp);
+p4_pd_commit_txn(p4_pd_sess_hdl_t shdl, bool hwSynchronous);
 
 p4_pd_status_t
 p4_pd_complete_operations(p4_pd_sess_hdl_t shdl);
