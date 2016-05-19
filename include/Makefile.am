@@ -64,4 +64,5 @@ bm/bm_sim/switch.h \
 bm/bm_sim/simple_pre.h \
 bm/bm_sim/simple_pre_lag.h \
 bm/bm_sim/tables.h \
+bm/bm_sim/target_parser.h \
 bm/bm_sim/transport.h

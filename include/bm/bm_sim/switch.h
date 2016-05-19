@@ -84,6 +84,7 @@
 #include "dev_mgr.h"
 #include "phv_source.h"
 #include "lookup_structures.h"
+#include "target_parser.h"
 
 namespace bm {
 
@@ -175,7 +176,17 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! int status = simple_switch->init_from_command_line_options(argc, argv);
   //! if (status != 0) std::exit(status);
   //! @endcode
-  int init_from_command_line_options(int argc, char *argv[]);
+  //! If your target has custom CLI options, you can provide a pointer \p tp to
+  //! a secondary parser which implements the TargetParserIface interface. The
+  //! bm::TargetParserIface::parse method will be called with the unrecognized
+  //! options. Target specific options need to appear after bmv2 general
+  //! options on the command line, and be separated from them by `--`. For
+  //! example:
+  //! @code
+  //! <my_target_exe> prog.json -i 0@eth0 -- --my-option v
+  //! @endcode
+  int init_from_command_line_options(int argc, char *argv[],
+                                     TargetParserIface *tp = nullptr);
 
   //! Retrieve the shared pointer to an object of type `T` previously added to
   //! the switch using add_component().

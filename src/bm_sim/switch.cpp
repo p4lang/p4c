@@ -106,9 +106,10 @@ SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
 }
 
 int
-SwitchWContexts::init_from_command_line_options(int argc, char *argv[]) {
+SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
+                                                TargetParserIface *tp) {
   OptionsParser parser;
-  parser.parse(argc, argv);
+  parser.parse(argc, argv, tp);
 
   notifications_addr = parser.notifications_addr;
   auto transport = std::shared_ptr<TransportIface>(

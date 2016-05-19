@@ -20,6 +20,7 @@
 
 #include <bm/bm_sim/options_parse.h>
 #include <bm/bm_sim/event_logger.h>
+#include <bm/bm_sim/logger.h>
 
 #include <boost/program_options.hpp>
 
@@ -74,7 +75,7 @@ void validate(boost::any& v,  // NOLINT(runtime/references)
 }
 
 void
-OptionsParser::parse(int argc, char *argv[]) {
+OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
   namespace po = boost::program_options;
 
   po::options_description description("Options");
@@ -124,31 +125,50 @@ OptionsParser::parse(int argc, char *argv[]) {
 
   po::options_description hidden;
   hidden.add_options()
-    ("input-config", po::value<std::string>(), "input config");
+      ("input-config", po::value<std::string>(), "input config")
+      ("to-pass-further", po::value<std::vector<std::string> >(), "");
 
   po::options_description options;
   options.add(description).add(hidden);
 
   po::positional_options_description positional;
   positional.add("input-config", 1);
+  positional.add("to-pass-further", -1);
 
   po::variables_map vm;
+  auto parser = po::command_line_parser(argc, argv);
+  parser.options(options).positional(positional);
+  std::vector<std::string> to_pass_further = {};
   try {
-    po::store(po::command_line_parser(argc, argv).
-              options(options).
-              positional(positional).run(), vm);
+    po::parsed_options parsed = parser.run();
+    po::store(parsed, vm);
     po::notify(vm);
+    if (tp && vm.count("to-pass-further")) {
+      to_pass_further = vm["to-pass-further"].as<std::vector<std::string> >();
+    }
   }
   catch(...) {
     std::cout << "Error while parsing command line arguments\n";
     std::cout << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
     std::cout << description;
+    if (tp) {
+      std::cout << "Your target comes with its own command line parser, "
+                << "make sure you separate general bmv2 options from, "
+                << "target specific options with '--'\n";
+    }
     exit(1);
   }
 
   if (vm.count("help")) {
     std::cout << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
     std::cout << description;
+    if (tp) {
+      std::cout << "This target also comes with its own command line parser, "
+                << "make sure you separate general bmv2 options from, "
+                << "target specific options with '--'\n"
+                << "Target specific options:\n";
+      tp->help_msg(&std::cout);
+    }
     exit(0);
   }
 
@@ -267,6 +287,13 @@ OptionsParser::parse(int argc, char *argv[]) {
 
   if (vm.count("restore-state")) {
     state_file_path = vm["restore-state"].as<std::string>();
+  }
+
+  if (tp) {
+    std::cout << "Calling target program-options parser\n";
+    if (tp->parse(to_pass_further, &std::cout)) {
+      std::cout << "Target parser returned an error\n";
+    }
   }
 }
 
