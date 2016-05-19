@@ -50,3 +50,5 @@ V12BUGS = \
 XFAIL_TESTS += \
     $(V12BUGS) \
     v12/testdata/v1_2_samples/cast-call.p4.test
+
+XFAIL_TESTS += v12/testdata/v1_2_samples/ternary2-bmv2.p4.test

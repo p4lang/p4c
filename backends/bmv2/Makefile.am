@@ -49,3 +49,5 @@ XFAIL_TESTS += \
     bmv2/testdata/v1_samples/09-IPv4OptionsUnparsed.p4.test \
     bmv2/testdata/v1_samples/TLV_parsing.p4.test \
     bmv2/testdata/v1_samples/truncate.p4.test
+
+XFAIL_TESTS += bmv2/testdata/v1_2_samples/ternary2-bmv2.p4.test
