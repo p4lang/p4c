@@ -56,6 +56,7 @@ stateful.cpp \
 switch.cpp \
 simple_pre.cpp \
 simple_pre_lag.cpp \
+target_parser.cpp \
 transport.cpp \
 utils.h \
 xxhash.c \

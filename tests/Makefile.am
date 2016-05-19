@@ -50,7 +50,8 @@ test_fields \
 test_devmgr \
 test_packet \
 test_extern \
-test_switch
+test_switch \
+test_target_parser
 
 check_PROGRAMS = $(TESTS) test_all
 
@@ -79,6 +80,7 @@ test_devmgr_SOURCES        = $(common_source) test_devmgr.cpp
 test_packet_SOURCES        = $(common_source) test_packet.cpp
 test_extern_SOURCES        = $(common_source) test_extern.cpp
 test_switch_SOURCES        = $(common_source) test_switch.cpp
+test_target_parser_SOURCES = $(common_source) test_target_parser.cpp
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
 test_checksums.cpp \
@@ -103,7 +105,8 @@ test_fields.cpp \
 test_devmgr.cpp \
 test_packet.cpp \
 test_extern.cpp \
-test_switch.cpp
+test_switch.cpp \
+test_target_parser.cpp
 
 EXTRA_DIST = \
 testdata/en0.pcap \
