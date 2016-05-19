@@ -27,6 +27,7 @@
 #include <map>
 
 #include "logger.h"
+#include "target_parser.h"
 
 namespace bm {
 
@@ -55,7 +56,7 @@ class OptionsParser {
   friend class SwitchWContexts;
 
  public:
-  void parse(int argc, char *argv[]);
+  void parse(int argc, char *argv[], TargetParserIface *tp);
 
  private:
   std::string config_file_path{};
