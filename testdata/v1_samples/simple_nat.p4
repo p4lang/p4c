@@ -145,7 +145,7 @@ parser parse_tcp {
 field_list tcp_checksum_list {
         ipv4.srcAddr;
         ipv4.dstAddr;
-        8'0;
+        8w0;
         ipv4.protocol;
         meta.tcpLength;
         tcp.srcPort;
