@@ -37,8 +37,9 @@ namespace bm {
 
 class MatchTableAbstract : public NamedP4Object {
  public:
+  friend class handle_iterator;
+
   typedef Counter::counter_value_t counter_value_t;
-  typedef MatchUnitAbstract_::handle_iterator handle_iterator;
 
   struct ActionEntry {
     ActionEntry() { }
@@ -66,6 +67,51 @@ class MatchTableAbstract : public NamedP4Object {
 
     ActionFnEntry action_fn{};
     const ControlFlowNode *next_node{nullptr};
+  };
+
+  class handle_iterator
+      : public std::iterator<std::forward_iterator_tag, handle_t> {
+   public:
+    handle_iterator(const MatchTableAbstract *mt,
+                    const MatchUnitAbstract_::handle_iterator &it)
+        : mt(mt), it(it) { }
+
+    const entry_handle_t &operator*() const {
+      ReadLock lock = mt->lock_read();
+      return *it;
+    }
+
+    const entry_handle_t *operator->() const {
+      ReadLock lock = mt->lock_read();
+      return it.operator->();
+    }
+
+    bool operator==(const handle_iterator &other) const {
+      ReadLock lock = mt->lock_read();
+      return (it == other.it);
+    }
+
+    bool operator!=(const handle_iterator &other) const {
+      ReadLock lock = mt->lock_read();
+      return !(*this == other);
+    }
+
+    handle_iterator &operator++() {
+      ReadLock lock = mt->lock_read();
+      it++;
+      return *this;
+    }
+
+    const handle_iterator operator++(int) {
+      // Use operator++()
+      const handle_iterator old(*this);
+      ++(*this);
+      return old;
+    }
+
+   private:
+    const MatchTableAbstract *mt;
+    MatchUnitAbstract_::handle_iterator it;
   };
 
  public:
@@ -132,8 +178,8 @@ class MatchTableAbstract : public NamedP4Object {
 
   void sweep_entries(std::vector<entry_handle_t> *entries) const;
 
-  handle_iterator handles_begin() const { return match_unit_->handles_begin(); }
-  handle_iterator handles_end() const { return match_unit_->handles_end(); }
+  handle_iterator handles_begin() const;
+  handle_iterator handles_end() const;
 
   MatchTableAbstract(const MatchTableAbstract &other) = delete;
   MatchTableAbstract &operator=(const MatchTableAbstract &other) = delete;

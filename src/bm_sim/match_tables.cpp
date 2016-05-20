@@ -255,6 +255,18 @@ MatchTableAbstract::sweep_entries(std::vector<entry_handle_t> *entries) const {
   match_unit_->sweep_entries(entries);
 }
 
+MatchTableAbstract::handle_iterator
+MatchTableAbstract::handles_begin() const {
+  ReadLock lock = lock_read();
+  return handle_iterator(this, match_unit_->handles_begin());
+}
+
+MatchTableAbstract::handle_iterator
+MatchTableAbstract::handles_end() const {
+  ReadLock lock = lock_read();
+  return handle_iterator(this, match_unit_->handles_end());
+}
+
 const ControlFlowNode *
 MatchTableAbstract::get_next_node(p4object_id_t action_id) const {
   if (has_next_node_hit)
