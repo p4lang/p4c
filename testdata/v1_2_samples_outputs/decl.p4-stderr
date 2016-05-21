@@ -1,13 +1,13 @@
-../testdata/v1_2_samples/decl.p4(21): warning: y shadows y
+../testdata/v1_2_samples/decl.p4(37): warning: y shadows y
                     bit y;
                         ^
-../testdata/v1_2_samples/decl.p4(17)
+../testdata/v1_2_samples/decl.p4(33)
                 bit y;
                     ^
-../testdata/v1_2_samples/decl.p4(17): warning: y shadows y
+../testdata/v1_2_samples/decl.p4(33): warning: y shadows y
                 bit y;
                     ^
-../testdata/v1_2_samples/decl.p4(14)
+../testdata/v1_2_samples/decl.p4(30)
             bit y;
                 ^
 warning: Program does not contain a `main' module
