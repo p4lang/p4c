@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
     P4::TypeMap typeMap;
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
-    // TODO: remove action in/out/inout parameters
     // TODO: remove expressions in table key
     // TODO: break down expression into simple parts
     // TODO: def-use analysis
@@ -51,7 +50,6 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
     // TODO: parser loop unrolling
     // TODO: simplify actions which are too complex
     // TODO: lower enums and errors to integers
-
     PassManager simplify = {
         // Proper semantics for uninitialzed local variables in parser states:
         // headers must be invalidated

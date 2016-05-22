@@ -75,7 +75,7 @@ Installing dependences on OS X:
 
 - You may need to install brew for useful utilities:
   `sudo /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
-  
+
 - `sudo brew install autoconf automake libtool boost`
 
 - You can recompile the C++ garbage-collector from sources from `https://github.com/ivmai/bdwgc.git`
@@ -84,7 +84,7 @@ Installing dependences on OS X:
   to `configure --enable-cxx`)
 
 # Development tools
- 
+
 - We recommend installing a new version of gdb, because older gdb versions
   do not always handle C++11 correctly.  See `http://ftp.gnu.org/gnu/gdb`.
 
@@ -192,54 +192,17 @@ output:
 
 # How to contribute
 
-* do not commit directly into master
 * do write unit test code
 * code has to be reviewed before it is merged
 * make sure all tests pass when you send a pull request (only PASS tests allowed)
 * make sure `make cpplint` produces no errors
-* only commit code within a branch
 
 # Git usage
 
-The code is in github, managed using the `git` command-line tool.
-
-* Use rebase, not merge from master.
-  - https://www.atlassian.com/git/tutorials/merging-vs-rebasing/
-  - http://nathanleclaire.com/blog/2014/09/14/dont-be-scared-of-git-rebase/
-* Rebase against origin/master frequently to get changes from master into your tree
-  without adding spurious commits.
-
-```
-git branch -b your-branch-name       # create & switch to personal branch
-git push origin your-branch-name     # Setup the remote to track your changes.
-
-# make your edits in your own branch
-git commit -m"message"            # commit your changes
-
-# rebase against master often to pull in changes
-git rebase origin/master 
-
-# Ready to push? squash commits into a single one
-git rebase -i master
-
-#This will open up an editor will have the list of your commit log.
-#Usually keep the first as "pick", and the rest as "squash".
-#This gives one commit per work item.
-
-#Now push to your remote tracking branch
-
-git push origin your-branch-name  # push only to your branch, never to master
-```
-
-* create a pull request and assign it to ChrisDodd
-  (seems to require interacting with the github web site)
-
-* only ChrisDodd can merge branches into master
-
+* Fork the p4lang/p4c repository on github
+  (see https://help.github.com/articles/fork-a-repo/)
+* After committing changes, create a pull request and assign it to ChrisDodd
 * Incorporate all review comments.
-
-* Squash extra commits, push, rebasing your branch against
-  origin/master if necessary.
 
 # Debugging
 
@@ -311,6 +274,6 @@ autotools.
     at the level of autotools.
     * `testdata/v1_errors`
     * `testdata/v1_2_errors`
-  * Expected intermediate compiler outputs.  
+  * Expected intermediate compiler outputs.
     * `testdata/v1_2_samples_outputs` outputs of positive tests
     * `testdata/v1_2_errors_outputs` outputs of negative tests
