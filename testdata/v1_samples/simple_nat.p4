@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2013-present Barefoot Networks, Inc. 
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ parser parse_tcp {
 field_list tcp_checksum_list {
         ipv4.srcAddr;
         ipv4.dstAddr;
-        8'0;
+        8w0;
         ipv4.protocol;
         meta.tcpLength;
         tcp.srcPort;

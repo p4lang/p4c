@@ -1,5 +1,5 @@
-#include "/home/mbudiu/git/p4c/build/../p4include/core.p4"
-#include "/home/mbudiu/git/p4c/build/../p4include/v1model.p4"
+#include "/home/cdodd/p4c/p4include/core.p4"
+#include "/home/cdodd/p4c/p4include/v1model.p4"
 
 struct routing_metadata_t {
     bit<32> nhop_ipv4;
