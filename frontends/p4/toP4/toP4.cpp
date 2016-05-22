@@ -1048,14 +1048,7 @@ bool ToP4::preorder(const IR::ExpressionValue* v) {
 bool ToP4::preorder(const IR::ActionListElement* ale) {
     dump(3);
     visit(ale->annotations);
-    visit(ale->name);
-    if (ale->arguments != nullptr) {
-        builder.append("(");
-        setVecSep(", ");
-        visit(ale->arguments);
-        doneVec();
-        builder.append(")");
-    }
+    visit(ale->expression);
     return false;
 }
 

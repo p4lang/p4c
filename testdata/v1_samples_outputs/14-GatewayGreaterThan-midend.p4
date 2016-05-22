@@ -142,8 +142,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t1") table t1_0() {
         actions = {
-            nop;
-            NoAction_1;
+            nop();
+            NoAction_1();
         }
         default_action = NoAction_1();
     }

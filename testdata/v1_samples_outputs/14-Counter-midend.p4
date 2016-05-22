@@ -138,8 +138,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t1") table t1_0() {
         actions = {
-            count_c1_0;
-            NoAction_1;
+            count_c1_0();
+            NoAction_1();
         }
         default_action = NoAction_1();
     }

@@ -186,9 +186,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("rewrite_mac") table rewrite_mac() {
         actions = {
-            on_miss;
-            rewrite_src_dst_mac;
-            NoAction;
+            on_miss();
+            rewrite_src_dst_mac();
+            NoAction();
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
@@ -219,8 +219,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("bd") table bd() {
         actions = {
-            set_vrf;
-            NoAction;
+            set_vrf();
+            NoAction();
         }
         key = {
             meta.ingress_metadata.bd: exact;
@@ -230,9 +230,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv4_fib") table ipv4_fib() {
         actions = {
-            on_miss;
-            fib_hit_nexthop;
-            NoAction;
+            on_miss();
+            fib_hit_nexthop();
+            NoAction();
         }
         key = {
             meta.ingress_metadata.vrf: exact;
@@ -243,9 +243,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv4_fib_lpm") table ipv4_fib_lpm() {
         actions = {
-            on_miss;
-            fib_hit_nexthop;
-            NoAction;
+            on_miss();
+            fib_hit_nexthop();
+            NoAction();
         }
         key = {
             meta.ingress_metadata.vrf: exact;
@@ -256,9 +256,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("nexthop") table nexthop() {
         actions = {
-            on_miss;
-            set_egress_details;
-            NoAction;
+            on_miss();
+            set_egress_details();
+            NoAction();
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
@@ -268,8 +268,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("port_mapping") table port_mapping() {
         actions = {
-            set_bd;
-            NoAction;
+            set_bd();
+            NoAction();
         }
         key = {
             standard_metadata.ingress_port: exact;

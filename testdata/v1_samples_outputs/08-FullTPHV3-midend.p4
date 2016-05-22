@@ -853,15 +853,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t1") table t1_0() {
         actions = {
-            a1;
-            NoAction_1;
+            a1();
+            NoAction_1();
         }
         default_action = NoAction_1();
     }
     @name("use_16bit_fields_1") table use_16bit_fields() {
         actions = {
-            set_egress_spec;
-            NoAction_2;
+            set_egress_spec();
+            NoAction_2();
         }
         key = {
             meta.m.field_16_01: exact;
@@ -933,8 +933,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("use_16bit_fields_2") table use_16bit_fields_0() {
         actions = {
-            set_egress_spec_1;
-            NoAction_3;
+            set_egress_spec_1();
+            NoAction_3();
         }
         key = {
             meta.m.field_16_65: exact;
@@ -974,8 +974,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("use_32bit_fields_1") table use_32bit_fields() {
         actions = {
-            set_egress_spec_2;
-            NoAction_4;
+            set_egress_spec_2();
+            NoAction_4();
         }
         key = {
             meta.m.field_32_01: exact;
@@ -1015,8 +1015,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("use_32bit_fields_2") table use_32bit_fields_0() {
         actions = {
-            set_egress_spec_3;
-            NoAction_5;
+            set_egress_spec_3();
+            NoAction_5();
         }
         key = {
             meta.m.field_32_33: exact;
@@ -1055,8 +1055,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("use_8bit_fields") table use_8bit_fields_0() {
         actions = {
-            set_egress_spec_4;
-            NoAction_6;
+            set_egress_spec_4();
+            NoAction_6();
         }
         key = {
             meta.m.field_8_01: exact;

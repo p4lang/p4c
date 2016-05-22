@@ -8,9 +8,9 @@ control p(inout bit<1> bt) {
     }
     table t() {
         actions = {
-            b;
+            b();
         }
-        default_action = b;
+        default_action = b();
     }
     apply {
         t.apply();

@@ -6,9 +6,9 @@ action Global1() {
 control c() {
     table t() {
         actions = {
-            Global;
+            Global();
         }
-        default_action = Global;
+        default_action = Global();
     }
     apply {
         t.apply();

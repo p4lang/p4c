@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,10 +27,12 @@ namespace P4 {
 class Cloner : public Transform {
  public:
     Cloner() { setName("Cloner"); }
-    const IR::Node* clone(const IR::Node* node)
-    { return node->apply(*this); }
     const IR::Node* postorder(IR::PathExpression* path) override
     { return new IR::PathExpression(path->path->clone()); }
+
+    template<typename T>
+    const T* clone(const IR::Node* node)
+    { return node->apply(*this)->to<T>(); }
 };
 
 }  // namespace P4

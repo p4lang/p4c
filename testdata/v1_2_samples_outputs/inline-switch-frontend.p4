@@ -5,10 +5,10 @@ control c(out bit<32> x) {
     }
     table t() {
         actions = {
-            a1;
-            a2;
+            a1();
+            a2();
         }
-        default_action = a1;
+        default_action = a1();
     }
     apply {
         switch (t.apply().action_run) {

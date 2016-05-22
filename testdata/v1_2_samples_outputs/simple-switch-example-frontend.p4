@@ -121,10 +121,10 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
         }
         actions = {
             Set_nhop(nextHop);
-            Drop_action;
+            Drop_action();
         }
         size = 1024;
-        default_action = Drop_action;
+        default_action = Drop_action();
     }
     action Send_to_cpu() {
         outCtrl.outputPort = 4w0xe;
@@ -134,10 +134,10 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             headers.ip.ttl: exact;
         }
         actions = {
-            Send_to_cpu;
-            NoAction;
+            Send_to_cpu();
+            NoAction();
         }
-        const default_action = NoAction;
+        const default_action = NoAction();
     }
     action Set_dmac(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
@@ -147,11 +147,11 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             nextHop: exact;
         }
         actions = {
-            Set_dmac;
-            Drop_action;
+            Set_dmac();
+            Drop_action();
         }
         size = 1024;
-        default_action = Drop_action;
+        default_action = Drop_action();
     }
     action Rewrite_smac(EthernetAddress sourceMac) {
         headers.ethernet.srcAddr = sourceMac;
@@ -161,11 +161,11 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             outCtrl.outputPort: exact;
         }
         actions = {
-            Drop_action;
-            Rewrite_smac;
+            Drop_action();
+            Rewrite_smac();
         }
         size = 16;
-        default_action = Drop_action;
+        default_action = Drop_action();
     }
     apply {
         if (parseError != NoError) {

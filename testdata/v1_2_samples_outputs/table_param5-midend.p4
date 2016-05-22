@@ -41,10 +41,10 @@ control c(inout bit<32> arg) {
             x_0: exact;
         }
         actions = {
-            a;
-            b;
+            a();
+            b();
         }
-        default_action = a;
+        default_action = a();
     }
     action act() {
         x_0 = arg;

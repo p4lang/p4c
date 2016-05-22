@@ -9,7 +9,7 @@ control c(inout bit<16> p) {
         }
     };
     action act() {
-        p = cntr_0.f(6);
+        p = cntr_0.f(16w6);
     }
     table tbl_act() {
         actions = {

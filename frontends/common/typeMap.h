@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,8 +49,6 @@ class TypeMap final : public ProgramMap {
     // checks some preconditions before setting the type
     void checkPrecondition(const IR::Node* element, const IR::Type* type) const;
 
-    static const IR::Type_InfInt* canonInfInt;
-
     friend class TypeInference;
     friend class ConstantTypeSubstitution;
 
@@ -72,8 +70,6 @@ class TypeMap final : public ProgramMap {
     // The following are only used by TypeInference
     void setLeftValue(const IR::Expression* expression);
     void setCompileTimeConstant(const IR::Expression* expression);
-    const IR::Type_InfInt* canonicalInfInt() const
-    { return TypeMap::canonInfInt; }
 };
 }  // namespace P4
 

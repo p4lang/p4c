@@ -102,11 +102,11 @@ control pipe(inout Headers_t headers, out bool pass) {
             address: exact;
         }
         actions = {
-            Reject;
-            NoAction;
+            Reject();
+            NoAction();
         }
         implementation = hash_table(32w1024);
-        const default_action = NoAction;
+        const default_action = NoAction();
     }
     apply {
         pass = true;

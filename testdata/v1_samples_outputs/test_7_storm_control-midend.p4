@@ -214,9 +214,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("storm_control") table storm_control_0() {
         actions = {
-            no_action;
-            ing_meter_set;
-            NoAction_1;
+            no_action();
+            ing_meter_set();
+            NoAction_1();
         }
         key = {
             meta.ingress_metadata.bd: exact;

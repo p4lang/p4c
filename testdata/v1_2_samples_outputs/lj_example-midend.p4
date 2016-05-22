@@ -68,8 +68,10 @@ parser LJparse(packet_in b, out Parsed_rep p) {
 }
 
 control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @name("Drop_action") action Drop_action(out PortId_t port_0) {
+    PortId_t port_0;
+    @name("Drop_action") action Drop_action() {
         port_0 = 4w0xf;
+        outCtrl.outputPort = port_0;
     }
     @name("Drop_1") action Drop_0() {
         outCtrl.outputPort = 4w0xf;
@@ -82,11 +84,11 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
             p.arpa_pak.dest: exact;
         }
         actions = {
-            Drop_action(outCtrl.outputPort);
-            Drop_0;
-            Forward;
+            Drop_action();
+            Drop_0();
+            Forward();
         }
-        default_action = Drop_0;
+        default_action = Drop_0();
     }
     apply {
         if (p.arpa_pak.isValid()) 

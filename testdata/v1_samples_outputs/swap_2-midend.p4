@@ -140,9 +140,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t_ingress_2") table t_ingress() {
         actions = {
-            a21;
-            a22;
-            NoAction_1;
+            a21();
+            a22();
+            NoAction_1();
         }
         key = {
             hdr.hdr2.f1: exact;

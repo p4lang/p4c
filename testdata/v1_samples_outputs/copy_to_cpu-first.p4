@@ -179,9 +179,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("redirect") table redirect() {
         actions = {
-            _drop;
-            do_cpu_encap;
-            NoAction;
+            _drop();
+            do_cpu_encap();
+            NoAction();
         }
         key = {
             standard_metadata.instance_type: exact;
@@ -200,8 +200,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("copy_to_cpu") table copy_to_cpu() {
         actions = {
-            do_copy_to_cpu;
-            NoAction;
+            do_copy_to_cpu();
+            NoAction();
         }
         size = 1;
         default_action = NoAction();

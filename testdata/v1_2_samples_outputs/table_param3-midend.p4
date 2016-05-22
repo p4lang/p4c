@@ -39,9 +39,9 @@ control c(inout bit<32> arg) {
             x_0: exact;
         }
         actions = {
-            a;
+            a();
         }
-        default_action = a;
+        default_action = a();
     }
     action act() {
         arg = x_0;

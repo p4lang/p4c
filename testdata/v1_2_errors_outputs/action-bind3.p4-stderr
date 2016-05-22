@@ -1,7 +1,10 @@
-../testdata/v1_2_errors/action-bind3.p4(7): error: a: Passing 1 arguments when 0 expected
+../testdata/v1_2_errors/action-bind3.p4(6): error: 0: parameter d cannot be bound, since it is set by the control plane
+        actions = { a(x, 0); }
+                         ^
+../testdata/v1_2_errors/action-bind3.p4(2)
+    action a(inout bit<32> b, bit<32> d) {
+                             ^^^^^^^^^^
+../testdata/v1_2_errors/action-bind3.p4(7): error: 0 Too many parameters for action
         default_action = a(0);
-                         ^^^^
-../testdata/v1_2_errors/action-bind3.p4(7): error: Could not find type of a
-        default_action = a(0);
-                         ^^^^
+                           ^
 error: 2 errors encountered, aborting compilation

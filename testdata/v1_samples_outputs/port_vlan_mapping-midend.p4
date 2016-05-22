@@ -936,12 +936,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("port_vlan_mapping") table port_vlan_mapping_0() {
         actions = {
-            set_bd;
-            set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags;
-            set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags;
-            set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags;
-            set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags;
-            NoAction_1;
+            set_bd();
+            set_outer_bd_ipv4_mcast_switch_ipv6_mcast_switch_flags();
+            set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags();
+            set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags();
+            set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags();
+            NoAction_1();
         }
         key = {
             meta.ingress_metadata.ifindex: exact;

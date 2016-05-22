@@ -133,9 +133,9 @@ control compute(inout hdr h) {
     }
     table t() {
         actions = {
-            add;
+            add();
         }
-        const default_action = add;
+        const default_action = add();
     }
     apply {
         t.apply();

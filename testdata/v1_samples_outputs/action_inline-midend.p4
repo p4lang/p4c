@@ -122,16 +122,22 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<1> y0_0;
+    bit<1> y0_1;
     action NoAction_1() {
     }
     @name("b") action b_1() {
-        meta.md.b = meta.md.b + 1w1;
-        meta.md.b = meta.md.b + 1w1;
+        y0_0 = meta.md.b;
+        y0_0 = y0_0 + 1w1;
+        meta.md.b = y0_0;
+        y0_1 = meta.md.b;
+        y0_1 = y0_1 + 1w1;
+        meta.md.b = y0_1;
     }
     @name("t") table t_0() {
         actions = {
-            b_1;
-            NoAction_1;
+            b_1();
+            NoAction_1();
         }
         default_action = NoAction_1();
     }

@@ -252,9 +252,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl1") table tbl1_0() {
         actions = {
-            set1;
-            noop;
-            NoAction_1;
+            set1();
+            noop();
+            NoAction_1();
         }
         key = {
             hdr.data.f1_1: exact;
@@ -263,9 +263,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl2") table tbl2_0() {
         actions = {
-            set2;
-            noop_1;
-            NoAction_2;
+            set2();
+            noop_1();
+            NoAction_2();
         }
         key = {
             hdr.data.f2_1: exact;
@@ -274,9 +274,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl3") table tbl3_0() {
         actions = {
-            set3;
-            noop_2;
-            NoAction_3;
+            set3();
+            noop_2();
+            NoAction_3();
         }
         key = {
             hdr.data.f3_1: exact;
@@ -285,9 +285,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl4") table tbl4_0() {
         actions = {
-            set4;
-            noop_3;
-            NoAction_4;
+            set4();
+            noop_3();
+            NoAction_4();
         }
         key = {
             hdr.data.f4_1: exact;
@@ -296,9 +296,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl5") table tbl5_0() {
         actions = {
-            set5;
-            noop_4;
-            NoAction_5;
+            set5();
+            noop_4();
+            NoAction_5();
         }
         key = {
             hdr.data.f5_1: exact;
@@ -307,9 +307,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl6") table tbl6_0() {
         actions = {
-            set6;
-            noop_5;
-            NoAction_6;
+            set6();
+            noop_5();
+            NoAction_6();
         }
         key = {
             hdr.data.f6_1: exact;
@@ -318,9 +318,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl7") table tbl7_0() {
         actions = {
-            set7;
-            noop_6;
-            NoAction_7;
+            set7();
+            noop_6();
+            NoAction_7();
         }
         key = {
             hdr.data.f7_1: exact;
@@ -329,9 +329,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl8") table tbl8_0() {
         actions = {
-            set8;
-            noop_7;
-            NoAction_8;
+            set8();
+            noop_7();
+            NoAction_8();
         }
         key = {
             hdr.data.f8_1: exact;

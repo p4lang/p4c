@@ -89,8 +89,7 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::UniqueParameters(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
-        new P4::RemoveTableParameters(&refMap, &typeMap),
+        new P4::RemoveParameters(&refMap, &typeMap, isv1),
         // Exit statements are transformed into control-flow
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::RemoveExits(&refMap, &typeMap),

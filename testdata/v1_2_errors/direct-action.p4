@@ -5,7 +5,7 @@ control c(inout bit<16> y) {
     }
 
     apply {
-        a(x);
+        a(x); // error: not a compile-time constant
     }
 }
 

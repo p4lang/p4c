@@ -171,9 +171,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("rewrite_mac") table rewrite_mac_0() {
         actions = {
-            on_miss;
-            rewrite_src_dst_mac;
-            NoAction_2;
+            on_miss();
+            rewrite_src_dst_mac();
+            NoAction_2();
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
@@ -222,8 +222,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("bd") table bd_0() {
         actions = {
-            set_vrf;
-            NoAction_3;
+            set_vrf();
+            NoAction_3();
         }
         key = {
             meta.ingress_metadata.bd: exact;
@@ -233,9 +233,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv4_fib") table ipv4_fib_0() {
         actions = {
-            on_miss_2;
-            fib_hit_nexthop;
-            NoAction_4;
+            on_miss_2();
+            fib_hit_nexthop();
+            NoAction_4();
         }
         key = {
             meta.ingress_metadata.vrf: exact;
@@ -246,9 +246,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv4_fib_lpm") table ipv4_fib_lpm_0() {
         actions = {
-            on_miss_3;
-            fib_hit_nexthop_1;
-            NoAction_5;
+            on_miss_3();
+            fib_hit_nexthop_1();
+            NoAction_5();
         }
         key = {
             meta.ingress_metadata.vrf: exact;
@@ -259,9 +259,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("nexthop") table nexthop_0() {
         actions = {
-            on_miss_4;
-            set_egress_details;
-            NoAction_6;
+            on_miss_4();
+            set_egress_details();
+            NoAction_6();
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
@@ -271,8 +271,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("port_mapping") table port_mapping_0() {
         actions = {
-            set_bd;
-            NoAction_7;
+            set_bd();
+            NoAction_7();
         }
         key = {
             standard_metadata.ingress_port: exact;

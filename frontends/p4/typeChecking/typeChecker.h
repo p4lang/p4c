@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -108,11 +108,9 @@ class TypeInference : public Transform {
     const IR::Type* containerInstantiation(const IR::Node* node,
                                            const IR::Vector<IR::Expression>* args,
                                            const IR::IContainer* container);
-    const IR::Type_Action* actionCallType(
+    const IR::Expression* actionCall(
         bool inActionList,   // if true this "call" is in the action list of a table
-        const IR::Node* errorPosition,
-        const IR::Type_Action* action,
-        const IR::Vector<IR::Expression>* boundArguments) const;
+        const IR::MethodCallExpression* actionCall);
     const IR::Vector<IR::Expression>*
             checkExternConstructor(const IR::Node* errorPosition,
                                    const IR::Type_Extern* ext,

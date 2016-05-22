@@ -188,7 +188,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         return typeMap->getType(type, true);
 
     if (type->is<IR::Type_InfInt>()) {
-        return typeMap->canonicalInfInt();
+        return type;
     } else if (type->is<IR::Type_Base>()) {
         if (!type->is<IR::Type_Bits>())
             // all other base types are singletons
@@ -427,7 +427,7 @@ const IR::Node* TypeInference::postorder(IR::P4Action* action) {
         return action;
     auto pl = canonicalize(action->parameters);
     auto type = new IR::Type_Action(Util::SourceInfo(), new IR::TypeParameters(),
-                                    IR::Type_Void::get(), pl);
+                                    nullptr, pl);
 
     bool foundDirectionless = false;
     for (auto p : *action->parameters->parameters) {
@@ -516,14 +516,14 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         return sourceExpression;
     }
 
-    auto tsv = unify(errorPosition, destType, initType, true);
-    if (tsv == nullptr)
+    auto tvs = unify(errorPosition, destType, initType, true);
+    if (tvs == nullptr)
         // error already signalled
         return sourceExpression;
-    if (tsv->isIdentity())
+    if (tvs->isIdentity())
         return sourceExpression;
 
-    ConstantTypeSubstitution cts(tsv, typeMap);
+    ConstantTypeSubstitution cts(tvs, typeMap);
     auto newInit = cts.convert(sourceExpression);  // sets type
     return newInit;
 }
@@ -586,17 +586,17 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         if (argType == nullptr || paramType == nullptr)
             return nullptr;
 
-        auto tsv = unify(errorPosition, paramType, argType, true);
-        if (tsv == nullptr) {
+        auto tvs = unify(errorPosition, paramType, argType, true);
+        if (tvs == nullptr) {
             // error already signalled
             return nullptr;
         }
-        if (tsv->isIdentity()) {
+        if (tvs->isIdentity()) {
             result->push_back(arg);
             continue;
         }
 
-        ConstantTypeSubstitution cts(tsv, typeMap);
+        ConstantTypeSubstitution cts(tvs, typeMap);
         auto newArg = cts.convert(arg);
         result->push_back(newArg);
         setType(newArg, paramType);
@@ -778,7 +778,7 @@ const IR::Node* TypeInference::postorder(IR::Method* method) {
 //////////////////////////////////////////////  Types
 
 const IR::Node* TypeInference::postorder(IR::Type_InfInt* type) {
-    setType(getOriginal(), typeMap->canonicalInfInt());
+    setType(getOriginal(), getOriginal<IR::Type_InfInt>());
     return type;
 }
 
@@ -1621,8 +1621,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
 const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (done())
         return expression;
-    auto edecl = refMap->getDeclaration(expression->path, true);
-    auto decl = edecl->getNode();
+    auto decl = refMap->getDeclaration(expression->path, true)->getNode();
     const IR::Type* type = nullptr;
 
     if (decl->is<IR::ParserState>()) {
@@ -1681,14 +1680,16 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
                 BUG_CHECK(ale->is<IR::ActionListElement>(),
                           "%1%: expected an ActionListElement", ale);
                 auto elem = ale->to<IR::ActionListElement>();
-                auto entrypath = elem->name;
-                auto entrydecl = refMap->getDeclaration(entrypath->path, true);
+                auto entrypath = elem->getPath();
+                auto entrydecl = refMap->getDeclaration(entrypath, true);
                 if (entrydecl != defdecl) {
                     ::error("%1% and %2% refer to different actions", def, elem);
                     return expression;
                 }
-                type = getType(elem);  // This Type_Action is already specialized with
-                                       // some arguments.
+                type = getType(elem);
+                setType(getOriginal(), type);
+                setType(expression, type);
+                return expression;
             }
         }
     }
@@ -1982,31 +1983,74 @@ const IR::Node* TypeInference::preorder(IR::MethodCallExpression* expression) {
     return expression;
 }
 
-const IR::Type_Action*
-TypeInference::actionCallType(bool inActionList,
-                              const IR::Node* errorPosition,
-                              const IR::Type_Action* action,
-                              const IR::Vector<IR::Expression>* arguments) const {
+// If inActionList this call is made in the "action" property of a table
+const IR::Expression*
+TypeInference::actionCall(bool inActionList,
+                          const IR::MethodCallExpression* actionCall) {
+    // If t is an action with signature _(arg1, arg2, arg3)
+    // Then the call a(arg1, arg2) is also an
+    // action, with signature _(arg3)
+    LOG1("Processing action " << actionCall);
+    auto method = actionCall->method;
+    auto methodType = getType(method);
+    if (!methodType->is<IR::Type_Action>())
+        ::error("%1%: must be an action", method);
+    auto baseType = methodType->to<IR::Type_Action>();
+    BUG_CHECK(method->is<IR::PathExpression>(), "%1%: unexpected call", method);
+    auto arguments = actionCall->arguments;
+    BUG_CHECK(baseType->returnType == nullptr,
+              "%1%: action with return type?", baseType->returnType);
+    if (!baseType->typeParameters->empty())
+        ::error("%1%: Cannot supply type parameters for an action invocation",
+                baseType->typeParameters);
+
+    TypeConstraints constraints;
     auto params = new IR::IndexedVector<IR::Parameter>();
-    if (arguments == nullptr)
-        arguments = new IR::Vector<IR::Expression>();
     auto it = arguments->begin();
-    for (auto p : *action->parameters->getEnumerator()) {
+    for (auto p : *baseType->parameters->parameters) {
+        LOG2("Action parameter " << p);
         if (it == arguments->end()) {
             params->push_back(p);
             if (p->direction != IR::Direction::None)
-                ::error("%1%: parameter %2% must be bound", errorPosition, p);
+                ::error("%1%: parameter %2% must be bound", actionCall, p);
         } else {
-            if (inActionList && p->direction == IR::Direction::None)
-                ::error("%1%: parameter %2% cannot be bound, since it is set by the control plane",
-                        *it, p);
+            auto arg = *it;
+            auto paramType = getType(p);
+            auto argType = getType(arg);
+            constraints.addEqualityConstraint(paramType, argType);
+            if (p->direction == IR::Direction::None) {
+                if (inActionList)
+                    ::error("%1%: parameter %2% cannot be bound, since it is set by the control plane",
+                            arg, p);
+                if (!isCompileTimeConstant(arg))
+                    ::error("%1%: must be a compile-time constant", arg);
+            } else if (p->direction == IR::Direction::Out ||
+                       p->direction == IR::Direction::InOut) {
+                if (!isLeftValue(arg))
+                    ::error("%1%: must be a left-value", arg);
+            }
             it++;
         }
     }
+    if (it != arguments->end())
+        ::error("%1% Too many parameters for action", *it);
     auto pl = new IR::ParameterList(Util::SourceInfo(), params);
-    auto result = new IR::Type_Action(action->srcInfo, action->typeParameters,
-                                      action->returnType, pl);
-    return result;
+    auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters,
+                                      nullptr, pl);
+
+    if (actionCall->is<IR::MethodCallExpression>()) {
+        setType(getOriginal(), resultType);
+        setType(actionCall, resultType);
+        auto subst = constraints.solve(actionCall, true);
+        if (subst == nullptr)
+            return actionCall;
+        ConstantTypeSubstitution cts(subst, typeMap);
+        actionCall = cts.convert(actionCall)->to<IR::MethodCallExpression>();  // cast arguments
+        LOG1("Converted action " << actionCall);
+        setType(actionCall, resultType);
+    }
+
+    return actionCall;
 }
 
 const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
@@ -2024,51 +2068,6 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         return expression;
     }
 
-    // We build a type for the callExpression and unify it with the method expression
-    // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-    auto rettype = new IR::Type_Var(Util::SourceInfo(), IR::ID(refMap->newName("R")));
-    auto args = new IR::Vector<IR::ArgumentInfo>();
-    for (auto arg : *expression->arguments) {
-        auto argType = getType(arg);
-        if (argType == nullptr)
-            return expression;
-        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, isLeftValue(arg),
-                                            isCompileTimeConstant(arg), argType);
-        args->push_back(argInfo);
-    }
-    auto typeArgs = new IR::Vector<IR::Type>();
-    for (auto ta : *expression->typeArguments) {
-        auto taType = getType(ta);
-        if (taType == nullptr)
-            return expression;
-        typeArgs->push_back(taType);
-    }
-    auto callType = new IR::Type_MethodCall(expression->srcInfo,
-                                            typeArgs, rettype, args);
-
-    TypeConstraints constraints;
-    constraints.addEqualityConstraint(ft, callType);
-    auto subst = constraints.solve(expression, true);
-    if (subst == nullptr)
-        return expression;
-
-    LOG1("Method type before specialization " << methodType);
-    IR::TypeVariableSubstitutionVisitor substVisitor(subst);
-    auto specMethodType = methodType->apply(substVisitor);
-
-    // construct types for the specMethodType, use a new typeChecker
-    // that uses the same tables!
-    TypeInference helper(refMap, typeMap, false, true);
-    (void)specMethodType->apply(helper);
-
-    auto canon = getType(specMethodType);
-    if (canon == nullptr)
-        return expression;
-
-    auto functionType = specMethodType->to<IR::Type_MethodBase>();
-    BUG_CHECK(functionType != nullptr, "Method type is %1%", specMethodType);
-    LOG1("Method type after specialization " << specMethodType);
-
     // Handle differently methods and actions: action invocations return actions
     // with different signatures
     if (methodType->is<IR::Type_Action>()) {
@@ -2076,12 +2075,53 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto prop = findContext<IR::TableProperty>();
         if (prop != nullptr && prop->name == IR::TableProperties::actionsPropertyName)
             inActionsList = true;
-        auto type = actionCallType(inActionsList, expression,
-                                   methodType->to<IR::Type_Action>(),
-                                   expression->arguments);
-        setType(getOriginal(), type);
-        setType(expression, type);
+        return actionCall(inActionsList, expression);
     } else {
+        // We build a type for the callExpression and unify it with the method expression
+        // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
+        auto rettype = new IR::Type_Var(Util::SourceInfo(), IR::ID(refMap->newName("R")));
+        auto args = new IR::Vector<IR::ArgumentInfo>();
+        for (auto arg : *expression->arguments) {
+            auto argType = getType(arg);
+            if (argType == nullptr)
+                return expression;
+            auto argInfo = new IR::ArgumentInfo(arg->srcInfo, isLeftValue(arg),
+                                                isCompileTimeConstant(arg), argType);
+            args->push_back(argInfo);
+        }
+        auto typeArgs = new IR::Vector<IR::Type>();
+        for (auto ta : *expression->typeArguments) {
+            auto taType = getType(ta);
+            if (taType == nullptr)
+                return expression;
+            typeArgs->push_back(taType);
+        }
+        auto callType = new IR::Type_MethodCall(expression->srcInfo,
+                                                typeArgs, rettype, args);
+
+        TypeConstraints constraints;
+        constraints.addEqualityConstraint(ft, callType);
+        auto subst = constraints.solve(expression, true);
+        if (subst == nullptr)
+            return expression;
+
+        LOG1("Method type before specialization " << methodType);
+        IR::TypeVariableSubstitutionVisitor substVisitor(subst);
+        auto specMethodType = methodType->apply(substVisitor);
+
+        // construct types for the specMethodType, use a new typeChecker
+        // that uses the same tables!
+        TypeInference helper(refMap, typeMap, false, true);
+        (void)specMethodType->apply(helper);  // TODO: should this be set as the type of the method?
+
+        auto canon = getType(specMethodType);
+        if (canon == nullptr)
+            return expression;
+
+        auto functionType = specMethodType->to<IR::Type_MethodBase>();
+        BUG_CHECK(functionType != nullptr, "Method type is %1%", specMethodType);
+        LOG1("Method type after specialization " << specMethodType);
+
         if (!functionType->is<IR::Type_Method>())
             BUG("Unexpected type for function %1%", functionType);
 
@@ -2090,8 +2130,14 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             ::error("Cannot infer return type %1%", expression);
             return expression;
         }
+
         setType(getOriginal(), returnType);
         setType(expression, returnType);
+        ConstantTypeSubstitution cts(subst, typeMap);
+        auto result = cts.convert(expression)->to<IR::MethodCallExpression>();  // cast arguments
+
+        setType(result, returnType);
+        return result;
     }
     return expression;
 }
@@ -2160,10 +2206,10 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tupl
         }
         useSelType = selectType->components->at(0);
     }
-    auto tsv = unify(select, useSelType, caseType, true);
-    if (tsv == nullptr)
+    auto tvs = unify(select, useSelType, caseType, true);
+    if (tvs == nullptr)
         return nullptr;
-    ConstantTypeSubstitution cts(tsv, typeMap);
+    ConstantTypeSubstitution cts(tvs, typeMap);
     auto ks = cts.convert(selectCase->keyset);
     if (ks != selectCase->keyset)
         selectCase = new IR::SelectCase(selectCase->srcInfo, ks, selectCase->state);
@@ -2327,16 +2373,12 @@ const IR::Node* TypeInference::postorder(IR::AssignmentStatement* assign) {
 const IR::Node* TypeInference::postorder(IR::ActionListElement* elem) {
     if (done())
         return elem;
-    auto basetype = getType(elem->name);
-    if (basetype == nullptr)
+    auto type = getType(elem->expression);
+    if (type == nullptr)
         return elem;
-    if (!basetype->is<IR::Type_Action>())
-        ::error("%1% is not an action", elem);
-    auto type = actionCallType(false, elem, basetype->to<IR::Type_Action>(), elem->arguments);
-    if (type != nullptr) {
-        setType(elem, type);
-        setType(getOriginal(), type);
-    }
+
+    setType(elem, type);
+    setType(getOriginal(), type);
     return elem;
 }
 

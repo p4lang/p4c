@@ -1142,9 +1142,12 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
 
     std::map<cstring, cstring> useActionName;
     for (auto a : *al->actionList) {
-        if (a->arguments != nullptr && a->arguments->size() > 0)
-            ::error("%1%: Actions in action list with arguments not supported", a);
-        auto decl = refMap->getDeclaration(a->name->path, true);
+        if (a->expression->is<IR::MethodCallExpression>()) {
+            auto mce = a->expression->to<IR::MethodCallExpression>();
+            if (mce->arguments->size() > 0)
+                ::error("%1%: Actions in action list with arguments not supported", a);
+        }
+        auto decl = refMap->getDeclaration(a->getPath(), true);
         BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
         auto action = decl->to<IR::P4Action>();
         unsigned id = get(structure.ids, action);
@@ -1203,7 +1206,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     // the nextLabel.
     if (!hitMiss) {
         for (auto a : *al->actionList) {
-            cstring name = a->name->path->name;
+            cstring name = a->getName().name;
             cstring label = ::get(useActionName, name);
             if (labelsDone.find(label) == labelsDone.end())
                 next_tables->emplace(label, nextLabel);

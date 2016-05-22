@@ -163,15 +163,20 @@ class ExpressionValue : PropertyValue {
 
 // An element in a table actions list
 class ActionListElement : IAnnotated, IDeclaration {
-    Annotations               annotations;
-    PathExpression            name;  // This can be real path
-    NullOK Vector<Expression> arguments;
+    Annotations annotations;
+    Expression  expression;  // This can be a PathExpression or a MethodCallExpression
 #nodbprint
 #emit
-    ID getName() const override { return name->path->name; }
+    ID getName() const override { return getPath()->name; }
+    const Path* getPath() const;
     const Annotations* getAnnotations() const override { return annotations; }
 #end
-    toString{ return name->toString(); }
+    validate {
+        BUG_CHECK(expression->is<IR::PathExpression>() ||
+                  expression->is<IR::MethodCallExpression>(),
+                "%1%: unexpected expression", expression);
+    }
+    toString{ return getName().toString(); }
 }
 
 // A list of actions (in a table)

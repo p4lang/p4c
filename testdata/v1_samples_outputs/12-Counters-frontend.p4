@@ -138,8 +138,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t1") table t1() {
         actions = {
-            count_c1_1;
-            NoAction;
+            count_c1_1();
+            NoAction();
         }
         key = {
             hdr.ethernet.dstAddr: exact;
@@ -148,8 +148,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t2") table t2() {
         actions = {
-            count_c1_1;
-            NoAction;
+            count_c1_1();
+            NoAction();
         }
         key = {
             hdr.ethernet.srcAddr: exact;

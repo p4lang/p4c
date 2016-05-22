@@ -254,19 +254,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("validate_outer_ethernet") table validate_outer_ethernet() {
         actions = {
-            set_valid_outer_unicast_packet_untagged;
-            set_valid_outer_unicast_packet_single_tagged;
-            set_valid_outer_unicast_packet_double_tagged;
-            set_valid_outer_unicast_packet_qinq_tagged;
-            set_valid_outer_multicast_packet_untagged;
-            set_valid_outer_multicast_packet_single_tagged;
-            set_valid_outer_multicast_packet_double_tagged;
-            set_valid_outer_multicast_packet_qinq_tagged;
-            set_valid_outer_broadcast_packet_untagged;
-            set_valid_outer_broadcast_packet_single_tagged;
-            set_valid_outer_broadcast_packet_double_tagged;
-            set_valid_outer_broadcast_packet_qinq_tagged;
-            NoAction;
+            set_valid_outer_unicast_packet_untagged();
+            set_valid_outer_unicast_packet_single_tagged();
+            set_valid_outer_unicast_packet_double_tagged();
+            set_valid_outer_unicast_packet_qinq_tagged();
+            set_valid_outer_multicast_packet_untagged();
+            set_valid_outer_multicast_packet_single_tagged();
+            set_valid_outer_multicast_packet_double_tagged();
+            set_valid_outer_multicast_packet_qinq_tagged();
+            set_valid_outer_broadcast_packet_untagged();
+            set_valid_outer_broadcast_packet_single_tagged();
+            set_valid_outer_broadcast_packet_double_tagged();
+            set_valid_outer_broadcast_packet_qinq_tagged();
+            NoAction();
         }
         key = {
             hdr.ethernet.dstAddr      : ternary;

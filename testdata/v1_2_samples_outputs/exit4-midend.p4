@@ -8,7 +8,7 @@ control ctrl() {
     }
     @name("t") table t_0() {
         actions = {
-            e;
+            e();
         }
         default_action = e();
     }

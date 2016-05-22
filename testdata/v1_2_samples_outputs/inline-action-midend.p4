@@ -1,13 +1,19 @@
 control p(inout bit<1> bt) {
+    bit<1> y0_0;
+    bit<1> y0_1;
     @name("b") action b() {
-        bt = bt | 1w1;
-        bt = bt | 1w1;
+        y0_0 = bt;
+        y0_0 = y0_0 | 1w1;
+        bt = y0_0;
+        y0_1 = bt;
+        y0_1 = y0_1 | 1w1;
+        bt = y0_1;
     }
     @name("t") table t_0() {
         actions = {
-            b;
+            b();
         }
-        default_action = b;
+        default_action = b();
     }
     apply {
         t_0.apply();

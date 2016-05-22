@@ -5,10 +5,10 @@ control test() {
     }
     table unit() {
         actions = {
-            @tableOnly Set_dmac;
-            @defaultOnly drop;
+            @tableOnly Set_dmac();
+            @defaultOnly drop();
         }
-        default_action = drop;
+        default_action = drop();
     }
     apply {
     }

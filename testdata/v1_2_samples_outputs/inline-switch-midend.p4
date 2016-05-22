@@ -7,10 +7,10 @@ control d(out bit<32> x) {
     }
     @name("cinst.t") table cinst_t() {
         actions = {
-            cinst_a1_0;
-            cinst_a2_0;
+            cinst_a1_0();
+            cinst_a2_0();
         }
-        default_action = cinst_a1_0;
+        default_action = cinst_a1_0();
     }
     action act() {
         hasReturned = true;

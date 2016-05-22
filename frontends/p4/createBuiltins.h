@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ class CreateBuiltins final : public Modifier {
     using Modifier::postorder;
     CreateBuiltins() { setName("CreateBuiltins"); }
     void postorder(IR::P4Parser* parser) override;
+    void postorder(IR::ActionListElement* element) override;
+    void postorder(IR::ExpressionValue* property) override;
 };
 }  // namespace P4
 

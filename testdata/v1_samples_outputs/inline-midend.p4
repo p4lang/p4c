@@ -134,8 +134,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("d.c.t") table d_c_t() {
         actions = {
-            d_c_x_0;
-            NoAction_1;
+            d_c_x_0();
+            NoAction_1();
         }
         default_action = NoAction_1();
     }

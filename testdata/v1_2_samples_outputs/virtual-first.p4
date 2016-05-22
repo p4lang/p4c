@@ -9,7 +9,7 @@ control c(inout bit<16> p) {
         }
     };
     apply {
-        p = cntr.f(6);
+        p = cntr.f(16w6);
     }
 }
 

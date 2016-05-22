@@ -7,11 +7,11 @@ control ctrl() {
     }
     table t() {
         actions = {
-            a;
-            b;
-            c;
+            a();
+            b();
+            c();
         }
-        default_action = a;
+        default_action = a();
     }
     apply {
         switch (t.apply().action_run) {

@@ -6,8 +6,8 @@ control ctrl() {
     }
     table t() {
         actions = {
-            e;
-            f;
+            e();
+            f();
         }
         default_action = e();
     }

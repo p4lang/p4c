@@ -47,7 +47,7 @@ class RemoveTableParameters : public Transform {
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RemoveTableParameters"); }
 
     const IR::Node* postorder(IR::P4Table* table) override;
-    // These should be all statements that may contain a table apply
+    // These should be all kinds of statements that may contain a table apply
     // after the program has been simplified
     const IR::Node* postorder(IR::MethodCallStatement* statement) override;
     const IR::Node* postorder(IR::IfStatement* statement) override;
@@ -57,6 +57,76 @@ class RemoveTableParameters : public Transform {
                       const IR::Vector<IR::Expression>* args,
                       IR::IndexedVector<IR::StatOrDecl>* result,
                       bool in);
+};
+
+// For each action that is invoked the list of arguments that it's called with
+// There must be only one call of each action.
+class ActionInvocation {
+    std::map<const IR::P4Action*, const IR::Expression*> invocations;
+    std::set<const IR::P4Action*> all;  // for these actions remove all parameters
+    std::set<const IR::Expression*> calls;
+ public:
+    void bind(const IR::P4Action* action, const IR::Expression* invocation, bool allParams) {
+        CHECK_NULL(action);
+        BUG_CHECK(invocations.find(action) == invocations.end(),
+                  "%1%: action called twice", action);
+        invocations.emplace(action, invocation);
+        if (allParams)
+            all.emplace(action);
+        calls.emplace(invocation);
+    }
+    const IR::Expression* get(const IR::P4Action* action) const {
+        return ::get(invocations, action);
+    }
+    bool removeAllParameters(const IR::P4Action* action) const {
+        return all.find(action) != all.end();
+    }
+    bool isCall(const IR::MethodCallExpression* expression) const {
+        return calls.find(expression) != calls.end();
+    }
+};
+
+class FindActionParameters : public Inspector {
+    ReferenceMap*     refMap;
+    TypeMap*          typeMap;
+    ActionInvocation* invocations;
+ public:
+    FindActionParameters(ReferenceMap* refMap, TypeMap* typeMap, ActionInvocation* invocations) :
+            refMap(refMap), typeMap(typeMap), invocations(invocations) {
+        CHECK_NULL(refMap); CHECK_NULL(invocations); CHECK_NULL(typeMap);
+        setName("FindActionParameters"); }
+    void postorder(const IR::ActionListElement* element) override;
+    void postorder(const IR::MethodCallExpression* expression) override;
+};
+
+// Removes parameters of an action which are in/inout/out.
+// For this to work each action must have a single caller.
+// (This is done by the LocalizeActions pass).
+// control c(inout bit<32> x) {
+//    action a(in bit<32> arg) { x = arg; }
+//    table t() { actions = { a(10); } }
+//    apply { ... } }
+// is converted to
+// control c(inout bit<32> x) {
+//    bit<32> arg;
+//    action a() { arg = 10; x = arg; }
+//    table t() { actions = { a; } }
+//    apply { ... } }
+class RemoveActionParameters : public Transform {
+    ActionInvocation* invocations;
+ public:
+    RemoveActionParameters(ActionInvocation* invocations) :
+            invocations(invocations)
+    { CHECK_NULL(invocations); setName("RemoveActionParameters"); }
+    const IR::Node* postorder(IR::P4Action* table) override;
+    const IR::Node* postorder(IR::ActionListElement* element) override;
+    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
+};
+
+// Calls RemoveActionParameters and RemoveTableParameters in the right order
+class RemoveParameters : public PassManager {
+ public:
+    RemoveParameters(ReferenceMap* refMap, TypeMap* typeMap, bool isv1);
 };
 
 }  // namespace P4

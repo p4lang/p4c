@@ -7,16 +7,16 @@ control c() {
     }
     @name("t1") table t1_0() {
         actions = {
-            a;
-            b;
+            a();
+            b();
         }
-        default_action = a;
+        default_action = a();
     }
     @name("t2") table t2_0() {
         actions = {
-            a_1;
+            a_1();
         }
-        default_action = a_1;
+        default_action = a_1();
     }
     apply {
         t1_0.apply();

@@ -3,8 +3,6 @@
 
 namespace P4 {
 
-const IR::Type_InfInt* TypeMap::canonInfInt = new IR::Type_InfInt();
-
 void TypeMap::dbprint(std::ostream& out) const {
     out << "TypeMap for " << dbp(program);
     for (auto it : typeMap)

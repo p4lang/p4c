@@ -16,8 +16,8 @@ control c(bit<1> x) {
             x: exact;
         }
         actions = {
-            Set_dmac;
-            drop;
+            Set_dmac();
+            drop();
         }
         default_action = Set_dmac(48w0xaabbccddeeff);
         implementation = tbl();

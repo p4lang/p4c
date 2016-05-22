@@ -758,10 +758,12 @@ actionList
 
 actionRef
     : optAnnotations name                { auto expr = new IR::PathExpression(*$2);
-                                           $$ = new IR::ActionListElement(@2, $1, expr, nullptr);}
+                                           $$ = new IR::ActionListElement(@2, $1, expr);}
     | optAnnotations name '(' argumentList ')'
-                                         { auto expr = new IR::PathExpression(*$2);
-                                           $$ = new IR::ActionListElement(@2, $1, expr, $4); }
+                                         { auto method = new IR::PathExpression(*$2);
+                                           auto mce = new IR::MethodCallExpression(
+                                               @2+@4, method, new IR::Vector<IR::Type>(), $4);
+                                           $$ = new IR::ActionListElement(@2, $1, mce); }
     ;
 
 /************************* ACTION ********************************/

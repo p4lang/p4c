@@ -150,9 +150,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("c.t") table c_t() {
         actions = {
-            c_add_0;
+            c_add_0();
         }
-        const default_action = c_add_0(10);
+        const default_action = c_add_0(32w10);
     }
     action act() {
         h_0 = h.h;

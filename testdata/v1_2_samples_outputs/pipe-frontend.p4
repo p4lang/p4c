@@ -48,7 +48,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
         }
         actions = {
             B_action(tArg1.field1);
-            C_action;
+            C_action();
         }
         size = t2Size;
         const default_action = C_action(9w5);
@@ -61,10 +61,10 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
             pArg1.field1: ternary;
         }
         actions = {
-            Drop;
-            NoAction;
+            Drop();
+            NoAction();
         }
-        const default_action = NoAction;
+        const default_action = NoAction();
     }
     apply {
         T.apply(pArg1, pArg2);

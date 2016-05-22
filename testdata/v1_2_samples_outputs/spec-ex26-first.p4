@@ -75,13 +75,13 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     }
     table IPv4_match(in IPv4Address a) {
         actions = {
-            drop;
+            drop();
         }
         key = {
             inCtrl.inputPort: exact;
         }
         implementation = tbl();
-        default_action = drop;
+        default_action = drop();
     }
     apply {
         if (parseError != NoError) {

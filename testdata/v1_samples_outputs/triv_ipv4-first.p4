@@ -182,9 +182,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("routing") table routing() {
         actions = {
-            do_drop;
-            route_ipv4;
-            NoAction;
+            do_drop();
+            route_ipv4();
+            NoAction();
         }
         key = {
             hdr.ipv4.dstAddr: lpm;

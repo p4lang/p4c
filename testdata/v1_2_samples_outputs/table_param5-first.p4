@@ -44,10 +44,10 @@ control c(inout bit<32> arg) {
             x: exact;
         }
         actions = {
-            a;
-            b;
+            a();
+            b();
         }
-        default_action = a;
+        default_action = a();
     }
     apply {
         switch (t.apply(arg).action_run) {

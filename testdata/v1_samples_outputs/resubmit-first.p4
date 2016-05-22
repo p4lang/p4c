@@ -178,9 +178,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t_ingress_1") table t_ingress_1() {
         actions = {
-            _nop;
-            set_port;
-            NoAction;
+            _nop();
+            set_port();
+            NoAction();
         }
         key = {
             meta.mymeta.f1: exact;
@@ -190,9 +190,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t_ingress_2") table t_ingress_2() {
         actions = {
-            _nop;
-            _resubmit;
-            NoAction;
+            _nop();
+            _resubmit();
+            NoAction();
         }
         key = {
             meta.mymeta.f1: exact;

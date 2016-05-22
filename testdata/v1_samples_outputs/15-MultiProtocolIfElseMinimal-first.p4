@@ -205,9 +205,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv4_match") table ipv4_match() {
         actions = {
-            nop;
-            set_egress_port;
-            NoAction;
+            nop();
+            set_egress_port();
+            NoAction();
         }
         key = {
             hdr.ipv4.srcAddr: exact;
@@ -216,9 +216,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("l2_match") table l2_match() {
         actions = {
-            nop;
-            set_egress_port;
-            NoAction;
+            nop();
+            set_egress_port();
+            NoAction();
         }
         key = {
             hdr.ethernet.srcAddr: exact;

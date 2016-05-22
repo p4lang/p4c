@@ -588,11 +588,11 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
             newname = actions.get(action);
         }
         auto ale = new IR::ActionListElement(a.srcInfo, IR::Annotations::empty,
-                                             new IR::PathExpression(newname), nullptr);
+                                             new IR::PathExpression(newname));
         actVect->push_back(ale);
     }
     auto nop = new IR::ActionListElement(Util::SourceInfo(), IR::Annotations::empty,
-                                         new IR::PathExpression(p4lib.noAction.Id()), nullptr);
+                                         new IR::PathExpression(p4lib.noAction.Id()));
     actVect->push_back(nop);
     propvec->push_back(new IR::TableProperty(Util::SourceInfo(),
                                              IR::ID(IR::TableProperties::actionsPropertyName),

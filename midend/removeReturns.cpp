@@ -201,8 +201,8 @@ const IR::Node* RemoveExits::preorder(IR::ExitStatement* statement) {
 
 const IR::Node* RemoveExits::preorder(IR::P4Table* table) {
     for (auto a : *table->getActionList()->actionList) {
-        auto path = a->name;
-        auto decl = refMap->getDeclaration(path->path, true);
+        auto path = a->getPath();
+        auto decl = refMap->getDeclaration(path, true);
         BUG_CHECK(decl->is<IR::P4Action>(), "%1% is not an action", decl);
         if (callsExit.find(decl->getNode()) != callsExit.end()) {
             callExit(getOriginal());

@@ -145,10 +145,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test1") table test1() {
         actions = {
-            noop;
-            setf1;
-            setall;
-            NoAction;
+            noop();
+            setf1();
+            setall();
+            NoAction();
         }
         key = {
             hdr.data.b1: exact;

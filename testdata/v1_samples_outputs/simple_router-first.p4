@@ -184,9 +184,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("send_frame") table send_frame() {
         actions = {
-            rewrite_mac;
-            _drop;
-            NoAction;
+            rewrite_mac();
+            _drop();
+            NoAction();
         }
         key = {
             standard_metadata.egress_port: exact;
@@ -213,9 +213,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("forward") table forward() {
         actions = {
-            set_dmac;
-            _drop;
-            NoAction;
+            set_dmac();
+            _drop();
+            NoAction();
         }
         key = {
             meta.routing_metadata.nhop_ipv4: exact;
@@ -225,9 +225,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv4_lpm") table ipv4_lpm() {
         actions = {
-            set_nhop;
-            _drop;
-            NoAction;
+            set_nhop();
+            _drop();
+            NoAction();
         }
         key = {
             hdr.ipv4.dstAddr: lpm;

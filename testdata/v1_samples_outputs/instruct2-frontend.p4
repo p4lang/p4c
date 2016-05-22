@@ -146,11 +146,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test1") table test1() {
         actions = {
-            do_add;
-            do_and;
-            do_or;
-            do_xor;
-            NoAction;
+            do_add();
+            do_and();
+            do_or();
+            do_xor();
+            NoAction();
         }
         key = {
             hdr.data.f1: exact;

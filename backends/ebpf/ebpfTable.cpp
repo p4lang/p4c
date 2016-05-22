@@ -109,7 +109,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     builder->blockStart();
 
     for (auto a : *actionList->actionList) {
-        auto adecl = program->refMap->getDeclaration(a->name->path, true);
+        auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         cstring name = nameFromAnnotation(action->annotations, action->name);
         builder->emitIndent();
@@ -135,7 +135,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     builder->blockStart();
 
     for (auto a : *actionList->actionList) {
-        auto adecl = program->refMap->getDeclaration(a->name->path, true);
+        auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         cstring name = nameFromAnnotation(action->annotations, action->name);
         emitActionArguments(builder, action, name);
@@ -236,7 +236,7 @@ void EBPFTable::runAction(CodeBuilder* builder, cstring valueName) {
     builder->blockStart();
 
     for (auto a : *actionList->actionList) {
-        auto adecl = program->refMap->getDeclaration(a->name->path, true);
+        auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         builder->emitIndent();
         cstring name = nameFromAnnotation(action->annotations, action->name);

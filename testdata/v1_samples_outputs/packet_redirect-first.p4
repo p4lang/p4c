@@ -178,10 +178,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("t_egress") table t_egress() {
         actions = {
-            _nop;
-            _recirculate;
-            _clone_e2e;
-            NoAction;
+            _nop();
+            _recirculate();
+            _clone_e2e();
+            NoAction();
         }
         key = {
             hdr.hdrA.f1                    : exact;
@@ -213,10 +213,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t_ingress_1") table t_ingress_1() {
         actions = {
-            _nop;
-            _set_port;
-            _multicast;
-            NoAction;
+            _nop();
+            _set_port();
+            _multicast();
+            NoAction();
         }
         key = {
             hdr.hdrA.f1  : exact;
@@ -227,10 +227,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("t_ingress_2") table t_ingress_2() {
         actions = {
-            _nop;
-            _resubmit;
-            _clone_i2e;
-            NoAction;
+            _nop();
+            _resubmit();
+            _clone_i2e();
+            NoAction();
         }
         key = {
             hdr.hdrA.f1                    : exact;

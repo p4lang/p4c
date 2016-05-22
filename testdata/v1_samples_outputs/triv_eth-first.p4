@@ -151,9 +151,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("routing") table routing() {
         actions = {
-            route_eth;
-            noop;
-            NoAction;
+            route_eth();
+            noop();
+            NoAction();
         }
         key = {
             hdr.ethernet.dst_addr: lpm;

@@ -83,10 +83,10 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
         }
         actions = {
             Drop_action(outCtrl.outputPort);
-            Drop_1;
-            Forward;
+            Drop_1();
+            Forward();
         }
-        default_action = Drop_1;
+        default_action = Drop_1();
     }
     apply {
         if (p.arpa_pak.isValid()) 

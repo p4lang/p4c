@@ -3,9 +3,9 @@ control qp() {
     }
     table m() {
         actions = {
-            drop;
+            drop();
         }
-        default_action = drop;
+        default_action = drop();
     }
     apply {
         m.apply();

@@ -167,9 +167,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("m_filter") table m_filter_0() {
         actions = {
-            _drop;
-            _nop;
-            NoAction_1;
+            _drop();
+            _nop();
+            NoAction_1();
         }
         key = {
             meta.meta.meter_tag: exact;
@@ -179,9 +179,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("m_table") table m_table_0() {
         actions = {
-            m_action;
-            _nop_1;
-            NoAction_2;
+            m_action();
+            _nop_1();
+            NoAction_2();
         }
         key = {
             hdr.ethernet.srcAddr: exact;

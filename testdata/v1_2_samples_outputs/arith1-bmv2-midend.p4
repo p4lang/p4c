@@ -151,9 +151,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("t") table t_0() {
         actions = {
-            compare;
+            compare();
         }
-        const default_action = compare;
+        const default_action = compare();
     }
     apply {
         t_0.apply();

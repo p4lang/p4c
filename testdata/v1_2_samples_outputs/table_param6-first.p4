@@ -42,9 +42,9 @@ control c(inout bit<32> arg) {
             x: exact;
         }
         actions = {
-            a;
+            a();
         }
-        default_action = a;
+        default_action = a();
     }
     apply {
         if (t.apply(arg).hit) 

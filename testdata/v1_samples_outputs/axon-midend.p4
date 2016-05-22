@@ -203,17 +203,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("drop_pkt") table drop_pkt_0() {
         actions = {
-            _drop;
-            NoAction_1;
+            _drop();
+            NoAction_1();
         }
         size = 1;
         default_action = NoAction_1();
     }
     @name("route_pkt") table route_pkt_0() {
         actions = {
-            _drop_1;
-            route;
-            NoAction_2;
+            _drop_1();
+            route();
+            NoAction_2();
         }
         key = {
             hdr.axon_head.isValid()     : exact;

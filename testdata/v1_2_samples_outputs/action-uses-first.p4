@@ -5,16 +5,16 @@ control c() {
     }
     table t1() {
         actions = {
-            a;
-            b;
+            a();
+            b();
         }
-        default_action = a;
+        default_action = a();
     }
     table t2() {
         actions = {
-            a;
+            a();
         }
-        default_action = a;
+        default_action = a();
     }
     apply {
         t1.apply();

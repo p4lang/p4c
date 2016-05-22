@@ -100,6 +100,15 @@ Type_Control::getApplyMethodType() const {
     return new Type_Method(Util::SourceInfo(), typeParams, nullptr, applyParams);
 }
 
+const IR::Path* ActionListElement::getPath() const {
+    auto expr = expression;
+    if (expr->is<IR::MethodCallExpression>())
+        expr = expr->to<IR::MethodCallExpression>()->method;
+    if (expr->is<IR::PathExpression>())
+        return expr->to<IR::PathExpression>()->path;
+    BUG("%1%: unexpected expression", expression);
+}
+
 const Type_Method*
 P4Table::getApplyMethodType() const {
     // Synthesize a new type for the return

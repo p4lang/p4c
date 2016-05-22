@@ -4,7 +4,7 @@ control ctrl() {
     }
     table t() {
         actions = {
-            e;
+            e();
         }
         default_action = e();
     }

@@ -236,7 +236,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             return false;
         }
 
-        bool success = src == dest;
+        bool success = (*src) == (*dest);
         if (!success) {
             if (reportErrors)
                 ::error("%1%: Cannot unify %2% to %3%",

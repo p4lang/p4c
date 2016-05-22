@@ -1,12 +1,15 @@
 control c(inout bit<32> x) {
-    @name("a") action a(inout bit<32> b_0, bit<32> d) {
+    bit<32> b_0;
+    @name("a") action a(bit<32> d) {
+        b_0 = x;
         b_0 = d;
+        x = b_0;
     }
     @name("t") table t_0() {
         actions = {
-            a(x);
+            a();
         }
-        default_action = a(0);
+        default_action = a(32w0);
     }
     apply {
         t_0.apply();

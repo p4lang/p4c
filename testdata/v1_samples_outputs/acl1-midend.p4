@@ -295,22 +295,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("drop_stats") table drop_stats_4() {
         actions = {
-            drop_stats_update;
-            NoAction_1;
+            drop_stats_update();
+            NoAction_1();
         }
         size = 256;
         default_action = NoAction_1();
     }
     @name("system_acl") table system_acl_0() {
         actions = {
-            nop;
-            redirect_to_cpu;
-            copy_to_cpu;
-            drop_packet;
-            drop_packet_with_reason;
-            negative_mirror;
-            congestion_mirror_set;
-            NoAction_2;
+            nop();
+            redirect_to_cpu();
+            copy_to_cpu();
+            drop_packet();
+            drop_packet_with_reason();
+            negative_mirror();
+            congestion_mirror_set();
+            NoAction_2();
         }
         key = {
             meta.acl_metadata.if_label               : ternary;

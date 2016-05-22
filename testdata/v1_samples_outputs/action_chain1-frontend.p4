@@ -173,12 +173,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ex1") table ex1() {
         actions = {
-            set0b1;
-            act1;
-            act2;
-            act3;
-            noop;
-            NoAction;
+            set0b1();
+            act1();
+            act2();
+            act3();
+            noop();
+            NoAction();
         }
         key = {
             hdr.extra[0].h: ternary;
@@ -187,9 +187,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl1") table tbl1() {
         actions = {
-            setb2;
-            noop;
-            NoAction;
+            setb2();
+            noop();
+            NoAction();
         }
         key = {
             hdr.data.f2: ternary;
@@ -198,9 +198,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl2") table tbl2() {
         actions = {
-            set1b1;
-            noop;
-            NoAction;
+            set1b1();
+            noop();
+            NoAction();
         }
         key = {
             hdr.data.f2: ternary;
@@ -209,9 +209,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tbl3") table tbl3() {
         actions = {
-            set2b2;
-            noop;
-            NoAction;
+            set2b2();
+            noop();
+            NoAction();
         }
         key = {
             hdr.data.f2: ternary;
@@ -220,9 +220,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test1") table test1() {
         actions = {
-            setb1;
-            noop;
-            NoAction;
+            setb1();
+            noop();
+            NoAction();
         }
         key = {
             hdr.data.f1: ternary;

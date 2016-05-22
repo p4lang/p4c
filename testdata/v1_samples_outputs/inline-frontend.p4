@@ -128,8 +128,8 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
     }
     @name("t") table t() {
         actions = {
-            x;
-            NoAction;
+            x();
+            NoAction();
         }
         default_action = NoAction();
     }

@@ -151,8 +151,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("e_t1") table e_t1_0() {
         actions = {
-            nop;
-            NoAction_2;
+            nop();
+            NoAction_2();
         }
         key = {
             hdr.ethernet.srcAddr: exact;
@@ -195,9 +195,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("i_t1") table i_t1_0() {
         actions = {
-            nop_2;
-            set_f1;
-            NoAction_3;
+            nop_2();
+            set_f1();
+            NoAction_3();
         }
         key = {
             hdr.vag.f1: exact;
@@ -206,9 +206,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("i_t2") table i_t2_0() {
         actions = {
-            nop_3;
-            set_f2;
-            NoAction_4;
+            nop_3();
+            set_f2();
+            NoAction_4();
         }
         key = {
             hdr.vag.f2: exact;
@@ -217,9 +217,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("i_t3") table i_t3_0() {
         actions = {
-            nop_4;
-            set_f3;
-            NoAction_5;
+            nop_4();
+            set_f3();
+            NoAction_5();
         }
         key = {
             hdr.vag.f3: exact;
@@ -228,9 +228,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("i_t4") table i_t4_0() {
         actions = {
-            nop_5;
-            set_f4;
-            NoAction_6;
+            nop_5();
+            set_f4();
+            NoAction_6();
         }
         key = {
             hdr.vag.f4: ternary;

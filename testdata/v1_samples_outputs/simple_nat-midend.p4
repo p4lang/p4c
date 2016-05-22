@@ -253,9 +253,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("send_frame") table send_frame_0() {
         actions = {
-            do_rewrites;
-            _drop;
-            NoAction_2;
+            do_rewrites();
+            _drop();
+            NoAction_2();
         }
         key = {
             standard_metadata.egress_port: exact;
@@ -265,8 +265,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("send_to_cpu") table send_to_cpu_0() {
         actions = {
-            do_cpu_encap;
-            NoAction_3;
+            do_cpu_encap();
+            NoAction_3();
         }
         default_action = NoAction_3();
     }
@@ -334,9 +334,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("forward") table forward_0() {
         actions = {
-            set_dmac;
-            _drop_2;
-            NoAction_4;
+            set_dmac();
+            _drop_2();
+            NoAction_4();
         }
         key = {
             meta.meta.nhop_ipv4: exact;
@@ -346,9 +346,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("if_info") table if_info_0() {
         actions = {
-            _drop_3;
-            set_if_info;
-            NoAction_5;
+            _drop_3();
+            set_if_info();
+            NoAction_5();
         }
         key = {
             meta.meta.if_index: exact;
@@ -357,9 +357,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv4_lpm") table ipv4_lpm_0() {
         actions = {
-            set_nhop;
-            _drop_4;
-            NoAction_6;
+            set_nhop();
+            _drop_4();
+            NoAction_6();
         }
         key = {
             meta.meta.ipv4_da: lpm;
@@ -369,13 +369,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("nat") table nat_0() {
         actions = {
-            _drop_5;
-            nat_miss_int_to_ext;
-            nat_miss_ext_to_int;
-            nat_hit_int_to_ext;
-            nat_hit_ext_to_int;
-            nat_no_nat;
-            NoAction_7;
+            _drop_5();
+            nat_miss_int_to_ext();
+            nat_miss_ext_to_int();
+            nat_hit_int_to_ext();
+            nat_hit_ext_to_int();
+            nat_no_nat();
+            NoAction_7();
         }
         key = {
             meta.meta.is_ext_if: exact;

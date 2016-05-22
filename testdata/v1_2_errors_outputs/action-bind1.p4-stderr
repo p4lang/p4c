@@ -1,7 +1,4 @@
-../testdata/v1_2_errors/action-bind1.p4(7): error: a: Passing 0 arguments when 1 expected
+../testdata/v1_2_errors/action-bind1.p4(7): error: Action for default_action has some unbound arguments
         default_action = a();
-                         ^^^
-../testdata/v1_2_errors/action-bind1.p4(7): error: Could not find type of a
-        default_action = a();
-                         ^^^
-error: 2 errors encountered, aborting compilation
+        ^^^^^^^^^^^^^^
+error: 1 errors encountered, aborting compilation

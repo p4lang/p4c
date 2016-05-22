@@ -27,10 +27,10 @@ const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statemen
     // Action invocation
     BUG_CHECK(ac->expr->method->is<IR::PathExpression>(),
               "%1%: Expected a PathExpression", ac->expr->method);
-    auto actionpath = new IR::PathExpression(ac->action->name);
-    auto actinst = new IR::ActionListElement(statement->srcInfo,
-                                             IR::Annotations::empty,
-                                             actionpath, directionArgs);
+    auto actionPath = new IR::PathExpression(ac->action->name);
+    auto call = new IR::MethodCallExpression(Util::SourceInfo(), actionPath,
+                                             new IR::Vector<IR::Type>(), directionArgs);
+    auto actinst = new IR::ActionListElement(statement->srcInfo, IR::Annotations::empty, call);
     auto actions = new IR::IndexedVector<IR::ActionListElement>();
     actions->push_back(actinst);
     // Action list property

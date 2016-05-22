@@ -145,9 +145,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test1") table test1() {
         actions = {
-            setf4;
-            noop;
-            NoAction;
+            setf4();
+            noop();
+            NoAction();
         }
         key = {
             hdr.data.f1: exact;
@@ -156,9 +156,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test2") table test2() {
         actions = {
-            setf4;
-            noop;
-            NoAction;
+            setf4();
+            noop();
+            NoAction();
         }
         key = {
             hdr.data.f2: exact;

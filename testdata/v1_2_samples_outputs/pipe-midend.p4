@@ -37,10 +37,12 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     TArg2 pArg2_0;
     TArg1 tArg1_0;
     TArg2 aArg2_0;
+    bit<9> barg_0;
     action NoAction_1() {
     }
-    @name("p1.B_action") action p1_B_action_0(out bit<9> barg_0, BParamType bData) {
+    @name("p1.B_action") action p1_B_action_0(BParamType bData) {
         barg_0 = (bit<9>)bData;
+        tArg1_0.field1 = barg_0;
     }
     @name("p1.C_action") action p1_C_action_0(bit<9> cData) {
         pArg1_0.field1 = cData;
@@ -51,8 +53,8 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
             aArg2_0.field2: exact;
         }
         actions = {
-            p1_B_action_0(tArg1_0.field1);
-            p1_C_action_0;
+            p1_B_action_0();
+            p1_C_action_0();
         }
         size = 32w5;
         const default_action = p1_C_action_0(9w5);
@@ -65,10 +67,10 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
             pArg1_0.field1: ternary;
         }
         actions = {
-            p1_Drop_0;
-            NoAction_1;
+            p1_Drop_0();
+            NoAction_1();
         }
-        const default_action = NoAction_1;
+        const default_action = NoAction_1();
     }
     action act() {
         pArg1_0 = qArg1;

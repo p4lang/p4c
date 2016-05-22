@@ -171,9 +171,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("routing") table routing_0() {
         actions = {
-            route_eth;
-            noop;
-            NoAction_1;
+            route_eth();
+            noop();
+            NoAction_1();
         }
         key = {
             hdr.ethernet.dst_addr: lpm;
@@ -182,9 +182,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test1") table test1_0() {
         actions = {
-            setf2;
-            noop_1;
-            NoAction_2;
+            setf2();
+            noop_1();
+            NoAction_2();
         }
         key = {
             hdr.data.f1: exact;
@@ -193,9 +193,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test2") table test2_0() {
         actions = {
-            setf1;
-            noop_2;
-            NoAction_3;
+            setf1();
+            noop_2();
+            NoAction_3();
         }
         key = {
             hdr.data.f2: exact;

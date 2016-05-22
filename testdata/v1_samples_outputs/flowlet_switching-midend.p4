@@ -207,9 +207,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("send_frame") table send_frame_0() {
         actions = {
-            rewrite_mac;
-            _drop;
-            NoAction_2;
+            rewrite_mac();
+            _drop();
+            NoAction_2();
         }
         key = {
             standard_metadata.egress_port: exact;
@@ -269,9 +269,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ecmp_group") table ecmp_group_0() {
         actions = {
-            _drop_2;
-            set_ecmp_select;
-            NoAction_3;
+            _drop_2();
+            set_ecmp_select();
+            NoAction_3();
         }
         key = {
             hdr.ipv4.dstAddr: lpm;
@@ -281,9 +281,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ecmp_nhop") table ecmp_nhop_0() {
         actions = {
-            _drop_3;
-            set_nhop;
-            NoAction_4;
+            _drop_3();
+            set_nhop();
+            NoAction_4();
         }
         key = {
             meta.ingress_metadata.ecmp_offset: exact;
@@ -293,16 +293,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("flowlet") table flowlet_0() {
         actions = {
-            lookup_flowlet_map;
-            NoAction_5;
+            lookup_flowlet_map();
+            NoAction_5();
         }
         default_action = NoAction_5();
     }
     @name("forward") table forward_0() {
         actions = {
-            set_dmac;
-            _drop_4;
-            NoAction_6;
+            set_dmac();
+            _drop_4();
+            NoAction_6();
         }
         key = {
             meta.ingress_metadata.nhop_ipv4: exact;
@@ -312,8 +312,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("new_flowlet") table new_flowlet_0() {
         actions = {
-            update_flowlet_id;
-            NoAction_7;
+            update_flowlet_id();
+            NoAction_7();
         }
         default_action = NoAction_7();
     }

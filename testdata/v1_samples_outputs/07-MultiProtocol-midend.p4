@@ -292,12 +292,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ethertype_match") table ethertype_match_0() {
         actions = {
-            l2_packet;
-            ipv4_packet;
-            ipv6_packet;
-            mpls_packet;
-            mim_packet;
-            NoAction_1;
+            l2_packet();
+            ipv4_packet();
+            ipv6_packet();
+            mpls_packet();
+            mim_packet();
+            NoAction_1();
         }
         key = {
             hdr.ethernet.etherType: exact;
@@ -306,9 +306,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv4_match") table ipv4_match_0() {
         actions = {
-            nop;
-            set_egress_port;
-            NoAction_2;
+            nop();
+            set_egress_port();
+            NoAction_2();
         }
         key = {
             hdr.ipv4.srcAddr: exact;
@@ -317,9 +317,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ipv6_match") table ipv6_match_0() {
         actions = {
-            nop_1;
-            set_egress_port_1;
-            NoAction_3;
+            nop_1();
+            set_egress_port_1();
+            NoAction_3();
         }
         key = {
             hdr.ipv6.srcAddr: exact;
@@ -328,9 +328,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("l2_match") table l2_match_0() {
         actions = {
-            nop_2;
-            set_egress_port_2;
-            NoAction_4;
+            nop_2();
+            set_egress_port_2();
+            NoAction_4();
         }
         key = {
             hdr.ethernet.srcAddr: exact;

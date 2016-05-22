@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -69,8 +69,8 @@ class RemoveAllUnusedDeclarations : public PassManager {
         CHECK_NULL(refMap);
         passes.emplace_back(
             new PassRepeated {
-                new P4::ResolveReferences(refMap, isv1),
-                new P4::RemoveUnusedDeclarations(refMap)
+                new ResolveReferences(refMap, isv1),
+                new RemoveUnusedDeclarations(refMap)
              });
         setName("RemoveAllUnusedDeclarations");
         setStopOnError(true);

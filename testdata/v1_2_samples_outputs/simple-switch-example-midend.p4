@@ -109,6 +109,7 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     IPv4Address nextHop_2;
     IPv4Address nextHop_3;
     bool hasReturned;
+    IPv4Address nextHop_1;
     action NoAction_1() {
     }
     @name("Drop_action") action Drop_action() {
@@ -123,21 +124,22 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
     @name("Drop_action") action Drop_action_3() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("Set_nhop") action Set_nhop(out IPv4Address nextHop_1, IPv4Address ipv4_dest, PortId_t port) {
+    @name("Set_nhop") action Set_nhop(IPv4Address ipv4_dest, PortId_t port) {
         nextHop_1 = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
+        nextHop_2 = nextHop_1;
     }
     @name("ipv4_match") table ipv4_match_0() {
         key = {
             headers.ip.dstAddr: lpm;
         }
         actions = {
-            Set_nhop(nextHop_2);
-            Drop_action;
+            Set_nhop();
+            Drop_action();
         }
         size = 1024;
-        default_action = Drop_action;
+        default_action = Drop_action();
     }
     @name("Send_to_cpu") action Send_to_cpu() {
         outCtrl.outputPort = 4w0xe;
@@ -147,10 +149,10 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             headers.ip.ttl: exact;
         }
         actions = {
-            Send_to_cpu;
-            NoAction_1;
+            Send_to_cpu();
+            NoAction_1();
         }
-        const default_action = NoAction_1;
+        const default_action = NoAction_1();
     }
     @name("Set_dmac") action Set_dmac(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
@@ -160,11 +162,11 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             nextHop_3: exact;
         }
         actions = {
-            Set_dmac;
-            Drop_action_1;
+            Set_dmac();
+            Drop_action_1();
         }
         size = 1024;
-        default_action = Drop_action_1;
+        default_action = Drop_action_1();
     }
     @name("Rewrite_smac") action Rewrite_smac(EthernetAddress sourceMac) {
         headers.ethernet.srcAddr = sourceMac;
@@ -174,11 +176,11 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
             outCtrl.outputPort: exact;
         }
         actions = {
-            Drop_action_2;
-            Rewrite_smac;
+            Drop_action_2();
+            Rewrite_smac();
         }
         size = 16;
-        default_action = Drop_action_2;
+        default_action = Drop_action_2();
     }
     action act() {
         hasReturned = true;

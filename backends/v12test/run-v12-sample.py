@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright 2013-present Barefoot Networks, Inc. 
-# 
+# Copyright 2013-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -175,7 +175,7 @@ def process_file(options, argv):
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + basename                  # after parsing
-    referenceOutputs = "FrontEnd_11,FrontEnd_12,MidEnd_28_Evaluator"
+    referenceOutputs = "FrontEnd_11,FrontEnd_12,MidEnd_27_Evaluator"
     stderr = tmpdir + "/" + basename + "-stderr"
 
     if not os.path.isfile(options.p4filename):
@@ -210,7 +210,7 @@ def process_file(options, argv):
         newName = file_name(tmpdir, base, "-frontend", ext)
         os.rename(midFile, newName)
         lastFile = newName
-    endFile = file_name(tmpdir, base, "-MidEnd_28_Evaluator", ext)
+    endFile = file_name(tmpdir, base, "-MidEnd_27_Evaluator", ext)
     if os.path.isfile(endFile):
         newName = file_name(tmpdir, base, "-midend", ext)
         os.rename(endFile, newName)

@@ -10,8 +10,8 @@ control ctrl() {
     }
     @name("t") table t_0() {
         actions = {
-            e;
-            f;
+            e();
+            f();
         }
         default_action = e();
     }

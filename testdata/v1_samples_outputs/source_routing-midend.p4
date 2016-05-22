@@ -161,9 +161,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("route_pkt") table route_pkt_0() {
         actions = {
-            _drop;
-            route;
-            NoAction_1;
+            _drop();
+            route();
+            NoAction_1();
         }
         key = {
             hdr.easyroute_port.isValid(): exact;

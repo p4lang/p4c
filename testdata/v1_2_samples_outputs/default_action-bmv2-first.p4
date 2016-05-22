@@ -132,9 +132,9 @@ control compute(inout hdr h) {
     }
     table t() {
         actions = {
-            add;
+            add();
         }
-        const default_action = add(10);
+        const default_action = add(32w10);
     }
     apply {
         t.apply();

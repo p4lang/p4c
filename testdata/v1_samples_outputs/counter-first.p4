@@ -175,9 +175,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("m_table") table m_table() {
         actions = {
-            m_action;
-            _nop;
-            NoAction;
+            m_action();
+            _nop();
+            NoAction();
         }
         key = {
             hdr.ethernet.srcAddr: exact;

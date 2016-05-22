@@ -16,7 +16,7 @@ control c(inout bit<16> p) {
         }
     };
     apply {
-        cntr.run(6);
+        cntr.run(16w6);
     }
 }
 

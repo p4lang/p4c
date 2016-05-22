@@ -139,8 +139,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("tab1") table tab1_0() {
         actions = {
-            act;
-            NoAction_1;
+            act();
+            NoAction_1();
         }
         key = {
             hdr.ethernet.dstAddr: exact;

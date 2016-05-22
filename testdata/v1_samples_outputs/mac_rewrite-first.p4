@@ -229,12 +229,12 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
     }
     @name("mac_rewrite") table mac_rewrite() {
         actions = {
-            nop;
-            rewrite_ipv4_unicast_mac;
-            rewrite_ipv4_multicast_mac;
-            rewrite_ipv6_unicast_mac;
-            rewrite_ipv6_multicast_mac;
-            NoAction;
+            nop();
+            rewrite_ipv4_unicast_mac();
+            rewrite_ipv4_multicast_mac();
+            rewrite_ipv6_unicast_mac();
+            rewrite_ipv6_multicast_mac();
+            NoAction();
         }
         key = {
             meta.egress_metadata.smac_idx: exact;
@@ -258,8 +258,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("setup") table setup() {
         actions = {
-            do_setup;
-            NoAction;
+            do_setup();
+            NoAction();
         }
         key = {
             hdr.ethernet.isValid(): exact;
