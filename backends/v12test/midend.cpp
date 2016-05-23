@@ -49,7 +49,7 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
     // TODO: parser inlining
     // TODO: parser loop unrolling
     // TODO: simplify actions which are too complex
-    // TODO: lower enums and errors to integers
+    // TODO: lower errors to integers
     PassManager simplify = {
         // Proper semantics for uninitialzed local variables in parser states:
         // headers must be invalidated

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -216,7 +216,7 @@ struct TableAttributes_Model {
 class V1Model : public ::Model::Model {
  protected:
     V1Model() :
-            Model::Model("0.1"),
+            Model::Model("0.1"), file("v1model.p4"),
             standardMetadata("standard_metadata"),
             headersType("headers"),
             metadataType("metadata"),
@@ -234,6 +234,7 @@ class V1Model : public ::Model::Model {
     {}
 
  public:
+    ::Model::Elem       file;
     ::Model::Elem       standardMetadata;
     ::Model::Type_Model headersType;
     ::Model::Type_Model metadataType;

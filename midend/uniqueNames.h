@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -46,7 +46,8 @@ class RenameMap {
     }
 };
 
-// give unique names to various declarations to make it easier to inline
+// Give unique names to various declarations to make it easier to
+// move declarations around.
 class UniqueNames : public PassManager {
  private:
     RenameMap    *renameMap;

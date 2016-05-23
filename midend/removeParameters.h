@@ -59,14 +59,15 @@ class RemoveTableParameters : public Transform {
                       bool in);
 };
 
-// For each action that is invoked the list of arguments that it's called with
-// There must be only one call of each action.
+// For each action that is invoked keep the list of arguments that it's called with.
+// There must be only one call of each action; this is done by LocalizeActions.
 class ActionInvocation {
-    std::map<const IR::P4Action*, const IR::Expression*> invocations;
+    std::map<const IR::P4Action*, const IR::MethodCallExpression*> invocations;
     std::set<const IR::P4Action*> all;  // for these actions remove all parameters
     std::set<const IR::Expression*> calls;
  public:
-    void bind(const IR::P4Action* action, const IR::Expression* invocation, bool allParams) {
+    void bind(const IR::P4Action* action, const IR::MethodCallExpression* invocation,
+              bool allParams) {
         CHECK_NULL(action);
         BUG_CHECK(invocations.find(action) == invocations.end(),
                   "%1%: action called twice", action);
@@ -75,7 +76,7 @@ class ActionInvocation {
             all.emplace(action);
         calls.emplace(invocation);
     }
-    const IR::Expression* get(const IR::P4Action* action) const {
+    const IR::MethodCallExpression* get(const IR::P4Action* action) const {
         return ::get(invocations, action);
     }
     bool removeAllParameters(const IR::P4Action* action) const {
@@ -115,7 +116,7 @@ class FindActionParameters : public Inspector {
 class RemoveActionParameters : public Transform {
     ActionInvocation* invocations;
  public:
-    RemoveActionParameters(ActionInvocation* invocations) :
+    explicit RemoveActionParameters(ActionInvocation* invocations) :
             invocations(invocations)
     { CHECK_NULL(invocations); setName("RemoveActionParameters"); }
     const IR::Node* postorder(IR::P4Action* table) override;

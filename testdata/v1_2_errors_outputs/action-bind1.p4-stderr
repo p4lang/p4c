@@ -1,4 +1,4 @@
-../testdata/v1_2_errors/action-bind1.p4(7): error: Action for default_action has some unbound arguments
+../testdata/v1_2_errors/action-bind1.p4(7): error: Action for ExpressionValue has some unbound arguments
         default_action = a();
-        ^^^^^^^^^^^^^^
+                         ^^^
 error: 1 errors encountered, aborting compilation

@@ -1,9 +1,9 @@
-# Copyright 2013-present Barefoot Networks, Inc. 
-# 
+# Copyright 2013-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -50,5 +50,3 @@ V12BUGS = \
 XFAIL_TESTS += \
     $(V12BUGS) \
     v12/testdata/v1_2_samples/cast-call.p4.test
-
-XFAIL_TESTS += v12/testdata/v1_2_samples/ternary2-bmv2.p4.test

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ limitations under the License.
 #include "midend/actionSynthesis.h"
 #include "midend/local_copyprop.h"
 #include "midend/removeLeftSlices.h"
+#include "midend/convertEnums.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -36,6 +37,7 @@ limitations under the License.
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "frontends/common/constantFolding.h"
+#include "frontends/p4/fromv1.0/v1model.h"
 
 namespace BMV2 {
 
@@ -68,12 +70,31 @@ const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* pr
     return program;
 }
 
+class EnumOn32Bits : public P4::ChooseEnumRepresentation {
+    bool convert(const IR::Type_Enum* type) const override {
+        if (type->srcInfo.isValid()) {
+            unsigned line = type->srcInfo.getStart().getLineNumber();
+            auto sfl = Util::InputSources::instance->getSourceLine(line);
+            cstring sourceFile = sfl.fileName;
+            if (sourceFile.endsWith(P4V1::V1Model::instance.file.name))
+                // Don't convert any of the standard enums
+                return false;
+        }
+        return true;
+    }
+    unsigned enumSize(unsigned) const override
+    { return 32; }
+};
+
+
 const IR::P4Program* MidEnd::processV1_2(CompilerOptions& options, const IR::P4Program* program) {
     // we may come through this path even if the program is actually a P4 v1.0 program
     bool isv1 = options.isv1();
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     PassManager simplify = {
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::ConvertEnums(new EnumOn32Bits(), &typeMap),
         // Proper semantics for uninitialzed local variables in parser states:
         // headers must be invalidated
         new P4::TypeChecking(&refMap, &typeMap, isv1),

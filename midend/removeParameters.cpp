@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -290,7 +290,10 @@ void FindActionParameters::postorder(const IR::ActionListElement* element) {
     auto path = element->getPath();
     auto decl = refMap->getDeclaration(path, true);
     BUG_CHECK(decl->is<IR::P4Action>(), "%1%: not an action", element);
-    invocations->bind(decl->to<IR::P4Action>(), element->expression, false);
+    BUG_CHECK(element->expression->is<IR::MethodCallExpression>(),
+              "%1%: expected a method call", element->expression);
+    invocations->bind(decl->to<IR::P4Action>(),
+                      element->expression->to<IR::MethodCallExpression>(), false);
 }
 
 void FindActionParameters::postorder(const IR::MethodCallExpression* expression) {
@@ -316,9 +319,7 @@ const IR::Node* RemoveActionParameters::postorder(IR::P4Action* action) {
     auto invocation = invocations->get(getOriginal<IR::P4Action>());
     if (invocation == nullptr)
         return action;
-    BUG_CHECK(invocation->is<IR::MethodCallExpression>(),
-              "%1%: expected a method call", invocation);
-    auto args = invocation->to<IR::MethodCallExpression>()->arguments;
+    auto args = invocation->arguments;
 
     auto argit = args->begin();
     bool removeAll = invocations->removeAllParameters(getOriginal<IR::P4Action>());
