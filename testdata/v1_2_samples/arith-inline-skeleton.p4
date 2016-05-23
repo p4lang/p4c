@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@ limitations under the License.
 */
 
 // P4 program fragment - used by the arith-* compiler tests
+// This fragment expects a two definitions:
+// - a header hdr
+// - a control compute(inout hdr h)
 
 // This is false if the P4 core library has not been included
 #ifdef _CORE_P4_

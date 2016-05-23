@@ -13,15 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-control c(inout bit<32> x) {
-    action a(in bit<32> arg) { x = arg; }
 
+#include "core.p4"
+#include "v1model.p4"
+
+header hdr {
+    bit<32> unused;
+}
+
+extern E {
+    bit<32> get();
+}
+
+control compute(inout hdr unused) {
+    E() e;
+    action a() {}
+    table t() {
+        key = { e.get() : exact; }
+        actions = { a; }
+        default_action = a;
+    }
     apply {
-        a(15);
+        t.apply();
     }
 }
 
-control proto(inout bit<32> arg);
-package top(proto p);
-
-top(c()) main;
+#include "arith-inline-skeleton.p4"
