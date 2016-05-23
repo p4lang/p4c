@@ -1,0 +1,4 @@
+../testdata/v1_2_errors/param2.p4(9): error: e: extern values cannot be passed in/out/inout
+    table t(in E e) {
+            ^^^^^^
+error: 1 errors encountered, aborting compilation

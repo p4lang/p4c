@@ -447,6 +447,9 @@ const IR::Node* TypeInference::postorder(IR::P4Action* action) {
 
     bool foundDirectionless = false;
     for (auto p : *action->parameters->parameters) {
+        auto ptype = getType(p);
+        if (ptype->is<IR::Type_Extern>())
+            ::error("%1%: Action parameters cannot have extern types", p->type);
         if (p->direction == IR::Direction::None)
             foundDirectionless = true;
         else if (foundDirectionless)
@@ -2371,7 +2374,7 @@ const IR::Node* TypeInference::postorder(IR::AssignmentStatement* assign) {
         return assign;
 
     if (!isLeftValue(assign->left)) {
-        ::error("Expression %1% cannot be assigned to", assign->left);
+        ::error("Expression %1% cannot be the target of an assignment", assign->left);
         LOG1(assign->left);
         return assign;
     }

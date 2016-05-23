@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                                      const IR::Type_MethodBase* dest,
                                      const IR::Type_MethodCall* src,
                                      bool reportErrors) {
+    // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG1("Unifying function " << dest << " with caller " << src);
 
@@ -69,6 +70,13 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                 ::error("%1%: not a compile-time constant when binding to %2%", arg->srcInfo, dit);
             return false;
         }
+
+        if (dit->direction != IR::Direction::None &&
+            dit->type->is<IR::Type_Extern>()) {
+            ::error("%1%: extern values cannot be passed in/out/inout", dit);
+            return false;
+        }
+
         constraints->addEqualityConstraint(dit->type, arg->type);
         ++sit;
     }
@@ -123,6 +131,7 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
                                   const IR::Type_ArchBlock* dest,
                                   const IR::Type_ArchBlock* src,
                                   bool reportErrors) {
+    // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG1("Unifying blocks " << dest << " to " << src);
     if (typeid(*dest) != typeid(*src)) {
@@ -146,6 +155,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                             const IR::Type* dest,
                             const IR::Type* src,
                             bool reportErrors) {
+    // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG1("Unifying " << dest->toString() << " to " << src->toString());
 
