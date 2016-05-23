@@ -11,9 +11,6 @@ Write end-to-end tests for eBPF.
 
 Many more test inputs (STF files) have to be written.
 
-The IR has to be refactored, separating more clearly legacy-support IR
-(P4 v1.0) from current IR (P4 v1.2).
-
 ## Language extensions
 
 Add to P4 various desired extensions
@@ -42,24 +39,17 @@ Add to P4 various desired extensions
 * Write many mid-end lowering passes.
   * Parser inlining
   * Parser loop unrolling
-  * Control inlining
   * Def-use analysis
   * Detect potential uses of undefined values
-  * Implement arithmetic on strange word sizes in terms of platoform-available arithmetic
-  * Eliminate "return"s
-  * Eliminate "exit"s
-  * Synthesize constant tables+actions from raw control statements
+  * Implement arithmetic on strange word sizes in terms of platform-available arithmetic
   * Code motion between actions
   * Field alignment manipulations
-  * Copy propagation
   * Split/merge fields
   * Cross-block optimizations
   * enum/error representation
 
 * Refactor BMv2 back-end to use BMv2 black-boxes instead of primitive
   actions
-
-* eBPF back-end needs a mid-end to lower many complex constructs
 
 ## Documentation
 

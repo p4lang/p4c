@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,9 +34,10 @@ cstring IR::dbp(const IR::INode* node) {
         } else if (node->is<IR::Type_MethodBase>()) {
             str << node;
         } else if (node->is<IR::PathExpression>() ||
-                 node->is<IR::Path>() ||
-                 node->is<IR::TypeNameExpression>() ||
-                 node->is<IR::Constant>() ||
+                   node->is<IR::Path>() ||
+                   node->is<IR::TypeNameExpression>() ||
+                   node->is<IR::Constant>() ||
+                   node->is<IR::Type_Name>() ||
                    node->is<IR::Type_Base>()) {
             node->getNode()->Node::dbprint(str);
             str << " " << node->toString();

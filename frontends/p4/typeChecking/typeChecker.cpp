@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -2003,7 +2003,7 @@ const IR::Node* TypeInference::preorder(IR::MethodCallExpression* expression) {
 const IR::Expression*
 TypeInference::actionCall(bool inActionList,
                           const IR::MethodCallExpression* actionCall) {
-    // If t is an action with signature _(arg1, arg2, arg3)
+    // If a is an action with signature _(arg1, arg2, arg3)
     // Then the call a(arg1, arg2) is also an
     // action, with signature _(arg3)
     LOG1("Processing action " << actionCall);
@@ -2036,7 +2036,7 @@ TypeInference::actionCall(bool inActionList,
             constraints.addEqualityConstraint(paramType, argType);
             if (p->direction == IR::Direction::None) {
                 if (inActionList)
-                    ::error("%1%: parameter %2% cannot be bound, since it is set by the control plane",
+                    ::error("%1%: parameter %2% cannot be bound: it is set by the control plane",
                             arg, p);
                 if (!isCompileTimeConstant(arg))
                     ::error("%1%: must be a compile-time constant", arg);
@@ -2051,21 +2051,17 @@ TypeInference::actionCall(bool inActionList,
     if (it != arguments->end())
         ::error("%1% Too many parameters for action", *it);
     auto pl = new IR::ParameterList(Util::SourceInfo(), params);
-    auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters,
-                                      nullptr, pl);
+    auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters, nullptr, pl);
 
-    if (actionCall->is<IR::MethodCallExpression>()) {
-        setType(getOriginal(), resultType);
-        setType(actionCall, resultType);
-        auto subst = constraints.solve(actionCall, true);
-        if (subst == nullptr)
-            return actionCall;
-        ConstantTypeSubstitution cts(subst, typeMap);
-        actionCall = cts.convert(actionCall)->to<IR::MethodCallExpression>();  // cast arguments
-        LOG1("Converted action " << actionCall);
-        setType(actionCall, resultType);
-    }
-
+    setType(getOriginal(), resultType);
+    setType(actionCall, resultType);
+    auto subst = constraints.solve(actionCall, true);
+    if (subst == nullptr)
+        return actionCall;
+    ConstantTypeSubstitution cts(subst, typeMap);
+    actionCall = cts.convert(actionCall)->to<IR::MethodCallExpression>();  // cast arguments
+    LOG1("Converted action " << actionCall);
+    setType(actionCall, resultType);
     return actionCall;
 }
 
@@ -2432,7 +2428,7 @@ const IR::Node* TypeInference::postorder(IR::TableProperty* prop) {
             }
             auto at = type->to<IR::Type_Action>();
             if (at->parameters->size() != 0)
-                ::error("Action for %1% has some unbound arguments", prop);
+                ::error("Action for %1% has some unbound arguments", prop->value);
         }
     }
     return prop;
