@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -625,7 +625,8 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
             auto ce = conv.convert(e);
             // TODO: this should use a translation routine.  Now it relies on the fact that
             // the spelling is the same
-            auto keyComp = new IR::KeyElement(Util::SourceInfo(), ce, new IR::PathExpression(rt));
+            auto keyComp = new IR::KeyElement(Util::SourceInfo(), IR::Annotations::empty,
+                                              ce, new IR::PathExpression(rt));
             keyVec->push_back(keyComp);
         }
 
@@ -639,7 +640,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                     for (auto f : fl->fields) {
                         auto ce = conv.convert(f);
                         auto keyComp = new IR::KeyElement(
-                            Util::SourceInfo(), ce,
+                            Util::SourceInfo(), IR::Annotations::empty, ce,
                             new IR::PathExpression(v1model.selectorMatchType.Id()));
                         keyVec->push_back(keyComp);
                     }

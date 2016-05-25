@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -133,8 +133,8 @@ class AbstractInliner : public Transform {
 // Repeatedly invokes an abstract inliner with work from the worklist
 class InlineDriver : public Transform {
     InlineWorkList*  toInline;
-    AbstractInliner*     inliner;
-    bool                 p4v1;
+    AbstractInliner* inliner;
+    bool             p4v1;
  public:
     explicit InlineDriver(InlineWorkList* toInline, AbstractInliner* inliner, bool p4v1) :
             toInline(toInline), inliner(inliner), p4v1(p4v1)
@@ -147,11 +147,11 @@ class InlineDriver : public Transform {
 
 // Must be run after an evaluator; uses the blocks to discover caller/callee relationships.
 class DiscoverInlining : public Inspector {
-    InlineWorkList* inlineList;   // output: result is here
-    ReferenceMap*   refMap;       // input
-    TypeMap*        typeMap;      // input
-    P4::Evaluator*  evaluator;    // used to obtain the toplevel block
-    IR::ToplevelBlock* toplevel;
+    InlineWorkList* inlineList;     // output: result is here
+    const ReferenceMap* refMap;     // input
+    const TypeMap*      typeMap;    // input
+    P4::Evaluator*      evaluator;  // used to obtain the toplevel block
+    IR::ToplevelBlock*  toplevel;
 
  public:
     bool allowParsers = true;
@@ -160,8 +160,8 @@ class DiscoverInlining : public Inspector {
     bool allowParsersFromControls = false;
     bool allowControlsFromParsers = false;
 
-    DiscoverInlining(InlineWorkList* inlineList, ReferenceMap* refMap,
-                     TypeMap* typeMap, P4::Evaluator* evaluator) :
+    DiscoverInlining(InlineWorkList* inlineList, const ReferenceMap* refMap,
+                     const TypeMap* typeMap, P4::Evaluator* evaluator) :
             inlineList(inlineList), refMap(refMap), typeMap(typeMap),
             evaluator(evaluator), toplevel(nullptr) {
         CHECK_NULL(inlineList); CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(evaluator);

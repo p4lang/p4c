@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,13 +38,11 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const P4::Reference
                 mem->member == IR::Type_Header::setInvalid ||
                 mem->member == IR::Type_Header::isValid)
                 return new BuiltInMethod(mce, mem->member, mem->expr);
-        }
-        if (basetype->is<IR::Type_Stack>()) {
+        } else if (basetype->is<IR::Type_Stack>()) {
             if (mem->member == IR::Type_Stack::push_front ||
                 mem->member == IR::Type_Stack::pop_front)
                 return new BuiltInMethod(mce, mem->member, mem->expr);
-        }
-        if (mem->expr->is<IR::PathExpression>()) {
+        } else if (mem->expr->is<IR::PathExpression>()) {
             auto pe = mem->expr->to<IR::PathExpression>();
             auto decl = refMap->getDeclaration(pe->path, true);
             auto type = typeMap->getType(decl->getNode());

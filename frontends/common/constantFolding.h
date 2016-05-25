@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ namespace P4 {
 // they are available.
 class ConstantFolding : public Transform {
  protected:
-    P4::ReferenceMap* refMap;  // if null no 'const' values can be resolved
-    P4::TypeMap* typeMap;  // if null we have no types
+    const P4::ReferenceMap* refMap;  // if null no 'const' values can be resolved
+    P4::TypeMap* typeMap;  // if null we have no types; updated with new constants
     bool typesKnown;
     // maps expressions and declarations to their constant values
     std::map<const IR::Node*, const IR::Expression*> constants;
@@ -48,7 +48,7 @@ class ConstantFolding : public Transform {
     const IR::Node* shift(const IR::Operation_Binary* op);
 
  public:
-    ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap) :
+    ConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr) {
         visitDagOnce = true; setName("ConstantFolding");
     }

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ class MoveActionsToTables : public Transform {
 // For this to work all variable declarations must have been moved to the beginning.
 class SynthesizeActions : public Transform {
     ReferenceMap* refMap;
-    TypeMap*      typeMap;
+    const TypeMap*      typeMap;
     std::vector<const IR::P4Action*> actions;  // inserted actions
     bool moveEmits = false;
     bool changes = false;
@@ -80,7 +80,7 @@ class SynthesizeActions : public Transform {
 
     // If moveEmits is true, move emit statements to actions, else
     // leave them in control blocks.
-    SynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap, bool moveEmits = false) :
+    SynthesizeActions(ReferenceMap* refMap, const TypeMap* typeMap, bool moveEmits = false) :
             refMap(refMap), typeMap(typeMap), moveEmits(moveEmits)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("SynthesizeActions"); }
     const IR::Node* preorder(IR::P4Parser* parser) override

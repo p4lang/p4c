@@ -187,6 +187,7 @@ class ActionList : PropertyValue {
 }
 
 class KeyElement {
+    Annotations     annotations;
     Expression      expression;
     PathExpression  matchType;
 #nodbprint

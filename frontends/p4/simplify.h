@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ namespace P4 {
 // Determines whether an expression may have side-effects
 class SideEffects : public Inspector {
  private:
-    ReferenceMap* refMap;
-    TypeMap*      typeMap;
-    bool          hasSideEffects;
+    const ReferenceMap* refMap;
+    const TypeMap*      typeMap;
+    bool                hasSideEffects;
     void postorder(const IR::MethodCallExpression* mce) override {
         if (refMap == nullptr || typeMap == nullptr) {
             // conservative
@@ -50,12 +50,14 @@ class SideEffects : public Inspector {
         hasSideEffects = true;
     }
     // If you pass nullptr for these arguments the check will be more conservative
-    SideEffects(ReferenceMap* refMap, TypeMap* typeMap) :
+    SideEffects(const ReferenceMap* refMap, const TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap), hasSideEffects(false) { setName("SideEffects"); }
 
  public:
     // Returns true if the expression may have side-effects.
-    static bool check(const IR::Expression* expression, ReferenceMap* refMap, TypeMap* typeMap) {
+    static bool check(const IR::Expression* expression,
+                      const ReferenceMap* refMap,
+                      const TypeMap* typeMap) {
         SideEffects se(refMap, typeMap);
         expression->apply(se);
         return se.hasSideEffects;
@@ -63,10 +65,10 @@ class SideEffects : public Inspector {
 };
 
 class SimplifyControlFlow : public Transform {
-    ReferenceMap* refMap;
-    TypeMap*      typeMap;
+    const ReferenceMap* refMap;
+    const TypeMap*      typeMap;
  public:
-    SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) :
+    SimplifyControlFlow(const ReferenceMap* refMap, const TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("SimplifyControlFlow"); }
     const IR::Node* postorder(IR::BlockStatement* statement) override;

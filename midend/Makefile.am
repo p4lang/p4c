@@ -37,6 +37,8 @@ midend_SOURCES = \
 	midend/removeReturns.h \
 	midend/removeLeftSlices.cpp \
 	midend/removeLeftSlices.h \
+	midend/simplifyKey.h \
+	midend/simplifyKey.cpp \
 	midend/uniqueNames.cpp \
 	midend/uniqueNames.h
 

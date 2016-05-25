@@ -1,20 +1,4 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
-/*
 Copyright 2016 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,29 +24,6 @@ limitations under the License.
 namespace P4 {
 
 namespace {
-// Checks to see whether an IR node includes a table.apply() sub-expression
-class HasTableApply : public Inspector {
-    ReferenceMap* refMap;
-    TypeMap*      typeMap;
- public:
-    const IR::P4Table*  table;
-    const IR::MethodCallExpression* call;
-    HasTableApply(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap), table(nullptr), call(nullptr)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("HasTableApply"); }
-    void postorder(const IR::MethodCallExpression* expression) override {
-        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
-        if (!mi->isApply()) return;
-        auto am = mi->to<P4::ApplyMethod>();
-        if (!am->object->is<IR::P4Table>()) return;
-        BUG_CHECK(table == nullptr, "%1 and %2%: multiple table applications in one expression",
-                  table, am->object);
-        table = am->object->to<IR::P4Table>();
-        call = expression;
-        LOG1("Invoked table is " << table);
-    }
-};
-
 // Remove all arguments from any embedded MethodCallExpression
 class RemoveMethodCallArguments : public Transform {
  public:
@@ -72,8 +33,23 @@ class RemoveMethodCallArguments : public Transform {
         return expression;
     }
 };
-
 }  // namespace
+
+HasTableApply::HasTableApply(const ReferenceMap* refMap, const TypeMap* typeMap) :
+        refMap(refMap), typeMap(typeMap), table(nullptr), call(nullptr)
+{ CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("HasTableApply"); }
+
+void HasTableApply::postorder(const IR::MethodCallExpression* expression) {
+    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+    if (!mi->isApply()) return;
+    auto am = mi->to<P4::ApplyMethod>();
+    if (!am->object->is<IR::P4Table>()) return;
+    BUG_CHECK(table == nullptr, "%1% and %2%: multiple table applications in one expression",
+              table, am->object);
+    table = am->object->to<IR::P4Table>();
+    call = expression;
+    LOG1("Invoked table is " << table);
+}
 
 const IR::Node* RemoveTableParameters::postorder(IR::P4Table* table) {
     if (table->parameters->size() == 0)

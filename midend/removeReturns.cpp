@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -175,13 +175,14 @@ const IR::Node* RemoveReturns::preorder(IR::SwitchStatement* statement) {
 
 namespace {
 class CallsExit : public Inspector {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    const ReferenceMap*        refMap;
+    const TypeMap*             typeMap;
     std::set<const IR::Node*>* callers;
 
  public:
     bool callsExit = false;
-    CallsExit(ReferenceMap* refMap, TypeMap* typeMap, std::set<const IR::Node*>* callers) :
+    CallsExit(const ReferenceMap* refMap, const TypeMap* typeMap,
+              std::set<const IR::Node*>* callers) :
             refMap(refMap), typeMap(typeMap), callers(callers) {}
     void postorder(const IR::MethodCallExpression* expression) override {
         auto mi = MethodInstance::resolve(expression, refMap, typeMap);

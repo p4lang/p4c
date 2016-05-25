@@ -17,10 +17,22 @@ limitations under the License.
 #ifndef _MIDEND_REMOVEPARAMETERS_H_
 #define _MIDEND_REMOVEPARAMETERS_H_
 
+#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/typeMap.h"
 
 namespace P4 {
+
+// Checks to see whether an IR node includes a table.apply() sub-expression
+class HasTableApply : public Inspector {
+    const ReferenceMap* refMap;
+    const TypeMap*      typeMap;
+ public:
+    const IR::P4Table*  table;
+    const IR::MethodCallExpression* call;
+    HasTableApply(const ReferenceMap* refMap, const TypeMap* typeMap);
+    void postorder(const IR::MethodCallExpression* expression) override;
+};
 
 // Remove table parameters by transforming them into local variables.
 // This should be run after table parameters have been given unique names.
@@ -39,10 +51,10 @@ namespace P4 {
 // }}
 class RemoveTableParameters : public Transform {
     ReferenceMap* refMap;
-    TypeMap*      typeMap;
+    const TypeMap*      typeMap;
     std::set<const IR::P4Table*> original;
  public:
-    RemoveTableParameters(ReferenceMap* refMap, TypeMap* typeMap) :
+    RemoveTableParameters(ReferenceMap* refMap, const TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RemoveTableParameters"); }
 
@@ -88,11 +100,12 @@ class ActionInvocation {
 };
 
 class FindActionParameters : public Inspector {
-    ReferenceMap*     refMap;
-    TypeMap*          typeMap;
-    ActionInvocation* invocations;
+    const ReferenceMap* refMap;
+    const TypeMap*      typeMap;
+    ActionInvocation*   invocations;
  public:
-    FindActionParameters(ReferenceMap* refMap, TypeMap* typeMap, ActionInvocation* invocations) :
+    FindActionParameters(const ReferenceMap* refMap,
+                         const TypeMap* typeMap, ActionInvocation* invocations) :
             refMap(refMap), typeMap(typeMap), invocations(invocations) {
         CHECK_NULL(refMap); CHECK_NULL(invocations); CHECK_NULL(typeMap);
         setName("FindActionParameters"); }

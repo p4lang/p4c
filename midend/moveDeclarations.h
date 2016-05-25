@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ namespace P4 {
 // A local uninitialized variable in a parser state that represents
 // a header must be invalid every time the parser state is entered.
 class ResetHeaders : public Transform {
-    TypeMap* typeMap;
+    const TypeMap* typeMap;
 
     void generateResets(const IR::Type* type, const IR::Expression* expr,
                         IR::Vector<IR::StatOrDecl>* resets);
  public:
-    explicit ResetHeaders(TypeMap* typeMap) : typeMap(typeMap)
+    explicit ResetHeaders(const TypeMap* typeMap) : typeMap(typeMap)
     { CHECK_NULL(typeMap); setName("ResetHeaders"); }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
 };

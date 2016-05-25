@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2016 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,18 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_MOVECONSTRUCTORS_H_
-#define _MIDEND_MOVECONSTRUCTORS_H_
+#include "core.p4"
+#include "v1model.p4"
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
+header hdr {
+    bit<32> a;
+    bit<32> b;
+}
 
-namespace P4 {
+control compute(inout hdr h) {
+    action a() { h.b = h.a; }
+    table t() {
+        key = { @name("e") h.a + h.a : exact; }
+        actions = { a; NoAction; }
+        default_action = NoAction;
+    }
+    apply {
+        t.apply();
+    }
+}
 
-class MoveConstructors : public PassManager {
- public:
-    MoveConstructors(ReferenceMap* refMap, bool isv1);
-};
-
-}  // namespace P4
-
-#endif /* _MIDEND_MOVECONSTRUCTORS_H_ */
+#include "arith-inline-skeleton.p4"

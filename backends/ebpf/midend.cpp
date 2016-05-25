@@ -56,7 +56,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap),  // necessary for inlining
         // Move some constructor calls into temporaries
-        new P4::MoveConstructors(isv1),
+        new P4::MoveConstructors(&refMap, isv1),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveUnusedDeclarations(&refMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),

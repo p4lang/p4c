@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -83,12 +83,12 @@ class RemoveReturns : public Transform {
 // if (t1.apply().hit && t2.apply().hit) { ... }
 // It also assumes that there are no global actions and that action calls have been inlined.
 class RemoveExits : public RemoveReturns {
-    TypeMap* typeMap;
+    const TypeMap* typeMap;
     // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
     std::set<const IR::Node*> callsExit;  // actions, tables
     void callExit(const IR::Node* node);
  public:
-    RemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :
+    RemoveExits(ReferenceMap* refMap, const TypeMap* typeMap) :
             RemoveReturns(refMap, "hasExited"), typeMap(typeMap)
     { visitDagOnce = false; CHECK_NULL(typeMap); setName("RemoveExits"); }
 

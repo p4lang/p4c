@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -182,9 +182,7 @@ class MoveConstructorsImpl : public Transform {
 };
 }  // namespace
 
-MoveConstructors::MoveConstructors(bool isv1) {
-    ReferenceMap* refMap = new ReferenceMap();
-
+MoveConstructors::MoveConstructors(ReferenceMap* refMap, bool isv1) {
     setName("MoveConstructors");
     passes.emplace_back(new P4::ResolveReferences(refMap, isv1));
     passes.emplace_back(new MoveConstructorsImpl(refMap));

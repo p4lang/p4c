@@ -28,6 +28,7 @@ limitations under the License.
 #include "midend/local_copyprop.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/convertEnums.h"
+#include "midend/simplifyKey.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/common/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -106,7 +107,7 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions& options, const IR::P4P
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap),
         // Move some constructor calls into temporaries
-        new P4::MoveConstructors(isv1),
+        new P4::MoveConstructors(&refMap, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         evaluator,
@@ -146,6 +147,9 @@ const IR::P4Program* MidEnd::processV1_2(CompilerOptions& options, const IR::P4P
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::RemoveTableParameters(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::SimplifyKey(&refMap, &typeMap,
+                            new P4::NonLeftValue(&refMap, &typeMap)),
         // Final simplifications
         new P4::TypeChecking(&refMap, &typeMap, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),

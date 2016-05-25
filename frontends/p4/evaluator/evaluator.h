@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ limitations under the License.
 namespace P4 {
 
 class Evaluator final : public Inspector {
-    ReferenceMap*            refMap;
-    TypeMap*                 typeMap;
+    const ReferenceMap*      refMap;
+    const TypeMap*           typeMap;
     std::vector<IR::Block*>  blockStack;
     IR::ToplevelBlock*       toplevelBlock;
 
@@ -34,7 +34,7 @@ class Evaluator final : public Inspector {
     void popBlock(IR::Block* block);
 
  public:
-    Evaluator(ReferenceMap* refMap, TypeMap* typeMap) :
+    Evaluator(const ReferenceMap* refMap, const TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap), toplevelBlock(nullptr)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("Evaluator"); }
     IR::ToplevelBlock* getToplevelBlock() { return toplevelBlock; }
