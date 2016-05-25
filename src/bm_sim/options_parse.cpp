@@ -32,6 +32,8 @@
 
 #include <cassert>
 
+#include "version.h"
+
 namespace bm {
 
 struct interface {
@@ -121,6 +123,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
 #endif
       ("restore-state", po::value<std::string>(),
        "Restore state from file")
+      ("version,v", "Display version information")
       ;  // NOLINT(whitespace/semicolon)
 
   po::options_description hidden;
@@ -169,6 +172,12 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
                 << "Target specific options:\n";
       tp->help_msg(&std::cout);
     }
+    exit(0);
+  }
+
+  if (vm.count("version")) {
+    std::string version_str(bm_version_str);
+    std::cout << version_str << "\n";
     exit(0);
   }
 

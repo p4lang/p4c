@@ -59,5 +59,7 @@ simple_pre_lag.cpp \
 target_parser.cpp \
 transport.cpp \
 utils.h \
+version.cpp \
+version.h \
 xxhash.c \
 xxhash.h

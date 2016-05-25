@@ -34,4 +34,13 @@ mininet/stress_test_commands.txt
 EXTRA_DIST += \
 docs/JSON_format.md
 
+EXTRA_DIST += \
+VERSION
+
+dist-hook:
+	@if test -f $(srcdir)/VERSION-build; then \
+	  cp $(srcdir)/VERSION-build $(distdir); \
+	else :; \
+	fi
+
 AM_DISTCHECK_CONFIGURE_FLAGS = --with-pdfixed --with-stress-tests
