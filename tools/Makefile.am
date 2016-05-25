@@ -27,6 +27,9 @@ bm_CLI \
 bm_nanomsg_events
 
 EXTRA_DIST = \
+get_version.sh
+
+EXTRA_DIST += \
 bm_p4dbg.in \
 bm_CLI.in \
 bm_nanomsg_events.in

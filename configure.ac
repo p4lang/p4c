@@ -2,10 +2,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.68])
-AC_INIT([bm], [0.1], [antonin@barefootnetworks.com])
+AC_INIT([bm], [m4_esyscmd(tools/get_version.sh)],
+        [antonin@barefootnetworks.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/bm_sim/checksums.cpp])
 AC_CONFIG_HEADERS([config.h])
+
+AC_SUBST([BM_VERSION], [AC_PACKAGE_VERSION])
 
 # Pyhton is optional to the package
 AM_PATH_PYTHON([2.7],, [:])
@@ -171,6 +174,7 @@ AC_CONFIG_FILES([Makefile
 
 # Generate other files
 AC_CONFIG_FILES([tests/utils.cpp
+                 src/bm_sim/version.cpp
                  mininet/stress_test_ipv4.py])
 
 AC_OUTPUT

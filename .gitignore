@@ -93,3 +93,5 @@ doxygen-out
 # thrift
 gen-cpp
 gen-py
+
+VERSION-build
