@@ -86,17 +86,8 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--top4", "pass1[,pass2]",
                    [this](const char* arg) {
                        auto copy = strdup(arg);
-                       while (*copy) {
-                           char* next = strchr(copy, ',');
-                           if (next == nullptr) {
-                               top4.push_back(copy);
-                               break;
-                           } else {
-                               *next = 0;
-                               top4.push_back(copy);
-                               copy = next + 1;
-                           }
-                       }
+                       while (auto pass = strsep(&copy, ","))
+                           top4.push_back(pass);
                        return true;
                    },
                    "[Compiler debugging] Dump the P4 representation after\n"
