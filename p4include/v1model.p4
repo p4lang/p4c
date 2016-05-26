@@ -46,39 +46,39 @@ extern Checksum16 {
 }
 
 enum CounterType {
-    Packets,
-    Bytes,
-    Both
+    packets,
+    bytes,
+    packets_and_bytes
 }
 
-extern Counter {
-    Counter(bit<32> size, CounterType type);
-    void increment(in bit<32> index);
+extern counter {
+    counter(bit<32> size, CounterType type);
+    void count(in bit<32> index);
 }
 
-extern DirectCounter {
-    DirectCounter(CounterType type);
+extern direct_counter {
+    direct_counter(CounterType type);
 }
 
-extern Meter {
-    Meter(bit<32> size, CounterType type);
-    void meter<T>(in bit<32> index, out T result);
+extern meter {
+    meter(bit<32> size, CounterType type);
+    void execute_meter<T>(in bit<32> index, out T result);
 }
 
-extern DirectMeter<T> {
-    DirectMeter(CounterType type);
+extern direct_meter<T> {
+    direct_meter(CounterType type);
     void read(out T result);
 }
 
-extern Register<T> {
-    Register(bit<32> size);
+extern register<T> {
+    register(bit<32> size);
     void read(out T result, in bit<32> index);
     void write(in bit<32> index, in T value);
 }
 
 // used as table implementation attribute
-extern ActionProfile {
-    ActionProfile(bit<32> size);
+extern action_profile {
+    action_profile(bit<32> size);
 }
 
 // Get a random number in the range 0..2^logRange
@@ -97,8 +97,8 @@ enum HashAlgorithm {
 extern void mark_to_drop();
 extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
 
-extern ActionSelector {
-    ActionSelector(HashAlgorithm algorithm, bit<32> size, bit<32> outputWidth);
+extern action_selector {
+    action_selector(HashAlgorithm algorithm, bit<32> size, bit<32> outputWidth);
 }
 
 enum CloneType {

@@ -48,7 +48,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 1024;
         default_action = NoAction();
-        @name("sel_profile") implementation = ActionSelector(HashAlgorithm.crc16, 32w16384, 32w14);
+        @name("sel_profile") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);
     }
     apply {
         test1.apply();

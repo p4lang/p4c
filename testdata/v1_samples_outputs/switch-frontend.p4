@@ -53,38 +53,38 @@ extern Checksum16 {
 }
 
 enum CounterType {
-    Packets,
-    Bytes,
-    Both
+    packets,
+    bytes,
+    packets_and_bytes
 }
 
-extern Counter {
-    Counter(bit<32> size, CounterType type);
-    void increment(in bit<32> index);
+extern counter {
+    counter(bit<32> size, CounterType type);
+    void count(in bit<32> index);
 }
 
-extern DirectCounter {
-    DirectCounter(CounterType type);
+extern direct_counter {
+    direct_counter(CounterType type);
 }
 
-extern Meter {
-    Meter(bit<32> size, CounterType type);
-    void meter<T>(in bit<32> index, out T result);
+extern meter {
+    meter(bit<32> size, CounterType type);
+    void execute_meter<T>(in bit<32> index, out T result);
 }
 
-extern DirectMeter<T> {
-    DirectMeter(CounterType type);
+extern direct_meter<T> {
+    direct_meter(CounterType type);
     void read(out T result);
 }
 
-extern Register<T> {
-    Register(bit<32> size);
+extern register<T> {
+    register(bit<32> size);
     void read(out T result, in bit<32> index);
     void write(in bit<32> index, in T value);
 }
 
-extern ActionProfile {
-    ActionProfile(bit<32> size);
+extern action_profile {
+    action_profile(bit<32> size);
 }
 
 extern void digest<T>(in bit<32> receiver, in T data);
@@ -97,8 +97,8 @@ enum HashAlgorithm {
 
 extern void mark_to_drop();
 extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
-extern ActionSelector {
-    ActionSelector(HashAlgorithm algorithm, bit<32> size, bit<32> outputWidth);
+extern action_selector {
+    action_selector(HashAlgorithm algorithm, bit<32> size, bit<32> outputWidth);
 }
 
 enum CloneType {
@@ -3163,11 +3163,11 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
 }
 
 control process_storm_control(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Meter(32w1024, CounterType.Bytes) @name("storm_control_meter") storm_control_meter;
+    meter(32w1024, CounterType.bytes) @name("storm_control_meter") storm_control_meter;
     @name("nop") action nop() {
     }
     @name("set_storm_control_meter") action set_storm_control_meter(bit<8> meter_idx) {
-        storm_control_meter.meter((bit<32>)meter_idx, meta.security_metadata.storm_control_color);
+        storm_control_meter.execute_meter((bit<32>)meter_idx, meta.security_metadata.storm_control_color);
     }
     @name("storm_control") table storm_control() {
         actions = {
@@ -3222,7 +3222,7 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
         }
         size = 4096;
         default_action = NoAction();
-        @name("bd_action_profile") implementation = ActionProfile(32w1024);
+        @name("bd_action_profile") implementation = action_profile(32w1024);
     }
     apply {
         port_vlan_mapping.apply();
@@ -4480,9 +4480,9 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
 }
 
 control process_ingress_bd_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Counter(32w1024, CounterType.Both) @name("ingress_bd_stats") ingress_bd_stats;
+    counter(32w1024, CounterType.packets_and_bytes) @name("ingress_bd_stats") ingress_bd_stats;
     @name("update_ingress_bd_stats") action update_ingress_bd_stats() {
-        ingress_bd_stats.increment((bit<32>)meta.l2_metadata.bd_stats_idx);
+        ingress_bd_stats.count((bit<32>)meta.l2_metadata.bd_stats_idx);
     }
     @name("ingress_bd_stats") table ingress_bd_stats_0() {
         actions = {
@@ -4498,9 +4498,9 @@ control process_ingress_bd_stats(inout headers hdr, inout metadata meta, inout s
 }
 
 control process_ingress_acl_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Counter(32w1024, CounterType.Both) @name("acl_stats") acl_stats;
+    counter(32w1024, CounterType.packets_and_bytes) @name("acl_stats") acl_stats;
     @name("acl_stats_update") action acl_stats_update() {
-        acl_stats.increment((bit<32>)meta.acl_metadata.acl_stats_index);
+        acl_stats.count((bit<32>)meta.acl_metadata.acl_stats_index);
     }
     @name("acl_stats") table acl_stats_0() {
         actions = {
@@ -4615,7 +4615,7 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
         }
         size = 1024;
         default_action = NoAction();
-        @name("ecmp_action_profile") implementation = ActionSelector(HashAlgorithm.identity, 32w1024, 32w10);
+        @name("ecmp_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
     }
     @name("nexthop") table nexthop() {
         actions = {
@@ -4685,7 +4685,7 @@ control process_lag(inout headers hdr, inout metadata meta, inout standard_metad
         }
         size = 1024;
         default_action = NoAction();
-        @name("lag_action_profile") implementation = ActionSelector(HashAlgorithm.identity, 32w1024, 32w8);
+        @name("lag_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
     }
     apply {
         lag_group.apply();
@@ -4745,7 +4745,7 @@ control process_fabric_lag(inout headers hdr, inout metadata meta, inout standar
             meta.hash_metadata.hash2       : selector;
         }
         default_action = NoAction();
-        @name("fabric_lag_action_profile") implementation = ActionSelector(HashAlgorithm.identity, 32w1024, 32w8);
+        @name("fabric_lag_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
     }
     apply {
         fabric_lag.apply();
@@ -4753,10 +4753,10 @@ control process_fabric_lag(inout headers hdr, inout metadata meta, inout standar
 }
 
 control process_system_acl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Counter(32w1024, CounterType.Packets) @name("drop_stats") drop_stats;
-    Counter(32w1024, CounterType.Packets) @name("drop_stats_2") drop_stats_2;
+    counter(32w1024, CounterType.packets) @name("drop_stats") drop_stats;
+    counter(32w1024, CounterType.packets) @name("drop_stats_2") drop_stats_2;
     @name("drop_stats_update") action drop_stats_update() {
-        drop_stats_2.increment((bit<32>)meta.ingress_metadata.drop_reason);
+        drop_stats_2.count((bit<32>)meta.ingress_metadata.drop_reason);
     }
     @name("nop") action nop() {
     }
@@ -4773,7 +4773,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         mark_to_drop();
     }
     @name("drop_packet_with_reason") action drop_packet_with_reason(bit<8> drop_reason) {
-        drop_stats.increment((bit<32>)drop_reason);
+        drop_stats.count((bit<32>)drop_reason);
         mark_to_drop();
     }
     @name("negative_mirror") action negative_mirror(bit<8> session_id) {

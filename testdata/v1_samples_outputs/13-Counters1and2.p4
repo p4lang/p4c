@@ -28,12 +28,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Counter(32w1024, CounterType.Packets) @name("c1") c1;
+    counter(32w1024, CounterType.packets) @name("c1") c1;
     @name("count_c1_1") action count_c1_1() {
-        c1.increment((bit<32>)1);
+        c1.count((bit<32>)1);
     }
     @name("count_c1_2") action count_c1_2() {
-        c1.increment((bit<32>)2);
+        c1.count((bit<32>)2);
     }
     @name("t1") table t1() {
         actions = {

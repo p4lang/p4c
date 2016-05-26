@@ -75,7 +75,7 @@ struct VerifyUpdate_Model : public ::Model::Elem {
 
 struct CounterType_Model : public ::Model::Enum_Model {
     CounterType_Model() : ::Model::Enum_Model("CounterType"),
-        packets("Packets"), bytes("Bytes"), both("Both") {}
+        packets("packets"), bytes("bytes"), both("packets_and_bytes") {}
     ::Model::Elem packets;
     ::Model::Elem bytes;
     ::Model::Elem both;
@@ -89,12 +89,12 @@ struct Checksum16_Model : public ::Model::Extern_Model {
 };
 
 struct ActionProfile_Model : public ::Model::Extern_Model {
-    ActionProfile_Model() : Extern_Model("ActionProfile"), sizeType(IR::Type_Bits::get(32)) {}
+    ActionProfile_Model() : Extern_Model("action_profile"), sizeType(IR::Type_Bits::get(32)) {}
     const IR::Type* sizeType;
 };
 
 struct ActionSelector_Model : public ::Model::Extern_Model {
-    ActionSelector_Model() : Extern_Model("ActionSelector"),
+    ActionSelector_Model() : Extern_Model("action_selector"),
                              sizeType(IR::Type_Bits::get(32)), widthType(IR::Type_Bits::get(32)) {}
     const IR::Type* sizeType;
     const IR::Type* widthType;
@@ -120,7 +120,7 @@ struct CounterOrMeter_Model : public ::Model::Extern_Model {
 };
 
 struct Register_Model : public ::Model::Extern_Model {
-    Register_Model() : Extern_Model("Register"),
+    Register_Model() : Extern_Model("register"),
                        sizeParam("size"), read("read"), write("write"),
                        size_type(IR::Type_Bits::get(32)),
                        index_type(IR::Type_Bits::get(32)) {}
@@ -137,17 +137,17 @@ struct DigestReceiver_Model : public ::Model::Elem {
 };
 
 struct Counter_Model : public CounterOrMeter_Model {
-    Counter_Model() : CounterOrMeter_Model("Counter"), increment("increment") {}
+    Counter_Model() : CounterOrMeter_Model("counter"), increment("count") {}
     ::Model::Elem increment;
 };
 
 struct Meter_Model : public CounterOrMeter_Model {
-    Meter_Model() : CounterOrMeter_Model("Meter"), executeMeter("meter") {}
+    Meter_Model() : CounterOrMeter_Model("meter"), executeMeter("execute_meter") {}
     ::Model::Elem executeMeter;
 };
 
 struct DirectMeter_Model : public CounterOrMeter_Model {
-    DirectMeter_Model() : CounterOrMeter_Model("DirectMeter"), read("read") {}
+    DirectMeter_Model() : CounterOrMeter_Model("direct_meter"), read("read") {}
     ::Model::Elem read;
 };
 
@@ -229,7 +229,7 @@ class V1Model : public ::Model::Model {
             tableAttributes(), selectorMatchType("selector"),
             verify("verifyChecksum", headersType), update("computeChecksum", headersType),
             ck16(), digest_receiver(), hash(), algorithm(),
-            directCounter("DirectCounter"), registers(), drop("mark_to_drop"),
+            directCounter("direct_counter"), registers(), drop("mark_to_drop"),
             recirculate("recirculate"), directMeter()
     {}
 

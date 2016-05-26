@@ -46,9 +46,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Counter(32w16384, CounterType.Packets) @name("my_indirect_counter") my_indirect_counter;
+    counter(32w16384, CounterType.packets) @name("my_indirect_counter") my_indirect_counter;
     @name("m_action") action m_action(bit<8> idx) {
-        my_indirect_counter.increment((bit<32>)idx);
+        my_indirect_counter.count((bit<32>)idx);
         mark_to_drop();
     }
     @name("_nop") action _nop() {
@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 16384;
         default_action = NoAction();
-        @name("my_direct_counter") counters = DirectCounter(CounterType.Bytes);
+        @name("my_direct_counter") counters = direct_counter(CounterType.bytes);
     }
     apply {
         m_table.apply();

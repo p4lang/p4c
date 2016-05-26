@@ -51,38 +51,38 @@ extern Checksum16 {
 }
 
 enum CounterType {
-    Packets,
-    Bytes,
-    Both
+    packets,
+    bytes,
+    packets_and_bytes
 }
 
-extern Counter {
-    Counter(bit<32> size, CounterType type);
-    void increment(in bit<32> index);
+extern counter {
+    counter(bit<32> size, CounterType type);
+    void count(in bit<32> index);
 }
 
-extern DirectCounter {
-    DirectCounter(CounterType type);
+extern direct_counter {
+    direct_counter(CounterType type);
 }
 
-extern Meter {
-    Meter(bit<32> size, CounterType type);
-    void meter<T>(in bit<32> index, out T result);
+extern meter {
+    meter(bit<32> size, CounterType type);
+    void execute_meter<T>(in bit<32> index, out T result);
 }
 
-extern DirectMeter<T> {
-    DirectMeter(CounterType type);
+extern direct_meter<T> {
+    direct_meter(CounterType type);
     void read(out T result);
 }
 
-extern Register<T> {
-    Register(bit<32> size);
+extern register<T> {
+    register(bit<32> size);
     void read(out T result, in bit<32> index);
     void write(in bit<32> index, in T value);
 }
 
-extern ActionProfile {
-    ActionProfile(bit<32> size);
+extern action_profile {
+    action_profile(bit<32> size);
 }
 
 extern void digest<T>(in bit<32> receiver, in T data);
@@ -95,8 +95,8 @@ enum HashAlgorithm {
 
 extern void mark_to_drop();
 extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
-extern ActionSelector {
-    ActionSelector(HashAlgorithm algorithm, bit<32> size, bit<32> outputWidth);
+extern action_selector {
+    action_selector(HashAlgorithm algorithm, bit<32> size, bit<32> outputWidth);
 }
 
 enum CloneType {
@@ -3755,11 +3755,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_37();
     }
-    Meter(32w1024, CounterType.Bytes) @name("process_storm_control.storm_control_meter") process_storm_control_storm_control_meter;
+    meter(32w1024, CounterType.bytes) @name("process_storm_control.storm_control_meter") process_storm_control_storm_control_meter;
     @name("process_storm_control.nop") action process_storm_control_nop_0() {
     }
     @name("process_storm_control.set_storm_control_meter") action process_storm_control_set_storm_control_meter_0(bit<8> meter_idx) {
-        process_storm_control_storm_control_meter.meter((bit<32>)meter_idx, meta_20.security_metadata.storm_control_color);
+        process_storm_control_storm_control_meter.execute_meter((bit<32>)meter_idx, meta_20.security_metadata.storm_control_color);
     }
     @name("process_storm_control.storm_control") table process_storm_control_storm_control() {
         actions = {
@@ -3808,7 +3808,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 4096;
         default_action = NoAction_39();
-        @name("bd_action_profile") implementation = ActionProfile(32w1024);
+        @name("bd_action_profile") implementation = action_profile(32w1024);
     }
     @name("process_spanning_tree.set_stp_state") action process_spanning_tree_set_stp_state_0(bit<3> stp_state) {
         meta_22.l2_metadata.stp_state = stp_state;
@@ -4935,9 +4935,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_74();
     }
-    Counter(32w1024, CounterType.Both) @name("process_ingress_bd_stats.ingress_bd_stats") process_ingress_bd_stats_ingress_bd_stats;
+    counter(32w1024, CounterType.packets_and_bytes) @name("process_ingress_bd_stats.ingress_bd_stats") process_ingress_bd_stats_ingress_bd_stats;
     @name("process_ingress_bd_stats.update_ingress_bd_stats") action process_ingress_bd_stats_update_ingress_bd_stats_0() {
-        process_ingress_bd_stats_ingress_bd_stats.increment((bit<32>)meta_40.l2_metadata.bd_stats_idx);
+        process_ingress_bd_stats_ingress_bd_stats.count((bit<32>)meta_40.l2_metadata.bd_stats_idx);
     }
     @name("process_ingress_bd_stats.ingress_bd_stats") table process_ingress_bd_stats_ingress_bd_stats_0() {
         actions = {
@@ -4947,9 +4947,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_75();
     }
-    Counter(32w1024, CounterType.Both) @name("process_ingress_acl_stats.acl_stats") process_ingress_acl_stats_acl_stats;
+    counter(32w1024, CounterType.packets_and_bytes) @name("process_ingress_acl_stats.acl_stats") process_ingress_acl_stats_acl_stats;
     @name("process_ingress_acl_stats.acl_stats_update") action process_ingress_acl_stats_acl_stats_update_0() {
-        process_ingress_acl_stats_acl_stats.increment((bit<32>)meta_41.acl_metadata.acl_stats_index);
+        process_ingress_acl_stats_acl_stats.count((bit<32>)meta_41.acl_metadata.acl_stats_index);
     }
     @name("process_ingress_acl_stats.acl_stats") table process_ingress_acl_stats_acl_stats_0() {
         actions = {
@@ -5054,7 +5054,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 1024;
         default_action = NoAction_78();
-        @name("ecmp_action_profile") implementation = ActionSelector(HashAlgorithm.identity, 32w1024, 32w10);
+        @name("ecmp_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
     }
     @name("process_nexthop.nexthop") table process_nexthop_nexthop() {
         actions = {
@@ -5109,7 +5109,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 1024;
         default_action = NoAction_81();
-        @name("lag_action_profile") implementation = ActionSelector(HashAlgorithm.identity, 32w1024, 32w8);
+        @name("lag_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
     }
     @name("process_mac_learning.nop") action process_mac_learning_nop_0() {
     }
@@ -5150,12 +5150,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta_47.hash_metadata.hash2       : selector;
         }
         default_action = NoAction_83();
-        @name("fabric_lag_action_profile") implementation = ActionSelector(HashAlgorithm.identity, 32w1024, 32w8);
+        @name("fabric_lag_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
     }
-    Counter(32w1024, CounterType.Packets) @name("process_system_acl.drop_stats") process_system_acl_drop_stats;
-    Counter(32w1024, CounterType.Packets) @name("process_system_acl.drop_stats_2") process_system_acl_drop_stats_0;
+    counter(32w1024, CounterType.packets) @name("process_system_acl.drop_stats") process_system_acl_drop_stats;
+    counter(32w1024, CounterType.packets) @name("process_system_acl.drop_stats_2") process_system_acl_drop_stats_0;
     @name("process_system_acl.drop_stats_update") action process_system_acl_drop_stats_update_0() {
-        process_system_acl_drop_stats_0.increment((bit<32>)meta_48.ingress_metadata.drop_reason);
+        process_system_acl_drop_stats_0.count((bit<32>)meta_48.ingress_metadata.drop_reason);
     }
     @name("process_system_acl.nop") action process_system_acl_nop_0() {
     }
@@ -5173,7 +5173,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop();
     }
     @name("process_system_acl.drop_packet_with_reason") action process_system_acl_drop_packet_with_reason_0(bit<8> drop_reason) {
-        process_system_acl_drop_stats.increment((bit<32>)drop_reason);
+        process_system_acl_drop_stats.count((bit<32>)drop_reason);
         mark_to_drop();
     }
     @name("process_system_acl.negative_mirror") action process_system_acl_negative_mirror_0(bit<8> session_id) {
