@@ -106,9 +106,8 @@ Context::mt_set_entry_ttl(const std::string &table_name,
 }
 
 MatchErrorCode
-Context::get_mt_indirect(
-    const std::string &table_name, MatchTableIndirect **table
-) {
+Context::get_mt_indirect(const std::string &table_name,
+                         MatchTableIndirect **table) const {
   MatchTableAbstract *abstract_table =
     p4objects_rt->get_abstract_match_table(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
@@ -216,7 +215,7 @@ Context::mt_indirect_set_default_member(const std::string &table_name,
 
 MatchErrorCode
 Context::get_mt_indirect_ws(const std::string &table_name,
-                            MatchTableIndirectWS **table) {
+                            MatchTableIndirectWS **table) const {
   MatchTableAbstract *abstract_table =
     p4objects_rt->get_abstract_match_table(table_name);
   if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
@@ -348,6 +347,80 @@ Context::mt_set_meter_rates(const std::string &table_name,
     p4objects_rt->get_abstract_match_table(table_name);
   assert(abstract_table);
   return abstract_table->set_meter_rates(handle, configs);
+}
+
+MatchTableType
+Context::mt_get_type(const std::string &table_name) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MatchTableAbstract *abstract_table =
+      p4objects_rt->get_abstract_match_table(table_name);
+  if (!abstract_table) return MatchTableType::NONE;
+  return abstract_table->get_table_type();
+}
+
+template <typename T>
+std::vector<typename T::Entry>
+Context::mt_get_entries(const std::string &table_name) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MatchTableAbstract *abstract_table =
+      p4objects_rt->get_abstract_match_table(table_name);
+  if (!abstract_table) return {};
+  T *table = dynamic_cast<T *>(abstract_table);
+  // TODO(antonin): return an error code instead?
+  if (!table) return {};
+  return table->get_entries();
+}
+
+// explicit instantiation
+template std::vector<MatchTable::Entry>
+Context::mt_get_entries<MatchTable>(const std::string &) const;
+template std::vector<MatchTableIndirect::Entry>
+Context::mt_get_entries<MatchTableIndirect>(const std::string &) const;
+template std::vector<MatchTableIndirectWS::Entry>
+Context::mt_get_entries<MatchTableIndirectWS>(const std::string &) const;
+
+template <typename T>
+MatchErrorCode
+Context::mt_get_default_entry(const std::string &table_name,
+                              typename T::Entry *default_entry) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MatchTableAbstract *abstract_table =
+      p4objects_rt->get_abstract_match_table(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  T *table = dynamic_cast<T *>(abstract_table);
+  if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
+  return table->get_default_entry(default_entry);
+}
+
+// explicit instantiation
+template MatchErrorCode
+Context::mt_get_default_entry<MatchTable>(
+    const std::string &, MatchTable::Entry *) const;
+template MatchErrorCode
+Context::mt_get_default_entry<MatchTableIndirect>(
+    const std::string &, MatchTableIndirect::Entry *) const;
+template MatchErrorCode
+Context::mt_get_default_entry<MatchTableIndirectWS>(
+    const std::string &, MatchTableIndirectWS::Entry *) const;
+
+std::vector<MatchTableIndirect::Member>
+Context::mt_indirect_get_members(const std::string &table_name) const {
+  MatchErrorCode rc;
+  MatchTableIndirect *table;
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
+    return {};
+  return table->get_members();
+}
+
+std::vector<MatchTableIndirectWS::Group>
+Context::mt_indirect_ws_get_groups(const std::string &table_name) const {
+  MatchErrorCode rc;
+  MatchTableIndirectWS *table;
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
+    return {};
+  return table->get_groups();
 }
 
 Counter::CounterErrorCode

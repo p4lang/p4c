@@ -1608,6 +1608,101 @@ class RuntimeAPI(cmd.Cmd):
     def complete_table_dump(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
+    def dump_action_and_data(self, action_name, action_data):
+        def hexstr(v):
+            return "".join("{:02x}".format(ord(c)) for c in v)
+
+        print "Action entry: {} - {}".format(
+            action_name, ", ".join([hexstr(a) for a in action_data]))
+
+    def dump_action_entry(self, a_entry):
+        if a_entry.action_type == BmActionEntryType.NONE:
+            print "EMPTY"
+        elif a_entry.action_type == BmActionEntryType.ACTION_DATA:
+            self.dump_action_and_data(a_entry.action_name, a_entry.action_data)
+        elif a_entry.action_type == BmActionEntryType.MBR_HANDLE:
+            print "Index: member({})".format(a_entry.mbr_handle)
+        elif a_entry.action_type == BmActionEntryType.GRP_HANDLE:
+            print "Index: group({})".format(a_entry.grp_handle)
+
+    def dump_members(self, members):
+        for m in members:
+            print "**********"
+            print "Dumping member {}".format(m.mbr_handle)
+            self.dump_action_and_data(m.action_name, m.action_data)
+
+    def dump_groups(self, groups):
+        for g in groups:
+            print "**********"
+            print "Dumping group {}".format(g.grp_handle)
+            print "Members: [{}]".format(", ".join(
+                [str(h) for h in g.mbr_handles]))
+
+    @handle_bad_input
+    def do_table_dump_2(self, line):
+        "Display some information about a table: table_dump <table_name>"
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+        entries = self.client.bm_mt_get_entries(0, table_name)
+        out_name_w = max(20, max([len(t[0]) for t in table.key]))
+
+        def hexstr(v):
+            return "".join("{:02x}".format(ord(c)) for c in v)
+        def dump_exact(p):
+             return hexstr(p.exact.key)
+        def dump_lpm(p):
+            return "{}/{}".format(hexstr(p.lpm.key), p.lpm.prefix_length)
+        def dump_ternary(p):
+            return "{} &&& {}".format(hexstr(p.ternary.key),
+                                      hexstr(p.ternary.mask))
+        def dump_valid(p):
+            return "01" if p.valid.key else "00"
+        pdumpers = {"exact": dump_exact, "lpm": dump_lpm,
+                    "ternary": dump_ternary, "valid": dump_ternary}
+
+        print "=========="
+        print "TABLE ENTRIES"
+
+        for e in entries:
+            print "**********"
+            print "Dumping entry {}".format(hex(e.entry_handle))
+            print "Match key:"
+            for p, k in zip(e.match_key, table.key):
+                assert(k[1] == p.type)
+                pdumper = pdumpers[MatchType.to_str(p.type)]
+                print "* {0:{w}}: {1:10}{2}".format(
+                    k[0], MatchType.to_str(p.type).upper(),
+                    pdumper(p), w=out_name_w)
+            if (e.options.priority >= 0):
+                print "Priority: {}".format(e.priority)
+            self.dump_action_entry(e.action_entry)
+
+        if table.type_ == TableType.indirect or\
+           table.type_ == TableType.indirect_ws:
+            members = self.client.bm_mt_indirect_get_members(0, table_name)
+            print "=========="
+            print "MEMBERS"
+            self.dump_members(members)
+
+        if table.type_ == TableType.indirect_ws:
+            groups = self.client.bm_mt_indirect_ws_get_groups(0, table_name)
+            print "=========="
+            print "GROUPS"
+            self.dump_groups(groups)
+
+        # default entry
+        default_entry = self.client.bm_mt_get_default_entry(0, table_name)
+        print "=========="
+        print "Dumping default entry"
+        self.dump_action_entry(default_entry)
+
+        print "=========="
+
+    def complete_table_dump_2(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
     @handle_bad_input
     def do_port_add(self, line):
         "Add a port to the switch (behavior depends on device manager used): port_add <iface_name> <port_num> [pcap_path]"

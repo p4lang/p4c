@@ -255,6 +255,18 @@ MatchTableAbstract::sweep_entries(std::vector<entry_handle_t> *entries) const {
   match_unit_->sweep_entries(entries);
 }
 
+MatchTableAbstract::handle_iterator
+MatchTableAbstract::handles_begin() const {
+  ReadLock lock = lock_read();
+  return handle_iterator(this, match_unit_->handles_begin());
+}
+
+MatchTableAbstract::handle_iterator
+MatchTableAbstract::handles_end() const {
+  ReadLock lock = lock_read();
+  return handle_iterator(this, match_unit_->handles_end());
+}
+
 const ControlFlowNode *
 MatchTableAbstract::get_next_node(p4object_id_t action_id) const {
   if (has_next_node_hit)
@@ -400,19 +412,47 @@ MatchTable::set_default_action(const ActionFn *action_fn,
 }
 
 MatchErrorCode
-MatchTable::get_entry(entry_handle_t handle,
-                      std::vector<MatchKeyParam> *match_key,
-                      const ActionFn **action_fn, ActionData *action_data,
-                      int *priority) const {
-  const ActionEntry *entry;
-  ReadLock lock = lock_read();
-  MatchErrorCode rc = match_unit->get_entry(handle, match_key, &entry,
-                                            priority);
+MatchTable::get_entry_(entry_handle_t handle, Entry *entry) const {
+  const ActionEntry *action_entry;
+  MatchErrorCode rc = match_unit->get_entry(handle, &entry->match_key,
+                                            &action_entry, &entry->priority);
   if (rc != MatchErrorCode::SUCCESS) return rc;
 
-  *action_fn = entry->action_fn.get_action_fn();
-  *action_data = entry->action_fn.get_action_data();
+  entry->handle = handle;
+  entry->action_fn = action_entry->action_fn.get_action_fn();
+  entry->action_data = action_entry->action_fn.get_action_data();
 
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTable::get_entry(entry_handle_t handle, Entry *entry) const {
+  ReadLock lock = lock_read();
+  return get_entry_(handle, entry);
+}
+
+std::vector<MatchTable::Entry>
+MatchTable::get_entries() const {
+  ReadLock lock = lock_read();
+  // maybe calling get_entry_ is not the most efficient way of building the
+  // vector, but at least we avoid code duplication
+  std::vector<Entry> entries(get_num_entries());
+  size_t idx = 0;
+  for (auto it = match_unit->handles_begin(); it != match_unit->handles_end();
+       it++) {
+    MatchErrorCode rc = get_entry_(*it, &entries[idx++]);
+    assert(rc == MatchErrorCode::SUCCESS);
+  }
+
+  return entries;
+}
+
+MatchErrorCode
+MatchTable::get_default_entry(Entry *entry) const {
+  ReadLock lock = lock_read();
+  entry->action_fn = default_entry.action_fn.get_action_fn();
+  if (!entry->action_fn) return MatchErrorCode::NO_DEFAULT_ENTRY;
+  entry->action_data = default_entry.action_fn.get_action_data();
   return MatchErrorCode::SUCCESS;
 }
 
@@ -742,33 +782,76 @@ MatchTableIndirect::set_default_member(mbr_hdl_t mbr) {
 }
 
 MatchErrorCode
-MatchTableIndirect::get_entry(entry_handle_t handle,
-                              std::vector<MatchKeyParam> *match_key,
-                              mbr_hdl_t *mbr, int *priority) const {
+MatchTableIndirect::get_entry_(entry_handle_t handle, Entry *entry) const {
   const IndirectIndex *index;
-  ReadLock lock = lock_read();
-  MatchErrorCode rc = match_unit->get_entry(handle, match_key, &index,
-                                            priority);
+  MatchErrorCode rc = match_unit->get_entry(handle, &entry->match_key, &index,
+                                            &entry->priority);
   if (rc != MatchErrorCode::SUCCESS) return rc;
 
+  entry->handle = handle;
   assert(index->is_mbr());
-  *mbr = index->get_mbr();
+  entry->mbr = index->get_mbr();
 
   return MatchErrorCode::SUCCESS;
 }
 
 MatchErrorCode
-MatchTableIndirect::get_member(mbr_hdl_t mbr, const ActionFn **action_fn,
-                               ActionData *action_data) const {
+MatchTableIndirect::get_entry(entry_handle_t handle, Entry *entry) const {
+  ReadLock lock = lock_read();
+  return get_entry_(handle, entry);
+}
+
+std::vector<MatchTableIndirect::Entry>
+MatchTableIndirect::get_entries() const {
+  ReadLock lock = lock_read();
+  std::vector<Entry> entries(get_num_entries());
+  size_t idx = 0;
+  for (auto it = match_unit->handles_begin(); it != match_unit->handles_end();
+       it++) {
+    MatchErrorCode rc = get_entry_(*it, &entries[idx++]);
+    assert(rc == MatchErrorCode::SUCCESS);
+  }
+
+  return entries;
+}
+
+MatchErrorCode
+MatchTableIndirect::get_default_entry(Entry *entry) const {
+  ReadLock lock = lock_read();
+  if (!default_set) return MatchErrorCode::NO_DEFAULT_ENTRY;
+  assert(default_index.is_mbr());
+  entry->mbr = default_index.get_mbr();
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableIndirect::get_member_(mbr_hdl_t mbr, Member *member) const {
+  const ActionEntry &entry = action_entries.at(mbr);
+  member->mbr = mbr;
+  member->action_fn = entry.action_fn.get_action_fn();
+  member->action_data = entry.action_fn.get_action_data();
+
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableIndirect::get_member(mbr_hdl_t mbr, Member *member) const {
   ReadLock lock = lock_read();
 
   if (!is_valid_mbr(mbr)) return MatchErrorCode::INVALID_MBR_HANDLE;
+  return get_member_(mbr, member);
+}
 
-  const ActionEntry &entry = action_entries[mbr];
-  *action_fn = entry.action_fn.get_action_fn();
-  *action_data = entry.action_fn.get_action_data();
-
-  return MatchErrorCode::SUCCESS;
+std::vector<MatchTableIndirect::Member>
+MatchTableIndirect::get_members() const {
+  ReadLock lock = lock_read();
+  std::vector<Member> members(get_num_members());
+  size_t idx = 0;
+  for (const auto h : mbr_handles) {
+    MatchErrorCode rc = get_member_(h, &members[idx++]);
+    assert(rc == MatchErrorCode::SUCCESS);
+  }
+  return members;
 }
 
 void
@@ -1226,39 +1309,87 @@ MatchTableIndirectWS::set_default_group(grp_hdl_t grp) {
 }
 
 MatchErrorCode
-MatchTableIndirectWS::get_entry(entry_handle_t handle,
-                                std::vector<MatchKeyParam> *match_key,
-                                mbr_hdl_t *mbr, grp_hdl_t *grp,
-                                int *priority) const {
+MatchTableIndirectWS::get_entry_(entry_handle_t handle, Entry *entry) const {
   const IndirectIndex *index;
-  ReadLock lock = lock_read();
-  MatchErrorCode rc = match_unit->get_entry(handle, match_key, &index,
-                                            priority);
+  MatchErrorCode rc = match_unit->get_entry(handle, &entry->match_key, &index,
+                                            &entry->priority);
   if (rc != MatchErrorCode::SUCCESS) return rc;
 
+  entry->handle = handle;
+
   if (index->is_mbr()) {
-    *mbr = index->get_mbr();
-    *grp = std::numeric_limits<grp_hdl_t>::max();
+    entry->mbr = index->get_mbr();
+    entry->grp = std::numeric_limits<grp_hdl_t>::max();
   } else {
-    *mbr = std::numeric_limits<mbr_hdl_t>::max();
-    *grp = index->get_grp();
+    entry->mbr = std::numeric_limits<mbr_hdl_t>::max();
+    entry->grp = index->get_grp();
   }
 
   return MatchErrorCode::SUCCESS;
 }
 
 MatchErrorCode
-MatchTableIndirectWS::get_group(grp_hdl_t grp,
-                                std::vector<mbr_hdl_t> *mbrs) const {
-  mbrs->clear();
+MatchTableIndirectWS::get_entry(entry_handle_t handle, Entry *entry) const {
   ReadLock lock = lock_read();
+  return get_entry_(handle, entry);
+}
 
-  if (!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+std::vector<MatchTableIndirectWS::Entry>
+MatchTableIndirectWS::get_entries() const {
+  ReadLock lock = lock_read();
+  std::vector<Entry> entries(get_num_entries());
+  size_t idx = 0;
+  for (auto it = match_unit->handles_begin(); it != match_unit->handles_end();
+       it++) {
+    MatchErrorCode rc = get_entry_(*it, &entries[idx++]);
+    assert(rc == MatchErrorCode::SUCCESS);
+  }
+
+  return entries;
+}
+
+MatchErrorCode
+MatchTableIndirectWS::get_default_entry(Entry *entry) const {
+  ReadLock lock = lock_read();
+  if (!default_set) return MatchErrorCode::NO_DEFAULT_ENTRY;
+  if (default_index.is_mbr()) {
+    entry->mbr = default_index.get_mbr();
+    entry->grp = std::numeric_limits<grp_hdl_t>::max();
+  } else {
+    entry->mbr = std::numeric_limits<mbr_hdl_t>::max();
+    entry->grp = default_index.get_grp();
+  }
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableIndirectWS::get_group_(grp_hdl_t grp, Group *group) const {
+  group->grp = grp;
+  group->mbr_handles.clear();
 
   for (const auto &mbr : group_entries[grp])
-    mbrs->push_back(mbr);
+    group->mbr_handles.push_back(mbr);
 
   return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
+MatchTableIndirectWS::get_group(grp_hdl_t grp, Group *group) const {
+  ReadLock lock = lock_read();
+  if (!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
+  return get_group_(grp, group);
+}
+
+std::vector<MatchTableIndirectWS::Group>
+MatchTableIndirectWS::get_groups() const {
+  ReadLock lock = lock_read();
+  std::vector<Group> groups(get_num_groups());
+  size_t idx = 0;
+  for (const auto h : grp_handles) {
+    MatchErrorCode rc = get_group_(h, &groups[idx++]);
+    assert(rc == MatchErrorCode::SUCCESS);
+  }
+  return groups;
 }
 
 MatchErrorCode

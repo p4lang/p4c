@@ -192,6 +192,41 @@ class RuntimeInterface {
                      entry_handle_t handle,
                      const std::vector<Meter::rate_config_t> &configs) = 0;
 
+  virtual MatchTableType
+  mt_get_type(size_t cxt_id, const std::string &table_name) const = 0;
+
+  virtual std::vector<MatchTable::Entry>
+  mt_get_entries(size_t cxt_id, const std::string &table_name) const = 0;
+
+  virtual std::vector<MatchTableIndirect::Entry>
+  mt_indirect_get_entries(size_t cxt_id,
+                          const std::string &table_name) const = 0;
+
+  virtual std::vector<MatchTableIndirectWS::Entry>
+  mt_indirect_ws_get_entries(size_t cxt_id,
+                             const std::string &table_name) const = 0;
+
+  virtual MatchErrorCode
+  mt_get_default_entry(size_t cxt_id, const std::string &table_name,
+                       MatchTable::Entry *entry) const = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_get_default_entry(size_t cxt_id, const std::string &table_name,
+                                MatchTableIndirect::Entry *entry) const = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_ws_get_default_entry(
+      size_t cxt_id, const std::string &table_name,
+      MatchTableIndirectWS::Entry *entry) const = 0;
+
+  virtual std::vector<MatchTableIndirect::Member>
+  mt_indirect_get_members(size_t cxt_id,
+                          const std::string &table_name) const = 0;
+
+  virtual std::vector<MatchTableIndirectWS::Group>
+  mt_indirect_ws_get_groups(size_t cxt_id,
+                            const std::string &table_name) const = 0;
+
   virtual Counter::CounterErrorCode
   read_counters(size_t cxt_id,
                 const std::string &counter_name,

@@ -426,6 +426,63 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
         table_name, grp);
   }
 
+  MatchTableType
+  mt_get_type(size_t cxt_id, const std::string &table_name) const override {
+    return contexts.at(cxt_id).mt_get_type(table_name);
+  }
+
+  std::vector<MatchTable::Entry>
+  mt_get_entries(size_t cxt_id, const std::string &table_name) const override {
+    return contexts.at(cxt_id).mt_get_entries<MatchTable>(table_name);
+  }
+
+  std::vector<MatchTableIndirect::Entry>
+  mt_indirect_get_entries(size_t cxt_id,
+                          const std::string &table_name) const override {
+    return contexts.at(cxt_id).mt_get_entries<MatchTableIndirect>(table_name);
+  }
+
+  std::vector<MatchTableIndirectWS::Entry>
+  mt_indirect_ws_get_entries(size_t cxt_id,
+                             const std::string &table_name) const override {
+    return contexts.at(cxt_id).mt_get_entries<MatchTableIndirectWS>(table_name);
+  }
+
+  MatchErrorCode
+  mt_get_default_entry(size_t cxt_id, const std::string &table_name,
+                       MatchTable::Entry *entry) const override {
+    return contexts.at(cxt_id).mt_get_default_entry<MatchTable>(
+        table_name, entry);
+  }
+
+  MatchErrorCode
+  mt_indirect_get_default_entry(
+      size_t cxt_id, const std::string &table_name,
+      MatchTableIndirect::Entry *entry) const override {
+    return contexts.at(cxt_id).mt_get_default_entry<MatchTableIndirect>(
+        table_name, entry);
+  }
+
+  MatchErrorCode
+  mt_indirect_ws_get_default_entry(
+      size_t cxt_id, const std::string &table_name,
+      MatchTableIndirectWS::Entry *entry) const override {
+    return contexts.at(cxt_id).mt_get_default_entry<MatchTableIndirectWS>(
+        table_name, entry);
+  }
+
+  std::vector<MatchTableIndirect::Member>
+  mt_indirect_get_members(size_t cxt_id,
+                          const std::string &table_name) const override {
+    return contexts.at(cxt_id).mt_indirect_get_members(table_name);
+  }
+
+  std::vector<MatchTableIndirectWS::Group>
+  mt_indirect_ws_get_groups(size_t cxt_id,
+                            const std::string &table_name) const override {
+    return contexts.at(cxt_id).mt_indirect_ws_get_groups(table_name);
+  }
+
   MatchErrorCode
   mt_read_counters(size_t cxt_id,
                    const std::string &table_name,

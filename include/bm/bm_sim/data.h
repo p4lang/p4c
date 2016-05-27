@@ -203,6 +203,17 @@ class Data {
     return static_cast<int>(value);
   }
 
+  //! get the binary representation of Data has a string. There is no sign
+  //! support.
+  std::string get_string() const {
+    assert(arith);
+    const size_t export_size = bignum::export_size_in_bytes(value);
+    std::string s(export_size, '\x00');
+    // this is not technically correct, but works for all compilers
+    bignum::export_bytes(&s[0], export_size, value);
+    return s;
+  }
+
   bool get_arith() const { return arith; }
 
   // TODO(antonin): overload operators for those ?

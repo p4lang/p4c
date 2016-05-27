@@ -1,0 +1,118 @@
+#!/usr/bin/python
+
+# Copyright 2013-present Barefoot Networks, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import sys
+import subprocess
+import os
+import time
+import random
+
+# Class written by Mihai Budiu, for Barefoot Networks, Inc.
+class ConcurrentInteger(object):
+    # Generates exclusive integers in a range 0-max
+    # in a way which is safe across multiple processes.
+    # It uses a simple form of locking using folder names.
+    # This is necessary because this script may be invoked
+    # concurrently many times by make, and we need the many simulator instances
+    # to use different port numbers.
+    def __init__(self, folder, max):
+        self.folder = folder
+        self.max = max
+    def lockName(self, value):
+        return "lock_" + str(value)
+    def release(self, value):
+        os.rmdir(self.lockName(value))
+    def generate(self):
+        # try 10 times
+        for i in range(0, 10):
+            index = random.randint(0, self.max)
+            file = self.lockName(index)
+            try:
+                os.makedirs(file)
+                os.rmdir(file)
+                return index
+            except:
+                time.sleep(1)
+                continue
+        return None
+
+def main():
+    if len(sys.argv) != 4:
+        sys.exit(1)
+    testdata_dir = sys.argv[1]
+    testname = sys.argv[2]
+    jsonname = sys.argv[3]
+
+    command_path = os.path.join(testdata_dir, testname + ".in")
+    output_path = os.path.join(testdata_dir, testname + ".out")
+    json_path = os.path.join(testdata_dir, jsonname)
+
+    concurrent = ConcurrentInteger(os.getcwd(), 1000)
+    rand = concurrent.generate()
+    if rand is None:
+        sys.exit(2)
+    thrift_port = str(9090 + rand)
+
+    # makes sure that the switch will start right away
+    simple_switch_p = subprocess.Popen(
+        ["@abs_top_builddir@/targets/simple_switch/simple_switch", "-h"])
+    simple_switch_p.wait()
+
+    # start simple_switch
+    simple_switch_p = subprocess.Popen(
+        ["@abs_top_builddir@/targets/simple_switch/simple_switch",
+         json_path, "--thrift-port", thrift_port],
+        stdout=subprocess.PIPE)
+    # while True:
+    #     line = simple_switch_p.stdout.readline()
+    #     if "Thrift" in line:
+    #         break
+
+    time.sleep(1)
+
+    cmd = ["@abs_top_srcdir@/tools/runtime_CLI.py",
+           "--thrift-port", thrift_port]
+    out = None
+    with open(command_path, "r") as f:
+        sub_env = os.environ.copy()
+        pythonpath = ""
+        if "PYHTONPATH" in sub_env:
+            pythonpath = sub_env["PYTHONPATH"] + ":"
+        sub_env["PYTHONPATH"] = pythonpath + \
+                                "@abs_top_builddir@/thrift_src/gen-py/"
+        p = subprocess.Popen(cmd, stdin=f, stdout=subprocess.PIPE, env=sub_env)
+        out, _ = p.communicate()
+        rc = p.returncode
+
+        if rc:
+            simple_switch_p.kill()
+            sys.exit(3)
+
+    assert(out)
+
+    with open(output_path, "r") as f:
+        expected_out = f.read()
+
+        if expected_out in out:
+            simple_switch_p.kill()
+            sys.exit(0)
+
+    simple_switch_p.kill()
+    sys.exit(4)
+
+if __name__ == '__main__':
+    main()

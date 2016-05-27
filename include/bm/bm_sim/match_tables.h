@@ -35,10 +35,18 @@
 
 namespace bm {
 
+enum class MatchTableType {
+  NONE = 0,
+  SIMPLE,
+  INDIRECT,
+  INDIRECT_WS
+};
+
 class MatchTableAbstract : public NamedP4Object {
  public:
+  friend class handle_iterator;
+
   typedef Counter::counter_value_t counter_value_t;
-  typedef MatchUnitAbstract_::handle_iterator handle_iterator;
 
   struct ActionEntry {
     ActionEntry() { }
@@ -68,6 +76,51 @@ class MatchTableAbstract : public NamedP4Object {
     const ControlFlowNode *next_node{nullptr};
   };
 
+  class handle_iterator
+      : public std::iterator<std::forward_iterator_tag, handle_t> {
+   public:
+    handle_iterator(const MatchTableAbstract *mt,
+                    const MatchUnitAbstract_::handle_iterator &it)
+        : mt(mt), it(it) { }
+
+    const entry_handle_t &operator*() const {
+      ReadLock lock = mt->lock_read();
+      return *it;
+    }
+
+    const entry_handle_t *operator->() const {
+      ReadLock lock = mt->lock_read();
+      return it.operator->();
+    }
+
+    bool operator==(const handle_iterator &other) const {
+      ReadLock lock = mt->lock_read();
+      return (it == other.it);
+    }
+
+    bool operator!=(const handle_iterator &other) const {
+      ReadLock lock = mt->lock_read();
+      return !(*this == other);
+    }
+
+    handle_iterator &operator++() {
+      ReadLock lock = mt->lock_read();
+      it++;
+      return *this;
+    }
+
+    const handle_iterator operator++(int) {
+      // Use operator++()
+      const handle_iterator old(*this);
+      ++(*this);
+      return old;
+    }
+
+   private:
+    const MatchTableAbstract *mt;
+    MatchUnitAbstract_::handle_iterator it;
+  };
+
  public:
   MatchTableAbstract(const std::string &name, p4object_id_t id,
                      size_t size, bool with_counters, bool with_ageing,
@@ -76,6 +129,8 @@ class MatchTableAbstract : public NamedP4Object {
   virtual ~MatchTableAbstract() { }
 
   const ControlFlowNode *apply_action(Packet *pkt);
+
+  virtual MatchTableType get_table_type() const = 0;
 
   virtual const ActionEntry &lookup(const Packet &pkt, bool *hit,
                                     entry_handle_t *handle) = 0;
@@ -132,8 +187,8 @@ class MatchTableAbstract : public NamedP4Object {
 
   void sweep_entries(std::vector<entry_handle_t> *entries) const;
 
-  handle_iterator handles_begin() const { return match_unit_->handles_begin(); }
-  handle_iterator handles_end() const { return match_unit_->handles_end(); }
+  handle_iterator handles_begin() const;
+  handle_iterator handles_end() const;
 
   MatchTableAbstract(const MatchTableAbstract &other) = delete;
   MatchTableAbstract &operator=(const MatchTableAbstract &other) = delete;
@@ -201,6 +256,14 @@ class MatchTable : public MatchTableAbstract {
  public:
   typedef MatchTableAbstract::ActionEntry ActionEntry;
 
+  struct Entry {
+    entry_handle_t handle;
+    std::vector<MatchKeyParam> match_key;
+    const ActionFn *action_fn;
+    ActionData action_data;
+    int priority;
+  };
+
  public:
   MatchTable(const std::string &name, p4object_id_t id,
              std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit,
@@ -221,11 +284,15 @@ class MatchTable : public MatchTableAbstract {
   MatchErrorCode set_default_action(const ActionFn *action_fn,
                                     ActionData action_data);
 
-  MatchErrorCode get_entry(entry_handle_t handle,
-                           std::vector<MatchKeyParam> *match_key,
-                           const ActionFn **action_fn,
-                           ActionData *action_data,
-                           int *priority = nullptr) const;
+  MatchErrorCode get_entry(entry_handle_t handle, Entry *entry) const;
+
+  std::vector<Entry> get_entries() const;
+
+  MatchErrorCode get_default_entry(Entry *entry) const;
+
+  MatchTableType get_table_type() const override {
+    return MatchTableType::SIMPLE;
+  }
 
   const ActionEntry &lookup(const Packet &pkt, bool *hit,
                             entry_handle_t *handle) override;
@@ -268,6 +335,8 @@ class MatchTable : public MatchTableAbstract {
   MatchErrorCode dump_entry_(std::ostream *out,
                              entry_handle_t handle) const override;
 
+  MatchErrorCode get_entry_(entry_handle_t handle, Entry *entry) const;
+
  private:
   ActionEntry default_entry{};
   std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit;
@@ -280,6 +349,19 @@ class MatchTableIndirect : public MatchTableAbstract {
   typedef MatchTableAbstract::ActionEntry ActionEntry;
 
   typedef uintptr_t mbr_hdl_t;
+
+  struct Entry {
+    entry_handle_t handle;
+    std::vector<MatchKeyParam> match_key;
+    mbr_hdl_t mbr;
+    int priority;
+  };
+
+  struct Member {
+    mbr_hdl_t mbr;
+    const ActionFn *action_fn;
+    ActionData action_data;
+  };
 
   class IndirectIndex {
    public:
@@ -397,13 +479,19 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   MatchErrorCode set_default_member(mbr_hdl_t mbr);
 
-  MatchErrorCode get_entry(entry_handle_t handle,
-                           std::vector<MatchKeyParam> *match_key,
-                           mbr_hdl_t *mbr,
-                           int *priority = nullptr) const;
+  MatchErrorCode get_entry(entry_handle_t handle, Entry *entry) const;
 
-  MatchErrorCode get_member(mbr_hdl_t mbr, const ActionFn **action_fn,
-                            ActionData *action_data) const;
+  std::vector<Entry> get_entries() const;
+
+  MatchErrorCode get_default_entry(Entry *entry) const;
+
+  MatchErrorCode get_member(mbr_hdl_t mbr, Member *member) const;
+
+  std::vector<Member> get_members() const;
+
+  MatchTableType get_table_type() const override {
+    return MatchTableType::INDIRECT;
+  }
 
   const ActionEntry &lookup(const Packet &pkt, bool *hit,
                             entry_handle_t *handle) override;
@@ -445,6 +533,10 @@ class MatchTableIndirect : public MatchTableAbstract {
   MatchErrorCode dump_entry_common(std::ostream *stream, entry_handle_t handle,
                                    const IndirectIndex **index) const;
 
+  MatchErrorCode get_entry_(entry_handle_t handle, Entry *entry) const;
+
+  MatchErrorCode get_member_(entry_handle_t handle, Member *member) const;
+
  protected:
   IndirectIndex default_index{};
   IndirectIndexRefCount index_ref_count{};
@@ -469,6 +561,22 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   typedef uintptr_t grp_hdl_t;
 
   typedef unsigned int hash_t;
+
+  // If the entry points to a member, grp will be set to its maximum possible
+  // value, i.e. std::numeric_limits<grp_hdl_t>::max(). If the entry points to a
+  // group, it will be mbr that will be set to its max possible value.
+  struct Entry {
+    entry_handle_t handle;
+    std::vector<MatchKeyParam> match_key;
+    mbr_hdl_t mbr;
+    grp_hdl_t grp;
+    int priority;
+  };
+
+  struct Group {
+    grp_hdl_t grp;
+    std::vector<mbr_hdl_t> mbr_handles;
+  };
 
  public:
   MatchTableIndirectWS(
@@ -497,15 +605,19 @@ class MatchTableIndirectWS : public MatchTableIndirect {
 
   MatchErrorCode set_default_group(grp_hdl_t grp);
 
-  // If the entry points to a member, grp will be set to its maximum possible
-  // value, i.e. std::numeric_limits<grp_hdl_t>::max(). If the entry points to a
-  // group, it will be mbr that will be set to its max possible value.
-  MatchErrorCode get_entry(entry_handle_t handle,
-                           std::vector<MatchKeyParam> *match_key,
-                           mbr_hdl_t *mbr, grp_hdl_t *grp,
-                           int *priority = nullptr) const;
+  MatchErrorCode get_entry(entry_handle_t handle, Entry *entry) const;
 
-  MatchErrorCode get_group(grp_hdl_t grp, std::vector<mbr_hdl_t> *mbrs) const;
+  std::vector<Entry> get_entries() const;
+
+  MatchErrorCode get_default_entry(Entry *entry) const;
+
+  MatchErrorCode get_group(grp_hdl_t grp, Group *group) const;
+
+  std::vector<Group> get_groups() const;
+
+  MatchTableType get_table_type() const override {
+    return MatchTableType::INDIRECT_WS;
+  }
 
   const ActionEntry &lookup(const Packet &pkt, bool *hit,
                             entry_handle_t *handle) override;
@@ -547,6 +659,10 @@ class MatchTableIndirectWS : public MatchTableIndirect {
 
   MatchErrorCode dump_entry_(std::ostream *out,
                             entry_handle_t handle) const override;
+
+  MatchErrorCode get_entry_(entry_handle_t handle, Entry *entry) const;
+
+  MatchErrorCode get_group_(grp_hdl_t grp, Group *group) const;
 
  private:
   class GroupInfo {
