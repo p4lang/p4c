@@ -184,58 +184,60 @@ PcapFilesReader::addFile(unsigned index, std::string file) {
 
 void
 PcapFilesReader::scan() {
-  if (nonEmptyFiles == 0) {
-    BMLOG_DEBUG("Pcap reader: end of all input files");
-    // notifyAllEnd();
-    return;
-  }
+  while (true) {
+    if (nonEmptyFiles == 0) {
+      BMLOG_DEBUG("Pcap reader: end of all input files");
+      // notifyAllEnd();
+      return;
+    }
 
-  int earliest_index = -1;
-  const struct timeval *earliest_time;
+    int earliest_index = -1;
+    const struct timeval *earliest_time;
 
-  for (unsigned i=0; i < files.size(); i++) {
-    auto file = files.at(i).get();
-    if (file->atEOF()) continue;
+    for (unsigned i=0; i < files.size(); i++) {
+      auto file = files.at(i).get();
+      if (file->atEOF()) continue;
 
-    std::unique_ptr<PcapPacket> p = file->current();
-    if (earliest_index == -1) {
-      earliest_index = i;
-      earliest_time = p->getTime();
-    } else {
-      const struct timeval *time = p->getTime();
-      if (timercmp(time, earliest_time, <)) {
+      std::unique_ptr<PcapPacket> p = file->current();
+      if (earliest_index == -1) {
         earliest_index = i;
-        earliest_time = time;
+        earliest_time = p->getTime();
+      } else {
+        const struct timeval *time = p->getTime();
+        if (timercmp(time, earliest_time, <)) {
+          earliest_index = i;
+          earliest_time = time;
+        }
       }
     }
+
+    assert(earliest_index >= 0);
+    struct timeval delay;
+
+    BMLOG_DEBUG("Pcap reader: first packet to send {}",
+                PcapPacket::timevalToString(earliest_time));
+
+    if (respectTiming) {
+      struct timeval delta;
+      timersub(earliest_time, &firstPacketTime, &delta);
+
+      struct timeval now;
+      gettimeofday(&now, nullptr);
+
+      struct timeval elapsed;
+      timersub(&now, &startTime, &elapsed);
+
+      timersub(&delta, &elapsed, &delay);
+      BMLOG_DEBUG("Pcap reader: delta {}, elapsed {}, delay {}",
+                  PcapPacket::timevalToString(&delta),
+                  PcapPacket::timevalToString(&elapsed),
+                  PcapPacket::timevalToString(&delay));
+    } else {
+      timerclear(&delay);
+    }
+
+    schedulePacket((unsigned)earliest_index, &delay);
   }
-
-  assert(earliest_index >= 0);
-  struct timeval delay;
-
-  BMLOG_DEBUG("Pcap reader: first packet to send {}",
-              PcapPacket::timevalToString(earliest_time));
-
-  if (respectTiming) {
-    struct timeval delta;
-    timersub(earliest_time, &firstPacketTime, &delta);
-
-    struct timeval now;
-    gettimeofday(&now, nullptr);
-
-    struct timeval elapsed;
-    timersub(&now, &startTime, &elapsed);
-
-    timersub(&delta, &elapsed, &delay);
-    BMLOG_DEBUG("Pcap reader: delta {}, elapsed {}, delay {}",
-                PcapPacket::timevalToString(&delta),
-                PcapPacket::timevalToString(&elapsed),
-                PcapPacket::timevalToString(&delay));
-  } else {
-    timerclear(&delay);
-  }
-
-  schedulePacket((unsigned)earliest_index, &delay);
 }
 
 
@@ -251,7 +253,6 @@ void PcapFilesReader::timerFired() {
   bool success = file->moveNext();
   if (!success)
     nonEmptyFiles--;
-  scan();
 }
 
 
