@@ -95,3 +95,6 @@ gen-cpp
 gen-py
 
 VERSION-build
+
+# dist archives
+*.tar.gz

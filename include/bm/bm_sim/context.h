@@ -241,6 +241,24 @@ class Context final {
   mt_indirect_ws_set_default_group(const std::string &table_name,
                                    grp_hdl_t grp);
 
+  MatchTableType
+  mt_get_type(const std::string &table_name) const;
+
+  template <typename T>
+  std::vector<typename T::Entry>
+  mt_get_entries(const std::string &table_name) const;
+
+  template <typename T>
+  MatchErrorCode
+  mt_get_default_entry(const std::string &table_name,
+                       typename T::Entry *default_entry) const;
+
+  std::vector<MatchTableIndirect::Member>
+  mt_indirect_get_members(const std::string &table_name) const;
+
+  std::vector<MatchTableIndirectWS::Group>
+  mt_indirect_ws_get_groups(const std::string &table_name) const;
+
   MatchErrorCode
   mt_read_counters(const std::string &table_name,
                    entry_handle_t handle,
@@ -319,9 +337,9 @@ class Context final {
 
  private:
   MatchErrorCode get_mt_indirect(const std::string &table_name,
-                                 MatchTableIndirect **table);
+                                 MatchTableIndirect **table) const;
   MatchErrorCode get_mt_indirect_ws(const std::string &table_name,
-                                    MatchTableIndirectWS **table);
+                                    MatchTableIndirectWS **table) const;
 
   bool field_exists(const std::string &header_name,
                     const std::string &field_name) const {

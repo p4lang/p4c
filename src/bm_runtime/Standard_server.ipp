@@ -23,6 +23,8 @@
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/logger.h>
 
+#include <functional>
+
 namespace bm_runtime { namespace standard {
 
 using namespace bm;
@@ -79,6 +81,8 @@ public:
       return TableOperationErrorCode::DEFAULT_ACTION_IS_CONST;
     case MatchErrorCode::DEFAULT_ENTRY_IS_CONST:
       return TableOperationErrorCode::DEFAULT_ENTRY_IS_CONST;
+      case MatchErrorCode::NO_DEFAULT_ENTRY:
+      return TableOperationErrorCode::NO_DEFAULT_ENTRY;
     case MatchErrorCode::ERROR:
       return TableOperationErrorCode::ERROR;
     default:
@@ -109,6 +113,57 @@ public:
         break;
       default:
         assert(0 && "wrong type");
+      }
+    }
+  }
+
+  static void retrieve_match_key(BmMatchParams& match_key,
+                                 const std::vector<MatchKeyParam> &params) {
+    match_key.reserve(params.size()); // the number of elements will be the same
+    for(const MatchKeyParam &param : params) {
+      switch(param.type) {
+        case MatchKeyParam::Type::EXACT:
+          {
+            BmMatchParamExact bm_param_exact;
+            bm_param_exact.key = param.key;
+            BmMatchParam bm_param;
+            bm_param.type = BmMatchParamType::type::EXACT;
+            bm_param.__set_exact(bm_param_exact);
+            match_key.push_back(std::move(bm_param));
+            break;
+          }
+        case MatchKeyParam::Type::LPM:
+          {
+            BmMatchParamLPM bm_param_lpm;
+            bm_param_lpm.key = param.key;
+            bm_param_lpm.prefix_length = param.prefix_length;
+            BmMatchParam bm_param;
+            bm_param.type = BmMatchParamType::type::LPM;
+            bm_param.__set_lpm(bm_param_lpm);
+            match_key.push_back(std::move(bm_param));
+            break;
+          }
+        case MatchKeyParam::Type::TERNARY:
+          {
+            BmMatchParamTernary bm_param_ternary;
+            bm_param_ternary.key = param.key;
+            bm_param_ternary.mask = param.mask;
+            BmMatchParam bm_param;
+            bm_param.type = BmMatchParamType::type::TERNARY;
+            bm_param.__set_ternary(bm_param_ternary);
+            match_key.push_back(std::move(bm_param));
+            break;
+          }
+        case MatchKeyParam::Type::VALID:
+          {
+            BmMatchParamValid bm_param_valid;
+            bm_param_valid.key = (param.key == std::string("\x01", 1));
+            BmMatchParam bm_param;
+            bm_param.type = BmMatchParamType::type::VALID;
+            bm_param.__set_valid(bm_param_valid);
+            match_key.push_back(std::move(bm_param));
+            break;
+          }
       }
     }
   }
@@ -431,9 +486,131 @@ public:
     }
   }
 
+  template <typename E>
+  void copy_match_part_entry(BmMtEntry *e, const E &entry) {
+    retrieve_match_key(e->match_key, entry.match_key);
+    e->entry_handle = entry.handle;
+    BmAddEntryOptions options;
+    options.priority = entry.priority;
+    e->options = options;
+  }
+
+  template <typename E>
+  void build_action_entry(BmActionEntry *action_e, const E &entry);
+
+  template <typename M,
+            typename std::vector<typename M::Entry> (RuntimeInterface::*GetFn)(
+                size_t, const std::string &) const>
+  void get_entries_common(size_t cxt_id, const std::string &table_name,
+                          std::vector<BmMtEntry> &_return) {
+    const auto entries = std::bind(GetFn, switch_, cxt_id, table_name)();
+    for (const auto &entry : entries) {
+      BmMtEntry e;
+      copy_match_part_entry(&e, entry);
+      build_action_entry(&e.action_entry, entry);
+      _return.push_back(std::move(e));
+    }
+  }
+
+  void bm_mt_get_entries(std::vector<BmMtEntry> & _return, const int32_t cxt_id, const std::string& table_name) {
+    Logger::get()->trace("bm_mt_get_entries");
+    switch (switch_->mt_get_type(cxt_id, table_name)) {
+      case MatchTableType::NONE:
+        return;
+      case MatchTableType::SIMPLE:
+        get_entries_common<MatchTable, &RuntimeInterface::mt_get_entries>(
+            cxt_id, table_name, _return);
+        break;
+      case MatchTableType::INDIRECT:
+        get_entries_common<MatchTableIndirect,
+                           &RuntimeInterface::mt_indirect_get_entries>(
+                               cxt_id, table_name, _return);
+        break;
+      case MatchTableType::INDIRECT_WS:
+        get_entries_common<MatchTableIndirectWS,
+                           &RuntimeInterface::mt_indirect_ws_get_entries>(
+                               cxt_id, table_name, _return);
+        break;
+    }
+  }
+
+  template <typename M,
+            MatchErrorCode (RuntimeInterface::*GetFn)(
+                size_t, const std::string &, typename M::Entry *) const>
+  typename M::Entry get_default_entry_common(
+      size_t cxt_id, const std::string &table_name, BmActionEntry &e) {
+    typename M::Entry entry;
+    auto error_code = std::bind(GetFn, switch_, cxt_id, table_name, &entry)();
+    if (error_code == MatchErrorCode::NO_DEFAULT_ENTRY) {
+      e.action_type = BmActionEntryType::NONE;
+    } else if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    } else {
+      build_action_entry(&e, entry);
+    }
+    return entry;
+  }
+
+  void bm_mt_get_default_entry(BmActionEntry& _return, const int32_t cxt_id, const std::string& table_name) {
+    Logger::get()->trace("bm_mt_get_default_entry");
+    BmActionEntry e;
+    switch (switch_->mt_get_type(cxt_id, table_name)) {
+      case MatchTableType::NONE:
+        return;
+      case MatchTableType::SIMPLE:
+        get_default_entry_common<
+          MatchTable, &RuntimeInterface::mt_get_default_entry>(
+              cxt_id, table_name, _return);
+        break;
+      case MatchTableType::INDIRECT:
+        get_default_entry_common<
+          MatchTableIndirect, &RuntimeInterface::mt_indirect_get_default_entry>(
+              cxt_id, table_name, _return);
+        break;
+      case MatchTableType::INDIRECT_WS:
+        get_default_entry_common<
+          MatchTableIndirectWS,
+          &RuntimeInterface::mt_indirect_ws_get_default_entry>(
+              cxt_id, table_name, _return);
+        break;
+    }
+  }
+
+  void bm_mt_indirect_get_members(std::vector<BmMtIndirectMember> & _return, const int32_t cxt_id, const std::string& table_name) {
+    Logger::get()->trace("bm_mt_indirect_get_members");
+    const auto members = switch_->mt_indirect_get_members(cxt_id, table_name);
+    for (const auto &member : members) {
+      BmMtIndirectMember m;
+      m.mbr_handle = member.mbr;
+      m.action_name = member.action_fn->get_name();
+      BmActionData action_data;
+      for (const Data &d : member.action_data.action_data) {
+        action_data.push_back(d.get_string());
+      }
+      m.action_data = std::move(action_data);
+
+      _return.push_back(std::move(m));
+    }
+  }
+
+  void bm_mt_indirect_ws_get_groups(std::vector<BmMtIndirectWsGroup> & _return, const int32_t cxt_id, const std::string& table_name) {
+    Logger::get()->trace("bm_mt_indirect_ws_get_groups");
+    const auto groups = switch_->mt_indirect_ws_get_groups(cxt_id, table_name);
+    for (const auto &group : groups) {
+      BmMtIndirectWsGroup g;
+      g.grp_handle = group.grp;
+      g.mbr_handles.reserve(group.mbr_handles.size());
+      for (const auto h : group.mbr_handles) g.mbr_handles.push_back(h);
+
+      _return.push_back(std::move(g));
+    }
+  }
+
   void bm_counter_read(BmCounterValue& _return, const int32_t cxt_id, const std::string& counter_name, const int32_t index) {
     Logger::get()->trace("bm_counter_read");
-    MatchTable::counter_value_t bytes; // unsigned
+    MatchTable::counter_value_t bytes;  // unsigned
     MatchTable::counter_value_t packets;
     Counter::CounterErrorCode error_code = switch_->read_counters(
         cxt_id, counter_name, index, &bytes, &packets);
@@ -723,5 +900,39 @@ public:
 private:
   SwitchWContexts *switch_;
 };
+
+template <>
+void
+StandardHandler::build_action_entry<MatchTable::Entry>(
+    BmActionEntry *action_e, const MatchTable::Entry &entry) {
+  BmActionData action_data;
+  for (const Data &d : entry.action_data.action_data) {
+    action_data.push_back(d.get_string());
+  }
+  action_e->action_type = BmActionEntryType::ACTION_DATA;
+  action_e->__set_action_name(entry.action_fn->get_name());
+  action_e->__set_action_data(std::move(action_data));
+}
+
+template <>
+void
+StandardHandler::build_action_entry<MatchTableIndirect::Entry>(
+    BmActionEntry *action_e, const MatchTableIndirect::Entry &entry) {
+  action_e->action_type = BmActionEntryType::MBR_HANDLE;
+  action_e->__set_mbr_handle(entry.mbr);
+}
+
+template <>
+void
+StandardHandler::build_action_entry<MatchTableIndirectWS::Entry>(
+    BmActionEntry *action_e, const MatchTableIndirectWS::Entry &entry) {
+  if (entry.mbr < entry.grp) {
+    action_e->action_type = BmActionEntryType::MBR_HANDLE;
+    action_e->__set_mbr_handle(entry.mbr);
+  } else {
+    action_e->action_type = BmActionEntryType::GRP_HANDLE;
+    action_e->__set_grp_handle(entry.grp);
+  }
+}
 
 } }

@@ -150,3 +150,9 @@ TEST(Data, TestEq) {
   Data d(v);
   ASSERT_TRUE(d.test_eq(v));
 }
+
+TEST(Data, GetString) {
+  std::string s("\xab\x11\xcd\x99", 4);
+  Data d(s.data(), s.size());
+  ASSERT_EQ(s, d.get_string());
+}

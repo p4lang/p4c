@@ -103,7 +103,8 @@ enum TableOperationErrorCode {
   INVALID_METER_OPERATION = 19,
   DEFAULT_ACTION_IS_CONST = 20,
   DEFAULT_ENTRY_IS_CONST = 21,
-  ERROR = 22,
+  NO_DEFAULT_ENTRY = 22,
+  ERROR = 23,
 }
 
 exception InvalidTableOperation {
@@ -202,6 +203,39 @@ enum CrcErrorCode {
 
 exception InvalidCrcOperation {
  1:CrcErrorCode code
+}
+
+enum BmActionEntryType {
+  NONE = 0,  // used when querying default entry, if none configured
+  ACTION_DATA = 1,
+  MBR_HANDLE = 2,
+  GRP_HANDLE = 3
+}
+
+struct BmActionEntry {
+ 1:BmActionEntryType action_type,
+ 2:optional string action_name,
+ 3:optional BmActionData action_data,
+ 4:optional BmMemberHandle mbr_handle,
+ 5:optional BmGroupHandle grp_handle
+}
+
+struct BmMtEntry {
+ 1:BmMatchParams match_key,
+ 2:BmAddEntryOptions options,
+ 3:BmEntryHandle entry_handle,
+ 4:BmActionEntry action_entry
+}
+
+struct BmMtIndirectMember {
+ 1:BmMemberHandle mbr_handle,
+ 2:string action_name,
+ 3:BmActionData action_data
+}
+
+struct BmMtIndirectWsGroup {
+ 1:BmGroupHandle grp_handle,
+ 2:list<BmMemberHandle> mbr_handles
 }
 
 service Standard {
@@ -373,6 +407,26 @@ service Standard {
     2:string table_name,
     3:BmEntryHandle entry_handle,
     4:list<BmMeterRateConfig> rates
+  ) throws (1:InvalidTableOperation ouch),
+
+  list<BmMtEntry> bm_mt_get_entries(
+    1:i32 cxt_id,
+    2:string table_name
+  ) throws (1:InvalidTableOperation ouch),
+
+  BmActionEntry bm_mt_get_default_entry(
+    1:i32 cxt_id,
+    2:string table_name
+  ) throws (1:InvalidTableOperation ouch),
+
+  list<BmMtIndirectMember> bm_mt_indirect_get_members(
+    1:i32 cxt_id,
+    2:string table_name
+  ) throws (1:InvalidTableOperation ouch),
+
+  list<BmMtIndirectWsGroup> bm_mt_indirect_ws_get_groups(
+    1:i32 cxt_id,
+    2:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
   // indirect counters

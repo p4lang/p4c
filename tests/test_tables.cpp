@@ -409,9 +409,18 @@ TYPED_TEST(TableSizeTwo, SetDefaultAction) {
   f.set("0xaba");
   ASSERT_EQ(&this->node_miss_default, this->table->apply_action(&pkt));
 
+  MatchTable::Entry de;
+
+  rc = this->table->get_default_entry(&de);
+  ASSERT_EQ(MatchErrorCode::NO_DEFAULT_ENTRY, rc);
+
   rc = this->table->set_default_action(&this->action_fn, ActionData());
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
+
+  rc = this->table->get_default_entry(&de);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(&this->action_fn, de.action_fn);
 }
 
 TYPED_TEST(TableSizeTwo, ConstDefaultActionFn) {
@@ -725,6 +734,32 @@ TYPED_TEST(TableSizeTwo, HandleIterator) {
   ASSERT_EQ(handle_1, *it++);
   ASSERT_EQ(handle_2, *it);
   ASSERT_EQ(this->table->handles_end(), ++it);
+}
+
+TYPED_TEST(TableSizeTwo, GetEntries) {
+  MatchErrorCode rc;
+  std::vector<entry_handle_t> handles;
+  std::vector<std::string> keys;
+
+  size_t num_entries = 2;
+  for (size_t e = 0; e < num_entries; e++) {
+    keys.emplace_back(2, static_cast<char>(e));
+    handles.push_back(0);
+    rc = this->add_entry(keys.back(), &handles.back());
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  }
+
+  const auto entries = this->table->get_entries();
+
+  ASSERT_EQ(num_entries, entries.size());
+
+  for (size_t i = 0; i < num_entries; i++) {
+    const auto &e = entries[i];
+    ASSERT_EQ(handles[i], e.handle);
+    ASSERT_EQ(keys[i], e.match_key[0].key);
+    ASSERT_EQ(&this->action_fn, e.action_fn);
+    ASSERT_EQ(0u, e.action_data.size());
+  }
 }
 
 
@@ -1077,6 +1112,52 @@ TEST_F(TableIndirect, ResetState) {
   ASSERT_TRUE(hit);
 }
 
+TEST_F(TableIndirect, GetEntries) {
+  MatchErrorCode rc;
+  std::vector<mbr_hdl_t> mbrs;
+  std::vector<entry_handle_t> handles;
+  std::vector<std::string> keys;
+  std::vector<unsigned int> datas;
+
+  size_t num_mbrs = 16;
+  for (size_t m = 0; m < num_mbrs; m++) {
+    mbrs.push_back(0);
+    datas.push_back(m);
+    rc = add_member(datas.back(), &mbrs.back());
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  }
+
+  size_t num_entries = 64;
+  for (size_t e = 0; e < num_entries; e++) {
+    keys.emplace_back(2, static_cast<char>(e));
+    handles.push_back(0);
+    rc = add_entry(keys.back(), mbrs[e % num_mbrs], &handles.back());
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  }
+
+  const auto entries = table->get_entries();
+  const auto members = table->get_members();
+
+  ASSERT_EQ(num_entries, entries.size());
+  ASSERT_EQ(num_mbrs, members.size());
+
+  for (size_t i = 0; i < num_entries; i++) {
+    const auto &e = entries[i];
+    ASSERT_EQ(handles[i], e.handle);
+    ASSERT_EQ(keys[i], e.match_key[0].key);
+    ASSERT_EQ(mbrs[i % num_mbrs], e.mbr);
+    ASSERT_EQ(-1, e.priority);
+  }
+
+  for (size_t i = 0; i < num_mbrs; i++) {
+    const auto &m = members[i];
+    ASSERT_EQ(mbrs[i], m.mbr);
+    ASSERT_EQ(&action_fn, m.action_fn);
+    ASSERT_EQ(1u, m.action_data.size());
+    ASSERT_EQ(datas[i], m.action_data.action_data[0].get<unsigned int>());
+  }
+}
+
 
 class TableIndirectWS : public ::testing::Test {
  protected:
@@ -1345,6 +1426,70 @@ TEST_F(TableIndirectWS, LookupEntryWS) {
   rc = table->delete_member(mbr_2);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 }
+
+TEST_F(TableIndirectWS, GetEntries) {
+  MatchErrorCode rc;
+  grp_hdl_t grp;
+  mbr_hdl_t mbr_1, mbr_2;
+  entry_handle_t handle_1, handle_2;
+  std::string key_1 = "\x0a\xba";
+  std::string key_2 = "\x0a\xbb";
+  unsigned int data_1 = 666u;
+  unsigned int data_2 = 777u;
+
+  rc = table->create_group(&grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = add_member(data_1, &mbr_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = add_member(data_2, &mbr_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = table->add_member_to_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = table->add_member_to_group(mbr_2, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = add_entry_ws(key_1, grp, &handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = add_entry(key_2, mbr_1, &handle_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  const auto entries = table->get_entries();
+  const auto groups = table->get_groups();
+  const auto members = table->get_members();
+
+  ASSERT_EQ(2u, entries.size());
+  ASSERT_EQ(1u, groups.size());
+  ASSERT_EQ(2u, members.size());
+
+  const auto &e1 = entries[0];
+  ASSERT_EQ(handle_1, e1.handle);
+  ASSERT_EQ(key_1, e1.match_key[0].key);
+  ASSERT_EQ(std::numeric_limits<mbr_hdl_t>::max(), e1.mbr);
+  ASSERT_EQ(grp, e1.grp);
+  ASSERT_EQ(-1, e1.priority);
+
+  const auto &g1 = groups[0];
+  ASSERT_EQ(grp, g1.grp);
+  ASSERT_EQ(2u, g1.mbr_handles.size());
+  ASSERT_EQ(mbr_1, g1.mbr_handles[0]);
+  ASSERT_EQ(mbr_2, g1.mbr_handles[1]);
+
+  const auto &m1 = members[0];
+  ASSERT_EQ(mbr_1, m1.mbr);
+  ASSERT_EQ(&action_fn, m1.action_fn);
+
+  const auto &m2 = members[1];
+  ASSERT_EQ(mbr_2, m2.mbr);
+
+  const auto &e2 = entries[1];
+  ASSERT_EQ(handle_2, e2.handle);
+  ASSERT_EQ(key_2, e2.match_key[0].key);
+  ASSERT_EQ(mbr_1, e2.mbr);
+  ASSERT_EQ(std::numeric_limits<grp_hdl_t>::max(), e2.grp);
+  ASSERT_EQ(-1, e2.priority);
+}
+
 
 template <typename MUType>
 class TableBigMask : public ::testing::Test {
@@ -2062,13 +2207,10 @@ TYPED_TEST(TableEntryDebug, GetEntry) {
   entry_handle_t handle;
   ASSERT_EQ(MatchErrorCode::SUCCESS, this->add_entry(&handle));
 
-  std::vector<MatchKeyParam> key_;
-  const ActionFn *action_fn_;
-  ActionData action_data_;
-  int priority_;
-  this->table->get_entry(handle, &key_, &action_fn_, &action_data_, &priority_);
-  ASSERT_TRUE(cmp_match_keys(this->gen_match_key(), key_));
-  ASSERT_EQ(this->action_data.get(0), action_data_.get(0));
+  MatchTable::Entry entry;
+  this->table->get_entry(handle, &entry);
+  ASSERT_TRUE(cmp_match_keys(this->gen_match_key(), entry.match_key));
+  ASSERT_EQ(this->action_data.get(0), entry.action_data.get(0));
 }
 
 TYPED_TEST(TableEntryDebug, DumpEntry) {

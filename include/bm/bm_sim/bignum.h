@@ -41,6 +41,10 @@ namespace bignum {
     return count;
   }
 
+  inline size_t export_size_in_bytes(const Bignum &src) {
+    return (mpz_sizeinbase(src.backend().data(), 2) + 7) / 8;
+  }
+
   inline void import_bytes(Bignum *dst, const char *src, size_t size) {
     mpz_import(dst->backend().data(), 1, 1, size, 1, 0, src);
   }
