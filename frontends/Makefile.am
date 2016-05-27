@@ -78,19 +78,19 @@ common_frontend_SOURCES = \
 	frontends/common/constantParsing.cpp
 
 v1_frontend_SOURCES = \
-	frontends/p4v1/intrinsic.cpp \
-	frontends/p4v1/p4v1-parse.ypp \
-	frontends/p4v1/typecheck.h \
-	frontends/p4v1/typecheck.cpp \
-	frontends/p4v1/header_type.h \
-	frontends/p4v1/header_type.cpp
+	frontends/p4-14/intrinsic.cpp \
+	frontends/p4-14/p4-14-parse.ypp \
+	frontends/p4-14/typecheck.h \
+	frontends/p4-14/typecheck.cpp \
+	frontends/p4-14/header_type.h \
+	frontends/p4-14/header_type.cpp
 
-ir_DEF_FILES += $(srcdir)/frontends/p4v1/ir-v1.def
+ir_DEF_FILES += $(srcdir)/frontends/p4-14/ir-v1.def
 
 BUILT_SOURCES += \
-        frontends/p4v1/p4v1-lex.c \
+        frontends/p4-14/p4-14-lex.c \
         frontends/p4/p4-lex.c \
-	frontends/p4v1/p4v1-parse.cpp \
+	frontends/p4-14/p4-14-parse.cpp \
 	frontends/p4/p4-parse.cpp
 
 frontend_SOURCES = \
@@ -100,5 +100,5 @@ frontend_SOURCES = \
 
 cpplint_FILES += \
 	$(frontend_SOURCES) \
-	frontends/p4v1/p4v1-lex.l \
+	frontends/p4-14/p4-14-lex.l \
 	frontends/p4/p4-lex.l

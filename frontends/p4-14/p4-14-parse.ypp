@@ -26,7 +26,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/source_file.h"
 #include "lib/gmputil.h"
-#include "frontends/p4v1/p4v1-parse.h"
+#include "frontends/p4-14/p4-14-parse.h"
 #include "frontends/common/constantParsing.h"
 
 #ifndef YYDEBUG
@@ -781,7 +781,7 @@ name: IDENTIFIER
 
 %%
 
-#include "p4v1-lex.c"
+#include "p4-14-lex.c"
 }  // end anonymous namespace
 
 static bool parsing = false;

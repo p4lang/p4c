@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "parseInput.h"
 #include "lib/error.h"
-#include "frontends/p4v1/p4v1-parse.h"
+#include "frontends/p4-14/p4-14-parse.h"
 #include "frontends/p4/fromv1.0/converters.h"
 #include "frontends/p4/frontend.h"
 #include "frontends/p4/p4-parse.h"

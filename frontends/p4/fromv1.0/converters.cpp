@@ -20,8 +20,8 @@ limitations under the License.
 #include "lib/gmputil.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/common/constantFolding.h"
-#include "frontends/p4v1/header_type.h"
-#include "frontends/p4v1/typecheck.h"
+#include "frontends/p4-14/header_type.h"
+#include "frontends/p4-14/typecheck.h"
 
 namespace P4V1 {
 
