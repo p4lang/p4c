@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,9 +20,16 @@ limitations under the License.
 namespace P4 {
 
 void TypeMap::dbprint(std::ostream& out) const {
-    out << "TypeMap for " << dbp(program);
+    out << "TypeMap for " << dbp(program) << std::endl;
     for (auto it : typeMap)
-        out << dbp(it.first) << "->" << dbp(it.second) << std::endl;
+        out << "\t" << dbp(it.first) << "->" << dbp(it.second) << std::endl;
+    out << "Left values" << std::endl;
+    for (auto it : leftValues)
+        out << "\t" << dbp(it) << std::endl;
+    out << "Constants" << std::endl;
+    for (auto it : constants)
+        out << "\t" << dbp(it) << std::endl;
+    out << "--------------" << std::endl;
 }
 
 void TypeMap::setLeftValue(const IR::Expression* expression) {
@@ -47,10 +54,7 @@ void TypeMap::clear() {
 }
 
 void TypeMap::checkPrecondition(const IR::Node* element, const IR::Type* type) const {
-    if (element == nullptr)
-        BUG("Null element in setType");
-    if (type == nullptr)
-        BUG("Null type in setType");
+    CHECK_NULL(element); CHECK_NULL(type);
     if (type->is<IR::Type_Name>())
         BUG("Element %1% maps to a Type_Name %2%", dbp(element), dbp(type));
 }
@@ -74,7 +78,7 @@ const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
     auto result = get(typeMap, element);
     LOG2("Looking up type for " << dbp(element) << " => " << dbp(result));
     if (notNull && result == nullptr) {
-        std::cout << this;
+        // std::cout << this;
         BUG("Could not find type for %1%", dbp(element));
     }
     if (result != nullptr && result->is<IR::Type_Name>())

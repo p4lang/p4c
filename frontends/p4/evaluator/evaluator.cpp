@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -263,7 +263,7 @@ EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) 
     setName("Evaluator");
     evaluator = new P4::Evaluator(refMap, typeMap);
     setStopOnError(true);
-    passes.emplace_back(new P4::TypeChecking(refMap, typeMap, isv1));
+    passes.emplace_back(new P4::TypeChecking(refMap, typeMap, false, isv1));
     passes.emplace_back(evaluator);
 }
 

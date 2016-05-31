@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -481,6 +481,7 @@ const IR::Node* ConstantFolding::postorder(IR::Member* e) {
     auto result = list->components->at(index)->clone();
     auto origtype = typeMap->getType(getOriginal());
     typeMap->setType(result, origtype);
+    typeMap->setCompileTimeConstant(result);
     setConstant(e, result);
     return result;
 }
@@ -607,6 +608,7 @@ const IR::Node *ConstantFolding::postorder(IR::Cast *e) {
         auto result = expr->clone();
         auto origtype = typeMap->getType(getOriginal());
         typeMap->setType(result, origtype);
+        typeMap->setCompileTimeConstant(result);
         setConstant(e, result);
         return result;
     }

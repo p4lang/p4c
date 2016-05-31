@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,12 +34,8 @@ class P4CExceptionBase : public std::exception {
  public:
     template <typename... T>
     P4CExceptionBase(const char* format, T... args) {
-#if 0
-        this->message = ErrorReporter::instance.format_message(format, std::forward<T>(args)...);
-#else
         boost::format fmt(format);
         this->message = ::bug_helper(fmt, "", "", "", std::forward<T>(args)...);
-#endif
     }
 
     const char* what() const noexcept

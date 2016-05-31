@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,17 +47,21 @@ limitations under the License.
 #undef DEFINE_VISIT_FUNCTIONS
 
 template<class T> void IR::Vector<T>::visit_children(Visitor &v) {
+    bool changes = false;
     for (auto i = vec.begin(); i != vec.end();) {
         auto n = v.apply_visitor(*i);
         if (!n) {
             i = erase(i);
+            changes = true;
         } else if (n == *i) {
             i++;
         } else if (auto l = dynamic_cast<const Vector *>(n)) {
             i = erase(i);
             i = insert(i, l->vec.begin(), l->vec.end());
             i += l->vec.size();
+            changes = true;
         } else if (auto v = dynamic_cast<const VectorBase *>(n)) {
+            changes = true;
             if (v->empty()) {
                 i = erase(i);
             } else {
@@ -69,10 +73,16 @@ template<class T> void IR::Vector<T>::visit_children(Visitor &v) {
                         BUG("visitor returned invalid type %s for Vector<%s>",
                             e->node_type_name(), T::static_type_name()); } }
         } else if (auto e = dynamic_cast<const T *>(n)) {
+            changes = true;
             *i++ = e;
         } else {
             BUG("visitor returned invalid type %s for Vector<%s>",
-                n->node_type_name(), T::static_type_name()); } } }
+                n->node_type_name(), T::static_type_name());
+        }
+    }
+    if (changes)
+        id = Node::currentId++;
+}
 template<class T> void IR::Vector<T>::visit_children(Visitor &v) const {
     for (auto &a : vec) v.visit(a); }
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template<class T>, <T>)
@@ -82,21 +92,30 @@ inline std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expressi
     return v ? out << *v : out << "<null>"; }
 
 template<class T> void IR::IndexedVector<T>::visit_children(Visitor &v) {
+    bool changes = false;
     for (auto i = begin(); i != end();) {
         auto n = v.apply_visitor(*i);
         if (!n) {
+            changes = true;
             i = erase(i);
         } else if (n == *i) {
             i++;
         } else if (auto l = dynamic_cast<const Vector<T> *>(n)) {
+            changes = true;
             i = erase(i);
             i = insert(i, l->begin(), l->end());
             i += l->Vector<T>::size();
         } else if (auto e = dynamic_cast<const T *>(n)) {
+            changes = true;
             i = replace(i, e);
         } else {
             BUG("visitor returned invalid type %s for IndexedVector<%s>",
-                n->node_type_name(), T::static_type_name()); } } }
+                n->node_type_name(), T::static_type_name());
+        }
+    }
+    if (changes)
+        Node::id = Node::currentId++;
+}
 template<class T> void IR::IndexedVector<T>::visit_children(Visitor &v) const {
     for (auto &a : *this) v.visit(a); }
 IRNODE_DEFINE_APPLY_OVERLOAD(IndexedVector, template<class T>, <T>)
@@ -132,16 +151,20 @@ template<class T, template<class K, class V, class COMP, class ALLOC> class MAP 
          class ALLOC /*= std::allocator<std::pair<const cstring, const T*>>*/>
 void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
     map_t   new_symbols;
+    bool changes = false;
     for (auto i = symbols.begin(); i != symbols.end();) {
         auto n = v.apply_visitor(i->second, i->first);
         if (!n) {
+            changes = true;
             i = symbols.erase(i);
         } else if (n == i->second) {
             i++;
         } else if (auto m = dynamic_cast<const NameMap *>(n)) {
+            changes = true;
             namemap_insert_helper(i, m->symbols.begin(), m->symbols.end(), symbols, new_symbols);
             i = symbols.erase(i);
         } else if (auto s = dynamic_cast<const T *>(n)) {
+            changes = true;
             if (match_name(i->first, s)) {
                 i->second = s;
                 i++;
@@ -151,7 +174,10 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
         } else {
             BUG("visitor returned invalid type %s for NameMap<%s>",
                 n->node_type_name(), T::static_type_name()); } }
-    symbols.insert(new_symbols.begin(), new_symbols.end()); }
+    symbols.insert(new_symbols.begin(), new_symbols.end());
+    if (changes)
+        id = Node::currentId++;
+}
 template<class T, template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
          class COMP /*= std::less<cstring>*/,
          class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
@@ -163,24 +189,32 @@ template<class KEY, class VALUE,
          class COMP /*= std::less<cstring>*/,
          class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
-    map_t   new_symbols;
+    bool  changes = false;
+    map_t new_symbols;
     for (auto i = symbols.begin(); i != symbols.end();) {
         auto nk = i->first;
         v.visit(nk);
         if (!nk) {
+            changes = true;
             i = symbols.erase(i);
         } else if (nk == i->first) {
             v.visit(i->second);
             if (i->second)
                 ++i;
-            else
+            else {
                 i = symbols.erase(i);
+                changes = true;
+            }
         } else {
+            changes = true;
             auto nv = i->second;
             v.visit(nv);
             if (nv) new_symbols.emplace(nk, nv);
             i = symbols.erase(i); } }
-    symbols.insert(new_symbols.begin(), new_symbols.end()); }
+    symbols.insert(new_symbols.begin(), new_symbols.end());
+    if (changes)
+        id = Node::currentId++;
+}
 template<class KEY, class VALUE,
          template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
          class COMP /*= std::less<cstring>*/,

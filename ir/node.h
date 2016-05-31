@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ template<typename T> const T* INode::to() const { return getNode()->to<T>(); }
 /* common things that ALL Node subclasses must define */
 #define IRNODE_SUBCLASS(T)                                              \
  public:                                                                \
-    T *clone() const override { return new T(*this); }                  \
+    T *clone() const override { auto r = new T(*this); r->id = Node::currentId++; return r; } \
     IRNODE_COMMON_SUBCLASS(T)
 
 #define IRNODE_ABSTRACT_SUBCLASS(T)                                     \

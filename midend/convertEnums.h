@@ -56,7 +56,7 @@ class ConvertEnums : public Transform {
  public:
     ConvertEnums(ChooseEnumRepresentation* policy, TypeMap* typeMap)
             : policy(policy), typeMap(typeMap)
-    { CHECK_NULL(policy); CHECK_NULL(typeMap); }
+    { CHECK_NULL(policy); CHECK_NULL(typeMap); setName("ConvertEnums"); }
     const IR::Node* preorder(IR::Type_Enum* type) override;
     const IR::Node* postorder(IR::Type_Name* type) override;
     const IR::Node* postorder(IR::Member* expression) override;

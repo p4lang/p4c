@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ class DumpIR : public Inspector {
         for (unsigned i = 0; i < startDepth; i++)
             str << IndentCtl::indent;
         setName("DumpIR");
+        visitDagOnce = false;
     }
     void display(const IR::Node* node) {
         str << IndentCtl::endl;
@@ -63,9 +64,11 @@ class DumpIR : public Inspector {
             node->is<IR::BlockStatement>() ||
             node->is<IR::Expression>() ||
             node->is<IR::AssignmentStatement>() ||
-            node->is<IR::P4Action>() ||
-            node->is<IR::VectorBase>()) {
+            node->is<IR::P4Action>()) {
             node->Node::dbprint(str);
+        } else if (node->is<IR::VectorBase>()) {
+            node->Node::dbprint(str);
+            str << ", size=" << node->to<IR::VectorBase>()->size();
         } else {
             str << node;
         }
@@ -94,7 +97,8 @@ class DumpIR : public Inspector {
     static std::string dump(const IR::Node* node, unsigned depth, unsigned startDepth) {
         DumpIR dumper(depth, startDepth);
         node->apply(dumper);
-        return dumper.str.str();
+        auto result = dumper.str.str();
+        return result;
     }
 };
 }  // namespace
@@ -460,7 +464,7 @@ bool ToP4::preorder(const IR::StringLiteral* s) {
 }
 
 bool ToP4::preorder(const IR::Declaration_Constant* cst) {
-    dump(1);
+    dump(2);
     visit(cst->annotations);
     builder.append("const ");
     visit(cst->type);

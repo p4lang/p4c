@@ -49,9 +49,6 @@ class TypeMap final : public ProgramMap {
     // checks some preconditions before setting the type
     void checkPrecondition(const IR::Node* element, const IR::Type* type) const;
 
-    friend class TypeInference;
-    friend class ConstantTypeSubstitution;
-
  public:
     TypeMap() : ProgramMap("TypeMap") {}
 
@@ -66,8 +63,6 @@ class TypeMap final : public ProgramMap {
     size_t size() const
     { return typeMap.size(); }
 
- private:
-    // The following are only used by TypeInference
     void setLeftValue(const IR::Expression* expression);
     void setCompileTimeConstant(const IR::Expression* expression);
 };

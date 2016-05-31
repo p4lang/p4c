@@ -53,7 +53,7 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
     PassManager simplify = {
         // Proper semantics for uninitialzed local variables in parser states:
         // headers must be invalidated
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::ResetHeaders(&typeMap),
         // Give each local declaration a unique internal name
         new P4::UniqueNames(&refMap, isv1),
@@ -64,7 +64,7 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         // Move some constructor calls into temporaries
         new P4::MoveConstructors(&refMap, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, true, isv1),
         evaluator,
     };
 
@@ -88,7 +88,7 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         // Perform inlining for actions calling other actions
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
@@ -101,28 +101,29 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         // Table and action parameters also get unique names
         new P4::UniqueParameters(&refMap, isv1),
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        // Must clear types after LocalizeAllActions
+        new P4::TypeChecking(&refMap, &typeMap, true, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveParameters(&refMap, &typeMap, isv1),
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, true, isv1),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonLeftValue(&refMap, &typeMap)),
         // Exit statements are transformed into control-flow
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::RemoveExits(&refMap, &typeMap),
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
-        new P4::TypeChecking(&refMap, &typeMap, isv1, true),
-        new P4::LocalCopyPropagation(),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
+        new P4::LocalCopyPropagation(&typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         // Create actions for statements that can't be done in control blocks.
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::SynthesizeActions(&refMap, &typeMap),
         // Move all stand-alone action invocations to custom tables
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator
     };

@@ -37,6 +37,12 @@ class ConstantTypeSubstitution;
 // with readOnly = true, it will assert that the program is not changed.
 // It is expected that once a program has been type-checked and all casts have
 // been inserted it will not need to change ever again during type-checking.
+// ------------
+// The typeMap assumes that if an expression has not changed, then its type has
+// not changed.  Some program transformations actually do not maintain this invariant;
+// (e.g., renaming actions changes the type of a table.apply()).
+// After running such transformations the 'clearMap' flag should be set to true
+// to force a recomputation.
 class TypeInference : public Transform {
     // Input: reference map
     ReferenceMap* refMap;
@@ -56,7 +62,7 @@ class TypeInference : public Transform {
     // an Inspector.
     // clearMap=true will clear the typeMap on start.
     TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
-                  bool clearMap = true, bool readOnly = true);
+                  bool clearMap = false, bool readOnly = true);
 
  protected:
     const IR::Type* getType(const IR::Node* element) const;
@@ -69,6 +75,15 @@ class TypeInference : public Transform {
     { typeMap->setCompileTimeConstant(expression); }
     bool isCompileTimeConstant(const IR::Expression* expression) const
     { return typeMap->isCompileTimeConstant(expression); }
+
+    template<typename... T>
+    void typeError(const char* format, T... args) const {
+        if (readOnly)
+            // At this point we should no longer find new type errors
+            BUG(format, args...);
+        else
+            ::error(format, args...);
+    }
 
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.
     // (visitDagOnce cannot take care of this).
@@ -121,6 +136,13 @@ class TypeInference : public Transform {
  public:
     using Transform::postorder;
     using Transform::preorder;
+
+    const IR::Node* pruneIfDone(const IR::Node* node)
+    { if (done()) prune(); return node; }
+    const IR::Node* preorder(IR::Expression* expression) override
+    { return pruneIfDone(expression); }
+    const IR::Node* preorder(IR::Type* type) override
+    { return pruneIfDone(type); }
 
     // do functions pre-order so we can check the prototype
     // before the returns
@@ -211,7 +233,6 @@ class TypeInference : public Transform {
 
 // Copy types from the typeMap to expressions.  Updates the typeMap with newly created nodes
 class ApplyTypesToExpressions : public Transform {
-    ApplyTypesToExpressions() { setName("ApplyTypesToExpressions"); }
     TypeMap *typeMap;
     IR::Node *postorder(IR::Node *n) override {
         const IR::Node *orig = getOriginal();
@@ -220,25 +241,35 @@ class ApplyTypesToExpressions : public Transform {
                 typeMap->setType(n, type); }
         return n; }
     IR::Expression *postorder(IR::Expression *e) override {
-        const IR::Node *orig = getOriginal();
+        auto orig = getOriginal<IR::Expression>();
         if (auto type = typeMap->getType(orig)) {
             e->type = type;
-            if (*orig != *e)
-                typeMap->setType(e, type); }
+            if (*orig != *e) {
+                typeMap->setType(e, type);
+                if (typeMap->isLeftValue(orig))
+                    typeMap->setLeftValue(e);
+                if (typeMap->isCompileTimeConstant(orig))
+                    typeMap->setCompileTimeConstant(e);
+            }
+        }
         return e; }
 
  public:
-    explicit ApplyTypesToExpressions(TypeMap *typeMap) : typeMap(typeMap) {}
+    explicit ApplyTypesToExpressions(TypeMap *typeMap) : typeMap(typeMap)
+    { setName("ApplyTypesToExpressions"); }
 };
 
 // Performs together reference resolution and type checking.
 // If updateExpressions is true, after type checking it will
 // update all Expression objects, writing the result type
 // into the Expression::type field.
+// 'clearMap' must be set if the pass is called a transformation
+// which may change the type of expressions even when expressions
+// do not change.
 class TypeChecking : public PassManager {
  public:
-    TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap, bool isv1,
-                 bool updateExpressions = false);
+    TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap,
+                 bool clearMap, bool isv1, bool updateExpressions = false);
 };
 
 }  // namespace P4

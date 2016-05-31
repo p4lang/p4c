@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ namespace P4 {
    (obtained by running Typechecking(updateProgram = true)).
  */
 class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
+    const TypeMap*              typeMap;
     bool                        in_action = false;
     struct Local {
         bool                    live = false;
@@ -52,7 +53,8 @@ class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContex
 
     LocalCopyPropagation(const LocalCopyPropagation &) = default;
  public:
-    LocalCopyPropagation() { visitDagOnce = false; setName("LocalCopyPropagation"); }
+    LocalCopyPropagation(const TypeMap* typeMap) : typeMap(typeMap)
+    { visitDagOnce = false; setName("LocalCopyPropagation"); }
 };
 
 }  // namespace P4

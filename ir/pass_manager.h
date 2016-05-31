@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class PassRepeated : virtual public PassManager {
     unsigned            repeats;  // 0 = until convergence
  public:
     PassRepeated(const std::initializer_list<Visitor *> &init) :
-            PassManager(init), repeats(0) { setStopOnError(true); }
+            PassManager(init), repeats(0) { setStopOnError(true); setName("PassRepeated"); }
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
     PassRepeated *setRepeats(unsigned repeats) { this->repeats = repeats; return this; }
 };
@@ -58,9 +58,10 @@ class VisitFunctor : virtual public Visitor {
     std::function<const IR::Node *(const IR::Node *)>       fn;
     const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override { return fn(n); }
  public:
-    explicit VisitFunctor(std::function<const IR::Node *(const IR::Node *)> f) : fn(f) {}
+    explicit VisitFunctor(std::function<const IR::Node *(const IR::Node *)> f) : fn(f)
+    { setName("VisitFunctor"); }
     explicit VisitFunctor(std::function<void()> f)
-    : fn([f](const IR::Node *n)->const IR::Node *{ f(); return n; }) {}
+    : fn([f](const IR::Node *n)->const IR::Node *{ f(); return n; }) { setName("VisitFunctor"); }
 };
 
 class DynamicVisitor : virtual public Visitor {

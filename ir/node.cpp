@@ -33,6 +33,9 @@ cstring IR::dbp(const IR::INode* node) {
             str << " " << node->to<IR::IDeclaration>()->getName();
         } else if (node->is<IR::Type_MethodBase>()) {
             str << node;
+        } else if (node->is<IR::Member>()) {
+            node->getNode()->Node::dbprint(str);
+            str << " ." << node->to<IR::Member>()->member;
         } else if (node->is<IR::PathExpression>() ||
                    node->is<IR::Path>() ||
                    node->is<IR::TypeNameExpression>() ||

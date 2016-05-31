@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -106,7 +106,8 @@ IR::AssignmentStatement *P4::LocalCopyPropagation::postorder(IR::AssignmentState
 
 IR::MethodCallExpression *P4::LocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
     if (!in_action) return mc;
-    auto type = mc->method->type->to<IR::Type_Method>();
+    auto type = typeMap->getType(mc->method, true)->to<IR::Type_Method>();
+    CHECK_NULL(type);
     int idx = 0;
     for (auto param : *type->parameters->parameters) {
         if (param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) {
