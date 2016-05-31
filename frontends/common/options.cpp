@@ -55,18 +55,28 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("-E", nullptr,
                    [this](const char*) { doNotCompile = true; return true; },
                    "Preprocess only, do not compile (prints program on stdout)");
+    registerOption("--p4-14", nullptr,
+                   [this](const char* arg) {
+                       langVersion = CompilerOptions::FrontendVersion::P4_14;
+                       return true; },
+                    "Specify language version to compile");
+    registerOption("--p4-16", nullptr,
+                   [this](const char* arg) {
+                       langVersion = CompilerOptions::FrontendVersion::P4_16;
+                       return true; },
+                    "Specify language version to compile");
     registerOption("--p4v", "lang",
                    [this](const char* arg) {
-                       if (!strcmp(arg, "1.0")) {
-                           langVersion = CompilerOptions::FrontendVersion::P4v1;
-                       } else if (!strcmp(arg, "1.2")) {
-                           langVersion = CompilerOptions::FrontendVersion::P4v1_2;
+                       if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_14;
+                       } else if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_16;
                        } else {
                            ::error("Illegal language version %1%", arg);
                            return false;
                        }
                        return true; },
-                    "Specify language version to compile (one of 1.0 and 1.2)");
+                    "Specify language version to compile");
     registerOption("--target", "target",
                    [this](const char* arg) { target = arg; return true; },
                     "Compile for the specified target");
@@ -174,7 +184,7 @@ static cstring makeFileName(cstring folder, cstring name, cstring baseSuffix) {
 }
 
 bool CompilerOptions::isv1() const {
-    return langVersion == CompilerOptions::FrontendVersion::P4v1;
+    return langVersion == CompilerOptions::FrontendVersion::P4_14;
 }
 
 void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pass,

@@ -411,12 +411,12 @@ void ProgramStructure::include(cstring filename) {
     path = path.join(filename);
 
     CompilerOptions options;
-    options.langVersion = CompilerOptions::FrontendVersion::P4v1_2;
+    options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.file = path.toString();
     FILE* file = options.preprocess();
     if (::errorCount() || file == nullptr)
         return;
-    auto std = parse_p4v1_2_file(options.file, file);
+    auto std = parse_P4_16_file(options.file, file);
     if (::errorCount() || std == nullptr)
         return;
     for (auto decl : *std->declarations)

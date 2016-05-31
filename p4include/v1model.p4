@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/* P4 v1.2 declaration of the P4 v1.0 switch model */
+/* P4-16 declaration of the P4 v1.0 switch model */
 
 #ifndef _V1_MODEL_P4_
 #define _V1_MODEL_P4_

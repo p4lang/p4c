@@ -33,7 +33,7 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
     CompilerOptions options;
-    options.langVersion = CompilerOptions::FrontendVersion::P4v1_2;
+    options.langVersion = CompilerOptions::FrontendVersion::P4_16;
 
     if (options.process(argc, argv) != nullptr)
         options.setInputFile();

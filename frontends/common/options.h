@@ -39,14 +39,14 @@ class CompilerOptions : public Util::Options {
     CompilerOptions();
 
     enum class FrontendVersion {
-        P4v1,
-        P4v1_2
+        P4_14,
+        P4_16
     };
 
     // Name of executable that is being run.
     cstring exe_name;
     // Which language to compile
-    FrontendVersion langVersion = FrontendVersion::P4v1;
+    FrontendVersion langVersion = FrontendVersion::P4_14;
     // options to pass to preprocessor
     cstring preprocessor_options = "";
     // file to compile (- for stdin)

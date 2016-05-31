@@ -32,9 +32,9 @@ limitations under the License.
 
 void compile(EbpfOptions& options) {
     auto hook = options.getDebugHook();
-    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
+    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     if (isv1) {
-        ::error("This compiler only handles P4 v1.2");
+        ::error("This compiler only handles P4-16");
         return;
     }
     auto program = parseP4File(options);

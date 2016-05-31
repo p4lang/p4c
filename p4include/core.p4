@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/* This is the P4 v1.2 core library, which declares some built-in P4 constructs using P4 */
+/* This is the P4-16 core library, which declares some built-in P4 constructs using P4 */
 
 #ifndef _CORE_P4_
 #define _CORE_P4_

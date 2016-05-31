@@ -53,7 +53,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {
-    // The P4v1 front-end may have constants that overflow their declared type,
+    // The P4-14 front-end may have constants that overflow their declared type,
     // since the v1 type inference sets types to constants without any checks.
     // We fix this here.
     return new IR::Constant(expression->srcInfo, expression->type,

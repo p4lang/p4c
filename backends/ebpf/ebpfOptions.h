@@ -23,7 +23,7 @@ limitations under the License.
 class EbpfOptions : public CompilerOptions {
  public:
     EbpfOptions() {
-        langVersion = CompilerOptions::FrontendVersion::P4v1_2;
+        langVersion = CompilerOptions::FrontendVersion::P4_16;
     }
 };
 

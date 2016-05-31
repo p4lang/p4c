@@ -41,7 +41,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-const IR::P4Program* MidEnd::processV1(CompilerOptions&, const IR::P4Program* program) {
+const IR::P4Program* MidEnd::processP4_14(CompilerOptions&, const IR::P4Program* program) {
     bool isv1 = true;
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
@@ -87,7 +87,7 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
 };
 
 
-const IR::P4Program* MidEnd::processV1_2(CompilerOptions& options, const IR::P4Program* program) {
+const IR::P4Program* MidEnd::processP4_16(CompilerOptions& options, const IR::P4Program* program) {
     // we may come through this path even if the program is actually a P4 v1.0 program
     bool isv1 = options.isv1();
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
@@ -177,9 +177,9 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
 
     if (isv1)
         // TODO: This path should be eventually deprecated
-        program = processV1(options, program);
+        program = processP4_14(options, program);
     else
-        program = processV1_2(options, program);
+        program = processP4_16(options, program);
     if (program == nullptr)
         return nullptr;
 

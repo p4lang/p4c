@@ -135,7 +135,7 @@ class InlineActionsDriver : public Transform {
 
 }  // namespace P4
 
-namespace P4v1 {
+namespace P4_14 {
 
 // Special inliner which works directly on P4 v1.0 representation
 class InlineActions : public Transform {
@@ -160,6 +160,6 @@ class InlineActions : public Transform {
         return p; }
 };
 
-}  // namespace P4v1
+}  // namespace P4_14
 
 #endif /* _MIDEND_ACTIONSINLINING_H_ */

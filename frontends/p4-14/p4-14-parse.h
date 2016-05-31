@@ -23,6 +23,6 @@ limitations under the License.
 
 namespace IR { class V1Program; }
 
-const IR::V1Program *parse_p4v1_file(const CompilerOptions &, FILE *in);
+const IR::V1Program *parse_P4_14_file(const CompilerOptions &, FILE *in);
 
 #endif /* _p4_parse_h_ */
