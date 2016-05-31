@@ -185,7 +185,8 @@ void IrClass::declare(std::ostream &out) const {
     out << "class " << name << ";" << std::endl;
 }
 
-static void output_scope_if_needed(std::ostream &out, const IrNamespace *scope, const IrNamespace *in) {
+static void output_scope_if_needed(std::ostream &out, const IrNamespace *scope,
+                                   const IrNamespace *in) {
     if (!scope) return;
     for (auto i = in; i; i = i->parent)
         if (scope == i) return;

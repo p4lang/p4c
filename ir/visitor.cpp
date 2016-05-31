@@ -272,8 +272,8 @@ class SetupJoinPoints : public Inspector {
     bool preorder(const IR::Node *n) override {
         return ++join_points[n].second == 1; }
  public:
-    SetupJoinPoints(map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *fjp)
-    : join_points(*fjp) { visitDagOnce = false; }
+    explicit SetupJoinPoints(decltype(join_points) &fjp)
+    : join_points(fjp) { visitDagOnce = false; }
 };
 
 void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
@@ -283,7 +283,7 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
         flow_join_points->clear();
     else
         flow_join_points = new std::remove_reference<decltype(*flow_join_points)>::type;
-    root->apply(SetupJoinPoints(flow_join_points));
+    root->apply(SetupJoinPoints(*flow_join_points));
     for (auto it = flow_join_points->begin(); it != flow_join_points->end(); ) {
         if (it->second.second > 1 && !filter_join_point(it->first)) {
             ++it;
