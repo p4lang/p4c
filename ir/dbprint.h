@@ -42,7 +42,9 @@ enum dbprint_flags {
     Prec_Cond = 3,
     Prec_Low = 1,
 
+    Reset = 0,
     TableNoActions = 0x10,
+    Brief = 0x20,
 };
 
 int dbgetflags(std::ostream &out);
@@ -72,5 +74,9 @@ struct clrflag : public setflags_helper {
 
 inline std::ostream &operator<<(std::ostream &out, const DBPrint::setflags_helper &p) {
     p.set(out); return out; }
+
+inline std::ostream &operator<<(std::ostream &out, const DBPrint::dbprint_flags fl) {
+    DBPrint::dbsetflags(out, fl, fl ? fl : ~0);
+    return out; }
 
 #endif /* _IR_DBPRINT_H_ */

@@ -39,7 +39,7 @@ limitations under the License.
 namespace V12Test {
 
 IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
-    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
+    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);

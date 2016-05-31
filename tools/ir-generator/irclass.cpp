@@ -185,6 +185,15 @@ void IrClass::declare(std::ostream &out) const {
     out << "class " << name << ";" << std::endl;
 }
 
+static void output_scope_if_needed(std::ostream &out, const IrNamespace *scope,
+                                   const IrNamespace *in) {
+    if (!scope) return;
+    for (auto i = in; i; i = i->parent)
+        if (scope == i) return;
+    output_scope_if_needed(out, scope->parent, in);
+    out << scope->name << "::";
+}
+
 void IrClass::generate_hdr(std::ostream &out) const {
     out << "namespace IR {" << std::endl;
     for (auto p = containedIn; p && p->name; p = p->parent)
@@ -217,6 +226,7 @@ void IrClass::generate_hdr(std::ostream &out) const {
         out << "public ";
         if (p->kind == NodeKind::Interface)
             out << "virtual ";
+        output_scope_if_needed(out, p->containedIn, containedIn);
         out << p->name;
         first = false;
     }

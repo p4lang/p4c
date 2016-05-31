@@ -9,7 +9,7 @@ const IR::Node* ConvertEnums::preorder(IR::Type_Enum* type) {
         return type;
     unsigned count = type->members->size();
     unsigned width = policy->enumSize(count);
-    BUG_CHECK(count >= (1 << width),
+    BUG_CHECK(count >= (1U << width),
               "%1%: not enough bits to represent %2%", width, type);
     auto r = new EnumRepresentation(type->srcInfo, width);
     auto canontype = typeMap->getType(getOriginal(), true);

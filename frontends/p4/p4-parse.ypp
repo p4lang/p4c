@@ -32,7 +32,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/cstring.h"
 #include "lib/gmputil.h"
-#include "frontends/p4v1/p4v1-parse.h"
+#include "frontends/p4-14/p4-14-parse.h"
 #include "lib/exceptions.h"
 #include "lib/source_file.h"
 #include "frontends/p4/symbol_table.h"
@@ -954,10 +954,10 @@ void yyerror(const char *fmt, ...) {
     va_end(args);
 }
 
-const IR::P4Program *parse_p4v1_2_file(const char *name, FILE *in) {
+const IR::P4Program *parse_P4_16_file(const char *name, FILE *in) {
     extern int verbose;
     if (verbose)
-        std::cout << "Parsing P4 v1.2 program " << name << std::endl;
+        std::cout << "Parsing P4-16 program " << name << std::endl;
 
     int errors = 0;
 #ifdef YYDEBUG

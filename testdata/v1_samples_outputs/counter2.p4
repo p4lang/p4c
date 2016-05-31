@@ -42,7 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 128;
         default_action = NoAction();
-        @name("cnt") counters = DirectCounter(CounterType.Packets);
+        @name("cnt") counters = direct_counter(CounterType.packets);
     }
     apply {
         tab1.apply();

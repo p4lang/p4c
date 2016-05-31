@@ -127,8 +127,9 @@ void IrClass::generateMethods() {
             auto eq_overload = new IrMethod("operator==", "{ return a == *this; }");
             eq_overload->isOverride = true;
             eq_overload->rtype = "bool";
-            eq_overload->args =
-                Util::printf_format("(const IR::%s &a) const", parent->name.c_str());
+            std::stringstream buf;
+            buf << "(const IR::" << parent->containedIn << parent->name << " &a) const";
+            eq_overload->args = buf.str();
             elements.push_back(eq_overload); } }
     for (auto m : *getUserMethods()) {
         if (m->rtype) continue;

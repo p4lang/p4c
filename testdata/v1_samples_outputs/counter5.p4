@@ -29,9 +29,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Counter(32w70000, CounterType.Packets) @name("cntDum") cntDum;
+    counter(32w70000, CounterType.packets) @name("cntDum") cntDum;
     @name("act") action act(bit<8> idx) {
-        cntDum.increment((bit<32>)idx);
+        cntDum.count((bit<32>)idx);
     }
     @name("tab1") table tab1() {
         actions = {

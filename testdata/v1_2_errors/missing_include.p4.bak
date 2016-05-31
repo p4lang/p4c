@@ -1,0 +1,6 @@
+// This test is disabled, since it produces
+// different outputs depending on the preprocessor used
+
+#include "no-such-file.p4"
+
+control c() { apply {} }

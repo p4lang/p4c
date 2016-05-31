@@ -41,7 +41,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
     if (program == nullptr)
         return nullptr;
 
-    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4v1;
+    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     PassManager simplify = {

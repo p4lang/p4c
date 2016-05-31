@@ -109,4 +109,4 @@ etags:
 	    . ../../lib
 
 check-%:
-	@$(MAKE) check TESTS="$(filter $*/%, $(TESTS))"
+	@$(MAKE) check TESTS="$(filter $*/%, $(TESTS) $(EXTRA_TESTS))"

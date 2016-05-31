@@ -59,9 +59,10 @@ class Visitor::ChangeTracker {
         return it->second.second; }
 };
 
-Visitor::profile_t Visitor::init_apply(const IR::Node *) {
+Visitor::profile_t Visitor::init_apply(const IR::Node *root) {
     if (ctxt) BUG("previous use of visitor did not clean up properly");
     ctxt = nullptr;
+    if (joinFlows) init_join_flows(root);
     return profile_t(*this);
 }
 Visitor::profile_t Modifier::init_apply(const IR::Node *root) {
@@ -182,7 +183,7 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
 
 const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
-    if (n) {
+    if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
         auto vp = visited->emplace(n, false);
         if (!vp.second && !vp.first->second)
@@ -265,3 +266,42 @@ const IR::Node *Transform::postorder(IR::CLASS *n) {                            
     return postorder(static_cast<IR::BASE *>(n)); }                                     \
 
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
+
+class SetupJoinPoints : public Inspector {
+    map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> &join_points;
+    bool preorder(const IR::Node *n) override {
+        return ++join_points[n].second == 1; }
+ public:
+    explicit SetupJoinPoints(decltype(join_points) &fjp)
+    : join_points(fjp) { visitDagOnce = false; }
+};
+
+void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
+    if (!dynamic_cast<Inspector *>(this))
+        BUG("joinFlows only works for Inspector passes currently, not Modifier or Transform");
+    if (flow_join_points)
+        flow_join_points->clear();
+    else
+        flow_join_points = new std::remove_reference<decltype(*flow_join_points)>::type;
+    root->apply(SetupJoinPoints(*flow_join_points));
+    for (auto it = flow_join_points->begin(); it != flow_join_points->end(); ) {
+        if (it->second.second > 1 && !filter_join_point(it->first)) {
+            ++it;
+        } else {
+            it = flow_join_points->erase(it); } }
+}
+
+bool ControlFlowVisitor::join_flows(const IR::Node *n) {
+    if (flow_join_points && flow_join_points->count(n)) {
+        auto &status = flow_join_points->at(n);
+        if (!--status.second) {
+            flow_merge(*status.first);
+            return false;
+        } else if (status.first) {
+            status.first->flow_merge(*this);
+            return true;
+        } else {
+            status.first = clone();
+            return true; } }
+    return false;
+}

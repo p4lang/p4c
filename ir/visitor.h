@@ -132,6 +132,9 @@ class Visitor {
     // pass, this will result in them being duplicated if they are modified.
     bool visitDagOnce = true;
     bool dontForwardChildrenBeforePreorder = false;
+    bool joinFlows = false;
+    virtual void init_join_flows(const IR::Node *) { assert(0); }
+    virtual bool join_flows(const IR::Node *) { return false; }
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
     class ChangeTracker;  // used by Modifier and Transform -- private to them
 
@@ -198,8 +201,12 @@ class Transform : public virtual Visitor {
 };
 
 class ControlFlowVisitor : public virtual Visitor {
+    map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
  protected:
     virtual ControlFlowVisitor *clone() const = 0;
+    void init_join_flows(const IR::Node *root) override;
+    bool join_flows(const IR::Node *n) override;
+    virtual bool filter_join_point(const IR::Node *) { return false; }
     ControlFlowVisitor &flow_clone() override { return *clone(); }
 };
 

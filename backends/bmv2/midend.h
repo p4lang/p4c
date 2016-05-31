@@ -26,8 +26,8 @@ namespace BMV2 {
 class MidEnd {
     std::vector<DebugHook> hooks;
 
-    const IR::P4Program* processV1(CompilerOptions& options, const IR::P4Program* program);
-    const IR::P4Program* processV1_2(CompilerOptions& options, const IR::P4Program* program);
+    const IR::P4Program* processP4_14(CompilerOptions& options, const IR::P4Program* program);
+    const IR::P4Program* processP4_16(CompilerOptions& options, const IR::P4Program* program);
  public:
     // These will be accurate when the mid-end completes evaluation
     P4::ReferenceMap refMap;

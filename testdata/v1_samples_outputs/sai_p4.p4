@@ -276,7 +276,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.intrinsic_metadata.ingress_port: exact;
         }
         default_action = NoAction();
-        @name("port_counters") counters = DirectCounter(CounterType.Packets);
+        @name("port_counters") counters = direct_counter(CounterType.packets);
     }
     @name("route") table route() {
         actions = {
