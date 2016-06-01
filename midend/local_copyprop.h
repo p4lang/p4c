@@ -52,8 +52,9 @@ class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContex
     class ElimDead;
 
     LocalCopyPropagation(const LocalCopyPropagation &) = default;
+
  public:
-    LocalCopyPropagation(const TypeMap* typeMap) : typeMap(typeMap)
+    explicit LocalCopyPropagation(const TypeMap* typeMap) : typeMap(typeMap)
     { visitDagOnce = false; setName("LocalCopyPropagation"); }
 };
 

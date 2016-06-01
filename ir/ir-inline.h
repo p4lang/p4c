@@ -199,9 +199,9 @@ void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
             i = symbols.erase(i);
         } else if (nk == i->first) {
             v.visit(i->second);
-            if (i->second)
+            if (i->second) {
                 ++i;
-            else {
+            } else {
                 i = symbols.erase(i);
                 changes = true;
             }

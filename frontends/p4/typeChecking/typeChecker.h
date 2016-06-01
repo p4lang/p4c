@@ -138,7 +138,7 @@ class TypeInference : public Transform {
     using Transform::preorder;
 
     const IR::Node* pruneIfDone(const IR::Node* node)
-    { if (done()) prune(); return node; }
+    { if (done()) { prune(); } return node; }
     const IR::Node* preorder(IR::Expression* expression) override
     { return pruneIfDone(expression); }
     const IR::Node* preorder(IR::Type* type) override

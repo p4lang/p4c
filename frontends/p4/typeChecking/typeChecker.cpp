@@ -39,7 +39,7 @@ class ConstantTypeSubstitution : public Transform {
     IR::TypeVariableSubstitution* subst;
     TypeMap                     * typeMap;
 
-  public:
+ public:
     ConstantTypeSubstitution(IR::TypeVariableSubstitution* subst,
                              TypeMap* typeMap) : subst(subst), typeMap(typeMap)
     { CHECK_NULL(subst); CHECK_NULL(typeMap); setName("ConstantTypeSubstitution"); }
@@ -957,7 +957,8 @@ bool TypeInference::validateFields(const IR::Type_StructLike* type,
                                    std::function<bool(const IR::Type*)> checker) const {
     for (auto field : *type->fields) {
         if (!checker(field->type)) {
-            typeError("Field %1% of %2% cannot have type %3%", field, type->toString(), field->type);
+            typeError("Field %1% of %2% cannot have type %3%",
+                      field, type->toString(), field->type);
             return false;
         }
     }
@@ -1134,11 +1135,13 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
         return expression;
 
     if (ltype->is<IR::Type_InfInt>()) {
-        typeError("Please specify a width for the operand %1% of a concatenation", expression->left);
+        typeError("Please specify a width for the operand %1% of a concatenation",
+                  expression->left);
         return expression;
     }
     if (rtype->is<IR::Type_InfInt>()) {
-        typeError("Please specify a width for the operand %1% of a concatenation", expression->right);
+        typeError("Please specify a width for the operand %1% of a concatenation",
+                  expression->right);
         return expression;
     }
     if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>() || !(*ltype == *rtype)) {
@@ -2357,7 +2360,8 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
                   elem->expression, ktype->toString());
     auto type = getType(elem->matchType);
     if (type != nullptr && type != IR::Type_MatchKind::get())
-        typeError("%1% must be a %2% value", elem->matchType, IR::Type_MatchKind::get()->toString());
+        typeError("%1% must be a %2% value", elem->matchType,
+                  IR::Type_MatchKind::get()->toString());
     return elem;
 }
 
