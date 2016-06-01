@@ -680,21 +680,27 @@ class RuntimeAPI(cmd.Cmd):
             return res
         return [r for r in res if r.startswith(text)]
 
+    @handle_bad_input
     def do_show_tables(self, line):
-        "List tables defined in the P4 program"
+        "List tables defined in the P4 program: show_tables"
+        self.exactly_n_args(line.split(), 0)
         for table_name in sorted(TABLES):
             print TABLES[table_name].table_str()
 
+    @handle_bad_input
     def do_show_actions(self, line):
-        "List tables defined in the P4 program"
+        "List actions defined in the P4 program: show_actions"
+        self.exactly_n_args(line.split(), 0)
         for action_name in sorted(ACTIONS):
             print ACTIONS[action_name].action_str()
 
     def _complete_tables(self, text):
         return self._complete_res(TABLES, text)
 
+    @handle_bad_input
     def do_table_show_actions(self, line):
-        "List tables defined in the P4 program"
+        "List one table's actions as per the P4 program: table_show_actions <table_name>"
+        self.exactly_n_args(line.split(), 1)
         table = TABLES[line]
         for action_name in sorted(table.actions):
             print ACTIONS[action_name].action_str()
@@ -702,8 +708,10 @@ class RuntimeAPI(cmd.Cmd):
     def complete_table_show_actions(self, text, line, start_index, end_index):
         return self._complete_tables(self, text)
 
+    @handle_bad_input
     def do_table_info(self, line):
-        "Show info about a table"
+        "Show info about a table: table_info <table_name>"
+        self.exactly_n_args(line.split(), 1)
         table = TABLES[line]
         print table.table_str()
         print "*" * 80
@@ -1660,7 +1668,7 @@ class RuntimeAPI(cmd.Cmd):
         def dump_valid(p):
             return "01" if p.valid.key else "00"
         pdumpers = {"exact": dump_exact, "lpm": dump_lpm,
-                    "ternary": dump_ternary, "valid": dump_ternary}
+                    "ternary": dump_ternary, "valid": dump_valid}
 
         print "=========="
         print "TABLE ENTRIES"
