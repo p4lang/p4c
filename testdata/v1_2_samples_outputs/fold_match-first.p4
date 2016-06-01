@@ -1,71 +1,33 @@
 parser p() {
     state start {
-        transition select(32w0) {
-            32w5 &&& 32w7: reject;
-            32w0: accept;
-            default: reject;
-        }
+        transition accept;
     }
     state next0 {
-        transition select(32w0) {
-            32w1 &&& 32w1: reject;
-            default: accept;
-            32w0: reject;
-        }
+        transition accept;
     }
     state next1 {
-        transition select(32w1) {
-            32w1 &&& 32w1: accept;
-            32w0: reject;
-            default: reject;
-        }
+        transition accept;
     }
     state next2 {
-        transition select(32w1) {
-            32w0 .. 32w7: accept;
-            32w0: reject;
-            default: reject;
-        }
+        transition accept;
     }
     state next3 {
-        transition select(32w3) {
-            32w1 &&& 32w1: accept;
-            32w0: reject;
-            default: reject;
-        }
+        transition accept;
     }
     state next00 {
-        transition select(true, 32w0) {
-            (true, 32w1 &&& 32w1): reject;
-            default: accept;
-            (true, 32w0): reject;
-        }
+        transition accept;
     }
     state next01 {
-        transition select(true, 32w1) {
-            (true, 32w1 &&& 32w1): accept;
-            (true, 32w0): reject;
-            default: reject;
-        }
+        transition accept;
     }
     state next02 {
-        transition select(true, 32w1) {
-            (true, 32w0 .. 32w7): accept;
-            (true, 32w0): reject;
-            default: reject;
-        }
+        transition accept;
     }
     state next03 {
-        transition select(true, 32w3) {
-            (true, 32w1 &&& 32w1): accept;
-            (true, 32w0): reject;
-            default: reject;
-        }
+        transition accept;
     }
     state last {
         transition select(32w0) {
-            32w5 &&& 32w7: reject;
-            32w1: reject;
         }
     }
 }

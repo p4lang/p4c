@@ -47,6 +47,14 @@ class ConstantFolding : public Transform {
     const IR::Node* compare(const IR::Operation_Binary* op);
     const IR::Node* shift(const IR::Operation_Binary* op);
 
+    enum class Result {
+        Yes,
+        No,
+        DontKnow
+    };
+
+    Result setContains(const IR::Expression* keySet, const IR::Expression* constant) const;
+
  public:
     ConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr) {
@@ -83,6 +91,7 @@ class ConstantFolding : public Transform {
     const IR::Node *postorder(IR::Concat *e) override;
     const IR::Node *postorder(IR::Member *e) override;
     const IR::Node *postorder(IR::Cast *e) override;
+    const IR::Node* postorder(IR::SelectExpression* e) override;
 };
 }  // namespace P4
 

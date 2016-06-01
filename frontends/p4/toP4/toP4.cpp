@@ -1108,6 +1108,10 @@ bool ToP4::preorder(const IR::Key* v) {
         builder.append(std::string(spaces, ' '));
         builder.append(": ");
         visit(f->matchType);
+        if (f->annotations->size() != 0) {
+            builder.append(" ");
+            visit(f->annotations);
+        }
         builder.endOfStatement(true);
     }
     builder.blockEnd(false);

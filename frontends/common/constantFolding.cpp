@@ -616,4 +616,126 @@ const IR::Node *ConstantFolding::postorder(IR::Cast *e) {
     return e;
 }
 
+ConstantFolding::Result
+ConstantFolding::setContains(const IR::Expression* keySet, const IR::Expression* select) const {
+    if (keySet->is<IR::DefaultExpression>())
+        return Result::Yes;
+    if (select->is<IR::ListExpression>()) {
+        auto list = select->to<IR::ListExpression>();
+        if (keySet->is<IR::ListExpression>()) {
+            auto klist = keySet->to<IR::ListExpression>();
+            BUG_CHECK(list->components->size() == klist->components->size(),
+                      "%1% and %2% size mismatch", list, klist);
+            for (unsigned i=0; i < list->components->size(); i++) {
+                auto r = setContains(klist->components->at(i), list->components->at(i));
+                if (r == Result::DontKnow || r == Result::No)
+                    return r;
+            }
+            return Result::Yes;
+        } else {
+            BUG_CHECK(list->components->size() == 1, "%1%: mismatch in list size", list);
+            return setContains(keySet, list->components->at(0));
+        }
+    }
+
+    if (select->is<IR::BoolLiteral>()) {
+        auto key = getConstant(keySet);
+        if (key == nullptr)
+            ::error("%1%: expression must evaluate to a constant", key);
+        BUG_CHECK(key->is<IR::BoolLiteral>(), "%1%: expected a boolean", key);
+        if (select->to<IR::BoolLiteral>()->value == key->to<IR::BoolLiteral>()->value)
+            return Result::Yes;
+        return Result::No;
+    }
+
+    BUG_CHECK(select->is<IR::Constant>(), "%1%: expected a constant", select);
+    auto cst = select->to<IR::Constant>();
+    if (keySet->is<IR::Constant>()) {
+        if (keySet->to<IR::Constant>()->value == cst->value)
+            return Result::Yes;
+        return Result::No;
+    } else if (keySet->is<IR::Range>()) {
+        auto range = keySet->to<IR::Range>();
+        auto left = getConstant(range->left);
+        if (left == nullptr) {
+            ::error("%1%: expression must evaluate to a constant", left);
+            return Result::DontKnow;
+        }
+        auto right = getConstant(range->right);
+        if (right == nullptr) {
+            ::error("%1%: expression must evaluate to a constant", right);
+            return Result::DontKnow;
+        }
+        if (left->to<IR::Constant>()->value <= cst->value &&
+            right->to<IR::Constant>()->value >= cst->value)
+            return Result::Yes;
+        return Result::No;
+    } else if (keySet->is<IR::Mask>()) {
+        // check if left & right == cst & right
+        auto range = keySet->to<IR::Mask>();
+        auto left = getConstant(range->left);
+        if (left == nullptr) {
+            ::error("%1%: expression must evaluate to a constant", left);
+            return Result::DontKnow;
+        }
+        auto right = getConstant(range->right);
+        if (right == nullptr) {
+            ::error("%1%: expression must evaluate to a constant", right);
+            return Result::DontKnow;
+        }
+        if ((left->to<IR::Constant>()->value & right->to<IR::Constant>()->value) ==
+            (right->to<IR::Constant>()->value & cst->value))
+            return Result::Yes;
+        return Result::No;
+    }
+    ::error("%1%: unexpected expression", keySet);
+    return Result::DontKnow;
+}
+
+const IR::Node* ConstantFolding::postorder(IR::SelectExpression* expression) {
+    if (!typesKnown) return expression;
+    auto sel = getConstant(expression->select);
+    if (sel == nullptr)
+        return expression;
+
+    auto cases = new IR::Vector<IR::SelectCase>();
+    bool someUnknown = false;
+    bool changes = false;
+    bool finished = false;
+
+    const IR::Expression* result = expression;
+    for (auto c : *expression->selectCases) {
+        if (finished) {
+            ::warning("%1%: unreachable case", c);
+            continue;
+        }
+        auto inside = setContains(c->keyset, sel);
+        if (inside == Result::No) {
+            changes = true;
+            continue;
+        } else if (inside == Result::DontKnow) {
+            someUnknown = true;
+            cases->push_back(c);
+        } else {
+            changes = true;
+            finished = true;
+            if (someUnknown) {
+                auto newc = new IR::SelectCase(
+                    c->srcInfo, new IR::DefaultExpression(Util::SourceInfo()), c->state);
+                cases->push_back(newc);
+            } else {
+                // This is the result.
+                result = c->state;
+            }
+        }
+    }
+
+    if (changes) {
+        if (cases->size() == 0 && result == expression)
+            ::warning("%1%: no case matches", expression);
+        expression->selectCases = cases;
+    }
+    return result;
+}
+
 }  // namespace P4

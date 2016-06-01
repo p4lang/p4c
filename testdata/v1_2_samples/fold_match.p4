@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ limitations under the License.
 
 parser p()
 {
-    state start 
+    state start
     {
         transition select(32w0)
         {
@@ -25,18 +25,18 @@ parser p()
             default       : reject;
         }
     }
-    
+
     state next0
     {
         transition select(32w0)
         {
             32w1 &&& 32w1 : reject;
             default       : accept;
-            32w0          : reject;            
+            32w0          : reject;
         }
     }
-    
-    state next1 
+
+    state next1
     {
         transition select(32w1)
         {
@@ -45,8 +45,8 @@ parser p()
             default       : reject;
         }
     }
-    
-    state next2 
+
+    state next2
     {
         transition select(32w1)
         {
@@ -55,7 +55,7 @@ parser p()
             default       : reject;
         }
     }
-    
+
     state next3
     {
         transition select(32w3)
@@ -65,18 +65,18 @@ parser p()
             default       : reject;
         }
     }
-    
+
     state next00
     {
         transition select(true, 32w0)
         {
             (true, 32w1 &&& 32w1) : reject;
             default       : accept;
-            (true, 32w0)          : reject;            
+            (true, 32w0)          : reject;
         }
     }
-    
-    state next01 
+
+    state next01
     {
         transition select(true, 32w1)
         {
@@ -85,8 +85,8 @@ parser p()
             default       : reject;
         }
     }
-    
-    state next02 
+
+    state next02
     {
         transition select(true, 32w1)
         {
@@ -95,7 +95,7 @@ parser p()
             default       : reject;
         }
     }
-    
+
     state next03
     {
         transition select(true, 32w3)
@@ -106,29 +106,7 @@ parser p()
         }
     }
 
-#if 0
-    state next13
-    {
-        transition select(true, 32w3)
-        {
-            (_, 32w1 &&& 32w1) : accept;
-            (_, 32w0)          : reject;
-            default       : reject;
-        }
-    }
-    
-    state next23
-    {
-        transition select(true, 32w3)
-        {
-            (_, _) : accept;
-            (_, 32w0)     : reject;
-            default       : reject;
-        }
-    }
-#endif
-    
-    state last 
+    state last
     {
         transition select(32w0)
         {

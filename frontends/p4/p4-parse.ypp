@@ -129,7 +129,7 @@ static int yylex();
                         keysetExpression selectExpression stateExpression optInitializer initializer
                         argument simpleKeysetExpression transitionStatement switchLabel
 %type<PathPrefix>       pathPrefix relativePathPrefix nonEmptyRelativePathPrefix
-%type<TypePtr>          baseType typeOrVoid specializedType headerStackType typeRef
+%type<TypePtr>          baseType typeOrVoid specializedType headerStackType typeRef typeArg
 %type<Type_Name>        typeName
 %type<Parameter>        parameter
 %type<annos>            optAnnotations
@@ -264,8 +264,8 @@ annotations
     ;
 
 annotation
-    : '@' name                     { $$ = new IR::Annotation(@1, *$2, nullptr); }
-    | '@' name '(' expression ')'  { $$ = new IR::Annotation(@1, *$2, $4); }
+    : '@' name                        { $$ = new IR::Annotation(@1, *$2, nullptr); }
+    | '@' name '(' expression ')'     { $$ = new IR::Annotation(@1, *$2, $4); }
     | '@' name '(' STRING_LITERAL ')' { $$ = new IR::Annotation(@1, *$2,
                                                                 new IR::StringLiteral(@4, $4)); }
     ;
@@ -519,7 +519,6 @@ methodPrototype
 typeRef
     : baseType                         { $$ = $1; }
     | typeName                         { $$ = $1; }
-    | DONTCARE                         { $$ = IR::Type_Dontcare::get(); }
     | specializedType                  { $$ = $1; }
     | headerStackType                  { $$ = $1; }
     ;
@@ -570,9 +569,14 @@ typeParameterList
     | typeParameterList ',' name       { ($$=$1)->push_back(new IR::Type_Var(@3, *$3)); }
     ;
 
+typeArg
+    : typeRef                          { $$ = $1; }
+    | DONTCARE                         { $$ = IR::Type_Dontcare::get(); }
+    ;
+
 typeArgumentList
-    : typeRef                          { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
-    | typeArgumentList ',' typeRef     { $$ = $1; $$->push_back($3); }
+    : typeArg                          { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
+    | typeArgumentList ',' typeArg     { $$ = $1; $$->push_back($3); }
     ;
 
 typeDeclaration
@@ -766,9 +770,9 @@ keyElementList
     ;
 
 keyElement
-    : optAnnotations expression ':' name ';'
-                                         { auto expr = new IR::PathExpression(*$4);
-                                           $$ = new IR::KeyElement(@4, $1, $2, expr); }
+    : expression ':' name optAnnotations ';'
+                                         { auto expr = new IR::PathExpression(*$3);
+                                           $$ = new IR::KeyElement(@3, $4, $1, expr); }
     ;
 
 actionList
