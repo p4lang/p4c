@@ -28,6 +28,7 @@
 #include <string>
 #include <functional>
 #include <set>
+#include <unordered_set>
 #include <map>
 #include <memory>
 
@@ -350,6 +351,7 @@ class PHVFactory {
   std::map<header_id_t, HeaderDesc> header_descs{};  // sorted by header id
   std::map<header_stack_id_t, HeaderStackDesc> header_stack_descs{};
   std::map<std::string, std::string> field_aliases{};  // order does not matter
+  std::unordered_set<std::string> field_names{};  // just for debugging
 };
 
 }  // namespace bm

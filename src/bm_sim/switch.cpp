@@ -125,10 +125,6 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
   }
 #endif
 
-  int status = init_objects(parser.config_file_path, parser.device_id,
-                            transport);
-  if (status != 0) return status;
-
   if (parser.console_logging)
     Logger::set_logger_console();
 
@@ -136,6 +132,10 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
     Logger::set_logger_file(parser.file_logger);
 
   Logger::set_log_level(parser.log_level);
+
+  int status = init_objects(parser.config_file_path, parser.device_id,
+                            transport);
+  if (status != 0) return status;
 
   if (parser.use_files)
     set_dev_mgr_files(parser.wait_time);

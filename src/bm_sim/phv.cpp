@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/logger.h>
 
 #include <string>
 #include <vector>
@@ -92,7 +93,12 @@ PHV::push_back_header_stack(const std::string &header_stack_name,
 
 void
 PHV::add_field_alias(const std::string &from, const std::string &to) {
-  fields_map.emplace(from, get_field(to));
+  // if an alias has the same name as an actual field, we give priority to the
+  // alias definition; the future will tell use if this is the right choice...
+  auto &ref = get_field(to);
+  auto r = fields_map.emplace(from, ref);
+  if (!r.second) r.first->second = ref;
+  // fields_map.emplace(from, ref);
 }
 
 
@@ -105,6 +111,9 @@ PHVFactory::push_back_header(const std::string &header_name,
                                header_type, metadata);
   // cannot use operator[] because it requires default constructibility
   header_descs.insert(std::make_pair(header_index, desc));
+  for (int i = 0; i < header_type.get_num_fields(); i++) {
+    field_names.insert(header_name + "." + header_type.get_field_name(i));
+  }
 }
 
 void
@@ -120,6 +129,11 @@ PHVFactory::push_back_header_stack(const std::string &header_stack_name,
 
 void
 PHVFactory::add_field_alias(const std::string &from, const std::string &to) {
+  auto it = field_names.find(from);
+  if (it != field_names.end()) {
+    Logger::get()->info("Field alias {} has the same name as an actual field; "
+                        "we will give priority to the alias", *it);
+  }
   field_aliases[from] = to;
 }
 

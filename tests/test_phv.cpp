@@ -104,6 +104,18 @@ TEST_F(PHVTest, FieldAlias) {
   ASSERT_EQ(&f, &f_alias);
 }
 
+TEST_F(PHVTest, FieldAliasDup) {
+  // in this test we create an alias with the same name as an actual field;
+  // currently bmv2 gives priority to the alias
+  phv_factory.add_field_alias("test1.f16", "test1.f48");
+  std::unique_ptr<PHV> phv_2 = phv_factory.create();
+
+  const Field &f = phv_2->get_field("test1.f48");
+  const Field &f_alias = phv_2->get_field("test1.f16");
+
+  ASSERT_EQ(&f, &f_alias);
+}
+
 using testing::Types;
 
 template <typename IteratorType>
