@@ -16,7 +16,6 @@ abstract Type {
     typedef Type_Varbits        Varbits;
     virtual int width_bits() const { return 0; }
 #end
-#nodbprint
 }
 
 // Implemented by all types that may be generic
@@ -92,61 +91,45 @@ abstract StatOrDecl {}
 // Two declarations wit the same name are not necessarily the same declaration
 abstract Declaration : StatOrDecl, IDeclaration {
     ID          name;
-#noconstructor
+    int declid = nextId++;
 #emit
     ID getName() const override { return name; }
  private:
     static int nextId;
  public:
-    int declid;
-    Declaration(Util::SourceInfo si, ID name) : StatOrDecl(si), name(name), declid(nextId++) {}
 #end
     dbprint { Node::dbprint(out); out << name << "/" << declid; }
     toString { return externalName(); }
-    operator== { return StatOrDecl::operator==(static_cast<const StatOrDecl&>(a)) &&
-                        name == a.name && declid == a.declid; }
 }
 
 // Two declarations with the same name are not the same declaration
 abstract Type_Declaration : Type, IDeclaration {
     ID name;
-#noconstructor
+    int declid = nextId++;
 #emit
     ID getName() const override { return name; }
  private:
     static int nextId;
  public:
-    int declid;
-    Type_Declaration(Util::SourceInfo si, ID name) : Type(si), name(name), declid(nextId++) {}
 #end
     toString { return externalName(); }
-    operator== { return Type::operator==(static_cast<const Type&>(a)) &&
-                        name == a.name && declid == a.declid; }
     dbprint { Node::dbprint(out); out << name << "/" << declid; }
 }
 
 abstract Expression {
-#emit
     // Note that the type field is not visited.
     // Most P4 v1.2 passes don't use this field.
     // It is a used to hold the result of TypeInferencing for the expression.
     // It is used by the P4 v1.0 front-end and by some back-ends.
     // It is not visited by the visitors by default (can visit explicitly in the preorder)
-    const Type* type = Type::Unknown::get();
-    Expression() : type(Type::Unknown::get()) {}
-    explicit Expression(const Type *t) : type(t) {}
-    Expression(Util::SourceInfo srcInfo, const Type *t) : Node(srcInfo), type(t) {}
-#end
-    operator== { return typeid(*this) == typeid(a) && type == a.type; }
+    optional Type type = Type::Unknown::get();
+    visit_children { (void)v; }
 }
 
 abstract Operation : Expression {
 #emit
     virtual int getPrecedence() const = 0;
     virtual cstring getStringOp() const = 0;
-    Operation(Util::SourceInfo si, const Type *t) : Expression(si, t) {}
-    explicit Operation(const Type *t) : Expression(t) {}
-    Operation() : Expression() {}
     typedef Operation_Unary Unary;
     typedef Operation_Binary Binary;
     typedef Operation_Relation Relation;
@@ -155,17 +138,14 @@ abstract Operation : Expression {
 }
 
 class PathPrefix {
-    bool absolute;
-    std::vector<ID> components;
-#noconstructor
+    bool absolute = false;
+    optional vector<ID> components;
 #emit
-    PathPrefix() : absolute(false) {}
     PathPrefix(Util::SourceInfo si, PathPrefix* start, ID end)
             : Node(si), absolute(start->absolute) {
         CHECK_NULL(start);
         std::copy(start->components.begin(), start->components.end(), components.begin());
-        components.push_back(end);
-    }
+        components.push_back(end); }
     void setAbsolute() { absolute = true; }
 #end
     toString{
@@ -186,18 +166,10 @@ class PathPrefix {
 }
 
 class Path {
-    NullOK PathPrefix prefix;
+    optional NullOK PathPrefix prefix;
     ID                name;
-#noconstructor
+    Path { if (!srcInfo) srcInfo = prefix ? prefix->srcInfo + name.srcInfo : name.srcInfo; }
 #emit
-    Path(const PathPrefix* prefix, ID name) :
-    Node(prefix != nullptr ? prefix->srcInfo + name.srcInfo : name.srcInfo),
-            prefix(prefix),
-            name(name) {}
-    explicit Path(ID name) :
-            Node(name.srcInfo),
-            prefix(nullptr),
-            name(name) {}
     bool isDontCare() const { return prefix == nullptr && name.isDontCare(); }
 #end
     toString{
@@ -216,8 +188,8 @@ class Path {
 class Annotation {
     ID name;
     NullOK Expression expr;
+    Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
 #emit
-    Annotation(cstring n, const Expression *e) : name(n), expr(e) {}
     Annotation(cstring n, intmax_t v);
     // Predefined annotations used by the compiler
     static const cstring nameAnnotation;
@@ -234,9 +206,8 @@ class Annotation {
 class Annotations {
     Vector<Annotation> annotations;
 #nodbprint
+    Annotations { if (!srcInfo && annotations) srcInfo = annotations->srcInfo; }
 #emit
-    Annotations(const Vector<Annotation>* annotations) :
-            Node(annotations->srcInfo), annotations(annotations) {}
     static Annotations *empty;
     size_t size() const { return annotations->size(); }
     // Get the annotation with the specified name or nullptr.

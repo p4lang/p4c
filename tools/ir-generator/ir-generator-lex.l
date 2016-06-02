@@ -58,6 +58,7 @@ static YYLTYPE          block_start;
 "interface"     { return INTERFACE; }
 "namespace"     { return NAMESPACE; }
 "operator"      { return OPERATOR; }
+"optional"      { return OPTIONAL; }
 "NullOK"        { return NULLOK; }
 "#apply"        { yylval.str = yytext; return APPLY; }
 "#no"[a-z]*     { yylval.str = yytext+3; return NO; }

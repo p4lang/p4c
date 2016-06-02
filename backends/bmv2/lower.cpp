@@ -73,7 +73,7 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     auto e0type = typeMap->getType(expression->e0, true);
     typeMap->setType(sh, e0type);
     auto type = IR::Type_Bits::get(h - l + 1);
-    auto result = new IR::Cast(expression->srcInfo, sh, type);
+    auto result = new IR::Cast(expression->srcInfo, type, sh);
     typeMap->setType(result, type);
     LOG1("Replaced " << expression << " with " << result);
     return result;
@@ -89,8 +89,8 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
               expression->right, type);
     unsigned sizeofb = type->to<IR::Type_Bits>()->size;
     unsigned sizeofresult = resulttype->to<IR::Type_Bits>()->size;
-    auto cast0 = new IR::Cast(expression->left->srcInfo, expression->left, resulttype);
-    auto cast1 = new IR::Cast(expression->right->srcInfo, expression->right, resulttype);
+    auto cast0 = new IR::Cast(expression->left->srcInfo, resulttype, expression->left);
+    auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, expression->right);
 
     auto sh = new IR::Shl(cast0->srcInfo, cast0, new IR::Constant(sizeofb));
     mpz_class m = Util::maskFromSlice(sizeofb, 0);

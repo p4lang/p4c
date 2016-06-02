@@ -70,12 +70,6 @@ const Type::Unknown *Type::Unknown::get() {
     return singleton;
 }
 
-StructField::StructField(Util::SourceInfo si, ID name, const Type *type)
-        : StructField(si, name, Annotations::empty, type) {}
-
-StructField::StructField(ID name, const Type *type)
-        : StructField(Util::SourceInfo(), name, Annotations::empty, type) {}
-
 const Type::Boolean *Type::Boolean::get() {
     static const Type::Boolean *singleton;
     if (!singleton)
@@ -133,9 +127,6 @@ const Type_MatchKind *Type_MatchKind::get() {
         singleton = (new Type_MatchKind(Util::SourceInfo()));
     return singleton;
 }
-
-Type_Struct::Type_Struct(cstring name, const IR::IndexedVector<IR::StructField> *fields)
-        : Type_Struct(Util::SourceInfo(), name, IR::Annotations::empty, fields) {}
 
 /**
  * Bind the parameters with the specified arguments.

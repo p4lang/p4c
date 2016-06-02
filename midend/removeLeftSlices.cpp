@@ -33,7 +33,7 @@ const IR::Node* RemoveLeftSlices::postorder(IR::AssignmentStatement* stat) {
     auto cmpl = new IR::Cmpl(ls->srcInfo, mask);
     auto and1 = new IR::BAnd(ls->srcInfo, ls->e0, cmpl);
 
-    auto cast = new IR::Cast(right->srcInfo, stat->right, type);
+    auto cast = new IR::Cast(right->srcInfo, type, stat->right);
     auto sh = new IR::Shl(right->srcInfo, cast, new IR::Constant(l));
     auto and2 = new IR::BAnd(right->srcInfo, sh, mask);
     auto rhs = new IR::BOr(right->srcInfo, and1, and2);
