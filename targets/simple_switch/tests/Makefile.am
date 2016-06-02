@@ -1,3 +1,5 @@
+SUBDIRS = . CLI_tests
+
 AM_CPPFLAGS += \
 -isystem $(top_srcdir)/third_party \
 -I$(srcdir)/.. \

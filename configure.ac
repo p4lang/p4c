@@ -166,9 +166,9 @@ AC_CONFIG_FILES([Makefile
 		targets/l2_switch/learn_client/Makefile
 		targets/simple_switch/Makefile
 		targets/simple_switch/tests/Makefile
+		targets/simple_switch/tests/CLI_tests/Makefile
 		tests/Makefile
 		tests/stress_tests/Makefile
-                tests/CLI_tests/Makefile
                 tools/Makefile
                 pdfixed/Makefile
                 pdfixed/include/Makefile])
@@ -177,8 +177,8 @@ AC_CONFIG_FILES([Makefile
 AC_CONFIG_FILES([tests/utils.cpp
                  src/bm_sim/version.cpp
                  mininet/stress_test_ipv4.py])
-AC_CONFIG_FILES([tests/CLI_tests/run_one_test.py],
-                [chmod +x tests/CLI_tests/run_one_test.py])
+AC_CONFIG_FILES([targets/simple_switch/tests/CLI_tests/run_one_test.py],
+                [chmod +x targets/simple_switch/tests/CLI_tests/run_one_test.py])
 
 AC_OUTPUT
 
