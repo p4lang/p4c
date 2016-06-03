@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <random>
 #include <thread>
 #include <future>
 #include <bm/bm_sim/tables.h>

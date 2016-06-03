@@ -46,7 +46,7 @@ packet_handler(int port_num, const char *buffer, int len, void *cookie) {
 SwitchWContexts::SwitchWContexts(size_t nb_cxts, bool enable_swap)
   : DevMgr(),
     nb_cxts(nb_cxts), contexts(nb_cxts), enable_swap(enable_swap),
-    phv_source(std::move(PHVSourceIface::make_phv_source(nb_cxts))) {
+    phv_source(PHVSourceIface::make_phv_source(nb_cxts)) {
   for (size_t i = 0; i < nb_cxts; i++) {
     contexts.at(i).set_cxt_id(i);
   }

@@ -20,6 +20,8 @@
 
 #include <bm/bm_sim/actions.h>
 
+#include <random>
+
 template <typename... Args>
 using ActionPrimitive = bm::ActionPrimitive<Args...>;
 

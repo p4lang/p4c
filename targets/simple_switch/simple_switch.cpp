@@ -254,7 +254,7 @@ SimpleSwitch::copy_ingress_pkt(
         .set(phv->get_field(p.header, p.offset));
   }
   phv_copy->get_field("standard_metadata.instance_type").set(copy_type);
-  return std::move(packet_copy);
+  return packet_copy;
 }
 
 void
