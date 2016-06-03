@@ -110,6 +110,8 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
       ("log-level,L", po::value<std::string>(),
        "Set log level, supported values are "
        "'trace', 'debug', 'info', 'warn', 'error', off'")
+      ("log-flush", "If used with '--log-file', the logger will flush to disk "
+       "after every log message")
       ("notifications-addr", po::value<std::string>(),
        "Specify the nanomsg address to use for notifications "
        "(e.g. learning, ageing, ...); "
@@ -241,6 +243,15 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
       exit(1);
     }
     log_level = levels_map[log_level_str];
+  }
+
+  if (vm.count("log-flush")) {
+    if (!vm.count("log-file")) {
+      std::cout << "Ignoring --log-flush option because --log-file "
+                << "not specified\n";
+    } else {
+      log_flush = true;
+    }
   }
 
   if (vm.count("interface")) {

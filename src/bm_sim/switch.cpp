@@ -145,7 +145,7 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
     Logger::set_logger_console();
 
   if (parser.file_logger != "")
-    Logger::set_logger_file(parser.file_logger);
+    Logger::set_logger_file(parser.file_logger, parser.log_flush);
 
   Logger::set_log_level(parser.log_level);
 

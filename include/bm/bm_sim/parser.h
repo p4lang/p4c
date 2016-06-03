@@ -75,9 +75,9 @@ struct ParserOpExtract : ParserOp {
   void operator()(Packet *pkt, const char *data,
                   size_t *bytes_parsed) const override {
     PHV *phv = pkt->get_phv();
-    BMELOG(parser_extract, *pkt, header);
-    BMLOG_DEBUG_PKT(*pkt, "Extracting header {}", header);
     Header &hdr = phv->get_header(header);
+    BMELOG(parser_extract, *pkt, header);
+    BMLOG_DEBUG_PKT(*pkt, "Extracting header '{}'", hdr.get_name());
     hdr.extract(data, *phv);
     *bytes_parsed += hdr.get_nbytes_packet();
   }

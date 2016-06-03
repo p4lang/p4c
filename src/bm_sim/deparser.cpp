@@ -20,6 +20,7 @@
 
 #include <bm/bm_sim/deparser.h>
 #include <bm/bm_sim/debugger.h>
+#include <bm/bm_sim/logger.h>
 
 namespace bm {
 
@@ -44,6 +45,7 @@ Deparser::deparse(Packet *pkt) const {
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
       DBG_CTR_DEPARSER | get_id());
+  BMLOG_DEBUG_PKT(*pkt, "Deparser '{}': start", get_name());
   update_checksums(pkt);
   char *data = pkt->prepend(get_headers_size(*phv));
   int bytes_parsed = 0;
@@ -53,6 +55,7 @@ Deparser::deparse(Packet *pkt) const {
     Header &header = phv->get_header(*it);
     if (header.is_valid()) {
       BMELOG(deparser_emit, *pkt, *it);
+      BMLOG_DEBUG_PKT(*pkt, "Deparsing header '{}'", header.get_name());
       header.deparse(data + bytes_parsed);
       bytes_parsed += header.get_nbytes_packet();
       // header.mark_invalid();
@@ -63,6 +66,7 @@ Deparser::deparse(Packet *pkt) const {
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
       DBG_CTR_EXIT(DBG_CTR_DEPARSER) | get_id());
+  BMLOG_DEBUG_PKT(*pkt, "Deparser '{}': end", get_name());
 }
 
 void
