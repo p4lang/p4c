@@ -547,6 +547,7 @@ class DebuggerAPI(cmd.Cmd):
         self.sok = nnpy.Socket(nnpy.AF_SP, nnpy.REQ)
         try:
             self.sok.connect(self.addr)
+            self.sok.setsockopt(nnpy.SOL_SOCKET, nnpy.RCVTIMEO, 500)
         except:
             print "Impossible to connect to provided socket (bad format?)"
             sys.exit(1)
@@ -599,7 +600,12 @@ class DebuggerAPI(cmd.Cmd):
     def send_attach(self):
         req = Msg_Attach(switch_id = 0, req_id = self.get_req_id())
         self.sok.send(req.generate())
-        msg = self.wait_for_msg()
+        try:
+            msg = self.wait_for_msg()
+        except AssertionError:
+            print "Unable to attach to the switch,",
+            print "maybe you need to run p4dbg as root?"
+            sys.exit(1)
         self.check_msg_CLS(msg, Msg_Status)
 
     def do_EOF(self, line):
@@ -662,6 +668,11 @@ class DebuggerAPI(cmd.Cmd):
                     break
                 except KeyboardInterrupt:
                     self.get_me_a_prompt = True
+                except AssertionError:
+                    # happens when there is a connection timeout
+                    print "Connection to the switch lost,",
+                    print "are you sure it is still running?"
+                    return
             if msg.type == MsgType.KEEP_ALIVE:
                 if self.get_me_a_prompt == True:
                     self.get_me_a_prompt = False
