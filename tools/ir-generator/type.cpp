@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "irclass.h"
 
+LookupScope::LookupScope(const IrNamespace *ns)
+: in((ns && ns->name) ? new LookupScope(ns->parent) : nullptr),
+  global(!ns || !ns->name), name(ns ? ns->name : nullptr) {}
+
 IrNamespace *LookupScope::resolve(const IrNamespace *in) const {
     if (global)
         return &IrNamespace::global;
@@ -32,7 +36,10 @@ IrNamespace *LookupScope::resolve(const IrNamespace *in) const {
     return nullptr;
 }
 
-IrClass *NamedType::resolve(const IrNamespace *in) const {
+NamedType::NamedType(const IrClass *cl)
+: lookup(new LookupScope(cl->containedIn)), name(cl->name), resolved(cl) {}
+
+const IrClass *NamedType::resolve(const IrNamespace *in) const {
     if (resolved) return resolved;
     if (!in) in = LookupScope().resolve(in);
     if (lookup) {
@@ -45,6 +52,10 @@ IrClass *NamedType::resolve(const IrNamespace *in) const {
         in = in->parent; }
     return nullptr;
 }
+
+NamedType NamedType::Bool("bool"), NamedType::Int("int"), NamedType::Void("void"),
+          NamedType::Cstring("cstring"), NamedType::Ostream("std::ostream"),
+          NamedType::Visitor("Visitor");
 
 cstring TemplateInstantiation::toString() const {
     std::string rv = base->toString().c_str();
@@ -59,5 +70,22 @@ cstring TemplateInstantiation::toString() const {
             rv += " *";
         sep = ", "; }
     rv += '>';
+    return rv;
+}
+
+cstring ReferenceType::toString() const {
+    cstring rv = base->toString();
+    if (isConst) rv += " const";
+    rv += " &";
+    return rv;
+}
+
+ReferenceType ReferenceType::OstreamRef(&NamedType::Ostream),
+              ReferenceType::VisitorRef(&NamedType::Visitor);
+
+cstring PointerType::toString() const {
+    cstring rv = base->toString();
+    if (isConst) rv += " const";
+    rv += " *";
     return rv;
 }

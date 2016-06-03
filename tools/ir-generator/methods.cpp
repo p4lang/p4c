@@ -17,10 +17,11 @@ limitations under the License.
 #include "irclass.h"
 #include "lib/algorithm.h"
 
-enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ONLY = 16 };
+enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ONLY = 16,
+             CONST = 32, CLASSREF = 64 };
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
-{ "operator==", { "bool", "(const %s &a) const", OVERRIDE,
+{ "operator==", { &NamedType::Bool, std::vector<const IrField *>{}, CONST + OVERRIDE + CLASSREF,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl << cl->indent << cl->indent << "return ";
@@ -35,7 +36,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         buf << ";" << std::endl;
         buf << cl->indent << "}";
         return buf.str(); } } },
-{ "visit_children", { "void", "(Visitor &v)", IN_IMPL + OVERRIDE,
+{ "visit_children", { &NamedType::Void, std::vector<const IrField *>{ new IrField(&ReferenceType::VisitorRef, "v") }, IN_IMPL + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         bool needed = false;
         std::stringstream buf;
@@ -53,7 +54,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             needed = true; }
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
-{ "validate", { "void", "() const", EXTEND + OVERRIDE,
+{ "validate", { &NamedType::Void, std::vector<const IrField *>{}, CONST + EXTEND + OVERRIDE,
     [](IrClass *cl, cstring body) -> cstring {
         bool needed = false;
         std::stringstream buf;
@@ -72,15 +73,15 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         if (body) buf << body;
         buf << " }";
         return needed ? buf.str() : cstring(); } } },
-{ "node_type_name", { "cstring", "() const", OVERRIDE,
+{ "node_type_name", { &NamedType::Cstring, std::vector<const IrField *>{}, CONST + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
-        buf << " { return \"" << cl->containedIn << cl->name << "\"; }";
+        buf << "{ return \"" << cl->containedIn << cl->name << "\"; }";
         return buf.str(); } } },
-{ "dbprint", { "void", "(std::ostream &out) const", OVERRIDE + CONCRETE_ONLY,
+{ "dbprint", { &NamedType::Void, std::vector<const IrField *>{ new IrField(&ReferenceType::OstreamRef, "out") }, CONST + OVERRIDE + CONCRETE_ONLY,
     [](IrClass *, cstring) -> cstring {
         return ";"; } } },
-{ "dump_fields", { "void", "(std::ostream &out) const", IN_IMPL + OVERRIDE,
+{ "dump_fields", { &NamedType::Void, std::vector<const IrField *>{ new IrField(&ReferenceType::OstreamRef, "out") }, CONST + IN_IMPL + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl;
@@ -95,7 +96,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 needed = true; } }
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
-{ "toString", { "cstring", "() const", OVERRIDE + NOT_DEFAULT,
+{ "toString", { &NamedType::Cstring, std::vector<const IrField *>{}, CONST + OVERRIDE + NOT_DEFAULT,
     [](IrClass *, cstring) -> cstring { return cstring(); } } },
 };
 
@@ -128,24 +129,29 @@ void IrClass::generateMethods() {
         for (auto *parent = getParent(); parent; parent = parent->getParent()) {
             auto eq_overload = new IrMethod("operator==", "{ return a == *this; }");
             eq_overload->isOverride = true;
-            eq_overload->rtype = "bool";
-            std::stringstream buf;
-            buf << "(const IR::" << parent->containedIn << parent->name << " &a) const";
-            eq_overload->args = buf.str();
+            eq_overload->rtype = &NamedType::Bool;
+            eq_overload->args.push_back(
+                new IrField(new ReferenceType(new NamedType(parent), true), "a"));
+            eq_overload->isConst = true;
             elements.push_back(eq_overload); } }
     IrMethod *ctor = nullptr;
     for (auto m : *getUserMethods()) {
         if (m->rtype) continue;
-        if (m->name == name && !m->args) {
+        if (m->name == name && m->args.empty()) {
             ctor = m;
             continue; }
         if (!IrMethod::Generate.count(m->name))
             throw Util::CompilationError("Unrecognized predefined method %1%", m);
         auto &info = IrMethod::Generate.at(m->name);
         m->rtype = info.rtype;
-        m->args = Util::printf_format(info.args, name.c_str());
+        m->args = info.args;
+        if (info.flags & CLASSREF)
+            m->args.push_back(
+                new IrField(new ReferenceType(new NamedType(this), true), "a"));
         if (info.flags & IN_IMPL)
             m->inImpl = true;
+        if (info.flags & CONST)
+            m->isConst = true;
         if (info.flags & OVERRIDE)
             m->isOverride = true; }
     if (ctor) elements.erase(find(elements, ctor));

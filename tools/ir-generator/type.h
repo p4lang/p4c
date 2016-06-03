@@ -24,7 +24,7 @@ limitations under the License.
 class IrClass;
 class IrNamespace;
 
-#define ALL_TYPES(M) M(NamedType) M(TemplateInstantiation)
+#define ALL_TYPES(M) M(NamedType) M(TemplateInstantiation) M(ReferenceType) M(PointerType)
 #define FORWARD_DECLARE(T) class T;
 ALL_TYPES(FORWARD_DECLARE)
 #undef FORWARD_DECLARE
@@ -32,9 +32,10 @@ ALL_TYPES(FORWARD_DECLARE)
 class Type : public Util::IHasSourceInfo {
     Util::SourceInfo            srcInfo;
  public:
+    Type() = default;
     explicit Type(Util::SourceInfo si) : srcInfo(si) {}
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
-    virtual IrClass *resolve(const IrNamespace *) const = 0;
+    virtual const IrClass *resolve(const IrNamespace *) const = 0;
     virtual bool isResolved() const = 0;
     virtual bool templateArgResolved() const = 0;
     virtual bool operator==(const Type &) const = 0;
@@ -51,6 +52,7 @@ struct LookupScope : public Util::IHasSourceInfo {
     cstring             name;
     LookupScope() : in(nullptr), global(true), name(nullptr) {}
     LookupScope(const LookupScope *in, cstring name) : in(in), global(false), name(name) {}
+    LookupScope(const IrNamespace *);
 
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override {
@@ -64,15 +66,17 @@ struct LookupScope : public Util::IHasSourceInfo {
 
 
 class NamedType : public Type {
-    const LookupScope   *lookup;
-    cstring             name;
-    mutable IrClass     *resolved = nullptr;
+    const LookupScope     *lookup;
+    cstring               name;
+    mutable const IrClass *resolved = nullptr;
  public:
     NamedType(Util::SourceInfo si, const LookupScope *l, cstring n)
     : Type(si), lookup(l), name(n) {}
+    explicit NamedType(cstring n) : lookup(nullptr), name(n) {}
+    explicit NamedType(const IrClass *);
 
     cstring toString() const override { return lookup ? lookup->toString() + name : name; }
-    IrClass *resolve(const IrNamespace *) const override;
+    const IrClass *resolve(const IrNamespace *) const override;
     bool isResolved() const override { return resolved != nullptr; }
     bool templateArgResolved() const override { return resolved != nullptr; }
     bool operator==(const Type &t) const override { return t == *this; }
@@ -80,6 +84,8 @@ class NamedType : public Type {
         if (resolved && resolved == t.resolved) return true;
         if (name != t.name) return false;
         return (lookup == t.lookup || (lookup && t.lookup && *lookup == *t.lookup)); }
+
+    static NamedType Bool, Int, Void, Cstring, Ostream, Visitor;
 };
 
 class TemplateInstantiation : public Type {
@@ -94,7 +100,7 @@ class TemplateInstantiation : public Type {
     bool templateArgResolved() const override {
         for (auto arg : args) if (arg->templateArgResolved()) return true;
         return base->templateArgResolved(); }
-    IrClass *resolve(const IrNamespace *ns) const override {
+    const IrClass *resolve(const IrNamespace *ns) const override {
         for (auto arg : args) arg->resolve(ns);
         return base->resolve(ns); }
     cstring toString() const override;
@@ -106,5 +112,37 @@ class TemplateInstantiation : public Type {
         return true; }
 };
 
+class ReferenceType : public Type {
+    const Type          *base;
+    bool                isConst;
+ public:
+    explicit ReferenceType(const Type *t, bool c = false) : base(t), isConst(c) {}
+    bool isResolved() const override { return base->isResolved(); }
+    bool templateArgResolved() const override { return base->templateArgResolved(); }
+    const IrClass *resolve(const IrNamespace *ns) const override {
+        base->resolve(ns);
+        return nullptr; }
+    cstring toString() const override;
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const ReferenceType &t) const override {
+        return isConst == t.isConst && *base == *t.base; }
+    static ReferenceType OstreamRef, VisitorRef;
+};
+
+class PointerType : public Type {
+    const Type          *base;
+    bool                isConst;
+ public:
+    explicit PointerType(const Type *t, bool c = false) : base(t), isConst(c) {}
+    bool isResolved() const override { return base->isResolved(); }
+    bool templateArgResolved() const override { return base->templateArgResolved(); }
+    const IrClass *resolve(const IrNamespace *ns) const override {
+        base->resolve(ns);
+        return nullptr; }
+    cstring toString() const override;
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const PointerType &t) const override {
+        return isConst == t.isConst && *base == *t.base; }
+};
 
 #endif /* _TOOLS_IR_GENERATOR_TYPE_H_ */

@@ -140,42 +140,52 @@ void EmitBlock::generate_impl(std::ostream &out) const {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+void IrMethod::generate_proto(std::ostream &out, bool fullname) const {
+    if (rtype)
+        out << rtype->toString() << " ";
+    if (fullname)
+        out << "IR::" << clss->containedIn << clss->name << "::";
+    out << name << "(";
+    for (unsigned i = 0; i < args.size(); ++i) {
+        if (i) out << ", ";
+        args[i]->generate(out, false); }
+    out << ")" << (isConst ? " const" : "");
+}
+
 void IrMethod::generate_hdr(std::ostream &out) const {
-    if (!args || !body) return;
+    if (!body) return;
     if (inImpl) {
         out << IrClass::indent;
-        if (rtype)
-            out << rtype << " ";
-        out << name << args << (isOverride ? " override" : "")
-            << ";" << std::endl;
-        if (name == "visit_children")
-            out << IrClass::indent << rtype << " " << name << args << " const"
-                << (isOverride ? " override" : "") << ";" << std::endl;
+        generate_proto(out, false);
+        if (isOverride) out << " override";
+        out << ";" << std::endl;
+        if (name == "visit_children") {
+            out << IrClass::indent;
+            generate_proto(out, false);
+            out << " const";
+            if (isOverride) out << " override";
+            out << ";" << std::endl; }
     } else {
         out << LineDirective(srcInfo) << IrClass::indent;
-        if (rtype)
-            out << rtype << " ";
-        out << name << args << (isOverride ? " override" : "") << " " << body << std::endl;
+        generate_proto(out, false);
+        if (isOverride) out << " override";
+        out << " " << body << std::endl;
         if (name == "node_type_name")
-            out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype
+            out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype->toString()
                 << " static_type_name() " << body << std::endl;
         if (srcInfo.isValid())
             out << LineDirective(); }
 }
 
 void IrMethod::generate_impl(std::ostream &out) const {
-    if (!inImpl || !args || !body) return;
+    if (!inImpl || !body) return;
     out << LineDirective(srcInfo);
-    if (rtype)
-        out << rtype << " ";
-    out << "IR::" << clss->containedIn << clss->name << "::" << name << args
-        << " " << body << std::endl;
+    generate_proto(out, true);
+    out << " " << body << std::endl;
     if (name == "visit_children") {
         out << LineDirective(srcInfo);
-        if (rtype)
-            out << rtype << " ";
-        out << "IR::" << clss->containedIn << clss->name << "::" << name << args << " const "
-            << body << std::endl; }
+        generate_proto(out, true);
+        out << " const " << body << std::endl; }
     if (srcInfo.isValid())
         out << LineDirective();
 }
@@ -294,22 +304,9 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     //     { validate(); }
     // }
     int optargs = 0;
-    std::stringstream args, body;
-
-    bool first = true;
-    args << "(";
-    for (auto a : arglist) {
-        if (a.first->optional && (skip_opt & (1U << optargs++)))
-            continue;
-        if (!first)
-            args << ",\n" << indent << indent;
-        a.first->generate(args, false);
-        first = false; }
-    args << ")";
-
+    std::stringstream body;
     body << ":\n" << indent << indent;
-    first = true;
-    optargs = 0;
+    bool first = true;
     // First print parent arguments
     body << getParent()->name << "(";
     auto it = arglist.begin();
@@ -334,9 +331,13 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
         body << '\n' << LineDirective(user->getSourceInfo()) << user->body << '\n'
              << LineDirective() << indent;
     body << " validate(); }";
-
     auto ctor = new IrMethod(name, body.str());
-    ctor->args = args.str();
+    optargs = 0;
+    for (auto a : arglist) {
+        if (a.first->optional && (skip_opt & (1U << optargs++)))
+            continue;
+        ctor->args.push_back(a.first); }
+
     if (kind != NodeKind::Concrete)
         ctor->access = IrElement::Protected;
     elements.push_back(ctor);

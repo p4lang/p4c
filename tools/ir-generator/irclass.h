@@ -30,6 +30,7 @@ limitations under the License.
 #include "type.h"
 
 class IrClass;
+class IrField;
 
 class IrNamespace {
     std::map<cstring, IrClass *>        classes;
@@ -79,19 +80,23 @@ inline std::ostream &operator<<(std::ostream &out, IrElement::access_t a) {
 
 class IrMethod : public IrElement {
  public:
-    const cstring name;
-    cstring rtype, args, body;
-    bool inImpl = false, isOverride = false;
+    const cstring                       name;
+    const Type                          *rtype = nullptr;
+    std::vector<const IrField *>        args;
+    cstring                             body;
+    bool inImpl = false, isConst = false, isOverride = false;
     IrMethod(Util::SourceInfo info, cstring name, cstring body)
     : IrElement(info), name(name), body(body) {}
     IrMethod(cstring name, cstring body) : name(name), body(body) {}
     cstring toString() const override { return name; }
 
+    void generate_proto(std::ostream &, bool) const;
     void generate_hdr(std::ostream &) const override;
     void generate_impl(std::ostream &) const override;
     struct info_t {
-        cstring rtype, args;
-        int flags;
+        const Type                      *rtype;
+        std::vector<const IrField *>    args;
+        int                             flags;
         std::function<cstring(IrClass *, cstring)>       create;
     };
     static const ordered_map<cstring, info_t> Generate;
@@ -112,6 +117,8 @@ class IrField : public IrElement {
     IrField(Util::SourceInfo info, const Type *type, cstring name, cstring init, int flags = 0)
     : IrElement(info), type(type), name(name), initializer(init),
       nullOK(flags & NullOK), optional(flags & Optional), isInline(flags & Inline) {}
+    IrField(const Type *type, cstring name, cstring init = cstring())
+    : type(type), name(name), initializer(init) {}
     void generate(std::ostream &out, bool asField) const;
     void generate_hdr(std::ostream &out) const override { generate(out, true); }
     void generate_impl(std::ostream &) const override {}
@@ -168,9 +175,8 @@ class EmitBlock : public IrElement {
 // Represents a C++ class for an IR node.
 class IrClass : public IrElement {
     std::vector<const IrClass *> parentClasses;
-
     std::vector<const Type *> parents;
-    std::vector<IrElement *> elements;
+    const IrClass *concreteParent;
 
     // each argument together with the class that has to receive it
     typedef std::vector<std::pair<const IrField*, const IrClass*>> ctor_args_t;
@@ -179,28 +185,27 @@ class IrClass : public IrElement {
     void generateMethods();
     bool shouldSkip(cstring feature) const;
 
-    const IrClass *concreteParent;
-
  public:
     const IrClass *getParent() const {
         if (concreteParent == nullptr && this != nodeClass)
             return IrClass::nodeClass;
         return concreteParent; }
 
+    std::vector<IrElement *> elements;
     IrNamespace *containedIn, local;
     const NodeKind kind;
     const cstring name;
-    bool needVector = false;  // using a Vector of this class
-    bool needIndexedVector = false;  // using an IndexedVecor of this class
-    bool needNameMap = false;  // using a NameMap of this class
-    bool needNodeMap = false;  // using a NodeMap of this class
+    mutable bool needVector = false;  // using a Vector of this class
+    mutable bool needIndexedVector = false;  // using an IndexedVecor of this class
+    mutable bool needNameMap = false;  // using a NameMap of this class
+    mutable bool needNodeMap = false;  // using a NodeMap of this class
 
     static const char* indent;
 
     IrClass(Util::SourceInfo info, IrNamespace *ns, NodeKind kind, cstring name,
             const std::initializer_list<const Type *> &parents,
             const std::initializer_list<IrElement *> &elements)
-    : IrElement(info), parents(parents), elements(elements), concreteParent(nullptr),
+    : IrElement(info), parents(parents), concreteParent(nullptr), elements(elements),
       containedIn(ns && ns->name ? ns : nullptr), local(containedIn, name), kind(kind), name(name) {
         IrNamespace::add_class(this); }
     IrClass(Util::SourceInfo info, IrNamespace *ns, NodeKind kind, cstring name,
@@ -213,7 +218,7 @@ class IrClass : public IrElement {
         IrNamespace::add_class(this); }
     IrClass(NodeKind kind, cstring name) : IrClass(Util::SourceInfo(), nullptr, kind, name) {}
     IrClass(NodeKind kind, cstring name, const std::initializer_list<IrElement *> &elements)
-    : elements(elements), concreteParent(nullptr), containedIn(nullptr), local(containedIn, name),
+    : concreteParent(nullptr), elements(elements), containedIn(nullptr), local(containedIn, name),
       kind(kind), name(name) {
         IrNamespace::add_class(this); }
 
