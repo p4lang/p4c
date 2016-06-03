@@ -80,6 +80,8 @@ class DebuggerDummy final : public DebuggerIface {
     (void) port;
   }
 
+  void config_change_() override { }
+
   std::string get_addr_() const override {
     return "";
   }
@@ -106,6 +108,8 @@ class DebuggerNN final : public DebuggerIface {
   void packet_in_(const PacketId &packet_id, int port) override;
 
   void packet_out_(const PacketId &packet_id, int port) override;
+
+  void config_change_() override;
 
   std::string get_addr_() const override {
     return addr;
@@ -402,6 +406,20 @@ DebuggerNN::packet_out_(const PacketId &packet_id, int port) {
   packet_ids_count_out(packet_id.packet_id);
 
   (void) port;
+}
+
+void
+DebuggerNN::config_change_() {
+  BMLOG_DEBUG("Dbg had been notified of config change");
+  UniqueLock lock(mutex);
+  // We treat a config change as any other request that needs to be sent to the
+  // client. While this call does not return the debugger still has access to
+  // all the old register values to we are fine if the client asks to see the
+  // value of a field.
+  wait_for_continue(lock);
+  reset_state();
+  // TODO(antonin): standardize those codes
+  send_rep_status(999, 0);
 }
 
 void

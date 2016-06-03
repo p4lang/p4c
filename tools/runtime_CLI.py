@@ -1398,7 +1398,7 @@ class RuntimeAPI(cmd.Cmd):
             except:
                 raise UIn_Error("Not a valid JSON file")
             self.client.bm_load_new_config(json_str)
-            load_json_str(filename)
+            load_json_str(json_str)
 
     @handle_bad_input
     def do_swap_configs(self, line):

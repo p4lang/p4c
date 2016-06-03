@@ -113,6 +113,10 @@ class DebuggerIface {
     packet_out_(packet_id, port);
   }
 
+  void config_change() {
+    config_change_();
+  }
+
   std::string get_addr() const {
     return get_addr_();
   }
@@ -132,6 +136,8 @@ class DebuggerIface {
   virtual void packet_in_(const PacketId &packet_id, int port) = 0;
 
   virtual void packet_out_(const PacketId &packet_id, int port) = 0;
+
+  virtual void config_change_() = 0;
 
   virtual std::string get_addr_() const = 0;
 };

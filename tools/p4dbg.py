@@ -523,11 +523,25 @@ def handle_bad_input(f):
             print "Error:", e
     return handle
 
+def prompt_yes_no(question, yes_default=True):
+    valid = {"yes": True, "y": True, "no": False, "n": False}
+    if yes_default:
+        prompt = "[Y/n]"
+    else:
+        prompt = "[y/N]"
+    while True:
+        print question, prompt,
+        choice = raw_input().lower()
+        if choice in valid:
+            return valid[choice]
+        else:
+            print "Please respond with 'yes' or 'no' (or 'y' or 'n')."
+
 class DebuggerAPI(cmd.Cmd):
     prompt = 'P4DBG: '
     intro = "Prototype for Debugger UI"
 
-    def __init__(self, addr, json_cfg, standard_client=None):
+    def __init__(self, addr, standard_client=None):
         cmd.Cmd.__init__(self)
         self.addr = addr
         self.sok = nnpy.Socket(nnpy.AF_SP, nnpy.REQ)
@@ -538,8 +552,30 @@ class DebuggerAPI(cmd.Cmd):
             sys.exit(1)
         self.req_id = 0
         self.switch_id = 0
-        self.break_packet_in = False
-        self.stop_packet_in = False
+
+        # creates new attributes
+        self.reset()
+
+        # creates new attributes
+        self.standard_client = standard_client
+        self.json_dependent_init()
+
+    def json_dependent_init(self):
+        self.json_cfg = utils.get_json_config(
+            standard_client=self.standard_client)
+        field_map.load_names(self.json_cfg)
+        obj_map.load_names(self.json_cfg)
+
+        if not with_runtime_CLI:
+            self.with_CLI = False
+        else:
+            self.with_CLI = True
+            self.init_runtime_CLI()
+
+    def reset(self):
+        self.wps = set()
+        self.bps = set()
+
         # right now we never remove elements from this
         self.skips = set()
         self.skips_all = set()
@@ -548,14 +584,6 @@ class DebuggerAPI(cmd.Cmd):
 
         self.get_me_a_prompt = False
         self.attached = False
-
-        self.json_cfg = json_cfg
-        self.standard_client = standard_client
-        if not with_runtime_CLI or not self.standard_client:
-            self.with_CLI = False
-        else:
-            self.with_CLI = True
-            self.init_runtime_CLI()
 
     def init_runtime_CLI(self):
         runtime_CLI.load_json_str(self.json_cfg)
@@ -573,8 +601,6 @@ class DebuggerAPI(cmd.Cmd):
         self.sok.send(req.generate())
         msg = self.wait_for_msg()
         self.check_msg_CLS(msg, Msg_Status)
-        self.wps = set()
-        self.bps = set()
 
     def do_EOF(self, line):
         print "Detaching from switch"
@@ -600,8 +626,7 @@ class DebuggerAPI(cmd.Cmd):
         self.sok.send(req.generate())
         msg = self.wait_for_msg()
         self.check_msg_CLS(msg, Msg_Status)
-        self.wps = set()
-        self.bps = set()
+        self.reset()
 
     def packet_id_str(self, packet_id, copy_id):
         return ".".join([str(packet_id), str(copy_id)])
@@ -616,6 +641,18 @@ class DebuggerAPI(cmd.Cmd):
                 "Wrong number of args, expected %d but got %d" % (n, len(args))
             )
 
+    def handle_config_change(self):
+        self.reset()
+        print "We have been notified that the JSON config has changed on the",
+        print "switch. The debugger state has therefore been reset."
+        print "You can request the new config and keep debugging,",
+        print "or we will exit."
+        v = prompt_yes_no("Do you want to request the new config?", True)
+        if v:
+           self.json_dependent_init()
+        else:
+            sys.exit(0)
+
     def continue_or_next(self, req, is_next):
         while True:
             self.sok.send(req.generate())
@@ -629,6 +666,10 @@ class DebuggerAPI(cmd.Cmd):
                 if self.get_me_a_prompt == True:
                     self.get_me_a_prompt = False
                     return
+            elif msg.type == MsgType.STATUS:
+                assert(msg.status == 999)  # config change
+                self.handle_config_change()
+                return
             else:
                 self.check_msg_CLS(msg, EventMsg)
                 if msg.packet_id in self.skips_all:
@@ -1090,12 +1131,7 @@ def main():
         print "The debugger is not enabled on the switch"
         sys.exit(1)
 
-    json_cfg = utils.get_json_config(standard_client=client)
-
-    field_map.load_names(json_cfg)
-    obj_map.load_names(json_cfg)
-
-    c = DebuggerAPI(socket_addr, json_cfg, standard_client=client)
+    c = DebuggerAPI(socket_addr, standard_client=client)
     try:
         c.attach()
         c.cmdloop()

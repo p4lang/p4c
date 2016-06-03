@@ -325,6 +325,7 @@ SwitchWContexts::do_swap() {
       phv_source->set_phv_factory(cxt_id, &cxt.get_phv_factory());
     rc &= swap_done;
   }
+  Debugger::get()->config_change();
   return rc;
 }
 
