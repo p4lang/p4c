@@ -76,6 +76,8 @@ class OptionsParser {
   bool console_logging{false};
   // by default everything is logged
   Logger::LogLevel log_level{Logger::LogLevel::TRACE};
+  // by default file logs are not "force-flushed" to disk
+  bool log_flush{false};
   std::string notifications_addr{};
   bool debugger{false};
   std::string debugger_addr{};

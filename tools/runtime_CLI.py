@@ -27,13 +27,7 @@ import sys
 import struct
 import json
 from functools import wraps
-import md5
-
-from thrift import Thrift
-from thrift.transport import TSocket
-from thrift.transport import TTransport
-from thrift.protocol import TBinaryProtocol
-from thrift.protocol import TMultiplexedProtocol
+import bmpy_utils as utils
 
 from bm_runtime.standard import Standard
 from bm_runtime.standard.ttypes import *
@@ -292,10 +286,6 @@ def load_json_str(json_str):
             elif j_calc["algo"] == "crc32_custom":
                 CUSTOM_CRC_CALCS[calc_name] = 32
 
-def load_json(json_src):
-    with open(json_src, 'r') as f:
-        load_json_str(f.read())
-
 class UIn_Error(Exception):
     def __init__(self, info=""):
         self.info = info
@@ -526,32 +516,7 @@ BmMatchParamValid.to_str = BmMatchParamValid_to_str
 
 # services is [(service_name, client_class), ...]
 def thrift_connect(thrift_ip, thrift_port, services):
-    # Make socket
-    transport = TSocket.TSocket(thrift_ip, thrift_port)
-    # Buffering is critical. Raw sockets are very slow
-    transport = TTransport.TBufferedTransport(transport)
-    # Wrap in a protocol
-    bprotocol = TBinaryProtocol.TBinaryProtocol(transport)
-
-    clients = []
-
-    for service_name, service_cls in services:
-        if service_name is None:
-            clients.append(None)
-            continue
-        protocol = TMultiplexedProtocol.TMultiplexedProtocol(bprotocol, service_name)
-        client = service_cls(protocol)
-        clients.append(client)
-
-    # Connect!
-    try:
-        transport.open()
-    except TTransport.TTransportException:
-        print "Could not connect to thrift client on port", thrift_port
-        print "Make sure the switch is running and that you have the right port"
-        sys.exit(1)
-
-    return clients
+    return utils.thrift_connect(thrift_ip, thrift_port, services)
 
 def handle_bad_input(f):
     @wraps(f)
@@ -1433,7 +1398,7 @@ class RuntimeAPI(cmd.Cmd):
             except:
                 raise UIn_Error("Not a valid JSON file")
             self.client.bm_load_new_config(json_str)
-        load_json(filename)
+            load_json_str(json_str)
 
     @handle_bad_input
     def do_swap_configs(self, line):
@@ -1740,8 +1705,7 @@ class RuntimeAPI(cmd.Cmd):
     @handle_bad_input
     def do_show_ports(self, line):
         "Shows the ports connected to the switch: show_ports"
-        args = line.split()
-        self.exactly_n_args(args, 0)
+        self.exactly_n_args(line.split(), 0)
         ports = self.client.bm_dev_mgr_show_ports()
         print "{:^10}{:^20}{:^10}{}".format(
             "port #", "iface name", "status", "extra info")
@@ -1752,13 +1716,21 @@ class RuntimeAPI(cmd.Cmd):
                 [k + "=" + v for k, v in port_info.extra.items()])
             print "{:^10}{:^20}{:^10}{}".format(
                 port_info.port_num, port_info.iface_name, status, extra_info)
-            # print port_info
+
+    @handle_bad_input
+    def do_switch_info(self, line):
+        "Show some basic info about the switch: switch_info"
+        self.exactly_n_args(line.split(), 0)
+        info = self.client.bm_mgmt_get_info()
+        attributes = [t[2] for t in info.thrift_spec[1:]]
+        out_attr_w = 5 + max(len(a) for a in attributes)
+        for a in attributes:
+            print "{:{w}}: {}".format(a, getattr(info, a), w=out_attr_w)
 
     @handle_bad_input
     def do_reset_state(self, line):
         "Reset all state in the switch (table entries, registers, ...), but P4 config is preserved: reset_state"
-        args = line.split()
-        self.exactly_n_args(args, 0)
+        self.exactly_n_args(line.split(), 0)
         self.client.bm_reset_state()
 
     @handle_bad_input
@@ -1819,45 +1791,8 @@ class RuntimeAPI(cmd.Cmd):
     def complete_set_crc32_parameters(self, text, line, start_index, end_index):
         return self._complete_crc(text, 32)
 
-def check_JSON_md5(client, json_src):
-    with open(json_src, 'r') as f:
-        m = md5.new()
-        for L in f:
-            m.update(L)
-        md5sum = m.digest()
-
-    try:
-        bm_md5sum = client.bm_get_config_md5()
-    except:
-        print "Error when requesting config md5 sum from switch"
-        sys.exit(1)
-
-    if md5sum != bm_md5sum:
-        print "**********"
-        print "WARNING: the JSON files loaded into the switch and the one you",
-        print "just provided to this CLI don't have the same md5 sum.",
-        print "Are you sure they describe the same program?"
-        bm_md5sum_str = "".join("{:02x}".format(ord(c)) for c in bm_md5sum)
-        md5sum_str = "".join("{:02x}".format(ord(c)) for c in md5sum)
-        print "{:<15}: {}".format("switch md5", bm_md5sum_str)
-        print "{:<15}: {}".format("CLI input md5", md5sum_str)
-        print "**********"
-
-def load_json_config(standard_client = None, json_path = None):
-    if json_path:
-        load_json(json_path)
-        if standard_client is not None:
-            check_JSON_md5(standard_client, json_path)
-    else:
-        assert(standard_client is not None)
-        try:
-            print "Obtaining JSON from switch..."
-            json_cfg = standard_client.bm_get_config()
-            print "Done"
-        except:
-            print "Error when requesting JSON config from switch"
-            sys.exit(1)
-        load_json_str(json_cfg)
+def load_json_config(standard_client=None, json_path=None):
+    load_json_str(utils.get_json_config(standard_client, json_path))
 
 def main():
     args = get_parser().parse_args()

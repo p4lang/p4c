@@ -39,10 +39,10 @@ Logger::set_logger_console() {
 }
 
 void
-Logger::set_logger_file(const std::string &filename) {
+Logger::set_logger_file(const std::string &filename, bool force_flush) {
   unset_logger();
   auto logger_ = spdlog::rotating_logger_mt("bmv2", filename,
-                                            1024 * 1024 * 5, 3);
+                                            1024 * 1024 * 5, 3, force_flush);
   logger = logger_.get();
   set_pattern();
   logger_->set_level(to_spd_level(LogLevel::DEBUG));

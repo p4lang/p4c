@@ -238,6 +238,14 @@ struct BmMtIndirectWsGroup {
  2:list<BmMemberHandle> mbr_handles
 }
 
+struct BmConfig {
+ 1:i32 device_id,
+ 2:i32 thrift_port,
+ 3:optional string notifications_socket,
+ 4:optional string elogger_socket,
+ 5:optional string debugger_socket
+}
+
 service Standard {
 	
   // table operations
@@ -543,6 +551,10 @@ service Standard {
 
   list<DevMgrPortInfo> bm_dev_mgr_show_ports(
   ) throws (1:InvalidDevMgrOperation ouch)
+
+  // bmv2 management functions
+
+  BmConfig bm_mgmt_get_info()
 
   // debug functions
 

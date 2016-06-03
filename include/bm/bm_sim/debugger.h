@@ -76,6 +76,9 @@ class Debugger {
     return debugger;
   }
 
+  // returns an empty string if debugger wasn't initialized
+  static std::string get_addr();
+
   static DebuggerIface *debugger;
 
   static constexpr PacketId dummy_PacketId{0u, 0u};
@@ -110,6 +113,14 @@ class DebuggerIface {
     packet_out_(packet_id, port);
   }
 
+  void config_change() {
+    config_change_();
+  }
+
+  std::string get_addr() const {
+    return get_addr_();
+  }
+
  protected:
   ~DebuggerIface() { }
 
@@ -125,6 +136,10 @@ class DebuggerIface {
   virtual void packet_in_(const PacketId &packet_id, int port) = 0;
 
   virtual void packet_out_(const PacketId &packet_id, int port) = 0;
+
+  virtual void config_change_() = 0;
+
+  virtual std::string get_addr_() const = 0;
 };
 
 #ifdef BMDEBUG_ON

@@ -86,8 +86,10 @@ class Logger {
   //! Log all messages to stdout.
   static void set_logger_console();
 
-  //! Log all messages to the given file.
-  static void set_logger_file(const std::string &filename);
+  //! Log all messages to the given file. If \p force_flush is true, the logger
+  //! will flush to disk after every log message.
+  static void set_logger_file(const std::string &filename,
+                              bool force_flush = false);
 
  private:
   static spdlog::logger *init_logger();

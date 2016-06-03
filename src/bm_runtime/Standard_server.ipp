@@ -836,6 +836,21 @@ public:
     }
   }
 
+  void bm_mgmt_get_info(BmConfig& _return) {
+    Logger::get()->trace("bm_mgmt_get_info");
+    _return.device_id = switch_->get_device_id();
+    _return.thrift_port = switch_->get_runtime_port();
+    _return.__set_notifications_socket(switch_->get_notifications_addr());
+    {
+      std::string s = switch_->get_event_logger_addr();
+      if (s != "") _return.__set_elogger_socket(s);
+    }
+    {
+      std::string s = switch_->get_debugger_addr();
+      if (s != "") _return.__set_debugger_socket(s);
+    }
+  }
+
   void bm_dump_table(std::string& _return, const int32_t cxt_id, const std::string& table_name) {
     Logger::get()->trace("dump_table");
     std::ostringstream stream;

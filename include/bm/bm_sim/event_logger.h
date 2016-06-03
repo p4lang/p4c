@@ -97,6 +97,8 @@ class EventLogger {
   void action_execute(const Packet &packet,
                       const ActionFn &action_fn, const ActionData &action_data);
 
+  void config_change();
+
   static EventLogger *get() {
     static EventLogger event_logger(TransportIface::make_dummy());
     return &event_logger;

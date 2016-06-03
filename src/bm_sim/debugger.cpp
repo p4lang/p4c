@@ -79,15 +79,21 @@ class DebuggerDummy final : public DebuggerIface {
     (void) packet_id;
     (void) port;
   }
+
+  void config_change_() override { }
+
+  std::string get_addr_() const override {
+    return "";
+  }
 };
 
 class DebuggerNN final : public DebuggerIface {
  public:
-  DebuggerNN();
+  explicit DebuggerNN(const std::string &addr);
 
   ~DebuggerNN();
 
-  void open(const std::string &addr);
+  void open();
 
  private:
   typedef std::unique_lock<std::mutex> UniqueLock;
@@ -102,6 +108,12 @@ class DebuggerNN final : public DebuggerIface {
   void packet_in_(const PacketId &packet_id, int port) override;
 
   void packet_out_(const PacketId &packet_id, int port) override;
+
+  void config_change_() override;
+
+  std::string get_addr_() const override {
+    return addr;
+  }
 
   void reset_state();
 
@@ -201,6 +213,8 @@ class DebuggerNN final : public DebuggerIface {
 
   int switch_id{0};
   uint64_t req_id{0};
+
+  std::string addr{};
 };
 
 // IMPLEMENTATION
@@ -244,7 +258,7 @@ typedef struct __attribute__((packed)) {
   uint64_t copy_id;
 } rep_event_msg_hdr_t;
 
-DebuggerNN::DebuggerNN() : s(AF_SP, NN_REP) {
+DebuggerNN::DebuggerNN(const std::string &addr) : s(AF_SP, NN_REP), addr(addr) {
   request_thread = std::thread(&DebuggerNN::request_in, this);
 }
 
@@ -257,7 +271,7 @@ DebuggerNN::~DebuggerNN() {
 }
 
 void
-DebuggerNN::open(const std::string &addr) {
+DebuggerNN::open() {
   s.bind(addr.c_str());
   int to = 100;
   s.setsockopt(NN_SOL_SOCKET, NN_RCVTIMEO, &to, sizeof (to));
@@ -392,6 +406,21 @@ DebuggerNN::packet_out_(const PacketId &packet_id, int port) {
   packet_ids_count_out(packet_id.packet_id);
 
   (void) port;
+}
+
+void
+DebuggerNN::config_change_() {
+  BMLOG_DEBUG("Dbg had been notified of config change");
+  UniqueLock lock(mutex);
+  if (!attached) return;
+  // We treat a config change as any other request that needs to be sent to the
+  // client. While this call does not return the debugger still has access to
+  // all the old register values to we are fine if the client asks to see the
+  // value of a field.
+  wait_for_continue(lock);
+  reset_state();
+  // TODO(antonin): standardize those codes
+  send_rep_status(999, 0);
 }
 
 void
@@ -889,9 +918,15 @@ Debugger::init_debugger(const std::string &addr) {
   DebuggerDummy *dummy = dynamic_cast<DebuggerDummy *>(debugger);
   assert(dummy);
   delete dummy;
-  DebuggerNN *debugger_nn = new DebuggerNN();
-  debugger_nn->open(addr);
+  DebuggerNN *debugger_nn = new DebuggerNN(addr);
+  debugger_nn->open();
   debugger = debugger_nn;
+}
+
+std::string
+Debugger::get_addr() {
+  if (!is_init) return "";
+  return debugger->get_addr();
 }
 
 }  // namespace bm
