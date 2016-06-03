@@ -412,6 +412,7 @@ void
 DebuggerNN::config_change_() {
   BMLOG_DEBUG("Dbg had been notified of config change");
   UniqueLock lock(mutex);
+  if (!attached) return;
   // We treat a config change as any other request that needs to be sent to the
   // client. While this call does not return the debugger still has access to
   // all the old register values to we are fine if the client asks to see the

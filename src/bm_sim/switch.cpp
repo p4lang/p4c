@@ -23,6 +23,7 @@
 #include <bm/bm_sim/options_parse.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/debugger.h>
+#include <bm/bm_sim/event_logger.h>
 
 #include <cassert>
 #include <fstream>
@@ -326,6 +327,7 @@ SwitchWContexts::do_swap() {
     rc &= swap_done;
   }
   Debugger::get()->config_change();
+  BMELOG(config_change);
   return rc;
 }
 

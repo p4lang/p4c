@@ -36,7 +36,8 @@ enum EventType {
   CHECKSUM_UPDATE,
   PIPELINE_START, PIPELINE_DONE,
   CONDITION_EVAL, TABLE_HIT, TABLE_MISS,
-  ACTION_EXECUTE
+  ACTION_EXECUTE,
+  CONFIG_CHANGE = 999
 };
 
 typedef struct __attribute__((packed)) {
@@ -261,6 +262,15 @@ EventLogger::action_execute(const Packet &packet,
   transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
   // to costly to send action data?
   (void) action_data;
+}
+
+void
+EventLogger::config_change() {
+  msg_hdr_t msg;
+  std::memset(&msg, 0, sizeof(msg));
+  msg.type = static_cast<int>(EventType::CONFIG_CHANGE);
+  msg.switch_id = device_id;
+  transport_instance->send(reinterpret_cast<char *>(&msg), sizeof(msg));
 }
 
 // TODO(antonin): move this?
