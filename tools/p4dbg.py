@@ -28,6 +28,7 @@ import argparse
 import cmd
 from collections import defaultdict
 from functools import wraps
+import bmpy_utils as utils
 
 try:
     import runtime_CLI
@@ -36,40 +37,43 @@ except:
     with_runtime_CLI = False
 
 parser = argparse.ArgumentParser(description='BM nanomsg debugger')
-parser.add_argument('--socket', help='Nanomsg socket to which to subscribe',
-                    action="store", default="ipc:///tmp/bmv2-0-debug.ipc")
+parser.add_argument('--socket', help='Nanomsg socket to which to subscribe [deprecated]',
+                    action="store", required=False)
 parser.add_argument('--thrift-port', help='Thrift server port for table updates',
                     type=int, action="store", default=9090)
 parser.add_argument('--thrift-ip', help='Thrift IP address for table updates',
                     type=str, action="store", default='localhost')
-parser.add_argument('--json', help='JSON description of P4 program',
-                    action="store", required=True)
+parser.add_argument('--json', help='JSON description of P4 program [deprecated]',
+                    action="store", required=False)
 
 args = parser.parse_args()
 
 class FieldMap:
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.fields = {}
         self.fields_rev = {}
 
-    def load_names(self, json_src):
+    def load_names(self, json_cfg):
+        self.reset()
         header_types_map = {}
-        with open(json_src, 'r') as f:
-            json_ = json.load(f)
+        json_ = json.loads(json_cfg)
 
-            header_types = json_["header_types"]
-            for h in header_types:
-                header_type = h["name"]
-                header_types_map[header_type] = h
+        header_types = json_["header_types"]
+        for h in header_types:
+            header_type = h["name"]
+            header_types_map[header_type] = h
 
-            header_instances = json_["headers"]
-            for h in header_instances:
-                header = h["name"]
-                header_type = header_types_map[h["header_type"]]
-                for idx, (f_name, f_nbits) in enumerate(header_type["fields"]):
-                    e = (".".join([header, f_name]), f_nbits)
-                    self.fields[(header_type["id"], idx)] = e
-                    self.fields_rev[e[0]] = (header_type["id"], idx)
+        header_instances = json_["headers"]
+        for h in header_instances:
+            header = h["name"]
+            header_type = header_types_map[h["header_type"]]
+            for idx, (f_name, f_nbits) in enumerate(header_type["fields"]):
+                e = (".".join([header, f_name]), f_nbits)
+                self.fields[(header_type["id"], idx)] = e
+                self.fields_rev[e[0]] = (header_type["id"], idx)
 
     def get_name(self, header_id, offset):
         return self.fields[(header_id, offset)][0]
@@ -135,6 +139,9 @@ class ObjectMap:
             self.names_rev[name] = id_
 
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.store = defaultdict(ObjectMap._Map)
         self.ids = {
             1: "parser",
@@ -149,38 +156,37 @@ class ObjectMap:
         for k, v in self.ids.items():
             self.ids_rev[v] = k
 
-    def load_names(self, json_src):
-        with open(json_src, 'r') as f:
-            json_ = json.load(f)
-            for type_ in {"parser", "deparser", "action", "pipeline"}:
-                _map = self.store[type_]
-                _map.pname = type_
-                json_list = json_[type_ + "s"]
-                for obj in json_list:
-                    _map.add_one(obj["id"], obj["name"])
+    def load_names(self, json_cfg):
+        json_ = json.loads(json_cfg)
+        for type_ in {"parser", "deparser", "action", "pipeline"}:
+            _map = self.store[type_]
+            _map.pname = type_
+            json_list = json_[type_ + "s"]
+            for obj in json_list:
+                _map.add_one(obj["id"], obj["name"])
 
-            # self.store["pipeline"].pname = "control"
-            self.store["pipeline"].pname = "pipeline"
+        # self.store["pipeline"].pname = "control"
+        self.store["pipeline"].pname = "pipeline"
 
-            for pipeline in json_["pipelines"]:
-                _map = self.store["table"]
-                _map.pname = "table"
-                tables = pipeline["tables"]
-                for obj in tables:
-                    _map.add_one(obj["id"], obj["name"])
+        for pipeline in json_["pipelines"]:
+            _map = self.store["table"]
+            _map.pname = "table"
+            tables = pipeline["tables"]
+            for obj in tables:
+                _map.add_one(obj["id"], obj["name"])
 
-                _map = self.store["condition"]
-                _map.pname = "condition"
-                conds = pipeline["conditionals"]
-                for obj in conds:
-                    _map.add_one(obj["id"], obj["name"])
+            _map = self.store["condition"]
+            _map.pname = "condition"
+            conds = pipeline["conditionals"]
+            for obj in conds:
+                _map.add_one(obj["id"], obj["name"])
 
-            for parser in json_["parsers"]:
-                _map = self.store["parse_state"]
-                _map.pname = "parse_state"
-                parse_states = parser["parse_states"]
-                for obj in parse_states:
-                    _map.add_one(obj["id"], obj["name"])
+        for parser in json_["parsers"]:
+            _map = self.store["parse_state"]
+            _map.pname = "parse_state"
+            parse_states = parser["parse_states"]
+            for obj in parse_states:
+                _map.add_one(obj["id"], obj["name"])
 
     def resolve_ctr(self, ctr):
         type_id = ctr >> 24
@@ -521,7 +527,7 @@ class DebuggerAPI(cmd.Cmd):
     prompt = 'P4DBG: '
     intro = "Prototype for Debugger UI"
 
-    def __init__(self, addr):
+    def __init__(self, addr, json_cfg, standard_client=None):
         cmd.Cmd.__init__(self)
         self.addr = addr
         self.sok = nnpy.Socket(nnpy.AF_SP, nnpy.REQ)
@@ -542,6 +548,19 @@ class DebuggerAPI(cmd.Cmd):
 
         self.get_me_a_prompt = False
         self.attached = False
+
+        self.json_cfg = json_cfg
+        self.standard_client = standard_client
+        if not with_runtime_CLI or not self.standard_client:
+            self.with_CLI = False
+        else:
+            self.with_CLI = True
+            self.init_runtime_CLI()
+
+    def init_runtime_CLI(self):
+        runtime_CLI.load_json_str(self.json_cfg)
+        self.runtime_CLI = runtime_CLI.RuntimeAPI(
+            runtime_CLI.PreType.None, self.standard_client, mc_client=None)
 
     def attach(self):
         print "Connecting to the switch..."
@@ -1009,30 +1028,21 @@ class DebuggerAPI(cmd.Cmd):
         assert(self.current_copy_id is not None)
         self.skips_all.add(self.current_packet_id)
 
-    # TODO(antonin): improve this a little bit
-    # e.g. avoid loading the JSON everytime
     def do_CLI(self, line):
         "Connects to the bmv2 using the CLI, e.g. CLI table_dump <table_name>"
-        if not with_runtime_CLI:
+        if not with_runtime_CLI or not self.standard_client:
             return UIn_Error("Runtime CLI not available")
-        services = runtime_CLI.RuntimeAPI.get_thrift_services(
-            runtime_CLI.PreType.None)
-        standard_client, mc_client = runtime_CLI.thrift_connect(
-            args.thrift_ip, args.thrift_port, services)
-        runtime_CLI.RuntimeAPI(
-            runtime_CLI.PreType.None, standard_client, mc_client).onecmd(line)
+        self.runtime_CLI.onecmd(line)
 
     def complete_CLI(self, text, line, start_index, end_index):
         args_ = line.split()
         args_cnt = len(args_)
-        runtime_CLI.load_json(args.json)
         if (args_cnt == 1 and not text) or\
            (args_cnt == 2 and text):
-            return runtime_CLI.RuntimeAPI(None, None, None).completenames(
-                " ".join(args_[1:]))
+            return self.runtime_CLI.completenames(" ".join(args_[1:]))
         else:
             complete = "complete_" + args_[1]
-            method = getattr(runtime_CLI.RuntimeAPI(None, None, None), complete)
+            method = getattr(self.runtime_CLI, complete)
             return method(text, " ".join(args_[1:]), start_index, end_index)
 
     def wait_for_msg(self):
@@ -1067,13 +1077,25 @@ for long_name, short_name in shortcuts.items():
         setattr(DebuggerAPI, "complete_" + short_name, f_complete)
 
 def main():
-    json_src = args.json
+    deprecated_args = ["socket", "json"]
+    for a in deprecated_args:
+        if getattr(args, a) is not None:
+            print "Command line option --{} is deprecated".format(a),
+            print "and will be ignored"
 
-    if json_src:
-        field_map.load_names(json_src)
-        obj_map.load_names(json_src)
+    client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
+    info = client.bm_mgmt_get_info()
+    socket_addr = info.debugger_socket
+    if socket_addr is None:
+        print "The debugger is not enabled on the switch"
+        sys.exit(1)
 
-    c = DebuggerAPI(args.socket)
+    json_cfg = utils.get_json_config(standard_client=client)
+
+    field_map.load_names(json_cfg)
+    obj_map.load_names(json_cfg)
+
+    c = DebuggerAPI(socket_addr, json_cfg, standard_client=client)
     try:
         c.attach()
         c.cmdloop()

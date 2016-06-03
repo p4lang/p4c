@@ -3,7 +3,8 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 python_PYTHON = \
 p4dbg.py \
 runtime_CLI.py \
-nanomsg_client.py
+nanomsg_client.py \
+bmpy_utils.py
 
 # See
 # http://www.gnu.org/software/autoconf/manual/autoconf-2.69/html_node/Installation-Directory-Variables.html

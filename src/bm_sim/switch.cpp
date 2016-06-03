@@ -54,6 +54,20 @@ SwitchWContexts::SwitchWContexts(size_t nb_cxts, bool enable_swap)
 
 LookupStructureFactory SwitchWContexts::default_lookup_factory {};
 
+std::string
+SwitchWContexts::get_debugger_addr() const {
+#ifdef BMDEBUG_ON
+  return Debugger::get_addr();
+#else
+  return "";
+#endif
+}
+
+std::string
+SwitchWContexts::get_event_logger_addr() const {
+  return event_logger_addr;
+}
+
 void
 SwitchWContexts::add_required_field(const std::string &header_name,
                                   const std::string &field_name) {
@@ -124,6 +138,8 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
     Debugger::init_debugger(parser.debugger_addr);
   }
 #endif
+
+  event_logger_addr = parser.event_logger_addr;
 
   if (parser.console_logging)
     Logger::set_logger_console();

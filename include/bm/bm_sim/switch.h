@@ -125,7 +125,19 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   virtual void reset_target_state() { }
 
   //! Returns the Thrift port used for the runtime RPC server.
-  int get_runtime_port() { return thrift_port; }
+  int get_runtime_port() const { return thrift_port; }
+
+  //! Returns the device id for this switch instance.
+  int get_device_id() const { return device_id; }
+
+  //! Returns the nanomsg IPC address for this switch.
+  std::string get_notifications_addr() const { return notifications_addr; }
+
+  // Returns empty string ("") if debugger disabled
+  std::string get_debugger_addr() const;
+
+  // Returns empty string ("") if event logger disabled
+  std::string get_event_logger_addr() const;
 
   //! Specify that the field is required for this target switch, i.e. the field
   //! needs to be defined in the input JSON. This function is purely meant as a
@@ -707,6 +719,8 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   std::string current_config{};
   mutable std::mutex config_mutex{};
+
+  std::string event_logger_addr{};
 };
 
 
