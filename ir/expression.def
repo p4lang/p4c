@@ -4,192 +4,122 @@
 
 abstract Operation_Unary : Operation {
     Expression expr;
+    Operation_Unary {
+        if (!srcInfo && expr) srcInfo = expr->srcInfo;
+        if (type->is<Type::Unknown>() && expr) type = expr->type; }
     precedence = DBPrint::Prec_Prefix;
-#emit
-    Operation_Unary(Util::SourceInfo si, const Type *t, const Expression *e)
-    : Operation(si, t), expr(e) {}
-    Operation_Unary(const Type *t, const Expression *e) : Operation(t), expr(e) {}
-    Operation_Unary(const Expression *e) : expr(e) {}
-#end
 }
 
 class Neg : Operation_Unary {
     stringOp = "-";
-#emit
-    Neg(const Expression *e) : Operation_Unary(e) {}
-#end
 }
 
 class Cmpl : Operation_Unary {
     stringOp = "~";
-#emit
-    Cmpl(const Expression *e) : Operation_Unary(e) {}
-#end
 }
 
 class LNot : Operation_Unary {
     stringOp = "!";
-#emit
-    LNot(const Expression *e) : Operation_Unary(e) {}
-#end
 }
 
 abstract Operation_Binary : Operation {
     Expression left;
     Expression right;
-#emit
-    Operation_Binary(const Expression *l, const Expression *r) : left(l), right(r) {}
-#end
+    Operation_Binary {
+        if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
+        if (type->is<Type::Unknown>() && left && right && left->type == right->type)
+            type = left->type; }
 }
 
 abstract Operation_Ternary : Operation {
     Expression e0;
     Expression e1;
     Expression e2;
-#emit
-    Operation_Ternary(const Expression *e0, const Expression *e1, const Expression *e2)
-    : e0(e0), e1(e1), e2(e2) {}
-#end
+    Operation_Ternary { if (!srcInfo && e0 && e2) srcInfo = e0->srcInfo + e2->srcInfo; }
 }
 
 abstract Operation_Relation : Operation_Binary {
-#emit
-    Operation_Relation(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
+    Operation_Relation { type = Type::Boolean::get(); }
 }
 
 class Mul : Operation_Binary {
     stringOp = "*";
     precedence = DBPrint::Prec_Mul;
-#emit
-    Mul(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 
 class Div : Operation_Binary {
     stringOp = "/";
     precedence = DBPrint::Prec_Div;
-#emit
-    Div(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class Mod : Operation_Binary {
     stringOp = "%";
     precedence = DBPrint::Prec_Mod;
-#emit
-    Mod(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class Add : Operation_Binary {
     stringOp = "+";
     precedence = DBPrint::Prec_Add;
-#emit
-    Add(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class Sub : Operation_Binary {
     stringOp = "-";
     precedence = DBPrint::Prec_Sub;
-#emit
-    Sub(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class Shl : Operation_Binary {
     stringOp = "<<";
     precedence = DBPrint::Prec_Shl;
-#emit
-    Shl(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class Shr : Operation_Binary {
     stringOp = ">>";
     precedence = DBPrint::Prec_Shr;
-#emit
-    Shr(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class Equ : Operation_Relation {
     stringOp = "==";
     precedence = DBPrint::Prec_Equ;
-#emit
-    Equ(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
-#end
 }
 class Neq : Operation_Relation {
     stringOp = "!=";
     precedence = DBPrint::Prec_Neq;
-#emit
-    Neq(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
-#end
 }
 class Lss : Operation_Relation {
     stringOp = "<";
     precedence = DBPrint::Prec_Lss;
-#emit
-    Lss(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
-#end
 }
 class Leq : Operation_Relation {
     stringOp = "<=";
     precedence = DBPrint::Prec_Leq;
-#emit
-    Leq(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
-#end
 }
 class Grt : Operation_Relation {
     stringOp = ">";
     precedence = DBPrint::Prec_Grt;
-#emit
-    Grt(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
-#end
 }
 class Geq : Operation_Relation {
     stringOp = ">=";
     precedence = DBPrint::Prec_Geq;
-#emit
-    Geq(const Expression *l, const Expression *r) : Operation_Relation(l, r) {}
-#end
 }
 class BAnd : Operation_Binary {
     stringOp = "&";
     precedence = DBPrint::Prec_BAnd;
-#emit
-    BAnd(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class BOr : Operation_Binary {
     stringOp = "|";
     precedence = DBPrint::Prec_BOr;
-#emit
-    BOr(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class BXor : Operation_Binary {
     stringOp = "^";
     precedence = DBPrint::Prec_BXor;
-#emit
-    BXor(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class LAnd : Operation_Binary {
     stringOp = "&&";
     precedence = DBPrint::Prec_LAnd;
-#emit
-    LAnd(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 class LOr : Operation_Binary {
     stringOp = "||";
     precedence = DBPrint::Prec_LOr;
-#emit
-    LOr(const Expression *l, const Expression *r) : Operation_Binary(l, r) {}
-#end
 }
 
 // This is an integer literal on arbitrary-precision.
 class Constant : Expression, CompileTimeValue {
     mpz_class value;
-    unsigned  base;  // base used when reading/writing
+    optional unsigned  base;  // base used when reading/writing
 #noconstructor
 #emit
     // if noWarning is true, no warning is emitted
@@ -241,13 +171,9 @@ class StringLiteral : Expression {
 
 class PathExpression : Expression {
     Path path;
-#noconstructor
+    PathExpression { if (!srcInfo && path) srcInfo = path->srcInfo; }
 #emit
-    explicit PathExpression(IR::ID id) :
-            Expression(id.srcInfo), path(new IR::Path(id)) {}
-    explicit PathExpression(const Path* path)
-        : Expression(path->srcInfo), path(path)
-    { CHECK_NULL(path); }
+    explicit PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
 #end
     toString{ return path->toString(); }
 }
@@ -257,8 +183,10 @@ class PathExpression : Expression {
 // The 'X' portion is a TypeNameExpression
 class TypeNameExpression : Expression {
     Type_Name typeName;
+    TypeNameExpression { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
 #emit
-    TypeNameExpression(ID id) : typeName(new IR::Type_Name(new IR::Path(id))) {}
+    TypeNameExpression(ID id) : Expression(id.srcInfo),
+                                typeName(new IR::Type_Name(new IR::Path(id))) {}
 #end
     dbprint{ Node::dbprint(out); out << typeName; }
     toString { return typeName->toString(); }
@@ -282,10 +210,6 @@ class Slice : Operation_Ternary {
 class Member : Operation_Unary {
     ID member;
 #emit
-    Member(Util::SourceInfo si, const Type *t, const Expression *b, cstring n)
-    : Operation_Unary(si, t, b), member(n) {}
-    Member(const Expression *b, ID n) : Operation_Unary(b), member(n) {}
-    Member(const Type *t, const Expression *b, cstring n) : Operation_Unary(t, b), member(n) {}
     virtual int offset_bits() const;
     int lsb() const;
     int msb() const;
@@ -324,12 +248,10 @@ class DefaultExpression : Expression {}
 class This : Expression {}  // experimental
 
 class Cast : Operation_Unary {
-    Type destType;
-#emit
-    // We set both type and destType.
-    Cast(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Expression *expression) :
-            Operation_Unary(srcInfo, type, expression), destType(type) {}
-#end
+    Type destType = type;
+    // These will generally always be the same, except when a cast to a type argument of
+    // a generic occurs.  Then at some point, the 'destType' will be specialized to a concrete
+    // type, and 'type' will only be updated later when type inferencing occurs
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
     toString{ return "cast"; }
@@ -352,16 +274,12 @@ class MethodCallExpression : Expression {
 }
 
 class ConstructorCallExpression : Expression {
-    Type               constructedType;
+    Type               constructedType = type;
     Vector<Expression> arguments;
-#noconstructor
-#emit
-    ConstructorCallExpression(Util::SourceInfo srcInfo, const Type* type,
-                              const Vector<Expression> *arguments) :
-            Expression(srcInfo), constructedType(type), arguments(arguments) {}
-#end
     toString{ return constructedType->toString(); }
-    validate{ arguments->check_null(); }
+    validate{ if (constructedType->is<Type_Unknown>())
+                  BUG("%1%: Cannot construct unknown type", this);
+              arguments->check_null(); }
 }
 
 // Represents a list of expressions separated by commas

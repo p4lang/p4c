@@ -54,6 +54,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 
 %union {
     YYSTYPE() {}
+    int                         i;
     cstring                     str;
     IrClass                     *irClass;
     IrElement                   *irElement;
@@ -72,21 +73,22 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
     }                           emit;
 }
 
-%token          ABSTRACT APPLY CLASS DBLCOL INLINE INTERFACE NULLOK OPERATOR
+%token          ABSTRACT APPLY CLASS DBLCOL INLINE INTERFACE NULLOK OPERATOR OPTIONAL
 %token<str>     BLOCK IDENTIFIER INTEGER NAMESPACE NO STRING
 %token<emit>    EMITBLOCK
 
 %type<type>                     type
-%type<irClass>                  irclass;
+%type<irClass>                  irclass
 %type<irElement>                part
 %type<irField>                  irField
+%type<i>                        fieldMod fieldMods
 %type<irMethod>                 methodBody
 %type<irNamespace>              scope
 %type<constFieldInit>           constFieldInit
 %type<kind>                     kind
 %type<elems>                    partList
 %type<types>                    parentList nonEmptyParentList type_args
-%type<str>                      expression optInitializer
+%type<str>                      name expression optInitializer
 %type<lookup>                   lookup_scope
 
 %error-verbose
@@ -189,16 +191,23 @@ methodBody
 
 irField
     : type IDENTIFIER optInitializer ';'
-      { $$ = new IrField(@2, $1, $2, $3, false, false); }
-    | NULLOK type IDENTIFIER optInitializer ';'
-      { $$ = new IrField(@3, $2, $3, $4, true, false); }
-    | INLINE type IDENTIFIER optInitializer ';'
-      { $$ = new IrField(@3, $2, $3, $4, false, true); }
+      { $$ = new IrField(@2, $1, $2, $3); }
+    | fieldMods type IDENTIFIER optInitializer ';'
+      { $$ = new IrField(@3, $2, $3, $4, $1); }
     ;
+
+fieldMod
+    : NULLOK { $$ = IrField::NullOK; }
+    | INLINE { $$ = IrField::Inline; }
+    | OPTIONAL { $$ = IrField::Optional; }
+    ;
+
+fieldMods : fieldMod | fieldMods fieldMod { $$ = $1 | $2; }
 
 optInitializer
     : /* empty */       { $$ = nullptr; }
     | '=' expression    { $$ = $2; }
+    | '=' BLOCK         { $$ = $2; }
     ;
 
 lookup_scope
@@ -222,9 +231,12 @@ constFieldInit
     ;
 
 expression
-    : IDENTIFIER | STRING | INTEGER
-    | IDENTIFIER DBLCOL IDENTIFIER      { $$ = $1 + "::" + $3; }
+    : name | STRING | INTEGER
+    | expression '(' ')'                { $$ = $1 + "()"; }
+    | expression '+' '+'                { $$ = $1 + "++"; }
     ;
+
+name: IDENTIFIER | name DBLCOL IDENTIFIER { $$ = $1 + "::" + $3; }
 
 /*****************************************************************************/
 
@@ -259,6 +271,9 @@ IrDefinitions *parse(char** files, int count) {
             yyrestart(fp);
             BEGIN(NORMAL);
             errors |= yyparse();
+            if (errors & 2) {
+                error("out of memory");
+                break; }
         } else {
             ::error("Cannot open file %s", files[i]);
             perror("");

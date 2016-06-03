@@ -22,8 +22,8 @@ const char* IrClass::indent = "    ";
 IrNamespace IrNamespace::global(nullptr, cstring(0));
 static const LookupScope utilScope(nullptr, "Util");
 static const NamedType srcInfoType(Util::SourceInfo(), &utilScope, "SourceInfo");
-IrField *IrField::srcInfoField = new IrField(Util::SourceInfo(), &srcInfoType,
-                                             "srcInfo", nullptr, false, true);
+IrField *IrField::srcInfoField = new IrField(Util::SourceInfo(), &srcInfoType, "srcInfo", nullptr,
+                                             IrField::Inline | IrField::Optional);
 IrClass *IrClass::ideclaration = new IrClass(NodeKind::Interface, "IDeclaration");
 IrClass *IrClass::nodeClass = new IrClass(NodeKind::Abstract, "Node", {IrField::srcInfoField});
 IrClass *IrClass::vectorClass = new IrClass(NodeKind::Template, "Vector");
@@ -141,15 +141,21 @@ void EmitBlock::generate_impl(std::ostream &out) const {
 ////////////////////////////////////////////////////////////////////////////////////
 
 void IrMethod::generate_hdr(std::ostream &out) const {
+    if (!args || !body) return;
     if (inImpl) {
-        out << IrClass::indent << rtype << " " << name << args << (isOverride ? " override" : "")
+        out << IrClass::indent;
+        if (rtype)
+            out << rtype << " ";
+        out << name << args << (isOverride ? " override" : "")
             << ";" << std::endl;
         if (name == "visit_children")
             out << IrClass::indent << rtype << " " << name << args << " const"
                 << (isOverride ? " override" : "") << ";" << std::endl;
     } else {
-        out << LineDirective(srcInfo) << IrClass::indent << rtype << " " << name << args
-            << (isOverride ? " override" : "") << " " << body << std::endl;
+        out << LineDirective(srcInfo) << IrClass::indent;
+        if (rtype)
+            out << rtype << " ";
+        out << name << args << (isOverride ? " override" : "") << " " << body << std::endl;
         if (name == "node_type_name")
             out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype
                 << " static_type_name() " << body << std::endl;
@@ -158,12 +164,18 @@ void IrMethod::generate_hdr(std::ostream &out) const {
 }
 
 void IrMethod::generate_impl(std::ostream &out) const {
-    if (!inImpl) return;
-    out << LineDirective(srcInfo) << rtype << " IR::" << clss->containedIn << clss->name
-        << "::" << name << args << " " << body << std::endl;
-    if (name == "visit_children")
-        out << LineDirective(srcInfo) << rtype << " IR::" << clss->containedIn << clss->name
-            << "::" << name << args << " const " << body << std::endl;
+    if (!inImpl || !args || !body) return;
+    out << LineDirective(srcInfo);
+    if (rtype)
+        out << rtype << " ";
+    out << "IR::" << clss->containedIn << clss->name << "::" << name << args
+        << " " << body << std::endl;
+    if (name == "visit_children") {
+        out << LineDirective(srcInfo);
+        if (rtype)
+            out << rtype << " ";
+        out << "IR::" << clss->containedIn << clss->name << "::" << name << args << " const "
+            << body << std::endl; }
     if (srcInfo.isValid())
         out << LineDirective();
 }
@@ -232,15 +244,15 @@ void IrClass::generate_hdr(std::ostream &out) const {
     }
 
     out << " {" << std::endl;
-    out << " public:" << std::endl;
 
-    for (auto e : elements)
-        e->generate_hdr(out);
+    auto access = IrElement::Private;
+    for (auto e : elements) {
+        if (e->access != access) out << (access = e->access);
+        e->generate_hdr(out); }
 
-    if (kind != NodeKind::Interface) {
+    if (kind != NodeKind::Interface)
         out << indent << "IRNODE" << (kind == NodeKind::Abstract ?  "_ABSTRACT" : "")
             << "_SUBCLASS(" << name << ")" << std::endl;
-        generateConstructor(out); }
 
     out << "};" << std::endl;
     for (auto p = containedIn; p && p->name; p = p->parent)
@@ -261,15 +273,16 @@ void IrClass::computeConstructorArguments(IrClass::ctor_args_t &args) const {
     else
         concreteParent->computeConstructorArguments(args);
 
-    for (auto e : elements)
-        if (e->is<IrField>())
-            args.emplace_back(e->to<IrField>(), this);
+    for (auto field : *getFields())
+        if (!field->initializer || field->optional)
+            args.emplace_back(field, this);
 
     if (args.size() == 0)
         BUG("No constructor arguments?");
 }
 
-void IrClass::generateConstructor(std::ostream &out) const {
+int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *user,
+                                 unsigned skip_opt) {
     // Constructor call has the following shape
     // class T : public P, public I1, public I2 {
     //     F1 f1;
@@ -280,49 +293,54 @@ void IrClass::generateConstructor(std::ostream &out) const {
     //         f2(f2)
     //     { validate(); }
     // }
+    int optargs = 0;
+    std::stringstream args, body;
 
-    if (shouldSkip("constructor")) return;
-    if (kind != NodeKind::Concrete)
-        out << " protected:" << std::endl;
-
-    std::vector<std::pair<const IrField*, const IrClass*>> args;
-    computeConstructorArguments(args);
-    out << indent << name << "(";
     bool first = true;
-    for (auto a : args) {
+    args << "(";
+    for (auto a : arglist) {
+        if (a.first->optional && (skip_opt & (1U << optargs++)))
+            continue;
         if (!first)
-            out << "," << std::endl << indent << indent;
-        a.first->generate(out, false);
-        first = false;
-    }
-    out << ") :" << std::endl;
+            args << ",\n" << indent << indent;
+        a.first->generate(args, false);
+        first = false; }
+    args << ")";
 
-    out << indent << indent;
+    body << ":\n" << indent << indent;
     first = true;
+    optargs = 0;
     // First print parent arguments
-    out << getParent()->name << "(";
-    auto it = args.begin();
-    for (; it != args.end(); ++it) {
+    body << getParent()->name << "(";
+    auto it = arglist.begin();
+    for (; it != arglist.end(); ++it) {
         if (it->second == this)
             break;  // end of parent arguments
-
+        if (it->first->optional && (skip_opt & (1U << optargs++)))
+            continue;
         if (!first)
-            out << ", ";
-        out << it->first->name;
-        first = false;
-    }
-
-    out << ")";
+            body << ", ";
+        body << it->first->name;
+        first = false; }
+    body << ")";
     // Print my fields
-    for (; it != args.end(); ++it) {
-        out << "," << std::endl << indent << indent;
-        out << it->first->name << "(" << it->first->name << ")";
-    }
+    for (; it != arglist.end(); ++it) {
+        if (it->first->optional && (skip_opt & (1U << optargs++)))
+            continue;
+        body << ",\n" << indent << indent << it->first->name << "(" << it->first->name << ")"; }
 
-    out << std::endl;
-    out << indent << "{ validate(); }" << std::endl;
+    body << std::endl << indent << "{";
+    if (user)
+        body << '\n' << LineDirective(user->getSourceInfo()) << user->body << '\n'
+             << LineDirective() << indent;
+    body << " validate(); }";
+
+    auto ctor = new IrMethod(name, body.str());
+    ctor->args = args.str();
     if (kind != NodeKind::Concrete)
-        out << " public:" << std::endl;
+        ctor->access = IrElement::Protected;
+    elements.push_back(ctor);
+    return optargs;
 }
 
 Util::Enumerator<IrField*>* IrClass::getFields() const {
@@ -380,7 +398,7 @@ void IrField::generate(std::ostream &out, bool asField) const {
         out << IrClass::indent;
 
     auto tmpl = dynamic_cast<const TemplateInstantiation *>(type);
-    const IrClass* cls = type->resolve(clss->containedIn);
+    const IrClass* cls = type->resolve(clss ? clss->containedIn : nullptr);
     if (cls) {
         if (tmpl) {
             if (cls->kind != NodeKind::Template)
@@ -389,7 +407,7 @@ void IrField::generate(std::ostream &out, bool asField) const {
             if (tmpl->args.size() < tmpl_args)
                 throw Util::CompilationError("Wrong number of args for template %1%", cls);
             for (unsigned i = 0; i < tmpl_args; i++) {
-                if (auto acl = tmpl->args[i]->resolve(clss->containedIn)) {
+                if (auto acl = tmpl->args[i]->resolve(clss ? clss->containedIn : nullptr)) {
                     if (cls == IrClass::vectorClass)
                         acl->needVector = true;
                     else if (cls == IrClass::indexedVectorClass)
@@ -413,11 +431,9 @@ void IrField::generate(std::ostream &out, bool asField) const {
         if (!initializer.isNullOrEmpty())
             out << " = " << initializer;
         else if (cls != nullptr && !isInline)
-            out << " = nullptr"; }
-    if (asField) {
+            out << " = nullptr";
         out << ";";
-        out << std::endl;
-    }
+        out << std::endl; }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

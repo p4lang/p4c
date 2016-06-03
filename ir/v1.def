@@ -33,7 +33,7 @@ inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
 abstract HeaderOrMetadata {
     IR::ID                      type_name;
     IR::ID                      name;
-    NullOK Type_StructLike      type;
+    NullOK Type_StructLike      type = nullptr;
 #emit
     HeaderOrMetadata(IR::ID n, const Type_StructLike *t) : type_name(t->name), name(n), type(t) {}
 #end
@@ -63,22 +63,11 @@ class Metadata : HeaderOrMetadata {
 }
 
 abstract HeaderRef : Expression {
-#noconstructor
-#emit
-    HeaderRef() {}
-    HeaderRef(Util::SourceInfo si) : Expression(si) {}
-    HeaderRef(Util::SourceInfo si, const Type_StructLike *ht) : Expression(si, ht) {}
-#end
 }
 
 class ConcreteHeaderRef : HeaderRef {
     HeaderOrMetadata    ref;
-#noconstructor
-#emit
-    ConcreteHeaderRef(Util::SourceInfo si, const HeaderOrMetadata *r)
-    : HeaderRef(si, r->type), ref(r) {}
-    ConcreteHeaderRef(const HeaderOrMetadata *r) : HeaderRef(Util::SourceInfo(), r->type), ref(r) {}
-#end
+    ConcreteHeaderRef { if (type->is<Type::Unknown>() && ref) type = ref->type; }
     toString{ return ref->name; }
     dbprint{ out << ref->name; }
 }
@@ -86,13 +75,7 @@ class ConcreteHeaderRef : HeaderRef {
 class HeaderStackItemRef : HeaderRef {
     Expression      base_;
     Expression      index_;
-#noconstructor
 #emit
-    HeaderStackItemRef(Util::SourceInfo si, const Type_Header *t, const Expression *b,
-                       const Expression *i)
-    : HeaderRef(si, t), base_(b), index_(i) {}
-    HeaderStackItemRef(Util::SourceInfo si, const Expression *b, const Expression *i)
-    : HeaderRef(si), base_(b), index_(i) {}
     const Expression* base() const { return base_; }
     const Expression* index() const { return index_; }
     void set_base(const Expression *b) { base_ = b; }
@@ -102,10 +85,6 @@ class HeaderStackItemRef : HeaderRef {
 
 class NamedRef : Expression {
     ID     name;
-#emit
-    explicit NamedRef(ID n) : name(n) {}
-    NamedRef(const Type *t, ID n) : Expression(t), name(n) {}
-#end
     toString{ return name; }
 }
 
@@ -113,10 +92,6 @@ class If :  Expression {
     Expression            pred;
     NullOK Vector<Expression>    ifTrue;
     NullOK Vector<Expression>    ifFalse;
-#emit
-    If(const Expression *p, const Vector<Expression> *T, const Vector<Expression> *F)
-            : pred(p), ifTrue(T), ifFalse(F) { validate(); }
-#end
     visit_children {
         v.visit(pred, "pred");
         auto &clone(v.flow_clone());
@@ -129,11 +104,9 @@ class If :  Expression {
 
 // an if condition tagged with a name so we can refer to it
 class NamedCond : If {
-    cstring  name;
+    cstring  name = unique_name();
 #emit
     static cstring unique_name();
-    NamedCond(const Expression *p, const Vector<Expression> *T,
-       const Vector<Expression> *F) : If(p, T, F), name(unique_name()) {}
     explicit NamedCond(const If &i) : If(i), name(unique_name()) {}
 #end
     operator== { return If::operator==(static_cast<const If &>(a)); }
@@ -142,14 +115,8 @@ class NamedCond : If {
 }
 
 class Apply : Expression {
-    ID                                  name;
-    inline NameMap<Vector<Expression>>  actions;
-#emit
-    Apply() = default;
-    explicit Apply(ID n) : name(n) {}
-    Apply(const Util::SourceInfo &si, ID n) : Expression(si), name(n) {}
-#end
-#noconstructor
+    optional ID                         name;
+    inline NameMap<Vector<Expression>>  actions = {};
     visit_children {
         auto &clone(v.flow_clone());
         // HACK -- temp sort actions into program (source) order, so that condition names are
@@ -169,11 +136,9 @@ class Apply : Expression {
 }
 
 class Primitive : Operation {
-    cstring name;
-    inline Vector<Expression> operands;
+    cstring                     name;
+    inline Vector<Expression>   operands = {};
 #emit
-    explicit Primitive(cstring n) : name(n) {}
-    Primitive(Util::SourceInfo si, cstring n) : Operation(si), name(n) {}
     Primitive(cstring n, const Vector<Expression> *l) : name(n) {
         if (l) for (auto e : *l) operands.push_back(e); }
     Primitive(Util::SourceInfo si, cstring n, const Vector<Expression> *l)
@@ -211,31 +176,21 @@ class Primitive : Operation {
 }
 
 class FieldList {
-    ID                          name;
-    bool                        payload;
-    inline Vector<Expression>   fields;
-#noconstructor
-#emit
-    FieldList() = default;
-#end
+    optional ID                 name;
+    bool                        payload = false;
+    inline Vector<Expression>   fields = {};
 }
 
 class FieldListCalculation {
-    ID                  name;
-    NameList            input;
-    ID                  algorithm;
-    int                 output_width;
-#noconstructor
-#emit
-    FieldListCalculation() = default;
-#end
+    optional ID         name;
+    NullOK NameList     input = nullptr;
+    ID                  algorithm = {};
+    int                 output_width = 0;
 }
 
 class CalculatedField {
-    Expression            field;
-#noconstructor
+    optional NullOK Expression  field;
 #emit
-    CalculatedField() = default;
     struct update_or_verify {
         Util::SourceInfo        srcInfo;
         bool                    update;
@@ -247,39 +202,31 @@ class CalculatedField {
             name == a.name && cond == a.cond; }
     };
 #end
-    vector<update_or_verify>    specs;
+    vector<update_or_verify>    specs = {};
     visit_children { v.visit(field, "field"); for (auto &s : specs) v.visit(s.cond, s.name.name); }
 }
 
 class CaseEntry {
-    vector<std::pair<Constant, Constant>>       values;
-    ID                                          action;
-#emit
-    CaseEntry() = default;
-#end
+    vector<std::pair<Constant, Constant>>       values = {};
+    optional ID                                 action;
 }
 
 class V1Parser {
-    ID                          name;
-    inline Vector<Expression>   stmts;
-    NullOK Vector<Expression>   select;
-    NullOK Vector<CaseEntry>    cases;
-    ID                          default_return;
-    ID                          parse_error;
-    bool                        drop;
-#noconstructor
-#emit
-    V1Parser() = default;
-#end
+    optional ID                 name;
+    inline Vector<Expression>   stmts = {};
+    NullOK Vector<Expression>   select = nullptr;
+    NullOK Vector<CaseEntry>    cases = nullptr;
+    ID                          default_return = {};
+    ID                          parse_error = {};
+    bool                        drop = false;
     toString { return node_type_name() + " " + name; }
 }
 
 class ParserException {}
 
 abstract Attached {
-    ID     name;
+    optional ID     name;
 #emit
-    Attached() = default;
     virtual const char *kind() const = 0;
     virtual bool indexed() const { return false; }
     Attached *clone_rename(const char *ext) const {
@@ -292,20 +239,18 @@ abstract Attached {
 }
 
 abstract Stateful : Attached {
-    ID          table;
-    bool        direct;
-    bool        saturating;
+    ID          table = {};
+    bool        direct = false;
+    bool        saturating = false;
     int         instance_count = -1;
 #emit
-    Stateful() = default;
     virtual bool indexed() const override { return !direct; }
 #end
 }
 
 abstract CounterOrMeter : Stateful {
-    CounterType   type;
+    CounterType   type = CounterType::NONE;
 #emit
-    CounterOrMeter() = default;
     void settype(cstring t) {
         if (t == "packets") type = CounterType::PACKETS;
         else if (t == "bytes") type = CounterType::BYTES;
@@ -318,28 +263,25 @@ class Counter : CounterOrMeter {
     int         max_width = -1;
     int         min_width = -1;
 #emit
-    Counter() = default;
     const char *kind() const override { return "stats"; }
 #end
 }
 
 class Meter : CounterOrMeter {
-    NullOK Expression   result;
-    NullOK Expression   pre_color;
-    ID                  implementation;
+    NullOK Expression   result = nullptr;
+    NullOK Expression   pre_color = nullptr;
+    ID                  implementation = {};
 #emit
-    Meter() = default;
     const char *kind() const override { return "meter"; }
 #end
 }
 
 class Register : Stateful {
-    ID          layout;
+    ID          layout = {};
     int         width = -1;
-    bool        signed_;
- /* bool        saturating; */
+    bool        signed_ = false;
+ /* bool        saturating = false; */
 #emit
-    Register() = default;
     const char *kind() const override { return "register"; }
 #end
 }
@@ -347,9 +289,8 @@ class Register : Stateful {
 class PrimitiveAction {}
 
 class NameList {
-    vector<ID>          names;
+    vector<ID>  names = {};
 #emit
-    NameList() = default;
     NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
 #end
 }
@@ -358,23 +299,18 @@ class ActionArg : Expression {
     ID             name;
     bool           read = false;
     bool           write = false;
-#emit
-    explicit ActionArg(const ID &n) : Expression(n.srcInfo), name(n) {}
-    ActionArg(Util::SourceInfo si, const Type *t, const ID &n) : Expression(si, t), name(n) {}
-#end
+    ActionArg { if (!srcInfo) srcInfo = name.srcInfo; }
     dbprint{ out << name; }
     toString{ return name.name; }
 }
 
 // Represents a P4 v1.0 action
 class ActionFunction {
-    ID                          name;
-    inline Vector<Primitive>    action;
-    vector<ActionArg>           args;
-#noconstructor
+    optional ID                 name;
+    inline Vector<Primitive>    action = {};
+    vector<ActionArg>           args = {};
 #emit
-    ActionFunction() = default;
-    const ActionArg     *arg(cstring n) const {
+    const ActionArg *arg(cstring n) const {
         for (auto a : args)
             if (a->name == n)
                 return a;
@@ -393,10 +329,9 @@ class ActionFunction {
 }
 
 class ActionProfile : Attached {
-    ID          selector;
-    vector<ID>  actions;
-    int         size;
-#noconstructor
+    ID          selector = {};
+    vector<ID>  actions = {};
+    int         size = 0;
 #emit
     const char *kind() const override { return "action_profile"; }
     bool indexed() const override { return true; }
@@ -404,30 +339,27 @@ class ActionProfile : Attached {
 }
 
 class ActionSelector : Attached {
-    ID key;
-    ID mode;
-    ID type;
-#noconstructor
+    ID key = {};
+    ID mode = {};
+    ID type = {};
 #emit
     const char *kind() const override { return "action_selector"; }
 #end
 }
 
 class V1Table {
-    ID                          name;
-    Vector<Expression>          reads = 0;
-    vector<ID>                  reads_types;
+    optional ID                 name;
+    NullOK Vector<Expression>   reads = 0;
+    vector<ID>                  reads_types = {};
     int                         min_size = 0;
     int                         max_size = 0;
     int                         size = 0;
-    ID                          action_profile;
-    vector<ID>                  actions;
-    ID                          default_action;
+    ID                          action_profile = {};
+    vector<ID>                  actions = {};
+    ID                          default_action = {};
     NullOK Vector<Expression>   default_action_args = 0;
-    inline TableProperties      properties;  // non-standard properties
-#noconstructor
+    inline TableProperties      properties = {};  // non-standard properties
 #emit
-    V1Table() = default;
     // inefficient add
     void addProperty(const TableProperty* prop) {
         auto props = new IndexedVector<TableProperty>(*properties.properties);

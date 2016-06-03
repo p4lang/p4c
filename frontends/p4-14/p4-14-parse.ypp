@@ -236,16 +236,16 @@ type: INT '<' INTEGER '>'
 
 header_instance:
       HEADER name name ';'
-      { global->add($3, new IR::Header(@1+@4, IR::ID(@2, $2), IR::ID(@3, $3), nullptr)); }
+      { global->add($3, new IR::Header(@1+@4, IR::ID(@2, $2), IR::ID(@3, $3))); }
     | HEADER name name '[' const_expression ']' ';'
       { global->add($3, new IR::HeaderStack(@1+@7, IR::ID(@2, $2), IR::ID(@3, $3),
-                                            nullptr, $5 ? $5->asLong() : 0));
+                                            $5 ? $5->asLong() : 0));
         $5 = nullptr; }
     ;
 
 metadata_instance:
       METADATA name name opt_metadata_initializer ';'
-      { global->add($3, new IR::Metadata(@1+@5, IR::ID(@2, $2), IR::ID(@3, $3), nullptr)); }
+      { global->add($3, new IR::Metadata(@1+@5, IR::ID(@2, $2), IR::ID(@3, $3))); }
     ;
 
 opt_metadata_initializer: /* epsilon */

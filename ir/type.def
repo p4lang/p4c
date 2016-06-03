@@ -95,8 +95,6 @@ class ParameterList : ISimpleNamespace {
     dbprint { Node::dbprint(out); out << "[" << size() << "]"; }
 #emit
     ParameterList() { parameters = new IndexedVector<Parameter>(); }
-    explicit ParameterList(const IndexedVector<Parameter>* parameters) :
-            parameters(parameters) {}
     Util::Enumerator<const Parameter*>* getEnumerator() const
     { return parameters->getEnumerator(); }
     Util::Enumerator<const IDeclaration*>* getDeclarations() const override
@@ -136,13 +134,11 @@ class Type_Var : Type_Declaration, ITypeVar {
 // type unification to discover the correct type for the constants
 // in some contexts.
 class Type_InfInt : Type, ITypeVar {
-#noconstructor
+    int declid = nextId++;
 #emit
  private:
     static int nextId;
  public:
-    int declid;
-    Type_InfInt() : Type(Util::SourceInfo()), declid(nextId++) {}
     cstring getVarName() const override { return "int_" + Util::toString(declid); }
 #end
     dbprint { Node::dbprint(out); out << declid; }
@@ -185,9 +181,7 @@ class Type_MatchKind : Type_Base {
 class TypeParameters : ISimpleNamespace {
     IndexedVector<Type_Var> parameters;
 #emit
-    TypeParameters() : Node(Util::SourceInfo()), parameters(new IndexedVector<Type_Var>()) {}
-    TypeParameters(Util::SourceInfo &si, IndexedVector<Type_Var> *p)
-            : Node(si), parameters(p) { CHECK_NULL(p); }
+    TypeParameters() : parameters(new IndexedVector<Type_Var>()) {}
     Util::Enumerator<const IDeclaration*>* getDeclarations() const override
     { return parameters->getDeclarations(); }
     bool empty() const { return parameters->empty(); }
@@ -213,18 +207,16 @@ class TypeParameters : ISimpleNamespace {
 }
 
 class StructField : Declaration, IAnnotated {
-    Annotations annotations;
+    optional Annotations annotations = Annotations::empty;
     Type        type;
 #nodbprint
 #emit
-    StructField(Util::SourceInfo si, ID name, const Type *type);
-    StructField(ID name, const Type *type);
     const Annotations* getAnnotations() const override { return annotations; }
 #end
 }
 
 abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
-    Annotations                annotations;
+    optional Annotations       annotations = Annotations::empty;
     IndexedVector<StructField> fields;
 #emit
     const Annotations* getAnnotations() const override { return annotations; }
@@ -248,9 +240,6 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
 class Type_Struct : Type_StructLike {
 #nodbprint
     toString{ return cstring("struct ") + externalName(); }
-#emit
-    Type_Struct(cstring name, const IndexedVector<StructField> *fields);
-#end
 }
 
 class Type_Union : Type_StructLike {
@@ -329,9 +318,6 @@ class Type_Control : Type_ArchBlock, IApply {
 // A type referred by name
 class Type_Name : Type {
 #emit
-    explicit Type_Name(const Path* path)
-        : Type(path->srcInfo), path(path)
-    { CHECK_NULL(path); }
     explicit Type_Name(IR::ID id)
         : Type(id.srcInfo), path(new IR::Path(id)) {}
 #end

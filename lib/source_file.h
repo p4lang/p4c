@@ -174,6 +174,7 @@ class SourceInfo final {
 
     bool isValid() const
     { return this->start.isValid(); }
+    explicit operator bool() const { return isValid(); }
 
     const SourcePosition& getStart() const
     { return this->start; }

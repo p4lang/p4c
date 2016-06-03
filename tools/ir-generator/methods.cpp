@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "irclass.h"
+#include "lib/algorithm.h"
 
 enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ONLY = 16 };
 
@@ -99,7 +100,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 };
 
 void IrClass::generateMethods() {
-    if (kind != NodeKind::Interface && this != nodeClass && this != vectorClass) {
+    if (this == nodeClass || this == vectorClass) return;
+    if (kind != NodeKind::Interface) {
         for (auto &def : IrMethod::Generate) {
             if (def.second.flags & NOT_DEFAULT)
                 continue;
@@ -131,8 +133,12 @@ void IrClass::generateMethods() {
             buf << "(const IR::" << parent->containedIn << parent->name << " &a) const";
             eq_overload->args = buf.str();
             elements.push_back(eq_overload); } }
+    IrMethod *ctor = nullptr;
     for (auto m : *getUserMethods()) {
         if (m->rtype) continue;
+        if (m->name == name && !m->args) {
+            ctor = m;
+            continue; }
         if (!IrMethod::Generate.count(m->name))
             throw Util::CompilationError("Unrecognized predefined method %1%", m);
         auto &info = IrMethod::Generate.at(m->name);
@@ -142,4 +148,11 @@ void IrClass::generateMethods() {
             m->inImpl = true;
         if (info.flags & OVERRIDE)
             m->isOverride = true; }
+    if (ctor) elements.erase(find(elements, ctor));
+    if (kind != NodeKind::Interface && !shouldSkip("constructor")) {
+        ctor_args_t args;
+        computeConstructorArguments(args);
+        int optargs = generateConstructor(args, ctor, 0);
+        for (unsigned skip = 1; skip < (1U << optargs); ++skip)
+            generateConstructor(args, ctor, skip); }
 }

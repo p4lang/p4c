@@ -67,7 +67,15 @@ class IrElement  : public Util::IHasSourceInfo {
     virtual void generate_hdr(std::ostream &out) const = 0;
     virtual void generate_impl(std::ostream &out) const = 0;
     void set_class(const IrClass *cl) { clss = cl; }
+
+    enum access_t { Public, Protected, Private } access = Public;
 };
+inline std::ostream &operator<<(std::ostream &out, IrElement::access_t a) {
+    switch(a) {
+    case IrElement::Public: out << " public:"; break;
+    case IrElement::Protected: out << " protected:"; break;
+    case IrElement::Private: out << " private:"; break; }
+    return out << std::endl; }
 
 class IrMethod : public IrElement {
  public:
@@ -94,15 +102,16 @@ class IrField : public IrElement {
     const Type *type;
     const cstring name;
     const cstring initializer;
-    const bool nullOK;
-    const bool isInline;
+    enum { NullOK = 1, Optional = 2, Inline = 4 };
+    const bool nullOK = false;
+    const bool optional = false;
+    const bool isInline = false;
 
     static IrField *srcInfoField;
 
-    IrField(Util::SourceInfo info, const Type *type, cstring name, cstring initializer,
-            bool nullOK, bool isInline)
-    : IrElement(info), type(type), name(name), initializer(initializer), nullOK(nullOK),
-      isInline(isInline) {}
+    IrField(Util::SourceInfo info, const Type *type, cstring name, cstring init, int flags = 0)
+    : IrElement(info), type(type), name(name), initializer(init),
+      nullOK(flags & NullOK), optional(flags & Optional), isInline(flags & Inline) {}
     void generate(std::ostream &out, bool asField) const;
     void generate_hdr(std::ostream &out) const override { generate(out, true); }
     void generate_impl(std::ostream &) const override {}
@@ -163,12 +172,11 @@ class IrClass : public IrElement {
     std::vector<const Type *> parents;
     std::vector<IrElement *> elements;
 
-    void generateConstructor(std::ostream &out) const;
-    void generateMethods();
-
     // each argument together with the class that has to receive it
     typedef std::vector<std::pair<const IrField*, const IrClass*>> ctor_args_t;
     void computeConstructorArguments(ctor_args_t &out) const;
+    int generateConstructor(const ctor_args_t &args, const IrMethod *user, unsigned skip_opt);
+    void generateMethods();
     bool shouldSkip(cstring feature) const;
 
     const IrClass *concreteParent;
@@ -231,12 +239,12 @@ class IrDefinitions {
     void resolve() {
         IrClass::nodeClass->resolve();
         IrClass::vectorClass->resolve();
-        for (auto c : elements) {
-            IrClass* cls = dynamic_cast<IrClass*>(c);
-            if (cls != nullptr)
-                cls->resolve();
-        }
-    }
+        IrClass::namemapClass->resolve();
+        IrClass::nodemapClass->resolve();
+        IrClass::ideclaration->resolve();
+        IrClass::indexedVectorClass->resolve();
+        for (auto cls : *getClasses())
+            cls->resolve(); }
     void generate(std::ostream &t, std::ostream &out, std::ostream &impl) const;
 };
 
