@@ -175,7 +175,7 @@ def process_file(options, argv):
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + basename                  # after parsing
-    referenceOutputs = "FrontEnd_11,FrontEnd_12,MidEnd_27_Evaluator"
+    referenceOutputs = "FrontEnd_13,FrontEnd_14,MidEnd_29_Evaluator"
     stderr = tmpdir + "/" + basename + "-stderr"
 
     if not os.path.isfile(options.p4filename):
@@ -200,17 +200,17 @@ def process_file(options, argv):
 
     # Canonicalize the generated file names
     lastFile = None
-    firstFile = file_name(tmpdir, base, "-FrontEnd_11_SimplifyControlFlow", ext)
+    firstFile = file_name(tmpdir, base, "-FrontEnd_13_SimplifyControlFlow", ext)
     if os.path.isfile(firstFile):
         newName = file_name(tmpdir, base, "-first", ext)
         os.rename(firstFile, newName)
         lastFile = newName
-    midFile = file_name(tmpdir, base, "-FrontEnd_12_RemoveAllUnusedDeclarations", ext)
+    midFile = file_name(tmpdir, base, "-FrontEnd_14_RemoveAllUnusedDeclarations", ext)
     if os.path.isfile(midFile):
         newName = file_name(tmpdir, base, "-frontend", ext)
         os.rename(midFile, newName)
         lastFile = newName
-    endFile = file_name(tmpdir, base, "-MidEnd_27_Evaluator", ext)
+    endFile = file_name(tmpdir, base, "-MidEnd_29_Evaluator", ext)
     if os.path.isfile(endFile):
         newName = file_name(tmpdir, base, "-midend", ext)
         os.rename(endFile, newName)

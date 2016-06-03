@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_SUBSTITUTIONVISITOR_H_
-#define _IR_SUBSTITUTIONVISITOR_H_
+#ifndef _P4_SUBSTITUTIONVISITOR_H_
+#define _P4_SUBSTITUTIONVISITOR_H_
 
 #include "ir/ir.h"
 #include "substitution.h"
 
-namespace IR {
+namespace P4 {
 
 /**
  * See if a variable occurs in a Type.
@@ -30,8 +30,6 @@ class TypeOccursVisitor : public Inspector {
  public:
     const IR::ITypeVar* toFind;
     bool occurs;
-
-    using Inspector::preorder;
 
     explicit TypeOccursVisitor(const IR::ITypeVar* toFind) : toFind(toFind), occurs(false)
     { setName("TypeOccurs"); }
@@ -44,10 +42,9 @@ class TypeVariableSubstitutionVisitor : public Transform {
  protected:
     const TypeVariableSubstitution* bindings;
  public:
-    explicit TypeVariableSubstitutionVisitor(TypeVariableSubstitution *bindings)
+    explicit TypeVariableSubstitutionVisitor(const TypeVariableSubstitution *bindings)
             : bindings(bindings) { setName("TypeVariableSubstitution"); }
 
-    using Transform::preorder;
     const IR::Node* preorder(IR::TypeParameters *tps) override;
     const IR::Node* preorder(IR::Type_Var* typeVariable) override;
     const IR::Node* preorder(IR::Type_InfInt* typeVariable) override;
@@ -58,12 +55,10 @@ class TypeNameSubstitutionVisitor : public Transform {
  protected:
     const TypeNameSubstitution* bindings;
  public:
-    explicit TypeNameSubstitutionVisitor(TypeNameSubstitution* bindings) :
+    explicit TypeNameSubstitutionVisitor(const TypeNameSubstitution* bindings) :
             bindings(bindings) { setName("TypeNameSubstitution"); }
-
-    using Transform::preorder;
     const IR::Node* preorder(IR::Type_Name* typeName) override;
 };
 
-}  // namespace IR
-#endif /* _IR_SUBSTITUTIONVISITOR_H_ */
+}  // namespace P4
+#endif /* _P4_SUBSTITUTIONVISITOR_H_ */

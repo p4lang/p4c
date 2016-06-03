@@ -16,9 +16,8 @@ limitations under the License.
 
 #include "typeChecker.h"
 #include "typeUnification.h"
-#include "ir/substitution.h"
+#include "frontends/p4/substitution.h"
 #include "typeConstraints.h"
-#include "ir/dump.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace P4 {
@@ -36,11 +35,11 @@ TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap,
 
 // Used to set the type of Constants after type inference
 class ConstantTypeSubstitution : public Transform {
-    IR::TypeVariableSubstitution* subst;
-    TypeMap                     * typeMap;
+    TypeVariableSubstitution* subst;
+    TypeMap                 * typeMap;
 
  public:
-    ConstantTypeSubstitution(IR::TypeVariableSubstitution* subst,
+    ConstantTypeSubstitution(TypeVariableSubstitution* subst,
                              TypeMap* typeMap) : subst(subst), typeMap(typeMap)
     { CHECK_NULL(subst); CHECK_NULL(typeMap); setName("ConstantTypeSubstitution"); }
     // Expressions may be created anew
@@ -126,13 +125,13 @@ void TypeInference::setType(const IR::Node* element, const IR::Type* type) {
         typeMap->setType(type, type);
 }
 
-IR::TypeVariableSubstitution* TypeInference::unify(const IR::Node* errorPosition,
-                                                   const IR::Type* destType,
-                                                   const IR::Type* srcType,
-                                                   bool reportErrors) const {
+TypeVariableSubstitution* TypeInference::unify(const IR::Node* errorPosition,
+                                               const IR::Type* destType,
+                                               const IR::Type* srcType,
+                                               bool reportErrors) const {
     CHECK_NULL(destType); CHECK_NULL(srcType);
     if (srcType == destType)
-        return new IR::TypeVariableSubstitution();
+        return new TypeVariableSubstitution();
 
     TypeConstraints constraints;
     constraints.addEqualityConstraint(destType, srcType);
@@ -191,6 +190,36 @@ const IR::TypeParameters* TypeInference::canonicalize(const IR::TypeParameters* 
         return new IR::TypeParameters(params->srcInfo, newparams);
     else
         return params;
+}
+
+/**
+ * Bind the parameters with the specified arguments.
+ * @param arguments      Arguments to bind to the type's typeParameters.
+ * @return               A type produced by specializing this generic type.
+ * For example, given a type
+ *
+ * void _<T>(T data)
+ *
+ * it can be specialized to
+ *
+ * void _<int<32>>(int<32> data);
+ */
+const IR::Type* TypeInference::specialize(const IR::IMayBeGenericType* type,
+                                          const IR::Vector<IR::Type>* arguments) const {
+    TypeVariableSubstitution* bindings = new TypeVariableSubstitution();
+    bool success = bindings->setBindings(type->getNode(), type->getTypeParameters(), arguments);
+    if (!success)
+        return nullptr;
+
+    LOG1("Translation map\n" << bindings);
+
+    TypeVariableSubstitutionVisitor tsv(bindings);
+    const IR::Node* result = type->getNode()->apply(tsv);
+    if (result == nullptr)
+        return nullptr;
+
+    LOG1("Specialized " << this << "\n\tinto " << result);
+    return result->to<IR::Type>();
 }
 
 // This function does not return nullptr,
@@ -368,7 +397,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             const IR::Type* canon = canonicalize(a);
             args->push_back(canon);
         }
-        auto specialized = gt->specialize(args);
+        auto specialized = specialize(gt, args);
 
         auto result = new IR::Type_SpecializedCanonical(
             type->srcInfo, baseCanon, args, specialized);
@@ -1228,7 +1257,7 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
         if (hst->sizeKnown()) {
             int size = hst->getSize();
             if (index >= size) {
-                typeError("Array index %1% larger than array size %2%",
+                typeError("Array index %1% larger or equal to array size %2%",
                           cst, hst->size);
                 return expression;
             }
@@ -1851,6 +1880,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             } else if (expression->member.name == IR::Type_Header::setValid ||
                        expression->member.name == IR::Type_Header::setInvalid) {
+                if (!isLeftValue(expression->expr))
+                    ::error("%1%: must be applied to a left-value", expression);
                 // Built-in method
                 auto params = new IR::IndexedVector<IR::Parameter>();
                 auto type = new IR::Type_Method(
@@ -2078,7 +2109,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             return expression;
 
         LOG1("Method type before specialization " << methodType);
-        IR::TypeVariableSubstitutionVisitor substVisitor(subst);
+        TypeVariableSubstitutionVisitor substVisitor(subst);
         auto specMethodType = methodType->apply(substVisitor);
 
         // construct types for the specMethodType, use a new typeChecker

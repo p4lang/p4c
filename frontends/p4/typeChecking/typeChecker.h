@@ -22,8 +22,8 @@ limitations under the License.
 #include "../../common/resolveReferences/referenceMap.h"
 #include "lib/exceptions.h"
 #include "lib/cstring.h"
-#include "ir/substitution.h"
-#include "ir/substitutionVisitor.h"
+#include "frontends/p4/substitution.h"
+#include "frontends/p4/substitutionVisitor.h"
 #include "typeConstraints.h"
 #include "typeUnification.h"
 
@@ -88,7 +88,7 @@ class TypeInference : public Transform {
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.
     // (visitDagOnce cannot take care of this).
     bool done() const;
-    IR::TypeVariableSubstitution* unify(
+    TypeVariableSubstitution* unify(
         const IR::Node* errorPosition, const IR::Type* destType,
         const IR::Type* srcType, bool reportErrors) const;
 
@@ -110,6 +110,8 @@ class TypeInference : public Transform {
     const IR::IndexedVector<IR::StructField>* canonicalizeFields(const IR::Type_StructLike* type);
     const IR::ParameterList* canonicalize(const IR::ParameterList* params);
     const IR::TypeParameters* canonicalize(const IR::TypeParameters* params);
+    const IR::Type* specialize(const IR::IMayBeGenericType* type,
+                               const IR::Vector<IR::Type>* arguments) const;
 
     // various helpers
     bool validateFields(const IR::Type_StructLike* type,

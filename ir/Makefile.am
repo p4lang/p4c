@@ -1,9 +1,9 @@
-# Copyright 2013-present Barefoot Networks, Inc. 
-# 
+# Copyright 2013-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -29,13 +29,8 @@ ir_SOURCES += \
 	ir/namemap.h \
 	ir/node.cpp \
 	ir/node.h \
-	ir/parameterSubstitution.h \
 	ir/pass_manager.cpp \
 	ir/pass_manager.h \
-	ir/substitution.cpp \
-	ir/substitution.h \
-	ir/substitutionVisitor.cpp \
-	ir/substitutionVisitor.h \
 	ir/type.cpp \
 	ir/v1.cpp \
 	ir/vector.h \

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ limitations under the License.
 #include "ebpfControl.h"
 #include "ebpfType.h"
 #include "ebpfTable.h"
-#include "../../frontends/common/typeMap.h"
-#include "../../frontends/p4/methodInstance.h"
-#include "ir/parameterSubstitution.h"
+#include "frontends/common/typeMap.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
 
 namespace EBPF {
 
@@ -106,7 +106,7 @@ void ControlBodyTranslationVisitor::processApply(const P4::ApplyMethod* method) 
     auto table = control->getTable(method->object->getName().name);
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
-    IR::ParameterSubstitution binding;
+    P4::ParameterSubstitution binding;
     binding.populate(method->getParameters(), method->expr->arguments);
     cstring actionVariableName = saveAction.at(saveAction.size() - 1);
     if (!actionVariableName.isNullOrEmpty()) {

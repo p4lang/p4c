@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ limitations under the License.
 namespace P4 {
 
 bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint,
-                            IR::TypeVariableSubstitution *subst, bool reportErrors) {
+                            TypeVariableSubstitution *subst, bool reportErrors) {
     if (isUnifiableTypeVariable(constraint->left)) {
         auto leftTv = constraint->left->to<IR::ITypeVar>();
         if (constraint->left == constraint->right)

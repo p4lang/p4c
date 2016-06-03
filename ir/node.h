@@ -115,7 +115,7 @@ template<typename T> const T* INode::to() const { return getNode()->to<T>(); }
 /* common things that ALL Node subclasses must define */
 #define IRNODE_SUBCLASS(T)                                              \
  public:                                                                \
-    T *clone() const override { auto r = new T(*this); r->id = Node::currentId++; return r; } \
+    T *clone() const override { return new T(*this); }                  \
     IRNODE_COMMON_SUBCLASS(T)
 
 #define IRNODE_ABSTRACT_SUBCLASS(T)                                     \

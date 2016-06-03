@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,30 +20,30 @@ limitations under the License.
 #define _EVALUATOR_SUBSTITUTEPARAMETERS_H_
 
 #include "ir/ir.h"
-#include "ir/substitutionVisitor.h"
-#include "../../common/resolveReferences/referenceMap.h"
-#include "ir/parameterSubstitution.h"
+#include "frontends/p4/substitutionVisitor.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/parameterSubstitution.h"
 
 namespace P4 {
 
-class SubstituteParameters : public IR::TypeVariableSubstitutionVisitor {
+class SubstituteParameters : public TypeVariableSubstitutionVisitor {
  protected:
     // When a PathExpression is cloned, it is added to the RefMap.
     // It is set to point to the same declaration as the original path.
     // But running this pass may change some declaration nodes - so
     // in general the refMap won't be up-to-date at the end.
     ReferenceMap*              refMap;  // input and output
-    IR::ParameterSubstitution* subst;   // input
+    const ParameterSubstitution* subst;   // input
  public:
     SubstituteParameters(ReferenceMap* refMap,
-                         IR::ParameterSubstitution* subst,
-                         IR::TypeVariableSubstitution* tvs) :
+                         const ParameterSubstitution* subst,
+                         const TypeVariableSubstitution* tvs) :
             TypeVariableSubstitutionVisitor(tvs), refMap(refMap), subst(subst) {
         CHECK_NULL(refMap); CHECK_NULL(subst); CHECK_NULL(tvs);
         visitDagOnce = true;
         setName("SubstituteParameters");
         LOG1("Will substitute " << std::endl << subst << bindings); }
-    using IR::TypeVariableSubstitutionVisitor::postorder;
+    using TypeVariableSubstitutionVisitor::postorder;
     const IR::Node* postorder(IR::PathExpression* expr) override;
     const IR::Node* postorder(IR::Type_Name* type) override;
 };

@@ -16,6 +16,8 @@ v12_frontend_SOURCES = \
 	frontends/p4/p4-parse.ypp \
 	frontends/p4/frontend.h \
 	frontends/p4/frontend.cpp \
+	frontends/p4/checkAliasing.h \
+	frontends/p4/checkAliasing.cpp \
 	frontends/p4/createBuiltins.h \
 	frontends/p4/createBuiltins.cpp \
 	frontends/p4/validateParsedProgram.h \
@@ -52,6 +54,10 @@ v12_frontend_SOURCES = \
 	frontends/p4/tableApply.cpp \
 	frontends/p4/simplify.h \
 	frontends/p4/simplify.cpp \
+	frontends/p4/substitution.cpp \
+	frontends/p4/substitution.h \
+	frontends/p4/substitutionVisitor.cpp \
+	frontends/p4/substitutionVisitor.h \
 	frontends/p4/fromv1.0/programStructure.h \
 	frontends/p4/fromv1.0/programStructure.cpp \
 	frontends/p4/fromv1.0/v1model.h \

@@ -27,6 +27,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const P4::Reference
     if (mt == nullptr && useExpressionType)
         mt = mce->method->type;
     CHECK_NULL(mt);
+    BUG_CHECK(mt->is<IR::Type_MethodBase>(), "%1%: expected a MethodBase type", mt);
     // mt can be Type_Method or Type_Action
     if (mce->method->is<IR::Member>()) {
         auto mem = mce->method->to<IR::Member>();
@@ -37,11 +38,11 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const P4::Reference
             if (mem->member == IR::Type_Header::setValid ||
                 mem->member == IR::Type_Header::setInvalid ||
                 mem->member == IR::Type_Header::isValid)
-                return new BuiltInMethod(mce, mem->member, mem->expr);
+                return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
         } else if (basetype->is<IR::Type_Stack>()) {
             if (mem->member == IR::Type_Stack::push_front ||
                 mem->member == IR::Type_Stack::pop_front)
-                return new BuiltInMethod(mce, mem->member, mem->expr);
+                return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
         } else if (mem->expr->is<IR::PathExpression>()) {
             auto pe = mem->expr->to<IR::PathExpression>();
             auto decl = refMap->getDeclaration(pe->path, true);
@@ -69,7 +70,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const P4::Reference
             CHECK_NULL(methodType);
             return new ExternFunction(mce, decl->to<IR::Method>(), methodType);
         } else if (decl->is<IR::P4Action>()) {
-            return new ActionCall(mce, decl->to<IR::P4Action>());
+            return new ActionCall(mce, decl->to<IR::P4Action>(), mt->to<IR::Type_Action>());
         }
     }
 
@@ -86,6 +87,13 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
     else if (t->is<IR::IContainer>())
         return new ContainerConstructorCall(cce, t->to<IR::IContainer>());
     BUG("Unexpected constructor call %1%", cce);
+}
+
+MethodCallDescription::MethodCallDescription(const IR::MethodCallExpression* mce,
+                                             const ReferenceMap* refMap, const TypeMap* typeMap) {
+    auto mi = MethodInstance::resolve(mce, refMap, typeMap);
+    auto params = mi->getParameters();
+    substitution.populate(params, mce->arguments);
 }
 
 }  // namespace P4

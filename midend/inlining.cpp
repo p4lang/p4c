@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -261,8 +261,8 @@ class Substitutions : public SubstituteParameters {
 
  public:
     Substitutions(P4::ReferenceMap* refMap,
-                  IR::ParameterSubstitution* subst,
-                  IR::TypeVariableSubstitution* tvs,
+                  P4::ParameterSubstitution* subst,
+                  P4::TypeVariableSubstitution* tvs,
                   const SymRenameMap* renameMap) :
             SubstituteParameters(refMap, subst, tvs),
             refMap(refMap), renameMap(renameMap)
@@ -348,8 +348,8 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
         } else {
             auto callee = workToDo->declToCallee[inst]->to<IR::P4Control>();
             CHECK_NULL(callee);
-            IR::ParameterSubstitution subst;
-            IR::TypeVariableSubstitution tvs;
+            ParameterSubstitution subst;
+            TypeVariableSubstitution tvs;
 
             // Substitute constructor parameters
             subst.populate(callee->getConstructorParameters(), inst->arguments);

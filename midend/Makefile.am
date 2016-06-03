@@ -31,6 +31,8 @@ midend_SOURCES = \
 	midend/moveConstructors.h \
 	midend/moveDeclarations.cpp \
 	midend/moveDeclarations.h \
+	midend/parserUnroll.h \
+	midend/parserUnroll.cpp \
 	midend/removeParameters.cpp \
 	midend/removeParameters.h \
 	midend/removeReturns.cpp \

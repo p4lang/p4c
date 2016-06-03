@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_SUBSTITUTION_H_
-#define _IR_SUBSTITUTION_H_
+#ifndef _P4_SUBSTITUTION_H_
+#define _P4_SUBSTITUTION_H_
 
 #include <map>
 #include <sstream>
@@ -23,7 +23,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/exceptions.h"
 
-namespace IR {
+namespace P4 {
 
 /* Maps objects of type T to types. */
 template <class T>
@@ -117,7 +117,6 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
 
 class TypeNameSubstitution final : public TypeSubstitution<const IR::Type_Name*> {};
 
-}  // namespace IR
+}  // namespace P4
 
-#endif /* _IR_SUBSTITUTION_H_ */
-
+#endif /* _P4_SUBSTITUTION_H_ */

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "typeUnification.h"
 #include "typeConstraints.h"
-#include "ir/substitution.h"
+#include "frontends/p4/substitution.h"
 
 namespace P4 {
 
@@ -105,7 +105,7 @@ class TypeConstraints final {
      * @return           True on success.
      */
     bool solve(const IR::Node* root, IConstraint* constraint,
-               IR::TypeVariableSubstitution *subst, bool reportErrors) {
+               TypeVariableSubstitution *subst, bool reportErrors) {
         auto eq = dynamic_cast<EqualityConstraint*>(constraint);
         if (eq != nullptr)
             return solve(root, eq, subst, reportErrors);
@@ -113,12 +113,12 @@ class TypeConstraints final {
     }
 
     bool solve(const IR::Node* root, EqualityConstraint *constraint,
-               IR::TypeVariableSubstitution *subst, bool reportErrors);
+               TypeVariableSubstitution *subst, bool reportErrors);
 
-    IR::TypeVariableSubstitution* solve(const IR::Node* root, bool reportErrors) {
+    TypeVariableSubstitution* solve(const IR::Node* root, bool reportErrors) {
         LOG1("Solving constraints:\n" << *this);
 
-        IR::TypeVariableSubstitution *tvs = new IR::TypeVariableSubstitution();
+        auto tvs = new TypeVariableSubstitution();
         while (!constraints.empty()) {
             auto last = constraints.back();
             constraints.pop_back();

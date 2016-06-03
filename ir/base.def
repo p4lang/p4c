@@ -24,7 +24,6 @@ interface IMayBeGenericType {
 #emit
     virtual const TypeParameters* getTypeParameters() const = 0;
     const Type* toType() const { return getNode()->to<Type>(); }
-    const Type* specialize(const Vector<Type>* arguments) const;
 #end
 }
 

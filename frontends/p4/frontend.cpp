@@ -31,6 +31,7 @@ limitations under the License.
 #include "createBuiltins.h"
 #include "../common/constantFolding.h"
 #include "unusedDeclarations.h"
+#include "checkAliasing.h"
 #include "typeChecking/typeChecker.h"
 #include "evaluator/evaluator.h"
 #include "strengthReduction.h"
@@ -67,6 +68,8 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
         new P4::ResolveReferences(&refMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
+        new P4::CheckAliasing(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ limitations under the License.
 #include "substitution.h"
 #include "substitutionVisitor.h"
 
-namespace IR {
+namespace P4 {
 bool TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* substitution) {
     LOG1("Adding " << var->toString() << "->" << substitution->toString() << "to substitution");
 
@@ -86,4 +86,4 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* root,
     return true;
 }
 
-}  // namespace IR
+}  // namespace P4

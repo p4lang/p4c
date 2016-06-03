@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,12 +49,12 @@ const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
         } else {
             auto callee = workToDo->declToCallee[inst];
             CHECK_NULL(callee);
-            IR::ParameterSubstitution subst;
+            P4::ParameterSubstitution subst;
             // This is correct only if the arguments have no side-effects.
             // There should be a prior pass to ensure this fact.  This is
             // true for programs that come out of the P4 v1.0 front-end.
             subst.populate(callee->getConstructorParameters(), inst->arguments);
-            IR::TypeVariableSubstitution tvs;
+            P4::TypeVariableSubstitution tvs;
             if (inst->type->is<IR::Type_Specialized>()) {
                 auto spec = inst->type->to<IR::Type_Specialized>();
                 tvs.setBindings(callee->getNode(), callee->getTypeParameters(), spec->arguments);
@@ -126,9 +126,9 @@ const IR::Node* SimpleActionsInliner::preorder(IR::MethodCallStatement* statemen
         return statement;
 
     LOG1("Inlining: " << toInline);
-    IR::ParameterSubstitution subst;
+    P4::ParameterSubstitution subst;
     subst.populate(callee->parameters, statement->methodCall->arguments);
-    IR::TypeVariableSubstitution tvs;  // empty
+    P4::TypeVariableSubstitution tvs;  // empty
     P4::SubstituteParameters sp(refMap, &subst, &tvs);
     auto clone = callee->apply(sp);
     if (::errorCount() > 0)

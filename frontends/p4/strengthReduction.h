@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ limitations under the License.
 #include "../common/resolveReferences/referenceMap.h"
 #include "lib/exceptions.h"
 #include "lib/cstring.h"
-#include "ir/substitution.h"
-#include "ir/substitutionVisitor.h"
+#include "frontends/p4/substitution.h"
+#include "frontends/p4/substitutionVisitor.h"
 
 namespace P4 {
 

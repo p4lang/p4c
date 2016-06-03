@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@ limitations under the License.
 */
 
 #include "ir.h"
-#include "substitution.h"
-#include "substitutionVisitor.h"
 
 namespace IR {
 
@@ -136,35 +134,6 @@ const Type_MatchKind *Type_MatchKind::get() {
 
 Type_Struct::Type_Struct(cstring name, const IR::IndexedVector<IR::StructField> *fields)
         : Type_Struct(Util::SourceInfo(), name, IR::Annotations::empty, fields) {}
-
-/**
- * Bind the parameters with the specified arguments.
- * @param arguments      Arguments to bind to the type's typeParameters.
- * @return               A type produced by specializing this generic type.
- * For example, given a type
- *
- * void _<T>(T data)
- *
- * it can be specialized to
- *
- * void _<int<32>>(int<32> data);
- */
-const IR::Type* IMayBeGenericType::specialize(const IR::Vector<IR::Type>* arguments) const {
-    TypeVariableSubstitution* bindings = new TypeVariableSubstitution();
-    bool success = bindings->setBindings(getNode(), getTypeParameters(), arguments);
-    if (!success)
-        return nullptr;
-
-    LOG1("Translation map\n" << bindings);
-
-    TypeVariableSubstitutionVisitor tsv(bindings);
-    const IR::Node* result = getNode()->apply(tsv);
-    if (result == nullptr)
-        return nullptr;
-
-    LOG1("Specialized " << this << "\n\tinto " << result);
-    return result->to<IR::Type>();
-}
 
 bool Type_ActionEnum::contains(cstring name) const {
     for (auto a : *actionList->actionList) {
