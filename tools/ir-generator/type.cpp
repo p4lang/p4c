@@ -89,3 +89,9 @@ cstring PointerType::toString() const {
     rv += " *";
     return rv;
 }
+
+cstring ArrayType::declSuffix() const {
+    char buf[16];
+    sprintf(buf, "[%d]", size);
+    return buf;
+}

@@ -22,7 +22,7 @@ static YYLTYPE          block_start;
 %option stack
 
 %x COMMENT EMIT CODEBLOCK
-%s NORMAL PARSE_BRACKET
+%s NORMAL PARSE_BRACKET PARSE_CTOR_INIT
 
 %%
 
@@ -54,33 +54,47 @@ static YYLTYPE          block_start;
 "::"            { return DBLCOL; }
 "abstract"      { return ABSTRACT; }
 "class"         { return CLASS; }
+"const"         { return CONST; }
+"default"       { return DEFAULT; }
+"delete"        { return DELETE; }
 "inline"        { return INLINE; }
 "interface"     { return INTERFACE; }
 "namespace"     { return NAMESPACE; }
+"new"           { return NEW; }
 "operator"      { return OPERATOR; }
 "optional"      { return OPTIONAL; }
+"private"       { return PRIVATE; }
+"protected"     { return PROTECTED; }
+"public"        { return PUBLIC; }
+"static"        { return STATIC; }
+"virtual"       { return VIRTUAL; }
 "NullOK"        { return NULLOK; }
-"#apply"        { yylval.str = yytext; return APPLY; }
+"#apply"        { return APPLY; }
 "#no"[a-z]*     { yylval.str = yytext+3; return NO; }
 "#nooperator==" { yylval.str = yytext+3; return NO; }
+"0"             { yylval.str = yytext; return ZERO; }
 -?[0-9]+        { yylval.str = yytext; return INTEGER; }
 
 [A-Za-z_][A-Za-z0-9_]*  { yylval.str = yytext; return IDENTIFIER; }
 \"(\\.|[^\\"])*\"       { yylval.str = yytext; return STRING; }
 <PARSE_BRACKET>"{"      { BEGIN(NORMAL); return *yytext; }
 
-"{"             { block_buffer = yytext;
-                  block_depth = 1;
-                  block_start = yylloc;
-                  yy_push_state(CODEBLOCK); }
-<CODEBLOCK>"}"  { block_buffer += *yytext;
-                  if (!--block_depth) {
-                      yy_pop_state();
-                      yylval.str = block_buffer;
-                      yylloc = block_start + yylloc;
-                      return BLOCK; } }
-<CODEBLOCK>"{"  { block_buffer += *yytext; ++block_depth; }
-<CODEBLOCK>.|\n { block_buffer += *yytext; }
+"{"                     { block_buffer = yytext;
+                          block_depth = 1;
+                          block_start = yylloc;
+                          yy_push_state(CODEBLOCK); }
+<PARSE_CTOR_INIT>":"    { block_buffer = yytext;
+                          block_depth = 0;
+                          block_start = yylloc;
+                          yy_push_state(CODEBLOCK); }
+<CODEBLOCK>"}"          { block_buffer += *yytext;
+                          if (--block_depth <= 0) {
+                              yy_pop_state();
+                              yylval.str = block_buffer;
+                              yylloc = block_start + yylloc;
+                              return BLOCK; } }
+<CODEBLOCK>"{"          { block_buffer += *yytext; ++block_depth; }
+<CODEBLOCK>.|\n         { block_buffer += *yytext; }
 
 .               { return *yytext; }
 

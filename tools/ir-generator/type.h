@@ -24,7 +24,8 @@ limitations under the License.
 class IrClass;
 class IrNamespace;
 
-#define ALL_TYPES(M) M(NamedType) M(TemplateInstantiation) M(ReferenceType) M(PointerType)
+#define ALL_TYPES(M) M(NamedType) M(TemplateInstantiation) M(ReferenceType) \
+                     M(PointerType) M(ArrayType)
 #define FORWARD_DECLARE(T) class T;
 ALL_TYPES(FORWARD_DECLARE)
 #undef FORWARD_DECLARE
@@ -37,7 +38,7 @@ class Type : public Util::IHasSourceInfo {
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     virtual const IrClass *resolve(const IrNamespace *) const = 0;
     virtual bool isResolved() const = 0;
-    virtual bool templateArgResolved() const = 0;
+    virtual cstring declSuffix() const { return ""; }
     virtual bool operator==(const Type &) const = 0;
     bool operator!=(const Type &t) const { return !operator==(t); }
 #define OP_EQUALS(T) virtual bool operator==(const T &) const { return false; }
@@ -78,7 +79,6 @@ class NamedType : public Type {
     cstring toString() const override { return lookup ? lookup->toString() + name : name; }
     const IrClass *resolve(const IrNamespace *) const override;
     bool isResolved() const override { return resolved != nullptr; }
-    bool templateArgResolved() const override { return resolved != nullptr; }
     bool operator==(const Type &t) const override { return t == *this; }
     bool operator==(const NamedType &t) const override {
         if (resolved && resolved == t.resolved) return true;
@@ -97,9 +97,6 @@ class TemplateInstantiation : public Type {
     TemplateInstantiation(Util::SourceInfo si, Type *b, Type *a)
     : Type(si), base(b) { args.push_back(a); }
     bool isResolved() const override { return base->isResolved(); }
-    bool templateArgResolved() const override {
-        for (auto arg : args) if (arg->templateArgResolved()) return true;
-        return base->templateArgResolved(); }
     const IrClass *resolve(const IrNamespace *ns) const override {
         for (auto arg : args) arg->resolve(ns);
         return base->resolve(ns); }
@@ -117,8 +114,9 @@ class ReferenceType : public Type {
     bool                isConst;
  public:
     explicit ReferenceType(const Type *t, bool c = false) : base(t), isConst(c) {}
-    bool isResolved() const override { return base->isResolved(); }
-    bool templateArgResolved() const override { return base->templateArgResolved(); }
+    ReferenceType(Util::SourceInfo si, const Type *t, bool c = false)
+    : Type(si), base(t), isConst(c) {}
+    bool isResolved() const override { return false; }
     const IrClass *resolve(const IrNamespace *ns) const override {
         base->resolve(ns);
         return nullptr; }
@@ -134,8 +132,9 @@ class PointerType : public Type {
     bool                isConst;
  public:
     explicit PointerType(const Type *t, bool c = false) : base(t), isConst(c) {}
-    bool isResolved() const override { return base->isResolved(); }
-    bool templateArgResolved() const override { return base->templateArgResolved(); }
+    PointerType(Util::SourceInfo si, const Type *t, bool c = false)
+    : Type(si), base(t), isConst(c) {}
+    bool isResolved() const override { return false; }
     const IrClass *resolve(const IrNamespace *ns) const override {
         base->resolve(ns);
         return nullptr; }
@@ -143,6 +142,23 @@ class PointerType : public Type {
     bool operator==(const Type &t) const override { return t == *this; }
     bool operator==(const PointerType &t) const override {
         return isConst == t.isConst && *base == *t.base; }
+};
+
+class ArrayType : public Type {
+    const Type          *base;
+    int                 size;
+ public:
+    ArrayType(const Type *t, int s) : base(t), size(s) {}
+    ArrayType(Util::SourceInfo si, const Type *t, int s) : Type(si), base(t), size(s) {}
+    bool isResolved() const override { return false; }
+    const IrClass *resolve(const IrNamespace *ns) const override {
+        base->resolve(ns);
+        return nullptr; }
+    cstring toString() const override { return base->toString(); }
+    cstring declSuffix() const override;
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const ArrayType &t) const override {
+        return size == t.size && *base == *t.base; }
 };
 
 #endif /* _TOOLS_IR_GENERATOR_TYPE_H_ */

@@ -34,31 +34,24 @@ abstract HeaderOrMetadata {
     IR::ID                      type_name;
     IR::ID                      name;
     NullOK Type_StructLike      type = nullptr;
-#emit
-    HeaderOrMetadata(IR::ID n, const Type_StructLike *t) : type_name(t->name), name(n), type(t) {}
-#end
+
+    HeaderOrMetadata(IR::ID n, Type_StructLike t) : type_name(t->name), name(n), type(t) {}
     dbprint { out << type_name << ' ' << name; }
 }
 
 class Header : HeaderOrMetadata {
-#emit
-    Header(IR::ID n, const Type_Header *t) : HeaderOrMetadata(n, t) {}
-#end
+    Header(IR::ID n, Type_Header t) : HeaderOrMetadata(n, t) {}
 #nodbprint
 }
 
 class HeaderStack : HeaderOrMetadata {
     int size;
-#emit
-    HeaderStack(IR::ID n, const Type_Header *t, int sz) : HeaderOrMetadata(n, t), size(sz) {}
-#end
+    HeaderStack(IR::ID n, Type_Header t, int sz) : HeaderOrMetadata(n, t), size(sz) {}
 #nodbprint
 }
 
 class Metadata : HeaderOrMetadata {
-#emit
-    Metadata(IR::ID n, const Type_Struct *t) : HeaderOrMetadata(n, t) {}
-#end
+    Metadata(IR::ID n, Type_Struct t) : HeaderOrMetadata(n, t) {}
 #nodbprint
 }
 
@@ -75,11 +68,9 @@ class ConcreteHeaderRef : HeaderRef {
 class HeaderStackItemRef : HeaderRef {
     Expression      base_;
     Expression      index_;
-#emit
-    const Expression* base() const { return base_; }
-    const Expression* index() const { return index_; }
-    void set_base(const Expression *b) { base_ = b; }
-#end
+    Expression base() const { return base_; }
+    Expression index() const { return index_; }
+    void set_base(Expression b) { base_ = b; }
     toString{ return base_->toString() + "[" + index_->toString() + "]"; }
 }
 
@@ -105,10 +96,9 @@ class If :  Expression {
 // an if condition tagged with a name so we can refer to it
 class NamedCond : If {
     cstring  name = unique_name();
-#emit
+
     static cstring unique_name();
-    explicit NamedCond(const If &i) : If(i), name(unique_name()) {}
-#end
+    NamedCond(const If &i) : If(i), name(unique_name()) {}
     operator== { return If::operator==(static_cast<const If &>(a)); }
 #noconstructor
 #nodbprint
@@ -138,38 +128,35 @@ class Apply : Expression {
 class Primitive : Operation {
     cstring                     name;
     inline Vector<Expression>   operands = {};
-#emit
-    Primitive(cstring n, const Vector<Expression> *l) : name(n) {
+
+    Primitive(cstring n, Vector<Expression> l) : name(n) {
         if (l) for (auto e : *l) operands.push_back(e); }
-    Primitive(Util::SourceInfo si, cstring n, const Vector<Expression> *l)
-    : Operation(si), name(n) {
+    Primitive(Util::SourceInfo si, cstring n, Vector<Expression> l) : Operation(si), name(n) {
         if (l) for (auto e : *l) operands.push_back(e); }
-    Primitive(cstring n, const Expression *a1) : name(n) {
+    Primitive(cstring n, Expression a1) : name(n) {
         operands.push_back(a1); }
-    Primitive(Util::SourceInfo si, cstring n, const Expression *a1) : Operation(si), name(n) {
+    Primitive(Util::SourceInfo si, cstring n, Expression a1) : Operation(si), name(n) {
         operands.push_back(a1); }
-    Primitive(cstring n, const Expression *a1, const Expression *a2) : name(n) {
+    Primitive(cstring n, Expression a1, Expression a2) : name(n) {
         operands.push_back(a1); operands.push_back(a2); }
-    Primitive(Util::SourceInfo si, cstring n, const Expression *a1, const Expression *a2)
+    Primitive(Util::SourceInfo si, cstring n, Expression a1, Expression a2)
     : Operation(si), name(n) {
         operands.push_back(a1); operands.push_back(a2); }
-    Primitive(cstring n, const Expression *a1, const Vector<Expression> *a2) : name(n) {
+    Primitive(cstring n, Expression a1, Vector<Expression> a2) : name(n) {
         operands.push_back(a1);
         if (a2) for (auto e : *a2) operands.push_back(e); }
-    Primitive(Util::SourceInfo si, cstring n, const Expression *a1, const Vector<Expression> *a2)
+    Primitive(Util::SourceInfo si, cstring n, Expression a1, Vector<Expression> a2)
     : Operation(si), name(n) {
         operands.push_back(a1);
         if (a2) for (auto e : *a2) operands.push_back(e); }
-    Primitive(cstring n, const Expression *a1, const Expression *a2, const Expression *a3)
-    : name(n) {
+    Primitive(cstring n, Expression a1, Expression a2, Expression a3) : name(n) {
         operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
-    Primitive(Util::SourceInfo si, cstring n, const Expression *a1, const Expression *a2,
-              const Expression *a3) : Operation(si), name(n) {
+    Primitive(Util::SourceInfo si, cstring n, Expression a1, Expression a2, Expression a3)
+    : Operation(si), name(n) {
         operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
     virtual bool isOutput(int operand_index) const;
     virtual unsigned inferOperandTypes() const;
     virtual void typecheck() const;
-#end
 #apply
     stringOp = name;
     precedence = DBPrint::Prec_Postfix;
@@ -190,18 +177,15 @@ class FieldListCalculation {
 
 class CalculatedField {
     optional NullOK Expression  field;
-#emit
-    struct update_or_verify {
+    class update_or_verify {
         Util::SourceInfo        srcInfo;
         bool                    update;
         ID                      name;
-        const Expression       *cond;
-        update_or_verify(Util::SourceInfo si, bool u, ID n, const Expression *c)
-        : srcInfo(si), update(u), name(n), cond(c) {}
-        bool operator==(const update_or_verify &a) const { return update == a.update &&
-            name == a.name && cond == a.cond; }
-    };
-#end
+        Expression              cond;
+        //update_or_verify(Util::SourceInfo si, bool u, ID n, const Expression *c)
+        //: srcInfo(si), update(u), name(n), cond(c) {}
+        operator== { return update == a.update && name == a.name && cond == a.cond; }
+    }
     vector<update_or_verify>    specs = {};
     visit_children { v.visit(field, "field"); for (auto &s : specs) v.visit(s.cond, s.name.name); }
 }
@@ -226,14 +210,12 @@ class ParserException {}
 
 abstract Attached {
     optional ID     name;
-#emit
     virtual const char *kind() const = 0;
     virtual bool indexed() const { return false; }
     Attached *clone_rename(const char *ext) const {
         Attached *rv = clone();
         rv->name = IR::ID(Util::SourceInfo(), rv->name.name + ext);
         return rv; }
-#end
     dbprint { out << node_type_name() << " " << name; }
     toString { return node_type_name() + " " + name; }
 }
@@ -243,37 +225,29 @@ abstract Stateful : Attached {
     bool        direct = false;
     bool        saturating = false;
     int         instance_count = -1;
-#emit
     virtual bool indexed() const override { return !direct; }
-#end
 }
 
 abstract CounterOrMeter : Stateful {
     CounterType   type = CounterType::NONE;
-#emit
     void settype(cstring t) {
         if (t == "packets") type = CounterType::PACKETS;
         else if (t == "bytes") type = CounterType::BYTES;
         else if (t == "packets_and_bytes") type = CounterType::BOTH;
         else error("%s: Unknown type %s", srcInfo, t); }  // NOLINT
-#end
 }
 
 class Counter : CounterOrMeter {
     int         max_width = -1;
     int         min_width = -1;
-#emit
     const char *kind() const override { return "stats"; }
-#end
 }
 
 class Meter : CounterOrMeter {
     NullOK Expression   result = nullptr;
     NullOK Expression   pre_color = nullptr;
     ID                  implementation = {};
-#emit
     const char *kind() const override { return "meter"; }
-#end
 }
 
 class Register : Stateful {
@@ -281,18 +255,14 @@ class Register : Stateful {
     int         width = -1;
     bool        signed_ = false;
  /* bool        saturating = false; */
-#emit
     const char *kind() const override { return "register"; }
-#end
 }
 
 class PrimitiveAction {}
 
 class NameList {
     vector<ID>  names = {};
-#emit
     NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
-#end
 }
 
 class ActionArg : Expression {
@@ -309,13 +279,12 @@ class ActionFunction {
     optional ID                 name;
     inline Vector<Primitive>    action = {};
     vector<ActionArg>           args = {};
-#emit
-    const ActionArg *arg(cstring n) const {
+
+    ActionArg arg(cstring n) const {
         for (auto a : args)
             if (a->name == n)
                 return a;
         return nullptr; }
-#end
     visit_children {
         action.visit_children(v);
         // DANGER -- visiting action first so type inferencing will push types to
@@ -332,19 +301,15 @@ class ActionProfile : Attached {
     ID          selector = {};
     vector<ID>  actions = {};
     int         size = 0;
-#emit
     const char *kind() const override { return "action_profile"; }
     bool indexed() const override { return true; }
-#end
 }
 
 class ActionSelector : Attached {
     ID key = {};
     ID mode = {};
     ID type = {};
-#emit
     const char *kind() const override { return "action_selector"; }
-#end
 }
 
 class V1Table {
@@ -359,23 +324,21 @@ class V1Table {
     ID                          default_action = {};
     NullOK Vector<Expression>   default_action_args = 0;
     inline TableProperties      properties = {};  // non-standard properties
-#emit
+
     // inefficient add
-    void addProperty(const TableProperty* prop) {
+    void addProperty(TableProperty prop) {
         auto props = new IndexedVector<TableProperty>(*properties.properties);
         props->push_back(prop);
         properties = TableProperties(properties.srcInfo, props); }
-#end
     toString { return node_type_name() + " " + name; }
 }
 
 class V1Control {
     ID                            name;
     Vector<Expression>            code;
-#emit
-    explicit V1Control(ID n) : name(n), code(new Vector<Expression>()) {}
+
+    V1Control(ID n) : name(n), code(new Vector<Expression>()) {}
     V1Control(Util::SourceInfo si, ID n) : Node(si), name(n), code(new Vector<Expression>()) {}
-#end
 #apply
     toString { return node_type_name() + " " + name; }
 }
@@ -386,11 +349,12 @@ class CompilerOptions;
 
 class V1Program {
     inline NameMap<Node, std::multimap>         scope;
+
 #noconstructor
+    V1Program(const CompilerOptions &options);
 #emit
-    V1Program(const CompilerOptions &);
     template<class T> const T *get(cstring name) const { return scope.get<T>(name); }
-    void add(cstring name, const Node *n) { scope.add(name, n); }
 #end
+    void add(cstring name, const Node *n) { scope.add(name, n); }
 #apply
 }

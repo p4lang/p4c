@@ -21,7 +21,7 @@ enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ON
              CONST = 32, CLASSREF = 64 };
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
-{ "operator==", { &NamedType::Bool, std::vector<const IrField *>{}, CONST + OVERRIDE + CLASSREF,
+{ "operator==", { &NamedType::Bool, {}, CONST + IN_IMPL + OVERRIDE + CLASSREF,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl << cl->indent << cl->indent << "return ";
@@ -36,7 +36,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         buf << ";" << std::endl;
         buf << cl->indent << "}";
         return buf.str(); } } },
-{ "visit_children", { &NamedType::Void, std::vector<const IrField *>{ new IrField(&ReferenceType::VisitorRef, "v") }, IN_IMPL + OVERRIDE,
+{ "visit_children", { &NamedType::Void, { new IrField(&ReferenceType::VisitorRef, "v") },
+  IN_IMPL + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         bool needed = false;
         std::stringstream buf;
@@ -54,7 +55,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             needed = true; }
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
-{ "validate", { &NamedType::Void, std::vector<const IrField *>{}, CONST + EXTEND + OVERRIDE,
+{ "validate", { &NamedType::Void, {}, CONST + IN_IMPL + EXTEND + OVERRIDE,
     [](IrClass *cl, cstring body) -> cstring {
         bool needed = false;
         std::stringstream buf;
@@ -73,15 +74,17 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         if (body) buf << body;
         buf << " }";
         return needed ? buf.str() : cstring(); } } },
-{ "node_type_name", { &NamedType::Cstring, std::vector<const IrField *>{}, CONST + OVERRIDE,
+{ "node_type_name", { &NamedType::Cstring, {}, CONST + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
         buf << "{ return \"" << cl->containedIn << cl->name << "\"; }";
         return buf.str(); } } },
-{ "dbprint", { &NamedType::Void, std::vector<const IrField *>{ new IrField(&ReferenceType::OstreamRef, "out") }, CONST + OVERRIDE + CONCRETE_ONLY,
+{ "dbprint", { &NamedType::Void, { new IrField(&ReferenceType::OstreamRef, "out") },
+  CONST + IN_IMPL + OVERRIDE + CONCRETE_ONLY,
     [](IrClass *, cstring) -> cstring {
-        return ";"; } } },
-{ "dump_fields", { &NamedType::Void, std::vector<const IrField *>{ new IrField(&ReferenceType::OstreamRef, "out") }, CONST + IN_IMPL + OVERRIDE,
+        return ""; } } },
+{ "dump_fields", { &NamedType::Void, { new IrField(&ReferenceType::OstreamRef, "out") },
+  CONST + IN_IMPL + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl;
@@ -96,13 +99,13 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 needed = true; } }
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
-{ "toString", { &NamedType::Cstring, std::vector<const IrField *>{}, CONST + OVERRIDE + NOT_DEFAULT,
+{ "toString", { &NamedType::Cstring, {}, CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
     [](IrClass *, cstring) -> cstring { return cstring(); } } },
 };
 
 void IrClass::generateMethods() {
     if (this == nodeClass || this == vectorClass) return;
-    if (kind != NodeKind::Interface) {
+    if (kind != NodeKind::Interface && kind != NodeKind::Nested) {
         for (auto &def : IrMethod::Generate) {
             if (def.second.flags & NOT_DEFAULT)
                 continue;
@@ -122,12 +125,17 @@ void IrClass::generateMethods() {
                 continue;
             cstring body = def.second.create(this, exist ? exist->body : cstring());
             if (body) {
+                if (!body.size())
+                    body = nullptr;
                 if (exist)
                     exist->body = body;
-                else
-                    elements.push_back(new IrMethod(def.first, body)); } }
+                else {
+                    auto *m = new IrMethod(def.first, body);
+                    m->clss = this;
+                    elements.push_back(m); } } }
         for (auto *parent = getParent(); parent; parent = parent->getParent()) {
             auto eq_overload = new IrMethod("operator==", "{ return a == *this; }");
+            eq_overload->clss = this;
             eq_overload->isOverride = true;
             eq_overload->rtype = &NamedType::Bool;
             eq_overload->args.push_back(
@@ -136,9 +144,11 @@ void IrClass::generateMethods() {
             elements.push_back(eq_overload); } }
     IrMethod *ctor = nullptr;
     for (auto m : *getUserMethods()) {
-        if (m->rtype) continue;
-        if (m->name == name && m->args.empty()) {
-            ctor = m;
+        if (m->rtype) {
+            m->rtype->resolve(&local);
+            continue; }
+        if (m->name == name) {
+            if (m->args.empty()) ctor = m;
             continue; }
         if (!IrMethod::Generate.count(m->name))
             throw Util::CompilationError("Unrecognized predefined method %1%", m);
@@ -152,13 +162,14 @@ void IrClass::generateMethods() {
             m->inImpl = true;
         if (info.flags & CONST)
             m->isConst = true;
-        if (info.flags & OVERRIDE)
+        if ((info.flags & OVERRIDE) && kind != NodeKind::Nested)
             m->isOverride = true; }
     if (ctor) elements.erase(find(elements, ctor));
     if (kind != NodeKind::Interface && !shouldSkip("constructor")) {
         ctor_args_t args;
         computeConstructorArguments(args);
-        int optargs = generateConstructor(args, ctor, 0);
-        for (unsigned skip = 1; skip < (1U << optargs); ++skip)
-            generateConstructor(args, ctor, skip); }
+        if (!args.empty()) {
+            int optargs = generateConstructor(args, ctor, 0);
+            for (unsigned skip = 1; skip < (1U << optargs); ++skip)
+                generateConstructor(args, ctor, skip); } }
 }
