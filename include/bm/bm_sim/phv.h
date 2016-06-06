@@ -180,6 +180,9 @@ class PHV {
   //! call this on the PHV member of every new Packet you create.
   void reset_metadata();
 
+  //! Reset all header fields to `0`.
+  void reset_headers();
+
   //! Deleted copy constructor
   PHV(const PHV &other) = delete;
   //! Deleted copy assignment operator

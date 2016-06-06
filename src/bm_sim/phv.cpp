@@ -50,6 +50,13 @@ PHV::reset_metadata() {
 }
 
 void
+PHV::reset_headers() {
+  for (auto &h : headers) {
+    h.reset();
+  }
+}
+
+void
 PHV::push_back_header(const std::string &header_name,
                       header_id_t header_index,
                       const HeaderType &header_type,
