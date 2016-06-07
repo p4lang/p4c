@@ -1025,45 +1025,6 @@ MatchUnitGeneric<K, V>::dump_match_entry_(std::ostream *out,
   return MatchErrorCode::SUCCESS;
 }
 
-static void dump_entry_key_extra_(std::ostream *stream,
-                                  const ExactMatchKey &key) {
-  (void) stream;
-  (void) key;
-}
-
-static void dump_entry_key_extra_(std::ostream *stream,
-                                  const LPMMatchKey &key) {
-  (*stream) << " / " << key.prefix_length;
-}
-
-static void dump_entry_key_extra_(std::ostream *stream,
-                                  const TernaryMatchKey &key) {
-  (*stream) << " &&& " << key.mask.to_hex();
-}
-
-static void dump_entry_key_extra_(std::ostream *stream,
-                                  const RangeMatchKey &key) {
-  (*stream) << " -> " << key.mask.to_hex();
-}
-
-template <typename K, typename V>
-void
-MatchUnitGeneric<K, V>::dump_(std::ostream *stream) const {
-  for (internal_handle_t handle_ : this->handles) {
-    const Entry &entry = entries[handle_];
-    (*stream) << HANDLE_SET(entry.key.version, handle_) << ": "
-              << this->match_key_builder.key_to_string(entry.key.data, " ");
-
-    // Print the mask in the case of a ternary entry, or the prefix length
-    // in the case of an LPM key
-    dump_entry_key_extra_(stream, entry.key);
-
-    (*stream) << " => ";
-    entry.value.dump(stream);
-    (*stream) << "\n";
-  }
-}
-
 template <typename K, typename V>
 void
 MatchUnitGeneric<K, V>::reset_state_() {

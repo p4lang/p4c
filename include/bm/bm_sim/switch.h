@@ -603,13 +603,6 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   RuntimeInterface::ErrorCode
   serialize(std::ostream *out) override;
 
-  MatchErrorCode
-  dump_table(size_t cxt_id,
-             const std::string& table_name,
-             std::ostream *stream) const override {
-    return contexts.at(cxt_id).dump_table(table_name, stream);
-  }
-
   RuntimeInterface::ErrorCode
   load_new_config(const std::string &new_config) override;
 

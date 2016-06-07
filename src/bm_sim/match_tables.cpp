@@ -460,14 +460,6 @@ MatchTable::get_default_entry(Entry *entry) const {
   return MatchErrorCode::SUCCESS;
 }
 
-void
-MatchTable::dump(std::ostream *stream) const {
-  ReadLock lock = lock_read();
-  (*stream) << name << ":\n";
-  match_unit->dump(stream);
-  (*stream) << "default: " << default_entry << "\n";
-}
-
 MatchErrorCode
 MatchTable::dump_entry_(std::ostream *out, entry_handle_t handle) const {
   MatchErrorCode rc;
@@ -858,24 +850,6 @@ MatchTableIndirect::get_members() const {
   return members;
 }
 
-void
-MatchTableIndirect::dump_(std::ostream *stream) const {
-  (*stream) << name << ":\n";
-  match_unit->dump(stream);
-  (*stream) << "members:\n";
-  for (mbr_hdl_t mbr : mbr_handles) {
-    (*stream) << mbr << ": ";
-    action_entries[mbr].dump(stream);
-    (*stream) << "\n";
-  }
-}
-
-void
-MatchTableIndirect::dump(std::ostream *stream) const {
-  ReadLock lock = lock_read();
-  dump_(stream);
-}
-
 MatchErrorCode
 MatchTableIndirect::dump_entry_common(std::ostream *out,
                                       entry_handle_t handle,
@@ -1006,14 +980,6 @@ MatchTableIndirectWS::GroupInfo::size() const {
 MatchTableIndirect::mbr_hdl_t
 MatchTableIndirectWS::GroupInfo::get_nth(size_t n) const {
   return mbrs.get_nth(n);
-}
-
-void
-MatchTableIndirectWS::GroupInfo::dump(std::ostream *stream) const {
-  (*stream) << "{ ";
-  for (const auto &mbr : mbrs)
-    (*stream) << mbr << ", ";
-  (*stream) << "}";
 }
 
 void
@@ -1407,18 +1373,6 @@ MatchTableIndirectWS::get_num_members_in_group(grp_hdl_t grp,
   *nb = group_info.size();
 
   return MatchErrorCode::SUCCESS;
-}
-
-void
-MatchTableIndirectWS::dump(std::ostream *stream) const {
-  ReadLock lock = lock_read();
-  MatchTableIndirect::dump_(stream);
-  (*stream) << "groups:\n";
-  for (grp_hdl_t grp : grp_handles) {
-    (*stream) << grp << ": ";
-    group_entries[grp].dump(stream);
-    (*stream) << "\n";
-  }
 }
 
 MatchErrorCode

@@ -317,10 +317,6 @@ class Context final {
   RegisterErrorCode
   register_reset(const std::string &register_name);
 
-  MatchErrorCode
-  dump_table(const std::string& table_name,
-             std::ostream *stream) const;
-
   template <typename T>
   CustomCrcErrorCode
   set_crc_custom_parameters(

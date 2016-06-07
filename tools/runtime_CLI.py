@@ -1590,18 +1590,6 @@ class RuntimeAPI(cmd.Cmd):
     def _complete_registers(self, text):
         return self._complete_res(REGISTER_ARRAYS, text)
 
-    @handle_bad_input
-    def do_table_dump(self, line):
-        "Display some (non-formatted) information about a table: table_dump <table_name>"
-        args = line.split()
-        self.exactly_n_args(args, 1)
-        table_name = args[0]
-        self.get_res("table", table_name, TABLES)
-        print self.client.bm_dump_table(0, table_name)
-
-    def complete_table_dump(self, text, line, start_index, end_index):
-        return self._complete_tables(text)
-
     def dump_action_and_data(self, action_name, action_data):
         def hexstr(v):
             return "".join("{:02x}".format(ord(c)) for c in v)
@@ -1633,7 +1621,7 @@ class RuntimeAPI(cmd.Cmd):
                 [str(h) for h in g.mbr_handles]))
 
     @handle_bad_input
-    def do_table_dump_2(self, line):
+    def do_table_dump(self, line):
         "Display some information about a table: table_dump <table_name>"
         args = line.split()
         self.exactly_n_args(args, 1)
@@ -1698,8 +1686,20 @@ class RuntimeAPI(cmd.Cmd):
 
         print "=========="
 
-    def complete_table_dump_2(self, text, line, start_index, end_index):
+    def complete_table_dump(self, text, line, start_index, end_index):
         return self._complete_tables(text)
+
+    # the next 2 functions are temporary, they ensure backwards compatibility
+    # the current table_dump CLI command used to be called table_dump_2 (the old
+    # table_dump command has been deprecated)
+    # TODO(antonin): remove
+    @handle_bad_input
+    def do_table_dump_2(self, line):
+        "This command is deprecated, use table_dump instead"
+        self.do_table_dump(line)
+
+    def complete_table_dump_2(self, text, line, start_index, end_index):
+        return self.complete_table_dump(text, line, start_index, end_index)
 
     @handle_bad_input
     def do_port_add(self, line):

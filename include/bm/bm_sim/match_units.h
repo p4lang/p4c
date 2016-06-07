@@ -393,10 +393,6 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
   MatchErrorCode dump_match_entry(std::ostream *out,
                                   entry_handle_t handle) const;
 
-  void dump(std::ostream *stream) const {
-    return dump_(stream);
-  }
-
   void reset_state();
 
   void serialize(std::ostream *out) const {
@@ -425,8 +421,6 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
 
   virtual MatchErrorCode dump_match_entry_(std::ostream *out,
                                            entry_handle_t handle) const = 0;
-
-  virtual void dump_(std::ostream *stream) const = 0;
 
   virtual void reset_state_() = 0;
 
@@ -475,8 +469,6 @@ class MatchUnitGeneric : public MatchUnitAbstract<V> {
 
   MatchErrorCode dump_match_entry_(std::ostream *out,
                                    entry_handle_t handle) const override;
-
-  void dump_(std::ostream *stream) const override;
 
   void reset_state_() override;
 

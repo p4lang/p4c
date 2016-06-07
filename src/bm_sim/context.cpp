@@ -525,17 +525,6 @@ Context::register_reset(const std::string &register_name) {
   return Register::SUCCESS;
 }
 
-MatchErrorCode
-Context::dump_table(const std::string &table_name,
-                    std::ostream *stream) const {
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MatchTableAbstract *abstract_table =
-    p4objects_rt->get_abstract_match_table(table_name);
-  assert(abstract_table);
-  abstract_table->dump(stream);
-  return MatchErrorCode::SUCCESS;
-}
-
 template <typename T>
 CustomCrcErrorCode
 Context::set_crc_custom_parameters(

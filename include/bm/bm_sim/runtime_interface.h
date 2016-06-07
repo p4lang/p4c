@@ -302,11 +302,6 @@ class RuntimeInterface {
 
   virtual ErrorCode
   serialize(std::ostream *out) = 0;
-
-  virtual MatchErrorCode
-  dump_table(size_t cxt_id,
-             const std::string& table_name,
-             std::ostream *stream) const = 0;
 };
 
 }  // namespace bm

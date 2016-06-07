@@ -866,13 +866,6 @@ public:
     }
   }
 
-  void bm_dump_table(std::string& _return, const int32_t cxt_id, const std::string& table_name) {
-    Logger::get()->trace("dump_table");
-    std::ostringstream stream;
-    switch_->dump_table(cxt_id, table_name, &stream);
-    _return.append(stream.str());
-  }
-
   void bm_set_crc16_custom_parameters(const int32_t cxt_id, const std::string& calc_name, const BmCrc16Config& crc16_config) {
     Logger::get()->trace("bm_set_crc16_custom_parameters");
     CustomCrcMgr<uint16_t>::crc_config_t c;

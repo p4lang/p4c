@@ -564,13 +564,6 @@ service Standard {
 
   BmConfig bm_mgmt_get_info()
 
-  // debug functions
-
-  string bm_dump_table(
-    1:i32 cxt_id,
-    2:string table_name
-  )
-
   void bm_set_crc16_custom_parameters(
     1:i32 cxt_id,
     2:string calc_name,

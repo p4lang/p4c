@@ -2046,7 +2046,6 @@ class TableEntryDebug : public ::testing::Test {
                                            const char * key2="\xab\xcd") const;
 
   std::string gen_entry_string() const;
-  std::string gen_entries_string() const;
 
   MatchErrorCode add_entries() {
     entry_handle_t handle;
@@ -2217,43 +2216,6 @@ std::string TableEntryDebug<MURange>::gen_entry_string() const {
       "Action entry: actionA - aba,\n");
 }
 
-template <>
-std::string TableEntryDebug<MUExact>::gen_entries_string() const {
-  return std::string(
-      "test_table:\n"
-      "0: 1234 abcd 01 => actionA - aba,\n"
-      "1: 3456 cdef 01 => actionA - aba,\n"
-      "2: 5678 fedc 01 => actionA - aba,\n"
-      "3: 7890 dcba 01 => actionA - aba,\n"
-      "default: NULL\n");
-}
-
-template <>
-std::string TableEntryDebug<MULPM>::gen_entries_string() const {
-  return std::string(
-      "test_table:\n"
-      "0: 1234 abcd 01 / 36 => actionA - aba,\n"
-      "1: 3456 cdef 01 / 36 => actionA - aba,\n"
-      "2: 5678 fedc 01 / 36 => actionA - aba,\n"
-      "3: 7890 dcba 01 / 36 => actionA - aba,\n"
-      "default: NULL\n");
-}
-
-template <>
-std::string TableEntryDebug<MUTernary>::gen_entries_string() const {
-  return std::string(
-      "test_table:\n"
-      "0: 1230 0bc0 01 &&& fffff00ff0 => actionA - aba,\n"
-      "1: 3450 0de0 01 &&& fffff00ff0 => actionA - aba,\n"
-      "2: 5670 0ed0 01 &&& fffff00ff0 => actionA - aba,\n"
-      "3: 7890 0cb0 01 &&& fffff00ff0 => actionA - aba,\n"
-      "default: NULL\n");
-}
-
-template <>
-std::string TableEntryDebug<MURange>::gen_entries_string() const {
-}
-
 TYPED_TEST_CASE(TableEntryDebug, TableTypes);
 
 namespace {
@@ -2334,15 +2296,6 @@ TYPED_TEST(TableEntryDebug, DumpEntry) {
   ASSERT_NE(MatchErrorCode::SUCCESS, this->table->dump_entry(&os, bad_handle));
 
   ASSERT_EQ("", this->table->dump_entry_string(bad_handle));
-}
-
-TYPED_TEST(TableEntryDebug, Dump) {
-  ASSERT_EQ(MatchErrorCode::SUCCESS, this->add_entries());
-
-  std::stringstream os;
-  this->table->dump(&os);
-
-  ASSERT_EQ(os.str(), this->gen_entries_string());
 }
 
 

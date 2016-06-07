@@ -262,8 +262,10 @@ TEST(P4Objects, TableDefaultEntry) {
   auto t_ = objects.get_abstract_match_table("t0");
   auto t = dynamic_cast<MatchTable *>(t_);
   ASSERT_NE(nullptr, t);
-  std::stringstream os;
-  t->dump(&os);
-  std::string expected_dump_str = "t0:\ndefault: a0 - ab,\n";
-  ASSERT_EQ(expected_dump_str, os.str());
+  MatchTable::Entry entry;
+  auto rc = t->get_default_entry(&entry);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ("a0", entry.action_fn->get_name());
+  ASSERT_EQ(1u, entry.action_data.size());
+  ASSERT_EQ(0xab, entry.action_data.get(0).get_int());
 }
