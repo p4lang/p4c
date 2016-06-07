@@ -680,7 +680,8 @@ P4Objects::init_objects(std::istream *is,
       { {"exact", MatchKeyParam::Type::EXACT},
         {"lpm", MatchKeyParam::Type::LPM},
         {"ternary", MatchKeyParam::Type::TERNARY},
-        {"valid", MatchKeyParam::Type::VALID} };
+        {"valid", MatchKeyParam::Type::VALID},
+        {"range", MatchKeyParam::Type::RANGE} };
 
   const Json::Value &cfg_pipelines = cfg_root["pipelines"];
   for (const auto &cfg_pipeline : cfg_pipelines) {

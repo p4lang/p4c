@@ -107,15 +107,16 @@ class MatchType:
     EXACT = 0
     LPM = 1
     TERNARY = 2
-    VALID = 3 # not yet supported
+    VALID = 3
+    RANGE = 4
 
     @staticmethod
     def to_str(x):
-        return {0: "exact", 1: "lpm", 2: "ternary", 3: "valid"}[x]
+        return {0: "exact", 1: "lpm", 2: "ternary", 3: "valid", 4: "range"}[x]
 
     @staticmethod
     def from_str(x):
-        return {"exact": 0, "lpm": 1, "ternary": 2, "valid": 3}[x]
+        return {"exact": 0, "lpm": 1, "ternary": 2, "valid": 3, "range": 4}[x]
 
 class Table:
     def __init__(self, name, id_):
@@ -440,6 +441,7 @@ _match_types_mapping = {
     MatchType.LPM : BmMatchParamType.LPM,
     MatchType.TERNARY : BmMatchParamType.TERNARY,
     MatchType.VALID : BmMatchParamType.VALID,
+    MatchType.RANGE : BmMatchParamType.RANGE,
 }
 
 def parse_match_key(table, key_fields):
@@ -481,6 +483,20 @@ def parse_match_key(table, key_fields):
             key = bool(int(field))
             param = BmMatchParam(type = param_type,
                                  valid = BmMatchParamValid(key))
+        elif param_type == BmMatchParamType.RANGE:
+            start, end = field.split("->")
+            start = bytes_to_string(parse_param_(start, bw))
+            end = bytes_to_string(parse_param_(end, bw))
+            if len(start) != len(end):
+                raise UIn_MatchKeyError(
+                    "start and end have different lengths in expression %s" % field
+                )
+            if start > end:
+                raise UIn_MatchKeyError(
+                    "start is less than end in expression %s" % field
+                )
+            param = BmMatchParam(type = param_type,
+                                 range = BmMatchParamRange(start, end))
         else:
             assert(0)
         params.append(param)
@@ -494,7 +510,8 @@ def BmMatchParam_to_str(self):
         (self.exact.to_str() if self.exact else "") +\
         (self.lpm.to_str() if self.lpm else "") +\
         (self.ternary.to_str() if self.ternary else "") +\
-        (self.valid.to_str() if self.valid else "")
+        (self.valid.to_str() if self.valid else "") +\
+        (self.range.to_str() if self.range else "")
 
 def BmMatchParamExact_to_str(self):
     return printable_byte_str(self.key)
@@ -508,11 +525,15 @@ def BmMatchParamTernary_to_str(self):
 def BmMatchParamValid_to_str(self):
     return ""
 
+def BmMatchParamRange_to_str(self):
+    return printable_byte_str(self.start) + " -> " + printable_byte_str(self.end_)
+
 BmMatchParam.to_str = BmMatchParam_to_str
 BmMatchParamExact.to_str = BmMatchParamExact_to_str
 BmMatchParamLPM.to_str = BmMatchParamLPM_to_str
 BmMatchParamTernary.to_str = BmMatchParamTernary_to_str
 BmMatchParamValid.to_str = BmMatchParamValid_to_str
+BmMatchParamRange.to_str = BmMatchParamRange_to_str
 
 # services is [(service_name, client_class), ...]
 def thrift_connect(thrift_ip, thrift_port, services):
@@ -783,7 +804,7 @@ class RuntimeAPI(cmd.Cmd):
                 "Table %s has no action %s" % (table_name, action_name)
             )
 
-        if table.match_type == MatchType.TERNARY:
+        if table.match_type in {MatchType.TERNARY, MatchType.RANGE}:
             try:
                 priority = int(args.pop(-1))
             except:
@@ -999,7 +1020,7 @@ class RuntimeAPI(cmd.Cmd):
         else:
             self.check_indirect(table)
 
-        if table.match_type == MatchType.TERNARY:
+        if table.match_type in {MatchType.TERNARY, MatchType.RANGE}:
             try:
                 priority = int(args.pop(-1))
             except:
@@ -1569,18 +1590,6 @@ class RuntimeAPI(cmd.Cmd):
     def _complete_registers(self, text):
         return self._complete_res(REGISTER_ARRAYS, text)
 
-    @handle_bad_input
-    def do_table_dump(self, line):
-        "Display some (non-formatted) information about a table: table_dump <table_name>"
-        args = line.split()
-        self.exactly_n_args(args, 1)
-        table_name = args[0]
-        self.get_res("table", table_name, TABLES)
-        print self.client.bm_dump_table(0, table_name)
-
-    def complete_table_dump(self, text, line, start_index, end_index):
-        return self._complete_tables(text)
-
     def dump_action_and_data(self, action_name, action_data):
         def hexstr(v):
             return "".join("{:02x}".format(ord(c)) for c in v)
@@ -1612,7 +1621,7 @@ class RuntimeAPI(cmd.Cmd):
                 [str(h) for h in g.mbr_handles]))
 
     @handle_bad_input
-    def do_table_dump_2(self, line):
+    def do_table_dump(self, line):
         "Display some information about a table: table_dump <table_name>"
         args = line.split()
         self.exactly_n_args(args, 1)
@@ -1630,10 +1639,14 @@ class RuntimeAPI(cmd.Cmd):
         def dump_ternary(p):
             return "{} &&& {}".format(hexstr(p.ternary.key),
                                       hexstr(p.ternary.mask))
+        def dump_range(p):
+            return "{} -> {}".format(hexstr(p.range.start),
+                                     hexstr(p.range.end_))
         def dump_valid(p):
             return "01" if p.valid.key else "00"
         pdumpers = {"exact": dump_exact, "lpm": dump_lpm,
-                    "ternary": dump_ternary, "valid": dump_valid}
+                    "ternary": dump_ternary, "valid": dump_valid,
+                    "range": dump_range}
 
         print "=========="
         print "TABLE ENTRIES"
@@ -1673,8 +1686,20 @@ class RuntimeAPI(cmd.Cmd):
 
         print "=========="
 
-    def complete_table_dump_2(self, text, line, start_index, end_index):
+    def complete_table_dump(self, text, line, start_index, end_index):
         return self._complete_tables(text)
+
+    # the next 2 functions are temporary, they ensure backwards compatibility
+    # the current table_dump CLI command used to be called table_dump_2 (the old
+    # table_dump command has been deprecated)
+    # TODO(antonin): remove
+    @handle_bad_input
+    def do_table_dump_2(self, line):
+        "This command is deprecated, use table_dump instead"
+        self.do_table_dump(line)
+
+    def complete_table_dump_2(self, text, line, start_index, end_index):
+        return self.complete_table_dump(text, line, start_index, end_index)
 
     @handle_bad_input
     def do_port_add(self, line):

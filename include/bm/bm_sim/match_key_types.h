@@ -22,6 +22,7 @@
 #define BM_BM_SIM_MATCH_KEY_TYPES_H_
 
 #include <limits>
+#include <vector>
 
 #include "bytecontainer.h"
 
@@ -31,7 +32,7 @@ typedef uintptr_t internal_handle_t;
 typedef uint64_t entry_handle_t;
 
 enum class MatchUnitType {
-  EXACT, LPM, TERNARY
+  EXACT, LPM, TERNARY, RANGE
 };
 
 // Entry types.
@@ -55,7 +56,7 @@ struct ExactMatchKey : public MatchKey {
 struct LPMMatchKey : public MatchKey {
   LPMMatchKey() {}
   LPMMatchKey(ByteContainer data, int prefix_length, uint32_t version)
-      : MatchKey(data, version), prefix_length(prefix_length) {}
+      : MatchKey(std::move(data), version), prefix_length(prefix_length) {}
 
   int prefix_length{0};
 
@@ -66,7 +67,8 @@ struct TernaryMatchKey : public MatchKey {
   TernaryMatchKey() {}
   TernaryMatchKey(ByteContainer data, ByteContainer mask, int priority,
                   uint32_t version)
-      : MatchKey(data, version), mask(std::move(mask)), priority(priority) {}
+      : MatchKey(std::move(data), version), mask(std::move(mask)),
+        priority(priority) {}
 
   ByteContainer mask{};
   // This is initialized to `max` because lookups search for the matching
@@ -75,6 +77,18 @@ struct TernaryMatchKey : public MatchKey {
   int priority{std::numeric_limits<decltype(priority)>::max()};
 
   static constexpr MatchUnitType mut = MatchUnitType::TERNARY;
+};
+
+struct RangeMatchKey : public TernaryMatchKey {
+  RangeMatchKey() {}
+  RangeMatchKey(ByteContainer data, ByteContainer mask, int priority,
+                std::vector<size_t> range_widths, uint32_t version)
+      : TernaryMatchKey(std::move(data), std::move(mask), priority, version),
+        range_widths(std::move(range_widths)) {}
+
+  std::vector<size_t> range_widths;
+
+  static constexpr MatchUnitType mut = MatchUnitType::RANGE;
 };
 
 }  // namespace bm

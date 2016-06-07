@@ -24,6 +24,7 @@
 #include <random>
 #include <thread>
 #include <future>
+#include <limits>
 #include <bm/bm_sim/tables.h>
 
 using namespace bm;
@@ -40,6 +41,7 @@ typedef MatchTableAbstract::ActionEntry ActionEntry;
 typedef MatchUnitExact<ActionEntry> MUExact;
 typedef MatchUnitLPM<ActionEntry> MULPM;
 typedef MatchUnitTernary<ActionEntry> MUTernary;
+typedef MatchUnitRange<ActionEntry> MURange;
 
 namespace {
 
@@ -68,6 +70,10 @@ struct match_type_test<MULPM> {
 template <>
 struct match_type_test<MUTernary> {
   static constexpr MatchKeyParam::Type type = MatchKeyParam::Type::TERNARY;
+};
+template <>
+struct match_type_test<MURange> {
+  static constexpr MatchKeyParam::Type type = MatchKeyParam::Type::RANGE;
 };
 
 LookupStructureFactory lookup_factory;
@@ -189,6 +195,21 @@ TableSizeTwo<MUTernary>::add_entry(const std::string &key,
 
 template<>
 MatchErrorCode
+TableSizeTwo<MURange>::add_entry(const std::string &key,
+                                 entry_handle_t *handle) {
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  Data start(key.data(), key.size());
+  Data end;
+  // we create a range with 5 values
+  end.add(start, Data(4));
+  int priority = 1;
+  match_key.emplace_back(MatchKeyParam::Type::RANGE, key, end.get_string());
+  return table->add_entry(match_key, &action_fn, action_data, handle, priority);
+}
+
+template<>
+MatchErrorCode
 TableSizeTwo<MUExact>::add_entry_w_valid(const std::string &key,
 					 bool valid,
 					 entry_handle_t *handle) {
@@ -228,9 +249,28 @@ TableSizeTwo<MUTernary>::add_entry_w_valid(const std::string &key,
 				  handle, priority);
 }
 
+template<>
+MatchErrorCode
+TableSizeTwo<MURange>::add_entry_w_valid(const std::string &key,
+					   bool valid,
+					   entry_handle_t *handle) {
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  Data start(key.data(), key.size());
+  Data end;
+  // we create a range with 5 values
+  end.add(start, Data(4));
+  int priority = 1;
+  match_key.emplace_back(MatchKeyParam::Type::RANGE, key, end.get_string());
+  match_key.emplace_back(MatchKeyParam::Type::VALID, valid ? "\x01" : "\x00");
+  return table_w_valid->add_entry(match_key, &action_fn, action_data,
+				  handle, priority);
+}
+
 typedef Types<MUExact,
 	      MULPM,
-	      MUTernary> TableTypes;
+	      MUTernary,
+              MURange> TableTypes;
 
 TYPED_TEST_CASE(TableSizeTwo, TableTypes);
 
@@ -331,7 +371,8 @@ TYPED_TEST(TableSizeTwo, LookupEntry) {
   this->table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_TRUE(hit);
 
-  f.set("0xabb");
+  // has to be large enough for range test
+  f.set("0xcba");
   this->table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_FALSE(hit);
 
@@ -368,7 +409,7 @@ TYPED_TEST(TableSizeTwo, NextNodeHitMiss) {
   f.set("0xaba");
   ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
   // miss, next node is default one (as per the P4 program)
-  f.set("0xabb");
+  f.set("0xcba");
   ASSERT_EQ(&this->node_miss_default, this->table->apply_action(&pkt));
 
   // need to remove entry because the node pointer is inserted in the entry when
@@ -385,7 +426,7 @@ TYPED_TEST(TableSizeTwo, NextNodeHitMiss) {
 
   f.set("0xaba");
   ASSERT_EQ(&dummy_node_hit, this->table->apply_action(&pkt));
-  f.set("0xabb");
+  f.set("0xcba");
   ASSERT_EQ(&dummy_node_miss, this->table->apply_action(&pkt));
 
   rc = this->table->delete_entry(handle);
@@ -571,7 +612,7 @@ TYPED_TEST(TableSizeTwo, Counters) {
   ASSERT_EQ(64u, counter_bytes);
   ASSERT_EQ(1u, counter_packets);
 
-  f.set("0xabb");
+  f.set("0xcba");
   this->table->apply_action(&pkt);
 
   // counters should not have been incremented
@@ -744,7 +785,7 @@ TYPED_TEST(TableSizeTwo, GetEntries) {
 
   size_t num_entries = 2;
   for (size_t e = 0; e < num_entries; e++) {
-    keys.emplace_back(2, static_cast<char>(e));
+    keys.emplace_back(2, static_cast<char>(e + 1));
     handles.push_back(0);
     rc = this->add_entry(keys.back(), &handles.back());
     ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
@@ -1130,7 +1171,7 @@ TEST_F(TableIndirect, GetEntries) {
 
   size_t num_entries = 64;
   for (size_t e = 0; e < num_entries; e++) {
-    keys.emplace_back(2, static_cast<char>(e));
+    keys.emplace_back(2, static_cast<char>(e + 1));
     handles.push_back(0);
     rc = add_entry(keys.back(), mbrs[e % num_mbrs], &handles.back());
     ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
@@ -1614,9 +1655,30 @@ TableBigMask<MUTernary>::make_key_builder() {
                               MatchKeyParam::Type::EXACT);
 }
 
-typedef Types<MUExact,
-	      MULPM,
-	      MUTernary> TableTypes;
+template<>
+MatchErrorCode
+TableBigMask<MURange>::add_entry(const std::string &key_1,
+                                   const std::string &key_2,
+				   entry_handle_t *handle) {
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  Data start_1(key_1.data(), key_1.size());
+  Data end_1;
+  // we create a range with 5 values
+  end_1.add(start_1, Data(4));
+  int priority = 1;
+  match_key.emplace_back(MatchKeyParam::Type::RANGE, key_1, end_1.get_string());
+  match_key.emplace_back(MatchKeyParam::Type::EXACT, key_2);
+  return table->add_entry(match_key, &action_fn, action_data, handle, priority);
+}
+
+template<>
+void
+TableBigMask<MURange>::make_key_builder() {
+  key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::RANGE);
+  key_builder.push_back_field(testHeader2, 1, 48, mask_2,
+                              MatchKeyParam::Type::EXACT);
+}
 
 TYPED_TEST_CASE(TableBigMask, TableTypes);
 
@@ -1984,7 +2046,6 @@ class TableEntryDebug : public ::testing::Test {
                                            const char * key2="\xab\xcd") const;
 
   std::string gen_entry_string() const;
-  std::string gen_entries_string() const;
 
   MatchErrorCode add_entries() {
     entry_handle_t handle;
@@ -2047,6 +2108,15 @@ void TableEntryDebug<MUTernary>::set_key_builder() {
 }
 
 template <>
+void TableEntryDebug<MURange>::set_key_builder() {
+  key_builder.push_back_field(testHeader1, 0, 16,
+                              MatchKeyParam::Type::LPM, "h1.f0");
+  key_builder.push_back_field(testHeader2, 0, 16,
+                              MatchKeyParam::Type::RANGE, "h2.f0");
+  key_builder.push_back_valid_header(testHeader3, "h3");
+}
+
+template <>
 std::vector<MatchKeyParam>
 TableEntryDebug<MUExact>::gen_match_key(const char *k1, const char *k2) const {
   std::vector<MatchKeyParam> match_key;
@@ -2079,6 +2149,22 @@ TableEntryDebug<MUTernary>::gen_match_key(const char *k1, const char *k2) const 
   match_key.emplace_back(MatchKeyParam::Type::TERNARY,
                          std::string(k2, 2),
                          std::string("\x0f\xf0", 2));
+  match_key.emplace_back(MatchKeyParam::Type::VALID, std::string("\x01", 1));
+  return match_key;
+}
+
+template <>
+std::vector<MatchKeyParam>
+TableEntryDebug<MURange>::gen_match_key(const char *k1, const char *k2) const {
+  std::vector<MatchKeyParam> match_key;
+  match_key.emplace_back(MatchKeyParam::Type::LPM,
+                         std::string(k1, 2), 12);
+  Data start(k2, 2);
+  Data end;
+  // we create a range with 5 values
+  end.add(start, Data(4));
+  match_key.emplace_back(MatchKeyParam::Type::RANGE,
+                         std::string(k2, 2), end.get_string());
   match_key.emplace_back(MatchKeyParam::Type::VALID, std::string("\x01", 1));
   return match_key;
 }
@@ -2119,36 +2205,15 @@ std::string TableEntryDebug<MUTernary>::gen_entry_string() const {
 }
 
 template <>
-std::string TableEntryDebug<MUExact>::gen_entries_string() const {
+std::string TableEntryDebug<MURange>::gen_entry_string() const {
   return std::string(
-      "test_table:\n"
-      "0: 1234 abcd 01 => actionA - aba,\n"
-      "1: 3456 cdef 01 => actionA - aba,\n"
-      "2: 5678 fedc 01 => actionA - aba,\n"
-      "3: 7890 dcba 01 => actionA - aba,\n"
-      "default: NULL\n");
-}
-
-template <>
-std::string TableEntryDebug<MULPM>::gen_entries_string() const {
-  return std::string(
-      "test_table:\n"
-      "0: 1234 abcd 01 / 36 => actionA - aba,\n"
-      "1: 3456 cdef 01 / 36 => actionA - aba,\n"
-      "2: 5678 fedc 01 / 36 => actionA - aba,\n"
-      "3: 7890 dcba 01 / 36 => actionA - aba,\n"
-      "default: NULL\n");
-}
-
-template <>
-std::string TableEntryDebug<MUTernary>::gen_entries_string() const {
-  return std::string(
-      "test_table:\n"
-      "0: 1230 0bc0 01 &&& fffff00ff0 => actionA - aba,\n"
-      "1: 3450 0de0 01 &&& fffff00ff0 => actionA - aba,\n"
-      "2: 5670 0ed0 01 &&& fffff00ff0 => actionA - aba,\n"
-      "3: 7890 0cb0 01 &&& fffff00ff0 => actionA - aba,\n"
-      "default: NULL\n");
+      "Dumping entry 0\n"
+      "Match key:\n"
+      "* h1.f0               : LPM       1230/12\n"
+      "* h2.f0               : RANGE     abcd -> abd1\n"
+      "* h3                  : VALID     01\n"
+      "Priority: 12\n"
+      "Action entry: actionA - aba,\n");
 }
 
 TYPED_TEST_CASE(TableEntryDebug, TableTypes);
@@ -2189,6 +2254,8 @@ bool cmp_match_params(const MatchKeyParam &p1, const MatchKeyParam &p2) {
     case MatchKeyParam::Type::TERNARY:
       return (p1.mask == p2.mask &&
               cmp_ternary(p1.key, p2.key, p1.mask));
+    case MatchKeyParam::Type::RANGE:
+      return (p1.key == p2.key && p1.mask == p2.mask);
   }
   return true;
 }
@@ -2229,15 +2296,6 @@ TYPED_TEST(TableEntryDebug, DumpEntry) {
   ASSERT_NE(MatchErrorCode::SUCCESS, this->table->dump_entry(&os, bad_handle));
 
   ASSERT_EQ("", this->table->dump_entry_string(bad_handle));
-}
-
-TYPED_TEST(TableEntryDebug, Dump) {
-  ASSERT_EQ(MatchErrorCode::SUCCESS, this->add_entries());
-
-  std::stringstream os;
-  this->table->dump(&os);
-
-  ASSERT_EQ(os.str(), this->gen_entries_string());
 }
 
 
@@ -2443,6 +2501,16 @@ void TableBadInputKey<MUTernary>::set_key_builder() {
 }
 
 template <>
+void TableBadInputKey<MURange>::set_key_builder() {
+  key_builder.push_back_field(testHeader1, 0, 14,
+                              MatchKeyParam::Type::LPM, "h1.f0");
+  key_builder.push_back_field(testHeader2, 0, 14,
+                              MatchKeyParam::Type::RANGE, "h2.f0");
+  key_builder.push_back_field(testHeader3, 0, 14,
+                              MatchKeyParam::Type::EXACT, "h3.f0");
+}
+
+template <>
 std::vector<MatchKeyParam>
 TableBadInputKey<MUExact>::gen_match_key() const {
   std::vector<MatchKeyParam> match_key;
@@ -2470,6 +2538,17 @@ TableBadInputKey<MUTernary>::gen_match_key() const {
   return match_key;
 }
 
+template <>
+std::vector<MatchKeyParam>
+TableBadInputKey<MURange>::gen_match_key() const {
+  std::vector<MatchKeyParam> match_key;
+  match_key.emplace_back(MatchKeyParam::Type::LPM, std::string("\xff\xff"), 12);
+  match_key.emplace_back(MatchKeyParam::Type::RANGE, std::string("\xff\x01"),
+                         std::string("\xff\xff"));
+  match_key.emplace_back(MatchKeyParam::Type::EXACT, std::string("\xff\xff"));
+  return match_key;
+}
+
 TYPED_TEST_CASE(TableBadInputKey, TableTypes);
 
 TYPED_TEST(TableBadInputKey, NonByteAligned) {
@@ -2479,4 +2558,129 @@ TYPED_TEST(TableBadInputKey, NonByteAligned) {
   auto pkt = this->gen_pkt();
   this->table->lookup(pkt, &hit, &lookup_handle);
   ASSERT_TRUE(hit);
+}
+
+
+class TableRangeMatch : public ::testing::Test {
+ protected:
+  static constexpr size_t t_size = 1024u;
+
+  PHVFactory phv_factory;
+
+  std::unique_ptr<MatchTable> table;
+
+  HeaderType testHeaderType;
+  header_id_t testHeader1{0}, testHeader2{1};
+  ActionFn action_fn;
+
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  TableRangeMatch()
+      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+        phv_source(PHVSourceIface::make_phv_source()) {
+    testHeaderType.push_back_field("f16", 16);
+    testHeaderType.push_back_field("f48", 48);
+    phv_factory.push_back_header("test1", testHeader1, testHeaderType);
+    phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+  }
+
+  Packet get_pkt() {
+    // dummy packet, won't be parsed
+    Packet packet = Packet::make_new(128, PacketBuffer(256), phv_source.get());
+    packet.get_phv()->get_header(testHeader1).mark_valid();
+    packet.get_phv()->get_header(testHeader2).mark_valid();
+    return packet;
+  }
+
+  void create_table(const MatchKeyBuilder &key_builder) {
+    std::unique_ptr<MURange> match_unit(
+        new MURange(t_size, key_builder, &lookup_factory));
+
+    table = std::unique_ptr<MatchTable>(
+        new MatchTable("test_table", 0, std::move(match_unit), false));
+    table->set_next_node(0, nullptr);
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+  }
+
+  // virtual void TearDown() { }
+};
+
+TEST_F(TableRangeMatch, OneRange) {
+  {
+    MatchKeyBuilder key_builder;
+    key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::RANGE);
+    create_table(key_builder);
+  }
+
+  MatchErrorCode rc;
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  unsigned int start = 0xab;
+  unsigned int end = 0x041d;
+  std::string start_s("\x00\xab", 2);
+  std::string end_s("\x04\x1d", 2);
+  int priority = 1;
+  match_key.emplace_back(MatchKeyParam::Type::RANGE, start_s, end_s);
+  entry_handle_t handle;
+  rc = table->add_entry(match_key, &action_fn, std::move(action_data),
+                        &handle, priority);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  auto check_one = [this](unsigned int v, bool expected) {
+    bool hit;
+    entry_handle_t h;
+    Packet pkt = get_pkt();
+    pkt.get_phv()->get_field(testHeader1, 0).set(v);
+    table->lookup(pkt, &hit, &h);
+    ASSERT_EQ(expected, hit);
+  };
+
+  for (unsigned int v = start; v < end; v++) check_one(v, true);
+  for (unsigned int v = 0; v < start; v++) check_one(v, false);
+  for (unsigned int v = end + 1; v < 0xffff; v++) check_one(v, false);
+}
+
+TEST_F(TableRangeMatch, TwoRanges) {
+  {
+    MatchKeyBuilder key_builder;
+    key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::RANGE);
+    key_builder.push_back_field(testHeader2, 0, 16, MatchKeyParam::Type::RANGE);
+    create_table(key_builder);
+  }
+
+  MatchErrorCode rc;
+  ActionData action_data;
+  std::vector<MatchKeyParam> match_key;
+  unsigned int start_1 = 0xab, start_2 = 0x8888;
+  unsigned int end_1 = 0x041d, end_2 = 0x8889;
+  int priority = 1;
+  match_key.emplace_back(MatchKeyParam::Type::RANGE,
+                         std::string("\x00\xab", 2),
+                         std::string("\x04\x1d", 2));
+  match_key.emplace_back(MatchKeyParam::Type::RANGE,
+                         std::string("\x88\x88", 2),
+                         std::string("\x88\x89", 2));
+  entry_handle_t handle;
+  rc = table->add_entry(match_key, &action_fn, std::move(action_data),
+                        &handle, priority);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  auto check_one = [this](unsigned int v1, unsigned int v2, bool expected) {
+    bool hit;
+    entry_handle_t h;
+    Packet pkt = get_pkt();
+    pkt.get_phv()->get_field(testHeader1, 0).set(v1);
+    pkt.get_phv()->get_field(testHeader2, 0).set(v2);
+    table->lookup(pkt, &hit, &h);
+    ASSERT_EQ(expected, hit);
+  };
+
+  check_one(start_1, start_2, true);
+  check_one(1, start_2, false);
+  check_one(start_1, 1, false);
+  check_one(1, 1, false);
+  // TODO(antonin): more checks?
 }

@@ -111,6 +111,10 @@ public:
         params.emplace_back(MatchKeyParam::Type::VALID,
                             bm_param.valid.key ? std::string("\x01", 1) : std::string("\x00", 1));
         break;
+      case BmMatchParamType::type::RANGE:
+        params.emplace_back(MatchKeyParam::Type::RANGE,
+                            bm_param.range.start, bm_param.range.end_);
+        break;
       default:
         assert(0 && "wrong type");
       }
@@ -161,6 +165,17 @@ public:
             BmMatchParam bm_param;
             bm_param.type = BmMatchParamType::type::VALID;
             bm_param.__set_valid(bm_param_valid);
+            match_key.push_back(std::move(bm_param));
+            break;
+          }
+        case MatchKeyParam::Type::RANGE:
+          {
+            BmMatchParamRange bm_param_range;
+            bm_param_range.start = param.key;
+            bm_param_range.end_ = param.mask;
+            BmMatchParam bm_param;
+            bm_param.type = BmMatchParamType::type::RANGE;
+            bm_param.__set_range(bm_param_range);
             match_key.push_back(std::move(bm_param));
             break;
           }
@@ -849,13 +864,6 @@ public:
       std::string s = switch_->get_debugger_addr();
       if (s != "") _return.__set_debugger_socket(s);
     }
-  }
-
-  void bm_dump_table(std::string& _return, const int32_t cxt_id, const std::string& table_name) {
-    Logger::get()->trace("dump_table");
-    std::ostringstream stream;
-    switch_->dump_table(cxt_id, table_name, &stream);
-    _return.append(stream.str());
   }
 
   void bm_set_crc16_custom_parameters(const int32_t cxt_id, const std::string& calc_name, const BmCrc16Config& crc16_config) {

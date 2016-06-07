@@ -139,8 +139,6 @@ class MatchTableAbstract : public NamedP4Object {
 
   virtual bool is_valid_handle(entry_handle_t handle) const = 0;
 
-  virtual void dump(std::ostream *stream) const = 0;
-
   MatchErrorCode dump_entry(std::ostream *out,
                             entry_handle_t handle) const {
     ReadLock lock = lock_read();
@@ -304,8 +302,6 @@ class MatchTable : public MatchTableAbstract {
   bool is_valid_handle(entry_handle_t handle) const override {
     return match_unit->valid_handle(handle);
   }
-
-  void dump(std::ostream *stream) const override;
 
   // meant to be called by P4Objects when loading the JSON
   // set_const_default_action_fn makes sure that the control plane cannot change
@@ -504,8 +500,6 @@ class MatchTableIndirect : public MatchTableAbstract {
     return match_unit->valid_handle(handle);
   }
 
-  void dump(std::ostream *stream) const override;
-
   size_t get_num_members() const {
     return num_members;
   }
@@ -628,8 +622,6 @@ class MatchTableIndirectWS : public MatchTableIndirect {
 
   MatchErrorCode get_num_members_in_group(grp_hdl_t grp, size_t *nb) const;
 
-  void dump(std::ostream *stream) const override;
-
  public:
   static std::unique_ptr<MatchTableIndirectWS> create(
     const std::string &match_type,
@@ -681,8 +673,6 @@ class MatchTableIndirectWS : public MatchTableIndirect {
     const_iterator begin() const { return mbrs.begin(); }
     iterator end() { return mbrs.end(); }
     const_iterator end() const { return mbrs.end(); }
-
-    void dump(std::ostream *stream) const;
 
     void serialize(std::ostream *out) const;
     void deserialize(std::istream *in);

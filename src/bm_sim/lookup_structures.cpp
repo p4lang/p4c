@@ -15,6 +15,7 @@
 
 /*
  * Gordon Bailey (gb@gordonbailey.net)
+ * Antonin Bas (antonin@barefootnetworks.com)
  *
  */
 
@@ -127,39 +128,40 @@ class ExactMap : public ExactLookupStructure {
     entries_map{};
 };
 
-class TernaryMap : public TernaryLookupStructure {
+bool operator==(const TernaryMatchKey &k1, const TernaryMatchKey &k2) {
+  return (k1.data == k2.data && k1.mask == k2.mask);
+}
+
+bool operator==(const RangeMatchKey &k1, const RangeMatchKey &k2) {
+  return (k1.data == k2.data && k1.mask == k2.mask &&
+          k1.range_widths == k2.range_widths);
+}
+
+// used by both TernaryMap and RangeMap
+template <typename K>
+class EntryList {
  public:
-  explicit TernaryMap(size_t size, size_t nbytes_key)
-    : entries(size), nbytes_key(nbytes_key) {}
+  explicit EntryList(size_t size)
+      : entries(size) {}
 
-  bool lookup(const ByteContainer &key_data,
-              internal_handle_t *handle) const override {
+  template <typename Compare>
+  bool lookup(const ByteContainer &key_data, internal_handle_t *handle,
+              Compare cmp) const {
     auto min_priority =
-        std::numeric_limits<decltype(VectorEntry::priority)>::max();
-    bool match;
+        std::numeric_limits<decltype(TernaryMatchKey::priority)>::max();
 
-    const VectorEntry *min_entry = nullptr;
+    const Entry *min_entry = nullptr;
     internal_handle_t min_handle = 0;
 
-    for (const VectorEntry *entry = head; entry; entry = entry->next) {
+    for (const Entry *entry = head; entry; entry = entry->next) {
       if (entry->priority >= min_priority) continue;
 
-      match = true;
-      for (size_t byte_index = 0; byte_index < nbytes_key; byte_index++) {
-        if (entry->key->data[byte_index] !=
-            (key_data[byte_index] & entry->key->mask[byte_index])) {
-          match = false;
-          break;
-        }
-      }
-
-      if (match) {
+      if (cmp(key_data, *entry->key)) {
         min_priority = entry->priority;
         min_entry = entry;
         // a bit sad that this cast is needed, almost makes me want to do the
         // pointer arithmetic by hand
-        min_handle = std::distance(const_cast<const VectorEntry *>(head),
-                                   entry);
+        min_handle = std::distance(const_cast<const Entry *>(head), entry);
       }
     }
 
@@ -171,14 +173,13 @@ class TernaryMap : public TernaryLookupStructure {
     return false;
   }
 
-  bool entry_exists(const TernaryMatchKey &key) const override {
-    const VectorEntry *entry = find_vec_entry(key);
+  bool exists(const K &key) const {
+    const Entry *entry = find_entry(key);
     return (entry != nullptr);
   }
 
-  void add_entry(const TernaryMatchKey &key,
-                 internal_handle_t handle) override {
-    VectorEntry &entry = entries.at(handle);
+  void add(const K &key, internal_handle_t handle) {
+    Entry &entry = entries.at(handle);
     entry.priority = key.priority;
     entry.key = &key;
 
@@ -192,7 +193,7 @@ class TernaryMap : public TernaryLookupStructure {
       // this uses knowledge about how the match unit allocates handles;
       // basically if a handle is allocated, in means all handles before it have
       // already been allocated.
-      VectorEntry &prev_entry = entries[handle - 1];
+      Entry &prev_entry = entries[handle - 1];
       entry.prev = &prev_entry;
       entry.next = prev_entry.next;
       prev_entry.next = &entry;
@@ -200,8 +201,8 @@ class TernaryMap : public TernaryLookupStructure {
     }
   }
 
-  void delete_entry(const TernaryMatchKey &key) override {
-    const VectorEntry *entry = find_vec_entry(key);
+  void delete_entry(const K &key) {
+    const Entry *entry = find_entry(key);
     assert(entry);
     if (entry->prev)
       entry->prev->next = entry->next;
@@ -210,32 +211,120 @@ class TernaryMap : public TernaryLookupStructure {
     if (entry->next) entry->next->prev = entry->prev;
   }
 
-  void clear() override {
+  void clear() {
     head = nullptr;
   }
 
  private:
-  struct VectorEntry {
+  struct Entry {
     int priority;  // duplicated on purpose (for efficiency although debatable)
-    const TernaryMatchKey *key;
-    VectorEntry *prev;
-    VectorEntry *next;
+    const K *key;
+    Entry *prev;
+    Entry *next;
   };
 
-  VectorEntry *head{nullptr};
-  std::vector<VectorEntry> entries;
-  size_t nbytes_key;
+  Entry *head{nullptr};
+  std::vector<Entry> entries;
 
-  VectorEntry *find_vec_entry(const TernaryMatchKey &key) const {
-    for (VectorEntry *entry = head; entry; entry = entry->next) {
-      if (entry->priority == key.priority &&
-          entry->key->data == key.data &&
-          entry->key->mask == key.mask) {
+  Entry *find_entry(const K &key) const {
+    for (Entry *entry = head; entry; entry = entry->next) {
+      if (entry->priority == key.priority && *entry->key == key)
         return entry;
-      }
     }
     return nullptr;
   }
+};
+
+class TernaryMap : public TernaryLookupStructure {
+ public:
+  TernaryMap(size_t size, size_t nbytes_key)
+      : entry_list(size), nbytes_key(nbytes_key) {}
+
+  bool lookup(const ByteContainer &key_data,
+              internal_handle_t *handle) const override {
+    auto cmp = [this](const ByteContainer &key_data, const TernaryMatchKey &k) {
+      for (size_t byte_index = 0; byte_index < this->nbytes_key; byte_index++) {
+        if (k.data[byte_index] != (key_data[byte_index] & k.mask[byte_index]))
+          return false;
+      }
+      return true;
+    };
+
+    return entry_list.lookup(key_data, handle, cmp);
+  }
+
+  bool entry_exists(const TernaryMatchKey &key) const override {
+    return entry_list.exists(key);
+  }
+
+  void add_entry(const TernaryMatchKey &key,
+                 internal_handle_t handle) override {
+    entry_list.add(key, handle);
+  }
+
+  void delete_entry(const TernaryMatchKey &key) override {
+    entry_list.delete_entry(key);
+  }
+
+  void clear() override {
+    entry_list.clear();
+  }
+
+ private:
+  EntryList<TernaryMatchKey> entry_list;
+  size_t nbytes_key;
+};
+
+class RangeMap : public RangeLookupStructure {
+ public:
+  RangeMap(size_t size, size_t nbytes_key)
+      : entry_list(size), nbytes_key(nbytes_key) {}
+
+  bool lookup(const ByteContainer &key_data,
+              internal_handle_t *handle) const override {
+    auto cmp = [this](const ByteContainer &key_data, const RangeMatchKey &k) {
+      size_t offset = 0;
+      for (const int w : k.range_widths) {
+        if (memcmp(&key_data[offset], &k.data[offset], w) < 0) {
+          return false;
+        }
+        if (memcmp(&key_data[offset], &k.mask[offset], w) > 0) {
+          return false;
+        }
+        offset += w;
+      }
+
+      for (; offset < nbytes_key; offset++) {
+        if (k.data[offset] != (key_data[offset] & k.mask[offset]))
+          return false;
+      }
+
+      return true;
+    };
+
+    return entry_list.lookup(key_data, handle, cmp);
+  }
+
+  bool entry_exists(const RangeMatchKey &key) const override {
+    return entry_list.exists(key);
+  }
+
+  void add_entry(const RangeMatchKey &key,
+                 internal_handle_t handle) override {
+    entry_list.add(key, handle);
+  }
+
+  void delete_entry(const RangeMatchKey &key) override {
+    entry_list.delete_entry(key);
+  }
+
+  void clear() override {
+    entry_list.clear();
+  }
+
+ private:
+  EntryList<RangeMatchKey> entry_list;
+  size_t nbytes_key;
 };
 
 }  // namespace
@@ -261,6 +350,13 @@ LookupStructureFactory::create<TernaryMatchKey>(
   return f->create_for_ternary(size, nbytes_key);
 }
 
+template <>
+std::unique_ptr<LookupStructure<RangeMatchKey> >
+LookupStructureFactory::create<RangeMatchKey>(
+    LookupStructureFactory *f, size_t size, size_t nbytes_key) {
+  return f->create_for_range(size, nbytes_key);
+}
+
 
 std::unique_ptr<ExactLookupStructure>
 LookupStructureFactory::create_for_exact(size_t size, size_t nbytes_key) {
@@ -278,6 +374,11 @@ std::unique_ptr<TernaryLookupStructure>
 LookupStructureFactory::create_for_ternary(size_t size, size_t nbytes_key) {
   return std::unique_ptr<TernaryLookupStructure>(new TernaryMap(size,
                                                                 nbytes_key));
+}
+
+std::unique_ptr<RangeLookupStructure>
+LookupStructureFactory::create_for_range(size_t size, size_t nbytes_key) {
+  return std::unique_ptr<RangeLookupStructure>(new RangeMap(size, nbytes_key));
 }
 
 }  // namespace bm
