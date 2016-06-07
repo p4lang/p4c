@@ -50,7 +50,11 @@ class P4Objects;  // forward declaration for deserialize
 struct MatchKeyParam {
   // order is important, implementation sorts match fields according to their
   // match type based on this order
+  // VALID used to be before RANGE, but when RANGE support was added, it was
+  // easier (implementation-wise) to put RANGE first. Note that this order only
+  // matters for the implementation.
   enum class Type {
+    RANGE,
     VALID,
     EXACT,
     LPM,
@@ -71,8 +75,8 @@ struct MatchKeyParam {
   static std::string type_to_string(Type t);
 
   Type type;
-  std::string key;
-  std::string mask{};  // optional
+  std::string key;  // start for range
+  std::string mask{};  // optional, end for range
   int prefix_length{0};  // optional
 };
 
@@ -150,8 +154,8 @@ class MatchKeyBuilder {
   bool has_big_mask{false};
   ByteContainer big_mask{};
   // maps the position of the field in the original P4 key to its actual
-  // position in the implementation-specific key. In the implementation, VALID
-  // match keys come first, followed by EXACT, then LPM and TERNARY.
+  // position in the implementation-specific key. In the implementation, RANGE
+  // match keys come first, followed by VALID, EXACT, then LPM and TERNARY.
   std::vector<size_t> key_mapping{};
   // inverse of key_mapping, could be handy
   std::vector<size_t> inv_mapping{};
@@ -497,6 +501,9 @@ using MatchUnitLPM = MatchUnitGeneric<LPMMatchKey, V>;
 
 template <typename V>
 using MatchUnitTernary = MatchUnitGeneric<TernaryMatchKey, V>;
+
+template <typename V>
+using MatchUnitRange = MatchUnitGeneric<RangeMatchKey, V>;
 
 
 }  // namespace bm

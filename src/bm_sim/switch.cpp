@@ -250,7 +250,7 @@ SwitchWContexts::reset_state() {
 
 namespace {
 
-const char serialization_format_version_str[] = "04182016_0";
+const char serialization_format_version_str[] = "06062016_0";
 
 }  // namespace
 

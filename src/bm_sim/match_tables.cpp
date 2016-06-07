@@ -40,6 +40,7 @@ create_match_unit(const std::string match_type, const size_t size,
   typedef MatchUnitExact<V> MUExact;
   typedef MatchUnitLPM<V> MULPM;
   typedef MatchUnitTernary<V> MUTernary;
+  typedef MatchUnitRange<V> MURange;
 
   std::unique_ptr<MatchUnitAbstract<V> > match_unit;
   if (match_type == "exact")
@@ -51,6 +52,9 @@ create_match_unit(const std::string match_type, const size_t size,
   else if (match_type == "ternary")
     match_unit = std::unique_ptr<MUTernary>(
         new MUTernary(size, match_key_builder, lookup_factory));
+  else if (match_type == "range")
+    match_unit = std::unique_ptr<MURange>(
+        new MURange(size, match_key_builder, lookup_factory));
   else
     assert(0 && "invalid match type");
   return match_unit;

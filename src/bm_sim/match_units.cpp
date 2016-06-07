@@ -29,6 +29,8 @@
 #include <vector>
 #include <algorithm>  // for std::copy, std::max
 
+#include <cstring>
+
 #include "utils.h"
 
 namespace bm {
@@ -50,14 +52,16 @@ size_t nbits_to_nbytes(size_t nbits) {
 std::string
 MatchKeyParam::type_to_string(Type t) {
   switch (t) {
+    case Type::RANGE:
+      return "RANGE";
+    case Type::VALID:
+      return "VALID";
     case Type::EXACT:
       return "EXACT";
     case Type::LPM:
       return "LPM";
     case Type::TERNARY:
       return "TERNARY";
-    case Type::VALID:
-      return "VALID";
   }
   return "";
 }
@@ -94,6 +98,10 @@ std::ostream& operator<<(std::ostream &out, const MatchKeyParam &p) {
       break;
     case MatchKeyParam::Type::TERNARY:
       out << " &&& ";
+      dump_hexstring(out, p.mask);
+      break;
+    case MatchKeyParam::Type::RANGE:
+      out << " -> ";
       dump_hexstring(out, p.mask);
       break;
     default:
@@ -288,10 +296,9 @@ create_mask_from_pref_len(int prefix_length, int size) {
 }
 
 void
-format_ternary_key(ByteContainer *key, const ByteContainer &mask) {
-  assert(key->size() == mask.size());
-  for (size_t byte_index = 0; byte_index < mask.size(); byte_index++) {
-    (*key)[byte_index] = (*key)[byte_index] & mask[byte_index];
+format_ternary_key(char *key, const char *mask, size_t n) {
+  for (size_t byte_index = 0; byte_index < n; byte_index++) {
+    key[byte_index] = key[byte_index] & mask[byte_index];
   }
 }
 
@@ -383,6 +390,9 @@ class MatchKeyBuilderHelper {
         case MatchKeyParam::Type::EXACT:
           params.emplace_back(f_info.mtype, std::string(start, end));
           break;
+        case MatchKeyParam::Type::RANGE:
+          // should only happen for RangeMatchKey
+          // range treated the same as ternary
         case MatchKeyParam::Type::TERNARY:
           {
             auto mask_start = key.mask.begin() + byte_offset;
@@ -403,6 +413,16 @@ class MatchKeyBuilderHelper {
     }
 
     return params;
+  }
+
+  // TODO(antonin): This avoids code duplication and works because RangeMatchKey
+  // inherits from TernaryMatchKey, but is this the best solution?
+  template <typename K,
+            typename std::enable_if<K::mut == MatchUnitType::RANGE, int>::type
+            = 0>
+  static std::vector<MatchKeyParam>
+  entry_to_match_params(const MatchKeyBuilder &kb, const K &key) {
+    return entry_to_match_params<TernaryMatchKey>(kb, key);
   }
 
   // TODO(antonin):
@@ -457,6 +477,7 @@ class MatchKeyBuilderHelper {
         case MatchKeyParam::Type::LPM:
           entry.key.prefix_length += param.prefix_length;
           break;
+        case MatchKeyParam::Type::RANGE:
         case MatchKeyParam::Type::TERNARY:
           assert(0);
       }
@@ -472,35 +493,66 @@ class MatchKeyBuilderHelper {
   match_params_to_entry(const MatchKeyBuilder &kb,
                         const std::vector<MatchKeyParam> &params) {
     E entry;
-    entry.key.data.reserve(kb.nbytes_key);
-    entry.key.mask.reserve(kb.nbytes_key);
+    auto &key = entry.key;
+    match_params_to_entry_ternary_and_range(kb, params, &key);
+    assert(key.data.size() == key.mask.size());
+    format_ternary_key(&key.data[0], &key.mask[0], key.data.size());
+    return entry;
+  }
+
+  template <typename E, typename std::enable_if<
+              decltype(E::key)::mut == MatchUnitType::RANGE, int>::type = 0>
+  static E
+  match_params_to_entry(const MatchKeyBuilder &kb,
+                        const std::vector<MatchKeyParam> &params) {
+    E entry;
+    match_params_to_entry_ternary_and_range(kb, params, &entry.key);
+    size_t w = 0;
+    auto &key = entry.key;
+    for (size_t i = 0; i < kb.inv_mapping.size(); i++) {
+      const auto &param = params.at(kb.inv_mapping[i]);
+      if (param.type == MatchKeyParam::Type::RANGE) {
+        key.range_widths.push_back(param.key.size());
+        w += param.key.size();
+      }
+    }
+    size_t s = key.data.size();
+    assert(s == key.mask.size());
+    assert(s >= w);
+    if (s > w) format_ternary_key(&key.data[w], &key.mask[w], s - w);
+    return entry;
+  }
+
+ private:
+  static void match_params_to_entry_ternary_and_range(
+      const MatchKeyBuilder &kb, const std::vector<MatchKeyParam> &params,
+      TernaryMatchKey *key) {
+    key->data.reserve(kb.nbytes_key);
+    key->mask.reserve(kb.nbytes_key);
 
     size_t first_byte = 0;
     for (size_t i = 0; i < kb.inv_mapping.size(); i++) {
       const auto &param = params.at(kb.inv_mapping[i]);
-      entry.key.data.append(param.key);
-      entry.key.data[first_byte] &= get_byte0_mask(kb.key_input[i].nbits);
+      key->data.append(param.key);
+      key->data[first_byte] &= get_byte0_mask(kb.key_input[i].nbits);
       switch (param.type) {
         case MatchKeyParam::Type::VALID:
-          entry.key.mask.append("\xff");
+          key->mask.append("\xff");
           break;
         case MatchKeyParam::Type::EXACT:
-          entry.key.mask.append(std::string(param.key.size(), '\xff'));
+          key->mask.append(std::string(param.key.size(), '\xff'));
           break;
         case MatchKeyParam::Type::LPM:
-          entry.key.mask.append(
+          key->mask.append(
               create_mask_from_pref_len(param.prefix_length, param.key.size()));
           break;
+        case MatchKeyParam::Type::RANGE:
         case MatchKeyParam::Type::TERNARY:
-          entry.key.mask.append(param.mask);
+          key->mask.append(param.mask);
           break;
       }
       first_byte += param.key.size();
     }
-
-    format_ternary_key(&entry.key.data, entry.key.mask);
-
-    return entry;
   }
 };
 
@@ -544,6 +596,11 @@ MatchKeyBuilder::match_params_sanity_check(
         break;
       case MatchKeyParam::Type::TERNARY:
         if (param.mask.size() != nbytes) return false;
+        break;
+      case MatchKeyParam::Type::RANGE:
+        if (param.mask.size() != nbytes) return false;
+        if (std::memcmp(param.key.data(), param.mask.data(), nbytes) > 0)
+          return false;
         break;
     }
   }
@@ -867,7 +924,7 @@ MatchUnitGeneric<K, V>::add_entry_(const std::vector<MatchKeyParam> &match_key,
   // TODO(antonin): does this really make sense for a Ternary/LPM table?
   KeyB.apply_big_mask(&entry.key.data);
 
-  // For ternary. Must be done before the entry_exists call below
+  // For ternary and range. Must be done before the entry_exists call below
   set_priority(&entry.key, priority);
 
   // check if the key is already present
@@ -984,6 +1041,11 @@ static void dump_entry_key_extra_(std::ostream *stream,
   (*stream) << " &&& " << key.mask.to_hex();
 }
 
+static void dump_entry_key_extra_(std::ostream *stream,
+                                  const RangeMatchKey &key) {
+  (*stream) << " -> " << key.mask.to_hex();
+}
+
 template <typename K, typename V>
 void
 MatchUnitGeneric<K, V>::dump_(std::ostream *stream) const {
@@ -1019,6 +1081,7 @@ void serialize_key(const LPMMatchKey &key, std::ostream *out) {
   (*out) << key.prefix_length << "\n";
 }
 
+// works for RangeMatchKey as well
 void serialize_key(const TernaryMatchKey &key, std::ostream *out) {
   (*out) << key.mask.to_hex() << "\n";
   (*out) << key.priority << "\n";
@@ -1058,6 +1121,7 @@ void deserialize_key(LPMMatchKey *key, std::istream *in) {
   (*in) >> key->prefix_length;
 }
 
+// works for RangeMatchKey as well
 void deserialize_key(TernaryMatchKey *key, std::istream *in) {
   std::string mask_hex; (*in) >> mask_hex;
   key->mask = ByteContainer(mask_hex);
@@ -1116,5 +1180,10 @@ template class
 MatchUnitGeneric<TernaryMatchKey, MatchTableAbstract::ActionEntry>;
 template class
 MatchUnitGeneric<TernaryMatchKey, MatchTableIndirect::IndirectIndex>;
+
+template class
+MatchUnitGeneric<RangeMatchKey, MatchTableAbstract::ActionEntry>;
+template class
+MatchUnitGeneric<RangeMatchKey, MatchTableIndirect::IndirectIndex>;
 
 }  // namespace bm

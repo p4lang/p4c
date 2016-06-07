@@ -148,6 +148,7 @@ class LookupStructure {
 typedef LookupStructure<ExactMatchKey>   ExactLookupStructure;
 typedef LookupStructure<LPMMatchKey>     LPMLookupStructure;
 typedef LookupStructure<TernaryMatchKey> TernaryLookupStructure;
+typedef LookupStructure<RangeMatchKey>   RangeLookupStructure;
 
 //! This class is used by match units to create instances of the appropriate
 //! LookupStructure implementation. In order to use custom data structures in
@@ -177,6 +178,10 @@ class LookupStructureFactory {
   //! Create a lookup structure for ternary matches.
   virtual std::unique_ptr<TernaryLookupStructure>
   create_for_ternary(size_t size, size_t nbytes_key);
+
+  //! Create a lookup structure for range macthes
+  virtual std::unique_ptr<RangeLookupStructure>
+  create_for_range(size_t size, size_t nbytes_key);
 };
 
 
