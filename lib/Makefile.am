@@ -14,50 +14,49 @@
 
 noinst_LIBRARIES += libp4ctoolkit.a
 libp4ctoolkit_a_SOURCES = \
-	lib/bitvec.cpp \
-	lib/crash.cpp \
-	lib/cstring.cpp \
-	lib/error.cpp \
-	lib/gc.h \
-	lib/gc.cpp \
-	lib/hex.cpp\
-	lib/indent.cpp \
-	lib/log.cpp \
-	lib/path.cpp \
-	lib/match.cpp \
-	lib/source_file.cpp \
-	lib/source_file.h  \
-	lib/stringify.cpp \
-	lib/stringify.h \
 	lib/algorithm.h  \
 	lib/alloc.h  \
 	lib/bitops.h  \
+	lib/bitvec.cpp \
 	lib/bitvec.h  \
+	lib/crash.cpp \
+	lib/cstring.cpp \
 	lib/cstring.h  \
+	lib/default.h \
+	lib/enumerator.h \
+	lib/error.cpp \
 	lib/error.h  \
 	lib/exceptions.h  \
+	lib/gc.cpp \
+	lib/gc.h \
+	lib/gmputil.cpp \
+	lib/gmputil.h \
+	lib/hex.cpp\
 	lib/hex.h  \
+	lib/indent.cpp \
 	lib/indent.h  \
+	lib/json.cpp \
+	lib/json.h \
+	lib/log.cpp \
 	lib/log.h  \
 	lib/ltbitmatrix.h  \
 	lib/map.h  \
+	lib/match.cpp \
 	lib/match.h  \
 	lib/null.h \
-	lib/nullstream.h  \
 	lib/nullstream.cpp \
+	lib/nullstream.h  \
+	lib/options.cpp \
+	lib/options.h \
 	lib/ordered_set.h  \
+	lib/path.cpp \
 	lib/path.h  \
 	lib/range.h  \
-	lib/source_file.h  \
-	lib/stringify.h  \
-	lib/stringref.h \
-	lib/enumerator.h \
-	lib/default.h \
 	lib/sourceCodeBuilder.h \
-	lib/options.h \
-	lib/json.h \
-	lib/json.cpp \
-	lib/gmputil.h \
-	lib/gmputil.cpp
+	lib/source_file.cpp \
+	lib/source_file.h  \
+	lib/stringify.cpp \
+	lib/stringify.h  \
+	lib/stringref.h
 
 cpplint_FILES += $(libp4ctoolkit_a_SOURCES)
