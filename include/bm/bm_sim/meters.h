@@ -86,6 +86,7 @@ class Meter {
 
   enum MeterErrorCode {
     SUCCESS = 0,
+    INVALID_METER_NAME,
     INVALID_INDEX,
     BAD_RATES_LIST,
     INVALID_INFO_RATE_VALUE,

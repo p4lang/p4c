@@ -1,0 +1,9 @@
+counter_read my_indirect_counter 0
+counter_read my_indirect_counter 16
+meter_set_rates my_indirect_meter 0 1:1 2:1
+meter_set_rates my_indirect_meter 16 1:1 2:1
+meter_set_rates my_indirect_meter 0 2:1 1:1
+register_read my_register 0
+register_read my_register 16
+register_write my_register 0 1
+register_write my_register 16 1

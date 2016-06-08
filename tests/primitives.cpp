@@ -62,3 +62,20 @@ class execute_meter
 };
 
 REGISTER_PRIMITIVE(execute_meter);
+
+class count : public ActionPrimitive<CounterArray &, const Data &> {
+  void operator ()(CounterArray &counter_array, const Data &idx) {
+    counter_array.get_counter(idx.get_uint()).increment_counter(get_packet());
+  }
+};
+
+REGISTER_PRIMITIVE(count);
+
+class register_write
+  : public ActionPrimitive<RegisterArray &, const Data &, const Data &> {
+  void operator ()(RegisterArray &dst, const Data &idx, const Data &src) {
+    dst[idx.get_uint()].set(src);
+  }
+};
+
+REGISTER_PRIMITIVE(register_write);

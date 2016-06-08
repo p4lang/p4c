@@ -424,33 +424,36 @@ Context::mt_indirect_ws_get_groups(const std::string &table_name) const {
 }
 
 Counter::CounterErrorCode
-Context::read_counters(const std::string &counter_name,
-                       size_t index,
+Context::read_counters(const std::string &counter_name, size_t idx,
                        MatchTableAbstract::counter_value_t *bytes,
                        MatchTableAbstract::counter_value_t *packets) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  CounterArray *counter_array = p4objects_rt->get_counter_array(counter_name);
-  assert(counter_array);
-  return (*counter_array)[index].query_counter(bytes, packets);
+  CounterArray *counter_array = p4objects_rt->get_counter_array_rt(
+      counter_name);
+  if (!counter_array) return Counter::INVALID_COUNTER_NAME;
+  if (idx >= counter_array->size()) return Counter::INVALID_INDEX;
+  return (*counter_array)[idx].query_counter(bytes, packets);
 }
 
 Counter::CounterErrorCode
 Context::reset_counters(const std::string &counter_name) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  CounterArray *counter_array = p4objects_rt->get_counter_array(counter_name);
-  assert(counter_array);
+  CounterArray *counter_array = p4objects_rt->get_counter_array_rt(
+      counter_name);
+  if (!counter_array) return Counter::INVALID_COUNTER_NAME;
   return counter_array->reset_counters();
 }
 
 Counter::CounterErrorCode
-Context::write_counters(const std::string &counter_name,
-                        size_t index,
+Context::write_counters(const std::string &counter_name, size_t idx,
                         MatchTableAbstract::counter_value_t bytes,
                         MatchTableAbstract::counter_value_t packets) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  CounterArray *counter_array = p4objects_rt->get_counter_array(counter_name);
-  assert(counter_array);
-  return (*counter_array)[index].write_counter(bytes, packets);
+  CounterArray *counter_array = p4objects_rt->get_counter_array_rt(
+      counter_name);
+  if (!counter_array) return Counter::INVALID_COUNTER_NAME;
+  if (idx >= counter_array->size()) return Counter::INVALID_INDEX;
+  return (*counter_array)[idx].write_counter(bytes, packets);
 }
 
 Context::MeterErrorCode
@@ -458,8 +461,8 @@ Context::meter_array_set_rates(
     const std::string &meter_name,
     const std::vector<Meter::rate_config_t> &configs) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MeterArray *meter_array = p4objects_rt->get_meter_array(meter_name);
-  assert(meter_array);
+  MeterArray *meter_array = p4objects_rt->get_meter_array_rt(meter_name);
+  if (!meter_array) return Meter::INVALID_METER_NAME;
   return meter_array->set_rates(configs);
 }
 
@@ -468,8 +471,9 @@ Context::meter_set_rates(
     const std::string &meter_name, size_t idx,
     const std::vector<Meter::rate_config_t> &configs) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  MeterArray *meter_array = p4objects_rt->get_meter_array(meter_name);
-  assert(meter_array);
+  MeterArray *meter_array = p4objects_rt->get_meter_array_rt(meter_name);
+  if (!meter_array) return Meter::INVALID_METER_NAME;
+  if (idx >= meter_array->size()) return Meter::INVALID_INDEX;
   return meter_array->get_meter(idx).set_rates(configs);
 }
 
@@ -477,9 +481,9 @@ Context::RegisterErrorCode
 Context::register_read(const std::string &register_name,
                        const size_t idx, Data *value) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  RegisterArray *register_array =
-    p4objects_rt->get_register_array(register_name);
-  if (!register_array) return Register::ERROR;
+  RegisterArray *register_array = p4objects_rt->get_register_array_rt(
+      register_name);
+  if (!register_array) return Register::INVALID_REGISTER_NAME;
   if (idx >= register_array->size()) return Register::INVALID_INDEX;
   auto register_lock = register_array->unique_lock();
   value->set((*register_array)[idx]);
@@ -490,9 +494,9 @@ Context::RegisterErrorCode
 Context::register_write(const std::string &register_name,
                         const size_t idx, Data value) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  RegisterArray *register_array =
-    p4objects_rt->get_register_array(register_name);
-  if (!register_array) return Register::ERROR;
+  RegisterArray *register_array = p4objects_rt->get_register_array_rt(
+      register_name);
+  if (!register_array) return Register::INVALID_REGISTER_NAME;
   if (idx >= register_array->size()) return Register::INVALID_INDEX;
   auto register_lock = register_array->unique_lock();
   (*register_array)[idx].set(std::move(value));
@@ -504,9 +508,9 @@ Context::register_write_range(const std::string &register_name,
                               const size_t start, const size_t end,
                               Data value) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  RegisterArray *register_array =
-    p4objects_rt->get_register_array(register_name);
-  if (!register_array) return Register::ERROR;
+  RegisterArray *register_array = p4objects_rt->get_register_array_rt(
+      register_name);
+  if (!register_array) return Register::INVALID_REGISTER_NAME;
   if (end > register_array->size() || start > end)
     return Register::INVALID_INDEX;
   auto register_lock = register_array->unique_lock();
@@ -518,9 +522,9 @@ Context::register_write_range(const std::string &register_name,
 Context::RegisterErrorCode
 Context::register_reset(const std::string &register_name) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  RegisterArray *register_array =
-    p4objects_rt->get_register_array(register_name);
-  if (!register_array) return Register::ERROR;
+  RegisterArray *register_array = p4objects_rt->get_register_array_rt(
+      register_name);
+  if (!register_array) return Register::INVALID_REGISTER_NAME;
   register_array->reset_state();
   return Register::SUCCESS;
 }

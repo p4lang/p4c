@@ -140,11 +140,12 @@ exception InvalidSwapOperation {
 }
 
 enum MeterOperationErrorCode {
-  INVALID_INDEX = 1,
-  BAD_RATES_LIST = 2,
-  INVALID_INFO_RATE_VALUE = 3,
-  INVALID_BURST_SIZE_VALUE = 4,
-  ERROR = 5
+  INVALID_METER_NAME = 1,
+  INVALID_INDEX = 2,
+  BAD_RATES_LIST = 3,
+  INVALID_INFO_RATE_VALUE = 4,
+  INVALID_BURST_SIZE_VALUE = 5,
+  ERROR = 6
 }
 
 exception InvalidMeterOperation {
@@ -154,8 +155,9 @@ exception InvalidMeterOperation {
 typedef i64 BmRegisterValue
 
 enum RegisterOperationErrorCode {
-  INVALID_INDEX = 1,
-  ERROR = 2
+  INVALID_REGISTER_NAME = 1,
+  INVALID_INDEX = 2,
+  ERROR = 3
 }
 
 exception InvalidRegisterOperation {

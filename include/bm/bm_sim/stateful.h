@@ -55,6 +55,7 @@ class Register : public Data {
  public:
   enum RegisterErrorCode {
     SUCCESS = 0,
+    INVALID_REGISTER_NAME,
     INVALID_INDEX,
     ERROR
   };

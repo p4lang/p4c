@@ -1,0 +1,258 @@
+{
+    "header_types": [
+        {
+            "name": "standard_metadata_t",
+            "id": 0,
+            "fields": [
+                [
+                    "ingress_port",
+                    9
+                ],
+                [
+                    "packet_length",
+                    32
+                ],
+                [
+                    "egress_spec",
+                    9
+                ],
+                [
+                    "egress_port",
+                    9
+                ],
+                [
+                    "egress_instance",
+                    32
+                ],
+                [
+                    "instance_type",
+                    32
+                ],
+                [
+                    "clone_spec",
+                    32
+                ],
+                [
+                    "_padding",
+                    5
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        },
+        {
+            "name": "meta_t",
+            "id": 1,
+            "fields": [
+                [
+                    "f",
+                    32
+                ]
+            ],
+            "length_exp": null,
+            "max_length": null
+        }
+    ],
+    "headers": [
+        {
+            "name": "standard_metadata",
+            "id": 0,
+            "header_type": "standard_metadata_t",
+            "metadata": true
+        },
+        {
+            "name": "meta",
+            "id": 1,
+            "header_type": "meta_t",
+            "metadata": false
+        }
+    ],
+    "header_stacks": [],
+    "parsers": [
+        {
+            "name": "parser",
+            "id": 0,
+            "init_state": "start",
+            "parse_states": [
+                {
+                    "name": "start",
+                    "id": 0,
+                    "parser_ops": [],
+                    "transition_key": [],
+                    "transitions": [
+                        {
+                            "value": "default",
+                            "mask": null,
+                            "next_state": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "deparsers": [
+        {
+            "name": "deparser",
+            "id": 0,
+            "order": []
+        }
+    ],
+    "meter_arrays": [
+        {
+            "name": "my_indirect_meter",
+            "id": 0,
+            "is_direct": false,
+            "size": 16,
+            "rate_count": 2,
+            "type": "packets"
+        }
+    ],
+    "actions": [
+        {
+            "name": "m_action",
+            "id": 0,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "count",
+                    "parameters": [
+                        {
+                            "type": "counter_array",
+                            "value": "my_indirect_counter"
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                },
+                {
+                    "op": "execute_meter",
+                    "parameters": [
+                        {
+                            "type": "meter_array",
+                            "value": "my_indirect_meter"
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "meta",
+                                "f"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "op": "register_write",
+                    "parameters": [
+                        {
+                            "type": "register_array",
+                            "value": "my_register"
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0xab"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "pipelines": [
+        {
+            "name": "ingress",
+            "id": 0,
+            "init_table": "m_table",
+            "tables": [
+                {
+                    "name": "m_table",
+                    "id": 0,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 1024,
+                    "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
+                    "key": [],
+                    "actions": [
+                        "m_action"
+                    ],
+                    "next_tables": {
+                        "m_action": null
+                    },
+                    "base_default_next": null
+                }
+            ],
+            "conditionals": []
+        },
+        {
+            "name": "egress",
+            "id": 1,
+            "init_table": null,
+            "tables": [],
+            "conditionals": []
+        }
+    ],
+    "calculations": [],
+    "checksums": [],
+    "learn_lists": [],
+    "field_lists": [],
+    "counter_arrays": [
+        {
+            "name": "my_indirect_counter",
+            "id": 0,
+            "is_direct": false,
+            "size": 16
+        }
+    ],
+    "register_arrays": [
+        {
+            "name": "my_register",
+            "id": 0,
+            "bitwidth": 32,
+            "size": 16
+        }
+    ],
+    "force_arith": [
+        [
+            "standard_metadata",
+            "ingress_port"
+        ],
+        [
+            "standard_metadata",
+            "packet_length"
+        ],
+        [
+            "standard_metadata",
+            "egress_spec"
+        ],
+        [
+            "standard_metadata",
+            "egress_port"
+        ],
+        [
+            "standard_metadata",
+            "egress_instance"
+        ],
+        [
+            "standard_metadata",
+            "instance_type"
+        ],
+        [
+            "standard_metadata",
+            "clone_spec"
+        ],
+        [
+            "standard_metadata",
+            "_padding"
+        ]
+    ]
+}

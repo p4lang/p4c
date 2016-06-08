@@ -1207,4 +1207,22 @@ P4Objects::check_hash(const std::string &name) const {
   return h;
 }
 
+MeterArray *
+P4Objects::get_meter_array_rt(const std::string &name) const {
+  auto it = meter_arrays.find(name);
+  return (it != meter_arrays.end()) ? it->second.get() : nullptr;
+}
+
+CounterArray *
+P4Objects::get_counter_array_rt(const std::string &name) const {
+  auto it = counter_arrays.find(name);
+  return (it != counter_arrays.end()) ? it->second.get() : nullptr;
+}
+
+RegisterArray *
+P4Objects::get_register_array_rt(const std::string &name) const {
+  auto it = register_arrays.find(name);
+  return (it != register_arrays.end()) ? it->second.get() : nullptr;
+}
+
 }  // namespace bm

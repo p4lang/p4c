@@ -139,13 +139,19 @@ class P4Objects {
     return meter_arrays.at(name).get();
   }
 
+  MeterArray *get_meter_array_rt(const std::string &name) const;
+
   CounterArray *get_counter_array(const std::string &name) const {
     return counter_arrays.at(name).get();
   }
 
+  CounterArray *get_counter_array_rt(const std::string &name) const;
+
   RegisterArray *get_register_array(const std::string &name) const {
     return register_arrays.at(name).get();
   }
+
+  RegisterArray *get_register_array_rt(const std::string &name) const;
 
   NamedCalculation *get_named_calculation(const std::string &name) const {
     return calculations.at(name).get();

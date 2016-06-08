@@ -55,6 +55,7 @@ class Counter {
 
   enum CounterErrorCode {
     SUCCESS = 0,
+    INVALID_COUNTER_NAME,
     INVALID_INDEX,
     ERROR
   };

@@ -1,0 +1,2 @@
+#!/bin/sh
+./run_one_test.py $srcdir/testdata indirect_res indirect_res.json

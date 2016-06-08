@@ -1,0 +1,7 @@
+RuntimeCmd: my_indirect_counter[0]=  BmCounterValue(packets=0, bytes=0)
+RuntimeCmd: Invalid counter operation (INVALID_INDEX)
+RuntimeCmd: RuntimeCmd: Invalid meter operation (INVALID_INDEX)
+RuntimeCmd: Invalid meter operation (INVALID_INFO_RATE_VALUE)
+RuntimeCmd: my_register[0]=  0
+RuntimeCmd: Invalid register operation (INVALID_INDEX)
+RuntimeCmd: RuntimeCmd: Invalid register operation (INVALID_INDEX)
