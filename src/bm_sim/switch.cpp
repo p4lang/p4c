@@ -77,8 +77,13 @@ SwitchWContexts::add_required_field(const std::string &header_name,
 
 void
 SwitchWContexts::force_arith_field(const std::string &header_name,
-                                 const std::string &field_name) {
-  arith_fields.insert(std::make_pair(header_name, field_name));
+                                   const std::string &field_name) {
+  arith_objects.add_field(header_name, field_name);
+}
+
+void
+SwitchWContexts::force_arith_header(const std::string &header_name) {
+  arith_objects.add_header(header_name);
 }
 
 int
@@ -104,7 +109,7 @@ SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
     cxt.set_device_id(device_id);
     cxt.set_notifications_transport(notifications_transport);
     int status = cxt.init_objects(&fs, get_lookup_factory(),
-                                  required_fields, arith_fields);
+                                  required_fields, arith_objects);
     fs.clear();
     fs.seekg(0, std::ios::beg);
     if (status != 0) return status;
@@ -216,7 +221,7 @@ SwitchWContexts::load_new_config(const std::string &new_config) {
   std::istringstream ss(new_config);
   for (auto &cxt : contexts) {
     ErrorCode rc = cxt.load_new_config(&ss, get_lookup_factory(),
-                                       required_fields, arith_fields);
+                                       required_fields, arith_objects);
     if (rc != ErrorCode::SUCCESS) return rc;
     ss.clear();
     ss.seekg(0, std::ios::beg);

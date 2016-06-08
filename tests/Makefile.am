@@ -120,4 +120,5 @@ testdata/empty_config.md5 \
 testdata/serialize.p4 \
 testdata/serialize.json \
 testdata/runtime_iface.p4 \
-testdata/runtime_iface.json
+testdata/runtime_iface.json \
+testdata/one_header.json

@@ -60,6 +60,24 @@ class P4Objects {
  public:
   typedef std::pair<std::string, std::string> header_field_pair;
 
+  class ForceArith {
+    friend class P4Objects;
+
+   public:
+    void add_field(const std::string &header_name,
+                   const std::string &field_name) {
+      fields.insert(std::make_pair(header_name, field_name));
+    }
+
+    void add_header(const std::string &header_name) {
+      headers.insert(header_name);
+    }
+
+   private:
+    std::set<header_field_pair> fields;
+    std::set<std::string> headers;
+  };
+
  public:
   // A reference works great here, but should I switch to a pointer?
   // NOLINTNEXTLINE(runtime/references)
@@ -72,8 +90,7 @@ class P4Objects {
                    std::shared_ptr<TransportIface> transport = nullptr,
                    const std::set<header_field_pair> &required_fields =
                      std::set<header_field_pair>(),
-                   const std::set<header_field_pair> &arith_fields =
-                     std::set<header_field_pair>());
+                   const ForceArith &arith_objects = ForceArith());
 
   P4Objects(const P4Objects &other) = delete;
   P4Objects &operator=(const P4Objects &) = delete;
@@ -167,6 +184,8 @@ class P4Objects {
 
   bool field_exists(const std::string &header_name,
                     const std::string &field_name) const;
+
+  bool header_exists(const std::string &header_name) const;
 
  private:
   void add_header_type(const std::string &name,

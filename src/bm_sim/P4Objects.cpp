@@ -45,6 +45,7 @@ T hexstr_to_int(const std::string &hexstr) {
 
 }  // namespace
 
+
 void
 P4Objects::build_expression(const Json::Value &json_expression,
                             Expression *expr) {
@@ -119,7 +120,7 @@ P4Objects::init_objects(std::istream *is,
                         int device_id, size_t cxt_id,
                         std::shared_ptr<TransportIface> notifications_transport,
                         const std::set<header_field_pair> &required_fields,
-                        const std::set<header_field_pair> &arith_fields) {
+                        const ForceArith &arith_objects) {
   Json::Value cfg_root;
   (*is) >> cfg_root;
 
@@ -1083,7 +1084,7 @@ P4Objects::init_objects(std::istream *is,
     }
   }
 
-  for (const auto &p : arith_fields) {
+  for (const auto &p : arith_objects.fields) {
     if (!field_exists(p.first, p.second)) {
       continue;
       // TODO(antonin): skipping warning for now, but maybe it would be nice to
@@ -1094,6 +1095,13 @@ P4Objects::init_objects(std::istream *is,
       const auto field = field_info(p.first, p.second);
       phv_factory.enable_field_arith(std::get<0>(field), std::get<1>(field));
     }
+  }
+
+  for (const auto &h : arith_objects.headers) {
+    if (!header_exists(h)) continue;
+    // safe to call because we just checked for the header existence
+    const header_id_t header_id = get_header_id(h);
+    phv_factory.enable_all_field_arith(header_id);
   }
 
   return 0;
@@ -1184,6 +1192,11 @@ P4Objects::field_exists(const string &header_name,
   if (it == header_to_type_map.end()) return false;
   const HeaderType *header_type = it->second;
   return (header_type->get_field_offset(field_name) != -1);
+}
+
+bool
+P4Objects::header_exists(const string &header_name) const {
+  return header_to_type_map.find(header_name) != header_to_type_map.end();
 }
 
 bool

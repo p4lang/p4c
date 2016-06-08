@@ -139,3 +139,36 @@ TEST(Switch, SerializeState2) {
   sw.serialize(&s2);
   ASSERT_EQ(s1.str(), s2.str());
 }
+
+// TODO(antonin): unify the code for these three test cases?
+TEST(Switch, ForceArithNone) {
+  fs::path config_path = fs::path(TESTDATADIR) / fs::path("one_header.json");
+  SwitchTest sw;
+  sw.init_objects(config_path.string(), 0, nullptr);
+  Packet pkt = sw.new_packet(0, 0, 0, 128, PacketBuffer(256));
+  ASSERT_FALSE(pkt.get_phv()->get_field("hdr.f1").get_arith_flag());
+  ASSERT_FALSE(pkt.get_phv()->get_field("hdr.f2").get_arith_flag());
+  ASSERT_FALSE(pkt.get_phv()->get_field("hdr.f3").get_arith_flag());
+}
+
+TEST(Switch, ForceArithField) {
+  fs::path config_path = fs::path(TESTDATADIR) / fs::path("one_header.json");
+  SwitchTest sw;
+  sw.force_arith_field("hdr", "f1");
+  sw.init_objects(config_path.string(), 0, nullptr);
+  Packet pkt = sw.new_packet(0, 0, 0, 128, PacketBuffer(256));
+  ASSERT_TRUE(pkt.get_phv()->get_field("hdr.f1").get_arith_flag());
+  ASSERT_FALSE(pkt.get_phv()->get_field("hdr.f2").get_arith_flag());
+  ASSERT_FALSE(pkt.get_phv()->get_field("hdr.f3").get_arith_flag());
+}
+
+TEST(Switch, ForceArithHeader) {
+  fs::path config_path = fs::path(TESTDATADIR) / fs::path("one_header.json");
+  SwitchTest sw;
+  sw.force_arith_header("hdr");
+  sw.init_objects(config_path.string(), 0, nullptr);
+  Packet pkt = sw.new_packet(0, 0, 0, 128, PacketBuffer(256));
+  ASSERT_TRUE(pkt.get_phv()->get_field("hdr.f1").get_arith_flag());
+  ASSERT_TRUE(pkt.get_phv()->get_field("hdr.f2").get_arith_flag());
+  ASSERT_TRUE(pkt.get_phv()->get_field("hdr.f3").get_arith_flag());
+}

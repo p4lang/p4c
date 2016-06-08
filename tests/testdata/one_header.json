@@ -1,0 +1,5 @@
+{
+    "header_types": [{"name": "hdr_t", "id": 0, "fields": [
+        ["f1", 32], ["f2", 32], ["f3", 32]]}],
+    "headers": [{"name": "hdr", "id": 0, "header_type": "hdr_t"}]
+}

@@ -174,6 +174,12 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   void force_arith_field(const std::string &header_name,
                          const std::string &field_name);
 
+  //! Force arithmetic on all the fields of header \p header_name. No effect if
+  //! the header is not defined in the input JSON. Is equivalent to calling
+  //! force_arith_field() on all fields in the header. See force_arith_field()
+  //! for more information.
+  void force_arith_header(const std::string &header_name);
+
   //! Get the number of contexts included in this switch
   size_t get_nb_cxts() { return nb_cxts; }
 
@@ -627,13 +633,10 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
  protected:
   typedef Context::header_field_pair header_field_pair;
+  typedef Context::ForceArith ForceArith;
 
   const std::set<header_field_pair> &get_required_fields() const {
     return required_fields;
-  }
-
-  const std::set<header_field_pair> &get_arith_fields() const {
-    return arith_fields;
   }
 
   //! Add a component to this switch. Each switch maintains a map `T` ->
@@ -697,7 +700,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   std::unordered_map<std::type_index, std::shared_ptr<void> > components{};
 
   std::set<header_field_pair> required_fields{};
-  std::set<header_field_pair> arith_fields{};
+  ForceArith arith_objects{};
 
   int thrift_port{};
 

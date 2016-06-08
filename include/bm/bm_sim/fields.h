@@ -98,6 +98,8 @@ class Field : public Data {
 
   void set_arith(bool arith_flag) { arith = arith_flag; }
 
+  bool get_arith_flag() const { return arith; }
+
   void export_bytes() {
     std::fill(bytes.begin(), bytes.end(), 0);  // very important !
 

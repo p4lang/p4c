@@ -357,20 +357,19 @@ class Context final {
   void set_force_arith(bool force_arith);
 
   typedef P4Objects::header_field_pair header_field_pair;
+  typedef P4Objects::ForceArith ForceArith;
   int init_objects(std::istream *is,
                    LookupStructureFactory * lookup_factory,
                    const std::set<header_field_pair> &required_fields =
                      std::set<header_field_pair>(),
-                   const std::set<header_field_pair> &arith_fields =
-                     std::set<header_field_pair>());
+                   const ForceArith &arith_objects = ForceArith());
 
   ErrorCode load_new_config(
       std::istream *is,
       LookupStructureFactory * lookup_factory,
       const std::set<header_field_pair> &required_fields =
         std::set<header_field_pair>(),
-      const std::set<header_field_pair> &arith_fields =
-        std::set<header_field_pair>());
+      const ForceArith &arith_objects = ForceArith());
 
   ErrorCode swap_configs();
 
