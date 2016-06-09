@@ -506,7 +506,7 @@ public:
     retrieve_match_key(e->match_key, entry.match_key);
     e->entry_handle = entry.handle;
     BmAddEntryOptions options;
-    options.priority = entry.priority;
+    options.__set_priority(entry.priority);
     e->options = options;
   }
 
