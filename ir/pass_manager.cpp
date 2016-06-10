@@ -78,3 +78,10 @@ const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char 
     }
     return program;
 }
+
+const IR::Node *PassRepeatUntil::apply_visitor(const IR::Node *program, const char *name) {
+    do {
+        program = PassManager::apply_visitor(program, name);
+    } while (!done());
+    return program;
+}
