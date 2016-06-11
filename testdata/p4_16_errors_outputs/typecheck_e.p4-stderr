@@ -1,0 +1,4 @@
+../testdata/p4_16_errors/typecheck_e.p4(6): error: f: Cannot unify T to int<32>
+        f(x);
+        ^^^^
+error: 1 errors encountered, aborting compilation

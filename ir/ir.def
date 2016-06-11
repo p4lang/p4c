@@ -40,18 +40,17 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     IndexedVector<StatOrDecl> components;
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
     NullOK Expression         selectExpression;
-#emit
-    const Annotations* getAnnotations() const override { return annotations; }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return components->getDeclarations(); }
-    const IDeclaration* getDeclByName(cstring name) const override
-    { return components->getDeclaration(name); }
+
+    Annotations getAnnotations() const override { return annotations; }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return components->getDeclarations(); }
+    const IDeclaration* getDeclByName(cstring name) const override {
+        return components->getDeclaration(name); }
 
     static const ID accept;
     static const ID reject;
     static const ID start;
     bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
-#end
 #nodbprint
     validate{ components->check_null(); }
 }
@@ -62,20 +61,19 @@ class P4Parser : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     ParameterList        constructorParams;
     IndexedVector<Declaration>  stateful;
     IndexedVector<ParserState>  states;
-#emit
-    const TypeParameters* getTypeParameters() const override { return type->getTypeParameters(); }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return stateful->getDeclarations()->concat(states->getDeclarations()); }
-    const IDeclaration* getDeclByName(cstring name) const override {
+
+    TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return stateful->getDeclarations()->concat(states->getDeclarations()); }
+    IDeclaration getDeclByName(cstring name) const override {
         auto decl = stateful->getDeclaration(name);
         if (decl != nullptr)
             return decl;
         return states->getDeclaration(name); }
-    const Type_Method* getApplyMethodType() const override { return type->getApplyMethodType(); }
-    const Type_Method* getConstructorMethodType() const override;
-    const ParameterList* getConstructorParameters() const override { return constructorParams; }
+    Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
+    Type_Method getConstructorMethodType() const override;
+    ParameterList getConstructorParameters() const override { return constructorParams; }
     void checkDuplicates() const;
-#end
 #apply
 #nodbprint
     validate {
@@ -93,16 +91,15 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     ParameterList        constructorParams;
     IndexedVector<Declaration>  stateful;
     BlockStatement       body;
-#emit
-    const TypeParameters* getTypeParameters() const override { return type->getTypeParameters(); }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return stateful->getDeclarations(); }
-    const Type_Method* getApplyMethodType() const override { return type->getApplyMethodType(); }
-    const Type_Method* getConstructorMethodType() const override;
-    const IDeclaration* getDeclByName(cstring name) const override
-    { return stateful->getDeclaration(name); }
-    const ParameterList* getConstructorParameters() const override { return constructorParams; }
-#end
+
+    TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return stateful->getDeclarations(); }
+    Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
+    Type_Method getConstructorMethodType() const override;
+    IDeclaration getDeclByName(cstring name) const override {
+        return stateful->getDeclaration(name); }
+    ParameterList getConstructorParameters() const override { return constructorParams; }
 #apply
 #nodbprint
     validate {
@@ -117,22 +114,18 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated {
     Annotations    annotations;
     ParameterList  parameters;
     BlockStatement body;
-#emit
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override;
-    const IDeclaration* getDeclByName(cstring name) const override;
-    const Annotations* getAnnotations() const override { return annotations; }
-#end
+    Util::Enumerator<IDeclaration>* getDeclarations() const override;
+    IDeclaration getDeclByName(cstring name) const override;
+    Annotations getAnnotations() const override { return annotations; }
 }
 
 // Not a subclass of IDeclaration
 class Declaration_Errors : ISimpleNamespace {
     IndexedVector<Declaration_ID> members;
-#emit
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return members->getDeclarations(); }
-    const IDeclaration* getDeclByName(cstring name) const override
-    { return members->getDeclaration(name); }
-#end
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return members->getDeclarations(); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return members->getDeclaration(name); }
 #nodbprint
     validate{ members->check_null(); }
 }
@@ -140,12 +133,10 @@ class Declaration_Errors : ISimpleNamespace {
 // Not a subclass of IDeclaration
 class Declaration_MatchKind : ISimpleNamespace {
     IndexedVector<Declaration_ID> members;
-#emit
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return members->getDeclarations(); }
-    const IDeclaration* getDeclByName(cstring name) const override
-    { return members->getDeclaration(name); }
-#end
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return members->getDeclarations(); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return members->getDeclaration(name); }
 #nodbprint
     validate{ members->check_null(); }
 }
@@ -166,11 +157,9 @@ class ActionListElement : IAnnotated, IDeclaration {
     Annotations annotations;
     Expression  expression;  // This can be a PathExpression or a MethodCallExpression
 #nodbprint
-#emit
     ID getName() const override { return getPath()->name; }
-    const Path* getPath() const;
-    const Annotations* getAnnotations() const override { return annotations; }
-#end
+    Path getPath() const;
+    Annotations getAnnotations() const override { return annotations; }
     validate {
         BUG_CHECK(expression->is<IR::PathExpression>() ||
                   expression->is<IR::MethodCallExpression>(),
@@ -204,9 +193,7 @@ class TableProperty : Declaration, IAnnotated {
     Annotations   annotations;
     PropertyValue value;
     bool          isConstant;
-#emit
-    const Annotations* getAnnotations() const override { return annotations; }
-#end
+    Annotations getAnnotations() const override { return annotations; }
 #nodbprint
 }
 
@@ -215,17 +202,17 @@ class TableProperties : ISimpleNamespace {
     toString{ return "TableProperties(" + Util::toString(properties->size()) + ")"; }
 #emit
     TableProperties() { properties = new IndexedVector<TableProperty>(); }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return properties->getDeclarations(); }
-    const TableProperty* getProperty(cstring name) const
-    { return properties->getDeclaration<TableProperty>(name); }
-    const IDeclaration* getDeclByName(cstring name) const override
-    { return properties->getDeclaration(name); }
+#end
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return properties->getDeclarations(); }
+    TableProperty getProperty(cstring name) const {
+        return properties->getDeclaration<TableProperty>(name); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return properties->getDeclaration(name); }
 
     static const cstring actionsPropertyName;
     static const cstring keyPropertyName;
     static const cstring defaultActionPropertyName;
-#end
 #nodbprint
     validate{ properties->check_null(); }
 }
@@ -234,40 +221,33 @@ class P4Table : Declaration, IAnnotated, IApply {
     Annotations     annotations;
     ParameterList   parameters;
     TableProperties properties;
-#emit
-    const Annotations* getAnnotations() const override { return annotations; }
-    const Type_Method* getApplyMethodType() const override;
-    const ActionList* getActionList() const {
+
+    Annotations getAnnotations() const override { return annotations; }
+    Type_Method getApplyMethodType() const override;
+    ActionList getActionList() const {
         auto ap = properties->getProperty(TableProperties::actionsPropertyName);
         if (ap == nullptr)
             return nullptr;
         if (!ap->value->is<IR::ActionList>()) {
             ::error("%1% must be an action list", ap);
-            return nullptr;
-        }
-        return ap->value->to<IR::ActionList>();
-    }
-    const Key* getKey() const {
+            return nullptr; }
+        return ap->value->to<IR::ActionList>(); }
+    Key getKey() const {
         auto kp = properties->getProperty(TableProperties::keyPropertyName);
         if (kp == nullptr)
             return nullptr;
         if (!kp->value->is<IR::Key>()) {
             ::error("%1% must be a key", kp);
-            return nullptr;
-        }
-        return kp->value->to<IR::Key>();
-    }
-    const Expression* getDefaultAction() const {
+            return nullptr; }
+        return kp->value->to<IR::Key>(); }
+    Expression getDefaultAction() const {
         auto d = properties->getProperty(TableProperties::defaultActionPropertyName);
         if (d == nullptr)
             return nullptr;
         if (!d->value->is<IR::ExpressionValue>()) {
             ::error("%1% must be an expression", d);
-            return nullptr;
-        }
-        return d->value->to<IR::ExpressionValue>()->expression;
-    }
-#end
+            return nullptr; }
+        return d->value->to<IR::ExpressionValue>()->expression; }
 #nodbprint
 }
 
@@ -275,9 +255,8 @@ class Declaration_Variable : Declaration, IAnnotated {
     Annotations        annotations;
     Type               type;
     NullOK Expression  initializer;
-#emit
-    const Annotations* getAnnotations() const override { return annotations; }
-#end
+
+    Annotations getAnnotations() const override { return annotations; }
     dbprint { Declaration::dbprint(out);
         if (initializer) out << " = " << *initializer; }
 }
@@ -286,9 +265,8 @@ class Declaration_Constant : Declaration, IAnnotated {
     Annotations        annotations;
     Type               type;
     Expression         initializer;
-#emit
-    const Annotations* getAnnotations() const override { return annotations; }
-#end
+
+    Annotations getAnnotations() const override { return annotations; }
 #nodbprint
     toString { return Declaration::toString(); }
 }
@@ -300,9 +278,8 @@ class Declaration_Instance : Declaration, IAnnotated {
     Vector<Expression>    arguments;
     Annotations           annotations;
     NullOK BlockStatement initializer;  // experimental only; contains just declarations, no code
-#emit
-    const Annotations* getAnnotations() const override { return annotations; }
-#end
+
+    Annotations getAnnotations() const override { return annotations; }
 #nodbprint
     validate{ arguments->check_null(); }
 }
@@ -310,13 +287,11 @@ class Declaration_Instance : Declaration, IAnnotated {
 // Toplevel program representation
 class P4Program : ISimpleNamespace {
     IndexedVector<Node> declarations;
-#emit
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return declarations->getDeclarations(); }
-    const IDeclaration* getDeclByName(cstring name) const override
-    { return declarations->getDeclaration(name); }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return declarations->getDeclarations(); }
+    IDeclaration getDeclByName(cstring name) const override {
+        return declarations->getDeclaration(name); }
     static const cstring main;
-#end
 #apply
 #nodbprint
 }
@@ -364,12 +339,10 @@ class IfStatement : Statement {
 
 class BlockStatement : Statement, ISimpleNamespace {
     IndexedVector<StatOrDecl> components;
-#emit
-    const IDeclaration* getDeclByName(cstring name) const override
-    { return components->getDeclaration(name); }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const override
-    { return components->getDeclarations(); }
-#end
+    IDeclaration getDeclByName(cstring name) const override {
+        return components->getDeclaration(name); }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return components->getDeclarations(); }
 }
 
 class MethodCallStatement : Statement {
@@ -406,27 +379,24 @@ class Function : Declaration {
 abstract Block : CompileTimeValue {
     Node node;  // Node that evaluates to this block.
     // It's either a Declaration_Instance or a ConstructorCallExpression.
-#emit
+
     // One value for each Node inside that evaluates to a compile-time constant.
     // This includes all constructor parameters, and all inner nested blocks.
-    ordered_map<const Node*, const CompileTimeValue*> constantValue;
+    ordered_map<Node, CompileTimeValue> constantValue = {};
 
     virtual void dbprint(std::ostream& out) const override;
     virtual void dbprint_recursive(std::ostream& out) const;
-    void setValue(const Node* node, const CompileTimeValue* value) {
+    void setValue(Node node, CompileTimeValue value) {
         CHECK_NULL(node); CHECK_NULL(value);
         auto it = constantValue.find(node);
         BUG_CHECK(it == constantValue.end(), "%1% already set", node);
-        constantValue[node] = value;
-    }
-    const CompileTimeValue* getValue(const Node* node) const {
+        constantValue[node] = value; }
+    CompileTimeValue getValue(Node node) const {
         CHECK_NULL(node);
         auto it = constantValue.find(node);
         if (it == constantValue.end())
             return nullptr;
-        return it->second;
-    }
-#end
+        return it->second; }
     visit_children { (void)v; }
 }
 
@@ -439,58 +409,45 @@ class TableBlock : Block {
 // The substitution holds the constructor arguments.
 abstract InstantiatedBlock : Block {
     Type instanceType;  // May be a SpecializedType
-#emit
-    virtual const IR::ParameterList* getConstructorParameters() const = 0;
-    void instantiate(std::vector<const IR::CompileTimeValue*> *args);
-    const CompileTimeValue* getParameterValue(cstring paramName) const;
+
+    virtual ParameterList getConstructorParameters() const = 0;
+    void instantiate(std::vector<CompileTimeValue> *args);
+    CompileTimeValue getParameterValue(cstring paramName) const;
     virtual void dbprint(std::ostream& out) const override;
-#end
 }
 
 class ParserBlock : InstantiatedBlock {
     P4Parser container;
-#emit
-    const IR::ParameterList* getConstructorParameters() const override
-    { return container->constructorParams; }
-#end
+    ParameterList getConstructorParameters() const override {
+        return container->constructorParams; }
 #nodbprint
 }
 
 class ControlBlock : InstantiatedBlock {
     P4Control container;
-#emit
-    const IR::ParameterList* getConstructorParameters() const override
-    { return container->constructorParams; }
-#end
+    ParameterList getConstructorParameters() const override {
+        return container->constructorParams; }
 #nodbprint
 }
 
 class PackageBlock : InstantiatedBlock {
     Type_Package type;
-#emit
-    const IR::ParameterList* getConstructorParameters() const override
-    { return type->constructorParams; }
-#end
+    ParameterList getConstructorParameters() const override { return type->constructorParams; }
 #nodbprint
 }
 
 class ExternBlock : InstantiatedBlock {
     Type_Extern type;
     Method      constructor;  // used to instantiate this block
-#emit
-    const IR::ParameterList* getConstructorParameters() const override
-    { return constructor->type->parameters; }
-#end
+    ParameterList getConstructorParameters() const override {
+        return constructor->type->parameters; }
 #nodbprint
 }
 
 // Represents the program as a whole
 class ToplevelBlock : Block {
-#emit
-    const P4Program* getProgram() const
-    { return node->to<IR::P4Program>(); }
-    const IR::PackageBlock* getMain() const;
-#end
+    P4Program getProgram() const { return node->to<IR::P4Program>(); }
+    PackageBlock getMain() const;
 #nodbprint
     validate { BUG_CHECK(node->is<IR::P4Program>(), "%1%: expected a P4Program", node); }
 }

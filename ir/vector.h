@@ -77,6 +77,7 @@ class Vector : public VectorBase {
     const T*& front() { return vec.front(); }
     void clear() { vec.clear(); }
     iterator erase(iterator i) { return vec.erase(i); }
+    iterator erase(iterator s, iterator e) { return vec.erase(s, e); }
     template<typename ForwardIter>
     iterator insert(iterator i, ForwardIter b, ForwardIter e) {
         /* FIXME -- gcc prior to 4.9 is broken and the insert routine returns void

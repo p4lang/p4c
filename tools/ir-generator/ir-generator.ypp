@@ -63,7 +63,6 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
     IrNamespace                 *irNamespace;
     ConstFieldInitializer       *constFieldInit;
     LookupScope                 *lookup;
-    std::vector<IrElement *>    *elems;
     std::vector<const Type *>   *types;
     Type                        *type;
     NodeKind                    kind;
@@ -73,22 +72,22 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
     }                           emit;
 }
 
-%token          ABSTRACT APPLY CLASS DBLCOL INLINE INTERFACE NULLOK OPERATOR OPTIONAL
-%token<str>     BLOCK IDENTIFIER INTEGER NAMESPACE NO STRING
+%token          ABSTRACT APPLY CLASS CONST DBLCOL DEFAULT DELETE INLINE INTERFACE NAMESPACE NEW
+                NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED PUBLIC STATIC VIRTUAL
+%token<str>     BLOCK IDENTIFIER INTEGER NO STRING ZERO
 %token<emit>    EMITBLOCK
 
-%type<type>                     type
-%type<irClass>                  irclass
+%type<type>                     type nonRefType
+%type<irClass>                  irclass partList
 %type<irElement>                part
 %type<irField>                  irField
-%type<i>                        fieldMod fieldMods
-%type<irMethod>                 methodBody
+%type<i>                        modifier modifiers optConst optOverride
+%type<irMethod>                 method
 %type<irNamespace>              scope
 %type<constFieldInit>           constFieldInit
 %type<kind>                     kind
-%type<elems>                    partList
 %type<types>                    parentList nonEmptyParentList type_args
-%type<str>                      name expression optInitializer
+%type<str>                      name expression optInitializer methodName body
 %type<lookup>                   lookup_scope
 
 %error-verbose
@@ -108,6 +107,7 @@ symbol_print(FILE* file, int type, YYSTYPE value)
     case STRING:
     case NO:
     case INTEGER:
+    case ZERO:
         fprintf(file, "%s", value.str.c_str());
         break;
     default:
@@ -150,8 +150,10 @@ scope
     ;
 
 irclass
-    : kind scope IDENTIFIER parentList '{' partList '}'
-                        { $$ = new IrClass(@3, $2, $1, $3, $4, $6); }
+    : kind scope IDENTIFIER parentList '{'
+      { $<irClass>$ = new IrClass(@3, $2, $1, $3, $4); }
+      partList '}'
+      { $$ = $<irClass>6; }
     ;
 
 parentList
@@ -171,38 +173,117 @@ kind
     ;
 
 partList
-    : /* emtpy */       { $$ = new std::vector<IrElement*>(); }
-    | partList part     { ($$ = $1)->push_back($2); }
+    : /* emtpy */         { $$ = $<irClass>0; }
+    | partList part       { $$ = $1;
+                            if ($2) {
+                                $2->access = $$->current_access;
+                                $2->clss = $$;
+                                $$->elements.push_back($2); } }
     ;
 
 part
-    : EMITBLOCK         { $$ = new EmitBlock(@1, $1.impl, $1.block); }
-    | NO                { $$ = new IrNo(@1, $1); }
-    | methodBody        { $$ = $1; }
-    | irField           { $$ = $1; }
-    | constFieldInit    { $$ = $1; }
-    | APPLY             { $$ = new IrApply(@1); }
+    : EMITBLOCK       { $$ = new EmitBlock(@1, $1.impl, $1.block); }
+    | NO              { $$ = new IrNo(@1, $1); }
+    | PRIVATE ':'     { $$ = nullptr; $<irClass>0->current_access = IrElement::Private; }
+    | PROTECTED ':'   { $$ = nullptr; $<irClass>0->current_access = IrElement::Protected; }
+    | PUBLIC ':'      { $$ = nullptr; $<irClass>0->current_access = IrElement::Public; }
+    | irField         { $$ = $1; }
+    | method          { $$ = $1; }
+    | constFieldInit  { $$ = $1; }
+    | APPLY           { $$ = new IrApply(@1); }
+    | CLASS           { BEGIN(PARSE_BRACKET); }
+      IDENTIFIER '{'  { $<irClass>$ = new IrClass(@2, &$<irClass>0->local, NodeKind::Nested, $3); }
+      partList '}'    { $$ = $<irClass>5; }
     ;
 
-methodBody
-    : IDENTIFIER BLOCK          { $$ = new IrMethod(@1, canon_name($1), $2); }
-    | OPERATOR '=' '=' BLOCK    { $$ = new IrMethod(@1, "operator==", $4); }
+method
+    : modifiers methodName BLOCK
+          { $$ = new IrMethod(@2, canon_name($2), $3); }
+    | modifiers IDENTIFIER '('
+          { if ($2 != $<irClass>0->name)
+                yyerror("constructor name %s doesn't match class name %s", $2, $<irClass>0->name);
+            if ($1 & ~IrField::Inline)
+                yyerror("%s invalid on constructor", IrElement::modifier($1));
+            ($<irMethod>$ = new IrMethod(@2, $2))->inImpl = !($1 & IrField::Inline);
+            $<irMethod>$->clss = $<irClass>0; }
+      argList { BEGIN(PARSE_CTOR_INIT); } ')' body
+          { ($$ = $<irMethod>4)->body = $8;
+            BEGIN(NORMAL); }
+    | modifiers type methodName '('
+          { ($<irMethod>$ = new IrMethod(@3, $3))->rtype = $2;
+            $<irMethod>$->inImpl = !($1 & IrField::Inline);
+            $<irMethod>$->isStatic = ($1 & IrField::Static);
+            $<irMethod>$->isVirtual = ($1 & IrField::Virtual);
+            $<irMethod>$->clss = $<irClass>0;
+            if ($1 & !(IrField::Inline | IrField::Virtual))
+                yyerror("%s invalid on method", IrElement::modifier($1)); }
+      optArgList ')' optConst optOverride body
+          { ($$ = $<irMethod>5)->body = $10;
+            if (!$10 || $10[0] == '=') {
+                if (!$$->inImpl)
+                    yyerror("inline method %s with no body", $3);
+                $$->inImpl = false; }
+            $$->isConst = $8;
+            $$->isOverride = $9; }
+    ;
+
+methodName
+    : IDENTIFIER
+    | OPERATOR '=' '='          { $$ = "operator=="; }
+    | OPERATOR '!' '='          { $$ = "operator!="; }
+    | OPERATOR '<' '='          { $$ = "operator<="; }
+    | OPERATOR '>' '='          { $$ = "operator>="; }
+    | OPERATOR '<'              { $$ = "operator<="; }
+    | OPERATOR '>'              { $$ = "operator>="; }
+    ;
+
+optArgList : argList | ;
+
+argList
+    : type IDENTIFIER optInitializer
+            { auto *field =new IrField(@2, $1, $2, $3);
+              field->clss = $<irMethod>0->clss;
+              $<irMethod>0->args.push_back(field); }
+    | argList ',' type IDENTIFIER optInitializer
+            { auto *field = new IrField(@4, $3, $4, $5);
+              field->clss = $<irMethod>0->clss;
+              $<irMethod>0->args.push_back(field); }
+    ;
+
+optConst : { $$ = false; } | CONST { $$ = true; }
+
+optOverride
+    : { $$ = false; }
+    | IDENTIFIER      { if (!($$ = $1 == "override"))
+                            yyerror("syntax error, expecting override or method body"); }
+
+body: BLOCK
+    | '=' ZERO ';'    { $$ = "= 0;"; }
+    | '=' DEFAULT ';' { $$ = "= default;"; }
+    | '=' DELETE ';'  { $$ = "= delete;"; }
+    | ';'             { $$ = nullptr; }
     ;
 
 irField
-    : type IDENTIFIER optInitializer ';'
-      { $$ = new IrField(@2, $1, $2, $3); }
-    | fieldMods type IDENTIFIER optInitializer ';'
-      { $$ = new IrField(@3, $2, $3, $4, $1); }
+    : modifiers type IDENTIFIER optInitializer ';'
+          { $$ = new IrField(@3, $2, $3, $4, $1);
+            if ($1 & IrElement::Virtual)
+                yyerror("virtual invalid on field %s", $3); }
+    | modifiers CONST nonRefType IDENTIFIER optInitializer ';'
+          { $$ = new IrField(@4, $3, $4, $5, $1 | IrElement::Const);
+            if ($1 & IrElement::Virtual)
+                yyerror("virtual invalid on field %s", $4); }
     ;
 
-fieldMod
-    : NULLOK { $$ = IrField::NullOK; }
-    | INLINE { $$ = IrField::Inline; }
-    | OPTIONAL { $$ = IrField::Optional; }
+modifier
+    : NULLOK    { $$ = IrElement::NullOK; }
+    | INLINE    { $$ = IrElement::Inline; }
+    | OPTIONAL  { $$ = IrElement::Optional; }
+    | STATIC    { $$ = IrElement::Static; }
+    | VIRTUAL   { $$ = IrElement::Virtual; }
     ;
 
-fieldMods : fieldMod | fieldMods fieldMod { $$ = $1 | $2; }
+modifiers : { $$ = 0; } | modifiers modifier { $$ = $1 | $2; }
 
 optInitializer
     : /* empty */       { $$ = nullptr; }
@@ -215,10 +296,20 @@ lookup_scope
     | IDENTIFIER DBLCOL                 { $$ = new LookupScope(0, $1); }
     | lookup_scope IDENTIFIER DBLCOL    { $$ = new LookupScope($1, $2); }
 
-type
+nonRefType
     : IDENTIFIER                        { $$ = new NamedType(@1, 0, $1); }
     | lookup_scope IDENTIFIER           { $$ = new NamedType(@2, $1, $2); }
-    | type '<' type_args '>'            { $$ = new TemplateInstantiation(@1, $1, *$3); }
+    | nonRefType '<' type_args '>'      { $$ = new TemplateInstantiation(@1+@4, $1, *$3); }
+    | nonRefType '[' INTEGER ']'        { $$ = new ArrayType(@1+@4, $1, atoi($3)); }
+    ;
+
+type: nonRefType
+    | type '&'                          { $$ = new ReferenceType($1); }
+    | type CONST '&'                    { $$ = new ReferenceType($1, true); }
+    | CONST nonRefType '&'              { $$ = new ReferenceType($2, true); }
+    | type '*'                          { $$ = new PointerType($1); }
+    | type CONST '*'                    { $$ = new PointerType($1, true); }
+    | CONST nonRefType '*'              { $$ = new PointerType($2, true); }
     ;
 
 type_args
@@ -227,11 +318,13 @@ type_args
     ;
 
 constFieldInit
-    : IDENTIFIER '=' expression ';'     { $$ = new ConstFieldInitializer(@1, $1, $3); }
+    : modifiers IDENTIFIER '=' expression ';'
+          { $$ = new ConstFieldInitializer(@2, $2, $4);
+            if ($1) yyerror("%s invalid on constant", IrElement::modifier($1)); }
     ;
 
 expression
-    : name | STRING | INTEGER
+    : name | STRING | INTEGER | ZERO
     | expression '(' ')'                { $$ = $1 + "()"; }
     | expression '+' '+'                { $$ = $1 + "++"; }
     ;

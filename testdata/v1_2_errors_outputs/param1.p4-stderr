@@ -1,4 +1,0 @@
-../testdata/v1_2_errors/param1.p4(9): error: e: Table parameters cannot be direction-less
-    table t(E e) {
-            ^^^
-error: 1 errors encountered, aborting compilation

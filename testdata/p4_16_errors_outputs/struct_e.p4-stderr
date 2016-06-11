@@ -1,0 +1,19 @@
+../testdata/p4_16_errors/struct_e.p4(1): error: Structure struct s does not have a field data
+struct s {}
+       ^
+../testdata/p4_16_errors/struct_e.p4(9)
+        v.data = 1w0;
+          ^^^^
+../testdata/p4_16_errors/struct_e.p4(9): error: Could not find type of v.data
+        v.data = 1w0;
+        ^^^^^^
+../testdata/p4_16_errors/struct_e.p4(10): error: Cannot extract field data from b which has type bit<1>
+        b.data = 5;
+          ^^^^
+../testdata/p4_16_errors/struct_e.p4(10)
+        b.data = 5;
+        ^
+../testdata/p4_16_errors/struct_e.p4(10): error: Could not find type of b.data
+        b.data = 5;
+        ^^^^^^
+error: 4 errors encountered, aborting compilation

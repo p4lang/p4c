@@ -1,0 +1,4 @@
+../testdata/p4_16_errors/generic_e.p4(3):syntax error, unexpected TYPE
+   void f<D
+          ^
+error: 1 errors encountered, aborting compilation

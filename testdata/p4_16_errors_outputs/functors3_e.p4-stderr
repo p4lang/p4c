@@ -1,0 +1,7 @@
+../testdata/p4_16_errors/functors3_e.p4(3): error: s1: cannot allocate objects of type struct s
+s() s1;
+^^^^^^
+../testdata/p4_16_errors/functors3_e.p4(1)
+struct s {}
+       ^
+error: 1 errors encountered, aborting compilation

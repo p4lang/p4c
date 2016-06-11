@@ -124,6 +124,9 @@ struct StringRef {
         if (len <= length) return StringRef(p + start, len - start);
         return StringRef(p + start, length);
     }
+    class Split;
+    Split split(char) const;
+    Split split(const char *) const;
 };
 
 template <class T> inline
@@ -157,5 +160,29 @@ inline std::string operator+(cstring s, const StringRef &a) {
     std::string rv(s); rv += a; return rv; }
 inline std::string operator+(const StringRef &s, cstring a) {
     std::string rv(s); rv += a; return rv; }
+
+class StringRef::Split {
+    StringRef       rest;
+    const char      *set;
+    const char      *ptr;
+    friend struct StringRef;
+    Split(StringRef r, const char *s, const char *p) : rest(r), set(s), ptr(p) {}
+ public:
+    Split begin() const { return *this; }
+    Split end() const { return Split(StringRef(), nullptr, nullptr); }
+    StringRef operator*() const { return ptr ? rest.before(ptr) : rest; }
+    Split &operator++() {
+        if (ptr) {
+            rest = rest.after(ptr+1);
+            ptr = set ? rest.find(set) : rest.find(*ptr);
+        } else {
+            rest.clear(); }
+        return *this; }
+    bool operator==(const Split &a) const { return rest == a.rest && ptr == a.ptr; }
+    bool operator!=(const Split &a) const { return rest != a.rest || ptr != a.ptr; }
+};
+
+inline StringRef::Split StringRef::split(char ch) const { return Split(*this, nullptr, find(ch)); }
+inline StringRef::Split StringRef::split(const char *s) const { return Split(*this, s, find(s)); }
 
 #endif /* P4C_LIB_STRINGREF_H_ */

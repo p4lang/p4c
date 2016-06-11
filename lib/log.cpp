@@ -17,6 +17,7 @@ limitations under the License.
 #include "log.h"
 #include <string.h>
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -31,6 +32,7 @@ limitations under the License.
 int verbose = 0;
 static std::vector<std::string> debug_specs;
 static std::unordered_set<int *> *log_vars;
+static uint64_t init_time;
 
 static bool match(const char *pattern, const char *name) {
     const char *pend = pattern + strcspn(pattern, ",:");
@@ -77,6 +79,12 @@ int get_file_log_level(const char *file, int *level) {
 }
 
 void add_debug_spec(const char *spec) {
+#ifdef CLOCK_MONOTONIC
+    if (!init_time) {
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        init_time = ts.tv_sec*1000000000UL + ts.tv_nsec; }
+#endif
     bool ok = false;
     for (const char *p = strchr(spec, ':'); p; p = strchr(p, ':')) {
         ok = true;
@@ -94,15 +102,23 @@ void add_debug_spec(const char *spec) {
 }
 
 std::ostream &operator<<(std::ostream &out, const output_log_prefix &pfx) {
-#if 1
-    const char *s = strrchr(pfx.fn, '/');
-    const char *e = strrchr(pfx.fn, '.');
-    s = s ? s + 1 : pfx.fn;
-    if (e && e > s)
-        out.write(s, e-s);
-    else
-        out << s;
-    out << ':' << pfx.level << ':';
+#ifdef CLOCK_MONOTONIC
+    if (LOGGING(2)) {
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t t = ts.tv_sec*1000000000UL + ts.tv_nsec - init_time;
+        t /= 1000000UL;  // millisec
+        out << t/1000 << '.' << std::setw(3) << std::setfill('0') << t%1000 << ':'
+            << std::setfill(' '); }
 #endif
+    if (LOGGING(1)) {
+        const char *s = strrchr(pfx.fn, '/');
+        const char *e = strrchr(pfx.fn, '.');
+        s = s ? s + 1 : pfx.fn;
+        if (e && e > s)
+            out.write(s, e-s);
+        else
+            out << s;
+        out << ':' << pfx.level << ':'; }
     return out;
 }

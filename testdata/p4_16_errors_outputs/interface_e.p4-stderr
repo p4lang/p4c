@@ -1,0 +1,4 @@
+../testdata/p4_16_errors/interface_e.p4(6): error: x: Type parameters must be supplied for constructor
+    X() x;
+    ^^^^^
+error: 1 errors encountered, aborting compilation

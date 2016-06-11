@@ -1,0 +1,4 @@
+../testdata/p4_16_errors/accept_e.p4(3): error: accept: parser state should not be implemented, it is built-in
+    state accept {
+          ^^^^^^
+error: 1 errors encountered, aborting compilation

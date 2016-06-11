@@ -1,6 +1,6 @@
 # Repository
 
-This folder contains documentation for the P4 v1.2 prototype compiler.
+This folder contains documentation for the P4_16 prototype compiler.
 The code and documentation are hosted in the following repository: https://github.com/p4lang/p4c
 
 # Compiler source code organization
@@ -10,7 +10,7 @@ p4c
 ├── build                     -- recommended place to build binary
 ├── p4include                 -- standard P4 files needed by the compiler
 ├── backends
-│   ├── v12test               -- empty back-end for testing P4 v1.2 front-end
+│   ├── p4test                -- "fake" back-end for testing
 │   ├── ebpf                  -- extended Berkeley Packet Filters back-end
 │   └── bmv2                  -- behavioral model version 2 (switch simulator) back-end
 ├── extensions
@@ -18,8 +18,8 @@ p4c
 ├── docs                      -- documentation
 ├── frontends
 │   ├── common                -- common front-end utilities
-│   ├── p4v1                  -- P4 v1.0 front-end
-│   └── p4                    -- P4 v1.2 front-end
+│   ├── p4-14                 -- P4_14 front-end
+│   └── p4                    -- P4_16 front-end
 ├── ir                        -- core internal representation
 ├── lib                       -- common utilities (libp4toolkit.a)
 ├── midend                    -- code that may be useful for writing mid-ends
@@ -28,13 +28,14 @@ p4c
 ├── tools                     -- external programs used in the build/test process
 │   └── ir-generator          -- code for the IR C++ class hierarchy generator
 └── testdata                  -- test inputs and reference outputs
-    ├── v1_2_errors           -- P4 v1.2 negative input test programs
-    ├── v1_2_samples          -- P4 v1.2 input test programs
-    ├── v1_2_errors_outputs   -- Expected outputs from v1.2 negative tests
-    ├── v1_2_samples_outputs  -- Expected outputs from v1.2 tests
-    ├── v1_errors             -- P4 v1 negative input test programs
-    ├── v1_samples_outputs    -- Expected outputs from v1 tests (using v1.2 front-end)
-    └── v1_samples            -- P4 v1 input test programs
+    ├── p4_16_samples         -- P4_16 input test programs
+    ├── p4_16_errors          -- P4_16 negative input test programs
+    ├── p4_16_samples_outputs -- Expected outputs from P4_16 tests
+    ├── p4_16_errors_outputs  -- Expected outputs from P4_16 negative tests
+    ├── v1_1_samples          -- P4 v1.1 sample programs
+    ├── p4_14_samples         -- P4_14 input test programs
+    ├── p4_14_samples_outputs -- Expected outputs from P4_14 tests
+    └── p4_14_errors          -- P4_14 negative input test programs
 ```
 
 # Dependences
@@ -114,18 +115,18 @@ compilation and simplifying debugging.
 
 # Additional documentation
 
-* the P4 v1.0 language is described in the P4 spec:
+* the P4_14 (P4 v1.0) language is described in the P4 spec:
   http://p4.org/wp-content/uploads/2015/04/p4-latest.pdf
 
-* the P4 v1.2 draft language is described in [this Word
-  document](https://github.com/p4lang/p4-spec/tree/master/v1.2/spec/P4v1.2-spec.docx).
+* the P4_16 draft language is described in [this Word
+  document](https://github.com/p4lang/p4-spec/tree/master/p4_16/spec/P4-16-draft-spec.docx).
   This language is still under design.
 
 * the compiler intermediate representation (IR) is briefly described
   in [IR](IR.md)
 
-* The [migration guide](migration-guide.pptx) describes how P4 v1.0
-  programs are translated into P4 v1.2 programs
+* The [migration guide](migration-guide.pptx) describes how P4_14 (v1.0)
+  programs are translated into P4_16 programs
 
 * The [compiler design](compiler-design.pptx) describes the salient
   features of the compiler design and implementation
@@ -259,23 +260,9 @@ autotools.
   unfixed bugs in the compiler.
 
 * To run a subset of tests execute `make check-PATTERN`.  E.g., `make
-  check-v12`.
+  check-p4`.
 
 * Add unit tests in `test/unittests`
 
 * Code for running various compiler back-ends on p4 files is generated
   using a simple python script `tools/gen-tests.py`.
-
-* Standard back-ends use P4 programs organized in the following way:
-
-  * Positive tests (expected to succeed):
-    * `testdata/v1_samples` contains P4 v1 test programs
-    * `testdata/v1_2_samples` contains P4 v1.2 test programs
-  * Negative tests (expected to fail).  The testing script should
-    return success when these tests fail.  These tests should also PASS
-    at the level of autotools.
-    * `testdata/v1_errors`
-    * `testdata/v1_2_errors`
-  * Expected intermediate compiler outputs.
-    * `testdata/v1_2_samples_outputs` outputs of positive tests
-    * `testdata/v1_2_errors_outputs` outputs of negative tests

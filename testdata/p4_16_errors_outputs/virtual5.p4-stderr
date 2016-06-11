@@ -1,0 +1,7 @@
+../testdata/p4_16_errors/virtual5.p4(10): error: g: no matching abstract method in Virtual
+        bit<16> g() { return 0; }
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/virtual5.p4(1)
+extern Virtual {
+       ^^^^^^^
+error: 1 errors encountered, aborting compilation

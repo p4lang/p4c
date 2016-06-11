@@ -1,4 +1,0 @@
-../testdata/v1_2_errors/underscore_e.p4(1):syntax error, unexpected DONTCARE
-extern void _
-            ^
-error: 1 errors encountered, aborting compilation

@@ -1,0 +1,7 @@
+../testdata/p4_16_errors/virtual6.p4(7): error: cntr: g abstract method not implemented
+    Virtual() cntr = {
+    ^^^^^^^^^^^^^^
+../testdata/p4_16_errors/virtual6.p4(3)
+    abstract bit<16> g();
+                     ^
+error: 1 errors encountered, aborting compilation

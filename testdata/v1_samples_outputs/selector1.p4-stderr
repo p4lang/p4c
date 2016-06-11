@@ -1,3 +1,0 @@
-../testdata/v1_samples/selector1.p4(53): warning: fair: Action selector attribute ignored
-    selection_mode : fair;
-                     ^^^^

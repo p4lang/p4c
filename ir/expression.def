@@ -121,12 +121,12 @@ class Constant : Expression, CompileTimeValue {
     mpz_class value;
     optional unsigned  base;  // base used when reading/writing
 #noconstructor
-#emit
     // if noWarning is true, no warning is emitted
     void handleOverflow(bool noWarning);
-    explicit Constant(intmax_t v, unsigned base = 10) :
+#emit
+    Constant(intmax_t v, unsigned base = 10) :
             Expression(new Type_InfInt()), value(v), base(base) {}
-    explicit Constant(mpz_class v, unsigned base = 10) :
+    Constant(mpz_class v, unsigned base = 10) :
             Expression(new Type_InfInt()), value(v), base(base) {}
     Constant(Util::SourceInfo si, mpz_class v, unsigned base = 10) :
             Expression(si, new Type_InfInt()), value(v), base(base) {}
@@ -136,6 +136,7 @@ class Constant : Expression, CompileTimeValue {
              unsigned base = 10, bool noWarning = false) :
             Expression(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
     static Constant GetMask(unsigned width);
+#end
     bool fitsInt() const { return value.fits_sint_p(); }
     bool fitsLong() const { return value.fits_slong_p(); }
     long asLong() const {
@@ -149,6 +150,7 @@ class Constant : Expression, CompileTimeValue {
     // The following operators are only used in special circumstances.
     // They do not look at the type when operating.  There are separate
     // implementations of these computations when doing proper constant folding.
+#emit
     Constant operator<<(const unsigned &shift) const;
     Constant operator>>(const unsigned &shift) const;
     Constant operator&(const Constant &c) const;
@@ -172,9 +174,7 @@ class StringLiteral : Expression {
 class PathExpression : Expression {
     Path path;
     PathExpression { if (!srcInfo && path) srcInfo = path->srcInfo; }
-#emit
-    explicit PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
-#end
+    PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
     toString{ return path->toString(); }
 }
 
@@ -184,10 +184,8 @@ class PathExpression : Expression {
 class TypeNameExpression : Expression {
     Type_Name typeName;
     TypeNameExpression { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
-#emit
     TypeNameExpression(ID id) : Expression(id.srcInfo),
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
-#end
     dbprint{ Node::dbprint(out); out << typeName; }
     toString { return typeName->toString(); }
 }
@@ -197,23 +195,19 @@ class Slice : Operation_Ternary {
     stringOp = "[:]";
     toString{ return e0->toString() + "[" + e1->toString() + ":" + e2->toString() + "]"; }
     // After type checking e1 and e2 will be constants
-#emit
     int getH() const { return e1->to<IR::Constant>()->asInt(); }
     int getL() const { return e2->to<IR::Constant>()->asInt(); }
-    Slice(const Expression *a, int hi, int lo)
+    Slice(Expression a, int hi, int lo)
     : Operation_Ternary(a, new Constant(hi), new Constant(lo)) {}
-    Slice(const Util::SourceInfo &si, const Expression *a, int hi, int lo)
+    Slice(Util::SourceInfo si, Expression a, int hi, int lo)
     : Operation_Ternary(si, a, new Constant(hi), new Constant(lo)) {}
-#end
 }
 
 class Member : Operation_Unary {
     ID member;
-#emit
     virtual int offset_bits() const;
     int lsb() const;
     int msb() const;
-#end
     stringOp = ".";
     toString{ return expr->toString() + "." + member; }
 }

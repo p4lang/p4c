@@ -19,7 +19,7 @@ limitations under the License.
 #include "lib/enumerator.h"
 
 const char* IrClass::indent = "    ";
-IrNamespace IrNamespace::global(nullptr, cstring(0));
+IrNamespace IrNamespace::global(nullptr, nullptr);
 static const LookupScope utilScope(nullptr, "Util");
 static const NamedType srcInfoType(Util::SourceInfo(), &utilScope, "SourceInfo");
 IrField *IrField::srcInfoField = new IrField(Util::SourceInfo(), &srcInfoType, "srcInfo", nullptr,
@@ -55,6 +55,18 @@ std::ostream &operator<<(std::ostream &out, IrNamespace *ns) {
     return out;
 }
 
+void enter_namespace(std::ostream &out, IrNamespace *ns) {
+    if (ns && ns->name) {
+        enter_namespace(out, ns->parent);
+        out << "namespace " << ns->name << " {" << std::endl; }
+}
+
+void exit_namespace(std::ostream &out, IrNamespace *ns) {
+    if (ns && ns->name) {
+        exit_namespace(out, ns->parent);
+        out << "}  // namespace " << ns->name << std::endl; }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 Util::Enumerator<IrClass*>* IrDefinitions::getClasses() const {
@@ -65,11 +77,10 @@ Util::Enumerator<IrClass*>* IrDefinitions::getClasses() const {
 
 void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &impl) const {
     std::string macroname = "_IR_GENERATED_H_";
-    out << "#ifndef " << macroname << std::endl;
-    out << "#define " << macroname << std::endl << std::endl;
-    impl << "#include \"ir/ir.h\"" << std::endl;
-    impl << "#include \"ir/visitor.h\"" << std::endl;
-    impl << std::endl;
+    out << "#ifndef " << macroname << "\n"
+        << "#define " << macroname << "\n" << std::endl;
+    impl << "#include \"ir/ir.h\"\n"
+         << "#include \"ir/visitor.h\"\n" << std::endl;
 
     for (auto e : elements) {
         e->generate_hdr(out);
@@ -107,13 +118,11 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 
     t << "namespace IR {" << std::endl;
     for (auto cls : *getClasses()) {
-        for (auto p = cls->containedIn; p && p->name; p = p->parent)
-            t << "namespace " << p->name << " {" << std::endl;
+        enter_namespace(t, cls->containedIn);
         cls->declare(t);
-        for (auto p = cls->containedIn; p && p->name; p = p->parent)
-            t << "}" << std::endl;
+        exit_namespace(t, cls->containedIn);
     }
-    t << "}" << std::endl;
+    t << "}  // namespace IR" << std::endl;
 }
 
 void IrClass::generateTreeMacro(std::ostream &out) const {
@@ -140,42 +149,59 @@ void EmitBlock::generate_impl(std::ostream &out) const {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+void IrMethod::generate_proto(std::ostream &out, bool fullname, bool defaults) const {
+    if (rtype) {
+        if (rtype->isResolved()) out << "const ";
+        out << rtype->toString() << " ";
+        if (rtype->isResolved()) out << "*"; }
+    if (fullname)
+        out << "IR::" << clss->containedIn << clss->name << "::";
+    out << name << "(";
+    const char *sep = "";
+    for (auto *a : args) {
+        out << sep;
+        a->generate(out, false);
+        if (a->initializer && defaults)
+            out << " = " << a->initializer;
+        sep = ", "; }
+    out << ")" << (isConst ? " const" : "");
+}
+
 void IrMethod::generate_hdr(std::ostream &out) const {
-    if (!args || !body) return;
-    if (inImpl) {
+    if (!inImpl)
+        out << LineDirective(srcInfo);
+    out << IrClass::indent;
+    if (isStatic) out << "static ";
+    if (isVirtual) out << "virtual ";
+    generate_proto(out, false, !!rtype);
+    if (isOverride) out << " override";
+    if (inImpl || !body)
+        out << ';';
+    else
+        out << ' ' << body;
+    out << std::endl;
+    if (name == "visit_children") {
         out << IrClass::indent;
-        if (rtype)
-            out << rtype << " ";
-        out << name << args << (isOverride ? " override" : "")
-            << ";" << std::endl;
-        if (name == "visit_children")
-            out << IrClass::indent << rtype << " " << name << args << " const"
-                << (isOverride ? " override" : "") << ";" << std::endl;
-    } else {
-        out << LineDirective(srcInfo) << IrClass::indent;
-        if (rtype)
-            out << rtype << " ";
-        out << name << args << (isOverride ? " override" : "") << " " << body << std::endl;
-        if (name == "node_type_name")
-            out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype
-                << " static_type_name() " << body << std::endl;
-        if (srcInfo.isValid())
-            out << LineDirective(); }
+        generate_proto(out, false, !!rtype);
+        out << " const";
+        if (isOverride) out << " override";
+        out << ";" << std::endl;
+    } else if (name == "node_type_name")
+        out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype->toString()
+            << " static_type_name() " << body << std::endl;
+    if (!inImpl && srcInfo.isValid())
+        out << LineDirective();
 }
 
 void IrMethod::generate_impl(std::ostream &out) const {
-    if (!inImpl || !args || !body) return;
+    if (!inImpl || !body) return;
     out << LineDirective(srcInfo);
-    if (rtype)
-        out << rtype << " ";
-    out << "IR::" << clss->containedIn << clss->name << "::" << name << args
-        << " " << body << std::endl;
+    generate_proto(out, true, false);
+    out << " " << body << std::endl;
     if (name == "visit_children") {
         out << LineDirective(srcInfo);
-        if (rtype)
-            out << rtype << " ";
-        out << "IR::" << clss->containedIn << clss->name << "::" << name << args << " const "
-            << body << std::endl; }
+        generate_proto(out, true, false);
+        out << " const " << body << std::endl; }
     if (srcInfo.isValid())
         out << LineDirective();
 }
@@ -207,16 +233,10 @@ static void output_scope_if_needed(std::ostream &out, const IrNamespace *scope,
 }
 
 void IrClass::generate_hdr(std::ostream &out) const {
-    out << "namespace IR {" << std::endl;
-    for (auto p = containedIn; p && p->name; p = p->parent)
-        out << "namespace " << p->name << " {" << std::endl;
+    if (kind != NodeKind::Nested) {
+        out << "namespace IR {" << std::endl;
+        enter_namespace(out, containedIn); }
     out << "class " << name;
-#if 0
-    // TODO(mbudiu): This is not true, but it may be desirable someday
-    if (kind == NodeKind::Concrete)
-        out << " final";
-#endif
-    out << " : ";
 
     bool concreteParent = false;
     for (auto p : parentClasses) {
@@ -224,24 +244,20 @@ void IrClass::generate_hdr(std::ostream &out) const {
             concreteParent = true;
     }
 
-    bool first = true;
-    if (!concreteParent) {
+    const char *sep = " : ";
+    if (!concreteParent && kind != NodeKind::Nested) {
         if (kind != NodeKind::Interface)
-            out << "public Node";
+            out << sep << "public Node";
         else
-            out << "public virtual INode";
-        first = false;
-    }
+            out << sep << "public virtual INode";
+        sep = ", "; }
     for (auto p : parentClasses) {
-        if (!first)
-            out << ", ";
-        out << "public ";
+        out << sep << "public ";
         if (p->kind == NodeKind::Interface)
             out << "virtual ";
         output_scope_if_needed(out, p->containedIn, containedIn);
         out << p->name;
-        first = false;
-    }
+        sep = ", "; }
 
     out << " {" << std::endl;
 
@@ -250,35 +266,38 @@ void IrClass::generate_hdr(std::ostream &out) const {
         if (e->access != access) out << (access = e->access);
         e->generate_hdr(out); }
 
-    if (kind != NodeKind::Interface)
+    if (kind != NodeKind::Interface && kind != NodeKind::Nested)
         out << indent << "IRNODE" << (kind == NodeKind::Abstract ?  "_ABSTRACT" : "")
             << "_SUBCLASS(" << name << ")" << std::endl;
 
     out << "};" << std::endl;
-    for (auto p = containedIn; p && p->name; p = p->parent)
-        out << "}" << std::endl;
-    out << "}" << std::endl;
+    if (kind != NodeKind::Nested) {
+        exit_namespace(out, containedIn);
+        out << "}  // namespace IR" << std::endl; }
 }
 
 void IrClass::generate_impl(std::ostream &out) const {
+    if (kind != NodeKind::Nested) {
+        out << "namespace IR {" << std::endl;
+        enter_namespace(out, containedIn); }
     for (auto e : elements)
         e->generate_impl(out);
-    out << std::endl;
+    if (kind != NodeKind::Nested) {
+        exit_namespace(out, containedIn);
+        out << "}  // namespace IR" << std::endl; }
 }
 
 void IrClass::computeConstructorArguments(IrClass::ctor_args_t &args) const {
-    if (concreteParent == nullptr)
-        // direct descendant of Node, add srcInfo
-        args.emplace_back(IrField::srcInfoField, IrClass::nodeClass);
-    else
-        concreteParent->computeConstructorArguments(args);
+    if (concreteParent == nullptr) {
+        if (kind != NodeKind::Nested) {
+            // direct descendant of Node, add srcInfo
+            args.emplace_back(IrField::srcInfoField, IrClass::nodeClass); }
+    } else {
+        concreteParent->computeConstructorArguments(args); }
 
     for (auto field : *getFields())
-        if (!field->initializer || field->optional)
+        if (!field->isStatic && (!field->initializer|| field->optional))
             args.emplace_back(field, this);
-
-    if (args.size() == 0)
-        BUG("No constructor arguments?");
 }
 
 int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *user,
@@ -288,65 +307,57 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     //     F1 f1;
     //     F2 f2;
     //     T(PF1 pf1, PF2 pf2, F1 f1, F2 f2) :
-    //         P(pf1, pf2),
-    //         f1(f1),
-    //         f2(f2)
+    //         P(pf1, pf2), f1(f1), f2(f2)
     //     { validate(); }
     // }
     int optargs = 0;
-    std::stringstream args, body;
-
-    bool first = true;
-    args << "(";
-    for (auto a : arglist) {
-        if (a.first->optional && (skip_opt & (1U << optargs++)))
+    std::stringstream body;
+    const char *sep = ":\n    ";
+    auto parent = getParent() ? getParent()->name : cstring();
+    const char *end_parent = "";
+    for (auto &arg : arglist) {
+        if (arg.first->optional && (skip_opt & (1U << optargs++)))
             continue;
-        if (!first)
-            args << ",\n" << indent << indent;
-        a.first->generate(args, false);
-        first = false; }
-    args << ")";
+        if (arg.second == this) {
+            body << end_parent;
+            end_parent = "";
+        } else if (parent) {
+            body << sep << parent;
+            parent = nullptr;
+            sep = "(";
+            end_parent = ")"; }
+        body << sep << arg.first->name;
+        if (arg.second == this)
+            body << "(" << arg.first->name << ")";
+        sep = ", "; }
 
-    body << ":\n" << indent << indent;
-    first = true;
-    optargs = 0;
-    // First print parent arguments
-    body << getParent()->name << "(";
-    auto it = arglist.begin();
-    for (; it != arglist.end(); ++it) {
-        if (it->second == this)
-            break;  // end of parent arguments
-        if (it->first->optional && (skip_opt & (1U << optargs++)))
-            continue;
-        if (!first)
-            body << ", ";
-        body << it->first->name;
-        first = false; }
-    body << ")";
-    // Print my fields
-    for (; it != arglist.end(); ++it) {
-        if (it->first->optional && (skip_opt & (1U << optargs++)))
-            continue;
-        body << ",\n" << indent << indent << it->first->name << "(" << it->first->name << ")"; }
-
-    body << std::endl << indent << "{";
+    body << end_parent << std::endl << indent << "{";
     if (user)
         body << '\n' << LineDirective(user->getSourceInfo()) << user->body << '\n'
              << LineDirective() << indent;
-    body << " validate(); }";
-
+    if (kind != NodeKind::Nested)
+        body << " validate(); ";
+    body << "}";
     auto ctor = new IrMethod(name, body.str());
-    ctor->args = args.str();
-    if (kind != NodeKind::Concrete)
+    ctor->clss = this;
+    optargs = 0;
+    for (auto a : arglist) {
+        if (a.first->optional && (skip_opt & (1U << optargs++)))
+            continue;
+        ctor->args.push_back(a.first); }
+
+    if (kind == NodeKind::Abstract)
         ctor->access = IrElement::Protected;
+    ctor->inImpl = true;
     elements.push_back(ctor);
     return optargs;
 }
 
 Util::Enumerator<IrField*>* IrClass::getFields() const {
     return Util::Enumerator<IrElement*>::createEnumerator(elements)
-            ->where([] (IrElement* e) { return e->is<IrField>(); })
-            ->map<IrField*>([] (IrElement* e)->IrField* { return e->to<IrField>(); });
+            ->where([] (IrElement *e) { return e->is<IrField>(); })
+            ->map<IrField*>([] (IrElement *e)->IrField* { return e->to<IrField>(); })
+            ->where([] (IrField *f) { return !f->isStatic; });
 }
 
 Util::Enumerator<IrMethod*>* IrClass::getUserMethods() const {
@@ -388,18 +399,21 @@ void IrClass::resolve() {
         parentClasses.push_back(p); }
     generateMethods();
     for (auto e : elements)
-        e->set_class(this);
+        e->resolve();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 
 void IrField::generate(std::ostream &out, bool asField) const {
-    if (asField)
+    if (asField) {
         out << IrClass::indent;
+        if (isStatic) out << "static ";
+        if (isConst) out << "const "; }
 
     auto tmpl = dynamic_cast<const TemplateInstantiation *>(type);
     const IrClass* cls = type->resolve(clss ? clss->containedIn : nullptr);
     if (cls) {
+        // FIXME -- should be doing this in resolve and converting type to PointerType as needed
         if (tmpl) {
             if (cls->kind != NodeKind::Template)
                 throw Util::CompilationError("Template args with non-template class %1%", cls);
@@ -426,14 +440,20 @@ void IrField::generate(std::ostream &out, bool asField) const {
     out << type->toString();
     if (cls != nullptr && !isInline)
         out << "*";
-    out << " " << name;
+    out << " " << name << type->declSuffix();
     if (asField) {
-        if (!initializer.isNullOrEmpty())
-            out << " = " << initializer;
-        else if (cls != nullptr && !isInline)
-            out << " = nullptr";
+        if (!isStatic) {
+            if (!initializer.isNullOrEmpty())
+                out << " = " << initializer;
+            else if (cls != nullptr && !isInline)
+                out << " = nullptr"; }
         out << ";";
         out << std::endl; }
+}
+
+void IrField::generate_impl(std::ostream &) const {
+    if (!isStatic) return;
+    // FIXME -- for now statics are manually generated elsewhere
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright 2013-present Barefoot Networks, Inc. 
-# 
+# Copyright 2013-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -50,7 +50,7 @@ class Options(object):
         self.hasBMv2 = False            # Is the behavioral model installed?
 
 def nextWord(text, sep = " "):
-    # Split a text at the indicated separator. 
+    # Split a text at the indicated separator.
     # Note that the separator can be a string.
     # Separator is discarded.
     pos = text.find(sep)
@@ -92,7 +92,7 @@ class ConfigH(object):
         self.ok = True
     def __str__(self):
         return str(self.vars)
-        
+
 def usage(options):
     name = options.binary
     print(name, "usage:")
@@ -151,7 +151,7 @@ def run_timeout(options, args, timeout, stderr):
         print("Exit code ", local.process.returncode)
     return local.process.returncode
 
-v12_timeout = 100
+timeout = 100
 
 def compare_files(options, produced, expected):
     if options.replace:
@@ -213,7 +213,7 @@ class ConcurrentInteger(object):
                 time.sleep(1)
                 continue
         return None
-            
+
 def check_generated_files(options, tmpdir, expecteddir):
     files = os.listdir(tmpdir)
     for file in files:
@@ -244,7 +244,7 @@ class TableKey(object):
         self.ternary = ternary
     def append(self, name):
         self.fields.append(name)
-        
+
 class TableKeyInstance(object):
     def __init__(self, tableKey):
         assert isinstance(tableKey, TableKey)
@@ -257,7 +257,7 @@ class TableKeyInstance(object):
         m = array.match(key)
         if m:
             key = m.group(1) + "[" + m.group(2) + "]" + m.group(3)
-        
+
         found = False
         for i in self.key.fields:
             if key == i:
@@ -315,7 +315,7 @@ class BMV2ActionArguments(object):
         return result
     def size(self):
         return len(self.action.args)
-    
+
 class BMV2Action(object):
     def __init__(self, jsonAction):
         self.name = jsonAction["name"]
@@ -404,7 +404,7 @@ class RunBMV2(object):
             k, v = nextWord(word, ":")
             actionArgs.set(k, v)
         command = "table_set_default " + tableName + " " + actionName
-        if actionArgs.size(): 
+        if actionArgs.size():
             command += " => " + str(actionArgs)
         return command
     def parse_table_add(self, cmd):
@@ -528,7 +528,7 @@ class RunBMV2(object):
             if self.options.verbose:
                 print("Running", " ".join(runswitch))
             sw = subprocess.Popen(runswitch, cwd=self.folder)
-                
+
             runcli = ["simple_switch_CLI", "--thrift-port", thriftPort]
             if self.options.verbose:
                 print("Running", " ".join(runcli))
@@ -607,7 +607,7 @@ class RunBMV2(object):
 def run_model(options, tmpdir, jsonfile):
     if not options.hasBMv2:
         return SUCCESS
-    
+
     # We can do this if an *.stf file is present
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
@@ -646,11 +646,11 @@ def process_file(options, argv):
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
     args = ["./p4c-bm2-ss", "-o", jsonfile] + options.compilerOptions
-    if "v1_samples" in options.p4filename:
+    if "p4_14_samples" in options.p4filename:
         args.extend(["--p4v", "1.0"]);
     args.extend(argv)  # includes p4filename
 
-    result = run_timeout(options, args, v12_timeout, stderr)
+    result = run_timeout(options, args, timeout, stderr)
     if result != SUCCESS:
         print("Error compiling")
         print("".join(open(stderr).readlines()))
@@ -726,7 +726,7 @@ def main(argv):
     options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
     if not options.hasBMv2:
         reportError("config.h indicates that BMv2 is not installed; will skip running BMv2 tests")
-    
+
     options.p4filename=argv[-1]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcDir):

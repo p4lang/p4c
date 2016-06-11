@@ -1,7 +1,0 @@
-../testdata/v1_2_errors/action-bind.p4(7): error: x: must be a compile-time constant
-        default_action = a(x, 0);
-                           ^
-../testdata/v1_2_errors/action-bind.p4(7): error: 0 Too many parameters for action
-        default_action = a(x, 0);
-                              ^
-error: 2 errors encountered, aborting compilation

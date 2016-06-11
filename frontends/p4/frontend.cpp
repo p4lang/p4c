@@ -38,8 +38,8 @@ limitations under the License.
 #include "simplify.h"
 
 const IR::P4Program*
-FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) {
-    if (v12_program == nullptr)
+FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
+    if (program == nullptr)
         return nullptr;
 
     bool isv1 = options.isv1();
@@ -78,6 +78,6 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* v12_program) 
     passes.setName("FrontEnd");
     passes.setStopOnError(true);
     passes.addDebugHooks(hooks);
-    const IR::P4Program* result = v12_program->apply(passes);
+    const IR::P4Program* result = program->apply(passes);
     return result;
 }

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright 2013-present Barefoot Networks, Inc. 
-# 
+# Copyright 2013-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -84,7 +84,7 @@ def run_timeout(options, args, timeout, stderr):
         print("Exit code ", local.process.returncode)
     return local.process.returncode
 
-v12_timeout = 100
+timeout = 100
 
 def compare_files(options, produced, expected):
     if options.replace:
@@ -147,7 +147,7 @@ def process_v1_2_file(options, argv):
     args = ["./p4c-ebpf", "-o", ppfile]
     args.extend(argv)
 
-    result = run_timeout(options, args, v12_timeout, stderr)
+    result = run_timeout(options, args, timeout, stderr)
     if result != SUCCESS:
         print("Error compiling")
         print("".join(open(stderr).readlines()))

@@ -1,0 +1,19 @@
+../testdata/p4_16_errors/header2_e.p4(5): error: Field field of header h cannot have type struct s
+    s field;
+      ^^^^^
+../testdata/p4_16_errors/header2_e.p4(1)
+struct s {}
+       ^
+../testdata/p4_16_errors/header2_e.p4(12): error: Field field of struct s1 cannot have type parser p
+    p field;
+      ^^^^^
+../testdata/p4_16_errors/header2_e.p4(8)
+parser p();
+       ^
+../testdata/p4_16_errors/header2_e.p4(17): error: Field field of header_union u cannot have type struct s
+   s field;
+     ^^^^^
+../testdata/p4_16_errors/header2_e.p4(1)
+struct s {}
+       ^
+error: 3 errors encountered, aborting compilation

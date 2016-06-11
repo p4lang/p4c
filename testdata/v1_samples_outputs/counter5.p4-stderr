@@ -1,3 +1,0 @@
-../testdata/v1_samples/counter5.p4(36): warning: Could not infer type for idx, using bit<8>
-action act(idx) {
-           ^^^

@@ -84,7 +84,7 @@ void IR::Primitive::typecheck() const {
         if (operands.size() > info.max_operands)
             error("%s: too many operands for primitive %s", srcInfo, name);
     } else {
-        error("%s: unknown primitive %s", srcInfo, name); }
+        /*error("%s: unknown primitive %s", srcInfo, name);*/ }
 }
 
 bool IR::Primitive::isOutput(int operand_index) const {

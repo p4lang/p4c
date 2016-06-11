@@ -1,0 +1,22 @@
+../testdata/p4_16_samples/constant_folding.p4(87): warning: 256: value does not fit in 8 bits
+    z = 8w128 + 128;
+        ^^^^^^^^^^^
+../testdata/p4_16_samples/constant_folding.p4(90): warning: -128: negative value with unsigned type
+    z = 8w0 - 128;
+        ^^^^^^^^^
+../testdata/p4_16_samples/constant_folding.p4(93): warning: <<: Shifting 8-bit value with 9
+    z = 8w1 << 9;
+        ^^^^^^^^
+../testdata/p4_16_samples/constant_folding.p4(93): warning: 512: value does not fit in 8 bits
+    z = 8w1 << 9;
+        ^^^^^^^^
+../testdata/p4_16_samples/constant_folding.p4(86): warning: 256: value does not fit in 8 bits
+    z = 128 + 128;
+        ^^^^^^^^^
+../testdata/p4_16_samples/constant_folding.p4(89): warning: -128: negative value with unsigned type
+    z = 0 - 128;
+        ^^^^^^^
+../testdata/p4_16_samples/constant_folding.p4(92): warning: 512: value does not fit in 8 bits
+    z = 1 << 9;
+        ^^^^^^
+warning: Program does not contain a `main' module

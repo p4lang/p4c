@@ -1,9 +1,9 @@
-# Copyright 2013-present Barefoot Networks, Inc. 
-# 
+# Copyright 2013-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -41,13 +41,13 @@ ir_DEF_FILES += $(srcdir)/backends/bmv2/bmv2.def
 
 CLEANFILES += $(srcdir)/bmv2tests.am
 
-$(srcdir)/bmv2tests.am: $(srcdir)/testdata/v1_2_samples/*-bmv2.p4 $(srcdir)/testdata/v1_samples/*.p4
+$(srcdir)/bmv2tests.am: $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 $(srcdir)/testdata/p4_14_samples/*.p4
 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@
 
-# These tests exhibit P4 v1.0 features still unimplemented
+# These tests exhibit P4_14 features still unimplemented
 XFAIL_TESTS += \
-    bmv2/testdata/v1_samples/09-IPv4OptionsUnparsed.p4.test \
-    bmv2/testdata/v1_samples/TLV_parsing.p4.test \
-    bmv2/testdata/v1_samples/truncate.p4.test
+    bmv2/testdata/p4_14_samples/09-IPv4OptionsUnparsed.p4.test \
+    bmv2/testdata/p4_14_samples/TLV_parsing.p4.test \
+    bmv2/testdata/p4_14_samples/truncate.p4.test
 
-XFAIL_TESTS += bmv2/testdata/v1_2_samples/ternary2-bmv2.p4.test
+XFAIL_TESTS += bmv2/testdata/p4_16_samples/ternary2-bmv2.p4.test

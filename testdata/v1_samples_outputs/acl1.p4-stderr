@@ -1,6 +1,0 @@
-../testdata/v1_samples/acl1.p4(248): warning: Could not infer type for drop_reason, using bit<8>
-action drop_packet_with_reason(drop_reason) {
-                               ^^^^^^^^^^^
-../testdata/v1_samples/acl1.p4(223): warning: Could not infer type for session_id, using bit<8>
-action negative_mirror(session_id) {
-                       ^^^^^^^^^^

@@ -1,6 +1,0 @@
-../testdata/v1_2_errors/missing_include.p4:1:27: fatal error: no-such-file.p4: No such file or directory
- #include "no-such-file.p4"
-                           ^
-compilation terminated.
-error: Preprocessor returned exit code 256; aborting compilation
-error: 1 errors encountered, aborting compilation

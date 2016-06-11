@@ -14,61 +14,48 @@ abstract Type {
     typedef Type_Boolean        Boolean;
     typedef Type_Bits           Bits;
     typedef Type_Varbits        Varbits;
-    virtual int width_bits() const { return 0; }
 #end
+    virtual int width_bits() const { return 0; }
 }
 
 // Implemented by all types that may be generic
 interface IMayBeGenericType {
-#emit
     virtual const TypeParameters* getTypeParameters() const = 0;
-    const Type* toType() const { return getNode()->to<Type>(); }
-#end
+    inline const Type* toType() const { return getNode()->to<Type>(); }
+    const Type* specialize(const Vector<Type>* arguments) const;
 }
 
 // Implemented by objects with an 'apply' method
 interface IApply {
-#emit
     static const cstring applyMethodName;
     virtual const Type_Method* getApplyMethodType() const = 0;
-#end
 }
 
 interface INamespace {
-#emit
-    virtual Util::Enumerator<const IDeclaration*>* getDeclarations() const = 0;
-#end
+    virtual Util::Enumerator<IDeclaration> *getDeclarations() const = 0;
 }
 
 // No two declarations with the same name
 interface ISimpleNamespace : INamespace {
-#emit
-    virtual const IDeclaration* getDeclByName(cstring name) const = 0;
-#end
+    virtual IDeclaration getDeclByName(cstring name) const = 0;
 }
 
 interface IGeneralNamespace : INamespace {
-#emit
-    virtual Util::Enumerator<const IDeclaration*>* getDeclsByName(cstring name) const;
+    virtual Util::Enumerator<IDeclaration>* getDeclsByName(cstring name) const;
     void checkDuplicateDeclarations() const;
-#end
     validate{ checkDuplicateDeclarations(); }
 }
 
 // Implemented by things that look like type variables
 interface ITypeVar {
-#emit
     virtual cstring getVarName() const = 0;
-    const Type* asType() const { return to<Type>(); }
-#end
+    inline Type asType() const { return to<Type>(); }
 }
 
 interface IContainer : IMayBeGenericType {
-#emit
     // The type of the constructor as a method
-    virtual const Type_Method* getConstructorMethodType() const = 0;
-    virtual const ParameterList* getConstructorParameters() const = 0;
-#end
+    virtual Type_Method getConstructorMethodType() const = 0;
+    virtual ParameterList getConstructorParameters() const = 0;
 }
 
 // This represents a primitive type
@@ -78,9 +65,7 @@ abstract Type_Base : Type {}
 // This is needed by Expression
 class Type_Unknown : Type_Base {
 #nodbprint
-#emit
-    static const Type::Unknown *get();
-#end
+    static Type_Unknown get();
     toString{ return "Unknown type"; }
 }
 
@@ -91,12 +76,10 @@ abstract StatOrDecl {}
 abstract Declaration : StatOrDecl, IDeclaration {
     ID          name;
     int declid = nextId++;
-#emit
     ID getName() const override { return name; }
  private:
     static int nextId;
  public:
-#end
     dbprint { Node::dbprint(out); out << name << "/" << declid; }
     toString { return externalName(); }
 }
@@ -105,12 +88,10 @@ abstract Declaration : StatOrDecl, IDeclaration {
 abstract Type_Declaration : Type, IDeclaration {
     ID name;
     int declid = nextId++;
-#emit
     ID getName() const override { return name; }
  private:
     static int nextId;
  public:
-#end
     toString { return externalName(); }
     dbprint { Node::dbprint(out); out << name << "/" << declid; }
 }
@@ -126,9 +107,9 @@ abstract Expression {
 }
 
 abstract Operation : Expression {
-#emit
     virtual int getPrecedence() const = 0;
     virtual cstring getStringOp() const = 0;
+#emit
     typedef Operation_Unary Unary;
     typedef Operation_Binary Binary;
     typedef Operation_Relation Relation;
@@ -139,14 +120,12 @@ abstract Operation : Expression {
 class PathPrefix {
     bool absolute = false;
     optional vector<ID> components;
-#emit
-    PathPrefix(Util::SourceInfo si, PathPrefix* start, ID end)
+    PathPrefix(Util::SourceInfo si, PathPrefix start, ID end)
             : Node(si), absolute(start->absolute) {
         CHECK_NULL(start);
         std::copy(start->components.begin(), start->components.end(), components.begin());
         components.push_back(end); }
     void setAbsolute() { absolute = true; }
-#end
     toString{
         // Prints path prefix without the trailing dot
         std::stringstream result;
@@ -168,9 +147,7 @@ class Path {
     optional NullOK PathPrefix prefix;
     ID                name;
     Path { if (!srcInfo) srcInfo = prefix ? prefix->srcInfo + name.srcInfo : name.srcInfo; }
-#emit
     bool isDontCare() const { return prefix == nullptr && name.isDontCare(); }
-#end
     toString{
         std::stringstream str;
         if (prefix == nullptr) {
@@ -188,14 +165,9 @@ class Annotation {
     ID name;
     NullOK Expression expr;
     Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
-#emit
-    Annotation(cstring n, intmax_t v);
+    Annotation(cstring n, intmax_t v) : name(n), expr(new IR::Constant(v)) {}
     // Predefined annotations used by the compiler
     static const cstring nameAnnotation;
-#end
-#emit_impl
-    IR::Annotation::Annotation(cstring n, intmax_t v) : name(n), expr(new IR::Constant(v)) {}
-#end
     toString{ return cstring("@") + name; }
 #nodbprint
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
@@ -206,28 +178,26 @@ class Annotations {
     Vector<Annotation> annotations;
 #nodbprint
     Annotations { if (!srcInfo && annotations) srcInfo = annotations->srcInfo; }
-#emit
-    static Annotations *empty;
+    static Annotations *empty;  // FIXME -- should be const
     size_t size() const { return annotations->size(); }
     // Get the annotation with the specified name or nullptr.
     // There should be at most one annotation with this name.
-    const Annotation* getSingle(cstring name) const
-    { return get(annotations, name); }
-    Annotations* addAnnotation(cstring name, const Expression* expr) const {
+    Annotation getSingle(cstring name) const { return get(annotations, name); }
+    Annotations addAnnotation(cstring name, Expression expr) const {
         auto vec = new Vector<Annotation>(*annotations);
         vec->push_back(new Annotation(name, expr));
         return new Annotations(vec);
     }
     // Add annotation if another annotation with the same name is not
     // already present.
-    const Annotations* addAnnotationIfNew(cstring name, const Expression* expr) const {
+    Annotations addAnnotationIfNew(cstring name, Expression expr) const {
         if (getSingle(name) != nullptr)
             return this;
         return addAnnotation(name, expr);
     }
     // If annotations with the same name are already present, remove them.
     // Add this annotation.
-    const Annotations* addOrReplace(cstring name, const Expression* expr) const {
+    Annotations addOrReplace(cstring name, Expression expr) const {
         auto vec = new Vector<Annotation>();
         for (auto a : *annotations) {
             if (a->name.name != name)
@@ -236,12 +206,9 @@ class Annotations {
         vec->push_back(new Annotation(name, expr));
         return new Annotations(vec);
     }
-#end
     validate{ annotations->check_null(); }
 }
 
 interface IAnnotated {
-#emit
-    virtual const Annotations* getAnnotations() const = 0;
-#end
+    virtual Annotations getAnnotations() const = 0;
 }

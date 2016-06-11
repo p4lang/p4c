@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-v12_frontend_SOURCES = \
+p4_frontend_SOURCES = \
 	frontends/p4/p4-parse.ypp \
 	frontends/p4/frontend.h \
 	frontends/p4/frontend.cpp \
@@ -100,7 +100,7 @@ BUILT_SOURCES += \
 	frontends/p4/p4-parse.cpp
 
 frontend_SOURCES = \
-	$(v12_frontend_SOURCES) \
+	$(p4_frontend_SOURCES) \
 	$(common_frontend_SOURCES) \
 	$(v1_frontend_SOURCES)
 

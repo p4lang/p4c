@@ -1,7 +1,0 @@
-../testdata/v1_2_errors/missing_match.p4(5): warning: Table t does not have an `default_action' property
-    table t() {
-          ^
-../testdata/v1_2_errors/missing_match.p4(6): error: Could not find declaration for noSuchMatch
-        key = { b : noSuchMatch; }
-                    ^^^^^^^^^^^
-error: 1 errors encountered, aborting compilation
