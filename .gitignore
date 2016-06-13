@@ -38,7 +38,6 @@ extensions/*
 otherMakefiles.am
 *.d
 *.output
-*tests.am
 build/
 
 # Eclipse files

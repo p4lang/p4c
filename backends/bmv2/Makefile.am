@@ -37,11 +37,11 @@ cpplint_FILES += $(p4c_bm2_ss_SOURCES)
 ir_DEF_FILES += $(srcdir)/backends/bmv2/bmv2.def
 
 # Tests
--include $(srcdir)/bmv2tests.am
+-include bmv2tests.mk
 
-CLEANFILES += $(srcdir)/bmv2tests.am
+CLEANFILES += bmv2tests.mk
 
-$(srcdir)/bmv2tests.am: $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 $(srcdir)/testdata/p4_14_samples/*.p4
+bmv2tests.mk: $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 $(srcdir)/testdata/p4_14_samples/*.p4
 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@
 
 # These tests exhibit P4_14 features still unimplemented
