@@ -42,17 +42,15 @@ limitations under the License.
 
 namespace BMV2 {
 
-const IR::P4Program* MidEnd::processP4_14(CompilerOptions&, const IR::P4Program* program) {
+void MidEnd::setup_for_P4_14(CompilerOptions&) {
     bool isv1 = true;
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     // Inlining is simpler for P4 v1.0/1.1 programs, so we have a
     // specialized code path, which also generates slighly nicer
     // human-readable results.
-    P4::InlineWorkList controlsToInline;
-    P4::ActionsInlineList actionsToInline;
 
-    PassManager midend = {
+    addPasses({
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         evaluator,
         new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator),
@@ -62,13 +60,7 @@ const IR::P4Program* MidEnd::processP4_14(CompilerOptions&, const IR::P4Program*
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new SimpleActionsInliner(&refMap), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-    };
-    midend.setName("V1MidEnd");
-    midend.addDebugHooks(hooks);
-    program = program->apply(midend);
-    if (::errorCount() > 0)
-        return nullptr;
-    return program;
+    });
 }
 
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
@@ -88,12 +80,12 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
 };
 
 
-const IR::P4Program* MidEnd::processP4_16(CompilerOptions& options, const IR::P4Program* program) {
+void MidEnd::setup_for_P4_16(CompilerOptions& options) {
     // we may come through this path even if the program is actually a P4 v1.0 program
     bool isv1 = options.isv1();
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
-    PassManager simplify = {
+    addPasses({
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::ConvertEnums(new EnumOn32Bits(), &typeMap),
         // Proper semantics for uninitialzed local variables in parser states:
@@ -111,24 +103,17 @@ const IR::P4Program* MidEnd::processP4_16(CompilerOptions& options, const IR::P4
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, true, isv1),
         evaluator,
-    };
 
-    simplify.setName("Simplify");
-    simplify.addDebugHooks(hooks);
-    program = program->apply(simplify);
-    if (::errorCount() > 0)
-        return nullptr;
-    auto toplevel = evaluator->getToplevelBlock();
-    if (toplevel->getMain() == nullptr)
-        // nothing further to do
-        return nullptr;
+        new VisitFunctor([evaluator](const IR::Node *root) -> const IR::Node * {
+            auto toplevel = evaluator->getToplevelBlock();
+            if (toplevel->getMain() == nullptr)
+                // nothing further to do
+                return nullptr;
+            return root; }),
 
-    P4::InlineWorkList toInline;
-    P4::ActionsInlineList actionsToInline;
-    PassManager midEnd = {
         // Inlining
-        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
-        new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
+        new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator),
+        new P4::InlineDriver(&controlsToInline, new P4::GeneralInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
@@ -165,31 +150,23 @@ const IR::P4Program* MidEnd::processP4_16(CompilerOptions& options, const IR::P4
         // Move all stand-alone actions to custom tables
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::MoveActionsToTables(&refMap, &typeMap),
-    };
-
-    midEnd.setName("MidEnd");
-    midEnd.addDebugHooks(hooks);
-    program = program->apply(midEnd);
-    if (::errorCount() > 0)
-        return nullptr;
-    return program;
+    });
 }
 
 
-IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
+MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.isv1();
 
+    setName("MidEnd");
     if (isv1)
         // TODO: This path should be eventually deprecated
-        program = processP4_14(options, program);
+        setup_for_P4_14(options);
     else
-        program = processP4_16(options, program);
-    if (program == nullptr)
-        return nullptr;
+        setup_for_P4_16(options);
 
     // BMv2-specific passes
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
-    PassManager backend = {
+    addPasses({
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
@@ -199,17 +176,9 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        evaluator
-    };
-
-    backend.setName("Backend");
-    backend.addDebugHooks(hooks);
-    program = program->apply(backend);
-    if (::errorCount() > 0)
-        return nullptr;
-
-    auto toplevel = evaluator->getToplevelBlock();
-    return toplevel;
+        evaluator,
+        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
+    });
 }
 
 }  // namespace BMV2

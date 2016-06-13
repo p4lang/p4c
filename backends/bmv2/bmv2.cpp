@@ -53,9 +53,9 @@ int main(int argc, char *const argv[]) {
     if (program == nullptr || ::errorCount() > 0)
         return 1;
 
-    BMV2::MidEnd midEnd;
+    BMV2::MidEnd midEnd(options);
     midEnd.addDebugHook(hook);
-    auto toplevel = midEnd.process(options, program);
+    auto toplevel = midEnd.process(program);
     if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
