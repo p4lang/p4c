@@ -20,15 +20,23 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "midend/actionsInlining.h"
+#include "midend/inlining.h"
 
 namespace P4Test {
 
-class MidEnd {
-    std::vector<DebugHook> hooks;
+class MidEnd : public PassManager { 
+    P4::ReferenceMap    refMap;
+    P4::TypeMap         typeMap;
+    IR::ToplevelBlock   *toplevel = nullptr;
+    P4::InlineWorkList toInline;
+    P4::ActionsInlineList actionsToInline;
+
  public:
-    MidEnd() = default;
-    void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
-    IR::ToplevelBlock* process(CompilerOptions& options, const IR::P4Program* program);
+    MidEnd(CompilerOptions& options);
+    IR::ToplevelBlock* process(const IR::P4Program* program) {
+        program = program->apply(*this);
+        return toplevel; }
 };
 
 }   // namespace P4Test
