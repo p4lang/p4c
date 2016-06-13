@@ -1,4 +1,4 @@
-This folder contains the C++ source code for the P4 v1.2 compiler.
+This folder contains the C++ source code for the P4-16 compiler.
 
 The compiler documentation is in [docs/README.md](docs/README.md)
 
