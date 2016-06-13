@@ -123,7 +123,6 @@ class Constant : Expression, CompileTimeValue {
 #noconstructor
     // if noWarning is true, no warning is emitted
     void handleOverflow(bool noWarning);
-#emit
     Constant(intmax_t v, unsigned base = 10) :
             Expression(new Type_InfInt()), value(v), base(base) {}
     Constant(mpz_class v, unsigned base = 10) :
@@ -135,6 +134,7 @@ class Constant : Expression, CompileTimeValue {
     Constant(Util::SourceInfo si, const Type *t, mpz_class v,
              unsigned base = 10, bool noWarning = false) :
             Expression(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
+#emit
     static Constant GetMask(unsigned width);
 #end
     bool fitsInt() const { return value.fits_sint_p(); }

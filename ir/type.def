@@ -83,9 +83,7 @@ class ParameterList : ISimpleNamespace {
     IndexedVector<Parameter> parameters;
     validate{ parameters->check_null(); }
     dbprint { Node::dbprint(out); out << "[" << size() << "]"; }
-#emit
     ParameterList() { parameters = new IndexedVector<Parameter>(); }
-#end
     Util::Enumerator<Parameter>* getEnumerator() const {
         return parameters->getEnumerator(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
@@ -157,9 +155,7 @@ class Type_MatchKind : Type_Base {
 
 class TypeParameters : ISimpleNamespace {
     IndexedVector<Type_Var> parameters;
-#emit
     TypeParameters() : parameters(new IndexedVector<Type_Var>()) {}
-#end
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return parameters->getDeclarations(); }
     bool empty() const { return parameters->empty(); }
@@ -193,9 +189,7 @@ class StructField : Declaration, IAnnotated {
 abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
     optional Annotations       annotations = Annotations::empty;
     IndexedVector<StructField> fields;
-#emit
-    const Annotations* getAnnotations() const override { return annotations; }
-#end
+    Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return fields->getDeclarations(); }
     StructField getField(cstring name) const {

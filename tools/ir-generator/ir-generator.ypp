@@ -206,8 +206,9 @@ method
                 yyerror("%s invalid on constructor", IrElement::modifier($1));
             ($<irMethod>$ = new IrMethod(@2, $2))->inImpl = !($1 & IrField::Inline);
             $<irMethod>$->clss = $<irClass>0; }
-      argList { BEGIN(PARSE_CTOR_INIT); } ')' body
+      optArgList { BEGIN(PARSE_CTOR_INIT); } ')' body
           { ($$ = $<irMethod>4)->body = $8;
+            $$->isUser = true;
             BEGIN(NORMAL); }
     | modifiers type methodName '('
           { ($<irMethod>$ = new IrMethod(@3, $3))->rtype = $2;
@@ -223,6 +224,7 @@ method
                 if (!$$->inImpl)
                     yyerror("inline method %s with no body", $3);
                 $$->inImpl = false; }
+            $$->isUser = true;
             $$->isConst = $8;
             $$->isOverride = $9; }
     ;

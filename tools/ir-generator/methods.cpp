@@ -148,7 +148,7 @@ void IrClass::generateMethods() {
             m->rtype->resolve(&local);
             continue; }
         if (m->name == name) {
-            if (m->args.empty()) ctor = m;
+            if (!m->isUser) ctor = m;
             continue; }
         if (!IrMethod::Generate.count(m->name))
             throw Util::CompilationError("Unrecognized predefined method %1%", m);

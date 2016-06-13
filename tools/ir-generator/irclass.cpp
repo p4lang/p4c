@@ -173,7 +173,7 @@ void IrMethod::generate_hdr(std::ostream &out) const {
     out << IrClass::indent;
     if (isStatic) out << "static ";
     if (isVirtual) out << "virtual ";
-    generate_proto(out, false, !!rtype);
+    generate_proto(out, false, isUser);
     if (isOverride) out << " override";
     if (inImpl || !body)
         out << ';';
@@ -182,7 +182,7 @@ void IrMethod::generate_hdr(std::ostream &out) const {
     out << std::endl;
     if (name == "visit_children") {
         out << IrClass::indent;
-        generate_proto(out, false, !!rtype);
+        generate_proto(out, false, isUser);
         out << " const";
         if (isOverride) out << " override";
         out << ";" << std::endl;

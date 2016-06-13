@@ -200,9 +200,7 @@ class TableProperty : Declaration, IAnnotated {
 class TableProperties : ISimpleNamespace {
     IndexedVector<TableProperty> properties;
     toString{ return "TableProperties(" + Util::toString(properties->size()) + ")"; }
-#emit
     TableProperties() { properties = new IndexedVector<TableProperty>(); }
-#end
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return properties->getDeclarations(); }
     TableProperty getProperty(cstring name) const {
