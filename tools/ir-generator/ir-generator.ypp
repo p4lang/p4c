@@ -243,7 +243,7 @@ optArgList : argList | ;
 
 argList
     : type IDENTIFIER optInitializer
-            { auto *field =new IrField(@2, $1, $2, $3);
+            { auto *field = new IrField(@2, $1, $2, $3);
               field->clss = $<irMethod>0->clss;
               $<irMethod>0->args.push_back(field); }
     | argList ',' type IDENTIFIER optInitializer

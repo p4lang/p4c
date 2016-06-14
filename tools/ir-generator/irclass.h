@@ -80,7 +80,7 @@ class IrElement  : public Util::IHasSourceInfo {
         return ""; }
 };
 inline std::ostream &operator<<(std::ostream &out, IrElement::access_t a) {
-    switch(a) {
+    switch (a) {
     case IrElement::Public: out << " public:"; break;
     case IrElement::Protected: out << " protected:"; break;
     case IrElement::Private: out << " private:"; break; }

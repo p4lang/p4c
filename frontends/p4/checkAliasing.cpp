@@ -81,7 +81,7 @@ class CanonicalMemberExpression : public Inspector {
     }
 
  public:
-    CanonicalMemberExpression(const ReferenceMap* refMap) : refMap(refMap)
+    explicit CanonicalMemberExpression(const ReferenceMap* refMap) : refMap(refMap)
     { CHECK_NULL(refMap); }
 
     // Return true if this expression

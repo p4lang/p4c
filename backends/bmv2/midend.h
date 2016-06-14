@@ -35,13 +35,11 @@ class MidEnd : public PassManager {
     // These will be accurate when the mid-end completes evaluation
     P4::ReferenceMap    refMap;
     P4::TypeMap         typeMap;
-    // FIXME -- perhaps should return this from apply?
-    // FIXME -- should be const?
-    IR::ToplevelBlock   *toplevel = nullptr;
+    IR::ToplevelBlock   *toplevel = nullptr;  // Should this be const?
 
     explicit MidEnd(CompilerOptions& options);
     IR::ToplevelBlock* process(const IR::P4Program* program) {
-        program = program->apply(*this);   // throwing away program?
+        program = program->apply(*this);
         return toplevel; }
 };
 

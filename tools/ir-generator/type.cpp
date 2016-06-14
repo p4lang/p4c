@@ -92,6 +92,6 @@ cstring PointerType::toString() const {
 
 cstring ArrayType::declSuffix() const {
     char buf[16];
-    sprintf(buf, "[%d]", size);
+    snprintf(buf, sizeof(buf), "[%d]", size);
     return buf;
 }

@@ -33,6 +33,7 @@ class MethodInstance {
                    const IR::Type_MethodBase* methodType) :
             expr(mce), object(decl), methodType(methodType)
     { CHECK_NULL(mce); CHECK_NULL(methodType); }
+
  public:
     const IR::MethodCallExpression* expr;
     const IR::IDeclaration* object;  // Object that method is applied to.

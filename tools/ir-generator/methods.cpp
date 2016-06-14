@@ -127,9 +127,9 @@ void IrClass::generateMethods() {
             if (body) {
                 if (!body.size())
                     body = nullptr;
-                if (exist)
+                if (exist) {
                     exist->body = body;
-                else {
+                } else {
                     auto *m = new IrMethod(def.first, body);
                     m->clss = this;
                     elements.push_back(m); } } }
