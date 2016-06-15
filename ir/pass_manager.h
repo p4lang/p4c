@@ -23,6 +23,7 @@ typedef std::function<void(const char* manager, unsigned seqNo,
                            const char* pass, const IR::Node* node)> DebugHook;
 
 class PassManager : virtual public Visitor {
+    bool early_exit_flag;
  protected:
     vector<DebugHook>   debugHooks;  // called after each pass
     vector<Visitor *>   passes;
@@ -41,6 +42,7 @@ class PassManager : virtual public Visitor {
     void addDebugHook(DebugHook h) { debugHooks.push_back(h); }
     void addDebugHooks(std::vector<DebugHook> hooks)
     { debugHooks.insert(debugHooks.end(), hooks.begin(), hooks.end()); }
+    void early_exit() { early_exit_flag = true; }
 };
 
 // Repeat a pass until convergence (or up to a fixed number of repeats)
