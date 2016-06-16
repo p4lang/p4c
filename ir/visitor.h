@@ -219,6 +219,10 @@ class Backtrack : public virtual Visitor {
         enum type_t { OK, OTHER }       type;
         explicit trigger(type_t t) : type(t) {}
         virtual void dbprint(std::ostream &out) const { out << typeid(*this).name(); }
+        template<class T> T *to() { return dynamic_cast<T *>(this); }
+        template<class T> const T *to() const { return dynamic_cast<const T *>(this); }
+        template<class T> bool is() { return to<T>() != nullptr; }
+        template<class T> bool is() const { return to<T>() != nullptr; }
     };
     virtual bool backtrack(trigger &trig) = 0;
 };
