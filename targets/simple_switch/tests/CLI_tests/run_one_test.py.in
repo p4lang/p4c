@@ -20,6 +20,7 @@ import subprocess
 import os
 import time
 import random
+import re
 
 # Class written by Mihai Budiu, for Barefoot Networks, Inc.
 class ConcurrentInteger(object):
@@ -69,7 +70,8 @@ def main():
 
     # makes sure that the switch will start right away
     simple_switch_p = subprocess.Popen(
-        ["@abs_top_builddir@/targets/simple_switch/simple_switch", "-h"])
+        ["@abs_top_builddir@/targets/simple_switch/simple_switch", "-h"],
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     simple_switch_p.wait()
 
     # start simple_switch
@@ -104,12 +106,32 @@ def main():
 
     assert(out)
 
-    with open(output_path, "r") as f:
-        expected_out = f.read()
+    def parse_data(s, pattern):
+        m = re.findall("{}(.*?)(?={})".format(pattern, pattern), s,
+                       re.DOTALL)
+        return m
 
-        if expected_out in out:
+    # remove noise
+    out = out[out.find("RuntimeCmd: "):]
+    out_parsed = parse_data(out, "RuntimeCmd: ")
+
+    with open(output_path, "r") as f:
+        expected_parse = parse_data(f.read(), "\?\?\?\?\n")
+        success = True
+        if len(out_parsed) != len(expected_parse):
+            success = False
+        for o, e in zip(out_parsed, expected_parse):
+            if o != e:
+                success = False
+
+        if success:
             simple_switch_p.kill()
             sys.exit(0)
+        else:
+            print "Expected"
+            print "\n".join(expected_parse)
+            print "But got"
+            print "\n".join(out_parsed)
 
     simple_switch_p.kill()
     sys.exit(4)

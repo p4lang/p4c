@@ -1,3 +1,15 @@
+????
+Group has been created with handle 0
+????
+Member has been created with handle 0
+????
+Adding entry to indirect match table ecmp_group
+Entry has been added with handle 0
+????
+????
+Adding entry to indirect match table ecmp_group
+Entry has been added with handle 1
+????
 ==========
 TABLE ENTRIES
 **********
@@ -24,3 +36,4 @@ Members: [0]
 Dumping default entry
 EMPTY
 ==========
+????

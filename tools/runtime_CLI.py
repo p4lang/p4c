@@ -1628,7 +1628,8 @@ class RuntimeAPI(cmd.Cmd):
         table_name = args[0]
         table = self.get_res("table", table_name, TABLES)
         entries = self.client.bm_mt_get_entries(0, table_name)
-        out_name_w = max(20, max([len(t[0]) for t in table.key]))
+        if table.key:
+            out_name_w = max(20, max([len(t[0]) for t in table.key]))
 
         def hexstr(v):
             return "".join("{:02x}".format(ord(c)) for c in v)
@@ -1662,7 +1663,7 @@ class RuntimeAPI(cmd.Cmd):
                     k[0], MatchType.to_str(p.type).upper(),
                     pdumper(p), w=out_name_w)
             if (e.options.priority >= 0):
-                print "Priority: {}".format(e.priority)
+                print "Priority: {}".format(e.options.priority)
             self.dump_action_entry(e.action_entry)
 
         if table.type_ == TableType.indirect or\
