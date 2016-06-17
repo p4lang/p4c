@@ -408,7 +408,7 @@ stateExpression
 selectExpression
     : SELECT '(' expressionList ')' '{' selectCaseList '}'
                               { $$ = new IR::SelectExpression(@1 + @7,
-                                                              new IR::ListExpression(@3, $3), $6); }
+                                      new IR::ListExpression(@3, $3), std::move(*$6)); }
     ;
 
 selectCaseList
@@ -699,7 +699,8 @@ statOrDeclList
     ;
 
 switchStatement
-    : SWITCH '(' expression ')' '{' switchCases '}' { $$ = new IR::SwitchStatement(@1, $3, $6); }
+    : SWITCH '(' expression ')' '{' switchCases '}' {
+            $$ = new IR::SwitchStatement(@1, $3, std::move(*$6)); }
     ;
 
 switchCases

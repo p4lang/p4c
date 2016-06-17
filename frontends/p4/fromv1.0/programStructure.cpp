@@ -339,17 +339,17 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
         BUG_CHECK(match->size() > 0, "No select expression in %1%", parser);
         // select always expects a ListExpression
         auto list = new IR::ListExpression(parser->select->srcInfo, match);
-        auto cases = new IR::Vector<IR::SelectCase>();
+        IR::Vector<IR::SelectCase> cases;
         for (auto c : *parser->cases) {
             IR::ID state = c->action;
             auto deststate = getState(state);
             for (auto v : c->values) {
                 auto expr = explodeLabel(v.first, v.second, sizes);
                 auto sc = new IR::SelectCase(c->srcInfo, expr, deststate);
-                cases->push_back(sc);
+                cases.push_back(sc);
             }
         }
-        select = new IR::SelectExpression(parser->select->srcInfo, list, cases);
+        select = new IR::SelectExpression(parser->select->srcInfo, list, std::move(cases));
     } else if (!parser->default_return.name.isNullOrEmpty()) {
         IR::ID id = parser->default_return;
         select = getState(id);

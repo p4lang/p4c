@@ -161,7 +161,7 @@ const IR::Node* RemoveReturns::preorder(IR::IfStatement* statement) {
 const IR::Node* RemoveReturns::preorder(IR::SwitchStatement* statement) {
     auto r = Returns::No;
     push();
-    visit(statement->cases);
+    statement->cases.visit_children(*this);
     if (hasReturned() != Returns::No)
         // this is conservative: we don't check if we cover all labels.
         r = Returns::Maybe;
@@ -361,12 +361,13 @@ const IR::Node* RemoveExits::preorder(IR::SwitchStatement* statement) {
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->expression->apply(ce);
 
+    /* FIXME -- alter cases in place rather than allocating a new Vector */
     IR::Vector<IR::SwitchCase> *cases = nullptr;
     if (ce.callsExit) {
         r = Returns::Maybe;
         cases = new IR::Vector<IR::SwitchCase>();
     }
-    for (auto c : *statement->cases) {
+    for (auto &c : statement->cases) {
         push();
         visit(c);
         if (hasReturned() != Returns::No)
@@ -391,7 +392,7 @@ const IR::Node* RemoveExits::preorder(IR::SwitchStatement* statement) {
     set(r);
     prune();
     if (cases != nullptr)
-        statement->cases = cases;
+        statement->cases = std::move(*cases);
     return statement;
 }
 

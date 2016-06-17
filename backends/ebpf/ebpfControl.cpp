@@ -209,7 +209,7 @@ bool ControlBodyTranslationVisitor::preorder(const IR::SwitchStatement* statemen
     builder->append(newName);
     builder->append(") ");
     builder->blockStart();
-    for (auto c : *statement->cases) {
+    for (auto c : statement->cases) {
         builder->emitIndent();
         if (c->label->is<IR::DefaultExpression>()) {
             builder->append("default");

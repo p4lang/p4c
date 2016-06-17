@@ -90,7 +90,7 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
     builder->append(") ");
     builder->blockStart();
 
-    for (auto e : *expression->selectCases)
+    for (auto e : expression->selectCases)
         visit(e);
 
     if (!hasDefault) {

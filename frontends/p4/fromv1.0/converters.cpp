@@ -212,7 +212,7 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
             prune();
             return ifstat;
         } else {
-            auto cases = new IR::Vector<IR::SwitchCase>();
+            IR::Vector<IR::SwitchCase> cases;
             for (auto a : apply->actions) {
                 StatementConverter conv(structure, renameMap);
                 auto stat = conv.convert(a.second);
@@ -222,10 +222,10 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
                 else
                     destination = new IR::PathExpression(IR::ID(a.first));
                 auto swcase = new IR::SwitchCase(a.second->srcInfo, destination, stat);
-                cases->push_back(swcase);
+                cases.push_back(swcase);
             }
             auto check = new IR::Member(Util::SourceInfo(), call, IR::Type_Table::action_run);
-            auto sw = new IR::SwitchStatement(apply->srcInfo, check, cases);
+            auto sw = new IR::SwitchStatement(apply->srcInfo, check, std::move(cases));
             prune();
             return sw;
         }
