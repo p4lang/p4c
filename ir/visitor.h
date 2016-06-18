@@ -135,6 +135,9 @@ class Visitor {
     // pass, this will result in them being duplicated if they are modified.
     bool visitDagOnce = true;
     bool dontForwardChildrenBeforePreorder = false;
+    // if joinFlows is 'true', Visitor will track nodes with more than one parent and
+    // flow_merge the visitor from all the parents before visiting the node and its
+    // children.  This only works for Inspector (not Modifier/Transform) currently.
     bool joinFlows = false;
     virtual void init_join_flows(const IR::Node *) { assert(0); }
     virtual bool join_flows(const IR::Node *) { return false; }
