@@ -90,7 +90,7 @@ class NotificationsListener {
     iov[0].iov_base = reinterpret_cast<char *>(&storage);
     iov[0].iov_len = sizeof(storage);
     iov[1].iov_base = data;
-    iov[1].iov_len = sizeof(data); // apparently only max size needed ?
+    iov[1].iov_len = sizeof(data);  // apparently only max size needed ?
     memset(&msghdr, 0, sizeof(msghdr));
     msghdr.msg_iov = iov;
     msghdr.msg_iovlen = 2;

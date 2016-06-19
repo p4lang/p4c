@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _P4_PD_CONN_MGR_H_
-#define _P4_PD_CONN_MGR_H_
+#ifndef BM_PDFIXED_INT_PD_CONN_MGR_H_
+#define BM_PDFIXED_INT_PD_CONN_MGR_H_
 
 #ifdef P4THRIFT
 #include <p4thrift/protocol/TBinaryProtocol.h>
@@ -59,7 +59,7 @@ struct TypeMapper {
   template <typename A>
   void add() {
     map.insert({std::type_index(typeid(A)), idx++});
-  };
+  }
 
   template <typename A>
   size_t get() const {
@@ -80,7 +80,7 @@ struct ClientState {
 }  // namespace detail
 
 struct PdConnMgr {
-  virtual ~PdConnMgr() { };
+  virtual ~PdConnMgr() { }
 
   template <typename A>
   Client<A> get(int dev_id) {
@@ -108,18 +108,19 @@ struct Connector<> {
                      std::vector<std::string>::iterator it) {
     (void) cstate; (void) thrift_port_num; (void) it;
     return 0;
-  };
+  }
 };
 
 template <typename A, typename... Args>
 struct Connector<A, Args...> {
   static int connect(ClientState *cstate, int thrift_port_num,
                       std::vector<std::string>::iterator it) {
-    using namespace ::thrift_provider;
-    using namespace ::thrift_provider::protocol;
-    using namespace ::thrift_provider::transport;
+    using namespace ::thrift_provider;  // NOLINT(build/namespaces)
+    using namespace ::thrift_provider::protocol;  // NOLINT(build/namespaces)
+    using namespace ::thrift_provider::transport;  // NOLINT(build/namespaces)
 
-    boost::shared_ptr<TTransport> socket(new TSocket("localhost", thrift_port_num));
+    boost::shared_ptr<TTransport> socket(
+        new TSocket("localhost", thrift_port_num));
     boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
     boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
 
@@ -139,7 +140,7 @@ struct Connector<A, Args...> {
     }
 
     return Connector<Args...>::connect(cstate, thrift_port_num, ++it);
-  };
+  }
 };
 
 template <typename... Args> struct Cleaner;
@@ -180,7 +181,7 @@ struct TypeMapping<A, Args...> {
 template<typename... Args>
 struct PdConnMgr_ : public PdConnMgr {
   template <typename ...Names>
-  PdConnMgr_(Names&&... names) {
+  explicit PdConnMgr_(Names&&... names) {
     static_assert(sizeof...(Args) == sizeof...(Names),
                   "You need to provide as many names as client types");
     names_ = {names...};
@@ -213,4 +214,4 @@ struct PdConnMgr_ : public PdConnMgr {
 
 #undef NUM_DEVICES
 
-#endif
+#endif  // BM_PDFIXED_INT_PD_CONN_MGR_H_

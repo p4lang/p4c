@@ -19,8 +19,8 @@
  *
  */
 
-#ifndef _P4_PD_PRE_H_
-#define _P4_PD_PRE_H_
+#ifndef BM_PDFIXED_PD_PRE_H_
+#define BM_PDFIXED_PD_PRE_H_
 
 #include <bm/pdfixed/pd_common.h>
 
@@ -139,4 +139,4 @@ p4_pd_mc_update_port_prune_table(p4_pd_sess_hdl_t session,
 }
 #endif
 
-#endif
+#endif  // BM_PDFIXED_PD_PRE_H_

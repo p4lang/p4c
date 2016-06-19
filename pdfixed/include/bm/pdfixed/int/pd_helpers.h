@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _P4_PD_HELPERS_H_
-#define _P4_PD_HELPERS_H_
+#ifndef BM_PDFIXED_INT_PD_HELPERS_H_
+#define BM_PDFIXED_INT_PD_HELPERS_H_
 
 #include <bm/Standard.h>
 
@@ -27,7 +27,7 @@
 
 #include <vector>
 
-using namespace  ::bm_runtime::standard;
+using ::bm_runtime::standard::BmMeterRateConfig;
 
 std::vector<BmMeterRateConfig>
 pd_bytes_meter_spec_to_rates(p4_pd_bytes_meter_spec_t *meter_spec);
@@ -35,4 +35,4 @@ pd_bytes_meter_spec_to_rates(p4_pd_bytes_meter_spec_t *meter_spec);
 std::vector<BmMeterRateConfig>
 pd_packets_meter_spec_to_rates(p4_pd_packets_meter_spec_t *meter_spec);
 
-#endif
+#endif  // BM_PDFIXED_INT_PD_HELPERS_H_

@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _P4_PD_COMMON_H_
-#define _P4_PD_COMMON_H_
+#ifndef BM_PDFIXED_PD_COMMON_H_
+#define BM_PDFIXED_PD_COMMON_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,16 +35,15 @@ typedef uint32_t p4_pd_sess_hdl_t;
 typedef uint64_t p4_pd_entry_hdl_t;
 typedef uint32_t p4_pd_mbr_hdl_t;
 typedef uint32_t p4_pd_grp_hdl_t;
-/* TODO: change that, it is horrible */
+// TODO(unknown): change that, it is horrible
 typedef void* p4_pd_value_hdl_t;
 
 #define PD_DEV_PIPE_ALL 0xffff
 typedef struct p4_pd_dev_target {
-  int device_id; /*!< Device Identifier the API request is for */
-  uint16_t dev_pipe_id;/*!< If specified localizes target to the resources
-			 * only accessible to the port. DEV_PORT_ALL serves
-			 * as a wild-card value
-			 */
+  int device_id;  // Device Identifier the API request is for
+  // If specified localizes target to the resources only accessible to the
+  // port. DEV_PORT_ALL serves as a wild-card value.
+  uint16_t dev_pipe_id;
 } p4_pd_dev_target_t;
 
 typedef struct p4_pd_counter_value {
@@ -82,7 +81,8 @@ typedef struct p4_pd_bytes_meter_spec {
 
 typedef enum {ENTRY_IDLE, ENTRY_HIT} p4_pd_hit_state_t;
 
-typedef void (*p4_pd_notify_timeout_cb) (p4_pd_entry_hdl_t entry_hdl, void *client_data);
+typedef void (*p4_pd_notify_timeout_cb) (p4_pd_entry_hdl_t entry_hdl,
+                                         void *client_data);
 
 /* mirroring definitions */
 typedef enum {
@@ -104,4 +104,4 @@ typedef uint16_t p4_pd_mirror_id_t;
 }
 #endif
 
-#endif
+#endif  // BM_PDFIXED_PD_COMMON_H_

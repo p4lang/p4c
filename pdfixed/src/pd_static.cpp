@@ -25,9 +25,9 @@
 #include <bm/pdfixed/pd_static.h>
 #include <bm/pdfixed/int/pd_conn_mgr.h>
 
-using namespace  ::bm_runtime::standard;
-using namespace  ::bm_runtime::simple_pre_lag;
-using namespace  ::sswitch_runtime;
+using ::bm_runtime::standard::StandardClient;
+using ::bm_runtime::simple_pre_lag::SimplePreLAGClient;
+using ::sswitch_runtime::SimpleSwitchClient;
 
 static uint64_t session_hdl = 0;
 

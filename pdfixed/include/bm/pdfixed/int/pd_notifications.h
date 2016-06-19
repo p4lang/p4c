@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _P4_PD_NOTIFICATIONS_H_
-#define _P4_PD_NOTIFICATIONS_H_
+#ifndef BM_PDFIXED_INT_PD_NOTIFICATIONS_H_
+#define BM_PDFIXED_INT_PD_NOTIFICATIONS_H_
 
 typedef void (*NotificationCb)(const char *hdr, const char *data);
 
@@ -29,4 +29,4 @@ int pd_notifications_add_device(int dev_id, const char *notifications_addr,
 
 int pd_notifications_remove_device(int dev_id);
 
-#endif
+#endif  // BM_PDFIXED_INT_PD_NOTIFICATIONS_H_

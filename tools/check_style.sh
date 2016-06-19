@@ -21,4 +21,7 @@ run_cpplint $ROOT_DIR/targets/simple_switch targets
 run_cpplint $ROOT_DIR/targets/l2_switch targets
 run_cpplint $ROOT_DIR/targets/simple_router targets
 
+run_cpplint $ROOT_DIR/pdfixed/src src
+run_cpplint $ROOT_DIR/pdfixed/include pdfixed/include
+
 exit $return_status

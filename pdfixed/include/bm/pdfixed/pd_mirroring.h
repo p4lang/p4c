@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _P4_PD_MIRRORING_H_
-#define _P4_PD_MIRRORING_H_
+#ifndef BM_PDFIXED_PD_MIRRORING_H_
+#define BM_PDFIXED_PD_MIRRORING_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -81,4 +81,4 @@ int p4_pd_mirroring_set_coalescing_sessions_offset(const uint16_t offset);
 }
 #endif
 
-#endif
+#endif  // BM_PDFIXED_PD_MIRRORING_H_

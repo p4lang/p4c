@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef _P4_PD_STATIC_H_
-#define _P4_PD_STATIC_H_
+#ifndef BM_PDFIXED_PD_STATIC_H_
+#define BM_PDFIXED_PD_STATIC_H_
 
 #include <bm/pdfixed/pd_common.h>
 
@@ -58,4 +58,4 @@ p4_pd_complete_operations(p4_pd_sess_hdl_t shdl);
 }
 #endif
 
-#endif
+#endif  // BM_PDFIXED_PD_STATIC_H_

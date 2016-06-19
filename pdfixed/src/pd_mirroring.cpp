@@ -25,7 +25,7 @@
 
 #include <vector>
 
-using namespace  ::sswitch_runtime;
+using ::sswitch_runtime::SimpleSwitchClient;
 
 extern PdConnMgr *conn_mgr_state;
 
@@ -39,7 +39,7 @@ Client<SimpleSwitchClient> client(int device) {
 
 extern "C" {
 
-// TODO: remove
+// TODO(unknown): remove
 int p4_pd_mirroring_mapping_add(p4_pd_mirror_id_t mirror_id,
                                 uint16_t egress_port) {
   (void) mirror_id; (void) egress_port;
@@ -85,7 +85,7 @@ int p4_pd_mirror_session_update(p4_pd_sess_hdl_t shdl,
   return client(dev_tgt.device_id).c->mirroring_mapping_add(id, egr_port);
 }
 
-// TODO: remove
+// TODO(unknown): remove
 int p4_pd_mirroring_mapping_delete(p4_pd_mirror_id_t mirror_id) {
   (void) mirror_id;
   return 0;
