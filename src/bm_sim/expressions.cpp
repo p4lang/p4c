@@ -41,6 +41,8 @@ ExprOpcodesMap::ExprOpcodesMap() {
     {"load_register_gen", ExprOpcode::LOAD_REGISTER_GEN},
     {"+", ExprOpcode::ADD},
     {"-", ExprOpcode::SUB},
+    {"%", ExprOpcode::MOD},
+    {"/", ExprOpcode::DIV},
     {"*", ExprOpcode::MUL},
     {"<<", ExprOpcode::SHIFT_LEFT},
     {">>", ExprOpcode::SHIFT_RIGHT},
@@ -297,6 +299,20 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
         data_temps_stack.push_back(&data_temps[op.data_dest_index]);
         break;
 
+      case ExprOpcode::MOD:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].mod(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
+
+      case ExprOpcode::DIV:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        data_temps[op.data_dest_index].divide(*ld, *rd);
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
+
       case ExprOpcode::MUL:
         rd = data_temps_stack.back(); data_temps_stack.pop_back();
         ld = data_temps_stack.back(); data_temps_stack.pop_back();
@@ -479,6 +495,7 @@ Expression::assign_dest_registers() {
       case ExprOpcode::ADD:
       case ExprOpcode::SUB:
       case ExprOpcode::MOD:
+      case ExprOpcode::DIV:
       case ExprOpcode::MUL:
       case ExprOpcode::SHIFT_LEFT:
       case ExprOpcode::SHIFT_RIGHT:

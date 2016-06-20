@@ -114,6 +114,28 @@ TEST(Data, ShiftRight) {
 
 namespace {
 
+// negative operands are not supported
+void test_divide(int a, int b) {
+  int q_exp = a / b;
+  int r_exp = a % b;
+  Data q, r;
+  q.divide(Data(a), Data(b));
+  r.mod(Data(a), Data(b));
+  ASSERT_EQ(q_exp, q.get_int());
+  ASSERT_EQ(r_exp, r.get_int());
+}
+
+}  // namespace
+
+TEST(Data, Divide) {
+  test_divide(7, 3);
+  test_divide(56343, 45);
+  test_divide(5, 5);
+  test_divide(0, 3);
+}
+
+namespace {
+
 void test_two_comp_mod(int src, unsigned int width, int expected) {
   Data dst;
   dst.two_comp_mod(Data(src), Data(width));

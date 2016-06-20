@@ -232,10 +232,21 @@ class Data {
     export_bytes();
   }
 
-  //! Performs a modulo operation
+  //! Performs a modulo operation. The following needs to be true: \p src1 >= 0
+  //! and \p src2 > 0.
   void mod(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
+    assert(src1.value >= 0 && src2.value > 0);
     value = src1.value % src2.value;
+    export_bytes();
+  }
+
+  //! Performs a division operation. The following needs to be true: \p src1 >=
+  //! 0 and \p src2 > 0.
+  void divide(const Data &src1, const Data &src2) {
+    assert(src1.arith && src2.arith);
+    assert(src1.value >= 0 && src2.value > 0);
+    value = src1.value / src2.value;
     export_bytes();
   }
 

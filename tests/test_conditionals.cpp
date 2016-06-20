@@ -191,6 +191,28 @@ TEST_F(ConditionalsTest, Add) {
   ASSERT_FALSE(c.eval(*phv));
 }
 
+TEST_F(ConditionalsTest, Divide) {
+  Conditional c("ctest", 0);
+
+  // we check that (2 == 7 / 3) && (1 == 7 % 3) evaluates to true
+  c.push_back_load_const(Data(2));
+  c.push_back_load_const(Data(7));
+  c.push_back_load_const(Data(3));
+  c.push_back_op(ExprOpcode::DIV);
+  c.push_back_op(ExprOpcode::EQ_DATA);
+
+  c.push_back_load_const(Data(1));
+  c.push_back_load_const(Data(7));
+  c.push_back_load_const(Data(3));
+  c.push_back_op(ExprOpcode::MOD);
+  c.push_back_op(ExprOpcode::EQ_DATA);
+
+  c.push_back_op(ExprOpcode::AND);
+
+  c.build();
+  ASSERT_TRUE(c.eval(*phv));
+}
+
 TEST_F(ConditionalsTest, And) {
   Conditional c1("c1test", 0);
   c1.push_back_load_bool(true);
