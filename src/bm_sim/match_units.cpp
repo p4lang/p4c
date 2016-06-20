@@ -35,9 +35,10 @@
 
 namespace bm {
 
-#define HANDLE_VERSION(h) (h >> 32)
-#define HANDLE_INTERNAL(h) (h & 0xffffffff)
-#define HANDLE_SET(v, i) ((((uint64_t) v) << 32) | i)
+#define HANDLE_VERSION(h) (h >> 24)
+#define HANDLE_INTERNAL(h) (h & 0x00ffffff)
+#define HANDLE_SET(v, i) ((((uint32_t) (v & 0xff)) << 24) | i)
+#define MAX_TABLE_SIZE 0x00ffffff
 
 using MatchUnit::EntryMeta;
 
@@ -647,6 +648,19 @@ MatchUnitAbstract_::handles_begin() const {
 MatchUnitAbstract_::handle_iterator
 MatchUnitAbstract_::handles_end() const {
   return handle_iterator(this, handles.end());
+}
+
+MatchUnitAbstract_::MatchUnitAbstract_(size_t size,
+                                       const MatchKeyBuilder &key_builder)
+    : size(size), nbytes_key(key_builder.get_nbytes_key()),
+      match_key_builder(key_builder), entry_meta(size) {
+  if (size > MAX_TABLE_SIZE) {
+    Logger::get()->error("Table size is limited to {} but size requested is "
+                         "{}, table will therefore be smaller than requested",
+                         MAX_TABLE_SIZE, size);
+    size = MAX_TABLE_SIZE;
+  }
+  match_key_builder.build();
 }
 
 MatchErrorCode

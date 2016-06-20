@@ -29,7 +29,7 @@
 namespace bm {
 
 typedef uintptr_t internal_handle_t;
-typedef uint64_t entry_handle_t;
+typedef uint32_t entry_handle_t;
 
 enum class MatchUnitType {
   EXACT, LPM, TERNARY, RANGE

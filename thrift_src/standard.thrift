@@ -21,7 +21,7 @@
 namespace cpp bm_runtime.standard
 namespace py bm_runtime.standard
 
-typedef i64 BmEntryHandle
+typedef i32 BmEntryHandle
 typedef list<binary> BmActionData
 
 typedef i32 BmMemberHandle

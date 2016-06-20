@@ -123,7 +123,7 @@ class MatchTableAbstract : public NamedP4Object {
 
  public:
   MatchTableAbstract(const std::string &name, p4object_id_t id,
-                     size_t size, bool with_counters, bool with_ageing,
+                     bool with_counters, bool with_ageing,
                      MatchUnitAbstract_ *mu);
 
   virtual ~MatchTableAbstract() { }
@@ -208,8 +208,6 @@ class MatchTableAbstract : public NamedP4Object {
   void unlock(WriteLock &lock) const { lock.unlock(); }  // NOLINT
 
  protected:
-  size_t size{0};
-
   // Not sure these guys need to be atomic with the current code
   // TODO(antonin): check
   std::atomic_bool with_counters{false};
@@ -344,7 +342,7 @@ class MatchTableIndirect : public MatchTableAbstract {
  public:
   typedef MatchTableAbstract::ActionEntry ActionEntry;
 
-  typedef uintptr_t mbr_hdl_t;
+  typedef uint32_t mbr_hdl_t;
 
   struct Entry {
     entry_handle_t handle;
@@ -529,7 +527,7 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   MatchErrorCode get_entry_(entry_handle_t handle, Entry *entry) const;
 
-  MatchErrorCode get_member_(entry_handle_t handle, Member *member) const;
+  MatchErrorCode get_member_(mbr_hdl_t handle, Member *member) const;
 
  protected:
   IndirectIndex default_index{};
@@ -552,7 +550,7 @@ class MatchTableIndirect : public MatchTableAbstract {
 
 class MatchTableIndirectWS : public MatchTableIndirect {
  public:
-  typedef uintptr_t grp_hdl_t;
+  typedef uint32_t grp_hdl_t;
 
   typedef unsigned int hash_t;
 
