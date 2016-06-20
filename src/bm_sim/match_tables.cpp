@@ -85,9 +85,9 @@ ActionEntry::deserialize(std::istream *in, const P4Objects &objs) {
 
 MatchTableAbstract::MatchTableAbstract(
     const std::string &name, p4object_id_t id,
-    size_t size, bool with_counters, bool with_ageing,
+    bool with_counters, bool with_ageing,
     MatchUnitAbstract_ *mu)
-    : NamedP4Object(name, id), size(size),
+    : NamedP4Object(name, id),
       with_counters(with_counters), with_ageing(with_ageing),
       match_unit_(mu) { }
 
@@ -298,8 +298,7 @@ MatchTable::MatchTable(
     const std::string &name, p4object_id_t id,
     std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit,
     bool with_counters, bool with_ageing)
-    : MatchTableAbstract(name, id, match_unit->get_size(),
-                         with_counters, with_ageing,
+    : MatchTableAbstract(name, id, with_counters, with_ageing,
                          match_unit.get()),
       match_unit(std::move(match_unit)) { }
 
@@ -526,8 +525,7 @@ MatchTableIndirect::MatchTableIndirect(
     const std::string &name, p4object_id_t id,
     std::unique_ptr<MatchUnitAbstract<IndirectIndex> > match_unit,
     bool with_counters, bool with_ageing)
-    : MatchTableAbstract(name, id, match_unit->get_size(),
-                         with_counters, with_ageing,
+    : MatchTableAbstract(name, id, with_counters, with_ageing,
                          match_unit.get()),
       match_unit(std::move(match_unit)) { }
 
@@ -591,9 +589,11 @@ MatchTableIndirect::add_member(const ActionFn *action_fn,
   {
     WriteLock lock = lock_write();
 
-    if (mbr_handles.get_handle(mbr)) {
+    uintptr_t mbr_;
+    if (mbr_handles.get_handle(&mbr_)) {
       rc = MatchErrorCode::ERROR;
     } else {
+      *mbr = static_cast<mbr_hdl_t>(mbr_);
       entries_insert(*mbr, ActionEntry(std::move(action_fn_entry), next_node));
       num_members++;
     }
@@ -1071,9 +1071,11 @@ MatchTableIndirectWS::create_group(grp_hdl_t *grp) {
   {
     WriteLock lock = lock_write();
 
-    if (grp_handles.get_handle(grp)) {
+    uintptr_t grp_;
+    if (grp_handles.get_handle(&grp_)) {
       rc = MatchErrorCode::ERROR;
     } else {
+      *grp = static_cast<grp_hdl_t>(grp_);
       groups_insert(*grp);
       num_groups++;
     }

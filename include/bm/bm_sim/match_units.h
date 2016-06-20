@@ -269,11 +269,7 @@ class MatchUnitAbstract_ {
   };
 
  public:
-  MatchUnitAbstract_(size_t size, const MatchKeyBuilder &key_builder)
-    : size(size), nbytes_key(key_builder.get_nbytes_key()),
-      match_key_builder(key_builder), entry_meta(size) {
-    match_key_builder.build();
-  }
+  MatchUnitAbstract_(size_t size, const MatchKeyBuilder &key_builder);
 
   size_t get_num_entries() const { return num_entries; }
 

@@ -48,7 +48,7 @@ class Conditional;
 class Checksum;
 class ActionFn;
 
-typedef uint64_t entry_handle_t;
+typedef uint32_t entry_handle_t;
 
 //! Signals significant packet event by publishing a message on a
 //! transport. This is meant to be used with the nanomsg PUB/SUB transport.
