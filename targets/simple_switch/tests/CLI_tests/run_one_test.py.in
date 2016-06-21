@@ -67,6 +67,7 @@ def main():
     if rand is None:
         sys.exit(2)
     thrift_port = str(9090 + rand)
+    device_id = str(rand)
 
     # makes sure that the switch will start right away
     simple_switch_p = subprocess.Popen(
@@ -77,7 +78,7 @@ def main():
     # start simple_switch
     simple_switch_p = subprocess.Popen(
         ["@abs_top_builddir@/targets/simple_switch/simple_switch",
-         json_path, "--thrift-port", thrift_port],
+         json_path, "--thrift-port", thrift_port, "--device-id", device_id],
         stdout=subprocess.PIPE)
     # while True:
     #     line = simple_switch_p.stdout.readline()
