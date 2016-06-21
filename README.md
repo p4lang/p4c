@@ -15,6 +15,7 @@ the behavioral model, please look at the FAQ below.
 On Ubuntu 14.04, the following packages are required:
 
 - automake
+- cmake
 - libjudy-dev
 - libgmp-dev
 - libpcap-dev
@@ -34,11 +35,11 @@ On Ubuntu 14.04, the following packages are required:
 
 You also need to install [thrift](https://github.com/apache/thrift) and
 [nanomsg](http://download.nanomsg.org/nanomsg-0.5-beta.tar.gz) from source. Feel
-free to use the install scripts under build/travis/.
+free to use the install scripts under travis/.
 
 To use the CLI, you will need to install the
 [nnpy](https://github.com/nanomsg/nnpy) Python package. Feel free to use
-build/travis/install-nnpy.sh
+travis/install-nnpy.sh
 
 To make your life easier, we provide the *install_deps.sh* script, which will
 install all the dependencies needed on Ubuntu 14.04.

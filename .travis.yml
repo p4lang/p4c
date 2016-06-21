@@ -48,9 +48,9 @@ before_install:
   - export CPPFLAGS="$CPPFLAGS -I$HOME/thrift/include"
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/thrift/lib
   - sudo pip install --upgrade thrift
-  - bash build/travis/install-nanomsg.sh
+  - bash travis/install-nanomsg.sh
   - sudo ldconfig
-  - bash build/travis/install-nnpy.sh
+  - bash travis/install-nnpy.sh
 
 install:
   - ./autogen.sh
@@ -60,7 +60,7 @@ install:
 
 # command to run tests, e.g. python setup.py test
 script:
-  - python build/travis/check-nnpy.py
+  - python travis/check-nnpy.py
   - make check
   - bash tools/check_style.sh
 
