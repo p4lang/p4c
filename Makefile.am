@@ -21,6 +21,14 @@ LICENSE \
 README.md \
 install_deps.sh
 
+# 'travis' files, used by install_deps.sh to install some dependencies
+EXTRA_DIST += \
+travis/check-nnpy.py \
+travis/common.sh \
+travis/install-nanomsg.sh \
+travis/install-nnpy.sh \
+travis/install-thrift.sh
+
 # mininet directory
 EXTRA_DIST += \
 mininet/1sw_demo.py \

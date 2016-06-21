@@ -2,6 +2,7 @@
 set -e
 sudo apt-get install -y \
     automake \
+    cmake \
     libjudy-dev \
     libgmp-dev \
     libpcap-dev \
@@ -26,10 +27,10 @@ sudo apt-get install -y \
 tmpdir=`mktemp -d -p .`
 cd $tmpdir
 
-bash ../build/travis/install-thrift.sh
-bash ../build/travis/install-nanomsg.sh
+bash ../travis/install-thrift.sh
+bash ../travis/install-nanomsg.sh
 sudo ldconfig
-bash ../build/travis/install-nnpy.sh
+bash ../travis/install-nnpy.sh
 
 cd ..
 sudo rm -rf $tmpdir
