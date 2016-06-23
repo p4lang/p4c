@@ -467,6 +467,29 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   MatchErrorCode
+  mt_get_entry(size_t cxt_id, const std::string &table_name,
+               entry_handle_t handle, MatchTable::Entry *entry) const override {
+    return contexts.at(cxt_id).mt_get_entry<MatchTable>(
+        table_name, handle, entry);
+  }
+
+  MatchErrorCode
+  mt_indirect_get_entry(size_t cxt_id, const std::string &table_name,
+                        entry_handle_t handle,
+                        MatchTableIndirect::Entry *entry) const override {
+    return contexts.at(cxt_id).mt_get_entry<MatchTableIndirect>(
+        table_name, handle, entry);
+  }
+
+  MatchErrorCode
+  mt_indirect_ws_get_entry(size_t cxt_id, const std::string &table_name,
+                           entry_handle_t handle,
+                           MatchTableIndirectWS::Entry *entry) const override {
+    return contexts.at(cxt_id).mt_get_entry<MatchTableIndirectWS>(
+        table_name, handle, entry);
+  }
+
+  MatchErrorCode
   mt_get_default_entry(size_t cxt_id, const std::string &table_name,
                        MatchTable::Entry *entry) const override {
     return contexts.at(cxt_id).mt_get_default_entry<MatchTable>(
@@ -495,10 +518,25 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return contexts.at(cxt_id).mt_indirect_get_members(table_name);
   }
 
+  MatchErrorCode
+  mt_indirect_get_member(size_t cxt_id, const std::string &table_name,
+                         mbr_hdl_t mbr,
+                         MatchTableIndirect::Member *member) const override {
+    return contexts.at(cxt_id).mt_indirect_get_member(table_name, mbr, member);
+  }
+
   std::vector<MatchTableIndirectWS::Group>
   mt_indirect_ws_get_groups(size_t cxt_id,
                             const std::string &table_name) const override {
     return contexts.at(cxt_id).mt_indirect_ws_get_groups(table_name);
+  }
+
+  MatchErrorCode
+  mt_indirect_ws_get_group(size_t cxt_id, const std::string &table_name,
+                           grp_hdl_t grp,
+                           MatchTableIndirectWS::Group *group) const override {
+    return contexts.at(cxt_id).mt_indirect_ws_get_group(
+        table_name, grp, group);
   }
 
   MatchErrorCode

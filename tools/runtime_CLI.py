@@ -1607,27 +1607,26 @@ class RuntimeAPI(cmd.Cmd):
         elif a_entry.action_type == BmActionEntryType.GRP_HANDLE:
             print "Index: group({})".format(a_entry.grp_handle)
 
+    def dump_one_member(self, member):
+        print "Dumping member {}".format(member.mbr_handle)
+        self.dump_action_and_data(member.action_name, member.action_data)
+
     def dump_members(self, members):
         for m in members:
             print "**********"
-            print "Dumping member {}".format(m.mbr_handle)
-            self.dump_action_and_data(m.action_name, m.action_data)
+            self.dump_one_member(m)
+
+    def dump_one_group(self, group):
+        print "Dumping group {}".format(group.grp_handle)
+        print "Members: [{}]".format(", ".join(
+            [str(h) for h in group.mbr_handles]))
 
     def dump_groups(self, groups):
         for g in groups:
             print "**********"
-            print "Dumping group {}".format(g.grp_handle)
-            print "Members: [{}]".format(", ".join(
-                [str(h) for h in g.mbr_handles]))
+            self.dump_one_group(g)
 
-    @handle_bad_input
-    def do_table_dump(self, line):
-        "Display some information about a table: table_dump <table_name>"
-        args = line.split()
-        self.exactly_n_args(args, 1)
-        table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
-        entries = self.client.bm_mt_get_entries(0, table_name)
+    def dump_one_entry(self, table, entry):
         if table.key:
             out_name_w = max(20, max([len(t[0]) for t in table.key]))
 
@@ -1649,22 +1648,95 @@ class RuntimeAPI(cmd.Cmd):
                     "ternary": dump_ternary, "valid": dump_valid,
                     "range": dump_range}
 
+        print "Dumping entry {}".format(hex(entry.entry_handle))
+        print "Match key:"
+        for p, k in zip(entry.match_key, table.key):
+            assert(k[1] == p.type)
+            pdumper = pdumpers[MatchType.to_str(p.type)]
+            print "* {0:{w}}: {1:10}{2}".format(
+                k[0], MatchType.to_str(p.type).upper(),
+                pdumper(p), w=out_name_w)
+        if (entry.options.priority >= 0):
+            print "Priority: {}".format(entry.options.priority)
+        self.dump_action_entry(entry.action_entry)
+
+    @handle_bad_input
+    def do_table_dump_entry(self, line):
+        "Display some information about a table entry: table_dump <table name> <entry handle>"
+        args = line.split()
+        self.exactly_n_args(args, 2)
+        table_name = args[0]
+
+        table = self.get_res("table", table_name, TABLES)
+
+        try:
+            entry_handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for entry handle")
+
+        entry = self.client.bm_mt_get_entry(0, table_name, entry_handle)
+        self.dump_one_entry(table, entry)
+
+    def complete_table_dump_entry(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_dump_member(self, line):
+        "Display some information about a member: table_dump <table name> <member handle>"
+        args = line.split()
+        self.exactly_n_args(args, 2)
+        table_name = args[0]
+
+        table = self.get_res("table", table_name, TABLES)
+
+        try:
+            mbr_handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for member handle")
+
+        member = self.client.bm_mt_indirect_get_member(0, table_name,
+                                                       mbr_handle)
+        self.dump_one_member(member)
+
+    def complete_table_dump_member(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_dump_group(self, line):
+        "Display some information about a group: table_dump <table name> <group handle>"
+        args = line.split()
+        self.exactly_n_args(args, 2)
+        table_name = args[0]
+
+        table = self.get_res("table", table_name, TABLES)
+
+        try:
+            grp_handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for group handle")
+
+        group = self.client.bm_mt_indirect_ws_get_group(0, table_name,
+                                                        grp_handle)
+        self.dump_one_group(group)
+
+    def complete_table_dump_group(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
+    def do_table_dump(self, line):
+        "Display some information about a table: table_dump <table name>"
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+        entries = self.client.bm_mt_get_entries(0, table_name)
+
         print "=========="
         print "TABLE ENTRIES"
 
         for e in entries:
             print "**********"
-            print "Dumping entry {}".format(hex(e.entry_handle))
-            print "Match key:"
-            for p, k in zip(e.match_key, table.key):
-                assert(k[1] == p.type)
-                pdumper = pdumpers[MatchType.to_str(p.type)]
-                print "* {0:{w}}: {1:10}{2}".format(
-                    k[0], MatchType.to_str(p.type).upper(),
-                    pdumper(p), w=out_name_w)
-            if (e.options.priority >= 0):
-                print "Priority: {}".format(e.options.priority)
-            self.dump_action_entry(e.action_entry)
+            self.dump_one_entry(table, e)
 
         if table.type_ == TableType.indirect or\
            table.type_ == TableType.indirect_ws:

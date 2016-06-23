@@ -432,6 +432,12 @@ service Standard {
     2:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
+  BmMtEntry bm_mt_get_entry(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle
+  ) throws (1:InvalidTableOperation ouch),
+
   BmActionEntry bm_mt_get_default_entry(
     1:i32 cxt_id,
     2:string table_name
@@ -442,9 +448,21 @@ service Standard {
     2:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
+  BmMtIndirectMember bm_mt_indirect_get_member(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmMemberHandle mbr_handle
+  ) throws (1:InvalidTableOperation ouch),
+
   list<BmMtIndirectWsGroup> bm_mt_indirect_ws_get_groups(
     1:i32 cxt_id,
     2:string table_name
+  ) throws (1:InvalidTableOperation ouch),
+
+  BmMtIndirectWsGroup bm_mt_indirect_ws_get_group(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmGroupHandle grp_handle
   ) throws (1:InvalidTableOperation ouch),
 
   // indirect counters

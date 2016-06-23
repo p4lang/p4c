@@ -381,6 +381,30 @@ Context::mt_get_entries<MatchTableIndirectWS>(const std::string &) const;
 
 template <typename T>
 MatchErrorCode
+Context::mt_get_entry(const std::string &table_name,
+                      entry_handle_t handle, typename T::Entry *entry) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MatchTableAbstract *abstract_table =
+      p4objects_rt->get_abstract_match_table(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  T *table = dynamic_cast<T *>(abstract_table);
+  if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
+  return table->get_entry(handle, entry);
+}
+
+// explicit instantiation
+template MatchErrorCode
+Context::mt_get_entry<MatchTable>(
+    const std::string &, entry_handle_t, MatchTable::Entry *) const;
+template MatchErrorCode
+Context::mt_get_entry<MatchTableIndirect>(
+    const std::string &, entry_handle_t, MatchTableIndirect::Entry *) const;
+template MatchErrorCode
+Context::mt_get_entry<MatchTableIndirectWS>(
+    const std::string &, entry_handle_t, MatchTableIndirectWS::Entry *) const;
+
+template <typename T>
+MatchErrorCode
 Context::mt_get_default_entry(const std::string &table_name,
                               typename T::Entry *default_entry) const {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
@@ -413,6 +437,17 @@ Context::mt_indirect_get_members(const std::string &table_name) const {
   return table->get_members();
 }
 
+MatchErrorCode
+Context::mt_indirect_get_member(const std::string &table_name, grp_hdl_t grp,
+                                MatchTableIndirect::Member *member) const {
+  MatchErrorCode rc;
+  MatchTableIndirect *table;
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
+    return rc;
+  return table->get_member(grp, member);
+}
+
 std::vector<MatchTableIndirectWS::Group>
 Context::mt_indirect_ws_get_groups(const std::string &table_name) const {
   MatchErrorCode rc;
@@ -421,6 +456,17 @@ Context::mt_indirect_ws_get_groups(const std::string &table_name) const {
   if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
     return {};
   return table->get_groups();
+}
+
+MatchErrorCode
+Context::mt_indirect_ws_get_group(const std::string &table_name, grp_hdl_t grp,
+                                  MatchTableIndirectWS::Group *group) const {
+  MatchErrorCode rc;
+  MatchTableIndirectWS *table;
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
+    return rc;
+  return table->get_group(grp, group);
 }
 
 Counter::CounterErrorCode

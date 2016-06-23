@@ -250,14 +250,27 @@ class Context final {
 
   template <typename T>
   MatchErrorCode
+  mt_get_entry(const std::string &table_name, entry_handle_t handle,
+               typename T::Entry *entry) const;
+
+  template <typename T>
+  MatchErrorCode
   mt_get_default_entry(const std::string &table_name,
                        typename T::Entry *default_entry) const;
 
   std::vector<MatchTableIndirect::Member>
   mt_indirect_get_members(const std::string &table_name) const;
 
+  MatchErrorCode
+  mt_indirect_get_member(const std::string &table_name, grp_hdl_t grp,
+                         MatchTableIndirect::Member *member) const;
+
   std::vector<MatchTableIndirectWS::Group>
   mt_indirect_ws_get_groups(const std::string &table_name) const;
+
+  MatchErrorCode
+  mt_indirect_ws_get_group(const std::string &table_name, grp_hdl_t grp,
+                           MatchTableIndirectWS::Group *group) const;
 
   MatchErrorCode
   mt_read_counters(const std::string &table_name,

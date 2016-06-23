@@ -527,6 +527,22 @@ public:
     }
   }
 
+  template <typename M,
+            MatchErrorCode (RuntimeInterface::*GetFn)(
+                size_t, const std::string &, entry_handle_t, typename M::Entry *) const>
+  void get_entry_common(size_t cxt_id, const std::string &table_name,
+                        BmEntryHandle handle, BmMtEntry &e) {
+    typename M::Entry entry;
+    auto rc = std::bind(GetFn, switch_, cxt_id, table_name, handle, &entry)();
+    if(rc != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(rc);
+      throw ito;
+    }
+    copy_match_part_entry(&e, entry);
+    build_action_entry(&e.action_entry, entry);
+  }
+
   void bm_mt_get_entries(std::vector<BmMtEntry> & _return, const int32_t cxt_id, const std::string& table_name) {
     Logger::get()->trace("bm_mt_get_entries");
     switch (switch_->mt_get_type(cxt_id, table_name)) {
@@ -545,6 +561,28 @@ public:
         get_entries_common<MatchTableIndirectWS,
                            &RuntimeInterface::mt_indirect_ws_get_entries>(
                                cxt_id, table_name, _return);
+        break;
+    }
+  }
+
+  void bm_mt_get_entry(BmMtEntry& _return, const int32_t cxt_id, const std::string& table_name, const BmEntryHandle entry_handle) {
+    Logger::get()->trace("bm_mt_get_entry");
+    switch (switch_->mt_get_type(cxt_id, table_name)) {
+      case MatchTableType::NONE:
+        return;
+      case MatchTableType::SIMPLE:
+        get_entry_common<MatchTable, &RuntimeInterface::mt_get_entry>(
+            cxt_id, table_name, entry_handle,  _return);
+        break;
+      case MatchTableType::INDIRECT:
+        get_entry_common<MatchTableIndirect,
+                           &RuntimeInterface::mt_indirect_get_entry>(
+                               cxt_id, table_name, entry_handle, _return);
+        break;
+      case MatchTableType::INDIRECT_WS:
+        get_entry_common<MatchTableIndirectWS,
+                           &RuntimeInterface::mt_indirect_ws_get_entry>(
+                               cxt_id, table_name, entry_handle, _return);
         break;
     }
   }
@@ -593,34 +631,56 @@ public:
     }
   }
 
+  void copy_one_member(BmMtIndirectMember *m,
+                       const MatchTableIndirect::Member &from) const;
+
   void bm_mt_indirect_get_members(std::vector<BmMtIndirectMember> & _return, const int32_t cxt_id, const std::string& table_name) {
     Logger::get()->trace("bm_mt_indirect_get_members");
     const auto members = switch_->mt_indirect_get_members(cxt_id, table_name);
     for (const auto &member : members) {
       BmMtIndirectMember m;
-      m.mbr_handle = member.mbr;
-      m.action_name = member.action_fn->get_name();
-      BmActionData action_data;
-      for (const Data &d : member.action_data.action_data) {
-        action_data.push_back(d.get_string());
-      }
-      m.action_data = std::move(action_data);
-
+      copy_one_member(&m, member);
       _return.push_back(std::move(m));
     }
   }
+
+  void bm_mt_indirect_get_member(BmMtIndirectMember& _return, const int32_t cxt_id, const std::string& table_name, const BmMemberHandle mbr_handle) {
+    Logger::get()->trace("bm_mt_indirect_get_member");
+    MatchTableIndirect::Member member;
+    auto rc = switch_->mt_indirect_get_member(cxt_id, table_name, mbr_handle,
+                                              &member);
+    if(rc != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(rc);
+      throw ito;
+    }
+    copy_one_member(&_return, member);
+  }
+
+  void copy_one_group(BmMtIndirectWsGroup *g,
+                      const MatchTableIndirectWS::Group &from) const;
 
   void bm_mt_indirect_ws_get_groups(std::vector<BmMtIndirectWsGroup> & _return, const int32_t cxt_id, const std::string& table_name) {
     Logger::get()->trace("bm_mt_indirect_ws_get_groups");
     const auto groups = switch_->mt_indirect_ws_get_groups(cxt_id, table_name);
     for (const auto &group : groups) {
       BmMtIndirectWsGroup g;
-      g.grp_handle = group.grp;
-      g.mbr_handles.reserve(group.mbr_handles.size());
-      for (const auto h : group.mbr_handles) g.mbr_handles.push_back(h);
-
+      copy_one_group(&g, group);
       _return.push_back(std::move(g));
     }
+  }
+
+  void bm_mt_indirect_ws_get_group(BmMtIndirectWsGroup& _return, const int32_t cxt_id, const std::string& table_name, const BmGroupHandle grp_handle) {
+    Logger::get()->trace("bm_mt_indirect_ws_get_group");
+    MatchTableIndirectWS::Group group;
+    auto rc = switch_->mt_indirect_ws_get_group(cxt_id, table_name, grp_handle,
+                                                &group);
+    if(rc != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(rc);
+      throw ito;
+    }
+    copy_one_group(&_return, group);
   }
 
   void bm_counter_read(BmCounterValue& _return, const int32_t cxt_id, const std::string& counter_name, const int32_t index) {
@@ -956,6 +1016,24 @@ StandardHandler::build_action_entry<MatchTableIndirectWS::Entry>(
     action_e->action_type = BmActionEntryType::GRP_HANDLE;
     action_e->__set_grp_handle(entry.grp);
   }
+}
+
+void StandardHandler::copy_one_member(
+    BmMtIndirectMember *m, const MatchTableIndirect::Member &from) const{
+  m->mbr_handle = from.mbr;
+  m->action_name = from.action_fn->get_name();
+  BmActionData action_data;
+  for (const Data &d : from.action_data.action_data) {
+    action_data.push_back(d.get_string());
+  }
+  m->action_data = std::move(action_data);
+}
+
+void StandardHandler::copy_one_group(
+    BmMtIndirectWsGroup *g, const MatchTableIndirectWS::Group &from) const {
+  g->grp_handle = from.grp;
+  g->mbr_handles.reserve(from.mbr_handles.size());
+  for (const auto h : from.mbr_handles) g->mbr_handles.push_back(h);
 }
 
 } }

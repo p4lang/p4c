@@ -207,6 +207,20 @@ class RuntimeInterface {
                              const std::string &table_name) const = 0;
 
   virtual MatchErrorCode
+  mt_get_entry(size_t cxt_id, const std::string &table_name,
+               entry_handle_t handle, MatchTable::Entry *entry) const = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_get_entry(size_t cxt_id, const std::string &table_name,
+                        entry_handle_t handle,
+                        MatchTableIndirect::Entry *entry) const = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_ws_get_entry(size_t cxt_id, const std::string &table_name,
+                           entry_handle_t handle,
+                           MatchTableIndirectWS::Entry *entry) const = 0;
+
+  virtual MatchErrorCode
   mt_get_default_entry(size_t cxt_id, const std::string &table_name,
                        MatchTable::Entry *entry) const = 0;
 
@@ -223,9 +237,19 @@ class RuntimeInterface {
   mt_indirect_get_members(size_t cxt_id,
                           const std::string &table_name) const = 0;
 
+  virtual MatchErrorCode
+  mt_indirect_get_member(size_t cxt_id, const std::string &table_name,
+                         mbr_hdl_t mbr,
+                         MatchTableIndirect::Member *member) const = 0;
+
   virtual std::vector<MatchTableIndirectWS::Group>
   mt_indirect_ws_get_groups(size_t cxt_id,
                             const std::string &table_name) const = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_ws_get_group(size_t cxt_id, const std::string &table_name,
+                           grp_hdl_t grp,
+                           MatchTableIndirectWS::Group *group) const = 0;
 
   virtual Counter::CounterErrorCode
   read_counters(size_t cxt_id,

@@ -68,6 +68,8 @@ def main():
         sys.exit(2)
     thrift_port = str(9090 + rand)
     device_id = str(rand)
+    # TODO(antonin): fragile if the name changes in the bmv2 code
+    rpc_path = "/tmp/bmv2-{}-notifications.ipc".format(device_id)
 
     # makes sure that the switch will start right away
     simple_switch_p = subprocess.Popen(
@@ -87,6 +89,13 @@ def main():
 
     time.sleep(1)
 
+    def cleanup():
+        simple_switch_p.kill()
+        try:
+            os.remove(rpc_path)
+        except:
+            pass
+
     cmd = ["@abs_top_srcdir@/tools/runtime_CLI.py",
            "--thrift-port", thrift_port]
     out = None
@@ -102,7 +111,7 @@ def main():
         rc = p.returncode
 
         if rc:
-            simple_switch_p.kill()
+            cleanup()
             sys.exit(3)
 
     assert(out)
@@ -126,7 +135,7 @@ def main():
                 success = False
 
         if success:
-            simple_switch_p.kill()
+            cleanup()
             sys.exit(0)
         else:
             print "Expected"
@@ -134,7 +143,7 @@ def main():
             print "But got"
             print "\n".join(out_parsed)
 
-    simple_switch_p.kill()
+    cleanup()
     sys.exit(4)
 
 if __name__ == '__main__':
