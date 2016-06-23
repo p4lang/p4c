@@ -12,6 +12,7 @@ AC_PROG_CXX(clang++ g++ c++)
 AC_PROG_CC
 AC_PROG_LEX
 AC_PROG_YACC
+AC_PROG_RANLIB
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 AC_LANG(C++)
 
