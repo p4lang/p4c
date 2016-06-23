@@ -1235,6 +1235,7 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
         }
         auto param = new IR::Parameter(p->srcInfo, p->name, IR::Annotations::empty,
                                        direction, type);
+        LOG2("  " << p << " is " << direction << " " << param);
         params->push_back(param);
     }
     for (auto p : action->action) {

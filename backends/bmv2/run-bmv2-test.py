@@ -713,8 +713,10 @@ def main(argv):
             else:
                 options.compilerOptions += argv[1].split();
                 argv = argv[1:]
+        elif argv[0][1] == 'T':
+            options.compilerOptions.append(argv[0]);
         else:
-            reportError("Uknown option ", argv[0], file=sys.stderr)
+            reportError("Uknown option ", argv[0])
             usage(options)
         argv = argv[1:]
 

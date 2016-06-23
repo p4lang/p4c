@@ -39,13 +39,16 @@ CLEANFILES += \
 p4tests.mk: $(srcdir)/testdata/p4_16_samples/*.p4 $(srcdir)/testdata/p4_16_errors/*.p4
 	@$(GENTESTS) $(srcdir) p4 $(srcdir)/backends/p4test/run-p4-sample.py $^ >$@
 
-p14_to_16tests.mk: $(srcdir)/testdata/p4_14_samples/*.p4
+p14_to_16tests.mk: $(srcdir)/testdata/p4_14_samples/*.p4 \
+		   $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4
 	@$(GENTESTS) $(srcdir) p14_to_16 $(srcdir)/backends/p4test/run-p4-sample.py $^ >$@
 
 P14BUGS = \
     p14_to_16/testdata/p4_14_samples/09-IPv4OptionsUnparsed.p4.test \
     p14_to_16/testdata/p4_14_samples/TLV_parsing.p4.test \
-    p14_to_16/testdata/p4_14_samples/truncate.p4.test
+    p14_to_16/testdata/p4_14_samples/truncate.p4.test \
+    p14_to_16/testdata/p4_14_samples/action_inline2.p4.test \
+    p14_to_16/testdata/p4_14_samples/switch_20160512/switch.p4.test
 
 XFAIL_TESTS += \
     $(P14BUGS) \
