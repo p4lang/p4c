@@ -14,15 +14,11 @@ matrix:
       compiler: gcc
       env: COMPILER=g++-5 GCOV=gcov-5
 
-    - os: linux
-      env: COMPILER=clang++-3.6
-
 addons:
   apt:
     sources:
       - boost-latest
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.6
     packages:
       - libjudy-dev
       - libgmp-dev
@@ -41,7 +37,6 @@ addons:
       - pkg-config
       - g++-4.8
       - g++-5
-      - clang-3.6
       - libssl-dev
       - python-pip
 
