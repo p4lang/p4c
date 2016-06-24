@@ -20,10 +20,10 @@
 
 #include <bm/bm_sim/logger.h>
 
+#include <bm/spdlog/sinks/null_sink.h>
+
 #include <memory>
 #include <string>
-
-#include "spdlog/sinks/null_sink.h"
 
 namespace bm {
 

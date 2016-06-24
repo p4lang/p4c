@@ -133,7 +133,7 @@ AC_CHECK_HEADER([boost/filesystem.hpp], [], [AC_MSG_ERROR([Missing boost filesys
 AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS \
                           -I\$(top_srcdir)/include \
                           -isystem\$(top_srcdir)/third_party/jsoncpp/include \
-                          -isystem\$(top_srcdir)/third_party/spdlog/include"])
+                          -isystem\$(top_srcdir)/third_party/spdlog"])
 
 AC_SUBST([AM_CXXFLAGS], ["-Wall -Werror -Wextra"])
 AC_SUBST([AM_CFLAGS], [""])

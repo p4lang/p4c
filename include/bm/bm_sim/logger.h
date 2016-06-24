@@ -33,9 +33,9 @@
 #ifndef BM_BM_SIM_LOGGER_H_
 #define BM_BM_SIM_LOGGER_H_
 
-#include <string>
+#include <bm/spdlog/spdlog.h>
 
-#include "spdlog/spdlog.h"
+#include <string>
 
 namespace bm {
 
