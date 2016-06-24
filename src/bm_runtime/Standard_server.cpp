@@ -1036,4 +1036,9 @@ void StandardHandler::copy_one_group(
   for (const auto h : from.mbr_handles) g->mbr_handles.push_back(h);
 }
 
-} }
+boost::shared_ptr<StandardIf> get_handler(SwitchWContexts *switch_) {
+  return boost::shared_ptr<StandardHandler>(new StandardHandler(switch_));
+}
+
+}  // namespace standard
+}  // namespace bm_runtime

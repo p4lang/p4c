@@ -41,9 +41,12 @@ namespace thrift_provider = apache::thrift;
 #include <thread>
 #include <mutex>
 
-#include "Standard_server.ipp"
-#include "SimplePre_server.ipp"
-#include "SimplePreLAG_server.ipp"
+#include <bm/bm_sim/switch.h>
+#include <bm/bm_sim/simple_pre.h>
+#include <bm/bm_sim/simple_pre_lag.h>
+#include <bm/Standard.h>
+#include <bm/SimplePre.h>
+#include <bm/SimplePreLAG.h>
 
 using namespace ::thrift_provider;
 using namespace ::thrift_provider::protocol;
@@ -52,14 +55,23 @@ using namespace ::thrift_provider::server;
 
 using boost::shared_ptr;
 
-using ::bm_runtime::standard::StandardHandler;
 using ::bm_runtime::standard::StandardProcessor;
-using ::bm_runtime::simple_pre::SimplePreHandler;
 using ::bm_runtime::simple_pre::SimplePreProcessor;
-using ::bm_runtime::simple_pre_lag::SimplePreLAGHandler;
 using ::bm_runtime::simple_pre_lag::SimplePreLAGProcessor;
 
 namespace bm_runtime {
+
+namespace standard {
+shared_ptr<StandardIf> get_handler(bm::SwitchWContexts *switch_);
+}  // namespace standard
+
+namespace simple_pre {
+shared_ptr<SimplePreIf> get_handler(bm::SwitchWContexts *switch_);
+}  // namespace simple_pre
+
+namespace simple_pre_lag {
+shared_ptr<SimplePreLAGIf> get_handler(bm::SwitchWContexts *switch_);
+}  // namespace simple_pre_lag
 
 bm::SwitchWContexts *switch_;
 TMultiplexedProcessor *processor_;
@@ -80,25 +92,25 @@ int serve(int port) {
   shared_ptr<TMultiplexedProcessor> processor(new TMultiplexedProcessor());
   processor_ = processor.get();
 
-  shared_ptr<StandardHandler> standard_handler(new StandardHandler(switch_));
   processor->registerProcessor(
-    "standard",
-    shared_ptr<TProcessor>(new StandardProcessor(standard_handler))
+      "standard",
+      shared_ptr<TProcessor>(new StandardProcessor(
+          standard::get_handler(switch_)))
   );
 
   if(switch_has_component<bm::McSimplePre>()) {
-    shared_ptr<SimplePreHandler> simple_pre_handler(new SimplePreHandler(switch_));
     processor->registerProcessor(
-      "simple_pre",
-      shared_ptr<TProcessor>(new SimplePreProcessor(simple_pre_handler))
+        "simple_pre",
+        shared_ptr<TProcessor>(new SimplePreProcessor(
+            simple_pre::get_handler(switch_)))
     );
   }
 
   if(switch_has_component<bm::McSimplePreLAG>()) {
-    shared_ptr<SimplePreLAGHandler> simple_pre_handler(new SimplePreLAGHandler(switch_));
     processor->registerProcessor(
-      "simple_pre_lag",
-      shared_ptr<TProcessor>(new SimplePreLAGProcessor(simple_pre_handler))
+        "simple_pre_lag",
+        shared_ptr<TProcessor>(new SimplePreLAGProcessor(
+            simple_pre_lag::get_handler(switch_)))
     );
   }
 
@@ -117,7 +129,7 @@ int serve(int port) {
   return 0;  
 }
 
-}
+}  // namespace
 
 int start_server(bm::SwitchWContexts *sw, int port) {
   switch_ = sw;
@@ -129,4 +141,4 @@ int start_server(bm::SwitchWContexts *sw, int port) {
   return 0;
 }
 
-}
+}  // namespace bm_runtime

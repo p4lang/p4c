@@ -58,7 +58,7 @@ noinst_LTLIBRARIES = libsimpleswitch.la
 
 libsimpleswitch_la_SOURCES = \
 simple_switch.cpp simple_switch.h primitives.cpp \
-thrift/src/SimpleSwitch_server.ipp
+thrift/src/SimpleSwitch_server.cpp
 
 bin_PROGRAMS = simple_switch
 

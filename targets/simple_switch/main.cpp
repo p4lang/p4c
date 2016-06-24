@@ -20,13 +20,18 @@
 
 /* Switch instance */
 
+#include <bm/SimpleSwitch.h>
 #include <bm/bm_runtime/bm_runtime.h>
 
 #include "simple_switch.h"
 
-#include "SimpleSwitch_server.ipp"
+namespace {
+SimpleSwitch *simple_switch;
+}  // namespace
 
-static SimpleSwitch *simple_switch;
+namespace sswitch_runtime {
+shared_ptr<SimpleSwitchIf> get_handler(SimpleSwitch *sw);
+}  // namespace sswitch_runtime
 
 int
 main(int argc, char* argv[]) {
@@ -36,9 +41,10 @@ main(int argc, char* argv[]) {
 
   int thrift_port = simple_switch->get_runtime_port();
   bm_runtime::start_server(simple_switch, thrift_port);
-  // 3rd template argument could just as well be SimpleSwitch
-  bm_runtime::add_service<SimpleSwitchHandler, SimpleSwitchProcessor, Switch>(
-    "simple_switch");
+  using ::sswitch_runtime::SimpleSwitchIf;
+  using ::sswitch_runtime::SimpleSwitchProcessor;
+  bm_runtime::add_service<SimpleSwitchIf, SimpleSwitchProcessor>(
+      "simple_switch", sswitch_runtime::get_handler(simple_switch));
   simple_switch->start_and_return();
 
   while (true) std::this_thread::sleep_for(std::chrono::seconds(100));

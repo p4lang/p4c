@@ -19,15 +19,11 @@ using namespace thrift_provider::protocol;
 
 namespace bm_runtime {
 
-using boost::shared_ptr;
-
 extern TMultiplexedProcessor *processor_;
-extern bm::SwitchWContexts *switch_;
 
-template <typename Handler, typename Processor, typename S>
-int add_service(const std::string &service_name) {
-  // TODO(antonin): static_cast too error prone here?
-  shared_ptr<Handler> handler(new Handler(static_cast<S *>(switch_)));
+template <typename Iface, typename Processor>
+int add_service(const std::string &service_name,
+                boost::shared_ptr<Iface> handler) {
   processor_->registerProcessor(service_name,
 				shared_ptr<TProcessor>(new Processor(handler)));
   return 0;

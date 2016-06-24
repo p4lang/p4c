@@ -7,6 +7,6 @@ noinst_LTLIBRARIES = libbmruntime.la
 
 libbmruntime_la_SOURCES = \
 server.cpp \
-Standard_server.ipp \
-SimplePre_server.ipp \
-SimplePreLAG_server.ipp
+Standard_server.cpp \
+SimplePre_server.cpp \
+SimplePreLAG_server.cpp

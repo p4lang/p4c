@@ -20,6 +20,7 @@
 
 #include <bm/SimplePre.h>
 
+#include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/simple_pre.h>
 #include <bm/bm_sim/logger.h>
 
@@ -122,4 +123,9 @@ private:
   std::vector<std::shared_ptr<McSimplePre> > pres{};
 };
 
-} }
+boost::shared_ptr<SimplePreIf> get_handler(SwitchWContexts *switch_) {
+  return boost::shared_ptr<SimplePreHandler>(new SimplePreHandler(switch_));
+}
+
+}  // namespace simple_pre
+}  // namespace bm_runtime
