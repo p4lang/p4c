@@ -107,12 +107,12 @@ const Method* Type_Extern::lookupMethod(cstring name, int paramCount) const {
 
 const Type_Method*
 Type_Parser::getApplyMethodType() const {
-    return new Type_Method(Util::SourceInfo(), typeParams, nullptr, applyParams);
+    return new Type_Method(Util::SourceInfo(), new IR::TypeParameters(), nullptr, applyParams);
 }
 
 const Type_Method*
 Type_Control::getApplyMethodType() const {
-    return new Type_Method(Util::SourceInfo(), typeParams, nullptr, applyParams);
+    return new Type_Method(Util::SourceInfo(), new IR::TypeParameters(), nullptr, applyParams);
 }
 
 const IR::Path* ActionListElement::getPath() const {

@@ -26,7 +26,9 @@ limitations under the License.
 #include "midend/localizeActions.h"
 #include "midend/local_copyprop.h"
 #include "midend/simplifyKey.h"
-#include "frontends/common/typeMap.h"
+#include "midend/parserUnroll.h"
+#include "midend/specialize.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -92,9 +94,11 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        new P4::SpecializeAll(&refMap, &typeMap, isv1),
         // TODO: simplify statements and expressions.
         // This is required for the correctness of some of the following passes.
-
+        // Parser loop unrolling
+        // new P4::ParserUnroll(&refMap, &typeMap, isv1),
         // Clone an action for each use, so we can specialize the action
         // per user (e.g., for each table or direct invocation).
         new P4::LocalizeAllActions(&refMap, isv1),

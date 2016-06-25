@@ -59,6 +59,12 @@ bool TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* 
     return true;
 }
 
+void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* other) {
+    CHECK_NULL(other);
+    for (auto v : other->binding)
+        binding[v.first] = v.second;
+}
+
 bool TypeVariableSubstitution::setBindings(const IR::Node* root,
                                            const IR::TypeParameters* params,
                                            const IR::Vector<IR::Type>* args) {

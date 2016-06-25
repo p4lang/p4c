@@ -21,8 +21,8 @@ namespace P4 {
 
 // If useExpressionType is true trust the type in mce->type
 MethodInstance*
-MethodInstance::resolve(const IR::MethodCallExpression* mce, const P4::ReferenceMap* refMap,
-                        const P4::TypeMap* typeMap, bool useExpressionType) {
+MethodInstance::resolve(const IR::MethodCallExpression* mce, const ReferenceMap* refMap,
+                        const TypeMap* typeMap, bool useExpressionType) {
     auto mt = typeMap->getType(mce->method);
     if (mt == nullptr && useExpressionType)
         mt = mce->method->type;
@@ -48,7 +48,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const P4::Reference
             auto decl = refMap->getDeclaration(pe->path, true);
             auto type = typeMap->getType(decl->getNode());
             if (type->is<IR::Type_SpecializedCanonical>())
-                type = type->to<IR::Type_SpecializedCanonical>()->substituted;
+                type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
             BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);
             if (type->is<IR::IApply>() &&
                 mem->member == IR::IApply::applyMethodName) {
@@ -80,19 +80,48 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const P4::Reference
 
 ConstructorCall*
 ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
-                         const P4::TypeMap* typeMap) {
-    auto t = typeMap->getType(cce, true);
-    if (t->is<IR::Type_Extern>())
-        return new ExternConstructorCall(cce, t->to<IR::Type_Extern>());
-    else if (t->is<IR::IContainer>())
-        return new ContainerConstructorCall(cce, t->to<IR::IContainer>());
-    BUG("Unexpected constructor call %1%", cce);
+                         const ReferenceMap* refMap,
+                         const TypeMap* typeMap) {
+    auto t = typeMap->getType(cce->constructedType, true);
+    ConstructorCall* result;
+    const IR::Vector<IR::Type>* typeArguments = nullptr;
+    const IR::Type_Name* type;
+
+    if (cce->constructedType->is<IR::Type_Specialized>()) {
+        auto spec = cce->constructedType->to<IR::Type_Specialized>();
+        type = spec->baseType;
+        typeArguments = cce->constructedType->to<IR::Type_Specialized>()->arguments;
+    } else {
+        type = cce->constructedType->to<IR::Type_Name>();
+        CHECK_NULL(type);
+        typeArguments = new IR::Vector<IR::Type>();
+    }
+
+    if (t->is<IR::Type_SpecializedCanonical>()) {
+        auto tsc = t->to<IR::Type_SpecializedCanonical>();
+        t = typeMap->getType(tsc->baseType, true);
+    }
+
+    if (t->is<IR::Type_Extern>()) {
+        auto ext = refMap->getDeclaration(type->path);
+        BUG_CHECK(ext->is<IR::Type_Extern>(), "%1%: expected an extern type", ext);
+        result = new ExternConstructorCall(ext->to<IR::Type_Extern>());
+    } else if (t->is<IR::IContainer>()) {
+        auto cont = refMap->getDeclaration(type->path);
+        BUG_CHECK(cont->is<IR::IContainer>(), "%1%: expected a container", cont);
+        result = new ContainerConstructorCall(cont->to<IR::IContainer>());
+    } else {
+        BUG("Unexpected constructor call %1%; type is %2%", cce, t);
+    }
+    result->cce = cce;
+    result->typeArguments = typeArguments;
+    return result;
 }
 
 MethodCallDescription::MethodCallDescription(const IR::MethodCallExpression* mce,
                                              const ReferenceMap* refMap, const TypeMap* typeMap) {
-    auto mi = MethodInstance::resolve(mce, refMap, typeMap);
-    auto params = mi->getParameters();
+    instance = MethodInstance::resolve(mce, refMap, typeMap);
+    auto params = instance->getParameters();
     substitution.populate(params, mce->arguments);
 }
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,19 +26,17 @@ class PacketIn : public Model::Extern_Model {
  public:
     PacketIn() :
             Extern_Model("packet_in"),
-            extract("extract"),
-            lookahead("lookahead")
-    {}
+            extract("extract"), lookahead("lookahead"),
+            advance("advance"), length("length") {}
     Model::Elem extract;
     Model::Elem lookahead;
+    Model::Elem advance;
+    Model::Elem length;
 };
 
 class PacketOut : public Model::Extern_Model {
  public:
-    PacketOut() :
-            Extern_Model("packet_out"),
-            emit("emit")
-    {}
+    PacketOut() : Extern_Model("packet_out"), emit("emit") {}
     Model::Elem emit;
 };
 

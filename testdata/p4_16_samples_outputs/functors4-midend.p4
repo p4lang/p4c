@@ -1,10 +1,10 @@
-parser p1()(bit<1> b1) {
+parser p1_0() {
     state start {
     }
 }
 
 parser p() {
-    p1(1w0) @name("p1i") p1i_0;
+    p1_0() @name("p1i") p1i_0;
     state start {
         p1i_0.apply();
     }

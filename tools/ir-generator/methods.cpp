@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -127,9 +127,9 @@ void IrClass::generateMethods() {
             if (body) {
                 if (!body.size())
                     body = nullptr;
-                if (exist)
+                if (exist) {
                     exist->body = body;
-                else {
+                } else {
                     auto *m = new IrMethod(def.first, body);
                     m->clss = this;
                     elements.push_back(m); } } }

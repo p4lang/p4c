@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ struct LookupScope : public Util::IHasSourceInfo {
     cstring             name;
     LookupScope() : in(nullptr), global(true), name(nullptr) {}
     LookupScope(const LookupScope *in, cstring name) : in(in), global(false), name(name) {}
-    LookupScope(const IrNamespace *);
+    explicit LookupScope(const IrNamespace *);
 
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override {

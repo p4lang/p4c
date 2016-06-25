@@ -23,6 +23,8 @@ midend_SOURCES = \
 	midend/convertEnums.cpp \
 	midend/inlining.cpp \
 	midend/inlining.h \
+	midend/interpreter.h \
+	midend/interpreter.cpp \
 	midend/local_copyprop.cpp \
 	midend/local_copyprop.h \
 	midend/localizeActions.cpp \
@@ -41,6 +43,8 @@ midend_SOURCES = \
 	midend/removeLeftSlices.h \
 	midend/simplifyKey.h \
 	midend/simplifyKey.cpp \
+	midend/specialize.h \
+	midend/specialize.cpp \
 	midend/uniqueNames.cpp \
 	midend/uniqueNames.h
 

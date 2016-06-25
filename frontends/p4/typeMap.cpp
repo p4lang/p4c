@@ -50,7 +50,8 @@ bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
 
 void TypeMap::clear() {
     LOG1("Clearing typeMap");
-    typeMap.clear(); leftValues.clear(); constants.clear(); program = nullptr;
+    typeMap.clear(); leftValues.clear(); constants.clear(); allTypeVariables.clear();
+    program = nullptr;
 }
 
 void TypeMap::checkPrecondition(const IR::Node* element, const IR::Type* type) const {
@@ -84,6 +85,12 @@ const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
     if (result != nullptr && result->is<IR::Type_Name>())
         BUG("%1% in map", dbp(result));
     return result;
+}
+
+void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
+    if (tvs == nullptr)
+        return;
+    allTypeVariables.simpleCompose(tvs);
 }
 
 }  // namespace P4

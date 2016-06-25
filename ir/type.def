@@ -248,9 +248,9 @@ class Type_Tuple : Type {
 // Abstract base for control, parser and package types.
 abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated {
     Annotations    annotations;
-    TypeParameters typeParams;
+    TypeParameters typeParameters;
     Annotations getAnnotations() const override { return annotations; }
-    TypeParameters getTypeParameters() const override { return typeParams; }
+    TypeParameters getTypeParameters() const override { return typeParameters; }
 }
 
 class Type_Package : Type_ArchBlock, IContainer {
@@ -301,7 +301,7 @@ class Type_Stack : Type {
    E<bit<32>>
    baseType is Type_Extern E, arguments is a vector containing Type_Bits(32) */
 class Type_Specialized : Type {
-    Type baseType;
+    Type_Name    baseType;
     Vector<Type> arguments;
     dbprint{ Node::dbprint(out); out << baseType; }
     toString{ return baseType->toString() + "<...>"; }
@@ -311,21 +311,29 @@ class Type_Specialized : Type {
 /* Canonical representation of a Type_Specialized;
    only used by the type-checker, never in the IR tree. */
 class Type_SpecializedCanonical : Type {
-    Type              baseType;     // canonical baseType
-    Vector<Type>      arguments;    // canonical type arguments
-    // In 'substituted' all arguments have been substituted
-    // for the type variables of the baseType.
-    Type              substituted;
+    Type         baseType;     // canonical baseType; always IMayBeGenericType
+    Vector<Type> arguments;    // canonical type arguments
+    // 'substituted' is baseType with all type
+    // variables substituted with the arguments.
+    Type         substituted;  // always IMayBeGenericType
 #nodbprint
     validate{
         arguments->check_null();
         BUG_CHECK(baseType->is<IMayBeGenericType>(), "base type %1% is not generic", baseType);
+        BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
 }
 
 // A declaration that consists of just an identifier, e.g., an enum member
 class Declaration_ID : Declaration, CompileTimeValue {
 #nodbprint
+}
+
+// The type of a string literal
+class Type_String : Type {
+#nodbprint
+    static Type_String get();
+    toString{ return "string"; }
 }
 
 class Type_Enum : Type_Declaration, ISimpleNamespace {
@@ -356,7 +364,7 @@ class Type_ActionEnum : Type {
 }
 
 abstract Type_MethodBase : Type, IMayBeGenericType {
-    TypeParameters typeParameters; // we generally want these visited first
+    TypeParameters typeParameters;  // we generally want these visited first
     NullOK Type returnType;   // nullptr for constructors or functors; nullptr is not void
     ParameterList parameters;
 

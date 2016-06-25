@@ -77,7 +77,9 @@ bool Evaluator::preorder(const IR::P4Program* program) {
         visit(d);
     }
     popBlock(toplevelBlock);
-    LOG1(toplevelBlock);
+    std::stringstream str;
+    toplevelBlock->dbprint_recursive(str);
+    LOG1(str);
     return false;
 }
 
@@ -138,7 +140,7 @@ Evaluator::processConstructor(
         // constructors with zero arguments that may not appear in the original extern declaration.
         auto canon = instanceType;
         if (canon->is<IR::Type_SpecializedCanonical>())
-            canon = canon->to<IR::Type_SpecializedCanonical>()->substituted;
+            canon = canon->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
         BUG_CHECK(canon->is<IR::Type_Extern>(), "%1%: expected an extern", canon);
         auto constructor = canon->to<IR::Type_Extern>()->lookupMethod(exttype->name.name,
                                                                       arguments->size());

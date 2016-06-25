@@ -18,7 +18,7 @@ limitations under the License.
 #define MIDEND_LOCAL_COPYPROP_H_
 
 #include "ir/ir.h"
-#include "frontends/common/typeMap.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 
 namespace P4 {

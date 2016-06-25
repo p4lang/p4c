@@ -163,9 +163,9 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         return true;
 
     if (dest->is<IR::Type_SpecializedCanonical>())
-        dest = dest->to<IR::Type_SpecializedCanonical>()->substituted;
+        dest = dest->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
     if (src->is<IR::Type_SpecializedCanonical>())
-        src = src->to<IR::Type_SpecializedCanonical>()->substituted;
+        src = src->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
 
     if (dest == IR::Type_Dontcare::get())
         return true;

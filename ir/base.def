@@ -21,8 +21,7 @@ abstract Type {
 // Implemented by all types that may be generic
 interface IMayBeGenericType {
     virtual const TypeParameters* getTypeParameters() const = 0;
-    inline const Type* toType() const { return getNode()->to<Type>(); }
-    const Type* specialize(const Vector<Type>* arguments) const;
+    const Type* toType() const { return to<Type>(); }
 }
 
 // Implemented by objects with an 'apply' method
@@ -40,6 +39,8 @@ interface ISimpleNamespace : INamespace {
     virtual IDeclaration getDeclByName(cstring name) const = 0;
 }
 
+// A general namespace can have multiple declarations with the same name
+// E.g., an extern can have multiple methods with the same name.
 interface IGeneralNamespace : INamespace {
     virtual Util::Enumerator<IDeclaration>* getDeclsByName(cstring name) const;
     void checkDuplicateDeclarations() const;
@@ -52,6 +53,7 @@ interface ITypeVar {
     inline Type asType() const { return to<Type>(); }
 }
 
+// Implemented by P4Parser, P4Control and Type_Package
 interface IContainer : IMayBeGenericType {
     // The type of the constructor as a method
     virtual Type_Method getConstructorMethodType() const = 0;
@@ -72,7 +74,8 @@ class Type_Unknown : Type_Base {
 // A statement or a declaration
 abstract StatOrDecl {}
 
-// Two declarations wit the same name are not necessarily the same declaration
+// Two declarations with the same name are not necessarily the same declaration.
+// That's why declid is used to distinguish them.
 abstract Declaration : StatOrDecl, IDeclaration {
     ID          name;
     int declid = nextId++;
@@ -84,7 +87,9 @@ abstract Declaration : StatOrDecl, IDeclaration {
     toString { return externalName(); }
 }
 
+// A declaration which introduces a type.
 // Two declarations with the same name are not the same declaration
+// That's why declid is used to distinguish them.
 abstract Type_Declaration : Type, IDeclaration {
     ID name;
     int declid = nextId++;
@@ -98,10 +103,10 @@ abstract Type_Declaration : Type, IDeclaration {
 
 abstract Expression {
     // Note that the type field is not visited.
-    // Most P4 v1.2 passes don't use this field.
+    // Most P4_16 passes don't use this field.
     // It is a used to hold the result of TypeInferencing for the expression.
-    // It is used by the P4 v1.0 front-end and by some back-ends.
-    // It is not visited by the visitors by default (can visit explicitly in the preorder)
+    // It is used by the P4_14 front-end and by some back-ends.
+    // It is not visited by the visitors by default (can be visited explicitly in preorder)
     optional Type type = Type::Unknown::get();
     visit_children { (void)v; }
 }
@@ -209,6 +214,7 @@ class Annotations {
     validate{ annotations->check_null(); }
 }
 
+// Implemented by all objects that can have annotations
 interface IAnnotated {
     virtual Annotations getAnnotations() const = 0;
 }

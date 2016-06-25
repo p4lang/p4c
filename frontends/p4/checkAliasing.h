@@ -2,7 +2,7 @@
 #define _FRONTENDS_P4_CHECKALIASING_H_
 
 #include "ir/ir.h"
-#include "frontends/common/typeMap.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace P4 {

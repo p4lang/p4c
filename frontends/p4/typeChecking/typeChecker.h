@@ -18,8 +18,8 @@ limitations under the License.
 #define _TYPECHECKING_TYPECHECKER_H_
 
 #include "ir/ir.h"
-#include "../../common/typeMap.h"
-#include "../../common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "lib/exceptions.h"
 #include "lib/cstring.h"
 #include "frontends/p4/substitution.h"
@@ -28,8 +28,6 @@ limitations under the License.
 #include "typeUnification.h"
 
 namespace P4 {
-
-class ConstantTypeSubstitution;
 
 // Type checking algorithm.
 // It is a transform because it may convert implicit casts into explicit casts.
@@ -90,7 +88,7 @@ class TypeInference : public Transform {
     bool done() const;
     TypeVariableSubstitution* unify(
         const IR::Node* errorPosition, const IR::Type* destType,
-        const IR::Type* srcType, bool reportErrors) const;
+        const IR::Type* srcType, bool reportErrors);
 
     // Tries to assign sourceExpression to a destination with type destType.
     // This may rewrite the sourceExpression, in particular converting InfInt values
@@ -100,7 +98,7 @@ class TypeInference : public Transform {
     const IR::SelectCase* matchCase(const IR::SelectExpression* select,
                                     const IR::Type_Tuple* selectType,
                                     const IR::SelectCase* selectCase,
-                                    const IR::Type* caseType) const;
+                                    const IR::Type* caseType);
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
     bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
 
@@ -122,6 +120,8 @@ class TypeInference : public Transform {
     const IR::Node* shift(const IR::Operation_Binary* op);
     const IR::Node* bitwise(const IR::Operation_Binary* op);
     const IR::Node* typeSet(const IR::Operation_Binary* op);
+
+    const IR::Type* cloneWithFreshTypeVariables(const IR::IMayBeGenericType* type);
     const IR::Type* containerInstantiation(const IR::Node* node,
                                            const IR::Vector<IR::Expression>* args,
                                            const IR::IContainer* container);
@@ -186,6 +186,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Parameter* param) override;
     const IR::Node* postorder(IR::Constant* expression) override;
     const IR::Node* postorder(IR::BoolLiteral* expression) override;
+    const IR::Node* postorder(IR::StringLiteral* expression) override;
     const IR::Node* postorder(IR::Operation_Relation* expression) override;
     const IR::Node* postorder(IR::Concat* expression) override;
     const IR::Node* postorder(IR::ArrayIndex* expression) override;
@@ -259,6 +260,20 @@ class ApplyTypesToExpressions : public Transform {
  public:
     explicit ApplyTypesToExpressions(TypeMap *typeMap) : typeMap(typeMap)
     { setName("ApplyTypesToExpressions"); }
+};
+
+
+// Insert explicit type specializations where they are missing
+class BindTypeVariables : public Transform {
+    TypeMap                 * typeMap;
+    const IR::Type* getP4Type(const IR::Type_Var* var) const;
+ public:
+    explicit BindTypeVariables(TypeMap* typeMap) : typeMap(typeMap)
+    { CHECK_NULL(typeMap); setName("BindTypeVariables"); }
+    const IR::Node* postorder(IR::Expression* expression) override;
+    const IR::Node* postorder(IR::Declaration_Instance* decl) override;
+    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
+    const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
 };
 
 // Performs together reference resolution and type checking.

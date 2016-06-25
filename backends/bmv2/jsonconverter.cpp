@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -953,7 +953,7 @@ bool JsonConverter::handleTableImplementation(const IR::TableProperty* implement
         return false;
     }
     auto cc = P4::ConstructorCall::resolve(
-        propv->expression->to<IR::ConstructorCallExpression>(), typeMap);
+        propv->expression->to<IR::ConstructorCallExpression>(), refMap, typeMap);
     if (!cc->is<P4::ExternConstructorCall>()) {
         ::error("%1%: expected extern object for property", implementation);
         return false;

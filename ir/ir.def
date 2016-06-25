@@ -272,14 +272,17 @@ class Declaration_Constant : Declaration, IAnnotated {
 // Like a variable, but for a statically allocated instance.
 // The syntax is Contructor(args) name = initializer;
 class Declaration_Instance : Declaration, IAnnotated {
-    Type                  type;
+    Type                  type;         // Either Type_Name or Type_Specialized
     Vector<Expression>    arguments;
     Annotations           annotations;
     NullOK BlockStatement initializer;  // experimental only; contains just declarations, no code
 
     Annotations getAnnotations() const override { return annotations; }
 #nodbprint
-    validate{ arguments->check_null(); }
+    validate{ BUG_CHECK(type->is<Type_Name>() ||
+                        type->is<Type_Specialized>(),
+                        "%1%: unexpected type", type);
+        arguments->check_null(); }
 }
 
 // Toplevel program representation

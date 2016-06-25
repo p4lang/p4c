@@ -25,7 +25,7 @@ limitations under the License.
 #include "midend/localizeActions.h"
 #include "midend/removeParameters.h"
 #include "midend/local_copyprop.h"
-#include "frontends/common/typeMap.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -75,22 +75,22 @@ void IR::Type_MethodBase::dbprint(std::ostream& out) const {
 
 void IR::Type_Parser::dbprint(std::ostream& out) const {
     Type_Declaration::dbprint(out);
-    if (typeParams != nullptr)
-        out << typeParams;
+    if (typeParameters != nullptr)
+        out << typeParameters;
     out << "(" << applyParams << ")";
 }
 
 void IR::Type_Control::dbprint(std::ostream& out) const {
     Type_Declaration::dbprint(out);
-    if (typeParams != nullptr)
-        out << typeParams;
+    if (typeParameters != nullptr)
+        out << typeParameters;
     out << "(" << applyParams << ")";
 }
 
 void IR::Type_Package::dbprint(std::ostream& out) const {
     Type_Declaration::dbprint(out);
-    if (typeParams != nullptr)
-        out << typeParams;
+    if (typeParameters != nullptr)
+        out << typeParameters;
     out << "(" << constructorParams << ")";
 }
 

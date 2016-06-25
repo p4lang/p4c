@@ -14,23 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_REMOVELEFTSLICES_H_
-#define _MIDEND_REMOVELEFTSLICES_H_
+extern Generic<T> {
+    Generic(T sz);
+    R get<R>();
+    R get1<R, S>(in S value, in R data);
+}
 
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
+extern void f<T>(in T arg);
 
-namespace P4 {
+control c<T>()(T size) {
+    Generic<T>(size) x;
+    apply {
+        bit<32> a = x.get<bit<32>>();
+        bit<32> b = x.get1(10w0, 5w0);
+        f(b);
+    }
+}
 
-// Remove Slices on the lhs of an assignment
-class RemoveLeftSlices : public Transform {
-    P4::TypeMap* typeMap;
- public:
-    explicit RemoveLeftSlices(P4::TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("RemoveLeftSlices"); }
-    const IR::Node* postorder(IR::AssignmentStatement* stat) override;
-};
+control caller() {
+    c(8w9) cinst;
+    apply {
+        cinst.apply();
+    }
+}
 
-}  // namespace P4
-
-#endif /* _MIDEND_REMOVELEFTSLICES_H_ */
+control s();
+package p(s parg);
+p(caller()) main;

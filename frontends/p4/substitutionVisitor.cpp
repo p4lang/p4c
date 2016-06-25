@@ -34,10 +34,15 @@ const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::TypeParameters *tp
     // remove all variables that were substituted
     auto result = new IR::IndexedVector<IR::Type_Var>();
     for (auto param : *tps->parameters) {
-        if (bindings->containsKey(param))
+        const IR::Type* type = bindings->lookup(param);
+        if (type != nullptr && !replace) {
             LOG1("Removing from generic parameters " << param);
-        else
+        } else {
+            if (type != nullptr)
+                BUG_CHECK(type->is<IR::Type_Var>(),
+                          "cannot replace a type parameter %1% with %2%:", param, type);
             result->push_back(param);
+        }
     }
     return new IR::TypeParameters(tps->srcInfo, result);
 }

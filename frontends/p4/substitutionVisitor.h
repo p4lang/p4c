@@ -37,13 +37,17 @@ class TypeOccursVisitor : public Inspector {
     bool preorder(const IR::Type_InfInt* infint) override;
 };
 
-/* Replaces TypeVariables with other types. */
+/* Replaces TypeVariables with other types */
 class TypeVariableSubstitutionVisitor : public Transform {
  protected:
     const TypeVariableSubstitution* bindings;
+    bool  replace;  // If true variables that map to variables are just replaced
+                    // in the ParameterList of the replaced object; else they
+                    // are removed.
  public:
-    explicit TypeVariableSubstitutionVisitor(const TypeVariableSubstitution *bindings)
-            : bindings(bindings) { setName("TypeVariableSubstitution"); }
+    explicit TypeVariableSubstitutionVisitor(const TypeVariableSubstitution *bindings,
+                                             bool replace = false)
+            : bindings(bindings), replace(replace) { setName("TypeVariableSubstitution"); }
 
     const IR::Node* preorder(IR::TypeParameters *tps) override;
     const IR::Node* preorder(IR::Type_Var* typeVariable) override;

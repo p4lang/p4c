@@ -41,7 +41,7 @@ int Type_InfInt::nextId = 0;
 
 Annotations* Annotations::empty = new Annotations(new Vector<Annotation>());
 
-const IR::Type_Bits* Type_Bits::get(int width, bool isSigned) {
+const Type_Bits* Type_Bits::get(int width, bool isSigned) {
     std::map<int, const IR::Type_Bits*> *map;
     if (isSigned) {
         if (signedTypes == nullptr)
@@ -62,16 +62,23 @@ const IR::Type_Bits* Type_Bits::get(int width, bool isSigned) {
 }
 
 const Type::Unknown *Type::Unknown::get() {
-    static const Type::Unknown *singleton;
+    static const Type::Unknown *singleton = nullptr;
     if (!singleton)
         singleton = (new Type::Unknown(Util::SourceInfo()));
     return singleton;
 }
 
 const Type::Boolean *Type::Boolean::get() {
-    static const Type::Boolean *singleton;
+    static const Type::Boolean *singleton = nullptr;
     if (!singleton)
         singleton = (new Type::Boolean(Util::SourceInfo()));
+    return singleton;
+}
+
+const Type_String *Type_String::get() {
+    static const Type_String *singleton = nullptr;
+    if (!singleton)
+        singleton = (new Type_String(Util::SourceInfo()));
     return singleton;
 }
 

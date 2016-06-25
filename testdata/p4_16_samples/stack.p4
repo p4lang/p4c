@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,11 +21,15 @@ parser p()
     state start {
         h[12] stack;
 
+        stack[3].setValid();
         h b = stack[3];
         b = stack.last;
-        b = stack.next;
         stack[3] = b;
+        b = stack.next;
         stack.push_front(2);
         stack.pop_front(2);
     }
 }
+
+package top(p par);
+top(p()) main;

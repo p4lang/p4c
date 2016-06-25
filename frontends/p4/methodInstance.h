@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/common/typeMap.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/methodInstance.h"
 
@@ -33,6 +33,7 @@ class MethodInstance {
                    const IR::Type_MethodBase* methodType) :
             expr(mce), object(decl), methodType(methodType)
     { CHECK_NULL(mce); CHECK_NULL(methodType); }
+
  public:
     const IR::MethodCallExpression* expr;
     const IR::IDeclaration* object;  // Object that method is applied to.
@@ -45,12 +46,12 @@ class MethodInstance {
     virtual ~MethodInstance() {}
 
     static MethodInstance* resolve(const IR::MethodCallExpression* mce,
-                                   const P4::ReferenceMap* refMap,
-                                   const P4::TypeMap* typeMap,
+                                   const ReferenceMap* refMap,
+                                   const TypeMap* typeMap,
                                    bool useExpressionType = false);
     static MethodInstance* resolve(const IR::MethodCallStatement* mcs,
-                                   const P4::ReferenceMap* refMap,
-                                   const P4::TypeMap* typeMap)
+                                   const ReferenceMap* refMap,
+                                   const TypeMap* typeMap)
         { return resolve(mcs->methodCall, refMap, typeMap); }
     const IR::ParameterList* getParameters() const
     { return methodType->parameters; }
@@ -122,31 +123,31 @@ class BuiltInMethod final : public MethodInstance {
 // Similar to a MethodInstance, but for a constructor call expression
 class ConstructorCall {
  protected:
-    explicit ConstructorCall(const IR::ConstructorCallExpression* cce) : cce(cce)
-    { CHECK_NULL(cce); }
     virtual ~ConstructorCall() {}
  public:
     const IR::ConstructorCallExpression* cce;
-    static ConstructorCall* resolve(const IR::ConstructorCallExpression* mce,
-                                    const P4::TypeMap* typeMap);
+    const IR::Vector<IR::Type>*          typeArguments;
+    static ConstructorCall* resolve(const IR::ConstructorCallExpression* cce,
+                                    const ReferenceMap* refMap,
+                                    const TypeMap* typeMap);
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
 };
 
 class ExternConstructorCall : public ConstructorCall {
-    ExternConstructorCall(const IR::ConstructorCallExpression* cce, const IR::Type_Extern* type) :
-            ConstructorCall(cce), type(type) { CHECK_NULL(type); }
+    explicit ExternConstructorCall(const IR::Type_Extern* type) :
+            type(type) { CHECK_NULL(type); }
     friend class ConstructorCall;
  public:
-    const IR::Type_Extern* type;
+    const IR::Type_Extern* type;  // actual extern declaration in program IR
 };
 
 class ContainerConstructorCall : public ConstructorCall {
-    ContainerConstructorCall(const IR::ConstructorCallExpression* cce, const IR::IContainer* cont) :
-            ConstructorCall(cce), container(cont) { CHECK_NULL(cont); }
+    explicit ContainerConstructorCall(const IR::IContainer* cont) :
+            container(cont) { CHECK_NULL(cont); }
     friend class ConstructorCall;
  public:
-    const IR::IContainer* container;
+    const IR::IContainer* container;  // actual container in program IR
 };
 
 // Abstraction for a method call: maintains mapping between arguments
@@ -155,6 +156,7 @@ class ContainerConstructorCall : public ConstructorCall {
 // TODO: convert all code to use this class.
 class MethodCallDescription {
  public:
+    MethodInstance       *instance;
     // For each callee parameter the corresponding argument
     ParameterSubstitution substitution;
 

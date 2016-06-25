@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -186,9 +186,10 @@ void IrMethod::generate_hdr(std::ostream &out) const {
         out << " const";
         if (isOverride) out << " override";
         out << ";" << std::endl;
-    } else if (name == "node_type_name")
+    } else if (name == "node_type_name") {
         out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype->toString()
             << " static_type_name() " << body << std::endl;
+    }
     if (!inImpl && srcInfo.isValid())
         out << LineDirective();
 }

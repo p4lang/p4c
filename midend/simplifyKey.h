@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/common/typeMap.h"
+#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 

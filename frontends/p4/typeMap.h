@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_COMMON_TYPEMAP_H_
-#define _FRONTENDS_COMMON_TYPEMAP_H_
+#ifndef _FRONTENDS_P4_TYPEMAP_H_
+#define _FRONTENDS_P4_TYPEMAP_H_
 
 #include "ir/ir.h"
 #include "frontends/common/programMap.h"
+#include "frontends/p4/substitution.h"
 
 namespace P4 {
 /*
@@ -46,6 +47,10 @@ class TypeMap final : public ProgramMap {
     // is not necessarily a constant - it could be a directionless
     // parameter as well.
     std::set<const IR::Expression*> constants;
+    // For each type variable in the program the actual
+    // type that is substituted for it.
+    TypeVariableSubstitution allTypeVariables;
+
     // checks some preconditions before setting the type
     void checkPrecondition(const IR::Node* element, const IR::Type* type) const;
 
@@ -65,6 +70,9 @@ class TypeMap final : public ProgramMap {
 
     void setLeftValue(const IR::Expression* expression);
     void setCompileTimeConstant(const IR::Expression* expression);
+    void addSubstitutions(const TypeVariableSubstitution* tvs);
+    const IR::Type* getSubstitution(const IR::Type_Var* var)
+    { return allTypeVariables.lookup(var); }
 };
 }  // namespace P4
 

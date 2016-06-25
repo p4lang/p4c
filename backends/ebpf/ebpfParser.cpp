@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -275,8 +275,8 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
     builder->newline();
 
     auto mi = P4::MethodInstance::resolve(expression,
-                                             state->parser->program->refMap,
-                                             state->parser->program->typeMap);
+                                          state->parser->program->refMap,
+                                          state->parser->program->typeMap);
     auto extMethod = dynamic_cast<P4::ExternMethod*>(mi);
     if (extMethod != nullptr) {
         auto decl = extMethod->object;

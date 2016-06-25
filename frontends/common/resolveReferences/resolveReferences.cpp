@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -303,7 +303,7 @@ bool ResolveReferences::preorder(const IR::Type_Name* type) {
 bool ResolveReferences::preorder(const IR::P4Control *c) {
     refMap->usedName(c->name.name);
     addToContext(c);
-    addToContext(c->type->typeParams);
+    addToContext(c->type->typeParameters);
     addToContext(c->type->applyParams);
     addToContext(c->constructorParams);
     return true;
@@ -312,7 +312,7 @@ bool ResolveReferences::preorder(const IR::P4Control *c) {
 void ResolveReferences::postorder(const IR::P4Control *c) {
     removeFromContext(c->constructorParams);
     removeFromContext(c->type->applyParams);
-    removeFromContext(c->type->typeParams);
+    removeFromContext(c->type->typeParameters);
     removeFromContext(c);
     checkShadowing(c);
 }
@@ -320,7 +320,7 @@ void ResolveReferences::postorder(const IR::P4Control *c) {
 bool ResolveReferences::preorder(const IR::P4Parser *c) {
     refMap->usedName(c->name.name);
     addToContext(c);
-    addToContext(c->type->typeParams);
+    addToContext(c->type->typeParameters);
     addToContext(c->type->applyParams);
     addToContext(c->constructorParams);
     return true;
@@ -329,7 +329,7 @@ bool ResolveReferences::preorder(const IR::P4Parser *c) {
 void ResolveReferences::postorder(const IR::P4Parser *c) {
     removeFromContext(c->constructorParams);
     removeFromContext(c->type->applyParams);
-    removeFromContext(c->type->typeParams);
+    removeFromContext(c->type->typeParameters);
     removeFromContext(c);
     checkShadowing(c);
 }
@@ -423,13 +423,13 @@ bool ResolveReferences::preorder(const IR::Declaration_MatchKind *d) {
 
 bool ResolveReferences::preorder(const IR::Type_ArchBlock *t) {
     resolveForward.push_back(anyOrder);
-    addToContext(t->typeParams);
+    addToContext(t->typeParameters);
     return true;
 }
 
 void ResolveReferences::postorder(const IR::Type_ArchBlock *t) {
     refMap->usedName(t->name.name);
-    removeFromContext(t->typeParams);
+    removeFromContext(t->typeParameters);
     resolveForward.pop_back();
 }
 

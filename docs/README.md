@@ -119,7 +119,7 @@ compilation and simplifying debugging.
   http://p4.org/wp-content/uploads/2015/04/p4-latest.pdf
 
 * the P4_16 draft language is described in [this Word
-  document](https://github.com/p4lang/p4-spec/tree/master/p4_16/spec/P4-16-draft-spec.docx).
+  document](https://github.com/p4lang/p4-spec/tree/master/p4-16/spec/P4-16-draft-spec.docx).
   This language is still under design.
 
 * the compiler intermediate representation (IR) is briefly described

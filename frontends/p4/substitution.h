@@ -40,13 +40,10 @@ class TypeSubstitution {
 
     bool containsKey(T key) const { return binding.find(key) != binding.end(); }
 
-    /* Bind a variable to a value.  This can fail if the variable is already bound.
-     * @param  id   Variable to bind
-     * @param  type Type to bind to.
-     * @return True on success. */
+    /* This can fail if id is already bound.
+     * @return true on success. */
     bool setBinding(T id, const IR::Type* type) {
-        if (id == nullptr || type == nullptr)
-            BUG("Null argument for setBinding");
+        CHECK_NULL(id); CHECK_NULL(type);
         auto it = binding.find(id);
         if (it != binding.end()) {
             if (it->second != type)
@@ -74,32 +71,11 @@ class TypeSubstitution {
 };
 
 class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVar*> {
- private:
-    const IR::ITypeVar* lookupKey(cstring name) const {
-        for (auto it : binding)
-            if (it.first->getVarName() == name)
-                return it.first;
-        return nullptr;
-    }
-
  public:
-    /* Lookup a type variable by name.
-     * @param name  Name of variable to lookup.
-     * @return      The type variable value associated with that name in this map,
-     *              or nullptr if there is no such binding. */
-    bool setBinding(const IR::ITypeVar* id, const IR::Type* type) {
-        auto t = lookupKey(id->getVarName());
-        if (t != nullptr)
-            BUG("Two variables with the same name in a binding");
-
-        return TypeSubstitution::setBinding(id, type);
-    }
-
     /* Set bindings for multiple variables at the same time.
      * @param params   List of variables to set.
      * @param args     List of type arguments to set to variables.
      * @param root     P4 program element which is being processed. Used for error reporting.
-     * @param reporter Used to report errors.
      * @return         True on success. */
     bool setBindings(const IR::Node* root,
                      const IR::TypeParameters* params,
@@ -109,10 +85,11 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
      * Add this substitution to the list.
      * @param var           Variable to substitute everywhere.
      * @param substitution  Substitution for variable.
-     * @param debug         If true print debugging messages.
-     * @param reporter      Used to report errors.
      * @return              True on success.     */
     bool compose(const IR::ITypeVar* var, const IR::Type* substitution);
+    // Simple composition: do not expect that variables from other
+    // appear in the RHS of variables from this.
+    void simpleCompose(const TypeVariableSubstitution* other);
 };
 
 class TypeNameSubstitution final : public TypeSubstitution<const IR::Type_Name*> {};

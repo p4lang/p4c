@@ -23,13 +23,13 @@ limitations under the License.
 #include "lib/path.h"
 #include "frontend.h"
 
-#include "../common/typeMap.h"
-#include "../common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 // Passes
 #include "toP4/toP4.h"
 #include "validateParsedProgram.h"
 #include "createBuiltins.h"
-#include "../common/constantFolding.h"
+#include "frontends/common/constantFolding.h"
 #include "unusedDeclarations.h"
 #include "checkAliasing.h"
 #include "typeChecking/typeChecker.h"
@@ -64,13 +64,13 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
         new P4::TypeInference(&refMap, &typeMap, true, false),
+        new P4::BindTypeVariables(&typeMap),
         // Another round of constant folding, using type information.
-        new P4::ResolveReferences(&refMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::CheckAliasing(&refMap, &typeMap),
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
     };

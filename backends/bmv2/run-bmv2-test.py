@@ -32,8 +32,11 @@ import time
 import random
 import errno
 from string import maketrans
-from scapy.layers.all import *
-from scapy.utils import *
+try:
+    from scapy.layers.all import *
+    from scapy.utils import *
+except ImportError:
+    pass
 
 SUCCESS = 0
 FAILURE = 1
@@ -357,6 +360,7 @@ class BMV2Table(object):
 # and test packets in pcap files.
 class RunBMV2(object):
     def __init__(self, folder, options, jsonfile):
+
         self.clifile = folder + "/cli.txt"
         self.jsonfile = jsonfile
         self.clifd = open(self.clifile, "w")

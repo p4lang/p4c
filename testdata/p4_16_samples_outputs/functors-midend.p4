@@ -1,8 +1,8 @@
-parser p()(bit<1> b, bit<1> c) {
+parser p_0() {
     state start {
     }
 }
 
 parser nothing();
 package m(nothing n);
-m(p(1w0, 1w1)) main;
+m(p_0()) main;

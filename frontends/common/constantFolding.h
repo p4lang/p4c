@@ -20,7 +20,7 @@ limitations under the License.
 #include <gmpxx.h>
 
 #include "ir/ir.h"
-#include "typeMap.h"
+#include "frontends/p4/typeMap.h"
 #include "resolveReferences/referenceMap.h"
 
 namespace P4 {

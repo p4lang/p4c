@@ -249,31 +249,32 @@ class Cast : Operation_Unary {
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
     toString{ return "cast"; }
-    validate{ if (destType->is<Type_Unknown>()) BUG("%1%: Cannot cast to unknown type", this); }
+    validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
 }
 
 class SelectExpression : Expression {
-    ListExpression select;
+    ListExpression     select;
     Vector<SelectCase> selectCases;
 #nodbprint
     validate{ selectCases->check_null(); }
 }
 
 class MethodCallExpression : Expression {
-    Expression method;
-    Vector<Type> typeArguments;
+    Expression         method;
+    Vector<Type>       typeArguments;
     Vector<Expression> arguments;
     toString{ return method->toString(); }
     validate{ typeArguments->check_null(); arguments->check_null(); }
 }
 
 class ConstructorCallExpression : Expression {
-    Type               constructedType = type;
+    Type               constructedType = type;  // Either a Type_Name or a Specialized_Type
     Vector<Expression> arguments;
     toString{ return constructedType->toString(); }
-    validate{ if (constructedType->is<Type_Unknown>())
-                  BUG("%1%: Cannot construct unknown type", this);
-              arguments->check_null(); }
+    validate{ BUG_CHECK(constructedType->is<Type_Name>() ||
+                        constructedType->is<Type_Specialized>(),
+                        "%1%: unexpected type", constructedType);
+        arguments->check_null(); }
 }
 
 // Represents a list of expressions separated by commas

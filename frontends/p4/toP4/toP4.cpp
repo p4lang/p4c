@@ -345,7 +345,7 @@ bool ToP4::preorder(const IR::Type_Package* package) {
     visit(package->annotations);
     builder.append("package ");
     builder.append(package->name);
-    visit(package->typeParams);
+    visit(package->typeParameters);
     visit(package->constructorParams);
     if (isDeclaration) builder.endOfStatement();
     return false;
@@ -399,7 +399,7 @@ bool ToP4::preorder(const IR::Type_Parser* t) {
     visit(t->annotations);
     builder.append("parser ");
     builder.append(t->name);
-    visit(t->typeParams);
+    visit(t->typeParameters);
     visit(t->applyParams);
     if (isDeclaration) builder.endOfStatement();
     return false;
@@ -411,7 +411,7 @@ bool ToP4::preorder(const IR::Type_Control* t) {
     visit(t->annotations);
     builder.append("control ");
     builder.append(t->name);
-    visit(t->typeParams);
+    visit(t->typeParameters);
     visit(t->applyParams);
     if (isDeclaration) builder.endOfStatement();
     return false;

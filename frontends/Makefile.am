@@ -63,7 +63,9 @@ p4_frontend_SOURCES = \
 	frontends/p4/fromv1.0/v1model.h \
 	frontends/p4/fromv1.0/v1model.cpp \
 	frontends/p4/fromv1.0/converters.h \
-	frontends/p4/fromv1.0/converters.cpp
+	frontends/p4/fromv1.0/converters.cpp \
+	frontends/p4/typeMap.h \
+	frontends/p4/typeMap.cpp
 
 common_frontend_SOURCES = \
 	frontends/common/options.h  \
@@ -71,8 +73,6 @@ common_frontend_SOURCES = \
 	frontends/common/constantFolding.h \
 	frontends/common/constantFolding.cpp \
 	frontends/common/programMap.h  \
-	frontends/common/typeMap.h \
-	frontends/common/typeMap.cpp \
 	frontends/common/resolveReferences/referenceMap.cpp \
 	frontends/common/resolveReferences/resolveReferences.cpp \
 	frontends/common/resolveReferences/referenceMap.h \

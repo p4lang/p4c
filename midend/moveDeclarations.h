@@ -18,7 +18,7 @@ limitations under the License.
 #define _MIDEND_MOVEDECLARATIONS_H_
 
 #include "ir/ir.h"
-#include "frontends/common/typeMap.h"
+#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 

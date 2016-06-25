@@ -30,7 +30,7 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "midend/simplifyKey.h"
 #include "frontends/p4/strengthReduction.h"
-#include "frontends/common/typeMap.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"

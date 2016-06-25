@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -119,8 +119,8 @@ class IndexedVector : public Vector<T> {
     template <class... Args> void emplace_back(Args&&... args) {
         auto el = new T(std::forward<Args>(args)...);
         insert(el); }
-    void push_back(T *a) { Vector<T>::push_back(a); insertInMap(a); }
-    void push_back(const T *a) { Vector<T>::push_back(a); insertInMap(a); }
+    void push_back(T *a) { CHECK_NULL(a); Vector<T>::push_back(a); insertInMap(a); }
+    void push_back(const T *a) { CHECK_NULL(a); Vector<T>::push_back(a); insertInMap(a); }
     void pop_back() {
         if (typename Vector<T>::empty())
             BUG("pop_back from empty IndexedVector");

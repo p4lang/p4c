@@ -17,7 +17,7 @@ limitations under the License.
 #include "ebpfControl.h"
 #include "ebpfType.h"
 #include "ebpfTable.h"
-#include "frontends/common/typeMap.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
 
