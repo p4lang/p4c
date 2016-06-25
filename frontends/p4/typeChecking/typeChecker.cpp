@@ -72,14 +72,22 @@ TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap,
     setStopOnError(true);
 }
 
-const IR::Type* BindTypeVariables::getP4Type(const IR::Type_Var* var) const {
+const IR::Type* BindTypeVariables::getVarValue(const IR::Type_Var* var) const {
     // Lookup a type variable
     auto type = typeMap->getSubstitution(var);
     CHECK_NULL(type);
-    if (type->is<IR::Type_StructLike>())
+    return getP4Type(type);
+}
+
+const IR::Type* BindTypeVariables::getP4Type(const IR::Type* type) const {
+    if (type->is<IR::Type_StructLike>()) {
         return new IR::Type_Name(type->to<IR::Type_StructLike>()->name);
-    else if (type->is<IR::Type_Base>())
+    } else if (type->is<IR::Type_Base>()) {
         return type;
+    } else if (type->is<IR::Type_Stack>()) {
+        auto stack = type->to<IR::Type_Stack>();
+        return new IR::Type_Stack(type->srcInfo, getP4Type(stack->baseType), stack->size);
+    }
     BUG("%1%: unexpected type for type arguments", type);
 }
 
@@ -102,7 +110,7 @@ const IR::Node* BindTypeVariables::postorder(IR::Declaration_Instance* decl) {
         return decl;
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : *mt->getTypeParameters()->parameters) {
-        auto type = getP4Type(p);
+        auto type = getVarValue(p);
         typeArgs->push_back(type);
     }
     decl->type = new IR::Type_Specialized(
@@ -121,7 +129,7 @@ const IR::Node* BindTypeVariables::postorder(IR::MethodCallExpression* expressio
         return expression;
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : *mt->getTypeParameters()->parameters) {
-        auto type = getP4Type(p);
+        auto type = getVarValue(p);
         typeArgs->push_back(type);
     }
     expression->typeArguments = typeArgs;
@@ -139,7 +147,7 @@ const IR::Node* BindTypeVariables::postorder(IR::ConstructorCallExpression* expr
         return expression;
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : *mt->getTypeParameters()->parameters) {
-        auto type = getP4Type(p);
+        auto type = getVarValue(p);
         typeArgs->push_back(type);
     }
     expression->constructedType = new IR::Type_Specialized(

@@ -266,7 +266,9 @@ class ApplyTypesToExpressions : public Transform {
 // Insert explicit type specializations where they are missing
 class BindTypeVariables : public Transform {
     TypeMap                 * typeMap;
-    const IR::Type* getP4Type(const IR::Type_Var* var) const;
+    const IR::Type* getP4Type(const IR::Type* type) const;
+    const IR::Type* getVarValue(const IR::Type_Var* var) const;
+
  public:
     explicit BindTypeVariables(TypeMap* typeMap) : typeMap(typeMap)
     { CHECK_NULL(typeMap); setName("BindTypeVariables"); }

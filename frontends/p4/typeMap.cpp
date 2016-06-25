@@ -88,8 +88,9 @@ const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
 }
 
 void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
-    if (tvs == nullptr)
+    if (tvs == nullptr || tvs->isIdentity())
         return;
+    LOG1("New type variables " << tvs);
     allTypeVariables.simpleCompose(tvs);
 }
 

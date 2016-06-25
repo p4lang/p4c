@@ -50,7 +50,6 @@ class TypeSubstitution {
                 return false;
             return true;
         }
-
         binding.emplace(id, type);
         return true;
     }

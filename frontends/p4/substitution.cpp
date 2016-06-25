@@ -19,7 +19,7 @@ limitations under the License.
 
 namespace P4 {
 bool TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* substitution) {
-    LOG1("Adding " << var->toString() << "->" << substitution->toString() << "to substitution");
+    LOG1("Adding " << var->toString() << "->" << substitution->toString() << " to substitution");
 
     // First check whether the substitution is legal.
     // It is not if var occurs in substitution

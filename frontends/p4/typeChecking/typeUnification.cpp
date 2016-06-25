@@ -278,6 +278,17 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             ::error("%1%: Cannot unify %2% to %3%",
                     errorPosition, src->toString(), dest->toString());
         return canUnify;
+    } else if (dest->is<IR::Type_Stack>() && src->is<IR::Type_Stack>()) {
+        auto dstack = dest->to<IR::Type_Stack>();
+        auto sstack = src->to<IR::Type_Stack>();
+        if (dstack->getSize() != sstack->getSize()) {
+            if (reportErrors)
+                ::error("%1%: cannot unify stacks with different sized %2% and %3%",
+                        errorPosition, dstack, sstack);
+            return false;
+        }
+        constraints->addEqualityConstraint(dstack->baseType, sstack->baseType);
+        return true;
     }
 
     if (reportErrors)
