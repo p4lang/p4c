@@ -81,14 +81,14 @@ struct Headers_t {
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract(headers.ethernet);
+        p.extract<Ethernet_h>(headers.ethernet);
         transition select(headers.ethernet.etherType) {
             16w0x800: ip;
             default: reject;
         }
     }
     state ip {
-        p.extract(headers.ipv4);
+        p.extract<IPv4_h>(headers.ipv4);
         transition accept;
     }
 }
@@ -119,4 +119,4 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 }
 
-ebpfFilter(prs(), pipe()) main;
+ebpfFilter<Headers_t>(prs(), pipe()) main;

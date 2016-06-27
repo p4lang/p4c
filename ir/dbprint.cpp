@@ -94,6 +94,19 @@ void IR::Type_Package::dbprint(std::ostream& out) const {
     out << "(" << constructorParams << ")";
 }
 
+void IR::Type_Tuple::dbprint(std::ostream& out) const {
+    Type::dbprint(out);
+    out << ": tuple<";
+    bool first = true;
+    for (auto t : *components) {
+        if (!first)
+            out << ", ";
+        out << t;
+        first = false;
+    }
+    out << ">";
+}
+
 void IR::Method::dbprint(std::ostream& out) const {
     Declaration::dbprint(out);
     out << " " << getName() << " " << type;

@@ -127,11 +127,11 @@ struct Meta {
 
 parser p(packet_in b, out packet_t hdrs, inout Meta m, inout standard_metadata_t meta) {
     state start {
-        b.extract(hdrs.data);
+        b.extract<data_h>(hdrs.data);
         transition extra;
     }
     state extra {
-        b.extract(hdrs.extra.next);
+        b.extract<extra_h>(hdrs.extra.next);
         transition select(hdrs.extra.last.b2) {
             8w0x80 &&& 8w0x80: extra;
             default: accept;
@@ -245,8 +245,8 @@ control egress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta
 
 control deparser(packet_out b, in packet_t hdrs) {
     apply {
-        b.emit(hdrs.data);
+        b.emit<data_h>(hdrs.data);
     }
 }
 
-V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch<packet_t, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

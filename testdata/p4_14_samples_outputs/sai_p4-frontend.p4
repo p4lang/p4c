@@ -208,7 +208,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_eth") state parse_eth {
-        packet.extract(hdr.eth);
+        packet.extract<ethernet_t>(hdr.eth);
         transition select(hdr.eth.ethType) {
             16w0x8100: parse_vlan;
             16w0x800: parse_ipv4;
@@ -216,11 +216,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_ipv4") state parse_ipv4 {
-        packet.extract(hdr.ipv4);
+        packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
     @name("parse_vlan") state parse_vlan {
-        packet.extract(hdr.vlan);
+        packet.extract<vlan_t>(hdr.vlan);
         transition accept;
     }
     @name("start") state start {
@@ -447,26 +447,54 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr.eth);
-        packet.emit(hdr.ipv4);
-        packet.emit(hdr.vlan);
+        packet.emit<ethernet_t>(hdr.eth);
+        packet.emit<ipv4_t>(hdr.ipv4);
+        packet.emit<vlan_t>(hdr.vlan);
     }
+}
+
+struct struct_0 {
+    bit<4>  field;
+    bit<4>  field_0;
+    bit<8>  field_1;
+    bit<16> field_2;
+    bit<16> field_3;
+    bit<3>  field_4;
+    bit<13> field_5;
+    bit<8>  field_6;
+    bit<8>  field_7;
+    bit<32> field_8;
+    bit<32> field_9;
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     Checksum16() ipv4_checksum;
     apply {
-        if (hdr.ipv4.ihl == 4w5 && hdr.ipv4.checksum == ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr })) 
+        if (hdr.ipv4.ihl == 4w5 && hdr.ipv4.checksum == (ipv4_checksum.get<struct_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
             mark_to_drop();
     }
+}
+
+struct struct_1 {
+    bit<4>  field_10;
+    bit<4>  field_11;
+    bit<8>  field_12;
+    bit<16> field_13;
+    bit<16> field_14;
+    bit<3>  field_15;
+    bit<13> field_16;
+    bit<8>  field_17;
+    bit<8>  field_18;
+    bit<32> field_19;
+    bit<32> field_20;
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     Checksum16() ipv4_checksum;
     apply {
         if (hdr.ipv4.ihl == 4w5) 
-            hdr.ipv4.checksum = ipv4_checksum.get({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+            hdr.ipv4.checksum = ipv4_checksum.get<struct_1>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

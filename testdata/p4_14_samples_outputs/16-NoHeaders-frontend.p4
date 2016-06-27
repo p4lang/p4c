@@ -152,4 +152,4 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

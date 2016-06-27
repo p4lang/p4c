@@ -153,11 +153,11 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_cpu_header") state parse_cpu_header {
-        packet.extract(hdr.cpu_header);
+        packet.extract<cpu_header_t>(hdr.cpu_header);
         transition parse_ethernet;
     }
     @name("parse_ethernet") state parse_ethernet {
-        packet.extract(hdr.ethernet);
+        packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
     @name("start") state start {
@@ -194,9 +194,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
+struct struct_0 {
+    standard_metadata_t field;
+}
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("do_copy_to_cpu") action do_copy_to_cpu() {
-        clone3(CloneType.I2E, 32w250, { standard_metadata });
+        clone3<struct_0>(CloneType.I2E, 32w250, { standard_metadata });
     }
     @name("copy_to_cpu") table copy_to_cpu() {
         actions = {
@@ -213,8 +217,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr.cpu_header);
-        packet.emit(hdr.ethernet);
+        packet.emit<cpu_header_t>(hdr.cpu_header);
+        packet.emit<ethernet_t>(hdr.ethernet);
     }
 }
 
@@ -228,4 +232,4 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

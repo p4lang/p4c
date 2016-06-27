@@ -166,7 +166,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_ethernet") state parse_ethernet {
-        packet.extract(hdr.ethernet);
+        packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             16w0x86dd: parse_ipv6;
@@ -174,11 +174,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_ipv4") state parse_ipv4 {
-        packet.extract(hdr.ipv4);
+        packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
     @name("parse_ipv6") state parse_ipv6 {
-        packet.extract(hdr.ipv6);
+        packet.extract<ipv6_t>(hdr.ipv6);
         transition accept;
     }
     @name("start") state start {
@@ -286,9 +286,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv6);
-        packet.emit(hdr.ipv4);
+        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit<ipv6_t>(hdr.ipv6);
+        packet.emit<ipv4_t>(hdr.ipv4);
     }
 }
 
@@ -302,4 +302,4 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

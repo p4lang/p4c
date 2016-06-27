@@ -1,5 +1,5 @@
-#include "/home/mbudiu/git/p4c/build/../p4include/core.p4"
-#include "/home/mbudiu/git/p4c/build/../p4include/v1model.p4"
+#include "/home/mbudiu/git/p4c/p4include/core.p4"
+#include "/home/mbudiu/git/p4c/p4include/v1model.p4"
 
 struct intrinsic_metadata_t {
     bit<4>  mcast_grp;

@@ -149,27 +149,27 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_cfi") state parse_cfi {
-        packet.extract(hdr.cfi);
+        packet.extract<cfi_t>(hdr.cfi);
         transition parse_vlan_id;
     }
     @name("parse_len_or_type") state parse_len_or_type {
-        packet.extract(hdr.len_or_type);
+        packet.extract<len_or_type_t>(hdr.len_or_type);
         transition parse_pcp;
     }
     @name("parse_mac_da") state parse_mac_da {
-        packet.extract(hdr.mac_da);
+        packet.extract<mac_da_t>(hdr.mac_da);
         transition parse_mac_sa;
     }
     @name("parse_mac_sa") state parse_mac_sa {
-        packet.extract(hdr.mac_sa);
+        packet.extract<mac_sa_t>(hdr.mac_sa);
         transition parse_len_or_type;
     }
     @name("parse_pcp") state parse_pcp {
-        packet.extract(hdr.pcp);
+        packet.extract<pcp_t>(hdr.pcp);
         transition parse_cfi;
     }
     @name("parse_vlan_id") state parse_vlan_id {
-        packet.extract(hdr.vlan_id);
+        packet.extract<vlan_id_t>(hdr.vlan_id);
         transition accept;
     }
     @name("start") state start {
@@ -216,12 +216,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr.mac_da);
-        packet.emit(hdr.mac_sa);
-        packet.emit(hdr.len_or_type);
-        packet.emit(hdr.pcp);
-        packet.emit(hdr.cfi);
-        packet.emit(hdr.vlan_id);
+        packet.emit<mac_da_t>(hdr.mac_da);
+        packet.emit<mac_sa_t>(hdr.mac_sa);
+        packet.emit<len_or_type_t>(hdr.len_or_type);
+        packet.emit<pcp_t>(hdr.pcp);
+        packet.emit<cfi_t>(hdr.cfi);
+        packet.emit<vlan_id_t>(hdr.vlan_id);
     }
 }
 
@@ -235,4 +235,4 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

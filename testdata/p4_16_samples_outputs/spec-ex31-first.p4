@@ -61,7 +61,7 @@ parser GenericParser(packet_in b, out Packet_header p)(bool udpSupport) {
         }
     }
     state ipv4 {
-        b.extract(p.ipv4);
+        b.extract<IPv4>(p.ipv4);
         transition select(p.ipv4.protocol) {
             16w6: tryudp;
             16w17: tcp;

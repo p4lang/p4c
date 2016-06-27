@@ -154,7 +154,7 @@ static int yylex();
 %type<parserStates>     parserStates
 %type<Declaration>      constantDeclaration actionDeclaration variableDeclaration
                         instantiation functionDeclaration objDeclaration
-                        tableDeclaration stateElementDeclaration parserStatefulElement
+                        tableDeclaration controlGlobalDeclaration parserGlobalElement
 %type<Type_Declaration> headerTypeDeclaration structTypeDeclaration headerUnionDeclaration
                         derivedTypeDeclaration parserDeclaration
                         controlDeclaration enumDeclaration typedefDeclaration
@@ -162,7 +162,7 @@ static int yylex();
 %type<Node>             errorDeclaration declaration externDeclaration matchKindDeclaration
 %type<Type_Parser>      parserTypeDeclaration
 %type<Type_Control>     controlTypeDeclaration
-%type<decls>            parserStatefulElements stateListDeclaration
+%type<decls>            parserGlobalElements controlGlobalDeclarations
 %type<StructField>      structField
 %type<structFields>     structFieldList
 %type<Method>           methodPrototype functionPrototype
@@ -348,19 +348,19 @@ nonEmptyRelativePathPrefix
 
 parserDeclaration
     : parserTypeDeclaration optCompileParameters
-      '{' parserStatefulElements parserStates '}'
+      '{' parserGlobalElements parserStates '}'
                              { structure.pop();
                                auto pl = new IR::ParameterList(@2, $2);
                                $$ = new IR::P4Parser($1->name.srcInfo, $1->name,
                                                             $1, pl, $4, $5);}
     ;
 
-parserStatefulElements
+parserGlobalElements
     : /* empty */                     { $$ = new IR::IndexedVector<IR::Declaration>(); }
-    | parserStatefulElements parserStatefulElement { $$ = $1; $$->push_back($2); }
+    | parserGlobalElements parserGlobalElement { $$ = $1; $$->push_back($2); }
     ;
 
-parserStatefulElement
+parserGlobalElement
     : constantDeclaration             { $$ = $1; }
     | instantiation                   { $$ = $1; }
     | variableDeclaration             { $$ = $1; }
@@ -447,7 +447,7 @@ simpleKeysetExpression
 /*************************** CONTROL ************************/
 
 controlDeclaration
-    : controlTypeDeclaration optCompileParameters '{' stateListDeclaration APPLY controlBody '}'
+    : controlTypeDeclaration optCompileParameters '{' controlGlobalDeclarations APPLY controlBody '}'
                             { structure.pop();
                               auto pl = new IR::ParameterList(@2, $2);
                               $$ = new IR::P4Control($1->name.srcInfo, $1->name, $1, pl, $4, $6); }
@@ -461,12 +461,12 @@ controlTypeDeclaration
                                 $$ = new IR::Type_Control(@3, *$3, $1, $5, pl); }
     ;
 
-stateListDeclaration
+controlGlobalDeclarations
     : /* empty */               { $$ = new IR::IndexedVector<IR::Declaration>(); }
-    | stateListDeclaration stateElementDeclaration { $$ = $1; $$->push_back($2); }
+    | controlGlobalDeclarations controlGlobalDeclaration { $$ = $1; $$->push_back($2); }
     ;
 
-stateElementDeclaration
+controlGlobalDeclaration
     : constantDeclaration      { $$ = $1; }
     | actionDeclaration        { $$ = $1; }
     | tableDeclaration         { $$ = $1; }

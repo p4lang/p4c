@@ -24,6 +24,7 @@ limitations under the License.
 #include "frontend.h"
 
 #include "frontends/p4/typeMap.h"
+#include "frontends/p4/typeChecking/bindVariables.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 // Passes
 #include "toP4/toP4.h"
@@ -51,7 +52,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
     P4::TypeMap       typeMap;
 
     PassManager passes = {
-        new P4::ToP4(ppStream, false, options.file),
+        new P4::ToP4(ppStream, false, options.file),  // TODO: don't always run this
         // Simple checks on parsed program
         new P4::ValidateParsedProgram(isv1),
         // Synthesize some built-in constructs
@@ -64,9 +65,9 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
         new P4::TypeInference(&refMap, &typeMap, true, false),
-        new P4::BindTypeVariables(&typeMap),
+        new P4::BindTypeVariables(&refMap, &typeMap),
         // Another round of constant folding, using type information.
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
+        new P4::TypeChecking(&refMap, &typeMap, true, isv1),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),

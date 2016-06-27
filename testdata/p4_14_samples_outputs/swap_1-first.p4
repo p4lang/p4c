@@ -136,7 +136,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("start") state start {
-        packet.extract(hdr.hdr1);
+        packet.extract<hdr1_t>(hdr.hdr1);
         transition accept;
     }
 }
@@ -172,7 +172,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr.hdr1);
+        packet.emit<hdr1_t>(hdr.hdr1);
     }
 }
 
@@ -186,4 +186,4 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

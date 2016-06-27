@@ -30,6 +30,8 @@ p4_frontend_SOURCES = \
 	frontends/p4/callGraph.h \
 	frontends/p4/typeChecking/typeChecker.cpp \
 	frontends/p4/typeChecking/typeChecker.h \
+	frontends/p4/typeChecking/bindVariables.cpp \
+	frontends/p4/typeChecking/bindVariables.h \
 	frontends/p4/typeChecking/typeConstraints.h \
 	frontends/p4/typeChecking/typeConstraints.cpp \
 	frontends/p4/typeChecking/typeUnification.h \

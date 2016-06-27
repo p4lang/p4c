@@ -88,17 +88,17 @@ struct Parsed_packet {
 parser TopParser(packet_in b, out Parsed_packet p) {
     Checksum16() @name("ck") ck_0;
     state start {
-        b.extract(p.ethernet);
+        b.extract<Ethernet_h>(p.ethernet);
         transition select(p.ethernet.etherType) {
             16w0x800: parse_ipv4;
         }
     }
     state parse_ipv4 {
-        b.extract(p.ip);
+        b.extract<IPv4_h>(p.ip);
         verify(p.ip.version == 4w4, IPv4IncorrectVersion);
         verify(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
         ck_0.clear();
-        ck_0.update(p.ip);
+        ck_0.update<IPv4_h>(p.ip);
         verify(ck_0.get() == 16w0, IPv4ChecksumError);
         transition accept;
     }
@@ -284,7 +284,7 @@ control TopDeparser(inout Parsed_packet p, packet_out b) {
     action act_6() {
         ck_1.clear();
         p.ip.hdrChecksum = 16w0;
-        ck_1.update(p.ip);
+        ck_1.update<IPv4_h>(p.ip);
         p.ip.hdrChecksum = ck_1.get();
     }
     table tbl_act_6() {
@@ -294,12 +294,12 @@ control TopDeparser(inout Parsed_packet p, packet_out b) {
         const default_action = act_6();
     }
     apply {
-        b.emit(p.ethernet);
+        b.emit<Ethernet_h>(p.ethernet);
         if (p.ip.isValid()) {
             tbl_act_6.apply();
-            b.emit(p.ip);
+            b.emit<IPv4_h>(p.ip);
         }
     }
 }
 
-Simple(TopParser(), Pipe(), TopDeparser()) main;
+Simple<Parsed_packet>(TopParser(), Pipe(), TopDeparser()) main;

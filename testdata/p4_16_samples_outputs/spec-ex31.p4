@@ -1,4 +1,4 @@
-#include "/home/mbudiu/git/p4c/build/../p4include/core.p4"
+#include "/home/mbudiu/git/p4c/p4include/core.p4"
 
 struct EthernetHeader {
     bit<16> etherType;

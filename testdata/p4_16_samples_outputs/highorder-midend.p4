@@ -8,4 +8,4 @@ parser prs(out Headers_t headers) {
     }
 }
 
-ebpfFilter(prs()) main;
+ebpfFilter<Headers_t>(prs()) main;

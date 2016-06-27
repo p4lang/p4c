@@ -75,30 +75,30 @@ error {
 
 parser top(packet_in b, out Parsed_packet p) {
     state start {
-        b.extract(p.ethernet);
+        b.extract<Ethernet>(p.ethernet);
         transition select(p.ethernet.etherType) {
             16w0x800: parse_ipv4;
             16w0x86dd: parse_ipv6;
         }
     }
     state parse_ipv4 {
-        b.extract(p.ip.ipv4);
+        b.extract<IPv4>(p.ip.ipv4);
         verify(p.ip.ipv4.version == 4w4, IPv4IncorrectVersion);
         verify(p.ip.ipv4.ihl == 4w5, IPv4OptionsNotSupported);
         verify(p.ip.ipv4.fragOffset == 13w0, IPv4FragmentsNotSupported);
         transition accept;
     }
     state parse_ipv6 {
-        b.extract(p.ip.ipv6);
+        b.extract<IPv6>(p.ip.ipv6);
         transition accept;
     }
 }
 
 control Automatic(packet_out b, in Parsed_packet p) {
     apply {
-        b.emit(p.ethernet);
-        b.emit(p.ip.ipv6);
-        b.emit(p.ip.ipv4);
+        b.emit<Ethernet>(p.ethernet);
+        b.emit<IPv6>(p.ip.ipv6);
+        b.emit<IPv4>(p.ip.ipv4);
     }
 }
 

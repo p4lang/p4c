@@ -158,7 +158,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_ethernet") state parse_ethernet {
-        packet.extract(hdr.ethernet);
+        packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x8100: parse_vlan;
             16w0x9100: parse_vlan;
@@ -170,7 +170,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_ipv4") state parse_ipv4 {
-        packet.extract(hdr.ipv4);
+        packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
     @name("parse_mpls") state parse_mpls {
@@ -181,18 +181,18 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_mpls_bos") state parse_mpls_bos {
-        packet.extract(hdr.mpls_bos);
+        packet.extract<mpls_t>(hdr.mpls_bos);
         transition select(packet.lookahead<bit<4>>()[3:0]) {
             4w0x4: parse_ipv4;
             default: accept;
         }
     }
     @name("parse_mpls_not_bos") state parse_mpls_not_bos {
-        packet.extract(hdr.mpls.next);
+        packet.extract<mpls_t>(hdr.mpls.next);
         transition parse_mpls;
     }
     @name("parse_vlan") state parse_vlan {
-        packet.extract(hdr.vlan_tag_.next);
+        packet.extract<vlan_tag_t>(hdr.vlan_tag_.next);
         transition select(hdr.vlan_tag_.last.etherType) {
             16w0x8100: parse_vlan;
             16w0x9100: parse_vlan;
@@ -233,11 +233,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.vlan_tag_);
-        packet.emit(hdr.mpls);
-        packet.emit(hdr.mpls_bos);
-        packet.emit(hdr.ipv4);
+        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit<vlan_tag_t[2]>(hdr.vlan_tag_);
+        packet.emit<mpls_t[3]>(hdr.mpls);
+        packet.emit<mpls_t>(hdr.mpls_bos);
+        packet.emit<ipv4_t>(hdr.ipv4);
     }
 }
 
@@ -251,4 +251,4 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

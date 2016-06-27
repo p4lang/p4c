@@ -22,5 +22,5 @@ switch1<bool>(f()) main3;
 switch2(f()) main4;
 switch3(f2()) main5;
 switch4<bool>(f2()) main6;
-switch1(f()) main2;
-switch4(f2()) main7;
+switch1<bool>(f()) main2;
+switch4<bool>(f2()) main7;

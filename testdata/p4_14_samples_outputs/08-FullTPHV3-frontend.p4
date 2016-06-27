@@ -558,38 +558,38 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("start") state start {
-        packet.extract(hdr.h_8_1);
-        packet.extract(hdr.h_8_2);
-        packet.extract(hdr.h_8_3);
-        packet.extract(hdr.h_8_4);
-        packet.extract(hdr.h_16_1);
-        packet.extract(hdr.h_16_2);
-        packet.extract(hdr.h_16_3);
-        packet.extract(hdr.h_16_4);
-        packet.extract(hdr.h_16_5);
-        packet.extract(hdr.h_16_6);
-        packet.extract(hdr.h_16_7);
-        packet.extract(hdr.h_16_8);
-        packet.extract(hdr.h_16_9);
-        packet.extract(hdr.h_16_10);
-        packet.extract(hdr.h_16_11);
-        packet.extract(hdr.h_16_12);
-        packet.extract(hdr.h_32_1);
-        packet.extract(hdr.h_32_2);
-        packet.extract(hdr.h_32_3);
-        packet.extract(hdr.h_32_4);
-        packet.extract(hdr.h_32_5);
-        packet.extract(hdr.h_32_6);
-        packet.extract(hdr.h_32_7);
-        packet.extract(hdr.h_32_8);
-        packet.extract(hdr.h_32_9);
-        packet.extract(hdr.h_32_10);
-        packet.extract(hdr.h_32_11);
-        packet.extract(hdr.h_32_12);
-        packet.extract(hdr.h_32_13);
-        packet.extract(hdr.h_32_14);
-        packet.extract(hdr.h_32_15);
-        packet.extract(hdr.h_32_16);
+        packet.extract<h_8_1_t>(hdr.h_8_1);
+        packet.extract<h_8_2_t>(hdr.h_8_2);
+        packet.extract<h_8_3_t>(hdr.h_8_3);
+        packet.extract<h_8_4_t>(hdr.h_8_4);
+        packet.extract<h_16_1_t>(hdr.h_16_1);
+        packet.extract<h_16_2_t>(hdr.h_16_2);
+        packet.extract<h_16_3_t>(hdr.h_16_3);
+        packet.extract<h_16_4_t>(hdr.h_16_4);
+        packet.extract<h_16_5_t>(hdr.h_16_5);
+        packet.extract<h_16_6_t>(hdr.h_16_6);
+        packet.extract<h_16_7_t>(hdr.h_16_7);
+        packet.extract<h_16_8_t>(hdr.h_16_8);
+        packet.extract<h_16_9_t>(hdr.h_16_9);
+        packet.extract<h_16_10_t>(hdr.h_16_10);
+        packet.extract<h_16_11_t>(hdr.h_16_11);
+        packet.extract<h_16_12_t>(hdr.h_16_12);
+        packet.extract<h_32_1_t>(hdr.h_32_1);
+        packet.extract<h_32_2_t>(hdr.h_32_2);
+        packet.extract<h_32_3_t>(hdr.h_32_3);
+        packet.extract<h_32_4_t>(hdr.h_32_4);
+        packet.extract<h_32_5_t>(hdr.h_32_5);
+        packet.extract<h_32_6_t>(hdr.h_32_6);
+        packet.extract<h_32_7_t>(hdr.h_32_7);
+        packet.extract<h_32_8_t>(hdr.h_32_8);
+        packet.extract<h_32_9_t>(hdr.h_32_9);
+        packet.extract<h_32_10_t>(hdr.h_32_10);
+        packet.extract<h_32_11_t>(hdr.h_32_11);
+        packet.extract<h_32_12_t>(hdr.h_32_12);
+        packet.extract<h_32_13_t>(hdr.h_32_13);
+        packet.extract<h_32_14_t>(hdr.h_32_14);
+        packet.extract<h_32_15_t>(hdr.h_32_15);
+        packet.extract<h_32_16_t>(hdr.h_32_16);
         transition accept;
     }
 }
@@ -1116,38 +1116,38 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr.h_8_1);
-        packet.emit(hdr.h_8_2);
-        packet.emit(hdr.h_8_3);
-        packet.emit(hdr.h_8_4);
-        packet.emit(hdr.h_16_1);
-        packet.emit(hdr.h_16_2);
-        packet.emit(hdr.h_16_3);
-        packet.emit(hdr.h_16_4);
-        packet.emit(hdr.h_16_5);
-        packet.emit(hdr.h_16_6);
-        packet.emit(hdr.h_16_7);
-        packet.emit(hdr.h_16_8);
-        packet.emit(hdr.h_16_9);
-        packet.emit(hdr.h_16_10);
-        packet.emit(hdr.h_16_11);
-        packet.emit(hdr.h_16_12);
-        packet.emit(hdr.h_32_1);
-        packet.emit(hdr.h_32_2);
-        packet.emit(hdr.h_32_3);
-        packet.emit(hdr.h_32_4);
-        packet.emit(hdr.h_32_5);
-        packet.emit(hdr.h_32_6);
-        packet.emit(hdr.h_32_7);
-        packet.emit(hdr.h_32_8);
-        packet.emit(hdr.h_32_9);
-        packet.emit(hdr.h_32_10);
-        packet.emit(hdr.h_32_11);
-        packet.emit(hdr.h_32_12);
-        packet.emit(hdr.h_32_13);
-        packet.emit(hdr.h_32_14);
-        packet.emit(hdr.h_32_15);
-        packet.emit(hdr.h_32_16);
+        packet.emit<h_8_1_t>(hdr.h_8_1);
+        packet.emit<h_8_2_t>(hdr.h_8_2);
+        packet.emit<h_8_3_t>(hdr.h_8_3);
+        packet.emit<h_8_4_t>(hdr.h_8_4);
+        packet.emit<h_16_1_t>(hdr.h_16_1);
+        packet.emit<h_16_2_t>(hdr.h_16_2);
+        packet.emit<h_16_3_t>(hdr.h_16_3);
+        packet.emit<h_16_4_t>(hdr.h_16_4);
+        packet.emit<h_16_5_t>(hdr.h_16_5);
+        packet.emit<h_16_6_t>(hdr.h_16_6);
+        packet.emit<h_16_7_t>(hdr.h_16_7);
+        packet.emit<h_16_8_t>(hdr.h_16_8);
+        packet.emit<h_16_9_t>(hdr.h_16_9);
+        packet.emit<h_16_10_t>(hdr.h_16_10);
+        packet.emit<h_16_11_t>(hdr.h_16_11);
+        packet.emit<h_16_12_t>(hdr.h_16_12);
+        packet.emit<h_32_1_t>(hdr.h_32_1);
+        packet.emit<h_32_2_t>(hdr.h_32_2);
+        packet.emit<h_32_3_t>(hdr.h_32_3);
+        packet.emit<h_32_4_t>(hdr.h_32_4);
+        packet.emit<h_32_5_t>(hdr.h_32_5);
+        packet.emit<h_32_6_t>(hdr.h_32_6);
+        packet.emit<h_32_7_t>(hdr.h_32_7);
+        packet.emit<h_32_8_t>(hdr.h_32_8);
+        packet.emit<h_32_9_t>(hdr.h_32_9);
+        packet.emit<h_32_10_t>(hdr.h_32_10);
+        packet.emit<h_32_11_t>(hdr.h_32_11);
+        packet.emit<h_32_12_t>(hdr.h_32_12);
+        packet.emit<h_32_13_t>(hdr.h_32_13);
+        packet.emit<h_32_14_t>(hdr.h_32_14);
+        packet.emit<h_32_15_t>(hdr.h_32_15);
+        packet.emit<h_32_16_t>(hdr.h_32_16);
     }
 }
 
@@ -1161,4 +1161,4 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

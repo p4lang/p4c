@@ -72,7 +72,7 @@ struct Parsed_rep {
 
 parser LJparse(packet_in b, out Parsed_rep p) {
     state start {
-        b.extract(p.arpa_pak);
+        b.extract<ARPA_hdr>(p.arpa_pak);
         transition accept;
     }
 }
@@ -110,4 +110,4 @@ control LJdeparse(inout Parsed_rep p, packet_out b) {
     }
 }
 
-Simple(LJparse(), LjPipe(), LJdeparse()) main;
+Simple<Parsed_rep>(LJparse(), LjPipe(), LJdeparse()) main;

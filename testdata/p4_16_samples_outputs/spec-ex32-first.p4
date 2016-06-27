@@ -59,7 +59,7 @@ parser P(packet_in b, out Ph_t p) {
     state start {
     }
     state pv {
-        b.extract(p.h);
+        b.extract<Hdr_h>(p.h);
         transition next;
     }
     state next {
@@ -83,11 +83,11 @@ parser P1(packet_in b, out Ph1_t p) {
     state start {
     }
     state pv {
-        b.extract(p.htop);
+        b.extract<Hdr_top_h>(p.htop);
         transition pv_bot;
     }
     state pv_bot {
-        b.extract(p.h, (bit<32>)(p.htop.size + 4w8));
+        b.extract<Hdr_bot_h>(p.h, (bit<32>)(p.htop.size + 4w8));
         transition next;
     }
     state next {

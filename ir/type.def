@@ -239,7 +239,6 @@ class Type_Set : Type {
 // The type of an expressionList
 class Type_Tuple : Type {
     Vector<Type> components;
-#nodbprint
     toString{ return "Tuple(" + Util::toString(components->size()) + ")"; }
     validate{ components->check_null(); }
 }

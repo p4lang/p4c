@@ -155,12 +155,12 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_fwdHop") state parse_fwdHop {
-        packet.extract(hdr.axon_fwdHop.next);
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
         meta.my_metadata.fwdHopCount = meta.my_metadata.fwdHopCount + 8w255;
         transition parse_next_fwdHop;
     }
     @name("parse_head") state parse_head {
-        packet.extract(hdr.axon_head);
+        packet.extract<axon_head_t>(hdr.axon_head);
         meta.my_metadata.fwdHopCount = hdr.axon_head.fwdHopCount;
         meta.my_metadata.revHopCount = hdr.axon_head.revHopCount;
         meta.my_metadata.headerLen = (bit<16>)(8w2 + hdr.axon_head.fwdHopCount + hdr.axon_head.revHopCount);
@@ -182,7 +182,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_revHop") state parse_revHop {
-        packet.extract(hdr.axon_revHop.next);
+        packet.extract<axon_hop_t>(hdr.axon_revHop.next);
         meta.my_metadata.revHopCount = meta.my_metadata.revHopCount + 8w255;
         transition parse_next_revHop;
     }
@@ -242,9 +242,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr.axon_head);
-        packet.emit(hdr.axon_fwdHop);
-        packet.emit(hdr.axon_revHop);
+        packet.emit<axon_head_t>(hdr.axon_head);
+        packet.emit<axon_hop_t[64]>(hdr.axon_fwdHop);
+        packet.emit<axon_hop_t[64]>(hdr.axon_revHop);
     }
 }
 
@@ -258,4 +258,4 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

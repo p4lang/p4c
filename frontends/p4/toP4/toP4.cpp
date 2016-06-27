@@ -708,9 +708,8 @@ bool ToP4::preorder(const IR::ListExpression* e) {
 
 bool ToP4::preorder(const IR::MethodCallExpression* e) {
     int prec = expressionPrecedence;
-    bool useParens = (prec > DBPrint::Prec_Postfix) ||
-    (!e->typeArguments->empty() &&
-     getContext()->parent->node->is<IR::Expression>());
+    bool useParens = (!e->typeArguments->empty() &&
+                      getContext()->node->is<IR::Expression>());
     // FIXME: we use parenthesis more often than necessary
     // because the bison parser has a bug which parses
     // these expressions incorrectly.

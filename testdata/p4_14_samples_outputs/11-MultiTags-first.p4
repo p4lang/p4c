@@ -153,7 +153,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_my_tag") state parse_my_tag {
-        packet.extract(hdr.my_tag);
+        packet.extract<my_tag_t>(hdr.my_tag);
         transition select(hdr.my_tag.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag;
             16w0x9000: parse_my_tag;
@@ -161,7 +161,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_vlan_tag") state parse_vlan_tag {
-        packet.extract(hdr.vlan_tag);
+        packet.extract<vlan_tag_t>(hdr.vlan_tag);
         transition select(hdr.vlan_tag.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag;
             16w0x9000: parse_my_tag;
@@ -169,7 +169,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("start") state start {
-        packet.extract(hdr.ethernet);
+        packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag;
             16w0x9000: parse_my_tag;
@@ -216,9 +216,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.vlan_tag);
-        packet.emit(hdr.my_tag);
+        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit<vlan_tag_t>(hdr.vlan_tag);
+        packet.emit<my_tag_t>(hdr.my_tag);
     }
 }
 
@@ -232,4 +232,4 @@ control computeChecksum(inout headers hdr, inout metadata meta, inout standard_m
     }
 }
 
-V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

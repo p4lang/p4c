@@ -54,14 +54,14 @@ struct Pkthdr {
 
 parser X(packet_in b, out Pkthdr p) {
     state start {
-        b.extract(p.ethernet);
+        b.extract<Ethernet_h>(p.ethernet);
         transition select(p.ethernet.etherType) {
             16w0x8847: parse_mpls;
             16w0x800: parse_ipv4;
         }
     }
     state parse_mpls {
-        b.extract(p.mpls_vec.next);
+        b.extract<Mpls_h>(p.mpls_vec.next);
         transition select(p.mpls_vec.last.bos) {
             1w0: parse_mpls;
             1w1: parse_ipv4;

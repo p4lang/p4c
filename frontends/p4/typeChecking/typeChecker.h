@@ -262,22 +262,6 @@ class ApplyTypesToExpressions : public Transform {
     { setName("ApplyTypesToExpressions"); }
 };
 
-
-// Insert explicit type specializations where they are missing
-class BindTypeVariables : public Transform {
-    TypeMap                 * typeMap;
-    const IR::Type* getP4Type(const IR::Type* type) const;
-    const IR::Type* getVarValue(const IR::Type_Var* var) const;
-
- public:
-    explicit BindTypeVariables(TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("BindTypeVariables"); }
-    const IR::Node* postorder(IR::Expression* expression) override;
-    const IR::Node* postorder(IR::Declaration_Instance* decl) override;
-    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
-};
-
 // Performs together reference resolution and type checking.
 // If updateExpressions is true, after type checking it will
 // update all Expression objects, writing the result type

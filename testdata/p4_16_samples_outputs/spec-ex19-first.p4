@@ -96,23 +96,23 @@ parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
         }
     }
     state parse_tcp_option_end {
-        b.extract(vec.next.end);
+        b.extract<Tcp_option_end_h>(vec.next.end);
         transition accept;
     }
     state parse_tcp_option_nop {
-        b.extract(vec.next.nop);
+        b.extract<Tcp_option_nop_h>(vec.next.nop);
         transition start;
     }
     state parse_tcp_option_ss {
-        b.extract(vec.next.ss);
+        b.extract<Tcp_option_ss_h>(vec.next.ss);
         transition start;
     }
     state parse_tcp_option_s {
-        b.extract(vec.next.s);
+        b.extract<Tcp_option_s_h>(vec.next.s);
         transition start;
     }
     state parse_tcp_option_sack {
-        b.extract(vec.next.sack, (bit<32>)(b.lookahead<Tcp_option_sack_top>()).length);
+        b.extract<Tcp_option_sack_h>(vec.next.sack, (bit<32>)(b.lookahead<Tcp_option_sack_top>()).length);
         transition start;
     }
 }

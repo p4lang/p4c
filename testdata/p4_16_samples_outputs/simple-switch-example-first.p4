@@ -97,17 +97,17 @@ struct Parsed_packet {
 parser TopParser(packet_in b, out Parsed_packet p) {
     Checksum16() ck;
     state start {
-        b.extract(p.ethernet);
+        b.extract<Ethernet_h>(p.ethernet);
         transition select(p.ethernet.etherType) {
             16w0x800: parse_ipv4;
         }
     }
     state parse_ipv4 {
-        b.extract(p.ip);
+        b.extract<IPv4_h>(p.ip);
         verify(p.ip.version == 4w4, IPv4IncorrectVersion);
         verify(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
         ck.clear();
-        ck.update(p.ip);
+        ck.update<IPv4_h>(p.ip);
         verify(ck.get() == 16w0, IPv4ChecksumError);
         transition accept;
     }
@@ -196,15 +196,15 @@ control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCt
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     Checksum16() ck;
     apply {
-        b.emit(p.ethernet);
+        b.emit<Ethernet_h>(p.ethernet);
         if (p.ip.isValid()) {
             ck.clear();
             p.ip.hdrChecksum = 16w0;
-            ck.update(p.ip);
+            ck.update<IPv4_h>(p.ip);
             p.ip.hdrChecksum = ck.get();
-            b.emit(p.ip);
+            b.emit<IPv4_h>(p.ip);
         }
     }
 }
 
-Simple(TopParser(), Pipe(), TopDeparser()) main;
+Simple<Parsed_packet>(TopParser(), Pipe(), TopDeparser()) main;
