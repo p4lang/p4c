@@ -22,6 +22,7 @@ limitations under the License.
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <gc/gc_cpp.h>
 #include <utility>
 #include <iostream>
 
@@ -94,7 +95,7 @@ class bitvec {
     bitvec(size_t lo, size_t cnt) : size(1), data(0) { setrange(lo, cnt); }
     bitvec(const bitvec &a) : size(a.size) {
         if (size > 1) {
-            ptr = new uintptr_t[size];
+            ptr = new(PointerFreeGC) uintptr_t[size];
             memcpy(ptr, a.ptr, size * sizeof(*ptr));
         } else {
             data = a.data; }}
@@ -103,7 +104,7 @@ class bitvec {
         if (this == &a) return *this;
         if (size > 1) delete [] ptr;
         if ((size = a.size) > 1) {
-            ptr = new uintptr_t[size];
+            ptr = new(PointerFreeGC) uintptr_t[size];
             memcpy(ptr, a.ptr, size * sizeof(*ptr));
         } else {
             data = a.data; }
@@ -343,15 +344,23 @@ class bitvec {
  private:
     void expand(size_t newsize) {
         assert(newsize > size);
+        if (size_t m = newsize>>3) {
+            /* round up newsize to be at most 7*2**k, to avoid reallocing too much */
+            m |= m >> 1;
+            m |= m >> 2;
+            m |= m >> 4;
+            m |= m >> 8;
+            m |= m >> 16;
+            newsize = (newsize + m) & ~m; }
         if (size > 1) {
             uintptr_t *old = ptr;
-            ptr = new uintptr_t[newsize];
+            ptr = new(PointerFreeGC) uintptr_t[newsize];
             memcpy(ptr, old, size * sizeof(*ptr));
             memset(ptr + size, 0, (newsize - size) * sizeof(*ptr));
             delete [] old;
         } else {
             uintptr_t d = data;
-            ptr = new uintptr_t[newsize];
+            ptr = new(PointerFreeGC) uintptr_t[newsize];
             *ptr = d;
             memset(ptr + size, 0, (newsize - size) * sizeof(*ptr));
         }
