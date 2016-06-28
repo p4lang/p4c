@@ -85,6 +85,52 @@ template<class T> void IR::Vector<T>::visit_children(Visitor &v) {
 }
 template<class T> void IR::Vector<T>::visit_children(Visitor &v) const {
     for (auto &a : vec) v.visit(a); }
+template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) {
+    auto &start(v.flow_clone());
+    bool changes = false;
+    for (auto i = vec.begin(); i != vec.end();) {
+        auto &clone(start.flow_clone());
+        auto n = clone.apply_visitor(*i);
+        if (!n) {
+            i = erase(i);
+            changes = true;
+        } else if (n == *i) {
+            i++;
+        } else if (auto l = dynamic_cast<const Vector *>(n)) {
+            i = erase(i);
+            i = insert(i, l->vec.begin(), l->vec.end());
+            i += l->vec.size();
+            changes = true;
+        } else if (auto v = dynamic_cast<const VectorBase *>(n)) {
+            changes = true;
+            if (v->empty()) {
+                i = erase(i);
+            } else {
+                i = insert(i, v->size() - 1, nullptr);
+                for (auto el : *v) {
+                    if (auto e = dynamic_cast<const T *>(el))
+                        *i++ = e;
+                    else
+                        BUG("visitor returned invalid type %s for Vector<%s>",
+                            e->node_type_name(), T::static_type_name()); } }
+        } else if (auto e = dynamic_cast<const T *>(n)) {
+            changes = true;
+            *i++ = e;
+        } else {
+            BUG("visitor returned invalid type %s for Vector<%s>",
+                n->node_type_name(), T::static_type_name());
+        }
+        v.flow_merge(clone); }
+    if (changes)
+        id = Node::currentId++;
+}
+template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) const {
+    auto &start(v.flow_clone());
+    for (auto &a : vec) {
+        auto &clone(start.flow_clone());
+        clone.visit(a);
+        v.flow_merge(clone); }
+}
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template<class T>, <T>)
 
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v);

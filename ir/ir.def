@@ -361,12 +361,7 @@ class SwitchStatement : Statement {
 #nodbprint
     visit_children {
         v.visit(expression, "expression");
-        auto &start(v.flow_clone());
-        for (auto &c : cases) {
-            /* FIXME -- support transforms that remove or split cases? */
-            auto &clone(start.flow_clone());
-            clone.visit(c);
-            v.flow_merge(clone); } }
+        cases.parallel_visit_children(v); }
 }
 
 class Function : Declaration {
