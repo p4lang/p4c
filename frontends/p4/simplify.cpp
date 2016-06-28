@@ -70,7 +70,7 @@ const IR::Node* SimplifyControlFlow::postorder(IR::EmptyStatement* statement)  {
 }
 
 const IR::Node* SimplifyControlFlow::postorder(IR::SwitchStatement* statement)  {
-    if (statement->cases->empty()) {
+    if (statement->cases.empty()) {
         BUG_CHECK(statement->expression->is<IR::Member>(),
                   "%1%: expected a Member", statement->expression);
         auto expr = statement->expression->to<IR::Member>();
@@ -79,20 +79,15 @@ const IR::Node* SimplifyControlFlow::postorder(IR::SwitchStatement* statement)  
         auto mce = expr->expr->to<IR::MethodCallExpression>();
         return new IR::MethodCallStatement(mce->srcInfo, mce);
     }
-    auto last = statement->cases->back();
+    auto last = statement->cases.back();
     if (last->statement == nullptr) {
-        auto cases = new IR::Vector<IR::SwitchCase>();
-        auto it = statement->cases->rbegin();
-        for (; it != statement->cases->rend(); ++it) {
+        auto it = statement->cases.rbegin();
+        for (; it != statement->cases.rend(); ++it) {
             if ((*it)->statement != nullptr)
                 break;
             else
-                ::warning("%1%: fallthrough with no statement", last);
-        }
-        for (auto i = statement->cases->begin(); i != it.base(); ++i)
-            cases->push_back(*i);
-        return new IR::SwitchStatement(statement->srcInfo, statement-> expression, cases);
-    }
+                ::warning("%1%: fallthrough with no statement", last); }
+        statement->cases.erase(it.base(), statement->cases.end()); }
     return statement;
 }
 

@@ -2310,18 +2310,19 @@ const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
     }
 
     bool changes = false;
-    auto vec = new IR::Vector<IR::SelectCase>();
-    for (auto sc : *expression->selectCases)  {
+    IR::Vector<IR::SelectCase> vec;
+    for (auto sc : expression->selectCases)  {
         auto type = getType(sc->keyset);
         if (type == nullptr)
             return expression;
         auto newsc = matchCase(expression, tuple, sc, type);
-        vec->push_back(newsc);
+        vec.push_back(newsc);
         if (newsc != sc)
             changes = true;
     }
     if (changes)
-        expression = new IR::SelectExpression(expression->srcInfo, expression->select, vec);
+        expression = new IR::SelectExpression(expression->srcInfo, expression->select,
+                                              std::move(vec));
     setType(expression, IR::Type_State::get());
     setType(getOriginal(), IR::Type_State::get());
     return expression;
@@ -2351,7 +2352,7 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
     }
     auto ae = type->to<IR::Type_ActionEnum>();
     std::set<cstring> foundLabels;
-    for (auto c : *stat->cases) {
+    for (auto c : stat->cases) {
         if (c->label->is<IR::DefaultExpression>())
             continue;
         auto pe = c->label->to<IR::PathExpression>();

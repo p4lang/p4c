@@ -20,20 +20,27 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "midend/actionsInlining.h"
+#include "midend/inlining.h"
 
 namespace BMV2 {
 
-class MidEnd {
-    std::vector<DebugHook> hooks;
+class MidEnd : public PassManager {
+    void setup_for_P4_14(CompilerOptions& options);
+    void setup_for_P4_16(CompilerOptions& options);
+    P4::InlineWorkList controlsToInline;
+    P4::ActionsInlineList actionsToInline;
 
-    const IR::P4Program* processP4_14(CompilerOptions& options, const IR::P4Program* program);
-    const IR::P4Program* processP4_16(CompilerOptions& options, const IR::P4Program* program);
  public:
     // These will be accurate when the mid-end completes evaluation
-    P4::ReferenceMap refMap;
-    P4::TypeMap      typeMap;
-    IR::ToplevelBlock* process(CompilerOptions& options, const IR::P4Program* program);
-    void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
+    P4::ReferenceMap    refMap;
+    P4::TypeMap         typeMap;
+    IR::ToplevelBlock   *toplevel = nullptr;  // Should this be const?
+
+    explicit MidEnd(CompilerOptions& options);
+    IR::ToplevelBlock* process(const IR::P4Program* program) {
+        program = program->apply(*this);
+        return toplevel; }
 };
 
 }  // namespace BMV2

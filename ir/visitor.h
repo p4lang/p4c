@@ -62,7 +62,10 @@ class Visitor {
     // parent's init_apply to do further initialization
     virtual profile_t init_apply(const IR::Node *root);
     // End_apply is called symmetrically with init_apply, after the visit
-    // is completed.
+    // is completed.  Both functions will be called in the event of a normal
+    // completion, but only the 0-argument version will be called in the event
+    // of an exception, as there is no root in that case.
+    virtual void end_apply();
     virtual void end_apply(const IR::Node* root);
 
     // apply_visitor is the main traversal function that manages the
@@ -132,6 +135,9 @@ class Visitor {
     // pass, this will result in them being duplicated if they are modified.
     bool visitDagOnce = true;
     bool dontForwardChildrenBeforePreorder = false;
+    // if joinFlows is 'true', Visitor will track nodes with more than one parent and
+    // flow_merge the visitor from all the parents before visiting the node and its
+    // children.  This only works for Inspector (not Modifier/Transform) currently.
     bool joinFlows = false;
     virtual void init_join_flows(const IR::Node *) { assert(0); }
     virtual bool join_flows(const IR::Node *) { return false; }
@@ -215,6 +221,11 @@ class Backtrack : public virtual Visitor {
     struct trigger {
         enum type_t { OK, OTHER }       type;
         explicit trigger(type_t t) : type(t) {}
+        virtual void dbprint(std::ostream &out) const { out << typeid(*this).name(); }
+        template<class T> T *to() { return dynamic_cast<T *>(this); }
+        template<class T> const T *to() const { return dynamic_cast<const T *>(this); }
+        template<class T> bool is() { return to<T>() != nullptr; }
+        template<class T> bool is() const { return to<T>() != nullptr; }
     };
     virtual bool backtrack(trigger &trig) = 0;
 };

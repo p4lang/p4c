@@ -46,9 +46,9 @@ int main(int argc, char *const argv[]) {
         fe.addDebugHook(hook);
         program = fe.run(options, program);
         if (program != nullptr && ::errorCount() == 0) {
-            P4Test::MidEnd midEnd;
+            P4Test::MidEnd midEnd(options);
             midEnd.addDebugHook(hook);
-            (void)midEnd.process(options, program);
+            (void)midEnd.process(program);
         }
     }
     if (verbose)

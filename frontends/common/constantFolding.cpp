@@ -691,13 +691,15 @@ const IR::Node* ConstantFolding::postorder(IR::SelectExpression* expression) {
     if (sel == nullptr)
         return expression;
 
-    auto cases = new IR::Vector<IR::SelectCase>();
+    IR::Vector<IR::SelectCase> cases;
     bool someUnknown = false;
     bool changes = false;
     bool finished = false;
 
     const IR::Expression* result = expression;
-    for (auto c : *expression->selectCases) {
+    /* FIXME -- should erase/replace each element as needed, rather than creating a new Vector.
+     * Should really implement this in SelectCase pre/postorder and this postorder goes away */
+    for (auto c : expression->selectCases) {
         if (finished) {
             ::warning("%1%: unreachable case", c);
             continue;
@@ -708,14 +710,14 @@ const IR::Node* ConstantFolding::postorder(IR::SelectExpression* expression) {
             continue;
         } else if (inside == Result::DontKnow) {
             someUnknown = true;
-            cases->push_back(c);
+            cases.push_back(c);
         } else {
             changes = true;
             finished = true;
             if (someUnknown) {
                 auto newc = new IR::SelectCase(
                     c->srcInfo, new IR::DefaultExpression(Util::SourceInfo()), c->state);
-                cases->push_back(newc);
+                cases.push_back(newc);
             } else {
                 // This is the result.
                 result = c->state;
@@ -724,9 +726,9 @@ const IR::Node* ConstantFolding::postorder(IR::SelectExpression* expression) {
     }
 
     if (changes) {
-        if (cases->size() == 0 && result == expression)
+        if (cases.size() == 0 && result == expression)
             ::warning("%1%: no case matches", expression);
-        expression->selectCases = cases;
+        expression->selectCases = std::move(cases);
     }
     return result;
 }

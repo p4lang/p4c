@@ -48,7 +48,7 @@ class NameMap : public Node {
             if (!self.match_name(name, v))
                 BUG("Inserting into NameMap with incorrect name");
             return self.symbols[name] = v; }
-        operator const T *() const { return self.symbols.at(name); }
+        operator const T *() const { return self.count(name) ? self.at(name) : nullptr; }
     };
 
  public:
@@ -61,6 +61,7 @@ class NameMap : public Node {
     reverse_iterator rbegin() { return symbols.rbegin(); }
     reverse_iterator rend() { return symbols.rend(); }
     size_t count(cstring name) const { return symbols.count(name); }
+    void clear() { symbols.clear(); }
     size_t size() const { return symbols.size(); }
     bool empty() const { return symbols.empty(); }
     size_t erase(cstring n) { return symbols.erase(n); }
@@ -93,7 +94,7 @@ class NameMap : public Node {
         return it->second;
     }
     elem_ref operator[](cstring name) { return elem_ref(*this, name); }
-    const T *operator[](cstring name) const { return symbols.at(name); }
+    const T *operator[](cstring name) const { return count(name) ? at(name) : nullptr; }
     const T *&at(cstring name) { return symbols.at(name); }
     const T *const &at(cstring name) const { return symbols.at(name); }
     void check_null() const { for (auto &e : symbols) CHECK_NULL(e.second); }

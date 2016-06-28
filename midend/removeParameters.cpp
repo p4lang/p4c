@@ -230,9 +230,10 @@ const IR::Node* RemoveTableParameters::postorder(IR::SwitchStatement* statement)
     }
 
     if (anyOut) {
-        auto cases = new IR::Vector<IR::SwitchCase>();
+        /* FIXME -- alter cases in place rather than creating a new Vector? */
+        IR::Vector<IR::SwitchCase> cases;
         bool foundDefault = false;
-        for (auto l : *statement->cases) {
+        for (auto l : statement->cases) {
             if (l->label->is<IR::DefaultExpression>())
                 foundDefault = true;
             if (l->statement != nullptr) {
@@ -241,7 +242,7 @@ const IR::Node* RemoveTableParameters::postorder(IR::SwitchStatement* statement)
                 post->push_back(l->statement);
                 auto block = new IR::BlockStatement(l->srcInfo, post);
                 auto swcase = new IR::SwitchCase(l->srcInfo, l->label, block);
-                cases->push_back(swcase);
+                cases.push_back(swcase);
             }
         }
         if (!foundDefault) {
@@ -251,10 +252,10 @@ const IR::Node* RemoveTableParameters::postorder(IR::SwitchStatement* statement)
             auto block = new IR::BlockStatement(Util::SourceInfo(), post);
             auto swcase = new IR::SwitchCase(Util::SourceInfo(),
                                              new IR::DefaultExpression(Util::SourceInfo()), block);
-            cases->push_back(swcase);
+            cases.push_back(swcase);
         }
 
-        statement->cases = cases;
+        statement->cases = std::move(cases);
     }
     auto result = new IR::BlockStatement(statement->srcInfo, pre);
     return result;

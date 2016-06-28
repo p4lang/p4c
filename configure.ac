@@ -12,6 +12,7 @@ AC_PROG_CXX(clang++ g++ c++)
 AC_PROG_CC
 AC_PROG_LEX
 AC_PROG_YACC
+AC_PROG_RANLIB
 AX_CXX_COMPILE_STDCXX_11([noext],[mandatory])
 AC_LANG(C++)
 
@@ -76,9 +77,9 @@ AX_PYTHON_MODULE([subprocess], [fatal], [python])
 AX_PYTHON_MODULE([re], [fatal], [python])
 
 dnl The following lines are just including all "addconfig.ac" files
-dnl found in the backends/* and extensions/* folders
+dnl found in subdirectories
 
-m4_foreach_w([ac_file],m4_esyscmd([echo backends/*/addconfig.ac extensions/*/addconfig.ac]),
+m4_foreach_w([ac_file],m4_esyscmd([find -name addconfig.ac]),
 [[#]] config from ac_file
 [sinclude(]ac_file[)]
 [[#]] end of ac_file

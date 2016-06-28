@@ -682,7 +682,7 @@ bool ToP4::preorder(const IR::SelectExpression* e) {
     builder.blockStart();
     setVecSep(";\n", ";\n");
     expressionPrecedence = DBPrint::Prec_Low;
-    visit(e->selectCases);
+    preorder(&e->selectCases);
     doneVec();
     builder.blockEnd(true);
     expressionPrecedence = prec;
@@ -916,7 +916,7 @@ bool ToP4::preorder(const IR::SwitchStatement* s) {
     builder.append(") ");
     builder.blockStart();
     setVecSep("\n", "\n");
-    visit(s->cases);
+    preorder(&s->cases);
     doneVec();
     builder.blockEnd(true);
     return false;

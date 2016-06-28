@@ -2058,7 +2058,7 @@ Util::IJson* JsonConverter::toJson(const IR::ParserState* state) {
         if (state->selectExpression->is<IR::SelectExpression>()) {
             auto se = state->selectExpression->to<IR::SelectExpression>();
             key = conv->convert(se->select, false);
-            for (auto sc : *se->selectCases) {
+            for (auto sc : se->selectCases) {
                 auto trans = new Util::JsonObject();
                 mpz_class value, mask;
                 unsigned bytes = combine(sc->keyset, se->select, value, mask);

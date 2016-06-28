@@ -40,6 +40,9 @@ template<class T>
 static inline RangeIter<T> Range(T a, T b) { return RangeIter<T>(a, b); }
 template<class T>
 static inline RangeIter<T> Range(std::pair<T, T> p) { return RangeIter<T>(p.first, p.second); }
+template<class T>
+static inline RangeIter<T> ReverseRange(std::pair<T, T> p) {
+    return RangeIter<T>(p.second, p.first); }
 
 template<class T>
 std::ostream &operator<<(std::ostream &out, const RangeIter<T> &r) {

@@ -170,7 +170,14 @@ def process_file(options, argv):
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
-    expected_dirname = dirname + "_outputs"  # expected outputs are here
+    if "_samples/" in dirname:
+        expected_dirname = dirname.replace("_samples/", "_samples_outputs/", 1)
+    elif "_errors/" in dirname:
+        expected_dirname = dirname.replace("_errors/", "_errors_outputs/", 1)
+    else:
+        expected_dirname = dirname + "_outputs"  # expected outputs are here
+    if not os.path.exists(expected_dirname):
+        os.makedirs(expected_dirname)
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)

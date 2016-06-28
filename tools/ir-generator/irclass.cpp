@@ -188,8 +188,7 @@ void IrMethod::generate_hdr(std::ostream &out) const {
         out << ";" << std::endl;
     } else if (name == "node_type_name") {
         out << LineDirective(srcInfo) << IrClass::indent << "static " << rtype->toString()
-            << " static_type_name() " << body << std::endl;
-    }
+            << " static_type_name() " << body << std::endl; }
     if (!inImpl && srcInfo.isValid())
         out << LineDirective();
 }

@@ -39,6 +39,12 @@ class IRDumper : public Inspector {
         dumped.insert(n);
         out << std::endl;
         return true; }
+    bool preorder(const IR::Expression *e) override {
+        if (!preorder(static_cast<const IR::Node *>(e))) return false;
+        visit(e->type, "type");
+        return true; }
+    bool preorder(const IR::Constant *c) override {
+        return preorder(static_cast<const IR::Node *>(c)); }
     void postorder(const IR::Node *n) override {
         if (getChildrenVisited() == 0)
             dumped.erase(n); }

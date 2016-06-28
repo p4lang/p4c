@@ -126,6 +126,8 @@ class Vector : public VectorBase {
         return "Vector<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
+    virtual void parallel_visit_children(Visitor &v);
+    virtual void parallel_visit_children(Visitor &v) const;
     Util::Enumerator<const T*>* getEnumerator() const {
         return Util::Enumerator<const T*>::createEnumerator(vec); }
     template <typename S>

@@ -19,6 +19,7 @@ limitations under the License.
 const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *) {
     vector<std::pair<vector<Visitor *>::iterator, const IR::Node *>> backup;
 
+    early_exit_flag = false;
     for (auto it = passes.begin(); it != passes.end();) {
         Visitor* v = *it;
         if (dynamic_cast<Backtrack *>(v))
@@ -37,6 +38,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 throw Backtrack::trigger(trig_type);
             }
         } catch (Backtrack::trigger &trig) {
+            LOG1("caught backtrack trigger " << trig);
             while (!backup.empty()) {
                 if (backup.back().first == it) {
                     backup.pop_back();
@@ -45,11 +47,15 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 auto b = dynamic_cast<Backtrack *>(*it);
                 program = backup.back().second;
                 if (b->backtrack(trig))
-                    break; }
-            if (backup.empty())
-                throw trig;
+                    break;
+                LOG1("pass " << b->name() << " can't handle it"); }
+            if (backup.empty()) {
+                LOG1("rethrow trigger");
+                throw trig; }
             continue; }
         runDebugHooks(v->name(), program);
+        if (early_exit_flag)
+            break;
         seqNo++;
         it++; }
     return program;

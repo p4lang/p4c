@@ -40,10 +40,8 @@ limitations under the License.
 
 namespace P4Test {
 
-IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program* program) {
+MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
-    P4::ReferenceMap refMap;
-    P4::TypeMap typeMap;
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     // TODO: break down expression into simple parts
@@ -52,7 +50,7 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
     // TODO: parser loop unrolling
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
-    PassManager simplify = {
+    addPasses({
         // Proper semantics for uninitialzed local variables in parser states:
         // headers must be invalidated
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
@@ -68,23 +66,14 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, true, isv1),
         evaluator,
-    };
 
-    simplify.setName("Simplify");
-    simplify.setStopOnError(true);
-    simplify.addDebugHooks(hooks);
-    program = program->apply(simplify);
-    if (::errorCount() > 0)
-        return nullptr;
-    auto toplevel = evaluator->getToplevelBlock();
-    if (toplevel->getMain() == nullptr)
-        // nothing further to do
-        return nullptr;
+        new VisitFunctor([evaluator](const IR::Node *root) -> const IR::Node * {
+            auto toplevel = evaluator->getToplevelBlock();
+            if (toplevel->getMain() == nullptr)
+                // nothing further to do
+                return nullptr;
+            return root; }),
 
-    P4::InlineWorkList toInline;
-    P4::ActionsInlineList actionsToInline;
-
-    PassManager midEnd = {
         // Perform inlining for controls and parsers (parsers not yet implemented)
         new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
         new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
@@ -129,17 +118,9 @@ IR::ToplevelBlock* MidEnd::process(CompilerOptions& options, const IR::P4Program
         // Move all stand-alone action invocations to custom tables
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::MoveActionsToTables(&refMap, &typeMap),
-        evaluator
-    };
-    midEnd.setName("MidEnd");
-    midEnd.setStopOnError(true);
-    midEnd.addDebugHooks(hooks);
-    program = program->apply(midEnd);
-    if (::errorCount() > 0)
-        return nullptr;
-
-    toplevel = evaluator->getToplevelBlock();
-    return toplevel;
+        evaluator,
+        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
+    });
 }
 
 }  // namespace P4Test
