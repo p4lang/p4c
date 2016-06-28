@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/constantFolding.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
@@ -41,16 +42,17 @@ struct SpecializationInfo {
 };
 
 struct SpecializationMap {
-    // For each ConstructorCallExpression or Declaration_Instance
-    // we allocate a new name
     const TypeMap*                     typeMap;
     const ReferenceMap*                refMap;
+    // For each ConstructorCallExpression or Declaration_Instance
+    // we allocate a new name
     std::map<const IR::Node*, cstring> newName;
     std::vector<SpecializationInfo*>* getSpecializations(const IR::IContainer* decl);
     bool isSpecialized(const IR::Node* node) const
     { CHECK_NULL(node); return newName.find(node) != newName.end(); }
     cstring get(const IR::Node* node) const
     { CHECK_NULL(node); return ::get(newName, node); }
+    void clear() { newName.clear(); }
 };
 
 class FindSpecializations : public Inspector {
@@ -59,8 +61,13 @@ class FindSpecializations : public Inspector {
     SpecializationMap* specMap;
  public:
     FindSpecializations(ReferenceMap* refMap, const TypeMap* typeMap, SpecializationMap* specMap) :
-            refMap(refMap), typeMap(typeMap), specMap(specMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(specMap); }
+            refMap(refMap), typeMap(typeMap), specMap(specMap) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(specMap);
+        setName("FindSpecializations"); }
+
+    bool isSimpleConstant(const IR::Expression* expression) const;
+    Visitor::profile_t init_apply(const IR::Node* node) override
+    { specMap->clear(); return Inspector::init_apply(node); }
     void postorder(const IR::ConstructorCallExpression* expression) override;
     void postorder(const IR::Declaration_Instance* decl) override;
 };
@@ -70,24 +77,17 @@ class Specialize : public Transform {
     SpecializationMap* specMap;
  public:
     Specialize(ReferenceMap* refMap, SpecializationMap* specMap) : refMap(refMap), specMap(specMap)
-    { CHECK_NULL(refMap); CHECK_NULL(specMap); }
+    { CHECK_NULL(refMap); CHECK_NULL(specMap); setName("Specialize"); }
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
     const IR::Node* postorder(IR::Declaration_Instance* decl) override;
 };
 
-class SpecializeAll : public PassManager {
+class SpecializeAll : public PassRepeated {
     SpecializationMap specMap;
  public:
-    SpecializeAll(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-        specMap.refMap = refMap;
-        specMap.typeMap = typeMap;
-        passes.push_back(new TypeChecking(refMap, typeMap, false, isv1));
-        passes.push_back(new FindSpecializations(refMap, typeMap, &specMap));
-        passes.push_back(new Specialize(refMap, &specMap));
-        setName("SpecializeAll");
-    }
+    SpecializeAll(ReferenceMap* refMap, TypeMap* typeMap, bool isv1);
 };
 
 }  // namespace P4

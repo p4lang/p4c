@@ -87,7 +87,7 @@ struct Tcp_option_sack_top {
 
 parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
     state start {
-        transition select((b.lookahead<bit<8>>())) {
+        transition select(b.lookahead<bit<8>>()) {
             8w0x0: parse_tcp_option_end;
             8w0x1: parse_tcp_option_nop;
             8w0x2: parse_tcp_option_ss;

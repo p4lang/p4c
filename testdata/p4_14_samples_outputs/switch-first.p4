@@ -1146,7 +1146,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name("parse_lisp") state parse_lisp {
         packet.extract<lisp_t>(hdr.lisp);
-        transition select(packet.lookahead<bit<4>>()[3:0]) {
+        transition select((packet.lookahead<bit<4>>())[3:0]) {
             4w0x4: parse_inner_ipv4;
             4w0x6: parse_inner_ipv6;
             default: accept;
@@ -1169,7 +1169,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_mpls_bos") state parse_mpls_bos {
-        transition select(packet.lookahead<bit<4>>()[3:0]) {
+        transition select((packet.lookahead<bit<4>>())[3:0]) {
             4w0x4: parse_mpls_inner_ipv4;
             4w0x6: parse_mpls_inner_ipv6;
             default: parse_eompls;

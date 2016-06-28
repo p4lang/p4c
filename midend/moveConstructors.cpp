@@ -63,7 +63,7 @@ class MoveConstructorsImpl : public Transform {
 
  public:
     explicit MoveConstructorsImpl(ReferenceMap* refMap) :
-            refMap(refMap), convert(Region::Outside) { setName("MoveConstructors"); }
+            refMap(refMap), convert(Region::Outside) { setName("MoveConstructorsImpl"); }
 
     const IR::Node* preorder(IR::P4Parser* parser) override {
         cmap.clear();

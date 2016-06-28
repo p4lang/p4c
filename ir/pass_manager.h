@@ -71,6 +71,8 @@ class VisitFunctor : virtual public Visitor {
     { setName("VisitFunctor"); }
     explicit VisitFunctor(std::function<void()> f)
     : fn([f](const IR::Node *n)->const IR::Node *{ f(); return n; }) { setName("VisitFunctor"); }
+    explicit VisitFunctor(std::function<void(const IR::Node* n)> f)
+    : fn([f](const IR::Node *n)->const IR::Node *{ f(n); return n; }) { setName("VisitFunctor"); }
 };
 
 class DynamicVisitor : virtual public Visitor {

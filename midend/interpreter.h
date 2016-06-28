@@ -68,7 +68,6 @@ class ErrorValue : public AbstractValue {
 // Creates values from type declarations
 class ValueFactory {
     const TypeMap* typeMap;
-    // TODO: should be able to initialize values
  public:
     explicit ValueFactory(const TypeMap* typeMap) : typeMap(typeMap)
     { CHECK_NULL(typeMap); }

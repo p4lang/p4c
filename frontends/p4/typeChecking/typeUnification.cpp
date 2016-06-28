@@ -26,6 +26,8 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG1("Unifying function " << dest << " with caller " << src);
 
+    for (auto tv : *dest->typeParameters->parameters)
+        constraints->addUnifiableTypeVariable(tv);
     if (dest->returnType == nullptr)
         constraints->addEqualityConstraint(IR::Type_Void::get(), src->returnType);
     else
@@ -140,6 +142,10 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
                     errorPosition, src->toString(), dest->toString());
         return false;
     }
+    for (auto tv : *dest->typeParameters->parameters)
+        constraints->addUnifiableTypeVariable(tv);
+    for (auto tv : *src->typeParameters->parameters)
+        constraints->addUnifiableTypeVariable(tv);
     if (dest->is<IR::IApply>()) {
         auto srcapply = src->to<IR::IApply>()->getApplyMethodType();
         auto destapply = dest->to<IR::IApply>()->getApplyMethodType();

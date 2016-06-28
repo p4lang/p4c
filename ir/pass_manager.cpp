@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
             backup.emplace_back(it, program);
         try {
             try {
-                LOG1("Invoking " << v->name());
+                LOG1(name() << " invoking " << v->name());
                 program = program->apply(**it);
                 int errors = ErrorReporter::instance.getErrorCount();
                 if (stop_on_error && errors > 0) {

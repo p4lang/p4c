@@ -61,9 +61,6 @@ class ConstantFolding : public Transform {
         visitDagOnce = true; setName("ConstantFolding");
     }
 
-    using Transform::postorder;
-
-    const IR::Node* postorder(IR::P4Program* program) override;
     const IR::Node* postorder(IR::Declaration_Constant* d) override;
     const IR::Node* postorder(IR::PathExpression* e) override;
     const IR::Node* postorder(IR::Cmpl* e) override;

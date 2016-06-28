@@ -38,21 +38,39 @@ limitations under the License.
 #include "strengthReduction.h"
 #include "simplify.h"
 
+namespace {
+class PrettyPrint : public Inspector {
+    cstring ppfile;
+    cstring inputfile;
+ public:
+    PrettyPrint(const CompilerOptions& options) {
+        setName("PrettyPrint");
+        ppfile = options.prettyPrintFile;
+        inputfile = options.file;
+    }
+    bool preorder(const IR::P4Program* program) override {
+        if (!ppfile.isNullOrEmpty()) {
+            Util::PathName path(ppfile);
+            std::ostream *ppStream = openFile(path.toString(), true);
+            P4::ToP4 top4(ppStream, false, inputfile);
+            (void)program->apply(top4);
+        }
+        return false;  // prune
+    }
+};
+}  // namespace
+
 const IR::P4Program*
 FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
     if (program == nullptr)
         return nullptr;
 
     bool isv1 = options.isv1();
-
-    Util::PathName path(options.prettyPrintFile);
-    std::ostream *ppStream = openFile(path.toString(), true);
-
     P4::ReferenceMap  refMap;  // This is reused many times, since every analysis clear it
     P4::TypeMap       typeMap;
 
     PassManager passes = {
-        new P4::ToP4(ppStream, false, options.file),  // TODO: don't always run this
+        new PrettyPrint(options),
         // Simple checks on parsed program
         new P4::ValidateParsedProgram(isv1),
         // Synthesize some built-in constructs

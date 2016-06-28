@@ -22,9 +22,7 @@ limitations under the License.
 namespace P4 {
 
 const IR::Expression* ConstantFolding::getConstant(const IR::Expression* expr) const {
-    if (expr == nullptr)
-        BUG("Null pointer for expression");
-
+    CHECK_NULL(expr);
     auto cst = get(constants, expr);
     if (cst != nullptr)
         return cst;
@@ -53,11 +51,6 @@ void ConstantFolding::setConstant(const IR::Node* node, const IR::Expression* re
     LOG1("Folding " << node << " to " << result << " (" << result->id << ")");
     constants.emplace(node, result);
     constants.emplace(getOriginal(), result);
-}
-
-const IR::Node* ConstantFolding::postorder(IR::P4Program* program) {
-    // dump(program);
-    return program;
 }
 
 const IR::Node* ConstantFolding::postorder(IR::PathExpression* e) {

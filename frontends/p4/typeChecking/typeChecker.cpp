@@ -787,6 +787,8 @@ TypeInference::containerInstantiation(
     const IR::IContainer* container) {
     CHECK_NULL(node); CHECK_NULL(constructorArguments); CHECK_NULL(container);
     auto constructor = container->getConstructorMethodType();
+    constructor = cloneWithFreshTypeVariables(constructor->to<IR::IMayBeGenericType>())->to<IR::Type_Method>();
+    CHECK_NULL(constructor);
 
     // We build a type for the callExpression and unify it with the method expression
     // Allocate a fresh variable for the return type; it will be hopefully bound in the process.

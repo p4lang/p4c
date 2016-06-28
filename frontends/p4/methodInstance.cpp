@@ -103,11 +103,11 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
     }
 
     if (t->is<IR::Type_Extern>()) {
-        auto ext = refMap->getDeclaration(type->path);
+        auto ext = refMap->getDeclaration(type->path, true);
         BUG_CHECK(ext->is<IR::Type_Extern>(), "%1%: expected an extern type", ext);
         result = new ExternConstructorCall(ext->to<IR::Type_Extern>());
     } else if (t->is<IR::IContainer>()) {
-        auto cont = refMap->getDeclaration(type->path);
+        auto cont = refMap->getDeclaration(type->path, true);
         BUG_CHECK(cont->is<IR::IContainer>(), "%1%: expected a container", cont);
         result = new ContainerConstructorCall(cont->to<IR::IContainer>());
     } else {

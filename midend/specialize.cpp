@@ -14,10 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <iostream>
+
 #include "specialize.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/toP4/toP4.h"
+#include "frontends/p4/enumInstance.h"
 
 namespace P4 {
 
@@ -68,20 +72,71 @@ SpecializationMap::getSpecializations(const IR::IContainer* decl) {
     return result;
 }
 
+namespace {
+
+class IsConcreteType : public Inspector {
+    const TypeMap* typeMap;
+ public:
+    bool hasTypeVariables = false;
+
+    IsConcreteType(const TypeMap* typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
+    void postorder(const IR::Type_Var*) override { hasTypeVariables = true; }
+    void postorder(const IR::Type_Name* type) override {
+        auto t = typeMap->getType(type, true);
+        if (t->is<IR::Type_Var>())
+            hasTypeVariables = true;
+    }
+
+    bool isConcrete(const IR::Type* type) {
+        type->apply(*this);
+        return hasTypeVariables;
+    }
+};
+
+}  // namespace
+
+bool FindSpecializations::isSimpleConstant(const IR::Expression* expr) const {
+    CHECK_NULL(expr);
+    if (expr->is<IR::Constant>())
+        return true;
+    if (expr->is<IR::BoolLiteral>())
+        return true;
+    if (expr->is<IR::ListExpression>()) {
+        auto list = expr->to<IR::ListExpression>();
+        for (auto e : *list->components)
+            if (!isSimpleConstant(e))
+                return false;
+        return true;
+    }
+    auto ei = EnumInstance::resolve(expr, typeMap);
+    if (ei != nullptr)
+        return true;
+    return false;
+}
+
 void FindSpecializations::postorder(const IR::ConstructorCallExpression* expression) {
     if (expression->arguments->size() == 0 &&
         !expression->constructedType->is<IR::Type_Specialized>())
         return;  // nothing to specialize
 
     auto type = typeMap->getType(expression, true);
-    if (type->is<IR::Type_SpecializedCanonical>())
-        type = type->to<IR::Type_SpecializedCanonical>()->baseType;
+    if (type->is<IR::Type_SpecializedCanonical>()) {
+        auto ts = type->to<IR::Type_SpecializedCanonical>();
+        IsConcreteType ct(typeMap);
+        if (!ct.isConcrete(ts))
+            return;  // no point in specializing if arguments have type variables
+        type = ts->baseType;
+    }
     if (type->is<IR::P4Parser>())
         type = type->to<IR::P4Parser>()->type;
     else if (type->is<IR::P4Control>())
         type = type->to<IR::P4Control>()->type;
     if (!type->is<IR::Type_Control>() && !type->is<IR::Type_Parser>())
         return;
+    for (auto arg : *expression->arguments) {
+        if (!isSimpleConstant(arg))
+            return;
+    }
 
     auto archtype = type->to<IR::Type_ArchBlock>();
     cstring newName = refMap->newName(archtype->getName());
@@ -95,10 +150,19 @@ void FindSpecializations::postorder(const IR::Declaration_Instance* decl) {
         return;
 
     auto type = typeMap->getType(decl, true);
-    if (type->is<IR::Type_SpecializedCanonical>())
-        type = type->to<IR::Type_SpecializedCanonical>()->baseType;
+    if (type->is<IR::Type_SpecializedCanonical>()) {
+        auto ts = type->to<IR::Type_SpecializedCanonical>();
+        IsConcreteType ct(typeMap);
+        if (!ct.isConcrete(ts))
+            return;  // no point in specializing if arguments have type variables
+        type = ts->baseType;
+    }
     if (!type->is<IR::Type_Control>() && !type->is<IR::Type_Parser>())
         return;
+    for (auto arg : *decl->arguments) {
+        if (!isSimpleConstant(arg))
+            return;
+    }
 
     auto archtype = type->to<IR::Type_ArchBlock>();
     cstring newName = refMap->newName(archtype->getName());
@@ -130,6 +194,7 @@ const IR::Node* Specialize::postorder(IR::P4Parser* parser) {
         LOG1("Created " << prs << " for " << parser);
         result->push_back(prs);
     }
+    result->push_back(parser);
     return result;
 }
 
@@ -157,6 +222,7 @@ const IR::Node* Specialize::postorder(IR::P4Control* control) {
         LOG1("Created " << ctrl << " for " << control);
         result->push_back(ctrl);
     }
+    result->push_back(control);  // maybe it's still needed
     return result;
 }
 
@@ -180,6 +246,18 @@ const IR::Node* Specialize::postorder(IR::Declaration_Instance* decl) {
         decl->annotations, decl->initializer);
     LOG1("Replaced " << decl << " with " << result);
     return result;
+}
+
+SpecializeAll::SpecializeAll(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) :
+        PassRepeated({}) {
+    passes.emplace_back(new TypeChecking(refMap, typeMap, false, isv1));
+    passes.emplace_back(new ConstantFolding(refMap, typeMap));
+    passes.emplace_back(new TypeChecking(refMap, typeMap, false, isv1));
+    passes.emplace_back(new FindSpecializations(refMap, typeMap, &specMap));
+    passes.emplace_back(new Specialize(refMap, &specMap));
+    specMap.refMap = refMap;
+    specMap.typeMap = typeMap;
+    setName("SpecializeAll");
 }
 
 }  // namespace P4

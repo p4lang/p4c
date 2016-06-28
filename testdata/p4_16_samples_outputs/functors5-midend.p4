@@ -1,10 +1,10 @@
-parser p1()(bit<2> a) {
+parser p1_0() {
     state start {
     }
 }
 
-parser p2()(bit<2> a) {
-    p1(a) @name("x") x_0;
+parser p2_0() {
+    p1_0() @name("x") x_0;
     state start {
         x_0.apply();
     }
@@ -12,4 +12,4 @@ parser p2()(bit<2> a) {
 
 parser nothing();
 package m(nothing n);
-m(p2(2w1)) main;
+m(p2_0()) main;
