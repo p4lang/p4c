@@ -113,6 +113,13 @@ IR::Constant::operator-(const IR::Constant &c) const {
 }
 
 IR::Constant
+IR::Constant::operator-() const {
+  mpz_class v;
+  mpz_neg(v.get_mpz_t(), value.get_mpz_t());
+  return IR::Constant(v);
+}
+
+IR::Constant
 IR::Constant::GetMask(unsigned width) {
   return (IR::Constant(1) << width) - IR::Constant(1);
 }
