@@ -242,8 +242,8 @@ const IR::Node* Specialize::postorder(IR::Declaration_Instance* decl) {
     cstring newName = specMap->get(getOriginal());
     auto typeRef = new IR::Type_Name(IR::ID(newName));
     auto result = new IR::Declaration_Instance(
-        decl->name, typeRef, new IR::Vector<IR::Expression>(),
-        decl->annotations, decl->initializer);
+        decl->name, decl->annotations, typeRef, new IR::Vector<IR::Expression>(),
+        decl->initializer);
     LOG1("Replaced " << decl << " with " << result);
     return result;
 }

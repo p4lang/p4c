@@ -46,8 +46,8 @@ extern hash_table {
 parser parse<H>(packet_in packet, out H headers);
 control filter<H>(inout H headers, out bool accept);
 package ebpfFilter<H>(parse<H> prs, filter<H> filt);
-typedef bit<48> @ethernetaddress EthernetAddress;
-typedef bit<32> @ipv4address IPv4Address;
+@ethernetaddress typedef bit<48> EthernetAddress;
+@ipv4address typedef bit<32> IPv4Address;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;

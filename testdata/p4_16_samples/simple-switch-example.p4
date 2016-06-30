@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,14 +18,16 @@ limitations under the License.
 
 #include "simple_model.p4"
 
-// This program processes packets composed of an Ethernet and 
+// This program processes packets composed of an Ethernet and
 // an IPv4 header, performing forwarding based on the
 // destination IP address
 
 // Header declarations
 
-typedef bit<48> @ethernetaddress  EthernetAddress;
-typedef bit<32> @ipv4address      IPv4Address;
+@ethernetaddress
+typedef bit<48> EthernetAddress;
+@ipv4address
+typedef bit<32> IPv4Address;
 
 // standard Ethernet header
 header Ethernet_h
@@ -99,12 +101,12 @@ control Pipe(
     out OutControl outCtrl)
 {
     /**
-     * Indicates that a packet is dropped by setting the 
+     * Indicates that a packet is dropped by setting the
      * output port to the DROP_PORT
      */
     action Drop_action()
     { outCtrl.outputPort = DROP_PORT; }
-    
+
     /**
      * Set the next hop and the output port
      * @param nextHop   ipv4 address of next nop
@@ -119,7 +121,7 @@ control Pipe(
         headers.ip.ttl = headers.ip.ttl - 8w1;
         outCtrl.outputPort = port;
     }
-    
+
     /**
      * Computes address of next IPv4 hop and output port
      * based on the IPv4 destination of the current packet.
@@ -166,7 +168,7 @@ control Pipe(
     action Set_dmac(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
-    
+
     /**
      * Set the destination Ethernet address of the packet
      * based on the next hop IP address.
@@ -192,7 +194,7 @@ control Pipe(
     {
         headers.ethernet.srcAddr = sourceMac;
     }
-    
+
     /**
      * Set the source mac address based on the output port.
      */
@@ -254,4 +256,3 @@ control TopDeparser(inout Parsed_packet p, packet_out b)
 }
 
 Simple(TopParser(), Pipe(), TopDeparser()) main;
-

@@ -60,8 +60,8 @@ parser Parser<H>(packet_in b, out H parsedHeaders);
 control MAP<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
 control Deparser<H>(inout H outputHeaders, packet_out b);
 package Simple<H>(Parser<H> p, MAP<H> map, Deparser<H> d);
-typedef bit<48> @ethernetaddress EthernetAddress;
-typedef bit<32> @ipv4address IPv4Address;
+@ethernetaddress typedef bit<48> EthernetAddress;
+@ipv4address typedef bit<32> IPv4Address;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;

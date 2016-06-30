@@ -272,9 +272,9 @@ class Declaration_Constant : Declaration, IAnnotated {
 // Like a variable, but for a statically allocated instance.
 // The syntax is Contructor(args) name = initializer;
 class Declaration_Instance : Declaration, IAnnotated {
+    Annotations           annotations;
     Type                  type;         // Either Type_Name or Type_Specialized
     Vector<Expression>    arguments;
-    Annotations           annotations;
     NullOK BlockStatement initializer;  // experimental only; contains just declarations, no code
 
     Annotations getAnnotations() const override { return annotations; }

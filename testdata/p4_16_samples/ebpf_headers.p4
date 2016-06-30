@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _EBPF_HEADERS_
 #define _EBPF_HEADERS_
 
-typedef bit<48>  @ethernetaddress EthernetAddress;
-typedef bit<32>  @ipv4address     IPv4Address;
+@ethernetaddress typedef bit<48> EthernetAddress;
+@ipv4address     typedef bit<32>     IPv4Address;
 
 // standard Ethernet header
 header Ethernet_h
@@ -37,7 +37,7 @@ header IPv4_h {
     bit<16>      identification;
     bit<3>       flags;
     bit<13>      fragOffset;
-    bit<8>       ttl;  
+    bit<8>       ttl;
     bit<8>       protocol;
     bit<16>      hdrChecksum;
     IPv4Address  srcAddr;

@@ -420,8 +420,8 @@ class Method : Declaration {
 }
 
 class Type_Typedef : Type_Declaration, IAnnotated {
-    Type        type;
     Annotations annotations;
+    Type        type;
     Annotations getAnnotations() const override { return annotations; }
 #nodbprint
 }

@@ -221,10 +221,10 @@ bool ToP4::preorder(const IR::Type_Specialized* t) {
 
 bool ToP4::preorder(const IR::Type_Typedef* t) {
     dump(2);
+    visit(t->annotations);
     builder.append("typedef ");
     visit(t->type);
     builder.spc();
-    visit(t->annotations);
     builder.append(t->name);
     builder.endOfStatement();
     return false;
@@ -482,6 +482,7 @@ bool ToP4::preorder(const IR::Declaration_Constant* cst) {
 
 bool ToP4::preorder(const IR::Declaration_Instance* i) {
     dump(3);
+    visit(i->annotations);
     visit(i->type);
     builder.append("(");
     setVecSep(", ");
@@ -489,7 +490,6 @@ bool ToP4::preorder(const IR::Declaration_Instance* i) {
     doneVec();
     builder.append(")");
     builder.spc();
-    visit(i->annotations);
     builder.append(i->name);
     if (i->initializer != nullptr) {
         builder.append(" = ");

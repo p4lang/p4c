@@ -1,5 +1,5 @@
-typedef bit<48> @ethernetaddress EthernetAddress;
-typedef bit<32> @ipv4address IPv4Address;
+@ethernetaddress typedef bit<48> EthernetAddress;
+@ipv4address typedef bit<32> IPv4Address;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;

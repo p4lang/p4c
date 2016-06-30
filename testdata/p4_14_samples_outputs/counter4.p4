@@ -29,7 +29,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    counter(32w200, CounterType.packets) @name("cntDum") cntDum;
+    @name("cntDum") counter(32w200, CounterType.packets) cntDum;
     @name("act") action act(bit<48> idx) {
         hdr.ethernet.dstAddr = idx;
         cntDum.count((bit<32>)idx);
