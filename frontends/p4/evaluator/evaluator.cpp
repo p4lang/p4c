@@ -79,7 +79,7 @@ bool Evaluator::preorder(const IR::P4Program* program) {
     popBlock(toplevelBlock);
     std::stringstream str;
     toplevelBlock->dbprint_recursive(str);
-    LOG1(str);
+    LOG1(str.str());
     return false;
 }
 
