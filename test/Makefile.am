@@ -16,7 +16,7 @@
 
 check_PROGRAMS = exception_test format_test source_file_test path_test \
 		 enumerator_test default_test unittest_transform1 json_test \
-		 opeq_test
+		 opeq_test dumpjson
 
 default_test_SOURCES = test/unittests/default_test.cpp
 default_test_LDADD = libp4ctoolkit.a
@@ -34,6 +34,8 @@ json_test_SOURCES = test/unittests/json_test.cpp
 json_test_LDADD = libp4ctoolkit.a
 unittest_transform1_SOURCES = $(ir_SOURCES) test/unittests/transform1.cpp
 unittest_transform1_LDADD = libfrontend.a libp4ctoolkit.a
+dumpjson_SOURCES = $(ir_SOURCES) test/unittests/dumpjson.cpp
+dumpjson_LDADD = libfrontend.a libp4ctoolkit.a
 opeq_test_SOURCES = $(ir_SOURCES) test/unittests/opeq_test.cpp
 opeq_test_LDADD = libfrontend.a libp4ctoolkit.a
 

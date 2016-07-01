@@ -85,17 +85,19 @@ class NamedType : public Type {
         if (name != t.name) return false;
         return (lookup == t.lookup || (lookup && t.lookup && *lookup == *t.lookup)); }
 
-    static NamedType Bool, Int, Void, Cstring, Ostream, Visitor;
+    static NamedType Bool, Int, Void, Cstring, Ostream, Visitor, Unordered_Set;
 };
 
 class TemplateInstantiation : public Type {
+public:
     const Type                  *base;
- public:
+ 
     std::vector<const Type *>   args;
     TemplateInstantiation(Util::SourceInfo si, Type *b, const std::vector<const Type *> &a)
     : Type(si), base(b), args(a) {}
     TemplateInstantiation(Util::SourceInfo si, Type *b, Type *a)
     : Type(si), base(b) { args.push_back(a); }
+    TemplateInstantiation(const Type *b, const Type *a) : base(b) { args.push_back(a); }\
     bool isResolved() const override { return base->isResolved(); }
     const IrClass *resolve(const IrNamespace *ns) const override {
         for (auto arg : args) arg->resolve(ns);

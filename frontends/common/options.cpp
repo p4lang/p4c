@@ -84,6 +84,10 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) { prettyPrintFile = arg; return true; },
                    "Pretty-print the program in the\n"
                    "specified file.");
+    registerOption("--toJSON", "file",
+                   [this](const char* arg) { dumpJsonFile = arg; return true; },
+                   "Dump IR to JSON in the\n"
+                   "specified file.");
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");

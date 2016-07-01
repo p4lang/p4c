@@ -46,6 +46,7 @@ class INode : public Util::IHasSourceInfo, public Util::IHasDbPrint {
     virtual Node* getNode() = 0;
     virtual void dbprint(std::ostream &out) const = 0;  // for debugging
     virtual cstring toString() const = 0;  // for user consumption
+    virtual cstring toJSON(cstring indent, std::unordered_set<int> &node_refs) const = 0;
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     template<typename T> bool is() const;
@@ -95,8 +96,19 @@ class Node : public virtual INode {
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const {
         CHECK_NULL(this);
-        return dynamic_cast<const T*>(this); }
+        return dynamic_cast<const T*>(this); 
+    }
     cstring toString() const override { return node_type_name(); }
+    cstring toJSON(cstring indent, std::unordered_set<int> &node_refs) const override {
+        std::stringstream buf;
+        buf << indent << "\"Node_ID\" : " << id;
+        if (node_refs.find(id) == node_refs.end()) {
+            node_refs.insert(id);
+            buf << ", " << std::endl << indent 
+                << "\"Node_Type\" : \"" << node_type_name() << "\"";
+        }
+        return buf.str();
+    }
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }
