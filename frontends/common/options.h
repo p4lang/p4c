@@ -59,6 +59,10 @@ class CompilerOptions : public Util::Options {
     cstring prettyPrintFile = nullptr;
     // file to output to
     cstring outputFile = nullptr;
+
+    // Dump a JSON representation of the IR in the file
+    cstring dumpJsonFile = nullptr;
+    
     // higher means more verbose
     unsigned verbosity = 0;
     // Compiler target architecture

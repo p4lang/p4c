@@ -41,6 +41,7 @@ limitations under the License.
 #include "namemap.h"
 #include "nodemap.h"
 #include "id.h"
+#include "json_generator.h"
 
 // generated ir file
 #include "ir/ir-generated.h"

@@ -99,6 +99,68 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 needed = true; } }
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
+{ "toJSON", { &NamedType::Cstring, { 
+        new IrField(&NamedType::Cstring, "indent", ""), 
+        new IrField(new ReferenceType(new TemplateInstantiation(&NamedType::Unordered_Set, &NamedType::Int)), "node_refs") 
+    }, CONST + IN_IMPL + OVERRIDE,
+    [](IrClass *cl, cstring) -> cstring {
+        std::stringstream buf;
+        buf << "{" << std::endl;
+        buf << cl->indent << "std::stringstream buf;" << std::endl;
+        buf << cl->indent << "if (node_refs.find(this->id) != node_refs.end()) {" << std::endl
+            << cl->indent << cl->indent 
+            << "buf << indent << \"\\\"Node_ID\\\" : \" << this->id;" << std::endl
+            << cl->indent << cl->indent << "return buf.str();" << std::endl << "}" << std::endl;
+        buf << cl->indent << "buf << " << cl->getParent()->name << "::toJSON(indent, node_refs);" << std::endl;
+        
+        auto iter = cl->getFields(); 
+        size_t cnt = iter->count();
+        iter->reset(); //Not sure if needed
+
+        if (cnt > 0)
+            buf << cl->indent << "if (buf.str().length() > 0) buf << \",\";" << std::endl;
+
+        for (auto f : *iter) {
+            if (!f->isInline && f->nullOK)
+                buf << cl->indent << "if (" << f->name << " != nullptr) ";
+            if (f->type->resolve(cl->containedIn) == nullptr
+                    && !dynamic_cast<const TemplateInstantiation*>(f->type)) {
+                // not an IR pointer
+                buf << cl->indent << "buf << std::endl << indent << \"\\\"" 
+                    << f->name << "\\\" : \" << \"\\\"\" << "
+                    // << "JSONGenerator::generate<" << f->type->toString() << ">(" << f->name << ", \"" << f->type->toString() << "\")"
+                    << f->name << " << \"\\\"\"";
+                if (cnt > 1)
+                    buf << "<< \",\"";
+                buf << ";" << std::endl;
+            } else {
+                buf << cl->indent
+                    << "buf << std::endl << indent << \"\\\"" << f->name << "\\\": {\"" 
+                    << " << std::endl << ";
+                if (!dynamic_cast<const TemplateInstantiation*>(f->type)) {
+                    buf << f->name << (f->isInline  ? "." : "->") << "toJSON(indent + \"    \", node_refs)"; 
+                } else {
+                    cstring base_type = dynamic_cast<const TemplateInstantiation*>(f->type)->base->toString();
+                    if (base_type == "vector" || base_type == "std::vector") {
+                        buf << "\"Handle std::vector here.\"";
+                    } else if (base_type == "ordered_map" || base_type == "std::ordered_map") {
+                        buf << "\"Handle std::ordered_map here.\"";;
+                    } else {
+                        //Fallback to IR node handling. Will break if new STL container is used.
+                        buf << f->name << (f->isInline  ?  "." : "->") 
+                            << "toJSON(indent + \"    \", node_refs)";                    }
+                }
+                buf << " << std::endl << indent << \"}\"";
+                if (cnt > 1)
+                    buf << "<< \",\"";
+                buf << ";" << std::endl;
+
+            }
+            cnt--;
+        } 
+        buf << cl->indent << "node_refs.insert(this->id);" << std::endl;
+        buf << cl->indent << "return buf.str();" << std::endl << "}";
+        return buf.str(); } } },
 { "toString", { &NamedType::Cstring, {}, CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
     [](IrClass *, cstring) -> cstring { return cstring(); } } },
 };
