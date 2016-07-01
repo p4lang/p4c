@@ -2079,8 +2079,8 @@ TypeInference::actionCall(bool inActionList,
                 if (inActionList)
                     typeError("%1%: parameter %2% cannot be bound: it is set by the control plane",
                               arg, p);
-                if (!isCompileTimeConstant(arg))
-                    typeError("%1%: must be a compile-time constant", arg);
+                // For actions None parameters are treated as IN parameters.
+                // We don't require them to be bound to a compile-time constant.
             } else if (p->direction == IR::Direction::Out ||
                        p->direction == IR::Direction::InOut) {
                 if (!isLeftValue(arg))

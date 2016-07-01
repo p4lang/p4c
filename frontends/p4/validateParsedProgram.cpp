@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -52,6 +52,12 @@ void ValidateParsedProgram::postorder(const IR::ParserState* s) {
     if (s->name == IR::ParserState::accept ||
         s->name == IR::ParserState::reject)
         ::error("%1%: parser state should not be implemented, it is built-in", s->name);
+}
+
+void ValidateParsedProgram::container(const IR::IContainer* type) {
+    for (auto p : *type->getConstructorParameters()->parameters)
+        if (p->direction != IR::Direction::None)
+            ::error("%1%: constructor parameters cannot have a direction", p);
 }
 
 void ValidateParsedProgram::postorder(const IR::P4Table* t) {

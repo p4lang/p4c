@@ -49,8 +49,6 @@ bmv2tests.mk: $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 $(srcdir)/testdata/p4_1
 XFAIL_TESTS += \
     bmv2/testdata/p4_14_samples/09-IPv4OptionsUnparsed.p4.test \
     bmv2/testdata/p4_14_samples/TLV_parsing.p4.test \
-    bmv2/testdata/p4_14_samples/truncate.p4.test \
-    bmv2/testdata/p4_14_samples/action_inline2.p4.test \
-    bmv2/testdata/p4_14_samples/switch_20160512/switch.p4.test
+    bmv2/testdata/p4_14_samples/truncate.p4.test
 
 XFAIL_TESTS += bmv2/testdata/p4_16_samples/ternary2-bmv2.p4.test

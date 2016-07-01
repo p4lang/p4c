@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ class ValidateParsedProgram final : public Inspector {
     bool p4v1;
     using Inspector::postorder;
 
+    void container(const IR::IContainer* type);
  public:
     explicit ValidateParsedProgram(bool p4v1) : p4v1(p4v1)
     { setName("ValidateParsedProgram"); }
@@ -40,6 +41,12 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::ConstructorCallExpression* expression) override;
     void postorder(const IR::Declaration_Variable* decl) override;
     void postorder(const IR::Declaration_Constant* decl) override;
+    void postorder(const IR::Type_Package* package) override
+    { container(package); }
+    void postorder(const IR::P4Control* control) override
+    { container(control); }
+    void postorder(const IR::P4Parser* parser) override
+    { container(parser); }
 };
 
 }  // namespace P4

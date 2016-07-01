@@ -266,8 +266,6 @@ annotations
 annotation
     : '@' name                        { $$ = new IR::Annotation(@1, *$2, nullptr); }
     | '@' name '(' expression ')'     { $$ = new IR::Annotation(@1, *$2, $4); }
-    | '@' name '(' STRING_LITERAL ')' { $$ = new IR::Annotation(@1, *$2,
-                                                                new IR::StringLiteral(@4, $4)); }
     ;
 
 parameterList
@@ -897,6 +895,7 @@ lvalue
 
 expression
     : INTEGER                            { $$ = $1; }
+    | STRING_LITERAL                     { $$ = new IR::StringLiteral(@1, $1); }
     | TRUE                               { $$ = new IR::BoolLiteral(@1, true); }
     | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
     | THIS                               { $$ = new IR::This(@1); }
