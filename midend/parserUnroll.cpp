@@ -2,98 +2,186 @@
 
 namespace P4 {
 
-void ParserAnalyzer::postorder(const IR::PathExpression* expression) {
-    auto parser = findContext<IR::P4Parser>();
-    if (parser == nullptr)
-        return;
-    auto state = findContext<IR::ParserState>();
-    if (state == nullptr)
-        return;
-    auto decl = refMap->getDeclaration(expression->path);
-    if (!decl->is<IR::ParserState>())
-        return;
-    CHECK_NULL(current);
-    current->callGraph.add(state, decl->to<IR::ParserState>());
-}
-
-const IR::Node* ParserEvaluator::postorder(IR::P4Parser* parser) {
-    LOG1("Unrolling " << parser);
+void EvaluateParsers::postorder(const IR::P4Parser* parser) {
+    LOG1("Evaluating " << parser);
     auto structure = ::get(parsers->parsers, getOriginal<IR::P4Parser>());
     CHECK_NULL(structure);
-    structure->evaluate(refMap, typeMap);
-    return parser;
+    auto pi = structure->evaluate(refMap, typeMap, unroll);
+    parsers->evaluation.emplace(parser, pi);
 }
 
-ValueMap* ParserStructure::initializeVariables(TypeMap* typeMap) {
-    ValueMap* result = new ValueMap();
-    ValueFactory factory(typeMap);
-    for (auto p : *parser->type->applyParams->parameters) {
-        if (p->direction == IR::Direction::None)
-            continue;
-        auto type = typeMap->getType(p);
-        bool initialized = p->direction == IR::Direction::In ||
-                p->direction == IR::Direction::InOut;
-        auto value = factory.create(type, !initialized);
-        result->set(p, value);
+namespace {
+class ParserSymbolicInterpreter {
+    ParserStructure*    structure;
+    const IR::P4Parser* parser;
+    ReferenceMap*       refMap;
+    TypeMap*            typeMap;
+    ValueFactory*       factory;
+    ParserInfo*         synthesizedParser;  // output produced
+
+    ValueMap* initializeVariables() {
+        ValueMap* result = new ValueMap();
+        for (auto p : *parser->type->applyParams->parameters) {
+            auto type = typeMap->getType(p);
+            bool initialized = p->direction == IR::Direction::In ||
+                    p->direction == IR::Direction::InOut;
+            auto value = factory->create(type, !initialized);
+            result->set(p, value);
+        }
+        for (auto d : *parser->stateful) {
+            auto type = typeMap->getType(d);
+            auto value = factory->create(type, true);
+            result->set(d, value);
+        }
+        return result;
     }
-    for (auto d : *parser->stateful) {
-        if (!d->is<IR::Declaration_Variable>())
-            continue;
-        auto type = typeMap->getType(d);
-        auto value = factory.create(type, true);
-        result->set(d, value);
-    }
-    return result;
-}
 
-void ParserStructure::evaluate(ReferenceMap* refMap, TypeMap* typeMap) {
-    auto initial = initializeVariables(typeMap);
-    auto work = new Work(initial, start, nullptr);
-    toRun.push_back(work);
-    run(refMap, typeMap);
-}
-
-void ParserStructure::run(ReferenceMap* refMap, TypeMap* typeMap) {
-    LOG1("Process unrolling " << parser);
-    while (!toRun.empty()) {
-        auto work = toRun.back();
-        toRun.pop_back();
-        auto after = work->evaluate(refMap, typeMap);
-        if (after == nullptr) continue;
-
-        auto callees = callGraph.getCallees(work->state);
-        if (callees == nullptr)
-            continue;
-        for (auto c : *callees) {
-            auto newWork = new Work(after->clone(), c, work);
-            toRun.push_back(newWork);
+    ParserStateInfo* getState(cstring state, bool unroll) {
+        if (state == IR::ParserState::accept.name ||
+            state == IR::ParserState::reject.name)
+            return nullptr;
+        auto s = structure->get(state);
+        if (unroll) {
+            auto pi = new ParserStateInfo(state, parser, s);
+            synthesizedParser->add(pi);
+            return pi;
+        } else {
+            auto pi = synthesizedParser->getSingle(state);
+            if (pi == nullptr) {
+                cstring newName = refMap->newName(state);
+                pi = new ParserStateInfo(newName, parser, s);
+                synthesizedParser->add(pi);
+            }
+            return pi;
         }
     }
-}
 
-ValueMap* ParserStructure::Work::evaluate(ReferenceMap* refMap, TypeMap* typeMap) const {
-    LOG1("Analyzing " << state);
-    for (auto sd : *state->components)
-        evaluate(sd, refMap, typeMap);
-    return valueMap;
-}
-
-void ParserStructure::Work::evaluate(const IR::StatOrDecl* sord, ReferenceMap* refMap,
-                                     TypeMap* typeMap) const {
-    ExpressionEvaluator ev(refMap, typeMap, valueMap);
-
-    if (sord->is<IR::AssignmentStatement>()) {
-        auto ass = sord->to<IR::AssignmentStatement>();
-        auto left = ev.evaluate(ass->left);
-        auto right = ev.evaluate(ass->right);
-        left->assign(right);
-    } else if (sord->is<IR::MethodCallStatement>()) {
-        // can have side-effects
-        ev.evaluate(sord->to<IR::MethodCallStatement>()->methodCall);
-    } else {
-        BUG("%1%: unexpected declaration or statement", sord);
+    bool reportIfError(AbstractValue* value) const {
+        if (!value->is<ErrorValue>())
+            return true;
+        auto ev = value->to<ErrorValue>();
+        ::error("%1%: %2%", ev->errorPosition, ev->message());
+        return false;
     }
-    LOG2("After " << sord << " state is " << valueMap);
+
+    // Executes symbolically the specified statement.
+    // Returns 'true' if execution completes successfully,
+    // and 'false' if an error occurred.
+    bool executeStatement(const IR::StatOrDecl* sord, ValueMap* valueMap) const {
+        ExpressionEvaluator ev(refMap, typeMap, valueMap);
+
+        bool success = true;
+        if (sord->is<IR::AssignmentStatement>()) {
+            auto ass = sord->to<IR::AssignmentStatement>();
+            auto left = ev.evaluate(ass->left);
+            success = reportIfError(left);
+            if (success) {
+                auto right = ev.evaluate(ass->right);
+                success = reportIfError(right);
+                if (success)
+                    left->assign(right);
+            }
+        } else if (sord->is<IR::MethodCallStatement>()) {
+            // can have side-effects
+            auto mc = sord->to<IR::MethodCallStatement>();
+            auto e = ev.evaluate(mc->methodCall);
+            success = reportIfError(e);
+        } else {
+            BUG("%1%: unexpected declaration or statement", sord);
+        }
+        LOG2("After " << sord << " state is " << valueMap);
+        return success;
+    }
+
+    std::vector<ParserStateInfo*>* evaluateSelect(ParserStateInfo* state, bool unroll) {
+        // TODO: update next state map
+        auto select = state->state->selectExpression;
+        if (select == nullptr)
+            return nullptr;
+        auto result = new std::vector<ParserStateInfo*>();
+        if (select->is<IR::PathExpression>()) {
+            auto path = select->to<IR::PathExpression>()->path;
+            auto next = refMap->getDeclaration(path);
+            BUG_CHECK(next->is<IR::ParserState>(), "%1%: expected a state", path);
+            auto nextInfo = getState(next->getName(), unroll);
+            if (nextInfo != nullptr)
+                result->push_back(nextInfo);
+        } else if (select->is<IR::SelectExpression>()) {
+            // TODO: really try to match cases; today we are conservative
+            auto se = select->to<IR::SelectExpression>();
+            for (auto c : se->selectCases) {
+                auto path = c->state->path;
+                auto next = refMap->getDeclaration(path);
+                BUG_CHECK(next->is<IR::ParserState>(), "%1%: expected a state", path);
+                auto nextInfo = getState(next->getName(), unroll);
+                if (nextInfo != nullptr)
+                    result->push_back(nextInfo);
+            }
+        } else {
+            BUG("%1%: unexpected expression", select);
+        }
+        return result;
+    }
+
+    std::vector<ParserStateInfo*>* evaluate(ParserStateInfo* state, bool unroll) {
+        LOG1("Analyzing " << state->state);
+        auto valueMap = state->before->clone();
+        for (auto s : *state->state->components) {
+            bool success = executeStatement(s, valueMap);
+            if (!success)
+                return nullptr;
+        }
+        state->after = valueMap;
+        auto result = evaluateSelect(state, unroll);
+        return result;
+    }
+
+    struct StateInput {
+        ParserStateInfo* state;
+        ValueMap* values;
+        StateInput(ParserStateInfo* state, ValueMap* values) : state(state), values(values)
+        { CHECK_NULL(state); CHECK_NULL(values); }
+    };
+
+ public:
+    ParserSymbolicInterpreter(ParserStructure* structure, ReferenceMap* refMap,
+                              TypeMap* typeMap)
+            : structure(structure), refMap(refMap), typeMap(typeMap), synthesizedParser(nullptr) {
+        CHECK_NULL(structure); CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        factory = new ValueFactory(typeMap);
+        parser = structure->parser;
+    }
+
+    ParserInfo* run(bool unroll) {
+        synthesizedParser = new ParserInfo();
+        auto initMap = initializeVariables();
+        auto startInfo = getState(structure->start->name.name, unroll);
+        StateInput si(startInfo, initMap);
+        std::vector<StateInput> toRun;
+        toRun.push_back(si);
+
+        while (!toRun.empty()) {
+            auto work = toRun.back();
+            toRun.pop_back();
+            work.state->mergeValues(work.values);
+            auto nextStates = evaluate(work.state, unroll);
+            if (nextStates == nullptr)
+                continue;
+            for (auto a : *nextStates) {
+                StateInput si(a, work.state->after->clone());
+                toRun.push_back(si);
+            }
+        }
+
+        return synthesizedParser;
+    }
+};
+}  // namespace
+
+ParserInfo* ParserStructure::evaluate(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) {
+    ParserSymbolicInterpreter psi(this, refMap, typeMap);
+    auto result = psi.run(unroll);
+    return result;
 }
 
 }  // namespace P4

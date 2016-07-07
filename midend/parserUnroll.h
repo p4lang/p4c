@@ -26,50 +26,86 @@ limitations under the License.
 
 namespace P4 {
 
-class ParserStructure {
-    struct Work {
-        ValueMap* valueMap;
-        const IR::ParserState* state;
-        const Work* derivedFrom;
+// Information produced for a parser state by the symbolic evaluator
+struct ParserStateInfo {
+    const IR::P4Parser*    parser;
+    const IR::ParserState* state;  // original state this is produced from
+    cstring                name;  // new state name
+    ValueMap*              before;
+    ValueMap*              after;
+    std::map<cstring, cstring> successors;  // for each successor state the new successor
 
-        Work(ValueMap* valueMap, const IR::ParserState* state, const Work* derivedFrom) :
-                valueMap(valueMap), state(state), derivedFrom(derivedFrom)
-        { CHECK_NULL(valueMap); CHECK_NULL(state); }
+    ParserStateInfo(cstring name, const IR::P4Parser* parser, const IR::ParserState* state) :
+            parser(parser), state(state), name(name), before(nullptr), after(nullptr) {}
+    void mergeValues(ValueMap* b) {
+        if (before == nullptr)
+            before = b;
+        else
+            before->merge(b);
+    }
+};
 
-        ValueMap* evaluate(ReferenceMap* refMap, TypeMap* typeMap) const;
-        void evaluate(const IR::StatOrDecl* stat, ReferenceMap* refMap, TypeMap* typeMap) const;
-    };
-
-    std::vector<Work*> toRun;
-    void run(ReferenceMap* refMap, TypeMap* typeMap);
-    ValueMap* initializeVariables(TypeMap* typeMap);
-
+// Information produced for a parser by the symbolic evaluator
+class ParserInfo {
+    // for each original state a vector of states produced by unrolling
+    std::map<cstring, std::vector<ParserStateInfo*>*> states;
  public:
-    ExpressionEvaluator*              evaluator;
-    const IR::P4Parser*               parser;
-    CallGraph<const IR::ParserState*> callGraph;
-    const IR::ParserState*            start;
-    explicit ParserStructure(const IR::P4Parser* parser) :
-            parser(parser), callGraph("parsers"), start(nullptr)
-    { CHECK_NULL(parser); }
+    std::vector<ParserStateInfo*>* get(cstring origState) {
+        std::vector<ParserStateInfo*> *vec;
+        auto it = states.find(origState);
+        if (it == states.end()) {
+            vec = new std::vector<ParserStateInfo*>;
+            states.emplace(origState, vec);
+        } else {
+            vec = it->second;
+        }
+        return vec;
+    }
+    void add(ParserStateInfo* si) {
+        cstring origState = si->state->name.name;
+        auto vec = get(origState);
+        vec->push_back(si);
+    }
+    ParserStateInfo* getSingle(cstring origState) {
+        auto vec = get(origState);
+        if (vec->empty())
+            return nullptr;
+        BUG_CHECK(vec->size() == 1, "Too many states map to %1%", origState);
+        return vec->at(0);
+    }
+};
 
-    void evaluate(ReferenceMap* refMap, TypeMap* typeMap);
+// Information about a parser in the input program
+class ParserStructure {
+    std::map<cstring, const IR::ParserState*> stateMap;
+ public:
+    const IR::P4Parser*    parser;
+    const IR::ParserState* start;
+    explicit ParserStructure(const IR::P4Parser* parser) :
+            parser(parser), start(nullptr)
+    { CHECK_NULL(parser); }
+    void addState(const IR::ParserState* state)
+    { stateMap.emplace(state->name, state); }
+    const IR::ParserState* get(cstring state) const
+    { return ::get(stateMap, state); }
+
+    ParserInfo* evaluate(ReferenceMap* refMap, TypeMap* typeMap, bool unroll);
 };
 
 class Parsers {
  public:
     std::map<const IR::P4Parser*, ParserStructure*> parsers;
+    std::map<const IR::P4Parser*, ParserInfo*> evaluation;
 };
 
-class ParserAnalyzer : public Inspector {
-    const ReferenceMap* refMap;
+// Builds the 'parsers' structure
+class DiscoverParsers : public Inspector {
     ParserStructure*    current;
     Parsers*            parsers;
  public:
-    ParserAnalyzer(const ReferenceMap* refMap, Parsers* parsers) :
-            refMap(refMap), current(nullptr), parsers(parsers)
-    { CHECK_NULL(refMap); CHECK_NULL(parsers); }
-    void postorder(const IR::PathExpression* expression) override;
+    DiscoverParsers(Parsers* parsers) :
+            current(nullptr), parsers(parsers)
+    { CHECK_NULL(parsers); }
     bool preorder(const IR::Type*) override { return false; }  // prune
     bool preorder(const IR::P4Parser* parser) override
     { current = new ParserStructure(parser); return true; }  // do not prune
@@ -78,24 +114,25 @@ class ParserAnalyzer : public Inspector {
     bool preorder(const IR::ParserState* state) override {
         if (state->name.name == IR::ParserState::start)
             current->start = state;
+        current->addState(state);
         return true;
     }
 };
 
-// Process a parser and optionally perform unrolling of loops.
+// Performs symbolic evaluation over each parser.
 // Should be performed after local variable declarations have been removed.
-class ParserEvaluator : public Transform {
-    ReferenceMap*  refMap;
-    TypeMap*       typeMap;
-    const Parsers* parsers;
-    bool           unroll;  // if true perform loop unrolling
+class EvaluateParsers : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+    Parsers*      parsers;
+    bool          unroll;  // if true unroll the graph into a tree
  public:
-    ParserEvaluator(ReferenceMap* refMap, TypeMap* typeMap, const Parsers* parsers) :
+    EvaluateParsers(ReferenceMap* refMap, TypeMap* typeMap, Parsers* parsers) :
             refMap(refMap), typeMap(typeMap), parsers(parsers), unroll(false)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(parsers); setName("ParserEvaluator"); }
-    const IR::Node* postorder(IR::P4Parser* parser) override;
-    const IR::Node* preorder(IR::P4Parser* parser) override { return parser; }
-    const IR::Node* preorder(IR::Type* type) override { prune(); return type; }
+    void postorder(const IR::P4Parser* parser) override;
+    bool preorder(const IR::P4Parser*) override { return true; }  // needed to override the next
+    bool preorder(const IR::Type*) override { return false; }
 };
 
 class ParserUnroll : public PassManager {
@@ -103,8 +140,8 @@ class ParserUnroll : public PassManager {
  public:
     ParserUnroll(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
         passes.push_back(new TypeChecking(refMap, typeMap, false, isv1));
-        passes.push_back(new ParserAnalyzer(refMap, &parsers));
-        passes.push_back(new ParserEvaluator(refMap, typeMap, &parsers));
+        passes.push_back(new DiscoverParsers(&parsers));
+        passes.push_back(new EvaluateParsers(refMap, typeMap, &parsers));
         setName("ParserUnroll");
     }
 };

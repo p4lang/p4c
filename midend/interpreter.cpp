@@ -22,15 +22,102 @@ AbstractValue* ValueFactory::create(const IR::Type* type, bool uninitialized) co
         return new ArrayValue(st->baseType->to<IR::Type_Header>(), st->getSize(),
                               uninitialized, this);
     }
+    if (type->is<IR::Type_Tuple>()) {
+        auto tt = type->to<IR::Type_Tuple>();
+        return new TupleValue(tt, uninitialized, this);
+    }
+    if (type->is<IR::Type_Extern>()) {
+        auto te = type->to<IR::Type_Extern>();
+        if (te->name.name == P4CoreLibrary::instance.packetIn.name) {
+            return new PacketInValue(te);
+        }
+        return new ExternValue(te);
+    }
     BUG("%1%: unexpected type", type);
 }
 
+bool ValueFactory::isFixedWidth(const IR::Type* type) const {
+    type = typeMap->getType(type, true);
+    if (type->is<IR::Type_Varbits>())
+        return false;
+    if (type->is<IR::Type_Extern>())
+        return false;
+    if (type->is<IR::Type_Stack>())
+        return isFixedWidth(type->to<IR::Type_Stack>()->baseType);
+    if (type->is<IR::Type_StructLike>()) {
+        auto st = type->to<IR::Type_StructLike>();
+        for (auto f : *st->fields)
+            if (!isFixedWidth(f->type))
+                return false;
+        return true;
+    }
+    if (type->is<IR::Type_Tuple>()) {
+        auto tt = type->to<IR::Type_Tuple>();
+        for (auto f : *tt->components) {
+            if (!isFixedWidth(f))
+                return false;
+        }
+        return true;
+    }
+    return true;
+}
+
+unsigned ValueFactory::getWidth(const IR::Type* type) const {
+    type = typeMap->getType(type, true);
+    if (type->is<IR::Type_Bits>())
+        return type->to<IR::Type_Bits>()->size;
+    if (type->is<IR::Type_Boolean>())
+        return 1;
+    if (type->is<IR::Type_Union>()) {
+        unsigned width = 0;
+        for (auto f : *type->to<IR::Type_Union>()->fields)
+            width = std::max(width, getWidth(f->type));
+        return width;
+    }
+    if (type->is<IR::Type_StructLike>()) {
+        unsigned width = 0;
+        auto st = type->to<IR::Type_StructLike>();
+        for (auto f : *st->fields)
+            width += getWidth(f->type);
+        return width;
+    }
+    if (type->is<IR::Type_Stack>()) {
+        auto st = type->to<IR::Type_Stack>();
+        auto bw = getWidth(st->baseType);
+        return bw * st->getSize();
+    }
+    if (type->is<IR::Type_Tuple>()) {
+        auto tt = type->to<IR::Type_Tuple>();
+        unsigned width = 0;
+        for (auto f : *tt->components)
+            width += getWidth(f);
+        return width;
+    }
+    return 0;
+}
+
+void AbstractBool::merge(const AbstractValue* other) {
+    auto bo = other->to<AbstractBool>();
+    state = mergeState(other->to<ScalarValue>()->state);
+    if (state == ValueState::Constant && value != bo->value)
+        state = ValueState::NotConstant;
+}
+
 void AbstractBool::assign(const AbstractValue* other) {
-    if (other->is<ErrorValue>()) return;
     BUG_CHECK(other->is<AbstractBool>(), "%1%: expected a bool", other);
     auto bo = other->to<AbstractBool>();
     state = bo->state;
     value = bo->value;
+}
+
+void AbstractInteger::merge(const AbstractValue* other) {
+    BUG_CHECK(other->is<AbstractInteger>(), "%1%: expected an integer", other);
+    auto io = other->to<AbstractInteger>();
+    state = mergeState(io->state);
+    if (state == ValueState::Constant && constant->value != io->constant->value) {
+        state = ValueState::NotConstant;
+        constant = nullptr;
+    }
 }
 
 void AbstractInteger::assign(const AbstractValue* other) {
@@ -65,6 +152,13 @@ void StructValue::assign(const AbstractValue* other) {
         fieldValue[f.first]->assign(f.second);
 }
 
+void StructValue::merge(const AbstractValue* other) {
+    BUG_CHECK(other->is<StructValue>(), "%1%: expected a struct", other);
+    auto sv = other->to<StructValue>();
+    for (auto f : sv->fieldValue)
+        fieldValue[f.first]->merge(f.second);
+}
+
 void StructValue::setAllUnknown() {
     for (auto f : *type->fields)
         fieldValue[f->name.name]->setAllUnknown();
@@ -76,8 +170,17 @@ HeaderValue::HeaderValue(const IR::Type_Header* type,
         StructValue(type, uninitialized, factory),
         valid(new AbstractBool(false)) {}
 
-void HeaderValue::setValid(bool v)
-{ valid = new AbstractBool(v); }
+void HeaderValue::setValid(bool v) {
+    if (!v)
+        setAllUnknown();
+    valid = new AbstractBool(v);
+}
+
+AbstractValue* HeaderValue::get(const IR::Node* node, cstring field) const {
+    if (valid->isKnown() && !valid->value)
+        return new StaticErrorValue(node, "Reading field from invalid header");
+    return StructValue::get(node, field);
+}
 
 void HeaderValue::setAllUnknown() {
     StructValue::setAllUnknown();
@@ -99,6 +202,14 @@ void HeaderValue::assign(const AbstractValue* other) {
     for (auto f : hv->fieldValue)
         fieldValue[f.first]->assign(f.second);
     valid->assign(hv->valid);
+}
+
+void HeaderValue::merge(const AbstractValue* other) {
+    BUG_CHECK(other->is<HeaderValue>(), "%1%: expected a header", other);
+    auto hv = other->to<HeaderValue>();
+    for (auto f : hv->fieldValue)
+        fieldValue[f.first]->merge(f.second);
+    valid->merge(hv->valid);
 }
 
 ArrayValue::ArrayValue(const IR::Type_Header* elemType, size_t size,
@@ -124,7 +235,7 @@ void ArrayValue::shift(int amount) {
     }
 }
 
-AbstractValue* ArrayValue::next() {
+AbstractValue* ArrayValue::next(const IR::Node* node) {
     for (unsigned i = 0; i < values.size(); i++) {
         auto v = values.at(i);
         if (v->valid->isUnknown() || v->valid->isUninitialized())
@@ -132,10 +243,10 @@ AbstractValue* ArrayValue::next() {
         if (!v->valid->value)
             return v;
     }
-    return new ErrorValue("'next' of full stack");
+    return new ExceptionValue(node, P4::StandardExceptions::FullStack);
 }
 
-AbstractValue* ArrayValue::last() {
+AbstractValue* ArrayValue::last(const IR::Node* node) {
     for (unsigned i = 0; i < values.size(); i++) {
         unsigned index = values.size() - i - 1;
         auto v = values.at(index);
@@ -144,7 +255,7 @@ AbstractValue* ArrayValue::last() {
         if (v->valid->value)
             return v;
     }
-    return new ErrorValue("'last' of empty stack");
+    return new ExceptionValue(node, P4::StandardExceptions::EmptyStack);
 }
 
 void ArrayValue::setAllUnknown() {
@@ -155,7 +266,7 @@ void ArrayValue::setAllUnknown() {
 AbstractValue* ArrayValue::clone() const {
     auto result = new ArrayValue(elemType);
     for (unsigned i=0; i < values.size(); i++)
-        result->values.push_back(get(i)->clone()->to<HeaderValue>());
+        result->values.push_back(get(nullptr, i)->clone()->to<HeaderValue>());
     return result;
 }
 
@@ -163,23 +274,83 @@ void ArrayValue::assign(const AbstractValue* other) {
     if (other->is<ErrorValue>()) return;
     BUG_CHECK(other->is<ArrayValue>(), "%1%: expected an array", other);
     for (unsigned i=0; i < values.size(); i++)
-        values.at(i)->assign(other->to<ArrayValue>()->get(i));
+        values.at(i)->assign(other->to<ArrayValue>()->get(nullptr, i));
+}
+
+void ArrayValue::merge(const AbstractValue* other) {
+    BUG_CHECK(other->is<ArrayValue>(), "%1%: expected an array", other);
+    for (unsigned i=0; i < values.size(); i++)
+        values.at(i)->merge(other->to<ArrayValue>()->get(nullptr, i));
+}
+
+void AnyElement::merge(const AbstractValue* other) {
+    for (unsigned i=0; i < parent->values.size(); i++)
+        parent->values.at(i)->merge(other);
+}
+
+TupleValue::TupleValue(const IR::Type_Tuple* type, bool uninitialized,
+                       const ValueFactory* factory) {
+    for (auto t : *type->components) {
+        auto v = factory->create(t, uninitialized);
+        values.push_back(v);
+    }
+}
+
+void TupleValue::setAllUnknown() {
+    for (unsigned i = 0; i < values.size(); i++)
+        values.at(i)->setAllUnknown();
+}
+
+AbstractValue* TupleValue::clone() const {
+    auto result = new TupleValue();
+    for (unsigned i=0; i < values.size(); i++)
+        result->values.push_back(get(i)->clone());
+    return result;
+}
+
+void TupleValue::merge(const AbstractValue* other) {
+    BUG_CHECK(other->is<TupleValue>(), "%1%: expected a tuple value", other);
+    auto tpl = other->to<TupleValue>();
+    BUG_CHECK(values.size() == tpl->values.size(), "merging tuples with different sizes");
+    for (unsigned i=0; i < values.size(); i++)
+        values.at(i)->merge(tpl->get(i));
+}
+
+void PacketInValue::merge(const AbstractValue* other) {
+    BUG_CHECK(other->is<PacketInValue>(), "%1%: merging with non-packet", other);
+    auto pv = other->to<PacketInValue>();
+    if (minimumStreamOffset > pv->minimumStreamOffset)
+        minimumStreamOffset = pv->minimumStreamOffset;
 }
 
 VoidValue* VoidValue::instance = new VoidValue();
 
+/*****************************************************************************************/
+
 void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
     auto l = get(expression->left);
+    if (l->is<ErrorValue>()) {
+        set(expression, l);
+        return;
+    }
     auto r = get(expression->right);
+    if (r->is<ErrorValue>()) {
+        set(expression, l);
+        return;
+    }
     auto clone = expression->clone();
     BUG_CHECK(l->is<AbstractInteger>(), "%1%: expected an AbstractInteger", l);
     BUG_CHECK(r->is<AbstractInteger>(), "%1%: expected an AbstractInteger", r);
     auto li = l->to<AbstractInteger>();
     auto ri = r->to<AbstractInteger>();
     if (li->isUninitialized()) {
-        ::error("%1%: uninitialized value", expression->left);
+        auto result = new StaticErrorValue(expression->left, "Uninitialized");
+        set(expression, result);
+        return;
     } else if (ri->isUninitialized()) {
-        ::error("%1%: uninitialized value", expression->right);
+        auto result = new StaticErrorValue(expression->right, "Uninitialized");
+        set(expression, result);
+        return;
     } else if (!li->isUnknown() && !ri->isUnknown()) {
         clone->left = li->constant;
         clone->right = ri->constant;
@@ -194,12 +365,16 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
 
 void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     auto l = get(expression->expr);
+    if (l->is<ErrorValue>()) {
+        set(expression, l);
+        return;
+    }
     auto clone = expression->clone();
     BUG_CHECK(l->is<ScalarValue>(), "%1%: expected a scalar", l);
     auto sv = l->to<ScalarValue>();
     if (sv->isUninitialized()) {
-        ::error("%1%: uninitialized value", expression->expr);
-        set(expression, l);
+        auto result = new StaticErrorValue(expression->expr, "Uninitialized");
+        set(expression, result);
         return;
     }
     if (sv->isUnknown()) {
@@ -231,25 +406,42 @@ void ExpressionEvaluator::postorder(const IR::Constant* expression) {
     set(expression, new AbstractInteger(expression));
 }
 
+void ExpressionEvaluator::postorder(const IR::ListExpression* expression) {
+    auto result = new TupleValue();
+    for (auto e : *expression->components) {
+        auto v = get(e);
+        result->add(v);
+    }
+    set(expression, result);
+}
+
 void ExpressionEvaluator::postorder(const IR::BoolLiteral* expression) {
     set(expression, new AbstractBool(expression));
 }
 
 void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
     auto l = get(expression->left);
+    if (l->is<ErrorValue>()) {
+        set(expression, l);
+        return;
+    }
     auto r = get(expression->right);
+    if (r->is<ErrorValue>()) {
+        set(expression, l);
+        return;
+    }
     BUG_CHECK(l->is<ScalarValue>(), "%1%: expected a scalar", l);
     BUG_CHECK(r->is<ScalarValue>(), "%1%: expected a scalar", r);
     auto lv = l->to<ScalarValue>();
     auto rv = r->to<ScalarValue>();
     if (lv->isUninitialized()) {
-        ::error("%1%: uninitialized value", expression->left);
-        set(expression, l);
+        auto result = new StaticErrorValue(expression->left, "Uninitialized");
+        set(expression, result);
         return;
     }
     if (rv->isUninitialized()) {
-        ::error("%1%: uninitialized value", expression->right);
-        set(expression, l);
+        auto result = new StaticErrorValue(expression->right, "Uninitialized");
+        set(expression, result);
         return;
     }
     if (lv->isUnknown()) {
@@ -292,26 +484,34 @@ void ExpressionEvaluator::postorder(const IR::Member* expression) {
         return;
     }
     auto l = get(expression->expr);
+    if (l->is<ErrorValue>()) {
+        set(expression, l);
+        return;
+    }
     auto basetype = typeMap->getType(expression->expr, true);
     if (basetype->is<IR::Type_Stack>()) {
         BUG_CHECK(l->is<ArrayValue>(), "%1%: expected an array", l);
         auto array = l->to<ArrayValue>();
         AbstractValue* v;
         if (expression->member.name == IR::Type_Stack::next) {
-            v = array->next();
-            if (v->is<ErrorValue>())
-                ::error("%1%: %2%", expression, v->to<ErrorValue>()->message);
+            v = array->next(expression);
+            if (v->is<ErrorValue>()) {
+                set(expression, v);
+                return;
+            }
         } else if (expression->member.name == IR::Type_Stack::last) {
-            v = array->last();
-            if (v->is<ErrorValue>())
-                ::error("%1%: %2%", expression, v->to<ErrorValue>()->message);
+            v = array->last(expression);
+            if (v->is<ErrorValue>()) {
+                set(expression, v);
+                return;
+            }
         } else {
             BUG("%1%: unexpected expression", expression);
         }
         set(expression, v);
     } else {
         BUG_CHECK(l->is<StructValue>(), "%1%: expected a struct", l);
-        auto v = l->to<StructValue>()->get(expression->member.name);
+        auto v = l->to<StructValue>()->get(expression, expression->member.name);
         set(expression, v);
     }
 }
@@ -322,18 +522,28 @@ void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
     auto rv = r->to<ScalarValue>();
     auto lv = l->to<ArrayValue>();
 
+    if (lv->is<ErrorValue>()) {
+        set(expression, lv);
+        return;
+    }
+    if (rv->is<ErrorValue>()) {
+        set(expression, rv);
+        return;
+    }
     if (rv->isUninitialized() || rv->isUnknown()) {
-        if (rv->isUninitialized())
-            ::error("%1%: uninitialized value", expression->right);
-        auto v0 = lv->get(0)->clone();
-        v0->setAllUnknown();
+        if (rv->isUninitialized()) {
+            auto result = new StaticErrorValue(expression->right, "Uninitialized");
+            set(expression, result);
+            return;
+        }
+        auto v0 = new AnyElement(lv);
         set(expression, v0);
         return;
     }
     CHECK_NULL(lv);
     auto ix = r->to<AbstractInteger>();
     CHECK_NULL(ix);
-    auto result = lv->get(ix->constant->asInt());
+    auto result = lv->get(expression, ix->constant->asInt());
     set(expression, result);
 }
 

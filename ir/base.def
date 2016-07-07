@@ -15,6 +15,7 @@ abstract Type {
     typedef Type_Bits           Bits;
     typedef Type_Varbits        Varbits;
 #end
+    // This is well-defined only for types with fixed width
     virtual int width_bits() const { return 0; }
 }
 

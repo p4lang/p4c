@@ -43,7 +43,7 @@ class PrettyPrint : public Inspector {
     cstring ppfile;
     cstring inputfile;
  public:
-    PrettyPrint(const CompilerOptions& options) {
+    explicit PrettyPrint(const CompilerOptions& options) {
         setName("PrettyPrint");
         ppfile = options.prettyPrintFile;
         inputfile = options.file;

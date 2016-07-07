@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ limitations under the License.
 
 namespace P4V1 {
 
-// Information about the structure of a P4 v1.0 program
+// Information about the structure of a P4-14 program
 class ProgramStructure {
-    // In P4 v1.0 one can have multiple objects with different types with the same name
-    // In P4 v1.2 this is not possible, so we may need to rename some objects.
+    // In P4-14 one can have multiple objects with different types with the same name
+    // In P4-16 this is not possible, so we may need to rename some objects.
     // We will preserve the original name using an @name("") annotation.
     template<typename T>
     class NamedObjectInfo {

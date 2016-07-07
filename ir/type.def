@@ -195,7 +195,6 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
     StructField getField(cstring name) const {
         return fields->getDeclaration<StructField>(name); }
     int width_bits() const override {
-        // TODO: cache this value
         int rv = 0;
         for (auto f : *fields)
             rv += f->type->width_bits();

@@ -299,13 +299,17 @@ packageTypeDeclaration
 
 instantiation
       : annotations typeRef '(' argumentList ')' name ';'
-                     { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations($1), $2, $4, nullptr); }
+                     { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations($1),
+                                                         $2, $4, nullptr); }
       | typeRef '(' argumentList ')' name ';'
-                     { $$ = new IR::Declaration_Instance(@5, *$5, IR::Annotations::empty, $1, $3, nullptr); }
+                     { $$ = new IR::Declaration_Instance(@5, *$5, IR::Annotations::empty,
+                                                         $1, $3, nullptr); }
       | annotations typeRef '(' argumentList ')' name '=' objInitializer ';'
-                     { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations($1), $2, $4, $8); }
+                     { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations($1),
+                                                         $2, $4, $8); }
       | typeRef '(' argumentList ')' name '=' objInitializer ';'
-                     { $$ = new IR::Declaration_Instance(@5, *$5, IR::Annotations::empty, $1, $3, $7); }
+                     { $$ = new IR::Declaration_Instance(@5, *$5, IR::Annotations::empty,
+                                                         $1, $3, $7); }
     ;
 
 /* experimental */

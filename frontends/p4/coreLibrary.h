@@ -21,6 +21,43 @@ limitations under the License.
 #include "frontends/common/model.h"
 
 namespace P4 {
+enum class StandardExceptions {
+    NoError,
+    PacketTooShort,
+    NoMatch,
+    EmptyStack,
+    FullStack,
+    OverwritingHeader
+};
+}  // namespace P4
+
+inline std::ostream& operator<<(std::ostream &out, P4::StandardExceptions e) {
+    switch (e) {
+        case P4::StandardExceptions::NoError:
+            out << "NoError";
+            break;
+        case P4::StandardExceptions::PacketTooShort:
+            out << "PacketTooShort";
+            break;
+        case P4::StandardExceptions::NoMatch:
+            out << "NoMatch";
+            break;
+        case P4::StandardExceptions::EmptyStack:
+            out << "EmptyStack";
+            break;
+        case P4::StandardExceptions::FullStack:
+            out << "FullStack";
+            break;
+        case P4::StandardExceptions::OverwritingHeader:
+            out << "OverwritingHeader";
+            break;
+        default:
+            BUG("Unhandled case");
+    }
+    return out;
+}
+
+namespace P4 {
 
 class PacketIn : public Model::Extern_Model {
  public:
@@ -40,6 +77,16 @@ class PacketOut : public Model::Extern_Model {
     Model::Elem emit;
 };
 
+class P4Exception_Model : public ::Model::Elem {
+ public:
+    const StandardExceptions exc;
+    P4Exception_Model(StandardExceptions exc) : ::Model::Elem(""), exc(exc) {
+        std::stringstream str;
+        str << exc;
+        name = str.str();
+    }
+};
+
 // Model of P4 standard library
 // To be kept in sync with corelib.p4
 class P4CoreLibrary : public ::Model::Model {
@@ -47,9 +94,11 @@ class P4CoreLibrary : public ::Model::Model {
     P4CoreLibrary() :
             Model("0.2"), noAction("NoAction"), exactMatch("exact"),
             ternaryMatch("ternary"), lpmMatch("lpm"), packetIn(PacketIn()),
-            packetOut(PacketOut()), noError("NoError"), packetTooShort("PacketTooShort"),
-            noMatch("NoMatch"), emptyStack("EmptyStack"), fullStack("FullStack"),
-            overwritingHeader("OverwritingHeader") {}
+            packetOut(PacketOut()), noError(StandardExceptions::NoError),
+            packetTooShort(StandardExceptions::PacketTooShort),
+            noMatch(StandardExceptions::NoMatch), emptyStack(StandardExceptions::EmptyStack),
+            fullStack(StandardExceptions::FullStack),
+            overwritingHeader(StandardExceptions::OverwritingHeader) {}
 
  public:
     static P4CoreLibrary instance;
@@ -62,12 +111,12 @@ class P4CoreLibrary : public ::Model::Model {
     PacketIn    packetIn;
     PacketOut   packetOut;
 
-    ::Model::Elem noError;
-    ::Model::Elem packetTooShort;
-    ::Model::Elem noMatch;
-    ::Model::Elem emptyStack;
-    ::Model::Elem fullStack;
-    ::Model::Elem overwritingHeader;
+    P4Exception_Model noError;
+    P4Exception_Model packetTooShort;
+    P4Exception_Model noMatch;
+    P4Exception_Model emptyStack;
+    P4Exception_Model fullStack;
+    P4Exception_Model overwritingHeader;
 };
 
 }  // namespace P4

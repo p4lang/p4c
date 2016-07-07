@@ -17,12 +17,13 @@
   C comments are ignored.
   C++ line comments can appear in some places and are emitted in the output.
 
-  #emit/#end   -> copy text literally to output
-  #noXXX       -> do not emit the specified implementation for the XXX method
-                  e.g., #noconstructor, #nodbprint, #novisit_children
-  #apply       -> generate apply overload for visitors
-  method{ ... } -> specifies an implementation for a default method
-                   method can be 'operator=='
+  #emit/#end     -> copy text literally to output header file
+  #emitimpl/#end -> copy text literally to output C++ file
+  #noXXX         -> do not emit the specified implementation for the XXX method
+                    e.g., #noconstructor, #nodbprint, #novisit_children
+  #apply         -> generate apply overload for visitors
+  method{ ... }  -> specifies an implementation for a default method
+                    method can be 'operator=='
 
   Some assignments are turned into methods returning constant values:
   stringOp     -> cstring getStringOp() const

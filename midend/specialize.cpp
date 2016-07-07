@@ -73,13 +73,12 @@ SpecializationMap::getSpecializations(const IR::IContainer* decl) {
 }
 
 namespace {
-
 class IsConcreteType : public Inspector {
     const TypeMap* typeMap;
  public:
     bool hasTypeVariables = false;
 
-    IsConcreteType(const TypeMap* typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
+    explicit IsConcreteType(const TypeMap* typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
     void postorder(const IR::Type_Var*) override { hasTypeVariables = true; }
     void postorder(const IR::Type_Name* type) override {
         auto t = typeMap->getType(type, true);
@@ -92,7 +91,6 @@ class IsConcreteType : public Inspector {
         return hasTypeVariables;
     }
 };
-
 }  // namespace
 
 bool FindSpecializations::isSimpleConstant(const IR::Expression* expr) const {

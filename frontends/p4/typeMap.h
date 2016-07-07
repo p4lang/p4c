@@ -76,4 +76,4 @@ class TypeMap final : public ProgramMap {
 };
 }  // namespace P4
 
-#endif /* _FRONTENDS_COMMON_TYPEMAP_H_ */
+#endif /* _FRONTENDS_P4_TYPEMAP_H_ */

@@ -87,7 +87,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         // TODO: simplify statements and expressions.
         // This is required for the correctness of some of the following passes.
         // Parser loop unrolling
-        // new P4::ParserUnroll(&refMap, &typeMap, isv1),
+        new P4::ParserUnroll(&refMap, &typeMap, isv1),
         // Clone an action for each use, so we can specialize the action
         // per user (e.g., for each table or direct invocation).
         new P4::LocalizeAllActions(&refMap, isv1),
