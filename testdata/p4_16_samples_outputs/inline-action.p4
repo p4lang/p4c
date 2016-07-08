@@ -17,5 +17,6 @@ control p(inout bit<1> bt) {
     }
 }
 
-package m(p pipe);
+control simple<T>(inout T arg);
+package m<T>(simple<T> pipe);
 m(p()) main;

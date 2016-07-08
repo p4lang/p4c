@@ -26,16 +26,16 @@ limitations under the License.
 
 namespace P4 {
 
-class ValueFactory;
+class SymbolicValueFactory;
 
 // Base class for all abstract values
-class AbstractValue {
+class SymbolicValue {
     static unsigned crtid;
  protected:
-    virtual ~AbstractValue() {}
+    explicit SymbolicValue(const IR::Type* type) : id(crtid++), type(type) {}
  public:
     const unsigned id;
-    AbstractValue() : id(crtid++) {}
+    const IR::Type* type;
     virtual bool isScalar() const = 0;
     virtual void dbprint(std::ostream& out) const = 0;
     template<typename T> T* to() {
@@ -47,19 +47,22 @@ class AbstractValue {
         auto result = dynamic_cast<const T*>(this);
         CHECK_NULL(result); return result; }
     template<typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
-    virtual AbstractValue* clone() const = 0;
+    virtual SymbolicValue* clone() const = 0;
     virtual void setAllUnknown() = 0;
-    virtual void assign(const AbstractValue* other) = 0;
-    virtual void merge(const AbstractValue* other) = 0;
+    virtual void assign(const SymbolicValue* other) = 0;
+    // Merging two symbolic values; values should form a lattice.
+    // Returns 'true' if merging changed the current value.
+    virtual bool merge(const SymbolicValue* other) = 0;
+    virtual bool equals(const SymbolicValue* other) const = 0;
 };
 
 // Creates values from type declarations
-class ValueFactory {
+class SymbolicValueFactory {
     const TypeMap* typeMap;
  public:
-    explicit ValueFactory(const TypeMap* typeMap) : typeMap(typeMap)
+    explicit SymbolicValueFactory(const TypeMap* typeMap) : typeMap(typeMap)
     { CHECK_NULL(typeMap); }
-    AbstractValue* create(const IR::Type* type, bool uninitialized) const;
+    SymbolicValue* create(const IR::Type* type, bool uninitialized) const;
     // True if type has a fixed width, i.e., it does not contain a Varbit.
     bool isFixedWidth(const IR::Type* type) const;
     // If type has a fixed width return width in bits.
@@ -69,7 +72,7 @@ class ValueFactory {
 };
 
 class ValueMap final {
-    std::map<const IR::IDeclaration*, AbstractValue*> map;
+    std::map<const IR::IDeclaration*, SymbolicValue*> map;
  public:
     ValueMap* clone() const {
         auto result = new ValueMap();
@@ -77,9 +80,9 @@ class ValueMap final {
             result->map.emplace(v.first, v.second->clone());
         return result;
     }
-    void set(const IR::IDeclaration* left, AbstractValue* right)
+    void set(const IR::IDeclaration* left, SymbolicValue* right)
     { CHECK_NULL(left); CHECK_NULL(right); map[left] = right; }
-    AbstractValue* get(const IR::IDeclaration* left) const
+    SymbolicValue* get(const IR::IDeclaration* left) const
     { CHECK_NULL(left); return ::get(map, left); }
 
     void dbprint(std::ostream& out) const {
@@ -91,12 +94,25 @@ class ValueMap final {
             first = false;
         }
     }
-    void merge(ValueMap* other) {
+    bool merge(const ValueMap* other) {
+        bool change = false;
         BUG_CHECK(map.size() == other->map.size(), "Merging incompatible maps?");
         for (auto d : map) {
             auto v = other->get(d.first);
-            d.second->merge(v);
+            CHECK_NULL(v);
+            change = change || d.second->merge(v);
         }
+        return change;
+    }
+    bool equals(const ValueMap* other) const {
+        BUG_CHECK(map.size() == other->map.size(), "Incompatible maps compared");
+        for (auto v : map) {
+            auto ov = other->get(v.first);
+            CHECK_NULL(ov);
+            if (!v.second->equals(ov))
+                return false;
+        }
+        return true;
     }
 };
 
@@ -104,13 +120,14 @@ class ExpressionEvaluator : public Inspector {
     const ReferenceMap* refMap;
     TypeMap*            typeMap;  // updated if constant folding happens
     ValueMap*           valueMap;
-    const ValueFactory* factory;
+    const SymbolicValueFactory* factory;
+    bool evaluatingLeftValue = false;
 
-    std::map<const IR::Expression*, AbstractValue*> value;
+    std::map<const IR::Expression*, SymbolicValue*> value;
 
-    AbstractValue* set(const IR::Expression* expression, AbstractValue* v)
+    SymbolicValue* set(const IR::Expression* expression, SymbolicValue* v)
     { value.emplace(expression, v); return v; }
-    AbstractValue* get(const IR::Expression* expression) const {
+    SymbolicValue* get(const IR::Expression* expression) const {
         auto r = ::get(value, expression);
         BUG_CHECK(r != nullptr, "no evaluation for %1%", expression);
         return r;
@@ -130,34 +147,36 @@ class ExpressionEvaluator : public Inspector {
     ExpressionEvaluator(const ReferenceMap* refMap, TypeMap* typeMap, ValueMap* valueMap) :
             refMap(refMap), typeMap(typeMap), valueMap(valueMap) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(valueMap);
-        factory = new ValueFactory(typeMap);
+        factory = new SymbolicValueFactory(typeMap);
     }
 
-    // May mutate the valueMap, when evaluating expression with side-effects
-    AbstractValue* evaluate(const IR::Expression*);
+    // May mutate the valueMap, when evaluating expression with side-effects.
+    // If leftValue is true we are returning a leftValue.
+    SymbolicValue* evaluate(const IR::Expression* expression, bool leftValue);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 // produced when evaluation gives a static error
-class ErrorValue : public AbstractValue {
+class SymbolicError : public SymbolicValue {
  public:
     const IR::Node* errorPosition;
-    explicit ErrorValue(const IR::Node* errorPosition) : errorPosition(errorPosition) {}
+    explicit SymbolicError(const IR::Node* errorPosition) :
+            SymbolicValue(nullptr), errorPosition(errorPosition) {}
     void setAllUnknown() override {}
-    void assign(const AbstractValue*) override {}
+    void assign(const SymbolicValue*) override {}
     bool isScalar() const override { return true; }
-    void merge(const AbstractValue*) override
-    { BUG("%1%: cannot merge errors", this); }
+    bool merge(const SymbolicValue*) override
+    { BUG("%1%: cannot merge errors", this); return false; }
     virtual cstring message() const = 0;
 };
 
-class ExceptionValue : public ErrorValue {
+class SymbolicException : public SymbolicError {
  public:
     const P4::StandardExceptions exc;
-    ExceptionValue(const IR::Node* errorPosition, P4::StandardExceptions exc) :
-            ErrorValue(errorPosition), exc(exc) {}
-    AbstractValue* clone() const override { return new ExceptionValue(errorPosition, exc); }
+    SymbolicException(const IR::Node* errorPosition, P4::StandardExceptions exc) :
+            SymbolicError(errorPosition), exc(exc) {}
+    SymbolicValue* clone() const override { return new SymbolicException(errorPosition, exc); }
     void dbprint(std::ostream& out) const override
     { out << "Exception: " << exc; }
     cstring message() const override {
@@ -165,20 +184,22 @@ class ExceptionValue : public ErrorValue {
         str << exc;
         return str.str();
     }
+    bool equals(const SymbolicValue* other) const override;
 };
 
-class StaticErrorValue : public ErrorValue {
+class SymbolicStaticError : public SymbolicError {
  public:
     const cstring msg;
-    StaticErrorValue(const IR::Node* errorPosition, cstring message) :
-            ErrorValue(errorPosition), msg(message) {}
-    AbstractValue* clone() const override { return new StaticErrorValue(errorPosition, msg); }
+    SymbolicStaticError(const IR::Node* errorPosition, cstring message) :
+            SymbolicError(errorPosition), msg(message) {}
+    SymbolicValue* clone() const override { return new SymbolicStaticError(errorPosition, msg); }
     void dbprint(std::ostream& out) const override
     { out << "Error: " << msg; }
     cstring message() const override { return msg; }
+    bool equals(const SymbolicValue* other) const override;
 };
 
-class ScalarValue : public AbstractValue {
+class ScalarValue : public SymbolicValue {
  public:
     enum class ValueState {
         Uninitialized,
@@ -187,7 +208,8 @@ class ScalarValue : public AbstractValue {
     };
 
  protected:
-    explicit ScalarValue(ScalarValue::ValueState state) : state(state) {}
+    ScalarValue(ScalarValue::ValueState state, const IR::Type* type) :
+            SymbolicValue(type), state(state) {}
 
  public:
     ValueState state;
@@ -215,82 +237,91 @@ class ScalarValue : public AbstractValue {
     }
 };
 
-class VoidValue : public AbstractValue {
-    VoidValue() {}
-    static VoidValue* instance;
+class SymbolicVoid : public SymbolicValue {
+    SymbolicVoid() : SymbolicValue(IR::Type_Void::get()) {}
+    static SymbolicVoid* instance;
  public:
     void dbprint(std::ostream& out) const override { out << "void"; }
     void setAllUnknown() override {}
     bool isScalar() const override { return false; }
-    void assign(const AbstractValue*) override
+    void assign(const SymbolicValue*) override
     { BUG("assign to void"); }
-    static VoidValue* get() { return instance; }
-    AbstractValue* clone() const override { return instance; }
-    void merge(const AbstractValue* other) override
-    { BUG_CHECK(other->is<VoidValue>(), "%1%: expected void", other); }
+    static SymbolicVoid* get() { return instance; }
+    SymbolicValue* clone() const override { return instance; }
+    bool merge(const SymbolicValue* other) override
+    { BUG_CHECK(other->is<SymbolicVoid>(), "%1%: expected void", other); return false; }
+    bool equals(const SymbolicValue* other) const override
+    { return other == instance; }
 };
 
-class AbstractBool final : public ScalarValue {
+class SymbolicBool final : public ScalarValue {
  public:
     bool value;
-    explicit AbstractBool(ScalarValue::ValueState state) : ScalarValue(state), value(false) {}
-    AbstractBool() : ScalarValue(ScalarValue::ValueState::Uninitialized), value(false) {}
-    explicit AbstractBool(const IR::BoolLiteral* constant) :
-            ScalarValue(ScalarValue::ValueState::Constant), value(constant->value) {}
-    AbstractBool(const AbstractBool& other) = default;
-    explicit AbstractBool(bool value) :
-            ScalarValue(ScalarValue::ValueState::Constant), value(value) {}
+    explicit SymbolicBool(ScalarValue::ValueState state) :
+            ScalarValue(state, IR::Type_Boolean::get()), value(false) {}
+    SymbolicBool() : ScalarValue(ScalarValue::ValueState::Uninitialized, IR::Type_Boolean::get()),
+            value(false) {}
+    explicit SymbolicBool(const IR::BoolLiteral* constant) :
+            ScalarValue(ScalarValue::ValueState::Constant, IR::Type_Boolean::get()),
+            value(constant->value) {}
+    SymbolicBool(const SymbolicBool& other) = default;
+    explicit SymbolicBool(bool value) :
+            ScalarValue(ScalarValue::ValueState::Constant, IR::Type_Boolean::get()), value(value) {}
     void dbprint(std::ostream& out) const override {
         ScalarValue::dbprint(out);
         if (!isKnown()) return;
         out << (value ? "true" : "false"); }
-    AbstractValue* clone() const override {
-        auto result = new AbstractBool();
+    SymbolicValue* clone() const override {
+        auto result = new SymbolicBool();
         result->state = state;
         result->value = value;
         return result;
     }
-    void assign(const AbstractValue* other) override;
-    void merge(const AbstractValue* other) override;
+    void assign(const SymbolicValue* other) override;
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
 };
 
-class AbstractInteger final : public ScalarValue {
+class SymbolicInteger final : public ScalarValue {
  public:
     const IR::Constant* constant;
-    AbstractInteger() : ScalarValue(ScalarValue::ValueState::Uninitialized), constant(nullptr) {}
-    explicit AbstractInteger(ScalarValue::ValueState state) : ScalarValue(state) {}
-    explicit AbstractInteger(const IR::Constant* constant) :
-            ScalarValue(ScalarValue::ValueState::Constant), constant(constant)
+    explicit SymbolicInteger(const IR::Type_Bits* type) :
+            ScalarValue(ScalarValue::ValueState::Uninitialized, type), constant(nullptr) {}
+    SymbolicInteger(ScalarValue::ValueState state, const IR::Type_Bits* type) :
+            ScalarValue(state, type) {}
+    explicit SymbolicInteger(const IR::Constant* constant) :
+            ScalarValue(ScalarValue::ValueState::Constant, constant->type), constant(constant)
     { CHECK_NULL(constant); }
-    AbstractInteger(const AbstractInteger& other) = default;
+    SymbolicInteger(const SymbolicInteger& other) = default;
     void dbprint(std::ostream& out) const override {
         ScalarValue::dbprint(out);
         if (!isKnown()) return;
         out << constant->value; }
-    AbstractValue* clone() const override {
-        auto result = new AbstractInteger();
+    SymbolicValue* clone() const override {
+        auto result = new SymbolicInteger(type->to<IR::Type_Bits>());
         result->state = state;
         result->constant = constant;
         return result;
     }
-    void assign(const AbstractValue* other) override;
-    void merge(const AbstractValue* other) override;
+    void assign(const SymbolicValue* other) override;
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
 };
 
-class StructValue : public AbstractValue {
+class SymbolicStruct : public SymbolicValue {
  protected:
-    std::map<cstring, AbstractValue*> fieldValue;
-    explicit StructValue(const IR::Type_StructLike* type) : type(type) { CHECK_NULL(type); }
-
+    std::map<cstring, SymbolicValue*> fieldValue;
+    explicit SymbolicStruct(const IR::Type_StructLike* type) :
+            SymbolicValue(type) { CHECK_NULL(type); }
  public:
-    const IR::Type_StructLike* type;
-    StructValue(const IR::Type_StructLike* type, bool uninitialized, const ValueFactory* factory);
-    virtual AbstractValue* get(const IR::Node*, cstring field) const {
+    SymbolicStruct(const IR::Type_StructLike* type, bool uninitialized,
+                   const SymbolicValueFactory* factory);
+    virtual SymbolicValue* get(const IR::Node*, cstring field) const {
         auto r = ::get(fieldValue, field);
         CHECK_NULL(r);
         return r;
     }
-    void set(cstring field, AbstractValue* value) {
+    void set(cstring field, SymbolicValue* value) {
         CHECK_NULL(value);
         fieldValue[field] = value;
     }
@@ -306,47 +337,51 @@ class StructValue : public AbstractValue {
         out << " }";
     }
     bool isScalar() const override { return false; }
-    AbstractValue* clone() const override;
+    SymbolicValue* clone() const override;
     void setAllUnknown() override;
-    void assign(const AbstractValue* other) override;
-    void merge(const AbstractValue* other) override;
+    void assign(const SymbolicValue* other) override;
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
 };
 
-class HeaderValue : public StructValue {
+class SymbolicHeader : public SymbolicStruct {
  public:
-    explicit HeaderValue(const IR::Type_Header* type) : StructValue(type) {}
-    AbstractBool* valid;
-    HeaderValue(const IR::Type_Header* type, bool uninitialized, const ValueFactory* factory);
+    explicit SymbolicHeader(const IR::Type_Header* type) : SymbolicStruct(type) {}
+    SymbolicBool* valid;
+    SymbolicHeader(const IR::Type_Header* type, bool uninitialized, const SymbolicValueFactory* factory);
     virtual void setValid(bool v);
-    AbstractValue* clone() const override;
-    AbstractValue* get(const IR::Node* node, cstring field) const override;
+    SymbolicValue* clone() const override;
+    SymbolicValue* get(const IR::Node* node, cstring field) const override;
     void setAllUnknown() override;
-    void assign(const AbstractValue* other) override;
+    void assign(const SymbolicValue* other) override;
     void dbprint(std::ostream& out) const override {
         out << "valid=>";
         valid->dbprint(out);
         out << " ";
-        StructValue::dbprint(out);
+        SymbolicStruct::dbprint(out);
     }
-    void merge(const AbstractValue* other) override;
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
 };
 
-class ArrayValue final : public AbstractValue {
-    std::vector<HeaderValue*> values;
+class SymbolicArray final : public SymbolicValue {
+    std::vector<SymbolicHeader*> values;
+    size_t size;
     friend class AnyElement;
-    explicit ArrayValue(const IR::Type_Header* elemType) : elemType(elemType) {}
-
+    explicit SymbolicArray(const IR::Type_Stack* type) :
+            SymbolicValue(type), size(type->getSize()),
+            elemType(type->baseType->to<IR::Type_Header>()) {}
  public:
     const IR::Type_Header* elemType;
-    ArrayValue(const IR::Type_Header* elemType, size_t size,
-               bool uninitialized, const ValueFactory* factory);
-    AbstractValue* get(const IR::Node* node, size_t index) const {
+    SymbolicArray(const IR::Type_Stack* stack, bool uninitialized,
+                  const SymbolicValueFactory* factory);
+    SymbolicValue* get(const IR::Node* node, size_t index) const {
         if (index >= values.size())
-            return new StaticErrorValue(node, "Out of bounds");
+            return new SymbolicStaticError(node, "Out of bounds");
         return values.at(index);
     }
-    void shift(int amount);
-    void set(size_t index, HeaderValue* value) {
+    void shift(int amount);  // negative = shift left
+    void set(size_t index, SymbolicHeader* value) {
         CHECK_NULL(value);
         values[index] = value;
     }
@@ -359,40 +394,45 @@ class ArrayValue final : public AbstractValue {
             first = false;
         }
     }
-    AbstractValue* clone() const override;
-    AbstractValue* next(const IR::Node* node);
-    AbstractValue* last(const IR::Node* node);
+    SymbolicValue* clone() const override;
+    SymbolicValue* next(const IR::Node* node);
+    SymbolicValue* last(const IR::Node* node);
     bool isScalar() const override { return false; }
     void setAllUnknown() override;
-    void assign(const AbstractValue* other) override;
-    void merge(const AbstractValue* other) override;
+    void assign(const SymbolicValue* other) override;
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
 };
 
 // Represents any element from a stack
-class AnyElement final : public HeaderValue {
-    ArrayValue* parent;
+class AnyElement final : public SymbolicHeader {
+    SymbolicArray* parent;
  public:
-    explicit AnyElement(ArrayValue* parent) : HeaderValue(parent->elemType), parent(parent)
-    { CHECK_NULL(parent); valid = new AbstractBool(); }
-    AbstractValue* clone() const override
+    explicit AnyElement(SymbolicArray* parent) :
+            SymbolicHeader(parent->elemType), parent(parent)
+    { CHECK_NULL(parent); valid = new SymbolicBool(); }
+    SymbolicValue* clone() const override
     { auto result = new AnyElement(parent); return result; }
     void setAllUnknown() override
     { parent->setAllUnknown(); }
-    void assign(const AbstractValue*) override
+    void assign(const SymbolicValue*) override
     { parent->setAllUnknown(); }
     void dbprint(std::ostream& out) const override
     { out << "Any element of " << parent; }
     void setValid(bool) override { parent->setAllUnknown(); }
-    void merge(const AbstractValue* other) override;
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
+    SymbolicValue* collapse() const;
 };
 
-class TupleValue final : public AbstractValue {
-    std::vector<AbstractValue*> values;
+class SymbolicTuple final : public SymbolicValue {
+    std::vector<SymbolicValue*> values;
  public:
-    TupleValue() = default;
-    TupleValue(const IR::Type_Tuple* type,
-               bool uninitialized, const ValueFactory* factory);
-    AbstractValue* get(size_t index) const { return values.at(index); }
+    explicit SymbolicTuple(const IR::Type_Tuple* type) :
+            SymbolicValue(type) {}
+    SymbolicTuple(const IR::Type_Tuple* type,
+               bool uninitialized, const SymbolicValueFactory* factory);
+    SymbolicValue* get(size_t index) const { return values.at(index); }
     void dbprint(std::ostream& out) const override {
         bool first = true;
         for (auto f : values) {
@@ -402,70 +442,56 @@ class TupleValue final : public AbstractValue {
             first = false;
         }
     }
-    AbstractValue* clone() const override;
+    SymbolicValue* clone() const override;
     bool isScalar() const override { return false; }
     void setAllUnknown() override;
-    void assign(const AbstractValue*) override
+    void assign(const SymbolicValue*) override
     { BUG("%1%: tuples are read-only", this); }
-    void add(AbstractValue* value)
+    void add(SymbolicValue* value)
     { values.push_back(value); }
-    void merge(const AbstractValue* other) override;
-};
-
-class StateValue final : public AbstractValue {
-    const IR::ParserState* state;
- public:
-    explicit StateValue(const IR::ParserState* state) : state(state) {}
-    AbstractValue* clone() const override
-    { return new StateValue(state); }
-    bool isScalar() const override { return true; }
-    void setAllUnknown() override
-    { BUG("%1%: states are read-only", this); }
-    void assign(const AbstractValue*) override
-    { BUG("%1%: states are read-only", this); }
-    void dbprint(std::ostream& out) const override
-    { out << state->name; }
-    void merge(const AbstractValue*) override
-    { BUG("merging states are read-only"); }
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
 };
 
 // Some extern value of an unknown type
-class ExternValue : public AbstractValue {
- protected:
-    const IR::Type_Extern* type;
+class SymbolicExtern : public SymbolicValue {
  public:
-    explicit ExternValue(const IR::Type_Extern* type) : type(type)
+    explicit SymbolicExtern(const IR::Type_Extern* type) :
+            SymbolicValue(type)
     { CHECK_NULL(type); }
     void dbprint(std::ostream& out) const override
     { out << "instance of " << type; }
-    AbstractValue* clone() const override
-    { return new ExternValue(type); }
+    SymbolicValue* clone() const override
+    { return new SymbolicExtern(type->to<IR::Type_Extern>()); }
     bool isScalar() const override { return false; }
     void setAllUnknown() override
     { BUG("%1%: extern is read-only", this); }
-    void assign(const AbstractValue*) override
+    void assign(const SymbolicValue*) override
     { BUG("%1%: extern is read-only", this); }
-    void merge(const AbstractValue*) override {}
+    bool merge(const SymbolicValue*) override { return false; }
+    bool equals(const SymbolicValue* other) const override;
 };
 
 // Models an extern of type packet_in
-class PacketInValue final : public ExternValue {
+class SymbolicPacketIn final : public SymbolicExtern {
     // Minimum offset in the stream.
     // Extracting to a varbit may advance the stream offset
     // by an unknown quantity.  Varbits are counted as 0
-    // (as per ValueFactory::getWidth).
+    // (as per SymbolicValueFactory::getWidth).
     unsigned minimumStreamOffset;
  public:
-    explicit PacketInValue(const IR::Type_Extern* type) : ExternValue(type) {}
+    explicit SymbolicPacketIn(const IR::Type_Extern* type) : SymbolicExtern(type) {}
     void dbprint(std::ostream& out) const override
     { out << "packet_in; offset =" << minimumStreamOffset; }
-    AbstractValue* clone() const override {
-        auto result = new PacketInValue(type);
+    SymbolicValue* clone() const override {
+        auto result = new SymbolicPacketIn(type->to<IR::Type_Extern>());
         result->minimumStreamOffset = minimumStreamOffset;
         return result;
     }
-    void advance(const IR::Type* type);
-    void merge(const AbstractValue* other) override;
+    void advance(unsigned width)
+    { minimumStreamOffset += width; }
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
 };
 
 }  // namespace P4

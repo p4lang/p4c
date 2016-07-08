@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "core.p4"
 
-#include "simple_model.p4"
+#include "very_simple_model.p4"
 
 // This program processes packets composed of an Ethernet and
 // an IPv4 header, performing forwarding based on the

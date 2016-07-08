@@ -15,5 +15,6 @@ control p() {
     }
 }
 
-package m(p pipe);
+control Simple();
+package m(Simple pipe);
 m(p()) main;

@@ -1,13 +1,13 @@
-../testdata/p4_16_errors/signs.p4(2): warning: a shadows a
+../testdata/p4_16_errors/signs.p4(17): warning: a shadows a
     bit<8> a = 8w0;
            ^
-../testdata/p4_16_errors/signs.p4(1)
+../testdata/p4_16_errors/signs.p4(16)
 action a() {
        ^
-../testdata/p4_16_errors/signs.p4(4): error: -: Cannot operate on values with different signs
+../testdata/p4_16_errors/signs.p4(19): error: -: Cannot operate on values with different signs
     a = a - b;
         ^^^^^
-../testdata/p4_16_errors/signs.p4(4): error: Could not find type of -
+../testdata/p4_16_errors/signs.p4(19): error: Could not find type of -
     a = a - b;
         ^^^^^
 error: 2 errors encountered, aborting compilation

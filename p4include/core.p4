@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,18 +27,21 @@ struct Version {
 const Version P4_VERSION = { 8w1, 8w2 };
 
 error {
-    NoError,          // no error
-    PacketTooShort,   // not enough bits in packet for extract
-    NoMatch,          // match expression has no matches
-    EmptyStack,       // reference to .last in an empty header stack
-    FullStack,        // reference to .next in a full header stack
-    OverwritingHeader // one header is extracted twice
+    NoError,           // no error
+    PacketTooShort,    // not enough bits in packet for extract
+    NoMatch,           // match expression has no matches
+    EmptyStack,        // reference to .last in an empty header stack
+    FullStack,         // reference to .next in a full header stack
+    OverwritingHeader, // one header is extracted twice
+    HeaderTooShort     // extracting too many bits in a varbit field
 }
 
 extern packet_in {
+    // T must be a fixed-size header type
     void extract<T>(out T hdr);
-    // T must be a varbit type.
-    void extract<T>(out T variableSizeHeader, in bit<32> sizeInBits);
+    // T must be a header containing exactly 1 varbit field
+    void extract<T>(out T variableSizeHeader,
+                    in bit<32> variableFieldSizeInBits);
     // does not advance the cursor
     T lookahead<T>();
     // skip this many bits from packet

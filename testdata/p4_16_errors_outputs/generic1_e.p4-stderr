@@ -1,16 +1,16 @@
-../testdata/p4_16_errors/generic1_e.p4(6): error: Type parameters needed for x
+../testdata/p4_16_errors/generic1_e.p4(21): error: Type parameters needed for x
 control p1(in If x)
                  ^
-../testdata/p4_16_errors/generic1_e.p4(11): error: If<...>: Type If has 1 type parameter(s), but it is specialized with 2
+../testdata/p4_16_errors/generic1_e.p4(26): error: If<...>: Type If has 1 type parameter(s), but it is specialized with 2
 control p2(in If<int<32>, int<32>> x)
               ^^^^^^^^^^^^^^^^^^^^
-../testdata/p4_16_errors/generic1_e.p4(1)
+../testdata/p4_16_errors/generic1_e.p4(16)
 extern If<T>
        ^^
-../testdata/p4_16_errors/generic1_e.p4(21): error: h<...>: Type header h is not generic and thus it cannot be specialized using type arguments
+../testdata/p4_16_errors/generic1_e.p4(36): error: h<...>: Type header h is not generic and thus it cannot be specialized using type arguments
         h<bit> x;
         ^^^^^^
-../testdata/p4_16_errors/generic1_e.p4(16)
+../testdata/p4_16_errors/generic1_e.p4(31)
 header h {}
        ^
 error: 3 errors encountered, aborting compilation

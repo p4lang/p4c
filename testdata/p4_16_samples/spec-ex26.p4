@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,26 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "simple_model.p4"
-    
+#include "very_simple_model.p4"
+
 struct Parsed_packet {}
 
 typedef bit<32>  IPv4Address;
-    
+
 extern tbl {}
 
 control Pipe(inout Parsed_packet headers,
              in error parseError, // parser error
              in InControl inCtrl, // input port
              out OutControl outCtrl)
-{    
+{
     action Drop_action(out PortId_t port)
     {
-        port = DROP_PORT; 
+        port = DROP_PORT;
     }
 
     action drop() {}
-    
+
     table IPv4_match(in IPv4Address a)
     {
         actions = {
@@ -43,7 +43,7 @@ control Pipe(inout Parsed_packet headers,
         implementation = tbl();
         default_action = drop;
     }
-        
+
     apply {
         if (parseError != NoError)
         {
@@ -51,7 +51,7 @@ control Pipe(inout Parsed_packet headers,
             Drop_action(outCtrl.outputPort);
             return;
         }
-        
+
         IPv4Address nextHop; // temporary variable
         if (!IPv4_match.apply(nextHop).hit)
             return;

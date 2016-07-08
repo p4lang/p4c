@@ -1,4 +1,4 @@
-../testdata/p4_16_errors/expression_e.p4(6):syntax error, unexpected DONTCARE, expecting NAMESPACE
+../testdata/p4_16_errors/expression_e.p4(21):syntax error, unexpected DONTCARE, expecting NAMESPACE
         b = 32w0 & _
                    ^
 error: 1 errors encountered, aborting compilation

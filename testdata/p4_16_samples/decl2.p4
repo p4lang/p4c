@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ control p()
     action b(in bit<1> x, out bit<1> y)
     {
         bit<1> z;
-        
+
         {
             bit<1> x_0;
             x_0 = x;
@@ -34,6 +34,7 @@ control p()
     }
 }
 
-package m(p pipe);
+control simple();
+package m(simple pipe);
 
 .m(.p()) main;

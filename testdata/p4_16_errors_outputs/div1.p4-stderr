@@ -1,25 +1,25 @@
-../testdata/p4_16_errors/div1.p4(3): error: /: not defined on negative numbers
+../testdata/p4_16_errors/div1.p4(18): error: /: not defined on negative numbers
     a = a / -1;
         ^^^^^^
-../testdata/p4_16_errors/div1.p4(3): error: Could not find type of /
+../testdata/p4_16_errors/div1.p4(18): error: Could not find type of /
     a = a / -1;
         ^^^^^^
-../testdata/p4_16_errors/div1.p4(4): error: /: not defined on negative numbers
+../testdata/p4_16_errors/div1.p4(19): error: /: not defined on negative numbers
     a = -5 / a;
         ^^^^^^
-../testdata/p4_16_errors/div1.p4(4): error: Could not find type of /
+../testdata/p4_16_errors/div1.p4(19): error: Could not find type of /
     a = -5 / a;
         ^^^^^^
-../testdata/p4_16_errors/div1.p4(5): error: %: not defined on negative numbers
+../testdata/p4_16_errors/div1.p4(20): error: %: not defined on negative numbers
     a = a % -1;
         ^^^^^^
-../testdata/p4_16_errors/div1.p4(5): error: Could not find type of %
+../testdata/p4_16_errors/div1.p4(20): error: Could not find type of %
     a = a % -1;
         ^^^^^^
-../testdata/p4_16_errors/div1.p4(6): error: %: not defined on negative numbers
+../testdata/p4_16_errors/div1.p4(21): error: %: not defined on negative numbers
     a = -5 % a;
         ^^^^^^
-../testdata/p4_16_errors/div1.p4(6): error: Could not find type of %
+../testdata/p4_16_errors/div1.p4(21): error: Could not find type of %
     a = -5 % a;
         ^^^^^^
 error: 8 errors encountered, aborting compilation

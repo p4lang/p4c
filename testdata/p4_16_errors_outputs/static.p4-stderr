@@ -1,0 +1,5 @@
+../testdata/p4_16_errors/static.p4(26): error: /: Division by zero
+        x = x / (x - 2);
+            ^^^^^^^^^^^
+error: 1 errors encountered, aborting compilation
+error: 2 errors encountered, aborting compilation

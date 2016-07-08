@@ -1,7 +1,7 @@
-../testdata/p4_16_errors/call1_e.p4(5): error: s: cannot allocate objects of type struct S
+../testdata/p4_16_errors/call1_e.p4(20): error: s: cannot allocate objects of type struct S
     S() s;
         ^
-../testdata/p4_16_errors/call1_e.p4(1)
+../testdata/p4_16_errors/call1_e.p4(16)
 struct S { }
        ^
 error: 1 errors encountered, aborting compilation

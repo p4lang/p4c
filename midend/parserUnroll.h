@@ -30,18 +30,24 @@ namespace P4 {
 struct ParserStateInfo {
     const IR::P4Parser*    parser;
     const IR::ParserState* state;  // original state this is produced from
+    const ParserStateInfo* predecessor;  // how we got here in the symbolic evaluation
     cstring                name;  // new state name
     ValueMap*              before;
     ValueMap*              after;
     std::map<cstring, cstring> successors;  // for each successor state the new successor
 
-    ParserStateInfo(cstring name, const IR::P4Parser* parser, const IR::ParserState* state) :
-            parser(parser), state(state), name(name), before(nullptr), after(nullptr) {}
-    void mergeValues(ValueMap* b) {
-        if (before == nullptr)
+    ParserStateInfo(cstring name, const IR::P4Parser* parser, const IR::ParserState* state,
+                    const ParserStateInfo* predecessor) :
+            parser(parser), state(state), predecessor(predecessor),
+            name(name), before(nullptr), after(nullptr) {}
+    // return true if there are changes in the values
+    bool mergeValues(ValueMap* b) {
+        if (before == nullptr) {
             before = b;
-        else
-            before->merge(b);
+            return true;
+        } else {
+            return before->merge(b);
+        }
     }
 };
 
@@ -104,19 +110,14 @@ class DiscoverParsers : public Inspector {
     Parsers*            parsers;
  public:
     DiscoverParsers(Parsers* parsers) :
-            current(nullptr), parsers(parsers)
-    { CHECK_NULL(parsers); }
-    bool preorder(const IR::Type*) override { return false; }  // prune
-    bool preorder(const IR::P4Parser* parser) override
-    { current = new ParserStructure(parser); return true; }  // do not prune
-    void postorder(const IR::P4Parser* parser) override
-    { parsers->parsers.emplace(parser, current); }
-    bool preorder(const IR::ParserState* state) override {
-        if (state->name.name == IR::ParserState::start)
-            current->start = state;
-        current->addState(state);
-        return true;
+            current(nullptr), parsers(parsers) {
+        CHECK_NULL(parsers); setName("DiscoverParsers");
+        visitDagOnce = false;
     }
+    bool preorder(const IR::Type*) override { return false; }  // prune
+    bool preorder(const IR::P4Parser* parser) override;
+    void postorder(const IR::P4Parser* parser) override;
+    bool preorder(const IR::ParserState* state) override;
 };
 
 // Performs symbolic evaluation over each parser.
@@ -127,9 +128,12 @@ class EvaluateParsers : public Inspector {
     Parsers*      parsers;
     bool          unroll;  // if true unroll the graph into a tree
  public:
-    EvaluateParsers(ReferenceMap* refMap, TypeMap* typeMap, Parsers* parsers) :
-            refMap(refMap), typeMap(typeMap), parsers(parsers), unroll(false)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(parsers); setName("ParserEvaluator"); }
+    EvaluateParsers(ReferenceMap* refMap, TypeMap* typeMap, Parsers* parsers, bool unroll) :
+            refMap(refMap), typeMap(typeMap), parsers(parsers), unroll(unroll) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(parsers);
+        setName("ParserEvaluator");
+        visitDagOnce = false;
+    }
     void postorder(const IR::P4Parser* parser) override;
     bool preorder(const IR::P4Parser*) override { return true; }  // needed to override the next
     bool preorder(const IR::Type*) override { return false; }
@@ -141,7 +145,7 @@ class ParserUnroll : public PassManager {
     ParserUnroll(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
         passes.push_back(new TypeChecking(refMap, typeMap, false, isv1));
         passes.push_back(new DiscoverParsers(&parsers));
-        passes.push_back(new EvaluateParsers(refMap, typeMap, &parsers));
+        passes.push_back(new EvaluateParsers(refMap, typeMap, &parsers, false));
         setName("ParserUnroll");
     }
 };

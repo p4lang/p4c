@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #include "core.p4"
-#include "simple_model.p4"
+#include "very_simple_model.p4"
 
 header ARPA_hdr {
     bit<48> src;
@@ -34,8 +34,8 @@ parser LJparse(packet_in b, out Parsed_rep p) {
     }
 }
 
-control LjPipe(inout Parsed_rep p, 
-        in error parseError, 
+control LjPipe(inout Parsed_rep p,
+        in error parseError,
         in InControl inCtrl,
         out OutControl outCtrl)
 {
@@ -57,16 +57,16 @@ control LjPipe(inout Parsed_rep p,
     table Enet_lkup()
     {
         key = { p.arpa_pak.dest : exact; }
-    
+
         actions = {
             Drop_action(outCtrl.outputPort);
             Drop_1;
             Forward;
-        }            
+        }
 
         default_action = Drop_1;
     }
-    
+
     apply {
         if (p.arpa_pak.isValid())
             Enet_lkup.apply();
@@ -81,15 +81,3 @@ control LJdeparse(inout Parsed_rep p, packet_out b)
 }
 
 Simple(LJparse(), LjPipe(), LJdeparse()) main;
-
-
-
-
-
-
-
-
-
-
-
-

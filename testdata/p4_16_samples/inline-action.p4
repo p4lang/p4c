@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ limitations under the License.
 control p(inout bit bt) {
     action a(inout bit y0)
     { y0 = y0 | 1w1; }
-    
+
     action b() {
         a(bt);
         a(bt);
@@ -27,12 +27,13 @@ control p(inout bit bt) {
         actions = { b; }
         default_action = b;
     }
-    
+
     apply {
         t.apply();
     }
 }
 
-package m(p pipe);
+control simple<T>(inout T arg);
+package m<T>(simple<T> pipe);
 
 m(p()) main;

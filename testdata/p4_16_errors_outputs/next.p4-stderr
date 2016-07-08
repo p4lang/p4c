@@ -1,4 +1,4 @@
-../testdata/p4_16_errors/next.p4(9): error: stack.last: 'last' and 'next' for stacks cannot be used in a control
+../testdata/p4_16_errors/next.p4(24): error: stack.last: 'last' and 'next' for stacks cannot be used in a control
         stack.last = { 10 };
         ^^^^^^^^^^
 error: 1 errors encountered, aborting compilation

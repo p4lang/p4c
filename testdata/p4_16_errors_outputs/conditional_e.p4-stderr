@@ -1,4 +1,4 @@
-../testdata/p4_16_errors/conditional_e.p4(6): error: Condition of IfStatement does not evaluate to a bool but bit<1>
+../testdata/p4_16_errors/conditional_e.p4(21): error: Condition of IfStatement does not evaluate to a bool but bit<1>
         if (b) ; else ;
         ^^
 error: 1 errors encountered, aborting compilation

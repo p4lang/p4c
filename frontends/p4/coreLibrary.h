@@ -27,7 +27,8 @@ enum class StandardExceptions {
     NoMatch,
     EmptyStack,
     FullStack,
-    OverwritingHeader
+    OverwritingHeader,
+    HeaderTooShort
 };
 }  // namespace P4
 
@@ -50,6 +51,9 @@ inline std::ostream& operator<<(std::ostream &out, P4::StandardExceptions e) {
             break;
         case P4::StandardExceptions::OverwritingHeader:
             out << "OverwritingHeader";
+            break;
+        case P4::StandardExceptions::HeaderTooShort:
+            out << "HeaderTooShort";
             break;
         default:
             BUG("Unhandled case");
@@ -98,7 +102,8 @@ class P4CoreLibrary : public ::Model::Model {
             packetTooShort(StandardExceptions::PacketTooShort),
             noMatch(StandardExceptions::NoMatch), emptyStack(StandardExceptions::EmptyStack),
             fullStack(StandardExceptions::FullStack),
-            overwritingHeader(StandardExceptions::OverwritingHeader) {}
+            overwritingHeader(StandardExceptions::OverwritingHeader),
+            headerTooShort(StandardExceptions::HeaderTooShort) {}
 
  public:
     static P4CoreLibrary instance;
@@ -117,6 +122,7 @@ class P4CoreLibrary : public ::Model::Model {
     P4Exception_Model emptyStack;
     P4Exception_Model fullStack;
     P4Exception_Model overwritingHeader;
+    P4Exception_Model headerTooShort;
 };
 
 }  // namespace P4

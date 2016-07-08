@@ -121,7 +121,7 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
 
 void TypeInference::end_apply(const IR::Node* node) {
     if (readOnly && !(*node == *initialNode))
-        BUG("%1%: typechecker mutated node", node);
+        BUG("%1%: typechecker mutated node %2%", node, initialNode);
     typeMap->updateMap(node);
     if (node->is<IR::P4Program>())
         LOG2("Typemap: " << std::endl << typeMap);
@@ -862,6 +862,11 @@ const IR::Node* TypeInference::postorder(IR::Type_ArchBlock* decl) {
 const IR::Node* TypeInference::postorder(IR::Type_Package* decl) {
     if (done()) return decl;
     auto canon = canonicalize(getOriginal<IR::Type_Package>());
+    for (auto p : *decl->getConstructorParameters()->parameters) {
+        auto ptype = getType(p);
+        if (ptype->is<IR::P4Parser>() || ptype->is<IR::P4Control>())
+            ::error("%1%: Invalid package parameter type", p);
+    }
     setType(getOriginal(), canon);
     setType(decl, canon);
     return decl;
@@ -1380,6 +1385,7 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         setType(expression, resultType);
     }
     setType(getOriginal(), resultType);
+    setType(expression, resultType);
     if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());

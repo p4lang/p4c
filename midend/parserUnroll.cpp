@@ -2,6 +2,26 @@
 
 namespace P4 {
 
+bool DiscoverParsers::preorder(const IR::ParserState* state) {
+    LOG1("Found state " << state << " of " << current->parser);
+    if (state->name.name == IR::ParserState::start)
+        current->start = state;
+    current->addState(state);
+    return false;
+}
+
+void DiscoverParsers::postorder(const IR::P4Parser* parser) {
+    parsers->parsers.emplace(parser, current);
+    CHECK_NULL(current->start);
+    current = nullptr;
+}
+
+bool DiscoverParsers::preorder(const IR::P4Parser* parser) {
+    LOG1("Scanning " << parser);
+    current = new ParserStructure(parser);
+    return true;  // do not prune
+}
+
 void EvaluateParsers::postorder(const IR::P4Parser* parser) {
     LOG1("Evaluating " << parser);
     auto structure = ::get(parsers->parsers, getOriginal<IR::P4Parser>());
@@ -16,7 +36,7 @@ class ParserSymbolicInterpreter {
     const IR::P4Parser* parser;
     ReferenceMap*       refMap;
     TypeMap*            typeMap;
-    ValueFactory*       factory;
+    SymbolicValueFactory* factory;
     ParserInfo*         synthesizedParser;  // output produced
 
     ValueMap* initializeVariables() {
@@ -31,61 +51,84 @@ class ParserSymbolicInterpreter {
         for (auto d : *parser->stateful) {
             auto type = typeMap->getType(d);
             auto value = factory->create(type, true);
-            result->set(d, value);
+            if (value != nullptr)
+                result->set(d, value);
         }
         return result;
     }
 
-    ParserStateInfo* getState(cstring state, bool unroll) {
+    ParserStateInfo* getState(const ParserStateInfo* predecessor, cstring state, bool unroll) {
         if (state == IR::ParserState::accept.name ||
             state == IR::ParserState::reject.name)
             return nullptr;
         auto s = structure->get(state);
         if (unroll) {
-            auto pi = new ParserStateInfo(state, parser, s);
+            auto pi = new ParserStateInfo(state, parser, s, predecessor);
             synthesizedParser->add(pi);
             return pi;
         } else {
             auto pi = synthesizedParser->getSingle(state);
             if (pi == nullptr) {
                 cstring newName = refMap->newName(state);
-                pi = new ParserStateInfo(newName, parser, s);
+                pi = new ParserStateInfo(newName, parser, s, predecessor);
                 synthesizedParser->add(pi);
             }
             return pi;
         }
     }
 
-    bool reportIfError(AbstractValue* value) const {
-        if (!value->is<ErrorValue>())
+    static void stateChain(const ParserStateInfo* state, std::stringstream& stream) {
+        if (state->predecessor != nullptr) {
+            stateChain(state->predecessor, stream);
+            stream << ", ";
+        }
+        stream << state->state->externalName();
+    }
+
+    static cstring stateChain(const ParserStateInfo* state) {
+        CHECK_NULL(state);
+        std::stringstream result;
+        result << "Parser " << state->parser->externalName() << " state chain: ";
+        stateChain(state, result);
+        return result.str();
+    }
+
+    bool reportIfError(const ParserStateInfo* state, SymbolicValue* value, bool unroll) const {
+        if (!unroll && value->is<SymbolicException>()) {
+            auto exc = value->to<SymbolicException>();
+            ::warning("%1%: error %2% will be triggered\n%3%",
+                      exc->errorPosition, exc->message(), stateChain(state));
+        }
+        if (!value->is<SymbolicStaticError>())
             return true;
-        auto ev = value->to<ErrorValue>();
-        ::error("%1%: %2%", ev->errorPosition, ev->message());
+        auto ev = value->to<SymbolicStaticError>();
+        ::error("%1%: %2%\n%3%", ev->errorPosition, ev->message(), stateChain(state));
         return false;
     }
 
     // Executes symbolically the specified statement.
     // Returns 'true' if execution completes successfully,
     // and 'false' if an error occurred.
-    bool executeStatement(const IR::StatOrDecl* sord, ValueMap* valueMap) const {
+    bool executeStatement(const ParserStateInfo* state, const IR::StatOrDecl* sord,
+                          ValueMap* valueMap, bool unroll) const {
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
 
         bool success = true;
         if (sord->is<IR::AssignmentStatement>()) {
             auto ass = sord->to<IR::AssignmentStatement>();
-            auto left = ev.evaluate(ass->left);
-            success = reportIfError(left);
+            auto left = ev.evaluate(ass->left, true);
+            success = reportIfError(state, left, unroll);
             if (success) {
-                auto right = ev.evaluate(ass->right);
-                success = reportIfError(right);
+                auto right = ev.evaluate(ass->right, false);
+                success = reportIfError(state, right, unroll);
                 if (success)
                     left->assign(right);
             }
         } else if (sord->is<IR::MethodCallStatement>()) {
             // can have side-effects
             auto mc = sord->to<IR::MethodCallStatement>();
-            auto e = ev.evaluate(mc->methodCall);
-            success = reportIfError(e);
+            auto e = ev.evaluate(mc->methodCall, false);
+            success = reportIfError(state, e, unroll);
         } else {
             BUG("%1%: unexpected declaration or statement", sord);
         }
@@ -93,7 +136,7 @@ class ParserSymbolicInterpreter {
         return success;
     }
 
-    std::vector<ParserStateInfo*>* evaluateSelect(ParserStateInfo* state, bool unroll) {
+    std::vector<ParserStateInfo*>* evaluateSelect(const ParserStateInfo* state, bool unroll) {
         // TODO: update next state map
         auto select = state->state->selectExpression;
         if (select == nullptr)
@@ -103,7 +146,7 @@ class ParserSymbolicInterpreter {
             auto path = select->to<IR::PathExpression>()->path;
             auto next = refMap->getDeclaration(path);
             BUG_CHECK(next->is<IR::ParserState>(), "%1%: expected a state", path);
-            auto nextInfo = getState(next->getName(), unroll);
+            auto nextInfo = getState(state, next->getName(), unroll);
             if (nextInfo != nullptr)
                 result->push_back(nextInfo);
         } else if (select->is<IR::SelectExpression>()) {
@@ -113,7 +156,7 @@ class ParserSymbolicInterpreter {
                 auto path = c->state->path;
                 auto next = refMap->getDeclaration(path);
                 BUG_CHECK(next->is<IR::ParserState>(), "%1%: expected a state", path);
-                auto nextInfo = getState(next->getName(), unroll);
+                auto nextInfo = getState(state, next->getName(), unroll);
                 if (nextInfo != nullptr)
                     result->push_back(nextInfo);
             }
@@ -127,7 +170,7 @@ class ParserSymbolicInterpreter {
         LOG1("Analyzing " << state->state);
         auto valueMap = state->before->clone();
         for (auto s : *state->state->components) {
-            bool success = executeStatement(s, valueMap);
+            bool success = executeStatement(state, s, valueMap, unroll);
             if (!success)
                 return nullptr;
         }
@@ -148,14 +191,14 @@ class ParserSymbolicInterpreter {
                               TypeMap* typeMap)
             : structure(structure), refMap(refMap), typeMap(typeMap), synthesizedParser(nullptr) {
         CHECK_NULL(structure); CHECK_NULL(refMap); CHECK_NULL(typeMap);
-        factory = new ValueFactory(typeMap);
+        factory = new SymbolicValueFactory(typeMap);
         parser = structure->parser;
     }
 
     ParserInfo* run(bool unroll) {
         synthesizedParser = new ParserInfo();
         auto initMap = initializeVariables();
-        auto startInfo = getState(structure->start->name.name, unroll);
+        auto startInfo = getState(nullptr, structure->start->name.name, unroll);
         StateInput si(startInfo, initMap);
         std::vector<StateInput> toRun;
         toRun.push_back(si);
@@ -163,10 +206,17 @@ class ParserSymbolicInterpreter {
         while (!toRun.empty()) {
             auto work = toRun.back();
             toRun.pop_back();
-            work.state->mergeValues(work.values);
-            auto nextStates = evaluate(work.state, unroll);
-            if (nextStates == nullptr)
+            LOG1("Symbolic evaluation of " << work.state->state);
+            bool changes = work.state->mergeValues(work.values);
+            if (!changes) {
+                LOG1("No changes");
                 continue;
+            }
+            auto nextStates = evaluate(work.state, unroll);
+            if (nextStates == nullptr) {
+                LOG1("No next states");
+                continue;
+            }
             for (auto a : *nextStates) {
                 StateInput si(a, work.state->after->clone());
                 toRun.push_back(si);

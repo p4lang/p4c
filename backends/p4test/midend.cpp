@@ -43,6 +43,7 @@ namespace P4Test {
 MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
+    setName("MidEnd");
 
     // TODO: break down expression into simple parts
     // TODO: def-use analysis
@@ -84,6 +85,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::SpecializeAll(&refMap, &typeMap, isv1),
+        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         // TODO: simplify statements and expressions.
         // This is required for the correctness of some of the following passes.
         // Parser loop unrolling

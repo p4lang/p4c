@@ -1,13 +1,13 @@
-../testdata/p4_16_errors/action-bind2.p4(6): error: a: parameter b must be bound
+../testdata/p4_16_errors/action-bind2.p4(21): error: a: parameter b must be bound
         actions = { a; }
                     ^
-../testdata/p4_16_errors/action-bind2.p4(2)
+../testdata/p4_16_errors/action-bind2.p4(17)
     action a(inout bit<32> b, bit<32> d) {
              ^^^^^^^^^^^^^^^
-../testdata/p4_16_errors/action-bind2.p4(7): error: 0: must be a left-value
+../testdata/p4_16_errors/action-bind2.p4(22): error: 0: must be a left-value
         default_action = a(0);
                            ^
-../testdata/p4_16_errors/action-bind2.p4(7): error: Action for ExpressionValue has some unbound arguments
+../testdata/p4_16_errors/action-bind2.p4(22): error: Action for ExpressionValue has some unbound arguments
         default_action = a(0);
                          ^^^^
 error: 3 errors encountered, aborting compilation

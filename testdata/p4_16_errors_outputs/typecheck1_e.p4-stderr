@@ -1,31 +1,31 @@
-../testdata/p4_16_errors/typecheck1_e.p4(12): error: Cannot apply ~ to value d of type bool
+../testdata/p4_16_errors/typecheck1_e.p4(27): error: Cannot apply ~ to value d of type bool
         d = ~d;
              ^
-../testdata/p4_16_errors/typecheck1_e.p4(12): error: Could not find type of ~
+../testdata/p4_16_errors/typecheck1_e.p4(27): error: Could not find type of ~
         d = ~d;
             ^^
-../testdata/p4_16_errors/typecheck1_e.p4(17): error: +: cannot be applied to d of type bool
+../testdata/p4_16_errors/typecheck1_e.p4(32): error: +: cannot be applied to d of type bool
         d = d + d;
             ^
-../testdata/p4_16_errors/typecheck1_e.p4(17): error: Could not find type of +
+../testdata/p4_16_errors/typecheck1_e.p4(32): error: Could not find type of +
         d = d + d;
             ^^^^^
-../testdata/p4_16_errors/typecheck1_e.p4(18): error: -: cannot be applied to d of type bool
+../testdata/p4_16_errors/typecheck1_e.p4(33): error: -: cannot be applied to d of type bool
         d = d - d;
             ^
-../testdata/p4_16_errors/typecheck1_e.p4(18): error: Could not find type of -
+../testdata/p4_16_errors/typecheck1_e.p4(33): error: Could not find type of -
         d = d - d;
             ^^^^^
-../testdata/p4_16_errors/typecheck1_e.p4(20): error: Cannot apply ! to value a of type bit<32>
+../testdata/p4_16_errors/typecheck1_e.p4(35): error: Cannot apply ! to value a of type bit<32>
         a = !a;
              ^
-../testdata/p4_16_errors/typecheck1_e.p4(20): error: Could not find type of !
+../testdata/p4_16_errors/typecheck1_e.p4(35): error: Could not find type of !
         a = !a;
             ^^
-../testdata/p4_16_errors/typecheck1_e.p4(21): error: Cannot apply ! to value b of type int<32>
+../testdata/p4_16_errors/typecheck1_e.p4(36): error: Cannot apply ! to value b of type int<32>
         b = !b;
              ^
-../testdata/p4_16_errors/typecheck1_e.p4(21): error: Could not find type of !
+../testdata/p4_16_errors/typecheck1_e.p4(36): error: Could not find type of !
         b = !b;
             ^^
 error: 10 errors encountered, aborting compilation

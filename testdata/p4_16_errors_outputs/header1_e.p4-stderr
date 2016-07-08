@@ -1,4 +1,4 @@
-../testdata/p4_16_errors/header1_e.p4(3):syntax error, unexpected DONTCARE, expecting NAMESPACE
+../testdata/p4_16_errors/header1_e.p4(18):syntax error, unexpected DONTCARE, expecting NAMESPACE
     _
     ^
 error: 1 errors encountered, aborting compilation
