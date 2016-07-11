@@ -16,10 +16,7 @@ limitations under the License.
 
 /* P4-16 declaration of the P4 v1.0 switch model */
 
-#ifndef _V1_MODEL_P4_
-#define _V1_MODEL_P4_
-
-#include "core.p4"
+#import <core.p4>
 
 const Version v1modelVersion = { 8w0, 8w1 };
 
@@ -138,5 +135,3 @@ package V1Switch<H, M>(Parser<H, M> p,
                        ComputeCkecksum<H, M> ck,
                        Deparser<H> dep
                        );
-
-#endif  /* _V1_MODEL_P4_ */

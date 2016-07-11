@@ -14,12 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_P4_PARSE_H_
-#define _P4_P4_PARSE_H_
+#ifndef _FRONTENDS_COMMON_PREPROCESSOR_H_
+#define _FRONTENDS_COMMON_PREPROCESSOR_H_
+
+#include <stdio.h>
+#include <unordered_set>
+#include <vector>
 
 class cstring;
-namespace IR { class P4Program; }
 
-const IR::P4Program *parse_P4_16_file(const char *name, cstring in);
+// Preprocess a P4 source file using the native P4-16 preprocessor
+cstring preprocessP4File(FILE* input, cstring filename,
+                         const std::unordered_set<cstring>& definitions,
+                         const std::vector<cstring>& importPaths);
 
-#endif /* _P4_P4_PARSE_H_ */
+#endif /* _FRONTENDS_COMMON_PREPROCESSOR_H_ */

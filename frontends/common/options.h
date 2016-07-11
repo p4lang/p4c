@@ -69,8 +69,10 @@ class CompilerOptions : public Util::Options {
     // Expect that the only remaining argument is the input file.
     void setInputFile();
 
-    // Returns the output of the preprocessor.
-    FILE* preprocess();
+    // Returns the output of the external C preprocessor.
+    FILE* preprocessExternal();
+    // Returns the output of the native P4-16 preprocessor.
+    cstring preprocessNative();
     // Closes the input stream returned by preprocess.
     void closeInput(FILE* input) const;
 

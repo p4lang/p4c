@@ -16,9 +16,6 @@ limitations under the License.
 
 /* This is the P4-16 core library, which declares some built-in P4 constructs using P4 */
 
-#ifndef _CORE_P4_
-#define _CORE_P4_
-
 struct Version {
     bit<8> major;
     bit<8> minor;
@@ -60,5 +57,3 @@ match_kind {
     ternary,
     lpm
 }
-
-#endif  /* _CORE_P4_ */

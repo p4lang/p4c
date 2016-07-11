@@ -14,10 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _EBPF_MODEL_P4_
-#define _EBPF_MODEL_P4_
-
-#include "core.p4"
+#import <core.p4>
 
 const Version ebpf_version = { 8w0, 8w1 };
 
@@ -45,5 +42,3 @@ control filter<H>(inout H headers, out bool accept);
 
 package ebpfFilter<H>(parse<H> prs,
                       filter<H> filt);
-
-#endif

@@ -406,7 +406,7 @@ class ErrorReporter final {
         return warningCount;
     }
 
-    // Special error functions to be called from the parser only.
+    // Special error functions to be called from the parser and preprocessor only.
     // In the parser the IR objects don't yet have position information.
     // Use printf-format style arguments.
     // Use current position in the input file for error location.
@@ -414,6 +414,13 @@ class ErrorReporter final {
         va_list args;
         va_start(args, fmt);
         parser_error(fmt, args);
+        va_end(args);
+    }
+
+    void preprocessor_error(const Util::SourceFileLine& fileError, const char *fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        preprocessor_error(fileError, fmt, args);
         va_end(args);
     }
 
@@ -431,6 +438,13 @@ class ErrorReporter final {
         *outputstream << fileError.toString() << ":" << msg << std::endl;
         cstring sourceFragment = Util::InputSources::instance->getSourceFragment(position);
         emit_message(sourceFragment);
+    }
+
+    void preprocessor_error(const Util::SourceFileLine& fileError, const char* fmt, va_list args) {
+        errorCount++;
+
+        cstring msg = Util::vprintf_format(fmt, args);
+        *outputstream << fileError.toString() << ":" << msg << std::endl;
     }
 
  private:

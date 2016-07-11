@@ -101,7 +101,7 @@ def compare_files(options, produced, expected):
 
     # unfortunately difflib has no option to compare ignoring whitespace,
     # so we invoke diff for this purpose
-    cmd = "diff -B -q -w -I \"#include\" " + produced + " " + expected
+    cmd = "diff -B -q -w -I \"#import\" -I \"#include\" " + produced + " " + expected
     exitcode = subprocess.call(cmd, shell=True);
     if exitcode == 0:
         return SUCCESS
@@ -114,7 +114,7 @@ def compare_files(options, produced, expected):
     ignoreNextMarker = False
     message = ""
     for l in diff:
-        if l.startswith("- #include") or l.startswith("+ #include"):
+        if l.startswith("- #import") or l.startswith("+ #import") or l.startswith("- #include") or l.startswith("+ #include"):
             # These can differ because the paths change
             ignoreNextMarker = True
             continue

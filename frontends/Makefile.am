@@ -83,7 +83,9 @@ common_frontend_SOURCES = \
 	frontends/common/parseInput.h \
 	frontends/common/parseInput.cpp \
 	frontends/common/constantParsing.h \
-	frontends/common/constantParsing.cpp
+	frontends/common/constantParsing.cpp \
+	frontends/common/preprocessor.h \
+	frontends/common/preprocessor.cpp
 
 v1_frontend_SOURCES = \
 	frontends/p4-14/intrinsic.cpp \

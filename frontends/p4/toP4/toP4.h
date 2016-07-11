@@ -22,7 +22,7 @@ limitations under the License.
 #include "lib/sourceCodeBuilder.h"
 
 namespace P4 {
-    // conversion from P4 v1.2 IR back to P4 source
+    // conversion from P4-16 IR back to P4 source
 
 class ToP4 : public Inspector {
     int expressionPrecedence;  // precedence of current IR::Operation

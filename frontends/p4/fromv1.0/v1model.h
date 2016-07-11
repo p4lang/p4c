@@ -24,9 +24,9 @@ limitations under the License.
 
 namespace P4V1 {
 
-// This should be kept in sync with p4includes/v1model.p4
+// This should be kept in sync with p4include/v1model.p4
 // In a perfect world this would be generated automatically from
-// p4includes/v1model.p4
+// p4include/v1model.p4
 
 struct Parser_Model : public ::Model::Elem {
     Parser_Model(Model::Type_Model headersType, Model::Type_Model userMetaType,

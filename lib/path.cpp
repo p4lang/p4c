@@ -15,8 +15,11 @@ limitations under the License.
 */
 
 #include <stdexcept>
+#include <unistd.h>
+#include <vector>
 #include "path.h"
 #include "algorithm.h"
+#include "stringref.h"
 
 namespace Util {
 
@@ -74,6 +77,24 @@ cstring PathName::getBasename() const {
     if (dot == nullptr)
         return file.str;
     return file.str.before(dot);
+}
+
+PathName PathName::getAbsolutePath() const {
+    PathName path = *this;
+    if (!path.isAbsolute()) {
+        char* cwd = getcwd(nullptr, 0);
+        if (cwd == nullptr)
+            return PathName::empty;
+        path = PathName(cwd).join(str);
+    }
+    std::vector<cstring> parts;
+    for (const cstring& part : StringRef(path.toString()).split('/')) {
+        if (part == ".." && !parts.empty())
+            parts.pop_back();
+        else if (part != "." && part != "")
+            parts.push_back(part);
+    }
+    return "/" + cstring::join(parts.begin(), parts.end(), "/");
 }
 
 PathName PathName::join(cstring component) const {
