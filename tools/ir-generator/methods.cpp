@@ -128,8 +128,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 // not an IR pointer
                 buf << cl->indent << "buf << std::endl << indent << \"\\\"" 
                     << f->name << "\\\" : \" << \"\\\"\" << "
-                    // << "JSONGenerator::generate<" << f->type->toString() << ">(" << f->name << ", \"" << f->type->toString() << "\")"
-                    << f->name << " << \"\\\"\"";
+                    << "JSONGenerator::generate<" << f->type->toString() << ">(" << f->name << ", \"" << f->type->toString() << "\")"
+                    << " << \"\\\"\"";
                 if (cnt > 1)
                     buf << "<< \",\"";
                 buf << ";" << std::endl;
@@ -143,8 +143,28 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                     cstring base_type = dynamic_cast<const TemplateInstantiation*>(f->type)->base->toString();
                     if (base_type == "vector" || base_type == "std::vector") {
                         buf << "\"Handle std::vector here.\"";
+                       /* buf << cl->indent 
+                            << "indent << \"    \" << \"\\\"Node_Type\\\" : \\\"std::vector\\\",\" << std::endl"
+                            << " << \"\\\"Elements\\\" : [\" << std::endl;";
+                        buf << cl->indent
+                            << "vector<cstring> " << f-name << "_elems;
+                            << "for (auto & e : " << f->name << ") {" << std::endl
+                            << cl->indent << cl->ifdent
+                        if (f->args[0]->resolve(cl->containedIn) == nullptr
+                                && !dynamic_cast<const TemplateInstantiation*>(f->args[0])) {
+                            buf << "std::stringstream ss; ss << e; " 
+                                << f->name << "_elems.append(ss.str());";
+                        } else if (!dynamic_cast<const TemplateInstantiation*>(f->args[0])) {
+                            buf << f->name << "_elems.append(e.toJSON(indent + \"            \", node_refs));";
+                        } else {
+                            //Only one instance in ir-generated,  else {
+                            /
+                        }
+                        }
+                        buf << cl->indent << "}" << std::endl << "buf";
+*/
                     } else if (base_type == "ordered_map" || base_type == "std::ordered_map") {
-                        buf << "\"Handle std::ordered_map here.\"";;
+                        buf << "\"Handle std::ordered_map here.\"";
                     } else {
                         //Fallback to IR node handling. Will break if new STL container is used.
                         buf << f->name << (f->isInline  ?  "." : "->") 
