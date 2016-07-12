@@ -21,6 +21,7 @@
 #include <bm/bm_sim/packet.h>
 
 #include <algorithm>  // for swap
+#include <atomic>
 
 #include "xxhash.h"
 
@@ -29,6 +30,50 @@ namespace bm {
 typedef Debugger::PacketId PacketId;
 
 constexpr size_t Packet::nb_registers;
+
+copy_id_t
+CopyIdGenerator::add_one(packet_id_t packet_id) {
+  int idx = static_cast<int>(packet_id % W);
+  Cntr old_cntr = arr[idx].load();
+  Cntr new_cntr;
+  do {
+    new_cntr.num = old_cntr.num + 1;
+    new_cntr.max = old_cntr.max + 1;
+  } while (!arr[idx].compare_exchange_weak(old_cntr, new_cntr));
+  return new_cntr.max;
+}
+
+void
+CopyIdGenerator::remove_one(packet_id_t packet_id) {
+  int idx = static_cast<int>(packet_id % W);
+  Cntr old_cntr = arr[idx].load();
+  Cntr new_cntr;
+  do {
+    if (old_cntr.num == 0) {
+      new_cntr.max = 0;
+    } else {
+      new_cntr.max = old_cntr.max;
+      new_cntr.num = old_cntr.num - 1;
+    }
+  } while (!arr[idx].compare_exchange_weak(old_cntr, new_cntr));
+}
+
+copy_id_t
+CopyIdGenerator::get(packet_id_t packet_id) {
+  int idx = static_cast<int>(packet_id % W);
+  return arr[idx].load().max;
+}
+
+void
+CopyIdGenerator::reset(packet_id_t packet_id) {
+  int idx = static_cast<int>(packet_id % W);
+  Cntr old_cntr = arr[idx].load();
+  Cntr new_cntr;
+  do {
+    new_cntr.num = 0;
+    new_cntr.max = 0;
+  } while (!arr[idx].compare_exchange_weak(old_cntr, new_cntr));
+}
 
 void
 Packet::update_signature(uint64_t seed) {
