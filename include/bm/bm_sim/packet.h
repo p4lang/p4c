@@ -50,30 +50,26 @@ typedef uint64_t copy_id_t;
 class CopyIdGenerator {
  private:
   static constexpr size_t W = 4096;
+  struct Cntr {
+    // if default member initializer used, then g++-5 complains for some reason,
+    // so I had to provide an explicit constructor
+    // clang complains if 'noexcept' is missing
+    Cntr() noexcept : max(0), num(0) { }
+    uint16_t max;
+    uint16_t num;
+  };
 
  public:
-  copy_id_t add_one(packet_id_t packet_id) {
-    int idx = static_cast<int>(packet_id % W);
-    return ++arr[idx];
-  }
+  copy_id_t add_one(packet_id_t packet_id);
 
-  void remove_one(packet_id_t packet_id) {
-    int idx = static_cast<int>(packet_id % W);
-    --arr[idx];
-  }
+  void remove_one(packet_id_t packet_id);
 
-  copy_id_t get(packet_id_t packet_id) {
-    int idx = static_cast<int>(packet_id % W);
-    return arr[idx];
-  }
+  copy_id_t get(packet_id_t packet_id);
 
-  void reset(packet_id_t packet_id) {
-    int idx = static_cast<int>(packet_id % W);
-    arr[idx] = 0;
-  }
+  void reset(packet_id_t packet_id);
 
  private:
-  std::array<std::atomic<int>, W> arr{{}};
+  std::array<std::atomic<Cntr>, W> arr{{}};
 };
 
 

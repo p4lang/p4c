@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 #include <vector>
+#include <memory>
 
 #include <bm/bm_sim/packet.h>
 
@@ -34,7 +35,7 @@ TEST(CopyIdGenerator, Test) {
   ASSERT_EQ(1u, gen.get(packet_id));
   ASSERT_EQ(2u, gen.add_one(packet_id));
   gen.remove_one(packet_id);
-  ASSERT_EQ(1u, gen.get(packet_id));
+  ASSERT_EQ(2u, gen.get(packet_id));
   gen.reset(packet_id);
   ASSERT_EQ(0u, gen.get(packet_id));
 }
@@ -180,4 +181,28 @@ TEST_F(PacketTest, Exit) {
   ASSERT_TRUE(packet.is_marked_for_exit());
   packet.reset_exit();
   ASSERT_FALSE(packet.is_marked_for_exit());
+}
+
+TEST_F(PacketTest, CopyId) {
+  auto packet_0 = std::unique_ptr<Packet>(new Packet(get_packet(0)));
+  ASSERT_EQ(0u, packet_0->get_copy_id());
+  auto packet_1 = packet_0->clone_with_phv_ptr();
+  ASSERT_EQ(1u, packet_1->get_copy_id());
+  auto packet_2 = packet_0->clone_with_phv_ptr();
+  ASSERT_EQ(2u, packet_2->get_copy_id());
+
+  // reset so now 0.0, 0.2 exist but not 0.1
+  // new packet should get 0.3
+  packet_1.reset(nullptr);
+  auto packet_3 = packet_0->clone_with_phv_ptr();
+  ASSERT_EQ(3u, packet_3->get_copy_id());
+
+  packet_3.reset(nullptr);
+  packet_2.reset(nullptr);
+  packet_0.reset(nullptr);
+
+  auto packet_0_new = std::unique_ptr<Packet>(new Packet(get_packet(0)));
+  ASSERT_EQ(0u, packet_0_new->get_copy_id());
+  auto packet_1_new = packet_0_new->clone_with_phv_ptr();
+  ASSERT_EQ(1u, packet_1_new->get_copy_id());
 }

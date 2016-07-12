@@ -120,6 +120,26 @@ if test -n "$COVERAGE_FLAGS"; then
     AC_CHECK_LIB([gcov], [__gcov_init], [], [AC_MSG_ERROR([Missing gcov library])])
 fi
 
+AC_MSG_CHECKING(for compiler atomic support)
+AC_LINK_IFELSE(
+    [AC_LANG_SOURCE(
+      [[#include <atomic>
+        int main() {
+          struct C { int x; int y; };
+          std::atomic<C> c;
+          C c1 = c.load();
+          C c2;
+          do { c2.x = c1.x + 1; c2.y = c1.y + 1; }
+          while (!c.compare_exchange_weak(c1, c2));
+          return 0;
+        }
+    ]])],
+    [AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)
+     AC_MSG_NOTICE([using -latomic])
+     AX_CXX_CHECK_LIB([atomic], [__atomic_load_4], [], AC_MSG_ERROR([Missing latomic]))
+    ])
+
 AM_CONDITIONAL([WITH_PCAP_FIX], [test "$pcap_fix" = "yes"])
 
 # C++ libraries are harder (http://nerdland.net/2009/07/detecting-c-libraries-with-autotools/),
