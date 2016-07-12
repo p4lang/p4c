@@ -147,9 +147,9 @@ class PointerType : public Type {
 };
 
 class ArrayType : public Type {
+public:
     const Type          *base;
     int                 size;
- public:
     ArrayType(const Type *t, int s) : base(t), size(s) {}
     ArrayType(Util::SourceInfo si, const Type *t, int s) : Type(si), base(t), size(s) {}
     bool isResolved() const override { return false; }
