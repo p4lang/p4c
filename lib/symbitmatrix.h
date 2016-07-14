@@ -24,7 +24,7 @@ limitations under the License.
  * always symmetric.  Iterating over the matrix only iterates over the lower triangle */
 class SymBitMatrix : private bitvec {
  public:
-    bitref operator()(unsigned r, unsigned c) {
+    nonconst_bitref operator()(unsigned r, unsigned c) {
         if (r < c) std::swap(r, c);
         return bitvec::operator[]((r*r+r)/2 + c); }
     bool operator()(unsigned r, unsigned c) const {
@@ -70,9 +70,9 @@ class SymBitMatrix : private bitvec {
         using rowref<SymBitMatrix>::rowref;
         void operator|=(bitvec a) const {
             for (auto col = a[row]; ++col != a.end();)
-                self(row, col) = 1;
+                self(row, *col) = 1;
             a.clrrange(row+1, ~0); self |= a << (row*row+row)/2; }
-        bitref operator[](unsigned col) const { return self(row, col); }
+        nonconst_bitref operator[](unsigned col) const { return self(row, col); }
     };
     class const_rowref : public rowref<const SymBitMatrix> {
      public:

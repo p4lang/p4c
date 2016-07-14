@@ -107,18 +107,17 @@ int bitvec::ffs(unsigned start) const {
     uintptr_t val = ~0ULL;
     unsigned idx = start / bits_per_unit;
     val <<= (start % bits_per_unit);
-    if (size > 1) {
-        while (idx < size && !(ptr[idx]&val)) {
-            ++idx;
-            val = ~0ULL; }
-        if (idx < size)
-            val &= ptr[idx];
-    } else {
-        val &= data; }
-    if (!val || idx >= size) return -1;
+    while (idx < size && !(val &= word(idx))) {
+        ++idx;
+        val = ~0ULL; }
+    if (idx >= size) return -1;
     unsigned rv = idx * bits_per_unit;
+#if defined(__GNUC__) || defined(__clang__)
+    rv += builtin_ctz(val);
+#else
     while ((val & 0xff) == 0) { rv += 8; val >>= 8; }
     while ((val & 1) == 0) { rv++; val >>= 1; }
+#endif
     return rv;
 }
 
@@ -126,18 +125,15 @@ unsigned bitvec::ffz(unsigned start) const {
     uintptr_t val = 0;
     unsigned idx = start / bits_per_unit;
     val = ~(~val << (start % bits_per_unit));
-    if (size > 1) {
-        while (idx < size && !~(ptr[idx]|val)) {
-            ++idx;
-            val = 0; }
-        if (idx < size)
-            val |= ptr[idx];
-    } else if (idx) {
-        return start;
-    } else {
-        val |= data; }
+    while (!~(val |= word(idx))) {
+        ++idx;
+        val = 0; }
     unsigned rv = idx * bits_per_unit;
+#if defined(__GNUC__) || defined(__clang__)
+    rv += builtin_ctz(~val);
+#else
     while ((val & 0xff) == 0xff) { rv += 8; val >>= 8; }
     while (val & 1) { rv++; val >>= 1; }
+#endif
     return rv;
 }
