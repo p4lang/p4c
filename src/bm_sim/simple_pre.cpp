@@ -24,10 +24,9 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
-using std::vector;
-using std::copy;
-using std::string;
+#include "jsoncpp/json.h"
 
 namespace bm {
 
@@ -156,6 +155,74 @@ McSimplePre::mc_node_update(const l1_hdl_t l1_hdl,
   l2_entry.port_map = port_map;
   Logger::get()->debug("node updated for rid {}", l1_entry.rid);
   return SUCCESS;
+}
+
+void
+McSimplePre::get_entries_common(Json::Value *root) const {
+  Json::Value mgrps(Json::arrayValue);
+  for (const auto p : mgid_entries) {
+    Json::Value mgrp(Json::objectValue);
+    mgrp["id"] = Json::Value(Json::UInt(p.first));
+
+    Json::Value l1_handles(Json::arrayValue);
+    for (const auto h : p.second.l1_list) {
+      l1_handles.append(Json::Value(Json::UInt(h)));
+    }
+    mgrp["l1_handles"] = l1_handles;
+
+    mgrps.append(mgrp);
+  }
+
+  (*root)["mgrps"] = mgrps;
+
+  Json::Value l1_handles(Json::arrayValue);
+  for (const auto p : l1_entries) {
+    Json::Value handle(Json::objectValue);
+    handle["handle"] = Json::Value(Json::UInt(p.first));
+    handle["rid"] = Json::Value(Json::UInt(p.second.rid));
+    handle["l2_handle"] = Json::Value(Json::UInt(p.second.l2_hdl));
+
+    l1_handles.append(handle);
+  }
+
+  (*root)["l1_handles"] = l1_handles;
+
+  Json::Value l2_handles(Json::arrayValue);
+  for (const auto p : l2_entries) {
+    Json::Value handle(Json::objectValue);
+    handle["handle"] = Json::Value(Json::UInt(p.first));
+    const auto &entry = p.second;
+
+    Json::Value ports(Json::arrayValue);
+    for (size_t i = 0; i < entry.port_map.size(); i++) {
+      if (entry.port_map[i]) ports.append(Json::Value(Json::UInt(i)));
+    }
+    handle["ports"] = ports;
+
+    Json::Value lags(Json::arrayValue);
+    for (size_t i = 0; i < entry.lag_map.size(); i++) {
+      if (entry.lag_map[i]) lags.append(Json::Value(Json::UInt(i)));
+    }
+    handle["lags"] = lags;
+
+    l2_handles.append(handle);
+  }
+
+  (*root)["l2_handles"] = l2_handles;
+}
+
+std::string
+McSimplePre::mc_get_entries() const {
+  Json::Value root(Json::objectValue);
+
+  {
+    boost::unique_lock<boost::shared_mutex> lock(mutex);
+    get_entries_common(&root);
+  }
+
+  std::stringstream ss;
+  ss << root;
+  return ss.str();
 }
 
 void

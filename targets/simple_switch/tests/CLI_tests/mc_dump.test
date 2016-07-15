@@ -1,0 +1,2 @@
+#!/bin/sh
+./run_one_test.py $srcdir/testdata mc_dump ecmp.json --pre SimplePreLAG

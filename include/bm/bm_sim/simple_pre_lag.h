@@ -24,6 +24,7 @@
 #ifndef BM_BM_SIM_SIMPLE_PRE_LAG_H_
 #define BM_BM_SIM_SIMPLE_PRE_LAG_H_
 
+#include <string>
 #include <vector>
 
 #include "pre.h"
@@ -47,6 +48,8 @@ class McSimplePreLAG : public McSimplePre {
 
   McReturnCode mc_set_lag_membership(const lag_id_t lag_index,
                                      const PortMap &port_map);
+
+  std::string mc_get_entries() const;
 
   void reset_state();
 

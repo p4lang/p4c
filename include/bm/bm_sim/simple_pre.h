@@ -27,10 +27,18 @@
 #include <boost/thread/shared_mutex.hpp>
 
 #include <unordered_map>
+#include <string>
 #include <vector>
 
 #include "handle_mgr.h"
 #include "pre.h"
+
+// forward declaration of Json::Value
+namespace Json {
+
+class Value;
+
+}  // namespace Json
 
 namespace bm {
 
@@ -92,6 +100,9 @@ class McSimplePre {
   McReturnCode mc_node_destroy(const l1_hdl_t);
   McReturnCode mc_node_update(const l1_hdl_t l1_hdl,
                               const PortMap &port_map);
+
+  std::string mc_get_entries() const;
+
   void reset_state();
 
   //! This is the only "dataplane" method for this class. It takes as input a
@@ -171,6 +182,9 @@ class McSimplePre {
 
   // internal version, which does not acquire the lock
   void reset_state_();
+
+  // does not acquire lock
+  void get_entries_common(Json::Value *root) const;
 
   std::unordered_map<mgrp_hdl_t, MgidEntry> mgid_entries{};
   std::unordered_map<l1_hdl_t, L1Entry> l1_entries{};

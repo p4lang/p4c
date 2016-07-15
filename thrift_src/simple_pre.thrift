@@ -80,4 +80,8 @@ service SimplePre {
     2:BmMcL1Handle l1_handle,
     3:BmMcPortMap port_map
   ) throws (1:InvalidMcOperation ouch),
+
+  string bm_mc_get_entries(
+    1:i32 cxt_id
+  ) throws (1:InvalidMcOperation ouch),
 }

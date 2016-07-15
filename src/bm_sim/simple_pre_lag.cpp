@@ -22,11 +22,12 @@
 #include <bm/bm_sim/simple_pre_lag.h>
 #include <bm/bm_sim/logger.h>
 
+#include <string>
 #include <vector>
 
-namespace bm {
+#include "jsoncpp/json.h"
 
-using std::vector;
+namespace bm {
 
 McSimplePre::McReturnCode
 McSimplePreLAG::mc_node_create(const rid_t rid,
@@ -99,6 +100,37 @@ McSimplePreLAG::mc_set_lag_membership(const lag_id_t lag_index,
   lag_entry.port_map = port_map;
   Logger::get()->debug("lag membership set for lag index {}", lag_index);
   return SUCCESS;
+}
+
+std::string
+McSimplePreLAG::mc_get_entries() const {
+  Json::Value root(Json::objectValue);
+
+  {
+    boost::unique_lock<boost::shared_mutex> lock(mutex);
+    get_entries_common(&root);
+
+    Json::Value lags(Json::arrayValue);
+    for (const auto p : lag_entries) {
+      Json::Value lag(Json::objectValue);
+      lag["id"] = Json::Value(Json::UInt(p.first));
+
+      const auto &entry = p.second;
+      Json::Value ports(Json::arrayValue);
+      for (size_t i = 0; i < entry.port_map.size(); i++) {
+        if (entry.port_map[i]) ports.append(Json::Value(Json::UInt(i)));
+      }
+      lag["ports"] = ports;
+
+      lags.append(lag);
+    }
+
+    root["lags"] = lags;
+  }
+
+  std::stringstream ss;
+  ss << root;
+  return ss.str();
 }
 
 void

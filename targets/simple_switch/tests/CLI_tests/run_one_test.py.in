@@ -52,11 +52,12 @@ class ConcurrentInteger(object):
         return None
 
 def main():
-    if len(sys.argv) != 4:
+    if len(sys.argv) < 4:
         sys.exit(1)
     testdata_dir = sys.argv[1]
     testname = sys.argv[2]
     jsonname = sys.argv[3]
+    CLI_extra_args = sys.argv[4:]
 
     command_path = os.path.join(testdata_dir, testname + ".in")
     output_path = os.path.join(testdata_dir, testname + ".out")
@@ -98,6 +99,7 @@ def main():
 
     cmd = ["@abs_top_srcdir@/tools/runtime_CLI.py",
            "--thrift-port", thrift_port]
+    cmd += CLI_extra_args
     out = None
     with open(command_path, "r") as f:
         sub_env = os.environ.copy()

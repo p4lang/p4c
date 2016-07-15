@@ -3,7 +3,8 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 TESTS = \
 table_dump.test \
 table_dump_extra.test \
-indirect_res.test
+indirect_res.test \
+mc_dump.test
 
 # run_one_test.py.in included by default
 # note that we do not distribute the P4 files on purpose (there is no point),
@@ -20,4 +21,6 @@ testdata/table_dump_extra.json \
 indirect_res.test \
 testdata/indirect_res.in \
 testdata/indirect_res.out \
-testdata/indirect_res.json
+testdata/indirect_res.json \
+testdata/mc_dump.in \
+testdata/mc_dump.out

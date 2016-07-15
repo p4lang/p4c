@@ -1,0 +1,7 @@
+mc_mgrp_create 1
+mc_node_create 2 1 5 8 | 1 3
+mc_node_associate 1 0
+mc_node_create 4 5 8 | 1 2
+mc_node_associate 1 1
+mc_set_lag_membership 1 6 9 12
+mc_dump

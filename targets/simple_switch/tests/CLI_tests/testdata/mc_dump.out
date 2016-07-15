@@ -1,0 +1,26 @@
+????
+Creating multicast group 1
+????
+Creating node with rid 2 , port map 100100010 and lag map 1010
+node was created with handle 0
+????
+Associating node 0 to multicast group 1
+????
+Creating node with rid 4 , port map 100100000 and lag map 110
+node was created with handle 1
+????
+Associating node 1 to multicast group 1
+????
+Setting lag membership: 1 <- 1001001000000
+????
+==========
+MC ENTRIES
+**********
+mgrp(1)
+  -> (L1h=0, rid=2) -> (ports=[1, 5, 8], lags=[1, 3])
+  -> (L1h=1, rid=4) -> (ports=[5, 8], lags=[1, 2])
+==========
+LAGS
+lag(1) -> ports=[5, 8]
+==========
+????

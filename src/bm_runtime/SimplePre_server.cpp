@@ -119,6 +119,11 @@ public:
     }
   }
 
+  void bm_mc_get_entries(std::string& _return, const int32_t cxt_id) {
+    Logger::get()->trace("bm_mc_get_entries");
+    _return = pres.at(cxt_id)->mc_get_entries();
+  }
+
 private:
   std::vector<std::shared_ptr<McSimplePre> > pres{};
 };

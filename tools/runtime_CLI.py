@@ -1404,6 +1404,45 @@ class RuntimeAPI(cmd.Cmd):
         self.mc_client.bm_mc_set_lag_membership(0, lag_index, port_map_str)
 
     @handle_bad_input
+    def do_mc_dump(self, line):
+        "Dump entries in multicast engine"
+        self.check_has_pre()
+        json_dump = self.mc_client.bm_mc_get_entries(0)
+        try:
+            mc_json = json.loads(json_dump)
+        except:
+            print "Exception when retrieving MC entries"
+            return
+
+        l1_handles = {}
+        for h in mc_json["l1_handles"]:
+            l1_handles[h["handle"]] = (h["rid"], h["l2_handle"])
+        l2_handles = {}
+        for h in mc_json["l2_handles"]:
+            l2_handles[h["handle"]] = (h["ports"], h["lags"])
+
+        print "=========="
+        print "MC ENTRIES"
+        for mgrp in mc_json["mgrps"]:
+            print "**********"
+            mgid = mgrp["id"]
+            print "mgrp({})".format(mgid)
+            for L1h in mgrp["l1_handles"]:
+                rid, L2h = l1_handles[L1h]
+                print "  -> (L1h={}, rid={})".format(L1h, rid),
+                ports, lags = l2_handles[L2h]
+                print "-> (ports=[{}], lags=[{}])".format(
+                    ", ".join([str(p) for p in ports]),
+                    ", ".join([str(l) for l in lags]))
+
+        print "=========="
+        print "LAGS"
+        for lag in mc_json["lags"]:
+            print "lag({})".format(lag["id"]),
+            print "-> ports=[{}]".format(", ".join([str(p) for p in ports]))
+        print "=========="
+
+    @handle_bad_input
     def do_load_new_config_file(self, line):
         "Load new json config: load_new_config_file <path to .json file>"
         args = line.split()
