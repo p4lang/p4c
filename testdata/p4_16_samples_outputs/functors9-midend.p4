@@ -4,7 +4,7 @@ extern e<T> {
 
 parser p1_0(in bit<2> a) {
     bit<2> w_0;
-    e<bit<2>>() @name("ei") ei_0;
+    @name("ei") e<bit<2>>() ei_0;
     state start {
         w_0 = ei_0.get();
     }

@@ -9,12 +9,13 @@ error {
     NoMatch,
     EmptyStack,
     FullStack,
-    OverwritingHeader
+    OverwritingHeader,
+    HeaderTooShort
 }
 
 extern packet_in {
     void extract<T>(out T hdr);
-    void extract<T>(out T variableSizeHeader, in bit<32> sizeInBits);
+    void extract<T>(out T variableSizeHeader, in bit<32> variableFieldSizeInBits);
     T lookahead<T>();
     void advance(in bit<32> sizeInBits);
     bit<32> length();
@@ -3832,7 +3833,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_37();
     }
-    meter(32w1024, CounterType.bytes) @name("process_storm_control.storm_control_meter") process_storm_control_storm_control_meter;
+    @name("process_storm_control.storm_control_meter") meter(32w1024, CounterType.bytes) process_storm_control_storm_control_meter;
     @name("process_storm_control.nop") action process_storm_control_nop_0() {
     }
     @name("process_storm_control.set_storm_control_meter") action process_storm_control_set_storm_control_meter_0(bit<8> meter_idx) {
@@ -5012,7 +5013,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_74();
     }
-    counter(32w1024, CounterType.packets_and_bytes) @name("process_ingress_bd_stats.ingress_bd_stats") process_ingress_bd_stats_ingress_bd_stats;
+    @name("process_ingress_bd_stats.ingress_bd_stats") counter(32w1024, CounterType.packets_and_bytes) process_ingress_bd_stats_ingress_bd_stats;
     @name("process_ingress_bd_stats.update_ingress_bd_stats") action process_ingress_bd_stats_update_ingress_bd_stats_0() {
         process_ingress_bd_stats_ingress_bd_stats.count((bit<32>)meta_40.l2_metadata.bd_stats_idx);
     }
@@ -5024,7 +5025,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_75();
     }
-    counter(32w1024, CounterType.packets_and_bytes) @name("process_ingress_acl_stats.acl_stats") process_ingress_acl_stats_acl_stats;
+    @name("process_ingress_acl_stats.acl_stats") counter(32w1024, CounterType.packets_and_bytes) process_ingress_acl_stats_acl_stats;
     @name("process_ingress_acl_stats.acl_stats_update") action process_ingress_acl_stats_acl_stats_update_0() {
         process_ingress_acl_stats_acl_stats.count((bit<32>)meta_41.acl_metadata.acl_stats_index);
     }
@@ -5229,8 +5230,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_83();
         @name("fabric_lag_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
     }
-    counter(32w1024, CounterType.packets) @name("process_system_acl.drop_stats") process_system_acl_drop_stats;
-    counter(32w1024, CounterType.packets) @name("process_system_acl.drop_stats_2") process_system_acl_drop_stats_0;
+    @name("process_system_acl.drop_stats") counter(32w1024, CounterType.packets) process_system_acl_drop_stats;
+    @name("process_system_acl.drop_stats_2") counter(32w1024, CounterType.packets) process_system_acl_drop_stats_0;
     @name("process_system_acl.drop_stats_update") action process_system_acl_drop_stats_update_0() {
         process_system_acl_drop_stats_0.count((bit<32>)meta_48.ingress_metadata.drop_reason);
     }
@@ -6287,8 +6288,8 @@ struct struct_12 {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Checksum16() @name("inner_ipv4_checksum") inner_ipv4_checksum_0;
-    Checksum16() @name("ipv4_checksum") ipv4_checksum_0;
+    @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_0;
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
     action act_76() {
         mark_to_drop();
     }
@@ -6344,8 +6345,8 @@ struct struct_14 {
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Checksum16() @name("inner_ipv4_checksum") inner_ipv4_checksum_1;
-    Checksum16() @name("ipv4_checksum") ipv4_checksum_1;
+    @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_1;
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
     action act_78() {
         hdr.inner_ipv4.hdrChecksum = inner_ipv4_checksum_1.get<struct_13>({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
     }

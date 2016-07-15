@@ -23,7 +23,7 @@ parser P(packet_in p) {
     }
 
     state next {
-        x = x / (x - 2);
+        x = x / (x - 2);  // division by 0
     }
 }
 

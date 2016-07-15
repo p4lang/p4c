@@ -27,5 +27,6 @@ parser p() {
     }
 }
 
-package top(p par);
+parser Simple();
+package top(Simple par);
 top(p()) main;

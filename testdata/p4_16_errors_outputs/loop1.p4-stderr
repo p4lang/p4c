@@ -1,0 +1,4 @@
+terminate called after throwing an instance of 'Util::CompilerBug'
+  what():  COMPILER BUG: ../midend/interpreter.h:44
+../midend/interpreter.h:44: Null result
+

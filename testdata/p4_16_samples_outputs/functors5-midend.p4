@@ -4,7 +4,7 @@ parser p1_0() {
 }
 
 parser p2_0() {
-    p1_0() @name("x") x_0;
+    @name("x") p1_0() x_0;
     state start {
         x_0.apply();
     }

@@ -54,6 +54,8 @@ class SymbolicValue {
     // Returns 'true' if merging changed the current value.
     virtual bool merge(const SymbolicValue* other) = 0;
     virtual bool equals(const SymbolicValue* other) const = 0;
+    // True if some parts of this value are definitely uninitialized
+    virtual bool hasUninitializedParts() const = 0;
 };
 
 // Creates values from type declarations
@@ -72,12 +74,19 @@ class SymbolicValueFactory {
 };
 
 class ValueMap final {
-    std::map<const IR::IDeclaration*, SymbolicValue*> map;
  public:
+    std::map<const IR::IDeclaration*, SymbolicValue*> map;
     ValueMap* clone() const {
         auto result = new ValueMap();
         for (auto v : map)
             result->map.emplace(v.first, v.second->clone());
+        return result;
+    }
+    ValueMap* filter(std::function<bool(const IR::IDeclaration*, const SymbolicValue*)> filter) {
+        auto result = new ValueMap();
+        for (auto v : map)
+            if (filter(v.first, v.second))
+                result->map.emplace(v.first, v.second);
         return result;
     }
     void set(const IR::IDeclaration* left, SymbolicValue* right)
@@ -94,6 +103,7 @@ class ValueMap final {
             first = false;
         }
     }
+    void print() const;
     bool merge(const ValueMap* other) {
         bool change = false;
         BUG_CHECK(map.size() == other->map.size(), "Merging incompatible maps?");
@@ -169,6 +179,8 @@ class SymbolicError : public SymbolicValue {
     bool merge(const SymbolicValue*) override
     { BUG("%1%: cannot merge errors", this); return false; }
     virtual cstring message() const = 0;
+    bool hasUninitializedParts() const override
+    { return false; }
 };
 
 class SymbolicException : public SymbolicError {
@@ -235,6 +247,8 @@ class ScalarValue : public SymbolicValue {
             return ValueState::Constant;
         return ValueState::NotConstant;
     }
+    bool hasUninitializedParts() const override
+    { return state == ValueState::Uninitialized; }
 };
 
 class SymbolicVoid : public SymbolicValue {
@@ -252,6 +266,8 @@ class SymbolicVoid : public SymbolicValue {
     { BUG_CHECK(other->is<SymbolicVoid>(), "%1%: expected void", other); return false; }
     bool equals(const SymbolicValue* other) const override
     { return other == instance; }
+    bool hasUninitializedParts() const override
+    { return false; }
 };
 
 class SymbolicBool final : public ScalarValue {
@@ -295,8 +311,8 @@ class SymbolicInteger final : public ScalarValue {
     SymbolicInteger(const SymbolicInteger& other) = default;
     void dbprint(std::ostream& out) const override {
         ScalarValue::dbprint(out);
-        if (!isKnown()) return;
-        out << constant->value; }
+        if (isKnown())
+            out << constant->value; }
     SymbolicValue* clone() const override {
         auto result = new SymbolicInteger(type->to<IR::Type_Bits>());
         result->state = state;
@@ -308,12 +324,50 @@ class SymbolicInteger final : public ScalarValue {
     bool equals(const SymbolicValue* other) const override;
 };
 
+class SymbolicVarbit final : public ScalarValue {
+ public:
+    explicit SymbolicVarbit(const IR::Type_Varbits* type) :
+            ScalarValue(ScalarValue::ValueState::Uninitialized, type) {}
+    SymbolicVarbit(ScalarValue::ValueState state, const IR::Type_Varbits* type) :
+            ScalarValue(state, type) {}
+    SymbolicVarbit(const SymbolicVarbit& other) = default;
+    void dbprint(std::ostream& out) const override
+    { ScalarValue::dbprint(out); }
+    SymbolicValue* clone() const override
+    { return new SymbolicVarbit(state, type->to<IR::Type_Varbits>()); }
+    void assign(const SymbolicValue* other) override;
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
+};
+
+// represents enum, error, and match_kind
+class SymbolicEnum final : public ScalarValue {
+    IR::ID value;
+ public:
+    explicit SymbolicEnum(const IR::Type* type) :
+            ScalarValue(ScalarValue::ValueState::Uninitialized, type) {}
+    SymbolicEnum(ScalarValue::ValueState state, const IR::Type* type, const IR::ID value) :
+            ScalarValue(state, type), value(value) {}
+    SymbolicEnum(const IR::Type* type, const IR::ID value) :
+            ScalarValue(ScalarValue::ValueState::Constant, type), value(value) {}
+    SymbolicEnum(const SymbolicEnum& other) = default;
+    void dbprint(std::ostream& out) const override {
+        ScalarValue::dbprint(out);
+        if (isKnown())
+            out << value; }
+    SymbolicValue* clone() const override
+    { return new SymbolicEnum(state, type, value); }
+    void assign(const SymbolicValue* other) override;
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
+};
+
 class SymbolicStruct : public SymbolicValue {
  protected:
-    std::map<cstring, SymbolicValue*> fieldValue;
     explicit SymbolicStruct(const IR::Type_StructLike* type) :
             SymbolicValue(type) { CHECK_NULL(type); }
  public:
+    std::map<cstring, SymbolicValue*> fieldValue;
     SymbolicStruct(const IR::Type_StructLike* type, bool uninitialized,
                    const SymbolicValueFactory* factory);
     virtual SymbolicValue* get(const IR::Node*, cstring field) const {
@@ -325,23 +379,14 @@ class SymbolicStruct : public SymbolicValue {
         CHECK_NULL(value);
         fieldValue[field] = value;
     }
-    void dbprint(std::ostream& out) const override {
-        bool first = true;
-        out << "{ ";
-        for (auto f : fieldValue) {
-            if (!first)
-                out << ", ";
-            out << f.first << "=>" << f.second;
-            first = false;
-        }
-        out << " }";
-    }
+    void dbprint(std::ostream& out) const override;
     bool isScalar() const override { return false; }
     SymbolicValue* clone() const override;
     void setAllUnknown() override;
     void assign(const SymbolicValue* other) override;
     bool merge(const SymbolicValue* other) override;
     bool equals(const SymbolicValue* other) const override;
+    bool hasUninitializedParts() const override;
 };
 
 class SymbolicHeader : public SymbolicStruct {
@@ -354,24 +399,19 @@ class SymbolicHeader : public SymbolicStruct {
     SymbolicValue* get(const IR::Node* node, cstring field) const override;
     void setAllUnknown() override;
     void assign(const SymbolicValue* other) override;
-    void dbprint(std::ostream& out) const override {
-        out << "valid=>";
-        valid->dbprint(out);
-        out << " ";
-        SymbolicStruct::dbprint(out);
-    }
+    void dbprint(std::ostream& out) const override;
     bool merge(const SymbolicValue* other) override;
     bool equals(const SymbolicValue* other) const override;
 };
 
 class SymbolicArray final : public SymbolicValue {
     std::vector<SymbolicHeader*> values;
-    size_t size;
     friend class AnyElement;
     explicit SymbolicArray(const IR::Type_Stack* type) :
             SymbolicValue(type), size(type->getSize()),
             elemType(type->baseType->to<IR::Type_Header>()) {}
  public:
+    const size_t size;
     const IR::Type_Header* elemType;
     SymbolicArray(const IR::Type_Stack* stack, bool uninitialized,
                   const SymbolicValueFactory* factory);
@@ -385,15 +425,7 @@ class SymbolicArray final : public SymbolicValue {
         CHECK_NULL(value);
         values[index] = value;
     }
-    void dbprint(std::ostream& out) const override {
-        bool first = true;
-        for (auto f : values) {
-            if (!first)
-                out << ", ";
-            out << f;
-            first = false;
-        }
-    }
+    void dbprint(std::ostream& out) const override;
     SymbolicValue* clone() const override;
     SymbolicValue* next(const IR::Node* node);
     SymbolicValue* last(const IR::Node* node);
@@ -402,6 +434,7 @@ class SymbolicArray final : public SymbolicValue {
     void assign(const SymbolicValue* other) override;
     bool merge(const SymbolicValue* other) override;
     bool equals(const SymbolicValue* other) const override;
+    bool hasUninitializedParts() const override;
 };
 
 // Represents any element from a stack
@@ -423,6 +456,8 @@ class AnyElement final : public SymbolicHeader {
     bool merge(const SymbolicValue* other) override;
     bool equals(const SymbolicValue* other) const override;
     SymbolicValue* collapse() const;
+    bool hasUninitializedParts() const override
+    { BUG("Should not be called"); }
 };
 
 class SymbolicTuple final : public SymbolicValue {
@@ -451,6 +486,7 @@ class SymbolicTuple final : public SymbolicValue {
     { values.push_back(value); }
     bool merge(const SymbolicValue* other) override;
     bool equals(const SymbolicValue* other) const override;
+    bool hasUninitializedParts() const override;
 };
 
 // Some extern value of an unknown type
@@ -470,6 +506,8 @@ class SymbolicExtern : public SymbolicValue {
     { BUG("%1%: extern is read-only", this); }
     bool merge(const SymbolicValue*) override { return false; }
     bool equals(const SymbolicValue* other) const override;
+    bool hasUninitializedParts() const override
+    { return false; }
 };
 
 // Models an extern of type packet_in
@@ -479,15 +517,25 @@ class SymbolicPacketIn final : public SymbolicExtern {
     // by an unknown quantity.  Varbits are counted as 0
     // (as per SymbolicValueFactory::getWidth).
     unsigned minimumStreamOffset;
+    // If true the minimumStreamOffset is a conservative
+    // approximation.
+    bool conservative;
  public:
-    explicit SymbolicPacketIn(const IR::Type_Extern* type) : SymbolicExtern(type) {}
-    void dbprint(std::ostream& out) const override
-    { out << "packet_in; offset =" << minimumStreamOffset; }
+    explicit SymbolicPacketIn(const IR::Type_Extern* type) :
+            SymbolicExtern(type), minimumStreamOffset(0), conservative(false) {}
+    void dbprint(std::ostream& out) const override {
+        out << "packet_in; offset =" << minimumStreamOffset <<
+                (conservative ? " (conservative)" : ""); }
     SymbolicValue* clone() const override {
         auto result = new SymbolicPacketIn(type->to<IR::Type_Extern>());
         result->minimumStreamOffset = minimumStreamOffset;
+        result->conservative = conservative;
         return result;
     }
+    void setConservative()
+    { conservative = true; }
+    bool isConservative() const
+    { return conservative; }
     void advance(unsigned width)
     { minimumStreamOffset += width; }
     bool merge(const SymbolicValue* other) override;

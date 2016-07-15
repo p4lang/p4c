@@ -72,6 +72,22 @@ class MoveDeclarations : public Transform {
     const IR::Node* postorder(IR::Declaration_Constant* decl) override;
 };
 
+// Run after MoveDeclarations.
+// Some variable declarations in the "local" section of a parser and control
+// may still have initializers; these are moved into the start state,
+// and to the beginning of the apply body repectively.
+class MoveInitializers : public Transform {
+    IR::IndexedVector<IR::StatOrDecl> *toMove;  // This in fact contains just IR::AssignmentStatement
+
+ public:
+    MoveInitializers() {
+        setName("MoveInitializers");
+        toMove = new IR::IndexedVector<IR::StatOrDecl>(); }
+    const IR::Node* postorder(IR::Declaration_Variable* decl) override;
+    const IR::Node* postorder(IR::ParserState* state) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
+};
+
 }  // namespace P4
 
 #endif /* _MIDEND_MOVEDECLARATIONS_H_ */

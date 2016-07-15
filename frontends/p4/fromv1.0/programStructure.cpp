@@ -1411,7 +1411,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
 
     std::set<cstring> countersToDo;
     for (auto a : actionsToDo)
-        calledCounters.appendCallees(countersToDo, a);
+        calledCounters.getCallees(a, countersToDo);
     for (auto c : counters) {
         if (c.first->direct) {
             if (c.first->table.name.isNullOrEmpty()) {
@@ -1459,8 +1459,8 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     std::set<cstring> metersToDo;
     std::set<cstring> registersToDo;
     for (auto a : actionsToDo) {
-        calledMeters.appendCallees(metersToDo, a);
-        calledRegisters.appendCallees(registersToDo, a);
+        calledMeters.getCallees(a, metersToDo);
+        calledRegisters.getCallees(a, registersToDo);
     }
     for (auto c : metersToDo) {
         auto mtr = meters.get(c);

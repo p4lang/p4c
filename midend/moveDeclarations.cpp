@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -103,8 +103,12 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Parser* parser)  {
 }
 
 const IR::Node* MoveDeclarations::postorder(IR::Declaration_Variable* decl) {
+    auto parent = getContext()->node;
     // We must keep the initializer here
-    if (decl->initializer != nullptr) {
+    if (decl->initializer != nullptr &&
+        !parent->is<IR::IndexedVector<IR::Declaration>>()) {
+        // Don't split initializers from declarations that are at the "toplevel".
+        // We cannot have assignment statements there.
         LOG1("Moving and splitting " << decl);
         auto move = new IR::Declaration_Variable(decl->srcInfo, decl->name,
                                                  decl->annotations, decl->type, nullptr);
@@ -127,6 +131,44 @@ const IR::Node* MoveDeclarations::postorder(IR::Declaration_Constant* decl) {
         return decl;
     addMove(decl);
     return nullptr;
+}
+
+const IR::Node* MoveInitializers::postorder(IR::Declaration_Variable* decl) {
+    if (getContext()->parent == nullptr)
+        return decl;
+    auto parent = getContext()->parent->node;
+    if (!parent->is<IR::P4Control>() &&
+        !parent->is<IR::P4Parser>())
+        // We are not in the local toplevel declarations
+        return decl;
+    if (decl->initializer == nullptr)
+        return decl;
+
+    auto varRef = new IR::PathExpression(decl->name);
+    auto assign = new IR::AssignmentStatement(decl->srcInfo, varRef, decl->initializer);
+    toMove->push_back(assign);
+    decl->initializer = nullptr;
+    return decl;
+}
+
+const IR::Node* MoveInitializers::postorder(IR::ParserState* state) {
+    if (state->name != IR::ParserState::start ||
+        toMove->empty())
+        return state;
+    toMove->append(*state->components);
+    state->components = toMove;
+    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    return state;
+}
+
+const IR::Node* MoveInitializers::postorder(IR::P4Control* control) {
+    if (toMove->empty())
+        return control;
+    toMove->append(*control->body->components);
+    auto newBody = new IR::BlockStatement(Util::SourceInfo(), toMove);
+    control->body = newBody;
+    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    return control;
 }
 
 }  // namespace P4

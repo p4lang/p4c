@@ -37,18 +37,10 @@ struct ParserStateInfo {
     std::map<cstring, cstring> successors;  // for each successor state the new successor
 
     ParserStateInfo(cstring name, const IR::P4Parser* parser, const IR::ParserState* state,
-                    const ParserStateInfo* predecessor) :
+                    const ParserStateInfo* predecessor, ValueMap* before) :
             parser(parser), state(state), predecessor(predecessor),
-            name(name), before(nullptr), after(nullptr) {}
-    // return true if there are changes in the values
-    bool mergeValues(ValueMap* b) {
-        if (before == nullptr) {
-            before = b;
-            return true;
-        } else {
-            return before->merge(b);
-        }
-    }
+            name(name), before(before), after(nullptr)
+    { CHECK_NULL(parser); CHECK_NULL(state); CHECK_NULL(before); }
 };
 
 // Information produced for a parser by the symbolic evaluator
@@ -72,28 +64,27 @@ class ParserInfo {
         auto vec = get(origState);
         vec->push_back(si);
     }
-    ParserStateInfo* getSingle(cstring origState) {
-        auto vec = get(origState);
-        if (vec->empty())
-            return nullptr;
-        BUG_CHECK(vec->size() == 1, "Too many states map to %1%", origState);
-        return vec->at(0);
-    }
 };
+
+typedef CallGraph<const IR::ParserState*> StateCallGraph;
 
 // Information about a parser in the input program
 class ParserStructure {
     std::map<cstring, const IR::ParserState*> stateMap;
+    StateCallGraph callGraph;
+    std::vector<StateCallGraph::Loop*> loops;
  public:
     const IR::P4Parser*    parser;
     const IR::ParserState* start;
     explicit ParserStructure(const IR::P4Parser* parser) :
-            parser(parser), start(nullptr)
+            callGraph(parser->name), parser(parser), start(nullptr)
     { CHECK_NULL(parser); }
     void addState(const IR::ParserState* state)
     { stateMap.emplace(state->name, state); }
     const IR::ParserState* get(cstring state) const
     { return ::get(stateMap, state); }
+    void calls(const IR::ParserState* caller, const IR::ParserState* callee)
+    { callGraph.add(caller, callee); }
 
     ParserInfo* evaluate(ReferenceMap* refMap, TypeMap* typeMap, bool unroll);
 };
@@ -106,18 +97,20 @@ class Parsers {
 
 // Builds the 'parsers' structure
 class DiscoverParsers : public Inspector {
+    const ReferenceMap* refMap;
     ParserStructure*    current;
     Parsers*            parsers;
  public:
-    DiscoverParsers(Parsers* parsers) :
-            current(nullptr), parsers(parsers) {
-        CHECK_NULL(parsers); setName("DiscoverParsers");
+    DiscoverParsers(const ReferenceMap* refMap, Parsers* parsers) :
+            refMap(refMap), current(nullptr), parsers(parsers) {
+        CHECK_NULL(refMap); CHECK_NULL(parsers); setName("DiscoverParsers");
         visitDagOnce = false;
     }
     bool preorder(const IR::Type*) override { return false; }  // prune
     bool preorder(const IR::P4Parser* parser) override;
     void postorder(const IR::P4Parser* parser) override;
     bool preorder(const IR::ParserState* state) override;
+    void postorder(const IR::PathExpression* expression) override;
 };
 
 // Performs symbolic evaluation over each parser.
@@ -139,13 +132,33 @@ class EvaluateParsers : public Inspector {
     bool preorder(const IR::Type*) override { return false; }
 };
 
+#if 0
+class ParserUnroller : public Transform {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+    Parsers*      parsers;
+ public:
+    ParserUnroller(ReferenceMap* refMap, TypeMap* typeMap, Parsers* parsers) :
+            refMap(refMap), typeMap(typeMap), parsers(parsers) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(parsers);
+        setName("ParserUnroller");
+        visitDagOnce = false;
+    }
+    // const IR::Node* postorder(IR::P4Parser* parser) override;
+};
+#endif
+
 class ParserUnroll : public PassManager {
     Parsers parsers;
  public:
-    ParserUnroll(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+    ParserUnroll(bool unroll, ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
         passes.push_back(new TypeChecking(refMap, typeMap, false, isv1));
-        passes.push_back(new DiscoverParsers(&parsers));
-        passes.push_back(new EvaluateParsers(refMap, typeMap, &parsers, false));
+        passes.push_back(new DiscoverParsers(refMap, &parsers));
+        passes.push_back(new EvaluateParsers(refMap, typeMap, &parsers, unroll));
+#if 0
+        if (unroll)
+            passes.push_back(new ParserUnroller(refMap, typeMap, &parsers));
+#endif
         setName("ParserUnroll");
     }
 };

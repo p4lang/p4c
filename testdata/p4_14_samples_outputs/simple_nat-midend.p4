@@ -9,12 +9,13 @@ error {
     NoMatch,
     EmptyStack,
     FullStack,
-    OverwritingHeader
+    OverwritingHeader,
+    HeaderTooShort
 }
 
 extern packet_in {
     void extract<T>(out T hdr);
-    void extract<T>(out T variableSizeHeader, in bit<32> sizeInBits);
+    void extract<T>(out T variableSizeHeader, in bit<32> variableFieldSizeInBits);
     T lookahead<T>();
     void advance(in bit<32> sizeInBits);
     bit<32> length();
@@ -444,8 +445,8 @@ struct struct_2 {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Checksum16() @name("ipv4_checksum") ipv4_checksum_0;
-    Checksum16() @name("tcp_checksum") tcp_checksum_0;
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
+    @name("tcp_checksum") Checksum16() tcp_checksum_0;
     action act() {
         mark_to_drop();
     }
@@ -504,8 +505,8 @@ struct struct_4 {
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Checksum16() @name("ipv4_checksum") ipv4_checksum_1;
-    Checksum16() @name("tcp_checksum") tcp_checksum_1;
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
+    @name("tcp_checksum") Checksum16() tcp_checksum_1;
     action act_1() {
         hdr.tcp.checksum = tcp_checksum_1.get<struct_4>({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr });
     }

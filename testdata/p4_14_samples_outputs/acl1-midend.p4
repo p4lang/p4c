@@ -9,12 +9,13 @@ error {
     NoMatch,
     EmptyStack,
     FullStack,
-    OverwritingHeader
+    OverwritingHeader,
+    HeaderTooShort
 }
 
 extern packet_in {
     void extract<T>(out T hdr);
-    void extract<T>(out T variableSizeHeader, in bit<32> sizeInBits);
+    void extract<T>(out T variableSizeHeader, in bit<32> variableFieldSizeInBits);
     T lookahead<T>();
     void advance(in bit<32> sizeInBits);
     bit<32> length();
@@ -271,8 +272,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     action NoAction_2() {
     }
-    counter(32w256, CounterType.packets) @name("drop_stats") drop_stats_1;
-    counter(32w256, CounterType.packets) @name("drop_stats_2") drop_stats_3;
+    @name("drop_stats") counter(32w256, CounterType.packets) drop_stats_1;
+    @name("drop_stats_2") counter(32w256, CounterType.packets) drop_stats_3;
     @name("drop_stats_update") action drop_stats_update() {
         drop_stats_3.count((bit<32>)meta.ingress_metadata.drop_reason);
     }

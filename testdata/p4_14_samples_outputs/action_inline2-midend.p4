@@ -9,12 +9,13 @@ error {
     NoMatch,
     EmptyStack,
     FullStack,
-    OverwritingHeader
+    OverwritingHeader,
+    HeaderTooShort
 }
 
 extern packet_in {
     void extract<T>(out T hdr);
-    void extract<T>(out T variableSizeHeader, in bit<32> sizeInBits);
+    void extract<T>(out T variableSizeHeader, in bit<32> variableFieldSizeInBits);
     T lookahead<T>();
     void advance(in bit<32> sizeInBits);
     bit<32> length();
@@ -103,101 +104,78 @@ control Egress<H, M>(inout H hdr, inout M meta, inout standard_metadata_t standa
 control ComputeCkecksum<H, M>(inout H hdr, inout M meta, inout standard_metadata_t standard_metadata);
 control Deparser<H>(packet_out b, in H hdr);
 package V1Switch<H, M>(Parser<H, M> p, VerifyChecksum<H, M> vr, Ingress<H, M> ig, Egress<H, M> eg, ComputeCkecksum<H, M> ck, Deparser<H> dep);
-header hdr {
-    bit<32> a;
-    bit<32> b;
-    bit<32> c;
+header data_t {
+    bit<32> f1;
+    bit<32> f2;
+    bit<32> f3;
+    bit<32> f4;
+    bit<8>  b1;
+    bit<8>  b2;
+    bit<16> h1;
 }
 
-enum Choice {
-    First,
-    Second
+struct metadata {
 }
 
-struct Headers {
-    hdr h;
+struct headers {
+    @name("data") 
+    data_t data;
 }
 
-struct Meta {
-}
-
-parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
-    state start {
-        b.extract(h.h);
+parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("start") state start {
+        packet.extract<data_t>(hdr.data);
         transition accept;
     }
 }
 
-control vrfy(in Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {
+control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<8> dest_0;
+    action NoAction_1() {
     }
-}
-
-control update(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {
+    @name("setb1") action setb1(bit<9> port) {
+        dest_0 = hdr.data.b1;
+        dest_0 = hdr.data.b2;
+        hdr.data.b1 = dest_0;
+        standard_metadata.egress_spec = port;
     }
-}
-
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {
+    @name("noop") action noop() {
     }
-}
-
-control deparser(packet_out b, in Headers h) {
-    apply {
-        b.emit(h.h);
-    }
-}
-
-control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    hdr h_0;
-    Choice c_0;
-    action act() {
-        h_0.c = h_0.a;
-    }
-    action act_0() {
-        h_0.c = h_0.b;
-    }
-    action act_1() {
-        h_0 = h.h;
-        c_0 = Choice.First;
-    }
-    action act_2() {
-        h.h = h_0;
-        sm.egress_spec = 9w0;
-    }
-    table tbl_act() {
+    @name("test1") table test1_0() {
         actions = {
-            act_1();
+            setb1();
+            noop();
+            NoAction_1();
         }
-        const default_action = act_1();
-    }
-    table tbl_act_0() {
-        actions = {
-            act();
+        key = {
+            hdr.data.f1: ternary;
         }
-        const default_action = act();
-    }
-    table tbl_act_1() {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
-    table tbl_act_2() {
-        actions = {
-            act_2();
-        }
-        const default_action = act_2();
+        default_action = NoAction_1();
     }
     apply {
-        tbl_act.apply();
-        if (c_0 == Choice.Second) 
-            tbl_act_0.apply();
-        else 
-            tbl_act_1.apply();
-        tbl_act_2.apply();
+        test1_0.apply();
     }
 }
 
-V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    apply {
+    }
+}
+
+control DeparserImpl(packet_out packet, in headers hdr) {
+    apply {
+        packet.emit<data_t>(hdr.data);
+    }
+}
+
+control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    apply {
+    }
+}
+
+control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    apply {
+    }
+}
+
+V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

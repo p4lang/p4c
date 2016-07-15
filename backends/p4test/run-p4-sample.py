@@ -182,7 +182,7 @@ def process_file(options, argv):
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + basename                  # after parsing
-    referenceOutputs = "FrontEnd_13,FrontEnd_14,MidEnd_31_Evaluator"
+    referenceOutputs = "FrontEnd_13,FrontEnd_14,MidEnd_43_Evaluator"
     stderr = tmpdir + "/" + basename + "-stderr"
 
     if not os.path.isfile(options.p4filename):
@@ -217,7 +217,7 @@ def process_file(options, argv):
         newName = file_name(tmpdir, base, "-frontend", ext)
         os.rename(midFile, newName)
         lastFile = newName
-    endFile = file_name(tmpdir, base, "-MidEnd_30_Evaluator", ext)
+    endFile = file_name(tmpdir, base, "-MidEnd_43_Evaluator", ext)
     if os.path.isfile(endFile):
         newName = file_name(tmpdir, base, "-midend", ext)
         os.rename(endFile, newName)

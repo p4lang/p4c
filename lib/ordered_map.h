@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -200,5 +200,35 @@ public:
 
     template<class Compare> void sort(Compare comp) { data.sort(comp); }
 };
+
+template<class K, class T, class V, class Comp, class Alloc>
+inline V get(const ordered_map<K, V, Comp, Alloc> &m, T key, V def = V()) {
+    auto it = m.find(key);
+    if (it != m.end()) return it->second;
+    return def; }
+
+template<class K, class T, class V, class Comp, class Alloc>
+inline V *getref(ordered_map<K, V, Comp, Alloc> &m, T key) {
+    auto it = m.find(key);
+    if (it != m.end()) return &it->second;
+    return 0; }
+
+template<class K, class T, class V, class Comp, class Alloc>
+inline const V *getref(const ordered_map<K, V, Comp, Alloc> &m, T key) {
+    auto it = m.find(key);
+    if (it != m.end()) return &it->second;
+    return 0; }
+
+template<class K, class T, class V, class Comp, class Alloc>
+inline V get(const ordered_map<K, V, Comp, Alloc> *m, T key, V def = V()) {
+    return m ? get(*m, key, def) : def; }
+
+template<class K, class T, class V, class Comp, class Alloc>
+inline V *getref(ordered_map<K, V, Comp, Alloc> *m, T key) {
+    return m ? getref(*m, key) : 0; }
+
+template<class K, class T, class V, class Comp, class Alloc>
+inline const V *getref(const ordered_map<K, V, Comp, Alloc> *m, T key) {
+    return m ? getref(*m, key) : 0; }
 
 #endif /* _ordered_map_h_ */
