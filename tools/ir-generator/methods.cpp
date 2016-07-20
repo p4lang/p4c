@@ -18,7 +18,7 @@ limitations under the License.
 #include "lib/algorithm.h"
 
 enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ONLY = 16,
-             CONST = 32, CLASSREF = 64 };
+             CONST = 32, CLASSREF = 64, INCL_NESTED = 128};
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 { "operator==", { &NamedType::Bool, {}, CONST + IN_IMPL + OVERRIDE + CLASSREF,
@@ -113,7 +113,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             << cl->indent << cl->indent << "return buf.str();" << std::endl << "}" << std::endl;
         buf << cl->indent << "buf << " << cl->getParent()->name << "::toJSON(indent, node_refs);" << std::endl;
         
-        auto iter = cl->getFields(); 
+        auto iter = cl->getFields();  
         size_t cnt = iter->count();
         iter->reset(); //Not sure if needed
 
@@ -123,61 +123,18 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         for (auto f : *iter) {
             if (!f->isInline && f->nullOK)
                 buf << cl->indent << "if (" << f->name << " != nullptr) ";
-            if (f->type->resolve(cl->containedIn) == nullptr
-                    && !dynamic_cast<const TemplateInstantiation*>(f->type)) {
-                // not an IR pointer
-                buf << cl->indent << "buf << std::endl << indent << \"\\\"" 
-                    << f->name << "\\\" : \" << \"\\\"\" << "
-                    << "JSONGenerator::generate<" << f->type->toString() << ">(" << f->name << ", \"" << f->type->toString() << "\")"
-                    << " << \"\\\"\"";
-                if (cnt > 1)
-                    buf << "<< \",\"";
-                buf << ";" << std::endl;
-            } else {
-                buf << cl->indent
-                    << "buf << std::endl << indent << \"\\\"" << f->name << "\\\": {\"" 
-                    << " << std::endl << ";
-                if (!dynamic_cast<const TemplateInstantiation*>(f->type)) {
-                    buf << f->name << (f->isInline  ? "." : "->") << "toJSON(indent + \"    \", node_refs)"; 
-                } else {
-                    cstring base_type = dynamic_cast<const TemplateInstantiation*>(f->type)->base->toString();
-                    if (base_type == "vector" || base_type == "std::vector") {
-                        buf << "\"Handle std::vector here.\"";
-                       /* buf << cl->indent 
-                            << "indent << \"    \" << \"\\\"Node_Type\\\" : \\\"std::vector\\\",\" << std::endl"
-                            << " << \"\\\"Elements\\\" : [\" << std::endl;";
-                        buf << cl->indent
-                            << "vector<cstring> " << f-name << "_elems;
-                            << "for (auto & e : " << f->name << ") {" << std::endl
-                            << cl->indent << cl->ifdent
-                        if (f->args[0]->resolve(cl->containedIn) == nullptr
-                                && !dynamic_cast<const TemplateInstantiation*>(f->args[0])) {
-                            buf << "std::stringstream ss; ss << e; " 
-                                << f->name << "_elems.append(ss.str());";
-                        } else if (!dynamic_cast<const TemplateInstantiation*>(f->args[0])) {
-                            buf << f->name << "_elems.append(e.toJSON(indent + \"            \", node_refs));";
-                        } else {
-                            //Only one instance in ir-generated,  else {
-                            /
-                        }
-                        }
-                        buf << cl->indent << "}" << std::endl << "buf";
-*/
-                    } else if (base_type == "ordered_map" || base_type == "std::ordered_map") {
-                        buf << "\"Handle std::ordered_map here.\"";
-                    } else {
-                        //Fallback to IR node handling. Will break if new STL container is used.
-                        buf << f->name << (f->isInline  ?  "." : "->") 
-                            << "toJSON(indent + \"    \", node_refs)";                    }
-                }
-                buf << " << std::endl << indent << \"}\"";
-                if (cnt > 1)
-                    buf << "<< \",\"";
-                buf << ";" << std::endl;
-
-            }
+            buf << cl->indent << "buf << std::endl << indent << \"\\\"" 
+                << f->name << "\\\" : \" << "
+                << "JSONGenerator::generate<" << f->type->toString();
+            if (dynamic_cast<const ArrayType*>(f->type))
+                buf << ", " << dynamic_cast<const ArrayType*>(f->type)->size;
+            buf << ">"
+                << "(" << f->name << ", indent, node_refs)";
+            if (cnt > 1)
+                buf << " << \",\"";
+            buf << ";" << std::endl;
             cnt--;
-        } 
+        }
         buf << cl->indent << "node_refs.insert(this->id);" << std::endl;
         buf << cl->indent << "return buf.str();" << std::endl << "}";
         return buf.str(); } } },

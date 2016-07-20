@@ -45,6 +45,7 @@ class Vector : public VectorBase {
     vector<const T *>   vec;
 
  public:
+    typedef T value_type;
     Vector() = default;
     Vector(const Vector &) = default;
     Vector(Vector &&) = default;
@@ -134,6 +135,13 @@ class Vector : public VectorBase {
     Util::Enumerator<const S*>* only() const {
         std::function<bool(const T*)> filter = [](const T* d) { return d->template is<S>(); };
         return getEnumerator()->where(filter)->template as<const S*>(); }
+
+    vector<const T*> get_data() const { return vec; }
+   
+//    cstring toJSON(cstring indent, std::unordered_set<int> &node_refs) 
+//    {
+//        return JSONGenerator::generate<decltype(vec)>(vec, indent, node_refs); 
+//    }
 };
 
 }  // namespace IR

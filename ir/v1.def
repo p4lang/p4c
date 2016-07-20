@@ -188,7 +188,7 @@ class CalculatedField {
         //update_or_verify(Util::SourceInfo si, bool u, ID n, const Expression *c)
         //: srcInfo(si), update(u), name(n), cond(c) {}
         operator== { return update == a.update && name == a.name && cond == a.cond; }
-        cstring toJSON(cstring indent, std::unordered_set<int> & node_refs) { 
+        toJSON { 
             std::stringstream ss;
             ss  << indent << "\"update\" : " << (update ? "True" : "False") << "," << std::endl
                 << indent << "\"name\" : \"" << name.toString() << "\"," << std::endl

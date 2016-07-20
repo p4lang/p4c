@@ -99,7 +99,7 @@ class Node : public virtual INode {
         return dynamic_cast<const T*>(this); 
     }
     cstring toString() const override { return node_type_name(); }
-    cstring toJSON(cstring indent, std::unordered_set<int> &node_refs) const override {
+    virtual cstring toJSON(cstring indent, std::unordered_set<int> &node_refs) const override {
         std::stringstream buf;
         buf << indent << "\"Node_ID\" : " << id;
         if (node_refs.find(id) == node_refs.end()) {
