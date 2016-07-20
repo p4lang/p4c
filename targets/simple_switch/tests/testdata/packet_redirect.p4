@@ -21,6 +21,7 @@ header_type hdrA_t {
 }
 
 header hdrA_t hdrA;
+header hdrA_t hdrA2;
 
 header_type metaA_t {
     fields {
@@ -55,6 +56,7 @@ metadata intrinsic_metadata_t intrinsic_metadata;
 
 parser start {
     extract(hdrA);
+    extract(hdrA2);
     return ingress;
 }
 
@@ -76,6 +78,7 @@ action _recirculate() {
 
 action _multicast(mgrp) {
     modify_field(intrinsic_metadata.mcast_grp, mgrp);
+    remove_header(hdrA2);
 }
 
 action _clone_i2e(mirror_id) {
@@ -89,6 +92,7 @@ action _clone_e2e(mirror_id) {
 action _set_port(port) {
     modify_field(standard_metadata.egress_spec, port);
     modify_field(metaA.f1, 1);
+    remove_header(hdrA2);
 }
 
 action _exit() {
@@ -128,6 +132,17 @@ table t_egress {
     size : 128;
 }
 
+action set_hdr() {
+    modify_field(hdrA.f2, standard_metadata.packet_length);
+}
+
+table t_exit {
+    actions {
+        set_hdr;
+    }
+    size : 1;
+}
+
 control ingress {
     apply(t_ingress_1);
     apply(t_ingress_2);
@@ -135,4 +150,5 @@ control ingress {
 
 control egress {
     apply(t_egress);
+    apply(t_exit);
 }

@@ -108,6 +108,8 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
   import_primitives();
 }
 
+#define PACKET_LENGTH_REG_IDX 0
+
 int
 SimpleSwitch::receive(int port_num, const char *buffer, int len) {
   static int pkt_id = 0;
@@ -132,7 +134,11 @@ SimpleSwitch::receive(int port_num, const char *buffer, int len) {
   phv->reset_metadata();
 
   // setting standard metadata
+
   phv->get_field("standard_metadata.ingress_port").set(port_num);
+  // using packet register 0 to store length, this register will be updated for
+  // each add_header / remove_header primitive call
+  packet->set_register(PACKET_LENGTH_REG_IDX, len);
   phv->get_field("standard_metadata.packet_length").set(len);
   Field &f_instance_type = phv->get_field("standard_metadata.instance_type");
   f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
@@ -381,6 +387,7 @@ SimpleSwitch::ingress_thread() {
       BMLOG_DEBUG_PKT(*packet, "Multicast requested for packet");
       Field &f_rid = phv->get_field("intrinsic_metadata.egress_rid");
       const auto pre_out = pre->replicate({mgid});
+      auto packet_size = packet->get_register(PACKET_LENGTH_REG_IDX);
       for (const auto &out : pre_out) {
         egress_port = out.egress_port;
         // if (ingress_port == egress_port) continue; // pruning
@@ -388,6 +395,7 @@ SimpleSwitch::ingress_thread() {
         f_rid.set(out.rid);
         f_instance_type.set(PKT_INSTANCE_TYPE_REPLICATION);
         std::unique_ptr<Packet> packet_copy = packet->clone_with_phv_ptr();
+        packet_copy->set_register(PACKET_LENGTH_REG_IDX, packet_size);
         enqueue(egress_port, std::move(packet_copy));
       }
       f_instance_type.set(instance_type);
@@ -435,6 +443,9 @@ SimpleSwitch::egress_thread(size_t worker_id) {
 
     Field &f_egress_spec = phv->get_field("standard_metadata.egress_spec");
     f_egress_spec.set(0);
+
+    phv->get_field("standard_metadata.packet_length").set(
+        packet->get_register(PACKET_LENGTH_REG_IDX));
 
     egress_mau->apply(packet.get());
 
@@ -490,8 +501,9 @@ SimpleSwitch::egress_thread(size_t worker_id) {
         }
         phv_copy->get_field("standard_metadata.instance_type")
             .set(PKT_INSTANCE_TYPE_RECIRC);
-        phv_copy->get_field("standard_metadata.packet_length")
-            .set(packet_copy->get_data_size());
+        size_t packet_size = packet_copy->get_data_size();
+        packet_copy->set_register(PACKET_LENGTH_REG_IDX, packet_size);
+        phv_copy->get_field("standard_metadata.packet_length").set(packet_size);
         input_buffer.push_front(std::move(packet_copy));
         continue;
       }

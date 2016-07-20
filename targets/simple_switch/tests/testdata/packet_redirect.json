@@ -123,14 +123,20 @@
             "metadata": false
         },
         {
-            "name": "metaA",
+            "name": "hdrA2",
             "id": 2,
+            "header_type": "hdrA_t",
+            "metadata": false
+        },
+        {
+            "name": "metaA",
+            "id": 3,
             "header_type": "metaA_t",
             "metadata": true
         },
         {
             "name": "intrinsic_metadata",
-            "id": 3,
+            "id": 4,
             "header_type": "intrinsic_metadata_t",
             "metadata": true
         }
@@ -154,6 +160,15 @@
                                     "value": "hdrA"
                                 }
                             ]
+                        },
+                        {
+                            "op": "extract",
+                            "parameters": [
+                                {
+                                    "type": "regular",
+                                    "value": "hdrA2"
+                                }
+                            ]
                         }
                     ],
                     "transition_key": [],
@@ -173,15 +188,49 @@
             "name": "deparser",
             "id": 0,
             "order": [
-                "hdrA"
+                "hdrA",
+                "hdrA2"
             ]
         }
     ],
     "meter_arrays": [],
     "actions": [
         {
-            "name": "_recirculate",
+            "name": "_nop",
             "id": 0,
+            "runtime_data": [],
+            "primitives": []
+        },
+        {
+            "name": "_exit",
+            "id": 1,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "exit",
+                    "parameters": []
+                }
+            ]
+        },
+        {
+            "name": "_resubmit",
+            "id": 2,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "resubmit",
+                    "parameters": [
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "_recirculate",
+            "id": 3,
             "runtime_data": [],
             "primitives": [
                 {
@@ -197,7 +246,7 @@
         },
         {
             "name": "_multicast",
-            "id": 1,
+            "id": 4,
             "runtime_data": [
                 {
                     "name": "mgrp",
@@ -220,12 +269,21 @@
                             "value": 0
                         }
                     ]
+                },
+                {
+                    "op": "remove_header",
+                    "parameters": [
+                        {
+                            "type": "header",
+                            "value": "hdrA2"
+                        }
+                    ]
                 }
             ]
         },
         {
             "name": "_clone_i2e",
-            "id": 2,
+            "id": 5,
             "runtime_data": [
                 {
                     "name": "mirror_id",
@@ -250,7 +308,7 @@
         },
         {
             "name": "_clone_e2e",
-            "id": 3,
+            "id": 6,
             "runtime_data": [
                 {
                     "name": "mirror_id",
@@ -274,8 +332,34 @@
             ]
         },
         {
+            "name": "set_hdr",
+            "id": 7,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "hdrA",
+                                "f2"
+                            ]
+                        },
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "packet_length"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "name": "_set_port",
-            "id": 4,
+            "id": 8,
             "runtime_data": [
                 {
                     "name": "port",
@@ -314,41 +398,17 @@
                             "value": "0x1"
                         }
                     ]
-                }
-            ]
-        },
-        {
-            "name": "_exit",
-            "id": 5,
-            "runtime_data": [],
-            "primitives": [
+                },
                 {
-                    "op": "exit",
-                    "parameters": []
-                }
-            ]
-        },
-        {
-            "name": "_resubmit",
-            "id": 6,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "resubmit",
+                    "op": "remove_header",
                     "parameters": [
                         {
-                            "type": "hexstr",
-                            "value": "0x1"
+                            "type": "header",
+                            "value": "hdrA2"
                         }
                     ]
                 }
             ]
-        },
-        {
-            "name": "_nop",
-            "id": 7,
-            "runtime_data": [],
-            "primitives": []
         }
     ],
     "pipelines": [
@@ -396,7 +456,6 @@
                         "_multicast": "t_ingress_2",
                         "_exit": "t_ingress_2"
                     },
-                    "default_action": null,
                     "base_default_next": "t_ingress_2"
                 },
                 {
@@ -436,7 +495,6 @@
                         "_resubmit": null,
                         "_clone_i2e": null
                     },
-                    "default_action": null,
                     "base_default_next": null
                 }
             ],
@@ -480,11 +538,28 @@
                         "_clone_e2e"
                     ],
                     "next_tables": {
-                        "_nop": null,
-                        "_recirculate": null,
-                        "_clone_e2e": null
+                        "_nop": "t_exit",
+                        "_recirculate": "t_exit",
+                        "_clone_e2e": "t_exit"
                     },
-                    "default_action": null,
+                    "base_default_next": "t_exit"
+                },
+                {
+                    "name": "t_exit",
+                    "id": 3,
+                    "match_type": "exact",
+                    "type": "simple",
+                    "max_size": 1,
+                    "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
+                    "key": [],
+                    "actions": [
+                        "set_hdr"
+                    ],
+                    "next_tables": {
+                        "set_hdr": null
+                    },
                     "base_default_next": null
                 }
             ],

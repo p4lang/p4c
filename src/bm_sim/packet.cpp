@@ -214,7 +214,7 @@ Packet::Packet(Packet &&other) noexcept
       copy_id(other.copy_id), ingress_length(other.ingress_length),
       signature(other.signature), payload_size(other.payload_size),
       ingress_ts(other.ingress_ts), ingress_ts_ms(other.ingress_ts_ms),
-      phv_source(other.phv_source) {
+  phv_source(other.phv_source), registers(other.registers) {
   buffer = std::move(other.buffer);
   phv = std::move(other.phv);
 }
@@ -232,6 +232,7 @@ Packet::operator=(Packet &&other) noexcept {
   ingress_ts = other.ingress_ts;
   ingress_ts_ms = other.ingress_ts_ms;
   phv_source = other.phv_source;
+  registers = other.registers;
 
   std::swap(buffer, other.buffer);
   std::swap(phv, other.phv);
