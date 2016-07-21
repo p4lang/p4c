@@ -38,6 +38,8 @@ limitations under the License.
 #include "frontends/p4/symbol_table.h"
 #include "frontends/common/constantParsing.h"
 
+#undef PACKAGE  // autoconf wants to define this macro that we want to use as a token
+
 #ifndef YYDEBUG
 #define YYDEBUG 1
 #endif

@@ -18,6 +18,7 @@ AC_LANG(C++)
 
 AC_CHECK_FUNCS([clock_gettime])
 AC_CHECK_FUNCS([memchr])
+AC_CHECK_FUNCS([memrchr])
 AC_CHECK_FUNCS([memset])
 AC_CHECK_FUNCS([select])
 AC_CHECK_FUNCS([strchr])
@@ -79,7 +80,7 @@ AX_PYTHON_MODULE([re], [fatal], [python])
 dnl The following lines are just including all "addconfig.ac" files
 dnl found in subdirectories
 
-m4_foreach_w([ac_file],m4_esyscmd([find -name addconfig.ac]),
+m4_foreach_w([ac_file],m4_esyscmd([find . -name addconfig.ac]),
 [[#]] config from ac_file
 [sinclude(]ac_file[)]
 [[#]] end of ac_file
