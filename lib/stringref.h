@@ -27,7 +27,7 @@ limitations under the License.
 #if !HAVE_MEMRCHR
 static inline void *memrchr(const char *s, int c, size_t n) {
     for (auto *p = s+n-1; p >= s; --p)
-        if (*p == c) return p;
+        if (*p == c) return const_cast<char *>(p);
     return nullptr;
 }
 #endif
