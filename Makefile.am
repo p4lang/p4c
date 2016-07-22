@@ -57,7 +57,7 @@ $(srcdir)/otherMakefiles.am: $(srcdir)/backends $(srcdir)/extensions $(wildcard 
 # make is very stupid regarding multiple files generated from the same source
 # this pattern ensures that parallel builds continue to work
 ir/ir-generated.h: irgenerator $(ir_DEF_FILES)
-	./irgenerator -t ir/gen-tree-macro.h -i ir/ir-generated.cpp $(ir_DEF_FILES) >$@
+	./irgenerator -t ir/gen-tree-macro.h -i ir/ir-generated.cpp $(ir_DEF_FILES) >$@ || ( rm $@ && false )
 	@$(srcdir)/tools/fixup-line-directives $@ >$@.tmp
 	@mv $@.tmp $@
 ir/gen-tree-macro.h: ir/ir-generated.h

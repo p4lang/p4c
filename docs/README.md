@@ -77,7 +77,11 @@ Installing dependences on OS X:
 - You may need to install brew for useful utilities:
   `sudo /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
 
-- `sudo brew install autoconf automake libtool boost`
+- `sudo brew install autoconf automake libtool boost bison`
+  (OSX's default version of bison is old, you'll need a newer version)
+
+- in order to make brew or other locally installed tools accessable, you
+  may need to run `xcode-select --install`
 
 - You can recompile the C++ garbage-collector from sources from `https://github.com/ivmai/bdwgc.git`
 

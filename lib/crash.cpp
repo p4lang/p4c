@@ -94,7 +94,13 @@ const char *addr2line(void *addr, const char *text) {
     if (!memchr(text, '/', t-text)) *p++ = ')';
     strcpy(p, " | c++filt");  // NOLINT
     p += strlen(p);
+#if HAVE_PIPE2
     if (pipe2(pfd, O_CLOEXEC) < 0) return 0;
+#else
+    if (pipe(pfd) < 0) return 0;
+    fcntl(pfd[0], F_SETFD, FD_CLOEXEC | fcntl(pfd[0], F_GETFL));
+    fcntl(pfd[1], F_SETFD, FD_CLOEXEC | fcntl(pfd[1], F_GETFL));
+#endif
     while ((child = fork()) == -1 && errno == EAGAIN) {}
     if (child == -1) return 0;
     if (child == 0) {
