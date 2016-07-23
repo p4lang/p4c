@@ -717,7 +717,7 @@ def main(argv):
             else:
                 options.compilerOptions += argv[1].split();
                 argv = argv[1:]
-        elif argv[0][1] == 'T':
+        elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
             options.compilerOptions.append(argv[0]);
         else:
             reportError("Uknown option ", argv[0])

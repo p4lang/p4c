@@ -766,7 +766,7 @@ const IR::Expression* ProgramStructure::convertHashAlgorithm(IR::ID algorithm) {
         result = v1model.algorithm.identity.Id();
     } else {
         ::error("%1%: unexpected algorithm", algorithm);
-        return nullptr;
+        result = algorithm;
     }
     auto pe = new IR::TypeNameExpression(v1model.algorithm.Id());
     auto mem = new IR::Member(Util::SourceInfo(), pe, result);
