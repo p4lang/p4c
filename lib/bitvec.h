@@ -22,9 +22,16 @@ limitations under the License.
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gc/gc_cpp.h>
 #include <utility>
 #include <iostream>
+#include "config.h"
+
+#if HAVE_LIBGC
+#include <gc/gc_cpp.h>
+#define IF_HAVE_LIBGC(X)	X
+#else
+#define IF_HAVE_LIBGC(X)
+#endif
 
 #if defined(__GNUC__) || defined(__clang__)
 /* use builtin count leading/trailing bits of type-approprite size */
@@ -128,7 +135,7 @@ class bitvec {
     bitvec(size_t lo, size_t cnt) : size(1), data(0) { setrange(lo, cnt); }
     bitvec(const bitvec &a) : size(a.size) {
         if (size > 1) {
-            ptr = new(PointerFreeGC) uintptr_t[size];
+            ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[size];
             memcpy(ptr, a.ptr, size * sizeof(*ptr));
         } else {
             data = a.data; }}
@@ -137,7 +144,7 @@ class bitvec {
         if (this == &a) return *this;
         if (size > 1) delete [] ptr;
         if ((size = a.size) > 1) {
-            ptr = new(PointerFreeGC) uintptr_t[size];
+            ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[size];
             memcpy(ptr, a.ptr, size * sizeof(*ptr));
         } else {
             data = a.data; }
@@ -355,13 +362,13 @@ class bitvec {
             newsize = (newsize + m) & ~m; }
         if (size > 1) {
             uintptr_t *old = ptr;
-            ptr = new(PointerFreeGC) uintptr_t[newsize];
+            ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[newsize];
             memcpy(ptr, old, size * sizeof(*ptr));
             memset(ptr + size, 0, (newsize - size) * sizeof(*ptr));
             delete [] old;
         } else {
             uintptr_t d = data;
-            ptr = new(PointerFreeGC) uintptr_t[newsize];
+            ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[newsize];
             *ptr = d;
             memset(ptr + size, 0, (newsize - size) * sizeof(*ptr));
         }

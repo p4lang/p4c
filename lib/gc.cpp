@@ -26,10 +26,25 @@ limitations under the License.
 #define _GLIBCXX_USE_NOEXCEPT _NOEXCEPT
 #endif
 
-// One can disable the GC, e.g., to run under Valgrind
-#ifdef HAVE_LIBGC
-void *operator new(std::size_t size) { return ::operator new(size, UseGC, 0, 0); }
-void *operator new[](std::size_t size) { return ::operator new(size, UseGC, 0, 0); }
+// One can disable the GC, e.g., to run under Valgrind, by editing config.h
+#if HAVE_LIBGC
+static bool done_init;
+void *operator new(std::size_t size) {
+    /* DANGER -- on OSX, can't safely call the garbage collector allocation
+     * routines from a static global constructor without manually initializing
+     * it first.  Since we have global constructors that want to allocate
+     * memory, we need to force initialization */
+    if (!done_init) {
+	GC_INIT();
+	done_init = true; }
+    return ::operator new(size, UseGC, 0, 0);
+}
+void *operator new[](std::size_t size) {
+    if (!done_init) {
+	GC_INIT();
+	done_init = true; }
+    return ::operator new(size, UseGC, 0, 0);
+}
 void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator delete(p); }
 void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator delete(p); }
 
@@ -41,11 +56,11 @@ static void gc_callback() {
     LOG1("****** GC called ****** (heap size " << GC_get_heap_size() << ")");
     GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
 }
-#endif
+#endif  /* HAVE_LIBGC */
 
 void setup_gc_logging() {
-#ifdef HAVE_LIBGC
+#if HAVE_LIBGC
     GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
     GC_start_call_back = gc_callback;
-#endif
+#endif  /* HAVE_LIBGC */
 }
