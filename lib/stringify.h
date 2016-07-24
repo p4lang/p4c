@@ -39,12 +39,10 @@ class HasToString final {
     enum { value = sizeof(func<T>(0)) == sizeof(char) };
 };
 
+template<typename T, typename = decltype(std::to_string((T)0))>
+cstring toString(T value) { return std::to_string(value); }
+
 cstring toString(bool value);
-cstring toString(int value);
-cstring toString(long value);
-cstring toString(uint64_t value);
-cstring toString(unsigned value);
-cstring toString(double value);
 cstring toString(std::string value);
 cstring toString(const char* value);
 cstring toString(cstring value);

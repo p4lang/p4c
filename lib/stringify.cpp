@@ -22,26 +22,6 @@ cstring toString(bool value) {
     return value ? "true" : "false";
 }
 
-cstring toString(int value) {
-    return std::to_string(value);
-}
-
-cstring toString(long value) {
-    return std::to_string(value);
-}
-
-cstring toString(uint64_t value) {
-    return std::to_string(value);
-}
-
-cstring toString(unsigned value) {
-    return std::to_string(value);
-}
-
-cstring toString(double value) {
-    return std::to_string(value);
-}
-
 cstring toString(std::string value) {
     return value;
 }
