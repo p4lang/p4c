@@ -23,6 +23,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "lib/path.h"
 #include "frontends/p4/toP4/toP4.h"
+#include "ir/json_generator.h"
 
 static cstring version = "0.0.4";
 extern int verbose;
@@ -205,6 +206,8 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
     if (verbose)
         std::cerr << name << std::endl;
 
+
+
     for (auto s : top4) {
         if (strstr(name.c_str(), s.c_str()) != nullptr) {
             cstring suffix = cstring("-") + name;
@@ -221,6 +224,12 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
                 node->apply(toP4);
             }
         }
+    }
+    if (dumpJsonFile != "") {
+        std::unordered_set<int> refs;
+        std::cout   << "{" << std::endl 
+                    << JSONGenerator::generate<IR::Node>(node, "    ", refs)
+                    << std::endl << "}" << std::endl;
     }
 }
 

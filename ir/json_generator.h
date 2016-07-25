@@ -173,17 +173,7 @@ public:
             << std::endl << indent << "}";
         return ss.str();
     }
-/*
-    template<typename T>
-    static cstring generate(const typename 
-            std::enable_if<is_std_vector<T>::value, T>::type 
-                &v, cstring indent, std::unordered_set<int> &node_refs)
-    {
-        (void)v; (void)indent; (void)node_refs;
-    
-        return "\"Handle std::vector here.\"";
-    }
-*/
+
     template<typename T>
     static cstring generate(const typename 
             std::enable_if<is_ordered_map<T>::value, T>::type 
@@ -266,7 +256,7 @@ public:
                                 std::enable_if<
                                     std::is_same<typename std::remove_cv<
                                                     typename std::remove_pointer<T>::type
-                                                 >::type, TableResourceAlloc
+                                                 >::type, struct TableResourceAlloc
                                     >::value
                                 , T>::type
                             v, cstring indent, std::unordered_set<int> &node_refs)
