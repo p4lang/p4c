@@ -80,8 +80,8 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     out << "#ifndef " << macroname << "\n"
         << "#define " << macroname << "\n" << std::endl;
     impl << "#include \"ir/ir.h\"\n"
-         << "#include \"ir/visitor.h\"\n" << std::endl;
-#error
+         << "#include \"ir/visitor.h\"\n"
+         << "#include \"extensions/tofino/mau/resources.h\"\n" << std::endl;
     for (auto e : elements) {
         e->generate_hdr(out);
         e->generate_impl(impl); }
