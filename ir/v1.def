@@ -151,6 +151,9 @@ class Primitive : Operation {
     Primitive(Util::SourceInfo si, cstring n, Expression a1, Vector<Expression> a2)
     : Operation(si), name(n) {
         operands.push_back(a1);
+        if (a2) for (auto e : *a2) operands.push_back(e); }
+    Primitive(cstring n, Expression a1, Expression a2, Expression a3) : name(n) {
+        operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
     Primitive(Util::SourceInfo si, cstring n, Expression a1, Expression a2, Expression a3)
     : Operation(si), name(n) {
         operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
