@@ -45,7 +45,7 @@ class Vector : public VectorBase {
     vector<const T *>   vec;
 
  public:
-    typedef T value_type;
+    typedef const T* value_type;
     Vector() = default;
     Vector(const Vector &) = default;
     Vector(Vector &&) = default;

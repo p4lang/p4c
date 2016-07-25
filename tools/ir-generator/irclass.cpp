@@ -81,7 +81,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "#define " << macroname << "\n" << std::endl;
     impl << "#include \"ir/ir.h\"\n"
          << "#include \"ir/visitor.h\"\n" << std::endl;
-
+#error
     for (auto e : elements) {
         e->generate_hdr(out);
         e->generate_impl(impl); }
