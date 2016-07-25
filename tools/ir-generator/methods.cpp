@@ -101,9 +101,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         return needed ? buf.str() : cstring(); } } },
 { "toJSON", { &NamedType::Cstring, { 
         new IrField(&NamedType::Cstring, "indent", ""), 
-        new IrField(new ReferenceType(new TemplateInstantiation(&NamedType::Unordered_Set, 
-                                                                
-                        &NamedType::Int)), "node_refs") 
+        new IrField(new ReferenceType(new TemplateInstantiation(&NamedType::Unordered_Set, &NamedType::Int)), "node_refs") 
     }, CONST + IN_IMPL + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
