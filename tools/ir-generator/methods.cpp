@@ -126,11 +126,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 buf << cl->indent << "if (" << f->name << " != nullptr) ";
             buf << cl->indent << "buf << std::endl << indent << \"\\\"" 
                 << f->name << "\\\" : \" << "
-                << "JSONGenerator::generate<" << f->type->toString();
-            if (dynamic_cast<const ArrayType*>(f->type))
-                buf << ", " << dynamic_cast<const ArrayType*>(f->type)->size;
-            buf << ">"
-                << "(" << f->name << ", indent, node_refs)";
+                << "JSONGenerator::generate" << "(" << f->name << ", indent, node_refs)";
             if (cnt > 1)
                 buf << " << \",\"";
             buf << ";" << std::endl;

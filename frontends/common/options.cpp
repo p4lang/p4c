@@ -228,7 +228,7 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
     if (dumpJsonFile != "") {
         std::unordered_set<int> refs;
         std::cout   << "{" << std::endl 
-                    << JSONGenerator::generate<IR::Node>(node, "    ", refs)
+                    << JSONGenerator::generate(node, "    ", refs)
                     << std::endl << "}" << std::endl;
     }
 }
