@@ -1,4 +1,4 @@
-#include "/home/mbudiu/git/p4c/p4include/core.p4"
+#include "/home/cdodd/p4c/p4include/core.p4"
 
 parser Prs<T>(packet_in b, out T result);
 control Map<T>(in T d);

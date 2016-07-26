@@ -999,8 +999,12 @@ cstring JsonConverter::convertHashAlgorithm(cstring algorithm) const {
     cstring result;
     if (algorithm == v1model.algorithm.crc32.name)
         result = "crc32";
+    else if (algorithm == v1model.algorithm.crc32_custom.name)
+        result = "crc32_custom";
     else if (algorithm == v1model.algorithm.crc16.name)
         result = "crc16";
+    else if (algorithm == v1model.algorithm.crc16_custom.name)
+        result = "crc16_custom";
     else if (algorithm == v1model.algorithm.random.name)
         result = "random";
     else if (algorithm == v1model.algorithm.identity.name)

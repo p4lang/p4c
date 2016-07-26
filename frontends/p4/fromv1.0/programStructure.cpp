@@ -758,8 +758,12 @@ const IR::Expression* ProgramStructure::convertHashAlgorithm(IR::ID algorithm) {
     IR::ID result;
     if (algorithm == "crc32") {
         result = v1model.algorithm.crc32.Id();
+    } else if (algorithm == "crc32_custom") {
+        result = v1model.algorithm.crc32_custom.Id();
     } else if (algorithm == "crc16") {
         result = v1model.algorithm.crc16.Id();
+    } else if (algorithm == "crc16_custom") {
+        result = v1model.algorithm.crc16_custom.Id();
     } else if (algorithm == "random") {
         result = v1model.algorithm.random.Id();
     } else if (algorithm == "identity") {

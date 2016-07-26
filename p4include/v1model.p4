@@ -89,7 +89,9 @@ extern void digest<T>(in bit<32> receiver, in T data);
 
 enum HashAlgorithm {
     crc32,
+    crc32_custom,
     crc16,
+    crc16_custom,
     random,
     identity
 }
