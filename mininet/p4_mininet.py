@@ -53,6 +53,7 @@ class P4Switch(Switch):
                   pcap_dump = False,
                   verbose = False,
                   device_id = None,
+                  enable_debugger = False,
                   **kwargs ):
         Switch.__init__( self, name, **kwargs )
         assert(sw_path)
@@ -64,6 +65,7 @@ class P4Switch(Switch):
         self.output = open(logfile, 'w')
         self.thrift_port = thrift_port
         self.pcap_dump = pcap_dump
+        self.enable_debugger = enable_debugger
         if device_id is not None:
             self.device_id = device_id
             P4Switch.device_id = max(P4Switch.device_id, device_id)
@@ -95,9 +97,9 @@ class P4Switch(Switch):
         args.extend( ['--device-id', str(self.device_id)] )
         P4Switch.device_id += 1
         args.append(self.json_path)
-
+        if self.enable_debugger:
+            args.append("--debugger")
         logfile = '/tmp/p4s.%s.log' % self.name
-
         print ' '.join(args)
 
         self.cmd( ' '.join(args) + ' >' + logfile + ' 2>&1 &' )
