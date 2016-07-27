@@ -18,7 +18,7 @@ limitations under the License.
 #include "lib/algorithm.h"
 
 enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ONLY = 16,
-             CONST = 32, CLASSREF = 64, INCL_NESTED = 128, STATIC = 256};
+             CONST = 32, CLASSREF = 64, INCL_NESTED = 128};
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 { "operator==", { &NamedType::Bool, {}, CONST + IN_IMPL + OVERRIDE + CLASSREF,
@@ -101,69 +101,36 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         return needed ? buf.str() : cstring(); } } },
 { "toJSON", { &NamedType::Cstring, { 
         new IrField(&NamedType::Cstring, "indent", ""), 
-        new IrField(new ReferenceType(
-                    new TemplateInstantiation(&NamedType::Unordered_Set,
-                                                &NamedType::Int)), "node_refs") 
+        new IrField(new ReferenceType(new TemplateInstantiation(&NamedType::Unordered_Set, &NamedType::Int)), "node_refs") 
     }, CONST + IN_IMPL + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
-        static vector<cstring> preamble = {  
-                    "{\n", "std::stringstream buf;\n",
-                    "if (node_refs.find(this->id) != node_refs.end()) {\n",
-                    "", "buf << indent << \"\\\"Node_ID\\\" : \" << this->id;\n"
-                    "", "return buf.str();\n", "}\n" }
-        for (auto e : preamble)
-            buf << e << cl->indent;
-
-        buf << "buf << " << cl->getParent()->name << "::toJSON(indent, node_refs);" 
+        buf << "{" << std::endl;
+        buf << cl->indent << "std::stringstream buf;" << std::endl;
+        buf << cl->indent << "if (node_refs.find(this->id) != node_refs.end()) {" << std::endl
+            << cl->indent << cl->indent 
+            << "buf << indent << \"\\\"Node_ID\\\" : \" << this->id;" << std::endl
+            << cl->indent << cl->indent << "return buf.str();" << std::endl << "}" << std::endl;
+        buf << cl->indent << "buf << " << cl->getParent()->name << "::toJSON(indent, node_refs);" 
             << std::endl;
         
-        for (auto f : *cl->getFields()) {
-            if (!f->isInline && f->nullOK)
-                buf << cl->indent << "if (" << f->name << " == nullptr) buf << \"null\";";
-            buf << cl->indent << "buf << \",\" << std::endl << indent << \"\\\"" 
-                << f->name << "\\\" : \" << "
-                << "JSONGenerator::generate<" << f->type->toString();
-            if (dynamic_cast<const ArrayType*>(f->type))
-                buf << ", " << dynamic_cast<const ArrayType*>(f->type)->size;
-            buf << ">"
-                << "(" << f->name << ", indent, node_refs)";
-            Zbuf << ";" << std::endl;
-        }
-        buf << cl->indent << "node_refs.insert(this->id);" << std::endl;
-        buf << cl->indent << "return buf.str();" << std::endl << "}";
-        return buf.str(); } } },
-{ "fromJSON", { new PointerType(&NamedType::Node), { 
-        new IrField(&NamedType::Cstring, "json"), 
-        new IrField(new ReferenceType(
-                    new TemplateInstantiation(&NamedType::Map, 
-                                                { &NamedType::Int, new PointerType(&NamedType::Node) })),
-                                                "nodes") 
-    }, CONST + IN_IMPL + OVERRIDE + STATIC,
-    [](IrClass *cl, cstring) -> cstring {
-        std::stringstream buf;
-        static vector<cstring> preamble = {  
-                    "{\n", "std::stringstream buf;\n",
-                    "if (node_refs.find(this->id) != node_refs.end()) {\n",
-                    "", "buf << indent << \"\\\"Node_ID\\\" : \" << this->id;\n"
-                    "", "return buf.str();\n", "}\n" }
-        for (auto e : preamble)
-            buf << e << cl->indent;
+        auto iter = cl->getFields();  
+        size_t cnt = iter->count();
+        iter->reset(); //Not sure if needed
 
-        buf << "buf << " << cl->getParent()->name << "::toJSON(indent, node_refs);" 
-            << std::endl;
-        
-        for (auto f : *cl->getFields()) {
+        if (cnt > 0)
+            buf << cl->indent << "if (buf.str().length() > 0) buf << \",\";" << std::endl;
+
+        for (auto f : *iter) {
             if (!f->isInline && f->nullOK)
-                buf << cl->indent << "if (" << f->name << " == nullptr) buf << \"null\";";
-            buf << cl->indent << "buf << \",\" << std::endl << indent << \"\\\"" 
+                buf << cl->indent << "if (" << f->name << " != nullptr) ";
+            buf << cl->indent << "buf << std::endl << indent << \"\\\"" 
                 << f->name << "\\\" : \" << "
-                << "JSONGenerator::generate<" << f->type->toString();
-            if (dynamic_cast<const ArrayType*>(f->type))
-                buf << ", " << dynamic_cast<const ArrayType*>(f->type)->size;
-            buf << ">"
-                << "(" << f->name << ", indent, node_refs)";
-            Zbuf << ";" << std::endl;
+                << "JSONGenerator::generate" << "(" << f->name << ", indent, node_refs)";
+            if (cnt > 1)
+                buf << " << \",\"";
+            buf << ";" << std::endl;
+            cnt--;
         }
         buf << cl->indent << "node_refs.insert(this->id);" << std::endl;
         buf << cl->indent << "return buf.str();" << std::endl << "}";

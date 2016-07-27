@@ -140,7 +140,7 @@ class Vector : public VectorBase {
    
 //    cstring toJSON(cstring indent, std::unordered_set<int> &node_refs) 
 //    {
-//        return JSONGenerator::generate<decltype(vec)>(vec, indent, node_refs); 
+//        return JSONGenerator::generate(vec, indent, node_refs); 
 //    }
 };
 
