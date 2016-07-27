@@ -214,7 +214,7 @@ public:
                     is_ir_vector<T>::value, T>::type
              &v, cstring indent, std::unordered_set<int> &node_refs)
     {   
-        return generate<vector<const typename T::value_type*>>(v.get_data(), indent, node_refs);
+        return generate<vector<typename T::value_type>>(v.get_data(), indent, node_refs);
     }
 
     template<typename T>
@@ -352,6 +352,69 @@ public:
         ss << "]";
         return ss.str();
     }
+
+    struct JsonData {
+        cstring field_name;
+        enum JsonDataType {
+            INT_DATA,
+            FLOAT_DATA,
+            STRING_TYPE,
+            BOOLEAN_TYPE,
+            ARRAY_TYPE,
+            OBJECT_TYPE,
+            NULL_TYPE
+        }
+        enum JsonDataType type;
+        union {
+            cstring string_data;
+            long long int integer_data;
+            double float_data;
+            bool bool_data;
+            JsonData* array_data;
+            JsonData* object_data;
+        }
+    }
+    
+
+    cstring parse_string(char * s) {
+        assert(*s == '"');
+        char* end = strchr(s + 1, "\"");
+        *end = '\0';
+        cstring ret(s + 1);
+        *end = "\"";
+        return ret;
+    }
+
+    char* shift_to_next(char* s, char c) {
+        return strchr(s, c);
+    }
+    char* shift_to_non_whitespace(char * s)
+    {   
+        std::string str(s);
+        size_t idx = str.find_first_not_of(" \t\n\r");
+        return idx != std::string:npos ? s + idx : nullptr;
+    }
+
+    JsonData* parseJsonText(cstring json) {
+        JsonData* data = new JsonData;
+        char* ch = json.find('{'), *ch2;
+        if (ch != nullptr 
+                && (ch2 = json.find('[')) != nullptr && ch2 > ch)
+            ch = shift_to_next(ch, '"');
+            data->field_name = parse_string(s + 1);
+            ch = shift_to_next(ch, ':');
+            ch = shift_to_non_whitespace(ch);
+            assert(ch != nullptr);
+            switch
+            
+            
+            
+        } else if ((start = json.find("[") != nullptr) {
+            
+        } else
+            assert(true);
+    }
 };
+
 
 #endif /* _IR_JSON_GENERATOR_H_ */

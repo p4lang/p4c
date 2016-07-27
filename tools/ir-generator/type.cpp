@@ -55,7 +55,8 @@ const IrClass *NamedType::resolve(const IrNamespace *in) const {
 
 NamedType NamedType::Bool("bool"), NamedType::Int("int"), NamedType::Void("void"),
           NamedType::Cstring("cstring"), NamedType::Ostream("std::ostream"),
-          NamedType::Visitor("Visitor"), NamedType::Unordered_Set("std::unordered_set");
+          NamedType::Visitor("Visitor"), NamedType::Unordered_Set("std::unordered_set"),
+          NamedType::Node(IR::Node);
 
 cstring TemplateInstantiation::toString() const {
     std::string rv = base->toString().c_str();
