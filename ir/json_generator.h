@@ -34,24 +34,24 @@ class JSONGenerator {
 
         template<typename C> static small test(decltype(&C::toJSON));
         template<typename C> static big test(...);
-        
+    public: 
         static const bool value = sizeof(test<T>(0)) == sizeof(char);
     };
 
     template<typename T>
-    static constexpr bool is_vector(const T &v)
+    static constexpr bool is_vector()
     {
         return std::is_same<T, vector<typename T::value_type,
-                                      typename T::allocator_type>::value 
+                                      typename T::allocator_type>>::value 
                 || std::is_same<T, std::vector<typename T::value_type,
-                                               typename T::allocator_type>::value
+                                               typename T::allocator_type>>::value;
     }
 
     template<typename T>
     static cstring vectorToJson(const T &v,
                         cstring indent, std::unordered_set<int> &node_refs)
     {
-        static_assert(!is_vector(v), "vectorToJson requires a vector as first argument");
+        static_assert(is_vector<T>(), "vectorToJson requires a vector as first argument");
         std::stringstream ss;
         ss << "[";
         if (v.size() > 0) {
@@ -150,6 +150,12 @@ public:
         ss << v;
         ss << "\"";
         return ss.str();
+    }
+
+    static cstring generate(const struct TableResourceAlloc, 
+            cstring, std::unordered_set<int>&)
+    {
+        return "\"TODO: Implement TableResourceAlloc to JSON \"";
     }
 
     static cstring generate(const match_t &v, cstring indent, std::unordered_set<int> &)

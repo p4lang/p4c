@@ -101,36 +101,28 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         return needed ? buf.str() : cstring(); } } },
 { "toJSON", { &NamedType::Cstring, { 
         new IrField(&NamedType::Cstring, "indent", ""), 
-        new IrField(new ReferenceType(new TemplateInstantiation(&NamedType::Unordered_Set, &NamedType::Int)), "node_refs") 
+        new IrField(new ReferenceType(
+                            new TemplateInstantiation(&NamedType::Unordered_Set, 
+                                                      &NamedType::Int)), "node_refs") 
     }, CONST + IN_IMPL + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
-        buf << "{" << std::endl;
-        buf << cl->indent << "std::stringstream buf;" << std::endl;
-        buf << cl->indent << "if (node_refs.find(this->id) != node_refs.end()) {" << std::endl
-            << cl->indent << cl->indent 
-            << "buf << indent << \"\\\"Node_ID\\\" : \" << this->id;" << std::endl
-            << cl->indent << cl->indent << "return buf.str();" << std::endl << "}" << std::endl;
-        buf << cl->indent << "buf << " << cl->getParent()->name << "::toJSON(indent, node_refs);" 
+        static std::vector<cstring> preamble = {  
+                    "{\n", "std::stringstream buf;\n",
+                    "if (node_refs.find(this->id) != node_refs.end()) {\n",
+                    "", "buf << indent << \"\\\"Node_ID\\\" : \" << this->id;\n"
+                    "", "return buf.str();\n", "}\n" };
+        for (auto e : preamble)
+            buf << e << cl->indent;
+
+        buf << "buf << " << cl->getParent()->name << "::toJSON(indent, node_refs);" 
             << std::endl;
         
-        auto iter = cl->getFields();  
-        size_t cnt = iter->count();
-        iter->reset(); //Not sure if needed
-
-        if (cnt > 0)
-            buf << cl->indent << "if (buf.str().length() > 0) buf << \",\";" << std::endl;
-
-        for (auto f : *iter) {
-            if (!f->isInline && f->nullOK)
-                buf << cl->indent << "if (" << f->name << " != nullptr) ";
-            buf << cl->indent << "buf << std::endl << indent << \"\\\"" 
+        for (auto f : *cl->getFields()) {
+            buf << cl->indent << "buf << \",\" << std::endl << indent << \"\\\"" 
                 << f->name << "\\\" : \" << "
-                << "JSONGenerator::generate" << "(" << f->name << ", indent, node_refs)";
-            if (cnt > 1)
-                buf << " << \",\"";
-            buf << ";" << std::endl;
-            cnt--;
+                << "JSONGenerator::generate" << "(" << f->name << ", indent, node_refs)"
+                << ";" << std::endl;
         }
         buf << cl->indent << "node_refs.insert(this->id);" << std::endl;
         buf << cl->indent << "return buf.str();" << std::endl << "}";
