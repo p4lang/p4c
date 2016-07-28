@@ -26,6 +26,7 @@ limitations under the License.
 
 #include "ir.h"
 class JSONGenerator {
+ public:
     std::unordered_set<int> node_refs;
 
     template<typename T>
@@ -102,13 +103,8 @@ class JSONGenerator {
         return ss.str();
     }
 
-    template<typename T>
-    cstring generate(const IR::Vector<T>&v)
-    {
-        return generate(v.get_data());
-    }
-
     cstring generate(cstring v) {
+        if (!v) return "null";
         return "\"" + v + "\"";
     }
     template<typename T>

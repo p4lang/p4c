@@ -108,6 +108,7 @@ class NameMap : public Node {
         return "NameMap<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
+    cstring toJSON(JSONGenerator *json) const override;
 
     Util::Enumerator<const T*>* valueEnumerator() const {
         return Util::Enumerator<const T*>::createEnumerator(Values(symbols).begin(),

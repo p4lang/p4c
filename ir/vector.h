@@ -129,6 +129,7 @@ class Vector : public VectorBase {
     void visit_children(Visitor &v) const override;
     virtual void parallel_visit_children(Visitor &v);
     virtual void parallel_visit_children(Visitor &v) const;
+    cstring toJSON(JSONGenerator *json) const override;
     Util::Enumerator<const T*>* getEnumerator() const {
         return Util::Enumerator<const T*>::createEnumerator(vec); }
     template <typename S>
