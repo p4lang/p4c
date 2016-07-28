@@ -99,14 +99,10 @@ class Node : public virtual INode {
         return dynamic_cast<const T*>(this); 
     }
     cstring toString() const override { return node_type_name(); }
-    virtual cstring toJSON(cstring indent, std::unordered_set<int> &node_refs) const override {
+    virtual cstring toJSON(cstring indent, std::unordered_set<int> &) const override {
         std::stringstream buf;
-        buf << indent << "\"Node_ID\" : " << id;
-        if (node_refs.find(id) == node_refs.end()) {
-            node_refs.insert(id);
-            buf << ", " << std::endl << indent 
-                << "\"Node_Type\" : \"" << node_type_name() << "\"";
-        }
+        buf << indent << "\"Node_ID\" : " << id << ", " << std::endl
+            << indent << "\"Node_Type\" : \"" << node_type_name() << "\"";
         return buf.str();
     }
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }

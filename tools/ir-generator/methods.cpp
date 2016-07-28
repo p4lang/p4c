@@ -107,32 +107,17 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         std::stringstream buf;
         buf << "{" << std::endl;
         buf << cl->indent << "std::stringstream buf;" << std::endl;
-        buf << cl->indent << "if (node_refs.find(this->id) != node_refs.end()) {" << std::endl
-            << cl->indent << cl->indent 
-            << "buf << indent << \"\\\"Node_ID\\\" : \" << this->id;" << std::endl
-            << cl->indent << cl->indent << "return buf.str();" << std::endl << "}" << std::endl;
         buf << cl->indent << "buf << " << cl->getParent()->name << "::toJSON(indent, node_refs);" 
             << std::endl;
         
-        auto iter = cl->getFields();  
-        size_t cnt = iter->count();
-        iter->reset(); //Not sure if needed
-
-        if (cnt > 0)
-            buf << cl->indent << "if (buf.str().length() > 0) buf << \",\";" << std::endl;
-
-        for (auto f : *iter) {
+        for (auto f : *cl->getFields()) {
             if (!f->isInline && f->nullOK)
                 buf << cl->indent << "if (" << f->name << " != nullptr) ";
-            buf << cl->indent << "buf << std::endl << indent << \"\\\"" 
+            buf << cl->indent << "buf << \",\" << std::endl << indent << \"\\\"" 
                 << f->name << "\\\" : \" << "
                 << "JSONGenerator::generate" << "(" << f->name << ", indent, node_refs)";
-            if (cnt > 1)
-                buf << " << \",\"";
             buf << ";" << std::endl;
-            cnt--;
         }
-        buf << cl->indent << "node_refs.insert(this->id);" << std::endl;
         buf << cl->indent << "return buf.str();" << std::endl << "}";
         return buf.str(); } } },
 { "toString", { &NamedType::Cstring, {}, CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
