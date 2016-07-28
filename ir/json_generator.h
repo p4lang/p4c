@@ -138,7 +138,9 @@ public:
     }
 
     template<typename T>
-    static typename std::enable_if< has_toJSON<T>::value, cstring>::type
+    static typename std::enable_if<
+                            has_toJSON<T>::value &&
+                            !std::is_base_of<IR::Node, T>::value, cstring>::type
     generate(const T
             & v, cstring indent, std::unordered_set<int> &node_refs)
     {
