@@ -190,10 +190,9 @@ class CalculatedField {
         operator== { return update == a.update && name == a.name && cond == a.cond; }
         toJSON { 
             std::stringstream ss;
-            ss  << indent << "\"update\" : " << (update ? "True" : "False") << "," << std::endl
-                << indent << "\"name\" : \"" << name.toString() << "\"," << std::endl
-                << indent << "\"cond\" : {" << std::endl << cond->toJSON(indent + "   ", node_refs) << std::endl 
-                << indent << "}";
+            ss << json->indent << "\"update\" : " << json->generate(update) << "," << std::endl
+               << json->indent << "\"name\" : " << json->generate(name) << "," << std::endl
+               << json->indent << "\"cond\" : " << json->generate(cond);
             return ss.str();
         }
     }
