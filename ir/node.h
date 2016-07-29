@@ -47,7 +47,7 @@ class INode : public Util::IHasSourceInfo, public Util::IHasDbPrint {
     virtual Node* getNode() = 0;
     virtual void dbprint(std::ostream &out) const = 0;  // for debugging
     virtual cstring toString() const = 0;  // for user consumption
-    virtual cstring toJSON(JSONGenerator *) const = 0;
+    virtual cstring toJSON(JSONGenerator &) const = 0;
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     template<typename T> bool is() const;
@@ -100,7 +100,7 @@ class Node : public virtual INode {
         return dynamic_cast<const T*>(this); 
     }
     cstring toString() const override { return node_type_name(); }
-    virtual cstring toJSON(JSONGenerator *json) const override;
+    virtual cstring toJSON(JSONGenerator &json) const override;
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }

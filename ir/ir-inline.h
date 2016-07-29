@@ -132,15 +132,15 @@ template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) const 
         v.flow_merge(clone); }
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template<class T>, <T>)
-template<class T> cstring IR::Vector<T>::toJSON(JSONGenerator *json) const {
+template<class T> cstring IR::Vector<T>::toJSON(JSONGenerator &json) const {
     std::stringstream buf;
     const char *sep = "";
-    buf << Node::toJSON(json) << "," << std::endl << json->indent++ << "\"vec\" : [";
+    buf << Node::toJSON(json) << "," << std::endl << json.indent++ << "\"vec\" : [";
     for (auto &k : vec) {
-        buf << sep << std::endl << json->indent << json->generate(k);
+        buf << sep << std::endl << json.indent << json.generate(k);
         sep = ","; }
-    --json->indent;
-    if (*sep) buf << std::endl << json->indent;
+    --json.indent;
+    if (*sep) buf << std::endl << json.indent;
     buf << "]";
     return buf.str();
 }
@@ -244,16 +244,16 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) const {
 template<class T, template<class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
          class COMP /*= std::less<cstring>*/,
          class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
-cstring IR::NameMap<T, MAP, COMP, ALLOC>::toJSON(JSONGenerator *json) const {
+cstring IR::NameMap<T, MAP, COMP, ALLOC>::toJSON(JSONGenerator &json) const {
     std::stringstream buf;
     const char *sep = "";
-    buf << Node::toJSON(json) << "," << std::endl << json->indent++ << "\"symbols\" : {";
+    buf << Node::toJSON(json) << "," << std::endl << json.indent++ << "\"symbols\" : {";
     for (auto &k : symbols) {
-        buf << sep << std::endl << json->indent << "\"" << k.first << "\" : "
-            << json->generate(k.second);
+        buf << sep << std::endl << json.indent << "\"" << k.first << "\" : "
+            << json.generate(k.second);
         sep = ","; }
-    --json->indent;
-    if (*sep) buf << std::endl << json->indent;
+    --json.indent;
+    if (*sep) buf << std::endl << json.indent;
     buf << "}";
     return buf.str();
 }

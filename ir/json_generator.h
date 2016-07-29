@@ -136,7 +136,7 @@ class JSONGenerator {
         std::stringstream ss;
         ++indent;
         ss << "{" << std::endl
-           << v.toJSON(this) << std::endl
+           << v.toJSON(*this) << std::endl
            << --indent << "}";
         return ss.str();
     }
@@ -149,7 +149,7 @@ class JSONGenerator {
             ss << indent << "\"Node_ID\" : " << v.id << std::endl;
         } else {
             node_refs.insert(v.id);
-            ss << v.toJSON(this) << std::endl; }
+            ss << v.toJSON(*this) << std::endl; }
         ss << --indent << "}";
         return ss.str();
     }
