@@ -189,11 +189,9 @@ class CalculatedField {
         //: srcInfo(si), update(u), name(n), cond(c) {}
         operator== { return update == a.update && name == a.name && cond == a.cond; }
         toJSON { 
-            std::stringstream ss;
-            ss << json.indent << "\"update\" : " << json.generate(update) << "," << std::endl
-               << json.indent << "\"name\" : " << json.generate(name) << "," << std::endl
-               << json.indent << "\"cond\" : " << json.generate(cond);
-            return ss.str();
+            json << json.indent << "\"update\" : " << update << "," << std::endl
+                 << json.indent << "\"name\" : " << name << "," << std::endl
+                 << json.indent << "\"cond\" : " << cond;
         }
     }
     vector<update_or_verify>    specs = {};

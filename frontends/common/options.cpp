@@ -226,8 +226,8 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
         }
     }
     if (dumpJsonFile != "") {
-        JSONGenerator json;
-        std::cout << json.generate(node) << std::endl;
+        JSONGenerator json(std::cout);
+        json << node << std::endl;
     }
 }
 
