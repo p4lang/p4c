@@ -57,11 +57,15 @@ class PathName final {
     // extract the folder
     // e.g., /usr/local/bin
     PathName getFolder() const;
-    cstring toString() const { return str; }
+    // return the normalized absolute filename using the current directory as root
+    // e.g., ../dir/file (cwd: /usr/local/bin) -> /usr/local/dir/file
+    PathName getAbsolutePath() const;
     bool isNullOrEmpty() const { return str.isNullOrEmpty(); }
+    bool isAbsolute() const { return !isNullOrEmpty() && str[0] == '/'; }
     bool operator==(const PathName &other) const { return str == other.str; }
     bool operator!=(const PathName &other) const { return str != other.str; }
     PathName join(cstring component) const;
+    cstring toString() const { return str; }
 
     static PathName empty;
 };

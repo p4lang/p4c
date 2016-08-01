@@ -972,7 +972,7 @@ void yyerror(const char *fmt, ...) {
     va_end(args);
 }
 
-const IR::P4Program *parse_P4_16_file(const char *name, FILE *in) {
+const IR::P4Program *parse_P4_16_file(const char *name, cstring in) {
     extern int verbose;
     if (verbose)
         std::cout << "Parsing P4-16 program " << name << std::endl;
@@ -985,7 +985,7 @@ const IR::P4Program *parse_P4_16_file(const char *name, FILE *in) {
 #endif
     declarations = new IR::IndexedVector<IR::Node>();
     parsing = true;
-    yyrestart(in);
+    yy_scan_string(in.c_str());
     errors |= yyparse();
     parsing = false;
     if (errors) {

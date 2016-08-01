@@ -22,13 +22,15 @@ limitations under the License.
 #include "frontends/p4/p4-parse.h"
 
 const IR::P4Program* parseP4File(CompilerOptions& options) {
-    FILE* in = options.preprocess();
-    if (::errorCount() > 0 || in == nullptr)
-        return nullptr;
-
     const IR::P4Program* result = nullptr;
     bool compiling10 = options.isv1();
     if (compiling10) {
+        FILE* in = options.preprocessExternal();
+        if (::errorCount() > 0 || in == nullptr) {
+            options.closeInput(in);
+            return nullptr;
+        }
+
         P4V1::Converter converter;
         converter.loadModel();
         // Model is loaded before parsing the input file.
@@ -41,13 +43,18 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
             result = v1->to<IR::P4Program>();
             if (result == nullptr) {
                 BUG("Conversion returned %1%", v1);
+                options.closeInput(in);
                 return result;
             }
         }
+        options.closeInput(in);
     } else {
+        cstring in = options.preprocessNative();
+        if (::errorCount() > 0 || options.doNotCompile)
+            return nullptr;
+
         result = parse_P4_16_file(options.file, in);
     }
-    options.closeInput(in);
     if (::errorCount() > 0) {
         ::error("%1% errors encountered, aborting compilation", ::errorCount());
         return nullptr;

@@ -131,7 +131,7 @@ void ToP4::dump(unsigned depth, const IR::Node* node, unsigned adjDepth) {
 }
 
 bool ToP4::preorder(const IR::P4Program* program) {
-    std::set<cstring> includesEmitted;
+    std::set<cstring> importsEmitted;
 
     bool first = true;
     dump(2);
@@ -143,11 +143,11 @@ bool ToP4::preorder(const IR::P4Program* program) {
                 auto sfl = Util::InputSources::instance->getSourceLine(line);
                 cstring sourceFile = sfl.fileName;
                 if (sourceFile != mainFile && isSystemFile(sourceFile)) {
-                    if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
-                        builder.append("#include \"");
+                    if (importsEmitted.find(sourceFile) == importsEmitted.end()) {
+                        builder.append("#import <");
                         builder.append(sourceFile);
-                        builder.appendLine("\"");
-                        includesEmitted.emplace(sourceFile);
+                        builder.appendLine(">");
+                        importsEmitted.emplace(sourceFile);
                     }
                     first = false;
                     continue;

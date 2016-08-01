@@ -413,10 +413,10 @@ void ProgramStructure::include(cstring filename) {
     CompilerOptions options;
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.file = path.toString();
-    FILE* file = options.preprocess();
-    if (::errorCount() || file == nullptr)
+    cstring in = options.preprocessNative();
+    if (::errorCount())
         return;
-    auto std = parse_P4_16_file(options.file, file);
+    auto std = parse_P4_16_file(options.file, in);
     if (::errorCount() || std == nullptr)
         return;
     for (auto decl : *std->declarations)
@@ -424,7 +424,7 @@ void ProgramStructure::include(cstring filename) {
 }
 
 void ProgramStructure::loadModel() {
-    // This includes in turn stdlib.p4
+    // This includes in turn core.p4
     include("v1model.p4");
 }
 

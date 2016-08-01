@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include <getopt.h>
+#include <unistd.h>
 
 #include "setup.h"
 #include "options.h"
@@ -22,9 +23,11 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/nullstream.h"
 #include "lib/path.h"
+#include "lib/stringref.h"
 #include "frontends/p4/toP4/toP4.h"
+#include "frontends/common/preprocessor.h"
 
-static cstring version = "0.0.4";
+static cstring version = "0.1.0";
 extern int verbose;
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
@@ -43,7 +46,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("-I", "path",
                    [this](const char* arg) {
                        preprocessor_options += std::string(" -I") + arg; return true; },
-                   "Specify include path (passed to preprocessor)");
+                   "Specify import path (passed to preprocessor)");
     registerOption("-D", "arg=value",
                    [this](const char* arg) {
                        preprocessor_options += std::string(" -D") + arg; return true; },
@@ -124,7 +127,7 @@ void CompilerOptions::setInputFile() {
     }
 }
 
-FILE* CompilerOptions::preprocess() {
+FILE* CompilerOptions::preprocessExternal() {
     FILE* in = nullptr;
 
     if (file == "-") {
@@ -142,10 +145,10 @@ FILE* CompilerOptions::preprocess() {
         cmd += cstring(" -undef -nostdinc -I") +
                 p4includePath + " " + preprocessor_options + " " + file;
         if (verbose)
-            std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
+            std::cerr << "Invoking C preprocessor " << std::endl << cmd << std::endl;
         in = popen(cmd.c_str(), "r");
         if (in == nullptr) {
-            ::error("Error invoking preprocessor");
+            ::error("Error invoking C preprocessor");
             perror("");
             return nullptr;
         }
@@ -153,7 +156,7 @@ FILE* CompilerOptions::preprocess() {
     }
 
     if (doNotCompile) {
-        char *line = NULL;
+        char *line = nullptr;
         size_t len = 0;
         ssize_t read;
 
@@ -165,8 +168,50 @@ FILE* CompilerOptions::preprocess() {
     return in;
 }
 
+cstring CompilerOptions::preprocessNative() {
+    FILE* in = nullptr;
+    if (file == "-") {
+        file = "<stdin>";
+        in = stdin;
+    } else {
+        in = fopen(file.c_str(), "r");
+        if (in == nullptr) {
+            ::error("Error reading input file");
+            perror("");
+            return nullptr;
+        }
+    }
+
+    std::unordered_set<cstring> definitions;
+    std::vector<cstring> importPaths = { p4includePath };
+    for (const cstring& option : StringRef(preprocessor_options).split(' ')) {
+        cstring value = option.substr(2);
+        switch (option[1]) {
+        case 'I':
+            importPaths.push_back(value);
+            break;
+        case 'D':
+            definitions.emplace(value);
+            break;
+        case 'U':
+            definitions.erase(value);
+            break;
+        }
+    }
+
+    cstring source = preprocessP4File(in, file, definitions, importPaths);
+    if (in != stdin) {
+        fclose(in);
+    }
+    if (doNotCompile) {
+        printf("%s", source.c_str());
+        return cstring::empty;
+    }
+    return source;
+}
+
 void CompilerOptions::closeInput(FILE* inputStream) const {
-    if (close_input) {
+    if (close_input && inputStream != nullptr) {
         int exitCode = pclose(inputStream);
         if (exitCode != 0)
             ::error("Preprocessor returned exit code %d; aborting compilation", exitCode);
