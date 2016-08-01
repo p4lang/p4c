@@ -72,21 +72,28 @@ Most dependences can be installed using `apt-get install`:
 
 ## OS X dependences
 
-Installing dependences on OS X:
+Installing on OS X:
 
-- You may need to install brew for useful utilities:
-  `sudo /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
+- Enable XCode's command-line tools:
+  ```
+  xcode-select --install
+  ```
 
-- `sudo brew install autoconf automake libtool boost bison`
-  (OSX's default version of bison is old, you'll need a newer version)
+- Install Homebrew:
+  ```
+  sudo /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  ```
+  Be sure to add `/usr/local/bin/` to your `$PATH`.
 
-- in order to make brew or other locally installed tools accessable, you
-  may need to run `xcode-select --install`
+- Install dependencies using Homebrew:
+  ```
+  brew install autoconf automake libtool boost bison pkg-config
+  ```
 
-- You can recompile the C++ garbage-collector from sources from `https://github.com/ivmai/bdwgc.git`
+- Build the C++ garbage-collector (BDW-GC) from `https://github.com/ivmai/bdwgc.git`. Follow the build instructions in the [README](https://github.com/ivmai/bdwgc/blob/master/README.md) file; you will need to `configure --enable-cplus-plus`.
 
-- You can recompile GMP from sources `https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2` (you will need
-  to `configure --enable-cxx`)
+- Build the GNU Multi Precision Arithmetic Library (GMP) from `https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2`.
+  Follow the instructions in the `INSTALL` file; you will need to `configure --enable-cxx`.
 
 # Development tools
 
