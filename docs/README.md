@@ -72,7 +72,7 @@ Most dependences can be installed using `apt-get install`:
 
 ## OS X dependences
 
-Installing  on OS X:
+Installing on OS X:
 
 - Enable XCode's command-line tools:
   ```
