@@ -169,7 +169,9 @@ public:
     }
 
     template<typename T>
-    static typename std::enable_if<has_toJSON<T>::value, cstring>::type
+    static typename std::enable_if<
+                            has_toJSON<T>::value &&
+                            !std::is_base_of<IR::Node, T>::value, cstring>::type
     generate(const T
             & v, cstring indent, std::unordered_set<int> &node_refs)
     {
@@ -180,6 +182,19 @@ public:
         return ss.str();
     }
 
+    static cstring
+    generate(const IR::Node &v, cstring indent, std::unordered_set<int> &node_refs) {
+        std::stringstream ss;
+        ss << "{" << std::endl;
+        if (node_refs.find(v.id) != node_refs.end()) {
+            ss << indent << "    \"Node_ID\" : " << v.id << std::endl;
+        } else {
+            node_refs.insert(v.id);
+            ss << v.toJSON(indent + "    ", node_refs) << std::endl; }
+        ss << indent << "}";
+        return ss.str();
+    }
+
     template<typename T>
     static typename std::enable_if<
                         std::is_pointer<T>::value && 
@@ -187,13 +202,9 @@ public:
                         >::value, cstring>::type
     generate(T v, cstring indent, std::unordered_set<int> &node_refs)
     {
-        std::stringstream ss;
         if (v == nullptr)
             return "null";
-        ss << "{" << std::endl
-           << v->toJSON(indent + "    ", node_refs) << std::endl
-           << indent << "}";
-        return ss.str();
+        return generate(*v, indent, node_refs);
     }
 
     template<typename T, size_t N>
