@@ -152,7 +152,7 @@ public:
         return ss.str();
     }
 
-    static cstring generate(const struct TableResourceAlloc, 
+    static cstring generate(const struct TableResourceAlloc*, 
             cstring, std::unordered_set<int>&)
     {
         return "\"TODO: Implement TableResourceAlloc to JSON \"";
@@ -169,7 +169,7 @@ public:
     }
 
     template<typename T>
-    static typename std::enable_if< has_toJSON<T>::value, cstring>::type
+    static typename std::enable_if<has_toJSON<T>::value, cstring>::type
     generate(const T
             & v, cstring indent, std::unordered_set<int> &node_refs)
     {
@@ -182,8 +182,9 @@ public:
 
     template<typename T>
     static typename std::enable_if<
-                    std::is_pointer<T>::value &&
-                    has_toJSON<typename std::remove_pointer<T>::type>::value, cstring>::type
+                        std::is_pointer<T>::value && 
+                        has_toJSON<typename std::remove_pointer<T>::type
+                        >::value, cstring>::type
     generate(T v, cstring indent, std::unordered_set<int> &node_refs)
     {
         std::stringstream ss;
