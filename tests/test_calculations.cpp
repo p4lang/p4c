@@ -34,8 +34,8 @@ class CalculationTest : public ::testing::Test {
  protected:
   PHVFactory phv_factory;
 
-  HeaderType testHeaderType;
-  header_id_t testHeader1{0}, testHeader2{1};
+  HeaderType testHeaderType, testHeaderType2;
+  header_id_t testHeader1{0}, testHeader2{1}, testHeader3{2};
 
   ParseState oneParseState;
   Parser parser;
@@ -50,6 +50,7 @@ class CalculationTest : public ::testing::Test {
 
   CalculationTest()
       : testHeaderType("test_t", 0),
+        testHeaderType2("test2_t", 1),
         oneParseState("parse_state", 0),
         parser("test_parser", 0),
         phv_source(PHVSourceIface::make_phv_source()) {
@@ -60,8 +61,14 @@ class CalculationTest : public ::testing::Test {
     testHeaderType.push_back_field("f5", 5);
     testHeaderType.push_back_field("f19", 19);
 
+    testHeaderType2.push_back_field("f6", 6);
+    testHeaderType2.push_back_field("f8", 8);
+    testHeaderType2.push_back_field("f9", 9);
+    testHeaderType2.push_back_field("f9", 9);
+
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+    phv_factory.push_back_header("test3", testHeader3, testHeaderType2);
   }
 
   Packet get_pkt(const char *data, size_t data_size) {
@@ -207,6 +214,34 @@ TEST_F(CalculationTest, WithPayload) {
 	    &expected_buf[12]);
 
   auto expected = hash::xxh64((const char *) expected_buf, sizeof(expected_buf));
+  auto actual = calc.output(pkt);
+
+  ASSERT_EQ(expected, actual);
+}
+
+// this test helped catch a bug in Field::deparse (for some alignments,
+// deparsing was overwriting previous bits)
+TEST_F(CalculationTest, Extra) {
+  BufBuilder builder;
+
+  builder.push_back_field(testHeader3, 0); // f6
+  builder.push_back_field(testHeader3, 1); // f8
+  builder.push_back_field(testHeader3, 2); // f9
+  builder.push_back_field(testHeader3, 3); // f9
+
+  Calculation calc(builder, "identity");
+
+  unsigned char pkt_buf[128];  // dummy, not used
+  Packet pkt = get_pkt((const char *) pkt_buf, sizeof(pkt_buf));
+  PHV *phv = pkt.get_phv();
+  auto &hdr = phv->get_header(testHeader3);
+  hdr.mark_valid();
+  hdr.get_field(0).set(0x3d);
+  hdr.get_field(1).set(0x3e);
+  hdr.get_field(2).set(1);
+  hdr.get_field(3).set(0);
+
+  unsigned int expected = 0xf4f80200;
   auto actual = calc.output(pkt);
 
   ASSERT_EQ(expected, actual);
