@@ -105,6 +105,8 @@ TEST_P(FieldSerializeTest, Extract) {
   }
 }
 
+// TODO(antonin): check that deparsing does not write to the previous bits (when
+// not byte-aligned), with some sentinel value
 TEST_P(FieldSerializeTest, Deparse) {
   int max_input = 1 << bitwidth;
   for(int v = 0; v < max_input; v++) {
