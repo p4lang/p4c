@@ -32,7 +32,5 @@ class TestTrans : public Transform {
 int main() {
     c1 = new IR::Constant(2);
     IR::Expression *e = new IR::Add(Util::SourceInfo(), c1, c1);
-    std::unordered_set<int> ids;
-    cstring json_str = e->toJSON("    ", ids);
-    std::cout << "{" << std::endl << json_str << std::endl << "}" << std::endl;
+    JSONGenerator(std::cout) << e << std::endl;
 }

@@ -23,6 +23,11 @@ void IR::Node::traceCreation() const { LOG5("Created node " << id); }
 
 int IR::Node::currentId = 0;
 
+void IR::Node::toJSON(JSONGenerator &json) const {
+    json << json.indent << "\"Node_ID\" : " << id << ", " << std::endl
+         << json.indent << "\"Node_Type\" : " << node_type_name();
+}
+
 cstring IR::dbp(const IR::INode* node) {
     std::stringstream str;
     if (node == nullptr) {

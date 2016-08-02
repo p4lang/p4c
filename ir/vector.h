@@ -129,19 +129,13 @@ class Vector : public VectorBase {
     void visit_children(Visitor &v) const override;
     virtual void parallel_visit_children(Visitor &v);
     virtual void parallel_visit_children(Visitor &v) const;
+    void toJSON(JSONGenerator &json) const override;
     Util::Enumerator<const T*>* getEnumerator() const {
         return Util::Enumerator<const T*>::createEnumerator(vec); }
     template <typename S>
     Util::Enumerator<const S*>* only() const {
         std::function<bool(const T*)> filter = [](const T* d) { return d->template is<S>(); };
         return getEnumerator()->where(filter)->template as<const S*>(); }
-
-    vector<const T*> get_data() const { return vec; }
-   
-//    cstring toJSON(cstring indent, std::unordered_set<int> &node_refs) 
-//    {
-//        return JSONGenerator::generate(vec, indent, node_refs); 
-//    }
 };
 
 }  // namespace IR

@@ -20,11 +20,14 @@ limitations under the License.
 #include <assert.h>
 #include <string>
 #include "lib/cstring.h"
+#include "lib/indent.h"
 #include "lib/match.h"
 #include <gmpxx.h>
 
 #include "ir.h"
 class JSONGenerator {
+    std::unordered_set<int> node_refs;
+    std::ostream &out;
 
     template<typename T>
     class has_toJSON
@@ -38,32 +41,22 @@ class JSONGenerator {
         static const bool value = sizeof(test<T>(0)) == sizeof(char);
     };
 
-    template<typename T>
-    static constexpr bool is_vector()
-    {
-        return std::is_same<T, vector<typename T::value_type,
-                                      typename T::allocator_type>>::value 
-                || std::is_same<T, std::vector<typename T::value_type,
-                                               typename T::allocator_type>>::value;
-    }
+ public:
+    indent_t indent;
+
+    JSONGenerator(std::ostream &out) : out(out) {}
 
     template<typename T>
-    static cstring vectorToJson(const T &v,
-                        cstring indent, std::unordered_set<int> &node_refs)
-    {
-        static_assert(is_vector<T>(), "vectorToJson requires a vector as first argument");
-        std::stringstream ss;
-        ss << "[";
+    void generate(const vector<T> &v) {
+        out << "[";
         if (v.size() > 0) {
-            ss << indent << generate(v[0], indent + "    ", node_refs);
+            out << std::endl << ++indent;
+            generate(v[0]);
             for (size_t i = 1; i < v.size(); i++) {
-                ss  << "," << std::endl
-                    << indent << generate(v[i], indent + "    ", node_refs);
-            }
-            ss << std::endl;
-        }
-        ss << "]";
-        return ss.str();
+                out << "," << std::endl << indent;
+                generate(v[i]); }
+            out << std::endl << --indent; }
+        out << "]";
     }
 
 public:
@@ -83,148 +76,109 @@ public:
 
 
     template<typename T, typename U>
-    static cstring generate(const std::pair<T, U>
-                &v, cstring indent, std::unordered_set<int> &node_refs)
+    void generate(const std::pair<T, U> &v)
     {
-        std::stringstream ss;
-        ss  << "{" << std::endl
-            << indent << "\"first\" : "
-            << generate(v.first, indent + "    ", node_refs)
-            << "," << std::endl << indent << "\"second\" : "
-            << generate(v.second, indent + "    ", node_refs)
-            << std::endl << indent << "}";
-        return ss.str();
+        out << "{" << std::endl << ++indent << "\"first\" : ";
+        generate(v.first);
+        out << "," << std::endl << indent << "\"second\" : ";
+        generate(v.second);
+        out << std::endl << --indent << "}";
     }
 
     template<typename K, typename V>
-    static cstring generate(const ordered_map<K, V>
-                &v, cstring indent, std::unordered_set<int> &node_refs)
+    void generate(const ordered_map<K, V> &v)
     {
-        std::stringstream ss;
-        ss  << "[" << std::endl;
+        out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();
-            ss << indent << generate(*it, indent + "    ", node_refs);
+            out << ++indent;
+            generate(*it);
             for (it++; it != v.end(); ++it) {
-                ss  << "," << std::endl
-                    << indent << generate(*it, indent + "    ", node_refs);
-            }
-            ss << std::endl;
-        }
-        ss << "]";
-        return ss.str();
+                out << "," << std::endl << indent;
+                generate(*it); }
+            out << std::endl << --indent; }
+        out << "]";
     }
 
+    void generate(bool v) { out << (v ? "true" : "false"); }
     template<typename T>
-    static typename std::enable_if<
-        std::is_integral<T>::value, cstring>::type
-    generate(T v, cstring, std::unordered_set<int> &) {
-        return std::to_string(v);
-    }
-    static cstring generate(double v, cstring, std::unordered_set<int> &) {
-        return std::to_string(v);
-    }
-    static cstring generate(const mpz_class &v, cstring, std::unordered_set<int> &) {
-        std::stringstream ss;
-        ss << v;
-        return ss.str();
-    }
+    typename std::enable_if<std::is_integral<T>::value>::type
+    generate(T v) { out << std::to_string(v); }
+    void generate(double v) { out << std::to_string(v); }
+    void generate(const mpz_class &v) { out << v; }
 
-    template<typename T>
-    static cstring generate(const IR::Vector<T>&v, cstring indent,
-                            std::unordered_set<int> &node_refs)
-    {
-        return generate(v.get_data(), indent, node_refs);
-    }
-
-    static cstring generate(cstring v, cstring, std::unordered_set<int> &) {
-        return "\"" + v + "\"";
+    void generate(cstring v) {
+        if (v)
+            out << "\"" << v << "\"";
+        else
+            out << "null";
     }
     template<typename T>
-    static typename std::enable_if<
+    typename std::enable_if<
                 std::is_same<T, LTBitMatrix>::value ||
-                std::is_enum<T>::value, cstring>::type
-    generate(T v, cstring, std::unordered_set<int> &) {
-        std::stringstream ss;
-        ss << "\"";
-        ss << v;
-        ss << "\"";
-        return ss.str();
+                std::is_enum<T>::value>::type
+    generate(T v) {
+        out << "\"" << v << "\"";
     }
 
-    static cstring generate(const struct TableResourceAlloc*, 
-            cstring, std::unordered_set<int>&)
-    {
-        return "\"TODO: Implement TableResourceAlloc to JSON \"";
-    }
-
-    static cstring generate(const match_t &v, cstring indent, std::unordered_set<int> &)
-    {
-        std::stringstream ss;
-        ss  << "{" << std::endl
-            << indent + "    " << "\"word0\" : " << v.word0 << "," << std::endl
-            << indent + "    " << "\"word1\" : " << v.word1 << std::endl
+    void generate(const match_t &v) {
+        out << "{" << std::endl
+            << (indent + 1) << "\"word0\" : " << v.word0 << "," << std::endl
+            << (indent + 1) << "\"word1\" : " << v.word1 << std::endl
             << indent << "}";
-        return ss.str();
     }
 
     template<typename T>
-    static typename std::enable_if<
-                            has_toJSON<T>::value &&
-                            !std::is_base_of<IR::Node, T>::value, cstring>::type
-    generate(const T
-            & v, cstring indent, std::unordered_set<int> &node_refs)
-    {
-        std::stringstream ss;
-        ss << "{" << std::endl
-           << v.toJSON(indent + "    ", node_refs) << std::endl
-           << indent << "}";
-        return ss.str();
+    typename std::enable_if<
+                    has_toJSON<T>::value &&
+                    !std::is_base_of<IR::Node, T>::value>::type
+    generate(const T &v) {
+        ++indent;
+        out << "{" << std::endl;
+        v.toJSON(*this);
+        out << std::endl << --indent << "}";
     }
 
-    static cstring
-    generate(const IR::Node &v, cstring indent, std::unordered_set<int> &node_refs) {
-        std::stringstream ss;
-        ss << "{" << std::endl;
+    void generate(const IR::Node &v) {
+        out << "{" << std::endl;
+        ++indent;
         if (node_refs.find(v.id) != node_refs.end()) {
-            ss << indent << "    \"Node_ID\" : " << v.id << std::endl;
+            out << indent << "\"Node_ID\" : " << v.id;
         } else {
             node_refs.insert(v.id);
-            ss << v.toJSON(indent + "    ", node_refs) << std::endl; }
-        ss << indent << "}";
-        return ss.str();
+            v.toJSON(*this); }
+        out << std::endl << --indent << "}";
     }
 
     template<typename T>
-    static typename std::enable_if<
-                        std::is_pointer<T>::value && 
-                        has_toJSON<typename std::remove_pointer<T>::type
-                        >::value, cstring>::type
-    generate(T v, cstring indent, std::unordered_set<int> &node_refs)
-    {
-        if (v == nullptr)
-            return "null";
-        return generate(*v, indent, node_refs);
+    typename std::enable_if<
+                    std::is_pointer<T>::value &&
+                    has_toJSON<typename std::remove_pointer<T>::type>::value>::type
+    generate(T v) {
+        if (v)
+            generate(*v);
+        else
+            out << "null";
     }
 
     template<typename T, size_t N>
-    static cstring generate(const T
-            (&v)[N], cstring indent, std::unordered_set<int> &node_refs)
-    {
-        (void)v; (void) indent; (void)node_refs;
-        std::stringstream ss;
-        ss << "[";
+    void generate(const T (&v)[N]) {
+        out << "[";
         if (N > 0) {
-            ss << indent << generate(v[0], indent + "    ", node_refs);
+            out << std::endl << ++indent;
+            generate(v[0]);
             for (size_t i = 1; i < N; i++) {
-                ss  << "," << std::endl
-                    << indent << generate(v[i], indent + "    ", node_refs);
-            }
-            ss << std::endl;
-        }
-        ss << "]";
-        return ss.str();
-    } 
+                out << "," << std::endl << indent;
+                generate(v[i]); }
+            out << std::endl << --indent; }
+        out << "]";
+    }
+
+    JSONGenerator &operator<<(char ch) { out << ch; return *this; }
+    JSONGenerator &operator<<(const char *s) { out << s; return *this; }
+    JSONGenerator &operator<<(indent_t i) { out << i; return *this; }
+    JSONGenerator &operator<<(std::ostream &(*fn)(std::ostream &)) { out << fn; return *this; }
+    template<typename T> JSONGenerator &operator<<(T v) { generate(v); return *this; }
 };
 
 

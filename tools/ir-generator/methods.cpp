@@ -99,28 +99,19 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 needed = true; } }
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
-{ "toJSON", { &NamedType::Cstring, { 
-        new IrField(&NamedType::Cstring, "indent", ""), 
-        new IrField(new ReferenceType(
-                            new TemplateInstantiation(&NamedType::Unordered_Set, 
-                                                      &NamedType::Int)), "node_refs") 
+{ "toJSON", { &NamedType::Void, {
+        new IrField(new ReferenceType(&NamedType::JSONGenerator), "json")
     }, CONST + IN_IMPL + OVERRIDE,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
-        buf << "{" << std::endl;
-        buf << cl->indent << "std::stringstream buf;" << std::endl;
-        buf << cl->indent << "buf << " << cl->getParent()->name << "::toJSON(indent, node_refs);" 
-            << std::endl;
-        
+        buf << "{" << std::endl
+            << cl->indent << cl->getParent()->name << "::toJSON(json);" << std::endl;
         for (auto f : *cl->getFields()) {
             if (!f->isInline && f->nullOK)
                 buf << cl->indent << "if (" << f->name << " != nullptr) ";
-            buf << cl->indent << "buf << \",\" << std::endl << indent << \"\\\"" 
-                << f->name << "\\\" : \" << "
-                << "JSONGenerator::generate" << "(" << f->name << ", indent, node_refs)";
-            buf << ";" << std::endl;
-        }
-        buf << cl->indent << "return buf.str();" << std::endl << "}";
+            buf << cl->indent << "json << \",\" << std::endl << json.indent << \"\\\""
+                << f->name << "\\\" : \" << " << "this->" << f->name << ";" << std::endl; }
+        buf << "}";
         return buf.str(); } } },
 { "toString", { &NamedType::Cstring, {}, CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
     [](IrClass *, cstring) -> cstring { return cstring(); } } },
