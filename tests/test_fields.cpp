@@ -31,6 +31,7 @@ using bm::Field;
 using ::testing::TestWithParam;
 using ::testing::Range;
 using ::testing::Combine;
+using ::testing::Values;
 
 namespace {
 
@@ -73,21 +74,28 @@ class BitInStream {
 
 }  // namespace
 
+extern bool WITH_VALGRIND; // defined in main.cpp
+
 class FieldSerializeTest : public TestWithParam< std::tuple<int, int> > {
  protected:
   // I wanted to use size_t, but GTest Range() was complaining
   int bitwidth{0};
   int hdr_offset{0};
+  int step = 1;
   
   virtual void SetUp() {
     bitwidth = std::get<0>(GetParam());
     hdr_offset = std::get<1>(GetParam());
+    // otherwise, takes way too long
+    if (WITH_VALGRIND && bitwidth > 10) step = 10;
   }
+
+  void run_deparse_test(int sent_bit = 0);
 };
 
 TEST_P(FieldSerializeTest, Extract) {
   int max_input = 1 << bitwidth;
-  for(int v = 0; v < max_input; v++) {
+  for(int v = 0; v < max_input; v += step) {
     BitInStream input;
     for(int i = 0; i < hdr_offset; i++) {
       input.append_one(0);
@@ -105,36 +113,57 @@ TEST_P(FieldSerializeTest, Extract) {
   }
 }
 
-// TODO(antonin): check that deparsing does not write to the previous bits (when
-// not byte-aligned), with some sentinel value
-TEST_P(FieldSerializeTest, Deparse) {
+void
+FieldSerializeTest::run_deparse_test(int sent_bit) {
   int max_input = 1 << bitwidth;
-  for(int v = 0; v < max_input; v++) {
-    BitInStream expected;
+  for(int v = 0; v < max_input; v += step) {
+    BitInStream expected, output;
     for(int i = 0; i < hdr_offset; i++) {
-      expected.append_one(0);
+      expected.append_one(sent_bit);
+      output.append_one(sent_bit);
     }
     for(int i = bitwidth - 1; i >= 0; i--) {
       expected.append_one(v & (1 << i));
+      output.append_one(sent_bit);
     }
+    // we do not care about what happened to the "tail": if the deparse function
+    // modifies bits after the deparsed field, it is fine as fields are always
+    // deparsed in order
     for(int i = bitwidth + hdr_offset; i < 24; i++) {
       expected.append_one(0);
+      output.append_one(0);
     }
 
     Field f(bitwidth);
     f.set(v);
 
-    ByteContainer output(3);
+    ByteContainer output_bytes = output.bytes();
 
-    f.deparse(output.data(), hdr_offset);
+    f.deparse(output_bytes.data(), hdr_offset);
 
-    ASSERT_EQ(expected.bytes(), output);
+    ASSERT_EQ(expected.bytes(), output_bytes);
   }
+}
+
+TEST_P(FieldSerializeTest, Deparse) {
+  run_deparse_test();
+}
+
+
+// test that deparsing does not modify bits it is not supposed to modify and
+// works without assuming that the target bytes have been set to 0
+TEST_P(FieldSerializeTest, DeparseWSentinel) {
+  run_deparse_test(1);
 }
 
 INSTANTIATE_TEST_CASE_P(TestParameters,
                         FieldSerializeTest,
                         Combine(Range(1, 17), Range(0, 8)));
+
+// one bug only appeared for fields > 2 bytes, thus this addition
+INSTANTIATE_TEST_CASE_P(TestParameters2,
+                        FieldSerializeTest,
+                        Combine(Values(18), Range(0, 8)));
 
 
 namespace {

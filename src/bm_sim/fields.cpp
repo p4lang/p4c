@@ -53,8 +53,8 @@ int Field::deparse(char *data, int hdr_offset) const {
 
   int i;
 
-  /* necessary to ensure correct behavior when shifting right (no sign
-     extension) */
+  // necessary to ensure correct behavior when shifting right (no sign
+  // extension)
   unsigned char *ubytes = (unsigned char *) bytes.data();
 
   // zero out bits we are going to write in data[0]
@@ -64,19 +64,20 @@ int Field::deparse(char *data, int hdr_offset) const {
   if (offset == 0) {
     std::copy(bytes.begin() + 1, bytes.begin() + hdr_bytes, data + 1);
     data[0] |= ubytes[0];
-  } else if (offset > 0) { /* shift left */
-    /* this assumes that the packet was memset to 0, TODO: improve */
+  } else if (offset > 0) {  // shift left
+    // don't know if this is very efficient, we memset the remaining bytes to 0
+    // so we can use |= and preserve what was originally in data[0]
+    std::fill(&data[1], &data[hdr_bytes], 0);
     for (i = 0; i < hdr_bytes - 1; i++) {
       data[i] |= (ubytes[i] << offset) | (ubytes[i + 1] >> (8 - offset));
     }
-    if (i > 0) data[i] = 0;
     data[i] |= ubytes[i] << offset;
-  } else { /* shift right */
+  } else {  // shift right
     offset = -offset;
     data[0] |= (ubytes[0] >> offset);
     if (nbytes == 1) {
-      /* data[1] is always valid, otherwise we would not need to shift the field
-         to the right */
+      // data[1] is always valid, otherwise we would not need to shift the field
+      // to the right
       data[1] = ubytes[0] << (8 - offset);
       return nbits;
     }
