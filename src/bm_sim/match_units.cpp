@@ -291,7 +291,7 @@ create_mask_from_pref_len(int prefix_length, int size) {
   std::fill(mask.begin(), mask.begin() + (prefix_length / 8), '\xff');
   if (prefix_length % 8 != 0) {
     mask[prefix_length / 8] =
-      static_cast<char>(0xFF) << (8 - (prefix_length % 8));
+      static_cast<unsigned char>(0xFF) << (8 - (prefix_length % 8));
   }
   return mask;
 }
