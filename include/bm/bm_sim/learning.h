@@ -144,7 +144,7 @@ class LearnEngine {
  private:
   struct FilterPtrs {
     size_t unacked_count{0};
-    std::vector<LearnFilter::iterator> buffer{0};
+    std::vector<LearnFilter::iterator> buffer{};
   };
 
   class LearnList {
