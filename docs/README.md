@@ -68,7 +68,7 @@ Note that each back-end may have additional dependences:
 
 Most dependences can be installed using `apt-get install`:
 
-`sudo apt-get install libgc-dev bison flex libgmp-dev libboost-all-dev`
+`sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-all-dev python`
 
 ## OS X dependences
 
@@ -90,7 +90,7 @@ Installing on OS X:
   brew install autoconf automake libtool boost bison pkg-config
   ```
 
-- Build the C++ garbage-collector (BDW-GC) from `https://github.com/ivmai/bdwgc.git`. Follow the build instructions in the [README](https://github.com/ivmai/bdwgc/blob/master/README.md) file; you will need to `configure --enable-cplus-plus`.
+- Build the C++ garbage-collector (BDW-GC) from `https://github.com/ivmai/bdwgc.git`. Follow the build instructions in the [README](https://github.com/ivmai/bdwgc/blob/master/README.md) file; you will need to `configure --enable-cplusplus`.
 
 - Build the GNU Multi Precision Arithmetic Library (GMP) from `https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2`.
   Follow the instructions in the `INSTALL` file; you will need to `configure --enable-cxx`.
