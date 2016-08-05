@@ -38,6 +38,7 @@ class Options(object):
         self.compilerSrcDir = ""        # path to compiler source tree
         self.verbose = False
         self.replace = False            # replace previous outputs
+        self.dumpToJson = False
         self.compilerOptions = []
 
 def usage(options):
@@ -184,10 +185,17 @@ def process_file(options, argv):
     ppfile = tmpdir + "/" + basename                  # after parsing
     referenceOutputs = "FrontEnd_13,FrontEnd_14,MidEnd_31_Evaluator"
     stderr = tmpdir + "/" + basename + "-stderr"
+    
+    if not os.path.exists("json_outputs"):
+        os.mkdir("./json_outputs")
 
+    jsonfile = "./json_outputs" + "/" + basename + ".json"
+    
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs] + options.compilerOptions
+    args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs,
+            "--toJSON", jsonfile] + options.compilerOptions
+ 
     if "14_samples" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--p4-14"]);
     args.extend(argv)
@@ -222,7 +230,6 @@ def process_file(options, argv):
         newName = file_name(tmpdir, base, "-midend", ext)
         os.rename(endFile, newName)
         lastFile = newName
-
     if (result == SUCCESS):
         result = check_generated_files(options, tmpdir, expected_dirname);
     if (result == SUCCESS) and (not expected_error):
@@ -266,6 +273,8 @@ def main(argv):
             options.verbose = True
         elif argv[0] == "-f":
             options.replace = True
+        elif argv[0] == "-j":
+            options.dumpToJson = True
         elif argv[0] == "-a":
             if len(argv) == 0:
                 print("Missing argument for -a option")

@@ -59,21 +59,18 @@ class JSONGenerator {
         out << "]";
     }
 
-public:
     template<typename T>
-    static cstring generate(const vector<T>
-                &v, cstring indent, std::unordered_set<int> &node_refs)
-    {
-        return vectorToJson(v, indent, node_refs);
+    void generate(const std::vector<T> &v) {
+        out << "[";
+        if (v.size() > 0) {
+            out << std::endl << ++indent;
+            generate(v[0]);
+            for (size_t i = 1; i < v.size(); i++) {
+                out << "," << std::endl << indent;
+                generate(v[i]); }
+            out << std::endl << --indent; }
+        out << "]";
     }
-
-    template<typename T>
-    static cstring generate(const std::vector<T>
-                &v, cstring indent, std::unordered_set<int> &node_refs)
-    {
-        return vectorToJson(v, indent, node_refs);
-    }
-
 
     template<typename T, typename U>
     void generate(const std::pair<T, U> &v)
