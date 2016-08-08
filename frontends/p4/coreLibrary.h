@@ -84,7 +84,7 @@ class PacketOut : public Model::Extern_Model {
 class P4Exception_Model : public ::Model::Elem {
  public:
     const StandardExceptions exc;
-    P4Exception_Model(StandardExceptions exc) : ::Model::Elem(""), exc(exc) {
+    explicit P4Exception_Model(StandardExceptions exc) : ::Model::Elem(""), exc(exc) {
         std::stringstream str;
         str << exc;
         name = str.str();
