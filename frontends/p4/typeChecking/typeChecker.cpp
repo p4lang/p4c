@@ -1438,31 +1438,19 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         }
     } else if (bl == nullptr && br != nullptr) {
         auto e = expression->clone();
-#if 0
-        auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
-        e->left = cast;
-        setType(cast, rtype);
-#else
         auto cst = expression->left->to<IR::Constant>();
         CHECK_NULL(cst);
         e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
         setType(e->left, rtype);
-#endif
         expression = e;
         resultType = rtype;
         setType(expression, resultType);
     } else if (bl != nullptr && br == nullptr) {
         auto e = expression->clone();
-#if 0
-        auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
-        e->right = cast;
-        setType(cast, ltype);
-#else
         auto cst = expression->right->to<IR::Constant>();
         CHECK_NULL(cst);
         e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
         setType(e->right, ltype);
-#endif
         expression = e;
         resultType = ltype;
         setType(expression, resultType);
