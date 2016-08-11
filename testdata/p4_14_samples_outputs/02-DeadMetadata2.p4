@@ -1,5 +1,5 @@
-#include "/home/mbudiu/git/p4c/p4include/core.p4"
-#include "/home/mbudiu/git/p4c/p4include/v1model.p4"
+#include "/home/cdodd/p4c/p4include/core.p4"
+#include "/home/cdodd/p4c/p4include/v1model.p4"
 
 struct m_t {
     bit<32> f1;
@@ -15,7 +15,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("start") state start {
-        meta.m.f1 = 2;
+        meta.m.f1 = 32w2;
         transition accept;
     }
 }

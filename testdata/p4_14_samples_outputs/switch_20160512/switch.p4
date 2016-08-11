@@ -834,7 +834,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_set_prio_max;
     }
     @name("parse_eompls") state parse_eompls {
-        meta.tunnel_metadata.ingress_tunnel_type = 6;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w6;
         transition parse_inner_ethernet;
     }
     @name("parse_erspan_t3") state parse_erspan_t3 {
@@ -915,7 +915,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("parse_geneve") state parse_geneve {
         packet.extract(hdr.genv);
         meta.tunnel_metadata.tunnel_vni = hdr.genv.vni;
-        meta.tunnel_metadata.ingress_tunnel_type = 4;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w4;
         transition select(hdr.genv.ver, hdr.genv.optLen, hdr.genv.protoType) {
             (2w0x0, 6w0x0, 16w0x6558): parse_inner_ethernet;
             (2w0x0, 6w0x0, 16w0x800): parse_inner_ipv4;
@@ -939,11 +939,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_gre_ipv4") state parse_gre_ipv4 {
-        meta.tunnel_metadata.ingress_tunnel_type = 2;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w2;
         transition parse_inner_ipv4;
     }
     @name("parse_gre_ipv6") state parse_gre_ipv6 {
-        meta.tunnel_metadata.ingress_tunnel_type = 2;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w2;
         transition parse_inner_ipv6;
     }
     @name("parse_gre_v6") state parse_gre_v6 {
@@ -1055,7 +1055,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_ipv4_in_ip") state parse_ipv4_in_ip {
-        meta.tunnel_metadata.ingress_tunnel_type = 3;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w3;
         transition parse_inner_ipv4;
     }
     @name("parse_ipv6") state parse_ipv6 {
@@ -1075,7 +1075,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_ipv6_in_ip") state parse_ipv6_in_ip {
-        meta.tunnel_metadata.ingress_tunnel_type = 3;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w3;
         transition parse_inner_ipv6;
     }
     @name("parse_lisp") state parse_lisp {
@@ -1110,11 +1110,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name("parse_mpls_inner_ipv4") state parse_mpls_inner_ipv4 {
-        meta.tunnel_metadata.ingress_tunnel_type = 9;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w9;
         transition parse_inner_ipv4;
     }
     @name("parse_mpls_inner_ipv6") state parse_mpls_inner_ipv6 {
-        meta.tunnel_metadata.ingress_tunnel_type = 9;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w9;
         transition parse_inner_ipv6;
     }
     @name("parse_nsh") state parse_nsh {
@@ -1129,7 +1129,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name("parse_nvgre") state parse_nvgre {
         packet.extract(hdr.nvgre);
-        meta.tunnel_metadata.ingress_tunnel_type = 5;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w5;
         meta.tunnel_metadata.tunnel_vni = hdr.nvgre.tni;
         transition parse_inner_ethernet;
     }
@@ -1168,15 +1168,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name("parse_set_prio_high") state parse_set_prio_high {
-        meta.intrinsic_metadata.priority = 5;
+        meta.intrinsic_metadata.priority = 3w5;
         transition accept;
     }
     @name("parse_set_prio_max") state parse_set_prio_max {
-        meta.intrinsic_metadata.priority = 7;
+        meta.intrinsic_metadata.priority = 3w7;
         transition accept;
     }
     @name("parse_set_prio_med") state parse_set_prio_med {
-        meta.intrinsic_metadata.priority = 3;
+        meta.intrinsic_metadata.priority = 3w3;
         transition accept;
     }
     @name("parse_sflow") state parse_sflow {
@@ -1266,13 +1266,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name("parse_vxlan") state parse_vxlan {
         packet.extract(hdr.vxlan);
-        meta.tunnel_metadata.ingress_tunnel_type = 1;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w1;
         meta.tunnel_metadata.tunnel_vni = hdr.vxlan.vni;
         transition parse_inner_ethernet;
     }
     @name("parse_vxlan_gpe") state parse_vxlan_gpe {
         packet.extract(hdr.vxlan_gpe);
-        meta.tunnel_metadata.ingress_tunnel_type = 12;
+        meta.tunnel_metadata.ingress_tunnel_type = 5w12;
         meta.tunnel_metadata.tunnel_vni = hdr.vxlan_gpe.vni;
         transition select(hdr.vxlan_gpe.flags, hdr.vxlan_gpe.next_proto) {
             (8w0x8 &&& 8w0x8, 8w0x5 &&& 8w0xff): parse_gpe_int_header;

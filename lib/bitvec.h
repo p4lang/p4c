@@ -22,9 +22,26 @@ limitations under the License.
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gc/gc_cpp.h>
 #include <utility>
 #include <iostream>
+#include "config.h"
+
+#if HAVE_LIBGC
+#include <gc/gc_cpp.h>
+#define IF_HAVE_LIBGC(X)	X
+#else
+#define IF_HAVE_LIBGC(X)
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+/* use builtin count leading/trailing bits of type-approprite size */
+static inline int builtin_ctz(unsigned x) { return __builtin_ctz(x); }
+static inline int builtin_ctz(unsigned long x) { return __builtin_ctzl(x); }
+static inline int builtin_ctz(unsigned long long x) { return __builtin_ctzll(x); }
+static inline int builtin_clz(unsigned x) { return __builtin_clz(x); }
+static inline int builtin_clz(unsigned long x) { return __builtin_clzl(x); }
+static inline int builtin_clz(unsigned long long x) { return __builtin_clzll(x); }
+#endif
 
 class bitvec {
     size_t              size;
@@ -32,23 +49,66 @@ class bitvec {
         uintptr_t       data;
         uintptr_t       *ptr;
     };
+    uintptr_t word(size_t i) const { return i < size ? size > 1 ? ptr[i] : data : 0; }
 
  public:
     static constexpr size_t bits_per_unit = CHAR_BIT * sizeof(uintptr_t);
 
-    class bitref {
+ private:
+    template<class T> class bitref {
         friend class bitvec;
-        bitvec          &self;
+        T               &self;
         int             idx;
-        bitref(bitvec &s, int i) : self(s), idx(i) {}
+        bitref(T &s, int i) : self(s), idx(i) {}
 
      public:
         bitref(const bitref &a) = default;
         bitref(bitref &&a) = default;
         explicit operator bool() const { return self.getbit(idx); }
-        operator int() const { return self.getbit(idx) ? 1 : 0; }
+        bool operator==(const bitref &a) const { return &self == &a.self && idx == a.idx; }
+        bool operator!=(const bitref &a) const { return &self != &a.self || idx != a.idx; }
         int index() const { return idx; }
         int operator*() const { return idx; }
+        bitref &operator++() {
+            while ((size_t)++idx < self.size * bitvec::bits_per_unit) {
+                if (auto w = self.word(idx/bitvec::bits_per_unit) >> (idx%bitvec::bits_per_unit)) {
+#if defined(__GNUC__) || defined(__clang__)
+                    idx += builtin_ctz(w);
+#else
+                    while (!(w & 1)) {
+                        ++idx;
+                        w >>= 1; }
+#endif
+                    return *this; }
+                idx = (idx / bitvec::bits_per_unit) * bitvec::bits_per_unit
+                    + bitvec::bits_per_unit - 1; }
+            idx = -1;
+            return *this; }
+        bitref &operator--() {
+            if (idx < 0) idx = self.size * bitvec::bits_per_unit;
+            while (--idx >= 0) {
+                if (auto w = self.word(idx/bitvec::bits_per_unit)
+                           << (bitvec::bits_per_unit - 1 - idx%bitvec::bits_per_unit)) {
+#if defined(__GNUC__) || defined(__clang__)
+                    idx -= builtin_clz(w);
+#else
+                    while (!(w >> (bitvec::bits_per_unit - 1))) {
+                        --idx;
+                        w <<= 1; }
+#endif
+                    return *this; }
+                idx = (idx / bitvec::bits_per_unit) * bitvec::bits_per_unit; }
+            return *this; }
+    };
+
+ public:
+    class nonconst_bitref : public bitref<bitvec> {
+        friend class bitvec;
+        nonconst_bitref(bitvec &s, int i) : bitref(s, i) {}
+     public:
+        nonconst_bitref(const bitref<bitvec> &a) : bitref(a) {}
+        nonconst_bitref(const nonconst_bitref &a) = default;
+        nonconst_bitref(nonconst_bitref &&a) = default;
         bool operator=(bool b) const {
             assert(idx >= 0);
             return b ? self.setbit(idx) : self.clrbit(idx); }
@@ -57,45 +117,25 @@ class bitvec {
             bool rv = self.getbit(idx);
             b ? self.setbit(idx) : self.clrbit(idx);
             return rv; }
-        bitref &operator++() {
-            while ((size_t)++idx < self.size * bitvec::bits_per_unit)
-                if (self.getbit(idx)) return *this;
-            idx = -1;
-            return *this; }
-        bitref &operator--() {
-            while (--idx >= 0)
-                if (self.getbit(idx)) return *this;
-            return *this; }
     };
-    class const_bitref {
+    typedef nonconst_bitref     iterator;
+
+    class const_bitref : public bitref<const bitvec> {
         friend class bitvec;
-        const bitvec    &self;
-        int             idx;
-        const_bitref(const bitvec &s, int i) : self(s), idx(i) {}
+        const_bitref(const bitvec &s, int i) : bitref(s, i) {}
      public:
+        const_bitref(const bitref<const bitvec> &a) : bitref(a) {}
         const_bitref(const const_bitref &a) = default;
         const_bitref(const_bitref &&a) = default;
-        explicit operator bool() const { return self.getbit(idx); }
-        operator int() const { return self.getbit(idx) ? 1 : 0; }
-        int index() const { return idx; }
-        int operator*() const { return idx; }
-        const_bitref &operator++() {
-            while ((size_t)++idx < self.size * bitvec::bits_per_unit)
-                if (self.getbit(idx)) return *this;
-            idx = -1;
-            return *this; }
-        const_bitref &operator--() {
-            while (--idx >= 0)
-                if (self.getbit(idx)) return *this;
-            return *this; }
     };
+    typedef const_bitref        const_iterator;
 
     bitvec() : size(1), data(0) {}
     explicit bitvec(uintptr_t v) : size(1), data(v) {}
     bitvec(size_t lo, size_t cnt) : size(1), data(0) { setrange(lo, cnt); }
     bitvec(const bitvec &a) : size(a.size) {
         if (size > 1) {
-            ptr = new(PointerFreeGC) uintptr_t[size];
+            ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[size];
             memcpy(ptr, a.ptr, size * sizeof(*ptr));
         } else {
             data = a.data; }}
@@ -104,7 +144,7 @@ class bitvec {
         if (this == &a) return *this;
         if (size > 1) delete [] ptr;
         if ((size = a.size) > 1) {
-            ptr = new(PointerFreeGC) uintptr_t[size];
+            ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[size];
             memcpy(ptr, a.ptr, size * sizeof(*ptr));
         } else {
             data = a.data; }
@@ -180,12 +220,7 @@ class bitvec {
             if (i < size)
                 ptr[i] &= ~(((uintptr_t)1 << (idx%bits_per_unit)) - 1); } }
     bool getbit(size_t idx) const {
-        if (idx >= size * bits_per_unit) return false;
-        if (size > 1)
-            return (ptr[idx/bits_per_unit] >> (idx%bits_per_unit)) & 1;
-        else
-            return (data >> idx) & 1;
-        return false; }
+        return (word(idx/bits_per_unit) >> (idx%bits_per_unit)) & 1; }
     uintptr_t getrange(size_t idx, size_t sz) const {
         assert(sz > 0 && sz <= bits_per_unit);
         if (idx >= size * bits_per_unit) return 0;
@@ -199,7 +234,7 @@ class bitvec {
         } else {
             return (data >> idx) & ~(~(uintptr_t)1 << (sz-1)); }}
     bitvec getslice(size_t idx, size_t sz) const;
-    bitref operator[](int idx) { return bitref(*this, idx); }
+    nonconst_bitref operator[](int idx) { return nonconst_bitref(*this, idx); }
     bool operator[](int idx) const { return getbit(idx); }
     int ffs(unsigned start = 0) const;
     unsigned ffz(unsigned start = 0) const;
@@ -208,16 +243,14 @@ class bitvec {
         return --const_bitref(*this, size * bits_per_unit); }
     const_bitref begin() const { return min(); }
     const_bitref end() const { return const_bitref(*this, -1); }
-    bitref min() { return bitref(*this, ffs()); }
-    bitref max() { return --bitref(*this, size * bits_per_unit); }
-    bitref begin() { return min(); }
-    bitref end() { return bitref(*this, -1); }
+    nonconst_bitref min() { return nonconst_bitref(*this, ffs()); }
+    nonconst_bitref max() { return --nonconst_bitref(*this, size * bits_per_unit); }
+    nonconst_bitref begin() { return min(); }
+    nonconst_bitref end() { return nonconst_bitref(*this, -1); }
     bool empty() const {
-        if (size > 1) {
-            for (size_t i = 0; i < size; i++)
-                if (ptr[i] != 0) return false;
-            return true;
-        } else { return data == 0; }}
+        for (size_t i = 0; i < size; i++)
+            if (word(i) != 0) return false;
+        return true; }
     explicit operator bool() const { return !empty(); }
     bool operator&=(const bitvec &a) {
         bool rv = false;
@@ -303,39 +336,14 @@ class bitvec {
     bitvec operator-(const bitvec &a) const {
         bitvec rv(*this); rv -= a; return rv; }
     bool operator==(const bitvec &a) const {
-        if (size > 1) {
-            if (a.size > 1) {
-                size_t i;
-                for (i = 0; i < size && i < a.size; i++)
-                    if (ptr[i] != a.ptr[i]) return false;
-                for (; i < size; i++)
-                    if (ptr[i]) return false;
-                for (; i < a.size; i++)
-                    if (a.ptr[i]) return false;
-            } else {
-                if (ptr[0] != a.data) return false;
-                for (size_t i = 1; i < size; i++)
-                    if (ptr[i]) return false; }
-        } else if (a.size > 1) {
-            if (data != a.ptr[0]) return false;
-            for (size_t i = 1; i < a.size; i++)
-                if (a.ptr[i]) return false;
-        } else {
-            return data == a.data; }
+        for (size_t i = 0; i < size || i < a.size; i++)
+            if (word(i) != a.word(i)) return false;
         return true; }
     bool operator!=(const bitvec &a) const { return !(*this == a); }
     bool intersects(const bitvec &a) const {
-        if (size > 1) {
-            if (a.size > 1) {
-                for (size_t i = 0; i < size && i < a.size; i++)
-                    if (ptr[i] & a.ptr[i]) return true;
-                return false;
-            } else {
-                return (ptr[0] & a.data) != 0; }
-        } else if (a.size > 1) {
-            return (data & a.ptr[0]) != 0;
-        } else {
-            return (data & a.data) != 0; }}
+        for (size_t i = 0; i < size && i < a.size; i++)
+            if (word(i) & a.word(i)) return true;
+        return false; }
     bitvec &operator>>=(size_t count);
     bitvec &operator<<=(size_t count);
     bitvec operator>>(size_t count) const { bitvec rv(*this); rv >>= count; return rv; }
@@ -354,13 +362,13 @@ class bitvec {
             newsize = (newsize + m) & ~m; }
         if (size > 1) {
             uintptr_t *old = ptr;
-            ptr = new(PointerFreeGC) uintptr_t[newsize];
+            ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[newsize];
             memcpy(ptr, old, size * sizeof(*ptr));
             memset(ptr + size, 0, (newsize - size) * sizeof(*ptr));
             delete [] old;
         } else {
             uintptr_t d = data;
-            ptr = new(PointerFreeGC) uintptr_t[newsize];
+            ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[newsize];
             *ptr = d;
             memset(ptr + size, 0, (newsize - size) * sizeof(*ptr));
         }

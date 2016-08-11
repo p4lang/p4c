@@ -780,6 +780,15 @@ void ExpressionEvaluator::postorder(const IR::Member* expression) {
     }
 }
 
+bool ExpressionEvaluator::preorder(const IR::ArrayIndex* expression) {
+    bool lv = evaluatingLeftValue;
+    evaluatingLeftValue = false;
+    visit(expression->left);
+    evaluatingLeftValue = lv;
+    visit(expression->right);
+    return false;  // prune
+}
+
 void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
     auto l = get(expression->left);
     auto r = get(expression->right);

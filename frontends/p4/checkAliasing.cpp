@@ -5,8 +5,9 @@ namespace P4 {
 
 namespace {
 
-// Canonical representation for a set of Member expressions.
-// We represent a set of member expressions as a forest.
+// Canonical representation for Expressions which are
+// left-values.
+// We represent a set of such expressions as a forest.
 // E.g., a.b, a.b[2].c, a.c, e.f
 // The forest would be
 // a
@@ -20,6 +21,7 @@ namespace {
 // (This is the "argument" node of the TreeNode class.)
 // A set of expression is aliased if there is a path in a tree that
 // contains multiple stars.
+// TODO: Replace this class with SymbolicValue
 class CanonicalMemberExpression : public Inspector {
     const ReferenceMap* refMap;
 
@@ -84,7 +86,6 @@ class CanonicalMemberExpression : public Inspector {
     explicit CanonicalMemberExpression(const ReferenceMap* refMap) : refMap(refMap)
     { CHECK_NULL(refMap); }
 
-    // Return true if this expression
     void add(const IR::Expression* expression) {
         expression->apply(*this);
         auto repr = ::get(representation, expression);

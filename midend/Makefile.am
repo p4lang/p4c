@@ -41,6 +41,8 @@ midend_SOURCES = \
 	midend/removeReturns.h \
 	midend/removeLeftSlices.cpp \
 	midend/removeLeftSlices.h \
+	midend/simplifyExpressions.cpp \
+	midend/simplifyExpressions.h \
 	midend/simplifyKey.h \
 	midend/simplifyKey.cpp \
 	midend/specialize.h \

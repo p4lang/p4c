@@ -1,8 +1,9 @@
 #include "parserUnroll.h"
+#include "lib/stringify.h"
 
 namespace P4 {
 
-bool DiscoverParsers::preorder(const IR::ParserState* state) {
+bool AnalyzeParser::preorder(const IR::ParserState* state) {
     LOG1("Found state " << state << " of " << current->parser);
     if (state->name.name == IR::ParserState::start)
         current->start = state;
@@ -10,19 +11,7 @@ bool DiscoverParsers::preorder(const IR::ParserState* state) {
     return false;
 }
 
-void DiscoverParsers::postorder(const IR::P4Parser* parser) {
-    parsers->parsers.emplace(parser, current);
-    CHECK_NULL(current->start);
-    current = nullptr;
-}
-
-bool DiscoverParsers::preorder(const IR::P4Parser* parser) {
-    LOG1("Scanning " << parser);
-    current = new ParserStructure(parser);
-    return true;  // do not prune
-}
-
-void DiscoverParsers::postorder(const IR::PathExpression* expression) {
+void AnalyzeParser::postorder(const IR::PathExpression* expression) {
     auto state = findContext<IR::ParserState>();
     if (state == nullptr)
         return;
@@ -31,15 +20,28 @@ void DiscoverParsers::postorder(const IR::PathExpression* expression) {
         current->calls(state, decl->to<IR::ParserState>());
 }
 
-void EvaluateParsers::postorder(const IR::P4Parser* parser) {
-    LOG1("Evaluating " << parser);
-    auto structure = ::get(parsers->parsers, getOriginal<IR::P4Parser>());
-    CHECK_NULL(structure);
-    auto pi = structure->evaluate(refMap, typeMap, unroll);
-    parsers->evaluation.emplace(parser, pi);
-}
+/////////////////////////////////////
 
 namespace {
+
+// Set of possible definitions of a variable
+struct VarDef {
+    const SymbolicValue* leftValue;
+    std::vector<const IR::Node*> definitions;  // statements or parameters
+};
+
+// Definitions for all variables at a program point
+struct Definitions {
+    std::map<const SymbolicValue*, VarDef*> definitions;
+    void add(VarDef* def)
+    { definitions[def->leftValue] = def; }
+};
+
+// For each program point the definitions of all variables
+struct AllDefinitions {
+    std::map<const IR::Node*, Definitions*> perStatement;
+};
+
 class ParserSymbolicInterpreter {
     ParserStructure*    structure;
     const IR::P4Parser* parser;
@@ -47,6 +49,7 @@ class ParserSymbolicInterpreter {
     TypeMap*            typeMap;
     SymbolicValueFactory* factory;
     ParserInfo*         synthesizedParser;  // output produced
+    bool                unroll;
 
     ValueMap* initializeVariables() {
         ValueMap* result = new ValueMap();
@@ -59,7 +62,7 @@ class ParserSymbolicInterpreter {
             auto value = factory->create(type, !initialized);
             result->set(p, value);
         }
-        for (auto d : *parser->stateful) {
+        for (auto d : *parser->parserLocals) {
             auto type = typeMap->getType(d);
             SymbolicValue* value = nullptr;
             if (d->is<IR::Declaration_Constant>()) {
@@ -243,7 +246,7 @@ class ParserSymbolicInterpreter {
     }
 
     // Return true if we have detected a loop we cannot unroll
-    bool checkLoops(ParserStateInfo* state, bool unroll) const {
+    bool checkLoops(ParserStateInfo* state) const {
         const ParserStateInfo* crt = state;
         while (true) {
             crt = crt->predecessor;
@@ -288,7 +291,7 @@ class ParserSymbolicInterpreter {
         return false;
     }
 
-    std::vector<ParserStateInfo*>* evaluate(ParserStateInfo* state) {
+    std::vector<ParserStateInfo*>* evaluateState(ParserStateInfo* state) {
         LOG1("Analyzing " << state->state);
         auto valueMap = state->before->clone();
         for (auto s : *state->state->components) {
@@ -303,14 +306,15 @@ class ParserSymbolicInterpreter {
 
  public:
     ParserSymbolicInterpreter(ParserStructure* structure, ReferenceMap* refMap,
-                              TypeMap* typeMap)
-            : structure(structure), refMap(refMap), typeMap(typeMap), synthesizedParser(nullptr) {
+                              TypeMap* typeMap, bool unroll)
+            : structure(structure), refMap(refMap), typeMap(typeMap),
+              synthesizedParser(nullptr), unroll(unroll) {
         CHECK_NULL(structure); CHECK_NULL(refMap); CHECK_NULL(typeMap);
         factory = new SymbolicValueFactory(typeMap);
         parser = structure->parser;
     }
 
-    ParserInfo* run(bool unroll) {
+    ParserInfo* run() {
         synthesizedParser = new ParserInfo();
         auto initMap = initializeVariables();
         if (initMap == nullptr)
@@ -324,11 +328,11 @@ class ParserSymbolicInterpreter {
             auto stateInfo = toRun.back();
             toRun.pop_back();
             LOG1("Symbolic evaluation of " << stateChain(stateInfo));
-            bool infLoop = checkLoops(stateInfo, unroll);
+            bool infLoop = checkLoops(stateInfo);
             if (infLoop)
                 // don't evaluate successors anymore
                 continue;
-            auto nextStates = evaluate(stateInfo);
+            auto nextStates = evaluateState(stateInfo);
             if (nextStates == nullptr) {
                 LOG1("No next states");
                 continue;
@@ -341,11 +345,9 @@ class ParserSymbolicInterpreter {
 };
 }  // namespace
 
-ParserInfo* ParserStructure::evaluate(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) {
-    ParserSymbolicInterpreter psi(this, refMap, typeMap);
-    callGraph.compute_loops(start, loops);
-    auto result = psi.run(unroll);
-    return result;
+void ParserStructure::analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) {
+    ParserSymbolicInterpreter psi(this, refMap, typeMap, unroll);
+    result = psi.run();
 }
 
 }  // namespace P4

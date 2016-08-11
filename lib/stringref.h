@@ -22,6 +22,15 @@ limitations under the License.
 #include <iostream>
 #include <string>
 #include "cstring.h"
+#include "config.h"
+
+#if !HAVE_MEMRCHR
+static inline void *memrchr(const char *s, int c, size_t n) {
+    for (auto *p = s+n-1; p >= s; --p)
+        if (*p == c) return const_cast<char *>(p);
+    return nullptr;
+}
+#endif
 
 /* A StringRef is a *TEMPORARY* reference to a string held in memory managed by some other
  * object.  As such, it becomes dangling (invalid) when that other object goes away, so needs

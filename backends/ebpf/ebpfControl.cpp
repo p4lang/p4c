@@ -295,7 +295,7 @@ void EBPFControl::emitDeclaration(const IR::Declaration* decl, CodeBuilder* buil
 }
 
 void EBPFControl::emit(CodeBuilder* builder) {
-    for (auto a : *controlBlock->container->stateful)
+    for (auto a : *controlBlock->container->controlLocals)
         emitDeclaration(a, builder);
     builder->emitIndent();
     ControlBodyTranslationVisitor psi(this, builder);

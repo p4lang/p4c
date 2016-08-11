@@ -51,16 +51,18 @@ class HeaderStack : HeaderOrMetadata {
 }
 
 class Metadata : HeaderOrMetadata {
-    Metadata(IR::ID n, Type_Struct t) : HeaderOrMetadata(n, t) {}
+    Metadata(IR::ID n, Type_StructLike t) : HeaderOrMetadata(n, t) {}
 #nodbprint
 }
 
 abstract HeaderRef : Expression {
+    virtual HeaderOrMetadata baseRef() const = 0;
 }
 
 class ConcreteHeaderRef : HeaderRef {
     HeaderOrMetadata    ref;
     ConcreteHeaderRef { if (type->is<Type::Unknown>() && ref) type = ref->type; }
+    HeaderOrMetadata baseRef() const override { return ref; }
     toString{ return ref->name; }
     dbprint{ out << ref->name; }
 }
@@ -69,6 +71,7 @@ class HeaderStackItemRef : HeaderRef {
     Expression      base_;
     Expression      index_;
     Expression base() const { return base_; }
+    HeaderOrMetadata baseRef() const override { return base_->to<HeaderRef>()->baseRef(); }
     Expression index() const { return index_; }
     void set_base(Expression b) { base_ = b; }
     toString{ return base_->toString() + "[" + index_->toString() + "]"; }

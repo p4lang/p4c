@@ -25,6 +25,7 @@ limitations under the License.
 #include "midend/localizeActions.h"
 #include "midend/removeParameters.h"
 #include "midend/local_copyprop.h"
+#include "midend/simplifyExpressions.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -53,6 +54,9 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::UniqueNames(&refMap, isv1),
         // Move all local declarations to the beginning
         new P4::MoveDeclarations(),
+        new P4::MoveInitializers(),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
+        new P4::SimplifyExpressions(&refMap, &typeMap),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap),  // necessary for inlining
         // Move some constructor calls into temporaries

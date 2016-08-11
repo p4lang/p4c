@@ -149,6 +149,7 @@ class ExpressionEvaluator : public Inspector {
     void postorder(const IR::Operation_Unary* expression) override;
     void postorder(const IR::PathExpression* expression) override;
     void postorder(const IR::Member* expression) override;
+    bool preorder(const IR::ArrayIndex* expression) override;
     void postorder(const IR::ArrayIndex* expression) override;
     void postorder(const IR::ListExpression* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;

@@ -29,6 +29,7 @@ limitations under the License.
 #include "midend/removeLeftSlices.h"
 #include "midend/convertEnums.h"
 #include "midend/simplifyKey.h"
+#include "midend/simplifyExpressions.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -96,6 +97,9 @@ void MidEnd::setup_for_P4_16(CompilerOptions& options) {
         new P4::UniqueNames(&refMap, isv1),
         // Move all local declarations to the beginning
         new P4::MoveDeclarations(),
+        new P4::MoveInitializers(),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
+        new P4::SimplifyExpressions(&refMap, &typeMap),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap),
         // Move some constructor calls into temporaries

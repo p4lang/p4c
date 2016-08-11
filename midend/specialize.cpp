@@ -188,7 +188,7 @@ const IR::Node* Specialize::postorder(IR::P4Parser* parser) {
                                            new IR::TypeParameters(),
                                            clone->type->applyParams);
         auto prs = new IR::P4Parser(s->name, newtype, new IR::ParameterList(),
-                                    clone->stateful, clone->states);
+                                    clone->parserLocals, clone->states);
         LOG1("Created " << prs << " for " << parser);
         result->push_back(prs);
     }
@@ -216,7 +216,7 @@ const IR::Node* Specialize::postorder(IR::P4Control* control) {
                                             new IR::TypeParameters(),
                                             clone->type->applyParams);
         auto ctrl = new IR::P4Control(s->name, newtype, new IR::ParameterList(),
-                                     clone->stateful, clone->body);
+                                     clone->controlLocals, clone->body);
         LOG1("Created " << ctrl << " for " << control);
         result->push_back(ctrl);
     }

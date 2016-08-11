@@ -1,5 +1,5 @@
-#include "/home/mbudiu/git/p4c/p4include/core.p4"
-#include "../testdata/p4_16_samples/simple_model.p4"
+#include "/home/cdodd/p4c/p4include/core.p4"
+#include "../testdata/p4_16_samples/very_simple_model.p4"
 
 header ARPA_hdr {
     bit<48> src;

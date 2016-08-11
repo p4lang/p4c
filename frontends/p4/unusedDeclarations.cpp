@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
         return nullptr;
     }
 
-    visit(cont->stateful);
+    visit(cont->controlLocals);
     visit(cont->body);
     prune();
     return cont;
@@ -54,7 +54,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* cont) {
         return nullptr;
     }
 
-    visit(cont->stateful);
+    visit(cont->parserLocals);
     visit(cont->states);
     prune();
     return cont;

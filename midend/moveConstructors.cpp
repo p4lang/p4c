@@ -68,7 +68,7 @@ class MoveConstructorsImpl : public Transform {
     const IR::Node* preorder(IR::P4Parser* parser) override {
         cmap.clear();
         convert = Region::InParserStateful;
-        visit(parser->stateful);
+        visit(parser->parserLocals);
         convert = Region::InBody;
         visit(parser->states);
         convert = Region::Outside;
@@ -112,7 +112,7 @@ class MoveConstructorsImpl : public Transform {
                 cce->arguments, nullptr);
             newDecls->push_back(decl);
         }
-        newDecls->append(*parser->stateful);
+        newDecls->append(*parser->parserLocals);
         auto result = new IR::P4Parser(parser->srcInfo, parser->name, parser->type,
                                        parser->constructorParams, newDecls, parser->states);
         return result;
@@ -123,7 +123,7 @@ class MoveConstructorsImpl : public Transform {
         convert = Region::InControlStateful;
         auto newDecls = new IR::IndexedVector<IR::Declaration>();
         bool changes = false;
-        for (auto decl : *control->stateful) {
+        for (auto decl : *control->controlLocals) {
             visit(decl);
             for (auto e : cmap.tmpName) {
                 auto cce = e.first;
@@ -160,8 +160,7 @@ class MoveConstructorsImpl : public Transform {
                 cce->arguments, nullptr);
             newDecls->push_back(decl);
         }
-        for (auto s : *control->stateful)
-            newDecls->push_back(s);
+        newDecls->append(*control->controlLocals);
         auto result = new IR::P4Control(control->srcInfo, control->name, control->type,
                                         control->constructorParams, newDecls,
                                         control->body);

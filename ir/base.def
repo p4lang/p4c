@@ -35,7 +35,7 @@ interface INamespace {
     virtual Util::Enumerator<IDeclaration> *getDeclarations() const = 0;
 }
 
-// No two declarations with the same name
+// Does not allow two declarations with the same name
 interface ISimpleNamespace : INamespace {
     virtual IDeclaration getDeclByName(cstring name) const = 0;
 }

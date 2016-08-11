@@ -65,7 +65,7 @@ void TypeMap::setType(const IR::Node* element, const IR::Type* type) {
     auto it = typeMap.find(element);
     if (it != typeMap.end()) {
         const IR::Type* existingType = it->second;
-        if (existingType != type)
+        if (!TypeMap::equivalent(existingType, type))
             BUG("Changing type of %1% in type map from %2% to %3%",
                 dbp(element), dbp(existingType), dbp(type));
         return;
@@ -79,7 +79,6 @@ const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
     auto result = get(typeMap, element);
     LOG2("Looking up type for " << dbp(element) << " => " << dbp(result));
     if (notNull && result == nullptr) {
-        // std::cout << this;
         BUG("Could not find type for %1%", dbp(element));
     }
     if (result != nullptr && result->is<IR::Type_Name>())
@@ -92,6 +91,114 @@ void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
         return;
     LOG1("New type variables " << tvs);
     allTypeVariables.simpleCompose(tvs);
+}
+
+// Deep structural equivalence between canonical types.
+// Does not do unification of type variables - a type variable is only
+// equivalent to itself.
+bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
+    if (left->node_type_name() != right->node_type_name())
+        return false;
+
+    if (left->is<IR::Type_Base>())
+        return *left == *right;
+    if (left->is<IR::Type_InfInt>())
+        return true;
+    if (left->is<IR::Type_Var>()) {
+        auto lv = left->to<IR::Type_Var>();
+        auto rv = right->to<IR::Type_Var>();
+        return lv->name == rv->name && lv->declid == rv->declid;
+    }
+    if (left->is<IR::Type_Stack>()) {
+        auto ls = left->to<IR::Type_Stack>();
+        auto rs = right->to<IR::Type_Stack>();
+        return equivalent(ls->baseType, rs->baseType) &&
+                ls->getSize() == rs->getSize();
+    }
+    if (left->is<IR::Type_Enum>()) {
+        auto le = left->to<IR::Type_Enum>();
+        auto re = right->to<IR::Type_Enum>();
+        // only one enum with the same name allowed
+        return le->name == re->name;
+    }
+    if (left->is<IR::Type_StructLike>()) {
+        auto sl = left->to<IR::Type_StructLike>();
+        auto sr = right->to<IR::Type_StructLike>();
+        if (sl->fields->size() != sr->fields->size())
+            return false;
+        for (size_t i = 0; i < sl->fields->size(); i++) {
+            auto fl = sl->fields->at(i);
+            auto fr = sr->fields->at(i);
+            if (fl->name != fr->name)
+                return false;
+            if (!equivalent(fl->type, fr->type))
+                return false;
+        }
+        return true;
+    }
+    if (left->is<IR::Type_Tuple>()) {
+        auto lt = left->to<IR::Type_Tuple>();
+        auto rt = right->to<IR::Type_Tuple>();
+        if (lt->components->size() != rt->components->size())
+            return false;
+        for (size_t i = 0; i < lt->components->size(); i++) {
+            auto l = lt->components->at(i);
+            auto r = rt->components->at(i);
+            if (!equivalent(l, r))
+                return false;
+        }
+        return true;
+    }
+    if (left->is<IR::Type_Package>()) {
+        auto lp = left->to<IR::Type_Package>();
+        auto rp = right->to<IR::Type_Package>();
+        return equivalent(lp->getConstructorMethodType(), rp->getConstructorMethodType());
+    }
+    if (left->is<IR::Type_Parser>() || left->is<IR::Type_Control>() || left->is<IR::Type_Table>()) {
+        auto la = left->to<IR::IApply>();
+        auto ra = left->to<IR::IApply>();
+        return equivalent(la->getApplyMethodType(), ra->getApplyMethodType());
+    }
+    if (left->is<IR::Type_SpecializedCanonical>()) {
+        auto ls = left->to<IR::Type_SpecializedCanonical>();
+        auto rs = right->to<IR::Type_SpecializedCanonical>();
+        return equivalent(ls->substituted, rs->substituted);
+    }
+    if (left->is<IR::Type_ActionEnum>()) {
+        auto la = left->to<IR::Type_ActionEnum>();
+        auto ra = right->to<IR::Type_ActionEnum>();
+        return la->actionList == ra->actionList;  // pointer comparison
+    }
+    if (left->is<IR::Type_Method>() || left->is<IR::Type_Action>()) {
+        auto lm = left->to<IR::Type_MethodBase>();
+        auto rm = right->to<IR::Type_MethodBase>();
+        if (lm->returnType == nullptr)
+            return rm->returnType == nullptr;
+        if (rm->returnType == nullptr)
+            return false;
+        if (!equivalent(lm->returnType, rm->returnType))
+            return false;
+        if (lm->parameters->size() != rm->parameters->size())
+            return false;
+        for (size_t i = 0; i < lm->parameters->size(); i++) {
+            auto lp = lm->parameters->parameters->at(i);
+            auto rp = rm->parameters->parameters->at(i);
+            if (lp->direction != rp->direction)
+                return false;
+            if (!equivalent(lp->type, rp->type))
+                return false;
+        }
+        return true;
+    }
+    if (left->is<IR::Type_Extern>()) {
+        auto le = left->to<IR::Type_Extern>();
+        auto re = right->to<IR::Type_Extern>();
+        return le->name == re->name;
+    }
+
+    BUG("%1%: Unexpected type check for equivalence", left);
+    // The following are not expected to be compared for equivalence:
+    // Type_Dontcare, Type_Unknown, Type_Name, Type_Specialized, Type_Typedef
 }
 
 }  // namespace P4

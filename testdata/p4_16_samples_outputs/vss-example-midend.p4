@@ -87,6 +87,7 @@ struct Parsed_packet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
+    bit<16> tmp;
     @name("ck") Checksum16() ck_0;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
@@ -100,7 +101,8 @@ parser TopParser(packet_in b, out Parsed_packet p) {
         verify(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
         ck_0.clear();
         ck_0.update<IPv4_h>(p.ip);
-        verify(ck_0.get() == 16w0, IPv4ChecksumError);
+        tmp = ck_0.get();
+        verify(tmp == 16w0, IPv4ChecksumError);
         transition accept;
     }
 }

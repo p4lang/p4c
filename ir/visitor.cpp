@@ -57,6 +57,12 @@ class Visitor::ChangeTracker {
             return n;
         if (!it->second.first) BUG("IR loop detected");
         return it->second.second; }
+    void revisit_visited() {
+        for (auto it = visited.begin(); it != visited.end();) {
+            if (it->second.first)
+                it = visited.erase(it);
+            else
+                ++it; } }
 };
 
 Visitor::profile_t Visitor::init_apply(const IR::Node *root) {
@@ -252,6 +258,20 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
     else
         visited = nullptr;
     return n;
+}
+
+void Inspector::revisit_visited() {
+    for (auto it = visited->begin(); it != visited->end();) {
+        if (it->second)
+            it = visited->erase(it);
+        else
+            ++it; }
+}
+void Modifier::revisit_visited() {
+    visited->revisit_visited();
+}
+void Transform::revisit_visited() {
+    visited->revisit_visited();
 }
 
 #define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                             \

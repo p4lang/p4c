@@ -28,6 +28,7 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 #include "midend/parserUnroll.h"
 #include "midend/specialize.h"
+#include "midend/simplifyExpressions.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -45,7 +46,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
     setName("MidEnd");
 
-    // TODO: break down expression into simple parts
     // TODO: def-use analysis
     // TODO: parser inlining
     // TODO: parser loop unrolling
@@ -61,6 +61,9 @@ MidEnd::MidEnd(CompilerOptions& options) {
         // Move all local declarations to the beginning
         new P4::MoveDeclarations(),
         new P4::MoveInitializers(),
+        // Simplify expressions
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
+        new P4::SimplifyExpressions(&refMap, &typeMap),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap),
         // Move some constructor calls into temporaries
@@ -87,10 +90,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::SpecializeAll(&refMap, &typeMap, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-        // TODO: simplify statements and expressions.
-        // This is required for the correctness of some of the following passes.
-        // Parser loop unrolling
-        new P4::ParserUnroll(true, &refMap, &typeMap, isv1),
+        // Parser loop unrolling: TODO
+        // new P4::ParsersUnroll(true, &refMap, &typeMap, isv1),
         // Clone an action for each use, so we can specialize the action
         // per user (e.g., for each table or direct invocation).
         new P4::LocalizeAllActions(&refMap, isv1),

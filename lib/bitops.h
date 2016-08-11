@@ -22,8 +22,12 @@ limitations under the License.
 #include "exceptions.h"
 
 static inline unsigned bitcount(unsigned v) {
+#if defined(__GNUC__) || defined(__clang__)
+    unsigned rv = __builtin_popcount(v);
+#else
     unsigned rv = 0;
     while (v) { v &= v-1; ++rv; }
+#endif
     return rv; }
 static inline unsigned bitcount(mpz_class value) {
     mpz_class v = value;
@@ -32,14 +36,16 @@ static inline unsigned bitcount(mpz_class value) {
     unsigned rv = 0;
     while (v != 0) { v &= v-1; ++rv; }
     return rv; }
-static inline int ceil_log2(unsigned v) {
-    if (!v) return -1;
-    for (int rv = 0; rv < static_cast<int>(CHAR_BIT*sizeof(unsigned)); rv++)
-        if ((1U << rv) >= v) return rv;
-    return CHAR_BIT*sizeof(unsigned); }
 static inline int floor_log2(unsigned v) {
     int rv = -1;
+#if defined(__GNUC__) || defined(__clang__)
+    if (v) rv = CHAR_BIT*sizeof(unsigned) - __builtin_clz(v) - 1;
+#else
     while (v) { rv++; v >>= 1; }
+#endif
     return rv; }
+static inline int ceil_log2(unsigned v) {
+    return v ? floor_log2(v-1) + 1 : -1;
+}
 
 #endif /* P4C_LIB_BITOPS_H_ */

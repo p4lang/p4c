@@ -18,9 +18,11 @@ limitations under the License.
 #define _FRONTENDS_P4_CALLGRAPH_H_
 
 #include <vector>
+#include <unordered_set>
 #include "lib/log.h"
 #include "lib/map.h"
 #include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
 
 namespace P4 {
 
@@ -31,7 +33,7 @@ class CallGraph {
     // Use an ordered map to make this deterministic
     ordered_map<T, std::vector<T>*> out_edges;  // map caller to list of callees
     ordered_map<T, std::vector<T>*> in_edges;
-    std::set<T> nodes;    // all nodes
+    ordered_set<T> nodes;    // all nodes
 
     void sort(T el, std::vector<T> &out, std::set<T> &done)  {
         if (done.find(el) != done.end()) {
@@ -49,6 +51,9 @@ class CallGraph {
     typedef typename ordered_map<T, std::vector<T>*>::iterator iterator;
 
     explicit CallGraph(cstring name) : name(name) {}
+
+    // Graph construction.
+
     // node that may call no-one
     void add(T caller) {
         if (nodes.find(caller) != nodes.end())
@@ -58,21 +63,28 @@ class CallGraph {
         in_edges[caller] = new std::vector<T>();
         nodes.emplace(caller);
     }
-    void add(T caller, T callee) {
+    void calls(T caller, T callee) {
         LOG1(name << ": " << callee << " is called by " << caller);
         add(caller);
         add(callee);
         out_edges[caller]->push_back(callee);
         in_edges[callee]->push_back(caller);
     }
+
+    // Graph querying
+
     bool isCallee(T callee) const {
         auto callees =::get(in_edges, callee);
         return callees != nullptr && !callees->empty(); }
-    bool isCaller(T caller) const
-    { return out_edges.find(caller) != out_edges.end(); }
-    // If the graph has cycles except self-loops returns 'false'.
-    // In that case the graphs is still sorted, but the order
-    // in strongly-connected components is unspecified.
+    bool isCaller(T caller) const {
+        auto edges = ::get(out_edges, caller);
+        if (edges == nullptr)
+            return false;
+        return !edges->empty();
+    }
+    // Topological sort of the graph; calles are before callers.
+    // If the graph has cycles the graphs is still sorted, but the order
+    // of nodes in strongly-connected components is unspecified.
     void sort(std::vector<T> &start, std::vector<T> &out) {
         std::set<T> done;
         for (auto s : start)
@@ -93,12 +105,31 @@ class CallGraph {
         if (isCaller(caller))
             toAppend.insert(out_edges[caller]->begin(), out_edges[caller]->end());
     }
+    // out will contain all nodes reachable from start
+    void reachable(T start, std::set<T> &out) {
+        std::set<T> work;
+        work.emplace(start);
+        while (!work.empty()) {
+            T node = *work.begin();
+            work.erase(node);
+            if (out.find(node) != out.end())
+                continue;
+            out.emplace(node);
+            auto edges = out_edges[node];
+            if (edges == nullptr)
+                continue;
+            for (auto c : *edges)
+                work.emplace(c);
+        }
+    }
+
+    typedef std::unordered_set<T> Set;
 
     // Compute for each node the set of dominators with the indicated start node.
     // Node d dominates node n if all paths from the start to n go through d
     // Result is deposited in 'dominators'.
     // 'dominators' should be empty when calling this function.
-    void dominators(T start, std::map<T, std::unordered_set<T>> &dominators) {
+    void dominators(T start, std::map<T, Set> &dominators) {
         // initialize
         for (auto n : nodes) {
             if (n == start)
@@ -108,15 +139,16 @@ class CallGraph {
         }
 
         // There are faster but more complicated algorithms.
-        bool changes = false;
+        bool changes = true;
         while (changes) {
+            changes = false;
             for (auto node : nodes) {
                 auto vec = in_edges[node];
                 if (vec == nullptr)
                     continue;
                 auto size = dominators[node].size();
                 for (auto c : *vec)
-                    insersect(dominators[node], dominators[c]);
+                    insersectWith(dominators[node], dominators[c]);
                 dominators[node].emplace(node);
                 if (dominators[node].size() != size)
                     changes = true;
@@ -130,10 +162,35 @@ class CallGraph {
         std::set<T> body;
         // multiple back-edges could go to the same loop head
         std::set<T> back_edge_heads;
+
+        Loop(T entry) : entry(entry) {}
     };
 
-    void compute_loops(T start, std::vector<Loop*> &loops) {
-        std::map<T, std::unordered_set<T>> dom;
+    // All natural loops in a call-graph.
+    struct Loops {
+        std::vector<Loop*> loops;
+
+        // Return loop index if 'node' is a loop entry point
+        // else return -1
+        int isLoopEntryPoint(T node) const {
+            for (size_t i=0; i < loops.size(); i++) {
+                auto loop = loops.at(i);
+                if (loop->entry == node)
+                    return i;
+            }
+            return -1;
+        }
+        bool isInLoop(int loopIndex, T node) const {
+            if (loopIndex == -1)
+                return false;
+            auto loop = loops.at(loopIndex);
+            return (loop->body.find(node) != loop->body.end());
+        }
+    };
+
+    Loops* compute_loops(T start) {
+        auto result = new Loops();
+        std::map<T, Set> dom;
         dominators(start, dom);
 
         std::map<T, Loop*> entryToLoop;
@@ -146,34 +203,39 @@ class CallGraph {
                     // n is a loop head
                     auto loop = get(entryToLoop, n);
                     if (loop == nullptr) {
-                        loop = new Loop();
+                        loop = new Loop(n);
                         entryToLoop[n] = loop;
-                        loops.push_back(loop);
+                        result->loops.push_back(loop);
                     }
                     loop->back_edge_heads.emplace(e);
                     // reverse DFS from e to n
 
-                    std::vector<T> work;
-                    work.push_back(e);
+                    std::set<T> work;
+                    work.emplace(e);
                     while (!work.empty()) {
-                        auto crt = work.back();
-                        work.pop_back();
+                        auto crt = *work.begin();
+                        work.erase(crt);
                         loop->body.emplace(crt);
                         if (crt == n) continue;
                         for (auto i : *in_edges[crt])
-                            work.push_back(i);
+                            if (loop->body.find(i) == loop->body.end())
+                                work.emplace(i);
                     }
                 }
             }
         }
+        return result;
     }
 
  protected:
     // intersect in place
-    static void insersect(std::unordered_set<T> &set, std::unordered_set<T>& with) {
+    static void insersectWith(Set &set, Set& with) {
+        std::vector<T> toRemove;
         for (auto e : set)
             if (with.find(e) == with.end())
-                set.erase(e);
+                toRemove.push_back(e);
+        for (auto e : toRemove)
+            set.erase(e);
     }
 
     // Helper for computing strongly-connected components
@@ -248,10 +310,11 @@ class CallGraph {
     }
 
  public:
-    // Sort that computes strongly-connected components.
-    // Works for graphs with cycles.  Returns true if the graph
-    // contains at least one non-trivial cycle (not a self-loop).
-    // Ignores nodes not reachable from 'start'.
+    // Sort that computes strongly-connected components - all nodes in
+    // a strongly-connected components will be consecutive in the
+    // sort.  Returns true if the graph contains at least one
+    // non-trivial cycle (not a self-loop).  Ignores nodes not
+    // reachable from 'start'.
     bool sccSort(T start, std::vector<T> &out) {
         sccInfo helper;
         return strongConnect(start, helper, out);

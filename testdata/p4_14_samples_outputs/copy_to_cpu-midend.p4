@@ -88,7 +88,9 @@ extern action_profile {
 
 enum HashAlgorithm {
     crc32,
+    crc32_custom,
     crc16,
+    crc16_custom,
     random,
     identity
 }
@@ -142,6 +144,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<64> tmp;
     @name("parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
         transition parse_ethernet;
@@ -151,7 +154,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name("start") state start {
-        transition select((packet.lookahead<bit<64>>())[63:0]) {
+        tmp = packet.lookahead<bit<64>>();
+        transition select(tmp[63:0]) {
             64w0: parse_cpu_header;
             default: parse_ethernet;
         }

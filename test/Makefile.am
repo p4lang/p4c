@@ -1,9 +1,9 @@
-# Copyright 2013-present Barefoot Networks, Inc. 
-# 
+# Copyright 2013-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -16,7 +16,7 @@
 
 check_PROGRAMS = exception_test format_test source_file_test path_test \
 		 enumerator_test default_test unittest_transform1 json_test \
-		 opeq_test
+		 opeq_test call_graph_test
 
 default_test_SOURCES = test/unittests/default_test.cpp
 default_test_LDADD = libp4ctoolkit.a
@@ -32,6 +32,8 @@ path_test_SOURCES = test/unittests/path_test.cpp
 path_test_LDADD = libp4ctoolkit.a
 json_test_SOURCES = test/unittests/json_test.cpp
 json_test_LDADD = libp4ctoolkit.a
+call_graph_test_SOURCES = test/unittests/call_graph_test.cpp
+call_graph_test_LDADD = libp4ctoolkit.a
 unittest_transform1_SOURCES = $(ir_SOURCES) test/unittests/transform1.cpp
 unittest_transform1_LDADD = libfrontend.a libp4ctoolkit.a
 opeq_test_SOURCES = $(ir_SOURCES) test/unittests/opeq_test.cpp

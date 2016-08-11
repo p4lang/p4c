@@ -38,6 +38,8 @@ limitations under the License.
 #include "frontends/p4/symbol_table.h"
 #include "frontends/common/constantParsing.h"
 
+#undef PACKAGE  // autoconf wants to define this macro that we want to use as a token
+
 #ifndef YYDEBUG
 #define YYDEBUG 1
 #endif
@@ -358,7 +360,7 @@ parserDeclaration
                              { structure.pop();
                                auto pl = new IR::ParameterList(@2, $2);
                                $$ = new IR::P4Parser($1->name.srcInfo, $1->name,
-                                                            $1, pl, $4, $5);}
+                                                     $1, pl, $4, $5);}
     ;
 
 parserLocalElements

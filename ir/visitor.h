@@ -166,6 +166,7 @@ class Modifier : public virtual Visitor {
     virtual void postorder(IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
+    void revisit_visited();
 };
 
 class Inspector : public virtual Visitor {
@@ -181,6 +182,7 @@ class Inspector : public virtual Visitor {
     virtual void postorder(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
+    void revisit_visited();
 };
 
 class Transform : public virtual Visitor {
@@ -197,6 +199,7 @@ class Transform : public virtual Visitor {
     virtual const IR::Node *postorder(IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
+    void revisit_visited();
  protected:
     // can only be called usefully from 'preorder' function
     void prune() { prune_flag = true; }

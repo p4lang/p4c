@@ -999,8 +999,12 @@ cstring JsonConverter::convertHashAlgorithm(cstring algorithm) const {
     cstring result;
     if (algorithm == v1model.algorithm.crc32.name)
         result = "crc32";
+    else if (algorithm == v1model.algorithm.crc32_custom.name)
+        result = "crc32_custom";
     else if (algorithm == v1model.algorithm.crc16.name)
         result = "crc16";
+    else if (algorithm == v1model.algorithm.crc16_custom.name)
+        result = "crc16_custom";
     else if (algorithm == v1model.algorithm.random.name)
         result = "random";
     else if (algorithm == v1model.algorithm.identity.name)
@@ -1348,7 +1352,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
         tables->append(exitTable);
     }
 
-    for (auto c : *cont->stateful) {
+    for (auto c : *cont->controlLocals) {
         if (c->is<IR::Declaration_Constant>() ||
             c->is<IR::Declaration_Variable>() ||
             c->is<IR::P4Action>() ||
@@ -1875,8 +1879,8 @@ Util::IJson* JsonConverter::convertDeparser(const IR::P4Control* ctrl) {
 
 Util::IJson* JsonConverter::toJson(const IR::P4Parser* parser) {
     auto result = new Util::JsonObject();
-    if (parser->stateful->size() != 0) {
-        ::error("%1%: Stateful elements not yet supported in parser for this target", parser);
+    if (parser->parserLocals->size() != 0) {
+        ::error("%1%: locals not yet supported in parser for this target", parser);
         return result;
     }
     result->emplace("name", "parser");  // at least in simple_router this name is hardwired

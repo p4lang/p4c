@@ -85,7 +85,7 @@ const IR::Node* RemoveReturns::preorder(IR::P4Control* control) {
     bodyContents->append(*control->body->components);
     auto body = new IR::BlockStatement(control->body->srcInfo, bodyContents);
     auto result = new IR::P4Control(control->srcInfo, control->name, control->type,
-                                    control->constructorParams, control->stateful, body);
+                                    control->constructorParams, control->controlLocals, body);
     pop();
     BUG_CHECK(stack.empty(), "Non-empty stack");
     prune();
@@ -255,7 +255,7 @@ const IR::Node* RemoveExits::preorder(IR::P4Control* control) {
 
     cstring var = refMap->newName(variableName);
     returnVar = IR::ID(var);
-    visit(control->stateful);
+    visit(control->controlLocals);
 
     BUG_CHECK(stack.empty(), "Non-empty stack");
     push();
@@ -265,8 +265,8 @@ const IR::Node* RemoveExits::preorder(IR::P4Control* control) {
                                              IR::Annotations::empty,
                                              IR::Type_Boolean::get(), nullptr);
     stateful->push_back(decl);
-    stateful->append(*control->stateful);
-    control->stateful = stateful;
+    stateful->append(*control->controlLocals);
+    control->controlLocals = stateful;
 
     auto newbody = new IR::IndexedVector<IR::StatOrDecl>();
     auto left = new IR::PathExpression(returnVar);

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,6 +29,15 @@ limitations under the License.
             std::clog << cstring("") << #a << " is `" << Util::toString(a) << "'" << std::endl \
                       << cstring("") << #b << " is `" << Util::toString(b) << "'" << std::endl; \
             assert((a) == (b));                                         \
+        }                                                               \
+    } while (0)
+
+#define ASSERT_NEQ(a, b) \
+    do {                  \
+        if ((a) == (b)) {                                               \
+            std::clog << cstring("") << #a << " is `" << Util::toString(a) << "'" << std::endl \
+                      << cstring("") << #b << " is `" << Util::toString(b) << "'" << std::endl; \
+            assert((a) != (b));                                         \
         }                                                               \
     } while (0)
 

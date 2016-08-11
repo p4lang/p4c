@@ -22,7 +22,7 @@ limitations under the License.
 /* A lower-triangular bit matrix, held in a bit vector */
 class LTBitMatrix : private bitvec {
  public:
-    bitref operator()(unsigned r, unsigned c) {
+    nonconst_bitref operator()(unsigned r, unsigned c) {
         return r >= c ? bitvec::operator[]((r*r+r)/2 + c) : end(); }
     bool operator()(unsigned r, unsigned c) const {
         return  r >= c ? bitvec::operator[]((r*r+r)/2 + c) : false; }
@@ -58,7 +58,7 @@ class LTBitMatrix : private bitvec {
         friend class LTBitMatrix;
         using rowref<LTBitMatrix>::rowref;
         void operator|=(bitvec a) const { a.clrrange(row+1, ~0); self |= a << (row*row+row)/2; }
-        bitref operator[](unsigned col) const { return self(row, col); }
+        nonconst_bitref operator[](unsigned col) const { return self(row, col); }
     };
     class const_rowref : public rowref<const LTBitMatrix> {
      public:

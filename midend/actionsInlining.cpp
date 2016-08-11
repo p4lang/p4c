@@ -37,7 +37,7 @@ void ActionsInlineList::analyze() {
     P4::CallGraph<const IR::P4Action*> cg("Actions call-graph");
 
     for (auto c : toInline)
-        cg.add(c->caller, c->callee);
+        cg.calls(c->caller, c->callee);
 
     // must inline from leaves up
     std::vector<const IR::P4Action*> order;

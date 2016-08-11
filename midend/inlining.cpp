@@ -41,7 +41,7 @@ void InlineWorkList::analyze(bool allowMultipleCalls) {
                     first, second);
             continue;
         }
-        cg.add(inl->caller, inl->callee);
+        cg.calls(inl->caller, inl->callee);
     }
 
     // must inline from leaves up
@@ -338,13 +338,13 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
 
     workToDo = &toInline->callerToWork[orig];
     LOG1("Analyzing " << caller);
-    auto stateful = new IR::IndexedVector<IR::Declaration>();
-    for (auto s : *caller->stateful) {
+    auto locals = new IR::IndexedVector<IR::Declaration>();
+    for (auto s : *caller->controlLocals) {
         auto inst = s->to<IR::Declaration_Instance>();
         if (inst == nullptr ||
             workToDo->declToCallee.find(inst) == workToDo->declToCallee.end()) {
             // not a call
-            stateful->push_back(s);
+            locals->push_back(s);
         } else {
             auto callee = workToDo->declToCallee[inst]->to<IR::P4Control>();
             CHECK_NULL(callee);
@@ -373,7 +373,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                     auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
                                                                 param->annotations, param->type,
                                                                 nullptr);
-                    stateful->push_back(vardecl);
+                    locals->push_back(vardecl);
                     auto path = new IR::PathExpression(newName);
                     refMap->setDeclaration(path->path, vardecl);
                     subst.add(param, path);
@@ -392,15 +392,15 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
             clone = clone->apply(rename);
             CHECK_NULL(clone);
 
-            for (auto i : *clone->to<IR::P4Control>()->stateful)
-                stateful->push_back(i);
+            for (auto i : *clone->to<IR::P4Control>()->controlLocals)
+                locals->push_back(i);
             workToDo->declToCallee[inst] = clone->to<IR::IContainer>();
         }
     }
 
     visit(caller->body);
     auto result = new IR::P4Control(caller->srcInfo, caller->name, caller->type,
-                                    caller->constructorParams, stateful,
+                                    caller->constructorParams, locals,
                                     caller->body);
     list->replace(orig, result);
     workToDo = nullptr;

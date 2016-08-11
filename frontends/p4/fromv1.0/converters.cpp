@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -358,10 +358,10 @@ class ComputeCallGraph : public Inspector {
         LOG1("Scanning parser " << parser->name);
         structure->parsers.add(parser->name);
         if (!parser->default_return.name.isNullOrEmpty())
-            structure->parsers.add(parser->name, parser->default_return);
+            structure->parsers.calls(parser->name, parser->default_return);
         if (parser->cases != nullptr)
             for (auto ce : *parser->cases)
-                structure->parsers.add(parser->name, ce->action.name);
+                structure->parsers.calls(parser->name, ce->action.name);
         for (auto expr : parser->stmts) {
             if (expr->is<IR::Primitive>()) {
                 auto primitive = expr->to<IR::Primitive>();
@@ -387,7 +387,7 @@ class ComputeCallGraph : public Inspector {
                     ::error("Cannot find counter %1%", ctrref);
                 auto parent = findContext<IR::ActionFunction>();
                 BUG_CHECK(parent != nullptr, "%1%: Counter call not within action", primitive);
-                structure->calledCounters.add(parent->name, ctr->name.name);
+                structure->calledCounters.calls(parent->name, ctr->name.name);
                 return;
             }
             BUG("%1%: Unexpected counter reference", ctrref);
@@ -401,7 +401,7 @@ class ComputeCallGraph : public Inspector {
                 auto parent = findContext<IR::ActionFunction>();
                 BUG_CHECK(parent != nullptr,
                           "%1%: not within action", primitive);
-                structure->calledMeters.add(parent->name, mtr->name.name);
+                structure->calledMeters.calls(parent->name, mtr->name.name);
                 return;
             }
             BUG("%1%: Unexpected meter reference", mtrref);
@@ -419,18 +419,18 @@ class ComputeCallGraph : public Inspector {
                 auto parent = findContext<IR::ActionFunction>();
                 BUG_CHECK(parent != nullptr,
                           "%1%: not within action", primitive);
-                structure->calledRegisters.add(parent->name, reg->name.name);
+                structure->calledRegisters.calls(parent->name, reg->name.name);
                 return;
             }
             BUG("%1%: Unexpected register reference", regref);
         } else if (structure->actions.contains(name)) {
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr, "%1%: Action call not within action", primitive);
-            structure->calledActions.add(parent->name, name);
+            structure->calledActions.calls(parent->name, name);
         } else if (structure->controls.contains(name)) {
             auto parent = findContext<IR::V1Control>();
             BUG_CHECK(parent != nullptr, "%1%: Control call not within control", primitive);
-            structure->calledControls.add(parent->name, name);
+            structure->calledControls.calls(parent->name, name);
         }
     }
 };

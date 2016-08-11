@@ -86,9 +86,8 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Control* control)  {
         LOG1("Moved " << decl);
         decls->push_back(decl);
     }
-    for (auto stat : *control->stateful)
-        decls->push_back(stat);
-    control->stateful = decls;
+    decls->append(*control->controlLocals);
+    control->controlLocals = decls;
     pop();
     return control;
 }
@@ -96,8 +95,8 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Control* control)  {
 const IR::Node* MoveDeclarations::postorder(IR::P4Parser* parser)  {
     auto newStateful = new IR::IndexedVector<IR::Declaration>();
     newStateful->append(*getMoves());
-    newStateful->append(*parser->stateful);
-    parser->stateful = newStateful;
+    newStateful->append(*parser->parserLocals);
+    parser->parserLocals = newStateful;
     pop();
     return parser;
 }
