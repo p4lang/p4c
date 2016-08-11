@@ -31,8 +31,10 @@ class SymbolicValueFactory;
 // Base class for all abstract values
 class SymbolicValue {
     static unsigned crtid;
+
  protected:
     explicit SymbolicValue(const IR::Type* type) : id(crtid++), type(type) {}
+
  public:
     const unsigned id;
     const IR::Type* type;
@@ -367,6 +369,7 @@ class SymbolicStruct : public SymbolicValue {
  protected:
     explicit SymbolicStruct(const IR::Type_StructLike* type) :
             SymbolicValue(type) { CHECK_NULL(type); }
+
  public:
     std::map<cstring, SymbolicValue*> fieldValue;
     SymbolicStruct(const IR::Type_StructLike* type, bool uninitialized,
@@ -394,7 +397,8 @@ class SymbolicHeader : public SymbolicStruct {
  public:
     explicit SymbolicHeader(const IR::Type_Header* type) : SymbolicStruct(type) {}
     SymbolicBool* valid;
-    SymbolicHeader(const IR::Type_Header* type, bool uninitialized, const SymbolicValueFactory* factory);
+    SymbolicHeader(const IR::Type_Header* type, bool uninitialized,
+                   const SymbolicValueFactory* factory);
     virtual void setValid(bool v);
     SymbolicValue* clone() const override;
     SymbolicValue* get(const IR::Node* node, cstring field) const override;
@@ -411,6 +415,7 @@ class SymbolicArray final : public SymbolicValue {
     explicit SymbolicArray(const IR::Type_Stack* type) :
             SymbolicValue(type), size(type->getSize()),
             elemType(type->baseType->to<IR::Type_Header>()) {}
+
  public:
     const size_t size;
     const IR::Type_Header* elemType;
@@ -463,6 +468,7 @@ class AnyElement final : public SymbolicHeader {
 
 class SymbolicTuple final : public SymbolicValue {
     std::vector<SymbolicValue*> values;
+
  public:
     explicit SymbolicTuple(const IR::Type_Tuple* type) :
             SymbolicValue(type) {}
@@ -521,6 +527,7 @@ class SymbolicPacketIn final : public SymbolicExtern {
     // If true the minimumStreamOffset is a conservative
     // approximation.
     bool conservative;
+
  public:
     explicit SymbolicPacketIn(const IR::Type_Extern* type) :
             SymbolicExtern(type), minimumStreamOffset(0), conservative(false) {}

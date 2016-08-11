@@ -2449,7 +2449,8 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
     if (type == nullptr)
         return stat;
     if (!type->is<IR::Type_ActionEnum>()) {
-        typeError("%1%: Switch condition can only be produced by table.apply(...).action_run", stat);
+        typeError("%1%: Switch condition can only be produced by table.apply(...).action_run",
+                  stat);
         return stat;
     }
     auto ae = type->to<IR::Type_ActionEnum>();

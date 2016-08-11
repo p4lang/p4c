@@ -35,14 +35,14 @@ void *operator new(std::size_t size) {
      * it first.  Since we have global constructors that want to allocate
      * memory, we need to force initialization */
     if (!done_init) {
-	GC_INIT();
-	done_init = true; }
+        GC_INIT();
+        done_init = true; }
     return ::operator new(size, UseGC, 0, 0);
 }
 void *operator new[](std::size_t size) {
     if (!done_init) {
-	GC_INIT();
-	done_init = true; }
+        GC_INIT();
+        done_init = true; }
     return ::operator new(size, UseGC, 0, 0);
 }
 void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator delete(p); }

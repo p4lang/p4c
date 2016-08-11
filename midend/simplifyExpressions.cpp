@@ -91,6 +91,7 @@ class DismantleExpression : public Transform {
         typeMap->setType(result->final, type);
         return result->final;
     }
+
  public:
     DismantleExpression(ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap) {

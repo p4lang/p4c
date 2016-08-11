@@ -86,7 +86,8 @@ class ParserSymbolicInterpreter {
         return result;
     }
 
-    ParserStateInfo* newStateInfo(const ParserStateInfo* predecessor, cstring stateName, ValueMap* values) {
+    ParserStateInfo* newStateInfo(const ParserStateInfo* predecessor,
+                                  cstring stateName, ValueMap* values) {
         if (stateName == IR::ParserState::accept.name ||
             stateName == IR::ParserState::reject.name)
             return nullptr;

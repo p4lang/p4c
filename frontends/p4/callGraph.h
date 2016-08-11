@@ -163,7 +163,7 @@ class CallGraph {
         // multiple back-edges could go to the same loop head
         std::set<T> back_edge_heads;
 
-        Loop(T entry) : entry(entry) {}
+        explicit Loop(T entry) : entry(entry) {}
     };
 
     // All natural loops in a call-graph.

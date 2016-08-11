@@ -77,7 +77,7 @@ class MoveDeclarations : public Transform {
 // may still have initializers; these are moved into the start state,
 // and to the beginning of the apply body repectively.
 class MoveInitializers : public Transform {
-    IR::IndexedVector<IR::StatOrDecl> *toMove;  // This in fact contains just IR::AssignmentStatement
+    IR::IndexedVector<IR::StatOrDecl> *toMove;  // This contains just IR::AssignmentStatement
 
  public:
     MoveInitializers() {
