@@ -68,7 +68,7 @@ Note that each back-end may have additional dependences:
 
 Most dependences can be installed using `apt-get install`:
 
-`sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-all-dev python`
+`sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-dev python2.7 python-scapy python-ipaddr`
 
 ## OS X dependences
 
