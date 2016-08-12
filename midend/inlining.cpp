@@ -22,171 +22,12 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/parameterSubstitution.h"
-#include "frontends/p4/evaluator/substituteParameters.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "midend/moveDeclarations.h"
 
 namespace P4 {
 
-void InlineWorkList::analyze(bool allowMultipleCalls) {
-    P4::CallGraph<const IR::IContainer*> cg("Call-graph");
-
-    for (auto m : inlineMap) {
-        auto inl = m.second;
-        if (inl->invocations.size() == 0) continue;
-        auto it = inl->invocations.begin();
-        auto first = *it;
-        if (!allowMultipleCalls && inl->invocations.size() > 1) {
-            ++it;
-            auto second = *it;
-            ::error("Multiple invocations of the same block not supported on this target: %1%, %2%",
-                    first, second);
-            continue;
-        }
-        cg.calls(inl->caller, inl->callee);
-    }
-
-    // must inline from leaves up
-    std::vector<const IR::IContainer*> order;
-    cg.sort(order);
-    for (auto c : order) {
-        // This is quadratic, but hopefully the call graph is not too large
-        for (auto m : inlineMap) {
-            auto inl = m.second;
-            if (inl->caller == c)
-                toInline.push_back(inl);
-        }
-    }
-
-    std::reverse(toInline.begin(), toInline.end());
-}
-
-InlineSummary* InlineWorkList::next() {
-    if (toInline.size() == 0)
-        return nullptr;
-    auto result = new InlineSummary();
-    std::set<const IR::IContainer*> processing;
-    while (!toInline.empty()) {
-        auto toadd = toInline.back();
-        if (processing.find(toadd->callee) != processing.end())
-            break;
-        toInline.pop_back();
-        result->add(toadd);
-        processing.emplace(toadd->caller);
-    }
-    return result;
-}
-
-const IR::Node* InlineDriver::preorder(IR::P4Program* program) {
-    LOG1("InlineDriver");
-    const IR::P4Program* prog = program;  // we need the 'const'
-    toInline->analyze(false);
-
-    while (auto todo = toInline->next()) {
-        LOG1("Processing " << todo);
-        inliner->prepare(toInline, todo, p4v1);
-        prog = prog->apply(*inliner);
-        if (::errorCount() > 0)
-            return prog;
-    }
-
-    prune();
-    return prog;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
-void DiscoverInlining::postorder(const IR::MethodCallStatement* statement) {
-    LOG2("Visiting " << statement);
-    auto mi = P4::MethodInstance::resolve(statement, refMap, typeMap);
-    if (!mi->isApply())
-        return;
-    auto am = mi->to<P4::ApplyMethod>();
-    CHECK_NULL(am);
-    if (!am->type->is<IR::Type_Control>())
-        return;
-    auto instantiation = am->object->to<IR::Declaration_Instance>();
-    BUG_CHECK(instantiation != nullptr, "%1% expected an instance declaration", am->object);
-    inlineList->addInvocation(instantiation, statement);
-}
-
-void DiscoverInlining::visit_all(const IR::Block* block) {
-    for (auto it : block->constantValue) {
-        if (it.second->is<IR::Block>()) {
-            visit(it.second->getNode());
-        }
-    }
-}
-
-bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
-    LOG2("Visiting " << block);
-    if (getContext()->node->is<IR::ParserBlock>()) {
-        if (!allowParsersFromControls)
-            ::error("%1%: This target does not support invocation of a control from a parser",
-                    block->node);
-    } else if (getContext()->node->is<IR::ControlBlock>() && allowControls) {
-        auto parent = getContext()->node->to<IR::ControlBlock>();
-        LOG1("Will inline " << block << "@" << block->node << " into " << parent);
-        auto instance = block->node->to<IR::Declaration_Instance>();
-        auto callee = block->container;
-        inlineList->addInstantiation(parent->container, callee, instance);
-    }
-
-    visit_all(block);
-    visit(block->container->body);
-    return false;
-}
-
-bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
-    LOG2("Visiting " << block);
-    if (getContext()->node->is<IR::ControlBlock>()) {
-        if (!allowControlsFromParsers)
-            ::error("%1%: This target does not support invocation of a parser from a control",
-                    block->node);
-    } else if (getContext()->node->is<IR::ParserBlock>()) {
-        auto parent = getContext()->node->to<IR::ParserBlock>();
-        LOG1("Will inline " << block << "@" << block->node << " into " << parent);
-        auto instance = block->node->to<IR::Declaration_Instance>();
-        auto callee = block->container;
-        inlineList->addInstantiation(parent->container, callee, instance);
-    }
-    visit_all(block);
-    return false;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 namespace {
-class SymRenameMap {
-    std::map<const IR::IDeclaration*, cstring> internalName;
-    std::map<const IR::IDeclaration*, cstring> externalName;
-
- public:
-    void setNewName(const IR::IDeclaration* decl, cstring name, cstring extName) {
-        CHECK_NULL(decl);
-        BUG_CHECK(!name.isNullOrEmpty() && !extName.isNullOrEmpty(), "Empty name");
-        LOG1("Renaming " << decl << " to " << name);
-        if (internalName.find(decl) != internalName.end())
-            BUG("%1%: already renamed", decl);
-        internalName.emplace(decl, name);
-        externalName.emplace(decl, extName);
-    }
-    cstring getName(const IR::IDeclaration* decl) const {
-        CHECK_NULL(decl);
-        BUG_CHECK(internalName.find(decl) != internalName.end(), "%1%: no new name", decl);
-        auto result = ::get(internalName, decl);
-        return result;
-    }
-    cstring getExtName(const IR::IDeclaration* decl) const {
-        CHECK_NULL(decl);
-        BUG_CHECK(externalName.find(decl) != externalName.end(), "%1%: no external name", decl);
-        auto result = ::get(externalName, decl);
-        return result;
-    }
-    bool isRenamed(const IR::IDeclaration* decl) const {
-        CHECK_NULL(decl);
-        return internalName.find(decl) != internalName.end();
-    }
-};
-
 static cstring nameFromAnnotation(const IR::Annotations* annotations,
                                   const IR::IDeclaration* decl) {
     CHECK_NULL(annotations); CHECK_NULL(decl);
@@ -239,7 +80,6 @@ class ComputeNewNames : public Inspector {
     void postorder(const IR::P4Action* action) override { rename(action); }
     void postorder(const IR::Declaration_Instance* instance) override { rename(instance); }
 };
-}  // namespace
 
 // Add a @name annotation ONLY.
 static const IR::Annotations*
@@ -250,7 +90,6 @@ setNameAnnotation(cstring name, const IR::Annotations* annos) {
                                new IR::StringLiteral(Util::SourceInfo(), name));
 }
 
-namespace {
 // Prefix the names of all stateful declarations with a given string.
 // Also, perform parameter substitution.  Unfortunately these two
 // transformations have to be performed at the same time, because
@@ -323,13 +162,156 @@ class Substitutions : public SubstituteParameters {
 };
 }  // namespace
 
+template <class T>
+const T* PerInstanceSubstitutions::rename(ReferenceMap* refMap, const IR::Node* node) {
+    Substitutions rename(refMap, &paramSubst, &tvs, &renameMap);
+    auto convert = node->apply(rename);
+    CHECK_NULL(convert);
+    auto result = convert->to<T>();
+    CHECK_NULL(result);
+    return result;
+}
+
+void InlineWorkList::analyze(bool allowMultipleCalls) {
+    P4::CallGraph<const IR::IContainer*> cg("Call-graph");
+
+    for (auto m : inlineMap) {
+        auto inl = m.second;
+        if (inl->invocations.size() == 0) continue;
+        auto it = inl->invocations.begin();
+        auto first = *it;
+        if (!allowMultipleCalls && inl->invocations.size() > 1) {
+            ++it;
+            auto second = *it;
+            ::error("Multiple invocations of the same block not supported on this target: %1%, %2%",
+                    first, second);
+            continue;
+        }
+        cg.calls(inl->caller, inl->callee);
+    }
+
+    // must inline from leaves up
+    std::vector<const IR::IContainer*> order;
+    cg.sort(order);
+    for (auto c : order) {
+        // This is quadratic, but hopefully the call graph is not too large
+        for (auto m : inlineMap) {
+            auto inl = m.second;
+            if (inl->caller == c)
+                toInline.push_back(inl);
+        }
+    }
+
+    std::reverse(toInline.begin(), toInline.end());
+}
+
+InlineSummary* InlineWorkList::next() {
+    if (toInline.size() == 0)
+        return nullptr;
+    auto result = new InlineSummary();
+    std::set<const IR::IContainer*> processing;
+    while (!toInline.empty()) {
+        auto toadd = toInline.back();
+        if (processing.find(toadd->callee) != processing.end())
+            break;
+        toInline.pop_back();
+        result->add(toadd);
+        processing.emplace(toadd->caller);
+    }
+    return result;
+}
+
+const IR::Node* InlineDriver::preorder(IR::P4Program* program) {
+    LOG1("InlineDriver");
+    const IR::P4Program* prog = program;  // we need the 'const'
+    toInline->analyze(true);
+
+    while (auto todo = toInline->next()) {
+        LOG1("Processing " << todo);
+        inliner->prepare(toInline, todo, p4v1);
+        prog = prog->apply(*inliner);
+        if (::errorCount() > 0)
+            return prog;
+    }
+
+    prune();
+    return prog;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+void DiscoverInlining::postorder(const IR::MethodCallStatement* statement) {
+    LOG2("Visiting " << statement);
+    auto mi = P4::MethodInstance::resolve(statement, refMap, typeMap);
+    if (!mi->isApply())
+        return;
+    auto am = mi->to<P4::ApplyMethod>();
+    CHECK_NULL(am);
+    if (!am->type->is<IR::Type_Control>() &&
+        !am->type->is<IR::Type_Parser>())
+        return;
+    auto instantiation = am->object->to<IR::Declaration_Instance>();
+    BUG_CHECK(instantiation != nullptr, "%1% expected an instance declaration", am->object);
+    inlineList->addInvocation(instantiation, statement);
+}
+
+void DiscoverInlining::visit_all(const IR::Block* block) {
+    for (auto it : block->constantValue) {
+        if (it.second->is<IR::Block>()) {
+            visit(it.second->getNode());
+        }
+    }
+}
+
+bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
+    LOG2("Visiting " << block);
+    if (getContext()->node->is<IR::ParserBlock>()) {
+        if (!allowParsersFromControls)
+            ::error("%1%: This target does not support invocation of a control from a parser",
+                    block->node);
+    } else if (getContext()->node->is<IR::ControlBlock>() && allowControls) {
+        auto parent = getContext()->node->to<IR::ControlBlock>();
+        LOG1("Will inline " << block << "@" << block->node << " into " << parent);
+        auto instance = block->node->to<IR::Declaration_Instance>();
+        auto callee = block->container;
+        inlineList->addInstantiation(parent->container, callee, instance);
+    }
+
+    visit_all(block);
+    visit(block->container->body);
+    return false;
+}
+
+bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
+    LOG2("Visiting " << block);
+    if (getContext()->node->is<IR::ControlBlock>()) {
+        if (!allowControlsFromParsers)
+            ::error("%1%: This target does not support invocation of a parser from a control",
+                    block->node);
+    } else if (getContext()->node->is<IR::ParserBlock>()) {
+        auto parent = getContext()->node->to<IR::ParserBlock>();
+        LOG1("Will inline " << block << "@" << block->node << " into " << parent);
+        auto instance = block->node->to<IR::Declaration_Instance>();
+        auto callee = block->container;
+        inlineList->addInstantiation(parent->container, callee, instance);
+    }
+    visit_all(block);
+    visit(block->container->states);
+    return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 Visitor::profile_t GeneralInliner::init_apply(const IR::Node* node) {
-    P4::ResolveReferences solver(refMap, true);
+    ResolveReferences solver(refMap, true);
+    TypeChecking typeChecker(refMap, typeMap, false, isv1);
     node->apply(solver);
+    (void)node->apply(typeChecker);
     return AbstractInliner::init_apply(node);
 }
 
 const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
+    // prepares the code to inline
     auto orig = getOriginal<IR::P4Control>();
     if (toInline->callerToWork.find(orig) == toInline->callerToWork.end()) {
         prune();
@@ -348,105 +330,107 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
         } else {
             auto callee = workToDo->declToCallee[inst]->to<IR::P4Control>();
             CHECK_NULL(callee);
-            ParameterSubstitution subst;
-            TypeVariableSubstitution tvs;
+            auto substs = new PerInstanceSubstitutions();
+            workToDo->substitutions[inst] = substs;
 
             // Substitute constructor parameters
-            subst.populate(callee->getConstructorParameters(), inst->arguments);
+            substs->paramSubst.populate(callee->getConstructorParameters(), inst->arguments);
             if (inst->type->is<IR::Type_Specialized>()) {
                 auto spec = inst->type->to<IR::Type_Specialized>();
-                tvs.setBindings(callee->getNode(), callee->getTypeParameters(), spec->arguments);
+                substs->tvs.setBindings(callee->getNode(),
+                                        callee->getTypeParameters(), spec->arguments);
             }
 
-            auto paramRename = new std::map<cstring, cstring>();
-            workToDo->paramRename[inst] = paramRename;
-            // Substitute also applyParameters with fresh variable names.
-            auto it = inst->arguments->begin();
+            // Must rename callee local objects prefixing them with their instance name.
+            cstring prefix = nameFromAnnotation(inst->annotations, inst);
+            ComputeNewNames cnn(prefix, refMap, &substs->renameMap);
+            (void)callee->apply(cnn);  // populates substs.renameMap
+
+            // Substitute applyParameters which are not directionless
+            // with fresh variable names.
             for (auto param : *callee->type->applyParams->parameters) {
                 cstring newName = refMap->newName(param->name);
-                paramRename->emplace(param->name, newName);
+                auto path = new IR::PathExpression(newName);
+                substs->paramSubst.add(param, path);
                 LOG1("Replacing " << param->name << " with " << newName);
-                if (param->direction == IR::Direction::None) {
-                    auto initializer = *it;
-                    subst.add(param, initializer);
-                } else  {
-                    auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
-                                                                param->annotations, param->type,
-                                                                nullptr);
-                    locals->push_back(vardecl);
-                    auto path = new IR::PathExpression(newName);
-                    refMap->setDeclaration(path->path, vardecl);
-                    subst.add(param, path);
-                }
-                ++it;
+                if (param->direction == IR::Direction::None)
+                    continue;
+                auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
+                                                            param->annotations, param->type,
+                                                            nullptr);
+                locals->push_back(vardecl);
             }
 
-            // Must rename stateful objects prefixing them with their instance name.
-            SymRenameMap renameMap;
-            cstring prefix = nameFromAnnotation(inst->annotations, inst);
-            ComputeNewNames cnn(prefix, refMap, &renameMap);
-            auto clone = callee->apply(cnn);
-            CHECK_NULL(clone);
-
-            Substitutions rename(refMap, &subst, &tvs, &renameMap);
-            clone = clone->apply(rename);
-            CHECK_NULL(clone);
-
-            for (auto i : *clone->to<IR::P4Control>()->controlLocals)
+            /* We will perform these substitutions twice: once here, to
+               compute the names for the locals that we need to inline here,
+               and once again at the call site (where we do additional
+               substitutions, including the callee parameters). */
+            auto clone = substs->rename<IR::P4Control>(refMap, callee);
+            for (auto i : *clone->controlLocals)
                 locals->push_back(i);
-            workToDo->declToCallee[inst] = clone->to<IR::IContainer>();
         }
     }
 
     visit(caller->body);
-    auto result = new IR::P4Control(caller->srcInfo, caller->name, caller->type,
-                                    caller->constructorParams, locals,
-                                    caller->body);
-    list->replace(orig, result);
+    caller->controlLocals = locals;
+    list->replace(orig, caller);
     workToDo = nullptr;
     prune();
-    return result;
+    return caller;
 }
 
 const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
     if (workToDo == nullptr)
         return statement;
     auto orig = getOriginal<IR::MethodCallStatement>();
-    if (workToDo->callToinstance.find(orig) == workToDo->callToinstance.end())
+    if (workToDo->callToInstance.find(orig) == workToDo->callToInstance.end())
         return statement;
     LOG1("Inlining invocation " << orig);
-    auto decl = workToDo->callToinstance[orig];
+    auto decl = workToDo->callToInstance[orig];
     CHECK_NULL(decl);
 
-    auto callee = workToDo->declToCallee[decl]->to<IR::P4Control>();
-    auto body = new IR::IndexedVector<IR::StatOrDecl>();
+    auto called = workToDo->declToCallee[decl];
+    if (!called->is<IR::P4Control>())
+        // Parsers are inlined in the ParserState processor
+        return statement;
 
+    auto callee = called->to<IR::P4Control>();
+    auto body = new IR::IndexedVector<IR::StatOrDecl>();
+    // clone the substitution: it may be reused for multiple invocations
+    auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
+
+    // Substitute directionless parameter with their actual values.
     // Evaluate in and inout parameters in order.
-    std::map<cstring, cstring> *paramRename = workToDo->paramRename[decl];
     auto it = statement->methodCall->arguments->begin();
     for (auto param : *callee->type->applyParams->parameters) {
         auto initializer = *it;
         LOG1("Looking for " << param->name);
-        cstring newName = ::get(*paramRename, param->name);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
-            auto path = new IR::PathExpression(newName);
-            auto stat = new IR::AssignmentStatement(Util::SourceInfo(), path, initializer);
+            auto expr = substs->paramSubst.lookupByName(param->name);
+            auto stat = new IR::AssignmentStatement(Util::SourceInfo(), expr, initializer);
             body->push_back(stat);
+        } else if (param->direction == IR::Direction::Out) {
+            auto expr = substs->paramSubst.lookupByName(param->name);
+            auto paramType = typeMap->getType(param, true);
+            // This is important, since this variable may be used many times.
+            ResetHeaders::generateResets(typeMap, paramType, expr, body);
+        } else if (param->direction == IR::Direction::None) {
+            substs->paramSubst.add(param, initializer);
         }
         ++it;
     }
 
     // inline actual body
+    callee = substs->rename<IR::P4Control>(refMap, callee);
     body->append(*callee->body->components);
 
-    // Copy back out and inout parameters
+    // Copy values of out and inout parameters
     it = statement->methodCall->arguments->begin();
     for (auto param : *callee->type->applyParams->parameters) {
         auto left = *it;
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
-            cstring newName = ::get(paramRename, param->name);
-            auto right = new IR::PathExpression(newName);
-            auto copyout = new IR::AssignmentStatement(Util::SourceInfo(), left, right);
+            auto expr = substs->paramSubst.lookupByName(param->name);
+            auto copyout = new IR::AssignmentStatement(Util::SourceInfo(), left, expr->clone());
             body->push_back(copyout);
         }
         ++it;
@@ -458,8 +442,245 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
     return result;
 }
 
+namespace {
+class ComputeNewStateNames : public Inspector {
+    ReferenceMap* refMap;
+    cstring prefix;
+    cstring acceptName;
+    std::map<cstring, cstring> *stateRenameMap;
+ public:
+    ComputeNewStateNames(ReferenceMap* refMap, cstring prefix, cstring acceptName,
+                         std::map<cstring, cstring> *stateRenameMap) :
+            refMap(refMap), prefix(prefix), acceptName(acceptName), stateRenameMap(stateRenameMap)
+    { CHECK_NULL(refMap); CHECK_NULL(stateRenameMap); }
+    bool preorder(const IR::ParserState* state) override {
+        cstring newName;
+        if (state->name.name == IR::ParserState::accept) {
+            newName = acceptName;
+        } else {
+            cstring base = prefix + "_" + state->name.name;
+            newName = refMap->newName(base);
+        }
+        stateRenameMap->emplace(state->name.name, newName);
+        return false;  // prune
+    }
+};
+
+// Renames the states in a parser for inlining.  We cannot rely on the
+// ReferenceMap for identifying states - it is currently inconsistent,
+// so we rely on the fact that state names only appear in very
+// specific places.
+class RenameStates : public Transform {
+    std::map<cstring, cstring> *stateRenameMap;
+
+ public:
+    explicit RenameStates(std::map<cstring, cstring> *stateRenameMap) :
+            stateRenameMap(stateRenameMap)
+    { CHECK_NULL(stateRenameMap); }
+    const IR::Node* preorder(IR::Path* path) override {
+        // This is certainly a state name, by the way we organized the visitors
+        cstring newName = ::get(stateRenameMap, path->name);
+        path->name = IR::ID(path->name.srcInfo, newName);
+        return path;
+    }
+    const IR::Node* preorder(IR::SelectExpression* expression) override {
+        visit(&expression->selectCases);
+        prune();
+        return expression;
+    }
+    const IR::Node* preorder(IR::SelectCase* selCase) override {
+        visit(selCase->state);
+        prune();
+        return selCase;
+    }
+    const IR::Node* preorder(IR::ParserState* state) override {
+        if (state->name.name == IR::ParserState::accept ||
+            state->name.name == IR::ParserState::reject) {
+            prune();
+            return state;
+        }
+        cstring newName = ::get(stateRenameMap, state->name.name);
+        state->name = IR::ID(state->name.srcInfo, newName);
+        if (state->selectExpression != nullptr)
+            visit(state->selectExpression);
+        prune();
+        return state;
+    }
+    const IR::Node* preorder(IR::P4Parser* parser) override {
+        visit(parser->states);
+        prune();
+        return parser;
+    }
+};
+}  // namespace
+
+const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
+    LOG1("Visiting state " << state);
+    auto states = new IR::IndexedVector<IR::ParserState>();
+    auto current = new IR::IndexedVector<IR::StatOrDecl>();
+
+    // Scan the statements to find a parser call instruction
+    auto srcInfo = state->srcInfo;
+    auto annotations = state->annotations;
+    IR::ID name = state->name;
+    for (auto e : *state->components) {
+        if (!e->is<IR::MethodCallStatement>()) {
+            current->push_back(e);
+            continue;
+        }
+        auto call = e->to<IR::MethodCallStatement>();
+        if (workToDo->callToInstance.find(call) == workToDo->callToInstance.end()) {
+            current->push_back(e);
+            continue;
+        }
+
+        LOG1("Inlining invocation " << call);
+        auto decl = workToDo->callToInstance[call];
+        CHECK_NULL(decl);
+
+        auto called = workToDo->declToCallee[decl];
+        auto callee = called->to<IR::P4Parser>();
+        // clone the substitution: it may be reused for multiple invocations
+        auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
+
+        // Evaluate in and inout parameters in order.
+        auto it = call->methodCall->arguments->begin();
+        for (auto param : *callee->type->applyParams->parameters) {
+            auto initializer = *it;
+            LOG1("Looking for " << param->name);
+            if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
+                auto expr = substs->paramSubst.lookupByName(param->name);
+                auto stat = new IR::AssignmentStatement(Util::SourceInfo(), expr, initializer);
+                current->push_back(stat);
+            } else if (param->direction == IR::Direction::Out) {
+                auto expr = substs->paramSubst.lookupByName(param->name);
+                auto paramType = typeMap->getType(param, true);
+                // This is important, since this variable may be used many times.
+                ResetHeaders::generateResets(typeMap, paramType, expr, current);
+            } else if (param->direction == IR::Direction::None) {
+                substs->paramSubst.add(param, initializer);
+            }
+            ++it;
+        }
+
+        callee = substs->rename<IR::P4Parser>(refMap, callee);
+
+        cstring nextState = refMap->newName(state->name);
+        std::map<cstring, cstring> renameMap;
+        ComputeNewStateNames cnn(refMap, callee->name.name, nextState, &renameMap);
+        (void)callee->apply(cnn);
+        RenameStates rs(&renameMap);
+        auto renamed = callee->apply(rs);
+        cstring newStartName = ::get(renameMap, IR::ParserState::start);
+        auto transition = new IR::PathExpression(IR::ID(newStartName));
+        auto newState = new IR::ParserState(srcInfo, name, annotations, current, transition);
+        states->push_back(newState);
+        for (auto s : *renamed->to<IR::P4Parser>()->states) {
+            if (s->name == IR::ParserState::accept ||
+                s->name == IR::ParserState::reject)
+                continue;
+            states->push_back(s);
+        }
+
+        // Prepare next state
+        annotations = IR::Annotations::empty;
+        srcInfo = Util::SourceInfo();
+        name = IR::ID(nextState);
+        current = new IR::IndexedVector<IR::StatOrDecl>();
+
+        // Copy back out and inout parameters
+        it = call->methodCall->arguments->begin();
+        for (auto param : *callee->type->applyParams->parameters) {
+            auto left = *it;
+            if (param->direction == IR::Direction::InOut ||
+                param->direction == IR::Direction::Out) {
+                auto expr = substs->paramSubst.lookupByName(param->name);
+                auto copyout = new IR::AssignmentStatement(Util::SourceInfo(), left, expr->clone());
+                current->push_back(copyout);
+            }
+            ++it;
+        }
+    }
+
+    if (!states->empty()) {
+        // Create final state
+        auto newState = new IR::ParserState(srcInfo, name, annotations,
+                                            current, state->selectExpression);
+        states->push_back(newState);
+        LOG1("Replacing with " << states->size() << " states");
+        prune();
+        return states;
+    }
+    prune();
+    return state;
+}
+
 const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
-    // TODO
+    // prepares the code to inline
+    auto orig = getOriginal<IR::P4Parser>();
+    if (toInline->callerToWork.find(orig) == toInline->callerToWork.end()) {
+        prune();
+        return caller;
+    }
+
+    workToDo = &toInline->callerToWork[orig];
+    LOG1("Analyzing " << caller);
+    auto locals = new IR::IndexedVector<IR::Declaration>();
+    for (auto s : *caller->parserLocals) {
+        auto inst = s->to<IR::Declaration_Instance>();
+        if (inst == nullptr ||
+            workToDo->declToCallee.find(inst) == workToDo->declToCallee.end()) {
+            // not a call
+            locals->push_back(s);
+        } else {
+            auto callee = workToDo->declToCallee[inst]->to<IR::P4Parser>();
+            CHECK_NULL(callee);
+            auto substs = new PerInstanceSubstitutions();
+            workToDo->substitutions[inst] = substs;
+
+            // Substitute constructor parameters
+            substs->paramSubst.populate(callee->getConstructorParameters(), inst->arguments);
+            if (inst->type->is<IR::Type_Specialized>()) {
+                auto spec = inst->type->to<IR::Type_Specialized>();
+                substs->tvs.setBindings(callee->getNode(),
+                                        callee->getTypeParameters(), spec->arguments);
+            }
+
+            // Must rename callee local objects prefixing them with their instance name.
+            cstring prefix = nameFromAnnotation(inst->annotations, inst);
+            ComputeNewNames cnn(prefix, refMap, &substs->renameMap);
+            (void)callee->apply(cnn);  // populates substs.renameMap
+
+            // Substitute applyParameters which are not directionless
+            // with fresh variable names.
+            for (auto param : *callee->type->applyParams->parameters) {
+                if (param->direction == IR::Direction::None)
+                    continue;
+                cstring newName = refMap->newName(param->name);
+                auto path = new IR::PathExpression(newName);
+                substs->paramSubst.add(param, path);
+                LOG1("Replacing " << param->name << " with " << newName);
+                auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
+                                                            param->annotations, param->type,
+                                                            nullptr);
+                locals->push_back(vardecl);
+            }
+
+            /* We will perform these substitutions twice: once here, to
+               compute the names for the locals that we need to inline here,
+               and once again at the call site (where we do additional
+               substitutions, including the callee parameters). */
+            auto clone = substs->rename<IR::P4Parser>(refMap, callee);
+            for (auto i : *clone->parserLocals)
+                locals->push_back(i);
+        }
+    }
+
+    visit(caller->states);
+    caller->parserLocals = locals;
+    list->replace(orig, caller);
+    workToDo = nullptr;
+    prune();
     return caller;
 }
 

@@ -1,4 +1,4 @@
-#include "/home/cdodd/p4c/p4include/core.p4"
+#include "/home/mbudiu/git/p4c/p4include/core.p4"
 
 struct EthernetHeader {
     bit<16> etherType;
@@ -15,6 +15,7 @@ struct Packet_header {
 
 parser EthernetParser(packet_in b, out EthernetHeader h) {
     state start {
+        transition accept;
     }
 }
 
@@ -40,8 +41,10 @@ parser GenericParser(packet_in b, out Packet_header p)(bool udpSupport) {
         }
     }
     state udp {
+        transition accept;
     }
     state tcp {
+        transition accept;
     }
 }
 

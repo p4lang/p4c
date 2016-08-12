@@ -23,6 +23,7 @@ parser P() {
     Fake() fake;
     state start {
         fake.call(x);
+        transition accept;
     }
 }
 

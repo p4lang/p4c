@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -79,9 +79,9 @@ parser Top(packet_in b, out Parsed_headers headers) {
         }
     }
 
-    state well_known_port {}
+    state well_known_port { transition accept; }
 
-    state other_port {}
+    state other_port { transition accept; }
 
-    state parse_udp {}
+    state parse_udp { transition accept; }
 }

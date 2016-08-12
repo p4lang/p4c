@@ -8,6 +8,7 @@ parser P() {
     state start {
         x_0 = 32w0;
         fake_0.call(x_0);
+        transition accept;
     }
 }
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-parser p1<T>(in T a)
-{
-   state start {
-       T w = a; 
-   }
+parser p1<T>(in T a) {
+    state start {
+        T w = a;
+        transition accept;
+    }
 }
 
 parser simple(in bit<2> a);

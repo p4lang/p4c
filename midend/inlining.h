@@ -22,8 +22,10 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/evaluator/substituteParameters.h"
 
 // These are various data structures needed by the parser/parser and control/control inliners.
+// This only works correctly after local variable initializers have been removed.
 
 namespace P4 {
 
@@ -45,22 +47,68 @@ struct CallInfo {
     { out << "Inline " << callee << " into " << caller; }
 };
 
+class SymRenameMap {
+    std::map<const IR::IDeclaration*, cstring> internalName;
+    std::map<const IR::IDeclaration*, cstring> externalName;
+
+ public:
+    void setNewName(const IR::IDeclaration* decl, cstring name, cstring extName) {
+        CHECK_NULL(decl);
+        BUG_CHECK(!name.isNullOrEmpty() && !extName.isNullOrEmpty(), "Empty name");
+        LOG1("Renaming " << decl << " to " << name);
+        if (internalName.find(decl) != internalName.end())
+            BUG("%1%: already renamed", decl);
+        internalName.emplace(decl, name);
+        externalName.emplace(decl, extName);
+    }
+    cstring getName(const IR::IDeclaration* decl) const {
+        CHECK_NULL(decl);
+        BUG_CHECK(internalName.find(decl) != internalName.end(), "%1%: no new name", decl);
+        auto result = ::get(internalName, decl);
+        return result;
+    }
+    cstring getExtName(const IR::IDeclaration* decl) const {
+        CHECK_NULL(decl);
+        BUG_CHECK(externalName.find(decl) != externalName.end(), "%1%: no external name", decl);
+        auto result = ::get(externalName, decl);
+        return result;
+    }
+    bool isRenamed(const IR::IDeclaration* decl) const {
+        CHECK_NULL(decl);
+        return internalName.find(decl) != internalName.end();
+    }
+};
+
+struct PerInstanceSubstitutions {
+    ParameterSubstitution paramSubst;
+    TypeVariableSubstitution tvs;
+    SymRenameMap renameMap;
+    PerInstanceSubstitutions() = default;
+    PerInstanceSubstitutions(const PerInstanceSubstitutions &other) :
+            paramSubst(other.paramSubst),
+            tvs(other.tvs),
+            renameMap(other.renameMap) {}
+    template<class T>
+    const T* rename(ReferenceMap* refMap, const IR::Node* node);
+};
+
 // Summarizes all inline operations to be performed.
 struct InlineSummary {
+    // Various substitutions that must be applied for each instance
     struct PerCaller {  // information for each caller
-        // For each key instance the container that is intantiated.
+        // For each instance (key) the container that is intantiated.
         std::map<const IR::Declaration_Instance*, const IR::IContainer*> declToCallee;
-        // For each key instance the apply parameters are replaced with fresh variables.
-        std::map<const IR::Declaration_Instance*, std::map<cstring, cstring>*> paramRename;
-        // For each key call the instance that is invoked.
-        std::map<const IR::MethodCallStatement*, const IR::Declaration_Instance*> callToinstance;
+        // For each instance (key) we must apply a bunch of substitutions
+        std::map<const IR::Declaration_Instance*, PerInstanceSubstitutions*> substitutions;
+        // For each invocation (key) call the instance that is invoked.
+        std::map<const IR::MethodCallStatement*, const IR::Declaration_Instance*> callToInstance;
     };
     std::map<const IR::IContainer*, PerCaller> callerToWork;
 
     void add(const CallInfo *cci) {
         callerToWork[cci->caller].declToCallee[cci->instantiation] = cci->callee;
         for (auto mcs : cci->invocations)
-            callerToWork[cci->caller].callToinstance[mcs] = cci->instantiation;
+            callerToWork[cci->caller].callToInstance[mcs] = cci->instantiation;
     }
     void dbprint(std::ostream& out) const
     { out << "Inline " << callerToWork.size() << " call sites"; }
@@ -84,7 +132,7 @@ class InlineWorkList {
     void addInvocation(const IR::Declaration_Instance* instance,
                        const IR::MethodCallStatement* statement) {
         CHECK_NULL(instance); CHECK_NULL(statement);
-        LOG1("Inline invocation " << instance);
+        LOG1("Inline invocation " << instance << " at " << statement);
         auto info = inlineMap[instance];
         BUG_CHECK(info, "Could not locate instance %1% invoked by %2%", instance, statement);
         info->addInvocation(statement);
@@ -113,7 +161,7 @@ class AbstractInliner : public Transform {
  protected:
     InlineWorkList* list;
     InlineSummary*  toInline;
-    bool                p4v1;
+    bool            p4v1;
     AbstractInliner() : list(nullptr), toInline(nullptr), p4v1(false) {}
  public:
     void prepare(InlineWorkList* list, InlineSummary* toInline, bool p4v1) {
@@ -185,13 +233,18 @@ class DiscoverInlining : public Inspector {
 // Performs actual inlining work
 class GeneralInliner : public AbstractInliner {
     ReferenceMap* refMap;
+    TypeMap* typeMap;
     InlineSummary::PerCaller* workToDo;
+    bool isv1;
  public:
-    GeneralInliner() : refMap(new ReferenceMap()), workToDo(nullptr)
+    explicit GeneralInliner(bool isv1) :
+            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr), isv1(isv1)
     { setName("GeneralInliner"); }
+    // controlled visiting order
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
     const IR::Node* preorder(IR::P4Control* caller) override;
     const IR::Node* preorder(IR::P4Parser* caller) override;
+    const IR::Node* preorder(IR::ParserState* state) override;
     Visitor::profile_t init_apply(const IR::Node* node) override;
 };
 

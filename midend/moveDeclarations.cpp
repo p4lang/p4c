@@ -18,14 +18,14 @@ limitations under the License.
 
 namespace P4 {
 
-void ResetHeaders::generateResets(const IR::Type* type, const IR::Expression* expr,
-                                  IR::Vector<IR::StatOrDecl>* resets) {
+void ResetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type,
+                                  const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets) {
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
         auto sl = type->to<IR::Type_StructLike>();
         for (auto f : *sl->fields) {
             auto ftype = typeMap->getType(f->type, true);
             auto member = new IR::Member(Util::SourceInfo(), expr, f->name);
-            generateResets(ftype, member, resets);
+            generateResets(typeMap, ftype, member, resets);
         }
     } else if (type->is<IR::Type_Header>()) {
         auto method = new IR::Member(expr->srcInfo, expr, IR::Type_Header::setInvalid);
@@ -43,7 +43,7 @@ void ResetHeaders::generateResets(const IR::Type* type, const IR::Expression* ex
         for (int i = 0; i < tstack->getSize(); i++) {
             auto index = new IR::Constant(i);
             auto elem = new IR::ArrayIndex(Util::SourceInfo(), expr, index);
-            generateResets(tstack->baseType, elem, resets);
+            generateResets(typeMap, tstack->baseType, elem, resets);
         }
     }
 }
@@ -60,7 +60,7 @@ const IR::Node* ResetHeaders::postorder(IR::Declaration_Variable* decl) {
               decl, getContext()->node);
     auto type = typeMap->getType(getOriginal(), true);
     auto path = new IR::PathExpression(decl->getName());
-    generateResets(type, path, resets);
+    generateResets(typeMap, type, path, resets);
     if (resets->size() == 1)
         return decl;
     return resets;

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ parser p00()
 {
     state start {
         bit<1> z = (1w0 & 1w1);
+        transition accept;
     }
 }
 
@@ -25,4 +26,3 @@ parser nothing();
 package m(nothing n);
 
 m(p00()) main;
-

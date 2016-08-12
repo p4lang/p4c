@@ -85,10 +85,10 @@ const IR::Node* SimpleControlsInliner::preorder(IR::MethodCallStatement* stateme
     if (workToDo == nullptr)
         return statement;
     auto orig = getOriginal<IR::MethodCallStatement>();
-    if (workToDo->callToinstance.find(orig) == workToDo->callToinstance.end())
+    if (workToDo->callToInstance.find(orig) == workToDo->callToInstance.end())
         return statement;
     LOG1("Inlining invocation " << orig);
-    auto decl = workToDo->callToinstance[orig];
+    auto decl = workToDo->callToInstance[orig];
     CHECK_NULL(decl);
     prune();
     return workToDo->declToCallee[decl]->to<IR::P4Control>()->body;

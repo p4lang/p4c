@@ -47,7 +47,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
     setName("MidEnd");
 
     // TODO: def-use analysis
-    // TODO: parser inlining
+    // TODO: remove unnecessary parser transitions
     // TODO: parser loop unrolling
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
@@ -79,9 +79,9 @@ MidEnd::MidEnd(CompilerOptions& options) {
                 return nullptr;
             return root; }),
 
-        // Perform inlining for controls and parsers (parsers not yet implemented)
+        // Perform inlining for controls and parsers
         new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
-        new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
+        new P4::InlineDriver(&toInline, new P4::GeneralInliner(isv1), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         // Perform inlining for actions calling other actions
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),

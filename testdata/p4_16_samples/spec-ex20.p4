@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ header Mpls_h {
     bit<3>  tc;
     bit     bos;
     bit<8>  ttl;
-} 
- 
+}
+
 struct Pkthdr {
    Ethernet_h ethernet;
    Mpls_h[3] mpls_vec;
@@ -38,10 +38,10 @@ parser X(packet_in b, out Pkthdr p)
 {
     state start {
         b.extract(p.ethernet);
-        transition select(p.ethernet.etherType) {             
+        transition select(p.ethernet.etherType) {
            16w0x8847 : parse_mpls;
            16w0x0800 : parse_ipv4;
-        } 
+        }
     }
     state parse_mpls {
          b.extract(p.mpls_vec.next);
@@ -50,7 +50,5 @@ parser X(packet_in b, out Pkthdr p)
             1w1 : parse_ipv4;
          }
     }
-    state parse_ipv4 {}
-    // other states omitted
-}        
- 
+    state parse_ipv4 { transition accept; }
+}

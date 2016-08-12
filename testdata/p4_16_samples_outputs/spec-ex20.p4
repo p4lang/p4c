@@ -1,4 +1,4 @@
-#include "/home/cdodd/p4c/p4include/core.p4"
+#include "/home/mbudiu/git/p4c/p4include/core.p4"
 
 header Ethernet_h {
     bit<48> dstAddr;
@@ -34,6 +34,7 @@ parser X(packet_in b, out Pkthdr p) {
         }
     }
     state parse_ipv4 {
+        transition accept;
     }
 }
 

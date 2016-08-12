@@ -38,7 +38,7 @@ class SelectCase {
 
 class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     Annotations               annotations;
-    IndexedVector<StatOrDecl> components;
+    IndexedVector<StatOrDecl> components;  // only some statements allowed
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
     NullOK Expression         selectExpression;
 
@@ -53,7 +53,14 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     static const ID start;
     bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
 #nodbprint
-    validate{ components->check_null(); }
+    validate{
+        for (auto e : *components) {
+            CHECK_NULL(e);
+            if (e->is<IR::Statement>())
+                BUG_CHECK(e->is<IR::AssignmentStatement>() || e->is<IR::MethodCallStatement>(),
+                          "%1%: unexpected statement in parser", e);
+        }
+    }
 }
 
 // A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)

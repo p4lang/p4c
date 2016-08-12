@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package ebpfFilter<H>(parse<H> prs);
 struct Headers_t {}
 
 parser prs(out Headers_t headers) {
-    state start {}
+    state start { transition accept; }
 }
 
 ebpfFilter(prs()) main;

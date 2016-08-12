@@ -83,7 +83,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
     PassManager midEnd = {
         // Perform inlining for controls and parsers (parsers not yet implemented)
         new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
-        new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
+        new P4::InlineDriver(&toInline, new P4::GeneralInliner(isv1), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         // Perform inlining for actions calling other actions
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),

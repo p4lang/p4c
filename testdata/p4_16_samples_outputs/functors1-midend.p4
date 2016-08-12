@@ -1,5 +1,6 @@
 parser p00() {
     state start {
+        transition accept;
     }
 }
 

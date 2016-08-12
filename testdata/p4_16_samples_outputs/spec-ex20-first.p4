@@ -69,6 +69,7 @@ parser X(packet_in b, out Pkthdr p) {
         }
     }
     state parse_ipv4 {
+        transition accept;
     }
 }
 

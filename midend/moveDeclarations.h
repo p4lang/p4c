@@ -27,9 +27,10 @@ namespace P4 {
 class ResetHeaders : public Transform {
     const TypeMap* typeMap;
 
-    void generateResets(const IR::Type* type, const IR::Expression* expr,
-                        IR::Vector<IR::StatOrDecl>* resets);
  public:
+    static void generateResets(
+        const TypeMap* typeMap, const IR::Type* type,
+        const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets);
     explicit ResetHeaders(const TypeMap* typeMap) : typeMap(typeMap)
     { CHECK_NULL(typeMap); setName("ResetHeaders"); }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;

@@ -1,4 +1,4 @@
-#include "/home/cdodd/p4c/p4include/core.p4"
+#include "/home/mbudiu/git/p4c/p4include/core.p4"
 
 header IPv4_no_options_h {
     bit<4>  version;
@@ -58,10 +58,13 @@ parser Top(packet_in b, out Parsed_headers headers) {
         }
     }
     state well_known_port {
+        transition accept;
     }
     state other_port {
+        transition accept;
     }
     state parse_udp {
+        transition accept;
     }
 }
 

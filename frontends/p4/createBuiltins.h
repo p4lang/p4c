@@ -24,6 +24,7 @@ class CreateBuiltins final : public Modifier {
  public:
     using Modifier::postorder;
     CreateBuiltins() { setName("CreateBuiltins"); }
+    void postorder(IR::ParserState* state) override;
     void postorder(IR::P4Parser* parser) override;
     void postorder(IR::ActionListElement* element) override;
     void postorder(IR::ExpressionValue* property) override;

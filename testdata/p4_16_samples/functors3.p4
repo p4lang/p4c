@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,30 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-parser p1()(bit b1)
-{
-    state start
-    {
-        bit z1 = b1;
+parser p1(out bit z1)(bit b1) {
+    state start {
+        z1 = b1;
+        transition accept;
     }
 }
 
-parser p()(bit b, bit c)
-{
+parser p(out bit z)(bit b, bit c) {
    p1(b) p1i;
 
-   state start
-   {
-        p1i.apply();
-        bit z = b & c;
+   state start {
+        p1i.apply(z);
+        z = z & b & c;
+        transition accept;
    }
 }
 
 const bit bv = 1w0;
 
-parser nothing();
-package m(nothing n);
+parser simple(out bit z);
+package m(simple n);
 
 m(p(bv, 1w1)) main;
-
-

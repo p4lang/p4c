@@ -6,6 +6,7 @@ parser p1<T>(in T a) {
     e<T>() ei;
     state start {
         T w = ei.get();
+        transition accept;
     }
 }
 

@@ -32,6 +32,9 @@ class TypeSubstitution {
     std::map<T, const IR::Type*> binding;
     /* True if this is the empty substitution, which does not replace anything. */
  public:
+    TypeSubstitution() = default;
+    TypeSubstitution(const TypeSubstitution& other) : binding(other.binding) {}
+
     bool isIdentity() const { return binding.size() == 0; }
     const IR::Type* lookup(T t) const
     { return ::get(binding, t); }
@@ -71,6 +74,8 @@ class TypeSubstitution {
 
 class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVar*> {
  public:
+    TypeVariableSubstitution() = default;
+    TypeVariableSubstitution(const TypeVariableSubstitution& other) = default;
     /* Set bindings for multiple variables at the same time.
      * @param params   List of variables to set.
      * @param args     List of type arguments to set to variables.

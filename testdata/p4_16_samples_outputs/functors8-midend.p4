@@ -7,6 +7,7 @@ parser p1_0(in bit<2> a) {
     @name("ei") e<bit<2>>() ei_0;
     state start {
         w_0 = ei_0.get();
+        transition accept;
     }
 }
 

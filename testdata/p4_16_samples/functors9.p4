@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ extern e<T> {
     T get();
 }
 
-parser p1<T>(in T a)
-{
+parser p1<T>(in T a) {
     e<T>() ei;
     state start {
-        T w = ei.get(); 
+        T w = ei.get();
+        transition accept;
     }
 }
 

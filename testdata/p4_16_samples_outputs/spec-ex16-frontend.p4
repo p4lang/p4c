@@ -36,6 +36,7 @@ control Map<T>(in T d);
 package Switch<T>(Prs<T> prs, Map<T> map);
 parser P(packet_in b, out bit<32> d) {
     state start {
+        transition accept;
     }
 }
 

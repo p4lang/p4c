@@ -117,7 +117,7 @@ void MidEnd::setup_for_P4_16(CompilerOptions& options) {
 
         // Inlining
         new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator),
-        new P4::InlineDriver(&controlsToInline, new P4::GeneralInliner(), isv1),
+        new P4::InlineDriver(&controlsToInline, new P4::GeneralInliner(isv1), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),

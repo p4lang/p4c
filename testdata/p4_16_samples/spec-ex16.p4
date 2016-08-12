@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ limitations under the License.
 
 parser Prs<T>(packet_in b, out T result);
 control Map<T>(in T d);
-    
+
 package Switch<T>(Prs<T> prs, Map<T> map);
 
-parser P(packet_in b, out bit<32> d) { state start {} }
+parser P(packet_in b, out bit<32> d) { state start { transition accept; } }
 control Map1(in bit<32> d) { apply {} }
 control Map2(in bit<8> d) { apply {} }
 
 Switch(P(),
-       Map1()) main; 
+       Map1()) main;
 
 Switch<bit<32>>(P(),
-                Map1()) main1; 
+                Map1()) main1;
