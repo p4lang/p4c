@@ -33,6 +33,15 @@ limitations under the License.
 #define IF_HAVE_LIBGC(X)
 #endif
 
+#ifdef setbit
+/* some broken systems define a `setbit' macro in their system header files! */
+#undef setbit
+#endif
+#ifdef clrbit
+/* some broken systems define a `clrbit' macro in their system header files! */
+#undef clrbit
+#endif
+
 #if defined(__GNUC__) || defined(__clang__)
 /* use builtin count leading/trailing bits of type-approprite size */
 static inline int builtin_ctz(unsigned x) { return __builtin_ctz(x); }
