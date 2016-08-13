@@ -26,6 +26,7 @@ limitations under the License.
 #include "midend/removeParameters.h"
 #include "midend/local_copyprop.h"
 #include "midend/simplifyExpressions.h"
+#include "midend/unreachableStates.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -46,6 +47,8 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     PassManager simplify = {
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::UnreachableParserStates(&refMap),
         // Proper semantics for uninitialzed local variables in parser states:
         // headers must be invalidated
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),

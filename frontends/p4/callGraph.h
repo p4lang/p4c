@@ -106,7 +106,7 @@ class CallGraph {
             toAppend.insert(out_edges[caller]->begin(), out_edges[caller]->end());
     }
     // out will contain all nodes reachable from start
-    void reachable(T start, std::set<T> &out) {
+    void reachable(T start, std::set<T> &out) const {
         std::set<T> work;
         work.emplace(start);
         while (!work.empty()) {
@@ -115,10 +115,10 @@ class CallGraph {
             if (out.find(node) != out.end())
                 continue;
             out.emplace(node);
-            auto edges = out_edges[node];
-            if (edges == nullptr)
+            auto edges = out_edges.find(node);
+            if (edges == out_edges.end())
                 continue;
-            for (auto c : *edges)
+            for (auto c : *(edges->second))
                 work.emplace(c);
         }
     }

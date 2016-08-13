@@ -29,6 +29,7 @@ limitations under the License.
 #include "midend/parserUnroll.h"
 #include "midend/specialize.h"
 #include "midend/simplifyExpressions.h"
+#include "midend/unreachableStates.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -46,12 +47,14 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
     setName("MidEnd");
 
-    // TODO: def-use analysis
+    // TODO: def-use analysis and related optimizations
     // TODO: remove unnecessary parser transitions
     // TODO: parser loop unrolling
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
     addPasses({
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::UnreachableParserStates(&refMap),
         // Proper semantics for uninitialzed local variables in parser states:
         // headers must be invalidated
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),

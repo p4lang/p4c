@@ -48,6 +48,8 @@ midend_SOURCES = \
 	midend/specialize.h \
 	midend/specialize.cpp \
 	midend/uniqueNames.cpp \
-	midend/uniqueNames.h
+	midend/uniqueNames.h \
+	midend/unreachableStates.cpp \
+	midend/unreachableStates.h
 
 cpplint_FILES += $(midend_SOURCES)
