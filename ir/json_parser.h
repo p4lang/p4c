@@ -1,3 +1,6 @@
+#ifndef IR_JSON_PARSER_H_
+#define IR_JSON_PARSER_H_
+
 #include <vector>
 #include <map>
 #include <iostream>
@@ -7,7 +10,7 @@
 
 #include "../lib/ordered_map.h"
 class JsonData {
-public:
+ public:
     JsonData() {}
     JsonData(const JsonData&) = default;
     JsonData(JsonData&&) = default;
@@ -17,21 +20,21 @@ public:
 };
 
 class JsonNumber : public JsonData {
-public:
-    JsonNumber(long long v) : val(v) {}
+ public:
+    JsonNumber(long long v) : val(v) {}   // NOLINT(runtime/explicit)
     long long val;
 };
 
 class JsonBoolean : public JsonData {
-public:
-    JsonBoolean(bool v) : val(v) {}
+ public:
+    JsonBoolean(bool v) : val(v) {}   // NOLINT(runtime/explicit)
     bool val;
 };
 
 class JsonString : public JsonData, public std::string {
-public:
-    JsonString () {}
-    JsonString(const std::string &s) : std::string(s) {}
+ public:
+    JsonString() {}
+    JsonString(const std::string &s) : std::string(s) {}   // NOLINT(runtime/explicit)
     JsonString(const JsonString&) = default;
     JsonString(JsonString&&) = default;
     JsonString &operator=(const JsonString&) & = default;
@@ -39,25 +42,27 @@ public:
 };
 
 class JsonVector : public JsonData, public std::vector<JsonData*> {
-public:
+ public:
     JsonVector() {}
-    JsonVector(const std::vector<JsonData*> & v) : std::vector<JsonData*>(v) {}
+    JsonVector(const std::vector<JsonData*> & v)   // NOLINT(runtime/explicit)
+    : std::vector<JsonData*>(v) {}
     JsonVector &operator=(const JsonVector&) & = default;
     JsonVector &operator=(JsonVector&&) & = default;
 };
 
 class JsonObject : public JsonData, public ordered_map<JsonString, JsonData*>  {
-public:
+ public:
     JsonObject &operator=(JsonObject&&) & = default;
-    JsonObject(const ordered_map<JsonString, JsonData*> & v) : ordered_map<JsonString, JsonData*>(v) {}
+    JsonObject(const ordered_map<JsonString, JsonData*> & v)  // NOLINT(runtime/explicit)
+    : ordered_map<JsonString, JsonData*>(v) {}
 };
 
 class JsonNull : public JsonData {};
 
-//Hack to make << operator work multi-threaded
+// Hack to make << operator work multi-threaded
 thread_local int level = 0;
 
-std::string getIndent(int l) { 
+std::string getIndent(int l) {
     std::stringstream ss;
     for (int i = 0; i < l*4; i++) ss << " ";
     return ss.str();
@@ -65,15 +70,15 @@ std::string getIndent(int l) {
 
 std::ostream& operator<<(std::ostream &out, JsonData* json) {
     if (dynamic_cast<JsonObject*>(json)) {
-        ordered_map<JsonString, JsonData*>* obj = dynamic_cast<ordered_map<JsonString, JsonData*>*>(json);
+        auto obj = dynamic_cast<ordered_map<JsonString, JsonData*>*>(json);
         out << "{";
         if (obj->size() > 0) {
             level++;
             out << std::endl;
-            for (auto &e : *obj) 
+            for (auto &e : *obj)
                 out << getIndent(level) << e.first << " : " << e.second << "," << std::endl;
             out << getIndent(--level);
-        } 
+        }
         out << "}";
     } else if (dynamic_cast<JsonVector*>(json)) {
         std::vector<JsonData*>* vec = dynamic_cast<std::vector<JsonData*>*>(json);
@@ -90,7 +95,7 @@ std::ostream& operator<<(std::ostream &out, JsonData* json) {
     } else if (dynamic_cast<JsonString*>(json)) {
         JsonString* s = dynamic_cast<JsonString*>(json);
         out << "\"" << s->c_str() << "\"";
-    
+
     } else if (dynamic_cast<JsonNumber*>(json)) {
         JsonNumber* num = dynamic_cast<JsonNumber*>(json);
         out << num->val;
@@ -109,7 +114,7 @@ std::istream& operator>>(std::istream &in, JsonData*& json) {
     while (in) {
         char ch;
         in >> ch;
-        switch(ch) {
+        switch (ch) {
         case '{': {
             ordered_map<JsonString, JsonData*> obj;
             do {
@@ -124,24 +129,24 @@ std::istream& operator>>(std::istream &in, JsonData*& json) {
 
                 in >> std::ws >> ch;
             } while (in && ch != '}');
-            
+
             json = new JsonObject(obj);
             return in;
-        } 
+        }
         case '[': {
             std::vector<JsonData*> vec;
-            do { 
+            do {
                 in >> std::ws >> ch;
                 if (ch == ']')
                     break;
                 in.unget();
 
                 JsonData *elem;
-                in >> elem;    
+                in >> elem;
                 vec.push_back(elem);
-                
+
                 in >> std::ws >> ch;
-            } while(in && ch != ']');
+            } while (in && ch != ']');
 
             json = new JsonVector(vec);
             return in;
@@ -175,3 +180,5 @@ std::istream& operator>>(std::istream &in, JsonData*& json) {
         }
     }
 }
+
+#endif /* IR_JSON_PARSER_H_ */

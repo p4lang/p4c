@@ -24,6 +24,7 @@ ir_SOURCES += \
 	ir/id.h \
 	ir/ir.cpp \
 	ir/ir-generated.cpp \
+	ir/json_generator.h \
 	ir/json_parser.h \
 	ir/ir.h \
 	ir/ir-inline.h \
@@ -38,7 +39,7 @@ ir_SOURCES += \
 	ir/indexed_vector.h \
 	ir/visitor.cpp \
 	ir/visitor.h \
-	ir/write_context.cpp 
+	ir/write_context.cpp
 
 ir_DEF_FILES += \
     $(srcdir)/ir/base.def \

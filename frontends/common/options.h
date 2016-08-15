@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ class CompilerOptions : public Util::Options {
 
     // Dump a JSON representation of the IR in the file
     cstring dumpJsonFile = nullptr;
-    
+
     // higher means more verbose
     unsigned verbosity = 0;
     // Compiler target architecture

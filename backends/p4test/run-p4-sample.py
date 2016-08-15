@@ -185,17 +185,17 @@ def process_file(options, argv):
     ppfile = tmpdir + "/" + basename                  # after parsing
     referenceOutputs = "FrontEnd_13,FrontEnd_14,MidEnd_47_Evaluator"
     stderr = tmpdir + "/" + basename + "-stderr"
-    
+
     if not os.path.exists("json_outputs"):
         os.mkdir("./json_outputs")
 
     jsonfile = "./json_outputs" + "/" + basename + ".json"
-    
+
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
     args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs,
             "--toJSON", jsonfile] + options.compilerOptions
- 
+
     if "14_samples" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--p4-14"]);
     args.extend(argv)

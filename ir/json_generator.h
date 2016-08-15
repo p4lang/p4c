@@ -18,11 +18,11 @@ limitations under the License.
 #define _IR_JSON_GENERATOR_H_
 
 #include <assert.h>
+#include <gmpxx.h>
 #include <string>
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
-#include <gmpxx.h>
 
 #include "ir.h"
 class JSONGenerator {
@@ -30,21 +30,20 @@ class JSONGenerator {
     std::ostream &out;
 
     template<typename T>
-    class has_toJSON
-    {
+    class has_toJSON {
         typedef char small;
         typedef struct { char c[2]; } big;
 
         template<typename C> static small test(decltype(&C::toJSON));
         template<typename C> static big test(...);
-    public: 
+     public:
         static const bool value = sizeof(test<T>(0)) == sizeof(char);
     };
 
  public:
     indent_t indent;
 
-    JSONGenerator(std::ostream &out) : out(out) {}
+    explicit JSONGenerator(std::ostream &out) : out(out) {}
 
     template<typename T>
     void generate(const vector<T> &v) {
@@ -73,8 +72,7 @@ class JSONGenerator {
     }
 
     template<typename T, typename U>
-    void generate(const std::pair<T, U> &v)
-    {
+    void generate(const std::pair<T, U> &v) {
         out << "{" << std::endl << ++indent << "\"first\" : ";
         generate(v.first);
         out << "," << std::endl << indent << "\"second\" : ";
@@ -83,8 +81,7 @@ class JSONGenerator {
     }
 
     template<typename K, typename V>
-    void generate(const ordered_map<K, V> &v)
-    {
+    void generate(const ordered_map<K, V> &v) {
         out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();

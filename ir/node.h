@@ -97,10 +97,10 @@ class Node : public virtual INode {
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const {
         CHECK_NULL(this);
-        return dynamic_cast<const T*>(this); 
+        return dynamic_cast<const T*>(this);
     }
     cstring toString() const override { return node_type_name(); }
-    virtual void toJSON(JSONGenerator &json) const override;
+    void toJSON(JSONGenerator &json) const override;
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }

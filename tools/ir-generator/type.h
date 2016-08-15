@@ -89,9 +89,9 @@ class NamedType : public Type {
 };
 
 class TemplateInstantiation : public Type {
-public:
+ public:
     const Type                  *base;
- 
+
     std::vector<const Type *>   args;
     TemplateInstantiation(Util::SourceInfo si, Type *b, const std::vector<const Type *> &a)
     : Type(si), base(b), args(a) {}
@@ -147,7 +147,7 @@ class PointerType : public Type {
 };
 
 class ArrayType : public Type {
-public:
+ public:
     const Type          *base;
     int                 size;
     ArrayType(const Type *t, int s) : base(t), size(s) {}
