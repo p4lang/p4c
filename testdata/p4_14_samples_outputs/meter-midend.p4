@@ -9,12 +9,13 @@ error {
     NoMatch,
     EmptyStack,
     FullStack,
-    OverwritingHeader
+    OverwritingHeader,
+    HeaderTooShort
 }
 
 extern packet_in {
     void extract<T>(out T hdr);
-    void extract<T>(out T variableSizeHeader, in bit<32> sizeInBits);
+    void extract<T>(out T variableSizeHeader, in bit<32> variableFieldSizeInBits);
     T lookahead<T>();
     void advance(in bit<32> sizeInBits);
     bit<32> length();
@@ -87,7 +88,9 @@ extern action_profile {
 
 enum HashAlgorithm {
     crc32,
+    crc32_custom,
     crc16,
+    crc16_custom,
     random,
     identity
 }
@@ -153,7 +156,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     action NoAction_2() {
     }
-    meter(32w16384, CounterType.packets) @name("my_meter") my_meter_0;
+    @name("my_meter") meter(32w16384, CounterType.packets) my_meter_0;
     @name("_drop") action _drop() {
         mark_to_drop();
     }

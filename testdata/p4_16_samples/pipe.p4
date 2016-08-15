@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ match_kind {
 }
 
 typedef bit<9> BParamType;
-struct TArg1 
+struct TArg1
 {
     bit<9> field1;
     bool drop;
@@ -48,20 +48,20 @@ extern bs {}
 struct Packet_data {}
 
 action NoAction() {}
-    
+
 control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size)
 {
     // free-floating action: defined like a type
     action B_action(out bit<9> barg, BParamType bData)
     {
-        barg = (bit<9>)bData;    
+        barg = (bit<9>)bData;
     }
-    
+
     action C_action(bit<9> cData)
     {
         pArg1.field1 = cData;
     }
-    
+
     table T(inout TArg1 tArg1, in TArg2 aArg2)
     {
         key = {
@@ -83,8 +83,8 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size)
         pArg1.drop = true;
     }
 
-    table Tinner()            
-    { 
+    table Tinner()
+    {
         key = { pArg1.field1 : ternary; }
         actions =
         {
@@ -95,10 +95,10 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size)
 
     apply {
         bit<9> dt;     // local variable
-    
-        T.apply(pArg1, pArg2); 
-        T.apply(pArg1, pArg2); 
-        Tinner.apply();            
+
+        T.apply(pArg1, pArg2);
+        T.apply(pArg1, pArg2);
+        Tinner.apply();
     }
 }
 
@@ -116,7 +116,7 @@ control pp(inout TArg1 arg1, inout TArg2 arg2);
 
 package myswitch(prs prser, pp pipe);
 
-parser my_parser(in bs b, out Packet_data p) { state start {} }
+parser my_parser(in bs b, out Packet_data p) { state start { transition accept; } }
 
 //myswitch(Q_pipe(), my_parser()) main;
 myswitch(my_parser(), Q_pipe()) main;

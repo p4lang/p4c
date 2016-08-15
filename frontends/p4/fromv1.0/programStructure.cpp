@@ -495,7 +495,7 @@ void ProgramStructure::createDeparser() {
             for (auto e : extracts[caller]) {
                 auto h = hr.getHeader(e);
                 if (lastExtract != nullptr)
-                    headerOrder.add(lastExtract, h);
+                    headerOrder.calls(lastExtract, h);
                 lastExtract = h;
             }
         }
@@ -508,7 +508,7 @@ void ProgramStructure::createDeparser() {
                 auto h = hr.getHeader(e);
                 firstExtract = h;
             }
-            headerOrder.add(lastExtract, firstExtract);
+            headerOrder.calls(lastExtract, firstExtract);
         }
     }
 
@@ -758,8 +758,12 @@ const IR::Expression* ProgramStructure::convertHashAlgorithm(IR::ID algorithm) {
     IR::ID result;
     if (algorithm == "crc32") {
         result = v1model.algorithm.crc32.Id();
+    } else if (algorithm == "crc32_custom") {
+        result = v1model.algorithm.crc32_custom.Id();
     } else if (algorithm == "crc16") {
         result = v1model.algorithm.crc16.Id();
+    } else if (algorithm == "crc16_custom") {
+        result = v1model.algorithm.crc16_custom.Id();
     } else if (algorithm == "random") {
         result = v1model.algorithm.random.Id();
     } else if (algorithm == "identity") {
@@ -1411,7 +1415,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
 
     std::set<cstring> countersToDo;
     for (auto a : actionsToDo)
-        calledCounters.appendCallees(countersToDo, a);
+        calledCounters.getCallees(a, countersToDo);
     for (auto c : counters) {
         if (c.first->direct) {
             if (c.first->table.name.isNullOrEmpty()) {
@@ -1459,8 +1463,8 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     std::set<cstring> metersToDo;
     std::set<cstring> registersToDo;
     for (auto a : actionsToDo) {
-        calledMeters.appendCallees(metersToDo, a);
-        calledRegisters.appendCallees(registersToDo, a);
+        calledMeters.getCallees(a, metersToDo);
+        calledRegisters.getCallees(a, registersToDo);
     }
     for (auto c : metersToDo) {
         auto mtr = meters.get(c);

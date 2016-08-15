@@ -29,6 +29,8 @@ limitations under the License.
 #include "midend/removeLeftSlices.h"
 #include "midend/convertEnums.h"
 #include "midend/simplifyKey.h"
+#include "midend/simplifyExpressions.h"
+#include "midend/unreachableStates.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -86,6 +88,8 @@ void MidEnd::setup_for_P4_16(CompilerOptions& options) {
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
 
     addPasses({
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::UnreachableParserStates(&refMap),
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::ConvertEnums(new EnumOn32Bits(), &typeMap),
         // Proper semantics for uninitialzed local variables in parser states:
@@ -96,6 +100,9 @@ void MidEnd::setup_for_P4_16(CompilerOptions& options) {
         new P4::UniqueNames(&refMap, isv1),
         // Move all local declarations to the beginning
         new P4::MoveDeclarations(),
+        new P4::MoveInitializers(),
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
+        new P4::SimplifyExpressions(&refMap, &typeMap),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap),
         // Move some constructor calls into temporaries
@@ -113,7 +120,7 @@ void MidEnd::setup_for_P4_16(CompilerOptions& options) {
 
         // Inlining
         new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator),
-        new P4::InlineDriver(&controlsToInline, new P4::GeneralInliner(), isv1),
+        new P4::InlineDriver(&controlsToInline, new P4::GeneralInliner(isv1), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),

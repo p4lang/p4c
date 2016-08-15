@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,11 +22,10 @@ parser p()
     X<int<32>>() x;
     Y()          y;
 
-    state start {}
+    state start { transition accept; }
 }
 
 parser empty();
 package sw(empty e);
 
 sw(p()) main;
-

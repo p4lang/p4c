@@ -171,6 +171,8 @@ TypeInference::canonicalizeFields(const IR::Type_StructLike* type) {
     auto fields = new IR::IndexedVector<IR::StructField>();
     for (auto field : *type->fields) {
         auto ftype = canonicalize(field->type);
+        if (ftype == nullptr)
+            return nullptr;
         if (ftype != field->type)
             changes = true;
         auto newField = new IR::StructField(field->srcInfo, field->name, field->annotations, ftype);
@@ -190,6 +192,8 @@ const IR::ParameterList* TypeInference::canonicalize(const IR::ParameterList* pa
     auto vec = new IR::IndexedVector<IR::Parameter>();
     for (auto p : *params->getEnumerator()) {
         auto paramType = canonicalize(p->type);
+        if (paramType == nullptr)
+            return nullptr;
         if (paramType != p->type) {
             p = new IR::Parameter(p->srcInfo, p->name, p->annotations, p->direction, paramType);
             changes = true;
@@ -208,6 +212,8 @@ const IR::TypeParameters* TypeInference::canonicalize(const IR::TypeParameters* 
     bool changes = false;
     for (auto p : *params->parameters) {
         auto np = canonicalize(p)->to<IR::Type_Var>();
+        if (np == nullptr)
+            return nullptr;
         newparams->push_back(np);
         if (np != p)
             changes = true;
@@ -248,11 +254,10 @@ const IR::Type* TypeInference::specialize(const IR::IMayBeGenericType* type,
     return result->to<IR::Type>();
 }
 
-// This function does not return nullptr,
-// but it may return the wrong type if typechecking fails.
-// This function could probably be rewritten as a visitor...
+// May return nullptr if a type error occurs.
 const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
-    CHECK_NULL(type);
+    if (type == nullptr)
+        return nullptr;
     if (typeMap->contains(type))
         return typeMap->getType(type, true);
 
@@ -280,6 +285,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
                 t = t->to<IR::Type_Set>()->elementType;
             }
             t = canonicalize(t);
+            if (t == nullptr)
+                return nullptr;
             fields->push_back(t);
         }
         const IR::Type* canon = new IR::Type_Tuple(type->srcInfo, fields);
@@ -290,6 +297,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tp = type->to<IR::Type_Parser>();
         auto pl = canonicalize(tp->applyParams);
         auto tps = canonicalize(tp->typeParameters);
+        if (pl == nullptr || tps == nullptr)
+            return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Parser(tp->srcInfo, tp->name, tp->annotations, tps, pl);
         return type;
@@ -297,6 +306,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tp = type->to<IR::Type_Control>();
         auto pl = canonicalize(tp->applyParams);
         auto tps = canonicalize(tp->typeParameters);
+        if (pl == nullptr || tps == nullptr)
+            return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Control(tp->srcInfo, tp->name, tp->annotations, tps, pl);
         return type;
@@ -304,24 +315,36 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tp = type->to<IR::Type_Package>();
         auto pl = canonicalize(tp->constructorParams);
         auto tps = canonicalize(tp->typeParameters);
+        if (pl == nullptr || tps == nullptr)
+            return nullptr;
         if (pl != tp->constructorParams || tps != tp->typeParameters)
             return new IR::Type_Package(tp->srcInfo, tp->name, tp->annotations, tps, pl);
         return type;
     } else if (type->is<IR::P4Control>()) {
         auto cont = type->to<IR::P4Control>();
-        auto ctype = canonicalize(cont->type)->to<IR::Type_Control>();
+        auto ctype0 = canonicalize(cont->type);
+        if (ctype0 == nullptr)
+            return nullptr;
+        auto ctype = ctype0->to<IR::Type_Control>();
         auto pl = canonicalize(cont->constructorParams);
+        if (pl == nullptr)
+            return nullptr;
         if (ctype != cont->type || pl != cont->constructorParams)
             return new IR::P4Control(cont->srcInfo, cont->name,
-                                     ctype, pl, cont->stateful, cont->body);
+                                     ctype, pl, cont->controlLocals, cont->body);
         return type;
     } else if (type->is<IR::P4Parser>()) {
         auto cont = type->to<IR::P4Parser>();
-        auto ctype = canonicalize(cont->type)->to<IR::Type_Parser>();
+        auto ctype0 = canonicalize(cont->type);
+        if (ctype0 == nullptr)
+            return nullptr;
+        auto ctype = ctype0->to<IR::Type_Parser>();
         auto pl = canonicalize(cont->constructorParams);
+        if (pl == nullptr)
+            return nullptr;
         if (ctype != cont->type || pl != cont->constructorParams)
             return new IR::P4Parser(cont->srcInfo, cont->name, ctype,
-                                    pl, cont->stateful, cont->states);
+                                    pl, cont->parserLocals, cont->states);
         return type;
     } else if (type->is<IR::Type_Extern>()) {
         auto te = type->to<IR::Type_Extern>();
@@ -333,7 +356,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
                 constructorFound = true;
             auto fpType = canonicalize(method->type);
             if (fpType == nullptr)
-                return type;
+                return nullptr;
 
             if (fpType != method->type) {
                 method = new IR::Method(method->srcInfo, method->name,
@@ -354,6 +377,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             changes = true;
         }
         auto tps = canonicalize(te->typeParameters);
+        if (tps == nullptr)
+            return nullptr;
         const IR::Type* resultType = type;
         if (changes || tps != te->typeParameters)
             resultType = new IR::Type_Extern(te->srcInfo, te->name, tps, methods);
@@ -361,11 +386,16 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     } else if (type->is<IR::Type_Method>()) {
         auto mt = type->to<IR::Type_Method>();
         const IR::Type* res = nullptr;
-        if (mt->returnType != nullptr)
+        if (mt->returnType != nullptr) {
             res = canonicalize(mt->returnType);
+            if (res == nullptr)
+                return nullptr;
+        }
         bool changes = res != mt->returnType;
         auto pl = canonicalize(mt->parameters);
         auto tps = canonicalize(mt->typeParameters);
+        if (pl == nullptr || tps == nullptr)
+            return nullptr;
         changes = changes || pl != mt->parameters || tps != mt->typeParameters;
         const IR::Type* resultType = mt;
         if (changes)
@@ -374,6 +404,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     } else if (type->is<IR::Type_Header>()) {
         auto hdr = type->to<IR::Type_Header>();
         auto fields = canonicalizeFields(hdr);
+        if (fields == nullptr)
+            return nullptr;
         const IR::Type* canon;
         if (fields != hdr->fields)
             canon = new IR::Type_Header(hdr->srcInfo, hdr->name, hdr->annotations, fields);
@@ -383,6 +415,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     } else if (type->is<IR::Type_Struct>()) {
         auto str = type->to<IR::Type_Struct>();
         auto fields = canonicalizeFields(str);
+        if (fields == nullptr)
+            return nullptr;
         const IR::Type* canon;
         if (fields != str->fields)
             canon = new IR::Type_Struct(str->srcInfo, str->name, str->annotations, fields);
@@ -392,6 +426,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     } else if (type->is<IR::Type_Union>()) {
         auto str = type->to<IR::Type_Union>();
         auto fields = canonicalizeFields(str);
+        if (fields == nullptr)
+            return nullptr;
         const IR::Type* canon;
         if (fields != str->fields)
             canon = new IR::Type_Union(str->srcInfo, str->name, str->annotations, fields);
@@ -401,13 +437,15 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     } else if (type->is<IR::Type_Specialized>()) {
         auto st = type->to<IR::Type_Specialized>();
         auto baseCanon = canonicalize(st->baseType);
+        if (baseCanon == nullptr)
+            return nullptr;
         if (st->arguments == nullptr)
             return baseCanon;
 
         if (!baseCanon->is<IR::IMayBeGenericType>()) {
             typeError("%1%: Type %2% is not generic and thus it"
                       " cannot be specialized using type arguments", type, baseCanon);
-            return type;
+            return nullptr;
         }
 
         auto gt = baseCanon->to<IR::IMayBeGenericType>();
@@ -415,12 +453,14 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (tp->size() != st->arguments->size()) {
             typeError("%1%: Type %2% has %3% type parameter(s), but it is specialized with %4%",
                       type, gt, tp->size(), st->arguments->size());
-            return type;
+            return nullptr;
         }
 
         IR::Vector<IR::Type> *args = new IR::Vector<IR::Type>();
         for (const IR::Type* a : *st->arguments) {
             const IR::Type* canon = canonicalize(a);
+            if (canon == nullptr)
+                return nullptr;
             args->push_back(canon);
         }
         auto specialized = specialize(gt, args);
@@ -465,16 +505,20 @@ const IR::Node* TypeInference::postorder(IR::Declaration_MatchKind* decl) {
 const IR::Node* TypeInference::postorder(IR::P4Control* cont) {
     if (done()) return cont;
     auto canon = canonicalize(getOriginal<IR::P4Control>());
-    setType(getOriginal(), canon);
-    setType(cont, canon);
+    if (canon != nullptr) {
+        setType(getOriginal(), canon);
+        setType(cont, canon);
+    }
     return cont;
 }
 
 const IR::Node* TypeInference::postorder(IR::P4Parser* parser) {
     if (done()) return parser;
     auto canon = canonicalize(getOriginal<IR::P4Parser>());
-    setType(getOriginal(), canon);
-    setType(parser, canon);
+    if (canon != nullptr) {
+        setType(getOriginal(), canon);
+        setType(parser, canon);
+    }
     return parser;
 }
 
@@ -489,6 +533,8 @@ const IR::Node* TypeInference::postorder(IR::P4Table* table) {
 const IR::Node* TypeInference::postorder(IR::P4Action* action) {
     if (done()) return action;
     auto pl = canonicalize(action->parameters);
+    if (pl == nullptr)
+        return action;
     auto type = new IR::Type_Action(Util::SourceInfo(), new IR::TypeParameters(),
                                     nullptr, pl);
 
@@ -735,6 +781,8 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
     visit(decl->annotations);
 
     auto type = canonicalize(decl->type);
+    if (type == nullptr)
+        return decl;
     auto orig = getOriginal<IR::Declaration_Instance>();
 
     auto simpleType = type;
@@ -854,29 +902,35 @@ const IR::Node* TypeInference::postorder(IR::Type_InfInt* type) {
 const IR::Node* TypeInference::postorder(IR::Type_ArchBlock* decl) {
     if (done()) return decl;
     auto canon = canonicalize(getOriginal<IR::Type_ArchBlock>());
-    setType(getOriginal(), canon);
-    setType(decl, canon);
+    if (canon != nullptr) {
+        setType(getOriginal(), canon);
+        setType(decl, canon);
+    }
     return decl;
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Package* decl) {
     if (done()) return decl;
     auto canon = canonicalize(getOriginal<IR::Type_Package>());
-    for (auto p : *decl->getConstructorParameters()->parameters) {
-        auto ptype = getType(p);
-        if (ptype->is<IR::P4Parser>() || ptype->is<IR::P4Control>())
-            ::error("%1%: Invalid package parameter type", p);
+    if (canon != nullptr) {
+        for (auto p : *decl->getConstructorParameters()->parameters) {
+            auto ptype = getType(p);
+            if (ptype->is<IR::P4Parser>() || ptype->is<IR::P4Control>())
+                ::error("%1%: Invalid package parameter type", p);
+        }
+        setType(getOriginal(), canon);
+        setType(decl, canon);
     }
-    setType(getOriginal(), canon);
-    setType(decl, canon);
     return decl;
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Specialized *type) {
     if (done()) return type;
     auto canon = canonicalize(type);
-    setType(getOriginal(), canon);
-    setType(type, canon);
+    if (canon != nullptr) {
+        setType(getOriginal(), canon);
+        setType(type, canon);
+    }
     return type;
 }
 
@@ -939,39 +993,43 @@ const IR::Node* TypeInference::postorder(IR::Type_Var* typeVar) {
 const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
     if (done()) return type;
     auto canon = canonicalize(getOriginal<IR::Type_Tuple>());
-    setType(getOriginal(), canon);
-    setType(type, canon);
+    if (canon != nullptr) {
+        setType(getOriginal(), canon);
+        setType(type, canon);
+    }
     return type;
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Extern* type) {
     if (done()) return type;
     auto canon = canonicalize(getOriginal<IR::Type_Extern>())->to<IR::Type_Extern>();
-    for (auto method : *canon->methods) {
-        if (method->name == type->name) {  // constructor
-            if (method->type->typeParameters != nullptr &&
-                method->type->typeParameters->size() > 0) {
-                typeError("%1%: Constructors cannot have type parameters",
-                          method->type->typeParameters);
-                return type;
+    if (canon != nullptr) {
+        for (auto method : *canon->methods) {
+            if (method->name == type->name) {  // constructor
+                if (method->type->typeParameters != nullptr &&
+                    method->type->typeParameters->size() > 0) {
+                    typeError("%1%: Constructors cannot have type parameters",
+                              method->type->typeParameters);
+                    return type;
+                }
             }
+            auto m = canon->lookupMethod(method->name, method->type->parameters->size());
+            if (m == nullptr)  // duplicate method with this signature
+                return type;
         }
-
-        auto m = canon->lookupMethod(method->name, method->type->parameters->size());
-        if (m == nullptr)  // duplicate method with this signature
-            return type;
+        setType(getOriginal(), canon);
+        setType(type, canon);
     }
-
-    setType(getOriginal(), canon);
-    setType(type, canon);
     return type;
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Method* type) {
     if (done()) return type;
     auto canon = canonicalize(getOriginal<IR::Type_Method>());
-    setType(getOriginal(), canon);
-    setType(type, canon);
+    if (canon != nullptr) {
+        setType(getOriginal(), canon);
+        setType(type, canon);
+    }
     return type;
 }
 
@@ -987,8 +1045,10 @@ const IR::Node* TypeInference::postorder(IR::Type_Action* type) {
 const IR::Node* TypeInference::postorder(IR::Type_Base* type) {
     if (done()) return type;
     auto canon = canonicalize(getOriginal<IR::Type_Base>());
-    setType(getOriginal(), canon);
-    setType(type, canon);
+    if (canon != nullptr) {
+        setType(getOriginal(), canon);
+        setType(type, canon);
+    }
     return type;
 }
 
@@ -1048,15 +1108,17 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     if (done()) return type;
     auto orig = getOriginal<IR::Type_Header>();
     auto canon = canonicalize(orig)->to<IR::Type_Header>();
-    auto validator = [] (const IR::Type* t)
-            { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
-    if (validateFields(canon, validator)) {
-        if (canon != orig) {
-            TypeInference tc(refMap, typeMap, false, true);
-            (void)canon->apply(tc);
+    if (canon != nullptr) {
+        auto validator = [] (const IR::Type* t)
+                { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
+        if (validateFields(canon, validator)) {
+            if (canon != orig) {
+                TypeInference tc(refMap, typeMap, false, true);
+                (void)canon->apply(tc);
+            }
+            setType(getOriginal(), canon);
+            setType(type, canon);
         }
-        setType(getOriginal(), canon);
-        setType(type, canon);
     }
     return type;
 }
@@ -1064,7 +1126,10 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
 const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     if (done()) return type;
     auto orig = getOriginal<IR::Type_Struct>();
-    auto canon = canonicalize(orig)->to<IR::Type_Struct>();
+    auto c = canonicalize(orig);
+    if (c == nullptr)
+        return type;
+    auto canon = c->to<IR::Type_Struct>();
     auto validator = [] (const IR::Type* t) {
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() ||
         t->is<IR::Type_Header>() || t->is<IR::Type_Union>() ||
@@ -1086,7 +1151,10 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
 const IR::Node* TypeInference::postorder(IR::Type_Union *type) {
     if (done()) return type;
     auto orig = getOriginal<IR::Type_Union>();
-    auto canon = canonicalize(orig)->to<IR::Type_Union>();
+    auto c = canonicalize(orig);
+    if (c == nullptr)
+        return type;
+    auto canon = c->to<IR::Type_Union>();
     auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>(); };
     if (validateFields(canon, validator)) {
         if (canon != orig) {
@@ -1229,11 +1297,13 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     const IR::Type* resultType = IR::Type_Bits::get(Util::SourceInfo(),
                                                     bl->size + br->size, bl->isSigned);
     resultType = canonicalize(resultType);
-    setType(getOriginal(), resultType);
-    setType(expression, resultType);
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
+    if (resultType != nullptr) {
+        setType(getOriginal(), resultType);
+        setType(expression, resultType);
+        if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
+            setCompileTimeConstant(expression);
+            setCompileTimeConstant(getOriginal<IR::Expression>());
+        }
     }
     return expression;
 }
@@ -1253,7 +1323,8 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
 
     auto tupleType = new IR::Type_Tuple(expression->srcInfo, components);
     auto type = canonicalize(tupleType);
-    CHECK_NULL(type);
+    if (type == nullptr)
+        return expression;
     setType(getOriginal(), type);
     setType(expression, type);
     if (constant) {
@@ -1366,20 +1437,22 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
             return expression;
         }
     } else if (bl == nullptr && br != nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
         auto e = expression->clone();
-        e->left = cast;
+        auto cst = expression->left->to<IR::Constant>();
+        CHECK_NULL(cst);
+        e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
+        setType(e->left, rtype);
         expression = e;
         resultType = rtype;
-        setType(cast, resultType);
         setType(expression, resultType);
     } else if (bl != nullptr && br == nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
         auto e = expression->clone();
-        e->right = cast;
+        auto cst = expression->right->to<IR::Constant>();
+        CHECK_NULL(cst);
+        e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
+        setType(e->right, ltype);
         expression = e;
         resultType = ltype;
-        setType(cast, resultType);
         setType(expression, resultType);
     } else {
         setType(expression, resultType);
@@ -1818,6 +1891,8 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
 
     const IR::Type* result = IR::Type_Bits::get(bst->srcInfo, m - l + 1, bst->isSigned);
     result = canonicalize(result);
+    if (result == nullptr)
+        return expression;
     setType(getOriginal(), result);
     setType(expression, result);
     if (isLeftValue(expression->e0)) {
@@ -1929,6 +2004,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                     Util::SourceInfo(), new IR::TypeParameters(),
                     IR::Type_Boolean::get(), new IR::ParameterList());
                 auto ctype = canonicalize(type);
+                if (ctype == nullptr)
+                    return expression;
                 setType(getOriginal(), ctype);
                 setType(expression, ctype);
                 return expression;
@@ -1942,6 +2019,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                     Util::SourceInfo(), new IR::TypeParameters(), IR::Type_Void::get(),
                     new IR::ParameterList(Util::SourceInfo(), params));
                 auto ctype = canonicalize(type);
+                if (ctype == nullptr)
+                    return expression;
                 setType(getOriginal(), ctype);
                 setType(expression, ctype);
                 return expression;
@@ -1976,6 +2055,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         if (expression->member.name == IR::IApply::applyMethodName) {
             auto methodType = type->to<IR::IApply>()->getApplyMethodType();
             methodType = canonicalize(methodType)->to<IR::Type_Method>();
+            if (methodType == nullptr)
+                return expression;
             // sometimes this is a synthesized type, so we have to crawl it to understand it
             TypeInference learn(refMap, typeMap, false, true);
             (void)methodType->apply(learn);
@@ -2016,6 +2097,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                                             IR::Type_Void::get(),
                                             new IR::ParameterList(Util::SourceInfo(), params));
             auto canon = canonicalize(type);
+            if (type == nullptr)
+                return expression;
             setType(getOriginal(), canon);
             setType(expression, canon);
         }
@@ -2354,7 +2437,8 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
     if (type == nullptr)
         return stat;
     if (!type->is<IR::Type_ActionEnum>()) {
-        typeError("%1%: Switch condition can only be produced by table.apply()", stat);
+        typeError("%1%: Switch condition can only be produced by table.apply(...).action_run",
+                  stat);
         return stat;
     }
     auto ae = type->to<IR::Type_ActionEnum>();

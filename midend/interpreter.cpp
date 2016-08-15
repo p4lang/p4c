@@ -17,6 +17,8 @@ SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitial
         return new SymbolicStruct(type->to<IR::Type_Struct>(), uninitialized, this);
     if (type->is<IR::Type_Header>())
         return new SymbolicHeader(type->to<IR::Type_Header>(), uninitialized, this);
+    if (type->is<IR::Type_Varbits>())
+        return new SymbolicVarbit(type->to<IR::Type_Varbits>());
     if (type->is<IR::Type_Stack>()) {
         auto st = type->to<IR::Type_Stack>();
         return new SymbolicArray(st, uninitialized, this);
@@ -31,6 +33,11 @@ SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitial
             return new SymbolicPacketIn(te);
         }
         return new SymbolicExtern(te);
+    }
+    if (type->is<IR::Type_Enum>() ||
+        type->is<IR::Type_Error>() ||
+        type->is<IR::Type_MatchKind>()) {
+        return new SymbolicEnum(type);
     }
     if (type->is<IR::Type_SpecializedCanonical>()) {
         auto spec = type->to<IR::Type_SpecializedCanonical>();
@@ -105,6 +112,9 @@ unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
     return 0;
 }
 
+void ValueMap::print() const
+{ dbprint(std::cout); }
+
 /*********************************************************************************/
 
 bool SymbolicException::equals(const SymbolicValue* other) const {
@@ -177,6 +187,57 @@ bool SymbolicInteger::equals(const SymbolicValue* other) const {
     return true;
 }
 
+bool SymbolicVarbit::merge(const SymbolicValue* other) {
+    BUG_CHECK(other->is<SymbolicVarbit>(), "%1%: expected a varbit", other);
+    auto vo = other->to<SymbolicVarbit>();
+    auto saveState = state;
+    state = mergeState(vo->state);
+    return (state != saveState);
+}
+
+void SymbolicVarbit::assign(const SymbolicValue* other) {
+    if (other->is<SymbolicError>()) return;
+    BUG_CHECK(other->is<SymbolicVarbit>(), "%1%: expected a varbit", other);
+    auto vo = other->to<SymbolicVarbit>();
+    state = vo->state;
+}
+
+bool SymbolicVarbit::equals(const SymbolicValue* other) const {
+    if (!other->is<SymbolicVarbit>())
+        return false;
+    auto ab = other->to<SymbolicVarbit>();
+    return state == ab->state;
+}
+
+void SymbolicEnum::assign(const SymbolicValue* other) {
+    BUG_CHECK(other->is<SymbolicEnum>(), "%1%: expected an enum", other);
+    auto bo = other->to<SymbolicEnum>();
+    state = bo->state;
+    value = bo->value;
+}
+
+bool SymbolicEnum::merge(const SymbolicValue* other) {
+    auto bo = other->to<SymbolicEnum>();
+    auto saveState = state;
+    state = mergeState(other->to<ScalarValue>()->state);
+    if (state == ValueState::Constant && value != bo->value)
+        state = ValueState::NotConstant;
+    return (state != saveState);
+}
+
+bool SymbolicEnum::equals(const SymbolicValue* other) const {
+    if (!other->is<SymbolicEnum>())
+        return false;
+    auto ab = other->to<SymbolicEnum>();
+    if (state != ab->state)
+        return false;
+    if (isKnown())
+        return value == ab->value;
+    return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+
 SymbolicStruct::SymbolicStruct(const IR::Type_StructLike* type, bool uninitialized,
                                const SymbolicValueFactory* factory) : SymbolicValue(type) {
     CHECK_NULL(type); CHECK_NULL(factory);
@@ -223,6 +284,29 @@ bool SymbolicStruct::equals(const SymbolicValue* other) const {
         if (!get(nullptr, f.first)->equals(f.second))
             return false;
     return true;
+}
+
+bool SymbolicStruct::hasUninitializedParts() const {
+    for (auto f : fieldValue)
+        if (f.second->hasUninitializedParts())
+            return true;
+    return false;
+}
+
+void SymbolicStruct::dbprint(std::ostream& out) const {
+    bool first = true;
+    out << "{ ";
+    for (auto f : fieldValue) {
+        if (f.second->is<SymbolicHeader>() ||
+            f.second->is<SymbolicStruct>() ||
+            f.second->is<SymbolicArray>()) {
+            if (!first)
+                out << ", ";
+            out << f.first << "=>" << f.second;
+            first = false;
+        }
+    }
+    out << " }";
 }
 
 SymbolicHeader::SymbolicHeader(const IR::Type_Header* type,
@@ -285,6 +369,19 @@ bool SymbolicHeader::equals(const SymbolicValue* other) const {
         // Invalid headers are equal
         return true;
     return SymbolicStruct::equals(other);
+}
+
+void SymbolicHeader::dbprint(std::ostream& out) const {
+    out << "{ ";
+    out << "valid=>";
+    valid->dbprint(out);
+#if 0
+    for (auto f : fieldValue) {
+        out << ", ";
+        out << f.first << "=>" << f.second;
+    }
+#endif
+    out << " }";
 }
 
 SymbolicArray::SymbolicArray(const IR::Type_Stack* type, bool uninitialized,
@@ -373,6 +470,28 @@ bool SymbolicArray::equals(const SymbolicValue* other) const {
     return true;
 }
 
+bool SymbolicArray::hasUninitializedParts() const {
+    for (unsigned i=0; i < values.size(); i++)
+        if (values.at(i)->hasUninitializedParts())
+            return true;
+    return false;
+}
+
+void SymbolicArray::dbprint(std::ostream& out) const {
+    bool first = true;
+    unsigned index = 0;
+    out << "[";
+    for (auto f : values) {
+        if (!first)
+            out << ", ";
+        out << "@" << index << "=";
+        out << f;
+        first = false;
+        index++;
+    }
+    out << "]";
+}
+
 bool AnyElement::merge(const SymbolicValue*) {
     BUG("Merge should not be called on AnyElement");
     return false;
@@ -431,6 +550,13 @@ bool SymbolicTuple::equals(const SymbolicValue* other) const {
     return true;
 }
 
+bool SymbolicTuple::hasUninitializedParts() const {
+    for (unsigned i=0; i < values.size(); i++)
+        if (values.at(i)->hasUninitializedParts())
+            return true;
+    return false;
+}
+
 bool SymbolicExtern::equals(const SymbolicValue* other) const {
     if (!other->is<SymbolicExtern>())
         return false;
@@ -440,17 +566,21 @@ bool SymbolicExtern::equals(const SymbolicValue* other) const {
 bool SymbolicPacketIn::merge(const SymbolicValue* other) {
     BUG_CHECK(other->is<SymbolicPacketIn>(), "%1%: merging with non-packet", other);
     auto pv = other->to<SymbolicPacketIn>();
+    bool changes = false;
     if (minimumStreamOffset > pv->minimumStreamOffset) {
         minimumStreamOffset = pv->minimumStreamOffset;
-        return true;
+        changes = true;
+        if (pv->conservative)
+            conservative = true;
     }
-    return false;
+    return changes;
 }
 
 bool SymbolicPacketIn::equals(const SymbolicValue* other) const {
     if (!other->is<SymbolicPacketIn>())
         return false;
     auto sp = other->to<SymbolicPacketIn>();
+    // ignore the conservative flag
     return minimumStreamOffset == sp->minimumStreamOffset;
 }
 
@@ -650,6 +780,15 @@ void ExpressionEvaluator::postorder(const IR::Member* expression) {
     }
 }
 
+bool ExpressionEvaluator::preorder(const IR::ArrayIndex* expression) {
+    bool lv = evaluatingLeftValue;
+    evaluatingLeftValue = false;
+    visit(expression->left);
+    evaluatingLeftValue = lv;
+    visit(expression->right);
+    return false;  // prune
+}
+
 void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
     auto l = get(expression->left);
     auto r = get(expression->right);
@@ -685,14 +824,30 @@ void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
 }
 
 void ExpressionEvaluator::postorder(const IR::PathExpression* expression) {
+    auto type = typeMap->getType(expression, true);
     auto decl = refMap->getDeclaration(expression->path, true);
-    auto result = valueMap->get(decl);
+    SymbolicValue* result;
+    if (type->is<IR::Type_Error>())
+        result = new SymbolicEnum(type, decl->getName());
+    else
+        result = valueMap->get(decl);
     set(expression, result);
 }
 
 void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) {
     MethodCallDescription mcd(expression, refMap, typeMap);
     auto mi = mcd.instance;
+
+    for (auto arg : *expression->arguments) {
+        auto argValue = get(arg);
+        CHECK_NULL(argValue);
+        if (argValue->is<SymbolicError>()) {
+            set(expression, argValue);
+            return;
+        }
+        // TODO: check for uninitialized in arguments
+    }
+
     if (mi->is<BuiltInMethod>()) {
         auto bim = mi->to<BuiltInMethod>();
         auto base = get(bim->appliedTo);
@@ -744,13 +899,10 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                 auto arg0 = expression->arguments->at(0);
                 auto argType = typeMap->getType(arg0, true);
                 auto hdr = get(arg0);
-                if (hdr->is<SymbolicError>()) {
-                    set(expression, hdr);
-                    return;
-                }
-
                 bool fixed = factory->isFixedWidth(argType);
                 unsigned width = factory->getWidth(argType);
+                // For variable-sized objects width is the "minimum" width.
+
                 if (expression->arguments->size() == 1) {
                     // 1-argument extract method
                     if (!fixed || !argType->is<IR::Type_Header>()) {
@@ -762,12 +914,20 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                 } else {
                     BUG_CHECK(expression->arguments->size() == 2,
                               "%1%: expected 2 arguments", expression);
-                    // TODO: check first argument type more in depth
+                    // TODO: check first argument type more in depth; i.e. only
+                    // one varbit field allowed
                     if (fixed || !argType->is<IR::Type_Header>()) {
                         auto result = new SymbolicStaticError(
                             arg0, "Expected a variable-size header as argument");
                         set(expression, result);
                         return;
+                    }
+                    auto arg1 = expression->arguments->at(1);
+                    auto sz = get(arg1);
+                    if (sz->is<SymbolicInteger>()) {
+                        auto szValue = sz->to<SymbolicInteger>();
+                        if (szValue->isKnown())
+                            width = static_cast<unsigned>(szValue->constant->asInt());
                     }
                 }
 
@@ -782,6 +942,8 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                 BUG_CHECK(obj->is<SymbolicPacketIn>(), "%1%: expected a packetIn", decl);
                 auto pkt = obj->to<SymbolicPacketIn>();
                 pkt->advance(width);
+                if (!fixed)
+                    pkt->setConservative();
 
                 BUG_CHECK(hdr->is<SymbolicHeader>(), "%1%: Not a header?", hdr);
                 auto sh = hdr->to<SymbolicHeader>();

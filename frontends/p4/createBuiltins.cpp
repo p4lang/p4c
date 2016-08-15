@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -56,6 +56,13 @@ void CreateBuiltins::postorder(IR::ExpressionValue* expression) {
         expression->expression = new IR::MethodCallExpression(
             expression->expression->srcInfo, expression->expression,
             new IR::Vector<IR::Type>(), new IR::Vector<IR::Expression>());
+}
+
+void CreateBuiltins::postorder(IR::ParserState* state) {
+    if (state->selectExpression == nullptr) {
+        warning("%1%: implicit transition to `reject'", state);
+        state->selectExpression = new IR::PathExpression(IR::ParserState::reject);
+    }
 }
 
 }  // namespace P4

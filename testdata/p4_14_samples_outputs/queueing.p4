@@ -1,5 +1,5 @@
-#include "/home/mbudiu/git/p4c/p4include/core.p4"
-#include "/home/mbudiu/git/p4c/p4include/v1model.p4"
+#include "/home/cdodd/p4c/p4include/core.p4"
+#include "/home/cdodd/p4c/p4include/v1model.p4"
 
 @name("queueing_metadata_t") struct queueing_metadata_t_0 {
     bit<48> enq_timestamp;

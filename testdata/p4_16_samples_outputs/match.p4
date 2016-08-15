@@ -58,10 +58,13 @@ parser Top(packet_in b, out Parsed_headers headers) {
         }
     }
     state well_known_port {
+        transition accept;
     }
     state other_port {
+        transition accept;
     }
     state parse_udp {
+        transition accept;
     }
 }
 

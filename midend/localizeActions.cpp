@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -82,9 +82,8 @@ const IR::Node* LocalizeActions::postorder(IR::P4Control* control) {
         newDecls->push_back(toInsert);
     }
 
-    for (auto d : *control->stateful)
-        newDecls->push_back(d);
-    control->stateful = newDecls;
+    newDecls->append(*control->controlLocals);
+    control->controlLocals = newDecls;
     return control;
 }
 
@@ -164,7 +163,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
 const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
     bool changes = false;
     auto newDecls = new IR::IndexedVector<IR::Declaration>();
-    for (auto d : *control->stateful) {
+    for (auto d : *control->controlLocals) {
         newDecls->push_back(d);
         if (d->is<IR::P4Action>()) {
             // The replacement are inserted in the same place
@@ -181,7 +180,7 @@ const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
     }
 
     if (changes)
-        control->stateful = newDecls;
+        control->controlLocals = newDecls;
     return control;
 }
 

@@ -7,6 +7,7 @@ header H {
 parser P(packet_in p, out H h) {
     state start {
         p.extract(h, 32);
+        transition accept;
     }
 }
 

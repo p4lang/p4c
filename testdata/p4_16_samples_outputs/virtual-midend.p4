@@ -3,7 +3,7 @@ extern Virtual {
 }
 
 control c(inout bit<16> p) {
-    Virtual() @name("cntr") cntr_0 = {
+    @name("cntr") Virtual() cntr_0 = {
         bit<16> f(in bit<16> ix) {
             return ix + 16w1;
         }

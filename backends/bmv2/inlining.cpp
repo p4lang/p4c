@@ -37,7 +37,7 @@ const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
     workToDo = &toInline->callerToWork[orig];
     LOG1("Simple inliner " << caller);
     auto stateful = new IR::IndexedVector<IR::Declaration>();
-    for (auto s : *caller->stateful) {
+    for (auto s : *caller->controlLocals) {
         auto inst = s->to<IR::Declaration_Instance>();
         if (inst == nullptr ||
             workToDo->declToCallee.find(inst) == workToDo->declToCallee.end()) {
@@ -63,7 +63,7 @@ const IR::Node* SimpleControlsInliner::preorder(IR::P4Control* caller) {
             auto clone = callee->getNode()->apply(sp);
             if (clone == nullptr)
                 return caller;
-            for (auto i : *clone->to<IR::P4Control>()->stateful) {
+            for (auto i : *clone->to<IR::P4Control>()->controlLocals) {
                 if (stateful->getDeclaration(i->name) == nullptr)
                     stateful->push_back(i);
             }
@@ -85,10 +85,10 @@ const IR::Node* SimpleControlsInliner::preorder(IR::MethodCallStatement* stateme
     if (workToDo == nullptr)
         return statement;
     auto orig = getOriginal<IR::MethodCallStatement>();
-    if (workToDo->callToinstance.find(orig) == workToDo->callToinstance.end())
+    if (workToDo->callToInstance.find(orig) == workToDo->callToInstance.end())
         return statement;
     LOG1("Inlining invocation " << orig);
-    auto decl = workToDo->callToinstance[orig];
+    auto decl = workToDo->callToInstance[orig];
     CHECK_NULL(decl);
     prune();
     return workToDo->declToCallee[decl]->to<IR::P4Control>()->body;

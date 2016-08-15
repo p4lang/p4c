@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@ limitations under the License.
 #include "core.p4"
 
 struct EthernetHeader { bit<16> etherType; }
-struct IPv4          { bit<16> protocol; } 
-struct Packet_header { 
+struct IPv4          { bit<16> protocol; }
+struct Packet_header {
     EthernetHeader ethernet;
-    IPv4           ipv4; 
+    IPv4           ipv4;
 }
 
 parser EthernetParser(packet_in b,
                       out EthernetHeader h)
-{ state start {} }
+{ state start { transition accept; } }
 
-parser GenericParser(packet_in b, 
+parser GenericParser(packet_in b,
                      out Packet_header p)(bool udpSupport)
-{ 
+{
     EthernetParser() ethParser;
 
     state start {
@@ -52,7 +52,9 @@ parser GenericParser(packet_in b,
         }
     }
     state udp {
-         // ...
+        transition accept;
     }
-    state tcp { }
+    state tcp {
+        transition accept;
+    }
 }

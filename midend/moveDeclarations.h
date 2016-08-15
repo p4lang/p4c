@@ -27,9 +27,10 @@ namespace P4 {
 class ResetHeaders : public Transform {
     const TypeMap* typeMap;
 
-    void generateResets(const IR::Type* type, const IR::Expression* expr,
-                        IR::Vector<IR::StatOrDecl>* resets);
  public:
+    static void generateResets(
+        const TypeMap* typeMap, const IR::Type* type,
+        const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets);
     explicit ResetHeaders(const TypeMap* typeMap) : typeMap(typeMap)
     { CHECK_NULL(typeMap); setName("ResetHeaders"); }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
@@ -70,6 +71,22 @@ class MoveDeclarations : public Transform {
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* decl) override;
+};
+
+// Run after MoveDeclarations.
+// Some variable declarations in the "local" section of a parser and control
+// may still have initializers; these are moved into the start state,
+// and to the beginning of the apply body repectively.
+class MoveInitializers : public Transform {
+    IR::IndexedVector<IR::StatOrDecl> *toMove;  // This contains just IR::AssignmentStatement
+
+ public:
+    MoveInitializers() {
+        setName("MoveInitializers");
+        toMove = new IR::IndexedVector<IR::StatOrDecl>(); }
+    const IR::Node* postorder(IR::Declaration_Variable* decl) override;
+    const IR::Node* postorder(IR::ParserState* state) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
 };
 
 }  // namespace P4

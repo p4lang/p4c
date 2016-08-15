@@ -8,10 +8,12 @@ extern void f<T>(in T arg);
 control caller() {
     bit<32> a_0;
     bit<32> b_0;
-    Generic<bit<8>>(8w9) @name("cinst.x") cinst_x;
+    bit<5> tmp;
+    @name("cinst.x") Generic<bit<8>>(8w9) cinst_x;
     action act() {
         a_0 = cinst_x.get<bit<32>>();
-        b_0 = (bit<32>)(cinst_x.get1<bit<5>, bit<10>>(10w0, 5w0));
+        tmp = cinst_x.get1<bit<5>, bit<10>>(10w0, 5w0);
+        b_0 = (bit<32>)tmp;
         f<bit<32>>(b_0);
     }
     table tbl_act() {

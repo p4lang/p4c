@@ -306,6 +306,11 @@ template<typename T, class... Args>
 auto bug_helper(boost::format& f, std::string message, std::string position,
                 std::string tail, const T *t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
+    if (t == nullptr) {
+        return bug_helper(f, message, position,
+                          tail, std::forward<Args>(args)...);
+    }
+
     cstring posString = t->getSourceInfo().toPositionString();
     if (position.empty()) {
         position = posString;

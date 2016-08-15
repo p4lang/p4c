@@ -90,7 +90,9 @@ extern action_profile {
 
 enum HashAlgorithm {
     crc32,
+    crc32_custom,
     crc16,
+    crc16_custom,
     random,
     identity
 }

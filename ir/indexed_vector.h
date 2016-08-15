@@ -78,7 +78,7 @@ class IndexedVector : public Vector<T> {
     explicit IndexedVector(const Vector<T> &a) {
         insert(typename Vector<T>::end(), a.begin(), a.end()); }
 
-    void clear() { typename Vector<T>::clear(); declarations.clear(); }
+    void clear() { IR::Vector<T>::clear(); declarations.clear(); }
     // Although this is not a const_iterator, it should NOT
     // be used to modify the vector directly.  I don't know
     // how to enforce this property, though.

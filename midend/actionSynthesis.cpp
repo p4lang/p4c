@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statemen
 const IR::Node* MoveActionsToTables::postorder(IR::P4Control* control) {
     if (tables.empty())
         return control;
-    auto nm = new IR::IndexedVector<IR::Declaration>(*control->stateful);
+    auto nm = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
     for (auto t : tables)
         nm->push_back(t);
     auto result = new IR::P4Control(control->srcInfo, control->name,
@@ -122,7 +122,7 @@ bool SynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
 const IR::Node* SynthesizeActions::postorder(IR::P4Control* control) {
     if (actions.empty())
         return control;
-    auto nm = new IR::IndexedVector<IR::Declaration>(*control->stateful);
+    auto nm = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
     for (auto a : actions)
         nm->push_back(a);
     auto result = new IR::P4Control(control->srcInfo, control->name,

@@ -22,6 +22,7 @@ header H {
 parser P(packet_in p, out H h) {
     state start {
         p.extract(h, 32);  // error: not a variable-sized header
+        transition accept;
     }
 }
 

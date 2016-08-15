@@ -20,5 +20,5 @@ parser p()
     // no type arguments
     X() x;
 
-    state start {}
+    state start { transition accept; }
 }

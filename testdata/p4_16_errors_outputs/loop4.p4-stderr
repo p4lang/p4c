@@ -1,0 +1,4 @@
+error: Parser cycle cannot be unrolled:
+Parser P state chain: start, start, start
+error: 1 errors encountered, aborting compilation
+error: 2 errors encountered, aborting compilation

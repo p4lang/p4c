@@ -9,12 +9,13 @@ error {
     NoMatch,
     EmptyStack,
     FullStack,
-    OverwritingHeader
+    OverwritingHeader,
+    HeaderTooShort
 }
 
 extern packet_in {
     void extract<T>(out T hdr);
-    void extract<T>(out T variableSizeHeader, in bit<32> sizeInBits);
+    void extract<T>(out T variableSizeHeader, in bit<32> variableFieldSizeInBits);
     T lookahead<T>();
     void advance(in bit<32> sizeInBits);
     bit<32> length();
@@ -46,8 +47,8 @@ extern hash_table {
 parser parse<H>(packet_in packet, out H headers);
 control filter<H>(inout H headers, out bool accept);
 package ebpfFilter<H>(parse<H> prs, filter<H> filt);
-typedef bit<48> @ethernetaddress EthernetAddress;
-typedef bit<32> @ipv4address IPv4Address;
+@ethernetaddress typedef bit<48> EthernetAddress;
+@ipv4address typedef bit<32> IPv4Address;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;

@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "substitution.h"
 #include "substitutionVisitor.h"
+#include "typeMap.h"
 
 namespace P4 {
 bool TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* substitution) {
@@ -63,7 +64,8 @@ void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* oth
     CHECK_NULL(other);
     for (auto v : other->binding) {
         auto find = binding.find(v.first);
-        if (find != binding.end() && find->second != v.second)
+        if (find != binding.end() &&
+            !TypeMap::equivalent(find->second, v.second))
             BUG("Changing binding for %1% from %2% to %3%",
                 v.first, find->second, v.second);
         else

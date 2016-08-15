@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ header Hdr {
     bit<8> size;
     @length((bit<32>)size)// legal: declares width of ‘data0’
     varbit<256> data0;
-    
+
     //@length(data0)      // illegal: expression is not bit<32>
     varbit<12> data1;
 
@@ -44,15 +44,18 @@ struct Ph_t {
 
 parser P(packet_in b, out Ph_t p)
 {
-    state start {}
-    
+    state start {
+        transition pv;
+    }
+
     //...
     state pv {
         b.extract(p.h);
         transition next;
     }
-    
+
     state next {
+        transition accept;
     }
 }
 
@@ -71,6 +74,7 @@ struct Ph1_t {
 parser P1(packet_in b, out Ph1_t p)
 {
     state start {
+        transition pv;
     }
 
     //...
@@ -84,5 +88,6 @@ parser P1(packet_in b, out Ph1_t p)
     }
     //...
     state next {
+        transition accept;
     }
 }

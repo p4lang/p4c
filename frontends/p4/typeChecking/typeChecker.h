@@ -102,8 +102,7 @@ class TypeInference : public Transform {
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
     bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
 
-    // converts each type to a canonical pointer,
-    // so we can check just pointer equality in the map
+    // Converts each type to a canonical representation.
     const IR::Type* canonicalize(const IR::Type* type);
     const IR::IndexedVector<IR::StructField>* canonicalizeFields(const IR::Type_StructLike* type);
     const IR::ParameterList* canonicalize(const IR::ParameterList* params);

@@ -58,12 +58,14 @@ struct Ph_t {
 
 parser P(packet_in b, out Ph_t p) {
     state start {
+        transition pv;
     }
     state pv {
         b.extract<Hdr_h>(p.h);
         transition next;
     }
     state next {
+        transition accept;
     }
 }
 
@@ -82,6 +84,7 @@ struct Ph1_t {
 
 parser P1(packet_in b, out Ph1_t p) {
     state start {
+        transition pv;
     }
     state pv {
         b.extract<Hdr_top_h>(p.htop);
@@ -92,6 +95,7 @@ parser P1(packet_in b, out Ph1_t p) {
         transition next;
     }
     state next {
+        transition accept;
     }
 }
 

@@ -1,5 +1,6 @@
 parser p1_0(in bit<2> a) {
     state start {
+        transition accept;
     }
 }
 

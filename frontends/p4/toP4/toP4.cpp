@@ -969,7 +969,7 @@ bool ToP4::preorder(const IR::P4Control * c) {
         visit(c->constructorParams);
     builder.spc();
     builder.blockStart();
-    for (auto s : *c->stateful) {
+    for (auto s : *c->controlLocals) {
         builder.emitIndent();
         visit(s);
         builder.newline();
@@ -1045,7 +1045,7 @@ bool ToP4::preorder(const IR::P4Parser * c) {
     builder.spc();
     builder.blockStart();
     setVecSep("\n", "\n");
-    visit(c->stateful);
+    visit(c->parserLocals);
     doneVec();
     // explicit visit of parser states
     for (auto s : *c->states) {

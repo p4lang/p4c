@@ -9,12 +9,13 @@ error {
     NoMatch,
     EmptyStack,
     FullStack,
-    OverwritingHeader
+    OverwritingHeader,
+    HeaderTooShort
 }
 
 extern packet_in {
     void extract<T>(out T hdr);
-    void extract<T>(out T variableSizeHeader, in bit<32> sizeInBits);
+    void extract<T>(out T variableSizeHeader, in bit<32> variableFieldSizeInBits);
     T lookahead<T>();
     void advance(in bit<32> sizeInBits);
     bit<32> length();
@@ -87,7 +88,9 @@ extern action_profile {
 
 enum HashAlgorithm {
     crc32,
+    crc32_custom,
     crc16,
+    crc16_custom,
     random,
     identity
 }
@@ -191,6 +194,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<64> tmp;
     @name("parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
         meta.meta.if_index = hdr.cpu_header.if_index;
@@ -221,7 +225,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name("start") state start {
         meta.meta.if_index = (bit<8>)standard_metadata.ingress_port;
-        transition select((packet.lookahead<bit<64>>())[63:0]) {
+        tmp = packet.lookahead<bit<64>>();
+        transition select(tmp[63:0]) {
             64w0: parse_cpu_header;
             default: parse_ethernet;
         }
@@ -444,31 +449,53 @@ struct struct_2 {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Checksum16() @name("ipv4_checksum") ipv4_checksum_0;
-    Checksum16() @name("tcp_checksum") tcp_checksum_0;
+    bit<16> tmp_0;
+    bit<16> tmp_1;
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
+    @name("tcp_checksum") Checksum16() tcp_checksum_0;
     action act() {
         mark_to_drop();
     }
     action act_0() {
+        tmp_0 = ipv4_checksum_0.get<struct_1>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+    }
+    action act_1() {
         mark_to_drop();
     }
-    table tbl_act() {
-        actions = {
-            act();
-        }
-        const default_action = act();
+    action act_2() {
+        tmp_1 = tcp_checksum_0.get<struct_2>({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr });
     }
-    table tbl_act_0() {
+    table tbl_act() {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
+    table tbl_act_0() {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
+    table tbl_act_1() {
+        actions = {
+            act_2();
+        }
+        const default_action = act_2();
+    }
+    table tbl_act_2() {
+        actions = {
+            act_1();
+        }
+        const default_action = act_1();
+    }
     apply {
-        if (hdr.ipv4.hdrChecksum == (ipv4_checksum_0.get<struct_1>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
-            tbl_act.apply();
-        if (hdr.tcp.isValid() && hdr.tcp.checksum == (tcp_checksum_0.get<struct_2>({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr }))) 
+        tbl_act.apply();
+        if (hdr.ipv4.hdrChecksum == tmp_0) 
             tbl_act_0.apply();
+        tbl_act_1.apply();
+        if (hdr.tcp.isValid() && hdr.tcp.checksum == tmp_1) 
+            tbl_act_2.apply();
     }
 }
 
@@ -504,30 +531,30 @@ struct struct_4 {
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Checksum16() @name("ipv4_checksum") ipv4_checksum_1;
-    Checksum16() @name("tcp_checksum") tcp_checksum_1;
-    action act_1() {
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
+    @name("tcp_checksum") Checksum16() tcp_checksum_1;
+    action act_3() {
         hdr.tcp.checksum = tcp_checksum_1.get<struct_4>({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr });
     }
-    action act_2() {
+    action act_4() {
         hdr.ipv4.hdrChecksum = ipv4_checksum_1.get<struct_3>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
     }
-    table tbl_act_1() {
+    table tbl_act_3() {
         actions = {
-            act_2();
+            act_4();
         }
-        const default_action = act_2();
+        const default_action = act_4();
     }
-    table tbl_act_2() {
+    table tbl_act_4() {
         actions = {
-            act_1();
+            act_3();
         }
-        const default_action = act_1();
+        const default_action = act_3();
     }
     apply {
-        tbl_act_1.apply();
+        tbl_act_3.apply();
         if (hdr.tcp.isValid()) 
-            tbl_act_2.apply();
+            tbl_act_4.apply();
     }
 }
 

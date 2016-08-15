@@ -24,8 +24,10 @@ parser p() {
         b_0 = stack_0.next;
         stack_0.push_front(2);
         stack_0.pop_front(2);
+        transition accept;
     }
 }
 
-package top(p par);
+parser Simple();
+package top(Simple par);
 top(p()) main;

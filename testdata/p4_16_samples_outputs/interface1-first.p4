@@ -8,6 +8,7 @@ parser p() {
     X<int<32>>() x;
     Y() y;
     state start {
+        transition accept;
     }
 }
 

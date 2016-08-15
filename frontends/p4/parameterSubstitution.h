@@ -37,13 +37,13 @@ class ParameterSubstitution {
     std::map<cstring, const IR::Parameter*>  parametersByName;
     std::vector<const IR::Parameter*>        parameters;
 
-    const IR::Expression* lookupName(cstring name) const
-    { return get(parameterValues, name); }
-
     bool containsName(cstring name) const
     { return parameterValues.find(name) != parameterValues.end(); }
 
  public:
+    ParameterSubstitution() = default;
+    ParameterSubstitution(const ParameterSubstitution& other) = default;
+
     void add(const IR::Parameter* parameter, const IR::Expression* value) {
         LOG1("Mapping " << parameter << " to " << value);
         cstring name = parameter->name.name;
@@ -55,8 +55,11 @@ class ParameterSubstitution {
         parameters.push_back(parameter);
     }
 
+    const IR::Expression* lookupByName(cstring name) const
+    { return get(parameterValues, name); }
+
     const IR::Expression* lookup(const IR::Parameter* param) const
-    { return lookupName(param->name.name); }
+    { return lookupByName(param->name.name); }
 
     bool contains(const IR::Parameter* param) const {
         if (!containsName(param->name.name))
@@ -89,7 +92,7 @@ class ParameterSubstitution {
 
     void dbprint(std::ostream& out) const {
         for (auto s : parametersByName)
-            out << s.second << "=>" << lookupName(s.first) << std::endl;
+            out << s.second << "=>" << lookupByName(s.first) << std::endl;
     }
 };
 

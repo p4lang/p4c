@@ -28,9 +28,18 @@ limitations under the License.
 
 #if HAVE_LIBGC
 #include <gc/gc_cpp.h>
-#define IF_HAVE_LIBGC(X)	X
+#define IF_HAVE_LIBGC(X)    X
 #else
 #define IF_HAVE_LIBGC(X)
+#endif
+
+#ifdef setbit
+/* some broken systems define a `setbit' macro in their system header files! */
+#undef setbit
+#endif
+#ifdef clrbit
+/* some broken systems define a `clrbit' macro in their system header files! */
+#undef clrbit
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -106,7 +115,7 @@ class bitvec {
         friend class bitvec;
         nonconst_bitref(bitvec &s, int i) : bitref(s, i) {}
      public:
-        nonconst_bitref(const bitref<bitvec> &a) : bitref(a) {}
+        nonconst_bitref(const bitref<bitvec> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
         nonconst_bitref(const nonconst_bitref &a) = default;
         nonconst_bitref(nonconst_bitref &&a) = default;
         bool operator=(bool b) const {
@@ -124,7 +133,7 @@ class bitvec {
         friend class bitvec;
         const_bitref(const bitvec &s, int i) : bitref(s, i) {}
      public:
-        const_bitref(const bitref<const bitvec> &a) : bitref(a) {}
+        const_bitref(const bitref<const bitvec> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
         const_bitref(const const_bitref &a) = default;
         const_bitref(const_bitref &&a) = default;
     };

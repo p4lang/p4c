@@ -18,6 +18,7 @@ limitations under the License.
 parser P(packet_in p, out bit<32> h) {
     state start {
         p.extract(h);  // error: not a header
+        transition accept;
     }
 }
 

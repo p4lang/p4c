@@ -141,6 +141,7 @@ class Type_Void : Type_Base {
 #nodbprint
 }
 
+// This is "error" type
 class Type_Error : Type_Base {
     toString{ return "error"; }
     static Type_Error get();
@@ -328,7 +329,7 @@ class Declaration_ID : Declaration, CompileTimeValue {
 }
 
 // The type of a string literal
-class Type_String : Type {
+class Type_String : Type_Base {
 #nodbprint
     static Type_String get();
     toString{ return "string"; }

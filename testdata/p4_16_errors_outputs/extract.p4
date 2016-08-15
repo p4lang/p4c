@@ -3,6 +3,7 @@
 parser P(packet_in p, out bit<32> h) {
     state start {
         p.extract(h);
+        transition accept;
     }
 }
 

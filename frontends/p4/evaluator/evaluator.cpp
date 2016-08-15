@@ -161,7 +161,7 @@ Evaluator::processConstructor(
         auto values = evaluateArguments(arguments, current);
         if (values != nullptr) {
             block->instantiate(values);
-            for (auto a : *cont->stateful)
+            for (auto a : *cont->controlLocals)
                 visit(a);
         }
         popBlock(block);
@@ -173,7 +173,7 @@ Evaluator::processConstructor(
         auto values = evaluateArguments(arguments, current);
         if (values != nullptr) {
             block->instantiate(values);
-            for (auto a : *cont->stateful)
+            for (auto a : *cont->parserLocals)
                 visit(a);
             for (auto a : *cont->states)
                 visit(a);

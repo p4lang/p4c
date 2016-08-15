@@ -1,16 +1,18 @@
-parser p1()(bit<2> a) {
+parser p1(out bit<2> w)(bit<2> a) {
     state start {
-        bit<2> w = 2;
+        w = 2;
+        transition accept;
     }
 }
 
-parser p2()(bit<2> a) {
+parser p2(out bit<2> w)(bit<2> a) {
     p1(a) x;
     state start {
-        x.apply();
+        x.apply(w);
+        transition accept;
     }
 }
 
-parser nothing();
-package m(nothing n);
+parser simple(out bit<2> w);
+package m(simple n);
 m(p2(2w1)) main;

@@ -28,6 +28,8 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 #include "midend/parserUnroll.h"
 #include "midend/specialize.h"
+#include "midend/simplifyExpressions.h"
+#include "midend/unreachableStates.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -45,13 +47,14 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto evaluator = new P4::Evaluator(&refMap, &typeMap);
     setName("MidEnd");
 
-    // TODO: break down expression into simple parts
-    // TODO: def-use analysis
-    // TODO: parser inlining
+    // TODO: def-use analysis and related optimizations
+    // TODO: remove unnecessary parser transitions
     // TODO: parser loop unrolling
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
     addPasses({
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::UnreachableParserStates(&refMap),
         // Proper semantics for uninitialzed local variables in parser states:
         // headers must be invalidated
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
@@ -60,6 +63,10 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::UniqueNames(&refMap, isv1),
         // Move all local declarations to the beginning
         new P4::MoveDeclarations(),
+        new P4::MoveInitializers(),
+        // Simplify expressions
+        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
+        new P4::SimplifyExpressions(&refMap, &typeMap),
         new P4::ResolveReferences(&refMap, isv1),
         new P4::RemoveReturns(&refMap),
         // Move some constructor calls into temporaries
@@ -75,9 +82,9 @@ MidEnd::MidEnd(CompilerOptions& options) {
                 return nullptr;
             return root; }),
 
-        // Perform inlining for controls and parsers (parsers not yet implemented)
+        // Perform inlining for controls and parsers
         new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
-        new P4::InlineDriver(&toInline, new P4::GeneralInliner(), isv1),
+        new P4::InlineDriver(&toInline, new P4::GeneralInliner(isv1), isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         // Perform inlining for actions calling other actions
         new P4::TypeChecking(&refMap, &typeMap, false, isv1),
@@ -86,10 +93,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         new P4::SpecializeAll(&refMap, &typeMap, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-        // TODO: simplify statements and expressions.
-        // This is required for the correctness of some of the following passes.
-        // Parser loop unrolling
-        new P4::ParserUnroll(&refMap, &typeMap, isv1),
+        // Parser loop unrolling: TODO
+        // new P4::ParsersUnroll(true, &refMap, &typeMap, isv1),
         // Clone an action for each use, so we can specialize the action
         // per user (e.g., for each table or direct invocation).
         new P4::LocalizeAllActions(&refMap, isv1),

@@ -73,6 +73,9 @@ class TypeMap final : public ProgramMap {
     void addSubstitutions(const TypeVariableSubstitution* tvs);
     const IR::Type* getSubstitution(const IR::Type_Var* var)
     { return allTypeVariables.lookup(var); }
+
+    // deep structural equivalence between canonical types only.
+    static bool equivalent(const IR::Type* left, const IR::Type* right);
 };
 }  // namespace P4
 

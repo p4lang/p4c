@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ error { InvalidOptions }
 
 parser Top(packet_in b, out Parsed_headers headers) {
    state start {
-       transition parse_ipv4;   
+       transition parse_ipv4;
    }
 
    state parse_ipv4 {
@@ -60,7 +60,7 @@ parser Top(packet_in b, out Parsed_headers headers) {
    }
 
    state parse_ipv4_options {
-       b.extract(headers.ipv4options, 
+       b.extract(headers.ipv4options,
                  (bit<32>)(8w8 * ((bit<8>)headers.ipv4.ihl * 8w4 - 8w20)));
        transition select (headers.ipv4.protocol) {
           8w6     : parse_tcp;
@@ -68,7 +68,7 @@ parser Top(packet_in b, out Parsed_headers headers) {
           default : accept;
        }
    }
-   
+
    state parse_tcp {
        b.extract(headers.tcp);
        transition select (headers.tcp.port)
@@ -77,10 +77,16 @@ parser Top(packet_in b, out Parsed_headers headers) {
            default : other_port;
        }
     }
-    
-    state well_known_port {}
-    
-    state other_port {}
-    
-    state parse_udp {}
+
+    state well_known_port {
+        transition accept;
+    }
+
+    state other_port {
+        transition accept;
+    }
+
+    state parse_udp {
+        transition accept;
+    }
 }

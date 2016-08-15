@@ -11,6 +11,7 @@ parser p() {
         b = stack.next;
         stack.push_front(2);
         stack.pop_front(2);
+        transition accept;
     }
 }
 

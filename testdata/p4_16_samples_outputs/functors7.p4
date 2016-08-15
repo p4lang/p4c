@@ -1,6 +1,7 @@
 parser p1<T>(in T a) {
     state start {
         T w = a;
+        transition accept;
     }
 }
 

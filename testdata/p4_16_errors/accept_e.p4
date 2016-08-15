@@ -15,7 +15,7 @@ limitations under the License.
 */
 parser p()
 {
-    state accept {
+    state accept {  // reserved name
         transition reject;
     }
 }

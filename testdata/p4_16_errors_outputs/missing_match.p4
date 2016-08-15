@@ -9,7 +9,6 @@ control c(in bit<1> b) {
             NoAction;
         }
     }
-
     apply {
     }
 }

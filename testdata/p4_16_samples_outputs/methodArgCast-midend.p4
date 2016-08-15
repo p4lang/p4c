@@ -3,7 +3,7 @@ extern E {
 }
 
 control c() {
-    E() @name("e") e_0;
+    @name("e") E() e_0;
     action act() {
         e_0.set(32w10);
     }
