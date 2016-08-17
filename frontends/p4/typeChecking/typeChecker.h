@@ -35,7 +35,7 @@ class ClearTypeMap : public Inspector {
     TypeMap* typeMap;
  public:
     explicit ClearTypeMap(TypeMap* typeMap) :
-            typeMap(typeMap) { CHECK_NULL(typeMap); }
+            typeMap(typeMap) { CHECK_NULL(typeMap); setName("ClearTypeMap"); }
     bool preorder(const IR::P4Program* program) override {
         // Clear map only if program has not changed from last time
         // otherwise we can reuse it

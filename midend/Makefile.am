@@ -49,6 +49,8 @@ midend_SOURCES = \
 	midend/simplifyKey.cpp \
 	midend/simplifyParsers.cpp \
 	midend/simplifyParsers.h \
+	midend/simplifySelect.cpp \
+	midend/simplifySelect.h \
 	midend/specialize.h \
 	midend/specialize.cpp \
 	midend/uniqueNames.cpp \

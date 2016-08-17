@@ -56,6 +56,7 @@ class ScanParser : public Inspector {
         CHECK_NULL(state);
         CHECK_NULL(parser);
         auto reject = parser->getDeclByName(IR::ParserState::reject);
+        CHECK_NULL(reject);
         transitions->calls(state, reject->to<IR::ParserState>());
     }
 };
@@ -170,11 +171,6 @@ class CollapseChains : public Transform {
     }
 };
 
-const IR::Node* DoSimplifyParsers::preorder(IR::P4Parser* parser) {
-    SimplifyParser simpl(refMap);;
-    return parser->apply(simpl);
-}
-
 // This is invoked on each parser separately
 class SimplifyParser : public PassManager {
     CG transitions;
@@ -187,5 +183,10 @@ class SimplifyParser : public PassManager {
 };
 
 }  // namespace
+
+const IR::Node* DoSimplifyParsers::preorder(IR::P4Parser* parser) {
+    SimplifyParser simpl(refMap);;
+    return parser->apply(simpl);
+}
 
 }  // namespace P4

@@ -923,17 +923,6 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<4> tmp;
-    @name("parse_all_int_meta_value_heders") state parse_all_int_meta_value_heders {
-        packet.extract<int_switch_id_header_t>(hdr.int_switch_id_header);
-        packet.extract<int_ingress_port_id_header_t>(hdr.int_ingress_port_id_header);
-        packet.extract<int_hop_latency_header_t>(hdr.int_hop_latency_header);
-        packet.extract<int_q_occupancy_header_t>(hdr.int_q_occupancy_header);
-        packet.extract<int_ingress_tstamp_header_t>(hdr.int_ingress_tstamp_header);
-        packet.extract<int_egress_port_id_header_t>(hdr.int_egress_port_id_header);
-        packet.extract<int_q_congestion_header_t>(hdr.int_q_congestion_header);
-        packet.extract<int_egress_port_tx_utilization_header_t>(hdr.int_egress_port_tx_utilization_header);
-        transition parse_int_val;
-    }
     @name("parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
         transition select(hdr.arp_rarp.protoType) {
@@ -1124,7 +1113,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             (5w0x0, 8w0x0): accept;
             (5w0x0 &&& 5w0xf, 8w0x0 &&& 8w0x0): parse_int_val;
             default: accept;
-            default: parse_all_int_meta_value_heders;
         }
     }
     @name("parse_int_val") state parse_int_val {

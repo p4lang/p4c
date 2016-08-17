@@ -31,6 +31,7 @@ limitations under the License.
 #include "midend/simplifyExpressions.h"
 #include "midend/simplifyParsers.h"
 #include "midend/resetHeaders.h"
+#include "midend/simplifySelect.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -48,9 +49,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
     setName("MidEnd");
 
     // TODO: def-use analysis and related optimizations
-    // TODO: remove unnecessary parser transitions
-    // TODO: detect labels after default in select expressions
     // TODO: parser loop unrolling
+    // TODO: improve copy propagation
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
     addPasses({
@@ -86,6 +86,8 @@ MidEnd::MidEnd(CompilerOptions& options) {
                             new P4::NonLeftValue(&refMap, &typeMap)),
         new P4::RemoveExits(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap, isv1),
+        new P4::SimplifySelect(&refMap, &typeMap, isv1, false),  // non-constant keysets
+        new P4::SimplifyParsers(&refMap, isv1),
         new P4::StrengthReduction(),
         new P4::LocalCopyPropagation(&refMap, &typeMap, isv1),
         new P4::MoveDeclarations(),  // more may have been introduced

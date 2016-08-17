@@ -1,0 +1,72 @@
+/*
+Copyright 2016 VMware, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#include "simplifySelect.h"
+#include "frontends/p4/enumInstance.h"
+
+namespace P4 {
+
+void DoSimplifySelect::checkSimpleConstant(const IR::Expression* expr) const {
+    CHECK_NULL(expr);
+    if (expr->is<IR::Constant>())
+        return;
+    if (expr->is<IR::BoolLiteral>())
+        return;
+    if (expr->is<IR::Mask>()) {
+        auto mask = expr->to<IR::Mask>();
+        checkSimpleConstant(mask->left);
+        checkSimpleConstant(mask->right);
+    }
+    if (expr->is<IR::ListExpression>()) {
+        auto list = expr->to<IR::ListExpression>();
+        for (auto e : *list->components)
+            checkSimpleConstant(e);
+    }
+    auto ei = EnumInstance::resolve(expr, typeMap);
+    if (ei != nullptr)
+        return;
+    ::error("%1%: must be a compile-time constant", expr);
+}
+
+const IR::Node* DoSimplifySelect::preorder(IR::SelectExpression* expression) {
+    IR::Vector<IR::SelectCase> cases;
+
+    bool seenDefault = false;
+    bool changes = false;
+    for (auto c : expression->selectCases) {
+        if (seenDefault) {
+            ::warning("%1%: unreachable", c);
+            changes = true;
+            continue;
+        }
+        cases.push_back(c);
+        if (c->keyset->is<IR::DefaultExpression>())
+            seenDefault = true;
+        if (requireConstants)
+            checkSimpleConstant(c->keyset);
+    }
+    if (changes) {
+        if (cases.size() == 1) {
+            // just one default label
+            ::warning("%1%: transition does not depend on select argument", expression->select);
+            return cases.at(0)->state;
+        }
+        expression->selectCases = std::move(cases);
+    }
+    return expression;
+}
+
+}  // namespace P4

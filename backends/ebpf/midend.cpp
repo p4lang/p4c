@@ -29,6 +29,7 @@ limitations under the License.
 #include "midend/simplifyParsers.h"
 #include "midend/resetHeaders.h"
 #include "midend/simplifyKey.h"
+#include "midend/simplifySelect.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -88,6 +89,8 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
                             new P4::NonLeftValue(&refMap, &typeMap)),
         new P4::RemoveExits(&refMap, &typeMap, isv1),
         new P4::ConstantFolding(&refMap, &typeMap, isv1),
+        new P4::SimplifySelect(&refMap, &typeMap, isv1, false),  // accept non-constant keysets
+        new P4::SimplifyParsers(&refMap, isv1),
         new P4::StrengthReduction(),
         new P4::LocalCopyPropagation(&refMap, &typeMap, isv1),
         new P4::MoveDeclarations(),  // more may have been introduced

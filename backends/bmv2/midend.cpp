@@ -32,6 +32,7 @@ limitations under the License.
 #include "midend/simplifyExpressions.h"
 #include "midend/simplifyParsers.h"
 #include "midend/resetHeaders.h"
+#include "midend/simplifySelect.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -47,14 +48,12 @@ namespace BMV2 {
 
 void MidEnd::setup_for_P4_14(CompilerOptions&) {
     bool isv1 = true;
-    auto evaluator = new P4::Evaluator(&refMap, &typeMap);
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
 
     // Inlining is simpler for P4 v1.0/1.1 programs, so we have a
     // specialized code path, which also generates slighly nicer
     // human-readable results.
-
     addPasses({
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
         evaluator,
         new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator),
         new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap), isv1),
@@ -120,6 +119,8 @@ void MidEnd::setup_for_P4_16(CompilerOptions& options) {
                             new P4::NonLeftValue(&refMap, &typeMap)),
         new P4::ConstantFolding(&refMap, &typeMap, isv1),
         new P4::StrengthReduction(),
+        new P4::SimplifySelect(&refMap, &typeMap, isv1, true), // constant keysets
+        new P4::SimplifyParsers(&refMap, isv1),
         new P4::LocalCopyPropagation(&refMap, &typeMap, isv1),
         new P4::MoveDeclarations(),
         new P4::SimplifyControlFlow(&refMap, &typeMap, isv1),
