@@ -818,6 +818,6 @@ const IR::V1Program *parse_P4_14_file(const CompilerOptions &options, FILE *in) 
 
 static IR::Constant *constantFold(IR::Expression *a) {
     IR::Node *exp(a);
-    auto rv = exp->apply(P4::ConstantFolding(nullptr, nullptr))->to<IR::Constant>();
+    auto rv = exp->apply(P4::DoConstantFolding(nullptr, nullptr))->to<IR::Constant>();
     return rv ? new IR::Constant(rv->type, rv->value, rv->base) : nullptr;
 }

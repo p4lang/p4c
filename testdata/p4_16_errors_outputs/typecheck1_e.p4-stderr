@@ -28,4 +28,3 @@
 ../testdata/p4_16_errors/typecheck1_e.p4(36): error: Could not find type of !
         b = !b;
             ^^
-error: 10 errors encountered, aborting compilation

@@ -615,7 +615,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
     } else if (!li->isUnknown() && !ri->isUnknown()) {
         clone->left = li->constant;
         clone->right = ri->constant;
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
@@ -648,7 +648,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     if (l->is<SymbolicInteger>()) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
@@ -656,7 +656,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     } else if (l->is<SymbolicBool>()) {
         auto li = l->to<SymbolicBool>();
         clone->expr = new IR::BoolLiteral(li->value);
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
@@ -722,7 +722,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         BUG_CHECK(r->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger");
         clone->left = l->to<SymbolicInteger>()->constant;
         clone->right = r->to<SymbolicInteger>()->constant;
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
@@ -731,7 +731,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         BUG_CHECK(r->is<SymbolicBool>(), "%1%: expected an SymbolicBool");
         clone->left = new IR::BoolLiteral(l->to<SymbolicBool>()->value);
         clone->right = new IR::BoolLiteral(r->to<SymbolicBool>()->value);
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));

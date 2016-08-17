@@ -107,7 +107,7 @@ class DismantleExpression : public Transform {
 };
 }  // namespace
 
-const IR::Node* SimplifyExpressions::postorder(IR::P4Parser* parser) {
+const IR::Node* DoSimplifyExpressions::postorder(IR::P4Parser* parser) {
     if (toInsert.empty())
         return parser;
     auto locals = new IR::IndexedVector<IR::Declaration>(*parser->parserLocals);
@@ -117,7 +117,7 @@ const IR::Node* SimplifyExpressions::postorder(IR::P4Parser* parser) {
     return parser;
 }
 
-const IR::Node* SimplifyExpressions::postorder(IR::P4Control* control) {
+const IR::Node* DoSimplifyExpressions::postorder(IR::P4Control* control) {
     if (toInsert.empty())
         return control;
     auto locals = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
@@ -127,7 +127,7 @@ const IR::Node* SimplifyExpressions::postorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node* SimplifyExpressions::postorder(IR::P4Action* action) {
+const IR::Node* DoSimplifyExpressions::postorder(IR::P4Action* action) {
     if (toInsert.empty())
         return action;
     auto locals = new IR::IndexedVector<IR::StatOrDecl>();
@@ -140,7 +140,7 @@ const IR::Node* SimplifyExpressions::postorder(IR::P4Action* action) {
     return action;
 }
 
-const IR::Node* SimplifyExpressions::postorder(IR::ParserState* state) {
+const IR::Node* DoSimplifyExpressions::postorder(IR::ParserState* state) {
     if (state->selectExpression == nullptr)
         return state;
     DismantleExpression dm(refMap, typeMap);
@@ -156,7 +156,7 @@ const IR::Node* SimplifyExpressions::postorder(IR::ParserState* state) {
     return state;
 }
 
-const IR::Node* SimplifyExpressions::postorder(IR::AssignmentStatement* statement) {
+const IR::Node* DoSimplifyExpressions::postorder(IR::AssignmentStatement* statement) {
     DismantleExpression dm(refMap, typeMap);
     auto left = dm.dismantle(statement->left)->final;
     auto parts = dm.dismantle(statement->right);
@@ -175,7 +175,7 @@ const IR::Node* SimplifyExpressions::postorder(IR::AssignmentStatement* statemen
     }
 }
 
-const IR::Node* SimplifyExpressions::postorder(IR::MethodCallStatement* statement) {
+const IR::Node* DoSimplifyExpressions::postorder(IR::MethodCallStatement* statement) {
     DismantleExpression dm(refMap, typeMap);
     auto parts = dm.dismantle(statement->methodCall);
     CHECK_NULL(parts);
@@ -193,7 +193,7 @@ const IR::Node* SimplifyExpressions::postorder(IR::MethodCallStatement* statemen
     }
 }
 
-const IR::Node* SimplifyExpressions::postorder(IR::ReturnStatement* statement) {
+const IR::Node* DoSimplifyExpressions::postorder(IR::ReturnStatement* statement) {
     if (statement->expression == nullptr)
         return statement;
     DismantleExpression dm(refMap, typeMap);
@@ -208,7 +208,7 @@ const IR::Node* SimplifyExpressions::postorder(IR::ReturnStatement* statement) {
     return block;
 }
 
-const IR::Node* SimplifyExpressions::postorder(IR::IfStatement* statement) {
+const IR::Node* DoSimplifyExpressions::postorder(IR::IfStatement* statement) {
     DismantleExpression dm(refMap, typeMap);
     auto parts = dm.dismantle(statement->condition);
     CHECK_NULL(parts);
@@ -222,7 +222,7 @@ const IR::Node* SimplifyExpressions::postorder(IR::IfStatement* statement) {
     return block;
 }
 
-const IR::Node* SimplifyExpressions::postorder(IR::SwitchStatement* statement) {
+const IR::Node* DoSimplifyExpressions::postorder(IR::SwitchStatement* statement) {
     DismantleExpression dm(refMap, typeMap);
     auto parts = dm.dismantle(statement->expression);
     CHECK_NULL(parts);

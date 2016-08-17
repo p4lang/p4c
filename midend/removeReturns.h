@@ -18,8 +18,8 @@ limitations under the License.
 #define _MIDEND_REMOVERETURNS_H_
 
 #include "ir/ir.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
@@ -38,7 +38,7 @@ namespace P4 {
 //     if (!hasReturned)
 //       x = !x;
 // }}
-class RemoveReturns : public Transform {
+class DoRemoveReturns : public Transform {
  protected:
     P4::ReferenceMap* refMap;
     IR::ID            returnVar;  // one for each context
@@ -57,9 +57,9 @@ class RemoveReturns : public Transform {
     Returns hasReturned() { BUG_CHECK(!stack.empty(), "Empty stack"); return stack.back(); }
 
  public:
-    explicit RemoveReturns(P4::ReferenceMap* refMap, cstring varName = "hasReturned") :
+    explicit DoRemoveReturns(P4::ReferenceMap* refMap, cstring varName = "hasReturned") :
             refMap(refMap), variableName(varName)
-    { visitDagOnce = false; CHECK_NULL(refMap); setName("RemoveReturns"); }
+    { visitDagOnce = false; CHECK_NULL(refMap); setName("DoRemoveReturns"); }
 
     const IR::Node* preorder(IR::Function* function) override
     { prune(); return function; }  // We leave returns in functions alone
@@ -82,15 +82,15 @@ class RemoveReturns : public Transform {
 // (E.g., it does not handle:
 // if (t1.apply().hit && t2.apply().hit) { ... }
 // It also assumes that there are no global actions and that action calls have been inlined.
-class RemoveExits : public RemoveReturns {
+class DoRemoveExits : public DoRemoveReturns {
     const TypeMap* typeMap;
     // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
     std::set<const IR::Node*> callsExit;  // actions, tables
     void callExit(const IR::Node* node);
  public:
-    RemoveExits(ReferenceMap* refMap, const TypeMap* typeMap) :
-            RemoveReturns(refMap, "hasExited"), typeMap(typeMap)
-    { visitDagOnce = false; CHECK_NULL(typeMap); setName("RemoveExits"); }
+    DoRemoveExits(ReferenceMap* refMap, const TypeMap* typeMap) :
+            DoRemoveReturns(refMap, "hasExited"), typeMap(typeMap)
+    { visitDagOnce = false; CHECK_NULL(typeMap); setName("DoRemoveExits"); }
 
     const IR::Node* preorder(IR::ExitStatement* action) override;
     const IR::Node* preorder(IR::P4Table* table) override;
@@ -103,6 +103,24 @@ class RemoveExits : public RemoveReturns {
 
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::P4Control* control) override;
+};
+
+class RemoveReturns : public PassManager {
+ public:
+    RemoveReturns(ReferenceMap* refMap, bool isv1) {
+        passes.push_back(new ResolveReferences(refMap, isv1));
+        passes.push_back(new DoRemoveReturns(refMap));
+        setName("RemoveReturns");
+    }
+};
+
+class RemoveExits : public PassManager {
+ public:
+    RemoveExits(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+        passes.push_back(new DoRemoveExits(refMap, typeMap));
+        setName("RemoveExits");
+    }
 };
 
 }  // namespace P4

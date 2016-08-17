@@ -168,7 +168,7 @@ class RewriteAllParsers : public Transform {
 class ParsersUnroll : public PassManager {
  public:
     ParsersUnroll(bool unroll, ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-        passes.push_back(new TypeChecking(refMap, typeMap, false, isv1));
+        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
         passes.push_back(new RewriteAllParsers(refMap, typeMap, unroll));
         setName("ParsersUnroll");
     }

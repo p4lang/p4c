@@ -456,7 +456,7 @@ Converter::Converter() {
     setStopOnError(true);
 
     // Discover types using P4 v1.1 type-checker
-    passes.emplace_back(new P4::ConstantFolding(nullptr, nullptr));
+    passes.emplace_back(new P4::DoConstantFolding(nullptr, nullptr));
     passes.emplace_back(new CheckHeaderTypes);
     passes.emplace_back(new TypeCheck);
     // Convert

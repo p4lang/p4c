@@ -24,6 +24,7 @@ limitations under the License.
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "midend/moveDeclarations.h"
+#include "midend/resetHeaders.h"
 
 namespace P4 {
 
@@ -304,7 +305,7 @@ bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
 
 Visitor::profile_t GeneralInliner::init_apply(const IR::Node* node) {
     ResolveReferences solver(refMap, true);
-    TypeChecking typeChecker(refMap, typeMap, false, isv1);
+    TypeChecking typeChecker(refMap, typeMap, isv1);
     node->apply(solver);
     (void)node->apply(typeChecker);
     return AbstractInliner::init_apply(node);
@@ -413,7 +414,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
             auto expr = substs->paramSubst.lookupByName(param->name);
             auto paramType = typeMap->getType(param, true);
             // This is important, since this variable may be used many times.
-            ResetHeaders::generateResets(typeMap, paramType, expr, body);
+            DoResetHeaders::generateResets(typeMap, paramType, expr, body);
         } else if (param->direction == IR::Direction::None) {
             substs->paramSubst.add(param, initializer);
         }
@@ -556,7 +557,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
                 auto expr = substs->paramSubst.lookupByName(param->name);
                 auto paramType = typeMap->getType(param, true);
                 // This is important, since this variable may be used many times.
-                ResetHeaders::generateResets(typeMap, paramType, expr, current);
+                DoResetHeaders::generateResets(typeMap, paramType, expr, current);
             } else if (param->direction == IR::Direction::None) {
                 substs->paramSubst.add(param, initializer);
             }

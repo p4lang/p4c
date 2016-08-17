@@ -18,7 +18,7 @@ limitations under the License.
 #define _MIDEND_ACTIONSYNTHESIS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
@@ -37,15 +37,15 @@ namespace P4 {
 //   apply { _tmp.apply(); }
 // }
 // For this to work all variable declarations must have been moved to the beginning.
-class MoveActionsToTables : public Transform {
+class DoMoveActionsToTables : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
     std::vector<const IR::P4Table*> tables;  // inserted tables
 
  public:
-    MoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap)
+    DoMoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap)
             : refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("MoveActionsToTables"); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoMoveActionsToTables"); }
     const IR::Node* preorder(IR::P4Parser* parser) override
     { prune(); return parser; }
     const IR::Node* postorder(IR::P4Control* control) override;
@@ -67,7 +67,7 @@ class MoveActionsToTables : public Transform {
 //    apply { act(); }
 // }
 // For this to work all variable declarations must have been moved to the beginning.
-class SynthesizeActions : public Transform {
+class DoSynthesizeActions : public Transform {
     ReferenceMap* refMap;
     const TypeMap*      typeMap;
     std::vector<const IR::P4Action*> actions;  // inserted actions
@@ -80,9 +80,9 @@ class SynthesizeActions : public Transform {
 
     // If moveEmits is true, move emit statements to actions, else
     // leave them in control blocks.
-    SynthesizeActions(ReferenceMap* refMap, const TypeMap* typeMap, bool moveEmits = false) :
+    DoSynthesizeActions(ReferenceMap* refMap, const TypeMap* typeMap, bool moveEmits = false) :
             refMap(refMap), typeMap(typeMap), moveEmits(moveEmits)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("SynthesizeActions"); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoSynthesizeActions"); }
     const IR::Node* preorder(IR::P4Parser* parser) override
     { prune(); return parser; }
     const IR::Node* postorder(IR::P4Control* control) override;
@@ -98,6 +98,24 @@ class SynthesizeActions : public Transform {
 
  protected:
     const IR::Statement* createAction(const IR::Statement* body);
+};
+
+class SynthesizeActions : public PassManager {
+ public:
+    SynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+        passes.push_back(new DoSynthesizeActions(refMap, typeMap));
+        setName("SynthesizeActions");
+    }
+};
+
+class MoveActionsToTables : public PassManager {
+ public:
+    MoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+        passes.push_back(new DoMoveActionsToTables(refMap, typeMap));
+        setName("MoveActionsToTables");
+    }
 };
 
 }  // namespace P4

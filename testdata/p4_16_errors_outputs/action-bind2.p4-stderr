@@ -10,4 +10,3 @@
 ../testdata/p4_16_errors/action-bind2.p4(22): error: Action for ExpressionValue has some unbound arguments
         default_action = a(0);
                          ^^^^
-error: 3 errors encountered, aborting compilation

@@ -31,4 +31,3 @@ header h {}
 ../testdata/p4_16_errors/generic1_e.p4(36): error: Could not find type of h<...>
         h<bit> x;
         ^^^^^^
-error: 7 errors encountered, aborting compilation

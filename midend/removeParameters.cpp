@@ -356,7 +356,7 @@ const IR::Node* RemoveActionParameters::postorder(IR::MethodCallExpression* expr
 RemoveParameters::RemoveParameters(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
     setName("RemoveParameters");
     auto ai = new ActionInvocation();
-    passes.emplace_back(new TypeChecking(refMap, typeMap, false, isv1));
+    passes.emplace_back(new TypeChecking(refMap, typeMap, isv1));
     passes.emplace_back(new RemoveTableParameters(refMap, typeMap));
     // This is needed because of this case:
     // action a(inout x) { x = x + 1 }
@@ -367,7 +367,8 @@ RemoveParameters::RemoveParameters(ReferenceMap* refMap, TypeMap* typeMap, bool 
     // bit<32> w;
     // table t() { actions = a(); ... }
     passes.emplace_back(new MoveDeclarations());
-    passes.emplace_back(new TypeChecking(refMap, typeMap, true, isv1));
+    passes.emplace_back(new ClearTypeMap(typeMap));
+    passes.emplace_back(new TypeChecking(refMap, typeMap, isv1));
     passes.emplace_back(new FindActionParameters(refMap, typeMap, ai));
     passes.emplace_back(new RemoveActionParameters(ai));
 }

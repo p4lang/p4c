@@ -18,7 +18,7 @@ limitations under the License.
 #define _MIDEND_CONVERTENUMS_H_
 
 #include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
@@ -49,17 +49,27 @@ class EnumRepresentation {
     { return ::get(repr, decl); }
 };
 
-class ConvertEnums : public Transform {
+class DoConvertEnums : public Transform {
     std::map<const IR::Type_Enum*, EnumRepresentation*> repr;
     ChooseEnumRepresentation* policy;
     TypeMap* typeMap;
  public:
-    ConvertEnums(ChooseEnumRepresentation* policy, TypeMap* typeMap)
+    DoConvertEnums(ChooseEnumRepresentation* policy, TypeMap* typeMap)
             : policy(policy), typeMap(typeMap)
-    { CHECK_NULL(policy); CHECK_NULL(typeMap); setName("ConvertEnums"); }
+    { CHECK_NULL(policy); CHECK_NULL(typeMap); setName("DoConvertEnums"); }
     const IR::Node* preorder(IR::Type_Enum* type) override;
     const IR::Node* postorder(IR::Type_Name* type) override;
     const IR::Node* postorder(IR::Member* expression) override;
+};
+
+class ConvertEnums : public PassManager {
+ public:
+    ConvertEnums(ReferenceMap* refMap, TypeMap* typeMap, bool isv1,
+                 ChooseEnumRepresentation* policy) {
+        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+        passes.push_back(new DoConvertEnums(policy, typeMap));
+        setName("ConvertEnums");
+    }
 };
 
 }  // namespace P4

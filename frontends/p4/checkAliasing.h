@@ -2,19 +2,27 @@
 #define _FRONTENDS_P4_CHECKALIASING_H_
 
 #include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
-class CheckAliasing : public Inspector {
+class DoCheckAliasing : public Inspector {
     const ReferenceMap* refMap;
     const TypeMap*      typeMap;
  public:
-    CheckAliasing(const ReferenceMap* refMap, const TypeMap* typeMap) :
+    DoCheckAliasing(const ReferenceMap* refMap, const TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("CheckAliasing"); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoCheckAliasing"); }
     bool preorder(const IR::MethodCallExpression* expression) override;
+};
+
+class CheckAliasing : public PassManager {
+ public:
+    CheckAliasing(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, isv1));
+        passes.push_back(new DoCheckAliasing(refMap, typeMap));
+        setName("CheckAliasing");
+    }
 };
 
 }  // namespace P4

@@ -18,8 +18,8 @@ limitations under the License.
 #define _MIDEND_ACTIONSINLINING_H_
 
 #include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/unusedDeclarations.h"
 
 namespace P4 {
 
@@ -131,6 +131,18 @@ class InlineActionsDriver : public Transform {
     // Not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.
     const IR::Node* preorder(IR::P4Program* program) override;
+};
+
+class InlineActions : public PassManager {
+    ActionsInlineList actionsToInline;
+ public:
+    InlineActions(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+        passes.push_back(new DiscoverActionsInlining(&actionsToInline, refMap, typeMap));
+        passes.push_back(new InlineActionsDriver(&actionsToInline, new ActionsInliner(), isv1));
+        passes.push_back(new RemoveAllUnusedDeclarations(refMap, isv1));
+        setName("InlineActions");
+    }
 };
 
 }  // namespace P4

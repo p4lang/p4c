@@ -55,9 +55,6 @@ parser P(packet_in p, out H[2] h) {
     }
     state n3 {
         x_0 = x_0 + 32w4294967295;
-        transition n4;
-    }
-    state n4 {
         p.extract<H>(h[x_0]);
         transition accept;
     }

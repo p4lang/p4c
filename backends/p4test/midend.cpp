@@ -29,10 +29,10 @@ limitations under the License.
 #include "midend/parserUnroll.h"
 #include "midend/specialize.h"
 #include "midend/simplifyExpressions.h"
-#include "midend/unreachableStates.h"
+#include "midend/simplifyParsers.h"
+#include "midend/resetHeaders.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/simplify.h"
@@ -44,87 +44,54 @@ namespace P4Test {
 
 MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
-    auto evaluator = new P4::Evaluator(&refMap, &typeMap);
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
     setName("MidEnd");
 
     // TODO: def-use analysis and related optimizations
     // TODO: remove unnecessary parser transitions
+    // TODO: detect labels after default in select expressions
     // TODO: parser loop unrolling
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
     addPasses({
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::UnreachableParserStates(&refMap),
-        // Proper semantics for uninitialzed local variables in parser states:
-        // headers must be invalidated
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::ResetHeaders(&typeMap),
-        // Give each local declaration a unique internal name
-        new P4::UniqueNames(&refMap, isv1),
-        // Move all local declarations to the beginning
-        new P4::MoveDeclarations(),
+        new P4::SimplifyParsers(&refMap, isv1),
+        new P4::ResetHeaders(&refMap, &typeMap, isv1),
+        new P4::UniqueNames(&refMap, isv1),  // Give each local declaration a unique internal name
+        new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new P4::MoveInitializers(),
-        // Simplify expressions
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::SimplifyExpressions(&refMap, &typeMap),
-        new P4::ResolveReferences(&refMap, isv1),
-        new P4::RemoveReturns(&refMap),
-        // Move some constructor calls into temporaries
+        new P4::SimplifyExpressions(&refMap, &typeMap, isv1),
+        new P4::RemoveReturns(&refMap, isv1),
         new P4::MoveConstructors(&refMap, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-        new P4::TypeChecking(&refMap, &typeMap, true, isv1),
+        new P4::ClearTypeMap(&typeMap),
         evaluator,
-
         new VisitFunctor([evaluator](const IR::Node *root) -> const IR::Node * {
             auto toplevel = evaluator->getToplevelBlock();
             if (toplevel->getMain() == nullptr)
                 // nothing further to do
                 return nullptr;
             return root; }),
-
-        // Perform inlining for controls and parsers
-        new P4::DiscoverInlining(&toInline, &refMap, &typeMap, evaluator),
-        new P4::InlineDriver(&toInline, new P4::GeneralInliner(isv1), isv1),
-        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-        // Perform inlining for actions calling other actions
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
-        new P4::InlineActionsDriver(&actionsToInline, new P4::ActionsInliner(), isv1),
-        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        new P4::Inline(&refMap, &typeMap, evaluator, isv1),
+        new P4::InlineActions(&refMap, &typeMap, isv1),
         new P4::SpecializeAll(&refMap, &typeMap, isv1),
-        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
         // Parser loop unrolling: TODO
         // new P4::ParsersUnroll(true, &refMap, &typeMap, isv1),
-        // Clone an action for each use, so we can specialize the action
-        // per user (e.g., for each table or direct invocation).
         new P4::LocalizeAllActions(&refMap, isv1),
-        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-        // Table and action parameters also get unique names
         new P4::UniqueParameters(&refMap, isv1),
-        // Must clear types after LocalizeAllActions
-        new P4::TypeChecking(&refMap, &typeMap, true, isv1),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::ClearTypeMap(&typeMap),  // table types have changed
+        new P4::SimplifyControlFlow(&refMap, &typeMap, isv1),
         new P4::RemoveParameters(&refMap, &typeMap, isv1),
-        new P4::TypeChecking(&refMap, &typeMap, true, isv1),
-        new P4::SimplifyKey(&refMap, &typeMap,
+        new P4::ClearTypeMap(&typeMap),  // table types have changed
+        new P4::SimplifyKey(&refMap, &typeMap, isv1,
                             new P4::NonLeftValue(&refMap, &typeMap)),
-        // Exit statements are transformed into control-flow
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::RemoveExits(&refMap, &typeMap),
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::RemoveExits(&refMap, &typeMap, isv1),
+        new P4::ConstantFolding(&refMap, &typeMap, isv1),
         new P4::StrengthReduction(),
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::LocalCopyPropagation(&typeMap),
+        new P4::LocalCopyPropagation(&refMap, &typeMap, isv1),
         new P4::MoveDeclarations(),  // more may have been introduced
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
-        // Create actions for statements that can't be done in control blocks.
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::SynthesizeActions(&refMap, &typeMap),
-        // Move all stand-alone action invocations to custom tables
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::MoveActionsToTables(&refMap, &typeMap),
+        new P4::SimplifyControlFlow(&refMap, &typeMap, isv1),
+        new P4::SynthesizeActions(&refMap, &typeMap, isv1),
+        new P4::MoveActionsToTables(&refMap, &typeMap, isv1),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
     });

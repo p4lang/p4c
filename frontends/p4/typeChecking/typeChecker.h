@@ -29,25 +29,44 @@ limitations under the License.
 
 namespace P4 {
 
-// Type checking algorithm.
+// This pass only clears the typeMap if the program has changed.
+// This is needed if the types of some objects in the program change.
+class ClearTypeMap : public Inspector {
+    TypeMap* typeMap;
+ public:
+    explicit ClearTypeMap(TypeMap* typeMap) :
+            typeMap(typeMap) { CHECK_NULL(typeMap); }
+    bool preorder(const IR::P4Program* program) override {
+        // Clear map only if program has not changed from last time
+        // otherwise we can reuse it
+        if (!typeMap->checkMap(program))
+            typeMap->clear();
+        return false;  // prune()
+    }
+};
+
+// Performs together reference resolution and type checking by calling
+// TypeInference.  If updateExpressions is true, after type checking
+// it will update all Expression objects, writing the result type into
+// the Expression::type field.
+class TypeChecking : public PassManager {
+ public:
+    TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap,
+                 bool isv1, bool updateExpressions = false);
+};
+
+// Actual type checking algorithm.
+// In general this pass should not be called directly; call TypeChecking instead.
 // It is a transform because it may convert implicit casts into explicit casts.
 // But in general it operates like an Inspector; in fact, if it is instantiated
 // with readOnly = true, it will assert that the program is not changed.
 // It is expected that once a program has been type-checked and all casts have
 // been inserted it will not need to change ever again during type-checking.
-// ------------
-// The typeMap assumes that if an expression has not changed, then its type has
-// not changed.  Some program transformations actually do not maintain this invariant;
-// (e.g., renaming actions changes the type of a table.apply()).
-// After running such transformations the 'clearMap' flag should be set to true
-// to force a recomputation.
 class TypeInference : public Transform {
     // Input: reference map
     ReferenceMap* refMap;
     // Output: type map
     TypeMap* typeMap;
-    // If true clear the typeMap when starting
-    bool clearMap;
     // If true we expect to leave the program unchanged
     bool readOnly;
     // Stack: Save here method arguments count on each method visit.
@@ -58,9 +77,8 @@ class TypeInference : public Transform {
  public:
     // If readOnly=true it will assert that it behaves like
     // an Inspector.
-    // clearMap=true will clear the typeMap on start.
     TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
-                  bool clearMap = false, bool readOnly = true);
+                  bool readOnly = false);
 
  protected:
     const IR::Type* getType(const IR::Node* element) const;
@@ -259,19 +277,6 @@ class ApplyTypesToExpressions : public Transform {
  public:
     explicit ApplyTypesToExpressions(TypeMap *typeMap) : typeMap(typeMap)
     { setName("ApplyTypesToExpressions"); }
-};
-
-// Performs together reference resolution and type checking.
-// If updateExpressions is true, after type checking it will
-// update all Expression objects, writing the result type
-// into the Expression::type field.
-// 'clearMap' must be set if the pass is called a transformation
-// which may change the type of expressions even when expressions
-// do not change.
-class TypeChecking : public PassManager {
- public:
-    TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap,
-                 bool clearMap, bool isv1, bool updateExpressions = false);
 };
 
 }  // namespace P4

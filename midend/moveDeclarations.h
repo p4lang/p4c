@@ -22,20 +22,6 @@ limitations under the License.
 
 namespace P4 {
 
-// A local uninitialized variable in a parser state that represents
-// a header must be invalid every time the parser state is entered.
-class ResetHeaders : public Transform {
-    const TypeMap* typeMap;
-
- public:
-    static void generateResets(
-        const TypeMap* typeMap, const IR::Type* type,
-        const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets);
-    explicit ResetHeaders(const TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("ResetHeaders"); }
-    const IR::Node* postorder(IR::Declaration_Variable* decl) override;
-};
-
 // Moves all local declarations to the "top".
 // This can only be done safely if all declarations have different names,
 // so it has to be done after the UniqueNames pass.

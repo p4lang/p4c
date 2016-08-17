@@ -94,7 +94,7 @@ bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
 
 std::vector<const IR::CompileTimeValue*>*
 Evaluator::evaluateArguments(const IR::Vector<IR::Expression>* arguments, IR::Block* context) {
-    P4::ConstantFolding cf(refMap, nullptr);
+    P4::DoConstantFolding cf(refMap, nullptr);
     auto values = new std::vector<const IR::CompileTimeValue*>();
     pushBlock(context);
     for (auto e : *arguments) {
@@ -265,7 +265,7 @@ EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) 
     setName("Evaluator");
     evaluator = new P4::Evaluator(refMap, typeMap);
     setStopOnError(true);
-    passes.emplace_back(new P4::TypeChecking(refMap, typeMap, false, isv1));
+    passes.emplace_back(new P4::TypeChecking(refMap, typeMap, isv1));
     passes.emplace_back(evaluator);
 }
 

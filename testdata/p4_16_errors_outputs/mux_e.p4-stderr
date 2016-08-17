@@ -8,4 +8,3 @@ error: Selector of ?: must be bool, not bit<1>
 ../testdata/p4_16_errors/mux_e.p4(25): error: Could not find type of ?:
         d = d ? a : d;
             ^^^^^^^^^
-error: 4 errors encountered, aborting compilation

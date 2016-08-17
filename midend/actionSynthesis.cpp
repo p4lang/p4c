@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statement) {
+const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statement) {
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (!mi->is<ActionCall>())
         return statement;
@@ -89,7 +89,7 @@ const IR::Node* MoveActionsToTables::postorder(IR::MethodCallStatement* statemen
     return stat;
 }
 
-const IR::Node* MoveActionsToTables::postorder(IR::P4Control* control) {
+const IR::Node* DoMoveActionsToTables::postorder(IR::P4Control* control) {
     if (tables.empty())
         return control;
     auto nm = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
@@ -103,7 +103,7 @@ const IR::Node* MoveActionsToTables::postorder(IR::P4Control* control) {
 
 /////////////////////////////////////////////////////////////////////
 
-bool SynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
+bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (mi->is<ActionCall>() || mi->is<ApplyMethod>())
         return false;
@@ -119,7 +119,7 @@ bool SynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
     return true;
 }
 
-const IR::Node* SynthesizeActions::postorder(IR::P4Control* control) {
+const IR::Node* DoSynthesizeActions::postorder(IR::P4Control* control) {
     if (actions.empty())
         return control;
     auto nm = new IR::IndexedVector<IR::Declaration>(*control->controlLocals);
@@ -131,7 +131,7 @@ const IR::Node* SynthesizeActions::postorder(IR::P4Control* control) {
     return result;
 }
 
-const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
+const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
     // Find a chain of statements to convert
     auto actbody = new IR::IndexedVector<IR::StatOrDecl>();  // build here new action
     auto left = new IR::IndexedVector<IR::StatOrDecl>();  // leftover statements
@@ -174,7 +174,7 @@ const IR::Node* SynthesizeActions::preorder(IR::BlockStatement* statement) {
     return statement;
 }
 
-const IR::Statement* SynthesizeActions::createAction(const IR::Statement* toAdd) {
+const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAdd) {
     changes = true;
     auto name = refMap->newName("act");
     const IR::BlockStatement* body;
@@ -197,11 +197,11 @@ const IR::Statement* SynthesizeActions::createAction(const IR::Statement* toAdd)
     return result;
 }
 
-const IR::Node* SynthesizeActions::preorder(IR::AssignmentStatement* statement) {
+const IR::Node* DoSynthesizeActions::preorder(IR::AssignmentStatement* statement) {
     return createAction(statement);
 }
 
-const IR::Node* SynthesizeActions::preorder(IR::MethodCallStatement* statement) {
+const IR::Node* DoSynthesizeActions::preorder(IR::MethodCallStatement* statement) {
     if (mustMove(statement))
         return createAction(statement);
     return statement;

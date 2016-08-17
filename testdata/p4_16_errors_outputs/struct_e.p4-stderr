@@ -16,4 +16,3 @@ struct s {}
 ../testdata/p4_16_errors/struct_e.p4(25): error: Could not find type of b.data
         b.data = 5;
         ^^^^^^
-error: 4 errors encountered, aborting compilation

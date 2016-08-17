@@ -22,4 +22,3 @@
 ../testdata/p4_16_errors/div1.p4(21): error: Could not find type of %
     a = -5 % a;
         ^^^^^^
-error: 8 errors encountered, aborting compilation

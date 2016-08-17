@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/const1_e.p4(21): error: /: Division by zero
     x = 5 / 0;
         ^^^^^
-error: 2 errors encountered, aborting compilation

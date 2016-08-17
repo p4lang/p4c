@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/missing_match.p4(21): error: Could not find declaration for noSuchMatch
         key = { b : noSuchMatch; }
                     ^^^^^^^^^^^
-error: 1 errors encountered, aborting compilation

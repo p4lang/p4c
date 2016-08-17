@@ -23,7 +23,12 @@ limitations under the License.
 
 namespace P4 {
 
-class Evaluator final : public Inspector {
+class IHasBlock {
+ public:
+    virtual IR::ToplevelBlock* getToplevelBlock() = 0;
+};
+
+class Evaluator final : public Inspector, public IHasBlock {
     const ReferenceMap*      refMap;
     const TypeMap*           typeMap;
     std::vector<IR::Block*>  blockStack;
@@ -37,7 +42,7 @@ class Evaluator final : public Inspector {
     Evaluator(const ReferenceMap* refMap, const TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap), toplevelBlock(nullptr)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("Evaluator"); }
-    IR::ToplevelBlock* getToplevelBlock() { return toplevelBlock; }
+    IR::ToplevelBlock* getToplevelBlock() override { return toplevelBlock; }
 
     IR::Block* currentBlock() const;
     void setValue(const IR::Node* node, const IR::CompileTimeValue* constant);
@@ -71,10 +76,10 @@ class Evaluator final : public Inspector {
 };
 
 // A pass which "evaluates" the program
-class EvaluatorPass final : public PassManager {
+class EvaluatorPass final : public PassManager, public IHasBlock {
     P4::Evaluator* evaluator;
  public:
-    IR::ToplevelBlock* getToplevelBlock() { return evaluator->getToplevelBlock(); }
+    IR::ToplevelBlock* getToplevelBlock() override { return evaluator->getToplevelBlock(); }
     EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool anyOrder);
 };
 

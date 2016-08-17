@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/directionless.p4(24): error: y: direction-less action parameters have to be at the end
     action b(bit x, out bit y)
                    ^^^^^^^^^^
-error: 2 errors encountered, aborting compilation

@@ -41,15 +41,17 @@ midend_SOURCES = \
 	midend/removeReturns.h \
 	midend/removeLeftSlices.cpp \
 	midend/removeLeftSlices.h \
+	midend/resetHeaders.cpp \
+	midend/resetHeaders.h \
 	midend/simplifyExpressions.cpp \
 	midend/simplifyExpressions.h \
 	midend/simplifyKey.h \
 	midend/simplifyKey.cpp \
+	midend/simplifyParsers.cpp \
+	midend/simplifyParsers.h \
 	midend/specialize.h \
 	midend/specialize.cpp \
 	midend/uniqueNames.cpp \
-	midend/uniqueNames.h \
-	midend/unreachableStates.cpp \
-	midend/unreachableStates.h
+	midend/uniqueNames.h
 
 cpplint_FILES += $(midend_SOURCES)

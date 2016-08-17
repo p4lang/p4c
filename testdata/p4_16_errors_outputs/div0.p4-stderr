@@ -10,4 +10,3 @@
 ../testdata/p4_16_errors/div0.p4(21): error: %: Modulo by zero
     a = a % 8w0;
         ^^^^^^^
-error: 4 errors encountered, aborting compilation

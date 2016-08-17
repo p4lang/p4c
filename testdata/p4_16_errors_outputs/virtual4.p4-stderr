@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/virtual4.p4(16)
 extern Virtual {
        ^^^^^^^
-error: 1 errors encountered, aborting compilation

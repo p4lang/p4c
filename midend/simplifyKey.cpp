@@ -18,7 +18,7 @@ bool NonLeftValue::isTooComplex(const IR::Expression* expression) const {
     return true;
 }
 
-const IR::Node* SimplifyKey::postorder(IR::KeyElement* element) {
+const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
     bool doSimplify = policy->isTooComplex(element->expression);
     if (!doSimplify)
         return element;
@@ -51,7 +51,7 @@ const IR::Node* SimplifyKey::postorder(IR::KeyElement* element) {
     return element;
 }
 
-const IR::Node* SimplifyKey::postorder(IR::P4Table* table) {
+const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
     auto insertions = ::get(toInsert, getOriginal<IR::P4Table>());
     if (insertions == nullptr)
         return table;
@@ -63,7 +63,7 @@ const IR::Node* SimplifyKey::postorder(IR::P4Table* table) {
     return result;
 }
 
-const IR::Node* SimplifyKey::doStatement(const IR::Statement* statement,
+const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
                                          const IR::Expression *expression) {
     LOG1("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);

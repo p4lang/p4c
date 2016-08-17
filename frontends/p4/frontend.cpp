@@ -77,20 +77,19 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         new P4::CreateBuiltins(),
         // First pass of constant folding, before types are known
         // May be needed to compute types
-        new P4::ResolveReferences(&refMap, isv1, true),
-        new P4::ConstantFolding(&refMap, nullptr),
-        new P4::ResolveReferences(&refMap, isv1),
+        new P4::ResolveReferences(&refMap, isv1, true),  // check shadowing
+        new P4::ConstantFolding(&refMap, nullptr, isv1),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
-        new P4::TypeInference(&refMap, &typeMap, true, false),
+        new P4::ResolveReferences(&refMap, isv1),
+        new P4::TypeInference(&refMap, &typeMap),
         new P4::BindTypeVariables(&refMap, &typeMap),
         // Another round of constant folding, using type information.
-        new P4::TypeChecking(&refMap, &typeMap, true, isv1),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ClearTypeMap(&typeMap),
+        new P4::ConstantFolding(&refMap, &typeMap, isv1),
         new P4::StrengthReduction(),
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::CheckAliasing(&refMap, &typeMap),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::CheckAliasing(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap, isv1),
         new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
     };
 

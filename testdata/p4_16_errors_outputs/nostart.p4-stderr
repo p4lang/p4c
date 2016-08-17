@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/nostart.p4(17): error: parser p: parser does not have a `start' state
 parser p() {
        ^
-error: 1 errors encountered, aborting compilation

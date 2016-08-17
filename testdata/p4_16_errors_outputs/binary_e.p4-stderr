@@ -28,4 +28,3 @@
 ../testdata/p4_16_errors/binary_e.p4(39): error: Could not find type of >
         d = a > c;
             ^^^^^
-error: 10 errors encountered, aborting compilation

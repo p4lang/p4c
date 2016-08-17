@@ -35,7 +35,7 @@ class HasExits : public Inspector {
 };
 }  // namespace
 
-const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
+const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
     HasExits he;
     (void)action->apply(he);
     if (!he.hasReturns) {
@@ -63,7 +63,7 @@ const IR::Node* RemoveReturns::preorder(IR::P4Action* action) {
     return result;
 }
 
-const IR::Node* RemoveReturns::preorder(IR::P4Control* control) {
+const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
     HasExits he;
     (void)control->body->apply(he);
     if (!he.hasReturns) {
@@ -92,7 +92,7 @@ const IR::Node* RemoveReturns::preorder(IR::P4Control* control) {
     return result;
 }
 
-const IR::Node* RemoveReturns::preorder(IR::ReturnStatement* statement) {
+const IR::Node* DoRemoveReturns::preorder(IR::ReturnStatement* statement) {
     set(Returns::Yes);
     auto left = new IR::PathExpression(returnVar);
     return new IR::AssignmentStatement(statement->srcInfo, left,
@@ -100,12 +100,12 @@ const IR::Node* RemoveReturns::preorder(IR::ReturnStatement* statement) {
     return statement;
 }
 
-const IR::Node* RemoveReturns::preorder(IR::ExitStatement* statement) {
+const IR::Node* DoRemoveReturns::preorder(IR::ExitStatement* statement) {
     set(Returns::Yes);  // exit implies return
     return statement;
 }
 
-const IR::Node* RemoveReturns::preorder(IR::BlockStatement* statement) {
+const IR::Node* DoRemoveReturns::preorder(IR::BlockStatement* statement) {
     auto body = new IR::IndexedVector<IR::StatOrDecl>();
     auto currentBody = body;
     Returns ret = Returns::No;
@@ -134,7 +134,7 @@ const IR::Node* RemoveReturns::preorder(IR::BlockStatement* statement) {
     return new IR::BlockStatement(statement->srcInfo, body);
 }
 
-const IR::Node* RemoveReturns::preorder(IR::IfStatement* statement) {
+const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
     push();
     visit(statement->ifTrue);
     if (statement->ifTrue == nullptr)
@@ -158,7 +158,7 @@ const IR::Node* RemoveReturns::preorder(IR::IfStatement* statement) {
     return statement;
 }
 
-const IR::Node* RemoveReturns::preorder(IR::SwitchStatement* statement) {
+const IR::Node* DoRemoveReturns::preorder(IR::SwitchStatement* statement) {
     auto r = Returns::No;
     push();
     statement->cases.visit_children(*this);
@@ -204,19 +204,19 @@ class CallsExit : public Inspector {
 };
 }  // namespace
 
-void RemoveExits::callExit(const IR::Node* node) {
+void DoRemoveExits::callExit(const IR::Node* node) {
     LOG3(node << " calls exit");
     callsExit.emplace(node);
 }
 
-const IR::Node* RemoveExits::preorder(IR::ExitStatement* statement) {
+const IR::Node* DoRemoveExits::preorder(IR::ExitStatement* statement) {
     set(Returns::Yes);
     auto left = new IR::PathExpression(returnVar);
     return new IR::AssignmentStatement(statement->srcInfo, left,
                                        new IR::BoolLiteral(Util::SourceInfo(), true));
 }
 
-const IR::Node* RemoveExits::preorder(IR::P4Table* table) {
+const IR::Node* DoRemoveExits::preorder(IR::P4Table* table) {
     for (auto a : *table->getActionList()->actionList) {
         auto path = a->getPath();
         auto decl = refMap->getDeclaration(path, true);
@@ -230,7 +230,7 @@ const IR::Node* RemoveExits::preorder(IR::P4Table* table) {
     return table;
 }
 
-const IR::Node* RemoveExits::preorder(IR::P4Action* action) {
+const IR::Node* DoRemoveExits::preorder(IR::P4Action* action) {
     LOG3("Visiting " << action);
     push();
     visit(action->body);
@@ -244,7 +244,7 @@ const IR::Node* RemoveExits::preorder(IR::P4Action* action) {
     return action;
 }
 
-const IR::Node* RemoveExits::preorder(IR::P4Control* control) {
+const IR::Node* DoRemoveExits::preorder(IR::P4Control* control) {
     HasExits he;
     (void)control->apply(he);
     if (!he.hasExits) {
@@ -282,7 +282,7 @@ const IR::Node* RemoveExits::preorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node* RemoveExits::preorder(IR::BlockStatement* statement) {
+const IR::Node* DoRemoveExits::preorder(IR::BlockStatement* statement) {
     auto body = new IR::IndexedVector<IR::StatOrDecl>();
     auto currentBody = body;
     Returns ret = Returns::No;
@@ -314,7 +314,7 @@ const IR::Node* RemoveExits::preorder(IR::BlockStatement* statement) {
 // if (t.apply.hit()) stat1;
 // becomes
 // if (t.apply().hit()) if (!hasExited) stat1;
-const IR::Node* RemoveExits::preorder(IR::IfStatement* statement) {
+const IR::Node* DoRemoveExits::preorder(IR::IfStatement* statement) {
     push();
 
     CallsExit ce(refMap, typeMap, &callsExit);
@@ -356,7 +356,7 @@ const IR::Node* RemoveExits::preorder(IR::IfStatement* statement) {
     return statement;
 }
 
-const IR::Node* RemoveExits::preorder(IR::SwitchStatement* statement) {
+const IR::Node* DoRemoveExits::preorder(IR::SwitchStatement* statement) {
     auto r = Returns::No;
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->expression->apply(ce);
@@ -396,7 +396,7 @@ const IR::Node* RemoveExits::preorder(IR::SwitchStatement* statement) {
     return statement;
 }
 
-const IR::Node* RemoveExits::preorder(IR::AssignmentStatement* statement) {
+const IR::Node* DoRemoveExits::preorder(IR::AssignmentStatement* statement) {
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->apply(ce);
     if (ce.callsExit)
@@ -404,7 +404,7 @@ const IR::Node* RemoveExits::preorder(IR::AssignmentStatement* statement) {
     return statement;
 }
 
-const IR::Node* RemoveExits::preorder(IR::MethodCallStatement* statement) {
+const IR::Node* DoRemoveExits::preorder(IR::MethodCallStatement* statement) {
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->apply(ce);
     if (ce.callsExit)

@@ -20,16 +20,15 @@ limitations under the License.
 #include <gmpxx.h>
 
 #include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
-#include "resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 // Can also be run before type checking, so it only uses types if
 // they are available.
-class ConstantFolding : public Transform {
+class DoConstantFolding : public Transform {
  protected:
-    const P4::ReferenceMap* refMap;  // if null no 'const' values can be resolved
-    P4::TypeMap* typeMap;  // if null we have no types; updated for new constants
+    const ReferenceMap* refMap;  // if null no 'const' values can be resolved
+    TypeMap* typeMap;  // if null we have no types; updated for new constants
     bool typesKnown;
     // maps expressions and declarations to their constant values
     std::map<const IR::Node*, const IR::Expression*> constants;
@@ -56,9 +55,9 @@ class ConstantFolding : public Transform {
     Result setContains(const IR::Expression* keySet, const IR::Expression* constant) const;
 
  public:
-    ConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap) :
+    DoConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr) {
-        visitDagOnce = true; setName("ConstantFolding");
+        visitDagOnce = true; setName("DoConstantFolding");
     }
 
     const IR::Node* postorder(IR::Declaration_Constant* d) override;
@@ -90,6 +89,17 @@ class ConstantFolding : public Transform {
     const IR::Node *postorder(IR::Cast *e) override;
     const IR::Node* postorder(IR::SelectExpression* e) override;
 };
+
+class ConstantFolding : public PassManager {
+ public:
+    ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+        if (typeMap != nullptr)
+            passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+        passes.push_back(new DoConstantFolding(refMap, typeMap));
+        setName("ConstantFolding");
+    }
+};
+
 }  // namespace P4
 
 #endif /* _COMMON_CONSTANTFOLDING_H_ */

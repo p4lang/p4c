@@ -18,7 +18,7 @@ limitations under the License.
 #define MIDEND_LOCAL_COPYPROP_H_
 
 #include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 
 namespace P4 {
@@ -30,7 +30,7 @@ namespace P4 {
    Requires expression types be stored inline in the expression
    (obtained by running Typechecking(updateProgram = true)).
  */
-class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
+class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
     const TypeMap*              typeMap;
     bool                        in_action = false;
     struct Local {
@@ -38,7 +38,7 @@ class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContex
         const IR::Expression    *val = nullptr;
     };
     std::map<cstring, Local>    locals;
-    LocalCopyPropagation *clone() const override { return new LocalCopyPropagation(*this); }
+    DoLocalCopyPropagation *clone() const override { return new DoLocalCopyPropagation(*this); }
     void flow_merge(Visitor &) override;
     void dropLocalsUsing(cstring);
 
@@ -51,11 +51,20 @@ class LocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContex
     IR::P4Action *postorder(IR::P4Action *) override;
     class ElimDead;
 
-    LocalCopyPropagation(const LocalCopyPropagation &) = default;
+    DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    explicit LocalCopyPropagation(const TypeMap* typeMap) : typeMap(typeMap)
-    { visitDagOnce = false; setName("LocalCopyPropagation"); }
+    explicit DoLocalCopyPropagation(const TypeMap* typeMap) : typeMap(typeMap)
+    { visitDagOnce = false; setName("DoLocalCopyPropagation"); }
+};
+
+class LocalCopyPropagation : public PassManager {
+ public:
+    LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+        passes.push_back(new DoLocalCopyPropagation(typeMap));
+        setName("LocalCopyPropagation");
+    }
 };
 
 }  // namespace P4
