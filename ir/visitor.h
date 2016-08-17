@@ -109,6 +109,9 @@ class Visitor {
         CHECK_NULL(result);
         return result; }
     const Context *getContext() const { return ctxt->parent; }
+    template <class T>
+    const T* getParent() const {
+        return ctxt->parent ? ctxt->parent->node->to<T>() : nullptr; }
     int getChildrenVisited() const { return ctxt->child_index; }
     int getContextDepth() const { return ctxt->depth - 1; }
     template <class T> inline const T *findContext(const Context *&c) const {
