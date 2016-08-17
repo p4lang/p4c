@@ -170,6 +170,8 @@ array item has the following attributes:
 3-color meters
 - `size`: the number of meter instances in the array
 - `is_direct`: a boolean indicating whether this is a direct meter array
+- `binding`: if the meter array is direct, the name of the table it is attached
+to
 - `result_target`: a 2-tuple representing the field where the meter result
 (color) will be stored; only taken into account if `is_direct` is `true`.
 
@@ -181,6 +183,8 @@ array item has the following attributes:
 - `id`: a unique integer (unique with respect to other counter arrays)
 - `size`: the number of counter instances in the array
 - `is_direct`: a boolean indicating whether this is a direct counter array
+- `binding`: if the counter array is direct, the name of the table it is
+attached to
 
 Unlike for meter arrays, there is no `type` attribute because bmv2 counters
 always count both bytes and packets.
