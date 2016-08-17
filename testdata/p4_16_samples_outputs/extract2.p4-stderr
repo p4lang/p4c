@@ -1,4 +1,0 @@
-../testdata/p4_16_samples/extract2.p4(25): warning: p.extract: error OverwritingHeader will be triggered
-Parser P state chain: start
-        p.extract(h);
-        ^^^^^^^^^^^^

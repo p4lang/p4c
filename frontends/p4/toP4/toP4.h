@@ -76,10 +76,14 @@ class ToP4 : public Inspector {
  public:
     // Output is constructed here
     Util::SourceCodeBuilder& builder;
+    /* FIXME  -- simplify this by getting rid of the 'builder' object and just emitting
+     * directly to the ostream.  The SourceCodeBuilder object does not appear to add any
+     * useful functionality the ostream does not already provide; it just serves to
+     * obfuscate the code */
     std::ostream* outStream;
     // If this is set to non-nullptr, some declarations
     // that come from libraries and models are not
-    // emitted.
+    // emitted.  Currently unused.
     cstring mainFile;
 
     ToP4(Util::SourceCodeBuilder& builder, bool showIR, cstring mainFile = nullptr) :
