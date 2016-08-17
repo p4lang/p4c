@@ -29,7 +29,7 @@ namespace P4 {
 class DoSimplifyParsers : public Transform {
     ReferenceMap *refMap;
  public:
-    DoSimplifyParsers(ReferenceMap *refMap) : refMap(refMap) {
+    explicit DoSimplifyParsers(ReferenceMap *refMap) : refMap(refMap) {
         CHECK_NULL(refMap);
         setName("DoSimplifyParsers");
     }

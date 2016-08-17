@@ -27,6 +27,7 @@ typedef CallGraph<const IR::ParserState*> CG;
 class ScanParser : public Inspector {
     const ReferenceMap* refMap;
     CG* transitions;
+
  public:
     ScanParser(const ReferenceMap* refMap, CG* transitions) :
             refMap(refMap), transitions(transitions) {
@@ -62,8 +63,9 @@ class ScanParser : public Inspector {
 class RemoveUnreachableStates : public Transform {
     CG* transitions;
     std::set<const IR::ParserState*> reachable;
+
  public:
-    RemoveUnreachableStates(CG*transitions) :
+    explicit RemoveUnreachableStates(CG* transitions) :
             transitions(transitions)
     { CHECK_NULL(transitions); setName("RemoveUnreachableStates"); }
 
@@ -99,8 +101,9 @@ class CollapseChains : public Transform {
     CG* transitions;
     std::map<const IR::ParserState*, const IR::ParserState*> chain;
     ordered_set<const IR::ParserState*> chainStart;
+
  public:
-    CollapseChains(CG* transitions) : transitions(transitions)
+    explicit CollapseChains(CG* transitions) : transitions(transitions)
     { CHECK_NULL(transitions); }
 
     const IR::Node* preorder(IR::P4Parser* parser) override {
@@ -167,11 +170,16 @@ class CollapseChains : public Transform {
     }
 };
 
+const IR::Node* DoSimplifyParsers::preorder(IR::P4Parser* parser) {
+    SimplifyParser simpl(refMap);;
+    return parser->apply(simpl);
+}
+
 // This is invoked on each parser separately
 class SimplifyParser : public PassManager {
     CG transitions;
  public:
-    SimplifyParser(ReferenceMap* refMap) : transitions("transitions") {
+    explicit SimplifyParser(ReferenceMap* refMap) : transitions("transitions") {
         passes.push_back(new ScanParser(refMap, &transitions));
         passes.push_back(new RemoveUnreachableStates(&transitions));
         passes.push_back(new CollapseChains(&transitions));
@@ -179,10 +187,5 @@ class SimplifyParser : public PassManager {
 };
 
 }  // namespace
-
-const IR::Node* DoSimplifyParsers::preorder(IR::P4Parser* parser) {
-    SimplifyParser simpl(refMap);;
-    return parser->apply(simpl);
-}
 
 }  // namespace P4
