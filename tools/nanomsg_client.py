@@ -28,7 +28,7 @@ import argparse
 import bmpy_utils as utils
 
 parser = argparse.ArgumentParser(description='BM nanomsg event logger client')
-parser.add_argument('--socket', help='IPC socket to which to subscribe [deprecated]',
+parser.add_argument('--socket', help='IPC socket to which to subscribe',
                     action="store", required=False)
 parser.add_argument('--json', help='JSON description of P4 program [deprecated]',
                     action="store", required=False)
@@ -446,10 +446,10 @@ def recv_msgs(socket_addr, client):
             json_init(client)
 
 def main():
-    deprecated_args = ["socket", "json"]
+    deprecated_args = ["json"]
     for a in deprecated_args:
         if getattr(args, a) is not None:
-            print "Command line option --{} is deprecated".format(a),
+            print "Command line option '--{}' is deprecated".format(a),
             print "and will be ignored"
 
     client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
@@ -457,8 +457,13 @@ def main():
     socket_addr = info.elogger_socket
     if socket_addr is None:
         print "The event logger is not enabled on the switch,",
-        print "run with --nanolog <ip addr>"
+        print "run with '--nanolog <ip addr>'"
         sys.exit(1)
+    if args.socket is not None:
+        socket_addr = args.socket
+    else:
+        print "'--socket' not provided, using", socket_addr,
+        print "(obtained from switch)"
 
     recv_msgs(socket_addr, client)
 

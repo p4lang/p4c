@@ -37,7 +37,7 @@ except:
     with_runtime_CLI = False
 
 parser = argparse.ArgumentParser(description='BM nanomsg debugger')
-parser.add_argument('--socket', help='Nanomsg socket to which to subscribe [deprecated]',
+parser.add_argument('--socket', help='Nanomsg socket to which to subscribe',
                     action="store", required=False)
 parser.add_argument('--thrift-port', help='Thrift server port for table updates',
                     type=int, action="store", default=9090)
@@ -1129,10 +1129,10 @@ for long_name, short_name in shortcuts.items():
         setattr(DebuggerAPI, "complete_" + short_name, f_complete)
 
 def main():
-    deprecated_args = ["socket", "json"]
+    deprecated_args = ["json"]
     for a in deprecated_args:
         if getattr(args, a) is not None:
-            print "Command line option --{} is deprecated".format(a),
+            print "Command line option '--{}' is deprecated".format(a),
             print "and will be ignored"
 
     client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
@@ -1141,6 +1141,11 @@ def main():
     if socket_addr is None:
         print "The debugger is not enabled on the switch"
         sys.exit(1)
+    if args.socket is not None:
+        socket_addr = args.socket
+    else:
+        print "'--socket' not provided, using", socket_addr,
+        print "(obtained from switch)"
 
     c = DebuggerAPI(socket_addr, standard_client=client)
     try:
