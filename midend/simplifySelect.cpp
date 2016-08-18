@@ -21,6 +21,8 @@ namespace P4 {
 
 void DoSimplifySelect::checkSimpleConstant(const IR::Expression* expr) const {
     CHECK_NULL(expr);
+    if (expr->is<IR::DefaultExpression>())
+        return;
     if (expr->is<IR::Constant>())
         return;
     if (expr->is<IR::BoolLiteral>())
@@ -29,11 +31,13 @@ void DoSimplifySelect::checkSimpleConstant(const IR::Expression* expr) const {
         auto mask = expr->to<IR::Mask>();
         checkSimpleConstant(mask->left);
         checkSimpleConstant(mask->right);
+        return;
     }
     if (expr->is<IR::ListExpression>()) {
         auto list = expr->to<IR::ListExpression>();
         for (auto e : *list->components)
             checkSimpleConstant(e);
+        return;
     }
     auto ei = EnumInstance::resolve(expr, typeMap);
     if (ei != nullptr)
