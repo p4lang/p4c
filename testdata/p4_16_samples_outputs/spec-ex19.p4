@@ -1,4 +1,4 @@
-#include "/home/cdodd/p4c/p4include/core.p4"
+#include <core.p4>
 
 header Mpls_h {
     bit<20> label;

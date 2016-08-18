@@ -1,4 +1,4 @@
-#include "/home/mbudiu/git/p4c/p4include/core.p4"
+#include <core.p4>
 
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
