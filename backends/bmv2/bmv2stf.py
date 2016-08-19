@@ -430,8 +430,9 @@ class RunBMV2(object):
         thriftPort = str(9090 + rand)
 
         try:
-            runswitch = ["simple_switch", "--log-file", self.switchLogFile, "--use-files",
-                         str(wait), "--thrift-port", thriftPort] + interfaces + ["../" + self.jsonfile]
+            runswitch = ["simple_switch", "--log-file", self.switchLogFile,
+                         "--use-files", str(wait), "--thrift-port", thriftPort,
+                         "--device-id", str(rand)] + interfaces + ["../" + self.jsonfile]
             if self.options.verbose:
                 print("Running", " ".join(runswitch))
             sw = subprocess.Popen(runswitch, cwd=self.folder)
