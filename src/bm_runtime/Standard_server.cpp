@@ -501,6 +501,23 @@ public:
     }
   }
 
+  void bm_mt_get_meter_rates(std::vector<BmMeterRateConfig> & _return, const int32_t cxt_id, const std::string& table_name, const BmEntryHandle entry_handle) {
+    Logger::get()->trace("bm_mt_get_meter_rates");
+    std::vector<Meter::rate_config_t> rates;
+    MatchErrorCode error_code = switch_->mt_get_meter_rates(
+        cxt_id, table_name, entry_handle, &rates);
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    }
+    _return.resize(rates.size());
+    for (size_t i = 0; i < rates.size(); i++) {
+      _return[i].units_per_micros = rates[i].info_rate;
+      _return[i].burst_size = rates[i].burst_size;
+    }
+  }
+
   template <typename E>
   void copy_match_part_entry(BmMtEntry *e, const E &entry) {
     retrieve_match_key(e->match_key, entry.match_key);
@@ -823,6 +840,23 @@ public:
       InvalidMeterOperation imo;
       imo.code = (MeterOperationErrorCode::type) error_code;
       throw imo;
+    }
+  }
+
+  void bm_meter_get_rates(std::vector<BmMeterRateConfig> & _return, const int32_t cxt_id, const std::string& meter_array_name, const int32_t index) {
+    Logger::get()->trace("bm_meter_get_rates");
+    std::vector<Meter::rate_config_t> rates;
+    Meter::MeterErrorCode error_code = switch_->meter_get_rates(
+        cxt_id, meter_array_name, index, &rates);
+    if(error_code != Meter::MeterErrorCode::SUCCESS) {
+      InvalidMeterOperation imo;
+      imo.code = (MeterOperationErrorCode::type) error_code;
+      throw imo;
+    }
+    _return.resize(rates.size());
+    for (size_t i = 0; i < rates.size(); i++) {
+      _return[i].units_per_micros = rates[i].info_rate;
+      _return[i].burst_size = rates[i].burst_size;
     }
   }
 

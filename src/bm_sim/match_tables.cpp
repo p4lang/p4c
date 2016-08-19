@@ -247,6 +247,17 @@ MatchTableAbstract::set_meter_rates(
 }
 
 MatchErrorCode
+MatchTableAbstract::get_meter_rates(
+    entry_handle_t handle, std::vector<Meter::rate_config_t> *configs) const {
+  if (!with_meters) return MatchErrorCode::METERS_DISABLED;
+  WriteLock lock = lock_write();
+  if (!is_valid_handle(handle)) return MatchErrorCode::INVALID_HANDLE;
+  const Meter &meter = match_unit_->get_meter(handle);
+  *configs = meter.get_rates();
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
 MatchTableAbstract::set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms) {
   if (!with_ageing) return MatchErrorCode::AGEING_DISABLED;
   WriteLock lock = lock_write();

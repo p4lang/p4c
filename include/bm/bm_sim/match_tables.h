@@ -181,6 +181,9 @@ class MatchTableAbstract : public NamedP4Object {
       entry_handle_t handle,
       const std::vector<Meter::rate_config_t> &configs) const;
 
+  MatchErrorCode get_meter_rates(
+      entry_handle_t handle, std::vector<Meter::rate_config_t> *configs) const;
+
   MatchErrorCode set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms);
 
   void sweep_entries(std::vector<entry_handle_t> *entries) const;

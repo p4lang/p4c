@@ -192,6 +192,12 @@ class RuntimeInterface {
                      entry_handle_t handle,
                      const std::vector<Meter::rate_config_t> &configs) = 0;
 
+  virtual MatchErrorCode
+  mt_get_meter_rates(size_t cxt_id,
+                     const std::string &table_name,
+                     entry_handle_t handle,
+                     std::vector<Meter::rate_config_t> *configs) = 0;
+
   virtual MatchTableType
   mt_get_type(size_t cxt_id, const std::string &table_name) const = 0;
 
@@ -279,6 +285,11 @@ class RuntimeInterface {
   meter_set_rates(size_t cxt_id,
                   const std::string &meter_name, size_t idx,
                   const std::vector<Meter::rate_config_t> &configs) = 0;
+
+  virtual MeterErrorCode
+  meter_get_rates(size_t cxt_id,
+                  const std::string &meter_name, size_t idx,
+                  std::vector<Meter::rate_config_t> *configs) = 0;
 
   virtual RegisterErrorCode
   register_read(size_t cxt_id,

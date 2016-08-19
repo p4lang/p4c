@@ -154,3 +154,20 @@ TEST_F(MetersTest, trTCM) {
 
   ASSERT_EQ(expected, output);
 }
+
+TEST_F(MetersTest, GetRates) {
+  Meter meter(MeterType::PACKETS, 2);
+  // committed : 2 packets per second, burst size of 3
+  Meter::rate_config_t committed_rate = {0.000002, 3};
+  // peak : 10 packets per second, burst size of 1
+  Meter::rate_config_t peak_rate = {0.00001, 1};
+  const std::vector<Meter::rate_config_t> rates = {committed_rate, peak_rate};
+  meter.set_rates(rates);
+
+  const auto retrieved_rates = meter.get_rates();
+  ASSERT_EQ(rates.size(), retrieved_rates.size());
+  for (size_t i = 0; i < rates.size(); i++) {
+    ASSERT_EQ(rates[i].info_rate, retrieved_rates[i].info_rate);
+    ASSERT_EQ(rates[i].burst_size, retrieved_rates[i].burst_size);
+  }
+}

@@ -427,6 +427,12 @@ service Standard {
     4:list<BmMeterRateConfig> rates
   ) throws (1:InvalidTableOperation ouch),
 
+  list<BmMeterRateConfig> bm_mt_get_meter_rates(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmEntryHandle entry_handle
+  ) throws (1:InvalidTableOperation ouch),
+
   list<BmMtEntry> bm_mt_get_entries(
     1:i32 cxt_id,
     2:string table_name
@@ -533,6 +539,12 @@ service Standard {
     2:string meter_array_name,
     3:i32 index,
     4:list<BmMeterRateConfig> rates
+  ) throws (1:InvalidMeterOperation ouch)
+
+  list<BmMeterRateConfig> bm_meter_get_rates(
+    1:i32 cxt_id,
+    2:string meter_array_name,
+    3:i32 index
   ) throws (1:InvalidMeterOperation ouch)
 
 

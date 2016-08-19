@@ -572,6 +572,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return contexts.at(cxt_id).mt_set_meter_rates(table_name, handle, configs);
   }
 
+  MatchErrorCode
+  mt_get_meter_rates(
+      size_t cxt_id, const std::string &table_name, entry_handle_t handle,
+      std::vector<Meter::rate_config_t> *configs) override {
+    return contexts.at(cxt_id).mt_get_meter_rates(table_name, handle, configs);
+  }
+
   Counter::CounterErrorCode
   read_counters(size_t cxt_id,
                 const std::string &counter_name,
@@ -610,6 +617,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
                   const std::string &meter_name, size_t idx,
                   const std::vector<Meter::rate_config_t> &configs) override {
     return contexts.at(cxt_id).meter_set_rates(meter_name, idx, configs);
+  }
+
+  MeterErrorCode
+  meter_get_rates(size_t cxt_id,
+                  const std::string &meter_name, size_t idx,
+                  std::vector<Meter::rate_config_t> *configs) override {
+    return contexts.at(cxt_id).meter_get_rates(meter_name, idx, configs);
   }
 
   RegisterErrorCode

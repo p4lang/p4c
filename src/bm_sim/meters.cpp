@@ -21,6 +21,7 @@
 #include <bm/bm_sim/meters.h>
 
 #include <algorithm>
+#include <vector>
 
 namespace bm {
 
@@ -127,6 +128,18 @@ Meter::deserialize(std::istream *in) {
 void
 Meter::reset_global_clock() {
   time_init = Meter::clock::now();
+}
+
+std::vector<Meter::rate_config_t>
+Meter::get_rates() const {
+  std::vector<rate_config_t> configs;
+  auto lock = unique_lock();
+  if (!configured) return configs;
+  // elegant but probably not the most efficient
+  for (const MeterRate &rate : rates)
+    configs.push_back(rate_config_t::make(rate.info_rate, rate.burst_size));
+  std::reverse(configs.begin(), configs.end());
+  return configs;
 }
 
 

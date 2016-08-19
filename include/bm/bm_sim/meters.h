@@ -138,6 +138,9 @@ class Meter {
     return set_rates(configs.begin(), configs.end());
   }
 
+  // returns an empty vector if meter not configured
+  std::vector<rate_config_t> get_rates() const;
+
   MeterErrorCode reset_rates();
 
   //! Executes the meter on the given packet. Returns an integral value in the

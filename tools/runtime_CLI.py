@@ -1528,6 +1528,33 @@ class RuntimeAPI(cmd.Cmd):
     def complete_meter_set_rates(self, text, line, start_index, end_index):
         return self._complete_meters(text)
 
+    @handle_bad_input
+    def do_meter_get_rates(self, line):
+        "Retrieve rates for a meter: meter_get_rates <name> <index>"
+        args = line.split()
+        self.exactly_n_args(args, 2)
+        meter_name = args[0]
+        meter = self.get_res("meter", meter_name, METER_ARRAYS)
+        try:
+            index = int(args[1])
+        except:
+            raise UIn_Error("Bad format for index")
+        # meter.rate_count
+        if meter.is_direct:
+            table_name = meter.binding
+            rates = self.client.bm_mt_get_meter_rates(0, table_name, index)
+        else:
+            rates = self.client.bm_meter_get_rates(0, meter_name, index)
+        if len(rates) != meter.rate_count:
+            print "WARNING: expected", meter.rate_count, "rates",
+            print "but only received", len(rates)
+        for idx, rate in enumerate(rates):
+            print "{}: info rate = {}, burst size = {}".format(
+                idx, rate.units_per_micros, rate.burst_size)
+
+    def complete_meter_get_rates(self, text, line, start_index, end_index):
+        return self._complete_meters(text)
+
     def _complete_meters(self, text):
         return self._complete_res(METER_ARRAYS, text)
 
