@@ -20,7 +20,7 @@ const IR::Type* BindTypeVariables::getP4Type(const IR::Type* type) const {
         return type;
     } else if (type->is<IR::Type_Stack>()) {
         auto stack = type->to<IR::Type_Stack>();
-        return new IR::Type_Stack(type->srcInfo, getP4Type(stack->baseType), stack->size);
+        return new IR::Type_Stack(type->srcInfo, getP4Type(stack->elementType), stack->size);
     } else if (type->is<IR::Type_Tuple>()) {
         auto fields = new IR::IndexedVector<IR::StructField>();
         auto tuple = type->to<IR::Type_Tuple>();

@@ -52,7 +52,7 @@ class ClearTypeMap : public Inspector {
 class TypeChecking : public PassManager {
  public:
     TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap,
-                 bool isv1, bool updateExpressions = false);
+                 bool updateExpressions = false);
 };
 
 // Actual type checking algorithm.

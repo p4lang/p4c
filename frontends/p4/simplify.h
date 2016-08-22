@@ -79,8 +79,8 @@ class DoSimplifyControlFlow : public Transform {
 
 class SimplifyControlFlow : public PassManager {
  public:
-    SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+    SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoSimplifyControlFlow(refMap, typeMap));
         setName("SimplifyControlFlow");
     }

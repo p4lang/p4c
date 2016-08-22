@@ -18,8 +18,8 @@ class DoCheckAliasing : public Inspector {
 
 class CheckAliasing : public PassManager {
  public:
-    CheckAliasing(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-        passes.push_back(new P4::TypeChecking(refMap, typeMap, isv1));
+    CheckAliasing(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new DoCheckAliasing(refMap, typeMap));
         setName("CheckAliasing");
     }

@@ -45,7 +45,8 @@ namespace P4Test {
 
 MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
+    refMap.setIsV1(isv1);
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
 
     // TODO: def-use analysis and related optimizations
@@ -54,15 +55,15 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
     addPasses({
-        new P4::SimplifyParsers(&refMap, isv1),
-        new P4::ResetHeaders(&refMap, &typeMap, isv1),
-        new P4::UniqueNames(&refMap, isv1),  // Give each local declaration a unique internal name
+        new P4::SimplifyParsers(&refMap),
+        new P4::ResetHeaders(&refMap, &typeMap),
+        new P4::UniqueNames(&refMap),  // Give each local declaration a unique internal name
         new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new P4::MoveInitializers(),
-        new P4::SimplifyExpressions(&refMap, &typeMap, isv1),
-        new P4::RemoveReturns(&refMap, isv1),
-        new P4::MoveConstructors(&refMap, isv1),
-        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        new P4::SimplifyExpressions(&refMap, &typeMap),
+        new P4::RemoveReturns(&refMap),
+        new P4::MoveConstructors(&refMap),
+        new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
         new VisitFunctor([evaluator](const IR::Node *root) -> const IR::Node * {
@@ -71,29 +72,29 @@ MidEnd::MidEnd(CompilerOptions& options) {
                 // nothing further to do
                 return nullptr;
             return root; }),
-        new P4::Inline(&refMap, &typeMap, evaluator, isv1),
-        new P4::InlineActions(&refMap, &typeMap, isv1),
-        new P4::SpecializeAll(&refMap, &typeMap, isv1),
+        new P4::Inline(&refMap, &typeMap, evaluator),
+        new P4::InlineActions(&refMap, &typeMap),
+        new P4::SpecializeAll(&refMap, &typeMap),
         // Parser loop unrolling: TODO
-        // new P4::ParsersUnroll(true, &refMap, &typeMap, isv1),
-        new P4::LocalizeAllActions(&refMap, isv1),
-        new P4::UniqueParameters(&refMap, isv1),
+        // new P4::ParsersUnroll(true, &refMap, &typeMap),
+        new P4::LocalizeAllActions(&refMap),
+        new P4::UniqueParameters(&refMap),
         new P4::ClearTypeMap(&typeMap),  // table types have changed
-        new P4::SimplifyControlFlow(&refMap, &typeMap, isv1),
-        new P4::RemoveParameters(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::RemoveParameters(&refMap, &typeMap),
         new P4::ClearTypeMap(&typeMap),  // table types have changed
-        new P4::SimplifyKey(&refMap, &typeMap, isv1,
+        new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonLeftValue(&refMap, &typeMap)),
-        new P4::RemoveExits(&refMap, &typeMap, isv1),
-        new P4::ConstantFolding(&refMap, &typeMap, isv1),
-        new P4::SimplifySelect(&refMap, &typeMap, isv1, false),  // non-constant keysets
-        new P4::SimplifyParsers(&refMap, isv1),
+        new P4::RemoveExits(&refMap, &typeMap),
+        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::SimplifySelect(&refMap, &typeMap, false),  // non-constant keysets
+        new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
-        new P4::LocalCopyPropagation(&refMap, &typeMap, isv1),
+        new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
-        new P4::SimplifyControlFlow(&refMap, &typeMap, isv1),
-        new P4::SynthesizeActions(&refMap, &typeMap, isv1),
-        new P4::MoveActionsToTables(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::SynthesizeActions(&refMap, &typeMap),
+        new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
     });

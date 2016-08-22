@@ -24,12 +24,12 @@ namespace P4 {
 /* Run immediately after parsing.
    There is no type information. */
 class ValidateParsedProgram final : public Inspector {
-    bool p4v1;
+    bool isv1;
     using Inspector::postorder;
 
     void container(const IR::IContainer* type);
  public:
-    explicit ValidateParsedProgram(bool p4v1) : p4v1(p4v1)
+    explicit ValidateParsedProgram(bool isv1) : isv1(isv1)
     { setName("ValidateParsedProgram"); }
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::Method* t) override;

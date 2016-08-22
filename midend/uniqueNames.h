@@ -52,7 +52,7 @@ class UniqueNames : public PassManager {
  private:
     RenameMap    *renameMap;
  public:
-    UniqueNames(ReferenceMap* refMap, bool anyOrder);
+    UniqueNames(ReferenceMap* refMap);
 };
 
 // Finds and allocates new names for some symbols:
@@ -131,7 +131,7 @@ class UniqueParameters : public PassManager {
  private:
     RenameMap    *renameMap;
  public:
-    UniqueParameters(ReferenceMap* refMap, bool anyOrder);
+    UniqueParameters(ReferenceMap* refMap);
 };
 
 }  // namespace P4

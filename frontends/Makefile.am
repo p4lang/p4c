@@ -20,6 +20,8 @@ p4_frontend_SOURCES = \
 	frontends/p4/checkAliasing.cpp \
 	frontends/p4/createBuiltins.h \
 	frontends/p4/createBuiltins.cpp \
+	frontends/p4/def_use.h \
+	frontends/p4/def_use.cpp \
 	frontends/p4/validateParsedProgram.h \
 	frontends/p4/validateParsedProgram.cpp \
 	frontends/p4/p4-parse.h \

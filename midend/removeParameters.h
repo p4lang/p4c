@@ -140,7 +140,7 @@ class RemoveActionParameters : public Transform {
 // Calls RemoveActionParameters and RemoveTableParameters in the right order
 class RemoveParameters : public PassManager {
  public:
-    RemoveParameters(ReferenceMap* refMap, TypeMap* typeMap, bool isv1);
+    RemoveParameters(ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 }  // namespace P4

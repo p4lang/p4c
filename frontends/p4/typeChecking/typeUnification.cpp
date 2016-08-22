@@ -293,7 +293,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                         errorPosition, dstack, sstack);
             return false;
         }
-        constraints->addEqualityConstraint(dstack->baseType, sstack->baseType);
+        constraints->addEqualityConstraint(dstack->elementType, sstack->elementType);
         return true;
     }
 

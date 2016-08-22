@@ -37,8 +37,8 @@ class DoSimplifySelect : public Transform {
 
 class SimplifySelect : public PassManager {
  public:
-    SimplifySelect(ReferenceMap* refMap, TypeMap* typeMap, bool isv1, bool requireConstants) {
-        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+    SimplifySelect(ReferenceMap* refMap, TypeMap* typeMap, bool requireConstants) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoSimplifySelect(typeMap, requireConstants));
         setName("SimplifySelect");
     }

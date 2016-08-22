@@ -41,8 +41,8 @@ class DoSimplifyParsers : public Transform {
 
 class SimplifyParsers : public PassManager {
  public:
-    SimplifyParsers(ReferenceMap* refMap, bool isv1) {
-        passes.push_back(new ResolveReferences(refMap, isv1));
+    SimplifyParsers(ReferenceMap* refMap) {
+        passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new DoSimplifyParsers(refMap));
         setName("SimplifyParsers");
     }

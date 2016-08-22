@@ -141,16 +141,16 @@ class LocalizeAllActions : public PassManager {
     GlobalActionReplacements globalReplacements;
     ActionReplacement        localReplacements;
  public:
-    LocalizeAllActions(ReferenceMap* refMap, bool isv1) {
+    LocalizeAllActions(ReferenceMap* refMap) {
         passes.emplace_back(new PassRepeated {
-            new ResolveReferences(refMap, isv1),
+            new ResolveReferences(refMap),
             new FindGlobalActionUses(refMap, &globalReplacements),
             new LocalizeActions(refMap, &globalReplacements),
         });
-        passes.emplace_back(new ResolveReferences(refMap, isv1));
+        passes.emplace_back(new ResolveReferences(refMap));
         passes.emplace_back(new FindRepeatedActionUses(refMap, &localReplacements));
         passes.emplace_back(new DuplicateActions(&localReplacements));
-        passes.emplace_back(new RemoveAllUnusedDeclarations(refMap, isv1));
+        passes.emplace_back(new RemoveAllUnusedDeclarations(refMap));
         setName("LocalizeAllActions");
     }
 };

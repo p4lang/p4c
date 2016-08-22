@@ -70,6 +70,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
     bool isv1 = options.isv1();
     ReferenceMap  refMap;
     TypeMap       typeMap;
+    refMap.setIsV1(isv1);
 
     PassManager passes = {
         new PrettyPrint(options),
@@ -77,22 +78,22 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         new ValidateParsedProgram(isv1),
         // Synthesize some built-in constructs
         new CreateBuiltins(),
-        new ResolveReferences(&refMap, isv1, true),  // check shadowing
+        new ResolveReferences(&refMap, true),  // check shadowing
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
-        new ConstantFolding(&refMap, nullptr, isv1),
+        new ConstantFolding(&refMap, nullptr),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
-        new ResolveReferences(&refMap, isv1),
+        new ResolveReferences(&refMap),
         new TypeInference(&refMap, &typeMap),
         new BindTypeVariables(&refMap, &typeMap),
         // Another round of constant folding, using type information.
         new ClearTypeMap(&typeMap),
-        new ConstantFolding(&refMap, &typeMap, isv1),
+        new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
-        new CheckAliasing(&refMap, &typeMap, isv1),
-        new SimplifyControlFlow(&refMap, &typeMap, isv1),
-        new RemoveAllUnusedDeclarations(&refMap, isv1),
+        new CheckAliasing(&refMap, &typeMap),
+        new SimplifyControlFlow(&refMap, &typeMap),
+        new RemoveAllUnusedDeclarations(&refMap),
     };
 
     passes.setName("FrontEnd");

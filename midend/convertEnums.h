@@ -64,9 +64,9 @@ class DoConvertEnums : public Transform {
 
 class ConvertEnums : public PassManager {
  public:
-    ConvertEnums(ReferenceMap* refMap, TypeMap* typeMap, bool isv1,
+    ConvertEnums(ReferenceMap* refMap, TypeMap* typeMap,
                  ChooseEnumRepresentation* policy) {
-        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+        passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoConvertEnums(policy, typeMap));
         setName("ConvertEnums");
     }

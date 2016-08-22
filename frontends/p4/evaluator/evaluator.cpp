@@ -261,11 +261,11 @@ bool Evaluator::preorder(const IR::TableProperty* prop) {
 
 //////////////////////////////////////
 
-EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap) {
     setName("Evaluator");
     evaluator = new P4::Evaluator(refMap, typeMap);
     setStopOnError(true);
-    passes.emplace_back(new P4::TypeChecking(refMap, typeMap, isv1));
+    passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
     passes.emplace_back(evaluator);
 }
 

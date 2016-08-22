@@ -229,7 +229,7 @@ const IR::Node* InlineDriver::preorder(IR::P4Program* program) {
 
     while (auto todo = toInline->next()) {
         LOG1("Processing " << todo);
-        inliner->prepare(toInline, todo, p4v1);
+        inliner->prepare(toInline, todo);
         prog = prog->apply(*inliner);
         if (::errorCount() > 0)
             return prog;
@@ -304,8 +304,8 @@ bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 Visitor::profile_t GeneralInliner::init_apply(const IR::Node* node) {
-    ResolveReferences solver(refMap, true);
-    TypeChecking typeChecker(refMap, typeMap, isv1);
+    ResolveReferences solver(refMap);
+    TypeChecking typeChecker(refMap, typeMap);
     node->apply(solver);
     (void)node->apply(typeChecker);
     return AbstractInliner::init_apply(node);

@@ -60,8 +60,8 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
 
 class LocalCopyPropagation : public PassManager {
  public:
-    LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+    LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoLocalCopyPropagation(typeMap));
         setName("LocalCopyPropagation");
     }

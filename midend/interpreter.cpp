@@ -59,7 +59,7 @@ bool SymbolicValueFactory::isFixedWidth(const IR::Type* type) const {
     if (type->is<IR::Type_Extern>())
         return false;
     if (type->is<IR::Type_Stack>())
-        return isFixedWidth(type->to<IR::Type_Stack>()->baseType);
+        return isFixedWidth(type->to<IR::Type_Stack>()->elementType);
     if (type->is<IR::Type_StructLike>()) {
         auto st = type->to<IR::Type_StructLike>();
         for (auto f : *st->fields)
@@ -99,7 +99,7 @@ unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
     }
     if (type->is<IR::Type_Stack>()) {
         auto st = type->to<IR::Type_Stack>();
-        auto bw = getWidth(st->baseType);
+        auto bw = getWidth(st->elementType);
         return bw * st->getSize();
     }
     if (type->is<IR::Type_Tuple>()) {
@@ -387,7 +387,7 @@ void SymbolicHeader::dbprint(std::ostream& out) const {
 SymbolicArray::SymbolicArray(const IR::Type_Stack* type, bool uninitialized,
                              const SymbolicValueFactory* factory) :
         SymbolicValue(type), size(type->getSize()),
-        elemType(type->baseType->to<IR::Type_Header>()) {
+        elemType(type->elementType->to<IR::Type_Header>()) {
     for (unsigned i=0; i < size; i++) {
         auto elem = factory->create(elemType, uninitialized);
         BUG_CHECK(elem->is<SymbolicHeader>(), "%1%: expected a header", elem);
@@ -879,7 +879,8 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
             set(expression, SymbolicVoid::get());
             return;
         } else {
-            // isValid()
+            BUG_CHECK(name == IR::Type_Header::isValid,
+                      "%1%: unexpected method", bim->name);
             BUG_CHECK(base->is<SymbolicHeader>(), "%1%: expected a header", base);
             auto hv = base->to<SymbolicHeader>();
             auto v = hv->valid;

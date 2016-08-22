@@ -181,9 +181,9 @@ class MoveConstructorsImpl : public Transform {
 };
 }  // namespace
 
-MoveConstructors::MoveConstructors(ReferenceMap* refMap, bool isv1) {
+MoveConstructors::MoveConstructors(ReferenceMap* refMap) {
     setName("MoveConstructors");
-    passes.emplace_back(new P4::ResolveReferences(refMap, isv1));
+    passes.emplace_back(new P4::ResolveReferences(refMap));
     passes.emplace_back(new MoveConstructorsImpl(refMap));
 }
 

@@ -280,12 +280,12 @@ class Type_Name : Type {
 }
 
 class Type_Stack : Type {
-    Type        baseType;
+    Type        elementType;
     Expression  size;
-    toString{ return baseType->toString() + "[]"; }
-    dbprint{ Type::dbprint(out); out << baseType << "[" << size << "]"; }
+    toString{ return elementType->toString() + "[]"; }
+    dbprint{ Type::dbprint(out); out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
-    int getSize() const;
+    unsigned getSize() const;
     static const cstring next;
     static const cstring last;
     static const cstring push_front;

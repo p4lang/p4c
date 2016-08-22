@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2016 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,18 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_MOVECONSTRUCTORS_H_
-#define _MIDEND_MOVECONSTRUCTORS_H_
+struct S {
+    bit<32> x;
+}
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
+control c(inout bit<32> b) {
+    action a() {
+        S s1;
+        S s2;
+        s2 = { 0 };
+        s1 = s2;
+        //s1.x = b;
+        s2 = s1;
+        b = s2.x;
+    }
+    apply {
+        a();
+    }
+}
 
-namespace P4 {
+control proto(inout bit<32> _b);
+package top(proto _p);
 
-class MoveConstructors : public PassManager {
- public:
-    MoveConstructors(ReferenceMap* refMap);
-};
-
-}  // namespace P4
-
-#endif /* _MIDEND_MOVECONSTRUCTORS_H_ */
+top(c()) main;

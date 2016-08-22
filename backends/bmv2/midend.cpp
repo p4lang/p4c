@@ -47,21 +47,19 @@ limitations under the License.
 namespace BMV2 {
 
 void MidEnd::setup_for_P4_14(CompilerOptions&) {
-    bool isv1 = true;
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
-
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     // Inlining is simpler for P4 v1.0/1.1 programs, so we have a
     // specialized code path, which also generates slighly nicer
     // human-readable results.
     addPasses({
         evaluator,
         new P4::DiscoverInlining(&controlsToInline, &refMap, &typeMap, evaluator),
-        new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap), isv1),
-        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::InlineDriver(&controlsToInline, new SimpleControlsInliner(&refMap)),
+        new P4::RemoveAllUnusedDeclarations(&refMap),
+        new P4::TypeChecking(&refMap, &typeMap),
         new P4::DiscoverActionsInlining(&actionsToInline, &refMap, &typeMap),
-        new P4::InlineActionsDriver(&actionsToInline, new SimpleActionsInliner(&refMap), isv1),
-        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        new P4::InlineActionsDriver(&actionsToInline, new SimpleActionsInliner(&refMap)),
+        new P4::RemoveAllUnusedDeclarations(&refMap),
     });
 }
 
@@ -82,23 +80,21 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
 };
 
 
-void MidEnd::setup_for_P4_16(CompilerOptions& options) {
+void MidEnd::setup_for_P4_16(CompilerOptions&) {
     // we may come through this path even if the program is actually a P4 v1.0 program
-    bool isv1 = options.isv1();
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
-
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
-        new P4::SimplifyParsers(&refMap, isv1),
-        new P4::ConvertEnums(&refMap, &typeMap, isv1,
+        new P4::SimplifyParsers(&refMap),
+        new P4::ConvertEnums(&refMap, &typeMap,
                              new EnumOn32Bits()),
-        new P4::ResetHeaders(&refMap, &typeMap, isv1),
-        new P4::UniqueNames(&refMap, isv1),
+        new P4::ResetHeaders(&refMap, &typeMap),
+        new P4::UniqueNames(&refMap),
         new P4::MoveDeclarations(),
         new P4::MoveInitializers(),
-        new P4::SimplifyExpressions(&refMap, &typeMap, isv1),
-        new P4::RemoveReturns(&refMap, isv1),
-        new P4::MoveConstructors(&refMap, isv1),
-        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        new P4::SimplifyExpressions(&refMap, &typeMap),
+        new P4::RemoveReturns(&refMap),
+        new P4::MoveConstructors(&refMap),
+        new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
         new VisitFunctor([evaluator](const IR::Node *root) -> const IR::Node * {
@@ -107,32 +103,31 @@ void MidEnd::setup_for_P4_16(CompilerOptions& options) {
                 // nothing further to do
                 return nullptr;
             return root; }),
-        new P4::Inline(&refMap, &typeMap, evaluator, isv1),
-        new P4::InlineActions(&refMap, &typeMap, isv1),
-        new P4::LocalizeAllActions(&refMap, isv1),
-        new P4::UniqueParameters(&refMap, isv1),
+        new P4::Inline(&refMap, &typeMap, evaluator),
+        new P4::InlineActions(&refMap, &typeMap),
+        new P4::LocalizeAllActions(&refMap),
+        new P4::UniqueParameters(&refMap),
         new P4::ClearTypeMap(&typeMap),
-        new P4::SimplifyControlFlow(&refMap, &typeMap, isv1),
-        new P4::RemoveParameters(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::RemoveParameters(&refMap, &typeMap),
         new P4::ClearTypeMap(&typeMap),
-        new P4::SimplifyKey(&refMap, &typeMap, isv1,
+        new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonLeftValue(&refMap, &typeMap)),
-        new P4::ConstantFolding(&refMap, &typeMap, isv1),
+        new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
-        new P4::SimplifySelect(&refMap, &typeMap, isv1, true), // constant keysets
-        new P4::SimplifyParsers(&refMap, isv1),
-        new P4::LocalCopyPropagation(&refMap, &typeMap, isv1),
+        new P4::SimplifySelect(&refMap, &typeMap, true), // constant keysets
+        new P4::SimplifyParsers(&refMap),
+        new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::MoveDeclarations(),
-        new P4::SimplifyControlFlow(&refMap, &typeMap, isv1),
-        new P4::SynthesizeActions(&refMap, &typeMap, isv1),
-        new P4::MoveActionsToTables(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::SynthesizeActions(&refMap, &typeMap),
+        new P4::MoveActionsToTables(&refMap, &typeMap),
     });
 }
 
 
 MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.isv1();
-
     setName("MidEnd");
     if (isv1)
         // TODO: This path should be eventually deprecated
@@ -140,15 +135,16 @@ MidEnd::MidEnd(CompilerOptions& options) {
     else
         setup_for_P4_16(options);
 
+    refMap.setIsV1(isv1);
     // BMv2-specific passes
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap, isv1);
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
-        new P4::SimplifyControlFlow(&refMap, &typeMap, isv1),
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&typeMap),
-        new P4::TypeChecking(&refMap, &typeMap, isv1),
+        new P4::TypeChecking(&refMap, &typeMap),
         new LowerExpressions(&typeMap),
-        new P4::ConstantFolding(&refMap, &typeMap, isv1),
+        new P4::ConstantFolding(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
     });

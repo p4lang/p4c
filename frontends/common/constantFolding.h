@@ -92,9 +92,9 @@ class DoConstantFolding : public Transform {
 
 class ConstantFolding : public PassManager {
  public:
-    ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
+    ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap) {
         if (typeMap != nullptr)
-            passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+            passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoConstantFolding(refMap, typeMap));
         setName("ConstantFolding");
     }

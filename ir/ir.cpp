@@ -71,7 +71,7 @@ void P4Parser::checkDuplicates() const {
 
 bool Type_Stack::sizeKnown() const { return size->is<Constant>(); }
 
-int Type_Stack::getSize() const {
+unsigned Type_Stack::getSize() const {
     if (!sizeKnown())
         BUG("%1%: Size not yet known", size);
     auto cst = size->to<IR::Constant>();
@@ -79,7 +79,10 @@ int Type_Stack::getSize() const {
         ::error("Index too large: %1%", cst);
         return 0;
     }
-    return cst->asInt();
+    int size = cst->asInt();
+    if (size <= 0)
+        ::error("Illegal array size: %1%", cst);
+    return static_cast<unsigned>(size);
 }
 
 const Method* Type_Extern::lookupMethod(cstring name, int paramCount) const {

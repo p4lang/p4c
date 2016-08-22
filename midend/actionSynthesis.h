@@ -102,8 +102,8 @@ class DoSynthesizeActions : public Transform {
 
 class SynthesizeActions : public PassManager {
  public:
-    SynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+    SynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoSynthesizeActions(refMap, typeMap));
         setName("SynthesizeActions");
     }
@@ -111,8 +111,8 @@ class SynthesizeActions : public PassManager {
 
 class MoveActionsToTables : public PassManager {
  public:
-    MoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+    MoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoMoveActionsToTables(refMap, typeMap));
         setName("MoveActionsToTables");
     }

@@ -40,10 +40,10 @@ void DoResetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type
             ::error("%1%: stack size is not a compile-time constant", tstack);
             return;
         }
-        for (int i = 0; i < tstack->getSize(); i++) {
+        for (unsigned i = 0; i < tstack->getSize(); i++) {
             auto index = new IR::Constant(i);
             auto elem = new IR::ArrayIndex(Util::SourceInfo(), expr, index);
-            generateResets(typeMap, tstack->baseType, elem, resets);
+            generateResets(typeMap, tstack->elementType, elem, resets);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ limitations under the License.
 namespace P4 {
 
 class ReferenceMap final : public ProgramMap {
+    bool isv1;  // if true this is a map for a P4 v1.0 program (P4-14)
     // Maps each path in the program to the corresponding declaration
     std::map<const IR::Path*, const IR::IDeclaration*> pathToDeclaration;
     std::set<const IR::IDeclaration*> used;
@@ -38,8 +39,10 @@ class ReferenceMap final : public ProgramMap {
     void setDeclaration(const IR::Path* path, const IR::IDeclaration* decl);
     void print() const { dbprint(std::cout); }
     void dbprint(std::ostream& cout) const;
+    void setIsV1(bool isv1) { this->isv1 = isv1; }
     cstring newName(cstring base);
     void clear();
+    bool isV1() const { return isv1; }
     bool isUsed(const IR::IDeclaration* decl) const { return used.count(decl) > 0; }
     void usedName(cstring name) { usedNames.insert(name); }
 };

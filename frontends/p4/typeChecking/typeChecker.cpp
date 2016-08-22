@@ -62,12 +62,12 @@ class ConstantTypeSubstitution : public Transform {
 }  // namespace
 
 TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap,
-                           bool isv1, bool updateExpressions) {
+                           bool updateExpressions) {
     addPasses({
-       new P4::ResolveReferences(refMap, isv1),
+       new P4::ResolveReferences(refMap),
        new P4::TypeInference(refMap, typeMap, true),
        updateExpressions ? new ApplyTypesToExpressions(typeMap) : nullptr,
-       updateExpressions ? new P4::ResolveReferences(refMap, isv1) : nullptr });
+       updateExpressions ? new P4::ResolveReferences(refMap) : nullptr });
     setName("TypeChecking");
     setStopOnError(true);
 }
@@ -1061,7 +1061,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
     if (!type->sizeKnown())
         typeError("%1%: Size of header stack type should be a constant", type);
 
-    auto etype = getType(type->baseType);
+    auto etype = getType(type->elementType);
     if (etype == nullptr)
         return type;
 
@@ -1374,8 +1374,8 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
             }
         }
     }
-    setType(getOriginal(), hst->baseType);
-    setType(expression, hst->baseType);
+    setType(getOriginal(), hst->elementType);
+    setType(expression, hst->elementType);
     return expression;
 }
 
@@ -2067,8 +2067,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 typeError("%1%: 'last' and 'next' for stacks cannot be used in a control",
                           expression);
             auto stack = type->to<IR::Type_Stack>();
-            setType(getOriginal(), stack->baseType);
-            setType(expression, stack->baseType);
+            setType(getOriginal(), stack->elementType);
+            setType(expression, stack->elementType);
             if (isLeftValue(expression->expr)) {
                 setLeftValue(expression);
                 setLeftValue(getOriginal<IR::Expression>());

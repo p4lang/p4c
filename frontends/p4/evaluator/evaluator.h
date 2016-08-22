@@ -80,7 +80,7 @@ class EvaluatorPass final : public PassManager, public IHasBlock {
     P4::Evaluator* evaluator;
  public:
     IR::ToplevelBlock* getToplevelBlock() override { return evaluator->getToplevelBlock(); }
-    EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap, bool anyOrder);
+    EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 }  // namespace P4

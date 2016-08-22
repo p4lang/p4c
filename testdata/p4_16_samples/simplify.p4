@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2016 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,18 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_MOVECONSTRUCTORS_H_
-#define _MIDEND_MOVECONSTRUCTORS_H_
+#include <core.p4>
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
+control c(out bool x) {
+    bit<32> x;
+    table t1 {
+        key = { x : exact; }
+        actions = { NoAction; }
+        default_action = NoAction();
+    }
+    table t2 {
+        key = { x : exact; }
+        actions = { NoAction; }
+        default_action = NoAction();
+    }
+    apply {
+        x = true;
+        if (t1.apply().hit && t2.apply().hit)
+            x = false;
+    }
+}
 
-namespace P4 {
+control proto(out bool x);
+package top(proto p);
 
-class MoveConstructors : public PassManager {
- public:
-    MoveConstructors(ReferenceMap* refMap);
-};
-
-}  // namespace P4
-
-#endif /* _MIDEND_MOVECONSTRUCTORS_H_ */
+top(c()) main;

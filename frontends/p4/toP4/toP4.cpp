@@ -201,7 +201,7 @@ bool ToP4::preorder(const IR::Type_Name* t) {
 
 bool ToP4::preorder(const IR::Type_Stack* t) {
     dump(2);
-    visit(t->baseType);
+    visit(t->elementType);
     builder.append("[");
     visit(t->size);
     builder.append("]");

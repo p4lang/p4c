@@ -162,14 +162,12 @@ class AbstractInliner : public Transform {
  protected:
     InlineWorkList* list;
     InlineSummary*  toInline;
-    bool            p4v1;
-    AbstractInliner() : list(nullptr), toInline(nullptr), p4v1(false) {}
+    AbstractInliner() : list(nullptr), toInline(nullptr) {}
  public:
-    void prepare(InlineWorkList* list, InlineSummary* toInline, bool p4v1) {
+    void prepare(InlineWorkList* list, InlineSummary* toInline) {
         CHECK_NULL(list); CHECK_NULL(toInline);
         this->list = list;
         this->toInline = toInline;
-        this->p4v1 = p4v1;
     }
 
     Visitor::profile_t init_apply(const IR::Node* node) {
@@ -183,12 +181,10 @@ class AbstractInliner : public Transform {
 class InlineDriver : public Transform {
     InlineWorkList*  toInline;
     AbstractInliner* inliner;
-    bool             p4v1;
  public:
-    explicit InlineDriver(InlineWorkList* toInline, AbstractInliner* inliner, bool p4v1) :
-            toInline(toInline), inliner(inliner), p4v1(p4v1)
+    InlineDriver(InlineWorkList* toInline, AbstractInliner* inliner) :
+            toInline(toInline), inliner(inliner)
     { CHECK_NULL(toInline); CHECK_NULL(inliner); setName("InlineDriver"); }
-
     // Not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.
     const IR::Node* preorder(IR::P4Program* program) override;
@@ -236,11 +232,12 @@ class GeneralInliner : public AbstractInliner {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     InlineSummary::PerCaller* workToDo;
-    bool isv1;
  public:
     explicit GeneralInliner(bool isv1) :
-            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr), isv1(isv1)
-    { setName("GeneralInliner"); }
+            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr) {
+        setName("GeneralInliner");
+        refMap->setIsV1(isv1);
+    }
     // controlled visiting order
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
     const IR::Node* preorder(IR::P4Control* caller) override;
@@ -252,11 +249,11 @@ class GeneralInliner : public AbstractInliner {
 class Inline : public PassManager {
     InlineWorkList toInline;
  public:
-    Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator, bool isv1) {
-        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+    Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DiscoverInlining(&toInline, refMap, typeMap, evaluator));
-        passes.push_back(new InlineDriver(&toInline, new P4::GeneralInliner(isv1), isv1));
-        passes.push_back(new RemoveAllUnusedDeclarations(refMap, isv1));
+        passes.push_back(new InlineDriver(&toInline, new P4::GeneralInliner(refMap->isV1())));
+        passes.push_back(new RemoveAllUnusedDeclarations(refMap));
         setName("Inline");
     }
 };

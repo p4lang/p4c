@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ class TypeCheck::Pass1 : public Transform {
         if (auto ht = ref->base()->type->to<IR::Type_StructLike>())
             ref->type = ht;
         else if (auto hst = ref->base()->type->to<IR::Type_Stack>())
-            ref->type = hst->baseType;
+            ref->type = hst->elementType;
         else
             error("%s: %s is not a header", ref->base()->srcInfo, ref->base()->toString());
         return ref; }

@@ -48,8 +48,8 @@ class DoResetHeaders : public Transform {
 
 class ResetHeaders : public PassManager {
  public:
-    ResetHeaders(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-        passes.push_back(new P4::TypeChecking(refMap, typeMap, isv1));
+    ResetHeaders(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new P4::DoResetHeaders(typeMap));
         setName("ResetHeaders");
     }

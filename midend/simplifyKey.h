@@ -73,10 +73,11 @@ class DoSimplifyKey : public Transform {
     const IR::Node* postorder(IR::P4Table* table) override;
 };
 
+// Use a policy to decide when a key expression is too complex.
 class SimplifyKey : public PassManager {
  public:
-    SimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, bool isv1, const KeyIsComplex* policy) {
-        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+    SimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, const KeyIsComplex* policy) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoSimplifyKey(refMap, typeMap, policy));
         setName("SimplifyKey");
     }

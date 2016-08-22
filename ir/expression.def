@@ -116,24 +116,28 @@ class LOr : Operation_Binary {
     precedence = DBPrint::Prec_LOr;
 }
 
+abstract Literal : Expression, CompileTimeValue {
+#nodbprint
+}
+
 // This is an integer literal on arbitrary-precision.
-class Constant : Expression, CompileTimeValue {
+class Constant : Literal {
     mpz_class value;
     optional unsigned  base;  // base used when reading/writing
 #noconstructor
     // if noWarning is true, no warning is emitted
     void handleOverflow(bool noWarning);
     Constant(intmax_t v, unsigned base = 10) :
-            Expression(new Type_InfInt()), value(v), base(base) {}
+            Literal(new Type_InfInt()), value(v), base(base) {}
     Constant(mpz_class v, unsigned base = 10) :
-            Expression(new Type_InfInt()), value(v), base(base) {}
+            Literal(new Type_InfInt()), value(v), base(base) {}
     Constant(Util::SourceInfo si, mpz_class v, unsigned base = 10) :
-            Expression(si, new Type_InfInt()), value(v), base(base) {}
+            Literal(si, new Type_InfInt()), value(v), base(base) {}
     Constant(const Type *t, mpz_class v, unsigned base = 10, bool noWarning = false) :
-            Expression(t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
+            Literal(t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
     Constant(Util::SourceInfo si, const Type *t, mpz_class v,
              unsigned base = 10, bool noWarning = false) :
-            Expression(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
+            Literal(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
 #emit
     static Constant GetMask(unsigned width);
 #end
@@ -161,12 +165,12 @@ class Constant : Expression, CompileTimeValue {
     visit_children { v.visit(type, "type"); }
 }
 
-class BoolLiteral : Expression, CompileTimeValue {
+class BoolLiteral : Literal {
     bool value;
     toString{ return value ? "true" : "false"; }
 }
 
-class StringLiteral : Expression {
+class StringLiteral : Literal {
     cstring value;
     validate{ if (value.isNull()) BUG("null StringLiteral"); }
     toString{ return cstring("\"") + value + "\""; }
@@ -257,6 +261,12 @@ class Cast : Operation_Unary {
     stringOp = "(cast)";
     toString{ return "cast"; }
     validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
+}
+
+class SelectCase {
+    Expression     keyset;
+    PathExpression state;
+#nodbprint
 }
 
 class SelectExpression : Expression {

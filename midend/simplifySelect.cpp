@@ -27,10 +27,10 @@ void DoSimplifySelect::checkSimpleConstant(const IR::Expression* expr) const {
         return;
     if (expr->is<IR::BoolLiteral>())
         return;
-    if (expr->is<IR::Mask>()) {
-        auto mask = expr->to<IR::Mask>();
-        checkSimpleConstant(mask->left);
-        checkSimpleConstant(mask->right);
+    if (expr->is<IR::Mask>() || expr->is<IR::Range>()) {
+        auto bin = expr->to<IR::Operation_Binary>();
+        checkSimpleConstant(bin->left);
+        checkSimpleConstant(bin->right);
         return;
     }
     if (expr->is<IR::ListExpression>()) {

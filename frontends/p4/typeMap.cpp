@@ -112,7 +112,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     if (left->is<IR::Type_Stack>()) {
         auto ls = left->to<IR::Type_Stack>();
         auto rs = right->to<IR::Type_Stack>();
-        return equivalent(ls->baseType, rs->baseType) &&
+        return equivalent(ls->elementType, rs->elementType) &&
                 ls->getSize() == rs->getSize();
     }
     if (left->is<IR::Type_Enum>()) {

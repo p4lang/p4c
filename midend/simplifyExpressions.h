@@ -59,8 +59,8 @@ class DoSimplifyExpressions : public Transform {
 
 class SimplifyExpressions : public PassManager {
  public:
-    SimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) {
-        passes.push_back(new TypeChecking(refMap, typeMap, isv1));
+    SimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoSimplifyExpressions(refMap, typeMap));
         setName("SimplifyExpressions");
     }

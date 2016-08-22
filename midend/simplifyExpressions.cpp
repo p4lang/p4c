@@ -53,9 +53,33 @@ class DismantleExpression : public Transform {
         return expression;
     }
 
+    const IR::Node* postorder(IR::Member* expression) override {
+        LOG1("Visiting " << expression);
+        auto tbl = TableApplySolver::isHit(expression, refMap, typeMap);
+        auto ctx = getContext();
+        if (tbl == nullptr || ctx == nullptr)
+            return expression;
+
+        auto type = typeMap->getType(getOriginal(), true);
+        auto tmp = refMap->newName("tmp");
+        auto decl = new IR::Declaration_Variable(
+            Util::SourceInfo(), IR::ID(tmp), IR::Annotations::empty,
+            type, nullptr);
+        result->temporaries->push_back(decl);
+        auto left = new IR::PathExpression(IR::ID(tmp));
+        auto stat = new IR::AssignmentStatement(
+            Util::SourceInfo(), left, expression);
+        result->statements->push_back(stat);
+        result->final = left->clone();
+        LOG1(expression << " replaced with " << left << " = " << expression);
+        typeMap->setType(result->final, type);
+        return result->final;
+    }
+
     const IR::Node* postorder(IR::MethodCallExpression* mce) override {
         LOG1("Visiting " << mce);
-        if (!SideEffects::check(mce, refMap, typeMap)) {
+        auto orig = getOriginal<IR::MethodCallExpression>();
+        if (!SideEffects::check(orig, refMap, typeMap)) {
             result->final = mce;
             return mce;
         }
@@ -84,11 +108,11 @@ class DismantleExpression : public Transform {
                 Util::SourceInfo(), left, mce);
             result->statements->push_back(stat);
             result->final = left->clone();
+            typeMap->setType(result->final, type);
             LOG1(mce << " replaced with " << left << " = " << mce);
         } else {
             result->final = mce;
         }
-        typeMap->setType(result->final, type);
         return result->final;
     }
 
