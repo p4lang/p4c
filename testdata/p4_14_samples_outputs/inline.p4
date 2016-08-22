@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/p4include/core.p4"
-#include "/home/cdodd/p4c/p4include/v1model.p4"
+#include <core.p4>
+#include <v1model.p4>
 
 struct h {
     bit<1> b;

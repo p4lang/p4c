@@ -212,7 +212,7 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
             if (stream != nullptr) {
                 if (verbose)
                     std::cerr << "Writing program to " << fileName << std::endl;
-                P4::ToP4 toP4(stream, verbose);
+                P4::ToP4 toP4(stream, verbose, file);
                 node->apply(toP4);
             }
         }
