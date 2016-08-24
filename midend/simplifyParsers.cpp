@@ -22,51 +22,12 @@ namespace {
 // All the classes in this namespace are invoked on each parser
 // independently.
 
-typedef CallGraph<const IR::ParserState*> CG;
-
-class ScanParser : public Inspector {
-    const ReferenceMap* refMap;
-    CG* transitions;
-
- public:
-    ScanParser(const ReferenceMap* refMap, CG* transitions) :
-            refMap(refMap), transitions(transitions) {
-        CHECK_NULL(refMap); CHECK_NULL(transitions);
-        setName("ScanParser");
-    }
-    bool preorder(const IR::PathExpression* expression) override {
-        auto state = findContext<IR::ParserState>();
-        if (state != nullptr) {
-            auto decl = refMap->getDeclaration(expression->path);
-            if (decl != nullptr && decl->is<IR::ParserState>())
-                transitions->calls(state, decl->to<IR::ParserState>());
-        }
-        return false;
-    }
-    void postorder(const IR::SelectExpression* expression) override {
-        // transition (..) { ... } may imply a transition to
-        // "reject" - if none of the cases matches.
-        for (auto c : expression->selectCases) {
-            if (c->keyset->is<IR::DefaultExpression>())
-                // If we have a default case this will always match
-                return;
-        }
-        auto state = findContext<IR::ParserState>();
-        auto parser = findContext<IR::P4Parser>();
-        CHECK_NULL(state);
-        CHECK_NULL(parser);
-        auto reject = parser->getDeclByName(IR::ParserState::reject);
-        CHECK_NULL(reject);
-        transitions->calls(state, reject->to<IR::ParserState>());
-    }
-};
-
 class RemoveUnreachableStates : public Transform {
-    CG* transitions;
+    ParserCallGraph* transitions;
     std::set<const IR::ParserState*> reachable;
 
  public:
-    explicit RemoveUnreachableStates(CG* transitions) :
+    explicit RemoveUnreachableStates(ParserCallGraph* transitions) :
             transitions(transitions)
     { CHECK_NULL(transitions); setName("RemoveUnreachableStates"); }
 
@@ -99,13 +60,13 @@ class RemoveUnreachableStates : public Transform {
 
 // This is only invoked on parsers
 class CollapseChains : public Transform {
-    CG* transitions;
+    ParserCallGraph* transitions;
     std::map<const IR::ParserState*, const IR::ParserState*> chain;
     ordered_set<const IR::ParserState*> chainStart;
 
  public:
-    explicit CollapseChains(CG* transitions) : transitions(transitions)
-    { CHECK_NULL(transitions); }
+    explicit CollapseChains(ParserCallGraph* transitions) : transitions(transitions)
+    { CHECK_NULL(transitions); setName("CollapseChains"); }
 
     const IR::Node* preorder(IR::P4Parser* parser) override {
         std::map<const IR::ParserState*, const IR::ParserState*> pred;
@@ -120,7 +81,8 @@ class CollapseChains : public Transform {
                 continue;
             auto next = *outedges->begin();
             if (next->name == IR::ParserState::accept ||
-                next->name == IR::ParserState::reject)
+                next->name == IR::ParserState::reject ||
+                next->name == IR::ParserState::start)
                 continue;
             auto callers = transitions->getCallers(next);
             if (callers->size() != 1)
@@ -136,8 +98,12 @@ class CollapseChains : public Transform {
 
         for (auto e : pred) {
             auto crt = e.first;
-            while (pred.find(crt) != pred.end())
-                crt = pred.find(crt)->second;
+            while (pred.find(crt) != pred.end()) {
+                auto prev = pred.find(crt)->second;
+                if (prev == e.first)  // this could be a cycle, e.g., start->start
+                    break;
+                crt = prev;
+            }
             chainStart.emplace(crt);
         }
 
@@ -173,12 +139,13 @@ class CollapseChains : public Transform {
 
 // This is invoked on each parser separately
 class SimplifyParser : public PassManager {
-    CG transitions;
+    ParserCallGraph transitions;
  public:
     explicit SimplifyParser(ReferenceMap* refMap) : transitions("transitions") {
-        passes.push_back(new ScanParser(refMap, &transitions));
+        passes.push_back(new ComputeParserCG(refMap, &transitions));
         passes.push_back(new RemoveUnreachableStates(&transitions));
         passes.push_back(new CollapseChains(&transitions));
+        setName("SimplifyParser");
     }
 };
 

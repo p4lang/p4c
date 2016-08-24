@@ -26,7 +26,7 @@ namespace BMV2 {
 cstring nameFromAnnotation(const IR::Annotations* annotations, cstring defaultValue);
 
 // This CFG is only good for BMV2, which only cares about some Nodes in the program
-class CFG {
+class CFG : public IHasDbPrint {
  public:
     class Edge;
 

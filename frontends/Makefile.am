@@ -54,6 +54,8 @@ p4_frontend_SOURCES = \
 	frontends/p4/enumInstance.h \
 	frontends/p4/methodInstance.h \
 	frontends/p4/methodInstance.cpp \
+	frontends/p4/parserCallGraph.h \
+	frontends/p4/parserCallGraph.cpp \
 	frontends/p4/tableApply.h \
 	frontends/p4/tableApply.cpp \
 	frontends/p4/simplify.h \

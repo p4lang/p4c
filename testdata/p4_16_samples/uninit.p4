@@ -13,26 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "core.p4"
 
-extern E {
-    bit<32> call();
+#include <core.p4>
+
+header Header {
+    bit<32> data1;
+    bit<32> data2;
 }
 
-control c() {
-    action a() {}
-    table t(E e) {
-        key = { e.call() : exact; }
-        actions = { a; }
-        default_action = a;
+extern void f(in Header h);
+
+parser p1(packet_in p, out Header h) {
+    state start {
+        h.data1 = 0;
+        f(h);  // uninitialized
+        transition next;
     }
-    E() einst;
-    apply {
-        t.apply(einst);
+
+    state next {
+        h.data2 = h.data2 + 1;  // uninitialized
+        transition accept;
     }
 }
 
-control none();
-package top(none n);
+parser proto(packet_in p, out Header h);
+package top(proto _p);
 
-top(c()) main;
+top(p1()) main;

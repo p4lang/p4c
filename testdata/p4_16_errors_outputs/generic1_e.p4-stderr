@@ -1,24 +1,24 @@
 ../testdata/p4_16_errors/generic1_e.p4(21): error: Type parameters needed for x
-control p1(in If x)
-                 ^
+control p1(If x)
+              ^
 ../testdata/p4_16_errors/generic1_e.p4(26): error: If<...>: Type If has 1 type parameter(s), but it is specialized with 2
-control p2(in If<int<32>, int<32>> x)
-              ^^^^^^^^^^^^^^^^^^^^
+control p2(If<int<32>, int<32>> x)
+           ^^^^^^^^^^^^^^^^^^^^
 ../testdata/p4_16_errors/generic1_e.p4(16)
 extern If<T>
        ^^
 ../testdata/p4_16_errors/generic1_e.p4(26): error: Could not find type of If<...>
-control p2(in If<int<32>, int<32>> x)
-              ^^^^^^^^^^^^^^^^^^^^
+control p2(If<int<32>, int<32>> x)
+           ^^^^^^^^^^^^^^^^^^^^
 ../testdata/p4_16_errors/generic1_e.p4(26): error: If<...>: Type If has 1 type parameter(s), but it is specialized with 2
-control p2(in If<int<32>, int<32>> x)
-              ^^^^^^^^^^^^^^^^^^^^
+control p2(If<int<32>, int<32>> x)
+           ^^^^^^^^^^^^^^^^^^^^
 ../testdata/p4_16_errors/generic1_e.p4(16)
 extern If<T>
        ^^
 ../testdata/p4_16_errors/generic1_e.p4(26): error: If<...>: Type If has 1 type parameter(s), but it is specialized with 2
-control p2(in If<int<32>, int<32>> x)
-              ^^^^^^^^^^^^^^^^^^^^
+control p2(If<int<32>, int<32>> x)
+           ^^^^^^^^^^^^^^^^^^^^
 ../testdata/p4_16_errors/generic1_e.p4(16)
 extern If<T>
        ^^

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,3 +15,9 @@ limitations under the License.
 */
 
 @name("original") const bit b = 1;
+@name("string \" with \" quotes") const bit c = 1;
+@name("string with
+newline") const bit d = 1;
+@name("string with quoted \
+newline") const bit e = 1;
+@name("8-bit string ⟶") const bit f = 1;

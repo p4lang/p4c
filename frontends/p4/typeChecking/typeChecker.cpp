@@ -218,6 +218,19 @@ const IR::TypeParameters* TypeInference::canonicalize(const IR::TypeParameters* 
         return params;
 }
 
+bool TypeInference::checkParameters(const IR::ParameterList* paramList) const {
+    for (auto p : *paramList->parameters) {
+        if (p->direction != IR::Direction::None) {
+            auto type = getType(p->type);
+            if (type->is<IR::Type_Extern>()) {
+                ::error("%1%: a parameter with an extern type cannot have a direction", p);
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 /**
  * Bind the parameters with the specified arguments.
  * @param arguments      Arguments to bind to the type's typeParameters.
@@ -293,6 +306,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tps = canonicalize(tp->typeParameters);
         if (pl == nullptr || tps == nullptr)
             return nullptr;
+        if (!checkParameters(pl))
+            return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Parser(tp->srcInfo, tp->name, tp->annotations, tps, pl);
         return type;
@@ -301,6 +316,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto pl = canonicalize(tp->applyParams);
         auto tps = canonicalize(tp->typeParameters);
         if (pl == nullptr || tps == nullptr)
+            return nullptr;
+        if (!checkParameters(pl))
             return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Control(tp->srcInfo, tp->name, tp->annotations, tps, pl);
@@ -390,6 +407,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tps = canonicalize(mt->typeParameters);
         if (pl == nullptr || tps == nullptr)
             return nullptr;
+        if (!checkParameters(pl))
+            return nullptr;
         changes = changes || pl != mt->parameters || tps != mt->typeParameters;
         const IR::Type* resultType = mt;
         if (changes)
@@ -467,8 +486,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         (void)result->apply(tc);
         return result;
     }
-    BUG("Unhandled type %1%", type);
-    // unreachable
+    // If we reach this point some type error must have occurred, because
+    // the typeMap lookup at the beginning of the function has failed.
     return nullptr;
 }
 

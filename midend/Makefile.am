@@ -43,6 +43,8 @@ midend_SOURCES = \
 	midend/removeLeftSlices.h \
 	midend/resetHeaders.cpp \
 	midend/resetHeaders.h \
+	midend/simplifyDefUse.cpp \
+	midend/simplifyDefUse.h \
 	midend/simplifyExpressions.cpp \
 	midend/simplifyExpressions.h \
 	midend/simplifyKey.h \

@@ -62,7 +62,7 @@ class Local(object):
 
 def run_timeout(options, args, timeout, stderr):
     if options.verbose:
-        print("Executing ", " ".join(args))
+        print(" ".join(args))
     local = Local()
     local.process = None
     def target():

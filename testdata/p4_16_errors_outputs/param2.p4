@@ -1,4 +1,4 @@
-#include "/home/cdodd/p4c/p4include/core.p4"
+#include <core.p4>
 
 extern E {
     bit<32> call();
@@ -7,7 +7,7 @@ extern E {
 control c() {
     action a() {
     }
-    table t(in E e) {
+    table t(E e) {
         key = {
             e.call(): exact;
         }

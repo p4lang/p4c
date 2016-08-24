@@ -27,7 +27,7 @@ namespace P4 {
 
 /* Maps objects of type T to types. */
 template <class T>
-class TypeSubstitution {
+class TypeSubstitution : public IHasDbPrint {
  protected:
     std::map<T, const IR::Type*> binding;
     /* True if this is the empty substitution, which does not replace anything. */

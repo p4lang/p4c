@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/callGraph.h"
+#include "frontends/p4/parserCallGraph.h"
 
 namespace P4 {
 

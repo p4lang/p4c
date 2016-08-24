@@ -32,6 +32,7 @@ limitations under the License.
 #include "midend/simplifyParsers.h"
 #include "midend/resetHeaders.h"
 #include "midend/simplifySelect.h"
+#include "midend/simplifyDefUse.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -60,6 +61,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::UniqueNames(&refMap),  // Give each local declaration a unique internal name
         new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new P4::MoveInitializers(),
+        new P4::SimplifyDefUse(&refMap, &typeMap),
         new P4::SimplifyExpressions(&refMap, &typeMap),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),

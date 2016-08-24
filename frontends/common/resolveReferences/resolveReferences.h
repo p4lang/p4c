@@ -29,7 +29,7 @@ enum class ResolutionType {
     TypeVariable
 };
 
-class ResolutionContext {
+class ResolutionContext : public IHasDbPrint {
     std::vector<const IR::INamespace*> stack;
     const IR::INamespace* rootNamespace;
     std::vector<const IR::INamespace*> globals;  // errors and match_kind

@@ -23,13 +23,15 @@ void parseLineNumber(const char* text)
         ErrorReporter::instance.parser_error("Error parsing line number %s", text);
 }
 
+std::string stringLiteral;
+
 %}
 
 %option noyywrap nounput noinput noyyget_leng
 %option noyyget_debug noyyset_debug noyyget_extra noyyset_extra noyyget_in noyyset_in
 %option noyyget_out noyyset_out noyyget_text noyyget_lineno noyyset_lineno
 
-%x COMMENT
+%x COMMENT STRING
 %x LINE1 LINE2 LINE3
 %s NORMAL
 
@@ -57,9 +59,14 @@ void parseLineNumber(const char* text)
 <LINE1,LINE2,LINE3>\n { BEGIN(INITIAL); }
 <LINE1,LINE2,LINE3,COMMENT,NORMAL><<EOF>> { BEGIN(INITIAL); }
 
-\"[^\"]*\"      { BEGIN(NORMAL);
-                  yylval.str = cstring(yytext).substr(1, strlen(yytext) - 2);
+\"              { BEGIN(STRING); stringLiteral = ""; }
+<STRING>\\\"    { stringLiteral += yytext; }
+<STRING>\\\\    { stringLiteral += yytext; }
+<STRING>\"      { BEGIN(INITIAL);
+                  yylval.str = cstring(stringLiteral);
                   return(STRING_LITERAL); }
+<STRING>.       { stringLiteral += yytext; }
+<STRING>\n      { stringLiteral += yytext; }
 
 "abstract"      { BEGIN(NORMAL); return ABSTRACT; }
 "action"        { BEGIN(NORMAL); return ACTION; }

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ namespace P4 {
 // Base class for various maps.
 // A map is computed on a certain P4Program.
 // If the program has not changed, the map is up-to-date.
-class ProgramMap {
+class ProgramMap : public IHasDbPrint {
  protected:
     const IR::P4Program* program = nullptr;
     cstring mapKind;
