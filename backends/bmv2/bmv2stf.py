@@ -158,9 +158,13 @@ class TableKeyInstance(object):
             key = m.group(1) + "[" + m.group(2) + "]" + m.group(3)
 
         found = False
-        for i in self.key.fields:
-            if key == i:
-                found = True
+        if key in self.key.fields:
+            found = True
+        else:
+            for i in self.key.fields:
+                if i.endswith("." + key):
+                    key = i
+                    found = True
         if not found:
             raise Exception("Unexpected key field " + key)
         self.values[key] = self.makeMask(value, ternary)
@@ -547,4 +551,4 @@ def main(argv):
     return result
 
 if __name__ == "__main__":
-    main(sys.argv)
+    sys.exit(main(sys.argv))
