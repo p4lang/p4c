@@ -50,6 +50,9 @@ static inline int builtin_ctz(unsigned long long x) { return __builtin_ctzll(x);
 static inline int builtin_clz(unsigned x) { return __builtin_clz(x); }
 static inline int builtin_clz(unsigned long x) { return __builtin_clzl(x); }
 static inline int builtin_clz(unsigned long long x) { return __builtin_clzll(x); }
+static inline int builtin_popcount(unsigned x) { return __builtin_popcount(x); }
+static inline int builtin_popcount(unsigned long x) { return __builtin_popcountl(x); }
+static inline int builtin_popcount(unsigned long long x) { return __builtin_popcountll(x); }
 #endif
 
 class bitvec {
@@ -73,7 +76,7 @@ class bitvec {
      public:
         bitref(const bitref &a) = default;
         bitref(bitref &&a) = default;
-        explicit operator bool() const { return self.getbit(idx); }
+        operator bool() const { return self.getbit(idx); }
         bool operator==(const bitref &a) const { return &self == &a.self && idx == a.idx; }
         bool operator!=(const bitref &a) const { return &self != &a.self || idx != a.idx; }
         int index() const { return idx; }
@@ -357,6 +360,16 @@ class bitvec {
     bitvec &operator<<=(size_t count);
     bitvec operator>>(size_t count) const { bitvec rv(*this); rv >>= count; return rv; }
     bitvec operator<<(size_t count) const { bitvec rv(*this); rv <<= count; return rv; }
+    int popcount() const {
+        int rv = 0;
+        for (size_t i = 0; i < size; i++)
+#if defined(__GNUC__) || defined(__clang__)
+            rv += builtin_popcount(word(i));
+#else
+            for (auto v = word(i); v; v &= v-1)
+                ++rv;
+#endif
+        return rv; }
 
  private:
     void expand(size_t newsize) {

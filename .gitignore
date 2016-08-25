@@ -39,6 +39,7 @@ otherMakefiles.am
 *.d
 *.output
 build/
+*.pyc
 
 # Eclipse files
 .cproject

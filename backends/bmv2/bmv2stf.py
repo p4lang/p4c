@@ -44,17 +44,19 @@ class Options(object):
     def __init__(self):
         self.binary = None
         self.verbose = False
+        self.preserveTmp = False
 
-def nextWord(text, sep = " "):
+def nextWord(text, sep = None):
     # Split a text at the indicated separator.
     # Note that the separator can be a string.
     # Separator is discarded.
-    pos = text.find(sep)
-    if pos < 0:
-        return text, ""
-    l, r = text[0:pos].strip(), text[pos+len(sep):len(text)].strip()
-    # print(text, "/", sep, "->", l, "#", r)
-    return l, r
+    spl = text.split(sep, 1)
+    if len(spl) == 0:
+        return '', ''
+    elif len(spl) == 1:
+        return spl[0].strip(), ''
+    else:
+        return spl[0].strip(), spl[1].strip()
 
 def ByteToHex(byteStr):
     return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
@@ -65,10 +67,6 @@ def HexToByte(hexStr):
     for i in range(0, len(hexStr), 2):
         bytes.append( chr( int (hexStr[i:i+2], 16 ) ) )
     return ''.join( bytes )
-
-def isError(p4filename):
-    # True if the filename represents a p4 program that should fail
-    return "_errors" in p4filename
 
 def reportError(*message):
     print("***", *message)
@@ -261,10 +259,12 @@ class RunBMV2(object):
 
         self.clifile = folder + "/cli.txt"
         self.jsonfile = jsonfile
-        self.clifd = open(self.clifile, "w")
+        self.stffile = None
         self.folder = folder
         self.pcapPrefix = "pcap"
-        self.packets = {}
+        self.interfaces = {}
+        self.expected = {}
+        self.packetDelay = 0
         self.options = options
         self.json = None
         self.tables = []
@@ -280,25 +280,36 @@ class RunBMV2(object):
             self.tables.append(BMV2Table(t))
         for t in self.json["pipelines"][1]["tables"]:
             self.tables.append(BMV2Table(t))
-    def createEmptyPcapFile(self, fname):
-        fp = open(fname, 'wb')
-        fp.write('\xd4\xc3\xb2\xa1')  # magic number
-        fp.write('\2\0\4\0')          # version
-        fp.write('\0\0\0\0\0\0\0\0')
-        fp.write('\0\0\0\0\0\0\0\0')
-        fp.close()
-    def writeCommand(self, line):
-        self.clifd.write(line + "\n")
     def filename(self, interface, direction):
         return self.folder + "/" + self.pcapPrefix + interface + "_" + direction + ".pcap"
-    def translate_command(self, cmd):
+    def do_cli_command(self, cmd):
+        if self.options.verbose:
+            print(cmd)
+        self.cli_stdin.write(cmd + "\n")
+        self.cli_stdin.flush()
+        self.packetDelay = 1
+    def do_command(self, cmd):
         first, cmd = nextWord(cmd)
-        if first == "add":
-            return self.parse_table_add(cmd)
+        if first == "":
+            pass
+        elif first == "add":
+            self.do_cli_command(self.parse_table_add(cmd))
         elif first == "setdefault":
-            return self.parse_table_set_default(cmd)
+            self.do_cli_command(self.parse_table_set_default(cmd))
+        elif first == "packet":
+            interface, data = nextWord(cmd)
+            data = ''.join(data.split())
+            time.sleep(self.packetDelay)
+            self.interfaces[interface]._write_packet(HexToByte(data))
+            self.interfaces[interface].flush()
+            self.packetDelay = 0
+        elif first == "expect":
+            interface, data = nextWord(cmd)
+            data = ''.join(data.split())
+            self.expected.setdefault(interface, []).append(data)
         else:
-            return None
+            if self.options.verbose:
+                print("ignoring stf command:", first, cmd)
     def parse_table_set_default(self, cmd):
         tableName, cmd = nextWord(cmd)
         table = self.tableByName(tableName)
@@ -363,64 +374,29 @@ class RunBMV2(object):
             if t.name == tableName:
                 return t
         raise Exception("Could not find table " + tableName)
-    def writePacket(self, inout, interface, data):
-        if not interface in self.packets:
-            self.packets[interface] = {}
-        if not inout in self.packets[interface]:
-            self.packets[interface][inout] = []
-        data = data.replace(" ", "")
-        if len(data) % 2 == 1:
-            reportError("Packet data is not integral number of bytes:", len(data), "hex digits:", data)
-            return FAILURE
-        self.packets[interface][inout].append(data)
-        return SUCCESS
-    def interfaces(self):
+    def interfaceArgs(self):
         # return list of interface names suitable for bmv2
         result = []
-        for interface, v in self.packets.iteritems():
+        for interface in sorted(self.interfaces):
             result.append("-i " + interface + "@" + self.pcapPrefix + interface)
         return result
-    def translate_packet(self, line):
-        cmd, line = nextWord(line)
-        if cmd == "expect":
-            direction = "out"
-        elif cmd == "packet":
-            direction = "in"
-        else:
-            return SUCCESS
-        interface, line = nextWord(line)
-        return self.writePacket(direction, interface, line)
     def generate_model_inputs(self, stffile):
+        self.stffile = stffile
         with open(stffile) as i:
             for line in i:
-                cmd = self.translate_command(line)
-                if cmd is not None:
-                    if self.options.verbose:
-                        print(cmd)
-                    self.writeCommand(cmd)
-                else:
-                    success = self.translate_packet(line)
-                    if success != SUCCESS:
-                        return success
-        # Write the data to the files
-        self.clifd.close()
-        for interface, v in self.packets.iteritems():
-            direction ="in"
-            file = self.filename(interface, direction)
-            if direction in v:
-                packets = v[direction]
-                data = [Packet(_pkt=HexToByte(hx)) for hx in packets]
-                print("Creating", file)
-                wrpcap(file, data)
-            else:
-                print("Empty", file)
-                self.createEmptyPcapFile(file)
+                line, comment = nextWord(line, "#")
+                first, cmd = nextWord(line)
+                if first == "packet" or first == "expect":
+                    interface, cmd = nextWord(cmd)
+                    if not interface in self.interfaces:
+                        # Can't open the interfaces yet, as that would block
+                        ifname = self.interfaces[interface] = self.filename(interface, "in")
+                        os.mkfifo(ifname)
         return SUCCESS
     def run(self):
         if self.options.verbose:
             print("Running model")
-        interfaces = self.interfaces()
-        wait = 2  # Time to wait before model starts running
+        wait = 0  # Time to wait before model starts running
 
         concurrent = ConcurrentInteger(os.getcwd(), 1000)
         rand = concurrent.generate()
@@ -432,25 +408,37 @@ class RunBMV2(object):
         try:
             runswitch = ["simple_switch", "--log-file", self.switchLogFile,
                          "--use-files", str(wait), "--thrift-port", thriftPort,
-                         "--device-id", str(rand)] + interfaces + ["../" + self.jsonfile]
+                         "--device-id", str(rand)] + self.interfaceArgs() + ["../" + self.jsonfile]
             if self.options.verbose:
                 print("Running", " ".join(runswitch))
             sw = subprocess.Popen(runswitch, cwd=self.folder)
 
+            # open input interfaces
+            # DANGER -- it is critical that we open these fifos in the same order as bmv2,
+            # as otherwise we'll deadlock.  Would be nice if we could open nonblocking.
+            for interface in sorted(self.interfaces):
+                ifname = self.interfaces[interface]
+                fp = self.interfaces[interface] = RawPcapWriter(ifname, linktype=0)
+                fp._write_header(None)
+
             runcli = ["simple_switch_CLI", "--thrift-port", thriftPort]
             if self.options.verbose:
                 print("Running", " ".join(runcli))
-            i = open(self.clifile, 'r')
-            # The CLI has to run before the model starts running; so this is a little race.
-            # If the race turns out wrong the test will fail, which is unfortunate.
-            # This should be fixed by improving the CLI/simple_switch programs.
-            cli = subprocess.Popen(runcli, cwd=self.folder, stdin=i)
+            cli = subprocess.Popen(runcli, cwd=self.folder, stdin=subprocess.PIPE)
+            self.cli_stdin = cli.stdin
+            with open(self.stffile) as i:
+                for line in i:
+                    line, comment = nextWord(line, "#")
+                    self.do_command(line)
+            cli.stdin.close()
+            for interface, fp in self.interfaces.iteritems():
+                fp.close()
             cli.wait()
             if cli.returncode != 0:
                 reportError("CLI process failed with exit code", cli.returncode)
                 return FAILURE
             # Give time to the model to execute
-            time.sleep(3)
+            time.sleep(1)
             sw.terminate()
             sw.wait()
             # This only works on Unix: negative returncode is
@@ -465,8 +453,8 @@ class RunBMV2(object):
             print("Execution completed")
         return SUCCESS
     def comparePacket(self, expected, received):
-        received = ByteToHex(str(received)).replace(" ", "").upper()
-        expected = expected.replace(" ", "").upper()
+        received = ''.join(ByteToHex(str(received)).split()).upper()
+        expected = ''.join(expected.split()).upper()
         if len(received) < len(expected):
             reportError("Received packet too short", len(received), "vs", len(expected))
             return FAILURE
@@ -485,7 +473,7 @@ class RunBMV2(object):
     def checkOutputs(self):
         if self.options.verbose:
             print("Comparing outputs")
-        for interface, v in self.packets.iteritems():
+        for interface, expected in self.expected.iteritems():
             direction = "out"
             file = self.filename(interface, direction)
             if os.stat(file).st_size == 0:
@@ -497,19 +485,16 @@ class RunBMV2(object):
                     reportError("Corrupt pcap file", file)
                     self.showLog()
                     return FAILURE
-            if direction in v:
-                expected = v[direction]
-                if len(expected) != len(packets):
-                    reportError("Expected", len(expected), "packets on port", interface, "got", len(packets))
-                    self.showLog()
+            if len(expected) != len(packets):
+                reportError("Expected", len(expected), "packets on port", interface,
+                            "got", len(packets))
+                self.showLog()
+                return FAILURE
+            for i in range(0, len(expected)):
+                cmp = self.comparePacket(expected[i], packets[i])
+                if cmp != SUCCESS:
+                    reportError("Packet", i, "on port", interface, "differs")
                     return FAILURE
-                for i in range(0, len(expected)):
-                    cmp = self.comparePacket(expected[i], packets[i])
-                    if cmp != SUCCESS:
-                        reportError("Packet", i, "on port", interface, "differs")
-                        return FAILURE
-            else:
-                pass
         return SUCCESS
 
 def run_model(options, tmpdir, jsonfile, testfile):
@@ -533,7 +518,9 @@ def main(argv):
     options.binary = argv[0]
     argv = argv[1:]
     while len(argv) > 0 and argv[0][0] == '-':
-        if argv[0] == "-v":
+        if argv[0] == "-b":
+            options.preserveTmp = True
+        elif argv[0] == "-v":
             options.verbose = True
         else:
             reportError("Uknown option ", argv[0])
@@ -548,7 +535,15 @@ def main(argv):
 
     tmpdir = tempfile.mkdtemp(dir=".")
     result = run_model(options, tmpdir, argv[0], argv[1])
-    shutil.rmtree(tmpdir)
+    if options.preserveTmp:
+        print("preserving", tmpdir)
+    else:
+        shutil.rmtree(tmpdir)
+    if options.verbose:
+        if result == SUCCESS:
+            print("SUCCESS")
+        else:
+            print("FAILURE", result)
     return result
 
 if __name__ == "__main__":
