@@ -76,7 +76,7 @@ LearnListener::LearnListener(const std::string &learn_socket,
 LearnListener::~LearnListener() {
   {
     std::unique_lock<std::mutex> lock(mutex);
-    stop_listen_thread = false;
+    stop_listen_thread = true;
   }
   listen_thread.join();
 }
