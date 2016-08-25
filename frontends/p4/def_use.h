@@ -25,6 +25,7 @@ namespace P4 {
 class StorageFactory;
 class LocationSet;
 
+// Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint {
   public:
     virtual ~StorageLocation() {}
@@ -300,6 +301,8 @@ class AllDefinitions {
     { atPoint[point] = defs; }
 };
 
+// This does not scan variable initializers, so it must be executed
+// after these have been removed.
 // Run for each parser and control separately
 class ComputeDefUse : public Inspector {
     const ReferenceMap* refMap;

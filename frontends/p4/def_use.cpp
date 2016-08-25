@@ -136,6 +136,9 @@ void LocationSet::addCanonical(const StorageLocation* location) {
 }
 
 namespace {
+// Computes all locations written to by an expression.
+// Expressions can write something by being on the lhs of an assignment,
+// or by calling methods with out parameters.
 class WriteSet : public Inspector {
     const StorageMap* map;
     bool lhs;    // if true the expression appears on the lhs of an assignment
@@ -165,6 +168,10 @@ class WriteSet : public Inspector {
     bool preorder(const IR::TypeNameExpression* expression) override
     { set(expression, LocationSet::empty); return false; }
     bool preorder(const IR::PathExpression* expression) override {
+        if (!lhs) {
+            set(expression, LocationSet::empty);
+            return false;
+        }
         auto decl = map->refMap->getDeclaration(expression->path, true);
         auto storage = map->getStorage(decl);
         const LocationSet* result;
@@ -177,6 +184,10 @@ class WriteSet : public Inspector {
     }
     bool preorder(const IR::Member* expression) override {
         visit(expression->expr);
+        if (!lhs) {
+            set(expression, LocationSet::empty);
+            return false;
+        }
         auto type = map->typeMap->getType(expression, true);
         if (type->is<IR::Type_Method>())
             return false;
@@ -187,12 +198,6 @@ class WriteSet : public Inspector {
             if (expression->member.name == IR::Type_Stack::next ||
                 expression->member.name == IR::Type_Stack::last) {
                 set(expression, storage);
-                return false;
-            }
-            if (expression->member.name == IR::Type_Stack::empty ||
-                expression->member.name == IR::Type_Stack::full) {
-                auto valid = storage->getValidField();
-                set(expression, valid);
                 return false;
             }
         }
@@ -209,7 +214,7 @@ class WriteSet : public Inspector {
         lhs = save;
         auto storage = get(expression->left);
         if (expression->right->is<IR::Constant>()) {
-            if (lhs) {
+            if (!lhs) {
                 set(expression, LocationSet::empty);
             } else {
                 auto cst = expression->right->to<IR::Constant>();
@@ -274,7 +279,6 @@ class WriteSet : public Inspector {
     }
     bool preorder(const IR::MethodCallExpression* expression) override {
         visit(expression->method);
-        BUG_CHECK(!lhs, "%1% should not be on the lhs", expression);
         MethodCallDescription mcd(expression, map->refMap, map->typeMap);
         if (mcd.instance->is<BuiltInMethod>()) {
             auto bim = mcd.instance->to<BuiltInMethod>();
@@ -306,7 +310,11 @@ class WriteSet : public Inspector {
         auto result = LocationSet::empty;
         for (auto p : *mcd.substitution.getParameters()) {
             auto expr = mcd.substitution.lookup(p);
+            bool save = lhs;
+            // pretend we are on the lhs
+            lhs = true;
             visit(expr);
+            lhs = save;
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto val = get(expr);
                 result = result->join(val);
@@ -480,7 +488,6 @@ Definitions* ComputeDefUse::visitStatement(const IR::Statement* stat, Definition
     return result;
 }
 
-// return true if there are any changes
 Definitions* ComputeDefUse::visitState(const IR::ParserState* state) {
     ProgramPoint sp(state);
     auto defs = definitions->get(sp);

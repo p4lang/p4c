@@ -7,6 +7,8 @@ header Header {
 
 extern void f(in Header h);
 parser p1(packet_in p, out Header h) {
+    Header[2] stack;
+    bool b;
     state start {
         h.data1 = 0;
         f(h);
@@ -14,6 +16,8 @@ parser p1(packet_in p, out Header h) {
     }
     state next {
         h.data2 = h.data2 + 1;
+        stack[0] = stack[1];
+        b = stack[1].isValid();
         transition accept;
     }
 }
