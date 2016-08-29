@@ -12,7 +12,7 @@ service conn_mgr {
 
     void cleanup();
 
-    res.SessionHandle_t client_init(1:i32 max_txn_size);
+    res.SessionHandle_t client_init();
 
     i32 client_cleanup(1:res.SessionHandle_t sess_hdl);
 
