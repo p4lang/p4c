@@ -18,6 +18,7 @@ limitations under the License.
 #include "ir/visitor.h"
 #include <assert.h>
 #include <unordered_set>
+#include <iostream>
 
 static IR::Constant *c1;
 
@@ -31,6 +32,14 @@ class TestTrans : public Transform {
 
 int main() {
     c1 = new IR::Constant(2);
-    IR::Expression *e = new IR::Add(Util::SourceInfo(), c1, c1);
-    JSONGenerator(std::cout) << e << std::endl;
+    IR::Expression *e1 = new IR::Add(Util::SourceInfo(), c1, c1);
+    std::stringstream ss, ss2;
+    JSONGenerator(ss) << e1 << std::endl;
+    std::cout << ss.str();
+    JSONLoader loader(ss);
+    std::cout << loader.json;
+    IR::Node* e2 = nullptr;
+    loader >> e2;
+    JSONGenerator(std::cout) << e2 << std::endl;
+    
 }
