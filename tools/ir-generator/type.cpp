@@ -56,7 +56,8 @@ const IrClass *NamedType::resolve(const IrNamespace *in) const {
 NamedType NamedType::Bool("bool"), NamedType::Int("int"), NamedType::Void("void"),
           NamedType::Cstring("cstring"), NamedType::Ostream("std::ostream"),
           NamedType::Visitor("Visitor"), NamedType::Unordered_Set("std::unordered_set"),
-          NamedType::JSONGenerator("JSONGenerator");
+          NamedType::JSONGenerator("JSONGenerator"), NamedType::JSONLoader("JSONLoader"),
+          NamedType::JsonObject("JsonObject");
 
 cstring TemplateInstantiation::toString() const {
     std::string rv = base->toString().c_str();

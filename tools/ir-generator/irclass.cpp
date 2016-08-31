@@ -79,15 +79,41 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     std::string macroname = "_IR_GENERATED_H_";
     out << "#ifndef " << macroname << "\n"
         << "#define " << macroname << "\n" << std::endl;
+
     impl << "#include \"ir/ir.h\"\n"
          << "#include \"ir/visitor.h\"\n"
          << "#include \"extensions/tofino/mau/resource.h\"\n" << std::endl;
+
+    out << "#include <map>\n"
+        << "#include <functional>\n" << std::endl
+        << "class JSONLoader;\n"
+        << "typedef std::function<IR::Node*(JSONLoader&)> NodeFactoryFn;\n"
+        << std::endl;
+        << "namespace IR {\n" 
+        << "extern std::map<cstring, NodeFactoryFn> unpacker_table;\n"
+        << "}\n";
+
+    impl << "std::map<cstring, NodeFactoryFn> IR::unpacker_table = {\n";
+
+    bool first = true;
+    for (auto cls : *getClasses()) {
+        if (cls->kind == NodeKind::Concrete) {
+            if(first)
+                first = false;
+            else
+                impl << ",\n";
+            impl << "{\"" << cls->name << "\", NodeFactoryFn(&IR::";
+            if (cls->containedIn && cls->containedIn->name) 
+                impl << cls->containedIn->name << "::";
+            impl << cls->name << "::fromJSON)}"; } }
+    impl << " };\n" << std::endl;
+
     for (auto e : elements) {
         e->generate_hdr(out);
         e->generate_impl(impl); }
 
     out << "#endif /* " << macroname << " */" << std::endl;
-
+    
     ///////////////////////////////// tree
 
     t << "#define IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, T, D, B, ...) \\"

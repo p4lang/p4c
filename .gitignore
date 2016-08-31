@@ -24,7 +24,7 @@ m4/ltoptions.m4
 m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
-
+testdata/
 # vi/emacs tags files
 
 TAGS
@@ -38,6 +38,8 @@ extensions/*
 otherMakefiles.am
 *.d
 *.output
+*.json.p4
+*p4.json
 build/
 
 # Eclipse files

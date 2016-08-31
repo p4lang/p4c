@@ -28,6 +28,11 @@ void IR::Node::toJSON(JSONGenerator &json) const {
          << json.indent << "\"Node_Type\" : " << node_type_name();
 }
 
+IR::Node::Node(JSONLoader &json) { 
+    json.load("Node_ID", id); 
+}
+
+
 cstring IR::dbp(const IR::INode* node) {
     std::stringstream str;
     if (node == nullptr) {
