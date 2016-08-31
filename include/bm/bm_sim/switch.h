@@ -139,6 +139,12 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   // Returns empty string ("") if event logger disabled
   std::string get_event_logger_addr() const;
 
+  //! Enable JSON config swapping for the switch.
+  void enable_config_swap();
+
+  //! Disable JSON config swapping for the switch.
+  void disable_config_swap();
+
   //! Specify that the field is required for this target switch, i.e. the field
   //! needs to be defined in the input JSON. This function is purely meant as a
   //! safeguard and you should use it for error checking. For example, the

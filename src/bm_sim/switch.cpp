@@ -70,6 +70,16 @@ SwitchWContexts::get_event_logger_addr() const {
 }
 
 void
+SwitchWContexts::enable_config_swap() {
+  enable_swap = true;
+}
+
+void
+SwitchWContexts::disable_config_swap() {
+  enable_swap = false;
+}
+
+void
 SwitchWContexts::add_required_field(const std::string &header_name,
                                   const std::string &field_name) {
   required_fields.insert(std::make_pair(header_name, field_name));

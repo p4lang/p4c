@@ -22,11 +22,13 @@
 
 #include <bm/SimpleSwitch.h>
 #include <bm/bm_runtime/bm_runtime.h>
+#include <bm/bm_sim/target_parser.h>
 
 #include "simple_switch.h"
 
 namespace {
 SimpleSwitch *simple_switch;
+bm::TargetParserBasic *simple_switch_parser;
 }  // namespace
 
 namespace sswitch_runtime {
@@ -36,8 +38,18 @@ shared_ptr<SimpleSwitchIf> get_handler(SimpleSwitch *sw);
 int
 main(int argc, char* argv[]) {
   simple_switch = new SimpleSwitch();
-  int status = simple_switch->init_from_command_line_options(argc, argv);
+  simple_switch_parser = new bm::TargetParserBasic();
+  simple_switch_parser->add_flag_option("enable-swap",
+                                        "enable JSON swapping at runtime");
+  int status = simple_switch->init_from_command_line_options(
+      argc, argv, simple_switch_parser);
   if (status != 0) std::exit(status);
+
+  bool enable_swap_flag = false;
+  if (simple_switch_parser->get_flag_option("enable-swap", &enable_swap_flag)
+      != bm::TargetParserBasic::ReturnCode::SUCCESS)
+    std::exit(1);
+  if (enable_swap_flag) simple_switch->enable_config_swap();
 
   int thrift_port = simple_switch->get_runtime_port();
   bm_runtime::start_server(simple_switch, thrift_port);
