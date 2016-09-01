@@ -1,5 +1,5 @@
-#include "/home/cdodd/p4c/p4include/core.p4"
-#include "/home/cdodd/p4c/p4include/ebpf_model.p4"
+#include <core.p4>
+#include <ebpf_model.p4>
 
 @ethernetaddress typedef bit<48> EthernetAddress;
 @ipv4address typedef bit<32> IPv4Address;

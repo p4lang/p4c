@@ -161,11 +161,11 @@ void ResolutionContext::dbprint(std::ostream& out) const {
 /////////////////////////////////////////////////////
 
 ResolveReferences::ResolveReferences(ReferenceMap* refMap,
-                                     bool anyOrder, bool checkShadow) :
+                                     bool checkShadow) :
         refMap(refMap),
         context(nullptr),
         rootNamespace(nullptr),
-        anyOrder(anyOrder),
+        anyOrder(false),
         checkShadow(checkShadow) {
     CHECK_NULL(refMap);
     setName("ResolveReferences");
@@ -258,6 +258,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace*ns) const {
 }
 
 Visitor::profile_t ResolveReferences::init_apply(const IR::Node* node) {
+    anyOrder = refMap->isV1();
     if (!refMap->checkMap(node))
         refMap->clear();
     return Inspector::init_apply(node);

@@ -102,7 +102,7 @@ const IR::Node* InlineActionsDriver::preorder(IR::P4Program* program) {
     toInline->analyze();
     while (auto todo = toInline->next()) {
         LOG1("Processing " << todo);
-        inliner->prepare(toInline, todo, p4v1);
+        inliner->prepare(toInline, todo);
         prog = prog->apply(*inliner);
         if (::errorCount() > 0)
             break;

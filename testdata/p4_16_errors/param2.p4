@@ -21,7 +21,7 @@ extern E {
 
 control c() {
     action a() {}
-    table t(in E e) {
+    table t(E e) {
         key = { e.call() : exact; }
         actions = { a; }
         default_action = a;

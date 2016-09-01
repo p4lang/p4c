@@ -36,6 +36,12 @@ static inline unsigned bitcount(mpz_class value) {
     unsigned rv = 0;
     while (v != 0) { v &= v-1; ++rv; }
     return rv; }
+
+static inline int ffs(mpz_class v) {
+    if (v == 0) return -1;
+    return mpz_scan1(v.get_mpz_t(), 0);
+}
+
 static inline int floor_log2(unsigned v) {
     int rv = -1;
 #if defined(__GNUC__) || defined(__clang__)
@@ -44,6 +50,11 @@ static inline int floor_log2(unsigned v) {
     while (v) { rv++; v >>= 1; }
 #endif
     return rv; }
+static inline int floor_log2(mpz_class v) {
+    int rv = -1;
+    while (v > 0) { rv++; v /= 2; }
+    return rv; }
+
 static inline int ceil_log2(unsigned v) {
     return v ? floor_log2(v-1) + 1 : -1;
 }

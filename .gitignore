@@ -41,6 +41,7 @@ otherMakefiles.am
 *.json.p4
 *p4.json
 build/
+*.pyc
 
 # Eclipse files
 .cproject

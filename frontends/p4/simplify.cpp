@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* SimplifyControlFlow::postorder(IR::BlockStatement* statement) {
+const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) {
     LOG1("Visiting " << statement);
     auto parent = getContext()->node;
     auto statancestor = findContext<IR::Statement>();
@@ -51,7 +51,7 @@ const IR::Node* SimplifyControlFlow::postorder(IR::BlockStatement* statement) {
     return statement;
 }
 
-const IR::Node* SimplifyControlFlow::postorder(IR::IfStatement* statement)  {
+const IR::Node* DoSimplifyControlFlow::postorder(IR::IfStatement* statement)  {
     if (SideEffects::check(statement->condition, refMap, typeMap))
         return statement;
     if (statement->ifTrue->is<IR::EmptyStatement>() &&
@@ -60,7 +60,7 @@ const IR::Node* SimplifyControlFlow::postorder(IR::IfStatement* statement)  {
     return statement;
 }
 
-const IR::Node* SimplifyControlFlow::postorder(IR::EmptyStatement* statement)  {
+const IR::Node* DoSimplifyControlFlow::postorder(IR::EmptyStatement* statement)  {
     auto parent = findContext<IR::Statement>();
     if (parent == nullptr ||  // in a ParserState or P4Action
         parent->is<IR::BlockStatement>())
@@ -69,7 +69,7 @@ const IR::Node* SimplifyControlFlow::postorder(IR::EmptyStatement* statement)  {
     return statement;
 }
 
-const IR::Node* SimplifyControlFlow::postorder(IR::SwitchStatement* statement)  {
+const IR::Node* DoSimplifyControlFlow::postorder(IR::SwitchStatement* statement)  {
     if (statement->cases.empty()) {
         BUG_CHECK(statement->expression->is<IR::Member>(),
                   "%1%: expected a Member", statement->expression);

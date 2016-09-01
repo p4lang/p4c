@@ -64,17 +64,26 @@ class SideEffects : public Inspector {
     }
 };
 
-class SimplifyControlFlow : public Transform {
+class DoSimplifyControlFlow : public Transform {
     const ReferenceMap* refMap;
     const TypeMap*      typeMap;
  public:
-    SimplifyControlFlow(const ReferenceMap* refMap, const TypeMap* typeMap) :
+    DoSimplifyControlFlow(const ReferenceMap* refMap, const TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("SimplifyControlFlow"); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoSimplifyControlFlow"); }
     const IR::Node* postorder(IR::BlockStatement* statement) override;
     const IR::Node* postorder(IR::IfStatement* statement) override;
     const IR::Node* postorder(IR::EmptyStatement* statement) override;
     const IR::Node* postorder(IR::SwitchStatement* statement) override;
+};
+
+class SimplifyControlFlow : public PassManager {
+ public:
+    SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new DoSimplifyControlFlow(refMap, typeMap));
+        setName("SimplifyControlFlow");
+    }
 };
 
 }  // namespace P4

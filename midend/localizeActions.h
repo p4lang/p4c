@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ limitations under the License.
 
 #include "lib/ordered_set.h"
 #include "ir/ir.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/unusedDeclarations.h"
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/toP4/toP4.h"
 
@@ -140,15 +141,16 @@ class LocalizeAllActions : public PassManager {
     GlobalActionReplacements globalReplacements;
     ActionReplacement        localReplacements;
  public:
-    LocalizeAllActions(ReferenceMap* refMap, bool isv1) {
+    LocalizeAllActions(ReferenceMap* refMap) {
         passes.emplace_back(new PassRepeated {
-            new ResolveReferences(refMap, isv1),
+            new ResolveReferences(refMap),
             new FindGlobalActionUses(refMap, &globalReplacements),
             new LocalizeActions(refMap, &globalReplacements),
         });
-        passes.emplace_back(new ResolveReferences(refMap, isv1));
+        passes.emplace_back(new ResolveReferences(refMap));
         passes.emplace_back(new FindRepeatedActionUses(refMap, &localReplacements));
         passes.emplace_back(new DuplicateActions(&localReplacements));
+        passes.emplace_back(new RemoveAllUnusedDeclarations(refMap));
         setName("LocalizeAllActions");
     }
 };

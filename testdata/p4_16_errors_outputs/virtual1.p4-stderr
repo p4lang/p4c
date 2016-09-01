@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/virtual1.p4(21): error: cntr: Cannot unify bool to bit<16>
     Virtual() cntr = {
               ^^^^
-error: 2 errors encountered, aborting compilation

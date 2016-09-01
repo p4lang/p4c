@@ -111,7 +111,7 @@ class CanonicalMemberExpression : public Inspector {
 
 }  // namespace
 
-bool CheckAliasing::preorder(const IR::MethodCallExpression* expression) {
+bool DoCheckAliasing::preorder(const IR::MethodCallExpression* expression) {
     CanonicalMemberExpression cme(refMap);
     MethodCallDescription mcd(expression, refMap, typeMap);
 

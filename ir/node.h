@@ -40,7 +40,7 @@ class Node;
 template<class T> class Vector;
 template<class T> class IndexedVector;
 // node interface
-class INode : public Util::IHasSourceInfo, public Util::IHasDbPrint {
+class INode : public Util::IHasSourceInfo, public IHasDbPrint {
  public:
     virtual ~INode() {}
     virtual const Node* getNode() const = 0;

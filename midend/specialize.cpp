@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/enumInstance.h"
+#include "frontends/p4/unusedDeclarations.h"
 
 namespace P4 {
 
@@ -246,13 +247,13 @@ const IR::Node* Specialize::postorder(IR::Declaration_Instance* decl) {
     return result;
 }
 
-SpecializeAll::SpecializeAll(ReferenceMap* refMap, TypeMap* typeMap, bool isv1) :
+SpecializeAll::SpecializeAll(ReferenceMap* refMap, TypeMap* typeMap) :
         PassRepeated({}) {
-    passes.emplace_back(new TypeChecking(refMap, typeMap, false, isv1));
     passes.emplace_back(new ConstantFolding(refMap, typeMap));
-    passes.emplace_back(new TypeChecking(refMap, typeMap, false, isv1));
+    passes.emplace_back(new TypeChecking(refMap, typeMap));
     passes.emplace_back(new FindSpecializations(refMap, typeMap, &specMap));
     passes.emplace_back(new Specialize(refMap, &specMap));
+    passes.emplace_back(new RemoveAllUnusedDeclarations(refMap));
     specMap.refMap = refMap;
     specMap.typeMap = typeMap;
     setName("SpecializeAll");

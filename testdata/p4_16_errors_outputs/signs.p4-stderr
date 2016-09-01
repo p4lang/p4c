@@ -10,4 +10,3 @@ action a() {
 ../testdata/p4_16_errors/signs.p4(19): error: Could not find type of -
     a = a - b;
         ^^^^^
-error: 2 errors encountered, aborting compilation

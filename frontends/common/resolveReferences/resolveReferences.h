@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ enum class ResolutionType {
     TypeVariable
 };
 
-class ResolutionContext {
+class ResolutionContext : public IHasDbPrint {
     std::vector<const IR::INamespace*> stack;
     const IR::INamespace* rootNamespace;
     std::vector<const IR::INamespace*> globals;  // errors and match_kind
@@ -88,7 +88,6 @@ class ResolveReferences : public Inspector {
 
  public:
     explicit ResolveReferences(/* out */ P4::ReferenceMap* refMap,
-                               bool anyOrder,  // if true allow declarations in any order
                                bool checkShadow = false);
 
     Visitor::profile_t init_apply(const IR::Node* node) override;

@@ -7,4 +7,3 @@
 ../testdata/p4_16_errors/div.p4(20): error: %: Modulo is not defined for negative numbers
     a = 10 % -2;
         ^^^^^^^
-error: 3 errors encountered, aborting compilation

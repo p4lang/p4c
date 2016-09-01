@@ -23,7 +23,7 @@ namespace P4 {
 
 class MoveConstructors : public PassManager {
  public:
-    MoveConstructors(ReferenceMap* refMap, bool isv1);
+    MoveConstructors(ReferenceMap* refMap);
 };
 
 }  // namespace P4

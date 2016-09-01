@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/range_e.p4(20): error: Could not find type of ..
             2w2 .. 3w3 : reject;
             ^^^^^^^^^^
-error: 2 errors encountered, aborting compilation

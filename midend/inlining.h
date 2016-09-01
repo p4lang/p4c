@@ -20,9 +20,10 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
+#include "frontends/p4/unusedDeclarations.h"
 
 // These are various data structures needed by the parser/parser and control/control inliners.
 // This only works correctly after local variable initializers have been removed.
@@ -161,14 +162,12 @@ class AbstractInliner : public Transform {
  protected:
     InlineWorkList* list;
     InlineSummary*  toInline;
-    bool            p4v1;
-    AbstractInliner() : list(nullptr), toInline(nullptr), p4v1(false) {}
+    AbstractInliner() : list(nullptr), toInline(nullptr) {}
  public:
-    void prepare(InlineWorkList* list, InlineSummary* toInline, bool p4v1) {
+    void prepare(InlineWorkList* list, InlineSummary* toInline) {
         CHECK_NULL(list); CHECK_NULL(toInline);
         this->list = list;
         this->toInline = toInline;
-        this->p4v1 = p4v1;
     }
 
     Visitor::profile_t init_apply(const IR::Node* node) {
@@ -182,12 +181,10 @@ class AbstractInliner : public Transform {
 class InlineDriver : public Transform {
     InlineWorkList*  toInline;
     AbstractInliner* inliner;
-    bool             p4v1;
  public:
-    explicit InlineDriver(InlineWorkList* toInline, AbstractInliner* inliner, bool p4v1) :
-            toInline(toInline), inliner(inliner), p4v1(p4v1)
+    InlineDriver(InlineWorkList* toInline, AbstractInliner* inliner) :
+            toInline(toInline), inliner(inliner)
     { CHECK_NULL(toInline); CHECK_NULL(inliner); setName("InlineDriver"); }
-
     // Not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.
     const IR::Node* preorder(IR::P4Program* program) override;
@@ -198,7 +195,7 @@ class DiscoverInlining : public Inspector {
     InlineWorkList* inlineList;     // output: result is here
     const ReferenceMap* refMap;     // input
     const TypeMap*      typeMap;    // input
-    P4::Evaluator*      evaluator;  // used to obtain the toplevel block
+    IHasBlock*          evaluator;  // used to obtain the toplevel block
     IR::ToplevelBlock*  toplevel;
 
  public:
@@ -209,7 +206,7 @@ class DiscoverInlining : public Inspector {
     bool allowControlsFromParsers = false;
 
     DiscoverInlining(InlineWorkList* inlineList, const ReferenceMap* refMap,
-                     const TypeMap* typeMap, P4::Evaluator* evaluator) :
+                     const TypeMap* typeMap, IHasBlock* evaluator) :
             inlineList(inlineList), refMap(refMap), typeMap(typeMap),
             evaluator(evaluator), toplevel(nullptr) {
         CHECK_NULL(inlineList); CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(evaluator);
@@ -235,17 +232,30 @@ class GeneralInliner : public AbstractInliner {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     InlineSummary::PerCaller* workToDo;
-    bool isv1;
  public:
     explicit GeneralInliner(bool isv1) :
-            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr), isv1(isv1)
-    { setName("GeneralInliner"); }
+            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr) {
+        setName("GeneralInliner");
+        refMap->setIsV1(isv1);
+    }
     // controlled visiting order
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
     const IR::Node* preorder(IR::P4Control* caller) override;
     const IR::Node* preorder(IR::P4Parser* caller) override;
     const IR::Node* preorder(IR::ParserState* state) override;
     Visitor::profile_t init_apply(const IR::Node* node) override;
+};
+
+class Inline : public PassManager {
+    InlineWorkList toInline;
+ public:
+    Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new DiscoverInlining(&toInline, refMap, typeMap, evaluator));
+        passes.push_back(new InlineDriver(&toInline, new P4::GeneralInliner(refMap->isV1())));
+        passes.push_back(new RemoveAllUnusedDeclarations(refMap));
+        setName("Inline");
+    }
 };
 
 }  // namespace P4

@@ -80,10 +80,10 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
 }
 
-parser prs(in bs b, out Packet_data p);
+parser prs(bs b, out Packet_data p);
 control pp(inout TArg1 arg1, inout TArg2 arg2);
 package myswitch(prs prser, pp pipe);
-parser my_parser(in bs b, out Packet_data p) {
+parser my_parser(bs b, out Packet_data p) {
     state start {
         transition accept;
     }

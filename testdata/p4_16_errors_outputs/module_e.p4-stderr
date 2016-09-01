@@ -7,4 +7,3 @@ parser g(in bit x)
 ../testdata/p4_16_errors/module_e.p4(16)
 parser Filter(out bool filter);
               ^^^^^^^^^^^^^^^
-error: 1 errors encountered, aborting compilation

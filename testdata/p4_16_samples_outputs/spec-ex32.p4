@@ -1,4 +1,4 @@
-#include "/home/mbudiu/git/p4c/p4include/core.p4"
+#include <core.p4>
 
 header Hdr {
     bit<8>      size;

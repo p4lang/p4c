@@ -30,12 +30,6 @@
   precedence   -> int getPrecedence() const
  */
 
-class SelectCase {
-    Expression     keyset;
-    PathExpression state;
-#nodbprint
-}
-
 class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     Annotations               annotations;
     IndexedVector<StatOrDecl> components;  // only some statements allowed

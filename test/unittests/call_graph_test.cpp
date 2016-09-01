@@ -137,6 +137,8 @@ class TestCallGraph : public TestBase {
         std::set<int> reachable;
         cg.reachable(0, reachable);
         sameSet(reachable, {0, 1, 3});
+        cg.remove(2);
+        ASSERT_EQ(cg.size(), 3);
         return SUCCESS;
     }
 

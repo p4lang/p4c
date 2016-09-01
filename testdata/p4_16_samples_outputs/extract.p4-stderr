@@ -1,4 +1,0 @@
-../testdata/p4_16_samples/extract.p4(26): warning: h.next: error FullStack will be triggered
-Parser P state chain: start
-        p.extract(h.next);
-                  ^^^^^^

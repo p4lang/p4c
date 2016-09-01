@@ -125,7 +125,8 @@ class ordered_set {
             data.erase(it);
             return std::make_pair(old, false); } }
 
-    iterator erase(const_iterator pos) {
+    /* should be erase(const_iterator), but glibc++ std::list::erase is broken */
+    iterator erase(iterator pos) {
         data_map.erase(&*pos);
         return data.erase(pos); }
     size_type erase(const T &v) {

@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
@@ -31,7 +31,7 @@ namespace P4 {
 // m(n()) is converted to
 // tmp = n()
 // m(tmp)
-class SimplifyExpressions : public Transform {
+class DoSimplifyExpressions : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
 
@@ -40,10 +40,10 @@ class SimplifyExpressions : public Transform {
     // Currently this only works correctly only if initializers
     // cannot appear in local declarations - because we only have a global
     // toInsert vector.
-    SimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap)
+    DoSimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap)
             : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
-        setName("SimplifyExpressions");
+        setName("DoSimplifyExpressions");
     }
 
     const IR::Node* postorder(IR::P4Parser* parser) override;
@@ -55,6 +55,15 @@ class SimplifyExpressions : public Transform {
     const IR::Node* postorder(IR::ReturnStatement* statement) override;
     const IR::Node* postorder(IR::SwitchStatement* statement) override;
     const IR::Node* postorder(IR::IfStatement* statement) override;
+};
+
+class SimplifyExpressions : public PassManager {
+ public:
+    SimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new DoSimplifyExpressions(refMap, typeMap));
+        setName("SimplifyExpressions");
+    }
 };
 
 }  // namespace P4

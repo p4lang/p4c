@@ -7,4 +7,3 @@
 ../testdata/p4_16_errors/default_action.p4(21): error: Could not find type of b
         default_action = b;
                          ^
-error: 3 errors encountered, aborting compilation

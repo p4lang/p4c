@@ -1,54 +1,6 @@
-struct Version {
-    bit<8> major;
-    bit<8> minor;
-}
+#include <core.p4>
+#include <ebpf_model.p4>
 
-error {
-    NoError,
-    PacketTooShort,
-    NoMatch,
-    EmptyStack,
-    FullStack,
-    OverwritingHeader,
-    HeaderTooShort
-}
-
-extern packet_in {
-    void extract<T>(out T hdr);
-    void extract<T>(out T variableSizeHeader, in bit<32> variableFieldSizeInBits);
-    T lookahead<T>();
-    void advance(in bit<32> sizeInBits);
-    bit<32> length();
-}
-
-extern packet_out {
-    void emit<T>(in T hdr);
-}
-
-action NoAction() {
-}
-match_kind {
-    exact,
-    ternary,
-    lpm
-}
-
-extern CounterArray {
-    CounterArray(bit<32> max_index, bool sparse);
-    void increment(in bit<32> index);
-}
-
-extern array_table {
-    array_table(bit<32> size);
-}
-
-extern hash_table {
-    hash_table(bit<32> size);
-}
-
-parser parse<H>(packet_in packet, out H headers);
-control filter<H>(inout H headers, out bool accept);
-package ebpfFilter<H>(parse<H> prs, filter<H> filt);
 @ethernetaddress typedef bit<48> EthernetAddress;
 @ipv4address typedef bit<32> IPv4Address;
 header Ethernet_h {

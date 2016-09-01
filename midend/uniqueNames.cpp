@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,20 +28,20 @@ addNameAnnotation(cstring name, const IR::Annotations* annos) {
                                      new IR::StringLiteral(Util::SourceInfo(), name));
 }
 
-UniqueNames::UniqueNames(ReferenceMap* refMap, bool anyOrder) : renameMap(new RenameMap) {
+UniqueNames::UniqueNames(ReferenceMap* refMap) : renameMap(new RenameMap) {
     setStopOnError(true);
     setName("UniqueNames");
     CHECK_NULL(refMap);
-    passes.emplace_back(new ResolveReferences(refMap, anyOrder));
+    passes.emplace_back(new ResolveReferences(refMap));
     passes.emplace_back(new FindSymbols(refMap, renameMap));
     passes.emplace_back(new RenameSymbols(refMap, renameMap));
 }
 
-UniqueParameters::UniqueParameters(ReferenceMap* refMap, bool anyOrder) : renameMap(new RenameMap) {
+UniqueParameters::UniqueParameters(ReferenceMap* refMap) : renameMap(new RenameMap) {
     setStopOnError(true);
     setName("UniqueParameters");
     CHECK_NULL(refMap);
-    passes.emplace_back(new ResolveReferences(refMap, anyOrder));
+    passes.emplace_back(new ResolveReferences(refMap));
     passes.emplace_back(new FindParameters(refMap, renameMap));
     passes.emplace_back(new RenameSymbols(refMap, renameMap));
 }

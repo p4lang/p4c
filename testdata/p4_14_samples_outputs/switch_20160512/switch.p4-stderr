@@ -37,3 +37,6 @@ action drop_packet_with_reason(drop_reason) {
 ../testdata/p4_14_samples/switch_20160512/acl.p4(441): warning: Could not infer type for session_id, using bit<8>
 action negative_mirror(session_id) {
                        ^^^^^^^^^^
+../testdata/p4_14_samples/switch_20160512/includes/parser.p4(487): warning: SelectCase: unreachable
+        default: parse_all_int_meta_value_heders;
+        ^^^^^^^

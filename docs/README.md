@@ -163,7 +163,7 @@ compilation and simplifying debugging.
 
 * watch out for `const`; it is very important.
 
-* use `override` whenever possible; it may catch errors early
+* use `override` whenever possible (new gcc versions enforce this)
 
 * never use `const_cast` and `reinterpret_cast`.
 
@@ -180,7 +180,7 @@ compilation and simplifying debugging.
 
   * use `CHECK_NULL()` to validate that pointers are not nullptr
 
-  * use BUG_CHECK() instead of `assert`, and always supply an
+  * use `BUG_CHECK()` instead of `assert`, and always supply an
     informative error message
 
   * use `::error()` and `::warning()` for error reporting.  They use the
@@ -201,8 +201,11 @@ output:
         ^^^^
 ```
 
-  * use `vector` and `array` wrappers for `std::vector` and `std::array`
+  * use the `vector` and `array` wrappers for `std::vector` and `std::array`
     (these do bounds checking on all accesses).
+
+  * use `ordered_map` and `ordered_set` when you need to iterate;
+    they provide deterministic iterators
 
 # How to contribute
 
@@ -215,8 +218,9 @@ output:
 
 * Fork the p4lang/p4c repository on github
   (see https://help.github.com/articles/fork-a-repo/)
-* After committing changes, create a pull request and assign it to ChrisDodd
-* Incorporate all review comments.
+* To merge a forked repository with the latest changes in the source use:
+  `git fetch upstream; git merge upstream/master`
+* After committing changes, create a pull request (using the github web UI)
 
 # Debugging
 
@@ -249,6 +253,9 @@ output:
   method on objects that provide it.  Here is an example usage:
   `LOG1("Replacing " << id << " with " << newid);`
 
+* Keep the compiler output deterministic; watch for iterators over
+  sets and maps, which may introduce non-deterministic orders
+
 * You can control the logging level per compiler source-file with the
   `-T` compiler command-line flag.  The flag is followed by a list of
   file patterns and a numeric level after a colon `:`.  This flag
@@ -265,13 +272,15 @@ The testing infrastructure is based on autotools.  We use several
 small python and shell scripts to work around limitations of
 autotools.
 
-* To run tests execute `make check`
+* To run tests execute `make check -j3`
   - There should be no FAIL or XPASS tests.
   - XFAIL tests are tolerated only transiently - these indicate known
   unfixed bugs in the compiler.
 
 * To run a subset of tests execute `make check-PATTERN`.  E.g., `make
   check-p4`.
+
+* To rerun the tests that failed last time run `make recheck -j3`
 
 * Add unit tests in `test/unittests`
 

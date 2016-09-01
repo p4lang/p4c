@@ -22,6 +22,13 @@ bool P4WriteContext::isWrite() {
     const Context *ctxt = getContext();
     if (!ctxt || !ctxt->node)
         return false;
+    while (ctxt->child_index == 0 &&
+            (ctxt->node->is<IR::ArrayIndex>() ||
+             ctxt->node->is<IR::HeaderStackItemRef>() ||
+             ctxt->node->is<IR::Member>())) {
+        ctxt = ctxt->parent;
+        if (!ctxt || !ctxt->node)
+            return false; }
     if (auto *prim = ctxt->node->to<IR::Primitive>())
         return prim->isOutput(ctxt->child_index);
     if (ctxt->node->is<IR::AssignmentStatement>())

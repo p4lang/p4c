@@ -18,8 +18,8 @@ limitations under the License.
 #include "has_side_effects.h"
 #include "expr_uses.h"
 
-class P4::LocalCopyPropagation::ElimDead : public Transform {
-    LocalCopyPropagation &self;
+class P4::DoLocalCopyPropagation::ElimDead : public Transform {
+    DoLocalCopyPropagation &self;
     const IR::Node *preorder(IR::Declaration_Variable *var) override {
         if (auto local = ::getref(self.locals, var->name)) {
             if (!local->live) {
@@ -37,12 +37,12 @@ class P4::LocalCopyPropagation::ElimDead : public Transform {
         return as; }
 
  public:
-    explicit ElimDead(LocalCopyPropagation &self) : self(self) {}
+    explicit ElimDead(DoLocalCopyPropagation &self) : self(self) {}
 };
 
-void P4::LocalCopyPropagation::flow_merge(Visitor &a_) {
-    auto &a = dynamic_cast<LocalCopyPropagation &>(a_);
-    BUG_CHECK(in_action == a.in_action, "inconsitent LocalCopyPropagation state on merge");
+void P4::DoLocalCopyPropagation::flow_merge(Visitor &a_) {
+    auto &a = dynamic_cast<DoLocalCopyPropagation &>(a_);
+    BUG_CHECK(in_action == a.in_action, "inconsitent DoLocalCopyPropagation state on merge");
     for (auto &local : locals) {
         if (auto merge = ::getref(a.locals, local.first)) {
             if (merge->val != local.second.val)
@@ -53,7 +53,7 @@ void P4::LocalCopyPropagation::flow_merge(Visitor &a_) {
             local.second.val = nullptr; } }
 }
 
-void P4::LocalCopyPropagation::dropLocalsUsing(cstring name) {
+void P4::DoLocalCopyPropagation::dropLocalsUsing(cstring name) {
     for (auto &local : locals) {
         if (local.first == name) {
             LOG4("   dropping " << name << " as it is being assigned to");
@@ -63,7 +63,7 @@ void P4::LocalCopyPropagation::dropLocalsUsing(cstring name) {
             local.second.val = nullptr; } }
 }
 
-const IR::Node *P4::LocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
+const IR::Node *P4::DoLocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
     LOG1("Visiting " << getOriginal());
     if (!in_action) return var;
     if (locals.count(var->name))
@@ -78,7 +78,7 @@ const IR::Node *P4::LocalCopyPropagation::postorder(IR::Declaration_Variable *va
     return var;
 }
 
-const IR::Expression *P4::LocalCopyPropagation::postorder(IR::PathExpression *path) {
+const IR::Expression *P4::DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
     if (auto local = ::getref(locals, path->path->name)) {
         if (isWrite()) {
             return path;
@@ -91,7 +91,7 @@ const IR::Expression *P4::LocalCopyPropagation::postorder(IR::PathExpression *pa
     return path;
 }
 
-IR::AssignmentStatement *P4::LocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
+IR::AssignmentStatement *P4::DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
     if (as->left == as->right) {   // FIXME -- need deep equals here?
         LOG3("  removing noop assignment " << *as);
         return nullptr; }
@@ -104,7 +104,7 @@ IR::AssignmentStatement *P4::LocalCopyPropagation::postorder(IR::AssignmentState
     return as;
 }
 
-IR::MethodCallExpression *P4::LocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
+IR::MethodCallExpression *P4::DoLocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
     if (!in_action) return mc;
     auto type = typeMap->getType(mc->method, true)->to<IR::Type_Method>();
     CHECK_NULL(type);
@@ -117,7 +117,7 @@ IR::MethodCallExpression *P4::LocalCopyPropagation::postorder(IR::MethodCallExpr
     return mc;
 }
 
-IR::Primitive *P4::LocalCopyPropagation::postorder(IR::Primitive *prim) {
+IR::Primitive *P4::DoLocalCopyPropagation::postorder(IR::Primitive *prim) {
     if (!in_action) return prim;
     for (unsigned idx = 0; idx < prim->operands.size(); ++idx) {
         if (prim->isOutput(idx)) {
@@ -125,21 +125,21 @@ IR::Primitive *P4::LocalCopyPropagation::postorder(IR::Primitive *prim) {
     return prim;
 }
 
-IR::P4Action *P4::LocalCopyPropagation::preorder(IR::P4Action *act) {
+IR::P4Action *P4::DoLocalCopyPropagation::preorder(IR::P4Action *act) {
     in_action = true;
     if (!locals.empty()) BUG("corrupt internal data struct");
-    LOG2("LocalCopyPropagation working on action " << act->name);
+    LOG2("DoLocalCopyPropagation working on action " << act->name);
     LOG4(act);
     return act;
 }
 
-IR::P4Action *P4::LocalCopyPropagation::postorder(IR::P4Action *act) {
-    LOG5("LocalCopyPropagation before ElimDead " << act->name);
+IR::P4Action *P4::DoLocalCopyPropagation::postorder(IR::P4Action *act) {
+    LOG5("DoLocalCopyPropagation before ElimDead " << act->name);
     LOG5(act);
     act->body = act->body->apply(ElimDead(*this))->to<IR::BlockStatement>();
     in_action = false;
     locals.clear();
-    LOG3("LocalCopyPropagation finished action " << act->name);
+    LOG3("DoLocalCopyPropagation finished action " << act->name);
     LOG4(act);
     return act;
 }

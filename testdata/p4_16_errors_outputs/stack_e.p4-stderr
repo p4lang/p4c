@@ -22,4 +22,3 @@
 ../testdata/p4_16_errors/stack_e.p4(28): error: Could not find type of []
         h d = stack[6];
               ^^^^^^^^
-error: 7 errors encountered, aborting compilation

@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
@@ -50,15 +50,15 @@ class TableInsertions {
 
 // If some of the fields of a table key are "too complex",
 // turn them into simpler expressions.
-class SimplifyKey : public Transform {
+class DoSimplifyKey : public Transform {
     ReferenceMap*       refMap;
     const TypeMap*      typeMap;
     const KeyIsComplex* policy;
     std::map<const IR::P4Table*, TableInsertions*> toInsert;
  public:
-    SimplifyKey(ReferenceMap* refMap, const TypeMap* typeMap, const KeyIsComplex* policy) :
+    DoSimplifyKey(ReferenceMap* refMap, const TypeMap* typeMap, const KeyIsComplex* policy) :
             refMap(refMap), typeMap(typeMap), policy(policy)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(policy); setName("SimplifyKey"); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(policy); setName("DoSimplifyKey"); }
     const IR::Node* doStatement(const IR::Statement* statement, const IR::Expression* expression);
 
     // These should be all kinds of statements that may contain a table apply
@@ -71,6 +71,16 @@ class SimplifyKey : public Transform {
     { return doStatement(statement, statement->expression); }
     const IR::Node* postorder(IR::KeyElement* element) override;
     const IR::Node* postorder(IR::P4Table* table) override;
+};
+
+// Use a policy to decide when a key expression is too complex.
+class SimplifyKey : public PassManager {
+ public:
+    SimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, const KeyIsComplex* policy) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new DoSimplifyKey(refMap, typeMap, policy));
+        setName("SimplifyKey");
+    }
 };
 
 }  // namespace P4

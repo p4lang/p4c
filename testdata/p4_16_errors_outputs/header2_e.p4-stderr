@@ -16,4 +16,3 @@ parser p();
 ../testdata/p4_16_errors/header2_e.p4(16)
 struct s {}
        ^
-error: 3 errors encountered, aborting compilation

@@ -62,12 +62,12 @@ class ConstantTypeSubstitution : public Transform {
 }  // namespace
 
 TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap,
-                           bool clearMap, bool isv1, bool updateExpressions) {
+                           bool updateExpressions) {
     addPasses({
-       new P4::ResolveReferences(refMap, isv1),
-       new P4::TypeInference(refMap, typeMap, clearMap, true),
+       new P4::ResolveReferences(refMap),
+       new P4::TypeInference(refMap, typeMap, true),
        updateExpressions ? new ApplyTypesToExpressions(typeMap) : nullptr,
-       updateExpressions ? new P4::ResolveReferences(refMap, isv1) : nullptr });
+       updateExpressions ? new P4::ResolveReferences(refMap) : nullptr });
     setName("TypeChecking");
     setStopOnError(true);
 }
@@ -89,13 +89,13 @@ const IR::Type* TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     auto clone = type->toType()->apply(sv);
     CHECK_NULL(clone);
     // Learn this new type
-    TypeInference tc(refMap, typeMap, false, true);
+    TypeInference tc(refMap, typeMap, true);
     (void)clone->apply(tc);
     return clone->to<IR::Type>();
 }
 
-TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool clearMap, bool readOnly) :
-        refMap(refMap), typeMap(typeMap), clearMap(clearMap), readOnly(readOnly),
+TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOnly) :
+        refMap(refMap), typeMap(typeMap), readOnly(readOnly),
         initialNode(nullptr) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
@@ -110,12 +110,6 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
     }
     initialNode = node;
     refMap->validateMap(node);
-    if (clearMap) {
-        // Clear map only if program has not changed from last time
-        // oterwise we can reuse it
-        if (!typeMap->checkMap(node))
-            typeMap->clear();
-    }
     return Transform::init_apply(node);
 }
 
@@ -224,6 +218,19 @@ const IR::TypeParameters* TypeInference::canonicalize(const IR::TypeParameters* 
         return params;
 }
 
+bool TypeInference::checkParameters(const IR::ParameterList* paramList) const {
+    for (auto p : *paramList->parameters) {
+        if (p->direction != IR::Direction::None) {
+            auto type = getType(p->type);
+            if (type->is<IR::Type_Extern>()) {
+                ::error("%1%: a parameter with an extern type cannot have a direction", p);
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 /**
  * Bind the parameters with the specified arguments.
  * @param arguments      Arguments to bind to the type's typeParameters.
@@ -299,6 +306,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tps = canonicalize(tp->typeParameters);
         if (pl == nullptr || tps == nullptr)
             return nullptr;
+        if (!checkParameters(pl))
+            return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Parser(tp->srcInfo, tp->name, tp->annotations, tps, pl);
         return type;
@@ -307,6 +316,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto pl = canonicalize(tp->applyParams);
         auto tps = canonicalize(tp->typeParameters);
         if (pl == nullptr || tps == nullptr)
+            return nullptr;
+        if (!checkParameters(pl))
             return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Control(tp->srcInfo, tp->name, tp->annotations, tps, pl);
@@ -396,6 +407,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tps = canonicalize(mt->typeParameters);
         if (pl == nullptr || tps == nullptr)
             return nullptr;
+        if (!checkParameters(pl))
+            return nullptr;
         changes = changes || pl != mt->parameters || tps != mt->typeParameters;
         const IR::Type* resultType = mt;
         if (changes)
@@ -469,12 +482,12 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             type->srcInfo, baseCanon, args, specialized);
         // learn the types of all components of the specialized type
         LOG1("Scanning the specialized type");
-        TypeInference tc(refMap, typeMap, false, true);
+        TypeInference tc(refMap, typeMap, true);
         (void)result->apply(tc);
         return result;
     }
-    BUG("Unhandled type %1%", type);
-    // unreachable
+    // If we reach this point some type error must have occurred, because
+    // the typeMap lookup at the beginning of the function has failed.
     return nullptr;
 }
 
@@ -1067,7 +1080,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
     if (!type->sizeKnown())
         typeError("%1%: Size of header stack type should be a constant", type);
 
-    auto etype = getType(type->baseType);
+    auto etype = getType(type->elementType);
     if (etype == nullptr)
         return type;
 
@@ -1113,7 +1126,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                 { return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>(); };
         if (validateFields(canon, validator)) {
             if (canon != orig) {
-                TypeInference tc(refMap, typeMap, false, true);
+                TypeInference tc(refMap, typeMap, true);
                 (void)canon->apply(tc);
             }
             setType(getOriginal(), canon);
@@ -1139,7 +1152,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     if (validateFields(canon, validator)) {
         // Learn the types of the canonical fields too
         if (canon != orig) {
-            TypeInference tc(refMap, typeMap, false, true);
+            TypeInference tc(refMap, typeMap, true);
             (void)canon->apply(tc);
         }
         setType(getOriginal(), canon);
@@ -1158,7 +1171,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Union *type) {
     auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>(); };
     if (validateFields(canon, validator)) {
         if (canon != orig) {
-            TypeInference tc(refMap, typeMap, false, true);
+            TypeInference tc(refMap, typeMap, true);
             (void)canon->apply(tc);
         }
         setType(getOriginal(), canon);
@@ -1380,8 +1393,8 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
             }
         }
     }
-    setType(getOriginal(), hst->baseType);
-    setType(expression, hst->baseType);
+    setType(getOriginal(), hst->elementType);
+    setType(expression, hst->elementType);
     return expression;
 }
 
@@ -2058,7 +2071,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             if (methodType == nullptr)
                 return expression;
             // sometimes this is a synthesized type, so we have to crawl it to understand it
-            TypeInference learn(refMap, typeMap, false, true);
+            TypeInference learn(refMap, typeMap, true);
             (void)methodType->apply(learn);
 
             setType(getOriginal(), methodType);
@@ -2073,8 +2086,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 typeError("%1%: 'last' and 'next' for stacks cannot be used in a control",
                           expression);
             auto stack = type->to<IR::Type_Stack>();
-            setType(getOriginal(), stack->baseType);
-            setType(expression, stack->baseType);
+            setType(getOriginal(), stack->elementType);
+            setType(expression, stack->elementType);
             if (isLeftValue(expression->expr)) {
                 setLeftValue(expression);
                 setLeftValue(getOriginal<IR::Expression>());
@@ -2256,7 +2269,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         // construct types for the specMethodType, use a new typeChecker
         // that uses the same tables!
-        TypeInference helper(refMap, typeMap, false, true);
+        TypeInference helper(refMap, typeMap, true);
         (void)specMethodType->apply(helper);  // TODO: should this be set as the type of the method?
 
         auto canon = getType(specMethodType);

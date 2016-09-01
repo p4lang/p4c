@@ -42,7 +42,7 @@ int main(int argc, char *const argv[]) {
     auto hook = options.getDebugHook();
 
     if (program != nullptr && ::errorCount() == 0) {
-        FrontEnd fe;
+        P4::FrontEnd fe;
         fe.addDebugHook(hook);
         program = fe.run(options, program);
         if (program != nullptr && ::errorCount() == 0) {

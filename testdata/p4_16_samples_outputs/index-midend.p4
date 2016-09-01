@@ -1,35 +1,4 @@
-struct Version {
-    bit<8> major;
-    bit<8> minor;
-}
-
-error {
-    NoError,
-    PacketTooShort,
-    NoMatch,
-    EmptyStack,
-    FullStack,
-    OverwritingHeader,
-    HeaderTooShort
-}
-
-extern packet_in {
-    void extract<T>(out T hdr);
-    void extract<T>(out T variableSizeHeader, in bit<32> variableFieldSizeInBits);
-    T lookahead<T>();
-    void advance(in bit<32> sizeInBits);
-    bit<32> length();
-}
-
-extern packet_out {
-    void emit<T>(in T hdr);
-}
-
-match_kind {
-    exact,
-    ternary,
-    lpm
-}
+#include <core.p4>
 
 header H {
     bit<32> field;
@@ -55,9 +24,6 @@ parser P(packet_in p, out H[2] h) {
     }
     state n3 {
         x_0 = x_0 + 32w4294967295;
-        transition n4;
-    }
-    state n4 {
         p.extract<H>(h[x_0]);
         transition accept;
     }

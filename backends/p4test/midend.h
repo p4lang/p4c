@@ -29,8 +29,6 @@ class MidEnd : public PassManager {
     P4::ReferenceMap    refMap;
     P4::TypeMap         typeMap;
     IR::ToplevelBlock   *toplevel = nullptr;
-    P4::InlineWorkList toInline;
-    P4::ActionsInlineList actionsToInline;
 
  public:
     explicit MidEnd(CompilerOptions& options);

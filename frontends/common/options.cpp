@@ -145,7 +145,7 @@ FILE* CompilerOptions::preprocess() {
 #else
         std::string cmd("cpp");
 #endif
-        cmd += cstring(" -undef -nostdinc -I") +
+        cmd += cstring(" 2>/dev/null -undef -nostdinc -I") +
                 p4includePath + " " + preprocessor_options + " " + file;
         if (verbose)
             std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
@@ -220,7 +220,7 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
             if (stream != nullptr) {
                 if (verbose)
                     std::cerr << "Writing program to " << fileName << std::endl;
-                P4::ToP4 toP4(stream, verbose);
+                P4::ToP4 toP4(stream, verbose, file);
                 node->apply(toP4);
             }
         }

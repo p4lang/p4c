@@ -1,4 +1,0 @@
-error: Parser cycle without extracting any bytes:
-Parser P state chain: start, start
-error: 1 errors encountered, aborting compilation
-error: 2 errors encountered, aborting compilation

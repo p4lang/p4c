@@ -1475,18 +1475,18 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct,
         json->emplace("name", nameFromAnnotation(f->annotations, f->name.name));
         json->emplace("id", nextId("stack"));
         json->emplace("size", stack->getSize());
-        auto type = typeMap->getType(stack->baseType, true);
-        BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->baseType);
+        auto type = typeMap->getType(stack->elementType, true);
+        BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
         auto ht = type->to<IR::Type_Header>();
         if (!headerTypesDone.count(ht->name)) {
             auto json = typeToJson(ht);
             headerTypes->append(json);
         }
 
-        cstring header_type = stack->baseType->to<IR::Type_Header>()->name;
+        cstring header_type = stack->elementType->to<IR::Type_Header>()->name;
         json->emplace("header_type", header_type);
         auto stackMembers = mkArrayField(json, "header_ids");
-        for (int i=0; i < stack->getSize(); i++) {
+        for (unsigned i=0; i < stack->getSize(); i++) {
             unsigned id = nextId("headers");
             stackMembers->append(id);
             auto header = new Util::JsonObject();

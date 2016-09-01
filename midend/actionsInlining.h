@@ -18,8 +18,8 @@ limitations under the License.
 #define _MIDEND_ACTIONSINLINING_H_
 
 #include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/unusedDeclarations.h"
 
 namespace P4 {
 
@@ -89,14 +89,12 @@ class AbstractActionInliner : public Transform {
  protected:
     ActionsInlineList* list;
     AInlineWorkList*   toInline;
-    bool               p4v1;
-    AbstractActionInliner() : list(nullptr), toInline(nullptr), p4v1(false) {}
+    AbstractActionInliner() : list(nullptr), toInline(nullptr) {}
  public:
-    void prepare(ActionsInlineList* list, AInlineWorkList* toInline, bool p4v1) {
+    void prepare(ActionsInlineList* list, AInlineWorkList* toInline) {
         CHECK_NULL(list); CHECK_NULL(toInline);
         this->list = list;
         this->toInline = toInline;
-        this->p4v1 = p4v1;
     }
     Visitor::profile_t init_apply(const IR::Node* node) {
         LOG1("AbstractActionInliner " << toInline);
@@ -110,7 +108,8 @@ class ActionsInliner : public AbstractActionInliner {
     P4::ReferenceMap* refMap;
     std::map<const IR::MethodCallStatement*, const IR::P4Action*>* replMap;
  public:
-    ActionsInliner() : refMap(new P4::ReferenceMap()), replMap(nullptr) {}
+    ActionsInliner(bool isv1) : refMap(new P4::ReferenceMap()), replMap(nullptr)
+    { refMap->setIsV1(isv1); }
     Visitor::profile_t init_apply(const IR::Node* node) override;
     const IR::Node* preorder(IR::P4Parser* cont) override
     { prune(); return cont; }  // skip
@@ -122,15 +121,26 @@ class ActionsInliner : public AbstractActionInliner {
 class InlineActionsDriver : public Transform {
     ActionsInlineList*     toInline;
     AbstractActionInliner* inliner;
-    bool                   p4v1;
  public:
-    InlineActionsDriver(ActionsInlineList* toInline, AbstractActionInliner *inliner, bool p4v1) :
-            toInline(toInline), inliner(inliner), p4v1(p4v1)
+    InlineActionsDriver(ActionsInlineList* toInline, AbstractActionInliner *inliner) :
+            toInline(toInline), inliner(inliner)
     { CHECK_NULL(toInline); CHECK_NULL(inliner); setName("InlineActionsDriver"); }
-
     // Not really a visitor, but we want to embed it into a PassManager,
     // so we make it look like a visitor.
     const IR::Node* preorder(IR::P4Program* program) override;
+};
+
+class InlineActions : public PassManager {
+    ActionsInlineList actionsToInline;
+ public:
+    InlineActions(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new DiscoverActionsInlining(&actionsToInline, refMap, typeMap));
+        passes.push_back(new InlineActionsDriver(&actionsToInline,
+                                                 new ActionsInliner(refMap->isV1())));
+        passes.push_back(new RemoveAllUnusedDeclarations(refMap));
+        setName("InlineActions");
+    }
 };
 
 }  // namespace P4

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,6 +28,12 @@ limitations under the License.
 #include "map.h"
 
 namespace Test { class TestSourceFile; }
+
+class IHasDbPrint {
+ public:
+    virtual void dbprint(std::ostream& out) const = 0;
+    virtual ~IHasDbPrint() {}
+};
 
 namespace Util {
 struct SourceFileLine;
@@ -203,12 +209,6 @@ class SourceInfo final {
     SourcePosition end;
 };
 
-class IHasDbPrint {
- public:
-    virtual void dbprint(std::ostream& out) const = 0;
-    virtual ~IHasDbPrint() {}
-};
-
 class IHasSourceInfo {
  public:
     virtual SourceInfo getSourceInfo() const = 0;
@@ -289,4 +289,8 @@ class InputSources final {
 };
 
 }  // namespace Util
+
+inline void dbprint(const IHasDbPrint* o)
+{ o->dbprint(std::cout); }
+
 #endif /* P4C_LIB_SOURCE_FILE_H_ */

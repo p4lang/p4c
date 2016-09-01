@@ -2,12 +2,12 @@ extern If<T> {
     T id(in T d);
 }
 
-control p1(in If x) {
+control p1(If x) {
     apply {
     }
 }
 
-control p2(in If<int<32>, int<32>> x) {
+control p2(If<int<32>, int<32>> x) {
     apply {
     }
 }

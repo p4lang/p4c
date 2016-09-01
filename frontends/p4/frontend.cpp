@@ -38,6 +38,8 @@ limitations under the License.
 #include "strengthReduction.h"
 #include "simplify.h"
 
+namespace P4 {
+
 namespace {
 class PrettyPrint : public Inspector {
     cstring ppfile;
@@ -66,32 +68,32 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         return nullptr;
 
     bool isv1 = options.isv1();
-    P4::ReferenceMap  refMap;  // This is reused many times, since every analysis clear it
-    P4::TypeMap       typeMap;
+    ReferenceMap  refMap;
+    TypeMap       typeMap;
+    refMap.setIsV1(isv1);
 
     PassManager passes = {
         new PrettyPrint(options),
         // Simple checks on parsed program
-        new P4::ValidateParsedProgram(isv1),
+        new ValidateParsedProgram(isv1),
         // Synthesize some built-in constructs
-        new P4::CreateBuiltins(),
-        // First pass of constant folding, before types are known
-        // May be needed to compute types
-        new P4::ResolveReferences(&refMap, isv1, true),
-        new P4::ConstantFolding(&refMap, nullptr),
-        new P4::ResolveReferences(&refMap, isv1),
+        new CreateBuiltins(),
+        new ResolveReferences(&refMap, true),  // check shadowing
+        // First pass of constant folding, before types are known --
+        // may be needed to compute types.
+        new ConstantFolding(&refMap, nullptr),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
-        new P4::TypeInference(&refMap, &typeMap, true, false),
-        new P4::BindTypeVariables(&refMap, &typeMap),
+        new ResolveReferences(&refMap),
+        new TypeInference(&refMap, &typeMap),
+        new BindTypeVariables(&refMap, &typeMap),
         // Another round of constant folding, using type information.
-        new P4::TypeChecking(&refMap, &typeMap, true, isv1),
-        new P4::ConstantFolding(&refMap, &typeMap),
-        new P4::StrengthReduction(),
-        new P4::TypeChecking(&refMap, &typeMap, false, isv1),
-        new P4::CheckAliasing(&refMap, &typeMap),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveAllUnusedDeclarations(&refMap, isv1),
+        new ClearTypeMap(&typeMap),
+        new ConstantFolding(&refMap, &typeMap),
+        new StrengthReduction(),
+        new CheckAliasing(&refMap, &typeMap),
+        new SimplifyControlFlow(&refMap, &typeMap),
+        new RemoveAllUnusedDeclarations(&refMap),
     };
 
     passes.setName("FrontEnd");
@@ -100,3 +102,5 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
     const IR::P4Program* result = program->apply(passes);
     return result;
 }
+
+}  // namespace P4

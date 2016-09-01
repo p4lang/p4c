@@ -29,10 +29,8 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 LOG1(name() << " invoking " << v->name());
                 program = program->apply(**it);
                 int errors = ErrorReporter::instance.getErrorCount();
-                if (stop_on_error && errors > 0) {
-                    ::error("%1% errors encountered, aborting compilation", errors);
+                if (stop_on_error && errors > 0)
                     program = nullptr;
-                }
                 if (program == nullptr) break;
             } catch (Backtrack::trigger::type_t &trig_type) {
                 throw Backtrack::trigger(trig_type);

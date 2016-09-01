@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/virtual6.p4(18)
     abstract bit<16> g();
                      ^
-error: 1 errors encountered, aborting compilation

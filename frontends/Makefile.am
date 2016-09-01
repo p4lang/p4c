@@ -20,6 +20,8 @@ p4_frontend_SOURCES = \
 	frontends/p4/checkAliasing.cpp \
 	frontends/p4/createBuiltins.h \
 	frontends/p4/createBuiltins.cpp \
+	frontends/p4/def_use.h \
+	frontends/p4/def_use.cpp \
 	frontends/p4/validateParsedProgram.h \
 	frontends/p4/validateParsedProgram.cpp \
 	frontends/p4/p4-parse.h \
@@ -52,6 +54,8 @@ p4_frontend_SOURCES = \
 	frontends/p4/enumInstance.h \
 	frontends/p4/methodInstance.h \
 	frontends/p4/methodInstance.cpp \
+	frontends/p4/parserCallGraph.h \
+	frontends/p4/parserCallGraph.cpp \
 	frontends/p4/tableApply.h \
 	frontends/p4/tableApply.cpp \
 	frontends/p4/simplify.h \

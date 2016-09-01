@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/missing_actions.p4(20): warning: Table t does not have an `default_action' property
     table t()
           ^
-error: 1 errors encountered, aborting compilation

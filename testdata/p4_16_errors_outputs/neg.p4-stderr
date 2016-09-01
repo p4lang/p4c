@@ -10,4 +10,3 @@
 ../testdata/p4_16_errors/neg.p4(22): error: Could not find type of %
     c = a % b;
         ^^^^^
-error: 4 errors encountered, aborting compilation

@@ -16,4 +16,3 @@
 ../testdata/p4_16_errors/bitExtract_e.p4(27): error: Could not find type of dt[7:4]
         bit<4> z = dt[7:4];
                    ^^^^^^^
-error: 6 errors encountered, aborting compilation

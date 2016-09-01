@@ -16,4 +16,3 @@ action b() {}
 ../testdata/p4_16_errors/default_action1.p4(23): error: Could not find type of .b
         default_action = .b();
                          ^^^^
-error: 3 errors encountered, aborting compilation

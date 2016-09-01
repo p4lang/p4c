@@ -59,7 +59,7 @@ bool SymbolicValueFactory::isFixedWidth(const IR::Type* type) const {
     if (type->is<IR::Type_Extern>())
         return false;
     if (type->is<IR::Type_Stack>())
-        return isFixedWidth(type->to<IR::Type_Stack>()->baseType);
+        return isFixedWidth(type->to<IR::Type_Stack>()->elementType);
     if (type->is<IR::Type_StructLike>()) {
         auto st = type->to<IR::Type_StructLike>();
         for (auto f : *st->fields)
@@ -99,7 +99,7 @@ unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
     }
     if (type->is<IR::Type_Stack>()) {
         auto st = type->to<IR::Type_Stack>();
-        auto bw = getWidth(st->baseType);
+        auto bw = getWidth(st->elementType);
         return bw * st->getSize();
     }
     if (type->is<IR::Type_Tuple>()) {
@@ -387,7 +387,7 @@ void SymbolicHeader::dbprint(std::ostream& out) const {
 SymbolicArray::SymbolicArray(const IR::Type_Stack* type, bool uninitialized,
                              const SymbolicValueFactory* factory) :
         SymbolicValue(type), size(type->getSize()),
-        elemType(type->baseType->to<IR::Type_Header>()) {
+        elemType(type->elementType->to<IR::Type_Header>()) {
     for (unsigned i=0; i < size; i++) {
         auto elem = factory->create(elemType, uninitialized);
         BUG_CHECK(elem->is<SymbolicHeader>(), "%1%: expected a header", elem);
@@ -615,7 +615,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
     } else if (!li->isUnknown() && !ri->isUnknown()) {
         clone->left = li->constant;
         clone->right = ri->constant;
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
@@ -648,7 +648,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     if (l->is<SymbolicInteger>()) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
@@ -656,7 +656,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     } else if (l->is<SymbolicBool>()) {
         auto li = l->to<SymbolicBool>();
         clone->expr = new IR::BoolLiteral(li->value);
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
@@ -722,7 +722,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         BUG_CHECK(r->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger");
         clone->left = l->to<SymbolicInteger>()->constant;
         clone->right = r->to<SymbolicInteger>()->constant;
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
@@ -731,7 +731,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         BUG_CHECK(r->is<SymbolicBool>(), "%1%: expected an SymbolicBool");
         clone->left = new IR::BoolLiteral(l->to<SymbolicBool>()->value);
         clone->right = new IR::BoolLiteral(r->to<SymbolicBool>()->value);
-        ConstantFolding cf(refMap, typeMap);
+        DoConstantFolding cf(refMap, typeMap);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
@@ -879,7 +879,8 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
             set(expression, SymbolicVoid::get());
             return;
         } else {
-            // isValid()
+            BUG_CHECK(name == IR::Type_Header::isValid,
+                      "%1%: unexpected method", bim->name);
             BUG_CHECK(base->is<SymbolicHeader>(), "%1%: expected a header", base);
             auto hv = base->to<SymbolicHeader>();
             auto v = hv->valid;

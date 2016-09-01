@@ -414,7 +414,7 @@ class SymbolicArray final : public SymbolicValue {
     friend class AnyElement;
     explicit SymbolicArray(const IR::Type_Stack* type) :
             SymbolicValue(type), size(type->getSize()),
-            elemType(type->baseType->to<IR::Type_Header>()) {}
+            elemType(type->elementType->to<IR::Type_Header>()) {}
 
  public:
     const size_t size;

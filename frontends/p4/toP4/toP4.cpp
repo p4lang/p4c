@@ -17,6 +17,7 @@ limitations under the License.
 #include <sstream>
 #include <string>
 #include "toP4.h"
+#include "setup.h"
 
 namespace P4 {
 
@@ -35,8 +36,7 @@ void ToP4::end_apply(const IR::Node*) {
 
 // Try to guess whether a file is a "system" file
 bool ToP4::isSystemFile(cstring file) {
-    if (file.endsWith("core.p4")) return true;
-    if (file.endsWith("model.p4")) return true;
+    if (file.startsWith(p4includePath)) return true;
     return false;
 }
 
@@ -137,21 +137,33 @@ bool ToP4::preorder(const IR::P4Program* program) {
     dump(2);
     for (auto a : *program->declarations) {
         // Check where this declaration originates
-        if (!mainFile.isNullOrEmpty()) {
-            if (a->srcInfo.isValid()) {
-                unsigned line = a->srcInfo.getStart().getLineNumber();
-                auto sfl = Util::InputSources::instance->getSourceLine(line);
-                cstring sourceFile = sfl.fileName;
-                if (sourceFile != mainFile && isSystemFile(sourceFile)) {
-                    if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
-                        builder.append("#include \"");
+        if (a->srcInfo.isValid()) {
+            unsigned line = a->srcInfo.getStart().getLineNumber();
+            auto sfl = Util::InputSources::instance->getSourceLine(line);
+            cstring sourceFile = sfl.fileName;
+            /* FIXME -- when including a user header file (sourceFile != mainFile), do we want
+             * to emit an #include of it or not?  Probably not when translating from P4-14, as
+             * that would create a P4-16 file that tries to include a P4-14 header.  Unless we
+             * want to allow converting headers independently (is that even possible?).  For now
+             * we ignore mainFile and don't emit #includes for any non-system header */
+            if (isSystemFile(sourceFile)) {
+                if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
+                    builder.append("#include ");
+                    if (sourceFile.startsWith(p4includePath)) {
+                        const char *p = sourceFile.c_str() + strlen(p4includePath);
+                        if (*p == '/') p++;
+                        builder.append("<");
+                        builder.append(p);
+                        builder.appendLine(">");
+                    } else {
+                        builder.append("\"");
                         builder.append(sourceFile);
                         builder.appendLine("\"");
-                        includesEmitted.emplace(sourceFile);
                     }
-                    first = false;
-                    continue;
+                    includesEmitted.emplace(sourceFile);
                 }
+                first = false;
+                continue;
             }
         }
         if (!first)
@@ -201,7 +213,7 @@ bool ToP4::preorder(const IR::Type_Name* t) {
 
 bool ToP4::preorder(const IR::Type_Stack* t) {
     dump(2);
-    visit(t->baseType);
+    visit(t->elementType);
     builder.append("[");
     visit(t->size);
     builder.append("]");

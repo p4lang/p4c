@@ -4,4 +4,3 @@
 ../testdata/p4_16_errors/stack1_e.p4(22): error: h[]: Size of header stack type should be a constant
         h[w] stack;
         ^^^^
-error: 1 errors encountered, aborting compilation

@@ -3,7 +3,7 @@
 
 namespace P4 {
 
-const IR::Node* ConvertEnums::preorder(IR::Type_Enum* type) {
+const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
     bool convert = policy->convert(type);
     if (!convert)
         return type;
@@ -19,7 +19,7 @@ const IR::Node* ConvertEnums::preorder(IR::Type_Enum* type) {
     return nullptr;  // delete the declaration
 }
 
-const IR::Node* ConvertEnums::postorder(IR::Type_Name* type) {
+const IR::Node* DoConvertEnums::postorder(IR::Type_Name* type) {
     auto canontype = typeMap->getType(getOriginal(), true);
     if (!canontype->is<IR::Type_Enum>())
         return type;
@@ -33,7 +33,7 @@ const IR::Node* ConvertEnums::postorder(IR::Type_Name* type) {
     return r->type;
 }
 
-const IR::Node* ConvertEnums::postorder(IR::Member* expression) {
+const IR::Node* DoConvertEnums::postorder(IR::Member* expression) {
     auto ei = EnumInstance::resolve(getOriginal<IR::Member>(), typeMap);
     if (ei == nullptr)
         return expression;

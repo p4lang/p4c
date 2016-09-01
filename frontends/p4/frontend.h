@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ limitations under the License.
 #include "ir/ir.h"
 #include "../common/options.h"
 
+namespace P4 {
+
 class FrontEnd {
     std::vector<DebugHook> hooks;
  public:
@@ -27,5 +29,7 @@ class FrontEnd {
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     const IR::P4Program* run(const CompilerOptions& options, const IR::P4Program* program);
 };
+
+}  // namespace P4
 
 #endif /* _P4_FRONTEND_H_ */

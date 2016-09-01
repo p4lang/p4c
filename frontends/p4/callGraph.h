@@ -19,10 +19,13 @@ limitations under the License.
 
 #include <vector>
 #include <unordered_set>
+#include <algorithm>
 #include "lib/log.h"
+#include "lib/exceptions.h"
 #include "lib/map.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
+#include "lib/null.h"
 
 namespace P4 {
 
@@ -33,7 +36,7 @@ class CallGraph {
     // Use an ordered map to make this deterministic
     ordered_map<T, std::vector<T>*> out_edges;  // map caller to list of callees
     ordered_map<T, std::vector<T>*> in_edges;
-    ordered_set<T> nodes;    // all nodes
+    ordered_set<T> nodes;    // all nodes; do not modify this directly
 
     void sort(T el, std::vector<T> &out, std::set<T> &done)  {
         if (done.find(el) != done.end()) {
@@ -48,7 +51,7 @@ class CallGraph {
     }
 
  public:
-    typedef typename ordered_map<T, std::vector<T>*>::iterator iterator;
+    typedef typename ordered_map<T, std::vector<T>*>::const_iterator const_iterator;
 
     explicit CallGraph(cstring name) : name(name) {}
 
@@ -69,6 +72,33 @@ class CallGraph {
         add(callee);
         out_edges[caller]->push_back(callee);
         in_edges[callee]->push_back(caller);
+    }
+    void remove(T node) {
+        auto n = nodes.find(node);
+        BUG_CHECK(n != nodes.end(), "%1%: Node not in graph", node);
+        nodes.erase(n);
+        auto in = in_edges.find(node);
+        if (in != in_edges.end()) {
+            // remove all edges pointing to this node
+            for (auto n : *in->second) {
+                auto out = out_edges[n];
+                CHECK_NULL(out);
+                auto oe = std::find(out->begin(), out->end(), node);
+                out->erase(oe);
+            }
+            in_edges.erase(in);
+        }
+        auto it = out_edges.find(node);
+        if (it != out_edges.end()) {
+            // Remove all edges that point from this node
+            for (auto n : *it->second) {
+                auto in = in_edges[n];
+                CHECK_NULL(in);
+                auto ie = std::find(in->begin(), in->end(), node);
+                in->erase(ie);
+            }
+            out_edges.erase(it);
+        }
     }
 
     // Graph querying
@@ -96,15 +126,18 @@ class CallGraph {
             sort(n, out, done);
     }
     // Iterators over the out_edges
-    iterator begin() { return out_edges.begin(); }
-    iterator end()   { return out_edges.end(); }
+    const_iterator begin() const { return out_edges.cbegin(); }
+    const_iterator end()   const { return out_edges.cend(); }
     std::vector<T>* getCallees(T caller)
     { return out_edges[caller]; }
+    std::vector<T>* getCallers(T callee)
+    { return in_edges[callee]; }
     // Callees are appended to 'toAppend'
     void getCallees(T caller, std::set<T> &toAppend) {
         if (isCaller(caller))
             toAppend.insert(out_edges[caller]->begin(), out_edges[caller]->end());
     }
+    size_t size() const { return nodes.size(); }
     // out will contain all nodes reachable from start
     void reachable(T start, std::set<T> &out) const {
         std::set<T> work;
@@ -121,6 +154,15 @@ class CallGraph {
             for (auto c : *(edges->second))
                 work.emplace(c);
         }
+    }
+    // remove all nodes not in 'to'
+    void restrict(const std::set<T> &to) {
+        std::vector<T> toRemove;
+        for (auto n : nodes)
+            if (to.find(n) == to.end())
+                toRemove.push_back(n);
+        for (auto n : toRemove)
+            remove(n);
     }
 
     typedef std::unordered_set<T> Set;
@@ -274,6 +316,7 @@ class CallGraph {
         }
     };
 
+    // helper for scSort
     bool strongConnect(T node, sccInfo& helper, std::vector<T>& out) {
         bool loop = false;
 

@@ -28,7 +28,7 @@ limitations under the License.
 namespace P4 {
 
 /* Maps Parameters to Expressions */
-class ParameterSubstitution {
+class ParameterSubstitution : public IHasDbPrint {
  protected:
     // Parameter names are unique for a procedure, so each name
     // should show up only once.

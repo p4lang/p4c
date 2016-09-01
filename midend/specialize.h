@@ -87,7 +87,7 @@ class Specialize : public Transform {
 class SpecializeAll : public PassRepeated {
     SpecializationMap specMap;
  public:
-    SpecializeAll(ReferenceMap* refMap, TypeMap* typeMap, bool isv1);
+    SpecializeAll(ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 }  // namespace P4
