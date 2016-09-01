@@ -85,7 +85,8 @@ class NamedType : public Type {
         if (name != t.name) return false;
         return (lookup == t.lookup || (lookup && t.lookup && *lookup == *t.lookup)); }
 
-    static NamedType Bool, Int, Void, Cstring, Ostream, Visitor, Unordered_Set, JSONGenerator;
+    static NamedType Bool, Int, Void, Cstring, Ostream, Visitor, Unordered_Set, JSONGenerator,
+        JSONLoader, JsonObject;
 };
 
 class TemplateInstantiation : public Type {

@@ -31,6 +31,7 @@ class Inspector;
 class Modifier;
 class Transform;
 class JSONGenerator;
+class JSONLoader;
 
 namespace IR {
 
@@ -38,7 +39,6 @@ class Node;
 
 template<class T> class Vector;
 template<class T> class IndexedVector;
-
 // node interface
 class INode : public Util::IHasSourceInfo, public Util::IHasDbPrint {
  public:
@@ -99,6 +99,7 @@ class Node : public virtual INode {
         CHECK_NULL(this);
         return dynamic_cast<const T*>(this);
     }
+    Node(JSONLoader &json);
     cstring toString() const override { return node_type_name(); }
     void toJSON(JSONGenerator &json) const override;
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }

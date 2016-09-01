@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "../lib/ordered_map.h"
+
 class JsonData {
  public:
     JsonData() {}
@@ -16,18 +17,22 @@ class JsonData {
     JsonData(JsonData&&) = default;
     JsonData &operator=(const JsonData &) & = default;
     JsonData &operator=(JsonData &&) & = default;
+    template<typename T> bool is() const { return to<T>() != nullptr; }
+    template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
     virtual ~JsonData() {}
 };
 
 class JsonNumber : public JsonData {
  public:
     JsonNumber(long long v) : val(v) {}   // NOLINT(runtime/explicit)
+    operator int() const { return val; }
     long long val;
 };
 
 class JsonBoolean : public JsonData {
  public:
     JsonBoolean(bool v) : val(v) {}   // NOLINT(runtime/explicit)
+    operator bool() const { return val; }
     bool val;
 };
 
@@ -35,10 +40,12 @@ class JsonString : public JsonData, public std::string {
  public:
     JsonString() {}
     JsonString(const std::string &s) : std::string(s) {}   // NOLINT(runtime/explicit)
+    JsonString(const char *s) : std::string(s) {}
     JsonString(const JsonString&) = default;
     JsonString(JsonString&&) = default;
     JsonString &operator=(const JsonString&) & = default;
     JsonString &operator=(JsonString&&) & = default;
+    operator cstring() { return cstring(*this); }
 };
 
 class JsonVector : public JsonData, public std::vector<JsonData*> {
@@ -50,27 +57,40 @@ class JsonVector : public JsonData, public std::vector<JsonData*> {
     JsonVector &operator=(JsonVector&&) & = default;
 };
 
-class JsonObject : public JsonData, public ordered_map<JsonString, JsonData*>  {
+class JsonObject : public JsonData, public ordered_map<std::string, JsonData*>  {
  public:
     JsonObject &operator=(JsonObject&&) & = default;
-    JsonObject(const ordered_map<JsonString, JsonData*> & v)  // NOLINT(runtime/explicit)
-    : ordered_map<JsonString, JsonData*>(v) {}
+    JsonObject(const ordered_map<std::string, JsonData*> & v)  // NOLINT(runtime/explicit)
+    : ordered_map<std::string, JsonData*>(v) {}
+    int get_id() const {
+        if (find("Node_ID") == end())
+            return -1;
+        else
+            return *(find("Node_ID")->second->to<JsonNumber>());
+    }
+
+    std::string get_type() const { 
+        if (find("Node_Type") == end())
+            return "";
+        else
+            return *(dynamic_cast<JsonString*>(find("Node_Type")->second));
+    } 
 };
 
 class JsonNull : public JsonData {};
 
 // Hack to make << operator work multi-threaded
-thread_local int level = 0;
+static thread_local int level = 0;
 
-std::string getIndent(int l) {
+inline std::string getIndent(int l) {
     std::stringstream ss;
     for (int i = 0; i < l*4; i++) ss << " ";
     return ss.str();
 }
 
-std::ostream& operator<<(std::ostream &out, JsonData* json) {
+inline std::ostream& operator<<(std::ostream &out, JsonData* json) {
     if (dynamic_cast<JsonObject*>(json)) {
-        auto obj = dynamic_cast<ordered_map<JsonString, JsonData*>*>(json);
+        auto obj = dynamic_cast<ordered_map<std::string, JsonData*>*>(json);
         out << "{";
         if (obj->size() > 0) {
             level++;
@@ -110,13 +130,13 @@ std::ostream& operator<<(std::ostream &out, JsonData* json) {
 }
 
 
-std::istream& operator>>(std::istream &in, JsonData*& json) {
+inline std::istream& operator>>(std::istream &in, JsonData*& json) {
     while (in) {
         char ch;
         in >> ch;
         switch (ch) {
         case '{': {
-            ordered_map<JsonString, JsonData*> obj;
+            ordered_map<std::string, JsonData*> obj;
             do {
                 in >> std::ws >> ch;
                 if (ch == '}')
@@ -177,8 +197,11 @@ std::istream& operator>>(std::istream &in, JsonData*& json) {
             in.ignore(3);
             json = new JsonNull();
             return in;
+        default: 
+            return in;
         }
     }
+    return in;
 }
 
 #endif /* IR_JSON_PARSER_H_ */

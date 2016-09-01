@@ -18,7 +18,7 @@ limitations under the License.
 #include "lib/algorithm.h"
 
 enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ONLY = 16,
-             CONST = 32, CLASSREF = 64, INCL_NESTED = 128};
+             CONST = 32, CLASSREF = 64, INCL_NESTED = 128, CONSTRUCTOR = 256, FACTORY = 512};
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 { "operator==", { &NamedType::Bool, {}, CONST + IN_IMPL + OVERRIDE + CLASSREF,
@@ -113,6 +113,24 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 << f->name << "\\\" : \" << " << "this->" << f->name << ";" << std::endl; }
         buf << "}";
         return buf.str(); } } },
+{ "PLACEHOLDER", { nullptr, { new IrField(new ReferenceType(&NamedType::JSONLoader), "json")
+    }, IN_IMPL + CONSTRUCTOR, 
+    [](IrClass *cl, cstring) -> cstring {
+        std::stringstream buf;
+        buf << ": " << cl->getParent()->name << "(json) {" << std::endl;
+        for (auto f : *cl->getFields()) {
+            buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ");" << std::endl;
+        }
+        buf << "}";
+        return buf.str(); } } },
+{ "fromJSON", { nullptr, { 
+        new IrField(new ReferenceType(&NamedType::JSONLoader), "json"),
+    }, FACTORY + CONCRETE_ONLY + OVERRIDE,
+    [](IrClass *cl, cstring) -> cstring {
+        std::stringstream buf;
+        buf << "{ return new " << cl->name << "(json); }";
+        return buf.str();
+    } } },
 { "toString", { &NamedType::Cstring, {}, CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
     [](IrClass *, cstring) -> cstring { return cstring(); } } },
 };
@@ -125,6 +143,23 @@ void IrClass::generateMethods() {
                 continue;
             if ((def.second.flags & CONCRETE_ONLY) && kind != NodeKind::Concrete)
                 continue;
+            if (def.second.flags & CONSTRUCTOR || def.second.flags & FACTORY) {
+                cstring body = def.second.create(this, cstring());
+                IrMethod* m;
+                if (def.second.flags & CONSTRUCTOR) { 
+                    m = new IrMethod(this->name, body);
+                    m->rtype = def.second.rtype;
+                    m->inImpl = true;
+                } else {
+                    m = new IrMethod(def.first, body);
+                    m->rtype = new PointerType(new NamedType(name));
+                    m->isStatic = true;
+                    m->isSpecial = true;
+                }
+                m->clss = this;        
+                m->args = def.second.args;
+                elements.push_back(m);
+                continue; }
             if (Util::Enumerator<IrElement*>::createEnumerator(elements)
                 ->where([] (IrElement *el) { return el->is<IrNo>(); })
                 ->where([&def] (IrElement *el) { return el->to<IrNo>()->text == def.first; })
@@ -158,9 +193,13 @@ void IrClass::generateMethods() {
             elements.push_back(eq_overload); } }
     IrMethod *ctor = nullptr;
     for (auto m : *getUserMethods()) {
+        if (m->isSpecial)
+            continue;
         if (m->rtype) {
             m->rtype->resolve(&local);
             continue; }
+        if (!m->args.empty())
+            continue;
         if (m->name == name) {
             if (!m->isUser) ctor = m;
             continue; }
