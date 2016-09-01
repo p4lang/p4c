@@ -31,6 +31,7 @@ import time
 import random
 import errno
 from string import maketrans
+from collections import OrderedDict
 try:
     from scapy.layers.all import *
     from scapy.utils import *
@@ -138,20 +139,26 @@ class BMV2ActionArg(object):
         self.width = width
 
 class TableKey(object):
-    def __init__(self, ternary):
-        self.fields = []
-        self.ternary = ternary
-    def append(self, name):
-        self.fields.append(name)
+    def __init__(self):
+        self.fields = OrderedDict()
+    def append(self, name, type):
+        self.fields[name] = type
 
 class TableKeyInstance(object):
     def __init__(self, tableKey):
         assert isinstance(tableKey, TableKey)
         self.values = {}
         self.key = tableKey
-        for f in tableKey.fields:
-            self.values[f] = self.makeMask("0x*", tableKey.ternary)
-    def set(self, key, value, ternary):
+        for f,t in tableKey.fields.iteritems():
+            if t == "ternary":
+                self.values[f] = "0&&&0"
+            elif t == "lpm":
+                self.values[f] = "0/0"
+            elif t == "exact":
+                self.values[f] = "0"
+            else:
+                raise Exception("Unexpected key type " + t)
+    def set(self, key, value):
         array = re.compile("(.*)\$([0-9]+)(.*)");
         m = array.match(key)
         if m:
@@ -167,10 +174,13 @@ class TableKeyInstance(object):
                     found = True
         if not found:
             raise Exception("Unexpected key field " + key)
-        self.values[key] = self.makeMask(value, ternary)
-    def makeMask(self, value, ternary):
-        if not ternary:
-            return value
+        if self.key.fields[key] == "ternary":
+            self.values[key] = self.makeMask(value)
+        elif self.key.fields[key] == "lpm":
+            self.values[key] = self.makeLpm(value)
+        else:
+            self.values[key] = value
+    def makeMask(self, value):
         if value.startswith("0x"):
             mask = "F"
             value = value[2:]
@@ -183,11 +193,27 @@ class TableKeyInstance(object):
             mask = "7"
             value = value[2:]
             prefix = "0o"
-        values = "0123456789*"
-        replacements = (mask * 10) + "0"
+        else:
+            return value
+        values = "0123456789abcdefABCDEF*"
+        replacements = (mask * 22) + "0"
         trans = maketrans(values, replacements)
         m = value.translate(trans)
         return prefix + value.replace("*", "0") + "&&&" + prefix + m
+    def makeLpm(self, value):
+        if value.find('/') >= 0:
+            return value
+        if value.startswith("0x"):
+            bits_per_digit = 4
+        elif value.startswith("0b"):
+            bits_per_digit = 1
+        elif value.startswith("0o"):
+            bits_per_digit = 3
+        else:
+            value = "0x" + hex(int(value))
+            bits_per_digit = 4
+        digits = len(value) - 2 - value.count('*')
+        return value.replace('*', '0') + "/" + str(digits*bits_per_digit)
     def __str__(self):
         result = ""
         for f in self.key.fields:
@@ -235,7 +261,7 @@ class BMV2Table(object):
     def __init__(self, jsonTable):
         self.match_type = jsonTable["match_type"]
         self.name = jsonTable["name"]
-        self.key = TableKey(self.match_type == "ternary")
+        self.key = TableKey()
         self.actions = {}
         for k in jsonTable["key"]:
             name = ""
@@ -243,7 +269,7 @@ class BMV2Table(object):
                 if name != "":
                     name += "."
                 name += t
-            self.key.append(name)
+            self.key.append(name, k["match_type"])
         actions = jsonTable["actions"]
         action_ids = jsonTable["action_ids"]
         for i in range(0, len(actions)):
@@ -336,13 +362,11 @@ class RunBMV2(object):
         actionArgs = None
         actionName = None
         prio, cmd = nextWord(cmd)
-        ternary = True
         number = re.compile("[0-9]+")
         if not number.match(prio):
             # not a priority; push back
             cmd = prio + " " + cmd
             prio = ""
-            ternary = False
         while cmd != "":
             if actionName != None:
                 # parsing action arguments
@@ -361,13 +385,14 @@ class RunBMV2(object):
                     cmd = cmd.strip("()")
                 else:
                     k, v = nextWord(word, ":")
-                    key.set(k, v, ternary)
-
+                    key.set(k, v)
         if prio != "":
             # Priorities in BMV2 seem to be reversed with respect to the stf file
             # Hopefully 10000 is large enough
             prio = str(10000 - int(prio))
-        command = "table_add " + tableName + " " + actionName + " " + str(key) + " => " + str(actionArgs) + " " + prio
+        command = "table_add " + tableName + " " + actionName + " " + str(key) + " => " + str(actionArgs)
+        if table.match_type == "ternary":
+            command += " " + prio
         return command
     def actionByName(self, table, actionName):
         id = table.actions[actionName]

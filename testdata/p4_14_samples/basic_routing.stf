@@ -1,0 +1,40 @@
+setdefault ipv4_fib on_miss()
+setdefault ipv4_fib_lpm on_miss()
+setdefault nexthop on_miss()
+setdefault rewrite_mac on_miss()
+
+# Add ports 1 and 2 to BD 10.
+add port_mapping ingress_port:1 set_bd(bd:10)
+add port_mapping ingress_port:2 set_bd(bd:10)
+
+# Add ports 3 and 4 to BD 20.
+add port_mapping ingress_port:3 set_bd(bd:20)
+add port_mapping ingress_port:4 set_bd(bd:20)
+
+# Add both BDs to same VRF.
+add bd bd:10 set_vrf(vrf:30)
+add bd bd:20 set_vrf(vrf:30)
+
+# add lpm entries
+add ipv4_fib_lpm 1600 vrf:30 dstAddr:0xc0a8**** fib_hit_nexthop(nexthop_index:1)
+add ipv4_fib_lpm 800 vrf:30 dstAddr:0x0a****** fib_hit_nexthop(nexthop_index:3)
+
+# add nexthop and rewrite_mac entries
+add nexthop nexthop_index:1 set_egress_details(egress_spec:1)
+add rewrite_mac nexthop_index:1 rewrite_src_dst_mac(smac:0x010101010101, dmac:0x000101010101)
+add nexthop nexthop_index:2 set_egress_details(egress_spec:2)
+add rewrite_mac nexthop_index:2 rewrite_src_dst_mac(smac:0x010202020202, dmac:0x000202020202)
+add nexthop nexthop_index:3 set_egress_details(egress_spec:3)
+add rewrite_mac nexthop_index:3 rewrite_src_dst_mac(smac:0x010303030303, dmac:0x000303030303)
+add nexthop nexthop_index:4 set_egress_details(egress_spec:4)
+add rewrite_mac nexthop_index:4 rewrite_src_dst_mac(smac:0x010404040404, dmac:0x000404040404)
+
+#        | ethernet header            | | IPv4 header                                  | | UDP header      | | payload ...
+#        dstAddr      srcAddr      type VL   len  id       ttl    csum                 |  sp   dp  len     | |
+expect 3 000303030303 010303030303 0800 4500 002c 0000 0065 3f 11 6*55 01020304 0a000002 0064 0065 0010 0000 000102030405060708090a0b0c0d0e0f
+packet 2 aaaaaaaaaaaa bbbbbbbbbbbb 0800 4500 002c 0000 0065 40 11 6c55 01020304 0a000002 0064 0065 0010 0000 000102030405060708090a0b0c0d0e0f
+expect 1 000101010101 010101010101 0800 4500 002c 0000 0065 3f 11 b*ac 01020304 c0a80102 0064 0065 0010 0000 000102030405060708090a0b0c0d0e0f
+packet 4 cccccccccccc dddddddddddd 0800 4500 002c 0000 0065 40 11 b4ac 01020304 c0a80102 0064 0065 0010 0000 000102030405060708090a0b0c0d0e0f
+
+# FIXME - wildcard on expected checksum output for model w/o checksum support
+
