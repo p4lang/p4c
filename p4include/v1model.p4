@@ -128,7 +128,7 @@ control Ingress<H, M>(inout H hdr,
 control Egress<H, M>(inout H hdr,
                      inout M meta,
                      inout standard_metadata_t standard_metadata);
-control ComputeCkecksum<H, M>(inout H hdr,
+control ComputeChecksum<H, M>(inout H hdr,
                               inout M meta,
                               inout standard_metadata_t standard_metadata);
 control Deparser<H>(packet_out b, in H hdr);
@@ -137,7 +137,7 @@ package V1Switch<H, M>(Parser<H, M> p,
                        VerifyChecksum<H, M> vr,
                        Ingress<H, M> ig,
                        Egress<H, M> eg,
-                       ComputeCkecksum<H, M> ck,
+                       ComputeChecksum<H, M> ck,
                        Deparser<H> dep
                        );
 
