@@ -20,12 +20,17 @@
 
 #include <gtest/gtest.h>
 
+#include <fstream>
 #include <sstream>
 #include <string>
+
+#include <boost/filesystem.hpp>
 
 #include <bm/bm_sim/P4Objects.h>
 
 using namespace bm;
+
+namespace fs = boost::filesystem;
 
 /* I need to find a better way to test the json parser, maybe I could simply
    read from the target files... */
@@ -268,4 +273,18 @@ TEST(P4Objects, TableDefaultEntry) {
   ASSERT_EQ("a0", entry.action_fn->get_name());
   ASSERT_EQ(1u, entry.action_data.size());
   ASSERT_EQ(0xab, entry.action_data.get(0).get_int());
+}
+
+TEST(P4Objects, ParseVset) {
+  fs::path json_path = fs::path(TESTDATADIR) / fs::path("parse_vset.json");
+  std::ifstream is(json_path.string());
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  auto parse_vset_1 = objects.get_parse_vset("pv1");
+  ASSERT_NE(nullptr, parse_vset_1);
+  auto parse_vset_2 = objects.get_parse_vset("pv2");
+  ASSERT_NE(nullptr, parse_vset_2);
+  ASSERT_EQ("pv1", parse_vset_1->get_name());
+  ASSERT_EQ(16, parse_vset_1->get_compressed_bitwidth());
 }

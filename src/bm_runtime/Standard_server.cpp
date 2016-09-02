@@ -907,6 +907,28 @@ public:
     }
   }
 
+  void bm_parse_vset_add(const int32_t cxt_id, const std::string& parse_vset_name, const BmParseVSetValue& value) {
+    Logger::get()->trace("bm_parse_vset_add");
+    ParseVSet::ErrorCode error_code = switch_->parse_vset_add(
+        cxt_id, parse_vset_name, ByteContainer(value.data(), value.size()));
+    if(error_code != ParseVSet::ErrorCode::SUCCESS) {
+      InvalidParseVSetOperation ipo;
+      ipo.code = (ParseVSetOperationErrorCode::type) error_code;
+      throw ipo;
+    }
+  }
+
+  void bm_parse_vset_remove(const int32_t cxt_id, const std::string& parse_vset_name, const BmParseVSetValue& value) {
+    Logger::get()->trace("bm_parse_vset_remove");
+    ParseVSet::ErrorCode error_code = switch_->parse_vset_remove(
+        cxt_id, parse_vset_name, ByteContainer(value.data(), value.size()));
+    if(error_code != ParseVSet::ErrorCode::SUCCESS) {
+      InvalidParseVSetOperation ipo;
+      ipo.code = (ParseVSetOperationErrorCode::type) error_code;
+      throw ipo;
+    }
+  }
+
   void bm_dev_mgr_add_port(const std::string& iface_name, const int32_t port_num, const std::string& pcap_path) {
     Logger::get()->trace("bm_dev_mgr_add_port");
     const char *pcap = NULL;

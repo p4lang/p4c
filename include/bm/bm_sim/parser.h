@@ -26,6 +26,7 @@
 #include <utility>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include <cassert>
 
@@ -162,18 +163,25 @@ struct ParseSwitchKeyBuilder {
   };
 
   std::vector<Entry> entries{};
+  std::vector<int> bitwidths{};
 
-  void push_back_field(header_id_t header, int field_offset) {
+  void push_back_field(header_id_t header, int field_offset, int bitwidth) {
     entries.push_back(Entry::make_field(header, field_offset));
+    bitwidths.push_back(bitwidth);
   }
 
-  void push_back_stack_field(header_stack_id_t header_stack, int field_offset) {
+  void push_back_stack_field(header_stack_id_t header_stack, int field_offset,
+                             int bitwidth) {
     entries.push_back(Entry::make_stack_field(header_stack, field_offset));
+    bitwidths.push_back(bitwidth);
   }
 
   void push_back_lookahead(int offset, int bitwidth) {
     entries.push_back(Entry::make_lookahead(offset, bitwidth));
+    bitwidths.push_back(bitwidth);
   }
+
+  std::vector<int> get_bitwidths() const { return bitwidths; }
 
   void operator()(const PHV &phv, const char *data, ByteContainer *key) const {
     for (const Entry &e : entries) {
@@ -195,125 +203,125 @@ struct ParseSwitchKeyBuilder {
 
 class ParseState;
 
-class ParseSwitchCase {
+class ParseVSetIface {
  public:
-  ParseSwitchCase(const ByteContainer &key, const ParseState *next_state)
-    : key(key), with_mask(false), next_state(next_state) {
-  }
+  enum ErrorCode {
+    SUCCESS = 0,
+    INVALID_PARSE_VSET_NAME,
+    ERROR
+  };
 
-  ParseSwitchCase(int nbytes_key, const char *key, const ParseState *next_state)
-    : key(ByteContainer(key, nbytes_key)),
-      with_mask(false), next_state(next_state) {
-  }
+  virtual ~ParseVSetIface() { }
 
-  ParseSwitchCase(const ByteContainer &key,
-                  const ByteContainer &mask,
-                  const ParseState *next_state)
-    : key(key), mask(mask), with_mask(true), next_state(next_state) {
-    assert(key.size() == mask.size());
-    mask_key();
-  }
+  virtual void add(const ByteContainer &v) = 0;
 
-  ParseSwitchCase(int nbytes_key, const char *key, const char *mask,
-                  const ParseState *next_state)
-    : key(ByteContainer(key, nbytes_key)),
-      mask(ByteContainer(mask, nbytes_key)),
-      with_mask(true), next_state(next_state) {
-    mask_key();
-  }
+  virtual void remove(const ByteContainer &v) = 0;
 
-  bool match(const ByteContainer &input, const ParseState **state) const;
+  virtual bool contains(const ByteContainer &v) const = 0;
 
-  ParseSwitchCase(const ParseSwitchCase &other) = delete;
-  ParseSwitchCase &operator=(const ParseSwitchCase &other) = delete;
+  virtual void clear() = 0;
 
-  ParseSwitchCase(ParseSwitchCase &&other) /*noexcept*/ = default;
-  ParseSwitchCase &operator=(ParseSwitchCase &&other) /*noexcept*/ = default;
+  virtual size_t size() const = 0;
+};
+
+// Note that as of today, all parse states using a vset have to be configured
+// before any value can be added to a vset (otherwise the value won't be present
+// in the shadow copies). This can be easily changed if the need arises in the
+// future.
+class ParseVSet : public NamedP4Object, public ParseVSetIface {
+  template <typename P> friend class ParseSwitchCaseVSet;
+ public:
+  typedef ParseVSetIface::ErrorCode ErrorCode;
+
+  ParseVSet(const std::string &name, p4object_id_t id,
+            size_t compressed_bitwidth);
+
+  void add(const ByteContainer &v) override;
+
+  void remove(const ByteContainer &v) override;
+
+  bool contains(const ByteContainer &v) const override;
+
+  void clear() override;
+
+  size_t size() const override;
+
+  size_t get_compressed_bitwidth() const;
 
  private:
-  void mask_key();
+  void add_shadow(ParseVSetIface *shadow);
 
- private:
-  ByteContainer key;
-  ByteContainer mask{};
-  bool with_mask;
-  const ParseState *next_state; /* NULL if end */
+  size_t compressed_bitwidth;
+  std::vector<ParseVSetIface *> shadows{};
+  std::unique_ptr<ParseVSetIface> base{nullptr};
+};
+
+class ParseSwitchCaseIface {
+ public:
+  virtual ~ParseSwitchCaseIface() { }
+
+  virtual bool match(const ByteContainer &input,
+                     const ParseState **state) const = 0;
+
+  static std::unique_ptr<ParseSwitchCaseIface>
+  make_case(const ByteContainer &key, const ParseState *next_state);
+
+  static std::unique_ptr<ParseSwitchCaseIface>
+  make_case_with_mask(const ByteContainer &key, const ByteContainer &mask,
+                      const ParseState *next_state);
+
+  static std::unique_ptr<ParseSwitchCaseIface>
+  make_case_vset(ParseVSet *vset, std::vector<int> bitwidths,
+                 const ParseState *next_state);
+
+  static std::unique_ptr<ParseSwitchCaseIface>
+  make_case_vset_with_mask(ParseVSet *vset, const ByteContainer &mask,
+                           std::vector<int> bitwidths,
+                           const ParseState *next_state);
 };
 
 class ParseState : public NamedP4Object {
  public:
-  ParseState(const std::string &name, p4object_id_t id)
-    : NamedP4Object(name, id),
-      has_switch(false) {}
+  ParseState(const std::string &name, p4object_id_t id);
 
-  void add_extract(header_id_t header) {
-    parser_ops.emplace_back(new ParserOpExtract(header));
-  }
-
-  void add_extract_to_stack(header_stack_id_t header_stack) {
-    parser_ops.emplace_back(new ParserOpExtractStack(header_stack));
-  }
+  void add_extract(header_id_t header);
+  void add_extract_to_stack(header_stack_id_t header_stack);
 
   void add_set_from_field(header_id_t dst_header, int dst_offset,
-                          header_id_t src_header, int src_offset) {
-    parser_ops.emplace_back(
-      new ParserOpSet<field_t>(dst_header, dst_offset,
-                               field_t::make(src_header, src_offset)));
-  }
+                          header_id_t src_header, int src_offset);
 
   void add_set_from_data(header_id_t dst_header, int dst_offset,
-                         const Data &src) {
-    parser_ops.emplace_back(
-      new ParserOpSet<Data>(dst_header, dst_offset, src));
-  }
+                         const Data &src);
 
   void add_set_from_lookahead(header_id_t dst_header, int dst_offset,
-                              int src_offset, int src_bitwidth) {
-    parser_ops.emplace_back(new ParserOpSet<ParserLookAhead>(
-        dst_header, dst_offset,
-        ParserLookAhead(src_offset, src_bitwidth)));
-  }
+                              int src_offset, int src_bitwidth);
 
   void add_set_from_expression(header_id_t dst_header, int dst_offset,
-                               const ArithExpression &expr) {
-    expr.grab_register_accesses(&register_sync);
+                               const ArithExpression &expr);
 
-    parser_ops.emplace_back(
-      new ParserOpSet<ArithExpression>(dst_header, dst_offset, expr));
-  }
+  void set_key_builder(const ParseSwitchKeyBuilder &builder);
 
-  void set_key_builder(const ParseSwitchKeyBuilder &builder) {
-    has_switch = true;
-    key_builder = builder;
-  }
-
-  void add_switch_case(const ByteContainer &key, const ParseState *next_state) {
-    parser_switch.push_back(ParseSwitchCase(key, next_state));
-  }
-
+  void add_switch_case(const ByteContainer &key, const ParseState *next_state);
   void add_switch_case(int nbytes_key, const char *key,
-                       const ParseState *next_state) {
-    parser_switch.push_back(ParseSwitchCase(nbytes_key, key, next_state));
-  }
+                       const ParseState *next_state);
 
   void add_switch_case_with_mask(const ByteContainer &key,
                                  const ByteContainer &mask,
-                                 const ParseState *next_state) {
-    parser_switch.push_back(ParseSwitchCase(key, mask, next_state));
-  }
-
+                                 const ParseState *next_state);
   void add_switch_case_with_mask(int nbytes_key, const char *key,
                                  const char *mask,
-                                 const ParseState *next_state) {
-    parser_switch.push_back(ParseSwitchCase(nbytes_key, key, mask, next_state));
-  }
+                                 const ParseState *next_state);
 
-  void set_default_switch_case(const ParseState *default_next) {
-    default_next_state = default_next;
-  }
+  void add_switch_case_vset(ParseVSet *vset, const ParseState *next_state);
+
+  void add_switch_case_vset_with_mask(ParseVSet *vset,
+                                      const ByteContainer &mask,
+                                      const ParseState *next_state);
+
+  void set_default_switch_case(const ParseState *default_next);
 
   // Copy constructor
-  ParseState (const ParseState& other) = delete;
+  ParseState(const ParseState& other) = delete;
 
   // Copy assignment operator
   ParseState &operator =(const ParseState& other) = delete;
@@ -335,7 +343,7 @@ class ParseState : public NamedP4Object {
   RegisterSync register_sync{};
   bool has_switch;
   ParseSwitchKeyBuilder key_builder{};
-  std::vector<ParseSwitchCase> parser_switch{};
+  std::vector<std::unique_ptr<ParseSwitchCaseIface> > parser_switch{};
   const ParseState *default_next_state{nullptr};
 };
 

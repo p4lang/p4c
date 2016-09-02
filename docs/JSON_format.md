@@ -136,9 +136,18 @@ parser. The attributes for these objects are:
   stack) or `lookahead` (see [here] (#the-type-value-object)).
   - `transitions`: a JSON array of objects encoding each parse state
   transition. The different attributes for these objects are:
-    - `value`: either a hexstring or `default`.
-    - `mask`: either a hexstring (to be used as a mask and ANDed with the key
-    and the value) or `null`.
+    - `type`: either `default` (for the default transition), `hexstr` (for a
+    regular hexstring value-based transition) or `parse_vset` (for a parse
+    value-set).
+    - `value`: only relevant if the `type` attribute is `hexstr`, in which case
+    it is the hexstring value for the transition, or `parse_vset`, in which case
+    it is the name of the corresponding parse value-set. Set to `null` if `type`
+    is `hexstr`.
+    - `mask`: only relevant if the `type` attribute is `hexstr` or `parse_vset`
+    (`null` if `type` is `default`). It can either be a hexstring (to be used as
+    a mask and ANDed with the key and the value) or `null`. For a parse
+    value-set, the mask will be ANDed with each value in the set when checking
+    for a match.
     - `next_state`: the name of the next parse state, or `null` if this is the
     last state in the parser.
 
@@ -148,6 +157,15 @@ the concatenation (in the right order) of all byte padded fields (padded with
 2-bit field, each value will need to have 3 bytes (2 for the first field, 1 for
 the second one). If the transition value is `0xaba`, `0x3`, the `value`
 attribute will be set to `0x0aba03`.
+
+### `parse_vsets`
+
+It is a JSON array of all the parse value-sets declared in the P4 program. Each
+array item has the following attributes:
+- `name`
+- `id`: a unique integer (unique with respect to other parse value-sets)
+- `compressed_bitwidth`: the bitwidth of the values which can be added to the
+set. Note that this bitwidth does not include any padding.
 
 ### `deparsers`
 

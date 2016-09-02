@@ -160,11 +160,11 @@ class ChecksumTest : public ::testing::Test {
     phv_source->set_phv_factory(0, &phv_factory);
 
     ParseSwitchKeyBuilder ethernetKeyBuilder;
-    ethernetKeyBuilder.push_back_field(ethernetHeader, 2); // ethertype
+    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16); // ethertype
     ethernetParseState.set_key_builder(ethernetKeyBuilder);
 
     ParseSwitchKeyBuilder ipv4KeyBuilder;
-    ipv4KeyBuilder.push_back_field(ipv4Header, 8); // protocol
+    ipv4KeyBuilder.push_back_field(ipv4Header, 8, 8); // protocol
     ipv4ParseState.set_key_builder(ipv4KeyBuilder);
 
     ethernetParseState.add_extract(ethernetHeader);

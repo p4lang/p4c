@@ -598,6 +598,26 @@ Context::register_reset(const std::string &register_name) {
   return Register::SUCCESS;
 }
 
+ParseVSet::ErrorCode
+Context::parse_vset_add(const std::string &parse_vset_name,
+                        const ByteContainer &value) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  ParseVSet *parse_vset = p4objects_rt->get_parse_vset_rt(parse_vset_name);
+  if (!parse_vset) return ParseVSet::ErrorCode::INVALID_PARSE_VSET_NAME;
+  parse_vset->add(value);
+  return ParseVSet::ErrorCode::SUCCESS;
+}
+
+ParseVSet::ErrorCode
+Context::parse_vset_remove(const std::string &parse_vset_name,
+                           const ByteContainer &value) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  ParseVSet *parse_vset = p4objects_rt->get_parse_vset_rt(parse_vset_name);
+  if (!parse_vset) return ParseVSet::ErrorCode::INVALID_PARSE_VSET_NAME;
+  parse_vset->remove(value);
+  return ParseVSet::ErrorCode::SUCCESS;
+}
+
 template <typename T>
 CustomCrcErrorCode
 Context::set_crc_custom_parameters(

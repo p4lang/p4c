@@ -21,6 +21,9 @@
 #ifndef BM_BM_SIM_MATCH_TABLES_H_
 #define BM_BM_SIM_MATCH_TABLES_H_
 
+// shared_mutex will only be available in C++-14, so for now I'm using boost
+#include <boost/thread/shared_mutex.hpp>
+
 #include <vector>
 #include <type_traits>
 #include <iostream>

@@ -121,4 +121,6 @@ testdata/serialize.p4 \
 testdata/serialize.json \
 testdata/runtime_iface.p4 \
 testdata/runtime_iface.json \
-testdata/one_header.json
+testdata/one_header.json \
+testdata/parse_vset.p4 \
+testdata/parse_vset.json

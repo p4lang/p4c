@@ -338,6 +338,14 @@ class Context final {
   RegisterErrorCode
   register_reset(const std::string &register_name);
 
+  ParseVSet::ErrorCode
+  parse_vset_add(const std::string &parse_vset_name,
+                 const ByteContainer &value);
+
+  ParseVSet::ErrorCode
+  parse_vset_remove(const std::string &parse_vset_name,
+                    const ByteContainer &value);
+
   template <typename T>
   CustomCrcErrorCode
   set_crc_custom_parameters(

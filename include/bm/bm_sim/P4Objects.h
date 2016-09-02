@@ -128,6 +128,12 @@ class P4Objects {
     return parsers.at(name).get();
   }
 
+  ParseVSet *get_parse_vset(const std::string &name) const {
+    return parse_vsets.at(name).get();
+  }
+
+  ParseVSet *get_parse_vset_rt(const std::string &name) const;
+
   Deparser *get_deparser(const std::string &name) const {
     return deparsers.at(name).get();
   }
@@ -225,6 +231,11 @@ class P4Objects {
 
   void add_parser(const std::string &name, std::unique_ptr<Parser> parser) {
     parsers[name] = std::move(parser);
+  }
+
+  void add_parse_vset(const std::string &name,
+                      std::unique_ptr<ParseVSet> parse_vset) {
+    parse_vsets[name] = std::move(parse_vset);
   }
 
   void add_deparser(const std::string &name,
@@ -332,6 +343,9 @@ class P4Objects {
   std::unordered_map<std::string, std::unique_ptr<Parser> > parsers{};
   // this is to give the objects a place where to live
   std::vector<std::unique_ptr<ParseState> > parse_states{};
+
+  // parse vsets
+  std::unordered_map<std::string, std::unique_ptr<ParseVSet> > parse_vsets{};
 
   // checksums
   std::vector<std::unique_ptr<Checksum> > checksums{};

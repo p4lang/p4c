@@ -338,6 +338,11 @@ class PHVFactory {
     return header_descs.at(header_id).header_type;
   }
 
+  const HeaderType &get_header_stack_type(
+      header_stack_id_t header_stack_id) const {
+    return header_stack_descs.at(header_stack_id).header_type;
+  }
+
   void enable_field_arith(header_id_t header_id, int field_offset);
 
   void enable_all_field_arith(header_id_t header_id);
