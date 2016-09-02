@@ -89,7 +89,7 @@ bool JsonValue::operator==(const JsonValue& other) const {
 
 void JsonArray::serialize(std::ostream& out) const {
     bool isSmall = true;
-    for (auto v : values) {
+    for (auto v : *this) {
         if (!v->is<JsonValue>())
             isSmall = false;
     }
@@ -97,7 +97,7 @@ void JsonArray::serialize(std::ostream& out) const {
     if (!isSmall)
         out << IndentCtl::indent;
     bool first = true;
-    for (auto v : values) {
+    for (auto v : *this) {
         if (!first) {
             out << ",";
             if (isSmall)
@@ -135,24 +135,23 @@ mpz_class JsonValue::getValue() const {
 }
 
 JsonArray* JsonArray::append(const IJson* value) {
-    values.push_back(value);
+    push_back(value);
     return this;
 }
 
 void JsonObject::serialize(std::ostream& out) const {
     out << "{" << IndentCtl::indent;
     bool first = true;
-    for (auto it : labelOrder) {
+    for (auto &it : *this) {
         if (!first)
             out << ",";
         first = false;
         out << IndentCtl::endl;
-        out << "\"" << it << "\"" << " : ";
-        auto j = get(it);
-        if (j == nullptr)
+        out << "\"" << it.first << "\"" << " : ";
+        if (it.second == nullptr)
             out << "null";
         else
-            j->serialize(out);
+            it.second->serialize(out);
     }
     out << IndentCtl::unindent << IndentCtl::endl << "}";
 }
@@ -163,8 +162,7 @@ JsonObject* JsonObject::emplace(cstring label, const IJson* value) {
     auto j = get(label);
     if (j != nullptr)
         throw std::logic_error(cstring("Duplicate label in json object ") + label.c_str());
-    values.emplace(label, value);
-    labelOrder.push_back(label);
+    ordered_map<cstring, const IJson*>::emplace(label, value);
     return this;
 }
 
