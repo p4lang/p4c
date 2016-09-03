@@ -276,6 +276,20 @@ P4Objects::init_objects(std::istream *is,
     add_extern_instance(extern_instance_name, std::move(instance));
   }
 
+  // parse value sets
+
+  const Json::Value &cfg_parse_vsets = cfg_root["parse_vsets"];
+  for (const auto &cfg_parse_vset : cfg_parse_vsets) {
+    const string parse_vset_name = cfg_parse_vset["name"].asString();
+    const p4object_id_t parse_vset_id = cfg_parse_vset["id"].asInt();
+    const size_t parse_vset_cbitwidth =
+        cfg_parse_vset["compressed_bitwidth"].asUInt();
+
+    std::unique_ptr<ParseVSet> vset(
+        new ParseVSet(parse_vset_name, parse_vset_id, parse_vset_cbitwidth));
+    add_parse_vset(parse_vset_name, std::move(vset));
+  }
+
   // parsers
 
   const Json::Value &cfg_parsers = cfg_root["parsers"];
@@ -357,8 +371,6 @@ P4Objects::init_objects(std::istream *is,
         }
       }
 
-      // we do not support parser set ops for now
-
       ParseSwitchKeyBuilder key_builder;
       const Json::Value &cfg_transition_key = cfg_parse_state["transition_key"];
       for (const auto &cfg_key_elem : cfg_transition_key) {
@@ -367,7 +379,10 @@ P4Objects::init_objects(std::istream *is,
         if (type == "field") {
           const auto field = field_info(cfg_value[0].asString(),
                                         cfg_value[1].asString());
-          key_builder.push_back_field(std::get<0>(field), std::get<1>(field));
+          header_id_t header_id = std::get<0>(field);
+          int field_offset = std::get<1>(field);
+          key_builder.push_back_field(header_id, field_offset,
+                                      get_field_bits(header_id, field_offset));
         } else if (type == "stack_field") {
           const string header_stack_name = cfg_value[0].asString();
           header_stack_id_t header_stack_id =
@@ -375,7 +390,9 @@ P4Objects::init_objects(std::istream *is,
           HeaderType *header_type = header_stack_to_type_map[header_stack_name];
           const string field_name = cfg_value[1].asString();
           int field_offset = header_type->get_field_offset(field_name);
-          key_builder.push_back_stack_field(header_stack_id, field_offset);
+          int bitwidth = header_type->get_bit_width(field_offset);
+          key_builder.push_back_stack_field(header_stack_id, field_offset,
+                                            bitwidth);
         } else if (type == "lookahead") {
           int offset = cfg_value[0].asInt();
           int bitwidth = cfg_value[1].asInt();
@@ -397,20 +414,43 @@ P4Objects::init_objects(std::istream *is,
       ParseState *parse_state = current_parse_states[parse_state_name];
       const Json::Value &cfg_transitions = cfg_parse_state["transitions"];
       for (const auto &cfg_transition : cfg_transitions) {
-        const string value_hexstr = cfg_transition["value"].asString();
+        // ensures compatibility with old JSON versions
+        string type = "hexstr";
+        if (cfg_transition.isMember("type"))
+          type = cfg_transition["type"].asString();
+        if (type == "hexstr") {
+          const string value = cfg_transition["value"].asString();
+          if (value == "default") type = "default";
+        }
 
         const string next_state_name = cfg_transition["next_state"].asString();
         const ParseState *next_state = current_parse_states[next_state_name];
 
-        if (value_hexstr == "default") {
+        if (type == "default") {
           parse_state->set_default_switch_case(next_state);
-        } else if (cfg_transition["mask"].isNull()) {
-          parse_state->add_switch_case(ByteContainer(value_hexstr), next_state);
-        } else {
-          const string mask_hexstr = cfg_transition["mask"].asString();
-          parse_state->add_switch_case_with_mask(ByteContainer(value_hexstr),
-                                                 ByteContainer(mask_hexstr),
-                                                 next_state);
+        } else if (type == "hexstr") {
+          const string value_hexstr = cfg_transition["value"].asString();
+          const auto &cfg_mask = cfg_parse_state["mask"];
+          if (cfg_mask.isNull()) {
+            parse_state->add_switch_case(ByteContainer(value_hexstr),
+                                         next_state);
+          } else {
+            const string mask_hexstr = cfg_mask.asString();
+            parse_state->add_switch_case_with_mask(ByteContainer(value_hexstr),
+                                                   ByteContainer(mask_hexstr),
+                                                   next_state);
+          }
+        } else if (type == "parse_vset") {
+          const string vset_name = cfg_transition["value"].asString();
+          ParseVSet *vset = get_parse_vset(vset_name);
+          const auto &cfg_mask = cfg_parse_state["mask"];
+          if (cfg_mask.isNull()) {
+            parse_state->add_switch_case_vset(vset, next_state);
+          } else {
+            const string mask_hexstr = cfg_mask.asString();
+            parse_state->add_switch_case_vset_with_mask(
+                vset, ByteContainer(mask_hexstr), next_state);
+          }
         }
       }
     }
@@ -1236,6 +1276,12 @@ RegisterArray *
 P4Objects::get_register_array_rt(const std::string &name) const {
   auto it = register_arrays.find(name);
   return (it != register_arrays.end()) ? it->second.get() : nullptr;
+}
+
+ParseVSet *
+P4Objects::get_parse_vset_rt(const std::string &name) const {
+  auto it = parse_vsets.find(name);
+  return (it != parse_vsets.end()) ? it->second.get() : nullptr;
 }
 
 }  // namespace bm

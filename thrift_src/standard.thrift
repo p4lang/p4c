@@ -164,6 +164,17 @@ exception InvalidRegisterOperation {
  1:RegisterOperationErrorCode code
 }
 
+typedef binary BmParseVSetValue
+
+enum ParseVSetOperationErrorCode {
+  INVALID_PARSE_VSET_NAME = 1,
+  ERROR = 2
+}
+
+exception InvalidParseVSetOperation {
+ 1:ParseVSetOperationErrorCode code
+}
+
 enum LearnOperationErrorCode {
   INVALID_LIST_ID = 1,
   ERROR = 2
@@ -575,6 +586,20 @@ service Standard {
     1:i32 cxt_id,
     2:string register_array_name
   ) throws (1:InvalidRegisterOperation ouch)
+
+  // parse value sets
+
+  void bm_parse_vset_add(
+    1:i32 cxt_id,
+    2:string parse_vset_name,
+    3:BmParseVSetValue value
+  ) throws (1:InvalidParseVSetOperation ouch)
+
+  void bm_parse_vset_remove(
+    1:i32 cxt_id,
+    2:string parse_vset_name,
+    3:BmParseVSetValue value
+  ) throws (1:InvalidParseVSetOperation ouch)
 
 
   // device manager

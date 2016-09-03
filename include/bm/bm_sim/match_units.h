@@ -21,9 +21,6 @@
 #ifndef BM_BM_SIM_MATCH_UNITS_H_
 #define BM_BM_SIM_MATCH_UNITS_H_
 
-// shared_mutex will only be available in C++-14, so for now I'm using boost
-#include <boost/thread/shared_mutex.hpp>
-
 #include <string>
 #include <unordered_map>
 #include <vector>

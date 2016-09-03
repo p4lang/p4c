@@ -310,6 +310,14 @@ class RuntimeInterface {
   virtual RegisterErrorCode
   register_reset(size_t cxt_id, const std::string &register_name) = 0;
 
+  virtual ParseVSet::ErrorCode
+  parse_vset_add(size_t cxt_id, const std::string &parse_vset_name,
+                 const ByteContainer &value) = 0;
+
+  virtual ParseVSet::ErrorCode
+  parse_vset_remove(size_t cxt_id, const std::string &parse_vset_name,
+                    const ByteContainer &value) = 0;
+
   virtual ErrorCode
   load_new_config(const std::string &new_config) = 0;
 
