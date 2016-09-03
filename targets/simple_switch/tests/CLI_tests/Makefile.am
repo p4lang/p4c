@@ -22,5 +22,6 @@ indirect_res.test \
 testdata/indirect_res.in \
 testdata/indirect_res.out \
 testdata/indirect_res.json \
+mc_dump.test \
 testdata/mc_dump.in \
 testdata/mc_dump.out
