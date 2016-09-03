@@ -230,6 +230,8 @@ class ParseVSetIface {
 // future.
 class ParseVSet : public NamedP4Object, public ParseVSetIface {
   template <typename P> friend class ParseSwitchCaseVSet;
+  typedef std::unique_lock<std::mutex> Lock;
+
  public:
   typedef ParseVSetIface::ErrorCode ErrorCode;
 
@@ -252,6 +254,10 @@ class ParseVSet : public NamedP4Object, public ParseVSetIface {
   void add_shadow(ParseVSetIface *shadow);
 
   size_t compressed_bitwidth;
+  // if no mutex we can have inconsistent results accross shadow copies (some
+  // have a value, others don't. This mutex is never requested by the dataplane
+  // (each shadow has its own).
+  mutable std::mutex shadows_mutex{};
   std::vector<ParseVSetIface *> shadows{};
   std::unique_ptr<ParseVSetIface> base{nullptr};
 };

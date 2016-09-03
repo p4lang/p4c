@@ -215,8 +215,9 @@ directory. You can also browse this documentation [online]
 
 ### Are all features supported yet ?
 
-At this time, the only missing feature that we are aware of is *parse value
-sets*. This P4 feature was scarcely used in bmv1 and is not present in bmv2.
+At this time, we believe that all P4 features have been implemented. The last
+feature to have been implemented is *parse value sets*, which was scarcely used
+in bmv1.
 
 If you find more missing features or if you would like to request that a
 specific feature be added, please send us an email (p4-dev@p4.org) or submit an

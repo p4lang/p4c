@@ -215,6 +215,7 @@ class ParseVSetCommon : public ParseVSetIface {
 
   size_t compressed_bitwidth{};
   size_t width{};
+  // TODO(antonin): used shared mutex?
   mutable std::mutex set_mutex{};
   std::unordered_set<ByteContainer, ByteContainerKeyHash> set{};
   std::vector<int> bitwidths{};
@@ -266,11 +267,13 @@ ParseVSet::add_shadow(ParseVSetIface *shadow) {
 
 void
 ParseVSet::add(const ByteContainer &v) {
+  Lock lock(shadows_mutex);
   for (auto shadow : shadows) shadow->add(v);
 }
 
 void
 ParseVSet::remove(const ByteContainer &v) {
+  Lock lock(shadows_mutex);
   for (auto shadow : shadows) shadow->remove(v);
 }
 
@@ -281,6 +284,7 @@ ParseVSet::contains(const ByteContainer &v) const {
 
 void
 ParseVSet::clear() {
+  Lock lock(shadows_mutex);
   for (auto shadow : shadows) shadow->clear();
 }
 

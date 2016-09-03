@@ -23,6 +23,10 @@
 #include <bm/bm_sim/parser.h>
 #include <bm/bm_sim/deparser.h>
 
+#include <chrono>
+#include <thread>
+#include <mutex>
+
 using namespace bm;
 
 /* Frame (66 bytes) */
@@ -1450,4 +1454,67 @@ TEST_F(ParseVSetTest, NonAlignedWithMask) {
   phv->get_field(header_id, 3).set(f3_v);
   phv->get_field(header_id, 4).set(f13_v);
   ASSERT_EQ(nullptr, parseState(&pkt, nullptr, &bytes_parsed));
+}
+
+extern bool WITH_VALGRIND; // defined in main.cpp
+
+// test added after I detected a race condition in ParseVSet's shadow copies
+TEST_F(ParseVSetTest, ConcurrentRuntimeAccess) {
+  ParseVSet vset("vset", 0, 16);
+  set_parse_kb({{3, 3}, {4, 13}});  // f3, f13
+  ParseState dummy1("dummy1", 1);
+  int f3_v, f13_v;
+  size_t bytes_parsed = 0;
+
+  parseState.add_switch_case_vset(&vset, &dummy1);
+  ByteContainer v1("0xb2e6");  // compressed
+  vset.add(v1);
+  ASSERT_TRUE(vset.contains(v1));
+
+  // testing with exactly v1
+  auto pkt = get_pkt();
+  PHV *phv = pkt.get_phv();
+  f3_v = 0x5; f13_v = 0x12e6;
+  phv->get_field(header_id, 3).set(f3_v);
+  phv->get_field(header_id, 4).set(f13_v);
+  ASSERT_EQ(&dummy1, parseState(&pkt, nullptr, &bytes_parsed));
+
+  std::mutex m1;
+  std::mutex m2;
+  using clock = std::chrono::system_clock;
+
+  auto runtime_access = [&vset, &v1](std::mutex &m, bool do_add,
+                                     clock::time_point end) {
+    while (clock::now() < end) {
+      std::unique_lock<std::mutex> L(m);
+      if (do_add) vset.add(v1);
+      else vset.remove(v1);
+    }
+  };
+
+  std::vector<bool> consistency_results;
+  auto consistency_check = [&vset, &v1, &m1, &m2, &consistency_results,
+                            &dummy1, &pkt, this](
+      clock::time_point end) {
+    size_t bparsed = 0;
+    while (clock::now() < end) {
+      std::unique_lock<std::mutex> L1(m1, std::defer_lock);
+      std::unique_lock<std::mutex> L2(m2, std::defer_lock);
+      std::lock(L1, L2);
+      bool r1 = vset.contains(v1);
+      bool r2 = (&dummy1 == parseState(&pkt, nullptr, &bparsed));
+      consistency_results.push_back(r1 == r2);
+    }
+  };
+
+  int runtime_secs = WITH_VALGRIND ? 20 : 5;
+  clock::time_point end = clock::now() + std::chrono::seconds(runtime_secs);
+  std::thread t1(runtime_access, std::ref(m1), true, end);
+  std::thread t2(runtime_access, std::ref(m2), false, end);
+  std::thread t3(consistency_check, end);
+  t1.join(); t2.join(); t3.join();
+  size_t count = std::count(
+      consistency_results.begin(), consistency_results.end(), false);
+  EXPECT_LT(0, consistency_results.size());
+  ASSERT_EQ(0, count);
 }
