@@ -162,22 +162,6 @@
                             "type": "field",
                             "value": [
                                 "standard_metadata",
-                                "ingress_port"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x101"
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
                                 "egress_port"
                             ]
                         },
