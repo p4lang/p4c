@@ -86,6 +86,7 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
   add_required_field("standard_metadata", "instance_type");
   add_required_field("standard_metadata", "egress_spec");
   add_required_field("standard_metadata", "clone_spec");
+  add_required_field("standard_metadata", "egress_port");
 
   force_arith_field("standard_metadata", "ingress_port");
   force_arith_field("standard_metadata", "packet_length");
