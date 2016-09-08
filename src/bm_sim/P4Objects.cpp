@@ -430,7 +430,7 @@ P4Objects::init_objects(std::istream *is,
           parse_state->set_default_switch_case(next_state);
         } else if (type == "hexstr") {
           const string value_hexstr = cfg_transition["value"].asString();
-          const auto &cfg_mask = cfg_parse_state["mask"];
+          const auto &cfg_mask = cfg_transition["mask"];
           if (cfg_mask.isNull()) {
             parse_state->add_switch_case(ByteContainer(value_hexstr),
                                          next_state);
@@ -443,7 +443,7 @@ P4Objects::init_objects(std::istream *is,
         } else if (type == "parse_vset") {
           const string vset_name = cfg_transition["value"].asString();
           ParseVSet *vset = get_parse_vset(vset_name);
-          const auto &cfg_mask = cfg_parse_state["mask"];
+          const auto &cfg_mask = cfg_transition["mask"];
           if (cfg_mask.isNull()) {
             parse_state->add_switch_case_vset(vset, next_state);
           } else {
