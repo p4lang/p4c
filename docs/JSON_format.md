@@ -370,6 +370,6 @@ item has the following attributes:
 type
 - `attribute_values`: a JSON array with the initial values for the attributes of
 this extern instance. Each array item has the following attributes:
-- `name`: the name of the attribute
-- `type`: the type of the attribute, only `hexstr` is supported for now
-- `value`: the initial value for the attribute
+  - `name`: the name of the attribute
+  - `type`: the type of the attribute, only `hexstr` is supported for now
+  - `value`: the initial value for the attribute
