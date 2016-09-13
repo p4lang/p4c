@@ -65,6 +65,14 @@ expression. For example, in `(hA.f1 == 9) ? 3 : 4`, `cond` would be the JSON
 representation of `(hA.f1 == 9)`, `left` would be the JSON representation of `3`
 and `right` would be the JSON representation of `4`.
 
+For field references, some special values are allowed. They are called "hidden
+fields". For now, we only support one kind of hidden fields: `<header instance
+name>.$valid$`. This field is a 1-bit field which encodes the validity of the
+corresponding header. It is a read-only field. It can be used just like any
+other field; in particular as part of a match-table key or in a control-flow
+condition. In the long run, this field will completely replace the valid match
+type and the `valid()` built-in (in expressions), but we are not there yet.
+
 
 The attributes of the root JSON dictionary are:
 

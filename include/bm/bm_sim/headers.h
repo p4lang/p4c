@@ -40,26 +40,36 @@ class PHV;
 
 class HeaderType : public NamedP4Object {
  public:
-  HeaderType(const std::string &name, p4object_id_t id)
-    : NamedP4Object(name, id) {}
+  // do not specify custome values for enum entries, the value is used directly
+  // as an offset...
+  enum class HiddenF {
+    VALID
+  };
+
+  struct FInfo {
+    std::string name;
+    int bitwidth;
+    bool is_signed;
+    bool is_hidden;
+  };
+
+  size_t get_hidden_offset(HiddenF hf) const {
+    return fields_info.size() - 1 - static_cast<size_t>(hf);
+  }
+
+  HeaderType(const std::string &name, p4object_id_t id);
 
   // returns field offset
   int push_back_field(const std::string &field_name, int field_bit_width,
-                      bool is_signed = false) {
-    fields_info.push_back({field_name, field_bit_width, is_signed});
-    return fields_info.size() - 1;
-  }
+                      bool is_signed = false);
 
   int push_back_VL_field(
       const std::string &field_name,
       std::unique_ptr<VLHeaderExpression> field_length_expr,
-      bool is_signed = false) {
-    int offset = push_back_field(field_name, 0, is_signed);
-    // TODO(antonin)
-    assert(!is_VL_header() && "header can only have one VL field");
-    VL_expr_raw = std::move(field_length_expr);
-    VL_offset = offset;
-    return offset;
+      bool is_signed = false);
+
+  const FInfo &get_finfo(int field_offset) const {
+    return fields_info.at(field_offset);
   }
 
   int get_bit_width(int field_offset) const {
@@ -117,11 +127,6 @@ class HeaderType : public NamedP4Object {
   }
 
  private:
-  struct FInfo {
-    std::string name;
-    int bitwidth;
-    bool is_signed;
-  };
   std::vector<FInfo> fields_info;
   // used for VL headers only
   std::unique_ptr<VLHeaderExpression> VL_expr_raw{nullptr};
@@ -162,14 +167,10 @@ class Header : public NamedP4Object {
   }
 
   //! Marks the header as valid
-  void mark_valid() {
-    valid = true;
-  }
+  void mark_valid();
 
   //! Marks the header as not-valid
-  void mark_invalid() {
-    valid = false;
-  }
+  void mark_invalid();
 
   //! Sets all the fields in the header to value `0`
   void reset() {
@@ -269,8 +270,9 @@ class Header : public NamedP4Object {
   const HeaderType &header_type;
   std::vector<Field> fields{};
   bool valid{false};
+  // is caching this pointer here really useful?
+  Field *valid_field{nullptr};
   bool metadata{false};
-  int nbytes_phv{0};
   int nbytes_packet{0};
   std::unique_ptr<ArithExpression> VL_expr{nullptr};
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};

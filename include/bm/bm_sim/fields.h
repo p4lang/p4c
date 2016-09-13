@@ -46,9 +46,10 @@ class Field : public Data {
   // Field. Unfortunately that would require adding an extra level of
   // indirection in Header (for the field vector), so I am sticking to this for
   // now.
-  explicit Field(int nbits, bool arith_flag = true, bool is_signed = false)
+  explicit Field(int nbits, bool arith_flag = true, bool is_signed = false,
+                 bool hidden = false)
       : nbits(nbits), nbytes((nbits + 7) / 8), bytes(nbytes),
-        is_signed(is_signed) {
+        is_signed(is_signed), hidden(hidden) {
     arith = arith_flag;
     // TODO(antonin) ?
     // should I only do that for arith fields ?
@@ -74,6 +75,7 @@ class Field : public Data {
       bignum::clear_bit(&value, nbits - 1);
       value += min;
     }
+    // TODO(antonin): should notifications be disabled for hidden fields?
     DEBUGGER_NOTIFY_UPDATE(*packet_id, my_id, bytes.data(), nbits);
   }
 
@@ -100,7 +102,7 @@ class Field : public Data {
 
   bool get_arith_flag() const { return arith; }
 
-  void export_bytes() {
+  void export_bytes() override {
     std::fill(bytes.begin(), bytes.end(), 0);  // very important !
 
     if (!is_signed) {
@@ -149,11 +151,16 @@ class Field : public Data {
     bytes = src.bytes;
   }
 
+  bool is_hidden() const {
+    return hidden;
+  }
+
  private:
   int nbits;
   int nbytes;
   ByteContainer bytes;
   bool is_signed{false};
+  bool hidden{false};
   Bignum mask{1};
   Bignum max{1};
   Bignum min{1};
