@@ -435,7 +435,7 @@ class RunBMV2(object):
         thriftPort = str(9090 + rand)
 
         try:
-            runswitch = ["simple_switch", "--log-file", self.switchLogFile,
+            runswitch = ["simple_switch", "--log-file", self.switchLogFile, "--log-flush",
                          "--use-files", str(wait), "--thrift-port", thriftPort,
                          "--device-id", str(rand)] + self.interfaceArgs() + ["../" + self.jsonfile]
             if self.options.verbose:
@@ -467,7 +467,7 @@ class RunBMV2(object):
                 reportError("CLI process failed with exit code", cli.returncode)
                 return FAILURE
             # Give time to the model to execute
-            time.sleep(1)
+            time.sleep(2)
             sw.terminate()
             sw.wait()
             # This only works on Unix: negative returncode is
