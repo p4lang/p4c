@@ -213,10 +213,10 @@ MatchKeyBuilder::operator()(const PHV &phv, ByteContainer *key) const {
       // we do not reset all fields to 0 in between packets
       // so I need this hack if the P4 programmer assumed that:
       // field not valid => field set to 0
-      // const Field &field = phv.get_field(p.first, p.second);
-      // key->append(field.get_bytes());
+      // for hidden fields, we want the actual value, even though for $valid$,
+      // it does not make a difference
       const Field &field = header[in.f_offset];
-      if (header.is_valid()) {
+      if (header.is_valid() || field.is_hidden()) {
         key->append(field.get_bytes());
       } else {
         key->append(std::string(field.get_nbytes(), '\x00'));

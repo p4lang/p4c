@@ -90,6 +90,32 @@ TEST_F(PHVTest, CopyHeaders) {
   ASSERT_EQ(f48, f48_2);
 }
 
+// we are testing that the $valid$ hidden field is poperly added internally by
+// the HeaderType class, that it is properly accessible and that it is updated
+// properly.
+TEST_F(PHVTest, HiddenValid) {
+  ASSERT_EQ(2u, testHeaderType.get_hidden_offset(HeaderType::HiddenF::VALID));
+
+  ASSERT_EQ(2u, testHeaderType.get_field_offset("$valid$"));
+
+  const auto &finfo = testHeaderType.get_finfo(2u);
+  ASSERT_EQ("$valid$", finfo.name);
+  ASSERT_EQ(1, finfo.bitwidth);
+  ASSERT_FALSE(finfo.is_signed);
+  ASSERT_TRUE(finfo.is_hidden);
+
+  const Field &f = phv->get_field("test1.$valid$");
+  ASSERT_EQ(0, f.get_int());
+  Header &h = phv->get_header(testHeader1);
+  h.mark_valid();
+  ASSERT_EQ(1, f.get_int());
+  h.mark_invalid();
+  ASSERT_EQ(0, f.get_int());
+
+  // check that both point to the same thing
+  ASSERT_EQ(&f, &phv->get_field(testHeader1, 2u));
+}
+
 TEST_F(PHVTest, FieldAlias) {
   phv_factory.add_field_alias("best.alias.ever", "test1.f16");
   std::unique_ptr<PHV> phv_2 = phv_factory.create();

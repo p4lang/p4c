@@ -2006,6 +2006,97 @@ TEST_F(AdvancedTernaryTest, Lookup1) {
 }
 
 
+class HiddenValidFieldTest : public AdvancedTest {
+ protected:
+  HiddenValidFieldTest()
+      : AdvancedTest() {
+    int offset = testHeaderType.get_hidden_offset(HeaderType::HiddenF::VALID);
+    key_builder.push_back_field(testHeader1, offset, 1,
+                                MatchKeyParam::Type::TERNARY);
+    key_builder.push_back_field(testHeader2, 0, 16, MatchKeyParam::Type::EXACT);
+
+    std::unique_ptr<MUTernary> match_unit;
+    match_unit = std::unique_ptr<MUTernary>(
+        new MUTernary(t_size, key_builder, &lookup_factory));
+    table = std::unique_ptr<MatchTable>(
+        new MatchTable("test_table", 0, std::move(match_unit), false));
+    table->set_next_node(0, nullptr);
+  }
+
+  virtual void SetUp() {
+    AdvancedTest::SetUp();
+  }
+
+  MatchErrorCode add_entry(const std::string &exact_v,
+                           bool is_valid, bool is_masked,
+                           entry_handle_t *handle) {
+    std::vector<MatchKeyParam> match_key;
+    //10.00/12
+    std::string valid_key = is_valid ?
+        std::string("\x01", 1) : std::string("\x00", 1);
+    std::string valid_mask = is_masked ?
+        std::string("\x01", 1) : std::string("\x00", 1);
+    match_key.emplace_back(MatchKeyParam::Type::TERNARY,
+                           std::move(valid_key), std::move(valid_mask));
+    match_key.emplace_back(MatchKeyParam::Type::EXACT, exact_v);
+    return table->add_entry(match_key, &action_fn, ActionData(), handle);
+  }
+
+  Packet gen_pkt(const std::string &exact_v, bool is_valid) const {
+    Packet packet = Packet::make_new(
+        128, PacketBuffer(256), phv_source.get());
+    PHV *phv = packet.get_phv();
+    if (is_valid) phv->get_header(testHeader1).mark_valid();
+    phv->get_header(testHeader2).mark_valid();
+    Field &h2_f16 = phv->get_field(testHeader2, 0);
+    h2_f16.set(exact_v.data(), exact_v.size());
+    return packet;
+  }
+};
+
+TEST_F(HiddenValidFieldTest, Lookup) {
+  entry_handle_t h1, h2;
+  entry_handle_t lookup_handle;
+  bool hit;
+  const std::string exact_v_1("\xab\x15", 2);
+  const std::string exact_v_2("\xab\xcd", 2);
+
+  // needs header1 to be valid
+  ASSERT_EQ(MatchErrorCode::SUCCESS,
+            add_entry(exact_v_1, true, true, &h1));
+  // do not care about header1's validity
+  ASSERT_EQ(MatchErrorCode::SUCCESS,
+            add_entry(exact_v_2, true, false, &h2));
+
+  {
+    auto pkt = gen_pkt(exact_v_1, false);
+    table->lookup(pkt, &hit, &lookup_handle);
+    ASSERT_FALSE(hit);
+  }
+  {
+    auto pkt = gen_pkt(exact_v_2, false);
+    table->lookup(pkt, &hit, &lookup_handle);
+    ASSERT_TRUE(hit); ASSERT_EQ(h2, lookup_handle);
+  }
+  {
+    auto pkt = gen_pkt(exact_v_1, true);
+    table->lookup(pkt, &hit, &lookup_handle);
+    ASSERT_TRUE(hit); ASSERT_EQ(h1, lookup_handle);
+  }
+  {
+    auto pkt = gen_pkt(exact_v_2, true);
+    table->lookup(pkt, &hit, &lookup_handle);
+    ASSERT_TRUE(hit); ASSERT_EQ(h2, lookup_handle);
+  }
+  {
+    auto pkt = gen_pkt(exact_v_1, true);
+    pkt.get_phv()->get_header(testHeader1).mark_invalid();
+    table->lookup(pkt, &hit, &lookup_handle);
+    ASSERT_FALSE(hit);
+  }
+}
+
+
 template <typename MUType>
 class TableEntryDebug : public ::testing::Test {
  protected:

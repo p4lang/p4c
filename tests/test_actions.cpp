@@ -439,6 +439,7 @@ TEST_F(ActionsTest, CopyHeader) {
   testActionFnEntry(pkt.get());
   ASSERT_TRUE(hdr1.is_valid());
   for(unsigned int i = 0; i < hdr1.size(); i++) {
+    if (hdr1[i].is_hidden()) break;
     ASSERT_EQ(i + 1, hdr1[i].get_uint());
   }
 }
