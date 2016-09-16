@@ -188,6 +188,15 @@ compilation and simplifying debugging.
     for `printf` arguments.   These functions handle IR and SourceInfo
     objects smartly.  Here is an example:
 
+  * use `LOGn()` for log messages -- the `n` is an integer constant for
+    verbosity level.  These can be controlled on a per-source-file basis
+    with the -T option.  LOG1 should be used for general messages, so that
+    running with -T*:1 (turning on all LOG1 messages) is not too overwhelming.
+    LOG2 should be used to print information about the results of a module
+    that later passes may need to debug them.  Details of what a module
+    or pass is doing and looking at (only of interest when debugging that
+    code) should be at LOG4 or higher.
+
 ```C++
 IR::NamedRef *ref;
 error("%1%: No header or metadata named '%2%'", ref->srcInfo, ref->name);
