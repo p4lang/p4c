@@ -93,6 +93,7 @@ def main(argv):
         test_names = test_names[1:]
     # This $* may be handy when running the test by hand.
     test_args.append("$$*");
+    test_names = [name for name in test_names if os.path.isfile(name)]
     for i in range(0, len(test_names)):
         if test_names[i].startswith(srcdir):
             test_names[i] = test_names[i][len(srcdir):]
