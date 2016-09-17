@@ -48,9 +48,19 @@ TEST(P4Objects, LoadFromJSON1) {
   ASSERT_EQ(0, objects.init_objects(&is, &factory));
 
   ASSERT_NE(nullptr, objects.get_pipeline("ingress"));
+  ASSERT_ANY_THROW(objects.get_pipeline("bad_pipeline"));
+  ASSERT_EQ(nullptr, objects.get_pipeline_rt("bad_pipeline"));
+
   ASSERT_NE(nullptr, objects.get_action("ipv4_lpm", "_drop"));
+
   ASSERT_NE(nullptr, objects.get_parser("parser"));
+  ASSERT_ANY_THROW(objects.get_parser("bad_parser"));
+  ASSERT_EQ(nullptr, objects.get_parser_rt("bad_parser"));
+
   ASSERT_NE(nullptr, objects.get_deparser("deparser"));
+  ASSERT_ANY_THROW(objects.get_deparser("bad_deparser"));
+  ASSERT_EQ(nullptr, objects.get_deparser_rt("bad_deparser"));
+
   MatchTableAbstract *table;
   table = objects.get_abstract_match_table("forward");
   ASSERT_NE(nullptr, table);

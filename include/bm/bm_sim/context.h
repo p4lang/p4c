@@ -105,19 +105,22 @@ class Context final {
   // do these methods need any protection?
   // TODO(antonin): should I return shared_ptrs instead of raw_ptrs?
 
-  //! Get a raw, non-owning pointer to the Pipeline object with P4 name \p name
+  //! Get a raw, non-owning pointer to the Pipeline object with P4 name \p
+  //! name. Return a nullptr if there is no pipeline with this name.
   Pipeline *get_pipeline(const std::string &name) {
-    return p4objects->get_pipeline(name);
+    return p4objects->get_pipeline_rt(name);
   }
 
-  //! Get a raw, non-owning pointer to the Parser object with P4 name \p name
+  //! Get a raw, non-owning pointer to the Parser object with P4 name \p
+  //! name. Return a nullptr if there is no parser with this name.
   Parser *get_parser(const std::string &name) {
-    return p4objects->get_parser(name);
+    return p4objects->get_parser_rt(name);
   }
 
-  //! Get a raw, non-owning pointer to the Deparser object with P4 name \p name
+  //! Get a raw, non-owning pointer to the Deparser object with P4 name \p
+  //! name. Return a nullptr if there is no deparser with this name.
   Deparser *get_deparser(const std::string &name) {
-    return p4objects->get_deparser(name);
+    return p4objects->get_deparser_rt(name);
   }
 
   //! Get a raw, non-owning pointer to the FieldList object with id

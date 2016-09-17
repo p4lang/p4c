@@ -833,21 +833,24 @@ class Switch : public SwitchWContexts {
 
   //! Return a raw, non-owning pointer to Pipeline \p name. This pointer will be
   //! invalidated if a configuration swap is performed by the target. See
-  //! switch.h documentation for details.
+  //! switch.h documentation for details. Return a nullptr if there is no
+  //! pipeline with this name.
   Pipeline *get_pipeline(const std::string &name) {
     return get_context(0)->get_pipeline(name);
   }
 
   //! Return a raw, non-owning pointer to Parser \p name. This pointer will be
   //! invalidated if a configuration swap is performed by the target. See
-  //! switch.h documentation for details.
+  //! switch.h documentation for details. Return a nullptr if there is no parser
+  //! with this name.
   Parser *get_parser(const std::string &name) {
     return get_context(0)->get_parser(name);
   }
 
   //! Return a raw, non-owning pointer to Deparser \p name. This pointer will be
   //! invalidated if a configuration swap is performed by the target. See
-  //! switch.h documentation for details.
+  //! switch.h documentation for details. Return a nullptr if there is no
+  //! deparser with this name.
   Deparser *get_deparser(const std::string &name) {
     return get_context(0)->get_deparser(name);
   }

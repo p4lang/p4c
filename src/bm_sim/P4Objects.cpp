@@ -1284,4 +1284,22 @@ P4Objects::get_parse_vset_rt(const std::string &name) const {
   return (it != parse_vsets.end()) ? it->second.get() : nullptr;
 }
 
+Parser *
+P4Objects::get_parser_rt(const std::string &name) const {
+  auto it = parsers.find(name);
+  return (it != parsers.end()) ? it->second.get() : nullptr;
+}
+
+Deparser *
+P4Objects::get_deparser_rt(const std::string &name) const {
+  auto it = deparsers.find(name);
+  return (it != deparsers.end()) ? it->second.get() : nullptr;
+}
+
+Pipeline *
+P4Objects::get_pipeline_rt(const std::string &name) const {
+  auto it = pipelines_map.find(name);
+  return (it != pipelines_map.end()) ? it->second.get() : nullptr;
+}
+
 }  // namespace bm

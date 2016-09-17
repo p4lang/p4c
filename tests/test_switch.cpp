@@ -93,6 +93,22 @@ TEST(Switch, GetConfig) {
   ASSERT_EQ(std::string(md5.begin(), md5.end()), sw.get_config_md5());
 }
 
+TEST(Switch, GetP4Objects) {
+  // re-using serialize.json here as a convenience
+  fs::path config_path = fs::path(TESTDATADIR) / fs::path("serialize.json");
+  SwitchTest sw;
+  sw.init_objects(config_path.string(), 0, nullptr);
+
+  ASSERT_EQ(nullptr, sw.get_parser("bad_parser"));
+  ASSERT_NE(nullptr, sw.get_parser("parser"));
+
+  ASSERT_EQ(nullptr, sw.get_deparser("bad_deparser"));
+  ASSERT_NE(nullptr, sw.get_deparser("deparser"));
+
+  ASSERT_EQ(nullptr, sw.get_pipeline("bad_pipeline"));
+  ASSERT_NE(nullptr, sw.get_pipeline("ingress"));
+}
+
 TEST(Switch, SerializeState1) {
   fs::path config_path = fs::path(TESTDATADIR) / fs::path("serialize.json");
   SwitchTest sw;

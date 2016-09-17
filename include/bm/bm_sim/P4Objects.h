@@ -124,9 +124,15 @@ class P4Objects {
     return t_actions_map.at(std::make_pair(table_name, action_name));
   }
 
+  // For most functions I have a get_* version that will throw an exception if
+  // an element does not exist (exception not caught) and a get_*_rt version
+  // that returns a nullptr if it does not exist. I should probably get rid of
+  // the first version...
   Parser *get_parser(const std::string &name) const {
     return parsers.at(name).get();
   }
+
+  Parser *get_parser_rt(const std::string &name) const;
 
   ParseVSet *get_parse_vset(const std::string &name) const {
     return parse_vsets.at(name).get();
@@ -137,6 +143,8 @@ class P4Objects {
   Deparser *get_deparser(const std::string &name) const {
     return deparsers.at(name).get();
   }
+
+  Deparser *get_deparser_rt(const std::string &name) const;
 
   MatchTableAbstract *get_abstract_match_table(const std::string &name) const {
     return match_action_tables_map.at(name)->get_match_table();
@@ -157,6 +165,8 @@ class P4Objects {
   Pipeline *get_pipeline(const std::string &name) const {
     return pipelines_map.at(name).get();
   }
+
+  Pipeline *get_pipeline_rt(const std::string &name) const;
 
   MeterArray *get_meter_array(const std::string &name) const {
     return meter_arrays.at(name).get();
