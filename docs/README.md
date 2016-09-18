@@ -89,6 +89,8 @@ Installing on OS X:
   ```
   brew install autoconf automake libtool boost bison pkg-config
   ```
+  (Most systems already ship with a version of Bison. However, this is really old and you should install the latest version using brew. Also, please make sure that the newly installed bison is in your path before the system installed bison. Otherwise, make check will not work: https://github.com/p4lang/p4c/issues/83)
+
 
 - Build the C++ garbage-collector (BDW-GC) from `https://github.com/ivmai/bdwgc.git`. Follow the build instructions in the [README](https://github.com/ivmai/bdwgc/blob/master/README.md) file; you will need to `configure --enable-cplusplus`.
 
