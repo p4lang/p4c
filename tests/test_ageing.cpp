@@ -30,6 +30,7 @@
 #include <cassert>
 
 #include <bm/bm_sim/ageing.h>
+#include <bm/bm_sim/match_tables.h>
 
 #include "utils.h"
 
@@ -60,7 +61,7 @@ protected:
   std::shared_ptr<MemoryAccessor> ageing_writer;
   char buffer[4096];
 
-  std::unique_ptr<AgeingMonitor> ageing_monitor;
+  std::unique_ptr<AgeingMonitorIface> ageing_monitor;
 
   clock::time_point start;
 
@@ -136,8 +137,8 @@ protected:
   }
 
   void init_monitor(unsigned int sweep_int) {
-    ageing_monitor = std::unique_ptr<AgeingMonitor>(
-        new AgeingMonitor(device_id, cxt_id, ageing_writer, sweep_int));
+    ageing_monitor = AgeingMonitorIface::make(
+        device_id, cxt_id, ageing_writer, sweep_int);
     ageing_monitor->add_table(table.get());
   }
 };

@@ -638,12 +638,12 @@ template CustomCrcErrorCode Context::set_crc_custom_parameters<uint32_t>(
 
 // ---------- End runtime interfaces ----------
 
-LearnEngine *
+LearnEngineIface *
 Context::get_learn_engine() {
   return p4objects->get_learn_engine();
 }
 
-AgeingMonitor *
+AgeingMonitorIface *
 Context::get_ageing_monitor() {
   return p4objects->get_ageing_monitor();
 }

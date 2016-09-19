@@ -376,9 +376,9 @@ class Context final {
 
   PHVFactory &get_phv_factory();
 
-  LearnEngine *get_learn_engine();
+  LearnEngineIface *get_learn_engine();
 
-  AgeingMonitor *get_ageing_monitor();
+  AgeingMonitorIface *get_ageing_monitor();
 
   void set_notifications_transport(std::shared_ptr<TransportIface> transport);
 

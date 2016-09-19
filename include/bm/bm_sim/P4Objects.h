@@ -98,9 +98,9 @@ class P4Objects {
  public:
   PHVFactory &get_phv_factory() { return phv_factory; }
 
-  LearnEngine *get_learn_engine() { return learn_engine.get(); }
+  LearnEngineIface *get_learn_engine() { return learn_engine.get(); }
 
-  AgeingMonitor *get_ageing_monitor() { return ageing_monitor.get(); }
+  AgeingMonitorIface *get_ageing_monitor() { return ageing_monitor.get(); }
 
   void reset_state();
 
@@ -362,9 +362,9 @@ class P4Objects {
 
   std::unordered_map<std::string, std::unique_ptr<Deparser> > deparsers{};
 
-  std::unique_ptr<LearnEngine> learn_engine{};
+  std::unique_ptr<LearnEngineIface> learn_engine{};
 
-  std::unique_ptr<AgeingMonitor> ageing_monitor{};
+  std::unique_ptr<AgeingMonitorIface> ageing_monitor{};
 
   // meter arrays
   std::unordered_map<std::string, std::unique_ptr<MeterArray> > meter_arrays{};

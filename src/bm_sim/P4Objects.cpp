@@ -714,8 +714,8 @@ P4Objects::init_objects(std::istream *is,
 
   // pipelines
 
-  ageing_monitor = std::unique_ptr<AgeingMonitor>(
-      new AgeingMonitor(device_id, cxt_id, notifications_transport));
+  ageing_monitor = AgeingMonitorIface::make(
+      device_id, cxt_id, notifications_transport);
 
   std::unordered_map<std::string, MatchKeyParam::Type> map_name_to_match_type =
       { {"exact", MatchKeyParam::Type::EXACT},
@@ -1053,8 +1053,7 @@ P4Objects::init_objects(std::istream *is,
 
   // learn lists
 
-  learn_engine = std::unique_ptr<LearnEngine>(
-      new LearnEngine(device_id, cxt_id));
+  learn_engine = LearnEngineIface::make(device_id, cxt_id);
 
   const Json::Value &cfg_learn_lists = cfg_root["learn_lists"];
 
@@ -1063,7 +1062,7 @@ P4Objects::init_objects(std::istream *is,
   }
 
   for (const auto &cfg_learn_list : cfg_learn_lists) {
-    LearnEngine::list_id_t list_id = cfg_learn_list["id"].asInt();
+    LearnEngineIface::list_id_t list_id = cfg_learn_list["id"].asInt();
     learn_engine->list_create(list_id, 16);  // 16 is max nb of samples
     learn_engine->list_set_learn_writer(list_id, notifications_transport);
 

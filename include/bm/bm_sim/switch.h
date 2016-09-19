@@ -264,11 +264,11 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   //! Obtain a pointer to the LearnEngine for a given Context
-  LearnEngine *get_learn_engine(size_t cxt_id) {
+  LearnEngineIface *get_learn_engine(size_t cxt_id) {
     return contexts.at(cxt_id).get_learn_engine();
   }
 
-  AgeingMonitor *get_ageing_monitor(size_t cxt_id) {
+  AgeingMonitorIface *get_ageing_monitor(size_t cxt_id) {
     return contexts.at(cxt_id).get_ageing_monitor();
   }
 
@@ -875,13 +875,13 @@ class Switch : public SwitchWContexts {
   // to avoid C++ name hiding
   using SwitchWContexts::get_learn_engine;
   //! Obtain a pointer to the LearnEngine for this Switch instance
-  LearnEngine *get_learn_engine() {
+  LearnEngineIface *get_learn_engine() {
     return get_learn_engine(0);
   }
 
   // to avoid C++ name hiding
   using SwitchWContexts::get_ageing_monitor;
-  AgeingMonitor *get_ageing_monitor() {
+  AgeingMonitorIface *get_ageing_monitor() {
     return get_ageing_monitor(0);
   }
 

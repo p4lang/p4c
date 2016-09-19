@@ -21,25 +21,16 @@
 #ifndef BM_BM_SIM_AGEING_H_
 #define BM_BM_SIM_AGEING_H_
 
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <map>
-#include <unordered_set>
-#include <string>
-#include <vector>
+#include <memory>
 
-#include "match_tables.h"
-#include "packet.h"
 #include "transport.h"
 
 namespace bm {
 
-class AgeingMonitor {
- public:
-  typedef uint64_t buffer_id_t;
-  typedef Packet::clock clock;
+class MatchTableAbstract;
 
+class AgeingMonitorIface {
+ public:
   typedef struct {
     char sub_topic[4];
     int switch_id;
@@ -50,56 +41,17 @@ class AgeingMonitor {
     char _padding[4];  // the header size for notifications is always 32 bytes
   } __attribute__((packed)) msg_hdr_t;
 
-  AgeingMonitor(int device_id, int cxt_id,
-                std::shared_ptr<TransportIface> writer,
-                unsigned int sweep_interval_ms = 1000u);
+  virtual ~AgeingMonitorIface() { }
 
-  ~AgeingMonitor();
+  virtual void add_table(MatchTableAbstract *table) = 0;
 
-  void add_table(MatchTableAbstract *table);
+  virtual void set_sweep_interval(unsigned int ms) = 0;
 
-  void set_sweep_interval(unsigned int ms);
+  virtual void reset_state() = 0;
 
-  void reset_state();
-
- private:
-  void sweep_loop();
-  void do_sweep();
-
- private:
-  struct TableData {
-    explicit TableData(MatchTableAbstract *table)
-      : table(table) { }
-
-    TableData(const TableData &other) = delete;
-    TableData &operator=(const TableData &other) = delete;
-
-    TableData(TableData &&other) /*noexcept*/ = default;
-    TableData &operator=(TableData &&other) /*noexcept*/ = default;
-
-    MatchTableAbstract *table{nullptr};
-    std::unordered_set<entry_handle_t> prev_sweep_entries{};
-  };
-
- private:
-  mutable std::mutex mutex{};
-
-  std::map<p4object_id_t, TableData> tables_with_ageing{};
-
-  int device_id{};
-  int cxt_id{};
-
-  std::shared_ptr<TransportIface> writer{nullptr};
-
-  std::atomic<unsigned int> sweep_interval_ms{0};
-
-  std::vector<entry_handle_t> entries{};
-  std::vector<entry_handle_t> entries_tmp{};
-  buffer_id_t buffer_id{0};
-
-  std::thread sweep_thread{};
-  bool stop_sweep_thread{false};
-  mutable std::condition_variable stop_condvar{};
+  static std::unique_ptr<AgeingMonitorIface> make(
+      int device_id, int cxt_id, std::shared_ptr<TransportIface> writer,
+      unsigned int sweep_interval_ms = 1000u);
 };
 
 }  // namespace bm
