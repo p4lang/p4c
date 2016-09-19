@@ -268,7 +268,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return contexts.at(cxt_id).get_learn_engine();
   }
 
-  AgeingMonitor *get_ageing_monitor(size_t cxt_id) {
+  AgeingMonitorIface *get_ageing_monitor(size_t cxt_id) {
     return contexts.at(cxt_id).get_ageing_monitor();
   }
 
@@ -881,7 +881,7 @@ class Switch : public SwitchWContexts {
 
   // to avoid C++ name hiding
   using SwitchWContexts::get_ageing_monitor;
-  AgeingMonitor *get_ageing_monitor() {
+  AgeingMonitorIface *get_ageing_monitor() {
     return get_ageing_monitor(0);
   }
 

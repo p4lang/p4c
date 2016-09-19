@@ -19,13 +19,80 @@
  */
 
 #include <bm/bm_sim/ageing.h>
+#include <bm/bm_sim/match_tables.h>
+#include <bm/bm_sim/packet.h>
 
 #include <string>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <map>
+#include <unordered_set>
+#include <vector>
+#include <memory>
 
 namespace bm {
 
-static_assert(sizeof(AgeingMonitor::msg_hdr_t) == 32u,
+static_assert(sizeof(AgeingMonitorIface::msg_hdr_t) == 32u,
               "Invalid size for ageing notification header");
+
+class AgeingMonitor final : public AgeingMonitorIface {
+ public:
+  typedef AgeingMonitorIface::msg_hdr_t msg_hdr_t;
+  typedef uint64_t buffer_id_t;
+  typedef Packet::clock clock;
+
+  AgeingMonitor(int device_id, int cxt_id,
+                std::shared_ptr<TransportIface> writer,
+                unsigned int sweep_interval_ms = 1000u);
+
+  ~AgeingMonitor();
+
+  void add_table(MatchTableAbstract *table) override;
+
+  void set_sweep_interval(unsigned int ms) override;
+
+  void reset_state() override;
+
+ private:
+  void sweep_loop();
+  void do_sweep();
+
+ private:
+  struct TableData {
+    explicit TableData(MatchTableAbstract *table)
+      : table(table) { }
+
+    TableData(const TableData &other) = delete;
+    TableData &operator=(const TableData &other) = delete;
+
+    TableData(TableData &&other) /*noexcept*/ = default;
+    TableData &operator=(TableData &&other) /*noexcept*/ = default;
+
+    MatchTableAbstract *table{nullptr};
+    std::unordered_set<entry_handle_t> prev_sweep_entries{};
+  };
+
+ private:
+  mutable std::mutex mutex{};
+
+  std::map<p4object_id_t, TableData> tables_with_ageing{};
+
+  int device_id{};
+  int cxt_id{};
+
+  std::shared_ptr<TransportIface> writer{nullptr};
+
+  std::atomic<unsigned int> sweep_interval_ms{0};
+
+  std::vector<entry_handle_t> entries{};
+  std::vector<entry_handle_t> entries_tmp{};
+  buffer_id_t buffer_id{0};
+
+  std::thread sweep_thread{};
+  bool stop_sweep_thread{false};
+  mutable std::condition_variable stop_condvar{};
+};
 
 AgeingMonitor::AgeingMonitor(int device_id, int cxt_id,
                              std::shared_ptr<TransportIface> writer,
@@ -126,6 +193,14 @@ AgeingMonitor::do_sweep() {
     writer->send_msgs({buf_hdr, buf_entries});
     entries.clear();
   }
+}
+
+std::unique_ptr<AgeingMonitorIface>
+AgeingMonitorIface::make(int device_id, int cxt_id,
+                         std::shared_ptr<TransportIface> writer,
+                         unsigned int sweep_interval_ms) {
+  return std::unique_ptr<AgeingMonitorIface>(new AgeingMonitor(
+      device_id, cxt_id, writer, sweep_interval_ms));
 }
 
 }  // namespace bm

@@ -714,8 +714,8 @@ P4Objects::init_objects(std::istream *is,
 
   // pipelines
 
-  ageing_monitor = std::unique_ptr<AgeingMonitor>(
-      new AgeingMonitor(device_id, cxt_id, notifications_transport));
+  ageing_monitor = AgeingMonitorIface::make(
+      device_id, cxt_id, notifications_transport);
 
   std::unordered_map<std::string, MatchKeyParam::Type> map_name_to_match_type =
       { {"exact", MatchKeyParam::Type::EXACT},
