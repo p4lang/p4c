@@ -20,17 +20,208 @@
 
 #include <bm/bm_sim/learning.h>
 #include <bm/bm_sim/logger.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/bytecontainer.h>
+#include <bm/bm_sim/transport.h>
 
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <unordered_map>
+#include <unordered_set>
+#include <chrono>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include <cassert>
 
 namespace bm {
 
-static_assert(sizeof(LearnEngine::msg_hdr_t) == 32u,
+static_assert(sizeof(LearnEngineIface::msg_hdr_t) == 32u,
               "Invalid size for learning notification header");
+
+class LearnEngine final : public LearnEngineIface {
+ public:
+  using LearnEngineIface::list_id_t;
+  using LearnEngineIface::buffer_id_t;
+  using LearnEngineIface::LearnErrorCode;
+  using LearnEngineIface::msg_hdr_t;
+  using LearnEngineIface::LearnCb;
+
+  explicit LearnEngine(int device_id = 0, int cxt_id = 0);
+
+  void list_create(list_id_t list_id, size_t max_samples = 1,
+                   unsigned int timeout_ms = 1000) override;
+
+  void list_set_learn_writer(
+      list_id_t list_id, std::shared_ptr<TransportIface> learn_writer) override;
+  void list_set_learn_cb(list_id_t list_id, const LearnCb &learn_cb,
+                         void * cookie) override;
+
+  void list_push_back_field(list_id_t list_id, header_id_t header_id,
+                            int field_offset) override;
+  void list_push_back_constant(list_id_t list_id,
+                               const std::string &hexstring) override;
+
+  void list_init(list_id_t list_id) override;
+
+  LearnErrorCode list_set_timeout(list_id_t list_id,
+                                  unsigned int timeout_ms) override;
+
+  LearnErrorCode list_set_max_samples(list_id_t list_id,
+                                      size_t max_samples) override;
+
+  //! Performs learning on the packet. Needs to be called by the target after a
+  //! learning-enabled pipeline has been applied on the packet. See the simple
+  //! switch implementation for an example.
+  //!
+  //! The \p list_id should be mapped to a field list in the JSON fed into the
+  //! switch. Since learning is still not well-standardized in P4, this process
+  //! is a little bit hacky for now.
+  void learn(list_id_t list_id, const Packet &pkt) override;
+
+  LearnErrorCode ack(list_id_t list_id, buffer_id_t buffer_id,
+                     int sample_id) override;
+  LearnErrorCode ack(list_id_t list_id, buffer_id_t buffer_id,
+                     const std::vector<int> &sample_ids) override;
+  LearnErrorCode ack_buffer(list_id_t list_id, buffer_id_t buffer_id) override;
+
+  void reset_state() override;
+
+ private:
+  class LearnSampleBuilder {
+   public:
+    void push_back_constant(const ByteContainer &constant);
+    void push_back_field(header_id_t header_id, int field_offset);
+
+    void operator()(const PHV &phv, ByteContainer *sample) const;
+
+   private:
+    struct LearnSampleEntry {
+      enum {FIELD, CONSTANT} tag;
+
+      union {
+        struct {
+          header_id_t header;
+          int offset;
+        } field;
+
+        struct {
+          unsigned int offset;
+        } constant;
+      };
+    };
+
+   private:
+    std::vector<LearnSampleEntry> entries{};
+    std::vector<ByteContainer> constants{};
+  };
+
+  typedef std::chrono::high_resolution_clock clock;
+  typedef std::chrono::milliseconds milliseconds;
+
+  typedef std::unordered_set<ByteContainer, ByteContainerKeyHash> LearnFilter;
+
+ private:
+  struct FilterPtrs {
+    size_t unacked_count{0};
+    std::vector<LearnFilter::iterator> buffer{};
+  };
+
+  class LearnList {
+   public:
+    enum class LearnMode {NONE, WRITER, CB};
+
+   public:
+    LearnList(list_id_t list_id, int device_id, int cxt_id,
+              size_t max_samples, unsigned int timeout);
+
+    void init();
+
+    ~LearnList();
+
+    void set_learn_writer(std::shared_ptr<TransportIface> learn_writer);
+    void set_learn_cb(const LearnCb &learn_cb, void *cookie);
+
+    void push_back_field(header_id_t header_id, int field_offset);
+    void push_back_constant(const std::string &hexstring);
+
+    void set_timeout(unsigned int timeout_ms);
+
+    void set_max_samples(size_t max_samples);
+
+    void add_sample(const PHV &phv);
+
+    void ack(buffer_id_t buffer_id, const std::vector<int> &sample_ids);
+    void ack_buffer(buffer_id_t buffer_id);
+
+    void reset_state();
+
+    LearnList(const LearnList &other) = delete;
+    LearnList &operator=(const LearnList &other) = delete;
+    LearnList(LearnList &&other) = delete;
+    LearnList &operator=(LearnList &&other) = delete;
+
+   private:
+    using MutexType = std::mutex;
+    using LockType = std::unique_lock<MutexType>;
+
+   private:
+    void swap_buffers();
+    void process_full_buffer(LockType &lock);  // NOLINT(runtime/references)
+    void buffer_transmit_loop();
+    void buffer_transmit();
+
+   private:
+    mutable MutexType mutex{};
+
+    list_id_t list_id;
+
+    int device_id;
+    int cxt_id;
+
+    LearnSampleBuilder builder{};
+    std::vector<char> buffer{};
+    buffer_id_t buffer_id{0};
+    // size_t sample_size{0};
+    size_t num_samples{0};
+    size_t max_samples;
+    clock::time_point buffer_started{};
+    clock::time_point last_sent{};
+    milliseconds timeout;
+    bool with_timeout;
+
+    LearnFilter filter{};
+    std::unordered_map<buffer_id_t, FilterPtrs> old_buffers{};
+
+    std::vector<char> buffer_tmp{};
+    size_t num_samples_tmp{0};
+    mutable std::condition_variable b_can_swap{};
+    mutable std::condition_variable b_can_send{};
+    std::thread transmit_thread{};
+    bool stop_transmit_thread{false};
+
+    LearnMode learn_mode{LearnMode::NONE};
+
+    // should I use a union here? or is it not worth the trouble?
+    std::shared_ptr<TransportIface> writer{nullptr};
+    LearnCb cb_fn{};
+    void *cb_cookie{nullptr};
+
+    bool writer_busy{false};
+    mutable std::condition_variable can_change_writer{};
+  };
+
+ private:
+  LearnList *get_learn_list(list_id_t list_id);
+
+  int device_id{};
+  int cxt_id{};
+  // LearnList is not movable because of the mutex, I am using pointers
+  std::unordered_map<list_id_t, std::unique_ptr<LearnList> > learn_lists{};
+};
 
 void
 LearnEngine::LearnSampleBuilder::push_back_constant(
@@ -457,6 +648,11 @@ void
 LearnEngine::reset_state() {
   for (auto &p : learn_lists)
     p.second->reset_state();
+}
+
+std::unique_ptr<LearnEngineIface>
+LearnEngineIface::make(int device_id, int cxt_id) {
+  return std::unique_ptr<LearnEngineIface>(new LearnEngine(device_id, cxt_id));
 }
 
 }  // namespace bm

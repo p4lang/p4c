@@ -264,7 +264,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   }
 
   //! Obtain a pointer to the LearnEngine for a given Context
-  LearnEngine *get_learn_engine(size_t cxt_id) {
+  LearnEngineIface *get_learn_engine(size_t cxt_id) {
     return contexts.at(cxt_id).get_learn_engine();
   }
 
@@ -875,7 +875,7 @@ class Switch : public SwitchWContexts {
   // to avoid C++ name hiding
   using SwitchWContexts::get_learn_engine;
   //! Obtain a pointer to the LearnEngine for this Switch instance
-  LearnEngine *get_learn_engine() {
+  LearnEngineIface *get_learn_engine() {
     return get_learn_engine(0);
   }
 

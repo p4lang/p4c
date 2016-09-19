@@ -376,7 +376,7 @@ class Context final {
 
   PHVFactory &get_phv_factory();
 
-  LearnEngine *get_learn_engine();
+  LearnEngineIface *get_learn_engine();
 
   AgeingMonitorIface *get_ageing_monitor();
 
