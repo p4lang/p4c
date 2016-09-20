@@ -296,6 +296,20 @@ MatchTableAbstract::get_next_node_default(p4object_id_t action_id) const {
   return next_nodes.at(action_id);
 }
 
+void
+MatchTableAbstract::set_entry_common_info(EntryCommon *entry) const {
+  if (!with_ageing) return;
+  using std::chrono::duration_cast;
+  using std::chrono::milliseconds;
+  // when retrieving many entries, the clock is read many times; but this is the
+  // most readable solution IMO
+  auto tp = Packet::clock::now();
+  auto now_ms = duration_cast<milliseconds>(tp.time_since_epoch()).count();
+  MatchUnit::EntryMeta &meta = match_unit_->get_entry_meta(entry->handle);
+  entry->timeout_ms = meta.timeout_ms;
+  entry->time_since_hit_ms = now_ms - meta.ts.get_ms();
+}
+
 std::string
 MatchTableAbstract::dump_entry_string_(entry_handle_t handle) const {
   std::ostringstream ret;
@@ -435,6 +449,8 @@ MatchTable::get_entry_(entry_handle_t handle, Entry *entry) const {
   entry->handle = handle;
   entry->action_fn = action_entry->action_fn.get_action_fn();
   entry->action_data = action_entry->action_fn.get_action_data();
+
+  set_entry_common_info(entry);
 
   return MatchErrorCode::SUCCESS;
 }
@@ -798,6 +814,8 @@ MatchTableIndirect::get_entry_(entry_handle_t handle, Entry *entry) const {
   entry->handle = handle;
   assert(index->is_mbr());
   entry->mbr = index->get_mbr();
+
+  set_entry_common_info(entry);
 
   return MatchErrorCode::SUCCESS;
 }
@@ -1307,6 +1325,8 @@ MatchTableIndirectWS::get_entry_(entry_handle_t handle, Entry *entry) const {
     entry->mbr = std::numeric_limits<mbr_hdl_t>::max();
     entry->grp = index->get_grp();
   }
+
+  set_entry_common_info(entry);
 
   return MatchErrorCode::SUCCESS;
 }

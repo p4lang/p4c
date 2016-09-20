@@ -241,11 +241,17 @@ struct BmActionEntry {
  5:optional BmGroupHandle grp_handle
 }
 
+struct BmMtEntryLife {
+ 1:i32 timeout_ms;
+ 2:i32 time_since_hit_ms;
+}
+
 struct BmMtEntry {
  1:BmMatchParams match_key,
  2:BmAddEntryOptions options,
  3:BmEntryHandle entry_handle,
- 4:BmActionEntry action_entry
+ 4:BmActionEntry action_entry,
+ 5:optional BmMtEntryLife life
 }
 
 struct BmMtIndirectMember {

@@ -36,6 +36,7 @@ using std::to_string;
 
 using std::chrono::milliseconds;
 using std::this_thread::sleep_until;
+using std::this_thread::sleep_for;
 
 typedef MatchTableAbstract::ActionEntry ActionEntry;
 typedef MatchUnitExact<ActionEntry> MUExact;
@@ -801,6 +802,8 @@ TYPED_TEST(TableSizeTwo, GetEntries) {
     ASSERT_EQ(keys[i], e.match_key[0].key);
     ASSERT_EQ(&this->action_fn, e.action_fn);
     ASSERT_EQ(0u, e.action_data.size());
+    ASSERT_EQ(0u, e.timeout_ms);
+    ASSERT_EQ(0u, e.time_since_hit_ms);
   }
 }
 
@@ -1189,6 +1192,8 @@ TEST_F(TableIndirect, GetEntries) {
     ASSERT_EQ(keys[i], e.match_key[0].key);
     ASSERT_EQ(mbrs[i % num_mbrs], e.mbr);
     ASSERT_EQ(-1, e.priority);
+    ASSERT_EQ(0u, e.timeout_ms);
+    ASSERT_EQ(0u, e.time_since_hit_ms);
   }
 
   for (size_t i = 0; i < num_mbrs; i++) {
@@ -1510,6 +1515,8 @@ TEST_F(TableIndirectWS, GetEntries) {
   ASSERT_EQ(std::numeric_limits<mbr_hdl_t>::max(), e1.mbr);
   ASSERT_EQ(grp, e1.grp);
   ASSERT_EQ(-1, e1.priority);
+  ASSERT_EQ(0u, e1.timeout_ms);
+  ASSERT_EQ(0u, e1.time_since_hit_ms);
 
   const auto &g1 = groups[0];
   ASSERT_EQ(grp, g1.grp);
@@ -1530,6 +1537,8 @@ TEST_F(TableIndirectWS, GetEntries) {
   ASSERT_EQ(mbr_1, e2.mbr);
   ASSERT_EQ(std::numeric_limits<grp_hdl_t>::max(), e2.grp);
   ASSERT_EQ(-1, e2.priority);
+  ASSERT_EQ(0u, e2.timeout_ms);
+  ASSERT_EQ(0u, e2.time_since_hit_ms);
 }
 
 
@@ -2125,11 +2134,11 @@ class TableEntryDebug : public ::testing::Test {
 
     set_key_builder();
 
-    // true enables counters
     match_unit = std::unique_ptr<MUType>(
         new MUType(t_size, key_builder, &lookup_factory));
+    // disable counters, enable ageing
     table = std::unique_ptr<MatchTable>(
-        new MatchTable("test_table", 0, std::move(match_unit), false));
+        new MatchTable("test_table", 0, std::move(match_unit), false, true));
     table->set_next_node(0, nullptr);
   }
 
@@ -2370,6 +2379,27 @@ TYPED_TEST(TableEntryDebug, GetEntry) {
   this->table->get_entry(handle, &entry);
   ASSERT_TRUE(cmp_match_keys(this->gen_match_key(), entry.match_key));
   ASSERT_EQ(this->action_data.get(0), entry.action_data.get(0));
+  ASSERT_EQ(0u, entry.timeout_ms);
+  ASSERT_GT(400u, entry.time_since_hit_ms);  // 400ms just to be safe
+}
+
+TYPED_TEST(TableEntryDebug, GetEntryWTimeout) {
+  entry_handle_t handle;
+  ASSERT_EQ(MatchErrorCode::SUCCESS, this->add_entry(&handle));
+  uint32_t timeout_ms = 2345;  // 2.345 seconds
+  ASSERT_EQ(MatchErrorCode::SUCCESS,
+            this->table->set_entry_ttl(handle, timeout_ms));
+
+  uint32_t sleep_ms = 1500;
+  sleep_for(milliseconds(sleep_ms));
+  uint32_t tolerance_ms = 400;
+
+  MatchTable::Entry entry;
+  this->table->get_entry(handle, &entry);
+  ASSERT_TRUE(cmp_match_keys(this->gen_match_key(), entry.match_key));
+  ASSERT_EQ(this->action_data.get(0), entry.action_data.get(0));
+  ASSERT_EQ(timeout_ms, entry.timeout_ms);
+  ASSERT_NEAR(sleep_ms, entry.time_since_hit_ms, tolerance_ms);
 }
 
 TYPED_TEST(TableEntryDebug, DumpEntry) {

@@ -530,6 +530,16 @@ public:
   template <typename E>
   void build_action_entry(BmActionEntry *action_e, const E &entry);
 
+  template <typename E>
+  void copy_entry_life_info(BmMtEntry *e, const E &entry) {
+    if (entry.timeout_ms != 0) {
+      BmMtEntryLife entry_life;
+      entry_life.timeout_ms = entry.timeout_ms;
+      entry_life.time_since_hit_ms = entry.time_since_hit_ms;
+      e->__set_life(entry_life);
+    }
+  }
+
   template <typename M,
             typename std::vector<typename M::Entry> (RuntimeInterface::*GetFn)(
                 size_t, const std::string &) const>
@@ -540,6 +550,7 @@ public:
       BmMtEntry e;
       copy_match_part_entry(&e, entry);
       build_action_entry(&e.action_entry, entry);
+      copy_entry_life_info(&e, entry);
       _return.push_back(std::move(e));
     }
   }
@@ -558,6 +569,7 @@ public:
     }
     copy_match_part_entry(&e, entry);
     build_action_entry(&e.action_entry, entry);
+    copy_entry_life_info(&e, entry);
   }
 
   void bm_mt_get_entries(std::vector<BmMtEntry> & _return, const int32_t cxt_id, const std::string& table_name) {

@@ -127,6 +127,7 @@ class Table:
         self.key = []
         self.default_action = None
         self.type_ = None
+        self.support_timeout = False
 
         TABLES[name] = self
 
@@ -235,6 +236,7 @@ def load_json_str(json_str):
             table = Table(j_table["name"], j_table["id"])
             table.match_type = MatchType.from_str(j_table["match_type"])
             table.type_ = TableType.from_str(j_table["type"])
+            table.support_timeout = j_table["support_timeout"]
             for action in j_table["actions"]:
                 table.actions[action] = ACTIONS[action]
             for j_key in j_table["key"]:
@@ -845,6 +847,35 @@ class RuntimeAPI(cmd.Cmd):
 
     def complete_table_add(self, text, line, start_index, end_index):
         return self._complete_table_and_action(text, line)
+
+    @handle_bad_input
+    def do_table_set_timeout(self, line):
+        "Set a timeout in ms for a given entry; the table has to support timeouts: table_set_timeout <table_name> <entry handle> <timeout (ms)>"
+        args = line.split()
+        self.exactly_n_args(args, 3)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+        if not table.support_timeout:
+            raise UIn_Error(
+                "Table {} does not support entry timeouts".format(table_name))
+
+        try:
+            entry_handle = int(args[1])
+        except:
+            raise UIn_Error("Bad format for entry handle")
+
+        try:
+            timeout_ms = int(args[2])
+        except:
+            raise UIn_Error("Bad format for timeout")
+
+        print "Setting a", timeout_ms, "ms timeout for entry", entry_handle
+
+        self.client.bm_mt_set_entry_ttl(0, table_name, entry_handle, timeout_ms)
+
+    def complete_table_set_timeout(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
 
     @handle_bad_input
     def do_table_modify(self, line):
@@ -1722,9 +1753,12 @@ class RuntimeAPI(cmd.Cmd):
             print "* {0:{w}}: {1:10}{2}".format(
                 k[0], MatchType.to_str(p.type).upper(),
                 pdumper(p), w=out_name_w)
-        if (entry.options.priority >= 0):
+        if entry.options.priority >= 0:
             print "Priority: {}".format(entry.options.priority)
         self.dump_action_entry(entry.action_entry)
+        if entry.life is not None:
+            print "Life: {}ms since hit, timeout is {}ms".format(
+                entry.life.time_since_hit_ms, entry.life.timeout_ms)
 
     @handle_bad_input
     def do_table_dump_entry(self, line):

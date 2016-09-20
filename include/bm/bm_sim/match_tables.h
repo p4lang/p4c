@@ -51,6 +51,13 @@ class MatchTableAbstract : public NamedP4Object {
 
   typedef Counter::counter_value_t counter_value_t;
 
+  struct EntryCommon {
+    entry_handle_t handle;
+    std::vector<MatchKeyParam> match_key;
+    uint32_t timeout_ms{0};
+    uint32_t time_since_hit_ms{0};
+  };
+
   struct ActionEntry {
     ActionEntry() { }
 
@@ -208,6 +215,9 @@ class MatchTableAbstract : public NamedP4Object {
   const ControlFlowNode *get_next_node(p4object_id_t action_id) const;
   const ControlFlowNode *get_next_node_default(p4object_id_t action_id) const;
 
+  // assumes that entry->handle has been set
+  void set_entry_common_info(EntryCommon *entry) const;
+
   ReadLock lock_read() const { return ReadLock(t_mutex); }
   WriteLock lock_write() const { return WriteLock(t_mutex); }
   void unlock(ReadLock &lock) const { lock.unlock(); }  //NOLINT
@@ -258,9 +268,7 @@ class MatchTable : public MatchTableAbstract {
  public:
   typedef MatchTableAbstract::ActionEntry ActionEntry;
 
-  struct Entry {
-    entry_handle_t handle;
-    std::vector<MatchKeyParam> match_key;
+  struct Entry : public EntryCommon {
     const ActionFn *action_fn;
     ActionData action_data;
     int priority;
@@ -350,9 +358,7 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   typedef uint32_t mbr_hdl_t;
 
-  struct Entry {
-    entry_handle_t handle;
-    std::vector<MatchKeyParam> match_key;
+  struct Entry : public EntryCommon {
     mbr_hdl_t mbr;
     int priority;
   };
@@ -563,9 +569,7 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   // If the entry points to a member, grp will be set to its maximum possible
   // value, i.e. std::numeric_limits<grp_hdl_t>::max(). If the entry points to a
   // group, it will be mbr that will be set to its max possible value.
-  struct Entry {
-    entry_handle_t handle;
-    std::vector<MatchKeyParam> match_key;
+  struct Entry : public EntryCommon {
     mbr_hdl_t mbr;
     grp_hdl_t grp;
     int priority;
