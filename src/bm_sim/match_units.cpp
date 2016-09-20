@@ -730,6 +730,9 @@ MatchUnitAbstract_::set_entry_ttl(entry_handle_t handle, unsigned int ttl_ms) {
   if (!this->valid_handle_(handle_)) return MatchErrorCode::INVALID_HANDLE;
   EntryMeta &meta = entry_meta[handle_];
   meta.timeout_ms = ttl_ms;
+  // reset timestamp so that entries are not aged right away even if they have
+  // not been hit in a while (i.e. timeout starts now)
+  meta.ts.set(Packet::clock::now());
   return MatchErrorCode::SUCCESS;
 }
 

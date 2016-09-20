@@ -356,6 +356,8 @@ LearnEngine::LearnList::add_sample(const PHV &phv) {
   sample.clear();
   builder(phv, &sample);
 
+  BMLOG_TRACE("Learning sample for list id {}", list_id);
+
   LockType lock(mutex);
 
   const auto it = filter.find(sample);
@@ -421,6 +423,9 @@ LearnEngine::LearnList::buffer_transmit() {
   msg_hdr.list_id = list_id;
   msg_hdr.buffer_id = buffer_id - 1;
   msg_hdr.num_samples = static_cast<unsigned int>(num_samples_to_send);
+
+  BMLOG_TRACE("Sending learning notification for list id {} (buffer id {})",
+              msg_hdr.list_id, msg_hdr.buffer_id);
 
   if (learn_mode == LearnMode::WRITER) {
     // do not forget the -1 !!!

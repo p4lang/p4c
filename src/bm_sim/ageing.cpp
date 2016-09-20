@@ -21,6 +21,7 @@
 #include <bm/bm_sim/ageing.h>
 #include <bm/bm_sim/match_tables.h>
 #include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/logger.h>
 
 #include <string>
 #include <thread>
@@ -160,6 +161,7 @@ AgeingMonitor::do_sweep() {
 
     for (entry_handle_t handle : entries_tmp) {
       if (prev_sweep_entries.find(handle) == prev_sweep_entries.end()) {
+        BMLOG_TRACE("Ageing entry {} in table '{}'\n", handle, t->get_name());
         entries.push_back(handle);
       }
     }
@@ -171,6 +173,9 @@ AgeingMonitor::do_sweep() {
     for (entry_handle_t handle : entries) {
       prev_sweep_entries.insert(handle);
     }
+
+    BMLOG_TRACE("Sending ageing notification for table '{}' ({})",
+                t->get_name(), entry.first);
 
     unsigned int num_entries = static_cast<unsigned int>(entries.size());
     unsigned int size =
