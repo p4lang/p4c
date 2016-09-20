@@ -1,7 +1,7 @@
 SUBDIRS = . CLI_tests
 
 AM_CPPFLAGS += \
--isystem $(top_srcdir)/third_party \
+-isystem $(top_srcdir)/third_party/gtest/include \
 -I$(srcdir)/.. \
 -I$(srcdir)/ \
 -DTESTDATADIR=\"$(srcdir)/testdata\"
