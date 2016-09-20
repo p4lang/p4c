@@ -50,7 +50,7 @@ template<class T> void IR::Vector<T>::visit_children(Visitor &v) {
     bool changes = false;
     for (auto i = vec.begin(); i != vec.end();) {
         auto n = v.apply_visitor(*i);
-        if (!n) {
+        if (!n && *i) {
             i = erase(i);
             changes = true;
         } else if (n == *i) {
@@ -91,7 +91,7 @@ template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) {
     for (auto i = vec.begin(); i != vec.end();) {
         auto &clone(start.flow_clone());
         auto n = clone.apply_visitor(*i);
-        if (!n) {
+        if (!n && *i) {
             i = erase(i);
             changes = true;
         } else if (n == *i) {
@@ -141,7 +141,7 @@ template<class T> void IR::IndexedVector<T>::visit_children(Visitor &v) {
     bool changes = false;
     for (auto i = begin(); i != end();) {
         auto n = v.apply_visitor(*i);
-        if (!n) {
+        if (!n && *i) {
             changes = true;
             i = erase(i);
         } else if (n == *i) {
@@ -200,7 +200,7 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
     bool changes = false;
     for (auto i = symbols.begin(); i != symbols.end();) {
         auto n = v.apply_visitor(i->second, i->first);
-        if (!n) {
+        if (!n && i->second) {
             changes = true;
             i = symbols.erase(i);
         } else if (n == i->second) {
@@ -240,7 +240,7 @@ void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
     for (auto i = symbols.begin(); i != symbols.end();) {
         auto nk = i->first;
         v.visit(nk);
-        if (!nk) {
+        if (!nk && i->first) {
             changes = true;
             i = symbols.erase(i);
         } else if (nk == i->first) {
