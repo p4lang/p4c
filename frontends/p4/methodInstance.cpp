@@ -16,18 +16,29 @@ limitations under the License.
 
 #include "methodInstance.h"
 #include "ir/ir.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
 // If useExpressionType is true trust the type in mce->type
 MethodInstance*
-MethodInstance::resolve(const IR::MethodCallExpression* mce, const ReferenceMap* refMap,
-                        const TypeMap* typeMap, bool useExpressionType) {
+MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMap,
+                        TypeMap* typeMap, bool useExpressionType) {
     auto mt = typeMap->getType(mce->method);
     if (mt == nullptr && useExpressionType)
         mt = mce->method->type;
     CHECK_NULL(mt);
     BUG_CHECK(mt->is<IR::Type_MethodBase>(), "%1%: expected a MethodBase type", mt);
+    auto originalType = mt->to<IR::Type_MethodBase>();
+    auto actualType = originalType;
+    if (!mce->typeArguments->empty()) {
+        auto t = TypeInference::specialize(originalType, mce->typeArguments);
+        CHECK_NULL(t);
+        actualType = t->to<IR::Type_MethodBase>();
+        TypeInference tc(refMap, typeMap, true);
+        (void)actualType->apply(tc);  // may need to learn new type components
+        CHECK_NULL(actualType);
+    }
     // mt can be Type_Method or Type_Action
     if (mce->method->is<IR::Member>()) {
         auto mem = mce->method->to<IR::Member>();
@@ -59,7 +70,11 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const ReferenceMap*
                 auto methodType = mt->to<IR::Type_Method>();
                 CHECK_NULL(methodType);
                 auto method = et->lookupMethod(mem->member, mce->arguments->size());
-                return new ExternMethod(mce, decl, method, et, methodType);
+                // TODO: do we need to also substitute the extern instantiation type
+                // parameters into actualMethodType?
+                return new ExternMethod(mce, decl, method, et, methodType,
+                                        type->to<IR::Type_Extern>(),
+                                        actualType->to<IR::Type_Method>());
             }
         }
     } else if (mce->method->is<IR::PathExpression>()) {
@@ -68,7 +83,8 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const ReferenceMap*
         if (decl->is<IR::Method>()) {
             auto methodType = mt->to<IR::Type_Method>();
             CHECK_NULL(methodType);
-            return new ExternFunction(mce, decl->to<IR::Method>(), methodType);
+            return new ExternFunction(mce, decl->to<IR::Method>(), methodType,
+                                      actualType->to<IR::Type_Method>());
         } else if (decl->is<IR::P4Action>()) {
             return new ActionCall(mce, decl->to<IR::P4Action>(), mt->to<IR::Type_Action>());
         }
@@ -80,8 +96,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, const ReferenceMap*
 
 ConstructorCall*
 ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
-                         const ReferenceMap* refMap,
-                         const TypeMap* typeMap) {
+                         ReferenceMap* refMap, TypeMap* typeMap) {
     auto t = typeMap->getType(cce->constructedType, true);
     ConstructorCall* result;
     const IR::Vector<IR::Type>* typeArguments = nullptr;
@@ -119,9 +134,9 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
 }
 
 MethodCallDescription::MethodCallDescription(const IR::MethodCallExpression* mce,
-                                             const ReferenceMap* refMap, const TypeMap* typeMap) {
+                                             ReferenceMap* refMap, TypeMap* typeMap) {
     instance = MethodInstance::resolve(mce, refMap, typeMap);
-    auto params = instance->getParameters();
+    auto params = instance->getActualParameters();
     substitution.populate(params, mce->arguments);
 }
 

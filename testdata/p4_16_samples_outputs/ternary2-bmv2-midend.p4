@@ -48,113 +48,113 @@ control update(inout packet_t h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta) {
-    bit<8> reg_0;
-    bit<8> reg_1;
-    bit<8> reg_2;
-    bit<8> reg_3;
-    @name("setb1") action setb1(bit<9> port, bit<8> val) {
+    @name("reg") bit<8> reg_0;
+    @name("reg") bit<8> reg_1;
+    @name("reg") bit<8> reg_2;
+    @name("reg") bit<8> reg_3;
+    @name("setb1") action setb1_0(bit<9> port, bit<8> val) {
         hdrs.data.b1 = val;
         meta.egress_spec = port;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("noop") action noop_1() {
+    @name("noop") action noop_5() {
     }
-    @name("noop") action noop_2() {
+    @name("noop") action noop_6() {
     }
-    @name("noop") action noop_3() {
+    @name("noop") action noop_7() {
     }
-    @name("noop") action noop_4() {
+    @name("noop") action noop_8() {
     }
-    @name("setbyte") action setbyte(bit<8> val) {
+    @name("setbyte") action setbyte_0(bit<8> val) {
         reg_0 = val;
         hdrs.extra[0].b1 = reg_0;
     }
-    @name("setbyte") action setbyte_1(bit<8> val) {
+    @name("setbyte") action setbyte_4(bit<8> val) {
         reg_1 = val;
         hdrs.data.b2 = reg_1;
     }
-    @name("setbyte") action setbyte_2(bit<8> val) {
+    @name("setbyte") action setbyte_5(bit<8> val) {
         reg_2 = val;
         hdrs.extra[1].b1 = reg_2;
     }
-    @name("setbyte") action setbyte_3(bit<8> val) {
+    @name("setbyte") action setbyte_6(bit<8> val) {
         reg_3 = val;
         hdrs.extra[2].b2 = reg_3;
     }
-    @name("act1") action act1(bit<8> val) {
+    @name("act1") action act1_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    @name("act2") action act2(bit<8> val) {
+    @name("act2") action act2_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    @name("act3") action act3(bit<8> val) {
+    @name("act3") action act3_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1() {
         key = {
             hdrs.data.f1: ternary;
         }
         actions = {
-            setb1();
-            noop();
+            setb1_0();
+            noop_0();
         }
-        default_action = noop();
+        default_action = noop_0();
     }
-    @name("ex1") table ex1_0() {
+    @name("ex1") table ex1() {
         key = {
             hdrs.extra[0].h: ternary;
         }
         actions = {
-            setbyte();
-            act1();
-            act2();
-            act3();
-            noop_1();
+            setbyte_0();
+            act1_0();
+            act2_0();
+            act3_0();
+            noop_5();
         }
-        default_action = noop_1();
+        default_action = noop_5();
     }
-    @name("tbl1") table tbl1_0() {
+    @name("tbl1") table tbl1() {
         key = {
             hdrs.data.f2: ternary;
         }
         actions = {
-            setbyte_1();
-            noop_2();
+            setbyte_4();
+            noop_6();
         }
-        default_action = noop_2();
+        default_action = noop_6();
     }
-    @name("tbl2") table tbl2_0() {
+    @name("tbl2") table tbl2() {
         key = {
             hdrs.data.f2: ternary;
         }
         actions = {
-            setbyte_2();
-            noop_3();
+            setbyte_5();
+            noop_7();
         }
-        default_action = noop_3();
+        default_action = noop_7();
     }
-    @name("tbl3") table tbl3_0() {
+    @name("tbl3") table tbl3() {
         key = {
             hdrs.data.f2: ternary;
         }
         actions = {
-            setbyte_3();
-            noop_4();
+            setbyte_6();
+            noop_8();
         }
-        default_action = noop_4();
+        default_action = noop_8();
     }
     apply {
-        test1_0.apply();
-        switch (ex1_0.apply().action_run) {
-            act1: {
-                tbl1_0.apply();
+        test1.apply();
+        switch (ex1.apply().action_run) {
+            act1_0: {
+                tbl1.apply();
             }
-            act2: {
-                tbl2_0.apply();
+            act2_0: {
+                tbl2.apply();
             }
-            act3: {
-                tbl3_0.apply();
+            act3_0: {
+                tbl3.apply();
             }
         }
 

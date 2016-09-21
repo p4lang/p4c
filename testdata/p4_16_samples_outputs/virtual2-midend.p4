@@ -9,14 +9,16 @@ extern State {
 }
 
 control c(inout bit<16> p) {
-    @name("cntr") Virtual() cntr_0 = {
-        @name("state") State(16s1024) state_0;
+    @name("tmp") bit<16> tmp_0;
+    @name("cntr") Virtual() cntr = {
+        @name("state") State(16s1024) state_1;
         bit<16> f(in bit<16> ix) {
-            return state_0.get(ix);
+            tmp_0 = state_1.get(ix);
+            return tmp_0;
         }
     };
     action act() {
-        cntr_0.run(16w6);
+        cntr.run(16w6);
     }
     table tbl_act() {
         actions = {

@@ -34,47 +34,47 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    @name("setf4") action setf4(bit<32> val) {
+    @name("setf4") action setf4_0(bit<32> val) {
         hdr.data.f4 = val;
     }
-    @name("setf4") action setf4_1(bit<32> val) {
+    @name("setf4") action setf4_2(bit<32> val) {
         hdr.data.f4 = val;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("noop") action noop_1() {
+    @name("noop") action noop_2() {
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1() {
         actions = {
-            setf4();
-            noop();
-            NoAction_1();
+            setf4_0();
+            noop_0();
+            NoAction();
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("test2") table test2_0() {
+    @name("test2") table test2() {
         actions = {
-            setf4_1();
-            noop_1();
-            NoAction_2();
+            setf4_2();
+            noop_2();
+            NoAction_0();
         }
         key = {
             hdr.data.f2: exact;
         }
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
     apply {
         if (hdr.data.x1 == 2w1 && hdr.data.x4 == 1w0) 
-            test1_0.apply();
+            test1.apply();
         else 
-            test2_0.apply();
+            test2.apply();
     }
 }
 

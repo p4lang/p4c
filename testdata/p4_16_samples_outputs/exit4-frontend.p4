@@ -1,31 +1,31 @@
 control ctrl() {
-    action e() {
+    @name("a") bit<32> a_0;
+    @name("b") bit<32> b_0;
+    @name("c") bit<32> c_0;
+    @name("e") action e_0() {
         exit;
     }
-    table t() {
+    @name("t") table t_0() {
         actions = {
-            e();
+            e_0();
         }
-        default_action = e();
+        default_action = e_0();
     }
     apply {
-        bit<32> a;
-        bit<32> b;
-        bit<32> c;
-        a = 32w0;
-        b = 32w1;
-        c = 32w2;
-        if (t.apply().hit) {
-            b = 32w2;
-            t.apply();
-            c = 32w3;
+        a_0 = 32w0;
+        b_0 = 32w1;
+        c_0 = 32w2;
+        if (t_0.apply().hit) {
+            b_0 = 32w2;
+            t_0.apply();
+            c_0 = 32w3;
         }
         else {
-            b = 32w3;
-            t.apply();
-            c = 32w4;
+            b_0 = 32w3;
+            t_0.apply();
+            c_0 = 32w4;
         }
-        c = 32w5;
+        c_0 = 32w5;
     }
 }
 

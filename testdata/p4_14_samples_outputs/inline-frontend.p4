@@ -20,32 +20,32 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control c(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("x") action x() {
+    @name("x") action x_0() {
     }
-    @name("t") table t() {
+    @name("t") table t_0() {
         actions = {
-            x();
+            x_0();
             NoAction();
         }
         default_action = NoAction();
     }
     apply {
         if (meta.m.b == 1w1) 
-            t.apply();
+            t_0.apply();
     }
 }
 
 control d(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("c") c() c_0;
+    @name("c") c() c_1;
     apply {
-        c_0.apply(hdr, meta, standard_metadata);
+        c_1.apply(hdr, meta, standard_metadata);
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("d") d() d_0;
+    @name("d") d() d_1;
     apply {
-        d_0.apply(hdr, meta, standard_metadata);
+        d_1.apply(hdr, meta, standard_metadata);
     }
 }
 

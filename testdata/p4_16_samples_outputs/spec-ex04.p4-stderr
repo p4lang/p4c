@@ -1,4 +1,0 @@
-../testdata/p4_16_samples/spec-ex04.p4(24): warning: 170: signed value does not fit in 8 bits
-const int<8> b8 = 8s0b1010_1010
-                  ^^^^^^^^^^^^^
-warning: Program does not contain a `main' module

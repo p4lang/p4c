@@ -28,19 +28,19 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("do_b") action do_b() {
+    @name("do_b") action do_b_0() {
     }
-    @name("do_d") action do_d() {
+    @name("do_d") action do_d_0() {
     }
-    @name("do_e") action do_e() {
+    @name("do_e") action do_e_0() {
     }
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("A") table A() {
+    @name("A") table A_0() {
         actions = {
-            do_b();
-            do_d();
-            do_e();
+            do_b_0();
+            do_d_0();
+            do_e_0();
             NoAction();
         }
         key = {
@@ -48,57 +48,57 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("B") table B() {
+    @name("B") table B_0() {
         actions = {
-            nop();
+            nop_0();
             NoAction();
         }
         default_action = NoAction();
     }
-    @name("C") table C() {
+    @name("C") table C_0() {
         actions = {
-            nop();
+            nop_0();
             NoAction();
         }
         default_action = NoAction();
     }
-    @name("D") table D() {
+    @name("D") table D_0() {
         actions = {
-            nop();
+            nop_0();
             NoAction();
         }
         default_action = NoAction();
     }
-    @name("E") table E() {
+    @name("E") table E_0() {
         actions = {
-            nop();
+            nop_0();
             NoAction();
         }
         default_action = NoAction();
     }
-    @name("F") table F() {
+    @name("F") table F_0() {
         actions = {
-            nop();
+            nop_0();
             NoAction();
         }
         default_action = NoAction();
     }
     apply {
-        switch (A.apply().action_run) {
-            do_b: {
-                B.apply();
-                C.apply();
+        switch (A_0.apply().action_run) {
+            do_b_0: {
+                B_0.apply();
+                C_0.apply();
             }
-            do_d: {
-                D.apply();
-                C.apply();
+            do_d_0: {
+                D_0.apply();
+                C_0.apply();
             }
-            do_e: {
-                E.apply();
+            do_e_0: {
+                E_0.apply();
             }
         }
 
-        F.apply();
+        F_0.apply();
     }
 }
 

@@ -114,6 +114,16 @@ const LocationSet* LocationSet::getIndex(unsigned index) const {
     return result;
 }
 
+const LocationSet* LocationSet::allElements() const {
+    auto result = new LocationSet();
+    for (auto l : locations) {
+        auto array = l->to<ArrayLocation>();
+        for (auto e : *array)
+            result->add(e);
+    }
+    return result;
+}
+
 const LocationSet* LocationSet::canonicalize() const {
     LocationSet* result = new LocationSet();
     for (auto e : locations)
@@ -223,9 +233,7 @@ class WriteSet : public Inspector {
                 set(expression, result);
             }
         } else {
-            // we model an unknown index as a read/write to the whole
-            // array.
-            set(expression, storage);
+            set(expression, storage->allElements());
         }
         return false;
     }
@@ -436,6 +444,7 @@ bool Definitions::operator==(const Definitions& other) const {
     return true;
 }
 
+// This assumes that all variable declarations have been pushed to the top
 void ComputeDefUse::initialize(const IR::P4Parser* parser) {
     auto defs = new Definitions();
     auto startState = parser->getDeclByName(IR::ParserState::start)->getNode();
@@ -466,10 +475,14 @@ void ComputeDefUse::initialize(const IR::P4Parser* parser) {
         }
     }
     definitions->set(startPoint, defs);
-    LOG1("Initial definitions " << defs);
+    LOG1(parser << " initial definitions " << defs);
 }
 
-Definitions* ComputeDefUse::visitStatement(const IR::Statement* stat, Definitions* previous) {
+Definitions* ComputeDefUse::visitParserStatement(const IR::StatOrDecl* stat, Definitions* previous) {
+    if (!stat->is<IR::Statement>())
+        return previous;
+
+    ProgramPoint point(stat);
     const LocationSet* locs;
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
@@ -478,23 +491,29 @@ Definitions* ComputeDefUse::visitStatement(const IR::Statement* stat, Definition
         locs = l->join(r);
     } else if (stat->is<IR::MethodCallStatement>()) {
         locs = definitions->storageMap->writes(stat->to<IR::MethodCallStatement>()->methodCall, false);
+    } else if (stat->is<IR::BlockStatement>()) {
+        auto block = stat->to<IR::BlockStatement>();
+        auto defs = previous;
+        for (auto s : *block->components)
+            defs = visitParserStatement(s, defs);
+        LOG3("Setting definitions after " << point << " to:" << std::endl << defs);
+        definitions->set(point, defs);
+        return defs;
     } else {
         BUG("%1%: Unexpected statement", stat);
     }
-    ProgramPoint point(stat);
+    // TODO: handle conditionals
     auto result = previous->writes(point, locs);
     LOG3("Setting definitions after " << point << " to:" << std::endl << result);
     definitions->set(point, result);
     return result;
 }
 
-Definitions* ComputeDefUse::visitState(const IR::ParserState* state) {
+Definitions* ComputeDefUse::visitParserState(const IR::ParserState* state) {
     ProgramPoint sp(state);
     auto defs = definitions->get(sp);
-    for (auto stat : *state->components) {
-        if (!stat->is<IR::Statement>()) continue;
-        defs = visitStatement(stat->to<IR::Statement>(), defs);
-    }
+    for (auto stat : *state->components)
+        defs = visitParserStatement(stat, defs);
     return defs;
 }
 
@@ -523,7 +542,7 @@ bool ComputeDefUse::preorder(const IR::P4Parser* parser) {
         LOG1("Traversing " << state);
 
         ProgramPoint sp(state);
-        auto after = visitState(state);
+        auto after = visitParserState(state);
         auto next = transitions.getCallees(state);
         for (auto n : *next) {
             ProgramPoint pt(n);
@@ -538,7 +557,116 @@ bool ComputeDefUse::preorder(const IR::P4Parser* parser) {
     return false;
 }
 
-bool ComputeDefUse::preorder(const IR::P4Control* ) {
+/////////////// Control-def-use
+
+// This assumes that all variable declarations have been pushed to the top
+void ComputeDefUse::initialize(const IR::P4Control* control) {
+    auto defs = new Definitions();
+    startPoint = ProgramPoint(control);
+    auto startPoints = new ProgramPoints(startPoint);
+    auto uninit = new ProgramPoints(ProgramPoint::uninitialized);
+
+    for (auto p : *control->type->applyParams->parameters) {
+        StorageLocation* loc = definitions->storageMap->add(p);
+        if (loc == nullptr)
+            continue;
+        if (p->direction == IR::Direction::In ||
+            p->direction == IR::Direction::InOut)
+            defs->set(loc, startPoints);
+        else if (p->direction == IR::Direction::Out)
+            defs->set(loc, uninit);
+        auto valid = loc->getValidBits();
+        defs->set(valid, startPoints);
+    }
+    for (auto d : *control->controlLocals) {
+        if (d->is<IR::Declaration_Variable>()) {
+            StorageLocation* loc = definitions->storageMap->add(d);
+            if (loc != nullptr) {
+                defs->set(loc, uninit);
+                auto valid = loc->getValidBits();
+                defs->set(valid, startPoints);
+            }
+        }
+    }
+    definitions->set(startPoint, defs);
+    LOG1(control << " initial definitions " << defs);
+    currentDefinitions = defs;
+}
+
+bool ComputeDefUse::preorder(const IR::P4Control* control) {
+    initialize(control);
+    visit(control->body);
+    return false;  // prune
+}
+
+// if node is nullptr, use getOriginal().
+ProgramPoint ComputeDefUse::getProgramPoint(const IR::Node* node) const {
+    if (node == nullptr) {
+        node = getOriginal<IR::Statement>();
+        CHECK_NULL(node);
+    }
+    return ProgramPoint(callingContext, node);
+}
+
+// set the currentDefinitions after executing node
+bool ComputeDefUse::setDefinitions(Definitions* defs, const IR::Node* node) {
+    CHECK_NULL(defs);
+    currentDefinitions = defs;
+    auto point = getProgramPoint(node);
+    definitions->set(point, currentDefinitions);
+    LOG3("Setting definitions after " << point << " to:" << std::endl << currentDefinitions);
+    return false;  // always returns false
+}
+
+bool ComputeDefUse::preorder(const IR::IfStatement* statement) {
+    auto cond = definitions->storageMap->writes(statement->condition, false);
+    // defs are the definitions after evaluating the condition
+    auto defs = currentDefinitions->writes(getProgramPoint(), cond);
+    (void)setDefinitions(defs, statement->condition);
+    visit(statement->ifTrue);
+    auto result = currentDefinitions;
+    if (statement->ifFalse != nullptr) {
+        currentDefinitions = defs;
+        visit(statement->ifFalse);
+        result = result->join(currentDefinitions);
+    }
+    return setDefinitions(result);
+}
+
+bool ComputeDefUse::preorder(const IR::BlockStatement* statement) {
+    visit(statement->components);
+    return setDefinitions(currentDefinitions);
+}
+
+bool ComputeDefUse::preorder(const IR::ReturnStatement*) {
+    auto defs = new Definitions();
+    return setDefinitions(defs);
+}
+
+bool ComputeDefUse::preorder(const IR::ExitStatement*) {
+    auto defs = new Definitions();
+    return setDefinitions(defs);
+}
+
+bool ComputeDefUse::preorder(const IR::EmptyStatement*) {
+    return setDefinitions(currentDefinitions);
+}
+
+bool ComputeDefUse::preorder(const IR::AssignmentStatement* statement) {
+    const LocationSet* locs;
+    auto l = definitions->storageMap->writes(statement->left, true);
+    auto r = definitions->storageMap->writes(statement->right, false);
+    locs = l->join(r);
+    auto defs = currentDefinitions->writes(getProgramPoint(), locs);
+    return setDefinitions(defs);
+}
+
+bool ComputeDefUse::preorder(const IR::SwitchStatement* statement) {
+    // TODO
+    return false;
+}
+
+bool ComputeDefUse::preorder(const IR::MethodCallStatement* statement) {
     // TODO
     return false;
 }

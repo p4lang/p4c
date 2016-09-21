@@ -4,11 +4,13 @@ extern Y {
 }
 
 control d(out bit<32> x) {
-    bit<32> x_0;
-    Y(32w16) tmp;
+    @name("x_0") bit<32> x_1;
+    @name("tmp") bit<32> tmp_2;
+    @name("tmp_0") Y(32w16) tmp_1;
     action act() {
-        x_0 = tmp.get();
-        x = x_0;
+        tmp_2 = tmp_1.get();
+        x_1 = tmp_2;
+        x = x_1;
     }
     table tbl_act() {
         actions = {

@@ -47,6 +47,7 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     static const ID start;
     bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
 #nodbprint
+    /* Relaxing constraints on parser control-flow
     validate{
         for (auto e : *components) {
             CHECK_NULL(e);
@@ -54,7 +55,7 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
                 BUG_CHECK(e->is<IR::AssignmentStatement>() || e->is<IR::MethodCallStatement>(),
                           "%1%: unexpected statement in parser", e);
         }
-    }
+    } */
 }
 
 // A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)
@@ -342,6 +343,7 @@ class IfStatement : Statement {
 }
 
 class BlockStatement : Statement, ISimpleNamespace {
+    Annotations annotations;
     IndexedVector<StatOrDecl> components;
     IDeclaration getDeclByName(cstring name) const override {
         return components->getDeclaration(name); }

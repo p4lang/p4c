@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "core.p4"
+#include <core.p4>
 #include "very_simple_model.p4"
 
 header ARPA_hdr {
@@ -39,7 +39,7 @@ control LjPipe(inout Parsed_rep p,
         in InControl inCtrl,
         out OutControl outCtrl)
 {
-    action Drop_action(out PortId_t port)
+    action Drop_action(out PortId port)
     {
         port = DROP_PORT;
     }
@@ -49,7 +49,7 @@ control LjPipe(inout Parsed_rep p,
        outCtrl.outputPort = DROP_PORT;
     }
 
-    action Forward(PortId_t outPort)
+    action Forward(PortId outPort)
     {
        outCtrl.outputPort = outPort;
     }
@@ -80,4 +80,4 @@ control LJdeparse(inout Parsed_rep p, packet_out b)
     }
 }
 
-Simple(LJparse(), LjPipe(), LJdeparse()) main;
+VSS(LJparse(), LjPipe(), LJdeparse()) main;

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ namespace P4 {
 
 const IR::P4Table*
 TableApplySolver::isHit(const IR::Expression* expression,
-                        const P4::ReferenceMap* refMap,
-                        const P4::TypeMap* typeMap) {
+                        ReferenceMap* refMap,
+                        TypeMap* typeMap) {
     if (!expression->is<IR::Member>())
         return nullptr;
     auto mem = expression->to<IR::Member>();
@@ -43,8 +43,8 @@ TableApplySolver::isHit(const IR::Expression* expression,
 
 const IR::P4Table*
 TableApplySolver::isActionRun(const IR::Expression* expression,
-                              const P4::ReferenceMap* refMap,
-                              const P4::TypeMap* typeMap) {
+                              ReferenceMap* refMap,
+                              TypeMap* typeMap) {
     auto mem = expression->to<IR::Member>();
     if (mem == nullptr)
         return nullptr;

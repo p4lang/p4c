@@ -1,19 +1,19 @@
 #include <core.p4>
 
 control c(inout bit<32> arg) {
-    action a() {
+    @name("a") action a_0() {
     }
-    table t(inout bit<32> x) {
+    @name("t") table t_0(inout bit<32> x) {
         key = {
             x: exact;
         }
         actions = {
-            a();
+            a_0();
         }
-        default_action = a();
+        default_action = a_0();
     }
     apply {
-        if (t.apply(arg).hit) 
+        if (t_0.apply(arg).hit) 
             arg = 32w0;
     }
 }

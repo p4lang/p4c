@@ -1,22 +1,29 @@
 control p(inout bit<1> bt) {
-    bit<1> y0_0;
-    bit<1> y0_1;
-    @name("b") action b() {
-        y0_0 = bt;
-        y0_0 = y0_0 | 1w1;
-        bt = y0_0;
-        y0_1 = bt;
-        y0_1 = y0_1 | 1w1;
-        bt = y0_1;
-    }
-    @name("t") table t_0() {
-        actions = {
-            b();
+    @name("y0_0") bit<1> y0;
+    @name("tmp") bit<1> tmp_0;
+    @name("y0_1") bit<1> y0_2;
+    @name("b") action b_0() {
+        @name("a") {
+            y0 = bt;
+            tmp_0 = y0 | 1w1;
+            y0 = tmp_0;
+            bt = y0;
         }
-        default_action = b();
+        @name("a") {
+            y0_2 = bt;
+            tmp_0 = y0_2 | 1w1;
+            y0_2 = tmp_0;
+            bt = y0_2;
+        }
+    }
+    @name("t") table t() {
+        actions = {
+            b_0();
+        }
+        default_action = b_0();
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 

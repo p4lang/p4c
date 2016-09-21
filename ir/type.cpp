@@ -141,4 +141,22 @@ bool Type_ActionEnum::contains(cstring name) const {
     return false;
 }
 
+const Type* Type_Specialized::getP4Type() const{
+    auto args = new IR::Vector<Type>();
+    for (auto a : *arguments) {
+        auto at = a->getP4Type();
+        args->push_back(at);
+    }
+    return new IR::Type_Specialized(srcInfo, baseType, args);
+}
+
+const Type* Type_SpecializedCanonical::getP4Type() const {
+    auto args = new IR::Vector<Type>();
+    for (auto a : *arguments) {
+        auto at = a->getP4Type();
+        args->push_back(at);
+    }
+    return new IR::Type_Specialized(srcInfo, baseType->getP4Type()->to<IR::Type_Name>(), args);
+}
+
 }  // namespace IR

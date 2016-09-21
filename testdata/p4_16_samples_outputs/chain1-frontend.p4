@@ -5,25 +5,19 @@ header Header {
 }
 
 parser p1(packet_in p, out Header h) {
-    bit<1> x;
+    @name("x") bit<1> x_0;
     state start {
-        transition select(x) {
+        transition select(x_0) {
             1w0: chain1;
             1w1: chain2;
         }
     }
     state chain1 {
         p.extract<Header>(h);
-        transition next1;
-    }
-    state next1 {
         transition endchain;
     }
     state chain2 {
         p.extract<Header>(h);
-        transition next2;
-    }
-    state next2 {
         transition endchain;
     }
     state endchain {

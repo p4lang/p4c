@@ -1,31 +1,30 @@
 #include <core.p4>
 
+typedef bit<4> PortId;
+const PortId REAL_PORT_COUNT = 4w8;
+struct InControl {
+    PortId inputPort;
+}
+
+const PortId RECIRCULATE_IN_PORT = 4w0xd;
+const PortId CPU_IN_PORT = 4w0xe;
+struct OutControl {
+    PortId outputPort;
+}
+
+const PortId DROP_PORT = 4w0xf;
+const PortId CPU_OUT_PORT = 4w0xe;
+const PortId RECIRCULATE_OUT_PORT = 4w0xd;
+parser Parser<H>(packet_in b, out H parsedHeaders);
+control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
+control Deparser<H>(inout H outputHeaders, packet_out b);
+package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
 extern Checksum16 {
     void clear();
-    void update<D>(in D dt);
-    void update<D>(in bool condition, in D dt);
+    void update<T>(in T data);
     bit<16> get();
 }
 
-typedef bit<4> PortId_t;
-const PortId_t REAL_PORT_COUNT = 4w8;
-struct InControl {
-    PortId_t inputPort;
-}
-
-const PortId_t RECIRCULATE_INPUT_PORT = 4w0xd;
-const PortId_t CPU_INPUT_PORT = 4w0xe;
-struct OutControl {
-    PortId_t outputPort;
-}
-
-const PortId_t DROP_PORT = 4w0xf;
-const PortId_t CPU_OUT_PORT = 4w0xe;
-const PortId_t RECIRCULATE_OUT_PORT = 4w0xd;
-parser Parser<H>(packet_in b, out H parsedHeaders);
-control MAP<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
-control Deparser<H>(inout H outputHeaders, packet_out b);
-package Simple<H>(Parser<H> p, MAP<H> map, Deparser<H> d);
 header ARPA_hdr {
     bit<48> src;
     bit<48> dest;
@@ -44,13 +43,13 @@ parser LJparse(packet_in b, out Parsed_rep p) {
 }
 
 control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    action Drop_action(out PortId_t port) {
+    action Drop_action(out PortId port) {
         port = 4w0xf;
     }
     action Drop_1() {
         outCtrl.outputPort = 4w0xf;
     }
-    action Forward(PortId_t outPort) {
+    action Forward(PortId outPort) {
         outCtrl.outputPort = outPort;
     }
     table Enet_lkup() {
@@ -76,4 +75,4 @@ control LJdeparse(inout Parsed_rep p, packet_out b) {
     }
 }
 
-Simple<Parsed_rep>(LJparse(), LjPipe(), LJdeparse()) main;
+VSS<Parsed_rep>(LJparse(), LjPipe(), LJdeparse()) main;

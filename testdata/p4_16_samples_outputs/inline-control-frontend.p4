@@ -4,15 +4,17 @@ extern Y {
 }
 
 control c(out bit<32> x)(Y y) {
+    bit<32> tmp;
     apply {
-        x = y.get();
+        tmp = y.get();
+        x = tmp;
     }
 }
 
 control d(out bit<32> x) {
-    c(Y(32w16)) cinst;
+    @name("cinst") c(Y(32w16)) cinst_0;
     apply {
-        cinst.apply(x);
+        cinst_0.apply(x);
     }
 }
 

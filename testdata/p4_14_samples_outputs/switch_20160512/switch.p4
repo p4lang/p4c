@@ -3331,7 +3331,8 @@ control process_global_params(inout headers hdr, inout metadata meta, inout stan
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
         standard_metadata.egress_spec = 9w511;
         {
-            bit<32> tmp = random((bit<5>)0);
+            bit<32> tmp;
+            random((bit<5>)0, tmp);
             meta.ingress_metadata.sflow_take_sample[30:0] = tmp[30:0];
         }
     }

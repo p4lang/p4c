@@ -127,6 +127,7 @@ class Type_InfInt : Type, ITypeVar {
     dbprint { Node::dbprint(out); out << declid; }
     toString { return "int"; }
     operator== { return declid == a.declid; }
+    const Type* getP4Type() const override { return nullptr; }
 }
 
 class Type_Dontcare : Type_Base {
@@ -234,6 +235,7 @@ class Type_Set : Type {
     Type elementType;
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
     toString { return cstring("set<") + elementType->toString() + ">"; }
+    const Type* getP4Type() const override { return nullptr; }
 }
 
 // The type of an expressionList
@@ -241,6 +243,7 @@ class Type_Tuple : Type {
     Vector<Type> components;
     toString{ return "Tuple(" + Util::toString(components->size()) + ")"; }
     validate{ components->check_null(); }
+    const Type* getP4Type() const override { return nullptr; }
 }
 
 // The type of an architectural block.
@@ -277,6 +280,7 @@ class Type_Name : Type {
     Type_Name(IR::ID id) : Type(id.srcInfo), path(new IR::Path(id)) {}
     toString{ return path->name; }
     dbprint{ Type::dbprint(out); out << ":" << path->toString(); }
+    const Type* getP4Type() const override { return this; }
 }
 
 class Type_Stack : Type {
@@ -292,6 +296,8 @@ class Type_Stack : Type {
     static const cstring pop_front;
     static const cstring full;
     static const cstring empty;
+    const Type* getP4Type() const override
+    { return new IR::Type_Stack(srcInfo, elementType->getP4Type(), size); }
 }
 
 /* Given a declaration
@@ -305,6 +311,7 @@ class Type_Specialized : Type {
     dbprint{ Node::dbprint(out); out << baseType; }
     toString{ return baseType->toString() + "<...>"; }
     validate{ arguments->check_null(); }
+    const Type* getP4Type() const override;
 }
 
 /* Canonical representation of a Type_Specialized;
@@ -321,6 +328,7 @@ class Type_SpecializedCanonical : Type {
         BUG_CHECK(baseType->is<IMayBeGenericType>(), "base type %1% is not generic", baseType);
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
+    const Type* getP4Type() const override;
 }
 
 // A declaration that consists of just an identifier, e.g., an enum member
@@ -343,7 +351,7 @@ class Type_Enum : Type_Declaration, ISimpleNamespace {
         return members->getDeclaration(name); }
 #nodbprint
     validate{ members->check_null(); }
-}
+ }
 
 class Type_Table : Type, IApply {
     P4Table  table;
@@ -352,6 +360,7 @@ class Type_Table : Type, IApply {
     // by applying a table
     static const ID hit;
     static const ID action_run;
+    const IR::Type* getP4Type() const override { return nullptr; }
 }
 
 // A special enum-like anonymous type that
@@ -360,6 +369,7 @@ class Type_Table : Type, IApply {
 class Type_ActionEnum : Type {
     ActionList actionList;
     bool contains(cstring name) const;
+    const IR::Type* getP4Type() const override { return nullptr; }
 }
 
 abstract Type_MethodBase : Type, IMayBeGenericType {
@@ -381,6 +391,7 @@ abstract Type_MethodBase : Type, IMayBeGenericType {
         result += ")";
         return result;
     }
+    const IR::Type* getP4Type() const override { return nullptr; }
 }
 
 // Type for a method or function.
@@ -404,6 +415,7 @@ class Type_MethodCall : Type {
     Type_Var             returnType;
     Vector<ArgumentInfo> arguments;
     validate{ typeArguments->check_null(); arguments->check_null(); }
+    const Type* getP4Type() const override { return nullptr; }
 }
 
 // Actions look a lot like methods in many respects.

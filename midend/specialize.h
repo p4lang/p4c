@@ -42,8 +42,8 @@ struct SpecializationInfo {
 };
 
 struct SpecializationMap {
-    const TypeMap*                     typeMap;
-    const ReferenceMap*                refMap;
+    TypeMap*      typeMap;
+    ReferenceMap* refMap;
     // For each ConstructorCallExpression or Declaration_Instance
     // we allocate a new name
     std::map<const IR::Node*, cstring> newName;
@@ -57,10 +57,10 @@ struct SpecializationMap {
 
 class FindSpecializations : public Inspector {
     ReferenceMap*      refMap;
-    const TypeMap*     typeMap;
+    TypeMap*           typeMap;
     SpecializationMap* specMap;
  public:
-    FindSpecializations(ReferenceMap* refMap, const TypeMap* typeMap, SpecializationMap* specMap) :
+    FindSpecializations(ReferenceMap* refMap, TypeMap* typeMap, SpecializationMap* specMap) :
             refMap(refMap), typeMap(typeMap), specMap(specMap) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(specMap);
         setName("FindSpecializations"); }

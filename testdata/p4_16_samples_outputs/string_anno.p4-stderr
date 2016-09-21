@@ -1,7 +1,0 @@
-../testdata/p4_16_samples/string_anno.p4:19:7: warning: missing terminating " character
- @name("string with
-       ^
-../testdata/p4_16_samples/string_anno.p4:20:8: warning: missing terminating " character
- newline") const bit d = 1;
-        ^
-warning: Program does not contain a `main' module

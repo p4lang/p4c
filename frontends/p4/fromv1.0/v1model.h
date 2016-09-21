@@ -102,9 +102,11 @@ struct ActionSelector_Model : public ::Model::Extern_Model {
 
 struct Random_Model : public ::Model::Elem {
     Random_Model() : Elem("random"),
-                    resultType(IR::Type_Bits::get(32)), logRangeType(IR::Type_Bits::get(5)) {}
+                     resultType(IR::Type_Bits::get(32)), logRangeType(IR::Type_Bits::get(5)),
+                     modify_field_rng_uniform("modify_field_rng_uniform") {}
     const IR::Type* resultType;
     const IR::Type* logRangeType;
+    ::Model::Elem   modify_field_rng_uniform;
 };
 
 struct CounterOrMeter_Model : public ::Model::Extern_Model {

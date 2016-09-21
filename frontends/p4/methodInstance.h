@@ -30,31 +30,34 @@ class MethodInstance {
  protected:
     MethodInstance(const IR::MethodCallExpression* mce,
                    const IR::IDeclaration* decl,
-                   const IR::Type_MethodBase* methodType) :
-            expr(mce), object(decl), methodType(methodType)
-    { CHECK_NULL(mce); CHECK_NULL(methodType); }
+                   const IR::Type_MethodBase* originalMethodType,
+                   const IR::Type_MethodBase* actualMethodType) :
+            expr(mce), object(decl), originalMethodType(originalMethodType),
+            actualMethodType(actualMethodType)
+    { CHECK_NULL(mce); CHECK_NULL(originalMethodType); CHECK_NULL(actualMethodType); }
 
  public:
     const IR::MethodCallExpression* expr;
-    const IR::IDeclaration* object;  // Object that method is applied to.
+    const IR::IDeclaration* object;  // Declaration of object that method is applied to.
                                      // May be null for plain functions.
-    const IR::Type_MethodBase* methodType;  // the ACTUAL type of called method.
-    // (may not be the same as the actual method type,
-    // since the call may instantiate type parameters).
+    const IR::Type_MethodBase* originalMethodType;  // the type of the *original* called method,
+                                                    // without instantiated type parameters.
+    const IR::Type_MethodBase* actualMethodType;  // type of called method,
+                                                  // with instantiated type parameters.
 
     virtual bool isApply() const { return false; }
     virtual ~MethodInstance() {}
 
     static MethodInstance* resolve(const IR::MethodCallExpression* mce,
-                                   const ReferenceMap* refMap,
-                                   const TypeMap* typeMap,
+                                   ReferenceMap* refMap, TypeMap* typeMap,
                                    bool useExpressionType = false);
     static MethodInstance* resolve(const IR::MethodCallStatement* mcs,
-                                   const ReferenceMap* refMap,
-                                   const TypeMap* typeMap)
+                                   ReferenceMap* refMap, TypeMap* typeMap)
         { return resolve(mcs->methodCall, refMap, typeMap); }
-    const IR::ParameterList* getParameters() const
-    { return methodType->parameters; }
+    const IR::ParameterList* getOriginalParameters() const
+    { return originalMethodType->parameters; }
+    const IR::ParameterList* getActualParameters() const
+    { return actualMethodType->parameters; }
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
 };
@@ -62,33 +65,43 @@ class MethodInstance {
 // The call of an Apply method on an object that implements IApply
 class ApplyMethod final : public MethodInstance {
     ApplyMethod(const IR::MethodCallExpression* expr, const IR::IDeclaration* decl,
-                const IR::IApply* type) :
-            MethodInstance(expr, decl, type->getApplyMethodType()), type(type)
-    { CHECK_NULL(type); }
+                const IR::IApply* applyObject) :
+            // TODO: is this correct?
+            MethodInstance(expr, decl, applyObject->getApplyMethodType(),
+                           applyObject->getApplyMethodType()),
+            applyObject(applyObject)
+    { CHECK_NULL(applyObject); }
     friend class MethodInstance;
  public:
-    const IR::IApply* type;
+    const IR::IApply* applyObject;
     bool isApply() const { return true; }
 };
 
 // A method call on an extern object
 class ExternMethod final : public MethodInstance {
     ExternMethod(const IR::MethodCallExpression* expr, const IR::IDeclaration* decl,
-                 const IR::Method* method, const IR::Type_Extern* type,
-                 const IR::Type_Method* methodType) :
-            MethodInstance(expr, decl, methodType), method(method), type(type)
-    { CHECK_NULL(method); CHECK_NULL(type); }
+                 const IR::Method* method,
+                 const IR::Type_Extern* originalExternType,
+                 const IR::Type_Method* originalMethodType,
+                 const IR::Type_Extern* actualExternType,
+                 const IR::Type_Method* actualMethodType) :
+            MethodInstance(expr, decl, originalMethodType, actualMethodType), method(method),
+            originalExternType(originalExternType), actualExternType(actualExternType)
+    { CHECK_NULL(method); CHECK_NULL(originalExternType); CHECK_NULL(actualExternType); }
     friend class MethodInstance;
  public:
     const IR::Method*      method;
-    const IR::Type_Extern* type;    // type of object method is applied to
+    const IR::Type_Extern* originalExternType;    // type of object method is applied to
+    const IR::Type_Extern* actualExternType;      // with type variables substituted
 };
 
 // An extern function
 class ExternFunction final : public MethodInstance {
     ExternFunction(const IR::MethodCallExpression* expr,
-                   const IR::Method* method, const IR::Type_Method* methodType) :
-            MethodInstance(expr, nullptr, methodType), method(method)
+                   const IR::Method* method,
+                   const IR::Type_Method* originalMethodType,
+                   const IR::Type_Method* actualMethodType) :
+            MethodInstance(expr, nullptr, originalMethodType, actualMethodType), method(method)
     { CHECK_NULL(method); }
     friend class MethodInstance;
  public:
@@ -100,7 +113,8 @@ class ActionCall final : public MethodInstance {
     ActionCall(const IR::MethodCallExpression* expr,
                const IR::P4Action* action,
                const IR::Type_Action* actionType) :
-            MethodInstance(expr, nullptr, actionType), action(action) { CHECK_NULL(action); }
+            // Actions are never generic
+            MethodInstance(expr, nullptr, actionType, actionType), action(action) { CHECK_NULL(action); }
     friend class MethodInstance;
  public:
     const IR::P4Action* action;
@@ -113,7 +127,7 @@ class BuiltInMethod final : public MethodInstance {
     friend class MethodInstance;
     BuiltInMethod(const IR::MethodCallExpression* expr, IR::ID name,
                   const IR::Expression* appliedTo, const IR::Type_Method* methodType) :
-            MethodInstance(expr, nullptr, methodType), name(name), appliedTo(appliedTo)
+            MethodInstance(expr, nullptr, methodType, methodType), name(name), appliedTo(appliedTo)
     { CHECK_NULL(appliedTo); }
  public:
     const IR::ID name;
@@ -128,8 +142,8 @@ class ConstructorCall {
     const IR::ConstructorCallExpression* cce;
     const IR::Vector<IR::Type>*          typeArguments;
     static ConstructorCall* resolve(const IR::ConstructorCallExpression* cce,
-                                    const ReferenceMap* refMap,
-                                    const TypeMap* typeMap);
+                                    ReferenceMap* refMap,
+                                    TypeMap* typeMap);
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
 };
@@ -161,7 +175,7 @@ class MethodCallDescription {
     ParameterSubstitution substitution;
 
     MethodCallDescription(const IR::MethodCallExpression* mce,
-                          const ReferenceMap* refMap, const TypeMap* typeMap);
+                          ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 }  // namespace P4

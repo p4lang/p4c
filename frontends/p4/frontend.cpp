@@ -32,11 +32,16 @@ limitations under the License.
 #include "createBuiltins.h"
 #include "frontends/common/constantFolding.h"
 #include "unusedDeclarations.h"
-#include "checkAliasing.h"
 #include "typeChecking/typeChecker.h"
 #include "evaluator/evaluator.h"
 #include "strengthReduction.h"
 #include "simplify.h"
+#include "resetHeaders.h"
+#include "uniqueNames.h"
+#include "moveDeclarations.h"
+#include "sideEffects.h"
+#include "simplifyDefUse.h"
+#include "simplifyParsers.h"
 
 namespace P4 {
 
@@ -91,9 +96,16 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         new ClearTypeMap(&typeMap),
         new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
-        new CheckAliasing(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new RemoveAllUnusedDeclarations(&refMap),
+        new SimplifyParsers(&refMap),
+        new ResetHeaders(&refMap, &typeMap),
+        new UniqueNames(&refMap),  // Give each local declaration a unique internal name
+        new MoveDeclarations(),  // Move all local declarations to the beginning
+        new MoveInitializers(),
+        new SideEffectOrdering(&refMap, &typeMap),
+        new SimplifyControlFlow(&refMap, &typeMap),
+        new SimplifyDefUse(&refMap, &typeMap),
     };
 
     passes.setName("FrontEnd");

@@ -7,21 +7,21 @@ header hdr {
 }
 
 control compute(inout hdr h) {
-    action a() {
+    @name("a") action a_0() {
         h.b = h.a;
     }
-    table t() {
+    @name("t") table t_0() {
         key = {
             h.a + h.a: exact @name("e") ;
         }
         actions = {
-            a();
+            a_0();
             NoAction();
         }
         default_action = NoAction();
     }
     apply {
-        t.apply();
+        t_0.apply();
     }
 }
 
@@ -61,9 +61,9 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    compute() c;
+    @name("c") compute() c_0;
     apply {
-        c.apply(h.h);
+        c_0.apply(h.h);
         sm.egress_spec = 9w0;
     }
 }

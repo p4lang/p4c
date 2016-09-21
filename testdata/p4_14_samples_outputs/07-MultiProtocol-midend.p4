@@ -150,104 +150,104 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_5() {
     }
-    action NoAction_4() {
+    @name("NoAction_4") action NoAction_6() {
     }
-    @name("l2_packet") action l2_packet() {
+    @name("l2_packet") action l2_packet_0() {
         meta.ing_metadata.packet_type = 4w0;
     }
-    @name("ipv4_packet") action ipv4_packet() {
+    @name("ipv4_packet") action ipv4_packet_0() {
         meta.ing_metadata.packet_type = 4w1;
     }
-    @name("ipv6_packet") action ipv6_packet() {
+    @name("ipv6_packet") action ipv6_packet_0() {
         meta.ing_metadata.packet_type = 4w2;
     }
-    @name("mpls_packet") action mpls_packet() {
+    @name("mpls_packet") action mpls_packet_0() {
         meta.ing_metadata.packet_type = 4w3;
     }
-    @name("mim_packet") action mim_packet() {
+    @name("mim_packet") action mim_packet_0() {
         meta.ing_metadata.packet_type = 4w4;
     }
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("nop") action nop_1() {
+    @name("nop") action nop_3() {
     }
-    @name("nop") action nop_2() {
+    @name("nop") action nop_4() {
     }
-    @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
+    @name("set_egress_port") action set_egress_port_0(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("set_egress_port") action set_egress_port_1(bit<8> egress_port) {
+    @name("set_egress_port") action set_egress_port_3(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("set_egress_port") action set_egress_port_2(bit<8> egress_port) {
+    @name("set_egress_port") action set_egress_port_4(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("ethertype_match") table ethertype_match_0() {
+    @name("ethertype_match") table ethertype_match() {
         actions = {
-            l2_packet();
-            ipv4_packet();
-            ipv6_packet();
-            mpls_packet();
-            mim_packet();
-            NoAction_1();
+            l2_packet_0();
+            ipv4_packet_0();
+            ipv6_packet_0();
+            mpls_packet_0();
+            mim_packet_0();
+            NoAction();
         }
         key = {
             hdr.ethernet.etherType: exact;
         }
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("ipv4_match") table ipv4_match_0() {
+    @name("ipv4_match") table ipv4_match() {
         actions = {
-            nop();
-            set_egress_port();
-            NoAction_2();
+            nop_0();
+            set_egress_port_0();
+            NoAction_0();
         }
         key = {
             hdr.ipv4.srcAddr: exact;
         }
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
-    @name("ipv6_match") table ipv6_match_0() {
+    @name("ipv6_match") table ipv6_match() {
         actions = {
-            nop_1();
-            set_egress_port_1();
-            NoAction_3();
+            nop_3();
+            set_egress_port_3();
+            NoAction_5();
         }
         key = {
             hdr.ipv6.srcAddr: exact;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_5();
     }
-    @name("l2_match") table l2_match_0() {
+    @name("l2_match") table l2_match() {
         actions = {
-            nop_2();
-            set_egress_port_2();
-            NoAction_4();
+            nop_4();
+            set_egress_port_4();
+            NoAction_6();
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
-        default_action = NoAction_4();
+        default_action = NoAction_6();
     }
     apply {
-        switch (ethertype_match_0.apply().action_run) {
+        switch (ethertype_match.apply().action_run) {
             default: {
-                l2_match_0.apply();
+                l2_match.apply();
             }
-            ipv4_packet: {
-                ipv4_match_0.apply();
+            ipv4_packet_0: {
+                ipv4_match.apply();
             }
-            ipv6_packet: {
-                ipv6_match_0.apply();
+            ipv6_packet_0: {
+                ipv6_match.apply();
             }
-            mpls_packet: {
-                ipv6_match_0.apply();
+            mpls_packet_0: {
+                ipv6_match.apply();
             }
         }
 

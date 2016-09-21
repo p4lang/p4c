@@ -43,18 +43,20 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    hdr h_0;
+    @name("h_0") hdr h_1;
+    @name("tmp") bool tmp_0;
     action act() {
-        h_0.c = 8w0;
+        h_1.c = 8w0;
     }
     action act_0() {
-        h_0.c = 8w1;
+        h_1.c = 8w1;
     }
     action act_1() {
-        h_0 = h.h;
+        h_1 = h.h;
+        tmp_0 = h_1.a < h_1.b;
     }
     action act_2() {
-        h.h = h_0;
+        h.h = h_1;
         sm.egress_spec = 9w0;
     }
     table tbl_act() {
@@ -83,7 +85,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_act.apply();
-        if (h_0.a < h_0.b) 
+        if (tmp_0) 
             tbl_act_0.apply();
         else 
             tbl_act_1.apply();

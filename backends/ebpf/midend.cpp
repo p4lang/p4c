@@ -17,19 +17,16 @@ limitations under the License.
 #include "midend.h"
 #include "midend/actionsInlining.h"
 #include "midend/inlining.h"
-#include "midend/moveDeclarations.h"
-#include "midend/uniqueNames.h"
 #include "midend/removeReturns.h"
 #include "midend/moveConstructors.h"
 #include "midend/actionSynthesis.h"
 #include "midend/localizeActions.h"
 #include "midend/removeParameters.h"
 #include "midend/local_copyprop.h"
-#include "midend/simplifyExpressions.h"
-#include "midend/simplifyParsers.h"
-#include "midend/resetHeaders.h"
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelect.h"
+#include "frontends/p4/uniqueNames.h"
+#include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -39,6 +36,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/strengthReduction.h"
+#include "frontends/p4/simplifyParsers.h"
 
 namespace EBPF {
 
@@ -51,12 +49,6 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
     PassManager simplify = {
-        new P4::SimplifyParsers(&refMap),
-        new P4::ResetHeaders(&refMap, &typeMap),
-        new P4::UniqueNames(&refMap),
-        new P4::MoveDeclarations(),
-        new P4::MoveInitializers(),
-        new P4::SimplifyExpressions(&refMap, &typeMap),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
@@ -81,11 +73,12 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
+        new P4::UniqueNames(&refMap),
         new P4::UniqueParameters(&refMap),
         new P4::ClearTypeMap(&typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveParameters(&refMap, &typeMap),
-        new P4::ClearTypeMap(&typeMap),
+        new P4::RemoveTableParameters(&refMap, &typeMap),
+        new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonLeftValue(&refMap, &typeMap)),
         new P4::RemoveExits(&refMap, &typeMap),

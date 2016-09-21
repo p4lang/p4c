@@ -1,7 +1,0 @@
-../testdata/p4_16_samples/strength.p4(50): warning: 15: signed value does not fit in 4 bits
-        w = w - 4s0xF
-                ^^^^^
-../testdata/p4_16_samples/strength.p4(38): warning: 16: value does not fit in 4 bits
-        y = y * 16;
-                ^^
-warning: Program does not contain a `main' module

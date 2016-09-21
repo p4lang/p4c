@@ -1,0 +1,133 @@
+/*
+Copyright 2013-present Barefoot Networks, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#include "uniqueNames.h"
+
+namespace P4 {
+
+// Add a @name annotation ONLY if it does not already exist.
+// Otherwise do nothing.
+static const IR::Annotations*
+addNameAnnotation(cstring name, const IR::Annotations* annos) {
+    if (annos == nullptr)
+        annos = IR::Annotations::empty;
+    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral(Util::SourceInfo(), name));
+}
+
+UniqueNames::UniqueNames(ReferenceMap* refMap) : renameMap(new RenameMap) {
+    setStopOnError(true);
+    setName("UniqueNames");
+    CHECK_NULL(refMap);
+    passes.emplace_back(new ResolveReferences(refMap));
+    passes.emplace_back(new FindSymbols(refMap, renameMap));
+    passes.emplace_back(new RenameSymbols(refMap, renameMap));
+}
+
+UniqueParameters::UniqueParameters(ReferenceMap* refMap) : renameMap(new RenameMap) {
+    setStopOnError(true);
+    setName("UniqueParameters");
+    CHECK_NULL(refMap);
+    passes.emplace_back(new ResolveReferences(refMap));
+    passes.emplace_back(new FindParameters(refMap, renameMap));
+    passes.emplace_back(new RenameSymbols(refMap, renameMap));
+}
+
+/**************************************************************************/
+
+IR::ID* RenameSymbols::getName() const {
+    auto orig = getOriginal<IR::IDeclaration>();
+    if (!renameMap->toRename(orig))
+        return nullptr;
+    auto newName = renameMap->getName(orig);
+    auto name = new IR::ID(orig->getName().srcInfo, newName);
+    return name;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::Declaration_Variable* decl) {
+    auto name = getName();
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
+        decl->name = *name;
+        decl->annotations = annos;
+    }
+    return decl;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::Declaration_Constant* decl) {
+    auto name = getName();
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
+        decl->name = *name;
+        decl->annotations = annos;
+    }
+    return decl;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::Parameter* param) {
+    auto name = getName();
+    if (name != nullptr && *name != param->name) {
+        auto annos = addNameAnnotation(param->name, param->annotations);
+        param->name = *name;
+        param->annotations = annos;
+    }
+    return param;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::PathExpression* expression) {
+    auto decl = refMap->getDeclaration(expression->path, true);
+    if (!renameMap->toRename(decl))
+        return expression;
+    // This should be a local name.
+    BUG_CHECK(expression->path->prefix == nullptr,
+              "%1%: renaming expression with path", expression);
+    auto newName = renameMap->getName(decl);
+    auto name = IR::ID(expression->path->name.srcInfo, newName);
+    auto result = new IR::PathExpression(name);
+    return result;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::Declaration_Instance* decl) {
+    auto name = getName();
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
+        decl->name = *name;
+        decl->annotations = annos;
+    }
+    return decl;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::P4Table* decl) {
+    auto name = getName();
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
+        decl->name = *name;
+        decl->annotations = annos;
+    }
+    return decl;
+}
+
+const IR::Node* RenameSymbols::postorder(IR::P4Action* decl) {
+    auto name = getName();
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
+        decl->name = *name;
+        decl->annotations = annos;
+    }
+    return decl;
+}
+
+}  // namespace P4

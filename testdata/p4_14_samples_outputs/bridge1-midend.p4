@@ -31,60 +31,60 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction() {
     }
-    @name("copyb1") action copyb1() {
+    @name("copyb1") action copyb1_0() {
         hdr.data.b1 = meta.meta.val;
     }
-    @name("output") table output_0() {
+    @name("output") table output() {
         actions = {
-            copyb1();
-            NoAction_2();
+            copyb1_0();
+            NoAction();
         }
-        default_action = copyb1();
+        default_action = copyb1_0();
     }
     apply {
-        output_0.apply();
+        output.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_0() {
     }
-    action NoAction_4() {
+    @name("NoAction_4") action NoAction_1() {
     }
-    @name("setb1") action setb1(bit<8> val, bit<9> port) {
+    @name("setb1") action setb1_0(bit<8> val, bit<9> port) {
         meta.meta.val = val;
         standard_metadata.egress_spec = port;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("noop") action noop_1() {
+    @name("noop") action noop_2() {
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1() {
         actions = {
-            setb1();
-            noop();
-            NoAction_3();
+            setb1_0();
+            noop_0();
+            NoAction_0();
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_0();
     }
-    @name("test2") table test2_0() {
+    @name("test2") table test2() {
         actions = {
-            noop_1();
-            NoAction_4();
+            noop_2();
+            NoAction_1();
         }
         key = {
             meta.meta.val: exact;
         }
-        default_action = NoAction_4();
+        default_action = NoAction_1();
     }
     apply {
-        test1_0.apply();
-        test2_0.apply();
+        test1.apply();
+        test2.apply();
     }
 }
 

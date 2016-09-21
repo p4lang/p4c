@@ -10,18 +10,7 @@ const IR::Type* BindTypeVariables::getVarValue(const IR::Type_Var* var) const {
 }
 
 const IR::Type* BindTypeVariables::getP4Type(const IR::Type* type) const {
-    if (type->is<IR::Type_StructLike>()) {
-        return new IR::Type_Name(type->to<IR::Type_StructLike>()->name);
-    } else if (type->is<IR::Type_Enum>()) {
-        return new IR::Type_Name(type->to<IR::Type_Enum>()->name);
-    } else if (type->is<IR::Type_Var>()) {
-        return new IR::Type_Name(type->to<IR::Type_Var>()->name);
-    } else if (type->is<IR::Type_Base>()) {
-        return type;
-    } else if (type->is<IR::Type_Stack>()) {
-        auto stack = type->to<IR::Type_Stack>();
-        return new IR::Type_Stack(type->srcInfo, getP4Type(stack->elementType), stack->size);
-    } else if (type->is<IR::Type_Tuple>()) {
+    if (type->is<IR::Type_Tuple>()) {
         auto fields = new IR::IndexedVector<IR::StructField>();
         auto tuple = type->to<IR::Type_Tuple>();
         for (auto f : *tuple->components) {
@@ -35,8 +24,11 @@ const IR::Type* BindTypeVariables::getP4Type(const IR::Type* type) const {
                                          IR::Annotations::empty, fields);
         newTypes->push_back(strct);
         return getP4Type(strct);
+    } else {
+        auto rtype = type->getP4Type();
+        CHECK_NULL(rtype);
+        return rtype;
     }
-    BUG("%1%: unexpected type for type arguments", type);
 }
 
 const IR::Node* BindTypeVariables::postorder(IR::Expression* expression) {

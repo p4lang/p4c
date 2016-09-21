@@ -277,7 +277,7 @@ const IR::Statement* StatementConverter::convert(const IR::Vector<IR::Expression
         auto s = convert(e);
         stats->push_back(s);
     }
-    auto result = new IR::BlockStatement(toConvert->srcInfo, stats);
+    auto result = new IR::BlockStatement(toConvert->srcInfo, IR::Annotations::empty, stats);
     return result;
 }
 

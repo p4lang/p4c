@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #include "unusedDeclarations.h"
-#include "simplify.h"
+#include "sideEffects.h"
 
 namespace P4 {
 

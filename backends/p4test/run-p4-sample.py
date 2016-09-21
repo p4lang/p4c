@@ -161,7 +161,7 @@ def check_generated_files(options, tmpdir, expecteddir):
     return SUCCESS
 
 def file_name(tmpfolder, base, suffix, ext):
-    return tmpfolder + "/" + base + suffix + ext
+    return tmpfolder + "/" + base + "-" + suffix + ext
 
 def process_file(options, argv):
     assert isinstance(options, Options)
@@ -179,10 +179,15 @@ def process_file(options, argv):
     if not os.path.exists(expected_dirname):
         os.makedirs(expected_dirname)
 
+    # We rely on the fact that these keys are in alphabetical order.
+    rename = { "FrontEnd_11_SimplifyControlFlow": "first",
+               "FrontEnd_20_SimplifyDefUse": "frontend",
+               "MidEnd_27_Evaluator": "midend" }
+
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + basename                  # after parsing
-    referenceOutputs = "FrontEnd_12_Simplify,FrontEnd_13_Remove,MidEnd_32_Evaluator"
+    referenceOutputs = ",".join(rename.keys())
     stderr = tmpdir + "/" + basename + "-stderr"
 
     if not os.path.isfile(options.p4filename):
@@ -207,21 +212,12 @@ def process_file(options, argv):
 
     # Canonicalize the generated file names
     lastFile = None
-    firstFile = file_name(tmpdir, base, "-FrontEnd_12_SimplifyControlFlow", ext)
-    if os.path.isfile(firstFile):
-        newName = file_name(tmpdir, base, "-first", ext)
-        os.rename(firstFile, newName)
-        lastFile = newName
-    midFile = file_name(tmpdir, base, "-FrontEnd_13_RemoveAllUnusedDeclarations", ext)
-    if os.path.isfile(midFile):
-        newName = file_name(tmpdir, base, "-frontend", ext)
-        os.rename(midFile, newName)
-        lastFile = newName
-    endFile = file_name(tmpdir, base, "-MidEnd_32_Evaluator", ext)
-    if os.path.isfile(endFile):
-        newName = file_name(tmpdir, base, "-midend", ext)
-        os.rename(endFile, newName)
-        lastFile = newName
+    for k in sorted(rename.keys()):
+        file = file_name(tmpdir, base, k, ext)
+        if os.path.isfile(file):
+            newName = file_name(tmpdir, base, rename[k], ext)
+            os.rename(file, newName)
+            lastFile = newName
 
     if (result == SUCCESS):
         result = check_generated_files(options, tmpdir, expected_dirname);

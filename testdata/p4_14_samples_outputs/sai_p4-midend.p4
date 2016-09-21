@@ -135,45 +135,45 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_10() {
     }
-    action NoAction_4() {
+    @name("NoAction_4") action NoAction_11() {
     }
-    action NoAction_5() {
+    @name("NoAction_5") action NoAction_12() {
     }
-    action NoAction_6() {
+    @name("NoAction_6") action NoAction_13() {
     }
-    action NoAction_7() {
+    @name("NoAction_7") action NoAction_14() {
     }
-    action NoAction_8() {
+    @name("NoAction_8") action NoAction_15() {
     }
-    action NoAction_9() {
+    @name("NoAction_9") action NoAction_16() {
     }
-    @name("fdb_set") action fdb_set(bit<1> type_, bit<9> port_id) {
+    @name("fdb_set") action fdb_set_0(bit<1> type_, bit<9> port_id) {
         meta.ingress_metadata.mac_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
         standard_metadata.egress_spec = port_id;
         meta.ingress_metadata.routed = 1w0;
     }
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("generate_learn_notify") action generate_learn_notify() {
+    @name("generate_learn_notify") action generate_learn_notify_0() {
         digest<mac_learn_digest>(32w1024, { meta.ingress_metadata.vlan_id, hdr.eth.srcAddr, meta.intrinsic_metadata.ingress_port, meta.ingress_metadata.learning });
     }
-    @name("set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
+    @name("set_dmac") action set_dmac_0(bit<48> dst_mac_address, bit<9> port_id) {
         hdr.eth.dstAddr = dst_mac_address;
         hdr.eth.srcAddr = meta.ingress_metadata.def_smac;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
         standard_metadata.egress_spec = port_id;
     }
-    @name("set_next_hop") action set_next_hop(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
+    @name("set_next_hop") action set_next_hop_0(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
         meta.ingress_metadata.router_intf = router_interface_id;
     }
-    @name("set_in_port") action set_in_port(bit<10> port, bit<2> type_, bit<2> oper_status, bit<4> speed, bit<8> admin_state, bit<12> default_vlan, bit<8> default_vlan_priority, bit<1> ingress_filtering, bit<1> drop_untagged, bit<1> drop_tagged, bit<2> port_loopback_mode, bit<2> fdb_learning, bit<3> stp_state, bit<1> update_dscp, bit<14> mtu, bit<8> sflow, bit<8> flood_storm_control, bit<8> broadcast_storm_control, bit<8> multicast_storm_control, bit<2> global_flow_control, bit<16> max_learned_address, bit<8> fdb_learning_limit_violation) {
+    @name("set_in_port") action set_in_port_0(bit<10> port, bit<2> type_, bit<2> oper_status, bit<4> speed, bit<8> admin_state, bit<12> default_vlan, bit<8> default_vlan_priority, bit<1> ingress_filtering, bit<1> drop_untagged, bit<1> drop_tagged, bit<2> port_loopback_mode, bit<2> fdb_learning, bit<3> stp_state, bit<1> update_dscp, bit<14> mtu, bit<8> sflow, bit<8> flood_storm_control, bit<8> broadcast_storm_control, bit<8> multicast_storm_control, bit<2> global_flow_control, bit<16> max_learned_address, bit<8> fdb_learning_limit_violation) {
         meta.ingress_metadata.port_lag = port;
         meta.ingress_metadata.mac_limit = max_learned_address;
         meta.ingress_metadata.port_type = type_;
@@ -190,23 +190,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.mtu = mtu;
         meta.ingress_metadata.vlan_id = default_vlan;
     }
-    @name("route_set_trap") action route_set_trap(bit<3> trap_priority) {
+    @name("route_set_trap") action route_set_trap_0(bit<3> trap_priority) {
         meta.ingress_metadata.pri = trap_priority;
-        meta.ingress_metadata.copy_to_cpu = 1w1;
+        @name("copy_to_cpu") {
+            meta.ingress_metadata.copy_to_cpu = 1w1;
+        }
     }
-    @name("route_set_nexthop") action route_set_nexthop(bit<16> next_hop_id) {
+    @name("route_set_nexthop") action route_set_nexthop_0(bit<16> next_hop_id) {
         meta.ingress_metadata.nhop = next_hop_id;
         meta.ingress_metadata.routed = 1w1;
         meta.ingress_metadata.ip_dest = hdr.ipv4.dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("route_set_nexthop_group") action route_set_nexthop_group(bit<16> next_hop_group_id) {
+    @name("route_set_nexthop_group") action route_set_nexthop_group_0(bit<16> next_hop_group_id) {
         meta.ingress_metadata.ecmp_nhop = next_hop_group_id;
         meta.ingress_metadata.routed = 1w1;
         meta.ingress_metadata.ip_dest = hdr.ipv4.dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("set_router_interface") action set_router_interface(bit<16> virtual_router_id, bit<1> type_, bit<9> port_id, bit<12> vlan_id, bit<48> src_mac_address, bit<1> admin_v4_state, bit<1> admin_v6_state, bit<14> mtu) {
+    @name("set_router_interface") action set_router_interface_0(bit<16> virtual_router_id, bit<1> type_, bit<9> port_id, bit<12> vlan_id, bit<48> src_mac_address, bit<1> admin_v4_state, bit<1> admin_v6_state, bit<14> mtu) {
         meta.ingress_metadata.vrf = virtual_router_id;
         meta.ingress_metadata.interface_type = type_;
         meta.intrinsic_metadata.ucast_egress_port = port_id;
@@ -217,10 +219,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.mtu = mtu;
         meta.ingress_metadata.router_mac = 1w1;
     }
-    @name("router_interface_miss") action router_interface_miss() {
+    @name("router_interface_miss") action router_interface_miss_0() {
         meta.ingress_metadata.router_mac = 1w0;
     }
-    @name("set_switch") action set_switch(bit<8> port_number, bit<16> cpu_port, bit<8> max_virtual_routers, bit<8> fdb_table_size, bit<8> on_link_route_supported, bit<2> oper_status, bit<8> max_temp, bit<8> switching_mode, bit<8> cpu_flood_enable, bit<8> ttl1_action, bit<12> port_vlan_id, bit<48> src_mac_address, bit<8> fdb_aging_time, bit<8> fdb_unicast_miss_action, bit<8> fdb_broadcast_miss_action, bit<8> fdb_multicast_miss_action, bit<8> ecmp_hash_seed, bit<8> ecmp_hash_type, bit<8> ecmp_hash_fields, bit<8> ecmp_max_paths, bit<16> vr_id) {
+    @name("set_switch") action set_switch_0(bit<8> port_number, bit<16> cpu_port, bit<8> max_virtual_routers, bit<8> fdb_table_size, bit<8> on_link_route_supported, bit<2> oper_status, bit<8> max_temp, bit<8> switching_mode, bit<8> cpu_flood_enable, bit<8> ttl1_action, bit<12> port_vlan_id, bit<48> src_mac_address, bit<8> fdb_aging_time, bit<8> fdb_unicast_miss_action, bit<8> fdb_broadcast_miss_action, bit<8> fdb_multicast_miss_action, bit<8> ecmp_hash_seed, bit<8> ecmp_hash_type, bit<8> ecmp_hash_fields, bit<8> ecmp_max_paths, bit<16> vr_id) {
         meta.ingress_metadata.def_vlan = port_vlan_id;
         meta.ingress_metadata.vrf = vr_id;
         meta.ingress_metadata.def_smac = src_mac_address;
@@ -229,126 +231,126 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.oper_status = oper_status;
         meta.intrinsic_metadata.ingress_port = standard_metadata.ingress_port;
     }
-    @name("set_router") action set_router(bit<1> admin_v4_state, bit<1> admin_v6_state, bit<48> src_mac_address, bit<8> violation_ttl1_action, bit<8> violation_ip_options) {
+    @name("set_router") action set_router_0(bit<1> admin_v4_state, bit<1> admin_v6_state, bit<48> src_mac_address, bit<8> violation_ttl1_action, bit<8> violation_ip_options) {
         meta.ingress_metadata.def_smac = src_mac_address;
         meta.ingress_metadata.v4_enable = admin_v4_state;
         meta.ingress_metadata.v6_enable = admin_v6_state;
     }
-    @name("fdb") table fdb_0() {
+    @name("fdb") table fdb() {
         actions = {
-            fdb_set();
-            NoAction_1();
+            fdb_set_0();
+            NoAction();
         }
         key = {
             meta.ingress_metadata.vlan_id: exact;
             hdr.eth.dstAddr              : exact;
         }
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("learn_notify") table learn_notify_0() {
+    @name("learn_notify") table learn_notify() {
         actions = {
-            nop();
-            generate_learn_notify();
-            NoAction_2();
+            nop_0();
+            generate_learn_notify_0();
+            NoAction_0();
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact;
             meta.ingress_metadata.vlan_id       : exact;
             hdr.eth.srcAddr                     : exact;
         }
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
-    @name("neighbor") table neighbor_0() {
+    @name("neighbor") table neighbor() {
         actions = {
-            set_dmac();
-            NoAction_3();
+            set_dmac_0();
+            NoAction_10();
         }
         key = {
             meta.ingress_metadata.vrf        : exact;
             meta.ingress_metadata.ip_dest    : exact;
             meta.ingress_metadata.router_intf: exact;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_10();
     }
-    @name("next_hop") table next_hop_0() {
+    @name("next_hop") table next_hop() {
         actions = {
-            set_next_hop();
-            NoAction_4();
+            set_next_hop_0();
+            NoAction_11();
         }
         key = {
             meta.ingress_metadata.nhop: exact;
         }
-        default_action = NoAction_4();
+        default_action = NoAction_11();
     }
-    @name("port") table port_0() {
+    @name("port") table port_1() {
         actions = {
-            set_in_port();
-            NoAction_5();
+            set_in_port_0();
+            NoAction_12();
         }
         key = {
             meta.intrinsic_metadata.ingress_port: exact;
         }
-        default_action = NoAction_5();
+        default_action = NoAction_12();
         @name("port_counters") counters = direct_counter(CounterType.packets);
     }
-    @name("route") table route_0() {
+    @name("route") table route() {
         actions = {
-            route_set_trap();
-            route_set_nexthop();
-            route_set_nexthop_group();
-            NoAction_6();
+            route_set_trap_0();
+            route_set_nexthop_0();
+            route_set_nexthop_group_0();
+            NoAction_13();
         }
         key = {
             meta.ingress_metadata.vrf: exact;
             hdr.ipv4.dstAddr         : lpm;
         }
-        default_action = NoAction_6();
+        default_action = NoAction_13();
     }
-    @name("router_interface") table router_interface_0() {
+    @name("router_interface") table router_interface() {
         actions = {
-            set_router_interface();
-            router_interface_miss();
-            NoAction_7();
+            set_router_interface_0();
+            router_interface_miss_0();
+            NoAction_14();
         }
         key = {
             hdr.eth.dstAddr: exact;
         }
-        default_action = NoAction_7();
+        default_action = NoAction_14();
     }
-    @name("switch") table switch_1() {
+    @name("switch") table switch_0() {
         actions = {
-            set_switch();
-            NoAction_8();
+            set_switch_0();
+            NoAction_15();
         }
-        default_action = NoAction_8();
+        default_action = NoAction_15();
     }
-    @name("virtual_router") table virtual_router_0() {
+    @name("virtual_router") table virtual_router() {
         actions = {
-            set_router();
-            NoAction_9();
+            set_router_0();
+            NoAction_16();
         }
         key = {
             meta.ingress_metadata.vrf: exact;
         }
-        default_action = NoAction_9();
+        default_action = NoAction_16();
     }
     apply {
-        switch_1.apply();
-        port_0.apply();
+        switch_0.apply();
+        port_1.apply();
         if (meta.ingress_metadata.oper_status == 2w1) {
-            router_interface_0.apply();
+            router_interface.apply();
             if (meta.ingress_metadata.learning != 2w0) 
-                learn_notify_0.apply();
+                learn_notify.apply();
             if (meta.ingress_metadata.router_mac == 1w0) 
-                fdb_0.apply();
+                fdb.apply();
             else {
-                virtual_router_0.apply();
+                virtual_router.apply();
                 if (hdr.ipv4.isValid() && meta.ingress_metadata.v4_enable != 1w0) 
-                    route_0.apply();
-                next_hop_0.apply();
+                    route.apply();
+                next_hop.apply();
             }
             if (meta.ingress_metadata.routed != 1w0) 
-                neighbor_0.apply();
+                neighbor.apply();
         }
     }
 }
@@ -376,30 +378,19 @@ struct struct_0 {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp;
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
+    @name("ipv4_checksum") Checksum16() ipv4_checksum;
     action act() {
         mark_to_drop();
     }
-    action act_0() {
-        tmp = ipv4_checksum_0.get<struct_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-    }
     table tbl_act() {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
-    table tbl_act_0() {
         actions = {
             act();
         }
         const default_action = act();
     }
     apply {
-        tbl_act.apply();
-        if (hdr.ipv4.ihl == 4w5 && hdr.ipv4.checksum == tmp) 
-            tbl_act_0.apply();
+        if (hdr.ipv4.ihl == 4w5 && hdr.ipv4.checksum == (ipv4_checksum.get<struct_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
+            tbl_act.apply();
     }
 }
 
@@ -418,19 +409,19 @@ struct struct_1 {
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
-    action act_1() {
-        hdr.ipv4.checksum = ipv4_checksum_1.get<struct_1>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
+    action act_0() {
+        hdr.ipv4.checksum = ipv4_checksum_2.get<struct_1>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
     }
-    table tbl_act_1() {
+    table tbl_act_0() {
         actions = {
-            act_1();
+            act_0();
         }
-        const default_action = act_1();
+        const default_action = act_0();
     }
     apply {
         if (hdr.ipv4.ihl == 4w5) 
-            tbl_act_1.apply();
+            tbl_act_0.apply();
     }
 }
 

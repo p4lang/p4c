@@ -1,14 +1,14 @@
 control c(inout bit<32> x) {
-    bit<32> arg_0;
-    @name("a") action a() {
+    @name("arg") bit<32> arg_0;
+    @name("a") action a_0() {
         arg_0 = 32w15;
         x = arg_0;
     }
     table tbl_a() {
         actions = {
-            a();
+            a_0();
         }
-        const default_action = a();
+        const default_action = a_0();
     }
     apply {
         tbl_a.apply();

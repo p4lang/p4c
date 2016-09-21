@@ -32,6 +32,7 @@ class ValidateParsedProgram final : public Inspector {
     explicit ValidateParsedProgram(bool isv1) : isv1(isv1)
     { setName("ValidateParsedProgram"); }
     void postorder(const IR::Constant* c) override;
+    void postorder(const IR::SwitchStatement* statement) override;
     void postorder(const IR::Method* t) override;
     void postorder(const IR::StructField* f) override;
     void postorder(const IR::ParserState* s) override;

@@ -1,34 +1,33 @@
 #include <core.p4>
 
-extern Checksum16 {
-    void clear();
-    void update<D>(in D dt);
-    void update<D>(in bool condition, in D dt);
-    bit<16> get();
-}
-
-typedef bit<4> PortId_t;
+typedef bit<4> PortId;
 struct InControl {
-    PortId_t inputPort;
+    PortId inputPort;
 }
 
 struct OutControl {
-    PortId_t outputPort;
+    PortId outputPort;
 }
 
 parser Parser<H>(packet_in b, out H parsedHeaders);
-control MAP<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
+control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
 control Deparser<H>(inout H outputHeaders, packet_out b);
-package Simple<H>(Parser<H> p, MAP<H> map, Deparser<H> d);
-@ethernetaddress typedef bit<48> EthernetAddress;
-@ipv4address typedef bit<32> IPv4Address;
+package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
+extern Checksum16 {
+    void clear();
+    void update<T>(in T data);
+    bit<16> get();
+}
+
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
     bit<16>         etherType;
 }
 
-header IPv4_h {
+header Ipv4_h {
     bit<4>      version;
     bit<4>      ihl;
     bit<8>      diffserv;
@@ -44,18 +43,24 @@ header IPv4_h {
 }
 
 error {
-    IPv4IncorrectVersion,
     IPv4OptionsNotSupported,
+    IPv4IncorrectVersion,
     IPv4ChecksumError
 }
 
 struct Parsed_packet {
     Ethernet_h ethernet;
-    IPv4_h     ip;
+    Ipv4_h     ip;
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    Checksum16() ck;
+    @name("ck") Checksum16() ck_0;
+    bool tmp;
+    bool tmp_0;
+    bit<16> tmp_1;
+    bool tmp_2;
+    bool tmp_3;
+    error tmp_4;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
         transition select(p.ethernet.etherType) {
@@ -63,108 +68,126 @@ parser TopParser(packet_in b, out Parsed_packet p) {
         }
     }
     state parse_ipv4 {
-        b.extract<IPv4_h>(p.ip);
-        verify(p.ip.version == 4w4, IPv4IncorrectVersion);
-        verify(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
-        ck.clear();
-        ck.update<IPv4_h>(p.ip);
-        verify(ck.get() == 16w0, IPv4ChecksumError);
+        b.extract<Ipv4_h>(p.ip);
+        tmp = p.ip.version == 4w4;
+        verify(tmp, IPv4IncorrectVersion);
+        tmp_0 = p.ip.ihl == 4w5;
+        verify(tmp_0, IPv4OptionsNotSupported);
+        ck_0.clear();
+        ck_0.update<Ipv4_h>(p.ip);
+        tmp_1 = ck_0.get();
+        tmp_2 = tmp_1 == 16w0;
+        tmp_3 = tmp_2;
+        tmp_4 = IPv4ChecksumError;
+        verify(tmp_3, tmp_4);
         transition accept;
     }
 }
 
-control Pipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    action Drop_action() {
+control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
+    @name("nextHop") IPv4Address nextHop_0;
+    @name("Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;
     }
-    action Set_nhop(out IPv4Address nextHop, IPv4Address ipv4_dest, PortId_t port) {
+    @name("Set_nhop") action Set_nhop_0(out IPv4Address nextHop, IPv4Address ipv4_dest, PortId port) {
+        bit<8> tmp_5;
         nextHop = ipv4_dest;
-        headers.ip.ttl = headers.ip.ttl + 8w255;
+        tmp_5 = headers.ip.ttl + 8w255;
+        headers.ip.ttl = tmp_5;
         outCtrl.outputPort = port;
     }
-    table ipv4_match(out IPv4Address nextHop) {
+    @name("ipv4_match") table ipv4_match_0(out IPv4Address nextHop) {
         key = {
             headers.ip.dstAddr: lpm;
         }
         actions = {
-            Set_nhop(nextHop);
-            Drop_action();
+            Drop_action_0();
+            Set_nhop_0(nextHop);
         }
         size = 1024;
-        default_action = Drop_action();
+        default_action = Drop_action_0();
     }
-    action Send_to_cpu() {
+    @name("Send_to_cpu") action Send_to_cpu_0() {
         outCtrl.outputPort = 4w0xe;
     }
-    table check_ttl() {
+    @name("check_ttl") table check_ttl_0() {
         key = {
             headers.ip.ttl: exact;
         }
         actions = {
-            Send_to_cpu();
+            Send_to_cpu_0();
             NoAction();
         }
         const default_action = NoAction();
     }
-    action Set_dmac(EthernetAddress dmac) {
+    @name("Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
-    table dmac(in IPv4Address nextHop) {
+    @name("dmac") table dmac_0(in IPv4Address nextHop) {
         key = {
             nextHop: exact;
         }
         actions = {
-            Set_dmac();
-            Drop_action();
+            Drop_action_0();
+            Set_dmac_0();
         }
         size = 1024;
-        default_action = Drop_action();
+        default_action = Drop_action_0();
     }
-    action Rewrite_smac(EthernetAddress sourceMac) {
-        headers.ethernet.srcAddr = sourceMac;
+    @name("Set_smac") action Set_smac_0(EthernetAddress smac) {
+        headers.ethernet.srcAddr = smac;
     }
-    table smac() {
+    @name("smac") table smac_0() {
         key = {
             outCtrl.outputPort: exact;
         }
         actions = {
-            Drop_action();
-            Rewrite_smac();
+            Drop_action_0();
+            Set_smac_0();
         }
         size = 16;
-        default_action = Drop_action();
+        default_action = Drop_action_0();
     }
+    bool tmp_6;
+    bool tmp_7;
+    bool tmp_8;
+    bool tmp_9;
     apply {
-        if (parseError != NoError) {
-            Drop_action();
+        tmp_6 = parseError != NoError;
+        if (tmp_6) {
+            Drop_action_0();
             return;
         }
-        IPv4Address nextHop;
-        ipv4_match.apply(nextHop);
-        if (outCtrl.outputPort == 4w0xf) 
+        ipv4_match_0.apply(nextHop_0);
+        tmp_7 = outCtrl.outputPort == 4w0xf;
+        if (tmp_7) 
             return;
-        check_ttl.apply();
-        if (outCtrl.outputPort == 4w0xe) 
+        check_ttl_0.apply();
+        tmp_8 = outCtrl.outputPort == 4w0xe;
+        if (tmp_8) 
             return;
-        dmac.apply(nextHop);
-        if (outCtrl.outputPort == 4w0xf) 
+        dmac_0.apply(nextHop_0);
+        tmp_9 = outCtrl.outputPort == 4w0xf;
+        if (tmp_9) 
             return;
-        smac.apply();
+        smac_0.apply();
     }
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
-    Checksum16() ck;
+    @name("ck") Checksum16() ck_1;
+    bit<16> tmp_10;
     apply {
         b.emit<Ethernet_h>(p.ethernet);
         if (p.ip.isValid()) {
-            ck.clear();
+            ck_1.clear();
             p.ip.hdrChecksum = 16w0;
-            ck.update<IPv4_h>(p.ip);
-            p.ip.hdrChecksum = ck.get();
-            b.emit<IPv4_h>(p.ip);
+            ck_1.update<Ipv4_h>(p.ip);
+            tmp_10 = ck_1.get();
+            p.ip.hdrChecksum = tmp_10;
         }
+        b.emit<Ipv4_h>(p.ip);
     }
 }
 
-Simple<Parsed_packet>(TopParser(), Pipe(), TopDeparser()) main;
+VSS<Parsed_packet>(TopParser(), TopPipe(), TopDeparser()) main;

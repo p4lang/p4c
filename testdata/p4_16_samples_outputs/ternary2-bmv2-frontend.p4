@@ -48,88 +48,88 @@ control update(inout packet_t h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta) {
-    action setb1(bit<9> port, bit<8> val) {
+    @name("setb1") action setb1_0(bit<9> port, bit<8> val) {
         hdrs.data.b1 = val;
         meta.egress_spec = port;
     }
-    action noop() {
+    @name("noop") action noop_0() {
     }
-    action setbyte(out bit<8> reg, bit<8> val) {
+    @name("setbyte") action setbyte_0(out bit<8> reg, bit<8> val) {
         reg = val;
     }
-    action act1(bit<8> val) {
+    @name("act1") action act1_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    action act2(bit<8> val) {
+    @name("act2") action act2_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    action act3(bit<8> val) {
+    @name("act3") action act3_0(bit<8> val) {
         hdrs.extra[0].b1 = val;
     }
-    table test1() {
+    @name("test1") table test1_0() {
         key = {
             hdrs.data.f1: ternary;
         }
         actions = {
-            setb1();
-            noop();
+            setb1_0();
+            noop_0();
         }
-        default_action = noop();
+        default_action = noop_0();
     }
-    table ex1() {
+    @name("ex1") table ex1_0() {
         key = {
             hdrs.extra[0].h: ternary;
         }
         actions = {
-            setbyte(hdrs.extra[0].b1);
-            act1();
-            act2();
-            act3();
-            noop();
+            setbyte_0(hdrs.extra[0].b1);
+            act1_0();
+            act2_0();
+            act3_0();
+            noop_0();
         }
-        default_action = noop();
+        default_action = noop_0();
     }
-    table tbl1() {
+    @name("tbl1") table tbl1_0() {
         key = {
             hdrs.data.f2: ternary;
         }
         actions = {
-            setbyte(hdrs.data.b2);
-            noop();
+            setbyte_0(hdrs.data.b2);
+            noop_0();
         }
-        default_action = noop();
+        default_action = noop_0();
     }
-    table tbl2() {
+    @name("tbl2") table tbl2_0() {
         key = {
             hdrs.data.f2: ternary;
         }
         actions = {
-            setbyte(hdrs.extra[1].b1);
-            noop();
+            setbyte_0(hdrs.extra[1].b1);
+            noop_0();
         }
-        default_action = noop();
+        default_action = noop_0();
     }
-    table tbl3() {
+    @name("tbl3") table tbl3_0() {
         key = {
             hdrs.data.f2: ternary;
         }
         actions = {
-            setbyte(hdrs.extra[2].b2);
-            noop();
+            setbyte_0(hdrs.extra[2].b2);
+            noop_0();
         }
-        default_action = noop();
+        default_action = noop_0();
     }
     apply {
-        test1.apply();
-        switch (ex1.apply().action_run) {
-            act1: {
-                tbl1.apply();
+        test1_0.apply();
+        switch (ex1_0.apply().action_run) {
+            act1_0: {
+                tbl1_0.apply();
             }
-            act2: {
-                tbl2.apply();
+            act2_0: {
+                tbl2_0.apply();
             }
-            act3: {
-                tbl3.apply();
+            act3_0: {
+                tbl3_0.apply();
             }
         }
 

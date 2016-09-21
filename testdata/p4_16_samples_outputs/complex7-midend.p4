@@ -2,22 +2,23 @@
 
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    bit<32> r_0;
-    bit<32> tmp;
-    bit<32> tmp_0;
-    @name("a") action a() {
+    @name("r") bit<32> r_0;
+    @name("tmp") bit<32> tmp_2;
+    @name("tmp_0") bool tmp_3;
+    @name("tmp_1") bit<32> tmp_4;
+    @name("a") action a_0() {
     }
-    @name("b") action b() {
+    @name("b") action b_0() {
     }
-    @name("t") table t_0() {
+    @name("t") table t() {
         key = {
             r_0: ternary;
         }
         actions = {
-            a();
-            b();
+            a_0();
+            b_0();
         }
-        default_action = a();
+        default_action = a_0();
     }
     action act() {
         r = 32w1;
@@ -26,11 +27,12 @@ control c(inout bit<32> r) {
         r = 32w3;
     }
     action act_1() {
-        tmp = f(32w2);
+        tmp_2 = f(32w2);
+        tmp_3 = tmp_2 < 32w2;
     }
     action act_2() {
-        tmp_0 = f(32w2);
-        r_0 = tmp_0;
+        tmp_4 = f(32w2);
+        r_0 = tmp_4;
     }
     table tbl_act() {
         actions = {
@@ -58,10 +60,10 @@ control c(inout bit<32> r) {
     }
     apply {
         tbl_act.apply();
-        switch (t_0.apply().action_run) {
-            a: {
+        switch (t.apply().action_run) {
+            a_0: {
                 tbl_act_0.apply();
-                if (tmp < 32w2) 
+                if (tmp_3) 
                     tbl_act_1.apply();
                 else 
                     tbl_act_2.apply();

@@ -13,9 +13,12 @@ enum Choice {
 }
 
 control compute(inout hdr h) {
+    @name("c") Choice c_0;
+    bool tmp;
     apply {
-        Choice c = Choice.First;
-        if (c == Choice.Second) 
+        c_0 = Choice.First;
+        tmp = c_0 == Choice.Second;
+        if (tmp) 
             h.c = h.a;
         else 
             h.c = h.b;
@@ -58,9 +61,9 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    compute() c;
+    @name("c") compute() c_1;
     apply {
-        c.apply(h.h);
+        c_1.apply(h.h);
         sm.egress_spec = 9w0;
     }
 }

@@ -1,20 +1,21 @@
 #include <core.p4>
 
 control c(inout bit<32> arg) {
-    bit<32> x_0;
-    @name("a") action a() {
+    @name("x") bit<32> x_0;
+    @name("tmp") bit<32> tmp_0;
+    @name("a") action a_0() {
     }
-    @name("b") action b() {
+    @name("b") action b_0() {
     }
-    @name("t") table t_0() {
+    @name("t") table t() {
         key = {
             x_0: exact;
         }
         actions = {
-            a();
-            b();
+            a_0();
+            b_0();
         }
-        default_action = a();
+        default_action = a_0();
     }
     action act() {
         arg = x_0;
@@ -25,7 +26,8 @@ control c(inout bit<32> arg) {
     }
     action act_1() {
         arg = x_0;
-        arg = arg + 32w1;
+        tmp_0 = arg + 32w1;
+        arg = tmp_0;
     }
     action act_2() {
         arg = x_0;
@@ -65,13 +67,13 @@ control c(inout bit<32> arg) {
     }
     apply {
         tbl_act.apply();
-        switch (t_0.apply().action_run) {
-            a: {
+        switch (t.apply().action_run) {
+            a_0: {
                 tbl_act_0.apply();
-                t_0.apply();
+                t.apply();
                 tbl_act_1.apply();
             }
-            b: {
+            b_0: {
                 tbl_act_2.apply();
             }
             default: {

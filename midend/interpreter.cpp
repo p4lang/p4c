@@ -892,7 +892,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
     if (mi->is<ExternMethod>()) {
         // There are some extern methods that we know something about
         auto em = mi->to<ExternMethod>();
-        if (em->type->name.name == P4CoreLibrary::instance.packetIn.name) {
+        if (em->originalExternType->name.name == P4CoreLibrary::instance.packetIn.name) {
             // packet methods
             if (em->method->name.name == P4CoreLibrary::instance.packetIn.extract.name) {
                 // We know that after an extract terminates the header argument
@@ -972,11 +972,11 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         }
     }
 
-    if (mi->methodType->returnType == nullptr ||
-        mi->methodType->returnType->is<IR::Type_Void>()) {
+    if (mi->actualMethodType->returnType == nullptr ||
+        mi->actualMethodType->returnType->is<IR::Type_Void>()) {
         set(expression, SymbolicVoid::get());
     } else {
-        auto type = typeMap->getType(mi->methodType->returnType, true);
+        auto type = typeMap->getType(mi->actualMethodType->returnType, true);
         auto res = factory->create(type, false);
         set(expression, res);
     }

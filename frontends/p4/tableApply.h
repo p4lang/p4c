@@ -31,11 +31,9 @@ namespace P4 {
 class TableApplySolver {
  public:
     static const IR::P4Table* isHit(const IR::Expression* expression,
-                                    const P4::ReferenceMap* refMap,
-                                    const P4::TypeMap* typeMap);
+                                    ReferenceMap* refMap, TypeMap* typeMap);
     static const IR::P4Table* isActionRun(const IR::Expression* expression,
-                                          const P4::ReferenceMap* refMap,
-                                          const P4::TypeMap* typeMap);
+                                          ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 }  // namespace P4

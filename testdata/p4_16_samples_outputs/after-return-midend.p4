@@ -1,21 +1,23 @@
 control ctrl() {
-    bit<32> a_0;
-    bit<32> b_0;
-    bit<32> c_0;
-    bool hasReturned;
+    @name("a") bit<32> a;
+    @name("b") bit<32> b;
+    @name("c") bit<32> c;
+    @name("tmp") bool tmp_0;
+    @name("hasReturned") bool hasReturned_0;
     action act() {
-        b_0 = 32w2;
-        hasReturned = true;
+        b = 32w2;
+        hasReturned_0 = true;
     }
     action act_0() {
-        b_0 = 32w3;
-        hasReturned = true;
+        b = 32w3;
+        hasReturned_0 = true;
     }
     action act_1() {
-        hasReturned = false;
-        a_0 = 32w0;
-        b_0 = 32w1;
-        c_0 = 32w2;
+        hasReturned_0 = false;
+        a = 32w0;
+        b = 32w1;
+        c = 32w2;
+        tmp_0 = a == 32w0;
     }
     table tbl_act() {
         actions = {
@@ -37,7 +39,7 @@ control ctrl() {
     }
     apply {
         tbl_act.apply();
-        if (a_0 == 32w0) {
+        if (tmp_0) {
             tbl_act_0.apply();
         }
         else {

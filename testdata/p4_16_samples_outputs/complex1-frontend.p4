@@ -1,7 +1,23 @@
 extern bit<32> f(in bit<32> x, in bit<32> y);
 control c(inout bit<32> r) {
+    bit<32> tmp;
+    bit<32> tmp_0;
+    bit<32> tmp_1;
+    bit<32> tmp_2;
+    bit<32> tmp_3;
+    bit<32> tmp_4;
+    bit<32> tmp_5;
+    bit<32> tmp_6;
     apply {
-        r = f(f(32w5, 32w2), f(32w6, f(32w2, 32w3)));
+        tmp = f(32w5, 32w2);
+        tmp_0 = tmp;
+        tmp_1 = 32w6;
+        tmp_2 = f(32w2, 32w3);
+        tmp_3 = tmp_2;
+        tmp_4 = f(tmp_1, tmp_3);
+        tmp_5 = tmp_4;
+        tmp_6 = f(tmp_0, tmp_5);
+        r = tmp_6;
     }
 }
 

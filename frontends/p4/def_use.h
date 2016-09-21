@@ -121,9 +121,9 @@ class ArrayLocation : public StorageLocation {
 };
 
 class StorageFactory {
-    const TypeMap* typeMap;
+    TypeMap* typeMap;
  public:
-    explicit StorageFactory(const TypeMap* typeMap) : typeMap(typeMap)
+    explicit StorageFactory(TypeMap* typeMap) : typeMap(typeMap)
     { CHECK_NULL(typeMap); }
     StorageLocation* create(const IR::Type* type, cstring name) const;
 };
@@ -142,6 +142,7 @@ class LocationSet {
     const LocationSet* getField(cstring field) const;
     const LocationSet* getValidField() const;
     const LocationSet* getIndex(unsigned index) const;
+    const LocationSet* allElements() const;
     void add(const StorageLocation* location)
     { locations.emplace(location); }
     const LocationSet* join(const LocationSet* other) const;
@@ -156,12 +157,12 @@ class LocationSet {
 // For each declaration we keep the associated storage
 class StorageMap {
     std::map<const IR::IDeclaration*, StorageLocation*> storage;
-    StorageFactory      factory;
+    StorageFactory factory;
  public:
-    const ReferenceMap* refMap;
-    const TypeMap*      typeMap;
+    ReferenceMap*  refMap;
+    TypeMap*       typeMap;
 
-    StorageMap(const ReferenceMap* refMap, const TypeMap* typeMap) :
+    StorageMap(ReferenceMap* refMap, TypeMap* typeMap) :
             factory(typeMap), refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     StorageLocation* add(const IR::IDeclaration* decl) {
@@ -286,7 +287,7 @@ class AllDefinitions {
     std::unordered_map<ProgramPoint, Definitions*> atPoint;
  public:
     StorageMap* storageMap;
-    AllDefinitions(const ReferenceMap* refMap, const TypeMap* typeMap) :
+    AllDefinitions(ReferenceMap* refMap, TypeMap* typeMap) :
             storageMap(new StorageMap(refMap, typeMap)) {}
     Definitions* get(ProgramPoint point) {
         auto it = atPoint.find(point);
@@ -309,16 +310,34 @@ class ComputeDefUse : public Inspector {
     AllDefinitions*     definitions;  // result
     ProgramPoint        startPoint;
 
+    void initialize(const IR::P4Control* control);
+    // The following methods are used only when analyzing parsers.
+    // Since parsers have loops we do not rely on a standard visitor.
     void initialize(const IR::P4Parser* parser);
-    Definitions* visitStatement(const IR::Statement* stat, Definitions* defs);
-    Definitions* visitState(const IR::ParserState* state);  // return true on changes
+    Definitions* visitParserStatement(const IR::StatOrDecl* stat, Definitions* defs);
+    Definitions* visitParserState(const IR::ParserState* state);  // return true on changes
     Definitions* getDefinitionsAfter(const IR::ParserState* state);
  public:
     ComputeDefUse(const ReferenceMap* refMap, AllDefinitions* definitions) :
-            refMap(refMap), definitions(definitions)
+            refMap(refMap), definitions(definitions), currentDefinitions(nullptr)
     { CHECK_NULL(refMap); CHECK_NULL(definitions); setName("ComputeDefUse"); }
     bool preorder(const IR::P4Parser* parser) override;
+    // The following are used when analyzing P4Controls.
+ protected:
+    Definitions*        currentDefinitions;  // before statement currently processed
+    ProgramPoint        callingContext;
+    bool setDefinitions(Definitions* defs, const IR::Node* who = nullptr);
+    ProgramPoint getProgramPoint(const IR::Node* node = nullptr) const;
+ public:
     bool preorder(const IR::P4Control* control) override;
+    bool preorder(const IR::AssignmentStatement* statement) override;
+    bool preorder(const IR::ReturnStatement* statement) override;
+    bool preorder(const IR::ExitStatement* statement) override;
+    bool preorder(const IR::IfStatement* statement) override;
+    bool preorder(const IR::BlockStatement* statement) override;
+    bool preorder(const IR::SwitchStatement* statement) override;
+    bool preorder(const IR::EmptyStatement* statement) override;
+    bool preorder(const IR::MethodCallStatement* statement) override;
 };
 
 }  // namespace P4

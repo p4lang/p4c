@@ -15,10 +15,10 @@ limitations under the License.
 */
 
 parser p1<T>(in T a) {
-   state start {
-       T w = a;
+    state start {
+        T w = a;
         transition accept;
-   }
+    }
 }
 
 parser simple(in bit<2> a);

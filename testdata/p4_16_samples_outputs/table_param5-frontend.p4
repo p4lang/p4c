@@ -1,27 +1,29 @@
 #include <core.p4>
 
 control c(inout bit<32> arg) {
-    action a() {
+    @name("a") action a_0() {
     }
-    action b() {
+    @name("b") action b_0() {
     }
-    table t(in bit<32> x) {
+    @name("t") table t_0(in bit<32> x) {
         key = {
             x: exact;
         }
         actions = {
-            a();
-            b();
+            a_0();
+            b_0();
         }
-        default_action = a();
+        default_action = a_0();
     }
+    bit<32> tmp;
     apply {
-        switch (t.apply(arg).action_run) {
-            a: {
-                t.apply(arg);
+        switch (t_0.apply(arg).action_run) {
+            a_0: {
+                t_0.apply(arg);
             }
-            b: {
-                arg = arg + 32w1;
+            b_0: {
+                tmp = arg + 32w1;
+                arg = tmp;
             }
         }
 
