@@ -203,6 +203,9 @@ class P4Objects {
 
   bool header_exists(const std::string &header_name) const;
 
+  // public to be accessed by test class
+  std::ostream &outstream;
+
  private:
   void add_header_type(const std::string &name,
                          std::unique_ptr<HeaderType> header_type) {
@@ -390,9 +393,8 @@ class P4Objects {
 
   std::unordered_map<std::string, header_field_pair> field_aliases{};
 
- public:
-  // public to be accessed by test class
-  std::ostream &outstream;
+  // used for initialization only
+  std::unordered_map<p4object_id_t, p4object_id_t> header_id_to_stack_id{};
 
  private:
   int get_field_offset(header_id_t header_id, const std::string &field_name);
@@ -406,6 +408,8 @@ class P4Objects {
 
   std::unique_ptr<CalculationsMap::MyC> check_hash(
       const std::string &name) const;
+
+  void enable_arith(header_id_t header_id, int field_offset);
 };
 
 }  // namespace bm

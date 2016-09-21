@@ -79,3 +79,11 @@ class register_write
 };
 
 REGISTER_PRIMITIVE(register_write);
+
+class pop : public ActionPrimitive<HeaderStack &, const Data &> {
+  void operator ()(HeaderStack &stack, const Data &num) {
+    stack.pop_front(num.get_uint());
+  }
+};
+
+REGISTER_PRIMITIVE(pop);

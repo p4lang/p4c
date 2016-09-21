@@ -174,6 +174,14 @@ class HeaderStack : public NamedP4Object {
     next = 0;
   }
 
+  Header &at(size_t idx) {
+    return headers.at(idx);
+  }
+
+  const Header &at(size_t idx) const {
+    return headers.at(idx);
+  }
+
  private:
   // To be called by PHV class
   // This is a special case, as I want to store a reference

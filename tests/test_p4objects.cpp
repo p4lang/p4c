@@ -298,3 +298,35 @@ TEST(P4Objects, ParseVset) {
   ASSERT_EQ("pv1", parse_vset_1->get_name());
   ASSERT_EQ(16, parse_vset_1->get_compressed_bitwidth());
 }
+
+extern bool WITH_VALGRIND; // defined in main.cpp
+
+TEST(P4Objects, HeaderStackArith) {
+  std::unique_ptr<PHV> phv;
+
+  // gtest complains when a deathtest has multiple threads running
+  // by adding a nested scope here, I ensure that the threads started by
+  // P4Objects are destroyed before ASSERT_DEATH
+  {
+    fs::path json_path = fs::path(TESTDATADIR) / fs::path("header_stack.json");
+    std::ifstream is(json_path.string());
+    P4Objects objects;
+    LookupStructureFactory factory;
+    ASSERT_EQ(0, objects.init_objects(&is, &factory));
+    const auto &phv_factory = objects.get_phv_factory();
+    phv = phv_factory.create();
+  }
+
+  // check that arith has been enabled on hdr[x].f1 (but not on hdr[x].f2)
+  const auto &h0_f1 = phv->get_field("hdr[0].f1");
+  const auto &h1_f1 = phv->get_field("hdr[1].f1");
+  const auto &h0_f2 = phv->get_field("hdr[0].f2");
+  const auto &h1_f2 = phv->get_field("hdr[1].f2");
+  ASSERT_NO_THROW(h1_f1.get_int());
+  ASSERT_NO_THROW(h0_f1.get_int());
+
+  if (!WITH_VALGRIND) {
+    ASSERT_DEATH(h0_f2.get_int(), "Assertion .* failed");
+    ASSERT_DEATH(h1_f2.get_int(), "Assertion .* failed");
+  }
+}

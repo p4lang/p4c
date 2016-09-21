@@ -351,6 +351,9 @@ class PHVFactory {
 
   void disable_all_field_arith(header_id_t header_id);
 
+  void enable_stack_field_arith(header_stack_id_t header_stack_id,
+                                int field_offset);
+
   void enable_all_arith();
 
   std::unique_ptr<PHV> create() const;

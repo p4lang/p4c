@@ -123,4 +123,6 @@ testdata/runtime_iface.p4 \
 testdata/runtime_iface.json \
 testdata/one_header.json \
 testdata/parse_vset.p4 \
-testdata/parse_vset.json
+testdata/parse_vset.json \
+testdata/header_stack.p4 \
+testdata/header_stack.json
