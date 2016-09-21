@@ -546,7 +546,8 @@ class ExpressionConverter : public Inspector {
 
     // doFixup = true -> insert masking operations for proper arithmetic implementation
     // see below for wrap
-    Util::IJson* convert(const IR::Expression* e, bool doFixup = true, bool wrap = true, bool convertBool = false) {
+    Util::IJson* convert(const IR::Expression* e, bool doFixup = true,
+                         bool wrap = true, bool convertBool = false) {
         const IR::Expression *expr = e;
         if (doFixup) {
             ArithmeticFixup af(converter->typeMap);
@@ -874,7 +875,8 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     continue;
                 } else if (ef->method->name == v1model.random.name) {
                     BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
-                    auto primitive = mkPrimitive(v1model.random.modify_field_rng_uniform.name, result);
+                    auto primitive =
+                            mkPrimitive(v1model.random.modify_field_rng_uniform.name, result);
                     auto params = mkParameters(primitive);
                     auto range = conv->convert(mc->arguments->at(0));
                     auto dest = conv->convert(mc->arguments->at(1));

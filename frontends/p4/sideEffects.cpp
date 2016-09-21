@@ -35,7 +35,7 @@ struct EvaluationOrder {
     IR::IndexedVector<IR::Declaration> *temporaries;
     IR::IndexedVector<IR::StatOrDecl> *statements;
 
-    EvaluationOrder(ReferenceMap* refMap) : refMap(refMap), final(nullptr),
+    explicit EvaluationOrder(ReferenceMap* refMap) : refMap(refMap), final(nullptr),
                         temporaries(new IR::IndexedVector<IR::Declaration>()),
                         statements(new IR::IndexedVector<IR::StatOrDecl>())
     { CHECK_NULL(refMap); }
@@ -187,7 +187,8 @@ class DismantleExpression : public Transform {
         bool land = expression->is<IR::LAnd>();
         auto constant = new IR::BoolLiteral(Util::SourceInfo(), !land);
         auto tmp = result->createTemporary(type);
-        auto ifTrue = new IR::AssignmentStatement(Util::SourceInfo(), new IR::PathExpression(IR::ID(tmp)), constant);
+        auto ifTrue = new IR::AssignmentStatement(
+            Util::SourceInfo(), new IR::PathExpression(IR::ID(tmp)), constant);
         auto ifFalse = new IR::IndexedVector<IR::StatOrDecl>();
 
         auto save = result->statements;
@@ -351,7 +352,8 @@ class DismantleExpression : public Transform {
             auto tbl1 = TableApplySolver::isHit(mmbr, refMap, typeMap);
             tbl_apply = tbl != nullptr || tbl1 != nullptr;
         }
-        auto simplified = new IR::MethodCallExpression(mce->srcInfo, method, mce->typeArguments, args);
+        auto simplified = new IR::MethodCallExpression(
+            mce->srcInfo, method, mce->typeArguments, args);
         typeMap->setType(simplified, type);
         result->final = simplified;
         if (!type->is<IR::Type_Void>() &&  // no return type
@@ -370,10 +372,11 @@ class DismantleExpression : public Transform {
             typeMap->setType(result->final, type);
             LOG1(mce << " replaced with " << left << " = " << simplified);
         } else {
-            if (tbl_apply)
+            if (tbl_apply) {
                 result->final = simplified;
-            else {
-                result->statements->push_back(new IR::MethodCallStatement(mce->srcInfo, simplified));
+            } else {
+                result->statements->push_back(
+                    new IR::MethodCallStatement(mce->srcInfo, simplified));
                 result->final = nullptr;
             }
         }
@@ -389,7 +392,8 @@ class DismantleExpression : public Transform {
         result = new EvaluationOrder(refMap);
         setName("DismantleExpressions");
     }
-    EvaluationOrder* dismantle(const IR::Expression* expression, bool isLeftValue, bool resultNotUsed=false) {
+    EvaluationOrder* dismantle(const IR::Expression* expression,
+                               bool isLeftValue, bool resultNotUsed = false) {
         LOG1("Dismantling " << dbp(expression) << (isLeftValue ? " on left" : " on right"));
         leftValue = isLeftValue;
         this->resultNotUsed = resultNotUsed;
@@ -408,7 +412,8 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::Function* function) {
         locals->push_back(a);
     for (auto s : *function->body->components)
         locals->push_back(s);
-    function->body = new IR::BlockStatement(function->body->srcInfo, IR::Annotations::empty, locals);
+    function->body = new IR::BlockStatement(
+        function->body->srcInfo, IR::Annotations::empty, locals);
     toInsert.clear();
     return function;
 }

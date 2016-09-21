@@ -141,7 +141,7 @@ bool Type_ActionEnum::contains(cstring name) const {
     return false;
 }
 
-const Type* Type_Specialized::getP4Type() const{
+const Type* Type_Specialized::getP4Type() const {
     auto args = new IR::Vector<Type>();
     for (auto a : *arguments) {
         auto at = a->getP4Type();

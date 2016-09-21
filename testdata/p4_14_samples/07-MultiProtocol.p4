@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -157,14 +157,17 @@ parser parse_udp {
 header_type ingress_metadata_t {
     fields {
         drop : 1;
-        egress_port : 8;
+        egress_port : 9;
         packet_type : 4;
     }
-} 
+}
 
 metadata ingress_metadata_t ing_metadata;
 
 action nop() {
+}
+action drop() {
+    modify_field(ing_metadata.drop, 1);
 }
 
 action set_egress_port(egress_port) {
@@ -190,7 +193,7 @@ action mpls_packet() {
 action mim_packet() {
     modify_field(ing_metadata.packet_type, 4);
 }
-    
+
 table ethertype_match {
     reads {
         ethernet.etherType : exact;
@@ -206,7 +209,7 @@ table ethertype_match {
 
 table ipv4_match {
     reads {
-        ipv4.srcAddr : exact;
+        ipv4.dstAddr : exact;
     }
     actions {
         nop;
@@ -216,7 +219,7 @@ table ipv4_match {
 
 table ipv6_match {
     reads {
-        ipv6.srcAddr : exact;
+        ipv6.dstAddr : exact;
     }
     actions {
         nop;
@@ -226,11 +229,53 @@ table ipv6_match {
 
 table l2_match {
     reads {
-        ethernet.srcAddr : exact;
+        ethernet.dstAddr : exact;
     }
     actions {
         nop;
         set_egress_port;
+    }
+}
+
+table tcp_check {
+    reads {
+        tcp.dstPort : exact;
+    }
+    actions {
+        nop;
+        drop;
+    }
+}
+table udp_check {
+    reads {
+        udp.dstPort : exact;
+    }
+    actions {
+        nop;
+        drop;
+    }
+}
+table icmp_check {
+    reads {
+        icmp.typeCode : exact;
+    }
+    actions {
+        nop;
+        drop;
+    }
+}
+
+action send_packet() {
+    modify_field(standard_metadata.egress_spec, ing_metadata.egress_port);
+}
+
+table set_egress {
+    reads {
+        ing_metadata.drop : exact;
+    }
+    actions {
+        nop;
+        send_packet;
     }
 }
 
@@ -245,7 +290,14 @@ control ingress {
         default {
           apply(l2_match);
         }
-    }        
+    }
+    if (valid(tcp)) {
+        apply(tcp_check); }
+    else if (valid(udp)) {
+        apply(udp_check); }
+    else if (valid(icmp)) {
+        apply(icmp_check); }
+    apply(set_egress);
 }
 
 control egress {

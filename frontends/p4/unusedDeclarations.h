@@ -65,7 +65,7 @@ class RemoveUnusedDeclarations : public Transform {
 // Iterates RemoveUnusedDeclarations until convergence.
 class RemoveAllUnusedDeclarations : public PassManager {
  public:
-    RemoveAllUnusedDeclarations(ReferenceMap* refMap) {
+    explicit RemoveAllUnusedDeclarations(ReferenceMap* refMap) {
         CHECK_NULL(refMap);
         passes.emplace_back(
             new PassRepeated {

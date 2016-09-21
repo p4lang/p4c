@@ -70,13 +70,14 @@ class FindUninitialized : public Inspector {
  public:
     FindUninitialized(ReferenceMap* refMap, TypeMap* typeMap, AllDefinitions* definitions) :
             refMap(refMap), typeMap(typeMap), definitions(definitions),
-            lhs(false), currentDefinitions(nullptr)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions); setName("FindUninitialized"); }
+            lhs(false), currentDefinitions(nullptr) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions);
+        setName("FindUninitialized"); }
 
     bool preorder(const IR::ParserState* state) override {
         ProgramPoint cursor(state);  // point before the first statement
         for (auto s : *state->components) {
-            checkUninitialized(s, cursor); // the cursor points BEFORE the statement
+            checkUninitialized(s, cursor);  // the cursor points BEFORE the statement
             cursor = ProgramPoint(s);
         }
         return false;
@@ -208,7 +209,7 @@ class FindUninitialized : public Inspector {
         report(expression);
     }
 
-    bool preorder(const IR::P4Control* ) override {
+    bool preorder(const IR::P4Control*) override {
         // TODO: not yet implemented
         return false;
     }
@@ -230,7 +231,7 @@ class ProcessDefUse : public PassManager {
         setName("ProcessDefUse");
     }
 };
-}
+}  // namespace
 
 const IR::Node* DoSimplifyDefUse::process(const IR::Node* node) {
     ProcessDefUse process(refMap, typeMap);

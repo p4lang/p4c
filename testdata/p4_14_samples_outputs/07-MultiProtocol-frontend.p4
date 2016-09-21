@@ -3,7 +3,7 @@
 
 struct ingress_metadata_t {
     bit<1> drop;
-    bit<8> egress_port;
+    bit<9> egress_port;
     bit<4> packet_type;
 }
 
@@ -167,8 +167,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("nop") action nop_0() {
     }
-    @name("set_egress_port") action set_egress_port_0(bit<8> egress_port) {
+    @name("drop") action drop_0() {
+        meta.ing_metadata.drop = 1w1;
+    }
+    @name("set_egress_port") action set_egress_port_0(bit<9> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
+    }
+    @name("send_packet") action send_packet_0() {
+        standard_metadata.egress_spec = meta.ing_metadata.egress_port;
     }
     @name("ethertype_match") table ethertype_match_0() {
         actions = {
@@ -184,6 +190,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
+    @name("icmp_check") table icmp_check_0() {
+        actions = {
+            nop_0();
+            drop_0();
+            NoAction();
+        }
+        key = {
+            hdr.icmp.typeCode: exact;
+        }
+        default_action = NoAction();
+    }
     @name("ipv4_match") table ipv4_match_0() {
         actions = {
             nop_0();
@@ -191,7 +208,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction();
         }
         key = {
-            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.dstAddr: exact;
         }
         default_action = NoAction();
     }
@@ -202,7 +219,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction();
         }
         key = {
-            hdr.ipv6.srcAddr: exact;
+            hdr.ipv6.dstAddr: exact;
         }
         default_action = NoAction();
     }
@@ -213,7 +230,40 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.dstAddr: exact;
+        }
+        default_action = NoAction();
+    }
+    @name("set_egress") table set_egress_0() {
+        actions = {
+            nop_0();
+            send_packet_0();
+            NoAction();
+        }
+        key = {
+            meta.ing_metadata.drop: exact;
+        }
+        default_action = NoAction();
+    }
+    @name("tcp_check") table tcp_check_0() {
+        actions = {
+            nop_0();
+            drop_0();
+            NoAction();
+        }
+        key = {
+            hdr.tcp.dstPort: exact;
+        }
+        default_action = NoAction();
+    }
+    @name("udp_check") table udp_check_0() {
+        actions = {
+            nop_0();
+            drop_0();
+            NoAction();
+        }
+        key = {
+            hdr.udp.dstPort: exact;
         }
         default_action = NoAction();
     }
@@ -233,6 +283,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             }
         }
 
+        if (hdr.tcp.isValid()) 
+            tcp_check_0.apply();
+        else 
+            if (hdr.udp.isValid()) 
+                udp_check_0.apply();
+            else 
+                if (hdr.icmp.isValid()) 
+                    icmp_check_0.apply();
+        set_egress_0.apply();
     }
 }
 

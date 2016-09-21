@@ -114,7 +114,8 @@ class ActionCall final : public MethodInstance {
                const IR::P4Action* action,
                const IR::Type_Action* actionType) :
             // Actions are never generic
-            MethodInstance(expr, nullptr, actionType, actionType), action(action) { CHECK_NULL(action); }
+            MethodInstance(expr, nullptr, actionType, actionType), action(action)
+    { CHECK_NULL(action); }
     friend class MethodInstance;
  public:
     const IR::P4Action* action;

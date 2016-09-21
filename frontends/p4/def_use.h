@@ -27,7 +27,7 @@ class LocationSet;
 
 // Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint {
-  public:
+ public:
     virtual ~StorageLocation() {}
     const IR::Type* type;
     const cstring name;
@@ -98,7 +98,8 @@ class ArrayLocation : public StorageLocation {
 
     void addElement(unsigned index, StorageLocation* element)
     { elements[index] = element; CHECK_NULL(element); }
-  public:
+
+ public:
     ArrayLocation(const IR::Type* type, cstring name) :
             StorageLocation(type, name) {
         BUG_CHECK(type->is<IR::Type_Stack>(), "%1%: unexpected type", type);
@@ -187,6 +188,7 @@ class StorageMap {
 class ProgramPoint {
     // empty stack represents "uninitialized"
     std::vector<const IR::Node*> stack;
+
  public:
     ProgramPoint() = default;
     ProgramPoint(const ProgramPoint& other) : stack(other.stack) {}
@@ -211,7 +213,7 @@ class ProgramPoint {
     bool isUninitialized() const
     { return stack.empty(); }
 };
-}
+}  // namespace P4
 
 // hash and comparator for ProgramPoint
 inline bool operator==(const P4::ProgramPoint& left, const P4::ProgramPoint& right) {
@@ -227,16 +229,16 @@ template<> struct hash<P4::ProgramPoint> {
         return s.hash();
     }
 };
-}
+}  // namespace std
 
 namespace P4 {
 class ProgramPoints {
     typedef std::unordered_set<ProgramPoint> Points;
     Points points;
-    ProgramPoints(const Points &points) : points(points) {}
+    explicit ProgramPoints(const Points &points) : points(points) {}
  public:
     ProgramPoints() = default;
-    ProgramPoints(ProgramPoint point) { points.emplace(point); }
+    explicit ProgramPoints(ProgramPoint point) { points.emplace(point); }
     void add(ProgramPoint point) { points.emplace(point); }
     const ProgramPoints* merge(const ProgramPoints* with) const;
     bool operator==(const ProgramPoints& other) const;
@@ -256,6 +258,7 @@ class Definitions {
     // which program points have written last to each location
     // (conservative approximation)
     std::map<const BaseLocation*, const ProgramPoints*> definitions;
+
  public:
     Definitions() = default;
     Definitions(const Definitions& other) : definitions(other.definitions) {}
@@ -317,6 +320,7 @@ class ComputeDefUse : public Inspector {
     Definitions* visitParserStatement(const IR::StatOrDecl* stat, Definitions* defs);
     Definitions* visitParserState(const IR::ParserState* state);  // return true on changes
     Definitions* getDefinitionsAfter(const IR::ParserState* state);
+
  public:
     ComputeDefUse(const ReferenceMap* refMap, AllDefinitions* definitions) :
             refMap(refMap), definitions(definitions), currentDefinitions(nullptr)
@@ -328,6 +332,7 @@ class ComputeDefUse : public Inspector {
     ProgramPoint        callingContext;
     bool setDefinitions(Definitions* defs, const IR::Node* who = nullptr);
     ProgramPoint getProgramPoint(const IR::Node* node = nullptr) const;
+
  public:
     bool preorder(const IR::P4Control* control) override;
     bool preorder(const IR::AssignmentStatement* statement) override;

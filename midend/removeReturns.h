@@ -107,7 +107,7 @@ class DoRemoveExits : public DoRemoveReturns {
 
 class RemoveReturns : public PassManager {
  public:
-    RemoveReturns(ReferenceMap* refMap) {
+    explicit RemoveReturns(ReferenceMap* refMap) {
         passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new DoRemoveReturns(refMap));
         setName("RemoveReturns");

@@ -25,9 +25,8 @@ namespace P4 {
    There is no type information. */
 class ValidateParsedProgram final : public Inspector {
     bool isv1;
-    using Inspector::postorder;
-
     void container(const IR::IContainer* type);
+
  public:
     explicit ValidateParsedProgram(bool isv1) : isv1(isv1)
     { setName("ValidateParsedProgram"); }

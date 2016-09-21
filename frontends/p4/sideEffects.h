@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_SIDEEFFECTS_H_
-#define _MIDEND_SIDEEFFECTS_H_
+#ifndef _FRONTENDS_P4_SIDEEFFECTS_H_
+#define _FRONTENDS_P4_SIDEEFFECTS_H_
 
 /* makes explicit side effect ordering */
 
@@ -99,6 +99,7 @@ class DoSimplifyExpressions : public Transform {
     TypeMap*             typeMap;
 
     IR::IndexedVector<IR::Declaration> toInsert;
+
  public:
     // Currently this only works correctly only if initializers
     // cannot appear in local declarations.
@@ -135,4 +136,4 @@ class SideEffectOrdering : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_SIDEEFFECTS_H_ */
+#endif /* _FRONTENDS_P4_SIDEEFFECTS_H_ */

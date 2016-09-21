@@ -3588,8 +3588,8 @@ yyreduce:
 #line 813 "../frontends/p4/p4-parse.ypp" /* yacc.c:1646  */
     { auto pl = new IR::ParameterList((yylsp[-4]), (yyvsp[-4].params));
                                            (yyval.Declaration) = new IR::P4Action(
-                                               (yylsp[-6]), *(yyvsp[-6].id), (yyvsp[-8].annos), pl,
-                                               new IR::BlockStatement((yylsp[-1]), IR::Annotations::empty, (yyvsp[-1].statOrDecls))); }
+                                               (yylsp[-6]), *(yyvsp[-6].id), (yyvsp[-8].annos), pl, new IR::BlockStatement(
+                                                   (yylsp[-1]), IR::Annotations::empty, (yyvsp[-1].statOrDecls))); }
 #line 3594 "../frontends/p4/p4-parse.cpp" /* yacc.c:1646  */
     break;
 

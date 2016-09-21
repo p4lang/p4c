@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <boost/functional/hash.hpp>
 #include "def_use.h"
 #include "frontends/p4/methodInstance.h"
 #include "parserCallGraph.h"
-#include <boost/functional/hash.hpp>
 
 namespace P4 {
 
@@ -331,6 +331,7 @@ class WriteSet : public Inspector {
         set(expression, result);
         return false;
     }
+
  public:
     WriteSet(const StorageMap* map, bool lhs) :
             map(map), lhs(lhs)
@@ -478,7 +479,8 @@ void ComputeDefUse::initialize(const IR::P4Parser* parser) {
     LOG1(parser << " initial definitions " << defs);
 }
 
-Definitions* ComputeDefUse::visitParserStatement(const IR::StatOrDecl* stat, Definitions* previous) {
+Definitions*
+ComputeDefUse::visitParserStatement(const IR::StatOrDecl* stat, Definitions* previous) {
     if (!stat->is<IR::Statement>())
         return previous;
 
@@ -490,7 +492,8 @@ Definitions* ComputeDefUse::visitParserStatement(const IR::StatOrDecl* stat, Def
         auto r = definitions->storageMap->writes(assign->right, false);
         locs = l->join(r);
     } else if (stat->is<IR::MethodCallStatement>()) {
-        locs = definitions->storageMap->writes(stat->to<IR::MethodCallStatement>()->methodCall, false);
+        locs = definitions->storageMap->writes(
+            stat->to<IR::MethodCallStatement>()->methodCall, false);
     } else if (stat->is<IR::BlockStatement>()) {
         auto block = stat->to<IR::BlockStatement>();
         auto defs = previous;

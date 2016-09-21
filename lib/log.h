@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef P4C_LIB_LOG_H_
 #define P4C_LIB_LOG_H_
 
+#include <functional>
 #include <iostream>
 #include <set>
 #include <vector>
@@ -60,6 +61,10 @@ class output_log_prefix {
 #define ERROR(X) (std::clog << "ERROR: " << X << std::endl)
 #define WARNING(X) (verbose > 0 ? (std::clog << "WARNING: " << X << std::endl) : std::clog)
 #define ERRWARN(C, X) ((C) ? ERROR(X) : WARNING(X))
+
+static inline std::ostream &operator<<(std::ostream &out,
+                                       std::function<std::ostream &(std::ostream&)> fn) {
+    return fn(out); }
 
 template<class T> inline auto operator<<(std::ostream &out, const T &obj) ->
         decltype((void)obj.dbprint(out), out)

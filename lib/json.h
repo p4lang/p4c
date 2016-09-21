@@ -23,7 +23,7 @@ limitations under the License.
 
 #include "lib/gmputil.h"
 #include "lib/cstring.h"
-#include "lib/map.h"
+#include "lib/ordered_map.h"
 
 namespace Test { class TestJson; }
 
@@ -98,10 +98,9 @@ class JsonValue final : public IJson {
     const cstring str = nullptr;
 };
 
-class JsonArray final : public IJson {
+class JsonArray final : public IJson, public std::vector<const IJson*> {
     friend class Test::TestJson;
  public:
-    std::vector<const IJson*> values;
     void serialize(std::ostream& out) const;
     JsonArray* append(const IJson* value);
     JsonArray* append(bool b) { append(new JsonValue(b)); return this; }
@@ -115,14 +114,12 @@ class JsonArray final : public IJson {
     JsonArray* append(cstring s) { append(new JsonValue(s)); return this; }
     JsonArray* append(std::string s) { append(new JsonValue(s)); return this; }
     JsonArray* append(const char* s) { append(new JsonValue(s)); return this; }
-    JsonArray(std::initializer_list<const IJson*> data) : values(data) {} // NOLINT
+    JsonArray(std::initializer_list<const IJson*> data) : std::vector<const IJson*>(data) {} // NOLINT
     JsonArray() = default;
 };
 
-class JsonObject final : public IJson {
+class JsonObject final : public IJson, public ordered_map<cstring, const IJson*> {
     friend class Test::TestJson;
-    std::map<cstring, const IJson*> values;
-    std::vector<cstring> labelOrder;
 
  public:
     JsonObject() = default;
@@ -150,7 +147,7 @@ class JsonObject final : public IJson {
     { emplace(label, new JsonValue(s)); return this; }
     JsonObject* emplace(cstring label, const char* s)
     { emplace(label, new JsonValue(s)); return this; }
-    const IJson* get(cstring label) const { return ::get(values, label); }
+    const IJson* get(cstring label) const { return ::get(*this, label); }
 };
 
 }  // namespace Util
