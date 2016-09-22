@@ -175,6 +175,37 @@ template<class T> void IR::IndexedVector<T>::visit_children(Visitor &v) {
 }
 template<class T> void IR::IndexedVector<T>::visit_children(Visitor &v) const {
     for (auto &a : *this) v.visit(a); }
+template<class T>
+void IR::IndexedVector<T>::toJSON(JSONGenerator &json) const {
+    const char *sep = "";
+    Vector<T>::toJSON(json);
+    json << "," << std::endl << json.indent++ << "\"declarations\" : {";
+    for (auto &k : declarations) {
+        json << sep << std::endl << json.indent << k.first << " : " << k.second;
+        sep = ","; }
+    --json.indent;
+    if (*sep) json << std::endl << json.indent;
+    json << "}";
+}
+
+template<class T>
+IR::Vector<T>::Vector(JSONLoader &json) {
+    json.load("vec", vec);
+}
+template<class T>
+IR::Vector<T>* IR::Vector<T>::fromJSON(JSONLoader &json) {
+    return new Vector<T>(json);
+}
+
+template<class T>
+IR::IndexedVector<T>::IndexedVector(JSONLoader &json) : Vector<T>(json) {
+    //json.load("vec", vec);
+    json.load("declarations", declarations);
+}
+template<class T>
+IR::IndexedVector<T>* IR::IndexedVector<T>::fromJSON(JSONLoader &json) {
+    return new IndexedVector<T>(json);
+}
 IRNODE_DEFINE_APPLY_OVERLOAD(IndexedVector, template<class T>, <T>)
 
 #include "lib/ordered_map.h"

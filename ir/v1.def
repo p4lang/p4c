@@ -187,11 +187,24 @@ class CalculatedField {
         Expression              cond;
         //update_or_verify(Util::SourceInfo si, bool u, ID n, const Expression *c)
         //: srcInfo(si), update(u), name(n), cond(c) {}
+
+        update_or_verify(bool u, ID n, const Expression *c)
+        : update(u), name(n), cond(c) {}
+        update_or_verify() {}
         operator== { return update == a.update && name == a.name && cond == a.cond; }
         toJSON { 
             json << json.indent << "\"update\" : " << update << "," << std::endl
                  << json.indent << "\"name\" : " << name << "," << std::endl
                  << json.indent << "\"cond\" : " << cond;
+        }
+        static IR::CalculatedField::update_or_verify* fromJSON(JSONLoader &json) {
+            bool update_temp;
+            IR::ID name_temp;
+            IR::Expression* cond_temp;
+            json.load("update", update_temp);
+            json.load("name", name_temp);
+            json.load("cond", cond_temp);
+            return new IR::CalculatedField::update_or_verify(update_temp, name_temp, cond_temp);
         }
     }
     vector<update_or_verify>    specs = {};

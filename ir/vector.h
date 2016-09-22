@@ -49,13 +49,14 @@ class Vector : public VectorBase {
     Vector() = default;
     Vector(const Vector &) = default;
     Vector(Vector &&) = default;
+    Vector(JSONLoader &json);
     Vector &operator=(const Vector &) = default;
     Vector &operator=(Vector &&) = default;
     explicit Vector(const T *a) {
         vec.emplace_back(std::move(a)); }
     explicit Vector(const vector<const T *> &a) {
         vec.insert(vec.end(), a.begin(), a.end()); }
-
+    static Vector<T>* fromJSON(JSONLoader &json);
     typedef typename vector<const T *>::iterator        iterator;
     typedef typename vector<const T *>::const_iterator  const_iterator;
     iterator begin() { return vec.begin(); }

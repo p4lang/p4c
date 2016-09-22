@@ -30,6 +30,9 @@ limitations under the License.
 #include "ir.h"
 struct TableResourceAlloc;
 
+//class JSONLoader;
+//static void printloader(JSONLoader&) __attribute__((noinline));
+
 class JSONLoader {
     template<typename T>
     class has_fromJSON
@@ -54,15 +57,19 @@ public:
     JSONLoader(JsonData *json) : 
         node_refs(*(new std::unordered_map<int, IR::Node*>())),
         json(json) {}
+    
+    JSONLoader(JsonData *json, std::unordered_map<int, IR::Node*> &refs) :
+        node_refs(refs),
+        json(json) {}
 
     JSONLoader(const JSONLoader &unpacker, const std::string &field) :
         node_refs(unpacker.node_refs)
     { 
         JsonObject* obj = dynamic_cast<JsonObject*>(unpacker.json);
-        assert(obj->find(field) == obj->end());
-        
-        json = obj->find(field)->second;
+        auto it = obj->find(field);
+        json = (it == obj->end() ? nullptr : it->second);
     }
+
 
 private: 
     int get_id() { return json->to<JsonObject>()->get_id(); }
@@ -71,29 +78,56 @@ private:
 
     template<typename T>
     void unpack_json(vector<T> &v) {
-        (void)v;
+        T temp;
+        for (auto e : *json->to<JsonVector>()) {
+            load(e, temp);
+            v.push_back(temp);
+        }
     }
 
     template<typename T>
     void unpack_json(IR::Vector<T> &v) {
-        (void)v;
+        v = *IR::Vector<T>::fromJSON(*this);
+    }
+
+    template<typename T>
+    void unpack_json(const IR::Vector<T> *v) {
+        v = IR::Vector<T>::fromJSON(*this);
+    }
+
+
+    template<typename K, typename V>
+    void unpack_json(ordered_map<K, V> &v) {
+        std::pair<K, V> temp;
+        for (auto e: *json->to<JsonObject>()) {
+            JsonString* k = new JsonString(e.first);
+            load(k, temp.first);
+            load(e.second, temp.second);
+            v.insert(temp);
+        }
+    }
+
+    
+    template<typename T>
+    void unpack_json(const IR::IndexedVector<T>* &v) {
+        v = IR::IndexedVector<T>::fromJSON(*this);
     }
 
     template<typename T>
     void unpack_json(std::vector<T> &v) {
-        (void)v;
+        T temp;
+        for (auto e : *json->to<JsonVector>()) {
+            load(e, temp);
+            v.push_back(temp);
+        }
     }
 
     template<typename T, typename U>
     void unpack_json(std::pair<T, U> &v)
     {
-        (void)v;
-    }
-
-    template<typename K, typename V>
-    void unpack_json(ordered_map<K, V> &v)
-    { 
-        (void)v;
+        const JsonObject* obj = json->to<JsonObject>();
+        load(::get(obj, "first"), v.first);
+        load(::get(obj, "second"), v.second);
     }
 
     void unpack_json(bool &v) {
@@ -102,7 +136,7 @@ private:
     
     template<typename T>
     typename std::enable_if<std::is_integral<T>::value>::type
-    unpack_json(T &v) { 
+    unpack_json(T &v) {
         v = *json->to<JsonNumber>();
     }
     void unpack_json(mpz_class &v) {
@@ -130,10 +164,11 @@ private:
 
     template<typename T>
     typename std::enable_if<
-                    has_fromJSON<T>::value &&
-                    !std::is_base_of<IR::Node, T>::value>::type
-    unpack_json(const T &v) {
-        v = *(T::fromJSON(json));
+                    has_fromJSON<typename std::remove_pointer<T>::type>::value 
+                    && !std::is_base_of<IR::Node, typename std::remove_pointer<T>::type>::value
+                    >::type
+    unpack_json(T &v) {
+        v = *(T::fromJSON(*this));
     }
 
     void unpack_json(IR::Node &v) {
@@ -161,9 +196,14 @@ private:
     template<typename T>
     typename std::enable_if<
                     std::is_pointer<T>::value &&
-                    std::is_base_of<IR::Node, 
-                                    typename std::remove_pointer<T>::type
-                    >::value>::type                    
+                    !std::is_same<T, IR::IndexedVector<IR::Node> const *>::value &&
+                    !std::is_same<T, IR::Vector<IR::Annotation> const *>::value &&
+                    (std::is_base_of<IR::Node, 
+                                    typename std::remove_pointer<T>::type>::value
+                    || std::is_base_of<IR::INode, 
+                                    typename std::remove_pointer<T>::type>::value)
+
+                    >::type                    
     unpack_json(T &v) {
         if (get_id() > 0 
             && node_refs.find(get_id()) != node_refs.end()) {
@@ -180,9 +220,17 @@ private:
         (void)v;
     }
 public:
+    template<typename T>
+    void load(JsonData* json, T &v) {
+        JSONLoader(json, node_refs).unpack_json(v);
+    }
+
     template<typename T> 
     void load(const std::string field, T &v) { 
-        JSONLoader(*this, field).unpack_json(v);
+        JSONLoader loader(*this, field);
+        if (loader.json == nullptr) return;
+
+        loader.unpack_json(v);
     }
 
     template<typename T> JSONLoader& operator>>(T &v) {
@@ -191,6 +239,8 @@ public:
     }
 
 };
+
+//void printloader(JSONLoader& json) { std::cout << json.json;}
 
 
 #endif /* _IR_JSON_LOADER_H_ */

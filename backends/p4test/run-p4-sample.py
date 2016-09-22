@@ -194,12 +194,12 @@ def process_file(options, argv):
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
     args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs,
-            "--toJSON", jsonfile] + options.compilerOptions
+            "--testJson"] + options.compilerOptions
 
     if "14_samples" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--p4-14"]);
     args.extend(argv)
-
+    print(" ".join(args))
     result = run_timeout(options, args, timeout, stderr)
     if result != SUCCESS:
         print("Error compiling")

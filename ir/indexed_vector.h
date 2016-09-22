@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef IR_INDEXED_VECTOR_H_
 #define IR_INDEXED_VECTOR_H_
 
+
 #include "dbprint.h"
 #include "lib/enumerator.h"
 #include "lib/null.h"
@@ -77,6 +78,12 @@ class IndexedVector : public Vector<T> {
         insert(typename Vector<T>::end(), a.begin(), a.end()); }
     explicit IndexedVector(const Vector<T> &a) {
         insert(typename Vector<T>::end(), a.begin(), a.end()); }
+
+    IndexedVector(JSONLoader &json); 
+   // {
+   //     json.load("vec", vec);
+   //     json.load("declarations", declarations);
+   // }
 
     void clear() { IR::Vector<T>::clear(); declarations.clear(); }
     // Although this is not a const_iterator, it should NOT
@@ -141,6 +148,9 @@ class IndexedVector : public Vector<T> {
         return "IndexedVector<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
+
+    void toJSON(JSONGenerator &json) const override;
+    static IndexedVector<T>* fromJSON(JSONLoader &json);
 };
 
 }  // namespace IR

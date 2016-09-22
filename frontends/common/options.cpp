@@ -89,6 +89,9 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) { dumpJsonFile = arg; return true; },
                    "Dump IR to JSON in the\n"
                    "specified file.");
+    registerOption("--testJson", nullptr,
+                    [this](const char*) { debugJson = true; return true; },
+                    "Dump and undump the IR");
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");
@@ -225,7 +228,7 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
             }
         }
     }
-    if (dumpJsonFile != "") {
+/*    if (dumpJsonFile != "") {
         auto stream = openFile(dumpJsonFile, true);
         std::cout << "Json File: " << dumpJsonFile << std::endl;
         if (stream != nullptr) {
@@ -233,6 +236,7 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
             json << node << std::endl;
         }
     }
+*/
 }
 
 DebugHook CompilerOptions::getDebugHook() const {

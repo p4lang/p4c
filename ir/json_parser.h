@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "../lib/ordered_map.h"
+#include "../lib/gmputil.h"
 
 class JsonData {
  public:
@@ -24,9 +25,9 @@ class JsonData {
 
 class JsonNumber : public JsonData {
  public:
-    JsonNumber(long long v) : val(v) {}   // NOLINT(runtime/explicit)
-    operator int() const { return val; }
-    long long val;
+    JsonNumber(mpz_class v) : val(v) {}   // NOLINT(runtime/explicit)
+    operator int() const { return val.get_si(); } //Does not handle overflow
+    mpz_class val;
 };
 
 class JsonBoolean : public JsonData {
@@ -179,7 +180,7 @@ inline std::istream& operator>>(std::istream &in, JsonData*& json) {
         }
         case '-': case '0': case '1': case '2': case '3':
         case '4': case '5': case '6': case '7': case '8': case '9': {
-            long long num;
+            mpz_class num;
             in.unget();
             in >> num;
             json = new JsonNumber(num);

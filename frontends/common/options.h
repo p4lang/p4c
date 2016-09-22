@@ -63,6 +63,9 @@ class CompilerOptions : public Util::Options {
     // Dump a JSON representation of the IR in the file
     cstring dumpJsonFile = nullptr;
 
+    // Dump and undump the IR tree
+    bool debugJson = false;
+
     // higher means more verbose
     unsigned verbosity = 0;
     // Compiler target architecture
