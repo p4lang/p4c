@@ -22,7 +22,7 @@ limitations under the License.
 typedef std::function<void(const char* manager, unsigned seqNo,
                            const char* pass, const IR::Node* node)> DebugHook;
 
-class PassManager : virtual public Visitor {
+class PassManager : virtual public Visitor, virtual public Backtrack {
     bool early_exit_flag;
  protected:
     vector<DebugHook>   debugHooks;  // called after each pass
@@ -38,6 +38,7 @@ class PassManager : virtual public Visitor {
     PassManager(const std::initializer_list<Visitor *> &init)
     { addPasses(init); }
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
+    bool backtrack(trigger &trig) override;
     void setStopOnError(bool stop) { stop_on_error = stop; }
     void addDebugHook(DebugHook h) { debugHooks.push_back(h); }
     void addDebugHooks(std::vector<DebugHook> hooks)

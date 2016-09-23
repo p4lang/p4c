@@ -13,7 +13,7 @@ There are multiple modes in which people read code.  They may read the code
 in depth to try to understand the algorithms used in the code, or they may
 scan over the code looking to understand the structure and interfaces of
 the code.  Good coding style supports both kinds of readers.  When writing
-code, you need to consider how that code appears to readers have limited
+code, you need to consider how that code appears to readers who have limited
 understanding of the code as well as readers who already mostly understand
 it.  It should be easy for first-time readers to find where to start and
 for experienced readers to find the details they are looking for.
@@ -43,7 +43,8 @@ Similarly, a class or struct definition may naturally be one or multiple
 chunks.  This chunking informs where the brace characters should be placed,
 as brace by itself on a line makes a vertical space that separates chunks.
 So braces can be placed by themselves when they coincide with a chunk
-boundary, and should be placed with other text (generally the line above).
+boundary, and should be placed with other text (generally the line above)
+when they do not.
 
 Oftentimes, boilerplate code does not fit naturally into this chunking
 style -- while you can have a chunk of boilerplate followed by a chunk
