@@ -664,12 +664,12 @@ bool ComputeDefUse::preorder(const IR::AssignmentStatement* statement) {
     return setDefinitions(defs);
 }
 
-bool ComputeDefUse::preorder(const IR::SwitchStatement* statement) {
+bool ComputeDefUse::preorder(const IR::SwitchStatement *) {
     // TODO
     return false;
 }
 
-bool ComputeDefUse::preorder(const IR::MethodCallStatement* statement) {
+bool ComputeDefUse::preorder(const IR::MethodCallStatement *) {
     // TODO
     return false;
 }
