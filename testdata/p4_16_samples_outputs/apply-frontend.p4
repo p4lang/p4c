@@ -5,9 +5,9 @@ control p() {
 }
 
 control q() {
-    p() p1;
+    @name("p1") p() p1_0;
     apply {
-        p1.apply();
+        p1_0.apply();
     }
 }
 

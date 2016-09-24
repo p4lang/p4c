@@ -27,68 +27,68 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_4() {
     }
-    @name("setb1") action setb1(bit<8> val, bit<9> port) {
+    @name("setb1") action setb1_0(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name("setb1") action setb1_1(bit<8> val, bit<9> port) {
+    @name("setb1") action setb1_3(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name("setb1") action setb1_2(bit<8> val, bit<9> port) {
+    @name("setb1") action setb1_4(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("noop") action noop_1() {
+    @name("noop") action noop_3() {
     }
-    @name("noop") action noop_2() {
+    @name("noop") action noop_4() {
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1() {
         actions = {
-            setb1();
-            noop();
-            NoAction_1();
+            setb1_0();
+            noop_0();
+            NoAction();
         }
         key = {
             hdr.data.f1: ternary;
         }
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("test2") table test2_0() {
+    @name("test2") table test2() {
         actions = {
-            setb1_1();
-            noop_1();
-            NoAction_2();
+            setb1_3();
+            noop_3();
+            NoAction_0();
         }
         key = {
             hdr.data.f2: ternary;
         }
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
-    @name("test3") table test3_0() {
+    @name("test3") table test3() {
         actions = {
-            setb1_2();
-            noop_2();
-            NoAction_3();
+            setb1_4();
+            noop_4();
+            NoAction_4();
         }
         key = {
             hdr.data.f3: ternary;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_4();
     }
     apply {
-        if (test1_0.apply().hit) 
-            test2_0.apply();
+        if (test1.apply().hit) 
+            test2.apply();
         else 
-            test3_0.apply();
+            test3.apply();
     }
 }
 

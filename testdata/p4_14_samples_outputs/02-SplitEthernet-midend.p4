@@ -44,43 +44,43 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction() {
     }
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("t2") table t2_0() {
+    @name("t2") table t2() {
         actions = {
-            nop();
-            NoAction_2();
+            nop_0();
+            NoAction();
         }
         key = {
             hdr.mac_sa.mac: exact;
         }
-        default_action = NoAction_2();
+        default_action = NoAction();
     }
     apply {
-        t2_0.apply();
+        t2.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_0() {
     }
-    @name("nop") action nop_2() {
+    @name("nop") action nop_1() {
     }
-    @name("t1") table t1_0() {
+    @name("t1") table t1() {
         actions = {
-            nop_2();
-            NoAction_3();
+            nop_1();
+            NoAction_0();
         }
         key = {
             hdr.mac_da.mac       : exact;
             hdr.len_or_type.value: exact;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_0();
     }
     apply {
-        t1_0.apply();
+        t1.apply();
     }
 }
 

@@ -25,13 +25,13 @@ namespace P4 {
    There is no type information. */
 class ValidateParsedProgram final : public Inspector {
     bool isv1;
-    using Inspector::postorder;
-
     void container(const IR::IContainer* type);
+
  public:
     explicit ValidateParsedProgram(bool isv1) : isv1(isv1)
     { setName("ValidateParsedProgram"); }
     void postorder(const IR::Constant* c) override;
+    void postorder(const IR::SwitchStatement* statement) override;
     void postorder(const IR::Method* t) override;
     void postorder(const IR::StructField* f) override;
     void postorder(const IR::ParserState* s) override;

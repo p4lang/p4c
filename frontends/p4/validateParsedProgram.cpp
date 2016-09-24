@@ -91,4 +91,10 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Constant* decl) {
         ::error("%1%: illegal constant name", decl);
 }
 
+void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
+    auto inAction = findContext<IR::P4Action>();
+    if (inAction != nullptr)
+        ::error("%1%: switch statements not allowed in actions", statement);
+}
+
 }  // namespace P4

@@ -15,11 +15,14 @@ limitations under the License.
 */
 
 #include "simplify.h"
+#include "sideEffects.h"
 
 namespace P4 {
 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) {
-    LOG1("Visiting " << statement);
+    LOG1("Visiting " << dbp(getOriginal()));
+    if (statement->annotations->size() > 0)
+        return statement;
     auto parent = getContext()->node;
     auto statancestor = findContext<IR::Statement>();
     if (parent->is<IR::SwitchCase>() ||
@@ -29,8 +32,11 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
         // Cannot remove block from switch or toplevel control block
         return statement;
     }
-    if ((statancestor && statancestor->is<IR::BlockStatement>()) ||
-        findContext<IR::P4Action>() != nullptr) {  // directly within an action
+    bool withinBlock = statancestor != nullptr && statancestor->is<IR::BlockStatement>();
+    auto grandParent = getContext()->parent ? getContext()->parent->node : nullptr;
+    bool withinAction = grandParent != nullptr && grandParent->is<IR::P4Action>();
+    bool withinParserState = grandParent != nullptr && grandParent->is<IR::ParserState>();
+    if (withinParserState || withinBlock || withinAction) {
         // if there are no local declarations we can remove this block
         bool hasDeclarations = false;
         for (auto c : *statement->components)
@@ -52,6 +58,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
 }
 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::IfStatement* statement)  {
+    LOG1("Visiting " << dbp(getOriginal()));
     if (SideEffects::check(statement->condition, refMap, typeMap))
         return statement;
     if (statement->ifTrue->is<IR::EmptyStatement>() &&
@@ -61,6 +68,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::IfStatement* statement)  {
 }
 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::EmptyStatement* statement)  {
+    LOG1("Visiting " << dbp(getOriginal()));
     auto parent = findContext<IR::Statement>();
     if (parent == nullptr ||  // in a ParserState or P4Action
         parent->is<IR::BlockStatement>())
@@ -70,6 +78,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::EmptyStatement* statement) 
 }
 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::SwitchStatement* statement)  {
+    LOG1("Visiting " << dbp(getOriginal()));
     if (statement->cases.empty()) {
         BUG_CHECK(statement->expression->is<IR::Member>(),
                   "%1%: expected a Member", statement->expression);

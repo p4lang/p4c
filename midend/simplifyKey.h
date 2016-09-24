@@ -33,10 +33,10 @@ class KeyIsComplex {
 // Policy which returns 'true' whenever a key is not a left value
 // or a call to the isValid().
 class NonLeftValue : public KeyIsComplex {
-    const ReferenceMap* refMap;
-    const TypeMap*      typeMap;
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
  public:
-    NonLeftValue(const ReferenceMap* refMap, const TypeMap* typeMap) :
+    NonLeftValue(ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     bool isTooComplex(const IR::Expression* expression) const;
@@ -52,11 +52,11 @@ class TableInsertions {
 // turn them into simpler expressions.
 class DoSimplifyKey : public Transform {
     ReferenceMap*       refMap;
-    const TypeMap*      typeMap;
+    TypeMap*            typeMap;
     const KeyIsComplex* policy;
     std::map<const IR::P4Table*, TableInsertions*> toInsert;
  public:
-    DoSimplifyKey(ReferenceMap* refMap, const TypeMap* typeMap, const KeyIsComplex* policy) :
+    DoSimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, const KeyIsComplex* policy) :
             refMap(refMap), typeMap(typeMap), policy(policy)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(policy); setName("DoSimplifyKey"); }
     const IR::Node* doStatement(const IR::Statement* statement, const IR::Expression* expression);

@@ -1,43 +1,46 @@
 #include <core.p4>
 
 control c(out bool x) {
-    bool tmp;
-    bool tmp_0;
-    action NoAction_1() {
+    @name("tmp") bool tmp_0;
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    @name("t1") table t1_0() {
+    @name("t1") table t1() {
         key = {
             x: exact;
         }
         actions = {
-            NoAction_1();
+            NoAction();
         }
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("t2") table t2_0() {
+    @name("t2") table t2() {
         key = {
             x: exact;
         }
         actions = {
-            NoAction_2();
+            NoAction_0();
         }
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
     action act() {
-        x = false;
+        tmp_0 = false;
     }
     action act_0() {
+        tmp_0 = t2.apply().hit;
+    }
+    action act_1() {
         x = true;
-        tmp = t1_0.apply().hit;
-        tmp_0 = t2_0.apply().hit;
+    }
+    action act_2() {
+        x = false;
     }
     table tbl_act() {
         actions = {
-            act_0();
+            act_1();
         }
-        const default_action = act_0();
+        const default_action = act_1();
     }
     table tbl_act_0() {
         actions = {
@@ -45,10 +48,26 @@ control c(out bool x) {
         }
         const default_action = act();
     }
+    table tbl_act_1() {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
+    table tbl_act_2() {
+        actions = {
+            act_2();
+        }
+        const default_action = act_2();
+    }
     apply {
         tbl_act.apply();
-        if (tmp && tmp_0) 
+        if (!t1.apply().hit) 
             tbl_act_0.apply();
+        else 
+            tbl_act_1.apply();
+        if (tmp_0) 
+            tbl_act_2.apply();
     }
 }
 

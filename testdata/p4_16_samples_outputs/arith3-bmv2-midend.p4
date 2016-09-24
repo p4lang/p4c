@@ -43,18 +43,20 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("shift") action shift() {
-        h.h.c = (bit<64>)(h.h.a << h.h.b);
+    @name("tmp") bit<32> tmp_0;
+    @name("shift") action shift_0() {
+        tmp_0 = h.h.a << h.h.b;
+        h.h.c = (bit<64>)tmp_0;
         sm.egress_spec = 9w0;
     }
-    @name("t") table t_0() {
+    @name("t") table t() {
         actions = {
-            shift();
+            shift_0();
         }
-        const default_action = shift();
+        const default_action = shift_0();
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 

@@ -3,16 +3,16 @@ struct S {
 }
 
 control c(inout bit<32> b) {
-    action a() {
-        S s1;
-        S s2;
-        s2 = { 32w0 };
-        s1 = s2;
-        s2 = s1;
-        b = s2.x;
+    @name("s1") S s1_0;
+    @name("s2") S s2_0;
+    @name("a") action a_0() {
+        s2_0 = { 32w0 };
+        s1_0 = s2_0;
+        s2_0 = s1_0;
+        b = s2_0.x;
     }
     apply {
-        a();
+        a_0();
     }
 }
 

@@ -107,11 +107,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("do_noop") action do_noop() {
+    @name("do_noop") action do_noop_0() {
     }
-    @name("do_nothing") table do_nothing() {
+    @name("do_nothing") table do_nothing_0() {
         actions = {
-            do_noop();
+            do_noop_0();
             NoAction();
         }
         key = {
@@ -120,7 +120,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        do_nothing.apply();
+        do_nothing_0.apply();
     }
 }
 

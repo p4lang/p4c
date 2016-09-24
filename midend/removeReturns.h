@@ -83,12 +83,12 @@ class DoRemoveReturns : public Transform {
 // if (t1.apply().hit && t2.apply().hit) { ... }
 // It also assumes that there are no global actions and that action calls have been inlined.
 class DoRemoveExits : public DoRemoveReturns {
-    const TypeMap* typeMap;
+    TypeMap* typeMap;
     // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
     std::set<const IR::Node*> callsExit;  // actions, tables
     void callExit(const IR::Node* node);
  public:
-    DoRemoveExits(ReferenceMap* refMap, const TypeMap* typeMap) :
+    DoRemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :
             DoRemoveReturns(refMap, "hasExited"), typeMap(typeMap)
     { visitDagOnce = false; CHECK_NULL(typeMap); setName("DoRemoveExits"); }
 
@@ -107,7 +107,7 @@ class DoRemoveExits : public DoRemoveReturns {
 
 class RemoveReturns : public PassManager {
  public:
-    RemoveReturns(ReferenceMap* refMap) {
+    explicit RemoveReturns(ReferenceMap* refMap) {
         passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new DoRemoveReturns(refMap));
         setName("RemoveReturns");

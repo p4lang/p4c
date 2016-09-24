@@ -28,22 +28,22 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("setf1") action setf1(bit<32> val) {
+    @name("setf1") action setf1_0(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("setall") action setall(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4) {
+    @name("setall") action setall_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4) {
         hdr.data.f1 = v1;
         hdr.data.f2 = v2;
         hdr.data.f3 = v3;
         hdr.data.f4 = v4;
     }
-    @name("test1") table test1() {
+    @name("test1") table test1_0() {
         actions = {
-            noop();
-            setf1();
-            setall();
+            noop_0();
+            setf1_0();
+            setall_0();
             NoAction();
         }
         key = {
@@ -58,7 +58,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         @name("sel_profile") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);
     }
     apply {
-        test1.apply();
+        test1_0.apply();
     }
 }
 

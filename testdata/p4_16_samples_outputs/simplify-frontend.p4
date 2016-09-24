@@ -1,7 +1,7 @@
 #include <core.p4>
 
 control c(out bool x) {
-    table t1() {
+    @name("t1") table t1_0() {
         key = {
             x: exact;
         }
@@ -10,7 +10,7 @@ control c(out bool x) {
         }
         default_action = NoAction();
     }
-    table t2() {
+    @name("t2") table t2_0() {
         key = {
             x: exact;
         }
@@ -19,9 +19,14 @@ control c(out bool x) {
         }
         default_action = NoAction();
     }
+    bool tmp;
     apply {
         x = true;
-        if (t1.apply().hit && t2.apply().hit) 
+        if (!t1_0.apply().hit) 
+            tmp = false;
+        else 
+            tmp = t2_0.apply().hit;
+        if (tmp) 
             x = false;
     }
 }

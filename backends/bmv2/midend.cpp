@@ -18,8 +18,6 @@ limitations under the License.
 #include "lower.h"
 #include "inlining.h"
 #include "midend/actionsInlining.h"
-#include "midend/uniqueNames.h"
-#include "midend/moveDeclarations.h"
 #include "midend/removeReturns.h"
 #include "midend/moveConstructors.h"
 #include "midend/localizeActions.h"
@@ -29,10 +27,9 @@ limitations under the License.
 #include "midend/removeLeftSlices.h"
 #include "midend/convertEnums.h"
 #include "midend/simplifyKey.h"
-#include "midend/simplifyExpressions.h"
-#include "midend/simplifyParsers.h"
-#include "midend/resetHeaders.h"
 #include "midend/simplifySelect.h"
+#include "frontends/p4/uniqueNames.h"
+#include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -41,6 +38,7 @@ limitations under the License.
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "frontends/p4/moveDeclarations.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 
@@ -84,14 +82,8 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
     // we may come through this path even if the program is actually a P4 v1.0 program
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
-        new P4::SimplifyParsers(&refMap),
         new P4::ConvertEnums(&refMap, &typeMap,
                              new EnumOn32Bits()),
-        new P4::ResetHeaders(&refMap, &typeMap),
-        new P4::UniqueNames(&refMap),
-        new P4::MoveDeclarations(),
-        new P4::MoveInitializers(),
-        new P4::SimplifyExpressions(&refMap, &typeMap),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
@@ -106,16 +98,17 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
+        new P4::UniqueNames(&refMap),
         new P4::UniqueParameters(&refMap),
         new P4::ClearTypeMap(&typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveParameters(&refMap, &typeMap),
-        new P4::ClearTypeMap(&typeMap),
+        new P4::RemoveTableParameters(&refMap, &typeMap),
+        new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonLeftValue(&refMap, &typeMap)),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(),
-        new P4::SimplifySelect(&refMap, &typeMap, true), // constant keysets
+        new P4::SimplifySelect(&refMap, &typeMap, true),  // require constant keysets
         new P4::SimplifyParsers(&refMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::MoveDeclarations(),

@@ -107,7 +107,7 @@ void ControlBodyTranslationVisitor::processApply(const P4::ApplyMethod* method) 
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
     P4::ParameterSubstitution binding;
-    binding.populate(method->getParameters(), method->expr->arguments);
+    binding.populate(method->getActualParameters(), method->expr->arguments);
     cstring actionVariableName = saveAction.at(saveAction.size() - 1);
     if (!actionVariableName.isNullOrEmpty()) {
         builder->appendFormat("%s %s;\n", table->actionEnumName, actionVariableName);
@@ -118,7 +118,7 @@ void ControlBodyTranslationVisitor::processApply(const P4::ApplyMethod* method) 
     if (!binding.empty()) {
         builder->emitIndent();
         builder->appendLine("/* bind parameters */");
-        for (auto p : *method->getParameters()->getEnumerator()) {
+        for (auto p : *method->getActualParameters()->getEnumerator()) {
             toDereference.emplace(p);
             auto etype = EBPFTypeFactory::instance->create(p->type);
             builder->emitIndent();

@@ -6,17 +6,8 @@ header Header {
 
 parser p1(packet_in p, out Header h) {
     state start {
-        transition next;
-    }
-    state next {
         p.extract<Header>(h);
         transition accept;
-    }
-    state unreachable1 {
-        transition unreachable2;
-    }
-    state unreachable2 {
-        transition unreachable1;
     }
 }
 

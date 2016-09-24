@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "core.p4"
+#include <core.p4>
 
 #include "spec-ex09.p4"
 
@@ -23,7 +23,7 @@ struct Tcp_option_sack_top
     bit<8> kind;
     bit<8> length;
 }
-parser Tcp_option_parser(packet_in b, 
+parser Tcp_option_parser(packet_in b,
                          out Tcp_option_stack vec)
 {
     state start {

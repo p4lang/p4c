@@ -479,7 +479,9 @@ bool ToP4::preorder(const IR::Declaration_Constant* cst) {
     dump(2);
     visit(cst->annotations);
     builder.append("const ");
-    visit(cst->type);
+    auto type = cst->type->getP4Type();
+    CHECK_NULL(type);
+    visit(type);
     builder.spc();
     builder.append(cst->name);
     builder.append(" = ");
@@ -495,7 +497,9 @@ bool ToP4::preorder(const IR::Declaration_Constant* cst) {
 bool ToP4::preorder(const IR::Declaration_Instance* i) {
     dump(3);
     visit(i->annotations);
-    visit(i->type);
+    auto type = i->type->getP4Type();
+    CHECK_NULL(type);
+    visit(type);
     builder.append("(");
     setVecSep(", ");
     visit(i->arguments);
@@ -514,7 +518,9 @@ bool ToP4::preorder(const IR::Declaration_Instance* i) {
 bool ToP4::preorder(const IR::Declaration_Variable* v) {
     dump(1);
     visit(v->annotations);
-    visit(v->type);
+    auto type = v->type->getP4Type();
+    CHECK_NULL(type);
+    visit(type);
     builder.spc();
     builder.append(v->name);
     if (v->initializer != nullptr) {
@@ -846,6 +852,7 @@ bool ToP4::preorder(const IR::AssignmentStatement* a) {
 
 bool ToP4::preorder(const IR::BlockStatement* s) {
     dump(1);
+    visit(s->annotations);
     builder.blockStart();
     setVecSep("\n", "\n");
     visit(s->components);

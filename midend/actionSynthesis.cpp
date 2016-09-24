@@ -112,7 +112,7 @@ bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
             return true;
         auto em = mi->to<ExternMethod>();
         auto corelib = P4::P4CoreLibrary::instance;
-        if (em->type->name.name == corelib.packetOut.name &&
+        if (em->originalExternType->name.name == corelib.packetOut.name &&
             em->method->name.name == corelib.packetOut.emit.name)
             return false;
     }
@@ -151,15 +151,17 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
         }
 
         if (!actbody->empty()) {
-            auto block = new IR::BlockStatement(Util::SourceInfo(), actbody);
+            auto block = new IR::BlockStatement(
+                Util::SourceInfo(), IR::Annotations::empty, actbody);
             auto action = createAction(block);
             left->push_back(action);
             actbody = new IR::IndexedVector<IR::StatOrDecl>();
         }
         left->push_back(c);
     }
-    if (!actbody->empty())  {
-        auto block = new IR::BlockStatement(Util::SourceInfo(), actbody);
+    if (!actbody->empty()) {
+        auto block = new IR::BlockStatement(
+            Util::SourceInfo(), IR::Annotations::empty, actbody);
         auto action = createAction(block);
         left->push_back(action);
     }
@@ -168,7 +170,7 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
         // Since we have only one 'changes' per P4Control, this may
         // be conservatively creating a new block when it hasn't changed.
         // But the result should be correct.
-        auto result = new IR::BlockStatement(Util::SourceInfo(), left);
+        auto result = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, left);
         return result;
     }
     return statement;
@@ -183,7 +185,7 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
     } else {
         auto b = new IR::IndexedVector<IR::StatOrDecl>();
         b->push_back(toAdd);
-        body = new IR::BlockStatement(toAdd->srcInfo, b);
+        body = new IR::BlockStatement(toAdd->srcInfo, IR::Annotations::empty, b);
     }
     auto action = new IR::P4Action(Util::SourceInfo(), name,
                                    IR::Annotations::empty,

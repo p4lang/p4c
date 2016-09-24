@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_UNIQUENAMES_H_
-#define _MIDEND_UNIQUENAMES_H_
+#ifndef _FRONTENDS_P4_UNIQUENAMES_H_
+#define _FRONTENDS_P4_UNIQUENAMES_H_
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -52,7 +52,7 @@ class UniqueNames : public PassManager {
  private:
     RenameMap    *renameMap;
  public:
-    UniqueNames(ReferenceMap* refMap);
+    explicit UniqueNames(ReferenceMap* refMap);
 };
 
 // Finds and allocates new names for some symbols:
@@ -131,9 +131,9 @@ class UniqueParameters : public PassManager {
  private:
     RenameMap    *renameMap;
  public:
-    UniqueParameters(ReferenceMap* refMap);
+    explicit UniqueParameters(ReferenceMap* refMap);
 };
 
 }  // namespace P4
 
-#endif /* _MIDEND_UNIQUENAMES_H_ */
+#endif /* _FRONTENDS_P4_UNIQUENAMES_H_ */

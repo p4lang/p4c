@@ -9,10 +9,10 @@ control c(inout S data) {
 }
 
 control caller() {
-    S data;
-    c() cinst;
+    @name("data") S data_0;
+    @name("cinst") c() cinst_0;
     apply {
-        cinst.apply(data);
+        cinst_0.apply(data_0);
     }
 }
 

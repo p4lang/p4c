@@ -1,19 +1,19 @@
 control c(out bit<32> x) {
-    action a1() {
+    @name("a1") action a1_0() {
     }
-    action a2() {
+    @name("a2") action a2_0() {
     }
-    table t() {
+    @name("t") table t_0() {
         actions = {
-            a1();
-            a2();
+            a1_0();
+            a2_0();
         }
-        default_action = a1();
+        default_action = a1_0();
     }
     apply {
-        switch (t.apply().action_run) {
-            a1: 
-            a2: {
+        switch (t_0.apply().action_run) {
+            a1_0: 
+            a2_0: {
                 return;
             }
             default: {
@@ -25,9 +25,9 @@ control c(out bit<32> x) {
 }
 
 control d(out bit<32> x) {
-    c() cinst;
+    @name("cinst") c() cinst_0;
     apply {
-        cinst.apply(x);
+        cinst_0.apply(x);
     }
 }
 

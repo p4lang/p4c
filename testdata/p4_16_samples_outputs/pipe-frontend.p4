@@ -35,48 +35,64 @@ struct Packet_data {
 action NoAction() {
 }
 control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
-    action B_action(out bit<9> barg, BParamType bData) {
+    @name("B_action") action B_action_0(out bit<9> barg, BParamType bData) {
         barg = (bit<9>)bData;
     }
-    action C_action(bit<9> cData) {
+    @name("C_action") action C_action_0(bit<9> cData) {
         pArg1.field1 = cData;
     }
-    table T(inout TArg1 tArg1, in TArg2 aArg2) {
+    @name("T") table T_0(inout TArg1 tArg1, in TArg2 aArg2) {
         key = {
             tArg1.field1: ternary;
             aArg2.field2: exact;
         }
         actions = {
-            B_action(tArg1.field1);
-            C_action();
+            B_action_0(tArg1.field1);
+            C_action_0();
         }
         size = t2Size;
-        const default_action = C_action(9w5);
+        const default_action = C_action_0(9w5);
     }
-    action Drop() {
+    @name("Drop") action Drop_0() {
         pArg1.drop = true;
     }
-    table Tinner() {
+    @name("Tinner") table Tinner_0() {
         key = {
             pArg1.field1: ternary;
         }
         actions = {
-            Drop();
+            Drop_0();
             NoAction();
         }
         const default_action = NoAction();
     }
+    TArg1 tmp;
+    TArg2 tmp_0;
+    TArg1 tmp_1;
+    TArg2 tmp_2;
     apply {
-        T.apply(pArg1, pArg2);
-        T.apply(pArg1, pArg2);
-        Tinner.apply();
+        tmp = pArg1;
+        tmp_0 = pArg2;
+        T_0.apply(tmp, tmp_0);
+        pArg1 = tmp;
+        tmp_1 = pArg1;
+        tmp_2 = pArg2;
+        T_0.apply(tmp_1, tmp_2);
+        pArg1 = tmp_1;
+        Tinner_0.apply();
     }
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    P_pipe(32w5) p1;
+    @name("p1") P_pipe(32w5) p1_0;
+    TArg1 tmp_3;
+    TArg2 tmp_4;
     apply {
-        p1.apply(qArg1, qArg2);
+        tmp_3 = qArg1;
+        tmp_4 = qArg2;
+        p1_0.apply(tmp_3, tmp_4);
+        qArg1 = tmp_3;
+        qArg2 = tmp_4;
     }
 }
 

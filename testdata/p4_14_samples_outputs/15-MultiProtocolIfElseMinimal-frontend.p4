@@ -78,15 +78,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("set_egress_port") action set_egress_port(bit<8> egress_port) {
+    @name("set_egress_port") action set_egress_port_0(bit<8> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("ipv4_match") table ipv4_match() {
+    @name("ipv4_match") table ipv4_match_0() {
         actions = {
-            nop();
-            set_egress_port();
+            nop_0();
+            set_egress_port_0();
             NoAction();
         }
         key = {
@@ -94,10 +94,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("l2_match") table l2_match() {
+    @name("l2_match") table l2_match_0() {
         actions = {
-            nop();
-            set_egress_port();
+            nop_0();
+            set_egress_port_0();
             NoAction();
         }
         key = {
@@ -107,9 +107,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         if (hdr.ethernet.etherType == 16w0x800) 
-            ipv4_match.apply();
+            ipv4_match_0.apply();
         else 
-            l2_match.apply();
+            l2_match_0.apply();
     }
 }
 

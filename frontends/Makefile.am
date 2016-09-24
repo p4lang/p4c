@@ -16,8 +16,6 @@ p4_frontend_SOURCES = \
 	frontends/p4/p4-parse.ypp \
 	frontends/p4/frontend.h \
 	frontends/p4/frontend.cpp \
-	frontends/p4/checkAliasing.h \
-	frontends/p4/checkAliasing.cpp \
 	frontends/p4/createBuiltins.h \
 	frontends/p4/createBuiltins.cpp \
 	frontends/p4/def_use.h \
@@ -71,7 +69,19 @@ p4_frontend_SOURCES = \
 	frontends/p4/fromv1.0/converters.h \
 	frontends/p4/fromv1.0/converters.cpp \
 	frontends/p4/typeMap.h \
-	frontends/p4/typeMap.cpp
+	frontends/p4/typeMap.cpp \
+	frontends/p4/simplifyDefUse.cpp \
+	frontends/p4/simplifyDefUse.h \
+	frontends/p4/sideEffects.cpp \
+	frontends/p4/sideEffects.h \
+	frontends/p4/simplifyParsers.cpp \
+	frontends/p4/simplifyParsers.h \
+	frontends/p4/uniqueNames.cpp \
+	frontends/p4/uniqueNames.h \
+	frontends/p4/resetHeaders.cpp \
+	frontends/p4/resetHeaders.h \
+	frontends/p4/moveDeclarations.cpp \
+	frontends/p4/moveDeclarations.h
 
 common_frontend_SOURCES = \
 	frontends/common/options.h  \

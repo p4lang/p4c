@@ -165,45 +165,45 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("drop_stats") counter(32w256, CounterType.packets) drop_stats;
-    @name("drop_stats_2") counter(32w256, CounterType.packets) drop_stats_2;
-    @name("drop_stats_update") action drop_stats_update() {
-        drop_stats_2.count((bit<32>)meta.ingress_metadata.drop_reason);
+    @name("drop_stats") counter(32w256, CounterType.packets) drop_stats_1;
+    @name("drop_stats_2") counter(32w256, CounterType.packets) drop_stats_3;
+    @name("drop_stats_update") action drop_stats_update_0() {
+        drop_stats_3.count((bit<32>)meta.ingress_metadata.drop_reason);
     }
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("copy_to_cpu") action copy_to_cpu(bit<16> reason_code) {
+    @name("copy_to_cpu") action copy_to_cpu_0(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
     }
-    @name("redirect_to_cpu") action redirect_to_cpu(bit<16> reason_code) {
-        copy_to_cpu(reason_code);
+    @name("redirect_to_cpu") action redirect_to_cpu_0(bit<16> reason_code) {
+        copy_to_cpu_0(reason_code);
     }
-    @name("drop_packet") action drop_packet() {
+    @name("drop_packet") action drop_packet_0() {
     }
-    @name("drop_packet_with_reason") action drop_packet_with_reason(bit<8> drop_reason) {
-        drop_stats.count((bit<32>)drop_reason);
+    @name("drop_packet_with_reason") action drop_packet_with_reason_0(bit<8> drop_reason) {
+        drop_stats_1.count((bit<32>)drop_reason);
     }
-    @name("negative_mirror") action negative_mirror(bit<8> session_id) {
+    @name("negative_mirror") action negative_mirror_0(bit<8> session_id) {
     }
-    @name("congestion_mirror_set") action congestion_mirror_set() {
+    @name("congestion_mirror_set") action congestion_mirror_set_0() {
     }
-    @name("drop_stats") table drop_stats_0() {
+    @name("drop_stats") table drop_stats_4() {
         actions = {
-            drop_stats_update();
+            drop_stats_update_0();
             NoAction();
         }
         size = 256;
         default_action = NoAction();
     }
-    @name("system_acl") table system_acl() {
+    @name("system_acl") table system_acl_0() {
         actions = {
-            nop();
-            redirect_to_cpu();
-            copy_to_cpu();
-            drop_packet();
-            drop_packet_with_reason();
-            negative_mirror();
-            congestion_mirror_set();
+            nop_0();
+            redirect_to_cpu_0();
+            copy_to_cpu_0();
+            drop_packet_0();
+            drop_packet_with_reason_0();
+            negative_mirror_0();
+            congestion_mirror_set_0();
             NoAction();
         }
         key = {
@@ -239,9 +239,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        system_acl.apply();
+        system_acl_0.apply();
         if (meta.ingress_metadata.drop_flag == 1w1) 
-            drop_stats_0.apply();
+            drop_stats_4.apply();
     }
 }
 

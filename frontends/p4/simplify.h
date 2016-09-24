@@ -24,51 +24,11 @@ limitations under the License.
 
 namespace P4 {
 
-// Determines whether an expression may have side-effects
-class SideEffects : public Inspector {
- private:
-    const ReferenceMap* refMap;
-    const TypeMap*      typeMap;
-    bool                hasSideEffects;
-    void postorder(const IR::MethodCallExpression* mce) override {
-        if (refMap == nullptr || typeMap == nullptr) {
-            // conservative
-            hasSideEffects = true;
-            return;
-        }
-        // TODO: add an annotation to indicate lack of side-effects
-        auto mi = MethodInstance::resolve(mce, refMap, typeMap);
-        if (!mi->is<BuiltInMethod>()) {
-            hasSideEffects = true;
-            return;
-        }
-        auto bim = mi->to<BuiltInMethod>();
-        if (bim->name.name != IR::Type_Header::isValid)
-            hasSideEffects = true;
-    }
-    void postorder(const IR::ConstructorCallExpression*) override {
-        hasSideEffects = true;
-    }
-    // If you pass nullptr for these arguments the check will be more conservative
-    SideEffects(const ReferenceMap* refMap, const TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap), hasSideEffects(false) { setName("SideEffects"); }
-
- public:
-    // Returns true if the expression may have side-effects.
-    static bool check(const IR::Expression* expression,
-                      const ReferenceMap* refMap,
-                      const TypeMap* typeMap) {
-        SideEffects se(refMap, typeMap);
-        expression->apply(se);
-        return se.hasSideEffects;
-    }
-};
-
 class DoSimplifyControlFlow : public Transform {
-    const ReferenceMap* refMap;
-    const TypeMap*      typeMap;
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
  public:
-    DoSimplifyControlFlow(const ReferenceMap* refMap, const TypeMap* typeMap) :
+    DoSimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoSimplifyControlFlow"); }
     const IR::Node* postorder(IR::BlockStatement* statement) override;

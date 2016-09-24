@@ -6,18 +6,24 @@ extern Generic<T> {
 
 extern void f<T>(in T arg);
 control c<T>()(T size) {
-    Generic<T>(size) x;
+    @name("a") bit<32> a_0;
+    @name("b") bit<32> b_0;
+    @name("x") Generic<T>(size) x_0;
+    bit<32> tmp;
+    bit<5> tmp_0;
     apply {
-        bit<32> a = x.get<bit<32>>();
-        bit<32> b = (bit<32>)(x.get1<bit<5>, bit<10>>(10w0, 5w0));
-        f<bit<32>>(b);
+        tmp = x_0.get<bit<32>>();
+        a_0 = tmp;
+        tmp_0 = x_0.get1<bit<5>, bit<10>>(10w0, 5w0);
+        b_0 = (bit<32>)tmp_0;
+        f<bit<32>>(b_0);
     }
 }
 
 control caller() {
-    c<bit<8>>(8w9) cinst;
+    @name("cinst") c<bit<8>>(8w9) cinst_0;
     apply {
-        cinst.apply();
+        cinst_0.apply();
     }
 }
 

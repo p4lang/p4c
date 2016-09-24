@@ -52,48 +52,48 @@ struct struct_0 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    @name("_nop") action _nop() {
+    @name("_nop") action _nop_0() {
     }
-    @name("_nop") action _nop_1() {
+    @name("_nop") action _nop_2() {
     }
-    @name("set_port") action set_port(bit<9> port) {
+    @name("set_port") action set_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("_resubmit") action _resubmit() {
+    @name("_resubmit") action _resubmit_0() {
         meta.mymeta.f1 = 8w1;
         resubmit<struct_0>({ standard_metadata, meta.mymeta });
     }
-    @name("t_ingress_1") table t_ingress() {
+    @name("t_ingress_1") table t_ingress_1() {
         actions = {
-            _nop();
-            set_port();
-            NoAction_1();
+            _nop_0();
+            set_port_0();
+            NoAction();
         }
         key = {
             meta.mymeta.f1: exact;
         }
         size = 128;
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("t_ingress_2") table t_ingress_0() {
+    @name("t_ingress_2") table t_ingress_2() {
         actions = {
-            _nop_1();
-            _resubmit();
-            NoAction_2();
+            _nop_2();
+            _resubmit_0();
+            NoAction_0();
         }
         key = {
             meta.mymeta.f1: exact;
         }
         size = 128;
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
     apply {
-        t_ingress.apply();
-        t_ingress_0.apply();
+        t_ingress_1.apply();
+        t_ingress_2.apply();
     }
 }
 

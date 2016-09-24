@@ -44,15 +44,15 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    action Reject() {
+    @name("Reject") action Reject_0() {
         pass = false;
     }
-    table Check_ip(in IPv4Address address) {
+    @name("Check_ip") table Check_ip_0(in IPv4Address address) {
         key = {
             address: exact;
         }
         actions = {
-            Reject();
+            Reject_0();
             NoAction();
         }
         implementation = hash_table(32w1024);
@@ -64,8 +64,8 @@ control pipe(inout Headers_t headers, out bool pass) {
             pass = false;
             return;
         }
-        Check_ip.apply(headers.ipv4.srcAddr);
-        Check_ip.apply(headers.ipv4.dstAddr);
+        Check_ip_0.apply(headers.ipv4.srcAddr);
+        Check_ip_0.apply(headers.ipv4.dstAddr);
     }
 }
 

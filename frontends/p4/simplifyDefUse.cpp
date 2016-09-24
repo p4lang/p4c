@@ -24,13 +24,13 @@ namespace {
 
 // Run for each parser and control separately
 class FindUninitialized : public Inspector {
-    const ReferenceMap* refMap;
-    const TypeMap*      typeMap;
-    AllDefinitions*     definitions;
-    bool                lhs;  // checking the lhs of an assignment
+    ReferenceMap*   refMap;
+    TypeMap*        typeMap;
+    AllDefinitions* definitions;
+    bool            lhs;  // checking the lhs of an assignment
     // For some simple expresssions keep here the read location sets
     std::map<const IR::Expression*, const LocationSet*> locations;
-    Definitions*        currentDefinitions;  // set for each statement
+    Definitions*    currentDefinitions;  // set for each statement
 
     const LocationSet* get(const IR::Expression* expression) const {
         auto result = ::get(locations, expression);
@@ -42,7 +42,9 @@ class FindUninitialized : public Inspector {
         locations.emplace(expression, loc);
     }
 
-    void checkUninitialized(const IR::Statement* statement, ProgramPoint at) {
+    void checkUninitialized(const IR::StatOrDecl* statement, ProgramPoint at) {
+        if (!statement->is<IR::Statement>())
+            return;
         currentDefinitions = definitions->get(at);
         if (statement->is<IR::AssignmentStatement>()) {
             auto assign = statement->to<IR::AssignmentStatement>();
@@ -53,25 +55,29 @@ class FindUninitialized : public Inspector {
         } else if (statement->is<IR::MethodCallStatement>()) {
             auto mcs = statement->to<IR::MethodCallStatement>();
             visit(mcs->methodCall);
+        } else if (statement->is<IR::BlockStatement>()) {
+            auto block = statement->to<IR::BlockStatement>();
+            for (auto s : *block->components) {
+                checkUninitialized(s, at);
+                at = ProgramPoint(s);
+            }
         } else {
-            BUG("%1%: unexpected statement");
+            BUG("%1%: unexpected statement", statement);
         }
         currentDefinitions = nullptr;
     }
 
  public:
-    FindUninitialized(const ReferenceMap* refMap, const TypeMap* typeMap, AllDefinitions* definitions) :
+    FindUninitialized(ReferenceMap* refMap, TypeMap* typeMap, AllDefinitions* definitions) :
             refMap(refMap), typeMap(typeMap), definitions(definitions),
-            lhs(false), currentDefinitions(nullptr)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions); setName("FindUninitialized"); }
+            lhs(false), currentDefinitions(nullptr) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions);
+        setName("FindUninitialized"); }
 
     bool preorder(const IR::ParserState* state) override {
         ProgramPoint cursor(state);  // point before the first statement
         for (auto s : *state->components) {
-            if (s->is<IR::Statement>()) {
-                auto stat = s->to<IR::Statement>();
-                checkUninitialized(stat, cursor); // the cursor points BEFORE the statement
-            }
+            checkUninitialized(s, cursor);  // the cursor points BEFORE the statement
             cursor = ProgramPoint(s);
         }
         return false;
@@ -188,15 +194,22 @@ class FindUninitialized : public Inspector {
             return;
         CHECK_NULL(currentDefinitions);
         auto points = currentDefinitions->get(read);
-        if (points->containsUninitialized())
-            ::warning("%1% may be uninitialized", expression);
+        if (points->containsUninitialized()) {
+            auto type = typeMap->getType(expression, true);
+            cstring message;
+            if (type->is<IR::Type_Base>())
+                message = "%1% may be uninitialized";
+            else
+                message = "%1% may not be completely initialized";
+            ::warning(message, expression);
+        }
     }
 
     void postorder(const IR::Expression* expression) override {
         report(expression);
     }
 
-    bool preorder(const IR::P4Control* ) override {
+    bool preorder(const IR::P4Control*) override {
         // TODO: not yet implemented
         return false;
     }
@@ -218,7 +231,7 @@ class ProcessDefUse : public PassManager {
         setName("ProcessDefUse");
     }
 };
-}
+}  // namespace
 
 const IR::Node* DoSimplifyDefUse::process(const IR::Node* node) {
     ProcessDefUse process(refMap, typeMap);

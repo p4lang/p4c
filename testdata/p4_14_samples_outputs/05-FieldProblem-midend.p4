@@ -31,47 +31,47 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction() {
     }
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("e_t1") table e_t1_0() {
+    @name("e_t1") table e_t1() {
         actions = {
-            nop();
-            NoAction_2();
+            nop_0();
+            NoAction();
         }
         key = {
             hdr.vag.f1: exact;
         }
-        default_action = NoAction_2();
+        default_action = NoAction();
     }
     apply {
-        e_t1_0.apply();
+        e_t1.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_0() {
     }
-    @name("nop") action nop_2() {
+    @name("nop") action nop_1() {
     }
-    @name("set_f1") action set_f1(bit<8> f1) {
+    @name("set_f1") action set_f1_0(bit<8> f1) {
         meta.ing_metadata.f1 = f1;
     }
-    @name("i_t1") table i_t1_0() {
+    @name("i_t1") table i_t1() {
         actions = {
-            nop_2();
-            set_f1();
-            NoAction_3();
+            nop_1();
+            set_f1_0();
+            NoAction_0();
         }
         key = {
             hdr.vag.f1: exact;
         }
         size = 1024;
-        default_action = NoAction_3();
+        default_action = NoAction_0();
     }
     apply {
-        i_t1_0.apply();
+        i_t1.apply();
     }
 }
 

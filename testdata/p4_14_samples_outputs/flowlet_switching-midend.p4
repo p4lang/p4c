@@ -93,28 +93,28 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction() {
     }
-    @name("rewrite_mac") action rewrite_mac(bit<48> smac) {
+    @name("rewrite_mac") action rewrite_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("_drop") action _drop() {
+    @name("_drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("send_frame") table send_frame_0() {
+    @name("send_frame") table send_frame() {
         actions = {
-            rewrite_mac();
-            _drop();
-            NoAction_2();
+            rewrite_mac_0();
+            _drop_0();
+            NoAction();
         }
         key = {
             standard_metadata.egress_port: exact;
         }
         size = 256;
-        default_action = NoAction_2();
+        default_action = NoAction();
     }
     apply {
-        send_frame_0.apply();
+        send_frame.apply();
     }
 }
 
@@ -136,107 +136,107 @@ struct struct_1 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_0() {
     }
-    action NoAction_4() {
+    @name("NoAction_4") action NoAction_1() {
     }
-    action NoAction_5() {
+    @name("NoAction_5") action NoAction_8() {
     }
-    action NoAction_6() {
+    @name("NoAction_6") action NoAction_9() {
     }
-    action NoAction_7() {
+    @name("NoAction_7") action NoAction_10() {
     }
-    @name("flowlet_id") register<bit<16>>(32w8192) flowlet_id_0;
-    @name("flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_0;
-    @name("_drop") action _drop_2() {
+    @name("flowlet_id") register<bit<16>>(32w8192) flowlet_id_1;
+    @name("flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_1;
+    @name("_drop") action _drop_1() {
         mark_to_drop();
     }
-    @name("_drop") action _drop_3() {
+    @name("_drop") action _drop_5() {
         mark_to_drop();
     }
-    @name("_drop") action _drop_4() {
+    @name("_drop") action _drop_6() {
         mark_to_drop();
     }
-    @name("set_ecmp_select") action set_ecmp_select(bit<8> ecmp_base, bit<8> ecmp_count) {
+    @name("set_ecmp_select") action set_ecmp_select_0(bit<8> ecmp_base, bit<8> ecmp_count) {
         hash<bit<14>, bit<10>, struct_0, bit<20>>(meta.ingress_metadata.ecmp_offset, HashAlgorithm.crc16, (bit<10>)ecmp_base, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort, meta.ingress_metadata.flowlet_id }, (bit<20>)ecmp_count);
     }
-    @name("set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
+    @name("set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
         meta.ingress_metadata.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("lookup_flowlet_map") action lookup_flowlet_map() {
+    @name("lookup_flowlet_map") action lookup_flowlet_map_0() {
         hash<bit<13>, bit<13>, struct_1, bit<26>>(meta.ingress_metadata.flowlet_map_index, HashAlgorithm.crc16, 13w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 26w13);
-        flowlet_id_0.read(meta.ingress_metadata.flowlet_id, (bit<32>)meta.ingress_metadata.flowlet_map_index);
+        flowlet_id_1.read(meta.ingress_metadata.flowlet_id, (bit<32>)meta.ingress_metadata.flowlet_map_index);
         meta.ingress_metadata.flow_ipg = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-        flowlet_lasttime_0.read(meta.ingress_metadata.flowlet_lasttime, (bit<32>)meta.ingress_metadata.flowlet_map_index);
+        flowlet_lasttime_1.read(meta.ingress_metadata.flowlet_lasttime, (bit<32>)meta.ingress_metadata.flowlet_map_index);
         meta.ingress_metadata.flow_ipg = meta.ingress_metadata.flow_ipg - meta.ingress_metadata.flowlet_lasttime;
-        flowlet_lasttime_0.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp);
+        flowlet_lasttime_1.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp);
     }
-    @name("set_dmac") action set_dmac(bit<48> dmac) {
+    @name("set_dmac") action set_dmac_0(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
-    @name("update_flowlet_id") action update_flowlet_id() {
+    @name("update_flowlet_id") action update_flowlet_id_0() {
         meta.ingress_metadata.flowlet_id = meta.ingress_metadata.flowlet_id + 16w1;
-        flowlet_id_0.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<16>)meta.ingress_metadata.flowlet_id);
+        flowlet_id_1.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<16>)meta.ingress_metadata.flowlet_id);
     }
-    @name("ecmp_group") table ecmp_group_0() {
+    @name("ecmp_group") table ecmp_group() {
         actions = {
-            _drop_2();
-            set_ecmp_select();
-            NoAction_3();
+            _drop_1();
+            set_ecmp_select_0();
+            NoAction_0();
         }
         key = {
             hdr.ipv4.dstAddr: lpm;
         }
         size = 1024;
-        default_action = NoAction_3();
+        default_action = NoAction_0();
     }
-    @name("ecmp_nhop") table ecmp_nhop_0() {
+    @name("ecmp_nhop") table ecmp_nhop() {
         actions = {
-            _drop_3();
-            set_nhop();
-            NoAction_4();
+            _drop_5();
+            set_nhop_0();
+            NoAction_1();
         }
         key = {
             meta.ingress_metadata.ecmp_offset: exact;
         }
         size = 16384;
-        default_action = NoAction_4();
+        default_action = NoAction_1();
     }
-    @name("flowlet") table flowlet_0() {
+    @name("flowlet") table flowlet() {
         actions = {
-            lookup_flowlet_map();
-            NoAction_5();
+            lookup_flowlet_map_0();
+            NoAction_8();
         }
-        default_action = NoAction_5();
+        default_action = NoAction_8();
     }
-    @name("forward") table forward_0() {
+    @name("forward") table forward() {
         actions = {
-            set_dmac();
-            _drop_4();
-            NoAction_6();
+            set_dmac_0();
+            _drop_6();
+            NoAction_9();
         }
         key = {
             meta.ingress_metadata.nhop_ipv4: exact;
         }
         size = 512;
-        default_action = NoAction_6();
+        default_action = NoAction_9();
     }
-    @name("new_flowlet") table new_flowlet_0() {
+    @name("new_flowlet") table new_flowlet() {
         actions = {
-            update_flowlet_id();
-            NoAction_7();
+            update_flowlet_id_0();
+            NoAction_10();
         }
-        default_action = NoAction_7();
+        default_action = NoAction_10();
     }
     apply {
-        flowlet_0.apply();
+        flowlet.apply();
         if (meta.ingress_metadata.flow_ipg > 32w50000) 
-            new_flowlet_0.apply();
-        ecmp_group_0.apply();
-        ecmp_nhop_0.apply();
-        forward_0.apply();
+            new_flowlet.apply();
+        ecmp_group.apply();
+        ecmp_nhop.apply();
+        forward.apply();
     }
 }
 
@@ -263,30 +263,19 @@ struct struct_2 {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp;
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
+    @name("ipv4_checksum") Checksum16() ipv4_checksum;
     action act() {
         mark_to_drop();
     }
-    action act_0() {
-        tmp = ipv4_checksum_0.get<struct_2>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-    }
     table tbl_act() {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
-    table tbl_act_0() {
         actions = {
             act();
         }
         const default_action = act();
     }
     apply {
-        tbl_act.apply();
-        if (hdr.ipv4.hdrChecksum == tmp) 
-            tbl_act_0.apply();
+        if (hdr.ipv4.hdrChecksum == (ipv4_checksum.get<struct_2>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }))) 
+            tbl_act.apply();
     }
 }
 
@@ -305,18 +294,18 @@ struct struct_3 {
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
-    action act_1() {
-        hdr.ipv4.hdrChecksum = ipv4_checksum_1.get<struct_3>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
+    action act_0() {
+        hdr.ipv4.hdrChecksum = ipv4_checksum_2.get<struct_3>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
     }
-    table tbl_act_1() {
+    table tbl_act_0() {
         actions = {
-            act_1();
+            act_0();
         }
-        const default_action = act_1();
+        const default_action = act_0();
     }
     apply {
-        tbl_act_1.apply();
+        tbl_act_0.apply();
     }
 }
 

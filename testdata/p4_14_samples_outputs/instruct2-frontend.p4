@@ -28,24 +28,24 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("do_add") action do_add() {
+    @name("do_add") action do_add_0() {
         hdr.data.b3 = hdr.data.b1 + hdr.data.b2;
     }
-    @name("do_and") action do_and() {
+    @name("do_and") action do_and_0() {
         hdr.data.b2 = hdr.data.b3 & hdr.data.b4;
     }
-    @name("do_or") action do_or() {
+    @name("do_or") action do_or_0() {
         hdr.data.b4 = hdr.data.b3 | hdr.data.b1;
     }
-    @name("do_xor") action do_xor() {
+    @name("do_xor") action do_xor_0() {
         hdr.data.b1 = hdr.data.b2 ^ hdr.data.b3;
     }
-    @name("test1") table test1() {
+    @name("test1") table test1_0() {
         actions = {
-            do_add();
-            do_and();
-            do_or();
-            do_xor();
+            do_add_0();
+            do_and_0();
+            do_or_0();
+            do_xor_0();
             NoAction();
         }
         key = {
@@ -54,7 +54,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        test1.apply();
+        test1_0.apply();
     }
 }
 

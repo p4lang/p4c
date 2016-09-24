@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "core.p4"
+#include <core.p4>
 
 // IPv4 header without options
 header IPv4_no_options_h {

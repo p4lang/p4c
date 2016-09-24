@@ -28,97 +28,97 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_7() {
     }
-    action NoAction_4() {
+    @name("NoAction_4") action NoAction_8() {
     }
-    action NoAction_5() {
+    @name("NoAction_5") action NoAction_9() {
     }
-    action NoAction_6() {
+    @name("NoAction_6") action NoAction_10() {
     }
-    @name("do_b") action do_b() {
+    @name("do_b") action do_b_0() {
     }
-    @name("do_d") action do_d() {
+    @name("do_d") action do_d_0() {
     }
-    @name("do_e") action do_e() {
+    @name("do_e") action do_e_0() {
     }
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("nop") action nop_1() {
+    @name("nop") action nop_5() {
     }
-    @name("nop") action nop_2() {
+    @name("nop") action nop_6() {
     }
-    @name("nop") action nop_3() {
+    @name("nop") action nop_7() {
     }
-    @name("nop") action nop_4() {
+    @name("nop") action nop_8() {
     }
-    @name("A") table A_0() {
+    @name("A") table A() {
         actions = {
-            do_b();
-            do_d();
-            do_e();
-            NoAction_1();
+            do_b_0();
+            do_d_0();
+            do_e_0();
+            NoAction();
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("B") table B_0() {
+    @name("B") table B() {
         actions = {
-            nop();
-            NoAction_2();
+            nop_0();
+            NoAction_0();
         }
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
-    @name("C") table C_0() {
+    @name("C") table C() {
         actions = {
-            nop_1();
-            NoAction_3();
+            nop_5();
+            NoAction_7();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_7();
     }
-    @name("D") table D_0() {
+    @name("D") table D_1() {
         actions = {
-            nop_2();
-            NoAction_4();
+            nop_6();
+            NoAction_8();
         }
-        default_action = NoAction_4();
+        default_action = NoAction_8();
     }
-    @name("E") table E_0() {
+    @name("E") table E() {
         actions = {
-            nop_3();
-            NoAction_5();
+            nop_7();
+            NoAction_9();
         }
-        default_action = NoAction_5();
+        default_action = NoAction_9();
     }
-    @name("F") table F_0() {
+    @name("F") table F() {
         actions = {
-            nop_4();
-            NoAction_6();
+            nop_8();
+            NoAction_10();
         }
-        default_action = NoAction_6();
+        default_action = NoAction_10();
     }
     apply {
-        switch (A_0.apply().action_run) {
-            do_b: {
-                B_0.apply();
-                C_0.apply();
+        switch (A.apply().action_run) {
+            do_b_0: {
+                B.apply();
+                C.apply();
             }
-            do_d: {
-                D_0.apply();
-                C_0.apply();
+            do_d_0: {
+                D_1.apply();
+                C.apply();
             }
-            do_e: {
-                E_0.apply();
+            do_e_0: {
+                E.apply();
             }
         }
 
-        F_0.apply();
+        F.apply();
     }
 }
 

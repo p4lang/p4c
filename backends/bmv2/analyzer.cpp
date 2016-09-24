@@ -90,11 +90,11 @@ namespace {
 // This visitor "converts" IR::Node* into EdgeSets
 // Since we cannot return EdgeSets, we place them in the 'after' map.
 class CFGBuilder : public Inspector {
-    CFG*                                           cfg;
-    const CFG::EdgeSet*                            current;  // predecessors of current node
+    CFG*                    cfg;
+    const CFG::EdgeSet*     current;  // predecessors of current node
     std::map<const IR::Statement*, const CFG::EdgeSet*> after;  // successors of each statement
-    const P4::ReferenceMap*                     refMap;
-    const P4::TypeMap*                          typeMap;
+    P4::ReferenceMap*       refMap;
+    P4::TypeMap*            typeMap;
 
     void setAfter(const IR::Statement* statement, const CFG::EdgeSet* value) {
         LOG1("After " << statement << " " << value);
@@ -216,7 +216,7 @@ class CFGBuilder : public Inspector {
     }
 
  public:
-    CFGBuilder(CFG* cfg, const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap) :
+    CFGBuilder(CFG* cfg, P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
             cfg(cfg), current(nullptr), refMap(refMap), typeMap(typeMap) {}
     const CFG::EdgeSet* run(const IR::Statement* startNode, const CFG::EdgeSet* predecessors) {
         CHECK_NULL(startNode); CHECK_NULL(predecessors);
@@ -228,7 +228,7 @@ class CFGBuilder : public Inspector {
 }  // end anonymous namespace
 
 void CFG::build(const IR::P4Control* cc,
-                const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap) {
+                P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
     container = cc;
     entryPoint = makeNode(cc->name + ".entry");
     exitPoint = makeNode(cc->name + ".exit");

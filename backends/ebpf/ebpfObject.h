@@ -51,7 +51,7 @@ class EBPFProgram : public EBPFObject {
     const IR::P4Program* program;
     const IR::ToplevelBlock*  toplevel;
     P4::ReferenceMap*    refMap;
-    const P4::TypeMap*   typeMap;
+    P4::TypeMap*         typeMap;
     EBPFParser*          parser;
     EBPFControl*         control;
     EBPFModel           &model;
@@ -70,7 +70,7 @@ class EBPFProgram : public EBPFObject {
     bool build();  // return 'true' on success
 
     EBPFProgram(const IR::P4Program* program, P4::ReferenceMap* refMap,
-                const P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
+                P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
             program(program), toplevel(toplevel),
             refMap(refMap), typeMap(typeMap),
             parser(nullptr), control(nullptr), model(EBPFModel::instance) {

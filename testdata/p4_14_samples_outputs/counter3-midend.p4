@@ -29,25 +29,25 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    @name("act") action act(bit<48> idx) {
+    @name("act") action act_0(bit<48> idx) {
         hdr.ethernet.dstAddr = idx;
     }
-    @name("tab1") table tab1_0() {
+    @name("tab1") table tab1() {
         actions = {
-            act();
-            NoAction_1();
+            act_0();
+            NoAction();
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
         size = 128;
-        default_action = NoAction_1();
+        default_action = NoAction();
         @name("cnt") counters = direct_counter(CounterType.packets);
     }
     apply {
-        tab1_0.apply();
+        tab1.apply();
     }
 }
 

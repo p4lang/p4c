@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ limitations under the License.
 namespace EBPF {
 
 void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
-                      P4::ReferenceMap* refMap, const P4::TypeMap* typeMap) {
+                      P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
     if (toplevel == nullptr)
         return;
 

@@ -129,7 +129,7 @@ class ValueMap final {
 };
 
 class ExpressionEvaluator : public Inspector {
-    const ReferenceMap* refMap;
+    ReferenceMap*       refMap;
     TypeMap*            typeMap;  // updated if constant folding happens
     ValueMap*           valueMap;
     const SymbolicValueFactory* factory;
@@ -157,7 +157,7 @@ class ExpressionEvaluator : public Inspector {
     void postorder(const IR::MethodCallExpression* expression) override;
 
  public:
-    ExpressionEvaluator(const ReferenceMap* refMap, TypeMap* typeMap, ValueMap* valueMap) :
+    ExpressionEvaluator(ReferenceMap* refMap, TypeMap* typeMap, ValueMap* valueMap) :
             refMap(refMap), typeMap(typeMap), valueMap(valueMap) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(valueMap);
         factory = new SymbolicValueFactory(typeMap);

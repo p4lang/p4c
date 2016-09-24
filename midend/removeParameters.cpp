@@ -18,8 +18,8 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/moveDeclarations.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "midend/moveDeclarations.h"
 
 namespace P4 {
 
@@ -35,7 +35,7 @@ class RemoveMethodCallArguments : public Transform {
 };
 }  // namespace
 
-HasTableApply::HasTableApply(const ReferenceMap* refMap, const TypeMap* typeMap) :
+HasTableApply::HasTableApply(ReferenceMap* refMap, TypeMap* typeMap) :
         refMap(refMap), typeMap(typeMap), table(nullptr), call(nullptr)
 { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("HasTableApply"); }
 
@@ -51,7 +51,7 @@ void HasTableApply::postorder(const IR::MethodCallExpression* expression) {
     LOG1("Invoked table is " << table);
 }
 
-const IR::Node* RemoveTableParameters::postorder(IR::P4Table* table) {
+const IR::Node* DoRemoveTableParameters::postorder(IR::P4Table* table) {
     if (table->parameters->size() == 0)
         return table;
     BUG_CHECK(getContext()->node->is<IR::IndexedVector<IR::Declaration>>(),
@@ -69,7 +69,7 @@ const IR::Node* RemoveTableParameters::postorder(IR::P4Table* table) {
     return result;
 }
 
-void RemoveTableParameters::doParameters(
+void DoRemoveTableParameters::doParameters(
     const IR::ParameterList* params, const IR::Vector<IR::Expression>* args,
     IR::IndexedVector<IR::StatOrDecl>* result, bool in) {
 
@@ -100,7 +100,7 @@ void RemoveTableParameters::doParameters(
     }
 }
 
-const IR::Node* RemoveTableParameters::postorder(IR::MethodCallStatement* statement) {
+const IR::Node* DoRemoveTableParameters::postorder(IR::MethodCallStatement* statement) {
     LOG1("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
     statement->apply(hta);
@@ -131,11 +131,11 @@ const IR::Node* RemoveTableParameters::postorder(IR::MethodCallStatement* statem
     // Copy back out and inout parameters
     doParameters(params, args, body, false);
 
-    auto result = new IR::BlockStatement(statement->srcInfo, body);
+    auto result = new IR::BlockStatement(statement->srcInfo, IR::Annotations::empty, body);
     return result;
 }
 
-const IR::Node* RemoveTableParameters::postorder(IR::IfStatement* statement) {
+const IR::Node* DoRemoveTableParameters::postorder(IR::IfStatement* statement) {
     HasTableApply hta(refMap, typeMap);
     statement->condition->apply(hta);
     if (hta.table == nullptr)
@@ -171,24 +171,26 @@ const IR::Node* RemoveTableParameters::postorder(IR::IfStatement* statement) {
     auto tpost = new IR::IndexedVector<IR::StatOrDecl>();
     doParameters(params, args, tpost, false);
     if (tpost->size() != 0) {
-        auto trueBlock = new IR::BlockStatement(statement->ifTrue->srcInfo, tpost);
+        auto trueBlock = new IR::BlockStatement(
+            statement->ifTrue->srcInfo, IR::Annotations::empty, tpost);
         tpost->push_back(statement->ifTrue);
         statement->ifTrue = trueBlock;
 
         // Create false branch if it does not exist
         auto fpost = new IR::IndexedVector<IR::StatOrDecl>();
         doParameters(params, args, fpost, false);
-        auto falseBlock = new IR::BlockStatement(Util::SourceInfo(), fpost);
+        auto falseBlock = new IR::BlockStatement(
+            Util::SourceInfo(), IR::Annotations::empty, fpost);
         if (statement->ifFalse)
             fpost->push_back(statement->ifFalse);
         statement->ifFalse = falseBlock;
     }
 
-    auto result = new IR::BlockStatement(statement->srcInfo, pre);
+    auto result = new IR::BlockStatement(statement->srcInfo, IR::Annotations::empty, pre);
     return result;
 }
 
-const IR::Node* RemoveTableParameters::postorder(IR::SwitchStatement* statement) {
+const IR::Node* DoRemoveTableParameters::postorder(IR::SwitchStatement* statement) {
     HasTableApply hta(refMap, typeMap);
     statement->expression->apply(hta);
     if (hta.table == nullptr)
@@ -230,7 +232,6 @@ const IR::Node* RemoveTableParameters::postorder(IR::SwitchStatement* statement)
     }
 
     if (anyOut) {
-        /* FIXME -- alter cases in place rather than creating a new Vector? */
         IR::Vector<IR::SwitchCase> cases;
         bool foundDefault = false;
         for (auto l : statement->cases) {
@@ -240,7 +241,7 @@ const IR::Node* RemoveTableParameters::postorder(IR::SwitchStatement* statement)
                 auto post = new IR::IndexedVector<IR::StatOrDecl>();
                 doParameters(params, args, post, false);
                 post->push_back(l->statement);
-                auto block = new IR::BlockStatement(l->srcInfo, post);
+                auto block = new IR::BlockStatement(l->srcInfo, IR::Annotations::empty, post);
                 auto swcase = new IR::SwitchCase(l->srcInfo, l->label, block);
                 cases.push_back(swcase);
             }
@@ -249,7 +250,7 @@ const IR::Node* RemoveTableParameters::postorder(IR::SwitchStatement* statement)
             // Must add a default label
             auto post = new IR::IndexedVector<IR::StatOrDecl>();
             doParameters(params, args, post, false);
-            auto block = new IR::BlockStatement(Util::SourceInfo(), post);
+            auto block = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, post);
             auto swcase = new IR::SwitchCase(Util::SourceInfo(),
                                              new IR::DefaultExpression(Util::SourceInfo()), block);
             cases.push_back(swcase);
@@ -257,7 +258,7 @@ const IR::Node* RemoveTableParameters::postorder(IR::SwitchStatement* statement)
 
         statement->cases = std::move(cases);
     }
-    auto result = new IR::BlockStatement(statement->srcInfo, pre);
+    auto result = new IR::BlockStatement(statement->srcInfo, IR::Annotations::empty, pre);
     return result;
 }
 
@@ -285,7 +286,7 @@ void FindActionParameters::postorder(const IR::MethodCallExpression* expression)
     }
 }
 
-const IR::Node* RemoveActionParameters::postorder(IR::P4Action* action) {
+const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     LOG1("Visiting " << action);
     BUG_CHECK(getContext()->node->is<IR::IndexedVector<IR::Declaration>>(),
               "%1%: unexpected parent %2%", getOriginal(), getContext()->node);
@@ -331,19 +332,20 @@ const IR::Node* RemoveActionParameters::postorder(IR::P4Action* action) {
     initializers->append(*postamble);
 
     action->parameters = new IR::ParameterList(action->parameters->srcInfo, leftParams);
-    action->body = new IR::BlockStatement(action->body->srcInfo, initializers);
+    action->body = new IR::BlockStatement(
+        action->body->srcInfo, IR::Annotations::empty, initializers);
     LOG1("To replace " << action);
     result->push_back(action);
     return result;
 }
 
-const IR::Node* RemoveActionParameters::postorder(IR::ActionListElement* element) {
+const IR::Node* DoRemoveActionParameters::postorder(IR::ActionListElement* element) {
     RemoveMethodCallArguments rmca;
     element->expression = element->expression->apply(rmca)->to<IR::Expression>();
     return element;
 }
 
-const IR::Node* RemoveActionParameters::postorder(IR::MethodCallExpression* expression) {
+const IR::Node* DoRemoveActionParameters::postorder(IR::MethodCallExpression* expression) {
     if (invocations->isCall(getOriginal<IR::MethodCallExpression>())) {
         RemoveMethodCallArguments rmca;
         return expression->apply(rmca);
@@ -353,11 +355,15 @@ const IR::Node* RemoveActionParameters::postorder(IR::MethodCallExpression* expr
 
 //////////////////////////////////////////
 
-RemoveParameters::RemoveParameters(ReferenceMap* refMap, TypeMap* typeMap) {
-    setName("RemoveParameters");
-    auto ai = new ActionInvocation();
+RemoveTableParameters::RemoveTableParameters(ReferenceMap* refMap, TypeMap* typeMap) {
+    setName("RemoveTableParameters");
     passes.emplace_back(new TypeChecking(refMap, typeMap));
-    passes.emplace_back(new RemoveTableParameters(refMap, typeMap));
+    passes.emplace_back(new DoRemoveTableParameters(refMap, typeMap));
+    passes.emplace_back(new ClearTypeMap(typeMap));
+}
+
+RemoveActionParameters::RemoveActionParameters(ReferenceMap* refMap, TypeMap* typeMap) {
+    setName("RemoveActionParameters");
     // This is needed because of this case:
     // action a(inout x) { x = x + 1 }
     // bit<32> w;
@@ -366,11 +372,12 @@ RemoveParameters::RemoveParameters(ReferenceMap* refMap, TypeMap* typeMap) {
     // action a() { x = w; x = x + 1; w = x; } << w is not yet defined
     // bit<32> w;
     // table t() { actions = a(); ... }
+    auto ai = new ActionInvocation();
     passes.emplace_back(new MoveDeclarations());
-    passes.emplace_back(new ClearTypeMap(typeMap));
     passes.emplace_back(new TypeChecking(refMap, typeMap));
     passes.emplace_back(new FindActionParameters(refMap, typeMap, ai));
-    passes.emplace_back(new RemoveActionParameters(ai));
+    passes.emplace_back(new DoRemoveActionParameters(ai));
+    passes.emplace_back(new ClearTypeMap(typeMap));
 }
 
 }  // namespace P4

@@ -69,7 +69,7 @@ class DoMoveActionsToTables : public Transform {
 // For this to work all variable declarations must have been moved to the beginning.
 class DoSynthesizeActions : public Transform {
     ReferenceMap* refMap;
-    const TypeMap*      typeMap;
+    TypeMap*      typeMap;
     std::vector<const IR::P4Action*> actions;  // inserted actions
     bool moveEmits = false;
     bool changes = false;
@@ -80,7 +80,7 @@ class DoSynthesizeActions : public Transform {
 
     // If moveEmits is true, move emit statements to actions, else
     // leave them in control blocks.
-    DoSynthesizeActions(ReferenceMap* refMap, const TypeMap* typeMap, bool moveEmits = false) :
+    DoSynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap, bool moveEmits = false) :
             refMap(refMap), typeMap(typeMap), moveEmits(moveEmits)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoSynthesizeActions"); }
     const IR::Node* preorder(IR::P4Parser* parser) override
@@ -95,6 +95,8 @@ class DoSynthesizeActions : public Transform {
     const IR::Node* preorder(IR::BlockStatement* statement) override;
     const IR::Node* preorder(IR::AssignmentStatement* statement) override;
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
+    const IR::Node* preorder(IR::Function* function) override
+    { prune(); return function; }
 
  protected:
     const IR::Statement* createAction(const IR::Statement* body);

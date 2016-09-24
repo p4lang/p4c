@@ -68,6 +68,7 @@ class ConvertEnums : public PassManager {
                  ChooseEnumRepresentation* policy) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoConvertEnums(policy, typeMap));
+        passes.push_back(new ClearTypeMap(typeMap));
         setName("ConvertEnums");
     }
 };

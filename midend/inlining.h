@@ -192,9 +192,9 @@ class InlineDriver : public Transform {
 
 // Must be run after an evaluator; uses the blocks to discover caller/callee relationships.
 class DiscoverInlining : public Inspector {
-    InlineWorkList* inlineList;     // output: result is here
-    const ReferenceMap* refMap;     // input
-    const TypeMap*      typeMap;    // input
+    InlineWorkList*     inlineList;     // output: result is here
+    ReferenceMap*       refMap;     // input
+    TypeMap*            typeMap;    // input
     IHasBlock*          evaluator;  // used to obtain the toplevel block
     IR::ToplevelBlock*  toplevel;
 
@@ -205,8 +205,8 @@ class DiscoverInlining : public Inspector {
     bool allowParsersFromControls = false;
     bool allowControlsFromParsers = false;
 
-    DiscoverInlining(InlineWorkList* inlineList, const ReferenceMap* refMap,
-                     const TypeMap* typeMap, IHasBlock* evaluator) :
+    DiscoverInlining(InlineWorkList* inlineList, ReferenceMap* refMap,
+                     TypeMap* typeMap, IHasBlock* evaluator) :
             inlineList(inlineList), refMap(refMap), typeMap(typeMap),
             evaluator(evaluator), toplevel(nullptr) {
         CHECK_NULL(inlineList); CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(evaluator);

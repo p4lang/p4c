@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "core.p4"
+#include <core.p4>
 
 header Ethernet { bit<16> etherType; }
 header IPv4
@@ -41,9 +41,9 @@ header_union IP
     IPv4 ipv4;
     IPv6 ipv6;
 }
-struct Parsed_packet { 
+struct Parsed_packet {
    Ethernet ethernet;
-   IP ip; 
+   IP ip;
 }
 
 error { IPv4FragmentsNotSupported, IPv4OptionsNotSupported, IPv4IncorrectVersion }
@@ -54,7 +54,7 @@ parser top(packet_in b, out Parsed_packet p)
        b.extract(p.ethernet);
        transition select(p.ethernet.etherType) {
            16w0x0800 : parse_ipv4;
-           16w0x86DD : parse_ipv6;           
+           16w0x86DD : parse_ipv6;
        }
    }
 
@@ -68,7 +68,7 @@ parser top(packet_in b, out Parsed_packet p)
 
    state parse_ipv6 {
        b.extract(p.ip.ipv6);
-       transition accept;      
+       transition accept;
    }
 }
 

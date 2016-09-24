@@ -33,62 +33,78 @@ struct Packet_data {
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    TArg1 pArg1_0;
-    TArg2 pArg2_0;
-    TArg1 tArg1_0;
-    TArg2 aArg2_0;
-    bit<9> barg_0;
-    action NoAction_1() {
+    @name("pArg1_0") TArg1 pArg1;
+    @name("pArg2_0") TArg2 pArg2;
+    @name("tArg1") TArg1 tArg1_0;
+    @name("aArg2") TArg2 aArg2_0;
+    @name("tmp") TArg1 tmp_5;
+    @name("tmp_0") TArg2 tmp_6;
+    @name("tmp_1") TArg1 tmp_7;
+    @name("tmp_2") TArg2 tmp_8;
+    @name("tmp_3") TArg1 tmp_9;
+    @name("tmp_4") TArg2 tmp_10;
+    @name("barg") bit<9> barg_0;
+    @name("NoAction_1") action NoAction() {
     }
-    @name("p1.B_action") action p1_B_action_0(BParamType bData) {
+    @name("p1.B_action") action p1_B_action(BParamType bData) {
         barg_0 = (bit<9>)bData;
         tArg1_0.field1 = barg_0;
     }
-    @name("p1.C_action") action p1_C_action_0(bit<9> cData) {
-        pArg1_0.field1 = cData;
+    @name("p1.C_action") action p1_C_action(bit<9> cData) {
+        pArg1.field1 = cData;
     }
-    @name("p1.T") table p1_T() {
+    @name("p1.T") table p1_T_0() {
         key = {
             tArg1_0.field1: ternary;
             aArg2_0.field2: exact;
         }
         actions = {
-            p1_B_action_0();
-            p1_C_action_0();
+            p1_B_action();
+            p1_C_action();
         }
         size = 32w5;
-        const default_action = p1_C_action_0(9w5);
+        const default_action = p1_C_action(9w5);
     }
-    @name("p1.Drop") action p1_Drop_0() {
-        pArg1_0.drop = true;
+    @name("p1.Drop") action p1_Drop() {
+        pArg1.drop = true;
     }
-    @name("p1.Tinner") table p1_Tinner() {
+    @name("p1.Tinner") table p1_Tinner_0() {
         key = {
-            pArg1_0.field1: ternary;
+            pArg1.field1: ternary;
         }
         actions = {
-            p1_Drop_0();
-            NoAction_1();
+            p1_Drop();
+            NoAction();
         }
-        const default_action = NoAction_1();
+        const default_action = NoAction();
     }
     action act() {
-        pArg1_0 = qArg1;
-        pArg2_0 = qArg2;
-        tArg1_0 = pArg1_0;
-        aArg2_0 = pArg2_0;
+        tmp_9 = qArg1;
+        tmp_10 = qArg2;
+        pArg1 = tmp_9;
+        pArg2 = tmp_10;
+        tmp_5 = pArg1;
+        tmp_6 = pArg2;
+        tArg1_0 = tmp_5;
+        aArg2_0 = tmp_6;
     }
     action act_0() {
-        pArg1_0 = tArg1_0;
-        tArg1_0 = pArg1_0;
-        aArg2_0 = pArg2_0;
+        tmp_5 = tArg1_0;
+        pArg1 = tmp_5;
+        tmp_7 = pArg1;
+        tmp_8 = pArg2;
+        tArg1_0 = tmp_7;
+        aArg2_0 = tmp_8;
     }
     action act_1() {
-        pArg1_0 = tArg1_0;
+        tmp_7 = tArg1_0;
+        pArg1 = tmp_7;
     }
     action act_2() {
-        qArg1 = pArg1_0;
-        qArg2 = pArg2_0;
+        tmp_9 = pArg1;
+        tmp_10 = pArg2;
+        qArg1 = tmp_9;
+        qArg2 = tmp_10;
     }
     table tbl_act() {
         actions = {
@@ -116,19 +132,19 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     apply {
         tbl_act.apply();
-        p1_T.apply();
+        p1_T_0.apply();
         tbl_act_0.apply();
-        p1_T.apply();
+        p1_T_0.apply();
         tbl_act_1.apply();
-        p1_Tinner.apply();
+        p1_Tinner_0.apply();
         tbl_act_2.apply();
     }
 }
 
-parser prs(in bs b, out Packet_data p);
+parser prs(bs b, out Packet_data p);
 control pp(inout TArg1 arg1, inout TArg2 arg2);
 package myswitch(prs prser, pp pipe);
-parser my_parser(in bs b, out Packet_data p) {
+parser my_parser(bs b, out Packet_data p) {
     state start {
         transition accept;
     }

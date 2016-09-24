@@ -4,9 +4,13 @@ header H {
 }
 
 control c(inout bit<32> r) {
+    @name("h") H[2] h_0;
+    bit<32> tmp;
+    bit<32> tmp_0;
     apply {
-        H[2] h;
-        h[f(32w2)].setValid();
+        tmp = f(32w2);
+        tmp_0 = tmp;
+        h_0[tmp_0].setValid();
     }
 }
 

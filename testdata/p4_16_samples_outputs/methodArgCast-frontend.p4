@@ -3,9 +3,9 @@ extern E {
 }
 
 control c() {
-    E() e;
+    @name("e") E() e_0;
     apply {
-        e.set(32w10);
+        e_0.set(32w10);
     }
 }
 

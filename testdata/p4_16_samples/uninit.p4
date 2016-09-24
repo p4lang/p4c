@@ -19,9 +19,11 @@ limitations under the License.
 header Header {
     bit<32> data1;
     bit<32> data2;
+    bit<32> data3;
 }
 
 extern void f(in Header h);
+extern bit<32> g(inout bit<32> v, in bit<32> w);
 
 parser p1(packet_in p, out Header h) {
     Header[2] stack;
@@ -29,11 +31,12 @@ parser p1(packet_in p, out Header h) {
     state start {
         h.data1 = 0;
         f(h);  // uninitialized
+        g(h.data2, g(h.data2, h.data2));  // uninitialized
         transition next;
     }
 
     state next {
-        h.data2 = h.data2 + 1;  // uninitialized
+        h.data2 = h.data3 + 1;  // uninitialized
         stack[0] = stack[1];  // uninitialized
         b = stack[1].isValid();
         transition accept;

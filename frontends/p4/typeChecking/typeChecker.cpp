@@ -244,7 +244,7 @@ bool TypeInference::checkParameters(const IR::ParameterList* paramList) const {
  * void _<int<32>>(int<32> data);
  */
 const IR::Type* TypeInference::specialize(const IR::IMayBeGenericType* type,
-                                          const IR::Vector<IR::Type>* arguments) const {
+                                          const IR::Vector<IR::Type>* arguments) {
     TypeVariableSubstitution* bindings = new TypeVariableSubstitution();
     bool success = bindings->setBindings(type->getNode(), type->getTypeParameters(), arguments);
     if (!success)
@@ -257,7 +257,7 @@ const IR::Type* TypeInference::specialize(const IR::IMayBeGenericType* type,
     if (result == nullptr)
         return nullptr;
 
-    LOG1("Specialized " << this << "\n\tinto " << result);
+    LOG1("Specialized " << type << "\n\tinto " << result);
     return result->to<IR::Type>();
 }
 
@@ -1640,7 +1640,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
 
     const IR::Type* sameType = ltype;
     if (bl != nullptr && br != nullptr) {
-        if (!(*bl == *br)) {
+        if (!TypeMap::equivalent(bl, br)) {
             typeError("%1%: Cannot operate on values with different types %2% and %3%",
                       expression, bl->toString(), br->toString());
             return expression;
@@ -1659,6 +1659,14 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         expression = e;
         sameType = ltype;
         setType(cast, sameType);
+    } else {
+        // both are InfInt: use same exact type for both sides, so it is properly
+        // set after unification
+        auto r = expression->right->clone();
+        auto e = expression->clone();
+        e->right = r;
+        expression = e;
+        setType(r, sameType);
     }
 
     auto resultType = new IR::Type_Set(sameType->srcInfo, sameType);

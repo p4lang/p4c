@@ -17,8 +17,6 @@ limitations under the License.
 #include "midend.h"
 #include "midend/actionsInlining.h"
 #include "midend/inlining.h"
-#include "midend/moveDeclarations.h"
-#include "midend/uniqueNames.h"
 #include "midend/removeReturns.h"
 #include "midend/removeParameters.h"
 #include "midend/moveConstructors.h"
@@ -28,19 +26,18 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 #include "midend/parserUnroll.h"
 #include "midend/specialize.h"
-#include "midend/simplifyExpressions.h"
-#include "midend/simplifyParsers.h"
-#include "midend/resetHeaders.h"
 #include "midend/simplifySelect.h"
-#include "midend/simplifyDefUse.h"
+#include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "frontends/p4/moveDeclarations.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/strengthReduction.h"
+#include "frontends/p4/uniqueNames.h"
 
 namespace P4Test {
 
@@ -55,14 +52,9 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // TODO: improve copy propagation
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
+    // TODO: handle bit-slices as out arguments
+    // TODO: remove control-flow from parsers
     addPasses({
-        new P4::SimplifyParsers(&refMap),
-        new P4::ResetHeaders(&refMap, &typeMap),
-        new P4::UniqueNames(&refMap),  // Give each local declaration a unique internal name
-        new P4::MoveDeclarations(),  // Move all local declarations to the beginning
-        new P4::MoveInitializers(),
-        new P4::SimplifyDefUse(&refMap, &typeMap),
-        new P4::SimplifyExpressions(&refMap, &typeMap),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
@@ -80,11 +72,12 @@ MidEnd::MidEnd(CompilerOptions& options) {
         // Parser loop unrolling: TODO
         // new P4::ParsersUnroll(true, &refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
+        new P4::UniqueNames(&refMap),
         new P4::UniqueParameters(&refMap),
         new P4::ClearTypeMap(&typeMap),  // table types have changed
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::RemoveParameters(&refMap, &typeMap),
-        new P4::ClearTypeMap(&typeMap),  // table types have changed
+        new P4::RemoveTableParameters(&refMap, &typeMap),
+        new P4::RemoveActionParameters(&refMap, &typeMap),
         new P4::SimplifyKey(&refMap, &typeMap,
                             new P4::NonLeftValue(&refMap, &typeMap)),
         new P4::RemoveExits(&refMap, &typeMap),

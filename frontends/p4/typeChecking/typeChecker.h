@@ -125,8 +125,6 @@ class TypeInference : public Transform {
     const IR::IndexedVector<IR::StructField>* canonicalizeFields(const IR::Type_StructLike* type);
     const IR::ParameterList* canonicalize(const IR::ParameterList* params);
     const IR::TypeParameters* canonicalize(const IR::TypeParameters* params);
-    const IR::Type* specialize(const IR::IMayBeGenericType* type,
-                               const IR::Vector<IR::Type>* arguments) const;
 
     // various helpers
     bool validateFields(const IR::Type_StructLike* type,
@@ -157,6 +155,8 @@ class TypeInference : public Transform {
     using Transform::postorder;
     using Transform::preorder;
 
+    static const IR::Type* specialize(const IR::IMayBeGenericType* type,
+                                      const IR::Vector<IR::Type>* arguments);
     const IR::Node* pruneIfDone(const IR::Node* node)
     { if (done()) { prune(); } return node; }
     const IR::Node* preorder(IR::Expression* expression) override
