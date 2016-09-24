@@ -6,9 +6,9 @@ parser p1(out bit<2> w)(bit<2> a) {
 }
 
 parser p2(out bit<2> w)(bit<2> a) {
-    p1(a) x;
+    @name("x") p1(a) x_0;
     state start {
-        x.apply(w);
+        x_0.apply(w);
         transition accept;
     }
 }

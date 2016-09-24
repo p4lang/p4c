@@ -154,9 +154,15 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         auto rp = right->to<IR::Type_Package>();
         return equivalent(lp->getConstructorMethodType(), rp->getConstructorMethodType());
     }
-    if (left->is<IR::Type_Parser>() || left->is<IR::Type_Control>() || left->is<IR::Type_Table>()) {
-        auto la = left->to<IR::IApply>();
-        auto ra = left->to<IR::IApply>();
+    if (left->is<IR::Type_Parser>() || left->is<IR::Type_Control>()) {
+        if (!equivalent(left->to<IR::IApply>()->getApplyMethodType(),
+                        right->to<IR::IApply>()->getApplyMethodType()))
+            return false;
+        return true;
+    }
+    if (left->is<IR::Type_Table>()) {
+        auto la = left->to<IR::Type_Table>();
+        auto ra = right->to<IR::Type_Table>();
         return equivalent(la->getApplyMethodType(), ra->getApplyMethodType());
     }
     if (left->is<IR::Type_SpecializedCanonical>()) {
@@ -172,12 +178,22 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     if (left->is<IR::Type_Method>() || left->is<IR::Type_Action>()) {
         auto lm = left->to<IR::Type_MethodBase>();
         auto rm = right->to<IR::Type_MethodBase>();
-        if (lm->returnType == nullptr)
-            return rm->returnType == nullptr;
-        if (rm->returnType == nullptr)
+        if (lm->typeParameters->size() != rm->typeParameters->size())
             return false;
-        if (!equivalent(lm->returnType, rm->returnType))
+        for (size_t i = 0; i < lm->typeParameters->size(); i++) {
+            auto lp = lm->typeParameters->parameters->at(i);
+            auto rp = rm->typeParameters->parameters->at(i);
+            if (!equivalent(lp, rp))
+                return false;
+        }
+        if (lm->returnType == nullptr) {
+            if (rm->returnType != nullptr)
+                return false;
+        } else if (rm->returnType == nullptr) {
             return false;
+        } else if (!equivalent(lm->returnType, rm->returnType)) {
+            return false;
+        }
         if (lm->parameters->size() != rm->parameters->size())
             return false;
         for (size_t i = 0; i < lm->parameters->size(); i++) {

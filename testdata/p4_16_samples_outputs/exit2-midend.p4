@@ -1,35 +1,37 @@
 control ctrl() {
     bool hasExited;
-    bit<32> x_0;
-    bit<32> a_0;
-    bit<32> b_0;
-    bit<32> c_0;
-    @name("e") action e() {
+    @name("x") bit<32> x;
+    @name("a") bit<32> a;
+    @name("b") bit<32> b;
+    @name("c") bit<32> c;
+    @name("tmp") bool tmp_0;
+    @name("e") action e_0() {
         hasExited = true;
     }
-    @name("e") action e_1() {
+    @name("e") action e_2() {
         hasExited = true;
     }
     action act() {
-        b_0 = 32w2;
+        b = 32w2;
     }
     action act_0() {
-        c_0 = 32w3;
+        c = 32w3;
     }
     action act_1() {
-        b_0 = 32w3;
+        b = 32w3;
     }
     action act_2() {
-        c_0 = 32w4;
+        c = 32w4;
     }
     action act_3() {
         hasExited = false;
-        a_0 = 32w0;
-        b_0 = 32w1;
-        c_0 = 32w2;
+        a = 32w0;
+        b = 32w1;
+        c = 32w2;
+        tmp_0 = a == 32w0;
     }
     action act_4() {
-        c_0 = 32w5;
+        c = 32w5;
     }
     table tbl_act() {
         actions = {
@@ -45,9 +47,9 @@ control ctrl() {
     }
     table tbl_e() {
         actions = {
-            e();
+            e_0();
         }
-        const default_action = e();
+        const default_action = e_0();
     }
     table tbl_act_1() {
         actions = {
@@ -63,9 +65,9 @@ control ctrl() {
     }
     table tbl_e_0() {
         actions = {
-            e_1();
+            e_2();
         }
-        const default_action = e_1();
+        const default_action = e_2();
     }
     table tbl_act_3() {
         actions = {
@@ -81,7 +83,7 @@ control ctrl() {
     }
     apply {
         tbl_act.apply();
-        if (a_0 == 32w0) {
+        if (tmp_0) {
             tbl_act_0.apply();
             tbl_e.apply();
             if (!hasExited) 

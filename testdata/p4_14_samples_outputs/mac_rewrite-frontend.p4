@@ -85,35 +85,35 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("rewrite_ipv4_unicast_mac") action rewrite_ipv4_unicast_mac(bit<48> smac) {
+    @name("rewrite_ipv4_unicast_mac") action rewrite_ipv4_unicast_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("rewrite_ipv4_multicast_mac") action rewrite_ipv4_multicast_mac(bit<48> smac) {
+    @name("rewrite_ipv4_multicast_mac") action rewrite_ipv4_multicast_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr[47:23] = 25w0x0;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("rewrite_ipv6_unicast_mac") action rewrite_ipv6_unicast_mac(bit<48> smac) {
+    @name("rewrite_ipv6_unicast_mac") action rewrite_ipv6_unicast_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
-    @name("rewrite_ipv6_multicast_mac") action rewrite_ipv6_multicast_mac(bit<48> smac) {
+    @name("rewrite_ipv6_multicast_mac") action rewrite_ipv6_multicast_mac_0(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr[47:32] = 16w0x0;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
-    @name("mac_rewrite") table mac_rewrite() {
+    @name("mac_rewrite") table mac_rewrite_0() {
         actions = {
-            nop();
-            rewrite_ipv4_unicast_mac();
-            rewrite_ipv4_multicast_mac();
-            rewrite_ipv6_unicast_mac();
-            rewrite_ipv6_multicast_mac();
+            nop_0();
+            rewrite_ipv4_unicast_mac_0();
+            rewrite_ipv4_multicast_mac_0();
+            rewrite_ipv6_unicast_mac_0();
+            rewrite_ipv6_multicast_mac_0();
             NoAction();
         }
         key = {
@@ -126,19 +126,19 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
     }
     apply {
         if (meta.egress_metadata.routed == 1w1) 
-            mac_rewrite.apply();
+            mac_rewrite_0.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("do_setup") action do_setup(bit<9> idx, bit<1> routed) {
+    @name("do_setup") action do_setup_0(bit<9> idx, bit<1> routed) {
         meta.egress_metadata.mac_da = hdr.ethernet.dstAddr;
         meta.egress_metadata.smac_idx = idx;
         meta.egress_metadata.routed = routed;
     }
-    @name("setup") table setup() {
+    @name("setup") table setup_0() {
         actions = {
-            do_setup();
+            do_setup_0();
             NoAction();
         }
         key = {
@@ -146,10 +146,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("process_mac_rewrite") process_mac_rewrite() process_mac_rewrite_0;
+    @name("process_mac_rewrite") process_mac_rewrite() process_mac_rewrite_1;
     apply {
-        setup.apply();
-        process_mac_rewrite_0.apply(hdr, meta, standard_metadata);
+        setup_0.apply();
+        process_mac_rewrite_1.apply(hdr, meta, standard_metadata);
     }
 }
 

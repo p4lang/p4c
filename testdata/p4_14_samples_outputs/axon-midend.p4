@@ -34,7 +34,6 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<64> tmp;
     @name("parse_fwdHop") state parse_fwdHop {
         packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
         meta.my_metadata.fwdHopCount = meta.my_metadata.fwdHopCount + 8w255;
@@ -68,8 +67,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_next_revHop;
     }
     @name("start") state start {
-        tmp = packet.lookahead<bit<64>>();
-        transition select(tmp[63:0]) {
+        transition select((packet.lookahead<bit<64>>())[63:0]) {
             64w0: parse_head;
             default: accept;
         }
@@ -82,17 +80,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    @name("_drop") action _drop() {
+    @name("_drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("_drop") action _drop_1() {
+    @name("_drop") action _drop_2() {
         mark_to_drop();
     }
-    @name("route") action route() {
+    @name("route") action route_0() {
         standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
         hdr.axon_head.fwdHopCount = hdr.axon_head.fwdHopCount + 8w255;
         hdr.axon_fwdHop.pop_front(1);
@@ -100,32 +98,32 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.axon_revHop.push_front(1);
         hdr.axon_revHop[0].port = (bit<8>)standard_metadata.ingress_port;
     }
-    @name("drop_pkt") table drop_pkt_0() {
+    @name("drop_pkt") table drop_pkt() {
         actions = {
-            _drop();
-            NoAction_1();
+            _drop_0();
+            NoAction();
         }
         size = 1;
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("route_pkt") table route_pkt_0() {
+    @name("route_pkt") table route_pkt() {
         actions = {
-            _drop_1();
-            route();
-            NoAction_2();
+            _drop_2();
+            route_0();
+            NoAction_0();
         }
         key = {
             hdr.axon_head.isValid()     : exact;
             hdr.axon_fwdHop[0].isValid(): exact;
         }
         size = 1;
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
     apply {
         if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) 
-            drop_pkt_0.apply();
+            drop_pkt.apply();
         else 
-            route_pkt_0.apply();
+            route_pkt.apply();
     }
 }
 

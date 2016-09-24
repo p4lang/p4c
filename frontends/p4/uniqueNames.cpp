@@ -59,22 +59,31 @@ IR::ID* RenameSymbols::getName() const {
 
 const IR::Node* RenameSymbols::postorder(IR::Declaration_Variable* decl) {
     auto name = getName();
-    if (name != nullptr)
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
         decl->name = *name;
+        decl->annotations = annos;
+    }
     return decl;
 }
 
 const IR::Node* RenameSymbols::postorder(IR::Declaration_Constant* decl) {
     auto name = getName();
-    if (name != nullptr)
+    if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
         decl->name = *name;
+        decl->annotations = annos;
+    }
     return decl;
 }
 
 const IR::Node* RenameSymbols::postorder(IR::Parameter* param) {
     auto name = getName();
-    if (name != nullptr)
+    if (name != nullptr && *name != param->name) {
+        auto annos = addNameAnnotation(param->name, param->annotations);
         param->name = *name;
+        param->annotations = annos;
+    }
     return param;
 }
 

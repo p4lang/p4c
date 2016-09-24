@@ -1,8 +1,8 @@
 parser p(out bit<1> z) {
-    bit<1> z1_0;
+    @name("z1_0") bit<1> z1;
     state start {
-        z1_0 = 1w0;
-        z = z1_0;
+        z1 = 1w0;
+        z = z1;
         transition accept;
     }
 }

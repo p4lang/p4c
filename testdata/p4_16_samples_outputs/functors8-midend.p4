@@ -3,10 +3,12 @@ extern e<T> {
 }
 
 parser p1_0(in bit<2> a) {
-    bit<2> w_0;
-    @name("ei") e<bit<2>>() ei_0;
+    @name("w") bit<2> w;
+    @name("tmp") bit<2> tmp_0;
+    @name("ei") e<bit<2>>() ei;
     state start {
-        w_0 = ei_0.get();
+        tmp_0 = ei.get();
+        w = tmp_0;
         transition accept;
     }
 }

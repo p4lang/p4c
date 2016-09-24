@@ -1,13 +1,21 @@
 control c(inout bit<32> x) {
+    @name("tmp") bit<32> tmp_3;
+    @name("tmp_0") bit<32> tmp_4;
+    @name("tmp_1") bit<32> tmp_5;
+    @name("tmp_2") bool tmp_6;
     action act() {
-        x = x + 32w2;
-        x = x + 32w4294967290;
+        tmp_3 = x + 32w2;
+        x = tmp_3;
+        tmp_4 = x + 32w4294967290;
+        x = tmp_4;
     }
     action act_0() {
-        x = x << 2;
+        tmp_5 = x << 2;
+        x = tmp_5;
     }
     action act_1() {
         x = 32w10;
+        tmp_6 = x == 32w10;
     }
     table tbl_act() {
         actions = {
@@ -29,11 +37,12 @@ control c(inout bit<32> x) {
     }
     apply {
         tbl_act.apply();
-        if (x == 32w10) {
+        if (tmp_6) {
             tbl_act_0.apply();
         }
-        else 
+        else {
             tbl_act_1.apply();
+        }
     }
 }
 

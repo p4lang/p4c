@@ -199,7 +199,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         ++it;
     }
 
-    auto result = new IR::BlockStatement(statement->srcInfo, body);
+    auto result = new IR::BlockStatement(statement->srcInfo, callee->annotations, body);
     LOG1("Replacing " << orig << " with " << result);
     return result;
 }

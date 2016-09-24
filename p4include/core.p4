@@ -33,7 +33,8 @@ error {
     EmptyStack,        // reference to .last in an empty header stack
     FullStack,         // reference to .next in a full header stack
     OverwritingHeader, // one header is extracted twice
-    HeaderTooShort     // extracting too many bits in a varbit field
+    HeaderTooShort,    // extracting too many bits in a varbit field
+    ParserTimeout      // parser execution time limit exceeded
 }
 
 extern packet_in {
@@ -54,6 +55,7 @@ extern packet_out {
     void emit<T>(in T hdr);
 }
 
+// TODO: remove from this file, make built-in
 extern void verify(in bool check, in error toSignal);
 
 action NoAction() {}

@@ -46,28 +46,28 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    @name("my_register") register<bit<32>>(32w16384) my_register_0;
-    @name("m_action") action m_action(bit<8> register_idx) {
-        my_register_0.read(meta.meta.register_tmp, (bit<32>)register_idx);
+    @name("my_register") register<bit<32>>(32w16384) my_register;
+    @name("m_action") action m_action_0(bit<8> register_idx) {
+        my_register.read(meta.meta.register_tmp, (bit<32>)register_idx);
     }
-    @name("_nop") action _nop() {
+    @name("_nop") action _nop_0() {
     }
-    @name("m_table") table m_table_0() {
+    @name("m_table") table m_table() {
         actions = {
-            m_action();
-            _nop();
-            NoAction_1();
+            m_action_0();
+            _nop_0();
+            NoAction();
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
         size = 16384;
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
     apply {
-        m_table_0.apply();
+        m_table.apply();
     }
 }
 

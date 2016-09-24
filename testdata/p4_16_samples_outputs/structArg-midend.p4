@@ -3,12 +3,12 @@ struct S {
 }
 
 control caller() {
-    S data_0;
-    S data_1;
+    @name("data") S data;
+    @name("data_1") S data_2;
     action act() {
-        data_1 = data_0;
-        data_1.f = 32w0;
-        data_0 = data_1;
+        data_2 = data;
+        data_2.f = 32w0;
+        data = data_2;
     }
     table tbl_act() {
         actions = {

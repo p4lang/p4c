@@ -28,11 +28,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("test1") table test1() {
+    @name("test1") table test1_0() {
         actions = {
-            noop();
+            noop_0();
             NoAction();
         }
         key = {
@@ -47,7 +47,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         @name("sel_profile") implementation = action_selector(HashAlgorithm.crc16, 32w16384, 32w14);
     }
     apply {
-        test1.apply();
+        test1_0.apply();
     }
 }
 

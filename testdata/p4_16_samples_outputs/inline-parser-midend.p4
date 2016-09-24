@@ -5,14 +5,18 @@ header Header {
 }
 
 parser p1(packet_in p, out Header[2] h) {
-    Header h_0;
+    @name("h_0") Header h_1;
+    @name("tmp") Header tmp_1;
+    @name("tmp_0") Header tmp_2;
     state start {
-        h_0.setInvalid();
-        p.extract<Header>(h_0);
-        h[0] = h_0;
-        h_0.setInvalid();
-        p.extract<Header>(h_0);
-        h[1] = h_0;
+        h_1.setInvalid();
+        p.extract<Header>(h_1);
+        tmp_1 = h_1;
+        h[0] = tmp_1;
+        h_1.setInvalid();
+        p.extract<Header>(h_1);
+        tmp_2 = h_1;
+        h[1] = tmp_2;
         transition accept;
     }
 }

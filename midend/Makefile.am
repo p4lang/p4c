@@ -31,8 +31,6 @@ midend_SOURCES = \
 	midend/localizeActions.h \
 	midend/moveConstructors.cpp \
 	midend/moveConstructors.h \
-	midend/moveDeclarations.cpp \
-	midend/moveDeclarations.h \
 	midend/parserUnroll.h \
 	midend/parserUnroll.cpp \
 	midend/removeParameters.cpp \
@@ -41,21 +39,11 @@ midend_SOURCES = \
 	midend/removeReturns.h \
 	midend/removeLeftSlices.cpp \
 	midend/removeLeftSlices.h \
-	midend/resetHeaders.cpp \
-	midend/resetHeaders.h \
-	midend/simplifyDefUse.cpp \
-	midend/simplifyDefUse.h \
-	midend/simplifyExpressions.cpp \
-	midend/simplifyExpressions.h \
 	midend/simplifyKey.h \
 	midend/simplifyKey.cpp \
-	midend/simplifyParsers.cpp \
-	midend/simplifyParsers.h \
 	midend/simplifySelect.cpp \
 	midend/simplifySelect.h \
 	midend/specialize.h \
-	midend/specialize.cpp \
-	midend/uniqueNames.cpp \
-	midend/uniqueNames.h
+	midend/specialize.cpp
 
 cpplint_FILES += $(midend_SOURCES)

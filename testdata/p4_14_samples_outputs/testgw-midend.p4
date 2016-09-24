@@ -45,67 +45,67 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_4() {
     }
-    @name("route_eth") action route_eth(bit<9> egress_spec, bit<48> src_addr) {
+    @name("route_eth") action route_eth_0(bit<9> egress_spec, bit<48> src_addr) {
         standard_metadata.egress_spec = egress_spec;
         hdr.ethernet.src_addr = src_addr;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("noop") action noop_1() {
+    @name("noop") action noop_3() {
     }
-    @name("noop") action noop_2() {
+    @name("noop") action noop_4() {
     }
-    @name("setf2") action setf2(bit<32> val) {
+    @name("setf2") action setf2_0(bit<32> val) {
         hdr.data.f2 = val;
     }
-    @name("setf1") action setf1(bit<32> val) {
+    @name("setf1") action setf1_0(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("routing") table routing_0() {
+    @name("routing") table routing() {
         actions = {
-            route_eth();
-            noop();
-            NoAction_1();
+            route_eth_0();
+            noop_0();
+            NoAction();
         }
         key = {
             hdr.ethernet.dst_addr: lpm;
         }
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("test1") table test1_0() {
+    @name("test1") table test1() {
         actions = {
-            setf2();
-            noop_1();
-            NoAction_2();
+            setf2_0();
+            noop_3();
+            NoAction_0();
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
-    @name("test2") table test2_0() {
+    @name("test2") table test2() {
         actions = {
-            setf1();
-            noop_2();
-            NoAction_3();
+            setf1_0();
+            noop_4();
+            NoAction_4();
         }
         key = {
             hdr.data.f2: exact;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_4();
     }
     apply {
-        routing_0.apply();
+        routing.apply();
         if (hdr.data.f5 != hdr.data.f6) 
-            test1_0.apply();
+            test1.apply();
         else 
-            test2_0.apply();
+            test2.apply();
     }
 }
 

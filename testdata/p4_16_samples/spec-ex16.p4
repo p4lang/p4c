@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "core.p4"
+#include <core.p4>
 
 parser Prs<T>(packet_in b, out T result);
 control Map<T>(in T d);

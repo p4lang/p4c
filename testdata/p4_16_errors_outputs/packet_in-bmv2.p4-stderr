@@ -1,0 +1,4 @@
+../testdata/p4_16_errors/packet_in-bmv2.p4(22):syntax error, unexpected IDENTIFIER, expecting ACTION or CONST or TABLE
+    packet_in
+            ^
+error: 1 errors encountered, aborting compilation

@@ -28,21 +28,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("setf1") action setf1(bit<32> val) {
+    @name("setf1") action setf1_0(bit<32> val) {
         hdr.data.f1 = val;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("setb4") action setb4(bit<32> val) {
+    @name("setb4") action setb4_0(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("setb1") action setb1(bit<32> val) {
+    @name("setb1") action setb1_0(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("E1") table E1() {
+    @name("E1") table E1_0() {
         actions = {
-            setf1();
-            noop();
+            setf1_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -50,10 +50,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-    @name("E2") table E2() {
+    @name("E2") table E2_0() {
         actions = {
-            setb4();
-            noop();
+            setb4_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -61,10 +61,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-    @name("EA") table EA() {
+    @name("EA") table EA_0() {
         actions = {
-            setb1();
-            noop();
+            setb1_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -72,10 +72,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = NoAction();
     }
-    @name("EB") table EB() {
+    @name("EB") table EB_0() {
         actions = {
-            setb1();
-            noop();
+            setb1_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -84,34 +84,34 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction();
     }
     apply {
-        E1.apply();
+        E1_0.apply();
         if (hdr.data.f1 == 32w0) 
-            EA.apply();
+            EA_0.apply();
         else 
-            EB.apply();
-        E2.apply();
+            EB_0.apply();
+        E2_0.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("setb1") action setb1(bit<32> val) {
+    @name("setb1") action setb1_1(bit<32> val) {
         hdr.data.b1 = val;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_1() {
     }
-    @name("setb3") action setb3(bit<32> val) {
+    @name("setb3") action setb3_0(bit<32> val) {
         hdr.data.b3 = val;
     }
-    @name("setb2") action setb2(bit<32> val) {
+    @name("setb2") action setb2_0(bit<32> val) {
         hdr.data.b2 = val;
     }
-    @name("setb4") action setb4(bit<32> val) {
+    @name("setb4") action setb4_1(bit<32> val) {
         hdr.data.b4 = val;
     }
-    @name("A1") table A1() {
+    @name("A1") table A1_0() {
         actions = {
-            setb1();
-            noop();
+            setb1_1();
+            noop_1();
             NoAction();
         }
         key = {
@@ -119,10 +119,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("A2") table A2() {
+    @name("A2") table A2_0() {
         actions = {
-            setb3();
-            noop();
+            setb3_0();
+            noop_1();
             NoAction();
         }
         key = {
@@ -130,10 +130,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("A3") table A3() {
+    @name("A3") table A3_0() {
         actions = {
-            setb1();
-            noop();
+            setb1_1();
+            noop_1();
             NoAction();
         }
         key = {
@@ -141,10 +141,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("B1") table B1() {
+    @name("B1") table B1_0() {
         actions = {
-            setb2();
-            noop();
+            setb2_0();
+            noop_1();
             NoAction();
         }
         key = {
@@ -152,10 +152,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("B2") table B2() {
+    @name("B2") table B2_0() {
         actions = {
-            setb4();
-            noop();
+            setb4_1();
+            noop_1();
             NoAction();
         }
         key = {
@@ -165,12 +165,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         if (hdr.data.b1 == 32w0) {
-            A1.apply();
-            A2.apply();
-            A3.apply();
+            A1_0.apply();
+            A2_0.apply();
+            A3_0.apply();
         }
-        B1.apply();
-        B2.apply();
+        B1_0.apply();
+        B2_0.apply();
     }
 }
 

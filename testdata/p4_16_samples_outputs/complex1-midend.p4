@@ -1,13 +1,23 @@
 extern bit<32> f(in bit<32> x, in bit<32> y);
 control c(inout bit<32> r) {
-    bit<32> tmp;
-    bit<32> tmp_0;
-    bit<32> tmp_1;
+    @name("tmp") bit<32> tmp_7;
+    @name("tmp_0") bit<32> tmp_8;
+    @name("tmp_1") bit<32> tmp_9;
+    @name("tmp_2") bit<32> tmp_10;
+    @name("tmp_3") bit<32> tmp_11;
+    @name("tmp_4") bit<32> tmp_12;
+    @name("tmp_5") bit<32> tmp_13;
+    @name("tmp_6") bit<32> tmp_14;
     action act() {
-        tmp = f(32w5, 32w2);
-        tmp_0 = f(32w2, 32w3);
-        tmp_1 = f(32w6, tmp_0);
-        r = f(tmp, tmp_1);
+        tmp_7 = f(32w5, 32w2);
+        tmp_8 = tmp_7;
+        tmp_9 = 32w6;
+        tmp_10 = f(32w2, 32w3);
+        tmp_11 = tmp_10;
+        tmp_12 = f(tmp_9, tmp_11);
+        tmp_13 = tmp_12;
+        tmp_14 = f(tmp_8, tmp_13);
+        r = tmp_14;
     }
     table tbl_act() {
         actions = {

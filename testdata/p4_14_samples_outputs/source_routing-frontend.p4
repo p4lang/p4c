@@ -46,18 +46,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("_drop") action _drop() {
+    @name("_drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("route") action route() {
+    @name("route") action route_0() {
         standard_metadata.egress_spec = (bit<9>)hdr.easyroute_port.port;
         hdr.easyroute_head.num_valid = hdr.easyroute_head.num_valid + 32w4294967295;
         hdr.easyroute_port.setInvalid();
     }
-    @name("route_pkt") table route_pkt() {
+    @name("route_pkt") table route_pkt_0() {
         actions = {
-            _drop();
-            route();
+            _drop_0();
+            route_0();
             NoAction();
         }
         key = {
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        route_pkt.apply();
+        route_pkt_0.apply();
     }
 }
 

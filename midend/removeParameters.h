@@ -25,12 +25,12 @@ namespace P4 {
 
 // Checks to see whether an IR node includes a table.apply() sub-expression
 class HasTableApply : public Inspector {
-    const ReferenceMap* refMap;
-    const TypeMap*      typeMap;
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
  public:
     const IR::P4Table*  table;
     const IR::MethodCallExpression* call;
-    HasTableApply(const ReferenceMap* refMap, const TypeMap* typeMap);
+    HasTableApply(ReferenceMap* refMap, TypeMap* typeMap);
     void postorder(const IR::MethodCallExpression* expression) override;
 };
 
@@ -49,14 +49,14 @@ class HasTableApply : public Inspector {
 //       t.apply();
 //       y = x;  // all out and inout parameters
 // }}
-class RemoveTableParameters : public Transform {
+class DoRemoveTableParameters : public Transform {
     ReferenceMap* refMap;
-    const TypeMap*      typeMap;
+    TypeMap*      typeMap;
     std::set<const IR::P4Table*> original;
  public:
-    RemoveTableParameters(ReferenceMap* refMap, const TypeMap* typeMap) :
+    DoRemoveTableParameters(ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RemoveTableParameters"); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoRemoveTableParameters"); }
 
     const IR::Node* postorder(IR::P4Table* table) override;
     // These should be all kinds of statements that may contain a table apply
@@ -100,12 +100,12 @@ class ActionInvocation {
 };
 
 class FindActionParameters : public Inspector {
-    const ReferenceMap* refMap;
-    const TypeMap*      typeMap;
-    ActionInvocation*   invocations;
+    ReferenceMap*     refMap;
+    TypeMap*          typeMap;
+    ActionInvocation* invocations;
  public:
-    FindActionParameters(const ReferenceMap* refMap,
-                         const TypeMap* typeMap, ActionInvocation* invocations) :
+    FindActionParameters(ReferenceMap* refMap,
+                         TypeMap* typeMap, ActionInvocation* invocations) :
             refMap(refMap), typeMap(typeMap), invocations(invocations) {
         CHECK_NULL(refMap); CHECK_NULL(invocations); CHECK_NULL(typeMap);
         setName("FindActionParameters"); }
@@ -126,21 +126,25 @@ class FindActionParameters : public Inspector {
 //    action a() { arg = 10; x = arg; }
 //    table t() { actions = { a; } }
 //    apply { ... } }
-class RemoveActionParameters : public Transform {
+class DoRemoveActionParameters : public Transform {
     ActionInvocation* invocations;
  public:
-    explicit RemoveActionParameters(ActionInvocation* invocations) :
+    explicit DoRemoveActionParameters(ActionInvocation* invocations) :
             invocations(invocations)
-    { CHECK_NULL(invocations); setName("RemoveActionParameters"); }
+    { CHECK_NULL(invocations); setName("DoRemoveActionParameters"); }
     const IR::Node* postorder(IR::P4Action* table) override;
     const IR::Node* postorder(IR::ActionListElement* element) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
 };
 
-// Calls RemoveActionParameters and RemoveTableParameters in the right order
-class RemoveParameters : public PassManager {
+class RemoveTableParameters : public PassManager {
  public:
-    RemoveParameters(ReferenceMap* refMap, TypeMap* typeMap);
+    RemoveTableParameters(ReferenceMap* refMap, TypeMap* typeMap);
+};
+
+class RemoveActionParameters : public PassManager {
+ public:
+    RemoveActionParameters(ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 }  // namespace P4

@@ -23,8 +23,8 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "midend/moveDeclarations.h"
-#include "midend/resetHeaders.h"
+#include "frontends/p4/moveDeclarations.h"
+#include "frontends/p4/resetHeaders.h"
 
 namespace P4 {
 
@@ -243,13 +243,13 @@ const IR::Node* InlineDriver::preorder(IR::P4Program* program) {
 
 void DiscoverInlining::postorder(const IR::MethodCallStatement* statement) {
     LOG2("Visiting " << statement);
-    auto mi = P4::MethodInstance::resolve(statement, refMap, typeMap);
+    auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (!mi->isApply())
         return;
     auto am = mi->to<P4::ApplyMethod>();
     CHECK_NULL(am);
-    if (!am->type->is<IR::Type_Control>() &&
-        !am->type->is<IR::Type_Parser>())
+    if (!am->applyObject->is<IR::Type_Control>() &&
+        !am->applyObject->is<IR::Type_Parser>())
         return;
     auto instantiation = am->object->to<IR::Declaration_Instance>();
     BUG_CHECK(instantiation != nullptr, "%1% expected an instance declaration", am->object);
@@ -437,7 +437,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
         ++it;
     }
 
-    auto result = new IR::BlockStatement(statement->srcInfo, body);
+    auto result = new IR::BlockStatement(statement->srcInfo, callee->type->annotations, body);
     LOG1("Replacing " << orig << " with " << result);
     prune();
     return result;

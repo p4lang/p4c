@@ -4,11 +4,13 @@ header H {
 }
 
 control c(inout bit<32> r) {
-    H[2] h_0;
-    bit<32> tmp;
+    @name("h") H[2] h;
+    @name("tmp") bit<32> tmp_1;
+    @name("tmp_0") bit<32> tmp_2;
     action act() {
-        tmp = f(32w2);
-        h_0[tmp].setValid();
+        tmp_1 = f(32w2);
+        tmp_2 = tmp_1;
+        h[tmp_2].setValid();
     }
     table tbl_act() {
         actions = {

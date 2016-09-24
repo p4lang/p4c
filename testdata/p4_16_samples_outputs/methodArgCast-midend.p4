@@ -3,9 +3,9 @@ extern E {
 }
 
 control c() {
-    @name("e") E() e_0;
+    @name("e") E() e;
     action act() {
-        e_0.set(32w10);
+        e.set(32w10);
     }
     table tbl_act() {
         actions = {

@@ -1,25 +1,24 @@
 #include <core.p4>
 
-extern Checksum16 {
-    void clear();
-    void update<D>(in D dt);
-    void update<D>(in bool condition, in D dt);
-    bit<16> get();
-}
-
-typedef bit<4> PortId_t;
+typedef bit<4> PortId;
 struct InControl {
-    PortId_t inputPort;
+    PortId inputPort;
 }
 
 struct OutControl {
-    PortId_t outputPort;
+    PortId outputPort;
 }
 
 parser Parser<H>(packet_in b, out H parsedHeaders);
-control MAP<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
+control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
 control Deparser<H>(inout H outputHeaders, packet_out b);
-package Simple<H>(Parser<H> p, MAP<H> map, Deparser<H> d);
+package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
+extern Checksum16 {
+    void clear();
+    void update<T>(in T data);
+    bit<16> get();
+}
+
 header ARPA_hdr {
     bit<48> src;
     bit<48> dest;
@@ -38,29 +37,29 @@ parser LJparse(packet_in b, out Parsed_rep p) {
 }
 
 control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    action Drop_action(out PortId_t port) {
+    @name("Drop_action") action Drop_action_0(out PortId port) {
         port = 4w0xf;
     }
-    action Drop_1() {
+    @name("Drop_1") action Drop() {
         outCtrl.outputPort = 4w0xf;
     }
-    action Forward(PortId_t outPort) {
+    @name("Forward") action Forward_0(PortId outPort) {
         outCtrl.outputPort = outPort;
     }
-    table Enet_lkup() {
+    @name("Enet_lkup") table Enet_lkup_0() {
         key = {
             p.arpa_pak.dest: exact;
         }
         actions = {
-            Drop_action(outCtrl.outputPort);
-            Drop_1();
-            Forward();
+            Drop_action_0(outCtrl.outputPort);
+            Drop();
+            Forward_0();
         }
-        default_action = Drop_1();
+        default_action = Drop();
     }
     apply {
         if (p.arpa_pak.isValid()) 
-            Enet_lkup.apply();
+            Enet_lkup_0.apply();
     }
 }
 
@@ -70,4 +69,4 @@ control LJdeparse(inout Parsed_rep p, packet_out b) {
     }
 }
 
-Simple<Parsed_rep>(LJparse(), LjPipe(), LJdeparse()) main;
+VSS<Parsed_rep>(LJparse(), LjPipe(), LJdeparse()) main;

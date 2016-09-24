@@ -26,13 +26,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("action_1_1") action action_1_1(bit<1> value) {
+    @name("action_1_1") action action_1(bit<1> value) {
         meta.md.field_1_1_1 = value;
         meta.md.field_2_1_1 = 1w1;
     }
-    @name("dmac") table dmac() {
+    @name("dmac") table dmac_0() {
         actions = {
-            action_1_1();
+            action_1();
             NoAction();
         }
         key = {
@@ -40,7 +40,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        dmac.apply();
+        dmac_0.apply();
     }
 }
 

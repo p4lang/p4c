@@ -17,6 +17,9 @@ abstract Type {
 #end
     // This is well-defined only for types with fixed width
     virtual int width_bits() const { return 0; }
+    // If possible returns the corresponding type that can be inserted
+    // in a P4 program; may return a Type_Name
+    virtual const Type* getP4Type() const = 0;
 }
 
 // Implemented by all types that may be generic
@@ -63,7 +66,9 @@ interface IContainer : IMayBeGenericType {
 
 // This represents a primitive type
 // (called base type in the spec)
-abstract Type_Base : Type {}
+abstract Type_Base : Type {
+    const Type* getP4Type() const override { return this; }
+}
 
 // This is needed by Expression
 class Type_Unknown : Type_Base {
@@ -100,6 +105,7 @@ abstract Type_Declaration : Type, IDeclaration {
  public:
     toString { return externalName(); }
     dbprint { Node::dbprint(out); out << name << "/" << declid; }
+    const Type* getP4Type() const override { return new Type_Name(name); }
 }
 
 abstract Expression {

@@ -2,28 +2,28 @@ header h {
 }
 
 parser p() {
-    h[12] stack_0;
-    h b_0;
+    @name("stack") h[12] stack;
+    @name("b") h b;
     state start {
-        stack_0[0].setInvalid();
-        stack_0[1].setInvalid();
-        stack_0[2].setInvalid();
-        stack_0[3].setInvalid();
-        stack_0[4].setInvalid();
-        stack_0[5].setInvalid();
-        stack_0[6].setInvalid();
-        stack_0[7].setInvalid();
-        stack_0[8].setInvalid();
-        stack_0[9].setInvalid();
-        stack_0[10].setInvalid();
-        stack_0[11].setInvalid();
-        stack_0[3].setValid();
-        b_0 = stack_0[3];
-        b_0 = stack_0.last;
-        stack_0[3] = b_0;
-        b_0 = stack_0.next;
-        stack_0.push_front(2);
-        stack_0.pop_front(2);
+        stack[0].setInvalid();
+        stack[1].setInvalid();
+        stack[2].setInvalid();
+        stack[3].setInvalid();
+        stack[4].setInvalid();
+        stack[5].setInvalid();
+        stack[6].setInvalid();
+        stack[7].setInvalid();
+        stack[8].setInvalid();
+        stack[9].setInvalid();
+        stack[10].setInvalid();
+        stack[11].setInvalid();
+        stack[3].setValid();
+        b = stack[3];
+        b = stack.last;
+        stack[3] = b;
+        b = stack.next;
+        stack.push_front(2);
+        stack.pop_front(2);
         transition accept;
     }
 }

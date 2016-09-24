@@ -60,191 +60,191 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction_0() {
     }
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_9() {
     }
-    action NoAction_4() {
+    @name("NoAction_4") action NoAction_10() {
     }
-    action NoAction_5() {
+    @name("NoAction_5") action NoAction_11() {
     }
-    action NoAction_6() {
+    @name("NoAction_6") action NoAction_12() {
     }
-    action NoAction_7() {
+    @name("NoAction_7") action NoAction_13() {
     }
-    action NoAction_8() {
+    @name("NoAction_8") action NoAction_14() {
     }
-    @name("set1") action set1(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set1") action set1_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f1_1 = v1;
         hdr.data.f1_2 = v2;
         hdr.data.f1_3 = v3;
         hdr.data.f1_4 = v4;
         hdr.data.f1_5 = v5;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("noop") action noop_1() {
+    @name("noop") action noop_8() {
     }
-    @name("noop") action noop_2() {
+    @name("noop") action noop_9() {
     }
-    @name("noop") action noop_3() {
+    @name("noop") action noop_10() {
     }
-    @name("noop") action noop_4() {
+    @name("noop") action noop_11() {
     }
-    @name("noop") action noop_5() {
+    @name("noop") action noop_12() {
     }
-    @name("noop") action noop_6() {
+    @name("noop") action noop_13() {
     }
-    @name("noop") action noop_7() {
+    @name("noop") action noop_14() {
     }
-    @name("set2") action set2(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set2") action set2_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f2_1 = v1;
         hdr.data.f2_2 = v2;
         hdr.data.f2_3 = v3;
         hdr.data.f2_4 = v4;
         hdr.data.f2_5 = v5;
     }
-    @name("set3") action set3(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set3") action set3_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f3_1 = v1;
         hdr.data.f3_2 = v2;
         hdr.data.f3_3 = v3;
         hdr.data.f3_4 = v4;
         hdr.data.f3_5 = v5;
     }
-    @name("set4") action set4(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set4") action set4_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f4_1 = v1;
         hdr.data.f4_2 = v2;
         hdr.data.f4_3 = v3;
         hdr.data.f4_4 = v4;
         hdr.data.f4_5 = v5;
     }
-    @name("set5") action set5(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set5") action set5_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f5_1 = v1;
         hdr.data.f5_2 = v2;
         hdr.data.f5_3 = v3;
         hdr.data.f5_4 = v4;
         hdr.data.f5_5 = v5;
     }
-    @name("set6") action set6(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set6") action set6_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f6_1 = v1;
         hdr.data.f6_2 = v2;
         hdr.data.f6_3 = v3;
         hdr.data.f6_4 = v4;
         hdr.data.f6_5 = v5;
     }
-    @name("set7") action set7(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set7") action set7_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f7_1 = v1;
         hdr.data.f7_2 = v2;
         hdr.data.f7_3 = v3;
         hdr.data.f7_4 = v4;
         hdr.data.f7_5 = v5;
     }
-    @name("set8") action set8(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set8") action set8_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f8_1 = v1;
         hdr.data.f8_2 = v2;
         hdr.data.f8_3 = v3;
         hdr.data.f8_4 = v4;
         hdr.data.f8_5 = v5;
     }
-    @name("tbl1") table tbl1_0() {
+    @name("tbl1") table tbl1() {
         actions = {
-            set1();
-            noop();
-            NoAction_1();
+            set1_0();
+            noop_0();
+            NoAction();
         }
         key = {
             hdr.data.f1_1: exact;
         }
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name("tbl2") table tbl2_0() {
+    @name("tbl2") table tbl2() {
         actions = {
-            set2();
-            noop_1();
-            NoAction_2();
+            set2_0();
+            noop_8();
+            NoAction_0();
         }
         key = {
             hdr.data.f2_1: exact;
         }
-        default_action = NoAction_2();
+        default_action = NoAction_0();
     }
-    @name("tbl3") table tbl3_0() {
+    @name("tbl3") table tbl3() {
         actions = {
-            set3();
-            noop_2();
-            NoAction_3();
+            set3_0();
+            noop_9();
+            NoAction_9();
         }
         key = {
             hdr.data.f3_1: exact;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_9();
     }
-    @name("tbl4") table tbl4_0() {
+    @name("tbl4") table tbl4() {
         actions = {
-            set4();
-            noop_3();
-            NoAction_4();
+            set4_0();
+            noop_10();
+            NoAction_10();
         }
         key = {
             hdr.data.f4_1: exact;
         }
-        default_action = NoAction_4();
+        default_action = NoAction_10();
     }
-    @name("tbl5") table tbl5_0() {
+    @name("tbl5") table tbl5() {
         actions = {
-            set5();
-            noop_4();
-            NoAction_5();
+            set5_0();
+            noop_11();
+            NoAction_11();
         }
         key = {
             hdr.data.f5_1: exact;
         }
-        default_action = NoAction_5();
+        default_action = NoAction_11();
     }
-    @name("tbl6") table tbl6_0() {
+    @name("tbl6") table tbl6() {
         actions = {
-            set6();
-            noop_5();
-            NoAction_6();
+            set6_0();
+            noop_12();
+            NoAction_12();
         }
         key = {
             hdr.data.f6_1: exact;
         }
-        default_action = NoAction_6();
+        default_action = NoAction_12();
     }
-    @name("tbl7") table tbl7_0() {
+    @name("tbl7") table tbl7() {
         actions = {
-            set7();
-            noop_6();
-            NoAction_7();
+            set7_0();
+            noop_13();
+            NoAction_13();
         }
         key = {
             hdr.data.f7_1: exact;
         }
-        default_action = NoAction_7();
+        default_action = NoAction_13();
     }
-    @name("tbl8") table tbl8_0() {
+    @name("tbl8") table tbl8() {
         actions = {
-            set8();
-            noop_7();
-            NoAction_8();
+            set8_0();
+            noop_14();
+            NoAction_14();
         }
         key = {
             hdr.data.f8_1: exact;
         }
-        default_action = NoAction_8();
+        default_action = NoAction_14();
     }
     apply {
-        tbl1_0.apply();
-        tbl2_0.apply();
-        tbl3_0.apply();
-        tbl4_0.apply();
-        tbl5_0.apply();
-        tbl6_0.apply();
-        tbl7_0.apply();
-        tbl8_0.apply();
+        tbl1.apply();
+        tbl2.apply();
+        tbl3.apply();
+        tbl4.apply();
+        tbl5.apply();
+        tbl6.apply();
+        tbl7.apply();
+        tbl8.apply();
     }
 }
 

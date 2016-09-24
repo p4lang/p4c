@@ -47,50 +47,50 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_2() {
+    @name("NoAction_2") action NoAction() {
     }
-    @name("copy_queueing_data") action copy_queueing_data() {
+    @name("copy_queueing_data") action copy_queueing_data_0() {
         hdr.queueing_hdr.setValid();
         hdr.queueing_hdr.enq_timestamp = meta.queueing_metadata.enq_timestamp;
         hdr.queueing_hdr.enq_qdepth = meta.queueing_metadata.enq_qdepth;
         hdr.queueing_hdr.deq_timedelta = meta.queueing_metadata.deq_timedelta;
         hdr.queueing_hdr.deq_qdepth = meta.queueing_metadata.deq_qdepth;
     }
-    @name("t_egress") table t_egress_0() {
+    @name("t_egress") table t_egress() {
         actions = {
-            copy_queueing_data();
-            NoAction_2();
+            copy_queueing_data_0();
+            NoAction();
         }
-        default_action = NoAction_2();
+        default_action = NoAction();
     }
     apply {
-        t_egress_0.apply();
+        t_egress.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action NoAction_3() {
+    @name("NoAction_3") action NoAction_0() {
     }
-    @name("set_port") action set_port(bit<9> port) {
+    @name("set_port") action set_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name("_drop") action _drop() {
+    @name("_drop") action _drop_0() {
         mark_to_drop();
     }
-    @name("t_ingress") table t_ingress_0() {
+    @name("t_ingress") table t_ingress() {
         actions = {
-            set_port();
-            _drop();
-            NoAction_3();
+            set_port_0();
+            _drop_0();
+            NoAction_0();
         }
         key = {
             hdr.hdr1.f1: exact;
         }
         size = 128;
-        default_action = NoAction_3();
+        default_action = NoAction_0();
     }
     apply {
-        t_ingress_0.apply();
+        t_ingress.apply();
     }
 }
 

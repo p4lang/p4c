@@ -26,22 +26,22 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("a1") action a1() {
+    @name("a1") action a1_0() {
         meta.m.f1 = 32w1;
     }
-    @name("a2") action a2() {
+    @name("a2") action a2_0() {
         meta.m.f2 = 32w2;
     }
-    @name("t1") table t1() {
+    @name("t1") table t1_0() {
         actions = {
-            a1();
+            a1_0();
             NoAction();
         }
         default_action = NoAction();
     }
-    @name("t2") table t2() {
+    @name("t2") table t2_0() {
         actions = {
-            a2();
+            a2_0();
             NoAction();
         }
         key = {
@@ -50,8 +50,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        t1.apply();
-        t2.apply();
+        t1_0.apply();
+        t2_0.apply();
     }
 }
 

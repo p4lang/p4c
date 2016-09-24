@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "typeUnification.h"
 #include "typeConstraints.h"
+#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
@@ -165,7 +166,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG1("Unifying " << dest->toString() << " to " << src->toString());
 
-    if (dest == src)
+    if (TypeMap::equivalent(dest, src))
         return true;
 
     if (dest->is<IR::Type_SpecializedCanonical>())
@@ -223,8 +224,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             bool success = unify(errorPosition, di, si, reportErrors);
             if (!success)
                 return false;
-            return true;
         }
+        return true;
     } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
         auto strct = dest->to<IR::Type_StructLike>();
         if (src->is<IR::Type_Tuple>()) {

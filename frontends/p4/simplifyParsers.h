@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_SIMPLIFYPARSERS_H_
-#define _MIDEND_SIMPLIFYPARSERS_H_
+#ifndef _FRONTENDS_P4_SIMPLIFYPARSERS_H_
+#define _FRONTENDS_P4_SIMPLIFYPARSERS_H_
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -41,7 +41,7 @@ class DoSimplifyParsers : public Transform {
 
 class SimplifyParsers : public PassManager {
  public:
-    SimplifyParsers(ReferenceMap* refMap) {
+    explicit SimplifyParsers(ReferenceMap* refMap) {
         passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new DoSimplifyParsers(refMap));
         setName("SimplifyParsers");
@@ -50,4 +50,4 @@ class SimplifyParsers : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_SIMPLIFYPARSERS_H_ */
+#endif /* _FRONTENDS_P4_SIMPLIFYPARSERS_H_ */

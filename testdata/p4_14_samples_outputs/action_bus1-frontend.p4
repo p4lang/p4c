@@ -60,68 +60,68 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("set1") action set1(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set1") action set1_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f1_1 = v1;
         hdr.data.f1_2 = v2;
         hdr.data.f1_3 = v3;
         hdr.data.f1_4 = v4;
         hdr.data.f1_5 = v5;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("set2") action set2(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set2") action set2_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f2_1 = v1;
         hdr.data.f2_2 = v2;
         hdr.data.f2_3 = v3;
         hdr.data.f2_4 = v4;
         hdr.data.f2_5 = v5;
     }
-    @name("set3") action set3(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set3") action set3_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f3_1 = v1;
         hdr.data.f3_2 = v2;
         hdr.data.f3_3 = v3;
         hdr.data.f3_4 = v4;
         hdr.data.f3_5 = v5;
     }
-    @name("set4") action set4(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set4") action set4_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f4_1 = v1;
         hdr.data.f4_2 = v2;
         hdr.data.f4_3 = v3;
         hdr.data.f4_4 = v4;
         hdr.data.f4_5 = v5;
     }
-    @name("set5") action set5(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set5") action set5_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f5_1 = v1;
         hdr.data.f5_2 = v2;
         hdr.data.f5_3 = v3;
         hdr.data.f5_4 = v4;
         hdr.data.f5_5 = v5;
     }
-    @name("set6") action set6(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set6") action set6_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f6_1 = v1;
         hdr.data.f6_2 = v2;
         hdr.data.f6_3 = v3;
         hdr.data.f6_4 = v4;
         hdr.data.f6_5 = v5;
     }
-    @name("set7") action set7(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set7") action set7_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f7_1 = v1;
         hdr.data.f7_2 = v2;
         hdr.data.f7_3 = v3;
         hdr.data.f7_4 = v4;
         hdr.data.f7_5 = v5;
     }
-    @name("set8") action set8(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
+    @name("set8") action set8_0(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f8_1 = v1;
         hdr.data.f8_2 = v2;
         hdr.data.f8_3 = v3;
         hdr.data.f8_4 = v4;
         hdr.data.f8_5 = v5;
     }
-    @name("tbl1") table tbl1() {
+    @name("tbl1") table tbl1_0() {
         actions = {
-            set1();
-            noop();
+            set1_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -129,10 +129,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl2") table tbl2() {
+    @name("tbl2") table tbl2_0() {
         actions = {
-            set2();
-            noop();
+            set2_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -140,10 +140,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl3") table tbl3() {
+    @name("tbl3") table tbl3_0() {
         actions = {
-            set3();
-            noop();
+            set3_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -151,10 +151,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl4") table tbl4() {
+    @name("tbl4") table tbl4_0() {
         actions = {
-            set4();
-            noop();
+            set4_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -162,10 +162,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl5") table tbl5() {
+    @name("tbl5") table tbl5_0() {
         actions = {
-            set5();
-            noop();
+            set5_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -173,10 +173,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl6") table tbl6() {
+    @name("tbl6") table tbl6_0() {
         actions = {
-            set6();
-            noop();
+            set6_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -184,10 +184,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl7") table tbl7() {
+    @name("tbl7") table tbl7_0() {
         actions = {
-            set7();
-            noop();
+            set7_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -195,10 +195,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tbl8") table tbl8() {
+    @name("tbl8") table tbl8_0() {
         actions = {
-            set8();
-            noop();
+            set8_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -207,14 +207,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        tbl1.apply();
-        tbl2.apply();
-        tbl3.apply();
-        tbl4.apply();
-        tbl5.apply();
-        tbl6.apply();
-        tbl7.apply();
-        tbl8.apply();
+        tbl1_0.apply();
+        tbl2_0.apply();
+        tbl3_0.apply();
+        tbl4_0.apply();
+        tbl5_0.apply();
+        tbl6_0.apply();
+        tbl7_0.apply();
+        tbl8_0.apply();
     }
 }
 

@@ -560,7 +560,7 @@ void ProgramStructure::createDeparser() {
         auto stat = new IR::MethodCallStatement(Util::SourceInfo(), mce);
         components->push_back(stat);
     }
-    auto body = new IR::BlockStatement(Util::SourceInfo(), components);
+    auto body = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, components);
     deparser = new IR::P4Control(Util::SourceInfo(), v1model.deparser.Id(), type,
                                         new IR::ParameterList(), stateful, body);
     declarations->push_back(deparser);
@@ -999,27 +999,32 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         if (primitive->operands.size() == 3)
             mask = conv.convert(primitive->operands.at(2));
 
+        cstring tmpvar = makeUniqueName("tmp");
+        auto decl = new IR::Declaration_Variable(Util::SourceInfo(), tmpvar,
+                                                 IR::Annotations::empty,
+                                                 v1model.random.resultType, nullptr);
         auto args = new IR::Vector<IR::Expression>();
         args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
                                      v1model.random.logRangeType, logRange));
+        args->push_back(new IR::PathExpression(tmpvar));
         auto random = new IR::PathExpression(v1model.random.Id());
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, random,
                                                emptyTypeArguments, args);
-        if (mask == nullptr) {
-            return new IR::AssignmentStatement(primitive->srcInfo, field, mc);
+        auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
+        auto components = new IR::IndexedVector<IR::StatOrDecl>();
+        const IR::Statement* assign;
+        if (mask != nullptr) {
+            assign = sliceAssign(primitive->srcInfo, field,
+                                 new IR::PathExpression(IR::ID(tmpvar)), mask);
         } else {
-            cstring tmpvar = makeUniqueName("tmp");
-            auto decl = new IR::Declaration_Variable(Util::SourceInfo(), tmpvar,
-                                                     IR::Annotations::empty,
-                                                     v1model.random.resultType, mc);
-            auto components = new IR::IndexedVector<IR::StatOrDecl>();
-            auto assign = sliceAssign(primitive->srcInfo, field,
-                                      new IR::PathExpression(IR::ID(tmpvar)), mask);
-            components->push_back(decl);
-            components->push_back(assign);
-            auto block = new IR::BlockStatement(Util::SourceInfo(), components);
-            return block;
+            assign = new IR::AssignmentStatement(Util::SourceInfo(), field,
+                                                 new IR::PathExpression(tmpvar));
         }
+        components->push_back(decl);
+        components->push_back(call);
+        components->push_back(assign);
+        auto block = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, components);
+        return block;
     } else if (primitive->name == "recirculate") {
         OPS_CK(primitive, 1);
         auto right = convertFieldList(primitive->operands.at(0));
@@ -1267,9 +1272,9 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
 
     // Save the original action name in an annotation
     auto annos = addNameAnnotation(action->name);
-    auto result = new IR::P4Action(action->srcInfo, newName, annos,
-                                   new IR::ParameterList(params),
-                                   new IR::BlockStatement(body->srcInfo, body));
+    auto result = new IR::P4Action(
+        action->srcInfo, newName, annos, new IR::ParameterList(params),
+        new IR::BlockStatement(body->srcInfo, IR::Annotations::empty, body));
     return result;
 }
 
@@ -1523,7 +1528,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
         components->push_back(s);
     }
 
-    auto body = new IR::BlockStatement(Util::SourceInfo(), components);
+    auto body = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, components);
     auto result = new IR::P4Control(Util::SourceInfo(), name, type,
                                            new IR::ParameterList(), stateful, body);
     conversionContext.clear();
@@ -1550,7 +1555,7 @@ void ProgramStructure::createControls() {
         auto type = controlType(name);
         auto stateful = new IR::IndexedVector<IR::Declaration>();
         auto components = new IR::IndexedVector<IR::StatOrDecl>();
-        auto body = new IR::BlockStatement(Util::SourceInfo(), components);
+        auto body = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, components);
         auto egressControl = new IR::P4Control(Util::SourceInfo(), name, type,
                                                new IR::ParameterList(),
                                                stateful, body);
@@ -1741,7 +1746,7 @@ void ProgramStructure::createChecksumVerifications() {
             LOG1("Converted " << flc);
         }
     }
-    auto body = new IR::BlockStatement(Util::SourceInfo(), components);
+    auto body = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, components);
     verifyChecksums = new IR::P4Control(Util::SourceInfo(), v1model.verify.Id(), type,
                                         new IR::ParameterList(), stateful, body);
     declarations->push_back(verifyChecksums);
@@ -1828,7 +1833,7 @@ void ProgramStructure::createChecksumUpdates() {
             LOG1("Converted " << flc);
         }
     }
-    auto body = new IR::BlockStatement(Util::SourceInfo(), components);
+    auto body = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, components);
     updateChecksums = new IR::P4Control(Util::SourceInfo(), v1model.update.Id(), type,
                                         new IR::ParameterList(), stateful, body);
     declarations->push_back(updateChecksums);

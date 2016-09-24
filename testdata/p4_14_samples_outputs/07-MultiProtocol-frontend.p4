@@ -150,39 +150,39 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("l2_packet") action l2_packet() {
+    @name("l2_packet") action l2_packet_0() {
         meta.ing_metadata.packet_type = 4w0;
     }
-    @name("ipv4_packet") action ipv4_packet() {
+    @name("ipv4_packet") action ipv4_packet_0() {
         meta.ing_metadata.packet_type = 4w1;
     }
-    @name("ipv6_packet") action ipv6_packet() {
+    @name("ipv6_packet") action ipv6_packet_0() {
         meta.ing_metadata.packet_type = 4w2;
     }
-    @name("mpls_packet") action mpls_packet() {
+    @name("mpls_packet") action mpls_packet_0() {
         meta.ing_metadata.packet_type = 4w3;
     }
-    @name("mim_packet") action mim_packet() {
+    @name("mim_packet") action mim_packet_0() {
         meta.ing_metadata.packet_type = 4w4;
     }
-    @name("nop") action nop() {
+    @name("nop") action nop_0() {
     }
-    @name("drop") action drop() {
+    @name("drop") action drop_0() {
         meta.ing_metadata.drop = 1w1;
     }
-    @name("set_egress_port") action set_egress_port(bit<9> egress_port) {
+    @name("set_egress_port") action set_egress_port_0(bit<9> egress_port) {
         meta.ing_metadata.egress_port = egress_port;
     }
-    @name("send_packet") action send_packet() {
+    @name("send_packet") action send_packet_0() {
         standard_metadata.egress_spec = meta.ing_metadata.egress_port;
     }
-    @name("ethertype_match") table ethertype_match() {
+    @name("ethertype_match") table ethertype_match_0() {
         actions = {
-            l2_packet();
-            ipv4_packet();
-            ipv6_packet();
-            mpls_packet();
-            mim_packet();
+            l2_packet_0();
+            ipv4_packet_0();
+            ipv6_packet_0();
+            mpls_packet_0();
+            mim_packet_0();
             NoAction();
         }
         key = {
@@ -190,10 +190,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("icmp_check") table icmp_check() {
+    @name("icmp_check") table icmp_check_0() {
         actions = {
-            nop();
-            drop();
+            nop_0();
+            drop_0();
             NoAction();
         }
         key = {
@@ -201,10 +201,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("ipv4_match") table ipv4_match() {
+    @name("ipv4_match") table ipv4_match_0() {
         actions = {
-            nop();
-            set_egress_port();
+            nop_0();
+            set_egress_port_0();
             NoAction();
         }
         key = {
@@ -212,10 +212,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("ipv6_match") table ipv6_match() {
+    @name("ipv6_match") table ipv6_match_0() {
         actions = {
-            nop();
-            set_egress_port();
+            nop_0();
+            set_egress_port_0();
             NoAction();
         }
         key = {
@@ -223,10 +223,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("l2_match") table l2_match() {
+    @name("l2_match") table l2_match_0() {
         actions = {
-            nop();
-            set_egress_port();
+            nop_0();
+            set_egress_port_0();
             NoAction();
         }
         key = {
@@ -234,10 +234,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("set_egress") table set_egress() {
+    @name("set_egress") table set_egress_0() {
         actions = {
-            nop();
-            send_packet();
+            nop_0();
+            send_packet_0();
             NoAction();
         }
         key = {
@@ -245,10 +245,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("tcp_check") table tcp_check() {
+    @name("tcp_check") table tcp_check_0() {
         actions = {
-            nop();
-            drop();
+            nop_0();
+            drop_0();
             NoAction();
         }
         key = {
@@ -256,10 +256,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("udp_check") table udp_check() {
+    @name("udp_check") table udp_check_0() {
         actions = {
-            nop();
-            drop();
+            nop_0();
+            drop_0();
             NoAction();
         }
         key = {
@@ -268,30 +268,30 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        switch (ethertype_match.apply().action_run) {
+        switch (ethertype_match_0.apply().action_run) {
             default: {
-                l2_match.apply();
+                l2_match_0.apply();
             }
-            ipv4_packet: {
-                ipv4_match.apply();
+            ipv4_packet_0: {
+                ipv4_match_0.apply();
             }
-            ipv6_packet: {
-                ipv6_match.apply();
+            ipv6_packet_0: {
+                ipv6_match_0.apply();
             }
-            mpls_packet: {
-                ipv6_match.apply();
+            mpls_packet_0: {
+                ipv6_match_0.apply();
             }
         }
 
         if (hdr.tcp.isValid()) 
-            tcp_check.apply();
+            tcp_check_0.apply();
         else 
             if (hdr.udp.isValid()) 
-                udp_check.apply();
+                udp_check_0.apply();
             else 
                 if (hdr.icmp.isValid()) 
-                    icmp_check.apply();
-        set_egress.apply();
+                    icmp_check_0.apply();
+        set_egress_0.apply();
     }
 }
 

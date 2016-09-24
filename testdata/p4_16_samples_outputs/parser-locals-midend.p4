@@ -10,11 +10,11 @@ struct S {
 }
 
 parser p() {
-    S s_0;
+    @name("s") S s;
     state start {
-        s_0.h1.setInvalid();
-        s_0.h2.setInvalid();
-        s_0.c = 32w0;
+        s.h1.setInvalid();
+        s.h2.setInvalid();
+        s.c = 32w0;
         transition accept;
     }
 }

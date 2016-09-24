@@ -8,8 +8,10 @@ header hdr {
 }
 
 control compute(inout hdr h) {
+    bool tmp;
     apply {
-        if (h.a < h.b) 
+        tmp = h.a < h.b;
+        if (tmp) 
             h.c = 8w0;
         else 
             h.c = 8w1;
@@ -52,9 +54,9 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    compute() c;
+    @name("c") compute() c_0;
     apply {
-        c.apply(h.h);
+        c_0.apply(h.h);
         sm.egress_spec = 9w0;
     }
 }

@@ -108,7 +108,7 @@ class ActionsInliner : public AbstractActionInliner {
     P4::ReferenceMap* refMap;
     std::map<const IR::MethodCallStatement*, const IR::P4Action*>* replMap;
  public:
-    ActionsInliner(bool isv1) : refMap(new P4::ReferenceMap()), replMap(nullptr)
+    explicit ActionsInliner(bool isv1) : refMap(new P4::ReferenceMap()), replMap(nullptr)
     { refMap->setIsV1(isv1); }
     Visitor::profile_t init_apply(const IR::Node* node) override;
     const IR::Node* preorder(IR::P4Parser* cont) override

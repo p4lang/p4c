@@ -3,13 +3,15 @@ extern E {
 }
 
 control c(inout bit<32> r) {
-    bit<32> tmp;
-    bit<32> tmp_0;
-    @name("e") E() e_0;
+    @name("tmp") bit<32> tmp_2;
+    @name("tmp_0") bit<32> tmp_3;
+    @name("tmp_1") bit<32> tmp_4;
+    @name("e") E() e_1;
     action act() {
-        tmp = e_0.f(32w4);
-        tmp_0 = e_0.f(32w5);
-        r = tmp + tmp_0;
+        tmp_2 = e_1.f(32w4);
+        tmp_3 = e_1.f(32w5);
+        tmp_4 = tmp_2 + tmp_3;
+        r = tmp_4;
     }
     table tbl_act() {
         actions = {

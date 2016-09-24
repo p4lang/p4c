@@ -150,7 +150,7 @@ class CFG : public IHasDbPrint {
         return result;
     }
     void build(const IR::P4Control* cc,
-               const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap);
+               P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
     void setEntry(Node* entry) {
         BUG_CHECK(entryPoint == nullptr, "Entry already set");
         entryPoint = entry;

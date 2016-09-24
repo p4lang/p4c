@@ -42,29 +42,29 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    hdr h_0;
+    @name("h_0") hdr h_1;
     bit<32> key_0;
-    action NoAction_1() {
+    @name("NoAction_1") action NoAction() {
     }
-    @name("c.a") action c_a_0() {
-        h_0.b = h_0.a;
+    @name("c.a") action c_a() {
+        h_1.b = h_1.a;
     }
-    @name("c.t") table c_t() {
+    @name("c.t") table c_t_0() {
         key = {
             key_0: exact @name("e") ;
         }
         actions = {
-            c_a_0();
-            NoAction_1();
+            c_a();
+            NoAction();
         }
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
     action act() {
-        h_0 = h.h;
-        key_0 = h_0.a + h_0.a;
+        h_1 = h.h;
+        key_0 = h_1.a + h_1.a;
     }
     action act_0() {
-        h.h = h_0;
+        h.h = h_1;
         sm.egress_spec = 9w0;
     }
     table tbl_act() {
@@ -81,7 +81,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_act.apply();
-        c_t.apply();
+        c_t_0.apply();
         tbl_act_0.apply();
     }
 }

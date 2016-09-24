@@ -25,7 +25,8 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Action* action)  {
         auto m = getMoves();
         body->insert(body->end(), m->begin(), m->end());
         body->append(*action->body->components);
-        action->body = new IR::BlockStatement(action->body->srcInfo, body);
+        action->body = new IR::BlockStatement(
+            action->body->srcInfo, action->body->annotations, body);
         pop();
     }
     return action;
@@ -116,7 +117,8 @@ const IR::Node* MoveInitializers::postorder(IR::P4Control* control) {
     if (toMove->empty())
         return control;
     toMove->append(*control->body->components);
-    auto newBody = new IR::BlockStatement(Util::SourceInfo(), toMove);
+    auto newBody = new IR::BlockStatement(
+        Util::SourceInfo(), control->body->annotations, toMove);
     control->body = newBody;
     toMove = new IR::IndexedVector<IR::StatOrDecl>();
     return control;

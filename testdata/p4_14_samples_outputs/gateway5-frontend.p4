@@ -34,15 +34,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("setf4") action setf4(bit<32> val) {
+    @name("setf4") action setf4_0(bit<32> val) {
         hdr.data.f4 = val;
     }
-    @name("noop") action noop() {
+    @name("noop") action noop_0() {
     }
-    @name("test1") table test1() {
+    @name("test1") table test1_0() {
         actions = {
-            setf4();
-            noop();
+            setf4_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -50,10 +50,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    @name("test2") table test2() {
+    @name("test2") table test2_0() {
         actions = {
-            setf4();
-            noop();
+            setf4_0();
+            noop_0();
             NoAction();
         }
         key = {
@@ -63,9 +63,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         if (hdr.data.x1 == 2w1 && hdr.data.x4 == 1w0) 
-            test1.apply();
+            test1_0.apply();
         else 
-            test2.apply();
+            test2_0.apply();
     }
 }
 

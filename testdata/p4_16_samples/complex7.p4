@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "core.p4"
+#include <core.p4>
 
 extern bit<32> f(in bit<32> x);
 
