@@ -78,10 +78,8 @@ class Node : public virtual INode {
     int id;  // unique id for each node
     void traceCreation() const;
     Node() : id(currentId++) { traceCreation(); }
-    explicit Node(Util::SourceInfo si) : srcInfo(si), id(currentId++)
-    { traceCreation(); }
-    Node(const Node& other) : srcInfo(other.srcInfo), id(currentId++)
-    { traceCreation(); }
+    explicit Node(Util::SourceInfo si) : srcInfo(si), id(currentId++) { traceCreation(); }
+    Node(const Node& other) : srcInfo(other.srcInfo), id(currentId++) { traceCreation(); }
     virtual ~Node() {}
     const Node *apply(Visitor &v) const;
     const Node *apply(Visitor &&v) const { return apply(v); }

@@ -33,6 +33,12 @@ class NameMap : public Node {
     cstring obj_name(const void *) { return cstring(0); }
 
  public:
+    NameMap() = default;
+    NameMap(const NameMap &) = default;
+    NameMap(NameMap &&) = default;
+    explicit NameMap(JSONLoader &);
+    NameMap &operator=(const NameMap &) = default;
+    NameMap &operator=(NameMap &&) = default;
     typedef typename map_t::value_type          value_type;
     typedef typename map_t::iterator            iterator;
     typedef typename map_t::const_iterator      const_iterator;
@@ -109,6 +115,7 @@ class NameMap : public Node {
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
     void toJSON(JSONGenerator &json) const override;
+    static NameMap<T, MAP, COMP, ALLOC> *fromJSON(JSONLoader &json);
 
     Util::Enumerator<const T*>* valueEnumerator() const {
         return Util::Enumerator<const T*>::createEnumerator(Values(symbols).begin(),

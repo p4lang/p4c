@@ -38,7 +38,7 @@ int main() {
     std::cout << ss.str();
     JSONLoader loader(ss);
     std::cout << loader.json;
-    IR::Node* e2 = nullptr;
+    const IR::Node* e2 = nullptr;
     loader >> e2;
     JSONGenerator(std::cout) << e2 << std::endl;
     

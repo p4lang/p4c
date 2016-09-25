@@ -172,7 +172,7 @@ class JSONGenerator {
     JSONGenerator &operator<<(const char *s) { out << s; return *this; }
     JSONGenerator &operator<<(indent_t i) { out << i; return *this; }
     JSONGenerator &operator<<(std::ostream &(*fn)(std::ostream &)) { out << fn; return *this; }
-    template<typename T> JSONGenerator &operator<<(T v) { generate(v); return *this; }
+    template<typename T> JSONGenerator &operator<<(const T &v) { generate(v); return *this; }
 };
 
 

@@ -48,19 +48,34 @@ int main(int argc, char *const argv[]) {
         if (program != nullptr && ::errorCount() == 0) {
             P4Test::MidEnd midEnd(options);
             midEnd.addDebugHook(hook);
+#if 0
+            /* doing this breaks the output until we get dump/undump of srcInfo */
+            if (options.debugJson) {
+                std::stringstream tmp;
+                JSONGenerator gen(tmp);
+                gen << program;
+                JSONLoader loader(tmp);
+                loader >> program;
+            }
+#endif
             (void)midEnd.process(program);
             if (options.debugJson) {
                 std::stringstream ss1, ss2;
                 JSONGenerator gen1(ss1), gen2(ss2);
                 gen1 << program;
-                std::cout << ss1.str();
 
-                IR::Node* node = nullptr;
+                const IR::Node* node = nullptr;
                 JSONLoader loader(ss1);
                 loader >> node;
 
                 gen2 << node;
-                std::cout << ss2.str();
+                if (ss1.str() != ss2.str()) {
+                    error("json mismatch");
+                    std::ofstream t1("t1.json"), t2("t2.json");
+                    t1 << ss1.str() << std::flush;
+                    t2 << ss2.str() << std::flush;
+                    system("json_diff t1.json t2.json");
+                }
             }
         }
     }

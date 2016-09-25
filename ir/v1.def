@@ -28,6 +28,15 @@ inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
     }
     return out;
 }
+
+inline bool operator>>(cstring s, IR::CounterType &ctr) {
+    if (!s || s == "" || s == "NONE") ctr = IR::CounterType::NONE;
+    else if (s == "PACKETS") ctr = IR::CounterType::PACKETS;
+    else if (s == "BYTES") ctr = IR::CounterType::BYTES;
+    else if (s == "BOTH") ctr = IR::CounterType::BOTH;
+    else return false;
+    return true;
+}
 #end
 
 abstract HeaderOrMetadata {
@@ -200,7 +209,7 @@ class CalculatedField {
         static IR::CalculatedField::update_or_verify* fromJSON(JSONLoader &json) {
             bool update_temp;
             IR::ID name_temp;
-            IR::Expression* cond_temp;
+            const IR::Expression *cond_temp;
             json.load("update", update_temp);
             json.load("name", name_temp);
             json.load("cond", cond_temp);

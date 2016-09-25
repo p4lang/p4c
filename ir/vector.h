@@ -36,6 +36,13 @@ class VectorBase : public Node {
     virtual bool empty() const = 0;
     iterator begin() const { return VectorBase_begin(); }
     iterator end() const { return VectorBase_end(); }
+    VectorBase() = default;
+    VectorBase(const VectorBase &) = default;
+    VectorBase(VectorBase &&) = default;
+    VectorBase &operator=(const VectorBase &) = default;
+    VectorBase &operator=(VectorBase &&) = default;
+ protected:
+    explicit VectorBase(JSONLoader &json) : Node(json) {}
 };
 
 // This class should only be used in the IR.
@@ -49,7 +56,7 @@ class Vector : public VectorBase {
     Vector() = default;
     Vector(const Vector &) = default;
     Vector(Vector &&) = default;
-    Vector(JSONLoader &json);
+    explicit Vector(JSONLoader &json);
     Vector &operator=(const Vector &) = default;
     Vector &operator=(Vector &&) = default;
     explicit Vector(const T *a) {
