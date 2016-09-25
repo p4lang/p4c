@@ -20,6 +20,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/gc.h"
 #include "lib/crash.h"
+#include "lib/nullstream.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/frontend.h"
@@ -59,6 +60,8 @@ int main(int argc, char *const argv[]) {
             }
 #endif
             (void)midEnd.process(program);
+            if (options.dumpJsonFile)
+                JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
             if (options.debugJson) {
                 std::stringstream ss1, ss2;
                 JSONGenerator gen1(ss1), gen2(ss2);

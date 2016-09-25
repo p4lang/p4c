@@ -228,15 +228,6 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
             }
         }
     }
-/*    if (dumpJsonFile != "") {
-        auto stream = openFile(dumpJsonFile, true);
-        std::cout << "Json File: " << dumpJsonFile << std::endl;
-        if (stream != nullptr) {
-            JSONGenerator json(*stream);
-            json << node << std::endl;
-        }
-    }
-*/
 }
 
 DebugHook CompilerOptions::getDebugHook() const {

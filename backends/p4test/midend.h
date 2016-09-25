@@ -32,7 +32,7 @@ class MidEnd : public PassManager {
 
  public:
     explicit MidEnd(CompilerOptions& options);
-    IR::ToplevelBlock* process(const IR::P4Program* program) {
+    IR::ToplevelBlock* process(const IR::P4Program *&program) {
         program = program->apply(*this);
         return toplevel; }
 };
