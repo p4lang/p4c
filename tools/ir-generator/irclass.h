@@ -88,12 +88,12 @@ inline std::ostream &operator<<(std::ostream &out, IrElement::access_t a) {
 
 class IrMethod : public IrElement {
  public:
-    const cstring                       name;
+    cstring                             name;
     const Type                          *rtype = nullptr;
     std::vector<const IrField *>        args;
     cstring                             body;
     bool inImpl = false, isConst = false, isOverride = false, isStatic = false, isVirtual = false,
-         isUser = false, isSpecial = false;
+         isUser = false;
     IrMethod(Util::SourceInfo info, cstring name, cstring body)
     : IrElement(info), name(name), body(body) {}
     IrMethod(Util::SourceInfo info, cstring name) : IrElement(info), name(name) {}

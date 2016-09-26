@@ -113,7 +113,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 << f->name << "\\\" : \" << " << "this->" << f->name << ";" << std::endl; }
         buf << "}";
         return buf.str(); } } },
-{ "PLACEHOLDER", { nullptr, { new IrField(new ReferenceType(&NamedType::JSONLoader), "json")
+{ nullptr, { nullptr, { new IrField(new ReferenceType(&NamedType::JSONLoader), "json")
     }, IN_IMPL + CONSTRUCTOR, 
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
@@ -125,7 +125,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         return buf.str(); } } },
 { "fromJSON", { nullptr, { 
         new IrField(new ReferenceType(&NamedType::JSONLoader), "json"),
-    }, FACTORY + CONCRETE_ONLY + OVERRIDE,
+    }, FACTORY + IN_IMPL + CONCRETE_ONLY,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
         buf << "{ return new " << cl->name << "(json); }";
@@ -138,28 +138,12 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 void IrClass::generateMethods() {
     if (this == nodeClass || this == vectorClass) return;
     if (kind != NodeKind::Interface && kind != NodeKind::Nested) {
+        // FIXME -- some methods should be auto-generated for Nested classes
         for (auto &def : IrMethod::Generate) {
             if (def.second.flags & NOT_DEFAULT)
                 continue;
             if ((def.second.flags & CONCRETE_ONLY) && kind != NodeKind::Concrete)
                 continue;
-            if (def.second.flags & CONSTRUCTOR || def.second.flags & FACTORY) {
-                cstring body = def.second.create(this, cstring());
-                IrMethod* m;
-                if (def.second.flags & CONSTRUCTOR) { 
-                    m = new IrMethod(this->name, body);
-                    m->rtype = def.second.rtype;
-                    m->inImpl = true;
-                } else {
-                    m = new IrMethod(def.first, body);
-                    m->rtype = new PointerType(new NamedType(name));
-                    m->isStatic = true;
-                    m->isSpecial = true;
-                }
-                m->clss = this;        
-                m->args = def.second.args;
-                elements.push_back(m);
-                continue; }
             if (Util::Enumerator<IrElement*>::createEnumerator(elements)
                 ->where([] (IrElement *el) { return el->is<IrNo>(); })
                 ->where([&def] (IrElement *el) { return el->to<IrNo>()->text == def.first; })
@@ -193,8 +177,6 @@ void IrClass::generateMethods() {
             elements.push_back(eq_overload); } }
     IrMethod *ctor = nullptr;
     for (auto m : *getUserMethods()) {
-        if (m->isSpecial)
-            continue;
         if (m->rtype) {
             m->rtype->resolve(&local);
             continue; }
@@ -206,7 +188,10 @@ void IrClass::generateMethods() {
         if (!IrMethod::Generate.count(m->name))
             throw Util::CompilationError("Unrecognized predefined method %1%", m);
         auto &info = IrMethod::Generate.at(m->name);
-        m->rtype = info.rtype;
+        if (m->name)
+            m->rtype = info.rtype ? info.rtype : new PointerType(new NamedType(this));
+        else
+            m->name = name;
         m->args = info.args;
         if (info.flags & CLASSREF)
             m->args.push_back(
@@ -216,7 +201,9 @@ void IrClass::generateMethods() {
         if (info.flags & CONST)
             m->isConst = true;
         if ((info.flags & OVERRIDE) && kind != NodeKind::Nested)
-            m->isOverride = true; }
+            m->isOverride = true;
+        if (info.flags & FACTORY)
+            m->isStatic = true; }
     if (ctor) elements.erase(find(elements, ctor));
     if (kind != NodeKind::Interface && !shouldSkip("constructor")) {
         ctor_args_t args;

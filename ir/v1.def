@@ -206,7 +206,7 @@ class CalculatedField {
                  << json.indent << "\"name\" : " << name << "," << std::endl
                  << json.indent << "\"cond\" : " << cond;
         }
-        static IR::CalculatedField::update_or_verify* fromJSON(JSONLoader &json) {
+        fromJSON {
             bool update_temp;
             IR::ID name_temp;
             const IR::Expression *cond_temp;
