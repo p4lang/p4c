@@ -207,9 +207,9 @@ class CalculatedField {
                  << json.indent << "\"cond\" : " << cond;
         }
         fromJSON {
-            bool update_temp;
+            bool update_temp = false;
             IR::ID name_temp;
-            const IR::Expression *cond_temp;
+            const IR::Expression *cond_temp = nullptr;
             json.load("update", update_temp);
             json.load("name", name_temp);
             json.load("cond", cond_temp);
