@@ -87,7 +87,7 @@ inline std::ostream &operator <<(std::ostream &out, const LTBitMatrix &bm) {
 inline bool operator>>(const char *p, LTBitMatrix &bm) {
     bitvec rv;
     for (int i = 0; *p; ++p, ++i)
-        switch(*p) {
+        switch (*p) {
         case ' ': --i; break;
         case '0': break;
         case '1': rv[i] = 1; break;

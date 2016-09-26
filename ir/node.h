@@ -97,7 +97,7 @@ class Node : public virtual INode {
         CHECK_NULL(this);
         return dynamic_cast<const T*>(this);
     }
-    Node(JSONLoader &json);
+    explicit Node(JSONLoader &json);
     cstring toString() const override { return node_type_name(); }
     void toJSON(JSONGenerator &json) const override;
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }

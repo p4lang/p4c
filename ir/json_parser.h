@@ -26,7 +26,7 @@ class JsonData {
 class JsonNumber : public JsonData {
  public:
     JsonNumber(mpz_class v) : val(v) {}   // NOLINT(runtime/explicit)
-    operator int() const { return val.get_si(); } //Does not handle overflow
+    operator int() const { return val.get_si(); }  // Does not handle overflow
     mpz_class val;
 };
 
@@ -40,8 +40,8 @@ class JsonBoolean : public JsonData {
 class JsonString : public JsonData, public std::string {
  public:
     JsonString() {}
-    JsonString(const std::string &s) : std::string(s) {}   // NOLINT(runtime/explicit)
-    JsonString(const char *s) : std::string(s) {}
+    JsonString(const std::string &s) : std::string(s) {}    // NOLINT(runtime/explicit)
+    JsonString(const char *s) : std::string(s) {}           // NOLINT(runtime/explicit)
     JsonString(const JsonString&) = default;
     JsonString(JsonString&&) = default;
     JsonString &operator=(const JsonString&) & = default;
@@ -70,12 +70,12 @@ class JsonObject : public JsonData, public ordered_map<std::string, JsonData*>  
             return *(find("Node_ID")->second->to<JsonNumber>());
     }
 
-    std::string get_type() const { 
+    std::string get_type() const {
         if (find("Node_Type") == end())
             return "";
         else
             return *(dynamic_cast<JsonString*>(find("Node_Type")->second));
-    } 
+    }
 };
 
 class JsonNull : public JsonData {};
@@ -198,7 +198,7 @@ inline std::istream& operator>>(std::istream &in, JsonData*& json) {
             in.ignore(3);
             json = new JsonNull();
             return in;
-        default: 
+        default:
             return in;
         }
     }

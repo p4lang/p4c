@@ -51,12 +51,12 @@ bool operator>>(const char *p, match_t &m) {
     if (!p) return false;
     match_t rv(0, 0);
     unsigned base = 10;
-    if (*p == '0')
-        switch(p[1]) {
+    if (*p == '0') {
+        switch (p[1]) {
         case 'x': case 'X': base = 16; p += 2; break;
         case 'o': case 'O': base = 8; p += 2; break;
         case 'b': case 'B': base = 2; p += 2; break;
-        default: break; }
+        default: break; } }
     while (*p) {
         int digit = base - 1, mask = base - 1;
         switch (*p++) {

@@ -89,7 +89,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "class JSONLoader;\n"
         << "typedef std::function<IR::Node*(JSONLoader&)> NodeFactoryFn;\n"
         << std::endl
-        << "namespace IR {\n" 
+        << "namespace IR {\n"
         << "extern std::map<cstring, NodeFactoryFn> unpacker_table;\n"
         << "}\n";
 
@@ -98,12 +98,12 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     bool first = true;
     for (auto cls : *getClasses()) {
         if (cls->kind == NodeKind::Concrete) {
-            if(first)
+            if (first)
                 first = false;
             else
                 impl << ",\n";
             impl << "{\"" << cls->name << "\", NodeFactoryFn(&IR::";
-            if (cls->containedIn && cls->containedIn->name) 
+            if (cls->containedIn && cls->containedIn->name)
                 impl << cls->containedIn->name << "::";
             impl << cls->name << "::fromJSON)}"; } }
     impl << " };\n" << std::endl;
@@ -113,7 +113,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         e->generate_impl(impl); }
 
     out << "#endif /* " << macroname << " */" << std::endl;
-    
+
     ///////////////////////////////// tree
 
     t << "#define IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, T, D, B, ...) \\"

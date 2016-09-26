@@ -78,12 +78,7 @@ class IndexedVector : public Vector<T> {
         insert(typename Vector<T>::end(), a.begin(), a.end()); }
     explicit IndexedVector(const Vector<T> &a) {
         insert(typename Vector<T>::end(), a.begin(), a.end()); }
-
-    IndexedVector(JSONLoader &json); 
-   // {
-   //     json.load("vec", vec);
-   //     json.load("declarations", declarations);
-   // }
+    explicit IndexedVector(JSONLoader &json);
 
     void clear() { IR::Vector<T>::clear(); declarations.clear(); }
     // Although this is not a const_iterator, it should NOT

@@ -114,16 +114,16 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         buf << "}";
         return buf.str(); } } },
 { nullptr, { nullptr, { new IrField(new ReferenceType(&NamedType::JSONLoader), "json")
-    }, IN_IMPL + CONSTRUCTOR, 
+    }, IN_IMPL + CONSTRUCTOR,
     [](IrClass *cl, cstring) -> cstring {
         std::stringstream buf;
         buf << ": " << cl->getParent()->name << "(json) {" << std::endl;
         for (auto f : *cl->getFields()) {
-            buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ");" << std::endl;
-        }
+            buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ");"
+                << std::endl; }
         buf << "}";
         return buf.str(); } } },
-{ "fromJSON", { nullptr, { 
+{ "fromJSON", { nullptr, {
         new IrField(new ReferenceType(&NamedType::JSONLoader), "json"),
     }, FACTORY + IN_IMPL + CONCRETE_ONLY,
     [](IrClass *cl, cstring) -> cstring {
