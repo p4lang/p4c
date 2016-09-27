@@ -42,6 +42,7 @@ struct standard_metadata_t {
 }
 
 extern Checksum16 {
+    Checksum16();
     bit<16> get<D>(in D data);
 }
 

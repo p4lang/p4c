@@ -1,7 +1,9 @@
 extern X<T> {
+    X();
 }
 
 extern Y {
+    Y();
 }
 
 parser p() {

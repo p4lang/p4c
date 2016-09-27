@@ -4,6 +4,7 @@ control c(inout bit<16> y) {
         y = (bit<16>)arg;
     }
     apply {
+        x_0 = 32w10;
         a_0(x_0);
     }
 }

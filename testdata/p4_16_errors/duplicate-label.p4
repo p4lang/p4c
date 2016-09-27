@@ -13,17 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-extern E { E(); void call(); }
 
-control c() {
-    E() e1;
-    E() e2;
-
+control c(out bit arun) {
+    action a() {}
+    table t {
+        actions = { a; }
+        default_action = a;
+    }
     apply {
-        e1 = e2;
+        switch (t.apply().action_run) {
+            a: { arun = 1; }
+            a: { arun = 1; }  // duplicate label
+        }
     }
 }
 
-control none();
-package top(none n);
+control proto(out bit run);
+package top(proto _p);
+
 top(c()) main;

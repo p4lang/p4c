@@ -3,5 +3,6 @@ match_kind {
 }
 
 extern tbl {
+    tbl();
 }
 

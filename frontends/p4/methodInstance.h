@@ -75,6 +75,7 @@ class ApplyMethod final : public MethodInstance {
  public:
     const IR::IApply* applyObject;
     bool isApply() const { return true; }
+    bool isTableApply() const { return object->is<IR::P4Table>(); }
 };
 
 // A method call on an extern object

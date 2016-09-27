@@ -16,6 +16,7 @@ control p() {
         tmp_4 = y_1;
     }
     action act() {
+        x_1 = 1w0;
         tmp_3 = x_1;
     }
     action act_0() {

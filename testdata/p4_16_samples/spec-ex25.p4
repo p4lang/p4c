@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ match_kind { exact }
 
 typedef bit<48> EthernetAddress;
 
-extern tbl {}
+extern tbl { tbl(); }
 
 control c(bit x)
 {
-    action Set_dmac(EthernetAddress dmac) 
+    action Set_dmac(EthernetAddress dmac)
     {}
 
     action drop() {}
-    
+
     table unit()
     {
         key = { x : exact; }
@@ -39,14 +39,14 @@ control c(bit x)
             32w0x0B_00_00_00 &&& 32w0xFF_00_00_00 => drop();
         }
 #endif
-        
+
         actions = {
             Set_dmac;
             drop;
         }
-        
+
         default_action = Set_dmac((EthernetAddress)48w0xAA_BB_CC_DD_EE_FF);
-        
+
         implementation = tbl();
     }
 

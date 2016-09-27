@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 extern Virtual {
+    Virtual();
     abstract bit<16> f(in bit<16> ix);
     void run(in bit<16> ix);  // internally calls f
 }
@@ -27,7 +28,7 @@ extern State {
 control c(inout bit<16> p) {
     Virtual() cntr = {
         State(1024) state;
-        
+
         bit<16> f(in bit<16> ix) {  // abstract method implementation
             return state.get(ix);
         }

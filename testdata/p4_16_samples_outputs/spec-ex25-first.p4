@@ -4,6 +4,7 @@ match_kind {
 
 typedef bit<48> EthernetAddress;
 extern tbl {
+    tbl();
 }
 
 control c(bit<1> x) {

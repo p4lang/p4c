@@ -13,7 +13,8 @@ parser Parser<H>(packet_in b, out H parsedHeaders);
 control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
 control Deparser<H>(inout H outputHeaders, packet_out b);
 package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
-extern Checksum16 {
+extern Ck16 {
+    Ck16();
     void clear();
     void update<T>(in T data);
     bit<16> get();
@@ -60,7 +61,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     @name("tmp_2") bool tmp_14;
     @name("tmp_3") bool tmp_15;
     @name("tmp_4") error tmp_16;
-    @name("ck") Checksum16() ck;
+    @name("ck") Ck16() ck;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
         transition select(p.ethernet.etherType) {
@@ -176,25 +177,28 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         tmp_18 = parseError != NoError;
     }
     action act_1() {
-        hasReturned_0 = true;
+        outCtrl.outputPort = 4w0x0;
     }
     action act_2() {
+        hasReturned_0 = true;
+    }
+    action act_3() {
         nextHop_1 = nextHop_2;
         tmp_19 = outCtrl.outputPort == 4w0xf;
     }
-    action act_3() {
-        hasReturned_0 = true;
-    }
     action act_4() {
-        tmp_20 = outCtrl.outputPort == 4w0xe;
+        hasReturned_0 = true;
     }
     action act_5() {
-        nextHop_3 = nextHop_1;
+        tmp_20 = outCtrl.outputPort == 4w0xe;
     }
     action act_6() {
-        hasReturned_0 = true;
+        nextHop_3 = nextHop_1;
     }
     action act_7() {
+        hasReturned_0 = true;
+    }
+    action act_8() {
         tmp_21 = outCtrl.outputPort == 4w0xf;
     }
     table tbl_act() {
@@ -217,45 +221,51 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     table tbl_act_1() {
         actions = {
-            act_2();
-        }
-        const default_action = act_2();
-    }
-    table tbl_act_2() {
-        actions = {
             act_1();
         }
         const default_action = act_1();
     }
-    table tbl_act_3() {
-        actions = {
-            act_4();
-        }
-        const default_action = act_4();
-    }
-    table tbl_act_4() {
+    table tbl_act_2() {
         actions = {
             act_3();
         }
         const default_action = act_3();
     }
-    table tbl_act_5() {
+    table tbl_act_3() {
+        actions = {
+            act_2();
+        }
+        const default_action = act_2();
+    }
+    table tbl_act_4() {
         actions = {
             act_5();
         }
         const default_action = act_5();
     }
-    table tbl_act_6() {
+    table tbl_act_5() {
         actions = {
-            act_7();
+            act_4();
         }
-        const default_action = act_7();
+        const default_action = act_4();
     }
-    table tbl_act_7() {
+    table tbl_act_6() {
         actions = {
             act_6();
         }
         const default_action = act_6();
+    }
+    table tbl_act_7() {
+        actions = {
+            act_8();
+        }
+        const default_action = act_8();
+    }
+    table tbl_act_8() {
+        actions = {
+            act_7();
+        }
+        const default_action = act_7();
     }
     apply {
         tbl_act.apply();
@@ -264,23 +274,24 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
             tbl_act_0.apply();
         }
         if (!hasReturned_0) {
-            ipv4_match.apply();
             tbl_act_1.apply();
+            ipv4_match.apply();
+            tbl_act_2.apply();
             if (tmp_19) 
-                tbl_act_2.apply();
+                tbl_act_3.apply();
         }
         if (!hasReturned_0) {
             check_ttl.apply();
-            tbl_act_3.apply();
+            tbl_act_4.apply();
             if (tmp_20) 
-                tbl_act_4.apply();
+                tbl_act_5.apply();
         }
         if (!hasReturned_0) {
-            tbl_act_5.apply();
-            dmac_1.apply();
             tbl_act_6.apply();
+            dmac_1.apply();
+            tbl_act_7.apply();
             if (tmp_21) 
-                tbl_act_7.apply();
+                tbl_act_8.apply();
         }
         if (!hasReturned_0) 
             smac_1.apply();
@@ -289,24 +300,24 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     @name("tmp_10") bit<16> tmp_22;
-    @name("ck") Checksum16() ck_2;
-    action act_8() {
+    @name("ck") Ck16() ck_2;
+    action act_9() {
         ck_2.clear();
         p.ip.hdrChecksum = 16w0;
         ck_2.update<Ipv4_h>(p.ip);
         tmp_22 = ck_2.get();
         p.ip.hdrChecksum = tmp_22;
     }
-    table tbl_act_8() {
+    table tbl_act_9() {
         actions = {
-            act_8();
+            act_9();
         }
-        const default_action = act_8();
+        const default_action = act_9();
     }
     apply {
         b.emit<Ethernet_h>(p.ethernet);
         if (p.ip.isValid()) {
-            tbl_act_8.apply();
+            tbl_act_9.apply();
         }
         b.emit<Ipv4_h>(p.ip);
     }

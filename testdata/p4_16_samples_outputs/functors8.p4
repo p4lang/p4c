@@ -1,4 +1,5 @@
 extern e<T> {
+    e();
     T get();
 }
 

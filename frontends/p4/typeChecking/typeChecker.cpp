@@ -378,6 +378,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
 
             methods->push_back(method);
         }
+#if 0
         if (!constructorFound) {
             // synthesize a default constructor if and only if none given
             auto ct = new IR::Type_Method(Util::SourceInfo(), new IR::TypeParameters(),
@@ -387,6 +388,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             methods->push_back(constructor);
             changes = true;
         }
+#endif
         auto tps = canonicalize(te->typeParameters);
         if (tps == nullptr)
             return nullptr;

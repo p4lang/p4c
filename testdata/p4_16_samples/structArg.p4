@@ -28,6 +28,7 @@ control caller() {
     c() cinst;
 
     apply {
+        data.f = 0;
         cinst.apply(data);
     }
 }

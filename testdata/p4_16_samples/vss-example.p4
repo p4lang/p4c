@@ -65,7 +65,7 @@ struct Parsed_packet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    Checksum16() ck;  // instantiate checksum unit
+    Ck16() ck;  // instantiate checksum unit
 
     state start {
         b.extract(p.ethernet);
@@ -191,10 +191,11 @@ control TopPipe(inout Parsed_packet headers,
           IPv4Address nextHop; // temporary variable
 
           if (parseError != NoError) {
-	         Drop_action();  // invoke drop directly
+               Drop_action();  // invoke drop directly
                return;
           }
 
+          outCtrl.outputPort = 0x0;  // arbitrary choice
           ipv4_match.apply(nextHop); // Match result will go into nextHop
           if (outCtrl.outputPort == DROP_PORT) return;
 
@@ -210,7 +211,7 @@ control TopPipe(inout Parsed_packet headers,
 
 // deparser section
 control TopDeparser(inout Parsed_packet p, packet_out b) {
-    Checksum16() ck;
+    Ck16() ck;
     apply {
         b.emit(p.ethernet);
         if (p.ip.isValid()) {

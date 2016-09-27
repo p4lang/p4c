@@ -721,12 +721,12 @@ static const char *const yytname[] =
   "nonEmptyParameterList", "parameter", "direction",
   "packageTypeDeclaration", "$@1", "$@2", "instantiation",
   "objInitializer", "objDeclarations", "objDeclaration",
-  "optCompileParameters", "pathPrefix", "$@3", "$@4", "relativePathPrefix",
-  "nonEmptyRelativePathPrefix", "parserDeclaration", "parserLocalElements",
-  "parserLocalElement", "parserTypeDeclaration", "$@5", "$@6",
-  "parserStates", "parserState", "parserStatements", "parserStatement",
-  "transitionStatement", "stateExpression", "selectExpression",
-  "selectCaseList", "selectCase", "keysetExpression",
+  "optConstructorParameters", "pathPrefix", "$@3", "$@4",
+  "relativePathPrefix", "nonEmptyRelativePathPrefix", "parserDeclaration",
+  "parserLocalElements", "parserLocalElement", "parserTypeDeclaration",
+  "$@5", "$@6", "parserStates", "parserState", "parserStatements",
+  "parserStatement", "transitionStatement", "stateExpression",
+  "selectExpression", "selectCaseList", "selectCase", "keysetExpression",
   "tupleKeysetExpression", "simpleExpressionList",
   "simpleKeysetExpression", "controlDeclaration", "controlTypeDeclaration",
   "$@7", "$@8", "controlLocalDeclarations", "controlLocalDeclaration",
@@ -2414,7 +2414,7 @@ yyreduce:
 
   case 29:
 #line 286 "../frontends/p4/p4-parse.ypp" /* yacc.c:1646  */
-    { (yyval.Parameter) = new IR::Parameter((yylsp[-3]) + (yylsp[0]), *(yyvsp[0].id), (yyvsp[-3].annos), (yyvsp[-2].dir), (yyvsp[-1].TypePtr)); }
+    { (yyval.Parameter) = new IR::Parameter((yylsp[0]), *(yyvsp[0].id), (yyvsp[-3].annos), (yyvsp[-2].dir), (yyvsp[-1].TypePtr)); }
 #line 2419 "../frontends/p4/p4-parse.cpp" /* yacc.c:1646  */
     break;
 

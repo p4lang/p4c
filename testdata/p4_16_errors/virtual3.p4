@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 extern Virtual {
+    Virtual();
     abstract bit<16> f(in bit<16> ix);
 }
 

@@ -12,6 +12,7 @@ control caller() {
     S data;
     c() cinst;
     apply {
+        data.f = 0;
         cinst.apply(data);
     }
 }

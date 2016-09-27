@@ -84,7 +84,8 @@ package VSS<H>(Parser<H> p,
 // Target-specific objects that can be instantiated
 
 // Checksum unit
-extern Checksum16 {
+extern Ck16 {
+    Ck16();
     void clear();           // prepare unit for computation
     void update<T>(in T data); // add data to checksum
     bit<16> get(); // get the checksum for the data added since last clear

@@ -3,4 +3,4 @@
           ^^^^^^^^^
 ../testdata/p4_16_errors/function1_e.p4(16)
 extern void f(out bit x);
-              ^^^^^^^^^
+                      ^

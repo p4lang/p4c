@@ -32,6 +32,7 @@ namespace Test { class TestSourceFile; }
 class IHasDbPrint {
  public:
     virtual void dbprint(std::ostream& out) const = 0;
+    void dbprint() const { dbprint(std::cout); }
     virtual ~IHasDbPrint() {}
 };
 

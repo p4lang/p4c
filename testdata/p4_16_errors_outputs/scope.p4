@@ -1,4 +1,5 @@
 extern X {
+    X();
     bit<8> get();
 }
 

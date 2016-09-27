@@ -12,6 +12,7 @@ control p() {
     bit<1> tmp_0;
     bit<1> tmp_1;
     apply {
+        x_3 = 1w0;
         tmp_0 = x_3;
         b_0(tmp_0, tmp_1);
         y_1 = tmp_1;

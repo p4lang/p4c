@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ control qp()
         }
         default_action = drop;
     }
-    
+
     apply {
         m.apply();
     }
@@ -33,6 +33,7 @@ control qp()
 
 extern Ix
 {
+    Ix();
     void f();
     void f1(in int<32> x);
     void g();
