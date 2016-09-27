@@ -1,6 +1,0 @@
-../testdata/p4_16_samples/lj_example.p4(40): warning: out parameter outCtrl may be uninitialized when control LjPipe terminates
-        out OutControl outCtrl)
-                       ^^^^^^^
-../testdata/p4_16_samples/lj_example.p4(37)
-control LjPipe(inout Parsed_rep p,
-        ^^^^^^

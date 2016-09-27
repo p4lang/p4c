@@ -117,7 +117,7 @@ class ArrayLocation : public StorageLocation {
     }
     void addElement(unsigned index, LocationSet* result) const;
     void addValidBits(LocationSet* result) const override;
-    void removeHeaders(LocationSet*) const override {} // no results added
+    void removeHeaders(LocationSet*) const override {}  // no results added
 };
 
 class StorageFactory {
@@ -350,7 +350,7 @@ class ComputeWriteSet : public Inspector {
     }
 
  public:
-    ComputeWriteSet(AllDefinitions* definitions) :
+    explicit ComputeWriteSet(AllDefinitions* definitions) :
             definitions(definitions), currentDefinitions(nullptr),
             returnedDefinitions(nullptr), exitDefinitions(nullptr),
             storageMap(definitions->storageMap), lhs(false)

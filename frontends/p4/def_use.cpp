@@ -1,17 +1,17 @@
 /*
-  Copyright 2016 VMware, Inc.
+Copyright 2016 VMware, Inc.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-  http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 */
 
 #include <boost/functional/hash.hpp>
@@ -124,8 +124,7 @@ const LocationSet* LocationSet::getField(cstring field) const {
         if (l->is<StructLocation>()) {
             auto strct = l->to<StructLocation>();
             strct->addField(field, result);
-        }
-        else {
+        } else {
             BUG_CHECK(l->is<ArrayLocation>(), "%1%: expected an ArrayLocation", l);
             auto array = l->to<ArrayLocation>();
             for (auto f : *array)
@@ -715,7 +714,8 @@ bool ComputeWriteSet::preorder(const IR::P4Table* table) {
     for (auto ale : *actions->actionList) {
         const IR::P4Action *action;
         if (ale->expression->is<IR::PathExpression>()) {
-            auto act = storageMap->refMap->getDeclaration(ale->expression->to<IR::PathExpression>()->path);
+            auto act = storageMap->refMap->getDeclaration(
+                ale->expression->to<IR::PathExpression>()->path);
             BUG_CHECK(act->is<IR::P4Action>(), "%1%: expected an action", ale->expression);
             action = act->to<IR::P4Action>();
         } else if (ale->expression->is<IR::MethodCallExpression>()) {

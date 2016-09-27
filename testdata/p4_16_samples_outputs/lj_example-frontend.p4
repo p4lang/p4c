@@ -59,6 +59,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
         default_action = Drop();
     }
     apply {
+        outCtrl.outputPort = 4w0xf;
         if (p.arpa_pak.isValid()) 
             Enet_lkup_0.apply();
     }

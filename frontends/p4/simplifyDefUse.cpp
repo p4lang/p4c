@@ -50,7 +50,7 @@ class FindUninitialized : public Inspector {
     }
 
  public:
-    FindUninitialized(AllDefinitions* definitions) :
+    explicit FindUninitialized(AllDefinitions* definitions) :
             refMap(definitions->storageMap->refMap),
             typeMap(definitions->storageMap->typeMap),
             definitions(definitions), lhs(false), currentPoint() {
