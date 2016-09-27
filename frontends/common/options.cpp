@@ -23,6 +23,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "lib/path.h"
 #include "frontends/p4/toP4/toP4.h"
+#include "ir/json_generator.h"
 
 static cstring version = "0.0.4";
 extern int verbose;
@@ -82,7 +83,15 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                     "Compile for the specified target");
     registerOption("--pp", "file",
                    [this](const char* arg) { prettyPrintFile = arg; return true; },
-                   "Pretty-print the program in the specified file.");
+                   "Pretty-print the program in the\n"
+                   "specified file.");
+    registerOption("--toJSON", "file",
+                   [this](const char* arg) { dumpJsonFile = arg; return true; },
+                   "Dump IR to JSON in the\n"
+                   "specified file.");
+    registerOption("--testJson", nullptr,
+                    [this](const char*) { debugJson = true; return true; },
+                    "Dump and undump the IR");
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");
@@ -199,6 +208,8 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
     cstring name = cstring(manager) + "_" + Util::toString(seq) + "_" + pass;
     if (verbose)
         std::cerr << name << std::endl;
+
+
 
     for (auto s : top4) {
         if (strstr(name.c_str(), s.c_str()) != nullptr) {

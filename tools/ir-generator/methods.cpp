@@ -18,7 +18,7 @@ limitations under the License.
 #include "lib/algorithm.h"
 
 enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ONLY = 16,
-             CONST = 32, CLASSREF = 64 };
+             CONST = 32, CLASSREF = 64, INCL_NESTED = 128, CONSTRUCTOR = 256, FACTORY = 512};
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 { "operator==", { &NamedType::Bool, {}, CONST + IN_IMPL + OVERRIDE + CLASSREF,
@@ -99,6 +99,38 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 needed = true; } }
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
+{ "toJSON", { &NamedType::Void, {
+        new IrField(new ReferenceType(&NamedType::JSONGenerator), "json")
+    }, CONST + IN_IMPL + OVERRIDE,
+    [](IrClass *cl, cstring) -> cstring {
+        std::stringstream buf;
+        buf << "{" << std::endl
+            << cl->indent << cl->getParent()->name << "::toJSON(json);" << std::endl;
+        for (auto f : *cl->getFields()) {
+            if (!f->isInline && f->nullOK)
+                buf << cl->indent << "if (" << f->name << " != nullptr) ";
+            buf << cl->indent << "json << \",\" << std::endl << json.indent << \"\\\""
+                << f->name << "\\\" : \" << " << "this->" << f->name << ";" << std::endl; }
+        buf << "}";
+        return buf.str(); } } },
+{ nullptr, { nullptr, { new IrField(new ReferenceType(&NamedType::JSONLoader), "json")
+    }, IN_IMPL + CONSTRUCTOR,
+    [](IrClass *cl, cstring) -> cstring {
+        std::stringstream buf;
+        buf << ": " << cl->getParent()->name << "(json) {" << std::endl;
+        for (auto f : *cl->getFields()) {
+            buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ");"
+                << std::endl; }
+        buf << "}";
+        return buf.str(); } } },
+{ "fromJSON", { nullptr, {
+        new IrField(new ReferenceType(&NamedType::JSONLoader), "json"),
+    }, FACTORY + IN_IMPL + CONCRETE_ONLY,
+    [](IrClass *cl, cstring) -> cstring {
+        std::stringstream buf;
+        buf << "{ return new " << cl->name << "(json); }";
+        return buf.str();
+    } } },
 { "toString", { &NamedType::Cstring, {}, CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
     [](IrClass *, cstring) -> cstring { return cstring(); } } },
 };
@@ -106,6 +138,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 void IrClass::generateMethods() {
     if (this == nodeClass || this == vectorClass) return;
     if (kind != NodeKind::Interface && kind != NodeKind::Nested) {
+        // FIXME -- some methods should be auto-generated for Nested classes
         for (auto &def : IrMethod::Generate) {
             if (def.second.flags & NOT_DEFAULT)
                 continue;
@@ -147,13 +180,18 @@ void IrClass::generateMethods() {
         if (m->rtype) {
             m->rtype->resolve(&local);
             continue; }
+        if (!m->args.empty())
+            continue;
         if (m->name == name) {
             if (!m->isUser) ctor = m;
             continue; }
         if (!IrMethod::Generate.count(m->name))
             throw Util::CompilationError("Unrecognized predefined method %1%", m);
         auto &info = IrMethod::Generate.at(m->name);
-        m->rtype = info.rtype;
+        if (m->name)
+            m->rtype = info.rtype ? info.rtype : new PointerType(new NamedType(this));
+        else
+            m->name = name;
         m->args = info.args;
         if (info.flags & CLASSREF)
             m->args.push_back(
@@ -163,7 +201,9 @@ void IrClass::generateMethods() {
         if (info.flags & CONST)
             m->isConst = true;
         if ((info.flags & OVERRIDE) && kind != NodeKind::Nested)
-            m->isOverride = true; }
+            m->isOverride = true;
+        if (info.flags & FACTORY)
+            m->isStatic = true; }
     if (ctor) elements.erase(find(elements, ctor));
     if (kind != NodeKind::Interface && !shouldSkip("constructor")) {
         ctor_args_t args;

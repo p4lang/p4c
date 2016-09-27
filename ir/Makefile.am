@@ -24,6 +24,8 @@ ir_SOURCES += \
 	ir/id.h \
 	ir/ir.cpp \
 	ir/ir-generated.cpp \
+	ir/json_generator.h \
+	ir/json_parser.h \
 	ir/ir.h \
 	ir/ir-inline.h \
 	ir/namemap.h \

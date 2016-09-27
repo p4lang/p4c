@@ -30,6 +30,8 @@ class Visitor;
 class Inspector;
 class Modifier;
 class Transform;
+class JSONGenerator;
+class JSONLoader;
 
 namespace IR {
 
@@ -37,7 +39,6 @@ class Node;
 
 template<class T> class Vector;
 template<class T> class IndexedVector;
-
 // node interface
 class INode : public Util::IHasSourceInfo, public IHasDbPrint {
  public:
@@ -46,6 +47,7 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint {
     virtual Node* getNode() = 0;
     virtual void dbprint(std::ostream &out) const = 0;  // for debugging
     virtual cstring toString() const = 0;  // for user consumption
+    virtual void toJSON(JSONGenerator &) const = 0;
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     template<typename T> bool is() const;
@@ -76,10 +78,8 @@ class Node : public virtual INode {
     int id;  // unique id for each node
     void traceCreation() const;
     Node() : id(currentId++) { traceCreation(); }
-    explicit Node(Util::SourceInfo si) : srcInfo(si), id(currentId++)
-    { traceCreation(); }
-    Node(const Node& other) : srcInfo(other.srcInfo), id(currentId++)
-    { traceCreation(); }
+    explicit Node(Util::SourceInfo si) : srcInfo(si), id(currentId++) { traceCreation(); }
+    Node(const Node& other) : srcInfo(other.srcInfo), id(currentId++) { traceCreation(); }
     virtual ~Node() {}
     const Node *apply(Visitor &v) const;
     const Node *apply(Visitor &&v) const { return apply(v); }
@@ -95,8 +95,11 @@ class Node : public virtual INode {
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const {
         CHECK_NULL(this);
-        return dynamic_cast<const T*>(this); }
+        return dynamic_cast<const T*>(this);
+    }
+    explicit Node(JSONLoader &json);
     cstring toString() const override { return node_type_name(); }
+    void toJSON(JSONGenerator &json) const override;
     virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }

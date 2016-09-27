@@ -36,6 +36,13 @@ class VectorBase : public Node {
     virtual bool empty() const = 0;
     iterator begin() const { return VectorBase_begin(); }
     iterator end() const { return VectorBase_end(); }
+    VectorBase() = default;
+    VectorBase(const VectorBase &) = default;
+    VectorBase(VectorBase &&) = default;
+    VectorBase &operator=(const VectorBase &) = default;
+    VectorBase &operator=(VectorBase &&) = default;
+ protected:
+    explicit VectorBase(JSONLoader &json) : Node(json) {}
 };
 
 // This class should only be used in the IR.
@@ -45,16 +52,18 @@ class Vector : public VectorBase {
     vector<const T *>   vec;
 
  public:
+    typedef const T* value_type;
     Vector() = default;
     Vector(const Vector &) = default;
     Vector(Vector &&) = default;
+    explicit Vector(JSONLoader &json);
     Vector &operator=(const Vector &) = default;
     Vector &operator=(Vector &&) = default;
     explicit Vector(const T *a) {
         vec.emplace_back(std::move(a)); }
     explicit Vector(const vector<const T *> &a) {
         vec.insert(vec.end(), a.begin(), a.end()); }
-
+    static Vector<T>* fromJSON(JSONLoader &json);
     typedef typename vector<const T *>::iterator        iterator;
     typedef typename vector<const T *>::const_iterator  const_iterator;
     iterator begin() { return vec.begin(); }
@@ -128,6 +137,7 @@ class Vector : public VectorBase {
     void visit_children(Visitor &v) const override;
     virtual void parallel_visit_children(Visitor &v);
     virtual void parallel_visit_children(Visitor &v) const;
+    void toJSON(JSONGenerator &json) const override;
     Util::Enumerator<const T*>* getEnumerator() const {
         return Util::Enumerator<const T*>::createEnumerator(vec); }
     template <typename S>

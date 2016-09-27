@@ -42,8 +42,12 @@ limitations under the License.
 #include "nodemap.h"
 #include "id.h"
 
+
 // generated ir file
 #include "ir/ir-generated.h"
+
+#include "json_loader.h"
+#include "json_generator.h"
 
 #include "pass_manager.h"
 #include "ir-inline.h"

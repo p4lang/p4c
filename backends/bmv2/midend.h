@@ -38,7 +38,7 @@ class MidEnd : public PassManager {
     IR::ToplevelBlock   *toplevel = nullptr;  // Should this be const?
 
     explicit MidEnd(CompilerOptions& options);
-    IR::ToplevelBlock* process(const IR::P4Program* program) {
+    IR::ToplevelBlock* process(const IR::P4Program *&program) {
         program = program->apply(*this);
         return toplevel; }
 };

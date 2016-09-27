@@ -686,7 +686,7 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
         visit(s->statement);
         result = result->join(currentDefinitions);
     }
-    auto table = TableApplySolver::isHit(
+    auto table = TableApplySolver::isActionRun(
         statement->expression, storageMap->refMap, storageMap->typeMap);
     CHECK_NULL(table);
     auto al = table->getActionList();

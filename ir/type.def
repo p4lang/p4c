@@ -33,6 +33,15 @@ inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
     }
     return out;
 }
+
+inline bool operator>>(cstring s, IR::Direction &d) {
+    if (!s || s == "") d = IR::Direction::None;
+    else if (s == "in") d = IR::Direction::In;
+    else if (s == "out") d = IR::Direction::Out;
+    else if (s == "inout") d = IR::Direction::InOut;
+    else return false;
+    return true;
+}
 #end
 
 class Type_Boolean : Type_Base {

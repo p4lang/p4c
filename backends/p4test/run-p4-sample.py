@@ -38,6 +38,7 @@ class Options(object):
         self.compilerSrcDir = ""        # path to compiler source tree
         self.verbose = False
         self.replace = False            # replace previous outputs
+        self.dumpToJson = False
         self.compilerOptions = []
 
 def usage(options):
@@ -190,13 +191,20 @@ def process_file(options, argv):
     referenceOutputs = ",".join(rename.keys())
     stderr = tmpdir + "/" + basename + "-stderr"
 
+    if not os.path.exists("json_outputs"):
+        os.mkdir("./json_outputs")
+
+    jsonfile = "./json_outputs" + "/" + basename + ".json"
+
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs] + options.compilerOptions
+    args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs,
+            "--testJson"] + options.compilerOptions
+
     if "14_samples" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--p4-14"]);
     args.extend(argv)
-
+    print(" ".join(args))
     result = run_timeout(options, args, timeout, stderr)
     if result != SUCCESS:
         print("Error compiling")
@@ -212,6 +220,7 @@ def process_file(options, argv):
 
     # Canonicalize the generated file names
     lastFile = None
+
     for k in sorted(rename.keys()):
         file = file_name(tmpdir, base, k, ext)
         if os.path.isfile(file):
@@ -262,6 +271,8 @@ def main(argv):
             options.verbose = True
         elif argv[0] == "-f":
             options.replace = True
+        elif argv[0] == "-j":
+            options.dumpToJson = True
         elif argv[0] == "-a":
             if len(argv) == 0:
                 print("Missing argument for -a option")

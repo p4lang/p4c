@@ -73,6 +73,7 @@ class LTBitMatrix : private bitvec {
 
     bool operator==(const LTBitMatrix &a) const { return bitvec::operator==(a); }
     bool operator!=(const LTBitMatrix &a) const { return bitvec::operator!=(a); }
+    friend bool operator>>(const char *p, LTBitMatrix &bm);
 };
 
 inline std::ostream &operator <<(std::ostream &out, const LTBitMatrix &bm) {
@@ -81,6 +82,18 @@ inline std::ostream &operator <<(std::ostream &out, const LTBitMatrix &bm) {
         for (unsigned j = 0; j < i; j++)
             out << (bm[i][j] ? '1' : '0'); }
     return out;
+}
+
+inline bool operator>>(const char *p, LTBitMatrix &bm) {
+    bitvec rv;
+    for (int i = 0; *p; ++p, ++i)
+        switch (*p) {
+        case ' ': --i; break;
+        case '0': break;
+        case '1': rv[i] = 1; break;
+        default: return false; }
+    bm.bitvec::operator=(rv);
+    return true;
 }
 
 #endif /* P4C_LIB_LTBITMATRIX_H_ */

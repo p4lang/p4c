@@ -88,7 +88,7 @@ inline std::ostream &operator<<(std::ostream &out, IrElement::access_t a) {
 
 class IrMethod : public IrElement {
  public:
-    const cstring                       name;
+    cstring                             name;
     const Type                          *rtype = nullptr;
     std::vector<const IrField *>        args;
     cstring                             body;

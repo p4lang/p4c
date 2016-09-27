@@ -50,8 +50,9 @@ class Visitor::ChangeTracker {
             visited.emplace(final, std::make_pair(true, final));
             return true;
         } else {
-            if (final && final->id == IR::Node::currentId - 1)
-                --IR::Node::currentId;
+            // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
+            // if (final && final->id == IR::Node::currentId - 1)
+            //     --IR::Node::currentId;
             return false; } }
     const IR::Node *result(const IR::Node *n) const {
         auto it = visited.find(n);
@@ -237,8 +238,9 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
             assert(preorder_result != n);  // should never happen
             auto final = preorder_result;
             if (preorder_result != copy) {
-                if (copy->id == IR::Node::currentId - 1)
-                    --IR::Node::currentId;
+                // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
+                // if (copy->id == IR::Node::currentId - 1)
+                //     --IR::Node::currentId;
                 if (!preorder_result) {
                     prune_flag = true;
                 } else if (visited->done(preorder_result) && visitDagOnce) {

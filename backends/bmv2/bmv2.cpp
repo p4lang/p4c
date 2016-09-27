@@ -56,6 +56,8 @@ int main(int argc, char *const argv[]) {
     BMV2::MidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     auto toplevel = midEnd.process(program);
+    if (options.dumpJsonFile)
+        JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
     if (::errorCount() > 0 || toplevel == nullptr)
         return 1;
 
