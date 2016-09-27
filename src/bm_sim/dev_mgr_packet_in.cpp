@@ -117,12 +117,19 @@ class PacketInDevMgrImp : public DevMgrIface {
     MSG_TYPE_PORT_REMOVE,
     MSG_TYPE_PORT_SET_STATUS,
     MSG_TYPE_PACKET_IN,
-    MSG_TYPE_PACKET_OUT
+    MSG_TYPE_PACKET_OUT,
+    MSG_TYPE_INFO_REQ,
+    MSG_TYPE_INFO_REP
   };
 
   enum MsgPortStatus {
     MSG_PORT_STATUS_DOWN = 0,
     MSG_PORT_STATUS_UP
+  };
+
+  enum MsgInfoStatus {
+    MSG_INFO_STATUS_SUCCESS = 0,
+    MSG_INFO_STATUS_NOT_SUPPORTED
   };
 
   void do_port_add(port_t port) {
@@ -168,12 +175,14 @@ class PacketInDevMgrImp : public DevMgrIface {
     int type;
     int port;
     // 0 for PORT_ADD, PORT_REMOVE
+    // 1 for INFO_REQ, INFO_REP
     // status for PORT_SET_STATUS
     // length for PACKET_IN, PACKET_OUT
     int more;
   } __attribute__((packed));
 
   void handle_msg(void *msg);
+  void handle_info_req_msg(void *msg);
 
  private:
   using Mutex = std::mutex;
@@ -216,7 +225,19 @@ PacketInDevMgrImp::transmit_fn_(int port_num,
   msghdr.msg_iovlen = 1;
 
   s.sendmsg(&msghdr, 0);
-  std::cout << "packet send for port " << port_num << std::endl;
+  BMLOG_TRACE("Packet out sent for port {}", port_num);
+}
+
+void
+PacketInDevMgrImp::handle_info_req_msg(void *msg) {
+  struct msg_t : packet_hdr_t {
+    int info_status;
+  } __attribute__((packed));
+  msg_t rep;
+  std::memcpy(&rep, msg, sizeof(packet_hdr_t));
+  rep.type = MSG_TYPE_INFO_REP;
+  rep.info_status = MSG_INFO_STATUS_NOT_SUPPORTED;
+  s.send(&rep, sizeof(rep), 0);
 }
 
 void
@@ -251,13 +272,18 @@ PacketInDevMgrImp::handle_msg(void *msg) {
       }
       if (pkt_handler) {
         char *data = static_cast<char *>(msg) + sizeof(packet_hdr);
-        std::cout << "packet in received on port " << packet_hdr.port
-                  << std::endl;
+        BMLOG_TRACE("Packet in received on port {}", packet_hdr.port);
         pkt_handler(packet_hdr.port, data, packet_hdr.more, pkt_cookie);
       }
       break;
     case MSG_TYPE_PACKET_OUT:
       Logger::get()->error("Invalid PACKET_OUT message received");
+      break;
+    case MSG_TYPE_INFO_REQ:
+      handle_info_req_msg(msg);
+      break;
+    case MSG_TYPE_INFO_REP:
+      Logger::get()->error("Invalid INFO_REP message received");
       break;
     default:
       Logger::get()->error("Unknown message type");

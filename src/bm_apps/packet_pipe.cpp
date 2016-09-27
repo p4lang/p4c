@@ -25,6 +25,7 @@
 #include <string>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #include <memory>
 #include <iostream>
 
@@ -116,13 +117,26 @@ class PacketInjectImp final {
     send_port_msg(MSG_TYPE_PORT_SET_STATUS, port_num, MSG_PORT_STATUS_DOWN);
   }
 
+  int request_info(int port_num, int info_type, std::string *v) {
+    // request lock ensures only one request processed at a time
+    std::unique_lock<std::mutex> request_lock(request_mutex);
+    std::unique_lock<std::mutex> cvar_lock(request_cvar_mutex);
+    rep_status = -1;
+    send_port_msg(MSG_TYPE_INFO_REQ, port_num, info_type);
+    while (rep_status == -1) request_cvar.wait(cvar_lock);
+    *v = rep_v;
+    return rep_status;
+  }
+
  private:
   enum MsgType {
     MSG_TYPE_PORT_ADD = 0,
     MSG_TYPE_PORT_REMOVE,
     MSG_TYPE_PORT_SET_STATUS,
     MSG_TYPE_PACKET_IN,
-    MSG_TYPE_PACKET_OUT
+    MSG_TYPE_PACKET_OUT,
+    MSG_TYPE_INFO_REQ,
+    MSG_TYPE_INFO_REP
   };
 
   enum MsgPortStatus {
@@ -160,6 +174,13 @@ class PacketInjectImp final {
   bool stop_receive_thread{false};
   bool started{false};
   mutable std::mutex mutex{};
+
+  // for info req-rep testing
+  mutable std::mutex request_mutex{};
+  mutable std::mutex request_cvar_mutex{};
+  mutable std::condition_variable request_cvar{};
+  int rep_status{-1};
+  std::string rep_v{};
 };
 
 void
@@ -181,6 +202,17 @@ PacketInjectImp::receive_loop() {
     }
     assert(msg);
 
+    std::memcpy(&packet_hdr, msg, sizeof(packet_hdr));
+
+    if (packet_hdr.type == MSG_TYPE_INFO_REP) {
+      std::unique_lock<std::mutex> cvar_lock(request_cvar_mutex);
+      std::memcpy(&rep_status,
+                  reinterpret_cast<char *>(msg) + sizeof(packet_hdr),
+                  sizeof(rep_status));
+      rep_v = "";
+      request_cvar.notify_one();
+    }
+
     // I choose to make copies instead of holding the lock for the callback
     PacketReceiveCb cb_fn_;
     void *cb_cookie_;
@@ -192,7 +224,6 @@ PacketInjectImp::receive_loop() {
     }
 
     if (cb_fn_) {
-      std::memcpy(&packet_hdr, msg, sizeof(packet_hdr));
       // others are ignored
       if (packet_hdr.type == MSG_TYPE_PACKET_OUT) {
         char *data = static_cast<char *>(msg) + sizeof(packet_hdr);
@@ -246,6 +277,11 @@ PacketInject::port_bring_up(int port_num) {
 void
 PacketInject::port_bring_down(int port_num) {
   pimp->port_bring_down(port_num);
+}
+
+int
+PacketInject::request_info(int port_num, int info_type, std::string *v) {
+  return pimp->request_info(port_num, info_type, v);
 }
 
 }  // namespace bm_apps

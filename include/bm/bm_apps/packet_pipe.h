@@ -32,7 +32,7 @@ class PacketInjectImp;
 
 class PacketInject {
  public:
-  /* the library owns the memory, make a copy if you need before returning */
+  // the library owns the memory, make a copy if you need before returning
   typedef std::function<void(int port_num, const char *buffer, int len,
                              void *cookie)> PacketReceiveCb;
 
@@ -54,6 +54,11 @@ class PacketInject {
   void port_bring_up(int port_num);
 
   void port_bring_down(int port_num);
+
+  // returns 0 if success, 1 otherwise
+  // for now, this is for testing only, bmv2 will return "not supported" for
+  // every request
+  int request_info(int port_num, int info_type, std::string *v);
 
  private:
   // cannot use {nullptr} with pimpl

@@ -322,6 +322,16 @@ TEST_F(PacketInDevMgrTest, PacketInTest) {
   ASSERT_TRUE(check_recv(&recv_switch, port, pkt, sizeof(pkt)));
 }
 
+TEST_F(PacketInDevMgrTest, InfoRequestTest) {
+  constexpr int port = 2;
+  // using info_type 0 and 1, but can be any integer value at the moment
+  // we expect a return value of 1 (error) as bmv2 does not support any request
+  // type
+  std::string rep_v;
+  ASSERT_EQ(1, packet_inject.request_info(port, 0, &rep_v));
+  ASSERT_EQ(1, packet_inject.request_info(port, 1, &rep_v));
+}
+
 class PacketInDevMgrPortStatusTest : public PacketInDevMgrTest {
  protected:
 
