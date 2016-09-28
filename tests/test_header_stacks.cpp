@@ -22,12 +22,14 @@
 
 #include <bm/bm_sim/phv.h>
 
+#include <string>
+#include <vector>
+
 using namespace bm;
 
 // Google Test fixture for header stack tests
 class HeaderStackTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
   std::unique_ptr<PHV> phv;
 
@@ -49,7 +51,7 @@ protected:
     const std::vector<header_id_t> headers =
       {testHeader_0, testHeader_1, testHeader_2};
     phv_factory.push_back_header_stack("test_stack", testHeaderStack,
-				       testHeaderType, headers);
+                                       testHeaderType, headers);
   }
 
   virtual void SetUp() {
@@ -80,7 +82,7 @@ TEST_F(HeaderStackTest, PushBack) {
 
   ASSERT_EQ(0u, stack.get_count());
 
-  for(size_t i = 0; i < stack_depth; i++) {
+  for (size_t i = 0; i < stack_depth; i++) {
     ASSERT_EQ(1u, stack.push_back());
     ASSERT_EQ(i + 1, stack.get_count());
   }
@@ -105,7 +107,7 @@ TEST_F(HeaderStackTest, PopBack) {
   ASSERT_EQ(1u, stack.pop_back());
   ASSERT_FALSE(h0.is_valid());
 
-  ASSERT_EQ(0u, stack.pop_back()); // empty so nothing to pop
+  ASSERT_EQ(0u, stack.pop_back());  // empty so nothing to pop
 }
 
 TEST_F(HeaderStackTest, PushFront) {
@@ -186,7 +188,7 @@ TEST_F(HeaderStackTest, PushFrontNum) {
 TEST_F(HeaderStackTest, PopFront) {
   HeaderStack &stack = phv->get_header_stack(testHeaderStack);
 
-  ASSERT_EQ(2u, stack.push_front(2)); // add 2 headers
+  ASSERT_EQ(2u, stack.push_front(2));  // add 2 headers
 
   Header &h0 = phv->get_header(testHeader_0);
   Header &h1 = phv->get_header(testHeader_1);
@@ -218,14 +220,14 @@ TEST_F(HeaderStackTest, PopFront) {
   ASSERT_FALSE(h1.is_valid());
   ASSERT_FALSE(h0.is_valid());
 
-  ASSERT_EQ(0u, stack.pop_front()); // empty so nothing popped
+  ASSERT_EQ(0u, stack.pop_front());  // empty so nothing popped
   ASSERT_EQ(0u, stack.get_count());
 }
 
 TEST_F(HeaderStackTest, PopFrontNum) {
   HeaderStack &stack = phv->get_header_stack(testHeaderStack);
 
-  ASSERT_EQ(3u, stack.push_front(3)); // add 3 headers
+  ASSERT_EQ(3u, stack.push_front(3));  // add 3 headers
 
   Header &h0 = phv->get_header(testHeader_0);
   Header &h1 = phv->get_header(testHeader_1);

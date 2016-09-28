@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef TESTS_STRESS_TESTS_UTILS_H_
-#define TESTS_STRESS_TESTS_UTILS_H_
+#ifndef TESTS_STRESS_TESTS_STRESS_UTILS_H_
+#define TESTS_STRESS_TESTS_STRESS_UTILS_H_
 
 #include <bm/bm_sim/switch.h>
 
@@ -81,4 +81,4 @@ class TestChrono {
 
 }  // namespace stress_tests_utils
 
-#endif  // TESTS_STRESS_TESTS_UTILS_H_
+#endif  // TESTS_STRESS_TESTS_STRESS_UTILS_H_

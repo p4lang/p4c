@@ -21,10 +21,13 @@
 #ifndef TESTS_UTILS_H_
 #define TESTS_UTILS_H_
 
+#include <bm/bm_sim/transport.h>
+
 #include <mutex>
 #include <condition_variable>
-
-#include <bm/bm_sim/transport.h>
+#include <string>
+#include <vector>
+#include <algorithm>  // for std::copy
 
 class MemoryAccessor : public bm::TransportIface {
  public:
@@ -38,7 +41,7 @@ class MemoryAccessor : public bm::TransportIface {
   int read(char *dst, size_t len) const {
     len = (len > max_size) ? max_size : len;
     std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_READ) {
+    while (status != Status::CAN_READ) {
       can_read.wait(lock);
     }
     std::copy(buffer_.begin(), buffer_.begin() + len, dst);
@@ -59,9 +62,9 @@ class MemoryAccessor : public bm::TransportIface {
   }
 
   int send_(const char *buffer, int len) const override {
-    if(static_cast<size_t>(len) > max_size) return -1;
+    if (static_cast<size_t>(len) > max_size) return -1;
     std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_WRITE) {
+    while (status != Status::CAN_WRITE) {
       can_write.wait(lock);
     }
     buffer_.insert(buffer_.end(), buffer, buffer + len);
@@ -80,15 +83,15 @@ class MemoryAccessor : public bm::TransportIface {
   int send_msgs_(const std::initializer_list<TransportIface::MsgBuf> &msgs)
       const override {
     size_t len = 0;
-    for(const auto &msg : msgs) {
+    for (const auto &msg : msgs) {
       len += msg.len;
     }
-    if(len > max_size) return -1;
+    if (len > max_size) return -1;
     std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_WRITE) {
+    while (status != Status::CAN_WRITE) {
       can_write.wait(lock);
     }
-    for(const auto &msg : msgs) {
+    for (const auto &msg : msgs) {
       buffer_.insert(buffer_.end(), msg.buf, msg.buf + msg.len);
     }
     status = Status::CAN_READ;

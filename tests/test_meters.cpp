@@ -20,10 +20,11 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_sim/meters.h>
+
 #include <thread>
 #include <chrono>
-
-#include <bm/bm_sim/meters.h>
+#include <vector>
 
 using namespace bm;
 
@@ -83,13 +84,13 @@ TEST_F(MetersTest, trTCM) {
   clock::time_point next_stop = clock::now();
 
   color_t color;
-  for(size_t i = 0; i < 9; i++) {
+  for (size_t i = 0; i < 9; i++) {
     color = meter.execute(pkt);
     output.push_back(color);
     next_stop += milliseconds(90);
     sleep_until(next_stop);
   }
-  for(size_t i = 0; i < 3; i++) {
+  for (size_t i = 0; i < 3; i++) {
     color = meter.execute(pkt);
     output.push_back(color);
     next_stop += milliseconds(10);

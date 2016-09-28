@@ -18,16 +18,16 @@
  *
  */
 
+#include <netinet/in.h>
+
+#include <boost/filesystem.hpp>
+
 #include <vector>
 #include <string>
 #include <iostream>
 #include <memory>
 
 #include <cassert>
-
-#include <netinet/in.h>
-
-#include <boost/filesystem.hpp>
 
 #include "stress_utils.h"
 

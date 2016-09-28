@@ -24,6 +24,8 @@
 
 #include <bm/bm_sim/switch.h>
 
+#include <string>
+
 using namespace::bm;
 
 namespace fs = boost::filesystem;

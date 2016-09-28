@@ -20,9 +20,10 @@
 
 #include <gtest/gtest.h>
 
-#include <cassert>
-
 #include <bm/bm_sim/extern.h>
+
+#include <string>
+#include <cassert>
 
 using namespace bm;
 

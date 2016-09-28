@@ -18,16 +18,16 @@
  *
  */
 
+#include <netinet/in.h>
+
+#include <boost/filesystem.hpp>
+
 #include <vector>
 #include <string>
 #include <iostream>
 #include <memory>
 
 #include <cassert>
-
-#include <netinet/in.h>
-
-#include <boost/filesystem.hpp>
 
 #include "stress_utils.h"
 
@@ -50,7 +50,7 @@ struct ethernet_t {
 } __attribute__((packed));
 
 std::string get_mask() {
-  constexpr size_t s = sizeof(((ethernet_t *)0)->dstAddr);
+constexpr size_t s = sizeof(ethernet_t::dstAddr);
   std::string mask;
   for (size_t i = 0; i < s; i++)
     mask.push_back(rgen_ptr->get_bool(0.5) ? '\xff' : '\x00');

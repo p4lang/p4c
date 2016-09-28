@@ -20,10 +20,11 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_sim/fields.h>
+
 #include <string>
 #include <vector>
-
-#include <bm/bm_sim/fields.h>
+#include <tuple>
 
 using bm::ByteContainer;
 using bm::Field;
@@ -39,9 +40,9 @@ class BitInStream {
  public:
   void append_one(bool bit) {
     int offset = nbits_ % 8;
-    if(offset == 0)
+    if (offset == 0)
       bits_.push_back(0);
-    if(bit)
+    if (bit)
       bits_.back() |= (1 << (7 - offset));
     nbits_ += 1;
   }
@@ -74,7 +75,7 @@ class BitInStream {
 
 }  // namespace
 
-extern bool WITH_VALGRIND; // defined in main.cpp
+extern bool WITH_VALGRIND;  // defined in main.cpp
 
 class FieldSerializeTest : public TestWithParam< std::tuple<int, int> > {
  protected:
@@ -95,12 +96,12 @@ class FieldSerializeTest : public TestWithParam< std::tuple<int, int> > {
 
 TEST_P(FieldSerializeTest, Extract) {
   int max_input = 1 << bitwidth;
-  for(int v = 0; v < max_input; v += step) {
+  for (int v = 0; v < max_input; v += step) {
     BitInStream input;
-    for(int i = 0; i < hdr_offset; i++) {
+    for (int i = 0; i < hdr_offset; i++) {
       input.append_one(0);
     }
-    for(int i = bitwidth - 1; i >= 0; i--) {
+    for (int i = bitwidth - 1; i >= 0; i--) {
       input.append_one(v & (1 << i));
     }
 
@@ -116,20 +117,20 @@ TEST_P(FieldSerializeTest, Extract) {
 void
 FieldSerializeTest::run_deparse_test(int sent_bit) {
   int max_input = 1 << bitwidth;
-  for(int v = 0; v < max_input; v += step) {
+  for (int v = 0; v < max_input; v += step) {
     BitInStream expected, output;
-    for(int i = 0; i < hdr_offset; i++) {
+    for (int i = 0; i < hdr_offset; i++) {
       expected.append_one(sent_bit);
       output.append_one(sent_bit);
     }
-    for(int i = bitwidth - 1; i >= 0; i--) {
+    for (int i = bitwidth - 1; i >= 0; i--) {
       expected.append_one(v & (1 << i));
       output.append_one(sent_bit);
     }
     // we do not care about what happened to the "tail": if the deparse function
     // modifies bits after the deparsed field, it is fine as fields are always
     // deparsed in order
-    for(int i = bitwidth + hdr_offset; i < 24; i++) {
+    for (int i = bitwidth + hdr_offset; i < 24; i++) {
       expected.append_one(0);
       output.append_one(0);
     }
@@ -212,7 +213,7 @@ TEST_P(SignedFieldTest, SyncValue) {
   assert(bitwidth > 1);
   int max = (1 << (bitwidth - 1)) - 1;
   int min = -(1 << (bitwidth - 1));
-  for(int v = min; v <= max; v++) {
+  for (int v = min; v <= max; v++) {
     TwoCompV input(v, bitwidth);
     signed_f.set_bytes(input.bytes().data(), input.bytes().size());
     ASSERT_EQ(v, signed_f.get_int());
@@ -223,7 +224,7 @@ TEST_P(SignedFieldTest, ExportBytes) {
   assert(bitwidth > 1);
   int max = (1 << (bitwidth - 1)) - 1;
   int min = -(1 << (bitwidth - 1));
-  for(int v = min; v <= max; v++) {
+  for (int v = min; v <= max; v++) {
     TwoCompV expected(v, bitwidth);
     signed_f.set(v);
     ASSERT_EQ(expected.bytes(), signed_f.get_bytes());

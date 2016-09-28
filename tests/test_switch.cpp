@@ -20,17 +20,17 @@
 
 #include <gtest/gtest.h>
 
+#include <boost/filesystem.hpp>
+
+#include <bm/bm_sim/switch.h>
+#include <bm/bm_runtime/bm_runtime.h>
+
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <string>
 
-#include <boost/filesystem.hpp>
-
-#include <bm/bm_sim/switch.h>
 #include "utils.h"
-
-#include <bm/bm_runtime/bm_runtime.h>
 
 using namespace bm;
 
@@ -124,7 +124,7 @@ TEST(Switch, SerializeState1) {
   ASSERT_EQ(s1.str(), s2.str());
 }
 
-extern bool WITH_VALGRIND; // defined in main.cpp
+extern bool WITH_VALGRIND;  // defined in main.cpp
 
 TEST(Switch, SerializeState2) {
   if (WITH_VALGRIND) {

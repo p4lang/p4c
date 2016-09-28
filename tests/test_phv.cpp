@@ -20,19 +20,18 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_sim/phv.h>
+
 #include <memory>
 #include <string>
 
 #include <cassert>
 
-#include <bm/bm_sim/phv.h>
-
 using namespace bm;
 
 // Google Test fixture for PHV tests
 class PHVTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
   std::unique_ptr<PHV> phv;
 
@@ -159,7 +158,6 @@ class PHVHeaderNameIteratorTest : public PHVTest {
     PHVTest::SetUp();
     phv = phv_factory.create();
   }
-
 };
 
 typedef Types<PHV::header_name_iterator,
@@ -193,7 +191,6 @@ class PHVHeaderIteratorTest : public PHVTest {
     PHVTest::SetUp();
     phv = phv_factory.create();
   }
-
 };
 
 typedef Types<PHV::header_iterator, PHV::const_header_iterator> IteratorTypes;

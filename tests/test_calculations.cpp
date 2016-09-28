@@ -20,10 +20,11 @@
 
 #include <gtest/gtest.h>
 
-#include <random>
-
 #include <bm/bm_sim/calculations.h>
 #include <bm/bm_sim/parser.h>
+
+#include <random>
+#include <algorithm>  // for std::copy
 
 using namespace bm;
 
@@ -92,17 +93,17 @@ class CalculationTest : public ::testing::Test {
 TEST_F(CalculationTest, SimpleTest) {
   BufBuilder builder;
 
-  builder.push_back_field(testHeader1, 0); // f16
-  builder.push_back_field(testHeader1, 1); // f48
-  builder.push_back_field(testHeader1, 3); // f32_2
+  builder.push_back_field(testHeader1, 0);  // f16
+  builder.push_back_field(testHeader1, 1);  // f48
+  builder.push_back_field(testHeader1, 3);  // f32_2
 
-  builder.push_back_field(testHeader2, 2); // f32_1
+  builder.push_back_field(testHeader2, 2);  // f32_1
 
   Calculation calc(builder, "xxh64");
 
   unsigned char pkt_buf[2 * header_size];
 
-  for(size_t i = 0; i < sizeof(pkt_buf); i++) {
+  for (size_t i = 0; i < sizeof(pkt_buf); i++) {
     pkt_buf[i] = dis(gen);
   }
 
@@ -115,7 +116,7 @@ TEST_F(CalculationTest, SimpleTest) {
   std::copy(&pkt_buf[2], &pkt_buf[8], &expected_buf[2]);
   std::copy(&pkt_buf[12], &pkt_buf[16], &expected_buf[8]);
   std::copy(&pkt_buf[header_size + 8], &pkt_buf[header_size + 12],
-	    &expected_buf[12]);
+            &expected_buf[12]);
 
   auto expected = hash::xxh64(
       reinterpret_cast<const char *>(expected_buf), sizeof(expected_buf));
@@ -127,14 +128,14 @@ TEST_F(CalculationTest, SimpleTest) {
 TEST_F(CalculationTest, NonAlignedTest) {
   BufBuilder builder;
 
-  builder.push_back_field(testHeader1, 4); // f5
-  builder.push_back_field(testHeader1, 5); // f19
+  builder.push_back_field(testHeader1, 4);  // f5
+  builder.push_back_field(testHeader1, 5);  // f19
 
   Calculation calc(builder, "xxh64");;
 
   unsigned char pkt_buf[2 * header_size];
 
-  for(size_t i = 0; i < sizeof(pkt_buf); i++) {
+  for (size_t i = 0; i < sizeof(pkt_buf); i++) {
     pkt_buf[i] = dis(gen);
   }
 
@@ -145,7 +146,8 @@ TEST_F(CalculationTest, NonAlignedTest) {
   unsigned char expected_buf[3];
   std::copy(&pkt_buf[16], &pkt_buf[19], &expected_buf[0]);
 
-  auto expected = hash::xxh64((const char *) expected_buf, sizeof(expected_buf));
+  auto expected = hash::xxh64(reinterpret_cast<const char *>(expected_buf),
+                              sizeof(expected_buf));
   auto actual = calc.output(pkt);
 
   ASSERT_EQ(expected, actual);
@@ -156,16 +158,16 @@ TEST_F(CalculationTest, WithConstant) {
 
   ByteContainer constant("0x12ab");
 
-  builder.push_back_field(testHeader1, 0); // f16
-  builder.push_back_field(testHeader1, 1); // f48
+  builder.push_back_field(testHeader1, 0);  // f16
+  builder.push_back_field(testHeader1, 1);  // f48
   builder.push_back_constant(constant, 16);
-  builder.push_back_field(testHeader1, 3); // f32_2
+  builder.push_back_field(testHeader1, 3);  // f32_2
 
   Calculation calc(builder, "xxh64");
 
   unsigned char pkt_buf[2 * header_size];
 
-  for(size_t i = 0; i < sizeof(pkt_buf); i++) {
+  for (size_t i = 0; i < sizeof(pkt_buf); i++) {
     pkt_buf[i] = dis(gen);
   }
 
@@ -179,7 +181,8 @@ TEST_F(CalculationTest, WithConstant) {
   std::copy(constant.begin(), constant.end(), &expected_buf[8]);
   std::copy(&pkt_buf[12], &pkt_buf[16], &expected_buf[10]);
 
-  auto expected = hash::xxh64((const char *) expected_buf, sizeof(expected_buf));
+  auto expected = hash::xxh64(reinterpret_cast<const char *>(expected_buf),
+                              sizeof(expected_buf));
   auto actual = calc.output(pkt);
 
   ASSERT_EQ(expected, actual);
@@ -188,9 +191,9 @@ TEST_F(CalculationTest, WithConstant) {
 TEST_F(CalculationTest, WithPayload) {
   BufBuilder builder;
 
-  builder.push_back_field(testHeader1, 0); // f16
-  builder.push_back_field(testHeader1, 1); // f48
-  builder.push_back_field(testHeader1, 3); // f32_2
+  builder.push_back_field(testHeader1, 0);  // f16
+  builder.push_back_field(testHeader1, 1);  // f48
+  builder.push_back_field(testHeader1, 3);  // f32_2
   builder.push_back_header(testHeader2);
   builder.append_payload();
 
@@ -198,7 +201,7 @@ TEST_F(CalculationTest, WithPayload) {
 
   unsigned char pkt_buf[2 * header_size + 196];
 
-  for(size_t i = 0; i < sizeof(pkt_buf); i++) {
+  for (size_t i = 0; i < sizeof(pkt_buf); i++) {
     pkt_buf[i] = dis(gen);
   }
 
@@ -211,9 +214,10 @@ TEST_F(CalculationTest, WithPayload) {
   std::copy(&pkt_buf[2], &pkt_buf[8], &expected_buf[2]);
   std::copy(&pkt_buf[12], &pkt_buf[16], &expected_buf[8]);
   std::copy(&pkt_buf[header_size], &pkt_buf[sizeof(pkt_buf)],
-	    &expected_buf[12]);
+            &expected_buf[12]);
 
-  auto expected = hash::xxh64((const char *) expected_buf, sizeof(expected_buf));
+  auto expected = hash::xxh64(reinterpret_cast<const char *>(expected_buf),
+                              sizeof(expected_buf));
   auto actual = calc.output(pkt);
 
   ASSERT_EQ(expected, actual);
@@ -224,10 +228,10 @@ TEST_F(CalculationTest, WithPayload) {
 TEST_F(CalculationTest, Extra) {
   BufBuilder builder;
 
-  builder.push_back_field(testHeader3, 0); // f6
-  builder.push_back_field(testHeader3, 1); // f8
-  builder.push_back_field(testHeader3, 2); // f9
-  builder.push_back_field(testHeader3, 3); // f9
+  builder.push_back_field(testHeader3, 0);  // f6
+  builder.push_back_field(testHeader3, 1);  // f8
+  builder.push_back_field(testHeader3, 2);  // f9
+  builder.push_back_field(testHeader3, 3);  // f9
 
   Calculation calc(builder, "identity");
 
@@ -259,7 +263,7 @@ struct Hash {
 
 REGISTER_HASH(Hash);
 
-}
+}  // namespace
 
 TEST(CalculationsMap, Test) {
   ASSERT_NE(nullptr, CalculationsMap::get_instance()->get_copy("Hash"));

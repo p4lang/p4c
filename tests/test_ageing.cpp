@@ -20,17 +20,18 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_sim/ageing.h>
+#include <bm/bm_sim/match_tables.h>
+
 #include <memory>
 #include <string>
 #include <mutex>
 #include <thread>
 #include <condition_variable>
 #include <chrono>
+#include <vector>
 
 #include <cassert>
-
-#include <bm/bm_sim/ageing.h>
-#include <bm/bm_sim/match_tables.h>
 
 #include "utils.h"
 
@@ -42,10 +43,10 @@ using std::this_thread::sleep_for;
 
 // Google Test fixture for learning tests
 class AgeingTest : public ::testing::Test {
-protected:
+ protected:
   typedef std::chrono::high_resolution_clock clock;
 
-protected:
+ protected:
   PHVFactory phv_factory;
 
   const int device_id = 0;
@@ -88,8 +89,7 @@ protected:
 
     // counters disabled, ageing enabled
     table = std::unique_ptr<MatchTable>(
-      new MatchTable("test_table", 0, std::move(match_unit), false, true)
-    );
+      new MatchTable("test_table", 0, std::move(match_unit), false, true));
     table->set_next_node(0, nullptr);
   }
 
@@ -111,13 +111,13 @@ protected:
   }
 
   MatchErrorCode add_entry(const std::string &key, entry_handle_t *handle,
-			   unsigned int ttl_ms) {
+                           unsigned int ttl_ms) {
     ActionData action_data;
     std::vector<MatchKeyParam> match_key;
     match_key.emplace_back(MatchKeyParam::Type::EXACT, key);
     MatchErrorCode rc;
     rc = table->add_entry(match_key, &action_fn, action_data, handle);
-    if(rc != MatchErrorCode::SUCCESS) return rc;
+    if (rc != MatchErrorCode::SUCCESS) return rc;
     return table->set_entry_ttl(*handle, ttl_ms);
   }
 
@@ -148,7 +148,7 @@ TEST_F(AgeingTest, OneNotification) {
   std::string key("0x0aba");
   entry_handle_t handle_1;
   entry_handle_t lookup_handle;
-  unsigned int sweep_int = 200u; // use it as timeout too
+  unsigned int sweep_int = 200u;  // use it as timeout too
   init_monitor(sweep_int);
   ASSERT_EQ(MatchErrorCode::SUCCESS, add_entry(key_, &handle_1, sweep_int));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, ageing_writer->check_status());

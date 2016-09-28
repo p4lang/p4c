@@ -26,6 +26,8 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
+#include <vector>
+#include <utility>  // for std::pair
 
 using namespace bm;
 
@@ -114,7 +116,8 @@ class ParserTest : public ::testing::Test {
     tcpHeaderType.push_back_field("checksum", 16);
     tcpHeaderType.push_back_field("urgentPtr", 16);
 
-    phv_factory.push_back_header("ethernet", ethernetHeader, ethernetHeaderType);
+    phv_factory.push_back_header("ethernet", ethernetHeader,
+                                 ethernetHeaderType);
     phv_factory.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
     phv_factory.push_back_header("udp", udpHeader, udpHeaderType);
     phv_factory.push_back_header("tcp", tcpHeader, tcpHeaderType);
@@ -124,11 +127,11 @@ class ParserTest : public ::testing::Test {
     phv_source->set_phv_factory(0, &phv_factory);
 
     ParseSwitchKeyBuilder ethernetKeyBuilder;
-    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16); // ethertype
+    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16);  // ethertype
     ethernetParseState.set_key_builder(ethernetKeyBuilder);
 
     ParseSwitchKeyBuilder ipv4KeyBuilder;
-    ipv4KeyBuilder.push_back_field(ipv4Header, 8, 8); // protocol
+    ipv4KeyBuilder.push_back_field(ipv4Header, 8, 8);  // protocol
     ipv4ParseState.set_key_builder(ipv4KeyBuilder);
 
     ethernetParseState.add_extract(ethernetHeader);
@@ -140,17 +143,17 @@ class ParserTest : public ::testing::Test {
     ethernet_ipv4_key[0] = 0x08;
     ethernet_ipv4_key[1] = 0x00;
     ethernetParseState.add_switch_case(sizeof(ethernet_ipv4_key),
-				       ethernet_ipv4_key, &ipv4ParseState);
+                                       ethernet_ipv4_key, &ipv4ParseState);
 
     char ipv4_udp_key[1];
     ipv4_udp_key[0] = 17;
     ipv4ParseState.add_switch_case(sizeof(ipv4_udp_key), ipv4_udp_key,
-				   &udpParseState);
+                                   &udpParseState);
 
     char ipv4_tcp_key[1];
     ipv4_tcp_key[0] = 6;
     ipv4ParseState.add_switch_case(sizeof(ipv4_tcp_key),
-				   ipv4_tcp_key, &tcpParseState);
+                                   ipv4_tcp_key, &tcpParseState);
 
     parser.set_init_state(&ethernetParseState);
 
@@ -162,15 +165,15 @@ class ParserTest : public ::testing::Test {
 
   Packet get_tcp_pkt() {
     return Packet::make_new(
-	sizeof(raw_tcp_pkt),
-	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt)),
+        sizeof(raw_tcp_pkt),
+        PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt)),
         phv_source.get());
   }
 
   Packet get_udp_pkt() {
     return Packet::make_new(
-	sizeof(raw_udp_pkt),
-	PacketBuffer(256, (const char *) raw_udp_pkt, sizeof(raw_udp_pkt)),
+        sizeof(raw_udp_pkt),
+        PacketBuffer(256, (const char *) raw_udp_pkt, sizeof(raw_udp_pkt)),
         phv_source.get());
   }
 
@@ -251,7 +254,7 @@ TEST_F(ParserTest, ParseEthernetIPv4UDP) {
 
 
 TEST_F(ParserTest, ParseEthernetIPv4TCP_Stress) {
-  for(int t = 0; t < 10000; t++) {
+  for (int t = 0; t < 10000; t++) {
     Packet packet = get_tcp_pkt();
     PHV *phv = packet.get_phv();
     parser.parse(&packet);
@@ -266,7 +269,7 @@ TEST_F(ParserTest, ParseEthernetIPv4TCP_Stress) {
 TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
   Packet packet = get_tcp_pkt();
   parser.parse(&packet);
-  
+
   deparser.deparse(&packet);
 
   ASSERT_EQ(sizeof(raw_tcp_pkt), packet.get_data_size());
@@ -276,7 +279,7 @@ TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
 TEST_F(ParserTest, DeparseEthernetIPv4UDP) {
   Packet packet = get_udp_pkt();
   parser.parse(&packet);
-  
+
   deparser.deparse(&packet);
 
   ASSERT_EQ(sizeof(raw_udp_pkt), packet.get_data_size());
@@ -288,13 +291,12 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
   size_t size;
 
   Packet packet = Packet::make_new(phv_source.get());
-  for(int t = 0; t < 10000; t++) {
-    if(t % 2 == 0) {
+  for (int t = 0; t < 10000; t++) {
+    if (t % 2 == 0) {
       packet = get_tcp_pkt();
       ref_pkt = (const char *) raw_tcp_pkt;
       size = sizeof(raw_tcp_pkt);
-    }
-    else {
+    } else {
       packet = get_udp_pkt();
       ref_pkt = (const char *) raw_udp_pkt;
       size = sizeof(raw_udp_pkt);
@@ -303,14 +305,13 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
     deparser.deparse(&packet);
     ASSERT_EQ(0, memcmp(ref_pkt, packet.data(), size));
   }
-
 }
 
 TEST(LookAhead, Peek) {
   ByteContainer res;
   // 1011 0101, 1001 1101, 1111 1101, 0001 0111, 1101 0101, 1101 0111
   const unsigned char data_[6] = {0xb5, 0x9d, 0xfd, 0x17, 0xd5, 0xd7};
-  const char *data = (char *) data_;
+  const char *data = reinterpret_cast<const char *>(data_);
 
   ParserLookAhead lookahead1(0, 16);
   lookahead1.peek(data, &res);
@@ -377,7 +378,7 @@ class ParserOpSetTest : public ::testing::Test {
 
 TEST_F(ParserOpSetTest, SetFromData) {
   Data src("0xaba");
-  ParserOpSet<Data> op(testHeader1, 1, src); // f32
+  ParserOpSet<Data> op(testHeader1, 1, src);  // f32
   ParserOp &opRef = op;
   Packet pkt = get_pkt();
   Field &f = pkt.get_phv()->get_field(testHeader1, 1);
@@ -387,7 +388,8 @@ TEST_F(ParserOpSetTest, SetFromData) {
 }
 
 TEST_F(ParserOpSetTest, SetFromField) {
-  ParserOpSet<field_t> op(testHeader1, 1, field_t::make(testHeader2, 1)); // f32
+  ParserOpSet<field_t> op(testHeader1, 1,
+                          field_t::make(testHeader2, 1));  // f32
   ParserOp &opRef = op;
   Packet pkt = get_pkt();
   Field &f = pkt.get_phv()->get_field(testHeader1, 1);
@@ -400,10 +402,10 @@ TEST_F(ParserOpSetTest, SetFromField) {
 
 TEST_F(ParserOpSetTest, SetFromLookahead) {
   const unsigned char data_[6] = {0xb5, 0x9d, 0xfd, 0x17, 0xd5, 0xd7};
-  const char *data = (char *) data_;
+  const char *data = reinterpret_cast<const char *>(data_);
 
   ParserLookAhead lookahead1(0, 32);
-  const ParserOpSet<ParserLookAhead> op1(testHeader1, 1, lookahead1); // f32
+  const ParserOpSet<ParserLookAhead> op1(testHeader1, 1, lookahead1);  // f32
   const ParserOp &op1Ref = op1;
   Packet pkt1 = get_pkt();
   Field &f1 = pkt1.get_phv()->get_field(testHeader1, 1);
@@ -412,7 +414,7 @@ TEST_F(ParserOpSetTest, SetFromLookahead) {
   ASSERT_EQ(0xb59dfd17, f1.get_uint());
 
   ParserLookAhead lookahead2(8, 8);
-  const ParserOpSet<ParserLookAhead> op2(testHeader1, 1, lookahead2); // f32
+  const ParserOpSet<ParserLookAhead> op2(testHeader1, 1, lookahead2);  // f32
   const ParserOp &op2Ref = op2;
   Packet pkt2 = get_pkt();
   Field &f2 = pkt2.get_phv()->get_field(testHeader1, 1);
@@ -460,11 +462,13 @@ class ParseSwitchKeyBuilderTest : public ::testing::Test {
 
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
-    phv_factory.push_back_header("test_stack_1", testHeaderStack1, testHeaderType);
-    phv_factory.push_back_header("test_stack_2", testHeaderStack2, testHeaderType);
+    phv_factory.push_back_header("test_stack_1", testHeaderStack1,
+                                 testHeaderType);
+    phv_factory.push_back_header("test_stack_2", testHeaderStack2,
+                                 testHeaderType);
     phv_factory.push_back_header_stack("test_stack",
-				       testHeaderStack, testHeaderType,
-				       {testHeaderStack1, testHeaderStack2});
+                                       testHeaderStack, testHeaderType,
+                                       {testHeaderStack1, testHeaderStack2});
   }
 
   Packet get_pkt() {
@@ -490,7 +494,7 @@ TEST_F(ParseSwitchKeyBuilderTest, Mix) {
   builder.push_back_stack_field(testHeaderStack, 1, 32);
 
   const unsigned char data_[6] = {0xb5, 0x9d, 0xfd, 0x17, 0xd5, 0xd7};
-  const char *data = (char *) data_;
+  const char *data = reinterpret_cast<const char *>(data_);
 
   Packet pkt = get_pkt();
   PHV *phv = pkt.get_phv();
@@ -509,7 +513,8 @@ TEST_F(ParseSwitchKeyBuilderTest, Mix) {
   h.get_field(1).set("0x44332211");
 
   // aabbccddeeff b59d 1122 00ababab fd17d5d7 0d17d5 44332211
-  ByteContainer expected("0xaabbccddeeffb59d112200abababfd17d5d70d17d544332211");
+  ByteContainer expected(
+      "0xaabbccddeeffb59d112200abababfd17d5d70d17d544332211");
   ByteContainer res;
   builder(*phv, data, &res);
   ASSERT_EQ(expected, res);
@@ -564,7 +569,8 @@ class MPLSParserTest : public ::testing::Test {
     MPLSHeaderType.push_back_field("bos", 1);
     MPLSHeaderType.push_back_field("ttl", 8);
 
-    phv_factory.push_back_header("ethernet", ethernetHeader, ethernetHeaderType);
+    phv_factory.push_back_header("ethernet", ethernetHeader,
+                                 ethernetHeaderType);
     phv_factory.push_back_header("mpls0", MPLSHeader1, MPLSHeaderType);
     phv_factory.push_back_header("mpls1", MPLSHeader2, MPLSHeaderType);
     phv_factory.push_back_header("mpls2", MPLSHeader3, MPLSHeaderType);
@@ -578,11 +584,11 @@ class MPLSParserTest : public ::testing::Test {
     phv_source->set_phv_factory(0, &phv_factory);
 
     ParseSwitchKeyBuilder ethernetKeyBuilder;
-    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16); // ethertype
+    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16);  // ethertype
     ethernetParseState.set_key_builder(ethernetKeyBuilder);
 
     ParseSwitchKeyBuilder MPLSKeyBuilder;
-    MPLSKeyBuilder.push_back_stack_field(MPLSStack, 2, 1); // bos
+    MPLSKeyBuilder.push_back_stack_field(MPLSStack, 2, 1);  // bos
     MPLSParseState.set_key_builder(MPLSKeyBuilder);
 
     ethernetParseState.add_extract(ethernetHeader);
@@ -592,17 +598,17 @@ class MPLSParserTest : public ::testing::Test {
     ethernet_ipv4_key[0] = 0x88;
     ethernet_ipv4_key[1] = 0x47;
     ethernetParseState.add_switch_case(sizeof(ethernet_ipv4_key),
-				       ethernet_ipv4_key, &MPLSParseState);
+                                       ethernet_ipv4_key, &MPLSParseState);
 
     char mpls_mpls_key[1];
     mpls_mpls_key[0] = 0x00;
     MPLSParseState.add_switch_case(sizeof(mpls_mpls_key),
-				   mpls_mpls_key, &MPLSParseState);
+                                   mpls_mpls_key, &MPLSParseState);
 
     parser.set_init_state(&ethernetParseState);
 
     deparser.push_back_header(ethernetHeader);
-    // TODO
+    // TODO(antonin)
     // would it be better to have a push_back_stack here, for the deparser ?
     deparser.push_back_header(MPLSHeader1);
     deparser.push_back_header(MPLSHeader2);
@@ -612,8 +618,8 @@ class MPLSParserTest : public ::testing::Test {
 
   Packet get_mpls_pkt() {
     return Packet::make_new(
-	sizeof(raw_mpls_pkt),
-	PacketBuffer(256, (const char *) raw_mpls_pkt, sizeof(raw_mpls_pkt)),
+        sizeof(raw_mpls_pkt),
+        PacketBuffer(256, (const char *) raw_mpls_pkt, sizeof(raw_mpls_pkt)),
         phv_source.get());
   }
 
@@ -637,9 +643,9 @@ TEST_F(MPLSParserTest, ParseEthernetMPLS3) {
   const Header &MPLS_hdr_4 = phv->get_header(MPLSHeader4);
   ASSERT_FALSE(MPLS_hdr_4.is_valid());
 
-  ASSERT_EQ(1u, MPLS_hdr_1.get_field(0).get_uint()); // label
-  ASSERT_EQ(2u, MPLS_hdr_2.get_field(0).get_uint()); // label
-  ASSERT_EQ(3u, MPLS_hdr_3.get_field(0).get_uint()); // label
+  ASSERT_EQ(1u, MPLS_hdr_1.get_field(0).get_uint());  // label
+  ASSERT_EQ(2u, MPLS_hdr_2.get_field(0).get_uint());  // label
+  ASSERT_EQ(3u, MPLS_hdr_3.get_field(0).get_uint());  // label
 }
 
 class SwitchCaseTest : public ::testing::Test {
@@ -658,7 +664,7 @@ class SwitchCaseTest : public ::testing::Test {
 
   unsigned int bc_as_uint(const ByteContainer &bc) {
     unsigned int res = 0;
-    for(auto c : bc)
+    for (auto c : bc)
       res = (res << 8) + static_cast<unsigned char>(c);
     return res;
   }
@@ -709,22 +715,26 @@ TEST_F(SwitchCaseTest, Mask) {
   pstate.set_key_builder(builder);
 
   std::vector<const ParseState *> expected_next_states(65536);
-  for(int i = 0; i < 65536; i++) {
-    if((i & bc_as_uint(mask_1)) == (bc_as_uint(key_1) & bc_as_uint(mask_1)))
+  auto cmp_w_mask = [this](const ByteContainer &mask, const ByteContainer &key,
+                           int v) {
+    return (v & bc_as_uint(mask)) == (bc_as_uint(key) & bc_as_uint(mask));
+  };
+  for (int i = 0; i < 65536; i++) {
+    if (cmp_w_mask(mask_1, key_1, i))
       expected_next_states[i] = &next_state_1;
-    else if((i & bc_as_uint(mask_2)) == (bc_as_uint(key_2) & bc_as_uint(mask_2)))
+    else if (cmp_w_mask(mask_2, key_2, i))
       expected_next_states[i] = &next_state_2;
-    else if((i & bc_as_uint(mask_3)) == (bc_as_uint(key_3) & bc_as_uint(mask_3)))
+    else if (cmp_w_mask(mask_3, key_3, i))
       expected_next_states[i] = &next_state_3;
     else
       expected_next_states[i] = nullptr;
   }
 
   Packet packet = get_pkt();
-  for(int i = 0; i < 65536; i++) {
+  for (int i = 0; i < 65536; i++) {
     size_t bytes_parsed = 0;
     const char data[2] = {static_cast<char>(i >> 8),
-			  static_cast<char>(i & 0xff)};
+                          static_cast<char>(i & 0xff)};
     const ParseState *next_state = pstate(&packet, data, &bytes_parsed);
 
     ASSERT_EQ(expected_next_states[i], next_state);
@@ -771,7 +781,6 @@ class IPv4TLVParsingTest : public ::testing::Test {
         ipv4PaddingParseState("parse_ipv4_padding", 5),
         parser("test_parser", 0),
         phv_source(PHVSourceIface::make_phv_source()) {
-
     pMetaType.push_back_field("byte_counter", 8);
 
     ethernetHeaderType.push_back_field("dstAddr", 48);
@@ -803,26 +812,26 @@ class IPv4TLVParsingTest : public ::testing::Test {
     phv_factory.push_back_header("pMeta", pMeta, pMetaType);
 
     phv_factory.push_back_header("ethernet", ethernetHeader,
-				 ethernetHeaderType);
+                                 ethernetHeaderType);
     phv_factory.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
     phv_factory.push_back_header("ipv4OptionA", ipv4OptionAHeader,
-				 ipv4OptionAHeaderType);
+                                 ipv4OptionAHeaderType);
     phv_factory.push_back_header("ipv4OptionB", ipv4OptionBHeader,
-				 ipv4OptionBHeaderType);
+                                 ipv4OptionBHeaderType);
     phv_factory.push_back_header("ipv4Padding1", ipv4PaddingHeader1,
-				 ipv4PaddingHeaderType);
+                                 ipv4PaddingHeaderType);
     phv_factory.push_back_header("ipv4Padding2", ipv4PaddingHeader2,
-				 ipv4PaddingHeaderType);
+                                 ipv4PaddingHeaderType);
     phv_factory.push_back_header("ipv4Padding3", ipv4PaddingHeader3,
-				 ipv4PaddingHeaderType);
+                                 ipv4PaddingHeaderType);
     phv_factory.push_back_header("ipv4Padding4", ipv4PaddingHeader4,
-				 ipv4PaddingHeaderType);
+                                 ipv4PaddingHeaderType);
 
-    const std::vector<header_id_t> hs = {ipv4PaddingHeader1, ipv4PaddingHeader2,
-					 ipv4PaddingHeader3, ipv4PaddingHeader4};
+    const std::vector<header_id_t> hs =
+        {ipv4PaddingHeader1, ipv4PaddingHeader2,
+         ipv4PaddingHeader3, ipv4PaddingHeader4};
     phv_factory.push_back_header_stack(
-      "ipv4Padding", ipv4PaddingStack, ipv4PaddingHeaderType, hs
-    );
+      "ipv4Padding", ipv4PaddingStack, ipv4PaddingHeaderType, hs);
   }
 
   virtual void SetUp() {
@@ -831,10 +840,10 @@ class IPv4TLVParsingTest : public ::testing::Test {
     // parse_ethernet
     ethernetParseState.add_extract(ethernetHeader);
     ParseSwitchKeyBuilder ethernetKeyBuilder;
-    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16); // ethertype
+    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16);  // ethertype
     ethernetParseState.set_key_builder(ethernetKeyBuilder);
     ethernetParseState.add_switch_case(ByteContainer("0x0800"),
-				       &ipv4ParseState);
+                                       &ipv4ParseState);
 
     // parse_ipv4
     /* extract(ipv4);
@@ -846,7 +855,7 @@ class IPv4TLVParsingTest : public ::testing::Test {
     */
     ipv4ParseState.add_extract(ipv4Header);
     ArithExpression expr;
-    expr.push_back_load_field(ipv4Header, 1); // IHL
+    expr.push_back_load_field(ipv4Header, 1);  // IHL
     expr.push_back_load_const(Data(4));
     expr.push_back_op(ExprOpcode::MUL);
     expr.push_back_load_const(Data(20));
@@ -854,7 +863,7 @@ class IPv4TLVParsingTest : public ::testing::Test {
     expr.build();
     ipv4ParseState.add_set_from_expression(pMeta, 0, expr);
     ParseSwitchKeyBuilder ipv4KeyBuilder;
-    ipv4KeyBuilder.push_back_field(ipv4Header, 1, 4); // IHL
+    ipv4KeyBuilder.push_back_field(ipv4Header, 1, 4);  // IHL
     ipv4ParseState.set_key_builder(ipv4KeyBuilder);
     ipv4ParseState.add_switch_case(ByteContainer("0x05"), nullptr);
     ipv4ParseState.set_default_switch_case(&ipv4OptionsParseState);
@@ -868,21 +877,17 @@ class IPv4TLVParsingTest : public ::testing::Test {
        }
     */
     ParseSwitchKeyBuilder ipv4OptionsKeyBuilder;
-    ipv4OptionsKeyBuilder.push_back_field(pMeta, 0, 8); // byte_counter
+    ipv4OptionsKeyBuilder.push_back_field(pMeta, 0, 8);  // byte_counter
     ipv4OptionsKeyBuilder.push_back_lookahead(0, 8);
     ipv4OptionsParseState.set_key_builder(ipv4OptionsKeyBuilder);
     ipv4OptionsParseState.add_switch_case_with_mask(
-      ByteContainer("0x0000"), ByteContainer("0xff00"), nullptr
-    );
+      ByteContainer("0x0000"), ByteContainer("0xff00"), nullptr);
     ipv4OptionsParseState.add_switch_case_with_mask(
-      ByteContainer("0x00aa"), ByteContainer("0x00ff"), &ipv4OptionAParseState
-    );
+      ByteContainer("0x00aa"), ByteContainer("0x00ff"), &ipv4OptionAParseState);
     ipv4OptionsParseState.add_switch_case_with_mask(
-      ByteContainer("0x00bb"), ByteContainer("0x00ff"), &ipv4OptionBParseState
-    );
+      ByteContainer("0x00bb"), ByteContainer("0x00ff"), &ipv4OptionBParseState);
     ipv4OptionsParseState.add_switch_case_with_mask(
-      ByteContainer("0x0000"), ByteContainer("0x00ff"), &ipv4PaddingParseState
-    );
+      ByteContainer("0x0000"), ByteContainer("0x00ff"), &ipv4PaddingParseState);
 
     // parse_ipv4_optionA
     /* extract(ipv4_optionA);
@@ -941,7 +946,7 @@ class IPv4TLVParsingTest : public ::testing::Test {
   }
 
   void add_optionA(ByteContainer *buf,
-		   const ByteContainer &f1, const ByteContainer &f2) const {
+                   const ByteContainer &f1, const ByteContainer &f2) const {
     buf->push_back('\xaa');
     buf->push_back('\x07');
     buf->append(f1);
@@ -953,12 +958,12 @@ class IPv4TLVParsingTest : public ::testing::Test {
   }
 
   void do_padding(ByteContainer *buf) const {
-    size_t IHL = buf->size() - 14u; // - ethernet
+    size_t IHL = buf->size() - 14u;  // - ethernet
     size_t IHL_words = (IHL + 3) / 4;
     assert(IHL_words < 16u);
     (*buf)[14] = ((*buf)[14] & 0xf0) | (static_cast<char>(IHL_words));
     // pad
-    for(size_t i = 0; i < (IHL_words * 4 - IHL); i++) {
+    for (size_t i = 0; i < (IHL_words * 4 - IHL); i++) {
       buf->push_back('\x00');
     }
   }
@@ -971,7 +976,7 @@ class IPv4TLVParsingTest : public ::testing::Test {
   }
 
   void check_optionA(const PHV &phv,
-		     const ByteContainer &f1, const ByteContainer &f2) {
+                     const ByteContainer &f1, const ByteContainer &f2) {
     const Header &ipv4OptionA_hdr = phv.get_header(ipv4OptionAHeader);
     ASSERT_TRUE(ipv4OptionA_hdr.is_valid());
     ASSERT_EQ(0xaa, ipv4OptionA_hdr.get_field(0).get_int());
@@ -1066,14 +1071,13 @@ TEST_F(IPv4TLVParsingTest, BothOptions) {
 
   enum class Order { AB, BA };
 
-  for(const auto order: {Order::AB, Order::BA}) {
+  for (const auto order : {Order::AB, Order::BA}) {
     ByteContainer buf = get_ipv4_base();
 
-    if(order == Order::AB) {
+    if (order == Order::AB) {
       add_optionA(&buf, f1, f2);
       add_optionB(&buf);
-    }
-    else {
+    } else {
       add_optionB(&buf);
       add_optionA(&buf, f1, f2);
     }
@@ -1114,7 +1118,6 @@ class IPv4VLParsingTest : public ::testing::Test {
         ipv4ParseState("parse_ipv4", 1),
         parser("test_parser", 0), deparser("test_deparser", 0),
         phv_source(PHVSourceIface::make_phv_source()) {
-
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
     ethernetHeaderType.push_back_field("ethertype", 16);
@@ -1132,19 +1135,19 @@ class IPv4VLParsingTest : public ::testing::Test {
     ipv4HeaderType.push_back_field("srcAddr", 32);
     ipv4HeaderType.push_back_field("dstAddr", 32);
     ArithExpression raw_expr;
-    raw_expr.push_back_load_local(1); // IHL
+    raw_expr.push_back_load_local(1);  // IHL
     raw_expr.push_back_load_const(Data(4));
     raw_expr.push_back_op(ExprOpcode::MUL);
     raw_expr.push_back_load_const(Data(20));
     raw_expr.push_back_op(ExprOpcode::SUB);
     raw_expr.push_back_load_const(Data(8));
-    raw_expr.push_back_op(ExprOpcode::MUL); // to bits
+    raw_expr.push_back_op(ExprOpcode::MUL);  // to bits
     raw_expr.build();
     std::unique_ptr<VLHeaderExpression> expr(new VLHeaderExpression(raw_expr));
     ipv4HeaderType.push_back_VL_field("options", std::move(expr));
 
     phv_factory.push_back_header("ethernet", ethernetHeader,
-				 ethernetHeaderType);
+                                 ethernetHeaderType);
     phv_factory.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
   }
 
@@ -1154,10 +1157,10 @@ class IPv4VLParsingTest : public ::testing::Test {
     // parse_ethernet
     ethernetParseState.add_extract(ethernetHeader);
     ParseSwitchKeyBuilder ethernetKeyBuilder;
-    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16); // ethertype
+    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16);  // ethertype
     ethernetParseState.set_key_builder(ethernetKeyBuilder);
     ethernetParseState.add_switch_case(ByteContainer("0x0800"),
-				       &ipv4ParseState);
+                                       &ipv4ParseState);
 
     ipv4ParseState.add_extract(ipv4Header);
     ipv4ParseState.set_default_switch_case(nullptr);
@@ -1170,7 +1173,7 @@ class IPv4VLParsingTest : public ::testing::Test {
 
   ByteContainer option_value(size_t options_words) const {
     ByteContainer buf;
-    for(size_t i = 0; i < options_words * 4; i++)
+    for (size_t i = 0; i < options_words * 4; i++)
       buf.push_back(static_cast<char>(options_words));
     return buf;
   }
@@ -1207,7 +1210,7 @@ class IPv4VLParsingTest : public ::testing::Test {
   }
 
   void check_option(const PHV &phv, size_t option_words,
-		    const ByteContainer &v) {
+                    const ByteContainer &v) {
     assert(v.size() == option_words * 4);
     const Field &f_options = phv.get_field(ipv4Header, 12);
     ASSERT_EQ(option_words * 4 * 8, f_options.get_nbits());
@@ -1240,7 +1243,7 @@ TEST_F(IPv4VLParsingTest, SmallOption) {
 }
 
 TEST_F(IPv4VLParsingTest, BigOption) {
-  test<9u>(); // max value
+  test<9u>();  // max value
 }
 
 TEST_F(IPv4VLParsingTest, Deparser) {
@@ -1280,7 +1283,6 @@ class ParseVSetTest : public ::testing::Test {
         parseState("parse_header", 0),
         parser("test_parser", 0),
         phv_source(PHVSourceIface::make_phv_source()) {
-
     headerType.push_back_field("f16", 16);
     headerType.push_back_field("f32", 32);
     headerType.push_back_field("f8", 8);
@@ -1456,7 +1458,7 @@ TEST_F(ParseVSetTest, NonAlignedWithMask) {
   ASSERT_EQ(nullptr, parseState(&pkt, nullptr, &bytes_parsed));
 }
 
-extern bool WITH_VALGRIND; // defined in main.cpp
+extern bool WITH_VALGRIND;  // defined in main.cpp
 
 // test added after I detected a race condition in ParseVSet's shadow copies
 TEST_F(ParseVSetTest, ConcurrentRuntimeAccess) {
@@ -1487,8 +1489,10 @@ TEST_F(ParseVSetTest, ConcurrentRuntimeAccess) {
                                      clock::time_point end) {
     while (clock::now() < end) {
       std::unique_lock<std::mutex> L(m);
-      if (do_add) vset.add(v1);
-      else vset.remove(v1);
+      if (do_add)
+        vset.add(v1);
+      else
+        vset.remove(v1);
     }
   };
 

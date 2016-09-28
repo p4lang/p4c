@@ -26,8 +26,7 @@
 
 bool WITH_VALGRIND = false;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
   for (int i = 0; i < argc; i++) {
     if (strcmp(argv[i], "--valgrind") == 0) {

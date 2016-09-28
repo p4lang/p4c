@@ -32,7 +32,6 @@ REGISTER_PRIMITIVE(modify_field);
 
 class drop : public ActionPrimitive<> {
   void operator ()() {
-
   }
 };
 

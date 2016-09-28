@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
+
 #include <bm/bm_sim/dev_mgr.h>
 #include <bm/bm_sim/port_monitor.h>
 #include <bm/bm_apps/packet_pipe.h>
@@ -20,13 +22,14 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
-#include <gtest/gtest.h>
 #include <iostream>
 #include <map>
 #include <unordered_map>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <string>
+#include <vector>
 
 #include "utils.h"
 
@@ -35,8 +38,7 @@ using namespace bm;
 using testing::Types;
 
 class TestDevMgrImp : public DevMgrIface {
-
-public:
+ public:
   TestDevMgrImp() {
     // 0 is device_id
     p_monitor = PortMonitorIface::make_active(0);
@@ -65,7 +67,7 @@ public:
     }
   }
 
-private:
+ private:
   bool port_is_up_(port_t port) const override {
     std::lock_guard<std::mutex> lock(status_mutex);
     auto it = port_status.find(port);
@@ -100,8 +102,8 @@ private:
     return ReturnCode::SUCCESS;
   }
 
-  ReturnCode set_packet_handler_(const PacketHandler &handler, void *cookie)
-      override{
+  ReturnCode set_packet_handler_(const PacketHandler &handler,
+                                 void *cookie) override {
     (void) handler;
     (void) cookie;
     return ReturnCode::SUCCESS;
@@ -120,8 +122,7 @@ private:
 };
 
 class DevMgrTest : public ::testing::Test {
-public:
-
+ public:
   void port_status(DevMgrIface::port_t port_num,
                    const DevMgrIface::PortStatus status) {
     (void)port_num;
@@ -129,7 +130,7 @@ public:
     cb_counts[status]++;
   }
 
-protected:
+ protected:
   DevMgrTest()
       : g_mgr(new TestDevMgrImp()) {
     g_mgr->start();
@@ -208,7 +209,7 @@ class PacketInReceiver {
 
   void receive(int port_num, const char *buffer, int len, void *cookie) {
     (void) cookie;
-    if(static_cast<size_t>(len) > max_size) return;
+    if (static_cast<size_t>(len) > max_size) return;
     std::unique_lock<std::mutex> lock(mutex);
     while (status != Status::CAN_RECEIVE) {
       can_receive.wait(lock);
@@ -226,7 +227,7 @@ class PacketInReceiver {
     clock::time_point tp_start = clock::now();
     clock::time_point tp_end = tp_start + std::chrono::milliseconds(timeout_ms);
     std::unique_lock<std::mutex> lock(mutex);
-    while(status != Status::CAN_READ) {
+    while (status != Status::CAN_READ) {
       if (clock::now() > tp_end)
         return false;
       can_read.wait_until(lock, tp_end);
@@ -255,12 +256,11 @@ class PacketInReceiver {
 };
 
 // is here because DevMgr has a protected destructor
-class PacketInSwitch : public DevMgr {
-};
+class PacketInSwitch : public DevMgr { };
 
 class PacketInDevMgrTest : public ::testing::Test {
  protected:
-  static constexpr size_t max_buffer_size = 512;
+  static constexpr size_t kMaxBufferSize = 512;
 
   PacketInDevMgrTest()
       : packet_inject(addr) { }
@@ -292,7 +292,7 @@ class PacketInDevMgrTest : public ::testing::Test {
   bool check_recv(PacketInReceiver *receiver,
                   int send_port, const char *send_buffer, size_t size,
                   unsigned int timeout_ms = 1000) {
-    char recv_buffer[max_buffer_size];
+    char recv_buffer[kMaxBufferSize];
     memset(recv_buffer, 0, sizeof(recv_buffer));
     if (size > sizeof(recv_buffer)) return false;
     int recv_port = -1;
@@ -304,8 +304,8 @@ class PacketInDevMgrTest : public ::testing::Test {
 
   const std::string addr = "ipc:///tmp/test_packet_in_abc123";
 
-  PacketInReceiver recv_switch{max_buffer_size};
-  PacketInReceiver recv_lib{max_buffer_size};
+  PacketInReceiver recv_switch{kMaxBufferSize};
+  PacketInReceiver recv_lib{kMaxBufferSize};
 
   PacketInSwitch sw;
 
@@ -339,7 +339,6 @@ TEST_F(PacketInDevMgrTest, InfoRequestTest) {
 
 class PacketInDevMgrPortStatusTest : public PacketInDevMgrTest {
  protected:
-
   PacketInDevMgrPortStatusTest() { }
 
   virtual void SetUp() {

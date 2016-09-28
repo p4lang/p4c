@@ -20,19 +20,20 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_sim/learning.h>
+#include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/phv_source.h>
+#include <bm/bm_sim/packet.h>
+
 #include <memory>
 #include <string>
 #include <mutex>
 #include <thread>
 #include <condition_variable>
 #include <chrono>
+#include <algorithm>  // for std::copy
 
 #include <cassert>
-
-#include <bm/bm_sim/learning.h>
-#include <bm/bm_sim/phv.h>
-#include <bm/bm_sim/phv_source.h>
-#include <bm/bm_sim/packet.h>
 
 #include "utils.h"
 
@@ -90,10 +91,10 @@ class LearningTest : public ::testing::Test {
   // virtual void TearDown() { }
 
   void learn_on_test1_f16(LearnEngineIface::list_id_t list_id,
-			  size_t max_samples, unsigned timeout_ms) {
+                          size_t max_samples, unsigned timeout_ms) {
     learn_engine->list_create(list_id, max_samples, timeout_ms);
     learn_engine->list_set_learn_writer(list_id, learn_writer);
-    learn_engine->list_push_back_field(list_id, testHeader1, 0); // test1.f16
+    learn_engine->list_push_back_field(list_id, testHeader1, 0);  // test1.f16
     learn_engine->list_init(list_id);
   }
 
@@ -103,7 +104,7 @@ class LearningTest : public ::testing::Test {
   }
 
   void learn_cb_(LearnEngineIface::msg_hdr_t msg_hdr, size_t size,
-		 std::unique_ptr<char []> data) {
+                 std::unique_ptr<char[]> data) {
     std::unique_lock<std::mutex> lock(cb_written_mutex);
     std::copy(&data[0], &data[size], buffer);
     cb_hdr = msg_hdr;
@@ -112,9 +113,10 @@ class LearningTest : public ::testing::Test {
   }
 
   static void learn_cb(LearnEngineIface::msg_hdr_t msg_hdr, size_t size,
-		       std::unique_ptr<char []> data, void *cookie) {
+                       std::unique_ptr<char[]> data, void *cookie) {
     assert(size <= sizeof(buffer));
-    ((LearningTest *) cookie)->learn_cb_(msg_hdr, size, std::move(data));
+    auto instance = static_cast<LearningTest *>(cookie);
+    instance->learn_cb_(msg_hdr, size, std::move(data));
   }
 };
 
@@ -207,7 +209,7 @@ TEST_F(LearningTest, OneSampleConstData) {
   MemoryAccessor(sizeof(buffer)));
   learn_engine->list_create(list_id, max_samples, timeout_ms);
   learn_engine->list_set_learn_writer(list_id, learn_writer);
-  learn_engine->list_push_back_constant(list_id, "0xaba"); // 2 bytes
+  learn_engine->list_push_back_constant(list_id, "0xaba");  // 2 bytes
   learn_engine->list_init(list_id);
 
   Packet pkt = get_pkt();
@@ -316,7 +318,7 @@ TEST_F(LearningTest, FilterAck) {
   ASSERT_EQ((char) 0xa, data[0]);
   ASSERT_EQ((char) 0xba, data[1]);
 
-  learn_engine->learn(list_id, pkt); // cannot learn a second time
+  learn_engine->learn(list_id, pkt);  // cannot learn a second time
   sleep_for(milliseconds(100));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, learn_writer->check_status());
 
@@ -324,7 +326,7 @@ TEST_F(LearningTest, FilterAck) {
   ASSERT_EQ(LearnEngineIface::SUCCESS, learn_engine->ack(list_id, 0, 0));
   learn_engine->learn(list_id, pkt);
   learn_writer->read(buffer, sizeof(buffer));
-  ASSERT_EQ(1u, msg_hdr->buffer_id); // buffer id was incremented
+  ASSERT_EQ(1u, msg_hdr->buffer_id);  // buffer id was incremented
   ASSERT_EQ(1u, msg_hdr->num_samples);
   ASSERT_EQ((char) 0xa, data[0]);
   ASSERT_EQ((char) 0xba, data[1]);
@@ -350,7 +352,7 @@ TEST_F(LearningTest, FilterAcks) {
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(2u, msg_hdr->num_samples);
 
-  learn_engine->learn(list_id, pkt); // cannot learn a second time
+  learn_engine->learn(list_id, pkt);  // cannot learn a second time
   sleep_for(milliseconds(100));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, learn_writer->check_status());
 
@@ -364,7 +366,7 @@ TEST_F(LearningTest, FilterAcks) {
   learn_engine->learn(list_id, pkt);
 
   learn_writer->read(buffer, sizeof(buffer));
-  ASSERT_EQ(1u, msg_hdr->buffer_id); // buffer id was incremented
+  ASSERT_EQ(1u, msg_hdr->buffer_id);  // buffer id was incremented
   ASSERT_EQ(2u, msg_hdr->num_samples);
 }
 
@@ -388,7 +390,7 @@ TEST_F(LearningTest, FilterAckBuffer) {
   ASSERT_EQ(0u, msg_hdr->buffer_id);
   ASSERT_EQ(2u, msg_hdr->num_samples);
 
-  learn_engine->learn(list_id, pkt); // cannot learn a second time
+  learn_engine->learn(list_id, pkt);  // cannot learn a second time
   sleep_for(milliseconds(100));
   ASSERT_NE(MemoryAccessor::Status::CAN_READ, learn_writer->check_status());
 
@@ -402,7 +404,7 @@ TEST_F(LearningTest, FilterAckBuffer) {
   learn_engine->learn(list_id, pkt);
 
   learn_writer->read(buffer, sizeof(buffer));
-  ASSERT_EQ(1u, msg_hdr->buffer_id); // buffer id was incremented
+  ASSERT_EQ(1u, msg_hdr->buffer_id);  // buffer id was incremented
   ASSERT_EQ(2u, msg_hdr->num_samples);
 }
 
@@ -524,7 +526,7 @@ TEST_F(LearningTest, OneSampleCbMode) {
   size_t max_samples = 1; unsigned timeout_ms = 100;
   learn_engine->list_create(list_id, max_samples, timeout_ms);
   learn_engine->list_set_learn_cb(list_id, LearningTest::learn_cb, this);
-  learn_engine->list_push_back_field(list_id, testHeader1, 0); // test1.f16
+  learn_engine->list_push_back_field(list_id, testHeader1, 0);  // test1.f16
   learn_engine->list_init(list_id);
 
   cb_written = false;
@@ -536,7 +538,7 @@ TEST_F(LearningTest, OneSampleCbMode) {
   learn_engine->learn(list_id, pkt);
 
   std::unique_lock<std::mutex> lock(cb_written_mutex);
-  while(!cb_written) {
+  while (!cb_written) {
     cb_written_cv.wait(lock);
   }
 

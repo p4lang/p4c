@@ -20,13 +20,13 @@
 
 #include <gtest/gtest.h>
 
-#include <vector>
-#include <string>
-
 #include <boost/filesystem.hpp>
 
 #include <bm/bm_sim/options_parse.h>
 #include <bm/bm_sim/target_parser.h>
+
+#include <vector>
+#include <string>
 
 using namespace bm;
 
@@ -143,7 +143,7 @@ TEST_F(TargetParserIfaceTest, DispatchMany) {
         .push_back(std::to_string(i));
   }
   main_parser.parse(argv.size(), argv.get(), &dummy_parser);
-  ASSERT_EQ(2 * iters, dummy_parser.input.size());  
+  ASSERT_EQ(2 * iters, dummy_parser.input.size());
 }
 
 class TargetParserBasicTest : public ::testing::Test {

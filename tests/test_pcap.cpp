@@ -18,7 +18,10 @@
 #include <boost/filesystem.hpp>
 
 #include <bm/bm_sim/pcap_file.h>
-#include <stdio.h>
+
+#include <string>
+// TODO(unknown): is this still needed?
+#include <cstdio>
 
 using namespace bm;
 
@@ -30,13 +33,13 @@ namespace fs = boost::filesystem;
 
 // Google Test fixture for pcap tests
 class PcapTest : public ::testing::Test {
-protected:
+ protected:
   PcapTest()
-    : receiver(nullptr), received(0),
-      testDataFolder(TESTDATADIR), testfile1("en0.pcap"), testfile2("lo0.pcap"),
-      tmpfile("tmp.pcap") {}
+      : receiver(nullptr), received(0),
+        testDataFolder(TESTDATADIR), testfile1("en0.pcap"),
+        testfile2("lo0.pcap"), tmpfile("tmp.pcap") {}
 
-  virtual void SetUp()  {}
+  virtual void SetUp() {}
 
   virtual void TearDown() {
     std::string tmpfile = getTmpFile();
@@ -62,7 +65,7 @@ protected:
     receiver = recv;
   }
 
-public:
+ public:
   int receive(int port_num, const char *buffer, int len) {
     received++;
     if (receiver != nullptr)
@@ -70,7 +73,7 @@ public:
     return received;
   }
 
-protected:
+ protected:
   PacketReceiverIface* receiver;
   int received;
   std::string testDataFolder;
@@ -84,12 +87,11 @@ protected:
 // #define DIFFERENT 1
 // #define EXCEPTION 2
 
-class PcapFileComparator
-{
-public:
+class PcapFileComparator {
+ public:
   enum class Status { OK, DIFFERENT, EXCEPTION };
 
-private:
+ private:
   bool verbose;
   unsigned packetIndex;
 
@@ -104,10 +106,11 @@ private:
     unsigned p1len = p1->getLength();
     unsigned p2len = p2->getLength();
 
-    if (p1len != p2len)
+    if (p1len != p2len) {
       return this->reportDifference(
           std::string("Packet with index ") +
           std::to_string(this->packetIndex) + " differs in length");
+    }
     const char* p1d = p1->getData();
     const char* p2d = p2->getData();
 
@@ -121,7 +124,7 @@ private:
     return Status::OK;
   }
 
-public:
+ public:
   PcapFileComparator(bool verbose)
       : verbose(verbose), packetIndex(0) {}
 
@@ -180,32 +183,34 @@ TEST_F(PcapTest, ReadOneFile) {
   ASSERT_EQ(packetsSize, 0);
 }
 
+namespace {
 
-static void
-packet_handler(int port_num, const char *buffer, int len, void *cookie) {
-  ((PcapTest*) cookie)->receive(port_num, buffer, len);
+void packet_handler(int port_num, const char *buffer, int len, void *cookie) {
+  auto instance = static_cast<PcapTest *>(cookie);
+  instance->receive(port_num, buffer, len);
 }
 
+}  // namespace
 
 TEST_F(PcapTest, MergeFiles) {
   PcapFilesReader reader(false, 0);
   reader.addFile(0, getFile1());
   reader.addFile(1, getFile2());
-  reader.set_packet_handler(packet_handler, (void*)this);
+  reader.set_packet_handler(packet_handler, static_cast<void *>(this));
   reader.start();
   int totalPackets = received;
   received = 0;
 
   PcapFilesReader reader1(false, 0);
   reader1.addFile(0, getFile1());
-  reader1.set_packet_handler(packet_handler, (void*)this);
+  reader1.set_packet_handler(packet_handler, static_cast<void *>(this));
   reader1.start();
   int file1Packets = received;
   received = 0;
 
   PcapFilesReader reader2(false, 0);
   reader2.addFile(0, getFile2());
-  reader2.set_packet_handler(packet_handler, (void*)this);
+  reader2.set_packet_handler(packet_handler, static_cast<void *>(this));
   reader2.start();
   int file2Packets = received;
 
@@ -218,7 +223,7 @@ TEST_F(PcapTest, Write) {
   PcapFilesReader reader(false, 0);
   reader.addFile(0, getFile1());
   reader.addFile(1, getFile2());
-  reader.set_packet_handler(packet_handler, (void*)this);
+  reader.set_packet_handler(packet_handler, static_cast<void *>(this));
 
   PcapFilesWriter writer;
   setReceiver(&writer);

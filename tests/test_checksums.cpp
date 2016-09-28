@@ -18,12 +18,12 @@
  *
  */
 
+#include <bm/bm_sim/checksums.h>
+#include <bm/bm_sim/parser.h>
+
 #include <gtest/gtest.h>
 
 #include <cstring>
-
-#include <bm/bm_sim/checksums.h>
-#include <bm/bm_sim/parser.h>
 
 using namespace bm;
 
@@ -102,54 +102,51 @@ class ChecksumTest : public ::testing::Test {
 
     metaHeaderType.push_back_field("f16", 16);
 
-    phv_factory.push_back_header("ethernet", ethernetHeader, ethernetHeaderType);
+    phv_factory.push_back_header("ethernet", ethernetHeader,
+                                 ethernetHeaderType);
     phv_factory.push_back_header("ipv4", ipv4Header, ipv4HeaderType);
     phv_factory.push_back_header("udp", udpHeader, udpHeaderType);
     phv_factory.push_back_header("tcp", tcpHeader, tcpHeaderType);
     phv_factory.push_back_header("meta", metaHeader, metaHeaderType, true);
 
     BufBuilder tcp_cksum_engine_builder;
-    tcp_cksum_engine_builder.push_back_field(ipv4Header, 10); // ipv4.srcAddr
-    tcp_cksum_engine_builder.push_back_field(ipv4Header, 11); // ipv4.dstAddr
+    tcp_cksum_engine_builder.push_back_field(ipv4Header, 10);  // ipv4.srcAddr
+    tcp_cksum_engine_builder.push_back_field(ipv4Header, 11);  // ipv4.dstAddr
     tcp_cksum_engine_builder.push_back_constant(ByteContainer('\x00'), 8);
-    tcp_cksum_engine_builder.push_back_field(ipv4Header, 8); // ipv4.protocol
-    tcp_cksum_engine_builder.push_back_field(metaHeader, 0); // for tcpLength
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 0); // tcp.srcPort
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 1); // tcp.dstPort
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 2); // tcp.seqNo
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 3); // tcp.ackNo
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 4); // tcp.dataOffset
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 5); // tcp.res
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 6); // tcp.flags
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 7); // tcp.window
+    tcp_cksum_engine_builder.push_back_field(ipv4Header, 8);  // ipv4.protocol
+    tcp_cksum_engine_builder.push_back_field(metaHeader, 0);  // for tcpLength
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 0);  // tcp.srcPort
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 1);  // tcp.dstPort
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 2);  // tcp.seqNo
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 3);  // tcp.ackNo
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 4);  // tcp.dataOffset
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 5);  // tcp.res
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 6);  // tcp.flags
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 7);  // tcp.window
     // skip tcp.checksum of course
-    tcp_cksum_engine_builder.push_back_field(tcpHeader, 9); // tcp.urgentPtr
+    tcp_cksum_engine_builder.push_back_field(tcpHeader, 9);  // tcp.urgentPtr
     // no headers after that, directly payload
     tcp_cksum_engine_builder.append_payload();
 
     tcp_cksum_engine_calc = std::unique_ptr<NamedCalculation>(
       new NamedCalculation(
         "tcp_cksum_engine_calc", 0,
-        tcp_cksum_engine_builder, "cksum16"
-      )
-    );
+        tcp_cksum_engine_builder, "cksum16"));
     tcp_cksum_engine = std::unique_ptr<CalcBasedChecksum>(
       new CalcBasedChecksum(
         "tcp_cksum_engine", 1, tcpHeader, 8,
-        tcp_cksum_engine_calc.get()
-      )
-    );
+        tcp_cksum_engine_calc.get()));
   }
 
   virtual void SetUp() {
     phv_source->set_phv_factory(0, &phv_factory);
 
     ParseSwitchKeyBuilder ethernetKeyBuilder;
-    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16); // ethertype
+    ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16);  // ethertype
     ethernetParseState.set_key_builder(ethernetKeyBuilder);
 
     ParseSwitchKeyBuilder ipv4KeyBuilder;
-    ipv4KeyBuilder.push_back_field(ipv4Header, 8, 8); // protocol
+    ipv4KeyBuilder.push_back_field(ipv4Header, 8, 8);  // protocol
     ipv4ParseState.set_key_builder(ipv4KeyBuilder);
 
     ethernetParseState.add_extract(ethernetHeader);
@@ -161,33 +158,33 @@ class ChecksumTest : public ::testing::Test {
     ethernet_ipv4_key[0] = 0x08;
     ethernet_ipv4_key[1] = 0x00;
     ethernetParseState.add_switch_case(sizeof(ethernet_ipv4_key),
-				       ethernet_ipv4_key, &ipv4ParseState);
+                                       ethernet_ipv4_key, &ipv4ParseState);
 
     char ipv4_udp_key[1];
     ipv4_udp_key[0] = 17;
     ipv4ParseState.add_switch_case(sizeof(ipv4_udp_key), ipv4_udp_key,
-				   &udpParseState);
+                                   &udpParseState);
 
     char ipv4_tcp_key[1];
     ipv4_tcp_key[0] = 6;
     ipv4ParseState.add_switch_case(sizeof(ipv4_tcp_key),
-				   ipv4_tcp_key, &tcpParseState);
+                                   ipv4_tcp_key, &tcpParseState);
 
     parser.set_init_state(&ethernetParseState);
   }
 
-  Packet get_ipv4_pkt(unsigned short *cksum) {
-    *cksum = 0x3508; // big endian
+  Packet get_ipv4_pkt(uint16_t *cksum) {
+    *cksum = 0x3508;  // big endian
     return Packet::make_new(
         sizeof(raw_tcp_pkt),
-	PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt)),
+        PacketBuffer(256, (const char *) raw_tcp_pkt, sizeof(raw_tcp_pkt)),
         phv_source.get());
   }
 
-  Packet get_tcp_pkt(unsigned short *cksum, unsigned short *tcp_len) {
+  Packet get_tcp_pkt(uint16_t *cksum, uint16_t *tcp_len) {
     auto pkt = get_ipv4_pkt(cksum);
-    *cksum = 0x13cd; // big endian
-    *tcp_len = sizeof(raw_tcp_pkt) - 14 - 20; // - ethernet and ipv4
+    *cksum = 0x13cd;  // big endian
+    *tcp_len = sizeof(raw_tcp_pkt) - 14 - 20;  // - ethernet and ipv4
     // return std::move(pkt);
     // enable NVRO
     return pkt;
@@ -197,7 +194,7 @@ class ChecksumTest : public ::testing::Test {
 };
 
 TEST_F(ChecksumTest, IPv4ChecksumVerify) {
-  unsigned short cksum;
+  uint16_t cksum;
   Packet packet = get_ipv4_pkt(&cksum);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
@@ -211,7 +208,7 @@ TEST_F(ChecksumTest, IPv4ChecksumVerify) {
 }
 
 TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
-  unsigned short cksum;
+  uint16_t cksum;
   Packet packet = get_ipv4_pkt(&cksum);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
@@ -228,7 +225,7 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdate) {
 }
 
 TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
-  unsigned short cksum;
+  uint16_t cksum;
   Packet packet = get_ipv4_pkt(&cksum);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
@@ -237,7 +234,7 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
   ASSERT_EQ(cksum, ipv4_checksum.get_uint());
 
   IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
-  for(int i = 0; i < 100000; i++) {
+  for (int i = 0; i < 100000; i++) {
     ipv4_checksum.set(0);
     ASSERT_EQ((unsigned) 0, ipv4_checksum.get_uint());
 
@@ -248,8 +245,8 @@ TEST_F(ChecksumTest, IPv4ChecksumUpdateStress) {
 
 // actually more general than just TCP: CalcBasedChecksum test
 TEST_F(ChecksumTest, TCPChecksumVerify) {
-  unsigned short cksum;
-  unsigned short tcp_len;
+  uint16_t cksum;
+  uint16_t tcp_len;
   Packet packet = get_tcp_pkt(&cksum, &tcp_len);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
@@ -264,8 +261,8 @@ TEST_F(ChecksumTest, TCPChecksumVerify) {
 }
 
 TEST_F(ChecksumTest, TCPChecksumUpdate) {
-  unsigned short cksum;
-  unsigned short tcp_len;
+  uint16_t cksum;
+  uint16_t tcp_len;
   Packet packet = get_tcp_pkt(&cksum, &tcp_len);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);

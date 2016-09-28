@@ -21,6 +21,8 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <vector>
+#include <string>
 
 #include <cassert>
 

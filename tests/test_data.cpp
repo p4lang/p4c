@@ -20,9 +20,9 @@
 
 #include <gtest/gtest.h>
 
-#include <string>
-
 #include <bm/bm_sim/data.h>
+
+#include <string>
 
 using bm::Data;
 
@@ -32,8 +32,8 @@ TEST(Data, ConstructorFromUInt) {
 }
 
 TEST(Data, ConstructorFromBytes) {
-  unsigned char bytes[2] = {0x0a, 0xba};
-  const Data d((char *) bytes, sizeof(bytes));
+  unsigned char bytes[] = {0x0a, 0xba};
+  const Data d(reinterpret_cast<char *>(bytes), sizeof(bytes));
   ASSERT_EQ((unsigned) 0xaba, d.get_uint());
 }
 

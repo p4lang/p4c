@@ -20,9 +20,11 @@
 
 #include <gtest/gtest.h>
 
-#include <thread>
-
 #include <bm/bm_sim/queue.h>
+
+#include <thread>
+#include <random>
+#include <tuple>
 
 using std::unique_ptr;
 
@@ -35,28 +37,30 @@ using ::testing::Values;
 using ::testing::Combine;
 
 class QueueTest : public TestWithParam< std::tuple<size_t, int> > {
-protected:
+ protected:
   int iterations;
   size_t queue_size;
 
   unique_ptr<Queue<int> > queue;
-  unique_ptr<int []> values;
+  unique_ptr<int[]> values;
 
   virtual void SetUp() {
     queue_size = std::get<0>(GetParam());
     iterations = std::get<1>(GetParam());
 
     queue = unique_ptr<Queue<int> >(new Queue<int>(queue_size));
-    values = unique_ptr<int []>(new int[iterations]);
+    values = unique_ptr<int[]>(new int[iterations]);
 
-    for(int i = 0; i < iterations; i++) {
-      values[i] = rand();
+    std::mt19937 generator;
+    std::uniform_int_distribution<int> distrib;
+    for (int i = 0; i < iterations; i++) {
+      values[i] = distrib(generator);
     }
   }
 
-public:
+ public:
   void produce() {
-    for(int i = 0; i < iterations; i++) {
+    for (int i = 0; i < iterations; i++) {
       queue->push_front(values[i]);
     }
   }
@@ -70,11 +74,10 @@ static void producer(QueueTest *qt) {
 
 
 TEST_P(QueueTest, ProducerConsumer) {
-
   thread producer_thread(producer, this);
 
   int value;
-  for(int i = 0; i < iterations; i++) {
+  for (int i = 0; i < iterations; i++) {
     queue->pop_back(&value);
     ASSERT_EQ(values[i], value);
   }
@@ -86,4 +89,4 @@ TEST_P(QueueTest, ProducerConsumer) {
 INSTANTIATE_TEST_CASE_P(TestParameters,
                         QueueTest,
                         Combine(Values(16, 1024, 20000),
-				Values(1000, 200000)));
+                                Values(1000, 200000)));

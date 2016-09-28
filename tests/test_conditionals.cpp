@@ -22,6 +22,8 @@
 
 #include <bm/bm_sim/conditionals.h>
 
+#include <string>
+
 // This is where expressions are tested (essentially the same thing as
 // conditionals)
 
@@ -34,8 +36,7 @@ TEST(ExprOpcodesMap, GetOpcode) {
 
 // Google Test fixture for conditionals tests
 class ConditionalsTest : public ::testing::Test {
-protected:
-
+ protected:
   PHVFactory phv_factory;
   std::unique_ptr<PHV> phv;
 
@@ -62,12 +63,12 @@ protected:
 
 TEST_F(ConditionalsTest, EqData) {
   Conditional c("ctest", 0);
-  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader1, 3);  // f16
   c.push_back_load_const(Data(0xaba));
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0xaba);
 
   ASSERT_TRUE(c.eval(*phv));
@@ -79,12 +80,12 @@ TEST_F(ConditionalsTest, EqData) {
 
 TEST_F(ConditionalsTest, NeqData) {
   Conditional c("ctest", 0);
-  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader1, 3);  // f16
   c.push_back_load_const(Data(0xaba));
   c.push_back_op(ExprOpcode::NEQ_DATA);
   c.build();
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0xaba);
 
   ASSERT_FALSE(c.eval(*phv));
@@ -96,12 +97,12 @@ TEST_F(ConditionalsTest, NeqData) {
 
 TEST_F(ConditionalsTest, GtData) {
   Conditional c("ctest", 0);
-  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader1, 3);  // f16
   c.push_back_load_const(Data(0x1001));
   c.push_back_op(ExprOpcode::GT_DATA);
   c.build();
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0x1002);
 
   ASSERT_TRUE(c.eval(*phv));
@@ -113,12 +114,12 @@ TEST_F(ConditionalsTest, GtData) {
 
 TEST_F(ConditionalsTest, LtData) {
   Conditional c("ctest", 0);
-  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader1, 3);  // f16
   c.push_back_load_const(Data(0x1001));
   c.push_back_op(ExprOpcode::LT_DATA);
   c.build();
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0x1002);
 
   ASSERT_FALSE(c.eval(*phv));
@@ -130,12 +131,12 @@ TEST_F(ConditionalsTest, LtData) {
 
 TEST_F(ConditionalsTest, GetData) {
   Conditional c("ctest", 0);
-  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader1, 3);  // f16
   c.push_back_load_const(Data(0x1001));
   c.push_back_op(ExprOpcode::GET_DATA);
   c.build();
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0x1002);
 
   ASSERT_TRUE(c.eval(*phv));
@@ -151,12 +152,12 @@ TEST_F(ConditionalsTest, GetData) {
 
 TEST_F(ConditionalsTest, LetData) {
   Conditional c("ctest", 0);
-  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader1, 3);  // f16
   c.push_back_load_const(Data(0x1001));
   c.push_back_op(ExprOpcode::LET_DATA);
   c.build();
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0x1002);
 
   ASSERT_FALSE(c.eval(*phv));
@@ -172,15 +173,15 @@ TEST_F(ConditionalsTest, LetData) {
 
 TEST_F(ConditionalsTest, Add) {
   Conditional c("ctest", 0);
-  c.push_back_load_field(testHeader1, 3); // f16
-  c.push_back_load_field(testHeader2, 1); // f48
+  c.push_back_load_field(testHeader1, 3);  // f16
+  c.push_back_load_field(testHeader2, 1);  // f48
   c.push_back_op(ExprOpcode::ADD);
   c.push_back_load_const(Data(0x33));
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  Field &f1 = phv->get_field(testHeader1, 3); // f16
-  Field &f2 = phv->get_field(testHeader2, 1); // f48
+  Field &f1 = phv->get_field(testHeader1, 3);  // f16
+  Field &f2 = phv->get_field(testHeader2, 1);  // f48
   f1.set(0x11);
   f2.set(0x22);
 
@@ -414,8 +415,8 @@ TEST_F(ConditionalsTest, Add2) {
   const unsigned int f2_v = 2;
   const unsigned int expected_v = (f1_v + f2_v) * nb_sub_adds;
   for (size_t i = 0; i < nb_sub_adds; i++) {
-    c.push_back_load_field(testHeader1, 3); // f16
-    c.push_back_load_field(testHeader2, 1); // f48
+    c.push_back_load_field(testHeader1, 3);  // f16
+    c.push_back_load_field(testHeader2, 1);  // f48
     c.push_back_op(ExprOpcode::ADD);
   }
   for (size_t i = 0; i < nb_sub_adds - 1; i++) {
@@ -425,8 +426,8 @@ TEST_F(ConditionalsTest, Add2) {
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  Field &f1 = phv->get_field(testHeader1, 3); // f16
-  Field &f2 = phv->get_field(testHeader2, 1); // f48
+  Field &f1 = phv->get_field(testHeader1, 3);  // f16
+  Field &f2 = phv->get_field(testHeader2, 1);  // f48
   f1.set(f1_v);
   f2.set(f2_v);
 
@@ -453,16 +454,16 @@ TEST_F(ConditionalsTest, TernaryOp) {
   ternary_e2.push_back_load_const(Data(value_ternary_2));
   // ternary_e2.build();
 
-  c.push_back_load_field(testHeader1, 3); // f16
-  c.push_back_load_field(testHeader2, 3); // f16
+  c.push_back_load_field(testHeader1, 3);  // f16
+  c.push_back_load_field(testHeader2, 3);  // f16
   c.push_back_load_const(Data(value_ternary_test));
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.push_back_ternary_op(ternary_e1, ternary_e2);
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  Field &testHeader1_f16 = phv->get_field(testHeader1, 3); // f16
-  Field &testHeader2_f16 = phv->get_field(testHeader2, 3); // f16
+  Field &testHeader1_f16 = phv->get_field(testHeader1, 3);  // f16
+  Field &testHeader2_f16 = phv->get_field(testHeader2, 3);  // f16
   testHeader1_f16.set(value_ternary_1);
   testHeader2_f16.set(value_ternary_test);
 
@@ -487,8 +488,8 @@ TEST_F(ConditionalsTest, TernaryOp2) {
   Expression ternary_e2;
   ternary_e2.push_back_load_const(Data(0));
 
-  c.push_back_load_field(testHeader1, 3); // f16
-  c.push_back_load_field(testHeader2, 3); // f16
+  c.push_back_load_field(testHeader1, 3);  // f16
+  c.push_back_load_field(testHeader2, 3);  // f16
   c.push_back_op(ExprOpcode::LT_DATA);
   c.push_back_ternary_op(ternary_e1, ternary_e2);
   c.push_back_load_const(Data(0x1));
@@ -499,8 +500,8 @@ TEST_F(ConditionalsTest, TernaryOp2) {
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  Field &testHeader1_f16 = phv->get_field(testHeader1, 3); // f16
-  Field &testHeader2_f16 = phv->get_field(testHeader2, 3); // f16
+  Field &testHeader1_f16 = phv->get_field(testHeader1, 3);  // f16
+  Field &testHeader2_f16 = phv->get_field(testHeader2, 3);  // f16
   testHeader1_f16.set(3);
   testHeader2_f16.set(3);
 
@@ -557,11 +558,13 @@ TEST_F(ConditionalsTest, B2D) {
 
 TEST_F(ConditionalsTest, Stress) {
   Conditional c("ctest", 0);
-  // (valid(testHeader1) && (false || (testHeader1.f16 + 1 == 2))) && !valid(testHeader2)
+  // (valid(testHeader1)
+  // && (false || (testHeader1.f16 + 1 == 2)))
+  // && !valid(testHeader2)
   c.push_back_load_header(testHeader1);
   c.push_back_op(ExprOpcode::VALID_HEADER);
   c.push_back_load_bool(false);
-  c.push_back_load_field(testHeader1, 3); // f16
+  c.push_back_load_field(testHeader1, 3);  // f16
   c.push_back_load_const(Data(1));
   c.push_back_op(ExprOpcode::ADD);
   c.push_back_load_const(Data(2));
@@ -577,17 +580,16 @@ TEST_F(ConditionalsTest, Stress) {
   Header &hdr1 = phv->get_header(testHeader1);
   hdr1.mark_valid();
 
-  Field &f1 = phv->get_field(testHeader1, 3); // f16
+  Field &f1 = phv->get_field(testHeader1, 3);  // f16
 
   Header &hdr2 = phv->get_header(testHeader2);
   hdr2.mark_invalid();
 
-  for(int i = 0; i < 100000; i++) {
-    if(i % 2 == 0) {
+  for (int i = 0; i < 100000; i++) {
+    if (i % 2 == 0) {
       f1.set(1);
       ASSERT_TRUE(c.eval(*phv));
-    }
-    else {
+    } else {
       f1.set(0);
       ASSERT_FALSE(c.eval(*phv));
     }

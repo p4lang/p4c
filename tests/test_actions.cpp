@@ -20,14 +20,14 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_sim/actions.h>
+
 #include <memory>
 #include <chrono>
 #include <thread>
 #include <functional>
 
 #include <cassert>
-
-#include <bm/bm_sim/actions.h>
 
 using namespace bm;
 
@@ -68,10 +68,10 @@ REGISTER_PRIMITIVE(RemoveHeader);
 
 class CopyHeader : public ActionPrimitive<Header &, const Header &> {
   void operator ()(Header &dst, const Header &src) {
-    if(!src.is_valid()) return;
+    if (!src.is_valid()) return;
     dst.mark_valid();
     assert(dst.get_header_type_id() == src.get_header_type_id());
-    for(unsigned int i = 0; i < dst.size(); i++) {
+    for (unsigned int i = 0; i < dst.size(); i++) {
       dst[i].set(src[i]);
     }
   }
@@ -101,9 +101,9 @@ REGISTER_PRIMITIVE(Pop);
 /* implementation of old primitive modify_field_with_hash_based_offset */
 class ModifyFieldWithHashBasedOffset
   : public ActionPrimitive<Field &, const Data &,
-			   const NamedCalculation &, const Data &> {
+                           const NamedCalculation &, const Data &> {
   void operator ()(Field &dst, const Data &base,
-		   const NamedCalculation &hash, const Data &size) {
+                   const NamedCalculation &hash, const Data &size) {
     uint64_t v =
       (hash.output(get_packet()) + base.get<uint64_t>()) % size.get<uint64_t>();
     dst.set(v);
@@ -112,7 +112,8 @@ class ModifyFieldWithHashBasedOffset
 
 REGISTER_PRIMITIVE(ModifyFieldWithHashBasedOffset);
 
-class ExecuteMeter : public ActionPrimitive<Field &, MeterArray &, const Data &> {
+class ExecuteMeter
+    : public ActionPrimitive<Field &, MeterArray &, const Data &> {
   void operator ()(Field &dst, MeterArray &meter_array, const Data &idx) {
     dst.set(meter_array.execute_meter(get_packet(), idx.get_uint()));
   }
@@ -167,8 +168,8 @@ class ActionsTest : public ::testing::Test {
     phv_factory.push_back_header("testS0", testHeaderS0, testHeaderType);
     phv_factory.push_back_header("testS1", testHeaderS1, testHeaderType);
     phv_factory.push_back_header_stack("test_stack", testHeaderStack,
-				       testHeaderType,
-				       {testHeaderS0, testHeaderS1});
+                                       testHeaderType,
+                                       {testHeaderS0, testHeaderS1});
   }
 
   virtual void SetUp() {
@@ -186,7 +187,7 @@ class ActionsTest : public ::testing::Test {
 //   Data value(0xaba);
 //   SetField primitive;
 //   testActionFn.push_back_primitive(&primitive);
-//   testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+//   testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
 //   testActionFn.parameter_push_back_const(value);
 
 //   ASSERT_EQ(2u, testActionFn.num_params());
@@ -196,10 +197,10 @@ TEST_F(ActionsTest, SetFromConst) {
   Data value(0xaba);
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
   testActionFn.parameter_push_back_const(value);
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0);
 
   ASSERT_EQ((unsigned) 0, f.get_uint());
@@ -213,11 +214,11 @@ TEST_F(ActionsTest, SetFromActionData) {
   Data value(0xaba);
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
   testActionFn.parameter_push_back_action_data(0);
   testActionFnEntry.push_back_action_data(value);
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0);
 
   ASSERT_EQ((unsigned) 0, f.get_uint());
@@ -230,13 +231,13 @@ TEST_F(ActionsTest, SetFromActionData) {
 TEST_F(ActionsTest, SetFromField) {
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
-  testActionFn.parameter_push_back_field(testHeader1, 0); // f32
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
+  testActionFn.parameter_push_back_field(testHeader1, 0);  // f32
 
-  Field &src = phv->get_field(testHeader1, 0); // 32
+  Field &src = phv->get_field(testHeader1, 0);  // 32
   src.set(0xaba);
 
-  Field &dst = phv->get_field(testHeader1, 3); // f16
+  Field &dst = phv->get_field(testHeader1, 3);  // f16
   dst.set(0);
 
   ASSERT_EQ((unsigned) 0, dst.get_uint());
@@ -254,10 +255,10 @@ TEST_F(ActionsTest, SetFromRegisterRef) {
   const unsigned int register_idx = 68;
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
   testActionFn.parameter_push_back_register_ref(&register_array, register_idx);
 
-  Field &dst = phv->get_field(testHeader1, 3); // f16
+  Field &dst = phv->get_field(testHeader1, 3);  // f16
   dst.set(0);
 
   register_array.at(register_idx).set(value_i);
@@ -276,24 +277,24 @@ TEST_F(ActionsTest, SetFromRegisterGen) {
 
   // the register index is an expression
   std::unique_ptr<ArithExpression> expr_idx(new ArithExpression());
-  expr_idx->push_back_load_field(testHeader1, 0); // f32
+  expr_idx->push_back_load_field(testHeader1, 0);  // f32
   expr_idx->push_back_load_const(Data(1));
   expr_idx->push_back_op(ExprOpcode::ADD);
   expr_idx->build();
 
   const unsigned int register_idx = 68;
-  Field &f_idx = phv->get_field(testHeader1, 0); // f32
+  Field &f_idx = phv->get_field(testHeader1, 0);  // f32
   f_idx.set(register_idx - 1);
 
   unsigned int value_i(0xaba);
 
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
   testActionFn.parameter_push_back_register_gen(&register_array,
                                                 std::move(expr_idx));
 
-  Field &dst = phv->get_field(testHeader1, 3); // f16
+  Field &dst = phv->get_field(testHeader1, 3);  // f16
   dst.set(0);
 
   register_array.at(register_idx).set(value_i);
@@ -307,20 +308,20 @@ TEST_F(ActionsTest, SetFromRegisterGen) {
 
 TEST_F(ActionsTest, SetFromExpression) {
   std::unique_ptr<ArithExpression> expr(new ArithExpression());
-  expr->push_back_load_field(testHeader1, 0); // f32
+  expr->push_back_load_field(testHeader1, 0);  // f32
   expr->push_back_load_const(Data(1));
   expr->push_back_op(ExprOpcode::ADD);
   expr->build();
 
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
   testActionFn.parameter_push_back_expression(std::move(expr));
 
   Field &f32 = phv->get_field(testHeader1, 0);
   f32.set(0xaba);
 
-  Field &dst = phv->get_field(testHeader1, 3); // f16
+  Field &dst = phv->get_field(testHeader1, 3);  // f16
   dst.set(0);
 
   ASSERT_EQ((unsigned) 0, dst.get_uint());
@@ -334,12 +335,12 @@ TEST_F(ActionsTest, SetFromConstStress) {
   Data value(0xaba);
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
   testActionFn.parameter_push_back_const(value);
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
 
-  for(int i = 0; i < 100000; i++) {
+  for (int i = 0; i < 100000; i++) {
     f.set(0);
     ASSERT_EQ((unsigned) 0, f.get_uint());
     testActionFnEntry(pkt.get());
@@ -352,10 +353,10 @@ TEST_F(ActionsTest, Set) {
   Data value(value_i);
   Set primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
   testActionFn.parameter_push_back_const(value);
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
 
   f.set(0);
   ASSERT_EQ(0u, f.get_uint());
@@ -386,13 +387,13 @@ TEST_F(ActionsTest, SetRegisterGen) {
 
   // the register index is an expression
   std::unique_ptr<ArithExpression> expr_idx(new ArithExpression());
-  expr_idx->push_back_load_field(testHeader1, 0); // f32
+  expr_idx->push_back_load_field(testHeader1, 0);  // f32
   expr_idx->push_back_load_const(Data(1));
   expr_idx->push_back_op(ExprOpcode::ADD);
   expr_idx->build();
 
   const unsigned int register_idx = 68;
-  Field &f_idx = phv->get_field(testHeader1, 0); // f32
+  Field &f_idx = phv->get_field(testHeader1, 0);  // f32
   f_idx.set(register_idx - 1);
 
   unsigned int value_i(0xaba);
@@ -415,11 +416,11 @@ TEST_F(ActionsTest, CopyHeader) {
   Header &hdr2 = phv->get_header(testHeader2);
   ASSERT_FALSE(hdr2.is_valid());
 
-  for(unsigned int i = 0; i < hdr1.size(); i++) {
+  for (unsigned int i = 0; i < hdr1.size(); i++) {
     hdr1[i].set(0);
   }
 
-  for(unsigned int i = 0; i < hdr2.size(); i++) {
+  for (unsigned int i = 0; i < hdr2.size(); i++) {
     hdr2[i].set(i + 1);
   }
 
@@ -431,14 +432,14 @@ TEST_F(ActionsTest, CopyHeader) {
   testActionFnEntry(pkt.get());
   ASSERT_FALSE(hdr1.is_valid());
   ASSERT_FALSE(hdr2.is_valid());
-  for(unsigned int i = 0; i < hdr2.size(); i++) {
+  for (unsigned int i = 0; i < hdr2.size(); i++) {
     ASSERT_EQ(0u, hdr1[i].get_uint());
   }
 
   hdr2.mark_valid();
   testActionFnEntry(pkt.get());
   ASSERT_TRUE(hdr1.is_valid());
-  for(unsigned int i = 0; i < hdr1.size(); i++) {
+  for (unsigned int i = 0; i < hdr1.size(); i++) {
     if (hdr1[i].is_hidden()) break;
     ASSERT_EQ(i + 1, hdr1[i].get_uint());
   }
@@ -448,7 +449,7 @@ TEST_F(ActionsTest, CRSet) {
   CRSet primitive;
   testActionFn.push_back_primitive(&primitive);
 
-  Field &f = phv->get_field(testHeader1, 3); // f16
+  Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0);
 
   ASSERT_EQ((unsigned) 0, f.get_uint());
@@ -473,7 +474,7 @@ TEST_F(ActionsTest, Pop) {
 
 TEST_F(ActionsTest, ModifyFieldWithHashBasedOffset) {
   uint64_t base = 100;
-  uint64_t size = 65536; // 16 bits
+  uint64_t size = 65536;  // 16 bits
 
   BufBuilder builder;
   builder.push_back_field(testHeader1, 0);
@@ -482,7 +483,7 @@ TEST_F(ActionsTest, ModifyFieldWithHashBasedOffset) {
 
   ModifyFieldWithHashBasedOffset primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader2, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader2, 3);  // f16
   testActionFn.parameter_push_back_const(Data(base));
   testActionFn.parameter_push_back_calculation(&calculation);
   testActionFn.parameter_push_back_const(Data(size));
@@ -500,7 +501,8 @@ TEST_F(ActionsTest, ExecuteMeter) {
   const color_t GREEN = 0;
   const color_t RED = 1;
 
-  MeterArray meter_array("meter_test", 0, MeterArray::MeterType::PACKETS, 1, 64);
+  MeterArray meter_array(
+      "meter_test", 0, MeterArray::MeterType::PACKETS, 1, 64);
   // 10 packets per second, burst size of 5
   MeterArray::rate_config_t rate = {0.00001, 5};
   rc = meter_array.set_rates({rate});
@@ -508,20 +510,20 @@ TEST_F(ActionsTest, ExecuteMeter) {
 
   ExecuteMeter primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 0); // f32
+  testActionFn.parameter_push_back_field(testHeader1, 0);  // f32
   testActionFn.parameter_push_back_meter_array(&meter_array);
-  testActionFn.parameter_push_back_const(Data(16u)); // idx
+  testActionFn.parameter_push_back_const(Data(16u));  // idx
 
   const Field &fdst = phv->get_field(testHeader1, 0);
 
   // send 5 packets very quickly, it is less than the burst size, so all packets
   // should be marked GREEN
-  for(int i = 0; i < 5; i++) {
+  for (int i = 0; i < 5; i++) {
       testActionFnEntry(pkt.get());
       ASSERT_EQ(GREEN, fdst.get_uint());
   }
   // after the burst size, packets should be marked RED
-  for(int i = 0; i < 5; i++) {
+  for (int i = 0; i < 5; i++) {
       testActionFnEntry(pkt.get());
       ASSERT_EQ(RED, fdst.get_uint());
   }
@@ -546,18 +548,18 @@ TEST_F(ActionsTest, WritePacketRegister) {
 TEST_F(ActionsTest, TwoPrimitives) {
   SetField primitive;
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader1, 3); // f16
-  testActionFn.parameter_push_back_field(testHeader1, 0); // f32
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
+  testActionFn.parameter_push_back_field(testHeader1, 0);  // f32
   testActionFn.push_back_primitive(&primitive);
-  testActionFn.parameter_push_back_field(testHeader2, 3); // f16
-  testActionFn.parameter_push_back_field(testHeader2, 0); // f32
+  testActionFn.parameter_push_back_field(testHeader2, 3);  // f16
+  testActionFn.parameter_push_back_field(testHeader2, 0);  // f32
 
-  Field &src1 = phv->get_field(testHeader1, 0); // 32
-  Field &src2 = phv->get_field(testHeader2, 0); // 32
+  Field &src1 = phv->get_field(testHeader1, 0);  // 32
+  Field &src2 = phv->get_field(testHeader2, 0);  // 32
   src1.set(0xaba); src2.set(0xaba);
 
-  Field &dst1 = phv->get_field(testHeader1, 3); // f16
-  Field &dst2 = phv->get_field(testHeader2, 3); // f16
+  Field &dst1 = phv->get_field(testHeader1, 3);  // f16
+  Field &dst2 = phv->get_field(testHeader2, 3);  // f16
   dst1.set(0); dst2.set(0);
 
   ASSERT_EQ((unsigned) 0, dst1.get_uint());
@@ -569,13 +571,13 @@ TEST_F(ActionsTest, TwoPrimitives) {
   ASSERT_EQ((unsigned) 0xaba, dst2.get_uint());
 }
 
-extern bool WITH_VALGRIND; // defined in main.cpp
+extern bool WITH_VALGRIND;  // defined in main.cpp
 
 // added this test after I found a race condition when the same action primitive
 // is executed by 2 different threads
 TEST_F(ActionsTest, ConcurrentPrimitiveExecution) {
   uint64_t base = 100;
-  uint64_t size = 65536; // 16 bits
+  uint64_t size = 65536;  // 16 bits
 
   BufBuilder builder;
   builder.push_back_field(testHeader1, 0);
@@ -586,7 +588,7 @@ TEST_F(ActionsTest, ConcurrentPrimitiveExecution) {
       "ModifyFieldWithHashBasedOffset");
 
   testActionFn.push_back_primitive(primitive);
-  testActionFn.parameter_push_back_field(testHeader2, 3); // f16
+  testActionFn.parameter_push_back_field(testHeader2, 3);  // f16
   testActionFn.parameter_push_back_const(Data(base));
   testActionFn.parameter_push_back_calculation(&calculation);
   testActionFn.parameter_push_back_const(Data(size));
