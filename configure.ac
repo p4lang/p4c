@@ -111,7 +111,7 @@ cstdio string sys/stat.h sys/types.h ctime tuple unistd.h unordered_map \
 utility vector], [], [AC_MSG_ERROR([Missing header file])])
 
 # Check for pthread, libjudy, libgmp, libnanomsg, libpcap
-AX_PTHREAD([,AC_MSG_ERROR([Missing pthread library])])
+AX_PTHREAD([], [AC_MSG_ERROR([Missing pthread library])])
 AC_CHECK_LIB([Judy], [Judy1Next], [], [AC_MSG_ERROR([Missing libJudy])])
 AC_CHECK_LIB([gmp], [__gmpz_init], [], [AC_MSG_ERROR([Missing libgmp])])
 AC_CHECK_LIB([nanomsg], [nn_errno], [], [AC_MSG_ERROR([Missing libnanomsg])])
@@ -161,8 +161,8 @@ AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS \
                           -isystem\$(top_srcdir)/third_party/jsoncpp/include \
                           -isystem\$(top_srcdir)/third_party/spdlog"])
 
-AC_SUBST([AM_CXXFLAGS], ["-Wall -Werror -Wextra"])
-AC_SUBST([AM_CFLAGS], [""])
+AC_SUBST([AM_CXXFLAGS], ["$PTHREAD_CFLAGS -Wall -Werror -Wextra"])
+AC_SUBST([AM_CFLAGS], ["$PTHREAD_CFLAGS"])
 
 # Checks for typedefs, structures, and compiler characteristics.
 # not supported by autoconf 2.68, add to m4/ ?
