@@ -34,6 +34,9 @@ noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
 TESTS =                        # Tests to execute
 XFAIL_TESTS =                  # Tests that are supposed to fail
+IFAIL_TESTS =                  # intermittent failures
+export XFAIL_TESTS
+export IFAIL_TESTS
 
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR

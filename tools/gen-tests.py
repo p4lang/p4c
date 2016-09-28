@@ -70,8 +70,18 @@ def generate(exe, srcdir, prefix, command, test_args, test_names):
         print(test, ": ", test_names[i])
         print("\t@mkdir -p", os.path.dirname(test))
         print("\t@echo \"cd $$PWD\" >$@")
+        if 'IFAIL_TESTS' in os.environ and os.environ['IFAIL_TESTS'].find(test) >= 0:
+            print("\t@echo 'if' >$@")
+            ifail = True
+        else:
+            ifail = False
         print("\t@echo '"+command, srcdir, " ".join(test_args),
               srcdir+"/"+test_names[i]+"' >>$@")
+        if ifail:
+            print("\t@echo 'then echo \"intermittent test PASSED\"; ",
+                  "else echo \"intermittent test FAILED\"; fi' >>$@")
+            if 'XFAIL_TESTS' in os.environ and os.environ['XFAIL_TESTS'].find(test) >= 0:
+                print("\t@echo 'exit 1' >> $@")
         print("\t@chmod +x $@")
         print
         
