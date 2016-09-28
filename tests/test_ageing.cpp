@@ -175,7 +175,6 @@ TEST_F(AgeingTest, NoDuplicate) {
   std::string key_("\x0a\xba");
   std::string key("0x0aba");
   entry_handle_t handle_1;
-  entry_handle_t lookup_handle;
   unsigned int sweep_int = 200u;
   init_monitor(sweep_int);
   auto tp1 = clock::now();

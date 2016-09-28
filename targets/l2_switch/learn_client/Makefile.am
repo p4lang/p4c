@@ -4,4 +4,3 @@ AM_CPPFLAGS += \
 noinst_PROGRAMS = learn_client
 learn_client_SOURCES = learn_client.cpp
 learn_client_LDADD = $(top_builddir)/src/bm_apps/libbmapps.la
-learn_client_LDFLAGS = -pthread

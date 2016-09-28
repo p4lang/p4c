@@ -73,6 +73,7 @@ class PHVSourceTest : public PHVSourceIface {
   }
 
   size_t phvs_in_use_(size_t cxt) override {
+    (void)cxt;
     return count;
   }
 

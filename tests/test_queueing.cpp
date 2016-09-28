@@ -22,6 +22,7 @@
 
 #include <thread>
 #include <memory>
+#include <array>
 #include <vector>
 #include <algorithm>  // for std::count, std::max
 

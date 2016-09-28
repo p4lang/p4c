@@ -326,7 +326,7 @@ TEST(P4Objects, HeaderStackArith) {
   ASSERT_NO_THROW(h0_f1.get_int());
 
   if (!WITH_VALGRIND) {
-    ASSERT_DEATH(h0_f2.get_int(), "Assertion .* failed");
-    ASSERT_DEATH(h1_f2.get_int(), "Assertion .* failed");
+    ASSERT_DEATH(h0_f2.get_int(), "Assertion .*failed");
+    ASSERT_DEATH(h1_f2.get_int(), "Assertion .*failed");
   }
 }

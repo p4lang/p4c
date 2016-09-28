@@ -265,6 +265,9 @@ TEST(CalculationsMap, Test) {
   ASSERT_NE(nullptr, CalculationsMap::get_instance()->get_copy("Hash"));
 
   ASSERT_EQ(nullptr, CalculationsMap::get_instance()->get_copy("Hash_Neg"));
+
+  // avoids warning for REGISTER_HASH in anonymous namespace
+  ASSERT_EQ(true, Hash_create_);
 }
 
 // Could use a templatized test for this, but is it worth it?
@@ -339,8 +342,6 @@ TEST(HashTest, Crc32) {
 }
 
 TEST(HashTest, Crc16Custom) {
-  typedef CustomCrcMgr<uint16_t>::crc_config_t crc16_config_t;
-
   auto ptr = CalculationsMap::get_instance()->get_copy("crc16_custom");
   ASSERT_NE(nullptr, ptr);
 
@@ -384,8 +385,6 @@ TEST(HashTest, Crc16Custom) {
 }
 
 TEST(HashTest, Crc32Custom) {
-  typedef CustomCrcMgr<uint32_t>::crc_config_t crc32_config_t;
-
   auto ptr = CalculationsMap::get_instance()->get_copy("crc32_custom");
   ASSERT_NE(nullptr, ptr);
 

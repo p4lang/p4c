@@ -13,6 +13,5 @@ nn.h
 libbmapps_la_LIBADD = \
 $(top_builddir)/thrift_src/libruntimestubs.la \
 -lnanomsg $(THRIFT_LIB)
-libbmapps_la_LDFLAGS = -pthread
 
 noinst_LTLIBRARIES = libbmapps.la

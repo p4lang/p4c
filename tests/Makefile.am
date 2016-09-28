@@ -12,7 +12,6 @@ libtestutils_la_LIBADD = $(top_builddir)/src/bm_sim/libbmsim.la
 AM_CPPFLAGS += \
 -isystem $(top_srcdir)/third_party/gtest/include \
 -DTESTDATADIR=\"$(srcdir)/testdata\"
-AM_CXXFLAGS = -pthread
 LDADD = \
 $(top_builddir)/third_party/gtest/libgtest.la \
 $(top_builddir)/src/bm_runtime/libbmruntime.la \
@@ -23,7 +22,7 @@ $(top_builddir)/thrift_src/libruntimestubs.la \
 $(THRIFT_LIB) \
 $(top_builddir)/third_party/jsoncpp/libjson.la \
 $(builddir)/libtestutils.la \
--lboost_system -lboost_thread -lboost_filesystem -lboost_program_options
+-lboost_system -lboost_filesystem -lboost_program_options
 
 # Define unit tests
 common_source = main.cpp bmi_stubs.c primitives.cpp

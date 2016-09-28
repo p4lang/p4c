@@ -39,8 +39,7 @@ namespace fs = boost::filesystem;
 // this is non-portable and will only work on Unix systems
 class CLIWrapperImp {
  public:
-  CLIWrapperImp(int thrift_port, bool silent) :
-      silent(silent) {
+  CLIWrapperImp(int thrift_port, bool silent) {
     char cmd[256];
     sprintf(cmd, "%s --thrift-port %d",
             "PYTHONPATH=$PYTHONPATH:" THRIFT_BINDINGS_DIR " " CLI_PATH,
@@ -62,7 +61,6 @@ class CLIWrapperImp {
 
  private:
   FILE *CLI_f{nullptr};
-  bool silent{false};
 };
 
 CLIWrapper::CLIWrapper(int thrift_port, bool silent) {

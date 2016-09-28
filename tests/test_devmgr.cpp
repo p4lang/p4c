@@ -39,7 +39,7 @@ class TestDevMgrImp : public DevMgrIface {
 public:
   TestDevMgrImp() {
     // 0 is device_id
-    p_monitor = std::move(PortMonitorIface::make_active(0));
+    p_monitor = PortMonitorIface::make_active(0);
   }
 
   // Not part of public interface, just for testing
@@ -107,7 +107,11 @@ private:
     return ReturnCode::SUCCESS;
   }
 
-  void transmit_fn_(int port_num, const char *buffer, int len) override {}
+  void transmit_fn_(int port_num, const char *buffer, int len) override {
+    (void)port_num;
+    (void)buffer;
+    (void)len;
+  }
 
   void start_() override {}
 
@@ -120,6 +124,7 @@ public:
 
   void port_status(DevMgrIface::port_t port_num,
                    const DevMgrIface::PortStatus status) {
+    (void)port_num;
     std::lock_guard<std::mutex> lock(cnt_mutex);
     cb_counts[status]++;
   }
@@ -162,7 +167,7 @@ TEST_F(DevMgrTest, cb_test) {
 
   register_callback();
 
-  for (int i = 0; i < NPORTS; i++) {
+  for (unsigned int i = 0; i < NPORTS; i++) {
     g_mgr->port_add("dummyport", i, nullptr, nullptr);
   }
   std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -170,21 +175,21 @@ TEST_F(DevMgrTest, cb_test) {
       << "Port add callbacks incorrect" << std::endl;
   reset_counts();
 
-  for (int i = 0; i < NPORTS; i++) {
+  for (unsigned int i = 0; i < NPORTS; i++) {
     g_mgr->set_port_status(i, DevMgrIface::PortStatus::PORT_DOWN);
   }
   std::this_thread::sleep_for(std::chrono::seconds(2));
   ASSERT_EQ(NPORTS, get_count(DevMgrIface::PortStatus::PORT_DOWN))
       << "Port down callbacks incorrect" << std::endl;
 
-  for (int i = 0; i < NPORTS; i++) {
+  for (unsigned int i = 0; i < NPORTS; i++) {
     g_mgr->set_port_status(i, DevMgrIface::PortStatus::PORT_UP);
   }
   std::this_thread::sleep_for(std::chrono::seconds(2));
   ASSERT_EQ(NPORTS, get_count(DevMgrIface::PortStatus::PORT_UP))
       << "Port up callbacks incorrect" << std::endl;
 
-  for (int i = 0; i < NPORTS; i++) {
+  for (unsigned int i = 0; i < NPORTS; i++) {
     g_mgr->port_remove(i);
   }
   std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -203,7 +208,7 @@ class PacketInReceiver {
 
   void receive(int port_num, const char *buffer, int len, void *cookie) {
     (void) cookie;
-    if(len > max_size) return;
+    if(static_cast<size_t>(len) > max_size) return;
     std::unique_lock<std::mutex> lock(mutex);
     while (status != Status::CAN_RECEIVE) {
       can_receive.wait(lock);
@@ -347,6 +352,7 @@ class PacketInDevMgrPortStatusTest : public PacketInDevMgrTest {
 
   void port_status(DevMgrIface::port_t port_num,
                    const DevMgrIface::PortStatus status) {
+    (void)port_num;
     std::lock_guard<std::mutex> lock(cnt_mutex);
     cb_counts[status]++;
   }
@@ -502,6 +508,7 @@ PortMonitorTest<PMActive>::make_monitor() {
 template<>
 bool
 PortMonitorTest<PMPassive>::port_is_up(port_t port) {
+  (void)port;
   assert(0);
   return false;
 }

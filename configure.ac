@@ -110,7 +110,8 @@ AC_CHECK_HEADERS([algorithm array cassert cmath queue \
 cstdio string sys/stat.h sys/types.h ctime tuple unistd.h unordered_map \
 utility vector], [], [AC_MSG_ERROR([Missing header file])])
 
-# Check for libjudy, libgmp, libnanomsg, libpcap
+# Check for pthread, libjudy, libgmp, libnanomsg, libpcap
+AX_PTHREAD([,AC_MSG_ERROR([Missing pthread library])])
 AC_CHECK_LIB([Judy], [Judy1Next], [], [AC_MSG_ERROR([Missing libJudy])])
 AC_CHECK_LIB([gmp], [__gmpz_init], [], [AC_MSG_ERROR([Missing libgmp])])
 AC_CHECK_LIB([nanomsg], [nn_errno], [], [AC_MSG_ERROR([Missing libnanomsg])])
@@ -145,6 +146,11 @@ AM_CONDITIONAL([WITH_PCAP_FIX], [test "$pcap_fix" = "yes"])
 # C++ libraries are harder (http://nerdland.net/2009/07/detecting-c-libraries-with-autotools/),
 # so use headers to check
 AC_CHECK_HEADER([boost/thread.hpp], [], [AC_MSG_ERROR([Boost threading headers not found])])
+# need to check at least for the libboost_thread since it is -mt.so
+AX_CXX_CHECK_LIB([boost_thread], [boost::thread], [],
+                 [AX_CXX_CHECK_LIB([boost_thread-mt], [boost::thread],
+                                   [LIBS="-lboost_thread-mt $LIBS"],
+                                   [AC_MSG_ERROR([Missing boost thread library])])])
 AC_CHECK_HEADER([boost/multiprecision/gmp.hpp], [], [AC_MSG_ERROR([Missing boost Multiprecision headers])])
 AC_CHECK_HEADER([boost/program_options.hpp], [], [AC_MSG_ERROR([Missing boost program options header])])
 AC_CHECK_HEADER([boost/functional/hash.hpp], [], [AC_MSG_ERROR([Missing boost functional hash header])])

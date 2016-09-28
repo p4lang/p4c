@@ -8,5 +8,4 @@ $(top_builddir)/src/bf_lpm_trie/libbflpmtrie.la \
 $(top_builddir)/thrift_src/libruntimestubs.la \
 $(top_builddir)/src/BMI/libbmi.la \
 $(top_builddir)/third_party/jsoncpp/libjson.la \
--lboost_system -lboost_thread $(THRIFT_LIB) -lboost_program_options
-l2_switch_LDFLAGS = -pthread
+-lboost_system $(THRIFT_LIB) -lboost_program_options

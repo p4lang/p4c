@@ -40,21 +40,6 @@ static const unsigned char raw_tcp_pkt[66] = {
   0x21, 0x9b                                      /* !. */
 };
 
-/* Frame (82 bytes) */
-static const unsigned char raw_udp_pkt[82] = {
-  0x8c, 0x04, 0xff, 0xac, 0x28, 0xa0, 0xa0, 0x88, /* ....(... */
-  0x69, 0x0c, 0xc3, 0x03, 0x08, 0x00, 0x45, 0x00, /* i.....E. */
-  0x00, 0x44, 0x3a, 0xf5, 0x40, 0x00, 0x40, 0x11, /* .D:.@.@. */
-  0x5f, 0x0f, 0x0a, 0x00, 0x00, 0x0f, 0x4b, 0x4b, /* _.....KK */
-  0x4b, 0x4b, 0x1f, 0x5c, 0x00, 0x35, 0x00, 0x30, /* KK.\.5.0 */
-  0xeb, 0x61, 0x85, 0xa6, 0x01, 0x00, 0x00, 0x01, /* .a...... */
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x61, /* .......a */
-  0x70, 0x69, 0x03, 0x6e, 0x65, 0x77, 0x0a, 0x6c, /* pi.new.l */
-  0x69, 0x76, 0x65, 0x73, 0x74, 0x72, 0x65, 0x61, /* ivestrea */
-  0x6d, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01, /* m.com... */
-  0x00, 0x01                                      /* .. */
-};
-
 // Google Test fixture for checksums tests
 class ChecksumTest : public ::testing::Test {
  protected:
@@ -126,7 +111,7 @@ class ChecksumTest : public ::testing::Test {
     BufBuilder tcp_cksum_engine_builder;
     tcp_cksum_engine_builder.push_back_field(ipv4Header, 10); // ipv4.srcAddr
     tcp_cksum_engine_builder.push_back_field(ipv4Header, 11); // ipv4.dstAddr
-    tcp_cksum_engine_builder.push_back_constant(ByteContainer({'\x00'}), 8);
+    tcp_cksum_engine_builder.push_back_constant(ByteContainer('\x00'), 8);
     tcp_cksum_engine_builder.push_back_field(ipv4Header, 8); // ipv4.protocol
     tcp_cksum_engine_builder.push_back_field(metaHeader, 0); // for tcpLength
     tcp_cksum_engine_builder.push_back_field(tcpHeader, 0); // tcp.srcPort
@@ -216,12 +201,12 @@ TEST_F(ChecksumTest, IPv4ChecksumVerify) {
   Packet packet = get_ipv4_pkt(&cksum);
   PHV *phv = packet.get_phv();
   parser.parse(&packet);
-  
+
   IPv4Checksum cksum_engine("ipv4_checksum", 0, ipv4Header, 9);
   ASSERT_TRUE(cksum_engine.verify(packet));
 
   Field &ipv4_checksum = phv->get_field(ipv4Header, 9);
-  ipv4_checksum.set(0);  
+  ipv4_checksum.set(0);
   ASSERT_FALSE(cksum_engine.verify(packet));
 }
 
@@ -274,7 +259,7 @@ TEST_F(ChecksumTest, TCPChecksumVerify) {
   ASSERT_TRUE(tcp_cksum_engine->verify(packet));
 
   Field &tcp_checksum = phv->get_field(tcpHeader, 8);
-  tcp_checksum.set(0);  
+  tcp_checksum.set(0);
   ASSERT_FALSE(tcp_cksum_engine->verify(packet));
 }
 

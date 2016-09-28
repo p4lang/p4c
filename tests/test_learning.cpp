@@ -108,7 +108,7 @@ class LearningTest : public ::testing::Test {
     std::copy(&data[0], &data[size], buffer);
     cb_hdr = msg_hdr;
     cb_written = true;
-    cb_written_cv.notify_one();    
+    cb_written_cv.notify_one();
   }
 
   static void learn_cb(LearnEngineIface::msg_hdr_t msg_hdr, size_t size,

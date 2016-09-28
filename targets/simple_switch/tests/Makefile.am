@@ -5,7 +5,6 @@ AM_CPPFLAGS += \
 -I$(srcdir)/.. \
 -I$(srcdir)/ \
 -DTESTDATADIR=\"$(srcdir)/testdata\"
-AM_CXXFLAGS = -pthread
 LDADD = $(builddir)/../libsimpleswitch.la \
 $(top_builddir)/third_party/gtest/libgtest.la \
 $(top_builddir)/src/bm_apps/libbmapps.la \

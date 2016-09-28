@@ -32,8 +32,9 @@ namespace fs = boost::filesystem;
 class PcapTest : public ::testing::Test {
 protected:
   PcapTest()
-    : testDataFolder(TESTDATADIR), testfile1("en0.pcap"), testfile2("lo0.pcap"),
-      tmpfile("tmp.pcap"), received(0), receiver(nullptr) {}
+    : receiver(nullptr), received(0),
+      testDataFolder(TESTDATADIR), testfile1("en0.pcap"), testfile2("lo0.pcap"),
+      tmpfile("tmp.pcap") {}
 
   virtual void SetUp()  {}
 
@@ -60,7 +61,7 @@ protected:
   void setReceiver(PacketReceiverIface* recv) {
     receiver = recv;
   }
-  
+
 public:
   int receive(int port_num, const char *buffer, int len) {
     received++;
@@ -119,7 +120,7 @@ private:
 
     return Status::OK;
   }
-    
+
 public:
   PcapFileComparator(bool verbose)
       : verbose(verbose), packetIndex(0) {}
@@ -151,7 +152,7 @@ public:
 
       this->packetIndex++;
     }
-        
+
     return Status::OK;
   }
 };
@@ -167,14 +168,14 @@ TEST_F(PcapTest, ReadOneFile) {
     packetsRead++;
     packetsSize += packet->getLength();
   }
-    
+
   file->reset();
   while (file->moveNext()) {
     std::unique_ptr<PcapPacket> packet = file->current();
     packetsRead--;
     packetsSize -= packet->getLength();
   }
-    
+
   ASSERT_EQ(packetsRead, 0);
   ASSERT_EQ(packetsSize, 0);
 }
@@ -194,7 +195,7 @@ TEST_F(PcapTest, MergeFiles) {
   reader.start();
   int totalPackets = received;
   received = 0;
-    
+
   PcapFilesReader reader1(false, 0);
   reader1.addFile(0, getFile1());
   reader1.set_packet_handler(packet_handler, (void*)this);
