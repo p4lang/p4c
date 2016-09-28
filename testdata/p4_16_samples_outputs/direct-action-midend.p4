@@ -5,6 +5,15 @@ control c(inout bit<16> y) {
         arg_0 = x;
         y = (bit<16>)arg_0;
     }
+    action act() {
+        x = 32w2;
+    }
+    table tbl_act() {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
     table tbl_a() {
         actions = {
             a_0();
@@ -12,6 +21,7 @@ control c(inout bit<16> y) {
         const default_action = a_0();
     }
     apply {
+        tbl_act.apply();
         tbl_a.apply();
     }
 }

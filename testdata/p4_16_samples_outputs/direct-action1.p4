@@ -1,5 +1,5 @@
 control c(inout bit<16> y) {
-    bit<32> x;
+    bit<32> x = 10;
     action a(bit<32> arg) {
         y = (bit<16>)arg;
     }

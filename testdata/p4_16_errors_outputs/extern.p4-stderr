@@ -1,12 +1,12 @@
 ../testdata/p4_16_errors/extern.p4(19): error: x: a parameter with an extern type cannot have a direction
 control c(in X x) {
-          ^^^^^^
+               ^
 ../testdata/p4_16_errors/extern.p4(19): error: x: a parameter with an extern type cannot have a direction
 control c(in X x) {
-          ^^^^^^
+               ^
 ../testdata/p4_16_errors/extern.p4(24): error: x: a parameter with an extern type cannot have a direction
 control proto(in X x);
-              ^^^^^^
+                   ^
 ../testdata/p4_16_errors/extern.p4(24): error: Could not find type of control proto
 control proto(in X x);
         ^^^^^

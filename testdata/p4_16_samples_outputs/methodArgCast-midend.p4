@@ -1,4 +1,5 @@
 extern E {
+    E();
     void set(in bit<32> arg);
 }
 

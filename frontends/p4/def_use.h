@@ -52,6 +52,9 @@ class StorageLocation : public IHasDbPrint {
     // all locations inside that represent valid bits
     const LocationSet* getValidBits() const;
     virtual void addValidBits(LocationSet* result) const = 0;
+    // set of locations if we exclude all headers
+    const LocationSet* removeHeaders() const;
+    virtual void removeHeaders(LocationSet* result) const = 0;
 };
 
 /* Represents a storage location with a simple type.
@@ -64,6 +67,7 @@ class BaseLocation : public StorageLocation {
     { BUG_CHECK(type->is<IR::Type_Base>() || type->is<IR::Type_Enum>(),
                 "%1%: unexpected type", type); }
     void addValidBits(LocationSet*) const override {}
+    void removeHeaders(LocationSet* result) const override;
 };
 
 class StructLocation : public StorageLocation {
@@ -78,18 +82,15 @@ class StructLocation : public StorageLocation {
         BUG_CHECK(type->is<IR::Type_StructLike>(),
                   "%1%: unexpected type", type);
     }
-    const StorageLocation* getField(cstring field) const {
-        auto result = ::get(fieldLocations, field);
-        CHECK_NULL(result);
-        return result;
-    }
     IterValues<std::map<cstring, const StorageLocation*>::const_iterator> fields() const
     { return Values(fieldLocations); }
     void dbprint(std::ostream& out) const override {
         for (auto f : fieldLocations)
             out << *f.second;
     }
+    void addField(cstring field, LocationSet* addTo) const;
     void addValidBits(LocationSet* result) const override;
+    void removeHeaders(LocationSet* result) const override;
 };
 
 class ArrayLocation : public StorageLocation {
@@ -106,10 +107,6 @@ class ArrayLocation : public StorageLocation {
         auto stack = type->to<IR::Type_Stack>();
         elements.resize(stack->getSize());
     }
-    const StorageLocation* getElement(unsigned index) const {
-        BUG_CHECK(index < elements.size(), "%1%: out of bounds index", index);
-        return elements.at(index);
-    }
     std::vector<const StorageLocation*>::const_iterator begin() const
     { return elements.cbegin(); }
     std::vector<const StorageLocation*>::const_iterator end() const
@@ -118,7 +115,9 @@ class ArrayLocation : public StorageLocation {
         for (unsigned i = 0; i < elements.size(); i++)
             out << *elements.at(i);
     }
+    void addElement(unsigned index, LocationSet* result) const;
     void addValidBits(LocationSet* result) const override;
+    void removeHeaders(LocationSet*) const override {}  // no results added
 };
 
 class StorageFactory {
@@ -150,9 +149,9 @@ class LocationSet {
     // express this location set only in terms of BaseLocation;
     // e.g., a StructLocation is expanded in all its fields.
     const LocationSet* canonicalize() const;
+    void addCanonical(const StorageLocation* location);
     std::set<const StorageLocation*>::const_iterator begin() const { return locations.cbegin(); }
     std::set<const StorageLocation*>::const_iterator end()   const { return locations.cend(); }
-    void addCanonical(const StorageLocation* location);
 };
 
 // For each declaration we keep the associated storage
@@ -179,7 +178,6 @@ class StorageMap {
         auto result = ::get(storage, decl);
         return result;
     }
-    const LocationSet* writes(const IR::Expression* expression, bool lhs) const;
 };
 
 // Indicates a statement in the program.
@@ -270,17 +268,17 @@ class Definitions {
     void set(const StorageLocation* loc, const ProgramPoints* point);
     void set(const LocationSet* loc, const ProgramPoints* point);
     const ProgramPoints* get(const BaseLocation* location) const
-    { return ::get(definitions, location); }
+    { auto r = ::get(definitions, location); CHECK_NULL(r); return r; }
     const ProgramPoints* get(const LocationSet* locations) const;
     bool operator==(const Definitions& other) const;
     void dbprint(std::ostream& out) const {
         if (definitions.empty())
-            out << "Empty definitions";
+            out << "  Empty definitions";
         bool first = true;
         for (auto d : definitions) {
             if (!first)
                 out << std::endl;
-            out << *d.first << "=>" << *d.second;
+            out << "  " << *d.first << "=>" << *d.second;
             first = false;
         }
     }
@@ -292,12 +290,15 @@ class AllDefinitions {
     StorageMap* storageMap;
     AllDefinitions(ReferenceMap* refMap, TypeMap* typeMap) :
             storageMap(new StorageMap(refMap, typeMap)) {}
-    Definitions* get(ProgramPoint point) {
+    Definitions* get(ProgramPoint point, bool emptyIfNotFound = false) {
         auto it = atPoint.find(point);
         if (it == atPoint.end()) {
-            auto def = new Definitions();
-            atPoint[point] = def;
-            return def;
+            if (emptyIfNotFound) {
+                auto defs = new Definitions();
+                set(point, defs);
+                return defs;
+            }
+            BUG("Unknown point %1% for definitions", &point);
         }
         return it->second;
     }
@@ -307,34 +308,73 @@ class AllDefinitions {
 
 // This does not scan variable initializers, so it must be executed
 // after these have been removed.
-// Run for each parser and control separately
-class ComputeDefUse : public Inspector {
-    const ReferenceMap* refMap;
-    AllDefinitions*     definitions;  // result
-    ProgramPoint        startPoint;
-
-    void initialize(const IR::P4Control* control);
-    // The following methods are used only when analyzing parsers.
-    // Since parsers have loops we do not rely on a standard visitor.
-    void initialize(const IR::P4Parser* parser);
-    Definitions* visitParserStatement(const IR::StatOrDecl* stat, Definitions* defs);
-    Definitions* visitParserState(const IR::ParserState* state);  // return true on changes
-    Definitions* getDefinitionsAfter(const IR::ParserState* state);
-
- public:
-    ComputeDefUse(const ReferenceMap* refMap, AllDefinitions* definitions) :
-            refMap(refMap), definitions(definitions), currentDefinitions(nullptr)
-    { CHECK_NULL(refMap); CHECK_NULL(definitions); setName("ComputeDefUse"); }
-    bool preorder(const IR::P4Parser* parser) override;
-    // The following are used when analyzing P4Controls.
+// Run for each parser and control separately.
+// Computes the write set for each expression and statement.
+// We are controlling precisely the visit order - to simulate a
+// simbolic execution of the program.
+class ComputeWriteSet : public Inspector {
  protected:
+    AllDefinitions*     definitions;  // result
     Definitions*        currentDefinitions;  // before statement currently processed
+    Definitions*        returnedDefinitions;  // set by return statements
+    Definitions*        exitDefinitions;  // set by exit statements
     ProgramPoint        callingContext;
+    const StorageMap*   storageMap;
+    bool                lhs;    // if true we are processing an
+                                // expression on the lhs of an
+                                // assignment
+    // For each expression the location set it writes
+    std::map<const IR::Expression*, const LocationSet*> writes;
+
+    // Create new visitor, but with same underlying data structures.
+    // Needed to visit some program fragments repeatedly.
+    ComputeWriteSet(const ComputeWriteSet* source, ProgramPoint context, Definitions* definitions) :
+            definitions(source->definitions), currentDefinitions(definitions),
+            returnedDefinitions(nullptr), exitDefinitions(source->exitDefinitions),
+            callingContext(context), storageMap(source->storageMap), lhs(false) {
+        setName("ComputeWriteSet");
+    }
+    void initialize(const IR::IApply* block, const IR::IndexedVector<IR::Declaration>* locals,
+                    ProgramPoint startPoint);
+    Definitions* getDefinitionsAfter(const IR::ParserState* state);
     bool setDefinitions(Definitions* defs, const IR::Node* who = nullptr);
     ProgramPoint getProgramPoint(const IR::Node* node = nullptr) const;
+    const LocationSet* get(const IR::Expression* expression) const {
+        auto result = ::get(writes, expression);
+        CHECK_NULL(result);
+        return result;
+    }
+    void set(const IR::Expression* expression, const LocationSet* loc) {
+        CHECK_NULL(expression); CHECK_NULL(loc);
+        writes.emplace(expression, loc);
+    }
 
  public:
+    explicit ComputeWriteSet(AllDefinitions* definitions) :
+            definitions(definitions), currentDefinitions(nullptr),
+            returnedDefinitions(nullptr), exitDefinitions(nullptr),
+            storageMap(definitions->storageMap), lhs(false)
+    { CHECK_NULL(definitions); setName("ComputeWriteSet"); }
+
+    // expressions
+    bool preorder(const IR::Literal* expression) override;
+    bool preorder(const IR::Slice* expression) override;
+    bool preorder(const IR::TypeNameExpression* expression) override;
+    bool preorder(const IR::PathExpression* expression) override;
+    bool preorder(const IR::Member* expression) override;
+    bool preorder(const IR::ArrayIndex* expression) override;
+    bool preorder(const IR::Operation_Binary* expression) override;
+    bool preorder(const IR::Mux* expression) override;
+    bool preorder(const IR::SelectExpression* expression) override;
+    bool preorder(const IR::ListExpression* expression) override;
+    bool preorder(const IR::Operation_Unary* expression) override;
+    bool preorder(const IR::MethodCallExpression* expression) override;
+    // statements
+    bool preorder(const IR::ParserState* state) override;
+    bool preorder(const IR::P4Parser* parser) override;
     bool preorder(const IR::P4Control* control) override;
+    bool preorder(const IR::P4Action* action) override;
+    bool preorder(const IR::P4Table* table) override;
     bool preorder(const IR::AssignmentStatement* statement) override;
     bool preorder(const IR::ReturnStatement* statement) override;
     bool preorder(const IR::ExitStatement* statement) override;
@@ -343,6 +383,11 @@ class ComputeDefUse : public Inspector {
     bool preorder(const IR::SwitchStatement* statement) override;
     bool preorder(const IR::EmptyStatement* statement) override;
     bool preorder(const IR::MethodCallStatement* statement) override;
+
+    const LocationSet* writtenLocations(const IR::Expression* expression) {
+        expression->apply(*this);
+        return get(expression);
+    }
 };
 
 }  // namespace P4

@@ -95,8 +95,12 @@ void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
 
 // Deep structural equivalence between canonical types.
 // Does not do unification of type variables - a type variable is only
-// equivalent to itself.
+// equivalent to itself.  nullptr is only equivalent to nullptr.
 bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
+    if (left == nullptr)
+        return right == nullptr;
+    if (right == nullptr)
+        return false;
     if (left->node_type_name() != right->node_type_name())
         return false;
 
@@ -154,16 +158,9 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         auto rp = right->to<IR::Type_Package>();
         return equivalent(lp->getConstructorMethodType(), rp->getConstructorMethodType());
     }
-    if (left->is<IR::Type_Parser>() || left->is<IR::Type_Control>()) {
-        if (!equivalent(left->to<IR::IApply>()->getApplyMethodType(),
-                        right->to<IR::IApply>()->getApplyMethodType()))
-            return false;
-        return true;
-    }
-    if (left->is<IR::Type_Table>()) {
-        auto la = left->to<IR::Type_Table>();
-        auto ra = right->to<IR::Type_Table>();
-        return equivalent(la->getApplyMethodType(), ra->getApplyMethodType());
+    if (left->is<IR::IApply>()) {
+        return equivalent(left->to<IR::IApply>()->getApplyMethodType(),
+                          right->to<IR::IApply>()->getApplyMethodType());
     }
     if (left->is<IR::Type_SpecializedCanonical>()) {
         auto ls = left->to<IR::Type_SpecializedCanonical>();
@@ -186,14 +183,8 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
             if (!equivalent(lp, rp))
                 return false;
         }
-        if (lm->returnType == nullptr) {
-            if (rm->returnType != nullptr)
-                return false;
-        } else if (rm->returnType == nullptr) {
+        if (!equivalent(lm->returnType, rm->returnType))
             return false;
-        } else if (!equivalent(lm->returnType, rm->returnType)) {
-            return false;
-        }
         if (lm->parameters->size() != rm->parameters->size())
             return false;
         for (size_t i = 0; i < lm->parameters->size(); i++) {

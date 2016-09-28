@@ -13,6 +13,7 @@ struct S {
 }
 
 extern E {
+    E();
     void set1(out bit<32> x, out S y);
     void set2(out bit<32> x, out bit<32> y);
     void set3(out H h, out bit<32> y);

@@ -2,7 +2,7 @@
         x.f();
         ^^^
 ../testdata/p4_16_errors/interface1_e.p4(16)
-extern X
+extern X {
        ^
 ../testdata/p4_16_errors/interface1_e.p4(25)
         x.f();

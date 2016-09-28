@@ -1,4 +1,5 @@
 extern E {
+    E();
     void call();
 }
 

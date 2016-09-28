@@ -1,4 +1,5 @@
 extern Fake {
+    Fake();
     void call(in bit<32> data);
 }
 

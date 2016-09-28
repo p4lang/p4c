@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 extern Fake {
+    Fake();
     void call(in bit<32> data);
 }
 

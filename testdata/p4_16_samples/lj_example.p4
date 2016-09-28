@@ -68,6 +68,7 @@ control LjPipe(inout Parsed_rep p,
     }
 
     apply {
+        outCtrl.outputPort = DROP_PORT;
         if (p.arpa_pak.isValid())
             Enet_lkup.apply();
     }

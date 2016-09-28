@@ -19,7 +19,8 @@ parser Parser<H>(packet_in b, out H parsedHeaders);
 control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
 control Deparser<H>(inout H outputHeaders, packet_out b);
 package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
-extern Checksum16 {
+extern Ck16 {
+    Ck16();
     void clear();
     void update<T>(in T data);
     bit<16> get();
@@ -60,7 +61,7 @@ struct Parsed_packet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    Checksum16() ck;
+    Ck16() ck;
     state start {
         b.extract(p.ethernet);
         transition select(p.ethernet.etherType) {
@@ -145,6 +146,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
             Drop_action();
             return;
         }
+        outCtrl.outputPort = 0x0;
         ipv4_match.apply(nextHop);
         if (outCtrl.outputPort == DROP_PORT) 
             return;
@@ -159,7 +161,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
-    Checksum16() ck;
+    Ck16() ck;
     apply {
         b.emit(p.ethernet);
         if (p.ip.isValid()) {

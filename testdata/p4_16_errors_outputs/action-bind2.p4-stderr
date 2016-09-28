@@ -3,7 +3,7 @@
                     ^
 ../testdata/p4_16_errors/action-bind2.p4(17)
     action a(inout bit<32> b, bit<32> d) {
-             ^^^^^^^^^^^^^^^
+                           ^
 ../testdata/p4_16_errors/action-bind2.p4(22): error: 0: must be a left-value
         default_action = a(0);
                            ^

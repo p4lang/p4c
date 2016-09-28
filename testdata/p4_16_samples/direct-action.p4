@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 control c(inout bit<16> y) {
-    bit<32> x;
+    bit<32> x = 2;
     action a(in bit<32> arg) {
         y = (bit<16>)arg;
     }

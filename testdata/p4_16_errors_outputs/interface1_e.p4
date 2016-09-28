@@ -1,4 +1,5 @@
 extern X {
+    X();
 }
 
 control p() {

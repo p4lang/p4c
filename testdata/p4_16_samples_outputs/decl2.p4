@@ -8,7 +8,7 @@ control p() {
         }
     }
     apply {
-        bit<1> x_1;
+        bit<1> x_1 = 0;
         bit<1> y_0;
         b(x_1, y_0);
     }

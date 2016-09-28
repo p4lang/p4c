@@ -46,13 +46,17 @@ class RemoveUnreachableStates : public Transform {
 
     const IR::Node* preorder(IR::ParserState* state) override {
         if (state->name == IR::ParserState::start ||
-            state->name == IR::ParserState::reject ||
-            state->name == IR::ParserState::accept)
+            state->name == IR::ParserState::reject)
             return state;
         auto orig = getOriginal<IR::ParserState>();
         if (reachable.find(orig) == reachable.end()) {
-            LOG1("Removing unreachable state " << state);
-            return nullptr;
+            if (state->name == IR::ParserState::accept) {
+                ::warning("%1% state in %2% is unreachable", state, findContext<IR::P4Parser>());
+                return state;
+            } else  {
+                LOG1("Removing unreachable state " << state);
+                return nullptr;
+            }
         }
         return state;
     }

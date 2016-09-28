@@ -20,7 +20,7 @@ struct Parsed_packet {}
 
 typedef bit<32>  IPv4Address;
 
-extern tbl {}
+extern tbl { tbl(); }
 
 control c(inout Parsed_packet headers,
           in error parseError, // parser error

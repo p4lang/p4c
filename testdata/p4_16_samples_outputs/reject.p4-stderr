@@ -1,3 +1,9 @@
 ../testdata/p4_16_samples/reject.p4(18): warning: start: implicit transition to `reject'
     state start {
           ^^^^^
+../testdata/p4_16_samples/reject.p4(17): warning: accept state in parser f is unreachable
+parser f() {
+       ^
+../testdata/p4_16_samples/reject.p4(17): warning: accept state in parser f is unreachable
+parser f() {
+       ^

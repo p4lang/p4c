@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-extern X<T> { }
-extern Y    { }
+extern X<T> { X(); }
+extern Y    { Y(); }
 
 parser p()
 {

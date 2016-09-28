@@ -177,6 +177,7 @@ class ActionList : PropertyValue {
     IndexedVector<ActionListElement> actionList;
 #nodbprint
     validate{ actionList->check_null(); }
+    size_t size() const { return actionList->size(); }
 }
 
 class KeyElement {

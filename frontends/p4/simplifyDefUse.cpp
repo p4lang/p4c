@@ -17,6 +17,7 @@ limitations under the License.
 #include "simplifyDefUse.h"
 #include "frontends/p4/def_use.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/tableApply.h"
 
 namespace P4 {
 
@@ -24,63 +25,150 @@ namespace {
 
 // Run for each parser and control separately
 class FindUninitialized : public Inspector {
+    ProgramPoint    context;
     ReferenceMap*   refMap;
     TypeMap*        typeMap;
     AllDefinitions* definitions;
     bool            lhs;  // checking the lhs of an assignment
+    ProgramPoint    currentPoint;
     // For some simple expresssions keep here the read location sets
     std::map<const IR::Expression*, const LocationSet*> locations;
-    Definitions*    currentDefinitions;  // set for each statement
 
     const LocationSet* get(const IR::Expression* expression) const {
         auto result = ::get(locations, expression);
         return result;
     }
+    // 'expression' is reading the 'loc' location set
     void set(const IR::Expression* expression, const LocationSet* loc) {
         CHECK_NULL(expression);
         CHECK_NULL(loc);
         locations.emplace(expression, loc);
     }
-
-    void checkUninitialized(const IR::StatOrDecl* statement, ProgramPoint at) {
-        if (!statement->is<IR::Statement>())
-            return;
-        currentDefinitions = definitions->get(at);
-        if (statement->is<IR::AssignmentStatement>()) {
-            auto assign = statement->to<IR::AssignmentStatement>();
-            lhs = true;
-            visit(assign->left);
-            lhs = false;
-            visit(assign->right);
-        } else if (statement->is<IR::MethodCallStatement>()) {
-            auto mcs = statement->to<IR::MethodCallStatement>();
-            visit(mcs->methodCall);
-        } else if (statement->is<IR::BlockStatement>()) {
-            auto block = statement->to<IR::BlockStatement>();
-            for (auto s : *block->components) {
-                checkUninitialized(s, at);
-                at = ProgramPoint(s);
-            }
-        } else {
-            BUG("%1%: unexpected statement", statement);
-        }
-        currentDefinitions = nullptr;
+    bool setCurrent(const IR::Statement* statement) {
+        currentPoint = ProgramPoint(context, statement);
+        return false;
     }
 
  public:
-    FindUninitialized(ReferenceMap* refMap, TypeMap* typeMap, AllDefinitions* definitions) :
-            refMap(refMap), typeMap(typeMap), definitions(definitions),
-            lhs(false), currentDefinitions(nullptr) {
+    explicit FindUninitialized(AllDefinitions* definitions) :
+            refMap(definitions->storageMap->refMap),
+            typeMap(definitions->storageMap->typeMap),
+            definitions(definitions), lhs(false), currentPoint() {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions);
         setName("FindUninitialized"); }
 
+    // we control the traversal order manually, so we always 'prune()'
+    // (return false from preorder)
+
     bool preorder(const IR::ParserState* state) override {
-        ProgramPoint cursor(state);  // point before the first statement
-        for (auto s : *state->components) {
-            checkUninitialized(s, cursor);  // the cursor points BEFORE the statement
-            cursor = ProgramPoint(s);
-        }
+        LOG1("Visiting " << dbp(state));
+        context = ProgramPoint(state);
+        currentPoint = ProgramPoint(state);  // point before the first statement
+        visit(state->components);
+        context = ProgramPoint();
         return false;
+    }
+
+    Definitions* getCurrentDefinitions() const {
+        auto defs = definitions->get(currentPoint);
+        CHECK_NULL(defs);
+        return defs;
+    }
+
+    void checkOutParameters(const IR::IApply* block, Definitions* defs) {
+        for (auto p : *block->getApplyMethodType()->parameters->parameters) {
+            if (p->direction == IR::Direction::Out) {
+                auto storage = definitions->storageMap->getStorage(p);
+                if (storage == nullptr)
+                    continue;
+                auto loc = storage->removeHeaders();
+                auto points = defs->get(loc);
+                if (points->containsUninitialized())
+                    ::warning("out parameter %1% may be uninitialized when %2% terminates",
+                              p, block);
+            }
+        }
+    }
+
+    bool preorder(const IR::P4Control* control) override {
+        currentPoint = ProgramPoint(control);
+        visit(control->body);
+        checkOutParameters(control, getCurrentDefinitions());
+        return false;
+    }
+
+    bool preorder(const IR::P4Parser* parser) override {
+        LOG1("Visiting " << dbp(parser));
+        visit(parser->states);
+        auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
+        auto acceptdefs = definitions->get(accept, true);
+        checkOutParameters(parser, acceptdefs);
+        return false;
+    }
+
+    bool preorder(const IR::AssignmentStatement* statement) override {
+        auto assign = statement->to<IR::AssignmentStatement>();
+        lhs = true;
+        visit(assign->left);
+        lhs = false;
+        visit(assign->right);
+        return setCurrent(statement);
+    }
+
+    bool preorder(const IR::MethodCallStatement* statement) override {
+        LOG1("Visiting " << dbp(statement));
+        visit(statement->methodCall);
+        return setCurrent(statement);
+    }
+
+    bool preorder(const IR::BlockStatement* statement) override {
+        visit(statement->components);
+        return setCurrent(statement);
+    }
+
+    bool preorder(const IR::IfStatement* statement) override {
+        visit(statement->condition);
+        visit(statement->ifTrue);
+        if (statement->ifFalse != nullptr)
+            visit(statement->ifFalse);
+        return setCurrent(statement);
+    }
+
+    bool preorder(const IR::SwitchStatement* statement) override {
+        visit(statement->expression);
+        for (auto c : statement->cases)
+            visit(c);
+        return setCurrent(statement);
+    }
+
+    ////////////////// Expressions
+
+    void reportUninitialized(const IR::Expression* expression) {
+        auto ctx = getContext();
+        const LocationSet* read = nullptr;
+        if (ctx == nullptr) {
+            read = get(expression);
+        } else {
+            auto parentexp = ctx->node->to<IR::Expression>();
+            if (parentexp == nullptr ||  // e.g., Vector<Expression> for args
+                (!parentexp->is<IR::Member>() &&
+                 !parentexp->is<IR::ArrayIndex>())) {
+                read = get(expression);
+            }
+        }
+        if (read == nullptr)
+            return;
+        auto currentDefinitions = getCurrentDefinitions();
+        auto points = currentDefinitions->get(read);
+        if (points->containsUninitialized()) {
+            auto type = typeMap->getType(expression, true);
+            cstring message;
+            if (type->is<IR::Type_Base>())
+                message = "%1% may be uninitialized";
+            else
+                message = "%1% may not be completely initialized";
+            ::warning(message, expression);
+        }
     }
 
     // For the following we compute the read set and save it.
@@ -98,10 +186,11 @@ class FindUninitialized : public Inspector {
         else
             result = LocationSet::empty;
         set(expression, result);
-        report(expression);
+        reportUninitialized(expression);
     }
 
     bool preorder(const IR::MethodCallExpression* expression) override {
+        // TODO: handle table and action invocations
         MethodCallDescription mcd(expression, refMap, typeMap);
         for (auto p : *mcd.substitution.getParameters()) {
             auto expr = mcd.substitution.lookup(p);
@@ -127,7 +216,15 @@ class FindUninitialized : public Inspector {
         auto type = typeMap->getType(expression, true);
         if (type->is<IR::Type_Method>())
             return;
+        if (expression->expr->is<IR::TypeNameExpression>())
+            // this is a constant
+            return;
+        if (TableApplySolver::isHit(expression, refMap, typeMap) ||
+            TableApplySolver::isActionRun(expression, refMap, typeMap))
+            return;
+
         auto storage = get(expression->expr);
+        CHECK_NULL(storage);
 
         auto basetype = typeMap->getType(expression->expr, true);
         if (basetype->is<IR::Type_Stack>()) {
@@ -146,7 +243,7 @@ class FindUninitialized : public Inspector {
 
         auto fields = storage->getField(expression->member);
         set(expression, fields);
-        report(expression);
+        reportUninitialized(expression);
     }
 
     bool preorder(const IR::ArrayIndex* expression) override {
@@ -155,10 +252,6 @@ class FindUninitialized : public Inspector {
         lhs = false;
         visit(expression->right);
         lhs = save;
-        return true;
-    }
-
-    void postorder(const IR::ArrayIndex* expression) override {
         auto storage = get(expression->left);
         if (expression->right->is<IR::Constant>()) {
             if (lhs) {
@@ -174,49 +267,12 @@ class FindUninitialized : public Inspector {
             // array.
             set(expression, storage);
         }
-        report(expression);
-    }
-
-    void report(const IR::Expression* expression) {
-        auto ctx = getContext();
-        const LocationSet* read = nullptr;
-        if (ctx == nullptr) {
-            read = get(expression);
-        } else {
-            auto parentexp = ctx->node->to<IR::Expression>();
-            if (parentexp == nullptr ||  // e.g., Vector<Expression> for args
-                (!parentexp->is<IR::Member>() &&
-                 !parentexp->is<IR::ArrayIndex>())) {
-                read = get(expression);
-            }
-        }
-        if (read == nullptr)
-            return;
-        CHECK_NULL(currentDefinitions);
-        auto points = currentDefinitions->get(read);
-        if (points->containsUninitialized()) {
-            auto type = typeMap->getType(expression, true);
-            cstring message;
-            if (type->is<IR::Type_Base>())
-                message = "%1% may be uninitialized";
-            else
-                message = "%1% may not be completely initialized";
-            ::warning(message, expression);
-        }
+        reportUninitialized(expression);
+        return false;
     }
 
     void postorder(const IR::Expression* expression) override {
-        report(expression);
-    }
-
-    bool preorder(const IR::P4Control*) override {
-        // TODO: not yet implemented
-        return false;
-    }
-
-    bool preorder(const IR::P4Parser* parser) override {
-        visit(parser->states);
-        return false;
+        reportUninitialized(expression);
     }
 };
 
@@ -226,8 +282,8 @@ class ProcessDefUse : public PassManager {
  public:
     ProcessDefUse(ReferenceMap* refMap, TypeMap* typeMap) :
             definitions(new AllDefinitions(refMap, typeMap)) {
-        passes.push_back(new ComputeDefUse(refMap, definitions));
-        passes.push_back(new FindUninitialized(refMap, typeMap, definitions));
+        passes.push_back(new ComputeWriteSet(definitions));
+        passes.push_back(new FindUninitialized(definitions));
         setName("ProcessDefUse");
     }
 };

@@ -26,6 +26,7 @@ control p() {
     bit<1> tmp_5;
     bit<1> tmp_6;
     apply {
+        x_1 = 1w1;
         tmp_5 = x_1;
         b_0(tmp_5, tmp_6);
         y_0 = tmp_6;

@@ -19,7 +19,8 @@ parser Parser<H>(packet_in b, out H parsedHeaders);
 control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
 control Deparser<H>(inout H outputHeaders, packet_out b);
 package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
-extern Checksum16 {
+extern Ck16 {
+    Ck16();
     void clear();
     void update<T>(in T data);
     bit<16> get();
@@ -64,6 +65,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
         default_action = Drop_1;
     }
     apply {
+        outCtrl.outputPort = DROP_PORT;
         if (p.arpa_pak.isValid()) 
             Enet_lkup.apply();
     }

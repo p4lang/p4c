@@ -9,7 +9,8 @@ struct OutControl {
     PortId outputPort;
 }
 
-extern Checksum16 {
+extern Ck16 {
+    Ck16();
     void clear();
     void update<T>(in T data);
     bit<16> get();

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ limitations under the License.
 
 // In arch file
 extern Virtual {
+    Virtual();
     // abstract methods must be implemented
     // by the users
     abstract bit<16> f(in bit<16> ix);

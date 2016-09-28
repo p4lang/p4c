@@ -9,7 +9,7 @@ control p() {
         a(z & z, y);
     }
     apply {
-        bit<1> x;
+        bit<1> x = 1w1;
         bit<1> y;
         b(x, y);
     }

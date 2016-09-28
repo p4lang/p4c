@@ -30,7 +30,7 @@ control p()
     }
 
     apply {
-        bit x;
+        bit x = 1;
         bit y;
         b(x, y);
     }

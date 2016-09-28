@@ -12,6 +12,7 @@ control caller() {
     @name("data") S data_0;
     @name("cinst") c() cinst_0;
     apply {
+        data_0.f = 32w0;
         cinst_0.apply(data_0);
     }
 }

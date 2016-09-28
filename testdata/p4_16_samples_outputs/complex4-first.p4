@@ -1,4 +1,5 @@
 extern E {
+    E();
     bit<32> f(in bit<32> x);
 }
 
