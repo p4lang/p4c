@@ -1997,6 +1997,12 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
                 result->emplace("op", "extract");
                 if (mce->arguments->size() == 1) {
                     auto arg = mce->arguments->at(0);
+                    auto argtype = typeMap->getType(arg, true);
+                    if (!argtype->is<IR::Type_Header>()) {
+                        ::error("%1%: extract only accepts arguments with header types, not %2%",
+                                arg, argtype);
+                        return result;
+                    }
                     auto param = new Util::JsonObject();
                     params->append(param);
                     cstring type;
