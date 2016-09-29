@@ -137,7 +137,7 @@ static int yylex();
 %type<annos>            optAnnotations
 %type<annoVec>          annotations
 %type<Annotation>       annotation
-%type<params>           parameterList nonEmptyParameterList optCompileParameters
+%type<params>           parameterList nonEmptyParameterList optConstructorParameters
 %type<exprs>            argumentList nonEmptyArgList expressionList simpleExpressionList
                         tupleKeysetExpression
 %type<ids>              identifierList
@@ -330,7 +330,7 @@ objDeclaration
     | instantiation            { $$ = $1; }
     ;
 
-optCompileParameters
+optConstructorParameters
     : /* empty */              { $$ = new IR::IndexedVector<IR::Parameter>(); }
     | '(' parameterList ')'    { $$ = $2; }
     ;
@@ -356,7 +356,7 @@ nonEmptyRelativePathPrefix
 /**************************** PARSER ******************************/
 
 parserDeclaration
-    : parserTypeDeclaration optCompileParameters
+    : parserTypeDeclaration optConstructorParameters
       '{' parserLocalElements parserStates '}'
                              { structure.pop();
                                auto pl = new IR::ParameterList(@2, $2);
@@ -456,7 +456,7 @@ simpleKeysetExpression
 /*************************** CONTROL ************************/
 
 controlDeclaration
-    : controlTypeDeclaration optCompileParameters
+    : controlTypeDeclaration optConstructorParameters
       '{' controlLocalDeclarations APPLY controlBody '}'
                             { structure.pop();
                               auto pl = new IR::ParameterList(@2, $2);
