@@ -1,8 +1,11 @@
 # Config file for automatic testing at travis-ci.org
 
 sudo: required
+dist: trusty
 
-language: cpp
+# using cpp here leads to some weird version of Python being used and Python
+# ImportError exceptions, so I am using the minimal trusty image
+language: generic
 
 matrix:
   include:
@@ -17,12 +20,16 @@ matrix:
     - os: linux
       env: COMPILER=clang++-3.6
 
+    - os: linux
+      env: COMPILER=clang++-3.8
+
 addons:
   apt:
     sources:
       - boost-latest
       - ubuntu-toolchain-r-test
       - llvm-toolchain-precise-3.6
+      - llvm-toolchain-precise-3.8
     packages:
       - libjudy-dev
       - libgmp-dev
@@ -42,6 +49,7 @@ addons:
       - g++-4.8
       - g++-5
       - clang-3.6
+      - clang-3.8
       - libssl-dev
       - python-pip
 
@@ -63,7 +71,6 @@ install:
   - if [ "$GCOV" = "" ]; then ./configure CXX=$COMPILER --with-pdfixed --with-stress-tests; fi
   - make all -j2
 
-# command to run tests, e.g. python setup.py test
 script:
   - python travis/check-nnpy.py
   - make check
@@ -72,4 +79,4 @@ script:
 # code coverage
 after_success:
   - if [ "$GCOV" != "" ]; then (cd src/bm_sim; $GCOV -p -r -o .libs/ *.cpp; rm *third_party*); fi
-  - if [ "$GCOV" != "" ]; then bash <(curl -s https://codecov.io/bash); fi
+  - if [ "$GCOV" != "" ]; then bash <(curl -s https://codecov.io/bash) -x $GCOV -p src/bm_sim; fi
