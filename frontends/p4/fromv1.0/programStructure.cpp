@@ -1809,7 +1809,7 @@ void ProgramStructure::createChecksumUpdates() {
         auto dest = conv.convert(cf->field);
 
         for (auto uov : cf->specs) {
-            if (uov.update) continue;
+            if (!uov.update) continue;
             auto flc = field_list_calculations.get(uov.name.name);
             auto inst = get(map, flc);
 
