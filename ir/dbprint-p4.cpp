@@ -29,10 +29,24 @@ void IR::HeaderStackItemRef::dbprint(std::ostream &out) const {
   if (prec == 0) out << ';';
 }
 
-void IR::FieldList::dbprint(std::ostream &out) const { out << "IR::FieldList"; }
+void IR::FieldList::dbprint(std::ostream &out) const {
+    out << "field_list " << name << " {" << indent;
+    for (auto f : fields)
+        out << endl << f;
+    if (payload)
+        out << endl << "payload;";
+    out << unindent << " }";
+}
 void IR::FieldListCalculation::dbprint(std::ostream &out) const {
-  out << "IR::FieldListCalculation"; }
-void IR::CalculatedField::dbprint(std::ostream &out) const { out << "IR::CalculatedField"; }
+    out << "field_list_calcualtion " << name << '(' << algorithm << ", " << output_width << ')';
+}
+void IR::CalculatedField::dbprint(std::ostream &out) const {
+    out << "calcualted_field " << *field << indent;
+    for (auto &spec : specs) {
+        out << endl << (spec.update ? "update " : "verify ") << spec.name;
+        if (spec.cond) out << " if " << spec.cond; }
+    out << unindent;
+}
 void IR::CaseEntry::dbprint(std::ostream &out) const { out << "IR::CaseEntry"; }
 void IR::V1Parser::dbprint(std::ostream &out) const { out << "IR::V1Parser"; }
 void IR::ParserException::dbprint(std::ostream &out) const { out << "IR::ParserException"; }
