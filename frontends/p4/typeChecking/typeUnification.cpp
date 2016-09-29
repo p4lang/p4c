@@ -174,7 +174,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
     if (src->is<IR::Type_SpecializedCanonical>())
         src = src->to<IR::Type_SpecializedCanonical>()->substituted;
 
-    if (dest == IR::Type_Dontcare::get())
+    if (src->is<IR::Type_Dontcare>() || dest->is<IR::Type_Dontcare>())
         return true;
 
     if (dest->is<IR::Type_ArchBlock>()) {
