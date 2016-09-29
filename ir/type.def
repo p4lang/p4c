@@ -98,6 +98,7 @@ class ParameterList : ISimpleNamespace {
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return parameters->getDeclarations(); }
     size_t size() const { return parameters->size(); }
+    bool empty() const { return size() == 0; }
     IR::Parameter getParameter(cstring name) const {
         return parameters->getDeclaration<Parameter>(name); }
     IR::Parameter getParameter(unsigned index) const {

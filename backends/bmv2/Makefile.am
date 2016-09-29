@@ -41,7 +41,9 @@ ir_DEF_FILES += $(srcdir)/backends/bmv2/bmv2.def
 
 CLEANFILES += bmv2tests.mk
 
-bmv2tests.mk: $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 $(srcdir)/testdata/p4_14_samples/*.p4 \
+bmv2tests.mk: $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 \
+	      $(srcdir)/testdata/p4_16_errors/*-bmv2.p4 \
+	      $(srcdir)/testdata/p4_14_samples/*.p4 \
 	      $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4 \
 	      $(srcdir)/testdata/p4_16_samples $(srcdir)/testdata/p4_14_samples
 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@

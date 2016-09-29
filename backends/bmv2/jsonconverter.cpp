@@ -1868,7 +1868,10 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
             // Done elsewhere
             continue;
         } else {
-            BUG("%1%: Unexpected header type", ft);
+            if (!meta)
+                ::error("Type %1% should only contain headers or stacks", type);
+            else
+                BUG("%1%: Unhandled type for %2%", ft, f);
         }
     }
 }

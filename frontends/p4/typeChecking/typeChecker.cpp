@@ -218,14 +218,23 @@ const IR::TypeParameters* TypeInference::canonicalize(const IR::TypeParameters* 
         return params;
 }
 
-bool TypeInference::checkParameters(const IR::ParameterList* paramList) const {
+bool TypeInference::checkParameters(const IR::ParameterList* paramList, bool forbidModules) const {
     for (auto p : *paramList->parameters) {
+        auto type = getType(p->type);
         if (p->direction != IR::Direction::None) {
-            auto type = getType(p->type);
+            CHECK_NULL(type);
             if (type->is<IR::Type_Extern>()) {
                 ::error("%1%: a parameter with an extern type cannot have a direction", p);
                 return false;
             }
+        }
+        if (forbidModules && (type->is<IR::Type_Parser>() ||
+                              type->is<IR::Type_Control>() ||
+                              type->is<IR::Type_Package>() ||
+                              type->is<IR::P4Parser>() ||
+                              type->is<IR::P4Control>())) {
+            ::error("%1%: parameter cannot have type %2%", p, type);
+            return false;
         }
     }
     return true;
@@ -306,7 +315,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tps = canonicalize(tp->typeParameters);
         if (pl == nullptr || tps == nullptr)
             return nullptr;
-        if (!checkParameters(pl))
+        if (!checkParameters(pl, true))
             return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Parser(tp->srcInfo, tp->name, tp->annotations, tps, pl);
@@ -317,7 +326,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto tps = canonicalize(tp->typeParameters);
         if (pl == nullptr || tps == nullptr)
             return nullptr;
-        if (!checkParameters(pl))
+        if (!checkParameters(pl, true))
             return nullptr;
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Control(tp->srcInfo, tp->name, tp->annotations, tps, pl);

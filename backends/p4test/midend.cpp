@@ -59,6 +59,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
+        new P4::SpecializeAll(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([evaluator](const IR::Node *root) -> const IR::Node * {
             auto toplevel = evaluator->getToplevelBlock();
@@ -68,7 +69,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
             return root; }),
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
-        new P4::SpecializeAll(&refMap, &typeMap),
         // Parser loop unrolling: TODO
         // new P4::ParsersUnroll(true, &refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),

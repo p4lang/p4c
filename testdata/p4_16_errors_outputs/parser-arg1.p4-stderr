@@ -1,0 +1,4 @@
+terminate called after throwing an instance of 'Util::CompilerBug'
+  what():  COMPILER BUG: ../midend/specialize.cpp:40
+Not handled
+

@@ -285,7 +285,8 @@ bool Definitions::operator==(const Definitions& other) const {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // ComputeWriteSet implementation
 
-// This assumes that all variable declarations have been pushed to the top
+// This assumes that all variable declarations have been pushed to the top.
+// We could remove this constraint if we also scanned variable declaration initializers.
 void ComputeWriteSet::initialize(const IR::IApply* block,
                                  const IR::IndexedVector<IR::Declaration>* locals,
                                  ProgramPoint startPoint) {

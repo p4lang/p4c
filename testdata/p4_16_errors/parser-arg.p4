@@ -14,20 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-header H {
-    bit<32> f;
-}
+parser Parser();
+parser MyParser(Parser p);
+package Package(MyParser p1, MyParser p2);
 
-control c() {
-    packet_in() p;
-    H h;
-
-    apply {
-        p.extract(h);
+parser Parser1(Parser p) {
+    state start {
+        p.apply();
+        transition accept;
     }
 }
 
-control proto();
-package top(proto _p);
+parser Parser2(Parser p) {
+    state start {
+        p.apply();
+        transition accept;
+    }
+}
 
-top(c()) main;
+Parser1() p1;
+Parser2() p2;
+
+Package(p1,p2) main;

@@ -1,4 +1,6 @@
-../testdata/p4_16_errors/packet_in-bmv2.p4(22):syntax error, unexpected IDENTIFIER, expecting ACTION or CONST or TABLE
-    packet_in
-            ^
-error: 1 errors encountered, aborting compilation
+../testdata/p4_16_errors/packet_in-bmv2.p4(24): error: p: type packet_in has no constructor with 0 arguments
+    packet_in() p;
+                ^
+/home/mbudiu/git/p4c/p4include/core.p4(40)
+extern packet_in {
+       ^^^^^^^^^

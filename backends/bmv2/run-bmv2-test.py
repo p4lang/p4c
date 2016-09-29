@@ -296,9 +296,6 @@ def process_file(options, argv):
         else:
             result = SUCCESS
 
-    #if result == SUCCESS:
-    #    result = check_generated_files(options, tmpdir, expected_dirname);
-
     if result == SUCCESS:
         result = run_model(options, tmpdir, jsonfile);
 

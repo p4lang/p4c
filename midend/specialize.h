@@ -34,54 +34,97 @@ namespace P4 {
 // A different specialization is made for each constructor invocation
 // and Declaration_Instance.
 
+// Describes how a parser or control is specialized:
 struct SpecializationInfo {
-    const IR::Vector<IR::Type>*       typeArguments;
-    const IR::Vector<IR::Expression>* constructorArguments;
-    const IR::Node*                   invocation;
+    // Name to use for specialized object
     cstring name;
+    // Actual parser or control that is being specialized
+    const IR::IContainer*              specialized;
+    // values to substitute for type arguments
+    const IR::Vector<IR::Type>*        typeArguments;
+    // values to substitute for constructor arguments
+    IR::Vector<IR::Expression>*        constructorArguments;
+    // declarations to insert in the list of locals
+    IR::IndexedVector<IR::Declaration>* declarations;
+    // Invocation which causes this specialization
+    const IR::Node*                    invocation;
+    // Where in the program should the specialization be inserted
+    const IR::Node*                    insertBefore;
+
+    SpecializationInfo(const IR::Node* invocation, const IR::IContainer* cont,
+                       const IR::Node* insertion) :
+            specialized(cont), typeArguments(nullptr),
+            constructorArguments(new IR::Vector<IR::Expression>()),
+            declarations(new IR::IndexedVector<IR::Declaration>()),
+            invocation(invocation), insertBefore(insertion)
+    { CHECK_NULL(cont); CHECK_NULL(invocation); CHECK_NULL(insertion); }
+    const IR::Type_Declaration* synthesize(ReferenceMap* refMap) const;
 };
 
-struct SpecializationMap {
+class SpecializationMap {
+    // map invocation to specialization
+    std::map<const IR::Node*, SpecializationInfo*> specializations;
+    const IR::Expression* convertArgument(const IR::Expression* arg, SpecializationInfo* info);
+
+ public:
     TypeMap*      typeMap;
     ReferenceMap* refMap;
-    // For each ConstructorCallExpression or Declaration_Instance
-    // we allocate a new name
-    std::map<const IR::Node*, cstring> newName;
-    std::vector<SpecializationInfo*>* getSpecializations(const IR::IContainer* decl);
-    bool isSpecialized(const IR::Node* node) const
-    { CHECK_NULL(node); return newName.find(node) != newName.end(); }
-    cstring get(const IR::Node* node) const
-    { CHECK_NULL(node); return ::get(newName, node); }
-    void clear() { newName.clear(); }
+    void addSpecialization(
+        const IR::ConstructorCallExpression* invocation,
+        const IR::IContainer* container,  // actual object specialized
+        const IR::Node* insertion);  // where the specialization should be inserted
+    void addSpecialization(
+        const IR::Declaration_Instance* invocation,
+        const IR::IContainer* container,  // actual object specialized
+        const IR::Node* insertion);  // where the specialization should be inserted
+    IR::Vector<IR::Node>* getSpecializations(const IR::Node* insertion) const;
+    cstring getName(const IR::Node* insertion) const {
+        auto s = ::get(specializations, insertion);
+        if (s == nullptr)
+            return nullptr;
+        return s->name;
+    }
+    void clear() { specializations.clear(); }
 };
 
 class FindSpecializations : public Inspector {
-    ReferenceMap*      refMap;
-    TypeMap*           typeMap;
     SpecializationMap* specMap;
- public:
-    FindSpecializations(ReferenceMap* refMap, TypeMap* typeMap, SpecializationMap* specMap) :
-            refMap(refMap), typeMap(typeMap), specMap(specMap) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(specMap);
-        setName("FindSpecializations"); }
 
+ public:
+    explicit FindSpecializations(SpecializationMap* specMap) : specMap(specMap) {
+        CHECK_NULL(specMap);
+        setName("FindSpecializations");
+    }
+
+    const IR::Node* findInsertionPoint() const;
     bool isSimpleConstant(const IR::Expression* expression) const;
     Visitor::profile_t init_apply(const IR::Node* node) override
     { specMap->clear(); return Inspector::init_apply(node); }
+    // True if this container does not have constructor or type
+    // parameters i.e., we can look inside for invocations to
+    // specialize.
+    bool noParameters(const IR::IContainer* container);
+
+    bool preorder(const IR::P4Parser* parser) override
+    { return noParameters(parser); }
+    bool preorder(const IR::P4Control* control) override
+    { return noParameters(control); }
     void postorder(const IR::ConstructorCallExpression* expression) override;
     void postorder(const IR::Declaration_Instance* decl) override;
 };
 
 class Specialize : public Transform {
-    ReferenceMap*      refMap;
     SpecializationMap* specMap;
+    const IR::Node* instantiate(const IR::Node* node);
  public:
-    Specialize(ReferenceMap* refMap, SpecializationMap* specMap) : refMap(refMap), specMap(specMap)
-    { CHECK_NULL(refMap); CHECK_NULL(specMap); setName("Specialize"); }
-    const IR::Node* postorder(IR::P4Parser* parser) override;
-    const IR::Node* postorder(IR::P4Control* control) override;
+    explicit Specialize(SpecializationMap* specMap) : specMap(specMap)
+    { CHECK_NULL(specMap); setName("Specialize"); }
+    const IR::Node* postorder(IR::P4Parser* parser) override
+    { return instantiate(parser); }
+    const IR::Node* postorder(IR::P4Control* control) override
+    { return instantiate(control); }
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
-    const IR::Node* postorder(IR::Declaration_Instance* decl) override;
+    const IR::Node* postorder(IR::Declaration_Instance*) override;
 };
 
 class SpecializeAll : public PassRepeated {

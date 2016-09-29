@@ -1,3 +1,5 @@
+parser simple(out bit<2> z);
+package m(simple n);
 parser p2_0(out bit<2> z2) {
     @name("x1") bit<2> x1;
     @name("x2") bit<2> x2;
@@ -25,6 +27,4 @@ parser p2_0(out bit<2> z2) {
     }
 }
 
-parser simple(out bit<2> z);
-package m(simple n);
 m(p2_0()) main;
