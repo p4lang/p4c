@@ -170,7 +170,7 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
         // Since we have only one 'changes' per P4Control, this may
         // be conservatively creating a new block when it hasn't changed.
         // But the result should be correct.
-        auto result = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, left);
+        auto result = new IR::BlockStatement(Util::SourceInfo(), statement->annotations, left);
         return result;
     }
     return statement;
