@@ -1937,9 +1937,12 @@ void JsonConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
                                 ref += "[" + Util::toString(i) + "]";
                                 result->append(ref);
                             }
-                        } else {
+                        } else if (type->is<IR::Type_Header>()) {
                             auto j = conv->convert(arg);
                             result->append(j->to<Util::JsonObject>()->get("value"));
+                        } else {
+                            ::error("%1%: emit only supports header and stack arguments, not %2%",
+                                    arg, type);
                         }
                     }
                     continue;

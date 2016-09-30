@@ -23,7 +23,6 @@ struct M { };
 parser ParserI(packet_in b, out H parsedHdr, inout M meta,
               inout standard_metadata_t standard_metadata) {
     state start {
-        b.extract(parsedHdr);  // illegal data type
         transition accept;
     }
 }
@@ -58,7 +57,9 @@ control ComputeChecksumI(inout H hdr,
 
 
 control DeparserI(packet_out b, in H hdr) {
-    apply { }
+    apply {
+        b.emit(hdr);  // illegal data type
+    }
 }
 
 
