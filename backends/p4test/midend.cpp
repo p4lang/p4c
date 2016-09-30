@@ -25,8 +25,8 @@ limitations under the License.
 #include "midend/local_copyprop.h"
 #include "midend/simplifyKey.h"
 #include "midend/parserUnroll.h"
-#include "midend/specialize.h"
 #include "midend/simplifySelect.h"
+#include "midend/parserControlFlow.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -47,19 +47,18 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
 
-    // TODO: def-use analysis and related optimizations
+    // TODO: def-use-related optimizations
     // TODO: parser loop unrolling
     // TODO: improve copy propagation
     // TODO: simplify actions which are too complex
     // TODO: lower errors to integers
     // TODO: handle bit-slices as out arguments
-    // TODO: remove control-flow from parsers
     addPasses({
+        new P4::RemoveParserControlFlow(&refMap, &typeMap),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
-        new P4::SpecializeAll(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([evaluator](const IR::Node *root) -> const IR::Node * {
             auto toplevel = evaluator->getToplevelBlock();

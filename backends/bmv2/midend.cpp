@@ -27,6 +27,7 @@ limitations under the License.
 #include "midend/removeLeftSlices.h"
 #include "midend/convertEnums.h"
 #include "midend/simplifyKey.h"
+#include "midend/parserControlFlow.h"
 #include "midend/simplifySelect.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/simplifyParsers.h"
@@ -82,6 +83,7 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
     // we may come through this path even if the program is actually a P4 v1.0 program
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
+        new P4::RemoveParserControlFlow(&refMap, &typeMap),
         new P4::ConvertEnums(&refMap, &typeMap,
                              new EnumOn32Bits()),
         new P4::RemoveReturns(&refMap),

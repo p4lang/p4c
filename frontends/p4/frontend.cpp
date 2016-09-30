@@ -42,6 +42,7 @@ limitations under the License.
 #include "sideEffects.h"
 #include "simplifyDefUse.h"
 #include "simplifyParsers.h"
+#include "specialize.h"
 
 namespace P4 {
 
@@ -106,6 +107,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         new SideEffectOrdering(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new SimplifyDefUse(&refMap, &typeMap),
+        new P4::SpecializeAll(&refMap, &typeMap),
     };
 
     passes.setName("FrontEnd");

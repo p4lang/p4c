@@ -33,6 +33,8 @@ midend_SOURCES = \
 	midend/moveConstructors.h \
 	midend/parserUnroll.h \
 	midend/parserUnroll.cpp \
+	midend/parserControlFlow.h \
+	midend/parserControlFlow.cpp \
 	midend/removeParameters.cpp \
 	midend/removeParameters.h \
 	midend/removeReturns.cpp \
@@ -42,8 +44,6 @@ midend_SOURCES = \
 	midend/simplifyKey.h \
 	midend/simplifyKey.cpp \
 	midend/simplifySelect.cpp \
-	midend/simplifySelect.h \
-	midend/specialize.h \
-	midend/specialize.cpp
+	midend/simplifySelect.h
 
 cpplint_FILES += $(midend_SOURCES)

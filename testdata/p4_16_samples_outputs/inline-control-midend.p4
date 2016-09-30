@@ -5,11 +5,11 @@ extern Y {
 
 control d(out bit<32> x) {
     @name("x_0") bit<32> x_1;
-    @name("tmp") bit<32> tmp_2;
-    @name("tmp_0") Y(32w16) tmp_1;
+    @name("tmp") bit<32> tmp_0;
+    @name("cinst.inst") Y(32w16) cinst_inst_0;
     action act() {
-        tmp_2 = tmp_1.get();
-        x_1 = tmp_2;
+        tmp_0 = cinst_inst_0.get();
+        x_1 = tmp_0;
         x = x_1;
     }
     table tbl_act() {

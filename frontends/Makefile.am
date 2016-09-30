@@ -81,7 +81,9 @@ p4_frontend_SOURCES = \
 	frontends/p4/resetHeaders.cpp \
 	frontends/p4/resetHeaders.h \
 	frontends/p4/moveDeclarations.cpp \
-	frontends/p4/moveDeclarations.h
+	frontends/p4/moveDeclarations.h \
+	frontends/p4/specialize.h \
+	frontends/p4/specialize.cpp
 
 common_frontend_SOURCES = \
 	frontends/common/options.h  \
