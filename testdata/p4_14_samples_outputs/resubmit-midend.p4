@@ -46,11 +46,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-struct struct_0 {
-    standard_metadata_t field;
-    mymeta_t            field_0;
-}
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction_1") action NoAction() {
     }
@@ -65,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("_resubmit") action _resubmit_0() {
         meta.mymeta.f1 = 8w1;
-        resubmit<struct_0>({ standard_metadata, meta.mymeta });
+        resubmit<tuple<standard_metadata_t, mymeta_t>>({ standard_metadata, meta.mymeta });
     }
     @name("t_ingress_1") table t_ingress_1() {
         actions = {

@@ -242,6 +242,22 @@ bool ToP4::preorder(const IR::Type_Typedef* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::Type_Tuple* t) {
+    dump(1);
+    builder.append("tuple<");
+    bool first = true;
+    for (auto a : *t->components) {
+        if (!first)
+            builder.append(", ");
+        first = false;
+        auto p4type = a->getP4Type();
+        CHECK_NULL(p4type);
+        visit(p4type);
+    }
+    builder.append(">");
+    return false;
+}
+
 bool ToP4::preorder(const IR::Type_Enum* t) {
     dump(1);
     builder.append("enum ");

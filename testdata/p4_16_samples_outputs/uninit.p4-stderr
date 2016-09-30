@@ -16,6 +16,9 @@
 ../testdata/p4_16_samples/uninit.p4(42): warning: [] may not be completely initialized
         stack[0] = stack[1];
                    ^^^^^^^^
+../testdata/p4_16_samples/uninit.p4(62): warning: c_0 may be uninitialized
+        c = !c;
+             ^
 ../testdata/p4_16_samples/uninit.p4(82): warning: b_1 may be uninitialized
         b = b + 1;
             ^

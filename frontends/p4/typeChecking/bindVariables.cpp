@@ -10,25 +10,9 @@ const IR::Type* BindTypeVariables::getVarValue(const IR::Type_Var* var) const {
 }
 
 const IR::Type* BindTypeVariables::getP4Type(const IR::Type* type) const {
-    if (type->is<IR::Type_Tuple>()) {
-        auto fields = new IR::IndexedVector<IR::StructField>();
-        auto tuple = type->to<IR::Type_Tuple>();
-        for (auto f : *tuple->components) {
-            auto t = getP4Type(f);
-            cstring fname = refMap->newName("field");
-            auto field = new IR::StructField(Util::SourceInfo(), fname, IR::Annotations::empty, t);
-            fields->push_back(field);
-        }
-        cstring name = refMap->newName("struct");
-        auto strct = new IR::Type_Struct(Util::SourceInfo(), IR::ID(name),
-                                         IR::Annotations::empty, fields);
-        newTypes->push_back(strct);
-        return getP4Type(strct);
-    } else {
-        auto rtype = type->getP4Type();
-        CHECK_NULL(rtype);
-        return rtype;
-    }
+    auto rtype = type->getP4Type();
+    CHECK_NULL(rtype);
+    return rtype;
 }
 
 const IR::Node* BindTypeVariables::postorder(IR::Expression* expression) {

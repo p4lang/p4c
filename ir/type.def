@@ -253,7 +253,7 @@ class Type_Tuple : Type {
     Vector<Type> components;
     toString{ return "Tuple(" + Util::toString(components->size()) + ")"; }
     validate{ components->check_null(); }
-    const Type* getP4Type() const override { return nullptr; }
+    const Type* getP4Type() const override { return this; }
 }
 
 // The type of an architectural block.

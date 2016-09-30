@@ -119,7 +119,7 @@ static int yylex();
             DEFAULT DONTCARE ELSE ENUM T_ERROR  // There is an ERROR macro elsewhere
             EXIT EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
             PACKAGE PARSER RANGE RETURN STATE STRUCT SWITCH TABLE TRANSITION
-            TYPEDEF VARBIT VOID
+            TUPLE TYPEDEF VARBIT VOID
 %token<str> IDENTIFIER TYPE NAMESPACE STRING_LITERAL
 %token<Constant>  INTEGER
 
@@ -131,7 +131,7 @@ static int yylex();
                         keysetExpression selectExpression stateExpression optInitializer initializer
                         argument simpleKeysetExpression transitionStatement switchLabel
 %type<PathPrefix>       pathPrefix relativePathPrefix nonEmptyRelativePathPrefix
-%type<TypePtr>          baseType typeOrVoid specializedType headerStackType typeRef typeArg
+%type<TypePtr>          baseType typeOrVoid specializedType headerStackType typeRef tupleType typeArg
 %type<Type_Name>        typeName
 %type<Parameter>        parameter
 %type<annos>            optAnnotations
@@ -431,8 +431,7 @@ selectCase
     ;
 
 keysetExpression
-    : DEFAULT                   { $$ = new IR::DefaultExpression(@1); }
-    | tupleKeysetExpression     { $$ = new IR::ListExpression(@1, $1); }
+    : tupleKeysetExpression     { $$ = new IR::ListExpression(@1, $1); }
     | simpleKeysetExpression    { $$ = $1; }
     ;
 
@@ -532,11 +531,16 @@ typeRef
     | typeName                         { $$ = $1; }
     | specializedType                  { $$ = $1; }
     | headerStackType                  { $$ = $1; }
+    | tupleType                        { $$ = $1; }
     ;
 
 typeName
     : TYPE                        { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, $1))); }
     | pathPrefix TYPE             { $$ = new IR::Type_Name(@1, new IR::Path($1, IR::ID(@2, $2))); }
+    ;
+
+tupleType
+    : TUPLE '<' typeArgumentList '>'   { $$ = new IR::Type_Tuple(@1+@4, $3); }
     ;
 
 headerStackType

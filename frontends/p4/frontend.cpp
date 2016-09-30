@@ -91,7 +91,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         // explicit casts where implicit casts exist.
         new ResolveReferences(&refMap),
         new TypeInference(&refMap, &typeMap),
-        new BindTypeVariables(&refMap, &typeMap),
+        new BindTypeVariables(&typeMap),
         // Another round of constant folding, using type information.
         new ClearTypeMap(&typeMap),
         new ConstantFolding(&refMap, &typeMap),

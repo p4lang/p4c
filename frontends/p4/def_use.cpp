@@ -591,6 +591,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
         // We need a new visitor to visit the state,
         // but we use the same data structures
         ProgramPoint pt(state);
+        currentDefinitions = definitions->get(pt);
         ComputeWriteSet cws(this, pt, currentDefinitions);
         (void)state->apply(cws);
 

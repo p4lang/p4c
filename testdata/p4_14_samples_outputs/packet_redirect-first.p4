@@ -47,24 +47,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-struct struct_0 {
-    standard_metadata_t field;
-    metaA_t             field_0;
-}
-
-struct struct_1 {
-    standard_metadata_t field_1;
-    metaA_t             field_2;
-}
-
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("_nop") action _nop() {
     }
     @name("_recirculate") action _recirculate() {
-        recirculate<struct_0>({ standard_metadata, meta.metaA });
+        recirculate<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
     }
     @name("_clone_e2e") action _clone_e2e(bit<8> mirror_id) {
-        clone3<struct_1>(CloneType.E2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
+        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
     @name("t_egress") table t_egress() {
         actions = {
@@ -85,16 +75,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-struct struct_2 {
-    standard_metadata_t field_3;
-    metaA_t             field_4;
-}
-
-struct struct_3 {
-    standard_metadata_t field_5;
-    metaA_t             field_6;
-}
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("_nop") action _nop() {
     }
@@ -106,10 +86,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.intrinsic_metadata.mcast_grp = mgrp;
     }
     @name("_resubmit") action _resubmit() {
-        resubmit<struct_2>({ standard_metadata, meta.metaA });
+        resubmit<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
     }
     @name("_clone_i2e") action _clone_i2e(bit<8> mirror_id) {
-        clone3<struct_3>(CloneType.I2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
+        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
     @name("t_ingress_1") table t_ingress_1() {
         actions = {

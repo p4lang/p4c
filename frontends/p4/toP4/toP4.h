@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -134,6 +134,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Type_Typedef* t) override;
     bool preorder(const IR::Type_Extern* t) override;
     bool preorder(const IR::Type_Unknown* t) override;
+    bool preorder(const IR::Type_Tuple* t) override;
 
     // declarations
     bool preorder(const IR::Declaration_Constant* cst) override;

@@ -103,6 +103,7 @@ std::string stringLiteral;
 "this"          { BEGIN(NORMAL); return THIS; }
 "transition"    { BEGIN(NORMAL); return TRANSITION; }
 "true"          { BEGIN(NORMAL); return TRUE; }
+"tuple"         { BEGIN(NORMAL); return TUPLE; }
 "typedef"       { BEGIN(NORMAL); return TYPEDEF; }
 "varbit"        { BEGIN(NORMAL); return VARBIT; }
 "void"          { BEGIN(NORMAL); return VOID; }
