@@ -140,6 +140,7 @@ class PathPrefix {
     void setAbsolute() { absolute = true; }
     toString{
         // Prints path prefix without the trailing dot
+        // This uses the original name
         std::stringstream result;
         bool first = true;
         if (absolute)
@@ -148,7 +149,7 @@ class PathPrefix {
             if (!first)
                 result << ".";
             first = false;
-            result << a.name.c_str();
+            result << a.toString();
         }
         return cstring(result.str());
     }
@@ -161,14 +162,33 @@ class Path {
     Path { if (!srcInfo) srcInfo = prefix ? prefix->srcInfo + name.srcInfo : name.srcInfo; }
     bool isDontCare() const { return prefix == nullptr && name.isDontCare(); }
     toString{
+        // This is the ORIGINAL name the user used
         std::stringstream str;
         if (prefix == nullptr) {
-            str << name;
+            str << name.toString();
         } else {
             cstring ps = prefix->toString();
-            str << ps << "." << name;
+            str << ps << "." << name.toString();
         }
         return cstring(str.str());
+    }
+    cstring asString() const {
+        // The CURRENT internal name
+        std::stringstream result;
+        bool first = true;
+        if (prefix != nullptr) {
+            if (prefix->absolute)
+                first = false;
+            for (auto a : prefix->components) {
+                if (!first)
+                    result << ".";
+                first = false;
+                result << a;
+            }
+            result << ".";
+        }
+        result << name;
+        return cstring(result.str());
     }
     dbprint{ Node::dbprint(out); out << ":" << toString(); }
 }

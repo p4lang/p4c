@@ -1189,7 +1189,7 @@ bool ToP4::preorder(const IR::P4Table* c) {
 }
 
 bool ToP4::preorder(const IR::Path* p) {
-    builder.append(p->toString());
+    builder.append(p->asString());
     return false;
 }
 }  // namespace P4

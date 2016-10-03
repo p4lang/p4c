@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,15 +24,19 @@ limitations under the License.
 
 namespace IR {
 
-// an identifier
+// An identifier.
 struct ID : Util::IHasSourceInfo {
     Util::SourceInfo    srcInfo;
     cstring             name = nullptr;
+    // We save the original name to show the user on error messages
+    cstring             originalName = nullptr;
     ID() = default;
-    ID(Util::SourceInfo si, cstring n) : srcInfo(si), name(n) {
-        if (n.isNullOrEmpty()) BUG("Identifier with no name"); }
-    ID(const char *n) : ID(Util::SourceInfo(), n) {}  // NOLINT(runtime/explicit)
-    ID(cstring n) : ID(Util::SourceInfo(), n) {}  // NOLINT(runtime/explicit)
+    ID(Util::SourceInfo si, cstring n, cstring o = nullptr) : srcInfo(si), name(n), originalName(o)
+    { if (n.isNullOrEmpty()) BUG("Identifier with no name"); }
+    ID(const char *n, const char* o = nullptr) :  // NOLINT(runtime/explicit)
+            ID(Util::SourceInfo(), n, o) {}
+    ID(cstring n, cstring o = nullptr) :  // NOLINT(runtime/explicit)
+            ID(Util::SourceInfo(), n, o) {}
     void dbprint(std::ostream &out) const { out << name; }
     bool operator==(const ID &a) const { return name == a.name; }
     bool operator!=(const ID &a) const { return name != a.name; }
@@ -40,7 +44,7 @@ struct ID : Util::IHasSourceInfo {
     operator cstring() const { return name; }
     bool isDontCare() const { return name == "_"; }
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
-    cstring toString() const override { return name; }
+    cstring toString() const override { return originalName.isNullOrEmpty() ? name : originalName; }
 };
 
 }  // namespace IR
