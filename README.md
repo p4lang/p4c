@@ -44,8 +44,7 @@ travis/install-nnpy.sh
 To make your life easier, we provide the *install_deps.sh* script, which will
 install all the dependencies needed on Ubuntu 14.04.
 
-Our Travis regression tests run on Ubuntu 12.04. Look at .travis.yml for more
-information on the Ubuntu 12.04 dependencies.
+Our Travis regression tests now run on Ubuntu 14.04.
 
 On MacOS you can use the tools/macos/bootstrap_mac.sh script to
 install all the above dependencies using homebrew. Note that in order
