@@ -141,7 +141,6 @@ static int yylex();
 %type<exprs>            argumentList nonEmptyArgList expressionList simpleExpressionList
                         tupleKeysetExpression
 %type<ids>              identifierList
-%type<id>               member
 %type<SelectCase>       selectCase
 %type<selectCases>      selectCaseList
 %type<Statement>        statement emptyStatement returnStatement switchStatement exitStatement
@@ -873,15 +872,11 @@ expressionList
     | expressionList ',' expression      { $$ = $1; $$->push_back($3); }
     ;
 
-member
-    : name
-    ;
-
 lvalue
     : nonTypeName                        { $$ = new IR::PathExpression(*$1); }
     | THIS                               { $$ = new IR::This(@1); }
     | pathPrefix nonTypeName             { $$ = new IR::PathExpression(new IR::Path($1, *$2)); }
-    | lvalue '.' member                  { $$ = new IR::Member(@1 + @3, $1, *$3); }
+    | lvalue '.' name                    { $$ = new IR::Member(@1 + @3, $1, *$3); }
     | lvalue '[' expression ']'          { $$ = new IR::ArrayIndex(@1 + @3, $1, $3); }
     | lvalue '[' expression ':' expression ']' { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     ;
@@ -902,10 +897,10 @@ expression
     | '~' expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | '-' expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
     | '+' expression %prec PREFIX        { $$ = $2; }
-    | typeName '.' member                { $$ = new IR::Member(@1 + @3,
+    | typeName '.' name                  { $$ = new IR::Member(@1 + @3,
                                                                new IR::TypeNameExpression(@1, $1),
                                                                *$3); }
-    | expression '.' member              { $$ = new IR::Member(@1 + @3, $1, *$3); }
+    | expression '.' name                { $$ = new IR::Member(@1 + @3, $1, *$3); }
     | expression '*' expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }
     | expression '/' expression          { $$ = new IR::Div(@1 + @3, $1, $3); }
     | expression '%' expression          { $$ = new IR::Mod(@1 + @3, $1, $3); }
