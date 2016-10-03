@@ -313,7 +313,7 @@ struct struct_2 {
     bit<16> field_24;
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control verifyChecksum(in headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     Checksum16() tcp_checksum;
     apply {
@@ -355,7 +355,7 @@ struct struct_4 {
     bit<16> field_49;
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() ipv4_checksum;
     Checksum16() tcp_checksum;
     apply {
