@@ -29,6 +29,9 @@ void ValidateParsedProgram::postorder(const IR::Constant* c) {
 void ValidateParsedProgram::postorder(const IR::Method* m) {
     if (m->name.isDontCare())
         ::error("%1%: Illegal method/function name", m->name);
+    if (auto ext = findContext<IR::Type_Extern>()) {
+        if (m->name == ext->name && m->type->returnType != nullptr)
+            ::error("%1%: Constructor can't have return type", m); }
 }
 
 void ValidateParsedProgram::postorder(const IR::StructField* f) {
