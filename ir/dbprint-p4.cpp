@@ -47,8 +47,45 @@ void IR::CalculatedField::dbprint(std::ostream &out) const {
         if (spec.cond) out << " if " << spec.cond; }
     out << unindent;
 }
-void IR::CaseEntry::dbprint(std::ostream &out) const { out << "IR::CaseEntry"; }
-void IR::V1Parser::dbprint(std::ostream &out) const { out << "IR::V1Parser"; }
+void IR::CaseEntry::dbprint(std::ostream &out) const {
+    const char *sep = "";
+    int prec = getprec(out);
+    out << setprec(Prec_Low);
+    for (auto &val : values) {
+        if (val.second->asLong() == -1)
+            out << sep << *val.first;
+        else if (val.second->asLong() == 0)
+            out << sep << "default";
+        else
+            out << sep << *val.first << " &&& " << *val.second;
+        sep = ", "; }
+    out << ':' << setprec(prec) << " " << action;
+}
+void IR::V1Parser::dbprint(std::ostream &out) const {
+    out << "parser " << name << " {" << indent;
+    for (auto &stmt : stmts)
+        out << endl << *stmt;
+    if (select) {
+        int prec = getprec(out);
+        const char *sep = "";
+        out << endl << "select (" << setprec(Prec_Low);
+        for (auto e : *select) {
+            out << sep << *e;
+            sep = ", "; }
+        out << ") {" << indent << setprec(prec); }
+    if (cases)
+        for (auto c : *cases)
+            out << endl << *c;
+    if (select)
+        out << " }" << unindent;
+    if (default_return)
+        out << endl << "return " << default_return << ";";
+    if (parse_error)
+        out << endl << "error " << parse_error << ";";
+    if (drop)
+        out << endl << "drop;";
+    out << " }" << unindent;
+}
 void IR::ParserException::dbprint(std::ostream &out) const { out << "IR::ParserException"; }
 void IR::Counter::dbprint(std::ostream &out) const { IR::Attached::dbprint(out); }
 void IR::Meter::dbprint(std::ostream &out) const { IR::Attached::dbprint(out); }
