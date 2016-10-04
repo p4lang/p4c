@@ -79,6 +79,10 @@ class ConcreteHeaderRef : HeaderRef {
 class HeaderStackItemRef : HeaderRef {
     Expression      base_;
     Expression      index_;
+    HeaderStackItemRef {
+        if (type->is<Type::Unknown>() && base_)
+            if (auto *hr = base_->to<HeaderRef>())
+                type = hr->baseRef()->type; }
     Expression base() const { return base_; }
     HeaderOrMetadata baseRef() const override { return base_->to<HeaderRef>()->baseRef(); }
     Expression index() const { return index_; }
