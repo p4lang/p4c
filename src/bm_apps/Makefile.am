@@ -7,6 +7,7 @@ AM_CPPFLAGS += \
 
 libbmapps_la_SOURCES = \
 learn.cpp \
+notifications.cpp \
 packet_pipe.cpp \
 nn.h
 

@@ -2,6 +2,7 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
 nobase_include_HEADERS = \
 bm/bm_apps/learn.h \
+bm/bm_apps/notifications.h \
 bm/bm_apps/packet_pipe.h
 
 nobase_include_HEADERS += \
