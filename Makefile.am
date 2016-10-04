@@ -33,7 +33,7 @@ noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
 TESTS =                        # Tests to execute
-XFAIL_TESTS =                  # Tests that are supposed to fail
+XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
 IFAIL_TESTS =                  # intermittent failures
 export XFAIL_TESTS
 export IFAIL_TESTS

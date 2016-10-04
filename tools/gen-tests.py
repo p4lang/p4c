@@ -67,11 +67,11 @@ def generate(exe, srcdir, prefix, command, test_args, test_names):
     print
     for i in range(0, len(test_names)):
         test = filename(prefix, test_names[i])
-        print(test, ": ", test_names[i])
+        print(test, ": Makefile ", test_names[i])
         print("\t@mkdir -p", os.path.dirname(test))
         print("\t@echo \"cd $$PWD\" >$@")
         if 'IFAIL_TESTS' in os.environ and os.environ['IFAIL_TESTS'].find(test) >= 0:
-            print("\t@echo 'if' >$@")
+            print("\t@echo 'if' >>$@")
             ifail = True
         else:
             ifail = False
@@ -103,7 +103,8 @@ def main(argv):
         test_names = test_names[1:]
     # This $* may be handy when running the test by hand.
     test_args.append("$$*");
-    test_names = [name for name in test_names if os.path.isfile(name)]
+    test_names = [name for name in test_names
+        if os.path.isfile(name) and not "/tools/" in name and not "Makefile" in name]
     for i in range(0, len(test_names)):
         if test_names[i].startswith(srcdir):
             test_names[i] = test_names[i][len(srcdir):]
