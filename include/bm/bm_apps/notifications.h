@@ -64,6 +64,11 @@ class NotificationsListener {
   typedef std::function<void(const AgeingMsgInfo &msg_info,
                              const char *, void *)> AgeingCb;
 
+  enum class PortEvent { PORT_UP, PORT_DOWN };
+
+  typedef std::function<void(switch_id_t, int port_num, PortEvent,
+                             void *)> PortEventCb;
+
  public:
   explicit NotificationsListener(
       const std::string &socket_name = "ipc:///tmp/bmv2-0-notifications.ipc");
@@ -75,6 +80,8 @@ class NotificationsListener {
   void register_learn_cb(const LearnCb &cb, void *cookie);
 
   void register_ageing_cb(const AgeingCb &cb, void *cookie);
+
+  void register_port_event_cb(const PortEventCb &cb, void *cookie);
 
  private:
   std::unique_ptr<NotificationsListenerImp> pimp;

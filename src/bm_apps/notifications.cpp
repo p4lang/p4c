@@ -53,6 +53,13 @@ typedef struct {
   char _padding[4];
 } __attribute__((packed)) AGE_hdr_t;
 
+typedef struct {
+  char sub_topic[4];
+  int switch_id;
+  unsigned int num_statuses;
+  char _padding[20];
+} __attribute__((packed)) PRT_hdr_t;
+
 }  // namespace
 
 class NotificationsListenerImp {
@@ -61,6 +68,8 @@ class NotificationsListenerImp {
   using LearnMsgInfo = NotificationsListener::LearnMsgInfo;
   using AgeingCb = NotificationsListener::AgeingCb;
   using AgeingMsgInfo = NotificationsListener::AgeingMsgInfo;
+  using PortEventCb = NotificationsListener::PortEventCb;
+  using PortEvent = NotificationsListener::PortEvent;
 
   explicit NotificationsListenerImp(const std::string &socket_name)
       : socket_name(socket_name), s(AF_SP, NN_SUB) {
@@ -91,17 +100,23 @@ class NotificationsListenerImp {
     LEA_cb_cookie = cookie;
   }
 
-  void
-  register_ageing_cb(const AgeingCb &cb, void *cookie) {
+  void register_ageing_cb(const AgeingCb &cb, void *cookie) {
     std::unique_lock<std::mutex> lock(mutex);
     AGE_cb_fn = cb;
     AGE_cb_cookie = cookie;
+  }
+
+  void register_port_event_cb(const PortEventCb &cb, void *cookie) {
+    std::unique_lock<std::mutex> lock(mutex);
+    PRT_cb_fn = cb;
+    PRT_cb_cookie = cookie;
   }
 
  private:
   void listen_loop();
   void receive_AGE(const char *hdr, const char *data);
   void receive_LEA(const char *hdr, const char *data);
+  void receive_PRT(const char *hdr, const char *data);
 
   std::string socket_name{};
   nn::socket s;
@@ -110,6 +125,8 @@ class NotificationsListenerImp {
   void *LEA_cb_cookie{nullptr};
   AgeingCb AGE_cb_fn{};
   void *AGE_cb_cookie{nullptr};
+  PortEventCb PRT_cb_fn{};
+  void *PRT_cb_cookie{nullptr};
 
   std::thread listen_thread{};
   bool stop_listen_thread{false};
@@ -128,7 +145,7 @@ NotificationsListenerImp::receive_AGE(const char *hdr, const char *data) {
     std::unique_lock<std::mutex> lock(mutex);
     cb = AGE_cb_fn;
   }
-  const AGE_hdr_t *hdr_ = reinterpret_cast<const AGE_hdr_t *>(hdr);
+  auto hdr_ = reinterpret_cast<const AGE_hdr_t *>(hdr);
   AgeingMsgInfo info = {hdr_->switch_id, hdr_->cxt_id, hdr_->table_id,
                         hdr_->buffer_id, hdr_->num_entries};
   cb(info, data, AGE_cb_cookie);
@@ -146,10 +163,37 @@ NotificationsListenerImp::receive_LEA(const char *hdr, const char *data) {
     std::unique_lock<std::mutex> lock(mutex);
     cb = LEA_cb_fn;
   }
-  const LEA_hdr_t *hdr_ = reinterpret_cast<const LEA_hdr_t *>(hdr);
+  auto hdr_ = reinterpret_cast<const LEA_hdr_t *>(hdr);
   LearnMsgInfo info = {hdr_->switch_id, hdr_->cxt_id, hdr_->list_id,
                        hdr_->buffer_id, hdr_->num_samples};
   cb(info, data, LEA_cb_cookie);
+}
+
+void
+NotificationsListenerImp::receive_PRT(const char *hdr, const char *data) {
+  std::cout << "Received port notification\n";
+  if (!PRT_cb_fn) {
+    std::cout << "No cb registered\n";
+    return;
+  }
+  PortEventCb cb;
+  {
+    std::unique_lock<std::mutex> lock(mutex);
+    cb = PRT_cb_fn;
+  }
+  auto hdr_ = reinterpret_cast<const PRT_hdr_t *>(hdr);
+
+  typedef struct {
+    int port;
+    int status;
+  } __attribute__((packed)) one_status_t;
+  auto statuses = reinterpret_cast<const one_status_t *>(data);
+
+  for (unsigned int i = 0; i < hdr_->num_statuses; i++) {
+    PortEvent status = (statuses[i].status) ?
+        PortEvent::PORT_UP : PortEvent::PORT_DOWN;
+    cb(hdr_->switch_id, statuses[i].port, status, PRT_cb_cookie);
+  }
 }
 
 void
@@ -179,8 +223,10 @@ NotificationsListenerImp::listen_loop() {
       receive_AGE(hdr, data);
     } else if (!memcmp("LEA|", hdr, 4)) {
       receive_LEA(hdr, data);
+    } else if (!memcmp("PRT|", hdr, 4)) {
+      receive_PRT(hdr, data);
     } else {
-      std::cout << "Unknow notification type\n";
+      std::cout << "Unknown notification type\n";
     }
   }
 }
@@ -207,6 +253,12 @@ NotificationsListener::register_learn_cb(const LearnCb &cb, void *cookie) {
 void
 NotificationsListener::register_ageing_cb(const AgeingCb &cb, void *cookie) {
   pimp->register_ageing_cb(cb, cookie);
+}
+
+void
+NotificationsListener::register_port_event_cb(const PortEventCb &cb,
+                                              void *cookie) {
+  pimp->register_port_event_cb(cb, cookie);
 }
 
 }  // namespace bm_apps

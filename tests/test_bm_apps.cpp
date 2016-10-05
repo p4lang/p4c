@@ -22,13 +22,13 @@
 
 #include <bm/bm_sim/ageing.h>
 #include <bm/bm_sim/learning.h>
+#include <bm/bm_sim/port_monitor.h>
 #include <bm/bm_sim/transport.h>
 #include <bm/bm_apps/notifications.h>
 
 #include <string>
 #include <memory>
 #include <future>
-#include <thread>
 #include <chrono>
 
 class NotificationsTest : public ::testing::Test {
@@ -106,7 +106,7 @@ class NotificationsTest : public ::testing::Test {
 
   static const std::string notifications_addr;
 
-  std::unique_ptr<bm::TransportIface> transport;
+  std::shared_ptr<bm::TransportIface> transport;
   NotificationsListener notifications;
 };
 
@@ -157,4 +157,49 @@ TEST_F(NotificationsTest, Learn) {
   auto received = future.get();
   ASSERT_TRUE(compare(input_info, received.info));
   ASSERT_TRUE(check_data(received.data));
+}
+
+TEST_F(NotificationsTest, PortEvent) {
+  using PortEvent = NotificationsListener::PortEvent;
+  using PortStatus = bm::PortMonitorIface::PortStatus;
+  using switch_id_t = NotificationsListener::switch_id_t;
+  switch_id_t switch_id = 3;
+  auto port_monitor = bm::PortMonitorIface::make_passive(switch_id, transport);
+
+  // generates a port event and wait for notification; if no notification
+  // expected, use event_expected = false and port_event will be ignored.
+  auto test = [this, switch_id, &port_monitor](
+      int port_num, PortStatus port_status,
+      bool event_expected, PortEvent port_event = PortEvent::PORT_UP) {
+    struct PortEventData {
+      switch_id_t switch_id;
+      int port_num;
+      PortEvent port_event;
+    };
+    std::promise<PortEventData> promise;
+    auto future = promise.get_future();
+    auto cb = [](switch_id_t switch_id, int port_num, PortEvent port_event,
+                 void *cookie) {
+      PortEventData data = {switch_id, port_num, port_event};
+      static_cast<decltype(&promise)>(cookie)->set_value(data);
+    };
+    notifications.register_port_event_cb(cb, static_cast<void *>(&promise));
+    port_monitor->notify(port_num, port_status);
+
+    auto status = future.wait_for(std::chrono::seconds(1));
+    auto event_received = (status == decltype(status)::ready);
+
+    ASSERT_EQ(event_expected, event_received);
+    if (event_expected) {
+      auto received = future.get();
+      ASSERT_EQ(switch_id, received.switch_id);
+      ASSERT_EQ(port_num, received.port_num);
+      ASSERT_EQ(port_event, received.port_event);
+    }
+  };
+
+  test(1, PortStatus::PORT_ADDED, false);
+  test(1, PortStatus::PORT_UP, true, PortEvent::PORT_UP);
+  test(1, PortStatus::PORT_DOWN, true, PortEvent::PORT_DOWN);
+  test(1, PortStatus::PORT_UP, true, PortEvent::PORT_UP);
 }
