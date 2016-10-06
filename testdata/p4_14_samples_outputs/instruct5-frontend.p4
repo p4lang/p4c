@@ -4,17 +4,15 @@
 header data_t {
     bit<32> f1;
     bit<32> f2;
-    bit<32> f3;
-    bit<32> f4;
     bit<8>  b1;
     bit<8>  b2;
     bit<8>  b3;
-    bit<8>  b4;
+    bit<8>  more;
 }
 
 header data2_t {
-    bit<16> x1;
-    bit<16> x2;
+    bit<24> x1;
+    bit<8>  more;
 }
 
 struct metadata {
@@ -30,34 +28,57 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_extra") state parse_extra {
         packet.extract<data2_t>(hdr.extra.next);
-        transition select(hdr.extra.last.x1) {
-            16w1 &&& 16w1: parse_extra;
-            default: accept;
+        transition select(hdr.extra.last.more) {
+            8w0: accept;
+            default: parse_extra;
         }
     }
     @name("start") state start {
         packet.extract<data_t>(hdr.data);
-        transition select(hdr.data.b1) {
-            8w0x0: parse_extra;
-            default: accept;
+        transition select(hdr.data.more) {
+            8w0: accept;
+            default: parse_extra;
         }
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("output") action output_1(bit<9> port) {
+        standard_metadata.egress_spec = port;
+    }
     @name("noop") action noop_0() {
     }
-    @name("push1") action push1_0() {
+    @name("push1") action push1_0(bit<24> x1) {
         hdr.extra.push_front(1);
+        hdr.extra[0].x1 = x1;
+        hdr.extra[0].more = hdr.data.more;
+        hdr.data.more = 8w1;
     }
-    @name("push2") action push2_0() {
+    @name("push2") action push2_0(bit<24> x1, bit<24> x2) {
         hdr.extra.push_front(2);
+        hdr.extra[0].x1 = x1;
+        hdr.extra[0].more = 8w1;
+        hdr.extra[1].x1 = x2;
+        hdr.extra[1].more = hdr.data.more;
+        hdr.data.more = 8w1;
+    }
+    @name("pop1") action pop1_0() {
+        hdr.data.more = hdr.extra[0].more;
+        hdr.extra.pop_front(1);
+    }
+    @name("output") table output_2() {
+        actions = {
+            output_1();
+            NoAction();
+        }
+        default_action = output_1(9w1);
     }
     @name("test1") table test1_0() {
         actions = {
             noop_0();
             push1_0();
             push2_0();
+            pop1_0();
             NoAction();
         }
         key = {
@@ -67,6 +88,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         test1_0.apply();
+        output_2.apply();
     }
 }
 

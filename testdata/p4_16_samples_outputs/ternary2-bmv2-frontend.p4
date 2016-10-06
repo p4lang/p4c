@@ -144,6 +144,7 @@ control egress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta
 control deparser(packet_out b, in packet_t hdrs) {
     apply {
         b.emit<data_h>(hdrs.data);
+        b.emit<extra_h[4]>(hdrs.extra);
     }
 }
 
