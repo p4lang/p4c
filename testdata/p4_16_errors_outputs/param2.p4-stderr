@@ -1,0 +1,3 @@
+../testdata/p4_16_errors/param2.p4(24): error: e: Table parameters cannot be direction-less
+    table t(E e) {
+              ^

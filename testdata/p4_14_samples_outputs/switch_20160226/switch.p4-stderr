@@ -1,0 +1,39 @@
+../testdata/p4_14_samples/switch_20160226/nexthop.p4(138): warning: fair: Action selector attribute ignored
+    selection_mode : fair;
+                     ^^^^
+../testdata/p4_14_samples/switch_20160226/fabric.p4(254): warning: fair: Action selector attribute ignored
+    selection_mode : fair;
+                     ^^^^
+../testdata/p4_14_samples/switch_20160226/port.p4(312): warning: fair: Action selector attribute ignored
+    selection_mode : fair;
+                     ^^^^
+../testdata/p4_14_samples/switch_20160226/l3.p4(140): warning: -1: negative value with unsigned type
+    add_to_field(ipv4.ttl, -1);
+                            ^
+../testdata/p4_14_samples/switch_20160226/l3.p4(150): warning: -1: negative value with unsigned type
+    add_to_field(ipv4.ttl, -1);
+                            ^
+../testdata/p4_14_samples/switch_20160226/l3.p4(156): warning: -1: negative value with unsigned type
+    add_to_field(ipv6.hopLimit, -1);
+                                 ^
+../testdata/p4_14_samples/switch_20160226/l3.p4(166): warning: -1: negative value with unsigned type
+    add_to_field(ipv6.hopLimit, -1);
+                                 ^
+../testdata/p4_14_samples/switch_20160226/l3.p4(172): warning: -1: negative value with unsigned type
+    add_to_field(mpls[0].ttl, -1);
+                               ^
+../testdata/p4_14_samples/switch_20160226/tunnel.p4(880): warning: -14: negative value with unsigned type
+    add(egress_metadata.payload_length, standard_metadata.packet_length, -14);
+                                                                          ^^
+../testdata/p4_14_samples/switch_20160226/security.p4(44): warning: Could not infer type for meter_idx, using bit<8>
+action set_storm_control_meter(meter_idx) {
+                               ^^^^^^^^^
+../testdata/p4_14_samples/switch_20160226/fabric.p4(230): warning: Could not infer type for fabric_mgid, using bit<8>
+action set_fabric_multicast(fabric_mgid) {
+                            ^^^^^^^^^^^
+../testdata/p4_14_samples/switch_20160226/acl.p4(470): warning: Could not infer type for drop_reason, using bit<8>
+action drop_packet_with_reason(drop_reason) {
+                               ^^^^^^^^^^^
+../testdata/p4_14_samples/switch_20160226/acl.p4(436): warning: Could not infer type for session_id, using bit<8>
+action negative_mirror(session_id) {
+                       ^^^^^^^^^^

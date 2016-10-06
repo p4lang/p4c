@@ -1,0 +1,4 @@
+extern X {
+    void X();
+}
+
