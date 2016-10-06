@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/persistent_e.p4(23): error: z: cannot evaluate to a compile-time constant
-    p(z) p1;
-      ^

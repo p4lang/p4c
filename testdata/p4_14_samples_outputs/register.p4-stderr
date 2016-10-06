@@ -1,3 +1,0 @@
-../testdata/p4_14_samples/register.p4(67): warning: Could not infer type for register_idx, using bit<8>
-action m_action(register_idx) {
-                ^^^^^^^^^^^^

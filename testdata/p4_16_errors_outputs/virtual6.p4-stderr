@@ -1,6 +1,0 @@
-../testdata/p4_16_errors/virtual6.p4(22): error: cntr: g abstract method not implemented
-    Virtual() cntr = {
-              ^^^^
-../testdata/p4_16_errors/virtual6.p4(18)
-    abstract bit<16> g();
-                     ^

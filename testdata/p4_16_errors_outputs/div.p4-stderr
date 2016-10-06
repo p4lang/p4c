@@ -1,9 +1,0 @@
-../testdata/p4_16_errors/div.p4(18): error: /: Division is not defined for negative numbers
-    a = - 8 / -2;
-        ^^^^^^^^
-../testdata/p4_16_errors/div.p4(19): error: %: Modulo is not defined for negative numbers
-    a = -10 % 2;
-        ^^^^^^^
-../testdata/p4_16_errors/div.p4(20): error: %: Modulo is not defined for negative numbers
-    a = 10 % -2;
-        ^^^^^^^

@@ -1,6 +1,0 @@
-../testdata/p4_16_errors/virtual1.p4(23): error: return: Cannot unify bit<16> to bool
-            return (ix + 1);
-            ^^^^^^
-../testdata/p4_16_errors/virtual1.p4(21): error: cntr: Cannot unify bool to bit<16>
-    Virtual() cntr = {
-              ^^^^

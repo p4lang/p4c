@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/typecheck_e.p4(21): error: f: Cannot unify T to int<32>
-        f(x);
-        ^^^^

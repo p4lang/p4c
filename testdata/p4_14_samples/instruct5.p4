@@ -19,41 +19,55 @@ header_type data_t {
     fields {
         f1 : 32;
         f2 : 32;
-        f3 : 32;
-        f4 : 32;
         b1 : 8;
         b2 : 8;
         b3 : 8;
-        b4 : 8;
+        more : 8;
     }
 }
 header data_t data;
 header_type data2_t {
     fields {
-        x1 : 16;
-        x2 : 16;
+        x1 : 24;
+        more : 8;
     }
 }
 header data2_t extra[4];
 
 parser start {
     extract(data);
-    return select(data.b1) {
-    0x00: parse_extra;
-    default: ingress;
+    return select(data.more) {
+        0: ingress;
+        default: parse_extra;
     }
 }
 parser parse_extra {
     extract(extra[next]);
-    return select(latest.x1) {
-    1 mask 1: parse_extra;
-    default: ingress;
+    return select(latest.more) {
+        0: ingress;
+        default: parse_extra;
     }
 }
 
 action noop() { }
-action push1() { push(extra, 1); }
-action push2() { push(extra, 2); }
+action push1(x1) {
+    push(extra, 1);
+    extra[0].x1 = x1;
+    extra[0].more = data.more;
+    data.more = 1;
+}
+action push2(x1, x2) {
+    push(extra, 2);
+    extra[0].x1 = x1;
+    extra[0].more = 1;
+    extra[1].x1 = x2;
+    extra[1].more = data.more;
+    data.more = 1;
+}
+action pop1() { 
+    data.more = extra[0].more;
+    pop(extra, 1);
+}
 
 
 table test1 {
@@ -64,9 +78,14 @@ table test1 {
         noop;
         push1;
         push2;
+        pop1;
     }
 }
 
+action output(port) { standard_metadata.egress_spec = port; }
+table output { actions { output; } default_action: output(1); }
+
 control ingress {
     apply(test1);
+    apply(output);
 }

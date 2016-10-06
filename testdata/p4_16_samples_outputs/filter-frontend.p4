@@ -1,3 +1,0 @@
-extern packet_in {
-}
-

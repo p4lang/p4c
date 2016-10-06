@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/conditional_e.p4(21): error: Condition of IfStatement does not evaluate to a bool but bit<1>
-        if (b) ; else ;
-        ^^

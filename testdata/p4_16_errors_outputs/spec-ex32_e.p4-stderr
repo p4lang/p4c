@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/spec-ex32_e.p4(22): error: Could not find declaration for size2
-    @length(size2)
-            ^^^^^

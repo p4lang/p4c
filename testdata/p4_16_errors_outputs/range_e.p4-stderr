@@ -1,6 +1,0 @@
-../testdata/p4_16_errors/range_e.p4(20): error: ..: Cannot operate on values with different types bit<2> and bit<3>
-            2w2 .. 3w3 : reject;
-            ^^^^^^^^^^
-../testdata/p4_16_errors/range_e.p4(20): error: Could not find type of ..
-            2w2 .. 3w3 : reject;
-            ^^^^^^^^^^

@@ -1,6 +1,0 @@
-../testdata/p4_16_samples/default2.p4(28): warning: SelectCase: unreachable
-            default: reject;
-            ^^^^^^^^^^^^^^^
-../testdata/p4_16_samples/default2.p4(26): warning: ListExpression: transition does not depend on select argument
-        transition select(h.data) {
-                          ^^^^^^

@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/interface_e.p4(21): error: x: Type parameters must be supplied for constructor
-    X() x;
-        ^

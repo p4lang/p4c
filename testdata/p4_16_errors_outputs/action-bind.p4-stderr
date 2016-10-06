@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/action-bind.p4(22): error: 0 Too many parameters for action
-        default_action = a(x, 0);
-                              ^

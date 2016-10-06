@@ -1,4 +1,0 @@
-../testdata/p4_16_errors/underscore1_e.p4(17):syntax error, unexpected DONTCARE
-    bit _
-        ^
-error: 1 errors encountered, aborting compilation

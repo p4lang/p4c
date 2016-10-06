@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/accept_e.p4(18): error: accept: parser state should not be implemented, it is built-in
-    state accept {
-          ^^^^^^

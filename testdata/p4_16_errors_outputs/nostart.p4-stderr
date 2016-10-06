@@ -1,9 +1,0 @@
-../testdata/p4_16_errors/nostart.p4(18): warning: next: implicit transition to `reject'
-    state next {}
-          ^^^^
-../testdata/p4_16_errors/nostart.p4(17): error: parser p: parser does not have a `start' state
-parser p() {
-       ^
-../testdata/p4_16_errors/nostart.p4(17): warning: accept state in parser p is unreachable
-parser p() {
-       ^

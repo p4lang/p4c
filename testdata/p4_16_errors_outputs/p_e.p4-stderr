@@ -1,4 +1,0 @@
-../testdata/p4_16_errors/p_e.p4(17):syntax error, unexpected IDENTIFIER "x"
-   x
-   ^
-error: 1 errors encountered, aborting compilation

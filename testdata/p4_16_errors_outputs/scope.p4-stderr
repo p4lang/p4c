@@ -1,9 +1,0 @@
-../testdata/p4_16_errors/scope.p4(25): error: Could not find type of q.x
-        bit<8> y = .q.x.get();
-                   ^^^^
-../testdata/p4_16_errors/scope.p4(25): error: Could not find type of q.x.get
-        bit<8> y = .q.x.get();
-                   ^^^^^^^^
-../testdata/p4_16_errors/scope.p4(25): error: Could not find type of q.x.get
-        bit<8> y = .q.x.get();
-                   ^^^^^^^^^^

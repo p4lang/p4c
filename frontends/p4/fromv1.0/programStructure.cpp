@@ -1678,13 +1678,7 @@ void ProgramStructure::createChecksumVerifications() {
     params->push_back(meta);
     conversionContext.userMetadata = paramReference(meta);
 
-    auto stdMetaPath = new IR::Path(v1model.standardMetadataType.Id());
-    auto stdMetaType = new IR::Type_Name(Util::SourceInfo(), stdMetaPath);
-    auto stdmeta = new IR::Parameter(
-        Util::SourceInfo(), v1model.ingress.standardMetadataParam.Id(),
-        IR::Annotations::empty, IR::Direction::InOut, stdMetaType);
-    params->push_back(stdmeta);
-    conversionContext.standardMetadata = paramReference(stdmeta);
+    conversionContext.standardMetadata = nullptr;
 
     auto type = new IR::Type_Control(Util::SourceInfo(), v1model.verify.Id(),
                                      IR::Annotations::empty,
@@ -1770,13 +1764,7 @@ void ProgramStructure::createChecksumUpdates() {
     params->push_back(meta);
     conversionContext.userMetadata = paramReference(meta);
 
-    auto stdMetaPath = new IR::Path(v1model.standardMetadataType.Id());
-    auto stdMetaType = new IR::Type_Name(Util::SourceInfo(), stdMetaPath);
-    auto stdmeta = new IR::Parameter(
-        Util::SourceInfo(), v1model.ingress.standardMetadataParam.Id(),
-        IR::Annotations::empty, IR::Direction::InOut, stdMetaType);
-    params->push_back(stdmeta);
-    conversionContext.standardMetadata = paramReference(stdmeta);
+    conversionContext.standardMetadata = nullptr;
 
     auto type = new IR::Type_Control(Util::SourceInfo(), v1model.update.Id(),
                                      IR::Annotations::empty,

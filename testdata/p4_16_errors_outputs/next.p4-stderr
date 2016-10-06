@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/next.p4(24): error: stack.last: 'last' and 'next' for stacks cannot be used in a control
-        stack.last = { 10 };
-        ^^^^^^^^^^

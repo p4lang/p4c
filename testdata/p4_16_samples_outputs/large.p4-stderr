@@ -1,4 +1,0 @@
-../testdata/p4_16_samples/large.p4(17): warning: 103929005307130220006098923584552504982110632080: value does not fit in 128 bits
-const bit<128> large = 0x1234567890123456789012345678901234567890;
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-warning: Program does not contain a `main' module

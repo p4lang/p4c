@@ -1,6 +1,0 @@
-../testdata/p4_16_errors/virtual2.p4(23): error: return: return expression in function with void return
-            return (ix + 1);
-            ^^^^^^
-../testdata/p4_16_errors/virtual2.p4(21): error: cntr: Cannot unify void to bit<16>
-    Virtual() cntr = {
-              ^^^^

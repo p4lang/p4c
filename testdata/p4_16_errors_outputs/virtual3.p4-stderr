@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/virtual3.p4(24): error: return: return with no expression in a function returning bit<16>
-            return;
-            ^^^^^^

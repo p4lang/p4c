@@ -1,6 +1,0 @@
-../testdata/p4_16_errors/functors3_e.p4(18): error: s1: cannot allocate objects of type struct s
-s() s1;
-    ^^
-../testdata/p4_16_errors/functors3_e.p4(16)
-struct s {}
-       ^

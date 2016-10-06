@@ -1,4 +1,0 @@
-../testdata/p4_16_errors/width1_e.p4(17):syntax error, unexpected '(', expecting INTEGER
-const int<(
-          ^
-error: 1 errors encountered, aborting compilation

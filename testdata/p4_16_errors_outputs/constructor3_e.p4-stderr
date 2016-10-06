@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/constructor3_e.p4(22): error: e: Cannot unify bool to bit<1>
-    E(true) e;
-            ^

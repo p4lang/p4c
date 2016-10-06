@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/duplicate-label.p4(26): error: a: duplicate switch label
-            a: { arun = 1; }
-            ^

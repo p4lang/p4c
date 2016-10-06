@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/extract.p4(28): error: main: Cannot unify functions with different number of arguments:  _(p, h) to  _(p)
-top(P()) main;
-         ^^^^

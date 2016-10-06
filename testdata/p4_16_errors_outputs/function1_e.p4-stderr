@@ -1,6 +1,0 @@
-../testdata/p4_16_errors/function1_e.p4(21): error: : Read-only value used for out/inout parameter x
-        f(1w1 & 1w0);
-          ^^^^^^^^^
-../testdata/p4_16_errors/function1_e.p4(16)
-extern void f(out bit x);
-                      ^

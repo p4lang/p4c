@@ -41,7 +41,8 @@ ir_DEF_FILES += $(srcdir)/backends/bmv2/bmv2.def
 
 CLEANFILES += bmv2tests.mk
 
-bmv2tests.mk: $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 \
+bmv2tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
+	      $(srcdir)/testdata/p4_16_samples/*-bmv2.p4 \
 	      $(srcdir)/testdata/p4_16_bmv_errors/*-bmv2.p4 \
 	      $(srcdir)/testdata/p4_14_samples/*.p4 \
 	      $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4 \
@@ -53,5 +54,3 @@ XFAIL_TESTS += \
     bmv2/testdata/p4_14_samples/09-IPv4OptionsUnparsed.p4.test \
     bmv2/testdata/p4_14_samples/TLV_parsing.p4.test \
     bmv2/testdata/p4_14_samples/truncate.p4.test
-
-XFAIL_TESTS += bmv2/testdata/p4_16_samples/ternary2-bmv2.p4.test

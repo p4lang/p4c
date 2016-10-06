@@ -1,4 +1,0 @@
-../testdata/p4_16_errors/tuple-left.p4(21):syntax error, unexpected ','
-        { a,
-           ^
-error: 1 errors encountered, aborting compilation

@@ -1,3 +1,0 @@
-../testdata/p4_14_samples/checksum1.p4(122): warning: -1: negative value with unsigned type
-    add_to_field(ipv4.ttl, -1);
-                            ^

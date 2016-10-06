@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/package.p4(18): error: _c: constructor parameters cannot have a direction
-package top(in proto _c);
-                     ^^

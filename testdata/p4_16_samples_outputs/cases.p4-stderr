@@ -1,4 +1,0 @@
-../testdata/p4_16_samples/cases.p4(31): warning: SwitchCase: fallthrough with no statement
-            c:
-            ^
-warning: Program does not contain a `main' module

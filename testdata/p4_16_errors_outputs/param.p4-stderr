@@ -1,3 +1,0 @@
-../testdata/p4_16_errors/param.p4(22): error: E: Action parameters cannot have extern types
-    action a(in E e) { e.call(); }
-                ^
