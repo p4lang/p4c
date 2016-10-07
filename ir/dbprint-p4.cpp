@@ -23,10 +23,10 @@ using namespace DBPrint;
 using namespace IndentCtl;
 
 void IR::HeaderStackItemRef::dbprint(std::ostream &out) const {
-  int prec = getprec(out);
-  out << setprec(Prec_Postfix) << *base_ << "[" << setprec(Prec_Low) << *index_
-      << "]" << setprec(prec);
-  if (prec == 0) out << ';';
+    int prec = getprec(out);
+    out << setprec(Prec_Postfix) << *base_ << "[" << setprec(Prec_Low) << *index_
+        << "]" << setprec(prec);
+    if (prec == 0) out << ';';
 }
 
 void IR::FieldList::dbprint(std::ostream &out) const {
@@ -87,6 +87,28 @@ void IR::V1Parser::dbprint(std::ostream &out) const {
     out << " }" << unindent;
 }
 void IR::ParserException::dbprint(std::ostream &out) const { out << "IR::ParserException"; }
+void IR::ParserState::dbprint(std::ostream &out) const {
+    out << "state " << name << " " << annotations << "{" << indent;
+    for (auto *s : *components)
+        out << endl << s;
+    if (selectExpression)
+        out << endl << selectExpression;
+    out << " }" << unindent;
+}
+void IR::P4Parser::dbprint(std::ostream &out) const {
+    out << "parser " << name;
+    if (type->typeParameters && !type->typeParameters->empty())
+        out << type->typeParameters;
+    if (constructorParams)
+        out << '(' << constructorParams << ')';
+    out << " " << type->annotations << "{" << indent;
+    for (auto d : *parserLocals)
+        out << endl << d;
+    for (auto s : *states)
+        out << endl << s;
+    out << " }" << unindent;
+}
+
 void IR::Counter::dbprint(std::ostream &out) const { IR::Attached::dbprint(out); }
 void IR::Meter::dbprint(std::ostream &out) const { IR::Attached::dbprint(out); }
 void IR::Register::dbprint(std::ostream &out) const { IR::Attached::dbprint(out); }
@@ -94,52 +116,137 @@ void IR::PrimitiveAction::dbprint(std::ostream &out) const { out << "IR::Primiti
 void IR::NameList::dbprint(std::ostream &out) const { out << "IR::NameList"; }
 
 void IR::ActionFunction::dbprint(std::ostream &out) const {
-  out << "action " << name << "(";
-  const char *sep = "";
-  for (auto &arg : args) {
-    out << sep << *arg->type << ' ' << arg->name;
-    sep = ", "; }
-  out << ") {" << indent;
-  for (auto &p : action)
-    out << endl << p;
-  out << unindent << " }";
+    out << "action " << name << "(";
+    const char *sep = "";
+    for (auto &arg : args) {
+        out << sep << *arg->type << ' ' << arg->name;
+        sep = ", "; }
+    out << ") {" << indent;
+    for (auto &p : action)
+        out << endl << p;
+    out << unindent << " }";
 }
 
 void IR::P4Action::dbprint(std::ostream &out) const {
-  out << "action " << name << "(";
-  const char *sep = "";
-  for (auto &arg : *parameters->parameters) {
-    out << sep << arg->direction << ' ' << arg->type << ' ' << arg->name;
-    sep = ", "; }
-  out << ") {" << indent;
-  if (body)
-    for (auto &p : *body->components)
-      out << endl << p;
-  out << unindent << " }";
+    out << "action " << name << "(";
+    const char *sep = "";
+    for (auto &arg : *parameters->parameters) {
+        out << sep << arg->direction << ' ' << arg->type << ' ' << arg->name;
+        sep = ", "; }
+    out << ") {" << indent;
+    if (body)
+        for (auto &p : *body->components)
+            out << endl << p;
+    out << unindent << " }";
 }
 
 void IR::BlockStatement::dbprint(std::ostream &out) const {
-  out << "{" << indent;
-  if (components) {
-    bool first = true;
-    for (auto &p : *components) {
-      if (first) {
-        out << ' ' << p;
-        first = false;
-      } else {
-        out << endl << p; } } }
-  out << unindent << " }";
+    out << "{" << indent;
+    if (components) {
+        bool first = true;
+        for (auto &p : *components) {
+            if (first) {
+                out << ' ' << p;
+                first = false;
+            } else {
+                out << endl << p; } } }
+    out << unindent << " }";
 }
 
 void IR::ActionProfile::dbprint(std::ostream &out) const { out << "IR::ActionProfile"; }
 void IR::ActionSelector::dbprint(std::ostream &out) const { out << "IR::ActionSelector"; }
 void IR::V1Table::dbprint(std::ostream &out) const { out << "IR::V1Table " << name; }
 
+void IR::ActionList::dbprint(std::ostream &out) const {
+    out << "{" << indent;
+    bool first = true;
+    for (auto *el : *actionList) {
+        if (first)
+            out << ' ' << el;
+        else
+            out << endl << el;
+        first = false; }
+    out << unindent << " }";
+}
+void IR::KeyElement::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    out << annotations << Prec_Low << expression << ": " << matchType << setprec(prec);
+    if (!prec) out << ';';
+}
+void IR::Key::dbprint(std::ostream &out) const {
+    out << "{" << indent;
+    bool first = true;
+    for (auto *el : *keyElements) {
+        if (first)
+            out << ' ' << el;
+        else
+            out << endl << el;
+        first = false; }
+    out << unindent << " }";
+}
+void IR::P4Table::dbprint(std::ostream &out) const {
+    out << "table " << name;
+    if (parameters) out << '(' << parameters << ')';
+    out << " " << annotations << "{" << indent;
+    for (auto p : *properties->properties)
+        out << endl << p;
+    out << " }" << unindent;
+}
+
 void IR::V1Control::dbprint(std::ostream &out) const {
-  out << "control " << name << " {" << indent << code << unindent << " }";
+    out << "control " << name << " {" << indent << code << unindent << " }";
+}
+void IR::P4Control::dbprint(std::ostream &out) const {
+    out << "control " << name;
+    if (type->typeParameters && !type->typeParameters->empty())
+        out << type->typeParameters;
+    if (constructorParams)
+        out << '(' << constructorParams << ')';
+    out << " " << type->annotations << "{" << indent;
+    for (auto d : *controlLocals)
+        out << endl << d;
+    if (body->components)
+        for (auto s : *body->components)
+            out << endl << s;
+    out << " }" << unindent;
 }
 
 void IR::V1Program::dbprint(std::ostream &out) const {
-  for (auto &obj : Values(scope))
-    out << obj << endl;
+    for (auto &obj : Values(scope))
+        out << obj << endl;
+}
+
+void IR::P4Program::dbprint(std::ostream &out) const {
+    for (auto &obj : *declarations)
+        out << obj << endl;
+}
+
+void IR::Declaration_Errors::dbprint(std::ostream &out) const {
+    out << "error {";
+    const char *sep = " ";
+    for (auto &id : *members) {
+        out << sep << id->name;
+        sep = ", "; }
+    out << (sep+1) << "}";
+}
+
+void IR::Declaration_MatchKind::dbprint(std::ostream &out) const {
+    out << "match_kind {";
+    const char *sep = " ";
+    for (auto &id : *members) {
+        out << sep << id->name;
+        sep = ", "; }
+    out << (sep+1) << "}";
+}
+
+void IR::Declaration_Instance::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    out << annotations << type << ' ' << name << '(' << Prec_Low;
+    const char *sep = "";
+    for (auto e : *arguments) {
+        out << sep << e;
+        sep = ", "; }
+    out << ')' << setprec(prec);
+    if (initializer)
+        out << " {" << indent << initializer << " }" << unindent;
 }

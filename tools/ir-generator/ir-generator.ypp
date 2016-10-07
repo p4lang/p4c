@@ -199,6 +199,8 @@ part
 method
     : modifiers methodName BLOCK
           { $$ = new IrMethod(@2, canon_name($2), $3); }
+    | modifiers methodName ';'
+          { $$ = new IrMethod(@2, canon_name($2)); }
     | modifiers IDENTIFIER '('
           { if ($2 != $<irClass>0->name)
                 yyerror("constructor name %s doesn't match class name %s", $2, $<irClass>0->name);

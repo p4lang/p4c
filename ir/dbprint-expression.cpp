@@ -189,31 +189,31 @@ void IR::MethodCallExpression::dbprint(std::ostream &out) const {
     out << setprec(Prec_Postfix) << method;
     if (typeArguments->size() > 0) {
         out << "<";
-        bool first = true;
+        const char *sep = "";
         for (auto a : *typeArguments) {
-            if (first) out << ", ";
-            first = false;
-            out << a;
-        }
-        out << ">";
-    }
+            out << sep << a;
+            sep = ", "; }
+        out << ">"; }
     out << "(" << setprec(Prec_Low);
-    {
-        bool first = true;
-        for (auto a : *arguments) {
-            if (!first) out << ", ";
-            first = false;
-            out << setprec(Prec_Low) << a;
-        }
-    }
+    const char *sep = "";
+    for (auto a : *arguments) {
+        out << sep << setprec(Prec_Low) << a;
+        sep = ", "; }
     out << ")" << setprec(prec);
     if (prec > Prec_Postfix) out << ')';
     if (prec == 0) out << ';';
 }
 
 void IR::ConstructorCallExpression::dbprint(std::ostream &out) const {
-    Node::dbprint(out);
-    out << type << "(" << "..." << ")";
+    int flags = dbgetflags(out);
+    out << Brief << setprec(Prec_Low) << type << "(";
+    const char *sep = "";
+    for (auto e : *arguments) {
+        out << sep << e;
+        sep = ", "; }
+    out << ")";
+    if (!flags) out << ';';
+    dbsetflags(out, flags);
 }
 
 void IR::ListExpression::dbprint(std::ostream &out) const {

@@ -17,6 +17,8 @@ ir_SOURCES += \
 	ir/configuration.h \
 	ir/dbprint.cpp \
 	ir/dbprint-expression.cpp \
+	ir/dbprint-stmt.cpp \
+	ir/dbprint-type.cpp \
 	ir/dbprint.h \
 	ir/dbprint-p4.cpp \
 	ir/dump.cpp \
