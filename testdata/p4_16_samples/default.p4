@@ -21,16 +21,21 @@ header Header {
 }
 
 parser p0(packet_in p, out Header h) {
+    bool b = true;
     state start {
-        bool b = true;
         p.extract(h);
         transition select(h.data, b) {
-            (default, true):    next;
-            (default, default): reject;
+            (_, true):    next;
+            (_, _): reject;
         }
     }
     state next {
-        transition accept;
+        p.extract(h);
+        transition select(h.data, b) {
+            (_, true):    accept;
+            (_, _): reject;
+            _: reject;
+        }
     }
 }
 

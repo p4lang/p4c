@@ -29,7 +29,7 @@ namespace P4 {
 class DoRemoveParserControlFlow : public Transform {
     ReferenceMap* refMap;
  public:
-    DoRemoveParserControlFlow(ReferenceMap* refMap) : refMap(refMap)
+    explicit DoRemoveParserControlFlow(ReferenceMap* refMap) : refMap(refMap)
     { CHECK_NULL(refMap); setName("DoRemoveParserControlFlow"); }
     const IR::Node* postorder(IR::ParserState* state) override;
     Visitor::profile_t init_apply(const IR::Node* node) override;

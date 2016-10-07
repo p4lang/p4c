@@ -23,6 +23,25 @@ namespace P4 {
 
 namespace {
 
+class HasUses {
+    // Set of program points whose left-hand sides are used elsewhere
+    // in the program.
+    std::unordered_set<const IR::Node*> used;
+ public:
+    HasUses() = default;
+    void add(const ProgramPoints* points) {
+        for (auto e : *points) {
+            auto last = e.last();
+            if (last != nullptr) {
+                LOG1("Found use for " << last);
+                used.emplace(last);
+            }
+        }
+    }
+    bool hasUses(const IR::Node* node) const
+    { return used.find(node) != used.end(); }
+};
+
 // Run for each parser and control separately
 class FindUninitialized : public Inspector {
     ProgramPoint    context;
@@ -33,6 +52,7 @@ class FindUninitialized : public Inspector {
     ProgramPoint    currentPoint;
     // For some simple expresssions keep here the read location sets
     std::map<const IR::Expression*, const LocationSet*> locations;
+    HasUses*        hasUses;  // output
 
     const LocationSet* get(const IR::Expression* expression) const {
         auto result = ::get(locations, expression);
@@ -50,11 +70,13 @@ class FindUninitialized : public Inspector {
     }
 
  public:
-    explicit FindUninitialized(AllDefinitions* definitions) :
+    FindUninitialized(AllDefinitions* definitions, HasUses* hasUses) :
             refMap(definitions->storageMap->refMap),
             typeMap(definitions->storageMap->typeMap),
-            definitions(definitions), lhs(false), currentPoint() {
+            definitions(definitions), lhs(false), currentPoint(),
+            hasUses(hasUses) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions);
+        CHECK_NULL(hasUses);
         setName("FindUninitialized"); }
 
     // we control the traversal order manually, so we always 'prune()'
@@ -77,12 +99,18 @@ class FindUninitialized : public Inspector {
 
     void checkOutParameters(const IR::IApply* block, Definitions* defs) {
         for (auto p : *block->getApplyMethodType()->parameters->parameters) {
-            if (p->direction == IR::Direction::Out) {
+            if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
                 if (storage == nullptr)
                     continue;
-                auto loc = storage->removeHeaders();
+
+                const LocationSet* loc = new LocationSet(storage);
                 auto points = defs->get(loc);
+                hasUses->add(points);
+                // Check uninitialized non-headers (headers can be invalid).
+                // inout parameters can never match here, so we could skip them.
+                loc = storage->removeHeaders();
+                points = defs->get(loc);
                 if (points->containsUninitialized())
                     ::warning("out parameter %1% may be uninitialized when %2% terminates",
                               p, block);
@@ -169,6 +197,7 @@ class FindUninitialized : public Inspector {
                 message = "%1% may not be completely initialized";
             ::warning(message, expression);
         }
+        hasUses->add(points);
     }
 
     // For the following we compute the read set and save it.
@@ -276,14 +305,35 @@ class FindUninitialized : public Inspector {
     }
 };
 
+class RemoveUnused : public Transform {
+    const HasUses* hasUses;
+ public:
+    explicit RemoveUnused(const HasUses* hasUses) : hasUses(hasUses)
+    { CHECK_NULL(hasUses); }
+    const IR::Node* postorder(IR::AssignmentStatement* statement) override {
+        if (!hasUses->hasUses(getOriginal())) {
+            LOG1("Removing statement " << statement);
+            if (statement->right->is<IR::MethodCallExpression>()) {
+                // keep the method for side effects
+                auto mce = statement->right->to<IR::MethodCallExpression>();
+                return new IR::MethodCallStatement(statement->srcInfo, mce);
+            }
+            return new IR::EmptyStatement();
+        }
+        return statement;
+    }
+};
+
 // Run for each parser and control separately.
 class ProcessDefUse : public PassManager {
     AllDefinitions *definitions;
+    HasUses         hasUses;
  public:
     ProcessDefUse(ReferenceMap* refMap, TypeMap* typeMap) :
             definitions(new AllDefinitions(refMap, typeMap)) {
         passes.push_back(new ComputeWriteSet(definitions));
-        passes.push_back(new FindUninitialized(definitions));
+        passes.push_back(new FindUninitialized(definitions, &hasUses));
+        passes.push_back(new RemoveUnused(&hasUses));
         setName("ProcessDefUse");
     }
 };

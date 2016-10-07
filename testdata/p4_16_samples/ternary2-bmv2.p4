@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -88,15 +88,15 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     }
     table tbl1() {
         key = { hdrs.data.f2 : ternary; }
-        actions = { setbyte(hdrs.data.b2); noop; } 
+        actions = { setbyte(hdrs.data.b2); noop; }
         default_action = noop; }
     table tbl2() {
         key = { hdrs.data.f2 : ternary; }
         actions = { setbyte(hdrs.extra[1].b1); noop; }
-        default_action = noop; }        
+        default_action = noop; }
     table tbl3() {
         key = { hdrs.data.f2 : ternary; }
-        actions = { setbyte(hdrs.extra[2].b2); noop; } 
+        actions = { setbyte(hdrs.extra[2].b2); noop; }
         default_action = noop; }
     apply {
         test1.apply();
@@ -115,6 +115,7 @@ control egress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta
 control deparser(packet_out b, in packet_t hdrs) {
     apply {
         b.emit(hdrs.data);
+        b.emit(hdrs.extra);
     }
 }
 

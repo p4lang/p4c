@@ -249,6 +249,10 @@ class ProgramPoints {
     size_t size() const { return points.size(); }
     bool containsUninitialized() const
     { return points.find(ProgramPoint::uninitialized) != points.end(); }
+    Points::const_iterator begin() const
+    { return points.cbegin(); }
+    Points::const_iterator end() const
+    { return points.cend(); }
 };
 
 // List of definers for each base storage (at a specific program point)

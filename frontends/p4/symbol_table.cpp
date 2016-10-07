@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -113,8 +113,7 @@ class SimpleType : public NamedSymbol {
 class ContainerType : public Namespace {
  public:
     ContainerType(cstring name, Util::SourceInfo si, bool allowDuplicates) :
-            Namespace(name, si, allowDuplicates)
-    {}
+            Namespace(name, si, allowDuplicates) {}
     cstring toString() const { return cstring("ContainerType ") + getName(); }
 };
 
@@ -127,7 +126,7 @@ ProgramStructure::ProgramStructure()
           currentNamespace(nullptr) {
     rootNamespace = new Namespace("", Util::SourceInfo(), false);
     currentNamespace = rootNamespace;
-    // We use stderr because debugging because we want debugging output
+    // We use stderr because we want debugging output
     // to be the same as the bison debugging output.
     debugStream = stderr;
 }
@@ -221,6 +220,8 @@ ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifi
         return ProgramStructure::SymbolKind::Type;
         LOG2("Type " << identifier);
     }
+    // This can never happen currently
+    // This design accommodates a possible future 'namespace' construct
     LOG2("Namespace " << identifier);
     return ProgramStructure::SymbolKind::Namespace;
 }
