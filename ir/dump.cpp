@@ -60,11 +60,16 @@ void dump(std::ostream &out, const IR::Node *n, unsigned maxdepth) {
 void dump(std::ostream &out, const IR::Node *n) { dump(out, n, ~0U); }
 void dump(const IR::Node *n, unsigned maxdepth) { dump(std::cout, n, maxdepth); }
 void dump(const IR::Node *n) { dump(n, ~0U); }
-void dump_notype(const IR::Node *n) { n->apply(IRDumper(std::cout, ~0U, "type")); }
+void dump_notype(const IR::Node *n, unsigned maxdepth) {
+    n->apply(IRDumper(std::cout, maxdepth, "type")); }
+void dump_notype(const IR::Node *n) { dump_notype(n, ~0U); }
 
 void dump(uintptr_t p, unsigned maxdepth) {
     dump(reinterpret_cast<const IR::Node *>(p), maxdepth); }
 void dump(uintptr_t p) { dump(p, ~0U); }
+void dump_notype(uintptr_t p, unsigned maxdepth) {
+    dump_notype(reinterpret_cast<const IR::Node *>(p), maxdepth); }
+void dump_notype(uintptr_t p) { dump_notype(p, ~0U); }
 
 void dump(const Visitor::Context *ctxt) {
     if (!ctxt) return;
