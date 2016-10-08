@@ -52,6 +52,7 @@ class Options(object):
         self.replace = False            # replace previous outputs
         self.compilerOptions = []
         self.hasBMv2 = False            # Is the behavioral model installed?
+        self.runDebugger = False
 
 def nextWord(text, sep = " "):
     # Split a text at the indicated separator.
@@ -282,7 +283,9 @@ def process_file(options, argv):
     if "p4_14_samples" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--p4v", "1.0"]);
     args.extend(argv)  # includes p4filename
-
+    if options.runDebugger:
+        args[0:0] = options.runDebugger.split()
+        os.execvp(args[0], args)
     result = run_timeout(options, args, timeout, stderr)
     if result != SUCCESS:
         print("Error compiling")
@@ -344,7 +347,9 @@ def main(argv):
                 options.compilerOptions += argv[1].split();
                 argv = argv[1:]
         elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
-            options.compilerOptions.append(argv[0]);
+            options.compilerOptions.append(argv[0])
+        elif argv[0] == "-gdb":
+            options.runDebugger = "gdb --args"
         else:
             reportError("Uknown option ", argv[0])
             usage(options)
