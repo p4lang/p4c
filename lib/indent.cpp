@@ -14,9 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <gc/gc_cpp.h>
-#include "indent.h"
 #include "config.h"
+#if HAVE_LIBGC
+#include <gc/gc_cpp.h>
+#define NOGC_ARGS (NoGC, 0, 0)
+#else
+#define NOGC_ARGS
+#endif /* HAVE_LIBGC */
+#include "indent.h"
 
 int indent_t::tabsz = 2;
 
@@ -36,12 +41,9 @@ indent_t &indent_t::getindent(std::ostream &out) {
      * using here.  So to ensure that these indent_t objects are not prematurely
      * collected, we mark them as non-collectable, and delete them explicitly with
      * a callback */
-#ifdef HAVE_LIBGC
     if (!p) {
-        p = new(NoGC, 0, 0) indent_t();
-        out.register_callback(delete_indent, indentctl_index);
-    }
-#endif
+        p = new NOGC_ARGS indent_t();
+        out.register_callback(delete_indent, indentctl_index); }
     return *static_cast<indent_t *>(p);
 }
 

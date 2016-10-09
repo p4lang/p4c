@@ -31,7 +31,7 @@ limitations under the License.
 #define IF_HAVE_LIBGC(X)    X
 #else
 #define IF_HAVE_LIBGC(X)
-#endif
+#endif /* HAVE_LIBGC */
 
 #ifdef setbit
 /* some broken systems define a `setbit' macro in their system header files! */
