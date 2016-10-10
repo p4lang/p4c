@@ -106,8 +106,10 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         new MoveInitializers(),
         new SideEffectOrdering(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
+        new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&refMap, &typeMap),
-        new P4::SpecializeAll(&refMap, &typeMap),
+        new SimplifyControlFlow(&refMap, &typeMap),
+        new SpecializeAll(&refMap, &typeMap),
     };
 
     passes.setName("FrontEnd");

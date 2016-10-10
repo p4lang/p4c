@@ -322,6 +322,11 @@ class RemoveUnused : public Transform {
         }
         return statement;
     }
+    const IR::Node* preorder(IR::P4Action* action) override {
+        // TODO
+        prune();
+        return action;
+    }
 };
 
 // Run for each parser and control separately.

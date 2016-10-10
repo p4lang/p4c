@@ -427,7 +427,7 @@ selectExpression
     ;
 
 selectCaseList
-    : selectCase                 { $$ = new IR::Vector<IR::SelectCase>(); $$->push_back($1); }
+    : /* empty */                { $$ = new IR::Vector<IR::SelectCase>(); }
     | selectCaseList selectCase  { $$ = $1; $$->push_back($2); }
     ;
 

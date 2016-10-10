@@ -182,8 +182,8 @@ def process_file(options, argv):
 
     # We rely on the fact that these keys are in alphabetical order.
     rename = { "FrontEnd_11_SimplifyControlFlow": "first",
-               "FrontEnd_20_SimplifyDefUse": "frontend",
-               "MidEnd_27_Evaluator": "midend" }
+               "FrontEnd_21_SpecializeAll": "frontend",
+               "MidEnd_33_Evaluator": "midend" }
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
@@ -233,7 +233,10 @@ def process_file(options, argv):
     if (result == SUCCESS) and (not expected_error):
         result = recompile_file(options, ppfile, False)
     if (result == SUCCESS) and (not expected_error) and (lastFile is not None):
-        result = recompile_file(options, lastFile, True)
+        # Unfortunately compilation and pretty-printing of lastFile is
+        # not idempotent: For example a constant such as 8s128 is
+        # converted by the compiler to -8s128.
+        result = recompile_file(options, lastFile, False)
 
     if options.cleanupTmp:
         if options.verbose:

@@ -137,12 +137,12 @@ const IR::Node* ExpressionConverter::postorder(IR::NamedRef* ref) {
 const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
     const IR::Expression* ref;
     if (structure->isHeader(nhr)) {
-        ref = structure->conversionContext.header;
+        ref = structure->conversionContext.header->clone();
     } else {
         if (nhr->ref->name == P4V1::V1Model::instance.standardMetadata.name)
-            return structure->conversionContext.standardMetadata;
+            return structure->conversionContext.standardMetadata->clone();
         else
-            ref = structure->conversionContext.userMetadata;
+            ref = structure->conversionContext.userMetadata->clone();
         }
     auto result = new IR::Member(Util::SourceInfo(), ref, nhr->ref->name);
     result->type = nhr->type;
@@ -239,9 +239,9 @@ const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
         auto ctrl = new IR::PathExpression(IR::ID(instanceName));
         auto method = new IR::Member(Util::SourceInfo(), ctrl, IR::ID(IR::IApply::applyMethodName));
         auto args = new IR::Vector<IR::Expression>();
-        args->push_back(structure->conversionContext.header);
-        args->push_back(structure->conversionContext.userMetadata);
-        args->push_back(structure->conversionContext.standardMetadata);
+        args->push_back(structure->conversionContext.header->clone());
+        args->push_back(structure->conversionContext.userMetadata->clone());
+        args->push_back(structure->conversionContext.standardMetadata->clone());
         auto call = new IR::MethodCallExpression(primitive->srcInfo, method,
                                                  structure->emptyTypeArguments, args);
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);

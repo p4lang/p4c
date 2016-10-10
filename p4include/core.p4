@@ -55,7 +55,7 @@ extern packet_out {
     void emit<T>(in T hdr);
 }
 
-// TODO: remove from this file, make built-in
+// TODO: remove from this file, convert to built-in
 extern void verify(in bool check, in error toSignal);
 
 action NoAction() {}
