@@ -166,8 +166,9 @@ void bf_lpm_trie_insert(bf_lpm_trie_t *trie,
     current_node->pref_num++;
 }
 
-bool bf_lpm_trie_has_prefix(const bf_lpm_trie_t *trie,
-			    const char *prefix, int prefix_length) {
+bool bf_lpm_trie_retrieve_value(const bf_lpm_trie_t *trie,
+                                const char *prefix, int prefix_length,
+                                value_t *pvalue) {
   node_t *current_node = trie->root;
   byte_t byte;
   unsigned short prefix_key;
@@ -188,7 +189,20 @@ bool bf_lpm_trie_has_prefix(const bf_lpm_trie_t *trie,
   else 
     prefix_key = get_prefix_key((unsigned) prefix_length, (byte_t) *prefix);
 
-  return (get_prefix_ptr(current_node, prefix_key) != NULL);
+  value_t *pdata = get_prefix_ptr(current_node, prefix_key);
+  if(pdata != NULL) {
+    *pvalue = *pdata;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+bool bf_lpm_trie_has_prefix(const bf_lpm_trie_t *trie,
+			    const char *prefix, int prefix_length) {
+  value_t value;
+  return bf_lpm_trie_retrieve_value(trie, prefix, prefix_length, &value);
 }
 
 bool bf_lpm_trie_lookup(const bf_lpm_trie_t *trie, const char *key,

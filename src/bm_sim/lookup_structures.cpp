@@ -62,12 +62,17 @@ class LPMTrieStructure : public LPMLookupStructure {
 
   bool lookup(const ByteContainer &key_data,
               internal_handle_t *handle) const override {
-    return trie.lookup(key_data,
-                       reinterpret_cast<uintptr_t *>(handle));
+    return trie.lookup(key_data, reinterpret_cast<uintptr_t *>(handle));
   }
 
   bool entry_exists(const LPMMatchKey &key) const override {
     return trie.has_prefix(key.data, key.prefix_length);
+  }
+
+  bool retrieve_handle(const LPMMatchKey &key,
+                       internal_handle_t *handle) const override {
+    return trie.retrieve_value(key.data, key.prefix_length,
+                               reinterpret_cast<uintptr_t *>(handle));
   }
 
   void add_entry(const LPMMatchKey &key,
@@ -106,8 +111,15 @@ class ExactMap : public ExactLookupStructure {
   }
 
   bool entry_exists(const ExactMatchKey &key) const override {
-    (void) key;
     return entries_map.find(key.data) != entries_map.end();
+  }
+
+  bool retrieve_handle(const ExactMatchKey &key,
+                       internal_handle_t *handle) const override {
+    const auto it = entries_map.find(key.data);
+    if (it == entries_map.cend()) return false;
+    *handle = it->second;
+    return true;
   }
 
   void add_entry(const ExactMatchKey &key,
@@ -159,9 +171,7 @@ class EntryList {
       if (cmp(key_data, *entry->key)) {
         min_priority = entry->priority;
         min_entry = entry;
-        // a bit sad that this cast is needed, almost makes me want to do the
-        // pointer arithmetic by hand
-        min_handle = std::distance(const_cast<const Entry *>(head), entry);
+        min_handle = handle_from_entry(entry);
       }
     }
 
@@ -174,8 +184,15 @@ class EntryList {
   }
 
   bool exists(const K &key) const {
-    const Entry *entry = find_entry(key);
+    auto entry = find_entry(key);
     return (entry != nullptr);
+  }
+
+  bool retrieve_handle(const K &key, internal_handle_t *handle) const {
+    auto entry = find_entry(key);
+    if (entry == nullptr) return false;
+    *handle = handle_from_entry(entry);
+    return true;
   }
 
   void add(const K &key, internal_handle_t handle) {
@@ -202,7 +219,7 @@ class EntryList {
   }
 
   void delete_entry(const K &key) {
-    const Entry *entry = find_entry(key);
+    auto entry = find_entry(key);
     assert(entry);
     if (entry->prev)
       entry->prev->next = entry->next;
@@ -226,7 +243,13 @@ class EntryList {
   Entry *head{nullptr};
   std::vector<Entry> entries;
 
-  Entry *find_entry(const K &key) const {
+  internal_handle_t handle_from_entry(const Entry *entry) const {
+    // a bit sad that this cast is needed, almost makes me want to do the
+    // pointer arithmetic by hand
+    return std::distance(static_cast<const Entry *>(head), entry);
+  }
+
+  const Entry *find_entry(const K &key) const {
     for (Entry *entry = head; entry; entry = entry->next) {
       if (entry->priority == key.priority && *entry->key == key)
         return entry;
@@ -255,6 +278,11 @@ class TernaryMap : public TernaryLookupStructure {
 
   bool entry_exists(const TernaryMatchKey &key) const override {
     return entry_list.exists(key);
+  }
+
+  bool retrieve_handle(const TernaryMatchKey &key,
+                       internal_handle_t *handle) const override {
+    return entry_list.retrieve_handle(key, handle);
   }
 
   void add_entry(const TernaryMatchKey &key,
@@ -307,6 +335,11 @@ class RangeMap : public RangeLookupStructure {
 
   bool entry_exists(const RangeMatchKey &key) const override {
     return entry_list.exists(key);
+  }
+
+  bool retrieve_handle(const RangeMatchKey &key,
+                       internal_handle_t *handle) const override {
+    return entry_list.retrieve_handle(key, handle);
   }
 
   void add_entry(const RangeMatchKey &key,

@@ -466,6 +466,14 @@ service Standard {
     2:string table_name
   ) throws (1:InvalidTableOperation ouch),
 
+  // if match_key is empty, returns default entry
+  BmMtEntry bm_mt_get_entry_from_key(
+    1:i32 cxt_id,
+    2:string table_name,
+    3:BmMatchParams match_key,
+    4:BmAddEntryOptions options
+  ) throws (1:InvalidTableOperation ouch),
+
   list<BmMtIndirectMember> bm_mt_indirect_get_members(
     1:i32 cxt_id,
     2:string table_name

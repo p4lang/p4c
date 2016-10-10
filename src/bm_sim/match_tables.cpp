@@ -461,6 +461,43 @@ MatchTable::get_entry(entry_handle_t handle, Entry *entry) const {
   return get_entry_(handle, entry);
 }
 
+// You will notice some duplicated code between MatchTable, MatchTableIndirect
+// and MatchTableIndirectWS for the implementation of get_entry_from_key and
+// get_entries. This is regrettable. Ideally I would use CRTP to have something
+// like this:
+// template <typename T>
+// class MatchTableCommon {
+//  public:
+//   MatchErrorCode get_entry_from_key(
+//       const std::vector<MatchKeyParam> &match_key,
+//       typename T::Entry *entry, int priotiy) const {
+//     // ...
+//   }
+// };
+// However this is not possible, because Entry is a nested class for T
+// There are a few solutions like the following:
+// template <typename T>
+// class MatchTableCommon {
+//  public:
+//   template <U = T>
+//   MatchErrorCode get_entry_from_key(
+//       const std::vector<MatchKeyParam> &match_key,
+//       typename U::Entry *entry, int priotiy) const {
+//     // ...
+//   }
+// };
+// Does that make the code unreadable? If not I may choose to use this solution.
+
+MatchErrorCode
+MatchTable::get_entry_from_key(const std::vector<MatchKeyParam> &match_key,
+                               Entry *entry, int priority) const {
+  ReadLock lock = lock_read();
+  entry_handle_t handle;
+  const auto rc = match_unit->retrieve_handle(match_key, &handle, priority);
+  if (rc != MatchErrorCode::SUCCESS) return rc;
+  return get_entry_(handle, entry);
+}
+
 std::vector<MatchTable::Entry>
 MatchTable::get_entries() const {
   ReadLock lock = lock_read();
@@ -823,6 +860,17 @@ MatchTableIndirect::get_entry_(entry_handle_t handle, Entry *entry) const {
 MatchErrorCode
 MatchTableIndirect::get_entry(entry_handle_t handle, Entry *entry) const {
   ReadLock lock = lock_read();
+  return get_entry_(handle, entry);
+}
+
+MatchErrorCode
+MatchTableIndirect::get_entry_from_key(
+    const std::vector<MatchKeyParam> &match_key,
+    Entry *entry, int priority) const {
+  ReadLock lock = lock_read();
+  entry_handle_t handle;
+  const auto rc = match_unit->retrieve_handle(match_key, &handle, priority);
+  if (rc != MatchErrorCode::SUCCESS) return rc;
   return get_entry_(handle, entry);
 }
 
@@ -1334,6 +1382,17 @@ MatchTableIndirectWS::get_entry_(entry_handle_t handle, Entry *entry) const {
 MatchErrorCode
 MatchTableIndirectWS::get_entry(entry_handle_t handle, Entry *entry) const {
   ReadLock lock = lock_read();
+  return get_entry_(handle, entry);
+}
+
+MatchErrorCode
+MatchTableIndirectWS::get_entry_from_key(
+    const std::vector<MatchKeyParam> &match_key,
+    Entry *entry, int priority) const {
+  ReadLock lock = lock_read();
+  entry_handle_t handle;
+  const auto rc = match_unit->retrieve_handle(match_key, &handle, priority);
+  if (rc != MatchErrorCode::SUCCESS) return rc;
   return get_entry_(handle, entry);
 }
 

@@ -131,6 +131,12 @@ class LookupStructure {
   //! Ternary structure.
   virtual bool entry_exists(const K &key) const = 0;
 
+  //! Retrieve the handle of an entry. Returns true if and only if an entry
+  //! exists. See entry_exists() for more information about the notion of entry
+  //! existence.
+  virtual bool retrieve_handle(const K &key,
+                               internal_handle_t *handle) const = 0;
+
   //! Store an entry in the lookup structure. Associates the given handle
   //! with the given entry.
   virtual void add_entry(const K &key, internal_handle_t handle) = 0;

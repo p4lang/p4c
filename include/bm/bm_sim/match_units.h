@@ -372,6 +372,10 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
                            std::vector<MatchKeyParam> *match_key,
                            const V **value, int *priority = nullptr) const;
 
+  MatchErrorCode retrieve_handle(const std::vector<MatchKeyParam> &match_key,
+                                 entry_handle_t *handle,
+                                 int priority = -1) const;
+
   // TODO(antonin): move this one level up in class hierarchy?
   // will return an empty string if the handle is not valid
   // otherwise will return a dump of the match entry in a nice format
@@ -411,6 +415,11 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
   virtual MatchErrorCode get_entry_(entry_handle_t handle,
                                     std::vector<MatchKeyParam> *match_key,
                                     const V **value, int *priority) const = 0;
+
+  virtual MatchErrorCode retrieve_handle_(
+      const std::vector<MatchKeyParam> &match_key,
+      entry_handle_t *handle,
+      int priority) const = 0;
 
   virtual MatchErrorCode dump_match_entry_(std::ostream *out,
                                            entry_handle_t handle) const = 0;
@@ -460,6 +469,10 @@ class MatchUnitGeneric : public MatchUnitAbstract<V> {
                             std::vector<MatchKeyParam> *match_key,
                             const V **value, int *priority) const override;
 
+  MatchErrorCode retrieve_handle_(const std::vector<MatchKeyParam> &match_key,
+                                  entry_handle_t *handle,
+                                  int priority) const override;
+
   MatchErrorCode dump_match_entry_(std::ostream *out,
                                    entry_handle_t handle) const override;
 
@@ -469,6 +482,10 @@ class MatchUnitGeneric : public MatchUnitAbstract<V> {
 
   void serialize_(std::ostream *out) const override;
   void deserialize_(std::istream *in, const P4Objects &objs) override;
+
+  MatchErrorCode build_entry_from_match_key(
+      const std::vector<MatchKeyParam> &match_key, int priority,
+      Entry *entry) const;
 
  private:
   std::vector<Entry> entries{};

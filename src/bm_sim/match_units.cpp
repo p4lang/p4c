@@ -851,6 +851,14 @@ MatchUnitAbstract<V>::get_entry(entry_handle_t handle,
 }
 
 template<typename V>
+MatchErrorCode
+MatchUnitAbstract<V>::retrieve_handle(
+    const std::vector<MatchKeyParam> &match_key,
+    entry_handle_t *handle, int priority) const {
+  return retrieve_handle_(match_key, handle, priority);
+}
+
+template<typename V>
 std::string
 MatchUnitAbstract<V>::entry_to_string(entry_handle_t handle) const {
   std::ostringstream ret;
@@ -920,11 +928,12 @@ MatchUnitGeneric<K, V>::lookup_key(const ByteContainer &key) const {
   return MatchUnitLookup::empty_entry();
 }
 
+// used by add_entry_ and retrieve_handle_
 template <typename K, typename V>
 MatchErrorCode
-MatchUnitGeneric<K, V>::add_entry_(const std::vector<MatchKeyParam> &match_key,
-                                   V value, entry_handle_t *handle,
-                                   int priority) {
+MatchUnitGeneric<K, V>::build_entry_from_match_key(
+    const std::vector<MatchKeyParam> &match_key, int priority,
+    Entry *entry) const {
   const auto &KeyB = this->match_key_builder;
 
   if (!KeyB.match_params_sanity_check(match_key))
@@ -932,24 +941,37 @@ MatchUnitGeneric<K, V>::add_entry_(const std::vector<MatchKeyParam> &match_key,
 
   // for why "template" keyword is needed, see:
   // http://stackoverflow.com/questions/1840253/n/1840318#1840318
-  Entry entry = KeyB.template match_params_to_entry<Entry>(match_key);
+  *entry = KeyB.template match_params_to_entry<Entry>(match_key);
 
   // needs to go before duplicate check, because 2 different user keys can
   // become the same key. We would then have a problem when erasing the key from
   // the hash map.
   // TODO(antonin): maybe change this by modifying delete_entry method
   // TODO(antonin): does this really make sense for a Ternary/LPM table?
-  KeyB.apply_big_mask(&entry.key.data);
+  KeyB.apply_big_mask(&entry->key.data);
 
   // For ternary and range. Must be done before the entry_exists call below
-  set_priority(&entry.key, priority);
+  set_priority(&entry->key, priority);
+
+  return MatchErrorCode::SUCCESS;
+}
+
+template <typename K, typename V>
+MatchErrorCode
+MatchUnitGeneric<K, V>::add_entry_(const std::vector<MatchKeyParam> &match_key,
+                                   V value, entry_handle_t *handle,
+                                   int priority) {
+  MatchErrorCode status;
+  Entry entry;
+  status = build_entry_from_match_key(match_key, priority, &entry);
+  if (status != MatchErrorCode::SUCCESS) return status;
 
   // check if the key is already present
   if (lookup_structure->entry_exists(entry.key))
     return MatchErrorCode::DUPLICATE_ENTRY;
 
   internal_handle_t handle_;
-  MatchErrorCode status = this->get_and_set_handle(&handle_);
+  status = this->get_and_set_handle(&handle_);
   if (status != MatchErrorCode::SUCCESS) return status;
 
   uint32_t version = entries[handle_].key.version;
@@ -1022,6 +1044,24 @@ MatchUnitGeneric<K, V>::get_entry_(entry_handle_t handle,
   *match_key = this->match_key_builder.entry_to_match_params(entry.key);
   *value = &entry.value;
   if (priority) *priority = get_priority(entry.key);
+
+  return MatchErrorCode::SUCCESS;
+}
+
+template<typename K, typename V>
+MatchErrorCode
+MatchUnitGeneric<K, V>::retrieve_handle_(
+    const std::vector<MatchKeyParam> &match_key,
+    entry_handle_t *handle, int priority) const {
+  Entry entry;
+  auto status = build_entry_from_match_key(match_key, priority, &entry);
+  if (status != MatchErrorCode::SUCCESS) return status;
+
+  internal_handle_t handle_;
+  if (!lookup_structure->retrieve_handle(entry.key, &handle_))
+    return MatchErrorCode::BAD_MATCH_KEY;
+
+  *handle = HANDLE_SET(entry.key.version, handle_);
 
   return MatchErrorCode::SUCCESS;
 }

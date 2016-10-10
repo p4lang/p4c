@@ -261,6 +261,13 @@ class Context final {
   mt_get_default_entry(const std::string &table_name,
                        typename T::Entry *default_entry) const;
 
+  template <typename T>
+  MatchErrorCode
+  mt_get_entry_from_key(const std::string &table_name,
+                        const std::vector<MatchKeyParam> &match_key,
+                        typename T::Entry *entry,
+                        int priority = 1) const;
+
   std::vector<MatchTableIndirect::Member>
   mt_indirect_get_members(const std::string &table_name) const;
 

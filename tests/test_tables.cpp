@@ -87,6 +87,7 @@ template <typename MUType>
 class TableSizeTwo : public ::testing::Test {
  protected:
   static constexpr size_t t_size = 2u;
+  static constexpr int default_priority = 7;
 
   PHVFactory phv_factory;
 
@@ -137,8 +138,14 @@ class TableSizeTwo : public ::testing::Test {
     table_w_valid->set_next_node_miss_default(&node_miss_default);
   }
 
+  std::vector<MatchKeyParam> make_match_key(const std::string &key);
+
   MatchErrorCode add_entry(const std::string &key,
-                           entry_handle_t *handle);
+                           entry_handle_t *handle) {
+    auto match_key = make_match_key(key);
+    return table->add_entry(match_key, &action_fn, ActionData(), handle,
+                            default_priority);
+  }
 
   MatchErrorCode add_entry_w_valid(const std::string &key,
                                    bool valid,
@@ -162,52 +169,42 @@ class TableSizeTwo : public ::testing::Test {
   // virtual void TearDown() { }
 };
 
-template<>
-MatchErrorCode
-TableSizeTwo<MUExact>::add_entry(const std::string &key,
-                                 entry_handle_t *handle) {
-  ActionData action_data;
+template <>
+std::vector<MatchKeyParam>
+TableSizeTwo<MUExact>::make_match_key(const std::string &key) {
   std::vector<MatchKeyParam> match_key;
   match_key.emplace_back(MatchKeyParam::Type::EXACT, key);
-  return table->add_entry(match_key, &action_fn, action_data, handle);
+  return match_key;
 }
 
 template<>
-MatchErrorCode
-TableSizeTwo<MULPM>::add_entry(const std::string &key,
-                               entry_handle_t *handle) {
-  ActionData action_data;
+std::vector<MatchKeyParam>
+TableSizeTwo<MULPM>::make_match_key(const std::string &key) {
   std::vector<MatchKeyParam> match_key;
   int prefix_length = 16;
   match_key.emplace_back(MatchKeyParam::Type::LPM, key, prefix_length);
-  return table->add_entry(match_key, &action_fn, action_data, handle);
+  return match_key;
 }
 
 template<>
-MatchErrorCode
-TableSizeTwo<MUTernary>::add_entry(const std::string &key,
-                                   entry_handle_t *handle) {
-  ActionData action_data;
+std::vector<MatchKeyParam>
+TableSizeTwo<MUTernary>::make_match_key(const std::string &key) {
   std::vector<MatchKeyParam> match_key;
   std::string mask = "\xff\xff";
-  int priority = 1;
   match_key.emplace_back(MatchKeyParam::Type::TERNARY, key, std::move(mask));
-  return table->add_entry(match_key, &action_fn, action_data, handle, priority);
+  return match_key;
 }
 
 template<>
-MatchErrorCode
-TableSizeTwo<MURange>::add_entry(const std::string &key,
-                                 entry_handle_t *handle) {
-  ActionData action_data;
+std::vector<MatchKeyParam>
+TableSizeTwo<MURange>::make_match_key(const std::string &key) {
   std::vector<MatchKeyParam> match_key;
   Data start(key.data(), key.size());
   Data end;
   // we create a range with 5 values
   end.add(start, Data(4));
-  int priority = 1;
   match_key.emplace_back(MatchKeyParam::Type::RANGE, key, end.get_string());
-  return table->add_entry(match_key, &action_fn, action_data, handle, priority);
+  return match_key;
 }
 
 template<>
@@ -768,6 +765,42 @@ TYPED_TEST(TableSizeTwo, HandleIterator) {
   ASSERT_EQ(handle_1, *it++);
   ASSERT_EQ(handle_2, *it);
   ASSERT_EQ(this->table->handles_end(), ++it);
+}
+
+TYPED_TEST(TableSizeTwo, GetEntryFromKey) {
+  std::string key_1 = "\xaa\xaa";
+  std::string key_2 = "\xbb\xbb";
+  entry_handle_t handle_1, handle_2;
+  MatchErrorCode rc;
+
+  MatchTable::Entry entry;
+  auto match_key_1 = this->make_match_key(key_1);
+  auto match_key_2 = this->make_match_key(key_2);
+
+  rc = this->table->get_entry_from_key(match_key_1, &entry,
+                                       this->default_priority);
+  ASSERT_EQ(MatchErrorCode::BAD_MATCH_KEY, rc);
+
+  rc = this->add_entry(key_1, &handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = this->table->get_entry_from_key(match_key_1, &entry,
+                                       this->default_priority);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(handle_1, entry.handle);
+
+  rc = this->add_entry(key_2, &handle_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = this->table->get_entry_from_key(match_key_1, &entry,
+                                       this->default_priority);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(handle_1, entry.handle);
+
+  rc = this->table->get_entry_from_key(match_key_2, &entry,
+                                       this->default_priority);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(handle_2, entry.handle);
 }
 
 TYPED_TEST(TableSizeTwo, GetEntries) {

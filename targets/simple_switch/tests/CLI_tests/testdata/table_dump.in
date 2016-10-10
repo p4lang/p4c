@@ -7,3 +7,4 @@ table_dump ecmp_group
 table_dump_entry ecmp_group 0
 table_dump_member ecmp_group 0
 table_dump_group ecmp_group 0
+table_dump_entry_from_key ecmp_group 10.0.0.1/12

@@ -60,7 +60,8 @@ class LPMTrie {
 
   void insert_prefix(const ByteContainer &prefix, int prefix_length,
                      uintptr_t value) {
-    bf_lpm_trie_insert(trie, prefix.data(), prefix_length, (value_t) value);
+    bf_lpm_trie_insert(trie, prefix.data(), prefix_length,
+                       static_cast<value_t>(value));
   }
 
   bool delete_prefix(const ByteContainer &prefix, int prefix_length) {
@@ -69,6 +70,12 @@ class LPMTrie {
 
   bool has_prefix(const ByteContainer &prefix, int prefix_length) const {
     return bf_lpm_trie_has_prefix(trie, prefix.data(), prefix_length);
+  }
+
+  bool retrieve_value(const ByteContainer &prefix, int prefix_length,
+                      uintptr_t *value) const {
+    return bf_lpm_trie_retrieve_value(trie, prefix.data(), prefix_length,
+                                      reinterpret_cast<value_t *>(value));
   }
 
   bool lookup(const ByteContainer &key, uintptr_t *value) const {

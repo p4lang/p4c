@@ -438,6 +438,35 @@ template MatchErrorCode
 Context::mt_get_default_entry<MatchTableIndirectWS>(
     const std::string &, MatchTableIndirectWS::Entry *) const;
 
+template <typename T>
+MatchErrorCode
+Context::mt_get_entry_from_key(const std::string &table_name,
+                               const std::vector<MatchKeyParam> &match_key,
+                               typename T::Entry *entry,
+                               int priority) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  MatchTableAbstract *abstract_table =
+      p4objects_rt->get_abstract_match_table(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  T *table = dynamic_cast<T *>(abstract_table);
+  if (!table) return MatchErrorCode::WRONG_TABLE_TYPE;
+  return table->get_entry_from_key(match_key, entry, priority);
+}
+
+// explicit instantiation
+template MatchErrorCode
+Context::mt_get_entry_from_key<MatchTable>(
+    const std::string &, const std::vector<MatchKeyParam> &,
+    MatchTable::Entry *, int) const;
+template MatchErrorCode
+Context::mt_get_entry_from_key<MatchTableIndirect>(
+    const std::string &, const std::vector<MatchKeyParam> &,
+    MatchTableIndirect::Entry *, int) const;
+template MatchErrorCode
+Context::mt_get_entry_from_key<MatchTableIndirectWS>(
+    const std::string &, const std::vector<MatchKeyParam> &,
+    MatchTableIndirectWS::Entry *, int) const;
+
 std::vector<MatchTableIndirect::Member>
 Context::mt_indirect_get_members(const std::string &table_name) const {
   MatchErrorCode rc;

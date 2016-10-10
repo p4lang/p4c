@@ -660,6 +660,58 @@ public:
     }
   }
 
+  template <typename M,
+            MatchErrorCode (RuntimeInterface::*GetFn)(
+                size_t, const std::string &, const std::vector<MatchKeyParam> &,
+                typename M::Entry *, int) const>
+  void get_entry_from_key_common(size_t cxt_id, const std::string &table_name,
+                                 const BmMatchParams &match_key,
+                                 const BmAddEntryOptions &options,
+                                 BmMtEntry &e) {
+    std::vector<MatchKeyParam> params;
+    build_match_key(params, match_key);
+    typename M::Entry entry;
+    auto rc = std::bind(
+        GetFn, switch_, cxt_id, table_name, params, &entry, options.priority)();
+    if(rc != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(rc);
+      throw ito;
+    }
+    copy_match_part_entry(&e, entry);
+    build_action_entry(&e.action_entry, entry);
+    copy_entry_life_info(&e, entry);
+  }
+
+  void bm_mt_get_entry_from_key(BmMtEntry& _return, const int32_t cxt_id, const std::string& table_name, const BmMatchParams& match_key, const BmAddEntryOptions& options) {
+    Logger::get()->trace("bm_mt_get_entry_from_key");
+    if (match_key.empty()) {
+      bm_mt_get_default_entry(_return.action_entry, cxt_id, table_name);
+      return;
+    }
+    switch (switch_->mt_get_type(cxt_id, table_name)) {
+      case MatchTableType::NONE:
+        return;
+      case MatchTableType::SIMPLE:
+        get_entry_from_key_common<
+          MatchTable, &RuntimeInterface::mt_get_entry_from_key>(
+              cxt_id, table_name, match_key, options,  _return);
+        break;
+      case MatchTableType::INDIRECT:
+        get_entry_from_key_common<
+          MatchTableIndirect,
+          &RuntimeInterface::mt_indirect_get_entry_from_key>(
+              cxt_id, table_name, match_key, options, _return);
+        break;
+      case MatchTableType::INDIRECT_WS:
+        get_entry_from_key_common<
+          MatchTableIndirectWS,
+          &RuntimeInterface::mt_indirect_ws_get_entry_from_key>(
+              cxt_id, table_name, match_key, options, _return);
+        break;
+    }
+  }
+
   void copy_one_member(BmMtIndirectMember *m,
                        const MatchTableIndirect::Member &from) const;
 

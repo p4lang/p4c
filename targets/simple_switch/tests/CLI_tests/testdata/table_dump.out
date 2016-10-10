@@ -48,3 +48,8 @@ Action entry: set_nhop - 0a000001, 01
 Dumping group 0
 Members: [0]
 ????
+Dumping entry 0x0
+Match key:
+* ipv4.dstAddr        : LPM       0a000001/12
+Index: member(0)
+????

@@ -296,6 +296,9 @@ class MatchTable : public MatchTableAbstract {
 
   MatchErrorCode get_entry(entry_handle_t handle, Entry *entry) const;
 
+  MatchErrorCode get_entry_from_key(const std::vector<MatchKeyParam> &match_key,
+                                    Entry *entry, int priority = 1) const;
+
   std::vector<Entry> get_entries() const;
 
   MatchErrorCode get_default_entry(Entry *entry) const;
@@ -487,6 +490,9 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   MatchErrorCode get_entry(entry_handle_t handle, Entry *entry) const;
 
+  MatchErrorCode get_entry_from_key(const std::vector<MatchKeyParam> &match_key,
+                                    Entry *entry, int priority = 1) const;
+
   std::vector<Entry> get_entries() const;
 
   MatchErrorCode get_default_entry(Entry *entry) const;
@@ -608,6 +614,9 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   MatchErrorCode set_default_group(grp_hdl_t grp);
 
   MatchErrorCode get_entry(entry_handle_t handle, Entry *entry) const;
+
+  MatchErrorCode get_entry_from_key(const std::vector<MatchKeyParam> &match_key,
+                                    Entry *entry, int priority = 1) const;
 
   std::vector<Entry> get_entries() const;
 

@@ -518,6 +518,34 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
         table_name, entry);
   }
 
+  MatchErrorCode
+  mt_get_entry_from_key(size_t cxt_id, const std::string &table_name,
+                        const std::vector<MatchKeyParam> &match_key,
+                        MatchTable::Entry *entry,
+                        int priority = 1) const override {
+    return contexts.at(cxt_id).mt_get_entry_from_key<MatchTable>(
+        table_name, match_key, entry, priority);
+  }
+
+  MatchErrorCode
+  mt_indirect_get_entry_from_key(size_t cxt_id, const std::string &table_name,
+                                 const std::vector<MatchKeyParam> &match_key,
+                                 MatchTableIndirect::Entry *entry,
+                                 int priority = 1) const override {
+    return contexts.at(cxt_id).mt_get_entry_from_key<MatchTableIndirect>(
+        table_name, match_key, entry, priority);
+  }
+
+  MatchErrorCode
+  mt_indirect_ws_get_entry_from_key(size_t cxt_id,
+                                    const std::string &table_name,
+                                    const std::vector<MatchKeyParam> &match_key,
+                                    MatchTableIndirectWS::Entry *entry,
+                                    int priority = 1) const override {
+    return contexts.at(cxt_id).mt_get_entry_from_key<MatchTableIndirectWS>(
+        table_name, match_key, entry, priority);
+  }
+
   std::vector<MatchTableIndirect::Member>
   mt_indirect_get_members(size_t cxt_id,
                           const std::string &table_name) const override {

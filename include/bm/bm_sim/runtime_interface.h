@@ -239,6 +239,24 @@ class RuntimeInterface {
       size_t cxt_id, const std::string &table_name,
       MatchTableIndirectWS::Entry *entry) const = 0;
 
+  virtual MatchErrorCode
+  mt_get_entry_from_key(size_t cxt_id, const std::string &table_name,
+                        const std::vector<MatchKeyParam> &match_key,
+                        MatchTable::Entry *entry, int priority = 1) const = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_get_entry_from_key(size_t cxt_id, const std::string &table_name,
+                                 const std::vector<MatchKeyParam> &match_key,
+                                 MatchTableIndirect::Entry *entry,
+                                 int priority = 1) const = 0;
+
+  virtual MatchErrorCode
+  mt_indirect_ws_get_entry_from_key(size_t cxt_id,
+                                    const std::string &table_name,
+                                    const std::vector<MatchKeyParam> &match_key,
+                                    MatchTableIndirectWS::Entry *entry,
+                                    int priority = 1) const = 0;
+
   virtual std::vector<MatchTableIndirect::Member>
   mt_indirect_get_members(size_t cxt_id,
                           const std::string &table_name) const = 0;
