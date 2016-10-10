@@ -47,7 +47,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("tmp") bit<32> tmp_0;
     @name("c.add") action c_add() {
         tmp_0 = h_1.a + h_1.b;
-        h_1.c = (bit<64>)tmp_0;
+        h_1.c = (bit<64>)(h_1.a + h_1.b);
     }
     @name("c.t") table c_t_0() {
         actions = {

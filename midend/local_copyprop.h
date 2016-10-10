@@ -33,14 +33,15 @@ namespace P4 {
 class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
     const TypeMap*              typeMap;
     bool                        in_action = false;
-    struct Local {
+    struct VarInfo {
+        bool                    local = false;
         bool                    live = false;
         const IR::Expression    *val = nullptr;
     };
-    std::map<cstring, Local>    locals;
+    std::map<cstring, VarInfo>  available;
     DoLocalCopyPropagation *clone() const override { return new DoLocalCopyPropagation(*this); }
     void flow_merge(Visitor &) override;
-    void dropLocalsUsing(cstring);
+    void dropValuesUsing(cstring);
 
     const IR::Node *postorder(IR::Declaration_Variable *) override;
     const IR::Expression *postorder(IR::PathExpression *) override;
@@ -61,7 +62,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
 class LocalCopyPropagation : public PassManager {
  public:
     LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new TypeChecking(refMap, typeMap, true));
         passes.push_back(new DoLocalCopyPropagation(typeMap));
         setName("LocalCopyPropagation");
     }

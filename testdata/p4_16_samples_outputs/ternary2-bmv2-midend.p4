@@ -68,19 +68,19 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     }
     @name("setbyte") action setbyte_0(bit<8> val) {
         reg_0 = val;
-        hdrs.extra[0].b1 = reg_0;
+        hdrs.extra[0].b1 = val;
     }
     @name("setbyte") action setbyte_4(bit<8> val) {
         reg_1 = val;
-        hdrs.data.b2 = reg_1;
+        hdrs.data.b2 = val;
     }
     @name("setbyte") action setbyte_5(bit<8> val) {
         reg_2 = val;
-        hdrs.extra[1].b1 = reg_2;
+        hdrs.extra[1].b1 = val;
     }
     @name("setbyte") action setbyte_6(bit<8> val) {
         reg_3 = val;
-        hdrs.extra[2].b2 = reg_3;
+        hdrs.extra[2].b2 = val;
     }
     @name("act1") action act1_0(bit<8> val) {
         hdrs.extra[0].b1 = val;

@@ -10,9 +10,9 @@ control p() {
     @name("y") bit<1> y_1;
     @name("b") action b_0() {
         x_2 = tmp_3;
-        x_0 = x_2;
-        tmp_2 = x_2 & x_0;
-        z = tmp_2;
+        x_0 = tmp_3;
+        tmp_2 = tmp_3 & tmp_3;
+        z = tmp_3 & tmp_3;
         tmp_4 = y_1;
     }
     action act() {

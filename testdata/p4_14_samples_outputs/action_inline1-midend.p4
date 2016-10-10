@@ -34,7 +34,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         @name("setbyte") {
             dest = hdr.data.b1;
             dest = val;
-            hdr.data.b1 = dest;
+            hdr.data.b1 = val;
         }
         standard_metadata.egress_spec = port;
     }

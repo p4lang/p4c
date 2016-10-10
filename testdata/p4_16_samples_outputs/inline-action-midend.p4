@@ -5,15 +5,15 @@ control p(inout bit<1> bt) {
     @name("b") action b_0() {
         @name("a") {
             y0 = bt;
-            tmp_0 = y0 | 1w1;
-            y0 = tmp_0;
-            bt = y0;
+            tmp_0 = bt | 1w1;
+            y0 = bt | 1w1;
+            bt = bt | 1w1;
         }
         @name("a") {
-            y0_2 = bt;
-            tmp_0 = y0_2 | 1w1;
-            y0_2 = tmp_0;
-            bt = y0_2;
+            y0_2 = bt | 1w1;
+            tmp_0 = bt | 1w1 | 1w1;
+            y0_2 = bt | 1w1 | 1w1;
+            bt = bt | 1w1 | 1w1;
         }
     }
     @name("t") table t() {

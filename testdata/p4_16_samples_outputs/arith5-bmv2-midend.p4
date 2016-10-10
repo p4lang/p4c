@@ -46,7 +46,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("tmp") int<32> tmp_0;
     @name("shift") action shift_0() {
         tmp_0 = h.h.a >> h.h.b;
-        h.h.c = (int<64>)tmp_0;
+        h.h.c = (int<64>)(h.h.a >> h.h.b);
         sm.egress_spec = 9w0;
     }
     @name("t") table t() {

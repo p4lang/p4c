@@ -27,13 +27,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("b") action b_0() {
         @name("a") {
             y0 = meta.md.b;
-            y0 = y0 + 1w1;
-            meta.md.b = y0;
+            y0 = meta.md.b + 1w1;
+            meta.md.b = meta.md.b + 1w1;
         }
         @name("a") {
             y0_2 = meta.md.b;
-            y0_2 = y0_2 + 1w1;
-            meta.md.b = y0_2;
+            y0_2 = meta.md.b + 1w1;
+            meta.md.b = meta.md.b + 1w1;
         }
     }
     @name("t") table t() {

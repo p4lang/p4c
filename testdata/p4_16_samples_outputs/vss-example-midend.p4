@@ -113,9 +113,9 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     @name("Set_nhop") action Set_nhop_0(IPv4Address ipv4_dest, PortId port) {
         nextHop_0 = ipv4_dest;
         tmp_17 = headers.ip.ttl + 8w255;
-        headers.ip.ttl = tmp_17;
+        headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
-        nextHop_2 = nextHop_0;
+        nextHop_2 = ipv4_dest;
     }
     @name("ipv4_match") table ipv4_match() {
         key = {
