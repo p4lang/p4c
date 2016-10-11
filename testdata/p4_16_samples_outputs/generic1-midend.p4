@@ -6,10 +6,10 @@ extern Generic<T> {
 
 extern void f<T>(in T arg);
 control caller() {
-    @name("a") bit<32> a;
-    @name("b") bit<32> b;
-    @name("tmp") bit<32> tmp_1;
-    @name("tmp_0") bit<5> tmp_2;
+    bit<32> a;
+    bit<32> b;
+    bit<32> tmp_1;
+    bit<5> tmp_2;
     @name("cinst.x") Generic<bit<8>>(8w9) cinst_x_0;
     action act() {
         tmp_1 = cinst_x_0.get<bit<32>>();

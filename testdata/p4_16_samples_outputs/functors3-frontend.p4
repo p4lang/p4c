@@ -1,23 +1,23 @@
-parser p1(out bit<1> z1)(bit<1> b1) {
+parser simple(out bit<1> z);
+package m(simple n);
+parser p1_0(out bit<1> z1) {
     state start {
-        z1 = b1;
+        z1 = 1w0;
         transition accept;
     }
 }
 
-parser p(out bit<1> z)(bit<1> b, bit<1> c) {
-    @name("p1i") p1(b) p1i_0;
+parser p_0(out bit<1> z) {
     bit<1> tmp;
     bit<1> tmp_0;
+    @name("p1i") p1_0() p1i_0;
     state start {
         p1i_0.apply(z);
-        tmp = z & b;
-        tmp_0 = tmp & c;
+        tmp = z & 1w0;
+        tmp_0 = tmp & 1w1;
         z = tmp_0;
         transition accept;
     }
 }
 
-parser simple(out bit<1> z);
-package m(simple n);
-m(p(1w0, 1w1)) main;
+m(p_0()) main;

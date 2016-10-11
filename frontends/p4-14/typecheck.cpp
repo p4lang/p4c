@@ -66,8 +66,9 @@ class TypeCheck::Pass1 : public Transform {
             error("%s: %s is not a header", ref->base()->srcInfo, ref->base()->toString());
         return ref; }
     const IR::Node *postorder(IR::Member *ref) override {
-        if (ref->member == "$valid") {
-            ref->type = IR::Type::Boolean::get();
+        if (ref->member.toString()[0] == '$') {
+            if (ref->member == "$valid")
+                ref->type = IR::Type::Boolean::get();
         } else if (auto ht = ref->expr->type->to<IR::Type_StructLike>()) {
             auto f = ht->getField(ref->member);
             if (f != nullptr) {

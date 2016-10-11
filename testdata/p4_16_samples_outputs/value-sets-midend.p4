@@ -16,8 +16,8 @@ extern ValueSet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    @name("set") bit<6> set;
-    @name("tmp") bit<8> tmp_0;
+    bit<8> set;
+    bit<8> tmp_0;
     @name("ethtype_kinds") ValueSet(32w5) ethtype_kinds;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
@@ -30,10 +30,10 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     }
     state dispatch_value_sets {
         tmp_0 = ethtype_kinds.index(p.ethernet.etherType);
-        set = (bit<6>)tmp_0;
+        set = tmp_0;
         transition select(set) {
-            6w1: parse_trill;
-            6w2: parse_vlan_tag;
+            8w1: parse_trill;
+            8w2: parse_vlan_tag;
         }
     }
     state parse_ipv4 {

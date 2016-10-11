@@ -1,9 +1,9 @@
 parser simple(out bit<1> z);
 package m(simple n);
 parser p_0(out bit<1> z) {
-    @name("z1_0") bit<1> z1;
-    @name("tmp") bit<1> tmp_1;
-    @name("tmp_0") bit<1> tmp_2;
+    bit<1> tmp_1;
+    bit<1> tmp_2;
+    bit<1> z1;
     state start {
         z1 = 1w0;
         z = z1;

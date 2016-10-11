@@ -54,6 +54,17 @@ const IR::Node* MoveDeclarations::postorder(IR::P4Parser* parser)  {
     return parser;
 }
 
+const IR::Node* MoveDeclarations::postorder(IR::Function* function)  {
+    auto body = new IR::IndexedVector<IR::StatOrDecl>();
+    auto m = getMoves();
+    body->insert(body->end(), m->begin(), m->end());
+    body->append(*function->body->components);
+    function->body = new IR::BlockStatement(
+        function->body->srcInfo, function->body->annotations, body);
+    pop();
+    return function;
+}
+
 const IR::Node* MoveDeclarations::postorder(IR::Declaration_Variable* decl) {
     auto parent = getContext()->node;
     // We must keep the initializer here

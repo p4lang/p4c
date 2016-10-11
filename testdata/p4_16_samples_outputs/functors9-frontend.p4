@@ -3,10 +3,12 @@ extern e<T> {
     T get();
 }
 
-parser p1<T>(in T a) {
-    @name("w") T w_0;
-    @name("ei") e<T>() ei_0;
-    T tmp;
+parser simple(in bit<2> a);
+package m(simple n);
+parser p1_0(in bit<2> a) {
+    bit<2> w_0;
+    bit<2> tmp;
+    @name("ei") e<bit<2>>() ei_0;
     state start {
         tmp = ei_0.get();
         w_0 = tmp;
@@ -14,6 +16,4 @@ parser p1<T>(in T a) {
     }
 }
 
-parser simple(in bit<2> a);
-package m(simple n);
-m(p1<bit<2>>()) main;
+m(p1_0()) main;

@@ -1,16 +1,15 @@
-parser p() {
-    @name("a") bit<32> a;
-    @name("b") bit<32> b;
-    @name("tmp") bool tmp_9;
-    @name("tmp_0") bit<32> tmp_10;
-    @name("tmp_1") bit<32> tmp_11;
-    @name("tmp_2") bool tmp_12;
-    @name("tmp_3") bit<32> tmp_13;
-    @name("tmp_4") bool tmp_14;
-    @name("tmp_5") bit<32> tmp_15;
-    @name("tmp_6") bit<32> tmp_16;
-    @name("tmp_7") bit<32> tmp_17;
-    @name("tmp_8") bit<32> tmp_18;
+parser p(out bit<32> b) {
+    bit<32> a;
+    bool tmp_9;
+    bit<32> tmp_10;
+    bit<32> tmp_11;
+    bool tmp_12;
+    bit<32> tmp_13;
+    bool tmp_14;
+    bit<32> tmp_15;
+    bit<32> tmp_16;
+    bit<32> tmp_17;
+    bit<32> tmp_18;
     state start {
         a = 32w1;
         tmp_9 = a == 32w0;
@@ -69,6 +68,6 @@ parser p() {
     }
 }
 
-parser proto();
+parser proto(out bit<32> b);
 package top(proto _p);
 top(p()) main;

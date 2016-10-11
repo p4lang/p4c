@@ -1,10 +1,10 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    @name("tmp") bit<32> tmp_4;
-    @name("tmp_0") bool tmp_5;
-    @name("tmp_1") bool tmp_6;
-    @name("tmp_2") bit<32> tmp_7;
-    @name("tmp_3") bool tmp_8;
+    bit<32> tmp_4;
+    bool tmp_5;
+    bool tmp_6;
+    bit<32> tmp_7;
+    bool tmp_8;
     action act() {
         tmp_6 = false;
     }

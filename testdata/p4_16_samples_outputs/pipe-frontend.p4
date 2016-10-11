@@ -34,7 +34,11 @@ struct Packet_data {
 
 action NoAction() {
 }
-control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
+control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
+    TArg1 tmp;
+    TArg2 tmp_0;
+    TArg1 tmp_1;
+    TArg2 tmp_2;
     @name("B_action") action B_action_0(out bit<9> barg, BParamType bData) {
         barg = (bit<9>)bData;
     }
@@ -50,7 +54,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
             B_action_0(tArg1.field1);
             C_action_0();
         }
-        size = t2Size;
+        size = 32w5;
         const default_action = C_action_0(9w5);
     }
     @name("Drop") action Drop_0() {
@@ -66,10 +70,6 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
         }
         const default_action = NoAction();
     }
-    TArg1 tmp;
-    TArg2 tmp_0;
-    TArg1 tmp_1;
-    TArg2 tmp_2;
     apply {
         tmp = pArg1;
         tmp_0 = pArg2;
@@ -84,9 +84,9 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    @name("p1") P_pipe(32w5) p1_0;
     TArg1 tmp_3;
     TArg2 tmp_4;
+    @name("p1") P_pipe_0() p1_0;
     apply {
         tmp_3 = qArg1;
         tmp_4 = qArg2;

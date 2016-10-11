@@ -644,7 +644,9 @@ bool ComputeWriteSet::preorder(const IR::BlockStatement* statement) {
     return setDefinitions(currentDefinitions);
 }
 
-bool ComputeWriteSet::preorder(const IR::ReturnStatement*) {
+bool ComputeWriteSet::preorder(const IR::ReturnStatement* statement) {
+    if (statement->expression != nullptr)
+        visit(statement->expression);
     returnedDefinitions = returnedDefinitions->join(currentDefinitions);
     LOG3("Return definitions " << returnedDefinitions);
     return setDefinitions(new Definitions());

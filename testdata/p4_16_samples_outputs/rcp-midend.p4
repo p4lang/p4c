@@ -17,19 +17,19 @@ struct Metadata {
 }
 
 control ingress(inout H pkt_hdr, in Metadata metadata) {
-    @name("input_traffic_bytes_tmp") bit<32> input_traffic_bytes_tmp;
-    @name("sum_rtt_Tr_tmp") bit<32> sum_rtt_Tr_tmp;
-    @name("num_pkts_with_rtt_tmp") bit<32> num_pkts_with_rtt_tmp;
-    @name("tmp") bit<32> tmp_9;
-    @name("tmp_0") bit<32> tmp_10;
-    @name("tmp_1") bit<32> tmp_11;
-    @name("tmp_2") bit<32> tmp_12;
-    @name("tmp_3") bit<32> tmp_13;
-    @name("tmp_4") bit<32> tmp_14;
-    @name("tmp_5") bit<32> tmp_15;
-    @name("tmp_6") bit<32> tmp_16;
-    @name("tmp_7") bit<32> tmp_17;
-    @name("tmp_8") bool tmp_18;
+    bit<32> input_traffic_bytes_tmp;
+    bit<32> sum_rtt_Tr_tmp;
+    bit<32> num_pkts_with_rtt_tmp;
+    bit<32> tmp_9;
+    bit<32> tmp_10;
+    bit<32> tmp_11;
+    bit<32> tmp_12;
+    bit<32> tmp_13;
+    bit<32> tmp_14;
+    bit<32> tmp_15;
+    bit<32> tmp_16;
+    bit<32> tmp_17;
+    bool tmp_18;
     @name("input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes;
     @name("sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr;
     @name("num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt;

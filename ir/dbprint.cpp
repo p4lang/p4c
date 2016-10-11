@@ -63,87 +63,6 @@ void IR::Block::dbprint_recursive(std::ostream& out) const {
     out << unindent;
 }
 
-void IR::Type_MethodBase::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-    if (returnType != nullptr)
-        out << returnType << " ";
-    out << "_";
-    if (typeParameters != nullptr)
-        out << typeParameters;
-    out << "(" << parameters << ")";
-}
-
-void IR::Type_Parser::dbprint(std::ostream& out) const {
-    Type_Declaration::dbprint(out);
-    if (typeParameters != nullptr)
-        out << typeParameters;
-    out << "(" << applyParams << ")";
-}
-
-void IR::Type_Control::dbprint(std::ostream& out) const {
-    Type_Declaration::dbprint(out);
-    if (typeParameters != nullptr)
-        out << typeParameters;
-    out << "(" << applyParams << ")";
-}
-
-void IR::Type_Package::dbprint(std::ostream& out) const {
-    Type_Declaration::dbprint(out);
-    if (typeParameters != nullptr)
-        out << typeParameters;
-    out << "(" << constructorParams << ")";
-}
-
-void IR::Type_Tuple::dbprint(std::ostream& out) const {
-    Type::dbprint(out);
-    out << ": tuple<";
-    bool first = true;
-    for (auto t : *components) {
-        if (!first)
-            out << ", ";
-        out << t;
-        first = false;
-    }
-    out << ">";
-}
-
-void IR::Method::dbprint(std::ostream& out) const {
-    Declaration::dbprint(out);
-    out << " " << getName() << " " << type;
-}
-
-void IR::Type_Extern::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-    if (typeParameters != nullptr)
-        out << typeParameters;
-}
-
-void IR::Type_Var::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-    out << ":" << toString();
-}
-
-void IR::Parameter::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-    out << direction << " " << type << " " << name;
-}
-
-void IR::TypeParameters::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-    out << "<";
-    bool first = true;
-    for (auto p : *parameters) {
-        if (!first)
-            out << ", ";
-        out << p;
-        first = false;
-    }
-    out << ">";
-}
-
-void IR::Type_Table::dbprint(std::ostream& out) const
-{ Node::dbprint(out); out << table->name; }
-
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v) {
     int prec = getprec(out);
     if (prec) {
@@ -160,29 +79,4 @@ std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v)
 
 void dbprint(const IR::Node *n) {
   std::cout << n << std::endl;
-}
-
-void IR::ArgumentInfo::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-}
-
-void IR::MethodCallStatement::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-    out << " " << methodCall->method;
-}
-
-void IR::Type_MethodCall::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-    out << returnType << " _";
-    out << typeArguments;
-    out << "(" << arguments << ")";
-}
-
-void IR::Type_Bits::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
-    out << toString();
-}
-
-void IR::Type_ActionEnum::dbprint(std::ostream& out) const {
-    Node::dbprint(out);
 }

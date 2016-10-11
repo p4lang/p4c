@@ -1,18 +1,18 @@
 control p() {
-    @name("z") bit<1> z;
-    @name("x_0") bit<1> x_0;
-    @name("x_1") bit<1> x_1;
-    @name("y_0") bit<1> y_0;
-    @name("tmp") bit<1> tmp_2;
-    @name("tmp_0") bit<1> tmp_3;
-    @name("tmp_1") bit<1> tmp_4;
+    bit<1> z;
+    bit<1> x_0;
+    bit<1> x_1;
+    bit<1> y_0;
+    bit<1> tmp_2;
+    bit<1> tmp_3;
+    bit<1> tmp_4;
     @name("x") bit<1> x_2;
     @name("y") bit<1> y_1;
     @name("b") action b_0() {
         x_2 = tmp_3;
-        x_0 = x_2;
-        tmp_2 = x_2 & x_0;
-        z = tmp_2;
+        x_0 = tmp_3;
+        tmp_2 = tmp_3 & tmp_3;
+        z = tmp_3 & tmp_3;
         tmp_4 = y_1;
     }
     action act() {

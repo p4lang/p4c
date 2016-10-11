@@ -28,11 +28,11 @@ struct Metadata {
 }
 
 control ingress(inout H pkt_hdr, in Metadata metadata) {
+    bool tmp;
+    bool tmp_0;
     @name("input_traffic_bytes") Counter<bit<32>>(CounterType.packets_and_bytes) input_traffic_bytes_0;
     @name("sum_rtt_Tr") ConditionalAccumulator<bit<32>>(32w1) sum_rtt_Tr_0;
     @name("num_pkts_with_rtt") ConditionalAccumulator<bit<32>>(32w1) num_pkts_with_rtt_0;
-    bool tmp;
-    bool tmp_0;
     apply {
         @atomic {
             input_traffic_bytes_0.count();

@@ -1,6 +1,6 @@
 control p(inout bit<1> bt) {
+    bit<1> tmp;
     @name("a") action a_0(inout bit<1> y0) {
-        bit<1> tmp;
         tmp = y0 | 1w1;
         y0 = tmp;
     }

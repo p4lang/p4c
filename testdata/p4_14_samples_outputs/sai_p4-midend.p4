@@ -192,9 +192,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("route_set_trap") action route_set_trap_0(bit<3> trap_priority) {
         meta.ingress_metadata.pri = trap_priority;
-        @name("copy_to_cpu") {
-            meta.ingress_metadata.copy_to_cpu = 1w1;
-        }
+        meta.ingress_metadata.copy_to_cpu = 1w1;
     }
     @name("route_set_nexthop") action route_set_nexthop_0(bit<16> next_hop_id) {
         meta.ingress_metadata.nhop = next_hop_id;
@@ -363,7 +361,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control verifyChecksum(in headers hdr, inout metadata meta) {
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
     action act() {
         mark_to_drop();
@@ -380,7 +378,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control computeChecksum(inout headers hdr, inout metadata meta) {
     @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
     action act_0() {
         hdr.ipv4.checksum = ipv4_checksum_2.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });

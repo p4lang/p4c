@@ -1,16 +1,16 @@
 parser simple(out bit<2> z);
 package m(simple n);
 parser p2_0(out bit<2> z2) {
-    @name("x1") bit<2> x1;
-    @name("x2") bit<2> x2;
-    @name("x3") bit<2> x3;
-    @name("z1_0") bit<2> z1;
-    @name("z1_1") bit<2> z1_3;
-    @name("z1_2") bit<2> z1_4;
-    @name("tmp") bit<2> tmp_3;
-    @name("tmp_0") bit<2> tmp_4;
-    @name("tmp_1") bit<2> tmp_5;
-    @name("tmp_2") bit<2> tmp_6;
+    bit<2> x1;
+    bit<2> x2;
+    bit<2> x3;
+    bit<2> tmp_3;
+    bit<2> tmp_4;
+    bit<2> tmp_5;
+    bit<2> tmp_6;
+    bit<2> z1;
+    bit<2> z1_3;
+    bit<2> z1_4;
     state start {
         z1 = 2w0;
         x1 = z1;

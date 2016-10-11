@@ -1,7 +1,7 @@
 control ctrl() {
-    @name("a") bit<32> a_0;
-    @name("b") bit<32> b_0;
-    @name("c") bit<32> c_0;
+    bit<32> a_0;
+    bit<32> b_0;
+    bit<32> c_0;
     @name("e") action e_0() {
         exit;
     }

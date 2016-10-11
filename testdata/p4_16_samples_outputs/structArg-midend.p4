@@ -3,8 +3,8 @@ struct S {
 }
 
 control caller() {
-    @name("data") S data;
-    @name("data_1") S data_2;
+    S data;
+    S data_2;
     action act() {
         data.f = 32w0;
         data_2 = data;

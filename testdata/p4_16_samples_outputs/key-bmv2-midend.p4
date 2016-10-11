@@ -20,12 +20,12 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-control vrfy(in Headers h, inout Meta m, inout standard_metadata_t sm) {
+control vrfy(in Headers h, inout Meta m) {
     apply {
     }
 }
 
-control update(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control update(inout Headers h, inout Meta m) {
     apply {
     }
 }
@@ -42,7 +42,7 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("h_0") hdr h_1;
+    hdr h_1;
     bit<32> key_0;
     @name("NoAction_1") action NoAction() {
     }

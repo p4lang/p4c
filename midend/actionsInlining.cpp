@@ -199,7 +199,9 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         ++it;
     }
 
-    auto result = new IR::BlockStatement(statement->srcInfo, callee->annotations, body);
+    auto annotations = callee->annotations->where(
+        [](const IR::Annotation* a) { return a->name != IR::Annotation::nameAnnotation; });
+    auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG1("Replacing " << orig << " with " << result);
     return result;
 }

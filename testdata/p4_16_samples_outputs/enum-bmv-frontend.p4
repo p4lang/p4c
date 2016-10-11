@@ -13,7 +13,7 @@ enum Choice {
 }
 
 control compute(inout hdr h) {
-    @name("c") Choice c_0;
+    Choice c_0;
     bool tmp;
     apply {
         c_0 = Choice.First;
@@ -39,12 +39,12 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-control vrfy(in Headers h, inout Meta m, inout standard_metadata_t sm) {
+control vrfy(in Headers h, inout Meta m) {
     apply {
     }
 }
 
-control update(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control update(inout Headers h, inout Meta m) {
     apply {
     }
 }

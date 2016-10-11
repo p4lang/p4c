@@ -1191,48 +1191,48 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("hdr_21") headers hdr_64;
-    @name("meta_21") metadata meta_64;
-    @name("standard_metadata_21") standard_metadata_t standard_metadata_64;
-    @name("hdr_22") headers hdr_65;
-    @name("meta_22") metadata meta_65;
-    @name("standard_metadata_22") standard_metadata_t standard_metadata_65;
-    @name("hdr_23") headers hdr_66;
-    @name("meta_23") metadata meta_66;
-    @name("standard_metadata_23") standard_metadata_t standard_metadata_66;
-    @name("hdr_24") headers hdr_67;
-    @name("meta_24") metadata meta_67;
-    @name("standard_metadata_24") standard_metadata_t standard_metadata_67;
-    @name("hdr_25") headers hdr_68;
-    @name("meta_25") metadata meta_68;
-    @name("standard_metadata_25") standard_metadata_t standard_metadata_68;
-    @name("hdr_26") headers hdr_69;
-    @name("meta_26") metadata meta_69;
-    @name("standard_metadata_26") standard_metadata_t standard_metadata_69;
-    @name("hdr_27") headers hdr_70;
-    @name("meta_27") metadata meta_70;
-    @name("standard_metadata_27") standard_metadata_t standard_metadata_70;
-    @name("hdr_28") headers hdr_71;
-    @name("meta_28") metadata meta_71;
-    @name("standard_metadata_28") standard_metadata_t standard_metadata_71;
-    @name("hdr_29") headers hdr_72;
-    @name("meta_29") metadata meta_72;
-    @name("standard_metadata_29") standard_metadata_t standard_metadata_72;
-    @name("hdr_30") headers hdr_73;
-    @name("meta_30") metadata meta_73;
-    @name("standard_metadata_30") standard_metadata_t standard_metadata_73;
-    @name("hdr_31") headers hdr_74;
-    @name("meta_31") metadata meta_74;
-    @name("standard_metadata_31") standard_metadata_t standard_metadata_74;
-    @name("hdr_32") headers hdr_75;
-    @name("meta_32") metadata meta_75;
-    @name("standard_metadata_32") standard_metadata_t standard_metadata_75;
-    @name("hdr_33") headers hdr_76;
-    @name("meta_33") metadata meta_76;
-    @name("standard_metadata_33") standard_metadata_t standard_metadata_76;
-    @name("hdr_34") headers hdr_77;
-    @name("meta_34") metadata meta_77;
-    @name("standard_metadata_34") standard_metadata_t standard_metadata_77;
+    headers hdr_64;
+    metadata meta_64;
+    standard_metadata_t standard_metadata_64;
+    headers hdr_65;
+    metadata meta_65;
+    standard_metadata_t standard_metadata_65;
+    headers hdr_66;
+    metadata meta_66;
+    standard_metadata_t standard_metadata_66;
+    headers hdr_67;
+    metadata meta_67;
+    standard_metadata_t standard_metadata_67;
+    headers hdr_68;
+    metadata meta_68;
+    standard_metadata_t standard_metadata_68;
+    headers hdr_69;
+    metadata meta_69;
+    standard_metadata_t standard_metadata_69;
+    headers hdr_70;
+    metadata meta_70;
+    standard_metadata_t standard_metadata_70;
+    headers hdr_71;
+    metadata meta_71;
+    standard_metadata_t standard_metadata_71;
+    headers hdr_72;
+    metadata meta_72;
+    standard_metadata_t standard_metadata_72;
+    headers hdr_73;
+    metadata meta_73;
+    standard_metadata_t standard_metadata_73;
+    headers hdr_74;
+    metadata meta_74;
+    standard_metadata_t standard_metadata_74;
+    headers hdr_75;
+    metadata meta_75;
+    standard_metadata_t standard_metadata_75;
+    headers hdr_76;
+    metadata meta_76;
+    standard_metadata_t standard_metadata_76;
+    headers hdr_77;
+    metadata meta_77;
+    standard_metadata_t standard_metadata_77;
     @name("NoAction_2") action NoAction() {
     }
     @name("NoAction_3") action NoAction_0() {
@@ -1986,338 +1986,210 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("process_int_insertion.int_set_header_0003_i0") action process_int_insertion_int_set_header_0003_i0() {
     }
     @name("process_int_insertion.int_set_header_0003_i1") action process_int_insertion_int_set_header_0003_i1() {
-        @name("process_int_insertion.int_set_header_3") {
-            hdr_71.int_q_occupancy_header.setValid();
-            hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
-            hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
-        }
+        hdr_71.int_q_occupancy_header.setValid();
+        hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
+        hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
     }
     @name("process_int_insertion.int_set_header_0003_i2") action process_int_insertion_int_set_header_0003_i2() {
-        @name("process_int_insertion.int_set_header_2") {
-            hdr_71.int_hop_latency_header.setValid();
-            hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
-        }
+        hdr_71.int_hop_latency_header.setValid();
+        hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
     }
     @name("process_int_insertion.int_set_header_0003_i3") action process_int_insertion_int_set_header_0003_i3() {
-        @name("process_int_insertion.int_set_header_3") {
-            hdr_71.int_q_occupancy_header.setValid();
-            hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
-            hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
-        }
-        @name("process_int_insertion.int_set_header_2") {
-            hdr_71.int_hop_latency_header.setValid();
-            hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
-        }
+        hdr_71.int_q_occupancy_header.setValid();
+        hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
+        hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
+        hdr_71.int_hop_latency_header.setValid();
+        hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
     }
     @name("process_int_insertion.int_set_header_0003_i4") action process_int_insertion_int_set_header_0003_i4() {
-        @name("process_int_insertion.int_set_header_1") {
-            hdr_71.int_ingress_port_id_header.setValid();
-            hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
-            hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
-        }
+        hdr_71.int_ingress_port_id_header.setValid();
+        hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
+        hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
     }
     @name("process_int_insertion.int_set_header_0003_i5") action process_int_insertion_int_set_header_0003_i5() {
-        @name("process_int_insertion.int_set_header_3") {
-            hdr_71.int_q_occupancy_header.setValid();
-            hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
-            hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
-        }
-        @name("process_int_insertion.int_set_header_1") {
-            hdr_71.int_ingress_port_id_header.setValid();
-            hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
-            hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
-        }
+        hdr_71.int_q_occupancy_header.setValid();
+        hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
+        hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
+        hdr_71.int_ingress_port_id_header.setValid();
+        hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
+        hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
     }
     @name("process_int_insertion.int_set_header_0003_i6") action process_int_insertion_int_set_header_0003_i6() {
-        @name("process_int_insertion.int_set_header_2") {
-            hdr_71.int_hop_latency_header.setValid();
-            hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
-        }
-        @name("process_int_insertion.int_set_header_1") {
-            hdr_71.int_ingress_port_id_header.setValid();
-            hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
-            hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
-        }
+        hdr_71.int_hop_latency_header.setValid();
+        hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
+        hdr_71.int_ingress_port_id_header.setValid();
+        hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
+        hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
     }
     @name("process_int_insertion.int_set_header_0003_i7") action process_int_insertion_int_set_header_0003_i7() {
-        @name("process_int_insertion.int_set_header_3") {
-            hdr_71.int_q_occupancy_header.setValid();
-            hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
-            hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
-        }
-        @name("process_int_insertion.int_set_header_2") {
-            hdr_71.int_hop_latency_header.setValid();
-            hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
-        }
-        @name("process_int_insertion.int_set_header_1") {
-            hdr_71.int_ingress_port_id_header.setValid();
-            hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
-            hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
-        }
+        hdr_71.int_q_occupancy_header.setValid();
+        hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
+        hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
+        hdr_71.int_hop_latency_header.setValid();
+        hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
+        hdr_71.int_ingress_port_id_header.setValid();
+        hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
+        hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
     }
     @name("process_int_insertion.int_set_header_0003_i8") action process_int_insertion_int_set_header_0003_i8() {
-        @name("process_int_insertion.int_set_header_0") {
-            hdr_71.int_switch_id_header.setValid();
-            hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
-        }
+        hdr_71.int_switch_id_header.setValid();
+        hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
     }
     @name("process_int_insertion.int_set_header_0003_i9") action process_int_insertion_int_set_header_0003_i9() {
-        @name("process_int_insertion.int_set_header_3") {
-            hdr_71.int_q_occupancy_header.setValid();
-            hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
-            hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
-        }
-        @name("process_int_insertion.int_set_header_0") {
-            hdr_71.int_switch_id_header.setValid();
-            hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
-        }
+        hdr_71.int_q_occupancy_header.setValid();
+        hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
+        hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
+        hdr_71.int_switch_id_header.setValid();
+        hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
     }
     @name("process_int_insertion.int_set_header_0003_i10") action process_int_insertion_int_set_header_0003_i10() {
-        @name("process_int_insertion.int_set_header_2") {
-            hdr_71.int_hop_latency_header.setValid();
-            hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
-        }
-        @name("process_int_insertion.int_set_header_0") {
-            hdr_71.int_switch_id_header.setValid();
-            hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
-        }
+        hdr_71.int_hop_latency_header.setValid();
+        hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
+        hdr_71.int_switch_id_header.setValid();
+        hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
     }
     @name("process_int_insertion.int_set_header_0003_i11") action process_int_insertion_int_set_header_0003_i11() {
-        @name("process_int_insertion.int_set_header_3") {
-            hdr_71.int_q_occupancy_header.setValid();
-            hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
-            hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
-        }
-        @name("process_int_insertion.int_set_header_2") {
-            hdr_71.int_hop_latency_header.setValid();
-            hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
-        }
-        @name("process_int_insertion.int_set_header_0") {
-            hdr_71.int_switch_id_header.setValid();
-            hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
-        }
+        hdr_71.int_q_occupancy_header.setValid();
+        hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
+        hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
+        hdr_71.int_hop_latency_header.setValid();
+        hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
+        hdr_71.int_switch_id_header.setValid();
+        hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
     }
     @name("process_int_insertion.int_set_header_0003_i12") action process_int_insertion_int_set_header_0003_i12() {
-        @name("process_int_insertion.int_set_header_1") {
-            hdr_71.int_ingress_port_id_header.setValid();
-            hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
-            hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
-        }
-        @name("process_int_insertion.int_set_header_0") {
-            hdr_71.int_switch_id_header.setValid();
-            hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
-        }
+        hdr_71.int_ingress_port_id_header.setValid();
+        hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
+        hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
+        hdr_71.int_switch_id_header.setValid();
+        hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
     }
     @name("process_int_insertion.int_set_header_0003_i13") action process_int_insertion_int_set_header_0003_i13() {
-        @name("process_int_insertion.int_set_header_3") {
-            hdr_71.int_q_occupancy_header.setValid();
-            hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
-            hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
-        }
-        @name("process_int_insertion.int_set_header_1") {
-            hdr_71.int_ingress_port_id_header.setValid();
-            hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
-            hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
-        }
-        @name("process_int_insertion.int_set_header_0") {
-            hdr_71.int_switch_id_header.setValid();
-            hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
-        }
+        hdr_71.int_q_occupancy_header.setValid();
+        hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
+        hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
+        hdr_71.int_ingress_port_id_header.setValid();
+        hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
+        hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
+        hdr_71.int_switch_id_header.setValid();
+        hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
     }
     @name("process_int_insertion.int_set_header_0003_i14") action process_int_insertion_int_set_header_0003_i14() {
-        @name("process_int_insertion.int_set_header_2") {
-            hdr_71.int_hop_latency_header.setValid();
-            hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
-        }
-        @name("process_int_insertion.int_set_header_1") {
-            hdr_71.int_ingress_port_id_header.setValid();
-            hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
-            hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
-        }
-        @name("process_int_insertion.int_set_header_0") {
-            hdr_71.int_switch_id_header.setValid();
-            hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
-        }
+        hdr_71.int_hop_latency_header.setValid();
+        hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
+        hdr_71.int_ingress_port_id_header.setValid();
+        hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
+        hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
+        hdr_71.int_switch_id_header.setValid();
+        hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
     }
     @name("process_int_insertion.int_set_header_0003_i15") action process_int_insertion_int_set_header_0003_i15() {
-        @name("process_int_insertion.int_set_header_3") {
-            hdr_71.int_q_occupancy_header.setValid();
-            hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
-            hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
-        }
-        @name("process_int_insertion.int_set_header_2") {
-            hdr_71.int_hop_latency_header.setValid();
-            hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
-        }
-        @name("process_int_insertion.int_set_header_1") {
-            hdr_71.int_ingress_port_id_header.setValid();
-            hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
-            hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
-        }
-        @name("process_int_insertion.int_set_header_0") {
-            hdr_71.int_switch_id_header.setValid();
-            hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
-        }
+        hdr_71.int_q_occupancy_header.setValid();
+        hdr_71.int_q_occupancy_header.q_occupancy1 = 7w0;
+        hdr_71.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta_71.intrinsic_metadata.enq_qdepth;
+        hdr_71.int_hop_latency_header.setValid();
+        hdr_71.int_hop_latency_header.hop_latency = (bit<31>)meta_71.intrinsic_metadata.deq_timedelta;
+        hdr_71.int_ingress_port_id_header.setValid();
+        hdr_71.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
+        hdr_71.int_ingress_port_id_header.ingress_port_id_0 = meta_71.ingress_metadata.ifindex;
+        hdr_71.int_switch_id_header.setValid();
+        hdr_71.int_switch_id_header.switch_id = (bit<31>)meta_71.int_metadata.switch_id;
     }
     @name("process_int_insertion.int_set_header_0407_i0") action process_int_insertion_int_set_header_0407_i0() {
     }
     @name("process_int_insertion.int_set_header_0407_i1") action process_int_insertion_int_set_header_0407_i1() {
-        @name("process_int_insertion.int_set_header_7") {
-            hdr_71.int_egress_port_tx_utilization_header.setValid();
-            hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
-        }
+        hdr_71.int_egress_port_tx_utilization_header.setValid();
+        hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
     }
     @name("process_int_insertion.int_set_header_0407_i2") action process_int_insertion_int_set_header_0407_i2() {
-        @name("process_int_insertion.int_set_header_6") {
-            hdr_71.int_q_congestion_header.setValid();
-            hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
-        }
+        hdr_71.int_q_congestion_header.setValid();
+        hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
     }
     @name("process_int_insertion.int_set_header_0407_i3") action process_int_insertion_int_set_header_0407_i3() {
-        @name("process_int_insertion.int_set_header_7") {
-            hdr_71.int_egress_port_tx_utilization_header.setValid();
-            hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_6") {
-            hdr_71.int_q_congestion_header.setValid();
-            hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
-        }
+        hdr_71.int_egress_port_tx_utilization_header.setValid();
+        hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
+        hdr_71.int_q_congestion_header.setValid();
+        hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
     }
     @name("process_int_insertion.int_set_header_0407_i4") action process_int_insertion_int_set_header_0407_i4() {
-        @name("process_int_insertion.int_set_header_5") {
-            hdr_71.int_egress_port_id_header.setValid();
-            hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
-        }
+        hdr_71.int_egress_port_id_header.setValid();
+        hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
     }
     @name("process_int_insertion.int_set_header_0407_i5") action process_int_insertion_int_set_header_0407_i5() {
-        @name("process_int_insertion.int_set_header_7") {
-            hdr_71.int_egress_port_tx_utilization_header.setValid();
-            hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_5") {
-            hdr_71.int_egress_port_id_header.setValid();
-            hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
-        }
+        hdr_71.int_egress_port_tx_utilization_header.setValid();
+        hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
+        hdr_71.int_egress_port_id_header.setValid();
+        hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
     }
     @name("process_int_insertion.int_set_header_0407_i6") action process_int_insertion_int_set_header_0407_i6() {
-        @name("process_int_insertion.int_set_header_6") {
-            hdr_71.int_q_congestion_header.setValid();
-            hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_5") {
-            hdr_71.int_egress_port_id_header.setValid();
-            hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
-        }
+        hdr_71.int_q_congestion_header.setValid();
+        hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
+        hdr_71.int_egress_port_id_header.setValid();
+        hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
     }
     @name("process_int_insertion.int_set_header_0407_i7") action process_int_insertion_int_set_header_0407_i7() {
-        @name("process_int_insertion.int_set_header_7") {
-            hdr_71.int_egress_port_tx_utilization_header.setValid();
-            hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_6") {
-            hdr_71.int_q_congestion_header.setValid();
-            hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_5") {
-            hdr_71.int_egress_port_id_header.setValid();
-            hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
-        }
+        hdr_71.int_egress_port_tx_utilization_header.setValid();
+        hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
+        hdr_71.int_q_congestion_header.setValid();
+        hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
+        hdr_71.int_egress_port_id_header.setValid();
+        hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
     }
     @name("process_int_insertion.int_set_header_0407_i8") action process_int_insertion_int_set_header_0407_i8() {
-        @name("process_int_insertion.int_set_header_4") {
-            hdr_71.int_ingress_tstamp_header.setValid();
-            hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
-        }
+        hdr_71.int_ingress_tstamp_header.setValid();
+        hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
     }
     @name("process_int_insertion.int_set_header_0407_i9") action process_int_insertion_int_set_header_0407_i9() {
-        @name("process_int_insertion.int_set_header_7") {
-            hdr_71.int_egress_port_tx_utilization_header.setValid();
-            hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_4") {
-            hdr_71.int_ingress_tstamp_header.setValid();
-            hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
-        }
+        hdr_71.int_egress_port_tx_utilization_header.setValid();
+        hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
+        hdr_71.int_ingress_tstamp_header.setValid();
+        hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
     }
     @name("process_int_insertion.int_set_header_0407_i10") action process_int_insertion_int_set_header_0407_i10() {
-        @name("process_int_insertion.int_set_header_6") {
-            hdr_71.int_q_congestion_header.setValid();
-            hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_4") {
-            hdr_71.int_ingress_tstamp_header.setValid();
-            hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
-        }
+        hdr_71.int_q_congestion_header.setValid();
+        hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
+        hdr_71.int_ingress_tstamp_header.setValid();
+        hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
     }
     @name("process_int_insertion.int_set_header_0407_i11") action process_int_insertion_int_set_header_0407_i11() {
-        @name("process_int_insertion.int_set_header_7") {
-            hdr_71.int_egress_port_tx_utilization_header.setValid();
-            hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_6") {
-            hdr_71.int_q_congestion_header.setValid();
-            hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_4") {
-            hdr_71.int_ingress_tstamp_header.setValid();
-            hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
-        }
+        hdr_71.int_egress_port_tx_utilization_header.setValid();
+        hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
+        hdr_71.int_q_congestion_header.setValid();
+        hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
+        hdr_71.int_ingress_tstamp_header.setValid();
+        hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
     }
     @name("process_int_insertion.int_set_header_0407_i12") action process_int_insertion_int_set_header_0407_i12() {
-        @name("process_int_insertion.int_set_header_5") {
-            hdr_71.int_egress_port_id_header.setValid();
-            hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
-        }
-        @name("process_int_insertion.int_set_header_4") {
-            hdr_71.int_ingress_tstamp_header.setValid();
-            hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
-        }
+        hdr_71.int_egress_port_id_header.setValid();
+        hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
+        hdr_71.int_ingress_tstamp_header.setValid();
+        hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
     }
     @name("process_int_insertion.int_set_header_0407_i13") action process_int_insertion_int_set_header_0407_i13() {
-        @name("process_int_insertion.int_set_header_7") {
-            hdr_71.int_egress_port_tx_utilization_header.setValid();
-            hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_5") {
-            hdr_71.int_egress_port_id_header.setValid();
-            hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
-        }
-        @name("process_int_insertion.int_set_header_4") {
-            hdr_71.int_ingress_tstamp_header.setValid();
-            hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
-        }
+        hdr_71.int_egress_port_tx_utilization_header.setValid();
+        hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
+        hdr_71.int_egress_port_id_header.setValid();
+        hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
+        hdr_71.int_ingress_tstamp_header.setValid();
+        hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
     }
     @name("process_int_insertion.int_set_header_0407_i14") action process_int_insertion_int_set_header_0407_i14() {
-        @name("process_int_insertion.int_set_header_6") {
-            hdr_71.int_q_congestion_header.setValid();
-            hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_5") {
-            hdr_71.int_egress_port_id_header.setValid();
-            hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
-        }
-        @name("process_int_insertion.int_set_header_4") {
-            hdr_71.int_ingress_tstamp_header.setValid();
-            hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
-        }
+        hdr_71.int_q_congestion_header.setValid();
+        hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
+        hdr_71.int_egress_port_id_header.setValid();
+        hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
+        hdr_71.int_ingress_tstamp_header.setValid();
+        hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
     }
     @name("process_int_insertion.int_set_header_0407_i15") action process_int_insertion_int_set_header_0407_i15() {
-        @name("process_int_insertion.int_set_header_7") {
-            hdr_71.int_egress_port_tx_utilization_header.setValid();
-            hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_6") {
-            hdr_71.int_q_congestion_header.setValid();
-            hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
-        }
-        @name("process_int_insertion.int_set_header_5") {
-            hdr_71.int_egress_port_id_header.setValid();
-            hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
-        }
-        @name("process_int_insertion.int_set_header_4") {
-            hdr_71.int_ingress_tstamp_header.setValid();
-            hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
-        }
+        hdr_71.int_egress_port_tx_utilization_header.setValid();
+        hdr_71.int_egress_port_tx_utilization_header.egress_port_tx_utilization = 31w0x7fffffff;
+        hdr_71.int_q_congestion_header.setValid();
+        hdr_71.int_q_congestion_header.q_congestion = 31w0x7fffffff;
+        hdr_71.int_egress_port_id_header.setValid();
+        hdr_71.int_egress_port_id_header.egress_port_id = (bit<31>)standard_metadata_71.egress_port;
+        hdr_71.int_ingress_tstamp_header.setValid();
+        hdr_71.int_ingress_tstamp_header.ingress_tstamp = (bit<31>)meta_71.i2e_metadata.ingress_tstamp;
     }
     @name("process_int_insertion.int_set_e_bit") action process_int_insertion_int_set_e_bit() {
         hdr_71.int_header.e = 1w1;
@@ -2554,281 +2426,237 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         meta_73.egress_metadata.payload_length = (bit<16>)(standard_metadata_73.packet_length + 32w65522);
     }
     @name("process_tunnel_encap.ipv4_vxlan_rewrite") action process_tunnel_encap_ipv4_vxlan_rewrite() {
-        @name("process_tunnel_encap.f_insert_vxlan_header") {
-            hdr_73.inner_ethernet = hdr_73.ethernet;
-            hdr_73.udp.setValid();
-            hdr_73.vxlan.setValid();
-            hdr_73.udp.srcPort = meta_73.hash_metadata.entropy_hash;
-            hdr_73.udp.dstPort = 16w4789;
-            hdr_73.udp.checksum = 16w0;
-            hdr_73.udp.length_ = meta_73.egress_metadata.payload_length + 16w30;
-            hdr_73.vxlan.flags = 8w0x8;
-            hdr_73.vxlan.reserved = 24w0;
-            hdr_73.vxlan.vni = meta_73.tunnel_metadata.vnid;
-            hdr_73.vxlan.reserved2 = 8w0;
-        }
-        @name("process_tunnel_encap.f_insert_ipv4_header") {
-            hdr_73.ipv4.setValid();
-            hdr_73.ipv4.protocol = 8w17;
-            hdr_73.ipv4.ttl = 8w64;
-            hdr_73.ipv4.version = 4w0x4;
-            hdr_73.ipv4.ihl = 4w0x5;
-            hdr_73.ipv4.identification = 16w0;
-        }
+        hdr_73.inner_ethernet = hdr_73.ethernet;
+        hdr_73.udp.setValid();
+        hdr_73.vxlan.setValid();
+        hdr_73.udp.srcPort = meta_73.hash_metadata.entropy_hash;
+        hdr_73.udp.dstPort = 16w4789;
+        hdr_73.udp.checksum = 16w0;
+        hdr_73.udp.length_ = meta_73.egress_metadata.payload_length + 16w30;
+        hdr_73.vxlan.flags = 8w0x8;
+        hdr_73.vxlan.reserved = 24w0;
+        hdr_73.vxlan.vni = meta_73.tunnel_metadata.vnid;
+        hdr_73.vxlan.reserved2 = 8w0;
+        hdr_73.ipv4.setValid();
+        hdr_73.ipv4.protocol = 8w17;
+        hdr_73.ipv4.ttl = 8w64;
+        hdr_73.ipv4.version = 4w0x4;
+        hdr_73.ipv4.ihl = 4w0x5;
+        hdr_73.ipv4.identification = 16w0;
         hdr_73.ipv4.totalLen = meta_73.egress_metadata.payload_length + 16w50;
         hdr_73.ethernet.etherType = 16w0x800;
     }
     @name("process_tunnel_encap.ipv4_genv_rewrite") action process_tunnel_encap_ipv4_genv_rewrite() {
-        @name("process_tunnel_encap.f_insert_genv_header") {
-            hdr_73.inner_ethernet = hdr_73.ethernet;
-            hdr_73.udp.setValid();
-            hdr_73.genv.setValid();
-            hdr_73.udp.srcPort = meta_73.hash_metadata.entropy_hash;
-            hdr_73.udp.dstPort = 16w6081;
-            hdr_73.udp.checksum = 16w0;
-            hdr_73.udp.length_ = meta_73.egress_metadata.payload_length + 16w30;
-            hdr_73.genv.ver = 2w0;
-            hdr_73.genv.oam = 1w0;
-            hdr_73.genv.critical = 1w0;
-            hdr_73.genv.optLen = 6w0;
-            hdr_73.genv.protoType = 16w0x6558;
-            hdr_73.genv.vni = meta_73.tunnel_metadata.vnid;
-            hdr_73.genv.reserved = 6w0;
-            hdr_73.genv.reserved2 = 8w0;
-        }
-        @name("process_tunnel_encap.f_insert_ipv4_header") {
-            hdr_73.ipv4.setValid();
-            hdr_73.ipv4.protocol = 8w17;
-            hdr_73.ipv4.ttl = 8w64;
-            hdr_73.ipv4.version = 4w0x4;
-            hdr_73.ipv4.ihl = 4w0x5;
-            hdr_73.ipv4.identification = 16w0;
-        }
+        hdr_73.inner_ethernet = hdr_73.ethernet;
+        hdr_73.udp.setValid();
+        hdr_73.genv.setValid();
+        hdr_73.udp.srcPort = meta_73.hash_metadata.entropy_hash;
+        hdr_73.udp.dstPort = 16w6081;
+        hdr_73.udp.checksum = 16w0;
+        hdr_73.udp.length_ = meta_73.egress_metadata.payload_length + 16w30;
+        hdr_73.genv.ver = 2w0;
+        hdr_73.genv.oam = 1w0;
+        hdr_73.genv.critical = 1w0;
+        hdr_73.genv.optLen = 6w0;
+        hdr_73.genv.protoType = 16w0x6558;
+        hdr_73.genv.vni = meta_73.tunnel_metadata.vnid;
+        hdr_73.genv.reserved = 6w0;
+        hdr_73.genv.reserved2 = 8w0;
+        hdr_73.ipv4.setValid();
+        hdr_73.ipv4.protocol = 8w17;
+        hdr_73.ipv4.ttl = 8w64;
+        hdr_73.ipv4.version = 4w0x4;
+        hdr_73.ipv4.ihl = 4w0x5;
+        hdr_73.ipv4.identification = 16w0;
         hdr_73.ipv4.totalLen = meta_73.egress_metadata.payload_length + 16w50;
         hdr_73.ethernet.etherType = 16w0x800;
     }
     @name("process_tunnel_encap.ipv4_nvgre_rewrite") action process_tunnel_encap_ipv4_nvgre_rewrite() {
-        @name("process_tunnel_encap.f_insert_nvgre_header") {
-            hdr_73.inner_ethernet = hdr_73.ethernet;
-            hdr_73.gre.setValid();
-            hdr_73.nvgre.setValid();
-            hdr_73.gre.proto = 16w0x6558;
-            hdr_73.gre.recurse = 3w0;
-            hdr_73.gre.flags = 5w0;
-            hdr_73.gre.ver = 3w0;
-            hdr_73.gre.R = 1w0;
-            hdr_73.gre.K = 1w1;
-            hdr_73.gre.C = 1w0;
-            hdr_73.gre.S = 1w0;
-            hdr_73.gre.s = 1w0;
-            hdr_73.nvgre.tni = meta_73.tunnel_metadata.vnid;
-            hdr_73.nvgre.flow_id[7:0] = meta_73.hash_metadata.entropy_hash[7:0];
-        }
-        @name("process_tunnel_encap.f_insert_ipv4_header") {
-            hdr_73.ipv4.setValid();
-            hdr_73.ipv4.protocol = 8w47;
-            hdr_73.ipv4.ttl = 8w64;
-            hdr_73.ipv4.version = 4w0x4;
-            hdr_73.ipv4.ihl = 4w0x5;
-            hdr_73.ipv4.identification = 16w0;
-        }
+        hdr_73.inner_ethernet = hdr_73.ethernet;
+        hdr_73.gre.setValid();
+        hdr_73.nvgre.setValid();
+        hdr_73.gre.proto = 16w0x6558;
+        hdr_73.gre.recurse = 3w0;
+        hdr_73.gre.flags = 5w0;
+        hdr_73.gre.ver = 3w0;
+        hdr_73.gre.R = 1w0;
+        hdr_73.gre.K = 1w1;
+        hdr_73.gre.C = 1w0;
+        hdr_73.gre.S = 1w0;
+        hdr_73.gre.s = 1w0;
+        hdr_73.nvgre.tni = meta_73.tunnel_metadata.vnid;
+        hdr_73.nvgre.flow_id[7:0] = meta_73.hash_metadata.entropy_hash[7:0];
+        hdr_73.ipv4.setValid();
+        hdr_73.ipv4.protocol = 8w47;
+        hdr_73.ipv4.ttl = 8w64;
+        hdr_73.ipv4.version = 4w0x4;
+        hdr_73.ipv4.ihl = 4w0x5;
+        hdr_73.ipv4.identification = 16w0;
         hdr_73.ipv4.totalLen = meta_73.egress_metadata.payload_length + 16w42;
         hdr_73.ethernet.etherType = 16w0x800;
     }
     @name("process_tunnel_encap.ipv4_gre_rewrite") action process_tunnel_encap_ipv4_gre_rewrite() {
-        @name("process_tunnel_encap.f_insert_gre_header") {
-            hdr_73.gre.setValid();
-        }
+        hdr_73.gre.setValid();
         hdr_73.gre.proto = hdr_73.ethernet.etherType;
-        @name("process_tunnel_encap.f_insert_ipv4_header") {
-            hdr_73.ipv4.setValid();
-            hdr_73.ipv4.protocol = 8w47;
-            hdr_73.ipv4.ttl = 8w64;
-            hdr_73.ipv4.version = 4w0x4;
-            hdr_73.ipv4.ihl = 4w0x5;
-            hdr_73.ipv4.identification = 16w0;
-        }
+        hdr_73.ipv4.setValid();
+        hdr_73.ipv4.protocol = 8w47;
+        hdr_73.ipv4.ttl = 8w64;
+        hdr_73.ipv4.version = 4w0x4;
+        hdr_73.ipv4.ihl = 4w0x5;
+        hdr_73.ipv4.identification = 16w0;
         hdr_73.ipv4.totalLen = meta_73.egress_metadata.payload_length + 16w24;
         hdr_73.ethernet.etherType = 16w0x800;
     }
     @name("process_tunnel_encap.ipv4_ip_rewrite") action process_tunnel_encap_ipv4_ip_rewrite() {
-        @name("process_tunnel_encap.f_insert_ipv4_header") {
-            hdr_73.ipv4.setValid();
-            hdr_73.ipv4.protocol = meta_73.tunnel_metadata.inner_ip_proto;
-            hdr_73.ipv4.ttl = 8w64;
-            hdr_73.ipv4.version = 4w0x4;
-            hdr_73.ipv4.ihl = 4w0x5;
-            hdr_73.ipv4.identification = 16w0;
-        }
+        hdr_73.ipv4.setValid();
+        hdr_73.ipv4.protocol = meta_73.tunnel_metadata.inner_ip_proto;
+        hdr_73.ipv4.ttl = 8w64;
+        hdr_73.ipv4.version = 4w0x4;
+        hdr_73.ipv4.ihl = 4w0x5;
+        hdr_73.ipv4.identification = 16w0;
         hdr_73.ipv4.totalLen = meta_73.egress_metadata.payload_length + 16w20;
         hdr_73.ethernet.etherType = 16w0x800;
     }
     @name("process_tunnel_encap.ipv4_erspan_t3_rewrite") action process_tunnel_encap_ipv4_erspan_t3_rewrite() {
-        @name("process_tunnel_encap.f_insert_erspan_t3_header") {
-            hdr_73.inner_ethernet = hdr_73.ethernet;
-            hdr_73.gre.setValid();
-            hdr_73.erspan_t3_header.setValid();
-            hdr_73.gre.C = 1w0;
-            hdr_73.gre.R = 1w0;
-            hdr_73.gre.K = 1w0;
-            hdr_73.gre.S = 1w0;
-            hdr_73.gre.s = 1w0;
-            hdr_73.gre.recurse = 3w0;
-            hdr_73.gre.flags = 5w0;
-            hdr_73.gre.ver = 3w0;
-            hdr_73.gre.proto = 16w0x22eb;
-            hdr_73.erspan_t3_header.timestamp = meta_73.i2e_metadata.ingress_tstamp;
-            hdr_73.erspan_t3_header.span_id = (bit<10>)meta_73.i2e_metadata.mirror_session_id;
-            hdr_73.erspan_t3_header.version = 4w2;
-            hdr_73.erspan_t3_header.sgt_other = 32w0;
-        }
-        @name("process_tunnel_encap.f_insert_ipv4_header") {
-            hdr_73.ipv4.setValid();
-            hdr_73.ipv4.protocol = 8w47;
-            hdr_73.ipv4.ttl = 8w64;
-            hdr_73.ipv4.version = 4w0x4;
-            hdr_73.ipv4.ihl = 4w0x5;
-            hdr_73.ipv4.identification = 16w0;
-        }
+        hdr_73.inner_ethernet = hdr_73.ethernet;
+        hdr_73.gre.setValid();
+        hdr_73.erspan_t3_header.setValid();
+        hdr_73.gre.C = 1w0;
+        hdr_73.gre.R = 1w0;
+        hdr_73.gre.K = 1w0;
+        hdr_73.gre.S = 1w0;
+        hdr_73.gre.s = 1w0;
+        hdr_73.gre.recurse = 3w0;
+        hdr_73.gre.flags = 5w0;
+        hdr_73.gre.ver = 3w0;
+        hdr_73.gre.proto = 16w0x22eb;
+        hdr_73.erspan_t3_header.timestamp = meta_73.i2e_metadata.ingress_tstamp;
+        hdr_73.erspan_t3_header.span_id = (bit<10>)meta_73.i2e_metadata.mirror_session_id;
+        hdr_73.erspan_t3_header.version = 4w2;
+        hdr_73.erspan_t3_header.sgt_other = 32w0;
+        hdr_73.ipv4.setValid();
+        hdr_73.ipv4.protocol = 8w47;
+        hdr_73.ipv4.ttl = 8w64;
+        hdr_73.ipv4.version = 4w0x4;
+        hdr_73.ipv4.ihl = 4w0x5;
+        hdr_73.ipv4.identification = 16w0;
         hdr_73.ipv4.totalLen = meta_73.egress_metadata.payload_length + 16w50;
     }
     @name("process_tunnel_encap.ipv6_gre_rewrite") action process_tunnel_encap_ipv6_gre_rewrite() {
-        @name("process_tunnel_encap.f_insert_gre_header") {
-            hdr_73.gre.setValid();
-        }
+        hdr_73.gre.setValid();
         hdr_73.gre.proto = hdr_73.ethernet.etherType;
-        @name("process_tunnel_encap.f_insert_ipv6_header") {
-            hdr_73.ipv6.setValid();
-            hdr_73.ipv6.version = 4w0x6;
-            hdr_73.ipv6.nextHdr = 8w47;
-            hdr_73.ipv6.hopLimit = 8w64;
-            hdr_73.ipv6.trafficClass = 8w0;
-            hdr_73.ipv6.flowLabel = 20w0;
-        }
+        hdr_73.ipv6.setValid();
+        hdr_73.ipv6.version = 4w0x6;
+        hdr_73.ipv6.nextHdr = 8w47;
+        hdr_73.ipv6.hopLimit = 8w64;
+        hdr_73.ipv6.trafficClass = 8w0;
+        hdr_73.ipv6.flowLabel = 20w0;
         hdr_73.ipv6.payloadLen = meta_73.egress_metadata.payload_length + 16w4;
         hdr_73.ethernet.etherType = 16w0x86dd;
     }
     @name("process_tunnel_encap.ipv6_ip_rewrite") action process_tunnel_encap_ipv6_ip_rewrite() {
-        @name("process_tunnel_encap.f_insert_ipv6_header") {
-            hdr_73.ipv6.setValid();
-            hdr_73.ipv6.version = 4w0x6;
-            hdr_73.ipv6.nextHdr = meta_73.tunnel_metadata.inner_ip_proto;
-            hdr_73.ipv6.hopLimit = 8w64;
-            hdr_73.ipv6.trafficClass = 8w0;
-            hdr_73.ipv6.flowLabel = 20w0;
-        }
+        hdr_73.ipv6.setValid();
+        hdr_73.ipv6.version = 4w0x6;
+        hdr_73.ipv6.nextHdr = meta_73.tunnel_metadata.inner_ip_proto;
+        hdr_73.ipv6.hopLimit = 8w64;
+        hdr_73.ipv6.trafficClass = 8w0;
+        hdr_73.ipv6.flowLabel = 20w0;
         hdr_73.ipv6.payloadLen = meta_73.egress_metadata.payload_length;
         hdr_73.ethernet.etherType = 16w0x86dd;
     }
     @name("process_tunnel_encap.ipv6_nvgre_rewrite") action process_tunnel_encap_ipv6_nvgre_rewrite() {
-        @name("process_tunnel_encap.f_insert_nvgre_header") {
-            hdr_73.inner_ethernet = hdr_73.ethernet;
-            hdr_73.gre.setValid();
-            hdr_73.nvgre.setValid();
-            hdr_73.gre.proto = 16w0x6558;
-            hdr_73.gre.recurse = 3w0;
-            hdr_73.gre.flags = 5w0;
-            hdr_73.gre.ver = 3w0;
-            hdr_73.gre.R = 1w0;
-            hdr_73.gre.K = 1w1;
-            hdr_73.gre.C = 1w0;
-            hdr_73.gre.S = 1w0;
-            hdr_73.gre.s = 1w0;
-            hdr_73.nvgre.tni = meta_73.tunnel_metadata.vnid;
-            hdr_73.nvgre.flow_id[7:0] = meta_73.hash_metadata.entropy_hash[7:0];
-        }
-        @name("process_tunnel_encap.f_insert_ipv6_header") {
-            hdr_73.ipv6.setValid();
-            hdr_73.ipv6.version = 4w0x6;
-            hdr_73.ipv6.nextHdr = 8w47;
-            hdr_73.ipv6.hopLimit = 8w64;
-            hdr_73.ipv6.trafficClass = 8w0;
-            hdr_73.ipv6.flowLabel = 20w0;
-        }
+        hdr_73.inner_ethernet = hdr_73.ethernet;
+        hdr_73.gre.setValid();
+        hdr_73.nvgre.setValid();
+        hdr_73.gre.proto = 16w0x6558;
+        hdr_73.gre.recurse = 3w0;
+        hdr_73.gre.flags = 5w0;
+        hdr_73.gre.ver = 3w0;
+        hdr_73.gre.R = 1w0;
+        hdr_73.gre.K = 1w1;
+        hdr_73.gre.C = 1w0;
+        hdr_73.gre.S = 1w0;
+        hdr_73.gre.s = 1w0;
+        hdr_73.nvgre.tni = meta_73.tunnel_metadata.vnid;
+        hdr_73.nvgre.flow_id[7:0] = meta_73.hash_metadata.entropy_hash[7:0];
+        hdr_73.ipv6.setValid();
+        hdr_73.ipv6.version = 4w0x6;
+        hdr_73.ipv6.nextHdr = 8w47;
+        hdr_73.ipv6.hopLimit = 8w64;
+        hdr_73.ipv6.trafficClass = 8w0;
+        hdr_73.ipv6.flowLabel = 20w0;
         hdr_73.ipv6.payloadLen = meta_73.egress_metadata.payload_length + 16w22;
         hdr_73.ethernet.etherType = 16w0x86dd;
     }
     @name("process_tunnel_encap.ipv6_vxlan_rewrite") action process_tunnel_encap_ipv6_vxlan_rewrite() {
-        @name("process_tunnel_encap.f_insert_vxlan_header") {
-            hdr_73.inner_ethernet = hdr_73.ethernet;
-            hdr_73.udp.setValid();
-            hdr_73.vxlan.setValid();
-            hdr_73.udp.srcPort = meta_73.hash_metadata.entropy_hash;
-            hdr_73.udp.dstPort = 16w4789;
-            hdr_73.udp.checksum = 16w0;
-            hdr_73.udp.length_ = meta_73.egress_metadata.payload_length + 16w30;
-            hdr_73.vxlan.flags = 8w0x8;
-            hdr_73.vxlan.reserved = 24w0;
-            hdr_73.vxlan.vni = meta_73.tunnel_metadata.vnid;
-            hdr_73.vxlan.reserved2 = 8w0;
-        }
-        @name("process_tunnel_encap.f_insert_ipv6_header") {
-            hdr_73.ipv6.setValid();
-            hdr_73.ipv6.version = 4w0x6;
-            hdr_73.ipv6.nextHdr = 8w17;
-            hdr_73.ipv6.hopLimit = 8w64;
-            hdr_73.ipv6.trafficClass = 8w0;
-            hdr_73.ipv6.flowLabel = 20w0;
-        }
+        hdr_73.inner_ethernet = hdr_73.ethernet;
+        hdr_73.udp.setValid();
+        hdr_73.vxlan.setValid();
+        hdr_73.udp.srcPort = meta_73.hash_metadata.entropy_hash;
+        hdr_73.udp.dstPort = 16w4789;
+        hdr_73.udp.checksum = 16w0;
+        hdr_73.udp.length_ = meta_73.egress_metadata.payload_length + 16w30;
+        hdr_73.vxlan.flags = 8w0x8;
+        hdr_73.vxlan.reserved = 24w0;
+        hdr_73.vxlan.vni = meta_73.tunnel_metadata.vnid;
+        hdr_73.vxlan.reserved2 = 8w0;
+        hdr_73.ipv6.setValid();
+        hdr_73.ipv6.version = 4w0x6;
+        hdr_73.ipv6.nextHdr = 8w17;
+        hdr_73.ipv6.hopLimit = 8w64;
+        hdr_73.ipv6.trafficClass = 8w0;
+        hdr_73.ipv6.flowLabel = 20w0;
         hdr_73.ipv6.payloadLen = meta_73.egress_metadata.payload_length + 16w30;
         hdr_73.ethernet.etherType = 16w0x86dd;
     }
     @name("process_tunnel_encap.ipv6_genv_rewrite") action process_tunnel_encap_ipv6_genv_rewrite() {
-        @name("process_tunnel_encap.f_insert_genv_header") {
-            hdr_73.inner_ethernet = hdr_73.ethernet;
-            hdr_73.udp.setValid();
-            hdr_73.genv.setValid();
-            hdr_73.udp.srcPort = meta_73.hash_metadata.entropy_hash;
-            hdr_73.udp.dstPort = 16w6081;
-            hdr_73.udp.checksum = 16w0;
-            hdr_73.udp.length_ = meta_73.egress_metadata.payload_length + 16w30;
-            hdr_73.genv.ver = 2w0;
-            hdr_73.genv.oam = 1w0;
-            hdr_73.genv.critical = 1w0;
-            hdr_73.genv.optLen = 6w0;
-            hdr_73.genv.protoType = 16w0x6558;
-            hdr_73.genv.vni = meta_73.tunnel_metadata.vnid;
-            hdr_73.genv.reserved = 6w0;
-            hdr_73.genv.reserved2 = 8w0;
-        }
-        @name("process_tunnel_encap.f_insert_ipv6_header") {
-            hdr_73.ipv6.setValid();
-            hdr_73.ipv6.version = 4w0x6;
-            hdr_73.ipv6.nextHdr = 8w17;
-            hdr_73.ipv6.hopLimit = 8w64;
-            hdr_73.ipv6.trafficClass = 8w0;
-            hdr_73.ipv6.flowLabel = 20w0;
-        }
+        hdr_73.inner_ethernet = hdr_73.ethernet;
+        hdr_73.udp.setValid();
+        hdr_73.genv.setValid();
+        hdr_73.udp.srcPort = meta_73.hash_metadata.entropy_hash;
+        hdr_73.udp.dstPort = 16w6081;
+        hdr_73.udp.checksum = 16w0;
+        hdr_73.udp.length_ = meta_73.egress_metadata.payload_length + 16w30;
+        hdr_73.genv.ver = 2w0;
+        hdr_73.genv.oam = 1w0;
+        hdr_73.genv.critical = 1w0;
+        hdr_73.genv.optLen = 6w0;
+        hdr_73.genv.protoType = 16w0x6558;
+        hdr_73.genv.vni = meta_73.tunnel_metadata.vnid;
+        hdr_73.genv.reserved = 6w0;
+        hdr_73.genv.reserved2 = 8w0;
+        hdr_73.ipv6.setValid();
+        hdr_73.ipv6.version = 4w0x6;
+        hdr_73.ipv6.nextHdr = 8w17;
+        hdr_73.ipv6.hopLimit = 8w64;
+        hdr_73.ipv6.trafficClass = 8w0;
+        hdr_73.ipv6.flowLabel = 20w0;
         hdr_73.ipv6.payloadLen = meta_73.egress_metadata.payload_length + 16w30;
         hdr_73.ethernet.etherType = 16w0x86dd;
     }
     @name("process_tunnel_encap.ipv6_erspan_t3_rewrite") action process_tunnel_encap_ipv6_erspan_t3_rewrite() {
-        @name("process_tunnel_encap.f_insert_erspan_t3_header") {
-            hdr_73.inner_ethernet = hdr_73.ethernet;
-            hdr_73.gre.setValid();
-            hdr_73.erspan_t3_header.setValid();
-            hdr_73.gre.C = 1w0;
-            hdr_73.gre.R = 1w0;
-            hdr_73.gre.K = 1w0;
-            hdr_73.gre.S = 1w0;
-            hdr_73.gre.s = 1w0;
-            hdr_73.gre.recurse = 3w0;
-            hdr_73.gre.flags = 5w0;
-            hdr_73.gre.ver = 3w0;
-            hdr_73.gre.proto = 16w0x22eb;
-            hdr_73.erspan_t3_header.timestamp = meta_73.i2e_metadata.ingress_tstamp;
-            hdr_73.erspan_t3_header.span_id = (bit<10>)meta_73.i2e_metadata.mirror_session_id;
-            hdr_73.erspan_t3_header.version = 4w2;
-            hdr_73.erspan_t3_header.sgt_other = 32w0;
-        }
-        @name("process_tunnel_encap.f_insert_ipv6_header") {
-            hdr_73.ipv6.setValid();
-            hdr_73.ipv6.version = 4w0x6;
-            hdr_73.ipv6.nextHdr = 8w47;
-            hdr_73.ipv6.hopLimit = 8w64;
-            hdr_73.ipv6.trafficClass = 8w0;
-            hdr_73.ipv6.flowLabel = 20w0;
-        }
+        hdr_73.inner_ethernet = hdr_73.ethernet;
+        hdr_73.gre.setValid();
+        hdr_73.erspan_t3_header.setValid();
+        hdr_73.gre.C = 1w0;
+        hdr_73.gre.R = 1w0;
+        hdr_73.gre.K = 1w0;
+        hdr_73.gre.S = 1w0;
+        hdr_73.gre.s = 1w0;
+        hdr_73.gre.recurse = 3w0;
+        hdr_73.gre.flags = 5w0;
+        hdr_73.gre.ver = 3w0;
+        hdr_73.gre.proto = 16w0x22eb;
+        hdr_73.erspan_t3_header.timestamp = meta_73.i2e_metadata.ingress_tstamp;
+        hdr_73.erspan_t3_header.span_id = (bit<10>)meta_73.i2e_metadata.mirror_session_id;
+        hdr_73.erspan_t3_header.version = 4w2;
+        hdr_73.erspan_t3_header.sgt_other = 32w0;
+        hdr_73.ipv6.setValid();
+        hdr_73.ipv6.version = 4w0x6;
+        hdr_73.ipv6.nextHdr = 8w47;
+        hdr_73.ipv6.hopLimit = 8w64;
+        hdr_73.ipv6.trafficClass = 8w0;
+        hdr_73.ipv6.flowLabel = 20w0;
         hdr_73.ipv6.payloadLen = meta_73.egress_metadata.payload_length + 16w26;
     }
     @name("process_tunnel_encap.mpls_ethernet_push1_rewrite") action process_tunnel_encap_mpls_ethernet_push1_rewrite() {
@@ -3212,17 +3040,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, (bit<32>)session_id, { meta_77.i2e_metadata.ingress_tstamp, meta_77.i2e_metadata.mirror_session_id });
     }
     @name("process_egress_acl.egress_mirror_drop") action process_egress_acl_egress_mirror_drop(bit<16> session_id) {
-        @name("process_egress_acl.egress_mirror") {
-            meta_77.i2e_metadata.mirror_session_id = session_id;
-            clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, (bit<32>)session_id, { meta_77.i2e_metadata.ingress_tstamp, meta_77.i2e_metadata.mirror_session_id });
-        }
+        meta_77.i2e_metadata.mirror_session_id = session_id;
+        clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, (bit<32>)session_id, { meta_77.i2e_metadata.ingress_tstamp, meta_77.i2e_metadata.mirror_session_id });
         mark_to_drop();
     }
     @name("process_egress_acl.egress_redirect_to_cpu") action process_egress_acl_egress_redirect_to_cpu(bit<16> reason_code) {
-        @name("process_egress_acl.egress_copy_to_cpu") {
-            meta_77.fabric_metadata.reason_code = reason_code;
-            clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.E2E, 32w250, { meta_77.ingress_metadata.bd, meta_77.ingress_metadata.ifindex, meta_77.fabric_metadata.reason_code, meta_77.ingress_metadata.ingress_port });
-        }
+        meta_77.fabric_metadata.reason_code = reason_code;
+        clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.E2E, 32w250, { meta_77.ingress_metadata.bd, meta_77.ingress_metadata.ifindex, meta_77.fabric_metadata.reason_code, meta_77.ingress_metadata.ingress_port });
         mark_to_drop();
     }
     @name("process_egress_acl.egress_acl") table process_egress_acl_egress_acl_0() {
@@ -3595,157 +3419,157 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("hdr_14") headers hdr_78;
-    @name("meta_14") metadata meta_78;
-    @name("standard_metadata_14") standard_metadata_t standard_metadata_78;
-    @name("hdr_15") headers hdr_79;
-    @name("meta_15") metadata meta_79;
-    @name("standard_metadata_15") standard_metadata_t standard_metadata_79;
-    @name("hdr_0") headers hdr_80;
-    @name("meta_0") metadata meta_80;
-    @name("standard_metadata_0") standard_metadata_t standard_metadata_80;
-    @name("hdr_1") headers hdr_81;
-    @name("meta_1") metadata meta_81;
-    @name("standard_metadata_1") standard_metadata_t standard_metadata_81;
-    @name("hdr_2") headers hdr_82;
-    @name("meta_2") metadata meta_82;
-    @name("standard_metadata_2") standard_metadata_t standard_metadata_82;
-    @name("hdr_16") headers hdr_83;
-    @name("meta_16") metadata meta_83;
-    @name("standard_metadata_16") standard_metadata_t standard_metadata_83;
-    @name("tmp") bit<32> tmp;
-    @name("hdr_17") headers hdr_84;
-    @name("meta_17") metadata meta_84;
-    @name("standard_metadata_17") standard_metadata_t standard_metadata_84;
-    @name("hdr_18") headers hdr_85;
-    @name("meta_18") metadata meta_85;
-    @name("standard_metadata_18") standard_metadata_t standard_metadata_85;
-    @name("hdr_19") headers hdr_86;
-    @name("meta_19") metadata meta_86;
-    @name("standard_metadata_19") standard_metadata_t standard_metadata_86;
-    @name("hdr_20") headers hdr_87;
-    @name("meta_20") metadata meta_87;
-    @name("standard_metadata_20") standard_metadata_t standard_metadata_87;
-    @name("hdr_35") headers hdr_88;
-    @name("meta_35") metadata meta_88;
-    @name("standard_metadata_35") standard_metadata_t standard_metadata_88;
-    @name("hdr_6") headers hdr_89;
-    @name("meta_6") metadata meta_89;
-    @name("standard_metadata_6") standard_metadata_t standard_metadata_89;
-    @name("hdr_7") headers hdr_90;
-    @name("meta_7") metadata meta_90;
-    @name("standard_metadata_7") standard_metadata_t standard_metadata_90;
-    @name("hdr_8") headers hdr_91;
-    @name("meta_8") metadata meta_91;
-    @name("standard_metadata_8") standard_metadata_t standard_metadata_91;
-    @name("hdr_9") headers hdr_92;
-    @name("meta_9") metadata meta_92;
-    @name("standard_metadata_9") standard_metadata_t standard_metadata_92;
-    @name("hdr_10") headers hdr_93;
-    @name("meta_10") metadata meta_93;
-    @name("standard_metadata_10") standard_metadata_t standard_metadata_93;
-    @name("hdr_3") headers hdr_94;
-    @name("meta_3") metadata meta_94;
-    @name("standard_metadata_3") standard_metadata_t standard_metadata_94;
-    @name("hdr_4") headers hdr_95;
-    @name("meta_4") metadata meta_95;
-    @name("standard_metadata_4") standard_metadata_t standard_metadata_95;
-    @name("hdr_5") headers hdr_96;
-    @name("meta_5") metadata meta_96;
-    @name("standard_metadata_5") standard_metadata_t standard_metadata_96;
-    @name("hdr_36") headers hdr_97;
-    @name("meta_36") metadata meta_97;
-    @name("standard_metadata_36") standard_metadata_t standard_metadata_97;
-    @name("hdr_37") headers hdr_98;
-    @name("meta_37") metadata meta_98;
-    @name("standard_metadata_37") standard_metadata_t standard_metadata_98;
-    @name("hdr_38") headers hdr_99;
-    @name("meta_38") metadata meta_99;
-    @name("standard_metadata_38") standard_metadata_t standard_metadata_99;
-    @name("hdr_39") headers hdr_100;
-    @name("meta_39") metadata meta_100;
-    @name("standard_metadata_39") standard_metadata_t standard_metadata_100;
-    @name("hdr_40") headers hdr_101;
-    @name("meta_40") metadata meta_101;
-    @name("standard_metadata_40") standard_metadata_t standard_metadata_101;
-    @name("hdr_41") headers hdr_102;
-    @name("meta_41") metadata meta_102;
-    @name("standard_metadata_41") standard_metadata_t standard_metadata_102;
-    @name("hdr_42") headers hdr_103;
-    @name("meta_42") metadata meta_103;
-    @name("standard_metadata_42") standard_metadata_t standard_metadata_103;
-    @name("hdr_43") headers hdr_104;
-    @name("meta_43") metadata meta_104;
-    @name("standard_metadata_43") standard_metadata_t standard_metadata_104;
-    @name("hdr_44") headers hdr_105;
-    @name("meta_44") metadata meta_105;
-    @name("standard_metadata_44") standard_metadata_t standard_metadata_105;
-    @name("hdr_45") headers hdr_106;
-    @name("meta_45") metadata meta_106;
-    @name("standard_metadata_45") standard_metadata_t standard_metadata_106;
-    @name("hdr_46") headers hdr_107;
-    @name("meta_46") metadata meta_107;
-    @name("standard_metadata_46") standard_metadata_t standard_metadata_107;
-    @name("hdr_47") headers hdr_108;
-    @name("meta_47") metadata meta_108;
-    @name("standard_metadata_47") standard_metadata_t standard_metadata_108;
-    @name("hdr_48") headers hdr_109;
-    @name("meta_48") metadata meta_109;
-    @name("standard_metadata_48") standard_metadata_t standard_metadata_109;
-    @name("hdr_49") headers hdr_110;
-    @name("meta_49") metadata meta_110;
-    @name("standard_metadata_49") standard_metadata_t standard_metadata_110;
-    @name("hdr_50") headers hdr_111;
-    @name("meta_50") metadata meta_111;
-    @name("standard_metadata_50") standard_metadata_t standard_metadata_111;
-    @name("hdr_11") headers hdr_112;
-    @name("meta_11") metadata meta_112;
-    @name("standard_metadata_11") standard_metadata_t standard_metadata_112;
-    @name("hdr_12") headers hdr_113;
-    @name("meta_12") metadata meta_113;
-    @name("standard_metadata_12") standard_metadata_t standard_metadata_113;
-    @name("hdr_13") headers hdr_114;
-    @name("meta_13") metadata meta_114;
-    @name("standard_metadata_13") standard_metadata_t standard_metadata_114;
-    @name("hdr_51") headers hdr_115;
-    @name("meta_51") metadata meta_115;
-    @name("standard_metadata_51") standard_metadata_t standard_metadata_115;
-    @name("hdr_52") headers hdr_116;
-    @name("meta_52") metadata meta_116;
-    @name("standard_metadata_52") standard_metadata_t standard_metadata_116;
-    @name("hdr_53") headers hdr_117;
-    @name("meta_53") metadata meta_117;
-    @name("standard_metadata_53") standard_metadata_t standard_metadata_117;
-    @name("hdr_54") headers hdr_118;
-    @name("meta_54") metadata meta_118;
-    @name("standard_metadata_54") standard_metadata_t standard_metadata_118;
-    @name("hdr_55") headers hdr_119;
-    @name("meta_55") metadata meta_119;
-    @name("standard_metadata_55") standard_metadata_t standard_metadata_119;
-    @name("hdr_56") headers hdr_120;
-    @name("meta_56") metadata meta_120;
-    @name("standard_metadata_56") standard_metadata_t standard_metadata_120;
-    @name("hdr_57") headers hdr_121;
-    @name("meta_57") metadata meta_121;
-    @name("standard_metadata_57") standard_metadata_t standard_metadata_121;
-    @name("hdr_58") headers hdr_122;
-    @name("meta_58") metadata meta_122;
-    @name("standard_metadata_58") standard_metadata_t standard_metadata_122;
-    @name("hdr_59") headers hdr_123;
-    @name("meta_59") metadata meta_123;
-    @name("standard_metadata_59") standard_metadata_t standard_metadata_123;
-    @name("hdr_60") headers hdr_124;
-    @name("meta_60") metadata meta_124;
-    @name("standard_metadata_60") standard_metadata_t standard_metadata_124;
-    @name("hdr_61") headers hdr_125;
-    @name("meta_61") metadata meta_125;
-    @name("standard_metadata_61") standard_metadata_t standard_metadata_125;
-    @name("hdr_62") headers hdr_126;
-    @name("meta_62") metadata meta_126;
-    @name("standard_metadata_62") standard_metadata_t standard_metadata_126;
-    @name("hdr_63") headers hdr_127;
-    @name("meta_63") metadata meta_127;
-    @name("standard_metadata_63") standard_metadata_t standard_metadata_127;
+    headers hdr_78;
+    metadata meta_78;
+    standard_metadata_t standard_metadata_78;
+    headers hdr_79;
+    metadata meta_79;
+    standard_metadata_t standard_metadata_79;
+    headers hdr_80;
+    metadata meta_80;
+    standard_metadata_t standard_metadata_80;
+    headers hdr_81;
+    metadata meta_81;
+    standard_metadata_t standard_metadata_81;
+    headers hdr_82;
+    metadata meta_82;
+    standard_metadata_t standard_metadata_82;
+    headers hdr_83;
+    metadata meta_83;
+    standard_metadata_t standard_metadata_83;
+    bit<32> tmp;
+    headers hdr_84;
+    metadata meta_84;
+    standard_metadata_t standard_metadata_84;
+    headers hdr_85;
+    metadata meta_85;
+    standard_metadata_t standard_metadata_85;
+    headers hdr_86;
+    metadata meta_86;
+    standard_metadata_t standard_metadata_86;
+    headers hdr_87;
+    metadata meta_87;
+    standard_metadata_t standard_metadata_87;
+    headers hdr_88;
+    metadata meta_88;
+    standard_metadata_t standard_metadata_88;
+    headers hdr_89;
+    metadata meta_89;
+    standard_metadata_t standard_metadata_89;
+    headers hdr_90;
+    metadata meta_90;
+    standard_metadata_t standard_metadata_90;
+    headers hdr_91;
+    metadata meta_91;
+    standard_metadata_t standard_metadata_91;
+    headers hdr_92;
+    metadata meta_92;
+    standard_metadata_t standard_metadata_92;
+    headers hdr_93;
+    metadata meta_93;
+    standard_metadata_t standard_metadata_93;
+    headers hdr_94;
+    metadata meta_94;
+    standard_metadata_t standard_metadata_94;
+    headers hdr_95;
+    metadata meta_95;
+    standard_metadata_t standard_metadata_95;
+    headers hdr_96;
+    metadata meta_96;
+    standard_metadata_t standard_metadata_96;
+    headers hdr_97;
+    metadata meta_97;
+    standard_metadata_t standard_metadata_97;
+    headers hdr_98;
+    metadata meta_98;
+    standard_metadata_t standard_metadata_98;
+    headers hdr_99;
+    metadata meta_99;
+    standard_metadata_t standard_metadata_99;
+    headers hdr_100;
+    metadata meta_100;
+    standard_metadata_t standard_metadata_100;
+    headers hdr_101;
+    metadata meta_101;
+    standard_metadata_t standard_metadata_101;
+    headers hdr_102;
+    metadata meta_102;
+    standard_metadata_t standard_metadata_102;
+    headers hdr_103;
+    metadata meta_103;
+    standard_metadata_t standard_metadata_103;
+    headers hdr_104;
+    metadata meta_104;
+    standard_metadata_t standard_metadata_104;
+    headers hdr_105;
+    metadata meta_105;
+    standard_metadata_t standard_metadata_105;
+    headers hdr_106;
+    metadata meta_106;
+    standard_metadata_t standard_metadata_106;
+    headers hdr_107;
+    metadata meta_107;
+    standard_metadata_t standard_metadata_107;
+    headers hdr_108;
+    metadata meta_108;
+    standard_metadata_t standard_metadata_108;
+    headers hdr_109;
+    metadata meta_109;
+    standard_metadata_t standard_metadata_109;
+    headers hdr_110;
+    metadata meta_110;
+    standard_metadata_t standard_metadata_110;
+    headers hdr_111;
+    metadata meta_111;
+    standard_metadata_t standard_metadata_111;
+    headers hdr_112;
+    metadata meta_112;
+    standard_metadata_t standard_metadata_112;
+    headers hdr_113;
+    metadata meta_113;
+    standard_metadata_t standard_metadata_113;
+    headers hdr_114;
+    metadata meta_114;
+    standard_metadata_t standard_metadata_114;
+    headers hdr_115;
+    metadata meta_115;
+    standard_metadata_t standard_metadata_115;
+    headers hdr_116;
+    metadata meta_116;
+    standard_metadata_t standard_metadata_116;
+    headers hdr_117;
+    metadata meta_117;
+    standard_metadata_t standard_metadata_117;
+    headers hdr_118;
+    metadata meta_118;
+    standard_metadata_t standard_metadata_118;
+    headers hdr_119;
+    metadata meta_119;
+    standard_metadata_t standard_metadata_119;
+    headers hdr_120;
+    metadata meta_120;
+    standard_metadata_t standard_metadata_120;
+    headers hdr_121;
+    metadata meta_121;
+    standard_metadata_t standard_metadata_121;
+    headers hdr_122;
+    metadata meta_122;
+    standard_metadata_t standard_metadata_122;
+    headers hdr_123;
+    metadata meta_123;
+    standard_metadata_t standard_metadata_123;
+    headers hdr_124;
+    metadata meta_124;
+    standard_metadata_t standard_metadata_124;
+    headers hdr_125;
+    metadata meta_125;
+    standard_metadata_t standard_metadata_125;
+    headers hdr_126;
+    metadata meta_126;
+    standard_metadata_t standard_metadata_126;
+    headers hdr_127;
+    metadata meta_127;
+    standard_metadata_t standard_metadata_127;
     @name("NoAction_37") action NoAction_147() {
     }
     @name("NoAction_38") action NoAction_148() {
@@ -4108,9 +3932,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_153();
     }
     @name("process_global_params.set_config_parameters") action process_global_params_set_config_parameters(bit<1> enable_dod) {
-        @name("process_global_params.deflect_on_drop") {
-            meta_83.intrinsic_metadata.deflect_on_drop = enable_dod;
-        }
+        meta_83.intrinsic_metadata.deflect_on_drop = enable_dod;
         meta_83.i2e_metadata.ingress_tstamp = (bit<32>)meta_83.intrinsic_metadata.ingress_global_tstamp;
         meta_83.ingress_metadata.ingress_port = standard_metadata_83.ingress_port;
         meta_83.l2_metadata.same_if_check = meta_83.ingress_metadata.ifindex;
@@ -4232,36 +4054,34 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("process_int_endpoint.int_sink_gpe") action process_int_endpoint_int_sink_gpe(bit<16> mirror_id) {
         meta_87.int_metadata.insert_byte_cnt = meta_87.int_metadata.gpe_int_hdr_len << 2;
-        @name("process_int_endpoint.int_sink") {
-            meta_87.int_metadata_i2e.sink = 1w1;
-            meta_87.i2e_metadata.mirror_session_id = mirror_id;
-            clone3<tuple<bit<1>, bit<16>>>(CloneType.I2E, (bit<32>)mirror_id, { meta_87.int_metadata_i2e.sink, meta_87.i2e_metadata.mirror_session_id });
-            hdr_87.int_header.setInvalid();
-            hdr_87.int_val[0].setInvalid();
-            hdr_87.int_val[1].setInvalid();
-            hdr_87.int_val[2].setInvalid();
-            hdr_87.int_val[3].setInvalid();
-            hdr_87.int_val[4].setInvalid();
-            hdr_87.int_val[5].setInvalid();
-            hdr_87.int_val[6].setInvalid();
-            hdr_87.int_val[7].setInvalid();
-            hdr_87.int_val[8].setInvalid();
-            hdr_87.int_val[9].setInvalid();
-            hdr_87.int_val[10].setInvalid();
-            hdr_87.int_val[11].setInvalid();
-            hdr_87.int_val[12].setInvalid();
-            hdr_87.int_val[13].setInvalid();
-            hdr_87.int_val[14].setInvalid();
-            hdr_87.int_val[15].setInvalid();
-            hdr_87.int_val[16].setInvalid();
-            hdr_87.int_val[17].setInvalid();
-            hdr_87.int_val[18].setInvalid();
-            hdr_87.int_val[19].setInvalid();
-            hdr_87.int_val[20].setInvalid();
-            hdr_87.int_val[21].setInvalid();
-            hdr_87.int_val[22].setInvalid();
-            hdr_87.int_val[23].setInvalid();
-        }
+        meta_87.int_metadata_i2e.sink = 1w1;
+        meta_87.i2e_metadata.mirror_session_id = mirror_id;
+        clone3<tuple<bit<1>, bit<16>>>(CloneType.I2E, (bit<32>)mirror_id, { meta_87.int_metadata_i2e.sink, meta_87.i2e_metadata.mirror_session_id });
+        hdr_87.int_header.setInvalid();
+        hdr_87.int_val[0].setInvalid();
+        hdr_87.int_val[1].setInvalid();
+        hdr_87.int_val[2].setInvalid();
+        hdr_87.int_val[3].setInvalid();
+        hdr_87.int_val[4].setInvalid();
+        hdr_87.int_val[5].setInvalid();
+        hdr_87.int_val[6].setInvalid();
+        hdr_87.int_val[7].setInvalid();
+        hdr_87.int_val[8].setInvalid();
+        hdr_87.int_val[9].setInvalid();
+        hdr_87.int_val[10].setInvalid();
+        hdr_87.int_val[11].setInvalid();
+        hdr_87.int_val[12].setInvalid();
+        hdr_87.int_val[13].setInvalid();
+        hdr_87.int_val[14].setInvalid();
+        hdr_87.int_val[15].setInvalid();
+        hdr_87.int_val[16].setInvalid();
+        hdr_87.int_val[17].setInvalid();
+        hdr_87.int_val[18].setInvalid();
+        hdr_87.int_val[19].setInvalid();
+        hdr_87.int_val[20].setInvalid();
+        hdr_87.int_val[21].setInvalid();
+        hdr_87.int_val[22].setInvalid();
+        hdr_87.int_val[23].setInvalid();
     }
     @name("process_int_endpoint.int_no_sink") action process_int_endpoint_int_no_sink() {
         meta_87.int_metadata_i2e.sink = 1w0;
@@ -6174,10 +5994,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.I2E, 32w250, { meta_127.ingress_metadata.bd, meta_127.ingress_metadata.ifindex, meta_127.fabric_metadata.reason_code, meta_127.ingress_metadata.ingress_port });
     }
     @name("process_system_acl.redirect_to_cpu") action process_system_acl_redirect_to_cpu(bit<16> reason_code) {
-        @name("process_system_acl.copy_to_cpu_with_reason") {
-            meta_127.fabric_metadata.reason_code = reason_code;
-            clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.I2E, 32w250, { meta_127.ingress_metadata.bd, meta_127.ingress_metadata.ifindex, meta_127.fabric_metadata.reason_code, meta_127.ingress_metadata.ingress_port });
-        }
+        meta_127.fabric_metadata.reason_code = reason_code;
+        clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.I2E, 32w250, { meta_127.ingress_metadata.bd, meta_127.ingress_metadata.ifindex, meta_127.fabric_metadata.reason_code, meta_127.ingress_metadata.ingress_port });
         mark_to_drop();
         meta_127.fabric_metadata.dst_device = 8w0;
     }
@@ -7517,7 +7335,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control verifyChecksum(in headers hdr, inout metadata meta) {
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
     action act_95() {
@@ -7546,7 +7364,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control computeChecksum(inout headers hdr, inout metadata meta) {
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_2;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
     action act_97() {

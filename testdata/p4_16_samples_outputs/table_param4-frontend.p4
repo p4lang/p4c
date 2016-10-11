@@ -1,6 +1,7 @@
 #include <core.p4>
 
 control c(inout bit<32> arg) {
+    bit<32> tmp;
     @name("a") action a_0() {
     }
     @name("b") action b_0() {
@@ -15,7 +16,6 @@ control c(inout bit<32> arg) {
         }
         default_action = a_0();
     }
-    bit<32> tmp;
     apply {
         switch (t_0.apply(arg).action_run) {
             a_0: {

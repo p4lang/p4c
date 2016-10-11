@@ -249,17 +249,17 @@ declaration
     ;
 
 nonTypeName
-    : IDENTIFIER  { $$ = new IR::ID(@1, $1, $1); }
-    | APPLY       { $$ = new IR::ID(@1, "apply", "apply"); }
-    | KEY         { $$ = new IR::ID(@1, "key", "key"); }
-    | ACTIONS     { $$ = new IR::ID(@1, "actions", "actions"); }
-    | STATE       { $$ = new IR::ID(@1, "state", "state"); }
+    : IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    | APPLY       { $$ = new IR::ID(@1, "apply"); }
+    | KEY         { $$ = new IR::ID(@1, "key"); }
+    | ACTIONS     { $$ = new IR::ID(@1, "actions"); }
+    | STATE       { $$ = new IR::ID(@1, "state"); }
     ;
 
 name
     : nonTypeName
-    | TYPE { $$ = new IR::ID(@1, $1, $1); }
-    | NAMESPACE { $$ = new IR::ID(@1, $1, $1); }
+    | TYPE      { $$ = new IR::ID(@1, $1); }
+    | NAMESPACE { $$ = new IR::ID(@1, $1); }
     ;
 
 optAnnotations
@@ -351,12 +351,12 @@ pathPrefix
 relativePathPrefix
     : /* empty */ { $$ = new IR::PathPrefix(); }
     | relativePathPrefix NAMESPACE '.' { structure.pathAppendNamespace($2);
-                                         $$ = new IR::PathPrefix(@1 + @3, $1, IR::ID(@2, $2, $2)); }
+                                         $$ = new IR::PathPrefix(@1 + @3, $1, IR::ID(@2, $2)); }
     ;
 
 nonEmptyRelativePathPrefix
     : relativePathPrefix NAMESPACE '.' { structure.pathAppendNamespace($2);
-                                         $$ = new IR::PathPrefix(@1 + @3, $1, IR::ID(@2, $2, $2)); }
+                                         $$ = new IR::PathPrefix(@1 + @3, $1, IR::ID(@2, $2)); }
     ;
 
 /**************************** PARSER ******************************/
@@ -528,7 +528,7 @@ methodPrototype
                      '(' parameterList ')' ';'               { structure.pop(); }
                                         { auto par = new IR::ParameterList(@5, $5);
                                           auto mt = new IR::Type_Method(@1, $2, nullptr, par);
-                                          $$ = new IR::Method(@1, IR::ID(@1, $1, $1), mt, false); }
+                                          $$ = new IR::Method(@1, IR::ID(@1, $1), mt, false); }
     ;
 
 /************************** TYPES ****************************/
@@ -542,8 +542,8 @@ typeRef
     ;
 
 typeName
-    : TYPE                     { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, $1, $1))); }
-    | pathPrefix TYPE          { $$ = new IR::Type_Name(@1, new IR::Path($1, IR::ID(@2, $2, $2))); }
+    : TYPE                        { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, $1))); }
+    | pathPrefix TYPE             { $$ = new IR::Type_Name(@1, new IR::Path($1, IR::ID(@2, $2))); }
     ;
 
 tupleType
@@ -556,10 +556,10 @@ headerStackType
 
 specializedType
     : pathPrefix TYPE '<' typeArgumentList '>'
-                                       { auto id = IR::ID(@2, $2, $2);
+                                       { auto id = IR::ID(@2, $2);
                                          auto type = new IR::Type_Name(@1, new IR::Path($1, id));
                                          $$ = new IR::Type_Specialized(@1 + @5, type, $4); }
-    | TYPE '<' typeArgumentList '>'    { auto id = IR::ID(@1, $1, $1);
+    | TYPE '<' typeArgumentList '>'    { auto id = IR::ID(@1, $1);
                                          auto type = new IR::Type_Name(@1, new IR::Path(id));
                                          $$ = new IR::Type_Specialized(@1 + @4, type, $3); }
     ;
@@ -771,24 +771,20 @@ tablePropertyList
 
 tableProperty
     : KEY '=' '{' keyElementList '}'     { auto v = new IR::Key(@4, $4);
-                                           auto id = IR::ID(
-                                               @1, IR::TableProperties::keyPropertyName,
-                                               IR::TableProperties::keyPropertyName);
+                                           auto id = IR::ID(@1, "key");
                                            $$ = new IR::TableProperty(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
     | ACTIONS '=' '{' actionList '}'     { auto v = new IR::ActionList(@4, $4);
-                                           auto id = IR::ID(
-                                               @1, IR::TableProperties::actionsPropertyName,
-                                               IR::TableProperties::actionsPropertyName);
+                                           auto id = IR::ID(@1, "actions");
                                            $$ = new IR::TableProperty(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
     | optAnnotations CONST IDENTIFIER '=' initializer ';'
                                          { auto v = new IR::ExpressionValue(@5, $5);
-                                            auto id = IR::ID(@3, $3, $3);
+                                            auto id = IR::ID(@3, $3);
                                             $$ = new IR::TableProperty(@3, id, $1, v, true); }
     | optAnnotations IDENTIFIER '=' initializer ';'
                                          { auto v = new IR::ExpressionValue(@4, $4);
-                                           auto id = IR::ID(@2, $2, $2);
+                                           auto id = IR::ID(@2, $2);
                                            $$ = new IR::TableProperty(@2, id, $1, v, false); }
     ;
 

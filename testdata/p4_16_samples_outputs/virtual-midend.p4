@@ -4,17 +4,17 @@ extern Virtual {
 }
 
 control c(inout bit<16> p) {
-    @name("tmp") bit<16> tmp_1;
-    @name("tmp_0") bit<16> tmp_2;
+    bit<16> tmp_1;
     @name("cntr") Virtual() cntr = {
         bit<16> f(in bit<16> ix) {
-            tmp_1 = ix + 16w1;
-            return tmp_1;
+            bit<16> tmp_2;
+            tmp_2 = ix + 16w1;
+            return tmp_2;
         }
     };
     action act() {
-        tmp_2 = cntr.f(16w6);
-        p = tmp_2;
+        tmp_1 = cntr.f(16w6);
+        p = tmp_1;
     }
     table tbl_act() {
         actions = {

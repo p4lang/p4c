@@ -2,7 +2,7 @@
 
 extern bit<32> f(in bit<32> x);
 parser p() {
-    @name("tmp") bit<32> tmp_0;
+    bit<32> tmp_0;
     state start {
         tmp_0 = f(32w2);
         transition select(tmp_0) {

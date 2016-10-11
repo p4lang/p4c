@@ -5,9 +5,9 @@ header Header {
 }
 
 parser p1(packet_in p, out Header[2] h) {
-    @name("h_0") Header h_1;
-    @name("tmp") Header tmp_1;
-    @name("tmp_0") Header tmp_2;
+    Header tmp_1;
+    Header tmp_2;
+    Header h_1;
     state start {
         h_1.setInvalid();
         p.extract<Header>(h_1);

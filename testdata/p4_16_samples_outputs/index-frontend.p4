@@ -5,8 +5,8 @@ header H {
 }
 
 parser P(packet_in p, out H[2] h) {
-    @name("x") bit<32> x_0;
-    @name("tmp") H tmp_0;
+    bit<32> x_0;
+    H tmp_0;
     bit<32> tmp;
     bit<32> tmp_1;
     state start {

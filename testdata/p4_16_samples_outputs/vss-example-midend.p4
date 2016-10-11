@@ -55,12 +55,12 @@ struct Parsed_packet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    @name("tmp") bool tmp_11;
-    @name("tmp_0") bool tmp_12;
-    @name("tmp_1") bit<16> tmp_13;
-    @name("tmp_2") bool tmp_14;
-    @name("tmp_3") bool tmp_15;
-    @name("tmp_4") error tmp_16;
+    bool tmp_11;
+    bool tmp_12;
+    bit<16> tmp_13;
+    bool tmp_14;
+    bool tmp_15;
+    error tmp_16;
     @name("ck") Ck16() ck;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
@@ -86,15 +86,15 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 }
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @name("nextHop") IPv4Address nextHop_1;
-    @name("tmp_5") bit<8> tmp_17;
+    IPv4Address nextHop_1;
+    bit<8> tmp_17;
+    bool tmp_18;
+    bool tmp_19;
+    bool tmp_20;
+    bool tmp_21;
     @name("nextHop") IPv4Address nextHop_2;
     @name("nextHop") IPv4Address nextHop_3;
-    @name("tmp_6") bool tmp_18;
-    @name("tmp_7") bool tmp_19;
-    @name("tmp_8") bool tmp_20;
-    @name("tmp_9") bool tmp_21;
-    @name("hasReturned") bool hasReturned_0;
+    bool hasReturned_0;
     @name("nextHop") IPv4Address nextHop_0;
     @name("NoAction_1") action NoAction() {
     }
@@ -113,9 +113,9 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     @name("Set_nhop") action Set_nhop_0(IPv4Address ipv4_dest, PortId port) {
         nextHop_0 = ipv4_dest;
         tmp_17 = headers.ip.ttl + 8w255;
-        headers.ip.ttl = tmp_17;
+        headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
-        nextHop_2 = nextHop_0;
+        nextHop_2 = ipv4_dest;
     }
     @name("ipv4_match") table ipv4_match() {
         key = {
@@ -299,7 +299,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
-    @name("tmp_10") bit<16> tmp_22;
+    bit<16> tmp_22;
     @name("ck") Ck16() ck_2;
     action act_9() {
         ck_2.clear();

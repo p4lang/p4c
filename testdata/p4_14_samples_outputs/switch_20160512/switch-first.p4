@@ -5938,7 +5938,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control verifyChecksum(in headers hdr, inout metadata meta) {
     Checksum16() inner_ipv4_checksum;
     Checksum16() ipv4_checksum;
     apply {
@@ -5949,7 +5949,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control computeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() inner_ipv4_checksum;
     Checksum16() ipv4_checksum;
     apply {

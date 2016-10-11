@@ -14,9 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-parser p() {
+parser p(out bit<32> b) {
     bit<32> a = 1;
-    bit<32> b;
     state start {
         b = (a == 0) ? 32w2 : 3;
         b = b + 1;
@@ -25,7 +24,7 @@ parser p() {
     }
 }
 
-parser proto();
+parser proto(out bit<32> b);
 package top(proto _p);
 
 top(p()) main;

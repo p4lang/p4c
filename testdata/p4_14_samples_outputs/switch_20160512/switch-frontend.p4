@@ -3222,7 +3222,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
 }
 
 control process_global_params(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("tmp") bit<32> tmp_0;
+    bit<32> tmp_0;
     @name("deflect_on_drop") action deflect_on_drop_0(bit<1> enable_dod) {
         meta.intrinsic_metadata.deflect_on_drop = enable_dod;
     }
@@ -5852,7 +5852,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control verifyChecksum(in headers hdr, inout metadata meta) {
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_0;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
     apply {
@@ -5863,7 +5863,7 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control computeChecksum(inout headers hdr, inout metadata meta) {
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_1;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
     apply {

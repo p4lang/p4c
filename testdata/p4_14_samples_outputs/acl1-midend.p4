@@ -180,9 +180,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.fabric_metadata.reason_code = reason_code;
     }
     @name("redirect_to_cpu") action redirect_to_cpu_0(bit<16> reason_code) {
-        @name("copy_to_cpu") {
-            meta.fabric_metadata.reason_code = reason_code;
-        }
+        meta.fabric_metadata.reason_code = reason_code;
     }
     @name("drop_packet") action drop_packet_0() {
     }
@@ -262,12 +260,12 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control verifyChecksum(in headers hdr, inout metadata meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }

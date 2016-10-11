@@ -8,8 +8,8 @@ header hdr {
 }
 
 control compute(inout hdr h) {
+    bit<32> tmp;
     @name("add") action add_0() {
-        bit<32> tmp;
         tmp = h.a + h.b;
         h.c = (bit<64>)tmp;
     }
@@ -38,12 +38,12 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-control vrfy(in Headers h, inout Meta m, inout standard_metadata_t sm) {
+control vrfy(in Headers h, inout Meta m) {
     apply {
     }
 }
 
-control update(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control update(inout Headers h, inout Meta m) {
     apply {
     }
 }

@@ -33,22 +33,22 @@ struct Packet_data {
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    @name("pArg1_0") TArg1 pArg1;
-    @name("pArg2_0") TArg2 pArg2;
+    TArg1 tmp_5;
+    TArg2 tmp_6;
+    TArg1 pArg1;
+    TArg2 pArg2;
+    TArg1 tmp_7;
+    TArg2 tmp_8;
+    TArg1 tmp_9;
+    TArg2 tmp_10;
     @name("tArg1") TArg1 tArg1_0;
     @name("aArg2") TArg2 aArg2_0;
-    @name("tmp") TArg1 tmp_5;
-    @name("tmp_0") TArg2 tmp_6;
-    @name("tmp_1") TArg1 tmp_7;
-    @name("tmp_2") TArg2 tmp_8;
-    @name("tmp_3") TArg1 tmp_9;
-    @name("tmp_4") TArg2 tmp_10;
     @name("barg") bit<9> barg_0;
     @name("NoAction_1") action NoAction() {
     }
     @name("p1.B_action") action p1_B_action(BParamType bData) {
         barg_0 = (bit<9>)bData;
-        tArg1_0.field1 = barg_0;
+        tArg1_0.field1 = (bit<9>)bData;
     }
     @name("p1.C_action") action p1_C_action(bit<9> cData) {
         pArg1.field1 = cData;
@@ -79,32 +79,32 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         const default_action = NoAction();
     }
     action act() {
-        tmp_9 = qArg1;
-        tmp_10 = qArg2;
-        pArg1 = tmp_9;
-        pArg2 = tmp_10;
-        tmp_5 = pArg1;
-        tmp_6 = pArg2;
-        tArg1_0 = tmp_5;
-        aArg2_0 = tmp_6;
-    }
-    action act_0() {
-        tmp_5 = tArg1_0;
+        tmp_5 = qArg1;
+        tmp_6 = qArg2;
         pArg1 = tmp_5;
+        pArg2 = tmp_6;
         tmp_7 = pArg1;
         tmp_8 = pArg2;
         tArg1_0 = tmp_7;
         aArg2_0 = tmp_8;
     }
-    action act_1() {
+    action act_0() {
         tmp_7 = tArg1_0;
         pArg1 = tmp_7;
-    }
-    action act_2() {
         tmp_9 = pArg1;
         tmp_10 = pArg2;
-        qArg1 = tmp_9;
-        qArg2 = tmp_10;
+        tArg1_0 = tmp_9;
+        aArg2_0 = tmp_10;
+    }
+    action act_1() {
+        tmp_9 = tArg1_0;
+        pArg1 = tmp_9;
+    }
+    action act_2() {
+        tmp_5 = pArg1;
+        tmp_6 = pArg2;
+        qArg1 = tmp_5;
+        qArg2 = tmp_6;
     }
     table tbl_act() {
         actions = {

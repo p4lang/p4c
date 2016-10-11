@@ -3,7 +3,7 @@ control c(inout bit<32> x) {
     @name("a") action a_0(bit<32> d) {
         b_0 = x;
         b_0 = d;
-        x = b_0;
+        x = d;
     }
     @name("t") table t() {
         actions = {

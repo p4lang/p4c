@@ -52,9 +52,12 @@ class MoveDeclarations : public Transform {
     { push(); return control; }
     const IR::Node* preorder(IR::P4Parser* parser) override
     { push(); return parser; }
+    const IR::Node* preorder(IR::Function* function) override
+    { push(); return function; }
     const IR::Node* postorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;
+    const IR::Node* postorder(IR::Function* function) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* decl) override;
 };

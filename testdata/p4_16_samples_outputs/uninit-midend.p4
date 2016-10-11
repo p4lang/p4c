@@ -9,16 +9,16 @@ header Header {
 extern void func(in Header h);
 extern bit<32> g(inout bit<32> v, in bit<32> w);
 parser p1(packet_in p, out Header h) {
-    @name("stack") Header[2] stack;
-    @name("b") bool b;
-    @name("c") bool c_1;
-    @name("d") bool d;
-    @name("tmp") bit<32> tmp_11;
-    @name("tmp_0") bit<32> tmp_12;
-    @name("tmp_1") bit<32> tmp_13;
-    @name("tmp_2") bit<32> tmp_14;
-    @name("tmp_3") bit<32> tmp_15;
-    @name("tmp_4") bit<32> tmp_16;
+    Header[2] stack;
+    bool b;
+    bool c_1;
+    bool d;
+    bit<32> tmp_11;
+    bit<32> tmp_12;
+    bit<32> tmp_13;
+    bit<32> tmp_14;
+    bit<32> tmp_15;
+    bit<32> tmp_16;
     state start {
         h.data1 = 32w0;
         func(h);
@@ -56,18 +56,18 @@ parser p1(packet_in p, out Header h) {
 }
 
 control c(out bit<32> v) {
-    @name("b") bit<32> b_2;
-    @name("d") bit<32> d_2;
-    @name("setByAction") bit<32> setByAction;
-    @name("e") bit<32> e;
-    @name("f") bit<32> f;
-    @name("touched") bool touched;
-    @name("tmp_5") bit<32> tmp_17;
-    @name("tmp_6") bit<32> tmp_18;
-    @name("tmp_7") bool tmp_19;
-    @name("tmp_8") bit<32> tmp_20;
-    @name("tmp_9") bool tmp_21;
-    @name("tmp_10") bit<32> tmp_22;
+    bit<32> b_2;
+    bit<32> d_2;
+    bit<32> setByAction;
+    bit<32> e;
+    bit<32> f;
+    bool touched;
+    bit<32> tmp_17;
+    bit<32> tmp_18;
+    bool tmp_19;
+    bit<32> tmp_20;
+    bool tmp_21;
+    bit<32> tmp_22;
     @name("a1") action a1_0() {
         setByAction = 32w1;
     }

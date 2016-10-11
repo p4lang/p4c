@@ -1,10 +1,10 @@
 control ctrl() {
     bool hasExited;
-    @name("x") bit<32> x;
-    @name("a") bit<32> a;
-    @name("b") bit<32> b;
-    @name("c") bit<32> c;
-    @name("tmp") bool tmp_0;
+    bit<32> x;
+    bit<32> a;
+    bit<32> b;
+    bit<32> c;
+    bool tmp_0;
     @name("e") action e_0() {
         hasExited = true;
     }

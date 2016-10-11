@@ -10,7 +10,7 @@ struct S {
 }
 
 parser p() {
-    @name("s") S s;
+    S s;
     state start {
         s.h1.setInvalid();
         s.h2.setInvalid();

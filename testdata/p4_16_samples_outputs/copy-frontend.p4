@@ -3,8 +3,8 @@ struct S {
 }
 
 control c(inout bit<32> b) {
-    @name("s1") S s1_0;
-    @name("s2") S s2_0;
+    S s1_0;
+    S s2_0;
     @name("a") action a_0() {
         s2_0 = { 32w0 };
         s1_0 = s2_0;

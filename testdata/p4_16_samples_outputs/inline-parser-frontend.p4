@@ -12,9 +12,9 @@ parser p0(packet_in p, out Header h) {
 }
 
 parser p1(packet_in p, out Header[2] h) {
-    @name("p0inst") p0() p0inst_0;
     Header tmp;
     Header tmp_0;
+    @name("p0inst") p0() p0inst_0;
     state start {
         p0inst_0.apply(p, tmp);
         h[0] = tmp;

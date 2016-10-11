@@ -85,9 +85,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("hdr_0") headers hdr_1;
-    @name("meta_0") metadata meta_1;
-    @name("standard_metadata_0") standard_metadata_t standard_metadata_1;
+    headers hdr_1;
+    metadata meta_1;
+    standard_metadata_t standard_metadata_1;
     @name("NoAction_1") action NoAction() {
     }
     @name("NoAction_2") action NoAction_0() {
@@ -190,12 +190,12 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control verifyChecksum(in headers hdr, inout metadata meta) {
     apply {
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
     }
 }

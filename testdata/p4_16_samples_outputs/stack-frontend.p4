@@ -2,8 +2,8 @@ header h {
 }
 
 parser p() {
-    @name("stack") h[12] stack_0;
-    @name("b") h b_0;
+    h[12] stack_0;
+    h b_0;
     state start {
         stack_0[0].setInvalid();
         stack_0[1].setInvalid();

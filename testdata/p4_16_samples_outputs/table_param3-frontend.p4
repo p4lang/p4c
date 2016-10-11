@@ -1,6 +1,7 @@
 #include <core.p4>
 
 control c(inout bit<32> arg) {
+    bit<32> tmp;
     @name("a") action a_0() {
     }
     @name("t") table t_0(inout bit<32> x) {
@@ -12,7 +13,6 @@ control c(inout bit<32> arg) {
         }
         default_action = a_0();
     }
-    bit<32> tmp;
     apply {
         if (t_0.apply(arg).hit) 
             t_0.apply(arg);

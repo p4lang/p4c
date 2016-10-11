@@ -4,9 +4,9 @@ extern E {
 }
 
 control c(inout bit<32> r) {
-    @name("tmp") bit<32> tmp_2;
-    @name("tmp_0") bit<32> tmp_3;
-    @name("tmp_1") bit<32> tmp_4;
+    bit<32> tmp_2;
+    bit<32> tmp_3;
+    bit<32> tmp_4;
     @name("e") E() e_1;
     action act() {
         tmp_2 = e_1.f(32w4);

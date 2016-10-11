@@ -1,7 +1,7 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    @name("tmp") bit<32> tmp_1;
-    @name("tmp_0") bool tmp_2;
+    bit<32> tmp_1;
+    bool tmp_2;
     action act() {
         r = 32w1;
     }

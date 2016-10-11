@@ -37,12 +37,12 @@ parser p(packet_in b, out packet_t hdrs, inout Meta m, inout standard_metadata_t
     }
 }
 
-control vrfy(in packet_t h, inout Meta m, inout standard_metadata_t sm) {
+control vrfy(in packet_t h, inout Meta m) {
     apply {
     }
 }
 
-control update(inout packet_t h, inout Meta m, inout standard_metadata_t sm) {
+control update(inout packet_t h, inout Meta m) {
     apply {
     }
 }
@@ -144,6 +144,7 @@ control egress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta
 control deparser(packet_out b, in packet_t hdrs) {
     apply {
         b.emit<data_h>(hdrs.data);
+        b.emit<extra_h[4]>(hdrs.extra);
     }
 }
 

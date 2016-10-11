@@ -28,8 +28,8 @@ struct Metadata {
 }
 
 control ingress(inout H pkt_hdr, in Metadata metadata) {
-    @name("tmp") bool tmp_1;
-    @name("tmp_0") bool tmp_2;
+    bool tmp_1;
+    bool tmp_2;
     @name("input_traffic_bytes") Counter<bit<32>>(CounterType.packets_and_bytes) input_traffic_bytes;
     @name("sum_rtt_Tr") ConditionalAccumulator<bit<32>>(32w1) sum_rtt_Tr;
     @name("num_pkts_with_rtt") ConditionalAccumulator<bit<32>>(32w1) num_pkts_with_rtt;

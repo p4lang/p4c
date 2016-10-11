@@ -45,17 +45,17 @@ inline bool operator>>(cstring s, IR::Direction &d) {
 #end
 
 class Type_Boolean : Type_Base {
-#nodbprint
     static Type_Boolean get();
     int width_bits() const override { return 1; }
     toString{ return "bool"; }
+    dbprint { out << "bool"; }
 }
 
 // The type of a parser state
 class Type_State : Type_Base {
-#nodbprint
     static Type_State get();
     toString{ return "state"; }
+    dbprint { out << "state"; }
 }
 
 // Represents both bit<> and int<> types in P4 v1.1+
@@ -71,14 +71,15 @@ class Type_Bits : Type_Base {
     static std::map<int, IR::Type_Bits> *signedTypes;
     static std::map<int, IR::Type_Bits> *unsignedTypes;
     toString{ return baseName() + "<" + Util::toString(size) + ">"; }
+    dbprint { out << toString(); }
 }
 
 class Type_Varbits : Type_Base {
     int         size;   // if zero it means "unknown"
-#nodbprint
     static Type_Varbits get(Util::SourceInfo si, int size = 0);
     static Type_Varbits get();
     toString{ return cstring("varbit<") + Util::toString(size) + ">"; }
+    dbprint { out << "varbit<" << size << ">"; }
 }
 
 class Parameter : Declaration, IAnnotated {
@@ -86,12 +87,12 @@ class Parameter : Declaration, IAnnotated {
     Direction           direction;
     Type                type;
     Annotations getAnnotations() const override { return annotations; }
+    dbprint { out << annotations << direction << ' ' << type << ' ' << name; }
 }
 
 class ParameterList : ISimpleNamespace {
     IndexedVector<Parameter> parameters;
     validate{ parameters->check_null(); }
-    dbprint { Node::dbprint(out); out << "[" << size() << "]"; }
     ParameterList() { parameters = new IndexedVector<Parameter>(); }
     Util::Enumerator<Parameter>* getEnumerator() const {
         return parameters->getEnumerator(); }
@@ -122,6 +123,7 @@ class ParameterList : ISimpleNamespace {
 // Represents a type variable written by the user
 class Type_Var : Type_Declaration, ITypeVar {
     cstring getVarName() const override { return getName(); }
+    dbprint { out << name; }
 }
 
 // This stands for the 'int' type: infinite precision constant
@@ -134,7 +136,7 @@ class Type_InfInt : Type, ITypeVar {
     static int nextId;
  public:
     cstring getVarName() const override { return "int_" + Util::toString(declid); }
-    dbprint { Node::dbprint(out); out << declid; }
+    dbprint { out << "int"; }
     toString { return "int"; }
     operator== { return declid == a.declid; }
     const Type* getP4Type() const override { return nullptr; }
@@ -143,26 +145,26 @@ class Type_InfInt : Type, ITypeVar {
 class Type_Dontcare : Type_Base {
     toString{ return "_"; }
     static Type_Dontcare get();
-#nodbprint
+    dbprint { out << "_"; }
 }
 
 class Type_Void : Type_Base {
     toString{ return "void"; }
     static Type_Void get();
-#nodbprint
+    dbprint { out << "void"; }
 }
 
 // This is "error" type
 class Type_Error : Type_Base {
     toString{ return "error"; }
     static Type_Error get();
-#nodbprint
+    dbprint { out << "error"; }
 }
 
 class Type_MatchKind : Type_Base {
     toString{ return "match_kind"; }
     static Type_MatchKind get();
-#nodbprint
+    dbprint { out << "match_kind"; }
 }
 
 class TypeParameters : ISimpleNamespace {
@@ -194,7 +196,6 @@ class TypeParameters : ISimpleNamespace {
 class StructField : Declaration, IAnnotated {
     optional Annotations annotations = Annotations::empty;
     Type        type;
-#nodbprint
     Annotations getAnnotations() const override { return annotations; }
 }
 
@@ -213,8 +214,8 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
         return rv; }
     IR::IDeclaration getDeclByName(cstring name) const override {
         return fields->getDeclaration(name); }
-    dbprint{ Node::dbprint(out); out << toString(); }
     validate{ fields->check_null(); }
+    dbprint;
 }
 
 class Type_Struct : Type_StructLike {
@@ -289,7 +290,7 @@ class Type_Name : Type {
     Path path;
     Type_Name(IR::ID id) : Type(id.srcInfo), path(new IR::Path(id)) {}
     toString{ return path->name; }
-    dbprint{ Type::dbprint(out); out << ":" << path->toString(); }
+    dbprint{ out << path->toString(); }
     const Type* getP4Type() const override { return this; }
 }
 
@@ -297,7 +298,7 @@ class Type_Stack : Type {
     Type        elementType;
     Expression  size;
     toString{ return elementType->toString() + "[]"; }
-    dbprint{ Type::dbprint(out); out << elementType << "[" << size << "]"; }
+    dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
     unsigned getSize() const;
     static const cstring next;
@@ -318,7 +319,6 @@ class Type_Stack : Type {
 class Type_Specialized : Type {
     Type_Name    baseType;
     Vector<Type> arguments;
-    dbprint{ Node::dbprint(out); out << baseType; }
     toString{ return baseType->toString() + "<...>"; }
     validate{ arguments->check_null(); }
     const Type* getP4Type() const override;
@@ -371,6 +371,7 @@ class Type_Table : Type, IApply {
     static const ID hit;
     static const ID action_run;
     const IR::Type* getP4Type() const override { return nullptr; }
+    dbprint { out << table->name; }
 }
 
 // A special enum-like anonymous type that
@@ -415,6 +416,7 @@ class ArgumentInfo {
     bool leftValue;
     bool compileTimeConstant;
     Type type;
+#nodbprint
 }
 
 // Used to represent the type of a MethodCallExpression

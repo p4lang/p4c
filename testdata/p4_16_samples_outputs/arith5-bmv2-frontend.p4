@@ -21,12 +21,12 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-control vrfy(in Headers h, inout Meta m, inout standard_metadata_t sm) {
+control vrfy(in Headers h, inout Meta m) {
     apply {
     }
 }
 
-control update(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control update(inout Headers h, inout Meta m) {
     apply {
     }
 }
@@ -43,8 +43,8 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    int<32> tmp;
     @name("shift") action shift_0() {
-        int<32> tmp;
         tmp = h.h.a >> h.h.b;
         h.h.c = (int<64>)tmp;
         sm.egress_spec = 9w0;

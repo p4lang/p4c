@@ -7,8 +7,8 @@ header H {
 control c();
 package top(c _c);
 control my() {
-    @name("a") bit<1> a_0;
-    @name("s") H[2] s_0;
+    bit<1> a_0;
+    H[2] s_0;
     bit<1> tmp;
     bit<1> tmp_0;
     bit<1> tmp_1;

@@ -1,8 +1,8 @@
 control c(inout bit<32> x) {
-    @name("tmp") bit<32> tmp_3;
-    @name("tmp_0") bit<32> tmp_4;
-    @name("tmp_1") bit<32> tmp_5;
-    @name("tmp_2") bool tmp_6;
+    bit<32> tmp_3;
+    bit<32> tmp_4;
+    bit<32> tmp_5;
+    bool tmp_6;
     action act() {
         tmp_3 = x + 32w2;
         x = tmp_3;

@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "config.h"
+#if HAVE_LIBGC
 #include <gc/gc_cpp.h>
+#endif  /* HAVE_LIBGC */
 #include <new>
 #include "log.h"
 #include "gc.h"
-#include "config.h"
 
 /* glibc++ requires defining global delete with this exception spec to avoid warnings.
  * If it's not defined, probably not using glibc++ and don't need anything */

@@ -55,13 +55,13 @@ struct Parsed_packet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    @name("ck") Ck16() ck_0;
     bool tmp;
     bool tmp_0;
     bit<16> tmp_1;
     bool tmp_2;
     bool tmp_3;
     error tmp_4;
+    @name("ck") Ck16() ck_0;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
         transition select(p.ethernet.etherType) {
@@ -86,12 +86,16 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 }
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @name("nextHop") IPv4Address nextHop_0;
+    IPv4Address nextHop_0;
+    bit<8> tmp_5;
+    bool tmp_6;
+    bool tmp_7;
+    bool tmp_8;
+    bool tmp_9;
     @name("Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;
     }
     @name("Set_nhop") action Set_nhop_0(out IPv4Address nextHop, IPv4Address ipv4_dest, PortId port) {
-        bit<8> tmp_5;
         nextHop = ipv4_dest;
         tmp_5 = headers.ip.ttl + 8w255;
         headers.ip.ttl = tmp_5;
@@ -149,10 +153,6 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         size = 16;
         default_action = Drop_action_0();
     }
-    bool tmp_6;
-    bool tmp_7;
-    bool tmp_8;
-    bool tmp_9;
     apply {
         tmp_6 = parseError != NoError;
         if (tmp_6) {
@@ -177,8 +177,8 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
-    @name("ck") Ck16() ck_1;
     bit<16> tmp_10;
+    @name("ck") Ck16() ck_1;
     apply {
         b.emit<Ethernet_h>(p.ethernet);
         if (p.ip.isValid()) {

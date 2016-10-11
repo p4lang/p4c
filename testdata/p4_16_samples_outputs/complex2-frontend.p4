@@ -4,7 +4,7 @@ header H {
 }
 
 control c(inout bit<32> r) {
-    @name("h") H[2] h_0;
+    H[2] h_0;
     bit<32> tmp;
     bit<32> tmp_0;
     apply {

@@ -36,11 +36,13 @@ CLEANFILES += \
 	p14_to_16tests.mk
 
 # Unfortunately this does not rerun if a test is deleted.
-p4tests.mk: $(srcdir)/testdata/p4_16_samples/*.p4 $(srcdir)/testdata/p4_16_errors/*.p4 \
+p4tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
+	    $(srcdir)/testdata/p4_16_samples/*.p4 $(srcdir)/testdata/p4_16_errors/*.p4 \
 	    $(srcdir)/testdata/p4_16_samples $(srcdir)/testdata/p4_16_errors
 	@$(GENTESTS) $(srcdir) p4 $(srcdir)/backends/p4test/run-p4-sample.py $^ >$@
 
-p14_to_16tests.mk: $(srcdir)/testdata/p4_14_samples/*.p4 \
+p14_to_16tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
+		   $(srcdir)/testdata/p4_14_samples/*.p4 \
 		   $(srcdir)/testdata/p4_14_samples \
 		   $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4
 	@$(GENTESTS) $(srcdir) p14_to_16 $(srcdir)/backends/p4test/run-p4-sample.py $^ >$@

@@ -89,7 +89,6 @@ abstract Declaration : StatOrDecl, IDeclaration {
  private:
     static int nextId;
  public:
-    dbprint { Node::dbprint(out); out << name << "/" << declid; }
     toString { return externalName(); }
 }
 
@@ -104,7 +103,6 @@ abstract Type_Declaration : Type, IDeclaration {
     static int nextId;
  public:
     toString { return externalName(); }
-    dbprint { Node::dbprint(out); out << name << "/" << declid; }
     const Type* getP4Type() const override { return new Type_Name(name); }
 }
 
@@ -190,7 +188,7 @@ class Path {
         result << name;
         return cstring(result.str());
     }
-    dbprint{ Node::dbprint(out); out << ":" << toString(); }
+    dbprint { out << toString(); }
 }
 
 class Annotation {
@@ -201,14 +199,13 @@ class Annotation {
     // Predefined annotations used by the compiler
     static const cstring nameAnnotation;
     toString{ return cstring("@") + name; }
-#nodbprint
+    dbprint { out << '@' << name; if (expr) out << '(' << expr << ')'; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 }
 
 // There can be several annotations with the same "name", so this is a vector.
 class Annotations {
     Vector<Annotation> annotations;
-#nodbprint
     Annotations { if (!srcInfo && annotations) srcInfo = annotations->srcInfo; }
     static Annotations *empty;  // FIXME -- should be const
     size_t size() const { return annotations->size(); }
@@ -238,7 +235,24 @@ class Annotations {
         vec->push_back(new Annotation(name, expr));
         return new Annotations(vec);
     }
+#emit
+    typedef std::function<bool(const IR::Annotation*)> Filter;
+#end
+    Annotations where(Filter func) const {
+        auto vec = new Vector<Annotation>();
+        bool changes = false;
+        for (auto a : *annotations) {
+            if (func(a))
+                vec->push_back(a);
+            else
+                changes = true;
+        }
+        if (!changes)
+            return this;
+        return new Annotations(vec);
+    }
     validate{ annotations->check_null(); }
+    dbprint { for (auto a : *annotations) out << a << ' '; }
 }
 
 // Implemented by all objects that can have annotations

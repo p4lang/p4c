@@ -46,7 +46,6 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     static const ID reject;
     static const ID start;
     bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
-#nodbprint
     /* Relaxing constraints on parser control-flow
     validate{
         for (auto e : *components) {
@@ -78,7 +77,6 @@ class P4Parser : Type_Declaration, ISimpleNamespace, IApply, IContainer {
     ParameterList getConstructorParameters() const override { return constructorParams; }
     void checkDuplicates() const;
 #apply
-#nodbprint
     validate {
         if (!(name == type->name))
             BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
@@ -104,7 +102,6 @@ class P4Control : Type_Declaration, ISimpleNamespace, IApply, IContainer {
         return controlLocals->getDeclaration(name); }
     ParameterList getConstructorParameters() const override { return constructorParams; }
 #apply
-#nodbprint
     validate {
         if (!(name == type->name))
             BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
@@ -130,7 +127,6 @@ class Declaration_Errors : ISimpleNamespace {
         return members->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members->getDeclaration(name); }
-#nodbprint
     validate{ members->check_null(); }
 }
 
@@ -141,26 +137,23 @@ class Declaration_MatchKind : ISimpleNamespace {
         return members->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members->getDeclaration(name); }
-#nodbprint
     validate{ members->check_null(); }
 }
 
 // Table property value abstract base class
-abstract PropertyValue {
-#nodbprint
-}
+abstract PropertyValue { }
 
 // A property whose value is an expression
 class ExpressionValue : PropertyValue {
     Expression expression;
-#nodbprint
+    dbprint { out << expression; }
 }
 
 // An element in a table actions list
 class ActionListElement : IAnnotated, IDeclaration {
     Annotations annotations;
     Expression  expression;  // This can be a PathExpression or a MethodCallExpression
-#nodbprint
+    dbprint { out << annotations << expression; }
     ID getName() const override { return getPath()->name; }
     Path getPath() const;
     Annotations getAnnotations() const override { return annotations; }
@@ -175,7 +168,6 @@ class ActionListElement : IAnnotated, IDeclaration {
 // A list of actions (in a table)
 class ActionList : PropertyValue {
     IndexedVector<ActionListElement> actionList;
-#nodbprint
     validate{ actionList->check_null(); }
     size_t size() const { return actionList->size(); }
 }
@@ -184,13 +176,11 @@ class KeyElement {
     Annotations     annotations;
     Expression      expression;
     PathExpression  matchType;
-#nodbprint
 }
 
 // Value of a table key property
 class Key : PropertyValue {
     Vector<KeyElement> keyElements;
-#nodbprint
     validate { keyElements->check_null(); }
 }
 
@@ -199,7 +189,7 @@ class TableProperty : Declaration, IAnnotated {
     PropertyValue value;
     bool          isConstant;
     Annotations getAnnotations() const override { return annotations; }
-#nodbprint
+    dbprint { out << annotations << (isConstant ? "const " : "") << name << " = " << value; }
 }
 
 class TableProperties : ISimpleNamespace {
@@ -251,7 +241,6 @@ class P4Table : Declaration, IAnnotated, IApply {
             ::error("%1% must be an expression", d);
             return nullptr; }
         return d->value->to<IR::ExpressionValue>()->expression; }
-#nodbprint
 }
 
 class Declaration_Variable : Declaration, IAnnotated {
@@ -260,7 +249,8 @@ class Declaration_Variable : Declaration, IAnnotated {
     NullOK Expression  initializer;
 
     Annotations getAnnotations() const override { return annotations; }
-    dbprint { Declaration::dbprint(out);
+    dbprint {
+        out << annotations << type << ' ' << name;
         if (initializer) out << " = " << *initializer; }
 }
 
@@ -270,8 +260,8 @@ class Declaration_Constant : Declaration, IAnnotated {
     Expression         initializer;
 
     Annotations getAnnotations() const override { return annotations; }
-#nodbprint
     toString { return Declaration::toString(); }
+    dbprint { out << annotations << type << ' ' << name << " = " << *initializer; }
 }
 
 // Like a variable, but for a statically allocated instance.
@@ -283,7 +273,6 @@ class Declaration_Instance : Declaration, IAnnotated {
     NullOK BlockStatement initializer;  // experimental only; contains just declarations, no code
 
     Annotations getAnnotations() const override { return annotations; }
-#nodbprint
     validate{ BUG_CHECK(type->is<Type_Name>() ||
                         type->is<Type_Specialized>(),
                         "%1%: unexpected type", type);
@@ -299,41 +288,36 @@ class P4Program : ISimpleNamespace {
         return declarations->getDeclaration(name); }
     static const cstring main;
 #apply
-#nodbprint
 }
 
 ///////////////////////////// Statements //////////////////////////
 
 abstract Statement : StatOrDecl {
-#nodbprint
 }
 
 class ExitStatement : Statement {
     toString{ return "exit"; }
-#nodbprint
+    dbprint { out << "exit"; }
 }
 
 class ReturnStatement : Statement {
     NullOK Expression expression;
     toString{ return "return"; }
-#nodbprint
 }
 
 class EmptyStatement : Statement {
-#nodbprint
+    dbprint { out << ""; }
 }
 
 class AssignmentStatement : Statement {
     Expression left;
     Expression right;
-    dbprint{ out << left << " = " << right; }
 }
 
 class IfStatement : Statement {
     Expression       condition;
     Statement        ifTrue;
     NullOK Statement ifFalse;
-#nodbprint
     visit_children {
         v.visit(condition, "condition");
         auto &clone(v.flow_clone());

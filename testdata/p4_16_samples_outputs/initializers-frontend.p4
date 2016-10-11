@@ -4,7 +4,7 @@ extern Fake {
 }
 
 parser P() {
-    @name("x") bit<32> x_0;
+    bit<32> x_0;
     @name("fake") Fake() fake_0;
     state start {
         x_0 = 32w0;
@@ -14,10 +14,10 @@ parser P() {
 }
 
 control C() {
-    @name("x") bit<32> x_1;
-    @name("y") bit<32> y_0;
-    @name("fake") Fake() fake_1;
+    bit<32> x_1;
+    bit<32> y_0;
     bit<32> tmp;
+    @name("fake") Fake() fake_1;
     apply {
         x_1 = 32w0;
         tmp = x_1 + 32w1;

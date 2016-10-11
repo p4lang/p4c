@@ -143,6 +143,13 @@ class FindUninitialized : public Inspector {
         return setCurrent(statement);
     }
 
+    bool preorder(const IR::ReturnStatement* statement) override {
+        LOG1("Visiting " << dbp(statement));
+        if (statement->expression != nullptr)
+            visit(statement->expression);
+        return setCurrent(statement);
+    }
+
     bool preorder(const IR::MethodCallStatement* statement) override {
         LOG1("Visiting " << dbp(statement));
         visit(statement->methodCall);
@@ -338,7 +345,7 @@ class ProcessDefUse : public PassManager {
             definitions(new AllDefinitions(refMap, typeMap)) {
         passes.push_back(new ComputeWriteSet(definitions));
         passes.push_back(new FindUninitialized(definitions, &hasUses));
-        passes.push_back(new RemoveUnused(&hasUses));
+        //passes.push_back(new RemoveUnused(&hasUses));
         setName("ProcessDefUse");
     }
 };

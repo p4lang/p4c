@@ -1,6 +1,6 @@
 control d(out bit<32> x) {
-    @name("x_0") bit<32> x_1;
-    @name("hasReturned") bool hasReturned_0;
+    bit<32> x_1;
+    bool hasReturned_0;
     @name("cinst.a1") action cinst_a1() {
     }
     @name("cinst.a2") action cinst_a2() {

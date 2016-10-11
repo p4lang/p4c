@@ -2,6 +2,9 @@
 
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
+    bit<32> tmp;
+    bool tmp_0;
+    bit<32> tmp_1;
     @name("a") action a_0() {
     }
     @name("b") action b_0() {
@@ -16,9 +19,6 @@ control c(inout bit<32> r) {
         }
         default_action = a_0();
     }
-    bit<32> tmp;
-    bool tmp_0;
-    bit<32> tmp_1;
     apply {
         tmp_1 = f(32w2);
         switch (t_0.apply(tmp_1).action_run) {

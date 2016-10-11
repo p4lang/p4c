@@ -4,9 +4,9 @@ header H {
 }
 
 control c(inout bit<32> r) {
-    @name("h") H[2] h;
-    @name("tmp") bit<32> tmp_1;
-    @name("tmp_0") bit<32> tmp_2;
+    H[2] h;
+    bit<32> tmp_1;
+    bit<32> tmp_2;
     action act() {
         tmp_1 = f(32w2);
         tmp_2 = tmp_1;

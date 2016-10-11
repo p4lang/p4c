@@ -117,17 +117,30 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    bit<14> tmp;
+    HashAlgorithm tmp_0;
+    bit<10> tmp_1;
+    tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>, bit<16>> tmp_2;
+    bit<20> tmp_3;
+    bit<8> tmp_4;
+    bit<13> tmp_5;
+    HashAlgorithm tmp_6;
+    bit<13> tmp_7;
+    tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>> tmp_8;
+    bit<26> tmp_9;
+    bit<16> tmp_10;
+    bit<32> tmp_11;
+    bit<32> tmp_12;
+    bit<32> tmp_13;
+    bit<32> tmp_14;
+    bit<16> tmp_15;
+    bool tmp_16;
     @name("flowlet_id") register<bit<16>>(32w8192) flowlet_id_0;
     @name("flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_0;
     @name("_drop") action _drop_1() {
         mark_to_drop();
     }
     @name("set_ecmp_select") action set_ecmp_select_0(bit<8> ecmp_base, bit<8> ecmp_count) {
-        bit<14> tmp;
-        HashAlgorithm tmp_0;
-        bit<10> tmp_1;
-        tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>, bit<16>> tmp_2;
-        bit<20> tmp_3;
         tmp_0 = HashAlgorithm.crc16;
         tmp_1 = (bit<10>)ecmp_base;
         tmp_2 = { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort, meta.ingress_metadata.flowlet_id };
@@ -136,23 +149,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.ecmp_offset = tmp;
     }
     @name("set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
-        bit<8> tmp_4;
         meta.ingress_metadata.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         tmp_4 = hdr.ipv4.ttl + 8w255;
         hdr.ipv4.ttl = tmp_4;
     }
     @name("lookup_flowlet_map") action lookup_flowlet_map_0() {
-        bit<13> tmp_5;
-        HashAlgorithm tmp_6;
-        bit<13> tmp_7;
-        tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>> tmp_8;
-        bit<26> tmp_9;
-        bit<16> tmp_10;
-        bit<32> tmp_11;
-        bit<32> tmp_12;
-        bit<32> tmp_13;
-        bit<32> tmp_14;
         tmp_6 = HashAlgorithm.crc16;
         tmp_7 = 13w0;
         tmp_8 = { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort };
@@ -174,7 +176,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr = dmac;
     }
     @name("update_flowlet_id") action update_flowlet_id_0() {
-        bit<16> tmp_15;
         tmp_15 = meta.ingress_metadata.flowlet_id + 16w1;
         meta.ingress_metadata.flowlet_id = tmp_15;
         flowlet_id_0.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<16>)meta.ingress_metadata.flowlet_id);
@@ -229,7 +230,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction();
     }
-    bool tmp_16;
     apply {
         @atomic {
             flowlet_0.apply();
@@ -251,10 +251,10 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
+control verifyChecksum(in headers hdr, inout metadata meta) {
     bit<16> tmp_17;
     bool tmp_18;
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_0;
     apply {
         tmp_17 = ipv4_checksum_0.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         tmp_18 = hdr.ipv4.hdrChecksum == tmp_17;
@@ -263,9 +263,9 @@ control verifyChecksum(in headers hdr, inout metadata meta, inout standard_metad
     }
 }
 
-control computeChecksum(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
+control computeChecksum(inout headers hdr, inout metadata meta) {
     bit<16> tmp_19;
+    @name("ipv4_checksum") Checksum16() ipv4_checksum_1;
     apply {
         tmp_19 = ipv4_checksum_1.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         hdr.ipv4.hdrChecksum = tmp_19;

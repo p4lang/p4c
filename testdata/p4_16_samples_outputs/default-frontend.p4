@@ -5,7 +5,7 @@ header Header {
 }
 
 parser p0(packet_in p, out Header h) {
-    @name("b") bool b_0;
+    bool b_0;
     state start {
         b_0 = true;
         p.extract<Header>(h);
@@ -15,7 +15,12 @@ parser p0(packet_in p, out Header h) {
         }
     }
     state next {
-        transition accept;
+        p.extract<Header>(h);
+        transition select(h.data, b_0) {
+            (default, true): accept;
+            (default, default): reject;
+            default: reject;
+        }
     }
 }
 

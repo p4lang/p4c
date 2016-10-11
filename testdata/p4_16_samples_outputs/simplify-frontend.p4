@@ -1,6 +1,7 @@
 #include <core.p4>
 
 control c(out bool x) {
+    bool tmp;
     @name("t1") table t1_0() {
         key = {
             x: exact;
@@ -19,7 +20,6 @@ control c(out bool x) {
         }
         default_action = NoAction();
     }
-    bool tmp;
     apply {
         x = true;
         if (!t1_0.apply().hit) 

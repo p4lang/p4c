@@ -1,9 +1,9 @@
 control ctrl() {
-    @name("a") bit<32> a;
-    @name("b") bit<32> b;
-    @name("c") bit<32> c;
-    @name("tmp") bool tmp_0;
-    @name("hasReturned") bool hasReturned_0;
+    bit<32> a;
+    bit<32> b;
+    bit<32> c;
+    bool tmp_0;
+    bool hasReturned_0;
     action act() {
         b = 32w2;
         hasReturned_0 = true;

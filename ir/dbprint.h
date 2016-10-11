@@ -48,7 +48,7 @@ enum dbprint_flags {
 };
 
 int dbgetflags(std::ostream &out);
-int dbsetflags(std::ostream &out, int val, int mask);
+int dbsetflags(std::ostream &out, int val, int mask = ~0U);
 
 inline int getprec(std::ostream &out) { return dbgetflags(out) & DBPrint::Precedence; }
 class setflags_helper {
@@ -66,7 +66,7 @@ struct setflag : public setflags_helper {
     explicit setflag(int fl) : setflags_helper(fl, fl) {}
 };
 struct clrflag : public setflags_helper {
-    explicit clrflag(int fl) : setflags_helper(0, ~fl) {}
+    explicit clrflag(int fl) : setflags_helper(0, fl) {}
 };
 
 

@@ -6,5 +6,5 @@ class v1HeaderType {
 
     v1HeaderType(const Type_Struct *m, const Type_Header *h = nullptr)
     : v1HeaderType(Util::SourceInfo(), m->name, m, h) {}
-#nodbprint
+    dbprint { out << "header " << name; }
 }

@@ -3,12 +3,12 @@ struct S {
 }
 
 control c(inout bit<32> b) {
-    @name("s1") S s1;
-    @name("s2") S s2;
+    S s1;
+    S s2;
     @name("a") action a_0() {
         s2 = { 32w0 };
         s1 = s2;
-        s2 = s1;
+        s2 = s2;
         b = s2.x;
     }
     table tbl_a() {

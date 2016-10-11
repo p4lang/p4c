@@ -1,7 +1,7 @@
 #include <core.p4>
 
 control c(out bool x) {
-    @name("tmp") bool tmp_0;
+    bool tmp_0;
     @name("NoAction_1") action NoAction() {
     }
     @name("NoAction_2") action NoAction_0() {
