@@ -1061,7 +1061,8 @@ MatchUnitGeneric<K, V>::retrieve_handle_(
   if (!lookup_structure->retrieve_handle(entry.key, &handle_))
     return MatchErrorCode::BAD_MATCH_KEY;
 
-  *handle = HANDLE_SET(entry.key.version, handle_);
+  // cannot use entry.key.version which has not been set!
+  *handle = HANDLE_SET(entries[handle_].key.version, handle_);
 
   return MatchErrorCode::SUCCESS;
 }

@@ -801,6 +801,21 @@ TYPED_TEST(TableSizeTwo, GetEntryFromKey) {
                                        this->default_priority);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   ASSERT_EQ(handle_2, entry.handle);
+
+  // we delete the first entry, then add it again, then retrieve the entry
+  // this was added because an earlier implementation would return the correct
+  // internal handle with an incorrect version number (so entry.handle was
+  // incorrect)
+  rc = this->table->delete_entry(handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = this->add_entry(key_1, &handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = this->table->get_entry_from_key(match_key_1, &entry,
+                                       this->default_priority);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(handle_1, entry.handle);
 }
 
 TYPED_TEST(TableSizeTwo, GetEntries) {
