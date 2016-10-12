@@ -15,16 +15,28 @@ limitations under the License.
 */
 
 #include "cstring.h"
-#include <gc/gc.h>
 #include <string>
 #include <unordered_set>
 
+static std::unordered_set<std::string> *cache = nullptr;
+
 cstring &cstring::operator=(const char *p) {
-    static std::unordered_set<std::string> *cache = nullptr;
     if (cache == nullptr)
         cache = new std::unordered_set<std::string>();
     str = p ? cache->emplace(p).first->c_str() : 0;
     return *this;
+}
+
+size_t cstring::cache_size(size_t &count) {
+    size_t rv = 0;
+    if (cache) {
+        count = cache->size();
+        for (auto &s : *cache)
+            rv += sizeof(s) + s.size();
+    } else {
+        count = 0;
+    }
+    return rv;
 }
 
 cstring cstring::newline = cstring("\n");
