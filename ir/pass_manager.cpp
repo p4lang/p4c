@@ -22,8 +22,9 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
     early_exit_flag = false;
     for (auto it = passes.begin(); it != passes.end();) {
         Visitor* v = *it;
-        if (dynamic_cast<Backtrack *>(v))
-            backup.emplace_back(it, program);
+        if (auto b = dynamic_cast<Backtrack *>(v)) {
+            if (!b->never_backtracks()) {
+                backup.emplace_back(it, program); } }
         try {
             try {
                 LOG1(name() << " invoking " << v->name());
@@ -64,6 +65,17 @@ bool PassManager::backtrack(trigger &trig) {
         if (auto *bt = dynamic_cast<Backtrack *>(v))
             if (bt->backtrack(trig)) return true;
     return false;
+}
+
+bool PassManager::never_backtracks() {
+    if (never_backtracks_cache >= 0) return never_backtracks_cache;
+    for (auto v : passes) {
+        if (auto b = dynamic_cast<Backtrack *>(v)) {
+            if (!b->never_backtracks()) {
+                never_backtracks_cache = 0;
+                return false; } } }
+    never_backtracks_cache = 1;
+    return true;
 }
 
 void PassManager::runDebugHooks(const char* visitorName, const IR::Node* program) {

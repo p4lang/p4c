@@ -124,13 +124,13 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
 MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.isv1();
     setName("MidEnd");
+    refMap.setIsV1(isv1);  // must be done BEFORE creating passes
     if (isv1)
         // TODO: This path should be eventually deprecated
         setup_for_P4_14(options);
     else
         setup_for_P4_16(options);
 
-    refMap.setIsV1(isv1);
     // BMv2-specific passes
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({

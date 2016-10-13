@@ -29,7 +29,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOn
 
     for (auto it = toTry.rbegin(); it != toTry.rend(); ++it) {
         const IR::INamespace* current = *it;
-        LOG2("Trying to resolve in " << current->getNode());
+        LOG2("Trying to resolve in " << current->toString());
 
         if (current->is<IR::IGeneralNamespace>()) {
             auto gen = current->to<IR::IGeneralNamespace>();

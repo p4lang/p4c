@@ -21,6 +21,7 @@ limitations under the License.
 #include <new>
 #include "log.h"
 #include "gc.h"
+#include "cstring.h"
 
 /* glibc++ requires defining global delete with this exception spec to avoid warnings.
  * If it's not defined, probably not using glibc++ and don't need anything */
@@ -55,7 +56,9 @@ extern "C" size_t GC_get_heap_size(void);
 extern "C" int GC_print_stats;
 
 static void gc_callback() {
+    size_t count;
     LOG1("****** GC called ****** (heap size " << GC_get_heap_size() << ")");
+    LOG2("cstring cache size " << cstring::cache_size(count) << " (count=" << count << ")");
     GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
 }
 #endif  /* HAVE_LIBGC */

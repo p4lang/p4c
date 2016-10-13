@@ -234,6 +234,8 @@ class Backtrack : public virtual Visitor {
         template<class T> bool is() const { return to<T>() != nullptr; }
     };
     virtual bool backtrack(trigger &trig) = 0;
+    virtual bool never_backtracks() { return false; }  // generally not overridden
+        // returns true for passes that will never catch a trigger (backtrack() is always false)
 };
 
 class P4WriteContext : public virtual Visitor {
