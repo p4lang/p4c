@@ -33,7 +33,6 @@ class ClonePathExpressions : public Transform {
     template<typename T>
     const T* clone(const IR::Node* node)
     { return node->apply(*this)->to<T>(); }
-
 };
 
 }  // namespace P4

@@ -25,6 +25,7 @@ typedef std::function<void(const char* manager, unsigned seqNo,
 class PassManager : virtual public Visitor, virtual public Backtrack {
     bool early_exit_flag;
     mutable int never_backtracks_cache = -1;
+
  protected:
     vector<DebugHook>   debugHooks;  // called after each pass
     vector<Visitor *>   passes;
@@ -35,6 +36,7 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
         never_backtracks_cache = -1;
         for (auto p : init) if (p) passes.emplace_back(p); }
     void runDebugHooks(const char* visitorName, const IR::Node* node);
+
  public:
     PassManager() = default;
     PassManager(const std::initializer_list<Visitor *> &init)

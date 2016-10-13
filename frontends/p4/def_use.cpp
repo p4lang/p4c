@@ -629,7 +629,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
     auto startPoint = ProgramPoint(startState);
     initialize(parser->type->applyParams, parser->parserLocals, startPoint);
-    for (auto l: *parser->parserLocals) {
+    for (auto l : *parser->parserLocals) {
         if (l->is<IR::Declaration_Instance>())
             visit(l);  // process virtual Functions if any
     }
@@ -676,7 +676,7 @@ bool ComputeWriteSet::preorder(const IR::P4Control* control) {
     initialize(control->type->applyParams, control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
     returnedDefinitions = new Definitions();
-    for (auto l: *control->controlLocals) {
+    for (auto l : *control->controlLocals) {
         if (l->is<IR::Declaration_Instance>())
             visit(l);  // process virtual Functions if any
     }
@@ -786,7 +786,7 @@ class GetDeclarations : public Inspector {
         return gd.declarations;
     }
 };
-}
+}  // namespace
 
 bool ComputeWriteSet::preorder(const IR::Function* function) {
     LOG1("Visiting " << dbp(function));

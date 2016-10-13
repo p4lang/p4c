@@ -27,6 +27,7 @@ class HasUses {
     // Set of program points whose left-hand sides are used elsewhere
     // in the program together with their use count
     std::unordered_map<const IR::Node*, unsigned> used;
+
  public:
     HasUses() = default;
     void add(const ProgramPoints* points) {
