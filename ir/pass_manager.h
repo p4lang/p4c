@@ -50,6 +50,7 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
 class PassRepeated : virtual public PassManager {
     unsigned            repeats;  // 0 = until convergence
  public:
+    PassRepeated() : PassRepeated({}) {}
     PassRepeated(const std::initializer_list<Visitor *> &init) :
             PassManager(init), repeats(0) { setName("PassRepeated"); }
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;

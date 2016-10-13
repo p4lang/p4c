@@ -23,7 +23,7 @@ limitations under the License.
 namespace P4 {
 
 // name for header valid bit
-static const cstring validFieldName = "$valid";
+const cstring StorageFactory::validFieldName = "$valid";
 const LocationSet* LocationSet::empty = new LocationSet();
 ProgramPoint ProgramPoint::uninitialized;
 
@@ -32,7 +32,13 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         type->is<IR::Type_Boolean>() ||
         type->is<IR::Type_Varbits>() ||
         type->is<IR::Type_Enum>() ||
-        type->is<IR::Type_Error>())
+        type->is<IR::Type_Error>() ||
+        // Since we don't have any operations except assignment for a
+        // type described by a type variable, we treat is as a base type.
+        type->is<IR::Type_Var>() ||
+        // Similarly for tuples.  This may need to be revisited if we
+        // add tuple field accessors.
+        type->is<IR::Type_Tuple>())
         return new BaseLocation(type, name);
     if (type->is<IR::Type_StructLike>()) {
         type = typeMap->getType(type, true);  // get the canonical version
@@ -72,7 +78,7 @@ void BaseLocation::removeHeaders(LocationSet* result) const
 
 void StructLocation::addValidBits(LocationSet* result) const {
     if (type->is<IR::Type_Header>()) {
-        addField(validFieldName, result);
+        addField(StorageFactory::validFieldName, result);
     } else {
         for (auto f : fields())
             f->addValidBits(result);
@@ -108,6 +114,7 @@ const LocationSet* StorageLocation::getValidBits() const {
 }
 
 const LocationSet* LocationSet::join(const LocationSet* other) const {
+    CHECK_NULL(other);
     if (this == LocationSet::empty)
         return other;
     if (other == LocationSet::empty)
@@ -135,7 +142,7 @@ const LocationSet* LocationSet::getField(cstring field) const {
 }
 
 const LocationSet* LocationSet::getValidField() const
-{ return getField(validFieldName); }
+{ return getField(StorageFactory::validFieldName); }
 
 const LocationSet* LocationSet::getIndex(unsigned index) const {
     auto result = new LocationSet();
@@ -250,6 +257,17 @@ void Definitions::set(const LocationSet* locations, const ProgramPoints* point) 
         definitions[sl->to<BaseLocation>()] = point;
 }
 
+void Definitions::remove(const StorageLocation* location) {
+    auto loc = new LocationSet();
+    loc->addCanonical(location);
+    for (auto sl : *loc) {
+        auto bl = sl->to<BaseLocation>();
+        auto it = definitions.find(bl);
+        if (it != definitions.end())
+            definitions.erase(it);
+    }
+}
+
 const ProgramPoints* Definitions::get(const LocationSet* locations) const {
     const ProgramPoints* result = new ProgramPoints();
     for (auto sl : *locations->canonicalize()) {
@@ -287,14 +305,20 @@ bool Definitions::operator==(const Definitions& other) const {
 
 // This assumes that all variable declarations have been pushed to the top.
 // We could remove this constraint if we also scanned variable declaration initializers.
-void ComputeWriteSet::initialize(const IR::IApply* block,
+void ComputeWriteSet::initialize(const IR::ParameterList* parameters,
                                  const IR::IndexedVector<IR::Declaration>* locals,
-                                 ProgramPoint startPoint) {
-    auto defs = new Definitions();
+                                 ProgramPoint startPoint,
+                                 bool clear) {
+    Definitions* defs = nullptr;
+    if (!clear)
+        defs = currentDefinitions;
+    if (defs == nullptr)
+        defs = new Definitions();
+
     auto startPoints = new ProgramPoints(startPoint);
     auto uninit = new ProgramPoints(ProgramPoint::uninitialized);
 
-    for (auto p : *block->getApplyMethodType()->parameters->parameters) {
+    for (auto p : *parameters->parameters) {
         StorageLocation* loc = definitions->storageMap->add(p);
         if (loc == nullptr)
             continue;
@@ -318,6 +342,24 @@ void ComputeWriteSet::initialize(const IR::IApply* block,
     }
     definitions->set(startPoint, defs);
     currentDefinitions = defs;
+    LOG1("Definitions at " << startPoint << ":" << currentDefinitions);
+}
+
+void ComputeWriteSet::remove(const IR::ParameterList* parameters,
+                             const IR::IndexedVector<IR::Declaration>* locals) {
+    for (auto p : *parameters->parameters) {
+        StorageLocation* loc = definitions->storageMap->getStorage(p);
+        if (loc == nullptr)
+            continue;
+        currentDefinitions->remove(loc);
+    }
+    for (auto d : *locals) {
+        if (d->is<IR::Declaration_Variable>()) {
+            StorageLocation* loc = definitions->storageMap->getStorage(d);
+            if (loc == nullptr)
+                currentDefinitions->remove(loc);
+        }
+    }
 }
 
 Definitions* ComputeWriteSet::getDefinitionsAfter(const IR::ParserState* state) {
@@ -352,6 +394,11 @@ bool ComputeWriteSet::setDefinitions(Definitions* defs, const IR::Node* node) {
 //// visitor implementation
 
 /// For expressions we maintain the write-set in the writes std::map
+
+bool ComputeWriteSet::preorder(const IR::DefaultExpression* expression) {
+    set(expression, LocationSet::empty);
+    return false;
+}
 
 bool ComputeWriteSet::preorder(const IR::Literal* expression) {
     set(expression, LocationSet::empty);
@@ -494,7 +541,11 @@ bool ComputeWriteSet::preorder(const IR::Operation_Unary* expression) {
 
 bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
     LOG2("Visiting " << dbp(expression));
+    bool save = lhs;
+    lhs = true;
+    // The method call may modify the object, which is part of the method
     visit(expression->method);
+    lhs = save;
     MethodCallDescription mcd(expression, storageMap->refMap, storageMap->typeMap);
     if (mcd.instance->is<BuiltInMethod>()) {
         auto bim = mcd.instance->to<BuiltInMethod>();
@@ -506,7 +557,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
             return false;
         } else if (name == IR::Type_Header::setValid) {
             // modifies only the valid field
-            auto v = base->getField(validFieldName);
+            auto v = base->getField(StorageFactory::validFieldName);
             set(expression, v);
             return false;
         } else if (name == IR::Type_Stack::push_front ||
@@ -534,11 +585,12 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
         }
     }
     if (callee != nullptr) {
-        LOG1("Analyzing " << callee);
+        LOG1("Analyzing " << dbp(callee));
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
         (void)callee->apply(cw);
         currentDefinitions = definitions->get(pt);
+        exitDefinitions = exitDefinitions->join(cw.exitDefinitions);
     }
 
     // For all other methods we act conservatively:
@@ -566,6 +618,8 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
 bool ComputeWriteSet::preorder(const IR::ParserState* state) {
     for (auto stat : *state->components)
         visit(stat);
+    if (state->selectExpression != nullptr)
+        visit(state->selectExpression);
     return false;
 }
 
@@ -574,7 +628,11 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     LOG1("Visiting " << dbp(parser));
     auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
     auto startPoint = ProgramPoint(startState);
-    initialize(parser, parser->parserLocals, startPoint);
+    initialize(parser->type->applyParams, parser->parserLocals, startPoint);
+    for (auto l: *parser->parserLocals) {
+        if (l->is<IR::Declaration_Instance>())
+            visit(l);  // process virtual Functions if any
+    }
 
     ParserCallGraph transitions("transitions");
     ComputeParserCG pcg(storageMap->refMap, &transitions);
@@ -586,7 +644,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     while (!toRun.empty()) {
         auto state = *toRun.begin();
         toRun.erase(state);
-        LOG1("Traversing " << state);
+        LOG1("Traversing " << dbp(state));
 
         // We need a new visitor to visit the state,
         // but we use the same data structures
@@ -615,9 +673,13 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
 bool ComputeWriteSet::preorder(const IR::P4Control* control) {
     LOG1("Visiting " << dbp(control));
     auto startPoint = ProgramPoint(control);
-    initialize(control, control->controlLocals, startPoint);
+    initialize(control->type->applyParams, control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
     returnedDefinitions = new Definitions();
+    for (auto l: *control->controlLocals) {
+        if (l->is<IR::Declaration_Instance>())
+            visit(l);  // process virtual Functions if any
+    }
     visit(control->body);
     auto returned = currentDefinitions->join(returnedDefinitions);
     auto exited = returned->join(exitDefinitions);
@@ -710,10 +772,45 @@ bool ComputeWriteSet::preorder(const IR::P4Action* action) {
     return false;
 }
 
+namespace {
+class GetDeclarations : public Inspector {
+    IR::IndexedVector<IR::Declaration> *declarations;
+    bool preorder(const IR::Declaration* declaration) override
+    { declarations->push_back(declaration); return true; }
+ public:
+    GetDeclarations() : declarations(new IR::IndexedVector<IR::Declaration>())
+    { setName("GetDeclarations"); }
+    static IR::IndexedVector<IR::Declaration>* get(const IR::Node* node) {
+        GetDeclarations gd;
+        (void)node->apply(gd);
+        return gd.declarations;
+    }
+};
+}
+
+bool ComputeWriteSet::preorder(const IR::Function* function) {
+    LOG1("Visiting " << dbp(function));
+    auto point = ProgramPoint(function);
+    auto locals = GetDeclarations::get(function->body);
+    auto saveReturned = returnedDefinitions;
+
+    initialize(function->type->parameters, locals, point, false);
+    returnedDefinitions = new Definitions();
+    visit(function->body);
+    currentDefinitions = currentDefinitions->join(returnedDefinitions);
+    definitions->set(callingContext, currentDefinitions);
+    remove(function->type->parameters, locals);
+
+    returnedDefinitions = saveReturned;
+    LOG1("Done " << dbp(function));
+    return false;
+}
+
 bool ComputeWriteSet::preorder(const IR::P4Table* table) {
     LOG1("Visiting " << dbp(table));
     // non-deterministic call of one of the actions in the table
-    auto after = currentDefinitions;
+    auto after = new Definitions();
+    auto beforeTable = currentDefinitions;
     auto actions = table->getActionList();
     for (auto ale : *actions->actionList) {
         const IR::P4Action *action;
@@ -732,9 +829,10 @@ bool ComputeWriteSet::preorder(const IR::P4Table* table) {
         }
 
         ProgramPoint pt(callingContext, table);
-        ComputeWriteSet cw(this, pt, currentDefinitions);
+        ComputeWriteSet cw(this, pt, beforeTable);
         (void)action->apply(cw);
         currentDefinitions = definitions->get(pt);
+        exitDefinitions = exitDefinitions->join(cw.exitDefinitions);
         after = after->join(currentDefinitions);
     }
     definitions->set(callingContext, currentDefinitions);

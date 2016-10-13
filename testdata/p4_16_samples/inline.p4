@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-control p()
+control p(out bit y)
 {
     action a(in bit x0, out bit y0)
     {
@@ -31,12 +31,11 @@ control p()
 
     apply {
         bit x = 1;
-        bit y;
         b(x, y);
     }
 }
 
-control simple();
+control simple(out bit y);
 package m(simple pipe);
 
 m(p()) main;

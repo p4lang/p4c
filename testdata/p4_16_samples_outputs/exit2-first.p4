@@ -1,4 +1,4 @@
-control ctrl() {
+control ctrl(out bit<32> c) {
     bit<32> x;
     action e() {
         exit;
@@ -7,7 +7,6 @@ control ctrl() {
     apply {
         bit<32> a;
         bit<32> b;
-        bit<32> c;
         a = 32w0;
         b = 32w1;
         c = 32w2;
@@ -25,6 +24,6 @@ control ctrl() {
     }
 }
 
-control noop();
+control noop(out bit<32> c);
 package p(noop _n);
 p(ctrl()) main;

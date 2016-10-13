@@ -75,7 +75,7 @@ class SymbolicValueFactory {
     unsigned getWidth(const IR::Type* type) const;
 };
 
-class ValueMap final {
+class ValueMap final : public IHasDbPrint {
  public:
     std::map<const IR::IDeclaration*, SymbolicValue*> map;
     ValueMap* clone() const {
@@ -105,7 +105,6 @@ class ValueMap final {
             first = false;
         }
     }
-    void print() const;
     bool merge(const ValueMap* other) {
         bool change = false;
         BUG_CHECK(map.size() == other->map.size(), "Merging incompatible maps?");

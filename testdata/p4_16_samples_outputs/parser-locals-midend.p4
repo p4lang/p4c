@@ -14,7 +14,6 @@ parser p() {
     state start {
         s.h1.setInvalid();
         s.h2.setInvalid();
-        s.c = 32w0;
         transition accept;
     }
 }

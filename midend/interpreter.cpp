@@ -112,9 +112,6 @@ unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
     return 0;
 }
 
-void ValueMap::print() const
-{ dbprint(std::cout); }
-
 /*********************************************************************************/
 
 bool SymbolicException::equals(const SymbolicValue* other) const {

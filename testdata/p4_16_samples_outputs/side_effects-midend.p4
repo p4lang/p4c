@@ -33,7 +33,6 @@ control my() {
         tmp_18 = g(a);
         tmp_19 = tmp_18;
         tmp_20 = f(tmp_17, tmp_19);
-        a = tmp_17;
         a = tmp_20;
         tmp_21 = a;
         tmp_22 = s[tmp_21].z;
@@ -55,7 +54,6 @@ control my() {
         a[0:0] = tmp_32;
         tmp_33 = a;
         tmp_34 = g(a);
-        s[tmp_33].z = tmp_34;
     }
     table tbl_act() {
         actions = {

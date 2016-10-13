@@ -1,4 +1,4 @@
-../testdata/p4_16_samples/spec-ex16.p4(24): warning: out parameter d may be uninitialized when parser P terminates
+../testdata/p4_16_samples/spec-ex16.p4(24): warning: out parameter d may be uninitialized when P terminates
 parser P(packet_in b, out bit<32> d) { state start { transition accept; } }
                                   ^
 ../testdata/p4_16_samples/spec-ex16.p4(24)

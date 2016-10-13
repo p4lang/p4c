@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-control ctrl() {
+control ctrl(out bit<32> c) {
     action e() {
         exit;
     }
@@ -23,11 +23,10 @@ control ctrl() {
         actions = { e; }
         default_action = e();
     }
-    
+
     apply {
         bit<32> a;
         bit<32> b;
-        bit<32> c;
 
         a = 0;
         b = 1;
@@ -45,6 +44,6 @@ control ctrl() {
     }
 }
 
-control noop();
+control noop(out bit<32> c);
 package p(noop _n);
 p(ctrl()) main;

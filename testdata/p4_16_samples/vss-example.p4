@@ -195,7 +195,6 @@ control TopPipe(inout Parsed_packet headers,
                return;
           }
 
-          outCtrl.outputPort = 0x0;  // arbitrary choice
           ipv4_match.apply(nextHop); // Match result will go into nextHop
           if (outCtrl.outputPort == DROP_PORT) return;
 

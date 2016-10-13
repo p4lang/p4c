@@ -1,7 +1,4 @@
 control ctrl() {
-    bit<32> a_0;
-    bit<32> b_0;
-    bit<32> c_0;
     @name("e") action e_0() {
         exit;
     }
@@ -12,20 +9,10 @@ control ctrl() {
         default_action = e_0();
     }
     apply {
-        a_0 = 32w0;
-        b_0 = 32w1;
-        c_0 = 32w2;
-        if (t_0.apply().hit) {
-            b_0 = 32w2;
+        if (t_0.apply().hit) 
             t_0.apply();
-            c_0 = 32w3;
-        }
-        else {
-            b_0 = 32w3;
+        else 
             t_0.apply();
-            c_0 = 32w4;
-        }
-        c_0 = 32w5;
     }
 }
 

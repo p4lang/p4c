@@ -37,7 +37,7 @@ class DoSimplifyControlFlow : public Transform {
     const IR::Node* postorder(IR::SwitchStatement* statement) override;
 };
 
-class SimplifyControlFlow : public PassManager {
+class SimplifyControlFlow : public PassRepeated {
  public:
     SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));

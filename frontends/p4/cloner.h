@@ -24,15 +24,16 @@ namespace P4 {
 // Inserting an IR dag in several places does not work,
 // because PathExpressions must be unique.  The Cloner takes
 // care of this.
-class Cloner : public Transform {
+class ClonePathExpressions : public Transform {
  public:
-    Cloner() { setName("Cloner"); }
+    ClonePathExpressions() { setName("ClonePathExpressions"); }
     const IR::Node* postorder(IR::PathExpression* path) override
     { return new IR::PathExpression(path->path->clone()); }
 
     template<typename T>
     const T* clone(const IR::Node* node)
     { return node->apply(*this)->to<T>(); }
+
 };
 
 }  // namespace P4

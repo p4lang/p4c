@@ -60,17 +60,11 @@ class DumpIR : public Inspector {
         } else if (node->is<IR::Constant>()) {
             node->Node::dbprint(str);
             str << " " << node;
-        } else if (
-            node->is<IR::BlockStatement>() ||
-            node->is<IR::Expression>() ||
-            node->is<IR::AssignmentStatement>() ||
-            node->is<IR::P4Action>()) {
-            node->Node::dbprint(str);
         } else if (node->is<IR::VectorBase>()) {
             node->Node::dbprint(str);
             str << ", size=" << node->to<IR::VectorBase>()->size();
         } else {
-            str << node;
+            node->Node::dbprint(str);
         }
     }
     bool preorder(const IR::Node* node) override {

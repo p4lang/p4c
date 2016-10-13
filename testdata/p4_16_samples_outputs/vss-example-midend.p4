@@ -177,28 +177,25 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         tmp_18 = parseError != NoError;
     }
     action act_1() {
-        outCtrl.outputPort = 4w0x0;
-    }
-    action act_2() {
         hasReturned_0 = true;
     }
-    action act_3() {
+    action act_2() {
         nextHop_1 = nextHop_2;
         tmp_19 = outCtrl.outputPort == 4w0xf;
     }
-    action act_4() {
+    action act_3() {
         hasReturned_0 = true;
     }
-    action act_5() {
+    action act_4() {
         tmp_20 = outCtrl.outputPort == 4w0xe;
     }
-    action act_6() {
+    action act_5() {
         nextHop_3 = nextHop_1;
     }
-    action act_7() {
+    action act_6() {
         hasReturned_0 = true;
     }
-    action act_8() {
+    action act_7() {
         tmp_21 = outCtrl.outputPort == 4w0xf;
     }
     table tbl_act() {
@@ -221,51 +218,45 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     table tbl_act_1() {
         actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    table tbl_act_2() {
-        actions = {
-            act_3();
-        }
-        const default_action = act_3();
-    }
-    table tbl_act_3() {
-        actions = {
             act_2();
         }
         const default_action = act_2();
     }
-    table tbl_act_4() {
+    table tbl_act_2() {
         actions = {
-            act_5();
+            act_1();
         }
-        const default_action = act_5();
+        const default_action = act_1();
     }
-    table tbl_act_5() {
+    table tbl_act_3() {
         actions = {
             act_4();
         }
         const default_action = act_4();
     }
+    table tbl_act_4() {
+        actions = {
+            act_3();
+        }
+        const default_action = act_3();
+    }
+    table tbl_act_5() {
+        actions = {
+            act_5();
+        }
+        const default_action = act_5();
+    }
     table tbl_act_6() {
-        actions = {
-            act_6();
-        }
-        const default_action = act_6();
-    }
-    table tbl_act_7() {
-        actions = {
-            act_8();
-        }
-        const default_action = act_8();
-    }
-    table tbl_act_8() {
         actions = {
             act_7();
         }
         const default_action = act_7();
+    }
+    table tbl_act_7() {
+        actions = {
+            act_6();
+        }
+        const default_action = act_6();
     }
     apply {
         tbl_act.apply();
@@ -274,24 +265,23 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
             tbl_act_0.apply();
         }
         if (!hasReturned_0) {
-            tbl_act_1.apply();
             ipv4_match.apply();
-            tbl_act_2.apply();
+            tbl_act_1.apply();
             if (tmp_19) 
-                tbl_act_3.apply();
+                tbl_act_2.apply();
         }
         if (!hasReturned_0) {
             check_ttl.apply();
-            tbl_act_4.apply();
+            tbl_act_3.apply();
             if (tmp_20) 
-                tbl_act_5.apply();
+                tbl_act_4.apply();
         }
         if (!hasReturned_0) {
-            tbl_act_6.apply();
+            tbl_act_5.apply();
             dmac_1.apply();
-            tbl_act_7.apply();
+            tbl_act_6.apply();
             if (tmp_21) 
-                tbl_act_8.apply();
+                tbl_act_7.apply();
         }
         if (!hasReturned_0) 
             smac_1.apply();
@@ -301,23 +291,23 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     bit<16> tmp_22;
     @name("ck") Ck16() ck_2;
-    action act_9() {
+    action act_8() {
         ck_2.clear();
         p.ip.hdrChecksum = 16w0;
         ck_2.update<Ipv4_h>(p.ip);
         tmp_22 = ck_2.get();
         p.ip.hdrChecksum = tmp_22;
     }
-    table tbl_act_9() {
+    table tbl_act_8() {
         actions = {
-            act_9();
+            act_8();
         }
-        const default_action = act_9();
+        const default_action = act_8();
     }
     apply {
         b.emit<Ethernet_h>(p.ethernet);
         if (p.ip.isValid()) {
-            tbl_act_9.apply();
+            tbl_act_8.apply();
         }
         b.emit<Ipv4_h>(p.ip);
     }

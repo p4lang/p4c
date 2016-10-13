@@ -63,8 +63,8 @@ class Local(object):
     pass
 
 def run_timeout(options, args, timeout, stderr):
-    if options.verbose:
-        print(" ".join(args))
+    # if options.verbose:
+    print(" ".join(args))
     local = Local()
     local.process = None
     def target():
@@ -205,7 +205,6 @@ def process_file(options, argv):
     if "14_samples" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--p4-14"]);
     args.extend(argv)
-    print(" ".join(args))
     if options.runDebugger:
         args[0:0] = options.runDebugger.split()
         os.execvp(args[0], args)

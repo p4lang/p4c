@@ -31,7 +31,7 @@
 ../testdata/p4_16_samples/uninit.p4(97): warning: touched may be uninitialized
         touched = !touched;
                    ^^^^^^^
-../testdata/p4_16_samples/uninit.p4(68): warning: out parameter v may be uninitialized when control c terminates
+../testdata/p4_16_samples/uninit.p4(68): warning: out parameter v may be uninitialized when c terminates
 control c(out bit<32> v) {
                       ^
 ../testdata/p4_16_samples/uninit.p4(68)

@@ -1,7 +1,5 @@
-control ctrl() {
+control ctrl(out bit<32> c) {
     bit<32> a_0;
-    bit<32> b_0;
-    bit<32> c_0;
     bool tmp;
     @name("e") action e_0() {
         exit;
@@ -14,23 +12,16 @@ control ctrl() {
     }
     apply {
         a_0 = 32w0;
-        b_0 = 32w1;
-        c_0 = 32w2;
+        c = 32w2;
         tmp = a_0 == 32w0;
-        if (tmp) {
-            b_0 = 32w2;
+        if (tmp) 
             t_0.apply();
-            c_0 = 32w3;
-        }
-        else {
-            b_0 = 32w3;
+        else 
             t_0.apply();
-            c_0 = 32w4;
-        }
-        c_0 = 32w5;
+        c = 32w5;
     }
 }
 
-control noop();
+control noop(out bit<32> c);
 package p(noop _n);
 p(ctrl()) main;

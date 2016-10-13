@@ -1,8 +1,7 @@
-control p() {
+control p(out bit<1> y) {
     bit<1> x_2;
     bit<1> z;
     bit<1> x_3;
-    bit<1> y_1;
     bit<1> tmp_7;
     bit<1> tmp_8;
     bit<1> tmp_9;
@@ -41,7 +40,7 @@ control p() {
         tmp_13 = x_3;
     }
     action act_0() {
-        y_1 = tmp_14;
+        y = tmp_14;
     }
     table tbl_act() {
         actions = {
@@ -68,6 +67,6 @@ control p() {
     }
 }
 
-control simple();
+control simple(out bit<1> y);
 package m(simple pipe);
 m(p()) main;

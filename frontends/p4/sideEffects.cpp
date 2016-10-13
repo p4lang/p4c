@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "frontends/p4/sideEffects.h"
 #include "frontends/p4/tableApply.h"
+#include "frontends/p4/cloner.h"
 
 namespace P4 {
 
@@ -291,6 +292,8 @@ class DismantleExpression : public Transform {
         visit(mce->method);
         auto method = result->final;
 
+        ClonePathExpressions cloner;  // a cheap version of deep copy
+
         for (auto p : *desc.substitution.getParameters()) {
             auto arg = desc.substitution.lookup(p);
             if (p->direction == IR::Direction::None) {
@@ -332,7 +335,8 @@ class DismantleExpression : public Transform {
             }
             if (leftValue && useTemp) {
                 auto assign = new IR::AssignmentStatement(
-                    Util::SourceInfo(), newarg, argValue->clone());
+                    Util::SourceInfo(), cloner.clone<IR::Expression>(newarg),
+                    cloner.clone<IR::Expression>(argValue));
                 copyBack->push_back(assign);
                 LOG1("Will copy out value " << assign);
             }

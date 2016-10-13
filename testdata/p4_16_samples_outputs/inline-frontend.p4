@@ -1,8 +1,7 @@
-control p() {
+control p(out bit<1> y) {
     bit<1> x_0;
     bit<1> z_0;
     bit<1> x_1;
-    bit<1> y_0;
     bit<1> tmp;
     bit<1> tmp_0;
     bit<1> tmp_1;
@@ -29,10 +28,10 @@ control p() {
         x_1 = 1w1;
         tmp_5 = x_1;
         b_0(tmp_5, tmp_6);
-        y_0 = tmp_6;
+        y = tmp_6;
     }
 }
 
-control simple();
+control simple(out bit<1> y);
 package m(simple pipe);
 m(p()) main;

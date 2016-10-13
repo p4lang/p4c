@@ -1,15 +1,15 @@
 parser simple(out bit<2> z);
 package m(simple n);
-parser p1_1(out bit<2> z1) {
+parser p1_0(out bit<2> z1) {
     state start {
-        z1 = 2w1;
+        z1 = 2w0;
         transition accept;
     }
 }
 
-parser p1_0(out bit<2> z1) {
+parser p1_1(out bit<2> z1) {
     state start {
-        z1 = 2w0;
+        z1 = 2w1;
         transition accept;
     }
 }

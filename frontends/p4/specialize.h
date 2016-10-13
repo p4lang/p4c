@@ -63,7 +63,7 @@ struct SpecializationInfo {
 
 class SpecializationMap {
     // map invocation to specialization
-    std::map<const IR::Node*, SpecializationInfo*> specializations;
+    ordered_map<const IR::Node*, SpecializationInfo*> specializations;
     const IR::Expression* convertArgument(const IR::Expression* arg, SpecializationInfo* info);
 
  public:

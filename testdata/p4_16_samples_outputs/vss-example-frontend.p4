@@ -159,7 +159,6 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
             Drop_action_0();
             return;
         }
-        outCtrl.outputPort = 4w0x0;
         ipv4_match_0.apply(nextHop_0);
         tmp_7 = outCtrl.outputPort == 4w0xf;
         if (tmp_7) 

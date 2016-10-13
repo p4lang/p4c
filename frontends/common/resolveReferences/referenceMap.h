@@ -37,7 +37,6 @@ class ReferenceMap final : public ProgramMap {
     ReferenceMap();
     const IR::IDeclaration* getDeclaration(const IR::Path* path, bool notNull = false) const;
     void setDeclaration(const IR::Path* path, const IR::IDeclaration* decl);
-    void print() const { dbprint(std::cout); }
     void dbprint(std::ostream& cout) const;
     void setIsV1(bool isv1) { this->isv1 = isv1; }
     cstring newName(cstring base);
