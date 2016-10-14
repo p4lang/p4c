@@ -18,14 +18,12 @@ header_type data_t {
     fields {
         f1 : 32;
         f2 : 32;
-        f3 : 32;
-        f4 : 32;
         x1 : 2;
         pad0 : 3;
         x2 : 2;
         pad1 : 5;
         x3 : 1;
-        pad2 : 2;
+        pad2 : 3;
         skip : 32;
         x4 : 1;
         x5 : 1;
@@ -40,14 +38,14 @@ parser start {
 }
 
 action noop() { }
-action setf4(val) { modify_field(data.f4, val); }
+action output(port) { modify_field(standard_metadata.egress_spec, port); }
 
 table test1 {
     reads {
         data.f1 : exact;
     }
     actions {
-        setf4;
+        output;
         noop;
     }
 }
@@ -56,13 +54,13 @@ table test2 {
         data.f2 : exact;
     }
     actions {
-        setf4;
+        output;
         noop;
     }
 }
 
 control ingress {
-    if (data.x1 == 1 and data.x4 == 0) {
+    if (data.x2 == 1 and data.x4 == 0) {
         apply(test1);
     } else {
         apply(test2);
