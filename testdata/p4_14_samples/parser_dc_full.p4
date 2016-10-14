@@ -429,7 +429,7 @@ parser parse_ethernet {
         ETHERTYPE_NSH : parse_nsh;
         ETHERTYPE_ROCE: parse_roce;
         ETHERTYPE_FCOE: parse_fcoe;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -437,21 +437,21 @@ header snap_header_t snap_header;
 
 parser parse_snap_header {
     extract(snap_header);
-    return ingress;
+    return parse_payload;
 }
 
 header roce_header_t roce;
 
 parser parse_roce {
     extract(roce);
-    return ingress;
+    return parse_payload;
 }
 
 header fcoe_header_t fcoe;
 
 parser parse_fcoe {
     extract(fcoe);
-    return ingress;
+    return parse_payload;
 }
 
 header cpu_header_t cpu_header;
@@ -469,7 +469,7 @@ parser parse_cpu_header {
         ETHERTYPE_NSH : parse_nsh;
         ETHERTYPE_ROCE: parse_roce;
         ETHERTYPE_FCOE: parse_fcoe;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -487,7 +487,7 @@ parser parse_vlan {
         ETHERTYPE_IPV6 : parse_ipv6;
         ETHERTYPE_ARP : parse_arp_rarp;
         ETHERTYPE_RARP : parse_arp_rarp;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -504,7 +504,7 @@ parser parse_mpls {
     return select(current(23, 1)) {
         0 : parse_mpls_not_bos;
         1 : parse_mpls_bos;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -568,7 +568,7 @@ parser parse_ipv4 {
         IP_PROTOCOLS_UDP : parse_udp;
         IP_PROTOCOLS_GRE : parse_gre;
 //        IP_PROTOCOLS_SCTP : parse_sctp;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -582,7 +582,7 @@ parser parse_ipv6 {
         IP_PROTOCOLS_UDP : parse_udp;
         IP_PROTOCOLS_GRE : parse_gre;
 //        IP_PROTOCOLS_SCTP : parse_sctp;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -590,21 +590,21 @@ header icmp_t icmp;
 
 parser parse_icmp {
     extract(icmp);
-    return ingress;
+    return parse_payload;
 }
 
 header icmpv6_t icmpv6;
 
 parser parse_icmpv6 {
     extract(icmpv6);
-    return ingress;
+    return parse_payload;
 }
 
 header tcp_t tcp;
 
 parser parse_tcp {
     extract(tcp);
-    return ingress;
+    return parse_payload;
 }
 
 #define UDP_PORT_VXLAN 4789
@@ -618,7 +618,7 @@ header roce_v2_header_t roce_v2;
 
 parser parse_roce_v2 {
     extract(roce_v2);
-    return ingress;
+    return parse_payload;
 }
 
 parser parse_udp {
@@ -627,7 +627,7 @@ parser parse_udp {
         UDP_PORT_VXLAN : parse_vxlan;
         UDP_PORT_GENV: parse_geneve;
         UDP_PORT_ROCE_V2: parse_roce_v2;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -635,7 +635,7 @@ header sctp_t sctp;
 
 parser parse_sctp {
     extract(sctp);
-    return ingress;
+    return parse_payload;
 }
 
 
@@ -660,32 +660,32 @@ header gre_opt_t gre_opt;
 
 parser parse_gre_key {
     extract(gre_opt);
-    return ingress;
+    return parse_payload;
 }
 parser parse_gre_key2 {
     extract(gre_opt);
     extract(gre_opt);
-    return ingress;
+    return parse_payload;
 }
 parser parse_gre_key22 {
     extract(gre_opt);
     extract(gre_opt);
-    return ingress;
+    return parse_payload;
 }
 parser parse_gre_opt1 {
     extract(gre_opt);
-    return ingress;
+    return parse_payload;
 }
 parser parse_gre_opt2 {
     extract(gre_opt);
     extract(gre_opt);
-    return ingress;
+    return parse_payload;
 }
 parser parse_gre_opt3 {
     extract(gre_opt);
     extract(gre_opt);
     extract(gre_opt);
-    return ingress;
+    return parse_payload;
 }
 
 parser parse_gre_opts {
@@ -697,7 +697,7 @@ parser parse_gre_opts {
         5 mask 0x0000 :  parse_gre_key22;
         6 mask 0x0000 :  parse_gre_opt2;
         7 mask 0x0000 :  parse_gre_opt3;
-        default: ingress;
+        default: parse_payload;
     }
 }
 #endif
@@ -711,7 +711,7 @@ parser parse_gre {
         GRE_PROTOCOLS_ERSPAN_V1 : parse_erspan_v1;
         GRE_PROTOCOLS_ERSPAN_V2 : parse_erspan_v2;
         ETHERTYPE_NSH : parse_nsh;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -761,14 +761,14 @@ header erspan_header_v1_t erspan_v1_header;
 
 parser parse_erspan_v1 {
     extract(erspan_v1_header);
-    return ingress;
+    return parse_payload;
 }
 
 header erspan_header_v2_t erspan_v2_header;
 
 parser parse_erspan_v2 {
     extract(erspan_v2_header);
-    return ingress;
+    return parse_payload;
 }
 
 #define ARP_PROTOTYPES_ARP_RARP_IPV4 0x0800
@@ -779,7 +779,7 @@ parser parse_arp_rarp {
     extract(arp_rarp);
     return select(latest.protoType) {
         ARP_PROTOTYPES_ARP_RARP_IPV4 : parse_arp_rarp_ipv4;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -787,7 +787,7 @@ header arp_rarp_ipv4_t arp_rarp_ipv4;
 
 parser parse_arp_rarp_ipv4 {
     extract(arp_rarp_ipv4);
-    return ingress;
+    return parse_payload;
 }
 
 header eompls_t eompls;
@@ -795,7 +795,7 @@ header eompls_t eompls;
 parser parse_eompls {
     extract(eompls);
     extract(inner_ethernet);
-    return ingress;
+    return parse_payload;
 }
 
 header vxlan_t vxlan;
@@ -867,7 +867,7 @@ parser parse_genv_inner {
         ETHERTYPE_ETHERNET : parse_inner_ethernet;
         ETHERTYPE_IPV4 : parse_inner_ipv4;
         ETHERTYPE_IPV6 : parse_inner_ipv6;
-        default : ingress;
+        default : parse_payload;
     }
 }
 
@@ -881,7 +881,7 @@ parser parse_nsh {
         ETHERTYPE_IPV4 : parse_inner_ipv4;
         ETHERTYPE_IPV6 : parse_inner_ipv6;
         ETHERTYPE_ETHERNET : parse_inner_ethernet;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -892,7 +892,7 @@ parser parse_inner_ipv4 {
         IP_PROTOCOLS_TCP : parse_inner_tcp;
         IP_PROTOCOLS_UDP : parse_inner_udp;
 //        IP_PROTOCOLS_SCTP : parse_inner_sctp;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -900,28 +900,28 @@ header icmp_t inner_icmp;
 
 parser parse_inner_icmp {
     extract(inner_icmp);
-    return ingress;
+    return parse_payload;
 }
 
 header tcp_t inner_tcp;
 
 parser parse_inner_tcp {
     extract(inner_tcp);
-    return ingress;
+    return parse_payload;
 }
 
 header udp_t inner_udp;
 
 parser parse_inner_udp {
     extract(inner_udp);
-    return ingress;    
+    return parse_payload;    
 }
 
 header sctp_t inner_sctp;
 
 parser parse_inner_sctp {
     extract(inner_sctp);
-    return ingress;
+    return parse_payload;
 }
 
 parser parse_inner_ipv6 {
@@ -931,7 +931,7 @@ parser parse_inner_ipv6 {
         IP_PROTOCOLS_TCP : parse_inner_tcp;
         IP_PROTOCOLS_UDP : parse_inner_udp;
 //        IP_PROTOCOLS_SCTP : parse_inner_sctp;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
@@ -939,7 +939,7 @@ header icmpv6_t inner_icmpv6;
 
 parser parse_inner_icmpv6 {
     extract(inner_icmpv6);
-    return ingress;
+    return parse_payload;
 }
 
 parser parse_inner_ethernet {
@@ -947,19 +947,36 @@ parser parse_inner_ethernet {
     return select(latest.etherType) {
         ETHERTYPE_IPV4 : parse_inner_ipv4;
         ETHERTYPE_IPV6 : parse_inner_ipv6;
-        default: ingress;
+        default: parse_payload;
     }
 }
 
-action do_noop() { }
+header_type payload_t {
+    fields {
+        data : 8;
+    }
+}
+header payload_t data;
 
-table do_nothing {
+/* extract 1 byte of payload and mark it to ensure entire parser is not dead-code elim */
+parser parse_payload {
+    extract(data);
+    return ingress;
+}
+
+action mark_forward() {
+    data.data = 255;
+    standard_metadata.egress_spec = 10;
+}
+
+table mark_check {
     reads {
-        ethernet.dstAddr : exact;
+        data.data : exact;
     }
     actions {
-        do_noop;
+        mark_forward;
     }
+    default_action: mark_forward;
 }
 
-control ingress { apply(do_nothing); }
+control ingress { apply(mark_check); }
