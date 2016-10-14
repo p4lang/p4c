@@ -4,8 +4,6 @@
 header data_t {
     bit<32> f1;
     bit<32> f2;
-    bit<32> f3;
-    bit<32> f4;
     bit<8>  b1;
     bit<8>  b2;
     bit<8>  b3;
@@ -32,11 +30,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("NoAction_2") action NoAction_0() {
     }
-    @name("setb1") action setb1_0(bit<8> val) {
-        hdr.data.b1 = val;
+    @name("output") action output_0(bit<9> port) {
+        standard_metadata.egress_spec = port;
     }
-    @name("setb1") action setb1_2(bit<8> val) {
-        hdr.data.b1 = val;
+    @name("output") action output_2(bit<9> port) {
+        standard_metadata.egress_spec = port;
     }
     @name("noop") action noop_0() {
     }
@@ -44,7 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test1") table test1() {
         actions = {
-            setb1_0();
+            output_0();
             noop_0();
             NoAction();
         }
@@ -55,7 +53,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test2") table test2() {
         actions = {
-            setb1_2();
+            output_2();
             noop_2();
             NoAction_0();
         }
