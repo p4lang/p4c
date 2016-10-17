@@ -18,8 +18,6 @@ header_type data_t {
     fields {
         f1 : 32;
         f2 : 32;
-        f3 : 32;
-        f4 : 32;
         b1 : 8;
         b2 : 8;
         b3 : 8;
@@ -34,14 +32,14 @@ parser start {
 }
 
 action noop() { }
-action setb1(val) { modify_field(data.b1, val); }
+action output(port) { modify_field(standard_metadata.egress_spec, port); }
 
 table test1 {
     reads {
         data.f1 : exact;
     }
     actions {
-        setb1;
+        output;
         noop;
     }
 }
@@ -50,7 +48,7 @@ table test2 {
         data.f2 : exact;
     }
     actions {
-        setb1;
+        output;
         noop;
     }
 }

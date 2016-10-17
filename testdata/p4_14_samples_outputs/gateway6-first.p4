@@ -4,8 +4,6 @@
 header data_t {
     bit<32> f1;
     bit<32> f2;
-    bit<32> f3;
-    bit<32> f4;
     bit<8>  b1;
     bit<8>  b2;
     bit<8>  b3;
@@ -28,14 +26,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("setb1") action setb1(bit<8> val) {
-        hdr.data.b1 = val;
+    @name("output") action output(bit<9> port) {
+        standard_metadata.egress_spec = port;
     }
     @name("noop") action noop() {
     }
     @name("test1") table test1() {
         actions = {
-            setb1();
+            output();
             noop();
             NoAction();
         }
@@ -46,7 +44,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("test2") table test2() {
         actions = {
-            setb1();
+            output();
             noop();
             NoAction();
         }
