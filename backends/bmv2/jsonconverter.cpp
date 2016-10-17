@@ -250,6 +250,40 @@ class ExpressionConverter : public Inspector {
         BUG("%1%: unhandled case", expression);
     }
 
+    void postorder(const IR::Shr* expression) override {
+        // special handling for shift of a lookahead -> current
+        auto l = get(expression->left);
+        if (l->is<Util::JsonObject>()) {
+            auto jo = l->to<Util::JsonObject>();
+            auto type = jo->get("type");
+            if (type != nullptr && type->is<Util::JsonValue>()) {
+                auto val = type->to<Util::JsonValue>();
+                if (val->isString() && val->getString() == "lookahead") {
+                    auto r = jo->get("value");
+                    CHECK_NULL(r);
+                    auto arr = r->to<Util::JsonArray>();
+                    CHECK_NULL(arr);
+                    auto second = arr->at(1);
+                    BUG_CHECK(second->is<Util::JsonValue>(), "%1%: expected a value", second);
+                    auto max = second->to<Util::JsonValue>()->getInt();
+
+                    BUG_CHECK(expression->right->is<IR::Constant>(),
+                              "Not implemented: %1%", expression);
+                    auto amount = expression->right->to<IR::Constant>()->asInt();
+
+                    auto j = new Util::JsonObject();
+                    j->emplace("type", "lookahead");
+                    auto v = mkArrayField(j, "value");
+                    v->append(amount);
+                    v->append(max - amount);
+                    map.emplace(expression, j);
+                    return;
+                }
+            }
+        }
+        binary(expression);
+    }
+
     void postorder(const IR::Cast* expression) override {
         // nothing to do for casts - the ArithmeticFixup pass should have handled them already
         auto j = get(expression->expr);
@@ -433,6 +467,10 @@ class ExpressionConverter : public Inspector {
     }
 
     void postorder(const IR::Operation_Binary* expression) override {
+        binary(expression);
+    }
+
+    void binary(const IR::Operation_Binary* expression) {
         auto result = new Util::JsonObject();
         map.emplace(expression, result);
         if (simpleExpressionsOnly) {
