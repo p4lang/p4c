@@ -56,6 +56,10 @@ or later.
     1. ./autogen.sh
     2. ./configure
     3. make
+    4. [sudo] make install  # if you need to install bmv2
+
+In addition, on Linux, you may have to run `sudo ldconfig` after installing
+bmv2, to refresh the shared library cache.
 
 Debug logging is enabled by default. If you want to disable it for performance
 reasons, you can pass `--disable-logging-macros` to the `configure` script.
