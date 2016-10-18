@@ -104,9 +104,9 @@ class NotificationsListener {
 
       const char *hdr = reinterpret_cast<char *>(&storage);
       if (!memcmp("AGE|", hdr, 4)) {
-        std::cout << "Received ageing notification\n";
+        // std::cout << "Received ageing notification\n";
         if (!age_cb) {
-          std::cout << "No cb registered\n";
+          // std::cout << "No cb registered\n";
           continue;
         }
         NotificationCb cb;
@@ -116,9 +116,9 @@ class NotificationsListener {
         }
         cb(hdr, data);
       } else if (!memcmp("LEA|", hdr, 4)) {
-        std::cout << "Received learning notification\n";
+        // std::cout << "Received learning notification\n";
         if (!learn_cb) {
-          std::cout << "No cb registered\n";
+          // std::cout << "No cb registered\n";
           continue;
         }
         NotificationCb cb;
@@ -129,7 +129,7 @@ class NotificationsListener {
         cb(hdr, data);
 
       } else {
-        std::cout << "Unknow notification type\n";
+        std::cerr << "Unknow notification type\n";
       }
     }
   }
