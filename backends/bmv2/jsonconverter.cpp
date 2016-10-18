@@ -807,6 +807,10 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     int id = -1;
                     if (ef->method->name == v1model.clone.name) {
                         BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
+                        cstring name = refMap->newName("fl");
+                        auto emptylist = new IR::ListExpression(
+                            Util::SourceInfo(), new IR::Vector<IR::Expression>());
+                        id = createFieldList(emptylist, "field_lists", name, fieldLists);
                     } else {
                         BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
                         cstring name = refMap->newName("fl");
