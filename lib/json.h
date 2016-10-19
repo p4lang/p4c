@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ class JsonValue final : public IJson {
     bool getBool() const;
     cstring getString() const;
     mpz_class getValue() const;
+    int getInt() const;
 
     static JsonValue* null;
 

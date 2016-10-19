@@ -79,7 +79,7 @@ const IR::Node* ExpressionConverter::postorder(IR::ActionArg* arg) {
 
 const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
     if (primitive->name == "current") {
-        // current(a, b) => packet.lookahead<bit<a+b>>()[b-1::0]
+        // current(a, b) => packet.lookahead<bit<a+b>>()[a+b-1,a]
         BUG_CHECK(primitive->operands.size() == 2, "Expected 2 operands for %1%", primitive);
         auto a = primitive->operands.at(0);
         auto b = primitive->operands.at(1);
@@ -103,8 +103,8 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
         auto lookahead = new IR::MethodCallExpression(
             Util::SourceInfo(), method, typeargs, new IR::Vector<IR::Expression>());
         auto result = new IR::Slice(primitive->srcInfo, lookahead,
-                                    new IR::Constant(bval - 1),
-                                    new IR::Constant(0));
+                                    new IR::Constant(aval + bval - 1),
+                                    new IR::Constant(aval));
         result->type = IR::Type_Bits::get(bval);
         return result;
     } else if (primitive->name == "valid") {

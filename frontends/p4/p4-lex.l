@@ -127,15 +127,15 @@ std::string stringLiteral;
                 }
 
 0[xX][0-9a-fA-F_]+ { yylval.Constant = new IR::Constant(yylloc, Util::cvtInt(yytext+2, 16), 16);
-                  BEGIN(NORMAL); return INTEGER; }
-0[dD][0-9_]+    { yylval.Constant = new IR::Constant(yylloc, Util::cvtInt(yytext+2, 10), 10);
-                  BEGIN(NORMAL); return INTEGER; }
-0[oO][0-7_]+    { yylval.Constant = new IR::Constant(yylloc, Util::cvtInt(yytext+2, 8), 8);
-                  BEGIN(NORMAL); return INTEGER; }
-0[bB][01_]+     { yylval.Constant = new IR::Constant(yylloc, Util::cvtInt(yytext+2, 2), 2);
-                  BEGIN(NORMAL); return INTEGER; }
-[0-9]+          { yylval.Constant = new IR::Constant(yylloc, Util::cvtInt(yytext, 10), 10);
-                  BEGIN(NORMAL); return INTEGER; }
+                     BEGIN(NORMAL); return INTEGER; }
+0[dD][0-9_]+       { yylval.Constant = new IR::Constant(yylloc, Util::cvtInt(yytext+2, 10), 10);
+                     BEGIN(NORMAL); return INTEGER; }
+0[oO][0-7_]+       { yylval.Constant = new IR::Constant(yylloc, Util::cvtInt(yytext+2, 8), 8);
+                     BEGIN(NORMAL); return INTEGER; }
+0[bB][01_]+        { yylval.Constant = new IR::Constant(yylloc, Util::cvtInt(yytext+2, 2), 2);
+                     BEGIN(NORMAL); return INTEGER; }
+[0-9]+             { yylval.Constant = new IR::Constant(yylloc, Util::cvtInt(yytext, 10), 10);
+                     BEGIN(NORMAL); return INTEGER; }
 
 [0-9]+[ws]0[xX][0-9a-fA-F_]+ { yylval.Constant = cvtCst(yylloc, yytext, 2, 16);
                                BEGIN(NORMAL); return INTEGER; }

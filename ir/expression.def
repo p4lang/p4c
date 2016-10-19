@@ -300,7 +300,6 @@ class ConstructorCallExpression : Expression {
 class ListExpression : Expression {
     Vector<Expression> components;
     validate {
-        if (components->empty()) BUG("List expression with no components");
         components->check_null();
     }
 }
