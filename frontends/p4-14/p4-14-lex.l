@@ -1,4 +1,6 @@
 %{
+#include "lib/stringref.h"
+
 #define YY_USER_ACTION                                                  \
     { auto tmp = Util::InputSources::instance->getCurrentPosition();                            \
       Util::InputSources::instance->appendText(yytext);                                         \
@@ -43,7 +45,7 @@ static int lineDirectiveLine;
 <LINE1,LINE2,LINE3>\n { BEGIN(INITIAL); }
 <LINE1,LINE2,LINE3,COMMENT,NORMAL><<EOF>> { BEGIN(INITIAL); }
 
-"@pragma".*     ; /* ignore for now */
+"@pragma".*     { yylval.str = StringRef(yytext+7).trim(); return PRAGMA; }
 
 "action"        { yylval.str = yytext; BEGIN(NORMAL); return ACTION; }
 "actions"       { yylval.str = yytext; BEGIN(NORMAL); return ACTIONS; }

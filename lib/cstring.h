@@ -38,7 +38,6 @@ class cstring {
     cstring(const std::stringstream&);                      // NOLINT(runtime/explicit)
     cstring(const char *s) { *this = s; }                   // NOLINT(runtime/explicit)
     cstring(const std::string &a) { *this = a.c_str(); }    // NOLINT(runtime/explicit)
-    cstring &operator=(const std::string &a) { return *this = a.c_str(); }
     const char *c_str() const { return str; }
     const char *find(int c) const { return str ? strchr(str, c) : nullptr; }
     const char *findlast(int c) const { return str ? strrchr(str, c) : str; }
