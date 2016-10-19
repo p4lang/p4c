@@ -112,7 +112,7 @@ class ChecksumTest : public ::testing::Test {
     BufBuilder tcp_cksum_engine_builder;
     tcp_cksum_engine_builder.push_back_field(ipv4Header, 10);  // ipv4.srcAddr
     tcp_cksum_engine_builder.push_back_field(ipv4Header, 11);  // ipv4.dstAddr
-    tcp_cksum_engine_builder.push_back_constant(ByteContainer('\x00'), 8);
+    tcp_cksum_engine_builder.push_back_constant(ByteContainer(1, '\x00'), 8);
     tcp_cksum_engine_builder.push_back_field(ipv4Header, 8);  // ipv4.protocol
     tcp_cksum_engine_builder.push_back_field(metaHeader, 0);  // for tcpLength
     tcp_cksum_engine_builder.push_back_field(tcpHeader, 0);  // tcp.srcPort

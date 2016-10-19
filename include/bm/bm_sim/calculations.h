@@ -226,7 +226,16 @@ class RawCalculation
 };
 
 
-struct BufBuilder {
+class BufBuilder {
+ public:
+  void push_back_field(header_id_t header, int field_offset);
+  void push_back_constant(const ByteContainer &v, size_t nbits);
+  void push_back_header(header_id_t header);
+  void append_payload();
+
+  void operator()(const Packet &pkt, ByteContainer *buf) const;
+
+ private:
   struct field_t {
     header_id_t header;
     int field_offset;
@@ -241,94 +250,10 @@ struct BufBuilder {
     header_id_t header;
   };
 
+  struct Deparse;  // defined in calculations.cpp
+
   std::vector<boost::variant<field_t, constant_t, header_t> > entries{};
   bool with_payload{false};
-
-  void push_back_field(header_id_t header, int field_offset) {
-    field_t f = {header, field_offset};
-    entries.emplace_back(f);
-  }
-
-  void push_back_constant(const ByteContainer &v, size_t nbits) {
-    // TODO(antonin): general case
-    assert(nbits % 8 == 0);
-    constant_t c = {v, nbits};
-    entries.emplace_back(c);
-  }
-
-  void push_back_header(header_id_t header) {
-    header_t h = {header};
-    entries.emplace_back(h);
-  }
-
-  void append_payload() {
-    with_payload = true;
-  }
-
-  struct Deparse : public boost::static_visitor<> {
-    Deparse(const PHV &phv, ByteContainer *buf)
-      : phv(phv), buf(buf) { }
-
-    char *extend(int more_bits) {
-      int nbits_ = nbits + more_bits;
-      buf->resize((nbits_ + 7) / 8, '\x00');
-      char *ptr = buf->data() + (nbits / 8);
-      nbits = nbits_;
-      // needed ?
-      // if (new_bytes > 0) buf->back() = '\x00';
-      return ptr;
-    }
-
-    int get_offset() const {
-      return nbits % 8;
-    }
-
-    void operator()(const field_t &f) {
-      const Header &header = phv.get_header(f.header);
-      if (!header.is_valid()) return;
-      const Field &field = header.get_field(f.field_offset);
-      // taken from headers.cpp::deparse
-      const int offset = get_offset();
-      field.deparse(extend(field.get_nbits()), offset);
-    }
-
-    void operator()(const constant_t &c) {
-      assert(get_offset() == 0);
-      std::copy(c.v.begin(), c.v.end(), extend(c.nbits));
-    }
-
-    void operator()(const header_t &h) {
-      assert(get_offset() == 0);
-      const Header &header = phv.get_header(h.header);
-      if (header.is_valid()) {
-        header.deparse(extend(header.get_nbytes_packet() * 8));
-      }
-    }
-
-    Deparse(const Deparse &other) = delete;
-    Deparse &operator=(const Deparse &other) = delete;
-
-    Deparse(Deparse &&other) = delete;
-    Deparse &operator=(Deparse &&other) = delete;
-
-    const PHV &phv;
-    ByteContainer *buf;
-    int nbits{0};
-  };
-
-  void operator()(const Packet &pkt, ByteContainer *buf) const {
-    buf->clear();
-    const PHV *phv = pkt.get_phv();
-    Deparse visitor(*phv, buf);
-    std::for_each(entries.begin(), entries.end(),
-                  boost::apply_visitor(visitor));
-    if (with_payload) {
-      size_t curr = buf->size();
-      size_t psize = pkt.get_data_size();
-      buf->resize(curr + psize);
-      std::copy(pkt.data(), pkt.data() + psize, buf->begin() + curr);
-    }
-  }
 };
 
 

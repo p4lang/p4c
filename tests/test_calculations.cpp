@@ -188,6 +188,33 @@ TEST_F(CalculationTest, WithConstant) {
   ASSERT_EQ(expected, actual);
 }
 
+TEST_F(CalculationTest, WithConstantNonAligned) {
+  BufBuilder builder;
+
+  // 0x9fd = 1001 1111 1101
+  ByteContainer constant("0x9fd");
+
+  builder.push_back_constant(ByteContainer("0x00"), 4);
+  builder.push_back_field(testHeader1, 0);  // f16
+  builder.push_back_constant(constant, 12);
+
+  Calculation calc(builder, "identity");
+
+  unsigned char pkt_buf[2 * header_size];
+
+  for (size_t i = 0; i < sizeof(pkt_buf); i++) {
+    pkt_buf[i] = 0xff;
+  }
+
+  Packet pkt = get_pkt((const char *) pkt_buf, sizeof(pkt_buf));
+  parser.parse(&pkt);
+
+  auto expected = static_cast<uint64_t>(0x0ffff9fd);
+  auto actual = calc.output(pkt);
+
+  ASSERT_EQ(expected, actual);
+}
+
 TEST_F(CalculationTest, WithPayload) {
   BufBuilder builder;
 
