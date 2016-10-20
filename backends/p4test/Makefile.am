@@ -55,6 +55,3 @@ P14BUGS = \
 XFAIL_TESTS += \
     $(P14BUGS) \
     p4/testdata/p4_16_samples/cast-call.p4.test
-
-# see discussion in issue #108
-XFAIL_TESTS += p4/testdata/p4_16_errors/generic_e.p4.test

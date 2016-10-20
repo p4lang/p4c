@@ -1,4 +1,5 @@
 /*
+/*
 Copyright 2016 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-extern X<D>
-{
-   void f<D>(in D d); // bug: D shadows D
+
+control proto(out bit<32> x);
+package top(proto _c);
+
+control c(out bit<32> x) {
+    apply {
+        bit<8> a = 0xF;
+        bit<16> b = 0xF;
+        x = (a ++ b ++ a) + (b ++ (a ++ a));
+    }
 }
+
+top(c()) main;

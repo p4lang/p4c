@@ -190,8 +190,7 @@ static int yylex();
 %left EQ NE
 %left '<' '>' LE GE
 %left SHL
-%left PP
-%left '+' '-'
+%left PP '+' '-'
 %left '*' '/' '%'
 %right PREFIX
 %nonassoc ']' '(' '['

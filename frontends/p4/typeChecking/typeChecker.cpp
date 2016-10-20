@@ -387,17 +387,6 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
 
             methods->push_back(method);
         }
-#if 0
-        if (!constructorFound) {
-            // synthesize a default constructor if and only if none given
-            auto ct = new IR::Type_Method(Util::SourceInfo(), new IR::TypeParameters(),
-                                          nullptr, new IR::ParameterList());
-            auto constructor = new IR::Method(Util::SourceInfo(), te->name, ct, false);
-            setType(constructor, ct);
-            methods->push_back(constructor);
-            changes = true;
-        }
-#endif
         auto tps = canonicalize(te->typeParameters);
         if (tps == nullptr)
             return nullptr;
@@ -1316,7 +1305,7 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
                   expression->right);
         return expression;
     }
-    if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>() || !(*ltype == *rtype)) {
+    if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
         typeError("%1%: Concatenation not defined on %2% and %3%",
                   expression, ltype->toString(), rtype->toString());
         return expression;
