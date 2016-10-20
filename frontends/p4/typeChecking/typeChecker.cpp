@@ -1305,7 +1305,7 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
                   expression->right);
         return expression;
     }
-    if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>() || !(*ltype == *rtype)) {
+    if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
         typeError("%1%: Concatenation not defined on %2% and %3%",
                   expression, ltype->toString(), rtype->toString());
         return expression;
