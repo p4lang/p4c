@@ -15,5 +15,5 @@ limitations under the License.
 */
 extern X<D>
 {
-   void f<D>(in D d); // bug: D shadows D
+   void f<D>(in D d); // D shadows D
 }

@@ -331,6 +331,7 @@ expression
     : name | STRING | INTEGER | ZERO
     | expression '(' ')'                { $$ = $1 + "()"; }
     | expression '+' '+'                { $$ = $1 + "++"; }
+    | NEW name                          { $$ = "new " + $2; }
     ;
 
 name: IDENTIFIER | name DBLCOL IDENTIFIER { $$ = $1 + "::" + $3; }
