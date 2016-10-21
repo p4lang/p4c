@@ -455,6 +455,10 @@ class RunBMV2(object):
                 ifname = self.interfaces[interface]
                 fp = self.interfaces[interface] = RawPcapWriter(ifname, linktype=0)
                 fp._write_header(None)
+            if len(self.interfaces) == 0:
+                # opening interfaces synchronizes with bmv2 startup, so only
+                # need to wait if there are none
+                time.sleep(0.5)
 
             runcli = ["simple_switch_CLI", "--thrift-port", thriftPort]
             if self.options.verbose:
