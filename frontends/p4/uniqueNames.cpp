@@ -73,11 +73,8 @@ const IR::Node* RenameSymbols::postorder(IR::Declaration_Constant* decl) {
 
 const IR::Node* RenameSymbols::postorder(IR::Parameter* param) {
     auto name = getName();
-    if (name != nullptr && *name != param->name) {
-        auto annos = addNameAnnotation(param->name, param->annotations);
-        param->name = *name;
-        param->annotations = annos;
-    }
+    if (name != nullptr && *name != param->name.name)
+        param->name = IR::ID(param->name.srcInfo, *name, param->name.originalName);
     return param;
 }
 

@@ -48,7 +48,7 @@ void HasTableApply::postorder(const IR::MethodCallExpression* expression) {
               table, am->object);
     table = am->object->to<IR::P4Table>();
     call = expression;
-    LOG1("Invoked table is " << table);
+    LOG1("Invoked table is " << dbp(table));
 }
 
 const IR::Node* DoRemoveTableParameters::postorder(IR::P4Table* table) {
@@ -64,7 +64,7 @@ const IR::Node* DoRemoveTableParameters::postorder(IR::P4Table* table) {
     }
     original.emplace(getOriginal<IR::P4Table>());
     table->parameters = new IR::ParameterList();
-    LOG1("To replace " << table);
+    LOG1("To replace " << dbp(table));
     result->push_back(table);
     return result;
 }
@@ -287,7 +287,7 @@ void FindActionParameters::postorder(const IR::MethodCallExpression* expression)
 }
 
 const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
-    LOG1("Visiting " << action);
+    LOG1("Visiting " << dbp(action));
     BUG_CHECK(getContext()->node->is<IR::IndexedVector<IR::Declaration>>(),
               "%1%: unexpected parent %2%", getOriginal(), getContext()->node);
     auto result = new IR::IndexedVector<IR::Declaration>();
@@ -307,6 +307,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
         } else {
             auto decl = new IR::Declaration_Variable(p->srcInfo, p->name,
                                                      p->annotations, p->type, nullptr);
+            LOG3("Added declaration " << decl << " annotations " << p->annotations);
             result->push_back(decl);
             auto arg = *argit;
             ++argit;
@@ -334,7 +335,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     action->parameters = new IR::ParameterList(action->parameters->srcInfo, leftParams);
     action->body = new IR::BlockStatement(
         action->body->srcInfo, IR::Annotations::empty, initializers);
-    LOG1("To replace " << action);
+    LOG1("To replace " << dbp(action));
     result->push_back(action);
     return result;
 }

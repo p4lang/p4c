@@ -532,6 +532,13 @@ class ExpressionConverter : public Inspector {
         auto decl = converter->refMap->getDeclaration(expression->path, true);
         if (decl->is<IR::Parameter>()) {
             auto param = decl->to<IR::Parameter>();
+            if (param == converter->stdMetadataParameter) {
+                auto result = new Util::JsonObject();
+                result->emplace("type", "header");
+                result->emplace("value", "standard_metadata");
+                map.emplace(expression, result);
+                return;
+            }
             if (converter->structure.nonActionParameters.find(param) !=
                 converter->structure.nonActionParameters.end()) {
                 map.emplace(expression, new Util::JsonValue(param->name.name));
@@ -689,7 +696,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
 
             cstring operation;
             auto type = typeMap->getType(l, true);
-            if (type->is<IR::Type_Header>())
+            if (type->is<IR::Type_StructLike>())
                 operation = "copy_header";
             else
                 operation = "modify_field";
