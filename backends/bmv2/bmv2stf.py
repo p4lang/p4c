@@ -156,6 +156,8 @@ class TableKeyInstance(object):
                 self.values[f] = "0/0"
             elif t == "exact":
                 self.values[f] = "0"
+            elif t == "valid":
+                self.values[f] = "0"
             else:
                 raise Exception("Unexpected key type " + t)
     def set(self, key, value):
@@ -264,11 +266,13 @@ class BMV2Table(object):
         self.key = TableKey()
         self.actions = {}
         for k in jsonTable["key"]:
-            name = ""
-            for t in k["target"]:
-                if name != "":
-                    name += "."
-                name += t
+            name = k["target"]
+            if isinstance(name, list):
+                name = ""
+                for t in k["target"]:
+                    if name != "":
+                        name += "."
+                    name += t
             self.key.append(name, k["match_type"])
         actions = jsonTable["actions"]
         action_ids = jsonTable["action_ids"]

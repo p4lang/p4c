@@ -42,7 +42,10 @@ parser parse_data2 {
 }
 
 action noop() { }
-action setb1(val) { modify_field(data2.b1, val); }
+action setb1(val, port) {
+    modify_field(data.b1, val);
+    modify_field(standard_metadata.egress_spec, port);
+}
 
 table test1 {
     reads {
