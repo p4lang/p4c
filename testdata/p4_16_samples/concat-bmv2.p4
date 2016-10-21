@@ -1,5 +1,5 @@
 /*
-Copyright 2016 VMware, Inc.
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,15 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-control proto(out bit<32> x);
-package top(proto _c);
+#include <core.p4>
+#include <v1model.p4>
 
-control c(out bit<32> x) {
-    apply {
-        bit<8> a = 0xF;
-        bit<16> b = 0xF;
-        x = (a ++ b ++ a) + (b ++ (a ++ a));
-    }
+header hdr {
+    bit<32> a;
+    bit<32> b;
+    bit<64> c;
 }
 
-top(c()) main;
+#include "arith-skeleton.p4"
+
+control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    action concat()
+    { h.h.c = h.h.a ++ h.h.b; sm.egress_spec = 0; }
+    table t() {
+        actions = { concat; }
+        const default_action = concat;
+    }
+    apply { t.apply(); }
+}
+
+V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
