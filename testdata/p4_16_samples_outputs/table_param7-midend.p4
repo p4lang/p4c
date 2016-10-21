@@ -1,7 +1,7 @@
 #include <core.p4>
 
 control c(inout bit<32> arg) {
-    @name("x") bit<32> x_0;
+    bit<32> x_0;
     @name("a") action a_0() {
     }
     @name("t") table t() {

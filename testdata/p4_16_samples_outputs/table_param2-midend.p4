@@ -2,7 +2,7 @@
 
 control c(inout bit<32> arg) {
     bit<32> tmp_0;
-    @name("x") bit<32> x_0;
+    bit<32> x_0;
     @name("a") action a_0() {
     }
     @name("t") table t() {

@@ -5,7 +5,7 @@ control c(inout bit<32> r) {
     bit<32> tmp_2;
     bool tmp_3;
     bit<32> tmp_4;
-    @name("r") bit<32> r_0;
+    bit<32> r_0;
     @name("a") action a_0() {
     }
     @name("b") action b_0() {

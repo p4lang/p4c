@@ -41,9 +41,9 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     TArg2 tmp_8;
     TArg1 tmp_9;
     TArg2 tmp_10;
-    @name("tArg1") TArg1 tArg1_0;
-    @name("aArg2") TArg2 aArg2_0;
-    @name("barg") bit<9> barg_0;
+    TArg1 tArg1_0;
+    TArg2 aArg2_0;
+    bit<9> barg_0;
     @name("NoAction_1") action NoAction() {
     }
     @name("p1.B_action") action p1_B_action(BParamType bData) {

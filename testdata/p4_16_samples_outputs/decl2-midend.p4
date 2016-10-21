@@ -5,8 +5,8 @@ control p() {
     bit<1> tmp_2;
     bit<1> tmp_3;
     bit<1> tmp_4;
-    @name("x") bit<1> x_2;
-    @name("y") bit<1> y_0;
+    bit<1> x_2;
+    bit<1> y_0;
     @name("b") action b_0() {
         x_2 = tmp_3;
         x_0 = tmp_3;
