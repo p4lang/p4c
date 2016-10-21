@@ -504,7 +504,7 @@ action_function_declaration:
       ACTION name '(' opt_name_list ')' action_function_body
       { $6->name = IR::ID(@2, $2);
         if ($4) for (auto &arg : $4->names)
-            $6->args.push_back(new IR::ActionArg(arg));
+            $6->args.push_back(new IR::ActionArg($2, arg));
         $4 = nullptr;
         $6->srcInfo = @1 + @6;
         global->add($2, $6); }

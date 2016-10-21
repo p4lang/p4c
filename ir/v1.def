@@ -300,11 +300,12 @@ class NameList {
 }
 
 class ActionArg : Expression {
-    ID             name;
-    bool           read = false;
-    bool           write = false;
+    cstring     action_name;
+    ID          name;
+    bool        read = false;
+    bool        write = false;
     ActionArg { if (!srcInfo) srcInfo = name.srcInfo; }
-    dbprint{ out << name; }
+    dbprint{ out << action_name << ':' << name; }
     toString{ return name.name; }
 }
 

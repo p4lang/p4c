@@ -33,8 +33,16 @@ parser start {
     return ingress;
 }
 
-action setbyte(dest, val) {
+action copy2(dest, val) {
     modify_field(dest, val);
+}
+
+action copy(dest, val) {
+    copy2(dest, val);
+}
+
+action setbyte(dest, val) {
+    copy(dest, val);
 }
 
 action noop() { }
