@@ -92,10 +92,10 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     bool tmp_19;
     bool tmp_20;
     bool tmp_21;
-    @name("nextHop") IPv4Address nextHop_2;
-    @name("nextHop") IPv4Address nextHop_3;
+    IPv4Address nextHop_2;
+    IPv4Address nextHop_3;
     bool hasReturned_0;
-    @name("nextHop") IPv4Address nextHop_0;
+    IPv4Address nextHop_0;
     @name("NoAction_1") action NoAction() {
     }
     @name("Drop_action") action Drop_action_0() {

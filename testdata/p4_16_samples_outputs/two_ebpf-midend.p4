@@ -44,7 +44,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("address") IPv4Address address_0;
+    IPv4Address address_0;
     bool hasReturned_0;
     @name("NoAction_1") action NoAction() {
     }

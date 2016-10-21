@@ -14,8 +14,8 @@ control p(out bit<1> y) {
     bit<1> y0;
     bit<1> x0_2;
     bit<1> y0_2;
-    @name("x") bit<1> x_0;
-    @name("y") bit<1> y_0;
+    bit<1> x_0;
+    bit<1> y_0;
     @name("b") action b_0() {
         x_0 = tmp_13;
         tmp_8 = tmp_13;

@@ -48,10 +48,10 @@ control update(inout packet_t h, inout Meta m) {
 }
 
 control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta) {
-    @name("reg") bit<8> reg_0;
-    @name("reg") bit<8> reg_1;
-    @name("reg") bit<8> reg_2;
-    @name("reg") bit<8> reg_3;
+    bit<8> reg_0;
+    bit<8> reg_1;
+    bit<8> reg_2;
+    bit<8> reg_3;
     @name("setb1") action setb1_0(bit<9> port, bit<8> val) {
         hdrs.data.b1 = val;
         meta.egress_spec = port;

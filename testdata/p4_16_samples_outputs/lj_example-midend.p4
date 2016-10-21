@@ -38,7 +38,7 @@ parser LJparse(packet_in b, out Parsed_rep p) {
 }
 
 control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @name("port") PortId port_0;
+    PortId port_0;
     @name("Drop_action") action Drop_action_0() {
         port_0 = 4w0xf;
         outCtrl.outputPort = 4w0xf;
