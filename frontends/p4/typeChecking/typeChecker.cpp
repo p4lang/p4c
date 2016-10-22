@@ -131,7 +131,7 @@ bool TypeInference::done() const {
 const IR::Type* TypeInference::getType(const IR::Node* element) const {
     const IR::Type* result = typeMap->getType(element);
     if (result == nullptr) {
-        typeError("Could not find type of %1%", element);
+        typeError("Could not find type of %1%", dbp(element));
         return nullptr;
     }
     return result;
@@ -1596,20 +1596,22 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
             return expression;
         }
     } else if (bl == nullptr && br != nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
         auto e = expression->clone();
-        e->left = cast;
+        auto cst = expression->left->to<IR::Constant>();
+        CHECK_NULL(cst);
+        e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
+        setType(e->left, rtype);
         expression = e;
         resultType = rtype;
-        setType(cast, resultType);
         setType(expression, resultType);
     } else if (bl != nullptr && br == nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
         auto e = expression->clone();
-        e->right = cast;
+        auto cst = expression->right->to<IR::Constant>();
+        CHECK_NULL(cst);
+        e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
+        setType(e->right, ltype);
         expression = e;
         resultType = ltype;
-        setType(cast, resultType);
         setType(expression, resultType);
     } else {
         setType(expression, resultType);
@@ -1630,7 +1632,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
     if (ltype == nullptr || rtype == nullptr)
         return expression;
 
-    // The following section is very similar to "binary()" above
+    // The following section is very similar to "binaryArith()" above
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
     if (bl == nullptr && !ltype->is<IR::Type_InfInt>()) {
@@ -1651,19 +1653,19 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
             return expression;
         }
     } else if (bl == nullptr && br != nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), rtype, expression->left);
         auto e = expression->clone();
-        e->left = cast;
+        auto cst = expression->left->to<IR::Constant>();
+        e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
         expression = e;
         sameType = rtype;
-        setType(cast, sameType);
+        setType(e->left, sameType);
     } else if (bl != nullptr && br == nullptr) {
-        auto cast = new IR::Cast(Util::SourceInfo(), ltype, expression->right);
         auto e = expression->clone();
-        e->right = cast;
+        auto cst = expression->right->to<IR::Constant>();
+        e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
         expression = e;
         sameType = ltype;
-        setType(cast, sameType);
+        setType(e->right, sameType);
     } else {
         // both are InfInt: use same exact type for both sides, so it is properly
         // set after unification
