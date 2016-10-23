@@ -86,6 +86,7 @@ class Visitor {
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
+    virtual void flow_dead() { }
     virtual void flow_merge(Visitor &) { }
 
     virtual const char *name() const {

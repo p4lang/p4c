@@ -88,6 +88,7 @@ template<class T> void IR::Vector<T>::visit_children(Visitor &v) const {
 template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) {
     auto &start(v.flow_clone());
     bool changes = false;
+    if (!vec.empty()) v.flow_dead();
     for (auto i = vec.begin(); i != vec.end();) {
         auto &clone(start.flow_clone());
         auto n = clone.apply_visitor(*i);
@@ -126,6 +127,7 @@ template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) {
 }
 template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) const {
     auto &start(v.flow_clone());
+    if (!vec.empty()) v.flow_dead();
     for (auto &a : vec) {
         auto &clone(start.flow_clone());
         clone.visit(a);
