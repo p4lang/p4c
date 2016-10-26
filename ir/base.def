@@ -193,66 +193,60 @@ class Path {
 
 class Annotation {
     ID name;
-    NullOK Expression expr;
+    inline Vector<Expression> expr;
     Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
-    Annotation(cstring n, intmax_t v) : name(n), expr(new IR::Constant(v)) {}
+    Annotation(Util::SourceInfo si, ID n, const std::initializer_list<const IR::Expression *> &a)
+    : Node(si), name(n), expr(a) {}
+    Annotation(ID n, const std::initializer_list<const IR::Expression *> &a) : name(n), expr(a) {}
+    Annotation(ID n, intmax_t v) : name(n) {
+        expr.push_back(new IR::Constant(v)); }
     // Predefined annotations used by the compiler
     static const cstring nameAnnotation;
     toString{ return cstring("@") + name; }
-    dbprint { out << '@' << name; if (expr) out << '(' << expr << ')'; }
+    dbprint { out << '@' << name << expr; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 }
 
 // There can be several annotations with the same "name", so this is a vector.
+// FIXME -- get rid of this class -- classes with annotations should have an
+// inline Vector<Annotation> instead (remove useless indirection)
 class Annotations {
-    Vector<Annotation> annotations;
-    Annotations { if (!srcInfo && annotations) srcInfo = annotations->srcInfo; }
+    inline Vector<Annotation> annotations;
+    Annotations { if (!srcInfo && !annotations.empty()) srcInfo = annotations[0]->srcInfo; }
     static Annotations *empty;  // FIXME -- should be const
-    size_t size() const { return annotations->size(); }
+    size_t size() const { return annotations.size(); }
     // Get the annotation with the specified name or nullptr.
     // There should be at most one annotation with this name.
     Annotation getSingle(cstring name) const { return get(annotations, name); }
     Annotations addAnnotation(cstring name, Expression expr) const {
-        auto vec = new Vector<Annotation>(*annotations);
-        vec->push_back(new Annotation(name, expr));
-        return new Annotations(vec);
+        auto rv = clone();
+        rv->annotations.push_back(new Annotation(name, Vector<Expression>(expr)));
+        return rv;
     }
     // Add annotation if another annotation with the same name is not
     // already present.
     Annotations addAnnotationIfNew(cstring name, Expression expr) const {
-        if (getSingle(name) != nullptr)
-            return this;
-        return addAnnotation(name, expr);
-    }
+        return getSingle(name) ? this : addAnnotation(name, expr); }
     // If annotations with the same name are already present, remove them.
     // Add this annotation.
     Annotations addOrReplace(cstring name, Expression expr) const {
-        auto vec = new Vector<Annotation>();
-        for (auto a : *annotations) {
-            if (a->name.name != name)
-                vec->push_back(new Annotation(name, expr));
-        }
-        vec->push_back(new Annotation(name, expr));
-        return new Annotations(vec);
-    }
+        auto rv = clone();
+        auto &vec = rv->annotations;
+        vec.resize(std::remove_if(vec.begin(), vec.end(),
+            [name](const Annotation *a)->bool { return a->name == name; }) - vec.begin());
+        vec.push_back(new Annotation(name, Vector<Expression>(expr)));
+        return rv; }
 #emit
     typedef std::function<bool(const IR::Annotation*)> Filter;
 #end
     Annotations where(Filter func) const {
-        auto vec = new Vector<Annotation>();
-        bool changes = false;
-        for (auto a : *annotations) {
-            if (func(a))
-                vec->push_back(a);
-            else
-                changes = true;
-        }
-        if (!changes)
-            return this;
-        return new Annotations(vec);
-    }
-    validate{ annotations->check_null(); }
-    dbprint { for (auto a : *annotations) out << a << ' '; }
+        auto rv = empty->clone();
+        std::copy_if(annotations.begin(), annotations.end(),
+                     std::back_insert_iterator<Vector<Annotation>>(rv->annotations), func);
+        if (rv->annotations.size() == annotations.size()) return this;
+        return rv; }
+    validate{ annotations.check_null(); }
+    dbprint { for (auto a : annotations) out << a << ' '; }
 }
 
 // Implemented by all objects that can have annotations

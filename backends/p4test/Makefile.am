@@ -55,4 +55,5 @@ P14BUGS = \
 XFAIL_TESTS += \
     $(P14BUGS) \
     p4/testdata/p4_16_samples/cast-call.p4.test \
-    p4/testdata/p4_16_samples/control-inline.p4.test
+    p4/testdata/p4_16_samples/control-inline.p4.test \
+    p4/testdata/p4_16_errors/spec-ex32_e.p4.test

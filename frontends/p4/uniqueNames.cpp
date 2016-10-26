@@ -79,8 +79,8 @@ const IR::Node* RenameSymbols::postorder(IR::Parameter* param) {
 }
 
 const IR::Node* RenameSymbols::postorder(IR::PathExpression* expression) {
-    auto decl = refMap->getDeclaration(expression->path, true);
-    if (!renameMap->toRename(decl))
+    auto decl = refMap->getDeclaration(expression->path, !findContext<IR::Annotation>());
+    if (!decl || !renameMap->toRename(decl))
         return expression;
     // This should be a local name.
     BUG_CHECK(expression->path->prefix == nullptr,

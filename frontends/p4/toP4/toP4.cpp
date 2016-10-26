@@ -620,15 +620,6 @@ VECTOR_VISIT(IndexedVector, Declaration)
 VECTOR_VISIT(IndexedVector, Node)
 #undef VECTOR_VISIT
 
-bool ToP4::preorder(const IR::Vector<IR::Annotation> *v) {
-    if (v == nullptr) return false;
-    for (auto a : *v) {
-        visit(a);
-        builder.spc();
-    }
-    return false;
-}
-
 ///////////////////////////////////////////
 
 bool ToP4::preorder(const IR::Slice* slice) {
@@ -693,6 +684,11 @@ bool ToP4::preorder(const IR::Member* e) {
     builder.append(".");
     builder.append(e->member);
     expressionPrecedence = prec;
+    return false;
+}
+
+bool ToP4::preorder(const IR::NamedRef* e) {
+    builder.append(e->name);
     return false;
 }
 
@@ -966,11 +962,14 @@ bool ToP4::preorder(const IR::SwitchStatement* s) {
 bool ToP4::preorder(const IR::Annotation * a) {
     builder.append("@");
     builder.append(a->name);
-    if (a->expr != nullptr) {
+    if (!a->expr.empty()) {
         builder.append("(");
-        visit(a->expr);
+        setVecSep(", ");
+        preorder(&a->expr);
+        doneVec();
         builder.append(")");
     }
+    builder.spc();
     return false;
 }
 

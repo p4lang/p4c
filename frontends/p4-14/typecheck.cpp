@@ -36,7 +36,7 @@ class TypeCheck::Pass1 : public Transform {
         if (!global) return m;
         if (auto ht = global->get<IR::v1HeaderType>(m->type_name))
             m->type = ht->as_metadata;
-        else
+        else if (!findContext<IR::Annotation>())
             error("%s: No header type %s defined", m->srcInfo, m->type_name);
         return m; }
     const IR::Node *preorder(IR::BoolLiteral* b) override {
@@ -46,23 +46,24 @@ class TypeCheck::Pass1 : public Transform {
         if (!global) return hm;
         if (auto ht = global->get<IR::v1HeaderType>(hm->type_name))
             hm->type = ht->as_header;
-        else
+        else if (!findContext<IR::Annotation>())
             error("%s: No header type %s defined", hm->srcInfo, hm->type_name);
         return hm; }
     const IR::Node *postorder(IR::NamedRef *ref) override {
         if (!global) return ref;
         IR::Node *new_node = ref;
-        if (auto hdr = global->get<IR::HeaderOrMetadata>(ref->name))
-            new_node = new IR::ConcreteHeaderRef(ref->srcInfo, hdr);
-        else if (ref->name != "latest" && findContext<IR::Member>())
-            error("%s: No header or metadata named %s", ref->srcInfo, ref->name);
+        if (!findContext<IR::Annotation>()) {
+            if (auto hdr = global->get<IR::HeaderOrMetadata>(ref->name))
+                new_node = new IR::ConcreteHeaderRef(ref->srcInfo, hdr);
+            else if (ref->name != "latest" && findContext<IR::Member>())
+                error("%s: No header or metadata named %s", ref->srcInfo, ref->name); }
         return new_node; }
     const IR::Node *postorder(IR::HeaderStackItemRef *ref) override {
         if (auto ht = ref->base()->type->to<IR::Type_StructLike>())
             ref->type = ht;
         else if (auto hst = ref->base()->type->to<IR::Type_Stack>())
             ref->type = hst->elementType;
-        else
+        else if (!findContext<IR::Annotation>())
             error("%s: %s is not a header", ref->base()->srcInfo, ref->base()->toString());
         return ref; }
     const IR::Node *postorder(IR::Member *ref) override {
@@ -74,7 +75,8 @@ class TypeCheck::Pass1 : public Transform {
             if (f != nullptr) {
                 ref->type = f->type;
                 return ref; }
-            error("%s: No field named %s in %s", ref->srcInfo, ref->member, ht->name); }
+            if (!findContext<IR::Annotation>())
+                error("%s: No field named %s in %s", ref->srcInfo, ref->member, ht->name); }
         return ref; }
 };
 

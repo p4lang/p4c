@@ -40,27 +40,29 @@ inline bool operator>>(cstring s, IR::CounterType &ctr) {
 #end
 
 abstract HeaderOrMetadata {
-    IR::ID                      type_name;
-    IR::ID                      name;
+    ID                      type_name;
+    ID                      name;
+    Annotations                 annotations;
     NullOK Type_StructLike      type = nullptr;
 
-    HeaderOrMetadata(IR::ID n, Type_StructLike t) : type_name(t->name), name(n), type(t) {}
+    HeaderOrMetadata(ID n, Type_StructLike t)
+    : type_name(t->name), name(n), annotations(Annotations::empty), type(t) {}
     dbprint { out << type_name << ' ' << name; }
 }
 
 class Header : HeaderOrMetadata {
-    Header(IR::ID n, Type_Header t) : HeaderOrMetadata(n, t) {}
+    Header(ID n, Type_Header t) : HeaderOrMetadata(n, t) {}
 #nodbprint
 }
 
 class HeaderStack : HeaderOrMetadata {
     int size;
-    HeaderStack(IR::ID n, Type_Header t, int sz) : HeaderOrMetadata(n, t), size(sz) {}
+    HeaderStack(ID n, Type_Header t, int sz) : HeaderOrMetadata(n, t), size(sz) {}
 #nodbprint
 }
 
 class Metadata : HeaderOrMetadata {
-    Metadata(IR::ID n, Type_StructLike t) : HeaderOrMetadata(n, t) {}
+    Metadata(ID n, Type_StructLike t) : HeaderOrMetadata(n, t) {}
 #nodbprint
 }
 
@@ -181,6 +183,7 @@ class Primitive : Operation {
 class FieldList {
     optional ID                 name;
     bool                        payload = false;
+    optional Annotations        annotations = Annotations::empty;
     inline Vector<Expression>   fields = {};
 }
 
@@ -189,6 +192,7 @@ class FieldListCalculation {
     NullOK NameList     input = nullptr;
     ID                  algorithm = {};
     int                 output_width = 0;
+    Annotations         annotations;
 }
 
 class CalculatedField {
@@ -212,16 +216,20 @@ class CalculatedField {
         }
         fromJSON {
             bool update_temp = false;
-            IR::ID name_temp;
-            const IR::Expression *cond_temp = nullptr;
+            ID name_temp;
+            const Expression *cond_temp = nullptr;
             json.load("update", update_temp);
             json.load("name", name_temp);
             json.load("cond", cond_temp);
-            return new IR::CalculatedField::update_or_verify(update_temp, name_temp, cond_temp);
+            return new CalculatedField::update_or_verify(update_temp, name_temp, cond_temp);
         }
     }
     vector<update_or_verify>    specs = {};
-    visit_children { v.visit(field, "field"); for (auto &s : specs) v.visit(s.cond, s.name.name); }
+    Annotations                 annotations;
+    visit_children {
+        v.visit(field, "field");
+        for (auto &s : specs) v.visit(s.cond, s.name.name);
+        v.visit(annotations, "annotations"); }
 }
 
 class CaseEntry {
@@ -237,18 +245,20 @@ class V1Parser {
     ID                          default_return = {};
     ID                          parse_error = {};
     bool                        drop = false;
+    Annotations                 annotations;
     toString { return node_type_name() + " " + name; }
 }
 
 class ParserException {}
 
 abstract Attached {
-    optional ID     name;
+    optional ID                 name;
+    optional Annotations        annotations = Annotations::empty;
     virtual const char *kind() const = 0;
     virtual bool indexed() const { return false; }
     Attached *clone_rename(const char *ext) const {
         Attached *rv = clone();
-        rv->name = IR::ID(Util::SourceInfo(), rv->name.name + ext);
+        rv->name = ID(Util::SourceInfo(), rv->name.name + ext);
         return rv; }
     dbprint { out << node_type_name() << " " << name; }
     toString { return node_type_name() + " " + name; }
@@ -314,6 +324,7 @@ class ActionFunction {
     optional ID                 name;
     inline Vector<Primitive>    action = {};
     vector<ActionArg>           args = {};
+    optional Annotations        annotations = Annotations::empty;
 
     ActionArg arg(cstring n) const {
         for (auto a : args)
@@ -359,6 +370,7 @@ class V1Table {
     ID                          default_action = {};
     NullOK Vector<Expression>   default_action_args = 0;
     inline TableProperties      properties = {};  // non-standard properties
+    optional Annotations        annotations = Annotations::empty;
 
     // inefficient add
     void addProperty(TableProperty prop) {
@@ -369,8 +381,9 @@ class V1Table {
 }
 
 class V1Control {
-    ID                            name;
-    Vector<Expression>            code;
+    ID                  name;
+    Vector<Expression>  code;
+    Annotations         annotations;
 
     V1Control(ID n) : name(n), code(new Vector<Expression>()) {}
     V1Control(Util::SourceInfo si, ID n) : Node(si), name(n), code(new Vector<Expression>()) {}

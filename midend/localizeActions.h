@@ -62,6 +62,7 @@ class FindGlobalActionUses : public Inspector {
     { CHECK_NULL(refMap); CHECK_NULL(repl); setName("FindGlobalActionUses"); }
     bool preorder(const IR::PathExpression* path) override;
     bool preorder(const IR::P4Action* action) override;
+    bool preorder(const IR::Annotation *) override { return false; }
 };
 
 // Global actions are cloned into actions local to the
@@ -124,6 +125,7 @@ class FindRepeatedActionUses : public Inspector {
         CHECK_NULL(refMap); CHECK_NULL(repl);
         setName("FindRepeatedActionUses"); }
     bool preorder(const IR::PathExpression* expression) override;
+    bool preorder(const IR::Annotation *) override { return false; }
 };
 
 // Replicates actions for each different user.

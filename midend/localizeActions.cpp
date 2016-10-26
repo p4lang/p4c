@@ -92,7 +92,7 @@ const IR::Node* LocalizeActions::postorder(IR::PathExpression* expression) {
     if (control == nullptr)
         return expression;
     auto decl = refMap->getDeclaration(expression->path);
-    if (!decl->is<IR::P4Action>())
+    if (!decl || !decl->is<IR::P4Action>())
         return expression;
     auto action = decl->to<IR::P4Action>();
     auto replacement = repl->getReplacement(action, control);

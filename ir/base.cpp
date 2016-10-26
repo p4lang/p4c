@@ -24,10 +24,10 @@ cstring IDeclaration::externalName() const {
 
     auto anno = to<IAnnotated>()->getAnnotations()->getSingle(IR::Annotation::nameAnnotation);
     if (anno != nullptr) {
-        if (anno->expr == nullptr) {
+        if (anno->expr.size() != 1) {
             ::error("%1% should contain a string", anno);
         } else {
-            auto str = anno->expr->to<IR::StringLiteral>();
+            auto str = anno->expr[0]->to<IR::StringLiteral>();
             if (str == nullptr)
                 ::error("%1% should contain a string", anno);
             else

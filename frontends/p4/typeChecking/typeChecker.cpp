@@ -130,10 +130,8 @@ bool TypeInference::done() const {
 
 const IR::Type* TypeInference::getType(const IR::Node* element) const {
     const IR::Type* result = typeMap->getType(element);
-    if (result == nullptr) {
-        typeError("Could not find type of %1%", dbp(element));
-        return nullptr;
-    }
+    if (!result && !findContext<IR::Annotation>())
+        typeError("Could not find type of %1%", element);
     return result;
 }
 
@@ -1749,7 +1747,9 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
 
 const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (done()) return expression;
-    auto decl = refMap->getDeclaration(expression->path, true)->getNode();
+    auto idecl = refMap->getDeclaration(expression->path, !findContext<IR::Annotation>());
+    if (!idecl) return expression;
+    auto decl = idecl->getNode();
     const IR::Type* type = nullptr;
 
     if (decl->is<IR::ParserState>()) {

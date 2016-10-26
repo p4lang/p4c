@@ -65,7 +65,7 @@ class ResolutionContext : public IHasDbPrint {
 
     // Resolve a reference for the specified name; expect a single result
     const IR::IDeclaration*
-    resolveUnique(IR::ID name, ResolutionType type, bool previousOnly) const;
+    resolveUnique(IR::ID name, ResolutionType type, bool previousOnly, bool emitError) const;
 };
 
 class ResolveReferences : public Inspector {
@@ -83,8 +83,8 @@ class ResolveReferences : public Inspector {
     void removeFromContext(const IR::INamespace* ns);
     void addToGlobals(const IR::INamespace* ns);
     // returns the resolution context in which the path suffix is evaluated
-    ResolutionContext* resolvePathPrefix(const IR::PathPrefix* path) const;
-    void resolvePath(const IR::Path* path, bool isType) const;
+    ResolutionContext* resolvePathPrefix(const IR::PathPrefix* path, bool emitError) const;
+    void resolvePath(const IR::Path* path, bool isType, bool emitError) const;
 
  public:
     explicit ResolveReferences(/* out */ P4::ReferenceMap* refMap,
