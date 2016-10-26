@@ -131,6 +131,8 @@ const IR::Node* ExpressionConverter::postorder(IR::NamedRef* ref) {
         ExpressionConverter conv(structure);
         return conv.convert(fl);
     }
+    if (findContext<IR::Annotation>())
+        return ref;
     BUG("Unexpected expression %1%", ref);
 }
 

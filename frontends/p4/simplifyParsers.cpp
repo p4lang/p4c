@@ -91,7 +91,7 @@ class CollapseChains : public Transform {
             auto callers = transitions->getCallers(next);
             if (callers->size() != 1)
                 continue;
-            if (!next->annotations->annotations->empty())
+            if (!next->annotations->annotations.empty())
                 // we are not sure what to do with the annotations
                 continue;
             chain.emplace(node, next);

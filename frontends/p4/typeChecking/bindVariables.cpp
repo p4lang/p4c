@@ -18,8 +18,8 @@ const IR::Type* BindTypeVariables::getP4Type(const IR::Type* type) const {
 const IR::Node* BindTypeVariables::postorder(IR::Expression* expression) {
     // This is needed to handle newly created expressions because
     // their children have changed.
-    auto type = typeMap->getType(getOriginal(), true);
-    typeMap->setType(expression, type);
+    if (auto type = typeMap->getType(getOriginal(), !findContext<IR::Annotation>()))
+        typeMap->setType(expression, type);
     return expression;
 }
 

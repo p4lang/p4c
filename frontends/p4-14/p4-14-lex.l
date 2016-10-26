@@ -7,6 +7,7 @@
       yylloc = Util::SourceInfo(tmp, Util::InputSources::instance->getCurrentPosition()); }
 
 static int lineDirectiveLine;
+static bool pragmaLine = false;  // FIXME -- use a flex state (and state stack?)
 
 // shut up warnings about unused functions and variables
 #pragma GCC diagnostic ignored "-Wunused-function"
@@ -25,12 +26,12 @@ static int lineDirectiveLine;
 %%
 
 [ \t\r]+                ;
-[\n]            { BEGIN INITIAL; }
+[\n]            { BEGIN INITIAL; if (pragmaLine) { pragmaLine = false; return '\n'; }}
 "//".*                  ;
 "/*"            { BEGIN COMMENT; }
 <COMMENT>"*/"   { BEGIN NORMAL; }
 <COMMENT>.              ;
-<COMMENT>[\n]           ;
+<COMMENT>[\n]         { if (pragmaLine) { pragmaLine = false; return '\n'; } }
 
 <INITIAL>"#line"      { BEGIN(LINE1); }
 <INITIAL>"# "         { BEGIN(LINE1); }
@@ -45,7 +46,10 @@ static int lineDirectiveLine;
 <LINE1,LINE2,LINE3>\n { BEGIN(INITIAL); }
 <LINE1,LINE2,LINE3,COMMENT,NORMAL><<EOF>> { BEGIN(INITIAL); }
 
-"@pragma".*     { yylval.str = StringRef(yytext+7).trim(); return PRAGMA; }
+"@pragma"[ \t]*[A-Za-z_][A-Za-z0-9_]* {
+                  yylval.str = StringRef(yytext+7).trim();
+                  pragmaLine = true;
+                  return PRAGMA; }
 
 "action"        { yylval.str = yytext; BEGIN(NORMAL); return ACTION; }
 "actions"       { yylval.str = yytext; BEGIN(NORMAL); return ACTIONS; }

@@ -34,8 +34,8 @@ static cstring nameFromAnnotation(const IR::Annotations* annotations,
     CHECK_NULL(annotations); CHECK_NULL(decl);
     auto anno = annotations->getSingle(IR::Annotation::nameAnnotation);
     if (anno != nullptr) {
-        CHECK_NULL(anno->expr);
-        auto str = anno->expr->to<IR::StringLiteral>();
+        BUG_CHECK(anno->expr.size() == 1, "name annotation needs single expression");
+        auto str = anno->expr[0]->to<IR::StringLiteral>();
         CHECK_NULL(str);
         return str->value;
     }
@@ -159,6 +159,10 @@ class Substitutions : public SubstituteParameters {
         refMap->setDeclaration(newpath, decl);
         LOG1("Replaced " << expression << " with " << result);
         return result;
+    }
+    const IR::Node* preorder(IR::Annotation *annot) override {
+        prune();
+        return annot;
     }
 };
 }  // namespace

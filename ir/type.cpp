@@ -39,7 +39,7 @@ std::map<int, const IR::Type_Bits*> *Type_Bits::unsignedTypes = nullptr;
 int Type_Declaration::nextId = 0;
 int Type_InfInt::nextId = 0;
 
-Annotations* Annotations::empty = new Annotations(new Vector<Annotation>());
+Annotations* Annotations::empty = new Annotations(Vector<Annotation>());
 
 const Type_Bits* Type_Bits::get(int width, bool isSigned) {
     std::map<int, const IR::Type_Bits*> *map;
