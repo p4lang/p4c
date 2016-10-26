@@ -113,3 +113,6 @@ etags:
 
 check-%:
 	@$(MAKE) check TESTS="$(filter $*/%, $(TESTS) $(EXTRA_TESTS))"
+
+recheck-%:
+	@$(MAKE) recheck TESTS="$(filter $*/%, $(TESTS) $(EXTRA_TESTS))"
