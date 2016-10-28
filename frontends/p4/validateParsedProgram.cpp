@@ -90,6 +90,16 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Variable* decl) {
         ::error("%1%: illegal variable name", decl);
 }
 
+void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
+    if (decl->name.isDontCare())
+        ::error("%1%: illegal instance name", decl);
+    if (findContext<IR::BlockStatement>() &&
+        findContext<IR::P4Control>())
+        ::error("%1%: instances cannot be in a control 'apply' block", decl);
+    if (findContext<IR::ParserState>())
+        ::error("%1%: instances cannot be in a parser state", decl);
+}
+
 void ValidateParsedProgram::postorder(const IR::Declaration_Constant* decl) {
     if (decl->name.isDontCare())
         ::error("%1%: illegal constant name", decl);
