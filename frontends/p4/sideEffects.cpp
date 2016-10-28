@@ -302,17 +302,17 @@ class DismantleExpression : public Transform {
             }
 
             LOG1("Transforming " << arg << " for " << p);
+            bool useTemp = useTemporaries && !typeMap->isCompileTimeConstant(arg);
             if (p->direction == IR::Direction::In)
                 leftValue = false;
             else
                 leftValue = true;
             auto paramtype = typeMap->getType(p, true);
             const IR::Expression* argValue;
-            visit(arg);
+            visit(arg);  // may mutate arg
             auto newarg = result->final;
             CHECK_NULL(newarg);
 
-            bool useTemp = useTemporaries && !typeMap->isCompileTimeConstant(newarg);
             if (useTemp) {
                 // declare temporary variable
                 auto tmp = refMap->newName("tmp");

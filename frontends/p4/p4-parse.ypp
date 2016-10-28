@@ -146,7 +146,7 @@ static int yylex();
 %type<selectCases>      selectCaseList
 %type<Statement>        statement emptyStatement returnStatement switchStatement exitStatement
                         assignmentOrMethodCallStatement conditionalStatement
-%type<BlockStatement>   blockStatement controlBody objInitializer
+%type<BlockStatement>   blockStatement parserBlockStatement controlBody objInitializer
 %type<StatOrDecl>       statementOrDeclaration parserStatement
 %type<statOrDecls>      objDeclarations statOrDeclList parserStatements
 %type<SwitchCase>       switchCase
@@ -407,6 +407,11 @@ parserStatements
 parserStatement
     : assignmentOrMethodCallStatement { $$ = $1; }
     | variableDeclaration             { $$ = $1; }
+    | parserBlockStatement            { $$ = $1; }
+    ;
+
+parserBlockStatement
+    : optAnnotations '{' parserStatements '}' { $$ = new IR::BlockStatement(@1+@4, $1, $3); }
     ;
 
 transitionStatement
