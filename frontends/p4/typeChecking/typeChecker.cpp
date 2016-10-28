@@ -2186,7 +2186,7 @@ TypeInference::actionCall(bool inActionList,
         LOG2("Action parameter " << p);
         if (it == arguments->end()) {
             params->push_back(p);
-            if (p->direction != IR::Direction::None)
+            if ((p->direction != IR::Direction::None) || !inActionList)
                 typeError("%1%: parameter %2% must be bound", actionCall, p);
         } else {
             auto arg = *it;
@@ -2208,7 +2208,7 @@ TypeInference::actionCall(bool inActionList,
         }
     }
     if (it != arguments->end())
-        typeError("%1% Too many parameters for action", *it);
+        typeError("%1% Too many arguments for action", *it);
     auto pl = new IR::ParameterList(Util::SourceInfo(), params);
     auto resultType = new IR::Type_Action(baseType->srcInfo, baseType->typeParameters, nullptr, pl);
 

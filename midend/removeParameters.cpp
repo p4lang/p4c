@@ -309,6 +309,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
                                                      p->annotations, p->type, nullptr);
             LOG3("Added declaration " << decl << " annotations " << p->annotations);
             result->push_back(decl);
+            BUG_CHECK(argit != args->end(), "%1%: too few arguments", invocation);
             auto arg = *argit;
             ++argit;
             if (p->direction == IR::Direction::In ||
