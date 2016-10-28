@@ -118,7 +118,7 @@ static int yylex();
 %token      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DATA
             DEFAULT DONTCARE ELSE ENUM T_ERROR  // There is an ERROR macro elsewhere
             EXIT EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
-            PACKAGE PARSER RANGE RETURN STATE STRUCT SWITCH TABLE TRANSITION
+            PACKAGE PARSER RANGE RETURN SET STATE STRUCT SWITCH TABLE TRANSITION
             TUPLE TYPEDEF VARBIT VOID
 %token<str> IDENTIFIER TYPE NAMESPACE STRING_LITERAL
 %token<Constant>  INTEGER
@@ -132,7 +132,7 @@ static int yylex();
                         argument simpleKeysetExpression transitionStatement switchLabel
 %type<PathPrefix>       pathPrefix relativePathPrefix nonEmptyRelativePathPrefix
 %type<TypePtr>          baseType typeOrVoid specializedType headerStackType typeRef
-                        tupleType typeArg
+                        tupleType typeArg setType
 %type<Type_Name>        typeName
 %type<Parameter>        parameter
 %type<annos>            optAnnotations
@@ -541,6 +541,7 @@ typeRef
     | specializedType                  { $$ = $1; }
     | headerStackType                  { $$ = $1; }
     | tupleType                        { $$ = $1; }
+    | setType                          { $$ = $1; }
     ;
 
 typeName
@@ -550,6 +551,10 @@ typeName
 
 tupleType
     : TUPLE '<' typeArgumentList '>'   { $$ = new IR::Type_Tuple(@1+@4, $3); }
+    ;
+
+setType
+    : SET '<' typeRef '>'              { $$ = new IR::Type_Set(@1+@4, $3); }
     ;
 
 headerStackType

@@ -10,30 +10,22 @@ struct Parsed_packet {
     Ethernet_h ethernet;
 }
 
-extern ValueSet {
-    ValueSet(bit<32> size);
-    bit<8> index(in bit<16> proto);
+extern ValueSet<T> {
+    ValueSet();
+    T members();
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    bit<8> setIndex;
-    bit<8> tmp_0;
-    @name("ethtype_kinds") ValueSet(32w5) ethtype_kinds;
+    ValueSet<bit<16>>() trill;
+    ValueSet<bit<16>>() tpid;
     state start {
-        b.extract<Ethernet_h>(p.ethernet);
+        b.extract(p.ethernet);
         transition select(p.ethernet.etherType) {
             16w0x800: parse_ipv4;
             16w0x806: parse_arp;
             16w0x86dd: parse_ipv6;
-            default: dispatch_value_sets;
-        }
-    }
-    state dispatch_value_sets {
-        tmp_0 = ethtype_kinds.index(p.ethernet.etherType);
-        setIndex = tmp_0;
-        transition select(setIndex) {
-            8w1: parse_trill;
-            8w2: parse_vlan_tag;
+            trill.members(): parse_trill;
+            tpid.members(): parse_vlan_tag;
         }
     }
     state parse_ipv4 {
@@ -55,4 +47,4 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 
 parser proto<T>(packet_in p, out T h);
 package top<T>(proto<T> _p);
-top<Parsed_packet>(TopParser()) main;
+top(TopParser()) main;

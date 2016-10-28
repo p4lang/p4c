@@ -153,6 +153,11 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         }
         return true;
     }
+    if (left->is<IR::Type_Set>()) {
+        auto lt = left->to<IR::Type_Set>();
+        auto rt = right->to<IR::Type_Set>();
+        return equivalent(lt->elementType, rt->elementType);
+    }
     if (left->is<IR::Type_Package>()) {
         auto lp = left->to<IR::Type_Package>();
         auto rp = right->to<IR::Type_Package>();
