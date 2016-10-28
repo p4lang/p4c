@@ -115,6 +115,11 @@ cstring dbp(const INode* node);
 template<typename T> bool INode::is() const { return getNode()->is<T>(); }
 template<typename T> const T* INode::to() const { return getNode()->to<T>(); }
 
+inline bool equal(const Node *a, const Node *b) {
+    return a == b || (a && b && *a == *b); }
+inline bool equal(const INode *a, const INode *b) {
+    return a == b || (a && b && *a->getNode() == *b->getNode()); }
+
 /* common things that ALL Node subclasses must define */
 #define IRNODE_SUBCLASS(T)                                              \
  public:                                                                \
