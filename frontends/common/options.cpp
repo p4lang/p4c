@@ -177,7 +177,9 @@ FILE* CompilerOptions::preprocess() {
 void CompilerOptions::closeInput(FILE* inputStream) const {
     if (close_input) {
         int exitCode = pclose(inputStream);
-        if (exitCode != 0)
+        if (WIFEXITED(exitCode) && WEXITSTATUS(exitCode) == 4)
+            ::error("input file %s does not exist", file);
+        else if (exitCode != 0)
             ::error("Preprocessor returned exit code %d; aborting compilation", exitCode);
     }
 }
