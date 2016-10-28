@@ -1,0 +1,6 @@
+../testdata/p4_16_errors/not_bound.p4(36): error: set_nhop: parameter port must be bound
+        set_nhop();
+        ^^^^^^^^^^
+../testdata/p4_16_errors/not_bound.p4(32)
+    action set_nhop(bit<8> port) {
+                           ^^^^
