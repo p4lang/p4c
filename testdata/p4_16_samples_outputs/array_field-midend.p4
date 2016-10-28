@@ -7,35 +7,31 @@ control c(out H[2] h);
 package top(c _c);
 control my(out H[2] s) {
     bit<32> a;
+    bit<32> tmp_8;
+    bit<32> tmp_9;
     bit<32> tmp_10;
     bit<32> tmp_11;
-    bit<32> tmp_12;
-    bit<32> tmp_13;
-    bit<1> tmp_14;
+    bit<1> tmp_12;
+    bit<1> tmp_13;
+    bit<32> tmp_14;
     bit<1> tmp_15;
     bit<1> tmp_16;
-    bit<32> tmp_17;
-    bit<1> tmp_18;
-    bit<1> tmp_19;
-    bit<1> tmp_20;
     action act() {
         a = 32w0;
-        tmp_10 = a;
-        s[tmp_10].z = 1w1;
-        tmp_11 = a + 32w1;
-        tmp_12 = tmp_11;
-        s[tmp_12].z = 1w0;
-        tmp_13 = a;
-        tmp_14 = s[tmp_13].z;
-        tmp_15 = 1w0;
-        tmp_16 = f(tmp_14, tmp_15);
-        s[tmp_13].z = tmp_14;
-        a = (bit<32>)tmp_16;
-        tmp_17 = a;
-        tmp_18 = s[tmp_17].z;
-        tmp_19 = 1w1;
-        tmp_20 = f(tmp_18, tmp_19);
-        s[tmp_17].z = tmp_18;
+        tmp_8 = a;
+        s[tmp_8].z = 1w1;
+        tmp_9 = a + 32w1;
+        tmp_10 = tmp_9;
+        s[tmp_10].z = 1w0;
+        tmp_11 = a;
+        tmp_12 = s[tmp_11].z;
+        tmp_13 = f(tmp_12, 1w0);
+        s[tmp_11].z = tmp_12;
+        a = (bit<32>)tmp_13;
+        tmp_14 = a;
+        tmp_15 = s[tmp_14].z;
+        tmp_16 = f(tmp_15, 1w1);
+        s[tmp_14].z = tmp_15;
     }
     table tbl_act() {
         actions = {

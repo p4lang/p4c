@@ -1840,7 +1840,8 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
 
 void JsonConverter::createForceArith(const IR::Type* meta, cstring name,
                                      Util::JsonArray* force) const {
-    BUG_CHECK(meta->is<IR::Type_Struct>(), "Expected a struct type");
+    if (!meta->is<IR::Type_Struct>())
+        return;
     auto st = meta->to<IR::Type_StructLike>();
     for (auto f : *st->fields) {
         auto field = pushNewArray(force);
