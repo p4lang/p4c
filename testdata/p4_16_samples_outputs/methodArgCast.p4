@@ -1,12 +1,12 @@
 extern E {
     E();
-    void set(in bit<32> arg);
+    void setValue(in bit<32> arg);
 }
 
 control c() {
     E() e;
     apply {
-        e.set(10);
+        e.setValue(10);
     }
 }
 

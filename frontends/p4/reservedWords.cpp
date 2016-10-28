@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@ namespace P4 {
 
 // Keep this in sync with the lexer
 std::set<cstring> reservedWords = {
+    "abstract", // experimental
     "action", "actions", "apply", "bool", "bit", "const", "control", "default",
-    "else", "enum", "error", "exit", "extern", "false", "header", "header_union", "if",
-    "in", "inout", "int", "key", "match_kind", "out", "parser", "package",
-    "return", "select", "state", "struct", "switch", "table", "transition",
-    "true", "typedef", "varbit", "void"
+    "else", "enum", "error", "exit", "extern", "false", "header", "header_union", // experimental
+    "if", "in", "inout", "int", "key", "match_kind", "out", "parser", "package",
+    "return", "select", "set", "state", "struct", "switch", "table", "this", // experimental
+    "transition", "true", "tuple", "typedef", "varbit", "void", "_"
 };
 
 }  // namespace P4

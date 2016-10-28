@@ -290,6 +290,15 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
                type->is<IR::Type_ActionEnum>() ||
                type->is<IR::Type_MatchKind>()) {
         return type;
+    } else if (type->is<IR::Type_Set>()) {
+        auto set = type->to<IR::Type_Set>();
+        auto et = canonicalize(set->elementType);
+        if (et == nullptr)
+            return nullptr;
+        if (et == set->elementType)
+            return type;
+        const IR::Type* canon = new IR::Type_Set(type->srcInfo, et);
+        return canon;
     } else if (type->is<IR::Type_Tuple>()) {
         auto tuple = type->to<IR::Type_Tuple>();
         auto fields = new IR::Vector<IR::Type>();
@@ -1009,6 +1018,16 @@ const IR::Node* TypeInference::postorder(IR::Type_Var* typeVar) {
 const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
     if (done()) return type;
     auto canon = canonicalize(getOriginal<IR::Type_Tuple>());
+    if (canon != nullptr) {
+        setType(getOriginal(), canon);
+        setType(type, canon);
+    }
+    return type;
+}
+
+const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
+    if (done()) return type;
+    auto canon = canonicalize(getOriginal<IR::Type_Set>());
     if (canon != nullptr) {
         setType(getOriginal(), canon);
         setType(type, canon);

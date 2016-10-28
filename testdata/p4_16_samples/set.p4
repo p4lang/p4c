@@ -13,19 +13,5 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-extern E {
-    E();
-    void setValue(in bit<32> arg);
-}
 
-control c() {
-    E() e;
-    apply {
-        e.setValue(10);
-    }
-}
-
-control proto();
-package top(proto p);
-
-top(c()) main;
+typedef set<bit<32>> IntSet;

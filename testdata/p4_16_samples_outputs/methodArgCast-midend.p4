@@ -1,12 +1,12 @@
 extern E {
     E();
-    void set(in bit<32> arg);
+    void setValue(in bit<32> arg);
 }
 
 control c() {
     @name("e") E() e;
     action act() {
-        e.set(32w10);
+        e.setValue(32w10);
     }
     table tbl_act() {
         actions = {
