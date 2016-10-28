@@ -119,24 +119,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<14> tmp_20;
-    HashAlgorithm tmp_21;
-    bit<10> tmp_22;
-    tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>, bit<16>> tmp_23;
-    bit<20> tmp_24;
-    bit<8> tmp_25;
-    bit<13> tmp_26;
-    HashAlgorithm tmp_27;
-    bit<13> tmp_28;
-    tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>> tmp_29;
-    bit<26> tmp_30;
-    bit<16> tmp_31;
-    bit<32> tmp_32;
-    bit<32> tmp_33;
-    bit<32> tmp_34;
-    bit<32> tmp_35;
-    bit<16> tmp_36;
-    bool tmp_37;
+    bit<14> tmp_14;
+    tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>, bit<16>> tmp_15;
+    bit<8> tmp_16;
+    bit<13> tmp_17;
+    tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>> tmp_18;
+    bit<16> tmp_19;
+    bit<32> tmp_20;
+    bit<32> tmp_21;
+    bit<32> tmp_22;
+    bit<32> tmp_23;
+    bit<16> tmp_24;
+    bool tmp_25;
     @name("NoAction_3") action NoAction_0() {
     }
     @name("NoAction_4") action NoAction_1() {
@@ -159,34 +153,28 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop();
     }
     @name("set_ecmp_select") action set_ecmp_select_0(bit<8> ecmp_base, bit<8> ecmp_count) {
-        tmp_21 = HashAlgorithm.crc16;
-        tmp_22 = (bit<10>)ecmp_base;
-        tmp_23 = { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort, meta.ingress_metadata.flowlet_id };
-        tmp_24 = (bit<20>)ecmp_count;
-        hash<bit<14>, bit<10>, tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>, bit<16>>, bit<20>>(tmp_20, HashAlgorithm.crc16, (bit<10>)ecmp_base, tmp_23, (bit<20>)ecmp_count);
-        meta.ingress_metadata.ecmp_offset = tmp_20;
+        tmp_15 = { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort, meta.ingress_metadata.flowlet_id };
+        hash<bit<14>, bit<10>, tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>, bit<16>>, bit<20>>(tmp_14, HashAlgorithm.crc16, (bit<10>)ecmp_base, tmp_15, (bit<20>)ecmp_count);
+        meta.ingress_metadata.ecmp_offset = tmp_14;
     }
     @name("set_nhop") action set_nhop_0(bit<32> nhop_ipv4, bit<9> port) {
         meta.ingress_metadata.nhop_ipv4 = nhop_ipv4;
         standard_metadata.egress_spec = port;
-        tmp_25 = hdr.ipv4.ttl + 8w255;
+        tmp_16 = hdr.ipv4.ttl + 8w255;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("lookup_flowlet_map") action lookup_flowlet_map_0() {
-        tmp_27 = HashAlgorithm.crc16;
-        tmp_28 = 13w0;
-        tmp_29 = { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort };
-        tmp_30 = 26w13;
-        hash<bit<13>, bit<13>, tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>>, bit<26>>(tmp_26, HashAlgorithm.crc16, 13w0, tmp_29, 26w13);
-        meta.ingress_metadata.flowlet_map_index = tmp_26;
-        tmp_32 = (bit<32>)meta.ingress_metadata.flowlet_map_index;
-        flowlet_id_1.read(tmp_31, (bit<32>)meta.ingress_metadata.flowlet_map_index);
-        meta.ingress_metadata.flowlet_id = tmp_31;
+        tmp_18 = { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort };
+        hash<bit<13>, bit<13>, tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>>, bit<26>>(tmp_17, HashAlgorithm.crc16, 13w0, tmp_18, 26w13);
+        meta.ingress_metadata.flowlet_map_index = tmp_17;
+        tmp_20 = (bit<32>)meta.ingress_metadata.flowlet_map_index;
+        flowlet_id_1.read(tmp_19, (bit<32>)meta.ingress_metadata.flowlet_map_index);
+        meta.ingress_metadata.flowlet_id = tmp_19;
         meta.ingress_metadata.flow_ipg = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-        tmp_34 = (bit<32>)meta.ingress_metadata.flowlet_map_index;
-        flowlet_lasttime_1.read(tmp_33, (bit<32>)meta.ingress_metadata.flowlet_map_index);
-        meta.ingress_metadata.flowlet_lasttime = tmp_33;
-        tmp_35 = meta.ingress_metadata.flow_ipg - meta.ingress_metadata.flowlet_lasttime;
+        tmp_22 = (bit<32>)meta.ingress_metadata.flowlet_map_index;
+        flowlet_lasttime_1.read(tmp_21, (bit<32>)meta.ingress_metadata.flowlet_map_index);
+        meta.ingress_metadata.flowlet_lasttime = tmp_21;
+        tmp_23 = meta.ingress_metadata.flow_ipg - meta.ingress_metadata.flowlet_lasttime;
         meta.ingress_metadata.flow_ipg = meta.ingress_metadata.flow_ipg - meta.ingress_metadata.flowlet_lasttime;
         flowlet_lasttime_1.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp);
     }
@@ -194,7 +182,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr = dmac;
     }
     @name("update_flowlet_id") action update_flowlet_id_0() {
-        tmp_36 = meta.ingress_metadata.flowlet_id + 16w1;
+        tmp_24 = meta.ingress_metadata.flowlet_id + 16w1;
         meta.ingress_metadata.flowlet_id = meta.ingress_metadata.flowlet_id + 16w1;
         flowlet_id_1.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<16>)meta.ingress_metadata.flowlet_id);
     }
@@ -249,7 +237,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_10();
     }
     action act() {
-        tmp_37 = meta.ingress_metadata.flow_ipg > 32w50000;
+        tmp_25 = meta.ingress_metadata.flow_ipg > 32w50000;
     }
     table tbl_act() {
         actions = {
@@ -261,7 +249,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         @atomic {
             flowlet.apply();
             tbl_act.apply();
-            if (tmp_37) 
+            if (tmp_25) 
                 new_flowlet.apply();
         }
         ecmp_group.apply();
@@ -279,15 +267,15 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 control verifyChecksum(in headers hdr, inout metadata meta) {
-    bit<16> tmp_38;
-    bool tmp_39;
+    bit<16> tmp_26;
+    bool tmp_27;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
     action act_0() {
         mark_to_drop();
     }
     action act_1() {
-        tmp_38 = ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        tmp_39 = hdr.ipv4.hdrChecksum == tmp_38;
+        tmp_26 = ipv4_checksum.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        tmp_27 = hdr.ipv4.hdrChecksum == tmp_26;
     }
     table tbl_act_0() {
         actions = {
@@ -303,17 +291,17 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     }
     apply {
         tbl_act_0.apply();
-        if (tmp_39) 
+        if (tmp_27) 
             tbl_act_1.apply();
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    bit<16> tmp_40;
+    bit<16> tmp_28;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
     action act_2() {
-        tmp_40 = ipv4_checksum_2.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        hdr.ipv4.hdrChecksum = tmp_40;
+        tmp_28 = ipv4_checksum_2.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        hdr.ipv4.hdrChecksum = tmp_28;
     }
     table tbl_act_2() {
         actions = {

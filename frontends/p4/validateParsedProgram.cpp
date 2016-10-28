@@ -93,9 +93,11 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Variable* decl) {
 void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
     if (decl->name.isDontCare())
         ::error("%1%: illegal instance name", decl);
-    if (findContext<IR::BlockStatement>() &&
-        findContext<IR::P4Control>())
+    if (findContext<IR::BlockStatement>() &&  // we're looking for the apply block
+        findContext<IR::P4Control>() &&       // of a control
+        !findContext<IR::Declaration_Instance>()) { // but not in an instance initializer
         ::error("%1%: instances cannot be in a control 'apply' block", decl);
+    }
     if (findContext<IR::ParserState>())
         ::error("%1%: instances cannot be in a parser state", decl);
 }
