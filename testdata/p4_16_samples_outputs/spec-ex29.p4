@@ -1,5 +1,11 @@
 #include <core.p4>
 
+error {
+    IPv4FragmentsNotSupported,
+    IPv4OptionsNotSupported,
+    IPv4IncorrectVersion
+}
+
 header Ethernet {
     bit<16> etherType;
 }
@@ -33,12 +39,6 @@ struct Parsed_packet {
     IP       ip;
 }
 
-error {
-    IPv4FragmentsNotSupported,
-    IPv4OptionsNotSupported,
-    IPv4IncorrectVersion
-}
-
 parser top(packet_in b, out Parsed_packet p) {
     state start {
         b.extract(p.ethernet);
@@ -49,9 +49,9 @@ parser top(packet_in b, out Parsed_packet p) {
     }
     state parse_ipv4 {
         b.extract(p.ip.ipv4);
-        verify(p.ip.ipv4.version == 4w4, IPv4IncorrectVersion);
-        verify(p.ip.ipv4.ihl == 4w5, IPv4OptionsNotSupported);
-        verify(p.ip.ipv4.fragOffset == 13w0, IPv4FragmentsNotSupported);
+        verify(p.ip.ipv4.version == 4w4, error.IPv4IncorrectVersion);
+        verify(p.ip.ipv4.ihl == 4w5, error.IPv4OptionsNotSupported);
+        verify(p.ip.ipv4.fragOffset == 13w0, error.IPv4FragmentsNotSupported);
         transition accept;
     }
     state parse_ipv6 {

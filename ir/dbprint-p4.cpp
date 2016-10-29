@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -221,7 +221,7 @@ void IR::P4Program::dbprint(std::ostream &out) const {
         out << obj << endl;
 }
 
-void IR::Declaration_Errors::dbprint(std::ostream &out) const {
+void IR::Type_Error::dbprint(std::ostream &out) const {
     out << "error {";
     const char *sep = " ";
     for (auto &id : *members) {

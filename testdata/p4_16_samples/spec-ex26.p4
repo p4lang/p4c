@@ -40,7 +40,7 @@ control c(inout Parsed_packet headers,
     }
 
     apply {
-        if (parseError != NoError) {
+        if (parseError != error.NoError) {
             // invoke Drop_action directly
             Drop_action(outCtrl.outputPort);
             return;

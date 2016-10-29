@@ -94,6 +94,7 @@ class SideEffects : public Inspector {
 // An assignment statement
 // e = e1;
 // is treated as if it is a call to a function "set(out T v, in T v)"
+// FIXME: does not handle select labels
 class DoSimplifyExpressions : public Transform {
     ReferenceMap*        refMap;
     TypeMap*             typeMap;

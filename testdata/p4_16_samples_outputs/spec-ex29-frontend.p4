@@ -1,5 +1,11 @@
 #include <core.p4>
 
+error {
+    IPv4FragmentsNotSupported,
+    IPv4OptionsNotSupported,
+    IPv4IncorrectVersion
+}
+
 header Ethernet {
     bit<16> etherType;
 }
@@ -31,11 +37,5 @@ header_union IP {
 struct Parsed_packet {
     Ethernet ethernet;
     IP       ip;
-}
-
-error {
-    IPv4FragmentsNotSupported,
-    IPv4OptionsNotSupported,
-    IPv4IncorrectVersion
 }
 

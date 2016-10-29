@@ -1,5 +1,9 @@
 #include <core.p4>
 
+error {
+    InvalidOptions
+}
+
 header IPv4_no_options_h {
     bit<4>  version;
     bit<4>  ihl;
@@ -27,9 +31,5 @@ struct Parsed_headers {
     IPv4_no_options_h ipv4;
     IPv4_options_h    ipv4options;
     Tcp               tcp;
-}
-
-error {
-    InvalidOptions
 }
 

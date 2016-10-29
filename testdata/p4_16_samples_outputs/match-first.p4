@@ -1,5 +1,9 @@
 #include <core.p4>
 
+error {
+    InvalidOptions
+}
+
 header Ipv4_no_options_h {
     bit<4>  version;
     bit<4>  ihl;
@@ -29,17 +33,13 @@ struct Parsed_headers {
     Tcp               tcp;
 }
 
-error {
-    InvalidOptions
-}
-
 parser Top(packet_in b, out Parsed_headers headers) {
     state start {
         transition parse_ipv4;
     }
     state parse_ipv4 {
         b.extract<Ipv4_no_options_h>(headers.ipv4);
-        verify(headers.ipv4.ihl >= 4w5, InvalidOptions);
+        verify(headers.ipv4.ihl >= 4w5, error.InvalidOptions);
         transition parse_ipv4_options;
     }
     state parse_ipv4_options {

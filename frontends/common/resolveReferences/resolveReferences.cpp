@@ -23,8 +23,7 @@ std::vector<const IR::IDeclaration*>*
 ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOnly) const {
     static std::vector<const IR::IDeclaration*> empty;
 
-    std::vector<const IR::INamespace*> toTry;
-    toTry = stack;
+    std::vector<const IR::INamespace*> toTry(stack);
     toTry.insert(toTry.end(), globals.begin(), globals.end());
 
     for (auto it = toTry.rbegin(); it != toTry.rend(); ++it) {
@@ -118,8 +117,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOn
 
 void ResolutionContext::done() {
     pop(rootNamespace);
-    if (!stack.empty())
-        BUG("ResolutionContext::stack not empty");
+    BUG_CHECK(stack.empty(), "ResolutionContext::stack not empty");
 }
 
 const IR::IDeclaration*
@@ -173,22 +171,19 @@ ResolveReferences::ResolveReferences(ReferenceMap* refMap,
 }
 
 void ResolveReferences::addToContext(const IR::INamespace* ns) {
-    LOG1("Adding to context " << ns);
-    if (context == nullptr)
-        BUG("No resolution context; did not start at P4Program?");
+    LOG1("Adding to context " << dbp(ns));
+    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
     context->push(ns);
 }
 
 void ResolveReferences::addToGlobals(const IR::INamespace* ns) {
-    if (context == nullptr)
-        BUG("No resolution context; did not start at P4Program?");
+    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
     context->addGlobal(ns);
 }
 
 void ResolveReferences::removeFromContext(const IR::INamespace* ns) {
-    LOG1("Removing from context " << ns);
-    if (context == nullptr)
-        BUG("No resolution context; did not start at P4Program?");
+    LOG1("Removing from context " << dbp(ns));
+    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
     context->pop(ns);
 }
 
@@ -221,8 +216,7 @@ void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
     ResolutionContext* ctx = resolvePathPrefix(path->prefix);
     ResolutionType k = isType ? ResolutionType::Type : ResolutionType::Any;
 
-    if (resolveForward.empty())
-        BUG("Empty resolveForward");
+    BUG_CHECK(!resolveForward.empty(), "Empty resolveForward");
     bool allowForward = resolveForward.back();
 
     const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, !allowForward);
@@ -275,11 +269,9 @@ bool ResolveReferences::preorder(const IR::P4Program* program) {
     if (refMap->checkMap(program))
         return false;
 
-    if (!resolveForward.empty())
-        BUG("Expected empty resolvePath");
+    BUG_CHECK(resolveForward.empty(), "Expected empty resolvePath");
     resolveForward.push_back(anyOrder);
-    if (rootNamespace != nullptr)
-        BUG("Root namespace already set");
+    BUG_CHECK(rootNamespace == nullptr, "Root namespace already set");
     rootNamespace = program;
     context = new ResolutionContext(rootNamespace);
     return true;
@@ -289,8 +281,7 @@ void ResolveReferences::postorder(const IR::P4Program*) {
     rootNamespace = nullptr;
     context->done();
     resolveForward.pop_back();
-    if (!resolveForward.empty())
-        BUG("Expected empty resolvePath");
+    BUG_CHECK(resolveForward.empty(), "Expected empty resolvePath");
     context = nullptr;
     LOG1("Reference map " << refMap);
 }
@@ -416,11 +407,8 @@ void ResolveReferences::postorder(const IR::ParserState *s) {
     checkShadowing(s);
 }
 
-bool ResolveReferences::preorder(const IR::Declaration_Errors *d) {
-    addToGlobals(d); return true; }
-
-bool ResolveReferences::preorder(const IR::Declaration_MatchKind *d) {
-    addToGlobals(d); return true; }
+bool ResolveReferences::preorder(const IR::Declaration_MatchKind *d)
+{ addToGlobals(d); return true; }
 
 bool ResolveReferences::preorder(const IR::Type_ArchBlock *t) {
     resolveForward.push_back(anyOrder);

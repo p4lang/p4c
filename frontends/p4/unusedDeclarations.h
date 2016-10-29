@@ -45,8 +45,8 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* preorder(IR::Declaration_Instance* decl) override
     // don't scan the initializer
     { auto result = process(decl); prune(); return result; }
-    const IR::Node* preorder(IR::Declaration_Errors* decl) override
-    { prune(); return decl; }
+    const IR::Node* preorder(IR::Type_Error* type) override
+    { prune(); return type; }
     const IR::Node* preorder(IR::Declaration_MatchKind* decl) override
     { prune(); return decl; }
     const IR::Node* preorder(IR::Type_StructLike* type) override

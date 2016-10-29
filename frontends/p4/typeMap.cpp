@@ -104,9 +104,11 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     if (left->node_type_name() != right->node_type_name())
         return false;
 
+    // Below we are sure that it's the same Node class
     if (left->is<IR::Type_Base>())
         return *left == *right;
-    if (left->is<IR::Type_InfInt>())
+    if (left->is<IR::Type_Error>() ||
+        left->is<IR::Type_InfInt>())
         return true;
     if (left->is<IR::Type_Var>()) {
         auto lv = left->to<IR::Type_Var>();
@@ -208,7 +210,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         return le->name == re->name;
     }
 
-    BUG("%1%: Unexpected type check for equivalence", left);
+    BUG("%1%: Unexpected type check for equivalence", dbp(left));
     // The following are not expected to be compared for equivalence:
     // Type_Dontcare, Type_Unknown, Type_Name, Type_Specialized, Type_Typedef
 }

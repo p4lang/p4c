@@ -510,10 +510,12 @@ const IR::Node* TypeInference::preorder(IR::P4Program* program) {
     return program;
 }
 
-const IR::Node* TypeInference::postorder(IR::Declaration_Errors* decl) {
+const IR::Node* TypeInference::postorder(IR::Type_Error* decl) {
     if (done()) return decl;
     for (auto id : *decl->getDeclarations())
-        setType(id->getNode(), IR::Type_Error::get());
+        setType(id->getNode(), decl);
+    setType(decl, decl);
+    setType(getOriginal(), decl);
     return decl;
 }
 

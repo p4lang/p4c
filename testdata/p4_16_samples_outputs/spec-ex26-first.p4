@@ -1,5 +1,6 @@
 #include <core.p4>
 
+
 typedef bit<4> PortId;
 const PortId REAL_PORT_COUNT = 4w8;
 struct InControl {
@@ -51,7 +52,7 @@ control c(inout Parsed_packet headers, in error parseError, in InControl inCtrl,
         default_action = drop();
     }
     apply {
-        if (parseError != NoError) {
+        if (parseError != error.NoError) {
             Drop_action(outCtrl.outputPort);
             return;
         }

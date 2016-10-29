@@ -55,7 +55,7 @@ parser Top(packet_in b, out Parsed_headers headers) {
 
    state parse_ipv4 {
        b.extract(headers.ipv4);
-       verify(headers.ipv4.ihl >= 4w5, InvalidOptions);
+       verify(headers.ipv4.ihl >= 4w5, error.InvalidOptions);
        transition parse_ipv4_options;
    }
 

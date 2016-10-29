@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -183,8 +183,10 @@ void EBPFStructType::emit(CodeBuilder* builder) {
     if (type->is<IR::Type_Header>()) {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(IR::Type_Boolean::get());
-        type->declare(builder, "ebpf_valid", false);
-        builder->endOfStatement(true);
+        if (type != nullptr) {
+            type->declare(builder, "ebpf_valid", false);
+            builder->endOfStatement(true);
+        }
     }
 
     builder->blockEnd(false);

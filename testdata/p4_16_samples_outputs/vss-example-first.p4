@@ -1,5 +1,11 @@
 #include <core.p4>
 
+error {
+    IPv4OptionsNotSupported,
+    IPv4IncorrectVersion,
+    IPv4ChecksumError
+}
+
 typedef bit<4> PortId;
 const PortId REAL_PORT_COUNT = 4w8;
 struct InControl {
@@ -49,12 +55,6 @@ header Ipv4_h {
     IPv4Address dstAddr;
 }
 
-error {
-    IPv4OptionsNotSupported,
-    IPv4IncorrectVersion,
-    IPv4ChecksumError
-}
-
 struct Parsed_packet {
     Ethernet_h ethernet;
     Ipv4_h     ip;
@@ -70,11 +70,11 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     }
     state parse_ipv4 {
         b.extract<Ipv4_h>(p.ip);
-        verify(p.ip.version == 4w4, IPv4IncorrectVersion);
-        verify(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
+        verify(p.ip.version == 4w4, error.IPv4IncorrectVersion);
+        verify(p.ip.ihl == 4w5, error.IPv4OptionsNotSupported);
         ck.clear();
         ck.update<Ipv4_h>(p.ip);
-        verify(ck.get() == 16w0, IPv4ChecksumError);
+        verify(ck.get() == 16w0, error.IPv4ChecksumError);
         transition accept;
     }
 }
@@ -142,7 +142,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     apply {
         IPv4Address nextHop;
-        if (parseError != NoError) {
+        if (parseError != error.NoError) {
             Drop_action();
             return;
         }
