@@ -40,6 +40,16 @@ bool ToP4::isSystemFile(cstring file) {
     return false;
 }
 
+cstring ToP4::ifSystemFile(const IR::Node* node) {
+    if (!node->srcInfo.isValid()) return nullptr;
+    unsigned line = node->srcInfo.getStart().getLineNumber();
+    auto sfl = Util::InputSources::instance->getSourceLine(line);
+    cstring sourceFile = sfl.fileName;
+    if (isSystemFile(sourceFile))
+        return sourceFile;
+    return nullptr;
+}
+
 namespace {
 class DumpIR : public Inspector {
     unsigned depth;
@@ -131,34 +141,32 @@ bool ToP4::preorder(const IR::P4Program* program) {
     dump(2);
     for (auto a : *program->declarations) {
         // Check where this declaration originates
-        if (a->srcInfo.isValid()) {
-            unsigned line = a->srcInfo.getStart().getLineNumber();
-            auto sfl = Util::InputSources::instance->getSourceLine(line);
-            cstring sourceFile = sfl.fileName;
+        cstring sourceFile = ifSystemFile(a);
+        if (!a->is<IR::Type_Error>() &&  // errors can come from multiple files
+            sourceFile != nullptr) {
             /* FIXME -- when including a user header file (sourceFile != mainFile), do we want
              * to emit an #include of it or not?  Probably not when translating from P4-14, as
              * that would create a P4-16 file that tries to include a P4-14 header.  Unless we
              * want to allow converting headers independently (is that even possible?).  For now
              * we ignore mainFile and don't emit #includes for any non-system header */
-            if (isSystemFile(sourceFile)) {
-                if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
-                    builder.append("#include ");
-                    if (sourceFile.startsWith(p4includePath)) {
-                        const char *p = sourceFile.c_str() + strlen(p4includePath);
-                        if (*p == '/') p++;
-                        builder.append("<");
-                        builder.append(p);
-                        builder.appendLine(">");
-                    } else {
-                        builder.append("\"");
-                        builder.append(sourceFile);
-                        builder.appendLine("\"");
-                    }
-                    includesEmitted.emplace(sourceFile);
+
+            if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
+                builder.append("#include ");
+                if (sourceFile.startsWith(p4includePath)) {
+                    const char *p = sourceFile.c_str() + strlen(p4includePath);
+                    if (*p == '/') p++;
+                    builder.append("<");
+                    builder.append(p);
+                    builder.appendLine(">");
+                } else {
+                    builder.append("\"");
+                    builder.append(sourceFile);
+                    builder.appendLine("\"");
                 }
-                first = false;
-                continue;
+                includesEmitted.emplace(sourceFile);
             }
+            first = false;
+            continue;
         }
         if (!first)
             builder.newline();
@@ -343,11 +351,6 @@ bool ToP4::preorder(const IR::Type_Extern* t) {
     isDeclaration = decl;
     doneVec();
     builder.blockEnd(true);
-    return false;
-}
-
-bool ToP4::preorder(const IR::Type_Error*) {
-    builder.append("error");
     return false;
 }
 
@@ -543,21 +546,28 @@ bool ToP4::preorder(const IR::Declaration_Variable* v) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Declaration_Errors* d) {
+bool ToP4::preorder(const IR::Type_Error* d) {
     dump(1);
-    builder.append("error ");
-    builder.blockStart();
     bool first = true;
     for (auto a : *d->getDeclarations()) {
-        if (!first)
+        if (ifSystemFile(a->getNode()))
+            // only print if not from a system file
+            continue;
+        if (!first) {
             builder.append(",\n");
+        } else {
+            builder.append("error ");
+            builder.blockStart();
+        }
         dump(1, a->getNode(), 1);
         first = false;
         builder.emitIndent();
         builder.append(a->getName());
     }
-    builder.newline();
-    builder.blockEnd(true);
+    if (!first) {
+        builder.newline();
+        builder.blockEnd(true);
+    }
     return false;
 }
 
@@ -965,7 +975,7 @@ bool ToP4::preorder(const IR::Annotation * a) {
 }
 
 bool ToP4::preorder(const IR::Parameter* p) {
-    dump(1);
+    dump(2);
     visit(p->annotations);
     switch (p->direction) {
         case IR::Direction::None:

@@ -69,6 +69,7 @@ class ToP4 : public Inspector {
         listTerminators.pop_back();
     }
     bool isSystemFile(cstring file);
+    cstring ifSystemFile(const IR::Node* node);  // return file containing node if system file
     // dump node IR tree up to depth - in the form of a comment
     void dump(unsigned depth, const IR::Node* node = nullptr, unsigned adjDepth = 0);
     unsigned curDepth() const;
@@ -140,7 +141,6 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Declaration_Constant* cst) override;
     bool preorder(const IR::Declaration_Variable* v) override;
     bool preorder(const IR::Declaration_Instance* t) override;
-    bool preorder(const IR::Declaration_Errors* d) override;
     bool preorder(const IR::Declaration_MatchKind* d) override;
 
     // expressions

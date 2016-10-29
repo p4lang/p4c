@@ -170,7 +170,6 @@ class TypeInference : public Transform {
     const IR::Node* preorder(IR::P4Program* program) override;
 
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
-    const IR::Node* postorder(IR::Declaration_Errors* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* constant) override;
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
@@ -178,6 +177,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::P4Parser* cont) override;
     const IR::Node* postorder(IR::Method* method) override;
 
+    const IR::Node* postorder(IR::Type_Error* decl) override;
     const IR::Node* postorder(IR::Type_InfInt* type) override;
     const IR::Node* postorder(IR::Type_Method* type) override;
     const IR::Node* postorder(IR::Type_Action* type) override;

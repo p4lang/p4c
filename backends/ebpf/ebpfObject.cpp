@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -105,8 +105,11 @@ void EBPFProgram::emitTypes(CodeBuilder* builder) {
     for (auto d : *program->declarations) {
         if (d->is<IR::Type>() && !d->is<IR::IContainer>() &&
             !d->is<IR::Type_Extern>() && !d->is<IR::Type_Parser>() &&
-            !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>()) {
+            !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
+            !d->is<IR::Type_Error>()) {
             auto type = EBPFTypeFactory::instance->create(d->to<IR::Type>());
+            if (type == nullptr)
+                continue;
             type->emit(builder);
             builder->newline();
         }
@@ -118,7 +121,7 @@ class ErrorCodesVisitor : public Inspector {
     CodeBuilder* builder;
  public:
     explicit ErrorCodesVisitor(CodeBuilder* builder) : builder(builder) {}
-    bool preorder(const IR::Declaration_Errors* errors) override {
+    bool preorder(const IR::Type_Error* errors) override {
         for (auto m : *errors->getDeclarations()) {
             builder->emitIndent();
             builder->appendFormat("%s,\n", m->getName().name.c_str());

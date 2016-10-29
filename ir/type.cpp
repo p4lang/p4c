@@ -119,13 +119,6 @@ const Type_Void *Type_Void::get() {
     return singleton;
 }
 
-const Type_Error *Type_Error::get() {
-    static const Type_Error *singleton;
-    if (!singleton)
-        singleton = (new Type_Error(Util::SourceInfo()));
-    return singleton;
-}
-
 const Type_MatchKind *Type_MatchKind::get() {
     static const Type_MatchKind *singleton;
     if (!singleton)

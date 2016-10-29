@@ -64,7 +64,8 @@ class BaseLocation : public StorageLocation {
     BaseLocation(const IR::Type* type, cstring name) :
             StorageLocation(type, name)
     { BUG_CHECK(type->is<IR::Type_Base>() || type->is<IR::Type_Enum>()
-                || type->is<IR::Type_Var>() || type->is<IR::Type_Tuple>(),
+                || type->is<IR::Type_Var>() || type->is<IR::Type_Tuple>()
+                || type-is<IR::Type_Error>() || type->is<IR::Type_Var>(),
                 "%1%: unexpected type", type); }
     void addValidBits(LocationSet*) const override {}
     void removeHeaders(LocationSet* result) const override;

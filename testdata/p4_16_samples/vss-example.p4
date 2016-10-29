@@ -77,12 +77,12 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 
     state parse_ipv4 {
         b.extract(p.ip);
-        verify(p.ip.version == 4w4, IPv4IncorrectVersion);
-        verify(p.ip.ihl == 4w5, IPv4OptionsNotSupported);
+        verify(p.ip.version == 4w4, error.IPv4IncorrectVersion);
+        verify(p.ip.ihl == 4w5, error.IPv4OptionsNotSupported);
         ck.clear();
         ck.update(p.ip);
         // Verify that packet checksum is zero
-        verify(ck.get() == 16w0, IPv4ChecksumError);
+        verify(ck.get() == 16w0, error.IPv4ChecksumError);
         transition accept;
     }
 }
@@ -190,7 +190,7 @@ control TopPipe(inout Parsed_packet headers,
       apply {
           IPv4Address nextHop; // temporary variable
 
-          if (parseError != NoError) {
+          if (parseError != error.NoError) {
                Drop_action();  // invoke drop directly
                return;
           }

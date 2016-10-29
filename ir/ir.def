@@ -119,9 +119,7 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated {
     Annotations getAnnotations() const override { return annotations; }
 }
 
-// error { A, B, C }
-// Not a subclass of IDeclaration
-class Declaration_Errors : ISimpleNamespace {
+class Type_Error : ISimpleNamespace, Type_Declaration {
     IndexedVector<Declaration_ID> members;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members->getDeclarations(); }

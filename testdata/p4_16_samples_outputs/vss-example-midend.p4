@@ -1,5 +1,11 @@
 #include <core.p4>
 
+error {
+    IPv4OptionsNotSupported,
+    IPv4IncorrectVersion,
+    IPv4ChecksumError
+}
+
 typedef bit<4> PortId;
 struct InControl {
     PortId inputPort;
@@ -43,24 +49,17 @@ header Ipv4_h {
     IPv4Address dstAddr;
 }
 
-error {
-    IPv4OptionsNotSupported,
-    IPv4IncorrectVersion,
-    IPv4ChecksumError
-}
-
 struct Parsed_packet {
     Ethernet_h ethernet;
     Ipv4_h     ip;
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
+    bool tmp_10;
     bool tmp_11;
-    bool tmp_12;
-    bit<16> tmp_13;
+    bit<16> tmp_12;
+    bool tmp_13;
     bool tmp_14;
-    bool tmp_15;
-    error tmp_16;
     @name("ck") Ck16() ck;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
@@ -70,28 +69,27 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     }
     state parse_ipv4 {
         b.extract<Ipv4_h>(p.ip);
-        tmp_11 = p.ip.version == 4w4;
-        verify(tmp_11, IPv4IncorrectVersion);
-        tmp_12 = p.ip.ihl == 4w5;
-        verify(tmp_12, IPv4OptionsNotSupported);
+        tmp_10 = p.ip.version == 4w4;
+        verify(tmp_10, error.IPv4IncorrectVersion);
+        tmp_11 = p.ip.ihl == 4w5;
+        verify(tmp_11, error.IPv4OptionsNotSupported);
         ck.clear();
         ck.update<Ipv4_h>(p.ip);
-        tmp_13 = ck.get();
-        tmp_14 = tmp_13 == 16w0;
-        tmp_15 = tmp_14;
-        tmp_16 = IPv4ChecksumError;
-        verify(tmp_15, tmp_16);
+        tmp_12 = ck.get();
+        tmp_13 = tmp_12 == 16w0;
+        tmp_14 = tmp_13;
+        verify(tmp_14, error.IPv4ChecksumError);
         transition accept;
     }
 }
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     IPv4Address nextHop_1;
-    bit<8> tmp_17;
+    bit<8> tmp_15;
+    bool tmp_16;
+    bool tmp_17;
     bool tmp_18;
     bool tmp_19;
-    bool tmp_20;
-    bool tmp_21;
     IPv4Address nextHop_2;
     IPv4Address nextHop_3;
     bool hasReturned_0;
@@ -112,7 +110,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("Set_nhop") action Set_nhop_0(IPv4Address ipv4_dest, PortId port) {
         nextHop_0 = ipv4_dest;
-        tmp_17 = headers.ip.ttl + 8w255;
+        tmp_15 = headers.ip.ttl + 8w255;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
         nextHop_2 = ipv4_dest;
@@ -174,20 +172,20 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     action act_0() {
         hasReturned_0 = false;
-        tmp_18 = parseError != NoError;
+        tmp_16 = parseError != error.NoError;
     }
     action act_1() {
         hasReturned_0 = true;
     }
     action act_2() {
         nextHop_1 = nextHop_2;
-        tmp_19 = outCtrl.outputPort == 4w0xf;
+        tmp_17 = outCtrl.outputPort == 4w0xf;
     }
     action act_3() {
         hasReturned_0 = true;
     }
     action act_4() {
-        tmp_20 = outCtrl.outputPort == 4w0xe;
+        tmp_18 = outCtrl.outputPort == 4w0xe;
     }
     action act_5() {
         nextHop_3 = nextHop_1;
@@ -196,7 +194,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         hasReturned_0 = true;
     }
     action act_7() {
-        tmp_21 = outCtrl.outputPort == 4w0xf;
+        tmp_19 = outCtrl.outputPort == 4w0xf;
     }
     table tbl_act() {
         actions = {
@@ -260,27 +258,27 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     apply {
         tbl_act.apply();
-        if (tmp_18) {
+        if (tmp_16) {
             tbl_Drop_action.apply();
             tbl_act_0.apply();
         }
         if (!hasReturned_0) {
             ipv4_match.apply();
             tbl_act_1.apply();
-            if (tmp_19) 
+            if (tmp_17) 
                 tbl_act_2.apply();
         }
         if (!hasReturned_0) {
             check_ttl.apply();
             tbl_act_3.apply();
-            if (tmp_20) 
+            if (tmp_18) 
                 tbl_act_4.apply();
         }
         if (!hasReturned_0) {
             tbl_act_5.apply();
             dmac_1.apply();
             tbl_act_6.apply();
-            if (tmp_21) 
+            if (tmp_19) 
                 tbl_act_7.apply();
         }
         if (!hasReturned_0) 
@@ -289,14 +287,14 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
-    bit<16> tmp_22;
+    bit<16> tmp_20;
     @name("ck") Ck16() ck_2;
     action act_8() {
         ck_2.clear();
         p.ip.hdrChecksum = 16w0;
         ck_2.update<Ipv4_h>(p.ip);
-        tmp_22 = ck_2.get();
-        p.ip.hdrChecksum = tmp_22;
+        tmp_20 = ck_2.get();
+        p.ip.hdrChecksum = tmp_20;
     }
     table tbl_act_8() {
         actions = {

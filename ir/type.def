@@ -154,13 +154,6 @@ class Type_Void : Type_Base {
     dbprint { out << "void"; }
 }
 
-// This is "error" type
-class Type_Error : Type_Base {
-    toString{ return "error"; }
-    static Type_Error get();
-    dbprint { out << "error"; }
-}
-
 class Type_MatchKind : Type_Base {
     toString{ return "match_kind"; }
     static Type_MatchKind get();

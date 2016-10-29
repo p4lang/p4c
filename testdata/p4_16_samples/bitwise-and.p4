@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// p4lang/p4c#113
+// issue #113
 #include<core.p4>
 #include<v1model.p4>
 

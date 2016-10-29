@@ -32,7 +32,7 @@ enum class ResolutionType {
 class ResolutionContext : public IHasDbPrint {
     std::vector<const IR::INamespace*> stack;
     const IR::INamespace* rootNamespace;
-    std::vector<const IR::INamespace*> globals;  // errors and match_kind
+    std::vector<const IR::INamespace*> globals;  // match_kind
 
  public:
     explicit ResolutionContext(const IR::INamespace* rootNamespace) :
@@ -119,7 +119,6 @@ class ResolveReferences : public Inspector {
 #undef DECLARE
 
     bool preorder(const IR::Declaration_MatchKind* d) override;
-    bool preorder(const IR::Declaration_Errors* d) override;
     bool preorder(const IR::Declaration* d) override
     { refMap->usedName(d->getName().name); return true; }
     bool preorder(const IR::Type_Declaration* d) override
