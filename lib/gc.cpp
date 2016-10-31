@@ -69,3 +69,14 @@ void setup_gc_logging() {
     GC_start_call_back = gc_callback;
 #endif  /* HAVE_LIBGC */
 }
+
+size_t gc_mem_inuse() {
+#if HAVE_LIBGC
+    GC_word heapsize, heapfree;
+    GC_gcollect();
+    GC_get_heap_usage_safe(&heapsize, &heapfree, 0, 0, 0);
+    return heapsize - heapfree;
+#else
+    return 0;
+#endif
+}
