@@ -1175,6 +1175,8 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
             } else if (mt->name.name == corelib.lpmMatch.name) {
                 if (table_match_type != "lpm")
                     table_match_type = "lpm";
+            } else if (mt->name.name == v1model.rangeMatchType.name) {
+                continue;
             } else if (mt->name.name == v1model.selectorMatchType.name) {
                 continue;
             } else {
