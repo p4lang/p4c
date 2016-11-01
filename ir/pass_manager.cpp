@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "ir.h"
 #include "lib/gc.h"
+#include "lib/n4.h"
 
 const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *) {
     vector<std::pair<vector<Visitor *>::iterator, const IR::Node *>> backup;
@@ -28,9 +29,11 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 backup.emplace_back(it, program); } }
         try {
             try {
+                size_t maxmem;
                 LOG1(name() << " invoking " << v->name());
                 program = program->apply(**it);
-                LOG3("memory in use after " << v->name() << " " << gc_mem_inuse() << " bytes");
+                LOG3("heap after " << v->name() << ": in use " <<
+                     n4(gc_mem_inuse(&maxmem)) << "B, max " << n4(maxmem) << "B");
                 int errors = ErrorReporter::instance.getErrorCount();
                 if (stop_on_error && errors > 0)
                     program = nullptr;

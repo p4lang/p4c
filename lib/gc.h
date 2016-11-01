@@ -18,6 +18,6 @@ limitations under the License.
 #define LIB_GC_H_
 
 void setup_gc_logging();
-size_t gc_mem_inuse();  // trigger GC, return inuse after
+size_t gc_mem_inuse(size_t *max = 0);  // trigger GC, return inuse after
 
 #endif /* LIB_GC_H_ */
