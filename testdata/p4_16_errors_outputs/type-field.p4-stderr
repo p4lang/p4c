@@ -1,0 +1,7 @@
+../testdata/p4_16_errors/type-field.p4(60): error: Cannot extract field d from h which has type Type(struct h)
+    b.emit(h.d);
+             ^
+../testdata/p4_16_errors/type-field.p4(60)
+    b.emit(h.d);
+           ^
+error: Could not find type of <Member>(756) .d

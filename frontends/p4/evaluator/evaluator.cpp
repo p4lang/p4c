@@ -199,6 +199,8 @@ bool Evaluator::preorder(const IR::Member* expression) {
     LOG1("Evaluating " << expression);
     auto type = typeMap->getType(expression->expr, true);
     const IR::IDeclaration* decl = nullptr;
+    if (type->is<IR::Type_Type>())
+        type = type->to<IR::Type_Type>()->type;
     if (type->is<IR::IGeneralNamespace>()) {
         auto ns = type->to<IR::IGeneralNamespace>();
         decl = ns->getDeclsByName(expression->member.name)->nextOrDefault();

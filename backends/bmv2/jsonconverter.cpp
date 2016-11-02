@@ -221,7 +221,7 @@ class ExpressionConverter : public Inspector {
                 BUG_CHECK(expression->typeArguments->size() == 1,
                           "Expected 1 type parameter for %1%", em->method);
                 auto targ = expression->typeArguments->at(0);
-                auto typearg = converter->typeMap->getType(targ, true);
+                auto typearg = converter->typeMap->getTypeType(targ, true);
                 int width = typearg->width_bits();
                 BUG_CHECK(width > 0, "%1%: unknown width", targ);
                 auto j = new Util::JsonObject();
@@ -1574,7 +1574,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct,
                                     Util::JsonArray* headers, Util::JsonArray* headerTypes,
                                     Util::JsonArray* stacks, std::set<cstring> &headerTypesDone) {
     for (auto f : *headersStruct->fields) {
-        auto ft = typeMap->getType(f->type, true);
+        auto ft = typeMap->getType(f, true);
         auto stack = ft->to<IR::Type_Stack>();
         if (stack == nullptr)
             continue;
@@ -1584,7 +1584,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct,
         json->emplace("name", nameFromAnnotation(f->annotations, f->name.name));
         json->emplace("id", nextId("stack"));
         json->emplace("size", stack->getSize());
-        auto type = typeMap->getType(stack->elementType, true);
+        auto type = typeMap->getTypeType(stack->elementType, true);
         BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
         auto ht = type->to<IR::Type_Header>();
         if (!headerTypesDone.count(ht->name)) {
@@ -1894,7 +1894,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
                                          std::set<cstring> &headerTypesCreated) {
     // TODO: this is wrong if the structs are more deeply nested.
     for (auto f : *type->fields) {
-        auto ft = typeMap->getType(f->type, true);
+        auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             auto st = ft->to<IR::Type_StructLike>();
             if (headerTypesCreated.count(st->name))
@@ -1906,7 +1906,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
     }
 
     for (auto f : *type->fields) {
-        auto ft = typeMap->getType(f->type, true);
+        auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             auto json = new Util::JsonObject();
             json->emplace("name", nameFromAnnotation(f->annotations, f->name));
@@ -1934,7 +1934,7 @@ Util::IJson* JsonConverter::typeToJson(const IR::Type_StructLike* st) {
     for (auto f : *st->fields) {
         auto field = pushNewArray(fields);
         field->append(f->name.name);
-        auto ftype = typeMap->getType(f->type, true);
+        auto ftype = typeMap->getType(f, true);
         BUG_CHECK(ftype->is<IR::Type_Bits>(), "%1%: expected a bit<> or int<> type for %2%.%3%",
                   ftype, st, f->name);
         auto type = ftype->to<IR::Type_Bits>();

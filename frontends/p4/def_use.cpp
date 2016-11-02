@@ -41,7 +41,7 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         type->is<IR::Type_Tuple>())
         return new BaseLocation(type, name);
     if (type->is<IR::Type_StructLike>()) {
-        type = typeMap->getType(type, true);  // get the canonical version
+        type = typeMap->getTypeType(type, true);  // get the canonical version
         auto st = type->to<IR::Type_StructLike>();
         auto result = new StructLocation(type, name);
         for (auto f : *st->fields) {
@@ -55,7 +55,7 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         return result;
     }
     if (type->is<IR::Type_Stack>()) {
-        type = typeMap->getType(type, true);  // get the canonical version
+        type = typeMap->getTypeType(type, true);  // get the canonical version
         auto st = type->to<IR::Type_Stack>();
         auto result = new ArrayLocation(st, name);
         for (unsigned i = 0; i < st->getSize(); i++) {

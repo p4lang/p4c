@@ -19,13 +19,6 @@ limitations under the License.
 #ifndef _CORE_P4_
 #define _CORE_P4_
 
-struct Version {
-    bit<8> major;
-    bit<8> minor;
-}
-
-const Version P4_VERSION = { 8w1, 8w2 };
-
 error {
     NoError,           // no error
     PacketTooShort,    // not enough bits in packet for extract
