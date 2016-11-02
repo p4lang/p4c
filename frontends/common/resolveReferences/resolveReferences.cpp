@@ -125,16 +125,19 @@ void ResolutionContext::done() {
 const IR::IDeclaration*
 ResolutionContext::resolveUnique(IR::ID name,
                                  P4::ResolutionType type,
-                                 bool previousOnly) const {
+                                 bool previousOnly,
+                                 bool emitError) const {
     auto decls = resolve(name, type, previousOnly);
     if (decls->empty()) {
-        ::error("Could not find declaration for %1%", name);
+        if (emitError)
+            ::error("Could not find declaration for %1%", name);
         return nullptr;
     }
     if (decls->size() > 1) {
-        ::error("Multiple matching declarations for %1%", name);
-        for (auto a : *decls)
-            ::error("Candidate: %1%", a);
+        if (emitError) {
+            ::error("Multiple matching declarations for %1%", name);
+            for (auto a : *decls)
+                ::error("Candidate: %1%", a); }
         return nullptr;
     }
     return decls->at(0);
@@ -193,7 +196,7 @@ void ResolveReferences::removeFromContext(const IR::INamespace* ns) {
 }
 
 ResolutionContext*
-ResolveReferences::resolvePathPrefix(const IR::PathPrefix* prefix) const {
+ResolveReferences::resolvePathPrefix(const IR::PathPrefix* prefix, bool emitError) const {
     ResolutionContext* result = context;
     if (prefix == nullptr)
         return result;
@@ -202,30 +205,30 @@ ResolveReferences::resolvePathPrefix(const IR::PathPrefix* prefix) const {
         result = new ResolutionContext(rootNamespace);
 
     for (IR::ID id : prefix->components) {
-        const IR::IDeclaration* decl = result->resolveUnique(id, ResolutionType::Any, !anyOrder);
+        auto* decl = result->resolveUnique(id, ResolutionType::Any, !anyOrder, emitError);
         if (decl == nullptr)
             return nullptr;
         const IR::Node* node = decl->getNode();
         if (!node->is<IR::INamespace>()) {
-            ::error("%1%: %2% is not a namespace", prefix, decl);
-            return nullptr;
-        }
+            if (emitError)
+                ::error("%1%: %2% is not a namespace", prefix, decl);
+            return nullptr; }
         result = new ResolutionContext(node->to<IR::INamespace>());
     }
 
     return result;
 }
 
-void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
+void ResolveReferences::resolvePath(const IR::Path* path, bool isType, bool emitError) const {
     LOG1("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
-    ResolutionContext* ctx = resolvePathPrefix(path->prefix);
+    ResolutionContext* ctx = resolvePathPrefix(path->prefix, emitError);
     ResolutionType k = isType ? ResolutionType::Type : ResolutionType::Any;
 
     if (resolveForward.empty())
         BUG("Empty resolveForward");
     bool allowForward = resolveForward.back();
 
-    const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, !allowForward);
+    const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, !allowForward, emitError);
     if (decl == nullptr) {
         refMap->usedName(path->name.name);
         return;
@@ -296,10 +299,10 @@ void ResolveReferences::postorder(const IR::P4Program*) {
 }
 
 bool ResolveReferences::preorder(const IR::PathExpression* path) {
-    resolvePath(path->path, false); return true; }
+    resolvePath(path->path, false, !findContext<IR::Annotation>()); return true; }
 
 bool ResolveReferences::preorder(const IR::Type_Name* type) {
-    resolvePath(type->path, true); return true; }
+    resolvePath(type->path, true, !findContext<IR::Annotation>()); return true; }
 
 bool ResolveReferences::preorder(const IR::P4Control *c) {
     refMap->usedName(c->name.name);

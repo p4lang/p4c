@@ -157,6 +157,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Mux* a) override;
     bool preorder(const IR::ConstructorCallExpression* e) override;
     bool preorder(const IR::Member* e) override;
+    bool preorder(const IR::NamedRef* e) override;
     bool preorder(const IR::SelectCase* e) override;
     bool preorder(const IR::SelectExpression* e) override;
     bool preorder(const IR::ListExpression* e) override;
@@ -165,7 +166,6 @@ class ToP4 : public Inspector {
     bool preorder(const IR::This* e) override;
 
     // vectors
-    bool preorder(const IR::Vector<IR::Annotation>* v) override;
     bool preorder(const IR::Vector<IR::Type>* v) override;
     bool preorder(const IR::Vector<IR::Expression>* v) override;
     bool preorder(const IR::Vector<IR::SelectCase>* v) override;
