@@ -1264,9 +1264,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
                 meterMap.setSize(decl, size);
                 BUG_CHECK(decl->is<IR::Declaration_Instance>(),
                           "%1%: expected an instance", decl->getNode());
-                cstring dmname = nameFromAnnotation(
-                    decl->to<IR::Declaration_Instance>()->annotations, decl->getName());
-                result->emplace("direct_meters", dmname);
+                result->emplace("direct_meters", decl->getName());
             }
         } else {
             ::error("%1%: expected a Boolean", timeout);
