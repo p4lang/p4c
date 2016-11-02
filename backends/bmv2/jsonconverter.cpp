@@ -1887,9 +1887,9 @@ void JsonConverter::generateUpdate(const IR::P4Control* updateControl,
                     }
                 }
             }
-        } else if (auto apply = stat->to<IR::MethodCallStatement>()) {
-            BUG_CHECK(apply->methodCall->method->to<IR::Member>()->member == "apply",
-                      "Call of something other than an apply method");
+        } else if (auto mc = stat->to<IR::MethodCallStatement>()) {
+            auto mi = P4::MethodInstance::resolve(mc->methodCall, refMap, typeMap, true);
+            BUG_CHECK(mi && mi->isApply(), "Call of something other than an apply method");
             // FIXME -- ignore for now
             continue;
         }
