@@ -61,7 +61,7 @@ static const std::map<cstring, primitive_info_t> prim_info = {
     { "min",                    { 3, 3, 0x1, 0x7 } },
     { "modify_field",           { 2, 3, 0x1, 0x7 } },
     { "modify_field_from_rng",  { 2, 3, 0x1, 0x5 } },
-    { "modify_field_rng_uniform", { 2, 3, 0x1, 0x5 } },
+    { "modify_field_rng_uniform", { 3, 3, 0x1, 0x5 } },
     { "modify_field_with_hash_based_offset",    { 4, 4, 0x1, 0x0 } },
     { "no_op",                  { 0, 0, 0x0, 0x0 } },
     { "pop",                    { 2, 2, 0x1, 0x0 } },

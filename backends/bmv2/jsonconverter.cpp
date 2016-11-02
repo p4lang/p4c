@@ -784,7 +784,7 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         auto parameters = mkParameters(primitive);
                         auto dest = conv->convert(mc->arguments->at(0));
                         parameters->append(dest);
-                        parameters->append("reg");
+                        parameters->append(reg);
                         auto index = conv->convert(mc->arguments->at(1));
                         parameters->append(index);
                         continue;
@@ -923,14 +923,16 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     (void)mkParameters(primitive);
                     continue;
                 } else if (ef->method->name == v1model.random.name) {
-                    BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
+                    BUG_CHECK(mc->arguments->size() == 3, "Expected 3 arguments for %1%", mc);
                     auto primitive =
                             mkPrimitive(v1model.random.modify_field_rng_uniform.name, result);
                     auto params = mkParameters(primitive);
-                    auto range = conv->convert(mc->arguments->at(0));
-                    auto dest = conv->convert(mc->arguments->at(1));
+                    auto dest = conv->convert(mc->arguments->at(0));
+                    auto lo = conv->convert(mc->arguments->at(1));
+                    auto hi = conv->convert(mc->arguments->at(2));
                     params->append(dest);
-                    params->append(range);
+                    params->append(lo);
+                    params->append(hi);
                     continue;
                 }
             }

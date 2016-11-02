@@ -989,8 +989,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
                                                emptyTypeArguments, args);
         return new IR::MethodCallStatement(mc->srcInfo, mc);
-    } else if (primitive->name == "modify_field_from_rng" ||
-               primitive->name == "modify_field_rng_uniform") {
+    } else if (primitive->name == "modify_field_from_rng") {
         BUG_CHECK(primitive->operands.size() == 2 || primitive->operands.size() == 3,
                   "Expected 2 or 3 operands for %1%", primitive);
         auto field = conv.convert(primitive->operands.at(0));
@@ -1004,9 +1003,12 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
                                                  IR::Annotations::empty,
                                                  v1model.random.resultType, nullptr);
         auto args = new IR::Vector<IR::Expression>();
-        args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
-                                     v1model.random.logRangeType, logRange));
         args->push_back(new IR::PathExpression(tmpvar));
+        args->push_back(new IR::Constant(primitive->operands.at(1)->srcInfo,
+                                         v1model.random.resultType, 0));
+        auto one = new IR::Constant(primitive->operands.at(1)->srcInfo, 1);
+        args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo, v1model.random.resultType,
+                                     new IR::Sub(new IR::Shl(one, logRange), one)));
         auto random = new IR::PathExpression(v1model.random.Id());
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, random,
                                                emptyTypeArguments, args);
@@ -1025,6 +1027,22 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         components->push_back(assign);
         auto block = new IR::BlockStatement(Util::SourceInfo(), IR::Annotations::empty, components);
         return block;
+    } else if (primitive->name == "modify_field_rng_uniform") {
+        BUG_CHECK(primitive->operands.size() == 3, "Expected 3 operands for %1%", primitive);
+        auto field = conv.convert(primitive->operands.at(0));
+        auto lo = conv.convert(primitive->operands.at(1));
+        auto hi = conv.convert(primitive->operands.at(2));
+        auto args = new IR::Vector<IR::Expression>();
+        args->push_back(field);
+        args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
+                                     v1model.random.resultType, lo));
+        args->push_back(new IR::Cast(primitive->operands.at(1)->srcInfo,
+                                     v1model.random.resultType, hi));
+        auto random = new IR::PathExpression(v1model.random.Id());
+        auto mc = new IR::MethodCallExpression(primitive->srcInfo, random,
+                                               emptyTypeArguments, args);
+        auto call = new IR::MethodCallStatement(primitive->srcInfo, mc);
+        return call;
     } else if (primitive->name == "recirculate") {
         OPS_CK(primitive, 1);
         auto right = convertFieldList(primitive->operands.at(0));

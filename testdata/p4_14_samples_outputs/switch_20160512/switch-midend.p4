@@ -3437,7 +3437,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     headers hdr_83;
     metadata meta_83;
     standard_metadata_t standard_metadata_83;
-    bit<32> tmp;
     headers hdr_84;
     metadata meta_84;
     standard_metadata_t standard_metadata_84;
@@ -3937,8 +3936,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta_83.ingress_metadata.ingress_port = standard_metadata_83.ingress_port;
         meta_83.l2_metadata.same_if_check = meta_83.ingress_metadata.ifindex;
         standard_metadata_83.egress_spec = 9w511;
-        random(5w0, tmp);
-        meta_83.ingress_metadata.sflow_take_sample[30:0] = tmp[30:0];
+        random(meta_83.ingress_metadata.sflow_take_sample, 32w0, 32w0x7fffffff);
     }
     @name("process_global_params.switch_config_params") table process_global_params_switch_config_params_0() {
         actions = {
