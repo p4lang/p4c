@@ -44,11 +44,12 @@ cstring IR::dbp(const IR::INode* node) {
         if (node->is<IR::IDeclaration>()) {
             node->getNode()->Node::dbprint(str);
             str << " " << node->to<IR::IDeclaration>()->getName();
-        } else if (node->is<IR::Type_MethodBase>()) {
-            str << node;
         } else if (node->is<IR::Member>()) {
             node->getNode()->Node::dbprint(str);
             str << " ." << node->to<IR::Member>()->member;
+        } else if (node->is<IR::Type_Type>()) {
+            node->getNode()->Node::dbprint(str);
+            str << "(" << dbp(node->to<IR::Type_Type>()->type) << ")";
         } else if (node->is<IR::PathExpression>() ||
                    node->is<IR::Path>() ||
                    node->is<IR::TypeNameExpression>() ||

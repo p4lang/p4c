@@ -220,7 +220,7 @@ class ExpressionConverter : public Inspector {
                 BUG_CHECK(expression->typeArguments->size() == 1,
                           "Expected 1 type parameter for %1%", em->method);
                 auto targ = expression->typeArguments->at(0);
-                auto typearg = converter->typeMap->getType(targ, true);
+                auto typearg = converter->typeMap->getTypeType(targ, true);
                 int width = typearg->width_bits();
                 BUG_CHECK(width > 0, "%1%: unknown width", targ);
                 auto j = new Util::JsonObject();
@@ -1590,7 +1590,7 @@ unsigned JsonConverter::nextId(cstring group) {
 
 void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     for (auto f : *headersStruct->fields) {
-        auto ft = typeMap->getType(f->type, true);
+        auto ft = typeMap->getType(f, true);
         auto stack = ft->to<IR::Type_Stack>();
         if (stack == nullptr)
             continue;
@@ -1600,7 +1600,7 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         json->emplace("name", nameFromAnnotation(f->annotations, f->name.name));
         json->emplace("id", nextId("stack"));
         json->emplace("size", stack->getSize());
-        auto type = typeMap->getType(stack->elementType, true);
+        auto type = typeMap->getTypeType(stack->elementType, true);
         BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
         auto ht = type->to<IR::Type_Header>();
         createJsonType(ht);
@@ -1910,7 +1910,7 @@ void JsonConverter::generateUpdate(const IR::P4Control* updateControl,
 void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
     // TODO: this is wrong if the structs are more deeply nested.
     for (auto f : *type->fields) {
-        auto ft = typeMap->getType(f->type, true);
+        auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             auto st = ft->to<IR::Type_StructLike>();
             createJsonType(st);
@@ -1918,7 +1918,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
     }
 
     for (auto f : *type->fields) {
-        auto ft = typeMap->getType(f->type, true);
+        auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             auto json = new Util::JsonObject();
             json->emplace("name", nameFromAnnotation(f->annotations, f->name));
@@ -1941,7 +1941,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
 void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
                                Util::JsonArray *fields) {
     for (auto f : *st->fields) {
-        auto ftype = typeMap->getType(f->type, true);
+        auto ftype = typeMap->getType(f, true);
         if (auto nested = ftype->to<IR::Type_StructLike>()) {
             pushFields(prefix + f->name.name + ".", nested, fields);
         } else if (auto nested = ftype->to<IR::Type_Tuple>()) {

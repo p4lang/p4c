@@ -21,8 +21,6 @@ limitations under the License.
 
 #include "core.p4"
 
-const Version v1modelVersion = { 8w0, 8w1 };
-
 match_kind {
     range,
     // Used for implementing dynamic_action_selection

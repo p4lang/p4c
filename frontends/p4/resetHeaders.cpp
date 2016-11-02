@@ -23,7 +23,7 @@ void DoResetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
         auto sl = type->to<IR::Type_StructLike>();
         for (auto f : *sl->fields) {
-            auto ftype = typeMap->getType(f->type, true);
+            auto ftype = typeMap->getType(f, true);
             auto member = new IR::Member(Util::SourceInfo(), expr, f->name);
             generateResets(typeMap, ftype, member, resets);
         }

@@ -63,7 +63,8 @@ class Local(object):
     pass
 
 def run_timeout(options, args, timeout, stderr):
-    # if options.verbose:
+    if options.verbose:
+        print(args[0], args[len(args) - 1])  # handy for manual cut-and-paste
     print(" ".join(args))
     local = Local()
     local.process = None

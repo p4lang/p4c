@@ -82,6 +82,7 @@ class TypeInference : public Transform {
 
  protected:
     const IR::Type* getType(const IR::Node* element) const;
+    const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
     void setLeftValue(const IR::Expression* expression)
     { typeMap->setLeftValue(expression); }
@@ -123,11 +124,10 @@ class TypeInference : public Transform {
     // Converts each type to a canonical representation.
     const IR::Type* canonicalize(const IR::Type* type);
     const IR::IndexedVector<IR::StructField>* canonicalizeFields(const IR::Type_StructLike* type);
-    const IR::ParameterList* canonicalize(const IR::ParameterList* params);
-    const IR::TypeParameters* canonicalize(const IR::TypeParameters* params);
+    const IR::ParameterList* canonicalizeParameters(const IR::ParameterList* params);
 
     // various helpers
-    bool validateFields(const IR::Type_StructLike* type,
+    void validateFields(const IR::Type* type,
                         std::function<bool(const IR::Type*)> checker) const;
     const IR::Node* binaryBool(const IR::Operation_Binary* op);
     const IR::Node* binaryArith(const IR::Operation_Binary* op);
@@ -148,6 +148,7 @@ class TypeInference : public Transform {
                                    const IR::Type_Extern* ext,
                                    const IR::Vector<IR::Expression> *arguments);
     bool checkParameters(const IR::ParameterList* paramList, bool forbidModules = false) const;
+    const IR::Type* setTypeType(const IR::Type* type, bool learn = true);
 
     //////////////////////////////////////////////////////////////
 
@@ -168,15 +169,16 @@ class TypeInference : public Transform {
     // before the returns
     const IR::Node* preorder(IR::Function* function) override;
     const IR::Node* preorder(IR::P4Program* program) override;
+    const IR::Node* preorder(IR::Declaration_Instance* decl) override;
 
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* constant) override;
-    const IR::Node* preorder(IR::Declaration_Instance* decl) override;
     const IR::Node* postorder(IR::P4Control* cont) override;
     const IR::Node* postorder(IR::P4Parser* cont) override;
     const IR::Node* postorder(IR::Method* method) override;
 
+    const IR::Node* postorder(IR::Type_Type* type) override;
     const IR::Node* postorder(IR::Type_Error* decl) override;
     const IR::Node* postorder(IR::Type_InfInt* type) override;
     const IR::Node* postorder(IR::Type_Method* type) override;

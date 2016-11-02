@@ -44,6 +44,21 @@ inline bool operator>>(cstring s, IR::Direction &d) {
 }
 #end
 
+// Represents the type of a type.
+// For example, in a declaration like
+// bit<32> x;
+// The type of x is Type_Bits(32);
+// The type of 'bit<32>' is Type_Type(Type_Bits(32))
+// TypeType should not appear in the program IR, just in the TypeMap produced
+// by type-checking.
+class Type_Type : Type {
+    Type type;
+    toString { return "Type(" + type->toString() + ")"; }
+    dbprint { out << "Type(" << type << ")"; }
+    Type getP4Type() const override { return type; }
+    validate { BUG_CHECK(!type->is<IR::Type_Type>(), "%1%: nested Type_Type", type); }
+}
+
 class Type_Boolean : Type_Base {
     static Type_Boolean get();
     int width_bits() const override { return 1; }
@@ -251,7 +266,7 @@ class Type_Tuple : Type {
 }
 
 // The type of an architectural block.
-// Abstract base for control, parser and package types.
+// Abstract base for Type_Control, Type_Parser and Type_Package
 abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated {
     Annotations    annotations;
     TypeParameters typeParameters;
@@ -377,8 +392,8 @@ class Type_ActionEnum : Type {
 }
 
 abstract Type_MethodBase : Type, IMayBeGenericType {
+    // we generally want type parameters visited first
     optional TypeParameters typeParameters = new TypeParameters();
-    // we generally want these visited first
     optional NullOK Type returnType = nullptr;
     // nullptr for constructors or functors; nullptr is not void
     ParameterList parameters;
@@ -390,7 +405,7 @@ abstract Type_MethodBase : Type, IMayBeGenericType {
         cstring result = "";
         if (returnType != nullptr)
             result = returnType->toString();
-        result += " _";
+        result += " function";
         result += typeParameters->toString();
         result += "(";
         result += parameters->toString();

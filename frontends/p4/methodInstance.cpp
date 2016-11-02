@@ -97,7 +97,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
 ConstructorCall*
 ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
                          ReferenceMap* refMap, TypeMap* typeMap) {
-    auto t = typeMap->getType(cce->constructedType, true);
+    auto t = typeMap->getTypeType(cce->constructedType, true);
     ConstructorCall* result;
     const IR::Vector<IR::Type>* typeArguments = nullptr;
     const IR::Type_Name* type;
@@ -114,19 +114,19 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
 
     if (t->is<IR::Type_SpecializedCanonical>()) {
         auto tsc = t->to<IR::Type_SpecializedCanonical>();
-        t = typeMap->getType(tsc->baseType, true);
+        t = typeMap->getTypeType(tsc->baseType, true);
     }
 
     if (t->is<IR::Type_Extern>()) {
         auto ext = refMap->getDeclaration(type->path, true);
-        BUG_CHECK(ext->is<IR::Type_Extern>(), "%1%: expected an extern type", ext);
+        BUG_CHECK(ext->is<IR::Type_Extern>(), "%1%: expected an extern type", dbp(ext));
         result = new ExternConstructorCall(ext->to<IR::Type_Extern>());
     } else if (t->is<IR::IContainer>()) {
         auto cont = refMap->getDeclaration(type->path, true);
-        BUG_CHECK(cont->is<IR::IContainer>(), "%1%: expected a container", cont);
+        BUG_CHECK(cont->is<IR::IContainer>(), "%1%: expected a container", dbp(cont));
         result = new ContainerConstructorCall(cont->to<IR::IContainer>());
     } else {
-        BUG("Unexpected constructor call %1%; type is %2%", cce, t);
+        BUG("Unexpected constructor call %1%; type is %2%", dbp(cce), dbp(t));
     }
     result->cce = cce;
     result->typeArguments = typeArguments;

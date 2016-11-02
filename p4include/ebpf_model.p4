@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@ limitations under the License.
 #ifndef _EBPF_MODEL_P4_
 #define _EBPF_MODEL_P4_
 
-#include "core.p4"
-
-const Version ebpf_version = { 8w0, 8w1 };
+#include <core.p4>
 
 extern CounterArray {
     /* Allocate an array of counters.
