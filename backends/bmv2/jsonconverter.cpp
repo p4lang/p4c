@@ -1966,6 +1966,7 @@ void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
         field->append(false);
     }
 }
+
 void JsonConverter::pushFields(cstring prefix, const IR::Type_Tuple *tt,
                                Util::JsonArray *fields) {
     int idx = 1;
