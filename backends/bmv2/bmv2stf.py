@@ -27,6 +27,7 @@ import tempfile
 import shutil
 import difflib
 import subprocess
+import signal
 import time
 import random
 import errno
@@ -40,6 +41,11 @@ except ImportError:
 
 SUCCESS = 0
 FAILURE = 1
+
+class TimeoutException(Exception): pass
+def signal_handler(signum, frame):
+    raise TimeoutException, "Timed out!"
+signal.signal(signal.SIGALRM, signal_handler)
 
 class Options(object):
     def __init__(self):
@@ -448,13 +454,20 @@ class RunBMV2(object):
                 print("Running", " ".join(runswitch))
             sw = subprocess.Popen(runswitch, cwd=self.folder)
 
-            # open input interfaces
-            # DANGER -- it is critical that we open these fifos in the same order as bmv2,
-            # as otherwise we'll deadlock.  Would be nice if we could open nonblocking.
-            for interface in sorted(self.interfaces):
-                ifname = self.interfaces[interface]
-                fp = self.interfaces[interface] = RawPcapWriter(ifname, linktype=0)
-                fp._write_header(None)
+            try:
+                # open input interfaces
+                # DANGER -- it is critical that we open these fifos in the same order as bmv2,
+                # as otherwise we'll deadlock.  Would be nice if we could open nonblocking.
+                signal.alarm(2)
+                # if it takes more than 2 seconds to open, assume bmv2 crashed
+                for interface in sorted(self.interfaces):
+                    ifname = self.interfaces[interface]
+                    fp = self.interfaces[interface] = RawPcapWriter(ifname, linktype=0)
+                    fp._write_header(None)
+                signal.alarm(0)
+            except TimeoutException:
+                return FAILURE
+
             if len(self.interfaces) == 0:
                 # opening interfaces synchronizes with bmv2 startup, so only
                 # need to wait if there are none
