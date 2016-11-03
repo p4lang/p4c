@@ -17,6 +17,7 @@ limitations under the License.
 #include "actionSynthesis.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/fromv1.0/v1model.h"
 
 namespace P4 {
 
@@ -111,9 +112,22 @@ bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
         if (!mi->is<ExternMethod>())
             return true;
         auto em = mi->to<ExternMethod>();
-        auto corelib = P4::P4CoreLibrary::instance;
+        auto &corelib = P4::P4CoreLibrary::instance;
         if (em->originalExternType->name.name == corelib.packetOut.name &&
             em->method->name.name == corelib.packetOut.emit.name)
+            return false;
+    }
+    return true;
+}
+
+bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement *assign) {
+    if (auto mc = assign->right->to<IR::MethodCallExpression>()) {
+        auto mi = MethodInstance::resolve(mc, refMap, typeMap);
+        if (!mi->is<ExternMethod>())
+            return true;
+        auto em = mi->to<ExternMethod>();
+        auto &v1model = P4V1::V1Model::instance;
+        if (em->originalExternType->name.name == v1model.ck16.name)
             return false;
     }
     return true;
@@ -138,8 +152,9 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
 
     for (auto c : *statement->components) {
         if (c->is<IR::AssignmentStatement>()) {
-            actbody->push_back(c);
-            continue;
+            if (mustMove(c->to<IR::AssignmentStatement>())) {
+                actbody->push_back(c);
+                continue; }
         } else if (c->is<IR::MethodCallStatement>()) {
             if (mustMove(c->to<IR::MethodCallStatement>())) {
                 actbody->push_back(c);
@@ -200,7 +215,9 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
 }
 
 const IR::Node* DoSynthesizeActions::preorder(IR::AssignmentStatement* statement) {
-    return createAction(statement);
+    if (mustMove(statement))
+        return createAction(statement);
+    return statement;
 }
 
 const IR::Node* DoSynthesizeActions::preorder(IR::MethodCallStatement* statement) {
@@ -208,6 +225,5 @@ const IR::Node* DoSynthesizeActions::preorder(IR::MethodCallStatement* statement
         return createAction(statement);
     return statement;
 }
-
 
 }  // namespace P4

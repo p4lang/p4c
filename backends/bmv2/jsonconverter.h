@@ -70,17 +70,23 @@ class JsonConverter final {
     const IR::Parameter*   userMetadataParameter;
     const IR::Parameter*   stdMetadataParameter;
 
+ private:
+    Util::JsonArray *headerTypes;
+    std::map<cstring, cstring> headerTypesCreated;
+    std::map<const IR::Type_Tuple *, cstring> tupleTypesCreated;
+    Util::JsonArray *headerInstances;
+    Util::JsonArray *headerStacks;
+    friend class ExpressionConverter;
+
  protected:
-    Util::IJson* typeToJson(const IR::Type_StructLike* type);
+    void pushFields(cstring prefix, const IR::Type_StructLike *st, Util::JsonArray *fields);
+    void pushFields(cstring prefix, const IR::Type_Tuple *tt, Util::JsonArray *fields);
+    cstring createJsonType(const IR::Type_StructLike *type);
+    cstring createJsonType(const IR::Type_Tuple *type);
     unsigned nextId(cstring group);
-    void addHeaderStacks(const IR::Type_Struct* headersStruct,
-                         Util::JsonArray* headers, Util::JsonArray* headerTypes,
-                         Util::JsonArray* stacks, std::set<cstring> &headerTypesCreated);
-    void addLocals(Util::JsonArray* headerTYpes, Util::JsonArray* instances,
-                   Util::JsonArray* stacks, std::set<cstring> &headerTypesCreated);
-    void addTypesAndInstances(const IR::Type_StructLike* type, bool meta,
-                              Util::JsonArray* headerTypes, Util::JsonArray* instances,
-                              std::set<cstring> &headerTypesCreated);
+    void addHeaderStacks(const IR::Type_Struct* headersStruct);
+    void addLocals();
+    void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                            Util::JsonArray* result, Util::JsonArray* fieldLists,
                            Util::JsonArray* calculations, Util::JsonArray* learn_lists);

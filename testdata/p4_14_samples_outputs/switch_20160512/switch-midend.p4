@@ -3437,7 +3437,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     headers hdr_83;
     metadata meta_83;
     standard_metadata_t standard_metadata_83;
-    bit<32> tmp;
     headers hdr_84;
     metadata meta_84;
     standard_metadata_t standard_metadata_84;
@@ -3937,8 +3936,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta_83.ingress_metadata.ingress_port = standard_metadata_83.ingress_port;
         meta_83.l2_metadata.same_if_check = meta_83.ingress_metadata.ifindex;
         standard_metadata_83.egress_spec = 9w511;
-        random(5w0, tmp);
-        meta_83.ingress_metadata.sflow_take_sample[30:0] = tmp[30:0];
+        random(meta_83.ingress_metadata.sflow_take_sample, 32w0, 32w0x7fffffff);
     }
     @name("process_global_params.switch_config_params") table process_global_params_switch_config_params_0() {
         actions = {
@@ -7367,29 +7365,11 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
 control computeChecksum(inout headers hdr, inout metadata meta) {
     @name("inner_ipv4_checksum") Checksum16() inner_ipv4_checksum_2;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
-    action act_97() {
-        hdr.inner_ipv4.hdrChecksum = inner_ipv4_checksum_2.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
-    }
-    action act_98() {
-        hdr.ipv4.hdrChecksum = ipv4_checksum_2.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-    }
-    table tbl_act_97() {
-        actions = {
-            act_97();
-        }
-        const default_action = act_97();
-    }
-    table tbl_act_98() {
-        actions = {
-            act_98();
-        }
-        const default_action = act_98();
-    }
     apply {
         if (hdr.inner_ipv4.ihl == 4w5) 
-            tbl_act_97.apply();
+            hdr.inner_ipv4.hdrChecksum = inner_ipv4_checksum_2.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr });
         if (hdr.ipv4.ihl == 4w5) 
-            tbl_act_98.apply();
+            hdr.ipv4.hdrChecksum = ipv4_checksum_2.get<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
     }
 }
 

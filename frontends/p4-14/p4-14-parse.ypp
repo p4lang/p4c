@@ -600,6 +600,10 @@ field_match_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>(); }
       { ($$=$1)->push_back(new IR::Primitive(@2+@4, $4, $2));
         $$->srcInfo += @2 + @4;
         $<Table>-2->reads_types.push_back(IR::ID(@4, $4)); }
+    | field_match_list header_ref '.' VALID ':' name ';'
+      { ($$=$1)->push_back(new IR::Primitive(@2+@4, $4, $2));
+        $$->srcInfo += @2 + @6;
+        $<Table>-2->reads_types.push_back(IR::ID(@6, $6)); }
     | field_match_list error ';' { $$ = $1; }
     | field_match_list error { $$ = $1; }
 ;

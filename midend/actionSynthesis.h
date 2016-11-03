@@ -71,12 +71,13 @@ class DoSynthesizeActions : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
     std::vector<const IR::P4Action*> actions;  // inserted actions
-    bool moveEmits = false;
+    bool moveEmits = false;   // FIXME -- always false, remove it?
     bool changes = false;
 
  public:
     // If true the statement must be moved to an action
     bool mustMove(const IR::MethodCallStatement* statement);
+    bool mustMove(const IR::AssignmentStatement* statement);
 
     // If moveEmits is true, move emit statements to actions, else
     // leave them in control blocks.

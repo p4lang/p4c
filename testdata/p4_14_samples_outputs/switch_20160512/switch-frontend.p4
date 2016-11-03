@@ -3222,7 +3222,6 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
 }
 
 control process_global_params(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<32> tmp_0;
     @name("deflect_on_drop") action deflect_on_drop_0(bit<1> enable_dod) {
         meta.intrinsic_metadata.deflect_on_drop = enable_dod;
     }
@@ -3232,8 +3231,7 @@ control process_global_params(inout headers hdr, inout metadata meta, inout stan
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
         standard_metadata.egress_spec = 9w511;
-        random(5w0, tmp_0);
-        meta.ingress_metadata.sflow_take_sample[30:0] = tmp_0[30:0];
+        random(meta.ingress_metadata.sflow_take_sample, 32w0, 32w0x7fffffff);
     }
     @name("switch_config_params") table switch_config_params_0() {
         actions = {
