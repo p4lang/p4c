@@ -93,10 +93,7 @@ class Node : public virtual INode {
     static cstring static_type_name() { return "Node"; }
     virtual int num_children() { return 0; }
     template<typename T> bool is() const { return to<T>() != nullptr; }
-    template<typename T> const T* to() const {
-        CHECK_NULL(this);
-        return dynamic_cast<const T*>(this);
-    }
+    template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
     explicit Node(JSONLoader &json);
     cstring toString() const override { return node_type_name(); }
     void toJSON(JSONGenerator &json) const override;

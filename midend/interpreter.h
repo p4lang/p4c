@@ -41,11 +41,9 @@ class SymbolicValue {
     virtual bool isScalar() const = 0;
     virtual void dbprint(std::ostream& out) const = 0;
     template<typename T> T* to() {
-        CHECK_NULL(this);
         auto result = dynamic_cast<T*>(this);
         CHECK_NULL(result); return result; }
     template<typename T> const T* to() const {
-        CHECK_NULL(this);
         auto result = dynamic_cast<const T*>(this);
         CHECK_NULL(result); return result; }
     template<typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
