@@ -175,11 +175,25 @@ class TableKeyInstance(object):
         found = False
         if key in self.key.fields:
             found = True
-        else:
+        elif key + '$' in self.key.fields:
+            key = key + '$'
+            found = True
+        elif key.endswith(".valid"):
+            alt = key[:-5] + "$valid$"
+            if alt in self.key.fields:
+                key = alt
+                found = True
+        if not found:
             for i in self.key.fields:
-                if i.endswith("." + key):
+                if i.endswith("." + key) or i.endswith("." + key + "$"):
                     key = i
                     found = True
+                elif key == "valid" and i.endswith(".$valid$"):
+                    key = i
+                    found = True
+        if not found and key == "valid" and "$valid$" in self.key.fields:
+            key = "$valid$"
+            found = True
         if not found:
             raise Exception("Unexpected key field " + key)
         if self.key.fields[key] == "ternary":
@@ -189,6 +203,8 @@ class TableKeyInstance(object):
         else:
             self.values[key] = value
     def makeMask(self, value):
+        # TODO -- we really need to know the size of the key to make the mask properly,
+        # but to find that, we need to parse the headers and header_types from the json
         if value.startswith("0x"):
             mask = "F"
             value = value[2:]
@@ -202,6 +218,7 @@ class TableKeyInstance(object):
             value = value[2:]
             prefix = "0o"
         else:
+            raise Exception("Decimal value "+value+" not supported for ternary key")
             return value
         values = "0123456789abcdefABCDEF*"
         replacements = (mask * 22) + "0"
