@@ -1174,6 +1174,16 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
             } else if (mt->name.name == corelib.ternaryMatch.name) {
                 if (table_match_type == "exact")
                     table_match_type = "ternary";
+                if (expr->is<IR::MethodCallExpression>()) {
+                    auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
+                                                          refMap, typeMap);
+                    if (mi->is<P4::BuiltInMethod>()) {
+                        auto bim = mi->to<P4::BuiltInMethod>();
+                        if (bim->name == IR::Type_Header::isValid) {
+                            expr = new IR::Member(bim->appliedTo, "$valid$");
+                        }
+                    }
+                }
             } else if (mt->name.name == corelib.lpmMatch.name) {
                 if (table_match_type != "lpm")
                     table_match_type = "lpm";
