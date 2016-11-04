@@ -35,7 +35,7 @@ struct Parser_Model : public ::Model::Elem {
             packetParam("packet", P4::P4CoreLibrary::instance.packetIn, 0),
             headersParam("hdr", headersType, 1),
             metadataParam("meta", userMetaType, 2),
-            standardMetadataParam("stdMeta", standardMetadataType, 3)
+            standardMetadataParam("standard_metadata", standardMetadataType, 3)
     {}
     ::Model::Param_Model packetParam;
     ::Model::Param_Model headersParam;

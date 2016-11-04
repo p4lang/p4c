@@ -112,7 +112,11 @@ extern void recirculate<T>(in T data);
 extern void clone(in CloneType type, in bit<32> session);
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
-// Architecture
+// The name 'standard_metadata' is reserved
+
+// Architecture.
+// M should be a struct of structs
+// H should be a struct of headers or stacks
 
 parser Parser<H, M>(packet_in b,
                     out H parsedHdr,
