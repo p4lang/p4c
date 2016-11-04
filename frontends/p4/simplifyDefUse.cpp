@@ -197,9 +197,12 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::SwitchStatement* statement) override {
+        LOG1("Visiting " << dbp(statement));
         visit(statement->expression);
-        for (auto c : statement->cases)
+        for (auto c : statement->cases) {
+            LOG1("Visiting " << dbp(c));
             visit(c);
+        }
         return setCurrent(statement);
     }
 

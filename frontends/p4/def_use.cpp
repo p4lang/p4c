@@ -725,6 +725,7 @@ bool ComputeWriteSet::preorder(const IR::EmptyStatement*) {
 }
 
 bool ComputeWriteSet::preorder(const IR::AssignmentStatement* statement) {
+    LOG1("Visiting " << dbp(statement));
     lhs = true;
     visit(statement->left);
     lhs = false;
@@ -743,9 +744,10 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
     auto defs = currentDefinitions->writes(getProgramPoint(), locs);
     (void)setDefinitions(defs, statement->expression);
     auto save = currentDefinitions;
-    auto result = currentDefinitions;
+    auto result = new Definitions();
     bool seenDefault = false;
     for (auto s : statement->cases) {
+        currentDefinitions = save;
         if (s->label->is<IR::DefaultExpression>())
             seenDefault = true;
         visit(s->statement);
