@@ -90,7 +90,7 @@ def run_timeout(options, args, timeout, stderr):
         print("Exit code ", local.process.returncode)
     return local.process.returncode
 
-timeout = 200  # seconds
+timeout = 300  # seconds
 
 def compare_files(options, produced, expected):
     if options.replace:
