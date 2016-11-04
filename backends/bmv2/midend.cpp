@@ -17,6 +17,7 @@ limitations under the License.
 #include "midend.h"
 #include "lower.h"
 #include "inlining.h"
+#include "copyStructures.h"
 #include "midend/actionsInlining.h"
 #include "midend/removeReturns.h"
 #include "midend/moveConstructors.h"
@@ -134,11 +135,13 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // BMv2-specific passes
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
+        // TODO: replace Tuple types with structs
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new LowerExpressions(&typeMap),
+        new CopyStructures(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })

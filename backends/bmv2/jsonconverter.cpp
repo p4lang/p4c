@@ -367,7 +367,7 @@ class ExpressionConverter : public Inspector {
             if (param == converter->stdMetadataParameter) {
                 result->emplace("type", "field");
                 auto e = mkArrayField(result, "value");
-                e->append("standard_metadata");
+                e->append(converter->jsonMetadataParameterName);
                 e->append(expression->member);
             } else {
                 if (type->is<IR::Type_Stack>()) {
@@ -404,11 +404,29 @@ class ExpressionConverter : public Inspector {
                 CHECK_NULL(l);
                 result->emplace("type", "field");
                 auto e = mkArrayField(result, "value");
-                if (l->is<Util::JsonObject>())
-                    e->append(l->to<Util::JsonObject>()->get("value"));
-                else
+                if (l->is<Util::JsonObject>()) {
+                    auto lv = l->to<Util::JsonObject>()->get("value");
+                    if (lv->is<Util::JsonArray>()) {
+                        // nested struct reference [ ["m", "f"], "x" ] => [ "m", "f.x" ]
+                        auto array = lv->to<Util::JsonArray>();
+                        BUG_CHECK(array->size() == 2, "expected 2 elements");
+                        auto first = array->at(0);
+                        auto second = array->at(1);
+                        BUG_CHECK(second->is<Util::JsonValue>(), "expected a value");
+                        e->append(first);
+                        cstring nestedField = second->to<Util::JsonValue>()->getString();
+                        nestedField += "." + expression->member.name;
+                        e->append(nestedField);
+                    } else if (lv->is<Util::JsonValue>()) {
+                        e->append(lv);
+                        e->append(expression->member.name);
+                    } else {
+                        BUG("%1%: Unexpected json", lv);
+                    }
+                } else {
                     e->append(l);
-                e->append(expression->member.name);
+                    e->append(expression->member.name);
+                }
             }
         }
         map.emplace(expression, result);
@@ -531,9 +549,10 @@ class ExpressionConverter : public Inspector {
         auto decl = converter->refMap->getDeclaration(expression->path, true);
         if (auto param = decl->to<IR::Parameter>()) {
             if (param == converter->stdMetadataParameter) {
+                // This is a flat struct
                 auto result = new Util::JsonObject();
                 result->emplace("type", "header");
-                result->emplace("value", "standard_metadata");
+                result->emplace("value", converter->jsonMetadataParameterName);
                 map.emplace(expression, result);
                 return;
             }
