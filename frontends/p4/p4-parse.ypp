@@ -577,7 +577,8 @@ specializedType
 
 baseType
     : BOOL                             { $$ = IR::Type_Boolean::get(); }
-    | T_ERROR                          { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"))); }
+    | T_ERROR                          { $$ = new IR::Type_Name(@1, new IR::Path(
+                                                                    IR::ID(@1, "error"))); }
     | BIT                              { $$ = IR::Type::Bits::get(@1, 1); }
     | BIT '<' INTEGER '>'              { $$ = IR::Type::Bits::get(@3, $3->asInt(), false); }
     | INT '<' INTEGER '>'              { $$ = IR::Type::Bits::get(@3, $3->asInt(), true); }
