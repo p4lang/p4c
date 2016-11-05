@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "midend.h"
+#include "validateProperties.h"
 #include "lower.h"
 #include "inlining.h"
 #include "copyStructures.h"
@@ -118,7 +119,7 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::SynthesizeActions(&refMap, &typeMap),
         new P4::MoveActionsToTables(&refMap, &typeMap),
-    });
+     });
 }
 
 
@@ -142,6 +143,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::TypeChecking(&refMap, &typeMap),
         new LowerExpressions(&typeMap),
         new CopyStructures(&refMap, &typeMap),
+        new ValidateTableProperties(),
         new P4::ConstantFolding(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
