@@ -44,8 +44,8 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     // Action invocation
     BUG_CHECK(ac->expr->method->is<IR::PathExpression>(),
               "%1%: Expected a PathExpression", ac->expr->method);
-    auto actionPath = new IR::PathExpression(ac->action->name);
-    auto call = new IR::MethodCallExpression(Util::SourceInfo(), actionPath,
+    auto actionPath = new IR::PathExpression(IR::ID(mc->srcInfo, ac->action->name));
+    auto call = new IR::MethodCallExpression(mc->srcInfo, actionPath,
                                              new IR::Vector<IR::Type>(), directionArgs);
     auto actinst = new IR::ActionListElement(statement->srcInfo, IR::Annotations::empty, call);
     auto actions = new IR::IndexedVector<IR::ActionListElement>();
