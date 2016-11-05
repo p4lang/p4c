@@ -125,6 +125,28 @@ class DismantleExpression : public Transform {
         typeMap->setType(result->final, type);
         if (leftValue)
             typeMap->setLeftValue(result->final);
+
+        if (TableApplySolver::isHit(expression, refMap, typeMap)) {
+            auto ctx = getContext();
+            // f(t.apply().hit) =>
+            // bool tmp;
+            // if (t.apply().hit)
+            //    tmp = true;
+            // else
+            //    tmp = false;
+            // f(tmp)
+            BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
+            if (ctx != nullptr && ctx->node->is<IR::Expression>()) {
+                auto tmp = result->createTemporary(type);
+                auto path = new IR::PathExpression(IR::ID(tmp));
+                auto tstat = new IR::AssignmentStatement(Util::SourceInfo(), path->clone(), new IR::BoolLiteral(true));
+                auto fstat = new IR::AssignmentStatement(Util::SourceInfo(), path->clone(), new IR::BoolLiteral(false));
+                auto ifStatement = new IR::IfStatement(Util::SourceInfo(), result->final, tstat, fstat);
+                result->statements->push_back(ifStatement);
+                result->final = path->clone();
+                typeMap->setType(result->final, type);
+            }
+        }
         prune();
         return result->final;
     }
@@ -245,20 +267,9 @@ class DismantleExpression : public Transform {
     const IR::Node* preorder(IR::LAnd* expression) override { return shortCircuit(expression); }
     const IR::Node* preorder(IR::LOr* expression) override { return shortCircuit(expression); }
 
-    const IR::Node* postorder(IR::Member* expression) override {
-        LOG1("Visiting " << dbp(expression));
-        auto orig = getOriginal<IR::Member>();
-        result->final = expression;
-        if (typeMap->isLeftValue(orig))
-            typeMap->setLeftValue(result->final);
-        if (typeMap->isCompileTimeConstant(orig))
-            typeMap->setCompileTimeConstant(orig);
-        return result->final;
-    }
-
     const IR::Node* preorder(IR::MethodCallExpression* mce) override {
         BUG_CHECK(!leftValue, "%1%: method on left hand side?", mce);
-        LOG1("Visiting " << mce);
+        LOG1("Visiting " << dbp(mce));
         auto orig = getOriginal<IR::MethodCallExpression>();
         auto type = typeMap->getType(orig, true);
         if (!SideEffects::check(orig, refMap, typeMap)) {

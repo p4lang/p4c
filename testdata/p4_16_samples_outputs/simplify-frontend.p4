@@ -2,6 +2,8 @@
 
 control c(out bool x) {
     bool tmp;
+    bool tmp_0;
+    bool tmp_1;
     @name("t1") table t1_0() {
         key = {
             x: exact;
@@ -22,11 +24,20 @@ control c(out bool x) {
     }
     apply {
         x = true;
-        if (!t1_0.apply().hit) 
-            tmp = false;
+        if (t1_0.apply().hit) 
+            tmp = true;
         else 
-            tmp = t2_0.apply().hit;
-        if (tmp) 
+            tmp = false;
+        if (!tmp) 
+            tmp_0 = false;
+        else {
+            if (t2_0.apply().hit) 
+                tmp_1 = true;
+            else 
+                tmp_1 = false;
+            tmp_0 = tmp_1;
+        }
+        if (tmp_0) 
             x = false;
     }
 }
