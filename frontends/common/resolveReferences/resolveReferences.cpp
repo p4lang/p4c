@@ -69,7 +69,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOn
 
             auto vector = decls->toVector();
             if (!vector->empty()) {
-                LOG2("Resolved in " << current->getNode());
+                LOG2("Resolved in " << dbp(current->getNode()));
                 return vector;
             } else {
                 continue;
@@ -105,7 +105,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool previousOn
                     continue;
             }
 
-            LOG2("Resolved in " << current->getNode());
+            LOG2("Resolved in " << dbp(current->getNode()));
             auto result = new std::vector<const IR::IDeclaration*>();
             result->push_back(decl);
             return result;
