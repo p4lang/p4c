@@ -127,7 +127,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.isv1();
     setName("MidEnd");
     refMap.setIsV1(isv1);  // must be done BEFORE creating passes
-    if (isv1)
+    if (0 && isv1)
         // TODO: This path should be eventually deprecated
         setup_for_P4_14(options);
     else
