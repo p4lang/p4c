@@ -132,7 +132,7 @@ header data_t {
 }
 
 struct metadata {
-    @name("acl_metadata") 
+    @pa_solitary("ingress", "acl_metadata.if_label") @name("acl_metadata") 
     acl_metadata_t      acl_metadata;
     @name("fabric_metadata") 
     fabric_metadata_t   fabric_metadata;

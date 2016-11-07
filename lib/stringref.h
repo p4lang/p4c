@@ -90,6 +90,8 @@ struct StringRef {
         return *this; }
     StringRef &operator++() { p++; if (len) len--; else p = 0; return *this; }  // NOLINT
     StringRef operator++(int) { StringRef rv(*this); ++*this; return rv; }
+    StringRef &operator--() { if (len) len--; else p = 0; return *this; }  // NOLINT
+    StringRef operator--(int) { StringRef rv(*this); --*this; return rv; }
     char operator[](size_t i) const { return i < len ? p[i] : 0; }
     char operator*() const { return len ? *p : 0; }
     StringRef operator+(size_t i) const {

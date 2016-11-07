@@ -63,6 +63,7 @@ class Vector : public VectorBase {
         vec.emplace_back(std::move(a)); }
     explicit Vector(const vector<const T *> &a) {
         vec.insert(vec.end(), a.begin(), a.end()); }
+    Vector(const std::initializer_list<const T *> &a) : vec(a) {}
     static Vector<T>* fromJSON(JSONLoader &json);
     typedef typename vector<const T *>::iterator        iterator;
     typedef typename vector<const T *>::const_iterator  const_iterator;
@@ -81,6 +82,7 @@ class Vector : public VectorBase {
     std::reverse_iterator<iterator> rend() { return vec.rend(); }
     std::reverse_iterator<const_iterator> rend() const { return vec.rend(); }
     size_t size() const override { return vec.size(); }
+    void resize(size_t sz) { vec.resize(sz); }
     bool empty() const override { return vec.empty(); }
     const T* const & front() const { return vec.front(); }
     const T*& front() { return vec.front(); }

@@ -46,6 +46,13 @@ static IR::Constant *constantFold(IR::Expression *);
 namespace {  // anonymous namespace
 static int yylex();
 
+static IR::Vector<IR::Annotation> current_pragmas;
+static const IR::Annotations *getPragmas() {
+    if (current_pragmas.empty()) return IR::Annotations::empty;
+    auto *rv = new IR::Annotations(current_pragmas);
+    current_pragmas.clear();
+    return rv; }
+
 %}
 
 %union {
@@ -90,8 +97,12 @@ static int yylex();
             SELECT SELECTION_KEY SELECTION_MODE SELECTION_TYPE SET_METADATA
             SIGNED SIZE STATIC TABLE TRUE TYPE UPDATE VALID VERIFY WIDTH WRITES
 
-%token<str> IDENTIFIER
+%token<str> IDENTIFIER STRING
 %token<Constant> INTEGER
+
+%printer { fprintf(yyoutput, "\"%s\"", $$.c_str()); } <str>
+%printer { fprintf(yyoutput, "\%d", $$); } <i>
+%printer { fprintf(yyoutput, "\%s", $$->toString().c_str()); } <Constant>
 
 %left EXPRLIST
 %right '='
@@ -119,8 +130,9 @@ static int yylex();
 %type<Constant>         const_expression
 %type<Counter>          counter_spec_list
 %type<Expression>       expression header_ref header_or_field_ref field_or_masked_ref opt_condition
+                        pragma_operand
 %type<ExpressionList>   expression_list opt_expression_list control_statement_list opt_else
-                        field_match_list expressions
+                        field_match_list expressions pragma_operands
 %type<FieldList>        field_list_entries
 %type<FieldListCalculation>     field_list_calculation_body
 %type<Member>           field_ref
@@ -157,8 +169,10 @@ input: /* epsilon */
     | input control_function_declaration
     | input blackbox_type_declaration
     | input blackbox_instantiation
-    | input PRAGMA
+    | input PRAGMA pragma_operands '\n'
+          { current_pragmas.push_back(new IR::Annotation(@2, $2, *$3)); }
     | input error
+          { current_pragmas.clear(); }
 ;
 
 /********************************/
@@ -166,11 +180,13 @@ input: /* epsilon */
 /********************************/
 
 header_type_declaration: HEADER_TYPE name '{' header_dec_body '}'
-      { global->add($2, new IR::v1HeaderType(@1+@5, $2,
+      { $4.annotations->append(current_pragmas);
+        current_pragmas.clear();
+        global->add($2, new IR::v1HeaderType(@1+@5, $2,
             new IR::Type_Struct(@1+@5, IR::ID(@2, $2),
-                                new IR::Annotations($4.annotations), $4.fields),
+                                new IR::Annotations(*$4.annotations), $4.fields),
             new IR::Type_Header(@1+@5, IR::ID(@2, $2),
-                                new IR::Annotations($4.annotations), $4.fields))); }
+                                new IR::Annotations(*$4.annotations), $4.fields))); }
 ;
 
 header_dec_body: FIELDS '{' field_declarations '}' opt_length opt_max_length
@@ -213,12 +229,14 @@ attrib:
 
 opt_length: /* epsilon */
     | LENGTH ':' expression ';'  /* const_expression or name */
-      { $<HeaderType>-1.annotations->emplace_back(@1+@4, "length", $3); }
+      { $<HeaderType>-1.annotations->emplace_back(@1+@4, "length",
+              IR::Vector<IR::Expression>($3)); }
     ;
 
 opt_max_length: /* epsilon */
     | MAX_LENGTH ':' const_expression ';'
-      { $<HeaderType>-2.annotations->emplace_back(@1+@4, "max_length", $3); }
+      { $<HeaderType>-2.annotations->emplace_back(@1+@4, "max_length",
+              IR::Vector<IR::Expression>($3)); }
     ;
 
 type: INT '<' INTEGER '>'
@@ -237,16 +255,16 @@ type: INT '<' INTEGER '>'
 
 header_instance:
       HEADER name name ';'
-      { global->add($3, new IR::Header(@1+@4, IR::ID(@2, $2), IR::ID(@3, $3))); }
+      { global->add($3, new IR::Header(@1+@4, IR::ID(@2, $2), IR::ID(@3, $3), getPragmas())); }
     | HEADER name name '[' const_expression ']' ';'
-      { global->add($3, new IR::HeaderStack(@1+@7, IR::ID(@2, $2), IR::ID(@3, $3),
+      { global->add($3, new IR::HeaderStack(@1+@7, IR::ID(@2, $2), IR::ID(@3, $3), getPragmas(),
                                             $5 ? $5->asLong() : 0));
         $5 = nullptr; }
     ;
 
 metadata_instance:
       METADATA name name opt_metadata_initializer ';'
-      { global->add($3, new IR::Metadata(@1+@5, IR::ID(@2, $2), IR::ID(@3, $3))); }
+      { global->add($3, new IR::Metadata(@1+@5, IR::ID(@2, $2), IR::ID(@3, $3), getPragmas())); }
     ;
 
 opt_metadata_initializer: /* epsilon */
@@ -269,7 +287,7 @@ field_list_declaration:
       /* FIXME -- empty field list? or (unneeded) forward declaration? */
 ;
 
-field_list_entries: /* epsilon */ { $$ = new IR::FieldList; }
+field_list_entries: /* epsilon */ { $$ = new IR::FieldList(getPragmas()); }
     | field_list_entries expression ';'  /* const_expression or field_ref or name */
       { ($$=$1)->fields.push_back($2); }
     | field_list_entries PAYLOAD ';'
@@ -285,7 +303,7 @@ field_list_calculation_declaration:
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; global->add($2, $4); }
 ;
 
-field_list_calculation_body: /* epsilon */ { $$ = new IR::FieldListCalculation; }
+field_list_calculation_body: /* epsilon */ { $$ = new IR::FieldListCalculation(getPragmas()); }
     | field_list_calculation_body INPUT '{' field_list_list '}'
       { if ($1->input)
             error("%s: multiple 'input' in field_list_calculation", @2);
@@ -314,7 +332,7 @@ calculated_field_declaration:
 ;
 
 update_verify_spec_list: /* epsilon */
-      { $$ = new IR::CalculatedField; }
+      { $$ = new IR::CalculatedField(getPragmas()); }
     | update_verify_spec_list UPDATE name opt_condition ';'
       { ($$=$1)->specs.emplace_back(@1+@3, true, IR::ID(@3, $3), $4); }
     | update_verify_spec_list VERIFY name opt_condition ';'
@@ -336,7 +354,7 @@ parser_function_declaration:
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; global->add($2, $4); }
 ;
 
-parser_statement_list: /* epsilon */ { $$ = new IR::V1Parser; }
+parser_statement_list: /* epsilon */ { $$ = new IR::V1Parser(getPragmas()); }
     | parser_statement_list EXTRACT '(' header_ref ')' ';'
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@5, $2, $4)); }
     | parser_statement_list SET_METADATA '(' field_ref ',' expression ')' ';'
@@ -382,6 +400,7 @@ case_value:
 
 parser_exception_declaration:
       PARSER_EXCEPTION name '{' parser_statement_list '}'
+        { current_pragmas.clear(); }
 ;
 
 /*****************/
@@ -394,7 +413,7 @@ counter_declaration: COUNTER name '{' counter_spec_list '}'
 
 counter_spec_list:
       TYPE ':' name ';'
-      { ($$ = new IR::Counter)->settype($3); }
+      { ($$ = new IR::Counter(getPragmas()))->settype($3); }
     | counter_spec_list DIRECT ':' name ';'
       { if (($$=$1)->table)
             error("%s: Can't attach counter to two tables", @2+@4);
@@ -427,7 +446,7 @@ meter_declaration : METER name '{' meter_spec_list '}'
 
 meter_spec_list:
       TYPE ':' name ';'
-      { ($$ = new IR::Meter)->settype($3); }
+      { ($$ = new IR::Meter(getPragmas()))->settype($3); }
     | meter_spec_list RESULT ':' field_ref ';'
       { ($$=$1)->result = $4; }
     | meter_spec_list PRE_COLOR ':' field_ref ';'
@@ -460,9 +479,9 @@ register_declaration: REGISTER name '{' register_spec_list '}'
 
 register_spec_list:
       WIDTH ':' const_expression ';'
-      { ($$ = new IR::Register)->width = $3 ? $3->asLong() : 0; $3 = nullptr; }
+      { ($$ = new IR::Register(getPragmas()))->width = $3 ? $3->asLong() : 0; $3 = nullptr; }
     | LAYOUT ':' name ';'
-      { ($$ = new IR::Register)->layout = IR::ID(@3, $3); }
+      { ($$ = new IR::Register(getPragmas()))->layout = IR::ID(@3, $3); }
     | register_spec_list DIRECT ':' name ';'
       { if (($$=$1)->table)
             error("%s: Can't attach register to two tables", @2+@4);
@@ -487,7 +506,7 @@ register_spec_list:
 /**************************/
 
 primitive_action_declaration: PRIMITIVE_ACTION name '(' name_list ')' ';'
-    { $4 = nullptr; }
+    { current_pragmas.clear(); $4 = nullptr; }
 ;
 
 name_list: name { $$ = new IR::NameList(@1, $1); }
@@ -515,7 +534,7 @@ action_function_body:
     | '{' action_statement_list error '}'  { $$ = $2; }
 ;
 
-action_statement_list: /* epsilon */ { $$ = new IR::ActionFunction; }
+action_statement_list: /* epsilon */ { $$ = new IR::ActionFunction(getPragmas()); }
     | action_statement_list name '(' opt_expression_list ')' ';'
       { ($$ = $1)->action.push_back(new IR::Primitive(@2+@5, $2, $4)); }
     | action_statement_list field_ref '=' expression ';'
@@ -534,7 +553,7 @@ action_profile_declaration: ACTION_PROFILE name '{' action_profile_body '}'
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; global->add($2, $4); }
     ;
 
-action_profile_body: /* epsilon */ { $$ = new IR::ActionProfile; }
+action_profile_body: /* epsilon */ { $$ = new IR::ActionProfile(getPragmas()); }
     | action_profile_body ACTIONS '{' action_list '}'
       { ($$=$1)->actions = $4->names; $4 = nullptr; }
     | action_profile_body SIZE ':' const_expression ';'
@@ -547,7 +566,7 @@ action_selector_declaration: ACTION_SELECTOR name '{' action_selector_body '}'
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; global->add($2, $4); }
     ;
 
-action_selector_body: /* epsilon */ { $$ = new IR::ActionSelector; }
+action_selector_body: /* epsilon */ { $$ = new IR::ActionSelector(getPragmas()); }
     | action_selector_body SELECTION_KEY ':' name ';'
       { ($$=$1)->key = IR::ID(@4, $4); }
     | action_selector_body SELECTION_MODE ':' name ';'
@@ -564,7 +583,7 @@ table_declaration: TABLE name '{' table_body '}'
       { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; global->add($2, $4); }
 ;
 
-table_body: /* epsilon */ { $$ = new IR::V1Table; }
+table_body: /* epsilon */ { $$ = new IR::V1Table(getPragmas()); }
     | table_body READS '{' field_match_list '}'
       { ($$=$1)->reads = $4; }
     | table_body ACTIONS '{' action_list '}'
@@ -623,7 +642,7 @@ action_list: /* epsilon */ { $$ = new IR::NameList(); }
 /*****************************************/
 
 control_function_declaration: CONTROL name '{' control_statement_list '}'
-      { global->add($2, new IR::V1Control(@1+@5, IR::ID(@2, $2), $4)); }
+      { global->add($2, new IR::V1Control(@1+@5, IR::ID(@2, $2), $4, getPragmas())); }
 ;
 
 control_statement_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>; }
@@ -660,10 +679,12 @@ apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
 /************/
 
 blackbox_type_declaration: BLACKBOX_TYPE name '{' blackbox_body '}'
+        { current_pragmas.clear(); }
 ;
 
 blackbox_body: /* epsilon */
     | blackbox_body ATTRIBUTE name '{' blackbox_attribute '}'
+    | blackbox_body METHOD name '(' opt_argument_list ')' ';'
     | blackbox_body METHOD name '(' opt_argument_list ')' '{' blackbox_method '}'
     | blackbox_body error
 ;
@@ -688,7 +709,11 @@ argument_list: argument | argument_list ',' argument ;
 
 argument: name | type | argument name | argument type;
 
-blackbox_instantiation: BLACKBOX name name '{' blackbox_config '}'
+blackbox_instantiation:
+      BLACKBOX name name ';'
+        { current_pragmas.clear(); }
+    | BLACKBOX name name '{' blackbox_config '}'
+        { current_pragmas.clear(); }
 ;
 
 blackbox_config: /* epsilon */
@@ -700,6 +725,23 @@ expressions: /* epsilon */
       { $$ = new IR::Vector<IR::Expression>; }
     | expressions expression %prec EXPRLIST
       { ($$=$1)->push_back($2); $$->srcInfo += @2; }
+    | expressions ',' expression %prec EXPRLIST
+      { ($$=$1)->push_back($3); $$->srcInfo += @3; }
+;
+
+pragma_operands: /* epsilon */
+      { $$ = new IR::Vector<IR::Expression>; }
+    | pragma_operands pragma_operand
+      { ($$=$1)->push_back($2); $$->srcInfo += @2; }
+    | pragma_operands ',' pragma_operand
+      { ($$=$1)->push_back($3); $$->srcInfo += @3; }
+;
+
+pragma_operand:
+      INTEGER { $$ = $1; }
+    | STRING { $$ = new IR::StringLiteral($1); }
+    | name { $$ = new IR::StringLiteral($1); }
+    | name '.' name { $$ = new IR::StringLiteral($1 + '.' + $3); }
 ;
 
 /***************/
@@ -768,7 +810,6 @@ expression_list:
     ;
 
 opt_expression_list: /* epsilon */ { $$ = nullptr; } | expression_list
-
 
 name: IDENTIFIER
     | ACTION | ACTIONS | ACTION_PROFILE | ACTION_SELECTOR | ALGORITHM

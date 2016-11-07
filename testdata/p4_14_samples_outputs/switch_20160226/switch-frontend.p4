@@ -613,7 +613,7 @@ struct metadata {
     egress_metadata_t            egress_metadata;
     @name("fabric_metadata") 
     fabric_metadata_t            fabric_metadata;
-    @name("hash_metadata") 
+    @pa_atomic("ingress", "hash_metadata.hash1") @pa_solitary("ingress", "hash_metadata.hash1") @pa_atomic("ingress", "hash_metadata.hash2") @pa_solitary("ingress", "hash_metadata.hash2") @name("hash_metadata") 
     hash_metadata_t              hash_metadata;
     @name("i2e_metadata") 
     i2e_metadata_t               i2e_metadata;
