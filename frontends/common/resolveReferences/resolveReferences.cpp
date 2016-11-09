@@ -187,33 +187,11 @@ void ResolveReferences::removeFromContext(const IR::INamespace* ns) {
     context->pop(ns);
 }
 
-ResolutionContext*
-ResolveReferences::resolvePathPrefix(const IR::PathPrefix* prefix) const {
-    ResolutionContext* result = context;
-    if (prefix == nullptr)
-        return result;
-
-    if (prefix->absolute)
-        result = new ResolutionContext(rootNamespace);
-
-    for (IR::ID id : prefix->components) {
-        const IR::IDeclaration* decl = result->resolveUnique(id, ResolutionType::Any, !anyOrder);
-        if (decl == nullptr)
-            return nullptr;
-        const IR::Node* node = decl->getNode();
-        if (!node->is<IR::INamespace>()) {
-            ::error("%1%: %2% is not a namespace", prefix, decl);
-            return nullptr;
-        }
-        result = new ResolutionContext(node->to<IR::INamespace>());
-    }
-
-    return result;
-}
-
 void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
     LOG1("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
-    ResolutionContext* ctx = resolvePathPrefix(path->prefix);
+    ResolutionContext* ctx = context;
+    if (path->absolute)
+        ctx = new ResolutionContext(rootNamespace);
     ResolutionType k = isType ? ResolutionType::Type : ResolutionType::Any;
 
     BUG_CHECK(!resolveForward.empty(), "Empty resolveForward");

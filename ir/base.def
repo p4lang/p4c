@@ -127,66 +127,22 @@ abstract Operation : Expression {
     toString{ return getStringOp(); }
 }
 
-class PathPrefix {
-    bool absolute = false;
-    optional vector<ID> components;
-    PathPrefix(Util::SourceInfo si, PathPrefix start, ID end)
-            : Node(si), absolute(start->absolute) {
-        CHECK_NULL(start);
-        std::copy(start->components.begin(), start->components.end(), components.begin());
-        components.push_back(end); }
-    void setAbsolute() { absolute = true; }
-    toString{
-        // Prints path prefix without the trailing dot
-        // This uses the original name
-        std::stringstream result;
-        bool first = true;
-        if (absolute)
-            first = false;
-        for (auto a : components) {
-            if (!first)
-                result << ".";
-            first = false;
-            result << a.toString();
-        }
-        return cstring(result.str());
-    }
-#nodbprint
-}
-
 class Path {
-    optional NullOK PathPrefix prefix;
-    ID                name;
-    Path { if (!srcInfo) srcInfo = prefix ? prefix->srcInfo + name.srcInfo : name.srcInfo; }
-    bool isDontCare() const { return prefix == nullptr && name.isDontCare(); }
+    ID   name;
+    optional bool absolute = false;
+    Path { if (!srcInfo) srcInfo = name.srcInfo; }
+    bool isDontCare() const { return name.isDontCare(); }
     toString{
         // This is the ORIGINAL name the user used
-        std::stringstream str;
-        if (prefix == nullptr) {
-            str << name.toString();
-        } else {
-            cstring ps = prefix->toString();
-            str << ps << "." << name.toString();
-        }
-        return cstring(str.str());
+        if (absolute)
+            return cstring(".") + name.toString();
+        return name.toString();
     }
     cstring asString() const {
         // The CURRENT internal name
-        std::stringstream result;
-        bool first = true;
-        if (prefix != nullptr) {
-            if (prefix->absolute)
-                first = false;
-            for (auto a : prefix->components) {
-                if (!first)
-                    result << ".";
-                first = false;
-                result << a;
-            }
-            result << ".";
-        }
-        result << name;
-        return cstring(result.str());
+        if (absolute)
+            return cstring(".") + name;
+        return name;
     }
     dbprint { out << toString(); }
 }

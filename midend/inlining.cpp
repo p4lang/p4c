@@ -154,7 +154,7 @@ class Substitutions : public SubstituteParameters {
         else
             newName = expression->path->name;
         IR::ID newid = IR::ID(expression->path->srcInfo, newName);
-        auto newpath = new IR::Path(expression->path->prefix, newid);
+        auto newpath = new IR::Path(newid, expression->path->absolute);
         auto result = new IR::PathExpression(newpath);
         refMap->setDeclaration(newpath, decl);
         LOG1("Replaced " << expression << " with " << result);

@@ -101,7 +101,6 @@ static int yylex();
     IR::Function                *Function;
     IR::Parameter               *Parameter;
     IR::ParserState             *ParserState;
-    IR::PathPrefix              *PathPrefix;
     IR::SelectCase              *SelectCase;
     IR::Statement               *Statement;
     IR::StatOrDecl              *StatOrDecl;
@@ -114,6 +113,7 @@ static int yylex();
     IR::TypeParameters          *TypeParameters;
     IR::Type_Parser             *Type_Parser;
     IR::Type_Error              *Type_Error;
+    IR::Path                    *Path;
 }
 
 %token      LE GE SHL AND OR NE EQ
@@ -123,17 +123,17 @@ static int yylex();
             EXIT EXTERN HEADER HEADER_UNION IF IN INOUT INT KEY MASK SELECT MATCH_KIND OUT
             PACKAGE PARSER RANGE RETURN SET STATE STRUCT SWITCH TABLE TRANSITION
             TUPLE TYPEDEF VARBIT VOID
-%token<str> IDENTIFIER TYPE NAMESPACE STRING_LITERAL
+%token<str> IDENTIFIER TYPE STRING_LITERAL
 %token<Constant>  INTEGER
 
 %type<id>               name nonTypeName
 %type<dir>              direction
+%type<Path>             prefixedNonTypeName prefixedType
 %type<nm>               typeParameterList
 %type<TypeParameters>   optTypeParameters
 %type<Expression>       expression lvalue
                         keysetExpression selectExpression stateExpression optInitializer initializer
                         argument simpleKeysetExpression transitionStatement switchLabel
-%type<PathPrefix>       pathPrefix relativePathPrefix nonEmptyRelativePathPrefix
 %type<TypePtr>          baseType typeOrVoid specializedType headerStackType typeRef
                         tupleType typeArg setType
 %type<Type_Name>        typeName
@@ -211,7 +211,6 @@ symbol_print(FILE* file, int type, YYSTYPE value)
     case IDENTIFIER:
     case DONTCARE:
     case TYPE:
-    case NAMESPACE:
         fprintf(file, "%s", value.str.c_str());
     default:
         break;
@@ -262,7 +261,6 @@ nonTypeName
 name
     : nonTypeName { $$ = $1; }
     | TYPE      { $$ = new IR::ID(@1, $1); }
-    | NAMESPACE { $$ = new IR::ID(@1, $1); }
     ;
 
 optAnnotations
@@ -344,22 +342,8 @@ optConstructorParameters
     | '(' parameterList ')'    { $$ = $2; }
     ;
 
-pathPrefix
-    : '.' { structure.startAbsolutePath(); } relativePathPrefix
-                               { structure.clearPath(); $$ = $3; $$->setAbsolute(); }
-    | { structure.startRelativePath(); } nonEmptyRelativePathPrefix
-                               { structure.clearPath(); $$ = $2; }
-    ;
-
-relativePathPrefix
-    : /* empty */ { $$ = new IR::PathPrefix(); }
-    | relativePathPrefix NAMESPACE '.' { structure.pathAppendNamespace($2);
-                                         $$ = new IR::PathPrefix(@1 + @3, $1, IR::ID(@2, $2)); }
-    ;
-
-nonEmptyRelativePathPrefix
-    : relativePathPrefix NAMESPACE '.' { structure.pathAppendNamespace($2);
-                                         $$ = new IR::PathPrefix(@1 + @3, $1, IR::ID(@2, $2)); }
+dotPrefix
+    : '.'                      { structure.startAbsolutePath(); }
     ;
 
 /**************************** PARSER ******************************/
@@ -548,9 +532,13 @@ typeRef
     | setType                          { $$ = $1; }
     ;
 
+prefixedType
+    : TYPE                             { $$ = new IR::Path(IR::ID(@1, $1)); }
+    | dotPrefix TYPE                   { $$ = new IR::Path(IR::ID(@2, $2), true); structure.clearPath(); }
+    ;
+
 typeName
-    : TYPE                        { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, $1))); }
-    | pathPrefix TYPE             { $$ = new IR::Type_Name(@1, new IR::Path($1, IR::ID(@2, $2))); }
+    : prefixedType                     { $$ = new IR::Type_Name(@1, $1); }
     ;
 
 tupleType
@@ -566,13 +554,8 @@ headerStackType
     ;
 
 specializedType
-    : pathPrefix TYPE '<' typeArgumentList '>'
-                                       { auto id = IR::ID(@2, $2);
-                                         auto type = new IR::Type_Name(@1, new IR::Path($1, id));
-                                         $$ = new IR::Type_Specialized(@1 + @5, type, $4); }
-    | TYPE '<' typeArgumentList '>'    { auto id = IR::ID(@1, $1);
-                                         auto type = new IR::Type_Name(@1, new IR::Path(id));
-                                         $$ = new IR::Type_Specialized(@1 + @4, type, $3); }
+    : typeName '<' typeArgumentList '>'
+                                       { $$ = new IR::Type_Specialized(@1 + @4, $1, $3); }
     ;
 
 baseType
@@ -891,10 +874,14 @@ expressionList
     | expressionList ',' expression      { $$ = $1; $$->push_back($3); }
     ;
 
+prefixedNonTypeName
+    : nonTypeName                        { $$ = new IR::Path(*$1); }
+    | dotPrefix nonTypeName              { $$ = new IR::Path(*$2, true); structure.clearPath(); }
+    ;
+
 lvalue
-    : nonTypeName                        { $$ = new IR::PathExpression(*$1); }
+    : prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
     | THIS                               { $$ = new IR::This(@1); }
-    | pathPrefix nonTypeName             { $$ = new IR::PathExpression(new IR::Path($1, *$2)); }
     | lvalue '.' name                    { $$ = new IR::Member(@1 + @3, $1, *$3); }
     | lvalue '[' expression ']'          { $$ = new IR::ArrayIndex(@1 + @3, $1, $3); }
     | lvalue '[' expression ':' expression ']' { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
@@ -907,7 +894,7 @@ expression
     | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
     | THIS                               { $$ = new IR::This(@1); }
     | nonTypeName                        { $$ = new IR::PathExpression(*$1); }
-    | pathPrefix nonTypeName             { $$ = new IR::PathExpression(new IR::Path($1, *$2)); }
+    | '.' nonTypeName                    { $$ = new IR::PathExpression(new IR::Path(*$2, true)); }
     | expression '[' expression ']'      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | expression '[' expression ':' expression ']'   { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | '{' expressionList '}'             { $$ = new IR::ListExpression(@1 + @3, $2); }

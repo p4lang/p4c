@@ -169,27 +169,11 @@ void ProgramStructure::declareType(IR::ID id) {
 }
 
 void ProgramStructure::startAbsolutePath() {
-    identifierContext.components.clear();
     identifierContext.lookupContext = rootNamespace;
 }
 
-void ProgramStructure::startRelativePath() {
-    identifierContext.components.clear();
-    identifierContext.lookupContext = nullptr;
-}
-
 void ProgramStructure::clearPath() {
-    // The implementation is the same
-    startRelativePath();
-}
-
-void ProgramStructure::pathAppendNamespace(cstring ns) {
-    NamedSymbol* current = lookup(ns);
-    BUG_CHECK(current != nullptr, "Null namespace");
-    Namespace* nsp = dynamic_cast<Namespace*>(current);
-    BUG_CHECK(nsp != nullptr, "Expected a namespace, got %s%", current->toString());
-    identifierContext.components.push_back(ns);
-    identifierContext.lookupContext = nsp;
+    identifierContext.lookupContext = nullptr;
 }
 
 NamedSymbol* ProgramStructure::lookup(cstring identifier) const {
@@ -220,10 +204,7 @@ ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifi
         return ProgramStructure::SymbolKind::Type;
         LOG2("Type " << identifier);
     }
-    // This can never happen currently
-    // This design accommodates a possible future 'namespace' construct
-    LOG2("Namespace " << identifier);
-    return ProgramStructure::SymbolKind::Namespace;
+    BUG("Should be unreachable");
 }
 
 void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var>* typeVars) {

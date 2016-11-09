@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,9 +44,7 @@ class ProgramStructure final {
     Namespace* currentNamespace;
 
     struct PathContext {
-        std::vector<cstring> components;
         Namespace* lookupContext;
-
         PathContext() : lookupContext(nullptr) {}
     } identifierContext;
 
@@ -57,8 +55,7 @@ class ProgramStructure final {
  public:
     enum class SymbolKind {
         Identifier,
-        Type,
-        Namespace
+        Type
     };
 
     ProgramStructure();
@@ -74,11 +71,8 @@ class ProgramStructure final {
     void declareTypes(const IR::IndexedVector<IR::Type_Var>* typeVars);
     SymbolKind lookupIdentifier(cstring identifier) const;
 
-    // Manipulate path prefix in which next identifier is looked-up
     void startAbsolutePath();
-    void startRelativePath();
     void clearPath();
-    void pathAppendNamespace(cstring ns);
 
     void endParse();
 

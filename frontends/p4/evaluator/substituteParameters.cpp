@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ const IR::Node* SubstituteParameters::postorder(IR::PathExpression* expr) {
 
     // Path expressions always need to be cloned.
     IR::ID newid = expr->path->name;
-    auto path = new IR::Path(expr->path->prefix, newid);
+    auto path = new IR::Path(newid, expr->path->absolute);
     auto result = new IR::PathExpression(path);
     LOG1("Cloned " << expr << " into " << result);
     refMap->setDeclaration(path, decl);
@@ -46,7 +46,7 @@ const IR::Node* SubstituteParameters::postorder(IR::Type_Name* type) {
     }
 
     IR::ID newid = type->path->name;
-    auto path = new IR::Path(type->path->prefix, newid);
+    auto path = new IR::Path(newid, type->path->absolute);
     refMap->setDeclaration(path, decl);
     auto result = new IR::Type_Name(type->srcInfo, path);
     LOG1("Cloned " << type << " into " << result);

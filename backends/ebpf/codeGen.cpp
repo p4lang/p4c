@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -126,8 +126,8 @@ bool CodeGenInspector::preorder(const IR::Member* e) {
 }
 
 bool CodeGenInspector::preorder(const IR::Path* p) {
-    if (p->prefix != nullptr)
-        builder->append(p->prefix->toString());
+    if (p->absolute)
+        builder->append(".");
     builder->append(p->name);
     return false;
 }

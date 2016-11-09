@@ -82,8 +82,6 @@ class ResolveReferences : public Inspector {
     void addToContext(const IR::INamespace* ns);
     void removeFromContext(const IR::INamespace* ns);
     void addToGlobals(const IR::INamespace* ns);
-    // returns the resolution context in which the path suffix is evaluated
-    ResolutionContext* resolvePathPrefix(const IR::PathPrefix* path) const;
     void resolvePath(const IR::Path* path, bool isType) const;
 
  public:
