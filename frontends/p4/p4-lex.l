@@ -120,8 +120,6 @@ std::string stringLiteral;
                       return IDENTIFIER;
                   case Util::ProgramStructure::SymbolKind::Type:
                       return TYPE;
-                  case Util::ProgramStructure::SymbolKind::Namespace:
-                      return NAMESPACE;
                   default:
                       BUG("Unexpected symbol kind");
                   }

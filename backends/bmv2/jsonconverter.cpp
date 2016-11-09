@@ -113,7 +113,7 @@ static bool checkSame(const IR::Expression* expr0, const IR::Expression* expr1) 
     if (auto pe0 = expr0->to<IR::PathExpression>()) {
         auto pe1 = expr1->to<IR::PathExpression>();
         return pe0->path->name == pe1->path->name &&
-               IR::equal(pe0->path->prefix, pe1->path->prefix);
+               pe0->path->absolute == pe1->path->absolute;
     } else if (auto mem0 = expr0->to<IR::Member>()) {
         auto mem1 = expr1->to<IR::Member>();
         return checkSame(mem0->expr, mem1->expr) && mem0->member == mem1->member;
