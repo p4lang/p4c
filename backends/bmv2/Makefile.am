@@ -32,9 +32,7 @@ p4c_bm2_ss_SOURCES = \
 	backends/bmv2/midend.h \
 	backends/bmv2/midend.cpp \
 	backends/bmv2/lower.h \
-	backends/bmv2/lower.cpp \
-	backends/bmv2/validateProperties.h \
-	backends/bmv2/validateProperties.cpp
+	backends/bmv2/lower.cpp
 
 cpplint_FILES += $(p4c_bm2_ss_SOURCES)
 

@@ -14,22 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_BMV2_VALIDATEPROPERTIES_H_
-#define _BACKENDS_BMV2_VALIDATEPROPERTIES_H_
+#ifndef _MIDEND_VALIDATEPROPERTIES_H_
+#define _MIDEND_VALIDATEPROPERTIES_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
 
-namespace BMV2 {
+namespace P4 {
 
 // Checks to see if there are any unknown properties.
 class ValidateTableProperties : public Inspector {
+    std::set<cstring> legalProperties;
  public:
-    ValidateTableProperties()
-    { setName("ValidateTableProperties"); }
+    ValidateTableProperties(const std::initializer_list<cstring> legal) {
+        setName("ValidateTableProperties");
+        legalProperties.emplace("actions");
+        legalProperties.emplace("default_action");
+        legalProperties.emplace("key");
+        for (auto l : legal)
+            legalProperties.emplace(l);
+    }
     void postorder(const IR::TableProperty* property) override;
 };
 
-}  // namespace BMV2
+}  // namespace P4
 
-#endif /* _BACKENDS_BMV2_VALIDATEPROPERTIES_H_ */
+#endif /* _MIDEND_VALIDATEPROPERTIES_H_ */
