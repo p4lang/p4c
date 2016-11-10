@@ -45,7 +45,10 @@ class NamedSymbol {
     SourceInfo getSourceInfo() const { return sourceInfo; }
     cstring getName() const { return name; }
     virtual cstring toString() const { return getName(); }
-    virtual void dump(std::stringstream& into, unsigned indent) const = 0;
+    virtual void dump(std::stringstream& into, unsigned indent) const {
+        std::string s(indent, ' ');
+        into << s << toString() << std::endl;
+    }
     virtual bool sameType(const NamedSymbol* other) const {
         return typeid(*this) == typeid(*other);
     }
@@ -87,8 +90,8 @@ class Namespace : public NamedSymbol {
             return nullptr;
         return it->second;
     }
-    cstring toString() const { return cstring("Namespace ") + getName(); }
-    void dump(std::stringstream& into, unsigned indent) const {
+    cstring toString() const override { return cstring("Namespace ") + getName(); }
+    void dump(std::stringstream& into, unsigned indent) const override {
         std::string s(indent, ' ');
         into << s;
         into << toString() << "{" << std::endl;
@@ -99,14 +102,16 @@ class Namespace : public NamedSymbol {
     }
 };
 
+class Object : public NamedSymbol {
+ public:
+    Object(cstring name, Util::SourceInfo si) : NamedSymbol(name, si) {}
+    cstring toString() const override { return cstring("Object ") + getName(); }
+};
+
 class SimpleType : public NamedSymbol {
  public:
     SimpleType(cstring name, Util::SourceInfo si) : NamedSymbol(name, si) {}
     cstring toString() const { return cstring("SimpleType ") + getName(); }
-    void dump(std::stringstream& into, unsigned indent) const {
-        std::string s(indent, ' ');
-        into << s << toString() << std::endl;
-    }
 };
 
 // A Type that is also a namespace (e.g., a parser)
@@ -141,8 +146,9 @@ void ProgramStructure::push(Namespace* ns) {
     currentNamespace = ns;
 }
 
-void ProgramStructure::pushNamespace(cstring name, SourceInfo si, bool allowDuplicates) {
-    auto ns = new Util::Namespace(name, si, allowDuplicates);
+void ProgramStructure::pushNamespace(SourceInfo si, bool allowDuplicates) {
+    // Today we don't have named namespaces
+    auto ns = new Util::Namespace("", si, allowDuplicates);
     push(ns);
 }
 
@@ -166,6 +172,14 @@ void ProgramStructure::declareType(IR::ID id) {
 
     auto st = new SimpleType(id.name, id.srcInfo);
     currentNamespace->declare(st);
+}
+
+void ProgramStructure::declareObject(IR::ID id) {
+    if (debug)
+        fprintf(debugStream, "ProgramStructure: adding object %s\n", id.name.c_str());
+
+    auto o = new Object(id.name, id.srcInfo);
+    currentNamespace->declare(o);
 }
 
 void ProgramStructure::startAbsolutePath() {
@@ -196,7 +210,7 @@ NamedSymbol* ProgramStructure::lookup(cstring identifier) const {
 
 ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifier) const {
     NamedSymbol* ns = lookup(identifier);
-    if (ns == nullptr) {
+    if (ns == nullptr || dynamic_cast<Object*>(ns) != nullptr) {
         LOG2("Identifier " << identifier);
         return ProgramStructure::SymbolKind::Identifier;
     }

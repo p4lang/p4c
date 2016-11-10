@@ -61,9 +61,10 @@ class ProgramStructure final {
     ProgramStructure();
 
     void setDebug(bool debug) { this->debug = debug; }
-    void pushNamespace(cstring name, SourceInfo info, bool allowDuplicates);
+    void pushNamespace(SourceInfo info, bool allowDuplicates);
     void pushContainerType(IR::ID id, bool allowDuplicates);
     void declareType(IR::ID id);
+    void declareObject(IR::ID id);
 
     // the last namespace has been exited
     void pop();
