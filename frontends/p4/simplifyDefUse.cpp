@@ -190,18 +190,25 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::IfStatement* statement) override {
         visit(statement->condition);
+        auto saveCurrent = currentPoint;
         visit(statement->ifTrue);
-        if (statement->ifFalse != nullptr)
+        if (statement->ifFalse != nullptr) {
+            currentPoint = saveCurrent;
             visit(statement->ifFalse);
+        }
         return setCurrent(statement);
     }
 
     bool preorder(const IR::SwitchStatement* statement) override {
         LOG1("Visiting " << dbp(statement));
         visit(statement->expression);
+        auto saveCurrent = currentPoint;
         for (auto c : statement->cases) {
-            LOG1("Visiting " << dbp(c));
-            visit(c);
+            if (c->statement != nullptr) {
+                LOG1("Visiting " << dbp(c));
+                currentPoint = saveCurrent;
+                visit(c);
+            }
         }
         return setCurrent(statement);
     }

@@ -44,6 +44,8 @@ p4_frontend_SOURCES = \
 	frontends/p4/evaluator/evaluator.cpp \
 	frontends/p4/evaluator/substituteParameters.h \
 	frontends/p4/evaluator/substituteParameters.cpp \
+	frontends/p4/parserControlFlow.cpp \
+	frontends/p4/parserControlFlow.h \
 	frontends/p4/cloner.h \
 	frontends/p4/reservedWords.h \
 	frontends/p4/reservedWords.cpp \

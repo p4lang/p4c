@@ -44,7 +44,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
         return action;
     }
     cstring var = refMap->newName(variableName);
-    returnVar = IR::ID(var);
+    returnVar = IR::ID(var, nullptr);
     auto f = new IR::BoolLiteral(Util::SourceInfo(), false);
     auto decl = new IR::Declaration_Variable(Util::SourceInfo(), returnVar,
                                              IR::Annotations::empty, IR::Type_Boolean::get(), f);
@@ -74,7 +74,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
     }
 
     cstring var = refMap->newName(variableName);
-    returnVar = IR::ID(var);
+    returnVar = IR::ID(var, nullptr);
     auto f = new IR::BoolLiteral(Util::SourceInfo(), false);
     auto decl = new IR::Declaration_Variable(Util::SourceInfo(), returnVar,
                                              IR::Annotations::empty, IR::Type_Boolean::get(), f);
@@ -257,7 +257,7 @@ const IR::Node* DoRemoveExits::preorder(IR::P4Control* control) {
     }
 
     cstring var = refMap->newName(variableName);
-    returnVar = IR::ID(var);
+    returnVar = IR::ID(var, nullptr);
     visit(control->controlLocals);
 
     BUG_CHECK(stack.empty(), "Non-empty stack");

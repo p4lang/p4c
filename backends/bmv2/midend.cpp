@@ -18,6 +18,7 @@ limitations under the License.
 #include "lower.h"
 #include "inlining.h"
 #include "copyStructures.h"
+#include "eliminateVerify.h"
 #include "midend/actionsInlining.h"
 #include "midend/validateProperties.h"
 #include "midend/removeReturns.h"
@@ -29,7 +30,6 @@ limitations under the License.
 #include "midend/removeLeftSlices.h"
 #include "midend/convertEnums.h"
 #include "midend/simplifyKey.h"
-#include "midend/parserControlFlow.h"
 #include "midend/simplifySelect.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/simplifyParsers.h"
@@ -85,7 +85,6 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
     // we may come through this path even if the program is actually a P4 v1.0 program
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
-        new P4::RemoveParserControlFlow(&refMap, &typeMap),
         new P4::ConvertEnums(&refMap, &typeMap,
                              new EnumOn32Bits()),
         new P4::RemoveReturns(&refMap),
@@ -137,13 +136,15 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
         // TODO: replace Tuple types with structs
+        new EliminateVerify(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new LowerExpressions(&typeMap),
         new CopyStructures(&refMap, &typeMap),
-        new P4::ValidateTableProperties({ "implementation", "size" }),
+        new P4::ValidateTableProperties({ "implementation", "size", "counters",
+                                          "meters", "size", "supportTimeout" }),
         new P4::ConstantFolding(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })

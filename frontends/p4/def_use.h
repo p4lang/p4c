@@ -288,8 +288,10 @@ class Definitions {
     { CHECK_NULL(loc); CHECK_NULL(point); definitions[loc] = point; }
     void set(const StorageLocation* loc, const ProgramPoints* point);
     void set(const LocationSet* loc, const ProgramPoints* point);
-    const ProgramPoints* get(const BaseLocation* location) const
-    { auto r = ::get(definitions, location); CHECK_NULL(r); return r; }
+    const ProgramPoints* get(const BaseLocation* location) const {
+        auto r = ::get(definitions, location);
+        BUG_CHECK(r != nullptr, "%1%: no definitions", location);
+        return r; }
     const ProgramPoints* get(const LocationSet* locations) const;
     bool operator==(const Definitions& other) const;
     void dbprint(std::ostream& out) const {

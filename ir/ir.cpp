@@ -18,9 +18,11 @@ limitations under the License.
 
 namespace IR {
 
-const ID ParserState::accept = ID("accept");
-const ID ParserState::reject = ID("reject");
-const ID ParserState::start = ID("start");
+const cstring ParserState::accept = "accept";
+const cstring ParserState::reject = "reject";
+const cstring ParserState::start = "start";
+const cstring ParserState::verify = "verify";
+
 const cstring TableProperties::actionsPropertyName = "actions";
 const cstring TableProperties::keyPropertyName = "key";
 const cstring TableProperties::defaultActionPropertyName = "default_action";

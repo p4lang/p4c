@@ -83,7 +83,7 @@ void EBPFProgram::emit(CodeBuilder *builder) {
     createLocalVariables(builder);
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("goto %s;", IR::ParserState::start.name.c_str());
+    builder->appendFormat("goto %s;", IR::ParserState::start.c_str());
     builder->newline();
 
     parser->emit(builder);

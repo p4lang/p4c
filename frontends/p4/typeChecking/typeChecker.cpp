@@ -864,7 +864,7 @@ TypeInference::containerInstantiation(
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType);
         args->push_back(argInfo);
     }
-    auto rettype = new IR::Type_Var(Util::SourceInfo(), IR::ID(refMap->newName("R")));
+    auto rettype = new IR::Type_Var(Util::SourceInfo(), IR::ID(refMap->newName("R"), nullptr));
     // There are never type arguments at this point; if they exist, they have been folded
     // into the constructor by type specialization.
     auto callType = new IR::Type_MethodCall(node->srcInfo,
@@ -2095,7 +2095,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             if (!isLeftValue(expression->expr))
                 ::error("%1%: must be applied to a left-value", expression);
             auto params = new IR::IndexedVector<IR::Parameter>();
-            auto param = new IR::Parameter(Util::SourceInfo(), IR::ID("count"),
+            auto param = new IR::Parameter(Util::SourceInfo(), IR::ID("count", nullptr),
                                            IR::Annotations::empty, IR::Direction::In,
                                            new IR::Type_InfInt());
             setType(param, param->type);
@@ -2237,7 +2237,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     } else {
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-        auto rettype = new IR::Type_Var(Util::SourceInfo(), IR::ID(refMap->newName("R")));
+        auto rettype = new IR::Type_Var(Util::SourceInfo(), IR::ID(refMap->newName("R"), nullptr));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         for (auto arg : *expression->arguments) {
             auto argType = getType(arg);

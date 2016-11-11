@@ -26,7 +26,6 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 #include "midend/parserUnroll.h"
 #include "midend/simplifySelect.h"
-#include "midend/parserControlFlow.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -54,7 +53,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // TODO: lower errors to integers
     // TODO: handle bit-slices as out arguments
     addPasses({
-        new P4::RemoveParserControlFlow(&refMap, &typeMap),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),

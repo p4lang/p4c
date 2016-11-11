@@ -144,7 +144,7 @@ class Path {
             return cstring(".") + name;
         return name;
     }
-    dbprint { out << toString(); }
+    dbprint { out << name; }
 }
 
 class Annotation {

@@ -54,7 +54,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     auto actlist = new IR::ActionList(Util::SourceInfo(), actions);
     auto prop = new IR::TableProperty(
         Util::SourceInfo(),
-        IR::ID(IR::TableProperties::actionsPropertyName),
+        IR::ID(IR::TableProperties::actionsPropertyName, nullptr),
         IR::Annotations::empty, actlist, false);
     // default action property
     auto otherArgs = new IR::Vector<IR::Expression>();
@@ -66,7 +66,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     auto amce = new IR::MethodCallExpression(mc->srcInfo, mc->method, mc->typeArguments, otherArgs);
     auto defactval = new IR::ExpressionValue(Util::SourceInfo(), amce);
     auto defprop = new IR::TableProperty(
-        Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName),
+        Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName, nullptr),
         IR::Annotations::empty, defactval, true);
 
     // List of table properties
@@ -75,7 +75,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     nm->push_back(defprop);
     auto props = new IR::TableProperties(Util::SourceInfo(), nm);
     // Synthesize a new table
-    cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name));
+    cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name), nullptr);
     auto tbl = new IR::P4Table(Util::SourceInfo(), tblName, IR::Annotations::empty,
                                new IR::ParameterList(), props);
     tables.push_back(tbl);

@@ -42,9 +42,10 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     const IDeclaration* getDeclByName(cstring name) const override {
         return components->getDeclaration(name); }
 
-    static const ID accept;
-    static const ID reject;
-    static const ID start;
+    static const cstring accept;
+    static const cstring reject;
+    static const cstring start;
+    static const cstring verify;
     bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
     /* Relaxing constraints on parser control-flow
     validate{

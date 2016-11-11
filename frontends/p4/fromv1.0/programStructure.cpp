@@ -512,7 +512,7 @@ void ProgramStructure::createDeparser() {
         }
     }
 
-    cstring start = IR::ParserState::start.name;
+    cstring start = IR::ParserState::start;
     const IR::Expression* startHeader;
     // find starting point
     if (extracts.count(start) != 0) {

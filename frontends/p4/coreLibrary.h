@@ -28,7 +28,8 @@ enum class StandardExceptions {
     EmptyStack,
     FullStack,
     OverwritingHeader,
-    HeaderTooShort
+    HeaderTooShort,
+    ParserTimeout,
 };
 }  // namespace P4
 
@@ -54,6 +55,9 @@ inline std::ostream& operator<<(std::ostream &out, P4::StandardExceptions e) {
             break;
         case P4::StandardExceptions::HeaderTooShort:
             out << "HeaderTooShort";
+            break;
+        case P4::StandardExceptions::ParserTimeout:
+            out << "ParserTimeout";
             break;
         default:
             BUG("Unhandled case");
@@ -91,8 +95,8 @@ class P4Exception_Model : public ::Model::Elem {
     }
 };
 
-// Model of P4 standard library
-// To be kept in sync with corelib.p4
+// Model of P4 core library
+// To be kept in sync with core.p4
 class P4CoreLibrary : public ::Model::Model {
  protected:
     P4CoreLibrary() :

@@ -575,7 +575,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
         RenameStates rs(&renameMap);
         auto renamed = callee->apply(rs);
         cstring newStartName = ::get(renameMap, IR::ParserState::start);
-        auto transition = new IR::PathExpression(IR::ID(newStartName));
+        auto transition = new IR::PathExpression(IR::ID(newStartName, nullptr));
         auto newState = new IR::ParserState(srcInfo, name, annotations, current, transition);
         states->push_back(newState);
         for (auto s : *renamed->to<IR::P4Parser>()->states) {
@@ -588,7 +588,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
         // Prepare next state
         annotations = IR::Annotations::empty;
         srcInfo = Util::SourceInfo();
-        name = IR::ID(nextState);
+        name = IR::ID(nextState, nullptr);
         current = new IR::IndexedVector<IR::StatOrDecl>();
 
         // Copy back out and inout parameters

@@ -53,7 +53,7 @@ IR::ID* RenameSymbols::getName() const {
     if (!renameMap->toRename(orig))
         return nullptr;
     auto newName = renameMap->getName(orig);
-    auto name = new IR::ID(orig->getName().srcInfo, newName, orig->getName().name);
+    auto name = new IR::ID(orig->getName().srcInfo, newName, orig->getName().originalName);
     return name;
 }
 

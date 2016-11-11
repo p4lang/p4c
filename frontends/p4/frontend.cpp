@@ -43,6 +43,7 @@ limitations under the License.
 #include "simplifyDefUse.h"
 #include "simplifyParsers.h"
 #include "specialize.h"
+#include "parserControlFlow.h"
 
 namespace P4 {
 
@@ -110,6 +111,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         new SimplifyDefUse(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new SpecializeAll(&refMap, &typeMap),
+        new RemoveParserControlFlow(&refMap, &typeMap),
     };
 
     passes.setName("FrontEnd");

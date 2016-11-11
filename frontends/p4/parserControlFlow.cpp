@@ -86,7 +86,7 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
             trueComponents->push_back(ifstat->ifTrue);
             auto trueState = new IR::ParserState(
                 Util::SourceInfo(), trueName, IR::Annotations::empty, trueComponents,
-                new IR::PathExpression(IR::ID(joinName)));
+                new IR::PathExpression(IR::ID(joinName, nullptr)));
             states->push_back(trueState);
 
             // s_false
@@ -97,7 +97,7 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
                 falseComponents->push_back(ifstat->ifFalse);
                 auto falseState = new IR::ParserState(
                     Util::SourceInfo(), falseName, IR::Annotations::empty, falseComponents,
-                    new IR::PathExpression(IR::ID(joinName)));
+                    new IR::PathExpression(IR::ID(joinName, nullptr)));
                 states->push_back(falseState);
             }
 
@@ -106,10 +106,10 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
             vec->push_back(ifstat->condition);
             auto trueCase = new IR::SelectCase(
                 Util::SourceInfo(), new IR::BoolLiteral(true),
-                new IR::PathExpression(IR::ID(trueName)));
+                new IR::PathExpression(IR::ID(trueName, nullptr)));
             auto falseCase = new IR::SelectCase(
                 Util::SourceInfo(), new IR::BoolLiteral(false),
-                new IR::PathExpression(IR::ID(falseName)));
+                new IR::PathExpression(IR::ID(falseName, nullptr)));
             auto cases = new IR::Vector<IR::SelectCase>();
             cases->push_back(trueCase);
             cases->push_back(falseCase);

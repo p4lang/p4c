@@ -88,8 +88,8 @@ class ParserSymbolicInterpreter {
 
     ParserStateInfo* newStateInfo(const ParserStateInfo* predecessor,
                                   cstring stateName, ValueMap* values) {
-        if (stateName == IR::ParserState::accept.name ||
-            stateName == IR::ParserState::reject.name)
+        if (stateName == IR::ParserState::accept ||
+            stateName == IR::ParserState::reject)
             return nullptr;
         auto state = structure->get(stateName);
         auto pi = new ParserStateInfo(stateName, parser, state, predecessor, values->clone());

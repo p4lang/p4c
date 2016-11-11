@@ -46,13 +46,13 @@ struct EvaluationOrder {
     cstring createTemporary(const IR::Type* type) {
         auto tmp = refMap->newName("tmp");
         auto decl = new IR::Declaration_Variable(
-            Util::SourceInfo(), IR::ID(tmp), IR::Annotations::empty, type, nullptr);
+            Util::SourceInfo(), IR::ID(tmp, nullptr), IR::Annotations::empty, type, nullptr);
         temporaries->push_back(decl);
         return tmp;
     }
 
     const IR::Expression* addAssignment(cstring varName, const IR::Expression* expression) {
-        auto left = new IR::PathExpression(IR::ID(varName));
+        auto left = new IR::PathExpression(IR::ID(varName, nullptr));
         auto stat = new IR::AssignmentStatement(Util::SourceInfo(), left, expression);
         statements->push_back(stat);
         auto result = left->clone();
@@ -138,7 +138,7 @@ class DismantleExpression : public Transform {
             BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
             if (ctx != nullptr && ctx->node->is<IR::Expression>()) {
                 auto tmp = result->createTemporary(type);
-                auto path = new IR::PathExpression(IR::ID(tmp));
+                auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
                 auto tstat = new IR::AssignmentStatement(Util::SourceInfo(), path->clone(), new IR::BoolLiteral(true));
                 auto fstat = new IR::AssignmentStatement(Util::SourceInfo(), path->clone(), new IR::BoolLiteral(false));
                 auto ifStatement = new IR::IfStatement(Util::SourceInfo(), result->final, tstat, fstat);
@@ -211,7 +211,7 @@ class DismantleExpression : public Transform {
         auto constant = new IR::BoolLiteral(Util::SourceInfo(), !land);
         auto tmp = result->createTemporary(type);
         auto ifTrue = new IR::AssignmentStatement(
-            Util::SourceInfo(), new IR::PathExpression(IR::ID(tmp)), constant);
+            Util::SourceInfo(), new IR::PathExpression(IR::ID(tmp, nullptr)), constant);
         auto ifFalse = new IR::IndexedVector<IR::StatOrDecl>();
 
         auto save = result->statements;
@@ -327,9 +327,9 @@ class DismantleExpression : public Transform {
             if (useTemp) {
                 // declare temporary variable
                 auto tmp = refMap->newName("tmp");
-                argValue = new IR::PathExpression(IR::ID(tmp));
+                argValue = new IR::PathExpression(IR::ID(tmp, nullptr));
                 auto decl = new IR::Declaration_Variable(
-                    Util::SourceInfo(), IR::ID(tmp), IR::Annotations::empty, paramtype, nullptr);
+                    Util::SourceInfo(), IR::ID(tmp, nullptr), IR::Annotations::empty, paramtype, nullptr);
                 result->temporaries->push_back(decl);
                 if (p->direction != IR::Direction::Out) {
                     // assign temporary before method call
@@ -376,10 +376,10 @@ class DismantleExpression : public Transform {
             !resultNotUsed) {
             auto tmp = refMap->newName("tmp");
             auto decl = new IR::Declaration_Variable(
-                Util::SourceInfo(), IR::ID(tmp), IR::Annotations::empty,
+                Util::SourceInfo(), IR::ID(tmp, nullptr), IR::Annotations::empty,
                 type, nullptr);
             result->temporaries->push_back(decl);
-            auto left = new IR::PathExpression(IR::ID(tmp));
+            auto left = new IR::PathExpression(IR::ID(tmp, nullptr));
             auto stat = new IR::AssignmentStatement(
                 Util::SourceInfo(), left, simplified);
             result->statements->push_back(stat);

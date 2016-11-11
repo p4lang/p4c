@@ -66,10 +66,10 @@ const IR::Expression* SpecializationMap::convertArgument(
         auto cce = arg->to<IR::ConstructorCallExpression>();
         cstring nName = refMap->newName("inst");
         auto decl = new IR::Declaration_Instance(
-            Util::SourceInfo(), IR::ID(nName), IR::Annotations::empty,
+            Util::SourceInfo(), IR::ID(nName, nullptr), IR::Annotations::empty,
             cce->constructedType, cce->arguments, nullptr);
         spec->declarations->push_back(decl);
-        auto path = new IR::PathExpression(IR::ID(nName));
+        auto path = new IR::PathExpression(IR::ID(nName, nullptr));
         return path;
     } else {
         return arg;
@@ -266,7 +266,7 @@ const IR::Node* Specialize::postorder(IR::ConstructorCallExpression* expression)
     auto name = specMap->getName(getOriginal());
     if (name.isNullOrEmpty())
         return expression;
-    auto typeRef = new IR::Type_Name(IR::ID(name));
+    auto typeRef = new IR::Type_Name(IR::ID(name, nullptr));
     auto result = new IR::ConstructorCallExpression(typeRef, new IR::Vector<IR::Expression>());
     LOG1("Replaced " << expression << " with " << result);
     return result;
@@ -277,7 +277,7 @@ const IR::Node* Specialize::postorder(IR::Declaration_Instance* decl) {
     const IR::Node* replacement = decl;
     auto name = specMap->getName(getOriginal());
     if (!name.isNullOrEmpty()) {
-        auto typeRef = new IR::Type_Name(IR::ID(name));
+        auto typeRef = new IR::Type_Name(IR::ID(name, nullptr));
         replacement = new IR::Declaration_Instance(
             decl->name, decl->annotations, typeRef, new IR::Vector<IR::Expression>(),
             decl->initializer);

@@ -63,7 +63,7 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     if (parserState->selectExpression == nullptr) {
         builder->emitIndent();
         builder->append("goto ");
-        builder->append(IR::ParserState::reject.name);
+        builder->append(IR::ParserState::reject);
         builder->endOfStatement(true);
     } else if (parserState->selectExpression->is<IR::SelectExpression>()) {
         visit(parserState->selectExpression);
@@ -95,7 +95,7 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
 
     if (!hasDefault) {
         builder->emitIndent();
-        builder->appendFormat("default: goto %s;", IR::ParserState::reject.name.c_str());
+        builder->appendFormat("default: goto %s;", IR::ParserState::reject.c_str());
         builder->newline();
     }
 
@@ -137,7 +137,7 @@ StateTranslationVisitor::compileExtractField(
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("goto %s;", IR::ParserState::reject.name.c_str());
+    builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
     builder->newline();
     builder->blockEnd(true);
 
@@ -330,7 +330,7 @@ void EBPFParser::emit(CodeBuilder *builder) {
 
     // Create a synthetic reject state
     builder->emitIndent();
-    builder->appendFormat("%s: { return 1; }", IR::ParserState::reject.name.c_str());
+    builder->appendFormat("%s: { return 1; }", IR::ParserState::reject.c_str());
     builder->newline();
     builder->newline();
 }

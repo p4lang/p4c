@@ -33,8 +33,6 @@ midend_SOURCES = \
 	midend/moveConstructors.h \
 	midend/parserUnroll.h \
 	midend/parserUnroll.cpp \
-	midend/parserControlFlow.h \
-	midend/parserControlFlow.cpp \
 	midend/removeParameters.cpp \
 	midend/removeParameters.h \
 	midend/removeReturns.cpp \

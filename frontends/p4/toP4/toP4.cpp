@@ -73,6 +73,8 @@ class DumpIR : public Inspector {
         } else if (node->is<IR::VectorBase>()) {
             node->Node::dbprint(str);
             str << ", size=" << node->to<IR::VectorBase>()->size();
+        } else if (node->is<IR::Path>()) {
+            node->dbprint(str);
         } else {
             node->Node::dbprint(str);
         }
@@ -81,7 +83,7 @@ class DumpIR : public Inspector {
         if (depth == 0)
             return false;
         display(node);
-        if (node->is<IR::Expression>())
+        if (node->is<IR::Expression>() || node->is<IR::Path>())
             // increase depth limit for expressions.
             depth++;
         else
@@ -90,7 +92,7 @@ class DumpIR : public Inspector {
         return true;
     }
     void postorder(const IR::Node* node) override {
-        if (node->is<IR::Expression>())
+        if (node->is<IR::Expression>() || node->is<IR::Path>())
             depth--;
         else
             depth++;
