@@ -19,6 +19,7 @@ limitations under the License.
 #include "inlining.h"
 #include "copyStructures.h"
 #include "eliminateVerify.h"
+#include "eliminateTuples.h"
 #include "midend/actionsInlining.h"
 #include "midend/validateProperties.h"
 #include "midend/removeReturns.h"
@@ -135,7 +136,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // BMv2-specific passes
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
-        // TODO: replace Tuple types with structs
+        new EliminateTuples(&refMap, &typeMap),
         new EliminateVerify(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
@@ -144,7 +145,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new LowerExpressions(&typeMap),
         new CopyStructures(&refMap, &typeMap),
         new P4::ValidateTableProperties({ "implementation", "size", "counters",
-                                          "meters", "size", "supportTimeout" }),
+                                          "meters", "size", "support_timeout" }),
         new P4::ConstantFolding(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })

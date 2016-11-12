@@ -24,7 +24,12 @@ limitations under the License.
 
 namespace P4 {
 
-class ReferenceMap final : public ProgramMap {
+class NameGenerator {
+ public:
+    virtual cstring newName(cstring base) = 0;
+};
+
+class ReferenceMap final : public ProgramMap, public NameGenerator {
     bool isv1;  // if true this is a map for a P4 v1.0 program (P4-14)
     // Maps each path in the program to the corresponding declaration
     std::map<const IR::Path*, const IR::IDeclaration*> pathToDeclaration;

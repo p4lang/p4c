@@ -573,9 +573,6 @@ class ExpressionConverter : public Inspector {
             if (type->is<IR::Type_StructLike>()) {
                 result->emplace("type", "header");
                 result->emplace("value", var->name);
-            } else if (auto tt = type->to<IR::Type_Tuple>()) {
-                result->emplace("type", "header");
-                result->emplace("value", converter->createJsonType(tt));
             } else if (type->is<IR::Type_Bits>() ||
                        (type->is<IR::Type_Boolean>() && leftValue)) {
                 // no convertion d2b when writing (leftValue is true) to a boolean
@@ -1665,14 +1662,6 @@ void JsonConverter::addLocals() {
             json->emplace("header_type", name);
             json->emplace("metadata", true);
             headerInstances->append(json);
-        } else if (auto tt = type->to<IR::Type_Tuple>()) {
-            auto name = createJsonType(tt);
-            auto json = new Util::JsonObject();
-            json->emplace("name", v->name);
-            json->emplace("id", nextId("headers"));
-            json->emplace("header_type", name);
-            json->emplace("metadata", true);
-            headerInstances->append(json);
         } else if (type->is<IR::Type_Bits>()) {
             auto tb = type->to<IR::Type_Bits>();
             auto field = pushNewArray(scalarFields);
@@ -1761,7 +1750,6 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     (void)nextId("learn_lists");  // idem
 
     headerTypesCreated.clear();
-    tupleTypesCreated.clear();
     addTypesAndInstances(ht, false);
     addHeaderStacks(ht);
     if (::errorCount() > 0)
@@ -1957,21 +1945,28 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
     }
 }
 
+void JsonConverter::pushFields(cstring prefix, const IR::Type_Stack *st,
+                               Util::JsonArray *fields) {
+    auto et = typeMap->getTypeType(st->elementType, true);
+    for (unsigned i = 0; i < st->getSize(); i++)
+        pushFields(prefix + "_" + Util::toString(i), et->to<IR::Type_Header>(), fields);
+}
+
 void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
                                Util::JsonArray *fields) {
     for (auto f : *st->fields) {
         auto ftype = typeMap->getType(f, true);
         if (auto nested = ftype->to<IR::Type_StructLike>()) {
             pushFields(prefix + f->name.name + ".", nested, fields);
-        } else if (auto nested = ftype->to<IR::Type_Tuple>()) {
-            pushFields(prefix + f->name.name + ".", nested, fields);
         } else if (auto type = ftype->to<IR::Type_Bits>()) {
             auto field = pushNewArray(fields);
             field->append(prefix + f->name.name);
             field->append(type->size);
             field->append(type->isSigned);
+        } else if (auto nested = ftype->to<IR::Type_Stack>()) {
+            pushFields(prefix + f->name.name + ".", nested, fields);
         } else {
-            BUG_CHECK("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
+            BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
         }
     }
     // must add padding
@@ -1985,28 +1980,6 @@ void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
         field->append(false);
     }
 }
-void JsonConverter::pushFields(cstring prefix, const IR::Type_Tuple *tt,
-                               Util::JsonArray *fields) {
-    int idx = 1;
-    for (auto f : *tt->components) {
-        char name[8];
-        snprintf(name, sizeof(name), "_%d", idx);
-        auto ftype = typeMap->getType(f, true);
-        if (auto nested = ftype->to<IR::Type_StructLike>()) {
-            pushFields(prefix + name + ".", nested, fields);
-        } else if (auto nested = ftype->to<IR::Type_Tuple>()) {
-            pushFields(prefix + name + ".", nested, fields);
-        } else if (auto type = ftype->to<IR::Type_Bits>()) {
-            auto field = pushNewArray(fields);
-            field->append(prefix + name);
-            field->append(type->size);
-            field->append(type->isSigned);
-        } else {
-            BUG_CHECK("%1%: unexpected type for %2%.%3%", ftype, tt, idx);
-        }
-        ++idx;
-    }
-}
 
 cstring JsonConverter::createJsonType(const IR::Type_StructLike *st) {
     if (headerTypesCreated.count(st->name)) return headerTypesCreated[st->name];
@@ -2018,19 +1991,6 @@ cstring JsonConverter::createJsonType(const IR::Type_StructLike *st) {
     headerTypes->append(typeJson);
     auto fields = mkArrayField(typeJson, "fields");
     pushFields("", st, fields);
-    return name;
-}
-
-cstring JsonConverter::createJsonType(const IR::Type_Tuple *tt) {
-    if (tupleTypesCreated.count(tt)) return tupleTypesCreated[tt];
-    auto typeJson = new Util::JsonObject();
-    cstring name = refMap->newName("_tuple");
-    tupleTypesCreated[tt] = name;
-    typeJson->emplace("name", name);
-    typeJson->emplace("id", nextId("header_types"));
-    headerTypes->append(typeJson);
-    auto fields = mkArrayField(typeJson, "fields");
-    pushFields("", tt, fields);
     return name;
 }
 

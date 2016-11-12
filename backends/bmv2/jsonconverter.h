@@ -74,16 +74,14 @@ class JsonConverter final {
  private:
     Util::JsonArray *headerTypes;
     std::map<cstring, cstring> headerTypesCreated;
-    std::map<const IR::Type_Tuple *, cstring> tupleTypesCreated;
     Util::JsonArray *headerInstances;
     Util::JsonArray *headerStacks;
     friend class ExpressionConverter;
 
  protected:
     void pushFields(cstring prefix, const IR::Type_StructLike *st, Util::JsonArray *fields);
-    void pushFields(cstring prefix, const IR::Type_Tuple *tt, Util::JsonArray *fields);
+    void pushFields(cstring prefix, const IR::Type_Stack *st, Util::JsonArray *fields);
     cstring createJsonType(const IR::Type_StructLike *type);
-    cstring createJsonType(const IR::Type_Tuple *type);
     unsigned nextId(cstring group);
     void addHeaderStacks(const IR::Type_Struct* headersStruct);
     void addLocals();

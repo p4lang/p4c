@@ -34,7 +34,9 @@ p4c_bm2_ss_SOURCES = \
 	backends/bmv2/lower.h \
 	backends/bmv2/lower.cpp \
 	backends/bmv2/eliminateVerify.h \
-	backends/bmv2/eliminateVerify.cpp
+	backends/bmv2/eliminateVerify.cpp \
+	backends/bmv2/eliminateTuples.h \
+	backends/bmv2/eliminateTuples.cpp
 
 cpplint_FILES += $(p4c_bm2_ss_SOURCES)
 
