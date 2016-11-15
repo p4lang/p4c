@@ -98,7 +98,7 @@ class Type_Varbits : Type_Base {
 }
 
 class Parameter : Declaration, IAnnotated {
-    Annotations         annotations;
+    optional Annotations annotations = Annotations::empty;
     Direction           direction;
     Type                type;
     Annotations getAnnotations() const override { return annotations; }
@@ -449,6 +449,7 @@ class Type_Action : Type_MethodBase {
 class Method : Declaration {
     Type_Method type;
     optional bool isAbstract = false;
+    optional Annotations annotations = Annotations::empty;
     size_t getParameterCount() const { return type->getParameterCount(); }
     void setAbstract() { isAbstract = true; }
 }
@@ -462,8 +463,10 @@ class Type_Typedef : Type_Declaration, IAnnotated {
 
 // An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
-    TypeParameters typeParameters;
+    optional TypeParameters typeParameters = new TypeParameters;
     Vector<Method> methods;  // methods can be overloaded, so this is not IndexedVector
+    optional inline NameMap<Attribute, ordered_map> attributes;  // P4_14 only, currently
+    optional Annotations annotations = Annotations::empty;
 
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return methods->getEnumerator()->as<const IDeclaration*>(); }

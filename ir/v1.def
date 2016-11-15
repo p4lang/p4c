@@ -39,6 +39,42 @@ inline bool operator>>(cstring s, IR::CounterType &ctr) {
 }
 #end
 
+class Type_Block : Type_Base {
+    toString { return "block"; }
+    static Type_Block get();
+    dbprint { out << "block"; }
+}
+class Type_Counter : Type_Base {
+    toString { return "counter"; }
+    static Type_Counter get();
+    dbprint { out << "counter"; }
+}
+class Type_Expression : Type_Base {
+    toString { return "expression"; }
+    static Type_Expression get();
+    dbprint { out << "expression"; }
+}
+class Type_FieldListCalculation : Type_Base {
+    toString { return "field_list_calculation"; }
+    static Type_FieldListCalculation get();
+    dbprint { out << "field_list_calculation"; }
+}
+class Type_Meter : Type_Base {
+    toString { return "meter"; }
+    static Type_Meter get();
+    dbprint { out << "meter"; }
+}
+class Type_Register : Type_Base {
+    toString { return "register"; }
+    static Type_Register get();
+    dbprint { out << "register"; }
+}
+class Type_AnyTable : Type_Base {
+    toString { return "table"; }
+    static Type_AnyTable get();
+    dbprint { out << "table"; }
+}
+
 abstract HeaderOrMetadata {
     ID                      type_name;
     ID                      name;
@@ -373,8 +409,8 @@ class V1Table {
     optional Annotations        annotations = Annotations::empty;
 
     // inefficient add
-    void addProperty(TableProperty prop) {
-        auto props = new IndexedVector<TableProperty>(*properties.properties);
+    void addProperty(Property prop) {
+        auto props = new IndexedVector<Property>(*properties.properties);
         props->push_back(prop);
         properties = TableProperties(properties.srcInfo, props); }
     toString { return node_type_name() + " " + name; }
@@ -389,6 +425,13 @@ class V1Control {
     V1Control(Util::SourceInfo si, ID n) : Node(si), name(n), code(new Vector<Expression>()) {}
 #apply
     toString { return node_type_name() + " " + name; }
+}
+
+class Attribute : Declaration {
+    NullOK Type type = nullptr;
+    NullOK NameList locals = nullptr;
+    bool optional = false;
+#nodbprint
 }
 
 #emit

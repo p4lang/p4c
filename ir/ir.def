@@ -148,6 +148,11 @@ class ExpressionValue : PropertyValue {
     dbprint { out << expression; }
 }
 
+class ExpressionListValue : PropertyValue {
+    inline Vector<Expression> expressions;
+    dbprint { out << expressions; }
+}
+
 // An element in a table actions list
 class ActionListElement : IAnnotated, IDeclaration {
     Annotations annotations;
@@ -183,8 +188,8 @@ class Key : PropertyValue {
     validate { keyElements->check_null(); }
 }
 
-class TableProperty : Declaration, IAnnotated {
-    Annotations   annotations;
+class Property : Declaration, IAnnotated {
+    optional Annotations   annotations = Annotations::empty;
     PropertyValue value;
     bool          isConstant;
     Annotations getAnnotations() const override { return annotations; }
@@ -192,13 +197,13 @@ class TableProperty : Declaration, IAnnotated {
 }
 
 class TableProperties : ISimpleNamespace {
-    IndexedVector<TableProperty> properties;
+    IndexedVector<Property> properties;
     toString{ return "TableProperties(" + Util::toString(properties->size()) + ")"; }
-    TableProperties() { properties = new IndexedVector<TableProperty>(); }
+    TableProperties() { properties = new IndexedVector<Property>(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return properties->getDeclarations(); }
-    TableProperty getProperty(cstring name) const {
-        return properties->getDeclaration<TableProperty>(name); }
+    Property getProperty(cstring name) const {
+        return properties->getDeclaration<Property>(name); }
     IDeclaration getDeclByName(cstring name) const override {
         return properties->getDeclaration(name); }
 
@@ -266,10 +271,12 @@ class Declaration_Constant : Declaration, IAnnotated {
 // Like a variable, but for a statically allocated instance.
 // The syntax is Contructor(args) name = initializer;
 class Declaration_Instance : Declaration, IAnnotated {
-    Annotations           annotations;
+    optional Annotations  annotations = Annotations::empty;
     Type                  type;         // Either Type_Name or Type_Specialized
     Vector<Expression>    arguments;
-    NullOK BlockStatement initializer;  // experimental only; contains just declarations, no code
+    inline NameMap<Property> properties = {};  // P4_14 externs only, at the moment
+    optional NullOK BlockStatement initializer = nullptr;
+        // experimental only; contains just declarations, no code
 
     Annotations getAnnotations() const override { return annotations; }
     validate{ BUG_CHECK(type->is<Type_Name>() ||

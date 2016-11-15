@@ -52,7 +52,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     actions->push_back(actinst);
     // Action list property
     auto actlist = new IR::ActionList(Util::SourceInfo(), actions);
-    auto prop = new IR::TableProperty(
+    auto prop = new IR::Property(
         Util::SourceInfo(),
         IR::ID(IR::TableProperties::actionsPropertyName, nullptr),
         IR::Annotations::empty, actlist, false);
@@ -65,12 +65,12 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     BUG_CHECK(arg == mc->arguments->end(), "%1%: mismatched arguments", mc);
     auto amce = new IR::MethodCallExpression(mc->srcInfo, mc->method, mc->typeArguments, otherArgs);
     auto defactval = new IR::ExpressionValue(Util::SourceInfo(), amce);
-    auto defprop = new IR::TableProperty(
+    auto defprop = new IR::Property(
         Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName, nullptr),
         IR::Annotations::empty, defactval, true);
 
     // List of table properties
-    auto nm = new IR::IndexedVector<IR::TableProperty>();
+    auto nm = new IR::IndexedVector<IR::Property>();
     nm->push_back(prop);
     nm->push_back(defprop);
     auto props = new IR::TableProperties(Util::SourceInfo(), nm);

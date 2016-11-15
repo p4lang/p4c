@@ -49,7 +49,7 @@ void CreateBuiltins::postorder(IR::ActionListElement* element) {
 void CreateBuiltins::postorder(IR::ExpressionValue* expression) {
     // convert a default_action = a; into
     // default_action = a();
-    auto prop = findContext<IR::TableProperty>();
+    auto prop = findContext<IR::Property>();
     if (prop != nullptr &&
         prop->name == IR::TableProperties::defaultActionPropertyName &&
         expression->expression->is<IR::PathExpression>())

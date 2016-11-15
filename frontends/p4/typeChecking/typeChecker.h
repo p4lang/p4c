@@ -248,7 +248,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::AssignmentStatement* stat) override;
     const IR::Node* postorder(IR::ActionListElement* elem) override;
     const IR::Node* postorder(IR::KeyElement* elem) override;
-    const IR::Node* postorder(IR::TableProperty* elem) override;
+    const IR::Node* postorder(IR::Property* elem) override;
     const IR::Node* postorder(IR::SelectCase* elem) override;
 
     Visitor::profile_t init_apply(const IR::Node* node) override;

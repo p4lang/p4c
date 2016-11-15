@@ -207,7 +207,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::ActionListElement* ale) override;
     bool preorder(const IR::ActionList* v) override;
     bool preorder(const IR::Key* v) override;
-    bool preorder(const IR::TableProperty* p) override;
+    bool preorder(const IR::Property* p) override;
     bool preorder(const IR::TableProperties* t) override;
     bool preorder(const IR::P4Table* c) override;
 };

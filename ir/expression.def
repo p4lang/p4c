@@ -174,6 +174,7 @@ class StringLiteral : Literal {
     cstring value;
     validate{ if (value.isNull()) BUG("null StringLiteral"); }
     toString{ return cstring("\"") + value + "\""; }
+    StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
 }
 
 class PathExpression : Expression {

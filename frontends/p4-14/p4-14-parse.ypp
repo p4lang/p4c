@@ -37,6 +37,7 @@ static map<int, std::pair<std::string, int>> line_file_map;
 static IR::V1Program *global;
 static void yyerror(const char *fmt);
 static IR::Constant *constantFold(IR::Expression *);
+static IR::Vector<IR::Expression> make_expr_list(const IR::NameList *);
 
 #define YYLTYPE Util::SourceInfo
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                     \
@@ -62,12 +63,16 @@ static const IR::Annotations *getPragmas() {
     IR::ActionFunction          *ActionFunction;
     IR::ActionProfile           *ActionProfile;
     IR::ActionSelector          *ActionSelector;
+    IR::Annotations             *Annotations;
     IR::Apply                   *Apply;
+    IR::Attribute               *Attribute;
     IR::CalculatedField         *CalculatedField;
     IR::CaseEntry               *CaseEntry;
     IR::Vector<IR::CaseEntry>   *CaseEntryList;
     IR::Constant                *Constant;
     IR::Counter                 *Counter;
+    IR::Declaration_Instance    *BBox;
+    IR::Direction               Direction;
     IR::Expression              *Expression;
     IR::Vector<IR::Expression>  *ExpressionList;
     IR::FieldList               *FieldList;
@@ -75,6 +80,9 @@ static const IR::Annotations *getPragmas() {
     IR::NameList                *NameList;
     IR::Member                  *Member;
     IR::Meter                   *Meter;
+    IR::Parameter               *Parameter;
+    IR::ParameterList           *ParameterList;
+    IR::IndexedVector<IR::Parameter> *ParameterVector;
     IR::V1Parser                *Parser;
     IR::Register                *Register;
     IR::V1Table                 *Table;
@@ -83,21 +91,26 @@ static const IR::Annotations *getPragmas() {
         IR::Vector<IR::Annotation>      *annotations;
         IR::IndexedVector<IR::StructField> *fields;
     }                           HeaderType;
+    struct {
+        IR::Vector<IR::Method>                  *methods;
+        IR::NameMap<IR::Attribute, ordered_map> *attribs;
+    }                           BBoxType;
 }
 
 %token<str> ACTION ACTIONS ACTION_PROFILE ACTION_SELECTOR ALGORITHM APPLY
-            ATTRIBUTE ATTRIBUTES BIT BLACKBOX BLACKBOX_TYPE
+            ATTRIBUTE ATTRIBUTES BIT BLACKBOX BLACKBOX_TYPE BLOCK
             CALCULATED_FIELD CONTROL COUNTER CURRENT DEFAULT DEFAULT_ACTION
-            DIRECT DROP DYNAMIC_ACTION_SELECTION ELSE EXTRACT FALSE
+            DIRECT DROP DYNAMIC_ACTION_SELECTION ELSE EXTRACT EXPRESSION
+            EXPRESSION_LOCAL_VARIABLES FALSE
             FIELD_LIST FIELD_LIST_CALCULATION FIELDS HEADER HEADER_TYPE
-            IF IMPLEMENTATION INPUT INSTANCE_COUNT INT LATEST LAYOUT LENGTH MASK
+            IF IMPLEMENTATION IN INPUT INSTANCE_COUNT INT LATEST LAYOUT LENGTH MASK
             MAX_LENGTH MAX_SIZE MAX_WIDTH METADATA METER METHOD MIN_SIZE MIN_WIDTH NOT
-            OUTPUT_WIDTH PARSE_ERROR PARSER PARSER_EXCEPTION PAYLOAD PRAGMA PREFIX
-            PRE_COLOR PRIMITIVE_ACTION READS REGISTER RESULT RETURN SATURATING
+            OPTIONAL OUT OUTPUT_WIDTH PARSE_ERROR PARSER PARSER_EXCEPTION PAYLOAD PRAGMA
+            PREFIX PRE_COLOR PRIMITIVE_ACTION READS REGISTER RESULT RETURN SATURATING
             SELECT SELECTION_KEY SELECTION_MODE SELECTION_TYPE SET_METADATA
-            SIGNED SIZE STATIC TABLE TRUE TYPE UPDATE VALID VERIFY WIDTH WRITES
+            SIGNED SIZE STATIC STRING TABLE TRUE TYPE UPDATE VALID VERIFY WIDTH WRITES
 
-%token<str> IDENTIFIER STRING
+%token<str> IDENTIFIER STRING_LITERAL
 %token<Constant> INTEGER
 
 %printer { fprintf(yyoutput, "\"%s\"", $$.c_str()); } <str>
@@ -123,12 +136,17 @@ static const IR::Annotations *getPragmas() {
 %type<ActionFunction>   action_function_body action_statement_list
 %type<ActionProfile>    action_profile_body
 %type<ActionSelector>   action_selector_body
+%type<Annotations>      blackbox_method
 %type<Apply>            apply_case_list
+%type<Attribute>        blackbox_attribute
+%type<BBox>             blackbox_config
+%type<BBoxType>         blackbox_body
 %type<CalculatedField>  update_verify_spec_list
 %type<CaseEntry>        case_value_list
 %type<CaseEntryList>    case_entry_list
 %type<Constant>         const_expression
 %type<Counter>          counter_spec_list
+%type<Direction>        inout
 %type<Expression>       expression header_ref header_or_field_ref field_or_masked_ref opt_condition
                         pragma_operand
 %type<ExpressionList>   expression_list opt_expression_list control_statement_list opt_else
@@ -139,6 +157,9 @@ static const IR::Annotations *getPragmas() {
 %type<HeaderType>       header_dec_body field_declarations
 %type<NameList>         action_list name_list opt_name_list field_list_list
 %type<Meter>            meter_spec_list
+%type<Parameter>        argument
+%type<ParameterList>    opt_argument_list
+%type<ParameterVector>  argument_list
 %type<Parser>           parser_statement_list
 %type<Register>         register_spec_list
 %type<Table>            table_body
@@ -239,14 +260,24 @@ opt_max_length: /* epsilon */
               IR::Vector<IR::Expression>($3)); }
     ;
 
-type: INT '<' INTEGER '>'
-      { if (!$3->fitsInt())
-            BUG("%1$: Value too large", @3);
-        $$ = IR::Type::Bits::get(@3, $3->asInt()); }
+type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
     | BIT '<' INTEGER '>'
       { if (!$3->fitsInt())
             BUG("%1$: Value too large", @3);
         $$ = IR::Type::Bits::get(@3, $3->asInt()); }
+    | BLOCK { $$ = IR::Type_Block::get(); }
+    | COUNTER { $$ = IR::Type_Counter::get(); }
+    | EXPRESSION { $$ = IR::Type_Expression::get(); }
+    | FIELD_LIST_CALCULATION { $$ = IR::Type_FieldListCalculation::get(); }
+    | INT { $$ = new IR::Type_InfInt; }
+    | INT '<' INTEGER '>'
+      { if (!$3->fitsInt())
+            BUG("%1$: Value too large", @3);
+        $$ = IR::Type::Bits::get(@3, $3->asInt(), true); }
+    | METER { $$ = IR::Type_Meter::get(); }
+    | STRING { $$ = IR::Type_String::get(); }
+    | REGISTER { $$ = IR::Type_Register::get(); }
+    | TABLE { $$ = IR::Type_AnyTable::get(); }
 ;
 
 /************************************/
@@ -603,7 +634,7 @@ table_body: /* epsilon */ { $$ = new IR::V1Table(getPragmas()); }
         $$->default_action_args = $6; }
     | table_body IDENTIFIER ':' expression ';'
       { auto exp = new IR::ExpressionValue(@4, $4);
-        auto prop = new IR::TableProperty(@2, IR::ID(@2, $2), IR::Annotations::empty, exp, false);
+        auto prop = new IR::Property(@2, IR::ID(@2, $2), IR::Annotations::empty, exp, false);
         $1->addProperty(prop);
         $$ = $1; }
     | table_body error ';' { $$=$1; }
@@ -679,47 +710,83 @@ apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
 /************/
 
 blackbox_type_declaration: BLACKBOX_TYPE name '{' blackbox_body '}'
-        { current_pragmas.clear(); }
+      { global->add($2, new IR::Type_Extern(@1+@5, IR::ID(@2, $2), $4.methods,
+                                            *$4.attribs, getPragmas())); }
 ;
 
-blackbox_body: /* epsilon */
+blackbox_body: /* epsilon */ {
+            $$.methods = new IR::Vector<IR::Method>;
+            $$.attribs = new IR::NameMap<IR::Attribute, ordered_map>; }
     | blackbox_body ATTRIBUTE name '{' blackbox_attribute '}'
+          { ($$=$1).attribs->addUnique($3, $5); }
     | blackbox_body METHOD name '(' opt_argument_list ')' ';'
+          { ($$=$1).methods->push_back(new IR::Method(@2+@3, $3,
+                new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5))); }
     | blackbox_body METHOD name '(' opt_argument_list ')' '{' blackbox_method '}'
+          { ($$=$1).methods->push_back(new IR::Method(@2+@3, $3,
+                new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5), $8)); }
     | blackbox_body error
 ;
 
-blackbox_attribute: /* epsilon */
-    | blackbox_attribute name ':' name ';'
-    | blackbox_attribute name ':' type ';'
-    | blackbox_attribute name '{' opt_name_list '}'
-    | blackbox_attribute name ';'
+blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute(@-1, $<str>-1); }
+    | blackbox_attribute TYPE ':' type ';' { ($$=$1)->type = $4; }
+    | blackbox_attribute EXPRESSION_LOCAL_VARIABLES '{' opt_name_list '}'
+        { ($$=$1)->locals = $4; }
+    | blackbox_attribute OPTIONAL ';'
+        { ($$=$1)->optional = true; }
     | blackbox_attribute error ';'
     | blackbox_attribute error
 ;
 
-blackbox_method: /* epsilon */
+blackbox_method: { $$ = new IR::Annotations; }
     | blackbox_method READS '{' opt_name_list '}'
+        { ($$=$1)->add(new IR::Annotation(@2, $2, make_expr_list($4))); }
     | blackbox_method WRITES '{' opt_name_list '}'
+        { ($$=$1)->add(new IR::Annotation(@2, $2, make_expr_list($4))); }
 ;
 
-opt_argument_list: /* epsilon */ | argument_list ;
+opt_argument_list:
+      /* epsilon */ { $$ = new IR::ParameterList(new IR::IndexedVector<IR::Parameter>); }
+    | argument_list { $$ = new IR::ParameterList($1); }
+;
 
-argument_list: argument | argument_list ',' argument ;
+argument_list:
+      argument                          { $$ = new IR::IndexedVector<IR::Parameter>($1); }
+    | argument_list ',' argument        { ($$=$1)->push_back($3); }
+;
 
-argument: name | type | argument name | argument type;
+argument:
+      inout type name
+        { $$ = new IR::Parameter(@3, $3, $1, $2); }
+    | OPTIONAL argument
+        { ($$ = $2)->annotations = $2->annotations->add(new IR::Annotation(@1, $1, {})); }
+;
+
+inout: IN { $$ = IR::Direction::In; } | OUT { $$ = IR::Direction::Out; } ;
 
 blackbox_instantiation:
       BLACKBOX name name ';'
-        { current_pragmas.clear(); }
-    | BLACKBOX name name '{' blackbox_config '}'
-        { current_pragmas.clear(); }
+        { global->add($3, new IR::Declaration_Instance(@3, $3, getPragmas(),
+                            new IR::Type_Name($2), new IR::Vector<IR::Expression>)); }
+    | BLACKBOX name name '{'
+        { $<BBox>$ = new IR::Declaration_Instance(@3, $3, getPragmas(),
+                            new IR::Type_Name($2), new IR::Vector<IR::Expression>); }
+      blackbox_config '}'
+        { global->add($3, $6); }
 ;
 
-blackbox_config: /* epsilon */
+blackbox_config: /* epsilon */ { $$ = $<BBox>0; }
     | blackbox_config name ':' expressions ';'
+          { const IR::PropertyValue *pv;
+            if ($4->size() == 1)
+                pv = new IR::ExpressionValue($4->front());
+            else
+                pv = new IR::ExpressionListValue(std::move(*$4));
+            ($$=$1)->properties.add($2, new IR::Property(@2+@4, $2, pv, false)); }
     | blackbox_config name '{' expressions '}'
-;
+          { auto *pv = new IR::ExpressionListValue(std::move(*$4));
+            ($$=$1)->properties.add($2, new IR::Property(@2+@4, $2, pv, false)); }
+    ;
 
 expressions: /* epsilon */
       { $$ = new IR::Vector<IR::Expression>; }
@@ -739,9 +806,9 @@ pragma_operands: /* epsilon */
 
 pragma_operand:
       INTEGER { $$ = $1; }
-    | STRING { $$ = new IR::StringLiteral($1); }
-    | name { $$ = new IR::StringLiteral($1); }
-    | name '.' name { $$ = new IR::StringLiteral($1 + '.' + $3); }
+    | STRING_LITERAL { $$ = new IR::StringLiteral(@1, $1); }
+    | name { $$ = new IR::StringLiteral(@1, $1); }
+    | name '.' name { $$ = new IR::StringLiteral(@1+@3, $1 + '.' + $3); }
 ;
 
 /***************/
@@ -813,15 +880,16 @@ opt_expression_list: /* epsilon */ { $$ = nullptr; } | expression_list
 
 name: IDENTIFIER
     | ACTION | ACTIONS | ACTION_PROFILE | ACTION_SELECTOR | ALGORITHM
-    | ATTRIBUTE | ATTRIBUTES | BIT | BLACKBOX | BLACKBOX_TYPE
+    | ATTRIBUTE | ATTRIBUTES | BIT | BLACKBOX | BLACKBOX_TYPE | BLOCK
     | CALCULATED_FIELD | CONTROL | COUNTER | DEFAULT_ACTION
-    | DIRECT | DROP | DYNAMIC_ACTION_SELECTION | EXTRACT | FIELD_LIST
-    | FIELD_LIST_CALCULATION | FIELDS | HEADER | HEADER_TYPE | IMPLEMENTATION
+    | DIRECT | DROP | DYNAMIC_ACTION_SELECTION | EXPRESSION | EXPRESSION_LOCAL_VARIABLES
+    | EXTRACT | FIELD_LIST
+    | FIELD_LIST_CALCULATION | FIELDS | HEADER | HEADER_TYPE | IMPLEMENTATION | IN
     | INPUT | INSTANCE_COUNT | INT | LAYOUT | LENGTH | MASK | MAX_LENGTH | MAX_SIZE
-    | MAX_WIDTH | METADATA | METER | METHOD | MIN_SIZE | MIN_WIDTH | OUTPUT_WIDTH
-    | PARSER | PARSER_EXCEPTION | PRE_COLOR | PRIMITIVE_ACTION | READS
+    | MAX_WIDTH | METADATA | METER | METHOD | MIN_SIZE | MIN_WIDTH | OPTIONAL | OUT
+    | OUTPUT_WIDTH | PARSER | PARSER_EXCEPTION | PRE_COLOR | PRIMITIVE_ACTION | READS
     | REGISTER | RESULT | RETURN | SATURATING | SELECTION_KEY | SELECTION_MODE
-    | SELECTION_TYPE | SET_METADATA | SIGNED | SIZE | STATIC | TABLE | TYPE
+    | SELECTION_TYPE | SET_METADATA | SIGNED | SIZE | STATIC | STRING | TABLE | TYPE
     | UPDATE | VERIFY | WIDTH | WRITES
 ;
 
@@ -866,4 +934,11 @@ static IR::Constant *constantFold(IR::Expression *a) {
     IR::Node *exp(a);
     auto rv = exp->apply(P4::DoConstantFolding(nullptr, nullptr))->to<IR::Constant>();
     return rv ? new IR::Constant(rv->type, rv->value, rv->base) : nullptr;
+}
+
+static IR::Vector<IR::Expression> make_expr_list(const IR::NameList *list) {
+    IR::Vector<IR::Expression> rv;
+    for (auto &name :list->names)
+        rv.push_back(new IR::StringLiteral(name));
+    return rv;
 }

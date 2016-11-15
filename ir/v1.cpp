@@ -18,6 +18,21 @@ limitations under the License.
 #include "dbprint.h"
 #include "lib/gmputil.h"
 
+#define SINGLETON_TYPE(NAME)                                    \
+const IR::Type_##NAME *IR::Type_##NAME::get() {                 \
+    static const Type_##NAME *singleton;                        \
+    if (!singleton)                                             \
+        singleton = (new Type_##NAME(Util::SourceInfo()));      \
+    return singleton;                                           \
+}
+SINGLETON_TYPE(Block)
+SINGLETON_TYPE(Counter)
+SINGLETON_TYPE(Expression)
+SINGLETON_TYPE(FieldListCalculation)
+SINGLETON_TYPE(Meter)
+SINGLETON_TYPE(Register)
+SINGLETON_TYPE(AnyTable)
+
 cstring IR::NamedCond::unique_name() {
     static int unique_counter = 0;
     char buf[16];

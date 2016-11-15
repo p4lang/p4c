@@ -108,7 +108,7 @@ class JsonConverter final {
                           Util::JsonArray* force_list) const;
     cstring convertHashAlgorithm(cstring algorithm) const;
     // Return 'true' if the table is 'simple'
-    bool handleTableImplementation(const IR::TableProperty* implementation,
+    bool handleTableImplementation(const IR::Property* implementation,
                                    const IR::Key* key,
                                    Util::JsonObject* table);
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
