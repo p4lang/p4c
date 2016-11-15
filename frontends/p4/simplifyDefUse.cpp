@@ -321,6 +321,7 @@ class FindUninitialized : public Inspector {
                 visit(expr);
             }
         }
+        reads(expression, LocationSet::empty);
         return false;
     }
 
@@ -356,6 +357,18 @@ class FindUninitialized : public Inspector {
         auto fields = storage->getField(expression->member);
         reads(expression, fields);
         registerUses(expression);
+    }
+
+    bool preorder(const IR::Slice* expression) override {
+        LOG1("Visiting " << dbp(expression));
+        bool save = lhs;
+        lhs = false;  // slices on the LHS also read the data
+        visit(expression->e0);
+        auto storage = getReads(expression->e0, true);
+        reads(expression, storage);   // true even in LHS
+        registerUses(expression->e0);
+        lhs = save;
+        return false;
     }
 
     bool preorder(const IR::ArrayIndex* expression) override {

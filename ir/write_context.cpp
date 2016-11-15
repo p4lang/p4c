@@ -25,6 +25,7 @@ bool P4WriteContext::isWrite() {
     while (ctxt->child_index == 0 &&
             (ctxt->node->is<IR::ArrayIndex>() ||
              ctxt->node->is<IR::HeaderStackItemRef>() ||
+             ctxt->node->is<IR::Slice>() ||
              ctxt->node->is<IR::Member>())) {
         ctxt = ctxt->parent;
         if (!ctxt || !ctxt->node)

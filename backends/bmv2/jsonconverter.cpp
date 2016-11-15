@@ -681,6 +681,20 @@ cstring JsonConverter::createCalculation(cstring algo, const IR::Expression* fie
     calc->emplace("name", calcName);
     calc->emplace("id", nextId("calculations"));
     calc->emplace("algo", algo);
+    if (!fields->is<IR::ListExpression>()) {
+        // expand it into a list
+        auto vec = new IR::Vector<IR::Expression>();
+        auto type = typeMap->getType(fields, true);
+        BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%: expected a struct", fields);
+        for (auto f : *type->to<IR::Type_StructLike>()->fields) {
+            auto e = new IR::Member(Util::SourceInfo(), fields, f->name);
+            auto ftype = typeMap->getType(f);
+            typeMap->setType(e, ftype);
+            vec->push_back(e);
+        }
+        fields = new IR::ListExpression(Util::SourceInfo(), vec);
+        typeMap->setType(fields, type);
+    }
     auto jright = conv->convert(fields);
     calc->emplace("input", jright);
     calculations->append(calc);
