@@ -1090,7 +1090,7 @@ Util::IJson* JsonConverter::convertIf(const CFG::IfNode* node, cstring) {
     return result;
 }
 
-bool JsonConverter::handleTableImplementation(const IR::TableProperty* implementation,
+bool JsonConverter::handleTableImplementation(const IR::Property* implementation,
                                               const IR::Key* key,
                                               Util::JsonObject* table) {
     if (implementation == nullptr) {

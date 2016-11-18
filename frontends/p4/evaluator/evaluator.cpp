@@ -252,7 +252,7 @@ bool Evaluator::preorder(const IR::P4Table* table) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::TableProperty* prop) {
+bool Evaluator::preorder(const IR::Property* prop) {
     LOG1("Evaluating " << prop);
     visit(prop->value);
     auto value = getValue(prop->value);

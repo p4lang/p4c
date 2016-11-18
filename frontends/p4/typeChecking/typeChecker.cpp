@@ -1787,7 +1787,7 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
         //    default_action = a(2);  << a typechecked as specialized in the actions list
         // }
         // This works only if the actions property has already been visited
-        auto prop = findContext<IR::TableProperty>();
+        auto prop = findContext<IR::Property>();
         if (prop != nullptr) {
             auto table = findContext<IR::P4Table>();
             BUG_CHECK(table != nullptr, "%1%: property not within a table?", prop);
@@ -2234,7 +2234,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     // with different signatures
     if (methodType->is<IR::Type_Action>()) {
         bool inActionsList = false;
-        auto prop = findContext<IR::TableProperty>();
+        auto prop = findContext<IR::Property>();
         if (prop != nullptr && prop->name == IR::TableProperties::actionsPropertyName)
             inActionsList = true;
         return actionCall(inActionsList, expression);
@@ -2560,7 +2560,7 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     return elem;
 }
 
-const IR::Node* TypeInference::postorder(IR::TableProperty* prop) {
+const IR::Node* TypeInference::postorder(IR::Property* prop) {
     if (prop->name == IR::TableProperties::defaultActionPropertyName) {
         auto pv = prop->value->to<IR::ExpressionValue>();
         if (pv == nullptr) {

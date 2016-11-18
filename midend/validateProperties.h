@@ -34,7 +34,7 @@ class ValidateTableProperties : public Inspector {
         for (auto l : legal)
             legalProperties.emplace(l);
     }
-    void postorder(const IR::TableProperty* property) override;
+    void postorder(const IR::Property* property) override;
 };
 
 }  // namespace P4

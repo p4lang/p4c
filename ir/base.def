@@ -14,6 +14,7 @@ abstract Type {
     typedef Type_Boolean        Boolean;
     typedef Type_Bits           Bits;
     typedef Type_Varbits        Varbits;
+    typedef Type_Void           Void;
 #end
     // This is well-defined only for types with fixed width
     virtual int width_bits() const { return 0; }
@@ -168,18 +169,22 @@ class Annotation {
 // FIXME -- get rid of this class -- classes with annotations should have an
 // inline Vector<Annotation> instead (remove useless indirection)
 class Annotations {
-    inline Vector<Annotation> annotations;
+    optional inline Vector<Annotation> annotations;
     Annotations { if (!srcInfo && !annotations.empty()) srcInfo = annotations[0]->srcInfo; }
     static Annotations *empty;  // FIXME -- should be const
     size_t size() const { return annotations.size(); }
     // Get the annotation with the specified name or nullptr.
     // There should be at most one annotation with this name.
     Annotation getSingle(cstring name) const { return get(annotations, name); }
+    Annotations add(Annotation annot) {
+        if (annot->srcInfo) srcInfo += annot->srcInfo;
+        annotations.push_back(annot);
+        return this; }
+    Annotations add(Annotation annot) const { return clone()->add(annot); }
+    Annotations addAnnotation(cstring name, Expression expr) {
+        return add(new Annotation(name, Vector<Expression>(expr))); }
     Annotations addAnnotation(cstring name, Expression expr) const {
-        auto rv = clone();
-        rv->annotations.push_back(new Annotation(name, Vector<Expression>(expr)));
-        return rv;
-    }
+        return add(new Annotation(name, Vector<Expression>(expr))); }
     // Add annotation if another annotation with the same name is not
     // already present.
     Annotations addAnnotationIfNew(cstring name, Expression expr) const {

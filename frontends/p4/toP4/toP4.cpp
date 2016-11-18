@@ -1158,7 +1158,7 @@ bool ToP4::preorder(const IR::Key* v) {
     return false;
 }
 
-bool ToP4::preorder(const IR::TableProperty* p) {
+bool ToP4::preorder(const IR::Property* p) {
     dump(1);
     visit(p->annotations);
     if (p->isConstant)

@@ -64,6 +64,7 @@ static bool pragmaLine = false;  // FIXME -- use a flex state (and state stack?)
 "bit"           { yylval.str = yytext; BEGIN(NORMAL); return BIT; }
 "blackbox"      { yylval.str = yytext; BEGIN(NORMAL); return BLACKBOX; }
 "blackbox_type" { yylval.str = yytext; BEGIN(NORMAL); return BLACKBOX_TYPE; }
+"block"         { yylval.str = yytext; BEGIN(NORMAL); return BLOCK; }
 "calculated_field" {
                   yylval.str = yytext; BEGIN(NORMAL); return CALCULATED_FIELD; }
 "control"       { yylval.str = yytext; BEGIN(NORMAL); return CONTROL; }
@@ -77,6 +78,12 @@ static bool pragmaLine = false;  // FIXME -- use a flex state (and state stack?)
                   yylval.str = yytext; BEGIN(NORMAL);
                   return DYNAMIC_ACTION_SELECTION; }
 "else"          { yylval.str = yytext; BEGIN(NORMAL); return ELSE; }
+"extern"        { yylval.str = yytext; BEGIN(NORMAL); return BLACKBOX; }
+"extern_type"   { yylval.str = yytext; BEGIN(NORMAL); return BLACKBOX_TYPE; }
+"expression"    { yylval.str = yytext; BEGIN(NORMAL); return EXPRESSION; }
+"expression_local_variables" {
+                  yylval.str = yytext; BEGIN(NORMAL);
+                  return EXPRESSION_LOCAL_VARIABLES; }
 "extract"       { yylval.str = yytext; BEGIN(NORMAL); return EXTRACT; }
 "false"         { yylval.str = yytext; BEGIN(NORMAL); return FALSE; }
 "field_list"    { yylval.str = yytext; BEGIN(NORMAL); return FIELD_LIST; }
@@ -90,6 +97,7 @@ static bool pragmaLine = false;  // FIXME -- use a flex state (and state stack?)
 "implementation" {yylval.str = yytext; BEGIN(NORMAL); return IMPLEMENTATION; }
 "input"         { yylval.str = yytext; BEGIN(NORMAL); return INPUT; }
 "instance_count" {yylval.str = yytext; BEGIN(NORMAL); return INSTANCE_COUNT; }
+"in"            { yylval.str = yytext; BEGIN(NORMAL); return IN; }
 "int"           { yylval.str = yytext; BEGIN(NORMAL); return INT; }
 "latest"        { yylval.str = yytext; BEGIN(NORMAL); return LATEST; }
 "layout"        { yylval.str = yytext; BEGIN(NORMAL); return LAYOUT; }
@@ -105,6 +113,8 @@ static bool pragmaLine = false;  // FIXME -- use a flex state (and state stack?)
 "min_width"     { yylval.str = yytext; BEGIN(NORMAL); return MIN_WIDTH; }
 "not"           { yylval.str = yytext; BEGIN(NORMAL); return NOT; }
 "or"            { yylval.str = yytext; BEGIN(NORMAL); return OR; }
+"optional"      { yylval.str = yytext; BEGIN(NORMAL); return OPTIONAL; }
+"out"           { yylval.str = yytext; BEGIN(NORMAL); return OUT; }
 "output_width"  { yylval.str = yytext; BEGIN(NORMAL); return OUTPUT_WIDTH; }
 "parse_error"   { yylval.str = yytext; BEGIN(NORMAL); return PARSE_ERROR; }
 "parser"        { yylval.str = yytext; BEGIN(NORMAL); return PARSER; }
@@ -127,6 +137,7 @@ static bool pragmaLine = false;  // FIXME -- use a flex state (and state stack?)
 "signed"        { yylval.str = yytext; BEGIN(NORMAL); return SIGNED; }
 "size"          { yylval.str = yytext; BEGIN(NORMAL); return SIZE; }
 "static"        { yylval.str = yytext; BEGIN(NORMAL); return STATIC; }
+"string"        { yylval.str = yytext; BEGIN(NORMAL); return STRING; }
 "true"          { yylval.str = yytext; BEGIN(NORMAL); return TRUE; }
 "table"         { yylval.str = yytext; BEGIN(NORMAL); return TABLE; }
 "type"          { yylval.str = yytext; BEGIN(NORMAL); return TYPE; }

@@ -572,7 +572,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     ExpressionConverter conv(this);
 
     auto params = new IR::ParameterList();
-    auto propvec = new IR::IndexedVector<IR::TableProperty>(*table->properties.properties);
+    auto propvec = new IR::IndexedVector<IR::Property>(*table->properties.properties);
 
     auto actVect = new IR::IndexedVector<IR::ActionListElement>();
     auto actionList = new IR::ActionList(Util::SourceInfo(), actVect);
@@ -610,7 +610,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     auto nop = new IR::ActionListElement(Util::SourceInfo(), IR::Annotations::empty,
                                          new IR::PathExpression(p4lib.noAction.Id()));
     actVect->push_back(nop);
-    propvec->push_back(new IR::TableProperty(Util::SourceInfo(),
+    propvec->push_back(new IR::Property(Util::SourceInfo(),
                                              IR::ID(IR::TableProperties::actionsPropertyName),
                                              IR::Annotations::empty,
                                              actionList, false));
@@ -648,26 +648,26 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
             }
         }
 
-        propvec->push_back(new IR::TableProperty(Util::SourceInfo(),
+        propvec->push_back(new IR::Property(Util::SourceInfo(),
                                                  IR::ID(IR::TableProperties::keyPropertyName),
                                                  IR::Annotations::empty,
                                                  key, false));
     }
 
     if (table->size != 0) {
-        auto prop = new IR::TableProperty(
+        auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID("size"), IR::Annotations::empty,
             new IR::ExpressionValue(Util::SourceInfo(), new IR::Constant(table->size)), false);
         propvec->push_back(prop);
     }
     if (table->min_size != 0) {
-        auto prop = new IR::TableProperty(
+        auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID("min_size"), IR::Annotations::empty,
             new IR::ExpressionValue(Util::SourceInfo(), new IR::Constant(table->min_size)), false);
         propvec->push_back(prop);
     }
     if (table->max_size != 0) {
-        auto prop = new IR::TableProperty(
+        auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID("max_size"), IR::Annotations::empty,
             new IR::ExpressionValue(Util::SourceInfo(), new IR::Constant(table->max_size)), false);
         propvec->push_back(prop);
@@ -684,7 +684,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                 table->default_action_args : new IR::Vector<IR::Expression>();
         auto methodCall = new IR::MethodCallExpression(Util::SourceInfo(), act,
                                                        emptyTypeArguments, args);
-        auto prop = new IR::TableProperty(
+        auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName),
             IR::Annotations::empty, new IR::ExpressionValue(Util::SourceInfo(), methodCall), false);
         propvec->push_back(prop);
@@ -705,7 +705,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         auto constructor = new IR::ConstructorCallExpression(Util::SourceInfo(), type, args);
         auto propvalue = new IR::ExpressionValue(Util::SourceInfo(), constructor);
         auto annos = addNameAnnotation(action_profile->name);
-        auto prop = new IR::TableProperty(
+        auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID(v1model.tableAttributes.tableImplementation.Id()),
             annos, propvalue, false);
         propvec->push_back(prop);
@@ -717,7 +717,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         auto constructor = new IR::ConstructorCallExpression(Util::SourceInfo(), type, args);
         auto propvalue = new IR::ExpressionValue(Util::SourceInfo(), constructor);
         auto annos = addNameAnnotation(action_profile->name);
-        auto prop = new IR::TableProperty(
+        auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID(v1model.tableAttributes.tableImplementation.Id()),
             annos, propvalue, false);
         propvec->push_back(prop);
@@ -733,7 +733,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         auto constructor = new IR::ConstructorCallExpression(Util::SourceInfo(), type, args);
         auto propvalue = new IR::ExpressionValue(Util::SourceInfo(), constructor);
         auto annos = addNameAnnotation(ctr);
-        auto prop = new IR::TableProperty(
+        auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID(v1model.tableAttributes.directCounter.Id()),
             annos, propvalue, false);
         propvec->push_back(prop);
@@ -742,7 +742,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
     if (mtr != nullptr) {
         auto meter = new IR::PathExpression(mtr->name);
         auto propvalue = new IR::ExpressionValue(Util::SourceInfo(), meter);
-        auto prop = new IR::TableProperty(
+        auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID(v1model.tableAttributes.directMeter.Id()),
             IR::Annotations::empty, propvalue, false);
         propvec->push_back(prop);

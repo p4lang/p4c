@@ -87,7 +87,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 %type<constFieldInit>           constFieldInit
 %type<kind>                     kind
 %type<types>                    parentList nonEmptyParentList type_args
-%type<str>                      name expression optInitializer methodName body
+%type<str>                      name expression optInitializer fieldName methodName body
 %type<lookup>                   lookup_scope
 
 %error-verbose
@@ -269,11 +269,11 @@ body: BLOCK
     ;
 
 irField
-    : modifiers type IDENTIFIER optInitializer ';'
+    : modifiers type fieldName optInitializer ';'
           { $$ = new IrField(@3, $2, $3, $4, $1);
             if ($1 & IrElement::Virtual)
                 yyerror("virtual invalid on field %s", $3); }
-    | modifiers CONST nonRefType IDENTIFIER optInitializer ';'
+    | modifiers CONST nonRefType fieldName optInitializer ';'
           { $$ = new IrField(@4, $3, $4, $5, $1 | IrElement::Const);
             if ($1 & IrElement::Virtual)
                 yyerror("virtual invalid on field %s", $4); }
@@ -288,6 +288,8 @@ modifier
     ;
 
 modifiers : { $$ = 0; } | modifiers modifier { $$ = $1 | $2; }
+
+fieldName: IDENTIFIER | OPTIONAL { $$ = "optional"; } ;
 
 optInitializer
     : /* empty */       { $$ = nullptr; }

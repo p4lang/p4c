@@ -71,7 +71,7 @@ static int yylex();
     IR::IndexedVector<IR::Declaration>    *decls;
     IR::IndexedVector<IR::ParserState>    *parserStates;
     IR::IndexedVector<IR::StructField>    *structFields;
-    IR::IndexedVector<IR::TableProperty>  *properties;
+    IR::IndexedVector<IR::Property>       *properties;
     IR::IndexedVector<IR::Declaration_ID> *ids;
     IR::IndexedVector<IR::ActionListElement> *actions;
     IR::Vector<IR::Annotation>  *annoVec;
@@ -106,7 +106,7 @@ static int yylex();
     IR::StatOrDecl              *StatOrDecl;
     IR::StructField             *StructField;
     IR::SwitchCase              *SwitchCase;
-    IR::TableProperty           *TableProperty;
+    IR::Property                *Property;
     IR::Type_Control            *Type_Control;
     IR::Type_Declaration        *Type_Declaration;
     IR::Type_Name               *Type_Name;
@@ -173,7 +173,7 @@ static int yylex();
 %type<structFields>     structFieldList
 %type<Method>           methodPrototype functionPrototype
 %type<methods>          methodPrototypes
-%type<TableProperty>    tableProperty
+%type<Property>         tableProperty
 %type<properties>       tablePropertyList
 %type<KeyElement>       keyElement
 %type<keyElements>      keyElementList
@@ -770,7 +770,7 @@ tableDeclaration
     ;
 
 tablePropertyList
-    : tableProperty                      { $$ = new IR::IndexedVector<IR::TableProperty>();
+    : tableProperty                      { $$ = new IR::IndexedVector<IR::Property>();
                                            $$->push_back($1); }
     | tablePropertyList tableProperty    { $$ = $1; $$->push_back($2); }
     ;
@@ -778,20 +778,20 @@ tablePropertyList
 tableProperty
     : KEY '=' '{' keyElementList '}'     { auto v = new IR::Key(@4, $4);
                                            auto id = IR::ID(@1, "key");
-                                           $$ = new IR::TableProperty(
+                                           $$ = new IR::Property(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
     | ACTIONS '=' '{' actionList '}'     { auto v = new IR::ActionList(@4, $4);
                                            auto id = IR::ID(@1, "actions");
-                                           $$ = new IR::TableProperty(
+                                           $$ = new IR::Property(
                                                @1 + @5, id, IR::Annotations::empty, v, false); }
     | optAnnotations CONST IDENTIFIER '=' initializer ';'
                                          { auto v = new IR::ExpressionValue(@5, $5);
                                             auto id = IR::ID(@3, $3);
-                                            $$ = new IR::TableProperty(@3, id, $1, v, true); }
+                                            $$ = new IR::Property(@3, id, $1, v, true); }
     | optAnnotations IDENTIFIER '=' initializer ';'
                                          { auto v = new IR::ExpressionValue(@4, $4);
                                            auto id = IR::ID(@2, $2);
-                                           $$ = new IR::TableProperty(@2, id, $1, v, false); }
+                                           $$ = new IR::Property(@2, id, $1, v, false); }
     ;
 
 keyElementList
