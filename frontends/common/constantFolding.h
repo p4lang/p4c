@@ -30,6 +30,7 @@ class DoConstantFolding : public Transform {
     const ReferenceMap* refMap;  // if null no 'const' values can be resolved
     TypeMap* typeMap;  // if null we have no types; updated for new constants
     bool typesKnown;
+    bool warnings;  // if true emit warnings
     // maps expressions and declarations to their constant values
     std::map<const IR::Node*, const IR::Expression*> constants;
 
@@ -55,8 +56,8 @@ class DoConstantFolding : public Transform {
     Result setContains(const IR::Expression* keySet, const IR::Expression* constant) const;
 
  public:
-    DoConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr) {
+    DoConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true) :
+            refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
         visitDagOnce = true; setName("DoConstantFolding");
     }
 
@@ -92,10 +93,10 @@ class DoConstantFolding : public Transform {
 
 class ConstantFolding : public PassManager {
  public:
-    ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap) {
+    ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true) {
         if (typeMap != nullptr)
             passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DoConstantFolding(refMap, typeMap));
+        passes.push_back(new DoConstantFolding(refMap, typeMap, warnings));
         setName("ConstantFolding");
     }
 };

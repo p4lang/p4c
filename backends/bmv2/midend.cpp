@@ -148,7 +148,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveLeftSlices(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new LowerExpressions(&typeMap),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ConstantFolding(&refMap, &typeMap, false),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })
     });

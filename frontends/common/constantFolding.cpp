@@ -567,7 +567,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     auto tb = left->type->to<IR::Type_Bits>();
     if (tb != nullptr) {
-        if ((unsigned)tb->size < shift)
+        if (((unsigned)tb->size < shift) && warnings)
             ::warning("%1%: Shifting %2%-bit value with %3%", e, tb->size, shift);
     }
 
@@ -710,7 +710,8 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
      * Should really implement this in SelectCase pre/postorder and this postorder goes away */
     for (auto c : expression->selectCases) {
         if (finished) {
-            ::warning("%1%: unreachable case", c);
+            if (warnings)
+                ::warning("%1%: unreachable case", c);
             continue;
         }
         auto inside = setContains(c->keyset, sel);
@@ -735,7 +736,7 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
     }
 
     if (changes) {
-        if (cases.size() == 0 && result == expression)
+        if (cases.size() == 0 && result == expression && warnings)
             // TODO: this is the same as verify(false, error.NoMatch),
             // but we cannot replace the selectExpression with a method call.
             ::warning("%1%: no case matches", expression);
