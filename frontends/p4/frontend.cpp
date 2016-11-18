@@ -69,6 +69,11 @@ class PrettyPrint : public Inspector {
 };
 }  // namespace
 
+class FrontEndLast : public PassManager {
+ public:
+    FrontEndLast() { setName("FrontEndLast"); }
+};
+
 const IR::P4Program*
 FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
     if (program == nullptr)
@@ -112,6 +117,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         new SimplifyControlFlow(&refMap, &typeMap),
         new SpecializeAll(&refMap, &typeMap),
         new RemoveParserControlFlow(&refMap, &typeMap),
+        new FrontEndLast(),
     };
 
     passes.setName("FrontEnd");

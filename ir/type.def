@@ -138,6 +138,7 @@ class ParameterList : ISimpleNamespace {
 // Represents a type variable written by the user
 class Type_Var : Type_Declaration, ITypeVar {
     cstring getVarName() const override { return getName(); }
+    int getDeclId() const override { return declid; }
     dbprint { out << name; }
 }
 
@@ -151,6 +152,7 @@ class Type_InfInt : Type, ITypeVar {
     static int nextId;
  public:
     cstring getVarName() const override { return "int_" + Util::toString(declid); }
+    int getDeclId() const override { return declid; }
     dbprint { out << "int"; }
     toString { return "int"; }
     operator== { return declid == a.declid; }

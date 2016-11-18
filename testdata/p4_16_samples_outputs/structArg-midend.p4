@@ -7,9 +7,9 @@ control caller() {
     S data_2;
     action act() {
         data.f = 32w0;
-        data_2 = data;
+        data_2.f = data.f;
         data_2.f = 32w0;
-        data = data_2;
+        data.f = data_2.f;
     }
     table tbl_act() {
         actions = {

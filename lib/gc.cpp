@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -61,12 +61,15 @@ static void gc_callback() {
     LOG2("cstring cache size " << cstring::cache_size(count) << " (count=" << count << ")");
     GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
 }
+
+void silent(char *, GC_word) {}
 #endif  /* HAVE_LIBGC */
 
 void setup_gc_logging() {
 #if HAVE_LIBGC
     GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
     GC_start_call_back = gc_callback;
+    GC_set_warn_proc(&silent);
 #endif  /* HAVE_LIBGC */
 }
 

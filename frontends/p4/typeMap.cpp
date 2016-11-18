@@ -116,13 +116,12 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         return *left == *right;
     if (left->is<IR::Type_Type>())
         return equivalent(left->to<IR::Type_Type>()->type, right->to<IR::Type_Type>()->type);
-    if (left->is<IR::Type_Error>() ||
-        left->is<IR::Type_InfInt>())
+    if (left->is<IR::Type_Error>())
         return true;
-    if (left->is<IR::Type_Var>()) {
-        auto lv = left->to<IR::Type_Var>();
-        auto rv = right->to<IR::Type_Var>();
-        return lv->name == rv->name && lv->declid == rv->declid;
+    if (left->is<IR::ITypeVar>()) {
+        auto lv = left->to<IR::ITypeVar>();
+        auto rv = right->to<IR::ITypeVar>();
+        return lv->getVarName() == rv->getVarName() && lv->getDeclId() == rv->getDeclId();
     }
     if (left->is<IR::Type_Stack>()) {
         auto ls = left->to<IR::Type_Stack>();
@@ -248,5 +247,25 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     // The following are not expected to be compared for equivalence:
     // Type_Dontcare, Type_Unknown, Type_Name, Type_Specialized, Type_Typedef
 }
+
+// Used for tuples and stacks only
+const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
+    // Currently a linear search; hopefully this won't be too expensive in practice
+    std::vector<const IR::Type*>* searchIn;
+    if (type->is<IR::Type_Stack>())
+        searchIn = &canonicalStacks;
+    else if (type->is<IR::Type_Tuple>())
+        searchIn = &canonicalTuples;
+    else
+        BUG("%1%: unexpected type", type);
+
+    for (auto t : *searchIn) {
+        if (TypeMap::equivalent(type, t))
+            return t;
+    }
+    searchIn->push_back(type);
+    return type;
+}
+
 
 }  // namespace P4

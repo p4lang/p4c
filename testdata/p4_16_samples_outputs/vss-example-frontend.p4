@@ -1,10 +1,9 @@
-#include <core.p4>
-
 error {
     IPv4OptionsNotSupported,
     IPv4IncorrectVersion,
     IPv4ChecksumError
 }
+#include <core.p4>
 
 typedef bit<4> PortId;
 struct InControl {

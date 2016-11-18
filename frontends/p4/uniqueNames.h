@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 
@@ -131,7 +132,7 @@ class UniqueParameters : public PassManager {
  private:
     RenameMap    *renameMap;
  public:
-    explicit UniqueParameters(ReferenceMap* refMap);
+    UniqueParameters(ReferenceMap* refMap, TypeMap* typeMap);
 };
 
 }  // namespace P4

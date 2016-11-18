@@ -298,15 +298,18 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto et = canonicalize(stack->elementType);
         if (et == nullptr)
             return nullptr;
+        const IR::Type* canon;
         if (et == stack->elementType)
-            return type;
-        const IR::Type* canon = new IR::Type_Stack(stack->srcInfo, et, stack->size);
+            canon = type;
+        else
+            canon = new IR::Type_Stack(stack->srcInfo, et, stack->size);
+        canon = typeMap->getCanonical(canon);
         return canon;
     } else if (type->is<IR::Type_Tuple>()) {
         auto tuple = type->to<IR::Type_Tuple>();
         auto fields = new IR::Vector<IR::Type>();
         // tuple<set<a>, b> = set<tuple<a, b>>
-        // TODO: this probably should not be here.
+        // TODO: this should not be done here.
         bool anySet = false;
         bool anyChange = false;
         for (auto t : *tuple->components) {
@@ -325,6 +328,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             canon = new IR::Type_Tuple(type->srcInfo, fields);
         else
             canon = type;
+        canon = typeMap->getCanonical(canon);
         if (anySet)
             canon = new IR::Type_Set(type->srcInfo, canon);
         return canon;
@@ -1138,7 +1142,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Header>() || t->is<IR::Type_Union>() ||
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
-        t->is<IR::Type_ActionEnum>(); };
+        t->is<IR::Type_ActionEnum>() || t->is<IR::Type_Tuple>(); };
     validateFields(canon, validator);
     return type;
 }

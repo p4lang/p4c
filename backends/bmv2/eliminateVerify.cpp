@@ -32,7 +32,8 @@ const IR::Node* EliminateVerify::postorder(IR::ParserState* state) {
                 LOG1("Converting " << dbp(c) << " into states");
 
                 states->push_back(currentState);
-                BUG_CHECK(mcs->methodCall->arguments->size() == 2, "%1%: Expected 2 arguments", mcs);
+                BUG_CHECK(mcs->methodCall->arguments->size() == 2,
+                          "%1%: Expected 2 arguments", mcs);
                 auto cond = mcs->methodCall->arguments->at(0);
                 cstring joinName = refMap->newName(state->name.name + "_join");
 

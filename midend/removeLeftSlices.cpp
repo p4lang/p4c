@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* RemoveLeftSlices::postorder(IR::AssignmentStatement* stat) {
+const IR::Node* DoRemoveLeftSlices::postorder(IR::AssignmentStatement* stat) {
     if (!stat->left->is<IR::Slice>())
         return stat;
     auto ls = stat->left->to<IR::Slice>();

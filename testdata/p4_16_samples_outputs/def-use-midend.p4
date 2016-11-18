@@ -41,14 +41,38 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         hasReturned_0 = true;
     }
     action act_0() {
-        tmp_4 = std_meta;
-        hdr_1 = tmp_2;
-        meta_1 = tmp_3;
-        std_meta_1 = tmp_4;
-        tmp_2 = hdr_1;
-        tmp_3 = meta_1;
-        tmp_4 = std_meta_1;
-        std_meta = tmp_4;
+        tmp_4.ingress_port = std_meta.ingress_port;
+        tmp_4.egress_spec = std_meta.egress_spec;
+        tmp_4.egress_port = std_meta.egress_port;
+        tmp_4.clone_spec = std_meta.clone_spec;
+        tmp_4.instance_type = std_meta.instance_type;
+        tmp_4.drop = std_meta.drop;
+        tmp_4.recirculate_port = std_meta.recirculate_port;
+        tmp_4.packet_length = std_meta.packet_length;
+        std_meta_1.ingress_port = tmp_4.ingress_port;
+        std_meta_1.egress_spec = tmp_4.egress_spec;
+        std_meta_1.egress_port = tmp_4.egress_port;
+        std_meta_1.clone_spec = tmp_4.clone_spec;
+        std_meta_1.instance_type = tmp_4.instance_type;
+        std_meta_1.drop = tmp_4.drop;
+        std_meta_1.recirculate_port = tmp_4.recirculate_port;
+        std_meta_1.packet_length = tmp_4.packet_length;
+        tmp_4.ingress_port = std_meta_1.ingress_port;
+        tmp_4.egress_spec = std_meta_1.egress_spec;
+        tmp_4.egress_port = std_meta_1.egress_port;
+        tmp_4.clone_spec = std_meta_1.clone_spec;
+        tmp_4.instance_type = std_meta_1.instance_type;
+        tmp_4.drop = std_meta_1.drop;
+        tmp_4.recirculate_port = std_meta_1.recirculate_port;
+        tmp_4.packet_length = std_meta_1.packet_length;
+        std_meta.ingress_port = tmp_4.ingress_port;
+        std_meta.egress_spec = tmp_4.egress_spec;
+        std_meta.egress_port = tmp_4.egress_port;
+        std_meta.clone_spec = tmp_4.clone_spec;
+        std_meta.instance_type = tmp_4.instance_type;
+        std_meta.drop = tmp_4.drop;
+        std_meta.recirculate_port = tmp_4.recirculate_port;
+        std_meta.packet_length = tmp_4.packet_length;
     }
     action act_1() {
         hasReturned_0 = false;

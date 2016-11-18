@@ -165,9 +165,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction() {
+    @name("NoAction_1") action NoAction_0() {
     }
-    @name("NoAction_2") action NoAction_0() {
+    @name("NoAction_2") action NoAction_3() {
     }
     @name("drop_stats") counter(32w256, CounterType.packets) drop_stats;
     @name("drop_stats_2") counter(32w256, CounterType.packets) drop_stats_0;
@@ -194,10 +194,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("drop_stats") table drop_stats_2() {
         actions = {
             drop_stats_update_0();
-            NoAction();
+            NoAction_0();
         }
         size = 256;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("system_acl") table system_acl() {
         actions = {
@@ -208,7 +208,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_packet_with_reason_0();
             negative_mirror_0();
             congestion_mirror_set_0();
-            NoAction_0();
+            NoAction_3();
         }
         key = {
             meta.acl_metadata.if_label               : ternary;
@@ -240,7 +240,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.ingress_metadata.enable_dod         : ternary;
         }
         size = 512;
-        default_action = NoAction_0();
+        default_action = NoAction_3();
     }
     apply {
         system_acl.apply();

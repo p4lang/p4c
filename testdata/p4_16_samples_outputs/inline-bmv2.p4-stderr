@@ -1,3 +1,0 @@
-../testdata/p4_16_samples/inline-bmv2.p4(44): warning: Table adjust_lkp_fields does not have an `default_action' property
-    table adjust_lkp_fields {
-          ^^^^^^^^^^^^^^^^^

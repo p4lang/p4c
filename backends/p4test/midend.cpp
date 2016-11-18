@@ -26,6 +26,9 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 #include "midend/parserUnroll.h"
 #include "midend/simplifySelect.h"
+#include "midend/eliminateTuples.h"
+#include "midend/nestedStructs.h"
+#include "midend/copyStructures.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -46,7 +49,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
 
-    // TODO: def-use-related optimizations
     // TODO: parser loop unrolling
     // TODO: improve copy propagation
     // TODO: simplify actions which are too complex
@@ -70,8 +72,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         // new P4::ParsersUnroll(true, &refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
         new P4::UniqueNames(&refMap),
-        new P4::UniqueParameters(&refMap),
-        new P4::ClearTypeMap(&typeMap),  // table types have changed
+        new P4::UniqueParameters(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveTableParameters(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
@@ -82,6 +83,9 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifySelect(&refMap, &typeMap, false),  // non-constant keysets
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
+        new P4::EliminateTuples(&refMap, &typeMap),
+        new P4::CopyStructures(&refMap, &typeMap),
+        new P4::NestedStructs(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),

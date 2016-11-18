@@ -80,7 +80,6 @@ class JsonConverter final {
 
  protected:
     void pushFields(cstring prefix, const IR::Type_StructLike *st, Util::JsonArray *fields);
-    void pushFields(cstring prefix, const IR::Type_Stack *st, Util::JsonArray *fields);
     cstring createJsonType(const IR::Type_StructLike *type);
     unsigned nextId(cstring group);
     void addHeaderStacks(const IR::Type_Struct* headersStruct);

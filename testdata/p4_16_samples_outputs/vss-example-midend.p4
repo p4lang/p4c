@@ -1,10 +1,9 @@
-#include <core.p4>
-
 error {
     IPv4OptionsNotSupported,
     IPv4IncorrectVersion,
     IPv4ChecksumError
 }
+#include <core.p4>
 
 typedef bit<4> PortId;
 struct InControl {
@@ -94,7 +93,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     IPv4Address nextHop_3;
     bool hasReturned_0;
     IPv4Address nextHop_0;
-    @name("NoAction_1") action NoAction() {
+    @name("NoAction_1") action NoAction_0() {
     }
     @name("Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;
@@ -135,9 +134,9 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         }
         actions = {
             Send_to_cpu_0();
-            NoAction();
+            NoAction_0();
         }
-        const default_action = NoAction();
+        const default_action = NoAction_0();
     }
     @name("Set_dmac") action Set_dmac_0(EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;

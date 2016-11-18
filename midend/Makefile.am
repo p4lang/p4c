@@ -19,8 +19,14 @@ midend_SOURCES = \
 	midend/actionsInlining.h \
 	midend/actionSynthesis.cpp \
 	midend/actionSynthesis.h \
+	midend/copyStructures.h \
+	midend/copyStructures.cpp \
 	midend/convertEnums.h \
 	midend/convertEnums.cpp \
+	midend/eliminateTuples.h \
+	midend/eliminateTuples.cpp \
+	midend/nestedStructs.h \
+	midend/nestedStructs.cpp \
 	midend/inlining.cpp \
 	midend/inlining.h \
 	midend/interpreter.h \

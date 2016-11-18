@@ -139,9 +139,12 @@ class DismantleExpression : public Transform {
             if (ctx != nullptr && ctx->node->is<IR::Expression>()) {
                 auto tmp = result->createTemporary(type);
                 auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
-                auto tstat = new IR::AssignmentStatement(Util::SourceInfo(), path->clone(), new IR::BoolLiteral(true));
-                auto fstat = new IR::AssignmentStatement(Util::SourceInfo(), path->clone(), new IR::BoolLiteral(false));
-                auto ifStatement = new IR::IfStatement(Util::SourceInfo(), result->final, tstat, fstat);
+                auto tstat = new IR::AssignmentStatement(
+                    Util::SourceInfo(), path->clone(), new IR::BoolLiteral(true));
+                auto fstat = new IR::AssignmentStatement(
+                    Util::SourceInfo(), path->clone(), new IR::BoolLiteral(false));
+                auto ifStatement = new IR::IfStatement(
+                    Util::SourceInfo(), result->final, tstat, fstat);
                 result->statements->push_back(ifStatement);
                 result->final = path->clone();
                 typeMap->setType(result->final, type);
@@ -329,7 +332,8 @@ class DismantleExpression : public Transform {
                 auto tmp = refMap->newName("tmp");
                 argValue = new IR::PathExpression(IR::ID(tmp, nullptr));
                 auto decl = new IR::Declaration_Variable(
-                    Util::SourceInfo(), IR::ID(tmp, nullptr), IR::Annotations::empty, paramtype, nullptr);
+                    Util::SourceInfo(), IR::ID(tmp, nullptr),
+                    IR::Annotations::empty, paramtype, nullptr);
                 result->temporaries->push_back(decl);
                 if (p->direction != IR::Direction::Out) {
                     // assign temporary before method call

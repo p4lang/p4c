@@ -34,12 +34,16 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
+struct tuple_0 {
+    bit<32> field;
+}
+
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     bit<16> tmp_1;
-    tuple<bit<32>> tmp_2;
+    tuple_0 tmp_2;
     @name("a") action a_0() {
-        tmp_2 = { meta.ipv4.lkp_ipv4_sa };
-        hash<bit<16>, bit<16>, tuple<bit<32>>, bit<32>>(tmp_1, HashAlgorithm.crc16, 16w0, tmp_2, 32w65536);
+        tmp_2.field = meta.ipv4.lkp_ipv4_sa;
+        hash<bit<16>, bit<16>, tuple_0, bit<32>>(tmp_1, HashAlgorithm.crc16, 16w0, tmp_2, 32w65536);
         meta.hash.hash = tmp_1;
     }
     table tbl_a() {

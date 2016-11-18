@@ -17,9 +17,10 @@ limitations under the License.
 #include "midend.h"
 #include "lower.h"
 #include "inlining.h"
-#include "copyStructures.h"
 #include "eliminateVerify.h"
-#include "eliminateTuples.h"
+#include "midend/eliminateTuples.h"
+#include "midend/nestedStructs.h"
+#include "midend/copyStructures.h"
 #include "midend/actionsInlining.h"
 #include "midend/validateProperties.h"
 #include "midend/removeReturns.h"
@@ -103,8 +104,7 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
         new P4::UniqueNames(&refMap),
-        new P4::UniqueParameters(&refMap),
-        new P4::ClearTypeMap(&typeMap),
+        new P4::UniqueParameters(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveTableParameters(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
@@ -114,8 +114,14 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
         new P4::StrengthReduction(),
         new P4::SimplifySelect(&refMap, &typeMap, true),  // require constant keysets
         new P4::SimplifyParsers(&refMap),
+        new P4::StrengthReduction(),
+        new P4::EliminateTuples(&refMap, &typeMap),
+        new P4::CopyStructures(&refMap, &typeMap),
+        new P4::NestedStructs(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::MoveDeclarations(),
+        new P4::ValidateTableProperties({ "implementation", "size", "counters",
+                                          "meters", "size", "support_timeout" }),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::SynthesizeActions(&refMap, &typeMap),
         new P4::MoveActionsToTables(&refMap, &typeMap),
@@ -136,16 +142,12 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // BMv2-specific passes
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
-        new EliminateTuples(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap),
         new EliminateVerify(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::TypeChecking(&refMap, &typeMap),
-        new P4::RemoveLeftSlices(&typeMap),
+        new P4::RemoveLeftSlices(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new LowerExpressions(&typeMap),
-        new CopyStructures(&refMap, &typeMap),
-        new P4::ValidateTableProperties({ "implementation", "size", "counters",
-                                          "meters", "size", "support_timeout" }),
         new P4::ConstantFolding(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })

@@ -30,10 +30,10 @@ parser ParserI(packet_in b, out H parsedHdr, inout M meta, inout std_meta_t std_
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    M meta_1;
+    S meta_1_s;
     action act() {
-        meta_1 = meta;
-        meta = meta_1;
+        meta_1_s.x = meta.s.x;
+        meta.s.x = meta_1_s.x;
     }
     table tbl_act() {
         actions = {

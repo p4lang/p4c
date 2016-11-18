@@ -28,7 +28,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction() {
+    @name("NoAction_1") action NoAction_0() {
     }
     @name("setf4") action setf4_0() {
         hdr.data.f4 = 32w0x70a50;
@@ -39,12 +39,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setf4_0();
             noop_0();
-            NoAction();
+            NoAction_0();
         }
         key = {
             hdr.data.f1: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         test1.apply();

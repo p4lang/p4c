@@ -38,19 +38,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_2") action NoAction() {
+    @name("NoAction_2") action NoAction_0() {
     }
     @name("nop") action nop_0() {
     }
     @name("e_t1") table e_t1() {
         actions = {
             nop_0();
-            NoAction();
+            NoAction_0();
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         e_t1.apply();
@@ -58,7 +58,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_3") action NoAction_0() {
+    @name("NoAction_3") action NoAction_1() {
     }
     @name("nop") action nop_1() {
     }
@@ -69,12 +69,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop_1();
             set_egress_port_0();
-            NoAction_0();
+            NoAction_1();
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         i_t1.apply();

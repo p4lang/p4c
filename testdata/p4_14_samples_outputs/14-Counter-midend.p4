@@ -28,7 +28,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction() {
+    @name("NoAction_1") action NoAction_0() {
     }
     @name("c1") counter(32w1024, CounterType.packets) c1;
     @name("count_c1_1") action count_c1() {
@@ -37,9 +37,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t1") table t1() {
         actions = {
             count_c1();
-            NoAction();
+            NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         t1.apply();

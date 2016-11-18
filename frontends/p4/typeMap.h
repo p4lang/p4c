@@ -39,6 +39,11 @@ namespace P4 {
  */
 class TypeMap final : public ProgramMap {
  protected:
+    // We want to have the same canonical type for two
+    // different tuples or stacks with the same signature.
+    std::vector<const IR::Type*> canonicalTuples;
+    std::vector<const IR::Type*> canonicalStacks;
+
     // Map each node to its canonical type
     std::map<const IR::Node*, const IR::Type*> typeMap;
     // All left-values in the program.
@@ -78,6 +83,9 @@ class TypeMap final : public ProgramMap {
 
     // deep structural equivalence between canonical types only.
     static bool equivalent(const IR::Type* left, const IR::Type* right);
+
+    // Used for tuples and stacks only
+    const IR::Type* getCanonical(const IR::Type* type);
 };
 }  // namespace P4
 

@@ -326,10 +326,19 @@ class ExpressionConverter : public Inspector {
     void postorder(const IR::ArrayIndex* expression) override {
         auto result = new Util::JsonObject();
         result->emplace("type", "header");
-        // This is supposed to be a header, which is supposed to be a member of the headers struct.
-        auto mem = expression->left->to<IR::Member>();
-        BUG_CHECK(mem != nullptr, "%1%: expected array indexed", expression->left);
-        cstring elementAccess = mem->member.name;
+        cstring elementAccess;
+
+        // This is can be either a header, which is part of the "headers" parameter
+        // or a temporary array.
+        if (expression->left->is<IR::Member>()) {
+            // This is a header part of the parameters
+            auto mem = expression->left->to<IR::Member>();
+            elementAccess = mem->member.name;
+        } else if (expression->left->is<IR::PathExpression>()) {
+            // This is a temporary variable with type stack.
+            auto path = expression->left->to<IR::PathExpression>();
+            elementAccess = path->path->name;
+        }
 
         if (!expression->right->is<IR::Constant>()) {
             ::error("%1%: all array indexes must be constant on this architecture",
@@ -594,6 +603,8 @@ class ExpressionConverter : public Inspector {
                 auto f = mkArrayField(r, "value");
                 f->append(converter->scalarsName);
                 f->append(var->name);
+            } else if (type->is<IR::Type_Stack>()) {
+                // handled specially elsewhere
             } else {
                 BUG("%1%: type not yet handled", type);
             }
@@ -1657,7 +1668,6 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
 void JsonConverter::addLocals() {
     // We synthesize a "header_type" for each local which has a struct type
     // and we pack all the scalar-typed locals into a scalarsStruct
-    // TODO: synthesize stacks
     auto scalarsStruct = new Util::JsonObject();
     scalarsName = refMap->newName("scalars");
     scalarsStruct->emplace("name", scalarsName);
@@ -1676,6 +1686,32 @@ void JsonConverter::addLocals() {
             json->emplace("header_type", name);
             json->emplace("metadata", true);
             headerInstances->append(json);
+        }
+        else if (auto stack = type->to<IR::Type_Stack>()) {
+            auto json = new Util::JsonObject();
+            json->emplace("name", v->name);
+            json->emplace("id", nextId("stack"));
+            json->emplace("size", stack->getSize());
+            auto type = typeMap->getTypeType(stack->elementType, true);
+            BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
+            auto ht = type->to<IR::Type_Header>();
+            createJsonType(ht);
+
+            cstring header_type = stack->elementType->to<IR::Type_Header>()->name;
+            json->emplace("header_type", header_type);
+            auto stackMembers = mkArrayField(json, "header_ids");
+            for (unsigned i=0; i < stack->getSize(); i++) {
+                unsigned id = nextId("headers");
+                stackMembers->append(id);
+                auto header = new Util::JsonObject();
+                cstring name = v->name + "[" + Util::toString(i) + "]";
+                header->emplace("name", name);
+                header->emplace("id", id);
+                header->emplace("header_type", header_type);
+                header->emplace("metadata", false);
+                headerInstances->append(header);
+            }
+            headerStacks->append(json);
         } else if (type->is<IR::Type_Bits>()) {
             auto tb = type->to<IR::Type_Bits>();
             auto field = pushNewArray(scalarFields);
@@ -1929,7 +1965,6 @@ void JsonConverter::generateUpdate(const IR::P4Control* updateControl,
 }
 
 void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
-    // TODO: this is wrong if the structs are more deeply nested.
     for (auto f : *type->fields) {
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
@@ -1959,26 +1994,19 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
     }
 }
 
-void JsonConverter::pushFields(cstring prefix, const IR::Type_Stack *st,
-                               Util::JsonArray *fields) {
-    auto et = typeMap->getTypeType(st->elementType, true);
-    for (unsigned i = 0; i < st->getSize(); i++)
-        pushFields(prefix + "_" + Util::toString(i), et->to<IR::Type_Header>(), fields);
-}
-
 void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
                                Util::JsonArray *fields) {
     for (auto f : *st->fields) {
         auto ftype = typeMap->getType(f, true);
-        if (auto nested = ftype->to<IR::Type_StructLike>()) {
-            pushFields(prefix + f->name.name + ".", nested, fields);
+        if (ftype->to<IR::Type_StructLike>()) {
+            BUG("%1%: nested structure", st);
         } else if (auto type = ftype->to<IR::Type_Bits>()) {
             auto field = pushNewArray(fields);
             field->append(prefix + f->name.name);
             field->append(type->size);
             field->append(type->isSigned);
-        } else if (auto nested = ftype->to<IR::Type_Stack>()) {
-            pushFields(prefix + f->name.name + ".", nested, fields);
+        } else if (ftype->to<IR::Type_Stack>()) {
+            BUG("%1%: nested stack", st);
         } else {
             BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
         }

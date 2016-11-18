@@ -23,8 +23,6 @@ p4c_bm2_ss_SOURCES = \
 	backends/bmv2/bmv2.cpp \
 	backends/bmv2/analyzer.h \
 	backends/bmv2/analyzer.cpp \
-	backends/bmv2/copyStructures.h \
-	backends/bmv2/copyStructures.cpp \
 	backends/bmv2/jsonconverter.h \
 	backends/bmv2/jsonconverter.cpp \
 	backends/bmv2/inlining.h \
@@ -34,9 +32,7 @@ p4c_bm2_ss_SOURCES = \
 	backends/bmv2/lower.h \
 	backends/bmv2/lower.cpp \
 	backends/bmv2/eliminateVerify.h \
-	backends/bmv2/eliminateVerify.cpp \
-	backends/bmv2/eliminateTuples.h \
-	backends/bmv2/eliminateTuples.cpp
+	backends/bmv2/eliminateVerify.cpp
 
 cpplint_FILES += $(p4c_bm2_ss_SOURCES)
 

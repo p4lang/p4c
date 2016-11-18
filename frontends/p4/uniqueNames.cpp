@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "uniqueNames.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
@@ -37,13 +38,14 @@ UniqueNames::UniqueNames(ReferenceMap* refMap) : renameMap(new RenameMap) {
     passes.emplace_back(new RenameSymbols(refMap, renameMap));
 }
 
-UniqueParameters::UniqueParameters(ReferenceMap* refMap) : renameMap(new RenameMap) {
-    setStopOnError(true);
+UniqueParameters::UniqueParameters(ReferenceMap* refMap, TypeMap* typeMap) :
+        renameMap(new RenameMap) {
     setName("UniqueParameters");
-    CHECK_NULL(refMap);
+    CHECK_NULL(refMap); CHECK_NULL(typeMap);
     passes.emplace_back(new ResolveReferences(refMap));
     passes.emplace_back(new FindParameters(refMap, renameMap));
     passes.emplace_back(new RenameSymbols(refMap, renameMap));
+    passes.emplace_back(new ClearTypeMap(typeMap));
 }
 
 /**************************************************************************/

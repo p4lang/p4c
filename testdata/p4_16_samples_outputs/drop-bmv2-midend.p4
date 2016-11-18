@@ -17,7 +17,14 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     standard_metadata_t smeta_0;
     @name("drop_1") action drop_0() {
         smeta_0.drop = 1w1;
-        smeta = smeta_0;
+        smeta.ingress_port = smeta_0.ingress_port;
+        smeta.egress_spec = smeta_0.egress_spec;
+        smeta.egress_port = smeta_0.egress_port;
+        smeta.clone_spec = smeta_0.clone_spec;
+        smeta.instance_type = smeta_0.instance_type;
+        smeta.drop = smeta_0.drop;
+        smeta.recirculate_port = smeta_0.recirculate_port;
+        smeta.packet_length = smeta_0.packet_length;
     }
     @name("forward") table forward() {
         key = {

@@ -5,12 +5,19 @@ struct S {
 
 control proto();
 package top(proto _p);
+struct tuple_0 {
+    bit<32> field;
+    bool    field_0;
+}
+
 control c() {
-    tuple<bit<32>, bool> x;
-    tuple<bit<32>, bool> y;
+    tuple_0 x;
+    tuple_0 y;
     action act() {
-        x = { 32w10, false };
-        y = x;
+        x.field = 32w10;
+        x.field_0 = false;
+        y.field = x.field;
+        y.field_0 = x.field_0;
     }
     table tbl_act() {
         actions = {

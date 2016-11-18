@@ -60,7 +60,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction() {
+    @name("NoAction_1") action NoAction_0() {
     }
     @name("set_valid_outer_unicast_packet_untagged") action set_valid_outer_unicast_packet_untagged_0() {
         meta.ingress_metadata.lkp_pkt_type = 3w1;
@@ -148,7 +148,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_valid_outer_broadcast_packet_single_tagged_0();
             set_valid_outer_broadcast_packet_double_tagged_0();
             set_valid_outer_broadcast_packet_qinq_tagged_0();
-            NoAction();
+            NoAction_0();
         }
         key = {
             hdr.ethernet.dstAddr      : ternary;
@@ -156,7 +156,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.vlan_tag_[1].isValid(): exact;
         }
         size = 64;
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         validate_outer_ethernet.apply();

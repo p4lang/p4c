@@ -540,7 +540,8 @@ typeRef
 
 prefixedType
     : TYPE                             { $$ = new IR::Path(IR::ID(@1, $1)); }
-    | dotPrefix TYPE                   { $$ = new IR::Path(IR::ID(@2, $2), true); structure.clearPath(); }
+    | dotPrefix TYPE                   { $$ = new IR::Path(IR::ID(@2, $2), true);
+                                            structure.clearPath(); }
     ;
 
 typeName
@@ -719,7 +720,8 @@ statement
 
 blockStatement
     : optAnnotations '{'               { structure.pushNamespace(@2, false); }
-      statOrDeclList '}'               { structure.pop(); $$ = new IR::BlockStatement(@1 + @5, $1, $4); }
+      statOrDeclList '}'               { structure.pop();
+                                              $$ = new IR::BlockStatement(@1 + @5, $1, $4); }
     ;
 
 statOrDeclList

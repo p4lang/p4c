@@ -28,7 +28,8 @@ class EliminateVerify : public Transform {
     P4::TypeMap* typeMap;
  public:
     const IR::Node* postorder(IR::ParserState* state) override;
-    EliminateVerify(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) : refMap(refMap), typeMap(typeMap)
+    EliminateVerify(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
+            refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("EliminateVerify"); }
 };
 

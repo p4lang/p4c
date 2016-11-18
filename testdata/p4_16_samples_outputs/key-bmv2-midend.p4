@@ -44,7 +44,7 @@ control deparser(packet_out b, in Headers h) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     hdr h_1;
     bit<32> key_0;
-    @name("NoAction_1") action NoAction() {
+    @name("NoAction_1") action NoAction_0() {
     }
     @name("c.a") action c_a() {
         h_1.b = h_1.a;
@@ -55,9 +55,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             c_a();
-            NoAction();
+            NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     action act() {
         h_1 = h.h;

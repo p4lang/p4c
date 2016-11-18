@@ -47,7 +47,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_2") action NoAction() {
+    @name("NoAction_2") action NoAction_0() {
     }
     @name("copy_queueing_data") action copy_queueing_data_0() {
         hdr.queueing_hdr.setValid();
@@ -59,9 +59,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("t_egress") table t_egress() {
         actions = {
             copy_queueing_data_0();
-            NoAction();
+            NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         t_egress.apply();
@@ -69,7 +69,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_3") action NoAction_0() {
+    @name("NoAction_3") action NoAction_1() {
     }
     @name("set_port") action set_port_0(bit<9> port) {
         standard_metadata.egress_spec = port;
@@ -81,13 +81,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_port_0();
             _drop_0();
-            NoAction_0();
+            NoAction_1();
         }
         key = {
             hdr.hdr1.f1: exact;
         }
         size = 128;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_ingress.apply();

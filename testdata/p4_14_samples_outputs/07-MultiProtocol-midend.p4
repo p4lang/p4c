@@ -150,21 +150,21 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction() {
+    @name("NoAction_1") action NoAction_0() {
     }
-    @name("NoAction_2") action NoAction_0() {
+    @name("NoAction_2") action NoAction_9() {
     }
-    @name("NoAction_3") action NoAction_9() {
+    @name("NoAction_3") action NoAction_10() {
     }
-    @name("NoAction_4") action NoAction_10() {
+    @name("NoAction_4") action NoAction_11() {
     }
-    @name("NoAction_5") action NoAction_11() {
+    @name("NoAction_5") action NoAction_12() {
     }
-    @name("NoAction_6") action NoAction_12() {
+    @name("NoAction_6") action NoAction_13() {
     }
-    @name("NoAction_7") action NoAction_13() {
+    @name("NoAction_7") action NoAction_14() {
     }
-    @name("NoAction_8") action NoAction_14() {
+    @name("NoAction_8") action NoAction_15() {
     }
     @name("l2_packet") action l2_packet_0() {
         meta.ing_metadata.packet_type = 4w0;
@@ -223,89 +223,89 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv6_packet_0();
             mpls_packet_0();
             mim_packet_0();
-            NoAction();
+            NoAction_0();
         }
         key = {
             hdr.ethernet.etherType: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("icmp_check") table icmp_check() {
         actions = {
             nop_0();
             drop_0();
-            NoAction_0();
+            NoAction_9();
         }
         key = {
             hdr.icmp.typeCode: exact;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_9();
     }
     @name("ipv4_match") table ipv4_match() {
         actions = {
             nop_7();
             set_egress_port_0();
-            NoAction_9();
+            NoAction_10();
         }
         key = {
             hdr.ipv4.dstAddr: exact;
         }
-        default_action = NoAction_9();
+        default_action = NoAction_10();
     }
     @name("ipv6_match") table ipv6_match() {
         actions = {
             nop_8();
             set_egress_port_3();
-            NoAction_10();
+            NoAction_11();
         }
         key = {
             hdr.ipv6.dstAddr: exact;
         }
-        default_action = NoAction_10();
+        default_action = NoAction_11();
     }
     @name("l2_match") table l2_match() {
         actions = {
             nop_9();
             set_egress_port_4();
-            NoAction_11();
+            NoAction_12();
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
-        default_action = NoAction_11();
+        default_action = NoAction_12();
     }
     @name("set_egress") table set_egress() {
         actions = {
             nop_10();
             send_packet_0();
-            NoAction_12();
+            NoAction_13();
         }
         key = {
             meta.ing_metadata.drop: exact;
         }
-        default_action = NoAction_12();
+        default_action = NoAction_13();
     }
     @name("tcp_check") table tcp_check() {
         actions = {
             nop_11();
             drop_4();
-            NoAction_13();
+            NoAction_14();
         }
         key = {
             hdr.tcp.dstPort: exact;
         }
-        default_action = NoAction_13();
+        default_action = NoAction_14();
     }
     @name("udp_check") table udp_check() {
         actions = {
             nop_12();
             drop_5();
-            NoAction_14();
+            NoAction_15();
         }
         key = {
             hdr.udp.dstPort: exact;
         }
-        default_action = NoAction_14();
+        default_action = NoAction_15();
     }
     apply {
         switch (ethertype_match.apply().action_run) {

@@ -20,7 +20,7 @@ limitations under the License.
 #include "source_file.h"
 #include "exceptions.h"
 
-void IHasDbPrint::print() const { dbprint(std::cout); }
+void IHasDbPrint::print() const { dbprint(std::cout); std::cout << std::endl; }
 
 namespace Util {
 SourcePosition::SourcePosition(unsigned lineNumber, unsigned columnNumber)

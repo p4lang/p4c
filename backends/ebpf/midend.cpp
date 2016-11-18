@@ -75,7 +75,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::InlineActions(&refMap, &typeMap),
         new P4::LocalizeAllActions(&refMap),
         new P4::UniqueNames(&refMap),
-        new P4::UniqueParameters(&refMap),
+        new P4::UniqueParameters(&refMap, &typeMap),
         new P4::ClearTypeMap(&typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveTableParameters(&refMap, &typeMap),

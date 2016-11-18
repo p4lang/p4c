@@ -55,6 +55,7 @@ interface IGeneralNamespace : INamespace {
 interface ITypeVar {
     virtual cstring getVarName() const = 0;
     inline Type asType() const { return to<Type>(); }
+    virtual int getDeclId() const = 0;
 }
 
 // Implemented by P4Parser, P4Control and Type_Package

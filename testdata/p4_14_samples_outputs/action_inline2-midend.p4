@@ -30,7 +30,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     bit<8> dest;
     bit<8> dest_3;
     bit<8> dest_4;
-    @name("NoAction_1") action NoAction() {
+    @name("NoAction_1") action NoAction_0() {
     }
     @name("setb1") action setb1_0(bit<9> port) {
         dest = hdr.data.b1;
@@ -48,12 +48,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1_0();
             noop_0();
-            NoAction();
+            NoAction_0();
         }
         key = {
             hdr.data.f1: ternary;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     apply {
         test1.apply();

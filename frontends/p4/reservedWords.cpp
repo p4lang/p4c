@@ -25,7 +25,8 @@ std::set<cstring> reservedWords = {
     "else", "enum", "error", "exit", "extern", "false", "header", "header_union",  // experimental
     "if", "in", "inout", "int", "key", "match_kind", "out", "parser", "package",
     "return", "select", "set", "state", "struct", "switch", "table", "this",  // experimental
-    "transition", "true", "tuple", "typedef", "varbit", "void", "_"
+    "transition", "true", "tuple", "typedef", "varbit", "verify", "void", "_",
+    "NoAction"  // core.p4
 };
 
 }  // namespace P4

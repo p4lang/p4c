@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_PARSERCONTROLFLOW_H_
-#define _MIDEND_PARSERCONTROLFLOW_H_
+#ifndef _FRONTENDS_P4_PARSERCONTROLFLOW_H_
+#define _FRONTENDS_P4_PARSERCONTROLFLOW_H_
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -46,4 +46,4 @@ class RemoveParserControlFlow : public PassRepeated {
 
 }  // namespace P4
 
-#endif /* _MIDEND_PARSERCONTROLFLOW_H_ */
+#endif  /* _FRONTENDS_P4_PARSERCONTROLFLOW_H_ */

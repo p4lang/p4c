@@ -28,17 +28,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction() {
+    @name("NoAction_1") action NoAction_0() {
     }
-    @name("NoAction_2") action NoAction_0() {
+    @name("NoAction_2") action NoAction_7() {
     }
-    @name("NoAction_3") action NoAction_7() {
+    @name("NoAction_3") action NoAction_8() {
     }
-    @name("NoAction_4") action NoAction_8() {
+    @name("NoAction_4") action NoAction_9() {
     }
-    @name("NoAction_5") action NoAction_9() {
+    @name("NoAction_5") action NoAction_10() {
     }
-    @name("NoAction_6") action NoAction_10() {
+    @name("NoAction_6") action NoAction_11() {
     }
     @name("do_b") action do_b_0() {
     }
@@ -61,47 +61,47 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             do_b_0();
             do_d_0();
             do_e_0();
-            NoAction();
+            NoAction_0();
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
     @name("B") table B() {
         actions = {
             nop_0();
-            NoAction_0();
-        }
-        default_action = NoAction_0();
-    }
-    @name("C") table C() {
-        actions = {
-            nop_5();
             NoAction_7();
         }
         default_action = NoAction_7();
     }
-    @name("D") table D_1() {
+    @name("C") table C() {
         actions = {
-            nop_6();
+            nop_5();
             NoAction_8();
         }
         default_action = NoAction_8();
     }
-    @name("E") table E() {
+    @name("D") table D_1() {
         actions = {
-            nop_7();
+            nop_6();
             NoAction_9();
         }
         default_action = NoAction_9();
     }
-    @name("F") table F() {
+    @name("E") table E() {
         actions = {
-            nop_8();
+            nop_7();
             NoAction_10();
         }
         default_action = NoAction_10();
+    }
+    @name("F") table F() {
+        actions = {
+            nop_8();
+            NoAction_11();
+        }
+        default_action = NoAction_11();
     }
     apply {
         switch (A.apply().action_run) {

@@ -101,8 +101,8 @@ static const IR::Annotations *getPragmas() {
 %token<Constant> INTEGER
 
 %printer { fprintf(yyoutput, "\"%s\"", $$.c_str()); } <str>
-%printer { fprintf(yyoutput, "\%d", $$); } <i>
-%printer { fprintf(yyoutput, "\%s", $$->toString().c_str()); } <Constant>
+%printer { fprintf(yyoutput, "%d", $$); } <i>
+%printer { fprintf(yyoutput, "%s", $$->toString().c_str()); } <Constant>
 
 %left EXPRLIST
 %right '='
