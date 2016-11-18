@@ -409,49 +409,49 @@ class ComputeCallGraph : public Inspector {
         if (primitive->name == "count") {
             // counter invocation
             auto ctrref = primitive->operands.at(0);
-            if (ctrref->is<IR::NamedRef>()) {
-                auto nr = ctrref->to<IR::NamedRef>();
-                auto ctr = structure->counters.get(nr->name);
-                if (ctr == nullptr)
-                    ::error("Cannot find counter %1%", ctrref);
-                auto parent = findContext<IR::ActionFunction>();
-                BUG_CHECK(parent != nullptr, "%1%: Counter call not within action", primitive);
-                structure->calledCounters.calls(parent->name, ctr->name.name);
-                return;
-            }
-            BUG("%1%: Unexpected counter reference", ctrref);
+            const IR::Counter *ctr = nullptr;
+            if (auto gr = ctrref->to<IR::GlobalRef>())
+                ctr = gr->obj->to<IR::Counter>();
+            else if (auto nr = ctrref->to<IR::NamedRef>())
+                ctr = structure->counters.get(nr->name);
+            if (ctr == nullptr)
+                ::error("Cannot find counter %1%", ctrref);
+            auto parent = findContext<IR::ActionFunction>();
+            BUG_CHECK(parent != nullptr, "%1%: Counter call not within action", primitive);
+            structure->calledCounters.calls(parent->name, ctr->name.name);
+            return;
         } else if (primitive->name == "execute_meter") {
             auto mtrref = primitive->operands.at(0);
-            if (mtrref->is<IR::NamedRef>()) {
-                auto nr = mtrref->to<IR::NamedRef>();
-                auto mtr = structure->meters.get(nr->name);
-                if (mtr == nullptr)
-                    ::error("Cannot find meter %1%", mtrref);
-                auto parent = findContext<IR::ActionFunction>();
-                BUG_CHECK(parent != nullptr,
-                          "%1%: not within action", primitive);
-                structure->calledMeters.calls(parent->name, mtr->name.name);
-                return;
-            }
-            BUG("%1%: Unexpected meter reference", mtrref);
+            const IR::Meter *mtr = nullptr;
+            if (auto gr = mtrref->to<IR::GlobalRef>())
+                mtr = gr->obj->to<IR::Meter>();
+            else if (auto nr = mtrref->to<IR::NamedRef>())
+                mtr = structure->meters.get(nr->name);
+            if (mtr == nullptr)
+                ::error("Cannot find meter %1%", mtrref);
+            auto parent = findContext<IR::ActionFunction>();
+            BUG_CHECK(parent != nullptr,
+                      "%1%: not within action", primitive);
+            structure->calledMeters.calls(parent->name, mtr->name.name);
+            return;
         } else if (primitive->name == "register_read" || primitive->name == "register_write") {
             const IR::Expression* regref;
             if (primitive->name == "register_read")
                 regref = primitive->operands.at(1);
             else
                 regref = primitive->operands.at(0);
-            if (regref->is<IR::NamedRef>()) {
-                auto nr = regref->to<IR::NamedRef>();
-                auto reg = structure->registers.get(nr->name);
-                if (reg == nullptr)
-                    ::error("Cannot find register %1%", regref);
-                auto parent = findContext<IR::ActionFunction>();
-                BUG_CHECK(parent != nullptr,
-                          "%1%: not within action", primitive);
-                structure->calledRegisters.calls(parent->name, reg->name.name);
-                return;
-            }
-            BUG("%1%: Unexpected register reference", regref);
+            const IR::Register *reg = nullptr;
+            if (auto gr = regref->to<IR::GlobalRef>())
+                reg = gr->obj->to<IR::Register>();
+            else if (auto nr = regref->to<IR::NamedRef>())
+                reg = structure->registers.get(nr->name);
+            if (reg == nullptr)
+                ::error("Cannot find register %1%", regref);
+            auto parent = findContext<IR::ActionFunction>();
+            BUG_CHECK(parent != nullptr,
+                      "%1%: not within action", primitive);
+            structure->calledRegisters.calls(parent->name, reg->name.name);
+            return;
         } else if (structure->actions.contains(name)) {
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr, "%1%: Action call not within action", primitive);

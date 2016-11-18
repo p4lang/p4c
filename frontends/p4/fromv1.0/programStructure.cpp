@@ -973,16 +973,14 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
     } else if (primitive->name == "count") {
         OPS_CK(primitive, 2);
         auto ref = primitive->operands.at(0);
-        if (!ref->is<IR::NamedRef>()) {
-            ::error("Expected a counter reference %1%", ref);
-            return nullptr;
-        }
-        auto nr = ref->to<IR::NamedRef>();
-        auto counter = counters.get(nr->name);
+        const IR::Counter *counter = nullptr;
+        if (auto gr = ref->to<IR::GlobalRef>())
+            counter = gr->obj->to<IR::Counter>();
+        else if (auto nr = ref->to<IR::NamedRef>())
+            counter = counters.get(nr->name);
         if (counter == nullptr) {
             ::error("Expected a counter reference %1%", ref);
-            return nullptr;
-        }
+            return nullptr; }
         auto newname = counters.get(counter);
         auto counterref = new IR::PathExpression(newname);
         auto methodName = v1model.counter.increment.Id();
@@ -1102,12 +1100,14 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
     } else if (primitive->name == "execute_meter") {
         OPS_CK(primitive, 3);
         auto ref = primitive->operands.at(0);
-        if (!ref->is<IR::NamedRef>()) {
+        const IR::Meter *meter = nullptr;
+        if (auto gr = ref->to<IR::GlobalRef>())
+            meter = gr->obj->to<IR::Meter>();
+        else if (auto nr = ref->to<IR::NamedRef>())
+            meter = meters.get(nr->name);
+        if (!meter) {
             ::error("Expected a meter reference %1%", ref);
-            return nullptr;
-        }
-        auto nr = ref->to<IR::NamedRef>();
-        auto meter = meters.get(nr->name);
+            return nullptr; }
         if (!meter->implementation.name.isNullOrEmpty())
             ::warning("Ignoring `implementation' field of meter %1%", meter);
         auto newname = meters.get(meter);
@@ -1176,12 +1176,14 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         OPS_CK(primitive, 3);
         auto left = conv.convert(primitive->operands.at(0));
         auto ref = primitive->operands.at(1);
-        if (!ref->is<IR::NamedRef>()) {
+        const IR::Register *reg = nullptr;
+        if (auto gr = ref->to<IR::GlobalRef>())
+            reg = gr->obj->to<IR::Register>();
+        else if (auto nr = ref->to<IR::NamedRef>())
+            reg = registers.get(nr->name);
+        if (!reg) {
             ::error("Expected a register reference %1%", ref);
-            return nullptr;
-        }
-        auto nr = ref->to<IR::NamedRef>();
-        auto reg = registers.get(nr->name);
+            return nullptr; }
         auto newname = registers.get(reg);
         auto registerref = new IR::PathExpression(newname);
         auto methodName = v1model.registers.read.Id();
@@ -1197,12 +1199,14 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
     } else if (primitive->name == "register_write") {
         OPS_CK(primitive, 3);
         auto ref = primitive->operands.at(0);
-        if (!ref->is<IR::NamedRef>()) {
+        const IR::Register *reg = nullptr;
+        if (auto gr = ref->to<IR::GlobalRef>())
+            reg = gr->obj->to<IR::Register>();
+        else if (auto nr = ref->to<IR::NamedRef>())
+            reg = registers.get(nr->name);
+        if (!reg) {
             ::error("Expected a register reference %1%", ref);
-            return nullptr;
-        }
-        auto nr = ref->to<IR::NamedRef>();
-        auto reg = registers.get(nr->name);
+            return nullptr; }
         int width = reg->width;
         if (width <= 0)
             width = defaultRegisterWidth;

@@ -88,4 +88,4 @@ void dump(const Visitor::Context *ctxt) {
 
 std::string dumpToString(const IR::Node* n) {
     std::stringstream str;
-    dump(n); return str.str(); }
+    dump(str, n); return str.str(); }

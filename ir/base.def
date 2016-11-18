@@ -215,3 +215,8 @@ class Annotations {
 interface IAnnotated {
     virtual Annotations getAnnotations() const = 0;
 }
+
+interface IInstance {
+    virtual cstring Name() const = 0;
+    virtual Type getType() const = 0;
+}

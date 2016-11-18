@@ -31,6 +31,13 @@ class TypeCheck::Pass1 : public Transform {
         if (auto af = findContext<IR::ActionFunction>())
             if (auto arg = af->arg(ref->name))
                 return arg;
+        if (auto bbox = findContext<IR::Declaration_Instance>()) {
+            if (auto bbox_type = bbox->type->to<IR::Type_Extern>()) {
+                if (auto attr = bbox_type->attributes.get<IR::Attribute>(ref->name))
+                    return new IR::AttributeRef(ref->srcInfo, attr->type,
+                                                bbox->name, bbox_type, attr);
+            } else {
+                BUG("extern type is not extern_type?"); } }
         return ref; }
     const IR::Node *preorder(IR::Metadata *m) override {
         if (!global) return m;
@@ -51,12 +58,48 @@ class TypeCheck::Pass1 : public Transform {
         return hm; }
     const IR::Node *postorder(IR::NamedRef *ref) override {
         if (!global) return ref;
+        const Visitor::Context *prop_ctxt = nullptr;
+        if (auto prop = findContext<IR::Property>(prop_ctxt)) {
+            if (auto bbox = prop_ctxt->parent->node->to<IR::Declaration_Instance>()) {
+                auto bbox_type = bbox->type->to<IR::Type_Extern>();
+                auto attr = bbox_type->attributes.get<IR::Attribute>(prop->name);
+                if (attr->locals && contains(attr->locals->names, ref->name)) {
+                    /* ref to local of property -- do something with it? */
+                    return ref; } } }
         IR::Node *new_node = ref;
-        if (auto hdr = global->get<IR::HeaderOrMetadata>(ref->name))
+        if (auto hdr = global->get<IR::HeaderOrMetadata>(ref->name)) {
+            visit(hdr);
             new_node = new IR::ConcreteHeaderRef(ref->srcInfo, hdr);
-        else if (ref->name != "latest" && findContext<IR::Member>())
-            error("%s: No header or metadata named %s", ref->srcInfo, ref->name);
+        } else if (auto obj = global->get<IR::IInstance>(ref->name)) {
+            const IR::Node *tmp = obj->getNode();  // FIXME -- can't visit an interface directly
+            visit(tmp);
+            obj = tmp->to<IR::IInstance>();
+            new_node = new IR::GlobalRef(ref->srcInfo, obj->getType(), tmp);
+        } else if (/*auto obj = */global->get<IR::Node>(ref->name)) {
+            /* FIXME -- is something, should probably be typechecked */
+        } else if (getParent<IR::Member>()) {
+            if (ref->name != "latest")
+                error("%s: No header or metadata named %s", ref->srcInfo, ref->name);
+        } else {
+            if (getParent<IR::HeaderStackItemRef>()) {
+                if (ref->name == "next" || ref->name == "last")
+                    return ref; }
+            if (auto hdr = findContext<IR::Type_StructLike>()) {
+                if (auto field = hdr->getField(ref->name)) {
+                    /* FIXME --  Should this be converted to something else? */
+                    ref->type = field->type;
+                    visit(ref->type);
+                    return ref; } }
+            error("%s: No defintion for %s", ref->srcInfo, ref->name); }
         return new_node; }
+    const IR::Node *postorder(IR::Type_Name *ref) override {
+        if (!global) return ref;
+        if (auto t = global->get<IR::Type>(ref->path->name)) {
+            visit(t);
+            return t;
+        } else {
+            error("%s: No defintion for %s", ref->srcInfo, ref->path->name); }
+        return ref; }
     const IR::Node *postorder(IR::HeaderStackItemRef *ref) override {
         if (auto ht = ref->base()->type->to<IR::Type_StructLike>())
             ref->type = ht;
@@ -64,6 +107,7 @@ class TypeCheck::Pass1 : public Transform {
             ref->type = hst->elementType;
         else
             error("%s: %s is not a header", ref->base()->srcInfo, ref->base()->toString());
+        visit(ref->type);
         return ref; }
     const IR::Node *postorder(IR::Member *ref) override {
         if (ref->member.toString()[0] == '$') {
@@ -73,9 +117,13 @@ class TypeCheck::Pass1 : public Transform {
             auto f = ht->getField(ref->member);
             if (f != nullptr) {
                 ref->type = f->type;
+                visit(ref->type);
                 return ref; }
             error("%s: No field named %s in %s", ref->srcInfo, ref->member, ht->name); }
         return ref; }
+    const IR::Node *postorder(IR::Expression *e) override {
+        visit(e->type);
+        return e; }
 };
 
 static const IR::Type *combine(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) {
