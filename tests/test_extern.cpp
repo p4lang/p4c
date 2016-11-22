@@ -21,8 +21,10 @@
 #include <gtest/gtest.h>
 
 #include <bm/bm_sim/extern.h>
+#include <bm/bm_sim/P4Objects.h>
 
 #include <string>
+#include <vector>
 #include <cassert>
 
 using namespace bm;
@@ -76,6 +78,7 @@ class ExternCounter : public ExternType {
   size_t count{0};
 };
 
+// do not put these inside an anonymous namespace or some compilers may complain
 BM_REGISTER_EXTERN(ExternCounter);
 BM_REGISTER_EXTERN_METHOD(ExternCounter, increment);
 BM_REGISTER_EXTERN_METHOD(ExternCounter, increment_by, const Data &);
@@ -84,6 +87,81 @@ BM_REGISTER_EXTERN_METHOD(ExternCounter, get);
 
 constexpr unsigned int ExternCounter::PACKETS;
 constexpr unsigned int ExternCounter::BYTES;
+
+// this demonstrates how p4objects can be used in an extern for more advanced
+// use cases
+class ExternP4Objects : public ExternType {
+ public:
+  BM_EXTERN_ATTRIBUTES {
+    BM_EXTERN_ATTRIBUTE_ADD(register_name);
+  }
+
+  void init() override {
+    register_array = get_p4objects().get_register_array(register_name);
+  }
+
+  size_t read(const Data &idx) const {
+    const auto idx_v = idx.get<size_t>();
+    return register_array->at(idx_v).get<size_t>();
+  }
+
+  // not exposed as an extern method, for testing
+  RegisterArray *get_register_array() const {
+    return register_array;
+  }
+
+ private:
+  // declared attributes
+  std::string register_name{};
+
+  // implementation members
+  RegisterArray *register_array{nullptr};
+};
+
+BM_REGISTER_EXTERN(ExternP4Objects);
+BM_REGISTER_EXTERN_METHOD(ExternP4Objects, read, const Data &);
+
+// this demonstrates how expressions can be used as extern attributes
+// this extern type has 2 attributes: an expression and one integral value
+// (var1); it has one additional integral value which is not an attribute but
+// can be set by a method (var2). The execute method evaluates the expression,
+// using var1 and var2 as locals.
+class ExternExpression : public ExternType {
+ public:
+  BM_EXTERN_ATTRIBUTES {
+    BM_EXTERN_ATTRIBUTE_ADD(expr);
+    BM_EXTERN_ATTRIBUTE_ADD(var1);
+  }
+
+  void init() override {
+    vars.push_back(var1);
+    vars.emplace_back(0);
+  }
+
+  void set_var2(const Data &v) {
+    vars.at(1) = v;
+  }
+
+  void execute(Data &dest) const {
+    auto phv = get_packet().get_phv();
+    // 'vars' passed as locals to evaluate expression
+    expr.eval_arith(*phv, &dest, vars);
+  }
+
+ private:
+  // declared attributes
+  Expression expr{};
+  Data var1{0};
+
+  // implementation members
+  std::vector<Data> vars{};
+};
+
+BM_REGISTER_EXTERN(ExternExpression);
+BM_REGISTER_EXTERN_METHOD(ExternExpression, set_var2, const Data &);
+BM_REGISTER_EXTERN_METHOD(ExternExpression, execute, Data &);
+
+namespace {
 
 // Google Test fixture for extern tests
 class ExternTest : public ::testing::Test {
@@ -196,3 +274,58 @@ TEST_F(ExternTest, NameAndId) {
   ASSERT_EQ(name, extern_instance->get_name());
   ASSERT_EQ(id, extern_instance->get_id());
 }
+
+TEST_F(ExternTest, ExternP4Objects) {
+  auto extern_instance = ExternFactoryMap::get_instance()->get_extern_instance(
+      "ExternP4Objects");
+  auto typed_instance = dynamic_cast<ExternP4Objects *>(extern_instance.get());
+  ASSERT_NE(nullptr, typed_instance);
+  extern_instance->_register_attributes();
+  ASSERT_TRUE(extern_instance->_has_attribute("register_name"));
+  extern_instance->_set_attribute<std::string>("register_name", "my_register");
+
+  // build a P4Objects instance with just one register array for testing
+  std::stringstream is;
+  is << "{\"register_arrays\":[{\"name\":\"my_register\",\"id\":0,"
+     << "\"size\":1024,\"bitwidth\":32}]}";
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  auto register_array = objects.get_register_array("my_register");
+  ASSERT_NE(nullptr, register_array);
+
+  extern_instance->_set_p4objects(&objects);
+  extern_instance->init();
+  ASSERT_EQ(register_array, typed_instance->get_register_array());
+}
+
+TEST_F(ExternTest, ExternExpression) {
+  auto extern_instance = ExternFactoryMap::get_instance()->get_extern_instance(
+      "ExternExpression");
+  extern_instance->_register_attributes();
+  Data var1(77), var2(55);
+  extern_instance->_set_attribute<Data>("var1", var1);
+  Expression expr;
+  expr.push_back_load_local(0);
+  expr.push_back_load_local(1);
+  expr.push_back_op(ExprOpcode::ADD);
+  expr.build();
+  extern_instance->_set_attribute<Expression>("expr", expr);
+  extern_instance->init();
+
+  auto primitive_1 = get_extern_primitive("ExternExpression", "set_var2");
+  auto primitive_2 = get_extern_primitive("ExternExpression", "execute");
+  testActionFn.push_back_primitive(primitive_1);
+  testActionFn.parameter_push_back_extern_instance(extern_instance.get());
+  testActionFn.parameter_push_back_const(var2);
+  testActionFn.push_back_primitive(primitive_2);
+  testActionFn.parameter_push_back_extern_instance(extern_instance.get());
+  testActionFn.parameter_push_back_field(testHeader1, 0);  // f32
+  testActionFnEntry(pkt.get());
+
+  const auto &dst = pkt->get_phv()->get_field(testHeader1, 0);
+  const auto expected = var1.get<int>() + var2.get<int>();
+  ASSERT_EQ(expected, dst.get<int>());
+}
+
+}  // namespace

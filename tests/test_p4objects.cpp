@@ -269,8 +269,8 @@ TEST(P4Objects, ExternInstanceDeclaration) {
     create_extern_instance_json(&is, "my_extern_instance", "my_extern_type",
                                 "attr1", "unsupported_type");
     std::string expected_error_msg(
-        "Only attributes of type 'hexstr' are supported for "
-        "extern instance attribute initialization\n");
+        "Only attributes of type 'hexstr', 'string' or 'expression' are "
+        "supported for extern instance attribute initialization\n");
     ASSERT_NE(0, objects.init_objects(&is, &factory));
     EXPECT_EQ(expected_error_msg, os.str());
   }

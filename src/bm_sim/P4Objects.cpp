@@ -266,14 +266,28 @@ P4Objects::init_objects(std::istream *is,
       if (type == "hexstr") {
         const string value_hexstr = cfg_extern_attribute["value"].asString();
         instance->_set_attribute<Data>(name, Data(value_hexstr));
+      } else if (type == "string") {
+        // adding string to possible attributes for more flexible externs
+        // (especially now that externs can access P4Objects), while we finalize
+        // the extern design
+        const string value_string = cfg_extern_attribute["value"].asString();
+        instance->_set_attribute<std::string>(name, value_string);
+      } else if (type == "expression") {
+        Expression expr;
+        build_expression(cfg_extern_attribute["value"], &expr);
+        expr.build();
+        // we rely on the fact that an Expression can be copied
+        instance->_set_attribute<Expression>(name, expr);
       } else {
-        outstream << "Only attributes of type 'hexstr' are supported for extern"
-                  << " instance attribute initialization\n";
+        outstream << "Only attributes of type 'hexstr', 'string' or"
+                  << " 'expression' are supported for extern instance"
+                  << " attribute initialization\n";
         return 1;
       }
     }
 
-    instance->init();
+    // needs to be set before the call to init!
+    instance->_set_p4objects(this);
 
     add_extern_instance(extern_instance_name, std::move(instance));
   }
@@ -1108,6 +1122,11 @@ P4Objects::init_objects(std::istream *is,
 
     add_field_list(list_id, std::move(field_list));
   }
+
+  // invoke init() for extern instances, we do this at the very end in case
+  // init() looks up some object (e.g. RegisterArray) in P4Objects
+  for (const auto &p : extern_instances)
+    p.second->init();
 
   if (!check_required_fields(required_fields)) {
     return 1;

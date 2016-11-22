@@ -34,6 +34,7 @@
 
 namespace bm {
 
+class P4Objects;
 class ExternType;
 
 class ExternFactoryMap {
@@ -63,8 +64,8 @@ class ExternFactoryMap {
 #define BM_REGISTER_EXTERN_METHOD(extern_name, extern_method_name, ...) \
   template <typename... Args>                                           \
   struct _##extern_name##_##extern_method_name##_0                      \
-      : public ActionPrimitive<ExternType *, Args...> {                 \
-    void operator ()(ExternType *instance, Args... args) override {     \
+      : public ::bm::ActionPrimitive<::bm::ExternType *, Args...> {     \
+    void operator ()(::bm::ExternType *instance, Args... args) override { \
       auto lock = instance->_unique_lock();                             \
       instance->_set_packet_ptr(&this->get_packet());                   \
       dynamic_cast<extern_name *>(instance)->extern_method_name(args...); \
@@ -85,6 +86,11 @@ class ExternFactoryMap {
 class ExternType {
  public:
   virtual ~ExternType() { }
+
+  // needs to be called before init() when setting up the extern instance, in
+  // case init's implementation relies on p4objects (e.g. to resolve names to
+  // objects, such as register arrays)
+  void _set_p4objects(P4Objects *p4objects);
 
   template <typename T>
   void _set_attribute(const std::string &attr_name, const T &v) {
@@ -116,7 +122,9 @@ class ExternType {
     attributes[name] = ptr;
   }
 
-  Packet &get_packet() { return *pkt; }
+  Packet &get_packet() const { return *pkt; }
+
+  P4Objects &get_p4objects() const { return *p4objects; }
 
  private:
   // will use static_cast to cast from T * to void * and vice-versa
@@ -126,6 +134,11 @@ class ExternType {
   // set by _set_name_and_id
   std::string name{};
   p4object_id_t id{};
+  // while we improve the extern support in bmv2, it is useful to expose this to
+  // extern implementations, to give them maximum flexibility
+  // non-owning pointer, as ExternType instances themselves are owned by the
+  // P4Object instance
+  P4Objects *p4objects{nullptr};
 };
 
 }  // namespace bm

@@ -49,6 +49,11 @@ ExternFactoryMap::get_extern_instance(
 }
 
 void
+ExternType::_set_p4objects(P4Objects *p4objects) {
+  this->p4objects = p4objects;
+}
+
+void
 ExternType::_set_name_and_id(const std::string &name, p4object_id_t id) {
   this->name = name;
   this->id = id;
