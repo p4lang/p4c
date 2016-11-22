@@ -86,6 +86,40 @@ void CFG::Node::computeSuccessors() {
         e->getNode()->successors.emplace(e->clone(this));
 }
 
+bool CFG::dfs(Node* node, std::set<Node*> &visited, std::set<const IR::P4Table*> &stack) const {
+    const IR::P4Table* table = nullptr;
+    if (node->is<TableNode>()) {
+        table = node->to<TableNode>()->table;
+        if (stack.find(table) != stack.end()) {
+            ::error("Program cannot be implemented since it requires a cycle containing %1%",
+                    table);
+            return false;
+        }
+    }
+    if (visited.find(node) != visited.end())
+        return true;
+    if (table != nullptr)
+        stack.emplace(table);
+    for (auto e : node->successors.edges) {
+        bool success = dfs(e->endpoint, visited, stack);
+        if (!success) return false;
+    }
+    if (table != nullptr)
+        stack.erase(table);
+    visited.emplace(node);
+    return true;
+}
+
+bool CFG::checkForCycles() const {
+    std::set<Node*> visited;
+    std::set<const IR::P4Table*> stack;
+    for (auto n : allNodes) {
+        bool success = dfs(n, visited, stack);
+        if (!success) return false;
+    }
+    return true;
+}
+
 namespace {
 // This visitor "converts" IR::Node* into EdgeSets
 // Since we cannot return EdgeSets, we place them in the 'after' map.

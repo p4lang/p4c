@@ -26,11 +26,11 @@ namespace BMV2 {
 cstring nameFromAnnotation(const IR::Annotations* annotations, cstring defaultValue);
 
 // This CFG is only good for BMV2, which only cares about some Nodes in the program
-class CFG : public IHasDbPrint {
+class CFG final : public IHasDbPrint {
  public:
     class Edge;
 
-    class EdgeSet {
+    class EdgeSet final {
      public:
         std::set<CFG::Edge*> edges;
 
@@ -66,10 +66,11 @@ class CFG : public IHasDbPrint {
         template<typename T> T* to() { return dynamic_cast<T*>(this); }
         template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
         void computeSuccessors();
+        cstring toString() const { return name; }
     };
 
  public:
-    class TableNode : public Node {
+    class TableNode final : public Node {
      public:
         const IR::P4Table* table;
         const IR::Expression*      invocation;
@@ -78,13 +79,13 @@ class CFG : public IHasDbPrint {
                 table(table), invocation(invocation) {}
     };
 
-    class IfNode : public Node {
+    class IfNode final : public Node {
      public:
         const IR::IfStatement* statement;
         explicit IfNode(const IR::IfStatement* statement) : statement(statement) {}
     };
 
-    class DummyNode : public Node {
+    class DummyNode final : public Node {
      public:
         explicit DummyNode(cstring name) : Node(name) {}
     };
@@ -98,7 +99,7 @@ class CFG : public IHasDbPrint {
     };
 
  public:
-    class Edge {
+    class Edge final {
      protected:
         EdgeType type;
         Edge(Node* node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
@@ -159,6 +160,11 @@ class CFG : public IHasDbPrint {
     void dbprint(std::ostream& out) const;
     void computeSuccessors()
     { for (auto n : allNodes) n->computeSuccessors(); }
+    // Graphs that require cycles are not implementable on BMv2.
+    // These can arise if a table is invoked multiple times.
+    bool checkForCycles() const;
+ private:
+    bool dfs(Node* node, std::set<Node*> &visited, std::set<const IR::P4Table*> &stack) const;
 };
 
 // Represents global information about a P4 v1.2 program

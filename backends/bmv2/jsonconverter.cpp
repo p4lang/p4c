@@ -1471,6 +1471,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
 
     auto cfg = new CFG();
     cfg->build(cont, refMap, typeMap);
+    cfg->checkForCycles();
 
     if (cfg->entryPoint->successors.size() == 0) {
         result->emplace("init_table", Util::JsonValue::null);
