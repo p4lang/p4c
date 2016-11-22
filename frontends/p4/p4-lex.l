@@ -96,7 +96,6 @@ std::string stringLiteral;
 "package"       { BEGIN(NORMAL); return PACKAGE; }
 "return"        { BEGIN(NORMAL); return RETURN; }
 "select"        { BEGIN(NORMAL); return SELECT; }
-"set"           { BEGIN(NORMAL); return SET; }
 "state"         { BEGIN(NORMAL); return STATE; }
 "struct"        { BEGIN(NORMAL); return STRUCT; }
 "switch"        { BEGIN(NORMAL); return SWITCH; }
