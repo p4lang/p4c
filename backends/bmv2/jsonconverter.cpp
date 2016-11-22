@@ -1687,8 +1687,7 @@ void JsonConverter::addLocals() {
             json->emplace("header_type", name);
             json->emplace("metadata", true);
             headerInstances->append(json);
-        }
-        else if (auto stack = type->to<IR::Type_Stack>()) {
+        } else if (auto stack = type->to<IR::Type_Stack>()) {
             auto json = new Util::JsonObject();
             json->emplace("name", v->name);
             json->emplace("id", nextId("stack"));

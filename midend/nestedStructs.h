@@ -48,7 +48,7 @@ class ComplexValues final {
 
     struct FinalName : public Component {
         cstring newName;
-        FinalName(cstring name) : newName(name) {}
+        explicit FinalName(cstring name) : newName(name) {}
         const IR::Expression* convertToExpression() override
         { return new IR::PathExpression(IR::ID(newName)); }
         Component* get(cstring) override
@@ -97,14 +97,15 @@ class ComplexValues final {
     }
     Component* getTranslation(const IR::Expression* expression)
     {  LOG2("Check translation " << dbp(expression)); return ::get(translation, expression); }
-    void setTranslation(const IR::Expression* expression, Component* comp)
-    { translation.emplace(expression, comp); LOG2("Translated " << dbp(expression) << " to " << comp); }
+    void setTranslation(const IR::Expression* expression, Component* comp) {
+        translation.emplace(expression, comp);
+        LOG2("Translated " << dbp(expression) << " to " << comp); }
 };
 
 class RemoveNestedStructs final : public Transform {
     ComplexValues* values;
  public:
-    RemoveNestedStructs(ComplexValues* values) : values(values)
+    explicit RemoveNestedStructs(ComplexValues* values) : values(values)
     { CHECK_NULL(values); setName("RemoveNestedStructs"); }
 
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
