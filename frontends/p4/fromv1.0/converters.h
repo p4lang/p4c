@@ -69,6 +69,14 @@ class StatementConverter : public ExpressionConverter {
     }
 };
 
+class TypeConverter : public ExpressionConverter {
+    const IR::Type_Varbits *postorder(IR::Type_Varbits *) override;
+    const IR::Type_StructLike *postorder(IR::Type_StructLike *) override;
+    const IR::StructField *postorder(IR::StructField *) override;
+ public:
+    explicit TypeConverter(ProgramStructure* structure) : ExpressionConverter(structure) {}
+};
+
 // Is fed a P4 v1.0 program and outputs an equivalent P4 v1.2 program
 class Converter : public PassManager {
     ProgramStructure structure;

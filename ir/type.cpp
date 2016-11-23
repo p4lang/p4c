@@ -42,22 +42,12 @@ int Type_InfInt::nextId = 0;
 Annotations* Annotations::empty = new Annotations(Vector<Annotation>());
 
 const Type_Bits* Type_Bits::get(int width, bool isSigned) {
-    std::map<int, const IR::Type_Bits*> *map;
-    if (isSigned) {
-        if (signedTypes == nullptr)
-            signedTypes = new std::map<int, const IR::Type_Bits*>();
-        map = signedTypes;
-    } else {
-        if (unsignedTypes == nullptr)
-            unsignedTypes = new std::map<int, const IR::Type_Bits*>();
-        map = unsignedTypes;
-    }
-
-    auto it = map->find(width);
-    if (it != map->end())
-        return it->second;
-    auto result = IR::Type_Bits::get(Util::SourceInfo(), width, isSigned);
-    map->emplace(width, result);
+    std::map<int, const IR::Type_Bits*> *&map = isSigned ? signedTypes : unsignedTypes;
+    if (map == nullptr)
+        map = new std::map<int, const IR::Type_Bits*>();
+    auto &result = (*map)[width];
+    if (!result)
+        result = new Type_Bits(Util::SourceInfo(), width, isSigned);
     return result;
 }
 
@@ -85,7 +75,7 @@ const Type_String *Type_String::get() {
 const Type::Bits *Type::Bits::get(Util::SourceInfo si, int sz, bool isSigned) {
     if (sz <= 0)
         ::error("%1%: Width cannot be negative or zero", si);
-    return new Type::Bits(si, sz, isSigned);
+    return get(sz, isSigned);
 }
 
 const Type::Varbits *Type::Varbits::get(Util::SourceInfo si, int sz) {

@@ -80,60 +80,65 @@ bool ProgramStructure::isHeader(const IR::ConcreteHeaderRef* nhr) const {
 void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool metadata) {
     LOG1("Checking " << hdr << " " << (metadata ? "M" : "H"));
     for (auto f : *hdr->fields) {
-        if (metadata && f->type->is<IR::Type_Varbits>())
-            ::error("%1%: varbit types illegal in metadata", f);
-        else if (f->type->is<IR::Type_Varbits>())
-            BUG("%1%: varbit types not yet supported", f);
-        else if (!f->type->is<IR::Type_Bits>())
+        if (f->type->is<IR::Type_Varbits>()) {
+            if (metadata)
+                ::error("%1%: varbit types illegal in metadata", f);
+        } else if (!f->type->is<IR::Type_Bits>()) {
             // These come from P4 v1.0, so they cannot be anything else
-            BUG("%1%: unexpected type", f);
+            BUG("%1%: unexpected type", f); }
     }
 }
 
 void ProgramStructure::createTypes() {
-    std::unordered_set<const IR::Type*> converted;
+    std::unordered_set<const IR::Type *> converted;
     for (auto it : metadata) {
         auto type = it.first->type;
         if (type->name.name == v1model.standardMetadataType.name)
             continue;
+        if (converted.count(type))
+            continue;
+        converted.emplace(type);
         auto type_name = types.get(type);
+        type = type->apply(TypeConverter(this));
         if (type->name.name != type_name) {
             auto annos = addNameAnnotation(type->name.name, type->annotations);
             type = new IR::Type_Struct(type->srcInfo, type_name, annos, type->fields);
         }
-        if (converted.find(type) == converted.end()) {
-            checkHeaderType(type, true);
-            declarations->push_back(type);
-            converted.emplace(type);
-        }
+        checkHeaderType(type, true);
+        declarations->push_back(type);
+        converted.emplace(type);
     }
 
     converted.clear();
     for (auto it : headers) {
         auto type = it.first->type;
+        if (converted.count(type))
+            continue;
+        converted.emplace(type);
         auto type_name = types.get(type);
+        type = type->apply(TypeConverter(this));
         if (type->name.name != type_name) {
             auto annos = addNameAnnotation(type->name.name, type->annotations);
             type = new IR::Type_Header(type->srcInfo, type_name, annos, type->fields);
         }
-        if (converted.find(type) == converted.end()) {
-            checkHeaderType(type, false);
-            declarations->push_back(type);
-            converted.emplace(type);
-        }
+        checkHeaderType(type, false);
+        declarations->push_back(type);
+        converted.emplace(type);
     }
     for (auto it : stacks) {
         auto type = it.first->type;
+        if (converted.count(type))
+            continue;
+        converted.emplace(type);
         auto type_name = types.get(type);
+        type = type->apply(TypeConverter(this));
         if (type->name.name != type_name) {
             auto annos = addNameAnnotation(type->name.name, type->annotations);
             type = new IR::Type_Header(type->srcInfo, type_name, annos, type->fields);
         }
-        if (converted.find(type) == converted.end()) {
-            checkHeaderType(type, false);
-            declarations->push_back(type);
-            converted.emplace(type);
-        }
+        checkHeaderType(type, false);
+        declarations->push_back(type);
+        converted.emplace(type);
     }
 }
 

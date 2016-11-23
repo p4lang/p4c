@@ -2017,6 +2017,10 @@ void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
             field->append(prefix + f->name.name);
             field->append(type->size);
             field->append(type->isSigned);
+        } else if (auto type = ftype->to<IR::Type_Varbits>()) {
+            auto field = pushNewArray(fields);
+            field->append(prefix + f->name.name);
+            field->append(type->size);  // FIXME -- where does length go?
         } else if (ftype->to<IR::Type_Stack>()) {
             BUG("%1%: nested stack", st);
         } else {

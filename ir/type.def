@@ -226,6 +226,7 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
         return fields->getDeclaration(name); }
     validate{ fields->check_null(); }
     dbprint;
+#apply
 }
 
 class Type_Struct : Type_StructLike {

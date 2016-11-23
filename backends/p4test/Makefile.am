@@ -47,12 +47,7 @@ p14_to_16tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 		   $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4
 	@$(GENTESTS) $(srcdir) p14_to_16 $(srcdir)/backends/p4test/run-p4-sample.py $^ >$@
 
-# These are unsupported P4_14 constructs
-P14BUGS = \
-    p14_to_16/testdata/p4_14_samples/09-IPv4OptionsUnparsed.p4.test \
-    p14_to_16/testdata/p4_14_samples/TLV_parsing.p4.test
 
 # This is a bug in the grammar
 XFAIL_TESTS += \
-    $(P14BUGS) \
     p4/testdata/p4_16_samples/cast-call.p4.test

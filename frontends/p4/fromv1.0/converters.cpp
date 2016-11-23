@@ -131,7 +131,7 @@ const IR::Node* ExpressionConverter::postorder(IR::NamedRef* ref) {
         ExpressionConverter conv(structure);
         return conv.convert(fl);
     }
-    BUG("Unexpected expression %1%", ref);
+    return new IR::PathExpression(ref->name);
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
@@ -247,6 +247,7 @@ const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
         return stat;
     }
+    // FIXME -- always a noop as ExpressionConverter has only postorder methods?
     return ExpressionConverter::preorder(primitive);
 }
 
@@ -279,6 +280,34 @@ const IR::Statement* StatementConverter::convert(const IR::Vector<IR::Expression
     }
     auto result = new IR::BlockStatement(toConvert->srcInfo, IR::Annotations::empty, stats);
     return result;
+}
+
+const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
+    if (vbtype->size == 0) {
+        if (auto type = findContext<IR::Type_StructLike>()) {
+            if (auto max = type->annotations->getSingle("max_length")) {
+                if (max->expr.size() != 1 || !max->expr[0]->is<IR::Constant>())
+                    error("%s: max_length must be a constant", max);
+                else
+                    vbtype->size = 8 * max->expr[0]->to<IR::Constant>()->asInt() -
+                                   type->width_bits(); } } }
+    if (vbtype->size == 0)
+        error("%s: no max_length for * field size", vbtype);
+    return vbtype;
+}
+
+const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
+    if (!field->type->is<IR::Type_Varbits>()) return field;
+    if (auto type = findContext<IR::Type_StructLike>())
+        if (auto len = type->annotations->getSingle("length"))
+            field->annotations = field->annotations->add(len);
+    return field;
+}
+
+const IR::Type_StructLike *TypeConverter::postorder(IR::Type_StructLike *str) {
+    str->annotations = str->annotations->where([](const IR::Annotation *a) -> bool {
+        return a->name != "length" && a->name != "max_length"; });
+    return str;
 }
 
 ///////////////////////////////////////////////////////////////
