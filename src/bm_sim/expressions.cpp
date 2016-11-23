@@ -78,6 +78,11 @@ ExprOpcodesMap::get_opcode(std::string expr_name) {
   return instance->opcodes_map[expr_name];
 }
 
+Expression::Expression() {
+  // trick so that empty expressions can still be executed
+  build();
+}
+
 size_t
 Expression::get_num_ops() const {
   return ops.size();
@@ -220,6 +225,21 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
                   const std::vector<Data> &locals,
                   bool *b_res, Data *d_res) const {
   assert(built);
+
+  if (ops.empty()) {
+    // special case, where the expression is empty
+    // not sure if this is the best way to handle this case, maybe the compiler
+    // should make sure this never happens instead and we should treat this as
+    // an error
+    switch (expr_type) {
+      case ExprType::EXPR_BOOL:
+        *b_res = false;
+        return;
+      case ExprType::EXPR_DATA:
+        d_res->set(0);
+        return;
+    }
+  }
 
   static thread_local int data_temps_size = 4;
   // std::vector<Data> data_temps(data_registers_cnt);
@@ -576,6 +596,11 @@ Expression::assign_dest_registers() {
   }
 
   return registers_cnt;
+}
+
+bool
+Expression::empty() const {
+  return ops.empty();
 }
 
 VLHeaderExpression::VLHeaderExpression(const ArithExpression &expr)

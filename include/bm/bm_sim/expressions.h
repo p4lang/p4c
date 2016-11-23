@@ -93,7 +93,7 @@ struct Op {
 
 class Expression {
  public:
-  Expression() { }
+  Expression();
 
   void push_back_load_field(header_id_t header, int field_offset);
   void push_back_load_bool(bool value);
@@ -114,6 +114,8 @@ class Expression {
   Data eval_arith(const PHV &phv, const std::vector<Data> &locals = {}) const;
   void eval_arith(const PHV &phv, Data *data,
                   const std::vector<Data> &locals = {}) const;
+
+  bool empty() const;
 
   // I am authorizing copy for this object
   Expression(const Expression &other) = default;
