@@ -383,6 +383,34 @@ TYPED_TEST(TableSizeTwo, LookupEntry) {
   ASSERT_FALSE(hit);
 }
 
+TYPED_TEST(TableSizeTwo, PacketEntryIndex) {
+  std::string key = "\x0a\xba";
+  entry_handle_t handle;
+  MatchErrorCode rc;
+
+  Packet pkt = this->get_pkt(64);
+  Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+
+  rc = this->add_entry(key, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  const auto handle_index_mask = static_cast<entry_handle_t>(0x00ffffff);
+
+  ASSERT_EQ(Packet::INVALID_ENTRY_INDEX, pkt.get_entry_index());
+
+  // table hit
+  f.set("0xaba");
+  ASSERT_EQ(nullptr, this->table->apply_action(&pkt));
+  ASSERT_EQ(handle_index_mask & handle, pkt.get_entry_index());
+
+  rc = this->table->delete_entry(handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  // table miss
+  ASSERT_EQ(&this->node_miss_default, this->table->apply_action(&pkt));
+  ASSERT_EQ(Packet::INVALID_ENTRY_INDEX, pkt.get_entry_index());
+}
+
 TYPED_TEST(TableSizeTwo, NextNodeHitMiss) {
   std::string key = "\x0a\xba";
   entry_handle_t handle;

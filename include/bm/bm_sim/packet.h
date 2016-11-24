@@ -102,6 +102,9 @@ class Packet final {
   //! Number of general purpose registers per packet
   static constexpr size_t nb_registers = 2u;
 
+  static constexpr size_t INVALID_ENTRY_INDEX =
+      std::numeric_limits<size_t>::max();
+
   ~Packet();
 
   //! Obtain the packet_id. The packet_id is the one assigned by the target when
@@ -217,6 +220,11 @@ class Packet final {
   void set_register(size_t idx, uint64_t v) { registers.at(idx) = v; }
   //! Read general purpose register at index \p idx
   uint64_t get_register(size_t idx) { return registers.at(idx); }
+
+  void set_entry_index(size_t idx) { entry_index = idx; }
+  //! Get the index of the entry returned by the last match table lookup, or
+  //! Packet::INVALID_ENTRY_INDEX if lookup was a miss.
+  size_t get_entry_index() const { return entry_index; }
 
   //! Mark the packet for exit by setting an exit flag. If this is called from
   //! an action, the current pipeline will be interrupted as soon as the current
@@ -345,6 +353,10 @@ class Packet final {
   // General purpose registers available to a target, they can be written with
   // Packet::set_register and read with Packet::get_register
   std::array<uint64_t, nb_registers> registers;
+
+  // Used to store the index of the entry returned by the last match table
+  // lookup; INVALID_ENTRY_INDEX if lookup was a miss.
+  size_t entry_index{INVALID_ENTRY_INDEX};
 
  private:
   static CopyIdGenerator *copy_id_gen;

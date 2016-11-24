@@ -100,6 +100,13 @@ MatchTableAbstract::apply_action(Packet *pkt) {
 
   const ActionEntry &action_entry = lookup(*pkt, &hit, &handle);
 
+  // TODO(antonin): I hate this part, which requires this class to know that the
+  // lower 24 bits of the handle are used as an index. Is is expected that few
+  // people will ever use this index, but it is required for the implementation
+  // of direct-like extern instances.
+  pkt->set_entry_index(
+      hit ? (handle & 0x00ffffff) : Packet::INVALID_ENTRY_INDEX);
+
   if (hit && with_meters) {
     // we only execute the direct meter if hit, should we have a miss meter?
     Field &target_f = pkt->get_phv()->get_field(
