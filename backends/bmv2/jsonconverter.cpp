@@ -975,6 +975,13 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     params->append(lo);
                     params->append(hi);
                     continue;
+                } else if (ef->method->name == corelib.truncate.name) {
+                    BUG_CHECK(mc->arguments->size() == 1, "Expected 1 arguments for %1%", mc);
+                    auto primitive = mkPrimitive(corelib.truncate.name, result);
+                    auto params = mkParameters(primitive);
+                    auto len = conv->convert(mc->arguments->at(0));
+                    params->append(len);
+                    continue;
                 }
             }
         }

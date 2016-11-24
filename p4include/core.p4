@@ -48,6 +48,8 @@ extern packet_out {
     void emit<T>(in T hdr);
 }
 
+extern void truncate(in bit<32> length);
+
 // TODO: remove from this file, convert to built-in
 extern void verify(in bool check, in error toSignal);
 

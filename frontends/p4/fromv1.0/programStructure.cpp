@@ -1217,6 +1217,17 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
                                                emptyTypeArguments, args);
         return new IR::MethodCallStatement(mc->srcInfo, mc);
+    } else if (primitive->name == "truncate") {
+        OPS_CK(primitive, 1);
+        auto len = primitive->operands.at(0);
+        auto methodName = p4lib.truncate.Id();
+        auto method = new IR::PathExpression(methodName);
+        auto args = new IR::Vector<IR::Expression>();
+        auto arg0 = new IR::Cast(len->srcInfo, p4lib.truncate.length_type, conv.convert(len));
+        args->push_back(arg0);
+        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
+                                               emptyTypeArguments, args);
+        return new IR::MethodCallStatement(mc->srcInfo, mc);
     }
 
     // If everything else failed maybe we are invoking an action

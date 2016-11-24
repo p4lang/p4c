@@ -164,7 +164,9 @@ class TypeCheck::Pass3 : public Modifier {
                             if ((infer & 1) && o->type != rv) {
                                 rv = o->type;
                                 break; }
-                            infer >>= 1; } } } } }
+                            infer >>= 1; } }
+                } else if (auto infer = prim->inferOperandType(ctxt->child_index)) {
+                    rv = infer; } } }
         return rv; }
     bool preorder(IR::Expression *op) override {
         if (op->type == IR::Type::Unknown::get() || op->type->is<IR::Type_InfInt>()) {

@@ -210,6 +210,7 @@ class Primitive : Operation {
         operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
     virtual bool isOutput(int operand_index) const;
     virtual unsigned inferOperandTypes() const;
+    virtual Type inferOperandType(int operand) const;
     virtual void typecheck() const;
 #apply
     stringOp = name;

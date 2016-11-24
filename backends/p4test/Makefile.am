@@ -50,8 +50,7 @@ p14_to_16tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 # These are unsupported P4_14 constructs
 P14BUGS = \
     p14_to_16/testdata/p4_14_samples/09-IPv4OptionsUnparsed.p4.test \
-    p14_to_16/testdata/p4_14_samples/TLV_parsing.p4.test \
-    p14_to_16/testdata/p4_14_samples/truncate.p4.test
+    p14_to_16/testdata/p4_14_samples/TLV_parsing.p4.test
 
 # This is a bug in the grammar
 XFAIL_TESTS += \

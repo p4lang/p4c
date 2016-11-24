@@ -91,6 +91,7 @@ static const std::map<cstring, primitive_info_t> prim_info = {
     { "shift_right",            { 3, 3, 0x1, 0x3 } },
     { "subtract",               { 3, 3, 0x1, 0x7 } },
     { "subtract_from_field",    { 2, 2, 0x1, 0x3 } },
+    { "truncate",               { 1, 1, 0x0, 0x0 } },
     { "valid",                  { 1, 1, 0x0, 0x0 } },
 };
 
@@ -115,4 +116,10 @@ unsigned IR::Primitive::inferOperandTypes() const {
     if (prim_info.count(name))
         return prim_info.at(name).type_match_operands;
     return 0;
+}
+
+const IR::Type *IR::Primitive::inferOperandType(int operand) const {
+    if (name == "truncate")
+        return IR::Type::Bits::get(32);
+    return IR::Type::Unknown::get();
 }
