@@ -20,33 +20,43 @@ namespace P4 {
 
 const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) {
     auto ltype = typeMap->getType(statement->left, true);
-    if (!ltype->is<IR::Type_StructLike>())
-        return statement;
+    if (ltype->is<IR::Type_StructLike>()) {
+        auto retval = new IR::Vector<IR::StatOrDecl>();
+        auto strct = ltype->to<IR::Type_StructLike>();
+        if (statement->right->is<IR::ListExpression>()) {
+            auto list = statement->right->to<IR::ListExpression>();
+            unsigned index = 0;
+            for (auto f : *strct->fields) {
+                auto right = list->components->at(index);
+                auto left = new IR::Member(Util::SourceInfo(), statement->left, f->name);
+                retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
+                index++;
+            }
+        } else {
+            if (ltype->is<IR::Type_Header>())
+                // Leave headers as they are -- copy_header will also copy the valid bit
+                return statement;
 
-    auto retval = new IR::Vector<IR::StatOrDecl>();
-    auto strct = ltype->to<IR::Type_StructLike>();
-    if (statement->right->is<IR::ListExpression>()) {
-        auto list = statement->right->to<IR::ListExpression>();
-        unsigned index = 0;
-        for (auto f : *strct->fields) {
-            auto right = list->components->at(index);
-            auto left = new IR::Member(Util::SourceInfo(), statement->left, f->name);
-            retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
-            index++;
+            for (auto f : *strct->fields) {
+                auto right = new IR::Member(Util::SourceInfo(), statement->right, f->name);
+                auto left = new IR::Member(Util::SourceInfo(), statement->left, f->name);
+                retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
+            }
         }
-    } else {
-        if (ltype->is<IR::Type_Header>())
-            // Leave headers as they are -- copy_header will also copy the valid bit
-            return statement;
-
-        for (auto f : *strct->fields) {
-            auto right = new IR::Member(Util::SourceInfo(), statement->right, f->name);
-            auto left = new IR::Member(Util::SourceInfo(), statement->left, f->name);
+        return retval;
+    } else if (ltype->is<IR::Type_Stack>()) {
+        auto retval = new IR::Vector<IR::StatOrDecl>();
+        auto stack = ltype->to<IR::Type_Stack>();
+        for (unsigned i = 0; i < stack->getSize(); i++) {
+            auto index = new IR::Constant(i);
+            auto right = new IR::ArrayIndex(Util::SourceInfo(), statement->right, index);
+            auto left = new IR::ArrayIndex(Util::SourceInfo(), statement->left, index->clone());
             retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
         }
+        return retval;
     }
 
-    return retval;
+    return statement;
 }
 
 }  // namespace P4
