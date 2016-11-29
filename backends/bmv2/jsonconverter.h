@@ -114,6 +114,8 @@ class JsonConverter final {
     // returns id of created field list
     int createFieldList(const IR::Expression* expr, cstring group,
                         cstring listName, Util::JsonArray* fieldLists);
+    void generateUpdate(const IR::BlockStatement *block,
+                        Util::JsonArray* checksums, Util::JsonArray* calculations);
     void generateUpdate(const IR::P4Control* cont,
                         Util::JsonArray* checksums, Util::JsonArray* calculations);
 

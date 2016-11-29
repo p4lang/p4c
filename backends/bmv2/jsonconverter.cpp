@@ -1920,22 +1920,22 @@ void JsonConverter::createForceArith(const IR::Type* meta, cstring name,
     }
 }
 
-void JsonConverter::generateUpdate(const IR::P4Control* updateControl,
+void JsonConverter::generateUpdate(const IR::BlockStatement *block,
                                    Util::JsonArray* checksums, Util::JsonArray* calculations) {
     // Currently this is very hacky to target the very limited support for checksums in BMv2
     // This will work much better when BMv2 offers a checksum extern.
-    for (auto stat : *updateControl->body->components) {
+    for (auto stat : *block->components) {
         if (stat->is<IR::IfStatement>()) {
             // The way checksums work in Json, they always ignore the condition!
             stat = stat->to<IR::IfStatement>()->ifTrue;
         }
-        if (stat->is<IR::AssignmentStatement>()) {
-            auto assign = stat->to<IR::AssignmentStatement>();
-            if (assign->right->is<IR::MethodCallExpression>()) {
-                auto mi = P4::MethodInstance::resolve(
-                    assign->right->to<IR::MethodCallExpression>(), refMap, typeMap);
-                if (mi->is<P4::ExternMethod>()) {
-                    auto em = mi->to<P4::ExternMethod>();
+        if (auto blk = stat->to<IR::BlockStatement>()) {
+            generateUpdate(blk, checksums, calculations);
+            continue;
+        } else if (auto assign = stat->to<IR::AssignmentStatement>()) {
+            if (auto mc = assign->right->to<IR::MethodCallExpression>()) {
+                auto mi = P4::MethodInstance::resolve(mc, refMap, typeMap);
+                if (auto em = mi->to<P4::ExternMethod>()) {
                     if (em->method->name.name == v1model.ck16.get.name &&
                         em->originalExternType->name.name == v1model.ck16.name) {
                         BUG_CHECK(mi->expr->arguments->size() == 1,
@@ -1962,6 +1962,11 @@ void JsonConverter::generateUpdate(const IR::P4Control* updateControl,
         }
         BUG("%1%: not handled yet", stat);
     }
+}
+
+void JsonConverter::generateUpdate(const IR::P4Control* updateControl,
+                                   Util::JsonArray* checksums, Util::JsonArray* calculations) {
+    generateUpdate(updateControl->body, checksums, calculations);
 }
 
 void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
