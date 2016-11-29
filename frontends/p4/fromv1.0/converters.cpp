@@ -358,6 +358,10 @@ class DiscoverStructure : public Inspector {
         if (!as->mode.name.isNullOrEmpty())
             ::warning("%1%: Action selector attribute ignored", as->mode);
     }
+    void postorder(const IR::Type_Extern *ext) override
+    { structure->extern_types.emplace(ext); }
+    void postorder(const IR::Declaration_Instance *ext) override
+    { structure->externs.emplace(ext); }
 };
 
 class ComputeCallGraph : public Inspector {
@@ -406,7 +410,18 @@ class ComputeCallGraph : public Inspector {
     }
     void postorder(const IR::Primitive* primitive) override {
         auto name = primitive->name;
-        if (primitive->name == "count") {
+        const IR::GlobalRef *glob = nullptr;
+        const IR::Declaration_Instance *extrn = nullptr;
+        if (primitive->operands.size() >= 1)
+            glob = primitive->operands[0]->to<IR::GlobalRef>();
+        if (glob) extrn = glob->obj->to<IR::Declaration_Instance>();
+
+        if (extrn) {
+            auto parent = findContext<IR::ActionFunction>();
+            BUG_CHECK(parent != nullptr, "%1%: Extern call not within action", primitive);
+            structure->calledExterns.calls(parent->name, extrn->name.name);
+            return;
+        } else if (primitive->name == "count") {
             // counter invocation
             auto ctrref = primitive->operands.at(0);
             const IR::Counter *ctr = nullptr;

@@ -36,8 +36,9 @@ ProgramStructure::ProgramStructure() :
         controls(&allNames), parserStates(&allNames), tables(&allNames),
         actions(&allNames), counters(&allNames), registers(&allNames), meters(&allNames),
         action_profiles(nullptr), field_lists(nullptr), field_list_calculations(&allNames),
-        action_selectors(nullptr), calledActions("actions"), calledControls("controls"),
-        calledCounters("counters"), calledMeters("meters"), calledRegisters("registers"),
+        action_selectors(nullptr), extern_types(&allNames), externs(&allNames),
+        calledActions("actions"), calledControls("controls"), calledCounters("counters"),
+        calledMeters("meters"), calledRegisters("registers"), calledExterns("externs"),
         parsers("parsers"), parserPacketIn(nullptr), parserHeadersOut(nullptr),
         verifyChecksums(nullptr), updateChecksums(nullptr),
         deparser(nullptr), latest(nullptr) {
@@ -222,6 +223,17 @@ void ProgramStructure::createStructures() {
     auto headers = new IR::Type_Struct(Util::SourceInfo(), IR::ID(v1model.headersType.name),
                                        IR::Annotations::empty, fields);
     declarations->push_back(headers);
+}
+
+void ProgramStructure::createExterns() {
+    for (auto it : extern_types) {
+        auto type = it.first;
+        if (type->name != it.second) {
+            auto annos = addNameAnnotation(type->name.name, type->annotations);
+            type = new IR::Type_Extern(type->srcInfo, it.second, type->methods,
+                                       type->attributes, annos); }
+        declarations->push_back(type);
+    }
 }
 
 const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* param) {
@@ -842,7 +854,22 @@ const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* e
 
 const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* primitive) {
     ExpressionConverter conv(this);
-    if (primitive->name == "modify_field") {
+    const IR::GlobalRef *glob = nullptr;
+    const IR::Declaration_Instance *extrn = nullptr;
+    if (primitive->operands.size() >= 1)
+        glob = primitive->operands[0]->to<IR::GlobalRef>();
+    if (glob) extrn = glob->obj->to<IR::Declaration_Instance>();
+
+    if (extrn) {
+        auto extref = new IR::PathExpression(externs.get(extrn));
+        auto method = new IR::Member(primitive->srcInfo, extref, primitive->name);
+        auto args = new IR::Vector<IR::Expression>();
+        for (unsigned i = 1; i < primitive->operands.size(); ++i)
+            args->push_back(conv.convert(primitive->operands.at(i)));
+        auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
+                                               emptyTypeArguments, args);
+        return new IR::MethodCallStatement(primitive->srcInfo, mc);
+    } else if (primitive->name == "modify_field") {
         if (primitive->operands.size() == 2) {
             auto left = conv.convert(primitive->operands.at(0));
             auto right = conv.convert(primitive->operands.at(1));
@@ -1505,9 +1532,11 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
 
     std::set<cstring> metersToDo;
     std::set<cstring> registersToDo;
+    std::set<cstring> externsToDo;
     for (auto a : actionsToDo) {
         calledMeters.getCallees(a, metersToDo);
         calledRegisters.getCallees(a, registersToDo);
+        calledExterns.getCallees(a, externsToDo);
     }
     for (auto c : metersToDo) {
         auto mtr = meters.get(c);
@@ -1519,6 +1548,12 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
         auto reg = registers.get(c);
         auto r = convert(reg, registers.get(reg));
         stateful->push_back(r);
+    }
+
+    for (auto c : externsToDo) {
+        auto ext = externs.get(c);
+        // auto e = convert(ext, externs.get(ext));  -- no conversion needed?
+        stateful->push_back(ext);
     }
 
     for (auto a : actionsToDo) {
@@ -1871,6 +1906,7 @@ void ProgramStructure::createChecksumUpdates() {
 const IR::P4Program* ProgramStructure::create(Util::SourceInfo info) {
     createTypes();
     createStructures();
+    createExterns();
     createParser();
     createControls();
     createDeparser();
