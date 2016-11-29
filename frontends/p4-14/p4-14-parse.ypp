@@ -938,7 +938,7 @@ static IR::Constant *constantFold(IR::Expression *a) {
 
 static IR::Vector<IR::Expression> make_expr_list(const IR::NameList *list) {
     IR::Vector<IR::Expression> rv;
-    for (auto &name :list->names)
+    for (auto &name : list->names)
         rv.push_back(new IR::StringLiteral(name));
     return rv;
 }

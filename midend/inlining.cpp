@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 #include "lib/nullstream.h"
-#include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/def_use.h"
 
 #include "inlining.h"
@@ -56,6 +55,7 @@ class FindLocationSets : public Inspector {
         CHECK_NULL(expression); CHECK_NULL(ls);
         loc.emplace(expression, ls);
     }
+
  public:
     FindLocationSets(ReferenceMap* refMap, TypeMap* typeMap) :
             storageMap(new StorageMap(refMap, typeMap)) {}
@@ -368,13 +368,6 @@ const IR::Node* InlineDriver::preorder(IR::P4Program* program) {
         prog = prog->apply(*inliner);
         if (::errorCount() > 0)
             return prog;
-
-#if 0
-        std::stringstream str;
-        ToP4 top4(&str, false);
-        prog->apply(top4);
-        LOG2(str);
-#endif
     }
 
     prune();
@@ -509,8 +502,8 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                         if (param1 == param2) continue;
                         auto ls2 = ::get(locationSets, param2);
                         if (ls1->overlaps(ls2)) {
-                            LOG2("Arg for " << dbp(param1) << " aliases with arg for " << dbp(param2)
-                                 << ": using temp");
+                            LOG2("Arg for " << dbp(param1) << " aliases with arg for "
+                                 << dbp(param2) << ": using temp");
                             useTemporary.emplace(param1);
                             useTemporary.emplace(param2);
                         }
@@ -524,8 +517,11 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                 if (param->direction == IR::Direction::None)
                     continue;
                 if (useTemporary.find(param) == useTemporary.end()) {
+                    // Substitute argument directly
+                    CHECK_NULL(mcd);
                     auto initializer = mcd->substitution.lookup(param);
-                    LOG1("Substituting callee parameter " << dbp(param) << " with " << dbp(initializer));
+                    LOG1("Substituting callee parameter " << dbp(param)
+                         << " with " << dbp(initializer));
                     substs->paramSubst.add(param, initializer);
                 } else {
                     // use a temporary variable
@@ -533,7 +529,6 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
                     auto path = new IR::PathExpression(newName);
                     substs->paramSubst.add(param, path);
                     LOG1("Replacing " << param->name << " with " << newName);
-                    // This may not be used
                     auto vardecl = new IR::Declaration_Variable(Util::SourceInfo(), newName,
                                                                 param->annotations, param->type,
                                                                 nullptr);
@@ -597,7 +592,6 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
 
     // inline actual body
     callee = substs->rename<IR::P4Control>(refMap, callee);
-    // LOG3("After substitutions " << callee);
     body->append(*callee->body->components);
 
     // Copy values of out and inout parameters
@@ -606,7 +600,8 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
             auto left = mcd.substitution.lookup(param);
             auto initializer = substs->paramSubst.lookupByName(param->name);
             if (initializer != left) {
-                auto copyout = new IR::AssignmentStatement(Util::SourceInfo(), left, initializer->clone());
+                auto copyout = new IR::AssignmentStatement(
+                    Util::SourceInfo(), left, initializer->clone());
                 body->push_back(copyout);
             }
         }

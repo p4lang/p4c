@@ -409,7 +409,7 @@ class RemoveUnused : public Transform {
     const HasUses* hasUses;
  public:
     explicit RemoveUnused(const HasUses* hasUses) : hasUses(hasUses)
-    { CHECK_NULL(hasUses); }
+    { CHECK_NULL(hasUses); setName("RemoveUnused"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override {
         if (!hasUses->hasUses(getOriginal())) {
             LOG1("Removing statement " << dbp(getOriginal()) << " " << statement);

@@ -22,7 +22,6 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "frontends/p4/callGraph.h"
-#include "frontends/p4/toP4/toP4.h"
 
 namespace P4 {
 

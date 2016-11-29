@@ -20,7 +20,6 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/toP4/toP4.h"
 
 namespace P4 {
 

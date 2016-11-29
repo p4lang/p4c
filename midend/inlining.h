@@ -106,7 +106,8 @@ struct InlineSummary {
         std::map<const IR::MethodCallStatement*, const IR::Declaration_Instance*> callToInstance;
         // nullptr if there isn't exactly one caller,
         // otherwise the single caller of this instance.
-        const IR::MethodCallStatement* uniqueCaller(const IR::Declaration_Instance* instance) const {
+        const IR::MethodCallStatement* uniqueCaller(
+            const IR::Declaration_Instance* instance) const {
             const IR::MethodCallStatement* call = nullptr;
             for (auto m : callToInstance) {
                 if (m.second == instance) {

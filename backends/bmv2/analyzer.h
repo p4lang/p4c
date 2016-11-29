@@ -163,6 +163,7 @@ class CFG final : public IHasDbPrint {
     // Graphs that require cycles are not implementable on BMv2.
     // These can arise if a table is invoked multiple times.
     bool checkForCycles() const;
+
  private:
     bool dfs(Node* node, std::set<Node*> &visited, std::set<const IR::P4Table*> &stack) const;
 };
