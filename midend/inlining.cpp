@@ -516,7 +516,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
             for (auto param : *callee->type->applyParams->parameters) {
                 if (param->direction == IR::Direction::None)
                     continue;
-                if (useTemporary.find(param) == useTemporary.end()) {
+                if (call != nullptr && (useTemporary.find(param) == useTemporary.end())) {
                     // Substitute argument directly
                     CHECK_NULL(mcd);
                     auto initializer = mcd->substitution.lookup(param);
