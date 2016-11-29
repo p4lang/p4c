@@ -135,7 +135,7 @@ REGISTER_PRIMITIVE(shift_right);
 class drop : public ActionPrimitive<> {
   void operator ()() {
     get_field("standard_metadata.egress_spec").set(511);
-    if (get_phv().has_header("intrinsic_metadata")) {
+    if (get_phv().has_field("intrinsic_metadata.mcast_grp")) {
       get_field("intrinsic_metadata.mcast_grp").set(0);
     }
   }
