@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,6 +42,22 @@ class HasToString final {
 template<typename T, typename = decltype(std::to_string((T)0))>
 cstring toString(T value) { return std::to_string(value); }
 
+template<typename T>
+auto toString(const T& value) -> typename std::enable_if<HasToString<T>::value, cstring>::type
+{ return value.toString(); }
+
+template<typename T>
+auto toString(T& value) -> typename std::enable_if<HasToString<T>::value, cstring>::type
+{ return value.toString(); }
+
+template<typename T>
+auto toString(const T* value) -> typename std::enable_if<HasToString<T>::value, cstring>::type
+{ return value->toString(); }
+
+template<typename T>
+auto toString(T* value) -> typename std::enable_if<HasToString<T>::value, cstring>::type
+{ return value->toString(); }
+
 cstring toString(bool value);
 cstring toString(std::string value);
 cstring toString(const char* value);
@@ -49,10 +65,6 @@ cstring toString(cstring value);
 cstring toString(StringRef value);
 cstring toString(const mpz_class* value);
 cstring toString(const void* value);
-
-template<typename T>
-auto toString(const T& value) -> typename std::enable_if<HasToString<T>::value, cstring>::type
-{ return value.toString(); }
 
 // printf into a string
 cstring printf_format(const char* fmt_str, ...);

@@ -20,12 +20,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    headers hdr_2;
-    h meta_2_m;
-    standard_metadata_t standard_metadata_2;
-    headers hdr_3;
-    h meta_3_m;
-    standard_metadata_t standard_metadata_3;
     @name("NoAction_1") action NoAction_0() {
     }
     @name("d.c.x") action d_c_x() {
@@ -37,63 +31,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    action act() {
-        meta_2_m.b = meta.m.b;
-        standard_metadata_2.ingress_port = standard_metadata.ingress_port;
-        standard_metadata_2.egress_spec = standard_metadata.egress_spec;
-        standard_metadata_2.egress_port = standard_metadata.egress_port;
-        standard_metadata_2.clone_spec = standard_metadata.clone_spec;
-        standard_metadata_2.instance_type = standard_metadata.instance_type;
-        standard_metadata_2.drop = standard_metadata.drop;
-        standard_metadata_2.recirculate_port = standard_metadata.recirculate_port;
-        standard_metadata_2.packet_length = standard_metadata.packet_length;
-        meta_3_m.b = meta_2_m.b;
-        standard_metadata_3.ingress_port = standard_metadata_2.ingress_port;
-        standard_metadata_3.egress_spec = standard_metadata_2.egress_spec;
-        standard_metadata_3.egress_port = standard_metadata_2.egress_port;
-        standard_metadata_3.clone_spec = standard_metadata_2.clone_spec;
-        standard_metadata_3.instance_type = standard_metadata_2.instance_type;
-        standard_metadata_3.drop = standard_metadata_2.drop;
-        standard_metadata_3.recirculate_port = standard_metadata_2.recirculate_port;
-        standard_metadata_3.packet_length = standard_metadata_2.packet_length;
-    }
-    action act_0() {
-        meta_2_m.b = meta_3_m.b;
-        standard_metadata_2.ingress_port = standard_metadata_3.ingress_port;
-        standard_metadata_2.egress_spec = standard_metadata_3.egress_spec;
-        standard_metadata_2.egress_port = standard_metadata_3.egress_port;
-        standard_metadata_2.clone_spec = standard_metadata_3.clone_spec;
-        standard_metadata_2.instance_type = standard_metadata_3.instance_type;
-        standard_metadata_2.drop = standard_metadata_3.drop;
-        standard_metadata_2.recirculate_port = standard_metadata_3.recirculate_port;
-        standard_metadata_2.packet_length = standard_metadata_3.packet_length;
-        meta.m.b = meta_2_m.b;
-        standard_metadata.ingress_port = standard_metadata_2.ingress_port;
-        standard_metadata.egress_spec = standard_metadata_2.egress_spec;
-        standard_metadata.egress_port = standard_metadata_2.egress_port;
-        standard_metadata.clone_spec = standard_metadata_2.clone_spec;
-        standard_metadata.instance_type = standard_metadata_2.instance_type;
-        standard_metadata.drop = standard_metadata_2.drop;
-        standard_metadata.recirculate_port = standard_metadata_2.recirculate_port;
-        standard_metadata.packet_length = standard_metadata_2.packet_length;
-    }
-    table tbl_act() {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    table tbl_act_0() {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
     apply {
-        tbl_act.apply();
-        if (meta_3_m.b == 1w1) 
+        if (meta.m.b == 1w1) 
             d_c_t_0.apply();
-        tbl_act_0.apply();
     }
 }
 

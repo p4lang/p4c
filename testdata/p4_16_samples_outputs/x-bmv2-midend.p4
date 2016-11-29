@@ -30,19 +30,7 @@ parser ParserI(packet_in b, out H parsedHdr, inout M meta, inout std_meta_t std_
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    S meta_1_s;
-    action act() {
-        meta_1_s.x = meta.s.x;
-        meta.s.x = meta_1_s.x;
-    }
-    table tbl_act() {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     apply {
-        tbl_act.apply();
     }
 }
 

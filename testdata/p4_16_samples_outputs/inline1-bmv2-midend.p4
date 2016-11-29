@@ -29,15 +29,12 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    M tmp_1;
-    ipv4_t tmp_2_ipv4;
-    M meta_1;
-    ipv4_t hdr_1_ipv4;
+    ipv4_t tmp_ipv4;
     @name("NoAction_1") action NoAction_0() {
     }
     @name("do_aux.adjust_lkp_fields") table do_aux_adjust_lkp_fields_0() {
         key = {
-            hdr_1_ipv4.isValid(): exact;
+            tmp_ipv4.isValid(): exact;
         }
         actions = {
             NoAction_0();
@@ -45,8 +42,7 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         default_action = NoAction_0();
     }
     action act() {
-        tmp_2_ipv4 = hdr.ipv4;
-        hdr_1_ipv4 = tmp_2_ipv4;
+        tmp_ipv4 = hdr.ipv4;
     }
     table tbl_act() {
         actions = {

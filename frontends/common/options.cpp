@@ -211,8 +211,6 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
     if (verbose)
         std::cerr << name << std::endl;
 
-
-
     for (auto s : top4) {
         if (strstr(name.c_str(), s.c_str()) != nullptr) {
             cstring suffix = cstring("-") + name;

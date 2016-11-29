@@ -42,12 +42,11 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    hdr h_1;
     bit<32> key_0;
     @name("NoAction_1") action NoAction_0() {
     }
     @name("c.a") action c_a() {
-        h_1.b = h_1.a;
+        h.h.b = h.h.a;
     }
     @name("c.t") table c_t_0() {
         key = {
@@ -60,11 +59,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         default_action = NoAction_0();
     }
     action act() {
-        h_1 = h.h;
-        key_0 = h_1.a + h_1.a;
+        key_0 = h.h.a + h.h.a;
     }
     action act_0() {
-        h.h = h_1;
         sm.egress_spec = 9w0;
     }
     table tbl_act() {

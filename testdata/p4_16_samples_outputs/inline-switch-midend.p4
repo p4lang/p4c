@@ -1,5 +1,4 @@
 control d(out bit<32> x) {
-    bit<32> x_1;
     bool hasReturned_0;
     @name("cinst.a1") action cinst_a1() {
     }
@@ -21,9 +20,6 @@ control d(out bit<32> x) {
     action act_1() {
         hasReturned_0 = false;
     }
-    action act_2() {
-        x = x_1;
-    }
     table tbl_act() {
         actions = {
             act_1();
@@ -42,12 +38,6 @@ control d(out bit<32> x) {
         }
         const default_action = act_0();
     }
-    table tbl_act_2() {
-        actions = {
-            act_2();
-        }
-        const default_action = act_2();
-    }
     apply {
         tbl_act.apply();
         switch (cinst_t_0.apply().action_run) {
@@ -60,7 +50,6 @@ control d(out bit<32> x) {
             }
         }
 
-        tbl_act_2.apply();
     }
 }
 

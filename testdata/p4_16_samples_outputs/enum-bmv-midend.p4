@@ -48,22 +48,19 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    hdr h_1;
     Choice c_1;
     bool tmp_0;
     action act() {
-        h_1.c = h_1.a;
+        h.h.c = h.h.a;
     }
     action act_0() {
-        h_1.c = h_1.b;
+        h.h.c = h.h.b;
     }
     action act_1() {
-        h_1 = h.h;
         c_1 = Choice.First;
         tmp_0 = c_1 == Choice.Second;
     }
     action act_2() {
-        h.h = h_1;
         sm.egress_spec = 9w0;
     }
     table tbl_act() {

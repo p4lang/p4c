@@ -184,6 +184,14 @@ void LocationSet::addCanonical(const StorageLocation* location) {
     }
 }
 
+bool LocationSet::overlaps(const LocationSet* other) const {
+    for (auto s : locations) {
+        if (other->locations.find(s) != other->locations.end())
+            return true;
+    }
+    return false;
+}
+
 const ProgramPoints* ProgramPoints::merge(const ProgramPoints* with) const {
     auto result = new ProgramPoints(points);
     for (auto p : with->points)

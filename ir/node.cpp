@@ -36,6 +36,7 @@ IR::Node::Node(JSONLoader &json) : id(-1) {
         currentId = id+1;
 }
 
+// Abbreviated debug print
 cstring IR::dbp(const IR::INode* node) {
     std::stringstream str;
     if (node == nullptr) {

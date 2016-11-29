@@ -85,11 +85,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    ethernet_t hdr_1_ethernet;
-    ipv4_t hdr_1_ipv4;
-    ipv6_t hdr_1_ipv6;
-    egress_metadata_t meta_1_egress_metadata;
-    standard_metadata_t standard_metadata_1;
     @name("NoAction_1") action NoAction_0() {
     }
     @name("NoAction_2") action NoAction_3() {
@@ -112,24 +107,24 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("process_mac_rewrite.nop") action process_mac_rewrite_nop() {
     }
     @name("process_mac_rewrite.rewrite_ipv4_unicast_mac") action process_mac_rewrite_rewrite_ipv4_unicast_mac(bit<48> smac) {
-        hdr_1_ethernet.srcAddr = smac;
-        hdr_1_ethernet.dstAddr = meta_1_egress_metadata.mac_da;
-        hdr_1_ipv4.ttl = hdr_1_ipv4.ttl + 8w255;
+        hdr.ethernet.srcAddr = smac;
+        hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
+        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("process_mac_rewrite.rewrite_ipv4_multicast_mac") action process_mac_rewrite_rewrite_ipv4_multicast_mac(bit<48> smac) {
-        hdr_1_ethernet.srcAddr = smac;
-        hdr_1_ethernet.dstAddr[47:23] = 25w0x0;
-        hdr_1_ipv4.ttl = hdr_1_ipv4.ttl + 8w255;
+        hdr.ethernet.srcAddr = smac;
+        hdr.ethernet.dstAddr[47:23] = 25w0x0;
+        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("process_mac_rewrite.rewrite_ipv6_unicast_mac") action process_mac_rewrite_rewrite_ipv6_unicast_mac(bit<48> smac) {
-        hdr_1_ethernet.srcAddr = smac;
-        hdr_1_ethernet.dstAddr = meta_1_egress_metadata.mac_da;
-        hdr_1_ipv6.hopLimit = hdr_1_ipv6.hopLimit + 8w255;
+        hdr.ethernet.srcAddr = smac;
+        hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
+        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
     @name("process_mac_rewrite.rewrite_ipv6_multicast_mac") action process_mac_rewrite_rewrite_ipv6_multicast_mac(bit<48> smac) {
-        hdr_1_ethernet.srcAddr = smac;
-        hdr_1_ethernet.dstAddr[47:32] = 16w0x0;
-        hdr_1_ipv6.hopLimit = hdr_1_ipv6.hopLimit + 8w255;
+        hdr.ethernet.srcAddr = smac;
+        hdr.ethernet.dstAddr[47:32] = 16w0x0;
+        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
     }
     @name("process_mac_rewrite.mac_rewrite") table process_mac_rewrite_mac_rewrite_0() {
         actions = {
@@ -141,81 +136,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction_3();
         }
         key = {
-            meta_1_egress_metadata.smac_idx: exact;
-            hdr_1_ipv4.isValid()           : exact;
-            hdr_1_ipv6.isValid()           : exact;
+            meta.egress_metadata.smac_idx: exact;
+            hdr.ipv4.isValid()           : exact;
+            hdr.ipv6.isValid()           : exact;
         }
         size = 512;
         default_action = NoAction_3();
     }
-    action act() {
-        hdr_1_ethernet = hdr.ethernet;
-        hdr_1_ipv4 = hdr.ipv4;
-        hdr_1_ipv6 = hdr.ipv6;
-        meta_1_egress_metadata.payload_length = meta.egress_metadata.payload_length;
-        meta_1_egress_metadata.smac_idx = meta.egress_metadata.smac_idx;
-        meta_1_egress_metadata.bd = meta.egress_metadata.bd;
-        meta_1_egress_metadata.inner_replica = meta.egress_metadata.inner_replica;
-        meta_1_egress_metadata.replica = meta.egress_metadata.replica;
-        meta_1_egress_metadata.mac_da = meta.egress_metadata.mac_da;
-        meta_1_egress_metadata.routed = meta.egress_metadata.routed;
-        meta_1_egress_metadata.same_bd_check = meta.egress_metadata.same_bd_check;
-        meta_1_egress_metadata.header_count = meta.egress_metadata.header_count;
-        meta_1_egress_metadata.drop_reason = meta.egress_metadata.drop_reason;
-        meta_1_egress_metadata.egress_bypass = meta.egress_metadata.egress_bypass;
-        meta_1_egress_metadata.drop_exception = meta.egress_metadata.drop_exception;
-        standard_metadata_1.ingress_port = standard_metadata.ingress_port;
-        standard_metadata_1.egress_spec = standard_metadata.egress_spec;
-        standard_metadata_1.egress_port = standard_metadata.egress_port;
-        standard_metadata_1.clone_spec = standard_metadata.clone_spec;
-        standard_metadata_1.instance_type = standard_metadata.instance_type;
-        standard_metadata_1.drop = standard_metadata.drop;
-        standard_metadata_1.recirculate_port = standard_metadata.recirculate_port;
-        standard_metadata_1.packet_length = standard_metadata.packet_length;
-    }
-    action act_0() {
-        hdr.ethernet = hdr_1_ethernet;
-        hdr.ipv4 = hdr_1_ipv4;
-        hdr.ipv6 = hdr_1_ipv6;
-        meta.egress_metadata.payload_length = meta_1_egress_metadata.payload_length;
-        meta.egress_metadata.smac_idx = meta_1_egress_metadata.smac_idx;
-        meta.egress_metadata.bd = meta_1_egress_metadata.bd;
-        meta.egress_metadata.inner_replica = meta_1_egress_metadata.inner_replica;
-        meta.egress_metadata.replica = meta_1_egress_metadata.replica;
-        meta.egress_metadata.mac_da = meta_1_egress_metadata.mac_da;
-        meta.egress_metadata.routed = meta_1_egress_metadata.routed;
-        meta.egress_metadata.same_bd_check = meta_1_egress_metadata.same_bd_check;
-        meta.egress_metadata.header_count = meta_1_egress_metadata.header_count;
-        meta.egress_metadata.drop_reason = meta_1_egress_metadata.drop_reason;
-        meta.egress_metadata.egress_bypass = meta_1_egress_metadata.egress_bypass;
-        meta.egress_metadata.drop_exception = meta_1_egress_metadata.drop_exception;
-        standard_metadata.ingress_port = standard_metadata_1.ingress_port;
-        standard_metadata.egress_spec = standard_metadata_1.egress_spec;
-        standard_metadata.egress_port = standard_metadata_1.egress_port;
-        standard_metadata.clone_spec = standard_metadata_1.clone_spec;
-        standard_metadata.instance_type = standard_metadata_1.instance_type;
-        standard_metadata.drop = standard_metadata_1.drop;
-        standard_metadata.recirculate_port = standard_metadata_1.recirculate_port;
-        standard_metadata.packet_length = standard_metadata_1.packet_length;
-    }
-    table tbl_act() {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    table tbl_act_0() {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
     apply {
         setup.apply();
-        tbl_act.apply();
-        if (meta_1_egress_metadata.routed == 1w1) 
+        if (meta.egress_metadata.routed == 1w1) 
             process_mac_rewrite_mac_rewrite_0.apply();
-        tbl_act_0.apply();
     }
 }
 

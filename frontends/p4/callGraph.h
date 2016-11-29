@@ -26,8 +26,15 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "lib/null.h"
+#include "ir/ir.h"
 
 namespace P4 {
+
+// I could not get Util::toString() to work properly
+cstring cgMakeString(cstring s);
+cstring cgMakeString(char c);
+cstring cgMakeString(const IR::Node* node);
+cstring cgMakeString(const IR::INode* node);
 
 template <class T>
 class CallGraph {
@@ -45,7 +52,7 @@ class CallGraph {
             for (auto c : *out_edges[el])
                 sort(c, out, done);
         }
-        LOG1("Order " << el);
+        LOG2("Order " << cgMakeString(el));
         done.emplace(el);
         out.push_back(el);
     }
@@ -61,13 +68,13 @@ class CallGraph {
     void add(T caller) {
         if (nodes.find(caller) != nodes.end())
             return;
-        LOG1(name << ": " << caller);
+        LOG1(name << ": " << cgMakeString(caller));
         out_edges[caller] = new std::vector<T>();
         in_edges[caller] = new std::vector<T>();
         nodes.emplace(caller);
     }
     void calls(T caller, T callee) {
-        LOG1(name << ": " << callee << " is called by " << caller);
+        LOG1(name << ": " << cgMakeString(callee) << " is called by " << cgMakeString(caller));
         add(caller);
         add(callee);
         out_edges[caller]->push_back(callee);
@@ -320,13 +327,13 @@ class CallGraph {
     bool strongConnect(T node, sccInfo& helper, std::vector<T>& out) {
         bool loop = false;
 
-        LOG1("scc " << node);
+        LOG1("scc " << cgMakeString(node));
         helper.index.emplace(node, helper.crtIndex);
         helper.setLowLink(node, helper.crtIndex);
         helper.crtIndex++;
         helper.push(node);
         for (auto next : *out_edges[node]) {
-            LOG1(node << " => " << next);
+            LOG1(cgMakeString(node) << " => " << cgMakeString(next));
             if (helper.unknown(next)) {
                 bool l = strongConnect(next, helper, out);
                 loop = loop | l;
@@ -337,11 +344,11 @@ class CallGraph {
         }
 
         if (get(helper.lowlink, node) == get(helper.index, node)) {
-            LOG1(node << " index=" << get(helper.index, node)
+            LOG1(cgMakeString(node) << " index=" << get(helper.index, node)
                       << " lowlink=" << get(helper.lowlink, node));
             while (true) {
                 T sccMember = helper.pop();
-                LOG1("Scc order " << sccMember << "[" << node << "]");
+                LOG1("Scc order " << cgMakeString(sccMember) << "[" << cgMakeString(node) << "]");
                 out.push_back(sccMember);
                 if (sccMember == node)
                     break;

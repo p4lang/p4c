@@ -42,11 +42,10 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    hdr h_1;
     bit<32> tmp_0;
     @name("c.add") action c_add(bit<32> data) {
-        tmp_0 = h_1.a + data;
-        h_1.b = h_1.a + data;
+        tmp_0 = h.h.a + data;
+        h.h.b = h.h.a + data;
     }
     @name("c.t") table c_t_0() {
         actions = {
@@ -55,10 +54,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = c_add(32w10);
     }
     action act() {
-        h_1 = h.h;
-    }
-    action act_0() {
-        h.h = h_1;
         sm.egress_spec = 9w0;
     }
     table tbl_act() {
@@ -67,16 +62,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = act();
     }
-    table tbl_act_0() {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
     apply {
-        tbl_act.apply();
         c_t_0.apply();
-        tbl_act_0.apply();
+        tbl_act.apply();
     }
 }
 

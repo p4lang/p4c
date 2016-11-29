@@ -26,7 +26,8 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 
 // These are various data structures needed by the parser/parser and control/control inliners.
-// This only works correctly after local variable initializers have been removed.
+// This only works correctly after local variable initializers have been removed,
+// and after the SideEffectOrdering pass has been executed.
 
 namespace P4 {
 
@@ -56,7 +57,7 @@ class SymRenameMap {
     void setNewName(const IR::IDeclaration* decl, cstring name, cstring extName) {
         CHECK_NULL(decl);
         BUG_CHECK(!name.isNullOrEmpty() && !extName.isNullOrEmpty(), "Empty name");
-        LOG1("Renaming " << decl << " to " << name);
+        LOG1("setNewName " << dbp(decl) << " to " << name);
         if (internalName.find(decl) != internalName.end())
             BUG("%1%: already renamed", decl);
         internalName.emplace(decl, name);
@@ -103,6 +104,20 @@ struct InlineSummary {
         std::map<const IR::Declaration_Instance*, PerInstanceSubstitutions*> substitutions;
         // For each invocation (key) call the instance that is invoked.
         std::map<const IR::MethodCallStatement*, const IR::Declaration_Instance*> callToInstance;
+        // nullptr if there isn't exactly one caller,
+        // otherwise the single caller of this instance.
+        const IR::MethodCallStatement* uniqueCaller(const IR::Declaration_Instance* instance) const {
+            const IR::MethodCallStatement* call = nullptr;
+            for (auto m : callToInstance) {
+                if (m.second == instance) {
+                    if (call == nullptr)
+                        call = m.first;
+                    else
+                        return nullptr;
+                }
+            }
+            return call;
+        }
     };
     std::map<const IR::IContainer*, PerCaller> callerToWork;
 
@@ -125,7 +140,7 @@ class InlineWorkList {
     void addInstantiation(const IR::IContainer* caller, const IR::IContainer* callee,
                           const IR::Declaration_Instance* instantiation) {
         CHECK_NULL(caller); CHECK_NULL(callee); CHECK_NULL(instantiation);
-        LOG1("Inline instantiation " << instantiation);
+        LOG1("Inline instantiation " << dbp(instantiation));
         auto inst = new CallInfo(caller, callee, instantiation);
         inlineMap[instantiation] = inst;
     }
@@ -133,7 +148,7 @@ class InlineWorkList {
     void addInvocation(const IR::Declaration_Instance* instance,
                        const IR::MethodCallStatement* statement) {
         CHECK_NULL(instance); CHECK_NULL(statement);
-        LOG1("Inline invocation " << instance << " at " << statement);
+        LOG1("Inline invocation " << dbp(instance) << " at " << dbp(statement));
         auto info = inlineMap[instance];
         BUG_CHECK(info, "Could not locate instance %1% invoked by %2%", instance, statement);
         info->addInvocation(statement);
@@ -141,7 +156,7 @@ class InlineWorkList {
 
     void replace(const IR::IContainer* container, const IR::IContainer* replacement) {
         CHECK_NULL(container); CHECK_NULL(replacement);
-        LOG1("Replacing " << container << " with " << replacement);
+        LOG1("Replacing " << dbp(container) << " with " << dbp(replacement));
         for (auto e : toInline) {
             if (e->callee == container)
                 e->callee = replacement;
@@ -192,18 +207,15 @@ class InlineDriver : public Transform {
 
 // Must be run after an evaluator; uses the blocks to discover caller/callee relationships.
 class DiscoverInlining : public Inspector {
-    InlineWorkList*     inlineList;     // output: result is here
-    ReferenceMap*       refMap;     // input
-    TypeMap*            typeMap;    // input
-    IHasBlock*          evaluator;  // used to obtain the toplevel block
+    InlineWorkList*     inlineList;  // output: result is here
+    ReferenceMap*       refMap;      // input
+    TypeMap*            typeMap;     // input
+    IHasBlock*          evaluator;   // used to obtain the toplevel block
     IR::ToplevelBlock*  toplevel;
 
  public:
     bool allowParsers = true;
     bool allowControls = true;
-    // The following cannot be inlined, but we can report errors if we detect them
-    bool allowParsersFromControls = false;
-    bool allowControlsFromParsers = false;
 
     DiscoverInlining(InlineWorkList* inlineList, ReferenceMap* refMap,
                      TypeMap* typeMap, IHasBlock* evaluator) :

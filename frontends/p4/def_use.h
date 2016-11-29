@@ -163,6 +163,8 @@ class LocationSet : public IHasDbPrint {
             out << " ";
         }
     }
+    // only defined for canonical representations
+    bool overlaps(const LocationSet* other) const;
 };
 
 // For each declaration we keep the associated storage

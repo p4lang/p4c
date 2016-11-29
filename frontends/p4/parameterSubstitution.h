@@ -27,7 +27,8 @@ limitations under the License.
 
 namespace P4 {
 
-/* Maps Parameters to Expressions */
+/* Maps Parameters to Expressions via their name.  Note that
+   even parameter identity is not important, but the parameter name is. */
 class ParameterSubstitution : public IHasDbPrint {
  protected:
     // Parameter names are unique for a procedure, so each name
@@ -45,7 +46,7 @@ class ParameterSubstitution : public IHasDbPrint {
     ParameterSubstitution(const ParameterSubstitution& other) = default;
 
     void add(const IR::Parameter* parameter, const IR::Expression* value) {
-        LOG1("Mapping " << parameter << " to " << value);
+        LOG1("Mapping " << dbp(parameter) << " to " << dbp(value));
         cstring name = parameter->name.name;
         auto par = get(parametersByName, name);
         BUG_CHECK(par == nullptr,
@@ -54,6 +55,18 @@ class ParameterSubstitution : public IHasDbPrint {
         parametersByName.emplace(name, parameter);
         parameters.push_back(parameter);
     }
+
+#if 0
+    void replace(const IR::Parameter* parameter, const IR::Expression* value) {
+        LOG1("Remapping " << dbp(parameter) << " to " << dbp(value));
+        cstring name = parameter->name.name;
+        auto par = get(parametersByName, name);
+        BUG_CHECK(par != nullptr,
+                  "Parameter not found %1% in a substitution", name);
+        parameterValues[name] = value;
+        parametersByName[name] = parameter;
+    }
+#endif
 
     const IR::Expression* lookupByName(cstring name) const
     { return get(parameterValues, name); }
@@ -64,9 +77,11 @@ class ParameterSubstitution : public IHasDbPrint {
     bool contains(const IR::Parameter* param) const {
         if (!containsName(param->name.name))
             return false;
+#if 0
         auto it = parametersByName.find(param->name.name);
         if (param != it->second)
             return false;
+#endif
         return true;
     }
 
@@ -92,7 +107,7 @@ class ParameterSubstitution : public IHasDbPrint {
 
     void dbprint(std::ostream& out) const {
         for (auto s : parametersByName)
-            out << s.second << "=>" << lookupByName(s.first) << std::endl;
+            out << dbp(s.second) << "=>" << dbp(lookupByName(s.first)) << std::endl;
     }
 };
 

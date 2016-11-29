@@ -187,10 +187,6 @@ def process_file(options, argv):
     rename = { "FrontEnd_11_SimplifyControlFlow": "first",
                "FrontEnd_25_FrontEndLast": "frontend",
                "MidEnd_28_Evaluator": "midend" }
-    # FIXME: temporarily disable reference outputs after midend for switch.p4, since they
-    # are too large.
-    if "switch.p4" in options.p4filename or "switch_" in options.p4filename:
-        del rename["MidEnd_28_Evaluator"]
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
