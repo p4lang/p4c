@@ -45,6 +45,7 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelect.h"
 #include "midend/validateProperties.h"
+#include "midend/compileTimeOps.h"
 
 namespace BMV2 {
 
@@ -122,6 +123,7 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
         new P4::ValidateTableProperties({ "implementation", "size", "counters",
                                           "meters", "size", "support_timeout" }),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::CompileTimeOperations(),
         new P4::SynthesizeActions(&refMap, &typeMap),
         new P4::MoveActionsToTables(&refMap, &typeMap),
      });

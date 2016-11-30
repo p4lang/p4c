@@ -17,6 +17,7 @@ limitations under the License.
 #include "midend.h"
 #include "midend/actionsInlining.h"
 #include "midend/inlining.h"
+#include "midend/compileTimeOps.h"
 #include "midend/removeReturns.h"
 #include "midend/removeParameters.h"
 #include "midend/moveConstructors.h"
@@ -89,6 +90,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::CompileTimeOperations(),
         new P4::SynthesizeActions(&refMap, &typeMap),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator,

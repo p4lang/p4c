@@ -23,6 +23,7 @@ midend_SOURCES = \
 	midend/copyStructures.cpp \
 	midend/convertEnums.h \
 	midend/convertEnums.cpp \
+	midend/compileTimeOps.h \
 	midend/eliminateTuples.h \
 	midend/eliminateTuples.cpp \
 	midend/nestedStructs.h \
