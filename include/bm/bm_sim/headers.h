@@ -172,11 +172,14 @@ class Header : public NamedP4Object {
   //! Marks the header as not-valid
   void mark_invalid();
 
-  //! Sets all the fields in the header to value `0`
-  void reset() {
-    for (Field &f : fields)
-      f.set(0);
-  }
+  //! Sets all the fields in the header to value `0`.
+  void reset();
+
+  //! Set the written_to flag maintained by each field. This flag can be queried
+  //! at any time by the target, using the Field interface, and can be used to
+  //! check whether the field has been modified since written_to was last set to
+  //! `false`.
+  void set_written_to(bool written_to_value);
 
   //! Returns a reference to the Field at the specified offset, with bounds
   //! checking. If pos not within the range of the container, an exception of

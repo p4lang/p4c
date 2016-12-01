@@ -75,6 +75,7 @@ class Field : public Data {
       bignum::clear_bit(&value, nbits - 1);
       value += min;
     }
+    written_to = true;
     // TODO(antonin): should notifications be disabled for hidden fields?
     DEBUGGER_NOTIFY_UPDATE(*packet_id, my_id, bytes.data(), nbits);
   }
@@ -123,6 +124,7 @@ class Field : public Data {
         bignum::export_bytes(bytes.data(), nbytes, value - min - min);
       }
     }
+    written_to = true;
     DEBUGGER_NOTIFY_UPDATE(*packet_id, my_id, bytes.data(), nbits);
   }
 
@@ -155,12 +157,26 @@ class Field : public Data {
     return hidden;
   }
 
+  //! Set the value of the written_to flag for the field. This flag can be
+  //! queried at any time using get_written_to() and is used to check whether
+  //! the field has been modified since written_to was last set to `false`.
+  void set_written_to(bool v) {
+    written_to = v;
+  }
+
+  //! Get the value of the written_to flag. See set_written_to() for more
+  //! information.
+  bool get_written_to() const {
+    return written_to;
+  }
+
  private:
   int nbits;
   int nbytes;
   ByteContainer bytes;
   bool is_signed{false};
   bool hidden{false};
+  bool written_to{false};  // used to keep track of whether a field was modified
   Bignum mask{1};
   Bignum max{1};
   Bignum min{1};

@@ -137,6 +137,18 @@ Header::mark_invalid() {
   valid_field->set(0);
 }
 
+void
+Header::reset() {
+  for (Field &f : fields)
+    f.set(0);
+}
+
+void
+Header::set_written_to(bool written_to_value) {
+  for (Field &f : fields)
+    f.set_written_to(written_to_value);
+}
+
 void Header::extract(const char *data, const PHV &phv) {
   if (is_VL_header()) return extract_VL(data, phv);
   int hdr_offset = 0;

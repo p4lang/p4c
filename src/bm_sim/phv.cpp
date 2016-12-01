@@ -51,9 +51,14 @@ PHV::reset_metadata() {
 
 void
 PHV::reset_headers() {
-  for (auto &h : headers) {
+  for (auto &h : headers)
     h.reset();
-  }
+}
+
+void
+PHV::set_written_to(bool written_to_value) {
+  for (auto &h : headers)
+    h.set_written_to(written_to_value);
 }
 
 void

@@ -183,6 +183,12 @@ class PHV {
   //! Reset all header fields to `0`.
   void reset_headers();
 
+  //! Set the written_to flag maintained by each field. This flag can be queried
+  //! at any time by the target, using the Field interface, and can be used to
+  //! check whether the field has been modified since written_to was last set to
+  //! `false`.
+  void set_written_to(bool written_to_value);
+
   //! Deleted copy constructor
   PHV(const PHV &other) = delete;
   //! Deleted copy assignment operator

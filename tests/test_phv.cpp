@@ -89,7 +89,7 @@ TEST_F(PHVTest, CopyHeaders) {
   ASSERT_EQ(f48, f48_2);
 }
 
-// we are testing that the $valid$ hidden field is poperly added internally by
+// we are testing that the $valid$ hidden field is properly added internally by
 // the HeaderType class, that it is properly accessible and that it is updated
 // properly.
 TEST_F(PHVTest, HiddenValid) {
@@ -139,6 +139,48 @@ TEST_F(PHVTest, FieldAliasDup) {
   const Field &f_alias = phv_2->get_field("test1.f16");
 
   ASSERT_EQ(&f, &f_alias);
+}
+
+TEST_F(PHVTest, WrittenTo) {
+  auto &f = phv->get_field("test1.f16");
+  auto reset = [&f]() {
+    f.set_written_to(false);
+    ASSERT_FALSE(f.get_written_to());
+  };
+  ASSERT_FALSE(f.get_written_to());
+
+  // testing different ways of modifying a field
+  f.set(0xab);
+  ASSERT_TRUE(f.get_written_to());
+  reset();
+  f.add(Data(1), Data(1));
+  ASSERT_TRUE(f.get_written_to());
+  reset();
+  const char data[] = {'a', 'b'};
+  f.set_bytes(data, sizeof(data));
+  ASSERT_TRUE(f.get_written_to());
+  reset();
+  f.extract(data, 0);
+  ASSERT_TRUE(f.get_written_to());
+  reset();
+
+  // modifying flag directly
+  f.set_written_to(true);
+  ASSERT_TRUE(f.get_written_to());
+  reset();
+
+  // through header method
+  auto &hdr = phv->get_header("test1");
+  hdr.set_written_to(true);
+  ASSERT_TRUE(f.get_written_to());
+  hdr.set_written_to(false);
+  ASSERT_FALSE(f.get_written_to());
+
+  // through phv method
+  phv->set_written_to(true);
+  ASSERT_TRUE(f.get_written_to());
+  phv->set_written_to(false);
+  ASSERT_FALSE(f.get_written_to());
 }
 
 using testing::Types;
