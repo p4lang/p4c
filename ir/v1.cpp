@@ -68,7 +68,7 @@ static const std::map<cstring, primitive_info_t> prim_info = {
     { "count",                  { 2, 2, 0x1, 0x0 } },
     { "drop",                   { 0, 0, 0x0, 0x0 } },
     { "emit",                   { 1, 1, 0x0, 0x0 } },
-    { "execute_meter",          { 3, 4, 0x1, 0x0 } },
+    { "execute_meter",          { 3, 4, 0x5, 0x0 } },
     { "execute_stateful_alu",   { 1, 1, 0x0, 0x0 } },
     { "extract",                { 1, 1, 0x1, 0x0 } },
     { "generate_digest",        { 2, 2, 0x0, 0x0 } },
