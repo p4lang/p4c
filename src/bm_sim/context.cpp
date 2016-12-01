@@ -776,4 +776,10 @@ Context::do_swap() {
   return 0;
 }
 
+ConfigOptionMap
+Context::get_config_options() const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  return p4objects->get_config_options();
+}
+
 }  // namespace bm

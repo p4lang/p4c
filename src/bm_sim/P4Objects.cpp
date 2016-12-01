@@ -114,6 +114,17 @@ P4Objects::build_expression(const Json::Value &json_expression,
   }
 }
 
+void
+P4Objects::parse_config_options(const Json::Value &root) {
+  if (!root.isMember("config_options")) return;
+  const auto &cfg_options = root["config_options"];
+  for (auto it = cfg_options.begin(); it != cfg_options.end(); ++it) {
+    auto key = it.key().asString();
+    auto v = it->asString();
+    config_options.emplace(key, v);
+  }
+}
+
 int
 P4Objects::init_objects(std::istream *is,
                         LookupStructureFactory *lookup_factory,
@@ -177,9 +188,6 @@ P4Objects::init_objects(std::istream *is,
 
     HeaderType *header_type = get_header_type(header_type_name);
     header_to_type_map[header_name] = header_type;
-
-    // std::set<int> arith_offsets =
-    //   build_arith_offsets(cfg_root["actions"], header_name);
 
     phv_factory.push_back_header(header_name, header_id,
                                  *header_type, metadata);
@@ -1164,6 +1172,8 @@ P4Objects::init_objects(std::istream *is,
     phv_factory.enable_all_field_arith(header_id);
   }
 
+  parse_config_options(cfg_root);
+
   return 0;
   // obviously this function is very long, but it is doing a very dumb job...
   // NOLINTNEXTLINE(readability/fn_size)
@@ -1330,6 +1340,11 @@ Pipeline *
 P4Objects::get_pipeline_rt(const std::string &name) const {
   auto it = pipelines_map.find(name);
   return (it != pipelines_map.end()) ? it->second.get() : nullptr;
+}
+
+ConfigOptionMap
+P4Objects::get_config_options() const {
+  return config_options;
 }
 
 }  // namespace bm

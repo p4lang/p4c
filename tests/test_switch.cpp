@@ -93,6 +93,18 @@ TEST(Switch, GetConfig) {
   ASSERT_EQ(std::string(md5.begin(), md5.end()), sw.get_config_md5());
 }
 
+TEST(Switch, ConfigOptions) {
+  fs::path config_path =
+      fs::path(TESTDATADIR) / fs::path("config_options.json");
+  SwitchTest sw;
+  sw.init_objects(config_path.string(), 0, nullptr);
+
+  const auto config_options = sw.get_config_options();
+  ASSERT_EQ(2u, config_options.size());
+  ASSERT_EQ("aaa", config_options.at("key1"));
+  ASSERT_EQ("12345", config_options.at("key2"));
+}
+
 TEST(Switch, GetP4Objects) {
   // re-using serialize.json here as a convenience
   fs::path config_path = fs::path(TESTDATADIR) / fs::path("serialize.json");

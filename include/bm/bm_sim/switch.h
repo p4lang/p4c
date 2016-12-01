@@ -272,6 +272,12 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return contexts.at(cxt_id).get_ageing_monitor();
   }
 
+  //! Return string-to-string map of the target-specific options included in the
+  //! input config JSON for a given context.
+  ConfigOptionMap get_config_options(size_t cxt_id) const {
+    return contexts.at(cxt_id).get_config_options();
+  }
+
   // ---------- RuntimeInterface ----------
 
   MatchErrorCode
@@ -911,6 +917,12 @@ class Switch : public SwitchWContexts {
   using SwitchWContexts::get_ageing_monitor;
   AgeingMonitorIface *get_ageing_monitor() {
     return get_ageing_monitor(0);
+  }
+
+  // to avoid C++ name hiding
+  using SwitchWContexts::get_config_options;
+  ConfigOptionMap get_config_options() const {
+    return get_config_options(0);
   }
 
   //! Add a component to this Switch. Each Switch maintains a map `T` ->

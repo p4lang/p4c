@@ -56,6 +56,8 @@ class Value;
 
 namespace bm {
 
+using ConfigOptionMap = std::unordered_map<std::string, std::string>;
+
 class P4Objects {
  public:
   typedef std::pair<std::string, std::string> header_field_pair;
@@ -203,6 +205,8 @@ class P4Objects {
 
   bool header_exists(const std::string &header_name) const;
 
+  ConfigOptionMap get_config_options() const;
+
   // public to be accessed by test class
   std::ostream &outstream;
 
@@ -309,8 +313,7 @@ class P4Objects {
 
   void build_expression(const Json::Value &json_expression, Expression *expr);
 
-  std::set<int> build_arith_offsets(const Json::Value &json_actions,
-                                    const std::string &header_name);
+  void parse_config_options(const Json::Value &root);
 
  private:
   PHVFactory phv_factory{};  // this is probably temporary
@@ -395,6 +398,8 @@ class P4Objects {
 
   // used for initialization only
   std::unordered_map<p4object_id_t, p4object_id_t> header_id_to_stack_id{};
+
+  ConfigOptionMap config_options{};
 
  private:
   int get_field_offset(header_id_t header_id, const std::string &field_name);

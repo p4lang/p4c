@@ -421,6 +421,10 @@ class Context final {
 
   int swap_requested() { return swap_ordered; }
 
+  //! Return string-to-string map of the target-specific options included in the
+  //! input config JSON for this context.
+  ConfigOptionMap get_config_options() const;
+
  private:  // data members
   size_t cxt_id{};
 
