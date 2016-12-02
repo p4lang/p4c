@@ -108,6 +108,12 @@ struct Random_Model : public ::Model::Elem {
     ::Model::Elem   modify_field_rng_uniform;
 };
 
+class Truncate : public Model::Extern_Model {
+ public:
+    Truncate() : Extern_Model("truncate"), length_type(IR::Type::Bits::get(32)) {}
+    const IR::Type* length_type;
+};
+
 struct CounterOrMeter_Model : public ::Model::Extern_Model {
     explicit CounterOrMeter_Model(cstring name) : Extern_Model(name),
                       sizeParam("size"), typeParam("type"),
@@ -249,6 +255,7 @@ class V1Model : public ::Model::Model {
     Control_Model       egress;
     Control_Model       ingress;
     Switch_Model        sw;
+    Truncate            truncate;
     CounterOrMeter_Model counterOrMeter;
     Counter_Model       counter;
     Meter_Model         meter;

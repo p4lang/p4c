@@ -49,6 +49,7 @@ limitations under the License.
 
 namespace BMV2 {
 
+#if 0
 void MidEnd::setup_for_P4_14(CompilerOptions&) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     // Inlining is simpler for P4 v1.0/1.1 programs, so we have a
@@ -65,6 +66,7 @@ void MidEnd::setup_for_P4_14(CompilerOptions&) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
     });
 }
+#endif
 
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum* type) const override {
@@ -134,10 +136,12 @@ MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.isv1();
     setName("MidEnd");
     refMap.setIsV1(isv1);  // must be done BEFORE creating passes
+#if 0
     if (isv1)
         // TODO: This path should be eventually deprecated
         setup_for_P4_14(options);
     else
+#endif
         setup_for_P4_16(options);
 
     // BMv2-specific passes

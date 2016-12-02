@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Makefile for a fake backend that is used for testing the P4 v1.2 front-end.
+# Makefile for a fake backend that is used for testing the P4-16 front-end.
 # To be included in the main P4C compiler makefile
 
 noinst_PROGRAMS += p4test

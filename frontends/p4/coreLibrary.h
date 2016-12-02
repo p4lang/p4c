@@ -86,12 +86,6 @@ class PacketOut : public Model::Extern_Model {
     Model::Elem emit;
 };
 
-class Truncate : public Model::Extern_Model {
- public:
-    Truncate() : Extern_Model("truncate"), length_type(IR::Type::Bits::get(32)) {}
-    const IR::Type* length_type;
-};
-
 class P4Exception_Model : public ::Model::Elem {
  public:
     const StandardExceptions exc;
@@ -126,7 +120,6 @@ class P4CoreLibrary : public ::Model::Model {
 
     PacketIn    packetIn;
     PacketOut   packetOut;
-    Truncate    truncate;
 
     P4Exception_Model noError;
     P4Exception_Model packetTooShort;

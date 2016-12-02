@@ -1225,10 +1225,10 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
     } else if (primitive->name == "truncate") {
         OPS_CK(primitive, 1);
         auto len = primitive->operands.at(0);
-        auto methodName = p4lib.truncate.Id();
+        auto methodName = v1model.truncate.Id();
         auto method = new IR::PathExpression(methodName);
         auto args = new IR::Vector<IR::Expression>();
-        auto arg0 = new IR::Cast(len->srcInfo, p4lib.truncate.length_type, conv.convert(len));
+        auto arg0 = new IR::Cast(len->srcInfo, v1model.truncate.length_type, conv.convert(len));
         args->push_back(arg0);
         auto mc = new IR::MethodCallExpression(primitive->srcInfo, method,
                                                emptyTypeArguments, args);

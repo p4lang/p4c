@@ -112,6 +112,8 @@ extern void recirculate<T>(in T data);
 extern void clone(in CloneType type, in bit<32> session);
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
+extern void truncate(in bit<32> length);
+
 // The name 'standard_metadata' is reserved
 
 // Architecture.

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ unsigned IR::Primitive::inferOperandTypes() const {
     return 0;
 }
 
-const IR::Type *IR::Primitive::inferOperandType(int operand) const {
+const IR::Type *IR::Primitive::inferOperandType(int) const {
     if (name == "truncate")
         return IR::Type::Bits::get(32);
     return IR::Type::Unknown::get();
