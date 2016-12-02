@@ -86,7 +86,8 @@ void CFG::Node::computeSuccessors() {
         e->getNode()->successors.emplace(e->clone(this));
 }
 
-bool CFG::dfs(Node* node, std::set<Node*> &visited, std::set<const IR::P4Table*> &stack) const {
+bool CFG::dfs(Node* node, std::set<Node*> &visited,
+              std::set<const IR::P4Table*> &stack) const {
     const IR::P4Table* table = nullptr;
     if (node->is<TableNode>()) {
         table = node->to<TableNode>()->table;

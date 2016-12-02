@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "lib/ordered_set.h"
 
 namespace BMV2 {
 
@@ -32,7 +33,7 @@ class CFG final : public IHasDbPrint {
 
     class EdgeSet final {
      public:
-        std::set<CFG::Edge*> edges;
+        ordered_set<CFG::Edge*> edges;
 
         EdgeSet() = default;
         explicit EdgeSet(CFG::Edge* edge) { edges.emplace(edge); }
@@ -132,7 +133,7 @@ class CFG final : public IHasDbPrint {
     Node* entryPoint;
     Node* exitPoint;
     const IR::P4Control* container;
-    std::set<Node*> allNodes;
+    ordered_set<Node*> allNodes;
 
     CFG() : entryPoint(nullptr), exitPoint(nullptr), container(nullptr) {}
     Node* makeNode(const IR::P4Table* table, const IR::Expression* invocation) {
@@ -165,7 +166,8 @@ class CFG final : public IHasDbPrint {
     bool checkForCycles() const;
 
  private:
-    bool dfs(Node* node, std::set<Node*> &visited, std::set<const IR::P4Table*> &stack) const;
+    bool dfs(Node* node, std::set<Node*> &visited,
+             std::set<const IR::P4Table*> &stack) const;
 };
 
 // Represents global information about a P4 v1.2 program

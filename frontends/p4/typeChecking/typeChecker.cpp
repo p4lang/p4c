@@ -131,9 +131,6 @@ bool TypeInference::done() const {
 const IR::Type* TypeInference::getType(const IR::Node* element) const {
     const IR::Type* result = typeMap->getType(element);
     if (result == nullptr) {
-        if (auto field = element->to<IR::StructField>()) {
-            // FIXME -- for some reason, fields aren't in the typeMap?
-            return field->type; }
         typeError("Could not find type of %1%", element);
         return nullptr;
     }

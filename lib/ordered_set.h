@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -113,6 +113,10 @@ class ordered_set {
             data_map.emplace(&*it, it);
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
+    void insert(ordered_set::const_iterator begin, ordered_set::const_iterator end) {
+        for (auto it = begin; it != end; ++it)
+            insert(*it);
+    }
 
     template <class... Args>
     std::pair<iterator, bool> emplace(Args &&... args) {

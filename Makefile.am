@@ -1,9 +1,9 @@
-# Copyright 2013-present Barefoot Networks, Inc. 
-# 
+# Copyright 2013-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -37,7 +37,6 @@ XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
 IFAIL_TESTS =                  # intermittent failures
 export XFAIL_TESTS
 export IFAIL_TESTS
-
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
 ir_SOURCES =                   # Other files that contribute to the IR
