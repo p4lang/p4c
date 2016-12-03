@@ -52,32 +52,54 @@ class ExternFactoryMap {
   std::unordered_map<std::string, ExternFactoryFn> factory_map{};
 };
 
-#define BM_REGISTER_EXTERN(extern_name)                                 \
-  static_assert(std::is_default_constructible<extern_name>::value,      \
-                "User-defined extern type " #extern_name                \
+#define _BM_EXTERN_TO_STRING(name) #name
+
+#define BM_REGISTER_EXTERN_W_NAME(extern_name, extern__)                \
+  static_assert(std::is_default_constructible<extern__>::value,         \
+                "User-defined extern type " #extern__                   \
                 " needs to be default-constructible");                  \
   int _extern_##extern_name##_create_ =                                 \
       ::bm::ExternFactoryMap::get_instance()->register_extern_type(     \
            #extern_name,                                                \
-           [](){ return std::unique_ptr<ExternType>(new extern_name()); });
+           [](){ return std::unique_ptr<ExternType>(new extern__()); });
 
-#define BM_REGISTER_EXTERN_METHOD(extern_name, extern_method_name, ...) \
-  template <typename... Args>                                           \
-  struct _##extern_name##_##extern_method_name##_0                      \
-      : public ::bm::ActionPrimitive<::bm::ExternType *, Args...> {     \
+#define BM_REGISTER_EXTERN(extern_name) \
+  BM_REGISTER_EXTERN_W_NAME(extern_name, extern_name)
+
+#define BM_REGISTER_EXTERN_W_NAME_METHOD(extern_name, extern__,           \
+                                         extern_method_name, ...)         \
+  template <typename... Args>                                             \
+  struct _##extern_name##_##extern_method_name##_0                        \
+      : public ::bm::ActionPrimitive<::bm::ExternType *, Args...> {       \
     void operator ()(::bm::ExternType *instance, Args... args) override { \
-      auto lock = instance->_unique_lock();                             \
-      instance->_set_packet_ptr(&this->get_packet());                   \
+      auto lock = instance->_unique_lock();                               \
+      instance->_set_packet_ptr(&this->get_packet());                     \
+      dynamic_cast<extern__ *>(instance)->extern_method_name(args...);    \
+    }                                                                     \
+  };                                                                      \
+  struct _##extern_name##_##extern_method_name                            \
+      : public _##extern_name##_##extern_method_name##_0<__VA_ARGS__> {}; \
+  REGISTER_PRIMITIVE_W_NAME(                                              \
+    _BM_EXTERN_TO_STRING(_##extern_name##_##extern_method_name),          \
+    _##extern_name##_##extern_method_name)
+
+#define BM_REGISTER_EXTERN_METHOD(extern_name, extern_method_name, ...)   \
+  template <typename... Args>                                             \
+  struct _##extern_name##_##extern_method_name##_0                        \
+      : public ::bm::ActionPrimitive<::bm::ExternType *, Args...> {       \
+    void operator ()(::bm::ExternType *instance, Args... args) override { \
+      auto lock = instance->_unique_lock();                               \
+      instance->_set_packet_ptr(&this->get_packet());                     \
       dynamic_cast<extern_name *>(instance)->extern_method_name(args...); \
-    }                                                                   \
-  };                                                                    \
-  struct _##extern_name##_##extern_method_name                          \
+    }                                                                     \
+  };                                                                      \
+  struct _##extern_name##_##extern_method_name                            \
       : public _##extern_name##_##extern_method_name##_0<__VA_ARGS__> {}; \
   REGISTER_PRIMITIVE(_##extern_name##_##extern_method_name)
 
 #define BM_EXTERN_ATTRIBUTES void _register_attributes() override
 
-#define BM_EXTERN_ATTRIBUTE_ADD(attr_name)                      \
+#define BM_EXTERN_ATTRIBUTE_ADD(attr_name) \
   _add_attribute(#attr_name, static_cast<void *>(&attr_name));
 
 

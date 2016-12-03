@@ -85,6 +85,13 @@ BM_REGISTER_EXTERN_METHOD(ExternCounter, increment_by, const Data &);
 BM_REGISTER_EXTERN_METHOD(ExternCounter, reset);
 BM_REGISTER_EXTERN_METHOD(ExternCounter, get);
 
+BM_REGISTER_EXTERN_W_NAME(counter2, ExternCounter);
+BM_REGISTER_EXTERN_W_NAME_METHOD(counter2, ExternCounter, increment);
+BM_REGISTER_EXTERN_W_NAME_METHOD(counter2, ExternCounter,
+                                 increment_by, const Data &);
+BM_REGISTER_EXTERN_W_NAME_METHOD(counter2, ExternCounter, reset);
+BM_REGISTER_EXTERN_W_NAME_METHOD(counter2, ExternCounter, get);
+
 constexpr unsigned int ExternCounter::PACKETS;
 constexpr unsigned int ExternCounter::BYTES;
 
@@ -326,6 +333,25 @@ TEST_F(ExternTest, ExternExpression) {
   const auto &dst = pkt->get_phv()->get_field(testHeader1, 0);
   const auto expected = var1.get<int>() + var2.get<int>();
   ASSERT_EQ(expected, dst.get<int>());
+}
+
+TEST_F(ExternTest, ExternCounterRename) {
+  // check the objects are both retrievable
+  auto check_name = [](const std::string &name) {
+    auto extern_instance =
+        ExternFactoryMap::get_instance()->get_extern_instance(name);
+    extern_instance->_register_attributes();
+    extern_instance->init();
+    auto counter_instance =
+        dynamic_cast<ExternCounter *>(extern_instance.get());
+    ASSERT_NE(nullptr, counter_instance);
+
+    auto primitive = get_extern_primitive(name, "increment_by");
+    ASSERT_NE(nullptr, primitive);
+  };
+
+  check_name("ExternCounter");
+  check_name("counter2");
 }
 
 }  // namespace
