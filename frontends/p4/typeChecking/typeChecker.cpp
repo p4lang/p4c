@@ -1564,7 +1564,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
 
     const IR::Type* resultType = ltype;
     if (bl != nullptr && br != nullptr) {
-        if (!(*bl == *br)) {
+        if (!TypeMap::equivalent(bl, br)) {
             typeError("%1%: Cannot operate on values with different types %2% and %3%",
                       expression, bl->toString(), br->toString());
             return expression;
@@ -1577,7 +1577,6 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         setType(e->left, rtype);
         expression = e;
         resultType = rtype;
-        setType(expression, resultType);
     } else if (bl != nullptr && br == nullptr) {
         auto e = expression->clone();
         auto cst = expression->right->to<IR::Constant>();
@@ -1586,10 +1585,8 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         setType(e->right, ltype);
         expression = e;
         resultType = ltype;
-        setType(expression, resultType);
-    } else {
-        setType(expression, resultType);
     }
+    setType(expression, resultType);
     setType(getOriginal(), resultType);
     if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
         setCompileTimeConstant(expression);
