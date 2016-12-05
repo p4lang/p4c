@@ -53,7 +53,8 @@ test_extern \
 test_switch \
 test_target_parser \
 test_runtime_iface \
-test_bm_apps
+test_bm_apps \
+test_stateful
 
 check_PROGRAMS = $(TESTS) test_all
 
@@ -86,6 +87,7 @@ test_switch_SOURCES        = $(common_source) test_switch.cpp
 test_target_parser_SOURCES = $(common_source) test_target_parser.cpp
 test_runtime_iface_SOURCES = $(common_source) test_runtime_iface.cpp
 test_bm_apps_SOURCES       = $(common_source) test_bm_apps.cpp
+test_stateful_SOURCES      = $(common_source) test_stateful.cpp
 
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
@@ -115,7 +117,8 @@ test_extern.cpp \
 test_switch.cpp \
 test_target_parser.cpp \
 test_runtime_iface.cpp \
-test_bm_apps.cpp
+test_bm_apps.cpp \
+test_stateful.cpp
 
 EXTRA_DIST = \
 testdata/en0.pcap \
