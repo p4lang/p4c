@@ -22,7 +22,7 @@ enum flags { EXTEND = 1, IN_IMPL = 2, OVERRIDE = 4, NOT_DEFAULT = 8, CONCRETE_ON
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 { "operator==", { &NamedType::Bool, {}, CONST + IN_IMPL + OVERRIDE + CLASSREF,
-    [](IrClass *cl, cstring) -> cstring {
+    [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl << cl->indent << cl->indent << "return ";
         if (cl->getParent()->name == "Node")
@@ -38,7 +38,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         return buf.str(); } } },
 { "visit_children", { &NamedType::Void, { new IrField(&ReferenceType::VisitorRef, "v") },
   IN_IMPL + OVERRIDE,
-    [](IrClass *cl, cstring) -> cstring {
+    [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         bool needed = false;
         std::stringstream buf;
         buf << "{" << std::endl;
@@ -56,10 +56,10 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         buf << "}";
         return needed ? buf.str() : cstring(); } } },
 { "validate", { &NamedType::Void, {}, CONST + IN_IMPL + EXTEND + OVERRIDE,
-    [](IrClass *cl, cstring body) -> cstring {
+    [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
         bool needed = false;
         std::stringstream buf;
-        buf << "{";
+        buf << "{" << LineDirective(true);
         for (auto f : *cl->getFields()) {
             if (f->type->resolve(cl->containedIn) == nullptr)
                 // This is not an IR pointer
@@ -71,21 +71,21 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             else
                 continue;
             needed = true; }
-        if (body) buf << body;
+        if (body) buf << LineDirective(srcInfo, true) << body;
         buf << " }";
         return needed ? buf.str() : cstring(); } } },
 { "node_type_name", { &NamedType::Cstring, {}, CONST + OVERRIDE,
-    [](IrClass *cl, cstring) -> cstring {
+    [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{ return \"" << cl->containedIn << cl->name << "\"; }";
         return buf.str(); } } },
 { "dbprint", { &NamedType::Void, { new IrField(&ReferenceType::OstreamRef, "out") },
   CONST + IN_IMPL + OVERRIDE + CONCRETE_ONLY,
-    [](IrClass *, cstring) -> cstring {
+    [](IrClass *, Util::SourceInfo, cstring) -> cstring {
         return ""; } } },
 { "dump_fields", { &NamedType::Void, { new IrField(&ReferenceType::OstreamRef, "out") },
   CONST + IN_IMPL + OVERRIDE,
-    [](IrClass *cl, cstring) -> cstring {
+    [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl;
         buf << cl->indent << cl->getParent()->name << "::dump_fields(out);" << std::endl;
@@ -102,7 +102,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 { "toJSON", { &NamedType::Void, {
         new IrField(new ReferenceType(&NamedType::JSONGenerator), "json")
     }, CONST + IN_IMPL + OVERRIDE,
-    [](IrClass *cl, cstring) -> cstring {
+    [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl
             << cl->indent << cl->getParent()->name << "::toJSON(json);" << std::endl;
@@ -115,7 +115,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         return buf.str(); } } },
 { nullptr, { nullptr, { new IrField(new ReferenceType(&NamedType::JSONLoader), "json")
     }, IN_IMPL + CONSTRUCTOR,
-    [](IrClass *cl, cstring) -> cstring {
+    [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << ": " << cl->getParent()->name << "(json) {" << std::endl;
         for (auto f : *cl->getFields()) {
@@ -126,13 +126,13 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
 { "fromJSON", { nullptr, {
         new IrField(new ReferenceType(&NamedType::JSONLoader), "json"),
     }, FACTORY + IN_IMPL + CONCRETE_ONLY,
-    [](IrClass *cl, cstring) -> cstring {
+    [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         buf << "{ return new " << cl->name << "(json); }";
         return buf.str();
     } } },
 { "toString", { &NamedType::Cstring, {}, CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
-    [](IrClass *, cstring) -> cstring { return cstring(); } } },
+    [](IrClass *, Util::SourceInfo, cstring) -> cstring { return cstring(); } } },
 };
 
 void IrClass::generateMethods() {
@@ -156,7 +156,11 @@ void IrClass::generateMethods() {
                 ->nextOrDefault());
             if (exist && !(def.second.flags & EXTEND))
                 continue;
-            cstring body = def.second.create(this, exist ? exist->body : cstring());
+            cstring body;
+            if (exist)
+                body = def.second.create(this, exist->srcInfo, exist->body);
+            else
+                body = def.second.create(this, Util::SourceInfo(), cstring());
             if (body) {
                 if (!body.size())
                     body = nullptr;
