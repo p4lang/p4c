@@ -356,6 +356,12 @@ class bitvec {
         for (size_t i = 0; i < size && i < a.size; i++)
             if (word(i) & a.word(i)) return true;
         return false; }
+    bool contains(const bitvec &a) const {  // is 'a' a subset or equal to 'this'?
+        for (size_t i = 0; i < size && i < a.size; i++)
+            if ((word(i) & a.word(i)) != a.word(i)) return false;
+        for (size_t i = size; i < a.size; i++)
+            if (a.word(i)) return false;
+        return true; }
     bitvec &operator>>=(size_t count);
     bitvec &operator<<=(size_t count);
     bitvec operator>>(size_t count) const { bitvec rv(*this); rv >>= count; return rv; }

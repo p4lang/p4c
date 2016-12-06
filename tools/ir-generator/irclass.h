@@ -107,7 +107,7 @@ class IrMethod : public IrElement {
         const Type                      *rtype;
         std::vector<const IrField *>    args;
         int                             flags;
-        std::function<cstring(IrClass *, cstring)>       create;
+        std::function<cstring(IrClass *, Util::SourceInfo, cstring)>       create;
     };
     static const ordered_map<cstring, info_t> Generate;
 };
@@ -271,16 +271,19 @@ class LineDirective {
     Util::SourceInfo    loc;
     int                 delta = 0;
     bool                reset = false;
+    bool                newline_before = false;
     friend std::ostream &operator<<(std::ostream &, const LineDirective &);
  public:
     static bool inhibit;
-    explicit LineDirective(Util::SourceInfo l) : loc(l) {}
-    LineDirective(Util::SourceInfo l, int d) : loc(l), delta(d) {}
-    LineDirective() : reset(true) {}
+    explicit LineDirective(Util::SourceInfo l, bool nb = false) : loc(l), newline_before(nb) {}
+    LineDirective(Util::SourceInfo l, int d, bool nb = false)
+    : loc(l), delta(d), newline_before(nb) {}
+    explicit LineDirective(bool nb = false) : reset(true), newline_before(nb) {}
 };
 
 inline std::ostream &operator<<(std::ostream &out, const LineDirective &l) {
     if (!LineDirective::inhibit) {
+        if (l.newline_before) out << '\n';
         if (l.reset) {
             out << "#" << std::endl;   // will be fixed by tools/fixup-line-directives
         } else if (l.loc.isValid()) {

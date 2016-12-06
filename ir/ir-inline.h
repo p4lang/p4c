@@ -17,19 +17,25 @@ limitations under the License.
 #ifndef _IR_IR_INLINE_H_
 #define _IR_IR_INLINE_H_
 
-#define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT)                               \
-    TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Modifier &v)              \
-    { Node::traceVisit("Mod pre"); return v.preorder(this); }                           \
-    TEMPLATE inline void IR::CLASS TT::apply_visitor_postorder(Modifier &v)             \
-    { Node::traceVisit("Mod post"); v.postorder(this); }                                \
-    TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Inspector &v) const       \
-    { Node::traceVisit("Insp pre"); return v.preorder(this); }                          \
-    TEMPLATE inline void IR::CLASS TT::apply_visitor_postorder(Inspector &v) const      \
-    { Node::traceVisit("Insp post"); v.postorder(this); }                               \
-    TEMPLATE inline const IR::Node *IR::CLASS TT::apply_visitor_preorder(Transform &v)  \
-    { Node::traceVisit("Trans pre"); return v.preorder(this); }                         \
-    TEMPLATE inline const IR::Node *IR::CLASS TT::apply_visitor_postorder(Transform &v) \
-    { Node::traceVisit("Trans post"); return v.postorder(this); }
+#define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT)                                             \
+    TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Modifier &v)                      \
+    { Node::traceVisit("Mod pre"); return v.preorder(this); }                                   \
+    TEMPLATE inline void IR::CLASS TT::apply_visitor_postorder(Modifier &v)                     \
+    { Node::traceVisit("Mod post"); v.postorder(this); }                                        \
+    TEMPLATE inline void IR::CLASS TT::apply_visitor_revisit(Modifier &v, const Node *n) const  \
+    { Node::traceVisit("Mod revisit"); v.revisit(this, n); }                                    \
+    TEMPLATE inline bool IR::CLASS TT::apply_visitor_preorder(Inspector &v) const               \
+    { Node::traceVisit("Insp pre"); return v.preorder(this); }                                  \
+    TEMPLATE inline void IR::CLASS TT::apply_visitor_postorder(Inspector &v) const              \
+    { Node::traceVisit("Insp post"); v.postorder(this); }                                       \
+    TEMPLATE inline void IR::CLASS TT::apply_visitor_revisit(Inspector &v) const                \
+    { Node::traceVisit("Insp revisit"); v.revisit(this); }                                      \
+    TEMPLATE inline const IR::Node *IR::CLASS TT::apply_visitor_preorder(Transform &v)          \
+    { Node::traceVisit("Trans pre"); return v.preorder(this); }                                 \
+    TEMPLATE inline const IR::Node *IR::CLASS TT::apply_visitor_postorder(Transform &v)         \
+    { Node::traceVisit("Trans post"); return v.postorder(this); }                               \
+    TEMPLATE inline void IR::CLASS TT::apply_visitor_revisit(Transform &v, const Node *n) const \
+    { Node::traceVisit("Trans revisit"); v.revisit(this, n); }
     IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , )
     IRNODE_ALL_TEMPLATES(DEFINE_APPLY_FUNCTIONS)
 #undef DEFINE_APPLY_FUNCTIONS

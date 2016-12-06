@@ -142,4 +142,30 @@ class ordered_set {
         return 0; }
 };
 
+template<class T, class C1, class A1, class U> inline
+auto operator|=(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), a) {
+    for (auto &el : b) a.insert(el);
+    return a; }
+template<class T, class C1, class A1, class U> inline
+auto operator-=(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), a) {
+    for (auto &el : b) a.erase(el);
+    return a; }
+template<class T, class C1, class A1, class U> inline
+auto operator&=(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), a) {
+    for (auto it = a.begin(); it != a.end();) {
+        if (b.count(*it))
+            ++it;
+        else
+            it = a.erase(it); }
+    return a; }
+
+template<class T, class C1, class A1, class U> inline
+auto contains(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), true) {
+    for (auto &el : b) if (!a.count(el)) return false;
+    return true; }
+template<class T, class C1, class A1, class U> inline
+auto intersects(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), true) {
+    for (auto &el : b) if (a.count(el)) return true;
+    return false; }
+
 #endif /* P4C_LIB_ORDERED_SET_H_ */
