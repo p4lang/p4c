@@ -69,6 +69,7 @@ class PrettyPrint : public Inspector {
 };
 }  // namespace
 
+// This pass does nothing, it's just here to mark the end of the front-end
 class FrontEndLast : public PassManager {
  public:
     FrontEndLast() { setName("FrontEndLast"); }
