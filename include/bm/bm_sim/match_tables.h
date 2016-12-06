@@ -28,6 +28,7 @@
 #include <type_traits>
 #include <iostream>
 #include <string>
+#include <functional>
 
 #include "match_units.h"
 #include "actions.h"
@@ -49,7 +50,7 @@ class MatchTableAbstract : public NamedP4Object {
  public:
   friend class handle_iterator;
 
-  typedef Counter::counter_value_t counter_value_t;
+  using counter_value_t = Counter::counter_value_t;
 
   struct EntryCommon {
     entry_handle_t handle;
@@ -208,8 +209,8 @@ class MatchTableAbstract : public NamedP4Object {
   MatchTableAbstract &operator=(MatchTableAbstract &&other) = delete;
 
  protected:
-  typedef boost::shared_lock<boost::shared_mutex> ReadLock;
-  typedef boost::unique_lock<boost::shared_mutex> WriteLock;
+  using ReadLock = boost::shared_lock<boost::shared_mutex>;
+  using WriteLock = boost::unique_lock<boost::shared_mutex>;
 
  protected:
   const ControlFlowNode *get_next_node(p4object_id_t action_id) const;
@@ -266,7 +267,7 @@ class MatchTableAbstract : public NamedP4Object {
 
 class MatchTable : public MatchTableAbstract {
  public:
-  typedef MatchTableAbstract::ActionEntry ActionEntry;
+  using ActionEntry = MatchTableAbstract::ActionEntry;
 
   struct Entry : public EntryCommon {
     const ActionFn *action_fn;
@@ -357,9 +358,9 @@ class MatchTable : public MatchTableAbstract {
 
 class MatchTableIndirect : public MatchTableAbstract {
  public:
-  typedef MatchTableAbstract::ActionEntry ActionEntry;
+  using ActionEntry = MatchTableAbstract::ActionEntry;
 
-  typedef uint32_t mbr_hdl_t;
+  using mbr_hdl_t = uint32_t;
 
   struct Entry : public EntryCommon {
     mbr_hdl_t mbr;
@@ -419,7 +420,7 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   class IndirectIndexRefCount {
    public:
-    typedef unsigned int count_t;
+    using count_t = unsigned int;
 
    public:
     void set(const IndirectIndex &index, count_t value) {
@@ -568,9 +569,17 @@ class MatchTableIndirect : public MatchTableAbstract {
 
 class MatchTableIndirectWS : public MatchTableIndirect {
  public:
-  typedef uint32_t grp_hdl_t;
+  using grp_hdl_t = uint32_t;
 
-  typedef unsigned int hash_t;
+  using hash_t = unsigned int;
+
+  enum class GroupMembershipOp {
+    ADD,
+    REMOVE
+  };
+
+  using GroupMembershipNotifier =
+      std::function<void(GroupMembershipOp, grp_hdl_t, mbr_hdl_t)>;
 
   // If the entry points to a member, grp will be set to its maximum possible
   // value, i.e. std::numeric_limits<grp_hdl_t>::max(). If the entry points to a
@@ -639,6 +648,8 @@ class MatchTableIndirectWS : public MatchTableIndirect {
 
   MatchErrorCode get_num_members_in_group(grp_hdl_t grp, size_t *nb) const;
 
+  void register_group_membership_notifier(GroupMembershipNotifier notifier);
+
  public:
   static std::unique_ptr<MatchTableIndirectWS> create(
     const std::string &match_type,
@@ -703,6 +714,7 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   size_t num_groups{0};
   std::vector<GroupInfo> group_entries{};
   std::unique_ptr<Calculation> hash{nullptr};
+  std::vector<GroupMembershipNotifier> group_membership_notifiers{};
 };
 
 }  // namespace bm

@@ -1608,6 +1608,74 @@ TEST_F(TableIndirectWS, GetEntries) {
   ASSERT_EQ(0u, e2.time_since_hit_ms);
 }
 
+TEST_F(TableIndirectWS, GroupMembershipNotifier) {
+  MatchErrorCode rc;
+  using Op = MatchTableIndirectWS::GroupMembershipOp;
+  Op notif_op;
+  grp_hdl_t notif_grp;
+  mbr_hdl_t notif_mbr;
+  grp_hdl_t grp;
+  mbr_hdl_t mbr_1, mbr_2;
+  unsigned int data_1 = 666u;
+  unsigned int data_2 = 777u;
+  bool notifier_called = false;
+
+  auto notifier = [&notifier_called, &notif_op, &notif_grp, &notif_mbr](
+      Op op, grp_hdl_t grp, mbr_hdl_t mbr) {
+    notifier_called = true;
+    notif_op = op;
+    notif_grp = grp;
+    notif_mbr = mbr;
+  };
+
+  table->register_group_membership_notifier(notifier);
+
+  rc = table->create_group(&grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  auto check_notif = [&notifier_called, &notif_op, &notif_grp, &notif_mbr](
+      Op op, grp_hdl_t grp, mbr_hdl_t mbr) {
+    ASSERT_TRUE(notifier_called);
+    notifier_called = false;
+    ASSERT_EQ(op, notif_op);
+    ASSERT_EQ(grp, notif_grp);
+    ASSERT_EQ(mbr, notif_mbr);
+  };
+
+  auto check_no_notif = [&notifier_called]() {
+    ASSERT_FALSE(notifier_called);
+  };
+
+  rc = add_member(data_1, &mbr_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = add_member(data_2, &mbr_2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  rc = table->add_member_to_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  check_notif(Op::ADD, grp, mbr_1);
+  rc = table->add_member_to_group(mbr_2, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  check_notif(Op::ADD, grp, mbr_2);
+
+  rc = table->remove_member_from_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  check_notif(Op::REMOVE, grp, mbr_1);
+  // try to remove it a second time
+  rc = table->remove_member_from_group(mbr_1, grp);
+  ASSERT_NE(MatchErrorCode::SUCCESS, rc);
+  check_no_notif();
+
+  // re-add member
+  rc = table->add_member_to_group(mbr_1, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  check_notif(Op::ADD, grp, mbr_1);
+
+  rc = table->remove_member_from_group(mbr_2, grp);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  check_notif(Op::REMOVE, grp, mbr_2);
+}
+
 
 template <typename MUType>
 class TableBigMask : public ::testing::Test {

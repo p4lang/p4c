@@ -1223,8 +1223,13 @@ MatchTableIndirectWS::add_member_to_group(mbr_hdl_t mbr, grp_hdl_t grp) {
     } else {
       GroupInfo &group_info = group_entries[grp];
       rc = group_info.add_member(mbr);
-      if (rc == MatchErrorCode::SUCCESS)
+      if (rc == MatchErrorCode::SUCCESS) {
         index_ref_count.increase(IndirectIndex::make_mbr_index(mbr));
+
+        // TODO(antonin): is it an overkill to hold the lock here?
+        for (const auto &notifier : group_membership_notifiers)
+          notifier(GroupMembershipOp::ADD, grp, mbr);
+      }
     }
   }
 
@@ -1253,8 +1258,13 @@ MatchTableIndirectWS::remove_member_from_group(mbr_hdl_t mbr, grp_hdl_t grp) {
     } else {
       GroupInfo &group_info = group_entries[grp];
       rc = group_info.delete_member(mbr);
-      if (rc == MatchErrorCode::SUCCESS)
+      if (rc == MatchErrorCode::SUCCESS) {
         index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
+
+        // TODO(antonin): is it an overkill to hold the lock here?
+        for (const auto &notifier : group_membership_notifiers)
+          notifier(GroupMembershipOp::REMOVE, grp, mbr);
+      }
     }
   }
 
@@ -1472,6 +1482,13 @@ MatchTableIndirectWS::get_num_members_in_group(grp_hdl_t grp,
   *nb = group_info.size();
 
   return MatchErrorCode::SUCCESS;
+}
+
+void
+MatchTableIndirectWS::register_group_membership_notifier(
+    GroupMembershipNotifier notifier) {
+  WriteLock lock = lock_write();
+  group_membership_notifiers.push_back(std::move(notifier));
 }
 
 MatchErrorCode
