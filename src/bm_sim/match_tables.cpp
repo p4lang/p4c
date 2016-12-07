@@ -1082,6 +1082,61 @@ MatchTableIndirectWS::GroupInfo::deserialize(std::istream *in) {
 }
 
 
+void
+MatchTableIndirectWS::GroupMgr::add_member_to_group(grp_hdl_t grp,
+                                                    mbr_hdl_t mbr) {
+  (void) grp;
+  (void) mbr;
+}
+
+void
+MatchTableIndirectWS::GroupMgr::remove_member_from_group(grp_hdl_t grp,
+                                                         mbr_hdl_t mbr) {
+  (void) grp;
+  (void) mbr;
+}
+
+void
+MatchTableIndirectWS::GroupMgr::reset() { }
+
+MatchTableIndirect::mbr_hdl_t
+MatchTableIndirectWS::GroupMgr::get_from_hash(grp_hdl_t grp, hash_t h) const {
+  const auto &group_info = groups.at(grp);
+  auto s = group_info.size();
+  return group_info.get_nth(h % s);
+}
+
+void
+MatchTableIndirectWS::GroupMgr::insert_group(grp_hdl_t grp) {
+  assert(grp <= groups.size());
+
+  if (grp == groups.size())
+    groups.emplace_back();
+  else
+    groups[grp] = GroupInfo();
+}
+
+size_t
+MatchTableIndirectWS::GroupMgr::group_size(grp_hdl_t grp) const {
+  return groups.at(grp).size();
+}
+
+MatchTableIndirectWS::GroupInfo &
+MatchTableIndirectWS::GroupMgr::at(grp_hdl_t grp) {
+  return groups.at(grp);
+}
+
+const MatchTableIndirectWS::GroupInfo &
+MatchTableIndirectWS::GroupMgr::at(grp_hdl_t grp) const {
+  return groups.at(grp);
+}
+
+void
+MatchTableIndirectWS::GroupMgr::clear() {
+  groups.clear();
+}
+
+
 std::unique_ptr<MatchTableIndirectWS>
 MatchTableIndirectWS::create(const std::string &match_type,
                              const std::string &name, p4object_id_t id,
@@ -1101,12 +1156,9 @@ MatchTableIndirectWS::create(const std::string &match_type,
 MatchTableIndirect::mbr_hdl_t
 MatchTableIndirectWS::choose_from_group(grp_hdl_t grp,
                                         const Packet &pkt) const {
-  const GroupInfo &group_info = group_entries[grp];
-  size_t s = group_info.size();
-  assert(s > 0);
-  if (!hash) return group_info.get_nth(0);
+  if (!hash) return grp_selector->get_from_hash(grp, 0);
   hash_t h = static_cast<hash_t>(hash->output(pkt));
-  return group_info.get_nth(h % s);
+  return grp_selector->get_from_hash(grp, h);
 }
 
 const ActionEntry &
@@ -1136,18 +1188,6 @@ MatchTableIndirectWS::lookup(const Packet &pkt, bool *hit,
   return action_entries[mbr];
 }
 
-void
-MatchTableIndirectWS::groups_insert(grp_hdl_t grp) {
-  assert(grp <= group_entries.size());
-
-  if (grp == group_entries.size())
-    group_entries.emplace_back();
-  else
-    group_entries[grp] = GroupInfo();
-
-  index_ref_count.set(IndirectIndex::make_grp_index(grp), 0);
-}
-
 MatchErrorCode
 MatchTableIndirectWS::create_group(grp_hdl_t *grp) {
   MatchErrorCode rc = MatchErrorCode::SUCCESS;
@@ -1160,7 +1200,8 @@ MatchTableIndirectWS::create_group(grp_hdl_t *grp) {
       rc = MatchErrorCode::ERROR;
     } else {
       *grp = static_cast<grp_hdl_t>(grp_);
-      groups_insert(*grp);
+      grp_mgr.insert_group(*grp);
+      index_ref_count.set(IndirectIndex::make_grp_index(*grp), 0);
       num_groups++;
     }
   }
@@ -1189,7 +1230,7 @@ MatchTableIndirectWS::delete_group(grp_hdl_t grp) {
       // we allow deletion of non-empty groups, but we must remember to decrease
       // the ref count for the members. Note that we do not allow deletion of a
       // member which is in a group
-      GroupInfo &group_info = group_entries[grp];
+      GroupInfo &group_info = grp_mgr.at(grp);
       for (auto mbr : group_info)
         index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
 
@@ -1221,10 +1262,14 @@ MatchTableIndirectWS::add_member_to_group(mbr_hdl_t mbr, grp_hdl_t grp) {
     } else if (!is_valid_grp(grp)) {
       rc = MatchErrorCode::INVALID_GRP_HANDLE;
     } else {
-      GroupInfo &group_info = group_entries[grp];
+      GroupInfo &group_info = grp_mgr.at(grp);
       rc = group_info.add_member(mbr);
-      if (rc == MatchErrorCode::SUCCESS)
+      if (rc == MatchErrorCode::SUCCESS) {
         index_ref_count.increase(IndirectIndex::make_mbr_index(mbr));
+
+        // TODO(antonin): is it an overkill to hold the lock here?
+        grp_selector->add_member_to_group(grp, mbr);
+      }
     }
   }
 
@@ -1251,10 +1296,14 @@ MatchTableIndirectWS::remove_member_from_group(mbr_hdl_t mbr, grp_hdl_t grp) {
     } else if (!is_valid_grp(grp)) {
       rc = MatchErrorCode::INVALID_GRP_HANDLE;
     } else {
-      GroupInfo &group_info = group_entries[grp];
+      GroupInfo &group_info = grp_mgr.at(grp);
       rc = group_info.delete_member(mbr);
-      if (rc == MatchErrorCode::SUCCESS)
+      if (rc == MatchErrorCode::SUCCESS) {
         index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
+
+        // TODO(antonin): is it an overkill to hold the lock here?
+        grp_selector->remove_member_from_group(grp, mbr);
+      }
     }
   }
 
@@ -1281,7 +1330,7 @@ MatchTableIndirectWS::add_entry_ws(const std::vector<MatchKeyParam> &match_key,
     if (!is_valid_grp(grp))
       rc = MatchErrorCode::INVALID_GRP_HANDLE;
 
-    if (rc == MatchErrorCode::SUCCESS && get_grp_size(grp) == 0)
+    if (rc == MatchErrorCode::SUCCESS && grp_mgr.group_size(grp) == 0)
       rc = MatchErrorCode::EMPTY_GRP;
 
     if (rc == MatchErrorCode::SUCCESS) {
@@ -1317,7 +1366,7 @@ MatchTableIndirectWS::modify_entry_ws(entry_handle_t handle, grp_hdl_t grp) {
     if (rc == MatchErrorCode::SUCCESS && !is_valid_grp(grp))
       rc = MatchErrorCode::INVALID_GRP_HANDLE;
 
-    if (rc == MatchErrorCode::SUCCESS && get_grp_size(grp) == 0)
+    if (rc == MatchErrorCode::SUCCESS && grp_mgr.group_size(grp) == 0)
       rc = MatchErrorCode::EMPTY_GRP;
 
     if (rc == MatchErrorCode::SUCCESS) {
@@ -1436,7 +1485,7 @@ MatchTableIndirectWS::get_group_(grp_hdl_t grp, Group *group) const {
   group->grp = grp;
   group->mbr_handles.clear();
 
-  for (const auto &mbr : group_entries[grp])
+  for (const auto &mbr : grp_mgr.at(grp))
     group->mbr_handles.push_back(mbr);
 
   return MatchErrorCode::SUCCESS;
@@ -1468,10 +1517,16 @@ MatchTableIndirectWS::get_num_members_in_group(grp_hdl_t grp,
 
   if (!is_valid_grp(grp)) return MatchErrorCode::INVALID_GRP_HANDLE;
 
-  const GroupInfo &group_info = group_entries[grp];
+  const GroupInfo &group_info = grp_mgr.at(grp);
   *nb = group_info.size();
 
   return MatchErrorCode::SUCCESS;
+}
+
+void
+MatchTableIndirectWS::set_group_selector(GroupSelectionIface *selector) {
+  WriteLock lock = lock_write();
+  grp_selector = selector;
 }
 
 MatchErrorCode
@@ -1485,7 +1540,7 @@ MatchTableIndirectWS::dump_entry_(std::ostream *out,
     *out << "Action entry: " << action_entries[index->get_mbr()] << "\n";
   } else {
     *out << "Group members:\n";
-    for (const auto mbr : group_entries[index->get_grp()])
+    for (const auto mbr : grp_mgr.at(index->get_grp()))
       *out << "  " << "mbr " << mbr << ": " << action_entries[mbr] << "\n";
   }
   return MatchErrorCode::SUCCESS;
@@ -1495,7 +1550,8 @@ void
 MatchTableIndirectWS::reset_state_() {
   MatchTableIndirect::reset_state_();
   num_groups = 0;
-  group_entries.clear();
+  grp_mgr.clear();
+  grp_selector->reset();
 }
 
 void
@@ -1504,7 +1560,7 @@ MatchTableIndirectWS::serialize_(std::ostream *out) const {
   (*out) << num_groups << "\n";
   for (const auto h : grp_handles) {
     (*out) << h << "\n";
-    group_entries.at(h).serialize(out);
+    grp_mgr.at(h).serialize(out);
   }
 }
 
@@ -1512,11 +1568,13 @@ void
 MatchTableIndirectWS::deserialize_(std::istream *in, const P4Objects &objs) {
   MatchTableIndirect::deserialize_(in, objs);
   (*in) >> num_groups;
-  group_entries.resize(num_groups);
   for (size_t i = 0; i < num_groups; i++) {
     grp_hdl_t grp_hdl; (*in) >> grp_hdl;
     assert(!grp_handles.set_handle(grp_hdl));
-    group_entries.at(grp_hdl).deserialize(in);
+    grp_mgr.insert_group(grp_hdl);
+    grp_mgr.at(grp_hdl).deserialize(in);
+    for (const auto mbr : grp_mgr.at(grp_hdl))
+      grp_selector->add_member_to_group(grp_hdl, mbr);
   }
 }
 

@@ -29,6 +29,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <set>
 
 using namespace bm;
 
@@ -1606,6 +1607,102 @@ TEST_F(TableIndirectWS, GetEntries) {
   ASSERT_EQ(-1, e2.priority);
   ASSERT_EQ(0u, e2.timeout_ms);
   ASSERT_EQ(0u, e2.time_since_hit_ms);
+}
+
+TEST_F(TableIndirectWS, CustomGroupSelection) {
+  using GroupSelectionIface = MatchTableIndirectWS::GroupSelectionIface;
+  using hash_t = MatchTableIndirectWS::hash_t;
+
+  std::set<mbr_hdl_t> mbrs;
+  grp_hdl_t grp;
+  class GroupSelection : public GroupSelectionIface {
+   public:
+    GroupSelection(std::set<mbr_hdl_t> &mbrs, grp_hdl_t &grp)
+        : mbrs(mbrs), grp(grp) { }
+
+   private:
+    void add_member_to_group(grp_hdl_t g, mbr_hdl_t m) override {
+      grp = g;
+      mbrs.insert(m);
+    }
+
+    void remove_member_from_group(grp_hdl_t g, mbr_hdl_t m) override {
+      grp = g;
+      mbrs.erase(m);
+    }
+
+    mbr_hdl_t get_from_hash(grp_hdl_t g, hash_t h) const override {
+      std::cout << "hash " << h << "\n";
+      (void) h;
+      grp = g;
+      return *mbrs.rbegin();
+    }
+
+    void reset() override {
+      mbrs.clear();
+    }
+
+    std::set<mbr_hdl_t> &mbrs;
+    grp_hdl_t &grp;
+  };
+
+  GroupSelection selector(mbrs, grp);
+  table->set_group_selector(&selector);
+
+  grp_hdl_t grp_1;
+  mbr_hdl_t mbr_1, mbr_2;
+  unsigned int data_1 = 666u, data_2 = 777u;
+  MatchErrorCode rc;
+
+  rc = table->create_group(&grp_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  auto add_member_check = [this, &mbrs, &grp, &grp_1](unsigned int data,
+                                                      mbr_hdl_t *mbr) {
+    MatchErrorCode rc;
+    rc = add_member(data, mbr);
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+    rc = table->add_member_to_group(*mbr, grp_1);
+    ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+    ASSERT_EQ(grp_1, grp);
+    ASSERT_EQ(1u, mbrs.count(*mbr));
+  };
+
+  ASSERT_TRUE(mbrs.empty());
+  add_member_check(data_1, &mbr_1);
+  add_member_check(data_2, &mbr_2);
+  ASSERT_EQ(2u, mbrs.size());
+
+  entry_handle_t handle, lookup_handle;
+  bool hit;
+  rc = add_entry_ws("\x0a\xba", grp_1, &handle);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  auto pkt = get_pkt(64);
+  auto &h1_f16 = pkt.get_phv()->get_field(testHeader1, 0);
+  auto &h1_f48 = pkt.get_phv()->get_field(testHeader1, 1);
+  auto &h2_f16 = pkt.get_phv()->get_field(testHeader2, 0);
+  auto &h2_f48 = pkt.get_phv()->get_field(testHeader2, 1);
+
+  h1_f16.set("0xaba");
+
+  // do a few lookups, should always resolve to mbr_2
+  for (int i = 0; i < 16; i++) {
+    h1_f48.set(dis(gen));
+    h2_f16.set(dis(gen));
+    h2_f48.set(dis(gen));
+    const auto &entry = table->lookup(pkt, &hit, &lookup_handle);
+    ASSERT_TRUE(hit);
+    ASSERT_EQ(data_2, entry.action_fn.get_action_data_at(0).get<uint>());
+  }
+
+  rc = table->remove_member_from_group(grp_1, mbr_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  ASSERT_EQ(grp_1, grp);
+  ASSERT_EQ(1u, mbrs.size());
+
+  table->reset_state();
+  ASSERT_TRUE(mbrs.empty());
 }
 
 

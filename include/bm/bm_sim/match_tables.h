@@ -49,7 +49,7 @@ class MatchTableAbstract : public NamedP4Object {
  public:
   friend class handle_iterator;
 
-  typedef Counter::counter_value_t counter_value_t;
+  using counter_value_t = Counter::counter_value_t;
 
   struct EntryCommon {
     entry_handle_t handle;
@@ -208,8 +208,8 @@ class MatchTableAbstract : public NamedP4Object {
   MatchTableAbstract &operator=(MatchTableAbstract &&other) = delete;
 
  protected:
-  typedef boost::shared_lock<boost::shared_mutex> ReadLock;
-  typedef boost::unique_lock<boost::shared_mutex> WriteLock;
+  using ReadLock = boost::shared_lock<boost::shared_mutex>;
+  using WriteLock = boost::unique_lock<boost::shared_mutex>;
 
  protected:
   const ControlFlowNode *get_next_node(p4object_id_t action_id) const;
@@ -266,7 +266,7 @@ class MatchTableAbstract : public NamedP4Object {
 
 class MatchTable : public MatchTableAbstract {
  public:
-  typedef MatchTableAbstract::ActionEntry ActionEntry;
+  using ActionEntry = MatchTableAbstract::ActionEntry;
 
   struct Entry : public EntryCommon {
     const ActionFn *action_fn;
@@ -357,9 +357,9 @@ class MatchTable : public MatchTableAbstract {
 
 class MatchTableIndirect : public MatchTableAbstract {
  public:
-  typedef MatchTableAbstract::ActionEntry ActionEntry;
+  using ActionEntry = MatchTableAbstract::ActionEntry;
 
-  typedef uint32_t mbr_hdl_t;
+  using mbr_hdl_t = uint32_t;
 
   struct Entry : public EntryCommon {
     mbr_hdl_t mbr;
@@ -419,7 +419,7 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   class IndirectIndexRefCount {
    public:
-    typedef unsigned int count_t;
+    using count_t = unsigned int;
 
    public:
     void set(const IndirectIndex &index, count_t value) {
@@ -568,9 +568,9 @@ class MatchTableIndirect : public MatchTableAbstract {
 
 class MatchTableIndirectWS : public MatchTableIndirect {
  public:
-  typedef uint32_t grp_hdl_t;
+  using grp_hdl_t = uint32_t;
 
-  typedef unsigned int hash_t;
+  using hash_t = unsigned int;
 
   // If the entry points to a member, grp will be set to its maximum possible
   // value, i.e. std::numeric_limits<grp_hdl_t>::max(). If the entry points to a
@@ -584,6 +584,16 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   struct Group {
     grp_hdl_t grp;
     std::vector<mbr_hdl_t> mbr_handles;
+  };
+
+  class GroupSelectionIface {
+   public:
+    virtual ~GroupSelectionIface() { }
+
+    virtual void add_member_to_group(grp_hdl_t grp, mbr_hdl_t mbr) = 0;
+    virtual void remove_member_from_group(grp_hdl_t grp, mbr_hdl_t mbr) = 0;
+    virtual mbr_hdl_t get_from_hash(grp_hdl_t grp, hash_t h) const = 0;
+    virtual void reset() = 0;
   };
 
  public:
@@ -639,6 +649,9 @@ class MatchTableIndirectWS : public MatchTableIndirect {
 
   MatchErrorCode get_num_members_in_group(grp_hdl_t grp, size_t *nb) const;
 
+  // give the target some control over the member selection process
+  void set_group_selector(GroupSelectionIface *selector);
+
  public:
   static std::unique_ptr<MatchTableIndirectWS> create(
     const std::string &match_type,
@@ -652,13 +665,7 @@ class MatchTableIndirectWS : public MatchTableIndirect {
     return grp_handles.valid_handle(grp);
   }
 
-  size_t get_grp_size(grp_hdl_t grp) const {
-    return group_entries[grp].size();
-  }
-
  private:
-  void groups_insert(grp_hdl_t grp);
-
   mbr_hdl_t choose_from_group(grp_hdl_t grp, const Packet &pkt) const;
 
   void reset_state_() override;
@@ -676,8 +683,8 @@ class MatchTableIndirectWS : public MatchTableIndirect {
  private:
   class GroupInfo {
    public:
-    typedef RandAccessUIntSet::iterator iterator;
-    typedef RandAccessUIntSet::const_iterator const_iterator;
+    using iterator = RandAccessUIntSet::iterator;
+    using const_iterator = RandAccessUIntSet::const_iterator;
 
     MatchErrorCode add_member(mbr_hdl_t mbr);
     MatchErrorCode delete_member(mbr_hdl_t mbr);
@@ -698,10 +705,33 @@ class MatchTableIndirectWS : public MatchTableIndirect {
     RandAccessUIntSet mbrs{};
   };
 
+  class GroupMgr : public GroupSelectionIface {
+   public:
+    void add_member_to_group(grp_hdl_t grp, mbr_hdl_t mbr) override;
+    void remove_member_from_group(grp_hdl_t grp, mbr_hdl_t mbr) override;
+
+    mbr_hdl_t get_from_hash(grp_hdl_t grp, hash_t h) const override;
+
+    void reset() override;
+
+    void insert_group(grp_hdl_t grp);
+
+    size_t group_size(grp_hdl_t grp) const;
+
+    GroupInfo &at(grp_hdl_t grp);
+    const GroupInfo &at(grp_hdl_t grp) const;
+
+    void clear();
+
+   private:
+    std::vector<GroupInfo> groups{};
+  };
+
  private:
   HandleMgr grp_handles{};
   size_t num_groups{0};
-  std::vector<GroupInfo> group_entries{};
+  GroupMgr grp_mgr{};
+  GroupSelectionIface *grp_selector{&grp_mgr};
   std::unique_ptr<Calculation> hash{nullptr};
 };
 
