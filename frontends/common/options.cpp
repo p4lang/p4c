@@ -25,7 +25,7 @@ limitations under the License.
 #include "frontends/p4/toP4/toP4.h"
 #include "ir/json_generator.h"
 
-static cstring version = "0.0.4";
+static cstring version = "0.0.5";
 extern int verbose;
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
@@ -83,12 +83,10 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                     "Compile for the specified target");
     registerOption("--pp", "file",
                    [this](const char* arg) { prettyPrintFile = arg; return true; },
-                   "Pretty-print the program in the\n"
-                   "specified file.");
+                   "Pretty-print the program in the specified file.");
     registerOption("--toJSON", "file",
                    [this](const char* arg) { dumpJsonFile = arg; return true; },
-                   "Dump IR to JSON in the\n"
-                   "specified file.");
+                   "Dump IR to JSON in the specified file.");
     registerOption("--testJson", nullptr,
                     [this](const char*) { debugJson = true; return true; },
                     "Dump and undump the IR");

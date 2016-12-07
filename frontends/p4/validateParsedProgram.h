@@ -21,8 +21,23 @@ limitations under the License.
 
 namespace P4 {
 
-/* Run immediately after parsing.
-   There is no type information. */
+/*
+   Run immediately after parsing. There is no type information at this
+   point, so we do only simple checks.
+   - integer constants have valid types
+   - don't care _ is not used as a name for methods, fields, variables, instances
+   - unions have at least one field
+   - width of bit<> types is positive
+   - width of int<> types is larger than 1
+   - no parser state is named 'accept' or 'reject'
+   - constructor parameters are direction-less
+   - tables have an actions and a default_action properties
+   - table parameters are never directionless
+   - instantiations appear at the top-level only
+   - switch statements do not occur in actions
+   - instantiations do not occur in actions
+   - constructors are not invoked in actions
+ */
 class ValidateParsedProgram final : public Inspector {
     bool isv1;
     void container(const IR::IContainer* type);
@@ -42,6 +57,8 @@ class ValidateParsedProgram final : public Inspector {
     void postorder(const IR::Declaration_Variable* decl) override;
     void postorder(const IR::Declaration_Instance* inst) override;
     void postorder(const IR::Declaration_Constant* decl) override;
+    void postorder(const IR::ReturnStatement* statement) override;
+    void postorder(const IR::ExitStatement* statement) override;
     void postorder(const IR::Type_Package* package) override
     { container(package); }
     void postorder(const IR::P4Control* control) override

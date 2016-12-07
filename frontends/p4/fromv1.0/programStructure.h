@@ -112,12 +112,15 @@ class ProgramStructure {
     NamedObjectInfo<const IR::FieldList*>       field_lists;
     NamedObjectInfo<const IR::FieldListCalculation*> field_list_calculations;
     NamedObjectInfo<const IR::ActionSelector*>  action_selectors;
+    NamedObjectInfo<const IR::Type_Extern *>    extern_types;
+    NamedObjectInfo<const IR::Declaration_Instance *>  externs;
     std::vector<const IR::CalculatedField*>     calculated_fields;
     P4::CallGraph<cstring> calledActions;
     P4::CallGraph<cstring> calledControls;
     P4::CallGraph<cstring> calledCounters;
     P4::CallGraph<cstring> calledMeters;
     P4::CallGraph<cstring> calledRegisters;
+    P4::CallGraph<cstring> calledExterns;
     P4::CallGraph<cstring> parsers;
     std::map<cstring, IR::Vector<IR::Expression>> extracts;  // for each parser
     std::map<cstring, cstring> directCounters;  // map table to direct counter
@@ -179,6 +182,7 @@ class ProgramStructure {
     void createChecksumVerifications();
     void createChecksumUpdates();
     void createStructures();
+    void createExterns();
     void createTypes();
     void createParser();
     void createControls();

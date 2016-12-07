@@ -19,6 +19,12 @@ limitations under the License.
 
 #include "ir/ir.h"
 
+/*
+ * Creates accept and reject states.
+ * Adds parentheses to action invocations in tables:
+    e.g., actions = { a; } becomes actions = { a(); }
+ * Parser states without selects will transition to reject.
+ */
 namespace P4 {
 class CreateBuiltins final : public Modifier {
  public:

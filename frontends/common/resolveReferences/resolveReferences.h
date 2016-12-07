@@ -68,6 +68,9 @@ class ResolutionContext : public IHasDbPrint {
     resolveUnique(IR::ID name, ResolutionType type, bool previousOnly) const;
 };
 
+// No prerequisites, but it usually must be run over the whole program.
+// Builds output in refMap.
+// The ReferenceMap maps each Path to a declaration.
 class ResolveReferences : public Inspector {
     // Output: reference map
     ReferenceMap* refMap;

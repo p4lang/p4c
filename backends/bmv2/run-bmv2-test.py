@@ -360,6 +360,10 @@ def main(argv):
             else:
                 options.observationLog = argv[1]
                 argv = argv[1:]
+        elif argv[0] == "--pp":
+            options.compilerOptions.append(argv[0])
+            argv = argv[1:]
+            options.compilerOptions.append(argv[0])
         else:
             reportError("Uknown option ", argv[0])
             usage(options)

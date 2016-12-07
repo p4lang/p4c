@@ -100,6 +100,9 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
     }
     if (findContext<IR::ParserState>())
         ::error("%1%: instances cannot be in a parser state", decl);
+    auto inAction = findContext<IR::P4Action>();
+    if (inAction != nullptr)
+        ::error("%1%: Instantiations not allowed in actions", decl);
 }
 
 void ValidateParsedProgram::postorder(const IR::Declaration_Constant* decl) {
@@ -111,6 +114,18 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error("%1%: switch statements not allowed in actions", statement);
+}
+
+void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
+    auto inParser = findContext<IR::P4Parser>();
+    if (inParser != nullptr)
+        ::error("%1%: return statements not allowed in parsers", statement);
+}
+
+void ValidateParsedProgram::postorder(const IR::ExitStatement* statement) {
+    auto inParser = findContext<IR::P4Parser>();
+    if (inParser != nullptr)
+        ::error("%1%: exit statements not allowed in parsers", statement);
 }
 
 }  // namespace P4
