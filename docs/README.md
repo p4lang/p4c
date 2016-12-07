@@ -41,7 +41,7 @@ p4c
 
 # Dependences
 
-We have tested the compiler on U*X systems (OS X and Ubuntu).  The
+We have tested the compiler on U*X systems (macOS and Ubuntu).  The
 following tools are required to build and run the compiler and tests:
 
 - A C++11 compiler
@@ -71,9 +71,9 @@ Most dependences can be installed using `apt-get install`:
 
 `sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-dev python2.7 python-scapy python-ipaddr`
 
-## OS X dependences
+## macOS dependences
 
-Installing on OS X:
+Installing on macOS:
 
 - Enable XCode's command-line tools:
   ```
@@ -88,15 +88,23 @@ Installing on OS X:
 
 - Install dependencies using Homebrew:
   ```
-  brew install autoconf automake libtool boost bison pkg-config
+  brew install autoconf automake libtool bdw-gc boost bison pkg-config
   ```
-  (Most systems already ship with a version of Bison. However, this is really old and you should install the latest version using brew. Also, please make sure that the newly installed bison is in your path before the system installed bison. Otherwise, make check will not work: https://github.com/p4lang/p4c/issues/83)
 
+  Install GMP built in C++11 mode:
+  ```
+  brew install gmp --c++11
+  ```
 
-- Build the C++ garbage-collector (BDW-GC) from `https://github.com/ivmai/bdwgc.git`. Follow the build instructions in the [README](https://github.com/ivmai/bdwgc/blob/master/README.md) file; you will need to `configure --enable-cplusplus`.
-
-- Build the GNU Multi Precision Arithmetic Library (GMP) from `https://gmplib.org/download/gmp/gmp-6.1.0.tar.bz2`.
-  Follow the instructions in the `INSTALL` file; you will need to `configure --enable-cxx`.
+  By default, Homebrew doesn't link programs into `/usr/local/bin` if they would
+  conflict with a version provided by the base system. This includes Bison,
+  since an older version ships with macOS. `make check` depends on the newer
+  Bison we just installed from Homebrew (see #83), so you'll want to add it to
+  your `$PATH` one way or another. One simple way to do that is to request that
+  Homebrew link it into `/usr/local/bin`:
+  ```
+  brew link --force bison
+  ```
 
 # Development tools
 
