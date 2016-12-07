@@ -390,12 +390,12 @@ def main(argv):
 
     if not options.observationLog:
         if options.testName:
-            options.observationLog = os.path.join('%s.obs' % options.testName)
+            options.observationLog = os.path.join('%s.p4.obs' % options.testName)
         else:
             basename = os.path.basename(options.p4filename)
             base, ext = os.path.splitext(basename)
             dirname = os.path.dirname(options.p4filename)
-            options.observationLog = os.path.join(dirname, '%s.obs' % base)
+            options.observationLog = os.path.join(dirname, '%s.p4.obs' % base)
 
     result = process_file(options, argv)
     if result != SUCCESS:
