@@ -134,4 +134,5 @@ testdata/parse_vset.p4 \
 testdata/parse_vset.json \
 testdata/header_stack.p4 \
 testdata/header_stack.json \
-testdata/config_options.json
+testdata/config_options.json \
+testdata/one_extern.json

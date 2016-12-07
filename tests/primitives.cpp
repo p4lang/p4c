@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/actions.h>
+#include <bm/bm_sim/extern.h>
 
 using namespace bm;
 
@@ -88,3 +89,11 @@ class pop : public ActionPrimitive<HeaderStack &, const Data &> {
 };
 
 REGISTER_PRIMITIVE(pop);
+
+// one dummy extern
+
+class DummyExtern : public ExternType {
+ public:
+  BM_EXTERN_ATTRIBUTES { }
+};
+BM_REGISTER_EXTERN(DummyExtern);

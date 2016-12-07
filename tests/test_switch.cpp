@@ -200,3 +200,14 @@ TEST(Switch, ForceArithHeader) {
   ASSERT_TRUE(pkt.get_phv()->get_field("hdr.f2").get_arith_flag());
   ASSERT_TRUE(pkt.get_phv()->get_field("hdr.f3").get_arith_flag());
 }
+
+// that's the best place I could find for this test...
+TEST(Switch, ExternSafeAccess) {
+  fs::path config_path = fs::path(TESTDATADIR) / fs::path("one_extern.json");
+  SwitchTest sw;
+  sw.init_objects(config_path.string(), 0, nullptr);
+  auto context = sw.get_context(0);
+  auto extern_wrapper = context->get_extern_instance("extern_1");
+  auto extern_instance = extern_wrapper.get();
+  ASSERT_NE(nullptr, extern_instance);
+}

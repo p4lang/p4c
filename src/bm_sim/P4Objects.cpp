@@ -1342,6 +1342,12 @@ P4Objects::get_pipeline_rt(const std::string &name) const {
   return (it != pipelines_map.end()) ? it->second.get() : nullptr;
 }
 
+ExternType *
+P4Objects::get_extern_instance_rt(const std::string &name) const {
+  auto it = extern_instances.find(name);
+  return (it != extern_instances.end()) ? it->second.get() : nullptr;
+}
+
 ConfigOptionMap
 P4Objects::get_config_options() const {
   return config_options;

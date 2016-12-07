@@ -63,6 +63,21 @@
 
 namespace bm {
 
+//! Provides safe access to an extern instance for control plane calls.
+class ExternSafeAccess {
+ public:
+  ExternSafeAccess(boost::shared_lock<boost::shared_mutex> &&lock,
+                   ExternType *instance)
+      : lock(std::move(lock)), instance(instance) { }
+
+  //! Get a pointer to the extern instance itself.
+  ExternType *get() { return instance; }
+
+ private:
+  boost::shared_lock<boost::shared_mutex> lock;
+  ExternType *instance;
+};
+
 //! Implements a switch within a switch.
 //!
 //! See context.h description for more information.
@@ -128,6 +143,11 @@ class Context final {
   FieldList *get_field_list(const p4object_id_t field_list_id) {
     return p4objects->get_field_list(field_list_id);
   }
+
+  //! Obtain a pointer to an extern instance, wrapped inside an ExternSafeAccess
+  //! object. The wrapper holds a shared mutex, to make sure that accessing the
+  //! extern is safe (in the case where a P4 swap occurs).
+  ExternSafeAccess get_extern_instance(const std::string &name);
 
   // Added for testing, other "object types" can be added if needed
   p4object_id_t get_table_id(const std::string &name) {

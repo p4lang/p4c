@@ -682,6 +682,13 @@ Context::get_phv_factory() {
   return p4objects->get_phv_factory();
 }
 
+ExternSafeAccess
+Context::get_extern_instance(const std::string &name) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  return ExternSafeAccess(std::move(lock),
+                          p4objects_rt->get_extern_instance_rt(name));
+}
+
 void
 Context::set_notifications_transport(
     std::shared_ptr<TransportIface> transport) {

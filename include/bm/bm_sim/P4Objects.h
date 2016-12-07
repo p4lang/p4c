@@ -200,6 +200,8 @@ class P4Objects {
     return extern_instances.at(name).get();
   }
 
+  ExternType *get_extern_instance_rt(const std::string &name) const;
+
   bool field_exists(const std::string &header_name,
                     const std::string &field_name) const;
 
