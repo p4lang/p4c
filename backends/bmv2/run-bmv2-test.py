@@ -389,10 +389,13 @@ def main(argv):
         options.testName = "bmv2/" + options.testName
 
     if not options.observationLog:
-        basename = os.path.basename(options.p4filename)
-        base, ext = os.path.splitext(basename)
-        dirname = os.path.dirname(options.p4filename)
-        options.observationLog = os.path.join(dirname, '%s.obs' % base)
+        if options.testName:
+            options.observationLog = os.path.join('%s.obs' % options.testName)
+        else:
+            basename = os.path.basename(options.p4filename)
+            base, ext = os.path.splitext(basename)
+            dirname = os.path.dirname(options.p4filename)
+            options.observationLog = os.path.join(dirname, '%s.obs' % base)
 
     result = process_file(options, argv)
     if result != SUCCESS:
