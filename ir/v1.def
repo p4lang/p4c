@@ -227,6 +227,7 @@ class FieldList {
 class FieldListCalculation {
     optional ID         name;
     NullOK NameList     input = nullptr;
+    NullOK FieldList    input_fields = nullptr;
     ID                  algorithm = {};
     int                 output_width = 0;
     Annotations         annotations;
@@ -396,6 +397,7 @@ class ActionProfile : Attached {
 
 class ActionSelector : Attached {
     ID key = {};
+    NullOK FieldListCalculation key_fields = nullptr;
     ID mode = {};
     ID type = {};
     const char *kind() const override { return "action_selector"; }
