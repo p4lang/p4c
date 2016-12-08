@@ -59,7 +59,7 @@ class JSONLoader {
             json = get(obj, field); }
 
  private:
-    template<class T> const T *get_node() {
+    const IR::Node* get_node() {
         if (!json || !json->is<JsonObject>()) return nullptr;  // invalid json exception?
         int id = json->to<JsonObject>()->get_id();
         if (id >= 0) {
@@ -68,7 +68,7 @@ class JSONLoader {
                     node_refs[id] = fn(*this);
                 else
                     return nullptr; }  // invalid json exception?
-            return node_refs[id]->to<T>(); }
+            return node_refs[id]; }
         return nullptr;  // invalid json exception?
     }
 
@@ -173,9 +173,9 @@ class JSONLoader {
     unpack_json(T &v) { v = *(T::fromJSON(*this)); }
 
     template<typename T> typename std::enable_if<std::is_base_of<IR::INode, T>::value>::type
-    unpack_json(T &v) { v = *get_node<T>(); }
+    unpack_json(T &v) { v = *(get_node()->to<T>()); }
     template<typename T> typename std::enable_if<std::is_base_of<IR::INode, T>::value>::type
-    unpack_json(const T *&v) { v = get_node<T>(); }
+    unpack_json(const T *&v) { v = get_node()->to<T>(); }
 
     template<typename T, size_t N>
     void unpack_json(T (&v)[N]) {
