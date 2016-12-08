@@ -76,7 +76,10 @@ class DoRemoveTableParameters : public Transform {
 class ActionInvocation {
     std::map<const IR::P4Action*, const IR::MethodCallExpression*> invocations;
     std::set<const IR::P4Action*> all;  // for these actions remove all parameters
-    std::set<const IR::Expression*> calls;
+    std::set<const IR::MethodCallExpression*> calls;
+    // how many arguments to remove from each default action
+    std::map<const IR::MethodCallExpression*, unsigned> defaultActions;
+
  public:
     void bind(const IR::P4Action* action, const IR::MethodCallExpression* invocation,
               bool allParams) {
@@ -88,6 +91,15 @@ class ActionInvocation {
             all.emplace(action);
         calls.emplace(invocation);
     }
+    void bindDefaultAction(const IR::P4Action* action,
+                           const IR::MethodCallExpression* defaultInvocation) {
+        // We must have a binding for this action already.
+        auto actionCallInvocation = ::get(invocations, action);
+        CHECK_NULL(actionCallInvocation);
+        // We must remove all arguments which are bound in the action list.
+        unsigned boundArgs = actionCallInvocation->arguments->size();
+        defaultActions.emplace(defaultInvocation, boundArgs);
+    }
     const IR::MethodCallExpression* get(const IR::P4Action* action) const {
         return ::get(invocations, action);
     }
@@ -96,6 +108,11 @@ class ActionInvocation {
     }
     bool isCall(const IR::MethodCallExpression* expression) const {
         return calls.find(expression) != calls.end();
+    }
+    unsigned argsToRemove(const IR::MethodCallExpression* defaultCall) const {
+        if (defaultActions.find(defaultCall) == defaultActions.end())
+            return 0;
+        return ::get(defaultActions, defaultCall);
     }
 };
 

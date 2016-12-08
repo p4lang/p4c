@@ -39,7 +39,7 @@ class RemoveUnreachableStates : public Transform {
             transitions->reachable(start->to<IR::ParserState>(), reachable);
             // Remove unreachable states from call-graph
             transitions->restrict(reachable);
-            LOG1("Parser " << parser << " has " << transitions->size() << " reachable states");
+            LOG1("Parser " << dbp(parser) << " has " << transitions->size() << " reachable states");
         }
         return parser;
     }
@@ -54,7 +54,7 @@ class RemoveUnreachableStates : public Transform {
                 ::warning("%1% state in %2% is unreachable", state, findContext<IR::P4Parser>());
                 return state;
             } else  {
-                LOG1("Removing unreachable state " << state);
+                LOG1("Removing unreachable state " << dbp(state));
                 return nullptr;
             }
         }
@@ -119,7 +119,7 @@ class CollapseChains : public Transform {
                 // collapse chain
                 auto components = new IR::IndexedVector<IR::StatOrDecl>();
                 auto crt = s;
-                LOG1("Chaining states into " << crt);
+                LOG1("Chaining states into " << dbp(crt));
                 const IR::Expression *select = nullptr;
                 while (true) {
                     components->append(*crt->components);
@@ -127,7 +127,7 @@ class CollapseChains : public Transform {
                     crt = ::get(chain, crt);
                     if (crt == nullptr)
                         break;
-                    LOG1("Adding " << crt << " to chain");
+                    LOG1("Adding " << dbp(crt) << " to chain");
                 }
                 s = new IR::ParserState(s->srcInfo, s->name, s->annotations,
                                         components, select);

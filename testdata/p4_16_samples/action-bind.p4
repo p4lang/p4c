@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ control c(inout bit<32> x) {
     }
     table t() {
         actions = { a(x); }
-        default_action = a(0);
+        default_action = a(x, 0);
     }
     apply {
         t.apply();

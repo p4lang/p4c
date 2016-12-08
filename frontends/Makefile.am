@@ -37,6 +37,9 @@ p4_frontend_SOURCES = \
 	frontends/p4/typeChecking/typeConstraints.cpp \
 	frontends/p4/typeChecking/typeUnification.h \
 	frontends/p4/typeChecking/typeUnification.cpp \
+	frontends/p4/typeChecking/typeUnification.h \
+	frontends/p4/typeChecking/syntacticEquivalence.h \
+	frontends/p4/typeChecking/syntacticEquivalence.cpp \
 	frontends/p4/strengthReduction.h \
 	frontends/p4/strengthReduction.cpp \
 	frontends/p4/unusedDeclarations.h \

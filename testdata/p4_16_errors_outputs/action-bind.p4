@@ -1,4 +1,5 @@
 control c(inout bit<32> x) {
+    bit<32> y;
     action a(inout bit<32> b, bit<32> d) {
         b = d;
     }
@@ -6,7 +7,7 @@ control c(inout bit<32> x) {
         actions = {
             a(x);
         }
-        default_action = a(x, 0);
+        default_action = a(y, 0);
     }
     apply {
         t.apply();

@@ -24,12 +24,24 @@ limitations under the License.
 namespace P4 {
 
 namespace {
-// Remove all arguments from any embedded MethodCallExpression
+// Remove arguments from any embedded MethodCallExpression
 class RemoveMethodCallArguments : public Transform {
+    int argumentsToRemove;  // -1 => all
  public:
-    RemoveMethodCallArguments() { setName("RemoveMethodCallArguments"); }
+    explicit RemoveMethodCallArguments(int toRemove = -1) : argumentsToRemove(toRemove)
+    { setName("RemoveMethodCallArguments"); }
     const IR::Node* postorder(IR::MethodCallExpression* expression) override {
-        expression->arguments = new IR::Vector<IR::Expression>();
+        if (argumentsToRemove == -1) {
+            expression->arguments = new IR::Vector<IR::Expression>();
+        } else {
+            auto args = new IR::Vector<IR::Expression>();
+            for (int i = 0; i < static_cast<int>(expression->arguments->size()); i++) {
+                if (i < argumentsToRemove)
+                    continue;
+                args->push_back(expression->arguments->at(i));
+            }
+            expression->arguments = args;
+        }
         return expression;
     }
 };
@@ -275,13 +287,20 @@ void FindActionParameters::postorder(const IR::ActionListElement* element) {
 }
 
 void FindActionParameters::postorder(const IR::MethodCallExpression* expression) {
-    auto table = findContext<IR::P4Table>();
-    if (table != nullptr)
-        // Here we only care about direct action invocations
-        return;
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
-    if (mi->is<P4::ActionCall>()) {
-        auto ac = mi->to<P4::ActionCall>();
+    if (!mi->is<P4::ActionCall>())
+        return;
+    auto ac = mi->to<P4::ActionCall>();
+
+    auto table = findContext<IR::P4Table>();
+    if (table != nullptr) {
+        if (findContext<IR::ActionListElement>() != nullptr)
+            // These are processed elsewhere
+            return;
+        // This is probably the default_action; we must remove some parameters
+        invocations->bindDefaultAction(ac->action, expression);
+    } else {
+        // Direction action invocation: remove all parameters
         invocations->bind(ac->action, expression, true);
     }
 }
@@ -348,8 +367,12 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::ActionListElement* eleme
 }
 
 const IR::Node* DoRemoveActionParameters::postorder(IR::MethodCallExpression* expression) {
-    if (invocations->isCall(getOriginal<IR::MethodCallExpression>())) {
+    auto orig = getOriginal<IR::MethodCallExpression>();
+    if (invocations->isCall(orig)) {
         RemoveMethodCallArguments rmca;
+        return expression->apply(rmca);
+    } else if (unsigned toRemove = invocations->argsToRemove(orig)) {
+        RemoveMethodCallArguments rmca(toRemove);
         return expression->apply(rmca);
     }
     return expression;

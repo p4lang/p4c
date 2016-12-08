@@ -53,7 +53,7 @@ class TypeConstraints final {
         EqualityConstraint(const IR::Type* left, const IR::Type* right)
                 : TwoTypeConstraint(left, right) {}
         void dbprint(std::ostream& out) const override
-        { out << "Constraint:" << left << " = " << right; }
+        { out << "Constraint:" << dbp(left) << " = " << dbp(right); }
     };
 
  private:

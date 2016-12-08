@@ -31,7 +31,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     table forward {
         key = { }
         actions = { drop(smeta); }
-        const default_action = drop;
+        const default_action = drop(smeta);
     }
 
     apply {
