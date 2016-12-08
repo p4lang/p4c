@@ -6,7 +6,7 @@ control c(inout bit<32> x) {
         actions = {
             a(32w10);
         }
-        default_action = a();
+        default_action = a(32w10);
     }
     apply {
         t.apply();

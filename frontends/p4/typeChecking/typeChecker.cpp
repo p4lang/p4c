@@ -18,6 +18,7 @@ limitations under the License.
 #include "typeUnification.h"
 #include "frontends/p4/substitution.h"
 #include "typeConstraints.h"
+#include "syntacticEquivalence.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace P4 {
@@ -1346,6 +1347,12 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
         return expression;
     }
 
+#if 0
+    auto parser = findContext<IR::P4Parser>();
+    if (parser != nullptr)
+        typeError("%1%: Explicit stack indexing cannot be used in a parser", expression);
+#endif
+
     auto hst = ltype->to<IR::Type_Stack>();
     if (isLeftValue(expression->left)) {
         setLeftValue(expression);
@@ -1776,55 +1783,6 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
         type = getType(decl);
         // Each method invocation uses fresh type variables
         type = cloneWithFreshTypeVariables(type->to<IR::Type_MethodBase>());
-    } else if (decl->is<IR::P4Action>()) {
-        // Special handling for actions referred inside tables
-        // action a(inout bit x, bit y) { ... }
-        // table t () {
-        //    actions = { a(z); }  << a typechecked as action a
-        //    default_action = a(2);  << a typechecked as specialized in the actions list
-        // }
-        // This works only if the actions property has already been visited
-        auto prop = findContext<IR::Property>();
-        if (prop != nullptr) {
-            auto table = findContext<IR::P4Table>();
-            BUG_CHECK(table != nullptr, "%1%: property not within a table?", prop);
-            if (prop->name == IR::TableProperties::defaultActionPropertyName) {
-                LOG1("Handling default_action" << prop);
-                // Check that the default action appears in the list of actions.
-                BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
-                auto def = prop->value->to<IR::ExpressionValue>()->expression;
-                auto al = table->getActionList();
-                if (al == nullptr) {
-                    typeError("%1%: no action list, but %2% %3%",
-                              table, IR::TableProperties::defaultActionPropertyName, prop);
-                    return expression;
-                }
-                if (def->is<IR::MethodCallExpression>())
-                    def = def->to<IR::MethodCallExpression>()->method;
-                if (!def->is<IR::PathExpression>())
-                    BUG("%1%: unexpected expression", def);
-                auto pe = def->to<IR::PathExpression>();
-                auto defdecl = refMap->getDeclaration(pe->path, true);
-                auto ale = al->actionList->getDeclaration(defdecl->getName());
-                if (ale == nullptr) {
-                    typeError("%1% not present in action list", def);
-                    return expression;
-                }
-                BUG_CHECK(ale->is<IR::ActionListElement>(),
-                          "%1%: expected an ActionListElement", ale);
-                auto elem = ale->to<IR::ActionListElement>();
-                auto entrypath = elem->getPath();
-                auto entrydecl = refMap->getDeclaration(entrypath, true);
-                if (entrydecl != defdecl) {
-                    typeError("%1% and %2% refer to different actions", def, elem);
-                    return expression;
-                }
-                type = getType(elem);
-                setType(getOriginal(), type);
-                setType(expression, type);
-                return expression;
-            }
-        }
     }
 
     if (type == nullptr) {
@@ -2093,6 +2051,10 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             return expression;
         } else if (expression->member.name == IR::Type_Stack::push_front ||
                    expression->member.name == IR::Type_Stack::pop_front) {
+            auto parser = findContext<IR::P4Parser>();
+            if (parser != nullptr)
+                typeError("%1%: '%2%' and '%3%' for stacks cannot be used in a parser",
+                          expression, IR::Type_Stack::push_front, IR::Type_Stack::pop_front);
             if (!isLeftValue(expression->expr))
                 ::error("%1%: must be applied to a left-value", expression);
             auto params = new IR::IndexedVector<IR::Parameter>();
@@ -2152,12 +2114,13 @@ TypeInference::actionCall(bool inActionList,
     // If a is an action with signature _(arg1, arg2, arg3)
     // Then the call a(arg1, arg2) is also an
     // action, with signature _(arg3)
-    LOG1("Processing action " << actionCall);
+    LOG1("Processing action " << dbp(actionCall));
     auto method = actionCall->method;
     auto methodType = getType(method);
     if (!methodType->is<IR::Type_Action>())
         typeError("%1%: must be an action", method);
     auto baseType = methodType->to<IR::Type_Action>();
+    LOG1("Action type " << baseType);
     BUG_CHECK(method->is<IR::PathExpression>(), "%1%: unexpected call", method);
     auto arguments = actionCall->arguments;
     BUG_CHECK(baseType->returnType == nullptr,
@@ -2170,7 +2133,7 @@ TypeInference::actionCall(bool inActionList,
     auto params = new IR::IndexedVector<IR::Parameter>();
     auto it = arguments->begin();
     for (auto p : *baseType->parameters->parameters) {
-        LOG2("Action parameter " << p);
+        LOG2("Action parameter " << dbp(p));
         if (it == arguments->end()) {
             params->push_back(p);
             if ((p->direction != IR::Direction::None) || !inActionList)
@@ -2217,7 +2180,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     if (done()) return expression;
     methodArguments.pop_back();
 
-    LOG1("Solving method call " << expression);
+    LOG1("Solving method call " << dbp(expression));
     auto methodType = getType(expression->method);
     if (methodType == nullptr)
         return expression;
@@ -2558,6 +2521,7 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
 }
 
 const IR::Node* TypeInference::postorder(IR::Property* prop) {
+    // Handle the default_action
     if (prop->name == IR::TableProperties::defaultActionPropertyName) {
         auto pv = prop->value->to<IR::ExpressionValue>();
         if (pv == nullptr) {
@@ -2573,6 +2537,61 @@ const IR::Node* TypeInference::postorder(IR::Property* prop) {
             auto at = type->to<IR::Type_Action>();
             if (at->parameters->size() != 0)
                 typeError("Action for %1% has some unbound arguments", prop->value);
+
+            auto table = findContext<IR::P4Table>();
+            BUG_CHECK(table != nullptr, "%1%: property not within a table?", prop);
+            // Check that the default action appears in the list of actions.
+            BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
+            auto def = prop->value->to<IR::ExpressionValue>()->expression;
+            auto al = table->getActionList();
+            if (al == nullptr) {
+                typeError("%1%: no action list, but %2% %3%",
+                          table, IR::TableProperties::defaultActionPropertyName, prop);
+                return prop;
+            }
+
+            auto default_call = def->to<IR::MethodCallExpression>();
+            CHECK_NULL(default_call);
+            def = default_call->method;
+            if (!def->is<IR::PathExpression>())
+                BUG("%1%: unexpected expression", def);
+            auto pe = def->to<IR::PathExpression>();
+            auto defdecl = refMap->getDeclaration(pe->path, true);
+            auto ale = al->actionList->getDeclaration(defdecl->getName());
+            if (ale == nullptr) {
+                typeError("%1% not present in action list", def);
+                return prop;
+            }
+            BUG_CHECK(ale->is<IR::ActionListElement>(),
+                      "%1%: expected an ActionListElement", ale);
+            auto elem = ale->to<IR::ActionListElement>();
+            auto entrypath = elem->getPath();
+            auto entrydecl = refMap->getDeclaration(entrypath, true);
+            if (entrydecl != defdecl) {
+                typeError("%1% and %2% refer to different actions", def, elem);
+                return prop;
+            }
+
+            // Check that the default_action data-plane parameters
+            // match the data-plane parameters for the same action in
+            // the actions list.
+            auto actionListCall = elem->expression->to<IR::MethodCallExpression>();
+            CHECK_NULL(actionListCall);
+
+            if (actionListCall->arguments->size() > default_call->arguments->size())
+                typeError("%1%: not enough arguments", default_call);
+
+            SameExpression se(refMap, typeMap);
+            for (unsigned i=0; i < actionListCall->arguments->size(); i++) {
+                auto aa = actionListCall->arguments->at(i);
+                auto da = default_call->arguments->at(i);
+                bool same = se.sameExpression(aa, da);
+                if (!same) {
+                    typeError("%1%: argument does not match declaration in actions list: %2%",
+                              da, aa);
+                    return prop;
+                }
+            }
         }
     }
     return prop;

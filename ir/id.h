@@ -40,7 +40,7 @@ struct ID : Util::IHasSourceInfo {
     ID(cstring n) : ID(Util::SourceInfo(), n) {}        // NOLINT(runtime/explicit)
     ID(cstring n, cstring old) : ID(Util::SourceInfo(), n, old) {}
     void dbprint(std::ostream &out) const { out << name;
-        if (originalName != nullptr && originalName != name) out << " (" << originalName << ")"; }
+        if (originalName != nullptr && originalName != name) out << "/" << originalName; }
     bool operator==(const ID &a) const { return name == a.name; }
     bool operator!=(const ID &a) const { return name != a.name; }
     explicit operator bool() const { return name; }

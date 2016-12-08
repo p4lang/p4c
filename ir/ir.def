@@ -164,7 +164,7 @@ class ActionListElement : IAnnotated, IDeclaration {
     validate {
         BUG_CHECK(expression->is<IR::PathExpression>() ||
                   expression->is<IR::MethodCallExpression>(),
-                "%1%: unexpected expression", expression);
+                  "%1%: unexpected expression", expression);
     }
     toString{ return getName().toString(); }
 }

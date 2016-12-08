@@ -23,7 +23,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         actions = {
             drop(smeta);
         }
-        const default_action = drop();
+        const default_action = drop(smeta);
     }
     apply {
         forward.apply();
