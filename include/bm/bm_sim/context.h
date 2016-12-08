@@ -71,7 +71,7 @@ class ExternSafeAccess {
       : lock(std::move(lock)), instance(instance) { }
 
   //! Get a pointer to the extern instance itself.
-  ExternType *get() { return instance; }
+  ExternType *get() const { return instance; }
 
  private:
   boost::shared_lock<boost::shared_mutex> lock;
