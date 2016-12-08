@@ -161,27 +161,27 @@ DoConstantFolding::cast(const IR::Constant* node, unsigned base, const IR::Type_
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Add* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a + b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a + b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Sub* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a - b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a - b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Mul* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a * b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a * b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::BXor* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a ^ b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a ^ b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::BAnd* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a & b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a & b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::BOr* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a | b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a | b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Equ* e) {
@@ -193,23 +193,23 @@ const IR::Node* DoConstantFolding::postorder(IR::Neq* e) {
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Lss* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a < b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a < b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Grt* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a > b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a > b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Leq* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a <= b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a <= b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Geq* e) {
-    return binary(e, [](mpz_class a, mpz_class b) { return a >= b; });
+    return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a >= b; });
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Div* e) {
-    return binary(e, [e](mpz_class a, mpz_class b)->mpz_class {
+    return binary(e, [e](mpz_class a, mpz_class b) -> mpz_class {
             if (sgn(a) < 0 || sgn(b) < 0) {
                 ::error("%1%: Division is not defined for negative numbers", e);
                 return 0;
@@ -223,7 +223,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Div* e) {
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Mod* e) {
-    return binary(e, [e](mpz_class a, mpz_class b)->mpz_class {
+    return binary(e, [e](mpz_class a, mpz_class b) -> mpz_class {
             if (sgn(a) < 0 || sgn(b) < 0) {
                 ::error("%1%: Modulo is not defined for negative numbers", e);
                 return 0;
@@ -265,9 +265,9 @@ DoConstantFolding::compare(const IR::Operation_Binary* e) {
     }
 
     if (eqTest)
-        return binary(e, [](mpz_class a, mpz_class b) { return a == b; });
+        return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a == b; });
     else
-        return binary(e, [](mpz_class a, mpz_class b) { return a != b; });
+        return binary(e, [](mpz_class a, mpz_class b) -> mpz_class { return a != b; });
 }
 
 const IR::Node*

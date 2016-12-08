@@ -22,7 +22,7 @@ header ipv4_t {
     bit<16>     hdrChecksum;
     bit<32>     srcAddr;
     bit<32>     dstAddr;
-    @length(ihl * 4) 
+    @length(ihl * 4w4) 
     varbit<352> options;
 }
 

@@ -246,7 +246,7 @@ class CalculatedField {
         : update(u), name(n), cond(c) {}
         update_or_verify() {}
         operator== { return update == a.update && name == a.name && cond == a.cond; }
-        toJSON { 
+        toJSON {
             json << json.indent << "\"update\" : " << update << "," << std::endl
                  << json.indent << "\"name\" : " << name << "," << std::endl
                  << json.indent << "\"cond\" : " << cond;
@@ -288,10 +288,12 @@ class V1Parser {
 
 class ParserException {}
 
-abstract Attached {
+abstract Attached : IInstance {
     optional ID                 name;
     optional Annotations        annotations = Annotations::empty;
+    cstring Name() const override { return name; }
     virtual const char *kind() const = 0;
+    Type getType() const override { return Type_Unknown::get(); }
     virtual bool indexed() const { return false; }
     Attached *clone_rename(const char *ext) const {
         Attached *rv = clone();
@@ -322,6 +324,7 @@ class Counter : CounterOrMeter {
     int         max_width = -1;
     int         min_width = -1;
     const char *kind() const override { return "stats"; }
+    const Type *getType() const override { return Type_Counter::get(); }
 }
 
 class Meter : CounterOrMeter {
@@ -329,6 +332,7 @@ class Meter : CounterOrMeter {
     NullOK Expression   pre_color = nullptr;
     ID                  implementation = {};
     const char *kind() const override { return "meter"; }
+    Type getType() const override { return Type_Meter::get(); }
 }
 
 class Register : Stateful {
@@ -337,6 +341,7 @@ class Register : Stateful {
     bool        signed_ = false;
  /* bool        saturating = false; */
     const char *kind() const override { return "register"; }
+    Type getType() const override { return Type_Register::get(); }
 }
 
 class PrimitiveAction {}
@@ -344,6 +349,7 @@ class PrimitiveAction {}
 class NameList {
     vector<ID>  names = {};
     NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
+    dump_fields { out << "names=" << names; }
 }
 
 class ActionArg : Expression {
@@ -433,6 +439,24 @@ class Attribute : Declaration {
     NullOK NameList locals = nullptr;
     bool optional = false;
 #nodbprint
+}
+
+class GlobalRef : Expression {
+    Node        obj;            // FIXME -- should be IInstance, but IRgen doesn't allow
+                                // FIXME -- interface references directly in the IR
+    GlobalRef { type = obj->to<IInstance>()->getType(); }
+    validate { obj->is<IInstance>(); }
+    toString { return obj->to<IInstance>()->Name(); }
+    dbprint { out << obj->to<IInstance>()->Name(); }
+}
+
+class AttributeRef : Expression {
+    cstring             extern_name;
+    Type_Extern         extern_type;
+    Attribute           attrib;
+    AttributeRef { type = attrib->type; }
+    toString { return attrib->name; }
+    dbprint { out << attrib->name; }
 }
 
 #emit

@@ -9,10 +9,13 @@ const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
         return type;
     unsigned count = type->members->size();
     unsigned width = policy->enumSize(count);
+    LOG1("Converting enum " << type->name << " to " << "bit<" << width << ">");
     BUG_CHECK(count >= (1U << width),
               "%1%: not enough bits to represent %2%", width, type);
     auto r = new EnumRepresentation(type->srcInfo, width);
-    auto canontype = typeMap->getType(getOriginal(), true);
+    auto canontype = typeMap->getTypeType(getOriginal(), true);
+    BUG_CHECK(canontype->is<IR::Type_Enum>(),
+              "canon type of enum %s is non enum %s?", type, canontype);
     repr.emplace(canontype->to<IR::Type_Enum>(), r);
     for (auto d : *type->members)
         r->add(d->name.name);
@@ -20,7 +23,7 @@ const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
 }
 
 const IR::Node* DoConvertEnums::postorder(IR::Type_Name* type) {
-    auto canontype = typeMap->getType(getOriginal(), true);
+    auto canontype = typeMap->getTypeType(getOriginal(), true);
     if (!canontype->is<IR::Type_Enum>())
         return type;
     if (findContext<IR::TypeNameExpression>() != nullptr)

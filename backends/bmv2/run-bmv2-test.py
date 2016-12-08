@@ -350,6 +350,10 @@ def main(argv):
             options.compilerOptions.append(argv[0])
         elif argv[0] == "-gdb":
             options.runDebugger = "gdb --args"
+        elif argv[0] == "--pp":
+            options.compilerOptions.append(argv[0])
+            argv = argv[1:]
+            options.compilerOptions.append(argv[0])
         else:
             reportError("Uknown option ", argv[0])
             usage(options)
