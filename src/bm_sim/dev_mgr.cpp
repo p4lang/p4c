@@ -24,10 +24,14 @@
 #include <bm/bm_sim/nn.h>
 
 #include <cassert>
+#include <algorithm>  // std::min
 #include <thread>
 #include <mutex>
 #include <string>
 #include <map>
+#include <sstream>  // std::ostringstream
+
+#include "utils.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -193,6 +197,10 @@ DevMgr::port_add(const std::string &iface_name, port_t port_num,
 void
 DevMgr::transmit_fn(int port_num, const char *buffer, int len) {
   assert(pimp);
+  if (dump_packet_data > 0) {
+    Logger::get()->info("Sending packet of length {} on port {}: {}",
+                        len, port_num, sample_packet_data(buffer, len));
+  }
   pimp->transmit_fn(port_num, buffer, len);
 }
 
@@ -229,6 +237,15 @@ std::map<DevMgrIface::port_t, DevMgrIface::PortInfo>
 DevMgr::get_port_info() const {
   assert(pimp);
   return pimp->get_port_info();
+}
+
+std::string
+DevMgr::sample_packet_data(const char *buffer, int len) {
+  size_t amount = std::min(dump_packet_data, static_cast<size_t>(len));
+  assert(amount > 0);
+  std::ostringstream ret;
+  utils::dump_hexstring(ret, &buffer[0], &buffer[amount]);
+  return ret.str();
 }
 
 }  // namespace bm

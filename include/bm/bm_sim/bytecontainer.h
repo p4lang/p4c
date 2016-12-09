@@ -28,7 +28,6 @@
 #include <vector>
 #include <iterator>
 #include <string>
-#include <iomanip>
 
 #include "short_alloc.h"
 

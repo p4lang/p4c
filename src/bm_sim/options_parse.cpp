@@ -109,7 +109,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
        "Enable logging to given file")
       ("log-level,L", po::value<std::string>(),
        "Set log level, supported values are "
-       "'trace', 'debug', 'info', 'warn', 'error', off'")
+       "'trace', 'debug', 'info', 'warn', 'error', off'; default is 'trace'")
       ("log-flush", "If used with '--log-file', the logger will flush to disk "
        "after every log message")
       ("notifications-addr", po::value<std::string>(),
@@ -125,6 +125,11 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
 #endif
       ("restore-state", po::value<std::string>(),
        "Restore state from file")
+      ("dump-packet-data", po::value<size_t>(),
+       "Specify how many bytes of packet data to dump upon receiving & sending "
+       "a packet. We use the logger to dump the packet data, with log level "
+       "'info', so make sure the log level you have set does not exclude "
+       "'info' messages; default is 0, which means that nothing is logged.")
       ("version,v", "Display version information")
       ;  // NOLINT(whitespace/semicolon)
 
@@ -245,12 +250,37 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
     log_level = levels_map[log_level_str];
   }
 
+  auto log_requested = console_logging || !file_logger.empty();
+  auto missing_macros = false;
+#ifndef BMLOG_TRACE_ON
+  missing_macros |= log_level <= Logger::LogLevel::TRACE;
+#endif
+#ifndef BMLOG_DEBUG_ON
+  missing_macros |= log_level <= Logger::LogLevel::DEBUG;
+#endif
+  if (log_requested && missing_macros) {
+    std::cout << "You disabled logging macros when building this binary; "
+              << "however, the log level is currenty set to include 'debug' "
+              << "and possibly 'trace' messages; therefore the logs will be "
+              << "missing most messages\n";
+  }
+
   if (vm.count("log-flush")) {
     if (!vm.count("log-file")) {
       std::cout << "Ignoring --log-flush option because --log-file "
                 << "not specified\n";
     } else {
       log_flush = true;
+    }
+  }
+
+  if (vm.count("dump-packet-data")) {
+    dump_packet_data = vm["dump-packet-data"].as<size_t>();
+    if (dump_packet_data > 0 && log_level > Logger::LogLevel::INFO) {
+      std::cout << "You asked for some packet data to be dumped for each "
+                << "packet on ingress and egress, but you set a log level "
+                << "which excludes 'info' messages. Therefore, "
+                << "'--dump-packet-data' will be ignored.\n";
     }
   }
 

@@ -78,17 +78,17 @@ spdlog::level::level_enum
 Logger::to_spd_level(LogLevel level) {
   namespace spdL = spdlog::level;
   switch (level) {
-  case LogLevel::TRACE: return spdL::trace;
-  case LogLevel::DEBUG: return spdL::debug;
-  case LogLevel::INFO: return spdL::info;
-  case LogLevel::NOTICE: return spdL::notice;
-  case LogLevel::WARN: return spdL::warn;
-  case LogLevel::ERROR: return spdL::err;
-  case LogLevel::CRITICAL: return spdL::critical;
-  case LogLevel::ALERT: return spdL::alert;
-  case LogLevel::EMERG: return spdL::emerg;
-  case LogLevel::OFF: return spdL::off;
-  default: return spdL::off;
+    case LogLevel::TRACE: return spdL::trace;
+    case LogLevel::DEBUG: return spdL::debug;
+    case LogLevel::INFO: return spdL::info;
+    case LogLevel::NOTICE: return spdL::notice;
+    case LogLevel::WARN: return spdL::warn;
+    case LogLevel::ERROR: return spdL::err;
+    case LogLevel::CRITICAL: return spdL::critical;
+    case LogLevel::ALERT: return spdL::alert;
+    case LogLevel::EMERG: return spdL::emerg;
+    case LogLevel::OFF: return spdL::off;
+    default: return spdL::off;
   }
 }
 

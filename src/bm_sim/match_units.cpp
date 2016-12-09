@@ -67,22 +67,7 @@ MatchKeyParam::type_to_string(Type t) {
   return "";
 }
 
-namespace {
-
-// TODO(antonin): basically copied from ByteConatiner, need to avoid duplication
-void
-// NOLINTNEXTLINE(runtime/references)
-dump_hexstring(std::ostream &out, const std::string &s,
-               bool upper_case = false) {
-  utils::StreamStateSaver state_saver(out);
-  for (const char c : s) {
-    out << std::setw(2) << std::setfill('0') << std::hex
-        << (upper_case ? std::uppercase : std::nouppercase)
-        << static_cast<int>(static_cast<unsigned char>(c));
-  }
-}
-
-}  // namespace
+using utils::dump_hexstring;
 
 std::ostream& operator<<(std::ostream &out, const MatchKeyParam &p) {
   // need to restore the state right away (thus the additional scope), otherwise

@@ -21,8 +21,9 @@
 #include <bm/bm_sim/bytecontainer.h>
 
 #include <string>
-#include <iostream>
 #include <sstream>
+
+#include "utils.h"
 
 namespace bm {
 
@@ -31,15 +32,7 @@ ByteContainer::to_hex(size_t start, size_t s, bool upper_case) const {
   assert(start + s <= size());
 
   std::ostringstream ret;
-
-  for (std::string::size_type i = start; i < start + s; i++) {
-    ret << std::setw(2) << std::setfill('0') << std::hex
-        << (upper_case ? std::uppercase : std::nouppercase)
-        // the int cast was not sufficient 0xab -> 0xffffffab
-        // << static_cast<int>(bytes[i]);
-        << static_cast<int>(static_cast<unsigned char>(bytes[i]));
-  }
-
+  utils::dump_hexstring(ret, &bytes[start], &bytes[start + s], upper_case);
   return ret.str();
 }
 

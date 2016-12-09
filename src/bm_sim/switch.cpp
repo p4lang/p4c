@@ -38,9 +38,9 @@ namespace bm {
 
 static void
 packet_handler(int port_num, const char *buffer, int len, void *cookie) {
-  // static_cast<Switch *> if okay here because cookie was obtained by casting a
-  // Switch * to void *
-  static_cast<Switch *>(cookie)->receive(port_num, buffer, len);
+  // static_cast<SwitchWContexts *> if okay here because cookie was obtained by
+  // casting a SwitchWContexts * to void *
+  static_cast<SwitchWContexts *>(cookie)->receive_(port_num, buffer, len);
 }
 
 // TODO(antonin): maybe a factory method would be more appropriate for Switch
@@ -54,6 +54,15 @@ SwitchWContexts::SwitchWContexts(size_t nb_cxts, bool enable_swap)
 }
 
 LookupStructureFactory SwitchWContexts::default_lookup_factory {};
+
+void
+SwitchWContexts::receive_(int port_num, const char *buffer, int len) {
+  if (dump_packet_data > 0) {
+    Logger::get()->info("Received packet of length {} on port {}: {}",
+                        len, port_num, sample_packet_data(buffer, len));
+  }
+  receive(port_num, buffer, len);
+}
 
 std::string
 SwitchWContexts::get_debugger_addr() const {
@@ -207,6 +216,8 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
     status = deserialize_from_file(parser.state_file_path);
     if (status != 0) return status;
   }
+
+  dump_packet_data = parser.dump_packet_data;
 
   // TODO(unknown): is this the right place to do this?
   set_packet_handler(packet_handler, static_cast<void *>(this));

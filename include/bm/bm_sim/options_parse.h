@@ -82,6 +82,7 @@ class OptionsParser {
   bool debugger{false};
   std::string debugger_addr{};
   std::string state_file_path{};
+  size_t dump_packet_data{0};
 };
 
 }  // namespace bm

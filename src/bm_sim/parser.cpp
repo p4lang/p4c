@@ -616,7 +616,7 @@ Parser::parse(Packet *pkt) const {
   size_t bytes_parsed = 0;
   while (next_state) {
     next_state = (*next_state)(pkt, data, &bytes_parsed);
-    BMLOG_TRACE("Bytes parsed: {}", bytes_parsed);
+    BMLOG_TRACE_PKT(*pkt, "Bytes parsed: {}", bytes_parsed);
   }
   pkt->remove(bytes_parsed);
   BMELOG(parser_done, *pkt, *this);

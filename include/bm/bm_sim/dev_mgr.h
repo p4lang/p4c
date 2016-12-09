@@ -184,6 +184,10 @@ class DevMgr : public PacketDispatcherIface {
  protected:
   ~DevMgr();
 
+  std::string sample_packet_data(const char *buffer, int len);
+
+  size_t dump_packet_data{0};
+
  private:
   // Actual implementation (private)
   std::unique_ptr<DevMgrIface> pimp{nullptr};

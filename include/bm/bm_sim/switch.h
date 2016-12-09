@@ -124,6 +124,8 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! simple_switch target uses this to reset PRE state.
   virtual void reset_target_state() { }
 
+  void receive_(int port_num, const char *buffer, int len);
+
   //! Returns the Thrift port used for the runtime RPC server.
   int get_runtime_port() const { return thrift_port; }
 
