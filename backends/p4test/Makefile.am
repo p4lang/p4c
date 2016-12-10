@@ -18,12 +18,11 @@
 noinst_PROGRAMS += p4test
 p4test_LDADD = libfrontend.a libp4ctoolkit.a
 
-p4test_SOURCES = \
+p4test_UNIFIED = \
     backends/p4test/p4test.cpp \
-    backends/p4test/midend.h \
     backends/p4test/midend.cpp
 
-cpplint_FILES += $(p4test_SOURCES)
+cpplint_FILES += $(p4test_UNIFIED) $(p4test_NONUNIFIED)
 
 # Tests
 
