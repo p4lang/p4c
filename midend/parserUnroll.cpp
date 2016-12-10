@@ -22,7 +22,7 @@ void AnalyzeParser::postorder(const IR::PathExpression* expression) {
 
 /////////////////////////////////////
 
-namespace {
+namespace ParserStructureImpl {
 
 // Set of possible definitions of a variable
 struct VarDef {
@@ -344,10 +344,10 @@ class ParserSymbolicInterpreter {
         return synthesizedParser;
     }
 };
-}  // namespace
+}  // namespace ParserStructureImpl
 
 void ParserStructure::analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) {
-    ParserSymbolicInterpreter psi(this, refMap, typeMap, unroll);
+    ParserStructureImpl::ParserSymbolicInterpreter psi(this, refMap, typeMap, unroll);
     result = psi.run();
 }
 
