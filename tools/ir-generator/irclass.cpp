@@ -86,7 +86,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     out << "#include <map>\n"
         << "#include <functional>\n" << std::endl
         << "class JSONLoader;\n"
-        << "typedef std::function<IR::Node*(JSONLoader&)> NodeFactoryFn;\n"
+        << "using NodeFactoryFn = IR::Node*(*)(JSONLoader&);\n"
         << std::endl
         << "namespace IR {\n"
         << "extern std::map<cstring, NodeFactoryFn> unpacker_table;\n"
