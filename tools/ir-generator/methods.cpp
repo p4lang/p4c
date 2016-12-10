@@ -192,8 +192,21 @@ void IrClass::generateMethods() {
         if (!IrMethod::Generate.count(m->name))
             throw Util::CompilationError("Unrecognized predefined method %1%", m);
         auto &info = IrMethod::Generate.at(m->name);
-        if (m->name)
-            m->rtype = info.rtype ? info.rtype : new PointerType(new NamedType(this));
+        if (m->name) {
+            if (info.rtype) {
+                // This predefined method has an explicit return type.
+                m->rtype = info.rtype;
+            } else if (info.flags & FACTORY) {
+                // This is a factory method. These return an IR:Node*. The
+                // exception is nested classes, which typically aren't IR::Nodes
+                // and therefore just return a pointer to their concrete type.
+                m->rtype = kind == NodeKind::Nested
+                         ? new PointerType(new NamedType(this))
+                         : new PointerType(new NamedType(IrClass::nodeClass));
+            } else {
+                // By default predefined methods return a pointer to their
+                // concrete type.
+                m->rtype = new PointerType(new NamedType(this)); } }
         else
             m->name = name;
         m->args = info.args;
