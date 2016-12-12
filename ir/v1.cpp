@@ -17,6 +17,7 @@ limitations under the License.
 #include "ir.h"
 #include "dbprint.h"
 #include "lib/gmputil.h"
+#include "lib/bitops.h"
 
 #define SINGLETON_TYPE(NAME)                                    \
 const IR::Type_##NAME *IR::Type_##NAME::get() {                 \
@@ -118,8 +119,14 @@ unsigned IR::Primitive::inferOperandTypes() const {
     return 0;
 }
 
-const IR::Type *IR::Primitive::inferOperandType(int) const {
+const IR::Type *IR::Primitive::inferOperandType(int operand) const {
     if (name == "truncate")
         return IR::Type::Bits::get(32);
+    if ((name == "count" || name == "execute_meter") && operand == 1) {
+        if (auto obj = operands[0]->to<IR::GlobalRef>()) {
+            if (auto tbl = obj->obj->to<IR::Stateful>()) {
+                if (tbl->instance_count > 0) {
+                    int width = ceil_log2(tbl->instance_count);
+                    return IR::Type::Bits::get(width); } } } }
     return IR::Type::Unknown::get();
 }

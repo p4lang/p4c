@@ -267,13 +267,12 @@ class Cast : Operation_Unary {
 class SelectCase {
     Expression     keyset;
     PathExpression state;
-#nodbprint
+    dbprint { out << keyset << ": " << state; }
 }
 
 class SelectExpression : Expression {
     ListExpression            select;
     inline Vector<SelectCase> selectCases;
-#nodbprint
     visit_children {
         v.visit(select, "select");
         selectCases.parallel_visit_children(v); }

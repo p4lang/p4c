@@ -2079,19 +2079,18 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     if (type->is<IR::Type_Type>()) {
         auto base = type->to<IR::Type_Type>()->type;
         if (base->is<IR::Type_Error>() || base->is<IR::Type_Enum>()) {
-            auto fbase = base->to<IR::ISimpleNamespace>();
-            auto decl = fbase->getDeclByName(expression->member.name);
-            if (decl == nullptr)
-                return expression;
-            auto ftype = getType(decl->getNode());
-            if (ftype == nullptr)
-                return expression;
             if (isCompileTimeConstant(expression->expr)) {
                 setCompileTimeConstant(expression);
-                setCompileTimeConstant(getOriginal<IR::Expression>());
-            }
-            setType(getOriginal(), ftype);
-            setType(expression, ftype);
+                setCompileTimeConstant(getOriginal<IR::Expression>()); }
+            auto fbase = base->to<IR::ISimpleNamespace>();
+            if (auto decl = fbase->getDeclByName(expression->member.name)) {
+                if (auto ftype = getType(decl->getNode())) {
+                    setType(getOriginal(), ftype);
+                    setType(expression, ftype); }
+            } else {
+                typeError("%1%: Invalid enum tag", expression);
+                setType(getOriginal(), type);
+                setType(expression, type); }
             return expression;
         }
     }

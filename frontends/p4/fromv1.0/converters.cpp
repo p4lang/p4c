@@ -213,17 +213,23 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
             return ifstat;
         } else {
             IR::Vector<IR::SwitchCase> cases;
+            std::map<const IR::Vector<IR::Expression> *, int> converted;
             for (auto a : apply->actions) {
                 StatementConverter conv(structure, renameMap);
-                auto stat = conv.convert(a.second);
+                const IR::Statement *stat = nullptr;
+                auto insert_at = cases.end();
+                if (converted.count(a.second)) {
+                    insert_at = cases.begin() + converted.at(a.second);
+                } else {
+                    converted[a.second] = cases.size();
+                    stat = conv.convert(a.second); }
                 const IR::Expression* destination;
                 if (a.first == "default")
                     destination = new IR::DefaultExpression(Util::SourceInfo());
                 else
                     destination = new IR::PathExpression(IR::ID(a.first));
                 auto swcase = new IR::SwitchCase(a.second->srcInfo, destination, stat);
-                cases.push_back(swcase);
-            }
+                cases.insert(insert_at, swcase); }
             auto check = new IR::Member(Util::SourceInfo(), call, IR::Type_Table::action_run);
             auto sw = new IR::SwitchStatement(apply->srcInfo, check, std::move(cases));
             prune();

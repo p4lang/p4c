@@ -234,4 +234,12 @@ void IR::ListExpression::dbprint(std::ostream &out) const {
 void IR::DefaultExpression::dbprint(std::ostream &out) const { out << "default"; }
 void IR::This::dbprint(std::ostream &out) const { out << "this"; }
 
-void IR::StringLiteral::dbprint(std::ostream &out) const { out << toString(); }
+void IR::StringLiteral::dbprint(std::ostream &out) const { out << '"' << value << '"';; }
+
+void IR::SelectExpression::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    out << "select" << setprec(Prec_Low) << select << " {" << indent;
+    for (auto c : selectCases)
+        out << endl << c;
+    out << " }" << unindent << setprec(prec);
+}

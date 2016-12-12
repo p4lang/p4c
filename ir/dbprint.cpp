@@ -50,6 +50,15 @@ void IR::InstantiatedBlock::dbprint(std::ostream& out) const {
     out << " " << node << " instance type=" << instanceType;
 }
 
+void IR::Annotation::dbprint(std::ostream& out) const {
+    out << '@' << name;
+    const char *sep = "(";
+    for (auto e : expr) {
+        out << sep << e;
+        sep = ", "; }
+    if (*sep != '(') out << ')';
+}
+
 void IR::Block::dbprint_recursive(std::ostream& out) const {
     dbprint(out);
     out << indent;
@@ -79,4 +88,13 @@ std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v)
 
 void dbprint(const IR::Node *n) {
   std::cout << n << std::endl;
+}
+void dbprint(const IR::Node &n) {
+  std::cout << n << std::endl;
+}
+void dbprint(const std::set<const IR::Expression *> s) {
+    std::cout << indent << " {";
+    int i = 0;
+    for (auto el : s) std::cout << endl << '[' << i++ << "] " << el;
+    std::cout << " }" << unindent << std::endl;
 }

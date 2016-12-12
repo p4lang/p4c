@@ -161,7 +161,6 @@ class Annotation {
     // Predefined annotations used by the compiler
     static const cstring nameAnnotation;
     toString{ return cstring("@") + name; }
-    dbprint { out << '@' << name << expr; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 }
 

@@ -52,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("_nop") action _nop() {
     }
-    @name("m_action") action m_action(bit<8> meter_idx) {
+    @name("m_action") action m_action(bit<14> meter_idx) {
         my_meter.execute_meter<bit<32>>((bit<32>)meter_idx, meta.meta.meter_tag);
         standard_metadata.egress_spec = 9w1;
     }
