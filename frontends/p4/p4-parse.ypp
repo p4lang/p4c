@@ -972,8 +972,7 @@ void yyerror(const char *fmt, ...) {
 }
 
 const IR::P4Program *parse_P4_16_file(const char *name, FILE *in) {
-    extern int verbose;
-    if (verbose)
+    if (Log::verbose())
         std::cout << "Parsing P4-16 program " << name << std::endl;
 
     int errors = 0;

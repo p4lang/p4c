@@ -486,7 +486,7 @@ class Rewriter : public Transform {
     { CHECK_NULL(structure); setName("Rewriter"); }
 
     const IR::Node* preorder(IR::V1Program* global) override {
-        if (verbose > 1)
+        if (Log::verbose())
             dump(global);
         prune();
         return structure->create(global->srcInfo);

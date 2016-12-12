@@ -26,32 +26,51 @@ limitations under the License.
 #define __attribute__(X)
 #endif
 
-static int _file_log_level __attribute__((unused)) = -1;
+namespace Log {
+namespace Detail {
+  // The global verbosity level.
+  extern int verbosity;
 
-extern int get_file_log_level(const char *file, int *level);
-extern void add_debug_spec(const char *spec);
-extern int verbose;
-class output_log_prefix {
-    const char *fn;
-    int level;
-    friend std::ostream &operator<<(std::ostream &, const output_log_prefix &);
- public:
-    output_log_prefix(const char *f, int l) : fn(f), level(l) {}
-};
+  // A cache of the maximum log level requested for any file.
+  extern int maximumLogLevel;
 
-#ifdef __BASE_FILE__
-#define LOGGING(L)                                                                      \
-    ((L) <= (_file_log_level < 0 ? get_file_log_level(__BASE_FILE__, &_file_log_level)  \
-                                 : _file_log_level))
-#define LOG_PFX(L)      output_log_prefix(__BASE_FILE__, (L))
-#else
-#define LOGGING(L)                                                                      \
-    ((L) <= (_file_log_level < 0 ? get_file_log_level(__FILE__, &_file_log_level)       \
-                                     : _file_log_level))
-#define LOG_PFX(L)      output_log_prefix(__FILE__, (L))
-#endif
+  // Look up the log level of @file.
+  int fileLogLevel(const char* file);
 
-#define LOGN(N, X) (LOGGING(N) ? (std::clog << LOG_PFX(N) << X << std::endl) : std::clog)
+  // A utility class used to prepend file and log level information to logging output.
+  class OutputLogPrefix {
+      const char* fn;
+      int level;
+      friend std::ostream& operator<<(std::ostream&, const OutputLogPrefix&);
+   public:
+      OutputLogPrefix(const char* f, int l) : fn(f), level(l) {}
+  };
+} // namespace Detail
+
+inline bool fileLogLevelIsAtLeast(const char* file, int level) {
+  // If there's no file with a log level of at least @level, we don't need to do
+  // the more expensive per-file check.
+  if (Detail::maximumLogLevel < level) {
+    return false;
+  }
+
+  return Detail::fileLogLevel(file) >= level;
+}
+
+// Process @spec and update the log level requested for the appropriate file.
+void addDebugSpec(const char* spec);
+
+inline bool verbose() { return Detail::verbosity > 0; }
+inline int verbosity() { return Detail::verbosity; }
+void increaseVerbosity();
+
+}  // namespace Log
+
+#define LOGGING(N) (::Log::fileLogLevelIsAtLeast(__FILE__, N))
+#define LOGN(N, X) (LOGGING(N)                                                   \
+                      ? std::clog << ::Log::Detail::OutputLogPrefix(__FILE__, N) \
+                                  << X << std::endl                              \
+                      : std::clog)
 #define LOG1(X) LOGN(1, X)
 #define LOG2(X) LOGN(2, X)
 #define LOG3(X) LOGN(3, X)
@@ -59,7 +78,9 @@ class output_log_prefix {
 #define LOG5(X) LOGN(5, X)
 
 #define ERROR(X) (std::clog << "ERROR: " << X << std::endl)
-#define WARNING(X) (verbose > 0 ? (std::clog << "WARNING: " << X << std::endl) : std::clog)
+#define WARNING(X) (::Log::verbose()                               \
+                      ? std::clog << "WARNING: " << X << std::endl \
+                      : std::clog)
 #define ERRWARN(C, X) ((C) ? ERROR(X) : WARNING(X))
 
 static inline std::ostream &operator<<(std::ostream &out,
