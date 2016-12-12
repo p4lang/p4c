@@ -26,7 +26,6 @@ limitations under the License.
 #include "ir/json_generator.h"
 
 static cstring version = "0.0.5";
-extern int verbose;
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
 CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
@@ -94,10 +93,10 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");
     registerOption("-T", "loglevel",
-                    [](const char* arg) { ::add_debug_spec(arg); return true; },
+                   [](const char* arg) { Log::addDebugSpec(arg); return true; },
                    "[Compiler debugging] Adjust logging level per file (see below)");
     registerOption("-v", nullptr,
-                   [this](const char*) { ::verbose++; verbosity++; return true; },
+                   [this](const char*) { Log::increaseVerbosity(); return true; },
                    "[Compiler debugging] Increase verbosity level (can be repeated)");
     registerOption("--top4", "pass1[,pass2]",
                    [this](const char* arg) {
@@ -148,7 +147,7 @@ FILE* CompilerOptions::preprocess() {
 #endif
         cmd += cstring(" 2>/dev/null -undef -nostdinc -I") +
                 p4includePath + " " + preprocessor_options + " " + file;
-        if (verbose)
+        if (Log::verbose())
             std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
         in = popen(cmd.c_str(), "r");
         if (in == nullptr) {
@@ -199,14 +198,12 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
                                const IR::Node* node) const {
     // Some pass names are currently C++ class names mangled;
     // this is a weak attempt at making them more readable.
-    bool verbose = verbosity > 0;
-
     std::string p = pass;
     size_t last = p.find_last_of("0123456789", strlen(pass) - 3);
     if (last != strlen(pass))
         pass = pass + last + 1;
     cstring name = cstring(manager) + "_" + Util::toString(seq) + "_" + pass;
-    if (verbose)
+    if (Log::verbose())
         std::cerr << name << std::endl;
 
     for (auto s : top4) {
@@ -219,9 +216,9 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
             cstring fileName = makeFileName(dumpFolder, filename, suffix);
             auto stream = openFile(fileName, true);
             if (stream != nullptr) {
-                if (verbose)
+                if (Log::verbose())
                     std::cerr << "Writing program to " << fileName << std::endl;
-                P4::ToP4 toP4(stream, verbose, file);
+                P4::ToP4 toP4(stream, Log::verbose(), file);
                 node->apply(toP4);
             }
         }

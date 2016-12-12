@@ -19,20 +19,54 @@ limitations under the License.
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #ifdef MULTITHREAD
 #include <mutex>
-#define MTONLY(...)     __VA_ARGS__
-#else
-#define MTONLY(...)
 #endif  // MULTITHREAD
 
-int verbose = 0;
-static std::vector<std::string> debug_specs;
-static std::unordered_set<int *> *log_vars;
-static uint64_t init_time;
+namespace Log {
+namespace Detail {
+
+int verbosity = 0;
+int maximumLogLevel = 0;
+
+// The time at which logging was initialized; used so that log messages can have
+// relative rather than absolute timestamps.
+static uint64_t initTime = 0;
+
+// The first level cache for fileLogLevel() - the most recent result returned.
+static const char* mostRecentFile = nullptr;
+static int mostRecentLevel = -1;
+
+// The second level cache for fileLogLevel(), mapping filenames to log levels.
+static std::unordered_map<const char*, int> logLevelCache;
+
+// All log levels manually specified by the user.
+static std::vector<std::string> debugSpecs;
+
+std::ostream& operator<<(std::ostream& out, const Log::Detail::OutputLogPrefix& pfx) {
+#ifdef CLOCK_MONOTONIC
+    if (LOGGING(2)) {
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        uint64_t t = ts.tv_sec*1000000000UL + ts.tv_nsec - Log::Detail::initTime;
+        t /= 1000000UL;  // millisec
+        out << t/1000 << '.' << std::setw(3) << std::setfill('0') << t%1000 << ':'
+            << std::setfill(' '); }
+#endif
+    if (LOGGING(1)) {
+        const char *s = strrchr(pfx.fn, '/');
+        const char *e = strrchr(pfx.fn, '.');
+        s = s ? s + 1 : pfx.fn;
+        if (e && e > s)
+            out.write(s, e-s);
+        else
+            out << s;
+        out << ':' << pfx.level << ':'; }
+    return out;
+}
 
 static bool match(const char *pattern, const char *name) {
     const char *pend = pattern + strcspn(pattern, ",:");
@@ -55,70 +89,98 @@ static bool match(const char *pattern, const char *name) {
     }
 }
 
-int get_file_log_level(const char *file, int *level) {
-    static std::unordered_set<int *> log_vars_;
-    log_vars = &log_vars_;
-    if (!log_vars->count(level)) {
-        static bool loop_guard = false;
-        if (loop_guard) return -1;
-        MTONLY(
-            static std::mutex lock;
-            std::lock_guard<std::mutex> acquire(lock); )
-        loop_guard = true;
-        log_vars->emplace(level);
-        loop_guard = false; }
-    if (auto *p = strrchr(file, '/'))
-        file = p+1;
-    for (auto &s : debug_specs)
-        for (auto *p = s.c_str(); p; p = strchr(p, ',')) {
-            while (*p == ',') p++;
-            if (match(p, file))
-                if (auto *l = strchr(p, ':'))
-                    return *level = atoi(l+1); }
-    return *level = verbose > 0 ? verbose - 1 : 0;
+int uncachedFileLogLevel(const char* file) {
+    if (auto* startOfFilename = strrchr(file, '/'))
+        file = startOfFilename + 1;
+
+    for (auto& spec : debugSpecs)
+        for (auto* pattern = spec.c_str(); pattern; pattern = strchr(pattern, ',')) {
+            while (*pattern == ',') pattern++;
+            if (match(pattern, file))
+                if (auto* level = strchr(pattern, ':'))
+                    return atoi(level + 1); }
+
+    // If there's no matching spec, compute a default from the global verbosity level.
+    return verbosity > 0 ? verbosity - 1 : 0;
 }
 
-void add_debug_spec(const char *spec) {
+int fileLogLevel(const char* file) {
+#ifdef MULTITHREAD
+    static std::mutex lock;
+    std::lock_guard<std::mutex> acquire(lock);
+#endif
+
+    // There are two layers of caching here. First, we cache the most recent
+    // result we returned, to minimize expensive lookups in tight loops.
+    if (mostRecentFile == file)
+      return mostRecentLevel;
+
+    mostRecentFile = file;
+
+    // Second, we look up @file in a hash table mapping from pointers to log
+    // levels. We expect to hit in this cache virtually all the time.
+    auto logLevelCacheIter = logLevelCache.find(file);
+    if (logLevelCacheIter != logLevelCache.end())
+      return mostRecentLevel = logLevelCacheIter->second;
+
+    // This is the slow path. We have to walk @debugSpecs to see if there are any
+    // specs that match @file.
+    mostRecentLevel = uncachedFileLogLevel(file);
+    logLevelCache[file] = mostRecentLevel;
+    return mostRecentLevel;
+}
+
+void invalidateCaches(int possibleNewMaxLogLevel)
+{
+    mostRecentFile = nullptr;
+    mostRecentLevel = 0;
+    logLevelCache.clear();
+    maximumLogLevel = std::max(maximumLogLevel, possibleNewMaxLogLevel);
+}
+
+} // namespace Detail
+
+void addDebugSpec(const char* spec) {
 #ifdef CLOCK_MONOTONIC
-    if (!init_time) {
+    if (!Detail::initTime) {
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
-        init_time = ts.tv_sec*1000000000UL + ts.tv_nsec; }
+        Detail::initTime = ts.tv_sec*1000000000UL + ts.tv_nsec; }
 #endif
+
+    // Validate @spec.
     bool ok = false;
-    for (const char *p = strchr(spec, ':'); p; p = strchr(p, ':')) {
+    long maxLogLevelInSpec = 0;
+    for (auto* pattern = strchr(spec, ':'); pattern; pattern = strchr(pattern, ':')) {
         ok = true;
-        strtol(p+1, const_cast<char **>(&p), 10);
-        if (*p && *p != ',') {
+        long level = strtol(pattern + 1, const_cast<char**>(&pattern), 10);
+        if (*pattern && *pattern != ',') {
             ok = false;
-            break; } }
-    if (!ok)
+            break; }
+        maxLogLevelInSpec = std::max(maxLogLevelInSpec, level);
+    }
+
+    if (!ok) {
         std::cerr << "Invalid debug trace spec '" << spec << "'" << std::endl;
-    else
-        debug_specs.push_back(spec);
-    if (log_vars)
-        for (auto p : *log_vars)
-            *p = -1;
+        return; }
+
+#ifdef MULTITHREAD
+    static std::mutex lock;
+    std::lock_guard<std::mutex> acquire(lock);
+#endif
+
+    Detail::debugSpecs.push_back(spec);
+    Detail::invalidateCaches(maxLogLevelInSpec);
 }
 
-std::ostream &operator<<(std::ostream &out, const output_log_prefix &pfx) {
-#ifdef CLOCK_MONOTONIC
-    if (LOGGING(2)) {
-        struct timespec ts;
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        uint64_t t = ts.tv_sec*1000000000UL + ts.tv_nsec - init_time;
-        t /= 1000000UL;  // millisec
-        out << t/1000 << '.' << std::setw(3) << std::setfill('0') << t%1000 << ':'
-            << std::setfill(' '); }
+void increaseVerbosity() {
+#ifdef MULTITHREAD
+    static std::mutex lock;
+    std::lock_guard<std::mutex> acquire(lock);
 #endif
-    if (LOGGING(1)) {
-        const char *s = strrchr(pfx.fn, '/');
-        const char *e = strrchr(pfx.fn, '.');
-        s = s ? s + 1 : pfx.fn;
-        if (e && e > s)
-            out.write(s, e-s);
-        else
-            out << s;
-        out << ':' << pfx.level << ':'; }
-    return out;
+
+    Detail::verbosity++;
+    Detail::invalidateCaches(Detail::verbosity - 1);
 }
+
+} // namespace Log

@@ -34,7 +34,7 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
         // Model is loaded before parsing the input file.
         // In this way the SourceInfo in the model comes first.
         const IR::Node* v1 = parse_P4_14_file(options, in);
-        if (verbose)
+        if (Log::verbose())
             std::cerr << "Converting to P4-16" << std::endl;
         converter.visit(v1);
         if (v1 != nullptr) {

@@ -66,8 +66,6 @@ class CompilerOptions : public Util::Options {
     // Dump and undump the IR tree
     bool debugJson = false;
 
-    // higher means more verbose
-    unsigned verbosity = 0;
     // Compiler target architecture
     cstring target = nullptr;
     // substrings matched agains pass names
