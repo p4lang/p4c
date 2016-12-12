@@ -20,6 +20,7 @@ limitations under the License.
 #include "typeConstraints.h"
 #include "syntacticEquivalence.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
@@ -2260,6 +2261,14 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto result = cts.convert(expression)->to<IR::MethodCallExpression>();  // cast arguments
 
         setType(result, returnType);
+
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        if (mi->isApply()) {
+            auto a = mi->to<ApplyMethod>();
+            if (a->isTableApply() && findContext<IR::P4Action>())
+                ::error("%1%: tables cannot be invoked from actions", expression);
+        }
+
         return result;
     }
     return expression;
