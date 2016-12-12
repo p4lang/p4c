@@ -18,6 +18,7 @@
 from __future__ import print_function
 from subprocess import Popen
 from threading import Thread
+import glob
 import json
 import sys
 import re
@@ -339,6 +340,8 @@ class RunBMV2(object):
             self.tables.append(BMV2Table(t))
     def filename(self, interface, direction):
         return self.folder + "/" + self.pcapPrefix + interface + "_" + direction + ".pcap"
+    def interface_of_filename(self, f):
+        return os.path.basename(f).rstrip('.pcap').lstrip(self.pcapPrefix).rsplit('_', 1)[0]
     def do_cli_command(self, cmd):
         if self.options.verbose:
             print(cmd)
@@ -542,9 +545,9 @@ class RunBMV2(object):
     def checkOutputs(self):
         if self.options.verbose:
             print("Comparing outputs")
-        for interface, expected in self.expected.iteritems():
-            direction = "out"
-            file = self.filename(interface, direction)
+        direction = "out"
+        for file in glob.glob(self.filename('*', direction)):
+            interface = self.interface_of_filename(file)
             if os.stat(file).st_size == 0:
                 packets = []
             else:
@@ -554,6 +557,20 @@ class RunBMV2(object):
                     reportError("Corrupt pcap file", file)
                     self.showLog()
                     return FAILURE
+
+            # Log packets.
+            if self.options.observationLog:
+                observationLog = open(self.options.observationLog, 'w')
+                for pkt in packets:
+                    observationLog.write('%s %s\n' % (
+                        interface,
+                        ''.join(ByteToHex(str(pkt)).split()).upper()))
+                observationLog.close()
+
+            # Check for expected packets.
+            if interface not in self.expected:
+                continue
+            expected = self.expected[interface]
             if len(expected) != len(packets):
                 reportError("Expected", len(expected), "packets on port", interface,
                             "got", len(packets))
