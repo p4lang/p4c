@@ -99,11 +99,11 @@ class JsonValue final : public IJson {
     const cstring str = nullptr;
 };
 
-class JsonArray final : public IJson, public std::vector<const IJson*> {
+class JsonArray final : public IJson, public std::vector<IJson*> {
     friend class Test::TestJson;
  public:
     void serialize(std::ostream& out) const;
-    JsonArray* append(const IJson* value);
+    JsonArray* append(IJson* value);
     JsonArray* append(bool b) { append(new JsonValue(b)); return this; }
     JsonArray* append(mpz_class v) { append(new JsonValue(v)); return this; }
     JsonArray* append(int v) { append(new JsonValue(v)); return this; }
@@ -115,17 +115,17 @@ class JsonArray final : public IJson, public std::vector<const IJson*> {
     JsonArray* append(cstring s) { append(new JsonValue(s)); return this; }
     JsonArray* append(std::string s) { append(new JsonValue(s)); return this; }
     JsonArray* append(const char* s) { append(new JsonValue(s)); return this; }
-    JsonArray(std::initializer_list<const IJson*> data) : std::vector<const IJson*>(data) {} // NOLINT
+    JsonArray(std::initializer_list<IJson*> data) : std::vector<IJson*>(data) {} // NOLINT
     JsonArray() = default;
 };
 
-class JsonObject final : public IJson, public ordered_map<cstring, const IJson*> {
+class JsonObject final : public IJson, public ordered_map<cstring, IJson*> {
     friend class Test::TestJson;
 
  public:
     JsonObject() = default;
     void serialize(std::ostream& out) const;
-    JsonObject* emplace(cstring label, const IJson* value);
+    JsonObject* emplace(cstring label, IJson* value);
     JsonObject* emplace(cstring label, bool b)
     { emplace(label, new JsonValue(b)); return this; }
     JsonObject* emplace(cstring label, mpz_class v)
@@ -148,7 +148,7 @@ class JsonObject final : public IJson, public ordered_map<cstring, const IJson*>
     { emplace(label, new JsonValue(s)); return this; }
     JsonObject* emplace(cstring label, const char* s)
     { emplace(label, new JsonValue(s)); return this; }
-    const IJson* get(cstring label) const { return ::get(*this, label); }
+    IJson* get(cstring label) const { return ::get(*this, label); }
 };
 
 }  // namespace Util

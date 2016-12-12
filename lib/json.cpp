@@ -141,7 +141,7 @@ int JsonValue::getInt() const {
     return val.get_si();
 }
 
-JsonArray* JsonArray::append(const IJson* value) {
+JsonArray* JsonArray::append(IJson* value) {
     push_back(value);
     return this;
 }
@@ -163,13 +163,13 @@ void JsonObject::serialize(std::ostream& out) const {
     out << IndentCtl::unindent << IndentCtl::endl << "}";
 }
 
-JsonObject* JsonObject::emplace(cstring label, const IJson* value) {
+JsonObject* JsonObject::emplace(cstring label, IJson* value) {
     if (label.isNullOrEmpty())
         throw std::logic_error("Empty label");
     auto j = get(label);
     if (j != nullptr)
         throw std::logic_error(cstring("Duplicate label in json object ") + label.c_str());
-    ordered_map<cstring, const IJson*>::emplace(label, value);
+    ordered_map<cstring, IJson*>::emplace(label, value);
     return this;
 }
 

@@ -1676,11 +1676,11 @@ void JsonConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
 void JsonConverter::addLocals() {
     // We synthesize a "header_type" for each local which has a struct type
     // and we pack all the scalar-typed locals into a scalarsStruct
-    auto scalarsStruct = new Util::JsonObject();
+    scalarsStruct = new Util::JsonObject();
     scalarsName = refMap->newName("scalars");
     scalarsStruct->emplace("name", scalarsName);
     scalarsStruct->emplace("id", nextId("header_types"));
-    unsigned scalars_width = 0;
+    scalars_width = 0;
     auto scalarFields = mkArrayField(scalarsStruct, "fields");
 
     for (auto v : structure.variables) {
@@ -1738,28 +1738,28 @@ void JsonConverter::addLocals() {
         }
     }
 
-    if (scalars_width != 0) {
-        // pad the scalars
-        unsigned padding = scalars_width % 8;
-        if (padding != 0) {
-            cstring name = refMap->newName("_padding");
-            auto field = pushNewArray(scalarFields);
-            field->append(name);
-            field->append(8 - padding);
-            field->append(false);
-        }
+    // insert the scalars type
+    headerTypesCreated[scalarsName] = scalarsName;
+    headerTypes->append(scalarsStruct);
 
-        // insert the scalars type
-        headerTypesCreated[scalarsName] = scalarsName;
-        headerTypes->append(scalarsStruct);
+    // insert the scalars instance
+    auto json = new Util::JsonObject();
+    json->emplace("name", scalarsName);
+    json->emplace("id", nextId("headers"));
+    json->emplace("header_type", scalarsName);
+    json->emplace("metadata", true);
+    headerInstances->append(json);
+}
 
-        // insert the scalars instance
-        auto json = new Util::JsonObject();
-        json->emplace("name", scalarsName);
-        json->emplace("id", nextId("headers"));
-        json->emplace("header_type", scalarsName);
-        json->emplace("metadata", true);
-        headerInstances->append(json);
+void JsonConverter::padScalars() {
+    unsigned padding = scalars_width % 8;
+    auto scalarFields = (*scalarsStruct)["fields"]->to<Util::JsonArray>();
+    if (padding != 0) {
+        cstring name = refMap->newName("_padding");
+        auto field = pushNewArray(scalarFields);
+        field->append(name);
+        field->append(8 - padding);
+        field->append(false);
     }
 }
 
@@ -1822,8 +1822,9 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
         ::error("Expected metadata %1% to be a struct", mdType);
         return;
     }
-    addTypesAndInstances(mt, true);
     addLocals();
+    addTypesAndInstances(mt, true);
+    padScalars();
 
     auto prsrs = mkArrayField(&toplevel, "parsers");
     auto parserJson = toJson(parser);

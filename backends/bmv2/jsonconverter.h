@@ -76,6 +76,8 @@ class JsonConverter final {
     std::map<cstring, cstring> headerTypesCreated;
     Util::JsonArray *headerInstances;
     Util::JsonArray *headerStacks;
+    Util::JsonObject *scalarsStruct;
+    unsigned scalars_width = 0;
     friend class ExpressionConverter;
 
  protected:
@@ -84,6 +86,7 @@ class JsonConverter final {
     unsigned nextId(cstring group);
     void addHeaderStacks(const IR::Type_Struct* headersStruct);
     void addLocals();
+    void padScalars();
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                            Util::JsonArray* result, Util::JsonArray* fieldLists,
