@@ -56,6 +56,31 @@ class TypeCheck::Pass1 : public Transform {
         else
             error("%s: No header type %s defined", hm->srcInfo, hm->type_name);
         return hm; }
+    const IR::Node *preorder(IR::ActionSelector *sel) override {
+        if (!global) return sel;
+        if (sel->key_fields != nullptr) return sel;
+        const IR::FieldListCalculation *kf = nullptr;
+        if (sel->key.name && (kf = global->get<IR::FieldListCalculation>(sel->key)))
+            sel->key_fields = kf;
+        else
+            error("%s: Key must coordinate to a field_list_calculation", sel->srcInfo);
+        return sel; }
+    const IR::Node *preorder(IR::FieldListCalculation *flc) override {
+        if (!global) return flc;
+        if (flc->input_fields != nullptr) return flc;
+        if (!flc->input || flc->input->names.empty()) {
+            error("%s: no input in field_list_calculation", flc->srcInfo);
+            return flc; }
+        const IR::FieldList *in_f = nullptr;
+        if (flc->input->names.size() == 1 &&
+            (in_f = global->get<IR::FieldList>(flc->input->names[0]))) {
+            flc->input_fields = in_f;
+        } else {
+            auto fl = new IR::FieldList();
+            for (auto &name : flc->input->names) {
+                fl->fields.push_back(new IR::NamedRef(name));
+                fl->srcInfo += name.srcInfo; } }
+        return flc; }
     const IR::Node *postorder(IR::NamedRef *ref) override {
         if (!global) return ref;
         const Visitor::Context *prop_ctxt = nullptr;

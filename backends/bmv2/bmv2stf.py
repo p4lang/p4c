@@ -53,6 +53,7 @@ class Options(object):
         self.binary = None
         self.verbose = False
         self.preserveTmp = False
+        self.observationLog = None
 
 def nextWord(text, sep = None):
     # Split a text at the indicated separator.
@@ -597,7 +598,7 @@ def run_model(options, tmpdir, jsonfile, testfile):
 ######################### main
 
 def usage(options):
-    print("usage:", options.binary, "[-v] <json file> <stf file>");
+    print("usage:", options.binary, "[-v] [-observation-log <file>] <json file> <stf file>");
 
 def main(argv):
     options = Options()
@@ -608,8 +609,15 @@ def main(argv):
             options.preserveTmp = True
         elif argv[0] == "-v":
             options.verbose = True
+        elif argv[0] == '-observation-log':
+            if len(argv) == 1:
+                reportError("Missing argument", argv[0])
+                usage(options)
+                sys.exit(1)
+            options.observationLog = argv[1]
+            argv = argv[1:]
         else:
-            reportError("Uknown option ", argv[0])
+            reportError("Unknown option ", argv[0])
             usage(options)
         argv = argv[1:]
     if len(argv) < 2:
