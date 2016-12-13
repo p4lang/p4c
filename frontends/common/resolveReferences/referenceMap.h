@@ -34,6 +34,7 @@ class ReferenceMap final : public ProgramMap, public NameGenerator {
     // Maps each path in the program to the corresponding declaration
     std::map<const IR::Path*, const IR::IDeclaration*> pathToDeclaration;
     std::set<const IR::IDeclaration*> used;
+    std::map<const IR::This*, const IR::IDeclaration*> thisToDeclaration;
 
     // All names used within the program
     std::set<cstring> usedNames;
@@ -42,6 +43,8 @@ class ReferenceMap final : public ProgramMap, public NameGenerator {
     ReferenceMap();
     const IR::IDeclaration* getDeclaration(const IR::Path* path, bool notNull = false) const;
     void setDeclaration(const IR::Path* path, const IR::IDeclaration* decl);
+    const IR::IDeclaration* getDeclaration(const IR::This* pointer, bool notNull = false) const;
+    void setDeclaration(const IR::This* pointer, const IR::IDeclaration* decl);
     void dbprint(std::ostream& cout) const;
     void setIsV1(bool isv1) { this->isv1 = isv1; }
     cstring newName(cstring base);
