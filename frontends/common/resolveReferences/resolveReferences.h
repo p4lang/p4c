@@ -98,6 +98,7 @@ class ResolveReferences : public Inspector {
 
     bool preorder(const IR::Type_Name* type) override;
     bool preorder(const IR::PathExpression* path) override;
+    bool preorder(const IR::This* pointer) override;
 
 #define DECLARE(TYPE)                           \
     bool preorder(const IR::TYPE* t) override;  \

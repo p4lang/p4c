@@ -264,6 +264,14 @@ void ResolveReferences::postorder(const IR::P4Program*) {
     LOG1("Reference map " << refMap);
 }
 
+bool ResolveReferences::preorder(const IR::This* pointer) {
+    auto decl = findContext<IR::Declaration_Instance>();
+    if (findContext<IR::Function>() == nullptr || decl == nullptr)
+        ::error("%1%: can only be used in the definition of an abstract method", pointer);
+    refMap->setDeclaration(pointer, decl);
+    return true;
+}
+
 bool ResolveReferences::preorder(const IR::PathExpression* path) {
     resolvePath(path->path, false); return true; }
 
