@@ -45,18 +45,6 @@ class CallGraph {
     ordered_map<T, std::vector<T>*> in_edges;
     ordered_set<T> nodes;    // all nodes; do not modify this directly
 
-    void sort(T el, std::vector<T> &out, std::set<T> &done)  {
-        if (done.find(el) != done.end()) {
-            return;
-        } else if (isCaller(el)) {
-            for (auto c : *out_edges[el])
-                sort(c, out, done);
-        }
-        LOG2("Order " << cgMakeString(el));
-        done.emplace(el);
-        out.push_back(el);
-    }
-
  public:
     typedef typename ordered_map<T, std::vector<T>*>::const_iterator const_iterator;
 
@@ -118,19 +106,6 @@ class CallGraph {
         if (edges == nullptr)
             return false;
         return !edges->empty();
-    }
-    // Topological sort of the graph; calles are before callers.
-    // If the graph has cycles the graphs is still sorted, but the order
-    // of nodes in strongly-connected components is unspecified.
-    void sort(std::vector<T> &start, std::vector<T> &out) {
-        std::set<T> done;
-        for (auto s : start)
-            sort(s, out, done);
-    }
-    void sort(std::vector<T> &out) {
-        std::set<T> done;
-        for (auto n : nodes)
-            sort(n, out, done);
     }
     // Iterators over the out_edges
     const_iterator begin() const { return out_edges.cbegin(); }
@@ -332,14 +307,20 @@ class CallGraph {
         helper.setLowLink(node, helper.crtIndex);
         helper.crtIndex++;
         helper.push(node);
-        for (auto next : *out_edges[node]) {
-            LOG1(cgMakeString(node) << " => " << cgMakeString(next));
-            if (helper.unknown(next)) {
-                bool l = strongConnect(next, helper, out);
-                loop = loop | l;
-                helper.setLowLink(node, next);
-            } else if (helper.isOnStack(next)) {
-                helper.setLowLink(node, next);
+        auto oe = out_edges[node];
+        if (oe != nullptr) {
+            for (auto next : *oe) {
+                LOG1(cgMakeString(node) << " => " << cgMakeString(next));
+                if (helper.unknown(next)) {
+                    bool l = strongConnect(next, helper, out);
+                    loop = loop | l;
+                    helper.setLowLink(node, next);
+                } else if (helper.isOnStack(next)) {
+                    helper.setLowLink(node, next);
+                    if (next == node)
+                        // the check below does not find self-loops
+                        loop = true;
+                }
             }
         }
 
@@ -363,11 +344,32 @@ class CallGraph {
     // Sort that computes strongly-connected components - all nodes in
     // a strongly-connected components will be consecutive in the
     // sort.  Returns true if the graph contains at least one
-    // non-trivial cycle (not a self-loop).  Ignores nodes not
-    // reachable from 'start'.
+    // cycle.  Ignores nodes not reachable from 'start'.
     bool sccSort(T start, std::vector<T> &out) {
         sccInfo helper;
         return strongConnect(start, helper, out);
+    }
+    bool sort(std::vector<T> &start, std::vector<T> &out) {
+        sccInfo helper;
+        bool cycles = false;
+        for (auto n : start) {
+            if (std::find(out.begin(), out.end(), n) == out.end()) {
+                bool c = strongConnect(n, helper, out);
+                cycles = cycles || c;
+            }
+        }
+        return cycles;
+    }
+    bool sort(std::vector<T> &out) {
+        sccInfo helper;
+        bool cycles = false;
+        for (auto n : nodes) {
+            if (std::find(out.begin(), out.end(), n) == out.end()) {
+                bool c = strongConnect(n, helper, out);
+                cycles = cycles || c;
+            }
+        }
+        return cycles;
     }
 };
 
