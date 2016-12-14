@@ -4321,7 +4321,7 @@ control process_storm_control(inout headers hdr, inout metadata meta, inout stan
     @name("storm_control_meter") meter(32w1024, CounterType.bytes) storm_control_meter;
     @name("nop") action nop() {
     }
-    @name("set_storm_control_meter") action set_storm_control_meter(bit<8> meter_idx) {
+    @name("set_storm_control_meter") action set_storm_control_meter(bit<10> meter_idx) {
         storm_control_meter.execute_meter((bit<32>)meter_idx, meta.meter_metadata.meter_color);
         meta.meter_metadata.meter_index = meter_idx;
     }
@@ -5759,7 +5759,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
     @name("drop_packet") action drop_packet() {
         mark_to_drop();
     }
-    @name("drop_packet_with_reason") action drop_packet_with_reason(bit<8> drop_reason) {
+    @name("drop_packet_with_reason") action drop_packet_with_reason(bit<10> drop_reason) {
         drop_stats.count((bit<32>)drop_reason);
         mark_to_drop();
     }

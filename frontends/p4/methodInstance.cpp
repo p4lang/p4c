@@ -54,18 +54,22 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
             if (mem->member == IR::Type_Stack::push_front ||
                 mem->member == IR::Type_Stack::pop_front)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
-        } else if (mem->expr->is<IR::PathExpression>()) {
-            auto pe = mem->expr->to<IR::PathExpression>();
-            auto decl = refMap->getDeclaration(pe->path, true);
-            auto type = typeMap->getType(decl->getNode());
+        } else {
+            const IR::IDeclaration *decl = nullptr;
+            const IR::Type *type = nullptr;
+            if (auto th = mem->expr->to<IR::This>()) {
+                type = basetype;
+                decl = refMap->getDeclaration(th, true);
+            } else if (auto pe = mem->expr->to<IR::PathExpression>()) {
+                decl = refMap->getDeclaration(pe->path, true);
+                type = typeMap->getType(decl->getNode()); }
             if (type->is<IR::Type_SpecializedCanonical>())
                 type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
             BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);
             if (type->is<IR::IApply>() &&
                 mem->member == IR::IApply::applyMethodName) {
                 return new ApplyMethod(mce, decl, type->to<IR::IApply>());
-            }
-            if (type->is<IR::Type_Extern>()) {
+            } else if (type->is<IR::Type_Extern>()) {
                 auto et = type->to<IR::Type_Extern>();
                 auto methodType = mt->to<IR::Type_Method>();
                 CHECK_NULL(methodType);

@@ -786,7 +786,7 @@ const IR::Expression* ProgramStructure::convertHashAlgorithm(IR::ID algorithm) {
     } else if (algorithm == "identity") {
         result = v1model.algorithm.identity.Id();
     } else {
-        ::error("%1%: unexpected algorithm", algorithm);
+        ::warning("%1%: unexpected algorithm", algorithm);
         result = algorithm;
     }
     auto pe = new IR::TypeNameExpression(v1model.algorithm.Id());

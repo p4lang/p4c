@@ -70,7 +70,7 @@ int main(int argc, char *const argv[]) {
 
     compile(options);
 
-    if (options.verbosity > 0)
+    if (Log::verbose())
         std::cerr << "Done." << std::endl;
     return ::errorCount() > 0;
 }

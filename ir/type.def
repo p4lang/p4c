@@ -258,6 +258,10 @@ class Type_Set : Type {
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
     toString { return cstring("set<") + elementType->toString() + ">"; }
     const Type* getP4Type() const override { return nullptr; }
+    int width_bits() const override {
+        // returning the width of the set elements, not the set itself, which doesn't
+        // really have a sensible size
+        return elementType->width_bits(); }
 }
 
 // The type of an expressionList

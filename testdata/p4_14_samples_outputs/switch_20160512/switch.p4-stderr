@@ -25,15 +25,9 @@
 ../testdata/p4_14_samples/switch_20160512/tunnel.p4(1002): warning: -14: negative value with unsigned type
     add(egress_metadata.payload_length, standard_metadata.packet_length, -14);
                                                                           ^^
-../testdata/p4_14_samples/switch_20160512/security.p4(65): warning: Could not infer type for meter_idx, using bit<8>
-action set_storm_control_meter(meter_idx) {
-                               ^^^^^^^^^
 ../testdata/p4_14_samples/switch_20160512/fabric.p4(210): warning: Could not infer type for fabric_mgid, using bit<8>
 action set_fabric_multicast(fabric_mgid) {
                             ^^^^^^^^^^^
-../testdata/p4_14_samples/switch_20160512/acl.p4(479): warning: Could not infer type for drop_reason, using bit<8>
-action drop_packet_with_reason(drop_reason) {
-                               ^^^^^^^^^^^
 ../testdata/p4_14_samples/switch_20160512/acl.p4(441): warning: Could not infer type for session_id, using bit<8>
 action negative_mirror(session_id) {
                        ^^^^^^^^^^

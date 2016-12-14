@@ -36,7 +36,7 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
         const IR::Node* v1 = parse_P4_14_file(options, in);
         if (::errorCount() > 0 || v1 == nullptr)
             return nullptr;
-        if (verbose)
+        if (Log::verbose())
             std::cerr << "Converting to P4-16" << std::endl;
         converter.visit(v1);
         if (v1 != nullptr) {

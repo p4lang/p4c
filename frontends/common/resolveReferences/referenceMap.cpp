@@ -26,6 +26,7 @@ void ReferenceMap::clear() {
     pathToDeclaration.clear();
     usedNames.clear();
     used.clear();
+    thisToDeclaration.clear();
     usedNames.insert(P4::reservedWords.begin(), P4::reservedWords.end());
 }
 

@@ -275,10 +275,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv4_packet: {
                 ipv4_match.apply();
             }
+            mpls_packet: 
             ipv6_packet: {
-                ipv6_match.apply();
-            }
-            mpls_packet: {
                 ipv6_match.apply();
             }
         }

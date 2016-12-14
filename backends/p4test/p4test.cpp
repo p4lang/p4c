@@ -82,7 +82,7 @@ int main(int argc, char *const argv[]) {
             }
         }
     }
-    if (verbose)
+    if (Log::verbose())
         std::cerr << "Done." << std::endl;
     return ::errorCount() > 0;
 }

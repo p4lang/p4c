@@ -30,7 +30,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("cntDum") counter(32w70000, CounterType.packets) cntDum;
-    @name("act") action act(bit<8> idx) {
+    @name("act") action act(bit<17> idx) {
         cntDum.count((bit<32>)idx);
     }
     @name("tab1") table tab1() {
