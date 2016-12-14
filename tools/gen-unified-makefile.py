@@ -78,28 +78,39 @@ def find_automake_files():
             files.append(os.path.join(root, filename))
     return files
 
-def check_file_set(makefile, target, type, file_set):
-    # We only need to check '_UNIFIED' files; the others are passed through to
-    # the underlying makefile.
-    if type != '_UNIFIED':
-        return
+def construct_file_set(makefile, reldir, target, type, files):
+    for file in files:
+        # Filter empty filenames. These end up getting passed to us because of
+        # split()'s behavior when the regular expression contains a capture
+        # group.
+        if file == '':
+            continue
 
-    for file in file_set:
-        # We can't handle expansions ('$FOO or $(foo)') in 'foo_UNIFIED',
-        # because we're not actually evaluating the makefile, so report an error
-        # if we find anyway.
-        if '$' in file:
-            raise Exception('{}: {}{} includes file "{}" containing an expansion, '
-                            'which is not supported.'.format(makefile, target, type, file))
+        # Replace %reldir% replaced with a concrete path.
+        file = file.replace('%reldir%', reldir)
 
-        # Verify that the files in the file set are acceptable for unified
-        # compilation. Note that although we *could* allow header files, they're
-        # not useful, and we'd have to filter them out anyway or they'd
-        # interfere with accurate dependency tracking.
-        (_, extension) = os.path.splitext(file)
-        if extension not in ['.c', '.cpp']:
-            raise Exception('{}: {}{} includes file "{}" which is not a .c or .cpp '
-                            'source file.'.format(makefile, target, type, file))
+        # If this is a '_UNIFIED' file, we'll ultimately need to generate a C++
+        # source file that includes it, so it needs additional validation. We
+        # can be more permissive for other files since they are simply passed
+        # through to the underlying makefile.
+        if type == '_UNIFIED':
+            # We can't handle expansions ('$FOO or $(foo)') in 'foo_UNIFIED',
+            # because we're not actually evaluating the makefile, so report an
+            # error if we find any.
+            if '$' in file:
+                raise Exception('{}: {}{} includes file "{}" containing an expansion, '
+                                'which is not supported.'.format(makefile, target, type, file))
+
+            # Verify that the file type is acceptable for unified compilation.
+            # Note that although we *could* allow header files, they're not
+            # useful, and we'd have to filter them out anyway or they'd
+            # interfere with accurate dependency tracking.
+            (_, extension) = os.path.splitext(file)
+            if extension not in ['.c', '.cpp']:
+                raise Exception('{}: {}{} includes file "{}" which is not a .c or .cpp '
+                                'source file.'.format(makefile, target, type, file))
+
+        yield file
 
 def compute_file_sets(automake_files):
     # This regular expression matches expressions that set 'foo_UNIFIED' or
@@ -124,15 +135,17 @@ def compute_file_sets(automake_files):
     nonunified_file_sets = collections.defaultdict(set)
     targets_with_sources_vars = set()
     for makefile_name in automake_files:
+        # Determine the value of %reldir% in this makefile. Automake sets it to
+        # the path relative to the top-level Makefile.am. Rather than attempt to
+        # implement those semantics precisely, we simply use the path relative
+        # to the current directory.
+        reldir = os.path.relpath(os.path.dirname(makefile_name), '.')
+
         with open(makefile_name, 'r') as makefile:
             for assignment in unified_re.finditer(makefile.read()):
                 (target, type, files) = assignment.group('target', 'type', 'files')
-
-                # Construct the file set and make sure it's valid. Due to
-                # split()'s behavior when the regular expression contains a
-                # capture group, we have to filter out empty strings.
-                file_set = filter(None, file_split_re.split(files))
-                check_file_set(makefile_name, target, type, file_set)
+                file_set = construct_file_set(makefile, reldir, target, type,
+                                              file_split_re.split(files))
 
                 if type == '_UNIFIED':
                     unified_file_sets[target].update(file_set)
