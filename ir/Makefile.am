@@ -29,9 +29,6 @@ ir_UNIFIED = \
 	ir/visitor.cpp \
 	ir/write_context.cpp
 
-ir_NONUNIFIED = \
-	ir/ir-generated.cpp
-
 ir_DEF_FILES += \
     $(srcdir)/ir/base.def \
     $(srcdir)/ir/type.def \

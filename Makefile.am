@@ -40,6 +40,7 @@ export XFAIL_TESTS
 export IFAIL_TESTS
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
+extension_frontend_SOURCES =   # Files added to libfrontend by extensions
 
 include $(srcdir)/lib/Makefile.am
 include $(srcdir)/tools/ir-generator/Makefile.am
@@ -84,7 +85,9 @@ libfrontend_a_SOURCES = \
 	setup.cpp \
 	$(frontend_SOURCES) \
 	$(midend_SOURCES) \
-	$(ir_SOURCES)
+	$(ir_SOURCES) \
+	ir/ir-generated.cpp \
+	$(extension_frontend_SOURCES)
 
 # unit tests
 include $(srcdir)/test/Makefile.am
