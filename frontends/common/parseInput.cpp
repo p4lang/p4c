@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
         // Model is loaded before parsing the input file.
         // In this way the SourceInfo in the model comes first.
         const IR::Node* v1 = parse_P4_14_file(options, in);
+        if (::errorCount() > 0 || v1 == nullptr)
+            return nullptr;
         if (verbose)
             std::cerr << "Converting to P4-16" << std::endl;
         converter.visit(v1);

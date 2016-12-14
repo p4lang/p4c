@@ -1614,7 +1614,12 @@ void ProgramStructure::createControls() {
 
     for (auto it : controls)
         knownControls.push_back(it.second);
-    calledControls.sort(knownControls, controlsToDo);
+    bool cycles = calledControls.sort(knownControls, controlsToDo);
+    if (cycles) {
+        // TODO: give a better error message
+        ::error("Program contains recursive control blocks");
+        return;
+    }
 
     for (auto c : controlsToDo) {
         auto ct = controls.get(c);
