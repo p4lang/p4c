@@ -82,7 +82,7 @@ AX_PYTHON_MODULE([re], [fatal], [python])
 dnl The following lines are just including all "addconfig.ac" files
 dnl found in subdirectories
 
-m4_foreach_w([ac_file],m4_esyscmd([find -L . -name addconfig.ac 2>/dev/null]),
+m4_foreach_w([ac_file],m4_esyscmd([sh -c 'find -L . -name addconfig.ac 2>/dev/null']),
 [[#]] config from ac_file
 [sinclude(]ac_file[)]
 [[#]] end of ac_file

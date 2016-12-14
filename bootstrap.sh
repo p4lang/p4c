@@ -20,6 +20,7 @@ set -e  # exit on error
 ./find-makefiles.sh # creates otherMakefiles.am, included in Makefile.am
 mkdir -p extensions # place where additional back-ends are expected
 echo "Running autoconf/configure tools"
+rm -f aclocal.m4  # Needed to ensure we see updates to extension addconfig.ac files.
 autoreconf -i
 mkdir -p build # recommended folder for build
 sourcedir=`pwd`
