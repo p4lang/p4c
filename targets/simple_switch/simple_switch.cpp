@@ -201,6 +201,17 @@ SimpleSwitch::set_all_egress_queue_rates(const uint64_t rate_pps) {
   return 0;
 }
 
+uint64_t
+SimpleSwitch::get_time_elapsed_us() const {
+  return get_ts().count();
+}
+
+uint64_t
+SimpleSwitch::get_time_since_epoch_us() const {
+  auto tp = clock::now();
+  return duration_cast<ts_res>(tp.time_since_epoch()).count();
+}
+
 void
 SimpleSwitch::transmit_thread() {
   while (1) {

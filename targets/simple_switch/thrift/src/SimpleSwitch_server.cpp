@@ -89,6 +89,18 @@ class SimpleSwitchHandler : virtual public SimpleSwitchIf {
     return switch_->set_all_egress_queue_rates(static_cast<uint64_t>(rate_pps));
   }
 
+  int64_t get_time_elapsed_us() {
+    bm::Logger::get()->trace("get_time_elapsed_us");
+    // cast from unsigned to signed
+    return static_cast<int64_t>(switch_->get_time_elapsed_us());
+  }
+
+  int64_t get_time_since_epoch_us() {
+    bm::Logger::get()->trace("get_time_since_epoch_us");
+    // cast from unsigned to signed
+    return static_cast<int64_t>(switch_->get_time_since_epoch_us());
+  }
+
  private:
   SimpleSwitch *switch_;
 };

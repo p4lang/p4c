@@ -32,4 +32,9 @@ service SimpleSwitch {
   i32 set_egress_queue_rate(1:i32 port_num, 2:i64 rate_pps);
   i32 set_all_egress_queue_rates(1:i64 rate_pps);
 
+  // these methods are here as an experiment, prefer get_time_elapsed_us() when
+  // possible
+  i64 get_time_elapsed_us();
+  i64 get_time_since_epoch_us();
+
 }

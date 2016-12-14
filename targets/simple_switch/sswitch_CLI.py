@@ -68,6 +68,14 @@ class SimpleSwitchAPI(runtime_CLI.RuntimeAPI):
         mirror_id = int(line)
         self.sswitch_client.mirroring_mapping_delete(mirror_id)
 
+    def do_get_time_elapsed(self, line):
+        "Get time elapsed (in microseconds) since the switch started: get_time_elapsed"
+        print self.sswitch_client.get_time_elapsed_us()
+
+    def do_get_time_since_epoch(self, line):
+        "Get time elapsed (in microseconds) since the switch clock's epoch: get_time_since_epoch"
+        print self.sswitch_client.get_time_since_epoch_us()
+
 def main():
     args = runtime_CLI.get_parser().parse_args()
 

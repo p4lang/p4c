@@ -100,6 +100,12 @@ class SimpleSwitch : public Switch {
   int set_egress_queue_rate(int port, const uint64_t rate_pps);
   int set_all_egress_queue_rates(const uint64_t rate_pps);
 
+  // returns the number of microseconds elapsed since the switch started
+  uint64_t get_time_elapsed_us() const;
+
+  // returns the number of microseconds elasped since the clock's epoch
+  uint64_t get_time_since_epoch_us() const;
+
  private:
   static constexpr size_t nb_egress_threads = 4u;
 
