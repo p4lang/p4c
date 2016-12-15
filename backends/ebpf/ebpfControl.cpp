@@ -54,7 +54,7 @@ bool ControlBodyTranslationVisitor::preorder(const IR::PathExpression* expressio
     auto param = decl->getNode()->to<IR::Parameter>();
     if (param != nullptr && toDereference.count(param) > 0)
         builder->append("*");
-    builder->append(expression->path->toString());
+    builder->append(expression->path->name);  // each identifier should be unique
     return false;
 }
 
