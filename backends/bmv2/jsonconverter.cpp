@@ -604,7 +604,8 @@ class ExpressionConverter : public Inspector {
                 f->append(converter->scalarsName);
                 f->append(var->name);
             } else if (type->is<IR::Type_Stack>()) {
-                // handled specially elsewhere
+                result->emplace("type", "header_stack");
+                result->emplace("value", var->name);
             } else {
                 BUG("%1%: type not yet handled", type);
             }
