@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
         auto type = program->typeMap->getType(c->expression);
         builder->emitIndent();
         auto ebpfType = EBPFTypeFactory::instance->create(type);
-        ebpfType->declare(builder, cstring("field") + fieldNumber, false);
+        ebpfType->declare(builder, cstring("field") + Util::toString(fieldNumber), false);
         builder->endOfStatement(true);
 
         auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
