@@ -130,15 +130,14 @@ int fileLogLevel(const char* file) {
     return mostRecentLevel;
 }
 
-void invalidateCaches(int possibleNewMaxLogLevel)
-{
+void invalidateCaches(int possibleNewMaxLogLevel) {
     mostRecentFile = nullptr;
     mostRecentLevel = 0;
     logLevelCache.clear();
     maximumLogLevel = std::max(maximumLogLevel, possibleNewMaxLogLevel);
 }
 
-} // namespace Detail
+}  // namespace Detail
 
 void addDebugSpec(const char* spec) {
 #ifdef CLOCK_MONOTONIC
@@ -183,4 +182,4 @@ void increaseVerbosity() {
     Detail::invalidateCaches(Detail::verbosity - 1);
 }
 
-} // namespace Log
+}  // namespace Log

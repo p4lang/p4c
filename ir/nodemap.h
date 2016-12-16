@@ -26,6 +26,7 @@ template<class KEY, class VALUE,
 class NodeMap : public Node {
     typedef MAP<const KEY *, const VALUE *, COMP, ALLOC>        map_t;
     map_t       symbols;
+
  public:
     typedef typename map_t::value_type          value_type;
     typedef typename map_t::iterator            iterator;

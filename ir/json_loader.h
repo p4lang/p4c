@@ -18,13 +18,13 @@ limitations under the License.
 #define _IR_JSON_LOADER_H_
 
 #include <assert.h>
+#include <gmpxx.h>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
-#include <gmpxx.h>
-#include <unordered_map>
 #include "json_parser.h"
 
 #include "ir.h"
@@ -44,10 +44,10 @@ class JSONLoader {
     std::unordered_map<int, IR::Node*> &node_refs;
     JsonData *json;
 
-    JSONLoader(std::istream &in) : node_refs(*(new std::unordered_map<int, IR::Node*>()))
+    explicit JSONLoader(std::istream &in) : node_refs(*(new std::unordered_map<int, IR::Node*>()))
     { in >> json; }
 
-    JSONLoader(JsonData *json)
+    explicit JSONLoader(JsonData *json)
     : node_refs(*(new std::unordered_map<int, IR::Node*>())), json(json) {}
 
     JSONLoader(JsonData *json, std::unordered_map<int, IR::Node*> &refs)
@@ -99,7 +99,7 @@ class JSONLoader {
     template<typename K, typename V>
     void unpack_json(std::map<K, V> &v) {
         std::pair<K, V> temp;
-        for (auto e: *json->to<JsonObject>()) {
+        for (auto e : *json->to<JsonObject>()) {
             JsonString* k = new JsonString(e.first);
             load(k, temp.first);
             load(e.second, temp.second);
@@ -109,7 +109,7 @@ class JSONLoader {
     template<typename K, typename V>
     void unpack_json(ordered_map<K, V> &v) {
         std::pair<K, V> temp;
-        for (auto e: *json->to<JsonObject>()) {
+        for (auto e : *json->to<JsonObject>()) {
             JsonString* k = new JsonString(e.first);
             load(k, temp.first);
             load(e.second, temp.second);
@@ -119,7 +119,7 @@ class JSONLoader {
     template<typename K, typename V>
     void unpack_json(std::multimap<K, V> &v) {
         std::pair<K, V> temp;
-        for (auto e: *json->to<JsonObject>()) {
+        for (auto e : *json->to<JsonObject>()) {
             JsonString* k = new JsonString(e.first);
             load(k, temp.first);
             load(e.second, temp.second);

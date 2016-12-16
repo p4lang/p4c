@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES
+#ifndef IR_IR_TREE_MACROS_H_
+#define IR_IR_TREE_MACROS_H_
 
 /* macro table listing ALL IR subclasses of Node and all their direct and indirect bases
  * whenever a new IR Node subclass is addeded, it MUST be added to this table.  Target
@@ -73,4 +74,4 @@ limitations under the License.
                                 IGNORE, IGNORE, COPY, M, ##__VA_ARGS__)
 
 
-#endif /* IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES */
+#endif /* IR_IR_TREE_MACROS_H_ */

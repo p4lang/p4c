@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _name_gateways_h_
-#define _name_gateways_h_
+#ifndef FRONTENDS_COMMON_NAME_GATEWAYS_H_
+#define FRONTENDS_COMMON_NAME_GATEWAYS_H_
 
 class NameGateways : public Transform {
     const IR::Node *preorder(IR::If *n) override {
@@ -26,4 +26,4 @@ class NameGateways : public Transform {
     }
 };
 
-#endif // _name_gateways_h_
+#endif  /* FRONTENDS_COMMON_NAME_GATEWAYS_H_ */
