@@ -373,6 +373,7 @@ class ExpressionConverter : public Inspector {
         auto param = enclosingParamReference(expression->expr);
         if (param != nullptr) {
             auto type = converter->typeMap->getType(expression, true);
+            auto parentType = converter->typeMap->getType(expression->expr, true);
             if (param == converter->stdMetadataParameter) {
                 result->emplace("type", "field");
                 auto e = mkArrayField(result, "value");
@@ -381,12 +382,23 @@ class ExpressionConverter : public Inspector {
             } else {
                 if (type->is<IR::Type_Stack>()) {
                     result->emplace("type", "header_stack");
+                    result->emplace("value", expression->member.name);
+                } else if (parentType->is<IR::Type_StructLike>() &&
+                           (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>())) {
+                    auto field = parentType->to<IR::Type_StructLike>()->getField(expression->member);
+                    CHECK_NULL(field);
+                    auto name = ::get(converter->scalarMetadataFields, field);
+                    CHECK_NULL(name);
+                    result->emplace("type", "field");
+                    auto e = mkArrayField(result, "value");
+                    e->append(converter->scalarsName);
+                    e->append(name);
                 } else {
                     // This may be wrong, but the caller will handle it properly
                     // (e.g., this can be a method, such as packet.lookahead)
                     result->emplace("type", "header");
+                    result->emplace("value", expression->member.name);
                 }
-                result->emplace("value", expression->member.name);
             }
         } else {
             bool done = false;
@@ -1728,7 +1740,6 @@ void JsonConverter::addLocals() {
             field->append(tb->isSigned);
             scalars_width += tb->size;
         } else if (type->is<IR::Type_Boolean>()) {
-            unsigned boolWidth = 1;
             auto field = pushNewArray(scalarFields);
             field->append(v->name.name);
             field->append(boolWidth);
@@ -2000,10 +2011,32 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
             // Done elsewhere
             continue;
         } else {
-            if (!meta)
+            if (!meta) {
                 ::error("Type %1% should only contain headers or stacks", type);
-            else
+                return;
+            }
+            // Treat this field like a scalar local variable
+            auto scalarFields = scalarsStruct->get("fields")->to<Util::JsonArray>();
+            CHECK_NULL(scalarFields);
+            cstring newName = refMap->newName(type->getName() + "." + f->name);
+            if (ft->is<IR::Type_Bits>()) {
+                auto tb = ft->to<IR::Type_Bits>();
+                auto field = pushNewArray(scalarFields);
+                field->append(newName);
+                field->append(tb->size);
+                field->append(tb->isSigned);
+                scalars_width += tb->size;
+                scalarMetadataFields.emplace(f, newName);
+            } else if (type->is<IR::Type_Boolean>()) {
+                auto field = pushNewArray(scalarFields);
+                field->append(newName);
+                field->append(boolWidth);
+                field->append(0);
+                scalars_width += boolWidth;
+                scalarMetadataFields.emplace(f, newName);
+            } else {
                 BUG("%1%: Unhandled type for %2%", ft, f);
+            }
         }
     }
 }

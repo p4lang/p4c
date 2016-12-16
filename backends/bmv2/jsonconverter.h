@@ -70,6 +70,11 @@ class JsonConverter final {
     const IR::Parameter*   userMetadataParameter;
     const IR::Parameter*   stdMetadataParameter;
     cstring                jsonMetadataParameterName = "standard_metadata";
+    const unsigned         boolWidth = 1;
+    // We place scalar user metadata fields (i.e., bit<>, bool)
+    // in the "scalars" metadata object, so we may need to rename
+    // these fields.  This map holds the new names.
+    std::map<const IR::StructField*, cstring> scalarMetadataFields;
 
  private:
     Util::JsonArray *headerTypes;
