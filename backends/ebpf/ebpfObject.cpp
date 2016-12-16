@@ -69,8 +69,11 @@ void EBPFProgram::emit(CodeBuilder *builder) {
     control->emitTables(builder);
 
     builder->newline();
+#if 0
+    // TODO: is this necessary?
     builder->emitIndent();
-    builder->target->emitCodeSection(builder);
+    builder->target->emitCodeSection(builder, functionName);
+#endif
     builder->emitIndent();
     builder->appendFormat("int %s(struct __sk_buff* %s) ", functionName, model.CPacketName.str());
     builder->blockStart();

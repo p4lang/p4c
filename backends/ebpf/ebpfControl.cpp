@@ -107,7 +107,7 @@ void ControlBodyTranslationVisitor::processApply(const P4::ApplyMethod* method) 
     if (!saveAction.empty()) {
         actionVariableName = saveAction.at(saveAction.size() - 1);
         if (!actionVariableName.isNullOrEmpty()) {
-            builder->appendFormat("%s %s;\n", table->actionEnumName, actionVariableName);
+            builder->appendFormat("enum %s %s;\n", table->actionEnumName, actionVariableName);
             builder->emitIndent();
         }
     }
@@ -185,7 +185,7 @@ void ControlBodyTranslationVisitor::processApply(const P4::ApplyMethod* method) 
     table->runAction(builder, valueName);
     if (!actionVariableName.isNullOrEmpty()) {
         builder->emitIndent();
-        builder->appendFormat("%s = valueName->action;\n", actionVariableName);
+        builder->appendFormat("%s = %s->action;\n", actionVariableName, valueName);
     }
     toDereference.clear();
 

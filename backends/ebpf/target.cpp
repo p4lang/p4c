@@ -93,6 +93,11 @@ void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring 
     builder->newline();
 }
 
+void KernelSamplesTarget::emitCodeSection(
+    Util::SourceCodeBuilder* builder, cstring sectionName) const {
+    builder->appendFormat("SEC(\"%s\")\n", sectionName);
+}
+
 //////////////////////////////////////////////////////////////
 
 void BccTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,

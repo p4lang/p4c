@@ -35,7 +35,7 @@ class Target {
 
  public:
     virtual void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const = 0;
-    virtual void emitCodeSection(Util::SourceCodeBuilder* builder) const = 0;
+    virtual void emitCodeSection(Util::SourceCodeBuilder* builder, cstring sectionName) const = 0;
     virtual void emitIncludes(Util::SourceCodeBuilder* builder) const = 0;
     virtual void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                                  cstring key, cstring value) const = 0;
@@ -52,8 +52,8 @@ class KernelSamplesTarget : public Target {
  public:
     KernelSamplesTarget() : Target("Linux kernel") {}
     void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const override;
-    void emitCodeSection(Util::SourceCodeBuilder*) const override {}
-    void emitIncludes(Util::SourceCodeBuilder*) const override;
+    void emitCodeSection(Util::SourceCodeBuilder* builder, cstring sectionName) const override;
+    void emitIncludes(Util::SourceCodeBuilder* builder) const override;
     void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                          cstring key, cstring value) const override;
     void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
@@ -68,7 +68,7 @@ class BccTarget : public Target {
  public:
     BccTarget() : Target("BCC") {}
     void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const override;
-    void emitCodeSection(Util::SourceCodeBuilder*) const override {}
+    void emitCodeSection(Util::SourceCodeBuilder*, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
     void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                          cstring key, cstring value) const override;
