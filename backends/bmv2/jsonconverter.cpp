@@ -385,7 +385,8 @@ class ExpressionConverter : public Inspector {
                     result->emplace("value", expression->member.name);
                 } else if (parentType->is<IR::Type_StructLike>() &&
                            (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>())) {
-                    auto field = parentType->to<IR::Type_StructLike>()->getField(expression->member);
+                    auto field = parentType->to<IR::Type_StructLike>()->getField(
+                        expression->member);
                     CHECK_NULL(field);
                     auto name = ::get(converter->scalarMetadataFields, field);
                     CHECK_NULL(name);
