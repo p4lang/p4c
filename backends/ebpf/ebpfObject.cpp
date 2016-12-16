@@ -69,8 +69,11 @@ void EBPFProgram::emit(CodeBuilder *builder) {
     control->emitTables(builder);
 
     builder->newline();
+#if 0
+    // TODO: is this necessary?
     builder->emitIndent();
-    builder->target->emitCodeSection(builder);
+    builder->target->emitCodeSection(builder, functionName);
+#endif
     builder->emitIndent();
     builder->appendFormat("int %s(struct __sk_buff* %s) ", functionName, model.CPacketName.str());
     builder->blockStart();
@@ -176,6 +179,7 @@ void EBPFProgram::emitPipeline(CodeBuilder* builder) {
     builder->append(IR::ParserState::accept);
     builder->append(":");
     builder->newline();
+    builder->emitIndent();
     builder->blockStart();
     control->emit(builder);
     builder->blockEnd(true);

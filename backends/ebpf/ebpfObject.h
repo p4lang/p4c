@@ -63,7 +63,7 @@ class EBPFProgram : public EBPFObject {
     cstring errorVar;
     cstring errorEnum;
     cstring license = "GPL";  // TODO: this should be a compiler option probably
-    cstring arrayIndexType = "size_t";
+    cstring arrayIndexType = "u32";
 
     // write program as C source code
     void emit(CodeBuilder *builder) override;

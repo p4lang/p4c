@@ -19,29 +19,33 @@ limitations under the License.
 namespace EBPF {
 
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include <linux/skbuff.h>\n"
-                    "#include <linux/netdevice.h>\n"
-                    "#include <linux/version.h>\n"
-                    "#include <uapi/linux/bpf.h>\n"
-                    "/* TODO: these should be in some header somewhere in the kernel, but I could not find them! */\n"
-                    "#define SEC(NAME) __attribute__((section(NAME), used))\n"
-                    "static void *(*bpf_map_lookup_elem)(void *map, void *key) =\n"
-                    "	(void *) BPF_FUNC_map_lookup_elem;\n"
-                    "unsigned long long load_byte(void *skb,\n"
-                    "                             unsigned long long off) asm(\"llvm.bpf.load.byte\");\n"
-                    "unsigned long long load_half(void *skb,\n"
-                    "                             unsigned long long off) asm(\"llvm.bpf.load.half\");\n"
-                    "unsigned long long load_word(void *skb,\n"
-                    "                             unsigned long long off) asm(\"llvm.bpf.load.word\");\n"
-                    "struct bpf_map_def {\n"
-                    "        __u32 type;\n"
-                    "        __u32 key_size;\n"
-                    "        __u32 value_size;\n"
-                    "        __u32 max_entries;\n"
-                    "        __u32 flags;\n"
-                    "        __u32 id;\n"
-                    "        __u32 pinning;\n"
-                    "};\n");
+    builder->append(
+        "#include <linux/skbuff.h>\n"
+        "#include <linux/netdevice.h>\n"
+        "#include <linux/version.h>\n"
+        "#include <uapi/linux/bpf.h>\n"
+        "/* TODO: these should be in some header somewhere in the kernel, but where? */\n"
+        "#define SEC(NAME) __attribute__((section(NAME), used))\n"
+        "static void *(*bpf_map_lookup_elem)(void *map, void *key) =\n"
+        "	(void *) BPF_FUNC_map_lookup_elem;\n"
+        "static int (*bpf_map_update_elem)(void *map, void *key, void *value,\n"
+        "                                  unsigned long long flags) =\n"
+        "       (void *) BPF_FUNC_map_update_elem;\n"
+        "unsigned long long load_byte(void *skb,\n"
+        "                             unsigned long long off) asm(\"llvm.bpf.load.byte\");\n"
+        "unsigned long long load_half(void *skb,\n"
+        "                             unsigned long long off) asm(\"llvm.bpf.load.half\");\n"
+        "unsigned long long load_word(void *skb,\n"
+        "                             unsigned long long off) asm(\"llvm.bpf.load.word\");\n"
+        "struct bpf_map_def {\n"
+        "        __u32 type;\n"
+        "        __u32 key_size;\n"
+        "        __u32 value_size;\n"
+        "        __u32 max_entries;\n"
+        "        __u32 flags;\n"
+        "        __u32 id;\n"
+        "        __u32 pinning;\n"
+        "};\n");
 }
 
 void KernelSamplesTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
@@ -90,6 +94,11 @@ void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring 
     builder->emitIndent();
     builder->appendFormat("char _license[] SEC(\"license\") = \"%s\";", license);
     builder->newline();
+}
+
+void KernelSamplesTarget::emitCodeSection(
+    Util::SourceCodeBuilder* builder, cstring sectionName) const {
+    builder->appendFormat("SEC(\"%s\")\n", sectionName);
 }
 
 //////////////////////////////////////////////////////////////
