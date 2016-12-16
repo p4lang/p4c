@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ namespace EBPF {
 
 class EBPFControl : public EBPFObject {
  public:
-    const EBPFProgram*            program;
-    const IR::ControlBlock*       controlBlock;
-    const IR::Parameter*          headers;
-    const IR::Parameter*          accept;
+    const EBPFProgram*      program;
+    const IR::ControlBlock* controlBlock;
+    const IR::Parameter*    headers;
+    const IR::Parameter*    accept;
+    cstring                 hitVariable;
 
     std::set<const IR::Parameter*> toDereference;
     std::map<cstring, EBPFTable*>  tables;

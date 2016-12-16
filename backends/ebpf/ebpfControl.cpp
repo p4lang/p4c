@@ -17,6 +17,7 @@ limitations under the License.
 #include "ebpfControl.h"
 #include "ebpfType.h"
 #include "ebpfTable.h"
+#include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
@@ -24,10 +25,6 @@ limitations under the License.
 namespace EBPF {
 
 namespace {
-// TODO: table applys should be compiled into separate inline functions,
-// and then we can generate calls as proper expressions.
-// Right now "if (table.apply().hit) { ... }"
-// is broken.
 class ControlBodyTranslationVisitor : public CodeGenInspector {
     const EBPFControl* control;
     std::set<const IR::Parameter*> toDereference;
@@ -38,10 +35,8 @@ class ControlBodyTranslationVisitor : public CodeGenInspector {
             CodeGenInspector(builder, control->program->typeMap), control(control) {}
     using CodeGenInspector::preorder;
     bool preorder(const IR::PathExpression* expression) override;
-    bool preorder(const IR::MethodCallStatement* stat) override
-    { saveAction.push_back(nullptr); visit(stat->methodCall); saveAction.pop_back(); return false; }
     bool preorder(const IR::SwitchStatement* stat) override;
-    // bool preorder(const IR::IfStatement* stat) override;  // TODO
+    bool preorder(const IR::IfStatement* stat) override;
     bool preorder(const IR::MethodCallExpression* expression) override;
     bool preorder(const IR::ReturnStatement* stat) override;
     bool preorder(const IR::ExitStatement* stat) override;
@@ -108,10 +103,13 @@ void ControlBodyTranslationVisitor::processApply(const P4::ApplyMethod* method) 
 
     P4::ParameterSubstitution binding;
     binding.populate(method->getActualParameters(), method->expr->arguments);
-    cstring actionVariableName = saveAction.at(saveAction.size() - 1);
-    if (!actionVariableName.isNullOrEmpty()) {
-        builder->appendFormat("%s %s;\n", table->actionEnumName, actionVariableName);
-        builder->emitIndent();
+    cstring actionVariableName;
+    if (!saveAction.empty()) {
+        actionVariableName = saveAction.at(saveAction.size() - 1);
+        if (!actionVariableName.isNullOrEmpty()) {
+            builder->appendFormat("%s %s;\n", table->actionEnumName, actionVariableName);
+            builder->emitIndent();
+        }
     }
     builder->blockStart();
 
@@ -164,8 +162,18 @@ void ControlBodyTranslationVisitor::processApply(const P4::ApplyMethod* method) 
     builder->emitIndent();
     builder->appendLine("/* miss; find default action */");
     builder->emitIndent();
+    builder->appendFormat("%s = 0", control->hitVariable);
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
     builder->target->emitTableLookup(builder, table->defaultActionMapName,
                                      control->program->zeroKey, valueName);
+    builder->endOfStatement(true);
+    builder->blockEnd(false);
+    builder->append(" else ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("%s = 1", control->hitVariable);
     builder->endOfStatement(true);
     builder->blockEnd(true);
 
@@ -195,6 +203,48 @@ bool ControlBodyTranslationVisitor::preorder(const IR::ReturnStatement*) {
     return false;
 }
 
+bool ControlBodyTranslationVisitor::preorder(const IR::IfStatement* statement) {
+    bool isHit = P4::TableApplySolver::isHit(statement->condition, control->program->refMap,
+                                             control->program->typeMap);
+    if (isHit) {
+        // visit first the table, and then the conditional
+        auto member = statement->condition->to<IR::Member>();
+        CHECK_NULL(member);
+        visit(member->expr);  // table application.  Sets 'hitVariable'
+        builder->emitIndent();
+    }
+
+    // This is almost the same as the base class method
+    builder->append("if (");
+    if (isHit)
+        builder->append(control->hitVariable);
+    else
+        visit(statement->condition);
+    builder->append(") ");
+    if (!statement->ifTrue->is<IR::BlockStatement>()) {
+        builder->increaseIndent();
+        builder->newline();
+        builder->emitIndent();
+    }
+    visit(statement->ifTrue);
+    if (!statement->ifTrue->is<IR::BlockStatement>())
+        builder->decreaseIndent();
+    if (statement->ifFalse != nullptr) {
+        builder->newline();
+        builder->emitIndent();
+        builder->append("else ");
+        if (!statement->ifFalse->is<IR::BlockStatement>()) {
+            builder->increaseIndent();
+            builder->newline();
+            builder->emitIndent();
+        }
+        visit(statement->ifFalse);
+        if (!statement->ifFalse->is<IR::BlockStatement>())
+            builder->decreaseIndent();
+    }
+    return false;
+}
+
 bool ControlBodyTranslationVisitor::preorder(const IR::SwitchStatement* statement) {
     cstring newName = control->program->refMap->newName("action_run");
     saveAction.push_back(newName);
@@ -204,6 +254,7 @@ bool ControlBodyTranslationVisitor::preorder(const IR::SwitchStatement* statemen
               "%1%: Unexpected expression in switch statement", statement->expression);
     visit(mem->expr);
     saveAction.pop_back();
+    saveAction.push_back(nullptr);
     builder->emitIndent();
     builder->append("switch (");
     builder->append(newName);
@@ -231,6 +282,7 @@ bool ControlBodyTranslationVisitor::preorder(const IR::SwitchStatement* statemen
         builder->appendLine("break;");
     }
     builder->blockEnd(false);
+    saveAction.pop_back();
     return false;
 }
 }  // namespace
@@ -242,6 +294,7 @@ EBPFControl::EBPFControl(const EBPFProgram* program,
         program(program), controlBlock(block), headers(nullptr), accept(nullptr) {}
 
 bool EBPFControl::build() {
+    hitVariable = program->refMap->newName("hit");
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
         ::error("Expected control block to have exactly 2 parameters");
@@ -295,6 +348,10 @@ void EBPFControl::emitDeclaration(const IR::Declaration* decl, CodeBuilder* buil
 }
 
 void EBPFControl::emit(CodeBuilder* builder) {
+    auto hitType = EBPFTypeFactory::instance->create(IR::Type_Boolean::get());
+    builder->emitIndent();
+    hitType->declare(builder, hitVariable, false);
+    builder->endOfStatement(true);
     for (auto a : *controlBlock->container->controlLocals)
         emitDeclaration(a, builder);
     builder->emitIndent();
