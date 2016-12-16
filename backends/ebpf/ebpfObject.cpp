@@ -176,7 +176,10 @@ void EBPFProgram::emitPipeline(CodeBuilder* builder) {
     builder->append(IR::ParserState::accept);
     builder->append(":");
     builder->newline();
+    builder->emitIndent();
+    builder->blockStart();
     control->emit(builder);
+    builder->blockEnd(true);
 }
 
 }  // namespace EBPF
