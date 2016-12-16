@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _ordered_map_h_
-#define _ordered_map_h_
+#ifndef LIB_ORDERED_MAP_H_
+#define LIB_ORDERED_MAP_H_
 
 #include <functional>
 #include <list>
@@ -26,7 +26,7 @@ limitations under the License.
 template <class K, class V, class COMP = std::less<K>,
           class ALLOC = std::allocator<std::pair<const K, V>>>
 class ordered_map {
-public:
+ public:
     typedef K                           key_type;
     typedef V                           mapped_type;
     typedef std::pair<const K, V>       value_type;
@@ -34,25 +34,28 @@ public:
     typedef ALLOC                       allocator_type;
     typedef value_type                  &reference;
     typedef const value_type            &const_reference;
-private:
+
+ private:
     typedef std::list<value_type, ALLOC>                list_type;
     list_type                                           data;
-public:
+
+ public:
     typedef typename list_type::iterator                iterator;
     typedef typename list_type::const_iterator          const_iterator;
     typedef std::reverse_iterator<iterator>             reverse_iterator;
     typedef std::reverse_iterator<const_iterator>       const_reverse_iterator;
 
     class value_compare : std::binary_function<value_type, value_type, bool> {
-    friend class ordered_map;
-    protected:
+        friend class ordered_map;
+     protected:
         COMP    comp;
-        value_compare(COMP c) : comp(c) {}
-    public:
+        explicit value_compare(COMP c) : comp(c) {}
+     public:
         bool operator()(const value_type &a, const value_type &b) const {
             return comp(a.first, b.first); }
     };
-private:
+
+ private:
     struct mapcmp : std::binary_function<const K*, const K*, bool> {
         COMP    comp;
         bool operator()(const K *a, const K *b) const { return comp(*a, *b); } };
@@ -70,10 +73,11 @@ private:
         if (i == data_map.end())
             return data.end();
         return i->second; }
-public:
+
+ public:
     typedef typename map_type::size_type        size_type;
 
-public:
+ public:
     ordered_map() {}
     ordered_map(const ordered_map &a) : data(a.data) { init_data_map(); }
     ordered_map(ordered_map &&a) = default; /* move is ok? */
@@ -233,4 +237,4 @@ template<class K, class T, class V, class Comp, class Alloc>
 inline const V *getref(const ordered_map<K, V, Comp, Alloc> *m, T key) {
     return m ? getref(*m, key) : 0; }
 
-#endif /* _ordered_map_h_ */
+#endif /* LIB_ORDERED_MAP_H_ */

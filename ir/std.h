@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _std_h_
-#define _std_h_
+#ifndef IR_STD_H_
+#define IR_STD_H_
 #include <array>
 #include <map>
 #include <memory>
@@ -29,12 +29,12 @@ using std::map;
 using std::set;
 using std::unordered_map;
 using std::unordered_set;
-//using std::vector;
-//using std::array;
+// using std::vector;
+// using std::array;
 
 template<class T, class _Alloc = std::allocator<T>>
 class vector : public std::vector<T, _Alloc> {
-public:
+ public:
     using std::vector<T, _Alloc>::vector;
     typedef typename std::vector<T, _Alloc>::reference reference;
     typedef typename std::vector<T, _Alloc>::const_reference const_reference;
@@ -46,7 +46,7 @@ public:
 
 template<class T, size_t N>
 class array : public std::array<T, N> {
-public:
+ public:
     using std::array<T, N>::array;
     typedef typename std::array<T, N>::reference reference;
     typedef typename std::array<T, N>::const_reference const_reference;
@@ -55,4 +55,4 @@ public:
     const_reference operator[](size_type n) const { return this->at(n); }
 };
 
-#endif /* _std_h_ */
+#endif /* IR_STD_H_ */

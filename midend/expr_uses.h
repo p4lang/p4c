@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ limitations under the License.
 class exprUses : public Inspector {
     cstring look_for;
     bool result = false;
-    bool preorder(const IR::Path *p) override { 
+    bool preorder(const IR::Path *p) override {
         if (p->name == look_for) result = true;
         return !result; }
-    bool preorder(const IR::Primitive *p) override { 
+    bool preorder(const IR::Primitive *p) override {
         if (p->name == look_for) result = true;
         return !result; }
-    bool preorder(const IR::NamedRef *n) override { 
+    bool preorder(const IR::NamedRef *n) override {
         if (n->name == look_for) result = true;
         return !result; }
     bool preorder(const IR::Expression *) override { return !result; }

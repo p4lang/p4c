@@ -28,33 +28,33 @@ limitations under the License.
 
 namespace Log {
 namespace Detail {
-  // The global verbosity level.
-  extern int verbosity;
+// The global verbosity level.
+extern int verbosity;
 
-  // A cache of the maximum log level requested for any file.
-  extern int maximumLogLevel;
+// A cache of the maximum log level requested for any file.
+extern int maximumLogLevel;
 
-  // Look up the log level of @file.
-  int fileLogLevel(const char* file);
+// Look up the log level of @file.
+int fileLogLevel(const char* file);
 
-  // A utility class used to prepend file and log level information to logging output.
-  class OutputLogPrefix {
-      const char* fn;
-      int level;
-      friend std::ostream& operator<<(std::ostream&, const OutputLogPrefix&);
-   public:
-      OutputLogPrefix(const char* f, int l) : fn(f), level(l) {}
-  };
-} // namespace Detail
+// A utility class used to prepend file and log level information to logging output.
+class OutputLogPrefix {
+    const char* fn;
+    int level;
+    friend std::ostream& operator<<(std::ostream&, const OutputLogPrefix&);
+ public:
+    OutputLogPrefix(const char* f, int l) : fn(f), level(l) {}
+};
+}  // namespace Detail
 
 inline bool fileLogLevelIsAtLeast(const char* file, int level) {
-  // If there's no file with a log level of at least @level, we don't need to do
-  // the more expensive per-file check.
-  if (Detail::maximumLogLevel < level) {
-    return false;
-  }
+    // If there's no file with a log level of at least @level, we don't need to do
+    // the more expensive per-file check.
+    if (Detail::maximumLogLevel < level) {
+        return false;
+    }
 
-  return Detail::fileLogLevel(file) >= level;
+    return Detail::fileLogLevel(file) >= level;
 }
 
 // Process @spec and update the log level requested for the appropriate file.

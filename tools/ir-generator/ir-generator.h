@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _TOOLS_IRGENERATOR_IR_GENERATOR_H
-#define _TOOLS_IRGENERATOR_IR_GENERATOR_H
+#ifndef TOOLS_IR_GENERATOR_IR_GENERATOR_H_
+#define TOOLS_IR_GENERATOR_IR_GENERATOR_H_
 
 #include "irclass.h"
 
 IrDefinitions *parse(char** files, int count);
 
-#endif /* _TOOLS_IRGENERATOR_IR_GENERATOR_H */
+#endif /* TOOLS_IR_GENERATOR_IR_GENERATOR_H_ */

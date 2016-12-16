@@ -253,7 +253,5 @@ void IR::Declaration_Instance::dbprint(std::ostream &out) const {
         out << " {" << indent;
         for (auto &obj : properties)
             out << endl << obj.second;
-        out << " }" << unindent;
-
-    }
+        out << " }" << unindent; }
 }

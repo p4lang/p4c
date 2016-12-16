@@ -14,16 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _inline_control_flow_h_
-#define _inline_control_flow_h_
+#ifndef FRONTENDS_P4_14_INLINE_CONTROL_FLOW_H_
+#define FRONTENDS_P4_14_INLINE_CONTROL_FLOW_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/evaluator/evaluator.h"
 
 class InlineControlFlow : public Transform {
-public:
-    InlineControlFlow(const IR::V1Program *gl) : global(gl) { setName("InlineControlFlow"); }
-private:
+ public:
+    explicit InlineControlFlow(const IR::V1Program *gl) : global(gl) {
+        setName("InlineControlFlow"); }
+
+ private:
     const IR::V1Program *global;
 
     const IR::Node *preorder(IR::Apply *a) override {
@@ -48,4 +50,4 @@ private:
     }
 };
 
-#endif /* _inline_control_flow_h_ */
+#endif /* FRONTENDS_P4_14_INLINE_CONTROL_FLOW_H_ */

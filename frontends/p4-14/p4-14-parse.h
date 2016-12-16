@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _p4_parse_h_
-#define _p4_parse_h_
+#ifndef FRONTENDS_P4_14_P4_14_PARSE_H_
+#define FRONTENDS_P4_14_P4_14_PARSE_H_
 
 #include <memory>
 #include "lib/source_file.h"
@@ -25,4 +25,4 @@ namespace IR { class V1Program; }
 
 const IR::V1Program *parse_P4_14_file(const CompilerOptions &, FILE *in);
 
-#endif /* _p4_parse_h_ */
+#endif /* FRONTENDS_P4_14_P4_14_PARSE_H_ */

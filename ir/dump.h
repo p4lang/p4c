@@ -39,7 +39,7 @@ class Dump {
     unsigned maxdepth;
     friend std::ostream &operator<<(std::ostream &, const Dump &);
  public:
-    Dump(const IR::Node *n, unsigned maxdepth = ~0U) : n(n), maxdepth(maxdepth) {}
+    explicit Dump(const IR::Node *n, unsigned maxdepth = ~0U) : n(n), maxdepth(maxdepth) {}
 };
 
 inline std::ostream &operator<<(std::ostream &out, const Dump &d) {

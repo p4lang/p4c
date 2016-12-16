@@ -64,9 +64,9 @@ class DismantleExpression : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     EvaluationOrder *result;
-    bool leftValue;  // true when we are dismantling a left-value
+    bool leftValue;  // true when we are dismantling a left-value.
     bool resultNotUsed;  // true when the caller does not want the result (i.e.,
-                         // we are invoked from a MethodCallStatement.
+                         // we are invoked from a MethodCallStatement).
 
     // catch-all case
     const IR::Node* postorder(IR::Expression* expression) override {

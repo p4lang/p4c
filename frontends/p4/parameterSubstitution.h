@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_PARAMETERSUBSTITUTION_H_
-#define _FRONTENDS_P4_PARAMETERSUBSTITUTION_H_
+#ifndef FRONTENDS_P4_PARAMETERSUBSTITUTION_H_
+#define FRONTENDS_P4_PARAMETERSUBSTITUTION_H_
 
 // This file must be included after ir/ir.h
 
@@ -96,4 +96,4 @@ class ParameterSubstitution : public IHasDbPrint {
 
 }  // namespace P4
 
-#endif /* _IR_PARAMETERSUBSTITUTION_H_ */
+#endif /* FRONTENDS_P4_PARAMETERSUBSTITUTION_H_ */
