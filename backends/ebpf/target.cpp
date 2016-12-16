@@ -27,7 +27,7 @@ void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
         "/* TODO: these should be in some header somewhere in the kernel, but where? */\n"
         "#define SEC(NAME) __attribute__((section(NAME), used))\n"
         "static void *(*bpf_map_lookup_elem)(void *map, void *key) =\n"
-        "	(void *) BPF_FUNC_map_lookup_elem;\n"
+        "       (void *) BPF_FUNC_map_lookup_elem;\n"
         "static int (*bpf_map_update_elem)(void *map, void *key, void *value,\n"
         "                                  unsigned long long flags) =\n"
         "       (void *) BPF_FUNC_map_update_elem;\n"
