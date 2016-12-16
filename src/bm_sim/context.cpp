@@ -34,6 +34,17 @@ Context::Context() {
 // ---------- runtime interfaces ----------
 
 MatchErrorCode
+Context::mt_get_num_entries(const std::string &table_name,
+                            size_t *num_entries) const {
+  *num_entries = 0;
+  MatchTableAbstract *abstract_table =
+    p4objects_rt->get_abstract_match_table(table_name);
+  if (!abstract_table) return MatchErrorCode::INVALID_TABLE_NAME;
+  *num_entries = abstract_table->get_num_entries();
+  return MatchErrorCode::SUCCESS;
+}
+
+MatchErrorCode
 Context::mt_add_entry(const std::string &table_name,
                       const std::vector<MatchKeyParam> &match_key,
                       const std::string &action_name,

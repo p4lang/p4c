@@ -163,6 +163,9 @@ class Context final {
   // ---------- runtime interfaces ----------
 
   MatchErrorCode
+  mt_get_num_entries(const std::string &table_name, size_t *num_entries) const;
+
+  MatchErrorCode
   mt_add_entry(const std::string &table_name,
                const std::vector<MatchKeyParam> &match_key,
                const std::string &action_name,

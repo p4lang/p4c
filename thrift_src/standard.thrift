@@ -277,6 +277,14 @@ service Standard {
 	
   // table operations
 
+  // works for direct and indirect tables
+  i64 bm_mt_get_num_entries(
+    1:i32 cxt_id,
+    2:string table_name
+  ) throws (1:InvalidTableOperation ouch),
+
+  // direct tables
+
   BmEntryHandle bm_mt_add_entry(
     1:i32 cxt_id,
     2:string table_name,

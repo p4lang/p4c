@@ -283,6 +283,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   // ---------- RuntimeInterface ----------
 
   MatchErrorCode
+  mt_get_num_entries(size_t cxt_id,
+                     const std::string &table_name,
+                     size_t *num_entries) const override {
+    return contexts.at(cxt_id).mt_get_num_entries(table_name, num_entries);
+  }
+
+  MatchErrorCode
   mt_add_entry(size_t cxt_id,
                const std::string &table_name,
                const std::vector<MatchKeyParam> &match_key,

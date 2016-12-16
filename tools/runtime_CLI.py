@@ -796,6 +796,21 @@ class RuntimeAPI(cmd.Cmd):
         )
 
     @handle_bad_input
+    def do_table_num_entries(self, line):
+        "Return the number of entries in a match table (direct or indirect): table_num_entries <table name>"
+        args = line.split()
+
+        self.exactly_n_args(args, 1)
+
+        table_name = args[0]
+        table = self.get_res("table", table_name, TABLES)
+
+        print self.client.bm_mt_get_num_entries(0, table_name)
+
+    def complete_table_num_entries(self, text, line, start_index, end_index):
+        return self._complete_tables(text)
+
+    @handle_bad_input
     def do_table_add(self, line):
         "Add entry to a match table: table_add <table name> <action name> <match fields> => <action parameters> [priority]"
         args = line.split()

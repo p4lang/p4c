@@ -46,6 +46,15 @@ class RuntimeInterface {
  public:
   virtual ~RuntimeInterface() { }
 
+  // common to all tables
+
+  virtual MatchErrorCode
+  mt_get_num_entries(size_t cxt_id,
+                     const std::string &table_name,
+                     size_t *num_entries) const = 0;
+
+  // direct tables
+
   virtual MatchErrorCode
   mt_add_entry(size_t cxt_id,
                const std::string &table_name,
@@ -78,6 +87,8 @@ class RuntimeInterface {
                    const std::string &table_name,
                    entry_handle_t handle,
                    unsigned int ttl_ms) = 0;
+
+  // indirect tables
 
   virtual MatchErrorCode
   mt_indirect_add_member(size_t cxt_id,
