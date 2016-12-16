@@ -1923,6 +1923,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     if (type == nullptr)
         return expression;
 
+    cstring member = expression->member.name;
     if (type->is<IR::Type_SpecializedCanonical>())
         type = type->to<IR::Type_SpecializedCanonical>()->substituted;
 
@@ -1959,7 +1960,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
 
     if (type->is<IR::Type_StructLike>()) {
         if (type->is<IR::Type_Header>()) {
-            if (expression->member.name == IR::Type_Header::isValid) {
+            if (member == IR::Type_Header::isValid) {
                 // Built-in method
                 auto type = new IR::Type_Method(
                     Util::SourceInfo(), new IR::TypeParameters(),
@@ -1970,8 +1971,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 setType(getOriginal(), ctype);
                 setType(expression, ctype);
                 return expression;
-            } else if (expression->member.name == IR::Type_Header::setValid ||
-                       expression->member.name == IR::Type_Header::setInvalid) {
+            } else if (member == IR::Type_Header::setValid ||
+                       member == IR::Type_Header::setInvalid) {
                 if (!isLeftValue(expression->expr))
                     ::error("%1%: must be applied to a left-value", expression);
                 // Built-in method
@@ -1989,7 +1990,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         }
 
         auto stb = type->to<IR::Type_StructLike>();
-        auto field = stb->getField(expression->member.name);
+        auto field = stb->getField(member);
         if (field == nullptr) {
             typeError("Structure %1% does not have a field %2%",
                       stb, expression->member);
@@ -2015,7 +2016,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     }
 
     if (type->is<IR::IApply>() &&
-        expression->member.name == IR::IApply::applyMethodName) {
+        member == IR::IApply::applyMethodName) {
         auto methodType = type->to<IR::IApply>()->getApplyMethodType();
         methodType = canonicalize(methodType)->to<IR::Type_Method>();
         if (methodType == nullptr)
@@ -2031,8 +2032,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
 
 
     if (type->is<IR::Type_Stack>()) {
-        if (expression->member.name == IR::Type_Stack::next ||
-            expression->member.name == IR::Type_Stack::last) {
+        if (member == IR::Type_Stack::next ||
+            member == IR::Type_Stack::last) {
             auto control = findContext<IR::P4Control>();
             if (control != nullptr)
                 typeError("%1%: 'last' and 'next' for stacks cannot be used in a control",
@@ -2040,18 +2041,18 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             auto stack = type->to<IR::Type_Stack>();
             setType(getOriginal(), stack->elementType);
             setType(expression, stack->elementType);
-            if (isLeftValue(expression->expr)) {
+            if (isLeftValue(expression->expr) && member == IR::Type_Stack::next) {
                 setLeftValue(expression);
                 setLeftValue(getOriginal<IR::Expression>());
             }
             return expression;
-        } else if (expression->member.name == IR::Type_Stack::empty ||
-                   expression->member.name == IR::Type_Stack::full) {
+        } else if (member == IR::Type_Stack::empty ||
+                   member == IR::Type_Stack::full) {
             setType(getOriginal(), IR::Type_Boolean::get());
             setType(expression, IR::Type_Boolean::get());
             return expression;
-        } else if (expression->member.name == IR::Type_Stack::push_front ||
-                   expression->member.name == IR::Type_Stack::pop_front) {
+        } else if (member == IR::Type_Stack::push_front ||
+                   member == IR::Type_Stack::pop_front) {
             auto parser = findContext<IR::P4Parser>();
             if (parser != nullptr)
                 typeError("%1%: '%2%' and '%3%' for stacks cannot be used in a parser",
@@ -2083,7 +2084,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 setCompileTimeConstant(expression);
                 setCompileTimeConstant(getOriginal<IR::Expression>()); }
             auto fbase = base->to<IR::ISimpleNamespace>();
-            if (auto decl = fbase->getDeclByName(expression->member.name)) {
+            if (auto decl = fbase->getDeclByName(member)) {
                 if (auto ftype = getType(decl->getNode())) {
                     setType(getOriginal(), ftype);
                     setType(expression, ftype); }
