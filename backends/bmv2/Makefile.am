@@ -28,6 +28,14 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/lower.cpp \
 	backends/bmv2/eliminateVerify.cpp
 
+noinst_HEADERS += \
+	backends/bmv2/analyzer.h \
+	backends/bmv2/eliminateVerify.h \
+	backends/bmv2/inlining.h \
+	backends/bmv2/jsonconverter.h \
+	backends/bmv2/lower.h \
+	backends/bmv2/midend.h
+
 cpplint_FILES += $(p4c_bm2_ss_UNIFIED) $(p4c_bm2_ss_NONUNIFIED)
 
 ir_DEF_FILES += $(srcdir)/backends/bmv2/bmv2.def

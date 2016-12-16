@@ -34,4 +34,27 @@ midend_UNIFIED = \
 	midend/simplifySelect.cpp \
 	midend/validateProperties.cpp
 
+noinst_HEADERS += \
+	midend/actionsInlining.h \
+	midend/actionSynthesis.h \
+	midend/compileTimeOps.h \
+	midend/convertEnums.h \
+	midend/copyStructures.h \
+	midend/eliminateTuples.h \
+	midend/expr_uses.h \
+	midend/has_side_effects.h \
+	midend/inlining.h \
+	midend/interpreter.h \
+	midend/local_copyprop.h \
+	midend/localizeActions.h \
+	midend/moveConstructors.h \
+	midend/nestedStructs.h \
+	midend/parserUnroll.h \
+	midend/removeLeftSlices.h \
+	midend/removeParameters.h \
+	midend/removeReturns.h \
+	midend/simplifyKey.h \
+	midend/simplifySelect.h \
+	midend/validateProperties.h
+
 cpplint_FILES += $(midend_UNIFIED) $(midend_NONUNIFIED)

@@ -29,6 +29,26 @@ ir_UNIFIED = \
 	ir/visitor.cpp \
 	ir/write_context.cpp
 
+noinst_HEADERS += \
+	ir/configuration.h \
+	ir/dbprint.h \
+	ir/dump.h \
+	ir/id.h \
+	ir/indexed_vector.h \
+	ir/ir-inline.h \
+	ir/ir-tree-macros.h \
+	ir/ir.h \
+	ir/json_generator.h \
+	ir/json_loader.h \
+	ir/json_parser.h \
+	ir/namemap.h \
+	ir/node.h \
+	ir/nodemap.h \
+	ir/pass_manager.h \
+	ir/std.h \
+	ir/vector.h \
+	ir/visitor.h
+
 ir_DEF_FILES += \
     $(srcdir)/ir/base.def \
     $(srcdir)/ir/type.def \

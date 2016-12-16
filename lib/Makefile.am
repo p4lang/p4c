@@ -31,4 +31,40 @@ libp4ctoolkit_a_UNIFIED = \
 	lib/source_file.cpp \
 	lib/stringify.cpp
 
+noinst_HEADERS += \
+	lib/algorithm.h \
+	lib/alloc.h \
+	lib/bitops.h \
+	lib/bitrange.h \
+	lib/bitvec.h \
+	lib/crash.h \
+	lib/cstring.h \
+	lib/default.h \
+	lib/enumerator.h \
+	lib/error.h \
+	lib/exceptions.h \
+	lib/gc.h \
+	lib/gmputil.h \
+	lib/hex.h \
+	lib/indent.h \
+	lib/json.h \
+	lib/log.h \
+	lib/ltbitmatrix.h \
+	lib/map.h \
+	lib/match.h \
+	lib/n4.h \
+	lib/null.h \
+	lib/nullstream.h \
+	lib/options.h \
+	lib/ordered_map.h \
+	lib/ordered_set.h \
+	lib/path.h \
+	lib/range.h \
+	lib/set.h \
+	lib/source_file.h \
+	lib/sourceCodeBuilder.h \
+	lib/stringify.h \
+	lib/stringref.h \
+	lib/symbitmatrix.h
+
 cpplint_FILES += $(libp4ctoolkit_a_UNIFIED) $(libp4ctoolkit_a_NONUNIFIED)

@@ -30,6 +30,7 @@ GEN_UNIFIED_CPP=$(TOOLSDIR)/gen-unified-sources.py
 # The first 7 are standard automake variables
 CLEANFILES =                   # Files to remove on clean
 bin_PROGRAMS =                 # Binaries built
+noinst_HEADERS =               # Headers that are not installed
 noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
@@ -54,7 +55,6 @@ include $(srcdir)/unified-compilation.am
 
 $(srcdir)/otherMakefiles.am: $(srcdir)/backends $(srcdir)/extensions $(wildcard $(srcdir)/backends/*/Makefile.am $(srcdir)/extensions/*/Makefile.am)
 	cd $(srcdir); ./find-makefiles.sh
-
 
 ######## Generate C++ IR files from *.def files using ir-generator
 
@@ -91,6 +91,9 @@ libfrontend_a_SOURCES = \
 
 # unit tests
 include $(srcdir)/test/Makefile.am
+
+# Lint all header files.
+cpplint_FILES += $(noinst_HEADERS)
 
 ################ Misc custom targets
 

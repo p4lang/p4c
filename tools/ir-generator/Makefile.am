@@ -21,6 +21,11 @@ irgenerator_UNIFIED = \
 irgenerator_NONUNIFIED = \
 	tools/ir-generator/ir-generator.ypp
 
+noinst_HEADERS += \
+	tools/ir-generator/ir-generator.h \
+	tools/ir-generator/irclass.h \
+	tools/ir-generator/type.h
+
 BUILT_SOURCES += \
 	tools/ir-generator/ir-generator-lex.c
 

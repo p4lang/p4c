@@ -22,6 +22,8 @@ p4test_UNIFIED = \
     backends/p4test/p4test.cpp \
     backends/p4test/midend.cpp
 
+noinst_HEADERS += backends/p4test/midend.h
+
 cpplint_FILES += $(p4test_UNIFIED) $(p4test_NONUNIFIED)
 
 # Tests
