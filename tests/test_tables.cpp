@@ -597,7 +597,6 @@ TYPED_TEST(TableSizeTwo, ModifyEntry) {
 
 TYPED_TEST(TableSizeTwo, Counters) {
   std::string key_ = "\x0a\xba";
-  ByteContainer key("0x0aba");
   entry_handle_t handle;
   entry_handle_t bad_handle = 999u;
   MatchErrorCode rc;
@@ -606,8 +605,7 @@ TYPED_TEST(TableSizeTwo, Counters) {
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
   ASSERT_EQ(1u, this->table->get_num_entries());
 
-  uint64_t counter_bytes = 0;
-  uint64_t counter_packets = 0;
+  uint64_t counter_bytes = 0, counter_packets = 0;
 
   rc = this->table->query_counters(bad_handle, &counter_bytes,
                                    &counter_packets);
@@ -638,6 +636,51 @@ TYPED_TEST(TableSizeTwo, Counters) {
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
   ASSERT_EQ(64u, counter_bytes);
   ASSERT_EQ(1u, counter_packets);
+}
+
+TYPED_TEST(TableSizeTwo, CountersReset) {
+  std::string key1("\x0a\xba"), key2("\x0a\xbb"), key3("\x0a\xbc");
+  entry_handle_t h1, h2, h3;
+  MatchErrorCode rc;
+
+  rc = this->add_entry(key1, &h1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = this->add_entry(key2, &h2);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  rc = this->add_entry(key3, &h3);
+  ASSERT_NE(MatchErrorCode::SUCCESS, rc);  // table full
+
+  uint64_t counter_bytes = 0, counter_packets = 0;
+
+  auto send_pkt_and_increment = [this, &key1]() {
+    Packet pkt = this->get_pkt(64);
+    Field &f = pkt.get_phv()->get_field(this->testHeader1, 0);
+    f.set(key1.data(), key1.size());
+    this->table->apply_action(&pkt);
+  };
+
+  auto query_counter = [this, &h1, &counter_bytes, &counter_packets]() {
+    auto code = this->table->query_counters(h1, &counter_bytes,
+                                            &counter_packets);
+    ASSERT_EQ(code, MatchErrorCode::SUCCESS);
+  };
+
+  query_counter();
+  ASSERT_EQ(0u, counter_packets);
+  send_pkt_and_increment();
+  query_counter();
+  ASSERT_EQ(1u, counter_packets);
+
+  // now delete the entry
+  rc = this->table->delete_entry(h1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  // add the entry back and check that the counters have been reset (the entry
+  // occupies the same "slot" in the table)
+  rc = this->add_entry(key1, &h1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+  query_counter();
+  ASSERT_EQ(0u, counter_packets);
+  ASSERT_EQ(0u, counter_bytes);
 }
 
 TYPED_TEST(TableSizeTwo, Meters) {
