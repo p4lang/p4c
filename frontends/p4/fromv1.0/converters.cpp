@@ -119,19 +119,19 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
     BUG("Unexpected primitive %1%", primitive);
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::NamedRef* ref) {
-    if (ref->name.name == "latest") {
+const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
+    if (ref->path->name.name == "latest") {
         return structure->latest;
     }
-    if (ref->name.name == "next") {
+    if (ref->path->name.name == "next") {
         return ref;
     }
-    auto fl = structure->field_lists.get(ref->name);
+    auto fl = structure->field_lists.get(ref->path->name);
     if (fl != nullptr) {
         ExpressionConverter conv(structure);
         return conv.convert(fl);
     }
-    return new IR::PathExpression(ref->name);
+    return ref;
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
@@ -150,10 +150,10 @@ const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
-    if (ref->index_->is<IR::NamedRef>()) {
-        auto nr = ref->index_->to<IR::NamedRef>();
-        if (nr->name == "last" || nr->name == "next") {
-            cstring name = nr->name == "last" ? IR::Type_Stack::last : IR::Type_Stack::next;
+    if (ref->index_->is<IR::PathExpression>()) {
+        auto nr = ref->index_->to<IR::PathExpression>();
+        if (nr->path->name == "last" || nr->path->name == "next") {
+            cstring name = nr->path->name == "last" ? IR::Type_Stack::last : IR::Type_Stack::next;
             if (replaceNextWithLast && name == IR::Type_Stack::next)
                 name = IR::Type_Stack::last;
             auto result = new IR::Member(ref->srcInfo, ref->base_, name);
@@ -433,8 +433,8 @@ class ComputeCallGraph : public Inspector {
             const IR::Counter *ctr = nullptr;
             if (auto gr = ctrref->to<IR::GlobalRef>())
                 ctr = gr->obj->to<IR::Counter>();
-            else if (auto nr = ctrref->to<IR::NamedRef>())
-                ctr = structure->counters.get(nr->name);
+            else if (auto nr = ctrref->to<IR::PathExpression>())
+                ctr = structure->counters.get(nr->path->name);
             if (ctr == nullptr)
                 ::error("Cannot find counter %1%", ctrref);
             auto parent = findContext<IR::ActionFunction>();
@@ -446,8 +446,8 @@ class ComputeCallGraph : public Inspector {
             const IR::Meter *mtr = nullptr;
             if (auto gr = mtrref->to<IR::GlobalRef>())
                 mtr = gr->obj->to<IR::Meter>();
-            else if (auto nr = mtrref->to<IR::NamedRef>())
-                mtr = structure->meters.get(nr->name);
+            else if (auto nr = mtrref->to<IR::PathExpression>())
+                mtr = structure->meters.get(nr->path->name);
             if (mtr == nullptr)
                 ::error("Cannot find meter %1%", mtrref);
             auto parent = findContext<IR::ActionFunction>();
@@ -464,8 +464,8 @@ class ComputeCallGraph : public Inspector {
             const IR::Register *reg = nullptr;
             if (auto gr = regref->to<IR::GlobalRef>())
                 reg = gr->obj->to<IR::Register>();
-            else if (auto nr = regref->to<IR::NamedRef>())
-                reg = structure->registers.get(nr->name);
+            else if (auto nr = regref->to<IR::PathExpression>())
+                reg = structure->registers.get(nr->path->name);
             if (reg == nullptr)
                 ::error("Cannot find register %1%", regref);
             auto parent = findContext<IR::ActionFunction>();

@@ -27,13 +27,13 @@ limitations under the License.
 class TypeCheck::Pass1 : public Transform {
     const IR::V1Program   *global = nullptr;
     const IR::Node *preorder(IR::V1Program *glob) override { global = glob; return glob; }
-    const IR::Node *preorder(IR::NamedRef *ref) override {
+    const IR::Node *preorder(IR::PathExpression *ref) override {
         if (auto af = findContext<IR::ActionFunction>())
-            if (auto arg = af->arg(ref->name))
+            if (auto arg = af->arg(ref->path->name))
                 return arg;
         if (auto bbox = findContext<IR::Declaration_Instance>()) {
             if (auto bbox_type = bbox->type->to<IR::Type_Extern>()) {
-                if (auto attr = bbox_type->attributes.get<IR::Attribute>(ref->name))
+                if (auto attr = bbox_type->attributes.get<IR::Attribute>(ref->path->name))
                     return new IR::AttributeRef(ref->srcInfo, attr->type,
                                                 bbox->name, bbox_type, attr);
             } else {
@@ -78,44 +78,44 @@ class TypeCheck::Pass1 : public Transform {
         } else {
             auto fl = new IR::FieldList();
             for (auto &name : flc->input->names) {
-                fl->fields.push_back(new IR::NamedRef(name));
+                fl->fields.push_back(new IR::PathExpression(name));
                 fl->srcInfo += name.srcInfo; } }
         return flc; }
-    const IR::Node *postorder(IR::NamedRef *ref) override {
+    const IR::Node *postorder(IR::PathExpression *ref) override {
         if (!global) return ref;
         const Visitor::Context *prop_ctxt = nullptr;
         if (auto prop = findContext<IR::Property>(prop_ctxt)) {
             if (auto bbox = prop_ctxt->parent->node->to<IR::Declaration_Instance>()) {
                 auto bbox_type = bbox->type->to<IR::Type_Extern>();
                 auto attr = bbox_type->attributes.get<IR::Attribute>(prop->name);
-                if (attr->locals && contains(attr->locals->names, ref->name)) {
+                if (attr->locals && contains(attr->locals->names, ref->path->name)) {
                     /* ref to local of property -- do something with it? */
                     return ref; } } }
         IR::Node *new_node = ref;
-        if (auto hdr = global->get<IR::HeaderOrMetadata>(ref->name)) {
+        if (auto hdr = global->get<IR::HeaderOrMetadata>(ref->path->name)) {
             visit(hdr);
             new_node = new IR::ConcreteHeaderRef(ref->srcInfo, hdr);
-        } else if (auto obj = global->get<IR::IInstance>(ref->name)) {
+        } else if (auto obj = global->get<IR::IInstance>(ref->path->name)) {
             const IR::Node *tmp = obj->getNode();  // FIXME -- can't visit an interface directly
             visit(tmp);
             obj = tmp->to<IR::IInstance>();
             new_node = new IR::GlobalRef(ref->srcInfo, obj->getType(), tmp);
-        } else if (/*auto obj = */global->get<IR::Node>(ref->name)) {
+        } else if (/*auto obj = */global->get<IR::Node>(ref->path->name)) {
             /* FIXME -- is something, should probably be typechecked */
         } else if (getParent<IR::Member>()) {
-            if (ref->name != "latest")
-                error("%s: No header or metadata named %s", ref->srcInfo, ref->name);
+            if (ref->path->name != "latest")
+                error("%s: No header or metadata named %s", ref->srcInfo, ref->path->name);
         } else {
             if (getParent<IR::HeaderStackItemRef>()) {
-                if (ref->name == "next" || ref->name == "last")
+                if (ref->path->name == "next" || ref->path->name == "last")
                     return ref; }
             if (auto hdr = findContext<IR::Type_StructLike>()) {
-                if (auto field = hdr->getField(ref->name)) {
+                if (auto field = hdr->getField(ref->path->name)) {
                     /* FIXME --  Should this be converted to something else? */
                     ref->type = field->type;
                     visit(ref->type);
                     return ref; } }
-            error("%s: No defintion for %s", ref->srcInfo, ref->name); }
+            error("%s: No defintion for %s", ref->srcInfo, ref->path->name); }
         return new_node; }
     const IR::Node *postorder(IR::Type_Name *ref) override {
         if (!global) return ref;

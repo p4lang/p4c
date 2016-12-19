@@ -128,11 +128,6 @@ class HeaderStackItemRef : HeaderRef {
     toString{ return base_->toString() + "[" + index_->toString() + "]"; }
 }
 
-class NamedRef : Expression {
-    ID     name;
-    toString{ return name; }
-}
-
 class If :  Expression {
     Expression            pred;
     NullOK Vector<Expression>    ifTrue;

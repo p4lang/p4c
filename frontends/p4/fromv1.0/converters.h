@@ -41,7 +41,7 @@ class ExpressionConverter : public Transform {
     const IR::Node* postorder(IR::Mask* expression) override;
     const IR::Node* postorder(IR::ActionArg* arg) override;
     const IR::Node* postorder(IR::Primitive* primitive) override;
-    const IR::Node* postorder(IR::NamedRef* ref) override;
+    const IR::Node* postorder(IR::PathExpression* ref) override;
     const IR::Node* postorder(IR::ConcreteHeaderRef* nhr) override;
     const IR::Node* postorder(IR::HeaderStackItemRef* ref) override;
     const IR::Expression* convert(const IR::Node* node) {

@@ -689,11 +689,6 @@ bool ToP4::preorder(const IR::Member* e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::NamedRef* e) {
-    builder.append(e->name);
-    return false;
-}
-
 bool ToP4::preorder(const IR::SelectCase* e) {
     dump(2);
     int prec = expressionPrecedence;

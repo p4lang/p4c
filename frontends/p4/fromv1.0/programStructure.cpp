@@ -144,10 +144,10 @@ void ProgramStructure::createTypes() {
 }
 
 const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expression* expression) {
-    if (!expression->is<IR::NamedRef>())
+    if (!expression->is<IR::PathExpression>())
         ::error("%1%: expected a field list", expression);
-    auto nr = expression->to<IR::NamedRef>();
-    auto fl = field_lists.get(nr->name);
+    auto nr = expression->to<IR::PathExpression>();
+    auto fl = field_lists.get(nr->path->name);
     if (fl == nullptr)
         ::error("%1%: Expected a field list", expression);
     auto fields = new IR::IndexedVector<IR::StructField>();
@@ -168,8 +168,8 @@ const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expressio
         fields->push_back(sf);
     }
 
-    auto name = makeUniqueName(nr->name);
-    auto annos = addNameAnnotation(nr->name);
+    auto name = makeUniqueName(nr->path->name);
+    auto annos = addNameAnnotation(nr->path->name);
     auto result = new IR::Type_Struct(expression->srcInfo, name, annos, fields);
     return result;
 }
@@ -470,7 +470,7 @@ class HeaderRepresentation {
         } else if (expression->is<IR::HeaderStackItemRef>()) {
             auto hsir = expression->to<IR::HeaderStackItemRef>();
             auto hdr = getHeader(hsir->base_);
-            if (hsir->index_->is<IR::NamedRef>())
+            if (hsir->index_->is<IR::PathExpression>())
                 // This is most certainly 'next'.
                 return hdr;
             BUG_CHECK(hsir->index_->is<IR::Constant>(), "%1%: expected a constant", hsir->index_);
@@ -841,10 +841,10 @@ const IR::Statement* ProgramStructure::sliceAssign(
 const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* expression) {
     ExpressionConverter conv(this);
 
-    if (!expression->is<IR::NamedRef>())
+    if (!expression->is<IR::PathExpression>())
         ::error("%1%: expected a field list", expression);
-    auto nr = expression->to<IR::NamedRef>();
-    auto fl = field_lists.get(nr->name);
+    auto nr = expression->to<IR::PathExpression>();
+    auto fl = field_lists.get(nr->path->name);
     if (fl == nullptr)
         ::error("%1%: Expected a field list", expression);
     auto result = conv.convert(fl);
@@ -1003,8 +1003,8 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         const IR::Counter *counter = nullptr;
         if (auto gr = ref->to<IR::GlobalRef>())
             counter = gr->obj->to<IR::Counter>();
-        else if (auto nr = ref->to<IR::NamedRef>())
-            counter = counters.get(nr->name);
+        else if (auto nr = ref->to<IR::PathExpression>())
+            counter = counters.get(nr->path->name);
         if (counter == nullptr) {
             ::error("Expected a counter reference %1%", ref);
             return nullptr; }
@@ -1130,8 +1130,8 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         const IR::Meter *meter = nullptr;
         if (auto gr = ref->to<IR::GlobalRef>())
             meter = gr->obj->to<IR::Meter>();
-        else if (auto nr = ref->to<IR::NamedRef>())
-            meter = meters.get(nr->name);
+        else if (auto nr = ref->to<IR::PathExpression>())
+            meter = meters.get(nr->path->name);
         if (!meter) {
             ::error("Expected a meter reference %1%", ref);
             return nullptr; }
@@ -1158,8 +1158,8 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto max = conv.convert(primitive->operands.at(3));
         auto args = new IR::Vector<IR::Expression>();
 
-        auto nr = primitive->operands.at(2)->to<IR::NamedRef>();
-        auto flc = field_list_calculations.get(nr->name);
+        auto nr = primitive->operands.at(2)->to<IR::PathExpression>();
+        auto flc = field_list_calculations.get(nr->path->name);
         if (flc == nullptr)
             ::error("%1%: Expected a field_list_calculation", primitive->operands.at(1));
         auto ttype = IR::Type_Bits::get(flc->output_width);
@@ -1206,8 +1206,8 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         const IR::Register *reg = nullptr;
         if (auto gr = ref->to<IR::GlobalRef>())
             reg = gr->obj->to<IR::Register>();
-        else if (auto nr = ref->to<IR::NamedRef>())
-            reg = registers.get(nr->name);
+        else if (auto nr = ref->to<IR::PathExpression>())
+            reg = registers.get(nr->path->name);
         if (!reg) {
             ::error("Expected a register reference %1%", ref);
             return nullptr; }
@@ -1229,8 +1229,8 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         const IR::Register *reg = nullptr;
         if (auto gr = ref->to<IR::GlobalRef>())
             reg = gr->obj->to<IR::Register>();
-        else if (auto nr = ref->to<IR::NamedRef>())
-            reg = registers.get(nr->name);
+        else if (auto nr = ref->to<IR::PathExpression>())
+            reg = registers.get(nr->path->name);
         if (!reg) {
             ::error("Expected a register reference %1%", ref);
             return nullptr; }

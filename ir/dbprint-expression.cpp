@@ -81,10 +81,6 @@ void IR::Constant::dbprint(std::ostream &out) const {
     // if (getprec(out) == 0) out << ';';
 }
 
-void IR::NamedRef::dbprint(std::ostream &out) const {
-    out << name;
-    if (getprec(out) == 0) out << ';';
-}
 void IR::Member::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << setprec(Prec_Postfix) << expr << setprec(prec) << '.' << member;
