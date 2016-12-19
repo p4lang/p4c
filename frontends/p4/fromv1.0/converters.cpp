@@ -94,26 +94,18 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
             return primitive;
         }
 
-        const IR::Expression* method = new IR::Member(
-            Util::SourceInfo(),
-            structure->paramReference(structure->parserPacketIn),
-            P4::P4CoreLibrary::instance.packetIn.lookahead.Id());
+        IR::ERef method = structure->paramReference(structure->parserPacketIn)
+                .Member(P4::P4CoreLibrary::instance.packetIn.lookahead.Id());
         auto typeargs = new IR::Vector<IR::Type>();
         typeargs->push_back(IR::Type_Bits::get(aval + bval));
-        auto lookahead = new IR::MethodCallExpression(
-            Util::SourceInfo(), method, typeargs, new IR::Vector<IR::Expression>());
-        auto result = new IR::Slice(primitive->srcInfo, lookahead,
-                                    new IR::Constant(aval + bval - 1),
-                                    new IR::Constant(aval));
-        result->type = IR::Type_Bits::get(bval);
+        IR::ERef lookahead = method(typeargs);
+        IR::ERef result = lookahead.Slice(aval + bval - 1, aval);
         return result;
     } else if (primitive->name == "valid") {
         BUG_CHECK(primitive->operands.size() == 1, "Expected 1 operand for %1%", primitive);
-        auto base = primitive->operands.at(0);
-        auto method = new IR::Member(primitive->srcInfo, base, IR::ID(IR::Type_Header::isValid));
-        auto result = new IR::MethodCallExpression(
-            primitive->srcInfo, method, new IR::Vector<IR::Type>(),
-            new IR::Vector<IR::Expression>());
+        IR::ERef base = primitive->operands.at(0);
+        IR::ERef method = base.Member(primitive->srcInfo, IR::Type_Header::isValid);
+        IR::ERef result = method();
         return result;
     }
     BUG("Unexpected primitive %1%", primitive);
@@ -172,12 +164,9 @@ const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
 const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
     auto table = structure->tables.get(apply->name);
     auto newname = structure->tables.get(table);
-    auto tbl = new IR::PathExpression(newname);
-    auto method = new IR::Member(Util::SourceInfo(), tbl,
-                                 IR::ID(IR::IApply::applyMethodName));
-    auto call = new IR::MethodCallExpression(apply->srcInfo, method,
-                                             structure->emptyTypeArguments,
-                                             new IR::Vector<IR::Expression>());
+    IR::ERef tbl = new IR::PathExpression(newname);
+    IR::ERef method = tbl.Member(IR::IApply::applyMethodName);
+    auto call = method();
     if (apply->actions.size() == 0) {
         auto stat = new IR::MethodCallStatement(apply->srcInfo, call);
         prune();
@@ -207,7 +196,7 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
             StatementConverter conv(structure, renameMap);
             auto hitcase = hit ? conv.convert(hit) : new IR::EmptyStatement(Util::SourceInfo());
             auto misscase = miss ? conv.convert(miss) : nullptr;
-            auto check = new IR::Member(Util::SourceInfo(), call, IR::Type_Table::hit);
+            IR::ERef check = IR::ERef(call).Member(IR::Type_Table::hit);
             auto ifstat = new IR::IfStatement(apply->srcInfo, check, hitcase, misscase);
             prune();
             return ifstat;
@@ -242,15 +231,13 @@ const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
     auto control = structure->controls.get(primitive->name);
     if (control != nullptr) {
         auto instanceName = get(renameMap, control->name);
-        auto ctrl = new IR::PathExpression(IR::ID(instanceName));
-        auto method = new IR::Member(Util::SourceInfo(), ctrl, IR::ID(IR::IApply::applyMethodName));
+        IR::ERef ctrl = new IR::PathExpression(IR::ID(instanceName));
+        IR::ERef method = ctrl.Member(IR::IApply::applyMethodName);
         auto args = new IR::Vector<IR::Expression>();
         args->push_back(structure->conversionContext.header->clone());
         args->push_back(structure->conversionContext.userMetadata->clone());
         args->push_back(structure->conversionContext.standardMetadata->clone());
-        auto call = new IR::MethodCallExpression(primitive->srcInfo, method,
-                                                 structure->emptyTypeArguments, args);
-        auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
+        auto stat = new IR::MethodCallStatement(primitive->srcInfo, method(args));
         return stat;
     }
     // FIXME -- always a noop as ExpressionConverter has only postorder methods?

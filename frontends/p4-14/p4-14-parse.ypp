@@ -36,7 +36,7 @@ limitations under the License.
 static map<int, std::pair<std::string, int>> line_file_map;
 static IR::V1Program *global;
 static void yyerror(const char *fmt);
-static IR::Constant *constantFold(IR::Expression *);
+static const IR::Constant *constantFold(const IR::Expression *);
 static IR::Vector<IR::Expression> make_expr_list(const IR::NameList *);
 
 #define YYLTYPE Util::SourceInfo
@@ -69,16 +69,16 @@ static const IR::Annotations *getPragmas() {
     IR::CalculatedField         *CalculatedField;
     IR::CaseEntry               *CaseEntry;
     IR::Vector<IR::CaseEntry>   *CaseEntryList;
-    IR::Constant                *Constant;
+    const IR::Constant          *Constant;
     IR::Counter                 *Counter;
     IR::Declaration_Instance    *BBox;
     IR::Direction               Direction;
-    IR::Expression              *Expression;
+    IR::ERef                    Expression;
     IR::Vector<IR::Expression>  *ExpressionList;
     IR::FieldList               *FieldList;
     IR::FieldListCalculation    *FieldListCalculation;
     IR::NameList                *NameList;
-    IR::Member                  *Member;
+    const IR::Member            *Member;
     IR::Meter                   *Meter;
     IR::Parameter               *Parameter;
     IR::ParameterList           *ParameterList;
@@ -825,31 +825,31 @@ expression:
             new IR::PathExpression(IR::ID(@1, $1)), IR::ID(@3, $3)); }
     | INTEGER           { $$ = $1; }
     | '(' expression ')'                { $$ = $2; }
-    | NOT expression %prec PREFIX       { $$ = new IR::LNot(@1, $2); }
-    | '!' expression %prec PREFIX       { $$ = new IR::LNot(@1, $2); }
-    | '~' expression %prec PREFIX       { $$ = new IR::Cmpl(@1, $2); }
-    | '-' expression %prec PREFIX       { $$ = new IR::Neg(@1, $2); }
+    | NOT expression %prec PREFIX       { $$ = !$2; }
+    | '!' expression %prec PREFIX       { $$ = !$2; }
+    | '~' expression %prec PREFIX       { $$ = ~$2; }
+    | '-' expression %prec PREFIX       { $$ = -$2; }
     | '+' expression %prec PREFIX       { $$ = $2; }
-    | expression '*' expression         { $$ = new IR::Mul(@2, $1, $3); }
-    | expression '/' expression         { $$ = new IR::Div(@2, $1, $3); }
-    | expression '%' expression         { $$ = new IR::Mod(@2, $1, $3); }
-    | expression '+' expression         { $$ = new IR::Add(@2, $1, $3); }
-    | expression '-' expression         { $$ = new IR::Sub(@2, $1, $3); }
-    | expression SHL expression         { $$ = new IR::Shl(@2, $1, $3); }
-    | expression SHR expression         { $$ = new IR::Shr(@2, $1, $3); }
-    | expression LE expression          { $$ = new IR::Leq(@2, $1, $3); }
-    | expression GE expression          { $$ = new IR::Geq(@2, $1, $3); }
-    | expression '<' expression         { $$ = new IR::Lss(@2, $1, $3); }
-    | expression '>' expression         { $$ = new IR::Grt(@2, $1, $3); }
-    | expression NE expression          { $$ = new IR::Neq(@2, $1, $3); }
-    | expression EQ expression          { $$ = new IR::Equ(@2, $1, $3); }
-    | expression '&' expression         { $$ = new IR::BAnd(@2, $1, $3); }
-    | expression '^' expression         { $$ = new IR::BXor(@2, $1, $3); }
-    | expression '|' expression         { $$ = new IR::BOr(@2, $1, $3); }
-    | expression AND expression         { $$ = new IR::LAnd(@2, $1, $3); }
-    | expression OR expression          { $$ = new IR::LOr(@2, $1, $3); }
-    | TRUE                              { $$ = new IR::BoolLiteral(@1, true); }
-    | FALSE                             { $$ = new IR::BoolLiteral(@1, false); }
+    | expression '*' expression         { $$ = $1 * $3; }
+    | expression '/' expression         { $$ = $1 / $3; }
+    | expression '%' expression         { $$ = $1 % $3; }
+    | expression '+' expression         { $$ = $1 + $3; }
+    | expression '-' expression         { $$ = $1 - $3; }
+    | expression SHL expression         { $$ = $1 << $3; }
+    | expression SHR expression         { $$ = $1 >> $3; }
+    | expression LE expression          { $$ = $1 <= $3; }
+    | expression GE expression          { $$ = $1 >= $3; }
+    | expression '<' expression         { $$ = $1 < $3; }
+    | expression '>' expression         { $$ = $1 > $3; }
+    | expression NE expression          { $$ = $1 != $3; }
+    | expression EQ expression          { $$ = $1 == $3; }
+    | expression '&' expression         { $$ = $1 & $3; }
+    | expression '^' expression         { $$ = $1 ^ $3; }
+    | expression '|' expression         { $$ = $1 | $3; }
+    | expression AND expression         { $$ = $1 && $3; }
+    | expression OR expression          { $$ = $1 || $3; }
+    | TRUE                              { $$ = true; }
+    | FALSE                             { $$ = false; }
 ;
 
 header_or_field_ref:
@@ -862,13 +862,12 @@ header_ref:
     | header_ref '[' expression ']'     { $$ = new IR::HeaderStackItemRef(@1+@4, $1, $3); }
 ;
 
-field_ref: header_ref '.' name
-         { $$ = new IR::Member(@1+@3, $1, IR::ID(@3, $3)); }
+field_ref: header_ref '.' name { $$ = $1.Member(IR::ID(@3, $3)); }
 ;
 
 
 const_expression: expression
-        { if (!($$ = constantFold(&*$1)))
+        { if (!($$ = constantFold($1)))
                 error("%s: Non constant expression", @1); }
 ;
 
@@ -930,10 +929,8 @@ const IR::V1Program *parse_P4_14_file(const CompilerOptions &options, FILE *in) 
 
 #include "frontends/common/constantFolding.h"
 
-static IR::Constant *constantFold(IR::Expression *a) {
-    IR::Node *exp(a);
-    auto rv = exp->apply(P4::DoConstantFolding(nullptr, nullptr))->to<IR::Constant>();
-    return rv ? new IR::Constant(rv->type, rv->value, rv->base) : nullptr;
+static const IR::Constant *constantFold(const IR::Expression *a) {
+    return a->apply(P4::DoConstantFolding(nullptr, nullptr))->to<IR::Constant>();
 }
 
 static IR::Vector<IR::Expression> make_expr_list(const IR::NameList *list) {
