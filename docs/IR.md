@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This document outlines the design of the next-generation P4 compiler.
+This document outlines the design of the P4_16 compiler.
 It lays out the various classes and data structures used for the
 compiler and describes the general flow of the compilation process.
 The compiler is designed to operate in the `traditional’ manner,
@@ -23,15 +23,15 @@ represent the program as a tree or DAG from a single root node, with
 each node referring only to its children.  Transformations operate by
 creating new IR nodes that are shallow copies of existing nodes, and
 then creating new parent nodes to refer to these new nodes, up to the
-root of the IR.  IR The internal representation is designed around a
+root of the IR.  The internal representation is designed in C++ around a
 single inheritance object hierarchy with an ultimate base Node type
 used by all subclasses.  The base Node class supports the
 functionality needed for visitor transformations – clone, equality
 tests, and subclass dispatch.
 
 The IR needs to be extensible, allowing for the addition of new
-classes to the hierarchy as needs are discovered.  The initial IR
-produced by the parser will contain constructs that are related only
+classes to the hierarchy as support for new targets is added.  The initial IR
+produced by the parser contains constructs that are related only
 to the source P4 language, and there will be frontend transformation
 passes that convert things to a simpler and more canonical form.
 
@@ -46,12 +46,13 @@ object, recursively.
 ## Visitors and Transforms
 
 The compiler is organized as a series of `Visitor` and `Transform`
-passes.  The `Visitor` and `Transform` base classes make defining new
-passes easy -- a new transform need only specify the IR types it is
-interested in, and can ignore others.  A (constant) `Visitor` pass
-visits every node in the IR tree and accumulates information about the
-tree but does not modify it, while a Transform pass visits every node,
-possibly modifying the node or replacing it with some other node
+passes (https://en.wikipedia.org/wiki/Visitor_pattern).  The `Visitor`
+and `Transform` base classes make defining new passes easy -- a new
+transform need only specify the IR types it is interested in, and can
+ignore others.  A (constant) `Visitor` pass visits every node in the
+IR tree and accumulates information about the tree but does not modify
+it, while a Transform pass visits every node, possibly modifying the
+node or replacing it with some other node
 
 ```C++
     /* pseudo-code for basic Transform visitor */
@@ -131,7 +132,7 @@ be implemented by the leaf class.
 
 As an example for how these are used in the IR visitor routines, the IR::If class has
 three children to visit -- a predicate and two consequents, with the value of the
-predicate deciding which consequent to execute.  The child visitor for `IR::if` is
+predicate deciding which consequent to execute.  The child visitor for `IR::If` is
 
 ```C++
     visitor.visit(predicate);
@@ -159,13 +160,12 @@ parsers, which can support loops.
 ## Overall flow
 
 The compiler flow can be roughly split into frontend, middle-end, and
-backend.  The frontend will do largely non-target specific transforms
+backend.  The frontend does largely non-target specific transforms
 designed to clean up the IR and get it into a canonical form.  The
-middle end will make decisions about resource allocation high-level
-code reorganization.  The back end will finalize resource allocation
-decisions, applying them to the IR.  As this backend step may fail due
-to constraint violations, we may need to backtrack through the
-middle-end to try a different configuration.  I do not anticipate
+middle make target-dependent IR transformations.  The back end performs resource allocation
+decisions.  As this backend step may fail due
+to constraint violations, it may need to backtrack through the
+middle-end to try a different configuration.  We do not anticipate
 needing to backtrack through frontend passes.  The split between
 Front/Middle/Back-end is largely arbitrary, and some passes may end up
 being moved between them if we later find it makes more sense to do
@@ -173,23 +173,20 @@ so.
 
 ### Frontend
 
-The frontend will parse the source code into IR that corresponds
-directly to the source code.  It will then run a series of passes like
+The frontend parses the source code into IR that corresponds
+directly to the source code.  It then runs a series of passes like
 type-checking (modifying nodes to indicate their inferred types),
 constant folding, dead code elimination, etc.  The initial IR tree
-will correspond to the source code (Probably the root will be a Global
-or Scope object), and then various mostly target independent
-transformation will be done.  Any complex scoping or structuring in
-the code will be flattened here.
+corresponds to the source code, and then various mostly target independent
+transformation are done.  Complex scoping or structuring in
+the code is flattened here.
 
 ### Mid-end
 
 The mid-end is where transformations that depend somewhat on the
 target, but are not specific resource allocations, take place.
-Tables or other objects that are too complex as-is will be split into
-multiple tables or otherwise transformed to make them implementable.
-At some point the mid-end will transform the IR into a form that
-matches the target hierarchy.
+At some point the mid-end transforms the IR into a form that
+matches the target capabilities.
 
 ### Pass Managers
 
@@ -199,7 +196,7 @@ which encapsulates a sequence of passes and runs them in order.  Those
 passes that support the `Backtrack` interface are backtrack points.
 
 The generic `PassManager` can manage a
-dynamically chosen series of passes.  It will track passes that
+dynamically chosen series of passes.  It tracks passes that
 implement `Backtrack` and if a later pass fails, will backtrack to the
 Backtrack pass.
 
@@ -239,11 +236,6 @@ and backends having their own extensions to the IR defined in their own ir subdi
 The ir-generator tool takes reads all the .def files in the tree and constructs a single
 .h and .cpp file with all the IR class definition code.
 
-In addition, the ir-generator generates a tree-macro.h file with a single X-MACRO that
-enumerates all of the IR classes, templates, template instantiations, and their bases.
-The visitor classes use this X-MACRO to define all the relevant multi-dispatch functions
-needed for IR tree traversal.
-
 All references to IR class objects from other IR class object MUST be as `const` pointers,
 to maintain the write-only invariants.  Where that is too onerous, IR classes may be
 directly embedded in other IR objects, rather than by reference.  When an IR object is
@@ -257,7 +249,7 @@ modifier, in which case it will be a directly embedded sub-object.
 The ir-generator understands a number of "standard" methods for IR classes --
 `visit_children`, `operator==`, `dbprint`, `toString`, `apply`.  These methods can be
 declared *without* any arguments or return types (ie, just the method name followed by
-a {}-block of code), in which case the standard declaration will be supplied.  If the
+a {}-block of code), in which case the standard declaration will be synthesized.  If the
 method is not declared in the .def file, a standard definition (based on the fields
 declared in the class) will be created.  In this way, *most* classes can avoid including
 this boilerplate code in the .def file.

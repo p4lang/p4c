@@ -1,4 +1,5 @@
-;;; p4-mode.el --- Support for the P4 v1.2 programming language
+;;; p4-mode.el --- Support for the P4_16 programming language
+;;; This file is still incomplete
 
 ;; Copyright (C) 2016- Barefoot Networks
 ;; Version: 1.2
@@ -21,8 +22,8 @@
 ;; Syntactic HighLighting
 
 ;; Main keywors (declarations and operators)
-(setq p4-keywords 
-      '("action" "apply" "const" "control" 
+(setq p4-keywords
+      '("action" "apply" "const" "control"
         "else" "extern" "if" "parser" "package"
         "return" "select" "state" "switch" "table"
         "transition" "typedef"
@@ -40,7 +41,7 @@
         "int" "match_kind" "struct" "varbit" "void"))
 
 (setq p4-cpp
-      '("#include" 
+      '("#include"
         "#define" "#undef"
         "#if" "#ifdef" "#elif" "#else" "#endif" "defined"
         "#line"))
@@ -114,7 +115,7 @@
   (set-syntax-table p4-mode-syntax-table)
   (use-local-map p4-mode-map)
   (set (make-local-variable 'font-lock-defaults) '(p4-font-lock-keywords))
-  (set (make-local-variable 'indent-line-function) 'p4-indent-line)  
+  (set (make-local-variable 'indent-line-function) 'p4-indent-line)
   (setq major-mode 'p4-mode)
   (setq mode-name "P4")
   (run-hooks 'p4-mode-hook)

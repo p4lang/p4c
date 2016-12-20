@@ -1,8 +1,10 @@
+[TODO: this file is probably out-of-date]
+
 # Setting up Eclipse
 
 Use the following installation steps to setup an Eclipse development environment for p4c.
 Note that the following assumes you have already performed the preliminary environment
-bootstrap, as described in [README](README.md).  
+bootstrap, as described in [README](README.md).
 
 1. Download Eclipse Luna for C/C++ from [Eclipse webpage](http://www.eclipse.org/luna/)
   * Go to Downloads -> Eclipse IDS for C/C++ Developers -> Linux 64-bit
@@ -41,7 +43,7 @@ bootstrap, as described in [README](README.md).
   * Go to Window -> Preferences
   * Go to C/C++ -> Build -> Settings
   * Click the `Discovery` tab
-  * Highlight `CDT GCC Built-in Compiler Settings [Shared]` 
+  * Highlight `CDT GCC Built-in Compiler Settings [Shared]`
   * In the box labeled `Command to get compiler specs`, add `-std=c++11`
   * Click `Apply`
 
@@ -74,4 +76,3 @@ bootstrap, as described in [README](README.md).
 
 16. Setup editor
    * Window/Preferences/Text editor -> insert spaces for tabs
-   
