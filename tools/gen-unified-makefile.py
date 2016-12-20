@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright 2016-present Barefoot Networks, Inc. 
-# 
+# Copyright 2016-present Barefoot Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -73,7 +73,7 @@ import sys
 
 def find_automake_files():
     files = []
-    for root, _, filenames in os.walk('.'):
+    for root, _, filenames in os.walk('.', symlinks=True):
         for filename in fnmatch.filter(filenames, '*.am'):
             files.append(os.path.join(root, filename))
     return files
