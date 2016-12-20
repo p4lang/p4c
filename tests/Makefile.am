@@ -12,6 +12,11 @@ libtestutils_la_LIBADD = $(top_builddir)/src/bm_sim/libbmsim.la
 AM_CPPFLAGS += \
 -isystem $(top_srcdir)/third_party/gtest/include \
 -DTESTDATADIR=\"$(srcdir)/testdata\"
+
+if SKIP_UNDETERMINISTIC_TESTS
+    AM_CPPFLAGS += -DSKIP_UNDETERMINISTIC_TESTS
+endif
+
 LDADD = \
 $(top_builddir)/third_party/gtest/libgtest.la \
 $(top_builddir)/src/bm_runtime/libbmruntime.la \

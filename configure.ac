@@ -73,6 +73,12 @@ AS_IF([test "x$enable_elogger" != "xno"], [
     MY_CPPFLAGS="$MY_CPPFLAGS -DBMELOG_ON"
 ])
 
+AC_ARG_ENABLE([undeterministic_tests],
+    AS_HELP_STRING([--disable-undeterministic-tests],
+                   [Skip undeterministic tests (e.g. queueing) when running "make check"]))
+AM_CONDITIONAL([SKIP_UNDETERMINISTIC_TESTS],
+               [test "x$enable_undeterministic_tests" = "xno"])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC

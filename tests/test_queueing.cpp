@@ -223,6 +223,8 @@ struct RndInputPri {
   size_t priority;
 };
 
+#ifndef SKIP_UNDETERMINISTIC_TESTS
+
 class QueueingPriRLTest : public ::testing::Test {
  protected:
   typedef std::unique_ptr<int> T;
@@ -320,7 +322,9 @@ TEST_F(QueueingPriRLTest, PriRateLimiter) {
   else
     diff = priority_0 - priority_1;
 
-  // was originally 10%, but replaced it with 25% as the test would fail from
+  // was originally 10%, but replaced it with 20% as the test would fail from
   // time to time (on slower machines?)
-  ASSERT_LT(diff, std::max(priority_0, priority_1) * 0.25);
+  ASSERT_LT(diff, std::max(priority_0, priority_1) * 0.2);
 }
+
+#endif  // SKIP_UNDETERMINISTIC_TESTS
