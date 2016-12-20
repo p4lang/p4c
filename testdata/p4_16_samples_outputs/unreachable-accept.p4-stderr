@@ -1,0 +1,9 @@
+../testdata/p4_16_samples/unreachable-accept.p4(31): warning: start: implicit transition to `reject'
+    state start {
+          ^^^^^
+../testdata/p4_16_samples/unreachable-accept.p4(30): warning: accept state in parser Parser is unreachable
+parser Parser(packet_in pkt_in, out headers_t hdr) {
+       ^^^^^^
+../testdata/p4_16_samples/unreachable-accept.p4(30): warning: accept state in parser Parser is unreachable
+parser Parser(packet_in pkt_in, out headers_t hdr) {
+       ^^^^^^

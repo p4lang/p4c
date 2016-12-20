@@ -308,6 +308,7 @@ class Definitions {
         }
     }
     void remove(const StorageLocation* loc);
+    bool empty() const { return definitions.empty(); }
 };
 
 class AllDefinitions {

@@ -157,7 +157,9 @@ class FindUninitialized : public Inspector {
         visit(parser->states);
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
         auto acceptdefs = definitions->get(accept, true);
-        checkOutParameters(parser, parser->getApplyMethodType()->parameters, acceptdefs);
+        if (!acceptdefs->empty())
+            // acceptdefs is empty when the accept state is unreachable
+            checkOutParameters(parser, parser->getApplyMethodType()->parameters, acceptdefs);
         return false;
     }
 
