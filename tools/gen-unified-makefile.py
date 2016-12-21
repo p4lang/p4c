@@ -73,7 +73,7 @@ import sys
 
 def find_automake_files():
     files = []
-    for root, _, filenames in os.walk('.', symlinks=True):
+    for root, _, filenames in os.walk('.', followlinks=True):
         for filename in fnmatch.filter(filenames, '*.am'):
             files.append(os.path.join(root, filename))
     return files
