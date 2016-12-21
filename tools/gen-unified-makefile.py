@@ -217,7 +217,8 @@ def generate_rules(output, target, unified_file_chunks, nonunified_file_set):
         files_in_chunk = ' '.join(unified_file_chunks[index])
         chunk_target = 'unified-sources-{}-{}.cpp'.format(target, index)
 
-        print('{}: $(GEN_UNIFIED_CPP) {}'.format(chunk_target, files_in_chunk), file=output)
+        print('{}: $(GEN_UNIFIED_CPP) {} {}'
+                .format(chunk_target, output.name, files_in_chunk), file=output)
         print('\t@$(GEN_UNIFIED_CPP) {} > $@'.format(files_in_chunk), file=output)
         print(file=output)
         print('{}_SOURCES += {}'.format(target, chunk_target), file=output)
