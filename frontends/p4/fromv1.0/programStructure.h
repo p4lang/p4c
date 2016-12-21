@@ -175,8 +175,8 @@ class ProgramStructure {
     const IR::Expression* convertFieldList(const IR::Expression* expression);
     const IR::Type_Struct* createFieldListType(const IR::Expression* expression);
     const IR::Expression* convertHashAlgorithm(IR::ID algorithm);
-    const IR::Statement* sliceAssign(Util::SourceInfo srcInfo, const IR::Expression* left,
-                                     const IR::Expression* right, const IR::Expression* mask);
+    const IR::Statement* sliceAssign(Util::SourceInfo srcInfo, IR::ERef left,
+                                     IR::ERef right, IR::ERef mask);
     const IR::Expression* counterType(const IR::CounterOrMeter* cm) const;
     cstring mapAlgorithm(IR::ID algorithm) const;
     void createChecksumVerifications();
@@ -190,7 +190,7 @@ class ProgramStructure {
     void createMain();
 
  public:
-    const IR::Expression* paramReference(const IR::Parameter* param);
+    IR::ERef paramReference(const IR::Parameter* param);
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
 

@@ -52,5 +52,6 @@ limitations under the License.
 #include "pass_manager.h"
 #include "ir-inline.h"
 #include "dump.h"
+#include "expression_ref.h"
 
 #endif /* _IR_IR_H_*/
