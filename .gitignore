@@ -39,6 +39,7 @@ tags
 extensions/*
 otherMakefiles.am
 unified-compilation.am
+regenerate-unified-compilation.am
 *.d
 *.output
 *.json.p4
