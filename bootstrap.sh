@@ -24,6 +24,7 @@ set -e  # exit on error
 # for more discussion.
 echo "Generating unified-compilation.am"
 tools/gen-unified-makefile.py --max-chunk-size 10 \
+                              --regenerate-with regenerate-unified-compilation.am \
                               -o unified-compilation.am
 
 mkdir -p extensions # place where additional back-ends are expected
