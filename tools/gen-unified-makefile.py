@@ -75,11 +75,15 @@ import re
 import stat
 import sys
 
-def find_automake_files():
+def find_automake_files(excluded_files):
     files = []
-    for root, _, filenames in os.walk('.', followlinks=True):
+    for path_prefix, _, filenames in os.walk('.', followlinks=True):
         for filename in fnmatch.filter(filenames, '*.am'):
-            files.append(os.path.join(root, filename))
+            path = os.path.join(path_prefix, filename)
+            relative_path = os.path.relpath(path, '.')
+            if relative_path not in excluded_files:
+                files.append(path)
+
     return files
 
 def construct_file_set(makefile, reldir, target, type, files):
@@ -258,8 +262,10 @@ def main(argv):
     # do anything clever about e.g. excluding automake files that we don't
     # intend on actually including in the makefile, because we're just
     # generating rules at this point. The rules won't actually be invoked unless
-    # there's some target that depends on them.
-    automake_files = find_automake_files()
+    # unless there's some target that depends on them. (We do have to exclude
+    # the file we're generating, though, or else we'll confuse ourselves.)
+    excluded_files = [args.output]
+    automake_files = find_automake_files(excluded_files)
 
     # Now we compute the file sets. This is designed to fit right in with
     # automake's approach. We look for make variables named 'foo_UNIFIED' (the
