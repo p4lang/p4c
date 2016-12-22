@@ -1,17 +1,24 @@
 This folder contains the C++ source code for the P4-16 compiler.  This
-is a reference implementation of a compiler for the 2015 version of
-the P4 programming language, also called P4_16.  For the P4
-programming language see http://p4.org.
+is a reference implementation of a compiler for the 2016 version of
+the P4 programming language, also called P4-16.  The P4-16 draft spec
+is available at
+http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html.
+For the P4 programming language see http://p4.org.
 
 The code contains three sample compiler back-ends:
-* p4c-bm2-ss: can be used to target the P4 simple_switch written using
+* p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model
 * p4c-ebpf: can be used to generate C code which can be compiled to EBPF
-  https://en.wikipedia.org/wiki/Berkeley_Packet_Filter
+  https://en.wikipedia.org/wiki/Berkeley_Packet_Filter and then loaded
+  in the Linux kernel for packet filtering
 * p4test: a source-to-source P4 translator which can be used for
-  testing, learning and debugging
-All these compilers can accept both P4_14 (i.e., P4 v1.0, v1.1) and
-P4_16 programs.
+  testing, learning compiler internals and debugging.
+
+Some of these compilers can accept both
+[P4-14](http://p4.org/wp-content/uploads/2016/11/p4-spec-latest.pdf)
+(i.e., P4 v1.0, v1.1) and
+[P4-16](http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html)
+programs.
 
 The code and documentation are hosted in the following git repository:
 https://github.com/p4lang/p4c
@@ -33,9 +40,9 @@ following tools are required to build and run the compiler and tests:
 
 - Boehm-Weiser garbage-collector C++ library
 
-- Gnu Bison and Gnu Flex
+- GNU Bison and Flex (parser and lexical analyzer generators)
 
-- Gnu multiple precision library GMP
+- GNU multiple precision library GMP
 
 - C++ boost library (minimally used)
 
@@ -43,7 +50,7 @@ following tools are required to build and run the compiler and tests:
 
 The compiler is modular, and it contains multiple back-ends.  New ones can be added easily.
 Each back-end may have additional dependences.  This repository contains the following two
-back-ends; please read for installing more dependences:
+back-ends; please read the following documents for installing more dependences:
   * [BMv2](backends/bmv2/README.md)
   * [eBPF](backends/ebpf/README.md)
 
@@ -78,12 +85,13 @@ Installing on macOS:
   brew install gmp --c++11
   ```
 
-  By default, Homebrew doesn't link programs into `/usr/local/bin` if they would
-  conflict with a version provided by the base system. This includes Bison,
-  since an older version ships with macOS. `make check` depends on the newer
-  Bison we just installed from Homebrew (see #83), so you'll want to add it to
-  your `$PATH` one way or another. One simple way to do that is to request that
-  Homebrew link it into `/usr/local/bin`:
+  By default, Homebrew doesn't link programs into `/usr/local/bin` if
+  they would conflict with a version provided by the base system. This
+  includes Bison, since an older version ships with macOS. `make
+  check` depends on the newer Bison we just installed from Homebrew
+  (see [#83](http://github.com/p4lang/p4c/issues/83)), so you'll want
+  to add it to your `$PATH` one way or another. One simple way to do
+  that is to request that Homebrew link it into `/usr/local/bin`:
   ```
   brew link --force bison
   ```

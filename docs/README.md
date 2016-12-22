@@ -46,7 +46,7 @@ p4c
   http://p4.org/wp-content/uploads/2015/04/p4-latest.pdf
 
 * the P4_16 draft language is described in [this pdf
-  document](https://github.com/p4lang/p4-spec/wiki/P4-16-draft-spec.pdf).
+  document](http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.pdf).
   This language is still under revision.
 
 * the core design of the compiler intermediate representation (IR) and
@@ -65,11 +65,93 @@ p4c
   * Discussion of the three sample back-ends
 
 * Specific back-ends may have their own documentation; check the
-  `extensions` sub-folders, and also:
+  `extensions` sub-folders, and also the following supplied back-ends:
   * [BMv2](../backends/bmv2/README.md)
   * [eBPF](../backends/ebpf/README.md)
 
-# Coding conventions
+# How to contribute
+
+* do write unit test code
+* code has to be reviewed before it is merged
+* make sure all tests pass when you send a pull request (only PASS tests allowed)
+* make sure `make cpplint` produces no errors
+
+## Git usage
+
+* To contribute: fork the p4lang/p4c repository on github
+  (see https://help.github.com/articles/fork-a-repo/)
+* To merge a forked repository with the latest changes in the source use:
+  `git fetch upstream; git merge upstream/master`
+* After committing changes, create a pull request (using the github web UI)
+
+## Debugging
+
+* To debug the build process you can run `make V=1`
+
+* The top-level `.gdbinit` file has some additional pretty-printers.
+  If you start gdb in this folder (p4c), then it should be
+  automatically used.  Otherwise you can run at the gdb prompt `source
+  path-to-p4c/.gdbinit`.
+
+* To debug the compiler parser you can set the environment variable
+  `YYDEBUG` to 1
+
+* The following `IR::Node` methods can be used to print nice representations of
+  compiler data structures:
+
+  * `void dbprint(std::ostream& out) const`: this method is used when
+    logging information.  It should print useful debug information,
+    intended for consumption by compiler writers.
+
+  * `cstring toString() const`: this method is used when reporting
+    error messages to compiler users.  It should only display
+    information that is related to the P4 user program, and never
+    internal compiler data structures.
+
+* Use the LOG* macros for writing debug messages.  gdb misbehaves
+  frequently, so log messages are the best way to debug your programs.
+  The number in the function name is the debug verbosity.  The higher,
+  the less important the message.  This macro invokes the `dbprint`
+  method on objects that provide it.  Here is an example usage:
+  `LOG1("Replacing " << id << " with " << newid);`
+
+* Keep the compiler output deterministic; watch for iterators over
+  sets and maps, which may introduce non-deterministic orders.  Use
+  our own `ordered_map` and `ordered_set` if you iterate, to keep
+  iteration order deterministic.
+
+* You can control the logging level per compiler source-file with the
+  `-T` compiler command-line flag.  The flag is followed by a list of
+  file patterns and a numeric level after a colon `:`.  This flag
+  enables all logging messages above the specified level for all
+  compiler source files that match the file pattern.
+
+  For example, to enable logging in file `node.cpp` above level 1, and
+  in file `pass_manager.cpp` above level 2, use the following compiler
+  command-line option: `-Tnode:1,pass_manager:2`
+
+## Testing
+
+The testing infrastructure is based on autotools.  We use several
+small python and shell scripts to work around limitations of
+autotools.
+
+* To run tests execute `make check -j3`
+  - There should be no FAIL or XPASS tests.
+  - XFAIL tests are tolerated only transiently - these indicate known
+  unfixed bugs in the compiler.
+
+* To run a subset of tests execute `make check-PATTERN`.  E.g., `make
+  check-p4`.
+
+* To rerun the tests that failed last time run `make recheck -j3`
+
+* Add unit tests in `test/unittests`
+
+* Code for running various compiler back-ends on p4 files is generated
+  using a simple python script `tools/gen-tests.py`.
+
+## Coding conventions
 
 * Coding style is guided by the [following
   rules](CodingStandardPhilosophy.md)
@@ -133,85 +215,3 @@ output:
 
   * use `ordered_map` and `ordered_set` when you need to iterate;
     they provide deterministic iterators
-
-# How to contribute
-
-* do write unit test code
-* code has to be reviewed before it is merged
-* make sure all tests pass when you send a pull request (only PASS tests allowed)
-* make sure `make cpplint` produces no errors
-
-# Git usage
-
-* To contribute: fork the p4lang/p4c repository on github
-  (see https://help.github.com/articles/fork-a-repo/)
-* To merge a forked repository with the latest changes in the source use:
-  `git fetch upstream; git merge upstream/master`
-* After committing changes, create a pull request (using the github web UI)
-
-# Debugging
-
-* To debug the build process you can run `make V=1`
-
-* The top-level `.gdbinit` file has some additional pretty-printers.
-  If you start gdb in this folder (p4c), then it should be
-  automatically used.  Otherwise you can run at the gdb prompt `source
-  path-to-p4c/.gdbinit`.
-
-* To debug the compiler parser you can set the environment variable
-  `YYDEBUG` to 1
-
-* The following `IR::Node` methods can be used to print nice representations of
-  compiler data structures:
-
-  * `void dbprint(std::ostream& out) const`: this method is used when
-    logging information.  It should print useful debug information,
-    intended for consumption by compiler writers.
-
-  * `cstring toString() const`: this method is used when reporting
-    error messages to compiler users.  It should only display
-    information that is related to the P4 user program, and never
-    internal compiler data structures.
-
-* Use the LOG* macros for writing debug messages.  gdb misbehaves
-  frequently, so log messages are the best way to debug your programs.
-  The number in the function name is the debug verbosity.  The higher,
-  the less important the message.  This macro invokes the `dbprint`
-  method on objects that provide it.  Here is an example usage:
-  `LOG1("Replacing " << id << " with " << newid);`
-
-* Keep the compiler output deterministic; watch for iterators over
-  sets and maps, which may introduce non-deterministic orders.  Use
-  our own `ordered_map` and `ordered_set` if you iterate, to keep
-  iteration order deterministic.
-
-* You can control the logging level per compiler source-file with the
-  `-T` compiler command-line flag.  The flag is followed by a list of
-  file patterns and a numeric level after a colon `:`.  This flag
-  enables all logging messages above the specified level for all
-  compiler source files that match the file pattern.
-
-  For example, to enable logging in file `node.cpp` above level 1, and
-  in file `pass_manager.cpp` above level 2, use the following compiler
-  command-line option: `-Tnode:1,pass_manager:2`
-
-# Testing
-
-The testing infrastructure is based on autotools.  We use several
-small python and shell scripts to work around limitations of
-autotools.
-
-* To run tests execute `make check -j3`
-  - There should be no FAIL or XPASS tests.
-  - XFAIL tests are tolerated only transiently - these indicate known
-  unfixed bugs in the compiler.
-
-* To run a subset of tests execute `make check-PATTERN`.  E.g., `make
-  check-p4`.
-
-* To rerun the tests that failed last time run `make recheck -j3`
-
-* Add unit tests in `test/unittests`
-
-* Code for running various compiler back-ends on p4 files is generated
-  using a simple python script `tools/gen-tests.py`.
