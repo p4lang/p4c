@@ -54,7 +54,7 @@ table test2 {
 }
 
 control ingress {
-    if (data.b2 > 50) {
+    if (data.b2 > 49) {
         apply(test1);
     } else {
         apply(test2);

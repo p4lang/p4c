@@ -66,10 +66,12 @@ class Sub : Operation_Binary {
 class Shl : Operation_Binary {
     stringOp = "<<";
     precedence = DBPrint::Prec_Shl;
+    Shl { if (type->is<Type::Unknown>() && left) type = left->type; }
 }
 class Shr : Operation_Binary {
     stringOp = ">>";
     precedence = DBPrint::Prec_Shr;
+    Shr { if (type->is<Type::Unknown>() && left) type = left->type; }
 }
 class Equ : Operation_Relation {
     stringOp = "==";
@@ -204,9 +206,12 @@ class Slice : Operation_Ternary {
     int getH() const { return e1->to<IR::Constant>()->asInt(); }
     int getL() const { return e2->to<IR::Constant>()->asInt(); }
     Slice(Expression a, int hi, int lo)
-    : Operation_Ternary(a, new Constant(hi), new Constant(lo)) {}
+    : Operation_Ternary(IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
     Slice(Util::SourceInfo si, Expression a, int hi, int lo)
-    : Operation_Ternary(si, a, new Constant(hi), new Constant(lo)) {}
+    : Operation_Ternary(si, IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
+    Slice {
+        if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
+            type = IR::Type::Bits::get(getH() - getL() + 1); }
 }
 
 class Member : Operation_Unary {
@@ -221,11 +226,20 @@ class Member : Operation_Unary {
 class Concat : Operation_Binary {
     stringOp = "++";
     precedence = DBPrint::Prec_Add;
+    Concat {
+        if (left && right) {
+            auto lt = left->type->to<IR::Type::Bits>();
+            auto rt = left->type->to<IR::Type::Bits>();
+            if (lt && rt)
+                type = IR::Type::Bits::get(lt->size + rt->size, lt->isSigned); } }
 }
 
 class ArrayIndex : Operation_Binary {
     stringOp = "[]";
     precedence = DBPrint::Prec_Postfix;
+    ArrayIndex {
+        if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
+            type = st->elementType; }
 }
 
 class Range : Operation_Binary {
@@ -247,6 +261,7 @@ class Mux : Operation_Ternary {
         v.visit(e1, "e1");
         clone.visit(e2, "e2");
         v.flow_merge(clone); }
+    Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
 class DefaultExpression : Expression {}

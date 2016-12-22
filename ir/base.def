@@ -116,6 +116,7 @@ abstract Expression {
     // It is not visited by the visitors by default (can be visited explicitly in preorder)
     optional Type type = Type::Unknown::get();
     visit_children { (void)v; }
+#apply
 }
 
 abstract Operation : Expression {
