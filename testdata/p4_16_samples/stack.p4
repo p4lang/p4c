@@ -26,6 +26,7 @@ parser p()
         b = stack.last;
         stack[2] = b;
         b = stack.next;
+        int<32> e = stack.lastIndex;
         transition accept;
     }
 }
@@ -38,6 +39,7 @@ control c() {
         stack[2] = b;
         stack.push_front(2);
         stack.pop_front(2);
+        bit<32> sz = stack.size;
     }
 }
 

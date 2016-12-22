@@ -318,10 +318,10 @@ class Type_Stack : Type {
     unsigned getSize() const;
     static const cstring next;
     static const cstring last;
+    static const cstring arraySize;
+    static const cstring lastIndex;
     static const cstring push_front;
     static const cstring pop_front;
-    static const cstring full;
-    static const cstring empty;
     const Type* getP4Type() const override
     { return new IR::Type_Stack(srcInfo, elementType->getP4Type(), size); }
 }
