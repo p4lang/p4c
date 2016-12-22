@@ -447,32 +447,40 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
 const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
     if (!typesKnown)
         return e;
-    auto expr = getConstant(e->expr);
-    if (expr == nullptr)
-        return e;
     auto type = typeMap->getType(e->expr, true);
-    if (!type->is<IR::Type_StructLike>())
-        BUG("Expected a struct type, got %1%", type);
-    if (!expr->is<IR::ListExpression>())
-        BUG("Expected a list of constants, got %1%", expr);
-
-    auto list = expr->to<IR::ListExpression>();
-    auto structType = type->to<IR::Type_StructLike>();
-
-    bool found = false;
-    int index = 0;
-    for (auto f : *structType->fields) {
-        if (f->name.name == e->member.name) {
-            found = true;
-            break;
-        }
-        index++;
-    }
-
-    if (!found)
-        BUG("Could not find field %1% in type %2%", e->member, type);
-    auto result = list->components->at(index)->clone();
     auto origtype = typeMap->getType(getOriginal());
+
+    const IR::Expression* result;
+    if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
+        auto st = type->to<IR::Type_Stack>();
+        auto size = st->getSize();
+        result = new IR::Constant(st->size->srcInfo, size);
+    } else {
+        auto expr = getConstant(e->expr);
+        if (expr == nullptr)
+            return e;
+        if (!type->is<IR::Type_StructLike>())
+            BUG("Expected a struct type, got %1%", type);
+        if (!expr->is<IR::ListExpression>())
+            BUG("Expected a list of constants, got %1%", expr);
+
+        auto list = expr->to<IR::ListExpression>();
+        auto structType = type->to<IR::Type_StructLike>();
+
+        bool found = false;
+        int index = 0;
+        for (auto f : *structType->fields) {
+            if (f->name.name == e->member.name) {
+                found = true;
+                break;
+            }
+            index++;
+        }
+
+        if (!found)
+            BUG("Could not find field %1% in type %2%", e->member, type);
+        result = list->components->at(index)->clone();
+    }
     typeMap->setType(result, origtype);
     typeMap->setCompileTimeConstant(result);
     setConstant(e, result);

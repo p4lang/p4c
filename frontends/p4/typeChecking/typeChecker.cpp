@@ -2046,10 +2046,13 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 setLeftValue(getOriginal<IR::Expression>());
             }
             return expression;
-        } else if (member == IR::Type_Stack::empty ||
-                   member == IR::Type_Stack::full) {
-            setType(getOriginal(), IR::Type_Boolean::get());
-            setType(expression, IR::Type_Boolean::get());
+        } else if (member == IR::Type_Stack::arraySize) {
+            setType(getOriginal(), IR::Type_Bits::get(32));
+            setType(expression, IR::Type_Bits::get(32));
+            return expression;
+        } else if (member == IR::Type_Stack::lastIndex) {
+            setType(getOriginal(), IR::Type_Bits::get(32, true));
+            setType(expression, IR::Type_Bits::get(32, true));
             return expression;
         } else if (member == IR::Type_Stack::push_front ||
                    member == IR::Type_Stack::pop_front) {

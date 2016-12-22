@@ -347,13 +347,6 @@ class FindUninitialized : public Inspector {
                 registerUses(expression, false);
                 return;
             }
-            if (expression->member.name == IR::Type_Stack::empty ||
-                expression->member.name == IR::Type_Stack::full) {
-                auto valid = storage->getValidField();
-                reads(expression, valid);
-                registerUses(expression, false);
-                return;
-            }
         }
 
         auto fields = storage->getField(expression->member);
