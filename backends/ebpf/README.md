@@ -27,7 +27,8 @@ http://www.sigcomm.org/ccr/papers/2014/July/0000000.0000004:
 
 P4 itself is protocol-independent but allows programmers to express a
 rich set of data plane behaviors and protocols.  This back-end only
-supports the newest version of the P4 programming language, P4_16. The
+supports the newest version of the P4 programming language,
+[P4_16](http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html). The
 core P4 abstractions are:
 
 * Headers describe the format (the set of fields and their
