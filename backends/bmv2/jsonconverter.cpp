@@ -1761,6 +1761,7 @@ void JsonConverter::addLocals() {
     json->emplace("id", nextId("headers"));
     json->emplace("header_type", scalarsName);
     json->emplace("metadata", true);
+    json->emplace("pi_omit", true);  // Don't expose scalars in PI.
     headerInstances->append(json);
 }
 
