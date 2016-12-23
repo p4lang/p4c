@@ -1995,6 +1995,11 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
     for (auto f : *type->fields) {
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
+            // The headers struct can not contain nested structures.
+            if (!meta && !ft->is<IR::Type_Header>()) {
+                ::error("Type %1% should only contain headers or header stacks", type);
+                return;
+            }
             auto st = ft->to<IR::Type_StructLike>();
             createJsonType(st);
         }
@@ -2013,10 +2018,6 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
             // Done elsewhere
             continue;
         } else {
-            if (!meta) {
-                ::error("Type %1% should only contain headers or stacks", type);
-                return;
-            }
             // Treat this field like a scalar local variable
             auto scalarFields = scalarsStruct->get("fields")->to<Util::JsonArray>();
             CHECK_NULL(scalarFields);
