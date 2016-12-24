@@ -26,6 +26,7 @@ midend_UNIFIED = \
 	midend/local_copyprop.cpp \
 	midend/localizeActions.cpp \
 	midend/moveConstructors.cpp \
+	midend/predication.cpp \
 	midend/parserUnroll.cpp \
 	midend/removeParameters.cpp \
 	midend/removeReturns.cpp \
@@ -48,6 +49,7 @@ noinst_HEADERS += \
 	midend/local_copyprop.h \
 	midend/localizeActions.h \
 	midend/moveConstructors.h \
+	midend/predication.h \
 	midend/nestedStructs.h \
 	midend/parserUnroll.h \
 	midend/removeLeftSlices.h \
