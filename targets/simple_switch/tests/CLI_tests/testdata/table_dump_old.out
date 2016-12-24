@@ -1,0 +1,59 @@
+????
+0
+????
+Group has been created with handle 0
+????
+Member has been created with handle 0
+????
+Adding entry to indirect match table ecmp_group
+Entry has been added with handle 0
+????
+????
+Adding entry to indirect match table ecmp_group
+Entry has been added with handle 1
+????
+==========
+TABLE ENTRIES
+**********
+Dumping entry 0x0
+Match key:
+* ipv4.dstAddr        : LPM       0a000001/12
+Index: member(0)
+**********
+Dumping entry 0x1
+Match key:
+* ipv4.dstAddr        : LPM       0a000101/32
+Index: group(0)
+==========
+MEMBERS
+**********
+Dumping member 0
+Action entry: set_nhop - 0a000001, 01
+==========
+GROUPS
+**********
+Dumping group 0
+Members: [0]
+==========
+Dumping default entry
+EMPTY
+==========
+????
+2
+????
+Dumping entry 0x0
+Match key:
+* ipv4.dstAddr        : LPM       0a000001/12
+Index: member(0)
+????
+Dumping member 0
+Action entry: set_nhop - 0a000001, 01
+????
+Dumping group 0
+Members: [0]
+????
+Dumping entry 0x0
+Match key:
+* ipv4.dstAddr        : LPM       0a000001/12
+Index: member(0)
+????

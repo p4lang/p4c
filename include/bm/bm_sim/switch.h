@@ -336,32 +336,93 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return contexts.at(cxt_id).mt_set_entry_ttl(table_name, handle, ttl_ms);
   }
 
+  // action profiles
+
   MatchErrorCode
-  mt_indirect_add_member(size_t cxt_id,
-                         const std::string &table_name,
+  mt_act_prof_add_member(size_t cxt_id,
+                         const std::string &act_prof_name,
                          const std::string &action_name,
                          ActionData action_data,
                          mbr_hdl_t *mbr) override {
-    return contexts.at(cxt_id).mt_indirect_add_member(
-        table_name, action_name, std::move(action_data), mbr);
+    return contexts.at(cxt_id).mt_act_prof_add_member(
+        act_prof_name, action_name, std::move(action_data), mbr);
   }
 
   MatchErrorCode
-  mt_indirect_delete_member(size_t cxt_id,
-                            const std::string &table_name,
+  mt_act_prof_delete_member(size_t cxt_id,
+                            const std::string &act_prof_name,
                             mbr_hdl_t mbr) override {
-    return contexts.at(cxt_id).mt_indirect_delete_member(table_name, mbr);
+    return contexts.at(cxt_id).mt_act_prof_delete_member(act_prof_name, mbr);
   }
 
   MatchErrorCode
-  mt_indirect_modify_member(size_t cxt_id,
-                            const std::string &table_name,
-                            mbr_hdl_t mbr_hdl,
+  mt_act_prof_modify_member(size_t cxt_id,
+                            const std::string &act_prof_name,
+                            mbr_hdl_t mbr,
                             const std::string &action_name,
                             ActionData action_data) override {
-    return contexts.at(cxt_id).mt_indirect_modify_member(
-        table_name, mbr_hdl, action_name, std::move(action_data));
+    return contexts.at(cxt_id).mt_act_prof_modify_member(
+        act_prof_name, mbr, action_name, std::move(action_data));
   }
+
+  MatchErrorCode
+  mt_act_prof_create_group(size_t cxt_id,
+                           const std::string &act_prof_name,
+                           grp_hdl_t *grp) override {
+    return contexts.at(cxt_id).mt_act_prof_create_group(act_prof_name, grp);
+  }
+
+  MatchErrorCode
+  mt_act_prof_delete_group(size_t cxt_id,
+                           const std::string &act_prof_name,
+                           grp_hdl_t grp) override {
+    return contexts.at(cxt_id).mt_act_prof_delete_group(act_prof_name, grp);
+  }
+
+  MatchErrorCode
+  mt_act_prof_add_member_to_group(size_t cxt_id,
+                                  const std::string &act_prof_name,
+                                  mbr_hdl_t mbr, grp_hdl_t grp) override {
+    return contexts.at(cxt_id).mt_act_prof_add_member_to_group(
+        act_prof_name, mbr, grp);
+  }
+
+  MatchErrorCode
+  mt_act_prof_remove_member_from_group(size_t cxt_id,
+                                       const std::string &act_prof_name,
+                                       mbr_hdl_t mbr, grp_hdl_t grp) override {
+    return contexts.at(cxt_id).mt_act_prof_remove_member_from_group(
+        act_prof_name, mbr, grp);
+  }
+
+  std::vector<ActionProfile::Member>
+  mt_act_prof_get_members(size_t cxt_id,
+                          const std::string &act_prof_name) const override {
+    return contexts.at(cxt_id).mt_act_prof_get_members(act_prof_name);
+  }
+
+  MatchErrorCode
+  mt_act_prof_get_member(size_t cxt_id, const std::string &act_prof_name,
+                         mbr_hdl_t mbr,
+                         ActionProfile::Member *member) const override {
+    return contexts.at(cxt_id).mt_act_prof_get_member(
+        act_prof_name, mbr, member);
+  }
+
+  std::vector<ActionProfile::Group>
+  mt_act_prof_get_groups(size_t cxt_id,
+                         const std::string &act_prof_name) const override {
+    return contexts.at(cxt_id).mt_act_prof_get_groups(act_prof_name);
+  }
+
+  MatchErrorCode
+  mt_act_prof_get_group(size_t cxt_id, const std::string &act_prof_name,
+                        grp_hdl_t grp,
+                        ActionProfile::Group *group) const override {
+    return contexts.at(cxt_id).mt_act_prof_get_group(act_prof_name, grp, group);
+  }
+
+  // indirect tables
 
   MatchErrorCode
   mt_indirect_add_entry(size_t cxt_id,
@@ -404,37 +465,6 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
                                  const std::string &table_name,
                                  mbr_hdl_t mbr) override {
     return contexts.at(cxt_id).mt_indirect_set_default_member(table_name, mbr);
-  }
-
-  MatchErrorCode
-  mt_indirect_ws_create_group(size_t cxt_id,
-                              const std::string &table_name,
-                              grp_hdl_t *grp) override {
-    return contexts.at(cxt_id).mt_indirect_ws_create_group(table_name, grp);
-  }
-
-  MatchErrorCode
-  mt_indirect_ws_delete_group(size_t cxt_id,
-                              const std::string &table_name,
-                              grp_hdl_t grp) override {
-    return contexts.at(cxt_id).mt_indirect_ws_delete_group(table_name, grp);
-  }
-
-  MatchErrorCode
-  mt_indirect_ws_add_member_to_group(size_t cxt_id,
-                                     const std::string &table_name,
-                                     mbr_hdl_t mbr, grp_hdl_t grp) override {
-    return contexts.at(cxt_id).mt_indirect_ws_add_member_to_group(
-        table_name, mbr, grp);
-  }
-
-  MatchErrorCode
-  mt_indirect_ws_remove_member_from_group(size_t cxt_id,
-                                          const std::string &table_name,
-                                          mbr_hdl_t mbr,
-                                          grp_hdl_t grp) override {
-    return contexts.at(cxt_id).mt_indirect_ws_remove_member_from_group(
-        table_name, mbr, grp);
   }
 
   MatchErrorCode
@@ -559,33 +589,6 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
                                     int priority = 1) const override {
     return contexts.at(cxt_id).mt_get_entry_from_key<MatchTableIndirectWS>(
         table_name, match_key, entry, priority);
-  }
-
-  std::vector<MatchTableIndirect::Member>
-  mt_indirect_get_members(size_t cxt_id,
-                          const std::string &table_name) const override {
-    return contexts.at(cxt_id).mt_indirect_get_members(table_name);
-  }
-
-  MatchErrorCode
-  mt_indirect_get_member(size_t cxt_id, const std::string &table_name,
-                         mbr_hdl_t mbr,
-                         MatchTableIndirect::Member *member) const override {
-    return contexts.at(cxt_id).mt_indirect_get_member(table_name, mbr, member);
-  }
-
-  std::vector<MatchTableIndirectWS::Group>
-  mt_indirect_ws_get_groups(size_t cxt_id,
-                            const std::string &table_name) const override {
-    return contexts.at(cxt_id).mt_indirect_ws_get_groups(table_name);
-  }
-
-  MatchErrorCode
-  mt_indirect_ws_get_group(size_t cxt_id, const std::string &table_name,
-                           grp_hdl_t grp,
-                           MatchTableIndirectWS::Group *group) const override {
-    return contexts.at(cxt_id).mt_indirect_ws_get_group(
-        table_name, grp, group);
   }
 
   MatchErrorCode

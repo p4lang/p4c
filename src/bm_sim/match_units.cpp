@@ -18,9 +18,10 @@
  *
  */
 
+#include <bm/bm_sim/action_entry.h>
+#include <bm/bm_sim/action_profile.h>
 #include <bm/bm_sim/match_units.h>
 #include <bm/bm_sim/match_key_types.h>
-#include <bm/bm_sim/match_tables.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/lookup_structures.h>
 
@@ -1164,30 +1165,30 @@ MatchUnitGeneric<K, V>::deserialize_(std::istream *in, const P4Objects &objs) {
 // I did not think I had to explicitly instantiate MatchUnitAbstract, because it
 // is a base class for the others, but I get an linker error if I don't
 template class
-MatchUnitAbstract<MatchTableAbstract::ActionEntry>;
+MatchUnitAbstract<ActionEntry>;
 template class
-MatchUnitAbstract<MatchTableIndirect::IndirectIndex>;
+MatchUnitAbstract<ActionProfile::IndirectIndex>;
 
 // The following are all instantiations of MatchUnitGeneric, based on the
 // aliases created in match_units.h
 template class
-MatchUnitGeneric<ExactMatchKey, MatchTableAbstract::ActionEntry>;
+MatchUnitGeneric<ExactMatchKey, ActionEntry>;
 template class
-MatchUnitGeneric<ExactMatchKey, MatchTableIndirect::IndirectIndex>;
+MatchUnitGeneric<ExactMatchKey, ActionProfile::IndirectIndex>;
 
 template class
-MatchUnitGeneric<LPMMatchKey, MatchTableAbstract::ActionEntry>;
+MatchUnitGeneric<LPMMatchKey, ActionEntry>;
 template class
-MatchUnitGeneric<LPMMatchKey, MatchTableIndirect::IndirectIndex>;
+MatchUnitGeneric<LPMMatchKey, ActionProfile::IndirectIndex>;
 
 template class
-MatchUnitGeneric<TernaryMatchKey, MatchTableAbstract::ActionEntry>;
+MatchUnitGeneric<TernaryMatchKey, ActionEntry>;
 template class
-MatchUnitGeneric<TernaryMatchKey, MatchTableIndirect::IndirectIndex>;
+MatchUnitGeneric<TernaryMatchKey, ActionProfile::IndirectIndex>;
 
 template class
-MatchUnitGeneric<RangeMatchKey, MatchTableAbstract::ActionEntry>;
+MatchUnitGeneric<RangeMatchKey, ActionEntry>;
 template class
-MatchUnitGeneric<RangeMatchKey, MatchTableIndirect::IndirectIndex>;
+MatchUnitGeneric<RangeMatchKey, ActionProfile::IndirectIndex>;
 
 }  // namespace bm

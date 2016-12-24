@@ -60,7 +60,7 @@ using ConfigOptionMap = std::unordered_map<std::string, std::string>;
 
 class P4Objects {
  public:
-  typedef std::pair<std::string, std::string> header_field_pair;
+  using header_field_pair = std::pair<std::string, std::string>;
 
   class ForceArith {
     friend class P4Objects;
@@ -125,6 +125,9 @@ class P4Objects {
                        const std::string &action_name) const {
     return t_actions_map.at(std::make_pair(table_name, action_name));
   }
+
+  ActionFn *get_action_for_action_profile(
+      const std::string &act_prof_name, const std::string &action_name) const;
 
   // For most functions I have a get_* version that will throw an exception if
   // an element does not exist (exception not caught) and a get_*_rt version
@@ -202,6 +205,12 @@ class P4Objects {
 
   ExternType *get_extern_instance_rt(const std::string &name) const;
 
+  ActionProfile *get_action_profile(const std::string &name) const {
+    return action_profiles_map.at(name).get();
+  }
+
+  ActionProfile *get_action_profile_rt(const std::string &name) const;
+
   bool field_exists(const std::string &header_name,
                     const std::string &field_name) const;
 
@@ -231,11 +240,11 @@ class P4Objects {
     header_stack_ids_map[name] = header_stack_id;
   }
 
-  header_id_t get_header_id(const std::string &name) {
+  header_id_t get_header_id(const std::string &name) const {
     return header_ids_map.at(name);
   }
 
-  header_stack_id_t get_header_stack_id(const std::string &name) {
+  header_stack_id_t get_header_stack_id(const std::string &name) const {
     return header_stack_ids_map.at(name);
   }
 
@@ -246,6 +255,12 @@ class P4Objects {
   void add_action_to_table(const std::string &table_name,
                            const std::string &action_name, ActionFn *action) {
     t_actions_map[std::make_pair(table_name, action_name)] = action;
+  }
+
+  void add_action_to_act_prof(const std::string &act_prof_name,
+                              const std::string &action_name,
+                              ActionFn *action) {
+    aprof_actions_map[std::make_pair(act_prof_name, action_name)] = action;
   }
 
   void add_parser(const std::string &name, std::unique_ptr<Parser> parser) {
@@ -266,6 +281,11 @@ class P4Objects {
                               std::unique_ptr<MatchActionTable> table) {
     add_control_node(name, table.get());
     match_action_tables_map[name] = std::move(table);
+  }
+
+  void add_action_profile(const std::string &name,
+                          std::unique_ptr<ActionProfile> action_profile) {
+    action_profiles_map[name] = std::move(action_profile);
   }
 
   void add_conditional(const std::string &name,
@@ -330,10 +350,13 @@ class P4Objects {
 
   // tables
   std::unordered_map<std::string, std::unique_ptr<MatchActionTable> >
-    match_action_tables_map{};
+  match_action_tables_map{};
+
+  std::unordered_map<std::string, std::unique_ptr<ActionProfile> >
+  action_profiles_map{};
 
   std::unordered_map<std::string, std::unique_ptr<Conditional> >
-    conditionals_map{};
+  conditionals_map{};
 
   std::unordered_map<std::string, ControlFlowNode *> control_nodes_map{};
 
@@ -343,7 +366,7 @@ class P4Objects {
   // actions
   // TODO(antonin): make this a vector?
   std::unordered_map<p4object_id_t, std::unique_ptr<ActionFn> > actions_map{};
-  typedef std::pair<std::string, std::string> table_action_pair;
+  using table_action_pair = std::pair<std::string, std::string>;
   struct TableActionPairKeyHash {
     std::size_t operator()(const table_action_pair& p) const {
       std::size_t seed = 0;
@@ -355,7 +378,10 @@ class P4Objects {
   };
   std::unordered_map<table_action_pair, ActionFn *, TableActionPairKeyHash>
   t_actions_map{};
-  // std::unordered_map<std::string, std::unique_ptr<ActionFn> > actions_map{};
+  using aprof_action_pair = table_action_pair;
+  using AprofActionPairKeyHash = TableActionPairKeyHash;
+  std::unordered_map<aprof_action_pair, ActionFn *, AprofActionPairKeyHash>
+  aprof_actions_map{};
 
   // parsers
   std::unordered_map<std::string, std::unique_ptr<Parser> > parsers{};
@@ -404,12 +430,13 @@ class P4Objects {
   ConfigOptionMap config_options{};
 
  private:
-  int get_field_offset(header_id_t header_id, const std::string &field_name);
-  size_t get_field_bytes(header_id_t header_id, int field_offset);
-  size_t get_field_bits(header_id_t header_id, int field_offset);
-  size_t get_header_bits(header_id_t header_id);
+  int get_field_offset(header_id_t header_id,
+                       const std::string &field_name) const;
+  size_t get_field_bytes(header_id_t header_id, int field_offset) const;
+  size_t get_field_bits(header_id_t header_id, int field_offset) const;
+  size_t get_header_bits(header_id_t header_id) const;
   std::tuple<header_id_t, int> field_info(const std::string &header_name,
-                                          const std::string &field_name);
+                                          const std::string &field_name) const;
   bool check_required_fields(
       const std::set<header_field_pair> &required_fields);
 
@@ -417,6 +444,9 @@ class P4Objects {
       const std::string &name) const;
 
   void enable_arith(header_id_t header_id, int field_offset);
+
+  std::unique_ptr<Calculation> process_cfg_selector(
+      const Json::Value &cfg_selector) const;
 };
 
 }  // namespace bm

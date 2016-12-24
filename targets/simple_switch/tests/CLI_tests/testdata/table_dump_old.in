@@ -1,12 +1,12 @@
 table_num_entries ecmp_group
-act_prof_create_group ecmp_action_profile
-act_prof_create_member ecmp_action_profile set_nhop 10.0.0.1 1
+table_indirect_create_group ecmp_group
+table_indirect_create_member ecmp_group set_nhop 10.0.0.1 1
 table_indirect_add ecmp_group 10.0.0.1/12 => 0
-act_prof_add_member_to_group ecmp_action_profile 0 0
+table_indirect_add_member_to_group ecmp_group 0 0
 table_indirect_add_with_group ecmp_group 10.0.1.1/32 => 0
 table_dump ecmp_group
 table_num_entries ecmp_group
 table_dump_entry ecmp_group 0
-act_prof_dump_member ecmp_action_profile 0
-act_prof_dump_group ecmp_action_profile 0
+table_dump_member ecmp_group 0
+table_dump_group ecmp_group 0
 table_dump_entry_from_key ecmp_group 10.0.0.1/12

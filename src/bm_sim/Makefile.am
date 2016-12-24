@@ -14,6 +14,7 @@ AM_CFLAGS += $(COVERAGE_FLAGS)
 noinst_LTLIBRARIES = libbmsim.la
 
 libbmsim_la_SOURCES = \
+action_profile.cpp \
 actions.cpp \
 ageing.cpp \
 bytecontainer.cpp \

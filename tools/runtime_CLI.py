@@ -93,10 +93,11 @@ def get_parser():
     parser.add_argument('--pre', help='Packet Replication Engine used by target',
                         type=str, choices=['None', 'SimplePre', 'SimplePreLAG'],
                         default=PreType.SimplePre, action=ActionToPreType)
-    
+
     return parser
 
 TABLES = {}
+ACTION_PROFS = {}
 ACTIONS = {}
 METER_ARRAYS = {}
 COUNTER_ARRAYS = {}
@@ -128,6 +129,7 @@ class Table:
         self.default_action = None
         self.type_ = None
         self.support_timeout = False
+        self.action_prof = None
 
         TABLES[name] = self
 
@@ -136,9 +138,24 @@ class Table:
 
     def key_str(self):
         return ",\t".join([name + "(" + MatchType.to_str(t) + ", " + str(bw) + ")" for name, t, bw in self.key])
-        
+
     def table_str(self):
-        return "{0:30} [{1}]".format(self.name, self.key_str())
+        ap_str = "implementation={}".format(
+            "None" if not self.action_prof else self.action_prof.name)
+        return "{0:30} [{1}, mk={2}]".format(self.name, ap_str, self.key_str())
+
+class ActionProf:
+    def __init__(self, name, id_):
+        self.name = name
+        self.id_ = id_
+        self.with_selection = False
+        self.actions = {}
+        self.ref_cnt = 0
+
+        ACTION_PROFS[name] = self
+
+    def action_prof_str(self):
+        return "{0:30} [{1}]".format(self.name, self.with_selection)
 
 class Action:
     def __init__(self, name, id_):
@@ -200,6 +217,7 @@ class RegisterArray:
 
 def reset_config():
     TABLES.clear()
+    ACTION_PROFS.clear()
     ACTIONS.clear()
     METER_ARRAYS.clear()
     COUNTER_ARRAYS.clear()
@@ -232,6 +250,11 @@ def load_json_str(json_str):
             action.runtime_data += [(j_param["name"], j_param["bitwidth"])]
 
     for j_pipeline in json_["pipelines"]:
+        if "action_profiles" in j_pipeline:  # new JSON format
+            for j_aprof in j_pipeline["action_profiles"]:
+                action_prof = ActionProf(j_aprof["name"], j_aprof["id"])
+                action_prof.with_selection = "selector" in j_aprof
+
         for j_table in j_pipeline["tables"]:
             table = Table(j_table["name"], j_table["id"])
             table.match_type = MatchType.from_str(j_table["match_type"])
@@ -239,6 +262,19 @@ def load_json_str(json_str):
             table.support_timeout = j_table["support_timeout"]
             for action in j_table["actions"]:
                 table.actions[action] = ACTIONS[action]
+
+            if table.type_ in {TableType.indirect, TableType.indirect_ws}:
+                if "action_profile" in j_table:
+                    action_prof = ACTION_PROFS[j_table["action_profile"]]
+                else:  # for backward compatibility
+                    assert("act_prof_name" in j_table)
+                    action_prof = ActionProf(j_table["act_prof_name"],
+                                             table.id_)
+                    action_prof.with_selection = "selector" in j_table
+                action_prof.actions.update(table.actions)
+                action_prof.ref_cnt += 1
+                table.action_prof = action_prof
+
             for j_key in j_table["key"]:
                 target = j_key["target"]
                 match_type = MatchType.from_str(j_key["match_type"])
@@ -581,6 +617,42 @@ def handle_bad_input(f):
             print "Invalid crc operation (%s)" % error
     return handle
 
+def deprecated_act_prof(substitute, with_selection=False,
+                        strictly_deprecated=True):
+    # need two levels here because our decorator takes arguments
+    def deprecated_act_prof_(f):
+        # not sure if this is the right place for it, if I want it to play nice
+        # with @wraps
+        if strictly_deprecated:
+            f.__doc__ = "[DEPRECATED!] " + f.__doc__
+            f.__doc__ += "\nUse '{}' instead".format(substitute)
+        @wraps(f)
+        def wrapper(obj, line):
+            substitute_fn = getattr(obj, "do_" + substitute)
+            args = line.split()
+            obj.at_least_n_args(args, 1)
+            table_name = args[0]
+            table = obj.get_res("table", table_name, TABLES)
+            if with_selection:
+                obj.check_indirect_ws(table)
+            else:
+                obj.check_indirect(table)
+            assert(table.action_prof is not None)
+            assert(table.action_prof.ref_cnt > 0)
+            if strictly_deprecated and table.action_prof.ref_cnt > 1:
+                raise UIn_Error(
+                    "Legacy command does not work with shared action profiles")
+            args[0] = table.action_prof.name
+            if strictly_deprecated:
+                # writing to stderr in case someone is parsing stdout
+                sys.stderr.write(
+                    "This is a deprecated command, use '{}' instead\n".format(
+                        substitute))
+            return substitute_fn(" ".join(args))
+        # we add the handle_bad_input decorator "programatically"
+        return handle_bad_input(wrapper)
+    return deprecated_act_prof_
+
 # thrift does not support unsigned integers
 def hex_to_i16(h):
     x = int(h, 0)
@@ -618,7 +690,7 @@ def parse_bool(s):
 class RuntimeAPI(cmd.Cmd):
     prompt = 'RuntimeCmd: '
     intro = "Control utility for runtime P4 table manipulation"
-    
+
     @staticmethod
     def get_thrift_services(pre_type):
         services = [("standard", Standard.Client)]
@@ -640,7 +712,7 @@ class RuntimeAPI(cmd.Cmd):
 
     def do_greet(self, line):
         print "hello"
-    
+
     def do_EOF(self, line):
         print
         return True
@@ -688,6 +760,9 @@ class RuntimeAPI(cmd.Cmd):
     def _complete_tables(self, text):
         return self._complete_res(TABLES, text)
 
+    def _complete_act_profs(self, text):
+        return self._complete_res(ACTION_PROFS, text)
+
     @handle_bad_input
     def do_table_show_actions(self, line):
         "List one table's actions as per the P4 program: table_show_actions <table_name>"
@@ -712,12 +787,13 @@ class RuntimeAPI(cmd.Cmd):
     def complete_table_info(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
-    def _complete_actions(self, text, table_name = None):
+    # used for tables but also for action profiles
+    def _complete_actions(self, text, table_name = None, res = TABLES):
         if not table_name:
             actions = sorted(ACTIONS.keys())
-        elif table_name not in TABLES:
+        elif table_name not in res:
             return []
-        actions = sorted(TABLES[table_name].actions.keys())
+        actions = sorted(res[table_name].actions.keys())
         if not text:
             return actions
         return [a for a in actions if a.startswith(text)]
@@ -735,6 +811,21 @@ class RuntimeAPI(cmd.Cmd):
             return self._complete_actions(text, table_name)
         if args_cnt == 3 and text:
             return self._complete_actions(text, table_name)
+        return []
+
+    def _complete_act_prof_and_action(self, text, line):
+        act_profs = sorted(ACTION_PROFS.keys())
+        args = line.split()
+        args_cnt = len(args)
+        if args_cnt == 1 and not text:
+            return self._complete_act_profs(text)
+        if args_cnt == 2 and text:
+            return self._complete_act_profs(text)
+        act_prof_name = args[1]
+        if args_cnt == 2 and not text:
+            return self._complete_actions(text, act_prof_name, ACTION_PROFS)
+        if args_cnt == 3 and text:
+            return self._complete_actions(text, act_prof_name, ACTION_PROFS)
         return []
 
     # for debugging
@@ -962,79 +1053,88 @@ class RuntimeAPI(cmd.Cmd):
         if table.type_ != TableType.indirect_ws:
             raise UIn_Error(
                 "Cannot run this command on non-indirect table,"\
-                " or on indirect table with no selector"
-            )
+                " or on indirect table with no selector")
+
+    def check_act_prof_ws(self, act_prof):
+        if not act_prof.with_selection:
+            raise UIn_Error(
+                "Cannot run this command on an action profile without selector")
 
     @handle_bad_input
-    def do_table_indirect_create_member(self, line):
-        "Add a member to an indirect match table: table_indirect_create_member <table name> <action_name> [action parameters]"
+    def do_act_prof_create_member(self, line):
+        "Add a member to an action profile: act_prof_create_member <action profile name> <action_name> [action parameters]"
         args = line.split()
 
         self.at_least_n_args(args, 2)
 
-        table_name, action_name = args[0], args[1]
-        table = self.get_res("table", table_name, TABLES)
+        act_prof_name, action_name = args[0], args[1]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
 
-        self.check_indirect(table)
-
-        if action_name not in table.actions:
-            raise UIn_Error(
-                "Table %s has no action %s" % (table_name, action_name)
-            )
+        if action_name not in act_prof.actions:
+            raise UIn_Error("Action profile '{}' has no action '{}'".format(
+                act_prof_name, action_name))
         action = ACTIONS[action_name]
 
         action_params = args[2:]
         runtime_data = self.parse_runtime_data(action, action_params)
 
-        mbr_handle = self.client.bm_mt_indirect_add_member(
-            0, table_name, action_name, runtime_data
-        )
+        mbr_handle = self.client.bm_mt_act_prof_add_member(
+            0, act_prof_name, action_name, runtime_data)
 
         print "Member has been created with handle", mbr_handle
 
+    def complete_act_prof_create_member(self, text, line, start_index, end_index):
+        return self._complete_act_prof_and_action(text, line)
+
+    @deprecated_act_prof("act_prof_create_member")
+    def do_table_indirect_create_member(self, line):
+        "Add a member to an indirect match table: table_indirect_create_member <table name> <action_name> [action parameters]"
+        pass
+
     def complete_table_indirect_create_member(self, text, line, start_index, end_index):
-        # TODO: only show indirect tables
         return self._complete_table_and_action(text, line)
 
     @handle_bad_input
-    def do_table_indirect_delete_member(self, line):
-        "Delete a member in an indirect match table: table_indirect_delete_member <table name> <member handle>"
+    def do_act_prof_delete_member(self, line):
+        "Delete a member in an action profile: act_prof_delete_member <action profile name> <member handle>"
         args = line.split()
 
         self.exactly_n_args(args, 2)
 
-        table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
-
-        self.check_indirect(table)
+        act_prof_name, action_name = args[0], args[1]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
 
         try:
             mbr_handle = int(args[1])
         except:
             raise UIn_Error("Bad format for member handle")
 
-        self.client.bm_mt_indirect_delete_member(0, table_name, mbr_handle)
+        self.client.bm_mt_act_prof_delete_member(0, act_prof_name, mbr_handle)
+
+    def complete_act_prof_delete_member(self, text, line, start_index, end_index):
+        return self._complete_act_profs(text)
+
+    @deprecated_act_prof("act_prof_delete_member")
+    def do_table_indirect_delete_member(self, line):
+        "Delete a member in an indirect match table: table_indirect_delete_member <table name> <member handle>"
+        pass
 
     def complete_table_indirect_delete_member(self, text, line, start_index, end_index):
-        # TODO: only show indirect tables
         return self._complete_tables(text)
 
     @handle_bad_input
-    def do_table_indirect_modify_member(self, line):
-        "Modify member in an indirect match table: table_indirect_modify_member <table name> <action_name> <member_handle> [action parameters]"
+    def do_act_prof_modify_member(self, line):
+        "Modify member in an action profile: act_prof_modify_member <action profile name> <action_name> <member_handle> [action parameters]"
         args = line.split()
 
         self.at_least_n_args(args, 3)
 
-        table_name, action_name = args[0], args[1]
-        table = self.get_res("table", table_name, TABLES)
+        act_prof_name, action_name = args[0], args[1]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
 
-        self.check_indirect(table)
-
-        if action_name not in table.actions:
-            raise UIn_Error(
-                "Table %s has no action %s" % (table_name, action_name)
-            )
+        if action_name not in act_prof.actions:
+            raise UIn_Error("Action profile '{}' has no action '{}'".format(
+                act_prof_name, action_name))
         action = ACTIONS[action_name]
 
         try:
@@ -1048,12 +1148,18 @@ class RuntimeAPI(cmd.Cmd):
             action_params = args[4:]
         runtime_data = self.parse_runtime_data(action, action_params)
 
-        mbr_handle = self.client.bm_mt_indirect_modify_member(
-            0, table_name, action_name, mbr_handle, runtime_data
-        )
+        mbr_handle = self.client.bm_mt_act_prof_modify_member(
+            0, act_prof_name, mbr_handle, action_name, runtime_data)
+
+    def complete_act_prof_modify_member(self, text, line, start_index, end_index):
+        return self._complete_act_prof_and_action(text, line)
+
+    @deprecated_act_prof("act_prof_modify_member")
+    def do_table_indirect_modify_member(self, line):
+        "Modify member in an indirect match table: table_indirect_modify_member <table name> <action_name> <member_handle> [action parameters]"
+        pass
 
     def complete_table_indirect_modify_member(self, text, line, start_index, end_index):
-        # TODO: only show indirect tables
         return self._complete_table_and_action(text, line)
 
     def indirect_add_common(self, line, ws=False):
@@ -1194,59 +1300,73 @@ class RuntimeAPI(cmd.Cmd):
         return self._complete_tables(text)
 
     @handle_bad_input
-    def do_table_indirect_create_group(self, line):
-        "Add a group to an indirect match table: table_indirect_create_group <table name>"
+    def do_act_prof_create_group(self, line):
+        "Add a group to an action pofile: act_prof_create_group <action profile name>"
         args = line.split()
 
         self.exactly_n_args(args, 1)
 
-        table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        act_prof_name = args[0]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
 
-        self.check_indirect_ws(table)
+        self.check_act_prof_ws(act_prof)
 
-        grp_handle = self.client.bm_mt_indirect_ws_create_group(0, table_name)
+        grp_handle = self.client.bm_mt_act_prof_create_group(0, act_prof_name)
 
         print "Group has been created with handle", grp_handle
 
+    def complete_act_prof_create_group(self, text, line, start_index, end_index):
+        return self._complete_act_profs(text)
+
+    @deprecated_act_prof("act_prof_create_group", with_selection=True)
+    def do_table_indirect_create_group(self, line):
+        "Add a group to an indirect match table: table_indirect_create_group <table name>"
+        pass
+
     def complete_table_indirect_create_group(self, text, line, start_index, end_index):
-        # TODO: only show indirect_ws tables
         return self._complete_tables(text)
 
     @handle_bad_input
-    def do_table_indirect_delete_group(self, line):
-        "Delete a group: table_indirect_delete_group <table name> <group handle>"
+    def do_act_prof_delete_group(self, line):
+        "Delete a group from an action profile: act_prof_delete_group <action profile name> <group handle>"
         args = line.split()
 
         self.exactly_n_args(args, 2)
 
-        table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        act_prof_name = args[0]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
 
-        self.check_indirect_ws(table)
+        self.check_act_prof_ws(act_prof)
 
         try:
             grp_handle = int(args[1])
         except:
             raise UIn_Error("Bad format for group handle")
 
-        self.client.bm_mt_indirect_ws_delete_group(0, table_name, grp_handle)
+        self.client.bm_mt_act_prof_delete_group(0, act_prof_name, grp_handle)
+
+    def complete_act_prof_delete_group(self, text, line, start_index, end_index):
+        return self._complete_act_profs(text)
+
+    @deprecated_act_prof("act_prof_delete_group", with_selection=True)
+    def do_table_indirect_delete_group(self, line):
+        "Delete a group: table_indirect_delete_group <table name> <group handle>"
+        pass
 
     def complete_table_indirect_delete_group(self, text, line, start_index, end_index):
-        # TODO: only show indirect_ws tables
         return self._complete_tables(text)
 
     @handle_bad_input
-    def do_table_indirect_add_member_to_group(self, line):
-        "Delete a group: table_indirect_add_member_to_group <table name> <member handle> <group handle>"
+    def do_act_prof_add_member_to_group(self, line):
+        "Add member to group in an action profile: act_prof_add_member_to_group <action profile name> <member handle> <group handle>"
         args = line.split()
 
         self.exactly_n_args(args, 3)
 
-        table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        act_prof_name = args[0]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
 
-        self.check_indirect_ws(table)
+        self.check_act_prof_ws(act_prof)
 
         try:
             mbr_handle = int(args[1])
@@ -1258,25 +1378,31 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for group handle")
 
-        self.client.bm_mt_indirect_ws_add_member_to_group(
-            0, table_name, mbr_handle, grp_handle
-        )
+        self.client.bm_mt_act_prof_add_member_to_group(
+            0, act_prof_name, mbr_handle, grp_handle)
+
+    def complete_act_prof_add_member_to_group(self, text, line, start_index, end_index):
+        return self._complete_act_profs(text)
+
+    @deprecated_act_prof("act_prof_add_member_to_group", with_selection=True)
+    def do_table_indirect_add_member_to_group(self, line):
+        "Add member to group: table_indirect_add_member_to_group <table name> <member handle> <group handle>"
+        pass
 
     def complete_table_indirect_add_member_to_group(self, text, line, start_index, end_index):
-        # TODO: only show indirect_ws tables
         return self._complete_tables(text)
 
     @handle_bad_input
-    def do_table_indirect_remove_member_from_group(self, line):
-        "Delete a group: table_indirect_remove_member_from_group <table name> <member handle> <group handle>"
+    def do_act_prof_remove_member_from_group(self, line):
+        "Remove member from group in action profile: act_prof_remove_member_from_group <action profile name> <member handle> <group handle>"
         args = line.split()
 
         self.exactly_n_args(args, 3)
 
-        table_name = args[0]
-        table = self.get_res("table", table_name, TABLES)
+        act_prof_name = args[0]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
 
-        self.check_indirect_ws(table)
+        self.check_act_prof_ws(act_prof)
 
         try:
             mbr_handle = int(args[1])
@@ -1288,12 +1414,18 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for group handle")
 
-        self.client.bm_mt_indirect_ws_remove_member_from_group(
-            0, table_name, mbr_handle, grp_handle
-        )
+        self.client.bm_mt_act_prof_remove_member_from_group(
+            0, act_prof_name, mbr_handle, grp_handle)
+
+    def complete_act_prof_remove_member_from_group(self, text, line, start_index, end_index):
+        return self._complete_act_profs(text)
+
+    @deprecated_act_prof("act_prof_remove_member_from_group", with_selection=True)
+    def do_table_indirect_remove_member_from_group(self, line):
+        "Remove member from group: table_indirect_remove_member_from_group <table name> <member handle> <group handle>"
+        pass
 
     def complete_table_indirect_remove_member_from_group(self, text, line, start_index, end_index):
-        # TODO: only show indirect_ws tables
         return self._complete_tables(text)
 
 
@@ -1799,50 +1931,95 @@ class RuntimeAPI(cmd.Cmd):
         return self._complete_tables(text)
 
     @handle_bad_input
-    def do_table_dump_member(self, line):
-        "Display some information about a member: table_dump <table name> <member handle>"
+    def do_act_prof_dump_member(self, line):
+        "Display some information about a member: act_prof_dump_member <action profile name> <member handle>"
         args = line.split()
         self.exactly_n_args(args, 2)
-        table_name = args[0]
 
-        table = self.get_res("table", table_name, TABLES)
+        act_prof_name = args[0]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
 
         try:
             mbr_handle = int(args[1])
         except:
             raise UIn_Error("Bad format for member handle")
 
-        member = self.client.bm_mt_indirect_get_member(0, table_name,
-                                                       mbr_handle)
+        member = self.client.bm_mt_act_prof_get_member(
+            0, act_prof_name, mbr_handle)
         self.dump_one_member(member)
+
+    def complete_act_prof_dump_member(self, text, line, start_index, end_index):
+        return self._complete_act_profs(text)
+
+    # notice the strictly_deprecated=False; I don't consider this command to be
+    # strictly deprecated because it can be convenient and does not modify the
+    # action profile so won't create problems
+    @deprecated_act_prof("act_prof_dump_member", with_selection=False,
+                         strictly_deprecated=False)
+    def do_table_dump_member(self, line):
+        "Display some information about a member: table_dump_member <table name> <member handle>"
+        pass
 
     def complete_table_dump_member(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
     @handle_bad_input
-    def do_table_dump_group(self, line):
-        "Display some information about a group: table_dump <table name> <group handle>"
+    def do_act_prof_dump_group(self, line):
+        "Display some information about a group: table_dump_group <action profile name> <group handle>"
         args = line.split()
         self.exactly_n_args(args, 2)
-        table_name = args[0]
 
-        table = self.get_res("table", table_name, TABLES)
+        act_prof_name = args[0]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
 
         try:
             grp_handle = int(args[1])
         except:
             raise UIn_Error("Bad format for group handle")
 
-        group = self.client.bm_mt_indirect_ws_get_group(0, table_name,
-                                                        grp_handle)
+        group = self.client.bm_mt_act_prof_get_group(
+            0, act_prof_name, grp_handle)
         self.dump_one_group(group)
+
+    def complete_act_prof_dump_group(self, text, line, start_index, end_index):
+        return self._complete_act_profs(text)
+
+    @deprecated_act_prof("act_prof_dump_group", with_selection=False,
+                         strictly_deprecated=False)
+    def do_table_dump_group(self, line):
+        "Display some information about a group: table_dump_group <table name> <group handle>"
+        pass
 
     def complete_table_dump_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
+    def _dump_act_prof(self, act_prof):
+        act_prof_name = act_prof.name
+        members = self.client.bm_mt_act_prof_get_members(0, act_prof_name)
+        print "=========="
+        print "MEMBERS"
+        self.dump_members(members)
+        if act_prof.with_selection:
+            groups = self.client.bm_mt_act_prof_get_groups(0, act_prof_name)
+            print "=========="
+            print "GROUPS"
+            self.dump_groups(groups)
+
+    @handle_bad_input
+    def do_act_prof_dump(self, line):
+        "Display entries in an action profile: act_prof_dump <action profile name>"
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        act_prof_name = args[0]
+        act_prof = self.get_res("action profile", act_prof_name, ACTION_PROFS)
+        self._dump_act_prof(act_prof)
+
+    def complete_act_prof_dump(self, text, line, start_index, end_index):
+        return self._complete_act_profs(text)
+
     @handle_bad_input
     def do_table_dump(self, line):
-        "Display some information about a table: table_dump <table name>"
+        "Display entries in a match-table: table_dump <table name>"
         args = line.split()
         self.exactly_n_args(args, 1)
         table_name = args[0]
@@ -1858,16 +2035,8 @@ class RuntimeAPI(cmd.Cmd):
 
         if table.type_ == TableType.indirect or\
            table.type_ == TableType.indirect_ws:
-            members = self.client.bm_mt_indirect_get_members(0, table_name)
-            print "=========="
-            print "MEMBERS"
-            self.dump_members(members)
-
-        if table.type_ == TableType.indirect_ws:
-            groups = self.client.bm_mt_indirect_ws_get_groups(0, table_name)
-            print "=========="
-            print "GROUPS"
-            self.dump_groups(groups)
+            assert(table.action_prof is not None)
+            self._dump_act_prof(table.action_prof)
 
         # default entry
         default_entry = self.client.bm_mt_get_default_entry(0, table_name)

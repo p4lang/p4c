@@ -39,54 +39,58 @@ public:
 
   static TableOperationErrorCode::type get_exception_code(MatchErrorCode bm_code) {
     switch(bm_code) {
-    case MatchErrorCode::TABLE_FULL:
-      return TableOperationErrorCode::TABLE_FULL;
-    case MatchErrorCode::INVALID_HANDLE:
-      return TableOperationErrorCode::INVALID_HANDLE;
-    case MatchErrorCode::EXPIRED_HANDLE:
-      return TableOperationErrorCode::EXPIRED_HANDLE;
-    case MatchErrorCode::COUNTERS_DISABLED:
-      return TableOperationErrorCode::COUNTERS_DISABLED;
-    case MatchErrorCode::METERS_DISABLED:
-      return TableOperationErrorCode::METERS_DISABLED;
-    case MatchErrorCode::AGEING_DISABLED:
-      return TableOperationErrorCode::AGEING_DISABLED;
-    case MatchErrorCode::INVALID_TABLE_NAME:
-      return TableOperationErrorCode::INVALID_TABLE_NAME;
-    case MatchErrorCode::INVALID_ACTION_NAME:
-      return TableOperationErrorCode::INVALID_ACTION_NAME;
-    case MatchErrorCode::WRONG_TABLE_TYPE:
-      return TableOperationErrorCode::WRONG_TABLE_TYPE;
-    case MatchErrorCode::INVALID_MBR_HANDLE:
-      return TableOperationErrorCode::INVALID_MBR_HANDLE;
-    case MatchErrorCode::MBR_STILL_USED:
-      return TableOperationErrorCode::MBR_STILL_USED;
-    case MatchErrorCode::MBR_ALREADY_IN_GRP:
-      return TableOperationErrorCode::MBR_ALREADY_IN_GRP;
-    case MatchErrorCode::MBR_NOT_IN_GRP:
-      return TableOperationErrorCode::MBR_NOT_IN_GRP;
-    case MatchErrorCode::INVALID_GRP_HANDLE:
-      return TableOperationErrorCode::INVALID_GRP_HANDLE;
-    case MatchErrorCode::GRP_STILL_USED:
-      return TableOperationErrorCode::GRP_STILL_USED;
-    case MatchErrorCode::EMPTY_GRP:
-      return TableOperationErrorCode::EMPTY_GRP;
-    case MatchErrorCode::DUPLICATE_ENTRY:
-      return TableOperationErrorCode::DUPLICATE_ENTRY;
-    case MatchErrorCode::BAD_MATCH_KEY:
-      return TableOperationErrorCode::BAD_MATCH_KEY;
-    case MatchErrorCode::INVALID_METER_OPERATION:
-      return TableOperationErrorCode::INVALID_METER_OPERATION;
-    case MatchErrorCode::DEFAULT_ACTION_IS_CONST:
-      return TableOperationErrorCode::DEFAULT_ACTION_IS_CONST;
-    case MatchErrorCode::DEFAULT_ENTRY_IS_CONST:
-      return TableOperationErrorCode::DEFAULT_ENTRY_IS_CONST;
+      case MatchErrorCode::TABLE_FULL:
+        return TableOperationErrorCode::TABLE_FULL;
+      case MatchErrorCode::INVALID_HANDLE:
+        return TableOperationErrorCode::INVALID_HANDLE;
+      case MatchErrorCode::EXPIRED_HANDLE:
+        return TableOperationErrorCode::EXPIRED_HANDLE;
+      case MatchErrorCode::COUNTERS_DISABLED:
+        return TableOperationErrorCode::COUNTERS_DISABLED;
+      case MatchErrorCode::METERS_DISABLED:
+        return TableOperationErrorCode::METERS_DISABLED;
+      case MatchErrorCode::AGEING_DISABLED:
+        return TableOperationErrorCode::AGEING_DISABLED;
+      case MatchErrorCode::INVALID_TABLE_NAME:
+        return TableOperationErrorCode::INVALID_TABLE_NAME;
+      case MatchErrorCode::INVALID_ACTION_NAME:
+        return TableOperationErrorCode::INVALID_ACTION_NAME;
+      case MatchErrorCode::WRONG_TABLE_TYPE:
+        return TableOperationErrorCode::WRONG_TABLE_TYPE;
+      case MatchErrorCode::INVALID_MBR_HANDLE:
+        return TableOperationErrorCode::INVALID_MBR_HANDLE;
+      case MatchErrorCode::MBR_STILL_USED:
+        return TableOperationErrorCode::MBR_STILL_USED;
+      case MatchErrorCode::MBR_ALREADY_IN_GRP:
+        return TableOperationErrorCode::MBR_ALREADY_IN_GRP;
+      case MatchErrorCode::MBR_NOT_IN_GRP:
+        return TableOperationErrorCode::MBR_NOT_IN_GRP;
+      case MatchErrorCode::INVALID_GRP_HANDLE:
+        return TableOperationErrorCode::INVALID_GRP_HANDLE;
+      case MatchErrorCode::GRP_STILL_USED:
+        return TableOperationErrorCode::GRP_STILL_USED;
+      case MatchErrorCode::EMPTY_GRP:
+        return TableOperationErrorCode::EMPTY_GRP;
+      case MatchErrorCode::DUPLICATE_ENTRY:
+        return TableOperationErrorCode::DUPLICATE_ENTRY;
+      case MatchErrorCode::BAD_MATCH_KEY:
+        return TableOperationErrorCode::BAD_MATCH_KEY;
+      case MatchErrorCode::INVALID_METER_OPERATION:
+        return TableOperationErrorCode::INVALID_METER_OPERATION;
+      case MatchErrorCode::DEFAULT_ACTION_IS_CONST:
+        return TableOperationErrorCode::DEFAULT_ACTION_IS_CONST;
+      case MatchErrorCode::DEFAULT_ENTRY_IS_CONST:
+        return TableOperationErrorCode::DEFAULT_ENTRY_IS_CONST;
       case MatchErrorCode::NO_DEFAULT_ENTRY:
-      return TableOperationErrorCode::NO_DEFAULT_ENTRY;
-    case MatchErrorCode::ERROR:
-      return TableOperationErrorCode::ERROR;
-    default:
-      assert(0 && "invalid error code");
+        return TableOperationErrorCode::NO_DEFAULT_ENTRY;
+      case MatchErrorCode::INVALID_ACTION_PROFILE_NAME:
+        return TableOperationErrorCode::INVALID_ACTION_PROFILE_NAME;
+      case MatchErrorCode::NO_ACTION_PROFILE_SELECTION:
+        return TableOperationErrorCode::NO_ACTION_PROFILE_SELECTION;
+      case MatchErrorCode::ERROR:
+        return TableOperationErrorCode::ERROR;
+      default:
+        assert(0 && "invalid error code");
     }
   }
 
@@ -269,15 +273,15 @@ public:
     }
   }
 
-  BmMemberHandle bm_mt_indirect_add_member(const int32_t cxt_id, const std::string& table_name, const std::string& action_name, const BmActionData& action_data) {
-    Logger::get()->trace("bm_mt_indirect_add_member");
+  BmMemberHandle bm_mt_act_prof_add_member(const int32_t cxt_id, const std::string& act_prof_name, const std::string& action_name, const BmActionData& action_data) {
+    Logger::get()->trace("bm_mt_act_prof_add_member");
     mbr_hdl_t mbr_handle;
     ActionData data;
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
-    MatchErrorCode error_code = switch_->mt_indirect_add_member(
-        cxt_id, table_name, action_name, std::move(data), &mbr_handle);
+    MatchErrorCode error_code = switch_->mt_act_prof_add_member(
+        cxt_id, act_prof_name, action_name, std::move(data), &mbr_handle);
     if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
       ito.code = get_exception_code(error_code);
@@ -286,10 +290,10 @@ public:
     return mbr_handle;
   }
 
-  void bm_mt_indirect_delete_member(const int32_t cxt_id, const std::string& table_name, const BmMemberHandle mbr_handle) {
-    Logger::get()->trace("bm_mt_indirect_delete_member");
-    MatchErrorCode error_code = switch_->mt_indirect_delete_member(
-        cxt_id, table_name, mbr_handle);
+  void bm_mt_act_prof_delete_member(const int32_t cxt_id, const std::string& act_prof_name, const BmMemberHandle mbr_handle) {
+    Logger::get()->trace("bm_mt_act_prof_delete_member");
+    MatchErrorCode error_code = switch_->mt_act_prof_delete_member(
+        cxt_id, act_prof_name, mbr_handle);
     if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
       ito.code = get_exception_code(error_code);
@@ -297,14 +301,60 @@ public:
     }
   }
 
-  void bm_mt_indirect_modify_member(const int32_t cxt_id, const std::string& table_name, const BmMemberHandle mbr_handle, const std::string& action_name, const BmActionData& action_data) {
-    Logger::get()->trace("bm_mt_indirect_modify_member");
+  void bm_mt_act_prof_modify_member(const int32_t cxt_id, const std::string& act_prof_name, const BmMemberHandle mbr_handle, const std::string& action_name, const BmActionData& action_data) {
+    Logger::get()->trace("bm_mt_act_prof_modify_member");
     ActionData data;
     for(const std::string &d : action_data) {
       data.push_back_action_data(d.data(), d.size());
     }
-    MatchErrorCode error_code = switch_->mt_indirect_modify_member(
-        cxt_id, table_name, mbr_handle, action_name, std::move(data));
+    MatchErrorCode error_code = switch_->mt_act_prof_modify_member(
+        cxt_id, act_prof_name, mbr_handle, action_name, std::move(data));
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
+  BmGroupHandle bm_mt_act_prof_create_group(const int32_t cxt_id, const std::string& act_prof_name) {
+    Logger::get()->trace("bm_mt_act_prof_create_group");
+    grp_hdl_t grp_handle;
+    MatchErrorCode error_code = switch_->mt_act_prof_create_group(
+        cxt_id, act_prof_name, &grp_handle);
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    }
+    return grp_handle;
+  }
+
+  void bm_mt_act_prof_delete_group(const int32_t cxt_id, const std::string& act_prof_name, const BmGroupHandle grp_handle) {
+    Logger::get()->trace("bm_mt_act_prof_delete_group");
+    MatchErrorCode error_code = switch_->mt_act_prof_delete_group(
+        cxt_id, act_prof_name, grp_handle);
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
+  void bm_mt_act_prof_add_member_to_group(const int32_t cxt_id, const std::string& act_prof_name, const BmMemberHandle mbr_handle, const BmGroupHandle grp_handle) {
+    Logger::get()->trace("bm_mt_act_prof_add_member_to_group");
+    MatchErrorCode error_code = switch_->mt_act_prof_add_member_to_group(
+        cxt_id, act_prof_name, mbr_handle, grp_handle);
+    if(error_code != MatchErrorCode::SUCCESS) {
+      InvalidTableOperation ito;
+      ito.code = get_exception_code(error_code);
+      throw ito;
+    }
+  }
+
+  void bm_mt_act_prof_remove_member_from_group(const int32_t cxt_id, const std::string& act_prof_name, const BmMemberHandle mbr_handle, const BmGroupHandle grp_handle) {
+    Logger::get()->trace("bm_mt_act_prof_remove_member_from_group");
+    MatchErrorCode error_code = switch_->mt_act_prof_remove_member_from_group(
+        cxt_id, act_prof_name, mbr_handle, grp_handle);
     if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
       ito.code = get_exception_code(error_code);
@@ -366,52 +416,6 @@ public:
     Logger::get()->trace("bm_mt_indirect_set_default_member");
     MatchErrorCode error_code = switch_->mt_indirect_set_default_member(
         cxt_id, table_name, mbr_handle);
-    if(error_code != MatchErrorCode::SUCCESS) {
-      InvalidTableOperation ito;
-      ito.code = get_exception_code(error_code);
-      throw ito;
-    }
-  }
-
-  BmGroupHandle bm_mt_indirect_ws_create_group(const int32_t cxt_id, const std::string& table_name) {
-    Logger::get()->trace("bm_mt_indirect_ws_create_group");
-    grp_hdl_t grp_handle;
-    MatchErrorCode error_code = switch_->mt_indirect_ws_create_group(
-        cxt_id, table_name, &grp_handle);
-    if(error_code != MatchErrorCode::SUCCESS) {
-      InvalidTableOperation ito;
-      ito.code = get_exception_code(error_code);
-      throw ito;
-    }
-    return grp_handle;
-  }
-
-  void bm_mt_indirect_ws_delete_group(const int32_t cxt_id, const std::string& table_name, const BmGroupHandle grp_handle) {
-    Logger::get()->trace("bm_mt_indirect_ws_delete_group");
-    MatchErrorCode error_code = switch_->mt_indirect_ws_delete_group(
-        cxt_id, table_name, grp_handle);
-    if(error_code != MatchErrorCode::SUCCESS) {
-      InvalidTableOperation ito;
-      ito.code = get_exception_code(error_code);
-      throw ito;
-    }
-  }
-
-  void bm_mt_indirect_ws_add_member_to_group(const int32_t cxt_id, const std::string& table_name, const BmMemberHandle mbr_handle, const BmGroupHandle grp_handle) {
-    Logger::get()->trace("bm_mt_indirect_ws_add_member_to_group");
-    MatchErrorCode error_code = switch_->mt_indirect_ws_add_member_to_group(
-        cxt_id, table_name, mbr_handle, grp_handle);
-    if(error_code != MatchErrorCode::SUCCESS) {
-      InvalidTableOperation ito;
-      ito.code = get_exception_code(error_code);
-      throw ito;
-    }
-  }
-
-  void bm_mt_indirect_ws_remove_member_from_group(const int32_t cxt_id, const std::string& table_name, const BmMemberHandle mbr_handle, const BmGroupHandle grp_handle) {
-    Logger::get()->trace("bm_mt_indirect_ws_remove_member_from_group");
-    MatchErrorCode error_code = switch_->mt_indirect_ws_remove_member_from_group(
-        cxt_id, table_name, mbr_handle, grp_handle);
     if(error_code != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
       ito.code = get_exception_code(error_code);
@@ -725,24 +729,25 @@ public:
     }
   }
 
-  void copy_one_member(BmMtIndirectMember *m,
-                       const MatchTableIndirect::Member &from) const;
+  void copy_one_member(BmMtActProfMember *m,
+                       const ActionProfile::Member &from) const;
 
-  void bm_mt_indirect_get_members(std::vector<BmMtIndirectMember> & _return, const int32_t cxt_id, const std::string& table_name) {
-    Logger::get()->trace("bm_mt_indirect_get_members");
-    const auto members = switch_->mt_indirect_get_members(cxt_id, table_name);
+  void bm_mt_act_prof_get_members(std::vector<BmMtActProfMember> & _return, const int32_t cxt_id, const std::string& act_prof_name) {
+    Logger::get()->trace("bm_mt_act_prof_get_members");
+    const auto members = switch_->mt_act_prof_get_members(
+        cxt_id, act_prof_name);
     for (const auto &member : members) {
-      BmMtIndirectMember m;
+      BmMtActProfMember m;
       copy_one_member(&m, member);
       _return.push_back(std::move(m));
     }
   }
 
-  void bm_mt_indirect_get_member(BmMtIndirectMember& _return, const int32_t cxt_id, const std::string& table_name, const BmMemberHandle mbr_handle) {
-    Logger::get()->trace("bm_mt_indirect_get_member");
-    MatchTableIndirect::Member member;
-    auto rc = switch_->mt_indirect_get_member(cxt_id, table_name, mbr_handle,
-                                              &member);
+  void bm_mt_act_prof_get_member(BmMtActProfMember& _return, const int32_t cxt_id, const std::string& act_prof_name, const BmMemberHandle mbr_handle) {
+    Logger::get()->trace("bm_mt_act_prof_get_member");
+    ActionProfile::Member member;
+    auto rc = switch_->mt_act_prof_get_member(
+        cxt_id, act_prof_name, mbr_handle, &member);
     if(rc != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
       ito.code = get_exception_code(rc);
@@ -751,24 +756,24 @@ public:
     copy_one_member(&_return, member);
   }
 
-  void copy_one_group(BmMtIndirectWsGroup *g,
-                      const MatchTableIndirectWS::Group &from) const;
+  void copy_one_group(BmMtActProfGroup *g,
+                      const ActionProfile::Group &from) const;
 
-  void bm_mt_indirect_ws_get_groups(std::vector<BmMtIndirectWsGroup> & _return, const int32_t cxt_id, const std::string& table_name) {
-    Logger::get()->trace("bm_mt_indirect_ws_get_groups");
-    const auto groups = switch_->mt_indirect_ws_get_groups(cxt_id, table_name);
+  void bm_mt_act_prof_get_groups(std::vector<BmMtActProfGroup> & _return, const int32_t cxt_id, const std::string& act_prof_name) {
+    Logger::get()->trace("bm_mt_act_prof_get_groups");
+    const auto groups = switch_->mt_act_prof_get_groups(cxt_id, act_prof_name);
     for (const auto &group : groups) {
-      BmMtIndirectWsGroup g;
+      BmMtActProfGroup g;
       copy_one_group(&g, group);
       _return.push_back(std::move(g));
     }
   }
 
-  void bm_mt_indirect_ws_get_group(BmMtIndirectWsGroup& _return, const int32_t cxt_id, const std::string& table_name, const BmGroupHandle grp_handle) {
-    Logger::get()->trace("bm_mt_indirect_ws_get_group");
-    MatchTableIndirectWS::Group group;
-    auto rc = switch_->mt_indirect_ws_get_group(cxt_id, table_name, grp_handle,
-                                                &group);
+  void bm_mt_act_prof_get_group(BmMtActProfGroup& _return, const int32_t cxt_id, const std::string& act_prof_name, const BmGroupHandle grp_handle) {
+    Logger::get()->trace("bm_mt_act_prof_get_group");
+    ActionProfile::Group group;
+    auto rc = switch_->mt_act_prof_get_group(
+        cxt_id, act_prof_name, grp_handle, &group);
     if(rc != MatchErrorCode::SUCCESS) {
       InvalidTableOperation ito;
       ito.code = get_exception_code(rc);
@@ -1150,7 +1155,7 @@ StandardHandler::build_action_entry<MatchTableIndirectWS::Entry>(
 }
 
 void StandardHandler::copy_one_member(
-    BmMtIndirectMember *m, const MatchTableIndirect::Member &from) const{
+    BmMtActProfMember *m, const ActionProfile::Member &from) const{
   m->mbr_handle = from.mbr;
   m->action_name = from.action_fn->get_name();
   BmActionData action_data;
@@ -1161,7 +1166,7 @@ void StandardHandler::copy_one_member(
 }
 
 void StandardHandler::copy_one_group(
-    BmMtIndirectWsGroup *g, const MatchTableIndirectWS::Group &from) const {
+    BmMtActProfGroup *g, const ActionProfile::Group &from) const {
   g->grp_handle = from.grp;
   g->mbr_handles.reserve(from.mbr_handles.size());
   for (const auto h : from.mbr_handles) g->mbr_handles.push_back(h);

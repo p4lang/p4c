@@ -128,43 +128,109 @@ Context::get_mt_indirect(const std::string &table_name,
 }
 
 MatchErrorCode
-Context::mt_indirect_add_member(
-    const std::string &table_name, const std::string &action_name,
-    ActionData action_data, mbr_hdl_t *mbr) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
+Context::mt_act_prof_add_member(const std::string &act_prof_name,
+                                const std::string &action_name,
+                                ActionData action_data, mbr_hdl_t *mbr) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
+  const ActionFn *action = p4objects_rt->get_action_for_action_profile(
+      act_prof_name, action_name);
   if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
-  return table->add_member(action, std::move(action_data), mbr);
+  return act_prof->add_member(action, std::move(action_data), mbr);
 }
 
 MatchErrorCode
-Context::mt_indirect_delete_member(const std::string &table_name,
+Context::mt_act_prof_delete_member(const std::string &act_prof_name,
                                    mbr_hdl_t mbr) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->delete_member(mbr);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
+  return act_prof->delete_member(mbr);
 }
 
 MatchErrorCode
-Context::mt_indirect_modify_member(const std::string &table_name,
+Context::mt_act_prof_modify_member(const std::string &act_prof_name,
                                    mbr_hdl_t mbr,
                                    const std::string &action_name,
                                    ActionData action_data) {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  const ActionFn *action = p4objects_rt->get_action(table_name, action_name);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
+  const ActionFn *action = p4objects_rt->get_action_for_action_profile(
+      act_prof_name, action_name);
   if (!action) return MatchErrorCode::INVALID_ACTION_NAME;
-  return table->modify_member(mbr, action, std::move(action_data));
+  return act_prof->modify_member(mbr, action, std::move(action_data));
+}
+
+MatchErrorCode
+Context::mt_act_prof_create_group(const std::string &act_prof_name,
+                                  grp_hdl_t *grp) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
+  return act_prof->create_group(grp);
+}
+
+MatchErrorCode
+Context::mt_act_prof_delete_group(const std::string &act_prof_name,
+                                  grp_hdl_t grp) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
+  return act_prof->delete_group(grp);
+}
+
+MatchErrorCode
+Context::mt_act_prof_add_member_to_group(const std::string &act_prof_name,
+                                         mbr_hdl_t mbr, grp_hdl_t grp) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
+  return act_prof->add_member_to_group(mbr, grp);
+}
+
+MatchErrorCode
+Context::mt_act_prof_remove_member_from_group(const std::string &act_prof_name,
+                                              mbr_hdl_t mbr, grp_hdl_t grp) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
+  return act_prof->remove_member_from_group(mbr, grp);
+}
+
+std::vector<ActionProfile::Member>
+Context::mt_act_prof_get_members(const std::string &act_prof_name) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return {};
+  return act_prof->get_members();
+}
+
+MatchErrorCode
+Context::mt_act_prof_get_member(const std::string &act_prof_name, grp_hdl_t grp,
+                                ActionProfile::Member *member) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
+  return act_prof->get_member(grp, member);
+}
+
+std::vector<ActionProfile::Group>
+Context::mt_act_prof_get_groups(const std::string &act_prof_name) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return {};
+  return act_prof->get_groups();
+}
+
+MatchErrorCode
+Context::mt_act_prof_get_group(const std::string &act_prof_name, grp_hdl_t grp,
+                               ActionProfile::Group *group) const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto act_prof = p4objects_rt->get_action_profile_rt(act_prof_name);
+  if (!act_prof) return MatchErrorCode::INVALID_ACTION_PROFILE_NAME;
+  return act_prof->get_group(grp, group);
 }
 
 MatchErrorCode
@@ -233,51 +299,6 @@ Context::get_mt_indirect_ws(const std::string &table_name,
   *table = dynamic_cast<MatchTableIndirectWS *>(abstract_table);
   if (!(*table)) return MatchErrorCode::WRONG_TABLE_TYPE;
   return MatchErrorCode::SUCCESS;
-}
-
-MatchErrorCode
-Context::mt_indirect_ws_create_group(const std::string &table_name,
-                                     grp_hdl_t *grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->create_group(grp);
-}
-
-MatchErrorCode
-Context::mt_indirect_ws_delete_group(const std::string &table_name,
-                                     grp_hdl_t grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->delete_group(grp);
-}
-
-MatchErrorCode
-Context::mt_indirect_ws_add_member_to_group(
-    const std::string &table_name, mbr_hdl_t mbr, grp_hdl_t grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->add_member_to_group(mbr, grp);
-}
-
-MatchErrorCode
-Context::mt_indirect_ws_remove_member_from_group(
-    const std::string &table_name,
-    mbr_hdl_t mbr, grp_hdl_t grp) {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->remove_member_from_group(mbr, grp);
 }
 
 MatchErrorCode
@@ -477,48 +498,6 @@ template MatchErrorCode
 Context::mt_get_entry_from_key<MatchTableIndirectWS>(
     const std::string &, const std::vector<MatchKeyParam> &,
     MatchTableIndirectWS::Entry *, int) const;
-
-std::vector<MatchTableIndirect::Member>
-Context::mt_indirect_get_members(const std::string &table_name) const {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return {};
-  return table->get_members();
-}
-
-MatchErrorCode
-Context::mt_indirect_get_member(const std::string &table_name, grp_hdl_t grp,
-                                MatchTableIndirect::Member *member) const {
-  MatchErrorCode rc;
-  MatchTableIndirect *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->get_member(grp, member);
-}
-
-std::vector<MatchTableIndirectWS::Group>
-Context::mt_indirect_ws_get_groups(const std::string &table_name) const {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return {};
-  return table->get_groups();
-}
-
-MatchErrorCode
-Context::mt_indirect_ws_get_group(const std::string &table_name, grp_hdl_t grp,
-                                  MatchTableIndirectWS::Group *group) const {
-  MatchErrorCode rc;
-  MatchTableIndirectWS *table;
-  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  if ((rc = get_mt_indirect_ws(table_name, &table)) != MatchErrorCode::SUCCESS)
-    return rc;
-  return table->get_group(grp, group);
-}
 
 Counter::CounterErrorCode
 Context::read_counters(const std::string &counter_name, size_t idx,

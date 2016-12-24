@@ -32,8 +32,6 @@ namespace bm {
 using std::unique_ptr;
 using std::string;
 
-typedef unsigned char opcode_t;
-
 namespace {
 
 template <typename T,
@@ -753,6 +751,27 @@ P4Objects::init_objects(std::istream *is,
     const string pipeline_name = cfg_pipeline["name"].asString();
     p4object_id_t pipeline_id = cfg_pipeline["id"].asInt();
 
+    // pipelines -> action profiles
+
+    const auto &cfg_act_profs = cfg_pipeline["action_profiles"];
+    for (const auto &cfg_act_prof : cfg_act_profs) {
+      const auto act_prof_name = cfg_act_prof["name"].asString();
+      const auto act_prof_id = cfg_act_prof["id"].asInt();
+      const auto act_prof_size = cfg_act_prof["max_size"].asInt();
+      // we ignore size for action profiles, at least for now
+      (void) act_prof_size;
+      const auto with_selection = cfg_act_prof.isMember("selector");
+
+      std::unique_ptr<ActionProfile> action_profile(
+          new ActionProfile(act_prof_name, act_prof_id, with_selection));
+      if (with_selection) {
+        auto calc = process_cfg_selector(cfg_act_prof["selector"]);
+        if (!calc) return 1;
+        action_profile->set_hash(std::move(calc));
+      }
+      add_action_profile(act_prof_name, std::move(action_profile));
+    }
+
     // pipelines -> tables
 
     const Json::Value &cfg_tables = cfg_pipeline["tables"];
@@ -829,49 +848,47 @@ P4Objects::init_objects(std::istream *is,
         table = MatchActionTable::create_match_action_table<MatchTable>(
           match_type, table_name, table_id, table_size, key_builder,
           with_counters, with_ageing, lookup_factory);
-      } else if (table_type == "indirect") {
-        table = MatchActionTable::create_match_action_table<MatchTableIndirect>(
-          match_type, table_name, table_id, table_size, key_builder,
-          with_counters, with_ageing, lookup_factory);
-      } else if (table_type == "indirect_ws") {
-        table =
-          MatchActionTable::create_match_action_table<MatchTableIndirectWS>(
-            match_type, table_name, table_id, table_size, key_builder,
-            with_counters, with_ageing, lookup_factory);
-
-        if (!cfg_table.isMember("selector")) {
-          assert(0 && "indirect_ws tables need to specify a selector");
-        }
-        const Json::Value &cfg_table_selector = cfg_table["selector"];
-        const string selector_algo = cfg_table_selector["algo"].asString();
-        const Json::Value &cfg_table_selector_input =
-          cfg_table_selector["input"];
-
-        BufBuilder builder;
-        // TODO(antonin): I do this kind of thing in a bunch of places, I need
-        // to find a nicer way
-        for (const auto &cfg_element : cfg_table_selector_input) {
-          const string type = cfg_element["type"].asString();
-          assert(type == "field");  // TODO(antonin): other types
-
-          const Json::Value &cfg_value_field = cfg_element["value"];
-          const string header_name = cfg_value_field[0].asString();
-          header_id_t header_id = get_header_id(header_name);
-          const string field_name = cfg_value_field[1].asString();
-          int field_offset = get_field_offset(header_id, field_name);
-          builder.push_back_field(header_id, field_offset);
-        }
-        // typedef MatchTableIndirectWS::hash_t hash_t;
-        // check algo
-        if (!check_hash(selector_algo)) return 1;
-
-        std::unique_ptr<Calculation> calc(
-          new Calculation(builder, selector_algo));
-        MatchTableIndirectWS *mt_indirect_ws =
-          static_cast<MatchTableIndirectWS *>(table->get_match_table());
-        mt_indirect_ws->set_hash(std::move(calc));
       } else {
-        assert(0 && "invalid table type");
+        assert(table_type == "indirect" || table_type == "indirect_ws");
+        bool with_selection = (table_type == "indirect_ws");
+        if (table_type == "indirect") {
+          table =
+              MatchActionTable::create_match_action_table<MatchTableIndirect>(
+                  match_type, table_name, table_id, table_size, key_builder,
+                  with_counters, with_ageing, lookup_factory);
+        } else {
+          table =
+              MatchActionTable::create_match_action_table<MatchTableIndirectWS>(
+                  match_type, table_name, table_id, table_size, key_builder,
+                  with_counters, with_ageing, lookup_factory);
+        }
+        // static_cast valid even when table is indirect_ws
+        auto mt_indirect = static_cast<MatchTableIndirect *>(
+            table->get_match_table());
+        ActionProfile *action_profile = nullptr;
+        if (cfg_table.isMember("action_profile")) {
+          action_profile = get_action_profile(
+              cfg_table["action_profile"].asString());
+        } else if (cfg_table.isMember("act_prof_name")) {
+          const auto name = cfg_table["act_prof_name"].asString();
+          action_profile = new ActionProfile(name, table_id, with_selection);
+          add_action_profile(
+              name, std::unique_ptr<ActionProfile>(action_profile));
+        } else {
+          outstream << "indirect tables need to have attribute "
+                    << "'action_profile' (new JSON format) or "
+                    << "'act_prof_name' (old JSON format)\n";
+          return 1;
+        }
+        mt_indirect->set_action_profile(action_profile);
+
+        if (table_type == "indirect_ws"
+            && !cfg_table.isMember("action_profile")) {
+          assert(cfg_table.isMember("selector"));
+          auto calc = process_cfg_selector(cfg_table["selector"]);
+          if (!calc) return 1;
+          action_profile->set_hash(std::move(calc));
+        }
       }
 
       // maintains backwards compatibility
@@ -919,6 +936,13 @@ P4Objects::init_objects(std::istream *is,
         return get_control_node(cfg_next_node.asString());
       };
 
+      std::string act_prof_name("");
+      if (cfg_table.isMember("action_profile")) {  // new JSON format
+        act_prof_name = cfg_table["action_profile"].asString();
+      } else if (cfg_table.isMember("act_prof_name")) {
+        act_prof_name = cfg_table["act_prof_name"].asString();
+      }
+
       std::string actions_key = cfg_table.isMember("action_ids") ? "action_ids"
           : "actions";
       const Json::Value &cfg_actions = cfg_table[actions_key];
@@ -940,6 +964,8 @@ P4Objects::init_objects(std::istream *is,
         const ControlFlowNode *next_node = get_next_node(cfg_next_node);
         table->set_next_node(action_id, next_node);
         add_action_to_table(table_name, action_name, action);
+        if (act_prof_name != "")
+          add_action_to_act_prof(act_prof_name, action_name, action);
       }
 
       if (cfg_next_nodes.isMember("__HIT__"))
@@ -1185,6 +1211,9 @@ P4Objects::reset_state() {
   for (const auto &e : match_action_tables_map) {
     e.second->get_match_table()->reset_state();
   }
+  for (const auto &e : action_profiles_map) {
+    e.second->reset_state();
+  }
   for (const auto &e : meter_arrays) {
     e.second->reset_state();
   }
@@ -1203,6 +1232,9 @@ P4Objects::serialize(std::ostream *out) const {
   for (const auto &e : match_action_tables_map) {
     e.second->get_match_table()->serialize(out);
   }
+  for (const auto &e : action_profiles_map) {
+    e.second->serialize(out);
+  }
   for (const auto &e : meter_arrays) {
     e.second->serialize(out);
   }
@@ -1213,37 +1245,42 @@ P4Objects::deserialize(std::istream *in) {
   for (const auto &e : match_action_tables_map) {
     e.second->get_match_table()->deserialize(in, *this);
   }
+  for (const auto &e : action_profiles_map) {
+    e.second->deserialize(in, *this);
+  }
   for (const auto &e : meter_arrays) {
     e.second->deserialize(in);
   }
 }
 
 int
-P4Objects::get_field_offset(header_id_t header_id, const string &field_name) {
+P4Objects::get_field_offset(header_id_t header_id,
+                            const string &field_name) const {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_field_offset(field_name);
 }
 
 size_t
-P4Objects::get_field_bytes(header_id_t header_id, int field_offset) {
+P4Objects::get_field_bytes(header_id_t header_id, int field_offset) const {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return (header_type.get_bit_width(field_offset) + 7) / 8;
 }
 
 size_t
-P4Objects::get_field_bits(header_id_t header_id, int field_offset) {
+P4Objects::get_field_bits(header_id_t header_id, int field_offset) const {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_bit_width(field_offset);
 }
 
 size_t
-P4Objects::get_header_bits(header_id_t header_id) {
+P4Objects::get_header_bits(header_id_t header_id) const {
   const HeaderType &header_type = phv_factory.get_header_type(header_id);
   return header_type.get_bit_width();
 }
 
 std::tuple<header_id_t, int>
-P4Objects::field_info(const string &header_name, const string &field_name) {
+P4Objects::field_info(const string &header_name,
+                      const string &field_name) const {
   auto it = field_aliases.find(header_name + "." + field_name);
   if (it != field_aliases.end())
     return field_info(std::get<0>(it->second), std::get<1>(it->second));
@@ -1290,6 +1327,32 @@ P4Objects::check_hash(const std::string &name) const {
   return h;
 }
 
+std::unique_ptr<Calculation>
+P4Objects::process_cfg_selector(const Json::Value &cfg_selector) const {
+  const auto selector_algo = cfg_selector["algo"].asString();
+  const auto &cfg_selector_input = cfg_selector["input"];
+
+  BufBuilder builder;
+  // TODO(antonin): I do this kind of thing in a bunch of places, I need to find
+  // a nicer way
+  for (const auto &cfg_element : cfg_selector_input) {
+    const auto type = cfg_element["type"].asString();
+    assert(type == "field");  // TODO(antonin): other types
+
+    const auto &cfg_value_field = cfg_element["value"];
+    const auto header_name = cfg_value_field[0].asString();
+    const auto header_id = get_header_id(header_name);
+    const auto field_name = cfg_value_field[1].asString();
+    auto field_offset = get_field_offset(header_id, field_name);
+    builder.push_back_field(header_id, field_offset);
+  }
+
+  // check algo
+  if (!check_hash(selector_algo)) return nullptr;
+
+  return std::unique_ptr<Calculation>(new Calculation(builder, selector_algo));
+}
+
 void
 P4Objects::enable_arith(header_id_t header_id, int field_offset) {
   auto it = header_id_to_stack_id.find(header_id);
@@ -1298,6 +1361,12 @@ P4Objects::enable_arith(header_id_t header_id, int field_offset) {
   } else {
     phv_factory.enable_stack_field_arith(it->second, field_offset);
   }
+}
+
+ActionFn *
+P4Objects::get_action_for_action_profile(
+    const std::string &act_prof_name, const std::string &action_name) const {
+  return aprof_actions_map.at(std::make_pair(act_prof_name, action_name));
 }
 
 MeterArray *
@@ -1346,6 +1415,12 @@ ExternType *
 P4Objects::get_extern_instance_rt(const std::string &name) const {
   auto it = extern_instances.find(name);
   return (it != extern_instances.end()) ? it->second.get() : nullptr;
+}
+
+ActionProfile *
+P4Objects::get_action_profile_rt(const std::string &name) const {
+  auto it = action_profiles_map.find(name);
+  return (it != action_profiles_map.end()) ? it->second.get() : nullptr;
 }
 
 ConfigOptionMap

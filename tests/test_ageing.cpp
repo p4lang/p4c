@@ -80,7 +80,6 @@ class AgeingTest : public ::testing::Test {
 
     key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::EXACT);
 
-    typedef MatchTableAbstract::ActionEntry ActionEntry;
     typedef MatchUnitExact<ActionEntry> MUExact;
 
     LookupStructureFactory factory;

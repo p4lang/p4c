@@ -57,6 +57,7 @@
 #include <typeindex>
 
 #include "P4Objects.h"
+#include "action_profile.h"
 #include "match_tables.h"
 #include "runtime_interface.h"
 #include "lookup_structures.h"
@@ -193,21 +194,50 @@ class Context final {
                    entry_handle_t handle,
                    unsigned int ttl_ms);
 
+  // action profiles
+
   MatchErrorCode
-  mt_indirect_add_member(const std::string &table_name,
+  mt_act_prof_add_member(const std::string &act_prof_name,
                          const std::string &action_name,
-                         ActionData action_data,
-                         mbr_hdl_t *mbr);
+                         ActionData action_data, mbr_hdl_t *mbr);
 
   MatchErrorCode
-  mt_indirect_delete_member(const std::string &table_name,
-                            mbr_hdl_t mbr);
+  mt_act_prof_delete_member(const std::string &act_prof_name, mbr_hdl_t mbr);
 
   MatchErrorCode
-  mt_indirect_modify_member(const std::string &table_name,
-                            mbr_hdl_t mbr_hdl,
+  mt_act_prof_modify_member(const std::string &act_prof_name, mbr_hdl_t mbr,
                             const std::string &action_name,
                             ActionData action_data);
+
+  MatchErrorCode
+  mt_act_prof_create_group(const std::string &act_prof_name, grp_hdl_t *grp);
+
+  MatchErrorCode
+  mt_act_prof_delete_group(const std::string &act_prof_name, grp_hdl_t grp);
+
+  MatchErrorCode
+  mt_act_prof_add_member_to_group(const std::string &act_prof_name,
+                                  mbr_hdl_t mbr, grp_hdl_t grp);
+
+  MatchErrorCode
+  mt_act_prof_remove_member_from_group(const std::string &act_prof_name,
+                                       mbr_hdl_t mbr, grp_hdl_t grp);
+
+  std::vector<ActionProfile::Member>
+  mt_act_prof_get_members(const std::string &act_prof_name) const;
+
+  MatchErrorCode
+  mt_act_prof_get_member(const std::string &act_prof_name, grp_hdl_t grp,
+                         ActionProfile::Member *member) const;
+
+  std::vector<ActionProfile::Group>
+  mt_act_prof_get_groups(const std::string &act_prof_name) const;
+
+  MatchErrorCode
+  mt_act_prof_get_group(const std::string &act_prof_name, grp_hdl_t grp,
+                        ActionProfile::Group *group) const;
+
+  // indirect tables
 
   MatchErrorCode
   mt_indirect_add_entry(const std::string &table_name,
@@ -233,23 +263,6 @@ class Context final {
   MatchErrorCode
   mt_indirect_set_default_member(const std::string &table_name,
                                  mbr_hdl_t mbr);
-
-  MatchErrorCode
-  mt_indirect_ws_create_group(const std::string &table_name,
-                              grp_hdl_t *grp);
-
-  MatchErrorCode
-  mt_indirect_ws_delete_group(const std::string &table_name,
-                              grp_hdl_t grp);
-
-  MatchErrorCode
-  mt_indirect_ws_add_member_to_group(const std::string &table_name,
-                                     mbr_hdl_t mbr, grp_hdl_t grp);
-
-  MatchErrorCode
-  mt_indirect_ws_remove_member_from_group(
-      const std::string &table_name,
-      mbr_hdl_t mbr, grp_hdl_t grp);
 
   MatchErrorCode
   mt_indirect_ws_add_entry(const std::string &table_name,
@@ -290,20 +303,6 @@ class Context final {
                         const std::vector<MatchKeyParam> &match_key,
                         typename T::Entry *entry,
                         int priority = 1) const;
-
-  std::vector<MatchTableIndirect::Member>
-  mt_indirect_get_members(const std::string &table_name) const;
-
-  MatchErrorCode
-  mt_indirect_get_member(const std::string &table_name, grp_hdl_t grp,
-                         MatchTableIndirect::Member *member) const;
-
-  std::vector<MatchTableIndirectWS::Group>
-  mt_indirect_ws_get_groups(const std::string &table_name) const;
-
-  MatchErrorCode
-  mt_indirect_ws_get_group(const std::string &table_name, grp_hdl_t grp,
-                           MatchTableIndirectWS::Group *group) const;
 
   MatchErrorCode
   mt_read_counters(const std::string &table_name,

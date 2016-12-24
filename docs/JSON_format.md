@@ -264,16 +264,36 @@ program. Each array item has the following attributes:
 - `name`
 - `id`: a unique integer (unique with respect to other pipelines)
 - `init_table`: the name of the first table of the pipeline
+- `action profiles`: a JSON array of JSON objects. Each of these objects stores
+the information for a given P4 action profile, which is used by the current
+pipeline. The attributes for these objects are:
+  - `name`
+  - `id`: a unique integer; note that it has to be unique with respect to *all*
+  action profiles in the JSON file, not just the action profiles included in
+  this pipeline object
+  - `max_size`: an integer representing the size (number of entries) of the
+  action profile
+  - `selector`: only present if the action profile supports dynamic group member
+  selection. It needs to be a JSON object with these attributes:
+    - `algo`: the hash algorithm used for group member selection (has to be
+    supported by target switch)
+    - `input`: a JSON array of objects with the following attributes:
+      - `type`: has to be `field`
+      - `value`: the field reference
 - `tables`: a JSON array of JSON objects. Each of these objects stores the
 information for a given P4 table, which is used by the current pipeline. The
 attributes for these objects are:
   - `name`
   - `id`: a unique integer; note that it has to be unique with respect to *all*
-  tables in the JSON file, not just the tables included in this parser object
+  tables in the JSON file, not just the tables included in this pipeline object
   - `match_type`: one of `exact`, `lpm` or `ternary`
   - `type`: the implementation for the table, one of `simple`, `indirect`
   (action profiles), `indirect_ws` (action profiles with dynamic selector)
-  - `max_size`: an integer representing the size of the table
+  - `action_profile`: if the table is indirect, name of the action profile to
+  use with this table. If the table type is `indirect_ws`, then the referenced
+  action profile needs to have a selector attribute.
+  - `max_size`: an integer representing the size (number of entries) of the
+  table
   - `with_counters`: a boolean, `true` iff the match table has direct counters
   - `support_timeout`: a boolean, `true` iff the match table supports ageing
   - `key`: the lookup key format, represented by a JSON array. Each member of
@@ -314,14 +334,6 @@ attributes for these objects are:
   object
   - `expression`: the expression for the condition. See [here]
     (#the-type-value-object) for more information on expressions format.
-
-If the table `type` is `indirect_ws`, the `selector` attribute is also
-required for the table. It needs to be a JSON object with these attributes:
-  - `algo`: the hash algorithm used for group member selection (has to be
-  supported by target switch)
-  - `input`: a JSON array of objects with the following attributes:
-    - `type`: has to be `field`
-    - `value`: the field reference
 
 The `match_type` for the table needs to follow the following rules:
 - If one match field is `ternary`, the table `match_type` has to be `ternary`

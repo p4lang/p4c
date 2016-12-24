@@ -1,6 +1,7 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
 TESTS = \
+table_dump_old.test \
 table_dump.test \
 table_dump_extra.test \
 indirect_res.test \
@@ -10,6 +11,9 @@ mc_dump.test
 # note that we do not distribute the P4 files on purpose (there is no point),
 # even though they are checked in
 EXTRA_DIST = \
+table_dump_old.test \
+testdata/table_dump_old.in \
+testdata/table_dump_old.out \
 table_dump.test \
 testdata/table_dump.in \
 testdata/table_dump.out \

@@ -9,6 +9,8 @@ nobase_include_HEADERS += \
 bm/bm_runtime/bm_runtime.h
 
 nobase_include_HEADERS += \
+bm/bm_sim/action_entry.h \
+bm/bm_sim/action_profile.h \
 bm/bm_sim/actions.h \
 bm/bm_sim/ageing.h \
 bm/bm_sim/bignum.h \

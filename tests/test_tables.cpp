@@ -42,7 +42,6 @@ using std::chrono::milliseconds;
 using std::this_thread::sleep_until;
 using std::this_thread::sleep_for;
 
-typedef MatchTableAbstract::ActionEntry ActionEntry;
 typedef MatchUnitExact<ActionEntry> MUExact;
 typedef MatchUnitLPM<ActionEntry> MULPM;
 typedef MatchUnitTernary<ActionEntry> MUTernary;
@@ -927,6 +926,7 @@ class TableIndirect : public ::testing::Test {
   PHVFactory phv_factory;
 
   MatchKeyBuilder key_builder;
+  ActionProfile action_profile;
   std::unique_ptr<MatchTableIndirect> table;
 
   HeaderType testHeaderType;
@@ -940,7 +940,8 @@ class TableIndirect : public ::testing::Test {
   static const size_t table_size = 128;
 
   TableIndirect()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+      : action_profile("test_act_prof", 0, false),
+        testHeaderType("test_t", 0), action_fn("actionA", 0),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -956,6 +957,7 @@ class TableIndirect : public ::testing::Test {
                                        true, false);
     table->set_next_node(0, nullptr);
     table->set_next_node_miss_default(&node_miss_default);
+    table->set_action_profile(&action_profile);
   }
 
   MatchErrorCode add_entry(const std::string &key,
@@ -969,13 +971,14 @@ class TableIndirect : public ::testing::Test {
   MatchErrorCode add_member(unsigned int data, mbr_hdl_t *mbr) {
     ActionData action_data;
     action_data.push_back_action_data(data);
-    return table->add_member(&action_fn, std::move(action_data), mbr);
+    return action_profile.add_member(&action_fn, std::move(action_data), mbr);
   }
 
   MatchErrorCode modify_member(mbr_hdl_t mbr, unsigned int data) {
     ActionData action_data;
     action_data.push_back_action_data(data);
-    return table->modify_member(mbr, &action_fn, std::move(action_data));
+    return action_profile.modify_member(mbr, &action_fn,
+                                        std::move(action_data));
   }
 
   Packet get_pkt(int length) {
@@ -1006,7 +1009,7 @@ TEST_F(TableIndirect, AddMember) {
     ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
     // this is implementation specific, is it a good idea ?
     ASSERT_EQ(i, mbr);
-    ASSERT_EQ(i + 1, table->get_num_members());
+    ASSERT_EQ(i + 1, action_profile.get_num_members());
   }
 }
 
@@ -1052,28 +1055,28 @@ TEST_F(TableIndirect, DeleteMember) {
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
   // this is implementation specific, is it a good idea ?
   ASSERT_EQ(0u, mbr);
-  ASSERT_EQ(1u, table->get_num_members());
+  ASSERT_EQ(1u, action_profile.get_num_members());
 
-  rc = table->delete_member(mbr);
+  rc = action_profile.delete_member(mbr);
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
-  ASSERT_EQ(0u, table->get_num_members());
+  ASSERT_EQ(0u, action_profile.get_num_members());
 
   rc = add_member(0xabb, &mbr);
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
   // this is implementation specific, is it a good idea ?
   ASSERT_EQ(0u, mbr);
-  ASSERT_EQ(1u, table->get_num_members());
+  ASSERT_EQ(1u, action_profile.get_num_members());
 
   rc = add_entry(key, mbr, &handle);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->delete_member(mbr);
+  rc = action_profile.delete_member(mbr);
   ASSERT_EQ(rc, MatchErrorCode::MBR_STILL_USED);
 
   rc = table->delete_entry(handle);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->delete_member(mbr);
+  rc = action_profile.delete_member(mbr);
   ASSERT_EQ(rc, MatchErrorCode::SUCCESS);
 }
 
@@ -1161,7 +1164,7 @@ TEST_F(TableIndirect, NextNodeHitMiss) {
     MatchErrorCode rc;
     rc = table->delete_entry(handle);
     ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
-    rc = table->delete_member(mbr);
+    rc = action_profile.delete_member(mbr);
     ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   };
 
@@ -1254,9 +1257,10 @@ TEST_F(TableIndirect, ResetState) {
   ASSERT_TRUE(hit);
 
   table->reset_state();
+  action_profile.reset_state();
   rc = table->delete_entry(handle);
   ASSERT_EQ(MatchErrorCode::INVALID_HANDLE, rc);
-  rc = table->delete_member(mbr);
+  rc = action_profile.delete_member(mbr);
   ASSERT_EQ(MatchErrorCode::INVALID_MBR_HANDLE, rc);
 
   rc = add_member(data, &mbr);
@@ -1291,7 +1295,7 @@ TEST_F(TableIndirect, GetEntries) {
   }
 
   const auto entries = table->get_entries();
-  const auto members = table->get_members();
+  const auto members = action_profile.get_members();
 
   ASSERT_EQ(num_entries, entries.size());
   ASSERT_EQ(num_mbrs, members.size());
@@ -1325,6 +1329,7 @@ class TableIndirectWS : public ::testing::Test {
   PHVFactory phv_factory;
 
   MatchKeyBuilder key_builder;
+  ActionProfile action_profile;
   std::unique_ptr<MatchTableIndirectWS> table;
 
   HeaderType testHeaderType;
@@ -1340,7 +1345,8 @@ class TableIndirectWS : public ::testing::Test {
   static const size_t table_size = 128;
 
   TableIndirectWS()
-      : testHeaderType("test_t", 0), action_fn("actionA", 0),
+      : action_profile("test_act_prof", 0, true),
+        testHeaderType("test_t", 0), action_fn("actionA", 0),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);
@@ -1355,6 +1361,7 @@ class TableIndirectWS : public ::testing::Test {
                                          &lookup_factory,
                                          true, false);
     table->set_next_node(0, nullptr);
+    table->set_action_profile(&action_profile);
 
     BufBuilder builder;
 
@@ -1364,7 +1371,7 @@ class TableIndirectWS : public ::testing::Test {
 
     std::unique_ptr<Calculation> calc(new Calculation(builder, "xxh64"));
 
-    table->set_hash(std::move(calc));
+    action_profile.set_hash(std::move(calc));
   }
 
   MatchErrorCode add_entry(const std::string &key,
@@ -1386,7 +1393,7 @@ class TableIndirectWS : public ::testing::Test {
   MatchErrorCode add_member(unsigned int data, mbr_hdl_t *mbr) {
     ActionData action_data;
     action_data.push_back_action_data(data);
-    return table->add_member(&action_fn, std::move(action_data), mbr);
+    return action_profile.add_member(&action_fn, std::move(action_data), mbr);
   }
 
   Packet get_pkt(int length) {
@@ -1416,61 +1423,61 @@ TEST_F(TableIndirectWS, Group) {
   size_t num_mbrs;
   unsigned int data = 666u;
 
-  ASSERT_EQ(0u, table->get_num_groups());
+  ASSERT_EQ(0u, action_profile.get_num_groups());
 
-  rc = table->create_group(&grp);
+  rc = action_profile.create_group(&grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
-  ASSERT_EQ(1u, table->get_num_groups());
+  ASSERT_EQ(1u, action_profile.get_num_groups());
 
-  rc = table->get_num_members_in_group(grp, &num_mbrs);
+  rc = action_profile.get_num_members_in_group(grp, &num_mbrs);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   ASSERT_EQ(0u, num_mbrs);
 
   rc = add_member(data, &mbr_1);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->add_member_to_group(mbr_1, grp_bad);
+  rc = action_profile.add_member_to_group(mbr_1, grp_bad);
   ASSERT_EQ(MatchErrorCode::INVALID_GRP_HANDLE, rc);
 
-  rc = table->add_member_to_group(mbr_1, grp);
+  rc = action_profile.add_member_to_group(mbr_1, grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->add_member_to_group(mbr_bad, grp);
+  rc = action_profile.add_member_to_group(mbr_bad, grp);
   ASSERT_EQ(MatchErrorCode::INVALID_MBR_HANDLE, rc);
 
-  rc = table->get_num_members_in_group(grp, &num_mbrs);
+  rc = action_profile.get_num_members_in_group(grp, &num_mbrs);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   ASSERT_EQ(1u, num_mbrs);
 
-  rc = table->add_member_to_group(mbr_1, grp);
+  rc = action_profile.add_member_to_group(mbr_1, grp);
   ASSERT_EQ(MatchErrorCode::MBR_ALREADY_IN_GRP, rc);
 
-  rc = table->get_num_members_in_group(grp, &num_mbrs);
+  rc = action_profile.get_num_members_in_group(grp, &num_mbrs);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   ASSERT_EQ(1u, num_mbrs);
 
-  rc = table->delete_member(mbr_1);
+  rc = action_profile.delete_member(mbr_1);
   ASSERT_EQ(MatchErrorCode::MBR_STILL_USED, rc);
 
-  rc = table->remove_member_from_group(mbr_1, grp);
+  rc = action_profile.remove_member_from_group(mbr_1, grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->get_num_members_in_group(grp, &num_mbrs);
+  rc = action_profile.get_num_members_in_group(grp, &num_mbrs);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   ASSERT_EQ(0u, num_mbrs);
 
-  rc = table->remove_member_from_group(mbr_1, grp);
+  rc = action_profile.remove_member_from_group(mbr_1, grp);
   ASSERT_EQ(MatchErrorCode::MBR_NOT_IN_GRP, rc);
 
-  rc = table->delete_member(mbr_1);
+  rc = action_profile.delete_member(mbr_1);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->delete_group(grp);
+  rc = action_profile.delete_group(grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  ASSERT_EQ(0u, table->get_num_groups());
+  ASSERT_EQ(0u, action_profile.get_num_groups());
 
-  rc = table->delete_group(grp);
+  rc = action_profile.delete_group(grp);
   ASSERT_EQ(MatchErrorCode::INVALID_GRP_HANDLE, rc);
 }
 
@@ -1482,7 +1489,7 @@ TEST_F(TableIndirectWS, EntryWS) {
   std::string key = "\x0a\xba";
   unsigned int data = 666u;
 
-  rc = table->create_group(&grp);
+  rc = action_profile.create_group(&grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   rc = add_entry_ws(key, grp, &handle);
@@ -1491,19 +1498,19 @@ TEST_F(TableIndirectWS, EntryWS) {
   rc = add_member(data, &mbr_1);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->add_member_to_group(mbr_1, grp);
+  rc = action_profile.add_member_to_group(mbr_1, grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   rc = add_entry_ws(key, grp, &handle);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->delete_group(grp);
+  rc = action_profile.delete_group(grp);
   ASSERT_EQ(MatchErrorCode::GRP_STILL_USED, rc);
 
   rc = table->delete_entry(handle);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->delete_group(grp);
+  rc = action_profile.delete_group(grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 }
 
@@ -1518,12 +1525,12 @@ TEST_F(TableIndirectWS, LookupEntryWS) {
   unsigned int data_1 = 666u;
   unsigned int data_2 = 777u;
 
-  rc = table->create_group(&grp);
+  rc = action_profile.create_group(&grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   rc = add_member(data_1, &mbr_1);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
-  rc = table->add_member_to_group(mbr_1, grp);
+  rc = action_profile.add_member_to_group(mbr_1, grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   rc = add_entry_ws(key, grp, &handle);
@@ -1550,7 +1557,7 @@ TEST_F(TableIndirectWS, LookupEntryWS) {
   // add a second member
   rc = add_member(data_2, &mbr_2);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
-  rc = table->add_member_to_group(mbr_2, grp);
+  rc = action_profile.add_member_to_group(mbr_2, grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   // do a few lookups, should resolve to 1 or 2 with equal probability
@@ -1576,12 +1583,12 @@ TEST_F(TableIndirectWS, LookupEntryWS) {
   rc = table->delete_entry(handle);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->delete_group(grp);
+  rc = action_profile.delete_group(grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
-  rc = table->delete_member(mbr_1);
+  rc = action_profile.delete_member(mbr_1);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
-  rc = table->delete_member(mbr_2);
+  rc = action_profile.delete_member(mbr_2);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 }
 
@@ -1595,16 +1602,16 @@ TEST_F(TableIndirectWS, GetEntries) {
   unsigned int data_1 = 666u;
   unsigned int data_2 = 777u;
 
-  rc = table->create_group(&grp);
+  rc = action_profile.create_group(&grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   rc = add_member(data_1, &mbr_1);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   rc = add_member(data_2, &mbr_2);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
-  rc = table->add_member_to_group(mbr_1, grp);
+  rc = action_profile.add_member_to_group(mbr_1, grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
-  rc = table->add_member_to_group(mbr_2, grp);
+  rc = action_profile.add_member_to_group(mbr_2, grp);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   rc = add_entry_ws(key_1, grp, &handle_1);
@@ -1613,8 +1620,8 @@ TEST_F(TableIndirectWS, GetEntries) {
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   const auto entries = table->get_entries();
-  const auto groups = table->get_groups();
-  const auto members = table->get_members();
+  const auto groups = action_profile.get_groups();
+  const auto members = action_profile.get_members();
 
   ASSERT_EQ(2u, entries.size());
   ASSERT_EQ(1u, groups.size());
@@ -1653,8 +1660,8 @@ TEST_F(TableIndirectWS, GetEntries) {
 }
 
 TEST_F(TableIndirectWS, CustomGroupSelection) {
-  using GroupSelectionIface = MatchTableIndirectWS::GroupSelectionIface;
-  using hash_t = MatchTableIndirectWS::hash_t;
+  using GroupSelectionIface = ActionProfile::GroupSelectionIface;
+  using hash_t = ActionProfile::hash_t;
 
   std::set<mbr_hdl_t> mbrs;
   grp_hdl_t grp;
@@ -1675,7 +1682,7 @@ TEST_F(TableIndirectWS, CustomGroupSelection) {
     }
 
     mbr_hdl_t get_from_hash(grp_hdl_t g, hash_t h) const override {
-      std::cout << "hash " << h << "\n";
+      // std::cout << "hash " << h << "\n";
       (void) h;
       grp = g;
       return *mbrs.rbegin();
@@ -1690,14 +1697,14 @@ TEST_F(TableIndirectWS, CustomGroupSelection) {
   };
 
   GroupSelection selector(mbrs, grp);
-  table->set_group_selector(&selector);
+  action_profile.set_group_selector(&selector);
 
   grp_hdl_t grp_1;
   mbr_hdl_t mbr_1, mbr_2;
   unsigned int data_1 = 666u, data_2 = 777u;
   MatchErrorCode rc;
 
-  rc = table->create_group(&grp_1);
+  rc = action_profile.create_group(&grp_1);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
 
   auto add_member_check = [this, &mbrs, &grp, &grp_1](unsigned int data,
@@ -1705,7 +1712,7 @@ TEST_F(TableIndirectWS, CustomGroupSelection) {
     MatchErrorCode rc;
     rc = add_member(data, mbr);
     ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
-    rc = table->add_member_to_group(*mbr, grp_1);
+    rc = action_profile.add_member_to_group(*mbr, grp_1);
     ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
     ASSERT_EQ(grp_1, grp);
     ASSERT_EQ(1u, mbrs.count(*mbr));
@@ -1739,12 +1746,12 @@ TEST_F(TableIndirectWS, CustomGroupSelection) {
     ASSERT_EQ(data_2, entry.action_fn.get_action_data_at(0).get<uint>());
   }
 
-  rc = table->remove_member_from_group(grp_1, mbr_1);
+  rc = action_profile.remove_member_from_group(grp_1, mbr_1);
   ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
   ASSERT_EQ(grp_1, grp);
   ASSERT_EQ(1u, mbrs.size());
 
-  table->reset_state();
+  action_profile.reset_state();
   ASSERT_TRUE(mbrs.empty());
 }
 

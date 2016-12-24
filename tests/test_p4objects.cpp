@@ -138,7 +138,7 @@ TEST(P4Objects, UnknownHash) {
 
 TEST(P4Objects, UnknownHashSelector) {
   // NOLINTNEXTLINE(whitespace/line_length)
-  std::istringstream is("{\"pipelines\":[{\"name\":\"ingress\",\"id\":0,\"init_table\":\"t1\",\"tables\":[{\"name\":\"t1\",\"id\":0,\"match_type\":\"exact\",\"type\":\"indirect_ws\",\"selector\":{\"algo\":\"bad_hash_2\",\"input\":[]},\"max_size\":1024,\"with_counters\":false,\"key\":[],\"actions\":[\"_drop\"],\"next_tables\":{\"_drop\":null},\"default_action\":null}]}]}");
+  std::istringstream is("{\"pipelines\":[{\"name\":\"ingress\",\"id\":0,\"init_table\":\"t1\",\"tables\":[{\"name\":\"t1\",\"id\":0,\"match_type\":\"exact\",\"type\":\"indirect_ws\",\"act_prof_name\":\"ap1\",\"selector\":{\"algo\":\"bad_hash_2\",\"input\":[]},\"max_size\":1024,\"with_counters\":false,\"key\":[],\"actions\":[\"_drop\"],\"next_tables\":{\"_drop\":null},\"default_action\":null}]}]}");
   std::stringstream os;
   LookupStructureFactory factory;
   P4Objects objects(os);

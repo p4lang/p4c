@@ -112,7 +112,9 @@ enum TableOperationErrorCode {
   DEFAULT_ACTION_IS_CONST = 20,
   DEFAULT_ENTRY_IS_CONST = 21,
   NO_DEFAULT_ENTRY = 22,
-  ERROR = 23,
+  INVALID_ACTION_PROFILE_NAME = 23,
+  NO_ACTION_PROFILE_SELECTION = 24,
+  ERROR = 100,
 }
 
 exception InvalidTableOperation {
@@ -254,13 +256,13 @@ struct BmMtEntry {
  5:optional BmMtEntryLife life
 }
 
-struct BmMtIndirectMember {
+struct BmMtActProfMember {
  1:BmMemberHandle mbr_handle,
  2:string action_name,
  3:BmActionData action_data
 }
 
-struct BmMtIndirectWsGroup {
+struct BmMtActProfGroup {
  1:BmGroupHandle grp_handle,
  2:list<BmMemberHandle> mbr_handles
 }
@@ -322,28 +324,77 @@ service Standard {
     4:i32 timeout_ms
   ) throws (1:InvalidTableOperation ouch),
 
-  // indirect tables
+  // action profiles
 
-  BmMemberHandle bm_mt_indirect_add_member(
+  BmMemberHandle bm_mt_act_prof_add_member(
     1:i32 cxt_id,
-    2:string table_name,
+    2:string act_prof_name,
     3:string action_name,
     4:BmActionData action_data
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_mt_indirect_delete_member(
+  void bm_mt_act_prof_delete_member(
     1:i32 cxt_id,
-    2:string table_name,
+    2:string act_prof_name,
     3:BmMemberHandle mbr_handle
   ) throws (1:InvalidTableOperation ouch),
 
-  void bm_mt_indirect_modify_member(
+  void bm_mt_act_prof_modify_member(
     1:i32 cxt_id,
-    2:string table_name,
+    2:string act_prof_name,
     3:BmMemberHandle mbr_handle,
     4:string action_name,
     5:BmActionData action_data
   ) throws (1:InvalidTableOperation ouch),
+
+  BmGroupHandle bm_mt_act_prof_create_group(
+    1:i32 cxt_id,
+    2:string act_prof_name
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_act_prof_delete_group(
+    1:i32 cxt_id,
+    2:string act_prof_name,
+    3:BmGroupHandle grp_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_act_prof_add_member_to_group(
+    1:i32 cxt_id,
+    2:string act_prof_name,
+    3:BmMemberHandle mbr_handle,
+    4:BmGroupHandle grp_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  void bm_mt_act_prof_remove_member_from_group(
+    1:i32 cxt_id,
+    2:string act_prof_name,
+    3:BmMemberHandle mbr_handle,
+    4:BmGroupHandle grp_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  list<BmMtActProfMember> bm_mt_act_prof_get_members(
+    1:i32 cxt_id,
+    2:string act_prof_name
+  ) throws (1:InvalidTableOperation ouch),
+
+  BmMtActProfMember bm_mt_act_prof_get_member(
+    1:i32 cxt_id,
+    2:string act_prof_name,
+    3:BmMemberHandle mbr_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  list<BmMtActProfGroup> bm_mt_act_prof_get_groups(
+    1:i32 cxt_id,
+    2:string act_prof_name
+  ) throws (1:InvalidTableOperation ouch),
+
+  BmMtActProfGroup bm_mt_act_prof_get_group(
+    1:i32 cxt_id,
+    2:string act_prof_name,
+    3:BmGroupHandle grp_handle
+  ) throws (1:InvalidTableOperation ouch),
+
+  // indirect tables
 
   BmEntryHandle bm_mt_indirect_add_entry(
     1:i32 cxt_id,
@@ -380,31 +431,6 @@ service Standard {
   ) throws (1:InvalidTableOperation ouch),
 
   // indirect tables with selector
-
-  BmGroupHandle bm_mt_indirect_ws_create_group(
-    1:i32 cxt_id,
-    2:string table_name
-  ) throws (1:InvalidTableOperation ouch),
-
-  void bm_mt_indirect_ws_delete_group(
-    1:i32 cxt_id,
-    2:string table_name,
-    3:BmGroupHandle grp_handle
-  ) throws (1:InvalidTableOperation ouch),
-
-  void bm_mt_indirect_ws_add_member_to_group(
-    1:i32 cxt_id,
-    2:string table_name,
-    3:BmMemberHandle mbr_handle,
-    4:BmGroupHandle grp_handle
-  ) throws (1:InvalidTableOperation ouch),
-
-  void bm_mt_indirect_ws_remove_member_from_group(
-    1:i32 cxt_id,
-    2:string table_name,
-    3:BmMemberHandle mbr_handle,
-    4:BmGroupHandle grp_handle
-  ) throws (1:InvalidTableOperation ouch),
 
   BmEntryHandle bm_mt_indirect_ws_add_entry(
     1:i32 cxt_id,
@@ -480,28 +506,6 @@ service Standard {
     2:string table_name,
     3:BmMatchParams match_key,
     4:BmAddEntryOptions options
-  ) throws (1:InvalidTableOperation ouch),
-
-  list<BmMtIndirectMember> bm_mt_indirect_get_members(
-    1:i32 cxt_id,
-    2:string table_name
-  ) throws (1:InvalidTableOperation ouch),
-
-  BmMtIndirectMember bm_mt_indirect_get_member(
-    1:i32 cxt_id,
-    2:string table_name,
-    3:BmMemberHandle mbr_handle
-  ) throws (1:InvalidTableOperation ouch),
-
-  list<BmMtIndirectWsGroup> bm_mt_indirect_ws_get_groups(
-    1:i32 cxt_id,
-    2:string table_name
-  ) throws (1:InvalidTableOperation ouch),
-
-  BmMtIndirectWsGroup bm_mt_indirect_ws_get_group(
-    1:i32 cxt_id,
-    2:string table_name,
-    3:BmGroupHandle grp_handle
   ) throws (1:InvalidTableOperation ouch),
 
   // indirect counters
