@@ -46,6 +46,7 @@ limitations under the License.
 #include "midend/simplifySelect.h"
 #include "midend/validateProperties.h"
 #include "midend/compileTimeOps.h"
+#include "midend/predication.h"
 
 namespace BMV2 {
 
@@ -117,6 +118,7 @@ void MidEnd::setup_for_P4_16(CompilerOptions&) {
         new P4::SimplifySelect(&refMap, &typeMap, true),  // require constant keysets
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
+        new P4::Predication(&refMap),
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::CopyStructures(&refMap, &typeMap),
         new P4::NestedStructs(&refMap, &typeMap),
