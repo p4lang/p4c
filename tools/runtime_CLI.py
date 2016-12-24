@@ -2049,18 +2049,6 @@ class RuntimeAPI(cmd.Cmd):
     def complete_table_dump(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
-    # the next 2 functions are temporary, they ensure backwards compatibility
-    # the current table_dump CLI command used to be called table_dump_2 (the old
-    # table_dump command has been deprecated)
-    # TODO(antonin): remove
-    @handle_bad_input
-    def do_table_dump_2(self, line):
-        "This command is deprecated, use table_dump instead"
-        self.do_table_dump(line)
-
-    def complete_table_dump_2(self, text, line, start_index, end_index):
-        return self.complete_table_dump(text, line, start_index, end_index)
-
     @handle_bad_input
     def do_table_dump_entry_from_key(self, line):
         "Display some information about a table entry: table_dump_entry_from_key <table name> <match fields> [priority]"
