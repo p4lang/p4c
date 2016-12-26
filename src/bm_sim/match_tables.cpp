@@ -619,6 +619,11 @@ MatchTableIndirect::set_action_profile(ActionProfile *action_profile) {
   this->action_profile = action_profile;
 }
 
+ActionProfile *
+MatchTableIndirect::get_action_profile() const {
+  return action_profile;
+}
+
 const ActionEntry &
 MatchTableIndirect::lookup(const Packet &pkt,
                            bool *hit, entry_handle_t *handle) {

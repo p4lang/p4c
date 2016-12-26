@@ -1696,6 +1696,7 @@ TEST_F(TableIndirectWS, CustomGroupSelection) {
     grp_hdl_t &grp;
   };
 
+  ASSERT_EQ(&action_profile, table->get_action_profile());
   GroupSelection selector(mbrs, grp);
   action_profile.set_group_selector(&selector);
 

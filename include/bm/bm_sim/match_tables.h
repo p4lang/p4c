@@ -343,6 +343,8 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   void set_action_profile(ActionProfile *action_profile);
 
+  ActionProfile *get_action_profile() const;
+
   MatchErrorCode add_entry(const std::vector<MatchKeyParam> &match_key,
                            mbr_hdl_t mbr,
                            entry_handle_t *handle,
