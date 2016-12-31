@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,8 +33,9 @@ parser parse_ethernet {
     extract(ethernet);
     return ingress;
 }
-action act(idx) {
-    count(cntDum, idx);  
+action act(port, idx) {
+    modify_field(standard_metadata.egress_spec, port);
+    count(cntDum, idx);
 }
 table tab1 {
     reads {

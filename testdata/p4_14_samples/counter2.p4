@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 /*
- * Simple stat program. 
+ * Simple stat program.
  * Direct mapped, that does not go across stages
  */
 
@@ -34,8 +34,8 @@ parser parse_ethernet {
     extract(ethernet);
     return ingress;
 }
-action act(idx) {
-    modify_field(ethernet.dstAddr, idx);    
+action act(port) {
+    modify_field(standard_metadata.egress_spec, port);
 }
 table tab1 {
     reads {
@@ -44,7 +44,7 @@ table tab1 {
     actions {
         act;
     }
-  size: 128;
+  size: 6100;
 }
 
 counter cnt {
