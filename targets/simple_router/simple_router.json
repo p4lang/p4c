@@ -1,4 +1,10 @@
 {
+    "__meta__": {
+        "version": [
+            2,
+            0
+        ]
+    },
     "header_types": [
         {
             "name": "standard_metadata_t",
@@ -36,7 +42,9 @@
                     "_padding",
                     5
                 ]
-            ]
+            ],
+            "length_exp": null,
+            "max_length": null
         },
         {
             "name": "ethernet_t",
@@ -54,7 +62,9 @@
                     "etherType",
                     16
                 ]
-            ]
+            ],
+            "length_exp": null,
+            "max_length": null
         },
         {
             "name": "ipv4_t",
@@ -108,7 +118,9 @@
                     "dstAddr",
                     32
                 ]
-            ]
+            ],
+            "length_exp": null,
+            "max_length": null
         },
         {
             "name": "routing_metadata_t",
@@ -118,7 +130,9 @@
                     "nhop_ipv4",
                     32
                 ]
-            ]
+            ],
+            "length_exp": null,
+            "max_length": null
         }
     ],
     "headers": [
@@ -161,7 +175,8 @@
                     "transition_key": [],
                     "transitions": [
                         {
-                            "value": "default",
+                            "type": "default",
+                            "value": null,
                             "mask": null,
                             "next_state": "parse_ethernet"
                         }
@@ -192,12 +207,14 @@
                     ],
                     "transitions": [
                         {
-                            "value": "0x800",
+                            "type": "hexstr",
+                            "value": "0x0800",
                             "mask": null,
                             "next_state": "parse_ipv4"
                         },
                         {
-                            "value": "default",
+                            "type": "default",
+                            "value": null,
                             "mask": null,
                             "next_state": null
                         }
@@ -220,7 +237,8 @@
                     "transition_key": [],
                     "transitions": [
                         {
-                            "value": "default",
+                            "type": "default",
+                            "value": null,
                             "mask": null,
                             "next_state": null
                         }
@@ -229,6 +247,7 @@
             ]
         }
     ],
+    "parse_vsets": [],
     "deparsers": [
         {
             "name": "deparser",
@@ -240,23 +259,10 @@
         }
     ],
     "meter_arrays": [],
-    "counter_arrays": [],
-    "register_arrays": [],
     "actions": [
         {
-            "name": "_drop",
-            "id": 0,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "drop",
-                    "parameters": []
-                }
-            ]
-        },
-        {
             "name": "set_nhop",
-            "id": 1,
+            "id": 0,
             "runtime_data": [
                 {
                     "name": "nhop_ipv4",
@@ -320,7 +326,7 @@
         },
         {
             "name": "rewrite_mac",
-            "id": 2,
+            "id": 1,
             "runtime_data": [
                 {
                     "name": "smac",
@@ -343,6 +349,17 @@
                             "value": 0
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "name": "_drop",
+            "id": 2,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "drop",
+                    "parameters": []
                 }
             ]
         },
@@ -388,6 +405,7 @@
                     "type": "simple",
                     "max_size": 1024,
                     "with_counters": false,
+                    "direct_meters": null,
                     "support_timeout": false,
                     "key": [
                         {
@@ -395,7 +413,8 @@
                             "target": [
                                 "ipv4",
                                 "dstAddr"
-                            ]
+                            ],
+                            "mask": null
                         }
                     ],
                     "actions": [
@@ -406,7 +425,7 @@
                         "set_nhop": "forward",
                         "_drop": "forward"
                     },
-                    "default_action": null
+                    "base_default_next": "forward"
                 },
                 {
                     "name": "forward",
@@ -415,6 +434,7 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "direct_meters": null,
                     "support_timeout": false,
                     "key": [
                         {
@@ -422,7 +442,8 @@
                             "target": [
                                 "routing_metadata",
                                 "nhop_ipv4"
-                            ]
+                            ],
+                            "mask": null
                         }
                     ],
                     "actions": [
@@ -433,9 +454,10 @@
                         "set_dmac": null,
                         "_drop": null
                     },
-                    "default_action": null
+                    "base_default_next": null
                 }
             ],
+            "action_profiles": [],
             "conditionals": [
                 {
                     "name": "_condition_0",
@@ -491,6 +513,7 @@
                     "type": "simple",
                     "max_size": 256,
                     "with_counters": false,
+                    "direct_meters": null,
                     "support_timeout": false,
                     "key": [
                         {
@@ -498,7 +521,8 @@
                             "target": [
                                 "standard_metadata",
                                 "egress_port"
-                            ]
+                            ],
+                            "mask": null
                         }
                     ],
                     "actions": [
@@ -509,9 +533,10 @@
                         "rewrite_mac": null,
                         "_drop": null
                     },
-                    "default_action": null
+                    "base_default_next": null
                 }
             ],
+            "action_profiles": [],
             "conditionals": []
         }
     ],
@@ -603,16 +628,21 @@
     ],
     "checksums": [
         {
-            "name": "ipv4.hdrChecksum",
+            "name": "ipv4.hdrChecksum|ipv4_checksum",
             "id": 0,
             "target": [
                 "ipv4",
                 "hdrChecksum"
             ],
-            "type": "ipv4"
+            "type": "generic",
+            "calculation": "ipv4_checksum",
+            "if_cond": null
         }
     ],
     "learn_lists": [],
+    "field_lists": [],
+    "counter_arrays": [],
+    "register_arrays": [],
     "force_arith": [
         [
             "standard_metadata",

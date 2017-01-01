@@ -1,4 +1,10 @@
 {
+    "__meta__": {
+        "version": [
+            2,
+            0
+        ]
+    },
     "header_types": [
         {
             "name": "standard_metadata_t",
@@ -36,7 +42,9 @@
                     "_padding",
                     5
                 ]
-            ]
+            ],
+            "length_exp": null,
+            "max_length": null
         },
         {
             "name": "ethernet_t",
@@ -54,7 +62,9 @@
                     "etherType",
                     16
                 ]
-            ]
+            ],
+            "length_exp": null,
+            "max_length": null
         },
         {
             "name": "intrinsic_metadata_t",
@@ -68,24 +78,29 @@
                     "mgid",
                     4
                 ]
-            ]
+            ],
+            "length_exp": null,
+            "max_length": null
         }
     ],
     "headers": [
         {
             "name": "standard_metadata",
             "id": 0,
-            "header_type": "standard_metadata_t"
+            "header_type": "standard_metadata_t",
+            "metadata": true
         },
         {
             "name": "ethernet",
             "id": 1,
-            "header_type": "ethernet_t"
+            "header_type": "ethernet_t",
+            "metadata": false
         },
         {
             "name": "intrinsic_metadata",
             "id": 2,
-            "header_type": "intrinsic_metadata_t"
+            "header_type": "intrinsic_metadata_t",
+            "metadata": true
         }
     ],
     "header_stacks": [],
@@ -102,7 +117,8 @@
                     "transition_key": [],
                     "transitions": [
                         {
-                            "value": "default",
+                            "type": "default",
+                            "value": null,
                             "mask": null,
                             "next_state": "parse_ethernet"
                         }
@@ -125,7 +141,8 @@
                     "transition_key": [],
                     "transitions": [
                         {
-                            "value": "default",
+                            "type": "default",
+                            "value": null,
                             "mask": null,
                             "next_state": null
                         }
@@ -134,6 +151,7 @@
             ]
         }
     ],
+    "parse_vsets": [],
     "deparsers": [
         {
             "name": "deparser",
@@ -146,59 +164,8 @@
     "meter_arrays": [],
     "actions": [
         {
-            "name": "forward",
-            "id": 0,
-            "runtime_data": [
-                {
-                    "name": "port",
-                    "bitwidth": 9
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_port"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "broadcast",
-            "id": 1,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "intrinsic_metadata",
-                                "mgid"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "name": "mac_learn",
-            "id": 2,
+            "id": 0,
             "runtime_data": [],
             "primitives": [
                 {
@@ -233,6 +200,57 @@
             ]
         },
         {
+            "name": "broadcast",
+            "id": 1,
+            "runtime_data": [],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "intrinsic_metadata",
+                                "mgid"
+                            ]
+                        },
+                        {
+                            "type": "hexstr",
+                            "value": "0x1"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "forward",
+            "id": 2,
+            "runtime_data": [
+                {
+                    "name": "port",
+                    "bitwidth": 9
+                }
+            ],
+            "primitives": [
+                {
+                    "op": "modify_field",
+                    "parameters": [
+                        {
+                            "type": "field",
+                            "value": [
+                                "standard_metadata",
+                                "egress_port"
+                            ]
+                        },
+                        {
+                            "type": "runtime_data",
+                            "value": 0
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "name": "_nop",
             "id": 3,
             "runtime_data": [],
@@ -252,13 +270,16 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
                             "target": [
                                 "ethernet",
                                 "srcAddr"
-                            ]
+                            ],
+                            "mask": null
                         }
                     ],
                     "actions": [
@@ -269,7 +290,7 @@
                         "mac_learn": "dmac",
                         "_nop": "dmac"
                     },
-                    "default_action": null
+                    "base_default_next": "dmac"
                 },
                 {
                     "name": "dmac",
@@ -278,13 +299,16 @@
                     "type": "simple",
                     "max_size": 512,
                     "with_counters": false,
+                    "direct_meters": null,
+                    "support_timeout": false,
                     "key": [
                         {
                             "match_type": "exact",
                             "target": [
                                 "ethernet",
                                 "dstAddr"
-                            ]
+                            ],
+                            "mask": null
                         }
                     ],
                     "actions": [
@@ -295,9 +319,10 @@
                         "forward": null,
                         "broadcast": null
                     },
-                    "default_action": null
+                    "base_default_next": null
                 }
             ],
+            "action_profiles": [],
             "conditionals": []
         },
         {
@@ -305,6 +330,7 @@
             "id": 1,
             "init_table": null,
             "tables": [],
+            "action_profiles": [],
             "conditionals": []
         }
     ],
@@ -331,5 +357,50 @@
                 }
             ]
         }
+    ],
+    "field_lists": [],
+    "counter_arrays": [],
+    "register_arrays": [],
+    "force_arith": [
+        [
+            "standard_metadata",
+            "ingress_port"
+        ],
+        [
+            "standard_metadata",
+            "packet_length"
+        ],
+        [
+            "standard_metadata",
+            "egress_spec"
+        ],
+        [
+            "standard_metadata",
+            "egress_port"
+        ],
+        [
+            "standard_metadata",
+            "egress_instance"
+        ],
+        [
+            "standard_metadata",
+            "instance_type"
+        ],
+        [
+            "standard_metadata",
+            "clone_spec"
+        ],
+        [
+            "standard_metadata",
+            "_padding"
+        ],
+        [
+            "intrinsic_metadata",
+            "learn_id"
+        ],
+        [
+            "intrinsic_metadata",
+            "mgid"
+        ]
     ]
 }
