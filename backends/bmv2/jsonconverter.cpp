@@ -833,7 +833,10 @@ JsonConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                     BUG_CHECK(mc->arguments->size() == 2, "Expected 2 arguments for %1%", mc);
                     auto reg = new Util::JsonObject();
                     reg->emplace("type", "register_array");
-                    reg->emplace("value", em->object->getName());
+                    cstring name = nameFromAnnotation(
+                        em->object->to<IR::Declaration_Instance>()->annotations,
+                        em->object->getName());
+                    reg->emplace("value", name);
                     if (em->method->name == v1model.registers.read.name) {
                         auto primitive = mkPrimitive("register_read", result);
                         auto parameters = mkParameters(primitive);
@@ -1336,7 +1339,9 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
                 meterMap.setSize(decl, size);
                 BUG_CHECK(decl->is<IR::Declaration_Instance>(),
                           "%1%: expected an instance", decl->getNode());
-                result->emplace("direct_meters", decl->getName());
+                cstring name = nameFromAnnotation(decl->to<IR::Declaration_Instance>()->annotations,
+                                                  decl->getName());
+                result->emplace("direct_meters", name);
             }
         } else {
             ::error("%1%: expected a Boolean", timeout);
@@ -1551,11 +1556,13 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
         if (c->is<IR::Declaration_Instance>()) {
             auto bl = block->getValue(c);
             CHECK_NULL(bl);
+            cstring name = nameFromAnnotation(
+                c->to<IR::Declaration_Instance>()->annotations, c->name);
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
                 if (eb->type->name == v1model.counter.name) {
                     auto jctr = new Util::JsonObject();
-                    jctr->emplace("name", c->name);
+                    jctr->emplace("name", name);
                     jctr->emplace("id", nextId("counter_arrays"));
                     auto sz = eb->getParameterValue(v1model.counter.sizeParam.name);
                     CHECK_NULL(sz);
@@ -1566,7 +1573,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     continue;
                 } else if (eb->type->name == v1model.meter.name) {
                     auto jmtr = new Util::JsonObject();
-                    jmtr->emplace("name", c->name);
+                    jmtr->emplace("name", name);
                     jmtr->emplace("id", nextId("meter_arrays"));
                     jmtr->emplace("is_direct", false);
                     auto sz = eb->getParameterValue(v1model.meter.sizeParam.name);
@@ -1590,7 +1597,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     continue;
                 } else if (eb->type->name == v1model.registers.name) {
                     auto jreg = new Util::JsonObject();
-                    jreg->emplace("name", c->name);
+                    jreg->emplace("name", name);
                     jreg->emplace("id", nextId("register_arrays"));
                     auto sz = eb->getParameterValue(v1model.registers.sizeParam.name);
                     CHECK_NULL(sz);
@@ -1613,7 +1620,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     CHECK_NULL(info->destinationField);
 
                     auto jmtr = new Util::JsonObject();
-                    jmtr->emplace("name", c->name);
+                    jmtr->emplace("name", name);
                     jmtr->emplace("id", nextId("meter_arrays"));
                     jmtr->emplace("is_direct", true);
                     jmtr->emplace("rate_count", 2);
