@@ -16,6 +16,14 @@ limitations under the License.
 
 @annotest const bit b = 1;
 
+@size(100)
+extern Annotated {
+    Annotated();
+}
+
+@cycles(10)
+extern bit<32> log(in bit<32> data);
+
 control c() {
     apply {
         @blockAnnotation {

@@ -496,12 +496,11 @@ controlBody
 /*************************** EXTERN *************************/
 
 externDeclaration
-    : EXTERN nonTypeName { structure.pushContainerType(*$2, true); }
-                            optTypeParameters { structure.declareTypes($4->parameters); }
-                            '{' methodPrototypes '}'
-                                       { structure.pop();
-                                         $$ = new IR::Type_Extern(@2, *$2, $4, $7); }
-    | EXTERN functionPrototype ';'     { $$ = $2; }
+    : optAnnotations EXTERN nonTypeName { structure.pushContainerType(*$3, true); }
+                            optTypeParameters { structure.declareTypes($5->parameters); }
+                            '{' methodPrototypes '}' { structure.pop();
+                                         $$ = new IR::Type_Extern(@3, *$3, $5, $8, $1); }
+    | optAnnotations EXTERN functionPrototype ';'     { $$ = $3; $3->annotations = $1; }
     ;
 
 methodPrototypes
@@ -520,7 +519,7 @@ functionPrototype
 
 methodPrototype
     : functionPrototype ';' { $$ = $1; }
-    | ABSTRACT functionPrototype ';'    { $$ = $2; $$->setAbstract(); }
+    | ABSTRACT functionPrototype ';'    { $$ = $2; $$->setAbstract(); }  // experimental
     | TYPE '(' parameterList ')' ';'  // constructor
                                         { auto par = new IR::ParameterList(@3, $3);
                                           auto mt = new IR::Type_Method(@1, par);
