@@ -28,7 +28,7 @@ const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expres
         if (cst->value > maxShift)
             ::error("%1%: shift amount limited to %2% on this target", expression, maxShift);
     } else {
-        BUG_CHECK(rhstype->is<IR::Type_Bits>(), "%1%: expected a bit-string type", rhstype);
+        BUG_CHECK(rhstype->is<IR::Type_Bits>(), "%1%: expected a bit<> type", rhstype);
         auto bs = rhstype->to<IR::Type_Bits>();
         if (bs->size > LowerExpressions::maxShiftWidth)
             ::error("%1%: shift amount limited to %2% bits on this target",
@@ -43,6 +43,7 @@ const IR::Node* LowerExpressions::postorder(IR::Neg* expression) {
     auto sub = new IR::Sub(expression->srcInfo, zero, expression->expr);
     typeMap->setType(zero, type);
     typeMap->setType(sub, type);
+    LOG1("Replaced " << expression << " with " << sub);
     return sub;
 }
 
@@ -54,14 +55,23 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
         auto zero = new IR::Constant(srcType, 0);
         auto cmp = new IR::Equ(expression->srcInfo, expression->expr, zero);
         typeMap->setType(cmp, destType);
+        LOG1("Replaced " << expression << " with " << cmp);
         return cmp;
     } else if (destType->is<IR::Type_Bits>() && srcType->is<IR::Type_Boolean>()) {
         auto mux = new IR::Mux(expression->srcInfo, expression->expr,
                                new IR::Constant(destType, 1),
                                new IR::Constant(destType, 0));
         typeMap->setType(mux, destType);
+        LOG1("Replaced " << expression << " with " << mux);
         return mux;
     }
+    return expression;
+}
+
+const IR::Node* LowerExpressions::postorder(IR::Expression* expression) {
+    // Just update the typeMap incrementally.
+    auto type = typeMap->getType(getOriginal(), true);
+    typeMap->setType(expression, type);
     return expression;
 }
 
@@ -103,6 +113,7 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     typeMap->setType(result, resulttype);
     typeMap->setType(sh, resulttype);
     typeMap->setType(and0, resulttype);
+    LOG1("Replaced " << expression << " with " << result);
     return result;
 }
 

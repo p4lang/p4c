@@ -86,6 +86,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
         new P4::Predication(&refMap),
+        new P4::ConstantFolding(&refMap, &typeMap),
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::CopyStructures(&refMap, &typeMap),
         new P4::NestedStructs(&refMap, &typeMap),
