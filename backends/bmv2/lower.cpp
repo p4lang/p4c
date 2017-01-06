@@ -19,6 +19,10 @@ limitations under the License.
 
 namespace BMV2 {
 
+// We make an effort to update the typeMap as we proceed
+// since parent expression trees may need the information
+// when processing in post-order.
+
 const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expression) const {
     auto rhs = expression->right;
     auto rhstype = typeMap->getType(rhs, true);
@@ -34,6 +38,8 @@ const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expres
             ::error("%1%: shift amount limited to %2% bits on this target",
                     expression, LowerExpressions::maxShiftWidth);
     }
+    auto ltype = typeMap->getType(getOriginal(), true);
+    typeMap->setType(expression, ltype);
     return expression;
 }
 
@@ -65,6 +71,8 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
         LOG1("Replaced " << expression << " with " << mux);
         return mux;
     }
+    // This may be a new expression
+    typeMap->setType(expression, destType);
     return expression;
 }
 
