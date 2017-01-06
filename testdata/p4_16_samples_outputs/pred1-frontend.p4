@@ -11,21 +11,17 @@ control Ing() {
     @name("cond") action cond_0() {
         b_0 = true;
         if (b_0) 
-            a_0 = 32w5;
-        else {
+            ;
+        else 
             if (!b_0) 
                 tmp = false;
             else {
                 tmp_0 = a_0 == 32w5;
                 tmp = tmp_0;
             }
-            if (tmp) 
-                a_0 = 32w10;
-            else 
-                a_0 = 32w20;
-        }
     }
     apply {
+        a_0 = 32w2;
         cond_0();
     }
 }

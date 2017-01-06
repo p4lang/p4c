@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ action lookup_flowlet_map() {
     modify_field(ingress_metadata.flow_ipg,
                  intrinsic_metadata.ingress_global_timestamp);
     register_read(ingress_metadata.flowlet_lasttime,
-    flowlet_lasttime, ingress_metadata.flowlet_map_index);
+                  flowlet_lasttime, ingress_metadata.flowlet_map_index);
     subtract_from_field(ingress_metadata.flow_ipg,
                         ingress_metadata.flowlet_lasttime);
 

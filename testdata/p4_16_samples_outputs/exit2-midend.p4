@@ -1,6 +1,5 @@
 control ctrl(out bit<32> c) {
     bool hasExited;
-    bit<32> x;
     bit<32> a;
     bool tmp_0;
     @name("e") action e_0() {

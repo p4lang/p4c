@@ -12,12 +12,32 @@ parser p() {
         stack[3].setValid();
         b = stack.last;
         stack[2] = b;
-        stack.push_front(2);
-        stack.pop_front(2);
         transition accept;
     }
 }
 
+control c() {
+    h[4] stack_2;
+    h b_2;
+    action act() {
+        stack_2[3].setValid();
+        b_2 = stack_2[3];
+        stack_2[2] = b_2;
+        stack_2.push_front(2);
+        stack_2.pop_front(2);
+    }
+    table tbl_act() {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
+    apply {
+        tbl_act.apply();
+    }
+}
+
 parser Simple();
-package top(Simple par);
-top(p()) main;
+control Simpler();
+package top(Simple par, Simpler ctr);
+top(p(), c()) main;

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -106,9 +106,10 @@ class Visitor {
     template <class T>
     const T* getOriginal() const {
         CHECK_NULL(ctxt->original);
-        auto result = ctxt->original->to<T>();
-        CHECK_NULL(result);
-        return result; }
+        BUG_CHECK(ctxt->original->is<T>(), "%1% does not have the expected type %2%",
+                  ctxt->original, typeid(T).name());
+        return ctxt->original->to<T>();
+    }
     const Context *getContext() const { return ctxt->parent; }
     template <class T>
     const T* getParent() const {

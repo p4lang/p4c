@@ -20,27 +20,27 @@ match_kind {
 }
 
 typedef bit<9> BParamType;
-struct TArg1
-{
+struct TArg1 {
     bit<9> field1;
     bool drop;
 }
-struct TArg2
-{
+
+struct TArg2 {
     int<32> field2;
 }
-struct PArg1
-{
+
+struct PArg1 {
     bit<32> f0;
     bool drop;
 }
+
 typedef bit<32> PArg2;
-struct QArg1
-{
+
+struct QArg1 {
     bit<32> f1;
 }
-struct QArg2
-{
+
+struct QArg2 {
     bit<32> f2;
 }
 
@@ -49,45 +49,37 @@ struct Packet_data {}
 
 action NoAction() {}
 
-control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size)
-{
+control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     // free-floating action: defined like a type
-    action B_action(out bit<9> barg, BParamType bData)
-    {
+    action B_action(out bit<9> barg, BParamType bData) {
         barg = (bit<9>)bData;
     }
 
-    action C_action(bit<9> cData)
-    {
+    action C_action(bit<9> cData) {
         pArg1.field1 = cData;
     }
 
-    table T(inout TArg1 tArg1, in TArg2 aArg2)
-    {
+    table T(inout TArg1 tArg1, in TArg2 aArg2) {
         key = {
            tArg1.field1 : ternary;
            aArg2.field2 : exact;
         }
-        actions =
-            {
-                B_action(tArg1.field1); // invoked binding tArg1.field1 to barg
-                C_action;
-            }
+        actions = {
+            B_action(tArg1.field1); // invoked binding tArg1.field1 to barg
+            C_action;
+        }
 
         size = t2Size;
         const default_action = C_action(9w5);
     }
 
-    action Drop()
-    {
+    action Drop() {
         pArg1.drop = true;
     }
 
-    table Tinner()
-    {
+    table Tinner() {
         key = { pArg1.field1 : ternary; }
-        actions =
-        {
+        actions = {
             Drop; NoAction;
         }
         const default_action = NoAction;
@@ -102,8 +94,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size)
     }
 }
 
-control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2)
-{
+control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     P_pipe(32w5) p1;  // instantiate pipeline p1 with parameter t2Size=5
 
     apply {
@@ -118,5 +109,4 @@ package myswitch(prs prser, pp pipe);
 
 parser my_parser(bs b, out Packet_data p) { state start { transition accept; } }
 
-//myswitch(Q_pipe(), my_parser()) main;
 myswitch(my_parser(), Q_pipe()) main;

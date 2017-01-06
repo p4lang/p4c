@@ -2894,13 +2894,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("egress_port_type_fabric") action egress_port_type_fabric_0(bit<16> ifindex) {
         meta.egress_metadata.port_type = 2w1;
-        meta.egress_metadata.ifindex = ifindex;
         meta.tunnel_metadata.egress_tunnel_type = 5w15;
         meta.egress_metadata.ifindex = ifindex;
     }
     @name("egress_port_type_cpu") action egress_port_type_cpu_0(bit<16> ifindex) {
         meta.egress_metadata.port_type = 2w2;
-        meta.egress_metadata.ifindex = ifindex;
         meta.tunnel_metadata.egress_tunnel_type = 5w16;
         meta.egress_metadata.ifindex = ifindex;
     }

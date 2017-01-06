@@ -165,6 +165,7 @@ class LocationSet : public IHasDbPrint {
     }
     // only defined for canonical representations
     bool overlaps(const LocationSet* other) const;
+    bool isEmpty() const { return locations.empty(); }
 };
 
 // For each declaration we keep the associated storage
@@ -186,6 +187,12 @@ class StorageMap {
             storage.emplace(decl, loc);
         return loc;
     }
+    StorageLocation* getOrAdd(const IR::IDeclaration* decl) {
+        auto s = getStorage(decl);
+        if (s != nullptr)
+            return s;
+        return add(decl);
+    }
     StorageLocation* getStorage(const IR::IDeclaration* decl) const {
         CHECK_NULL(decl);
         auto result = ::get(storage, decl);
@@ -195,9 +202,9 @@ class StorageMap {
 
 // Indicates a statement in the program.
 // The stack is for representing calls: i.e.,
-// table.apply() statement -> table -> action statement
-class ProgramPoint {
-    // empty stack represents "uninitialized"
+// table.apply() -> table -> action
+class ProgramPoint : public IHasDbPrint {
+    // empty stack represents "beforeStart" (see below)
     std::vector<const IR::Node*> stack;
 
  public:
@@ -205,17 +212,17 @@ class ProgramPoint {
     ProgramPoint(const ProgramPoint& other) : stack(other.stack) {}
     explicit ProgramPoint(const IR::Node* node) { stack.push_back(node); }
     ProgramPoint(const ProgramPoint& context, const IR::Node* node);
-    static ProgramPoint uninitialized;
+    static ProgramPoint beforeStart;  // a point logically before the program start
     bool operator==(const ProgramPoint& other) const;
     std::size_t hash() const;
     void dbprint(std::ostream& out) const {
-        if (isUninitialized()) {
-            out << "<uninitialized>";
+        if (isBeforeStart()) {
+            out << "<BeforeStart>";
         } else {
             bool first = true;
             for (auto n : stack) {
                 if (!first)
-                    out << "/";
+                    out << "//";
                 out << dbp(n);
                 first = false;
             }
@@ -227,15 +234,17 @@ class ProgramPoint {
     }
     const IR::Node* last() const
     { return stack.empty() ? nullptr : stack.back(); }
-    bool isUninitialized() const
+    bool isBeforeStart() const
     { return stack.empty(); }
 };
 }  // namespace P4
 
+#if 0
 // hash and comparator for ProgramPoint
 inline bool operator==(const P4::ProgramPoint& left, const P4::ProgramPoint& right) {
     return left.operator==(right);
 }
+#endif
 
 // inject hash into std namespace so it is picked up by std::unordered_set
 namespace std {
@@ -249,7 +258,7 @@ template<> struct hash<P4::ProgramPoint> {
 }  // namespace std
 
 namespace P4 {
-class ProgramPoints {
+class ProgramPoints : public IHasDbPrint {
     typedef std::unordered_set<ProgramPoint> Points;
     Points points;
     explicit ProgramPoints(const Points &points) : points(points) {}
@@ -266,8 +275,8 @@ class ProgramPoints {
         out << "}";
     }
     size_t size() const { return points.size(); }
-    bool containsUninitialized() const
-    { return points.find(ProgramPoint::uninitialized) != points.end(); }
+    bool containsBeforeStart() const
+    { return points.find(ProgramPoint::beforeStart) != points.end(); }
     Points::const_iterator begin() const
     { return points.cbegin(); }
     Points::const_iterator end() const
@@ -275,7 +284,7 @@ class ProgramPoints {
 };
 
 // List of definers for each base storage (at a specific program point)
-class Definitions {
+class Definitions : public IHasDbPrint {
     // which program points have written last to each location
     // (conservative approximation)
     std::map<const BaseLocation*, const ProgramPoints*> definitions;
@@ -307,11 +316,15 @@ class Definitions {
             first = false;
         }
     }
+    Definitions* clone() const { return new Definitions(*this); }
     void remove(const StorageLocation* loc);
     bool empty() const { return definitions.empty(); }
 };
 
-class AllDefinitions {
+class AllDefinitions : public IHasDbPrint {
+    // These are the definitions available AFTER each ProgramPoint.
+    // However, for ProgramPoints representing P4Control, P4Action, and P4Table
+    // the definitions are BEFORE the ProgramPoint.
     std::unordered_map<ProgramPoint, Definitions*> atPoint;
  public:
     StorageMap* storageMap;
@@ -331,6 +344,10 @@ class AllDefinitions {
     }
     void set(ProgramPoint point, Definitions* defs)
     { atPoint[point] = defs; }
+    void dbprint(std::ostream& out) const {
+        for (auto e : atPoint)
+            out << e.first << " => " << e.second << std::endl;
+    }
 };
 
 // This does not scan variable initializers, so it must be executed
@@ -361,11 +378,11 @@ class ComputeWriteSet : public Inspector {
             callingContext(context), storageMap(source->storageMap), lhs(false) {
         setName("ComputeWriteSet");
     }
-    void initialize(const IR::ParameterList* parameters,
+    void enterScope(const IR::ParameterList* parameters,
                     const IR::IndexedVector<IR::Declaration>* locals,
                     ProgramPoint startPoint, bool clear = true);
-    void remove(const IR::ParameterList* parameters,
-                const IR::IndexedVector<IR::Declaration>* locals);
+    void exitScope(const IR::ParameterList* parameters,
+                   const IR::IndexedVector<IR::Declaration>* locals);
     Definitions* getDefinitionsAfter(const IR::ParserState* state);
     bool setDefinitions(Definitions* defs, const IR::Node* who = nullptr);
     ProgramPoint getProgramPoint(const IR::Node* node = nullptr) const;

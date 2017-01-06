@@ -539,6 +539,19 @@ const IR::Node* DoConstantFolding::postorder(IR::LNot* e) {
     return result;
 }
 
+const IR::Node* DoConstantFolding::postorder(IR::Mux* e) {
+    auto cond = getConstant(e->e0);
+    if (cond == nullptr)
+        return e;
+    auto b = cond->to<IR::BoolLiteral>();
+    if (b == nullptr)
+        ::error("%1%: expected a Boolean", cond);
+    if (b->value)
+        return e->e1;
+    else
+        return e->e2;
+}
+
 const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
     auto right = getConstant(e->right);
     if (right == nullptr)

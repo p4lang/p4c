@@ -55,7 +55,6 @@ conditional statement.
 */
 class Predication final : public Transform {
     NameGenerator* generator;
-    cstring conditionName;
     bool inside_action;
     std::vector<cstring> predicateName;
     unsigned ifNestingLevel;
@@ -64,9 +63,6 @@ class Predication final : public Transform {
         if (predicateName.empty())
             return nullptr;
         return new IR::PathExpression(IR::ID(predicateName.back())); }
-    const IR::PathExpression* condition() const {
-        BUG_CHECK(!conditionName.isNullOrEmpty(), "No condition declared?");
-        return new IR::PathExpression(IR::ID(conditionName)); }
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
             ::error("%1%: Predication cannot be applied", statement);
@@ -74,7 +70,7 @@ class Predication final : public Transform {
     }
  public:
     explicit Predication(NameGenerator* generator) : generator(generator),
-            conditionName(""), inside_action(false), ifNestingLevel(0)
+            inside_action(false), ifNestingLevel(0)
     { CHECK_NULL(generator); setName("Predication"); }
 
     const IR::Node* preorder(IR::IfStatement* statement) override;

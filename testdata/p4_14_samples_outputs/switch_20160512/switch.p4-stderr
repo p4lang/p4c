@@ -31,6 +31,7 @@ action set_fabric_multicast(fabric_mgid) {
 ../testdata/p4_14_samples/switch_20160512/acl.p4(441): warning: Could not infer type for session_id, using bit<8>
 action negative_mirror(session_id) {
                        ^^^^^^^^^^
+warning: The order of headers in deparser is not uniquely determined by parser!
 ../testdata/p4_14_samples/switch_20160512/includes/parser.p4(487): warning: SelectCase: unreachable
         default: parse_all_int_meta_value_heders;
         ^^^^^^^

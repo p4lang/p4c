@@ -417,6 +417,9 @@ void ProgramStructure::createParser() {
         auto ps = convertParser(p.first);
         states->push_back(ps);
     }
+
+    if (states->empty())
+        ::error("No parsers specified");
     auto result = new IR::P4Parser(Util::SourceInfo(), v1model.parser.Id(), type,
                                           new IR::ParameterList(), stateful, states);
     declarations->push_back(result);
@@ -951,13 +954,15 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
     } else if (primitive->name == "add_to_field" || primitive->name == "subtract_from_field") {
         OPS_CK(primitive, 2);
         auto left = conv.convert(primitive->operands.at(0));
+        auto left2 = conv.convert(primitive->operands.at(0));
+        // convert twice, so we have different expression trees on RHS and LHS
         auto right = conv.convert(primitive->operands.at(1));
         const IR::Expression* op;
         if (primitive->name == "add_to_field")
             op = new IR::Add(primitive->srcInfo, left, right);
         else
             op = new IR::Sub(primitive->srcInfo, left, right);
-        return new IR::AssignmentStatement(primitive->srcInfo, left, op);
+        return new IR::AssignmentStatement(primitive->srcInfo, left2, op);
     } else if (primitive->name == "remove_header") {
         OPS_CK(primitive, 1);
         auto hdr = conv.convert(primitive->operands.at(0));
@@ -1913,7 +1918,11 @@ const IR::P4Program* ProgramStructure::create(Util::SourceInfo info) {
     createStructures();
     createExterns();
     createParser();
+    if (::errorCount())
+        return nullptr;
     createControls();
+    if (::errorCount())
+        return nullptr;
     createDeparser();
     createChecksumVerifications();
     createChecksumUpdates();

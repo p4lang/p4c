@@ -25,7 +25,7 @@ namespace P4 {
 // name for header valid bit
 const cstring StorageFactory::validFieldName = "$valid";
 const LocationSet* LocationSet::empty = new LocationSet();
-ProgramPoint ProgramPoint::uninitialized;
+ProgramPoint ProgramPoint::beforeStart;
 
 StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) const {
     if (type->is<IR::Type_Bits>() ||
@@ -313,9 +313,9 @@ bool Definitions::operator==(const Definitions& other) const {
 
 // This assumes that all variable declarations have been pushed to the top.
 // We could remove this constraint if we also scanned variable declaration initializers.
-void ComputeWriteSet::initialize(const IR::ParameterList* parameters,
+void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
                                  const IR::IndexedVector<IR::Declaration>* locals,
-                                 ProgramPoint startPoint,
+                                 ProgramPoint entryPoint,
                                  bool clear) {
     Definitions* defs = nullptr;
     if (!clear)
@@ -323,49 +323,55 @@ void ComputeWriteSet::initialize(const IR::ParameterList* parameters,
     if (defs == nullptr)
         defs = new Definitions();
 
-    auto startPoints = new ProgramPoints(startPoint);
-    auto uninit = new ProgramPoints(ProgramPoint::uninitialized);
+    auto startPoints = new ProgramPoints(entryPoint);
+    auto uninit = new ProgramPoints(ProgramPoint::beforeStart);
 
     for (auto p : *parameters->parameters) {
-        StorageLocation* loc = definitions->storageMap->add(p);
+        StorageLocation* loc = definitions->storageMap->getOrAdd(p);
         if (loc == nullptr)
             continue;
         if (p->direction == IR::Direction::In ||
-            p->direction == IR::Direction::InOut)
+            p->direction == IR::Direction::InOut ||
+            p->direction == IR::Direction::None)
             defs->set(loc, startPoints);
         else if (p->direction == IR::Direction::Out)
             defs->set(loc, uninit);
         auto valid = loc->getValidBits();
         defs->set(valid, startPoints);
     }
-    for (auto d : *locals) {
-        if (d->is<IR::Declaration_Variable>()) {
-            StorageLocation* loc = definitions->storageMap->add(d);
-            if (loc != nullptr) {
-                defs->set(loc, uninit);
-                auto valid = loc->getValidBits();
-                defs->set(valid, startPoints);
+    if (locals != nullptr) {
+        for (auto d : *locals) {
+            if (d->is<IR::Declaration_Variable>()) {
+                StorageLocation* loc = definitions->storageMap->add(d);
+                if (loc != nullptr) {
+                    defs->set(loc, uninit);
+                    auto valid = loc->getValidBits();
+                    defs->set(valid, startPoints);
+                }
             }
         }
     }
-    definitions->set(startPoint, defs);
+    definitions->set(entryPoint, defs);
     currentDefinitions = defs;
-    LOG1("Definitions at " << startPoint << ":" << currentDefinitions);
+    LOG1("Definitions at " << entryPoint << ":" << currentDefinitions);
 }
 
-void ComputeWriteSet::remove(const IR::ParameterList* parameters,
+void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
                              const IR::IndexedVector<IR::Declaration>* locals) {
+    currentDefinitions = currentDefinitions->clone();
     for (auto p : *parameters->parameters) {
         StorageLocation* loc = definitions->storageMap->getStorage(p);
         if (loc == nullptr)
             continue;
         currentDefinitions->remove(loc);
     }
-    for (auto d : *locals) {
-        if (d->is<IR::Declaration_Variable>()) {
-            StorageLocation* loc = definitions->storageMap->getStorage(d);
-            if (loc == nullptr)
-                currentDefinitions->remove(loc);
+    if (locals != nullptr) {
+        for (auto d : *locals) {
+            if (d->is<IR::Declaration_Variable>()) {
+                StorageLocation* loc = definitions->storageMap->getStorage(d);
+                if (loc == nullptr)
+                    currentDefinitions->remove(loc);
+            }
         }
     }
 }
@@ -548,7 +554,7 @@ bool ComputeWriteSet::preorder(const IR::Operation_Unary* expression) {
 }
 
 bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
-    LOG2("Visiting " << dbp(expression));
+    LOG2("CWS Visiting " << dbp(expression));
     bool save = lhs;
     lhs = true;
     // The method call may modify the object, which is part of the method
@@ -580,7 +586,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
         }
     }
 
-    // Symbolically call some methods (actions and tables)
+    // Symbolically call some apply methods (actions and tables)
     const IR::Node* callee = nullptr;
     if (mcd.instance->is<ActionCall>()) {
         auto action = mcd.instance->to<ActionCall>()->action;
@@ -592,18 +598,19 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
             callee = table;
         }
     }
+
     if (callee != nullptr) {
         LOG1("Analyzing " << dbp(callee));
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
         (void)callee->apply(cw);
-        currentDefinitions = definitions->get(pt);
+        currentDefinitions = cw.currentDefinitions;
         exitDefinitions = exitDefinitions->join(cw.exitDefinitions);
+        LOG3("Definitions after call of " << expression << ": " << currentDefinitions);
     }
 
-    // For all other methods we act conservatively:
-    // out/inout arguments are written
     auto result = LocationSet::empty;
+    // For all methods out/inout arguments are written
     for (auto p : *mcd.substitution.getParameters()) {
         auto expr = mcd.substitution.lookup(p);
         bool save = lhs;
@@ -633,10 +640,10 @@ bool ComputeWriteSet::preorder(const IR::ParserState* state) {
 
 // Symbolic execution of the parser
 bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
-    LOG1("Visiting " << dbp(parser));
+    LOG1("CWS Visiting " << dbp(parser));
     auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
     auto startPoint = ProgramPoint(startState);
-    initialize(parser->type->applyParams, parser->parserLocals, startPoint);
+    enterScope(parser->type->applyParams, parser->parserLocals, startPoint);
     for (auto l : *parser->parserLocals) {
         if (l->is<IR::Declaration_Instance>())
             visit(l);  // process virtual Functions if any
@@ -679,9 +686,9 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Control* control) {
-    LOG1("Visiting " << dbp(control));
+    LOG1("CWS Visiting " << dbp(control));
     auto startPoint = ProgramPoint(control);
-    initialize(control->type->applyParams, control->controlLocals, startPoint);
+    enterScope(control->type->applyParams, control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
     returnedDefinitions = new Definitions();
     for (auto l : *control->controlLocals) {
@@ -733,7 +740,7 @@ bool ComputeWriteSet::preorder(const IR::EmptyStatement*) {
 }
 
 bool ComputeWriteSet::preorder(const IR::AssignmentStatement* statement) {
-    LOG1("Visiting " << dbp(statement) << " " << statement);
+    LOG1("CWS Visiting " << dbp(statement) << " " << statement);
     lhs = true;
     visit(statement->left);
     lhs = false;
@@ -747,7 +754,7 @@ bool ComputeWriteSet::preorder(const IR::AssignmentStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
-    LOG1("Visiting " << dbp(statement));
+    LOG1("CWS Visiting " << dbp(statement));
     visit(statement->expression);
     auto locs = get(statement->expression);
     auto defs = currentDefinitions->writes(getProgramPoint(), locs);
@@ -774,12 +781,18 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Action* action) {
-    // TODO: call initialize here too to analyze action locals
-    LOG1("Visiting " << dbp(action));
-    returnedDefinitions = new Definitions();
+    LOG1("CWS Visiting " << dbp(action));
+    auto decls = new IR::IndexedVector<IR::Declaration>();
+    // We assume that there are no declarations in inner scopes
+    // inside the action body.
+    for (auto s : *action->body->components) {
+        if (s->is<IR::Declaration>())
+            decls->push_back(s->to<IR::Declaration>());
+    }
+    ProgramPoint pt(callingContext, action);
+    enterScope(action->parameters, decls, pt, false);
     visit(action->body);
-    currentDefinitions = currentDefinitions->join(returnedDefinitions);
-    definitions->set(callingContext, currentDefinitions);
+    exitScope(action->parameters, decls);
     return false;
 }
 
@@ -800,17 +813,17 @@ class GetDeclarations : public Inspector {
 }  // namespace
 
 bool ComputeWriteSet::preorder(const IR::Function* function) {
-    LOG1("Visiting " << dbp(function));
+    LOG1("CWS Visiting " << dbp(function));
     auto point = ProgramPoint(function);
     auto locals = GetDeclarations::get(function->body);
     auto saveReturned = returnedDefinitions;
 
-    initialize(function->type->parameters, locals, point, false);
+    enterScope(function->type->parameters, locals, point, false);
     returnedDefinitions = new Definitions();
     visit(function->body);
     currentDefinitions = currentDefinitions->join(returnedDefinitions);
     definitions->set(callingContext, currentDefinitions);
-    remove(function->type->parameters, locals);
+    exitScope(function->type->parameters, locals);
 
     returnedDefinitions = saveReturned;
     LOG1("Done " << dbp(function));
@@ -818,35 +831,23 @@ bool ComputeWriteSet::preorder(const IR::Function* function) {
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Table* table) {
-    LOG1("Visiting " << dbp(table));
+    LOG1("CWS Visiting " << dbp(table));
+    ProgramPoint pt(callingContext, table);
+    enterScope(table->parameters, nullptr, pt, false);
+
     // non-deterministic call of one of the actions in the table
     auto after = new Definitions();
     auto beforeTable = currentDefinitions;
     auto actions = table->getActionList();
     for (auto ale : *actions->actionList) {
-        const IR::P4Action *action;
-        if (ale->expression->is<IR::PathExpression>()) {
-            auto act = storageMap->refMap->getDeclaration(
-                ale->expression->to<IR::PathExpression>()->path);
-            BUG_CHECK(act->is<IR::P4Action>(), "%1%: expected an action", ale->expression);
-            action = act->to<IR::P4Action>();
-        } else if (ale->expression->is<IR::MethodCallExpression>()) {
-            auto mi = MethodInstance::resolve(ale->expression->to<IR::MethodCallExpression>(),
-                                              storageMap->refMap, storageMap->typeMap);
-            BUG_CHECK(mi->is<ActionCall>(), "%1%: expected an action call", ale->expression);
-            action = mi->to<ActionCall>()->action;
-        } else {
-            BUG("%1%: Unexpected", ale->expression);
-        }
-
-        ProgramPoint pt(callingContext, table);
-        ComputeWriteSet cw(this, pt, beforeTable);
-        (void)action->apply(cw);
-        currentDefinitions = definitions->get(pt);
-        exitDefinitions = exitDefinitions->join(cw.exitDefinitions);
+        BUG_CHECK(ale->expression->is<IR::MethodCallExpression>(),
+                  "%1%: unexpected entry in action list", ale);
+        currentDefinitions = beforeTable;
+        visit(ale->expression);
         after = after->join(currentDefinitions);
     }
-    definitions->set(callingContext, currentDefinitions);
+    exitScope(table->parameters, nullptr);
+    currentDefinitions = after;
     return false;
 }
 

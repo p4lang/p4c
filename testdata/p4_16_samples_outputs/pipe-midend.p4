@@ -49,7 +49,6 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         tArg1_0.field1 = (bit<9>)bData;
     }
     @name("p1.C_action") action p1_C_action(bit<9> cData) {
-        tmp_5.field1 = cData;
     }
     @name("p1.T") table p1_T_0() {
         key = {

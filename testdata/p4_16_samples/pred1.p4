@@ -22,7 +22,7 @@ package top(empty e);
 
 control Ing() {
     bool b;
-    bit<32> a;
+    bit<32> a = 2;
 
     action cond() {
         b = true;

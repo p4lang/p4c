@@ -81,7 +81,13 @@ p4c
 * To contribute: fork the p4lang/p4c repository on github
   (see https://help.github.com/articles/fork-a-repo/)
 * To merge a forked repository with the latest changes in the source use:
-  `git fetch upstream; git rebase upstream/master`
+
+```
+git fetch upstream
+git rebase upstream/master
+git push -f
+```
+
 * After committing changes, create a pull request (using the github web UI)
 
 ## Debugging

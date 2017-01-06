@@ -148,6 +148,7 @@ class Path {
         return name;
     }
     dbprint { out << name; }
+    validate { BUG_CHECK(!name.name.isNullOrEmpty(), "Empty path"); }
 }
 
 class Annotation {
