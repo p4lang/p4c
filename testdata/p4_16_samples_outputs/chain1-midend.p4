@@ -10,6 +10,7 @@ parser p1(packet_in p, out Header h) {
         transition select(x) {
             1w0: chain1;
             1w1: chain2;
+            default: noMatch;
         }
     }
     state chain1 {
@@ -22,6 +23,10 @@ parser p1(packet_in p, out Header h) {
     }
     state endchain {
         transition accept;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
 }
 

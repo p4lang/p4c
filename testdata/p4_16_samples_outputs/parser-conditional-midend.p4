@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser p(out bit<32> b) {
     bit<32> a;
     bool tmp_9;
@@ -16,6 +18,7 @@ parser p(out bit<32> b) {
         transition select(tmp_9) {
             true: start_true;
             false: start_false;
+            default: noMatch;
         }
     }
     state start_true {
@@ -34,6 +37,7 @@ parser p(out bit<32> b) {
         transition select(tmp_12) {
             true: start_true_0;
             false: start_false_0;
+            default: noMatch;
         }
     }
     state start_true_0 {
@@ -41,6 +45,7 @@ parser p(out bit<32> b) {
         transition select(tmp_14) {
             true: start_true_0_true;
             false: start_true_0_false;
+            default: noMatch;
         }
     }
     state start_true_0_true {
@@ -65,6 +70,10 @@ parser p(out bit<32> b) {
     state start_join_0 {
         b = tmp_13;
         transition accept;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
 }
 

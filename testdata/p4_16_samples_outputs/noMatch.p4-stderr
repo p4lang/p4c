@@ -1,0 +1,9 @@
+../testdata/p4_16_samples/noMatch.p4(20): warning: accept state in parser p is unreachable
+parser p() {
+       ^
+../testdata/p4_16_samples/noMatch.p4(23): warning: x may be uninitialized
+        transition select(x) {
+                          ^
+../testdata/p4_16_samples/noMatch.p4(20): warning: accept state in parser p is unreachable
+parser p() {
+       ^

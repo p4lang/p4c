@@ -68,6 +68,7 @@ class Predication final : public Transform {
             ::error("%1%: Predication cannot be applied", statement);
         return statement;
     }
+
  public:
     explicit Predication(NameGenerator* generator) : generator(generator),
             inside_action(false), ifNestingLevel(0)

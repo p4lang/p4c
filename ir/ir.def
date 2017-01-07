@@ -32,7 +32,7 @@
 
 class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     Annotations               annotations;
-    IndexedVector<StatOrDecl> components;  // only some statements allowed
+    IndexedVector<StatOrDecl> components;
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
     NullOK Expression         selectExpression;
 
@@ -47,15 +47,12 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     static const cstring start;
     static const cstring verify;
     bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
-    /* Relaxing constraints on parser control-flow
     validate{
-        for (auto e : *components) {
-            CHECK_NULL(e);
-            if (e->is<IR::Statement>())
-                BUG_CHECK(e->is<IR::AssignmentStatement>() || e->is<IR::MethodCallStatement>(),
-                          "%1%: unexpected statement in parser", e);
-        }
-    } */
+        if (selectExpression != nullptr)
+            BUG_CHECK(selectExpression->is<IR::PathExpression>() ||
+                      selectExpression->is<IR::SelectExpression>(),
+                      "%1%: unexpected select expression", selectExpression);
+    }
 }
 
 // A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)
@@ -121,6 +118,7 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated {
 }
 
 class Type_Error : ISimpleNamespace, Type_Declaration {
+    static const cstring error;
     IndexedVector<Declaration_ID> members;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members->getDeclarations(); }

@@ -1004,6 +1004,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition select(hdr.int_val.last.bos) {
             1w0: parse_int_val;
             1w1: parse_inner_ethernet;
+            default: noMatch;
         }
     }
     @name("parse_ipv4") state parse_ipv4 {
@@ -1187,6 +1188,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name("start") state start {
         transition parse_ethernet;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
 }
 

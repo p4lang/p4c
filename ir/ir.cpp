@@ -28,6 +28,7 @@ const cstring TableProperties::keyPropertyName = "key";
 const cstring TableProperties::defaultActionPropertyName = "default_action";
 const cstring IApply::applyMethodName = "apply";
 const cstring P4Program::main = "main";
+const cstring Type_Error::error = "error";
 
 int IR::Declaration::nextId = 0;
 

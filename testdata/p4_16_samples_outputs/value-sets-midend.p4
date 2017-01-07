@@ -34,6 +34,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
         transition select(setIndex) {
             8w1: parse_trill;
             8w2: parse_vlan_tag;
+            default: noMatch;
         }
     }
     state parse_ipv4 {
@@ -50,6 +51,10 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     }
     state parse_vlan_tag {
         transition accept;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
 }
 

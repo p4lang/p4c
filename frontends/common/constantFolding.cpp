@@ -758,8 +758,6 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
 
     if (changes) {
         if (cases.size() == 0 && result == expression && warnings)
-            // TODO: this is the same as verify(false, error.NoMatch),
-            // but we cannot replace the selectExpression with a method call.
             ::warning("%1%: no case matches", expression);
         expression->selectCases = std::move(cases);
     }

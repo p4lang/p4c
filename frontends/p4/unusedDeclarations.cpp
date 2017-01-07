@@ -82,7 +82,8 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Variable* dec
 const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) {
     LOG1("Visiting " << decl);
     auto ctx = getContext();
-    if (decl->getName().name == IR::P4Program::main &&
+    if ((decl->getName().name == IR::P4Program::main ||
+        decl->getName().name == IR::ParserState::verify) &&
         ctx->parent->node->is<IR::P4Program>())
         return decl->getNode();
     if (refMap->isUsed(getOriginal<IR::IDeclaration>()))

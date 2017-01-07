@@ -12,6 +12,7 @@ parser p0(packet_in p, out Header h) {
         transition select(h.data, b) {
             (default, true): next;
             (default, default): reject;
+            default: noMatch;
         }
     }
     state next {
@@ -21,6 +22,10 @@ parser p0(packet_in p, out Header h) {
             (default, default): reject;
             default: reject;
         }
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
 }
 

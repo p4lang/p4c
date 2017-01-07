@@ -1,0 +1,6 @@
+../testdata/p4_16_samples/vss-example.p4(123): warning: out parameter nextHop may be uninitialized when ipv4_match terminates
+     table ipv4_match(out IPv4Address nextHop) {
+                                      ^^^^^^^
+../testdata/p4_16_samples/vss-example.p4(123)
+     table ipv4_match(out IPv4Address nextHop) {
+           ^^^^^^^^^^

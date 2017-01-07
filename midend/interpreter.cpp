@@ -414,7 +414,7 @@ SymbolicValue* SymbolicArray::next(const IR::Node* node) {
         if (!v->valid->value)
             return v;
     }
-    return new SymbolicException(node, P4::StandardExceptions::FullStack);
+    return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
 }
 
 SymbolicValue* SymbolicArray::last(const IR::Node* node) {
@@ -426,7 +426,7 @@ SymbolicValue* SymbolicArray::last(const IR::Node* node) {
         if (v->valid->value)
             return v;
     }
-    return new SymbolicException(node, P4::StandardExceptions::EmptyStack);
+    return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
 }
 
 void SymbolicArray::setAllUnknown() {

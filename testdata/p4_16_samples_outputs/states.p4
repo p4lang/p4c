@@ -1,6 +1,4 @@
-extern packet_in {
-    void extract<T>(out T hdr);
-}
+#include <core.p4>
 
 parser parse<H>(packet_in packet, out H headers);
 package ebpfFilter<H>(parse<H> prs);

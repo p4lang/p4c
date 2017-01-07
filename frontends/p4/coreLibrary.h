@@ -26,8 +26,7 @@ enum class StandardExceptions {
     NoError,
     PacketTooShort,
     NoMatch,
-    EmptyStack,
-    FullStack,
+    StackOutOfBounds,
     OverwritingHeader,
     HeaderTooShort,
     ParserTimeout,
@@ -45,11 +44,8 @@ inline std::ostream& operator<<(std::ostream &out, P4::StandardExceptions e) {
         case P4::StandardExceptions::NoMatch:
             out << "NoMatch";
             break;
-        case P4::StandardExceptions::EmptyStack:
-            out << "EmptyStack";
-            break;
-        case P4::StandardExceptions::FullStack:
-            out << "FullStack";
+        case P4::StandardExceptions::StackOutOfBounds:
+            out << "StackOutOfBounds";
             break;
         case P4::StandardExceptions::OverwritingHeader:
             out << "OverwritingHeader";
@@ -105,8 +101,8 @@ class P4CoreLibrary : public ::Model::Model {
             ternaryMatch("ternary"), lpmMatch("lpm"), packetIn(PacketIn()),
             packetOut(PacketOut()), noError(StandardExceptions::NoError),
             packetTooShort(StandardExceptions::PacketTooShort),
-            noMatch(StandardExceptions::NoMatch), emptyStack(StandardExceptions::EmptyStack),
-            fullStack(StandardExceptions::FullStack),
+            noMatch(StandardExceptions::NoMatch),
+            stackOutOfBounds(StandardExceptions::StackOutOfBounds),
             overwritingHeader(StandardExceptions::OverwritingHeader),
             headerTooShort(StandardExceptions::HeaderTooShort) {}
 
@@ -124,8 +120,7 @@ class P4CoreLibrary : public ::Model::Model {
     P4Exception_Model noError;
     P4Exception_Model packetTooShort;
     P4Exception_Model noMatch;
-    P4Exception_Model emptyStack;
-    P4Exception_Model fullStack;
+    P4Exception_Model stackOutOfBounds;
     P4Exception_Model overwritingHeader;
     P4Exception_Model headerTooShort;
 };

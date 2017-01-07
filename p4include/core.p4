@@ -23,8 +23,7 @@ error {
     NoError,           // no error
     PacketTooShort,    // not enough bits in packet for extract
     NoMatch,           // match expression has no matches
-    EmptyStack,        // reference to .last in an empty header stack
-    FullStack,         // reference to .next in a full header stack
+    StackOutOfBounds,  // reference to invalid element of a header stack
     OverwritingHeader, // one header is extracted twice
     HeaderTooShort,    // extracting too many bits in a varbit field
     ParserTimeout      // parser execution time limit exceeded
@@ -46,6 +45,7 @@ extern packet_in {
 
 extern packet_out {
     void emit<T>(in T hdr);
+    void emit<T>(in bool condition, in T data);
 }
 
 // TODO: remove from this file, convert to built-in

@@ -33,7 +33,8 @@ midend_UNIFIED = \
 	midend/removeLeftSlices.cpp \
 	midend/simplifyKey.cpp \
 	midend/simplifySelect.cpp \
-	midend/validateProperties.cpp
+	midend/validateProperties.cpp \
+	midend/noMatch.cpp
 
 noinst_HEADERS += \
 	midend/actionsInlining.h \
@@ -57,6 +58,7 @@ noinst_HEADERS += \
 	midend/removeReturns.h \
 	midend/simplifyKey.h \
 	midend/simplifySelect.h \
-	midend/validateProperties.h
+	midend/validateProperties.h \
+	midend/noMatch.h
 
 cpplint_FILES += $(midend_UNIFIED) $(midend_NONUNIFIED)

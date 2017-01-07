@@ -33,6 +33,7 @@ parser p1(packet_in p, out Header h) {
         transition select(h.isValid()) {
             true: next1;
             false: next2;
+            default: noMatch;
         }
     }
     state next1 {
@@ -46,6 +47,10 @@ parser p1(packet_in p, out Header h) {
     }
     state next3 {
         transition accept;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
 }
 

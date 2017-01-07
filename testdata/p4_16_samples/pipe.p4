@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <core.p4>
+
 match_kind {
     ternary,
     exact
@@ -46,8 +48,6 @@ struct QArg2 {
 
 extern bs {}
 struct Packet_data {}
-
-action NoAction() {}
 
 control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     // free-floating action: defined like a type

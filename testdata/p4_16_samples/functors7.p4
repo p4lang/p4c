@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <core.p4>
+
 parser p1<T>(in T a) {
     state start {
         T w = a;

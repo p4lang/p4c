@@ -31,6 +31,7 @@ limitations under the License.
 #include "midend/nestedStructs.h"
 #include "midend/copyStructures.h"
 #include "midend/predication.h"
+#include "midend/noMatch.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -83,6 +84,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveExits(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifySelect(&refMap, &typeMap, false),  // non-constant keysets
+        new P4::HandleNoMatch(&refMap),
         new P4::SimplifyParsers(&refMap),
         new P4::StrengthReduction(),
         new P4::Predication(&refMap),

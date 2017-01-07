@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser p(out bit<32> b) {
     bit<32> a = 32w1;
     state start {

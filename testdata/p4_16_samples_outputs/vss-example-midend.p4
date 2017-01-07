@@ -64,6 +64,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
         b.extract<Ethernet_h>(p.ethernet);
         transition select(p.ethernet.etherType) {
             16w0x800: parse_ipv4;
+            default: noMatch;
         }
     }
     state parse_ipv4 {
@@ -79,6 +80,10 @@ parser TopParser(packet_in b, out Parsed_packet p) {
         tmp_14 = tmp_13;
         verify(tmp_14, error.IPv4ChecksumError);
         transition accept;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
 }
 

@@ -1,3 +1,5 @@
+#include <core.p4>
+
 match_kind {
     ternary,
     exact

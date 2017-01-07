@@ -1,5 +1,5 @@
 /*
-Copyright 2016 VMware, Inc.
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,31 +15,18 @@ limitations under the License.
 */
 
 #include <core.p4>
+#include <v1model.p4>
 
-extern Fake {
-    Fake();
-    void call(in bit<32> data);
-}
-
-parser P() {
-    bit<32> x = 0;
-    Fake() fake;
+parser p() {
     state start {
-        fake.call(x);
-        transition accept;
+        bit<32> x;
+        transition select(x) {
+            0: reject;
+        }
     }
 }
 
-control C() {
-    bit<32> x = 0;
-    bit<32> y = x + 1;
-    Fake() fake;
-    apply {
-        fake.call(y);
-    }
-}
+parser e();
+package top(e e);
 
-parser SimpleParser();
-control SimpleControl();
-package top(SimpleParser prs, SimpleControl ctrl);
-top(P(), C()) main;
+top(p()) main;

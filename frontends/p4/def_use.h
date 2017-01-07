@@ -172,6 +172,7 @@ class LocationSet : public IHasDbPrint {
 class StorageMap {
     std::map<const IR::IDeclaration*, StorageLocation*> storage;
     StorageFactory factory;
+
  public:
     ReferenceMap*  refMap;
     TypeMap*       typeMap;
@@ -238,13 +239,6 @@ class ProgramPoint : public IHasDbPrint {
     { return stack.empty(); }
 };
 }  // namespace P4
-
-#if 0
-// hash and comparator for ProgramPoint
-inline bool operator==(const P4::ProgramPoint& left, const P4::ProgramPoint& right) {
-    return left.operator==(right);
-}
-#endif
 
 // inject hash into std namespace so it is picked up by std::unordered_set
 namespace std {
@@ -326,6 +320,7 @@ class AllDefinitions : public IHasDbPrint {
     // However, for ProgramPoints representing P4Control, P4Action, and P4Table
     // the definitions are BEFORE the ProgramPoint.
     std::unordered_map<ProgramPoint, Definitions*> atPoint;
+
  public:
     StorageMap* storageMap;
     AllDefinitions(ReferenceMap* refMap, TypeMap* typeMap) :

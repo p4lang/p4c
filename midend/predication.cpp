@@ -42,7 +42,7 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     // A vector for a new BlockStatement.
     auto blockVec = new IR::IndexedVector<IR::StatOrDecl>();
 
-    const IR::Expression* previousPredicate = predicate(); // This may be nullptr
+    const IR::Expression* previousPredicate = predicate();  // This may be nullptr
     // a new name for the new predicate
     cstring newPredName = generator->newName("pred");
     predicateName.push_back(newPredName);

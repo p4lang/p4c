@@ -1348,12 +1348,6 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
         return expression;
     }
 
-#if 0
-    auto parser = findContext<IR::P4Parser>();
-    if (parser != nullptr)
-        typeError("%1%: Explicit stack indexing cannot be used in a parser", expression);
-#endif
-
     auto hst = ltype->to<IR::Type_Stack>();
     if (isLeftValue(expression->left)) {
         setLeftValue(expression);

@@ -1,3 +1,5 @@
+#include <core.p4>
+
 match_kind {
     ternary,
     exact
@@ -33,8 +35,6 @@ extern bs {
 struct Packet_data {
 }
 
-action NoAction() {
-}
 control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     action B_action(out bit<9> barg, BParamType bData) {
         barg = (bit<9>)bData;

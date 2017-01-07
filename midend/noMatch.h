@@ -1,5 +1,5 @@
 /*
-Copyright 2016 VMware, Inc.
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,39 +14,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_SIMPLIFYPARSERS_H_
-#define _FRONTENDS_P4_SIMPLIFYPARSERS_H_
+#ifndef _MIDEND_NOMATCH_H_
+#define _MIDEND_NOMATCH_H_
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/parserCallGraph.h"
 
 namespace P4 {
 
-// - remove unreachable parser states
-// - collapse simple chains of states
-class DoSimplifyParsers : public Transform {
-    ReferenceMap *refMap;
+// Convert
+// state s { transition select (e) { ... } }
+// into
+// state s { transition select (e) { ... default: noMatch; }}
+// state noMatch { verify(false, error.NoMatch); transition reject; }
+class DoHandleNoMatch : public Transform {
+    const IR::ParserState* noMatch = nullptr;
+    NameGenerator* nameGen;
  public:
-    explicit DoSimplifyParsers(ReferenceMap *refMap) : refMap(refMap) {
-        CHECK_NULL(refMap);
-        setName("DoSimplifyParsers");
-    }
-
+    explicit DoHandleNoMatch(NameGenerator* ng): nameGen(ng)
+    { CHECK_NULL(ng); setName("DoHandleNoMatch"); }
+    const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* preorder(IR::P4Parser* parser) override;
-    const IR::Node* preorder(IR::P4Control* control) override
-    { prune(); return control; }
 };
 
-class SimplifyParsers : public PassManager {
+class HandleNoMatch : public PassManager {
  public:
-    explicit SimplifyParsers(ReferenceMap* refMap) {
+    explicit HandleNoMatch(ReferenceMap* refMap) {
         passes.push_back(new ResolveReferences(refMap));
-        passes.push_back(new DoSimplifyParsers(refMap));
-        setName("SimplifyParsers");
+        passes.push_back(new DoHandleNoMatch(refMap));
+        setName("HandleNoMatch");
     }
 };
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_SIMPLIFYPARSERS_H_ */
+#endif /* _MIDEND_NOMATCH_H_ */

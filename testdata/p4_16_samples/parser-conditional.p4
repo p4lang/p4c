@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <core.p4>
+
 parser p(out bit<32> b) {
     bit<32> a = 1;
     state start {
