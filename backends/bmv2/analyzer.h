@@ -24,8 +24,6 @@ limitations under the License.
 
 namespace BMV2 {
 
-cstring nameFromAnnotation(const IR::Annotations* annotations, cstring defaultValue);
-
 // This CFG is only good for BMV2, which only cares about some Nodes in the program
 class CFG final : public IHasDbPrint {
  public:
@@ -75,9 +73,8 @@ class CFG final : public IHasDbPrint {
      public:
         const IR::P4Table* table;
         const IR::Expression*      invocation;
-        explicit TableNode(const IR::P4Table* table, const IR::Expression* invocation) :
-                Node(nameFromAnnotation(table->annotations, table->name)),
-                table(table), invocation(invocation) {}
+        explicit TableNode(const IR::P4Table* table, const IR::Expression* invocation)
+        : Node(table->externalName()), table(table), invocation(invocation) {}
     };
 
     class IfNode final : public Node {

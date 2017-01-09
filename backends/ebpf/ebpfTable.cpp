@@ -42,7 +42,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
             if (isParam) {
                 builder->append(valueName);
                 builder->append("->u.");
-                cstring name = nameFromAnnotation(action->annotations, action->name);
+                cstring name = action->externalName();
                 builder->append(name);
                 builder->append(".");
             }
@@ -62,8 +62,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
 ////////////////////////////////////////////////////////////////
 
 EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table) :
-        EBPFTableBase(program, nameFromAnnotation(table->container->annotations,
-                                                  table->container->name.name)), table(table) {
+        EBPFTableBase(program, table->container->externalName()), table(table) {
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = program->refMap->newName(base);
 
@@ -127,7 +126,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     for (auto a : *actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        cstring name = nameFromAnnotation(action->annotations, action->name);
+        cstring name = action->externalName();
         builder->emitIndent();
         builder->append(name);
         builder->append(",");
@@ -153,7 +152,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     for (auto a : *actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        cstring name = nameFromAnnotation(action->annotations, action->name);
+        cstring name = action->externalName();
         emitActionArguments(builder, action, name);
     }
 
@@ -222,7 +221,7 @@ void EBPFTable::emit(CodeBuilder* builder) {
     }
 
     builder->emitIndent();
-    cstring name = nameFromAnnotation(table->container->annotations, table->container->name.name);
+    cstring name = table->container->externalName();
     builder->target->emitTableDecl(builder, name, isHash,
                                    cstring("struct ") + keyTypeName,
                                    cstring("struct ") + valueTypeName, size);
@@ -255,7 +254,7 @@ void EBPFTable::runAction(CodeBuilder* builder, cstring valueName) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         builder->emitIndent();
-        cstring name = nameFromAnnotation(action->annotations, action->name);
+        cstring name = action->externalName();
         builder->appendFormat("case %s: ", name);
         builder->newline();
         builder->emitIndent();

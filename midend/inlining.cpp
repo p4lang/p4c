@@ -29,18 +29,6 @@ limitations under the License.
 namespace P4 {
 
 namespace {
-static cstring nameFromAnnotation(const IR::Annotations* annotations,
-                                  const IR::IDeclaration* decl) {
-    CHECK_NULL(annotations); CHECK_NULL(decl);
-    auto anno = annotations->getSingle(IR::Annotation::nameAnnotation);
-    if (anno != nullptr) {
-        BUG_CHECK(anno->expr.size() == 1, "name annotation needs single expression");
-        auto str = anno->expr[0]->to<IR::StringLiteral>();
-        CHECK_NULL(str);
-        return str->value;
-    }
-    return decl->getName();
-}
 
 class FindLocationSets : public Inspector {
     StorageMap *storageMap;
@@ -204,7 +192,7 @@ class ComputeNewNames : public Inspector {
 
     void rename(const IR::Declaration* decl) {
         BUG_CHECK(decl->is<IR::IAnnotated>(), "%1%: no annotations", decl);
-        cstring name = nameFromAnnotation(decl->to<IR::IAnnotated>()->getAnnotations(), decl);
+        cstring name = decl->externalName();
         cstring extName = prefix + "." + name;
         cstring baseName = extName.replace('.', '_');
         cstring newName = refMap->newName(baseName);
@@ -476,7 +464,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
             }
 
             // Must rename callee local objects prefixing them with their instance name.
-            cstring prefix = nameFromAnnotation(inst->annotations, inst);
+            cstring prefix = inst->externalName();
             ComputeNewNames cnn(prefix, refMap, &substs->renameMap);
             (void)callee->apply(cnn);  // populates substs.renameMap
 
@@ -820,7 +808,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
             }
 
             // Must rename callee local objects prefixing them with their instance name.
-            cstring prefix = nameFromAnnotation(inst->annotations, inst);
+            cstring prefix = inst->externalName();
             ComputeNewNames cnn(prefix, refMap, &substs->renameMap);
             (void)callee->apply(cnn);  // populates substs.renameMap
 

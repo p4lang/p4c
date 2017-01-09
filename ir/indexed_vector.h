@@ -32,8 +32,8 @@ class IDeclaration : public virtual INode {
  public:
     // name of the declared object
     virtual ID getName() const = 0;
-    // User-visible name of the object
-    virtual cstring externalName() const;
+    // User-visible name of the object, with optional replacement if no explicit @name
+    virtual cstring externalName(cstring replace = cstring()) const;
     virtual ~IDeclaration() {}
 };
 

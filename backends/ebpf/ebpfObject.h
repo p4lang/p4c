@@ -32,8 +32,6 @@ class EBPFControl;
 class EBPFTable;
 class EBPFType;
 
-cstring nameFromAnnotation(const IR::Annotations* annotations, cstring defaultValue);
-
 // Base class for EBPF objects
 class EBPFObject {
  public:

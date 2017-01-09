@@ -23,19 +23,6 @@ limitations under the License.
 
 namespace EBPF {
 
-cstring nameFromAnnotation(const IR::Annotations* annotations,
-                           cstring defaultValue) {
-    CHECK_NULL(annotations); CHECK_NULL(defaultValue);
-    auto anno = annotations->getSingle(IR::Annotation::nameAnnotation);
-    if (anno != nullptr) {
-        BUG_CHECK(anno->expr.size() == 1, "name annotation must be a string");
-        auto str = anno->expr[0]->to<IR::StringLiteral>();
-        CHECK_NULL(str);
-        return str->value;
-    }
-    return defaultValue;
-}
-
 bool EBPFProgram::build() {
     auto pack = toplevel->getMain();
     if (pack->getConstructorParameters()->size() != 2) {

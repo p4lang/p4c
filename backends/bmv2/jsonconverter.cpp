@@ -1121,8 +1121,7 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
         return true;
     }
 
-    cstring name = refMap->newName("action_profile");
-    name = nameFromAnnotation(implementation->annotations, name);
+    cstring name = implementation->externalName(refMap->newName("action_profile"));
     table->emplace("action_profile", name);
     if (!implementation->value->is<IR::ExpressionValue>()) {
         ::error("%1%: expected expression for property", implementation);
@@ -1321,7 +1320,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
     if (ctrs != nullptr) {
         result->emplace("with_counters", true);
         auto jctr = new Util::JsonObject();
-        cstring ctrname = nameFromAnnotation(ctrs->annotations, "counter");
+        cstring ctrname = ctrs->externalName("counter");
         jctr->emplace("name", ctrname);
         jctr->emplace("id", nextId("counter_arrays"));
         jctr->emplace("is_direct", true);

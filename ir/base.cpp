@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace IR {
 
-cstring IDeclaration::externalName() const {
+cstring IDeclaration::externalName(cstring replace) const {
     if (!is<IAnnotated>())
         return getName().toString();
 
@@ -34,6 +34,8 @@ cstring IDeclaration::externalName() const {
                 return str->value;
         }
     }
+    if (replace)
+        return replace;
     return getName().name;
 }
 
