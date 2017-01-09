@@ -156,7 +156,7 @@ class SimplifyParser : public PassManager {
 }  // namespace
 
 const IR::Node* DoSimplifyParsers::preorder(IR::P4Parser* parser) {
-    SimplifyParser simpl(refMap);;
+    SimplifyParser simpl(refMap);
     return parser->apply(simpl);
 }
 

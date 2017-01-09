@@ -230,7 +230,7 @@ void IR::ListExpression::dbprint(std::ostream &out) const {
 void IR::DefaultExpression::dbprint(std::ostream &out) const { out << "default"; }
 void IR::This::dbprint(std::ostream &out) const { out << "this"; }
 
-void IR::StringLiteral::dbprint(std::ostream &out) const { out << '"' << value << '"';; }
+void IR::StringLiteral::dbprint(std::ostream &out) const { out << '"' << value << '"'; }
 
 void IR::SelectExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
