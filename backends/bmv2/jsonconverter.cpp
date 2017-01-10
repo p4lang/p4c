@@ -1114,7 +1114,8 @@ Util::IJson* JsonConverter::convertIf(const CFG::IfNode* node, cstring) {
 
 bool JsonConverter::handleTableImplementation(const IR::Property* implementation,
                                               const IR::Key* key,
-                                              Util::JsonObject* table) {
+                                              Util::JsonObject* table,
+                                              Util::JsonArray* action_profiles) {
     if (implementation == nullptr) {
         table->emplace("type", "simple");
         return true;
@@ -1122,7 +1123,7 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
 
     cstring name = refMap->newName("action_profile");
     name = nameFromAnnotation(implementation->annotations, name);
-    table->emplace("act_prof_name", name);
+    table->emplace("action_profile", name);
     if (!implementation->value->is<IR::ExpressionValue>()) {
         ::error("%1%: expected expression for property", implementation);
         return false;
@@ -1139,14 +1140,33 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
         return false;
     }
 
+    auto action_profile = new Util::JsonObject();
+    action_profiles->append(action_profile);
+    action_profile->emplace("name", name);
+    action_profile->emplace("id", nextId("action_profiles"));
+
     bool isSimpleTable = true;
     auto ecc = cc->to<P4::ExternConstructorCall>();
+
+    auto add_size = [&action_profile, &ecc](size_t arg_index) {
+      auto size_expr = ecc->cce->arguments->at(arg_index);
+      int size;
+      if (!size_expr->is<IR::Constant>()) {
+        ::error("%1% must be a constant", size_expr);
+        size = 0;
+      } else {
+        size = size_expr->to<IR::Constant>()->asInt();
+      }
+      action_profile->emplace("max_size", size);
+    };
+
     if (ecc->type->name == v1model.action_selector.name) {
         BUG_CHECK(ecc->cce->arguments->size() == 3, "%1%: expected 3 arguments", cc->cce);
         isSimpleTable = false;
         auto selector = new Util::JsonObject();
         table->emplace("type", "indirect_ws");
-        table->emplace("selector", selector);
+        action_profile->emplace("selector", selector);
+        add_size(1);
         auto hash = ecc->cce->arguments->at(0);
         auto ei = P4::EnumInstance::resolve(hash, typeMap);
         if (ei == nullptr) {
@@ -1169,6 +1189,7 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
     } else if (ecc->type->name == v1model.action_profile.name) {
         isSimpleTable = false;
         table->emplace("type", "indirect");
+        add_size(0);
     } else {
         ::error("%1%: unexpected value for property", propv);
     }
@@ -1195,7 +1216,9 @@ cstring JsonConverter::convertHashAlgorithm(cstring algorithm) const {
 }
 
 Util::IJson*
-JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counters) {
+JsonConverter::convertTable(const CFG::TableNode* node,
+                            Util::JsonArray* counters,
+                            Util::JsonArray* action_profiles) {
     auto table = node->table;
     LOG1("Processing " << table);
     auto result = new Util::JsonObject();
@@ -1273,7 +1296,7 @@ JsonConverter::convertTable(const CFG::TableNode* node, Util::JsonArray* counter
     conv->simpleExpressionsOnly = false;
 
     auto impl = table->properties->getProperty(v1model.tableAttributes.tableImplementation.name);
-    bool simple = handleTableImplementation(impl, key, result);
+    bool simple = handleTableImplementation(impl, key, result, action_profiles);
 
     unsigned size = 0;
     auto sz = table->properties->getProperty(v1model.tableAttributes.size.name);
@@ -1504,11 +1527,12 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
         result->emplace("init_table", start->name);
     }
     auto tables = mkArrayField(result, "tables");
+    auto action_profiles = mkArrayField(result, "action_profiles");
     auto conditionals = mkArrayField(result, "conditionals");
 
     for (auto node : cfg->allNodes) {
         if (node->is<CFG::TableNode>()) {
-            auto j = convertTable(node->to<CFG::TableNode>(), counters);
+            auto j = convertTable(node->to<CFG::TableNode>(), counters, action_profiles);
             tables->append(j);
         } else if (node->is<CFG::IfNode>()) {
             auto j = convertIf(node->to<CFG::IfNode>(), cont->name);
