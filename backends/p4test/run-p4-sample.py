@@ -204,7 +204,7 @@ def process_file(options, argv):
     args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs,
             "--testJson"] + options.compilerOptions
 
-    if "14_samples" in options.p4filename or "v1_samples" in options.p4filename:
+    if "14_samples" in options.p4filename or "p4_14" in options.p4filename:
         args.extend(["--p4-14"]);
     args.extend(argv)
     if options.runDebugger:
