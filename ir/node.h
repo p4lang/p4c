@@ -51,7 +51,8 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint {
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     template<typename T> bool is() const;
-    template<typename T> const T* to() const;
+    template<typename T> const T *to() const;
+    template<typename T> const T &as() const;
 };
 
 class Node : public virtual INode {
@@ -96,7 +97,8 @@ class Node : public virtual INode {
     static cstring static_type_name() { return "Node"; }
     virtual int num_children() { return 0; }
     template<typename T> bool is() const { return to<T>() != nullptr; }
-    template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
+    template<typename T> const T *to() const { return dynamic_cast<const T*>(this); }
+    template<typename T> const T &as() const { return dynamic_cast<const T&>(*this); }
     explicit Node(JSONLoader &json);
     cstring toString() const override { return node_type_name(); }
     void toJSON(JSONGenerator &json) const override;
@@ -113,7 +115,8 @@ class Node : public virtual INode {
 cstring dbp(const INode* node);
 
 template<typename T> bool INode::is() const { return getNode()->is<T>(); }
-template<typename T> const T* INode::to() const { return getNode()->to<T>(); }
+template<typename T> const T *INode::to() const { return getNode()->to<T>(); }
+template<typename T> const T &INode::as() const { return getNode()->as<T>(); }
 
 inline bool equal(const Node *a, const Node *b) {
     return a == b || (a && b && *a == *b); }
