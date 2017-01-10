@@ -138,6 +138,9 @@ class JsonConverter final {
                      mpz_class& value, mpz_class& mask) const;
     void buildCfg(IR::P4Control* cont);
 
+    // Adds meta information (such as version) to the json
+    void addMetaInformation();
+
  public:
     explicit JsonConverter(const CompilerOptions& options);
     void convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, IR::ToplevelBlock *toplevel);

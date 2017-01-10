@@ -1802,6 +1802,18 @@ void JsonConverter::padScalars() {
     }
 }
 
+void JsonConverter::addMetaInformation() {
+  auto meta = new Util::JsonObject();
+
+  static constexpr int version_major = 2;
+  static constexpr int version_minor = 0;
+  auto version = mkArrayField(meta, "version");
+  version->append(version_major);
+  version->append(version_minor);
+
+  toplevel.emplace("__meta__", meta);
+}
+
 void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                             IR::ToplevelBlock* toplevelBlock) {
     this->toplevelBlock = toplevelBlock;
@@ -1837,6 +1849,7 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
         return;
     }
     toplevel.emplace("program", options.file);
+    addMetaInformation();
 
     headerTypes = mkArrayField(&toplevel, "header_types");
     headerInstances = mkArrayField(&toplevel, "headers");
