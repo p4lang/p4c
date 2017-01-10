@@ -9,6 +9,21 @@ This documents attempt to describe the expected JSON schema and the constraints
 on each attribute. There is some ongoing work to write a formal JSON schema as
 per [this specification] (http://json-schema.org/).
 
+## Current bmv2 JSON format version
+
+The version described in this document is *2.0*.
+
+The major version number will be increased by the compiler only when
+backward-compatibility of the JSON format is broken. After a major version
+number increase, consummers of the JSON file may need to be updated or they may
+not be able to consume newer JSON files.
+
+Starting with version 2.0, the version number is included in the JSON file
+itself, under the key `__meta__` -> `version`.
+
+Note that the bmv2 code currently does not perform any version check, even
+though it is recommended for all consummers of the JSON.
+
 ## General information
 
 Tentative support for signed fields (with a 2 complement representation) has
@@ -75,6 +90,13 @@ type and the `valid()` built-in (in expressions), but we are not there yet.
 
 
 The attributes of the root JSON dictionary are:
+
+### `__meta__`
+
+It is a JSON object which includes some meta information about the JSON file. It
+has the following attributes:
+- `version`: a JSON array with exactly 2 integer entries, a major version number
+and a minor version number.
 
 ### `header_types`
 
