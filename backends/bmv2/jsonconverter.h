@@ -96,7 +96,9 @@ class JsonConverter final {
     void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                            Util::JsonArray* result, Util::JsonArray* fieldLists,
                            Util::JsonArray* calculations, Util::JsonArray* learn_lists);
-    Util::IJson* convertTable(const CFG::TableNode* node, Util::JsonArray* counters);
+    Util::IJson* convertTable(const CFG::TableNode* node,
+                              Util::JsonArray* counters,
+                              Util::JsonArray* action_profiles);
     Util::IJson* convertIf(const CFG::IfNode* node, cstring parent);
     Util::JsonArray* createActions(Util::JsonArray* fieldLists, Util::JsonArray* calculations,
                                    Util::JsonArray* learn_lists);
@@ -117,7 +119,8 @@ class JsonConverter final {
     // Return 'true' if the table is 'simple'
     bool handleTableImplementation(const IR::Property* implementation,
                                    const IR::Key* key,
-                                   Util::JsonObject* table);
+                                   Util::JsonObject* table,
+                                   Util::JsonArray* action_profiles);
     void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
     // returns id of created field list
     int createFieldList(const IR::Expression* expr, cstring group,
