@@ -177,6 +177,9 @@ class StringLiteral : Literal {
     validate{ if (value.isNull()) BUG("null StringLiteral"); }
     toString{ return cstring("\"") + value + "\""; }
     StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
+#emit
+    operator IR::ID() const { return IR::ID(srcInfo, value); }
+#end
 }
 
 class PathExpression : Expression {
