@@ -216,6 +216,9 @@ class P4Objects {
 
   bool header_exists(const std::string &header_name) const;
 
+  // public to be accessed by test class
+  ActionPrimitive_ *get_primitive(const std::string &name);
+
   ConfigOptionMap get_config_options() const;
 
   // public to be accessed by test class
@@ -428,6 +431,10 @@ class P4Objects {
   std::unordered_map<p4object_id_t, p4object_id_t> header_id_to_stack_id{};
 
   ConfigOptionMap config_options{};
+
+  // maps primitive names to primitive instances
+  std::unordered_map<std::string, std::unique_ptr<ActionPrimitive_>>
+      primitives{};
 
  private:
   int get_field_offset(header_id_t header_id,

@@ -624,8 +624,7 @@ P4Objects::init_objects(std::istream *is,
     for (const auto &cfg_primitive_call : cfg_primitive_calls) {
       const string primitive_name = cfg_primitive_call["op"].asString();
 
-      ActionPrimitive_ *primitive =
-        ActionOpcodesMap::get_instance()->get_primitive(primitive_name);
+      ActionPrimitive_ *primitive = get_primitive(primitive_name);
       if (!primitive) {
         outstream << "Unknown primitive action: " << primitive_name
                   << std::endl;
@@ -1351,6 +1350,19 @@ P4Objects::process_cfg_selector(const Json::Value &cfg_selector) const {
   if (!check_hash(selector_algo)) return nullptr;
 
   return std::unique_ptr<Calculation>(new Calculation(builder, selector_algo));
+}
+
+ActionPrimitive_ *
+P4Objects::get_primitive(const std::string &name) {
+  auto it = primitives.find(name);
+  if (it == primitives.end()) {
+    auto prim = ActionOpcodesMap::get_instance()->get_primitive(name);
+    if (!prim) return nullptr;
+    prim->_set_p4objects(this);
+    primitives[name] = std::move(prim);
+    return primitives[name].get();
+  }
+  return it->second.get();
 }
 
 void

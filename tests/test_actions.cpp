@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 #include <bm/bm_sim/actions.h>
+#include <bm/bm_sim/P4Objects.h>
 
 #include <memory>
 #include <chrono>
@@ -28,6 +29,7 @@
 #include <functional>
 
 #include <cassert>
+#include <string>
 
 using namespace bm;
 
@@ -129,6 +131,12 @@ class WritePacketRegister : public ActionPrimitive<const Data &> {
 };
 
 REGISTER_PRIMITIVE(WritePacketRegister);
+
+class _nop : public ActionPrimitive<> {
+  void operator ()() {}
+};
+
+REGISTER_PRIMITIVE(_nop);
 
 // Google Test fixture for actions tests
 class ActionsTest : public ::testing::Test {
@@ -587,7 +595,7 @@ TEST_F(ActionsTest, ConcurrentPrimitiveExecution) {
   auto primitive = ActionOpcodesMap::get_instance()->get_primitive(
       "ModifyFieldWithHashBasedOffset");
 
-  testActionFn.push_back_primitive(primitive);
+  testActionFn.push_back_primitive(primitive.get());
   testActionFn.parameter_push_back_field(testHeader2, 3);  // f16
   testActionFn.parameter_push_back_const(Data(base));
   testActionFn.parameter_push_back_calculation(&calculation);
@@ -623,7 +631,7 @@ TEST_F(ActionsTest, ConcurrentRegisterPrimitiveExecution) {
 
   auto primitive = ActionOpcodesMap::get_instance()->get_primitive("Set");
 
-  testActionFn.push_back_primitive(primitive);
+  testActionFn.push_back_primitive(primitive.get());
   testActionFn.parameter_push_back_register_ref(&register_array, 12);
   testActionFn.parameter_push_back_const(Data(0xabababab));
 
@@ -640,6 +648,30 @@ TEST_F(ActionsTest, ConcurrentRegisterPrimitiveExecution) {
   std::thread t1(action_loop, iterations, std::ref(testActionFnEntry));
   std::thread t2(action_loop, iterations, std::ref(testActionFnEntry));
   t1.join(); t2.join();
+}
+
+TEST_F(ActionsTest, UniquePrimitivesForEachP4Objects) {
+  // NOLINTNEXTLINE(whitespace/line_length)
+  std::istringstream first_is("{\"actions\":[{\"name\":\"nop\",\"id\":2,\"runtime_data\":[],\"primitives\":[{\"op\":\"_nop\",\"parameters\":[]}]}]}");
+  std::stringstream first_os;
+  P4Objects first_objects(first_os);
+  LookupStructureFactory first_factory;
+  ASSERT_EQ(0, first_objects.init_objects(&first_is, &first_factory));
+
+  // NOLINTNEXTLINE(whitespace/line_length)
+  std::istringstream second_is("{\"actions\":[{\"name\":\"nop\",\"id\":2,\"runtime_data\":[],\"primitives\":[{\"op\":\"_nop\",\"parameters\":[]}]}]}");
+  std::stringstream second_os;
+  P4Objects second_objects(second_os);
+  LookupStructureFactory second_factory;
+  ASSERT_EQ(0, second_objects.init_objects(&second_is, &second_factory));
+
+  // check primitives are unique across p4objects instances
+  ASSERT_TRUE(first_objects.get_primitive(std::string("_nop"))
+              != second_objects.get_primitive(std::string("_nop")));
+
+  // check only one copy of a primitive for one p4objects instance
+  ASSERT_TRUE(first_objects.get_primitive(std::string("_nop"))
+              == first_objects.get_primitive(std::string("_nop")));
 }
 
 class RegisterSpin : public ActionPrimitive<RegisterArray &, const Data &> {

@@ -203,7 +203,7 @@ class ExternTest : public ::testing::Test {
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
   }
 
-  static ActionPrimitive_ *get_extern_primitive(
+  static std::unique_ptr<ActionPrimitive_> get_extern_primitive(
       const std::string &extern_name, const std::string &method_name) {
     return ActionOpcodesMap::get_instance()->get_primitive(
         "_" + extern_name + "_" + method_name);
@@ -230,7 +230,7 @@ TEST_F(ExternTest, ExternCounterExecute) {
   auto primitive = get_extern_primitive("ExternCounter", "increment_by");
 
   size_t increment_value = 44u;
-  testActionFn.push_back_primitive(primitive);
+  testActionFn.push_back_primitive(primitive.get());
   testActionFn.parameter_push_back_extern_instance(extern_instance.get());
   testActionFn.parameter_push_back_const(Data(increment_value));
 
@@ -261,7 +261,7 @@ TEST_F(ExternTest, ExternCounterSetAttribute) {
   auto primitive = get_extern_primitive("ExternCounter", "increment_by");
 
   size_t increment_value = 44u;
-  testActionFn.push_back_primitive(primitive);
+  testActionFn.push_back_primitive(primitive.get());
   testActionFn.parameter_push_back_extern_instance(extern_instance.get());
   testActionFn.parameter_push_back_const(Data(increment_value));
 
@@ -322,10 +322,10 @@ TEST_F(ExternTest, ExternExpression) {
 
   auto primitive_1 = get_extern_primitive("ExternExpression", "set_var2");
   auto primitive_2 = get_extern_primitive("ExternExpression", "execute");
-  testActionFn.push_back_primitive(primitive_1);
+  testActionFn.push_back_primitive(primitive_1.get());
   testActionFn.parameter_push_back_extern_instance(extern_instance.get());
   testActionFn.parameter_push_back_const(var2);
-  testActionFn.push_back_primitive(primitive_2);
+  testActionFn.push_back_primitive(primitive_2.get());
   testActionFn.parameter_push_back_extern_instance(extern_instance.get());
   testActionFn.parameter_push_back_field(testHeader1, 0);  // f32
   testActionFnEntry(pkt.get());
@@ -347,7 +347,7 @@ TEST_F(ExternTest, ExternCounterRename) {
     ASSERT_NE(nullptr, counter_instance);
 
     auto primitive = get_extern_primitive(name, "increment_by");
-    ASSERT_NE(nullptr, primitive);
+    ASSERT_NE(nullptr, primitive.get());
   };
 
   check_name("ExternCounter");

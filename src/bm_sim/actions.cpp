@@ -175,17 +175,19 @@ ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
 bool
 ActionOpcodesMap::register_primitive(
     const char *name,
-    std::unique_ptr<ActionPrimitive_> primitive) {
+    ActionPrimitiveFactoryFn fn) {
   const std::string str_name = std::string(name);
   auto it = map_.find(str_name);
   if (it != map_.end()) return false;
-  map_[str_name] = std::move(primitive);
+  map_[str_name] = std::move(fn);
   return true;
 }
 
-ActionPrimitive_ *
+std::unique_ptr<ActionPrimitive_>
 ActionOpcodesMap::get_primitive(const std::string &name) {
-  return map_[name].get();
+  auto it = map_.find(name);
+  if (it == map_.end()) return nullptr;
+  return it->second();
 }
 
 ActionOpcodesMap *

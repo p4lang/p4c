@@ -96,27 +96,28 @@ class ActionPrimitive_;
 // them in this map using the REGISTER_PRIMITIVE(primitive_name) macro.
 class ActionOpcodesMap {
  public:
+  typedef std::function<std::unique_ptr<ActionPrimitive_>()>
+      ActionPrimitiveFactoryFn;
   static ActionOpcodesMap *get_instance();
-  bool register_primitive(
-      const char *name,
-      std::unique_ptr<ActionPrimitive_> primitive);
+  bool register_primitive(const char *name, ActionPrimitiveFactoryFn primitive);
 
-  ActionPrimitive_ *get_primitive(const std::string &name);
+  std::unique_ptr<ActionPrimitive_> get_primitive(const std::string &name);
  private:
   // Maps primitive names to their implementation.
   // The same pointer is used system-wide, even if a primitive is called from
   // different actions. As such, one has to be careful if some state is
   // maintained byt the primitive functor.
-  std::unordered_map<std::string, std::unique_ptr<ActionPrimitive_> > map_{};
+  std::unordered_map<std::string, ActionPrimitiveFactoryFn> map_{};
 };
 
 //! When implementing an action primitive for a target, this macro needs to be
 //! called to make this module aware of the primitive existence.
-#define REGISTER_PRIMITIVE(primitive_name)                              \
-  bool primitive_name##_create_ =                                       \
-      bm::ActionOpcodesMap::get_instance()->register_primitive(         \
-          #primitive_name,                                              \
-          std::unique_ptr<bm::ActionPrimitive_>(new primitive_name()));
+#define REGISTER_PRIMITIVE(primitive_name)                                  \
+  bool primitive_name##_create_ =                                           \
+      bm::ActionOpcodesMap::get_instance()->register_primitive(             \
+          #primitive_name,                                                  \
+          [](){ return std::unique_ptr<::bm::ActionPrimitive_>(             \
+              new primitive_name()); })
 
 //! This macro can also be called when registering a primitive for a target, in
 //! case you want to register the primitive under a different name than its
@@ -125,7 +126,8 @@ class ActionOpcodesMap {
   bool primitive##_create_ =                                            \
       bm::ActionOpcodesMap::get_instance()->register_primitive(         \
           primitive_name,                                               \
-          std::unique_ptr<bm::ActionPrimitive_>(new primitive()));
+          [](){ return std::unique_ptr<::bm::ActionPrimitive_>(         \
+              new primitive()); })
 
 struct ActionData {
   const Data &get(int offset) const { return action_data[offset]; }
@@ -434,6 +436,10 @@ class ActionPrimitive_ {
 
   virtual size_t get_num_params() = 0;
 
+  void _set_p4objects(P4Objects *p4objects) {
+    this->p4objects = p4objects;
+  }
+
  protected:
   // This used to be regular members in ActionPrimitive, but there could be a
   // race condition. Making them thread_local solves the issue. I moved these
@@ -442,6 +448,13 @@ class ActionPrimitive_ {
   // (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60056).
   static thread_local Packet *pkt;
   static thread_local PHV *phv;
+
+  P4Objects *get_p4objects() {
+    return p4objects;
+  }
+
+ private:
+  P4Objects *p4objects{nullptr};
 };
 
 //! This acts as the base class for all target-specific action primitives. It
@@ -582,7 +595,9 @@ class ActionFnEntry {
   ActionFnEntry(const ActionFnEntry &other) = default;
   ActionFnEntry &operator=(const ActionFnEntry &other) = default;
 
+  // NOLINTNEXTLINE(whitespace/operators)
   ActionFnEntry(ActionFnEntry &&other) /*noexcept*/ = default;
+  // NOLINTNEXTLINE(whitespace/operators)
   ActionFnEntry &operator=(ActionFnEntry &&other) /*noexcept*/ = default;
 
  private:
