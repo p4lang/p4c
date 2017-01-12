@@ -1495,12 +1495,12 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
         if (c.first->direct) {
             if (c.first->table.name.isNullOrEmpty()) {
                 ::error("%1%: Direct counter with no table", c.first);
-                continue;
+                return nullptr;
             }
             auto tbl = tables.get(c.first->table.name);
             if (tbl == nullptr) {
                 ::error("Cannot locate table %1%", c.first->table.name);
-                continue;
+                return nullptr;
             }
             if (std::find(usedTables.begin(), usedTables.end(), tbl) != usedTables.end())
                 directCounters.emplace(c.first->table.name, c.first->name);
@@ -1516,12 +1516,12 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
         if (m.first->direct) {
             if (m.first->table.name.isNullOrEmpty()) {
                 ::error("%1%: Direct meter with no table", m.first);
-                continue;
+                return nullptr;
             }
             auto tbl = tables.get(m.first->table.name);
             if (tbl == nullptr) {
                 ::error("Cannot locate table %1%", m.first->table.name);
-                continue;
+                return nullptr;
             }
             if (std::find(usedTables.begin(), usedTables.end(), tbl) != usedTables.end()) {
                 auto meter = meters.get(m.second);
@@ -1565,7 +1565,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
         auto act = actions.get(a);
         if (act == nullptr) {
             ::error("Cannot locate action %1%", a);
-            continue;
+            return nullptr;
         }
         auto action = convertAction(act, actions.get(act), nullptr);
         stateful->push_back(action);
@@ -1629,6 +1629,8 @@ void ProgramStructure::createControls() {
     for (auto c : controlsToDo) {
         auto ct = controls.get(c);
         auto ctrl = convertControl(ct, controls.get(ct));
+        if (ctrl == nullptr)
+            return;
         declarations->push_back(ctrl);
     }
 
