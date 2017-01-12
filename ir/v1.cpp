@@ -71,7 +71,7 @@ static const std::map<cstring, primitive_info_t> prim_info = {
     { "drop",                   { 0, 0, 0x0, 0x0 } },
     { "emit",                   { 1, 1, 0x0, 0x0 } },
     { "execute_meter",          { 3, 4, 0x5, 0x0 } },
-    { "execute_stateful_alu",   { 1, 1, 0x0, 0x0 } },
+    { "execute_stateful_alu",   { 1, 2, 0x0, 0x0 } },
     { "execute_stateful_alu_from_hash", { 1, 2, 0x0, 0x0 } },
     { "execute_stateful_log",   { 0, 0, 0x0, 0x0 } },
     { "exit",                   { 0, 0, 0x0, 0x0 } },
