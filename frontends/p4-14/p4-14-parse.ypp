@@ -650,10 +650,6 @@ field_match_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>(); }
       { ($$=$1)->push_back(new IR::Primitive(@2+@4, $4, $2));
         $$->srcInfo += @2 + @4;
         $<Table>-2->reads_types.push_back(IR::ID(@4, $4)); }
-    | field_match_list header_ref '.' VALID ':' name ';'
-      { ($$=$1)->push_back(new IR::Primitive(@2+@4, $4, $2));
-        $$->srcInfo += @2 + @6;
-        $<Table>-2->reads_types.push_back(IR::ID(@6, $6)); }
     | field_match_list error ';' { $$ = $1; }
     | field_match_list error { $$ = $1; }
 ;
@@ -662,6 +658,10 @@ field_or_masked_ref:
       field_ref { $$ = $1; }
     | field_ref MASK const_expression
       { $$ = new IR::Mask(@2, $1, $3); }
+    | header_ref '.' VALID
+      { $$ = new IR::Primitive(@1+@3, $3, $1); }
+    | header_ref '.' VALID MASK const_expression
+      { $$ = new IR::Mask(@4, new IR::Primitive(@1+@3, $3, $1), $5); }
 ;
 
 action_list: /* epsilon */ { $$ = new IR::NameList(); }
@@ -821,6 +821,7 @@ expression:
         { $$ = new IR::Primitive(@1+@6, $1, $3, $5); }
     | field_ref { $$ = $1; }
     | header_ref
+    | header_ref '.' VALID              { $$ = new IR::Primitive(@1+@3, $3, $1); }
     | LATEST '.' name   { $$ = new IR::Member(@1+@3,
             new IR::PathExpression(IR::ID(@1, $1)), IR::ID(@3, $3)); }
     | INTEGER           { $$ = $1; }
