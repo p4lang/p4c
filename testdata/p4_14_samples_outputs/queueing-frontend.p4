@@ -57,7 +57,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("t_egress") table t_egress_0() {
         actions = {
             copy_queueing_data_0();
-            NoAction();
+            @default_only NoAction();
         }
         default_action = NoAction();
     }
@@ -77,7 +77,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_port_0();
             _drop_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.hdr1.f1: exact;

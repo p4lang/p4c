@@ -61,7 +61,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _nop;
             _recirculate;
             _clone_e2e;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.hdrA.f1                    : exact;
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _nop;
             _set_port;
             _multicast;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.hdrA.f1  : exact;
@@ -110,7 +110,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _nop;
             _resubmit;
             _clone_i2e;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.hdrA.f1                    : exact;

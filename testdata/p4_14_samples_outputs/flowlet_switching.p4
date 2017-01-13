@@ -103,7 +103,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             rewrite_mac;
             _drop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             standard_metadata.egress_port: exact;
@@ -149,7 +149,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop;
             set_ecmp_select;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.ipv4.dstAddr: lpm;
@@ -161,7 +161,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop;
             set_nhop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             meta.ingress_metadata.ecmp_offset: exact;
@@ -172,7 +172,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("flowlet") table flowlet() {
         actions = {
             lookup_flowlet_map;
-            NoAction;
+            @default_only NoAction;
         }
         default_action = NoAction();
     }
@@ -180,7 +180,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_dmac;
             _drop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             meta.ingress_metadata.nhop_ipv4: exact;
@@ -191,7 +191,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("new_flowlet") table new_flowlet() {
         actions = {
             update_flowlet_id;
-            NoAction;
+            @default_only NoAction;
         }
         default_action = NoAction();
     }

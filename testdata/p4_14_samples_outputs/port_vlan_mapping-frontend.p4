@@ -836,7 +836,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags_0();
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags_0();
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.ingress_metadata.ifindex: exact;

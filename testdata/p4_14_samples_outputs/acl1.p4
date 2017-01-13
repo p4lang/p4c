@@ -190,7 +190,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("drop_stats") table drop_stats_0() {
         actions = {
             drop_stats_update;
-            NoAction;
+            @default_only NoAction;
         }
         size = 256;
         default_action = NoAction();
@@ -204,7 +204,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_packet_with_reason;
             negative_mirror;
             congestion_mirror_set;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             meta.acl_metadata.if_label               : ternary;

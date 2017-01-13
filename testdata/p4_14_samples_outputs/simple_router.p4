@@ -66,7 +66,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             rewrite_mac;
             _drop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             standard_metadata.egress_port: exact;
@@ -95,7 +95,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_dmac;
             _drop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             meta.routing_metadata.nhop_ipv4: exact;
@@ -107,7 +107,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_nhop;
             _drop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.ipv4.dstAddr: lpm;

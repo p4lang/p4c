@@ -159,7 +159,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             set_egress_port();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.ipv4.srcAddr: exact;
@@ -170,7 +170,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             set_egress_port();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.ipv6.srcAddr: exact;
@@ -181,7 +181,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop();
             set_egress_port();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.ethernet.srcAddr: exact;

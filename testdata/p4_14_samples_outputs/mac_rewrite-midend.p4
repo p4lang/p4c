@@ -97,7 +97,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setup") table setup() {
         actions = {
             do_setup_0();
-            NoAction_0();
+            @default_only NoAction_0();
         }
         key = {
             hdr.ethernet.isValid(): exact;
@@ -133,7 +133,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             process_mac_rewrite_rewrite_ipv4_multicast_mac();
             process_mac_rewrite_rewrite_ipv6_unicast_mac();
             process_mac_rewrite_rewrite_ipv6_multicast_mac();
-            NoAction_3();
+            @default_only NoAction_3();
         }
         key = {
             meta.egress_metadata.smac_idx: exact;

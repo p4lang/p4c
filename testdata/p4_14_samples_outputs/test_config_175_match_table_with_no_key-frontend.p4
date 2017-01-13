@@ -47,21 +47,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("table_0") table table_3() {
         actions = {
             action_2();
-            NoAction();
+            @default_only NoAction();
         }
         default_action = NoAction();
     }
     @name("table_1") table table_4() {
         actions = {
             action_3();
-            NoAction();
+            @default_only NoAction();
         }
         default_action = NoAction();
     }
     @name("table_2") table table_5() {
         actions = {
             do_nothing_0();
-            NoAction();
+            @default_only NoAction();
         }
         default_action = NoAction();
     }

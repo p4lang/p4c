@@ -1,5 +1,4 @@
 #include <core.p4>
-
 #include <v1model.p4>
 
 header data_t {
@@ -38,7 +37,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1();
             noop();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.data.isValid(): ternary;

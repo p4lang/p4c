@@ -80,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             drop();
             forward();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.ipv4.dstAddr: ternary;
@@ -90,7 +90,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("setup") table setup() {
         actions = {
             do_setup();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.ethernet.isValid(): exact;

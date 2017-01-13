@@ -94,7 +94,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("drop_pkt") table drop_pkt_0() {
         actions = {
             _drop_0();
-            NoAction();
+            @default_only NoAction();
         }
         size = 1;
         default_action = NoAction();
@@ -103,7 +103,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_0();
             route_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.axon_head.isValid()     : exact;

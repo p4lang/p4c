@@ -628,7 +628,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("mark_check") table mark_check() {
         actions = {
             mark_forward;
-            NoAction;
         }
         key = {
             hdr.data.data: exact;

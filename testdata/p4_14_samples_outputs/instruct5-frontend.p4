@@ -69,7 +69,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("output") table output_2() {
         actions = {
             output_1();
-            NoAction();
         }
         default_action = output_1(9w1);
     }
@@ -79,7 +78,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             push1_0();
             push2_0();
             pop1_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.data.f1: exact;

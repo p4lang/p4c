@@ -49,7 +49,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             setb2();
             setb3();
             setb4();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.data.f1: exact;

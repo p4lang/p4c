@@ -37,7 +37,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _nop();
             _truncate();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.hdrA.f1: exact;

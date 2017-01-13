@@ -53,7 +53,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             setf1_0();
             noop_0();
-            NoAction_0();
+            @default_only NoAction_0();
         }
         key = {
             hdr.data.f2: ternary;
@@ -64,7 +64,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             setb1_0();
             noop_1();
-            NoAction_1();
+            @default_only NoAction_1();
         }
         key = {
             hdr.data.f3: ternary;
@@ -75,7 +75,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             setb2_0();
             noop_8();
-            NoAction_9();
+            @default_only NoAction_9();
         }
         key = {
             hdr.data.f3: ternary;
@@ -124,7 +124,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1_1();
             noop_9();
-            NoAction_10();
+            @default_only NoAction_10();
         }
         key = {
             hdr.data.f1: ternary;
@@ -135,7 +135,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb3_0();
             noop_10();
-            NoAction_11();
+            @default_only NoAction_11();
         }
         key = {
             hdr.data.b1: ternary;
@@ -146,7 +146,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb2_1();
             noop_11();
-            NoAction_12();
+            @default_only NoAction_12();
         }
         key = {
             hdr.data.f2: ternary;
@@ -157,7 +157,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb4_0();
             noop_12();
-            NoAction_13();
+            @default_only NoAction_13();
         }
         key = {
             hdr.data.b2: ternary;

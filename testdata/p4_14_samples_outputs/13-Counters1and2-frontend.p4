@@ -38,14 +38,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t1") table t1_0() {
         actions = {
             count_c1();
-            NoAction();
+            @default_only NoAction();
         }
         default_action = NoAction();
     }
     @name("t2") table t2_0() {
         actions = {
             count_c1_0();
-            NoAction();
+            @default_only NoAction();
         }
         default_action = NoAction();
     }

@@ -68,7 +68,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             on_miss_0();
             rewrite_src_dst_mac_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
@@ -100,7 +100,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("bd") table bd_0() {
         actions = {
             set_vrf_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.ingress_metadata.bd: exact;
@@ -112,7 +112,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             on_miss_1();
             fib_hit_nexthop_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.ingress_metadata.vrf: exact;
@@ -125,7 +125,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             on_miss_1();
             fib_hit_nexthop_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.ingress_metadata.vrf: exact;
@@ -138,7 +138,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             on_miss_1();
             set_egress_details_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.ingress_metadata.nexthop_index: exact;
@@ -149,7 +149,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("port_mapping") table port_mapping_0() {
         actions = {
             set_bd_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             standard_metadata.ingress_port: exact;

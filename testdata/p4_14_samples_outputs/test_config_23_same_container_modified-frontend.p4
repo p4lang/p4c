@@ -75,7 +75,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             action_2();
             action_3();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.ipv4.srcAddr: exact;

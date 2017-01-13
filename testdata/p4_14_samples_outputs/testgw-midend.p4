@@ -71,7 +71,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             route_eth_0();
             noop_0();
-            NoAction_0();
+            @default_only NoAction_0();
         }
         key = {
             hdr.ethernet.dst_addr: lpm;
@@ -82,7 +82,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setf2_0();
             noop_3();
-            NoAction_4();
+            @default_only NoAction_4();
         }
         key = {
             hdr.data.f1: exact;
@@ -93,7 +93,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setf1_0();
             noop_4();
-            NoAction_5();
+            @default_only NoAction_5();
         }
         key = {
             hdr.data.f2: exact;

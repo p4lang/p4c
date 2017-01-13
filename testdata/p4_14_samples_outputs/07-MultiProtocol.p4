@@ -183,7 +183,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv6_packet;
             mpls_packet;
             mim_packet;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.ethernet.etherType: exact;
@@ -194,7 +194,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             drop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.icmp.typeCode: exact;
@@ -205,7 +205,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             set_egress_port;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.ipv4.dstAddr: exact;
@@ -216,7 +216,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             set_egress_port;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.ipv6.dstAddr: exact;
@@ -227,7 +227,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             set_egress_port;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
@@ -238,7 +238,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             send_packet;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             meta.ing_metadata.drop: exact;
@@ -249,7 +249,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             drop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.tcp.dstPort: exact;
@@ -260,7 +260,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             drop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.udp.dstPort: exact;

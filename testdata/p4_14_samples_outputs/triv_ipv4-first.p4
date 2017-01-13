@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             do_drop();
             route_ipv4();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.ipv4.dstAddr: lpm;

@@ -36,7 +36,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             my_drop();
             set_egress_port();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             standard_metadata.ingress_port: exact;

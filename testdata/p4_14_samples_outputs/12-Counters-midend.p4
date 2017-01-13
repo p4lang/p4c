@@ -42,7 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t1") table t1() {
         actions = {
             count_c1();
-            NoAction_0();
+            @default_only NoAction_0();
         }
         key = {
             hdr.ethernet.dstAddr: exact;
@@ -52,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("t2") table t2() {
         actions = {
             count_c1_2();
-            NoAction_3();
+            @default_only NoAction_3();
         }
         key = {
             hdr.ethernet.srcAddr: exact;

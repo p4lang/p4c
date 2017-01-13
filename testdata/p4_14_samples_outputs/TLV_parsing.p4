@@ -153,7 +153,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             format_options_timestamp;
             format_options_both;
             _nop;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.ipv4_option_security.isValid() : exact;

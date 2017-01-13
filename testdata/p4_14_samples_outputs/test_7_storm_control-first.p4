@@ -112,7 +112,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             no_action();
             ing_meter_set();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.ingress_metadata.bd: exact;

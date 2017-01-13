@@ -142,7 +142,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             do_rewrites();
             _drop();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             standard_metadata.egress_port: exact;
@@ -153,7 +153,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("send_to_cpu") table send_to_cpu() {
         actions = {
             do_cpu_encap();
-            NoAction();
+            @default_only NoAction();
         }
         default_action = NoAction();
     }
@@ -206,7 +206,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_dmac();
             _drop();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.meta.nhop_ipv4: exact;
@@ -218,7 +218,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop();
             set_if_info();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.meta.if_index: exact;
@@ -229,7 +229,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_nhop();
             _drop();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.meta.ipv4_da: lpm;
@@ -245,7 +245,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nat_hit_int_to_ext();
             nat_hit_ext_to_int();
             nat_no_nat();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.meta.is_ext_if: exact;

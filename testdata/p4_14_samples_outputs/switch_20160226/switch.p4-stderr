@@ -31,3 +31,4 @@ action set_fabric_multicast(fabric_mgid) {
 ../testdata/p4_14_samples/switch_20160226/acl.p4(436): warning: Could not infer type for session_id, using bit<8>
 action negative_mirror(session_id) {
                        ^^^^^^^^^^
+warning: The order of headers in deparser is not uniquely determined by parser!

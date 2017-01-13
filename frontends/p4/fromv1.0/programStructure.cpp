@@ -627,13 +627,21 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
                                              new IR::PathExpression(newname));
         actVect->push_back(ale);
     }
-    auto nop = new IR::ActionListElement(Util::SourceInfo(), IR::Annotations::empty,
-                                         new IR::PathExpression(p4lib.noAction.Id()));
-    actVect->push_back(nop);
+    if (!table->default_action) {
+        actVect->push_back(
+            new IR::ActionListElement(
+                new IR::Annotations({new IR::Annotation("default_only", {})}),
+                new IR::PathExpression(p4lib.noAction.Id())));
+    } else if (!actVect->getDeclaration(table->default_action)) {
+        actVect->push_back(
+            new IR::ActionListElement(
+                new IR::Annotations({new IR::Annotation("default_only", {})}),
+                new IR::PathExpression(table->default_action))); }
     propvec->push_back(new IR::Property(Util::SourceInfo(),
-                                             IR::ID(IR::TableProperties::actionsPropertyName),
-                                             IR::Annotations::empty,
-                                             actionList, false));
+                                        IR::ID(IR::TableProperties::actionsPropertyName),
+                                        IR::Annotations::empty,
+                                        actionList, false));
+
     if (table->reads != nullptr) {
         auto keyVec = new IR::Vector<IR::KeyElement>();
         auto key = new IR::Key(Util::SourceInfo(), keyVec);

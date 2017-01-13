@@ -613,8 +613,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction_0() {
-    }
     @name("mark_forward") action mark_forward_0() {
         hdr.data.data = 8w255;
         standard_metadata.egress_spec = 9w10;
@@ -622,7 +620,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("mark_check") table mark_check() {
         actions = {
             mark_forward_0();
-            NoAction_0();
         }
         key = {
             hdr.data.data: exact;

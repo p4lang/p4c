@@ -41,7 +41,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             output_0();
             noop_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.data.f1: exact;
@@ -52,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             output_0();
             noop_0();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.data.f2: exact;

@@ -35,7 +35,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("tab1") table tab1() {
         actions = {
             act;
-            NoAction;
+            @default_only NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;

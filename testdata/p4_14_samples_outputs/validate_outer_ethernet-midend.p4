@@ -148,7 +148,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_valid_outer_broadcast_packet_single_tagged_0();
             set_valid_outer_broadcast_packet_double_tagged_0();
             set_valid_outer_broadcast_packet_qinq_tagged_0();
-            NoAction_0();
+            @default_only NoAction_0();
         }
         key = {
             hdr.ethernet.dstAddr      : ternary;

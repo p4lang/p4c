@@ -60,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop();
             _nop();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             meta.meta.meter_tag: exact;
@@ -72,7 +72,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             m_action();
             _nop();
-            NoAction();
+            @default_only NoAction();
         }
         key = {
             hdr.ethernet.srcAddr: exact;
