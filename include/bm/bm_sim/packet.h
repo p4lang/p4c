@@ -36,6 +36,7 @@
 #include <cassert>
 
 #include "packet_buffer.h"
+#include "parser_error.h"
 #include "phv_source.h"
 #include "phv.h"
 
@@ -226,6 +227,12 @@ class Packet final {
   //! Packet::INVALID_ENTRY_INDEX if lookup was a miss.
   size_t get_entry_index() const { return entry_index; }
 
+  void set_error_code(const ErrorCode &code) { error_code = code; }
+  //! Get the error code for this Packet, as set by the most recent Parser
+  //! object the packet went through. For most packets, this error code should
+  //! be set to "NoError".
+  ErrorCode get_error_code() const { return error_code; }
+
   //! Mark the packet for exit by setting an exit flag. If this is called from
   //! an action, the current pipeline will be interrupted as soon as the current
   //! table is done processing the packet. This effectively skips the rest of
@@ -357,6 +364,8 @@ class Packet final {
   // Used to store the index of the entry returned by the last match table
   // lookup; INVALID_ENTRY_INDEX if lookup was a miss.
   size_t entry_index{INVALID_ENTRY_INDEX};
+
+  ErrorCode error_code{ErrorCode::make_invalid()};
 
  private:
   static CopyIdGenerator *copy_id_gen;

@@ -48,6 +48,7 @@ options_parse.cpp \
 P4Objects.cpp \
 packet.cpp \
 parser.cpp \
+parser_error.cpp \
 pcap_file.cpp \
 pipeline.cpp \
 port_monitor.cpp \

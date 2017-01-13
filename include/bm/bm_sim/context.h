@@ -447,6 +447,10 @@ class Context final {
   //! input config JSON for this context.
   ConfigOptionMap get_config_options() const;
 
+  //! Return a copy of the error codes map (a bi-directional map between an
+  //! error code's integral value and its name / description).
+  ErrorCodeMap get_error_codes() const;
+
  private:  // data members
   size_t cxt_id{};
 

@@ -779,4 +779,10 @@ Context::get_config_options() const {
   return p4objects->get_config_options();
 }
 
+ErrorCodeMap
+Context::get_error_codes() const {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  return p4objects->get_error_codes();
+}
+
 }  // namespace bm

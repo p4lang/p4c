@@ -312,6 +312,20 @@ P4Objects::init_objects(std::istream *is,
     add_parse_vset(parse_vset_name, std::move(vset));
   }
 
+  // errors (parser errors)
+
+  const auto &cfg_errors = cfg_root["errors"];
+  for (const auto &cfg_error : cfg_errors) {
+    auto name = cfg_error[0].asString();
+    auto value = static_cast<ErrorCode::type_t>(cfg_error[1].asInt());
+    auto added = error_codes.add(name, value);
+    if (!added) {
+      outstream << "Invalid errors specification in json\n";
+      return 1;
+    }
+  }
+  error_codes.add_core();
+
   // parsers
 
   const Json::Value &cfg_parsers = cfg_root["parsers"];
@@ -319,7 +333,7 @@ P4Objects::init_objects(std::istream *is,
     const string parser_name = cfg_parser["name"].asString();
     p4object_id_t parser_id = cfg_parser["id"].asInt();
 
-    Parser *parser = new Parser(parser_name, parser_id);
+    Parser *parser = new Parser(parser_name, parser_id, &error_codes);
 
     std::unordered_map<string, ParseState *> current_parse_states;
 
@@ -388,6 +402,18 @@ P4Objects::init_objects(std::istream *is,
           } else {
             assert(0 && "parser set op not supported");
           }
+        } else if (op_type == "verify") {
+          assert(cfg_parameters.size() == 2);
+          BoolExpression expr;
+          build_expression(cfg_parameters[0], &expr);
+          expr.build();
+          auto error_code = static_cast<ErrorCode::type_t>(
+              cfg_parameters[1].asInt());
+          if (!error_codes.exists(error_code)) {
+            outstream << "Invalid error code in verify statement\n";
+            return 1;
+          }
+          parse_state->add_verify(expr, ErrorCode(error_code));
         } else {
           assert(0 && "parser op not supported");
         }
@@ -1438,6 +1464,11 @@ P4Objects::get_action_profile_rt(const std::string &name) const {
 ConfigOptionMap
 P4Objects::get_config_options() const {
   return config_options;
+}
+
+ErrorCodeMap
+P4Objects::get_error_codes() const {
+  return error_codes;
 }
 
 }  // namespace bm

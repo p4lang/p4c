@@ -154,6 +154,14 @@ class ArithExpression : public Expression {
 };
 
 
+class BoolExpression : public Expression {
+ public:
+  bool eval(const PHV &phv, const std::vector<Data> &locals = {}) const {
+    return eval_bool(phv, locals);
+  }
+};
+
+
 class VLHeaderExpression {
  public:
   explicit VLHeaderExpression(const ArithExpression &expr);

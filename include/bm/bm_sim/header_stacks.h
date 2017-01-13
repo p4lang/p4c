@@ -170,6 +170,11 @@ class HeaderStack : public NamedP4Object {
     return headers[next];
   }
 
+  //! Returns true if the header stack is full
+  bool is_full() const {
+    return (next >= headers.size());
+  }
+
   void reset() {
     next = 0;
   }

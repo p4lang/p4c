@@ -27,6 +27,7 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <string>
 #include <utility>  // for std::pair
 
 using namespace bm;
@@ -59,20 +60,36 @@ static const unsigned char raw_udp_pkt[82] = {
   0x00, 0x01                                      /* .. */
 };
 
-// Google Test fixture for parser tests
-class ParserTest : public ::testing::Test {
+class ParserTestGeneric : public ::testing::Test {
  protected:
-  PHVFactory phv_factory;
+  PHVFactory phv_factory{};
+  ErrorCodeMap error_codes;
+  Parser parser;
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
+  ParserTestGeneric()
+      : error_codes(ErrorCodeMap::make_with_core()),
+        parser("test_parser", 0, &error_codes),
+        phv_source(PHVSourceIface::make_phv_source()),
+        no_error(error_codes.from_core(ErrorCodeMap::Core::NoError)) { }
+
+  void parse_and_check_no_error(Packet *packet) {
+    parser.parse(packet);
+    ASSERT_EQ(no_error, packet->get_error_code());
+  }
+
+ private:
+  ErrorCode no_error;
+};
+
+// Google Test fixture for parser tests
+class ParserTest : public ParserTestGeneric {
+ protected:
   HeaderType ethernetHeaderType, ipv4HeaderType, udpHeaderType, tcpHeaderType;
   ParseState ethernetParseState, ipv4ParseState, udpParseState, tcpParseState;
   header_id_t ethernetHeader{0}, ipv4Header{1}, udpHeader{2}, tcpHeader{3};
 
-  Parser parser;
-
   Deparser deparser;
-
-  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   ParserTest()
       : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
@@ -81,8 +98,7 @@ class ParserTest : public ::testing::Test {
         ipv4ParseState("parse_ipv4", 1),
         udpParseState("parse_udp", 2),
         tcpParseState("parse_tcp", 3),
-        parser("test_parser", 0), deparser("test_deparser", 0),
-        phv_source(PHVSourceIface::make_phv_source()) {
+        deparser("test_deparser", 0) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
     ethernetHeaderType.push_back_field("ethertype", 16);
@@ -181,83 +197,83 @@ class ParserTest : public ::testing::Test {
 };
 
 TEST_F(ParserTest, ParseEthernetIPv4TCP) {
-  Packet packet = get_tcp_pkt();
-  PHV *phv = packet.get_phv();
-  parser.parse(&packet);
+  auto packet = get_tcp_pkt();
+  auto phv = packet.get_phv();
+  parse_and_check_no_error(&packet);
 
-  const Header &ethernet_hdr = phv->get_header(ethernetHeader);
+  const auto &ethernet_hdr = phv->get_header(ethernetHeader);
   ASSERT_TRUE(ethernet_hdr.is_valid());
 
-  const Header &ipv4_hdr = phv->get_header(ipv4Header);
+  const auto &ipv4_hdr = phv->get_header(ipv4Header);
   ASSERT_TRUE(ipv4_hdr.is_valid());
 
-  Field &ipv4_version = phv->get_field(ipv4Header, 0);
-  ASSERT_EQ((unsigned) 0x4, ipv4_version.get_uint());
+  const auto &ipv4_version = phv->get_field(ipv4Header, 0);
+  ASSERT_EQ(0x4u, ipv4_version.get_uint());
 
-  Field &ipv4_ihl = phv->get_field(ipv4Header, 1);
-  ASSERT_EQ((unsigned) 0x5, ipv4_ihl.get_uint());
+  const auto &ipv4_ihl = phv->get_field(ipv4Header, 1);
+  ASSERT_EQ(0x5u, ipv4_ihl.get_uint());
 
-  Field &ipv4_diffserv = phv->get_field(ipv4Header, 2);
-  ASSERT_EQ((unsigned) 0x00, ipv4_diffserv.get_uint());
+  const auto &ipv4_diffserv = phv->get_field(ipv4Header, 2);
+  ASSERT_EQ(0x00u, ipv4_diffserv.get_uint());
 
-  Field &ipv4_len = phv->get_field(ipv4Header, 3);
-  ASSERT_EQ((unsigned) 0x0034, ipv4_len.get_uint());
+  const auto &ipv4_len = phv->get_field(ipv4Header, 3);
+  ASSERT_EQ(0x0034u, ipv4_len.get_uint());
 
-  Field &ipv4_identification = phv->get_field(ipv4Header, 4);
-  ASSERT_EQ((unsigned) 0x7090, ipv4_identification.get_uint());
+  const auto &ipv4_identification = phv->get_field(ipv4Header, 4);
+  ASSERT_EQ(0x7090u, ipv4_identification.get_uint());
 
-  Field &ipv4_flags = phv->get_field(ipv4Header, 5);
-  ASSERT_EQ((unsigned) 0x2, ipv4_flags.get_uint());
+  const auto &ipv4_flags = phv->get_field(ipv4Header, 5);
+  ASSERT_EQ(0x2u, ipv4_flags.get_uint());
 
-  Field &ipv4_flagOffset = phv->get_field(ipv4Header, 6);
-  ASSERT_EQ((unsigned) 0x0000, ipv4_flagOffset.get_uint());
+  const auto &ipv4_flagOffset = phv->get_field(ipv4Header, 6);
+  ASSERT_EQ(0x0000u, ipv4_flagOffset.get_uint());
 
-  Field &ipv4_ttl = phv->get_field(ipv4Header, 7);
-  ASSERT_EQ((unsigned) 0x40, ipv4_ttl.get_uint());
+  const auto &ipv4_ttl = phv->get_field(ipv4Header, 7);
+  ASSERT_EQ(0x40u, ipv4_ttl.get_uint());
 
-  Field &ipv4_protocol = phv->get_field(ipv4Header, 8);
-  ASSERT_EQ((unsigned) 0x06, ipv4_protocol.get_uint());
+  const auto &ipv4_protocol = phv->get_field(ipv4Header, 8);
+  ASSERT_EQ(0x06u, ipv4_protocol.get_uint());
 
-  Field &ipv4_checksum = phv->get_field(ipv4Header, 9);
-  ASSERT_EQ((unsigned) 0x3508, ipv4_checksum.get_uint());
+  const auto &ipv4_checksum = phv->get_field(ipv4Header, 9);
+  ASSERT_EQ(0x3508u, ipv4_checksum.get_uint());
 
-  Field &ipv4_srcAddr = phv->get_field(ipv4Header, 10);
-  ASSERT_EQ((unsigned) 0x0a36c121, ipv4_srcAddr.get_uint());
+  const auto &ipv4_srcAddr = phv->get_field(ipv4Header, 10);
+  ASSERT_EQ(0x0a36c121u, ipv4_srcAddr.get_uint());
 
-  Field &ipv4_dstAddr = phv->get_field(ipv4Header, 11);
-  ASSERT_EQ((unsigned) 0x4e287bac, ipv4_dstAddr.get_uint());
+  const auto &ipv4_dstAddr = phv->get_field(ipv4Header, 11);
+  ASSERT_EQ(0x4e287bacu, ipv4_dstAddr.get_uint());
 
-  const Header &tcp_hdr = phv->get_header(tcpHeader);
+  const auto &tcp_hdr = phv->get_header(tcpHeader);
   ASSERT_TRUE(tcp_hdr.is_valid());
 
-  const Header &udp_hdr = phv->get_header(udpHeader);
+  const auto &udp_hdr = phv->get_header(udpHeader);
   ASSERT_FALSE(udp_hdr.is_valid());
 }
 
 TEST_F(ParserTest, ParseEthernetIPv4UDP) {
-  Packet packet = get_udp_pkt();
-  PHV *phv = packet.get_phv();
-  parser.parse(&packet);
+  auto packet = get_udp_pkt();
+  auto phv = packet.get_phv();
+  parse_and_check_no_error(&packet);
 
-  const Header &ethernet_hdr = phv->get_header(ethernetHeader);
+  const auto &ethernet_hdr = phv->get_header(ethernetHeader);
   ASSERT_TRUE(ethernet_hdr.is_valid());
 
-  const Header &ipv4_hdr = phv->get_header(ipv4Header);
+  const auto &ipv4_hdr = phv->get_header(ipv4Header);
   ASSERT_TRUE(ipv4_hdr.is_valid());
 
-  const Header &udp_hdr = phv->get_header(udpHeader);
+  const auto &udp_hdr = phv->get_header(udpHeader);
   ASSERT_TRUE(udp_hdr.is_valid());
 
-  const Header &tcp_hdr = phv->get_header(tcpHeader);
+  const auto &tcp_hdr = phv->get_header(tcpHeader);
   ASSERT_FALSE(tcp_hdr.is_valid());
 }
 
 
 TEST_F(ParserTest, ParseEthernetIPv4TCP_Stress) {
   for (int t = 0; t < 10000; t++) {
-    Packet packet = get_tcp_pkt();
-    PHV *phv = packet.get_phv();
-    parser.parse(&packet);
+    auto packet = get_tcp_pkt();
+    auto phv = packet.get_phv();
+    parse_and_check_no_error(&packet);
 
     ASSERT_TRUE(phv->get_header(ethernetHeader).is_valid());
     ASSERT_TRUE(phv->get_header(ipv4Header).is_valid());
@@ -267,8 +283,8 @@ TEST_F(ParserTest, ParseEthernetIPv4TCP_Stress) {
 }
 
 TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
-  Packet packet = get_tcp_pkt();
-  parser.parse(&packet);
+  auto packet = get_tcp_pkt();
+  parse_and_check_no_error(&packet);
 
   deparser.deparse(&packet);
 
@@ -277,8 +293,8 @@ TEST_F(ParserTest, DeparseEthernetIPv4TCP) {
 }
 
 TEST_F(ParserTest, DeparseEthernetIPv4UDP) {
-  Packet packet = get_udp_pkt();
-  parser.parse(&packet);
+  auto packet = get_udp_pkt();
+  parse_and_check_no_error(&packet);
 
   deparser.deparse(&packet);
 
@@ -290,7 +306,7 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
   const char *ref_pkt;
   size_t size;
 
-  Packet packet = Packet::make_new(phv_source.get());
+  auto packet = Packet::make_new(phv_source.get());
   for (int t = 0; t < 10000; t++) {
     if (t % 2 == 0) {
       packet = get_tcp_pkt();
@@ -301,7 +317,7 @@ TEST_F(ParserTest, DeparseEthernetIPv4_Stress) {
       ref_pkt = (const char *) raw_udp_pkt;
       size = sizeof(raw_udp_pkt);
     }
-    parser.parse(&packet);
+    parse_and_check_no_error(&packet);
     deparser.deparse(&packet);
     ASSERT_EQ(0, memcmp(ref_pkt, packet.data(), size));
   }
@@ -404,23 +420,20 @@ TEST_F(ParserOpSetTest, SetFromLookahead) {
   const unsigned char data_[6] = {0xb5, 0x9d, 0xfd, 0x17, 0xd5, 0xd7};
   const char *data = reinterpret_cast<const char *>(data_);
 
-  ParserLookAhead lookahead1(0, 32);
-  const ParserOpSet<ParserLookAhead> op1(testHeader1, 1, lookahead1);  // f32
-  const ParserOp &op1Ref = op1;
-  Packet pkt1 = get_pkt();
-  Field &f1 = pkt1.get_phv()->get_field(testHeader1, 1);
-  ASSERT_EQ(0u, f1.get_uint());
-  op1Ref(&pkt1, (const char *) data, nullptr);
-  ASSERT_EQ(0xb59dfd17, f1.get_uint());
+  auto test = [data, this](int offset, int bitwidth, unsigned int v) {
+    ParserLookAhead lookahead(offset, bitwidth);
+    const ParserOpSet<ParserLookAhead> op(testHeader1, 1, lookahead);  // f32
+    const ParserOp &opRef = op;
+    auto pkt = get_pkt();
+    auto &f = pkt.get_phv()->get_field(testHeader1, 1);
+    f.set(0);
+    size_t bytes_parsed = 0;
+    opRef(&pkt, reinterpret_cast<const char *>(data), &bytes_parsed);
+    ASSERT_EQ(v, f.get_uint());
+  };
 
-  ParserLookAhead lookahead2(8, 8);
-  const ParserOpSet<ParserLookAhead> op2(testHeader1, 1, lookahead2);  // f32
-  const ParserOp &op2Ref = op2;
-  Packet pkt2 = get_pkt();
-  Field &f2 = pkt2.get_phv()->get_field(testHeader1, 1);
-  ASSERT_EQ(0u, f2.get_uint());
-  op2Ref(&pkt2, (const char *) data, nullptr);
-  ASSERT_EQ(0x9d, f2.get_uint());
+  test(0, 32, 0xb59dfd17);
+  test(8, 8, 0x9d);
 }
 
 TEST_F(ParserOpSetTest, SetFromExpression) {
@@ -537,10 +550,8 @@ static const unsigned char raw_mpls_pkt[93] = {
 
 // Google Test fixture for special MPLS test
 // This test complements the ParserTest by using header stacks
-class MPLSParserTest : public ::testing::Test {
+class MPLSParserTest : public ParserTestGeneric {
  protected:
-  PHVFactory phv_factory;
-
   HeaderType ethernetHeaderType, MPLSHeaderType;
   ParseState ethernetParseState, MPLSParseState;
   header_id_t ethernetHeader{0};
@@ -548,18 +559,13 @@ class MPLSParserTest : public ::testing::Test {
 
   header_stack_id_t MPLSStack{0};
 
-  Parser parser;
-
   Deparser deparser;
-
-  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   MPLSParserTest()
       : ethernetHeaderType("ethernet_t", 0), MPLSHeaderType("mpls_t", 1),
         ethernetParseState("parse_ethernet", 0),
         MPLSParseState("parse_mpls", 1),
-        parser("test_parser", 0), deparser("test_deparser", 0),
-        phv_source(PHVSourceIface::make_phv_source()) {
+        deparser("test_deparser", 0) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
     ethernetHeaderType.push_back_field("ethertype", 16);
@@ -627,20 +633,20 @@ class MPLSParserTest : public ::testing::Test {
 };
 
 TEST_F(MPLSParserTest, ParseEthernetMPLS3) {
-  Packet packet = get_mpls_pkt();
-  PHV *phv = packet.get_phv();
-  parser.parse(&packet);
+  auto packet = get_mpls_pkt();
+  auto phv = packet.get_phv();
+  parse_and_check_no_error(&packet);
 
-  const Header &ethernet_hdr = phv->get_header(ethernetHeader);
+  const auto &ethernet_hdr = phv->get_header(ethernetHeader);
   ASSERT_TRUE(ethernet_hdr.is_valid());
 
-  const Header &MPLS_hdr_1 = phv->get_header(MPLSHeader1);
+  const auto &MPLS_hdr_1 = phv->get_header(MPLSHeader1);
   ASSERT_TRUE(MPLS_hdr_1.is_valid());
-  const Header &MPLS_hdr_2 = phv->get_header(MPLSHeader2);
+  const auto &MPLS_hdr_2 = phv->get_header(MPLSHeader2);
   ASSERT_TRUE(MPLS_hdr_2.is_valid());
-  const Header &MPLS_hdr_3 = phv->get_header(MPLSHeader3);
+  const auto &MPLS_hdr_3 = phv->get_header(MPLSHeader3);
   ASSERT_TRUE(MPLS_hdr_3.is_valid());
-  const Header &MPLS_hdr_4 = phv->get_header(MPLSHeader4);
+  const auto &MPLS_hdr_4 = phv->get_header(MPLSHeader4);
   ASSERT_FALSE(MPLS_hdr_4.is_valid());
 
   ASSERT_EQ(1u, MPLS_hdr_1.get_field(0).get_uint());  // label
@@ -745,10 +751,8 @@ TEST_F(SwitchCaseTest, Mask) {
 // Google Test fixture for IPv4 TLV parsing test
 // This test is targetted a TLV parsing but covers many aspects of the parser
 // (e.g. header stacks)
-class IPv4TLVParsingTest : public ::testing::Test {
+class IPv4TLVParsingTest : public ParserTestGeneric {
  protected:
-  PHVFactory phv_factory;
-
   HeaderType ethernetHeaderType, ipv4HeaderType;
   HeaderType ipv4OptionAHeaderType, ipv4OptionBHeaderType;
   HeaderType ipv4PaddingHeaderType;
@@ -763,10 +767,6 @@ class IPv4TLVParsingTest : public ::testing::Test {
   header_id_t pMeta{8};
   header_stack_id_t ipv4PaddingStack{0};
 
-  Parser parser;
-
-  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
-
   IPv4TLVParsingTest()
       : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
         ipv4OptionAHeaderType("ipv4_optionA_t", 2),
@@ -778,9 +778,7 @@ class IPv4TLVParsingTest : public ::testing::Test {
         ipv4OptionsParseState("parse_ipv4_options", 2),
         ipv4OptionAParseState("parse_ipv4_optionA", 3),
         ipv4OptionBParseState("parse_ipv4_optionB", 4),
-        ipv4PaddingParseState("parse_ipv4_padding", 5),
-        parser("test_parser", 0),
-        phv_source(PHVSourceIface::make_phv_source()) {
+        ipv4PaddingParseState("parse_ipv4_padding", 5) {
     pMetaType.push_back_field("byte_counter", 8);
 
     ethernetHeaderType.push_back_field("dstAddr", 48);
@@ -969,15 +967,15 @@ class IPv4TLVParsingTest : public ::testing::Test {
   }
 
   void check_base(const PHV &phv) {
-    const Header &ethernet_hdr = phv.get_header(ethernetHeader);
+    const auto &ethernet_hdr = phv.get_header(ethernetHeader);
     ASSERT_TRUE(ethernet_hdr.is_valid());
-    const Header &ipv4_hdr = phv.get_header(ipv4Header);
+    const auto &ipv4_hdr = phv.get_header(ipv4Header);
     ASSERT_TRUE(ipv4_hdr.is_valid());
   }
 
   void check_optionA(const PHV &phv,
                      const ByteContainer &f1, const ByteContainer &f2) {
-    const Header &ipv4OptionA_hdr = phv.get_header(ipv4OptionAHeader);
+    const auto &ipv4OptionA_hdr = phv.get_header(ipv4OptionAHeader);
     ASSERT_TRUE(ipv4OptionA_hdr.is_valid());
     ASSERT_EQ(0xaa, ipv4OptionA_hdr.get_field(0).get_int());
     ASSERT_EQ(0x07, ipv4OptionA_hdr.get_field(1).get_int());
@@ -986,23 +984,22 @@ class IPv4TLVParsingTest : public ::testing::Test {
   }
 
   void check_no_optionA(const PHV &phv) {
-    const Header &ipv4OptionA_hdr = phv.get_header(ipv4OptionAHeader);
+    const auto &ipv4OptionA_hdr = phv.get_header(ipv4OptionAHeader);
     ASSERT_FALSE(ipv4OptionA_hdr.is_valid());
   }
 
   void check_optionB(const PHV &phv) {
-    const Header &ipv4OptionB_hdr = phv.get_header(ipv4OptionBHeader);
+    const auto &ipv4OptionB_hdr = phv.get_header(ipv4OptionBHeader);
     ASSERT_TRUE(ipv4OptionB_hdr.is_valid());
   }
 
   void check_no_optionB(const PHV &phv) {
-    const Header &ipv4OptionB_hdr = phv.get_header(ipv4OptionBHeader);
+    const auto &ipv4OptionB_hdr = phv.get_header(ipv4OptionBHeader);
     ASSERT_FALSE(ipv4OptionB_hdr.is_valid());
   }
 
   void check_padding(const PHV &phv, size_t expected_count) {
-    const HeaderStack &ipv4Padding_stack =
-      phv.get_header_stack(ipv4PaddingStack);
+    const auto &ipv4Padding_stack = phv.get_header_stack(ipv4PaddingStack);
     ASSERT_EQ(expected_count, ipv4Padding_stack.get_count());
   }
 
@@ -1022,10 +1019,10 @@ class IPv4TLVParsingTest : public ::testing::Test {
 
 TEST_F(IPv4TLVParsingTest, NoOption) {
   ByteContainer buf = get_ipv4_base();
-  Packet packet = get_pkt(buf);
-  const PHV &phv = *packet.get_phv();
+  auto packet = get_pkt(buf);
+  const auto &phv = *packet.get_phv();
 
-  parser.parse(&packet);
+  parse_and_check_no_error(&packet);
 
   check_base(phv);
   check_no_optionA(phv);
@@ -1039,10 +1036,10 @@ TEST_F(IPv4TLVParsingTest, OptionA) {
   const ByteContainer f2("0x000000a2");
   add_optionA(&buf, f1, f2);
   do_padding(&buf);
-  Packet packet = get_pkt(buf);
-  const PHV &phv = *packet.get_phv();
+  auto packet = get_pkt(buf);
+  const auto &phv = *packet.get_phv();
 
-  parser.parse(&packet);
+  parse_and_check_no_error(&packet);
 
   check_base(phv);
   check_optionA(phv, f1, f2);
@@ -1054,10 +1051,10 @@ TEST_F(IPv4TLVParsingTest, OptionB) {
   ByteContainer buf = get_ipv4_base();
   add_optionB(&buf);
   do_padding(&buf);
-  Packet packet = get_pkt(buf);
-  const PHV &phv = *packet.get_phv();
+  auto packet = get_pkt(buf);
+  const auto &phv = *packet.get_phv();
 
-  parser.parse(&packet);
+  parse_and_check_no_error(&packet);
 
   check_base(phv);
   check_no_optionA(phv);
@@ -1083,10 +1080,10 @@ TEST_F(IPv4TLVParsingTest, BothOptions) {
     }
 
     do_padding(&buf);
-    Packet packet = get_pkt(buf);
-    const PHV &phv = *packet.get_phv();
+    auto packet = get_pkt(buf);
+    const auto &phv = *packet.get_phv();
 
-    parser.parse(&packet);
+    parse_and_check_no_error(&packet);
 
     check_base(phv);
     check_optionA(phv, f1, f2);
@@ -1098,26 +1095,19 @@ TEST_F(IPv4TLVParsingTest, BothOptions) {
 
 // Google Test fixture for IPv4 Variable Length parsing test
 // This test parses the options as one VL field
-class IPv4VLParsingTest : public ::testing::Test {
+class IPv4VLParsingTest : public ParserTestGeneric {
  protected:
-  PHVFactory phv_factory;
-
   HeaderType ethernetHeaderType, ipv4HeaderType;
   ParseState ethernetParseState, ipv4ParseState;
   header_id_t ethernetHeader{0}, ipv4Header{1};
 
-  Parser parser;
-
   Deparser deparser;
-
-  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   IPv4VLParsingTest()
       : ethernetHeaderType("ethernet_t", 0), ipv4HeaderType("ipv4_t", 1),
         ethernetParseState("parse_ethernet", 0),
         ipv4ParseState("parse_ipv4", 1),
-        parser("test_parser", 0), deparser("test_deparser", 0),
-        phv_source(PHVSourceIface::make_phv_source()) {
+        deparser("test_deparser", 0) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);
     ethernetHeaderType.push_back_field("ethertype", 16);
@@ -1201,9 +1191,9 @@ class IPv4VLParsingTest : public ::testing::Test {
   }
 
   void check_base(const PHV &phv, size_t option_words) {
-    const Header &ethernet_hdr = phv.get_header(ethernetHeader);
+    const auto &ethernet_hdr = phv.get_header(ethernetHeader);
     ASSERT_TRUE(ethernet_hdr.is_valid());
-    const Header &ipv4_hdr = phv.get_header(ipv4Header);
+    const auto &ipv4_hdr = phv.get_header(ipv4Header);
     ASSERT_TRUE(ipv4_hdr.is_valid());
     ASSERT_TRUE(ipv4_hdr.is_VL_header());
     ASSERT_EQ(20 + option_words * 4, ipv4_hdr.get_nbytes_packet());
@@ -1212,7 +1202,7 @@ class IPv4VLParsingTest : public ::testing::Test {
   void check_option(const PHV &phv, size_t option_words,
                     const ByteContainer &v) {
     assert(v.size() == option_words * 4);
-    const Field &f_options = phv.get_field(ipv4Header, 12);
+    const auto &f_options = phv.get_field(ipv4Header, 12);
     ASSERT_EQ(option_words * 4 * 8, f_options.get_nbits());
     ASSERT_EQ(option_words * 4, f_options.get_nbytes());
     ASSERT_EQ(v, f_options.get_bytes());
@@ -1221,10 +1211,10 @@ class IPv4VLParsingTest : public ::testing::Test {
   template<size_t OptionWords>
   void test() {
     const ByteContainer buf = get_ipv4_bytes(OptionWords);
-    Packet packet = get_pkt(buf);
-    const PHV &phv = *packet.get_phv();
+    auto packet = get_pkt(buf);
+    const auto &phv = *packet.get_phv();
 
-    parser.parse(&packet);
+    parse_and_check_no_error(&packet);
 
     check_base(phv, OptionWords);
     ByteContainer expected_value = option_value(OptionWords);
@@ -1250,10 +1240,10 @@ TEST_F(IPv4VLParsingTest, Deparser) {
   const size_t option_words = 4;
   const ByteContainer buf = get_ipv4_bytes(option_words);
   const ByteContainer buf_save = buf;
-  Packet packet = get_pkt(buf);
-  const PHV &phv = *packet.get_phv();
+  auto packet = get_pkt(buf);
+  const auto &phv = *packet.get_phv();
 
-  parser.parse(&packet);
+  parse_and_check_no_error(&packet);
 
   check_base(phv, option_words);
   ByteContainer expected_value = option_value(option_words);
@@ -1274,14 +1264,11 @@ class ParseVSetTest : public ::testing::Test {
   ParseState parseState;
   header_id_t header_id{0};
 
-  Parser parser;
-
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
 
   ParseVSetTest()
       : headerType("header_t", 0),
         parseState("parse_header", 0),
-        parser("test_parser", 0),
         phv_source(PHVSourceIface::make_phv_source()) {
     headerType.push_back_field("f16", 16);
     headerType.push_back_field("f32", 32);
@@ -1294,8 +1281,6 @@ class ParseVSetTest : public ::testing::Test {
 
   virtual void SetUp() {
     phv_source->set_phv_factory(0, &phv_factory);
-
-    parser.set_init_state(&parseState);
   }
 
   void set_parse_kb(const std::vector<std::pair<int, int> > &fields) {
@@ -1521,4 +1506,189 @@ TEST_F(ParseVSetTest, ConcurrentRuntimeAccess) {
       consistency_results.begin(), consistency_results.end(), false);
   EXPECT_LT(0, consistency_results.size());
   ASSERT_EQ(0, count);
+}
+
+
+class ParserErrorTest : public ::testing::Test {
+ protected:
+  PHVFactory phv_factory{};
+  ErrorCodeMap error_codes;
+  Parser parser;
+  ParseState parse_state;
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  ParserErrorTest(ErrorCodeMap error_codes)
+      : error_codes(std::move(error_codes)),
+        parser("test_parser", 0, &this->error_codes),
+        parse_state("test_parse_state", 0),
+        phv_source(PHVSourceIface::make_phv_source()),
+        no_error(this->error_codes.from_core(ErrorCodeMap::Core::NoError)) { }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+
+    parser.set_init_state(&parse_state);
+  }
+
+  // virtual void TearDown() { }
+
+  void parse_and_check_no_error(Packet *packet) {
+    parser.parse(packet);
+    ASSERT_EQ(no_error, packet->get_error_code());
+  }
+
+  void parse_and_check_error(Packet *packet, ErrorCodeMap::Core core) {
+    parser.parse(packet);
+    ASSERT_EQ(error_codes.from_core(core), packet->get_error_code());
+  }
+
+  void parse_and_check_error(Packet *packet, const std::string &name) {
+    parser.parse(packet);
+    ASSERT_EQ(error_codes.from_name(name), packet->get_error_code());
+  }
+
+  Packet get_pkt(int length) {
+    std::vector<char> data(length, 0);
+    PacketBuffer buffer(length * 2, data.data(), data.size());
+    return Packet::make_new(length, std::move(buffer), phv_source.get());
+  }
+
+ private:
+  ErrorCode no_error;
+};
+
+class ParserCoreErrorsTest : public ParserErrorTest {
+ protected:
+  static constexpr int packet_nbytes = 2;
+
+  ParserCoreErrorsTest()
+      : ParserErrorTest(ErrorCodeMap::make_with_core()) { }
+};
+
+class ParserPacketTooShortTest : public ParserCoreErrorsTest {
+ protected:
+  HeaderType testHeaderType;
+  header_id_t testHeader{0};
+
+  // needs to be larger than the number of available packet bytes
+  static constexpr int header_nbits = (packet_nbytes + 1) * 8;
+
+  ParserPacketTooShortTest()
+      : testHeaderType("test_header_t", 0) {
+    testHeaderType.push_back_field("f", (packet_nbytes + 1) * 8);
+    phv_factory.push_back_header("test_header", testHeader, testHeaderType);
+  }
+};
+
+TEST_F(ParserPacketTooShortTest, Extract) {
+  auto packet = get_pkt(packet_nbytes);
+  parse_state.add_extract(testHeader);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::PacketTooShort);
+}
+
+TEST_F(ParserPacketTooShortTest, LookAhead) {
+  auto packet = get_pkt(packet_nbytes);
+  parse_state.add_set_from_lookahead(testHeader, 0, 0, header_nbits);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::PacketTooShort);
+}
+
+TEST_F(ParserCoreErrorsTest, StackOutOfBounds) {
+  HeaderType testHeaderType("test_header_t", 0);
+  testHeaderType.push_back_field("f", 8);
+  // for this test, a header stack with a single element is sufficient
+  header_id_t testHeaderStack1(0);
+  header_stack_id_t testHeaderStack(0);
+  phv_factory.push_back_header("test_stack_1", testHeaderStack1,
+                               testHeaderType);
+  phv_factory.push_back_header_stack("test_stack", testHeaderStack,
+                                     testHeaderType, {testHeaderStack1});
+
+  auto packet = get_pkt(packet_nbytes);
+  // 2 extracts to ensure we overflow
+  parse_state.add_extract_to_stack(testHeaderStack);
+  parse_state.add_extract_to_stack(testHeaderStack);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::StackOutOfBounds);
+}
+
+TEST_F(ParserCoreErrorsTest, OverwritingHeader) {
+  HeaderType testHeaderType("test_header_t", 0);
+  testHeaderType.push_back_field("f", 8);
+  header_id_t testHeader(0);
+  phv_factory.push_back_header("test_header", testHeader, testHeaderType);
+
+  auto packet = get_pkt(packet_nbytes);
+  // extract twice, try to overwrite
+  parse_state.add_extract(testHeader);
+  parse_state.add_extract(testHeader);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::OverwritingHeader);
+}
+
+namespace {
+
+template <typename It>
+ErrorCodeMap make_error_codes(It first, It last) {
+  ErrorCodeMap error_codes;
+  ErrorCode::type_t v(0);
+  for (auto it = first; it < last; ++it) error_codes.add(*it, v++);
+  error_codes.add_core();
+  return error_codes;
+}
+
+}  // namespace
+
+// test verify statements in parser, with arch-specific (not core) errors
+class ParserVerifyTest : public ParserErrorTest {
+ protected:
+  static constexpr const char *errors[] = {"error1", "error2"};
+  static constexpr size_t errors_size = sizeof(errors) / sizeof(errors[0]);
+  static constexpr const char *verify_error = "error2";
+
+  ParserVerifyTest()
+      : ParserErrorTest(
+            make_error_codes(&errors[0], &errors[errors_size])) { }
+
+  BoolExpression build_simple_condition(bool value) {
+    BoolExpression condition;
+    condition.push_back_load_bool(value);
+    condition.build();
+    return condition;
+  }
+
+  void verify_test(bool with_error) {
+    bool value = !with_error;
+    auto condition = build_simple_condition(value);
+    static constexpr int arbitrary_packet_length = 64;
+    auto packet = get_pkt(arbitrary_packet_length);
+    const auto &phv = *packet.get_phv();
+    ASSERT_EQ(value, condition.eval(phv));
+
+    parse_state.add_verify(condition, error_codes.from_name(verify_error));
+    if (with_error)
+      parse_and_check_error(&packet, verify_error);
+    else
+      parse_and_check_no_error(&packet);
+  }
+};
+
+constexpr const char *ParserVerifyTest::errors[];
+constexpr size_t ParserVerifyTest::errors_size;
+constexpr const char *ParserVerifyTest::verify_error;
+
+TEST_F(ParserVerifyTest, Basic) {
+  for (size_t i = 0; i < errors_size; i++) {
+    const std::string name(errors[i]);
+    ASSERT_TRUE(error_codes.exists(name));
+    auto code = error_codes.from_name(name);
+    ASSERT_EQ(static_cast<ErrorCode::type_t>(i), code.get());
+    ASSERT_EQ(name, error_codes.to_name(code));
+    ASSERT_TRUE(error_codes.exists(code.get()));
+  }
+}
+
+TEST_F(ParserVerifyTest, Noop) {
+  verify_test(false);
+}
+
+TEST_F(ParserVerifyTest, Error) {
+  verify_test(true);
 }

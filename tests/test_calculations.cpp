@@ -39,6 +39,7 @@ class CalculationTest : public ::testing::Test {
   header_id_t testHeader1{0}, testHeader2{1}, testHeader3{2};
 
   ParseState oneParseState;
+  ErrorCodeMap error_codes;
   Parser parser;
 
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
@@ -53,7 +54,8 @@ class CalculationTest : public ::testing::Test {
       : testHeaderType("test_t", 0),
         testHeaderType2("test2_t", 1),
         oneParseState("parse_state", 0),
-        parser("test_parser", 0),
+        error_codes(ErrorCodeMap::make_with_core()),
+        parser("test_parser", 0, &error_codes),
         phv_source(PHVSourceIface::make_phv_source()) {
     testHeaderType.push_back_field("f16", 16);
     testHeaderType.push_back_field("f48", 48);

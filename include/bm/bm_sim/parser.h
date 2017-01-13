@@ -37,6 +37,7 @@
 #include "logger.h"
 #include "expressions.h"
 #include "stateful.h"
+#include "parser_error.h"
 
 namespace bm {
 
@@ -67,55 +68,14 @@ struct ParserOp {
                           size_t *bytes_parsed) const = 0;
 };
 
-struct ParserOpExtract : ParserOp {
-  header_id_t header;
-
-  explicit ParserOpExtract(header_id_t header)
-    : header(header) {}
-
-  void operator()(Packet *pkt, const char *data,
-                  size_t *bytes_parsed) const override {
-    PHV *phv = pkt->get_phv();
-    Header &hdr = phv->get_header(header);
-    BMELOG(parser_extract, *pkt, header);
-    BMLOG_DEBUG_PKT(*pkt, "Extracting header '{}'", hdr.get_name());
-    hdr.extract(data, *phv);
-    *bytes_parsed += hdr.get_nbytes_packet();
-  }
-};
-
-// push back a header on a tag stack
-// TODO(antonin): probably room for improvement here
-struct ParserOpExtractStack : ParserOp {
-  header_stack_id_t header_stack;
-
-  explicit ParserOpExtractStack(header_stack_id_t header_stack)
-    : header_stack(header_stack) {}
-
-  void operator()(Packet *pkt, const char *data,
-                  size_t *bytes_parsed) const override {
-    PHV *phv = pkt->get_phv();
-    HeaderStack &stack = phv->get_header_stack(header_stack);
-    Header &next_hdr = stack.get_next();  // TODO(antonin): will assert if full
-    BMELOG(parser_extract, *pkt, next_hdr.get_id());
-    BMLOG_DEBUG_PKT(*pkt, "Extracting to header stack {}, next header is {}",
-                    header_stack, next_hdr.get_id());
-    next_hdr.extract(data, *phv);
-    *bytes_parsed += next_hdr.get_nbytes_packet();
-    // should I have a HeaderStack::extract() method instead?
-    stack.push_back();
-  }
-};
-
+// need to be in the header because of unit tests
 template <typename T>
 struct ParserOpSet : ParserOp {
   field_t dst;
   T src;
 
   ParserOpSet(header_id_t header, int offset, const T &src)
-    : dst({header, offset}), src(src) {
-    // dst = {header, offset};
-  }
+      : dst({header, offset}), src(src) { }
 
   void operator()(Packet *pkt, const char *data,
                   size_t *bytes_parsed) const override;
@@ -230,10 +190,10 @@ class ParseVSetIface {
 // future.
 class ParseVSet : public NamedP4Object, public ParseVSetIface {
   template <typename P> friend class ParseSwitchCaseVSet;
-  typedef std::unique_lock<std::mutex> Lock;
+  using Lock = std::unique_lock<std::mutex>;
 
  public:
-  typedef ParseVSetIface::ErrorCode ErrorCode;
+  using ErrorCode = ParseVSetIface::ErrorCode;
 
   ParseVSet(const std::string &name, p4object_id_t id,
             size_t compressed_bitwidth);
@@ -305,6 +265,8 @@ class ParseState : public NamedP4Object {
   void add_set_from_expression(header_id_t dst_header, int dst_offset,
                                const ArithExpression &expr);
 
+  void add_verify(const BoolExpression &condition, const ErrorCode &error);
+
   void set_key_builder(const ParseSwitchKeyBuilder &builder);
 
   void add_switch_case(const ByteContainer &key, const ParseState *next_state);
@@ -356,12 +318,10 @@ class ParseState : public NamedP4Object {
 //! Implements a P4 parser.
 class Parser : public NamedP4Object {
  public:
-  Parser(const std::string &name, p4object_id_t id)
-    : NamedP4Object(name, id), init_state(nullptr) { }
+  Parser(const std::string &name, p4object_id_t id,
+         const ErrorCodeMap *error_codes);
 
-  void set_init_state(const ParseState *state) {
-    init_state = state;
-  }
+  void set_init_state(const ParseState *state);
 
   //! Extracts Packet headers as specified by the parse graph. When the parser
   //! extracts a header to the PHV, the header is marked as valid. After parsing
@@ -382,6 +342,8 @@ class Parser : public NamedP4Object {
 
  private:
   const ParseState *init_state;
+  const ErrorCodeMap *error_codes;
+  const ErrorCode no_error;
 };
 
 }  // namespace bm

@@ -50,6 +50,7 @@ bm/bm_sim/packet.h \
 bm/bm_sim/packet_buffer.h \
 bm/bm_sim/packet_handler.h \
 bm/bm_sim/parser.h \
+bm/bm_sim/parser_error.h \
 bm/bm_sim/pcap_file.h \
 bm/bm_sim/phv.h \
 bm/bm_sim/phv_forward.h \

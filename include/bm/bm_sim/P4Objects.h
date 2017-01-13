@@ -221,6 +221,8 @@ class P4Objects {
 
   ConfigOptionMap get_config_options() const;
 
+  ErrorCodeMap get_error_codes() const;
+
   // public to be accessed by test class
   std::ostream &outstream;
 
@@ -393,6 +395,8 @@ class P4Objects {
 
   // parse vsets
   std::unordered_map<std::string, std::unique_ptr<ParseVSet> > parse_vsets{};
+
+  ErrorCodeMap error_codes;
 
   // checksums
   std::vector<std::unique_ptr<Checksum> > checksums{};

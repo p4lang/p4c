@@ -50,6 +50,7 @@ class ChecksumTest : public ::testing::Test {
   header_id_t ethernetHeader{0}, ipv4Header{1}, udpHeader{2}, tcpHeader{3};
   header_id_t metaHeader{4};
 
+  ErrorCodeMap error_codes;
   Parser parser;
 
   std::unique_ptr<NamedCalculation> tcp_cksum_engine_calc{nullptr};
@@ -65,7 +66,8 @@ class ChecksumTest : public ::testing::Test {
         ipv4ParseState("parse_ipv4", 1),
         udpParseState("parse_udp", 2),
         tcpParseState("parse_tcp", 3),
-        parser("test_parser", 0),
+        error_codes(ErrorCodeMap::make_with_core()),
+        parser("test_parser", 0, &error_codes),
         phv_source(PHVSourceIface::make_phv_source()) {
     ethernetHeaderType.push_back_field("dstAddr", 48);
     ethernetHeaderType.push_back_field("srcAddr", 48);

@@ -280,6 +280,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return contexts.at(cxt_id).get_config_options();
   }
 
+  //! Return a copy of the error codes map (a bi-directional map between an
+  //! error code's integral value and its name / description) for a given
+  //! context.
+  ErrorCodeMap get_error_codes(size_t cxt_id) const {
+    return contexts.at(cxt_id).get_error_codes();
+  }
+
   // ---------- RuntimeInterface ----------
 
   MatchErrorCode
@@ -935,6 +942,14 @@ class Switch : public SwitchWContexts {
   using SwitchWContexts::get_config_options;
   ConfigOptionMap get_config_options() const {
     return get_config_options(0);
+  }
+
+  // to avoid C++ name hiding
+  using SwitchWContexts::get_error_codes;
+  //! Return a copy of the error codes map (a bi-directional map between an
+  //! error code's integral value and its name / description) for the switch.
+  ErrorCodeMap get_error_codes() const {
+    return get_error_codes(0);
   }
 
   //! Add a component to this Switch. Each Switch maintains a map `T` ->

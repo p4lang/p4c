@@ -345,3 +345,68 @@ TEST(P4Objects, HeaderStackArith) {
     ASSERT_DEATH(h1_f2.get_int(), "Assertion .*failed");
   }
 }
+
+TEST(P4Objects, Errors) {
+  std::istringstream is(
+      "{\"errors\":[[\"NoError\",0],[\"PacketTooShort\",1]]}");
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  auto error_codes = objects.get_error_codes();
+  ASSERT_TRUE(error_codes.exists("NoError"));
+  ASSERT_TRUE(error_codes.exists("PacketTooShort"));
+  ASSERT_FALSE(error_codes.exists("InvalidError"));
+}
+
+TEST(P4Objects, InvalidErrors) {
+  std::string expected_error_msg("Invalid errors specification in json\n");
+
+  {
+    // duplicate name
+    std::istringstream is("{\"errors\":[[\"error0\",0],[\"error0\",1]]}");
+    std::stringstream os;
+    P4Objects objects(os);
+    LookupStructureFactory factory;
+    ASSERT_NE(0, objects.init_objects(&is, &factory));
+    EXPECT_EQ(expected_error_msg, os.str());
+  }
+
+  {
+    // duplicate value
+    std::istringstream is("{\"errors\":[[\"error0\",0],[\"error1\",0]]}");
+    std::stringstream os;
+    P4Objects objects(os);
+    LookupStructureFactory factory;
+    ASSERT_NE(0, objects.init_objects(&is, &factory));
+    EXPECT_EQ(expected_error_msg, os.str());
+  }
+}
+
+TEST(P4Objects, ParserVerify) {
+  auto create_json = [](int error_v, std::ostream *ss) {
+    *ss << "{\"errors\":[[\"NoError\",0]],"
+        << "\"parsers\":[{\"name\":\"parser\",\"id\":0,\"init_state\":"
+        << "\"start\",\"parse_states\":[{\"name\":\"start\",\"id\":0,"
+        << "\"parser_ops\":[{\"op\":\"verify\",\"parameters\":[null,"
+        << error_v << "]}],\"transition_key\":[],\"transitions\":[]}]}]}";
+  };
+
+  {
+    std::stringstream is;
+    create_json(0, &is);
+    P4Objects objects;
+    LookupStructureFactory factory;
+    ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  }
+
+  {
+    std::stringstream is;
+    create_json(1000, &is);
+    std::stringstream os;
+    P4Objects objects(os);
+    LookupStructureFactory factory;
+    ASSERT_NE(0, objects.init_objects(&is, &factory));
+    std::string expected_error_msg("Invalid error code in verify statement\n");
+    EXPECT_EQ(expected_error_msg, os.str());
+  }
+}

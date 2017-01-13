@@ -36,7 +36,7 @@ ParserLookAhead::ParserLookAhead(int offset, int bitwidth)
 
 void
 ParserLookAhead::peek(const char *data, ByteContainer *res) const {
-  size_t old_size = res->size();
+  auto old_size = res->size();
   res->resize(old_size + nbytes);
   char *dst = &(*res)[old_size];
   extract::generic_extract(data + byte_offset, bit_offset, bitwidth, dst);
@@ -47,9 +47,9 @@ void
 ParserOpSet<field_t>::operator()(Packet *pkt, const char *data,
                                  size_t *bytes_parsed) const {
   (void) bytes_parsed; (void) data;
-  PHV *phv = pkt->get_phv();
-  Field &f_dst = phv->get_field(dst.header, dst.offset);
-  Field &f_src = phv->get_field(src.header, src.offset);
+  auto phv = pkt->get_phv();
+  auto &f_dst = phv->get_field(dst.header, dst.offset);
+  auto &f_src = phv->get_field(src.header, src.offset);
   f_dst.set(f_src);
   BMLOG_DEBUG_PKT(
     *pkt,
@@ -62,8 +62,8 @@ void
 ParserOpSet<Data>::operator()(Packet *pkt, const char *data,
                               size_t *bytes_parsed) const {
   (void) bytes_parsed; (void) data;
-  PHV *phv = pkt->get_phv();
-  Field &f_dst = phv->get_field(dst.header, dst.offset);
+  auto phv = pkt->get_phv();
+  auto &f_dst = phv->get_field(dst.header, dst.offset);
   f_dst.set(src);
   BMLOG_DEBUG_PKT(*pkt, "Parser set: setting field ({}, {}) to {}",
                   dst.header, dst.offset, f_dst);
@@ -73,11 +73,12 @@ template<>
 void
 ParserOpSet<ParserLookAhead>::operator()(Packet *pkt, const char *data,
                                          size_t *bytes_parsed) const {
-  (void) bytes_parsed;
   static thread_local ByteContainer bc;
-  PHV *phv = pkt->get_phv();
-  Field &f_dst = phv->get_field(dst.header, dst.offset);
-  int f_bits = f_dst.get_nbits();
+  auto phv = pkt->get_phv();
+  if (pkt->get_ingress_length() - *bytes_parsed < src.nbytes)
+    throw parser_exception_core(ErrorCodeMap::Core::PacketTooShort);
+  auto &f_dst = phv->get_field(dst.header, dst.offset);
+  auto f_bits = f_dst.get_nbits();
   /* I expect the first case to be the most common one. In the first case, we
      extract the packet bytes to the field bytes and sync the bignum value. The
      second case requires extracting the packet bytes to the ByteContainer, then
@@ -106,8 +107,8 @@ void
 ParserOpSet<ArithExpression>::operator()(Packet *pkt, const char *data,
                                          size_t *bytes_parsed) const {
   (void) bytes_parsed; (void) data;
-  PHV *phv = pkt->get_phv();
-  Field &f_dst = phv->get_field(dst.header, dst.offset);
+  auto phv = pkt->get_phv();
+  auto &f_dst = phv->get_field(dst.header, dst.offset);
   src.eval(*phv, &f_dst);
   BMLOG_DEBUG_PKT(
     *pkt,
@@ -115,9 +116,80 @@ ParserOpSet<ArithExpression>::operator()(Packet *pkt, const char *data,
     dst.header, dst.offset, f_dst);
 }
 
+namespace {
+
+void check_enough_data_for_extract(const Packet &pkt, size_t bytes_parsed,
+                                   const Header &hdr) {
+  if (pkt.get_ingress_length() - bytes_parsed <
+      static_cast<size_t>(hdr.get_nbytes_packet()))
+    throw parser_exception_core(ErrorCodeMap::Core::PacketTooShort);
+}
+
+}  // namespace
+
+struct ParserOpExtract : ParserOp {
+  header_id_t header;
+
+  explicit ParserOpExtract(header_id_t header)
+    : header(header) {}
+
+  void operator()(Packet *pkt, const char *data,
+                  size_t *bytes_parsed) const override {
+    auto phv = pkt->get_phv();
+    auto &hdr = phv->get_header(header);
+    if (hdr.is_valid())
+      throw parser_exception_core(ErrorCodeMap::Core::OverwritingHeader);
+    BMELOG(parser_extract, *pkt, header);
+    BMLOG_DEBUG_PKT(*pkt, "Extracting header '{}'", hdr.get_name());
+    check_enough_data_for_extract(*pkt, *bytes_parsed, hdr);
+    hdr.extract(data, *phv);
+    *bytes_parsed += hdr.get_nbytes_packet();
+  }
+};
+
+// push back a header on a tag stack
+// TODO(antonin): probably room for improvement here
+struct ParserOpExtractStack : ParserOp {
+  header_stack_id_t header_stack;
+
+  explicit ParserOpExtractStack(header_stack_id_t header_stack)
+    : header_stack(header_stack) {}
+
+  void operator()(Packet *pkt, const char *data,
+                  size_t *bytes_parsed) const override {
+    auto phv = pkt->get_phv();
+    auto &stack = phv->get_header_stack(header_stack);
+    if (stack.is_full())
+      throw parser_exception_core(ErrorCodeMap::Core::StackOutOfBounds);
+    auto &next_hdr = stack.get_next();
+    BMELOG(parser_extract, *pkt, next_hdr.get_id());
+    BMLOG_DEBUG_PKT(*pkt, "Extracting to header stack {}, next header is {}",
+                    header_stack, next_hdr.get_id());
+    check_enough_data_for_extract(*pkt, *bytes_parsed, next_hdr);
+    next_hdr.extract(data, *phv);
+    *bytes_parsed += next_hdr.get_nbytes_packet();
+    // should I have a HeaderStack::extract() method instead?
+    stack.push_back();
+  }
+};
+
+struct ParserOpVerify : ParserOp {
+  BoolExpression condition;
+  ErrorCode error;
+
+  ParserOpVerify(const BoolExpression &condition, const ErrorCode &error)
+      : condition(condition), error(error) { }
+
+  void operator()(Packet *pkt, const char *data,
+                  size_t *bytes_parsed) const override {
+    (void) data; (void) bytes_parsed;
+    if (!condition.eval(*pkt->get_phv())) throw parser_exception_arch(error);
+  }
+};
+
 template <typename P, bool with_padding = true>
 class ParseVSetCommon : public ParseVSetIface {
-  typedef std::unique_lock<std::mutex> Lock;
+  using Lock = std::unique_lock<std::mutex>;
 
  public:
   explicit ParseVSetCommon(size_t compressed_bitwidth,
@@ -490,6 +562,12 @@ ParseState::add_set_from_expression(header_id_t dst_header, int dst_offset,
 }
 
 void
+ParseState::add_verify(const BoolExpression &condition,
+                       const ErrorCode &error) {
+  parser_ops.emplace_back(new ParserOpVerify(condition, error));
+}
+
+void
 ParseState::set_key_builder(const ParseSwitchKeyBuilder &builder) {
   has_switch = true;
   key_builder = builder;
@@ -549,7 +627,7 @@ const ParseState *
 ParseState::find_next_state(Packet *pkt, const char *data,
                             size_t *bytes_parsed) const {
   // execute parser ops
-  PHV *phv = pkt->get_phv();
+  auto phv = pkt->get_phv();
 
   {
     RegisterSync::RegisterLocks RL;
@@ -576,7 +654,7 @@ ParseState::find_next_state(Packet *pkt, const char *data,
                   get_name(), key.to_hex());
 
   // try the matches in order
-  const ParseState *next_state = NULL;
+  const ParseState *next_state = nullptr;
   for (const auto &switch_case : parser_switch)
     if (switch_case->match(key, &next_state)) return next_state;
 
@@ -601,6 +679,16 @@ ParseState::operator()(Packet *pkt, const char *data,
   return next_state;
 }
 
+Parser::Parser(const std::string &name, p4object_id_t id,
+               const ErrorCodeMap *error_codes)
+    : NamedP4Object(name, id), init_state(nullptr), error_codes(error_codes),
+      no_error(error_codes->from_core(ErrorCodeMap::Core::NoError)) { }
+
+void
+Parser::set_init_state(const ParseState *state) {
+  init_state = state;
+}
+
 void
 Parser::parse(Packet *pkt) const {
   BMELOG(parser_start, *pkt, *this);
@@ -610,12 +698,22 @@ Parser::parse(Packet *pkt) const {
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
       DBG_CTR_PARSER | get_id());
   BMLOG_DEBUG_PKT(*pkt, "Parser '{}': start", get_name());
+  // at the beginning of parsing, we "reset" the error code to Core::NoError
+  pkt->set_error_code(no_error);
   const char *data = pkt->data();
   if (!init_state) return;
   const ParseState *next_state = init_state;
   size_t bytes_parsed = 0;
   while (next_state) {
-    next_state = (*next_state)(pkt, data, &bytes_parsed);
+    try {
+      next_state = (*next_state)(pkt, data, &bytes_parsed);
+    } catch (const parser_exception &e) {
+      auto error_code = e.get(*error_codes);
+      BMLOG_ERROR_PKT(*pkt, "Exception while parsing: {}",
+                      error_codes->to_name(error_code));
+      pkt->set_error_code(error_code);
+      break;
+    }
     BMLOG_TRACE_PKT(*pkt, "Bytes parsed: {}", bytes_parsed);
   }
   pkt->remove(bytes_parsed);

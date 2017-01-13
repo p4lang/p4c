@@ -11,7 +11,7 @@ per [this specification] (http://json-schema.org/).
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.0*.
+The version described in this document is *2.1*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -130,6 +130,24 @@ array item has the following attributes:
 a header instance included in the stack. These ids have to be in the correct
 order: stack[0], stack[1], ...
 
+### `errors`
+
+It is a JSON array of all the errors declared in the P4 program (error
+declarations were introduced in P4_16 and can be raised in parsers). Each array
+item is itself an array with exactly 2 elements: the name of the error as it
+appears in the P4 program and an integer value in the range `[0, 2**31 - 1)`. It
+is up to the compiler to assign a *unique* integer value to each declared error;
+if the error constant is used in the parser (e.g. in a `verify` statement) or in
+a control, it is up to the compiler to consistently replace each error with its
+assigned value when producing the bmv2 JSON. bmv2 supports the core library
+errors, but it is up to the compiler to include them in this JSON array and
+assign a value to them (however this is not strictly necessary if these core
+error constants are not used anywhere in the program).
+
+We recommend using 0 for the core library error `NoError`, but this is not
+strictly necessary. Note that the value `2**31 - 1` is reserved and cannot be
+assigned by the compiler.
+
 ### `parsers`
 
 It is a JSON array of all the parsers declared in the P4 program. Each array
@@ -147,7 +165,7 @@ parser. The attributes for these objects are:
   - `parser_ops`: a JSON array of the operations (set or extract) performed in
   this parse state, in the correct order. Each parser operation is represented
   by a JSON object, whose attributes are:
-    - `op`: the type of operation, either `extract` or `set`
+    - `op`: the type of operation, either `extract`, `set` or `verify`
     - `parameters`: a JSON array of objects encoding the parameters to the
     parser operation. Each parameter object has 2 string attributes: `type` for
     the parameter type and `value` for its value. Depending on the type of
@@ -158,7 +176,10 @@ parser. The attributes for these objects are:
     takes exactly 2 parameters. The first one needs to be of type `field` with
     the appropriate value. The second one can be of type `field`, `hexstr`,
     `lookahead` or `expression`, with the appropriate value (see [here]
-    (#the-type-value-object)).
+    (#the-type-value-object)). Finally, for a verify operation, we expect an
+    array with exactly 2 elements: the first should be a boolean expression
+    while the second should be a valid integral value for an error constant (see
+    [here] (#errors)).
   - `transition_key`: a JSON array (in the correct order) of objects which
   describe the different fields of the parse state transition key. Each object
   has 2 attributes, `type` and `value`, where `type` can be either
@@ -286,7 +307,7 @@ program. Each array item has the following attributes:
 - `name`
 - `id`: a unique integer (unique with respect to other pipelines)
 - `init_table`: the name of the first table of the pipeline
-- `action profiles`: a JSON array of JSON objects. Each of these objects stores
+- `action_profiles`: a JSON array of JSON objects. Each of these objects stores
 the information for a given P4 action profile, which is used by the current
 pipeline. The attributes for these objects are:
   - `name`
