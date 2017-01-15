@@ -84,6 +84,23 @@ class ArithmeticFixup : public Transform {
         return updateType(expression);
     }
 };
+
+class ErrorCodesVisitor : public Inspector {
+    JsonConverter* converter;
+ public:
+    explicit ErrorCodesVisitor(JsonConverter* converter) : converter(converter)
+    { CHECK_NULL(converter); }
+
+    bool preorder(const IR::Type_Error* errors) override {
+        auto &map = converter->errorCodesMap;
+        for (auto m : *errors->getDeclarations()) {
+            BUG_CHECK(map.find(m) == map.end(), "Duplicate error");
+            map[m] = map.size();
+        }
+        return false;
+    }
+};
+
 }  // namespace
 
 DirectMeterMap::DirectMeterInfo* DirectMeterMap::createInfo(const IR::IDeclaration* meter) {
@@ -1805,7 +1822,7 @@ void JsonConverter::addMetaInformation() {
   auto meta = new Util::JsonObject();
 
   static constexpr int version_major = 2;
-  static constexpr int version_minor = 0;
+  static constexpr int version_minor = 1;
   auto version = mkArrayField(meta, "version");
   version->append(version_major);
   version->append(version_minor);
@@ -1876,6 +1893,10 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     addLocals();
     addTypesAndInstances(mt, true);
     padScalars();
+
+    ErrorCodesVisitor errorCodesVisitor(this);
+    toplevelBlock->getProgram()->apply(errorCodesVisitor);
+    addErrors();
 
     auto prsrs = mkArrayField(&toplevel, "parsers");
     auto parserJson = toJson(parser);
@@ -2256,6 +2277,26 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
                     return result;
                 }
             }
+        } else if (minst->is<P4::ExternFunction>()) {
+            auto extfn = minst->to<P4::ExternFunction>();
+            if (extfn->method->name.name == IR::ParserState::verify) {
+                result->emplace("op", "verify");
+                BUG_CHECK(mce->arguments->size() == 2, "%1%: Expected 2 arguments", mce);
+                {
+                    auto cond = mce->arguments->at(0);
+                    // false means don't wrap in an outer expression object, which is not needed
+                    // here
+                    auto jexpr = conv->convert(cond, true, false);
+                    params->append(jexpr);
+                }
+                {
+                    auto error = mce->arguments->at(1);
+                    BUG_CHECK(error->is<IR::Member>(), "Error when processing verify");
+                    auto errorValue = retrieveErrorValue(error);
+                    params->append(errorValue);
+                }
+                return result;
+            }
         }
     }
     ::error("%1%: not supported in parser on this target", stat);
@@ -2414,6 +2455,25 @@ Util::IJson* JsonConverter::toJson(const IR::ParserState* state) {
     }
     result->emplace("transition_key", key);
     return result;
+}
+
+void JsonConverter::addErrors() {
+    auto errors = mkArrayField(&toplevel, "errors");
+    for (const auto &p : errorCodesMap) {
+        auto name = p.first->getName().name.c_str();
+        auto entry = pushNewArray(errors);
+        entry->append(name);
+        entry->append(p.second);
+    }
+}
+
+JsonConverter::ErrorValue JsonConverter::retrieveErrorValue(const IR::Expression* expr) const {
+    BUG_CHECK(expr->is<IR::Member>(), "Not an error constant");
+    auto mem = expr->to<IR::Member>();
+    auto type = typeMap->getType(mem, true);
+    BUG_CHECK(type->is<IR::Type_Error>(), "Not an error constant");
+    auto decl = type->to<IR::Type_Error>()->getDeclByName(mem->member.name);
+    return errorCodesMap.at(decl);
 }
 
 }  // namespace BMV2

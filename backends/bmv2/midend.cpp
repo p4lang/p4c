@@ -17,7 +17,6 @@ limitations under the License.
 #include "midend.h"
 #include "lower.h"
 #include "inlining.h"
-#include "eliminateVerify.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -152,7 +151,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     addPasses({
         new P4::TypeChecking(&refMap, &typeMap),
-        new EliminateVerify(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),

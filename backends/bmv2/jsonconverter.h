@@ -75,6 +75,10 @@ class JsonConverter final {
     // in the "scalars" metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField*, cstring> scalarMetadataFields;
+    // we map error codes to numerical values for bmv2
+    using ErrorValue = unsigned int;
+    using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
+    ErrorCodesMap errorCodesMap{};
 
  private:
     Util::JsonArray *headerTypes;
@@ -140,6 +144,11 @@ class JsonConverter final {
 
     // Adds meta information (such as version) to the json
     void addMetaInformation();
+
+    // Adds declared errors to json
+    void addErrors();
+    // Retrieve assigned numerical value for given error constant (expr must be IR::Member)
+    ErrorValue retrieveErrorValue(const IR::Expression* expr) const;
 
  public:
     explicit JsonConverter(const CompilerOptions& options);
