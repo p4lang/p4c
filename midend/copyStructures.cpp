@@ -38,6 +38,10 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
                 return statement;
 
             for (auto f : *strct->fields) {
+                BUG_CHECK(statement->right->is<IR::PathExpression>() ||
+                          statement->right->is<IR::Member>() ||
+                          statement->right->is<IR::ArrayIndex>(),
+                          "%1%: Unexpected operation when eliminating struct copying", statement->right);
                 auto right = new IR::Member(Util::SourceInfo(), statement->right, f->name);
                 auto left = new IR::Member(Util::SourceInfo(), statement->left, f->name);
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
@@ -49,6 +53,8 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
         auto stack = ltype->to<IR::Type_Stack>();
         for (unsigned i = 0; i < stack->getSize(); i++) {
             auto index = new IR::Constant(i);
+            BUG_CHECK(statement->right->is<IR::PathExpression>() || statement->right->is<IR::Member>(),
+                      "%1%: Unexpected operation when eliminating struct copying", statement->right);
             auto right = new IR::ArrayIndex(Util::SourceInfo(), statement->right, index);
             auto left = new IR::ArrayIndex(Util::SourceInfo(), statement->left, index->clone());
             retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
