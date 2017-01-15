@@ -1,14 +1,21 @@
+error {
+    NewError
+}
 #include <core.p4>
 #include <v1model.p4>
+
+struct m {
+    int<8> x;
+}
 
 struct h {
 }
 
-struct m {
-}
-
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
+    bool tmp_0;
     state start {
+        tmp_0 = meta.x == 8s0;
+        verify(tmp_0, error.NewError);
         verify(true, error.NoError);
         transition accept;
     }

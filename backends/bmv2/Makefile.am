@@ -25,12 +25,10 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/jsonconverter.cpp \
 	backends/bmv2/inlining.cpp \
 	backends/bmv2/midend.cpp \
-	backends/bmv2/lower.cpp \
-	backends/bmv2/eliminateVerify.cpp
+	backends/bmv2/lower.cpp
 
 noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
-	backends/bmv2/eliminateVerify.h \
 	backends/bmv2/inlining.h \
 	backends/bmv2/jsonconverter.h \
 	backends/bmv2/lower.h \
