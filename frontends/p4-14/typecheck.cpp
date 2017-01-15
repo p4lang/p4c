@@ -81,6 +81,16 @@ class TypeCheck::Pass1 : public Transform {
                 fl->fields.push_back(new IR::PathExpression(name));
                 fl->srcInfo += name.srcInfo; } }
         return flc; }
+    const IR::Node *preorder(IR::Property *prop) override {
+        if (auto di = findContext<IR::Declaration_Instance>()) {
+            auto ext = di->type->to<IR::Type_Extern>();
+            BUG_CHECK(ext, "%s is not an extern", di);
+            if (auto attr = ext->attributes[prop->name]) {
+                if (attr->type->is<IR::Type::String>())
+                    prune();
+            } else {
+                error("No property name %s in extern %s", prop->name, ext->name); } }
+        return prop; }
     const IR::Node *postorder(IR::PathExpression *ref) override {
         if (!global) return ref;
         const Visitor::Context *prop_ctxt = nullptr;

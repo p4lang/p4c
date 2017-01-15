@@ -137,5 +137,7 @@ const IR::Type *IR::Primitive::inferOperandType(int operand) const {
                 if (tbl->instance_count > 0) {
                     int width = ceil_log2(tbl->instance_count);
                     return IR::Type::Bits::get(width); } } } }
+    if (name.startsWith("execute_stateful") && operand == 1) {
+            return IR::Type::Bits::get(32); }
     return IR::Type::Unknown::get();
 }

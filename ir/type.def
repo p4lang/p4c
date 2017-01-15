@@ -476,7 +476,8 @@ class Type_Extern : Type_Declaration, IGeneralNamespace, IMayBeGenericType {
     optional Annotations annotations = Annotations::empty;
 
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return methods->getEnumerator()->as<const IDeclaration*>(); }
+        return methods->getEnumerator()->as<const IDeclaration*>()
+            ->concat(attributes.valueEnumerator()->as<const IDeclaration*>()); }
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     Method lookupMethod(cstring name, int argCount) const;
     validate{ methods->check_null(); }
