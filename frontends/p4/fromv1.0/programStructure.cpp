@@ -1464,7 +1464,7 @@ ProgramStructure::convertExtern(const IR::Declaration_Instance *ext, cstring new
     BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
     rv->name = newName;
     rv->type = new IR::Type_Name(new IR::Path(extern_types.get(et)));
-    return rv;
+    return rv->apply(TypeConverter(this))->to<IR::Declaration_Instance>();;
 }
 
 const IR::Declaration_Instance*

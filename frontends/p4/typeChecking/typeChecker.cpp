@@ -796,6 +796,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
     visit(decl->type);
     visit(decl->arguments);
     visit(decl->annotations);
+    decl->properties.visit_children(*this);
 
     auto type = getTypeType(decl->type);
     if (type == nullptr) {

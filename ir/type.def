@@ -133,6 +133,10 @@ class ParameterList : ISimpleNamespace {
         }
         return result;
     }
+#emit
+    decltype(parameters->begin()) begin() const { return parameters->begin(); }
+    decltype(parameters->end()) end() const { return parameters->end(); }
+#end
 }
 
 // Represents a type variable written by the user
@@ -405,7 +409,8 @@ abstract Type_MethodBase : Type, IMayBeGenericType {
     // nullptr for constructors or functors; nullptr is not void
     ParameterList parameters;
 
-    size_t getParameterCount() const { return parameters->size(); }
+    size_t maxParameterCount() const { return parameters->size(); }
+    size_t minParameterCount() const;
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     void dbprint(std::ostream& out) const override;
     toString {
@@ -457,7 +462,8 @@ class Method : Declaration {
     Type_Method type;
     optional bool isAbstract = false;
     optional Annotations annotations = Annotations::empty;
-    size_t getParameterCount() const { return type->getParameterCount(); }
+    size_t maxParameterCount() const { return type->maxParameterCount(); }
+    size_t minParameterCount() const { return type->minParameterCount(); }
     void setAbstract() { isAbstract = true; }
 }
 

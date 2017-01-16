@@ -94,7 +94,8 @@ const Method* Type_Extern::lookupMethod(cstring name, int paramCount) const {
 
     bool reported = false;
     for (auto m : *methods) {
-        if (m->name == name && m->getParameterCount() == upc) {
+        if (m->name == name && m->minParameterCount() <= upc && m->maxParameterCount() >= upc) {
+
             if (result == nullptr) {
                 result = m;
             } else {

@@ -124,6 +124,14 @@ bool Type_ActionEnum::contains(cstring name) const {
     return false;
 }
 
+size_t Type_MethodBase::minParameterCount() const {
+    size_t rv = 0;
+    for (auto p : *parameters)
+        if (!p->annotations->getSingle("optional"))
+            ++rv;
+    return rv;
+}
+
 const Type* Type_Specialized::getP4Type() const {
     auto args = new IR::Vector<Type>();
     for (auto a : *arguments) {
