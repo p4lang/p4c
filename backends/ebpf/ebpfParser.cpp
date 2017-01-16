@@ -125,22 +125,6 @@ StateTranslationVisitor::compileExtractField(
     unsigned widthToExtract = dynamic_cast<IHasWidth*>(type)->widthInBits();
     auto program = state->parser->program;
 
-    builder->emitIndent();
-    builder->appendFormat("if (%s->len < BYTES(%s + %d)) ",
-                          program->model.CPacketName.str(),
-                          program->offsetVar.c_str(), widthToExtract);
-    builder->blockStart();
-
-    builder->emitIndent();
-    builder->appendFormat("%s = %s;", program->errorVar.c_str(),
-                          p4lib.packetTooShort.str());
-    builder->newline();
-
-    builder->emitIndent();
-    builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
-    builder->newline();
-    builder->blockEnd(true);
-
     if (widthToExtract <= 32) {
         unsigned lastBitIndex = widthToExtract + alignment - 1;
         unsigned lastWordIndex = lastBitIndex / 8;
@@ -169,7 +153,8 @@ StateTranslationVisitor::compileExtractField(
         builder->appendFormat(".%s = (", field.c_str());
         type->emit(builder);
         builder->appendFormat(")((%s(%s, BYTES(%s))",
-                              helper, program->model.CPacketName.str(),
+                              helper,
+                              builder->target->dataOffset(program->model.CPacketName.str()),
                               program->offsetVar.c_str());
         if (shift != 0)
             builder->appendFormat(" >> %d", shift);
@@ -204,7 +189,8 @@ StateTranslationVisitor::compileExtractField(
             builder->appendFormat(".%s[%d] = (", field.c_str(), i);
             bt->emit(builder);
             builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)",
-                                  helper, program->model.CPacketName.str(),
+                                  helper,
+                                  builder->target->dataOffset(program->model.CPacketName.str()),
                                   program->offsetVar.c_str(), i, shift);
 
             if ((i == bytes - 1) && (widthToExtract % 8 != 0)) {
@@ -238,6 +224,25 @@ StateTranslationVisitor::compileExtract(const IR::Vector<IR::Expression>* args) 
         ::error("Cannot extract to a non-header type %1%", expr);
         return;
     }
+
+    unsigned width = ht->width_bits();
+    auto program = state->parser->program;
+    builder->emitIndent();
+    builder->appendFormat("if (%s < %s + BYTES(%s + %d)) ",
+                          program->packetEndVar.c_str(),
+                          program->packetStartVar.c_str(),
+                          program->offsetVar.c_str(), width);
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("%s = %s;", program->errorVar.c_str(),
+                          p4lib.packetTooShort.str());
+    builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+    builder->newline();
+    builder->blockEnd(true);
 
     unsigned alignment = 0;
     for (auto f : *ht->fields) {

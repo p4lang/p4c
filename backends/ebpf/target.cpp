@@ -104,6 +104,12 @@ void KernelSamplesTarget::emitCodeSection(
     builder->appendFormat("SEC(\"%s\")\n", sectionName);
 }
 
+void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
+                                   cstring functionName,
+                                   cstring argName) const {
+    builder->appendFormat("int %s(struct __sk_buff* %s)", functionName, argName);
+}
+
 //////////////////////////////////////////////////////////////
 
 void BccTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
@@ -137,5 +143,11 @@ void BccTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
 }
 
 void BccTarget::emitLicense(Util::SourceCodeBuilder*, cstring) const {}
+
+void BccTarget::emitMain(Util::SourceCodeBuilder* builder,
+                                   cstring functionName,
+                                   cstring argName) const {
+    builder->appendFormat("int %s(struct __sk_buff* %s)", functionName, argName);
+}
 
 }  // namespace EBPF
