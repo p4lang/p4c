@@ -48,7 +48,10 @@ class SimpleSwitch : public Switch {
  public:
   SimpleSwitch()
     : Switch(true),  // enable_switch = true
-      input_buffer(1024), output_buffer(128) { }
+      input_buffer(1024), output_buffer(128) {
+    add_required_field("standard_metadata", "egress_spec");
+    add_required_field("standard_metadata", "egress_port");
+  }
 
   int receive(int port_num, const char *buffer, int len) {
     static int pkt_id = 0;
@@ -123,13 +126,14 @@ void SimpleSwitch::pipeline_thread() {
     parser->parse(packet.get());
     ingress_mau->apply(packet.get());
 
-    int egress_port = phv->get_field("standard_metadata.egress_port").get_int();
-    BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
+    int egress_spec = phv->get_field("standard_metadata.egress_spec").get_int();
+    BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_spec);
 
-    if (egress_port == 511) {
+    if (egress_spec == 511) {
       BMLOG_DEBUG_PKT(*packet, "Dropping packet");
     } else {
-      packet->set_egress_port(egress_port);
+      packet->set_egress_port(egress_spec);
+      phv->get_field("standard_metadata.egress_port").set(egress_spec);
       egress_mau->apply(packet.get());
       deparser->deparse(packet.get());
       output_buffer.push_front(std::move(packet));

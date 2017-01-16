@@ -178,6 +178,10 @@ Then in a second terminal:
 Now the switch is running and the tables have been populated. You can run
 *pingall* in Mininet or start a TCP flow with iperf between hosts *h1* and *h2*.
 
+When running a P4 program with *simple_switch* (instead of *simple_router* in
+the above example), just provide the appropriate `simple_switch` binary to
+`1sw_demo.py` with `--behavioral-exe`.
+
 ## FAQ
 
 ### Why did we need bmv2 ?
