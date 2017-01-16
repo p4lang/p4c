@@ -66,6 +66,8 @@ static const IR::Annotations *getPragmas() {
     IR::Annotations             *Annotations;
     IR::Apply                   *Apply;
     IR::Attribute               *Attribute;
+    IR::AttribLocal             *AttribLocal;
+    IR::AttribLocals            *AttribLocals;
     IR::CalculatedField         *CalculatedField;
     IR::CaseEntry               *CaseEntry;
     IR::Vector<IR::CaseEntry>   *CaseEntryList;
@@ -139,6 +141,8 @@ static const IR::Annotations *getPragmas() {
 %type<Annotations>      blackbox_method
 %type<Apply>            apply_case_list
 %type<Attribute>        blackbox_attribute
+%type<AttribLocal>      local_var
+%type<AttribLocals>     locals_list opt_locals_list
 %type<BBox>             blackbox_config
 %type<BBoxType>         blackbox_body
 %type<CalculatedField>  update_verify_spec_list
@@ -730,7 +734,7 @@ blackbox_body: /* epsilon */ {
 
 blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute(@-1, $<str>-1); }
     | blackbox_attribute TYPE ':' type ';' { ($$=$1)->type = $4; }
-    | blackbox_attribute EXPRESSION_LOCAL_VARIABLES '{' opt_name_list '}'
+    | blackbox_attribute EXPRESSION_LOCAL_VARIABLES '{' opt_locals_list '}'
         { ($$=$1)->locals = $4; }
     | blackbox_attribute OPTIONAL ';'
         { ($$=$1)->optional = true; }
@@ -763,6 +767,16 @@ argument:
 ;
 
 inout: IN { $$ = IR::Direction::In; } | OUT { $$ = IR::Direction::Out; } ;
+
+opt_locals_list: { $$ = nullptr; } | locals_list ;
+locals_list:
+      local_var  { ($$ = new IR::AttribLocals())->locals[$1->name] = $1; }
+    | locals_list ',' local_var  { ($$ = $1)->locals[$3->name] = $3; }
+;
+local_var:
+      name              { $$ = new IR::AttribLocal(@1, $1); }
+    | type name         { $$ = new IR::AttribLocal(@1+@2, $1, $2); }
+;
 
 blackbox_instantiation:
       BLACKBOX name name ';'

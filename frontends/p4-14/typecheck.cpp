@@ -98,9 +98,8 @@ class TypeCheck::Pass1 : public Transform {
             if (auto bbox = prop_ctxt->parent->node->to<IR::Declaration_Instance>()) {
                 auto bbox_type = bbox->type->to<IR::Type_Extern>();
                 auto attr = bbox_type->attributes.get<IR::Attribute>(prop->name);
-                if (attr->locals && contains(attr->locals->names, ref->path->name)) {
-                    /* ref to local of property -- do something with it? */
-                    return ref; } } }
+                if (attr->locals && attr->locals->locals.count(ref->path->name)) {
+                    return attr->locals->locals.at(ref->path->name); } } }
         IR::Node *new_node = ref;
         if (auto hdr = global->get<IR::HeaderOrMetadata>(ref->path->name)) {
             visit(hdr);

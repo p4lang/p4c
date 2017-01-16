@@ -2402,6 +2402,12 @@ const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
     return expression;
 }
 
+const IR::Node* TypeInference::postorder(IR::AttribLocal* local) {
+    setType(local, local->type);
+    setType(getOriginal(), local->type);
+    return local;
+}
+
 ///////////////////////////////////////// Statements et al.
 
 const IR::Node* TypeInference::postorder(IR::IfStatement* conditional) {

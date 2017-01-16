@@ -447,14 +447,18 @@ bool ResolveReferences::preorder(const IR::Property *prop) {
     if (auto attr = dynamic_cast<const IR::Attribute *>(context->
                     resolveUnique(prop->name, ResolutionType::Any, false))) {
         if (attr->locals)
-            // FIXME Property with local names -- skip is at it will break otherwise
-            return false;
+            addToContext(attr->locals);
         if (attr->type->is<IR::Type::String>())
             // Attribute is arbitray string -- need not match anything
             return false; }
     return true;
 }
-void ResolveReferences::postorder(const IR::Property *) {
+void ResolveReferences::postorder(const IR::Property *prop) {
+    if (auto attr = dynamic_cast<const IR::Attribute *>(context->
+                    resolveUnique(prop->name, ResolutionType::Any, false))) {
+        if (attr->locals)
+            removeFromContext(attr->locals);
+    }
 }
 
 #undef PROCESS_NAMESPACE
