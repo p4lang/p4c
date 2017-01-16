@@ -70,7 +70,7 @@ def configure_dp(commands_path, thrift_port):
         print " ".join(cmd)
         sub_env = os.environ.copy()
         pythonpath = ""
-        if "PYHTONPATH" in sub_env:
+        if "PYTHONPATH" in sub_env:
             pythonpath = sub_env["PYTHONPATH"] + ":"
         sub_env["PYTHONPATH"] = pythonpath + \
                                 "@abs_top_builddir@/thrift_src/gen-py/"

@@ -104,7 +104,7 @@ def main():
     with open(command_path, "r") as f:
         sub_env = os.environ.copy()
         pythonpath = ""
-        if "PYHTONPATH" in sub_env:
+        if "PYTHONPATH" in sub_env:
             pythonpath = sub_env["PYTHONPATH"] + ":"
         sub_env["PYTHONPATH"] = pythonpath + \
                                 "@abs_top_builddir@/thrift_src/gen-py/"
