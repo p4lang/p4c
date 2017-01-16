@@ -262,6 +262,17 @@ DoConstantFolding::compare(const IR::Operation_Binary* e) {
         auto result = new IR::BoolLiteral(e->srcInfo, bresult);
         setConstant(e, result);
         return result;
+    } else if (typesKnown) {
+        auto le = EnumInstance::resolve(eleft, typeMap);
+        auto re = EnumInstance::resolve(eright, typeMap);
+        if (le != nullptr && re != nullptr) {
+            BUG_CHECK(le->type == re->type,
+                      "%1%: different enum types in comparison", e);
+            bool bresult = (le->name == re->name) == eqTest;
+            auto result = new IR::BoolLiteral(e->srcInfo, bresult);
+            setConstant(e, result);
+            return result;
+        }
     }
 
     if (eqTest)
@@ -272,7 +283,7 @@ DoConstantFolding::compare(const IR::Operation_Binary* e) {
 
 const IR::Node*
 DoConstantFolding::binary(const IR::Operation_Binary* e,
-                        std::function<mpz_class(mpz_class, mpz_class)> func) {
+                          std::function<mpz_class(mpz_class, mpz_class)> func) {
     auto eleft = getConstant(e->left);
     auto eright = getConstant(e->right);
     if (eleft == nullptr || eright == nullptr)
@@ -508,11 +519,6 @@ const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {
     auto rt = right->type->to<IR::Type_Bits>();
     if (lt == nullptr || rt == nullptr) {
         ::error("%1%: both operand widths must be known", e);
-        return e;
-    }
-    if (!lt->operator==(*rt)) {
-        ::error("%1%: operands have different types: %2% and %3%",
-                e, lt->toString(), rt->toString());
         return e;
     }
 
