@@ -44,6 +44,11 @@ class Target {
     virtual void emitTableDecl(Util::SourceCodeBuilder* builder,
                                cstring tblName, bool isHash,
                                cstring keyType, cstring valueType, unsigned size) const = 0;
+    virtual void emitMain(Util::SourceCodeBuilder* builder,
+                          cstring functionName,
+                          cstring argName) const = 0;
+    virtual cstring dataOffset(cstring base) const = 0;
+    virtual cstring dataEnd(cstring base) const = 0;
 };
 
 // Represents a target that is compiled within the kernel
@@ -61,6 +66,12 @@ class KernelSamplesTarget : public Target {
     void emitTableDecl(Util::SourceCodeBuilder* builder,
                        cstring tblName, bool isHash,
                        cstring keyType, cstring valueType, unsigned size) const override;
+    void emitMain(Util::SourceCodeBuilder* builder,
+                  cstring functionName,
+                  cstring argName) const override;
+    cstring dataOffset(cstring base) const override { return base; }
+    cstring dataEnd(cstring base) const override
+    { return cstring("(") + base + " + " + base + "->len)"; }
 };
 
 // Represents a target compiled by bcc that uses the TC
@@ -77,6 +88,12 @@ class BccTarget : public Target {
     void emitTableDecl(Util::SourceCodeBuilder* builder,
                        cstring tblName, bool isHash,
                        cstring keyType, cstring valueType, unsigned size) const override;
+    void emitMain(Util::SourceCodeBuilder* builder,
+                  cstring functionName,
+                  cstring argName) const override;
+    cstring dataOffset(cstring base) const override { return base; }
+    cstring dataEnd(cstring base) const override
+    { return cstring("(") + base + " + " + base + "->len)"; }
 };
 
 }  // namespace EBPF

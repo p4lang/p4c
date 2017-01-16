@@ -54,11 +54,9 @@ class EBPFProgram : public EBPFObject {
     EBPFControl*         control;
     EBPFModel           &model;
 
-    cstring endLabel;
-    cstring offsetVar;
-    cstring zeroKey;
-    cstring functionName;
-    cstring errorVar;
+    cstring endLabel, offsetVar, lengthVar;
+    cstring zeroKey, functionName, errorVar;
+    cstring packetStartVar, packetEndVar;
     cstring errorEnum;
     cstring license = "GPL";  // TODO: this should be a compiler option probably
     cstring arrayIndexType = "u32";
@@ -76,6 +74,8 @@ class EBPFProgram : public EBPFObject {
         zeroKey = EBPFModel::reserved("zero");
         functionName = EBPFModel::reserved("filter");
         errorVar = EBPFModel::reserved("errorCode");
+        packetStartVar = EBPFModel::reserved("packetStart");
+        packetEndVar = EBPFModel::reserved("packetEnd");
         endLabel = EBPFModel::reserved("end");
         errorEnum = EBPFModel::reserved("errorCodes");
     }

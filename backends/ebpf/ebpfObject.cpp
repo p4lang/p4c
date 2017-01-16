@@ -57,9 +57,9 @@ void EBPFProgram::emit(CodeBuilder *builder) {
 
     builder->newline();
     builder->emitIndent();
-    builder->target->emitCodeSection(builder, "filter");  // TODO: should this be provided by user?
+    builder->target->emitCodeSection(builder, functionName);
     builder->emitIndent();
-    builder->appendFormat("int %s(struct __sk_buff* %s) ", functionName, model.CPacketName.str());
+    builder->target->emitMain(builder, functionName, model.CPacketName.str());
     builder->blockStart();
 
     emitHeaderInstances(builder);
@@ -143,6 +143,14 @@ void EBPFProgram::createLocalVariables(CodeBuilder* builder) {
     builder->appendFormat("enum %s %s = %s;", errorEnum, errorVar,
                           P4::P4CoreLibrary::instance.noError.str());
     builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat("void* %s = %s;",
+                          packetStartVar, builder->target->dataOffset(model.CPacketName.str()));
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("void* %s = %s;",
+                          packetEndVar, builder->target->dataEnd(model.CPacketName.str()));
 
     builder->emitIndent();
     builder->appendFormat("u8 %s = 0;", control->accept->name.name);

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ limitations under the License.
 #define _BACKENDS_EBPF_EBPFTABLE_H_
 
 #include "ebpfObject.h"
-#include "../../frontends/p4/methodInstance.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace EBPF {
 // Also used to represent counters
