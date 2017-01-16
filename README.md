@@ -71,7 +71,7 @@ Installing on macOS:
 
 - Install Homebrew:
   ```
-  sudo /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   ```
   Be sure to add `/usr/local/bin/` to your `$PATH`.
 
