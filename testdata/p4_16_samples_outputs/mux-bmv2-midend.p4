@@ -29,10 +29,10 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         p_0 = true;
         val_0 = tmp_2;
         _sub = tmp_2[31:0];
-        tmp_1 = (true ? tmp_2[31:0] : tmp_1);
-        tmp_1 = (!true ? 32w1 : (true ? tmp_2[31:0] : tmp_1));
-        _sub = (!true ? 32w1 : (true ? tmp_2[31:0] : tmp_1));
-        val_0[31:0] = (!true ? 32w1 : (true ? tmp_2[31:0] : tmp_1));
+        tmp_1 = tmp_2[31:0];
+        tmp_1 = tmp_2[31:0];
+        _sub = tmp_2[31:0];
+        val_0[31:0] = tmp_2[31:0];
     }
     action act() {
         res = 64w0;

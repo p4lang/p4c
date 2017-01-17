@@ -10,9 +10,9 @@ control Ing() {
     bool tmp_2;
     @name("cond") action cond_0() {
         b = true;
-        tmp_1 = (!true && !true ? false : tmp_1);
-        tmp_2 = (!true && !!true ? a == 32w5 : tmp_2);
-        tmp_1 = (!true && !!true ? (!true && !!true ? a == 32w5 : tmp_2) : (!true && !true ? false : tmp_1));
+        tmp_1 = tmp_1;
+        tmp_2 = tmp_2;
+        tmp_1 = tmp_1;
     }
     action act() {
         a = 32w2;
