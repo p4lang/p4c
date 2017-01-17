@@ -43,12 +43,12 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         same = inKey == defaultKey;
         val.field1 = 32w0;
         done = false;
-        tmp_2 = (!!false ? false : tmp_2);
-        tmp_2 = (!!!false ? inKey == defaultKey : (!!false ? false : tmp_2));
-        ok = (!!!false ? inKey == defaultKey : (!!false ? false : tmp_2));
-        val_2.field1 = ((!!!false ? inKey == defaultKey : (!!false ? false : tmp_2)) ? val.field1 : val_2.field1);
-        val_2.field1 = ((!!!false ? inKey == defaultKey : (!!false ? false : tmp_2)) ? 32w8 : val_2.field1);
-        val.field1 = ((!!!false ? inKey == defaultKey : (!!false ? false : tmp_2)) ? val_2.field1 : val.field1);
+        tmp_2 = tmp_2;
+        tmp_2 = inKey == defaultKey;
+        ok = inKey == defaultKey;
+        val_2.field1 = (inKey == defaultKey ? val.field1 : val_2.field1);
+        val_2.field1 = (inKey == defaultKey ? 32w8 : val_2.field1);
+        val.field1 = (inKey == defaultKey ? val_2.field1 : val.field1);
     }
     table tbl_test() {
         actions = {

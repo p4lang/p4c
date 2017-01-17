@@ -49,8 +49,9 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
 // This has to be called from a visitor method - it calls getOriginal()
 void DoConstantFolding::setConstant(const IR::Node* node, const IR::Expression* result) {
     LOG1("Folding " << node << " to " << result << " (" << result->id << ")");
+    auto orig = getOriginal();
     constants.emplace(node, result);
-    constants.emplace(getOriginal(), result);
+    constants.emplace(orig, result);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
@@ -458,8 +459,9 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
 const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
     if (!typesKnown)
         return e;
-    auto type = typeMap->getType(e->expr, true);
-    auto origtype = typeMap->getType(getOriginal());
+    auto orig = getOriginal<IR::Member>();
+    auto type = typeMap->getType(orig->expr, true);
+    auto origtype = typeMap->getType(orig);
 
     const IR::Expression* result;
     if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
