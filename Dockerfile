@@ -10,7 +10,8 @@ ENV P4C_DEPS automake \
              libgc-dev \
              libgmp-dev \
              libtool \
-             python2.7 \
+             pkg-config \
+             python \
              python-ipaddr \
              python-scapy \
              tcpdump

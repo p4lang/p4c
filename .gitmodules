@@ -1,0 +1,4 @@
+[submodule "control-plane/PI"]
+	path = control-plane/PI
+	url = https://github.com/p4lang/PI.git
+	ignore = untracked

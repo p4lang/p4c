@@ -64,6 +64,13 @@ if test "x$CLANG" = "xyes"; then
    CXXFLAGS="$CXXFLAGS -Wno-deprecated-register -Wuninitialized -Wsometimes-uninitialized"
 fi
 
+PKG_CHECK_MODULES([PROTOBUF], [protobuf >= 3.0.0])
+AC_SUBST([PROTOBUF_CFLAGS])
+AC_SUBST([PROTOBUF_LIBS])
+
+AC_PATH_PROG([PROTOC], [protoc], [])
+AS_IF([test "x$PROTOC" = x], [AC_MSG_ERROR([protoc not found; is protobuf installed?])])
+
 AC_CHECK_HEADERS([constraint_solver/constraint_solver.h])
 AC_CHECK_LIB([gc], [GC_malloc], [], [AC_MSG_ERROR([Missing GC library])])
 AC_CHECK_LIB([rt], [clock_gettime], [], [])
