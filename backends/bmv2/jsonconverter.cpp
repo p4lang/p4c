@@ -732,7 +732,7 @@ class ExpressionConverter : public Inspector {
 JsonConverter::JsonConverter(const CompilerOptions& options) :
         options(options), v1model(P4V1::V1Model::instance),
         corelib(P4::P4CoreLibrary::instance),
-        refMap(nullptr), typeMap(nullptr), dropActionId(0), toplevelBlock(nullptr),
+        refMap(nullptr), typeMap(nullptr), toplevelBlock(nullptr),
         conv(new ExpressionConverter(this)),
         headerParameter(nullptr), userMetadataParameter(nullptr), stdMetadataParameter(nullptr)
 {}
