@@ -91,6 +91,10 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         constraints->addEqualityConstraint(dit->type, arg->type);
         ++sit;
     }
+    if (sit != src->arguments->end()) {
+        if (reportErrors)
+            ::error("%1%: Too many arguments for call", errorPosition);
+        return false; }
 
     return true;
 }

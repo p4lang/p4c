@@ -31,6 +31,13 @@ class TypeCheck::Pass1 : public Transform {
         if (auto af = findContext<IR::ActionFunction>())
             if (auto arg = af->arg(ref->path->name))
                 return arg;
+        const Visitor::Context *prop_ctxt = nullptr;
+        if (auto prop = findContext<IR::Property>(prop_ctxt)) {
+            if (auto bbox = prop_ctxt->parent->node->to<IR::Declaration_Instance>()) {
+                auto bbox_type = bbox->type->to<IR::Type_Extern>();
+                auto attr = bbox_type->attributes.get<IR::Attribute>(prop->name);
+                if (attr->locals && attr->locals->locals.count(ref->path->name)) {
+                    return attr->locals->locals.at(ref->path->name); } } }
         if (auto bbox = findContext<IR::Declaration_Instance>()) {
             if (auto bbox_type = bbox->type->to<IR::Type_Extern>()) {
                 if (auto attr = bbox_type->attributes.get<IR::Attribute>(ref->path->name))
@@ -93,13 +100,6 @@ class TypeCheck::Pass1 : public Transform {
         return prop; }
     const IR::Node *postorder(IR::PathExpression *ref) override {
         if (!global) return ref;
-        const Visitor::Context *prop_ctxt = nullptr;
-        if (auto prop = findContext<IR::Property>(prop_ctxt)) {
-            if (auto bbox = prop_ctxt->parent->node->to<IR::Declaration_Instance>()) {
-                auto bbox_type = bbox->type->to<IR::Type_Extern>();
-                auto attr = bbox_type->attributes.get<IR::Attribute>(prop->name);
-                if (attr->locals && attr->locals->locals.count(ref->path->name)) {
-                    return attr->locals->locals.at(ref->path->name); } } }
         IR::Node *new_node = ref;
         if (auto hdr = global->get<IR::HeaderOrMetadata>(ref->path->name)) {
             visit(hdr);
@@ -181,15 +181,35 @@ class TypeCheck::Pass2 : public Modifier {
         self.iterCounter++;
         return Modifier::init_apply(root); }
     void postorder(IR::Member *) override {}
-    void postorder(IR::Operation_Unary *op) override {
-        op->type = op->expr->type; }
     void postorder(IR::Operation_Binary *op) override {
         if (op->left->type->is<IR::Type_InfInt>())
             op->type = op->right->type;
         else if (op->right->type->is<IR::Type_InfInt>())
             op->type = op->left->type;
         else if (op->left->type == op->right->type)
-            op->type = op->left->type; }
+            op->type = op->left->type;
+        else {
+            auto *lt = op->left->type->to<IR::Type::Bits>();
+            auto *rt = op->right->type->to<IR::Type::Bits>();
+            if (lt && rt) {
+                if (lt->size < rt->size)
+                    op->left = new IR::Cast(rt, op->left);
+                else if (rt->size < lt->size)
+                    op->right = new IR::Cast(lt, op->right); } } }
+    void logic_operand(const IR::Expression *&op) {
+        if (auto *bit = op->type->to<IR::Type::Bits>())
+            op = new IR::Neq(IR::Type::Boolean::get(), op, new IR::Constant(bit, 0)); }
+    void postorder(IR::LAnd *op) override {
+        logic_operand(op->left);
+        logic_operand(op->right);
+        op->type = IR::Type::Boolean::get(); }
+    void postorder(IR::LOr *op) override {
+        logic_operand(op->left);
+        logic_operand(op->right);
+        op->type = IR::Type::Boolean::get(); }
+    void postorder(IR::LNot *op) override {
+        logic_operand(op->expr);
+        op->type = IR::Type::Boolean::get(); }
     void postorder(IR::Operation_Relation *op) override {
         op->type = IR::Type::Boolean::get(); }
     void postorder(IR::Primitive *prim) override {
