@@ -43,7 +43,12 @@ libcontrolplane_la_CPPFLAGS = \
 	-I$(srcdir)/control-plane/PI/include \
 	-Icontrol-plane \
 	$(AM_CPPFLAGS)
-libcontrolplane_la_SOURCES = control-plane/p4/config/p4info.pb.cc
+libcontrolplane_la_SOURCES = \
+	control-plane/p4/config/p4info.pb.cc \
+	control-plane/p4RuntimeSerializer.cpp
+
+noinst_HEADERS += \
+	control-plane/p4RuntimeSerializer.h
 
 # Work around a bug in protoc v.3.0 which generates unused 'deterministic'
 # parameters that cause a lot of warning spew during the build process. This is
