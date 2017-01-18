@@ -1731,6 +1731,7 @@ void JsonConverter::addLocals() {
             json->emplace("id", nextId("headers"));
             json->emplace("header_type", name);
             json->emplace("metadata", true);
+            json->emplace("pi_omit", true);  // Don't expose in PI.
             headerInstances->append(json);
         } else if (auto stack = type->to<IR::Type_Stack>()) {
             auto json = new Util::JsonObject();
@@ -1754,6 +1755,7 @@ void JsonConverter::addLocals() {
                 header->emplace("id", id);
                 header->emplace("header_type", header_type);
                 header->emplace("metadata", false);
+                header->emplace("pi_omit", true);  // Don't expose in PI.
                 headerInstances->append(header);
             }
             headerStacks->append(json);
@@ -1785,7 +1787,7 @@ void JsonConverter::addLocals() {
     json->emplace("id", nextId("headers"));
     json->emplace("header_type", scalarsName);
     json->emplace("metadata", true);
-    json->emplace("pi_omit", true);  // Don't expose scalars in PI.
+    json->emplace("pi_omit", true);  // Don't expose in PI.
     headerInstances->append(json);
 }
 
