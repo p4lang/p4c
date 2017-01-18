@@ -24,6 +24,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/gc.h"
 #include "lib/nullstream.h"
+#include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "midend.h"
@@ -71,6 +72,17 @@ int main(int argc, char *const argv[]) {
         if (out != nullptr) {
             converter.serialize(*out);
             out->flush();
+        }
+    }
+
+    // Generate a PI control plane API for this program if requested.
+    if (!options.p4RuntimeFile.isNullOrEmpty()) {
+        std::ostream* out = openFile(options.p4RuntimeFile, false);
+        if (out != nullptr) {
+            auto format = options.p4RuntimeAsJson ? P4::P4RuntimeFormat::JSON
+                                                  : P4::P4RuntimeFormat::BINARY;
+            serializeP4Runtime(out, program, toplevel, &midEnd.refMap,
+                               &midEnd.typeMap, format);
         }
     }
 

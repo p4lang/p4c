@@ -67,6 +67,12 @@ class CompilerOptions : public Util::Options {
     // Dump and undump the IR tree
     bool debugJson = false;
 
+    // Write a P4Runtime control plane API description to the specified file.
+    cstring p4RuntimeFile = nullptr;
+
+    // If true, write out the P4Runtime API description as human-readable JSON.
+    bool p4RuntimeAsJson = false;
+
     // Compiler target architecture
     cstring target = nullptr;
     // substrings matched agains pass names
