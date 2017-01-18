@@ -16,7 +16,7 @@
 # To be included in the main P4C compiler makefile
 
 bin_PROGRAMS += p4c-ebpf
-p4c_ebpf_LDADD = libfrontend.a libp4ctoolkit.a
+p4c_ebpf_LDADD = libfrontend.la libp4ctoolkit.a
 
 p4c_ebpf_UNIFIED = \
 	backends/ebpf/p4c-ebpf.cpp \
