@@ -28,6 +28,7 @@ match_kind {
 }
 
 // Are these correct?
+@metadata @name("standard_metadata")
 struct standard_metadata_t {
     bit<9>  ingress_port;
     bit<9>  egress_spec;
