@@ -60,9 +60,7 @@ class JsonConverter final {
     P4::ReferenceMap*      refMap;
     P4::TypeMap*           typeMap;
     ProgramParts           structure;
-    cstring                dropAction = ".drop";
     cstring                scalarsName;  // name of struct in JSON holding all scalars
-    unsigned               dropActionId;
     IR::ToplevelBlock*     toplevelBlock;
     ExpressionConverter*   conv;
     DirectMeterMap         meterMap;
