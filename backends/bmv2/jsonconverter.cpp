@@ -1132,8 +1132,12 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
     return result;
 }
 
-Util::IJson* JsonConverter::nodeName(const CFG::Node* node) const
-{ return new Util::JsonValue(node->name); }
+Util::IJson* JsonConverter::nodeName(const CFG::Node* node) const {
+    if (node->name.isNullOrEmpty())
+        return Util::JsonValue::null;
+    else
+        return new Util::JsonValue(node->name);
+}
 
 Util::IJson* JsonConverter::convertIf(const CFG::IfNode* node, cstring) {
     auto result = new Util::JsonObject();
@@ -1562,7 +1566,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
     } else {
         BUG_CHECK(cfg->entryPoint->successors.size() == 1, "Expected 1 start node for %1%", cont);
         auto start = (*(cfg->entryPoint->successors.edges.begin()))->endpoint;
-        result->emplace("init_table", start->name);
+        result->emplace("init_table", nodeName(start));
     }
     auto tables = mkArrayField(result, "tables");
     auto action_profiles = mkArrayField(result, "action_profiles");
@@ -1576,34 +1580,6 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
             auto j = convertIf(node->to<CFG::IfNode>(), cont->name);
             conditionals->append(j);
         }
-    }
-
-    {
-        // synthesize an special table at the exit for dropping the packet
-        auto exitTable = new Util::JsonObject();
-        exitTable->emplace("name", nodeName(cfg->exitPoint));
-        exitTable->emplace("id", nextId("tables"));
-        auto key = mkArrayField(exitTable, "key");
-        auto ke = new Util::JsonObject();
-        key->append(ke);
-        ke->emplace("match_type", "exact");
-        auto drop = mkArrayField(ke, "target");
-        drop->append("standard_metadata");
-        drop->append("drop");
-        exitTable->emplace("match_type", "exact");
-        exitTable->emplace("type", "simple");
-        exitTable->emplace("max_size", 1);
-        exitTable->emplace("with_counters", false);
-        exitTable->emplace("support_timeout", false);
-        exitTable->emplace("direct_meters", Util::JsonValue::null);
-        auto actions = mkArrayField(exitTable, "actions");
-        actions->append(dropAction);
-        auto action_ids = mkArrayField(exitTable, "action_ids");
-        action_ids->append(dropActionId);
-        auto next_tables = new Util::JsonObject();
-        next_tables->emplace(dropAction, Util::JsonValue::null);
-        exitTable->emplace("next_tables", next_tables);
-        tables->append(exitTable);
     }
 
     for (auto c : *cont->controlLocals) {
@@ -1957,20 +1933,6 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     if (::errorCount() > 0)
         return;
     toplevel.emplace("actions", acts);
-    {
-        // synthesize a "drop" action
-        auto drop = new Util::JsonObject();
-        drop->emplace("name", dropAction);
-        dropActionId = nextId("actions");
-        drop->emplace("id", dropActionId);
-        drop->emplace("runtime_data", new Util::JsonArray());
-        auto body = mkArrayField(drop, "primitives");
-        auto call = new Util::JsonObject();
-        call->emplace("op", "drop");
-        call->emplace("parameters", new Util::JsonArray());
-        body->append(call);
-        acts->append(drop);
-    }
 
     auto pipelines = mkArrayField(&toplevel, "pipelines");
     auto ingressBlock = package->getParameterValue(v1model.sw.ingress.name);
