@@ -7,6 +7,8 @@ is available at
 http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html.
 For the P4 programming language see http://p4.org.
 
+** This repository has submodules; clone it with `git clone --recursive`. **
+
 The code contains three sample compiler back-ends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model
@@ -59,7 +61,16 @@ back-ends; please read the following documents for installing more dependences:
 
 Most dependences can be installed using `apt-get install`:
 
-`sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-dev python2.7 python-scapy python-ipaddr tcpdump`
+`sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-dev pkg-config python python-scapy python-ipaddr tcpdump`
+
+An exception is Protocol Buffers; we need version 3.0, which is not available
+until Ubuntu 16.10. For earlier releases of Ubuntu, you'll need to install from
+source. You can find instructions
+[here](https://github.com/google/protobuf/blob/master/src/README.md). Check out
+the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you build.
+Please note that while newer versions should work for p4c itself, you may run
+into trouble with some extensions unless you install version 3.0, so you may
+want to install from source even on newer releases of Ubuntu.
 
 ## macOS dependences
 
@@ -96,6 +107,13 @@ Installing on macOS:
   ```
   brew link --force bison
   ```
+
+  Homebrew offers a `protobuf` formula. It installs version 3.2, which should
+  work for p4c itself but may cause problems with some extensions. It's
+  preferable to install Protocol Buffers 3.0 from source using the instructions
+  [here](https://github.com/google/protobuf/blob/master/src/README.md). Check
+  out the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you
+  build.
 
 # Development tools
 
