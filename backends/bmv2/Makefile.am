@@ -17,7 +17,7 @@
 # To be included in the main P4C compiler makefile
 
 bin_PROGRAMS += p4c-bm2-ss
-p4c_bm2_ss_LDADD = libfrontend.la libp4ctoolkit.a
+p4c_bm2_ss_LDADD = libfrontend.a libp4ctoolkit.a
 
 p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/bmv2.cpp \

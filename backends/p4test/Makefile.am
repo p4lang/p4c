@@ -16,7 +16,7 @@
 # To be included in the main P4C compiler makefile
 
 noinst_PROGRAMS += p4test
-p4test_LDADD = libfrontend.la libp4ctoolkit.a
+p4test_LDADD = libfrontend.a libp4ctoolkit.a
 
 p4test_UNIFIED = \
     backends/p4test/p4test.cpp \

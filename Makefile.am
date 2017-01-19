@@ -31,7 +31,6 @@ GEN_UNIFIED_CPP=$(TOOLSDIR)/gen-unified-sources.py
 # The first 7 are standard automake variables
 CLEANFILES =                   # Files to remove on clean
 bin_PROGRAMS =                 # Binaries built
-lib_LTLIBRARIES =              # Libtool convenience libraries
 noinst_HEADERS =               # Headers that are not installed
 noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
@@ -83,8 +82,8 @@ BUILT_SOURCES += \
 ################
 
 # Front-end library
-lib_LTLIBRARIES += libfrontend.la
-libfrontend_la_SOURCES = \
+noinst_LIBRARIES += libfrontend.a
+libfrontend_a_SOURCES = \
 	setup.h \
 	setup.cpp \
 	$(frontend_SOURCES) \
