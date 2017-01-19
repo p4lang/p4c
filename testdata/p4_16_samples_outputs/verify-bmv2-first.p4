@@ -15,6 +15,8 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
     state start {
         verify(meta.x == 8s0, error.NewError);
         verify(true, error.NoError);
+        error e = error.NoError;
+        verify(true, e);
         transition accept;
     }
 }

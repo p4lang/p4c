@@ -387,6 +387,19 @@ class ExpressionConverter : public Inspector {
     void postorder(const IR::Member* expression) override {
         // TODO: deal with references that return bool
         auto result = new Util::JsonObject();
+
+        // handle errors
+        {
+            auto type = converter->typeMap->getType(expression, true);
+            if (type->is<IR::Type_Error>()) {
+                result->emplace("type", "hexstr");
+                auto errorValue = converter->retrieveErrorValue(expression);
+                result->emplace("value", Util::toString(errorValue));
+                map.emplace(expression, result);
+                return;
+            }
+        }
+
         auto param = enclosingParamReference(expression->expr);
         if (param != nullptr) {
             auto type = converter->typeMap->getType(expression, true);
@@ -636,11 +649,20 @@ class ExpressionConverter : public Inspector {
             } else if (type->is<IR::Type_Stack>()) {
                 result->emplace("type", "header_stack");
                 result->emplace("value", var->name);
+            } else if (type->is<IR::Type_Error>()) {
+                result->emplace("type", "field");
+                auto f = mkArrayField(result, "value");
+                f->append(converter->scalarsName);
+                f->append(var->name);
             } else {
                 BUG("%1%: type not yet handled", type);
             }
             map.emplace(expression, result);
         }
+    }
+
+    void postorder(const IR::TypeNameExpression* expression) override {
+        (void)expression;
     }
 
     void postorder(const IR::Expression* expression) override {
@@ -1789,6 +1811,12 @@ void JsonConverter::addLocals() {
             field->append(boolWidth);
             field->append(0);
             scalars_width += boolWidth;
+        } else if (type->is<IR::Type_Error>()) {
+            auto field = pushNewArray(scalarFields);
+            field->append(v->name.name);
+            field->append(32);  // using 32-bit fields for errors
+            field->append(0);
+            scalars_width += 32;
         } else {
             BUG("%1%: type not yet handled on this target", type);
         }
@@ -1824,7 +1852,7 @@ void JsonConverter::addMetaInformation() {
   auto meta = new Util::JsonObject();
 
   static constexpr int version_major = 2;
-  static constexpr int version_minor = 1;
+  static constexpr int version_minor = 4;
   auto version = mkArrayField(meta, "version");
   version->append(version_major);
   version->append(version_minor);
@@ -2293,8 +2321,10 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
                 }
                 {
                     auto error = mce->arguments->at(1);
-                    auto errorValue = retrieveErrorValue(error);
-                    params->append(errorValue);
+                    // false means don't wrap in an outer expression object, which is not needed
+                    // here
+                    auto jexpr = conv->convert(error, true, false);
+                    params->append(jexpr);
                 }
                 return result;
             }
@@ -2468,12 +2498,7 @@ void JsonConverter::addErrors() {
     }
 }
 
-JsonConverter::ErrorValue JsonConverter::retrieveErrorValue(const IR::Expression* expr) const {
-    if (!expr->is<IR::Member>()) {
-        ::error("%1%: only constant error values supported for errors", expr);
-        return 0;
-    }
-    auto mem = expr->to<IR::Member>();
+JsonConverter::ErrorValue JsonConverter::retrieveErrorValue(const IR::Member* mem) const {
     auto type = typeMap->getType(mem, true);
     BUG_CHECK(type->is<IR::Type_Error>(), "Not an error constant");
     auto decl = type->to<IR::Type_Error>()->getDeclByName(mem->member.name);
