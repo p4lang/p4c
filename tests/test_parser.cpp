@@ -1654,6 +1654,13 @@ class ParserVerifyTest : public ParserErrorTest {
     return condition;
   }
 
+  ArithExpression build_simple_error_expr(ErrorCode error_code) {
+    ArithExpression expr;
+    expr.push_back_load_const(Data(error_code.get()));
+    expr.build();
+    return expr;
+  }
+
   void verify_test(bool with_error) {
     bool value = !with_error;
     auto condition = build_simple_condition(value);
@@ -1662,7 +1669,8 @@ class ParserVerifyTest : public ParserErrorTest {
     const auto &phv = *packet.get_phv();
     ASSERT_EQ(value, condition.eval(phv));
 
-    parse_state.add_verify(condition, error_codes.from_name(verify_error));
+    auto error_code = error_codes.from_name(verify_error);
+    parse_state.add_verify(condition, build_simple_error_expr(error_code));
     if (with_error)
       parse_and_check_error(&packet, verify_error);
     else

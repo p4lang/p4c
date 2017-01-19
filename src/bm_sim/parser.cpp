@@ -175,15 +175,21 @@ struct ParserOpExtractStack : ParserOp {
 
 struct ParserOpVerify : ParserOp {
   BoolExpression condition;
-  ErrorCode error;
+  ArithExpression error_expr;
 
-  ParserOpVerify(const BoolExpression &condition, const ErrorCode &error)
-      : condition(condition), error(error) { }
+  ParserOpVerify(const BoolExpression &condition,
+                 const ArithExpression &error_expr)
+      : condition(condition), error_expr(error_expr) { }
 
   void operator()(Packet *pkt, const char *data,
                   size_t *bytes_parsed) const override {
     (void) data; (void) bytes_parsed;
-    if (!condition.eval(*pkt->get_phv())) throw parser_exception_arch(error);
+    static thread_local Data error;
+    const auto &phv = *pkt->get_phv();
+    if (!condition.eval(phv)) {
+      error_expr.eval(phv, &error);
+      throw parser_exception_arch(ErrorCode(error.get<ErrorCode::type_t>()));
+    }
   }
 };
 
@@ -563,8 +569,8 @@ ParseState::add_set_from_expression(header_id_t dst_header, int dst_offset,
 
 void
 ParseState::add_verify(const BoolExpression &condition,
-                       const ErrorCode &error) {
-  parser_ops.emplace_back(new ParserOpVerify(condition, error));
+                       const ArithExpression &error_expr) {
+  parser_ops.emplace_back(new ParserOpVerify(condition, error_expr));
 }
 
 void

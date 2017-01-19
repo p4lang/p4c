@@ -386,8 +386,8 @@ TEST(P4Objects, InvalidErrors) {
 }
 
 TEST(P4Objects, ParserVerify) {
-  auto create_json = [](int error_v, std::ostream *ss) {
-    *ss << "{\"errors\":[[\"NoError\",0]],"
+  auto create_json = [](const std::string &error_v, std::ostream *os) {
+    *os << "{\"errors\":[[\"NoError\",0]],"
         << "\"parsers\":[{\"name\":\"parser\",\"id\":0,\"init_state\":"
         << "\"start\",\"parse_states\":[{\"name\":\"start\",\"id\":0,"
         << "\"parser_ops\":[{\"op\":\"verify\",\"parameters\":[null,"
@@ -396,7 +396,7 @@ TEST(P4Objects, ParserVerify) {
 
   {
     std::stringstream is;
-    create_json(0, &is);
+    create_json("0", &is);
     P4Objects objects;
     LookupStructureFactory factory;
     ASSERT_EQ(0, objects.init_objects(&is, &factory));
@@ -404,7 +404,15 @@ TEST(P4Objects, ParserVerify) {
 
   {
     std::stringstream is;
-    create_json(1000, &is);
+    create_json("{\"type\":\"hexstr\",\"value\":\"0x00\"}", &is);
+    P4Objects objects;
+    LookupStructureFactory factory;
+    ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  }
+
+  {
+    std::stringstream is;
+    create_json("1000", &is);
     std::stringstream os;
     P4Objects objects(os);
     LookupStructureFactory factory;

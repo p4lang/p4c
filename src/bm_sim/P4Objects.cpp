@@ -540,16 +540,24 @@ P4Objects::init_objects(std::istream *is,
           }
         } else if (op_type == "verify") {
           assert(cfg_parameters.size() == 2);
-          BoolExpression expr;
-          build_expression(cfg_parameters[0], &expr);
-          expr.build();
-          auto error_code = static_cast<ErrorCode::type_t>(
-              cfg_parameters[1].asInt());
-          if (!error_codes.exists(error_code)) {
-            outstream << "Invalid error code in verify statement\n";
-            return 1;
+          BoolExpression cond_expr;
+          build_expression(cfg_parameters[0], &cond_expr);
+          cond_expr.build();
+          ArithExpression error_expr;
+          const auto &j_error_expr = cfg_parameters[1];
+          if (j_error_expr.isInt()) {  // backward-compatibility
+            auto error_code =  static_cast<ErrorCode::type_t>(
+                j_error_expr.asInt());
+            if (!error_codes.exists(error_code)) {
+              outstream << "Invalid error code in verify statement\n";
+              return 1;
+            }
+            error_expr.push_back_load_const(Data(error_code));
+          } else {
+            build_expression(j_error_expr, &error_expr);
           }
-          parse_state->add_verify(expr, ErrorCode(error_code));
+          error_expr.build();
+          parse_state->add_verify(cond_expr, error_expr);
         } else {
           assert(0 && "parser op not supported");
         }

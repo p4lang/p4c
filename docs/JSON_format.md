@@ -11,7 +11,7 @@ per [this specification] (http://json-schema.org/).
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.3*.
+The version described in this document is *2.4*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -195,8 +195,8 @@ parser. The attributes for these objects are:
     `lookahead` or `expression`, with the appropriate value (see [here]
     (#the-type-value-object)). Finally, for a verify operation, we expect an
     array with exactly 2 elements: the first should be a boolean expression
-    while the second should be a valid integral value for an error constant (see
-    [here] (#errors)).
+    while the second should be an expression resolving to a valid integral value
+    for an error constant (see [here] (#errors)).
   - `transition_key`: a JSON array (in the correct order) of objects which
   describe the different fields of the parse state transition key. Each object
   has 2 attributes, `type` and `value`, where `type` can be either
