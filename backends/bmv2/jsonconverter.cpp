@@ -2293,7 +2293,6 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
                 }
                 {
                     auto error = mce->arguments->at(1);
-                    BUG_CHECK(error->is<IR::Member>(), "Error when processing verify");
                     auto errorValue = retrieveErrorValue(error);
                     params->append(errorValue);
                 }
@@ -2470,7 +2469,10 @@ void JsonConverter::addErrors() {
 }
 
 JsonConverter::ErrorValue JsonConverter::retrieveErrorValue(const IR::Expression* expr) const {
-    BUG_CHECK(expr->is<IR::Member>(), "Not an error constant");
+    if (!expr->is<IR::Member>()) {
+        ::error("%1%: only constant error values supported for errors", expr);
+        return 0;
+    }
     auto mem = expr->to<IR::Member>();
     auto type = typeMap->getType(mem, true);
     BUG_CHECK(type->is<IR::Type_Error>(), "Not an error constant");
