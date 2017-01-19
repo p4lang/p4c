@@ -90,8 +90,8 @@ class Node : public virtual INode {
     virtual Node *clone() const = 0;
     void dbprint(std::ostream &out) const override;
     virtual void dump_fields(std::ostream &) const { }
-    const Node* getNode() const override final { return this; }
-    Node* getNode() override final { return this; }
+    const Node* getNode() const final { return this; }
+    Node* getNode() final { return this; }
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring node_type_name() const override { return "Node"; }
     static cstring static_type_name() { return "Node"; }
