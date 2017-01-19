@@ -257,6 +257,11 @@ class Header : public NamedP4Object {
       fields[f].copy_value(src.fields[f]);
   }
 
+  // compare to another header instance; returns true iff headers have the same
+  // type, are both valid (irrelevant for metadata) and all the fields have the
+  // same value.
+  bool cmp(const Header &other) const;
+
   void set_packet_id(const Debugger::PacketId *id);
 
   Header(const Header &other) = delete;

@@ -44,25 +44,132 @@ T hexstr_to_int(const std::string &hexstr) {
 }  // namespace
 
 
+enum class P4Objects::ExprType { UNKNOWN, DATA, HEADER, BOOL };
+
 void
 P4Objects::build_expression(const Json::Value &json_expression,
                             Expression *expr) {
+  ExprType expr_type(ExprType::UNKNOWN);
+  build_expression(json_expression, expr, &expr_type);
+}
+
+namespace {
+
+using ExprType = P4Objects::ExprType;
+
+ExprOpcode get_eq_opcode(ExprType expr_type) {
+  switch (expr_type) {
+    case ExprType::DATA:
+      return ExprOpcode::EQ_DATA;
+    case ExprType::HEADER:
+      return ExprOpcode::EQ_HEADER;
+    case ExprType::BOOL:
+      return ExprOpcode::EQ_BOOL;
+    default:
+      break;
+  }
+  assert(0);
+  return ExprOpcode::EQ_DATA;
+}
+
+ExprOpcode get_neq_opcode(ExprType expr_type) {
+  switch (expr_type) {
+    case ExprType::DATA:
+      return ExprOpcode::NEQ_DATA;
+    case ExprType::HEADER:
+      return ExprOpcode::NEQ_HEADER;
+    case ExprType::BOOL:
+      return ExprOpcode::NEQ_BOOL;
+    default:
+      break;
+  }
+  assert(0);
+  return ExprOpcode::NEQ_DATA;
+}
+
+// TODO(antonin): should this information be in expressions.h?
+ExprType get_opcode_type(ExprOpcode opcode) {
+  switch (opcode) {
+    case ExprOpcode::LOAD_FIELD:
+    case ExprOpcode::LOAD_CONST:
+    case ExprOpcode::LOAD_LOCAL:
+    case ExprOpcode::LOAD_REGISTER_REF:
+    case ExprOpcode::LOAD_REGISTER_GEN:
+    case ExprOpcode::ADD:
+    case ExprOpcode::SUB:
+    case ExprOpcode::MOD:
+    case ExprOpcode::DIV:
+    case ExprOpcode::MUL:
+    case ExprOpcode::SHIFT_LEFT:
+    case ExprOpcode::SHIFT_RIGHT:
+    case ExprOpcode::BIT_AND:
+    case ExprOpcode::BIT_OR:
+    case ExprOpcode::BIT_XOR:
+    case ExprOpcode::BIT_NEG:
+    case ExprOpcode::TWO_COMP_MOD:
+    case ExprOpcode::BOOL_TO_DATA:
+      return ExprType::DATA;
+    case ExprOpcode::LOAD_BOOL:
+    case ExprOpcode::EQ_DATA:
+    case ExprOpcode::NEQ_DATA:
+    case ExprOpcode::GT_DATA:
+    case ExprOpcode::LT_DATA:
+    case ExprOpcode::GET_DATA:
+    case ExprOpcode::LET_DATA:
+    case ExprOpcode::EQ_HEADER:
+    case ExprOpcode::NEQ_HEADER:
+    case ExprOpcode::EQ_BOOL:
+    case ExprOpcode::NEQ_BOOL:
+    case ExprOpcode::AND:
+    case ExprOpcode::OR:
+    case ExprOpcode::NOT:
+    case ExprOpcode::VALID_HEADER:
+    case ExprOpcode::DATA_TO_BOOL:
+      return ExprType::BOOL;
+    case ExprOpcode::LOAD_HEADER:
+      return ExprType::HEADER;
+    case ExprOpcode::TERNARY_OP:
+      return ExprType::UNKNOWN;
+    case ExprOpcode::SKIP:
+      break;
+  }
+  assert(0);
+  return ExprType::UNKNOWN;
+}
+
+}  // namespace
+
+void
+P4Objects::build_expression(const Json::Value &json_expression,
+                            Expression *expr, ExprType *expr_type) {
+  *expr_type = ExprType::UNKNOWN;
   if (json_expression.isNull()) return;
-  const string type = json_expression["type"].asString();
-  const Json::Value json_value = json_expression["value"];
+  const auto type = json_expression["type"].asString();
+  const auto &json_value = json_expression["value"];
   if (type == "expression") {
-    const string op = json_value["op"].asString();
-    const Json::Value json_left = json_value["left"];
-    const Json::Value json_right = json_value["right"];
+    const auto op = json_value["op"].asString();
+    const auto &json_left = json_value["left"];
+    const auto &json_right = json_value["right"];
+    ExprType typeL, typeR;
 
     if (op == "?") {
-      const Json::Value json_cond = json_value["cond"];
+      const auto &json_cond = json_value["cond"];
       build_expression(json_cond, expr);
 
       Expression e1, e2;
-      build_expression(json_left, &e1);
-      build_expression(json_right, &e2);
+      build_expression(json_left, &e1, &typeL);
+      build_expression(json_right, &e2, &typeR);
+      assert(typeL == typeR);
       expr->push_back_ternary_op(e1, e2);
+      *expr_type = typeL;
+    } else if (op == "==" || op == "!=") {
+      build_expression(json_left, expr, &typeL);
+      build_expression(json_right, expr, &typeR);
+      assert(typeL == typeR);
+      assert(typeL != ExprType::UNKNOWN);
+      auto opcode = (op == "==") ? get_eq_opcode(typeL) : get_neq_opcode(typeL);
+      expr->push_back_op(opcode);
+      *expr_type = ExprType::BOOL;
     } else {
       // special handling for unary + and -, we set the left operand to 0
       if ((op == "+" || op == "-") && json_left.isNull())
@@ -71,34 +178,42 @@ P4Objects::build_expression(const Json::Value &json_expression,
         build_expression(json_left, expr);
       build_expression(json_right, expr);
 
-      ExprOpcode opcode = ExprOpcodesMap::get_opcode(op);
+      auto opcode = ExprOpcodesMap::get_opcode(op);
       expr->push_back_op(opcode);
+      *expr_type = get_opcode_type(opcode);
     }
   } else if (type == "header") {
-    header_id_t header_id = get_header_id(json_value.asString());
+    auto header_id = get_header_id(json_value.asString());
     expr->push_back_load_header(header_id);
+    *expr_type = ExprType::HEADER;
+
+    enable_arith(header_id);
   } else if (type == "field") {
-    const string header_name = json_value[0].asString();
-    header_id_t header_id = get_header_id(header_name);
-    const string field_name = json_value[1].asString();
+    const auto header_name = json_value[0].asString();
+    auto header_id = get_header_id(header_name);
+    const auto field_name = json_value[1].asString();
     int field_offset = get_field_offset(header_id, field_name);
     expr->push_back_load_field(header_id, field_offset);
+    *expr_type = ExprType::DATA;
 
     enable_arith(header_id, field_offset);
   } else if (type == "bool") {
     expr->push_back_load_bool(json_value.asBool());
+    *expr_type = ExprType::BOOL;
   } else if (type == "hexstr") {
     expr->push_back_load_const(Data(json_value.asString()));
+    *expr_type = ExprType::DATA;
   } else if (type == "local") {  // runtime data for expressions in actions
     expr->push_back_load_local(json_value.asInt());
+    *expr_type = ExprType::DATA;
   } else if (type == "register") {
     // TODO(antonin): cheap optimization
     // this may not be worth doing, and probably does not belong here
-    const string register_array_name = json_value[0].asString();
-    auto &json_index = json_value[1];
+    const auto register_array_name = json_value[0].asString();
+    const auto &json_index = json_value[1];
     assert(json_index.size() == 2);
     if (json_index["type"].asString() == "hexstr") {
-      const unsigned int idx = hexstr_to_int<unsigned int>(
+      const auto idx = hexstr_to_int<unsigned int>(
           json_index["value"].asString());
       expr->push_back_load_register_ref(
           get_register_array(register_array_name), idx);
@@ -107,6 +222,7 @@ P4Objects::build_expression(const Json::Value &json_expression,
       expr->push_back_load_register_gen(
           get_register_array(register_array_name));
     }
+    *expr_type = ExprType::DATA;
   } else {
     assert(0);
   }
@@ -190,10 +306,6 @@ P4Objects::init_objects(std::istream *is,
     phv_factory.push_back_header(header_name, header_id,
                                  *header_type, metadata);
     phv_factory.disable_all_field_arith(header_id);
-    // if (!metadata) // temporary ?
-    //   phv_factory.disable_all_field_arith(header_id);
-    // else
-    //   phv_factory.enable_all_field_arith(header_id);
     add_header_id(header_name, header_id);
   }
 
@@ -687,9 +799,7 @@ P4Objects::init_objects(std::istream *is,
           header_id_t header_id = get_header_id(header_name);
           action_fn->parameter_push_back_header(header_id);
 
-          // TODO(antonin):
-          // overkill, needs something more efficient, but looks hard
-          phv_factory.enable_all_field_arith(header_id);
+          enable_arith(header_id);
         } else if (type == "field") {
           const Json::Value &cfg_value_field = cfg_parameter["value"];
           const string header_name = cfg_value_field[0].asString();
@@ -1220,7 +1330,7 @@ P4Objects::init_objects(std::istream *is,
     if (!header_exists(h)) continue;
     // safe to call because we just checked for the header existence
     const header_id_t header_id = get_header_id(h);
-    phv_factory.enable_all_field_arith(header_id);
+    enable_arith(header_id);
   }
 
   parse_config_options(cfg_root);
@@ -1398,6 +1508,16 @@ P4Objects::enable_arith(header_id_t header_id, int field_offset) {
     phv_factory.enable_field_arith(header_id, field_offset);
   } else {
     phv_factory.enable_stack_field_arith(it->second, field_offset);
+  }
+}
+
+void
+P4Objects::enable_arith(header_id_t header_id) {
+  auto it = header_id_to_stack_id.find(header_id);
+  if (it == header_id_to_stack_id.end()) {
+    phv_factory.enable_all_field_arith(header_id);
+  } else {
+    phv_factory.enable_all_stack_field_arith(it->second);
   }
 }
 

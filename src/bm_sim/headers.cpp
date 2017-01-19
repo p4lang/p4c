@@ -199,4 +199,10 @@ void Header::set_packet_id(const Debugger::PacketId *id) {
   for (Field &f : fields) f.set_packet_id(id);
 }
 
+bool Header::cmp(const Header &other) const {
+  return (header_type.get_type_id() == other.header_type.get_type_id()) &&
+      is_valid() && other.is_valid() &&
+      (fields == other.fields);
+}
+
 }  // namespace bm

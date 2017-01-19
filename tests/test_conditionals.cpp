@@ -171,6 +171,70 @@ TEST_F(ConditionalsTest, LetData) {
   ASSERT_TRUE(c.eval(*phv));
 }
 
+TEST_F(ConditionalsTest, EqHeader) {
+  Conditional c("ctest", 0);
+  c.push_back_load_header(testHeader1);
+  c.push_back_load_header(testHeader2);
+  c.push_back_op(ExprOpcode::EQ_HEADER);
+  c.build();
+
+  auto &hdr1 = phv->get_header(testHeader1);
+  auto &hdr2 = phv->get_header(testHeader2);
+  hdr1.mark_valid();
+  hdr2.mark_valid();
+
+  ASSERT_TRUE(c.eval(*phv));
+
+  hdr2.mark_invalid();
+
+  ASSERT_FALSE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsTest, NeqHeader) {
+  Conditional c("ctest", 0);
+  c.push_back_load_header(testHeader1);
+  c.push_back_load_header(testHeader2);
+  c.push_back_op(ExprOpcode::NEQ_HEADER);
+  c.build();
+
+  auto &hdr1 = phv->get_header(testHeader1);
+  auto &hdr2 = phv->get_header(testHeader2);
+  hdr1.mark_valid();
+  hdr2.mark_invalid();
+
+  ASSERT_TRUE(c.eval(*phv));
+
+  hdr2.mark_valid();
+
+  ASSERT_FALSE(c.eval(*phv));
+}
+
+TEST_F(ConditionalsTest, EqBool) {
+  for (auto v1 : {true, false}) {
+    for (auto v2 : {true, false}) {
+      Conditional c("ctest", 0);
+      c.push_back_load_bool(v1);
+      c.push_back_load_bool(v2);
+      c.push_back_op(ExprOpcode::EQ_BOOL);
+      c.build();
+      ASSERT_EQ(v1 == v2, c.eval(*phv));
+    }
+  }
+}
+
+TEST_F(ConditionalsTest, NeqBool) {
+  for (auto v1 : {true, false}) {
+    for (auto v2 : {true, false}) {
+      Conditional c("ctest", 0);
+      c.push_back_load_bool(v1);
+      c.push_back_load_bool(v2);
+      c.push_back_op(ExprOpcode::NEQ_BOOL);
+      c.build();
+      ASSERT_EQ(v1 != v2, c.eval(*phv));
+    }
+  }
+}
+
 TEST_F(ConditionalsTest, Add) {
   Conditional c("ctest", 0);
   c.push_back_load_field(testHeader1, 3);  // f16

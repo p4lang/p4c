@@ -48,6 +48,10 @@ ExprOpcodesMap::ExprOpcodesMap() {
     {">>", ExprOpcode::SHIFT_RIGHT},
     {"==", ExprOpcode::EQ_DATA},
     {"!=", ExprOpcode::NEQ_DATA},
+    {"==h", ExprOpcode::EQ_HEADER},
+    {"!=h", ExprOpcode::NEQ_HEADER},
+    {"==b", ExprOpcode::EQ_BOOL},
+    {"!=b", ExprOpcode::NEQ_BOOL},
     {">", ExprOpcode::GT_DATA},
     {"<", ExprOpcode::LT_DATA},
     {">=", ExprOpcode::GET_DATA},
@@ -270,6 +274,7 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
 
   bool lb, rb;
   const Data *ld, *rd;
+  const Header *lh, *rh;
 
   for (size_t i = 0; i < ops.size(); i++) {
     const auto &op = ops[i];
@@ -388,6 +393,30 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
         rd = data_temps_stack.back(); data_temps_stack.pop_back();
         ld = data_temps_stack.back(); data_temps_stack.pop_back();
         bool_temps_stack.push_back(*ld <= *rd);
+        break;
+
+      case ExprOpcode::EQ_HEADER:
+        rh = header_temps_stack.back(); header_temps_stack.pop_back();
+        lh = header_temps_stack.back(); header_temps_stack.pop_back();
+        bool_temps_stack.push_back(lh->cmp(*rh));
+        break;
+
+      case ExprOpcode::NEQ_HEADER:
+        rh = header_temps_stack.back(); header_temps_stack.pop_back();
+        lh = header_temps_stack.back(); header_temps_stack.pop_back();
+        bool_temps_stack.push_back(!lh->cmp(*rh));
+        break;
+
+      case ExprOpcode::EQ_BOOL:
+        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        bool_temps_stack.push_back(lb == rb);
+        break;
+
+      case ExprOpcode::NEQ_BOOL:
+        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        bool_temps_stack.push_back(lb != rb);
         break;
 
       case ExprOpcode::AND:

@@ -184,6 +184,13 @@ PHVFactory::enable_stack_field_arith(header_stack_id_t header_stack_id,
 }
 
 void
+PHVFactory::enable_all_stack_field_arith(header_stack_id_t header_stack_id) {
+  HeaderStackDesc &desc = header_stack_descs.at(header_stack_id);
+  for (header_id_t header_id : desc.headers)
+    enable_all_field_arith(header_id);
+}
+
+void
 PHVFactory::enable_all_arith() {
   for (auto it : header_descs)
     enable_all_field_arith(it.first);

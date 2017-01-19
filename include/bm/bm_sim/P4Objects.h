@@ -80,6 +80,8 @@ class P4Objects {
     std::set<std::string> headers;
   };
 
+  enum class ExprType;  // forward declaration
+
  public:
   // A reference works great here, but should I switch to a pointer?
   // NOLINTNEXTLINE(runtime/references)
@@ -87,7 +89,7 @@ class P4Objects {
       : outstream(outstream) { }
 
   int init_objects(std::istream *is,
-                   LookupStructureFactory * lookup_factory,
+                   LookupStructureFactory *lookup_factory,
                    int device_id = 0, size_t cxt_id = 0,
                    std::shared_ptr<TransportIface> transport = nullptr,
                    const std::set<header_field_pair> &required_fields =
@@ -339,6 +341,8 @@ class P4Objects {
   }
 
   void build_expression(const Json::Value &json_expression, Expression *expr);
+  void build_expression(const Json::Value &json_expression, Expression *expr,
+                        ExprType *expr_type);
 
   void parse_config_options(const Json::Value &root);
 
@@ -455,6 +459,7 @@ class P4Objects {
       const std::string &name) const;
 
   void enable_arith(header_id_t header_id, int field_offset);
+  void enable_arith(header_id_t header_id);
 
   std::unique_ptr<Calculation> process_cfg_selector(
       const Json::Value &cfg_selector) const;

@@ -360,6 +360,8 @@ class PHVFactory {
   void enable_stack_field_arith(header_stack_id_t header_stack_id,
                                 int field_offset);
 
+  void enable_all_stack_field_arith(header_stack_id_t header_stack_id);
+
   void enable_all_arith();
 
   std::unique_ptr<PHV> create() const;

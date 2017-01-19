@@ -29,6 +29,8 @@
 #include <string>
 #include <set>
 
+#include "jsoncpp/json.h"
+
 using namespace bm;
 
 namespace fs = boost::filesystem;
@@ -409,4 +411,150 @@ TEST(P4Objects, ParserVerify) {
     std::string expected_error_msg("Invalid error code in verify statement\n");
     EXPECT_EQ(expected_error_msg, os.str());
   }
+}
+
+// convenience classes to generate some test JSON input; as of now this is
+// pretty limited but we could extend it if this proves useful
+namespace {
+
+class JsonExpr {
+ public:
+  static JsonExpr load_header(const std::string &name) {
+    JsonExpr res;
+    res.json["type"] = "header";
+    res.json["value"] = name;
+    return res;
+  }
+
+  static JsonExpr load_bool(bool v) {
+    JsonExpr res;
+    res.json["type"] = "bool";
+    res.json["value"] = v;
+    return res;
+  }
+
+  static JsonExpr expression(const std::string &op, const JsonExpr &left,
+                             const JsonExpr &right) {
+    JsonExpr res;
+    res.json["type"] = "expression";
+    res.json["op"] = op;
+    res.json["left"] = left.json;
+    res.json["right"] = right.json;
+    return res;
+  }
+
+  const Json::Value &get_json() const { return json; }
+
+ private:
+  JsonExpr() { }
+
+  Json::Value json;
+};
+
+class JsonBuilder {
+ public:
+  JsonBuilder() {
+    json["header_types"] = Json::Value(Json::arrayValue);
+    json["headers"] = Json::Value(Json::arrayValue);
+    json["pipelines"] = Json::Value(Json::arrayValue);
+  }
+
+  void add_header_type(const std::string &name) {
+    auto &header_types = json["header_types"];
+    Json::Value header_type(Json::objectValue);
+    header_type["name"] = name;
+    header_type["id"] = header_types.size();
+    header_type["fields"] = Json::Value(Json::arrayValue);
+    Json::Value field(Json::arrayValue);
+    field.append("f8");
+    field.append(8);
+    header_type["fields"].append(field);
+    header_types.append(header_type);
+  }
+
+  void add_header(const std::string &name,
+                  const std::string &header_type_name) {
+    auto &headers = json["headers"];
+    Json::Value header(Json::objectValue);
+    header["name"] = name;
+    header["id"] = headers.size();
+    header["header_type"] = header_type_name;
+    header["metadata"] = false;
+    headers.append(header);
+  }
+
+  // only supports one condition for now
+  void add_condition(const std::string &name, const JsonExpr &expr) {
+    auto &pipelines = json["pipelines"];
+    Json::Value pipeline(Json::objectValue);
+    pipeline["name"] = "pipe";
+    pipeline["id"] = 0;
+    pipeline["init_table"] = name;
+    pipeline["tables"] = Json::Value(Json::arrayValue);
+    pipeline["conditionals"] = Json::Value(Json::arrayValue);
+    Json::Value cond(Json::objectValue);
+    cond["name"] = name;
+    cond["id"] = 0;
+    Json::Value expression(Json::objectValue);
+    expression["type"] = "expression";
+    expression["value"] = expr.get_json();
+    cond["expression"] = expression;
+    cond["true_next"] = Json::Value();  // null
+    cond["false_next"] = Json::Value();  // null
+    pipeline["conditionals"].append(cond);
+    pipelines.append(pipeline);
+  }
+
+  std::string to_string() const {
+    Json::StyledWriter writer;
+    return writer.write(json);
+  }
+
+ private:
+  Json::Value json;
+};
+
+}  // namespace
+
+class P4ObjectsExprBuilderTest : public ::testing::Test {
+ protected:
+  P4Objects objects;
+  LookupStructureFactory factory;
+
+  P4ObjectsExprBuilderTest() { }
+};
+
+TEST_F(P4ObjectsExprBuilderTest, EqHeader) {
+  JsonBuilder builder;
+  builder.add_header_type("hdr_t");
+  builder.add_header("hdr1", "hdr_t");
+  builder.add_header("hdr2", "hdr_t");
+  auto e1 = JsonExpr::load_header("hdr1");
+  auto e2 = JsonExpr::load_header("hdr2");
+  auto expr = JsonExpr::expression("==", e1, e2);
+  builder.add_condition("c0", expr);
+  std::stringstream is(builder.to_string());
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  const auto cond = objects.get_conditional("c0");
+  const auto &phv_factory = objects.get_phv_factory();
+  auto phv = phv_factory.create();
+  auto &hdr1 = phv->get_header("hdr1");
+  auto &hdr2 = phv->get_header("hdr2");
+  ASSERT_FALSE(cond->eval(*phv));
+  hdr1.mark_valid(); hdr2.mark_valid();
+  ASSERT_TRUE(cond->eval(*phv));
+}
+
+TEST_F(P4ObjectsExprBuilderTest, EqBool) {
+  JsonBuilder builder;
+  auto e1 = JsonExpr::load_bool(true);
+  auto e2 = JsonExpr::load_bool(true);
+  auto expr = JsonExpr::expression("!=", e1, e2);
+  builder.add_condition("c0", expr);
+  std::stringstream is(builder.to_string());
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+  const auto cond = objects.get_conditional("c0");
+  const auto &phv_factory = objects.get_phv_factory();
+  auto phv = phv_factory.create();
+  ASSERT_FALSE(cond->eval(*phv));
 }
