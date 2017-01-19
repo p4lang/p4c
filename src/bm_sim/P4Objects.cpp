@@ -445,7 +445,8 @@ P4Objects::init_objects(std::istream *is,
     const string parser_name = cfg_parser["name"].asString();
     p4object_id_t parser_id = cfg_parser["id"].asInt();
 
-    Parser *parser = new Parser(parser_name, parser_id, &error_codes);
+    std::unique_ptr<Parser> parser(
+        new Parser(parser_name, parser_id, &error_codes));
 
     std::unordered_map<string, ParseState *> current_parse_states;
 
@@ -456,7 +457,8 @@ P4Objects::init_objects(std::istream *is,
       const string parse_state_name = cfg_parse_state["name"].asString();
       const p4object_id_t id = cfg_parse_state["id"].asInt();
       // p4object_id_t parse_state_id = cfg_parse_state["id"].asInt();
-      ParseState *parse_state = new ParseState(parse_state_name, id);
+      std::unique_ptr<ParseState> parse_state(
+          new ParseState(parse_state_name, id));
 
       const Json::Value &cfg_parser_ops = cfg_parse_state["parser_ops"];
       for (const auto &cfg_parser_op : cfg_parser_ops) {
@@ -565,8 +567,8 @@ P4Objects::init_objects(std::istream *is,
       if (cfg_transition_key.size() > 0u)
         parse_state->set_key_builder(key_builder);
 
-      parse_states.push_back(unique_ptr<ParseState>(parse_state));
-      current_parse_states[parse_state_name] = parse_state;
+      current_parse_states[parse_state_name] = parse_state.get();
+      parse_states.push_back(std::move(parse_state));
     }
 
     for (const auto &cfg_parse_state : cfg_parse_states) {
@@ -619,7 +621,7 @@ P4Objects::init_objects(std::istream *is,
     const ParseState *init_state = current_parse_states[init_state_name];
     parser->set_init_state(init_state);
 
-    add_parser(parser_name, unique_ptr<Parser>(parser));
+    add_parser(parser_name, std::move(parser));
   }
 
   // deparsers
