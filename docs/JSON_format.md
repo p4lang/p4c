@@ -11,7 +11,7 @@ per [this specification] (http://json-schema.org/).
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.1*.
+The version described in this document is *2.2*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -48,6 +48,7 @@ endian order); it can be prefixed with a negative sign, for negative values.
 - if `type` is a named P4 type (`header`, `header_stack`, `calculation`,
 `register_array`, `meter_array`, `counter_array`), `value` is a string
 corresponding to the name of the designated object.
+- if `type` is `string`, `value` is a sequence of characters.
 - if `type` is `lookahead` (parser only), `value` is a JSON 2-tuple, where the
 first item is the bit offset for the lookahead and the second item is the
 bitwidth.
@@ -285,7 +286,7 @@ call, with the following attributes:
   object with the following attributes:
     - `type`: one of `hexstr`, `runtime_data`, `header`, `field`, `calculation`,
     `meter_array`, `counter_array`, `register_array`, `header_stack`,
-    `expression`, `extern`
+    `expression`, `extern`, `string`
     - `value`: the appropriate parameter value. If `type` is `runtime_data`,
     this is an integer representing an index into the `runtime_data` (attribute
     of action) array. If `type` is `extern`, this is the name of the extern

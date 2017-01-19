@@ -56,6 +56,7 @@
 //!   - `[const] MeterArray &`
 //!   - `[const] CounterArray &`
 //!   - `[const] RegisterArray &`
+//!   - `const std::string &` or `const char *` for strings
 //!
 //! You can declare and register primitives anywhere in your switch target C++
 //! code.
@@ -175,7 +176,8 @@ struct ActionParam {
         HEADER_STACK, CALCULATION,
         METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY,
         EXPRESSION,
-        EXTERN_INSTANCE} tag;
+        EXTERN_INSTANCE,
+        STRING} tag;
 
   union {
     unsigned int const_offset;
@@ -226,6 +228,10 @@ struct ActionParam {
     } expression;
 
     ExternType *extern_instance;
+
+    // I use a pointer here to avoid complications with the union; the string
+    // memory is owned by ActionFn (just like for ArithExpression above)
+    const std::string *str;
   };
 
   // convert to the correct type when calling a primitive
@@ -380,6 +386,23 @@ ExternType *ActionParam::to<ExternType *>(ActionEngineState *state) const {
   return extern_instance;
 }
 
+template <> inline
+const std::string &ActionParam::to<const std::string &>(
+    ActionEngineState *state) const {
+  assert(tag == ActionParam::STRING);
+  (void) state;
+  return *str;
+}
+
+// just a convenience function, I expect the version above to be the most used
+// one
+template <> inline
+const char *ActionParam::to<const char *>(ActionEngineState *state) const {
+  assert(tag == ActionParam::STRING);
+  (void) state;
+  return str->c_str();
+}
+
 /* This is adapted from stack overflow code:
    http://stackoverflow.com/questions/11044504/any-solution-to-unpack-a-vector-to-function-arguments-in-c
 */
@@ -531,6 +554,7 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_register_array(RegisterArray *register_array);
   void parameter_push_back_expression(std::unique_ptr<ArithExpression> expr);
   void parameter_push_back_extern_instance(ExternType *extern_instance);
+  void parameter_push_back_string(const std::string &str);
 
   void push_back_primitive(ActionPrimitive_ *primitive);
 
@@ -544,6 +568,7 @@ class ActionFn :  public NamedP4Object {
   std::vector<Data> const_values{};
   // should I store the objects in the vector, instead of pointers?
   std::vector<std::unique_ptr<ArithExpression> > expressions{};
+  std::vector<std::string> strings{};
 
  private:
   static size_t nb_data_tmps;

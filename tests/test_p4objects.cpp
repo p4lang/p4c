@@ -413,6 +413,16 @@ TEST(P4Objects, ParserVerify) {
   }
 }
 
+TEST(P4Objects, ActionParamString) {
+  std::stringstream is(
+      "{\"actions\":[{\"name\":\"a0\",\"id\":0,\"runtime_data\":[],"
+      "\"primitives\":[{\"op\":\"ignore_string\","
+      "\"parameters\":[{\"type\":\"string\",\"value\":\"testString\"}]}]}]}");
+  P4Objects objects;
+  LookupStructureFactory factory;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+}
+
 // convenience classes to generate some test JSON input; as of now this is
 // pretty limited but we could extend it if this proves useful
 namespace {

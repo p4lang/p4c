@@ -36,7 +36,7 @@ using namespace bm;
 // some primitive definitions for testing
 
 class SetField : public ActionPrimitive<Field &, const Data &> {
-  void operator ()(Field &f, const Data &d) {
+  void operator ()(Field &f, const Data &d) override {
     f.set(d);
   }
 };
@@ -45,7 +45,7 @@ REGISTER_PRIMITIVE(SetField);
 
 // more general Set operation, which can take any writable Data type
 class Set : public ActionPrimitive<Data &, const Data &> {
-  void operator ()(Data &f, const Data &d) {
+  void operator ()(Data &f, const Data &d) override {
     f.set(d);
   }
 };
@@ -53,7 +53,7 @@ class Set : public ActionPrimitive<Data &, const Data &> {
 REGISTER_PRIMITIVE(Set);
 
 class Add : public ActionPrimitive<Field &, const Data &, const Data &> {
-  void operator ()(Field &f, const Data &d1, const Data &d2) {
+  void operator ()(Field &f, const Data &d1, const Data &d2) override {
     f.add(d1, d2);
   }
 };
@@ -61,7 +61,7 @@ class Add : public ActionPrimitive<Field &, const Data &, const Data &> {
 REGISTER_PRIMITIVE(Add);
 
 class RemoveHeader : public ActionPrimitive<Header &> {
-  void operator ()(Header &hdr) {
+  void operator ()(Header &hdr) override {
     hdr.mark_invalid();
   }
 };
@@ -69,7 +69,7 @@ class RemoveHeader : public ActionPrimitive<Header &> {
 REGISTER_PRIMITIVE(RemoveHeader);
 
 class CopyHeader : public ActionPrimitive<Header &, const Header &> {
-  void operator ()(Header &dst, const Header &src) {
+  void operator ()(Header &dst, const Header &src) override {
     if (!src.is_valid()) return;
     dst.mark_valid();
     assert(dst.get_header_type_id() == src.get_header_type_id());
@@ -84,7 +84,7 @@ REGISTER_PRIMITIVE(CopyHeader);
 /* this is an example of primitive that can be used to set known control
    registers, e.g. a drop() primitive that would set a drop metadata bit flag */
 class CRSet : public ActionPrimitive<> {
-  void operator ()() {
+  void operator ()() override {
     get_field("test1.f16").set(666);
   }
 };
@@ -93,7 +93,7 @@ REGISTER_PRIMITIVE(CRSet);
 
 /* this is an example of primitive which uses header stacks */
 class Pop : public ActionPrimitive<HeaderStack &> {
-  void operator ()(HeaderStack &stack) {
+  void operator ()(HeaderStack &stack) override {
     stack.pop_front();
   }
 };
@@ -105,7 +105,8 @@ class ModifyFieldWithHashBasedOffset
   : public ActionPrimitive<Field &, const Data &,
                            const NamedCalculation &, const Data &> {
   void operator ()(Field &dst, const Data &base,
-                   const NamedCalculation &hash, const Data &size) {
+                   const NamedCalculation &hash,
+                   const Data &size) override {
     uint64_t v =
       (hash.output(get_packet()) + base.get<uint64_t>()) % size.get<uint64_t>();
     dst.set(v);
@@ -116,7 +117,8 @@ REGISTER_PRIMITIVE(ModifyFieldWithHashBasedOffset);
 
 class ExecuteMeter
     : public ActionPrimitive<Field &, MeterArray &, const Data &> {
-  void operator ()(Field &dst, MeterArray &meter_array, const Data &idx) {
+  void operator ()(Field &dst, MeterArray &meter_array,
+                   const Data &idx) override {
     dst.set(meter_array.execute_meter(get_packet(), idx.get_uint()));
   }
 };
@@ -125,7 +127,7 @@ REGISTER_PRIMITIVE(ExecuteMeter);
 
 // illustrates how a packet general purpose register can be used in a primitive
 class WritePacketRegister : public ActionPrimitive<const Data &> {
-  void operator ()(const Data &v) {
+  void operator ()(const Data &v) override {
     get_packet().set_register(0, v.get<uint64_t>());
   }
 };
@@ -133,10 +135,43 @@ class WritePacketRegister : public ActionPrimitive<const Data &> {
 REGISTER_PRIMITIVE(WritePacketRegister);
 
 class _nop : public ActionPrimitive<> {
-  void operator ()() {}
+  void operator ()() override {}
 };
 
 REGISTER_PRIMITIVE(_nop);
+
+class SaveStringIface {
+ public:
+  virtual std::string get_saved_string() const = 0;
+};
+
+class SaveString
+    : public ActionPrimitive<const std::string &>, public SaveStringIface {
+  void operator ()(const std::string &s) override {
+    s_ = s;
+  }
+
+  std::string s_;
+
+ public:
+  std::string get_saved_string() const override { return s_; }
+};
+
+REGISTER_PRIMITIVE(SaveString);
+
+class SaveCString
+    : public ActionPrimitive<const char *>, public SaveStringIface {
+  void operator ()(const char *s) override {
+    s_ = s;
+  }
+
+  const char *s_;
+
+ public:
+  std::string get_saved_string() const override { return std::string(s_); }
+};
+
+REGISTER_PRIMITIVE(SaveCString);
 
 // Google Test fixture for actions tests
 class ActionsTest : public ::testing::Test {
@@ -551,6 +586,23 @@ TEST_F(ActionsTest, WritePacketRegister) {
   testActionFnEntry(pkt.get());
 
   ASSERT_EQ(v, pkt->get_register(idx));
+}
+
+template <typename Primitive>
+class ActionsStringParamTest : public ActionsTest {
+ protected:
+  Primitive primitive;
+};
+
+using SaveStringTypes = ::testing::Types<SaveString, SaveCString>;
+TYPED_TEST_CASE(ActionsStringParamTest, SaveStringTypes);
+
+TYPED_TEST(ActionsStringParamTest, Basic) {
+  const std::string testString("testString");
+  this->testActionFn.push_back_primitive(&this->primitive);
+  this->testActionFn.parameter_push_back_string(testString);
+  this->testActionFnEntry(this->pkt.get());
+  ASSERT_EQ(testString, this->primitive.get_saved_string());
 }
 
 TEST_F(ActionsTest, TwoPrimitives) {

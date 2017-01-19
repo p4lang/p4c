@@ -141,7 +141,7 @@ ActionFn::parameter_push_back_expression(
   std::unique_ptr<ArithExpression> expr
 ) {
   size_t nb_expression_params = 1;
-  for (const ActionParam &p : params)
+  for (const auto &p : params)
     if (p.tag == ActionParam::EXPRESSION) nb_expression_params += 1;
 
   assert(nb_expression_params <= ActionFn::nb_data_tmps);
@@ -163,6 +163,22 @@ ActionFn::parameter_push_back_extern_instance(ExternType *extern_instance) {
   ActionParam param;
   param.tag = ActionParam::EXTERN_INSTANCE;
   param.extern_instance = extern_instance;
+  params.push_back(param);
+}
+
+void
+ActionFn::parameter_push_back_string(const std::string &str) {
+  strings.push_back(str);
+  size_t idx = 0;
+  // we called push_back on the vector which may have invalidated the pointers,
+  // so we need to recompute them; alternatively we could add a level of
+  // indirection and store std::unique_ptr<std::string> in strings...
+  for (auto &p : params)
+    if (p.tag == ActionParam::STRING) p.str = &strings.at(idx++);
+  assert(strings.size() - 1 == idx);
+  ActionParam param;
+  param.tag = ActionParam::STRING;
+  param.str = &strings.back();
   params.push_back(param);
 }
 

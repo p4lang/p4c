@@ -863,6 +863,9 @@ P4Objects::init_objects(std::istream *is,
           const string name = cfg_parameter["value"].asString();
           ExternType *extern_instance = get_extern_instance(name);
           action_fn->parameter_push_back_extern_instance(extern_instance);
+        } else if (type == "string") {
+          action_fn->parameter_push_back_string(
+              cfg_parameter["value"].asString());
         } else {
           assert(0 && "parameter not supported");
         }

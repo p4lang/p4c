@@ -21,6 +21,8 @@
 #include <bm/bm_sim/actions.h>
 #include <bm/bm_sim/extern.h>
 
+#include <string>
+
 using namespace bm;
 
 class modify_field : public ActionPrimitive<Field &, const Data &> {
@@ -89,6 +91,14 @@ class pop : public ActionPrimitive<HeaderStack &, const Data &> {
 };
 
 REGISTER_PRIMITIVE(pop);
+
+class ignore_string : public ActionPrimitive<const std::string &> {
+  void operator ()(const std::string &s) {
+    (void)s;
+  }
+};
+
+REGISTER_PRIMITIVE(ignore_string);
 
 // one dummy extern
 
