@@ -11,7 +11,7 @@ per [this specification] (http://json-schema.org/).
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.2*.
+The version described in this document is *2.3*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -148,6 +148,22 @@ error constants are not used anywhere in the program).
 We recommend using 0 for the core library error `NoError`, but this is not
 strictly necessary. Note that the value `2**31 - 1` is reserved and cannot be
 assigned by the compiler.
+
+### `enums`
+
+Its is a JSON array of all the enums declared in the P4 program (enum
+declarations were introduced in P4_16). Each array item has the following
+attributes:
+- `name`: name of the enum, as it appears in the p4 program
+- `entries`: a JSON array of all the constants declared inside the enum. Each
+array item is itself an array with exactly 2 elements: the name of the enum
+constant as it appears in the P4 program and an integer value in the range `[0,
+2**31 - 1)`. It is up to the compiler to assign a *unique* integer value (unique
+with respect to the other constants in the enum) to each enum constant; if the
+enum constant is used in an expression in the P4 program, it is up to the
+compiler to consistently replace each reference with its assigned value when
+producing the bmv2 JSON. This is very similar to how we handle [errors]
+(#errors).
 
 ### `parsers`
 

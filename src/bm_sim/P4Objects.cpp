@@ -254,6 +254,28 @@ P4Objects::init_objects(std::istream *is,
         TransportIface::make_dummy());
   }
 
+  // enums
+
+  const auto &cfg_enums = cfg_root["enums"];
+  for (const auto &cfg_enum : cfg_enums) {
+    auto enum_name = cfg_enum["name"].asString();
+    auto enum_added = enums.add_enum(enum_name);
+    if (!enum_added) {
+      outstream << "Invalid enums specification in json\n";
+      return 1;
+    }
+    const auto &cfg_enum_entries = cfg_enum["entries"];
+    for (const auto &cfg_enum_entry : cfg_enum_entries) {
+      auto entry_name = cfg_enum_entry[0].asString();
+      auto value = static_cast<EnumMap::type_t>(cfg_enum_entry[1].asInt());
+      auto entry_added = enums.add_entry(enum_name, entry_name, value);
+      if (!entry_added) {
+        outstream << "Invalid enums specification in json\n";
+        return 1;
+      }
+    }
+  }
+
   // header types
 
   const Json::Value &cfg_header_types = cfg_root["header_types"];
@@ -1594,6 +1616,17 @@ P4Objects::get_config_options() const {
 ErrorCodeMap
 P4Objects::get_error_codes() const {
   return error_codes;
+}
+
+EnumMap::type_t
+P4Objects::get_enum_value(const std::string &name) const {
+  return enums.from_name(name);
+}
+
+const std::string &
+P4Objects::get_enum_name(const std::string &enum_name,
+                         EnumMap::type_t entry_value) const {
+  return enums.to_name(enum_name, entry_value);
 }
 
 }  // namespace bm

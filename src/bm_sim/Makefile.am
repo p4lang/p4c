@@ -29,6 +29,7 @@ deparser.cpp \
 dev_mgr.cpp \
 dev_mgr_bmi.cpp \
 dev_mgr_packet_in.cpp \
+enums.cpp \
 event_logger.cpp \
 expressions.cpp \
 extern.cpp \

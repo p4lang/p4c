@@ -25,6 +25,7 @@
 #include <bm/bm_sim/P4Objects.h>
 
 #include <fstream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <set>
@@ -467,6 +468,7 @@ class JsonBuilder {
     json["header_types"] = Json::Value(Json::arrayValue);
     json["headers"] = Json::Value(Json::arrayValue);
     json["pipelines"] = Json::Value(Json::arrayValue);
+    json["enums"] = Json::Value(Json::arrayValue);
   }
 
   void add_header_type(const std::string &name) {
@@ -513,6 +515,22 @@ class JsonBuilder {
     cond["false_next"] = Json::Value();  // null
     pipeline["conditionals"].append(cond);
     pipelines.append(pipeline);
+  }
+
+  void add_enum(const std::string &name,
+                const std::map<std::string, int> &enum_entries) {
+    auto &enums = json["enums"];
+    Json::Value enum_(Json::objectValue);
+    enum_["name"] = name;
+    Json::Value entries(Json::arrayValue);
+    for (const auto &p : enum_entries) {
+      Json::Value entry(Json::arrayValue);
+      entry.append(p.first);
+      entry.append(p.second);
+      entries.append(entry);
+    }
+    enum_["entries"] = entries;
+    enums.append(enum_);
   }
 
   std::string to_string() const {
@@ -567,4 +585,39 @@ TEST_F(P4ObjectsExprBuilderTest, EqBool) {
   const auto &phv_factory = objects.get_phv_factory();
   auto phv = phv_factory.create();
   ASSERT_FALSE(cond->eval(*phv));
+}
+
+
+TEST(P4Objects, Enums) {
+  LookupStructureFactory factory;
+  JsonBuilder builder;
+  std::map<std::string, int> entries = {{"Entry1", 1}, {"Entry2", 2}};
+  builder.add_enum("Enum1", entries);
+  {
+    std::stringstream is(builder.to_string());
+    P4Objects objects;
+    ASSERT_EQ(0, objects.init_objects(&is, &factory));
+    ASSERT_EQ(1, objects.get_enum_value("Enum1.Entry1"));
+    ASSERT_EQ("Enum1.Entry1", objects.get_enum_name("Enum1", 1));
+  }
+
+  std::string expected_error_msg("Invalid enums specification in json\n");
+  {
+    auto builder1 = builder;
+    builder1.add_enum("Enum1", {});
+    std::stringstream os;
+    std::stringstream is(builder1.to_string());
+    P4Objects objects(os);
+    ASSERT_NE(0, objects.init_objects(&is, &factory));
+    EXPECT_EQ(expected_error_msg, os.str());
+  }
+  {
+    JsonBuilder builder1;
+    builder1.add_enum("Enum1", {{"Entry1", 1}, {"Entry2", 1}});
+    std::stringstream os;
+    std::stringstream is(builder1.to_string());
+    P4Objects objects(os);
+    ASSERT_NE(0, objects.init_objects(&is, &factory));
+    EXPECT_EQ(expected_error_msg, os.str());
+  }
 }

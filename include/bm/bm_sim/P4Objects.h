@@ -46,6 +46,7 @@
 #include "ageing.h"
 #include "field_lists.h"
 #include "extern.h"
+#include "enums.h"
 
 // forward declaration of Json::Value
 namespace Json {
@@ -225,6 +226,10 @@ class P4Objects {
 
   ErrorCodeMap get_error_codes() const;
 
+  EnumMap::type_t get_enum_value(const std::string &name) const;
+  const std::string &get_enum_name(const std::string &enum_name,
+                                   EnumMap::type_t entry_value) const;
+
   // public to be accessed by test class
   std::ostream &outstream;
 
@@ -401,6 +406,8 @@ class P4Objects {
   std::unordered_map<std::string, std::unique_ptr<ParseVSet> > parse_vsets{};
 
   ErrorCodeMap error_codes;
+
+  EnumMap enums{};
 
   // checksums
   std::vector<std::unique_ptr<Checksum> > checksums{};

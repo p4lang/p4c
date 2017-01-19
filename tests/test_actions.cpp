@@ -718,12 +718,12 @@ TEST_F(ActionsTest, UniquePrimitivesForEachP4Objects) {
   ASSERT_EQ(0, second_objects.init_objects(&second_is, &second_factory));
 
   // check primitives are unique across p4objects instances
-  ASSERT_TRUE(first_objects.get_primitive(std::string("_nop"))
-              != second_objects.get_primitive(std::string("_nop")));
+  ASSERT_NE(first_objects.get_primitive(std::string("_nop")),
+            second_objects.get_primitive(std::string("_nop")));
 
   // check only one copy of a primitive for one p4objects instance
-  ASSERT_TRUE(first_objects.get_primitive(std::string("_nop"))
-              == first_objects.get_primitive(std::string("_nop")));
+  ASSERT_EQ(first_objects.get_primitive(std::string("_nop")),
+            first_objects.get_primitive(std::string("_nop")));
 }
 
 class RegisterSpin : public ActionPrimitive<RegisterArray &, const Data &> {
