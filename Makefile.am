@@ -26,9 +26,10 @@ GEN_UNIFIED_CPP=$(TOOLSDIR)/gen-unified-sources.py
 .l.c:
 	$(LEX.l) $< > $@
 
-# Variables that are appended to in sub-Makefiles
-# Please use += to add values to these variables
-# The first 7 are standard automake variables
+################ Variables populated in subproject Makefiles
+# Please use += to append values to these variables.
+
+# Standard automake variables.
 CLEANFILES =                   # Files to remove on clean
 bin_PROGRAMS =                 # Binaries built
 noinst_LTLIBRARIES =           # Libtool convenience libraries
@@ -37,6 +38,8 @@ noinst_LIBRARIES =             # Static libraries built
 noinst_PROGRAMS =              # Binaries built that are not installed
 BUILT_SOURCES =                # Generated source files
 TESTS =                        # Tests to execute
+
+# Variables specific to our build system.
 XFAIL_TESTS = $(IFAIL_TESTS)   # Tests that are supposed to fail
 IFAIL_TESTS =                  # intermittent failures
 export XFAIL_TESTS
@@ -44,6 +47,8 @@ export IFAIL_TESTS
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
 extension_frontend_SOURCES =   # Files added to libfrontend by extensions
+
+################ Subproject Makefile inclusions
 
 include $(srcdir)/lib/Makefile.am
 include $(srcdir)/tools/ir-generator/Makefile.am
