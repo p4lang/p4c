@@ -147,8 +147,8 @@ class JsonConverter final {
 
     // Adds declared errors to json
     void addErrors();
-    // Retrieve assigned numerical value for given error constant (expr must be IR::Member)
-    ErrorValue retrieveErrorValue(const IR::Expression* expr) const;
+    // Retrieve assigned numerical value for given error constant
+    ErrorValue retrieveErrorValue(const IR::Member* mem) const;
 
  public:
     explicit JsonConverter(const CompilerOptions& options);
