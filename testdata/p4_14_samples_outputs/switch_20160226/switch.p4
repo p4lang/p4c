@@ -4495,11 +4495,11 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
 }
 
 control process_ingress_bd_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ingress_bd_stats") counter(32w1024, CounterType.packets_and_bytes) ingress_bd_stats;
+    @name("ingress_bd_stats_count") counter(32w1024, CounterType.packets_and_bytes) ingress_bd_stats_count;
     @name("update_ingress_bd_stats") action update_ingress_bd_stats() {
-        ingress_bd_stats.count((bit<32>)meta.l2_metadata.bd_stats_idx);
+        ingress_bd_stats_count.count((bit<32>)meta.l2_metadata.bd_stats_idx);
     }
-    @name("ingress_bd_stats") table ingress_bd_stats_0() {
+    @name("ingress_bd_stats") table ingress_bd_stats() {
         actions = {
             update_ingress_bd_stats;
             @default_only NoAction;
@@ -4508,16 +4508,16 @@ control process_ingress_bd_stats(inout headers hdr, inout metadata meta, inout s
         default_action = NoAction();
     }
     apply {
-        ingress_bd_stats_0.apply();
+        ingress_bd_stats.apply();
     }
 }
 
 control process_ingress_acl_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("acl_stats") counter(32w1024, CounterType.packets_and_bytes) acl_stats;
+    @name("acl_stats_count") counter(32w1024, CounterType.packets_and_bytes) acl_stats_count;
     @name("acl_stats_update") action acl_stats_update() {
-        acl_stats.count((bit<32>)meta.acl_metadata.acl_stats_index);
+        acl_stats_count.count((bit<32>)meta.acl_metadata.acl_stats_index);
     }
-    @name("acl_stats") table acl_stats_0() {
+    @name("acl_stats") table acl_stats() {
         actions = {
             acl_stats_update;
             @default_only NoAction;
@@ -4529,7 +4529,7 @@ control process_ingress_acl_stats(inout headers hdr, inout metadata meta, inout 
         default_action = NoAction();
     }
     apply {
-        acl_stats_0.apply();
+        acl_stats.apply();
     }
 }
 

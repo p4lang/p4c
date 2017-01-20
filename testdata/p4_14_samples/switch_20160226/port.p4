@@ -267,14 +267,14 @@ control process_port_vlan_mapping {
 /* Ingress BD stats based on packet type                                     */
 /*****************************************************************************/
 #ifndef STATS_DISABLE
-counter ingress_bd_stats {
+counter ingress_bd_stats_count {
     type : packets_and_bytes;
     instance_count : BD_STATS_TABLE_SIZE;
     min_width : 32;
 }
 
 action update_ingress_bd_stats() {
-    count(ingress_bd_stats, l2_metadata.bd_stats_idx);
+    count(ingress_bd_stats_count, l2_metadata.bd_stats_idx);
 }
 
 table ingress_bd_stats {
