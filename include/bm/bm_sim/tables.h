@@ -35,11 +35,11 @@ namespace bm {
 
 template<typename T>
 struct HasFactoryMethod {
-  typedef std::unique_ptr<T> (*Signature)(
-    const std::string &, const std::string &,
-    p4object_id_t, size_t, const MatchKeyBuilder &,
-    LookupStructureFactory *,
-    bool, bool);
+  using Signature = std::unique_ptr<T> (*)(
+      const std::string &, const std::string &,
+      p4object_id_t, size_t, const MatchKeyBuilder &,
+      LookupStructureFactory *,
+      bool, bool);
 
   template <typename U, Signature> struct SFINAE {};
   template<typename U> static char Test(SFINAE<U, U::create>*);

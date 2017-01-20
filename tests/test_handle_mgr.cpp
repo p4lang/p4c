@@ -37,7 +37,7 @@ class SimpleTest : public ::testing::Test {
   // virtual void TearDown() {}
 };
 
-typedef Types<HandleMgr::iterator, HandleMgr::const_iterator> IteratorTypes;
+using IteratorTypes = Types<HandleMgr::iterator, HandleMgr::const_iterator>;
 
 TYPED_TEST_CASE(SimpleTest, IteratorTypes);
 

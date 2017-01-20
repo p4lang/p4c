@@ -206,7 +206,7 @@ struct AtomicTimestamp {
 };
 
 struct EntryMeta {
-  typedef Packet::clock clock;
+  using clock = Packet::clock;
 
   AtomicTimestamp ts{};
   uint32_t timeout_ms{0};
@@ -436,7 +436,7 @@ class MatchUnitAbstract : public MatchUnitAbstract_ {
 template <typename K, typename V>
 class MatchUnitGeneric : public MatchUnitAbstract<V> {
  public:
-  typedef typename MatchUnitAbstract<V>::MatchUnitLookup MatchUnitLookup;
+  using MatchUnitLookup = typename MatchUnitAbstract<V>::MatchUnitLookup;
   struct Entry {
     Entry() {}
     Entry(K key, V value)

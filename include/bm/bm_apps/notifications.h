@@ -36,11 +36,11 @@ class NotificationsListenerImp;
 
 class NotificationsListener {
  public:
-  typedef uint64_t buffer_id_t;
-  typedef int switch_id_t;
-  typedef int cxt_id_t;
-  typedef int list_id_t;
-  typedef int table_id_t;
+  using buffer_id_t = uint64_t;
+  using switch_id_t = int;
+  using cxt_id_t = int;
+  using list_id_t = int;
+  using table_id_t = int;
 
   struct LearnMsgInfo {
     switch_id_t switch_id;
@@ -50,8 +50,8 @@ class NotificationsListener {
     unsigned int num_samples;
   };
 
-  typedef std::function<void(const LearnMsgInfo &msg_info,
-                             const char *, void *)> LearnCb;
+  using LearnCb = std::function<void(const LearnMsgInfo &msg_info,
+                                     const char *, void *)>;
 
   struct AgeingMsgInfo {
     switch_id_t switch_id;
@@ -61,13 +61,13 @@ class NotificationsListener {
     unsigned int num_entries;
   };
 
-  typedef std::function<void(const AgeingMsgInfo &msg_info,
-                             const char *, void *)> AgeingCb;
+  using AgeingCb = std::function<void(const AgeingMsgInfo &msg_info,
+                                      const char *, void *)>;
 
   enum class PortEvent { PORT_UP, PORT_DOWN };
 
-  typedef std::function<void(switch_id_t, int port_num, PortEvent,
-                             void *)> PortEventCb;
+  using PortEventCb = std::function<void(switch_id_t, int port_num, PortEvent,
+                                         void *)>;
 
  public:
   explicit NotificationsListener(

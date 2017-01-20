@@ -39,7 +39,7 @@ class ExternType;
 
 class ExternFactoryMap {
  public:
-  typedef std::function<std::unique_ptr<ExternType>()> ExternFactoryFn;
+  using ExternFactoryFn = std::function<std::unique_ptr<ExternType>()>;
 
   static ExternFactoryMap *get_instance();
 

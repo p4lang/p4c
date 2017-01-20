@@ -29,8 +29,8 @@ namespace bm_runtime { namespace standard {
 
 using namespace bm;
 
-typedef RuntimeInterface::mbr_hdl_t mbr_hdl_t;
-typedef RuntimeInterface::grp_hdl_t grp_hdl_t;
+using mbr_hdl_t = RuntimeInterface::mbr_hdl_t;
+using grp_hdl_t = RuntimeInterface::grp_hdl_t;
 
 class StandardHandler : virtual public StandardIf {
 public:

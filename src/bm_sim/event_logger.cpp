@@ -40,14 +40,14 @@ enum EventType {
   CONFIG_CHANGE = 999
 };
 
-typedef struct __attribute__((packed)) {
+struct msg_hdr_t {
   int type;
   int switch_id;
   int cxt_id;
   uint64_t sig;
   uint64_t id;
   uint64_t copy_id;
-} msg_hdr_t;
+} __attribute__((packed));
 
 namespace {
 
@@ -66,9 +66,9 @@ fill_msg_hdr(EventType type, int device_id,
 
 void
 EventLogger::packet_in(const Packet &packet) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int port_in;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::PACKET_IN, device_id, packet, &msg);
@@ -78,9 +78,9 @@ EventLogger::packet_in(const Packet &packet) {
 
 void
 EventLogger::packet_out(const Packet &packet) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int port_out;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::PACKET_OUT, device_id, packet, &msg);
@@ -90,9 +90,9 @@ EventLogger::packet_out(const Packet &packet) {
 
 void
 EventLogger::parser_start(const Packet &packet, const Parser &parser) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int parser_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::PARSER_START, device_id, packet, &msg);
@@ -102,9 +102,9 @@ EventLogger::parser_start(const Packet &packet, const Parser &parser) {
 
 void
 EventLogger::parser_done(const Packet &packet, const Parser &parser) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int parser_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::PARSER_DONE, device_id, packet, &msg);
@@ -114,9 +114,9 @@ EventLogger::parser_done(const Packet &packet, const Parser &parser) {
 
 void
 EventLogger::parser_extract(const Packet &packet, header_id_t header) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int header_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::PARSER_EXTRACT, device_id, packet, &msg);
@@ -126,9 +126,9 @@ EventLogger::parser_extract(const Packet &packet, header_id_t header) {
 
 void
 EventLogger::deparser_start(const Packet &packet, const Deparser &deparser) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int deparser_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::DEPARSER_START, device_id, packet, &msg);
@@ -138,9 +138,9 @@ EventLogger::deparser_start(const Packet &packet, const Deparser &deparser) {
 
 void
 EventLogger::deparser_done(const Packet &packet, const Deparser &deparser) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int deparser_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::DEPARSER_DONE, device_id, packet, &msg);
@@ -150,9 +150,9 @@ EventLogger::deparser_done(const Packet &packet, const Deparser &deparser) {
 
 void
 EventLogger::deparser_emit(const Packet &packet, header_id_t header) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int header_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::DEPARSER_EMIT, device_id, packet, &msg);
@@ -162,9 +162,9 @@ EventLogger::deparser_emit(const Packet &packet, header_id_t header) {
 
 void
 EventLogger::checksum_update(const Packet &packet, const Checksum &checksum) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int checksum_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::CHECKSUM_UPDATE, device_id, packet, &msg);
@@ -174,9 +174,9 @@ EventLogger::checksum_update(const Packet &packet, const Checksum &checksum) {
 
 void
 EventLogger::pipeline_start(const Packet &packet, const Pipeline &pipeline) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int pipeline_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::PIPELINE_START, device_id, packet, &msg);
@@ -186,9 +186,9 @@ EventLogger::pipeline_start(const Packet &packet, const Pipeline &pipeline) {
 
 void
 EventLogger::pipeline_done(const Packet &packet, const Pipeline &pipeline) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int pipeline_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::PIPELINE_DONE, device_id, packet, &msg);
@@ -199,10 +199,10 @@ EventLogger::pipeline_done(const Packet &packet, const Pipeline &pipeline) {
 void
 EventLogger::condition_eval(const Packet &packet,
                             const Conditional &cond, bool result) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int condition_id;
     int result;  // 0 (true) or 1 (false);
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::CONDITION_EVAL, device_id, packet, &msg);
@@ -224,10 +224,10 @@ EventLogger::condition_eval(const Packet &packet,
 void
 EventLogger::table_hit(const Packet &packet, const MatchTableAbstract &table,
                        entry_handle_t handle) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int table_id;
     int entry_hdl;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::TABLE_HIT, device_id, packet, &msg);
@@ -238,9 +238,9 @@ EventLogger::table_hit(const Packet &packet, const MatchTableAbstract &table,
 
 void
 EventLogger::table_miss(const Packet &packet, const MatchTableAbstract &table) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int table_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::TABLE_MISS, device_id, packet, &msg);
@@ -252,9 +252,9 @@ void
 EventLogger::action_execute(const Packet &packet,
                             const ActionFn &action_fn,
                             const ActionData &action_data) {
-  typedef struct : msg_hdr_t {
+  struct msg_t : msg_hdr_t {
     int action_id;
-  } __attribute__((packed)) msg_t;
+  } __attribute__((packed));
 
   msg_t msg;
   fill_msg_hdr(EventType::ACTION_EXECUTE, device_id, packet, &msg);

@@ -27,7 +27,7 @@
 
 namespace bm {
 
-typedef Debugger::PacketId PacketId;
+using PacketId = Debugger::PacketId;
 
 constexpr size_t Packet::nb_registers;
 constexpr size_t Packet::INVALID_ENTRY_INDEX;

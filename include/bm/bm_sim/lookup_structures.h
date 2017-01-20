@@ -149,12 +149,12 @@ class LookupStructure {
   virtual void clear() = 0;
 };
 
-// Convenience typedefs to simplify the code needed to override LookupStructure
-// and LookupStructureFactory
-typedef LookupStructure<ExactMatchKey>   ExactLookupStructure;
-typedef LookupStructure<LPMMatchKey>     LPMLookupStructure;
-typedef LookupStructure<TernaryMatchKey> TernaryLookupStructure;
-typedef LookupStructure<RangeMatchKey>   RangeLookupStructure;
+// Convenience alias declarations to simplify the code needed to override
+// LookupStructure and LookupStructureFactory
+using ExactLookupStructure = LookupStructure<ExactMatchKey>;
+using LPMLookupStructure = LookupStructure<LPMMatchKey>;
+using TernaryLookupStructure = LookupStructure<TernaryMatchKey>;
+using RangeLookupStructure = LookupStructure<RangeMatchKey>;
 
 //! This class is used by match units to create instances of the appropriate
 //! LookupStructure implementation. In order to use custom data structures in

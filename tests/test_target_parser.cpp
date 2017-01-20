@@ -148,7 +148,7 @@ TEST_F(TargetParserIfaceTest, DispatchMany) {
 
 class TargetParserBasicTest : public ::testing::Test {
  protected:
-  typedef TargetParserBasic::ReturnCode ReturnCode;
+  using ReturnCode = TargetParserBasic::ReturnCode;
 
   TargetParserBasic target_parser;
   fs::path json_path;

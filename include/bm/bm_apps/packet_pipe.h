@@ -33,8 +33,8 @@ class PacketInjectImp;
 class PacketInject {
  public:
   // the library owns the memory, make a copy if you need before returning
-  typedef std::function<void(int port_num, const char *buffer, int len,
-                             void *cookie)> PacketReceiveCb;
+  using PacketReceiveCb = std::function<void(int port_num, const char *buffer,
+                                             int len, void *cookie)>;
 
   explicit PacketInject(const std::string &addr);
 

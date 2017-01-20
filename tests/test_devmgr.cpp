@@ -223,7 +223,7 @@ class PacketInReceiver {
   bool read(char *dst, size_t len, int *recv_port,
             unsigned int timeout_ms = 1000) {
     len = (len > max_size) ? max_size : len;
-    typedef std::chrono::system_clock clock;
+    using clock = std::chrono::system_clock;
     clock::time_point tp_start = clock::now();
     clock::time_point tp_end = tp_start + std::chrono::milliseconds(timeout_ms);
     std::unique_lock<std::mutex> lock(mutex);
@@ -450,8 +450,8 @@ struct PMPassive { };
 template <typename PMType>
 class PortMonitorTest : public ::testing::Test {
  protected:
-  typedef DevMgrIface::port_t port_t;
-  typedef DevMgrIface::PortStatus PortStatus;
+  using port_t = DevMgrIface::port_t;
+  using PortStatus = DevMgrIface::PortStatus;
 
   static constexpr int device_id = 0;
 
@@ -541,7 +541,7 @@ PortMonitorTest<PMActive>::set_port_status(port_t port, PortStatus status) {
   }
 }
 
-typedef Types<PMPassive, PMActive> PMTypes;
+using PMTypes = Types<PMPassive, PMActive>;
 
 TYPED_TEST_CASE(PortMonitorTest, PMTypes);
 

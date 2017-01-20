@@ -33,7 +33,7 @@ namespace bm_apps {
 
 namespace {
 
-typedef struct {
+struct LEA_hdr_t {
   char sub_topic[4];
   int switch_id;
   int cxt_id;
@@ -41,9 +41,9 @@ typedef struct {
   uint64_t buffer_id;
   unsigned int num_samples;
   char _padding[4];
-} __attribute__((packed)) LEA_hdr_t;
+} __attribute__((packed));
 
-typedef struct {
+struct AGE_hdr_t {
   char sub_topic[4];
   int switch_id;
   int cxt_id;
@@ -51,14 +51,14 @@ typedef struct {
   int table_id;
   unsigned int num_entries;
   char _padding[4];
-} __attribute__((packed)) AGE_hdr_t;
+} __attribute__((packed));
 
-typedef struct {
+struct PRT_hdr_t {
   char sub_topic[4];
   int switch_id;
   unsigned int num_statuses;
   char _padding[20];
-} __attribute__((packed)) PRT_hdr_t;
+} __attribute__((packed));
 
 }  // namespace
 
@@ -183,10 +183,10 @@ NotificationsListenerImp::receive_PRT(const char *hdr, const char *data) {
   }
   auto hdr_ = reinterpret_cast<const PRT_hdr_t *>(hdr);
 
-  typedef struct {
+  struct one_status_t {
     int port;
     int status;
-  } __attribute__((packed)) one_status_t;
+  } __attribute__((packed));
   auto statuses = reinterpret_cast<const one_status_t *>(data);
 
   for (unsigned int i = 0; i < hdr_->num_statuses; i++) {

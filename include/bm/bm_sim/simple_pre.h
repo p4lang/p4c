@@ -47,15 +47,15 @@ namespace bm {
 class McSimplePre {
  public:
   //! NC
-  typedef unsigned int mgrp_t;
+  using mgrp_t = unsigned int;
   //! NC
-  typedef unsigned int rid_t;
+  using rid_t = unsigned int;
   //! NC
-  typedef unsigned int egress_port_t;
+  using egress_port_t = unsigned int;
 
-  typedef uintptr_t mgrp_hdl_t;
-  typedef uintptr_t l1_hdl_t;
-  typedef uintptr_t l2_hdl_t;
+  using mgrp_hdl_t = uintptr_t;
+  using l1_hdl_t = uintptr_t;
+  using l2_hdl_t = uintptr_t;
 
  public:
   enum McReturnCode {
@@ -83,10 +83,10 @@ class McSimplePre {
 
  public:
   static constexpr size_t PORT_MAP_SIZE = 256;
-  typedef McPre::Set<PORT_MAP_SIZE> PortMap;
+  using PortMap = McPre::Set<PORT_MAP_SIZE>;
 
   static constexpr size_t LAG_MAP_SIZE = 256;
-  typedef McPre::Set<LAG_MAP_SIZE> LagMap;
+  using LagMap = McPre::Set<LAG_MAP_SIZE>;
 
   McSimplePre() {}
   McReturnCode mc_mgrp_create(const mgrp_t, mgrp_hdl_t *);

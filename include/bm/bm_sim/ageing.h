@@ -31,7 +31,7 @@ class MatchTableAbstract;
 
 class AgeingMonitorIface {
  public:
-  typedef struct {
+  struct msg_hdr_t {
     char sub_topic[4];
     int switch_id;
     int cxt_id;
@@ -39,7 +39,7 @@ class AgeingMonitorIface {
     int table_id;
     unsigned int num_entries;
     char _padding[4];  // the header size for notifications is always 32 bytes
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
 
   virtual ~AgeingMonitorIface() { }
 

@@ -43,10 +43,10 @@
 namespace bm {
 
 //! Integral type used to identify a given data packet
-typedef uint64_t packet_id_t;
+using packet_id_t = uint64_t;
 
 //! Integral type used to distinguish between different clones of a packet
-typedef uint64_t copy_id_t;
+using copy_id_t = uint64_t;
 
 class CopyIdGenerator {
  private:
@@ -96,9 +96,9 @@ class Packet final {
   friend class Switch;
 
  public:
-  typedef std::chrono::system_clock clock;
+  using clock = std::chrono::system_clock;
 
-  typedef PacketBuffer::state_t buffer_state_t;
+  using buffer_state_t = PacketBuffer::state_t;
 
   //! Number of general purpose registers per packet
   static constexpr size_t nb_registers = 2u;

@@ -42,7 +42,7 @@
 
 namespace bm {
 
-typedef p4object_id_t header_id_t;
+using header_id_t = p4object_id_t;
 
 // forward declaration
 class PHVFactory;
@@ -65,26 +65,26 @@ class PHVFactory;
 //! why we expose methods like reset(), reset_header_stacks() and
 //! reset_metadata().
 class PHV {
-  typedef std::reference_wrapper<Header> HeaderRef;
-  typedef std::reference_wrapper<Field> FieldRef;
+  using HeaderRef = std::reference_wrapper<Header>;
+  using FieldRef = std::reference_wrapper<Field>;
 
  public:
   friend class PHVFactory;
   friend class Packet;
 
-  typedef std::unordered_map<std::string, HeaderRef> HeaderNamesMap;
+  using HeaderNamesMap = std::unordered_map<std::string, HeaderRef>;
   //! Used to iterate over headers and access their names. The order may be
   //! different from the header id order.
-  typedef HeaderNamesMap::iterator header_name_iterator;
+  using header_name_iterator = HeaderNamesMap::iterator;
   //! @copydoc header_name_iterator
-  typedef HeaderNamesMap::const_iterator const_header_name_iterator;
+  using const_header_name_iterator = HeaderNamesMap::const_iterator;
 
-  typedef std::unordered_map<std::string, FieldRef> FieldNamesMap;
+  using FieldNamesMap = std::unordered_map<std::string, FieldRef>;
 
   //! Used to iterate over headers in ascending id order.
-  typedef std::vector<Header>::iterator header_iterator;
+  using header_iterator = std::vector<Header>::iterator;
   //! @copydoc header_iterator
-  typedef std::vector<Header>::const_iterator const_header_iterator;
+  using const_header_iterator = std::vector<Header>::const_iterator;
 
  public:
   PHV() {}

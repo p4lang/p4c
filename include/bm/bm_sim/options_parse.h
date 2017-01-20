@@ -33,8 +33,8 @@ namespace bm {
 
 class InterfaceList {
  public:
-  typedef std::map<int, std::string>::iterator iterator;
-  typedef std::map<int, std::string>::const_iterator const_iterator;
+  using iterator = std::map<int, std::string>::iterator;
+  using const_iterator = std::map<int, std::string>::const_iterator;
 
  public:
   void add(int port, const std::string &iface) {

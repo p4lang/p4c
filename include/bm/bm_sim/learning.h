@@ -42,8 +42,8 @@ class Packet;
 //! learn() method, which will send out the learning notifications.
 class LearnEngineIface {
  public:
-  typedef int list_id_t;
-  typedef uint64_t buffer_id_t;
+  using list_id_t = int;
+  using buffer_id_t = uint64_t;
 
   enum LearnErrorCode {
     SUCCESS = 0,
@@ -51,7 +51,7 @@ class LearnEngineIface {
     ERROR
   };
 
-  typedef struct {
+  struct msg_hdr_t {
     char sub_topic[4];
     int switch_id;
     int cxt_id;
@@ -59,10 +59,10 @@ class LearnEngineIface {
     uint64_t buffer_id;
     unsigned int num_samples;
     char _padding[4];  // the header size for notifications is always 32 bytes
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
 
-  typedef std::function<void(const msg_hdr_t &, size_t,
-                             std::unique_ptr<char[]>, void *)> LearnCb;
+  using LearnCb = std::function<void(const msg_hdr_t &, size_t,
+                                     std::unique_ptr<char[]>, void *)>;
 
   virtual ~LearnEngineIface() { }
 

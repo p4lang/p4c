@@ -43,11 +43,11 @@ class ByteContainer {
   using _vector = std::vector<char, detail::short_alloc<char, S, 1> >;
 
  public:
-  typedef _vector::iterator iterator;
-  typedef _vector::const_iterator const_iterator;
-  typedef _vector::reference reference;
-  typedef _vector::const_reference const_reference;
-  typedef size_t size_type;
+  using iterator = _vector::iterator;
+  using const_iterator = _vector::const_iterator;
+  using reference = _vector::reference;
+  using const_reference = _vector::const_reference;
+  using size_type = size_t;
 
  public:
   ByteContainer()

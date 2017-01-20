@@ -25,7 +25,7 @@
 
 namespace bm {
 
-typedef Meter::MeterErrorCode MeterErrorCode;
+using MeterErrorCode = Meter::MeterErrorCode;
 
 using ticks = std::chrono::microseconds;  // better with nanoseconds ?
 using std::chrono::duration_cast;

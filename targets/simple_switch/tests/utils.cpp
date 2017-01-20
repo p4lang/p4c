@@ -56,7 +56,7 @@ NNEventListener::get_and_remove_events(const std::string &pid,
                                        std::vector<NNEvent> *pevents,
                                        size_t num_events,
                                        unsigned int timeout_ms) {
-  typedef std::chrono::system_clock clock;
+  using clock = std::chrono::system_clock;
   clock::time_point tp_start = clock::now();
   clock::time_point tp_end = tp_start + std::chrono::milliseconds(timeout_ms);
   std::unique_lock<std::mutex> lock(mutex);

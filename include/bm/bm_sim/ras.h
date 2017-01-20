@@ -31,7 +31,7 @@ namespace bm {
 
 class RandAccessUIntSet {
  public:
-  typedef uintptr_t mbr_t;
+  using mbr_t = uintptr_t;
 
  public:
   /* this code is basically copied from handle_mgr.h, maybe I should just write

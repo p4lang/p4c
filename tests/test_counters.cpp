@@ -29,7 +29,7 @@ using namespace bm;
 // Google Test fixture for counter tests
 class CountersTest : public ::testing::Test {
  protected:
-  typedef Counter::counter_value_t counter_value_t;
+  using counter_value_t = Counter::counter_value_t;
 
  protected:
   PHVFactory phv_factory;

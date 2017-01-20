@@ -46,7 +46,7 @@ static_assert(std::is_pod<Debugger::PacketId>::value,
 
 constexpr Debugger::PacketId Debugger::dummy_PacketId;
 
-typedef Debugger::PacketId PacketId;
+using PacketId = Debugger::PacketId;
 
 class DebuggerDummy final : public DebuggerIface {
  private:
@@ -96,7 +96,7 @@ class DebuggerNN final : public DebuggerIface {
   void open();
 
  private:
-  typedef std::unique_lock<std::mutex> UniqueLock;
+  using UniqueLock = std::unique_lock<std::mutex>;
 
   void notify_update_(const PacketId &packet_id,
                       uint64_t id, const char *bytes, int nbits) override;
@@ -204,7 +204,7 @@ class DebuggerNN final : public DebuggerIface {
   std::unordered_map<PacketId, std::vector<uint32_t>, PacketIdKeyHash>
       packet_ctr_stacks{};
 
-  typedef std::aligned_storage<256>::type ReplyStorage;
+  using ReplyStorage = std::aligned_storage<256>::type;
   std::unique_ptr<ReplyStorage> rep_storage{new ReplyStorage()};
   size_t rep_size{};
 
@@ -236,27 +236,27 @@ enum MsgType {
   ATTACH, DETACH,
 };
 
-typedef struct __attribute__((packed)) {
+struct req_msg_hdr_t {
   int type;
   int switch_id;
   uint64_t req_id;
-} req_msg_hdr_t;
+} __attribute__((packed));
 
-typedef struct __attribute__((packed)) {
+struct rep_status_msg_hdr_t {
   int type;
   int switch_id;
   uint64_t req_id;
   int status;
   uint64_t aux;
-} rep_status_msg_hdr_t;
+} __attribute__((packed));
 
-typedef struct __attribute__((packed)) {
+struct rep_event_msg_hdr_t {
   int type;
   int switch_id;
   uint64_t req_id;
   uint64_t packet_id;
   uint64_t copy_id;
-} rep_event_msg_hdr_t;
+} __attribute__((packed));
 
 DebuggerNN::DebuggerNN(const std::string &addr) : s(AF_SP, NN_REP), addr(addr) {
   request_thread = std::thread(&DebuggerNN::request_in, this);
@@ -495,11 +495,11 @@ DebuggerNN::req_next(const char *data) {
 
 void
 DebuggerNN::req_get_value(const char *data) {
-  typedef struct : req_msg_hdr_t {
+  struct msg_hdr_t : req_msg_hdr_t {
     uint64_t packet_id;
     uint64_t copy_id;
     uint64_t id;
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
   const msg_hdr_t *msg_hdr = reinterpret_cast<const msg_hdr_t *>(data);
   BMLOG_TRACE("Dbg cmd received: get value");
   UniqueLock lock(mutex);
@@ -522,10 +522,10 @@ DebuggerNN::req_get_value(const char *data) {
 
 void
 DebuggerNN::req_get_backtrace(const char *data) {
-  typedef struct : req_msg_hdr_t {
+  struct msg_hdr_t : req_msg_hdr_t {
     uint64_t packet_id;
     uint64_t copy_id;
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
   const msg_hdr_t *msg_hdr = reinterpret_cast<const msg_hdr_t *>(data);
   BMLOG_TRACE("Dbg cmd received: get backtrace");
   UniqueLock lock(mutex);
@@ -586,15 +586,15 @@ DebuggerNN::req_resume_packet_in(const char *data) {
 
 void
 DebuggerNN::req_filter_notifications(const char *data) {
-  typedef struct : req_msg_hdr_t {
+  struct msg_hdr_t : req_msg_hdr_t {
     int nb;
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
   const msg_hdr_t *msg_hdr = reinterpret_cast<const msg_hdr_t *>(data);
   int nb = msg_hdr->nb;
-  typedef struct {
+  struct one_id_t {
     uint64_t packet_id;
     uint64_t copy_id;
-  } __attribute__((packed)) one_id_t;
+  } __attribute__((packed));
   BMLOG_TRACE("Dbg cmd received: filter notifications");
   const char *data_ = data + sizeof(*msg_hdr);;
   UniqueLock lock(mutex);
@@ -614,9 +614,9 @@ DebuggerNN::req_filter_notifications(const char *data) {
 
 void
 DebuggerNN::req_set_watchpoint(const char *data) {
-  typedef struct : req_msg_hdr_t {
+  struct msg_hdr_t : req_msg_hdr_t {
     uint64_t id;
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
   const msg_hdr_t *msg_hdr = reinterpret_cast<const msg_hdr_t *>(data);
   BMLOG_TRACE("Dbg cmd received: set watchpoint");
   UniqueLock lock(mutex);
@@ -626,9 +626,9 @@ DebuggerNN::req_set_watchpoint(const char *data) {
 
 void
 DebuggerNN::req_unset_watchpoint(const char *data) {
-  typedef struct : req_msg_hdr_t {
+  struct msg_hdr_t : req_msg_hdr_t {
     uint64_t id;
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
   const msg_hdr_t *msg_hdr = reinterpret_cast<const msg_hdr_t *>(data);
   BMLOG_TRACE("Dbg cmd received: unset watchpoint");
   UniqueLock lock(mutex);
@@ -708,10 +708,10 @@ DebuggerNN::send_rep_status(int status, uint64_t aux) {
 void
 DebuggerNN::send_field_value(const PacketId &packet_id,
                            uint64_t id, const char *bytes, int nbytes) {
-  typedef struct : rep_event_msg_hdr_t {
+  struct msg_hdr_t : rep_event_msg_hdr_t {
     uint64_t id;
     int nbytes;
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
   msg_hdr_t *msg_hdr = reinterpret_cast<msg_hdr_t *>(rep_storage.get());
   char *buf = reinterpret_cast<char *>(rep_storage.get());
   msg_hdr->type = FIELD_VALUE;
@@ -731,9 +731,9 @@ DebuggerNN::send_field_value(const PacketId &packet_id,
 void
 DebuggerNN::send_backtrace(const PacketId &packet_id,
                            const std::vector<uint32_t> &stack) {
-  typedef struct : rep_event_msg_hdr_t {
+  struct msg_hdr_t : rep_event_msg_hdr_t {
     int nb;
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
   msg_hdr_t *msg_hdr = reinterpret_cast<msg_hdr_t *>(rep_storage.get());
   char *buf = reinterpret_cast<char *>(rep_storage.get());
   msg_hdr->type = BACKTRACE;
@@ -752,9 +752,9 @@ DebuggerNN::send_backtrace(const PacketId &packet_id,
 
 void
 DebuggerNN::send_packet_in(const PacketId &packet_id, int port) {
-  typedef struct : rep_event_msg_hdr_t {
+  struct msg_hdr_t : rep_event_msg_hdr_t {
     int port;
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
   msg_hdr_t *msg_hdr = reinterpret_cast<msg_hdr_t *>(rep_storage.get());
   msg_hdr->type = PACKET_IN;
   msg_hdr->switch_id = switch_id;
@@ -770,9 +770,9 @@ DebuggerNN::send_packet_in(const PacketId &packet_id, int port) {
 
 void
 DebuggerNN::send_packet_out(const PacketId &packet_id, int port) {
-  typedef struct : rep_event_msg_hdr_t {
+  struct msg_hdr_t : rep_event_msg_hdr_t {
     int port;
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
   msg_hdr_t *msg_hdr = reinterpret_cast<msg_hdr_t *>(rep_storage.get());
   msg_hdr->type = PACKET_OUT;
   msg_hdr->switch_id = switch_id;

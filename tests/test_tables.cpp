@@ -42,10 +42,10 @@ using std::chrono::milliseconds;
 using std::this_thread::sleep_until;
 using std::this_thread::sleep_for;
 
-typedef MatchUnitExact<ActionEntry> MUExact;
-typedef MatchUnitLPM<ActionEntry> MULPM;
-typedef MatchUnitTernary<ActionEntry> MUTernary;
-typedef MatchUnitRange<ActionEntry> MURange;
+using MUExact = MatchUnitExact<ActionEntry>;
+using MULPM = MatchUnitLPM<ActionEntry>;
+using MUTernary = MatchUnitTernary<ActionEntry>;
+using MURange = MatchUnitRange<ActionEntry>;
 
 namespace {
 
@@ -266,10 +266,10 @@ TableSizeTwo<MURange>::add_entry_w_valid(const std::string &key,
                                   handle, priority);
 }
 
-typedef Types<MUExact,
-              MULPM,
-              MUTernary,
-              MURange> TableTypes;
+using TableTypes = Types<MUExact,
+                         MULPM,
+                         MUTernary,
+                         MURange>;
 
 TYPED_TEST_CASE(TableSizeTwo, TableTypes);
 
@@ -683,7 +683,7 @@ TYPED_TEST(TableSizeTwo, CountersReset) {
 }
 
 TYPED_TEST(TableSizeTwo, Meters) {
-  typedef std::chrono::high_resolution_clock clock;
+  using clock = std::chrono::high_resolution_clock;
 
   std::string key_ = "\x0a\xba";
   ByteContainer key("0x0aba");
@@ -920,7 +920,7 @@ TYPED_TEST(TableSizeTwo, GetEntries) {
 
 class TableIndirect : public ::testing::Test {
  protected:
-  typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
+  using mbr_hdl_t = MatchTableIndirect::mbr_hdl_t;
 
  protected:
   PHVFactory phv_factory;
@@ -1322,8 +1322,8 @@ TEST_F(TableIndirect, GetEntries) {
 
 class TableIndirectWS : public ::testing::Test {
  protected:
-  typedef MatchTableIndirect::mbr_hdl_t mbr_hdl_t;
-  typedef MatchTableIndirectWS::grp_hdl_t grp_hdl_t;
+  using mbr_hdl_t = MatchTableIndirect::mbr_hdl_t;
+  using grp_hdl_t = MatchTableIndirectWS::grp_hdl_t;
 
  protected:
   PHVFactory phv_factory;

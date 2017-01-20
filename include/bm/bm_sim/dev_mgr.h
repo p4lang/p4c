@@ -46,9 +46,9 @@ namespace bm {
 
 class DevMgrIface : public PacketDispatcherIface {
  public:
-  typedef PortMonitorIface::port_t port_t;
-  typedef PortMonitorIface::PortStatus PortStatus;
-  typedef PortMonitorIface::PortStatusCb PortStatusCb;
+  using port_t = PortMonitorIface::port_t;
+  using PortStatus = PortMonitorIface::PortStatus;
+  using PortStatusCb = PortMonitorIface::PortStatusCb;
 
   struct PortInfo {
     PortInfo(port_t port_num, const std::string &iface_name)
@@ -123,11 +123,11 @@ class DevMgrIface : public PacketDispatcherIface {
 class DevMgr : public PacketDispatcherIface {
  public:
   //! @copydoc PortMonitorIface::port_t
-  typedef PortMonitorIface::port_t port_t;
+  using port_t = PortMonitorIface::port_t;
   //! @copydoc PortMonitorIface::PortStatus
-  typedef PortMonitorIface::PortStatus PortStatus;
+  using PortStatus = PortMonitorIface::PortStatus;
   //! @copydoc PortMonitorIface::PortStatusCb
-  typedef PortMonitorIface::PortStatusCb PortStatusCb;
+  using PortStatusCb = PortMonitorIface::PortStatusCb;
 
   DevMgr();
 

@@ -86,13 +86,13 @@ class Context final {
   friend class SwitchWContexts;
 
  public:
-  typedef RuntimeInterface::mbr_hdl_t mbr_hdl_t;
-  typedef RuntimeInterface::grp_hdl_t grp_hdl_t;
+  using mbr_hdl_t = RuntimeInterface::mbr_hdl_t;
+  using grp_hdl_t = RuntimeInterface::grp_hdl_t;
 
-  typedef RuntimeInterface::MeterErrorCode MeterErrorCode;
-  typedef RuntimeInterface::RegisterErrorCode RegisterErrorCode;
+  using MeterErrorCode = RuntimeInterface::MeterErrorCode;
+  using RegisterErrorCode = RuntimeInterface::RegisterErrorCode;
 
-  typedef RuntimeInterface::ErrorCode ErrorCode;
+  using ErrorCode = RuntimeInterface::ErrorCode;
 
  public:
   // needs to be default constructible if I want to put it in a std::vector
@@ -417,8 +417,8 @@ class Context final {
 
   void set_force_arith(bool force_arith);
 
-  typedef P4Objects::header_field_pair header_field_pair;
-  typedef P4Objects::ForceArith ForceArith;
+  using header_field_pair = P4Objects::header_field_pair;
+  using ForceArith = P4Objects::ForceArith;
   int init_objects(std::istream *is,
                    LookupStructureFactory * lookup_factory,
                    const std::set<header_field_pair> &required_fields =

@@ -23,7 +23,7 @@
 
 namespace bm {
 
-typedef int header_id_t;
+using header_id_t = int;
 
 class PHV;
 class Header;

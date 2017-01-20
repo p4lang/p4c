@@ -119,10 +119,10 @@ class LearnEngine final : public LearnEngineIface {
     std::vector<ByteContainer> constants{};
   };
 
-  typedef std::chrono::high_resolution_clock clock;
-  typedef std::chrono::milliseconds milliseconds;
+  using clock = std::chrono::high_resolution_clock;
+  using milliseconds = std::chrono::milliseconds;
 
-  typedef std::unordered_set<ByteContainer, ByteContainerKeyHash> LearnFilter;
+  using LearnFilter = std::unordered_set<ByteContainer, ByteContainerKeyHash>;
 
  private:
   struct FilterPtrs {

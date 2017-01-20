@@ -53,7 +53,7 @@ namespace runtime = bm_runtime::standard;
 
 namespace {
 
-typedef struct {
+struct learn_hdr_t {
   char sub_topic[4];
   int switch_id;
   int cxt_id;
@@ -61,7 +61,7 @@ typedef struct {
   uint64_t buffer_id;
   unsigned int num_samples;
   char _padding[4];
-} __attribute__((packed)) learn_hdr_t;
+} __attribute__((packed));
 
 }  // namespace
 

@@ -28,7 +28,7 @@
 
 namespace bm {
 
-typedef uintptr_t handle_t;
+using handle_t = uintptr_t;
 
 class HandleMgr {
  public:

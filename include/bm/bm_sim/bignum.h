@@ -33,7 +33,7 @@ namespace bignum {
   using boost::multiprecision::gmp_int;
   using boost::multiprecision::number;
 
-  typedef number<gmp_int> Bignum;
+  using Bignum = number<gmp_int>;
 
   inline size_t export_bytes(char *dst, size_t size, const Bignum &src) {
     size_t count;

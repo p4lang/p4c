@@ -79,7 +79,7 @@ class QueueingTest : public ::testing::Test {
   // virtual void TearDown() {}
 };
 
-typedef std::unique_ptr<int> QEm;
+using QEm = std::unique_ptr<int>;
 
 template <typename QType>
 void QueueingTest<QType>::produce() {
@@ -121,9 +121,9 @@ void QueueingTest<QueueingLogicPriRL<QEm, WorkerMapper> >::produce() {
 
 using testing::Types;
 
-typedef Types<QueueingLogic<QEm, WorkerMapper>,
-              QueueingLogicRL<QEm, WorkerMapper>,
-              QueueingLogicPriRL<QEm, WorkerMapper> > QueueingTypes;
+using QueueingTypes = Types<QueueingLogic<QEm, WorkerMapper>,
+                            QueueingLogicRL<QEm, WorkerMapper>,
+                            QueueingLogicPriRL<QEm, WorkerMapper> >;
 
 TYPED_TEST_CASE(QueueingTest, QueueingTypes);
 
@@ -148,7 +148,7 @@ TYPED_TEST(QueueingTest, ProducerConsummer) {
 
 class QueueingRLTest : public ::testing::Test {
  protected:
-  typedef std::unique_ptr<int> T;
+  using T = std::unique_ptr<int>;
   static constexpr size_t nb_queues = 1u;
   static constexpr size_t nb_workers = 1u;
   static constexpr size_t capacity = 1024u;
@@ -227,7 +227,7 @@ struct RndInputPri {
 
 class QueueingPriRLTest : public ::testing::Test {
  protected:
-  typedef std::unique_ptr<int> T;
+  using T = std::unique_ptr<int>;
   static constexpr size_t nb_queues = 1u;
   static constexpr size_t nb_workers = 1u;
   static constexpr size_t nb_priorities = 2u;

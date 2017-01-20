@@ -34,7 +34,7 @@
 
 namespace bm {
 
-typedef p4object_id_t header_stack_id_t;
+using header_stack_id_t = p4object_id_t;
 
 //! HeaderStack is used to reprsent header stacks in P4. The HeaderStack class
 //! does not store any header / field data itself, but stores references to
@@ -196,7 +196,7 @@ class HeaderStack : public NamedP4Object {
   }
 
  private:
-  typedef std::reference_wrapper<Header> HeaderRef;
+  using HeaderRef = std::reference_wrapper<Header>;
 
  private:
   const HeaderType &header_type;

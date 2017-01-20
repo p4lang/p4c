@@ -64,7 +64,7 @@ class SwitchTest : public bm::Switch {
 
 class TestChrono {
  public:
-  typedef std::chrono::high_resolution_clock clock;
+  using clock = std::chrono::high_resolution_clock;
 
   TestChrono(size_t packet_cnt);
 

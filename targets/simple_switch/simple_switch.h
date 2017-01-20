@@ -66,10 +66,10 @@ using bm::p4object_id_t;
 
 class SimpleSwitch : public Switch {
  public:
-  typedef int mirror_id_t;
+  using mirror_id_t = int;
 
  private:
-  typedef std::chrono::high_resolution_clock clock;
+  using clock = std::chrono::high_resolution_clock;
 
  public:
   // by default, swapping is off

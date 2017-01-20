@@ -36,7 +36,7 @@ namespace bm {
 class McSimplePreLAG : public McSimplePre {
  public:
   static constexpr int LAG_MAX_ENTRIES = 256;
-  typedef uint16_t lag_id_t;
+  using lag_id_t = uint16_t;
 
   McReturnCode mc_node_create(const rid_t rid,
                               const PortMap &port_map,

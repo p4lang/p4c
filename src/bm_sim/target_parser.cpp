@@ -33,7 +33,7 @@ namespace po = boost::program_options;
 namespace bm {
 
 class TargetParserBasicStore {
-  typedef TargetParserBasic::ReturnCode ReturnCode;
+  using ReturnCode = TargetParserBasic::ReturnCode;
 
  public:
   template <typename T>

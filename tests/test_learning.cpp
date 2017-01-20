@@ -46,7 +46,7 @@ using std::this_thread::sleep_for;
 // Google Test fixture for learning tests
 class LearningTest : public ::testing::Test {
  protected:
-  typedef std::chrono::high_resolution_clock clock;
+  using clock = std::chrono::high_resolution_clock;
 
  protected:
   PHVFactory phv_factory;

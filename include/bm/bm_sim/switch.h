@@ -755,8 +755,8 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   // ---------- End RuntimeInterface ----------
 
  protected:
-  typedef Context::header_field_pair header_field_pair;
-  typedef Context::ForceArith ForceArith;
+  using header_field_pair = Context::header_field_pair;
+  using ForceArith = Context::ForceArith;
 
   const std::set<header_field_pair> &get_required_fields() const {
     return required_fields;

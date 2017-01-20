@@ -189,10 +189,10 @@ template <typename IteratorType>
 struct PHVRef { };
 
 template <>
-struct PHVRef<PHV::header_name_iterator> { typedef PHV& type; };
+struct PHVRef<PHV::header_name_iterator> { using type = PHV&; };
 
 template <>
-struct PHVRef<PHV::const_header_name_iterator> { typedef const PHV& type; };
+struct PHVRef<PHV::const_header_name_iterator> { using type = const PHV&; };
 
 template <typename IteratorType>
 class PHVHeaderNameIteratorTest : public PHVTest {
@@ -202,8 +202,8 @@ class PHVHeaderNameIteratorTest : public PHVTest {
   }
 };
 
-typedef Types<PHV::header_name_iterator,
-              PHV::const_header_name_iterator> NameIteratorTypes;
+using NameIteratorTypes = Types<PHV::header_name_iterator,
+                                PHV::const_header_name_iterator>;
 
 TYPED_TEST_CASE(PHVHeaderNameIteratorTest, NameIteratorTypes);
 
@@ -222,10 +222,10 @@ TYPED_TEST(PHVHeaderNameIteratorTest, Iterate) {
 }
 
 template <>
-struct PHVRef<PHV::header_iterator> { typedef PHV& type; };
+struct PHVRef<PHV::header_iterator> { using type = PHV&; };
 
 template <>
-struct PHVRef<PHV::const_header_iterator> { typedef const PHV& type; };
+struct PHVRef<PHV::const_header_iterator> { using type = const PHV&; };
 
 template <typename IteratorType>
 class PHVHeaderIteratorTest : public PHVTest {
@@ -235,7 +235,7 @@ class PHVHeaderIteratorTest : public PHVTest {
   }
 };
 
-typedef Types<PHV::header_iterator, PHV::const_header_iterator> IteratorTypes;
+using IteratorTypes = Types<PHV::header_iterator, PHV::const_header_iterator>;
 
 TYPED_TEST_CASE(PHVHeaderIteratorTest, IteratorTypes);
 
@@ -243,10 +243,10 @@ template <typename IteratorType>
 struct HeaderRef { };
 
 template <>
-struct HeaderRef<PHV::header_iterator> { typedef Header& type; };
+struct HeaderRef<PHV::header_iterator> { using type = Header&; };
 
 template <>
-struct HeaderRef<PHV::const_header_iterator> { typedef const Header& type; };
+struct HeaderRef<PHV::const_header_iterator> { using type = const Header&; };
 
 TYPED_TEST(PHVHeaderIteratorTest, Iterate) {
   typename PHVRef<TypeParam>::type phv_ref = *(this->phv).get();

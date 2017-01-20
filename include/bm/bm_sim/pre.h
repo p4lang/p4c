@@ -32,7 +32,7 @@ namespace McPre {
 template <size_t set_size>
 class Set {
  public:
-  typedef typename std::bitset<set_size>::reference reference;
+  using reference = typename std::bitset<set_size>::reference;
 
  public:
   constexpr Set() noexcept { }

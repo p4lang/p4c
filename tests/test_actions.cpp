@@ -538,8 +538,8 @@ TEST_F(ActionsTest, ModifyFieldWithHashBasedOffset) {
 }
 
 TEST_F(ActionsTest, ExecuteMeter) {
-  typedef MeterArray::MeterErrorCode MeterErrorCode;
-  typedef MeterArray::color_t color_t;
+  using MeterErrorCode = MeterArray::MeterErrorCode;
+  using color_t = MeterArray::color_t;
   MeterErrorCode rc;
   const color_t GREEN = 0;
   const color_t RED = 1;

@@ -44,7 +44,7 @@ struct packet_hdr_t {
 }  // namespace
 
 class PacketInjectImp final {
-  typedef PacketInject::PacketReceiveCb PacketReceiveCb;
+  using PacketReceiveCb = PacketInject::PacketReceiveCb;
 
  public:
   explicit PacketInjectImp(const std::string &addr)

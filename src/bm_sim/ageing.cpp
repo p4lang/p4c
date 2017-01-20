@@ -39,9 +39,9 @@ static_assert(sizeof(AgeingMonitorIface::msg_hdr_t) == 32u,
 
 class AgeingMonitor final : public AgeingMonitorIface {
  public:
-  typedef AgeingMonitorIface::msg_hdr_t msg_hdr_t;
-  typedef uint64_t buffer_id_t;
-  typedef Packet::clock clock;
+  using msg_hdr_t = AgeingMonitorIface::msg_hdr_t;
+  using buffer_id_t = uint64_t;
+  using clock = Packet::clock;
 
   AgeingMonitor(int device_id, int cxt_id,
                 std::shared_ptr<TransportIface> writer,

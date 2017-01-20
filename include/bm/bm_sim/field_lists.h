@@ -53,11 +53,11 @@ class FieldList {
   };
 
  public:
-  typedef std::vector<field_t>::iterator iterator;
-  typedef std::vector<field_t>::const_iterator const_iterator;
-  typedef std::vector<field_t>::reference reference;
-  typedef std::vector<field_t>::const_reference const_reference;
-  typedef size_t size_type;
+  using iterator = std::vector<field_t>::iterator;
+  using const_iterator = std::vector<field_t>::const_iterator;
+  using reference = std::vector<field_t>::reference;
+  using const_reference = std::vector<field_t>::const_reference;
+  using size_type = size_t;
 
  public:
   void push_back_field(header_id_t header, int field_offset) {

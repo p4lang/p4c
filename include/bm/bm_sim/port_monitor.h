@@ -35,29 +35,29 @@ class TransportIface;
 class PortMonitorIface {
  public:
   //! Representation of a port number
-  typedef unsigned int port_t;
+  using port_t = unsigned int;
 
   //! Represents the status of a port
   enum class PortStatus { PORT_ADDED, PORT_REMOVED, PORT_UP, PORT_DOWN };
 
   //! Signature of the cb function to call when a port status changes
-  typedef std::function<void(port_t port_num, const PortStatus status)>
-      PortStatusCb;
+  using PortStatusCb = std::function<void(port_t port_num,
+                                          const PortStatus status)>;
 
-  typedef std::function<bool(port_t port_num)> PortStatusFn;
+  using PortStatusFn = std::function<bool(port_t port_num)>;
 
   // putting it in TransportIface so that it is visible (e.g. for tests)
-  typedef struct {
+  struct msg_hdr_t {
     char sub_topic[4];
     int switch_id;
     unsigned int num_statuses;
     char _padding[20];  // the header size for notifications is always 32 bytes
-  } __attribute__((packed)) msg_hdr_t;
+  } __attribute__((packed));
 
-  typedef struct {
+  struct one_status_t {
     int port;
     int status;
-  } __attribute__((packed)) one_status_t;
+  } __attribute__((packed));
 
   void notify(port_t port_num, const PortStatus evt) {
     notify_(port_num, evt);

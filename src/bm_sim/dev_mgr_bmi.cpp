@@ -91,7 +91,7 @@ class BmiDevMgrImp : public DevMgrIface {
 
   ReturnCode set_packet_handler_(const PacketHandler &handler, void *cookie)
       override {
-    typedef void function_t(int, const char *, int, void *);
+    using function_t = void(int, const char *, int, void *);
     function_t * const*ptr_fun = handler.target<function_t *>();
     assert(ptr_fun);
     assert(*ptr_fun);

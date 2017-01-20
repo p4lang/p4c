@@ -89,7 +89,7 @@ class Debugger {
 
 class DebuggerIface {
  public:
-  typedef Debugger::PacketId PacketId;
+  using PacketId = Debugger::PacketId;
 
   void notify_update(const PacketId &packet_id,
                      uint64_t id, const char *bytes, int nbits) {

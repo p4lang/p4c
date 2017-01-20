@@ -97,8 +97,8 @@ class ActionPrimitive_;
 // them in this map using the REGISTER_PRIMITIVE(primitive_name) macro.
 class ActionOpcodesMap {
  public:
-  typedef std::function<std::unique_ptr<ActionPrimitive_>()>
-      ActionPrimitiveFactoryFn;
+  using ActionPrimitiveFactoryFn =
+      std::function<std::unique_ptr<ActionPrimitive_>()>;
   static ActionOpcodesMap *get_instance();
   bool register_primitive(const char *name, ActionPrimitiveFactoryFn primitive);
 

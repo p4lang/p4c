@@ -32,10 +32,10 @@ namespace {
 
 bm_apps::LearnListener *listener;
 
-typedef struct {
+struct sample_t {
   char src_addr[6];
   uint16_t ingress_port;
-} __attribute__((packed)) sample_t;
+} __attribute__((packed));
 
 }  // namespace
 

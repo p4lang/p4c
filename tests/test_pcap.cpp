@@ -218,7 +218,7 @@ TEST_F(PcapTest, MergeFiles) {
 }
 
 TEST_F(PcapTest, Write) {
-  typedef PcapFileComparator::Status Status;
+  using Status = PcapFileComparator::Status;
 
   PcapFilesReader reader(false, 0);
   reader.addFile(0, getFile1());

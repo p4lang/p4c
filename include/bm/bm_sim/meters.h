@@ -66,8 +66,8 @@ namespace bm {
 //! Counter).
 class Meter {
  public:
-  typedef unsigned int color_t;
-  typedef size_t rate_idx_t;
+  using color_t = unsigned int;
+  using rate_idx_t = size_t;
   struct rate_config_t {
     double info_rate;
     size_t burst_size;
@@ -76,7 +76,7 @@ class Meter {
       return {info_rate, burst_size};
     }
   };
-  typedef std::chrono::steady_clock clock;
+  using clock = std::chrono::steady_clock;
 
  public:
   enum class MeterType {
@@ -159,7 +159,7 @@ class Meter {
   static void reset_global_clock();
 
  private:
-  typedef std::unique_lock<std::mutex> UniqueLock;
+  using UniqueLock = std::unique_lock<std::mutex>;
   UniqueLock unique_lock() const { return UniqueLock(*m_mutex); }
   void unlock(UniqueLock &lock) const { lock.unlock(); }  // NOLINT
 
@@ -187,7 +187,7 @@ class Meter {
   bool configured{false};
 };
 
-typedef p4object_id_t meter_array_id_t;
+using meter_array_id_t = p4object_id_t;
 
 //! MeterArray corresponds to the `meter` standard P4 v1.02 object. A
 //! MeterArray reference can be used as a P4 primitive parameter. For example:
@@ -201,13 +201,13 @@ typedef p4object_id_t meter_array_id_t;
 //! @endcode
 class MeterArray : public NamedP4Object {
  public:
-  typedef Meter::MeterErrorCode MeterErrorCode;
-  typedef Meter::color_t color_t;
-  typedef Meter::MeterType MeterType;
-  typedef Meter::rate_config_t rate_config_t;
+  using MeterErrorCode = Meter::MeterErrorCode;
+  using color_t = Meter::color_t;
+  using MeterType = Meter::MeterType;
+  using rate_config_t = Meter::rate_config_t;
 
-  typedef std::vector<Meter>::iterator iterator;
-  typedef std::vector<Meter>::const_iterator const_iterator;
+  using iterator = std::vector<Meter>::iterator;
+  using const_iterator = std::vector<Meter>::const_iterator;
 
  public:
   MeterArray(const std::string &name, p4object_id_t id,

@@ -27,7 +27,7 @@
 
 namespace bm {
 
-typedef int p4object_id_t;
+using p4object_id_t = int;
 
 //! NamedP4Object is used as a base class for all the bmv2 classes with are used
 //! to represent named P4 objects (e.g. Parser for P4 `parser` objects). It

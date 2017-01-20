@@ -34,7 +34,7 @@
 
 namespace bm {
 
-typedef p4object_id_t header_type_id_t;
+using header_type_id_t = p4object_id_t;
 
 class PHV;
 
@@ -137,11 +137,11 @@ class HeaderType : public NamedP4Object {
 //! objects.
 class Header : public NamedP4Object {
  public:
-  typedef std::vector<Field>::iterator iterator;
-  typedef std::vector<Field>::const_iterator const_iterator;
-  typedef std::vector<Field>::reference reference;
-  typedef std::vector<Field>::const_reference const_reference;
-  typedef size_t size_type;
+  using iterator = std::vector<Field>::iterator;
+  using const_iterator = std::vector<Field>::const_iterator;
+  using reference = std::vector<Field>::reference;
+  using const_reference = std::vector<Field>::const_reference;
+  using size_type = size_t;
 
   friend class PHV;
 

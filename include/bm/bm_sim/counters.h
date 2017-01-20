@@ -51,7 +51,7 @@ namespace bm {
 class Counter {
  public:
   //! A counter value (measuring bytes or packets) is a `uint64_t`.
-  typedef uint64_t counter_value_t;
+  using counter_value_t = uint64_t;
 
   enum CounterErrorCode {
     SUCCESS = 0,
@@ -83,7 +83,7 @@ class Counter {
   std::atomic<std::uint_fast64_t> packets{0u};
 };
 
-typedef p4object_id_t meter_array_id_t;
+using meter_array_id_t = p4object_id_t;
 
 //! CounterArray corresponds to the `counter` standard P4 v1.02 object. A
 //! CounterArray reference can be used as a P4 primitive parameter. For example:
@@ -97,10 +97,10 @@ typedef p4object_id_t meter_array_id_t;
 //! @endcode
 class CounterArray : public NamedP4Object {
  public:
-  typedef Counter::CounterErrorCode CounterErrorCode;
+  using CounterErrorCode = Counter::CounterErrorCode;
 
-  typedef std::vector<Counter>::iterator iterator;
-  typedef std::vector<Counter>::const_iterator const_iterator;
+  using iterator = std::vector<Counter>::iterator;
+  using const_iterator = std::vector<Counter>::const_iterator;
 
  public:
   CounterArray(const std::string &name, p4object_id_t id, size_t size)

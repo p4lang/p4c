@@ -44,7 +44,7 @@ using std::this_thread::sleep_for;
 // Google Test fixture for learning tests
 class AgeingTest : public ::testing::Test {
  protected:
-  typedef std::chrono::high_resolution_clock clock;
+  using clock = std::chrono::high_resolution_clock;
 
  protected:
   PHVFactory phv_factory;
@@ -80,7 +80,7 @@ class AgeingTest : public ::testing::Test {
 
     key_builder.push_back_field(testHeader1, 0, 16, MatchKeyParam::Type::EXACT);
 
-    typedef MatchUnitExact<ActionEntry> MUExact;
+    using MUExact = MatchUnitExact<ActionEntry>;
 
     LookupStructureFactory factory;
 

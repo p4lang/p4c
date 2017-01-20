@@ -41,10 +41,10 @@ namespace bm_apps {
 
 class LearnListener {
  public:
-  typedef uint64_t buffer_id_t;
-  typedef int switch_id_t;
-  typedef int cxt_id_t;
-  typedef int list_id_t;
+  using buffer_id_t = uint64_t;
+  using switch_id_t = int;
+  using cxt_id_t = int;
+  using list_id_t = int;
 
   struct MsgInfo {
     switch_id_t switch_id;
@@ -54,8 +54,8 @@ class LearnListener {
     unsigned int num_samples;
   };
 
-  typedef std::function<void(const MsgInfo &msg_info,
-                             const char *, void *)> LearnCb;
+  using LearnCb = std::function<void(const MsgInfo &msg_info,
+                                     const char *, void *)>;
 
  public:
   LearnListener(

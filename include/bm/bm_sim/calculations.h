@@ -73,8 +73,8 @@ namespace bm {
 /* Used to determine whether a class overloads the '()' operator */
 template <typename T>
 struct defines_functor_operator {
-  typedef char (& yes)[1];
-  typedef char (& no)[2];
+  using yes = char (&)[1];
+  using no = char (&)[2];
 
   // we need a template here to enable SFINAE
   template <typename U>
@@ -137,8 +137,8 @@ struct check_functor_signature {
 template <typename H>
 struct HashChecker<true, H> {
  private:
-  typedef typename callable_traits<H>::return_type return_type;
-  typedef typename callable_traits<H>::argument_type argument_type;
+  using return_type = typename callable_traits<H>::return_type;
+  using argument_type = typename callable_traits<H>::argument_type;
 
   static bool constexpr v1 = std::is_unsigned<return_type>::value;
   static bool constexpr v2 =
@@ -202,7 +202,7 @@ class RawCalculation
     return ptr;
   }
 
-  typedef HashChecker<defines_functor_operator<HashFn>::value, HashFn> HC;
+  using HC = HashChecker<defines_functor_operator<HashFn>::value, HashFn>;
 
   static_assert(defines_functor_operator<HashFn>::value,
                 "HashFn needs to overload '()' operator");
@@ -284,7 +284,7 @@ class Calculation_ {
 
 class CalculationsMap {
  public:
-  typedef RawCalculationIface<uint64_t> MyC;
+  using MyC = RawCalculationIface<uint64_t>;
 
   static CalculationsMap *get_instance();
   bool register_one(const char *name, std::unique_ptr<MyC> c);
