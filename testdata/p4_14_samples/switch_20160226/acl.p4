@@ -390,13 +390,13 @@ control process_ipv6_racl {
 /*****************************************************************************/
 /* ACL stats                                                                 */
 /*****************************************************************************/
-counter acl_stats {
+counter acl_stats_count {
     type : packets_and_bytes;
     instance_count : ACL_STATS_TABLE_SIZE;
 }
 
 action acl_stats_update() {
-    count(acl_stats, acl_metadata.acl_stats_index);
+    count(acl_stats_count, acl_metadata.acl_stats_index);
 }
 
 table acl_stats {
