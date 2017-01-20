@@ -26,8 +26,6 @@
 
 #include "control_flow.h"
 #include "match_tables.h"
-#include "logger.h"
-#include "debugger.h"
 
 namespace bm {
 
@@ -50,23 +48,9 @@ struct HasFactoryMethod {
 class MatchActionTable : public ControlFlowNode {
  public:
   MatchActionTable(const std::string &name, p4object_id_t id,
-                   std::unique_ptr<MatchTableAbstract> match_table)
-    : ControlFlowNode(name, id),
-      match_table(std::move(match_table)) { }
+                   std::unique_ptr<MatchTableAbstract> match_table);
 
-  const ControlFlowNode *operator()(Packet *pkt) const override {
-    // TODO(antonin)
-    // this is temporary while we experiment with the debugger
-    DEBUGGER_NOTIFY_CTR(
-        Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
-        DBG_CTR_TABLE | get_id());
-    BMLOG_TRACE_PKT(*pkt, "Applying table '{}'", get_name());
-    const ControlFlowNode *next = match_table->apply_action(pkt);
-    DEBUGGER_NOTIFY_CTR(
-        Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
-        DBG_CTR_EXIT(DBG_CTR_TABLE) | get_id());
-    return next;
-  }
+  const ControlFlowNode *operator()(Packet *pkt) const override;
 
   MatchTableAbstract *get_match_table() { return match_table.get(); }
 
