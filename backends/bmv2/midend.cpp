@@ -88,9 +88,10 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
 void MidEnd::setup_for_P4_16(CompilerOptions&) {
     // we may come through this path even if the program is actually a P4 v1.0 program
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     addPasses({
-        new P4::ConvertEnums(&refMap, &typeMap,
-                             new EnumOn32Bits()),
+        convertEnums,
+        new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
