@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/p4lang/p4c.svg?branch=master)](https://travis-ci.org/p4lang/p4c)
+
 This folder contains the C++ source code for the P4-16 compiler.  This
 is a reference implementation of a compiler for the 2016 version of
 the P4 programming language, also called P4-16.  The P4-16 draft spec
