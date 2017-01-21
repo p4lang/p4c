@@ -26,6 +26,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include <limits>  // std::numeric_limits
 
 namespace bm {

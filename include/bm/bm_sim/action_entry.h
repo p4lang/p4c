@@ -21,6 +21,8 @@
 #ifndef BM_BM_SIM_ACTION_ENTRY_H_
 #define BM_BM_SIM_ACTION_ENTRY_H_
 
+#include <iosfwd>
+
 #include "actions.h"
 #include "calculations.h"
 #include "control_flow.h"

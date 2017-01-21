@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <ostream>
+#include <iosfwd>
 
 namespace bm {
 

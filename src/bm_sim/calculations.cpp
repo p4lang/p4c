@@ -26,6 +26,7 @@
 #include <string>
 #include <algorithm>
 #include <mutex>
+#include <ostream>
 
 #include "xxhash.h"
 #include "crc_tables.h"
@@ -358,6 +359,19 @@ using crc16_custom = crc_custom<uint16_t>;
 REGISTER_HASH(crc16_custom);
 using crc32_custom = crc_custom<uint32_t>;
 REGISTER_HASH(crc32_custom);
+
+namespace detail {
+
+template <typename T>
+std::ostream &operator<<(std::ostream &out, const crc_config_t<T> &c) {
+  out << "polynomial: " << c.polynomial << ", initial_remainder: "
+      << c.initial_remainder << ", final_xor_value: " << c.final_xor_value
+      << ", data_reflected: " << c.data_reflected
+      << ", remainder_reflected: " << c.remainder_reflected;
+  return out;
+}
+
+}  // namespace detail
 
 template <typename T>
 CustomCrcErrorCode

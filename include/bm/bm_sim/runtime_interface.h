@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include <iosfwd>
 
 #include "action_profile.h"
 #include "match_tables.h"

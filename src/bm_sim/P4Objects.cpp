@@ -20,6 +20,8 @@
 
 #include <bm/bm_sim/P4Objects.h>
 
+#include <istream>
+#include <ostream>
 #include <string>
 #include <tuple>
 #include <vector>

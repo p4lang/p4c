@@ -24,7 +24,7 @@
 // shared_mutex will only be available in C++-14, so for now I'm using boost
 #include <boost/thread/shared_mutex.hpp>
 
-#include <iostream>
+#include <iosfwd>
 #include <string>
 #include <vector>
 

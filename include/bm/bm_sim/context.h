@@ -49,6 +49,7 @@
 #ifndef BM_BM_SIM_CONTEXT_H_
 #define BM_BM_SIM_CONTEXT_H_
 
+#include <iosfwd>
 #include <mutex>
 #include <atomic>
 #include <string>

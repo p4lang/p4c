@@ -38,6 +38,7 @@
 #include <vector>
 #include <atomic>
 #include <string>
+#include <iosfwd>
 
 #include "named_p4object.h"
 #include "packet.h"

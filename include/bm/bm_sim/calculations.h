@@ -61,7 +61,7 @@
 #include <tuple>
 #include <vector>
 #include <algorithm>   // for std::copy
-#include <ostream>
+#include <iosfwd>
 
 #include "boost/variant.hpp"
 
@@ -351,26 +351,28 @@ enum class CustomCrcErrorCode {
   INVALID_CONFIG,
 };
 
+namespace detail {
+
+template <typename T>
+struct crc_config_t {
+  T polynomial;
+  T initial_remainder;
+  T final_xor_value;
+  bool data_reflected;
+  bool remainder_reflected;
+};
+
+template <typename T>
+std::ostream &operator<<(std::ostream &out, const crc_config_t<T> &c);
+
+}  // namespace detail
+
 // can be used for crc16, with T == uint16_t
 // can be used for crc32, with T uint32_t
 template <typename T>
 class CustomCrcMgr {
  public:
-  struct crc_config_t {
-    T polynomial;
-    T initial_remainder;
-    T final_xor_value;
-    bool data_reflected;
-    bool remainder_reflected;
-
-    friend std::ostream &operator<<(std::ostream &out, const crc_config_t &c) {
-      out << "polynomial: " << c.polynomial << ", initial_remainder: "
-          << c.initial_remainder << ", final_xor_value: " << c.final_xor_value
-          << ", data_reflected: " << c.data_reflected
-          << ", remainder_reflected: " << c.remainder_reflected;
-      return out;
-    }
-  };
+  using crc_config_t = detail::crc_config_t<T>;
 
   static CustomCrcErrorCode update_config(NamedCalculation *calculation,
                                           const crc_config_t &config);

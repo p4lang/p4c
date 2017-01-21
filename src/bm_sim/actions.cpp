@@ -23,6 +23,7 @@
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/P4Objects.h>
 
+#include <iostream>
 #include <string>
 
 #include "utils.h"

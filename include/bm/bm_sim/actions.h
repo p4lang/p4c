@@ -70,7 +70,7 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
-#include <iostream>
+#include <iosfwd>
 #include <limits>
 #include <tuple>
 

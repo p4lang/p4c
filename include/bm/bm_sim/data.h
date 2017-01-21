@@ -26,6 +26,7 @@
 #include <type_traits>
 #include <string>
 #include <vector>
+#include <iosfwd>
 
 #include <cstring>
 #include <cassert>

@@ -24,10 +24,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <iostream>
 #include <atomic>
 #include <utility>  // for pair<>
 #include <memory>
+#include <iosfwd>
 
 #include "match_key_types.h"
 #include "match_error_codes.h"

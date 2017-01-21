@@ -26,7 +26,7 @@
 
 #include <vector>
 #include <type_traits>
-#include <iostream>
+#include <iosfwd>
 #include <string>
 
 #include "match_units.h"

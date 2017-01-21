@@ -75,6 +75,7 @@
 #include <typeindex>
 #include <set>
 #include <vector>
+#include <iosfwd>
 
 #include "context.h"
 #include "queue.h"
