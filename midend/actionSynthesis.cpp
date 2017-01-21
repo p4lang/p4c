@@ -108,15 +108,6 @@ bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (mi->is<ActionCall>() || mi->is<ApplyMethod>())
         return false;
-    if (!moveEmits) {
-        if (!mi->is<ExternMethod>())
-            return true;
-        auto em = mi->to<ExternMethod>();
-        auto &corelib = P4::P4CoreLibrary::instance;
-        if (em->originalExternType->name.name == corelib.packetOut.name &&
-            em->method->name.name == corelib.packetOut.emit.name)
-            return false;
-    }
     return true;
 }
 
@@ -131,6 +122,14 @@ bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement *assign) {
             return false;
     }
     return true;
+}
+
+const IR::Node* DoSynthesizeActions::preorder(IR::P4Control* control) {
+    actions.clear();
+    changes = false;
+    if (policy != nullptr && !policy->convert(control))
+        prune();  // skip this one
+    return control;
 }
 
 const IR::Node* DoSynthesizeActions::postorder(IR::P4Control* control) {

@@ -23,13 +23,11 @@ p4c_bm2_ss_UNIFIED = \
 	backends/bmv2/bmv2.cpp \
 	backends/bmv2/analyzer.cpp \
 	backends/bmv2/jsonconverter.cpp \
-	backends/bmv2/inlining.cpp \
 	backends/bmv2/midend.cpp \
 	backends/bmv2/lower.cpp
 
 noinst_HEADERS += \
 	backends/bmv2/analyzer.h \
-	backends/bmv2/inlining.h \
 	backends/bmv2/jsonconverter.h \
 	backends/bmv2/lower.h \
 	backends/bmv2/midend.h
@@ -50,4 +48,3 @@ bmv2tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 	      $(srcdir)/testdata/p4_14_samples/switch_*/switch.p4 \
 	      $(srcdir)/testdata/p4_16_samples $(srcdir)/testdata/p4_14_samples
 	@$(GENTESTS) $(srcdir) bmv2 $(srcdir)/backends/bmv2/run-bmv2-test.py $^ >$@
-

@@ -28,12 +28,13 @@ namespace EBPF {
 
 class Target {
  protected:
-    cstring name;
     explicit Target(cstring name) : name(name) {}
     Target() = delete;
     virtual ~Target() {}
 
  public:
+    const cstring name;
+
     virtual void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const = 0;
     virtual void emitCodeSection(Util::SourceCodeBuilder* builder, cstring sectionName) const = 0;
     virtual void emitIncludes(Util::SourceCodeBuilder* builder) const = 0;
@@ -55,7 +56,7 @@ class Target {
 // source tree samples folder and which attaches to a socket
 class KernelSamplesTarget : public Target {
  public:
-    KernelSamplesTarget() : Target("Linux kernel") {}
+    explicit KernelSamplesTarget(cstring name = "Linux kernel") : Target(name) {}
     void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const override;
     void emitCodeSection(Util::SourceCodeBuilder* builder, cstring sectionName) const override;
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;

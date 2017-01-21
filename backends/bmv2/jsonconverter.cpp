@@ -1839,7 +1839,7 @@ void JsonConverter::addMetaInformation() {
 }
 
 void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                            IR::ToplevelBlock* toplevelBlock,
+                            const IR::ToplevelBlock* toplevelBlock,
                             P4::ConvertEnums::EnumMapping* enumMap) {
     this->toplevelBlock = toplevelBlock;
     this->refMap = refMap;

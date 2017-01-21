@@ -29,20 +29,21 @@ namespace BMV2 {
 class MidEnd : public PassManager {
 #if 0
     void setup_for_P4_14(CompilerOptions& options);
-#endif
     void setup_for_P4_16(CompilerOptions& options);
+#endif
     P4::InlineWorkList controlsToInline;
     P4::ActionsInlineList actionsToInline;
+    cstring updateControlBlockName;
 
  public:
     // These will be accurate when the mid-end completes evaluation
-    P4::ReferenceMap refMap;
-    P4::TypeMap typeMap;
-    IR::ToplevelBlock *toplevel = nullptr;  // Should this be const?
+    P4::ReferenceMap    refMap;
+    P4::TypeMap         typeMap;
+    const IR::ToplevelBlock   *toplevel = nullptr;
     P4::ConvertEnums::EnumMapping enumMap;
 
     explicit MidEnd(CompilerOptions& options);
-    IR::ToplevelBlock* process(const IR::P4Program *&program) {
+    const IR::ToplevelBlock* process(const IR::P4Program *&program) {
         program = program->apply(*this);
         return toplevel; }
 };

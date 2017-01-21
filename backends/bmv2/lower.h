@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace BMV2 {
 
@@ -43,6 +44,19 @@ class LowerExpressions : public Transform {
     const IR::Node* postorder(IR::Concat* expression) override;
     const IR::Node* preorder(IR::P4Table* table) override
     { prune(); return table; }  // don't simplify expressions in table
+};
+
+// TODO: FIXME
+// This pass is a hack to work around current BMv2 limitations:
+// checksum computations must be expressed in a restricted way, since
+// the JSON code generator uses simple pattern-matching.
+class FixupChecksum : public Transform {
+    const cstring* updateBlockName;
+ public:
+    explicit FixupChecksum(const cstring* updateBlockName) :
+            updateBlockName(updateBlockName)
+    { setName("FixupChecksum"); }
+    const IR::Node* preorder(IR::P4Control* control) override;
 };
 
 }  // namespace BMV2

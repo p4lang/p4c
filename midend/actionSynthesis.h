@@ -22,6 +22,16 @@ limitations under the License.
 
 namespace P4 {
 
+// Policy which selects the control blocks where action
+// synthesis is applied.
+class ActionSynthesisPolicy {
+ public:
+    virtual ~ActionSynthesisPolicy() {}
+    // If the policy returns true the control block is processed,
+    // otherwise it is left unchanged.
+    virtual bool convert(const IR::P4Control* control) const = 0;
+};
+
 // Convert direct action calls to table invocations.
 // control c() {
 //   action x(in bit b) { ... }
@@ -71,24 +81,21 @@ class DoSynthesizeActions : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
     std::vector<const IR::P4Action*> actions;  // inserted actions
-    bool moveEmits = false;   // FIXME -- always false, remove it?
     bool changes = false;
+    ActionSynthesisPolicy* policy;
 
  public:
     // If true the statement must be moved to an action
     bool mustMove(const IR::MethodCallStatement* statement);
     bool mustMove(const IR::AssignmentStatement* statement);
 
-    // If moveEmits is true, move emit statements to actions, else
-    // leave them in control blocks.
-    DoSynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap, bool moveEmits = false) :
-            refMap(refMap), typeMap(typeMap), moveEmits(moveEmits)
+    DoSynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap, ActionSynthesisPolicy* policy) :
+            refMap(refMap), typeMap(typeMap), policy(policy)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoSynthesizeActions"); }
     const IR::Node* preorder(IR::P4Parser* parser) override
     { prune(); return parser; }
     const IR::Node* postorder(IR::P4Control* control) override;
-    const IR::Node* preorder(IR::P4Control* control) override
-    { actions.clear(); changes = false; return control; }
+    const IR::Node* preorder(IR::P4Control* control) override;
     const IR::Node* preorder(IR::P4Action* action) override
     { prune(); return action; }  // skip actions
     // We do not handle return and exit: this pass should be called after
@@ -105,9 +112,10 @@ class DoSynthesizeActions : public Transform {
 
 class SynthesizeActions : public PassManager {
  public:
-    SynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap) {
+    SynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap,
+                      ActionSynthesisPolicy* policy = nullptr) {
         passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DoSynthesizeActions(refMap, typeMap));
+        passes.push_back(new DoSynthesizeActions(refMap, typeMap, policy));
         setName("SynthesizeActions");
     }
 };

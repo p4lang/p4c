@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ class EBPFTypeFactory {
     EBPFType* create(const IR::Type* type);
 };
 
-class EBPFBoolType : public EBPFType, IHasWidth {
+class EBPFBoolType : public EBPFType, public IHasWidth {
  public:
     EBPFBoolType() : EBPFType(IR::Type_Boolean::get()) {}
     void emit(CodeBuilder* builder) override

@@ -77,8 +77,17 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
 }
 
 control LJdeparse(inout Parsed_rep p, packet_out b) {
-    apply {
+    action act_0() {
         b.emit<ARPA_hdr>(p.arpa_pak);
+    }
+    table tbl_act_0() {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
+    apply {
+        tbl_act_0.apply();
     }
 }
 

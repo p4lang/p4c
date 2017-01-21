@@ -21,6 +21,7 @@ limitations under the License.
 #include "ebpfBackend.h"
 #include "target.h"
 #include "ebpfType.h"
+#include "ebpfProgram.h"
 
 namespace EBPF {
 
