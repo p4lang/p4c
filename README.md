@@ -58,7 +58,7 @@ back-ends; please read the following documents for installing more dependences:
 
 Most dependences can be installed using `apt-get install`:
 
-`sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-dev python2.7 python-scapy python-ipaddr`
+`sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-dev python2.7 python-scapy python-ipaddr tcpdump`
 
 ## macOS dependences
 
