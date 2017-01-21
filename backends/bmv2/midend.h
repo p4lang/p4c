@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "midend/actionsInlining.h"
 #include "midend/inlining.h"
+#include "midend/convertEnums.h"
 
 namespace BMV2 {
 
@@ -35,9 +36,10 @@ class MidEnd : public PassManager {
 
  public:
     // These will be accurate when the mid-end completes evaluation
-    P4::ReferenceMap    refMap;
-    P4::TypeMap         typeMap;
-    IR::ToplevelBlock   *toplevel = nullptr;  // Should this be const?
+    P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
+    IR::ToplevelBlock *toplevel = nullptr;  // Should this be const?
+    P4::ConvertEnums::EnumMapping enumMap;
 
     explicit MidEnd(CompilerOptions& options);
     IR::ToplevelBlock* process(const IR::P4Program *&program) {

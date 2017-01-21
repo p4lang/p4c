@@ -1861,12 +1861,15 @@ void JsonConverter::addMetaInformation() {
 }
 
 void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                            IR::ToplevelBlock* toplevelBlock) {
+                            IR::ToplevelBlock* toplevelBlock,
+                            P4::ConvertEnums::EnumMapping* enumMap) {
     this->toplevelBlock = toplevelBlock;
     this->refMap = refMap;
     this->typeMap = typeMap;
+    this->enumMap = enumMap;
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
+    CHECK_NULL(enumMap);
 
     auto package = toplevelBlock->getMain();
     if (package == nullptr) {
@@ -1927,6 +1930,8 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     ErrorCodesVisitor errorCodesVisitor(this);
     toplevelBlock->getProgram()->apply(errorCodesVisitor);
     addErrors();
+
+    addEnums();
 
     auto prsrs = mkArrayField(&toplevel, "parsers");
     auto parserJson = toJson(parser);
@@ -2503,6 +2508,23 @@ JsonConverter::ErrorValue JsonConverter::retrieveErrorValue(const IR::Member* me
     BUG_CHECK(type->is<IR::Type_Error>(), "Not an error constant");
     auto decl = type->to<IR::Type_Error>()->getDeclByName(mem->member.name);
     return errorCodesMap.at(decl);
+}
+
+void JsonConverter::addEnums() {
+    CHECK_NULL(enumMap);
+    auto enums = mkArrayField(&toplevel, "enums");
+    for (const auto &pEnum : *enumMap) {
+        auto enumName = pEnum.first->getName().name.c_str();
+        auto enumObj = new Util::JsonObject();
+        enumObj->emplace("name", enumName);
+        auto entries = mkArrayField(enumObj, "entries");
+        for (const auto &pEntry : *pEnum.second) {
+            auto entry = pushNewArray(entries);
+            entry->append(pEntry.first);
+            entry->append(pEntry.second);
+        }
+        enums->append(enumObj);
+    }
 }
 
 }  // namespace BMV2

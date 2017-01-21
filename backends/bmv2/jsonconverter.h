@@ -79,6 +79,7 @@ class JsonConverter final {
     using ErrorValue = unsigned int;
     using ErrorCodesMap = std::unordered_map<const IR::IDeclaration *, ErrorValue>;
     ErrorCodesMap errorCodesMap{};
+    P4::ConvertEnums::EnumMapping* enumMap;
 
  private:
     Util::JsonArray *headerTypes;
@@ -150,9 +151,13 @@ class JsonConverter final {
     // Retrieve assigned numerical value for given error constant
     ErrorValue retrieveErrorValue(const IR::Member* mem) const;
 
+    // Adds declared enums to json
+    void addEnums();
+
  public:
     explicit JsonConverter(const CompilerOptions& options);
-    void convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, IR::ToplevelBlock *toplevel);
+    void convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, IR::ToplevelBlock *toplevel,
+                 P4::ConvertEnums::EnumMapping* enumMap);
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }
 };
