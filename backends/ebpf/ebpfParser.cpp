@@ -282,7 +282,7 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
     auto mi = P4::MethodInstance::resolve(expression,
                                           state->parser->program->refMap,
                                           state->parser->program->typeMap);
-    auto extMethod = dynamic_cast<P4::ExternMethod*>(mi);
+    auto extMethod = mi->to<P4::ExternMethod>();
     if (extMethod != nullptr) {
         auto decl = extMethod->object;
         if (decl == state->parser->packet) {

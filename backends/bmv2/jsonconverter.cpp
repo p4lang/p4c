@@ -1309,6 +1309,7 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                         auto bim = mi->to<P4::BuiltInMethod>();
                         if (bim->name == IR::Type_Header::isValid) {
                             expr = new IR::Member(bim->appliedTo, "$valid$");
+                            typeMap->setType(expr, IR::Type_Boolean::get());
                         }
                     }
                 }
@@ -1837,7 +1838,7 @@ void JsonConverter::addMetaInformation() {
 }
 
 void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                            IR::ToplevelBlock* toplevelBlock,
+                            const IR::ToplevelBlock* toplevelBlock,
                             P4::ConvertEnums::EnumMapping* enumMap) {
     this->toplevelBlock = toplevelBlock;
     this->refMap = refMap;

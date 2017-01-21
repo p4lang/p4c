@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ebpfObject.h"
+#include "ebpfProgram.h"
 #include "ebpfType.h"
 #include "ebpfControl.h"
 #include "ebpfParser.h"
@@ -41,7 +41,7 @@ bool EBPFProgram::build() {
     auto cb = pack->getParameterValue(model.filter.filter.name)
                       ->to<IR::ControlBlock>();
     BUG_CHECK(cb != nullptr, "No control block found");
-    control = new EBPFControl(this, cb);
+    control = new EBPFControl(this, cb, parser->headers);
     success = control->build();
     if (!success)
         return success;
@@ -131,6 +131,8 @@ void EBPFProgram::emitPreamble(CodeBuilder* builder) {
     builder->newline();
     builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
     builder->appendLine("#define BYTES(w) ((w + 7) / 8)");
+    builder->appendLine("#define WRITE_PARTIAL(a, s, v) do { u8 mask = EBPF_MASK(u8, s); *((u8*)a) = ((*((u8*)a)) & ~mask) | (((v) >> (8 - (s))) & mask); } while (0)");
+    builder->appendLine("#define write_byte(base, offset, v) do { *(u8*)((base) + (offset)) = (v); } while (0)");
     builder->newline();
 }
 
@@ -151,6 +153,7 @@ void EBPFProgram::createLocalVariables(CodeBuilder* builder) {
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;",
                           packetEndVar, builder->target->dataEnd(model.CPacketName.str()));
+    builder->newline();
 
     builder->emitIndent();
     builder->appendFormat("u8 %s = 0;", control->accept->name.name);
@@ -158,6 +161,10 @@ void EBPFProgram::createLocalVariables(CodeBuilder* builder) {
 
     builder->emitIndent();
     builder->appendFormat("u32 %s = 0;", zeroKey);
+    builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat("unsigned char %s;", byteVar);
     builder->newline();
 }
 

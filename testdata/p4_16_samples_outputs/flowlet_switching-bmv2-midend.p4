@@ -310,47 +310,20 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     bit<16> tmp_26;
     bool tmp_27;
     @name("ipv4_checksum") Checksum16() ipv4_checksum;
-    action act_0() {
-        mark_to_drop();
-    }
-    action act_1() {
-        tmp_27 = hdr.ipv4.hdrChecksum == tmp_26;
-    }
-    table tbl_act_0() {
-        actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    table tbl_act_1() {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
     apply {
         tmp_26 = ipv4_checksum.get<tuple_2>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        tbl_act_0.apply();
+        tmp_27 = hdr.ipv4.hdrChecksum == tmp_26;
         if (tmp_27) 
-            tbl_act_1.apply();
+            mark_to_drop();
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     bit<16> tmp_28;
     @name("ipv4_checksum") Checksum16() ipv4_checksum_2;
-    action act_2() {
-        hdr.ipv4.hdrChecksum = tmp_28;
-    }
-    table tbl_act_2() {
-        actions = {
-            act_2();
-        }
-        const default_action = act_2();
-    }
     apply {
         tmp_28 = ipv4_checksum_2.get<tuple_2>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        tbl_act_2.apply();
+        hdr.ipv4.hdrChecksum = tmp_28;
     }
 }
 

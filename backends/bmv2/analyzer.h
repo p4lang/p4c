@@ -185,7 +185,7 @@ class ProgramParts {
     std::vector<const IR::Declaration_Variable*> variables;
 
     ProgramParts() {}
-    void analyze(IR::ToplevelBlock* toplevel);
+    void analyze(const IR::ToplevelBlock* toplevel);
 };
 
 }  // namespace BMV2

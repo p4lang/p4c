@@ -61,7 +61,7 @@ class JsonConverter final {
     P4::TypeMap*           typeMap;
     ProgramParts           structure;
     cstring                scalarsName;  // name of struct in JSON holding all scalars
-    IR::ToplevelBlock*     toplevelBlock;
+    const IR::ToplevelBlock* toplevelBlock;
     ExpressionConverter*   conv;
     DirectMeterMap         meterMap;
     const IR::Parameter*   headerParameter;
@@ -154,7 +154,7 @@ class JsonConverter final {
 
  public:
     explicit JsonConverter(const CompilerOptions& options);
-    void convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, IR::ToplevelBlock *toplevel,
+    void convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, const IR::ToplevelBlock *toplevel,
                  P4::ConvertEnums::EnumMapping* enumMap);
     void serialize(std::ostream& out) const
     { toplevel.serialize(out); }

@@ -293,7 +293,7 @@ class DiscoverStructure : public Inspector {
 };
 }  // namespace
 
-void ProgramParts::analyze(IR::ToplevelBlock* toplevel) {
+void ProgramParts::analyze(const IR::ToplevelBlock* toplevel) {
     DiscoverStructure disc(this);
     toplevel->getProgram()->apply(disc);
 }
