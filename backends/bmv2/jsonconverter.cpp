@@ -1304,7 +1304,9 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                     if (mi->is<P4::BuiltInMethod>()) {
                         auto bim = mi->to<P4::BuiltInMethod>();
                         if (bim->name == IR::Type_Header::isValid) {
-                            expr = new IR::Member(bim->appliedTo, "$valid$");
+                            expr = new IR::Member(IR::Type::Boolean::get(), bim->appliedTo,
+                                                  "$valid$");
+                            typeMap->setType(expr, expr->type);
                         }
                     }
                 }
