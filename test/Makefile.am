@@ -32,14 +32,14 @@ path_test_SOURCES = test/unittests/path_test.cpp
 path_test_LDADD = libp4ctoolkit.a
 json_test_SOURCES = test/unittests/json_test.cpp
 json_test_LDADD = libp4ctoolkit.a
-call_graph_test_SOURCES = $(ir_SOURCES) test/unittests/call_graph_test.cpp
-call_graph_test_LDADD = libp4ctoolkit.a libfrontend.a
-unittest_transform1_SOURCES = $(ir_SOURCES) test/unittests/transform1.cpp
-unittest_transform1_LDADD = libfrontend.a libp4ctoolkit.a
-dumpjson_SOURCES = $(ir_SOURCES) test/unittests/dumpjson.cpp
-dumpjson_LDADD = libfrontend.a libp4ctoolkit.a
-opeq_test_SOURCES = $(ir_SOURCES) test/unittests/opeq_test.cpp
-opeq_test_LDADD = libfrontend.a libp4ctoolkit.a
+call_graph_test_SOURCES = test/unittests/call_graph_test.cpp
+call_graph_test_LDADD = libp4ctoolkit.a libfrontend.la
+unittest_transform1_SOURCES = test/unittests/transform1.cpp
+unittest_transform1_LDADD = libfrontend.la libp4ctoolkit.a
+dumpjson_SOURCES = test/unittests/dumpjson.cpp
+dumpjson_LDADD = libfrontend.la libp4ctoolkit.a
+opeq_test_SOURCES = test/unittests/opeq_test.cpp
+opeq_test_LDADD = libfrontend.la libp4ctoolkit.a
 
 # Compiler tests
 

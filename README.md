@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/p4lang/p4c.svg?branch=master)](https://travis-ci.org/p4lang/p4c)
+
 This folder contains the C++ source code for the P4-16 compiler.  This
 is a reference implementation of a compiler for the 2016 version of
 the P4 programming language, also called P4-16.  The P4-16 draft spec
@@ -124,6 +126,21 @@ make check -j4
 
 We recommend using `clang++` with no optimizations for speeding up
 compilation and simplifying debugging.
+
+# Docker
+
+A Dockerfile is included. You can generate an image which contains a copy of p4c
+in `/p4c/build` by running:
+
+```
+docker build -t p4c .
+```
+
+On some platforms Docker limits the memory usage of any container, even
+containers used during the `docker build` process. On macOS in particular the
+default is 2GB, which is not enough to build p4c. Increase the memory limit to
+at least 4GB via Docker preferences or you are likely to see "internal compiler
+errors" from gcc which are caused by low memory.
 
 ## Additional documentation
 

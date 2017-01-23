@@ -1,0 +1,12 @@
+# Travis CI integration for p4c using Docker.
+
+services:
+  - docker
+
+install:
+  - docker build -t p4c .
+
+script:
+  - docker run -w /p4c/build p4c sh -c 'make check VERBOSE=1 -j8'
+    #  We should enable this once 'make cpplint' comes back clean.
+    #  - docker run -w /p4c/build p4c sh -c 'make cpplint'
