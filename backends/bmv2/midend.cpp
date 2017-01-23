@@ -90,7 +90,7 @@ class SkipControls : public P4::ActionSynthesisPolicy {
     const std::set<cstring> *skip;
 
  public:
-    SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
+    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
     bool convert(const IR::P4Control* control) const {
         if (skip->find(control->name) != skip->end())
             return false;
@@ -114,7 +114,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
-        new VisitFunctor([this,v1controls,evaluator](const IR::Node *root) -> const IR::Node* {
+        new VisitFunctor([this, v1controls, evaluator](const IR::Node *root) -> const IR::Node* {
             auto toplevel = evaluator->getToplevelBlock();
             auto main = toplevel->getMain();
             if (main == nullptr)

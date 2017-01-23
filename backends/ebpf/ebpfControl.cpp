@@ -95,8 +95,8 @@ class ControlBodyTranslationVisitor : public CodeGenInspector {
         auto ac = mi->to<P4::ActionCall>();
         if (ac != nullptr) {
             // Action arguments have been eliminated by the mid-end.
-            BUG_CHECK(expression->arguments->size() == 0, "%1%: unexpected arguments for action call",
-                      expression);
+            BUG_CHECK(expression->arguments->size() == 0,
+                      "%1%: unexpected arguments for action call", expression);
             visit(ac->action->body);
             return false;
         }
@@ -127,7 +127,7 @@ class ControlBodyTranslationVisitor : public CodeGenInspector {
             for (unsigned i=0; i < (widthToEmit + 7) / 8; i++) {
                 builder->emitIndent();
                 builder->appendFormat("write_byte(%s, BYTES(%s) + %d, ((u8*)(&",
-                                      builder->target->dataOffset(program->model.CPacketName.str()),
+                                      program->packetStartVar.c_str(),
                                       program->offsetVar.c_str(), i);
                 visit(expr);
                 builder->appendFormat(".%s))[%d]", field.c_str(), i);
@@ -146,15 +146,17 @@ class ControlBodyTranslationVisitor : public CodeGenInspector {
                 builder->emitIndent();
                 builder->appendFormat("WRITE_PARTIAL(%s + BYTES(%s) + %d, %d, %s)",
                                       builder->target->dataOffset(program->model.CPacketName.str()),
-                                      program->offsetVar.c_str(), i, alignment % 8, program->byteVar);
+                                      program->offsetVar.c_str(), i, alignment % 8,
+                                      program->byteVar);
                 builder->endOfStatement(true);
                 left -= alignment % 8;
 
                 if (left > 0) {
                     builder->emitIndent();
-                    builder->appendFormat("write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
-                                          builder->target->dataOffset(program->model.CPacketName.str()),
-                                          program->offsetVar.c_str(), i, program->byteVar, 8 - alignment % 8);
+                    builder->appendFormat(
+                        "write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
+                        builder->target->dataOffset(program->model.CPacketName.str()),
+                        program->offsetVar.c_str(), i, program->byteVar, 8 - alignment % 8);
                     builder->endOfStatement(true);
                     left -= (8 - alignment % 8);
                 }

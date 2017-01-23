@@ -138,7 +138,8 @@ const IR::Node* FixupChecksum::preorder(IR::P4Control* control) {
     auto instrs = control->body->components;
     if (instrs->size() != 2)
         return control;
-    if (!instrs->at(0)->is<IR::AssignmentStatement>() || !instrs->at(1)->is<IR::AssignmentStatement>())
+    if (!instrs->at(0)->is<IR::AssignmentStatement>() ||
+        !instrs->at(1)->is<IR::AssignmentStatement>())
         return control;
     auto ass0 = instrs->at(0)->to<IR::AssignmentStatement>();
     auto ass1 = instrs->at(1)->to<IR::AssignmentStatement>();
