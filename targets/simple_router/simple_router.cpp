@@ -24,6 +24,7 @@
 #include <bm/bm_sim/tables.h>
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/event_logger.h>
+#include <bm/bm_sim/logger.h>
 
 #include <bm/bm_runtime/bm_runtime.h>
 

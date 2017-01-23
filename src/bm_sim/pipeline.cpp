@@ -22,6 +22,7 @@
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/debugger.h>
+#include <bm/bm_sim/packet.h>
 
 namespace bm {
 

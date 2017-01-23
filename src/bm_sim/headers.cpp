@@ -25,6 +25,7 @@
 #include <string>
 #include <set>
 #include <map>
+#include <vector>
 
 namespace bm {
 
@@ -96,6 +97,19 @@ HeaderType::push_back_VL_field(
   VL_expr_raw = std::move(field_length_expr);
   VL_offset = offset;
   return offset;
+}
+
+std::unique_ptr<ArithExpression>
+HeaderType::resolve_VL_expr(header_id_t header_id) const {
+  if (!is_VL_header()) return nullptr;
+  std::unique_ptr<ArithExpression> expr(new ArithExpression());
+  *expr = VL_expr_raw->resolve(header_id);
+  return expr;
+}
+
+const std::vector<int> &
+HeaderType::get_VL_input_offsets() const {
+  return VL_expr_raw->get_input_offsets();
 }
 
 

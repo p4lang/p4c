@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 #include <bm/bm_sim/conditionals.h>
+#include <bm/bm_sim/stateful.h>
 
 #include <string>
 

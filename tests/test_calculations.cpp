@@ -21,7 +21,10 @@
 #include <gtest/gtest.h>
 
 #include <bm/bm_sim/calculations.h>
+#include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/parser.h>
+#include <bm/bm_sim/phv_source.h>
+#include <bm/bm_sim/phv.h>
 
 #include <random>
 #include <algorithm>  // for std::copy

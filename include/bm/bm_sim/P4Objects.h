@@ -32,11 +32,12 @@
 
 #include "tables.h"
 #include "headers.h"
-#include "phv.h"
+#include "phv_forward.h"
 #include "parser.h"
 #include "deparser.h"
 #include "pipeline.h"
 #include "conditionals.h"
+#include "checksums.h"
 #include "control_flow.h"
 #include "learning.h"
 #include "meters.h"

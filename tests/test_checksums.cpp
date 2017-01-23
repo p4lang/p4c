@@ -18,8 +18,12 @@
  *
  */
 
+#include <bm/bm_sim/calculations.h>
 #include <bm/bm_sim/checksums.h>
+#include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/parser.h>
+#include <bm/bm_sim/phv_source.h>
+#include <bm/bm_sim/phv.h>
 
 #include <gtest/gtest.h>
 

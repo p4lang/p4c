@@ -184,7 +184,7 @@ class RegisterSync {
 
   template <size_t NumLocks = 4>
   using LockVector = std::vector<
-    Lock, detail::short_alloc<Lock, NumLocks * sizeof(Lock), alignof(Lock)> >;
+    Lock, ::detail::short_alloc<Lock, NumLocks * sizeof(Lock), alignof(Lock)> >;
 
   struct RegisterLocks {
     LockVector<>::allocator_type::arena_type a;

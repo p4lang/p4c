@@ -24,12 +24,14 @@
 #include <string>
 #include <memory>
 
-#include "phv.h"
 #include "named_p4object.h"
-#include "calculations.h"
 #include "expressions.h"
 
 namespace bm {
+
+class Packet;
+
+class NamedCalculation;
 
 class Checksum : public NamedP4Object{
  public:

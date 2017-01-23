@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/phv.h>
 
 #include <algorithm>  // for swap
 #include <atomic>

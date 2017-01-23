@@ -24,6 +24,7 @@
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/debugger.h>
 #include <bm/bm_sim/event_logger.h>
+#include <bm/bm_sim/packet.h>
 
 #include <cassert>
 #include <fstream>
@@ -395,9 +396,45 @@ SwitchWContexts::set_crc32_custom_parameters(
       calc_name, crc32_config);
 }
 
+std::unique_ptr<Packet>
+SwitchWContexts::new_packet_ptr(size_t cxt_id, int ingress_port,
+                                packet_id_t id, int ingress_length,
+                                // NOLINTNEXTLINE(whitespace/operators)
+                                PacketBuffer &&buffer) {
+  boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
+  return std::unique_ptr<Packet>(new Packet(
+      cxt_id, ingress_port, id, 0u, ingress_length, std::move(buffer),
+      phv_source.get()));
+}
+
+Packet
+SwitchWContexts::new_packet(size_t cxt_id, int ingress_port, packet_id_t id,
+                            // NOLINTNEXTLINE(whitespace/operators)
+                            int ingress_length, PacketBuffer &&buffer) {
+  boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
+  return Packet(cxt_id, ingress_port, id, 0u, ingress_length,
+                std::move(buffer), phv_source.get());
+}
+
 // Switch convenience class
 
 Switch::Switch(bool enable_swap)
     : SwitchWContexts(1u, enable_swap) { }
+
+std::unique_ptr<Packet>
+Switch::new_packet_ptr(int ingress_port,
+                       packet_id_t id, int ingress_length,
+                       // NOLINTNEXTLINE(whitespace/operators)
+                       PacketBuffer &&buffer) {
+  return new_packet_ptr(0u, ingress_port, id, ingress_length,
+                        std::move(buffer));
+}
+
+Packet
+Switch::new_packet(int ingress_port, packet_id_t id, int ingress_length,
+                   // NOLINTNEXTLINE(whitespace/operators)
+                   PacketBuffer &&buffer) {
+  return new_packet(0u, ingress_port, id, ingress_length, std::move(buffer));
+}
 
 }  // namespace bm

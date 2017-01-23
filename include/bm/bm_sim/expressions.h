@@ -27,9 +27,11 @@
 
 #include "data.h"
 #include "phv_forward.h"
-#include "stateful.h"
 
 namespace bm {
+
+class RegisterArray;
+class RegisterSync;
 
 enum class ExprOpcode {
   LOAD_FIELD, LOAD_HEADER, LOAD_BOOL, LOAD_CONST, LOAD_LOCAL,

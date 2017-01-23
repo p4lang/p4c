@@ -20,6 +20,7 @@
 
 #include <bm/bm_sim/conditionals.h>
 #include <bm/bm_sim/event_logger.h>
+#include <bm/bm_sim/packet.h>
 
 #include <cassert>
 

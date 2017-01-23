@@ -19,8 +19,14 @@
  */
 
 #include <bm/bm_sim/actions.h>
+#include <bm/bm_sim/calculations.h>
+#include <bm/bm_sim/counters.h>
+#include <bm/bm_sim/meters.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/phv.h>
 
 #include <random>
+#include <thread>
 
 template <typename... Args>
 using ActionPrimitive = bm::ActionPrimitive<Args...>;

@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/P4Objects.h>
+#include <bm/bm_sim/phv.h>
 
 #include <istream>
 #include <ostream>

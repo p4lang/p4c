@@ -38,7 +38,7 @@
 #include "packet_buffer.h"
 #include "parser_error.h"
 #include "phv_source.h"
-#include "phv.h"
+#include "phv_forward.h"
 
 namespace bm {
 
@@ -353,7 +353,7 @@ class Packet final {
   clock::time_point ingress_ts{};
   uint64_t ingress_ts_ms{};
 
-  std::unique_ptr<PHV> phv{nullptr};
+  std::unique_ptr<PHV> phv;
 
   PHVSourceIface *phv_source{nullptr};
 

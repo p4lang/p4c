@@ -23,10 +23,11 @@
 
 #include <string>
 
-#include "packet.h"
 #include "named_p4object.h"
 
 namespace bm {
+
+class Packet;
 
 class ControlFlowNode : public NamedP4Object {
  public:

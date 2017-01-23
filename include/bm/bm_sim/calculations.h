@@ -65,10 +65,13 @@
 
 #include "boost/variant.hpp"
 
-#include "phv.h"
-#include "packet.h"
+#include "bytecontainer.h"
+#include "named_p4object.h"
+#include "phv_forward.h"
 
 namespace bm {
+
+class Packet;
 
 /* Used to determine whether a class overloads the '()' operator */
 template <typename T>

@@ -22,13 +22,21 @@
 #include <bm/bm_sim/debugger.h>
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/P4Objects.h>
+#include <bm/bm_sim/packet.h>
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "utils.h"
 
 namespace bm {
+
+ActionEngineState::ActionEngineState(Packet *pkt,
+                                     const ActionData &action_data,
+                                     const std::vector<Data> &const_values)
+    : pkt(*pkt), phv(*pkt->get_phv()),
+      action_data(action_data), const_values(const_values) { }
 
 // the first tmp data register is reserved for internal engine use (register
 // index evaluation)

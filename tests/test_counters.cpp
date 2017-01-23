@@ -21,6 +21,9 @@
 #include <gtest/gtest.h>
 
 #include <bm/bm_sim/counters.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/phv_source.h>
 
 #include <random>
 

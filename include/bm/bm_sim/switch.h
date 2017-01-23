@@ -79,7 +79,6 @@
 
 #include "context.h"
 #include "queue.h"
-#include "packet.h"
 #include "learning.h"
 #include "runtime_interface.h"
 #include "dev_mgr.h"
@@ -88,6 +87,8 @@
 #include "target_parser.h"
 
 namespace bm {
+
+class Packet;
 
 // multiple inheritance in accordance with Google C++ guidelines:
 // "Multiple inheritance is allowed only when all superclasses, with the
@@ -249,22 +250,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
                                          packet_id_t id, int ingress_length,
                                          // cpplint false positive
                                          // NOLINTNEXTLINE(whitespace/operators)
-                                         PacketBuffer &&buffer) {
-    boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
-    return std::unique_ptr<Packet>(new Packet(
-        cxt_id, ingress_port, id, 0u, ingress_length, std::move(buffer),
-        phv_source.get()));
-  }
+                                         PacketBuffer &&buffer);
 
   //! @copydoc new_packet_ptr
   Packet new_packet(size_t cxt_id, int ingress_port, packet_id_t id,
                     // cpplint false positive
                     // NOLINTNEXTLINE(whitespace/operators)
-                    int ingress_length, PacketBuffer &&buffer) {
-    boost::shared_lock<boost::shared_mutex> lock(ongoing_swap_mutex);
-    return Packet(cxt_id, ingress_port, id, 0u, ingress_length,
-                  std::move(buffer), phv_source.get());
-  }
+                    int ingress_length, PacketBuffer &&buffer);
 
   //! Obtain a pointer to the LearnEngine for a given Context
   LearnEngineIface *get_learn_engine(size_t cxt_id) {
@@ -869,10 +861,7 @@ class Switch : public SwitchWContexts {
                                          packet_id_t id, int ingress_length,
                                          // cpplint false positive
                                          // NOLINTNEXTLINE(whitespace/operators)
-                                         PacketBuffer &&buffer) {
-    return new_packet_ptr(0u, ingress_port, id, ingress_length,
-                          std::move(buffer));
-  }
+                                         PacketBuffer &&buffer);
 
   // to avoid C++ name hiding
   using SwitchWContexts::new_packet;
@@ -881,9 +870,7 @@ class Switch : public SwitchWContexts {
   Packet new_packet(int ingress_port, packet_id_t id, int ingress_length,
                     // cpplint false positive
                     // NOLINTNEXTLINE(whitespace/operators)
-                    PacketBuffer &&buffer) {
-    return new_packet(0u, ingress_port, id, ingress_length, std::move(buffer));
-  }
+                    PacketBuffer &&buffer);
 
   //! Return a raw, non-owning pointer to Pipeline \p name. This pointer will be
   //! invalidated if a configuration swap is performed by the target. See

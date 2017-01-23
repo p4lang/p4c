@@ -21,6 +21,10 @@
 #include <bm/bm_sim/deparser.h>
 #include <bm/bm_sim/debugger.h>
 #include <bm/bm_sim/logger.h>
+#include <bm/bm_sim/event_logger.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/checksums.h>
+#include <bm/bm_sim/phv.h>
 
 namespace bm {
 

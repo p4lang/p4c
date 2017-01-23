@@ -23,7 +23,7 @@
 
 #include <memory>
 
-#include "phv.h"
+#include "phv_forward.h"
 
 namespace bm {
 
@@ -31,21 +31,13 @@ class PHVSourceIface {
  public:
   virtual ~PHVSourceIface() { }
 
-  std::unique_ptr<PHV> get(size_t cxt) {
-    return get_(cxt);
-  }
+  std::unique_ptr<PHV> get(size_t cxt);
 
-  void release(size_t cxt, std::unique_ptr<PHV> phv) {
-    release_(cxt, std::move(phv));
-  }
+  void release(size_t cxt, std::unique_ptr<PHV> phv);
 
-  void set_phv_factory(size_t cxt, const PHVFactory *factory) {
-    set_phv_factory_(cxt, factory);
-  }
+  void set_phv_factory(size_t cxt, const PHVFactory *factory);
 
-  size_t phvs_in_use(size_t cxt) {
-    return phvs_in_use_(cxt);
-  }
+  size_t phvs_in_use(size_t cxt);
 
   static std::unique_ptr<PHVSourceIface> make_phv_source(size_t size = 1);
 

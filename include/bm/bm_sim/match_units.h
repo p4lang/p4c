@@ -33,11 +33,11 @@
 #include "match_error_codes.h"
 #include "lookup_structures.h"
 #include "bytecontainer.h"
-#include "phv.h"
 #include "packet.h"
 #include "handle_mgr.h"
 #include "counters.h"
 #include "meters.h"
+#include "phv_forward.h"
 
 namespace bm {
 

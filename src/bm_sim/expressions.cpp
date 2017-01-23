@@ -20,6 +20,7 @@
 
 #include <bm/bm_sim/expressions.h>
 #include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/stateful.h>
 
 #include <stack>
 #include <string>

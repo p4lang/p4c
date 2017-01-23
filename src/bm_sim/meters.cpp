@@ -19,9 +19,12 @@
  */
 
 #include <bm/bm_sim/meters.h>
+#include <bm/bm_sim/logger.h>
+#include <bm/bm_sim/packet.h>
 
 #include <algorithm>
 #include <vector>
+#include <string>
 
 namespace bm {
 
@@ -142,6 +145,30 @@ Meter::get_rates() const {
   return configs;
 }
 
+
+MeterArray::MeterArray(const std::string &name, p4object_id_t id,
+                       MeterType type, size_t rate_count, size_t size)
+    : NamedP4Object(name, id) {
+  meters.reserve(size);
+  for (size_t i = 0; i < size; i++)
+    meters.emplace_back(type, rate_count);
+}
+
+MeterArray::color_t
+MeterArray::execute_meter(const Packet &pkt, size_t idx) {
+  BMLOG_DEBUG_PKT(pkt, "Executing meter {}[{}]", get_name(), idx);
+  return meters[idx].execute(pkt);
+}
+
+MeterArray::MeterErrorCode
+MeterArray::set_rates(const std::vector<rate_config_t> &configs) {
+  return set_rates(configs.begin(), configs.end());
+}
+
+MeterArray::MeterErrorCode
+MeterArray::set_rates(const std::initializer_list<rate_config_t> &configs) {
+  return set_rates(configs.begin(), configs.end());
+}
 
 void
 MeterArray::reset_state() {

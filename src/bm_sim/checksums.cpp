@@ -19,7 +19,10 @@
  */
 
 #include <bm/bm_sim/checksums.h>
+#include <bm/bm_sim/calculations.h>
 #include <bm/bm_sim/logger.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/phv.h>
 
 #include <cstdint>
 #include <string>

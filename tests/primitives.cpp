@@ -19,7 +19,10 @@
  */
 
 #include <bm/bm_sim/actions.h>
+#include <bm/bm_sim/counters.h>
 #include <bm/bm_sim/extern.h>
+#include <bm/bm_sim/meters.h>
+#include <bm/bm_sim/packet.h>
 
 #include <string>
 

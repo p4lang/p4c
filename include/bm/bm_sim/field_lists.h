@@ -29,7 +29,7 @@
 #include <vector>
 #include <unordered_set>
 
-#include "phv.h"
+#include "phv_forward.h"
 
 namespace bm {
 

@@ -21,6 +21,9 @@
 #include <gtest/gtest.h>
 
 #include <bm/bm_sim/meters.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/phv_source.h>
 
 #include <thread>
 #include <chrono>

@@ -20,8 +20,11 @@
 
 #include <gtest/gtest.h>
 
-#include <bm/bm_sim/parser.h>
 #include <bm/bm_sim/deparser.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/parser.h>
+#include <bm/bm_sim/phv_source.h>
+#include <bm/bm_sim/phv.h>
 
 #include <chrono>
 #include <thread>

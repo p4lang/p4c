@@ -26,13 +26,14 @@
 #include <vector>
 #include <string>
 
-#include "phv.h"
-#include "packet.h"
-#include "event_logger.h"
 #include "named_p4object.h"
-#include "checksums.h"
+#include "phv_forward.h"
 
 namespace bm {
+
+class Packet;
+
+class Checksum;
 
 //! Implements a P4 deparser. Since there are no deparser objects per se in the
 //! P4 language yet, the deparser logic is obtained by generating a topological

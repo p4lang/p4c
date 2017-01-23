@@ -24,6 +24,9 @@
 #include <bm/bm_sim/tables.h>
 #include <bm/bm_sim/conditionals.h>
 #include <bm/bm_sim/actions.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/pipeline.h>
+#include <bm/bm_sim/checksums.h>
 
 #include <cstring>
 

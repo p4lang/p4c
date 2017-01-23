@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/phv_source.h>
+#include <bm/bm_sim/phv.h>
 
 #include <vector>
 #include <mutex>
@@ -89,6 +90,24 @@ class PHVSourceContextPools : public PHVSourceIface {
 
   std::vector<PHVPool> phv_pools;
 };
+
+std::unique_ptr<PHV>
+PHVSourceIface::get(size_t cxt) { return get_(cxt); }
+
+void
+PHVSourceIface::release(size_t cxt, std::unique_ptr<PHV> phv) {
+  release_(cxt, std::move(phv));
+}
+
+void
+PHVSourceIface::set_phv_factory(size_t cxt, const PHVFactory *factory) {
+  set_phv_factory_(cxt, factory);
+}
+
+size_t
+PHVSourceIface::phvs_in_use(size_t cxt) {
+  return phvs_in_use_(cxt);
+}
 
 std::unique_ptr<PHVSourceIface>
 PHVSourceIface::make_phv_source(size_t size) {

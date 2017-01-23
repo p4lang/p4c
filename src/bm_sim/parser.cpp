@@ -20,6 +20,10 @@
 
 #include <bm/bm_sim/parser.h>
 #include <bm/bm_sim/debugger.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/logger.h>
+#include <bm/bm_sim/event_logger.h>
+#include <bm/bm_sim/expressions.h>
 
 #include <string>
 #include <vector>

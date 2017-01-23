@@ -30,16 +30,17 @@
 
 #include <cassert>
 
-#include "packet.h"
 #include "phv.h"
 #include "named_p4object.h"
-#include "event_logger.h"
-#include "logger.h"
-#include "expressions.h"
 #include "stateful.h"
 #include "parser_error.h"
 
 namespace bm {
+
+class Packet;
+
+class BoolExpression;
+class ArithExpression;
 
 struct field_t {
   header_id_t header;

@@ -26,6 +26,7 @@ namespace bm {
 using header_id_t = int;
 
 class PHV;
+class PHVFactory;
 class Header;
 class Field;
 

@@ -40,12 +40,15 @@
 #include <memory>
 #include <string>
 #include <iosfwd>
+#include <algorithm>
+
+#include <cassert>
 
 #include "named_p4object.h"
-#include "packet.h"
-#include "logger.h"
 
 namespace bm {
+
+class Packet;
 
 // I initially implemented this with template values: meter type and rate
 // count. I thought it would potentially speed up operations. However, it meant
@@ -212,20 +215,12 @@ class MeterArray : public NamedP4Object {
 
  public:
   MeterArray(const std::string &name, p4object_id_t id,
-             MeterType type, size_t rate_count, size_t size)
-    : NamedP4Object(name, id) {
-    meters.reserve(size);
-    for (size_t i = 0; i < size; i++)
-      meters.emplace_back(type, rate_count);
-  }
+             MeterType type, size_t rate_count, size_t size);
 
   //! Executes the meter at index \p idx on the given packet and returns the
   //! correct integral color value.
   //! See Meter::execute() for more information.
-  color_t execute_meter(const Packet &pkt, size_t idx) {
-    BMLOG_DEBUG_PKT(pkt, "Executing meter {}[{}]", get_name(), idx);
-    return meters[idx].execute(pkt);
-  }
+  color_t execute_meter(const Packet &pkt, size_t idx);
 
   template<class RAIt>
   MeterErrorCode set_rates(const RAIt first, const RAIt last) {
@@ -238,14 +233,10 @@ class MeterArray : public NamedP4Object {
     return MeterErrorCode::SUCCESS;
   }
 
-  MeterErrorCode set_rates(const std::vector<rate_config_t> &configs) {
-    return set_rates(configs.begin(), configs.end());
-  }
+  MeterErrorCode set_rates(const std::vector<rate_config_t> &configs);
 
   MeterErrorCode set_rates(
-      const std::initializer_list<rate_config_t> &configs) {
-    return set_rates(configs.begin(), configs.end());
-  }
+      const std::initializer_list<rate_config_t> &configs);
 
   //! Access the meter at position \p idx, asserts if bad \p idx
   Meter &get_meter(size_t idx) {
