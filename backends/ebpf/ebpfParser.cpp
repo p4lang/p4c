@@ -154,7 +154,7 @@ StateTranslationVisitor::compileExtractField(
         type->emit(builder);
         builder->appendFormat(")((%s(%s, BYTES(%s))",
                               helper,
-                              builder->target->dataOffset(program->model.CPacketName.str()),
+                              program->packetStartVar.c_str(),
                               program->offsetVar.c_str());
         if (shift != 0)
             builder->appendFormat(" >> %d", shift);
@@ -190,7 +190,7 @@ StateTranslationVisitor::compileExtractField(
             bt->emit(builder);
             builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)",
                                   helper,
-                                  builder->target->dataOffset(program->model.CPacketName.str()),
+                                  program->packetStartVar.c_str(),
                                   program->offsetVar.c_str(), i, shift);
 
             if ((i == bytes - 1) && (widthToExtract % 8 != 0)) {
