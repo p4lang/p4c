@@ -22,7 +22,8 @@ sudo apt-get install -y \
     mktemp \
     libffi-dev \
     python-dev \
-    python-pip
+    python-pip \
+    wget
 
 tmpdir=`mktemp -d -p .`
 cd $tmpdir
