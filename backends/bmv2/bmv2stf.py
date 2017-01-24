@@ -110,7 +110,7 @@ def run_timeout(options, args, timeout, stderr):
         print("Exit code ", local.process.returncode)
     return local.process.returncode
 
-timeout = 100
+timeout = 10 * 60
 
 class ConcurrentInteger(object):
     # Generates exclusive integers in a range 0-max
