@@ -20,6 +20,11 @@ RUN apt-get update && \
       python-scapy \
       tcpdump
 
+# Default to using 8 make jobs, which is appropriate for local builds. On CI
+# infrastructure it will often be best to override this.
+ARG MAKEFLAGS
+ENV MAKEFLAGS ${MAKEFLAGS:-j8}
+
 # Clone and build behavioral-model, which is needed by some tests.
 ENV BEHAVIORAL_MODEL_REPO https://github.com/sethfowler/behavioral-model.git
 ENV BEHAVIORAL_MODEL_TAG 4f85ec95da24
@@ -29,7 +34,7 @@ RUN git clone --recursive $BEHAVIORAL_MODEL_REPO /behavioral-model && \
     ./install_deps.sh && \
     ./autogen.sh && \
     ./configure && \
-    make -j8 && \
+    make && \
     make install && \
     ldconfig
 
@@ -40,4 +45,4 @@ WORKDIR /p4c/
 # Build.
 RUN ./bootstrap.sh && \
     cd build && \
-    make -j8
+    make
