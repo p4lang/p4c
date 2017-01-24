@@ -8,5 +8,4 @@ install:
 
 script:
   - docker run -w /p4c/build p4c sh -c 'make check VERBOSE=1 -j8'
-    #  We should enable this once 'make cpplint' comes back clean.
-    #  - docker run -w /p4c/build p4c sh -c 'make cpplint'
+  - docker run -w /p4c/build p4c sh -c 'make cpplint'
