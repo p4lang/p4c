@@ -182,13 +182,13 @@ class TypeCheck::Pass2 : public Modifier {
         return Modifier::init_apply(root); }
     void postorder(IR::Member *) override {}
     void postorder(IR::Operation_Binary *op) override {
-        if (op->left->type->is<IR::Type_InfInt>())
+        if (op->left->type->is<IR::Type_InfInt>()) {
             op->type = op->right->type;
-        else if (op->right->type->is<IR::Type_InfInt>())
+        } else if (op->right->type->is<IR::Type_InfInt>()) {
             op->type = op->left->type;
-        else if (op->left->type == op->right->type)
+        } else if (op->left->type == op->right->type) {
             op->type = op->left->type;
-        else {
+        } else {
             auto *lt = op->left->type->to<IR::Type::Bits>();
             auto *rt = op->right->type->to<IR::Type::Bits>();
             if (lt && rt) {

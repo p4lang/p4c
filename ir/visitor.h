@@ -205,6 +205,7 @@ class Transform : public virtual Visitor {
     bool prune_flag = false;
     void visitor_const_error() override;
     void check_clone(const Visitor *) override;
+
  public:
     profile_t init_apply(const IR::Node *root) override;
     const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
@@ -218,6 +219,7 @@ class Transform : public virtual Visitor {
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
+
  protected:
     // can only be called usefully from 'preorder' function
     void prune() { prune_flag = true; }
