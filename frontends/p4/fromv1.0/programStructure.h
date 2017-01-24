@@ -163,7 +163,8 @@ class ProgramStructure {
     const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
     const IR::Declaration_Instance* convert(const IR::CounterOrMeter* cm, cstring newName);
     const IR::Declaration_Instance* convert(const IR::Register* reg, cstring newName);
-    const IR::Declaration_Instance* convertExtern(const IR::Declaration_Instance *ext, cstring newName);
+    const IR::Declaration_Instance*
+    convertExtern(const IR::Declaration_Instance* ext, cstring newName);
     const IR::P4Table*
     convertTable(const IR::V1Table* table, cstring newName,
                  IR::IndexedVector<IR::Declaration>* stateful);
