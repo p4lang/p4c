@@ -633,7 +633,7 @@ table_body: /* epsilon */ { $$ = new IR::V1Table(getPragmas()); }
       { ($$=$1)->size = $4 ? $4->asLong() : 0; $4 = nullptr; }
     | table_body DEFAULT_ACTION ':' name ';'
       { ($$=$1)->default_action = IR::ID(@4, $4); }
-    | table_body DEFAULT_ACTION ':' name '(' expression_list ')' ';'
+    | table_body DEFAULT_ACTION ':' name '(' opt_expression_list ')' ';'
       { ($$=$1)->default_action = IR::ID(@4, $4);
         $$->default_action_args = $6; }
     | table_body IDENTIFIER ':' expression ';'
