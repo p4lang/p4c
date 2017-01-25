@@ -1317,14 +1317,21 @@ P4Objects::init_objects(std::istream *is,
 
     for (const auto &cfg_element : cfg_elements) {
       const string type = cfg_element["type"].asString();
-      assert(type == "field");  // TODO(antonin): other types
-
-      const Json::Value &cfg_value_field = cfg_element["value"];
-      const string header_name = cfg_value_field[0].asString();
-      header_id_t header_id = get_header_id(header_name);
-      const string field_name = cfg_value_field[1].asString();
-      int field_offset = get_field_offset(header_id, field_name);
-      field_list->push_back_field(header_id, field_offset);
+      if (type == "field") {
+        const Json::Value &cfg_value_field = cfg_element["value"];
+        const string header_name = cfg_value_field[0].asString();
+        header_id_t header_id = get_header_id(header_name);
+        const string field_name = cfg_value_field[1].asString();
+        int field_offset = get_field_offset(header_id, field_name);
+        field_list->push_back_field(header_id, field_offset);
+      } else if (type == "hexstr") {
+        const Json::Value &cfg_value_hexstr = cfg_element["value"];
+        const Json::Value &cfg_value_bitwidth = cfg_element["bitwidth"];
+        field_list->push_back_constant(
+            cfg_value_hexstr.asString(), cfg_value_bitwidth.asInt());
+      } else {
+        assert(0);  // TODO(antonin): other types
+      }
     }
 
     add_field_list(list_id, std::move(field_list));

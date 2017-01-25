@@ -266,11 +266,7 @@ SimpleSwitch::copy_ingress_pkt(
   PHV *phv_copy = packet_copy->get_phv();
   phv_copy->reset_metadata();
   FieldList *field_list = this->get_field_list(field_list_id);
-  const PHV *phv = packet->get_phv();
-  for (const auto &p : *field_list) {
-    phv_copy->get_field(p.header, p.offset)
-        .set(phv->get_field(p.header, p.offset));
-  }
+  field_list->copy_fields_between_phvs(phv_copy, packet->get_phv());
   phv_copy->get_field("standard_metadata.instance_type").set(copy_type);
   return packet_copy;
 }
@@ -475,10 +471,7 @@ SimpleSwitch::egress_thread(size_t worker_id) {
             packet->clone_with_phv_reset_metadata_ptr();
         PHV *phv_copy = packet_copy->get_phv();
         FieldList *field_list = this->get_field_list(field_list_id);
-        for (const auto &p : *field_list) {
-          phv_copy->get_field(p.header, p.offset)
-            .set(phv->get_field(p.header, p.offset));
-        }
+        field_list->copy_fields_between_phvs(phv_copy, phv);
         phv_copy->get_field("standard_metadata.instance_type")
             .set(PKT_INSTANCE_TYPE_EGRESS_CLONE);
         enqueue(egress_port, std::move(packet_copy));
@@ -507,10 +500,7 @@ SimpleSwitch::egress_thread(size_t worker_id) {
         std::unique_ptr<Packet> packet_copy = packet->clone_no_phv_ptr();
         PHV *phv_copy = packet_copy->get_phv();
         phv_copy->reset_metadata();
-        for (const auto &p : *field_list) {
-          phv_copy->get_field(p.header, p.offset)
-              .set(phv->get_field(p.header, p.offset));
-        }
+        field_list->copy_fields_between_phvs(phv_copy, phv);
         phv_copy->get_field("standard_metadata.instance_type")
             .set(PKT_INSTANCE_TYPE_RECIRC);
         size_t packet_size = packet_copy->get_data_size();

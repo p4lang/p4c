@@ -24,12 +24,15 @@
 #define BM_BM_SIM_FIELD_LISTS_H_
 
 #include <boost/functional/hash.hpp>
+#include <boost/variant.hpp>
 
 #include <utility>  // for pair<>
 #include <vector>
 #include <unordered_set>
+#include <string>
 
 #include "phv_forward.h"
+#include "bytecontainer.h"
 
 namespace bm {
 
@@ -46,59 +49,87 @@ class FieldList {
     bool operator==(const field_t& other) const {
       return header == other.header && offset == other.offset;
     }
-
     bool operator!=(const field_t& other) const {
       return !(*this == other);
     }
   };
 
- public:
-  using iterator = std::vector<field_t>::iterator;
-  using const_iterator = std::vector<field_t>::const_iterator;
-  using reference = std::vector<field_t>::reference;
-  using const_reference = std::vector<field_t>::const_reference;
-  using size_type = size_t;
+  struct constant_t {
+    ByteContainer value;
+    size_t bitwidth;
+
+    bool operator==(const constant_t& other) const {
+      return value == other.value;
+    }
+    bool operator!=(const constant_t& other) const {
+      return !(*this == other);
+    }
+  };
+
+  struct FieldListVisitor : boost::static_visitor<> {
+    void operator()(const field_t &) { }
+    void operator()(const constant_t &) { }
+  };
 
  public:
   void push_back_field(header_id_t header, int field_offset) {
-    fields.push_back({header, field_offset});
-    fields_set.insert({header, field_offset});
+    field_t f = {header, field_offset};
+    fields.push_back(field_list_member_t(f));
+    fields_set.insert(f);
   }
 
-  // iterators
-
-  //! NC
-  iterator begin() { return fields.begin(); }
-
-  //! NC
-  const_iterator begin() const { return fields.begin(); }
-
-  //! NC
-  iterator end() { return fields.end(); }
-
-  //! NC
-  const_iterator end() const { return fields.end(); }
+  void push_back_constant(const std::string &hexstr, size_t bitwidth) {
+    constant_t c = {ByteContainer(hexstr), bitwidth};
+    fields.push_back(field_list_member_t(c));
+  }
 
   //! Returns true if the FieldList contains the given field, identified by the
   //! header id and the offset of the field in the header
-  bool contains(header_id_t header, int field_offset) const {
+  bool contains_field(header_id_t header, int field_offset) const {
     auto it = fields_set.find({header, field_offset});
     return it != fields_set.end();
   }
 
+  template <typename T>
+  // NOLINTNEXTLINE(runtime/references)
+  void visit(T &visitor) {
+    static_assert(std::is_base_of<FieldListVisitor, T>::value,
+                  "Invalid visitor, must inherit from from FieldListVisitor");
+    std::for_each(fields.begin(), fields.end(), boost::apply_visitor(visitor));
+  }
+
+  void copy_fields_between_phvs(PHV *dst, const PHV *src) {
+    struct CopyFieldsVisitor : FieldListVisitor {
+      CopyFieldsVisitor(PHV *dst, const PHV *src)
+          : dst(dst), src(src) {}
+      PHV *dst;
+      const PHV *src;
+
+      void operator()(const field_t &f) {
+        dst->get_field(f.header, f.offset)
+            .set(src->get_field(f.header, f.offset));
+      }
+      void operator()(const constant_t &) { }
+    };
+
+    CopyFieldsVisitor v(dst, src);
+    visit(v);
+  }
+
  private:
+  using field_list_member_t = boost::variant<field_t, constant_t>;
+
   struct FieldKeyHash {
     std::size_t operator()(const field_t& f) const {
       std::size_t seed = 0;
       boost::hash_combine(seed, f.header);
       boost::hash_combine(seed, f.offset);
-
       return seed;
     }
   };
 
  private:
-  std::vector<field_t> fields{};
+  std::vector<field_list_member_t> fields{};
   std::unordered_set<field_t, FieldKeyHash> fields_set{};
 };
 

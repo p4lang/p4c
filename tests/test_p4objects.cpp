@@ -477,6 +477,7 @@ class JsonBuilder {
     json["headers"] = Json::Value(Json::arrayValue);
     json["pipelines"] = Json::Value(Json::arrayValue);
     json["enums"] = Json::Value(Json::arrayValue);
+    json["field_lists"] = Json::Value(Json::arrayValue);
   }
 
   void add_header_type(const std::string &name) {
@@ -539,6 +540,30 @@ class JsonBuilder {
     }
     enum_["entries"] = entries;
     enums.append(enum_);
+  }
+
+  // adds a constant and f8 field from table_name to field_list fl_name
+  void add_field_list(const std::string &fl_name,
+                      const std::string &table_name) {
+    auto &field_lists = json["field_lists"];
+    Json::Value fl(Json::objectValue);
+    fl["id"] = 1;
+    fl["name"] = fl_name;
+    Json::Value f1(Json::objectValue);
+    f1["type"] = "field";
+    Json::Value f1v = Json::Value(Json::arrayValue);
+    f1v.append(table_name);
+    f1v.append("f8");
+    f1["value"] = f1v;
+    Json::Value elements = Json::Value(Json::arrayValue);
+    elements.append(f1);
+    Json::Value constant_field(Json::objectValue);
+    constant_field["type"] = "hexstr";
+    constant_field["value"] = "0x1";
+    constant_field["bitwidth"] = 8;
+    elements.append(constant_field);
+    fl["elements"] = elements;
+    field_lists.append(fl);
   }
 
   std::string to_string() const {
@@ -628,4 +653,20 @@ TEST(P4Objects, Enums) {
     ASSERT_NE(0, objects.init_objects(&is, &factory));
     EXPECT_EQ(expected_error_msg, os.str());
   }
+}
+
+TEST(P4Objects, FieldLists) {
+  LookupStructureFactory factory;
+  JsonBuilder builder;
+  const std::string header_name("test_header");
+  const std::string header_type_name("test_header_t");
+  const std::string field_list_name("test_field_list");
+  builder.add_header_type(header_type_name);
+  builder.add_header(header_name, header_type_name);
+  builder.add_field_list(field_list_name, header_name);
+
+  std::stringstream os;
+  std::stringstream is(builder.to_string());
+  P4Objects objects(os);
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
 }
