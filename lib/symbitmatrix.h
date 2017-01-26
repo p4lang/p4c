@@ -41,6 +41,7 @@ class SymBitMatrix : private bitvec {
     using bitvec::operator bool;
 
  private:
+    using bitvec::operator|=;
     template<class T> class rowref {
         friend class SymBitMatrix;
         T               &self;
@@ -87,6 +88,7 @@ class SymBitMatrix : private bitvec {
 
     bool operator==(const SymBitMatrix &a) const { return bitvec::operator==(a); }
     bool operator!=(const SymBitMatrix &a) const { return bitvec::operator!=(a); }
+    bool operator|=(const SymBitMatrix &a) { return bitvec::operator|=(a); }
 };
 
 #endif /* P4C_LIB_SYMBITMATRIX_H_ */
