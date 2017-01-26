@@ -78,7 +78,7 @@ class KernelSamplesTarget : public Target {
     { return cstring("(") + base + " + " + base + "->len)"; }
     cstring forwardReturnCode() const override { return "0"; }
     cstring dropReturnCode() const override { return "1"; }
-    cstring abortReturnCode() const override { return ""; }
+    cstring abortReturnCode() const override { return "1"; }
 };
 
 // Represents a target compiled by bcc that uses the TC
@@ -103,7 +103,7 @@ class BccTarget : public Target {
     { return cstring("(") + base + " + " + base + "->len)"; }
     cstring forwardReturnCode() const override { return "0"; }
     cstring dropReturnCode() const override { return "1"; }
-    cstring abortReturnCode() const override { return ""; }
+    cstring abortReturnCode() const override { return "1"; }
 };
 
 }  // namespace EBPF
