@@ -50,6 +50,9 @@ class Target {
                           cstring argName) const = 0;
     virtual cstring dataOffset(cstring base) const = 0;
     virtual cstring dataEnd(cstring base) const = 0;
+    virtual cstring forwardReturnCode() const = 0;
+    virtual cstring dropReturnCode() const = 0;
+    virtual cstring abortReturnCode() const = 0;
 };
 
 // Represents a target that is compiled within the kernel
@@ -73,6 +76,9 @@ class KernelSamplesTarget : public Target {
     cstring dataOffset(cstring base) const override { return base; }
     cstring dataEnd(cstring base) const override
     { return cstring("(") + base + " + " + base + "->len)"; }
+    cstring forwardReturnCode() const override { return "0"; }
+    cstring dropReturnCode() const override { return "1"; }
+    cstring abortReturnCode() const override { return ""; }
 };
 
 // Represents a target compiled by bcc that uses the TC
@@ -95,6 +101,9 @@ class BccTarget : public Target {
     cstring dataOffset(cstring base) const override { return base; }
     cstring dataEnd(cstring base) const override
     { return cstring("(") + base + " + " + base + "->len)"; }
+    cstring forwardReturnCode() const override { return "0"; }
+    cstring dropReturnCode() const override { return "1"; }
+    cstring abortReturnCode() const override { return ""; }
 };
 
 }  // namespace EBPF

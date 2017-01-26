@@ -130,9 +130,9 @@ void EBPFProgram::emitPreamble(CodeBuilder* builder) {
     builder->endOfStatement(true);
     builder->newline();
     builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
-    builder->appendLine("#define BYTES(w) ((w + 7) / 8)");
+    builder->appendLine("#define BYTES(w) ((w) / 8)");
     builder->appendLine(
-        "#define WRITE_PARTIAL(a, s, v) do "
+        "#define write_partial(a, s, v) do "
         "{ u8 mask = EBPF_MASK(u8, s); "
         "*((u8*)a) = ((*((u8*)a)) & ~mask) | (((v) >> (8 - (s))) & mask); "
         "} while (0)");

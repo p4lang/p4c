@@ -335,7 +335,9 @@ void EBPFParser::emit(CodeBuilder *builder) {
 
     // Create a synthetic reject state
     builder->emitIndent();
-    builder->appendFormat("%s: { return 1; }", IR::ParserState::reject.c_str());
+    builder->appendFormat("%s: { return %s; }",
+                          IR::ParserState::reject.c_str(),
+                          builder->target->abortReturnCode().c_str());
     builder->newline();
     builder->newline();
 }

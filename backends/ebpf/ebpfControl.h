@@ -22,6 +22,33 @@ limitations under the License.
 
 namespace EBPF {
 
+class EBPFControl;
+
+class ControlBodyTranslator : public CodeGenInspector {
+    const EBPFControl* control;
+    std::set<const IR::Parameter*> toDereference;
+    std::vector<cstring> saveAction;
+    P4::P4CoreLibrary& p4lib;
+    std::map<const IR::Parameter*, const IR::Parameter*> substitution;
+ public:
+    ControlBodyTranslator(const EBPFControl* control, CodeBuilder* builder);
+    void substitute(const IR::Parameter* p, const IR::Parameter* with);
+
+    // handle the packet_out.emit method
+    void compileEmitField(const IR::Expression* expr, cstring field,
+                          unsigned alignment, EBPFType* type);
+    void compileEmit(const IR::Vector<IR::Expression>* args);
+    void processMethod(const P4::ExternMethod* method);
+    void processApply(const P4::ApplyMethod* method);
+
+    bool preorder(const IR::PathExpression* expression) override;
+    bool preorder(const IR::MethodCallExpression* expression) override;
+    bool preorder(const IR::ExitStatement*) override;
+    bool preorder(const IR::ReturnStatement*) override;
+    bool preorder(const IR::IfStatement* statement) override;
+    bool preorder(const IR::SwitchStatement* statement) override;
+};
+
 class EBPFControl : public EBPFObject {
  public:
     const EBPFProgram*      program;
