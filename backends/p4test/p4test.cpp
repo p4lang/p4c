@@ -27,6 +27,18 @@ limitations under the License.
 #include "frontends/p4/toP4/toP4.h"
 #include "midend.h"
 
+static void log_dump(const IR::Node *node, const char *head) {
+    if (node && LOGGING(1)) {
+        if (head)
+            std::cout << '+' << std::setw(strlen(head)+6) << std::setfill('-') << "+\n| "
+                      << head << " |\n" << '+' << std::setw(strlen(head)+3) << "+" <<
+                      std::endl << std::setfill(' ');
+        if (LOGGING(2))
+            dump(node);
+        else
+            std::cout << *node << std::endl; }
+}
+
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
@@ -46,6 +58,7 @@ int main(int argc, char *const argv[]) {
         P4::FrontEnd fe;
         fe.addDebugHook(hook);
         program = fe.run(options, program);
+        log_dump(program, "Initial program");
         if (program != nullptr && ::errorCount() == 0) {
             P4Test::MidEnd midEnd(options);
             midEnd.addDebugHook(hook);
@@ -59,7 +72,9 @@ int main(int argc, char *const argv[]) {
                 loader >> program;
             }
 #endif
-            (void)midEnd.process(program);
+            auto top = midEnd.process(program);
+            log_dump(program, "After midend");
+            log_dump(top, "Top level block");
             if (options.dumpJsonFile)
                 JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
             if (options.debugJson) {
