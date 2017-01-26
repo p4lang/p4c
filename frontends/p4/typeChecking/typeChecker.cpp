@@ -391,10 +391,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto te = type->to<IR::Type_Extern>();
         bool changes = false;
         auto methods = new IR::Vector<IR::Method>();
-        bool constructorFound = false;
         for (auto method : *te->methods) {
-            if (method->name == te->name)
-                constructorFound = true;
             auto fpType = canonicalize(method->type);
             if (fpType == nullptr)
                 return nullptr;
