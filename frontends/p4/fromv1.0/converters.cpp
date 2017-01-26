@@ -377,7 +377,7 @@ class ComputeCallGraph : public Inspector {
     explicit ComputeCallGraph(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); setName("ComputeCallGraph"); }
     void postorder(const IR::Apply* apply) override {
-        LOG1("Scanning " << apply->name);
+        LOG3("Scanning " << apply->name);
         auto tbl = structure->tables.get(apply->name.name);
         if (tbl == nullptr)
             ::error("Could not find table %1%", apply->name);
@@ -389,12 +389,12 @@ class ComputeCallGraph : public Inspector {
             ::error("Table %1% invoked from two different controls: %2% and %3%",
                     tbl, apply, previous);
         }
-        LOG1("Invoking " << tbl << " in " << parent->name);
+        LOG3("Invoking " << tbl << " in " << parent->name);
         structure->tableMapping.emplace(tbl, parent);
         structure->tableInvocation.emplace(tbl, apply);
     }
     void postorder(const IR::V1Parser* parser) override {
-        LOG1("Scanning parser " << parser->name);
+        LOG3("Scanning parser " << parser->name);
         structure->parsers.add(parser->name);
         if (!parser->default_return.name.isNullOrEmpty())
             structure->parsers.calls(parser->name, parser->default_return);
@@ -408,7 +408,7 @@ class ComputeCallGraph : public Inspector {
                     BUG_CHECK(primitive->operands.size() == 1,
                               "Expected 1 operand for %1%", primitive);
                     auto dest = primitive->operands.at(0);
-                    LOG1("Parser " << parser->name << " extracts into " << dest);
+                    LOG3("Parser " << parser->name << " extracts into " << dest);
                     structure->extracts[parser->name].push_back(dest);
                 }
             }
@@ -492,7 +492,7 @@ class Rewriter : public Transform {
     { CHECK_NULL(structure); setName("Rewriter"); }
 
     const IR::Node* preorder(IR::V1Program* global) override {
-        if (Log::verbose())
+        if (LOGGING(2))
             dump(global);
         prune();
         return structure->create(global->srcInfo);
