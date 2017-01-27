@@ -70,9 +70,7 @@ AC_CHECK_LIB([rt], [clock_gettime], [], [])
 AC_CHECK_LIB([gmp], [__gmpz_init], [], [AC_MSG_ERROR([GNU MP not found])])
 AC_CHECK_LIB([gmpxx], [__gmpz_init], [], [AC_MSG_ERROR([GNU MP not found])])
 
-AC_SUBST(P4INCLUDE, $prefix/p4include)
-
-AC_CONFIG_FILES([Makefile setup.h])
+AC_CONFIG_FILES([Makefile])
 AX_PYTHON_MODULE([difflib], [fatal], [python])
 AX_PYTHON_MODULE([shutil], [fatal], [python])
 AX_PYTHON_MODULE([tempfile], [fatal], [python])

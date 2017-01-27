@@ -47,6 +47,8 @@ export IFAIL_TESTS
 cpplint_FILES =                # Files that should be passed to cpplint (and etags)
 ir_DEF_FILES =                 # Files that generate the IR
 extension_frontend_SOURCES =   # Files added to libfrontend by extensions
+p4include_HEADERS =		# p4_16 include files
+p4_14include_HEADERS =		# p4_14 include files
 
 ################ Subproject Makefile inclusions
 
@@ -85,6 +87,31 @@ BUILT_SOURCES += \
 	ir/ir-generated.cpp \
 	ir/gen-tree-macro.h
 
+######## P4 header files to install
+
+# FIXME -- should these be in $(pkgdatadir) or $(prefix)?  setup.h.in
+# FIXME -- and check-install-headers: below need to be consistent
+p4includedir = $(pkgdatadir)/p4include
+p4_14includedir = $(pkgdatadir)/p4_14include
+p4include_HEADERS += $(srcdir)/p4include/core.p4 $(srcdir)/p4include/v1model.p4
+
+#### For testing, install headers in the build directory
+
+check-install-headers:
+	@$(MAKE) install-data pkgdatadir=$(builddir)
+
+check: check-install-headers
+recheck: check-install-headers
+
+# FIXME -- should be a way of getting configure to do this automatcially? or automake?
+setup.h: $(srcdir)/setup.h.in Makefile
+	@sed -e 's|@pkgdatadir[@]|$(pkgdatadir)|g' \
+	     -e 's|@prefix[@]|$(prefix)|g' \
+	     -e 's|@p4includedir[@]|$(p4includedir)|g' \
+	     -e 's|@p4_14includedir[@]|$(p4_14includedir)|g' \
+	$< >$@
+setup.o setup.lo: setup.h
+
 ################
 
 # Front-end library
@@ -105,9 +132,6 @@ include $(srcdir)/test/Makefile.am
 cpplint_FILES += $(noinst_HEADERS)
 
 ################ Misc custom targets
-
-install:
-	echo "Installation not yet supported."
 
 clean-local:
 	-rm -f $(BUILT_SOURCES) $(CLEANFILES)

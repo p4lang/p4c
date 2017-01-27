@@ -34,8 +34,5 @@ autoreconf -i
 mkdir -p build # recommended folder for build
 sourcedir=`pwd`
 cd build
-# TODO: the "prefix" is needed for finding the p4include folder.
-# It should be an absolute path.  This may need to change
-# when we have a proper installation procedure.
-../configure CXXFLAGS="-g -O0" --prefix=$sourcedir $*
+../configure CXXFLAGS="-g -O0" $*
 echo "### Configured for building in 'build' folder"
