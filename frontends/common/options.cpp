@@ -15,6 +15,9 @@ limitations under the License.
 */
 
 #include <getopt.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "setup.h"
 #include "options.h"
@@ -130,6 +133,41 @@ void CompilerOptions::setInputFile() {
     }
 }
 
+std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[]) {
+    char buffer[PATH_MAX];
+    int len;
+    struct stat st;
+    /* find the path of the executable.  We use a number of techniques that may fail
+     * or work on different systems, and take the first working one we find.  Fall
+     * back to not overriding the compiled-in installation path */
+    if ((len = readlink("/proc/self/exe", buffer, sizeof(buffer))) > 0 ||
+        (len = readlink("/proc/curproc/exe", buffer, sizeof(buffer))) > 0 ||
+        (len = readlink("/proc/curproc/file", buffer, sizeof(buffer))) > 0 ||
+        (len = readlink("/proc/self/path/a.out", buffer, sizeof(buffer))) > 0) {
+        buffer[len] = 0;
+    } else if (argv[0][0] == '/') {
+        snprintf(buffer, sizeof(buffer), "%s", argv[0]);
+    } else if (strchr(argv[0], '/')) {
+        getcwd(buffer, sizeof(buffer));
+        strncat(buffer, argv[0], sizeof(buffer) - strlen(buffer) - 1);
+    } else if (getenv("_")) {
+        strncpy(buffer, getenv("_"), sizeof(buffer));
+        buffer[sizeof(buffer) - 1] = 0;
+    } else {
+        buffer[0] = 0; }
+
+    if (char *p = strrchr(buffer, '/')) {
+        ++p;
+        snprintf(p, buffer + sizeof(buffer) - p, "p4include");
+        if (stat(buffer, &st) >= 0 && S_ISDIR(st.st_mode))
+            p4includePath = strdup(buffer);
+        snprintf(p, buffer + sizeof(buffer) - p, "p4_14include");
+        if (stat(buffer, &st) >= 0 && S_ISDIR(st.st_mode))
+            p4_14includePath = strdup(buffer); }
+
+    return Util::Options::process(argc, argv);
+}
+
 FILE* CompilerOptions::preprocess() {
     FILE* in = nullptr;
 
@@ -145,8 +183,8 @@ FILE* CompilerOptions::preprocess() {
 #else
         std::string cmd("cpp");
 #endif
-        cmd += cstring(" -undef -nostdinc -I") +
-                p4includePath + " " + preprocessor_options + " " + file;
+        cmd += cstring(" -undef -nostdinc") + " " + preprocessor_options
+            + " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
         if (Log::verbose())
             std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
         in = popen(cmd.c_str(), "r");
