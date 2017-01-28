@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser p00() {
     state start {
         transition accept;

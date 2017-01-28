@@ -108,7 +108,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction_0();
         }
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         size = 256;
         default_action = NoAction_0();
@@ -187,7 +187,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_1();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 1024;
         default_action = NoAction_1();
@@ -199,7 +199,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_8();
         }
         key = {
-            meta.ingress_metadata.ecmp_offset: exact;
+            meta.ingress_metadata.ecmp_offset: exact @name("meta.ingress_metadata.ecmp_offset") ;
         }
         size = 16384;
         default_action = NoAction_8();
@@ -218,7 +218,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_10();
         }
         key = {
-            meta.ingress_metadata.nhop_ipv4: exact;
+            meta.ingress_metadata.nhop_ipv4: exact @name("meta.ingress_metadata.nhop_ipv4") ;
         }
         size = 512;
         default_action = NoAction_10();

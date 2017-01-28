@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser nothing();
 package m(nothing n);
 parser p_0() {

@@ -51,7 +51,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     }
     @name("Enet_lkup") table Enet_lkup() {
         key = {
-            p.arpa_pak.dest: exact;
+            p.arpa_pak.dest: exact @name("p.arpa_pak.dest") ;
         }
         actions = {
             Drop_action_0();

@@ -49,7 +49,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_3();
         }
         key = {
-            meta.m.f1: exact;
+            meta.m.f1: exact @name("meta.m.f1") ;
         }
         default_action = NoAction_3();
     }

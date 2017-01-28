@@ -226,7 +226,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_0();
         }
         key = {
-            hdr.ethernet.etherType: exact;
+            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType") ;
         }
         default_action = NoAction_0();
     }
@@ -237,7 +237,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_9();
         }
         key = {
-            hdr.icmp.typeCode: exact;
+            hdr.icmp.typeCode: exact @name("hdr.icmp.typeCode") ;
         }
         default_action = NoAction_9();
     }
@@ -248,7 +248,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_10();
         }
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         default_action = NoAction_10();
     }
@@ -259,7 +259,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_11();
         }
         key = {
-            hdr.ipv6.dstAddr: exact;
+            hdr.ipv6.dstAddr: exact @name("hdr.ipv6.dstAddr") ;
         }
         default_action = NoAction_11();
     }
@@ -270,7 +270,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_12();
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         default_action = NoAction_12();
     }
@@ -281,7 +281,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_13();
         }
         key = {
-            meta.ing_metadata.drop: exact;
+            meta.ing_metadata.drop: exact @name("meta.ing_metadata.drop") ;
         }
         default_action = NoAction_13();
     }
@@ -292,7 +292,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_14();
         }
         key = {
-            hdr.tcp.dstPort: exact;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
         }
         default_action = NoAction_14();
     }
@@ -303,7 +303,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_15();
         }
         key = {
-            hdr.udp.dstPort: exact;
+            hdr.udp.dstPort: exact @name("hdr.udp.dstPort") ;
         }
         default_action = NoAction_15();
     }

@@ -46,8 +46,8 @@ control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
     }
     @name("T") table T_0(inout TArg1 tArg1, in TArg2 aArg2) {
         key = {
-            tArg1.field1: ternary;
-            aArg2.field2: exact;
+            tArg1.field1: ternary @name("tArg1.field1") ;
+            aArg2.field2: exact @name("aArg2.field2") ;
         }
         actions = {
             B_action_0(tArg1.field1);
@@ -61,7 +61,7 @@ control P_pipe_0(inout TArg1 pArg1, inout TArg2 pArg2) {
     }
     @name("Tinner") table Tinner_0() {
         key = {
-            pArg1.field1: ternary;
+            pArg1.field1: ternary @name("pArg1.field1") ;
         }
         actions = {
             Drop_0();

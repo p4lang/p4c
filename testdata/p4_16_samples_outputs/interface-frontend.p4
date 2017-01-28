@@ -1,3 +1,5 @@
+#include <core.p4>
+
 extern Crc16<T> {
     Crc16();
     Crc16(in int<32> x);

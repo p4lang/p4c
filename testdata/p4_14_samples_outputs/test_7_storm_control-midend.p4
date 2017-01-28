@@ -117,8 +117,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_0();
         }
         key = {
-            meta.ingress_metadata.bd: exact;
-            hdr.ethernet.dstAddr    : ternary;
+            meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
+            hdr.ethernet.dstAddr    : ternary @name("hdr.ethernet.dstAddr") ;
         }
         size = 8192;
         default_action = NoAction_0();

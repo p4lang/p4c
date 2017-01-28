@@ -1,8 +1,7 @@
-#include <core.p4>
-
 error {
     InvalidOptions
 }
+#include <core.p4>
 
 header IPv4_no_options_h {
     bit<4>  version;

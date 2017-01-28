@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser simple(out bit<2> z);
 package m(simple n);
 parser p1_0(out bit<2> z1) {

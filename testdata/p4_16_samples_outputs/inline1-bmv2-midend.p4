@@ -34,7 +34,7 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     }
     @name("do_aux.adjust_lkp_fields") table do_aux_adjust_lkp_fields_0() {
         key = {
-            tmp_ipv4.isValid(): exact;
+            tmp_ipv4.isValid(): exact @name("hdr.ipv4.isValid()") ;
         }
         actions = {
             NoAction_0();

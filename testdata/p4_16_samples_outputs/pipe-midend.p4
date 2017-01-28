@@ -54,8 +54,8 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @name("p1.T") table p1_T_0() {
         key = {
-            tArg1_0.field1: ternary;
-            aArg2_0.field2: exact;
+            tArg1_0.field1: ternary @name("tArg1.field1") ;
+            aArg2_0.field2: exact @name("aArg2.field2") ;
         }
         actions = {
             p1_B_action();
@@ -69,7 +69,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @name("p1.Tinner") table p1_Tinner_0() {
         key = {
-            tmp_5.field1: ternary;
+            tmp_5.field1: ternary @name("pArg1.field1") ;
         }
         actions = {
             p1_Drop();
