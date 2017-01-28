@@ -16,7 +16,7 @@
 # To be included in the main P4C compiler makefile
 
 noinst_PROGRAMS += p4test
-p4test_LDADD = libfrontend.a libp4ctoolkit.a
+p4test_LDADD = libfrontend.la libp4ctoolkit.a
 
 p4test_UNIFIED = \
     backends/p4test/p4test.cpp \
@@ -49,6 +49,8 @@ p14_to_16tests.mk: $(GENTESTS) $(srcdir)/%reldir%/Makefile.am \
 	@$(GENTESTS) $(srcdir) p14_to_16 $(srcdir)/backends/p4test/run-p4-sample.py $^ >$@
 
 
-# This is a bug in the grammar
+# First one is issue #13
+# Second one is issue #242
 XFAIL_TESTS += \
-    p4/testdata/p4_16_samples/cast-call.p4.test
+    p4/testdata/p4_16_samples/cast-call.p4.test \
+    p4/testdata/p4_16_samples/issue242.p4.test

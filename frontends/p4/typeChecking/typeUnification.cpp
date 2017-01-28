@@ -53,7 +53,7 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         }
     }
 
-    if (dest->parameters->size() != src->arguments->size()) {
+    if (dest->parameters->size() < src->arguments->size()) {
         if (reportErrors)
             ::error("%1%: Passing %2% arguments when %3% expected",
                     errorPosition, src->arguments->size(), dest->parameters->size());
@@ -62,20 +62,28 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
 
     auto sit = src->arguments->begin();
     for (auto dit : *dest->parameters->getEnumerator()) {
+        bool optarg = dit->annotations->getSingle("optional") != nullptr;
+        if (sit == src->arguments->end()) {
+            if (optarg) continue;
+            if (reportErrors)
+                ::error("%1%: Not enough arguments for call", errorPosition);
+            return false; }
         auto arg = *sit;
         if ((dit->direction == IR::Direction::Out || dit->direction == IR::Direction::InOut) &&
             (!arg->leftValue)) {
+            if (optarg) continue;
             if (reportErrors)
                 ::error("%1%: Read-only value used for out/inout parameter %2%", arg->srcInfo, dit);
             return false;
         } else if (dit->direction == IR::Direction::None && !arg->compileTimeConstant) {
+            if (optarg) continue;
             if (reportErrors)
                 ::error("%1%: not a compile-time constant when binding to %2%", arg->srcInfo, dit);
             return false;
         }
 
-        if (dit->direction != IR::Direction::None &&
-            dit->type->is<IR::Type_Extern>()) {
+        if (dit->direction != IR::Direction::None && dit->type->is<IR::Type_Extern>()) {
+            if (optarg) continue;
             ::error("%1%: extern values cannot be passed in/out/inout", dit);
             return false;
         }
@@ -83,6 +91,10 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         constraints->addEqualityConstraint(dit->type, arg->type);
         ++sit;
     }
+    if (sit != src->arguments->end()) {
+        if (reportErrors)
+            ::error("%1%: Too many arguments for call", errorPosition);
+        return false; }
 
     return true;
 }

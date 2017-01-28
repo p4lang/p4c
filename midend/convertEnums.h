@@ -47,9 +47,18 @@ class EnumRepresentation {
     { repr.emplace(decl, repr.size()); }
     unsigned get(cstring decl) const
     { return ::get(repr, decl); }
+
+    using iterator = decltype(repr)::iterator;
+    using const_iterator = decltype(repr)::const_iterator;
+    iterator begin() { return repr.begin(); }
+    const_iterator begin() const { return repr.begin(); }
+    iterator end() { return repr.end(); }
+    const_iterator end() const { return repr.end(); }
 };
 
 class DoConvertEnums : public Transform {
+    friend class ConvertEnums;
+
     std::map<const IR::Type_Enum*, EnumRepresentation*> repr;
     ChooseEnumRepresentation* policy;
     TypeMap* typeMap;
@@ -63,14 +72,19 @@ class DoConvertEnums : public Transform {
 };
 
 class ConvertEnums : public PassManager {
+  DoConvertEnums *convertEnums{nullptr};
  public:
+    using EnumMapping = decltype(DoConvertEnums::repr);
     ConvertEnums(ReferenceMap* refMap, TypeMap* typeMap,
-                 ChooseEnumRepresentation* policy) {
+                 ChooseEnumRepresentation* policy)
+        : convertEnums(new DoConvertEnums(policy, typeMap)) {
         passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DoConvertEnums(policy, typeMap));
+        passes.push_back(convertEnums);
         passes.push_back(new ClearTypeMap(typeMap));
         setName("ConvertEnums");
     }
+
+    EnumMapping getEnumMapping() const { return convertEnums->repr; }
 };
 
 }  // namespace P4

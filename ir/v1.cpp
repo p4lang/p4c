@@ -73,12 +73,12 @@ static const std::map<cstring, primitive_info_t> prim_info = {
     { "execute_meter",          { 3, 4, 0x5, 0x0 } },
     { "execute_stateful_alu",   { 1, 2, 0x0, 0x0 } },
     { "execute_stateful_alu_from_hash", { 1, 2, 0x0, 0x0 } },
-    { "execute_stateful_log",   { 0, 0, 0x0, 0x0 } },
+    { "execute_stateful_log",   { 1, 1, 0x0, 0x0 } },
     { "exit",                   { 0, 0, 0x0, 0x0 } },
     { "extract",                { 1, 1, 0x1, 0x0 } },
     { "funnel_shift_right",     { 4, 4, 0x1, 0x0 } },
     { "generate_digest",        { 2, 2, 0x0, 0x0 } },
-    { "invalidate",             { 0, 0, 0x0, 0x0 } },
+    { "invalidate",             { 1, 1, 0x0, 0x0 } },
     { "mark_for_drop",          { 0, 0, 0x0, 0x0 } },
     { "max",                    { 3, 3, 0x1, 0x7 } },
     { "min",                    { 3, 3, 0x1, 0x7 } },
@@ -137,5 +137,7 @@ const IR::Type *IR::Primitive::inferOperandType(int operand) const {
                 if (tbl->instance_count > 0) {
                     int width = ceil_log2(tbl->instance_count);
                     return IR::Type::Bits::get(width); } } } }
+    if (name.startsWith("execute_stateful") && operand == 1) {
+            return IR::Type::Bits::get(32); }
     return IR::Type::Unknown::get();
 }

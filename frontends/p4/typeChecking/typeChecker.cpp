@@ -391,10 +391,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto te = type->to<IR::Type_Extern>();
         bool changes = false;
         auto methods = new IR::Vector<IR::Method>();
-        bool constructorFound = false;
         for (auto method : *te->methods) {
-            if (method->name == te->name)
-                constructorFound = true;
             auto fpType = canonicalize(method->type);
             if (fpType == nullptr)
                 return nullptr;
@@ -796,6 +793,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
     visit(decl->type);
     visit(decl->arguments);
     visit(decl->annotations);
+    decl->properties.visit_children(*this);
 
     auto type = getTypeType(decl->type);
     if (type == nullptr) {
@@ -2400,6 +2398,12 @@ const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
     setType(expression, IR::Type_State::get());
     setType(getOriginal(), IR::Type_State::get());
     return expression;
+}
+
+const IR::Node* TypeInference::postorder(IR::AttribLocal* local) {
+    setType(local, local->type);
+    setType(getOriginal(), local->type);
+    return local;
 }
 
 ///////////////////////////////////////// Statements et al.

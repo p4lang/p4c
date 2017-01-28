@@ -28,12 +28,13 @@ namespace EBPF {
 
 class Target {
  protected:
-    cstring name;
     explicit Target(cstring name) : name(name) {}
     Target() = delete;
     virtual ~Target() {}
 
  public:
+    const cstring name;
+
     virtual void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const = 0;
     virtual void emitCodeSection(Util::SourceCodeBuilder* builder, cstring sectionName) const = 0;
     virtual void emitIncludes(Util::SourceCodeBuilder* builder) const = 0;
@@ -49,13 +50,16 @@ class Target {
                           cstring argName) const = 0;
     virtual cstring dataOffset(cstring base) const = 0;
     virtual cstring dataEnd(cstring base) const = 0;
+    virtual cstring forwardReturnCode() const = 0;
+    virtual cstring dropReturnCode() const = 0;
+    virtual cstring abortReturnCode() const = 0;
 };
 
 // Represents a target that is compiled within the kernel
 // source tree samples folder and which attaches to a socket
 class KernelSamplesTarget : public Target {
  public:
-    KernelSamplesTarget() : Target("Linux kernel") {}
+    explicit KernelSamplesTarget(cstring name = "Linux kernel") : Target(name) {}
     void emitLicense(Util::SourceCodeBuilder* builder, cstring license) const override;
     void emitCodeSection(Util::SourceCodeBuilder* builder, cstring sectionName) const override;
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
@@ -72,6 +76,9 @@ class KernelSamplesTarget : public Target {
     cstring dataOffset(cstring base) const override { return base; }
     cstring dataEnd(cstring base) const override
     { return cstring("(") + base + " + " + base + "->len)"; }
+    cstring forwardReturnCode() const override { return "0"; }
+    cstring dropReturnCode() const override { return "1"; }
+    cstring abortReturnCode() const override { return "1"; }
 };
 
 // Represents a target compiled by bcc that uses the TC
@@ -94,6 +101,9 @@ class BccTarget : public Target {
     cstring dataOffset(cstring base) const override { return base; }
     cstring dataEnd(cstring base) const override
     { return cstring("(") + base + " + " + base + "->len)"; }
+    cstring forwardReturnCode() const override { return "0"; }
+    cstring dropReturnCode() const override { return "1"; }
+    cstring abortReturnCode() const override { return "1"; }
 };
 
 }  // namespace EBPF

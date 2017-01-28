@@ -343,3 +343,22 @@ bool ControlFlowVisitor::join_flows(const IR::Node *n) {
             return true; } }
     return false;
 }
+
+void Inspector::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const Inspector *>(v);
+    BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
+}
+void Modifier::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const Modifier *>(v);
+    BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
+}
+void Transform::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const Transform *>(v);
+    BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
+}
+
+ControlFlowVisitor &ControlFlowVisitor::flow_clone() {
+    auto *rv = clone();
+    rv->check_clone(this);
+    return *rv;
+}

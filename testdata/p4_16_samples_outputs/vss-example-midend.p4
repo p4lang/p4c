@@ -300,18 +300,36 @@ control TopDeparser(inout Parsed_packet p, packet_out b) {
         tmp_20 = ck_2.get();
         p.ip.hdrChecksum = tmp_20;
     }
+    action act_9() {
+        b.emit<Ethernet_h>(p.ethernet);
+    }
+    action act_10() {
+        b.emit<Ipv4_h>(p.ip);
+    }
     table tbl_act_8() {
+        actions = {
+            act_9();
+        }
+        const default_action = act_9();
+    }
+    table tbl_act_9() {
         actions = {
             act_8();
         }
         const default_action = act_8();
     }
-    apply {
-        b.emit<Ethernet_h>(p.ethernet);
-        if (p.ip.isValid()) {
-            tbl_act_8.apply();
+    table tbl_act_10() {
+        actions = {
+            act_10();
         }
-        b.emit<Ipv4_h>(p.ip);
+        const default_action = act_10();
+    }
+    apply {
+        tbl_act_8.apply();
+        if (p.ip.isValid()) {
+            tbl_act_9.apply();
+        }
+        tbl_act_10.apply();
     }
 }
 

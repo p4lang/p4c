@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "ebpfObject.h"
+#include "ebpfProgram.h"
 
 namespace EBPF {
+
+class EBPFParser;
 
 class EBPFParserState : public EBPFObject {
  public:

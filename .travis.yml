@@ -1,0 +1,11 @@
+# Travis CI integration for p4c using Docker.
+
+services:
+  - docker
+
+install:
+  - docker build --build-arg MAKEFLAGS=-j2 -t p4c .
+
+script:
+  - docker run -w /p4c/build p4c make check VERBOSE=1
+  - docker run -w /p4c/build p4c make cpplint

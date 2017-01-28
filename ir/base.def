@@ -13,6 +13,7 @@ abstract Type {
     typedef Type_Unknown        Unknown;
     typedef Type_Boolean        Boolean;
     typedef Type_Bits           Bits;
+    typedef Type_String         String;
     typedef Type_Varbits        Varbits;
     typedef Type_Void           Void;
 #end

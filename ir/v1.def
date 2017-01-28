@@ -431,9 +431,23 @@ class V1Control {
     toString { return node_type_name() + " " + name; }
 }
 
+class AttribLocal : Expression, IDeclaration {
+    ID  name;
+#nodbprint
+    ID getName() const override { return name; }
+}
+
+class AttribLocals : ISimpleNamespace {
+    inline NameMap<AttribLocal> locals = {};
+#nodbprint
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return locals.valueEnumerator()->as<const IDeclaration *>(); }
+    IDeclaration getDeclByName(cstring name) const override { return locals[name]; }
+}
+
 class Attribute : Declaration {
     NullOK Type type = nullptr;
-    NullOK NameList locals = nullptr;
+    NullOK AttribLocals locals = nullptr;
     bool optional = false;
 #nodbprint
 }

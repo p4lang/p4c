@@ -123,7 +123,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
         auto type = EBPFTypeFactory::instance->create(f->type);
         auto wt = dynamic_cast<IHasWidth*>(type);
         if (wt == nullptr) {
-            ::error("EBPF: Unsupported type in struct %s", f->type);
+            ::error("EBPF: Unsupported type in struct: %s", f->type);
         } else {
             width += wt->widthInBits();
             implWidth += wt->implementationWidthInBits();

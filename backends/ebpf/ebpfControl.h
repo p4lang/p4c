@@ -22,24 +22,53 @@ limitations under the License.
 
 namespace EBPF {
 
+class EBPFControl;
+
+class ControlBodyTranslator : public CodeGenInspector {
+    const EBPFControl* control;
+    std::set<const IR::Parameter*> toDereference;
+    std::vector<cstring> saveAction;
+    P4::P4CoreLibrary& p4lib;
+    std::map<const IR::Parameter*, const IR::Parameter*> substitution;
+ public:
+    ControlBodyTranslator(const EBPFControl* control, CodeBuilder* builder);
+    void substitute(const IR::Parameter* p, const IR::Parameter* with);
+
+    // handle the packet_out.emit method
+    void compileEmitField(const IR::Expression* expr, cstring field,
+                          unsigned alignment, EBPFType* type);
+    void compileEmit(const IR::Vector<IR::Expression>* args);
+    void processMethod(const P4::ExternMethod* method);
+    void processApply(const P4::ApplyMethod* method);
+
+    bool preorder(const IR::PathExpression* expression) override;
+    bool preorder(const IR::MethodCallExpression* expression) override;
+    bool preorder(const IR::ExitStatement*) override;
+    bool preorder(const IR::ReturnStatement*) override;
+    bool preorder(const IR::IfStatement* statement) override;
+    bool preorder(const IR::SwitchStatement* statement) override;
+};
+
 class EBPFControl : public EBPFObject {
  public:
     const EBPFProgram*      program;
     const IR::ControlBlock* controlBlock;
     const IR::Parameter*    headers;
     const IR::Parameter*    accept;
+    const IR::Parameter*    parserHeaders;
+    // replace references to headers with references to parserHeaders
     cstring                 hitVariable;
 
     std::set<const IR::Parameter*> toDereference;
     std::map<cstring, EBPFTable*>  tables;
     std::map<cstring, EBPFCounterTable*>  counters;
 
-    explicit EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block);
-    virtual ~EBPFControl() {}
-    void emit(CodeBuilder* builder);
+    EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
+                const IR::Parameter* parserHeaders);
+    virtual void emit(CodeBuilder* builder);
     void emitDeclaration(const IR::Declaration* decl, CodeBuilder *builder);
     void emitTables(CodeBuilder* builder);
-    bool build();
+    virtual bool build();
     EBPFTable* getTable(cstring name) const {
         auto result = get(tables, name);
         BUG_CHECK(result != nullptr, "No table named %1%", name);
@@ -48,6 +77,9 @@ class EBPFControl : public EBPFObject {
         auto result = get(counters, name);
         BUG_CHECK(result != nullptr, "No counter named %1%", name);
         return result; }
+
+ protected:
+    void scanConstants();
 };
 
 }  // namespace EBPF

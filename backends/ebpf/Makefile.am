@@ -16,12 +16,12 @@
 # To be included in the main P4C compiler makefile
 
 bin_PROGRAMS += p4c-ebpf
-p4c_ebpf_LDADD = libfrontend.a libp4ctoolkit.a
+p4c_ebpf_LDADD = libfrontend.la libp4ctoolkit.a
 
 p4c_ebpf_UNIFIED = \
 	backends/ebpf/p4c-ebpf.cpp \
 	backends/ebpf/ebpfBackend.cpp \
-	backends/ebpf/ebpfObject.cpp \
+	backends/ebpf/ebpfProgram.cpp \
 	backends/ebpf/ebpfTable.cpp \
 	backends/ebpf/ebpfControl.cpp \
 	backends/ebpf/ebpfParser.cpp \
@@ -37,6 +37,7 @@ noinst_HEADERS += \
 	backends/ebpf/ebpfControl.h \
 	backends/ebpf/ebpfModel.h \
 	backends/ebpf/ebpfObject.h \
+	backends/ebpf/ebpfProgram.h \
 	backends/ebpf/ebpfOptions.h \
 	backends/ebpf/ebpfParser.h \
 	backends/ebpf/ebpfTable.h \

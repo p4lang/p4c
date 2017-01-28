@@ -31,11 +31,15 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
     vector<Visitor *>   passes;
     // if true stops compilation after first pass that signals an error
     bool                stop_on_error = true;
+    bool                running = false;
     unsigned            seqNo = 0;
     void addPasses(const std::initializer_list<Visitor *> &init) {
         never_backtracks_cache = -1;
         for (auto p : init) if (p) passes.emplace_back(p); }
     void runDebugHooks(const char* visitorName, const IR::Node* node);
+    profile_t init_apply(const IR::Node *root) override {
+        running = true;
+        return Visitor::init_apply(root); }
 
  public:
     PassManager() = default;

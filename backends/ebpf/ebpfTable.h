@@ -18,6 +18,7 @@ limitations under the License.
 #define _BACKENDS_EBPF_EBPFTABLE_H_
 
 #include "ebpfObject.h"
+#include "ebpfProgram.h"
 #include "frontends/p4/methodInstance.h"
 
 namespace EBPF {

@@ -138,6 +138,13 @@ ResolutionContext::resolveUnique(IR::ID name,
     return decls->at(0);
 }
 
+const IR::Type *
+ResolutionContext::resolveType(const IR::Type *type) const {
+    if (auto tname = type->to<IR::Type_Name>())
+        return resolveUnique(tname->path->name, ResolutionType::Type, false)->to<IR::Type>();
+    return type;
+}
+
 void ResolutionContext::dbprint(std::ostream& out) const {
     out << "Context stack[" << stack.size() << "]" << std::endl;
     for (auto it = stack.begin(); it != stack.end(); it++) {
@@ -422,6 +429,8 @@ void ResolveReferences::postorder(const IR::BlockStatement *b)
 
 bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
     refMap->usedName(decl->name.name);
+    if (auto ext = context->resolveType(decl->type)->to<IR::Type_Extern>())
+        addToContext(ext);
     if (decl->initializer != nullptr)
         addToContext(decl->initializer);
     return true;
@@ -430,6 +439,26 @@ bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
 void ResolveReferences::postorder(const IR::Declaration_Instance *decl) {
     if (decl->initializer != nullptr)
         removeFromContext(decl->initializer);
+    if (auto ext = context->resolveType(decl->type)->to<IR::Type_Extern>())
+        removeFromContext(ext);
+}
+
+bool ResolveReferences::preorder(const IR::Property *prop) {
+    if (auto attr = dynamic_cast<const IR::Attribute *>(context->
+                    resolveUnique(prop->name, ResolutionType::Any, false))) {
+        if (attr->locals)
+            addToContext(attr->locals);
+        if (attr->type->is<IR::Type::String>())
+            // Attribute is arbitray string -- need not match anything
+            return false; }
+    return true;
+}
+void ResolveReferences::postorder(const IR::Property *prop) {
+    if (auto attr = dynamic_cast<const IR::Attribute *>(context->
+                    resolveUnique(prop->name, ResolutionType::Any, false))) {
+        if (attr->locals)
+            removeFromContext(attr->locals);
+    }
 }
 
 #undef PROCESS_NAMESPACE

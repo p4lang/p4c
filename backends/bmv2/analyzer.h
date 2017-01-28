@@ -74,13 +74,15 @@ class CFG final : public IHasDbPrint {
         const IR::P4Table* table;
         const IR::Expression*      invocation;
         explicit TableNode(const IR::P4Table* table, const IR::Expression* invocation)
-        : Node(table->externalName()), table(table), invocation(invocation) {}
+        : Node(table->externalName()), table(table), invocation(invocation)
+        { CHECK_NULL(table); CHECK_NULL(invocation); }
     };
 
     class IfNode final : public Node {
      public:
         const IR::IfStatement* statement;
-        explicit IfNode(const IR::IfStatement* statement) : statement(statement) {}
+        explicit IfNode(const IR::IfStatement* statement) : statement(statement)
+        { CHECK_NULL(statement); }
     };
 
     class DummyNode final : public Node {
@@ -183,7 +185,7 @@ class ProgramParts {
     std::vector<const IR::Declaration_Variable*> variables;
 
     ProgramParts() {}
-    void analyze(IR::ToplevelBlock* toplevel);
+    void analyze(const IR::ToplevelBlock* toplevel);
 };
 
 }  // namespace BMV2

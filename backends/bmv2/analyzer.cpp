@@ -253,7 +253,7 @@ void CFG::build(const IR::P4Control* cc,
                 P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
     container = cc;
     entryPoint = makeNode(cc->name + ".entry");
-    exitPoint = makeNode(cc->name + ".exit");
+    exitPoint = makeNode("");  // the only node with an empty name
 
     CFGBuilder builder(this, refMap, typeMap);
     auto startValue = new CFG::EdgeSet(new CFG::Edge(entryPoint));
@@ -293,7 +293,7 @@ class DiscoverStructure : public Inspector {
 };
 }  // namespace
 
-void ProgramParts::analyze(IR::ToplevelBlock* toplevel) {
+void ProgramParts::analyze(const IR::ToplevelBlock* toplevel) {
     DiscoverStructure disc(this);
     toplevel->getProgram()->apply(disc);
 }

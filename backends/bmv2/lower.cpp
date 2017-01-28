@@ -125,4 +125,37 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     return result;
 }
 
+/////////////////////////////////////////////////////////////
+
+const IR::Node* FixupChecksum::preorder(IR::P4Control* control) {
+    if (control->name != *updateBlockName)
+        return control;
+    // Convert
+    // tmp = e;
+    // f = tmp;
+    // into
+    // f = e;
+    auto instrs = control->body->components;
+    if (instrs->size() != 2)
+        return control;
+    if (!instrs->at(0)->is<IR::AssignmentStatement>() ||
+        !instrs->at(1)->is<IR::AssignmentStatement>())
+        return control;
+    auto ass0 = instrs->at(0)->to<IR::AssignmentStatement>();
+    auto ass1 = instrs->at(1)->to<IR::AssignmentStatement>();
+    if (!ass0->left->is<IR::PathExpression>() || !ass1->right->is<IR::PathExpression>())
+        return control;
+    auto pe0 = ass0->left->to<IR::PathExpression>();
+    auto pe1 = ass1->right->to<IR::PathExpression>();
+    if (pe0->path->name != pe1->path->name ||
+        pe0->path->absolute != pe1->path->absolute)
+        return control;
+    auto ass = new IR::AssignmentStatement(ass1->srcInfo, ass1->left, ass0->right);
+    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
+    vec->push_back(ass);
+    auto block = new IR::BlockStatement(control->body->srcInfo, control->body->annotations, vec);
+    control->body = block;
+    return control;
+}
+
 }  // namespace BMV2

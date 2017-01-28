@@ -66,6 +66,9 @@ class ResolutionContext : public IHasDbPrint {
     // Resolve a reference for the specified name; expect a single result
     const IR::IDeclaration*
     resolveUnique(IR::ID name, ResolutionType type, bool previousOnly) const;
+
+    // Resolve a Type_Name to a concrete type
+    const IR::Type *resolveType(const IR::Type *type) const;
 };
 
 // No prerequisites, but it usually must be run over the whole program.
@@ -118,6 +121,7 @@ class ResolveReferences : public Inspector {
     DECLARE(Type_StructLike)
     DECLARE(BlockStatement)
     DECLARE(Declaration_Instance)
+    DECLARE(Property)
 #undef DECLARE
 
     bool preorder(const IR::Declaration_MatchKind* d) override;

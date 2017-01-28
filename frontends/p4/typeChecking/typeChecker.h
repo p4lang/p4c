@@ -241,6 +241,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* postorder(IR::DefaultExpression* expression) override;
     const IR::Node* postorder(IR::This* expression) override;
+    const IR::Node* postorder(IR::AttribLocal* local) override;
 
     const IR::Node* postorder(IR::ReturnStatement* stat) override;
     const IR::Node* postorder(IR::IfStatement* stat) override;

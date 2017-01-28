@@ -154,7 +154,7 @@ StateTranslationVisitor::compileExtractField(
         type->emit(builder);
         builder->appendFormat(")((%s(%s, BYTES(%s))",
                               helper,
-                              builder->target->dataOffset(program->model.CPacketName.str()),
+                              program->packetStartVar.c_str(),
                               program->offsetVar.c_str());
         if (shift != 0)
             builder->appendFormat(" >> %d", shift);
@@ -190,7 +190,7 @@ StateTranslationVisitor::compileExtractField(
             bt->emit(builder);
             builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)",
                                   helper,
-                                  builder->target->dataOffset(program->model.CPacketName.str()),
+                                  program->packetStartVar.c_str(),
                                   program->offsetVar.c_str(), i, shift);
 
             if ((i == bytes - 1) && (widthToExtract % 8 != 0)) {
@@ -282,7 +282,7 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
     auto mi = P4::MethodInstance::resolve(expression,
                                           state->parser->program->refMap,
                                           state->parser->program->typeMap);
-    auto extMethod = dynamic_cast<P4::ExternMethod*>(mi);
+    auto extMethod = mi->to<P4::ExternMethod>();
     if (extMethod != nullptr) {
         auto decl = extMethod->object;
         if (decl == state->parser->packet) {
@@ -335,7 +335,9 @@ void EBPFParser::emit(CodeBuilder *builder) {
 
     // Create a synthetic reject state
     builder->emitIndent();
-    builder->appendFormat("%s: { return 1; }", IR::ParserState::reject.c_str());
+    builder->appendFormat("%s: { return %s; }",
+                          IR::ParserState::reject.c_str(),
+                          builder->target->abortReturnCode().c_str());
     builder->newline();
     builder->newline();
 }

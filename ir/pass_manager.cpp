@@ -22,6 +22,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
     vector<std::pair<vector<Visitor *>::iterator, const IR::Node *>> backup;
 
     early_exit_flag = false;
+    BUG_CHECK(running, "not calling apply properly");
     for (auto it = passes.begin(); it != passes.end();) {
         Visitor* v = *it;
         if (auto b = dynamic_cast<Backtrack *>(v)) {
@@ -62,6 +63,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
             break;
         seqNo++;
         it++; }
+    running = false;
     return program;
 }
 
@@ -93,6 +95,7 @@ const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char 
     unsigned iterations = 0;
     while (!done) {
         LOG5("PassRepeated state is:\n" << dumpToString(program));
+        running = true;
         auto newprogram = PassManager::apply_visitor(program, name);
         if (program == newprogram || newprogram == nullptr)
             done = true;
@@ -109,6 +112,7 @@ const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char 
 
 const IR::Node *PassRepeatUntil::apply_visitor(const IR::Node *program, const char *name) {
     do {
+        running = true;
         program = PassManager::apply_visitor(program, name);
     } while (!done());
     return program;

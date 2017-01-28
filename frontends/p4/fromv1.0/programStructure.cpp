@@ -228,10 +228,20 @@ void ProgramStructure::createStructures() {
 void ProgramStructure::createExterns() {
     for (auto it : extern_types) {
         auto type = it.first;
+        IR::Type_Extern *modified_type = nullptr;
         if (type->name != it.second) {
             auto annos = addNameAnnotation(type->name.name, type->annotations);
-            type = new IR::Type_Extern(type->srcInfo, it.second, type->methods,
-                                       type->attributes, annos); }
+            type = modified_type = new IR::Type_Extern(type->srcInfo, it.second, type->methods,
+                                                       type->attributes, annos); }
+        // FIXME -- should create ctors based on attributes?  For now just create a
+        // FIXME -- 0-arg one if needed
+        if (!type->lookupMethod(type->name, 0)) {
+            if (!modified_type)
+                type = modified_type = type->clone();
+            auto methods = type->methods->clone();
+            modified_type->methods = methods;
+            methods->push_back(new IR::Method(type->name, new IR::Type_Method(
+                                                new IR::ParameterList()))); }
         declarations->push_back(type);
     }
 }
@@ -1447,6 +1457,17 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
 }
 
 const IR::Declaration_Instance*
+ProgramStructure::convertExtern(const IR::Declaration_Instance *ext, cstring newName) {
+    LOG1("Synthesizing " << ext);
+    auto *rv = ext->clone();
+    auto *et = rv->type->to<IR::Type_Extern>();
+    BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
+    rv->name = newName;
+    rv->type = new IR::Type_Name(new IR::Path(extern_types.get(et)));
+    return rv->apply(TypeConverter(this))->to<IR::Declaration_Instance>();;
+}
+
+const IR::Declaration_Instance*
 ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     LOG1("Synthesizing " << m);
     auto meterOutput = m->result;
@@ -1565,7 +1586,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
 
     for (auto c : externsToDo) {
         auto ext = externs.get(c);
-        // auto e = convert(ext, externs.get(ext));  -- no conversion needed?
+        ext = convertExtern(ext, externs.get(ext));
         stateful->push_back(ext);
     }
 

@@ -43,14 +43,29 @@ limitations under the License.
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/uniqueNames.h"
+#include "frontends/p4/fromv1.0/v1model.h"
 
 namespace P4Test {
+
+class SkipControls : public P4::ActionSynthesisPolicy {
+    const std::set<cstring> *skip;
+
+ public:
+    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
+    bool convert(const IR::P4Control* control) const override {
+        if (skip->find(control->name) != skip->end())
+            return false;
+        return true;
+    }
+};
 
 MidEnd::MidEnd(CompilerOptions& options) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
+
+    auto v1controls = new std::set<cstring>();
 
     // TODO: parser loop unrolling
     // TODO: improve copy propagation
@@ -63,11 +78,28 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveAllUnusedDeclarations(&refMap),
         new P4::ClearTypeMap(&typeMap),
         evaluator,
-        new VisitFunctor([evaluator](const IR::Node *root) -> const IR::Node * {
+            new VisitFunctor([v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
             auto toplevel = evaluator->getToplevelBlock();
-            if (toplevel->getMain() == nullptr)
+            auto main = toplevel->getMain();
+            if (main == nullptr)
                 // nothing further to do
                 return nullptr;
+            // Special handling when compiling for v1model.p4
+            if (main->type->name == P4V1::V1Model::instance.sw.name) {
+                if (main->getConstructorParameters()->size() != 6)
+                    return root;
+                auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
+                auto update = main->getParameterValue(P4V1::V1Model::instance.sw.update.name);
+                auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
+                if (verify == nullptr || update == nullptr || deparser == nullptr ||
+                    !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
+                    !deparser->is<IR::ControlBlock>()) {
+                    return root;
+                }
+                v1controls->emplace(verify->to<IR::ControlBlock>()->container->name);
+                v1controls->emplace(update->to<IR::ControlBlock>()->container->name);
+                v1controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
+            }
             return root; }),
         new P4::Inline(&refMap, &typeMap, evaluator),
         new P4::InlineActions(&refMap, &typeMap),
@@ -97,7 +129,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
-        new P4::SynthesizeActions(&refMap, &typeMap),
+        new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); })

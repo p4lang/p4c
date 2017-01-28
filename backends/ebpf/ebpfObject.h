@@ -26,12 +26,6 @@ limitations under the License.
 
 namespace EBPF {
 
-class EBPFProgram;
-class EBPFParser;
-class EBPFControl;
-class EBPFTable;
-class EBPFType;
-
 // Base class for EBPF objects
 class EBPFObject {
  public:
@@ -42,54 +36,6 @@ class EBPFObject {
         return dynamic_cast<const T*>(this); }
     template<typename T> T* to() {
         return dynamic_cast<T*>(this); }
-};
-
-class EBPFProgram : public EBPFObject {
- public:
-    const IR::P4Program* program;
-    const IR::ToplevelBlock*  toplevel;
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
-    EBPFParser*          parser;
-    EBPFControl*         control;
-    EBPFModel           &model;
-
-    cstring endLabel, offsetVar, lengthVar;
-    cstring zeroKey, functionName, errorVar;
-    cstring packetStartVar, packetEndVar;
-    cstring errorEnum;
-    cstring license = "GPL";  // TODO: this should be a compiler option probably
-    cstring arrayIndexType = "u32";
-
-    // write program as C source code
-    void emit(CodeBuilder *builder) override;
-    bool build();  // return 'true' on success
-
-    EBPFProgram(const IR::P4Program* program, P4::ReferenceMap* refMap,
-                P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
-            program(program), toplevel(toplevel),
-            refMap(refMap), typeMap(typeMap),
-            parser(nullptr), control(nullptr), model(EBPFModel::instance) {
-        offsetVar = EBPFModel::reserved("packetOffsetInBits");
-        zeroKey = EBPFModel::reserved("zero");
-        functionName = EBPFModel::reserved("filter");
-        errorVar = EBPFModel::reserved("errorCode");
-        packetStartVar = EBPFModel::reserved("packetStart");
-        packetEndVar = EBPFModel::reserved("packetEnd");
-        endLabel = EBPFModel::reserved("end");
-        errorEnum = EBPFModel::reserved("errorCodes");
-    }
-
- private:
-    void emitIncludes(CodeBuilder* builder);
-    void emitPreamble(CodeBuilder* builder);
-    void emitTypes(CodeBuilder* builder);
-    void emitTables(CodeBuilder* builder);
-    void emitHeaderInstances(CodeBuilder* builder);
-    void emitIninitailizeHeaders(CodeBuilder* builder);
-    void createLocalVariables(CodeBuilder* builder);
-    void emitPipeline(CodeBuilder* builder);
-    void emitLicense(CodeBuilder* builder);
 };
 
 }  // namespace EBPF

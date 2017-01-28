@@ -387,6 +387,19 @@ class ExpressionConverter : public Inspector {
     void postorder(const IR::Member* expression) override {
         // TODO: deal with references that return bool
         auto result = new Util::JsonObject();
+
+        // handle errors
+        {
+            auto type = converter->typeMap->getType(expression, true);
+            if (type->is<IR::Type_Error>()) {
+                result->emplace("type", "hexstr");
+                auto errorValue = converter->retrieveErrorValue(expression);
+                result->emplace("value", Util::toString(errorValue));
+                map.emplace(expression, result);
+                return;
+            }
+        }
+
         auto param = enclosingParamReference(expression->expr);
         if (param != nullptr) {
             auto type = converter->typeMap->getType(expression, true);
@@ -636,11 +649,20 @@ class ExpressionConverter : public Inspector {
             } else if (type->is<IR::Type_Stack>()) {
                 result->emplace("type", "header_stack");
                 result->emplace("value", var->name);
+            } else if (type->is<IR::Type_Error>()) {
+                result->emplace("type", "field");
+                auto f = mkArrayField(result, "value");
+                f->append(converter->scalarsName);
+                f->append(var->name);
             } else {
                 BUG("%1%: type not yet handled", type);
             }
             map.emplace(expression, result);
         }
+    }
+
+    void postorder(const IR::TypeNameExpression* expression) override {
+        (void)expression;
     }
 
     void postorder(const IR::Expression* expression) override {
@@ -710,7 +732,7 @@ class ExpressionConverter : public Inspector {
 JsonConverter::JsonConverter(const CompilerOptions& options) :
         options(options), v1model(P4V1::V1Model::instance),
         corelib(P4::P4CoreLibrary::instance),
-        refMap(nullptr), typeMap(nullptr), dropActionId(0), toplevelBlock(nullptr),
+        refMap(nullptr), typeMap(nullptr), toplevelBlock(nullptr),
         conv(new ExpressionConverter(this)),
         headerParameter(nullptr), userMetadataParameter(nullptr), stdMetadataParameter(nullptr)
 {}
@@ -1110,8 +1132,12 @@ Util::JsonArray* JsonConverter::createActions(Util::JsonArray* fieldLists,
     return result;
 }
 
-Util::IJson* JsonConverter::nodeName(const CFG::Node* node) const
-{ return new Util::JsonValue(node->name); }
+Util::IJson* JsonConverter::nodeName(const CFG::Node* node) const {
+    if (node->name.isNullOrEmpty())
+        return Util::JsonValue::null;
+    else
+        return new Util::JsonValue(node->name);
+}
 
 Util::IJson* JsonConverter::convertIf(const CFG::IfNode* node, cstring) {
     auto result = new Util::JsonObject();
@@ -1282,7 +1308,9 @@ JsonConverter::convertTable(const CFG::TableNode* node,
                     if (mi->is<P4::BuiltInMethod>()) {
                         auto bim = mi->to<P4::BuiltInMethod>();
                         if (bim->name == IR::Type_Header::isValid) {
-                            expr = new IR::Member(bim->appliedTo, "$valid$");
+                            expr = new IR::Member(IR::Type::Boolean::get(), bim->appliedTo,
+                                                  "$valid$");
+                            typeMap->setType(expr, expr->type);
                         }
                     }
                 }
@@ -1540,7 +1568,7 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
     } else {
         BUG_CHECK(cfg->entryPoint->successors.size() == 1, "Expected 1 start node for %1%", cont);
         auto start = (*(cfg->entryPoint->successors.edges.begin()))->endpoint;
-        result->emplace("init_table", start->name);
+        result->emplace("init_table", nodeName(start));
     }
     auto tables = mkArrayField(result, "tables");
     auto action_profiles = mkArrayField(result, "action_profiles");
@@ -1554,34 +1582,6 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
             auto j = convertIf(node->to<CFG::IfNode>(), cont->name);
             conditionals->append(j);
         }
-    }
-
-    {
-        // synthesize an special table at the exit for dropping the packet
-        auto exitTable = new Util::JsonObject();
-        exitTable->emplace("name", nodeName(cfg->exitPoint));
-        exitTable->emplace("id", nextId("tables"));
-        auto key = mkArrayField(exitTable, "key");
-        auto ke = new Util::JsonObject();
-        key->append(ke);
-        ke->emplace("match_type", "exact");
-        auto drop = mkArrayField(ke, "target");
-        drop->append("standard_metadata");
-        drop->append("drop");
-        exitTable->emplace("match_type", "exact");
-        exitTable->emplace("type", "simple");
-        exitTable->emplace("max_size", 1);
-        exitTable->emplace("with_counters", false);
-        exitTable->emplace("support_timeout", false);
-        exitTable->emplace("direct_meters", Util::JsonValue::null);
-        auto actions = mkArrayField(exitTable, "actions");
-        actions->append(dropAction);
-        auto action_ids = mkArrayField(exitTable, "action_ids");
-        action_ids->append(dropActionId);
-        auto next_tables = new Util::JsonObject();
-        next_tables->emplace(dropAction, Util::JsonValue::null);
-        exitTable->emplace("next_tables", next_tables);
-        tables->append(exitTable);
     }
 
     for (auto c : *cont->controlLocals) {
@@ -1789,6 +1789,12 @@ void JsonConverter::addLocals() {
             field->append(boolWidth);
             field->append(0);
             scalars_width += boolWidth;
+        } else if (type->is<IR::Type_Error>()) {
+            auto field = pushNewArray(scalarFields);
+            field->append(v->name.name);
+            field->append(32);  // using 32-bit fields for errors
+            field->append(0);
+            scalars_width += 32;
         } else {
             BUG("%1%: type not yet handled on this target", type);
         }
@@ -1824,7 +1830,7 @@ void JsonConverter::addMetaInformation() {
   auto meta = new Util::JsonObject();
 
   static constexpr int version_major = 2;
-  static constexpr int version_minor = 1;
+  static constexpr int version_minor = 4;
   auto version = mkArrayField(meta, "version");
   version->append(version_major);
   version->append(version_minor);
@@ -1833,12 +1839,15 @@ void JsonConverter::addMetaInformation() {
 }
 
 void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                            IR::ToplevelBlock* toplevelBlock) {
+                            const IR::ToplevelBlock* toplevelBlock,
+                            P4::ConvertEnums::EnumMapping* enumMap) {
     this->toplevelBlock = toplevelBlock;
     this->refMap = refMap;
     this->typeMap = typeMap;
+    this->enumMap = enumMap;
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
+    CHECK_NULL(enumMap);
 
     auto package = toplevelBlock->getMain();
     if (package == nullptr) {
@@ -1900,6 +1909,8 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     toplevelBlock->getProgram()->apply(errorCodesVisitor);
     addErrors();
 
+    addEnums();
+
     auto prsrs = mkArrayField(&toplevel, "parsers");
     auto parserJson = toJson(parser);
     prsrs->append(parserJson);
@@ -1924,20 +1935,6 @@ void JsonConverter::convert(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     if (::errorCount() > 0)
         return;
     toplevel.emplace("actions", acts);
-    {
-        // synthesize a "drop" action
-        auto drop = new Util::JsonObject();
-        drop->emplace("name", dropAction);
-        dropActionId = nextId("actions");
-        drop->emplace("id", dropActionId);
-        drop->emplace("runtime_data", new Util::JsonArray());
-        auto body = mkArrayField(drop, "primitives");
-        auto call = new Util::JsonObject();
-        call->emplace("op", "drop");
-        call->emplace("parameters", new Util::JsonArray());
-        body->append(call);
-        acts->append(drop);
-    }
 
     auto pipelines = mkArrayField(&toplevel, "pipelines");
     auto ingressBlock = package->getParameterValue(v1model.sw.ingress.name);
@@ -2293,8 +2290,10 @@ Util::IJson* JsonConverter::convertParserStatement(const IR::StatOrDecl* stat) {
                 }
                 {
                     auto error = mce->arguments->at(1);
-                    auto errorValue = retrieveErrorValue(error);
-                    params->append(errorValue);
+                    // false means don't wrap in an outer expression object, which is not needed
+                    // here
+                    auto jexpr = conv->convert(error, true, false);
+                    params->append(jexpr);
                 }
                 return result;
             }
@@ -2468,16 +2467,28 @@ void JsonConverter::addErrors() {
     }
 }
 
-JsonConverter::ErrorValue JsonConverter::retrieveErrorValue(const IR::Expression* expr) const {
-    if (!expr->is<IR::Member>()) {
-        ::error("%1%: only constant error values supported for errors", expr);
-        return 0;
-    }
-    auto mem = expr->to<IR::Member>();
+JsonConverter::ErrorValue JsonConverter::retrieveErrorValue(const IR::Member* mem) const {
     auto type = typeMap->getType(mem, true);
     BUG_CHECK(type->is<IR::Type_Error>(), "Not an error constant");
     auto decl = type->to<IR::Type_Error>()->getDeclByName(mem->member.name);
     return errorCodesMap.at(decl);
+}
+
+void JsonConverter::addEnums() {
+    CHECK_NULL(enumMap);
+    auto enums = mkArrayField(&toplevel, "enums");
+    for (const auto &pEnum : *enumMap) {
+        auto enumName = pEnum.first->getName().name.c_str();
+        auto enumObj = new Util::JsonObject();
+        enumObj->emplace("name", enumName);
+        auto entries = mkArrayField(enumObj, "entries");
+        for (const auto &pEntry : *pEnum.second) {
+            auto entry = pushNewArray(entries);
+            entry->append(pEntry.first);
+            entry->append(pEntry.second);
+        }
+        enums->append(enumObj);
+    }
 }
 
 }  // namespace BMV2
