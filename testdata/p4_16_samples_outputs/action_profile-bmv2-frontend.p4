@@ -30,7 +30,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name("indirect_ws") table indirect_ws_0() {
         key = {
-            meta.hash1: selector;
+            meta.hash1: selector @name("meta.hash1") ;
         }
         actions = {
             drop_0();

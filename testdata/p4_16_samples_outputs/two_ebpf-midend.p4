@@ -53,7 +53,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @name("Check_ip") table Check_ip() {
         key = {
-            address_0: exact;
+            address_0: exact @name("address") ;
         }
         actions = {
             Reject_0();

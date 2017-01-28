@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_0();
         }
         key = {
-            hdr.hdr2.f1: exact;
+            hdr.hdr2.f1: exact @name("hdr.hdr2.f1") ;
         }
         size = 64;
         default_action = NoAction_0();

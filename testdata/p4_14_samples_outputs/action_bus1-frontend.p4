@@ -125,7 +125,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f1_1: exact;
+            hdr.data.f1_1: exact @name("hdr.data.f1_1") ;
         }
         default_action = NoAction();
     }
@@ -136,7 +136,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2_1: exact;
+            hdr.data.f2_1: exact @name("hdr.data.f2_1") ;
         }
         default_action = NoAction();
     }
@@ -147,7 +147,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f3_1: exact;
+            hdr.data.f3_1: exact @name("hdr.data.f3_1") ;
         }
         default_action = NoAction();
     }
@@ -158,7 +158,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f4_1: exact;
+            hdr.data.f4_1: exact @name("hdr.data.f4_1") ;
         }
         default_action = NoAction();
     }
@@ -169,7 +169,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f5_1: exact;
+            hdr.data.f5_1: exact @name("hdr.data.f5_1") ;
         }
         default_action = NoAction();
     }
@@ -180,7 +180,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f6_1: exact;
+            hdr.data.f6_1: exact @name("hdr.data.f6_1") ;
         }
         default_action = NoAction();
     }
@@ -191,7 +191,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f7_1: exact;
+            hdr.data.f7_1: exact @name("hdr.data.f7_1") ;
         }
         default_action = NoAction();
     }
@@ -202,7 +202,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f8_1: exact;
+            hdr.data.f8_1: exact @name("hdr.data.f8_1") ;
         }
         default_action = NoAction();
     }

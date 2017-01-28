@@ -46,7 +46,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2: ternary @name("hdr.data.f2") ;
         }
         default_action = NoAction();
     }
@@ -57,7 +57,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            hdr.data.b1: ternary;
+            hdr.data.b1: ternary @name("hdr.data.b1") ;
         }
         default_action = NoAction();
     }
@@ -68,7 +68,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            hdr.data.f3: ternary;
+            hdr.data.f3: ternary @name("hdr.data.f3") ;
         }
         default_action = NoAction();
     }
@@ -79,7 +79,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            hdr.data.f4: ternary;
+            hdr.data.f4: ternary @name("hdr.data.f4") ;
         }
         default_action = NoAction();
     }
@@ -115,7 +115,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1: ternary @name("hdr.data.f1") ;
         }
         default_action = NoAction();
     }
@@ -126,7 +126,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.b1: ternary;
+            hdr.data.b1: ternary @name("hdr.data.b1") ;
         }
         default_action = NoAction();
     }
@@ -137,7 +137,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.b3: ternary;
+            hdr.data.b3: ternary @name("hdr.data.b3") ;
         }
         default_action = NoAction();
     }
@@ -148,7 +148,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2: ternary @name("hdr.data.f2") ;
         }
         default_action = NoAction();
     }
@@ -159,7 +159,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.data.b2: ternary;
+            hdr.data.b2: ternary @name("hdr.data.b2") ;
         }
         default_action = NoAction();
     }

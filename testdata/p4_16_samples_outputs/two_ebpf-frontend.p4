@@ -49,7 +49,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @name("Check_ip") table Check_ip_0(in IPv4Address address) {
         key = {
-            address: exact;
+            address: exact @name("address") ;
         }
         actions = {
             Reject_0();

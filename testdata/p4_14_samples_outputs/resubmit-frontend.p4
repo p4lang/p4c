@@ -63,7 +63,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.mymeta.f1: exact;
+            meta.mymeta.f1: exact @name("meta.mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction();
@@ -75,7 +75,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.mymeta.f1: exact;
+            meta.mymeta.f1: exact @name("meta.mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction();

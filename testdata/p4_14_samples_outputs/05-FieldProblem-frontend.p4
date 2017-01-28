@@ -39,7 +39,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            hdr.vag.f1: exact;
+            hdr.vag.f1: exact @name("hdr.vag.f1") ;
         }
         default_action = NoAction();
     }
@@ -61,7 +61,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.vag.f1: exact;
+            hdr.vag.f1: exact @name("hdr.vag.f1") ;
         }
         size = 1024;
         default_action = NoAction();

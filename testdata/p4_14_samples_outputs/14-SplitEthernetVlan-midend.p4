@@ -84,7 +84,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction_0();
         }
         key = {
-            hdr.mac_sa.mac: exact;
+            hdr.mac_sa.mac: exact @name("hdr.mac_sa.mac") ;
         }
         default_action = NoAction_0();
     }
@@ -104,8 +104,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_1();
         }
         key = {
-            hdr.mac_da.mac       : exact;
-            hdr.len_or_type.value: exact;
+            hdr.mac_da.mac       : exact @name("hdr.mac_da.mac") ;
+            hdr.len_or_type.value: exact @name("hdr.len_or_type.value") ;
         }
         default_action = NoAction_1();
     }

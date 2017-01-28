@@ -5,7 +5,7 @@ control c(inout bit<32> arg) {
     }
     @name("t") table t_0(in bit<32> x) {
         key = {
-            x: exact;
+            x: exact @name("x") ;
         }
         actions = {
             a_0();

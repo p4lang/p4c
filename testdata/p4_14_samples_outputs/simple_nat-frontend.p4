@@ -145,7 +145,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         size = 256;
         default_action = NoAction();
@@ -209,7 +209,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.meta.nhop_ipv4: exact;
+            meta.meta.nhop_ipv4: exact @name("meta.meta.nhop_ipv4") ;
         }
         size = 512;
         default_action = NoAction();
@@ -221,7 +221,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.meta.if_index: exact;
+            meta.meta.if_index: exact @name("meta.meta.if_index") ;
         }
         default_action = NoAction();
     }
@@ -232,7 +232,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.meta.ipv4_da: lpm;
+            meta.meta.ipv4_da: lpm @name("meta.meta.ipv4_da") ;
         }
         size = 1024;
         default_action = NoAction();
@@ -248,13 +248,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.meta.is_ext_if: exact;
-            hdr.ipv4.isValid() : exact;
-            hdr.tcp.isValid()  : exact;
-            hdr.ipv4.srcAddr   : ternary;
-            hdr.ipv4.dstAddr   : ternary;
-            hdr.tcp.srcPort    : ternary;
-            hdr.tcp.dstPort    : ternary;
+            meta.meta.is_ext_if: exact @name("meta.meta.is_ext_if") ;
+            hdr.ipv4.isValid() : exact @name("hdr.ipv4.isValid()") ;
+            hdr.tcp.isValid()  : exact @name("hdr.tcp.isValid()") ;
+            hdr.ipv4.srcAddr   : ternary @name("hdr.ipv4.srcAddr") ;
+            hdr.ipv4.dstAddr   : ternary @name("hdr.ipv4.dstAddr") ;
+            hdr.tcp.srcPort    : ternary @name("hdr.tcp.srcPort") ;
+            hdr.tcp.dstPort    : ternary @name("hdr.tcp.dstPort") ;
         }
         size = 128;
         default_action = NoAction();

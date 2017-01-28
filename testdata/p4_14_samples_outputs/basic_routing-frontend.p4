@@ -71,7 +71,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.nexthop_index: exact;
+            meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
         default_action = NoAction();
@@ -103,7 +103,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.bd: exact;
+            meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
         }
         size = 65536;
         default_action = NoAction();
@@ -115,8 +115,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
-            hdr.ipv4.dstAddr         : exact;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : exact @name("hdr.ipv4.dstAddr") ;
         }
         size = 131072;
         default_action = NoAction();
@@ -128,8 +128,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
-            hdr.ipv4.dstAddr         : lpm;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 16384;
         default_action = NoAction();
@@ -141,7 +141,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            meta.ingress_metadata.nexthop_index: exact;
+            meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
         default_action = NoAction();
@@ -152,7 +152,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            standard_metadata.ingress_port: exact;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
         size = 32768;
         default_action = NoAction();

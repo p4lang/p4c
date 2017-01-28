@@ -66,7 +66,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction_0();
         }
         key = {
-            standard_metadata.instance_type: exact;
+            standard_metadata.instance_type: exact @name("standard_metadata.instance_type") ;
         }
         size = 16;
         default_action = NoAction_0();

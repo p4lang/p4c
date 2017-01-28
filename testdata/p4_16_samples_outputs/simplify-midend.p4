@@ -10,7 +10,7 @@ control c(out bool x) {
     }
     @name("t1") table t1() {
         key = {
-            x: exact;
+            x: exact @name("x") ;
         }
         actions = {
             NoAction_0();
@@ -19,7 +19,7 @@ control c(out bool x) {
     }
     @name("t2") table t2() {
         key = {
-            x: exact;
+            x: exact @name("x") ;
         }
         actions = {
             NoAction_3();
