@@ -4,7 +4,7 @@ services:
   - docker
 
 install:
-  - docker build --build-arg MAKEFLAGS=-j2 -t p4c .
+  - docker build -t p4c .
 
 script:
   - docker run -w /p4c/build p4c make check VERBOSE=1
