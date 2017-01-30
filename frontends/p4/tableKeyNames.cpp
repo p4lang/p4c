@@ -36,7 +36,7 @@ class KeyNameGenerator : public Inspector {
 
     void postorder(const IR::Member* expression) override {
         cstring n = getName(expression->expr);
-        if (n.isNullOrEmpty())
+        if (!n)
             return;
         name.emplace(expression, n + "." + expression->member);
     }
@@ -44,7 +44,7 @@ class KeyNameGenerator : public Inspector {
     void postorder(const IR::ArrayIndex* expression) override {
         cstring l = getName(expression->left);
         cstring r = getName(expression->right);
-        if (l.isNullOrEmpty() || r.isNullOrEmpty())
+        if (!l || !r)
             return;
         name.emplace(expression, l + "[" + r + "]");
     }
@@ -57,14 +57,14 @@ class KeyNameGenerator : public Inspector {
         cstring e0 = getName(expression->e0);
         cstring e1 = getName(expression->e1);
         cstring e2 = getName(expression->e2);
-        if (e0.isNullOrEmpty() || e1.isNullOrEmpty() || e2.isNullOrEmpty())
+        if (!e0 || !e1 || !e2)
             return;
         name.emplace(expression, e0 + "[" + e1 + ":" + e2 + "]");
     }
 
     void postorder(const IR::MethodCallExpression* expression) override {
         cstring m = getName(expression->method);
-        if (m.isNullOrEmpty())
+        if (!m)
             return;
         if (!m.endsWith(IR::Type_Header::isValid) || expression->arguments->size() != 0) {
             // This is a heuristic
@@ -76,7 +76,7 @@ class KeyNameGenerator : public Inspector {
 
     cstring getName(const IR::Expression* expression) {
         if (name.find(expression) == name.end())
-            return "";
+            return cstring();
         return ::get(name, expression);
     }
 };
@@ -91,7 +91,7 @@ const IR::Node* TableKeyNames::postorder(IR::KeyElement* keyElement) {
     cstring name = kng.getName(keyElement->expression);
 
     LOG3("Generated name " << name);
-    if (name.isNullOrEmpty())
+    if (!name)
         return keyElement;
     keyElement->annotations = keyElement->annotations->addAnnotation(
         IR::Annotation::nameAnnotation,
