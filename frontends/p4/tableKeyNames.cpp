@@ -35,10 +35,8 @@ class KeyNameGenerator : public Inspector {
     }
 
     void postorder(const IR::Member* expression) override {
-        cstring n = getName(expression->expr);
-        if (!n)
-            return;
-        name.emplace(expression, n + "." + expression->member);
+        if (cstring n = getName(expression->expr))
+            name.emplace(expression, n + "." + expression->member);
     }
 
     void postorder(const IR::ArrayIndex* expression) override {
@@ -75,8 +73,6 @@ class KeyNameGenerator : public Inspector {
     }
 
     cstring getName(const IR::Expression* expression) {
-        if (name.find(expression) == name.end())
-            return cstring();
         return ::get(name, expression);
     }
 };
