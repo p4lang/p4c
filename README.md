@@ -25,8 +25,7 @@ programs.
 The code and documentation are hosted in the following git repository:
 https://github.com/p4lang/p4c
 
-The code is currently alpha quality.  Currently there is no way to
-install the compiler.
+The code is currently alpha quality.
 
 # Dependences
 
