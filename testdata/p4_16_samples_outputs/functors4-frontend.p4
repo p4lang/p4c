@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser p1_0(out bit<1> z1) {
     state start {
         z1 = 1w0;

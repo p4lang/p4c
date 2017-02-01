@@ -11,7 +11,7 @@ control c(inout bit<32> r) {
     }
     @name("t") table t_0(in bit<32> r) {
         key = {
-            r: ternary;
+            r: ternary @name("r") ;
         }
         actions = {
             a_0();

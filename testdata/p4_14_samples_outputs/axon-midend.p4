@@ -113,8 +113,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_3();
         }
         key = {
-            hdr.axon_head.isValid()     : exact;
-            hdr.axon_fwdHop[0].isValid(): exact;
+            hdr.axon_head.isValid()     : exact @name("hdr.axon_head.isValid()") ;
+            hdr.axon_fwdHop[0].isValid(): exact @name("hdr.axon_fwdHop[0].isValid()") ;
         }
         size = 1;
         default_action = NoAction_3();

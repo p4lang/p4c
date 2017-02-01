@@ -71,8 +71,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction_0();
         }
         key = {
-            hdr.hdrA.f1                    : exact;
-            standard_metadata.instance_type: ternary;
+            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
         default_action = NoAction_0();
@@ -112,8 +112,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_1();
         }
         key = {
-            hdr.hdrA.f1  : exact;
-            meta.metaA.f1: exact;
+            hdr.hdrA.f1  : exact @name("hdr.hdrA.f1") ;
+            meta.metaA.f1: exact @name("meta.metaA.f1") ;
         }
         size = 128;
         default_action = NoAction_1();
@@ -126,8 +126,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_5();
         }
         key = {
-            hdr.hdrA.f1                    : exact;
-            standard_metadata.instance_type: ternary;
+            hdr.hdrA.f1                    : exact @name("hdr.hdrA.f1") ;
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
         }
         size = 128;
         default_action = NoAction_5();

@@ -34,7 +34,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction();
         }
         key = {
-            hdr.ethernet.etherType: ternary;
+            hdr.ethernet.etherType: ternary @name("hdr.ethernet.etherType") ;
         }
         default_action = NoAction();
     }

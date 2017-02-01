@@ -156,8 +156,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @default_only NoAction();
         }
         key = {
-            hdr.ipv4_option_security.isValid() : exact;
-            hdr.ipv4_option_timestamp.isValid(): exact;
+            hdr.ipv4_option_security.isValid() : exact @name("hdr.ipv4_option_security.isValid()") ;
+            hdr.ipv4_option_timestamp.isValid(): exact @name("hdr.ipv4_option_timestamp.isValid()") ;
         }
         size = 4;
         default_action = NoAction();

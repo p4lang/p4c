@@ -40,7 +40,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @default_only NoAction_0();
         }
         key = {
-            hdr.ethernet.dstAddr: ternary;
+            hdr.ethernet.dstAddr: ternary @name("hdr.ethernet.dstAddr") ;
         }
         size = 6100;
         default_action = NoAction_0();

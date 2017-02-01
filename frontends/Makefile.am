@@ -48,6 +48,7 @@ p4_frontend_UNIFIED = \
 	frontends/p4/uniqueNames.cpp \
 	frontends/p4/resetHeaders.cpp \
 	frontends/p4/moveDeclarations.cpp \
+	frontends/p4/tableKeyNames.cpp \
 	frontends/p4/specialize.cpp
 
 p4_frontend_NONUNIFIED = \
@@ -97,6 +98,7 @@ noinst_HEADERS += \
 	frontends/p4/typeMap.h \
 	frontends/p4/uniqueNames.h \
 	frontends/p4/unusedDeclarations.h \
+	frontends/p4/tableKeyNames.h \
 	frontends/p4/validateParsedProgram.h
 
 cpplint_FILES += frontends/p4/p4-lex.l \

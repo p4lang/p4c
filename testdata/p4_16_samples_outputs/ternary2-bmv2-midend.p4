@@ -93,7 +93,7 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     }
     @name("test1") table test1() {
         key = {
-            hdrs.data.f1: ternary;
+            hdrs.data.f1: ternary @name("hdrs.data.f1") ;
         }
         actions = {
             setb1_0();
@@ -103,7 +103,7 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     }
     @name("ex1") table ex1() {
         key = {
-            hdrs.extra[0].h: ternary;
+            hdrs.extra[0].h: ternary @name("hdrs.extra[0].h") ;
         }
         actions = {
             setbyte_0();
@@ -116,7 +116,7 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     }
     @name("tbl1") table tbl1() {
         key = {
-            hdrs.data.f2: ternary;
+            hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
         actions = {
             setbyte_4();
@@ -126,7 +126,7 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     }
     @name("tbl2") table tbl2() {
         key = {
-            hdrs.data.f2: ternary;
+            hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
         actions = {
             setbyte_5();
@@ -136,7 +136,7 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     }
     @name("tbl3") table tbl3() {
         key = {
-            hdrs.data.f2: ternary;
+            hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
         actions = {
             setbyte_6();

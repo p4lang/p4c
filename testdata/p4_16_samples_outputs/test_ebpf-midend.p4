@@ -53,7 +53,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @name("Check_src_ip") table Check_src_ip() {
         key = {
-            headers.ipv4.srcAddr: exact;
+            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
         }
         actions = {
             Reject_0();

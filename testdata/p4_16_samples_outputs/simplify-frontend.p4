@@ -6,7 +6,7 @@ control c(out bool x) {
     bool tmp_1;
     @name("t1") table t1_0() {
         key = {
-            x: exact;
+            x: exact @name("x") ;
         }
         actions = {
             NoAction();
@@ -15,7 +15,7 @@ control c(out bool x) {
     }
     @name("t2") table t2_0() {
         key = {
-            x: exact;
+            x: exact @name("x") ;
         }
         actions = {
             NoAction();
