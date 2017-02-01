@@ -492,10 +492,15 @@ class Rewriter : public Transform {
     { CHECK_NULL(structure); setName("Rewriter"); }
 
     const IR::Node* preorder(IR::V1Program* global) override {
-        if (LOGGING(2))
-            dump(global);
+        if (LOGGING(4)) {
+            LOG4("#### Initial P4_14 program");
+            dump(global); }
         prune();
-        return structure->create(global->srcInfo);
+        auto *rv = structure->create(global->srcInfo);
+        if (LOGGING(4)) {
+            LOG4("#### Generated P4_16 program");
+            dump(rv); }
+        return rv;
     }
 };
 }  // namespace

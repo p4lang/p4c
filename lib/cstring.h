@@ -136,7 +136,7 @@ namespace std {
 template<> struct hash<cstring> {
     std::size_t operator()(const cstring& c) const {
         // This implementation is good for cstring, since the strings are internalized
-        return hash<const char*>()(c.c_str());
+        return hash<const void *>()(c.c_str());
     }
 };
 }  // namespace std
