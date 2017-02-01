@@ -46,6 +46,9 @@ class NameMap:
     def load_names(self, json_cfg):
         self.names = {}
         json_ = json.loads(json_cfg)
+        # special case where the switch was started with an empty config
+        if len(json_.keys()) == 0:
+            return
 
         for type_ in {"header_type", "header", "parser",
                       "deparser", "action", "pipeline", "checksum"}:

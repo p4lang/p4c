@@ -76,6 +76,7 @@
 #include <set>
 #include <vector>
 #include <iosfwd>
+#include <condition_variable>
 
 #include "context.h"
 #include "queue.h"
@@ -113,20 +114,15 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return &contexts.at(cxt_id);
   }
 
-  //! Your implementation will be called every time a new packet is received by
-  //! the device.
-  virtual int receive(int port_num, const char *buffer, int len) = 0;
+  int receive(int port_num, const char *buffer, int len);
 
-  //! Do all your initialization in this function (e.g. start processing
-  //! threads) and call this function when you are ready to process packets.
-  virtual void start_and_return() = 0;
-
-  //! You can override this method in your target. It will be called whenever
-  //! reset_state() is invoked by the control plane. For example, the
-  //! simple_switch target uses this to reset PRE state.
-  virtual void reset_target_state() { }
-
-  void receive_(int port_num, const char *buffer, int len);
+  //! Call this function when you are ready to process packets. This function
+  //! will call start_and_return_() which you have to override in your switch
+  //! implementation. Note that if the switch is started without a P4
+  //! configuration, this function will block until a P4 configuration is
+  //! available (you can push a configuration through the Thrift RPC service)
+  //! before calling start_and_return_().
+  void start_and_return();
 
   //! Returns the Thrift port used for the runtime RPC server.
   int get_runtime_port() const { return thrift_port; }
@@ -195,6 +191,8 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   int init_objects(const std::string &json_path, int device_id = 0,
                    std::shared_ptr<TransportIface> notif_transport = nullptr);
+
+  int init_objects_empty(int dev_id, std::shared_ptr<TransportIface> transport);
 
   //! Initialize the switch using command line options. This function is meant
   //! to be called right after your switch instance has been constructed. For
@@ -790,6 +788,27 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   int deserialize_from_file(const std::string &state_dump_path);
 
  private:
+  int init_objects(std::istream *is, int dev_id,
+                   std::shared_ptr<TransportIface> transport);
+
+  void reset_target_state();
+
+  //! Override in your switch implementation; it will be called every time a
+  //! packet is received.
+  virtual int receive_(int port_num, const char *buffer, int len) = 0;
+
+  //! Override in your switch implementation; do all your initialization in this
+  //! function (e.g. start processing threads) and call start_and_return() when
+  //! you are ready to process packets. See start_and_return() for more
+  //! information.
+  virtual void start_and_return_() = 0;
+
+  //! You can override this method in your target. It will be called whenever
+  //! reset_state() is invoked by the control plane. For example, the
+  //! simple_switch target uses this to reset PRE state.
+  virtual void reset_target_state_() { }
+
+ private:
   size_t nb_cxts{};
   // TODO(antonin)
   // Context is not-movable, but is default-constructible, so I can put it in a
@@ -829,7 +848,9 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   mutable boost::shared_mutex ongoing_swap_mutex{};
 
-  std::string current_config{};
+  std::string current_config{"{}"};  // empty JSON config
+  bool config_loaded{false};
+  mutable std::condition_variable config_loaded_cv{};
   mutable std::mutex config_mutex{};
 
   std::string event_logger_addr{};

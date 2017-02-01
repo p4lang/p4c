@@ -146,7 +146,7 @@ class QueueingLogic {
     return q_info.size;
   }
 
-  //! Set the capacity of the logical queue with id \id queue_id to \p c
+  //! Set the capacity of the logical queue with id \p queue_id to \p c
   //! elements.
   void set_capacity(size_t queue_id, size_t c) {
     size_t worker_id = map_to_worker(queue_id);

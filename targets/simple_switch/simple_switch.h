@@ -75,11 +75,11 @@ class SimpleSwitch : public Switch {
   // by default, swapping is off
   explicit SimpleSwitch(int max_port = 256, bool enable_swap = false);
 
-  int receive(int port_num, const char *buffer, int len) override;
+  int receive_(int port_num, const char *buffer, int len) override;
 
-  void start_and_return() override;
+  void start_and_return_() override;
 
-  void reset_target_state() override;
+  void reset_target_state_() override;
 
   int mirroring_mapping_add(mirror_id_t mirror_id, int egress_port) {
     mirroring_map[mirror_id] = egress_port;

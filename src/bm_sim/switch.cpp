@@ -41,7 +41,7 @@ static void
 packet_handler(int port_num, const char *buffer, int len, void *cookie) {
   // static_cast<SwitchWContexts *> if okay here because cookie was obtained by
   // casting a SwitchWContexts * to void *
-  static_cast<SwitchWContexts *>(cookie)->receive_(port_num, buffer, len);
+  static_cast<SwitchWContexts *>(cookie)->receive(port_num, buffer, len);
 }
 
 // TODO(antonin): maybe a factory method would be more appropriate for Switch
@@ -56,13 +56,27 @@ SwitchWContexts::SwitchWContexts(size_t nb_cxts, bool enable_swap)
 
 LookupStructureFactory SwitchWContexts::default_lookup_factory {};
 
-void
-SwitchWContexts::receive_(int port_num, const char *buffer, int len) {
+int
+SwitchWContexts::receive(int port_num, const char *buffer, int len) {
   if (dump_packet_data > 0) {
     Logger::get()->info("Received packet of length {} on port {}: {}",
                         len, port_num, sample_packet_data(buffer, len));
   }
-  receive(port_num, buffer, len);
+  return receive_(port_num, buffer, len);
+}
+
+void
+SwitchWContexts::start_and_return() {
+  {
+    std::unique_lock<std::mutex> config_lock(config_mutex);
+    config_loaded_cv.wait(config_lock, [this]() { return config_loaded; });
+  }
+  start_and_return_();
+}
+
+void
+SwitchWContexts::reset_target_state() {
+  reset_target_state_();
 }
 
 std::string
@@ -107,13 +121,9 @@ SwitchWContexts::force_arith_header(const std::string &header_name) {
 }
 
 int
-SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
+SwitchWContexts::init_objects(std::istream *is, int dev_id,
                               std::shared_ptr<TransportIface> transport) {
-  std::ifstream fs(json_path, std::ios::in);
-  if (!fs) {
-    std::cout << "JSON input file " << json_path << " cannot be opened\n";
-    return 1;
-  }
+  int status = 0;
 
   device_id = dev_id;
 
@@ -128,26 +138,51 @@ SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
     auto &cxt = contexts.at(cxt_id);
     cxt.set_device_id(device_id);
     cxt.set_notifications_transport(notifications_transport);
-    int status = cxt.init_objects(&fs, get_lookup_factory(),
-                                  required_fields, arith_objects);
-    fs.clear();
-    fs.seekg(0, std::ios::beg);
-    if (status != 0) return status;
+    if (is != nullptr) {
+      status = cxt.init_objects(is, get_lookup_factory(),
+                                required_fields, arith_objects);
+      is->clear();
+      is->seekg(0, std::ios::beg);
+      if (status != 0) return status;
+    }
     phv_source->set_phv_factory(cxt_id, &cxt.get_phv_factory());
-  }
-
-  {
-    std::unique_lock<std::mutex> config_lock(config_mutex);
-    current_config = std::string((std::istreambuf_iterator<char>(fs)),
-                                 std::istreambuf_iterator<char>());
   }
 
   return 0;
 }
 
 int
+SwitchWContexts::init_objects(const std::string &json_path, int dev_id,
+                              std::shared_ptr<TransportIface> transport) {
+  std::ifstream fs(json_path, std::ios::in);
+  if (!fs) {
+    std::cout << "JSON input file " << json_path << " cannot be opened\n";
+    return 1;
+  }
+
+  int status = init_objects(&fs, dev_id, transport);
+  if (status != 0) return status;
+
+  {
+    std::unique_lock<std::mutex> config_lock(config_mutex);
+    current_config = std::string((std::istreambuf_iterator<char>(fs)),
+                                 std::istreambuf_iterator<char>());
+    config_loaded = true;
+  }
+
+  return 0;
+}
+
+int
+SwitchWContexts::init_objects_empty(int dev_id,
+                                    std::shared_ptr<TransportIface> transport) {
+  return init_objects(nullptr, dev_id, transport);
+}
+
+int
 SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
                                                 TargetParserIface *tp) {
+  int status = 0;
   OptionsParser parser;
   parser.parse(argc, argv, tp);
 
@@ -175,8 +210,10 @@ SwitchWContexts::init_from_command_line_options(int argc, char *argv[],
 
   Logger::set_log_level(parser.log_level);
 
-  int status = init_objects(parser.config_file_path, parser.device_id,
-                            transport);
+  if (parser.no_p4)
+    status = init_objects_empty(parser.device_id, transport);
+  else
+    status = init_objects(parser.config_file_path, parser.device_id, transport);
   if (status != 0) return status;
 
   if (parser.use_files)
@@ -262,6 +299,12 @@ SwitchWContexts::swap_configs() {
     ErrorCode rc = cxt.swap_configs();
     if (rc != ErrorCode::SUCCESS) return rc;
   }
+  {
+    std::unique_lock<std::mutex> config_lock(config_mutex);
+    if (!config_loaded) config_loaded = true;
+    assert(do_swap() == 0);
+  }
+  config_loaded_cv.notify_one();
   return ErrorCode::SUCCESS;
 }
 

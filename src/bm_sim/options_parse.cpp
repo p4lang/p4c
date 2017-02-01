@@ -131,6 +131,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
        "'info', so make sure the log level you have set does not exclude "
        "'info' messages; default is 0, which means that nothing is logged.")
       ("version,v", "Display version information")
+      ("no-p4", "Enable the switch to start without an inout configuration")
       ;  // NOLINT(whitespace/semicolon)
 
   po::options_description hidden;
@@ -188,12 +189,29 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
     exit(0);
   }
 
-  if (!vm.count("input-config")) {
+  no_p4 = vm.count("no-p4");
+  if (!no_p4 && !vm.count("input-config")) {
     std::cout << "Error: please specify an input JSON configuration file\n";
     std::cout << "Usage: SWITCH_NAME [options] <path to JSON config file>\n";
     std::cout << description;
     exit(1);
   }
+  // this is a little hacky because we are mixing positional arguments; ideally
+  // the input config would be just a regular option
+  if (no_p4 && vm.count("input-config")) {
+    auto path = vm["input-config"].as<std::string>();
+    auto is_pos = (path.size() > 2 && path.substr(0, 2) != "--");
+    auto dot = path.find_last_of(".");
+    auto has_json_extension =
+        (dot != std::string::npos && path.substr(dot) == ".json");
+    if (tp && (!is_pos || !has_json_extension)) {
+      to_pass_further.insert(to_pass_further.begin(), path);
+    } else {
+      std::cout << "Warning: ignoring input config as '--no-p4' was used\n";
+    }
+  }
+  if (!no_p4 && vm.count("input-config"))
+    config_file_path = vm["input-config"].as<std::string>();
 
   device_id = 0;
   if (vm.count("device-id")) {
@@ -321,9 +339,6 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp) {
     debugger_addr = std::string("ipc:///tmp/bmv2-")
         + std::to_string(device_id) + std::string("-debug.ipc");
   }
-
-  assert(vm.count("input-config"));
-  config_file_path = vm["input-config"].as<std::string>();
 
   int default_thrift_port = 9090;
   if (vm.count("thrift-port")) {

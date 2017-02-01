@@ -60,6 +60,7 @@ class OptionsParser {
 
  private:
   std::string config_file_path{};
+  bool no_p4{false};
   InterfaceList ifaces{};
   bool pcap{false};
   int thrift_port{};

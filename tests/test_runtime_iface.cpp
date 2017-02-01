@@ -32,12 +32,12 @@ namespace fs = boost::filesystem;
 
 class SwitchTest : public Switch {
  public:
-  int receive(int port_num, const char *buffer, int len) override {
+  int receive_(int port_num, const char *buffer, int len) override {
     (void) port_num; (void) buffer; (void) len;
     return 0;
   }
 
-  void start_and_return() override { }
+  void start_and_return_() override { }
 };
 
 class RuntimeIfaceTest : public ::testing::Test {

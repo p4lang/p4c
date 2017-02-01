@@ -112,7 +112,7 @@ SimpleSwitch::SimpleSwitch(int max_port, bool enable_swap)
 #define PACKET_LENGTH_REG_IDX 0
 
 int
-SimpleSwitch::receive(int port_num, const char *buffer, int len) {
+SimpleSwitch::receive_(int port_num, const char *buffer, int len) {
   static int pkt_id = 0;
 
   // this is a good place to call this, because blocking this thread will not
@@ -154,7 +154,7 @@ SimpleSwitch::receive(int port_num, const char *buffer, int len) {
 }
 
 void
-SimpleSwitch::start_and_return() {
+SimpleSwitch::start_and_return_() {
   check_queueing_metadata();
 
   std::thread t1(&SimpleSwitch::ingress_thread, this);
@@ -168,7 +168,7 @@ SimpleSwitch::start_and_return() {
 }
 
 void
-SimpleSwitch::reset_target_state() {
+SimpleSwitch::reset_target_state_() {
   bm::Logger::get()->debug("Resetting simple_switch target-specific state");
   get_component<McSimplePreLAG>()->reset_state();
 }

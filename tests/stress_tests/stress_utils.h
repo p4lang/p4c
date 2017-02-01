@@ -49,12 +49,12 @@ class RandomGen {
 
 class SwitchTest : public bm::Switch {
  public:
-  int receive(int port_num, const char *buffer, int len) override {
+  int receive_(int port_num, const char *buffer, int len) override {
     (void) port_num; (void) buffer; (void) len;
     return 0;
   }
 
-  void start_and_return() override {
+  void start_and_return_() override {
   }
 
   // using pointers as most targets are expected to do that

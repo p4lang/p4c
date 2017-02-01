@@ -61,6 +61,10 @@ class FieldMap:
         header_types_map = {}
         json_ = json.loads(json_cfg)
 
+        # special case where the switch was started with an empty config
+        if len(json_.keys()) == 0:
+            return
+
         header_types = json_["header_types"]
         for h in header_types:
             header_type = h["name"]
@@ -158,6 +162,11 @@ class ObjectMap:
 
     def load_names(self, json_cfg):
         json_ = json.loads(json_cfg)
+
+        # special case where the switch was started with an empty config
+        if len(json_.keys()) == 0:
+            return
+
         for type_ in {"parser", "deparser", "action", "pipeline"}:
             _map = self.store[type_]
             _map.pname = type_

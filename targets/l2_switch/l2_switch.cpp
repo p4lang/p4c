@@ -62,7 +62,7 @@ class SimpleSwitch : public Switch {
     force_arith_header("intrinsic_metadata");
   }
 
-  int receive(int port_num, const char *buffer, int len) {
+  int receive_(int port_num, const char *buffer, int len) override {
     static int pkt_id = 0;
 
     auto packet = new_packet_ptr(port_num, pkt_id++, len,
@@ -74,7 +74,7 @@ class SimpleSwitch : public Switch {
     return 0;
   }
 
-  void start_and_return() {
+  void start_and_return_() override {
     std::thread t1(&SimpleSwitch::pipeline_thread, this);
     t1.detach();
     std::thread t2(&SimpleSwitch::transmit_thread, this);

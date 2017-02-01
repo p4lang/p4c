@@ -29,6 +29,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <thread>
 
 #include "utils.h"
 
@@ -53,12 +54,12 @@ char char2digit(char c) {
 
 class SwitchTest : public Switch {
  public:
-  int receive(int port_num, const char *buffer, int len) override {
+  int receive_(int port_num, const char *buffer, int len) override {
     (void) port_num; (void) buffer; (void) len;
     return 0;
   }
 
-  void start_and_return() override {
+  void start_and_return_() override {
   }
 
   // needed because the method is protected
@@ -103,6 +104,28 @@ TEST(Switch, ConfigOptions) {
   ASSERT_EQ(2u, config_options.size());
   ASSERT_EQ("aaa", config_options.at("key1"));
   ASSERT_EQ("12345", config_options.at("key2"));
+}
+
+TEST(Switch, InitObjectsEmpty) {
+  SwitchTest sw;
+  ASSERT_EQ(0, sw.init_objects_empty(0, nullptr));
+  ASSERT_EQ("{}", sw.get_config());
+  sw.enable_config_swap();
+  using clock = std::chrono::high_resolution_clock;
+  using std::chrono::duration_cast;
+  auto start = clock::now();
+  std::thread config_push_thread([&sw]{
+      std::string new_config("{}");
+      sw.load_new_config(new_config);
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+      sw.swap_configs();
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+  });
+  sw.start_and_return();
+  auto end = clock::now();
+  config_push_thread.join();
+  auto elapsed = duration_cast<std::chrono::milliseconds>(end - start).count();
+  EXPECT_NEAR(elapsed, 1000, 500);
 }
 
 TEST(Switch, GetP4Objects) {

@@ -244,12 +244,15 @@ def load_json_str(json_str):
     reset_config()
     json_ = json.loads(json_str)
 
-    for j_action in json_["actions"]:
+    def get_json_key(key):
+        return json_.get(key, [])
+
+    for j_action in get_json_key("actions"):
         action = Action(j_action["name"], j_action["id"])
         for j_param in j_action["runtime_data"]:
             action.runtime_data += [(j_param["name"], j_param["bitwidth"])]
 
-    for j_pipeline in json_["pipelines"]:
+    for j_pipeline in get_json_key("pipelines"):
         if "action_profiles" in j_pipeline:  # new JSON format
             for j_aprof in j_pipeline["action_profiles"]:
                 action_prof = ActionProf(j_aprof["name"], j_aprof["id"])
@@ -292,41 +295,36 @@ def load_json_str(json_str):
                                                   json_["header_types"])
                 table.key += [(field_name, match_type, bitwidth)]
 
-    if "meter_arrays" in json_:
-        for j_meter in json_["meter_arrays"]:
-            meter_array = MeterArray(j_meter["name"], j_meter["id"])
-            if "is_direct" in j_meter and j_meter["is_direct"]:
-                meter_array.is_direct = True
-                meter_array.binding = j_meter["binding"]
-            else:
-                meter_array.is_direct = False
-                meter_array.size = j_meter["size"]
-            meter_array.type_ = MeterType.from_str(j_meter["type"])
-            meter_array.rate_count = j_meter["rate_count"]
+    for j_meter in get_json_key("meter_arrays"):
+        meter_array = MeterArray(j_meter["name"], j_meter["id"])
+        if "is_direct" in j_meter and j_meter["is_direct"]:
+            meter_array.is_direct = True
+            meter_array.binding = j_meter["binding"]
+        else:
+            meter_array.is_direct = False
+            meter_array.size = j_meter["size"]
+        meter_array.type_ = MeterType.from_str(j_meter["type"])
+        meter_array.rate_count = j_meter["rate_count"]
 
-    if "counter_arrays" in json_:
-        for j_counter in json_["counter_arrays"]:
-            counter_array = CounterArray(j_counter["name"], j_counter["id"])
-            counter_array.is_direct = j_counter["is_direct"]
-            if counter_array.is_direct:
-                counter_array.binding = j_counter["binding"]
-            else:
-                counter_array.size = j_counter["size"]
+    for j_counter in get_json_key("counter_arrays"):
+        counter_array = CounterArray(j_counter["name"], j_counter["id"])
+        counter_array.is_direct = j_counter["is_direct"]
+        if counter_array.is_direct:
+            counter_array.binding = j_counter["binding"]
+        else:
+            counter_array.size = j_counter["size"]
 
-    if "register_arrays" in json_:
-        for j_register in json_["register_arrays"]:
-            register_array = RegisterArray(j_register["name"],
-                                           j_register["id"])
-            register_array.size = j_register["size"]
-            register_array.width = j_register["bitwidth"]
+    for j_register in get_json_key("register_arrays"):
+        register_array = RegisterArray(j_register["name"], j_register["id"])
+        register_array.size = j_register["size"]
+        register_array.width = j_register["bitwidth"]
 
-    if "calculations" in json_:
-        for j_calc in json_["calculations"]:
-            calc_name = j_calc["name"]
-            if j_calc["algo"] == "crc16_custom":
-                CUSTOM_CRC_CALCS[calc_name] = 16
-            elif j_calc["algo"] == "crc32_custom":
-                CUSTOM_CRC_CALCS[calc_name] = 32
+    for j_calc in get_json_key("calculations"):
+        calc_name = j_calc["name"]
+        if j_calc["algo"] == "crc16_custom":
+            CUSTOM_CRC_CALCS[calc_name] = 16
+        elif j_calc["algo"] == "crc32_custom":
+            CUSTOM_CRC_CALCS[calc_name] = 32
 
 class UIn_Error(Exception):
     def __init__(self, info=""):
