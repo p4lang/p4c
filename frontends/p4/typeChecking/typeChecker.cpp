@@ -918,7 +918,7 @@ const IR::Type* TypeInference::setTypeType(const IR::Type* type, bool learn) {
     if (canon != nullptr) {
         // Learn the new type
         if (canon != orig && learn) {
-            TypeInference tc(refMap, typeMap, true);
+            TypeInference tc(refMap, typeMap, readOnly);
             (void)canon->apply(tc);
         }
         auto tt = new IR::Type_Type(canon);
