@@ -4,7 +4,7 @@ control Ing(out bit<32> a) {
     bool b;
     @name("cond") action cond_0() {
         a = (b ? 32w5 : a);
-        a = (!b ? 32w10 : (b ? 32w5 : a));
+        a = (!b ? 32w10 : a);
     }
     action act() {
         b = true;

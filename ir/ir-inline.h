@@ -48,7 +48,16 @@ limitations under the License.
             BUG("visitor returned non-" #CLASS " type: %1%", t); }                      \
     inline void Visitor::visit(const IR::CLASS *const &n, const char *name) {           \
         /* This function needed solely due to order of declaration issues */            \
-        visit(static_cast<const IR::Node *const &>(n), name); }
+        visit(static_cast<const IR::Node *const &>(n), name); }                         \
+    inline void Visitor::visit(const IR::CLASS *&n, const char *name, int cidx) {       \
+        ctxt->child_index = cidx;                                                       \
+        auto t = apply_visitor(n, name);                                                \
+        n = dynamic_cast<const IR::CLASS *>(t);                                         \
+        if (t && !n)                                                                    \
+            BUG("visitor returned non-" #CLASS " type: %1%", t); }                      \
+    inline void Visitor::visit(const IR::CLASS *const &n, const char *name, int cidx) { \
+        /* This function needed solely due to order of declaration issues */            \
+        visit(static_cast<const IR::Node *const &>(n), name, cidx); }
     IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 #undef DEFINE_VISIT_FUNCTIONS
 

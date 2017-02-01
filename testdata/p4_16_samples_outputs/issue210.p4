@@ -1,3 +1,5 @@
+#include <core.p4>
+
 control Ing(out bit<32> a) {
     bool b;
     action cond() {

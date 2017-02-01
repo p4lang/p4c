@@ -34,7 +34,11 @@ class P4::DoLocalCopyPropagation::ElimDead : public Transform {
             if (auto var = ::getref(self.available, dest->path->name)) {
                 if (var->local && !var->live) {
                     LOG3("  removing dead assignment to " << dest->path->name);
-                    return nullptr; } } }
+                    return nullptr;
+                } else if (var->local) {
+                    LOG6("  not removing live assignment to " << dest->path->name);
+                } else {
+                    LOG6("  not removing assignment to non-local " << dest->path->name); } } }
         return as; }
 
  public:
@@ -55,25 +59,27 @@ void P4::DoLocalCopyPropagation::flow_merge(Visitor &a_) {
 }
 
 void P4::DoLocalCopyPropagation::dropValuesUsing(cstring name) {
+    LOG6("dropValuesUsing(" << name << ")");
     for (auto &var : available) {
+        LOG7("  checking " << var.first << " = " << var.second.val);
         if (var.first == name) {
             LOG4("   dropping " << name << " as it is being assigned to");
             var.second.val = nullptr;
         } else if (var.second.val && exprUses(var.second.val, name)) {
-            LOG4("   dropping " << var.first << " as it is use" << name);
+            LOG4("   dropping " << var.first << " as it uses " << name);
             var.second.val = nullptr; } }
 }
 
 const IR::Node *P4::DoLocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
-    LOG1("Visiting " << getOriginal());
     if (!in_action) return var;
+    LOG1("Visiting " << getOriginal());
     if (available.count(var->name))
         BUG("duplicate var declaration for %s", var->name);
     auto &local = available[var->name];
     local.local = true;
     if (var->initializer) {
         if (!hasSideEffects(var->initializer)) {
-            LOG3("  saving init value for " << var->name);
+            LOG3("  saving init value for " << var->name << ": " << var->initializer);
             local.val = var->initializer;
         } else {
             local.live = true; } }
@@ -81,16 +87,33 @@ const IR::Node *P4::DoLocalCopyPropagation::postorder(IR::Declaration_Variable *
 }
 
 const IR::Expression *P4::DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
+    if (!in_action) return path;
+    if (isWrite()) {
+        dropValuesUsing(path->path->name);
+        return path; }
     if (auto var = ::getref(available, path->path->name)) {
-        if (isWrite()) {
-            return path;
-        } else if (var->val) {
-            LOG3("  propagating value for " << path->path->name);
+        if (var->val) {
+            LOG3("  propagating value for " << path->path->name << ": " << var->val);
             return var->val;
         } else {
             LOG4("  using " << path->path->name << " with no propagated value");
             var->live = true; } }
     return path;
+}
+
+IR::AssignmentStatement *P4::DoLocalCopyPropagation::preorder(IR::AssignmentStatement *as) {
+    if (!in_action) return as;
+    // visit the source subtree first, before the destination subtree
+    // make sure child indexes are set properly so we can detect writes -- these are the
+    // extra arguments to 'visit' in order to make introspection vis the Visitor::Context
+    // work.  Normally this is all managed by the auto-generated visit_children methods,
+    // but since we're overriding that here AND P4WriteContext cares about it (that's how
+    // it determines whether something is a write or a read), it needs to be correct
+    // This is error-prone and fragile
+    visit(as->right, "right", 1);
+    visit(as->left, "left", 0);
+    prune();
+    return postorder(as);
 }
 
 IR::AssignmentStatement *P4::DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
@@ -99,14 +122,21 @@ IR::AssignmentStatement *P4::DoLocalCopyPropagation::postorder(IR::AssignmentSta
         return nullptr; }
     if (!in_action) return as;
     if (auto dest = as->left->to<IR::PathExpression>()) {
-        dropValuesUsing(dest->path->name);
         if (!hasSideEffects(as->right)) {
             if (as->right->is<IR::ListExpression>()) {
                 /* FIXME -- List Expressions need to be turned into constructor calls before
                  * we can copyprop them */
-                 return as; }
-            LOG3("  saving value for " << dest->path->name);
-            available[dest->path->name].val = as->right; } }
+                return as; }
+            if (exprUses(as->right, dest->path->name)) {
+                /* can't propagate the value as it is defined in terms of itself.
+                 * FIXME -- we could propagate if we introduced a new temp, but that
+                 * may make things worse rather than better */
+                return as; }
+            LOG3("  saving value for " << dest->path->name << ": " << as->right);
+            available[dest->path->name].val = as->right; }
+    } else {
+        LOG3("dest of assignment is " << as->left << " so skipping");
+    }
     return as;
 }
 

@@ -76,11 +76,20 @@ class Visitor {
     void visit(const IR::Node *const &n, const char *name = 0) {
         auto t = apply_visitor(n, name);
         if (t != n) visitor_const_error(); }
-    void visit(IR::Node *&, const char * = 0) { BUG("Can't visit non-const pointer"); }
+    void visit(const IR::Node *&n, const char *name, int cidx) {
+        ctxt->child_index = cidx;
+        n = apply_visitor(n, name); }
+    void visit(const IR::Node *const &n, const char *name, int cidx) {
+        ctxt->child_index = cidx;
+        auto t = apply_visitor(n, name);
+        if (t != n) visitor_const_error(); }
+    void visit(IR::Node *&, const char * = 0, int = 0) { BUG("Can't visit non-const pointer"); }
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                            \
     void visit(const IR::CLASS *&n, const char *name = 0);              \
     void visit(const IR::CLASS *const &n, const char *name = 0);        \
-    void visit(IR::CLASS *&, const char * = 0) { BUG("Can't visit non-const pointer"); }
+    void visit(const IR::CLASS *&n, const char *name, int cidx);        \
+    void visit(const IR::CLASS *const &n, const char *name , int cidx); \
+    void visit(IR::CLASS *&, const char * = 0, int = 0) { BUG("Can't visit non-const pointer"); }
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
 

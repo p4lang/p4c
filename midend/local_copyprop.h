@@ -45,6 +45,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
 
     const IR::Node *postorder(IR::Declaration_Variable *) override;
     const IR::Expression *postorder(IR::PathExpression *) override;
+    IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
     IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;
     IR::Primitive *postorder(IR::Primitive *) override;

@@ -76,6 +76,10 @@ void increaseVerbosity();
 #define LOG3(X) LOGN(3, X)
 #define LOG4(X) LOGN(4, X)
 #define LOG5(X) LOGN(5, X)
+#define LOG6(X) LOGN(6, X)
+#define LOG7(X) LOGN(7, X)
+#define LOG8(X) LOGN(8, X)
+#define LOG9(X) LOGN(9, X)
 
 #define ERROR(X) (std::clog << "ERROR: " << X << std::endl)
 #define WARNING(X) (::Log::verbose()                               \

@@ -100,40 +100,14 @@ def compare_files(options, produced, expected):
         return SUCCESS
 
     if options.verbose:
-        print("Comparing", produced, "and", expected)
+        print("Comparing", expected, "and", produced)
 
-    # unfortunately difflib has no option to compare ignoring whitespace,
-    # so we invoke diff for this purpose
-    cmd = "diff -B -q -w -I \"#include\" " + produced + " " + expected
+    cmd = "diff -B -u -w -I \"#include\" " + expected + " " + produced + " >&2"
     exitcode = subprocess.call(cmd, shell=True);
     if exitcode == 0:
         return SUCCESS
-
-    # if the files differ print the differences
-    diff = difflib.Differ().compare(open(produced).readlines(), open(expected).readlines())
-    result = SUCCESS
-
-    marker = re.compile("\?[ \t\+]*");
-    ignoreNextMarker = False
-    message = ""
-    for l in diff:
-        if l.startswith("- #include") or l.startswith("+ #include"):
-            # These can differ because the paths change
-            ignoreNextMarker = True
-            continue
-        if ignoreNextMarker:
-            ignoreNextMarker = False
-            if marker.match(l):
-                continue
-        if l[0] == ' ': continue
-        result = FAILURE
-        message += l
-
-    if message is not "":
-        print("Files ", produced, " and ", expected, " differ:", file=sys.stderr)
-        print("'", message, "'", file=sys.stderr)
-
-    return result
+    else:
+        return FAILURE
 
 def recompile_file(options, produced, mustBeIdentical):
     # Compile the generated file a second time
@@ -298,6 +272,9 @@ def main(argv):
             usage(options)
             sys.exit(1)
         argv = argv[1:]
+
+    if 'P4TEST_REPLACE' in os.environ:
+        options.replace = True
 
     options.p4filename=argv[-1]
     options.testName = None
