@@ -315,7 +315,7 @@ class SetupJoinPoints : public Inspector {
 };
 
 void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
-    if (!dynamic_cast<Inspector *>(this))
+    if (!dynamic_cast<Inspector *>(static_cast<Visitor *>(this)))
         BUG("joinFlows only works for Inspector passes currently, not Modifier or Transform");
     if (flow_join_points)
         flow_join_points->clear();
