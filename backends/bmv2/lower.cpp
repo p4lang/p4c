@@ -141,8 +141,8 @@ struct VariableWriters {
             result->writers.emplace(e);
         return result;
     }
-    // Non-null only if there is exaclty one writer.
-    // Return the RHS of the expression
+    // Non-null only if there is exaclty one writer statement.
+    // Return the RHS of the assignment
     const IR::Expression* substitution() const {
         if (writers.size() != 1)
             return nullptr;
@@ -176,6 +176,7 @@ struct VariableDefinitions {
                                        const IR::AssignmentStatement* statement) {
         auto w = getWriters(path);
         if (w == nullptr)
+            // Path does not represent a variable
             return this;
         auto result = clone();
         result->writers[path->name.name] = new VariableWriters(statement);
