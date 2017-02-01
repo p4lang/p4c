@@ -41,7 +41,11 @@ int Field::extract_VL(const char *data, int hdr_offset, int computed_nbits) {
 }
 
 int Field::deparse(char *data, int hdr_offset) const {
-  extract::generic_deparse(&bytes[0], nbits, data, hdr_offset);
+  // this does not work for empty variable-length fields, as we assert in the
+  // ByteContainer's [] operator. The right thing to do would probably be to add
+  // a at() method to ByteContainer and not perform any check in [].
+  // extract::generic_deparse(&bytes[0], nbits, data, hdr_offset);
+  extract::generic_deparse(bytes.data(), nbits, data, hdr_offset);
   return nbits;
 }
 

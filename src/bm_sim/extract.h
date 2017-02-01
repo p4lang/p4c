@@ -68,6 +68,8 @@ static inline void generic_extract(const char *data, int bit_offset,
 
 static inline void generic_deparse(const char *data, int bitwidth,
                                    char *dst, int hdr_offset) {
+  if (bitwidth == 0) return;
+
   int nbytes = (bitwidth + 7) / 8;
 
   if (hdr_offset == 0 && bitwidth % 8 == 0) {

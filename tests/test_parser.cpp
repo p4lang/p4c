@@ -1096,9 +1096,13 @@ TEST_F(IPv4TLVParsingTest, BothOptions) {
 }
 
 
+using ::testing::WithParamInterface;
+using ::testing::Range;
+
 // Google Test fixture for IPv4 Variable Length parsing test
 // This test parses the options as one VL field
-class IPv4VLParsingTest : public ParserTestGeneric {
+class IPv4VLParsingTest : public ParserTestGeneric,
+                          public WithParamInterface<int> {
  protected:
   HeaderType ethernetHeaderType, ipv4HeaderType;
   ParseState ethernetParseState, ipv4ParseState;
@@ -1211,52 +1215,31 @@ class IPv4VLParsingTest : public ParserTestGeneric {
     ASSERT_EQ(v, f_options.get_bytes());
   }
 
-  template<size_t OptionWords>
-  void test() {
-    const ByteContainer buf = get_ipv4_bytes(OptionWords);
-    auto packet = get_pkt(buf);
-    const auto &phv = *packet.get_phv();
-
-    parse_and_check_no_error(&packet);
-
-    check_base(phv, OptionWords);
-    ByteContainer expected_value = option_value(OptionWords);
-    check_option(phv, OptionWords, expected_value);
-  }
-
   // virtual void TearDown() { }
 };
 
-TEST_F(IPv4VLParsingTest, NoOption) {
-  test<0u>();
-}
+TEST_P(IPv4VLParsingTest, ParseAndDeparse) {
+  const auto OptionWords = GetParam();
 
-TEST_F(IPv4VLParsingTest, SmallOption) {
-  test<3u>();
-}
-
-TEST_F(IPv4VLParsingTest, BigOption) {
-  test<9u>();  // max value
-}
-
-TEST_F(IPv4VLParsingTest, Deparser) {
-  const size_t option_words = 4;
-  const ByteContainer buf = get_ipv4_bytes(option_words);
+  const ByteContainer buf = get_ipv4_bytes(OptionWords);
   const ByteContainer buf_save = buf;
   auto packet = get_pkt(buf);
   const auto &phv = *packet.get_phv();
 
   parse_and_check_no_error(&packet);
 
-  check_base(phv, option_words);
-  ByteContainer expected_value = option_value(option_words);
-  check_option(phv, option_words, expected_value);
+  check_base(phv, OptionWords);
+  ByteContainer expected_value = option_value(OptionWords);
+  check_option(phv, OptionWords, expected_value);
 
   deparser.deparse(&packet);
 
   ASSERT_EQ(buf_save.size(), packet.get_data_size());
   ASSERT_EQ(0, memcmp(buf_save.data(), packet.data(), buf_save.size()));
 }
+
+INSTANTIATE_TEST_CASE_P(IPv4VLOptionWords, IPv4VLParsingTest,
+                        Range(0, 10));
 
 
 class ParseVSetTest : public ::testing::Test {
