@@ -17,3 +17,4 @@ limitations under the License.
 #include "setup.h"
 
 const char* p4includePath = P4_SYSTEM_INCLUDE_PATH;
+const char* p4_14includePath = P4_14_SYSTEM_INCLUDE_PATH;
