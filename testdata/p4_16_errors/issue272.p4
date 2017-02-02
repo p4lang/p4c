@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "setup.h"
+#include <core.p4>
 
-const char* p4includePath = P4_SYSTEM_INCLUDE_PATH;
-const char* p4_14includePath = P4_14_SYSTEM_INCLUDE_PATH;
+header boolfield {
+    bool x;
+}

@@ -369,7 +369,8 @@ class RunBMV2(object):
         elif first == "expect":
             interface, data = nextWord(cmd)
             data = ''.join(data.split())
-            self.expected.setdefault(interface, []).append(data)
+            if data != '':
+                self.expected.setdefault(interface, []).append(data)
         else:
             if self.options.verbose:
                 print("ignoring stf command:", first, cmd)
