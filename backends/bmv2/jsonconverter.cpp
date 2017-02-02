@@ -2087,7 +2087,7 @@ void JsonConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool m
                 field->append(tb->isSigned);
                 scalars_width += tb->size;
                 scalarMetadataFields.emplace(f, newName);
-            } else if (type->is<IR::Type_Boolean>()) {
+            } else if (ft->is<IR::Type_Boolean>()) {
                 auto field = pushNewArray(scalarFields);
                 field->append(newName);
                 field->append(boolWidth);
@@ -2107,6 +2107,11 @@ void JsonConverter::pushFields(cstring prefix, const IR::Type_StructLike *st,
         auto ftype = typeMap->getType(f, true);
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
+        } else if (ftype->is<IR::Type_Boolean>()) {
+            auto field = pushNewArray(fields);
+            field->append(prefix + f->name.name);
+            field->append(boolWidth);
+            field->append(0);
         } else if (auto type = ftype->to<IR::Type_Bits>()) {
             auto field = pushNewArray(fields);
             field->append(prefix + f->name.name);
