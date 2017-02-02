@@ -161,11 +161,8 @@ struct VariableDefinitions {
     VariableDefinitions* join(const VariableDefinitions* other) const {
         auto result = clone();
         for (auto e : other->writers) {
-            auto prev = writers.find(e.first);
-            if (prev == writers.end())
-                result->writers[e.first] = e.second;
-            else
-                result->writers[e.first] = prev->second->join(e.second);
+            auto &prev = result->writers[e.first];
+            prev = prev ? prev->join(e.second) : e.second;
         }
         return result;
     }
