@@ -46,7 +46,6 @@ class LowerExpressions : public Transform {
     { prune(); return table; }  // don't simplify expressions in table
 };
 
-// TODO: FIXME
 // This pass is a hack to work around current BMv2 limitations:
 // checksum computations must be expressed in a restricted way, since
 // the JSON code generator uses simple pattern-matching.
