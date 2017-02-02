@@ -127,34 +127,223 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
 
 /////////////////////////////////////////////////////////////
 
+namespace {
+
+struct VariableWriters {
+    std::set<const IR::AssignmentStatement*> writers;
+    VariableWriters() = default;
+    explicit VariableWriters(const IR::AssignmentStatement* writer)
+    { writers.emplace(writer); }
+    VariableWriters* join(const VariableWriters* other) const {
+        auto result = new VariableWriters();
+        result->writers = writers;
+        for (auto e : other->writers)
+            result->writers.emplace(e);
+        return result;
+    }
+    // Non-null only if there is exaclty one writer statement.
+    // Return the RHS of the assignment
+    const IR::Expression* substitution() const {
+        if (writers.size() != 1)
+            return nullptr;
+        auto first = *writers.begin();
+        return first->right;
+    }
+};
+
+struct VariableDefinitions {
+    std::map<cstring, const VariableWriters*> writers;
+    VariableDefinitions(const VariableDefinitions& other) = default;
+    VariableDefinitions() = default;
+    VariableDefinitions* clone() const {
+        return new VariableDefinitions(*this);
+    }
+    VariableDefinitions* join(const VariableDefinitions* other) const {
+        auto result = clone();
+        for (auto e : other->writers) {
+            auto &prev = result->writers[e.first];
+            prev = prev ? prev->join(e.second) : e.second;
+        }
+        return result;
+    }
+    void declare(const IR::Declaration_Variable* decl) {
+        writers.emplace(decl->getName().name, new VariableWriters());
+    }
+    const VariableWriters* getWriters(const IR::Path* path) {
+        if (path->absolute)
+            return nullptr;
+        return ::get(writers, path->name.name);
+    }
+    VariableDefinitions* setDefinition(const IR::Path* path,
+                                       const IR::AssignmentStatement* statement) {
+        auto w = getWriters(path);
+        if (w == nullptr)
+            // Path does not represent a variable
+            return this;
+        auto result = clone();
+        result->writers[path->name.name] = new VariableWriters(statement);
+        return result;
+    }
+};
+
+struct PathSubstitutions {
+    std::map<const IR::PathExpression*, const IR::Expression*> definitions;
+    std::set<const IR::AssignmentStatement*> haveUses;
+    PathSubstitutions() = default;
+    void add(const IR::PathExpression* path, const IR::Expression* expression) {
+        definitions.emplace(path, expression);
+        LOG3("Will substitute " << dbp(path) << " with " << expression);
+    }
+    const IR::Expression* get(const IR::PathExpression* path) const {
+        return ::get(definitions, path);
+    }
+    void foundUses(const VariableWriters* writers) {
+        for (auto w : writers->writers)
+            haveUses.emplace(w);
+    }
+    void foundUses(const IR::AssignmentStatement* statement) {
+        haveUses.emplace(statement);
+    }
+    bool hasUses(const IR::AssignmentStatement* statement) const {
+        return haveUses.find(statement) != haveUses.end();
+    }
+};
+
+// See the SimpleCopyProp pass below for the context in which this
+// analysis is run.  We take advantage that some more complex code
+// patterns have already been eliminated.
+class Accesses : public Inspector {
+    PathSubstitutions* substitutions;
+    VariableDefinitions* currentDefinitions;
+
+    bool notSupported(const IR::Node* node) {
+        ::error("%1%: not supported in checksum update control", node);
+        return false;
+    }
+
+ public:
+    explicit Accesses(PathSubstitutions* substitutions): substitutions(substitutions) {
+        CHECK_NULL(substitutions); setName("Accesses");
+        currentDefinitions = new VariableDefinitions();
+    }
+
+    bool preorder(const IR::Declaration_Variable* decl) override {
+        // we assume all variable declarations are at the beginning
+        currentDefinitions->declare(decl);
+        return false;
+    }
+
+    // This is only invoked for read expressions
+    bool preorder(const IR::PathExpression* expression) override {
+        auto writers = currentDefinitions->getWriters(expression->path);
+        if (writers != nullptr) {
+            if (auto s = writers->substitution())
+                substitutions->add(expression, s);
+            else
+                substitutions->foundUses(writers);
+        }
+        return false;
+    }
+
+    bool preorder(const IR::AssignmentStatement* statement) override {
+        visit(statement->right);
+        if (statement->left->is<IR::PathExpression>()) {
+            auto pe = statement->left->to<IR::PathExpression>();
+            currentDefinitions = currentDefinitions->setDefinition(pe->path, statement);
+        } else {
+            substitutions->foundUses(statement);
+        }
+        return false;
+    }
+
+    bool preorder(const IR::IfStatement* statement) override {
+        visit(statement->condition);
+        auto defs = currentDefinitions->clone();
+        visit(statement->ifTrue);
+        auto afterTrue = currentDefinitions;
+        if (statement->ifFalse != nullptr) {
+            currentDefinitions = defs;
+            visit(statement->ifFalse);
+            currentDefinitions = afterTrue->join(currentDefinitions);
+        } else {
+            currentDefinitions = defs->join(afterTrue);
+        }
+        return false;
+    }
+
+    bool preorder(const IR::SwitchStatement* statement) override
+    { return notSupported(statement); }
+
+    bool preorder(const IR::P4Action* action) override
+    { return notSupported(action); }
+
+    bool preorder(const IR::P4Table* table) override
+    { return notSupported(table); }
+
+    bool preorder(const IR::ReturnStatement* statement) override
+    { return notSupported(statement); }
+
+    bool preorder(const IR::ExitStatement* statement) override
+    { return notSupported(statement); }
+};
+
+class Replace : public Transform {
+    const PathSubstitutions* substitutions;
+ public:
+    explicit Replace(const PathSubstitutions* substitutions): substitutions(substitutions) {
+        CHECK_NULL(substitutions); setName("Accesses"); }
+
+    const IR::Node* postorder(IR::AssignmentStatement* statement) override {
+        if (!substitutions->hasUses(getOriginal<IR::AssignmentStatement>()))
+            return new IR::EmptyStatement();
+        return statement;
+    }
+
+    const IR::Node* postorder(IR::PathExpression* expression) override {
+        auto repl = substitutions->get(getOriginal<IR::PathExpression>());
+        if (repl != nullptr) {
+            Replace rpl(substitutions);
+            auto recurse = repl->apply(rpl);
+            return recurse;
+        }
+        return expression;
+    }
+};
+
+// This analysis is only executed on the control which performs
+// checksum update computations.
+//
+// This is a simpler variant of copy propagation; it just finds
+// patterns of the form:
+// tmp = X;
+// ...
+// out = tmp;
+// then it substitutes the definition into the use.
+// The LocalCopyPropagation pass does not do this, because
+// it won't consider replacing definitions where the RHS has side-effects.
+// Since the only method call we accept in the checksum update block
+// is a checksum unit "get" method (this is not checked here, but
+// in the json code generator), we know that this method has no side-effects,
+// so we can safely reorder calls to methods.
+// Also, this is run after eliminating struct and tuple operations,
+// so we know that all assignments operate on scalar values.
+class SimpleCopyProp : public PassManager {
+    PathSubstitutions substitutions;
+ public:
+    SimpleCopyProp() {
+        setName("SimpleCopyProp");
+        passes.push_back(new Accesses(&substitutions));
+        passes.push_back(new Replace(&substitutions));
+    }
+};
+
+}  // namespace
+
 const IR::Node* FixupChecksum::preorder(IR::P4Control* control) {
-    if (control->name != *updateBlockName)
-        return control;
-    // Convert
-    // tmp = e;
-    // f = tmp;
-    // into
-    // f = e;
-    auto instrs = control->body->components;
-    if (instrs->size() != 2)
-        return control;
-    if (!instrs->at(0)->is<IR::AssignmentStatement>() ||
-        !instrs->at(1)->is<IR::AssignmentStatement>())
-        return control;
-    auto ass0 = instrs->at(0)->to<IR::AssignmentStatement>();
-    auto ass1 = instrs->at(1)->to<IR::AssignmentStatement>();
-    if (!ass0->left->is<IR::PathExpression>() || !ass1->right->is<IR::PathExpression>())
-        return control;
-    auto pe0 = ass0->left->to<IR::PathExpression>();
-    auto pe1 = ass1->right->to<IR::PathExpression>();
-    if (pe0->path->name != pe1->path->name ||
-        pe0->path->absolute != pe1->path->absolute)
-        return control;
-    auto ass = new IR::AssignmentStatement(ass1->srcInfo, ass1->left, ass0->right);
-    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
-    vec->push_back(ass);
-    auto block = new IR::BlockStatement(control->body->srcInfo, control->body->annotations, vec);
-    control->body = block;
+    if (control->name == *updateBlockName) {
+        SimpleCopyProp scp;
+        return control->apply(scp);
+    }
     return control;
 }
 
