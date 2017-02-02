@@ -97,11 +97,8 @@ p4include_HEADERS += $(srcdir)/p4include/core.p4 $(srcdir)/p4include/v1model.p4
 
 #### For testing, install headers in the build directory
 
-check-install-headers:
+all-local:
 	@$(MAKE) install-data pkgdatadir=$(builddir)
-
-check: check-install-headers
-recheck: check-install-headers
 
 # FIXME -- should be a way of getting configure to do this automatcially? or automake?
 setup.h: $(srcdir)/setup.h.in Makefile
