@@ -150,6 +150,13 @@ class Vector : public VectorBase {
 
 }  // namespace IR
 
+// XXX(seth): We use this namespace to hide our get() overloads from ADL. GCC
+// 4.8 has a bug which causes these overloads to be considered when get() is
+// called on a type in the global namespace, even if the number of arguments
+// doesn't match up, which can trigger template instantiations that cause
+// errors.
+namespace GetImpl {
+
 template<class T, class U> const T *get(const IR::Vector<T> &vec, U name) {
     for (auto el : vec)
         if (el->name == name)
@@ -161,5 +168,8 @@ template<class T, class U> const T *get(const IR::Vector<T> *vec, U name) {
             if (el->name == name)
                 return el;
     return nullptr; }
+
+}  // namespace GetImpl
+using namespace GetImpl;  // NOLINT(build/namespaces)
 
 #endif /* _IR_VECTOR_H_ */
