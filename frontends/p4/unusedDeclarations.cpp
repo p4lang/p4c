@@ -49,7 +49,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
         return nullptr;
     }
 
-    cont->controlLocals.visit_children(*this);
+    visit(cont->controlLocals, "controlLocals");
     visit(cont->body);
     prune();
     return cont;
@@ -62,8 +62,8 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* cont) {
         return nullptr;
     }
 
-    cont->parserLocals.visit_children(*this);
-    cont->states.visit_children(*this);
+    visit(cont->parserLocals, "parserLocals");
+    visit(cont->states, "states");
     prune();
     return cont;
 }

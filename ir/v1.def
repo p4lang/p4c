@@ -374,7 +374,7 @@ class ActionFunction {
                 return a;
         return nullptr; }
     visit_children {
-        action.visit_children(v);
+        v.visit(action, "action");
         // DANGER -- visiting action first so type inferencing will push types to
         // DANGER -- action args based on use.  This is immoral.
         for (auto &a : args) v.visit(a, "arg");

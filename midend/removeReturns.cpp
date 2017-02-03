@@ -71,7 +71,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
-    control->controlLocals.visit_children(*this);
+    visit(control->controlLocals, "controlLocals");
 
     HasExits he;
     (void)control->body->apply(he);
@@ -168,7 +168,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
 const IR::Node* DoRemoveReturns::preorder(IR::SwitchStatement* statement) {
     auto r = Returns::No;
     push();
-    statement->cases.visit_children(*this);
+    parallel_visit(statement->cases, "cases", 1);
     if (hasReturned() != Returns::No)
         // this is conservative: we don't check if we cover all labels.
         r = Returns::Maybe;
@@ -262,7 +262,7 @@ const IR::Node* DoRemoveExits::preorder(IR::P4Control* control) {
 
     cstring var = refMap->newName(variableName);
     returnVar = IR::ID(var, nullptr);
-    control->controlLocals.visit_children(*this);
+    visit(control->controlLocals, "controlLocals");
 
     BUG_CHECK(stack.empty(), "Non-empty stack");
     push();
