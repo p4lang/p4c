@@ -30,6 +30,14 @@ tools/gen-unified-makefile.py --max-chunk-size 10 \
 mkdir -p extensions # place where additional back-ends are expected
 echo "Running autoconf/configure tools"
 rm -f aclocal.m4  # Needed to ensure we see updates to extension addconfig.ac files.
+case "$(uname)" in
+    Darwin) #MAC OS
+        glibtoolize
+        ;;
+    *)
+        libtoolize
+        ;;
+esac
 autoreconf -i
 mkdir -p build # recommended folder for build
 sourcedir=`pwd`
