@@ -1,6 +1,8 @@
 #ifndef LIB_SET_H_
 #define LIB_SET_H_
 
+#include <set>
+
 /* stuff that should be in std::set but is missing... */
 
 template<class T, class C1, class A1, class U> inline

@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <string.h>
 
+#include <functional>
 #include <iostream>
 #include <string>
 #include <sstream>
