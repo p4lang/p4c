@@ -244,7 +244,7 @@ bool CodeGenInspector::preorder(const IR::AssignmentStatement* a) {
 bool CodeGenInspector::preorder(const IR::BlockStatement* s) {
     builder->blockStart();
     setVecSep("\n", "\n");
-    s->components.visit_children(*this);
+    visit(s->components, "components");
     doneVec();
     builder->blockEnd(false);
     return false;

@@ -457,7 +457,7 @@ class SwitchStatement : Statement {
     inline Vector<SwitchCase> cases;
     visit_children {
         v.visit(expression, "expression");
-        cases.parallel_visit_children(v); }
+        v.parallel_visit(cases, "cases"); }
 }
 
 class Function : Declaration {

@@ -49,9 +49,9 @@ class MoveConstructorsImpl : public Transform {
     const IR::Node* preorder(IR::P4Parser* parser) override {
         cmap.clear();
         convert = Region::InParserStateful;
-        parser->parserLocals.visit_children(*this);
+        visit(parser->parserLocals, "parserLocals");
         convert = Region::InBody;
-        parser->states.visit_children(*this);
+        visit(parser->states, "states");
         convert = Region::Outside;
         prune();
         return parser;

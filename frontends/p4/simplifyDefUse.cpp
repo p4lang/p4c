@@ -115,7 +115,7 @@ class FindUninitialized : public Inspector {
         LOG1("FU Visiting " << dbp(state));
         context = ProgramPoint(state);
         currentPoint = ProgramPoint(state);  // point before the first statement
-        state->components.visit_children(*this);
+        visit(state->components, "components");
         if (state->selectExpression != nullptr)
             visit(state->selectExpression);
         context = ProgramPoint();
@@ -164,7 +164,7 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::P4Parser* parser) override {
         LOG1("FU Visiting " << dbp(parser));
-        parser->states.visit_children(*this);
+        visit(parser->states, "states");
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
         auto acceptdefs = definitions->get(accept, true);
         if (!acceptdefs->empty())
@@ -198,7 +198,7 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::BlockStatement* statement) override {
         LOG1("FU Visiting " << dbp(statement));
-        statement->components.visit_children(*this);
+        visit(statement->components, "components");
         return setCurrent(statement);
     }
 

@@ -307,7 +307,7 @@ class SelectExpression : Expression {
     inline Vector<SelectCase> selectCases;
     visit_children {
         v.visit(select, "select");
-        selectCases.parallel_visit_children(v); }
+        v.parallel_visit(selectCases, "selectCases"); }
 }
 
 class MethodCallExpression : Expression {
