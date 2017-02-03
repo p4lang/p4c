@@ -2,6 +2,7 @@
 #define LIB_N4_H_
 
 #include <iomanip>
+#include <ostream>
 
 class n4 {
     /* format a value as 4 chars */

@@ -645,7 +645,7 @@ class RenameStates : public Transform {
         return path;
     }
     const IR::Node* preorder(IR::SelectExpression* expression) override {
-        visit(&expression->selectCases);
+        expression->selectCases.parallel_visit_children(*this);
         prune();
         return expression;
     }
