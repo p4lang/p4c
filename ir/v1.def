@@ -475,11 +475,13 @@ class AttributeRef : Expression {
 class CompilerOptions;
 #end
 
-class V1Program {
+class V1Program : ISimpleNamespace {
     inline NameMap<Node, std::multimap>         scope;
 
 #noconstructor
     V1Program(const CompilerOptions &options);
+    Util::Enumerator<IDeclaration>* getDeclarations() const override;
+    IDeclaration getDeclByName(cstring name) const override;
 #emit
     template<class T> const T *get(cstring name) const { return scope.get<T>(name); }
 #end

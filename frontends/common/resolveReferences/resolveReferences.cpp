@@ -247,28 +247,44 @@ void ResolveReferences::end_apply(const IR::Node* node) {
     refMap->updateMap(node);
 }
 
-/////////////////// visitor methods ////////////////////////
-
-// visitor should be invoked here
-bool ResolveReferences::preorder(const IR::P4Program* program) {
-    if (refMap->checkMap(program))
+bool ResolveReferences::enterRootNamespace(const IR::INamespace* ns) {
+    if (refMap->checkMap(ns->getNode()))
         return false;
 
     BUG_CHECK(resolveForward.empty(), "Expected empty resolvePath");
     resolveForward.push_back(anyOrder);
     BUG_CHECK(rootNamespace == nullptr, "Root namespace already set");
-    rootNamespace = program;
+    rootNamespace = ns;
     context = new ResolutionContext(rootNamespace);
     return true;
 }
 
-void ResolveReferences::postorder(const IR::P4Program*) {
+void ResolveReferences::leaveRootNamespace() {
     rootNamespace = nullptr;
     context->done();
     resolveForward.pop_back();
     BUG_CHECK(resolveForward.empty(), "Expected empty resolvePath");
     context = nullptr;
     LOG1("Reference map " << refMap);
+}
+
+/////////////////// visitor methods ////////////////////////
+
+// visitor should be invoked here
+bool ResolveReferences::preorder(const IR::P4Program* program) {
+    return enterRootNamespace(program);
+}
+
+void ResolveReferences::postorder(const IR::P4Program*) {
+    leaveRootNamespace();
+}
+
+bool ResolveReferences::preorder(const IR::V1Program* program) {
+    return enterRootNamespace(program);
+}
+
+void ResolveReferences::postorder(const IR::V1Program*) {
+    leaveRootNamespace();
 }
 
 bool ResolveReferences::preorder(const IR::This* pointer) {

@@ -89,6 +89,8 @@ class ResolveReferences : public Inspector {
     void removeFromContext(const IR::INamespace* ns);
     void addToGlobals(const IR::INamespace* ns);
     void resolvePath(const IR::Path* path, bool isType) const;
+    bool enterRootNamespace(const IR::INamespace* ns);
+    void leaveRootNamespace();
 
  public:
     explicit ResolveReferences(/* out */ P4::ReferenceMap* refMap,
@@ -108,6 +110,7 @@ class ResolveReferences : public Inspector {
     void postorder(const IR::TYPE* t) override; \
 
     DECLARE(P4Program)
+    DECLARE(V1Program)
     DECLARE(P4Control)
     DECLARE(P4Parser)
     DECLARE(P4Action)
