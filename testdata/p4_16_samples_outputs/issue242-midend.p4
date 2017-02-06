@@ -83,14 +83,14 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         tmp_2 = val.field1 != 32w0;
         _pred = val.field1 != 32w0;
         tmp_3 = (val.field1 != 32w0 ? 32w1 : tmp_3);
-        tmp_3 = (!(val.field1 != 32w0) ? 32w0 : (val.field1 != 32w0 ? 32w1 : tmp_3));
-        inc = (!(val.field1 != 32w0) ? 32w0 : (val.field1 != 32w0 ? 32w1 : tmp_3));
+        tmp_3 = (!(val.field1 != 32w0) ? 32w0 : tmp_3);
+        inc = tmp_3;
         tmp_4 = (val.field1 != 32w0 ? 32w1 : tmp_4);
-        tmp_4 = (!(val.field1 != 32w0) ? 32w0 : (val.field1 != 32w0 ? 32w1 : tmp_4));
-        debug.write(32w0, (!(val.field1 != 32w0) ? 32w0 : (val.field1 != 32w0 ? 32w1 : tmp_4)));
-        debug.write(32w1, (!(val.field1 != 32w0) ? 32w0 : (val.field1 != 32w0 ? 32w1 : tmp_3)));
+        tmp_4 = (!(val.field1 != 32w0) ? 32w0 : tmp_4);
+        debug.write(32w0, tmp_4);
+        debug.write(32w1, tmp_3);
         val.field1 = 32w1;
-        debug.write(32w2, inc);
+        debug.write(32w2, tmp_3);
         reg.write(32w0, val.field1);
     }
     table tbl_test() {
