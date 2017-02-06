@@ -69,9 +69,7 @@ LearnListener::LearnListener(const std::string &learn_socket,
                              const std::string &thrift_addr,
                              const int thrift_port)
   : socket_name(learn_socket),
-    thrift_addr(thrift_addr), thrift_port(thrift_port) {
-  (void) this->thrift_port;  // clang unused private field warning
-}
+    thrift_addr(thrift_addr), thrift_port(thrift_port) { }
 
 LearnListener::~LearnListener() {
   {
@@ -104,7 +102,7 @@ LearnListener::start() {
   using thrift_provider::transport::TTransport;
   using thrift_provider::transport::TBufferedTransport;
 
-  boost::shared_ptr<TTransport> tsocket(new TSocket("localhost", 9090));
+  boost::shared_ptr<TTransport> tsocket(new TSocket(thrift_addr, thrift_port));
   boost::shared_ptr<TTransport> transport(new TBufferedTransport(tsocket));
   boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
 
