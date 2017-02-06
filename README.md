@@ -68,6 +68,9 @@ until Ubuntu 16.10. For earlier releases of Ubuntu, you'll need to install from
 source. You can find instructions
 [here](https://github.com/google/protobuf/blob/master/src/README.md). Check out
 the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you build.
+
+`git checkout v3.0.2`
+
 Please note that while newer versions should work for p4c itself, you may run
 into trouble with some extensions unless you install version 3.0, so you may
 want to install from source even on newer releases of Ubuntu.
