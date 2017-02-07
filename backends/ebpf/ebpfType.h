@@ -1,4 +1,4 @@
-/*
+
 Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ namespace EBPF {
 // Base class for EBPF types
 class EBPFType : public EBPFObject {
  protected:
-    explicit EBPFType(const IR::Type* type, CodeBuilder* builder) :
+    EBPFType(const IR::Type* type, CodeBuilder* builder) :
             EBPFObject(builder), type(type) {}
  public:
     const IR::Type* type;
@@ -64,7 +64,7 @@ class EBPFTypeFactory {
 
 class EBPFBoolType : public EBPFType, public IHasWidth {
  public:
-    EBPFBoolType(CodeBuilder* builder) : EBPFType(IR::Type_Boolean::get(), builder) {}
+    explicit EBPFBoolType(CodeBuilder* builder) : EBPFType(IR::Type_Boolean::get(), builder) {}
     void emit() override
     { builder->append("u8"); }
     void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
@@ -78,8 +78,13 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
  public:
     const unsigned width;
     const bool     isSigned;
+<<<<<<< 8f5dfba7b57ef4bde6a5da900a0576bfd47931e1
     explicit EBPFScalarType(const IR::Type_Bits* bits) :
             EBPFType(bits), width(bits->size), isSigned(bits->isSigned) {}
+=======
+    EBPFScalarType(const IR::Type_Bits* bits, CodeBuilder* builder) :
+            EBPFType(bits, builder), width(bits->size), isSigned(bits->isSigned) {}
+>>>>>>> cpplint fix
     unsigned bytesRequired() const { return ROUNDUP(width, 8); }
     unsigned alignment() const;
     void emit(CodeBuilder* builder) override;
