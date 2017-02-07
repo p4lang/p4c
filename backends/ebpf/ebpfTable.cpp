@@ -74,7 +74,7 @@ EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
     actionList = table->container->getActionList();
 }
 
-void EBPFTable::emitKeyType(CodeBuilder* builder) {
+void EBPFTable::emitKeyType() {
     builder->emitIndent();
     builder->appendFormat("struct %s ", keyTypeName);
     builder->blockStart();
@@ -112,7 +112,7 @@ void EBPFTable::emitActionArguments(CodeBuilder* builder,
     for (auto p : *action->parameters->getEnumerator()) {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(p->type);
-        type->declare(builder, p->name.name, false);
+        type->declare(p->name.name, false);
         builder->endOfStatement(true);
     }
 
@@ -122,7 +122,7 @@ void EBPFTable::emitActionArguments(CodeBuilder* builder,
     builder->endOfStatement(true);
 }
 
-void EBPFTable::emitValueType(CodeBuilder* builder) {
+void EBPFTable::emitValueType() {
     // create an enum with tags for all actions
     builder->emitIndent();
     builder->append("enum ");
@@ -160,7 +160,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         cstring name = action->externalName();
-        emitActionArguments(builder, action, name);
+        emitActionArguments(action, name);
     }
 
     builder->blockEnd(false);
@@ -388,8 +388,7 @@ void EBPFCounterTable::emitInstance(CodeBuilder* builder) {
         EBPFModel::instance.counterValueType, size);
 }
 
-void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
-                                            const IR::MethodCallExpression *expression) {
+void EBPFCounterTable::emitCounterIncrement(const IR::MethodCallExpression *expression) {
     cstring keyName = program->refMap->newName("key");
     cstring valueName = program->refMap->newName("value");
 
@@ -440,9 +439,9 @@ void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
 }
 
 void
-EBPFCounterTable::emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method) {
+EBPFCounterTable::emitMethodInvocation(const P4::ExternMethod* method) {
     if (method->method->name.name == program->model.counterArray.increment.name) {
-        emitCounterIncrement(builder, method->expr);
+        emitCounterIncrement(method->expr);
         return;
     }
     ::error("%1%: Unexpected method for %2%", method->expr, program->model.counterArray.name);
