@@ -222,7 +222,7 @@ void ControlBodyTranslator::processMethod(const P4::ExternMethod* method) {
         builder->blockStart();
         cstring name = decl->externalName();
         auto counterMap = control->getCounter(name);
-        counterMap->emitMethodInvocation(builder, method);
+        counterMap->emitMethodInvocation(method);
         builder->blockEnd(true);
         return;
     } else if (declType->name.name == p4lib.packetOut.name) {
@@ -260,7 +260,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
             builder->emitIndent();
 
             bool pointer = p->direction != IR::Direction::In;
-            etype->declare(builder, p->name.name, pointer);
+            etype->declare(p->name.name, pointer);
 
             builder->append(" = ");
             auto e = binding.lookup(p);
@@ -460,6 +460,7 @@ void EBPFControl::scanConstants() {
 }
 
 bool EBPFControl::build() {
+    CHECK_NULL(builder);
     hitVariable = program->refMap->newName("hit");
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
@@ -484,7 +485,7 @@ void EBPFControl::emitDeclaration(CodeBuilder* builder, const IR::Declaration* d
         auto vd = decl->to<IR::Declaration_Variable>();
         auto etype = EBPFTypeFactory::instance->create(vd->type);
         builder->emitIndent();
-        etype->declare(builder, vd->name, false);
+        etype->declare(vd->name, false);
         builder->endOfStatement(true);
         BUG_CHECK(vd->initializer == nullptr,
                   "%1%: declarations with initializers not supported", decl);
@@ -497,15 +498,14 @@ void EBPFControl::emitDeclaration(CodeBuilder* builder, const IR::Declaration* d
     BUG("%1%: not yet handled", decl);
 }
 
-void EBPFControl::emit(CodeBuilder* builder) {
+void EBPFControl::emit() {
     auto hitType = EBPFTypeFactory::instance->create(IR::Type_Boolean::get());
     builder->emitIndent();
-    hitType->declare(builder, hitVariable, false);
+    hitType->declare(hitVariable, false);
     builder->endOfStatement(true);
     for (auto a : *controlBlock->container->controlLocals)
-        emitDeclaration(builder, a);
+        emitDeclaration(a);
     builder->emitIndent();
-    codeGen->setBuilder(builder);
     controlBlock->container->body->apply(*codeGen);
     builder->newline();
 }
