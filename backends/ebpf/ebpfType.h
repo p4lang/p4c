@@ -27,7 +27,7 @@ namespace EBPF {
 // Base class for EBPF types
 class EBPFType : public EBPFObject {
  protected:
-    explicit EBPFType(const IR::Type* type, CodeBuilder* builder) :
+    EBPFType(const IR::Type* type, CodeBuilder* builder) :
             EBPFObject(builder), type(type) {}
  public:
     const IR::Type* type;
@@ -54,7 +54,7 @@ class EBPFTypeFactory {
  private:
     const P4::TypeMap* typeMap;
     CodeBuilder* builder;
-    explicit EBPFTypeFactory(const P4::TypeMap* typeMap, CodeBuilder* builder) :
+    EBPFTypeFactory(const P4::TypeMap* typeMap, CodeBuilder* builder) :
             typeMap(typeMap), builder(builder) { CHECK_NULL(typeMap); CHECK_NULL(builder); }
  public:
     static EBPFTypeFactory* instance;
@@ -65,7 +65,7 @@ class EBPFTypeFactory {
 
 class EBPFBoolType : public EBPFType, public IHasWidth {
  public:
-    EBPFBoolType(CodeBuilder* builder) : EBPFType(IR::Type_Boolean::get(), builder) {}
+    explicit EBPFBoolType(CodeBuilder* builder) : EBPFType(IR::Type_Boolean::get(), builder) {}
     void emit() override
     { builder->append("u8"); }
     void declare(cstring id, bool asPointer) override;
@@ -79,7 +79,7 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
  public:
     const unsigned width;
     const bool     isSigned;
-    explicit EBPFScalarType(const IR::Type_Bits* bits, CodeBuilder* builder) :
+    EBPFScalarType(const IR::Type_Bits* bits, CodeBuilder* builder) :
             EBPFType(bits, builder), width(bits->size), isSigned(bits->isSigned) {}
     unsigned bytesRequired() const { return ROUNDUP(width, 8); }
     unsigned alignment() const;
