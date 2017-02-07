@@ -26,6 +26,8 @@ limitations under the License.
 
 namespace EBPF {
 
+class EBPFType;
+
 class Target {
  protected:
     explicit Target(cstring name) : name(name) {}
