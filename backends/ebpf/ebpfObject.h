@@ -29,8 +29,12 @@ namespace EBPF {
 // Base class for EBPF objects
 class EBPFObject {
  public:
+    CodeBuilder* builder;
+
+    explicit EBPFObject(CodeBuilder* builder) : builder(builder)
+    { CHECK_NULL(builder); }
     virtual ~EBPFObject() {}
-    virtual void emit(CodeBuilder* builder) = 0;
+    virtual void emit() = 0;
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const {
         return dynamic_cast<const T*>(this); }

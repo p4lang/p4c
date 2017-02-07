@@ -50,12 +50,12 @@ class EBPFProgram : public EBPFObject {
     cstring arrayIndexType = "u32";
 
     // write program as C source code
-    void emit(CodeBuilder *builder) override;
+    void emit() override;
     virtual bool build();  // return 'true' on success
 
     EBPFProgram(const IR::P4Program* program, P4::ReferenceMap* refMap,
-                P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
-            program(program), toplevel(toplevel),
+                P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel, CodeBuilder* builder) :
+            EBPFObject(builder), program(program), toplevel(toplevel),
             refMap(refMap), typeMap(typeMap),
             parser(nullptr), control(nullptr), model(EBPFModel::instance) {
         offsetVar = EBPFModel::reserved("packetOffsetInBits");
@@ -70,11 +70,11 @@ class EBPFProgram : public EBPFObject {
     }
 
  protected:
-    virtual void emitPreamble(CodeBuilder* builder);
-    virtual void emitTypes(CodeBuilder* builder);
-    virtual void emitHeaderInstances(CodeBuilder* builder);
-    virtual void createLocalVariables(CodeBuilder* builder);
-    virtual void emitPipeline(CodeBuilder* builder);
+    virtual void emitPreamble();
+    virtual void emitTypes();
+    virtual void emitHeaderInstances();
+    virtual void createLocalVariables();
+    virtual void emitPipeline();
 };
 
 }  // namespace EBPF

@@ -20,6 +20,9 @@ limitations under the License.
 
 namespace EBPF {
 
+void CodeGenInspector::substitute(const IR::Parameter* p, const IR::Parameter* with)
+{ substitution.emplace(p, with); }
+
 bool CodeGenInspector::preorder(const IR::Constant* expression) {
     builder->append(expression->toString());
     return true;
@@ -27,7 +30,7 @@ bool CodeGenInspector::preorder(const IR::Constant* expression) {
 
 bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
     auto type = EBPFTypeFactory::instance->create(decl->type);
-    type->declare(builder, decl->name.name, false);
+    type->declare(decl->name.name, false);
     if (decl->initializer != nullptr) {
         builder->append(" = ");
         visit(decl->initializer);
@@ -111,7 +114,7 @@ bool CodeGenInspector::preorder(const IR::Cast* c) {
     builder->append("(");
     builder->append("(");
     auto et = EBPFTypeFactory::instance->create(c->destType);
-    et->emit(builder);
+    et->emit();
     builder->append(")");
     visit(c->expr);
     builder->append(")");
@@ -142,7 +145,7 @@ bool CodeGenInspector::preorder(const IR::BoolLiteral* b) {
 bool CodeGenInspector::preorder(const IR::Type_Typedef* type) {
     auto et = EBPFTypeFactory::instance->create(type->type);
     builder->append("typedef ");
-    et->emit(builder);
+    et->emit();
     builder->spc();
     builder->append(type->name);
     builder->endOfStatement();
@@ -164,9 +167,28 @@ bool CodeGenInspector::preorder(const IR::Type_Enum* type) {
 }
 
 bool CodeGenInspector::preorder(const IR::AssignmentStatement* a) {
-    visit(a->left);
-    builder->append(" = ");
-    visit(a->right);
+    auto ltype = typeMap->getType(a->left);
+    auto ebpfType = EBPFTypeFactory::instance->create(ltype);
+    bool memcpy = false;
+    EBPFScalarType* scalar = nullptr;
+    unsigned width = 0;
+    if (ebpfType->is<EBPFScalarType>()) {
+        scalar = ebpfType->to<EBPFScalarType>();
+        width = scalar->implementationWidthInBits();
+        memcpy = !EBPFScalarType::generatesScalar(width);
+    }
+
+    if (memcpy) {
+        builder->append("memcpy(&");
+        visit(a->left);
+        builder->append(", &");
+        visit(a->right);
+        builder->appendFormat(", %d)", scalar->bytesRequired());
+    } else {
+        visit(a->left);
+        builder->append(" = ");
+        visit(a->right);
+    }
     builder->endOfStatement();
     return false;
 }

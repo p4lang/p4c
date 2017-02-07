@@ -30,9 +30,9 @@ class EBPFParserState : public EBPFObject {
     const IR::ParserState* state;
     const EBPFParser* parser;
 
-    EBPFParserState(const IR::ParserState* state, EBPFParser* parser) :
-            state(state), parser(parser) {}
-    void emit(CodeBuilder* builder) override;
+    EBPFParserState(const IR::ParserState* state, EBPFParser* parser, CodeBuilder* builder) :
+            EBPFObject(builder), state(state), parser(parser) {}
+    void emit() override;
 };
 
 class EBPFParser : public EBPFObject {
@@ -46,8 +46,8 @@ class EBPFParser : public EBPFObject {
     EBPFType*                     headerType;
 
     explicit EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
-                        const P4::TypeMap* typeMap);
-    void emit(CodeBuilder* builder) override;
+                        const P4::TypeMap* typeMap, CodeBuilder* builder);
+    void emit() override;
     bool build();
 };
 

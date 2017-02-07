@@ -46,9 +46,6 @@ bool ControlBodyTranslator::preorder(const IR::PathExpression* expression) {
     return false;
 }
 
-void ControlBodyTranslator::substitute(const IR::Parameter* p, const IR::Parameter* with)
-{ substitution.emplace(p, with); }
-
 bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
     builder->append("/* ");
     visit(expression->method);
@@ -225,7 +222,7 @@ void ControlBodyTranslator::processMethod(const P4::ExternMethod* method) {
         builder->blockStart();
         cstring name = decl->externalName();
         auto counterMap = control->getCounter(name);
-        counterMap->emitMethodInvocation(builder, method);
+        counterMap->emitMethodInvocation(method);
         builder->blockEnd(true);
         return;
     } else if (declType->name.name == p4lib.packetOut.name) {
@@ -238,6 +235,7 @@ void ControlBodyTranslator::processMethod(const P4::ExternMethod* method) {
 }
 
 void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
+    builder->emitIndent();
     auto table = control->getTable(method->object->getName().name);
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
@@ -262,7 +260,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
             builder->emitIndent();
 
             bool pointer = p->direction != IR::Direction::In;
-            etype->declare(builder, p->name.name, pointer);
+            etype->declare(p->name.name, pointer);
 
             builder->append(" = ");
             auto e = binding.lookup(p);
@@ -281,7 +279,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->appendFormat("struct %s %s", table->keyTypeName, keyname);
     builder->endOfStatement(true);
 
-    table->createKey(builder, keyname);
+    table->createKey(keyname);
     builder->emitIndent();
     builder->appendLine("/* value */");
     builder->emitIndent();
@@ -322,14 +320,19 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->blockStart();
     builder->emitIndent();
     builder->appendLine("/* run action */");
-    table->runAction(builder, valueName);
+    table->runAction(valueName);
     if (!actionVariableName.isNullOrEmpty()) {
         builder->emitIndent();
-        builder->appendFormat("%s = %s->action;\n", actionVariableName, valueName);
+        builder->appendFormat("%s = %s->action", actionVariableName, valueName);
+        builder->endOfStatement(true);
     }
     toDereference.clear();
 
     builder->blockEnd(true);
+    builder->emitIndent();
+    builder->appendFormat("else return %s", builder->target->abortReturnCode());
+    builder->endOfStatement(true);
+
     builder->blockEnd(true);
 }
 
@@ -428,11 +431,10 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
 
 /////////////////////////////////////////////////
 
-EBPFControl::EBPFControl(const EBPFProgram* program,
-                         const IR::ControlBlock* block,
+EBPFControl::EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
                          const IR::Parameter* parserHeaders) :
-        program(program), controlBlock(block), headers(nullptr), accept(nullptr),
-        parserHeaders(parserHeaders) {}
+        EBPFObject(program->builder), program(program), controlBlock(block), headers(nullptr),
+        accept(nullptr), parserHeaders(parserHeaders), codeGen(nullptr) {}
 
 void EBPFControl::scanConstants() {
     for (auto c : controlBlock->constantValue) {
@@ -440,7 +442,7 @@ void EBPFControl::scanConstants() {
         if (!b->is<IR::Block>()) continue;
         if (b->is<IR::TableBlock>()) {
             auto tblblk = b->to<IR::TableBlock>();
-            auto tbl = new EBPFTable(program, tblblk);
+            auto tbl = new EBPFTable(program, tblblk, codeGen);
             tables.emplace(tblblk->container->name, tbl);
         } else if (b->is<IR::ExternBlock>()) {
             auto ctrblk = b->to<IR::ExternBlock>();
@@ -448,7 +450,7 @@ void EBPFControl::scanConstants() {
             if (node->is<IR::Declaration_Instance>()) {
                 auto di = node->to<IR::Declaration_Instance>();
                 cstring name = di->externalName();
-                auto ctr = new EBPFCounterTable(program, ctrblk, name);
+                auto ctr = new EBPFCounterTable(program, ctrblk, name, codeGen);
                 counters.emplace(name, ctr);
             }
         } else {
@@ -458,6 +460,7 @@ void EBPFControl::scanConstants() {
 }
 
 bool EBPFControl::build() {
+    CHECK_NULL(builder);
     hitVariable = program->refMap->newName("hit");
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
@@ -469,16 +472,20 @@ bool EBPFControl::build() {
     headers = *it;
     ++it;
     accept = *it;
+
+    codeGen = new ControlBodyTranslator(this, builder);
+    codeGen->substitute(headers, parserHeaders);
+
     scanConstants();
     return ::errorCount() == 0;
 }
 
-void EBPFControl::emitDeclaration(const IR::Declaration* decl, CodeBuilder* builder) {
+void EBPFControl::emitDeclaration(const IR::Declaration* decl) {
     if (decl->is<IR::Declaration_Variable>()) {
         auto vd = decl->to<IR::Declaration_Variable>();
         auto etype = EBPFTypeFactory::instance->create(vd->type);
         builder->emitIndent();
-        etype->declare(builder, vd->name, false);
+        etype->declare(vd->name, false);
         builder->endOfStatement(true);
         BUG_CHECK(vd->initializer == nullptr,
                   "%1%: declarations with initializers not supported", decl);
@@ -491,25 +498,23 @@ void EBPFControl::emitDeclaration(const IR::Declaration* decl, CodeBuilder* buil
     BUG("%1%: not yet handled", decl);
 }
 
-void EBPFControl::emit(CodeBuilder* builder) {
+void EBPFControl::emit() {
     auto hitType = EBPFTypeFactory::instance->create(IR::Type_Boolean::get());
     builder->emitIndent();
-    hitType->declare(builder, hitVariable, false);
+    hitType->declare(hitVariable, false);
     builder->endOfStatement(true);
     for (auto a : *controlBlock->container->controlLocals)
-        emitDeclaration(a, builder);
+        emitDeclaration(a);
     builder->emitIndent();
-    ControlBodyTranslator t(this, builder);
-    t.substitute(headers, parserHeaders);
-    controlBlock->container->body->apply(t);
+    controlBlock->container->body->apply(*codeGen);
     builder->newline();
 }
 
-void EBPFControl::emitTables(CodeBuilder* builder) {
+void EBPFControl::emitTables() {
     for (auto it : tables)
-        it.second->emit(builder);
+        it.second->emit();
     for (auto it : counters)
-        it.second->emit(builder);
+        it.second->emit();
 }
 
 }  // namespace EBPF

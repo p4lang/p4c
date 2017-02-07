@@ -29,10 +29,8 @@ class ControlBodyTranslator : public CodeGenInspector {
     std::set<const IR::Parameter*> toDereference;
     std::vector<cstring> saveAction;
     P4::P4CoreLibrary& p4lib;
-    std::map<const IR::Parameter*, const IR::Parameter*> substitution;
  public:
     ControlBodyTranslator(const EBPFControl* control, CodeBuilder* builder);
-    void substitute(const IR::Parameter* p, const IR::Parameter* with);
 
     // handle the packet_out.emit method
     void compileEmitField(const IR::Expression* expr, cstring field,
@@ -58,6 +56,7 @@ class EBPFControl : public EBPFObject {
     const IR::Parameter*    parserHeaders;
     // replace references to headers with references to parserHeaders
     cstring                 hitVariable;
+    ControlBodyTranslator*  codeGen;
 
     std::set<const IR::Parameter*> toDereference;
     std::map<cstring, EBPFTable*>  tables;
@@ -65,9 +64,9 @@ class EBPFControl : public EBPFObject {
 
     EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
                 const IR::Parameter* parserHeaders);
-    virtual void emit(CodeBuilder* builder);
-    void emitDeclaration(const IR::Declaration* decl, CodeBuilder *builder);
-    void emitTables(CodeBuilder* builder);
+    virtual void emit();
+    void emitDeclaration(const IR::Declaration* decl);
+    void emitTables();
     virtual bool build();
     EBPFTable* getTable(cstring name) const {
         auto result = get(tables, name);

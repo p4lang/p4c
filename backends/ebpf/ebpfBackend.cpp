@@ -36,8 +36,6 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
         return;
     }
 
-    EBPFTypeFactory::createFactory(typeMap);
-
     Target* target;
     if (options.target.isNullOrEmpty() || options.target == "bcc") {
         target = new BccTarget();
@@ -47,7 +45,10 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
         ::error("Unknown target %s; legal choices are 'bcc' and 'kernel'", options.target);
         return;
     }
-    auto ebpfprog = new EBPFProgram(toplevel->getProgram(), refMap, typeMap, toplevel);
+
+    CodeBuilder builder(target);
+    EBPFTypeFactory::createFactory(typeMap, &builder);
+    auto ebpfprog = new EBPFProgram(toplevel->getProgram(), refMap, typeMap, toplevel, &builder);
     if (!ebpfprog->build())
         return;
 
@@ -57,8 +58,7 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
     if (stream == nullptr)
         return;
 
-    CodeBuilder builder(target);
-    ebpfprog->emit(&builder);
+    ebpfprog->emit();
     *stream << builder.toString();
     stream->flush();
 }

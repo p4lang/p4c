@@ -61,8 +61,9 @@ class ActionTranslationVisitor : public CodeGenInspector {
 
 ////////////////////////////////////////////////////////////////
 
-EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table) :
-        EBPFTableBase(program, table->container->externalName()), table(table) {
+EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
+                     CodeGenInspector* codeGen) :
+        EBPFTableBase(program, table->container->externalName(), codeGen), table(table) {
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = program->refMap->newName(base);
 
@@ -73,7 +74,7 @@ EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table) :
     actionList = table->container->getActionList();
 }
 
-void EBPFTable::emitKeyType(CodeBuilder* builder) {
+void EBPFTable::emitKeyType() {
     builder->emitIndent();
     builder->appendFormat("struct %s ", keyTypeName);
     builder->blockStart();
@@ -83,7 +84,7 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
         auto type = program->typeMap->getType(c->expression);
         builder->emitIndent();
         auto ebpfType = EBPFTypeFactory::instance->create(type);
-        ebpfType->declare(builder, cstring("field") + Util::toString(fieldNumber), false);
+        ebpfType->declare(cstring("field") + Util::toString(fieldNumber), false);
         builder->endOfStatement(true);
 
         auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
@@ -96,8 +97,7 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
-void EBPFTable::emitActionArguments(CodeBuilder* builder, const IR::P4Action* action,
-                                    cstring name) {
+void EBPFTable::emitActionArguments(const IR::P4Action* action, cstring name) {
     builder->emitIndent();
     builder->append("struct ");
     builder->blockStart();
@@ -105,7 +105,7 @@ void EBPFTable::emitActionArguments(CodeBuilder* builder, const IR::P4Action* ac
     for (auto p : *action->parameters->getEnumerator()) {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(p->type);
-        type->declare(builder, p->name.name, false);
+        type->declare(p->name.name, false);
         builder->endOfStatement(true);
     }
 
@@ -115,7 +115,7 @@ void EBPFTable::emitActionArguments(CodeBuilder* builder, const IR::P4Action* ac
     builder->endOfStatement(true);
 }
 
-void EBPFTable::emitValueType(CodeBuilder* builder) {
+void EBPFTable::emitValueType() {
     // create an enum with tags for all actions
     builder->emitIndent();
     builder->append("enum ");
@@ -153,7 +153,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         cstring name = action->externalName();
-        emitActionArguments(builder, action, name);
+        emitActionArguments(action, name);
     }
 
     builder->blockEnd(false);
@@ -163,9 +163,9 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
-void EBPFTable::emit(CodeBuilder* builder) {
-    emitKeyType(builder);
-    emitValueType(builder);
+void EBPFTable::emit() {
+    emitKeyType();
+    emitValueType();
 
     auto impl = table->container->properties->getProperty(program->model.tableImplProperty.name);
     if (impl == nullptr) {
@@ -230,22 +230,41 @@ void EBPFTable::emit(CodeBuilder* builder) {
                                    cstring("struct ") + valueTypeName, 1);
 }
 
-void EBPFTable::createKey(CodeBuilder* builder, cstring keyName) {
+void EBPFTable::createKey(cstring keyName) {
     unsigned fieldNumber = 0;
     for (auto c : *keyGenerator->keyElements) {
-        builder->emitIndent();
-        builder->append(keyName);
-        builder->append(".field");
-        builder->append(fieldNumber);
-        builder->append(" = ");
+        auto ltype = program->typeMap->getType(c->expression);
+        auto ebpfType = EBPFTypeFactory::instance->create(ltype);
+        bool memcpy = false;
+        EBPFScalarType* scalar = nullptr;
+        unsigned width = 0;
+        if (ebpfType->is<EBPFScalarType>()) {
+            scalar = ebpfType->to<EBPFScalarType>();
+            width = scalar->implementationWidthInBits();
+            memcpy = !EBPFScalarType::generatesScalar(width);
+        }
 
-        CodeGenInspector visitor(builder, program->typeMap);
-        c->expression->apply(visitor);
+        builder->emitIndent();
+        if (memcpy) {
+            builder->append("memcpy(&");
+            builder->append(keyName);
+            builder->append(".field");
+            builder->append(fieldNumber);
+            builder->append(", &");
+            codeGen->visit(c->expression);
+            builder->appendFormat(", %d)", scalar->bytesRequired());
+        } else {
+            builder->append(keyName);
+            builder->append(".field");
+            builder->append(fieldNumber);
+            builder->append(" = ");
+            codeGen->visit(c->expression);
+        }
         builder->endOfStatement(true);
     }
 }
 
-void EBPFTable::runAction(CodeBuilder* builder, cstring valueName) {
+void EBPFTable::runAction(cstring valueName) {
     builder->emitIndent();
     builder->appendFormat("switch (%s->action) ", valueName);
     builder->blockStart();
@@ -260,20 +279,25 @@ void EBPFTable::runAction(CodeBuilder* builder, cstring valueName) {
         builder->emitIndent();
 
         ActionTranslationVisitor visitor(builder, valueName, program);
+        visitor.copySubstitutions(codeGen);
         action->apply(visitor);
         builder->newline();
         builder->emitIndent();
         builder->appendLine("break;");
     }
 
+    builder->emitIndent();
+    builder->appendFormat("default: return %s", builder->target->abortReturnCode());
+    builder->endOfStatement(true);
+
     builder->blockEnd(true);
 }
 
 ////////////////////////////////////////////////////////////////
 
-EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program,
-                                   const IR::ExternBlock* block, cstring name) :
-        EBPFTableBase(program, name) {
+EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program, const IR::ExternBlock* block,
+                                   cstring name, CodeGenInspector* codeGen) :
+        EBPFTableBase(program, name, codeGen) {
     auto sz = block->getParameterValue(program->model.counterArray.size.name);
     if (sz == nullptr || !sz->is<IR::Constant>()) {
         ::error("Expected an integer argument for parameter %1% or %2%; is the model corrupted?",
@@ -301,17 +325,13 @@ EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program,
     isHash = sprs->to<IR::BoolLiteral>()->value;
 }
 
-void EBPFCounterTable::emit(CodeBuilder* builder) {
-    auto indexType = EBPFTypeFactory::instance->create(EBPFModel::counterIndexType);
-    auto valueType = EBPFTypeFactory::instance->create(EBPFModel::counterValueType);
-    keyTypeName = indexType->toString(builder->target);
-    valueTypeName = valueType->toString(builder->target);
-    builder->target->emitTableDecl(builder, dataMapName, isHash,
-                                   keyTypeName, valueTypeName, size);
+void EBPFCounterTable::emit() {
+    builder->target->emitTableDecl(
+        builder, dataMapName, isHash, EBPFModel::instance.counterIndexType,
+        EBPFModel::instance.counterValueType, size);
 }
 
-void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
-                                            const IR::MethodCallExpression *expression) {
+void EBPFCounterTable::emitCounterIncrement(const IR::MethodCallExpression *expression) {
     cstring keyName = program->refMap->newName("key");
     cstring valueName = program->refMap->newName("value");
 
@@ -336,8 +356,7 @@ void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
     BUG_CHECK(expression->arguments->size() == 1, "Expected just 1 argument for %1%", expression);
     auto arg = expression->arguments->at(0);
 
-    CodeGenInspector visitor(builder, program->typeMap);
-    arg->apply(visitor);
+    codeGen->visit(arg);
     builder->endOfStatement(true);
 
     builder->emitIndent();
@@ -363,9 +382,9 @@ void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
 }
 
 void
-EBPFCounterTable::emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method) {
+EBPFCounterTable::emitMethodInvocation(const P4::ExternMethod* method) {
     if (method->method->name.name == program->model.counterArray.increment.name) {
-        emitCounterIncrement(builder, method->expr);
+        emitCounterIncrement(method->expr);
         return;
     }
     ::error("%1%: Unexpected method for %2%", method->expr, program->model.counterArray.name);

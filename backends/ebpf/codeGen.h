@@ -36,12 +36,17 @@ class CodeGenInspector : public Inspector {
  protected:
     CodeBuilder*       builder;
     const P4::TypeMap* typeMap;
+    std::map<const IR::Parameter*, const IR::Parameter*> substitution;
 
  public:
     CodeGenInspector(CodeBuilder* builder, const P4::TypeMap* typeMap) :
             builder(builder), typeMap(typeMap) { visitDagOnce = false; }
 
-    using Inspector::preorder;
+    void substitute(const IR::Parameter* p, const IR::Parameter* with);
+    void copySubstitutions(CodeGenInspector* other) {
+        for (auto s : other->substitution)
+            substitute(s.first, s.second);
+    }
 
     bool preorder(const IR::Constant* expression) override;
     bool preorder(const IR::Declaration_Variable* decl) override;
