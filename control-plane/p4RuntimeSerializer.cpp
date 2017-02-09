@@ -128,7 +128,7 @@ struct HeaderFieldPath {
             BUG_CHECK(name != boost::none, "Member not found in containing type?");
             return parentPath->append(*name, type);
         } else {
-            ::error("Expression '%1' is too complicated to resolve to a header field");
+            ::error("Expression '%1%' is too complicated to resolve to a header field", expression);
             return nullptr;
         }
     }
