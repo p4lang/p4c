@@ -17,10 +17,9 @@ limitations under the License.
 #ifndef FRONTENDS_P4_PARAMETERSUBSTITUTION_H_
 #define FRONTENDS_P4_PARAMETERSUBSTITUTION_H_
 
-// This file must be included after ir/ir.h
-
 #include <iostream>
 
+#include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/enumerator.h"

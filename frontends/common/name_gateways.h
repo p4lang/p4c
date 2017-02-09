@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_NAME_GATEWAYS_H_
 #define FRONTENDS_COMMON_NAME_GATEWAYS_H_
 
+#include "ir/ir.h"
+
 class NameGateways : public Transform {
     const IR::Node *preorder(IR::If *n) override {
         return new IR::NamedCond(*n);
