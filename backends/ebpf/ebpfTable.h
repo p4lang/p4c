@@ -36,8 +36,7 @@ class EBPFTableBase : public EBPFObject {
  protected:
     EBPFTableBase(const EBPFProgram* program, cstring instanceName,
                   CodeGenInspector* codeGen) :
-            EBPFObject(program->builder), program(program),
-            instanceName(instanceName), codeGen(codeGen) {
+            program(program), instanceName(instanceName), codeGen(codeGen) {
         CHECK_NULL(codeGen); CHECK_NULL(program);
         keyTypeName = program->refMap->newName(instanceName + "_key");
         valueTypeName = program->refMap->newName(instanceName + "_value");
@@ -56,12 +55,14 @@ class EBPFTable final : public EBPFTableBase {
     cstring               actionEnumName;
 
     EBPFTable(const EBPFProgram* program, const IR::TableBlock* table, CodeGenInspector* codeGen);
-    void emit() override;
-    void emitActionArguments(const IR::P4Action* action, cstring name);
-    void emitKeyType();
-    void emitValueType();
-    void createKey(cstring keyName);
-    void runAction(cstring valueName);
+    void emitTypes(CodeBuilder* builder);
+    void emitInstance(CodeBuilder* builder);
+    void emitActionArguments(CodeBuilder* builder, const IR::P4Action* action, cstring name);
+    void emitKeyType(CodeBuilder* builder);
+    void emitValueType(CodeBuilder* builder);
+    void emitKey(CodeBuilder* builder, cstring keyName);
+    void emitAction(CodeBuilder* builder, cstring valueName);
+    void emitInitializer(CodeBuilder* builder);
 };
 
 class EBPFCounterTable final : public EBPFTableBase {
@@ -70,9 +71,10 @@ class EBPFCounterTable final : public EBPFTableBase {
  public:
     EBPFCounterTable(const EBPFProgram* program, const IR::ExternBlock* block,
                      cstring name, CodeGenInspector* codeGen);
-    void emit() override;
-    void emitCounterIncrement(const IR::MethodCallExpression* expression);
-    void emitMethodInvocation(const P4::ExternMethod* method);
+    void emitTypes(CodeBuilder*) {}
+    void emitInstance(CodeBuilder* builder);
+    void emitCounterIncrement(CodeBuilder* builder, const IR::MethodCallExpression* expression);
+    void emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method);
 };
 
 }  // namespace EBPF

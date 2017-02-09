@@ -33,8 +33,8 @@ class StateTranslationVisitor : public CodeGenInspector {
     void compileExtract(const IR::Vector<IR::Expression>* args);
 
  public:
-    StateTranslationVisitor(const EBPFParserState* state, CodeBuilder* builder) :
-            CodeGenInspector(builder, state->parser->program->typeMap),
+    explicit StateTranslationVisitor(const EBPFParserState* state) :
+            CodeGenInspector(state->parser->program->typeMap),
             hasDefault(false), p4lib(P4::P4CoreLibrary::instance), state(state) {}
     bool preorder(const IR::ParserState* state) override;
     bool preorder(const IR::SelectCase* selectCase) override;
@@ -82,7 +82,11 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
 
 bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
     hasDefault = false;
-    // TODO: this does not handle correctly tuples
+    if (expression->select->components->size() != 1) {
+        // TODO: this does not handle correctly tuples
+        ::error("%1%: only supporting a single argument for select", expression->select);
+        return false;
+    }
     builder->emitIndent();
     builder->append("switch (");
     visit(expression->select);
@@ -150,7 +154,7 @@ StateTranslationVisitor::compileExtractField(
         builder->emitIndent();
         visit(expr);
         builder->appendFormat(".%s = (", field.c_str());
-        type->emit();
+        type->emit(builder);
         builder->appendFormat(")((%s(%s, BYTES(%s))",
                               helper,
                               program->packetStartVar.c_str(),
@@ -161,7 +165,7 @@ StateTranslationVisitor::compileExtractField(
 
         if (widthToExtract != loadSize) {
             builder->append(" & EBPF_MASK(");
-            type->emit();
+            type->emit(builder);
             builder->appendFormat(", %d)", widthToExtract);
         }
 
@@ -186,7 +190,7 @@ StateTranslationVisitor::compileExtractField(
             builder->emitIndent();
             visit(expr);
             builder->appendFormat(".%s[%d] = (", field.c_str(), i);
-            bt->emit();
+            bt->emit(builder);
             builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)",
                                   helper,
                                   program->packetStartVar.c_str(),
@@ -194,7 +198,7 @@ StateTranslationVisitor::compileExtractField(
 
             if ((i == bytes - 1) && (widthToExtract % 8 != 0)) {
                 builder->append(" & EBPF_MASK(");
-                bt->emit();
+                bt->emit(builder);
                 builder->appendFormat(", %d)", widthToExtract % 8);
             }
 
@@ -317,19 +321,20 @@ bool StateTranslationVisitor::preorder(const IR::Member* expression) {
 
 //////////////////////////////////////////////////////////////////
 
-void EBPFParserState::emit() {
-    StateTranslationVisitor visitor(this, builder);
+void EBPFParserState::emit(CodeBuilder* builder) {
+    StateTranslationVisitor visitor(this);
+    visitor.setBuilder(builder);
     state->apply(visitor);
 }
 
 EBPFParser::EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
-                       const P4::TypeMap* typeMap, CodeBuilder* builder) :
-        EBPFObject(builder), program(program), typeMap(typeMap), parserBlock(block),
+                       const P4::TypeMap* typeMap) :
+        program(program), typeMap(typeMap), parserBlock(block),
         packet(nullptr), headers(nullptr), headerType(nullptr) {}
 
-void EBPFParser::emit() {
+void EBPFParser::emit(CodeBuilder* builder) {
     for (auto s : states)
-        s->emit();
+        s->emit(builder);
     builder->newline();
 
     // Create a synthetic reject state
@@ -348,12 +353,11 @@ bool EBPFParser::build() {
         return false;
     }
 
-    // TODO: more checks on these parameter types
     auto it = pl->parameters->begin();
     packet = *it; ++it;
     headers = *it;
     for (auto state : *parserBlock->container->states) {
-        auto ps = new EBPFParserState(state, this, builder);
+        auto ps = new EBPFParserState(state, this);
         states.push_back(ps);
     }
 

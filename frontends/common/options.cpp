@@ -164,6 +164,7 @@ std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[])
 
     if (char *p = strrchr(buffer, '/')) {
         ++p;
+        exe_name = p;
         snprintf(p, buffer + sizeof(buffer) - p, "p4include");
         if (stat(buffer, &st) >= 0 && S_ISDIR(st.st_mode))
             p4includePath = strdup(buffer);

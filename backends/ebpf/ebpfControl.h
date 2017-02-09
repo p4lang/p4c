@@ -30,7 +30,7 @@ class ControlBodyTranslator : public CodeGenInspector {
     std::vector<cstring> saveAction;
     P4::P4CoreLibrary& p4lib;
  public:
-    ControlBodyTranslator(const EBPFControl* control, CodeBuilder* builder);
+    explicit ControlBodyTranslator(const EBPFControl* control);
 
     // handle the packet_out.emit method
     void compileEmitField(const IR::Expression* expr, cstring field,
@@ -64,16 +64,18 @@ class EBPFControl : public EBPFObject {
 
     EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
                 const IR::Parameter* parserHeaders);
-    virtual void emit();
-    void emitDeclaration(const IR::Declaration* decl);
-    void emitTables();
+    virtual void emit(CodeBuilder* builder);
+    void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl);
+    void emitTableTypes(CodeBuilder* builder);
+    void emitTableInitializers(CodeBuilder* builder);
+    void emitTableInstances(CodeBuilder* builder);
     virtual bool build();
     EBPFTable* getTable(cstring name) const {
-        auto result = get(tables, name);
+        auto result = ::get(tables, name);
         BUG_CHECK(result != nullptr, "No table named %1%", name);
         return result; }
     EBPFCounterTable* getCounter(cstring name) const {
-        auto result = get(counters, name);
+        auto result = ::get(counters, name);
         BUG_CHECK(result != nullptr, "No counter named %1%", name);
         return result; }
 
