@@ -18,6 +18,7 @@ limitations under the License.
 #define _P4_P4_PARSE_H_
 
 #include <memory>
+#include "ir/ir.h"
 
 namespace IR { class Global; }
 

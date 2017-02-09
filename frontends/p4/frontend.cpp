@@ -43,6 +43,7 @@ limitations under the License.
 #include "simplifyDefUse.h"
 #include "simplifyParsers.h"
 #include "specialize.h"
+#include "tableKeyNames.h"
 #include "parserControlFlow.h"
 
 namespace P4 {
