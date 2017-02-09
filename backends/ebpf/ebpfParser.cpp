@@ -154,7 +154,7 @@ StateTranslationVisitor::compileExtractField(
         builder->emitIndent();
         visit(expr);
         builder->appendFormat(".%s = (", field.c_str());
-        type->emit();
+        type->emit(builder);
         builder->appendFormat(")((%s(%s, BYTES(%s))",
                               helper,
                               program->packetStartVar.c_str(),
@@ -165,7 +165,7 @@ StateTranslationVisitor::compileExtractField(
 
         if (widthToExtract != loadSize) {
             builder->append(" & EBPF_MASK(");
-            type->emit();
+            type->emit(builder);
             builder->appendFormat(", %d)", widthToExtract);
         }
 
@@ -190,7 +190,7 @@ StateTranslationVisitor::compileExtractField(
             builder->emitIndent();
             visit(expr);
             builder->appendFormat(".%s[%d] = (", field.c_str(), i);
-            bt->emit();
+            bt->emit(builder);
             builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)",
                                   helper,
                                   program->packetStartVar.c_str(),
@@ -198,7 +198,7 @@ StateTranslationVisitor::compileExtractField(
 
             if ((i == bytes - 1) && (widthToExtract % 8 != 0)) {
                 builder->append(" & EBPF_MASK(");
-                bt->emit();
+                bt->emit(builder);
                 builder->appendFormat(", %d)", widthToExtract % 8);
             }
 
@@ -334,7 +334,7 @@ EBPFParser::EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
 
 void EBPFParser::emit(CodeBuilder* builder) {
     for (auto s : states)
-        s->emit();
+        s->emit(builder);
     builder->newline();
 
     // Create a synthetic reject state
@@ -357,7 +357,7 @@ bool EBPFParser::build() {
     packet = *it; ++it;
     headers = *it;
     for (auto state : *parserBlock->container->states) {
-        auto ps = new EBPFParserState(state, this, builder);
+        auto ps = new EBPFParserState(state, this);
         states.push_back(ps);
     }
 

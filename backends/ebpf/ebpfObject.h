@@ -29,10 +29,6 @@ namespace EBPF {
 // Base class for EBPF objects
 class EBPFObject {
  public:
-    CodeBuilder* builder;
-
-    explicit EBPFObject(CodeBuilder* builder) : builder(builder)
-    { CHECK_NULL(builder); }
     virtual ~EBPFObject() {}
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const {
