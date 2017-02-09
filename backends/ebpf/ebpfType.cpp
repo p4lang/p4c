@@ -25,16 +25,16 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
     CHECK_NULL(typeMap);
     EBPFType* result = nullptr;
     if (type->is<IR::Type_Boolean>()) {
-        result = new EBPFBoolType(builder);
+        result = new EBPFBoolType();
     } else if (type->is<IR::Type_Bits>()) {
-        result = new EBPFScalarType(type->to<IR::Type_Bits>(), builder);
+        result = new EBPFScalarType(type->to<IR::Type_Bits>());
     } else if (type->is<IR::Type_StructLike>()) {
-        result = new EBPFStructType(type->to<IR::Type_StructLike>(), builder);
+        result = new EBPFStructType(type->to<IR::Type_StructLike>());
     } else if (type->is<IR::Type_Typedef>()) {
         auto canon = typeMap->getTypeType(type, true);
         result = create(canon);
         auto path = new IR::Path(type->to<IR::Type_Typedef>()->name);
-        result = new EBPFTypeName(new IR::Type_Name(Util::SourceInfo(), path), result, builder);
+        result = new EBPFTypeName(new IR::Type_Name(Util::SourceInfo(), path), result);
     } else if (type->is<IR::Type_Name>()) {
         auto canon = typeMap->getTypeType(type, true);
         result = create(canon);
@@ -49,8 +49,8 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
 }
 
 void
-EBPFBoolType::declare(cstring id, bool asPointer) {
-    emit();
+EBPFBoolType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
+    emit(builder);
     if (asPointer)
         builder->append("*");
     builder->appendFormat(" %s", id.c_str());
@@ -70,7 +70,7 @@ unsigned EBPFScalarType::alignment() const {
         return 1;
 }
 
-void EBPFScalarType::emit() {
+void EBPFScalarType::emit(CodeBuilder* builder) {
     auto prefix = isSigned ? "i" : "u";
 
     if (width <= 8)
@@ -84,9 +84,9 @@ void EBPFScalarType::emit() {
 }
 
 void
-EBPFScalarType::declare(cstring id, bool asPointer) {
+EBPFScalarType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     if (width <= 32) {
-        emit();
+        emit(builder);
         if (asPointer)
             builder->append("*");
         builder->spc();
@@ -101,8 +101,8 @@ EBPFScalarType::declare(cstring id, bool asPointer) {
 
 //////////////////////////////////////////////////////////
 
-EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct, CodeBuilder* builder) :
-        EBPFType(strct, builder) {
+EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
+        EBPFType(strct) {
     if (strct->is<IR::Type_Struct>())
         kind = "struct";
     else if (strct->is<IR::Type_Header>())
@@ -129,7 +129,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct, CodeBuilder* bu
 }
 
 void
-EBPFStructType::declare(cstring id, bool asPointer) {
+EBPFStructType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     builder->append(kind);
     if (asPointer)
         builder->append("*");
@@ -137,13 +137,13 @@ EBPFStructType::declare(cstring id, bool asPointer) {
     builder->appendFormat(" %s %s", n, id.c_str());
 }
 
-void EBPFStructType::emitInitializer() {
+void EBPFStructType::emitInitializer(CodeBuilder* builder) {
     builder->blockStart();
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_Union>()) {
         for (auto f : fields) {
             builder->emitIndent();
             builder->appendFormat(".%s = ", f->field->name.name);
-            f->type->emitInitializer();
+            f->type->emitInitializer(builder);
             builder->append(",");
             builder->newline();
         }
@@ -156,7 +156,7 @@ void EBPFStructType::emitInitializer() {
     builder->blockEnd(false);
 }
 
-void EBPFStructType::emit() {
+void EBPFStructType::emit(CodeBuilder* builder) {
     builder->emitIndent();
     builder->append(kind);
     builder->spc();
@@ -168,7 +168,7 @@ void EBPFStructType::emit() {
         auto type = f->type;
         builder->emitIndent();
 
-        type->declare(f->field->name, false);
+        type->declare(builder, f->field->name, false);
         builder->append("; ");
         builder->append("/* ");
         builder->append(type->type->toString());
@@ -184,7 +184,7 @@ void EBPFStructType::emit() {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(IR::Type_Boolean::get());
         if (type != nullptr) {
-            type->declare("ebpf_valid", false);
+            type->declare(builder, "ebpf_valid", false);
             builder->endOfStatement(true);
         }
     }
@@ -195,14 +195,14 @@ void EBPFStructType::emit() {
 
 ///////////////////////////////////////////////////////////////
 
-void EBPFTypeName::declare(cstring id, bool asPointer) {
+void EBPFTypeName::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     if (canonical != nullptr)
-        canonical->declare(id, asPointer);
+        canonical->declare(builder, id, asPointer);
 }
 
-void EBPFTypeName::emitInitializer() {
+void EBPFTypeName::emitInitializer(CodeBuilder* builder) {
     if (canonical != nullptr)
-        canonical->emitInitializer();
+        canonical->emitInitializer(builder);
 }
 
 unsigned EBPFTypeName::widthInBits() {

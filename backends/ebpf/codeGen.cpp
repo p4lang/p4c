@@ -36,7 +36,7 @@ bool CodeGenInspector::preorder(const IR::StringLiteral* expression) {
 
 bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
     auto type = EBPFTypeFactory::instance->create(decl->type);
-    type->declare(decl->name.name, false);
+    type->declare(builder, decl->name.name, false);
     if (decl->initializer != nullptr) {
         builder->append(" = ");
         visit(decl->initializer);
@@ -120,7 +120,7 @@ bool CodeGenInspector::preorder(const IR::Cast* c) {
     builder->append("(");
     builder->append("(");
     auto et = EBPFTypeFactory::instance->create(c->destType);
-    et->emit();
+    et->emit(builder);
     builder->append(")");
     visit(c->expr);
     builder->append(")");
@@ -191,7 +191,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
 bool CodeGenInspector::preorder(const IR::Type_Typedef* type) {
     auto et = EBPFTypeFactory::instance->create(type->type);
     builder->append("typedef ");
-    et->emit();
+    et->emit(builder);
     builder->spc();
     builder->append(type->name);
     builder->endOfStatement();

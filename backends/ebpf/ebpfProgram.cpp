@@ -37,7 +37,7 @@ bool EBPFProgram::build() {
     auto pb = pack->getParameterValue(model.filter.parser.name)
                       ->to<IR::ParserBlock>();
     BUG_CHECK(pb != nullptr, "No parser block found");
-    parser = new EBPFParser(this, pb, typeMap, builder);
+    parser = new EBPFParser(this, pb, typeMap);
     bool success = parser->build();
     if (!success)
         return success;
@@ -70,9 +70,9 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     builder->target->emitMain(builder, functionName, model.CPacketName.str());
     builder->blockStart();
 
-    emitHeaderInstances();
+    emitHeaderInstances(builder);
     builder->append(" = ");
-    parser->headerType->emitInitializer();
+    parser->headerType->emitInitializer(builder);
     builder->endOfStatement(true);
 
     // HACK to force LLVM to put the headers on the stack.
@@ -89,8 +89,8 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     builder->appendFormat("goto %s;", IR::ParserState::start.c_str());
     builder->newline();
 
-    parser->emit();
-    emitPipeline();
+    parser->emit(builder);
+    emitPipeline(builder);
 
     builder->emitIndent();
     builder->append(endLabel);
@@ -147,7 +147,7 @@ void EBPFProgram::emitTypes(CodeBuilder* builder) {
             auto type = EBPFTypeFactory::instance->create(d->to<IR::Type>());
             if (type == nullptr)
                 continue;
-            type->emit();
+            type->emit(builder);
             builder->newline();
         }
     }
@@ -168,7 +168,7 @@ class ErrorCodesVisitor : public Inspector {
 };
 }  // namespace
 
-void EBPFProgram::emitPreamble() {
+void EBPFProgram::emitPreamble(CodeBuilder* builder) {
     builder->emitIndent();
     builder->appendFormat("enum %s ", errorEnum.c_str());
     builder->blockStart();
@@ -226,19 +226,19 @@ void EBPFProgram::emitLocalVariables(CodeBuilder* builder) {
     builder->newline();
 }
 
-void EBPFProgram::emitHeaderInstances() {
+void EBPFProgram::emitHeaderInstances(CodeBuilder* builder) {
     builder->emitIndent();
-    parser->headerType->declare(parser->headers->name.name, false);
+    parser->headerType->declare(builder, parser->headers->name.name, false);
 }
 
-void EBPFProgram::emitPipeline() {
+void EBPFProgram::emitPipeline(CodeBuilder* builder) {
     builder->emitIndent();
     builder->append(IR::ParserState::accept);
     builder->append(":");
     builder->newline();
     builder->emitIndent();
     builder->blockStart();
-    control->emit();
+    control->emit(builder);
     builder->blockEnd(true);
 }
 
