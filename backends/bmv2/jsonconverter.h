@@ -20,6 +20,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "midend/convertEnums.h"
 #include "analyzer.h"
 // Currently we are requiring a v1model to be used
 
