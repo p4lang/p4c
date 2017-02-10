@@ -34,6 +34,7 @@ class EBPFType;
 
 class EBPFProgram : public EBPFObject {
  public:
+    const CompilerOptions& options;
     const IR::P4Program* program;
     const IR::ToplevelBlock*  toplevel;
     P4::ReferenceMap*    refMap;
@@ -49,13 +50,11 @@ class EBPFProgram : public EBPFObject {
     cstring license = "GPL";  // TODO: this should be a compiler option probably
     cstring arrayIndexType = "u32";
 
-    // write program as C source code
-    void emit(CodeBuilder *builder) override;
     virtual bool build();  // return 'true' on success
 
-    EBPFProgram(const IR::P4Program* program, P4::ReferenceMap* refMap,
-                P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
-            program(program), toplevel(toplevel),
+    EBPFProgram(const CompilerOptions &options, const IR::P4Program* program,
+                P4::ReferenceMap* refMap, P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
+            options(options), program(program), toplevel(toplevel),
             refMap(refMap), typeMap(typeMap),
             parser(nullptr), control(nullptr), model(EBPFModel::instance) {
         offsetVar = EBPFModel::reserved("packetOffsetInBits");
@@ -70,11 +69,16 @@ class EBPFProgram : public EBPFObject {
     }
 
  protected:
+    virtual void emitGeneratedComment(CodeBuilder* builder);
     virtual void emitPreamble(CodeBuilder* builder);
     virtual void emitTypes(CodeBuilder* builder);
     virtual void emitHeaderInstances(CodeBuilder* builder);
-    virtual void createLocalVariables(CodeBuilder* builder);
+    virtual void emitLocalVariables(CodeBuilder* builder);
     virtual void emitPipeline(CodeBuilder* builder);
+
+ public:
+    virtual void emitH(CodeBuilder* builder, cstring headerFile);  // emits C headers
+    virtual void emitC(CodeBuilder* builder, cstring headerFile);  // emits C program
 };
 
 }  // namespace EBPF

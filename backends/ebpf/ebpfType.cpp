@@ -54,12 +54,6 @@ EBPFBoolType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     builder->appendFormat(" %s", id.c_str());
 }
 
-cstring EBPFType::toString(const Target* target) {
-    CodeBuilder builder(target);
-    emit(&builder);
-    return builder.toString();
-}
-
 /////////////////////////////////////////////////////////////
 
 unsigned EBPFScalarType::alignment() const {
@@ -176,6 +170,10 @@ void EBPFStructType::emit(CodeBuilder* builder) {
         builder->append("; ");
         builder->append("/* ");
         builder->append(type->type->toString());
+        if (f->comment != nullptr) {
+            builder->append(" ");
+            builder->append(f->comment);
+        }
         builder->append(" */");
         builder->newline();
     }

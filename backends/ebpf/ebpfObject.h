@@ -30,7 +30,6 @@ namespace EBPF {
 class EBPFObject {
  public:
     virtual ~EBPFObject() {}
-    virtual void emit(CodeBuilder* builder) = 0;
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T* to() const {
         return dynamic_cast<const T*>(this); }

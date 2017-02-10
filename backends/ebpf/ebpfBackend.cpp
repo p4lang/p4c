@@ -36,8 +36,6 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
         return;
     }
 
-    EBPFTypeFactory::createFactory(typeMap);
-
     Target* target;
     if (options.target.isNullOrEmpty() || options.target == "bcc") {
         target = new BccTarget();
@@ -47,20 +45,39 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
         ::error("Unknown target %s; legal choices are 'bcc' and 'kernel'", options.target);
         return;
     }
-    auto ebpfprog = new EBPFProgram(toplevel->getProgram(), refMap, typeMap, toplevel);
+
+    CodeBuilder c(target);
+    CodeBuilder h(target);
+
+    EBPFTypeFactory::createFactory(typeMap);
+    auto ebpfprog = new EBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
     if (!ebpfprog->build())
         return;
 
     if (options.outputFile.isNullOrEmpty())
         return;
-    auto stream = openFile(options.outputFile, false);
-    if (stream == nullptr)
+
+    cstring cfile = options.outputFile;
+    auto cstream = openFile(cfile, false);
+    if (cstream == nullptr)
         return;
 
-    CodeBuilder builder(target);
-    ebpfprog->emit(&builder);
-    *stream << builder.toString();
-    stream->flush();
+    cstring hfile;
+    const char* dot = cfile.findlast('.');
+    if (dot == nullptr)
+        hfile = cfile + ".h";
+    else
+        hfile = cfile.before(dot) + ".h";
+    auto hstream = openFile(hfile, false);
+    if (hstream == nullptr)
+        return;
+
+    ebpfprog->emitC(&c, hfile);
+    ebpfprog->emitH(&h, hfile);
+    *cstream << c.toString();
+    *hstream << h.toString();
+    cstream->flush();
+    hstream->flush();
 }
 
 }  // namespace EBPF

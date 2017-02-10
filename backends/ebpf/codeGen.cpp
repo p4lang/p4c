@@ -20,6 +20,9 @@ limitations under the License.
 
 namespace EBPF {
 
+void CodeGenInspector::substitute(const IR::Parameter* p, const IR::Parameter* with)
+{ substitution.emplace(p, with); }
+
 bool CodeGenInspector::preorder(const IR::Constant* expression) {
     builder->append(expression->toString());
     return true;
@@ -164,9 +167,28 @@ bool CodeGenInspector::preorder(const IR::Type_Enum* type) {
 }
 
 bool CodeGenInspector::preorder(const IR::AssignmentStatement* a) {
-    visit(a->left);
-    builder->append(" = ");
-    visit(a->right);
+    auto ltype = typeMap->getType(a->left);
+    auto ebpfType = EBPFTypeFactory::instance->create(ltype);
+    bool memcpy = false;
+    EBPFScalarType* scalar = nullptr;
+    unsigned width = 0;
+    if (ebpfType->is<EBPFScalarType>()) {
+        scalar = ebpfType->to<EBPFScalarType>();
+        width = scalar->implementationWidthInBits();
+        memcpy = !EBPFScalarType::generatesScalar(width);
+    }
+
+    if (memcpy) {
+        builder->append("memcpy(&");
+        visit(a->left);
+        builder->append(", &");
+        visit(a->right);
+        builder->appendFormat(", %d)", scalar->bytesRequired());
+    } else {
+        visit(a->left);
+        builder->append(" = ");
+        visit(a->right);
+    }
     builder->endOfStatement();
     return false;
 }

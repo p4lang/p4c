@@ -32,7 +32,7 @@ class EBPFParserState : public EBPFObject {
 
     EBPFParserState(const IR::ParserState* state, EBPFParser* parser) :
             state(state), parser(parser) {}
-    void emit(CodeBuilder* builder) override;
+    void emit(CodeBuilder* builder);
 };
 
 class EBPFParser : public EBPFObject {
@@ -47,7 +47,7 @@ class EBPFParser : public EBPFObject {
 
     explicit EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
                         const P4::TypeMap* typeMap);
-    void emit(CodeBuilder* builder) override;
+    void emit(CodeBuilder* builder);
     bool build();
 };
 

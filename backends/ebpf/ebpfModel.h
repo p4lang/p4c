@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ class EBPFModel : public ::Model::Model {
                   tableImplProperty("implementation"),
                   CPacketName("skb"),
                   packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
-                  filter()
+                  filter(), counterIndexType("u32"), counterValueType("u32")
     {}
 
  public:
@@ -72,8 +72,8 @@ class EBPFModel : public ::Model::Model {
     ::Model::Param_Model   packet;
     Filter_Model           filter;
 
-    static const IR::Type* counterIndexType;
-    static const IR::Type* counterValueType;
+    cstring counterIndexType;
+    cstring counterValueType;
 
     static cstring reserved(cstring name)
     { return reservedPrefix + name; }
