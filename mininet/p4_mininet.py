@@ -56,6 +56,7 @@ class P4Switch(Switch):
     def __init__(self, name, sw_path = None, json_path = None,
                  thrift_port = None,
                  pcap_dump = False,
+                 log_console = False,
                  verbose = False,
                  device_id = None,
                  enable_debugger = False,
@@ -77,6 +78,7 @@ class P4Switch(Switch):
         self.thrift_port = thrift_port
         self.pcap_dump = pcap_dump
         self.enable_debugger = enable_debugger
+        self.log_console = log_console
         if device_id is not None:
             self.device_id = device_id
             P4Switch.device_id = max(P4Switch.device_id, device_id)
@@ -122,6 +124,8 @@ class P4Switch(Switch):
         args.append(self.json_path)
         if self.enable_debugger:
             args.append("--debugger")
+        if self.log_console:
+            args.append("--log-console")
         logfile = "/tmp/p4s.{}.log".format(self.name)
         info(' '.join(args) + "\n")
 
