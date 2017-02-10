@@ -139,6 +139,21 @@ void CompilerOptions::setInputFile() {
     }
 }
 
+template <size_t N>
+static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
+    output[0] = '\0';  // Default to the empty string, indicating failure.
+
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+    const size_t cwdLen = strlen(cwd);
+    if (cwdLen == 0) return;
+    const char* separator = cwd[cwdLen - 1] == '/' ? "" : "/";
+
+    // Construct an absolute path. We're assuming that @relPath is relative to
+    // the current working directory.
+    snprintf(output, N, "%s%s%s", cwd, separator, relPath);
+}
+
 std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[]) {
     char buffer[PATH_MAX];
     int len;
@@ -154,8 +169,7 @@ std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[])
     } else if (argv[0][0] == '/') {
         snprintf(buffer, sizeof(buffer), "%s", argv[0]);
     } else if (strchr(argv[0], '/')) {
-        getcwd(buffer, sizeof(buffer));
-        strncat(buffer, argv[0], sizeof(buffer) - strlen(buffer) - 1);
+        convertToAbsPath(argv[0], buffer);
     } else if (getenv("_")) {
         strncpy(buffer, getenv("_"), sizeof(buffer));
         buffer[sizeof(buffer) - 1] = 0;
