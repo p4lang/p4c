@@ -78,7 +78,7 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     // HACK to force LLVM to put the headers on the stack.
     // This should not be needed, but the llvm bpf back-end seems to be broken.
     builder->emitIndent();
-    builder->append("printk(\"\%p\", ");
+    builder->append("printk(\"%p\", ");
     builder->append(parser->headers->name);
     builder->append(")");
     builder->endOfStatement(true);
