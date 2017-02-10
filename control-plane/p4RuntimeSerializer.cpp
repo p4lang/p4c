@@ -43,7 +43,9 @@ namespace ControlPlaneAPI {
 // XXX(seth): Here are the known issues:
 // - Direct counters are not yet supported.
 // - Direct meters are not yet supported.
-// - Action profiles are not yet supported.
+// - We currently don't handle the case where, in P4-16, a table's
+//   implementation property refers to an action profile that is instantiated
+//   elsewhere. See Github issue #297.
 // - The @id pragma is not supported for header instances and especially not for
 //   header stack instances, which currently requires allowing the programmer to
 //   provide a sequence of ids in the @id pragma. Note that @id *is* supported
@@ -217,6 +219,24 @@ struct HeaderField {
     static HeaderField* synthesize(const HeaderFieldPath* path, cstring fieldName,
                                    size_t offset, uint32_t bitwidth) {
         return from(path, fieldName, offset, bitwidth, boost::none, nullptr);
+    }
+};
+
+/// The types of action profiles available in the V1 model.
+enum class ActionProfileType {
+    INDIRECT,
+    INDIRECT_WITH_SELECTOR
+};
+
+/// The information about an action profile which is necessary to generate its
+/// serialized representation.
+struct ActionProfile {
+    const cstring name;  // The fully qualified external name of this action profile.
+    const ActionProfileType type;
+    const int64_t size;
+
+    bool operator<(const ActionProfile& other) const {
+        return name < other.name && type < other.type && size < other.size;
     }
 };
 
@@ -796,7 +816,8 @@ public:
 
     void addTable(const IR::P4Table* tableDeclaration,
                   uint64_t tableSize,
-                  boost::optional<cstring> defaultAction,
+                  const boost::optional<cstring>& implementation,
+                  const boost::optional<cstring>& defaultAction,
                   const std::vector<cstring>& actions,
                   const std::vector<std::pair<cstring, MatchType>>& matchFields) {
         auto name = tableDeclaration->externalName();
@@ -807,6 +828,12 @@ public:
         table->mutable_preamble()->set_name(name);
         addAnnotations(table->mutable_preamble(), annotations);
         table->set_size(tableSize);
+
+        if (implementation) {
+            auto id =
+              symbols.getId(P4RuntimeSymbolType::ACTION_PROFILE, *implementation);
+            table->set_implementation_id(id);
+        }
 
         if (defaultAction) {
             auto id = symbols.getId(P4RuntimeSymbolType::ACTION, *defaultAction);
@@ -823,6 +850,22 @@ public:
             auto id = symbols.getHeaderFieldIdByName(field.first);
             match_field->set_header_field_id(id);
             match_field->set_match_type(field.second);
+        }
+    }
+
+    void addActionProfile(const ActionProfile& actionProfile,
+                          const std::set<cstring>& tables) {
+        auto profile = p4Info->add_action_profiles();
+        auto id = symbols.getId(P4RuntimeSymbolType::ACTION_PROFILE,
+                                actionProfile.name);
+        profile->mutable_preamble()->set_id(id);
+        profile->mutable_preamble()->set_name(actionProfile.name);
+        profile->set_with_selector(actionProfile.type
+                                     == ActionProfileType::INDIRECT_WITH_SELECTOR);
+        profile->set_size(actionProfile.size);
+
+        for (const auto& table : tables) {
+            profile->add_table_ids(symbols.getId(P4RuntimeSymbolType::TABLE, table));
         }
     }
 
@@ -1218,7 +1261,19 @@ static void serializeParser(P4RuntimeSerializer& serializer,
 static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
                                 const IR::TableBlock* tableBlock) {
     CHECK_NULL(tableBlock);
-    symbols.add(P4RuntimeSymbolType::TABLE, tableBlock->container);
+    auto table = tableBlock->container;
+    symbols.add(P4RuntimeSymbolType::TABLE, table);
+
+    // If this table has an implementation property, it has an action profile.
+    // We collect that symbol here as well, because in P4-16 action profiles are
+    // just extern instantiations and aren't defined separately from the tables
+    // that use them.
+    auto impl = table->properties->getProperty(P4V1::V1Model::instance
+                                                .tableAttributes
+                                                .tableImplementation.name);
+    if (impl) {
+        symbols.add(P4RuntimeSymbolType::ACTION_PROFILE, impl->externalName());
+    }
 }
 
 /// @return @table's size property if available, falling back to the default size.
@@ -1308,6 +1363,20 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             }
         } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
             matchType = MatchField::RANGE;
+        } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
+            // This match type indicates that this table is using an action
+            // profile. We serialize action profiles separately from the tables
+            // themselves, so we don't need to record any information about this
+            // key, but it's worth doing a sanity check that this table has an
+            // implementation property - if it doesn't, serializeActionProfiles()
+            // will ignore it.
+            auto impl = table->properties->getProperty(P4V1::V1Model::instance
+                                                        .tableAttributes
+                                                        .tableImplementation.name);
+            BUG_CHECK(impl != nullptr, "Table '%1%' has match type 'selector' "
+                                       "but no implementation property",
+                      table->externalName());
+            continue;
         } else {
             ::error("Table '%1%': cannot represent match type '%2%' in P4Runtime",
                     table->externalName(), matchTypeName);
@@ -1383,7 +1452,14 @@ static void serializeTable(P4RuntimeSerializer& serializer,
         actions.push_back(decl->to<IR::P4Action>()->externalName());
     }
 
-    serializer.addTable(table, tableSize, defaultAction, actions, matchFields);
+    auto impl = table->properties->getProperty(P4V1::V1Model::instance
+                                                .tableAttributes
+                                                .tableImplementation.name);
+    boost::optional<cstring> implementation;
+    if (impl) implementation = impl->externalName();
+
+    serializer.addTable(table, tableSize, implementation, defaultAction,
+                        actions, matchFields);
 }
 
 /// Visit evaluated blocks under the provided top-level block. Guarantees that
@@ -1409,6 +1485,94 @@ static void forAllEvaluatedBlocks(const IR::ToplevelBlock* aToplevelBlock,
             if (visited.find(evaluatedChildBlock) != visited.end()) continue;
             frontier.insert(evaluatedChildBlock);
         }
+    }
+}
+
+/// @return the action profile referenced in @table's implementation property,
+/// if it has one, or boost::none otherwise.
+static boost::optional<ActionProfile>
+getActionProfile(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
+    auto impl = table->properties->getProperty(P4V1::V1Model::instance
+                                                .tableAttributes
+                                                .tableImplementation.name);
+    if (!impl) return boost::none;
+
+    cstring name = impl->externalName();
+
+    // In P4-16, an action profile is just an instantiation of an extern. In
+    // P4-14, it's a language construct, but it's desugared into an extern
+    // instantiation in the frontend. Either way, we currently expect the
+    // implementation property to contain an extern constructor call.
+    // XXX(seth): You should also be able to refer to an action profile that's
+    // instantiated elsewhere (i.e., we should accept a Declaration_Instance
+    // here), but that currently crashes the compiler - see Github issue #297.
+    // Once that's fixed, we'll be able to support it here.
+    if (!impl->value->is<IR::ExpressionValue>()) {
+        ::error("Table '%1%' has an implementation which is not an expression: %2%",
+                table->externalName(), impl);
+        return boost::none;
+    }
+    const auto propValue = impl->value->to<IR::ExpressionValue>();
+    if (!propValue->expression->is<IR::ConstructorCallExpression>()) {
+        ::error("Table '%1%' has an implementation which is not a constructor call: %2%",
+                table->externalName(), impl);
+        return boost::none;
+    }
+    const auto constructorCallExpr =
+      propValue->expression->to<IR::ConstructorCallExpression>();
+    const auto constructorCall =
+      P4::ConstructorCall::resolve(constructorCallExpr, refMap, typeMap);
+    if (!constructorCall->is<P4::ExternConstructorCall>()) {
+        ::error("Table '%1%' has an implementation which doesn't resolve to an extern: %2%",
+                table->externalName(), impl);
+        return boost::none;
+    }
+
+    const auto externType = constructorCall->to<P4::ExternConstructorCall>()->type;
+    ActionProfileType actionProfileType;
+    const IR::Expression* sizeExpression;
+    if (externType->name == P4V1::V1Model::instance.action_selector.name) {
+        actionProfileType = ActionProfileType::INDIRECT_WITH_SELECTOR;
+        sizeExpression = constructorCallExpr->arguments->at(1);
+    } else if (externType->name == P4V1::V1Model::instance.action_profile.name) {
+        actionProfileType = ActionProfileType::INDIRECT;
+        sizeExpression = constructorCallExpr->arguments->at(0);
+    } else {
+        ::error("Table '%1%' has an implementation which doesn't resolve to an "
+                "action profile: %2%", table->externalName(), impl);
+        return boost::none;
+    }
+
+    if (!sizeExpression->is<IR::Constant>()) {
+      ::error("Action profile '%1%' has non-constant size '%1%'", name, sizeExpression);
+      return boost::none;
+    }
+
+    const int64_t size = sizeExpression->to<IR::Constant>()->asInt();
+    return ActionProfile{name, actionProfileType, size};
+}
+
+static void serializeActionProfiles(P4RuntimeSerializer& serializer,
+                                    const IR::ToplevelBlock* aToplevelBlock,
+                                    ReferenceMap* refMap,
+                                    TypeMap* typeMap) {
+    std::map<ActionProfile, std::set<cstring>> actionProfiles;
+
+    // Collect all of the action profiles referenced in the program. The same
+    // action profile may be referenced by multiple tables.
+    forAllEvaluatedBlocks(aToplevelBlock, [&](const IR::Block* block) {
+        if (!block->is<IR::TableBlock>()) return;
+        auto table = block->to<IR::TableBlock>()->container;
+        auto actionProfile = getActionProfile(table, refMap, typeMap);
+        if (actionProfile) {
+          actionProfiles[*actionProfile].insert(table->externalName());
+        }
+    });
+
+    for (const auto& actionProfile : actionProfiles) {
+        const auto& profile = actionProfile.first;
+        const auto& tables = actionProfile.second;
+        serializer.addActionProfile(profile, tables);
     }
 }
 
@@ -1456,6 +1620,7 @@ void serializeP4Runtime(std::ostream* destination,
             serializeTable(serializer, block->to<IR::TableBlock>(), refMap, typeMap);
         }
     });
+    serializeActionProfiles(serializer, evaluatedProgram, refMap, typeMap);
 
     // Write the serialization out in the requested format.
     switch (format) {
