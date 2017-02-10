@@ -142,6 +142,11 @@ bool CodeGenInspector::preorder(const IR::PathExpression* expression) {
     return false;
 }
 
+bool CodeGenInspector::preorder(const IR::PathExpression* expression) {
+    visit(expression->path);
+    return false;
+}
+
 bool CodeGenInspector::preorder(const IR::Path* p) {
     if (p->absolute)
         ::error("%1%: Unexpected absolute path", p);
