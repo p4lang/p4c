@@ -53,7 +53,6 @@ namespace ControlPlaneAPI {
 //   are desugared into a match against a local. This could be fixed just by
 //   exposing locals, but first we need to decide how it makes sense to expose
 //   this information to the control plane.
-// - Table match keys which involve header stacks are not supported.
 // - There is some hardcoded stuff which is tied to BMV2 and won't necessarily
 //   suit other backends. These can all be dealt with on a case-by-case basis,
 //   but they require work outside of this code.
@@ -127,6 +126,22 @@ struct HeaderFieldPath {
 
             BUG_CHECK(name != boost::none, "Member not found in containing type?");
             return parentPath->append(*name, type);
+        } else if (expression->is<IR::ArrayIndex>()) {
+            auto indexExpression = expression->to<IR::ArrayIndex>();
+            auto parent = indexExpression->left;
+            auto parentPath = from(parent, refMap, typeMap);
+            if (parentPath == nullptr) {
+                return nullptr;  // Propagate the error.
+            }
+
+            auto index = indexExpression->right;
+            if (!index->is<IR::Constant>()) {
+              ::error("Index expression '%1%' is too complicated to represent in P4Runtime", expression);
+              return nullptr;
+            }
+
+            auto constant = index->to<IR::Constant>();
+            return parentPath->append(uint32_t(constant->asInt()), type);
         } else {
             ::error("Expression '%1%' is too complicated to resolve to a header field", expression);
             return nullptr;
