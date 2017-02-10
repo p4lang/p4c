@@ -42,6 +42,8 @@ class Target {
                                  cstring key, cstring value) const = 0;
     virtual void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                  cstring key, cstring value) const = 0;
+    virtual void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
+                                     cstring key, cstring value) const = 0;
     virtual void emitTableDecl(Util::SourceCodeBuilder* builder,
                                cstring tblName, bool isHash,
                                cstring keyType, cstring valueType, unsigned size) const = 0;
@@ -53,6 +55,8 @@ class Target {
     virtual cstring forwardReturnCode() const = 0;
     virtual cstring dropReturnCode() const = 0;
     virtual cstring abortReturnCode() const = 0;
+    // Path on /sys filesystem where maps are stored
+    virtual cstring sysMapPath() const = 0;
 };
 
 // Represents a target that is compiled within the kernel
@@ -67,6 +71,8 @@ class KernelSamplesTarget : public Target {
                          cstring key, cstring value) const override;
     void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                          cstring key, cstring value) const override;
+    void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
+                             cstring key, cstring value) const override;
     void emitTableDecl(Util::SourceCodeBuilder* builder,
                        cstring tblName, bool isHash,
                        cstring keyType, cstring valueType, unsigned size) const override;
@@ -79,6 +85,7 @@ class KernelSamplesTarget : public Target {
     cstring forwardReturnCode() const override { return "0"; }
     cstring dropReturnCode() const override { return "1"; }
     cstring abortReturnCode() const override { return "1"; }
+    cstring sysMapPath() const override { return "/sys/fs/bpf"; }
 };
 
 // Represents a target compiled by bcc that uses the TC
@@ -92,6 +99,8 @@ class BccTarget : public Target {
                          cstring key, cstring value) const override;
     void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                          cstring key, cstring value) const override;
+    void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
+                             cstring key, cstring value) const override;
     void emitTableDecl(Util::SourceCodeBuilder* builder,
                        cstring tblName, bool isHash,
                        cstring keyType, cstring valueType, unsigned size) const override;
@@ -104,6 +113,7 @@ class BccTarget : public Target {
     cstring forwardReturnCode() const override { return "0"; }
     cstring dropReturnCode() const override { return "1"; }
     cstring abortReturnCode() const override { return "1"; }
+    cstring sysMapPath() const override { return "/sys/fs/bpf"; }
 };
 
 }  // namespace EBPF

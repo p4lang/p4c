@@ -30,7 +30,7 @@ class ActionTranslationVisitor : public CodeGenInspector {
 
  public:
     ActionTranslationVisitor(cstring valueName, const EBPFProgram* program):
-            CodeGenInspector(program->typeMap), program(program),
+            CodeGenInspector(program->refMap, program->typeMap), program(program),
             action(nullptr), valueName(valueName)
     { CHECK_NULL(program); }
 
@@ -79,7 +79,7 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
     builder->appendFormat("struct %s ", keyTypeName);
     builder->blockStart();
 
-    CodeGenInspector commentGen(program->typeMap);
+    CodeGenInspector commentGen(program->refMap, program->typeMap);
     commentGen.setBuilder(builder);
 
     unsigned fieldNumber = 0;
@@ -317,11 +317,19 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     auto ac = mcd.instance->to<P4::ActionCall>();
     auto action = ac->action;
     cstring name = action->externalName();
+    cstring fd = "tableFileDescriptor";
+    cstring table = defaultActionMapName;
+    cstring value = "value";
 
     builder->emitIndent();
     builder->blockStart();
-    cstring table = defaultActionMapName;
-    cstring value = "value";
+    builder->emitIndent();
+    builder->appendFormat("int %s = bpf_obj_get(MAP_PATH \"/%s\")", fd.c_str(), table.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\"); exit(1); }",
+                          fd.c_str(), table.c_str());
+    builder->newline();
 
     builder->emitIndent();
     builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
@@ -330,7 +338,7 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->appendFormat(".action = %s,", name.c_str());
     builder->newline();
 
-    CodeGenInspector cg(program->typeMap);
+    CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
     for (auto p : *mcd.substitution.getParameters()) {
@@ -345,7 +353,14 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    builder->target->emitTableUpdate(builder, table, program->zeroKey, value);
+    builder->append("int ok = ");
+    builder->target->emitUserTableUpdate(builder, fd, program->zeroKey, value);
+    builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat("if (ok != 0) { "
+                          "perror(\"Could not write in %s\"); exit(1); }",
+                          table);
     builder->newline();
     builder->blockEnd(true);
 }

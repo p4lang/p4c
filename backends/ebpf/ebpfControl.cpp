@@ -26,7 +26,7 @@ limitations under the License.
 namespace EBPF {
 
 ControlBodyTranslator::ControlBodyTranslator(const EBPFControl* control) :
-        CodeGenInspector(control->program->typeMap), control(control),
+        CodeGenInspector(control->program->refMap, control->program->typeMap), control(control),
         p4lib(P4::P4CoreLibrary::instance)
 { setName("ControlBodyTranslator"); }
 
@@ -44,6 +44,10 @@ bool ControlBodyTranslator::preorder(const IR::PathExpression* expression) {
     }
     builder->append(expression->path->name);  // each identifier should be unique
     return false;
+}
+
+void ControlBodyTranslator::processFunction(const P4::ExternFunction* function) {
+    ::error("%1%: Not supported", function->method);
 }
 
 bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
@@ -67,6 +71,11 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression)
     auto apply = mi->to<P4::ApplyMethod>();
     if (apply != nullptr) {
         processApply(apply);
+        return false;
+    }
+    auto ef = mi->to<P4::ExternFunction>();
+    if (ef != nullptr) {
+        processFunction(ef);
         return false;
     }
     auto ext = mi->to<P4::ExternMethod>();
@@ -218,7 +227,7 @@ void ControlBodyTranslator::processMethod(const P4::ExternMethod* method) {
     auto decl = method->object;
     auto declType = method->originalExternType;
 
-    if (declType->name.name == control->program->model.counterArray.name) {
+    if (declType->name.name == EBPFModel::instance.counterArray.name) {
         builder->blockStart();
         cstring name = decl->externalName();
         auto counterMap = control->getCounter(name);

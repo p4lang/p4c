@@ -64,6 +64,12 @@ void KernelSamplesTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstr
                           tblName, key, value);
 }
 
+void KernelSamplesTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
+                                          cstring key, cstring value) const {
+    builder->appendFormat("bpf_update_elem(%s, &%s, &%s, BPF_ANY);",
+                          tblName, key, value);
+}
+
 void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
                                         cstring tblName, bool isHash,
                                         cstring keyType, cstring valueType,
@@ -122,6 +128,12 @@ void BccTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblNam
 void BccTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                 cstring key, cstring value) const {
     builder->appendFormat("%s.update(&%s, &%s);",
+                          tblName, key, value);
+}
+
+void BccTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
+                                    cstring key, cstring value) const {
+    builder->appendFormat("bpf_update_elem(%s, &%s, &%s, BPF_ANY);",
                           tblName, key, value);
 }
 

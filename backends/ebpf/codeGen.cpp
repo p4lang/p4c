@@ -28,6 +28,11 @@ bool CodeGenInspector::preorder(const IR::Constant* expression) {
     return true;
 }
 
+bool CodeGenInspector::preorder(const IR::StringLiteral* expression) {
+    builder->appendFormat("\"%s\"", expression->toString());
+    return true;
+}
+
 bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
     auto type = EBPFTypeFactory::instance->create(decl->type);
     type->declare(builder, decl->name.name, false);
@@ -128,15 +133,52 @@ bool CodeGenInspector::preorder(const IR::Member* e) {
     return false;
 }
 
+bool CodeGenInspector::preorder(const IR::PathExpression* expression) {
+    visit(expression->path);
+    return false;
+}
+
 bool CodeGenInspector::preorder(const IR::Path* p) {
     if (p->absolute)
-        builder->append(".");
+        ::error("%1%: Unexpected absolute path", p);
     builder->append(p->name);
     return false;
 }
 
 bool CodeGenInspector::preorder(const IR::BoolLiteral* b) {
     builder->append(b->toString());
+    return false;
+}
+
+bool CodeGenInspector::preorder(const IR::ListExpression* expression) {
+    bool first = true;
+    for (auto e: *expression->components) {
+        if (!first)
+            builder->append(", ");
+        first = false;
+        visit(e);
+    }
+    return false;
+}
+
+bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
+    P4::MethodCallDescription mcd(expression, refMap, typeMap);
+
+    visit(expression->method);
+    builder->append("(");
+    bool first = true;
+    for (auto p : *mcd.substitution.getParameters()) {
+        if (!first)
+            builder->append(", ");
+        first = false;
+
+        if (p->direction == IR::Direction::Out ||
+            p->direction == IR::Direction::InOut)
+            builder->append("&");
+        auto arg = mcd.substitution.lookup(p);
+        visit(arg);
+    }
+    builder->append(")");
     return false;
 }
 
