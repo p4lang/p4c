@@ -82,14 +82,34 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
     CodeGenInspector commentGen(program->refMap, program->typeMap);
     commentGen.setBuilder(builder);
 
+    // Use this to order elements by size
+    std::map<size_t, const IR::KeyElement*> ordered;
     unsigned fieldNumber = 0;
     for (auto c : *keyGenerator->keyElements) {
         auto type = program->typeMap->getType(c->expression);
-        builder->emitIndent();
         auto ebpfType = EBPFTypeFactory::instance->create(type);
-        ebpfType->declare(builder, cstring("field") + Util::toString(fieldNumber), false);
+        cstring fieldName = cstring("field") + Util::toString(fieldNumber);
+        if (!ebpfType->is<IHasWidth>()) {
+            ::error("%1%: illegal type %2% for key field", c, type);
+            return;
+        }
+        unsigned width = ebpfType->to<IHasWidth>()->widthInBits();
+        ordered.emplace(width, c);
+        keyTypes.emplace(c, ebpfType);
+        keyFieldNames.emplace(c, fieldName);
+        fieldNumber++;
+    }
+
+    // Emit key in decreasing order size - this way there will be no haps
+    for (auto it = ordered.rbegin(); it != ordered.rend(); ++it) {
+        auto c = it->second;
+
+        auto ebpfType = ::get(keyTypes, c);
+        builder->emitIndent();
+        cstring fieldName = ::get(keyFieldNames, c);
+        ebpfType->declare(builder, fieldName, false);
         builder->append("; /* ");
-        c->apply(commentGen);
+        c->expression->apply(commentGen);
         builder->append(" */");
         builder->newline();
 
@@ -240,10 +260,10 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
 }
 
 void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
-    unsigned fieldNumber = 0;
     for (auto c : *keyGenerator->keyElements) {
-        auto ltype = program->typeMap->getType(c->expression);
-        auto ebpfType = EBPFTypeFactory::instance->create(ltype);
+        auto ebpfType = ::get(keyTypes, c);
+        cstring fieldName = ::get(keyFieldNames, c);
+        CHECK_NULL(fieldName);
         bool memcpy = false;
         EBPFScalarType* scalar = nullptr;
         unsigned width = 0;
@@ -255,18 +275,11 @@ void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
 
         builder->emitIndent();
         if (memcpy) {
-            builder->append("memcpy(&");
-            builder->append(keyName);
-            builder->append(".field");
-            builder->append(fieldNumber);
-            builder->append(", &");
+            builder->appendFormat("&%s.%s, &", keyName.c_str(), fieldName.c_str());
             codeGen->visit(c->expression);
             builder->appendFormat(", %d)", scalar->bytesRequired());
         } else {
-            builder->append(keyName);
-            builder->append(".field");
-            builder->append(fieldNumber);
-            builder->append(" = ");
+            builder->appendFormat("%s.%s = ", keyName.c_str(), fieldName.c_str());
             codeGen->visit(c->expression);
         }
         builder->endOfStatement(true);
@@ -399,8 +412,7 @@ EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program, const IR::ExternB
 
 void EBPFCounterTable::emitInstance(CodeBuilder* builder) {
     builder->target->emitTableDecl(
-        builder, dataMapName, isHash, EBPFModel::instance.counterIndexType,
-        EBPFModel::instance.counterValueType, size);
+        builder, dataMapName, isHash, keyTypeName, valueTypeName, size);
 }
 
 void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
@@ -461,6 +473,15 @@ EBPFCounterTable::emitMethodInvocation(CodeBuilder* builder, const P4::ExternMet
         return;
     }
     ::error("%1%: Unexpected method for %2%", method->expr, program->model.counterArray.name);
+}
+
+void EBPFCounterTable::emitTypes(CodeBuilder* builder) {
+    builder->emitIndent();
+    builder->appendFormat("typedef %s %s", EBPFModel::instance.counterIndexType.c_str(), keyTypeName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("typedef %s %s", EBPFModel::instance.counterValueType.c_str(), valueTypeName.c_str());
+    builder->endOfStatement(true);
 }
 
 }  // namespace EBPF

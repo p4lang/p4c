@@ -72,8 +72,8 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
     if (hstream == nullptr)
         return;
 
-    ebpfprog->emitC(&c, hfile);
     ebpfprog->emitH(&h, hfile);
+    ebpfprog->emitC(&c, hfile);
     *cstream << c.toString();
     *hstream << h.toString();
     cstream->flush();
