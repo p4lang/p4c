@@ -275,7 +275,7 @@ void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
 
         builder->emitIndent();
         if (memcpy) {
-            builder->appendFormat("&%s.%s, &", keyName.c_str(), fieldName.c_str());
+            builder->appendFormat("memcpy(&%s.%s, &", keyName.c_str(), fieldName.c_str());
             codeGen->visit(c->expression);
             builder->appendFormat(", %d)", scalar->bytesRequired());
         } else {

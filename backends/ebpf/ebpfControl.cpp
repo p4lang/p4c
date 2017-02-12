@@ -285,7 +285,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->appendLine("/* construct key */");
     builder->emitIndent();
     cstring keyname = "key";
-    builder->appendFormat("struct %s %s", table->keyTypeName, keyname);
+    builder->appendFormat("struct %s %s = {}", table->keyTypeName, keyname);
     builder->endOfStatement(true);
 
     table->emitKey(builder, keyname);
