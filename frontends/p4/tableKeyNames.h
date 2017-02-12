@@ -26,10 +26,21 @@ namespace P4 {
 // if the expression is "simple" enough.  If the expression is not
 // simple the compiler will give an error.  Simple expressions are
 // PathExpression, ArrayIndex, Member, .isValid(), Constant, Slice
-class TableKeyNames : public Transform {
+class DoTableKeyNames : public Transform {
+    const TypeMap* typeMap;
  public:
-    TableKeyNames() { setName("TableKeyNames"); }
+    DoTableKeyNames(const TypeMap* typeMap) :typeMap(typeMap)
+    { CHECK_NULL(typeMap); setName("DoTableKeyNames"); }
     const IR::Node* postorder(IR::KeyElement* keyElement) override;
+};
+
+class TableKeyNames : public PassManager {
+ public:
+    TableKeyNames(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new DoTableKeyNames(typeMap));
+        setName("TableKeyNames");
+    }
 };
 
 }  // namespace P4
