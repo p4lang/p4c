@@ -29,7 +29,7 @@ namespace P4 {
 class DoTableKeyNames : public Transform {
     const TypeMap* typeMap;
  public:
-    DoTableKeyNames(const TypeMap* typeMap) :typeMap(typeMap)
+    explicit DoTableKeyNames(const TypeMap* typeMap) :typeMap(typeMap)
     { CHECK_NULL(typeMap); setName("DoTableKeyNames"); }
     const IR::Node* postorder(IR::KeyElement* keyElement) override;
 };
