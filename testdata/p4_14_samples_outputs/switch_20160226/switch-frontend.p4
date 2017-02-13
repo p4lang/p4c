@@ -4502,7 +4502,7 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
         }
         size = 1024;
         default_action = NoAction();
-        @name("ecmp_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
+        @name("ecmp_action_profile") @mode("fair") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
     }
     @name("nexthop") table nexthop_0() {
         actions = {
@@ -4572,7 +4572,7 @@ control process_lag(inout headers hdr, inout metadata meta, inout standard_metad
         }
         size = 1024;
         default_action = NoAction();
-        @name("lag_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
+        @name("lag_action_profile") @mode("fair") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
     }
     apply {
         lag_group_0.apply();
@@ -4632,7 +4632,7 @@ control process_fabric_lag(inout headers hdr, inout metadata meta, inout standar
             meta.hash_metadata.hash2       : selector @name("meta.hash_metadata.hash2") ;
         }
         default_action = NoAction();
-        @name("fabric_lag_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
+        @name("fabric_lag_action_profile") @mode("fair") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
     }
     apply {
         fabric_lag_0.apply();

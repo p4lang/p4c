@@ -357,13 +357,8 @@ class DiscoverStructure : public Inspector {
     { structure->calculated_fields.push_back(cf); }
     void postorder(const IR::Meter* m) override
     { structure->meters.emplace(m); }
-    void postorder(const IR::ActionSelector* as) override {
-        structure->action_selectors.emplace(as);
-        if (!as->type.name.isNullOrEmpty())
-            ::warning("%1%: Action selector attribute ignored", as->type);
-        if (!as->mode.name.isNullOrEmpty())
-            ::warning("%1%: Action selector attribute ignored", as->mode);
-    }
+    void postorder(const IR::ActionSelector* as) override
+    { structure->action_selectors.emplace(as); }
     void postorder(const IR::Type_Extern *ext) override
     { structure->extern_types.emplace(ext); }
     void postorder(const IR::Declaration_Instance *ext) override
