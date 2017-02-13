@@ -743,6 +743,10 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         auto constructor = new IR::ConstructorCallExpression(Util::SourceInfo(), type, args);
         auto propvalue = new IR::ExpressionValue(Util::SourceInfo(), constructor);
         auto annos = addNameAnnotation(action_profile->name);
+        if (action_selector->mode)
+            annos = annos->addAnnotation("mode", new IR::StringLiteral(action_selector->mode));
+        if (action_selector->type)
+            annos = annos->addAnnotation("type", new IR::StringLiteral(action_selector->mode));
         auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID(v1model.tableAttributes.tableImplementation.Id()),
             annos, propvalue, false);
@@ -1750,6 +1754,7 @@ ProgramStructure::checksumUnit(const IR::FieldListCalculation* flc) {
 // if a FieldListCalculation contains multiple field lists concatenate them all
 // into a temporary field list
 const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculation* flc) {
+    // FIXME -- this duplicates P4_14::TypeCheck.  Why not just use flc->input_fields?
     if (flc->input->names.size() == 0)
         ::error("%1%: field_list_calculation with zero inputs", flc);
     if (flc->input->names.size() == 1) {

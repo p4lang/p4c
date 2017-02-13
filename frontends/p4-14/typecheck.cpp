@@ -86,7 +86,8 @@ class TypeCheck::Pass1 : public Transform {
             auto fl = new IR::FieldList();
             for (auto &name : flc->input->names) {
                 fl->fields.push_back(new IR::PathExpression(name));
-                fl->srcInfo += name.srcInfo; } }
+                fl->srcInfo += name.srcInfo; }
+            flc->input_fields = fl; }
         return flc; }
     const IR::Node *preorder(IR::Property *prop) override {
         if (auto di = findContext<IR::Declaration_Instance>()) {

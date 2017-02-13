@@ -5488,7 +5488,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 1024;
         default_action = NoAction_218();
-        @name("ecmp_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
+        @name("ecmp_action_profile") @mode("fair") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
     }
     @name("process_nexthop.nexthop") table process_nexthop_nexthop_0() {
         actions = {
@@ -5543,7 +5543,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 1024;
         default_action = NoAction_221();
-        @name("lag_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
+        @name("lag_action_profile") @mode("fair") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
     }
     @name("process_mac_learning.nop") action process_mac_learning_nop() {
     }
@@ -5584,7 +5584,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.hash_metadata.hash2       : selector @name("meta.hash_metadata.hash2") ;
         }
         default_action = NoAction_223();
-        @name("fabric_lag_action_profile") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
+        @name("fabric_lag_action_profile") @mode("fair") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w8);
     }
     @name("process_system_acl.drop_stats") counter(32w1024, CounterType.packets) process_system_acl_drop_stats_2;
     @name("process_system_acl.drop_stats_2") counter(32w1024, CounterType.packets) process_system_acl_drop_stats_3;
