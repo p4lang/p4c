@@ -41,7 +41,7 @@ static const char* mostRecentFile = nullptr;
 static int mostRecentLevel = -1;
 
 // The second level cache for fileLogLevel(), mapping filenames to log levels.
-static std::unordered_map<const char*, int> logLevelCache;
+static std::unordered_map<const void*, int> logLevelCache;
 
 // All log levels manually specified by the user.
 static std::vector<std::string> debugSpecs;
