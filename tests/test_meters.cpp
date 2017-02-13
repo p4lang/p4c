@@ -175,3 +175,19 @@ TEST_F(MetersTest, GetRates) {
     ASSERT_EQ(rates[i].burst_size, retrieved_rates[i].burst_size);
   }
 }
+
+TEST_F(MetersTest, PreColor) {
+  const color_t GREEN = 0;
+  const color_t RED = 1;
+
+  Meter meter(MeterType::PACKETS, 1);
+  // 2 packets per second, burst size of 3
+  Meter::rate_config_t rate = {0.000002, 3};
+  meter.set_rates({rate});
+
+  Packet pkt = get_pkt(128);
+
+  ASSERT_EQ(GREEN, meter.execute(pkt));
+  ASSERT_EQ(RED, meter.execute(pkt, RED));
+  ASSERT_EQ(GREEN, meter.execute(pkt));
+}

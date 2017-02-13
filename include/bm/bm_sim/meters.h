@@ -153,7 +153,9 @@ class Meter {
   //!   - `0 <-> GREEN`
   //!   - `1 <-> YELLOW`
   //!   - `2 <-> RED`
-  color_t execute(const Packet &pkt);
+  //! You can optionally provide a pre-color for the meter. If the computed
+  //! color is less than the pre-color, the pre-color will be returned instead.
+  color_t execute(const Packet &pkt, color_t pre_color = 0);
 
   void serialize(std::ostream *out) const;
   void deserialize(std::istream *in);
@@ -220,7 +222,7 @@ class MeterArray : public NamedP4Object {
   //! Executes the meter at index \p idx on the given packet and returns the
   //! correct integral color value.
   //! See Meter::execute() for more information.
-  color_t execute_meter(const Packet &pkt, size_t idx);
+  color_t execute_meter(const Packet &pkt, size_t idx, color_t pre_color = 0);
 
   template<class RAIt>
   MeterErrorCode set_rates(const RAIt first, const RAIt last) {

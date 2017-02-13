@@ -66,7 +66,7 @@ Meter::reset_rates() {
 }
 
 Meter::color_t
-Meter::execute(const Packet &pkt) {
+Meter::execute(const Packet &pkt, color_t pre_color) {
   color_t packet_color = 0;
 
   if (!configured) return packet_color;
@@ -101,7 +101,7 @@ Meter::execute(const Packet &pkt) {
     }
   }
 
-  return packet_color;
+  return std::max(pre_color, packet_color);
 }
 
 void
@@ -155,9 +155,9 @@ MeterArray::MeterArray(const std::string &name, p4object_id_t id,
 }
 
 MeterArray::color_t
-MeterArray::execute_meter(const Packet &pkt, size_t idx) {
+MeterArray::execute_meter(const Packet &pkt, size_t idx, color_t pre_color) {
   BMLOG_DEBUG_PKT(pkt, "Executing meter {}[{}]", get_name(), idx);
-  return meters[idx].execute(pkt);
+  return meters[idx].execute(pkt, pre_color);
 }
 
 MeterArray::MeterErrorCode
