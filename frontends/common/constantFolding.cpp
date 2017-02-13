@@ -351,7 +351,7 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
 
     const IR::Expression* result;
     if (e->is<IR::Operation_Relation>())
-        result = new IR::BoolLiteral(e->srcInfo, static_cast<bool>(value));
+        result = new IR::BoolLiteral(e->srcInfo, value != 0);
     else
         result = new IR::Constant(e->srcInfo, resultType, value, left->base, true);
     setConstant(e, result);
