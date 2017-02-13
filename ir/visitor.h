@@ -228,10 +228,10 @@ class Transform : public virtual Visitor {
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
+    // can only be called usefully from a 'preorder' function (directly or indirectly)
+    void prune() { prune_flag = true; }
 
  protected:
-    // can only be called usefully from 'preorder' function
-    void prune() { prune_flag = true; }
     const IR::Node *transform_child(const IR::Node *child) {
         auto *rv = apply_visitor(child);
         prune_flag = true;
