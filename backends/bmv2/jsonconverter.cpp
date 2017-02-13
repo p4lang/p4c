@@ -388,7 +388,17 @@ class ExpressionConverter : public Inspector {
         // TODO: deal with references that return bool
         auto result = new Util::JsonObject();
 
-        // handle errors
+        auto parentType = converter->typeMap->getType(expression->expr, true);
+        cstring fieldName = expression->member.name;
+        if (parentType->is<IR::Type_StructLike>()) {
+            auto st = parentType->to<IR::Type_StructLike>();
+            auto field = st->getField(expression->member);
+            if (field != nullptr)
+                // field could be a method call, i.e., isValid.
+                fieldName = field->externalName();
+        }
+
+        // handle the 'error' type
         {
             auto type = converter->typeMap->getType(expression, true);
             if (type->is<IR::Type_Error>()) {
@@ -403,16 +413,15 @@ class ExpressionConverter : public Inspector {
         auto param = enclosingParamReference(expression->expr);
         if (param != nullptr) {
             auto type = converter->typeMap->getType(expression, true);
-            auto parentType = converter->typeMap->getType(expression->expr, true);
             if (param == converter->stdMetadataParameter) {
                 result->emplace("type", "field");
                 auto e = mkArrayField(result, "value");
                 e->append(converter->jsonMetadataParameterName);
-                e->append(expression->member);
+                e->append(fieldName);
             } else {
                 if (type->is<IR::Type_Stack>()) {
                     result->emplace("type", "header_stack");
-                    result->emplace("value", expression->member.name);
+                    result->emplace("value", fieldName);
                 } else if (parentType->is<IR::Type_StructLike>() &&
                            (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>())) {
                     auto field = parentType->to<IR::Type_StructLike>()->getField(
@@ -428,7 +437,7 @@ class ExpressionConverter : public Inspector {
                     // This may be wrong, but the caller will handle it properly
                     // (e.g., this can be a method, such as packet.lookahead)
                     result->emplace("type", "header");
-                    result->emplace("value", expression->member.name);
+                    result->emplace("value", fieldName);
                 }
             }
         } else {
@@ -446,7 +455,7 @@ class ExpressionConverter : public Inspector {
                         e->append(l->to<Util::JsonObject>()->get("value"));
                     else
                         e->append(l);
-                    e->append(expression->member);
+                    e->append(fieldName);
                     done = true;
                 }
             }
@@ -459,6 +468,7 @@ class ExpressionConverter : public Inspector {
                 if (l->is<Util::JsonObject>()) {
                     auto lv = l->to<Util::JsonObject>()->get("value");
                     if (lv->is<Util::JsonArray>()) {
+                        // TODO: is this case still necessary after eliminating nested structs?
                         // nested struct reference [ ["m", "f"], "x" ] => [ "m", "f.x" ]
                         auto array = lv->to<Util::JsonArray>();
                         BUG_CHECK(array->size() == 2, "expected 2 elements");
@@ -467,17 +477,17 @@ class ExpressionConverter : public Inspector {
                         BUG_CHECK(second->is<Util::JsonValue>(), "expected a value");
                         e->append(first);
                         cstring nestedField = second->to<Util::JsonValue>()->getString();
-                        nestedField += "." + expression->member.name;
+                        nestedField += "." + fieldName;
                         e->append(nestedField);
                     } else if (lv->is<Util::JsonValue>()) {
                         e->append(lv);
-                        e->append(expression->member.name);
+                        e->append(fieldName);
                     } else {
                         BUG("%1%: Unexpected json", lv);
                     }
                 } else {
                     e->append(l);
-                    e->append(expression->member.name);
+                    e->append(fieldName);
                 }
             }
         }

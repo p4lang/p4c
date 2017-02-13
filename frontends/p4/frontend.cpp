@@ -103,7 +103,7 @@ FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program) {
         new BindTypeVariables(&typeMap),
         // Another round of constant folding, using type information.
         new ClearTypeMap(&typeMap),
-        new TableKeyNames(),
+        new TableKeyNames(&refMap, &typeMap),
         new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
         new SimplifyControlFlow(&refMap, &typeMap),

@@ -20,9 +20,11 @@ namespace P4 {
 
 class KeyNameGenerator : public Inspector {
     std::map<const IR::Expression*, cstring> name;
+    const TypeMap* typeMap;
 
  public:
-    KeyNameGenerator() { setName("KeyNameGenerator"); }
+    explicit KeyNameGenerator(const TypeMap* typeMap) : typeMap(typeMap)
+    { setName("KeyNameGenerator"); }
 
     void error(const IR::Expression* expression) {
         ::error("%1%: Complex key expression requires a @name annotation", expression);
@@ -35,8 +37,16 @@ class KeyNameGenerator : public Inspector {
     }
 
     void postorder(const IR::Member* expression) override {
+        auto type = typeMap->getType(expression->expr, true);
+        cstring fname = expression->member.name;
+        if (type->is<IR::Type_StructLike>()) {
+            auto st = type->to<IR::Type_StructLike>();
+            auto field = st->getField(expression->member);
+            if (field != nullptr)
+                fname = field->externalName();
+        }
         if (cstring n = getName(expression->expr))
-            name.emplace(expression, n + "." + expression->member);
+            name.emplace(expression, n + "." + fname);
     }
 
     void postorder(const IR::ArrayIndex* expression) override {
@@ -77,12 +87,12 @@ class KeyNameGenerator : public Inspector {
     }
 };
 
-const IR::Node* TableKeyNames::postorder(IR::KeyElement* keyElement) {
+const IR::Node* DoTableKeyNames::postorder(IR::KeyElement* keyElement) {
     LOG3("Visiting " << getOriginal());
     if (keyElement->annotations->getSingle(IR::Annotation::nameAnnotation) != nullptr)
         // already present: no changes
         return keyElement;
-    KeyNameGenerator kng;
+    KeyNameGenerator kng(typeMap);;
     (void)keyElement->expression->apply(kng);
     cstring name = kng.getName(keyElement->expression);
 
