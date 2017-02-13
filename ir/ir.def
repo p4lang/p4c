@@ -178,6 +178,25 @@ class KeyElement {
     Annotations     annotations;
     Expression      expression;
     PathExpression  matchType;
+
+    const IR::Node *transform_visit(Transform &v) {
+        // call this from Transform::preorder(KeyElement) if the transform might split
+        // the expression into a Vector<Expression>
+        v.visit(annotations, "annotations");
+        auto exp = v.apply_visitor(expression, "expression");
+        v.visit(matchType, "matchType");
+        v.prune();
+        if (exp == expression) {
+        } else if (auto vec = exp->to<Vector<Expression>>()) {
+            auto *rv = new Vector<KeyElement>();
+            for (auto el : *vec) {
+                auto *kel = clone();
+                kel->expression = el;
+                rv->push_back(kel); }
+            return rv;
+        } else {
+            expression = exp->to<IR::Expression>(); }
+        return this; }
 }
 
 // Value of a table key property
@@ -243,6 +262,13 @@ class P4Table : Declaration, IAnnotated, IApply {
             ::error("%1% must be an expression", d);
             return nullptr; }
         return d->value->to<IR::ExpressionValue>()->expression; }
+    Constant getConstantProperty(cstring name) const {
+        if (auto d = properties->getProperty(name)) {
+            if (auto ev = d->value->to<IR::ExpressionValue>()) {
+                if (auto k = ev->expression->to<IR::Constant>()) {
+                    return k; } }
+            error("%1% must be a constant expression", d); }
+        return nullptr; }
 }
 
 class Declaration_Variable : Declaration, IAnnotated {
