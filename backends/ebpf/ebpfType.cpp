@@ -40,7 +40,7 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
         result = create(canon);
         result = new EBPFTypeName(type->to<IR::Type_Name>(), result);
     } else {
-        ::error("Type %1% unsupported by EBPF", type);
+        ::error("Type %1% not supported", type);
     }
 
     return result;

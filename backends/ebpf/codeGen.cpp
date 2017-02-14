@@ -17,6 +17,7 @@ limitations under the License.
 #include "codeGen.h"
 #include "ebpfObject.h"
 #include "ebpfType.h"
+#include "frontends/p4/enumInstance.h"
 
 namespace EBPF {
 
@@ -126,10 +127,13 @@ bool CodeGenInspector::preorder(const IR::Cast* c) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::Member* e) {
-    visit(e->expr);
-    builder->append(".");
-    builder->append(e->member);
+bool CodeGenInspector::preorder(const IR::Member* expression) {
+    auto ei = P4::EnumInstance::resolve(expression, typeMap);
+    if (ei == nullptr) {
+        visit(expression->expr);
+        builder->append(".");
+    }
+    builder->append(expression->member);
     return false;
 }
 

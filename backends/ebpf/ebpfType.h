@@ -50,7 +50,7 @@ class IHasWidth {
 };
 
 class EBPFTypeFactory {
- private:
+ protected:
     const P4::TypeMap* typeMap;
     explicit EBPFTypeFactory(const P4::TypeMap* typeMap) :
             typeMap(typeMap) { CHECK_NULL(typeMap); }
@@ -58,7 +58,7 @@ class EBPFTypeFactory {
     static EBPFTypeFactory* instance;
     static void createFactory(const P4::TypeMap* typeMap)
     { EBPFTypeFactory::instance = new EBPFTypeFactory(typeMap); }
-    EBPFType* create(const IR::Type* type);
+    virtual EBPFType* create(const IR::Type* type);
 };
 
 class EBPFBoolType : public EBPFType, public IHasWidth {
