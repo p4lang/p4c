@@ -1587,9 +1587,13 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
     for (auto node : cfg->allNodes) {
         if (node->is<CFG::TableNode>()) {
             auto j = convertTable(node->to<CFG::TableNode>(), counters, action_profiles);
+            if (::errorCount() > 0)
+                return nullptr;
             tables->append(j);
         } else if (node->is<CFG::IfNode>()) {
             auto j = convertIf(node->to<CFG::IfNode>(), cont->name);
+            if (::errorCount() > 0)
+                return nullptr;
             conditionals->append(j);
         }
     }

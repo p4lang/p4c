@@ -133,6 +133,19 @@ class EBPFStructType : public EBPFType, public IHasWidth {
     void emit(CodeBuilder* builder) override;
 };
 
+class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
+ public:
+    explicit EBPFEnumType(const IR::Type_Enum* type) : EBPFType(type) {}
+    void emit(CodeBuilder* builder) override;
+    void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void emitInitializer(CodeBuilder* builder) override
+    { builder->append("0"); }
+    unsigned widthInBits() override { return 32; }
+    unsigned implementationWidthInBits() override { return 32; }
+
+    const IR::Type_Enum* getType() const { return type->to<IR::Type_Enum>(); }
+};
+
 }  // namespace EBPF
 
 #endif /* _BACKENDS_EBPF_EBPFTYPE_H_ */
