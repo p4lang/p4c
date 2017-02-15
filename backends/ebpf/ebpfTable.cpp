@@ -477,10 +477,12 @@ EBPFCounterTable::emitMethodInvocation(CodeBuilder* builder, const P4::ExternMet
 
 void EBPFCounterTable::emitTypes(CodeBuilder* builder) {
     builder->emitIndent();
-    builder->appendFormat("typedef %s %s", EBPFModel::instance.counterIndexType.c_str(), keyTypeName.c_str());
+    builder->appendFormat("typedef %s %s",
+                          EBPFModel::instance.counterIndexType.c_str(), keyTypeName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("typedef %s %s", EBPFModel::instance.counterValueType.c_str(), valueTypeName.c_str());
+    builder->appendFormat("typedef %s %s",
+                          EBPFModel::instance.counterValueType.c_str(), valueTypeName.c_str());
     builder->endOfStatement(true);
 }
 

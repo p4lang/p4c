@@ -1,0 +1,84 @@
+../testdata/p4_16_errors/issue306.p4(30): error: Structure struct my_packet does not have a field stack
+struct my_packet {
+       ^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(45)
+    b.extract(p.stack.next);
+                ^^^^^
+../testdata/p4_16_errors/issue306.p4(45): error: Could not find type of p.stack
+    b.extract(p.stack.next);
+              ^^^^^^^
+../testdata/p4_16_errors/issue306.p4(45): error: Could not find type of p.stack.next
+    b.extract(p.stack.next);
+              ^^^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(30): error: Structure struct my_packet does not have a field stack
+struct my_packet {
+       ^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(46)
+    transition select(p.stack.last.op_code) {
+                        ^^^^^
+../testdata/p4_16_errors/issue306.p4(46): error: Could not find type of p.stack
+    transition select(p.stack.last.op_code) {
+                      ^^^^^^^
+../testdata/p4_16_errors/issue306.p4(46): error: Could not find type of p.stack.last
+    transition select(p.stack.last.op_code) {
+                      ^^^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(46): error: Could not find type of p.stack.last.op_code
+    transition select(p.stack.last.op_code) {
+                      ^^^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(46): error: Could not find type of ListExpression
+    transition select(p.stack.last.op_code) {
+                      ^^^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(30): error: Structure struct my_packet does not have a field stack
+struct my_packet {
+       ^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(53)
+    b.extract(p.stack.next);
+                ^^^^^
+../testdata/p4_16_errors/issue306.p4(53): error: Could not find type of p.stack
+    b.extract(p.stack.next);
+              ^^^^^^^
+../testdata/p4_16_errors/issue306.p4(53): error: Could not find type of p.stack.next
+    b.extract(p.stack.next);
+              ^^^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(30): error: Structure struct my_packet does not have a field stack
+struct my_packet {
+       ^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(54)
+    transition select(p.stack.last.op_code) {
+                        ^^^^^
+../testdata/p4_16_errors/issue306.p4(54): error: Could not find type of p.stack
+    transition select(p.stack.last.op_code) {
+                      ^^^^^^^
+../testdata/p4_16_errors/issue306.p4(54): error: Could not find type of p.stack.last
+    transition select(p.stack.last.op_code) {
+                      ^^^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(54): error: Could not find type of p.stack.last.op_code
+    transition select(p.stack.last.op_code) {
+                      ^^^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(54): error: Could not find type of ListExpression
+    transition select(p.stack.last.op_code) {
+                      ^^^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(30): error: Structure struct my_packet does not have a field stack
+struct my_packet {
+       ^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(73)
+    key = { p.stack[0].op_code : exact; }
+              ^^^^^
+../testdata/p4_16_errors/issue306.p4(73): error: Could not find type of p.stack
+    key = { p.stack[0].op_code : exact; }
+            ^^^^^^^
+../testdata/p4_16_errors/issue306.p4(73): error: Could not find type of []
+    key = { p.stack[0].op_code : exact; }
+            ^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(73): error: Could not find type of [].op_code
+    key = { p.stack[0].op_code : exact; }
+            ^^^^^^^^^^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(30): error: Structure struct my_packet does not have a field stack
+struct my_packet {
+       ^^^^^^^^^
+../testdata/p4_16_errors/issue306.p4(91)
+    b.emit(p.stack);
+             ^^^^^
+../testdata/p4_16_errors/issue306.p4(91): error: Could not find type of p.stack
+    b.emit(p.stack);
+           ^^^^^^^

@@ -39,7 +39,7 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
         auto canon = typeMap->getTypeType(type, true);
         result = create(canon);
         result = new EBPFTypeName(type->to<IR::Type_Name>(), result);
-    } else if (type->is<IR::Type_Enum>()){
+    } else if (type->is<IR::Type_Enum>()) {
         return new EBPFEnumType(type->to<IR::Type_Enum>());
     } else {
         ::error("Type %1% not supported", type);

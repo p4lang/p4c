@@ -2519,6 +2519,8 @@ const IR::Node* TypeInference::postorder(IR::SelectCase* sc) {
 
 const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     auto ktype = getType(elem->expression);
+    if (ktype == nullptr)
+        return elem;
     if (!ktype->is<IR::Type_Bits>() && !ktype->is<IR::Type_Enum>() &&
         !ktype->is<IR::Type_Error>() && !ktype->is<IR::Type_Boolean>())
         typeError("Key %1% field type must be a scalar type; it cannot be %2%",

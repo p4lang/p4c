@@ -1,6 +1,6 @@
 control t(inout bit<32> b) {
-    @name("c1.tmp") bit<32> c1_tmp_0;
-    @name("c2.tmp") bit<32> c2_tmp_0;
+    bit<32> c1_tmp_0;
+    bit<32> c2_tmp_0;
     action act() {
         c1_tmp_0 = b + 32w1;
         b = c1_tmp_0;
