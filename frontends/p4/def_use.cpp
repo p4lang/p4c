@@ -409,6 +409,11 @@ bool ComputeWriteSet::setDefinitions(Definitions* defs, const IR::Node* node) {
 
 /// For expressions we maintain the write-set in the writes std::map
 
+bool ComputeWriteSet::preorder(const IR::Expression* expression) {
+    set(expression, LocationSet::empty);
+    return false;
+}
+
 bool ComputeWriteSet::preorder(const IR::DefaultExpression* expression) {
     set(expression, LocationSet::empty);
     return false;

@@ -126,10 +126,12 @@ const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
     if (ref->path->name.name == "next") {
         return ref;
     }
-    auto fl = structure->field_lists.get(ref->path->name);
-    if (fl != nullptr) {
+    if (auto fl = structure->field_lists.get(ref->path->name)) {
         ExpressionConverter conv(structure);
-        return conv.convert(fl);
+        return conv.convert(fl); }
+    if (auto flc = structure->field_list_calculations.get(ref->path->name)) {
+        // FIXME -- what to do with the algorithm and width from flc?
+        return ExpressionConverter(structure).convert(flc->input_fields);
     }
     return ref;
 }
@@ -167,6 +169,10 @@ const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
     }
     BUG("Unexpected index %1%", ref->index_);
     return ref;
+}
+
+const IR::Node* ExpressionConverter::postorder(IR::GlobalRef *ref) {
+    return new IR::PathExpression(new IR::Path(ref->srcInfo, ref->toString()));
 }
 
 const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
@@ -477,6 +483,18 @@ class ComputeCallGraph : public Inspector {
             BUG_CHECK(parent != nullptr, "%1%: Control call not within control", primitive);
             structure->calledControls.calls(parent->name, name);
         }
+    }
+    void postorder(const IR::GlobalRef *gref) override {
+        auto parent = findContext<IR::ActionFunction>();
+        BUG_CHECK(parent != nullptr, "%1%: GlobalRef not within action", gref);
+        if (auto ctr = gref->obj->to<IR::Counter>())
+            structure->calledCounters.calls(parent->name, ctr->name.name);
+        else if (auto mtr = gref->obj->to<IR::Meter>())
+            structure->calledMeters.calls(parent->name, mtr->name.name);
+        else if (auto reg = gref->obj->to<IR::Register>())
+            structure->calledRegisters.calls(parent->name, reg->name.name);
+        else if (auto ext = gref->obj->to<IR::Declaration_Instance>())
+            structure->calledExterns.calls(parent->name, ext->name.name);
     }
 };
 
