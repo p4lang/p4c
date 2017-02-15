@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_TABLEKEYNAMES_H_
 #define _FRONTENDS_P4_TABLEKEYNAMES_H_
 
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
 namespace P4 {
