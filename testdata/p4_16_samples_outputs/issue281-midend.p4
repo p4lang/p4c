@@ -39,76 +39,76 @@ struct m {
 }
 
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
-    ethernet_t tmp_4_ether;
-    vlan_t tmp_4_vlan;
-    ipv4_t tmp_4_ipv4;
-    ethernet_t tmp_5_ether;
-    vlan_t tmp_5_vlan;
-    ipv4_t tmp_5_ipv4;
+    ethernet_t tmp_ether;
+    vlan_t tmp_vlan;
+    ipv4_t tmp_ipv4;
+    ethernet_t tmp_0_ether;
+    vlan_t tmp_0_vlan;
+    ipv4_t tmp_0_ipv4;
     ethernet_t hdr_2_ether;
     vlan_t hdr_2_vlan;
     ipv4_t hdr_2_ipv4;
-    ethernet_t tmp_6;
-    ethernet_t ether_1;
+    ethernet_t l2_tmp_0;
+    ethernet_t l2_ether_0;
     ethernet_t hdr_3_ether;
     vlan_t hdr_3_vlan;
     ipv4_t hdr_3_ipv4;
-    bit<16> etherType_1;
-    ipv4_t tmp_7;
-    vlan_t tmp_8;
-    ipv4_t ipv4_1;
-    vlan_t vlan_1;
+    bit<16> l3_etherType_0;
+    ipv4_t l3_tmp_1;
+    vlan_t l3_tmp_2;
+    ipv4_t l3_ipv4_0;
+    vlan_t l3_vlan_0;
     state start {
         hdr_2_ether.setInvalid();
         hdr_2_vlan.setInvalid();
         hdr_2_ipv4.setInvalid();
-        ether_1.setInvalid();
-        b.extract<ethernet_t>(ether_1);
-        tmp_6 = ether_1;
-        hdr_2_ether = tmp_6;
-        tmp_4_ether = hdr_2_ether;
-        tmp_4_vlan = hdr_2_vlan;
-        tmp_4_ipv4 = hdr_2_ipv4;
-        hdr.ether = tmp_4_ether;
-        hdr.vlan = tmp_4_vlan;
-        hdr.ipv4 = tmp_4_ipv4;
-        tmp_5_ether = hdr.ether;
-        tmp_5_vlan = hdr.vlan;
-        tmp_5_ipv4 = hdr.ipv4;
-        hdr_3_ether = tmp_5_ether;
-        hdr_3_vlan = tmp_5_vlan;
-        hdr_3_ipv4 = tmp_5_ipv4;
+        l2_ether_0.setInvalid();
+        b.extract<ethernet_t>(l2_ether_0);
+        l2_tmp_0 = l2_ether_0;
+        hdr_2_ether = l2_tmp_0;
+        tmp_ether = hdr_2_ether;
+        tmp_vlan = hdr_2_vlan;
+        tmp_ipv4 = hdr_2_ipv4;
+        hdr.ether = tmp_ether;
+        hdr.vlan = tmp_vlan;
+        hdr.ipv4 = tmp_ipv4;
+        tmp_0_ether = hdr.ether;
+        tmp_0_vlan = hdr.vlan;
+        tmp_0_ipv4 = hdr.ipv4;
+        hdr_3_ether = tmp_0_ether;
+        hdr_3_vlan = tmp_0_vlan;
+        hdr_3_ipv4 = tmp_0_ipv4;
         transition L3_start;
     }
     state L3_start {
-        etherType_1 = hdr_3_ether.etherType;
-        transition select(etherType_1) {
+        l3_etherType_0 = hdr_3_ether.etherType;
+        transition select(l3_etherType_0) {
             16w0x800: L3_ipv4;
             16w0x8100: L3_vlan;
             default: start_2;
         }
     }
     state L3_ipv4 {
-        ipv4_1.setInvalid();
-        b.extract<ipv4_t>(ipv4_1);
-        tmp_7 = ipv4_1;
-        hdr_3_ipv4 = tmp_7;
+        l3_ipv4_0.setInvalid();
+        b.extract<ipv4_t>(l3_ipv4_0);
+        l3_tmp_1 = l3_ipv4_0;
+        hdr_3_ipv4 = l3_tmp_1;
         transition start_2;
     }
     state L3_vlan {
-        vlan_1.setInvalid();
-        b.extract<vlan_t>(vlan_1);
-        tmp_8 = vlan_1;
-        hdr_3_vlan = tmp_8;
+        l3_vlan_0.setInvalid();
+        b.extract<vlan_t>(l3_vlan_0);
+        l3_tmp_2 = l3_vlan_0;
+        hdr_3_vlan = l3_tmp_2;
         transition L3_start;
     }
     state start_2 {
-        tmp_5_ether = hdr_3_ether;
-        tmp_5_vlan = hdr_3_vlan;
-        tmp_5_ipv4 = hdr_3_ipv4;
-        hdr.ether = tmp_5_ether;
-        hdr.vlan = tmp_5_vlan;
-        hdr.ipv4 = tmp_5_ipv4;
+        tmp_0_ether = hdr_3_ether;
+        tmp_0_vlan = hdr_3_vlan;
+        tmp_0_ipv4 = hdr_3_ipv4;
+        hdr.ether = tmp_0_ether;
+        hdr.vlan = tmp_0_vlan;
+        hdr.ipv4 = tmp_0_ipv4;
         transition accept;
     }
 }

@@ -1,5 +1,5 @@
 control d(out bit<32> x) {
-    bool hasReturned_0;
+    bool cinst_hasReturned_0;
     @name("cinst.a1") action cinst_a1() {
     }
     @name("cinst.a2") action cinst_a2() {
@@ -12,13 +12,13 @@ control d(out bit<32> x) {
         default_action = cinst_a1();
     }
     action act() {
-        hasReturned_0 = true;
+        cinst_hasReturned_0 = true;
     }
     action act_0() {
-        hasReturned_0 = true;
+        cinst_hasReturned_0 = true;
     }
     action act_1() {
-        hasReturned_0 = false;
+        cinst_hasReturned_0 = false;
     }
     table tbl_act() {
         actions = {

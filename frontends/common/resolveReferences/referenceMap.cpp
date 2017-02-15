@@ -50,7 +50,7 @@ void ReferenceMap::setDeclaration(const IR::This* pointer, const IR::IDeclaratio
     auto previous = get(thisToDeclaration, pointer);
     if (previous != nullptr && previous != decl)
         BUG("%1% already resolved to %2% instead of %3%",
-            pointer, previous, decl);
+            dbp(pointer), dbp(previous), dbp(decl));
     thisToDeclaration.emplace(pointer, decl);
 }
 
