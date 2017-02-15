@@ -34,16 +34,16 @@ class TypeCheck::Pass1 : public Transform {
         const Visitor::Context *prop_ctxt = nullptr;
         if (auto prop = findContext<IR::Property>(prop_ctxt)) {
             if (auto bbox = prop_ctxt->parent->node->to<IR::Declaration_Instance>()) {
-                auto bbox_type = bbox->type->to<IR::Type_Extern>();
-                auto attr = bbox_type->attributes.get<IR::Attribute>(prop->name);
-                if (attr->locals && attr->locals->locals.count(ref->path->name)) {
-                    return attr->locals->locals.at(ref->path->name); } } }
+                if (auto bbox_type = bbox->type->to<IR::Type_Extern>()) {
+                    auto attr = bbox_type->attributes.get<IR::Attribute>(prop->name);
+                    if (attr->locals && attr->locals->locals.count(ref->path->name)) {
+                        return attr->locals->locals.at(ref->path->name); } } } }
         if (auto bbox = findContext<IR::Declaration_Instance>()) {
             if (auto bbox_type = bbox->type->to<IR::Type_Extern>()) {
                 if (auto attr = bbox_type->attributes.get<IR::Attribute>(ref->path->name))
                     return new IR::AttributeRef(ref->srcInfo, attr->type,
                                                 bbox->name, bbox_type, attr);
-            } else {
+            } else if (global) {
                 BUG("extern type is not extern_type?"); } }
         return ref; }
     const IR::Node *preorder(IR::Metadata *m) override {
@@ -92,6 +92,7 @@ class TypeCheck::Pass1 : public Transform {
     const IR::Node *preorder(IR::Property *prop) override {
         if (auto di = findContext<IR::Declaration_Instance>()) {
             auto ext = di->type->to<IR::Type_Extern>();
+            if (!ext && !global) return prop;
             BUG_CHECK(ext, "%s is not an extern", di);
             if (auto attr = ext->attributes[prop->name]) {
                 if (attr->type->is<IR::Type::String>())

@@ -89,6 +89,7 @@ class ProgramStructure {
         iterator begin() { return iterator(nameToObject.begin(), objectToNewName); }
         iterator end() { return iterator(nameToObject.end(), objectToNewName); }
     };
+    class FixupExtern;
 
  public:
     ProgramStructure();

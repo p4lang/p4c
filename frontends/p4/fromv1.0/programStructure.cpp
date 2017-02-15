@@ -225,25 +225,54 @@ void ProgramStructure::createStructures() {
     declarations->push_back(headers);
 }
 
-void ProgramStructure::createExterns() {
-    for (auto it : extern_types) {
-        auto type = it.first;
-        IR::Type_Extern *modified_type = nullptr;
-        if (type->name != it.second) {
-            auto annos = addNameAnnotation(type->name.name, type->annotations);
-            type = modified_type = new IR::Type_Extern(type->srcInfo, it.second, type->methods,
-                                                       type->attributes, annos); }
+class ProgramStructure::FixupExtern : public Modifier {
+    ProgramStructure            &self;
+    cstring                     origname, extname;
+    const IR::TypeParameters    *typeParams = nullptr;
+
+    bool preorder(IR::Type_Extern *type) override {
+        BUG_CHECK(!origname, "Nested extern");
+        origname = type->name;
+        return true; }
+    void postorder(IR::Type_Extern *type) override {
+        if (extname != type->name) {
+            type->annotations = self.addNameAnnotation(type->name.name, type->annotations);
+            type->name = extname; }
         // FIXME -- should create ctors based on attributes?  For now just create a
         // FIXME -- 0-arg one if needed
         if (!type->lookupMethod(type->name, 0)) {
-            if (!modified_type)
-                type = modified_type = type->clone();
             auto methods = type->methods->clone();
-            modified_type->methods = methods;
+            type->methods = methods;
             methods->push_back(new IR::Method(type->name, new IR::Type_Method(
-                                                new IR::ParameterList()))); }
-        declarations->push_back(type);
-    }
+                                                new IR::ParameterList()))); } }
+    void postorder(IR::Method *meth) override {
+        if (meth->name == origname) meth->name = extname; }
+    // Convert extern methods that take a field_list_calculation to take a type param instead
+    bool preorder(IR::Type_MethodBase *mtype) override {
+        BUG_CHECK(!typeParams, "recursion failure");
+        typeParams = mtype->typeParameters;
+        return true; }
+    bool preorder(IR::Parameter *param) override {
+        BUG_CHECK(typeParams, "recursion failure");
+        if (param->type->is<IR::Type_FieldListCalculation>()) {
+            auto n = new IR::Type_Var(self.makeUniqueName("FL"));
+            param->type = n;
+            auto v = typeParams->parameters->clone();
+            v->push_back(n);
+            typeParams = new IR::TypeParameters(v); }
+        return false; }
+    void postorder(IR::Type_MethodBase *mtype) override {
+        BUG_CHECK(typeParams, "recursion failure");
+        mtype->typeParameters = typeParams;
+        typeParams = nullptr; }
+
+ public:
+    FixupExtern(ProgramStructure &self, cstring n) : self(self), extname(n) {}
+};
+
+void ProgramStructure::createExterns() {
+    for (auto it : extern_types)
+        declarations->push_back(it.first->apply(FixupExtern(*this, it.second)));
 }
 
 const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* param) {
@@ -443,14 +472,13 @@ void ProgramStructure::include(cstring filename) {
     CompilerOptions options;
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.file = path.toString();
-    FILE* file = options.preprocess();
-    if (::errorCount() || file == nullptr)
-        return;
-    auto std = parse_P4_16_file(options.file, file);
-    if (::errorCount() || std == nullptr)
-        return;
-    for (auto decl : *std->declarations)
-        declarations->push_back(decl);
+    if (FILE* file = options.preprocess()) {
+        if (!::errorCount()) {
+            if (auto std = parse_P4_16_file(options.file, file)) {
+                if (!::errorCount()) {
+                    for (auto decl : *std->declarations) {
+                        declarations->push_back(decl); } } } }
+        options.closeInput(file); }
 }
 
 void ProgramStructure::loadModel() {
