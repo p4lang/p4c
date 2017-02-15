@@ -26,7 +26,8 @@ namespace P4 {
 // care of this.
 class ClonePathExpressions : public Transform {
  public:
-    ClonePathExpressions() { setName("ClonePathExpressions"); }
+    ClonePathExpressions()
+    { visitDagOnce = false; setName("ClonePathExpressions"); }
     const IR::Node* postorder(IR::PathExpression* path) override
     { return new IR::PathExpression(path->path->clone()); }
 
