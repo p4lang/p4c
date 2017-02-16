@@ -53,6 +53,8 @@ class EBPFTable final : public EBPFTableBase {
     const IR::TableBlock*    table;
     cstring               defaultActionMapName;
     cstring               actionEnumName;
+    std::map<const IR::KeyElement*, cstring> keyFieldNames;
+    std::map<const IR::KeyElement*, EBPFType*> keyTypes;
 
     EBPFTable(const EBPFProgram* program, const IR::TableBlock* table, CodeGenInspector* codeGen);
     void emitTypes(CodeBuilder* builder);
@@ -71,7 +73,7 @@ class EBPFCounterTable final : public EBPFTableBase {
  public:
     EBPFCounterTable(const EBPFProgram* program, const IR::ExternBlock* block,
                      cstring name, CodeGenInspector* codeGen);
-    void emitTypes(CodeBuilder*) {}
+    void emitTypes(CodeBuilder*);
     void emitInstance(CodeBuilder* builder);
     void emitCounterIncrement(CodeBuilder* builder, const IR::MethodCallExpression* expression);
     void emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method);

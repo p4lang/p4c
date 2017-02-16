@@ -33,11 +33,12 @@ class ControlBodyTranslator : public CodeGenInspector {
     explicit ControlBodyTranslator(const EBPFControl* control);
 
     // handle the packet_out.emit method
-    void compileEmitField(const IR::Expression* expr, cstring field,
-                          unsigned alignment, EBPFType* type);
-    void compileEmit(const IR::Vector<IR::Expression>* args);
-    void processMethod(const P4::ExternMethod* method);
-    void processApply(const P4::ApplyMethod* method);
+    virtual void compileEmitField(const IR::Expression* expr, cstring field,
+                                  unsigned alignment, EBPFType* type);
+    virtual void compileEmit(const IR::Vector<IR::Expression>* args);
+    virtual void processMethod(const P4::ExternMethod* method);
+    virtual void processApply(const P4::ApplyMethod* method);
+    virtual void processFunction(const P4::ExternFunction* function);
 
     bool preorder(const IR::PathExpression* expression) override;
     bool preorder(const IR::MethodCallExpression* expression) override;

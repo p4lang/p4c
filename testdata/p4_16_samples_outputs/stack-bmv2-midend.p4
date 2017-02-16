@@ -41,12 +41,12 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    hdr[1] tmp_1;
-    bit<32> tmp_2;
+    hdr[1] c_tmp_1;
+    bit<32> c_tmp_2;
     action act() {
-        tmp_2 = h.h.f + 32w1;
-        tmp_1[0].f = tmp_2;
-        h.h.f = tmp_1[0].f;
+        c_tmp_2 = h.h.f + 32w1;
+        c_tmp_1[0].f = c_tmp_2;
+        h.h.f = c_tmp_1[0].f;
         sm.egress_spec = 9w0;
     }
     table tbl_act() {

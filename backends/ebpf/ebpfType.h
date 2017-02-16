@@ -50,7 +50,7 @@ class IHasWidth {
 };
 
 class EBPFTypeFactory {
- private:
+ protected:
     const P4::TypeMap* typeMap;
     explicit EBPFTypeFactory(const P4::TypeMap* typeMap) :
             typeMap(typeMap) { CHECK_NULL(typeMap); }
@@ -58,7 +58,7 @@ class EBPFTypeFactory {
     static EBPFTypeFactory* instance;
     static void createFactory(const P4::TypeMap* typeMap)
     { EBPFTypeFactory::instance = new EBPFTypeFactory(typeMap); }
-    EBPFType* create(const IR::Type* type);
+    virtual EBPFType* create(const IR::Type* type);
 };
 
 class EBPFBoolType : public EBPFType, public IHasWidth {
@@ -131,6 +131,19 @@ class EBPFStructType : public EBPFType, public IHasWidth {
     unsigned widthInBits() override { return width; }
     unsigned implementationWidthInBits() override { return implWidth; }
     void emit(CodeBuilder* builder) override;
+};
+
+class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
+ public:
+    explicit EBPFEnumType(const IR::Type_Enum* type) : EBPFType(type) {}
+    void emit(CodeBuilder* builder) override;
+    void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void emitInitializer(CodeBuilder* builder) override
+    { builder->append("0"); }
+    unsigned widthInBits() override { return 32; }
+    unsigned implementationWidthInBits() override { return 32; }
+
+    const IR::Type_Enum* getType() const { return type->to<IR::Type_Enum>(); }
 };
 
 }  // namespace EBPF

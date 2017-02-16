@@ -18,6 +18,12 @@ limitations under the License.
 
 namespace P4 {
 
+const IR::Node* SubstituteParameters::postorder(IR::This* t) {
+    auto result = new IR::This(t->srcInfo);
+    LOG1("Cloned " << dbp(t) << " into " << dbp(result));
+    return result;
+}
+
 const IR::Node* SubstituteParameters::postorder(IR::PathExpression* expr) {
     auto decl = refMap->getDeclaration(expr->path, true);
     auto param = decl->to<IR::Parameter>();

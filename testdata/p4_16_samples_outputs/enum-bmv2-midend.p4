@@ -48,8 +48,8 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    Choice c_1;
-    bool tmp_0;
+    Choice c_c_0;
+    bool c_tmp_0;
     action act() {
         h.h.c = h.h.a;
     }
@@ -57,8 +57,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.c = h.h.b;
     }
     action act_1() {
-        c_1 = Choice.First;
-        tmp_0 = c_1 == Choice.Second;
+        c_c_0 = Choice.First;
+        c_tmp_0 = c_c_0 == Choice.Second;
     }
     action act_2() {
         sm.egress_spec = 9w0;
@@ -89,7 +89,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_act.apply();
-        if (tmp_0) 
+        if (c_tmp_0) 
             tbl_act_0.apply();
         else 
             tbl_act_1.apply();

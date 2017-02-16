@@ -269,7 +269,13 @@ class Mux : Operation_Ternary {
 
 class DefaultExpression : Expression {}
 
-class This : Expression {}  // experimental
+// Two different This should not be equal.
+// That's why we use a hidden id field to distinguish them.
+class This : Expression {
+    int id = nextId++;
+ private:
+    static int nextId;
+}  // experimental
 
 class Cast : Operation_Unary {
     Type destType = type;

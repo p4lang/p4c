@@ -25,6 +25,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/resetHeaders.h"
+#include "frontends/p4/toP4/toP4.h"
 
 namespace P4 {
 
@@ -175,8 +176,8 @@ class FindLocationSets : public Inspector {
 // }
 // After inlining we will get:
 // control d() {
-//   @name("cinst.t") table t() { ... }
-//   apply { t.apply(); }
+//   @name("cinst.t") table cinst_t() { ... }
+//   apply { cinst_t.apply(); }
 // }
 // So the externally visible name for the table is "cinst.t"
 class ComputeNewNames : public Inspector {
@@ -201,6 +202,7 @@ class ComputeNewNames : public Inspector {
     void postorder(const IR::P4Table* table) override { rename(table); }
     void postorder(const IR::P4Action* action) override { rename(action); }
     void postorder(const IR::Declaration_Instance* instance) override { rename(instance); }
+    void postorder(const IR::Declaration_Variable* decl) override { rename(decl); }
 };
 
 // Add a @name annotation ONLY.
@@ -258,6 +260,14 @@ class Substitutions : public SubstituteParameters {
         instance->name = newName;
         instance->annotations = annos;
         return instance;
+    }
+    const IR::Node* postorder(IR::Declaration_Variable* decl) override {
+        auto orig = getOriginal<IR::IDeclaration>();
+        cstring newName = renameMap->getName(orig);
+        cstring extName = renameMap->getExtName(orig);
+        LOG1("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
+        decl->name = newName;
+        return decl;
     }
     const IR::Node* postorder(IR::PathExpression* expression) override {
         LOG1("(Substitutions) visiting" << dbp(getOriginal()));
@@ -356,6 +366,13 @@ const IR::Node* InlineDriver::preorder(IR::P4Program* program) {
         prog = prog->apply(*inliner);
         if (::errorCount() > 0)
             return prog;
+
+#if 0
+        // debugging code; we don't have an easy way to dump the program here,
+        // since we are not between passes
+        ToP4 top4(&std::cout, true, nullptr);
+        prog->apply(top4);
+#endif
     }
 
     prune();

@@ -46,6 +46,7 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor {
     using TypeVariableSubstitutionVisitor::postorder;
     const IR::Node* postorder(IR::PathExpression* expr) override;
     const IR::Node* postorder(IR::Type_Name* type) override;
+    const IR::Node* postorder(IR::This* t) override;
 };
 
 }  // namespace P4

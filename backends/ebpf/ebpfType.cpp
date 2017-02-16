@@ -39,8 +39,10 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
         auto canon = typeMap->getTypeType(type, true);
         result = create(canon);
         result = new EBPFTypeName(type->to<IR::Type_Name>(), result);
+    } else if (type->is<IR::Type_Enum>()) {
+        return new EBPFEnumType(type->to<IR::Type_Enum>());
     } else {
-        ::error("Type %1% unsupported by EBPF", type);
+        ::error("Type %1% not supported", type);
     }
 
     return result;
@@ -64,7 +66,7 @@ unsigned EBPFScalarType::alignment() const {
     else if (width <= 32)
         return 4;
     else
-        // compiled as char*
+        // compiled as u8*
         return 1;
 }
 
@@ -78,7 +80,7 @@ void EBPFScalarType::emit(CodeBuilder* builder) {
     else if (width <= 32)
         builder->appendFormat("%s32", prefix);
     else
-        builder->appendFormat("char*");
+        builder->appendFormat("u8*");
 }
 
 void
@@ -91,9 +93,9 @@ EBPFScalarType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
         builder->append(id);
     } else {
         if (asPointer)
-            builder->append("char*");
+            builder->append("u8*");
         else
-            builder->appendFormat("char %s[%d]", id.c_str(), bytesRequired());
+            builder->appendFormat("u8 %s[%d]", id.c_str(), bytesRequired());
     }
 }
 
@@ -219,6 +221,29 @@ unsigned EBPFTypeName::implementationWidthInBits() {
         return 0;
     }
     return wt->implementationWidthInBits();
+}
+
+////////////////////////////////////////////////////////////////
+
+void EBPFEnumType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+    builder->append("enum ");
+    builder->append(getType()->name);
+    if (asPointer)
+        builder->append("*");
+    builder->append(" ");
+    builder->append(id);
+}
+
+void EBPFEnumType::emit(EBPF::CodeBuilder* builder) {
+    builder->append("enum ");
+    auto et = getType();
+    builder->append(et->name);
+    builder->blockStart();
+    for (auto m : *et->members) {
+        builder->append(m->name);
+        builder->appendLine(",");
+    }
+    builder->blockEnd(true);
 }
 
 }  // namespace EBPF

@@ -6,14 +6,14 @@ extern Y {
 control d(out bit<32> x) {
     bit<32> y;
     bit<32> x_1;
-    bit<32> tmp_0;
+    bit<32> cinst_tmp_0;
     @name("cinst.inst") Y(32w16) cinst_inst_0;
     action act() {
-        tmp_0 = cinst_inst_0.get();
-        x_1 = tmp_0;
+        cinst_tmp_0 = cinst_inst_0.get();
+        x_1 = cinst_tmp_0;
         x = x_1;
-        tmp_0 = cinst_inst_0.get();
-        x_1 = tmp_0;
+        cinst_tmp_0 = cinst_inst_0.get();
+        x_1 = cinst_tmp_0;
         y = x_1;
     }
     table tbl_act() {

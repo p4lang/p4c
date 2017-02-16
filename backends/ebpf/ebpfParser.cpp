@@ -34,7 +34,7 @@ class StateTranslationVisitor : public CodeGenInspector {
 
  public:
     explicit StateTranslationVisitor(const EBPFParserState* state) :
-            CodeGenInspector(state->parser->program->typeMap),
+            CodeGenInspector(state->parser->program->refMap, state->parser->program->typeMap),
             hasDefault(false), p4lib(P4::P4CoreLibrary::instance), state(state) {}
     bool preorder(const IR::ParserState* state) override;
     bool preorder(const IR::SelectCase* selectCase) override;

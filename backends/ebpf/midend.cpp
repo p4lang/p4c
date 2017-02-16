@@ -28,6 +28,7 @@ limitations under the License.
 #include "midend/validateProperties.h"
 #include "midend/eliminateTuples.h"
 #include "midend/noMatch.h"
+#include "midend/convertEnums.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeMap.h"
@@ -43,6 +44,22 @@ limitations under the License.
 
 namespace EBPF {
 
+class EnumOn32Bits : public P4::ChooseEnumRepresentation {
+    bool convert(const IR::Type_Enum* type) const override {
+        if (type->srcInfo.isValid()) {
+            unsigned line = type->srcInfo.getStart().getLineNumber();
+            auto sfl = Util::InputSources::instance->getSourceLine(line);
+            cstring sourceFile = sfl.fileName;
+            if (sourceFile.endsWith("_model.p4"))
+                // Don't convert any of the standard enums
+                return false;
+        }
+        return true;
+    }
+    unsigned enumSize(unsigned) const override
+    { return 32; }
+};
+
 const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* program) {
     if (program == nullptr)
         return nullptr;
@@ -52,6 +69,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
     PassManager simplify = {
+        new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
         new P4::RemoveReturns(&refMap),
         new P4::MoveConstructors(&refMap),
         new P4::RemoveAllUnusedDeclarations(&refMap),
