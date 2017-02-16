@@ -30,6 +30,7 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     bool compiling10 = options.isv1();
     if (compiling10) {
         P4V1::Converter converter;
+        converter.addDebugHook(options.getDebugHook());
         converter.loadModel();
         // Model is loaded before parsing the input file.
         // In this way the SourceInfo in the model comes first.

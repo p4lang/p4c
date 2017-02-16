@@ -363,7 +363,11 @@ class RunBMV2(object):
             interface, data = nextWord(cmd)
             data = ''.join(data.split())
             time.sleep(self.packetDelay)
-            self.interfaces[interface]._write_packet(HexToByte(data))
+            try:
+                self.interfaces[interface]._write_packet(HexToByte(data))
+            except ValueError:
+                reportError("Invalid packet data", data)
+                return FAILURE
             self.interfaces[interface].flush()
             self.packetDelay = 0
         elif first == "expect":

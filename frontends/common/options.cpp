@@ -280,13 +280,13 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
                 P4::ToP4 toP4(stream, Log::verbose(), file);
                 node->apply(toP4);
             }
+            break;
         }
     }
 }
 
 DebugHook CompilerOptions::getDebugHook() const {
-    auto dp = std::bind(&CompilerOptions::dumpPass, this,
-                        std::placeholders::_1, std::placeholders::_2,
-                        std::placeholders::_3, std::placeholders::_4);
+    using namespace std::placeholders;
+    auto dp = std::bind(&CompilerOptions::dumpPass, this, _1, _2, _3, _4);
     return dp;
 }
