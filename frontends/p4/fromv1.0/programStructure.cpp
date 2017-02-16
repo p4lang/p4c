@@ -474,9 +474,9 @@ void ProgramStructure::include(cstring filename) {
     options.file = path.toString();
     if (FILE* file = options.preprocess()) {
         if (!::errorCount()) {
-            if (auto std = parse_P4_16_file(options.file, file)) {
+            if (auto code = parse_P4_16_file(options.file, file)) {
                 if (!::errorCount()) {
-                    for (auto decl : *std->declarations) {
+                    for (auto decl : *code->declarations) {
                         declarations->push_back(decl); } } } }
         options.closeInput(file); }
 }

@@ -26,6 +26,7 @@ class FrontEnd {
     std::vector<DebugHook> hooks;
  public:
     FrontEnd() = default;
+    explicit FrontEnd(DebugHook hook) { hooks.push_back(hook); }
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     const IR::P4Program* run(const CompilerOptions& options, const IR::P4Program* program);
 };
