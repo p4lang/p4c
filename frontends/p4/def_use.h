@@ -55,6 +55,9 @@ class StorageLocation : public IHasDbPrint {
     // set of locations if we exclude all headers
     const LocationSet* removeHeaders() const;
     virtual void removeHeaders(LocationSet* result) const = 0;
+    // all locations inside that represent the last index of an array
+    const LocationSet* getLastIndexField() const;
+    virtual void addLastIndexField(LocationSet* result) const = 0;
 };
 
 /* Represents a storage location with a simple type.
@@ -68,6 +71,7 @@ class BaseLocation : public StorageLocation {
                 || type-is<IR::Type_Error>() || type->is<IR::Type_Var>(),
                 "%1%: unexpected type", type); }
     void addValidBits(LocationSet*) const override {}
+    void addLastIndexField(LocationSet* result) const override {}
     void removeHeaders(LocationSet* result) const override;
 };
 
@@ -92,10 +96,12 @@ class StructLocation : public StorageLocation {
     void addField(cstring field, LocationSet* addTo) const;
     void addValidBits(LocationSet* result) const override;
     void removeHeaders(LocationSet* result) const override;
+    void addLastIndexField(LocationSet* result) const override;
 };
 
 class ArrayLocation : public StorageLocation {
     std::vector<const StorageLocation*> elements;
+    const StorageLocation* lastIndexField;  // accessed by lastIndex
     friend class StorageFactory;
 
     void addElement(unsigned index, StorageLocation* element)
@@ -103,11 +109,15 @@ class ArrayLocation : public StorageLocation {
 
  public:
     ArrayLocation(const IR::Type* type, cstring name) :
-            StorageLocation(type, name) {
+            StorageLocation(type, name), lastIndexField(nullptr) {
         BUG_CHECK(type->is<IR::Type_Stack>(), "%1%: unexpected type", type);
         auto stack = type->to<IR::Type_Stack>();
         elements.resize(stack->getSize());
     }
+    void setLastIndexField(const StorageLocation* location)
+    { lastIndexField = location; }
+    const StorageLocation* getLastIndexField() const
+    { return lastIndexField; }
     std::vector<const StorageLocation*>::const_iterator begin() const
     { return elements.cbegin(); }
     std::vector<const StorageLocation*>::const_iterator end() const
@@ -119,6 +129,7 @@ class ArrayLocation : public StorageLocation {
     void addElement(unsigned index, LocationSet* result) const;
     void addValidBits(LocationSet* result) const override;
     void removeHeaders(LocationSet*) const override {}  // no results added
+    void addLastIndexField(LocationSet* result) const override;
 };
 
 class StorageFactory {
@@ -129,6 +140,7 @@ class StorageFactory {
     StorageLocation* create(const IR::Type* type, cstring name) const;
 
     static const cstring validFieldName;
+    static const cstring indexFieldName;
 };
 
 // A set of locations that may be read or written by a computation.
@@ -146,6 +158,8 @@ class LocationSet : public IHasDbPrint {
     const LocationSet* getValidField() const;
     const LocationSet* getIndex(unsigned index) const;
     const LocationSet* allElements() const;
+    const LocationSet* getArrayLastIndex() const;
+
     void add(const StorageLocation* location)
     { locations.emplace(location); }
     const LocationSet* join(const LocationSet* other) const;

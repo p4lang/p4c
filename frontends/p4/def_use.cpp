@@ -24,6 +24,7 @@ namespace P4 {
 
 // name for header valid bit
 const cstring StorageFactory::validFieldName = "$valid";
+const cstring StorageFactory::indexFieldName = "$lastIndex";
 const LocationSet* LocationSet::empty = new LocationSet();
 ProgramPoint ProgramPoint::beforeStart;
 
@@ -62,6 +63,7 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
             auto sl = create(st->elementType, name + "[" + Util::toString(i) + "]");
             result->addElement(i, sl);
         }
+        result->setLastIndexField(create(IR::Type_Bits::get(32), name + "." + indexFieldName));
         return result;
     }
     return nullptr;
@@ -85,6 +87,11 @@ void StructLocation::addValidBits(LocationSet* result) const {
     }
 }
 
+void StructLocation::addLastIndexField(LocationSet* result) const {
+    for (auto f : fields())
+        f->addLastIndexField(result);
+}
+
 void StructLocation::addField(cstring field, LocationSet* result) const {
     auto f = ::get(fieldLocations, field);
     CHECK_NULL(f);
@@ -102,6 +109,11 @@ void ArrayLocation::addValidBits(LocationSet* result) const {
         e->addValidBits(result);
 }
 
+void ArrayLocation::addLastIndexField(LocationSet* result) const {
+    result->add(getLastIndexField());
+}
+
+
 void ArrayLocation::addElement(unsigned index, LocationSet* result) const {
     BUG_CHECK(index < elements.size(), "%1%: out of bounds index", index);
     result->add(elements.at(index));
@@ -110,6 +122,12 @@ void ArrayLocation::addElement(unsigned index, LocationSet* result) const {
 const LocationSet* StorageLocation::getValidBits() const {
     auto result = new LocationSet();
     addValidBits(result);
+    return result;
+}
+
+const LocationSet* StorageLocation::getLastIndexField() const {
+    auto result = new LocationSet();
+    addLastIndexField(result);
     return result;
 }
 
@@ -124,6 +142,18 @@ const LocationSet* LocationSet::join(const LocationSet* other) const {
         result->add(e);
     return result;
 }
+
+const LocationSet* LocationSet::getArrayLastIndex() const {
+    auto result = new LocationSet();
+    for (auto l : locations) {
+        if (l->is<ArrayLocation>()) {
+            auto array = l->to<ArrayLocation>();
+            result->add(array->getLastIndexField());
+        }
+    }
+    return result;
+}
+
 
 const LocationSet* LocationSet::getField(cstring field) const {
     auto result = new LocationSet();
@@ -338,6 +368,8 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
             defs->set(loc, uninit);
         auto valid = loc->getValidBits();
         defs->set(valid, startPoints);
+        auto lastIndex = loc->getLastIndexField();
+        defs->set(lastIndex, startPoints);
     }
     if (locals != nullptr) {
         for (auto d : *locals) {
@@ -347,6 +379,8 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
                     defs->set(loc, uninit);
                     auto valid = loc->getValidBits();
                     defs->set(valid, startPoints);
+                    auto lastIndex = loc->getLastIndexField();
+                    defs->set(lastIndex, startPoints);
                 }
             }
         }
@@ -357,7 +391,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
 }
 
 void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
-                             const IR::IndexedVector<IR::Declaration>* locals) {
+                                const IR::IndexedVector<IR::Declaration>* locals) {
     currentDefinitions = currentDefinitions->clone();
     for (auto p : *parameters->parameters) {
         StorageLocation* loc = definitions->storageMap->getStorage(p);
@@ -474,6 +508,9 @@ bool ComputeWriteSet::preorder(const IR::Member* expression) {
         if (expression->member.name == IR::Type_Stack::next ||
             expression->member.name == IR::Type_Stack::last) {
             set(expression, storage);
+            return false;
+        } else if (expression->member.name == IR::Type_Stack::lastIndex) {
+            set(expression, LocationSet::empty);
             return false;
         }
     }
