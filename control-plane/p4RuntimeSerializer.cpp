@@ -42,9 +42,6 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 // XXX(seth): Here are the known issues:
-// - We currently don't handle the case where, in P4-16, a table's
-//   implementation property refers to an action profile that is instantiated
-//   elsewhere. See Github issue #297.
 // - The @id pragma is not supported for header instances and especially not for
 //   header stack instances, which currently requires allowing the programmer to
 //   provide a sequence of ids in the @id pragma. Note that @id *is* supported
@@ -1687,64 +1684,34 @@ static void forAllEvaluatedBlocks(const IR::ToplevelBlock* aToplevelBlock,
 /// if it has one, or boost::none otherwise.
 static boost::optional<ActionProfile>
 getActionProfile(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
-    auto impl = table->properties->getProperty(P4V1::V1Model::instance
-                                                .tableAttributes
-                                                .tableImplementation.name);
-    if (!impl) return boost::none;
+    auto propertyName = P4V1::V1Model::instance.tableAttributes
+                                               .tableImplementation.name;
+    auto instance =
+      getExternInstanceFromProperty(table, propertyName, refMap, typeMap);
+    if (!instance) return boost::none;
 
-    cstring name = impl->externalName();
-
-    // In P4-16, an action profile is just an instantiation of an extern. In
-    // P4-14, it's a language construct, but it's desugared into an extern
-    // instantiation in the frontend. Either way, we currently expect the
-    // implementation property to contain an extern constructor call.
-    // XXX(seth): You should also be able to refer to an action profile that's
-    // instantiated elsewhere (i.e., we should accept a Declaration_Instance
-    // here), but that currently crashes the compiler - see Github issue #297.
-    // Once that's fixed, we'll be able to support it here.
-    if (!impl->value->is<IR::ExpressionValue>()) {
-        ::error("Table '%1%' has an implementation which is not an expression: %2%",
-                table->externalName(), impl);
-        return boost::none;
-    }
-    const auto propValue = impl->value->to<IR::ExpressionValue>();
-    if (!propValue->expression->is<IR::ConstructorCallExpression>()) {
-        ::error("Table '%1%' has an implementation which is not a constructor call: %2%",
-                table->externalName(), impl);
-        return boost::none;
-    }
-    const auto constructorCallExpr =
-      propValue->expression->to<IR::ConstructorCallExpression>();
-    const auto constructorCall =
-      P4::ConstructorCall::resolve(constructorCallExpr, refMap, typeMap);
-    if (!constructorCall->is<P4::ExternConstructorCall>()) {
-        ::error("Table '%1%' has an implementation which doesn't resolve to an extern: %2%",
-                table->externalName(), impl);
-        return boost::none;
-    }
-
-    const auto externType = constructorCall->to<P4::ExternConstructorCall>()->type;
     ActionProfileType actionProfileType;
     const IR::Expression* sizeExpression;
-    if (externType->name == P4V1::V1Model::instance.action_selector.name) {
+    if (instance->type->name == P4V1::V1Model::instance.action_selector.name) {
         actionProfileType = ActionProfileType::INDIRECT_WITH_SELECTOR;
-        sizeExpression = constructorCallExpr->arguments->at(1);
-    } else if (externType->name == P4V1::V1Model::instance.action_profile.name) {
+        sizeExpression = instance->arguments->at(1);
+    } else if (instance->type->name == P4V1::V1Model::instance.action_profile.name) {
         actionProfileType = ActionProfileType::INDIRECT;
-        sizeExpression = constructorCallExpr->arguments->at(0);
+        sizeExpression = instance->arguments->at(0);
     } else {
         ::error("Table '%1%' has an implementation which doesn't resolve to an "
-                "action profile: %2%", table->externalName(), impl);
+                "action profile: %2%", table->externalName(), instance->expression);
         return boost::none;
     }
 
     if (!sizeExpression->is<IR::Constant>()) {
-      ::error("Action profile '%1%' has non-constant size '%1%'", name, sizeExpression);
+      ::error("Action profile '%1%' has non-constant size '%1%'",
+              *instance->name, sizeExpression);
       return boost::none;
     }
 
     const int64_t size = sizeExpression->to<IR::Constant>()->asInt();
-    return ActionProfile{name, actionProfileType, size};
+    return ActionProfile{*instance->name, actionProfileType, size};
 }
 
 static void serializeActionProfiles(P4RuntimeSerializer& serializer,
