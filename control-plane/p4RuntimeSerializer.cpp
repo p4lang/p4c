@@ -28,6 +28,7 @@ limitations under the License.
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/externInstance.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
@@ -41,8 +42,6 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 // XXX(seth): Here are the known issues:
-// - Direct counters are not yet supported.
-// - Direct meters are not yet supported.
 // - We currently don't handle the case where, in P4-16, a table's
 //   implementation property refers to an action profile that is instantiated
 //   elsewhere. See Github issue #297.
@@ -237,6 +236,145 @@ struct ActionProfile {
 
     bool operator<(const ActionProfile& other) const {
         return name < other.name && type < other.type && size < other.size;
+    }
+};
+
+/// @return @table's size property if available, falling back to the default size.
+static int64_t getTableSize(const IR::P4Table* table) {
+    const int64_t defaultTableSize =
+        P4V1::V1Model::instance.tableAttributes.defaultTableSize;
+
+    auto sizeProperty = table->properties->getProperty("size");
+    if (sizeProperty == nullptr) {
+        return defaultTableSize;  
+    }
+
+    if (!sizeProperty->value->is<IR::ExpressionValue>()) {
+        ::error("Expected an expression for table size property: %1%", sizeProperty);
+        return defaultTableSize;
+    }
+
+    auto expression = sizeProperty->value->to<IR::ExpressionValue>()->expression;
+    if (!expression->is<IR::Constant>()) {
+        ::error("Expected a constant for table size property: %1%", sizeProperty);
+        return defaultTableSize;
+    }
+
+    const int64_t tableSize = expression->to<IR::Constant>()->asInt();
+    return tableSize == 0 ? defaultTableSize : tableSize;
+}
+
+/// A traits class describing the properties of "counterlike" things.
+/// XXX(seth): We could avoid needing this by refactoring the Model code a
+/// little; it's currently not friendly to metaprogramming.
+template <typename Kind> struct CounterlikeTraits;
+
+template<> struct CounterlikeTraits<IR::Counter> {
+    static const cstring name() { return "counter"; }
+    static const cstring directPropertyName() {
+        return P4V1::V1Model::instance.tableAttributes.directCounter.name;
+    }
+    static const cstring typeName() {
+        return P4V1::V1Model::instance.counter.name;
+    }
+    static const cstring directTypeName() {
+        return P4V1::V1Model::instance.directCounter.name;
+    }
+};
+
+template<> struct CounterlikeTraits<IR::Meter> {
+    static const cstring name() { return "meter"; }
+    static const cstring directPropertyName() {
+        return P4V1::V1Model::instance.tableAttributes.directMeter.name;
+    }
+    static const cstring typeName() {
+        return P4V1::V1Model::instance.meter.name;
+    }
+    static const cstring directTypeName() {
+        return P4V1::V1Model::instance.directMeter.name;
+    }
+};
+
+/**
+ * The information about a counter or meter instance which is necessary to
+ * serialize it. @Kind must be a class with a CounterlikeTraits<>
+ * specialization.
+ */
+template <typename Kind>
+struct Counterlike {
+    /// The name of the instance.
+    const cstring name;
+    /// If non-null, the instance's annotations.
+    const IR::IAnnotated* annotations;  
+    /// The units parameter to the instance; valid values vary depending on @Kind.
+    const cstring unit;
+    /// The size parameter to the instance.
+    const int64_t size;
+    /// If not none, the instance is a direct resource associated with @table.
+    const boost::optional<cstring> table;
+
+    /// @return the information required to serialize an explicit @instance of
+    /// @Kind, which is defined inside a control block.
+    static boost::optional<Counterlike<Kind>>
+    from(const IR::ExternBlock* instance) {
+        CHECK_NULL(instance);
+        auto declaration = instance->node->to<IR::IDeclaration>();
+
+        // Counter and meter externs refer to their unit as a "type"; this is
+        // (confusingly) unrelated to the "type" field of a counter or meter in
+        // P4Info.
+        auto unit = instance->getParameterValue("type");
+        if (!unit->is<IR::Declaration_ID>()) {
+            ::error("%1% '%2%' has a unit type which is not an enum constant: %3%",
+                    CounterlikeTraits<Kind>::name(), declaration, unit);
+            return boost::none;
+        }
+
+        auto size = instance->getParameterValue("size")->to<IR::Constant>();
+        if (!size->is<IR::Constant>()) {
+            ::error("%1% '%2%' has a non-constant size: %3%",
+                    CounterlikeTraits<Kind>::name(), declaration, size);
+            return boost::none;
+        }
+
+        return Counterlike<Kind>{declaration->externalName(),
+                                 declaration->to<IR::IAnnotated>(),
+                                 unit->to<IR::Declaration_ID>()->name,
+                                 size->to<IR::Constant>()->value.get_si(),
+                                 boost::none};
+    }
+
+    /// @return the information required to serialize an @instance of @Kind which
+    /// is either defined in or referenced by a property value of @table. (This
+    /// implies that @instance is a direct resource of @table.)
+    static boost::optional<Counterlike<Kind>>
+    fromDirect(const ExternInstance& instance, const IR::P4Table* table) {
+        CHECK_NULL(table);
+        BUG_CHECK(instance.name != boost::none,
+                  "Caller should've ensured we have a name");
+
+        if (instance.type->name != CounterlikeTraits<Kind>::directTypeName()) {
+            ::error("Expected a direct %1%: %2%", CounterlikeTraits<Kind>::name(),
+                    instance.expression);
+            return boost::none;
+        }
+
+        auto unitArgument = instance.arguments->at(0);
+        if (unitArgument == nullptr) {
+            ::error("Direct %1% instance %2% should take a constructor argument",
+                    CounterlikeTraits<Kind>::name(), instance.expression);
+            return boost::none;
+        }
+        if (!unitArgument->is<IR::Member>()) {
+            ::error("Direct %1% instance %2% has an unexpected constructor argument",
+                    CounterlikeTraits<Kind>::name(), instance.expression);
+            return boost::none;
+        }
+
+        auto unit = unitArgument->to<IR::Member>()->member.name;
+        return Counterlike<Kind>{*instance.name, instance.annotations,
+                                 unit, getTableSize(table),
+                                 table->externalName()};
     }
 };
 
@@ -714,68 +852,52 @@ public:
         headerField->set_bitwidth(field->bitwidth);
     }
 
-    void addCounter(const IR::IDeclaration* counterDeclaration,
-                    const IR::CompileTimeValue* size,
-                    const IR::CompileTimeValue* unit) {
-        CHECK_NULL(counterDeclaration);
-        CHECK_NULL(size);
-        CHECK_NULL(unit);
-        BUG_CHECK(size->is<IR::Constant>(),
-                  "Counter size should be a constant: %1%", size);
-        BUG_CHECK(unit->is<IR::Declaration_ID>(),
-                  "Counter unit should be an enum constant: %1%", unit);
-
-        auto name = counterDeclaration->externalName();
-        auto annotations = counterDeclaration->to<IR::IAnnotated>();
-        auto unitName = unit->to<IR::Declaration_ID>()->name;
-
+    void addCounter(const Counterlike<IR::Counter>& counterInstance) {
         auto counter = p4Info->add_counters();
-        counter->mutable_preamble()->set_id(symbols.getId(P4RuntimeSymbolType::COUNTER, name));
-        counter->mutable_preamble()->set_name(name);
-        addAnnotations(counter->mutable_preamble(), annotations);
-        counter->set_size(size->to<IR::Constant>()->value.get_si());
-        counter->set_direct_table_id(0);  // XXX(seth): Not yet supported.
+        auto id = symbols.getId(P4RuntimeSymbolType::COUNTER, counterInstance.name);
+        counter->mutable_preamble()->set_id(id);
+        counter->mutable_preamble()->set_name(counterInstance.name);
+        addAnnotations(counter->mutable_preamble(), counterInstance.annotations);
+        counter->set_size(counterInstance.size);
 
-        if (unitName == "packets") {
+        if (counterInstance.unit == "packets") {
             counter->set_unit(Counter::PACKETS);
-        } else if (unitName == "bytes") {
+        } else if (counterInstance.unit == "bytes") {
             counter->set_unit(Counter::BYTES);
-        } else if (unitName == "packets_and_bytes") {
+        } else if (counterInstance.unit == "packets_and_bytes") {
             counter->set_unit(Counter::BOTH);
         } else {
             counter->set_unit(Counter::UNSPECIFIED);
         }
+
+        if (counterInstance.table) {
+            auto id = symbols.getId(P4RuntimeSymbolType::TABLE,
+                                    *counterInstance.table);
+            counter->set_direct_table_id(id);
+        }
     }
 
-    void addMeter(const IR::IDeclaration* meterDeclaration,
-                  const IR::CompileTimeValue* size,
-                  const IR::CompileTimeValue* unit) {
-        CHECK_NULL(meterDeclaration);
-        CHECK_NULL(size);
-        CHECK_NULL(unit);
-        BUG_CHECK(size->is<IR::Constant>(),
-                  "Meter size should be a constant: %1%", size);
-        BUG_CHECK(unit->is<IR::Declaration_ID>(),
-                  "Meter unit should be an enum constant: %1%", unit);
-
-        auto name = meterDeclaration->externalName();
-        auto annotations = meterDeclaration->to<IR::IAnnotated>();
-        auto unitName = unit->to<IR::Declaration_ID>()->name;
-
+    void addMeter(const Counterlike<IR::Meter>& meterInstance) {
         auto meter = p4Info->add_meters();
-        meter->mutable_preamble()->set_id(symbols.getId(P4RuntimeSymbolType::METER, name));
-        meter->mutable_preamble()->set_name(name);
-        addAnnotations(meter->mutable_preamble(), annotations);
-        meter->set_size(size->to<IR::Constant>()->value.get_si());
-        meter->set_direct_table_id(0);  // XXX(seth): Not yet supported.
+        auto id = symbols.getId(P4RuntimeSymbolType::METER, meterInstance.name);
+        meter->mutable_preamble()->set_id(id);
+        meter->mutable_preamble()->set_name(meterInstance.name);
+        addAnnotations(meter->mutable_preamble(), meterInstance.annotations);
+        meter->set_size(meterInstance.size);
         meter->set_type(Meter::COLOR_UNAWARE);  // A default; this isn't exposed.
 
-        if (unitName == "packets") {
+        if (meterInstance.unit == "packets") {
             meter->set_unit(Meter::PACKETS);
-        } else if (unitName == "bytes") {
+        } else if (meterInstance.unit == "bytes") {
             meter->set_unit(Meter::BYTES);
         } else {
             meter->set_unit(Meter::UNSPECIFIED);
+        }
+
+        if (meterInstance.table) {
+            auto id = symbols.getId(P4RuntimeSymbolType::TABLE,
+                                    *meterInstance.table);
+            meter->set_direct_table_id(id);
         }
     }
 
@@ -835,6 +957,8 @@ public:
     void addTable(const IR::P4Table* tableDeclaration,
                   uint64_t tableSize,
                   const boost::optional<cstring>& implementation,
+                  const boost::optional<Counterlike<IR::Counter>>& directCounter,
+                  const boost::optional<Counterlike<IR::Meter>>& directMeter,
                   const boost::optional<cstring>& defaultAction,
                   const std::vector<cstring>& actions,
                   const std::vector<std::pair<cstring, MatchType>>& matchFields) {
@@ -851,6 +975,20 @@ public:
             auto id =
               symbols.getId(P4RuntimeSymbolType::ACTION_PROFILE, *implementation);
             table->set_implementation_id(id);
+        }
+
+        if (directCounter) {
+            auto id = symbols.getId(P4RuntimeSymbolType::COUNTER,
+                                    directCounter->name);
+            table->add_direct_resource_ids(id);
+            addCounter(*directCounter);
+        }
+
+        if (directMeter) {
+            auto id = symbols.getId(P4RuntimeSymbolType::METER,
+                                    directMeter->name);
+            table->add_direct_resource_ids(id);
+            addMeter(*directMeter);
         }
 
         if (defaultAction) {
@@ -1220,14 +1358,12 @@ static void serializeExtern(P4RuntimeSerializer& serializer,
     CHECK_NULL(externBlock);
     CHECK_NULL(typeMap);
 
-    if (externBlock->type->name == "counter") {
-        serializer.addCounter(externBlock->node->to<IR::IDeclaration>(),
-                              externBlock->getParameterValue("size"),
-                              externBlock->getParameterValue("type"));
-    } else if (externBlock->type->name == "meter") {
-        serializer.addMeter(externBlock->node->to<IR::IDeclaration>(),
-                            externBlock->getParameterValue("size"),
-                            externBlock->getParameterValue("type"));
+    if (externBlock->type->name == CounterlikeTraits<IR::Counter>::typeName()) {
+        auto counter = Counterlike<IR::Counter>::from(externBlock);
+        if (counter) serializer.addCounter(*counter);
+    } else if (externBlock->type->name == CounterlikeTraits<IR::Meter>::typeName()) {
+        auto meter = Counterlike<IR::Meter>::from(externBlock);
+        if (meter) serializer.addMeter(*meter);
     }
 }
 
@@ -1277,8 +1413,50 @@ static void serializeParser(P4RuntimeSerializer& serializer,
     }
 }
 
+/// @return an extern instance defined or referenced by the value of @table's
+/// @propertyName property, or boost::none if no extern was referenced.
+static boost::optional<ExternInstance>
+getExternInstanceFromProperty(const IR::P4Table* table,
+                              const cstring& propertyName,
+                              ReferenceMap* refMap,
+                              TypeMap* typeMap) {
+    auto property = table->properties->getProperty(propertyName);
+    if (property == nullptr) return boost::none;
+    if (!property->value->is<IR::ExpressionValue>()) {
+        ::error("Expected %1% property value for table %2% to be an expression: %3%",
+                propertyName, table->externalName(), property);
+        return boost::none;
+    }
+
+    auto expr = property->value->to<IR::ExpressionValue>()->expression;
+    auto name = property->externalName();
+    auto externInstance = ExternInstance::resolve(expr, refMap, typeMap, name);
+    if (!externInstance) {
+        ::error("Expected %1% property value for table %2% to resolve to an "
+                "extern instance: %3%", propertyName, table->externalName(),
+                property);
+        return boost::none;
+    }
+
+    return externInstance;
+}
+
+/// @return the direct counter associated with @table, if it has one, or
+/// boost::none otherwise.
+template <typename Kind>
+static boost::optional<Counterlike<Kind>>
+getDirectCounterlike(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
+    auto propertyName = CounterlikeTraits<Kind>::directPropertyName();
+    auto instance =
+      getExternInstanceFromProperty(table, propertyName, refMap, typeMap);
+    if (!instance) return boost::none;
+    return Counterlike<Kind>::fromDirect(*instance, table);
+}
+
 static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
-                                const IR::TableBlock* tableBlock) {
+                                const IR::TableBlock* tableBlock,
+                                ReferenceMap* refMap,
+                                TypeMap* typeMap) {
     CHECK_NULL(tableBlock);
     auto table = tableBlock->container;
     symbols.add(P4RuntimeSymbolType::TABLE, table);
@@ -1293,31 +1471,16 @@ static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
     if (impl) {
         symbols.add(P4RuntimeSymbolType::ACTION_PROFILE, impl->externalName());
     }
-}
 
-/// @return @table's size property if available, falling back to the default size.
-static int64_t getTableSize(const IR::P4Table* table) {
-    const int64_t defaultTableSize =
-        P4V1::V1Model::instance.tableAttributes.defaultTableSize;
-
-    auto sizeProperty = table->properties->getProperty("size");
-    if (sizeProperty == nullptr) {
-        return defaultTableSize;  
+    auto directCounter = getDirectCounterlike<IR::Counter>(table, refMap, typeMap);
+    if (directCounter) {
+        symbols.add(P4RuntimeSymbolType::COUNTER, directCounter->name);
     }
 
-    if (!sizeProperty->value->is<IR::ExpressionValue>()) {
-        ::error("Expected an expression for table size property: %1%", sizeProperty);
-        return defaultTableSize;
+    auto directMeter = getDirectCounterlike<IR::Meter>(table, refMap, typeMap);
+    if (directMeter) {
+        symbols.add(P4RuntimeSymbolType::METER, directMeter->name);
     }
-
-    auto expression = sizeProperty->value->to<IR::ExpressionValue>()->expression;
-    if (!expression->is<IR::Constant>()) {
-        ::error("Expected a constant for table size property: %1%", sizeProperty);
-        return defaultTableSize;
-    }
-
-    const int64_t tableSize = expression->to<IR::Constant>()->asInt();
-    return tableSize == 0 ? defaultTableSize : tableSize;
 }
 
 /// @return true iff @expression is a call to the 'isValid()' builtin.
@@ -1487,8 +1650,11 @@ static void serializeTable(P4RuntimeSerializer& serializer,
     boost::optional<cstring> implementation;
     if (impl) implementation = impl->externalName();
 
-    serializer.addTable(table, tableSize, implementation, defaultAction,
-                        actions, matchFields);
+    auto directCounter = getDirectCounterlike<IR::Counter>(table, refMap, typeMap);
+    auto directMeter = getDirectCounterlike<IR::Meter>(table, refMap, typeMap);
+
+    serializer.addTable(table, tableSize, implementation, directCounter,
+                        directMeter, defaultAction, actions, matchFields);
 }
 
 /// Visit evaluated blocks under the provided top-level block. Guarantees that
@@ -1631,7 +1797,7 @@ void serializeP4Runtime(std::ostream* destination,
             } else if (block->is<IR::ParserBlock>()) {
                 collectParserSymbols(symbols, block->to<IR::ParserBlock>(), typeMap);
             } else if (block->is<IR::TableBlock>()) {
-                collectTableSymbols(symbols, block->to<IR::TableBlock>());
+                collectTableSymbols(symbols, block->to<IR::TableBlock>(), refMap, typeMap);
             }
         });
     });
