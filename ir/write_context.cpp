@@ -18,6 +18,12 @@ limitations under the License.
 #include "lib/log.h"
 #include "frontends/p4/typeMap.h"
 
+/* Determine from the Visitor context whether the currently being visited IR node
+ * denotes something that might be written to by the code.  This is always conservative
+ * (we don't know for certain that it is written) since even if it is, it might be
+ * writing the same value.  All you can say for certain is that if this returns 'false'
+ * the code at this point will not modify the object referred to by the current node */
+
 bool P4WriteContext::isWrite() {
     const Context *ctxt = getContext();
     if (!ctxt || !ctxt->node)
@@ -48,5 +54,9 @@ bool P4WriteContext::isWrite() {
         if (ctxt->parent->node->is<IR::ConstructorCallExpression>()) {
             /* FIXME -- no constructor types?  assume all arguments are inout? */
             return true; } }
+    if (ctxt->node->is<IR::MethodCallExpression>()) {
+        /* receiver of a method call -- some methods might be 'const' and not modify
+         * their receiver, but we currently have no way of determining that */
+        return true; }
     return false;
 }
