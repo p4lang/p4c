@@ -31,7 +31,8 @@ namespace P4 {
    (obtained by running Typechecking(updateProgram = true)).
  */
 class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
-    const TypeMap*              typeMap;
+    ReferenceMap*               refMap;
+    TypeMap*                    typeMap;
     bool                        in_action = false;
     struct VarInfo {
         bool                    local = false;
@@ -56,7 +57,8 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    explicit DoLocalCopyPropagation(const TypeMap* typeMap) : typeMap(typeMap)
+    explicit DoLocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap) :
+        refMap(refMap), typeMap(typeMap)
     { visitDagOnce = false; setName("DoLocalCopyPropagation"); }
 };
 
@@ -64,7 +66,7 @@ class LocalCopyPropagation : public PassManager {
  public:
     LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap, true));
-        passes.push_back(new DoLocalCopyPropagation(typeMap));
+        passes.push_back(new DoLocalCopyPropagation(refMap, typeMap));
         setName("LocalCopyPropagation");
     }
 };

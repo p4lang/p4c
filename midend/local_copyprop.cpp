@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "local_copyprop.h"
+#include "frontends/p4/methodInstance.h"
 #include "has_side_effects.h"
 #include "expr_uses.h"
 
@@ -144,6 +145,13 @@ IR::MethodCallExpression *P4::DoLocalCopyPropagation::postorder(IR::MethodCallEx
     if (!in_action) return mc;
     auto type = mc->method->type->to<IR::Type_Method>();
     CHECK_NULL(type);
+    auto mInst = MethodInstance::resolve(mc, refMap, typeMap, true);
+    if (auto bi = mInst->to<BuiltInMethod>()) {
+        if (bi->name == IR::Type_Header::setValid
+                || bi->name == IR::Type_Header::setInvalid
+                || bi->name == IR::Type_Stack::push_front
+                || bi->name == IR::Type_Stack::pop_front) {
+            dropValuesUsing(bi->appliedTo->toString()); } }
     int idx = 0;
     for (auto param : *type->parameters->parameters) {
         if (param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) {
