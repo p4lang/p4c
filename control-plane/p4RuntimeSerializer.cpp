@@ -1355,6 +1355,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             expr = expr->to<IR::Slice>()->e0;
         }
 
+        bool synthesizeValidField = false;
         MatchType matchType;
         if (matchTypeName == P4CoreLibrary::instance.exactMatch.name) {
             matchType = MatchField::EXACT;
@@ -1364,6 +1365,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             auto callToIsValid = tryCastToIsValidBuiltin(expr, refMap, typeMap);
             if (callToIsValid != nullptr) {
                 expr = callToIsValid->appliedTo;
+                synthesizeValidField = true;
                 matchType = MatchField::VALID;
             }
         } else if (matchTypeName == P4CoreLibrary::instance.lpmMatch.name) {
@@ -1372,13 +1374,14 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             matchType = MatchField::TERNARY;
 
             // If this is a ternary match on the result of an isValid() call, desugar
-            // that to a ternary match against the '$valid$' field of the appropriate
+            // that to a ternary match against the '_valid' field of the appropriate
             // header instance.
             // XXX(seth): This is baking in BMV2-specific stuff. We should remove this
             // by performing the desugaring in a separate compiler pass.
             auto callToIsValid = tryCastToIsValidBuiltin(expr, refMap, typeMap);
             if (callToIsValid != nullptr) {
-                expr = new IR::Member(callToIsValid->appliedTo, "$valid$");
+                expr = callToIsValid->appliedTo;
+                synthesizeValidField = true;
             }
         } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
             matchType = MatchField::RANGE;
@@ -1407,6 +1410,13 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             ::error("Table '%1%': Match field '%2%' is too complicated "
                     "to represent in P4Runtime", table->externalName(), expr);
             break;
+        }
+
+        // If we're performing some variety of "valid" match, we desugar it into
+        // a match against a hidden '_valid' field. That field doesn't really
+        // exist in the program, of course, so we have to append it manually.
+        if (synthesizeValidField) {
+            path = path->append("_valid", new IR::Type_Boolean);
         }
 
         // XXX(seth): If there's only one component in the path, then it represents
