@@ -30,7 +30,9 @@ class exprUses : public Inspector {
     bool preorder(const IR::Primitive *p) override {
         if (p->name == look_for) result = true;
         return !result; }
-    bool preorder(const IR::Expression *) override { return !result; }
+    bool preorder(const IR::Expression *e) override {
+        if (e->toString() == look_for) result = true;
+        return !result; }
  public:
     exprUses(const IR::Expression *e, cstring n) : look_for(n) { e->apply(*this); }
     explicit operator bool () { return result; }
