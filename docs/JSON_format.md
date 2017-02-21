@@ -11,7 +11,7 @@ per [this specification] (http://json-schema.org/).
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.4*.
+The version described in this document is *2.5*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -52,6 +52,9 @@ corresponding to the name of the designated object.
 - if `type` is `lookahead` (parser only), `value` is a JSON 2-tuple, where the
 first item is the bit offset for the lookahead and the second item is the
 bitwidth.
+- if `type` is `register`, `value` is a JSON 2-tuple, where the first item is
+the register array name and the second is an `expression` used to evaluate the
+index.
 - if `type` is `expression`, `value` is a JSON object with 3 attributes:
   - `op`: the operation performed (`+`, `-`, `*`, `<<`, `>>`, `==`, `!=`, `>`,
   `>=`, `<`, `<=`, `and`, `or`, `not`, `&`, `|`, `^`, `~`, `valid`)
@@ -60,7 +63,7 @@ bitwidth.
 
 For an expression, `left` and `right` will themselves be JSON objects, where the
 `value` attribute can be one of `field`, `hexstr`, `header`, `expression`,
-`bool`.
+`bool`, `register`, `header_stack`.
 
 bmv2 also supports these recently-added operations:
   - data-to-bool conversion (`op` is `d2b`): unary operation which can be used
@@ -80,6 +83,21 @@ object has a fourth attribute, `cond` (condition), which is itself an
 expression. For example, in `(hA.f1 == 9) ? 3 : 4`, `cond` would be the JSON
 representation of `(hA.f1 == 9)`, `left` would be the JSON representation of `3`
 and `right` would be the JSON representation of `4`.
+  - stack header access (`op` is `dereference_stack`): `left` is a
+`header_stack` and `right` needs to evaluate to a valid index inside the stack;
+the expression produces a `header`.
+  - last valid index in a stack (`op` is `last_stack_index`): unary operation
+which takes a `header_stack` and produces the index of the last valid `header`
+in the stack as a data value.
+  - size of a stack (`op` is `size_stack`): unary operation which takes a
+`header_stack` and produces the size of the stack (i.e. number of valid headers
+in the stack) as a data value.
+  - access to the header field at a given offset (`op` is `access_field`):
+`left` needs to evaluate to a `header` and `right` is a JSON integer
+representing a valid field offset for that header; the expression returns the
+header field at the given offset. The interest of this operation is that the
+`header` needs not be known at compile time, it can be a stack member resolved
+at runtime.
 
 For field references, some special values are allowed. They are called "hidden
 fields". For now, we only support one kind of hidden fields: `<header instance
@@ -98,6 +116,8 @@ It is a JSON object which includes some meta information about the JSON file. It
 has the following attributes:
 - `version`: a JSON array with exactly 2 integer entries, a major version number
 and a minor version number.
+- `compiler`: an optional string to help identify the P4 compiler which produced
+the JSON.
 
 ### `header_types`
 

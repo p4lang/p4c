@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/expressions.h>
+#include <bm/bm_sim/header_stacks.h>
 #include <bm/bm_sim/phv.h>
 #include <bm/bm_sim/stateful.h>
 
@@ -35,6 +36,7 @@ ExprOpcodesMap::ExprOpcodesMap() {
   opcodes_map = {
     {"load_field", ExprOpcode::LOAD_FIELD},
     {"load_header", ExprOpcode::LOAD_HEADER},
+    {"load_header_stack", ExprOpcode::LOAD_HEADER_STACK},
     {"load_bool", ExprOpcode::LOAD_BOOL},
     {"load_const", ExprOpcode::LOAD_CONST},
     {"load_local", ExprOpcode::LOAD_LOCAL},
@@ -69,6 +71,10 @@ ExprOpcodesMap::ExprOpcodesMap() {
     {"two_comp_mod", ExprOpcode::TWO_COMP_MOD},
     {"d2b", ExprOpcode::DATA_TO_BOOL},
     {"b2d", ExprOpcode::BOOL_TO_DATA},
+    {"dereference_stack", ExprOpcode::DEREFERENCE_STACK},
+    {"last_stack_index", ExprOpcode::LAST_STACK_INDEX},
+    {"size_stack", ExprOpcode::SIZE_STACK},
+    {"access_field", ExprOpcode::ACCESS_FIELD},
   };
 }
 
@@ -114,6 +120,14 @@ Expression::push_back_load_header(header_id_t header) {
   Op op;
   op.opcode = ExprOpcode::LOAD_HEADER;
   op.header = header;
+  ops.push_back(op);
+}
+
+void
+Expression::push_back_load_header_stack(header_stack_id_t header_stack) {
+  Op op;
+  op.opcode = ExprOpcode::LOAD_HEADER_STACK;
+  op.header_stack = header_stack;
   ops.push_back(op);
 }
 
@@ -203,6 +217,14 @@ Expression::push_back_ternary_op(const Expression &e1, const Expression &e2) {
 }
 
 void
+Expression::push_back_access_field(int field_offset) {
+  Op op;
+  op.opcode = ExprOpcode::ACCESS_FIELD;
+  op.field_offset = field_offset;
+  ops.push_back(op);
+}
+
+void
 Expression::build() {
   data_registers_cnt = assign_dest_registers();
   built = true;
@@ -273,6 +295,10 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
   header_temps_stack.clear();
   // header_temps_stack.reserve(4);
 
+  static thread_local std::vector<const HeaderStack *> hs_temps_stack;
+  hs_temps_stack.clear();
+  // hs_temps_stack.reserve(2);
+
   bool lb, rb;
   const Data *ld, *rd;
   const Header *lh, *rh;
@@ -287,6 +313,10 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
 
       case ExprOpcode::LOAD_HEADER:
         header_temps_stack.push_back(&(phv.get_header(op.header)));
+        break;
+
+      case ExprOpcode::LOAD_HEADER_STACK:
+        hs_temps_stack.push_back(&(phv.get_header_stack(op.header_stack)));
         break;
 
       case ExprOpcode::LOAD_BOOL:
@@ -309,6 +339,12 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
       case ExprOpcode::LOAD_REGISTER_GEN:
         rd = data_temps_stack.back(); data_temps_stack.pop_back();
         data_temps_stack.push_back(&op.register_array->at(rd->get<size_t>()));
+        break;
+
+      case ExprOpcode::ACCESS_FIELD:
+        data_temps_stack.push_back(
+            &(header_temps_stack.back()->get_field(op.field_offset)));
+        header_temps_stack.pop_back();
         break;
 
       case ExprOpcode::ADD:
@@ -497,6 +533,28 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
         data_temps_stack.push_back(&data_temps[op.data_dest_index]);
         break;
 
+      case ExprOpcode::DEREFERENCE_STACK:
+        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        header_temps_stack.push_back(
+            &hs_temps_stack.back()->at(rd->get<size_t>()));
+        hs_temps_stack.pop_back();
+        break;
+
+      // LAST_STACK_INDEX seems a little redundant given SIZE_STACK, but I don't
+      // exclude in the future to do some sanity checking for LAST_STACK_INDEX
+      case ExprOpcode::LAST_STACK_INDEX:
+        data_temps[op.data_dest_index].set(
+            hs_temps_stack.back()->get_count() - 1);
+        hs_temps_stack.pop_back();
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
+
+      case ExprOpcode::SIZE_STACK:
+        data_temps[op.data_dest_index].set(hs_temps_stack.back()->get_count());
+        hs_temps_stack.pop_back();
+        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        break;
+
       default:
         assert(0 && "invalid operand");
         break;
@@ -575,6 +633,8 @@ Expression::assign_dest_registers() {
         break;
 
       case ExprOpcode::BOOL_TO_DATA:
+      case ExprOpcode::LAST_STACK_INDEX:
+      case ExprOpcode::SIZE_STACK:
         op.data_dest_index = registers_curr;
 
         new_registers.push(1);
@@ -595,6 +655,7 @@ Expression::assign_dest_registers() {
         break;
 
       case ExprOpcode::DATA_TO_BOOL:
+      case ExprOpcode::DEREFERENCE_STACK:
         registers_curr -= new_registers.top();
         new_registers.pop();
         break;
@@ -603,6 +664,7 @@ Expression::assign_dest_registers() {
       case ExprOpcode::LOAD_LOCAL:
       case ExprOpcode::LOAD_FIELD:
       case ExprOpcode::LOAD_REGISTER_REF:
+      case ExprOpcode::ACCESS_FIELD:
         new_registers.push(0);
         break;
 

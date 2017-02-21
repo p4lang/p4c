@@ -44,6 +44,9 @@ class ConditionalsTest : public ::testing::Test {
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
 
+  header_stack_id_t testHeaderStack{0};
+  size_t stack_depth{2};
+
   ConditionalsTest()
     : testHeaderType("test_t", 0) {
     testHeaderType.push_back_field("f32", 32);
@@ -53,6 +56,10 @@ class ConditionalsTest : public ::testing::Test {
     testHeaderType.push_back_field("f128", 128);
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+
+    phv_factory.push_back_header_stack(
+        "test_stack", testHeaderStack, testHeaderType,
+        {testHeader1, testHeader2});
   }
 
   virtual void SetUp() {
@@ -607,18 +614,84 @@ TEST_F(ConditionalsTest, B2D) {
     return c;
   };
 
-  Conditional c1 = build_condition("c1", 0, true, 0);
+  auto c1 = build_condition("c1", 0, true, 0);
   ASSERT_FALSE(c1.eval(*phv));
-  Conditional c2 = build_condition("c2", 1, true, 1);
+  auto c2 = build_condition("c2", 1, true, 1);
   ASSERT_TRUE(c2.eval(*phv));
-  Conditional c3 = build_condition("c3", 2, true, 7);
+  auto c3 = build_condition("c3", 2, true, 7);
   ASSERT_FALSE(c3.eval(*phv));
-  Conditional c4 = build_condition("c4", 3, false, 0);
+  auto c4 = build_condition("c4", 3, false, 0);
   ASSERT_TRUE(c4.eval(*phv));
-  Conditional c5 = build_condition("c5", 4, false, 1);
+  auto c5 = build_condition("c5", 4, false, 1);
   ASSERT_FALSE(c5.eval(*phv));
-  Conditional c6 = build_condition("c6", 5, false, 7);
+  auto c6 = build_condition("c6", 5, false, 7);
   ASSERT_FALSE(c6.eval(*phv));
+}
+
+TEST_F(ConditionalsTest, Stacks) {
+  HeaderStack &stack = phv->get_header_stack(testHeaderStack);
+  ASSERT_EQ(1u, stack.push_back());
+
+  auto base_condition = [this](const std::string &name) {
+    Conditional c(name, 0);
+    c.push_back_load_header_stack(testHeaderStack);
+    return c;
+  };
+
+  // DEREFERENCE_STACK
+  {
+    auto build_condition = [this, &base_condition](const std::string &name,
+                                                   size_t index) {
+      auto c = base_condition(name);
+      c.push_back_load_const(Data(index));
+      c.push_back_op(ExprOpcode::DEREFERENCE_STACK);
+      c.push_back_op(ExprOpcode::VALID_HEADER);
+      c.build();
+      return c;
+    };
+    auto c1 = build_condition("c1", 0);
+    ASSERT_TRUE(c1.eval(*phv));
+    auto c2 = build_condition("c2", 1);
+    ASSERT_FALSE(c2.eval(*phv));
+  }
+
+  // LAST_STACK_INDEX
+  {
+    auto c = base_condition("c");
+    c.push_back_op(ExprOpcode::LAST_STACK_INDEX);
+    c.push_back_load_const(Data(0));
+    c.push_back_op(ExprOpcode::EQ_DATA);
+    c.build();
+    ASSERT_TRUE(c.eval(*phv));
+  }
+
+  // SIZE_STACK
+  {
+    auto c = base_condition("c");
+    c.push_back_op(ExprOpcode::SIZE_STACK);
+    c.push_back_load_const(Data(1));
+    c.push_back_op(ExprOpcode::EQ_DATA);
+    c.build();
+    ASSERT_TRUE(c.eval(*phv));
+  }
+}
+
+TEST_F(ConditionalsTest, AccessField) {
+  Conditional c("ctest", 0);
+  c.push_back_load_header(testHeader1);
+  c.push_back_access_field(3);  // f16
+  c.push_back_load_const(Data(0xaba));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  Field &f = phv->get_field(testHeader1, 3);  // f16
+  f.set(0xaba);
+
+  ASSERT_TRUE(c.eval(*phv));
+
+  f.set(0xabb);
+
+  ASSERT_FALSE(c.eval(*phv));
 }
 
 TEST_F(ConditionalsTest, Stress) {

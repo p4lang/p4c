@@ -24,6 +24,7 @@
 namespace bm {
 
 using header_id_t = int;
+using header_stack_id_t = int;
 
 class PHV;
 class PHVFactory;

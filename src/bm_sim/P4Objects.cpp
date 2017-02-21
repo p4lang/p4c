@@ -47,7 +47,7 @@ T hexstr_to_int(const std::string &hexstr) {
 }  // namespace
 
 
-enum class P4Objects::ExprType { UNKNOWN, DATA, HEADER, BOOL };
+enum class P4Objects::ExprType { UNKNOWN, DATA, HEADER, HEADER_STACK, BOOL };
 
 void
 P4Objects::build_expression(const Json::Value &json_expression,
@@ -111,6 +111,9 @@ ExprType get_opcode_type(ExprOpcode opcode) {
     case ExprOpcode::BIT_NEG:
     case ExprOpcode::TWO_COMP_MOD:
     case ExprOpcode::BOOL_TO_DATA:
+    case ExprOpcode::LAST_STACK_INDEX:
+    case ExprOpcode::SIZE_STACK:
+    case ExprOpcode::ACCESS_FIELD:
       return ExprType::DATA;
     case ExprOpcode::LOAD_BOOL:
     case ExprOpcode::EQ_DATA:
@@ -130,7 +133,10 @@ ExprType get_opcode_type(ExprOpcode opcode) {
     case ExprOpcode::DATA_TO_BOOL:
       return ExprType::BOOL;
     case ExprOpcode::LOAD_HEADER:
+    case ExprOpcode::DEREFERENCE_STACK:
       return ExprType::HEADER;
+    case ExprOpcode::LOAD_HEADER_STACK:
+      return ExprType::HEADER_STACK;
     case ExprOpcode::TERNARY_OP:
       return ExprType::UNKNOWN;
     case ExprOpcode::SKIP:
@@ -173,6 +179,9 @@ P4Objects::build_expression(const Json::Value &json_expression,
       auto opcode = (op == "==") ? get_eq_opcode(typeL) : get_neq_opcode(typeL);
       expr->push_back_op(opcode);
       *expr_type = ExprType::BOOL;
+    } else if (op == "access_field") {
+      build_expression(json_left, expr);
+      expr->push_back_access_field(json_right.asInt());
     } else {
       // special handling for unary + and -, we set the left operand to 0
       if ((op == "+" || op == "-") && json_left.isNull())
@@ -226,6 +235,12 @@ P4Objects::build_expression(const Json::Value &json_expression,
           get_register_array(register_array_name));
     }
     *expr_type = ExprType::DATA;
+  } else if (type == "header_stack") {
+    auto header_stack_id = get_header_stack_id(json_value.asString());
+    expr->push_back_load_header_stack(header_stack_id);
+    *expr_type = ExprType::HEADER_STACK;
+
+    phv_factory.enable_all_stack_field_arith(header_stack_id);
   } else {
     assert(0);
   }

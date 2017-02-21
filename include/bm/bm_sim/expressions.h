@@ -34,7 +34,8 @@ class RegisterArray;
 class RegisterSync;
 
 enum class ExprOpcode {
-  LOAD_FIELD, LOAD_HEADER, LOAD_BOOL, LOAD_CONST, LOAD_LOCAL,
+  LOAD_FIELD, LOAD_HEADER, LOAD_HEADER_STACK,
+  LOAD_BOOL, LOAD_CONST, LOAD_LOCAL,
   LOAD_REGISTER_REF, LOAD_REGISTER_GEN,
   ADD, SUB, MOD, DIV, MUL, SHIFT_LEFT, SHIFT_RIGHT,
   EQ_DATA, NEQ_DATA, GT_DATA, LT_DATA, GET_DATA, LET_DATA,
@@ -45,7 +46,9 @@ enum class ExprOpcode {
   VALID_HEADER,
   TERNARY_OP, SKIP,
   TWO_COMP_MOD,
-  DATA_TO_BOOL, BOOL_TO_DATA
+  DATA_TO_BOOL, BOOL_TO_DATA,
+  DEREFERENCE_STACK, LAST_STACK_INDEX, SIZE_STACK,
+  ACCESS_FIELD,
 };
 
 class ExprOpcodesMap {
@@ -74,11 +77,15 @@ struct Op {
 
     header_id_t header;
 
+    header_stack_id_t header_stack;
+
     bool bool_value;
 
     int const_offset;
 
     int local_offset;
+
+    int field_offset;
 
     // In theory, if registers cannot be resized, I could directly store a
     // pointer to the correct register cell, i.e. &(*array)[idx]. However, this
@@ -102,6 +109,7 @@ class Expression {
   void push_back_load_field(header_id_t header, int field_offset);
   void push_back_load_bool(bool value);
   void push_back_load_header(header_id_t header);
+  void push_back_load_header_stack(header_stack_id_t header_stack);
   void push_back_load_const(const Data &data);
   void push_back_load_local(const int offset);
   void push_back_load_register_ref(RegisterArray *register_array,
@@ -109,6 +117,7 @@ class Expression {
   void push_back_load_register_gen(RegisterArray *register_array);
   void push_back_op(ExprOpcode opcode);
   void push_back_ternary_op(const Expression &e1, const Expression &e2);
+  void push_back_access_field(int field_offset);
 
   void build();
 
