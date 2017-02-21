@@ -405,6 +405,11 @@ class FindUninitialized : public Inspector {
                 reads(expression, storage);
                 registerUses(expression, false);
                 return;
+            } else if (expression->member.name == IR::Type_Stack::lastIndex) {
+                auto index = storage->getArrayLastIndex();
+                reads(expression, index);
+                registerUses(expression, false);
+                return;
             }
         }
 
