@@ -781,10 +781,28 @@ public:
 
     void addAction(const IR::P4Action* actionDeclaration) {
         auto name = actionDeclaration->externalName();
+        auto id = symbols.getId(P4RuntimeSymbolType::ACTION, name);
         auto annotations = actionDeclaration->to<IR::IAnnotated>();
 
+        // XXX(seth): The compiler creates a new instance of an action for each
+        // table that references it; this is done to make it possible to
+        // optimize the actions differently depending on their context. There
+        // are several issues with this behavior as it stands right now:
+        //   (1) We don't rename the actions, which means they all have the same
+        //       id and the control plane can't distinguish between them.
+        //   (2) No version of the P4 spec allows the user to explicitly name
+        //       a particular table's "version" of an action, which makes it
+        //       hard to generate useful names for the replicated variants.
+        //   (3) We don't perform any optimizations that leverage this anyway,
+        //       so the duplication is pointless.
+        // Considering these three issues together, for now the best bet seems
+        // to be to deduplicate the actions during serialization. If we resolve
+        // some of these issues, we'll want to revisit this decision.
+        if (serializedActions.find(id) != serializedActions.end()) return;
+        serializedActions.insert(id);
+
         auto action = p4Info->add_actions();
-        action->mutable_preamble()->set_id(symbols.getId(P4RuntimeSymbolType::ACTION, name));
+        action->mutable_preamble()->set_id(id);
         action->mutable_preamble()->set_name(name);
         addAnnotations(action->mutable_preamble(), annotations);
 
@@ -911,6 +929,7 @@ private:
 
     P4Info* p4Info;  // P4Runtime's representation of a program's control plane API.
     const P4RuntimeSymbolTable& symbols;  // The symbols used in the API and their ids.
+    std::set<pi_p4_id_t> serializedActions;  // The actions we've serialized so far.
     ReferenceMap* refMap;
     TypeMap* typeMap;
 };
