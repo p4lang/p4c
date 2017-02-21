@@ -156,3 +156,6 @@ check-%:
 
 recheck-%:
 	@$(MAKE) recheck TESTS="$(filter $*/%, $(TESTS) $(EXTRA_TESTS))"
+
+check-ifail:
+	@$(MAKE) check TESTS="$(IFAIL_TESTS)"
