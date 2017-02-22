@@ -26,11 +26,11 @@ limitations under the License.
 namespace P4Test {
 
 class MidEnd : public PassManager {
+ public:
     P4::ReferenceMap    refMap;
     P4::TypeMap         typeMap;
     IR::ToplevelBlock   *toplevel = nullptr;
 
- public:
     explicit MidEnd(CompilerOptions& options);
     IR::ToplevelBlock* process(const IR::P4Program *&program) {
         program = program->apply(*this);
