@@ -51,6 +51,7 @@ extern packet_out {
 // TODO: remove from this file, convert to built-in
 extern void verify(in bool check, in error toSignal);
 
+@name("NoAction")
 action NoAction() {}
 
 match_kind {
