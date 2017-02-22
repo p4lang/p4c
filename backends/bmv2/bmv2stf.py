@@ -18,7 +18,7 @@
 from __future__ import print_function
 from subprocess import Popen
 from threading import Thread
-import glob
+from glob import glob
 import json
 import sys
 import re
@@ -68,7 +68,7 @@ def nextWord(text, sep = None):
         return spl[0].strip(), spl[1].strip()
 
 def ByteToHex(byteStr):
-    return ''.join( [ "%02X " % ord( x ) for x in byteStr.translate(None, ' ') ] ).strip()
+    return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
 
 def HexToByte(hexStr):
     bytes = []
@@ -552,7 +552,7 @@ class RunBMV2(object):
         if self.options.verbose:
             print("Comparing outputs")
         direction = "out"
-        for file in glob.glob(self.filename('*', direction)):
+        for file in glob(self.filename('*', direction)):
             interface = self.interface_of_filename(file)
             if os.stat(file).st_size == 0:
                 packets = []
