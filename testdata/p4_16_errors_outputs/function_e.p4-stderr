@@ -1,4 +1,4 @@
-../testdata/p4_16_errors/function_e.p4(22): error: f: Passing 0 arguments when 1 expected
+../testdata/p4_16_errors/function_e.p4(22): error: f: Not enough arguments for call
         f();
         ^^^
 ../testdata/p4_16_errors/function_e.p4(23): error: f: Passing 2 arguments when 1 expected

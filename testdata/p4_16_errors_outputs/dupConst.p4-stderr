@@ -1,7 +1,13 @@
+../testdata/p4_16_errors/dupConst.p4(17): error: Duplicate declaration of a; previous at 
+const bit<4> a = 2;
+             ^
+../testdata/p4_16_errors/dupConst.p4(16)
+const bit<4> a = 1;
+             ^
 ../testdata/p4_16_errors/dupConst.p4(16): error: a: Duplicates declaration a
 const bit<4> a = 1;
                    ^
 ../testdata/p4_16_errors/dupConst.p4(16)
 const bit<4> a = 1;
                  ^
-error: 1 errors encountered, aborting compilation
+error: 2 errors encountered, aborting compilation

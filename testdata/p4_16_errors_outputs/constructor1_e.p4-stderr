@@ -1,3 +1,4 @@
-../testdata/p4_16_errors/constructor1_e.p4(18): error: <T>: Constructors cannot have type parameters
-    Y<T>(in T arg);
-     ^^^
+../testdata/p4_16_errors/constructor1_e.p4(18):syntax error, unexpected IDENTIFIER "T"
+    Y<T
+      ^
+error: 1 errors encountered, aborting compilation

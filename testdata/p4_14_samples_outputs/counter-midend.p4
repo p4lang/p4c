@@ -46,7 +46,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction_0() {
+    @name("NoAction") action NoAction_0() {
     }
     @name("my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter;
     @name("m_action") action m_action_0(bit<14> idx) {

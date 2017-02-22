@@ -10,9 +10,3 @@ action b() {}
 ../testdata/p4_16_errors/default_action1.p4(22)
         actions = { a; b; }
                        ^
-../testdata/p4_16_errors/default_action1.p4(23): error: Could not find type of .b
-        default_action = .b();
-                          ^
-../testdata/p4_16_errors/default_action1.p4(23): error: Could not find type of .b
-        default_action = .b();
-                         ^^^^

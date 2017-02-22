@@ -44,7 +44,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     TArg1 tArg1_0;
     TArg2 aArg2_0;
     bit<9> barg_0;
-    @name("NoAction_1") action NoAction_0() {
+    @name("NoAction") action NoAction_0() {
     }
     @name("p1.B_action") action p1_B_action(BParamType bData) {
         barg_0 = (bit<9>)bData;

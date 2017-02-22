@@ -1,3 +1,5 @@
+#include <core.p4>
+
 parser Parser();
 package Package(Parser p1, Parser p2);
 parser Parser1()(Parser p) {

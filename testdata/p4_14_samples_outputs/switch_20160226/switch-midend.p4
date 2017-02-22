@@ -1150,65 +1150,65 @@ struct tuple_1 {
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_2") action NoAction_0() {
+    @name("NoAction") action NoAction_0() {
     }
-    @name("NoAction_3") action NoAction_1() {
+    @name("NoAction") action NoAction_1() {
     }
-    @name("NoAction_4") action NoAction_86() {
+    @name("NoAction") action NoAction_86() {
     }
-    @name("NoAction_5") action NoAction_87() {
+    @name("NoAction") action NoAction_87() {
     }
-    @name("NoAction_6") action NoAction_88() {
+    @name("NoAction") action NoAction_88() {
     }
-    @name("NoAction_7") action NoAction_89() {
+    @name("NoAction") action NoAction_89() {
     }
-    @name("NoAction_8") action NoAction_90() {
+    @name("NoAction") action NoAction_90() {
     }
-    @name("NoAction_9") action NoAction_91() {
+    @name("NoAction") action NoAction_91() {
     }
-    @name("NoAction_10") action NoAction_92() {
+    @name("NoAction") action NoAction_92() {
     }
-    @name("NoAction_11") action NoAction_93() {
+    @name("NoAction") action NoAction_93() {
     }
-    @name("NoAction_12") action NoAction_94() {
+    @name("NoAction") action NoAction_94() {
     }
-    @name("NoAction_13") action NoAction_95() {
+    @name("NoAction") action NoAction_95() {
     }
-    @name("NoAction_14") action NoAction_96() {
+    @name("NoAction") action NoAction_96() {
     }
-    @name("NoAction_15") action NoAction_97() {
+    @name("NoAction") action NoAction_97() {
     }
-    @name("NoAction_16") action NoAction_98() {
+    @name("NoAction") action NoAction_98() {
     }
-    @name("NoAction_17") action NoAction_99() {
+    @name("NoAction") action NoAction_99() {
     }
-    @name("NoAction_18") action NoAction_100() {
+    @name("NoAction") action NoAction_100() {
     }
-    @name("NoAction_19") action NoAction_101() {
+    @name("NoAction") action NoAction_101() {
     }
-    @name("NoAction_20") action NoAction_102() {
+    @name("NoAction") action NoAction_102() {
     }
-    @name("NoAction_21") action NoAction_103() {
+    @name("NoAction") action NoAction_103() {
     }
-    @name("NoAction_22") action NoAction_104() {
+    @name("NoAction") action NoAction_104() {
     }
-    @name("NoAction_23") action NoAction_105() {
+    @name("NoAction") action NoAction_105() {
     }
-    @name("NoAction_24") action NoAction_106() {
+    @name("NoAction") action NoAction_106() {
     }
-    @name("NoAction_25") action NoAction_107() {
+    @name("NoAction") action NoAction_107() {
     }
-    @name("NoAction_26") action NoAction_108() {
+    @name("NoAction") action NoAction_108() {
     }
-    @name("NoAction_27") action NoAction_109() {
+    @name("NoAction") action NoAction_109() {
     }
-    @name("NoAction_28") action NoAction_110() {
+    @name("NoAction") action NoAction_110() {
     }
-    @name("NoAction_29") action NoAction_111() {
+    @name("NoAction") action NoAction_111() {
     }
-    @name("NoAction_30") action NoAction_112() {
+    @name("NoAction") action NoAction_112() {
     }
-    @name("NoAction_31") action NoAction_113() {
+    @name("NoAction") action NoAction_113() {
     }
     @name("egress_port_type_normal") action egress_port_type_normal_0() {
         meta.egress_metadata.port_type = 2w0;
@@ -2961,113 +2961,113 @@ struct tuple_7 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_32") action NoAction_114() {
+    @name("NoAction") action NoAction_114() {
     }
-    @name("NoAction_33") action NoAction_115() {
+    @name("NoAction") action NoAction_115() {
     }
-    @name("NoAction_34") action NoAction_116() {
+    @name("NoAction") action NoAction_116() {
     }
-    @name("NoAction_35") action NoAction_117() {
+    @name("NoAction") action NoAction_117() {
     }
-    @name("NoAction_36") action NoAction_118() {
+    @name("NoAction") action NoAction_118() {
     }
-    @name("NoAction_37") action NoAction_119() {
+    @name("NoAction") action NoAction_119() {
     }
-    @name("NoAction_38") action NoAction_120() {
+    @name("NoAction") action NoAction_120() {
     }
-    @name("NoAction_39") action NoAction_121() {
+    @name("NoAction") action NoAction_121() {
     }
-    @name("NoAction_40") action NoAction_122() {
+    @name("NoAction") action NoAction_122() {
     }
-    @name("NoAction_41") action NoAction_123() {
+    @name("NoAction") action NoAction_123() {
     }
-    @name("NoAction_42") action NoAction_124() {
+    @name("NoAction") action NoAction_124() {
     }
-    @name("NoAction_43") action NoAction_125() {
+    @name("NoAction") action NoAction_125() {
     }
-    @name("NoAction_44") action NoAction_126() {
+    @name("NoAction") action NoAction_126() {
     }
-    @name("NoAction_45") action NoAction_127() {
+    @name("NoAction") action NoAction_127() {
     }
-    @name("NoAction_46") action NoAction_128() {
+    @name("NoAction") action NoAction_128() {
     }
-    @name("NoAction_47") action NoAction_129() {
+    @name("NoAction") action NoAction_129() {
     }
-    @name("NoAction_48") action NoAction_130() {
+    @name("NoAction") action NoAction_130() {
     }
-    @name("NoAction_49") action NoAction_131() {
+    @name("NoAction") action NoAction_131() {
     }
-    @name("NoAction_50") action NoAction_132() {
+    @name("NoAction") action NoAction_132() {
     }
-    @name("NoAction_51") action NoAction_133() {
+    @name("NoAction") action NoAction_133() {
     }
-    @name("NoAction_52") action NoAction_134() {
+    @name("NoAction") action NoAction_134() {
     }
-    @name("NoAction_53") action NoAction_135() {
+    @name("NoAction") action NoAction_135() {
     }
-    @name("NoAction_54") action NoAction_136() {
+    @name("NoAction") action NoAction_136() {
     }
-    @name("NoAction_55") action NoAction_137() {
+    @name("NoAction") action NoAction_137() {
     }
-    @name("NoAction_56") action NoAction_138() {
+    @name("NoAction") action NoAction_138() {
     }
-    @name("NoAction_57") action NoAction_139() {
+    @name("NoAction") action NoAction_139() {
     }
-    @name("NoAction_58") action NoAction_140() {
+    @name("NoAction") action NoAction_140() {
     }
-    @name("NoAction_59") action NoAction_141() {
+    @name("NoAction") action NoAction_141() {
     }
-    @name("NoAction_60") action NoAction_142() {
+    @name("NoAction") action NoAction_142() {
     }
-    @name("NoAction_61") action NoAction_143() {
+    @name("NoAction") action NoAction_143() {
     }
-    @name("NoAction_62") action NoAction_144() {
+    @name("NoAction") action NoAction_144() {
     }
-    @name("NoAction_63") action NoAction_145() {
+    @name("NoAction") action NoAction_145() {
     }
-    @name("NoAction_64") action NoAction_146() {
+    @name("NoAction") action NoAction_146() {
     }
-    @name("NoAction_65") action NoAction_147() {
+    @name("NoAction") action NoAction_147() {
     }
-    @name("NoAction_66") action NoAction_148() {
+    @name("NoAction") action NoAction_148() {
     }
-    @name("NoAction_67") action NoAction_149() {
+    @name("NoAction") action NoAction_149() {
     }
-    @name("NoAction_68") action NoAction_150() {
+    @name("NoAction") action NoAction_150() {
     }
-    @name("NoAction_69") action NoAction_151() {
+    @name("NoAction") action NoAction_151() {
     }
-    @name("NoAction_70") action NoAction_152() {
+    @name("NoAction") action NoAction_152() {
     }
-    @name("NoAction_71") action NoAction_153() {
+    @name("NoAction") action NoAction_153() {
     }
-    @name("NoAction_72") action NoAction_154() {
+    @name("NoAction") action NoAction_154() {
     }
-    @name("NoAction_73") action NoAction_155() {
+    @name("NoAction") action NoAction_155() {
     }
-    @name("NoAction_74") action NoAction_156() {
+    @name("NoAction") action NoAction_156() {
     }
-    @name("NoAction_75") action NoAction_157() {
+    @name("NoAction") action NoAction_157() {
     }
-    @name("NoAction_76") action NoAction_158() {
+    @name("NoAction") action NoAction_158() {
     }
-    @name("NoAction_77") action NoAction_159() {
+    @name("NoAction") action NoAction_159() {
     }
-    @name("NoAction_78") action NoAction_160() {
+    @name("NoAction") action NoAction_160() {
     }
-    @name("NoAction_79") action NoAction_161() {
+    @name("NoAction") action NoAction_161() {
     }
-    @name("NoAction_80") action NoAction_162() {
+    @name("NoAction") action NoAction_162() {
     }
-    @name("NoAction_81") action NoAction_163() {
+    @name("NoAction") action NoAction_163() {
     }
-    @name("NoAction_82") action NoAction_164() {
+    @name("NoAction") action NoAction_164() {
     }
-    @name("NoAction_83") action NoAction_165() {
+    @name("NoAction") action NoAction_165() {
     }
-    @name("NoAction_84") action NoAction_166() {
+    @name("NoAction") action NoAction_166() {
     }
-    @name("NoAction_85") action NoAction_167() {
+    @name("NoAction") action NoAction_167() {
     }
     @name("rmac_hit") action rmac_hit_0() {
         meta.l3_metadata.rmac_hit = 1w1;
