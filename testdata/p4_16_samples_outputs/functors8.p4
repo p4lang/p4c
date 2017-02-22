@@ -1,3 +1,5 @@
+#include <core.p4>
+
 extern e<T> {
     e();
     T get();

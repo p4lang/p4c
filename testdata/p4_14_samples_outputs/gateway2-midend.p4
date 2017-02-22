@@ -26,9 +26,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction_0() {
+    @name("NoAction") action NoAction_0() {
     }
-    @name("NoAction_2") action NoAction_3() {
+    @name("NoAction") action NoAction_3() {
     }
     @name("setb1") action setb1_0(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;

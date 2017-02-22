@@ -98,7 +98,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     IPv4Address nextHop_3;
     bool hasReturned_0;
     IPv4Address nextHop_0;
-    @name("NoAction_1") action NoAction_0() {
+    @name("NoAction") action NoAction_0() {
     }
     @name("Drop_action") action Drop_action_0() {
         outCtrl.outputPort = 4w0xf;

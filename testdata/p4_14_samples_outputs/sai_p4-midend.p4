@@ -135,23 +135,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_1") action NoAction_0() {
+    @name("NoAction") action NoAction_0() {
     }
-    @name("NoAction_2") action NoAction_10() {
+    @name("NoAction") action NoAction_10() {
     }
-    @name("NoAction_3") action NoAction_11() {
+    @name("NoAction") action NoAction_11() {
     }
-    @name("NoAction_4") action NoAction_12() {
+    @name("NoAction") action NoAction_12() {
     }
-    @name("NoAction_5") action NoAction_13() {
+    @name("NoAction") action NoAction_13() {
     }
-    @name("NoAction_6") action NoAction_14() {
+    @name("NoAction") action NoAction_14() {
     }
-    @name("NoAction_7") action NoAction_15() {
+    @name("NoAction") action NoAction_15() {
     }
-    @name("NoAction_8") action NoAction_16() {
+    @name("NoAction") action NoAction_16() {
     }
-    @name("NoAction_9") action NoAction_17() {
+    @name("NoAction") action NoAction_17() {
     }
     @name("fdb_set") action fdb_set_0(bit<1> type_, bit<9> port_id) {
         meta.ingress_metadata.mac_type = type_;

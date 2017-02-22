@@ -1,10 +1,9 @@
-#include <core.p4>
-
 error {
     IPv4FragmentsNotSupported,
     IPv4OptionsNotSupported,
     IPv4IncorrectVersion
 }
+#include <core.p4>
 
 header Ethernet {
     bit<16> etherType;

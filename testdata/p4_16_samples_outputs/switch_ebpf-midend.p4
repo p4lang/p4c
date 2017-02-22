@@ -44,7 +44,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("NoAction_1") action NoAction_0() {
+    @name("NoAction") action NoAction_0() {
     }
     @name("Reject") action Reject_0(IPv4Address add) {
         pass = false;
