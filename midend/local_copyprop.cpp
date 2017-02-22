@@ -140,27 +140,6 @@ IR::AssignmentStatement *P4::DoLocalCopyPropagation::postorder(IR::AssignmentSta
     return as;
 }
 
-IR::MethodCallExpression *P4::DoLocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
-    if (!in_action) return mc;
-    auto type = mc->method->type->to<IR::Type_Method>();
-    CHECK_NULL(type);
-    int idx = 0;
-    for (auto param : *type->parameters->parameters) {
-        if (param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) {
-            if (auto arg = mc->arguments->at(idx)->to<IR::PathExpression>()) {
-                dropValuesUsing(arg->path->name); } }
-        ++idx; }
-    return mc;
-}
-
-IR::Primitive *P4::DoLocalCopyPropagation::postorder(IR::Primitive *prim) {
-    if (!in_action) return prim;
-    for (unsigned idx = 0; idx < prim->operands.size(); ++idx) {
-        if (prim->isOutput(idx)) {
-            dropValuesUsing(prim->operands.at(idx)->toString()); } }
-    return prim;
-}
-
 IR::P4Action *P4::DoLocalCopyPropagation::preorder(IR::P4Action *act) {
     in_action = true;
     if (!available.empty()) BUG("corrupt internal data struct");

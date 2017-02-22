@@ -31,7 +31,6 @@ namespace P4 {
    (obtained by running Typechecking(updateProgram = true)).
  */
 class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
-    const TypeMap*              typeMap;
     bool                        in_action = false;
     struct VarInfo {
         bool                    local = false;
@@ -47,8 +46,6 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     const IR::Expression *postorder(IR::PathExpression *) override;
     IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
-    IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;
-    IR::Primitive *postorder(IR::Primitive *) override;
     IR::P4Action *preorder(IR::P4Action *) override;
     IR::P4Action *postorder(IR::P4Action *) override;
     class ElimDead;
@@ -56,15 +53,14 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    explicit DoLocalCopyPropagation(const TypeMap* typeMap) : typeMap(typeMap)
-    { visitDagOnce = false; setName("DoLocalCopyPropagation"); }
+    DoLocalCopyPropagation() { visitDagOnce = false; setName("DoLocalCopyPropagation"); }
 };
 
 class LocalCopyPropagation : public PassManager {
  public:
     LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap, true));
-        passes.push_back(new DoLocalCopyPropagation(typeMap));
+        passes.push_back(new DoLocalCopyPropagation);
         setName("LocalCopyPropagation");
     }
 };
