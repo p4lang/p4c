@@ -68,7 +68,7 @@ def nextWord(text, sep = None):
         return spl[0].strip(), spl[1].strip()
 
 def ByteToHex(byteStr):
-    return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
+    return ''.join( [ "%02X " % ord( x ) for x in byteStr.translate(None, ' ') ] ).strip()
 
 def HexToByte(hexStr):
     bytes = []
