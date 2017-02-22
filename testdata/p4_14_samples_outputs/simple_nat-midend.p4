@@ -120,9 +120,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_2") action NoAction_0() {
+    @name("NoAction") action NoAction_0() {
     }
-    @name("NoAction_3") action NoAction_1() {
+    @name("NoAction") action NoAction_1() {
     }
     @name("do_rewrites") action do_rewrites_0(bit<48> smac) {
         hdr.cpu_header.setInvalid();
@@ -174,13 +174,13 @@ struct tuple_0 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("NoAction_4") action NoAction_8() {
+    @name("NoAction") action NoAction_8() {
     }
-    @name("NoAction_5") action NoAction_9() {
+    @name("NoAction") action NoAction_9() {
     }
-    @name("NoAction_6") action NoAction_10() {
+    @name("NoAction") action NoAction_10() {
     }
-    @name("NoAction_7") action NoAction_11() {
+    @name("NoAction") action NoAction_11() {
     }
     @name("set_dmac") action set_dmac_0(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
