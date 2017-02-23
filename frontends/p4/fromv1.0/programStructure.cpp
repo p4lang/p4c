@@ -739,20 +739,18 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         propvec->push_back(prop);
     }
 
-    IR::ID defaction;
-    if (!table->default_action.name.isNullOrEmpty())
-        defaction = table->default_action;
-    else
-        defaction = p4lib.noAction.Id();
     {
-        auto act = new IR::PathExpression(defaction);
+        const bool hasExplicitDefaultAction = !table->default_action.name.isNullOrEmpty();
+        auto act = new IR::PathExpression(hasExplicitDefaultAction ? table->default_action
+                                                                   : p4lib.noAction.Id());
         auto args = table->default_action_args != nullptr ?
                 table->default_action_args : new IR::Vector<IR::Expression>();
         auto methodCall = new IR::MethodCallExpression(Util::SourceInfo(), act,
                                                        emptyTypeArguments, args);
         auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID(IR::TableProperties::defaultActionPropertyName),
-            IR::Annotations::empty, new IR::ExpressionValue(Util::SourceInfo(), methodCall), false);
+            IR::Annotations::empty, new IR::ExpressionValue(Util::SourceInfo(), methodCall),
+            /* isConstant = */ hasExplicitDefaultAction);
         propvec->push_back(prop);
     }
 
