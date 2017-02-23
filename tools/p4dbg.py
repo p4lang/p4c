@@ -74,7 +74,8 @@ class FieldMap:
         for h in header_instances:
             header = h["name"]
             header_type = header_types_map[h["header_type"]]
-            for idx, (f_name, f_nbits) in enumerate(header_type["fields"]):
+            for idx, t in enumerate(header_type["fields"]):
+                f_name, f_nbits = t[0], t[1]
                 e = (".".join([header, f_name]), f_nbits)
                 self.fields[(h["id"], idx)] = e
                 self.fields_rev[e[0]] = (h["id"], idx)
