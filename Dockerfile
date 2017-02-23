@@ -30,7 +30,7 @@ WORKDIR /behavioral-model/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $BM_DEPS $BM_RUNTIME_DEPS && \
     ./autogen.sh && \
-    ./configure --with-pdfixed --with-stress-tests && \
+    ./configure --enable-debugger --with-pdfixed --with-stress-tests && \
     make && \
     make install && \
     ldconfig && \
