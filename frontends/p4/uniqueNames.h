@@ -26,6 +26,8 @@ namespace P4 {
 class RenameMap {
     // Internal declaration name
     std::map<const IR::IDeclaration*, cstring> newName;
+    std::set<const IR::P4Action*> inTable;  // all actions that appear in tables
+
  public:
     void setNewName(const IR::IDeclaration* decl, cstring name) {
         CHECK_NULL(decl);
@@ -45,6 +47,10 @@ class RenameMap {
         CHECK_NULL(decl);
         return newName.find(decl) != newName.end();
     }
+    void foundInTable(const IR::P4Action* action)
+    { inTable.emplace(action); }
+    bool isInTable(const IR::P4Action* action)
+    { return inTable.find(action) != inTable.end(); }
 };
 
 // Give unique names to various declarations to make it easier to
@@ -110,9 +116,11 @@ class FindParameters : public Inspector {
     ReferenceMap* refMap;  // used to generate new names
     RenameMap*    renameMap;
 
-    void doParameters(const IR::ParameterList* pl) {
+    // If all is true then rename all parameters, else rename only
+    // directional parameters
+    void doParameters(const IR::ParameterList* pl, bool all) {
         for (auto p : *pl->parameters) {
-            if (p->direction == IR::Direction::None)
+            if (!all && p->direction == IR::Direction::None)
                 continue;
             cstring newName = refMap->newName(p->name);
             renameMap->setNewName(p, newName);
@@ -123,9 +131,11 @@ class FindParameters : public Inspector {
             refMap(refMap), renameMap(renameMap)
     { CHECK_NULL(refMap); CHECK_NULL(renameMap); setName("FindParameters"); }
     void postorder(const IR::P4Table* table) override
-    { doParameters(table->parameters); }
-    void postorder(const IR::P4Action* action) override
-    { doParameters(action->parameters); }
+    { doParameters(table->parameters, false); }
+    void postorder(const IR::P4Action* action) override {
+        bool inTable = renameMap->isInTable(action);
+        doParameters(action->parameters, !inTable);
+    }
 };
 
 class UniqueParameters : public PassManager {

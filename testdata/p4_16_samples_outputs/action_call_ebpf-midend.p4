@@ -12,9 +12,9 @@ parser prs(packet_in p, out Headers_t headers) {
 
 control pipe(inout Headers_t headers, out bool pass) {
     bool x;
-    bool rej;
+    bool rej_0;
     @name("Reject") action Reject_0() {
-        rej = x;
+        rej_0 = x;
         pass = x;
     }
     action act() {
