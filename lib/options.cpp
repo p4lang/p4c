@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@ limitations under the License.
 #include "options.h"
 
 void Util::Options::registerOption(const char* option, const char* argName,
-                                   OptionProcessor processor, const char* description) {
+                                   OptionProcessor processor, const char* description,
+                                   bool hide) {
     if (option == nullptr || processor == nullptr || description == nullptr)
         throw std::logic_error("Null argument to registerOption");
     if (strlen(option) <= 1)
@@ -29,6 +30,7 @@ void Util::Options::registerOption(const char* option, const char* argName,
     o->argName = argName;
     o->processor = processor;
     o->description = description;
+    o->hide = hide;
     auto opt = get(options, option);
     if (opt != nullptr)
         throw std::logic_error(std::string("Option already registered: ") + option);
@@ -100,6 +102,8 @@ void Util::Options::usage() {
     for (auto o : optionOrder) {
         auto option = get(options, o);
         size_t len = strlen(o);
+        if (option->hide)
+            continue;
         *outStream << option->option;
         if (option->argName != nullptr) {
             *outStream << " " << option->argName;

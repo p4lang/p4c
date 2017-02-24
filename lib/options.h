@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ class Options {
         const char* argName;  // nullptr if argument is not required
         const char* description;
         OptionProcessor processor;
+        bool hide;  // is true to hide option from help message
     };
     const char* binaryName;
     cstring message;
@@ -59,7 +60,8 @@ class Options {
                         const char* argName,  // name of option argument;
                                               // nullptr if no argument expected
                         OptionProcessor processor,  // function to execute when option matches
-                        const char* description);   // option help message
+                        const char* description,  // option help message
+                        bool hide = false);  // hide option from --help message
 
     explicit Options(cstring message) : binaryName(nullptr), message(message) {}
 
