@@ -56,7 +56,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             count_entries;
         }
-        default_action = count_entries();
+        const default_action = count_entries();
     }
     apply {
         index_setter.apply();

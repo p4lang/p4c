@@ -64,13 +64,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             count_entries_0();
         }
-        default_action = count_entries_0();
+        const default_action = count_entries_0();
     }
     @name("stats2") table stats2() {
         actions = {
             count_entries2_0();
         }
-        default_action = count_entries2_0();
+        const default_action = count_entries2_0();
     }
     apply {
         index_setter.apply();
