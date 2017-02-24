@@ -624,7 +624,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         key = {
             hdr.data.data: exact @name("hdr.data.data") ;
         }
-        default_action = mark_forward_0();
+        const default_action = mark_forward_0();
     }
     apply {
         mark_check.apply();
