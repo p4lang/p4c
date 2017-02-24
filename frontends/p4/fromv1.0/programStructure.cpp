@@ -1610,6 +1610,9 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
         calledRegisters.getCallees(a, registersToDo);
         calledExterns.getCallees(a, externsToDo);
     }
+    for (auto c : externsToDo) {
+        calledRegisters.getCallees(c, registersToDo);
+    }
     for (auto c : metersToDo) {
         auto mtr = meters.get(c);
         auto meter = convert(mtr, meters.get(mtr));
