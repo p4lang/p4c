@@ -152,6 +152,10 @@ def process_file(options, argv):
         expected_dirname = dirname.replace("_samples/", "_samples_outputs/", 1)
     elif "_errors/" in dirname:
         expected_dirname = dirname.replace("_errors/", "_errors_outputs/", 1)
+    elif "p4_14/" in dirname:
+        expected_dirname = dirname.replace("p4_14/", "p4_14_outputs/", 1)
+    elif "p4_16/" in dirname:
+        expected_dirname = dirname.replace("p4_16/", "p4_16_outputs/", 1)
     else:
         expected_dirname = dirname + "_outputs"  # expected outputs are here
     if not os.path.exists(expected_dirname):
