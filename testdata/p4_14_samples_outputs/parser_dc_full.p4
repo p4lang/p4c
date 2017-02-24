@@ -632,7 +632,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         key = {
             hdr.data.data: exact;
         }
-        default_action = mark_forward();
+        const default_action = mark_forward();
     }
     apply {
         mark_check.apply();

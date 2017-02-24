@@ -218,6 +218,12 @@ struct HeaderField {
     }
 };
 
+/// The information about a default action which is needed to serialize it.
+struct DefaultAction {
+    const cstring name;  // The fully qualified external name of this action.
+    const bool isConst;  // Is this a const default action?
+};
+
 /// The types of action profiles available in the V1 model.
 enum class ActionProfileType {
     INDIRECT,
@@ -956,7 +962,7 @@ public:
                   const boost::optional<cstring>& implementation,
                   const boost::optional<Counterlike<IR::Counter>>& directCounter,
                   const boost::optional<Counterlike<IR::Meter>>& directMeter,
-                  const boost::optional<cstring>& defaultAction,
+                  const boost::optional<DefaultAction>& defaultAction,
                   const std::vector<cstring>& actions,
                   const std::vector<std::pair<cstring, MatchType>>& matchFields) {
         auto name = tableDeclaration->externalName();
@@ -988,8 +994,8 @@ public:
             addMeter(*directMeter);
         }
 
-        if (defaultAction) {
-            auto id = symbols.getId(P4RuntimeSymbolType::ACTION, *defaultAction);
+        if (defaultAction && defaultAction->isConst) {
+            auto id = symbols.getId(P4RuntimeSymbolType::ACTION, defaultAction->name);
             table->set_const_default_action_id(id);
         }
 
@@ -1597,7 +1603,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
 }
 
 /// @return @table's default action, if it has one, or boost::none otherwise.
-static boost::optional<cstring>
+static boost::optional<DefaultAction>
 getDefaultAction(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
     auto defaultActionProperty =
         table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
@@ -1609,18 +1615,23 @@ getDefaultAction(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMa
 
     auto expr =
         defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
+    cstring actionName;
     if (expr->is<IR::PathExpression>()) {
         auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
         BUG_CHECK(decl->is<IR::P4Action>(), "Expected an action: %1%", expr);
-        return decl->to<IR::P4Action>()->externalName();
+        actionName = decl->to<IR::P4Action>()->externalName();
     } else if (expr->is<IR::MethodCallExpression>()) {
         auto callExpr = expr->to<IR::MethodCallExpression>();
         auto instance = P4::MethodInstance::resolve(callExpr, refMap, typeMap);
         BUG_CHECK(instance->is<P4::ActionCall>(), "Expected an action: %1%", expr);
-        return instance->to<P4::ActionCall>()->action->externalName();
+        actionName = instance->to<P4::ActionCall>()->action->externalName();
     } else {
-        BUG("Unexpected expression default action: %1%", expr);
+        ::error("Unexpected expression in default action for table %1%: %2%",
+                table->externalName(), expr);
+        return boost::none;
     }
+
+    return DefaultAction{actionName, defaultActionProperty->isConstant};
 }
 
 static void serializeTable(P4RuntimeSerializer& serializer,

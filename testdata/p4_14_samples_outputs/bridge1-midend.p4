@@ -38,7 +38,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             copyb1_0();
         }
-        default_action = copyb1_0();
+        const default_action = copyb1_0();
     }
     apply {
         output.apply();

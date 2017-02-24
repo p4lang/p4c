@@ -19,6 +19,31 @@ limitations under the License.
 
 namespace P4 {
 
+namespace {
+
+class FindActionCalls : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+    RenameMap* renameMap;
+ public:
+    explicit FindActionCalls(ReferenceMap* refMap, TypeMap* typeMap, RenameMap* renameMap) :
+            refMap(refMap), typeMap(typeMap), renameMap(renameMap)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(renameMap); }
+
+    void postorder(const IR::MethodCallExpression* expression) {
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        if (!mi->is<P4::ActionCall>())
+            return;
+        auto ac = mi->to<P4::ActionCall>();
+
+        auto table = findContext<IR::P4Table>();
+        if (table != nullptr)
+            renameMap->foundInTable(ac->action);
+    }
+};
+
+}  // namespace
+
 // Add a @name annotation ONLY if it does not already exist.
 // Otherwise do nothing.
 static const IR::Annotations*
@@ -42,7 +67,8 @@ UniqueParameters::UniqueParameters(ReferenceMap* refMap, TypeMap* typeMap) :
         renameMap(new RenameMap) {
     setName("UniqueParameters");
     CHECK_NULL(refMap); CHECK_NULL(typeMap);
-    passes.emplace_back(new ResolveReferences(refMap));
+    passes.emplace_back(new TypeChecking(refMap, typeMap));
+    passes.emplace_back(new FindActionCalls(refMap, typeMap, renameMap));
     passes.emplace_back(new FindParameters(refMap, renameMap));
     passes.emplace_back(new RenameSymbols(refMap, renameMap));
     passes.emplace_back(new ClearTypeMap(typeMap));

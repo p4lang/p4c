@@ -72,7 +72,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             output_0();
         }
-        default_action = output_0(9w1);
+        const default_action = output_0(9w1);
     }
     @name("test1") table test1() {
         actions = {
