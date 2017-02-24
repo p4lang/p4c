@@ -21,8 +21,10 @@ limitations under the License.
 #include "lib/cstring.h"
 
 namespace IR {
+class ConstructorCallExpression;
 class Expression;
 class IAnnotated;
+class PathExpression;
 class Type_Extern;
 class TypeMap;
 template <typename T> class Vector;
