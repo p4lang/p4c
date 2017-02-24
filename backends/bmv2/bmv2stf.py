@@ -18,7 +18,7 @@
 from __future__ import print_function
 from subprocess import Popen
 from threading import Thread
-import glob
+from glob import glob
 import json
 import sys
 import re
@@ -552,7 +552,7 @@ class RunBMV2(object):
         if self.options.verbose:
             print("Comparing outputs")
         direction = "out"
-        for file in glob.glob(self.filename('*', direction)):
+        for file in glob(self.filename('*', direction)):
             interface = self.interface_of_filename(file)
             if os.stat(file).st_size == 0:
                 packets = []

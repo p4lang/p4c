@@ -774,7 +774,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         if (action_selector->mode)
             annos = annos->addAnnotation("mode", new IR::StringLiteral(action_selector->mode));
         if (action_selector->type)
-            annos = annos->addAnnotation("type", new IR::StringLiteral(action_selector->mode));
+            annos = annos->addAnnotation("type", new IR::StringLiteral(action_selector->type));
         auto prop = new IR::Property(
             Util::SourceInfo(), IR::ID(v1model.tableAttributes.tableImplementation.Id()),
             annos, propvalue, false);
@@ -1483,6 +1483,12 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
     auto kindarg = counterType(cm);
     args->push_back(kindarg);
     auto annos = addNameAnnotation(cm->name, cm->annotations);
+    if (auto *c = cm->to<IR::Counter>()) {
+        if (c->min_width >= 0)
+            annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
+        if (c->max_width >= 0)
+            annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width));
+    }
     auto decl = new IR::Declaration_Instance(
         Util::SourceInfo(), newName, annos, type, args, nullptr);
     return decl;
@@ -1603,6 +1609,9 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
         calledMeters.getCallees(a, metersToDo);
         calledRegisters.getCallees(a, registersToDo);
         calledExterns.getCallees(a, externsToDo);
+    }
+    for (auto c : externsToDo) {
+        calledRegisters.getCallees(c, registersToDo);
     }
     for (auto c : metersToDo) {
         auto mtr = meters.get(c);

@@ -32,9 +32,6 @@ static cstring version = "0.0.5";
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
 CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
-    registerOption("-h", nullptr,
-                   [this](const char*) { usage(); exit(0); return false; },
-                   "Print this help message");
     registerOption("--help", nullptr,
                    [this](const char*) { usage(); exit(0); return false; },
                    "Print this help message");
@@ -62,13 +59,13 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char*) {
                        langVersion = CompilerOptions::FrontendVersion::P4_14;
                        return true; },
-                    "Specify language version to compile");
+                    "[Deprecated] Specify language version to compile");
     registerOption("--p4-16", nullptr,
                    [this](const char*) {
                        langVersion = CompilerOptions::FrontendVersion::P4_16;
                        return true; },
-                    "Specify language version to compile");
-    registerOption("--p4v", "lang",
+                    "[Deprecated] Specify language version to compile");
+    registerOption("--p4v", "{14|16}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
                            langVersion = CompilerOptions::FrontendVersion::P4_14;
