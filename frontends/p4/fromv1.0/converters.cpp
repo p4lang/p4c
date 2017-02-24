@@ -485,16 +485,22 @@ class ComputeCallGraph : public Inspector {
         }
     }
     void postorder(const IR::GlobalRef *gref) override {
-        auto parent = findContext<IR::ActionFunction>();
-        BUG_CHECK(parent != nullptr, "%1%: GlobalRef not within action", gref);
+        const Context *ctxt = nullptr;
+        cstring caller;
+        if (auto af = findContext<IR::ActionFunction>()) {
+            caller = af->name;
+        } else if (auto di = findContext<IR::Declaration_Instance>()) {
+            caller = di->name;
+        } else {
+            BUG("%1%: GlobalRef not within action or extern", gref); }
         if (auto ctr = gref->obj->to<IR::Counter>())
-            structure->calledCounters.calls(parent->name, ctr->name.name);
+            structure->calledCounters.calls(caller, ctr->name.name);
         else if (auto mtr = gref->obj->to<IR::Meter>())
-            structure->calledMeters.calls(parent->name, mtr->name.name);
+            structure->calledMeters.calls(caller, mtr->name.name);
         else if (auto reg = gref->obj->to<IR::Register>())
-            structure->calledRegisters.calls(parent->name, reg->name.name);
+            structure->calledRegisters.calls(caller, reg->name.name);
         else if (auto ext = gref->obj->to<IR::Declaration_Instance>())
-            structure->calledExterns.calls(parent->name, ext->name.name);
+            structure->calledExterns.calls(caller, ext->name.name);
     }
 };
 
