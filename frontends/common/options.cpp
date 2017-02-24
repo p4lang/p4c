@@ -39,7 +39,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char*) {
                        std::cerr << binaryName << std::endl;
                        std::cerr << "Version " << version << std::endl;
-                       return true; }, "Print compiler version");
+                       exit(0); return false; }, "Print compiler version");
     registerOption("-I", "path",
                    [this](const char* arg) {
                        preprocessor_options += std::string(" -I") + arg; return true; },
