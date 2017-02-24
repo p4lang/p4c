@@ -13,7 +13,7 @@ struct acl_metadata_t {
     bit<15> if_label;
     bit<16> bd_label;
     bit<10> mirror_session_id;
-    bit<32> acl_stats_index;
+    bit<16> acl_stats_index;
 }
 
 struct egress_filter_metadata_t {
@@ -3807,20 +3807,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("process_mac_acl.nop") action process_mac_acl_nop() {
     }
-    @name("process_mac_acl.acl_log") action process_mac_acl_acl_log(bit<32> acl_stats_index) {
+    @name("process_mac_acl.acl_log") action process_mac_acl_acl_log(bit<16> acl_stats_index) {
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_mac_acl.acl_deny") action process_mac_acl_acl_deny(bit<32> acl_stats_index) {
+    @name("process_mac_acl.acl_deny") action process_mac_acl_acl_deny(bit<16> acl_stats_index) {
         meta.acl_metadata.acl_deny = 1w1;
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_mac_acl.acl_permit") action process_mac_acl_acl_permit(bit<32> acl_stats_index) {
+    @name("process_mac_acl.acl_permit") action process_mac_acl_acl_permit(bit<16> acl_stats_index) {
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_mac_acl.acl_mirror") action process_mac_acl_acl_mirror(bit<16> session_id, bit<32> acl_stats_index) {
+    @name("process_mac_acl.acl_mirror") action process_mac_acl_acl_mirror(bit<16> session_id, bit<16> acl_stats_index) {
         meta.i2e_metadata.mirror_session_id = session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         meta.ingress_metadata.enable_dod = 1w0;
@@ -3850,40 +3850,40 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("process_ip_acl.nop") action process_ip_acl_nop_2() {
     }
-    @name("process_ip_acl.acl_log") action process_ip_acl_acl_log(bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_log") action process_ip_acl_acl_log(bit<16> acl_stats_index) {
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_log") action process_ip_acl_acl_log_2(bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_log") action process_ip_acl_acl_log_2(bit<16> acl_stats_index) {
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_deny") action process_ip_acl_acl_deny(bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_deny") action process_ip_acl_acl_deny(bit<16> acl_stats_index) {
         meta.acl_metadata.acl_deny = 1w1;
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_deny") action process_ip_acl_acl_deny_2(bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_deny") action process_ip_acl_acl_deny_2(bit<16> acl_stats_index) {
         meta.acl_metadata.acl_deny = 1w1;
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_permit") action process_ip_acl_acl_permit(bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_permit") action process_ip_acl_acl_permit(bit<16> acl_stats_index) {
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_permit") action process_ip_acl_acl_permit_2(bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_permit") action process_ip_acl_acl_permit_2(bit<16> acl_stats_index) {
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror(bit<16> session_id, bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror(bit<16> session_id, bit<16> acl_stats_index) {
         meta.i2e_metadata.mirror_session_id = session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         meta.ingress_metadata.enable_dod = 1w0;
         clone3<tuple_0>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror_2(bit<16> session_id, bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror_2(bit<16> session_id, bit<16> acl_stats_index) {
         meta.i2e_metadata.mirror_session_id = session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         meta.ingress_metadata.enable_dod = 1w0;
@@ -3893,28 +3893,28 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("process_ip_acl.acl_dod_en") action process_ip_acl_acl_dod_en() {
         meta.ingress_metadata.enable_dod = 1w1;
     }
-    @name("process_ip_acl.acl_redirect_nexthop") action process_ip_acl_acl_redirect_nexthop(bit<16> nexthop_index, bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_redirect_nexthop") action process_ip_acl_acl_redirect_nexthop(bit<16> nexthop_index, bit<16> acl_stats_index) {
         meta.acl_metadata.acl_redirect = 1w1;
         meta.acl_metadata.acl_nexthop = nexthop_index;
         meta.acl_metadata.acl_nexthop_type = 1w0;
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_redirect_nexthop") action process_ip_acl_acl_redirect_nexthop_2(bit<16> nexthop_index, bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_redirect_nexthop") action process_ip_acl_acl_redirect_nexthop_2(bit<16> nexthop_index, bit<16> acl_stats_index) {
         meta.acl_metadata.acl_redirect = 1w1;
         meta.acl_metadata.acl_nexthop = nexthop_index;
         meta.acl_metadata.acl_nexthop_type = 1w0;
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_redirect_ecmp") action process_ip_acl_acl_redirect_ecmp(bit<16> ecmp_index, bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_redirect_ecmp") action process_ip_acl_acl_redirect_ecmp(bit<16> ecmp_index, bit<16> acl_stats_index) {
         meta.acl_metadata.acl_redirect = 1w1;
         meta.acl_metadata.acl_nexthop = ecmp_index;
         meta.acl_metadata.acl_nexthop_type = 1w1;
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_redirect_ecmp") action process_ip_acl_acl_redirect_ecmp_2(bit<16> ecmp_index, bit<32> acl_stats_index) {
+    @name("process_ip_acl.acl_redirect_ecmp") action process_ip_acl_acl_redirect_ecmp_2(bit<16> ecmp_index, bit<16> acl_stats_index) {
         meta.acl_metadata.acl_redirect = 1w1;
         meta.acl_metadata.acl_nexthop = ecmp_index;
         meta.acl_metadata.acl_nexthop_type = 1w1;
@@ -4005,23 +4005,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("process_ipv4_racl.nop") action process_ipv4_racl_nop() {
     }
-    @name("process_ipv4_racl.racl_log") action process_ipv4_racl_racl_log(bit<32> acl_stats_index) {
+    @name("process_ipv4_racl.racl_log") action process_ipv4_racl_racl_log(bit<16> acl_stats_index) {
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ipv4_racl.racl_deny") action process_ipv4_racl_racl_deny(bit<32> acl_stats_index) {
+    @name("process_ipv4_racl.racl_deny") action process_ipv4_racl_racl_deny(bit<16> acl_stats_index) {
         meta.acl_metadata.racl_deny = 1w1;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ipv4_racl.racl_permit") action process_ipv4_racl_racl_permit(bit<32> acl_stats_index) {
+    @name("process_ipv4_racl.racl_permit") action process_ipv4_racl_racl_permit(bit<16> acl_stats_index) {
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ipv4_racl.racl_redirect_nexthop") action process_ipv4_racl_racl_redirect_nexthop(bit<16> nexthop_index, bit<32> acl_stats_index) {
+    @name("process_ipv4_racl.racl_redirect_nexthop") action process_ipv4_racl_racl_redirect_nexthop(bit<16> nexthop_index, bit<16> acl_stats_index) {
         meta.acl_metadata.racl_redirect = 1w1;
         meta.acl_metadata.racl_nexthop = nexthop_index;
         meta.acl_metadata.racl_nexthop_type = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ipv4_racl.racl_redirect_ecmp") action process_ipv4_racl_racl_redirect_ecmp(bit<16> ecmp_index, bit<32> acl_stats_index) {
+    @name("process_ipv4_racl.racl_redirect_ecmp") action process_ipv4_racl_racl_redirect_ecmp(bit<16> ecmp_index, bit<16> acl_stats_index) {
         meta.acl_metadata.racl_redirect = 1w1;
         meta.acl_metadata.racl_nexthop = ecmp_index;
         meta.acl_metadata.racl_nexthop_type = 1w1;
@@ -4143,23 +4143,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("process_ipv6_racl.nop") action process_ipv6_racl_nop() {
     }
-    @name("process_ipv6_racl.racl_log") action process_ipv6_racl_racl_log(bit<32> acl_stats_index) {
+    @name("process_ipv6_racl.racl_log") action process_ipv6_racl_racl_log(bit<16> acl_stats_index) {
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ipv6_racl.racl_deny") action process_ipv6_racl_racl_deny(bit<32> acl_stats_index) {
+    @name("process_ipv6_racl.racl_deny") action process_ipv6_racl_racl_deny(bit<16> acl_stats_index) {
         meta.acl_metadata.racl_deny = 1w1;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ipv6_racl.racl_permit") action process_ipv6_racl_racl_permit(bit<32> acl_stats_index) {
+    @name("process_ipv6_racl.racl_permit") action process_ipv6_racl_racl_permit(bit<16> acl_stats_index) {
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ipv6_racl.racl_redirect_nexthop") action process_ipv6_racl_racl_redirect_nexthop(bit<16> nexthop_index, bit<32> acl_stats_index) {
+    @name("process_ipv6_racl.racl_redirect_nexthop") action process_ipv6_racl_racl_redirect_nexthop(bit<16> nexthop_index, bit<16> acl_stats_index) {
         meta.acl_metadata.racl_redirect = 1w1;
         meta.acl_metadata.racl_nexthop = nexthop_index;
         meta.acl_metadata.racl_nexthop_type = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ipv6_racl.racl_redirect_ecmp") action process_ipv6_racl_racl_redirect_ecmp(bit<16> ecmp_index, bit<32> acl_stats_index) {
+    @name("process_ipv6_racl.racl_redirect_ecmp") action process_ipv6_racl_racl_redirect_ecmp(bit<16> ecmp_index, bit<16> acl_stats_index) {
         meta.acl_metadata.racl_redirect = 1w1;
         meta.acl_metadata.racl_nexthop = ecmp_index;
         meta.acl_metadata.racl_nexthop_type = 1w1;
@@ -4491,7 +4491,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_156();
     }
-    @name("process_ingress_bd_stats.ingress_bd_stats_count") counter(32w1024, CounterType.packets_and_bytes) process_ingress_bd_stats_ingress_bd_stats_count_0;
+    @min_width(32) @name("process_ingress_bd_stats.ingress_bd_stats_count") counter(32w1024, CounterType.packets_and_bytes) process_ingress_bd_stats_ingress_bd_stats_count_0;
     @name("process_ingress_bd_stats.update_ingress_bd_stats") action process_ingress_bd_stats_update_ingress_bd_stats() {
         process_ingress_bd_stats_ingress_bd_stats_count_0.count((bit<32>)meta.l2_metadata.bd_stats_idx);
     }

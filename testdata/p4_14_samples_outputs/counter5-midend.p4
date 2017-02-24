@@ -31,7 +31,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("NoAction") action NoAction_0() {
     }
-    @name("cntDum") counter(32w70000, CounterType.packets) cntDum;
+    @name("cntDum") @min_width(64) counter(32w70000, CounterType.packets) cntDum;
     @name("act") action act_0(bit<9> port, bit<17> idx) {
         standard_metadata.egress_spec = port;
         cntDum.count((bit<32>)idx);

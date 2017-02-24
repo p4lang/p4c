@@ -35,7 +35,7 @@ header_type acl_metadata_t {
         if_label : 15;                         /* if label for acls */
         bd_label : 16;                         /* bd label for acls */
         mirror_session_id : 10;                /* mirror session id */
-        acl_stats_index : 32;                  /* acl stats index */
+        acl_stats_index : 16;                  /* acl stats index */
     }
 }
 header_type qos_metadata_t {

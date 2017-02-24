@@ -5255,7 +5255,7 @@ control process_meter_action(inout headers hdr, inout metadata meta, inout stand
 }
 
 control process_ingress_bd_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ingress_bd_stats_count") counter(32w1024, CounterType.packets_and_bytes) ingress_bd_stats_count_0;
+    @name("ingress_bd_stats_count") @min_width(32) counter(32w1024, CounterType.packets_and_bytes) ingress_bd_stats_count_0;
     @name("update_ingress_bd_stats") action update_ingress_bd_stats_0() {
         ingress_bd_stats_count_0.count((bit<32>)meta.l2_metadata.bd_stats_idx);
     }
@@ -5273,7 +5273,7 @@ control process_ingress_bd_stats(inout headers hdr, inout metadata meta, inout s
 }
 
 control process_ingress_acl_stats(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("acl_stats_count") counter(32w1024, CounterType.packets_and_bytes) acl_stats_count_0;
+    @name("acl_stats_count") @min_width(16) counter(32w1024, CounterType.packets_and_bytes) acl_stats_count_0;
     @name("acl_stats_update") action acl_stats_update_0() {
         acl_stats_count_0.count((bit<32>)meta.acl_metadata.acl_stats_index);
     }
