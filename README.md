@@ -49,7 +49,7 @@ following tools are required to build and run the compiler and tests:
 
 - GNU Bison and Flex for the parser and lexical analyzer generators.
 
-- Google's Protocol Buffers for the control plane
+- Google Protocol Buffers 3.0.2 for control plane API generation
 
 - GNU multiple precision library GMP
 
