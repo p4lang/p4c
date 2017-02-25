@@ -69,11 +69,7 @@ Most dependences can be installed using `apt-get install`:
 
 `sudo apt-get install g++ git automake libtool libgc-dev bison flex libgmp-dev libboost-dev pkg-config python python-scapy python-ipaddr tcpdump`
 
-An exception is Google Protocol Buffers; `p4c` depends on version 3.0, which is not available
-until Ubuntu 16.10. For earlier releases of Ubuntu, you'll need to install from
-source. You can find instructions
-[here](https://github.com/google/protobuf/blob/master/src/README.md). Check out
-the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you build.
+An exception is Google Protocol Buffers; `p4c` depends on version 3.0.2, which is not available until Ubuntu 16.10. For earlier releases of Ubuntu, you'll need to install from source. You can find instructions [here](https://github.com/google/protobuf/blob/master/src/README.md). Check out the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you build.
 
 `git checkout v3.0.2`
 
