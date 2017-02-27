@@ -359,6 +359,7 @@ class ErrorReporter final {
 
  private:
     std::ostream* outputstream;
+    bool          warningsAreErrors = false;
 
     ErrorReporter()
         : errorCount(0),
@@ -380,6 +381,9 @@ class ErrorReporter final {
         return message;
     }
 
+    void setWarningsAreErrors()
+    { warningsAreErrors = true; }
+
     template <typename... T>
     std::string format_message(const char* format, T... args) {
         boost::format fmt(format);
@@ -397,9 +401,16 @@ class ErrorReporter final {
 
     template <typename... T>
     void warning(const char* format, T... args) {
-        warningCount++;
+        const char* msg;
+        if (warningsAreErrors) {
+            msg = "error: ";
+            errorCount++;
+        } else {
+            msg = "warning: ";
+            warningCount++;
+        }
         boost::format fmt(format);
-        std::string message = ::error_helper(fmt, "warning: ", "", "", args...);
+        std::string message = ::error_helper(fmt, msg, "", "", args...);
         emit_message(message);
     }
 
