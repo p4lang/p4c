@@ -53,7 +53,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("_recirculate") action _recirculate_0() {
         recirculate<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
     }
-    @name("_clone_e2e") action _clone_e2e_0(bit<8> mirror_id) {
+    @name("_clone_e2e") action _clone_e2e_0(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
     @name("t_egress") table t_egress_0() {
@@ -88,7 +88,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("_resubmit") action _resubmit_0() {
         resubmit<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
     }
-    @name("_clone_i2e") action _clone_i2e_0(bit<8> mirror_id) {
+    @name("_clone_i2e") action _clone_i2e_0(bit<32> mirror_id) {
         clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, (bit<32>)mirror_id, { standard_metadata, meta.metaA });
     }
     @name("t_ingress_1") table t_ingress() {

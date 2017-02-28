@@ -3008,12 +3008,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("process_egress_acl.nop") action process_egress_acl_nop() {
     }
-    @name("process_egress_acl.egress_mirror") action process_egress_acl_egress_mirror(bit<16> session_id) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_egress_acl.egress_mirror") action process_egress_acl_egress_mirror(bit<32> session_id) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         clone3<tuple_0>(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
     }
-    @name("process_egress_acl.egress_mirror_drop") action process_egress_acl_egress_mirror_drop(bit<16> session_id) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_egress_acl.egress_mirror_drop") action process_egress_acl_egress_mirror_drop(bit<32> session_id) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         clone3<tuple_0>(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         mark_to_drop();
     }
@@ -3656,10 +3656,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("process_int_endpoint.int_set_no_src") action process_int_endpoint_int_set_no_src() {
         meta.int_metadata_i2e.source = 1w0;
     }
-    @name("process_int_endpoint.int_sink_gpe") action process_int_endpoint_int_sink_gpe(bit<16> mirror_id) {
+    @name("process_int_endpoint.int_sink_gpe") action process_int_endpoint_int_sink_gpe(bit<32> mirror_id) {
         meta.int_metadata.insert_byte_cnt = meta.int_metadata.gpe_int_hdr_len << 2;
         meta.int_metadata_i2e.sink = 1w1;
-        meta.i2e_metadata.mirror_session_id = mirror_id;
+        meta.i2e_metadata.mirror_session_id = (bit<16>)mirror_id;
         clone3<tuple_2>(CloneType.I2E, (bit<32>)mirror_id, { meta.int_metadata_i2e.sink, meta.i2e_metadata.mirror_session_id });
         hdr.int_header.setInvalid();
         hdr.int_val[0].setInvalid();
@@ -4340,9 +4340,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("process_ingress_sflow.nop") action process_ingress_sflow_nop_2() {
     }
-    @name("process_ingress_sflow.sflow_ing_pkt_to_cpu") action process_ingress_sflow_sflow_ing_pkt_to_cpu(bit<16> sflow_i2e_mirror_id, bit<16> reason_code) {
+    @name("process_ingress_sflow.sflow_ing_pkt_to_cpu") action process_ingress_sflow_sflow_ing_pkt_to_cpu(bit<32> sflow_i2e_mirror_id, bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
-        meta.i2e_metadata.mirror_session_id = sflow_i2e_mirror_id;
+        meta.i2e_metadata.mirror_session_id = (bit<16>)sflow_i2e_mirror_id;
         clone3<tuple_3>(CloneType.I2E, (bit<32>)sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
     }
     @name("process_ingress_sflow.sflow_ing_session_enable") action process_ingress_sflow_sflow_ing_session_enable(bit<32> rate_thr, bit<16> session_id) {
@@ -4380,9 +4380,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("process_storm_control.storm_control_meter") meter(32w1024, CounterType.bytes) process_storm_control_storm_control_meter_0;
     @name("process_storm_control.nop") action process_storm_control_nop() {
     }
-    @name("process_storm_control.set_storm_control_meter") action process_storm_control_set_storm_control_meter(bit<10> meter_idx) {
+    @name("process_storm_control.set_storm_control_meter") action process_storm_control_set_storm_control_meter(bit<16> meter_idx) {
         process_storm_control_storm_control_meter_0.execute_meter<bit<2>>((bit<32>)meter_idx, meta.meter_metadata.meter_color);
-        meta.meter_metadata.meter_index = (bit<16>)meter_idx;
+        meta.meter_metadata.meter_index = meter_idx;
     }
     @name("process_storm_control.storm_control") table process_storm_control_storm_control_0() {
         actions = {
@@ -4529,8 +4529,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.acl_metadata.acl_copy = acl_copy;
         meta.fabric_metadata.reason_code = acl_copy_reason;
     }
-    @name("process_mac_acl.acl_mirror") action process_mac_acl_acl_mirror(bit<16> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_mac_acl.acl_mirror") action process_mac_acl_acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         clone3<tuple_0>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
@@ -4604,15 +4604,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.acl_metadata.acl_copy = acl_copy;
         meta.fabric_metadata.reason_code = acl_copy_reason;
     }
-    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror(bit<16> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         clone3<tuple_0>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
-    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror_2(bit<16> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror_2(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         clone3<tuple_0>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
@@ -5613,7 +5613,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         process_system_acl_drop_stats_2.count((bit<32>)drop_reason);
         mark_to_drop();
     }
-    @name("process_system_acl.negative_mirror") action process_system_acl_negative_mirror(bit<8> session_id) {
+    @name("process_system_acl.negative_mirror") action process_system_acl_negative_mirror(bit<32> session_id) {
         clone3<tuple_9>(CloneType.I2E, (bit<32>)session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
         mark_to_drop();
     }
