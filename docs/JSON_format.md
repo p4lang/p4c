@@ -325,7 +325,7 @@ call, with the following attributes:
   object with the following attributes:
     - `type`: one of `hexstr`, `runtime_data`, `header`, `field`, `calculation`,
     `meter_array`, `counter_array`, `register_array`, `header_stack`,
-    `expression`, `extern`, `string`
+    `expression`, `extern`, `string`, 'stack_field'
     - `value`: the appropriate parameter value. If `type` is `runtime_data`,
     this is an integer representing an index into the `runtime_data` (attribute
     of action) array. If `type` is `extern`, this is the name of the extern

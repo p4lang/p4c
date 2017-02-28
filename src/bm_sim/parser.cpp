@@ -24,6 +24,7 @@
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/expressions.h>
+#include <bm/bm_sim/phv.h>
 
 #include <string>
 #include <vector>
@@ -34,9 +35,11 @@
 
 namespace bm {
 
-ParserLookAhead::ParserLookAhead(int offset, int bitwidth)
-  : byte_offset(offset / 8), bit_offset(offset % 8),
-    bitwidth(bitwidth), nbytes((bitwidth + 7) / 8) { }
+ParserLookAhead
+ParserLookAhead::make(int offset, int bitwidth) {
+  return {offset / 8, offset % 8, bitwidth,
+          static_cast<size_t>((bitwidth + 7) / 8)};
+}
 
 void
 ParserLookAhead::peek(const char *data, ByteContainer *res) const {
@@ -118,6 +121,76 @@ ParserOpSet<ArithExpression>::operator()(Packet *pkt, const char *data,
     *pkt,
     "Parser set: setting field ({}, {}) from expression, new value is {}",
     dst.header, dst.offset, f_dst);
+}
+
+ParseSwitchKeyBuilder::Entry
+ParseSwitchKeyBuilder::Entry::make_field(header_id_t header, int offset) {
+  Entry e;
+  e.tag = FIELD;
+  e.field = field_t::make(header, offset);
+  return e;
+}
+
+ParseSwitchKeyBuilder::Entry
+ParseSwitchKeyBuilder::Entry::make_stack_field(header_stack_id_t header_stack,
+                                               int offset) {
+  Entry e;
+  e.tag = STACK_FIELD;
+  e.field.header = header_stack;
+  e.field.offset = offset;
+  return e;
+}
+
+ParseSwitchKeyBuilder::Entry
+ParseSwitchKeyBuilder::Entry::make_lookahead(int offset, int bitwidth) {
+  Entry e;
+  e.tag = LOOKAHEAD;
+  e.lookahead = ParserLookAhead::make(offset, bitwidth);
+  return e;
+}
+
+void
+ParseSwitchKeyBuilder::push_back_field(header_id_t header, int field_offset,
+                                       int bitwidth) {
+  entries.push_back(Entry::make_field(header, field_offset));
+  bitwidths.push_back(bitwidth);
+}
+
+void
+ParseSwitchKeyBuilder::push_back_stack_field(header_stack_id_t header_stack,
+                                             int field_offset, int bitwidth) {
+  entries.push_back(Entry::make_stack_field(header_stack, field_offset));
+  bitwidths.push_back(bitwidth);
+}
+
+void
+ParseSwitchKeyBuilder::push_back_lookahead(int offset, int bitwidth) {
+  entries.push_back(Entry::make_lookahead(offset, bitwidth));
+  bitwidths.push_back(bitwidth);
+}
+
+std::vector<int>
+ParseSwitchKeyBuilder::get_bitwidths() const {
+  return bitwidths;
+}
+
+void
+ParseSwitchKeyBuilder::operator()(const PHV &phv, const char *data,
+                                  ByteContainer *key) const {
+  for (const Entry &e : entries) {
+    switch (e.tag) {
+      case Entry::FIELD:
+        key->append(phv.get_field(e.field.header, e.field.offset).get_bytes());
+        break;
+      case Entry::STACK_FIELD:
+        key->append(phv.get_header_stack(e.field.header).get_last()
+                    .get_field(e.field.offset).get_bytes());
+        break;
+      case Entry::LOOKAHEAD:
+        e.lookahead.peek(data, key);
+        break;
+    }
+  }
 }
 
 namespace {
@@ -559,7 +632,7 @@ ParseState::add_set_from_lookahead(header_id_t dst_header, int dst_offset,
                                    int src_offset, int src_bitwidth) {
   parser_ops.emplace_back(new ParserOpSet<ParserLookAhead>(
       dst_header, dst_offset,
-      ParserLookAhead(src_offset, src_bitwidth)));
+      ParserLookAhead::make(src_offset, src_bitwidth)));
 }
 
 void

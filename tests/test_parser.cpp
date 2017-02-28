@@ -332,32 +332,32 @@ TEST(LookAhead, Peek) {
   const unsigned char data_[6] = {0xb5, 0x9d, 0xfd, 0x17, 0xd5, 0xd7};
   const char *data = reinterpret_cast<const char *>(data_);
 
-  ParserLookAhead lookahead1(0, 16);
+  auto lookahead1 = ParserLookAhead::make(0, 16);
   lookahead1.peek(data, &res);
   ASSERT_EQ(ByteContainer("0xb59d"), res);
   res.clear();
 
-  ParserLookAhead lookahead2(3, 16);
+  auto lookahead2 = ParserLookAhead::make(3, 16);
   lookahead2.peek(data, &res);
   // 1010 1100, 1110 1111
   ASSERT_EQ(ByteContainer("0xacef"), res);
   res.clear();
 
-  ParserLookAhead lookahead3(0, 21);
+  auto lookahead3 = ParserLookAhead::make(0, 21);
   lookahead3.peek(data, &res);
   // 0001 0110, 1011 0011, 1011 1111
   ASSERT_EQ(ByteContainer("0x16b3bf"), res);
   res.clear();
 
-  ParserLookAhead lookahead4(18, 15);
+  auto lookahead4 = ParserLookAhead::make(18, 15);
   lookahead4.peek(data, &res);
   // 0111 1010, 0010 1111
   ASSERT_EQ(ByteContainer("0x7a2f"), res);
   res.clear();
 
-  ParserLookAhead lookahead5_1(0, 16);
+  auto lookahead5_1 = ParserLookAhead::make(0, 16);
   lookahead5_1.peek(data, &res);
-  ParserLookAhead lookahead5_2(16, 16);
+  auto lookahead5_2 = ParserLookAhead::make(16, 16);
   lookahead5_2.peek(data, &res);
   ASSERT_EQ(ByteContainer("0xb59dfd17"), res);
 }
@@ -424,7 +424,7 @@ TEST_F(ParserOpSetTest, SetFromLookahead) {
   const char *data = reinterpret_cast<const char *>(data_);
 
   auto test = [data, this](int offset, int bitwidth, unsigned int v) {
-    ParserLookAhead lookahead(offset, bitwidth);
+    auto lookahead = ParserLookAhead::make(offset, bitwidth);
     const ParserOpSet<ParserLookAhead> op(testHeader1, 1, lookahead);  // f32
     const ParserOp &opRef = op;
     auto pkt = get_pkt();

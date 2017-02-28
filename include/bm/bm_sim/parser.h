@@ -27,10 +27,11 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <type_traits>
 
 #include <cassert>
 
-#include "phv.h"
+#include "phv_forward.h"
 #include "named_p4object.h"
 #include "stateful.h"
 #include "parser_error.h"
@@ -58,10 +59,13 @@ struct ParserLookAhead {
   int bitwidth;
   size_t nbytes;
 
-  ParserLookAhead(int offset, int bitwidth);
+  static ParserLookAhead make(int offset, int bitwidth);
 
   void peek(const char *data, ByteContainer *res) const;
 };
+
+static_assert(std::is_pod<ParserLookAhead>::value,
+              "ParserLookAhead is used in union and we assume it is POD data");
 
 struct ParserOp {
   virtual ~ParserOp() {}
@@ -82,84 +86,38 @@ struct ParserOpSet : ParserOp {
                   size_t *bytes_parsed) const override;
 };
 
-struct ParseSwitchKeyBuilder {
+class ParseSwitchKeyBuilder {
+ public:
+  void push_back_field(header_id_t header, int field_offset, int bitwidth);
+
+  void push_back_stack_field(header_stack_id_t header_stack, int field_offset,
+                             int bitwidth);
+
+  void push_back_lookahead(int offset, int bitwidth);
+
+  std::vector<int> get_bitwidths() const;
+
+  void operator()(const PHV &phv, const char *data, ByteContainer *key) const;
+
+ private:
   struct Entry {
-    // I could use a union, but I only have 2 choices, and they are both quite
-    // small. Plus I make a point of not using unions for non POD data. So I
-    // could either change ParserLookAhead to POD data or go through the trouble
-    // of implementing a union with setters, a copy assignment operator, a
-    // dtor... I'll see if it is worth it later
-    // The larger picture: is there really an improvement in performance. versus
-    // using derived classes and virtual methods ? I guess there is a small one,
-    // not because of the use of the vtable, but because I don't have to store
-    // pointers, but I can store the objects in the vector directly
-    // After some testing, it appears that using this is at least a couple times
-    // faster
     enum {FIELD, LOOKAHEAD, STACK_FIELD} tag{};
-    field_t field{0, 0};
-    ParserLookAhead lookahead{0, 0};
+    // I made sure ParserLookAhead was POD data so that it is easy to use in the
+    // union
+    union {
+      field_t field;
+      ParserLookAhead lookahead;
+    };
 
-    static Entry make_field(header_id_t header, int offset) {
-      Entry e;
-      e.tag = FIELD;
-      e.field.header = header;
-      e.field.offset = offset;
-      return e;
-    }
+    static Entry make_field(header_id_t header, int offset);
 
-    static Entry make_stack_field(header_stack_id_t header_stack, int offset) {
-      Entry e;
-      e.tag = STACK_FIELD;
-      e.field.header = header_stack;
-      e.field.offset = offset;
-      return e;
-    }
+    static Entry make_stack_field(header_stack_id_t header_stack, int offset);
 
-    static Entry make_lookahead(int offset, int bitwidth) {
-      Entry e;
-      e.tag = LOOKAHEAD;
-      e.lookahead = ParserLookAhead(offset, bitwidth);
-      return e;
-    }
+    static Entry make_lookahead(int offset, int bitwidth);
   };
 
   std::vector<Entry> entries{};
   std::vector<int> bitwidths{};
-
-  void push_back_field(header_id_t header, int field_offset, int bitwidth) {
-    entries.push_back(Entry::make_field(header, field_offset));
-    bitwidths.push_back(bitwidth);
-  }
-
-  void push_back_stack_field(header_stack_id_t header_stack, int field_offset,
-                             int bitwidth) {
-    entries.push_back(Entry::make_stack_field(header_stack, field_offset));
-    bitwidths.push_back(bitwidth);
-  }
-
-  void push_back_lookahead(int offset, int bitwidth) {
-    entries.push_back(Entry::make_lookahead(offset, bitwidth));
-    bitwidths.push_back(bitwidth);
-  }
-
-  std::vector<int> get_bitwidths() const { return bitwidths; }
-
-  void operator()(const PHV &phv, const char *data, ByteContainer *key) const {
-    for (const Entry &e : entries) {
-      switch (e.tag) {
-      case Entry::FIELD:
-        key->append(phv.get_field(e.field.header, e.field.offset).get_bytes());
-        break;
-      case Entry::STACK_FIELD:
-        key->append(phv.get_header_stack(e.field.header).get_last()
-                    .get_field(e.field.offset).get_bytes());
-        break;
-      case Entry::LOOKAHEAD:
-        e.lookahead.peek(data, key);
-        break;
-      }
-    }
-  }
 };
 
 class ParseState;
