@@ -139,5 +139,10 @@ const IR::Type *IR::Primitive::inferOperandType(int operand) const {
                     return IR::Type::Bits::get(width); } } } }
     if (name.startsWith("execute_stateful") && operand == 1) {
             return IR::Type::Bits::get(32); }
+    if ((name == "clone_ingress_pkt_to_egress" || name == "clone_i2e" ||
+         name == "clone_egress_pkt_to_egress" || name == "clone_e2e") &&
+        operand == 0) {
+        return IR::Type::Bits::get(32);
+    }
     return IR::Type::Unknown::get();
 }
