@@ -707,16 +707,21 @@ class ExpressionConverter : public Inspector {
             result = obj;
         }
 
-        // This is weird, but that's how it is: expressions must
-        // be wrapped in another outer object.
+        std::set<cstring> to_wrap({"expression", "stack_field"});
+
+        // This is weird, but that's how it is: expression and stack_field must be wrapped in
+        // another outer object. In a future version of the bmv2 JSON, this will not be needed
+        // anymore as expressions will be treated in a more uniform way.
         if (wrap && result->is<Util::JsonObject>()) {
             auto to = result->to<Util::JsonObject>()->get("type");
-            if (to != nullptr && to->to<Util::JsonValue>() != nullptr &&
-                (*to->to<Util::JsonValue>()) == "expression") {
-                auto rwrap = new Util::JsonObject();
-                rwrap->emplace("type", "expression");
-                rwrap->emplace("value", result);
-                result = rwrap;
+            if (to != nullptr && to->to<Util::JsonValue>() != nullptr) {
+                auto jv = *to->to<Util::JsonValue>();
+                if (jv.isString() && to_wrap.find(jv.getString()) != to_wrap.end()) {
+                    auto rwrap = new Util::JsonObject();
+                    rwrap->emplace("type", "expression");
+                    rwrap->emplace("value", result);
+                    result = rwrap;
+                }
             }
         }
         return result;
@@ -1844,10 +1849,12 @@ void JsonConverter::addMetaInformation() {
   auto meta = new Util::JsonObject();
 
   static constexpr int version_major = 2;
-  static constexpr int version_minor = 4;
+  static constexpr int version_minor = 6;
   auto version = mkArrayField(meta, "version");
   version->append(version_major);
   version->append(version_minor);
+
+  meta->emplace("compiler", "https://github.com/p4lang/p4c");
 
   toplevel.emplace("__meta__", meta);
 }
