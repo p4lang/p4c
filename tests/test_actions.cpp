@@ -73,7 +73,7 @@ class CopyHeader : public ActionPrimitive<Header &, const Header &> {
     if (!src.is_valid()) return;
     dst.mark_valid();
     assert(dst.get_header_type_id() == src.get_header_type_id());
-    for (unsigned int i = 0; i < dst.size(); i++) {
+    for (size_t i = 0; i < dst.size(); i++) {
       dst[i].set(src[i]);
     }
   }
@@ -246,11 +246,11 @@ TEST_F(ActionsTest, SetFromConst) {
   Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0);
 
-  ASSERT_EQ((unsigned) 0, f.get_uint());
+  ASSERT_EQ(0u, f.get_uint());
 
   testActionFnEntry(pkt.get());
 
-  ASSERT_EQ((unsigned) 0xaba, f.get_uint());
+  ASSERT_EQ(0xabau, f.get_uint());
 }
 
 TEST_F(ActionsTest, SetFromActionData) {
@@ -264,11 +264,11 @@ TEST_F(ActionsTest, SetFromActionData) {
   Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0);
 
-  ASSERT_EQ((unsigned) 0, f.get_uint());
+  ASSERT_EQ(0u, f.get_uint());
 
   testActionFnEntry(pkt.get());
 
-  ASSERT_EQ((unsigned) 0xaba, f.get_uint());
+  ASSERT_EQ(0xabau, f.get_uint());
 }
 
 TEST_F(ActionsTest, SetFromField) {
@@ -283,11 +283,11 @@ TEST_F(ActionsTest, SetFromField) {
   Field &dst = phv->get_field(testHeader1, 3);  // f16
   dst.set(0);
 
-  ASSERT_EQ((unsigned) 0, dst.get_uint());
+  ASSERT_EQ(0u, dst.get_uint());
 
   testActionFnEntry(pkt.get());
 
-  ASSERT_EQ((unsigned) 0xaba, dst.get_uint());
+  ASSERT_EQ(0xabau, dst.get_uint());
 }
 
 TEST_F(ActionsTest, SetFromRegisterRef) {
@@ -367,11 +367,31 @@ TEST_F(ActionsTest, SetFromExpression) {
   Field &dst = phv->get_field(testHeader1, 3);  // f16
   dst.set(0);
 
-  ASSERT_EQ((unsigned) 0, dst.get_uint());
+  ASSERT_EQ(0u, dst.get_uint());
 
   testActionFnEntry(pkt.get());
 
-  ASSERT_EQ((unsigned) 0xabb, dst.get_uint());
+  ASSERT_EQ(0xabbu, dst.get_uint());
+}
+
+TEST_F(ActionsTest, SetFromLastStackField) {
+  HeaderStack &stack = phv->get_header_stack(testHeaderStack);
+  ASSERT_EQ(1u, stack.push_back());
+
+  SetField primitive;
+  testActionFn.push_back_primitive(&primitive);
+  testActionFn.parameter_push_back_field(testHeader1, 3);  // f16
+  // f32
+  testActionFn.parameter_push_back_last_header_stack_field(testHeaderStack, 0);
+
+  auto &src = phv->get_field(testHeaderS0, 0);
+  auto &dst = phv->get_field(testHeader1, 3);
+  dst.set(0);
+  src.set(0xaba);
+
+  testActionFnEntry(pkt.get());
+
+  ASSERT_EQ(0xaba, dst.get<int>());
 }
 
 TEST_F(ActionsTest, SetFromConstStress) {
@@ -385,9 +405,9 @@ TEST_F(ActionsTest, SetFromConstStress) {
 
   for (int i = 0; i < 100000; i++) {
     f.set(0);
-    ASSERT_EQ((unsigned) 0, f.get_uint());
+    ASSERT_EQ(0u, f.get_uint());
     testActionFnEntry(pkt.get());
-    ASSERT_EQ((unsigned) 0xaba, f.get_uint());
+    ASSERT_EQ(0xabau, f.get_uint());
   }
 }
 
@@ -495,11 +515,11 @@ TEST_F(ActionsTest, CRSet) {
   Field &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0);
 
-  ASSERT_EQ((unsigned) 0, f.get_uint());
+  ASSERT_EQ(0u, f.get_uint());
 
   testActionFnEntry(pkt.get());
 
-  ASSERT_EQ((unsigned) 666, f.get_uint());
+  ASSERT_EQ(666u, f.get_uint());
 }
 
 TEST_F(ActionsTest, Pop) {
@@ -622,13 +642,13 @@ TEST_F(ActionsTest, TwoPrimitives) {
   Field &dst2 = phv->get_field(testHeader2, 3);  // f16
   dst1.set(0); dst2.set(0);
 
-  ASSERT_EQ((unsigned) 0, dst1.get_uint());
-  ASSERT_EQ((unsigned) 0, dst2.get_uint());
+  ASSERT_EQ(0u, dst1.get_uint());
+  ASSERT_EQ(0u, dst2.get_uint());
 
   testActionFnEntry(pkt.get());
 
-  ASSERT_EQ((unsigned) 0xaba, dst1.get_uint());
-  ASSERT_EQ((unsigned) 0xaba, dst2.get_uint());
+  ASSERT_EQ(0xabau, dst1.get_uint());
+  ASSERT_EQ(0xabau, dst2.get_uint());
 }
 
 extern bool WITH_VALGRIND;  // defined in main.cpp

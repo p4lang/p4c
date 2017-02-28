@@ -676,6 +676,23 @@ TEST_F(ConditionalsTest, Stacks) {
   }
 }
 
+TEST_F(ConditionalsTest, LastHeaderStackField) {
+  HeaderStack &stack = phv->get_header_stack(testHeaderStack);
+  ASSERT_EQ(1u, stack.push_back());
+
+  Conditional c("ctest", 0);
+  c.push_back_load_last_header_stack_field(testHeaderStack, 3);  // f16
+  c.push_back_load_const(Data(0xaba));
+  c.push_back_op(ExprOpcode::EQ_DATA);
+  c.build();
+
+  auto &f = phv->get_field(testHeader1, 3);  // f16
+  f.set(0xaba);
+  ASSERT_TRUE(c.eval(*phv));
+  f.set(0xabb);
+  ASSERT_FALSE(c.eval(*phv));
+}
+
 TEST_F(ConditionalsTest, AccessField) {
   Conditional c("ctest", 0);
   c.push_back_load_header(testHeader1);
@@ -684,7 +701,7 @@ TEST_F(ConditionalsTest, AccessField) {
   c.push_back_op(ExprOpcode::EQ_DATA);
   c.build();
 
-  Field &f = phv->get_field(testHeader1, 3);  // f16
+  auto &f = phv->get_field(testHeader1, 3);  // f16
   f.set(0xaba);
 
   ASSERT_TRUE(c.eval(*phv));

@@ -11,7 +11,7 @@ per [this specification] (http://json-schema.org/).
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.5*.
+The version described in this document is *2.6*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -55,6 +55,9 @@ bitwidth.
 - if `type` is `register`, `value` is a JSON 2-tuple, where the first item is
 the register array name and the second is an `expression` used to evaluate the
 index.
+- if `type` is `stack_field`, `value` is a JSON 2-tuple, where the first item is
+the header stack name and the second is the field member name. This is used to
+access a field in the last valid header instance in the stack.
 - if `type` is `expression`, `value` is a JSON object with 3 attributes:
   - `op`: the operation performed (`+`, `-`, `*`, `<<`, `>>`, `==`, `!=`, `>`,
   `>=`, `<`, `<=`, `and`, `or`, `not`, `&`, `|`, `^`, `~`, `valid`)
@@ -63,7 +66,7 @@ index.
 
 For an expression, `left` and `right` will themselves be JSON objects, where the
 `value` attribute can be one of `field`, `hexstr`, `header`, `expression`,
-`bool`, `register`, `header_stack`.
+`bool`, `register`, `header_stack`, `stack_field`.
 
 bmv2 also supports these recently-added operations:
   - data-to-bool conversion (`op` is `d2b`): unary operation which can be used

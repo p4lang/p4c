@@ -98,6 +98,7 @@ ExprType get_opcode_type(ExprOpcode opcode) {
     case ExprOpcode::LOAD_LOCAL:
     case ExprOpcode::LOAD_REGISTER_REF:
     case ExprOpcode::LOAD_REGISTER_GEN:
+    case ExprOpcode::LOAD_LAST_HEADER_STACK_FIELD:
     case ExprOpcode::ADD:
     case ExprOpcode::SUB:
     case ExprOpcode::MOD:
@@ -241,7 +242,18 @@ P4Objects::build_expression(const Json::Value &json_expression,
     *expr_type = ExprType::HEADER_STACK;
 
     phv_factory.enable_all_stack_field_arith(header_stack_id);
+  } else if (type == "stack_field") {
+    const auto header_stack_name = json_value[0].asString();
+    auto header_stack_id = get_header_stack_id(header_stack_name);
+    auto *header_type = header_stack_to_type_map[header_stack_name];
+    const auto field_name = json_value[1].asString();
+    int field_offset = header_type->get_field_offset(field_name);
+    expr->push_back_load_last_header_stack_field(header_stack_id, field_offset);
+    *expr_type = ExprType::DATA;
+
+    phv_factory.enable_stack_field_arith(header_stack_id, field_offset);
   } else {
+    outstream << "Invalid 'type' in expression: '" << type << "'\n";
     assert(0);
   }
 }
@@ -914,6 +926,17 @@ P4Objects::init_objects(std::istream *is,
         } else if (type == "string") {
           action_fn->parameter_push_back_string(
               cfg_parameter["value"].asString());
+        } else if (type == "stack_field") {
+          const auto &cfg_value = cfg_parameter["value"];
+          const auto header_stack_name = cfg_value[0].asString();
+          auto header_stack_id = get_header_stack_id(header_stack_name);
+          auto *header_type = header_stack_to_type_map[header_stack_name];
+          const auto field_name = cfg_value[1].asString();
+          int field_offset = header_type->get_field_offset(field_name);
+          action_fn->parameter_push_back_last_header_stack_field(
+              header_stack_id, field_offset);
+
+          phv_factory.enable_stack_field_arith(header_stack_id, field_offset);
         } else {
           assert(0 && "parameter not supported");
         }

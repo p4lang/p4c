@@ -34,7 +34,7 @@ class RegisterArray;
 class RegisterSync;
 
 enum class ExprOpcode {
-  LOAD_FIELD, LOAD_HEADER, LOAD_HEADER_STACK,
+  LOAD_FIELD, LOAD_HEADER, LOAD_HEADER_STACK, LOAD_LAST_HEADER_STACK_FIELD,
   LOAD_BOOL, LOAD_CONST, LOAD_LOCAL,
   LOAD_REGISTER_REF, LOAD_REGISTER_GEN,
   ADD, SUB, MOD, DIV, MUL, SHIFT_LEFT, SHIFT_RIGHT,
@@ -79,6 +79,11 @@ struct Op {
 
     header_stack_id_t header_stack;
 
+    struct {
+      header_stack_id_t header_stack;
+      int field_offset;
+    } stack_field;
+
     bool bool_value;
 
     int const_offset;
@@ -110,6 +115,8 @@ class Expression {
   void push_back_load_bool(bool value);
   void push_back_load_header(header_id_t header);
   void push_back_load_header_stack(header_stack_id_t header_stack);
+  void push_back_load_last_header_stack_field(header_stack_id_t header_stack,
+                                              int field_offset);
   void push_back_load_const(const Data &data);
   void push_back_load_local(const int offset);
   void push_back_load_register_ref(RegisterArray *register_array,

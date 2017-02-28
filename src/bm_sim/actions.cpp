@@ -67,6 +67,15 @@ ActionFn::parameter_push_back_header_stack(header_stack_id_t header_stack) {
 }
 
 void
+ActionFn::parameter_push_back_last_header_stack_field(
+    header_stack_id_t header_stack, int field_offset) {
+  ActionParam param;
+  param.tag = ActionParam::LAST_HEADER_STACK_FIELD;
+  param.stack_field = {header_stack, field_offset};
+  params.push_back(param);
+}
+
+void
 ActionFn::parameter_push_back_const(const Data &data) {
   const_values.push_back(data);
   ActionParam param;

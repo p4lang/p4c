@@ -173,7 +173,8 @@ struct ActionParam {
   // some old P4 primitives take a calculation as a parameter, I don't know if I
   // will keep it around but for now I need it
   enum {CONST, FIELD, HEADER, ACTION_DATA, REGISTER_REF, REGISTER_GEN,
-        HEADER_STACK, CALCULATION,
+        HEADER_STACK, LAST_HEADER_STACK_FIELD,
+        CALCULATION,
         METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY,
         EXPRESSION,
         EXTERN_INSTANCE,
@@ -206,6 +207,12 @@ struct ActionParam {
     } register_gen;
 
     header_stack_id_t header_stack;
+
+    // special case when trying to access a field in the last header of a stack
+    struct {
+      header_stack_id_t header_stack;
+      int field_offset;
+    } stack_field;
 
     // non owning pointer
     const NamedCalculation *calculation;
@@ -256,6 +263,9 @@ Data &ActionParam::to<Data &>(ActionEngineState *state) const {
       register_gen.idx->eval(state->phv, &data_temp,
                              state->action_data.action_data);
       return register_ref.array->at(data_temp.get<size_t>());
+    case ActionParam::LAST_HEADER_STACK_FIELD:
+      return state->phv.get_header_stack(stack_field.header_stack).get_last()
+          .get_field(stack_field.field_offset);
     default:
       assert(0);
   }
@@ -289,6 +299,9 @@ const Data &ActionParam::to<const Data &>(ActionEngineState *state) const {
       expression.ptr->eval(state->phv, &data_temps[expression.offset],
                               state->action_data.action_data);
       return data_temps[expression.offset];
+    case ActionParam::LAST_HEADER_STACK_FIELD:
+      return state->phv.get_header_stack(stack_field.header_stack).get_last()
+          .get_field(stack_field.field_offset);
     default:
       assert(0);
   }
@@ -542,6 +555,8 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_field(header_id_t header, int field_offset);
   void parameter_push_back_header(header_id_t header);
   void parameter_push_back_header_stack(header_stack_id_t header_stack);
+  void parameter_push_back_last_header_stack_field(
+      header_stack_id_t header_stack, int field_offset);
   void parameter_push_back_const(const Data &data);
   void parameter_push_back_action_data(int action_data_offset);
   void parameter_push_back_register_ref(RegisterArray *register_array,
@@ -557,9 +572,6 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_string(const std::string &str);
 
   void push_back_primitive(ActionPrimitive_ *primitive);
-
-  // TODO(antonin)
-  // size_t num_params() const { 0u; }
 
  private:
   std::vector<ActionPrimitive_ *> primitives{};

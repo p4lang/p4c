@@ -37,6 +37,7 @@ ExprOpcodesMap::ExprOpcodesMap() {
     {"load_field", ExprOpcode::LOAD_FIELD},
     {"load_header", ExprOpcode::LOAD_HEADER},
     {"load_header_stack", ExprOpcode::LOAD_HEADER_STACK},
+    {"load_last_header_stack_field", ExprOpcode::LOAD_LAST_HEADER_STACK_FIELD},
     {"load_bool", ExprOpcode::LOAD_BOOL},
     {"load_const", ExprOpcode::LOAD_CONST},
     {"load_local", ExprOpcode::LOAD_LOCAL},
@@ -128,6 +129,15 @@ Expression::push_back_load_header_stack(header_stack_id_t header_stack) {
   Op op;
   op.opcode = ExprOpcode::LOAD_HEADER_STACK;
   op.header_stack = header_stack;
+  ops.push_back(op);
+}
+
+void
+Expression::push_back_load_last_header_stack_field(
+    header_stack_id_t header_stack, int field_offset) {
+  Op op;
+  op.opcode = ExprOpcode::LOAD_LAST_HEADER_STACK_FIELD;
+  op.stack_field = {header_stack, field_offset};
   ops.push_back(op);
 }
 
@@ -317,6 +327,12 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
 
       case ExprOpcode::LOAD_HEADER_STACK:
         hs_temps_stack.push_back(&(phv.get_header_stack(op.header_stack)));
+        break;
+
+      case ExprOpcode::LOAD_LAST_HEADER_STACK_FIELD:
+        data_temps_stack.push_back(
+            &(phv.get_header_stack(op.stack_field.header_stack).get_last()
+              .get_field(op.stack_field.field_offset)));
         break;
 
       case ExprOpcode::LOAD_BOOL:
@@ -663,6 +679,7 @@ Expression::assign_dest_registers() {
       case ExprOpcode::LOAD_CONST:
       case ExprOpcode::LOAD_LOCAL:
       case ExprOpcode::LOAD_FIELD:
+      case ExprOpcode::LOAD_LAST_HEADER_STACK_FIELD:
       case ExprOpcode::LOAD_REGISTER_REF:
       case ExprOpcode::ACCESS_FIELD:
         new_registers.push(0);
