@@ -23,9 +23,12 @@ limitations under the License.
 class TypeCheck : public PassManager {
     std::map<const IR::Node *, const IR::Type *>        actionArgUseTypes;
     int                                                 iterCounter = 0;
-    class Pass1;
-    class Pass2;
-    class Pass3;
+    class AssignInitialTypes;
+    class InferExpressionsBottomUp;
+    class InferExpressionsTopDown;
+    class InferActionArgsBottomUp;
+    class InferActionArgsTopDown;
+    class AssignActionArgTypes;
  public:
     TypeCheck();
     const IR::Node *apply_visitor(const IR::Node *, const char *) override;
