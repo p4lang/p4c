@@ -84,10 +84,21 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression)
         return false;
     }
     auto bim = mi->to<P4::BuiltInMethod>();
-    if (bim != nullptr && bim->name == IR::Type_Header::isValid) {
-        visit(bim->appliedTo);
-        builder->append(".ebpf_valid");
-        return false;
+    if (bim != nullptr) {
+        builder->emitIndent();
+        if (bim->name == IR::Type_Header::isValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid");
+            return false;
+        } else if (bim->name == IR::Type_Header::setValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = true");
+            return false;
+        } else if (bim->name == IR::Type_Header::setInvalid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = false");
+            return false;
+        }
     }
     auto ac = mi->to<P4::ActionCall>();
     if (ac != nullptr) {
