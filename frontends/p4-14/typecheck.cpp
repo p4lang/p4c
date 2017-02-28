@@ -169,6 +169,17 @@ combineTypes(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) 
     if (a->is<IR::Type_InfInt>()) return b;
     if (b->is<IR::Type_InfInt>()) return a;
     if (*a == *b) return a;
+    if (a->is<IR::Type_Bits>() && b->is<IR::Type_Bits>()) {
+        auto aBits = a->to<IR::Type_Bits>();
+        auto bBits = b->to<IR::Type_Bits>();
+        if (aBits->isSigned != bBits->isSigned) {
+            error("%s: Types %s and %s differ in signedness",
+                  loc, a->toString(), b->toString());
+            return a;
+        }
+        return IR::Type_Bits::get(std::max(aBits->width_bits(), bBits->width_bits()),
+                                  aBits->isSigned);
+    }
     error("%s: Incompatible types %s and %s", loc, a->toString(), b->toString());
     return a;
 }
