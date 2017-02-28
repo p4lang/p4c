@@ -24,7 +24,7 @@ limitations under the License.
 // - replace named references to global header or metadata instances with ConcreteHeaderRef
 //   expressions that link directly to them.
 // - set type for Member and HeaderStackItemRefs
-class TypeCheck::Pass1 : public Transform {
+class TypeCheck::AssignInitialTypes : public Transform {
     const IR::V1Program   *global = nullptr;
     const IR::Node *preorder(IR::V1Program *glob) override { global = glob; return glob; }
     const IR::Node *preorder(IR::PathExpression *ref) override {
@@ -162,7 +162,8 @@ class TypeCheck::Pass1 : public Transform {
         return e; }
 };
 
-static const IR::Type *combine(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) {
+static const IR::Type*
+combineTypes(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) {
     if (!a || a == IR::Type::Unknown::get()) return b;
     if (!b || b == IR::Type::Unknown::get()) return a;
     if (a->is<IR::Type_InfInt>()) return b;
@@ -172,17 +173,9 @@ static const IR::Type *combine(const Util::SourceInfo &loc, const IR::Type *a, c
     return a;
 }
 
-// bottom up type inferencing -- set the types of expression nodes based on operands,
-// - also records types of operands to action function calls for Pass3 to use
-class TypeCheck::Pass2 : public Modifier {
+// bottom up type inferencing -- set the types of expression nodes based on operands
+class TypeCheck::InferExpressionsBottomUp : public Modifier {
     TypeCheck           &self;
-    const IR::V1Program *global = nullptr;
-    profile_t init_apply(const IR::Node *root) override {
-        global = root->to<IR::V1Program>();
-        self.actionArgUseTypes.clear();
-        self.iterCounter++;
-        return Modifier::init_apply(root); }
-    void postorder(IR::Member *) override {}
     void postorder(IR::Operation_Binary *op) override {
         if (op->left->type->is<IR::Type_InfInt>()) {
             op->type = op->right->type;
@@ -214,7 +207,70 @@ class TypeCheck::Pass2 : public Modifier {
         op->type = IR::Type::Boolean::get(); }
     void postorder(IR::Operation_Relation *op) override {
         op->type = IR::Type::Boolean::get(); }
-    void postorder(IR::Primitive *prim) override {
+
+ public:
+    explicit InferExpressionsBottomUp(TypeCheck &s) : self(s) {}
+};
+
+static const IR::Type*
+inferTypeFromContext(const Visitor::Context* ctxt, const IR::V1Program* global) {
+    const IR::Type *rv = IR::Type::Unknown::get();
+    if (auto parent = ctxt->node->to<IR::Expression>()) {
+        if (auto p = parent->to<IR::Operation_Relation>()) {
+            if (ctxt->child_index == 0)
+                rv = p->right->type;
+            else if (ctxt->child_index == 1)
+                rv = p->left->type;
+            else
+                BUG("Unepxected child index");
+        } else if (parent->is<IR::Operation::Binary>()) {
+            rv = parent->type;
+        } else if (!global) {
+        } else if (auto prim = parent->to<IR::Primitive>()) {
+            if (auto af = global->get<IR::ActionFunction>(prim->name)) {
+                if (size_t(ctxt->child_index) < af->args.size()) {
+                    rv = af->args[ctxt->child_index]->type;
+                }
+            } else if (auto infer = prim->inferOperandTypes()) {
+                if ((infer >> (ctxt->child_index)) & 1) {
+                    unsigned i = 0;
+                    for (auto o : prim->operands) {
+                        if ((infer & 1) && o->type != rv) {
+                            rv = o->type;
+                            break; }
+                        infer >>= 1; } }
+            } else if (auto infer = prim->inferOperandType(ctxt->child_index)) {
+                rv = infer; } } }
+    return rv;
+}
+
+// top down type inferencing -- set the type of expression nodes based on their uses.
+class TypeCheck::InferExpressionsTopDown : public Modifier {
+    TypeCheck           &self;
+    const IR::V1Program *global = nullptr;
+    profile_t init_apply(const IR::Node *root) override {
+        global = root->to<IR::V1Program>();
+        return Modifier::init_apply(root); }
+    bool preorder(IR::Expression *op) override {
+        if (op->type == IR::Type::Unknown::get() || op->type->is<IR::Type_InfInt>()) {
+            auto *type = inferTypeFromContext(getContext(), global);
+            if (type != IR::Type::Unknown::get())
+                op->type = type; }
+        return true; }
+
+ public:
+    explicit InferExpressionsTopDown(TypeCheck &s) : self(s) { }
+};
+
+class TypeCheck::InferActionArgsBottomUp : public Inspector {
+    TypeCheck           &self;
+    const IR::V1Program *global = nullptr;
+    profile_t init_apply(const IR::Node *root) override {
+        global = root->to<IR::V1Program>();
+        self.actionArgUseTypes.clear();
+        self.iterCounter++;
+        return Inspector::init_apply(root); }
+    void postorder(const IR::Primitive *prim) override {
         if (!global || !findContext<IR::ActionFunction>())
             return;
         if (auto af = global->get<IR::ActionFunction>(prim->name)) {
@@ -226,7 +282,7 @@ class TypeCheck::Pass2 : public Modifier {
                     break; }
                 if (op->type != IR::Type::Unknown::get())
                     self.actionArgUseTypes[*arg] =
-                        combine(prim->srcInfo, self.actionArgUseTypes[*arg], op->type);
+                        combineTypes(prim->srcInfo, self.actionArgUseTypes[*arg], op->type);
                 ++arg; }
             if (arg != af->args.end() && self.iterCounter == 1)
                 error("%s: not enough arguments to action %s", prim->srcInfo, prim);
@@ -234,50 +290,56 @@ class TypeCheck::Pass2 : public Modifier {
             prim->typecheck(); } }
 
  public:
-    explicit Pass2(TypeCheck &s) : self(s) {}
+    explicit InferActionArgsBottomUp(TypeCheck &s) : self(s) {}
 };
 
-// top down type inferencing -- set the type of expression nodes based on their uses.
-class TypeCheck::Pass3 : public Modifier {
+class TypeCheck::InferActionArgsTopDown : public Inspector {
+    TypeCheck           &self;
+    const IR::V1Program *global = nullptr;
+    profile_t init_apply(const IR::Node *root) override {
+        global = root->to<IR::V1Program>();
+        return Inspector::init_apply(root); }
+    bool preorder(const IR::ActionArg *arg) override {
+        // Start with any type we may have already assigned to this argument in
+        // a previous run of AssignActionArgTypes.
+        auto type = arg->type;
+
+        // Combine that with any type we computed in the bottom-up pass we just
+        // completed, or in a previous visit to this node within this pass.
+        auto bottomUpType = self.actionArgUseTypes.count(arg)
+                          ? self.actionArgUseTypes[arg]
+                          : IR::Type::Unknown::get();
+        type = combineTypes(arg->srcInfo, type, bottomUpType);
+
+        // Combine that with whatever type information we can infer from the
+        // context (e.g., if this argument is being used as an operand to a
+        // primitive, we know the type we expect for that operand).
+        auto contextType = inferTypeFromContext(getContext(), global);
+        type = combineTypes(arg->srcInfo, type, contextType);
+
+        self.actionArgUseTypes[arg] = type;
+        return true;
+    }
+
+ public:
+    explicit InferActionArgsTopDown(TypeCheck &s) : self(s) {
+        // In the AssignInitialTypes pass, we replaced all nodes which refer to
+        // action arguments with the action argument they refer to. This means
+        // that the same action argument node may appear in the IR tree multiple
+        // times if it's referenced more than once within the action body.
+        // Because we may infer different types from different uses of the
+        // action argument, we need to visit the action argument nodes every
+        // time they appear in the IR tree.
+        visitDagOnce = false;
+    }
+};
+
+class TypeCheck::AssignActionArgTypes : public Modifier {
     TypeCheck           &self;
     const IR::V1Program *global = nullptr;
     profile_t init_apply(const IR::Node *root) override {
         global = root->to<IR::V1Program>();
         return Modifier::init_apply(root); }
-    const IR::Type *ctxtType() {
-        const IR::Type *rv = IR::Type::Unknown::get();
-        const Context *ctxt = getContext();
-        if (auto parent = ctxt->node->to<IR::Expression>()) {
-            if (auto p = parent->to<IR::Operation_Relation>()) {
-                if (ctxt->child_index == 0)
-                    rv = p->right->type;
-                else if (ctxt->child_index == 1)
-                    rv = p->left->type;
-                else
-                    BUG("Unepxected child index");
-            } else if (parent->is<IR::Operation::Binary>()) {
-                rv = parent->type;
-            } else if (!global) {
-            } else if (auto prim = parent->to<IR::Primitive>()) {
-                if (auto af = global->get<IR::ActionFunction>(prim->name)) {
-                    if (size_t(ctxt->child_index) < af->args.size())
-                        rv = af->args[ctxt->child_index]->type;
-                } else if (auto infer = prim->inferOperandTypes()) {
-                    if ((infer >> (ctxt->child_index)) & 1) {
-                        for (auto o : prim->operands) {
-                            if ((infer & 1) && o->type != rv) {
-                                rv = o->type;
-                                break; }
-                            infer >>= 1; } }
-                } else if (auto infer = prim->inferOperandType(ctxt->child_index)) {
-                    rv = infer; } } }
-        return rv; }
-    bool preorder(IR::Expression *op) override {
-        if (op->type == IR::Type::Unknown::get() || op->type->is<IR::Type_InfInt>()) {
-            auto *type = ctxtType();
-            if (type != IR::Type::Unknown::get())
-                op->type = type; }
-        return true; }
     bool preorder(IR::ActionArg *arg) override {
         // FIXME -- this duplicates P4WriteContext::isWrite, but that is unable to deal with
         // calls of action functions (it treats all IR::Primitive as primitive calls)
@@ -291,20 +353,26 @@ class TypeCheck::Pass3 : public Modifier {
                 arg->write = true;
             } else {
                 arg->read = true; } }
-        if (self.actionArgUseTypes.count(getOriginal()))
-            arg->type = combine(arg->srcInfo, arg->type, self.actionArgUseTypes[getOriginal()]);
-        arg->type = combine(arg->srcInfo, arg->type, ctxtType());
-        return true; }
+
+        // Assign the type we computed in the previous passes.
+        BUG_CHECK(self.actionArgUseTypes.count(getOriginal()) > 0,
+                  "Didn't compute a type for action arg %1%", getOriginal());
+        arg->type = self.actionArgUseTypes[getOriginal()];
+        return true;
+    }
 
  public:
-    explicit Pass3(TypeCheck &s) : self(s) {}
+    explicit AssignActionArgTypes(TypeCheck &s) : self(s) { }
 };
 
 TypeCheck::TypeCheck() : PassManager({
-    new Pass1,
+    new AssignInitialTypes,
     (new PassRepeated({
-        new Pass2(*this),
-        new Pass3(*this),
+        new InferExpressionsBottomUp(*this),
+        new InferExpressionsTopDown(*this),
+        new InferActionArgsBottomUp(*this),
+        new InferActionArgsTopDown(*this),
+        new AssignActionArgTypes(*this)
     }))->setRepeats(100)   // avoid infinite loop if there's a bug
 }) { setStopOnError(true); }
 
