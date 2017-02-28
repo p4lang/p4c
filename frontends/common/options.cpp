@@ -98,6 +98,12 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("-o", "outfile",
                    [this](const char* arg) { outputFile = arg; return true; },
                    "Write output to outfile");
+    registerOption("--Werror", nullptr,
+                    [](const char*) {
+                        ErrorReporter::instance.setWarningsAreErrors();
+                        return true;
+                    },
+                    "Treat all warnings as errors");
     registerOption("-T", "loglevel",
                    [](const char* arg) { Log::addDebugSpec(arg); return true; },
                    "[Compiler debugging] Adjust logging level per file (see below)");
