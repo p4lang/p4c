@@ -2814,12 +2814,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("process_egress_acl.nop") action process_egress_acl_nop() {
     }
-    @name("process_egress_acl.egress_mirror") action process_egress_acl_egress_mirror(bit<16> session_id) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_egress_acl.egress_mirror") action process_egress_acl_egress_mirror(bit<32> session_id) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         clone3<tuple_0>(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
     }
-    @name("process_egress_acl.egress_mirror_drop") action process_egress_acl_egress_mirror_drop(bit<16> session_id) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_egress_acl.egress_mirror_drop") action process_egress_acl_egress_mirror_drop(bit<32> session_id) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         clone3<tuple_0>(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         mark_to_drop();
     }
@@ -3820,8 +3820,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_mac_acl.acl_mirror") action process_mac_acl_acl_mirror(bit<16> session_id, bit<16> acl_stats_index) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_mac_acl.acl_mirror") action process_mac_acl_acl_mirror(bit<32> session_id, bit<16> acl_stats_index) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         meta.ingress_metadata.enable_dod = 1w0;
         clone3<tuple_0>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
@@ -3876,15 +3876,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.enable_dod = 1w0;
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror(bit<16> session_id, bit<16> acl_stats_index) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror(bit<32> session_id, bit<16> acl_stats_index) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         meta.ingress_metadata.enable_dod = 1w0;
         clone3<tuple_0>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
     }
-    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror_2(bit<16> session_id, bit<16> acl_stats_index) {
-        meta.i2e_metadata.mirror_session_id = session_id;
+    @name("process_ip_acl.acl_mirror") action process_ip_acl_acl_mirror_2(bit<32> session_id, bit<16> acl_stats_index) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
         meta.ingress_metadata.enable_dod = 1w0;
         clone3<tuple_0>(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
@@ -4732,7 +4732,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         process_system_acl_drop_stats_2.count((bit<32>)drop_reason);
         mark_to_drop();
     }
-    @name("process_system_acl.negative_mirror") action process_system_acl_negative_mirror(bit<8> session_id) {
+    @name("process_system_acl.negative_mirror") action process_system_acl_negative_mirror(bit<32> session_id) {
         clone3<tuple_7>(CloneType.I2E, (bit<32>)session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
         mark_to_drop();
     }

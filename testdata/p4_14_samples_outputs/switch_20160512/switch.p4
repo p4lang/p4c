@@ -2938,17 +2938,17 @@ control process_egress_filter(inout headers hdr, inout metadata meta, inout stan
 control process_egress_acl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("egress_mirror") action egress_mirror(bit<16> session_id) {
+    @name("egress_mirror") action egress_mirror(bit<32> session_id) {
         meta.i2e_metadata.mirror_session_id = session_id;
         clone3(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
     }
-    @name("egress_mirror_drop") action egress_mirror_drop(bit<16> session_id) {
+    @name("egress_mirror_drop") action egress_mirror_drop(bit<32> session_id) {
         egress_mirror(session_id);
         mark_to_drop();
     }
     @name("egress_copy_to_cpu") action egress_copy_to_cpu(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
-        clone3(CloneType.E2E, (bit<32>)250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
+        clone3(CloneType.E2E, (bit<32>)32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
     }
     @name("egress_redirect_to_cpu") action egress_redirect_to_cpu(bit<16> reason_code) {
         egress_copy_to_cpu(reason_code);
@@ -3477,7 +3477,7 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
     @name("int_set_no_src") action int_set_no_src() {
         meta.int_metadata_i2e.source = 1w0;
     }
-    @name("int_sink") action int_sink(bit<16> mirror_id) {
+    @name("int_sink") action int_sink(bit<32> mirror_id) {
         meta.int_metadata_i2e.sink = 1w1;
         meta.i2e_metadata.mirror_session_id = mirror_id;
         clone3(CloneType.I2E, (bit<32>)mirror_id, { meta.int_metadata_i2e.sink, meta.i2e_metadata.mirror_session_id });
@@ -3507,7 +3507,7 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
         hdr.int_val[22].setInvalid();
         hdr.int_val[23].setInvalid();
     }
-    @name("int_sink_gpe") action int_sink_gpe(bit<16> mirror_id) {
+    @name("int_sink_gpe") action int_sink_gpe(bit<32> mirror_id) {
         meta.int_metadata.insert_byte_cnt = meta.int_metadata.gpe_int_hdr_len << 2;
         int_sink(mirror_id);
     }
@@ -4274,7 +4274,7 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
 control process_ingress_sflow(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("nop") action nop() {
     }
-    @name("sflow_ing_pkt_to_cpu") action sflow_ing_pkt_to_cpu(bit<16> sflow_i2e_mirror_id, bit<16> reason_code) {
+    @name("sflow_ing_pkt_to_cpu") action sflow_ing_pkt_to_cpu(bit<32> sflow_i2e_mirror_id, bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
         meta.i2e_metadata.mirror_session_id = sflow_i2e_mirror_id;
         clone3(CloneType.I2E, (bit<32>)sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
@@ -4321,7 +4321,7 @@ control process_storm_control(inout headers hdr, inout metadata meta, inout stan
     @name("storm_control_meter") meter(32w1024, CounterType.bytes) storm_control_meter;
     @name("nop") action nop() {
     }
-    @name("set_storm_control_meter") action set_storm_control_meter(bit<10> meter_idx) {
+    @name("set_storm_control_meter") action set_storm_control_meter(bit<16> meter_idx) {
         storm_control_meter.execute_meter((bit<32>)meter_idx, meta.meter_metadata.meter_color);
         meta.meter_metadata.meter_index = meter_idx;
     }
@@ -4495,7 +4495,7 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
         meta.acl_metadata.acl_copy = acl_copy;
         meta.fabric_metadata.reason_code = acl_copy_reason;
     }
-    @name("acl_mirror") action acl_mirror(bit<16> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
+    @name("acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = session_id;
         meta.i2e_metadata.ingress_tstamp = meta.intrinsic_metadata.ingress_global_tstamp;
         clone3(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
@@ -4563,7 +4563,7 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
         meta.acl_metadata.acl_copy = acl_copy;
         meta.fabric_metadata.reason_code = acl_copy_reason;
     }
-    @name("acl_mirror") action acl_mirror(bit<16> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
+    @name("acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = session_id;
         meta.i2e_metadata.ingress_tstamp = meta.intrinsic_metadata.ingress_global_tstamp;
         clone3(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
@@ -5746,7 +5746,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name("copy_to_cpu_with_reason") action copy_to_cpu_with_reason(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
-        clone3(CloneType.I2E, (bit<32>)250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
+        clone3(CloneType.I2E, (bit<32>)32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
     }
     @name("redirect_to_cpu") action redirect_to_cpu(bit<16> reason_code) {
         copy_to_cpu_with_reason(reason_code);
@@ -5754,7 +5754,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         meta.fabric_metadata.dst_device = 8w0;
     }
     @name("copy_to_cpu") action copy_to_cpu() {
-        clone3(CloneType.I2E, (bit<32>)250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
+        clone3(CloneType.I2E, (bit<32>)32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
     }
     @name("drop_packet") action drop_packet() {
         mark_to_drop();
@@ -5763,7 +5763,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         drop_stats.count((bit<32>)drop_reason);
         mark_to_drop();
     }
-    @name("negative_mirror") action negative_mirror(bit<8> session_id) {
+    @name("negative_mirror") action negative_mirror(bit<32> session_id) {
         clone3(CloneType.I2E, (bit<32>)session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
         mark_to_drop();
     }
