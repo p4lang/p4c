@@ -83,6 +83,7 @@ class JsonConverter final {
  private:
     Util::JsonArray *headerTypes;
     std::map<cstring, cstring> headerTypesCreated;
+    std::map<cstring, Util::JsonObject*> declared_action_profiles;
     Util::JsonArray *headerInstances;
     Util::JsonArray *headerStacks;
     Util::JsonObject *scalarsStruct;
