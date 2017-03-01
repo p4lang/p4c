@@ -1179,77 +1179,103 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
         return true;
     }
 
-    cstring name = implementation->externalName(refMap->newName("action_profile"));
-    table->emplace("action_profile", name);
     if (!implementation->value->is<IR::ExpressionValue>()) {
         ::error("%1%: expected expression for property", implementation);
         return false;
     }
     auto propv = implementation->value->to<IR::ExpressionValue>();
-    if (!propv->expression->is<IR::ConstructorCallExpression>()) {
-        ::error("%1%: expected constructor call for property", implementation);
-        return false;
-    }
-    auto cc = P4::ConstructorCall::resolve(
-        propv->expression->to<IR::ConstructorCallExpression>(), refMap, typeMap);
-    if (!cc->is<P4::ExternConstructorCall>()) {
-        ::error("%1%: expected extern object for property", implementation);
-        return false;
-    }
-
-    auto action_profile = new Util::JsonObject();
-    action_profiles->append(action_profile);
-    action_profile->emplace("name", name);
-    action_profile->emplace("id", nextId("action_profiles"));
 
     bool isSimpleTable = true;
-    auto ecc = cc->to<P4::ExternConstructorCall>();
+    Util::JsonObject* action_profile;
+    cstring apname;
 
-    auto add_size = [&action_profile, &ecc](size_t arg_index) {
-      auto size_expr = ecc->cce->arguments->at(arg_index);
-      int size;
-      if (!size_expr->is<IR::Constant>()) {
-        ::error("%1% must be a constant", size_expr);
-        size = 0;
-      } else {
-        size = size_expr->to<IR::Constant>()->asInt();
-      }
-      action_profile->emplace("max_size", size);
-    };
+    if (propv->expression->is<IR::ConstructorCallExpression>()) {
+        auto cc = P4::ConstructorCall::resolve(
+            propv->expression->to<IR::ConstructorCallExpression>(), refMap, typeMap);
+        if (!cc->is<P4::ExternConstructorCall>()) {
+            ::error("%1%: expected extern object for property", implementation);
+            return false;
+        }
+        auto ecc = cc->to<P4::ExternConstructorCall>();
+        auto implementationType = ecc->type;
+        auto arguments = ecc->cce->arguments;
+        apname = implementation->externalName(refMap->newName("action_profile"));
+        action_profile = new Util::JsonObject();
+        action_profiles->append(action_profile);
+        action_profile->emplace("name", apname);
+        action_profile->emplace("id", nextId("action_profiles"));
 
-    if (ecc->type->name == v1model.action_selector.name) {
-        BUG_CHECK(ecc->cce->arguments->size() == 3, "%1%: expected 3 arguments", cc->cce);
-        isSimpleTable = false;
-        auto selector = new Util::JsonObject();
-        table->emplace("type", "indirect_ws");
-        action_profile->emplace("selector", selector);
-        add_size(1);
-        auto hash = ecc->cce->arguments->at(0);
-        auto ei = P4::EnumInstance::resolve(hash, typeMap);
-        if (ei == nullptr) {
-            ::error("%1%: must be a constant on this target", hash);
+        auto add_size = [&action_profile, &arguments](size_t arg_index) {
+            auto size_expr = arguments->at(arg_index);
+            int size;
+            if (!size_expr->is<IR::Constant>()) {
+                ::error("%1% must be a constant", size_expr);
+                size = 0;
+            } else {
+                size = size_expr->to<IR::Constant>()->asInt();
+            }
+            action_profile->emplace("max_size", size);
+        };
+
+        if (implementationType->name == v1model.action_selector.name) {
+            BUG_CHECK(arguments->size() == 3, "%1%: expected 3 arguments", arguments);
+            isSimpleTable = false;
+            auto selector = new Util::JsonObject();
+            table->emplace("type", "indirect_ws");
+            action_profile->emplace("selector", selector);
+            add_size(1);
+            auto hash = arguments->at(0);
+            auto ei = P4::EnumInstance::resolve(hash, typeMap);
+            if (ei == nullptr) {
+                ::error("%1%: must be a constant on this target", hash);
+            } else {
+                cstring algo = convertHashAlgorithm(ei->name);
+                selector->emplace("algo", algo);
+            }
+            auto input = mkArrayField(selector, "input");
+            for (auto ke : *key->keyElements) {
+                auto mt = refMap->getDeclaration(ke->matchType->path, true)
+                        ->to<IR::Declaration_ID>();
+                BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
+                if (mt->name.name != v1model.selectorMatchType.name)
+                    continue;
+
+                auto expr = ke->expression;
+                auto jk = conv->convert(expr);
+                input->append(jk);
+            }
+        } else if (implementationType->name == v1model.action_profile.name) {
+            isSimpleTable = false;
+            table->emplace("type", "indirect");
+            add_size(0);
         } else {
-            cstring algo = convertHashAlgorithm(ei->name);
-            selector->emplace("algo", algo);
+            ::error("%1%: unexpected value for property", propv);
         }
-        auto input = mkArrayField(selector, "input");
-        for (auto ke : *key->keyElements) {
-            auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
-            BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
-            if (mt->name.name != v1model.selectorMatchType.name)
-                continue;
-
-            auto expr = ke->expression;
-            auto jk = conv->convert(expr);
-            input->append(jk);
+    } else if (propv->expression->is<IR::PathExpression>()) {
+        auto pathe = propv->expression->to<IR::PathExpression>();
+        auto decl = refMap->getDeclaration(pathe->path, true);
+        if (!decl->is<IR::Declaration_Instance>()) {
+            ::error("%1%: expected a reference to an instance", pathe);
+            return false;
         }
-    } else if (ecc->type->name == v1model.action_profile.name) {
-        isSimpleTable = false;
+        apname = decl->externalName();
+        auto dcltype = typeMap->getType(pathe, true);
+        if (!dcltype->is<IR::Type_Extern>()) {
+            ::error("%1%: unexpected type for implementation", dcltype);
+            return false;
+        }
+        if (dcltype->to<IR::Type_Extern>()->name != v1model.action_profile.name) {
+            ::error("%1%: unexpected type for implementation", dcltype);
+            return false;
+        }
         table->emplace("type", "indirect");
-        add_size(0);
+        isSimpleTable = false;
     } else {
         ::error("%1%: unexpected value for property", propv);
+        return false;
     }
+
+    table->emplace("action_profile", apname);
     return isSimpleTable;
 }
 
@@ -1697,6 +1723,15 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     auto result = conv->convert(info->destinationField);
                     jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
                     meters->append(jmtr);
+                    continue;
+                } else if (eb->type->name == v1model.action_profile.name) {
+                    auto action_profile = new Util::JsonObject();
+                    action_profile->emplace("name", name);
+                    action_profile->emplace("id", nextId("action_profiles"));
+                    auto sz = eb->getParameterValue(v1model.action_profile.sizeParam.name);
+                    BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
+                    action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
+                    action_profiles->append(action_profile);
                     continue;
                 }
             }
