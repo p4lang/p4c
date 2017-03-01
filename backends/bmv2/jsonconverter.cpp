@@ -1234,7 +1234,8 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
             }
             auto input = mkArrayField(selector, "input");
             for (auto ke : *key->keyElements) {
-                auto mt = refMap->getDeclaration(ke->matchType->path, true)->to<IR::Declaration_ID>();
+                auto mt = refMap->getDeclaration(ke->matchType->path, true)
+                        ->to<IR::Declaration_ID>();
                 BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
                 if (mt->name.name != v1model.selectorMatchType.name)
                     continue;
