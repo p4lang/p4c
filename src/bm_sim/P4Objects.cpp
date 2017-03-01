@@ -258,6 +258,129 @@ P4Objects::build_expression(const Json::Value &json_expression,
   }
 }
 
+int
+P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
+                                   ActionFn *action_fn) {
+  const auto primitive_name = cfg_primitive["op"].asString();
+
+  auto primitive = get_primitive(primitive_name);
+  if (!primitive) {
+    outstream << "Unknown primitive action: " << primitive_name << "\n";
+    return 1;
+  }
+
+  action_fn->push_back_primitive(primitive);
+
+  const auto &cfg_primitive_parameters = cfg_primitive["parameters"];
+
+  // check number of parameters
+  const size_t num_params_expected = primitive->get_num_params();
+  const size_t num_params = cfg_primitive_parameters.size();
+  if (num_params != num_params_expected) {
+    // should not happen with a good compiler
+    outstream << "Invalid number of parameters for primitive action "
+              << primitive_name << ": expected " << num_params_expected
+              << " but got " << num_params << "\n";
+    return 1;
+  }
+
+  for (const auto &cfg_parameter : cfg_primitive_parameters) {
+    const auto type = cfg_parameter["type"].asString();
+
+    if (type == "hexstr") {
+      const auto value_hexstr = cfg_parameter["value"].asString();
+      action_fn->parameter_push_back_const(Data(value_hexstr));
+    } else if (type == "runtime_data") {
+      auto action_data_offset = cfg_parameter["value"].asInt();
+      action_fn->parameter_push_back_action_data(action_data_offset);
+    } else if (type == "header") {
+      const auto header_name = cfg_parameter["value"].asString();
+      auto header_id = get_header_id(header_name);
+      action_fn->parameter_push_back_header(header_id);
+
+      enable_arith(header_id);
+    } else if (type == "field") {
+      const auto &cfg_value_field = cfg_parameter["value"];
+      const auto header_name = cfg_value_field[0].asString();
+      auto header_id = get_header_id(header_name);
+      const auto field_name = cfg_value_field[1].asString();
+      auto field_offset = get_field_offset(header_id, field_name);
+      action_fn->parameter_push_back_field(header_id, field_offset);
+
+      enable_arith(header_id, field_offset);
+    } else if (type == "calculation") {
+      const auto name = cfg_parameter["value"].asString();
+      auto calculation = get_named_calculation(name);
+      action_fn->parameter_push_back_calculation(calculation);
+    } else if (type == "meter_array") {
+      const auto name = cfg_parameter["value"].asString();
+      auto meter = get_meter_array(name);
+      action_fn->parameter_push_back_meter_array(meter);
+    } else if (type == "counter_array") {
+      const auto name = cfg_parameter["value"].asString();
+      auto counter = get_counter_array(name);
+      action_fn->parameter_push_back_counter_array(counter);
+    } else if (type == "register_array") {
+      const auto name = cfg_parameter["value"].asString();
+      auto register_array = get_register_array(name);
+      action_fn->parameter_push_back_register_array(register_array);
+    } else if (type == "header_stack") {
+      const auto header_stack_name = cfg_parameter["value"].asString();
+      auto header_stack_id = get_header_stack_id(header_stack_name);
+      action_fn->parameter_push_back_header_stack(header_stack_id);
+    } else if (type == "expression") {
+      // TODO(Antonin): should this make the field case (and other) obsolete
+      // maybe if we can optimize this case
+      auto expr = new ArithExpression();
+      build_expression(cfg_parameter["value"], expr);
+      expr->build();
+      action_fn->parameter_push_back_expression(
+          std::unique_ptr<ArithExpression>(expr));
+    } else if (type == "register") {
+      // TODO(antonin): cheap optimization
+      // this may not be worth doing, and probably does not belong here
+      const auto &cfg_register = cfg_parameter["value"];
+      const auto register_array_name = cfg_register[0].asString();
+      auto &json_index = cfg_register[1];
+      assert(json_index.size() == 2);
+      if (json_index["type"].asString() == "hexstr") {
+        const auto idx = hexstr_to_int<unsigned int>(
+            json_index["value"].asString());
+        action_fn->parameter_push_back_register_ref(
+            get_register_array(register_array_name), idx);
+      } else {
+        auto idx_expr = new ArithExpression();
+        build_expression(json_index, idx_expr);
+        idx_expr->build();
+        action_fn->parameter_push_back_register_gen(
+            get_register_array(register_array_name),
+            std::unique_ptr<ArithExpression>(idx_expr));
+      }
+    } else if (type == "extern") {
+      const auto name = cfg_parameter["value"].asString();
+      auto extern_instance = get_extern_instance(name);
+      action_fn->parameter_push_back_extern_instance(extern_instance);
+    } else if (type == "string") {
+      action_fn->parameter_push_back_string(cfg_parameter["value"].asString());
+    } else if (type == "stack_field") {
+      const auto &cfg_value = cfg_parameter["value"];
+      const auto header_stack_name = cfg_value[0].asString();
+      auto header_stack_id = get_header_stack_id(header_stack_name);
+      auto *header_type = header_stack_to_type_map[header_stack_name];
+      const auto field_name = cfg_value[1].asString();
+      auto field_offset = header_type->get_field_offset(field_name);
+      action_fn->parameter_push_back_last_header_stack_field(
+          header_stack_id, field_offset);
+
+      phv_factory.enable_stack_field_arith(header_stack_id, field_offset);
+    } else {
+      outstream << "Parameter type '" << type << "' not supported\n";
+      return 1;
+    }
+  }
+  return 0;
+}
+
 void
 P4Objects::parse_config_options(const Json::Value &root) {
   if (!root.isMember("config_options")) return;
@@ -588,6 +711,14 @@ P4Objects::init_objects(std::istream *is,
           }
           error_expr.build();
           parse_state->add_verify(cond_expr, error_expr);
+        } else if (op_type == "primitive") {
+          assert(cfg_parameters.size() == 1);
+          const auto primitive_name = cfg_parameters[0]["op"].asString();
+          std::unique_ptr<ActionFn> action_fn(new ActionFn(primitive_name, 0));
+          auto rc = add_primitive_to_action(cfg_parameters[0], action_fn.get());
+          if (rc != 0) return rc;
+          parse_state->add_method_call(action_fn.get());
+          parse_methods.push_back(std::move(action_fn));
         } else {
           assert(0 && "parser op not supported");
         }
@@ -820,128 +951,12 @@ P4Objects::init_objects(std::istream *is,
     p4object_id_t action_id = cfg_action["id"].asInt();
     std::unique_ptr<ActionFn> action_fn(new ActionFn(action_name, action_id));
 
-    const Json::Value &cfg_primitive_calls = cfg_action["primitives"];
+    const auto &cfg_primitive_calls = cfg_action["primitives"];
     for (const auto &cfg_primitive_call : cfg_primitive_calls) {
-      const string primitive_name = cfg_primitive_call["op"].asString();
-
-      ActionPrimitive_ *primitive = get_primitive(primitive_name);
-      if (!primitive) {
-        outstream << "Unknown primitive action: " << primitive_name
-                  << std::endl;
-        return 1;
-      }
-
-      action_fn->push_back_primitive(primitive);
-
-      const Json::Value &cfg_primitive_parameters =
-        cfg_primitive_call["parameters"];
-
-      // check number of parameters
-      const size_t num_params_expected = primitive->get_num_params();
-      const size_t num_params = cfg_primitive_parameters.size();
-      if (num_params != num_params_expected) {
-        // should not happen with a good compiler
-        outstream << "Invalid number of parameters for primitive action "
-                  << primitive_name << ": expected " << num_params_expected
-                  << " but got " << num_params << std::endl;
-        return 1;
-      }
-
-      for (const auto &cfg_parameter : cfg_primitive_parameters) {
-        const string type = cfg_parameter["type"].asString();
-
-        if (type == "hexstr") {
-          const string value_hexstr = cfg_parameter["value"].asString();
-          action_fn->parameter_push_back_const(Data(value_hexstr));
-        } else if (type == "runtime_data") {
-          int action_data_offset = cfg_parameter["value"].asInt();
-          action_fn->parameter_push_back_action_data(action_data_offset);
-        } else if (type == "header") {
-          const string header_name = cfg_parameter["value"].asString();
-          header_id_t header_id = get_header_id(header_name);
-          action_fn->parameter_push_back_header(header_id);
-
-          enable_arith(header_id);
-        } else if (type == "field") {
-          const Json::Value &cfg_value_field = cfg_parameter["value"];
-          const string header_name = cfg_value_field[0].asString();
-          header_id_t header_id = get_header_id(header_name);
-          const string field_name = cfg_value_field[1].asString();
-          int field_offset = get_field_offset(header_id, field_name);
-          action_fn->parameter_push_back_field(header_id, field_offset);
-
-          enable_arith(header_id, field_offset);
-        } else if (type == "calculation") {
-          const string name = cfg_parameter["value"].asString();
-          NamedCalculation *calculation = get_named_calculation(name);
-          action_fn->parameter_push_back_calculation(calculation);
-        } else if (type == "meter_array") {
-          const string name = cfg_parameter["value"].asString();
-          MeterArray *meter = get_meter_array(name);
-          action_fn->parameter_push_back_meter_array(meter);
-        } else if (type == "counter_array") {
-          const string name = cfg_parameter["value"].asString();
-          CounterArray *counter = get_counter_array(name);
-          action_fn->parameter_push_back_counter_array(counter);
-        } else if (type == "register_array") {
-          const string name = cfg_parameter["value"].asString();
-          RegisterArray *register_array = get_register_array(name);
-          action_fn->parameter_push_back_register_array(register_array);
-        } else if (type == "header_stack") {
-          const string header_stack_name = cfg_parameter["value"].asString();
-          header_id_t header_stack_id = get_header_stack_id(header_stack_name);
-          action_fn->parameter_push_back_header_stack(header_stack_id);
-        } else if (type == "expression") {
-          // TODO(Antonin): should this make the field case (and other) obsolete
-          // maybe if we can optimize this case
-          ArithExpression *expr = new ArithExpression();
-          build_expression(cfg_parameter["value"], expr);
-          expr->build();
-          action_fn->parameter_push_back_expression(
-            std::unique_ptr<ArithExpression>(expr));
-        } else if (type == "register") {
-          // TODO(antonin): cheap optimization
-          // this may not be worth doing, and probably does not belong here
-          const Json::Value &cfg_register = cfg_parameter["value"];
-          const string register_array_name = cfg_register[0].asString();
-          auto &json_index = cfg_register[1];
-          assert(json_index.size() == 2);
-          if (json_index["type"].asString() == "hexstr") {
-            const unsigned int idx = hexstr_to_int<unsigned int>(
-                json_index["value"].asString());
-            action_fn->parameter_push_back_register_ref(
-                get_register_array(register_array_name), idx);
-          } else {
-            ArithExpression *idx_expr = new ArithExpression();
-            build_expression(json_index, idx_expr);
-            idx_expr->build();
-            action_fn->parameter_push_back_register_gen(
-                get_register_array(register_array_name),
-                std::unique_ptr<ArithExpression>(idx_expr));
-          }
-        } else if (type == "extern") {
-          const string name = cfg_parameter["value"].asString();
-          ExternType *extern_instance = get_extern_instance(name);
-          action_fn->parameter_push_back_extern_instance(extern_instance);
-        } else if (type == "string") {
-          action_fn->parameter_push_back_string(
-              cfg_parameter["value"].asString());
-        } else if (type == "stack_field") {
-          const auto &cfg_value = cfg_parameter["value"];
-          const auto header_stack_name = cfg_value[0].asString();
-          auto header_stack_id = get_header_stack_id(header_stack_name);
-          auto *header_type = header_stack_to_type_map[header_stack_name];
-          const auto field_name = cfg_value[1].asString();
-          int field_offset = header_type->get_field_offset(field_name);
-          action_fn->parameter_push_back_last_header_stack_field(
-              header_stack_id, field_offset);
-
-          phv_factory.enable_stack_field_arith(header_stack_id, field_offset);
-        } else {
-          assert(0 && "parameter not supported");
-        }
-      }
+      auto rc = add_primitive_to_action(cfg_primitive_call, action_fn.get());
+      if (rc != 0) return rc;
     }
+
     add_action(action_id, std::move(action_fn));
   }
 

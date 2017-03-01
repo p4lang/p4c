@@ -205,6 +205,11 @@ ActionFn::push_back_primitive(ActionPrimitive_ *primitive) {
   primitives.push_back(primitive);
 }
 
+void
+ActionFn::grab_register_accesses(RegisterSync *rs) const {
+  rs->merge_from(register_sync);
+}
+
 
 bool
 ActionOpcodesMap::register_primitive(
@@ -246,6 +251,19 @@ ActionFnEntry::push_back_action_data(const char *bytes, int nbytes) {
 }
 
 void
+ActionFnEntry::execute(Packet *pkt) const {
+  ActionEngineState state(pkt, action_data, action_fn->const_values);
+
+  auto &primitives = action_fn->primitives;
+  size_t param_offset = 0;
+  // primitives is a vector of pointers
+  for (auto primitive : primitives) {
+    primitive->execute(&state, &(action_fn->params[param_offset]));
+    param_offset += primitive->get_num_params();
+  }
+}
+
+void
 ActionFnEntry::operator()(Packet *pkt) const {
   if (!action_fn) return;  // empty action
   BMELOG(action_execute, *pkt, *action_fn, action_data);
@@ -254,19 +272,11 @@ ActionFnEntry::operator()(Packet *pkt) const {
   DEBUGGER_NOTIFY_CTR(
       Debugger::PacketId::make(pkt->get_packet_id(), pkt->get_copy_id()),
       DBG_CTR_ACTION | action_fn->get_id());
-  ActionEngineState state(pkt, action_data, action_fn->const_values);
 
   {
     RegisterSync::RegisterLocks RL;
     action_fn->register_sync.lock(&RL);
-
-    auto &primitives = action_fn->primitives;
-    size_t param_offset = 0;
-    // primitives is a vector of pointers
-    for (auto primitive : primitives) {
-      primitive->execute(&state, &(action_fn->params[param_offset]));
-      param_offset += primitive->get_num_params();
-    }
+    execute(pkt);
   }
 
   DEBUGGER_NOTIFY_CTR(

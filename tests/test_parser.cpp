@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_sim/actions.h>
 #include <bm/bm_sim/deparser.h>
 #include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/parser.h>
@@ -1685,4 +1686,91 @@ TEST_F(ParserVerifyTest, Noop) {
 
 TEST_F(ParserVerifyTest, Error) {
   verify_test(true);
+}
+
+
+class ParserMethodCallTest : public ParserTestGeneric {
+ protected:
+  ParseState parse_state;
+  HeaderType headerType;
+  header_id_t testHeader{0};
+
+  ParserMethodCallTest()
+      : parse_state("parse_state", 0),
+        headerType("header_type", 0) {
+    headerType.push_back_field("f32", 32);
+    phv_factory.push_back_header("test", testHeader, headerType);
+  }
+
+  Packet get_pkt() {
+    // dummy packet, won't be parsed
+    return Packet::make_new(64, PacketBuffer(128), phv_source.get());
+  }
+
+  virtual void SetUp() {
+    phv_source->set_phv_factory(0, &phv_factory);
+    parser.set_init_state(&parse_state);
+  }
+
+  // virtual void TearDown() { }
+};
+
+struct ParserTestSetField : public ActionPrimitive<Field &, const Data &> {
+  void operator ()(Field &f, const Data &d) override {
+    f.set(d);
+    has_been_called = true;
+  }
+
+  bool has_been_called{false};
+};
+
+REGISTER_PRIMITIVE(ParserTestSetField);
+
+TEST_F(ParserMethodCallTest, SetField) {
+  ActionFn action_fn("test_action", 0);
+  ParserTestSetField primitive;
+  constexpr int value(97);
+  action_fn.push_back_primitive(&primitive);
+  action_fn.parameter_push_back_field(testHeader, 0);  // f32
+  action_fn.parameter_push_back_const(Data(value));
+  parse_state.add_method_call(&action_fn);
+  auto pkt = get_pkt();
+  auto phv = pkt.get_phv();
+  auto &f = phv->get_field(testHeader, 0);  // f32
+
+  ASSERT_FALSE(primitive.has_been_called);
+  parse_and_check_no_error(&pkt);
+  ASSERT_TRUE(primitive.has_been_called);
+  ASSERT_EQ(value, f.get<decltype(value)>());
+}
+
+TEST_F(ParserMethodCallTest, RegisterSync) {
+  RegisterArray register_array("register_test", 0, 128u, 32u);
+  ActionFn action_fn("test_action", 0);
+  auto primitive_spin = ActionOpcodesMap::get_instance()->get_primitive(
+      "RegisterSpin");
+  constexpr unsigned int msecs_to_sleep(1000u);
+  action_fn.push_back_primitive(primitive_spin.get());
+  action_fn.parameter_push_back_register_array(&register_array);
+  action_fn.parameter_push_back_const(Data(msecs_to_sleep));
+  parse_state.add_method_call(&action_fn);
+  auto pkt = get_pkt();
+  ActionFnEntry testActionFnEntry(&action_fn);
+
+  using clock = std::chrono::system_clock;
+  clock::time_point start = clock::now();
+
+  // access same register through parser method call and direct action call,
+  // check that the 2 calls are executing sequentially
+  std::thread t([this, &pkt]() { this->parse_and_check_no_error(&pkt); });
+  testActionFnEntry(&pkt);
+  t.join();
+
+  clock::time_point end = clock::now();
+
+  constexpr unsigned int expected_timedelta = msecs_to_sleep * 2;
+  auto timedelta = std::chrono::duration_cast<std::chrono::milliseconds>(
+      end - start).count();
+  ASSERT_LT(expected_timedelta * 0.95, timedelta);
+  ASSERT_GT(expected_timedelta * 1.2, timedelta);
 }

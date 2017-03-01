@@ -25,6 +25,7 @@
 #include <bm/bm_sim/packet.h>
 
 #include <string>
+#include <thread>
 
 using namespace bm;
 
@@ -102,6 +103,15 @@ class ignore_string : public ActionPrimitive<const std::string &> {
 };
 
 REGISTER_PRIMITIVE(ignore_string);
+
+class RegisterSpin : public ActionPrimitive<RegisterArray &, const Data &> {
+  void operator ()(RegisterArray &register_array, const Data &ts) {
+    register_array.at(0).set(ts);
+    std::this_thread::sleep_for(std::chrono::milliseconds(ts.get_uint()));
+  }
+};
+
+REGISTER_PRIMITIVE(RegisterSpin);
 
 // one dummy extern
 

@@ -42,6 +42,7 @@ class Packet;
 
 class BoolExpression;
 class ArithExpression;
+class ActionFn;
 
 struct field_t {
   header_id_t header;
@@ -226,6 +227,8 @@ class ParseState : public NamedP4Object {
 
   void add_verify(const BoolExpression &condition,
                   const ArithExpression &error_expr);
+
+  void add_method_call(ActionFn *action_fn);
 
   void set_key_builder(const ParseSwitchKeyBuilder &builder);
 

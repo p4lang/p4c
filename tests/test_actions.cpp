@@ -746,15 +746,6 @@ TEST_F(ActionsTest, UniquePrimitivesForEachP4Objects) {
             first_objects.get_primitive(std::string("_nop")));
 }
 
-class RegisterSpin : public ActionPrimitive<RegisterArray &, const Data &> {
-  void operator ()(RegisterArray &register_array, const Data &ts) {
-    register_array.at(0).set(ts);
-    std::this_thread::sleep_for(std::chrono::milliseconds(ts.get_uint()));
-  }
-};
-
-REGISTER_PRIMITIVE(RegisterSpin);
-
 class ActionsTestRegisterProtection : public ActionsTest {
  protected:
   static constexpr unsigned int msecs_to_sleep = 1000u;
@@ -764,7 +755,7 @@ class ActionsTestRegisterProtection : public ActionsTest {
 
   RegisterArray register_array_1;
 
-  RegisterSpin primitive_spin;
+  std::unique_ptr<ActionPrimitive_> primitive_spin;
 
   ActionFn testActionFn_2;
   ActionFnEntry testActionFnEntry_2;
@@ -772,6 +763,8 @@ class ActionsTestRegisterProtection : public ActionsTest {
   ActionsTestRegisterProtection()
       : ActionsTest(),
         register_array_1("register_test_1", 0, register_size, register_bw),
+        primitive_spin(ActionOpcodesMap::get_instance()->get_primitive(
+            "RegisterSpin")),
         testActionFn_2("test_action_2", 1),
         testActionFnEntry_2(&testActionFn_2) {
     configure_one_action(&testActionFn, &register_array_1);
@@ -785,7 +778,7 @@ class ActionsTestRegisterProtection : public ActionsTest {
 
   void configure_one_action(ActionFn *action_fn,
                             RegisterArray *register_array) {
-    action_fn->push_back_primitive(&primitive_spin);
+    action_fn->push_back_primitive(primitive_spin.get());
     action_fn->parameter_push_back_register_array(register_array);
     action_fn->parameter_push_back_const(Data(msecs_to_sleep));
   }

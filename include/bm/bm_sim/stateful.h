@@ -191,7 +191,9 @@ class RegisterSync {
     LockVector<> v{a};
   };
 
-  void add_register_array(RegisterArray *register_array);
+  void add_register_array(const RegisterArray *register_array);
+
+  void merge_from(const RegisterSync &other);
 
   // tried NRVO, but RegisterLocks not movable
   void lock(RegisterLocks *RL) const {

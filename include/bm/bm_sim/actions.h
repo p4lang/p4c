@@ -573,6 +573,8 @@ class ActionFn :  public NamedP4Object {
 
   void push_back_primitive(ActionPrimitive_ *primitive);
 
+  void grab_register_accesses(RegisterSync *register_sync) const;
+
  private:
   std::vector<ActionPrimitive_ *> primitives{};
   std::vector<ActionParam> params{};
@@ -597,7 +599,10 @@ class ActionFnEntry {
   explicit ActionFnEntry(const ActionFn *action_fn)
     : action_fn(action_fn) { }
 
+  // log event, notify debugger if needed, lock registers, then call execute()
   void operator()(Packet *pkt) const;
+
+  void execute(Packet *pkt) const;
 
   void push_back_action_data(const Data &data);
 

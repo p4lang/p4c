@@ -72,9 +72,15 @@ RegisterArray::notify(const Register &reg) const {
 }
 
 void
-RegisterSync::add_register_array(RegisterArray *register_array) {
+RegisterSync::add_register_array(const RegisterArray *register_array) {
   if (register_arrays.insert(register_array).second)
     mutexes.push_back(&register_array->m_mutex);
+}
+
+void
+RegisterSync::merge_from(const RegisterSync &other) {
+  for (auto register_array : other.register_arrays)
+    add_register_array(register_array);  // takes care of duplicates
 }
 
 }  // namespace bm

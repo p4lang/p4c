@@ -25,6 +25,7 @@
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/expressions.h>
 #include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/actions.h>
 
 #include <string>
 #include <vector>
@@ -267,6 +268,21 @@ struct ParserOpVerify : ParserOp {
       error_expr.eval(phv, &error);
       throw parser_exception_arch(ErrorCode(error.get<ErrorCode::type_t>()));
     }
+  }
+};
+
+struct ParserOpMethodCall : ParserOp {
+  ActionFnEntry action;
+
+  explicit ParserOpMethodCall(ActionFn *action_fn)
+      : action(action_fn) { }
+
+  void operator()(Packet *pkt, const char *data,
+                  size_t *bytes_parsed) const override {
+    (void) data; (void) bytes_parsed;
+    BMLOG_DEBUG_PKT(*pkt, "Executing method {}",
+                    action.get_action_fn()->get_name());
+    action.execute(pkt);
   }
 };
 
@@ -648,6 +664,12 @@ void
 ParseState::add_verify(const BoolExpression &condition,
                        const ArithExpression &error_expr) {
   parser_ops.emplace_back(new ParserOpVerify(condition, error_expr));
+}
+
+void
+ParseState::add_method_call(ActionFn *action_fn) {
+  action_fn->grab_register_accesses(&register_sync);
+  parser_ops.emplace_back(new ParserOpMethodCall(action_fn));
 }
 
 void
