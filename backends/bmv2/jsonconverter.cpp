@@ -1728,7 +1728,6 @@ Util::IJson* JsonConverter::convertControl(const IR::ControlBlock* block, cstrin
                     auto sz = eb->getParameterValue(v1model.action_profile.sizeParam.name);
                     BUG_CHECK(sz->is<IR::Constant>(), "%1%: expected a constant", sz);
                     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
-                    declared_action_profiles.emplace(name, action_profile);
                     action_profiles->append(action_profile);
                     continue;
                 }
