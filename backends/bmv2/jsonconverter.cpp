@@ -1268,6 +1268,8 @@ bool JsonConverter::handleTableImplementation(const IR::Property* implementation
             ::error("%1%: unexpected type for implementation", dcltype);
             return false;
         }
+        table->emplace("type", "indirect");
+        isSimpleTable = false;
     } else {
         ::error("%1%: unexpected value for property", propv);
         return false;
