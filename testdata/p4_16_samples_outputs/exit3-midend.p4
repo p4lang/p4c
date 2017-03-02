@@ -15,7 +15,7 @@ control ctrl(out bit<32> c) {
         hasExited = false;
         a = 32w0;
         c = 32w2;
-        tmp_0 = a == 32w0;
+        tmp_0 = true;
     }
     action act_0() {
         c = 32w5;
@@ -34,7 +34,7 @@ control ctrl(out bit<32> c) {
     }
     apply {
         tbl_act.apply();
-        if (tmp_0) 
+        if (true) 
             t.apply();
         else 
             t.apply();

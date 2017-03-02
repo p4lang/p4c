@@ -51,7 +51,7 @@ control c(inout S s) {
         if (s.h.isValid()) 
             tbl_act.apply();
         tbl_act_0.apply();
-        if (tmp_2) {
+        if (s.h.data2 == 32w0) {
             tbl_act_1.apply();
         }
     }

@@ -9,14 +9,7 @@ control c(out bit<32> x) {
     bit<32> tmp_7;
     bit<32> tmp_8;
     action act() {
-        a = 8w0xf;
-        b = 16w0xf;
-        tmp_4 = a ++ b;
-        tmp_5 = tmp_4 ++ a;
-        tmp_6 = a ++ a;
-        tmp_7 = b ++ tmp_6;
-        tmp_8 = tmp_5 + tmp_7;
-        x = tmp_8;
+        x = 32w0xf0f1e1e;
     }
     table tbl_act() {
         actions = {

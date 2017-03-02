@@ -51,42 +51,32 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.c = 8w1;
     }
     action act_1() {
-        c_tmp_0 = h.h.a < h.h.b;
-    }
-    action act_2() {
         sm.egress_spec = 9w0;
     }
     table tbl_act() {
-        actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    table tbl_act_0() {
         actions = {
             act();
         }
         const default_action = act();
     }
-    table tbl_act_1() {
+    table tbl_act_0() {
         actions = {
             act_0();
         }
         const default_action = act_0();
     }
-    table tbl_act_2() {
+    table tbl_act_1() {
         actions = {
-            act_2();
+            act_1();
         }
-        const default_action = act_2();
+        const default_action = act_1();
     }
     apply {
-        tbl_act.apply();
-        if (c_tmp_0) 
-            tbl_act_0.apply();
+        if (h.h.a < h.h.b) 
+            tbl_act.apply();
         else 
-            tbl_act_1.apply();
-        tbl_act_2.apply();
+            tbl_act_0.apply();
+        tbl_act_1.apply();
     }
 }
 

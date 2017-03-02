@@ -262,27 +262,27 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     apply {
         tbl_act.apply();
-        if (tmp_16) {
+        if (parseError != error.NoError) {
             tbl_Drop_action.apply();
             tbl_act_0.apply();
         }
         if (!hasReturned_0) {
             ipv4_match.apply();
             tbl_act_1.apply();
-            if (tmp_17) 
+            if (outCtrl.outputPort == 4w0xf) 
                 tbl_act_2.apply();
         }
         if (!hasReturned_0) {
             check_ttl.apply();
             tbl_act_3.apply();
-            if (tmp_18) 
+            if (outCtrl.outputPort == 4w0xe) 
                 tbl_act_4.apply();
         }
         if (!hasReturned_0) {
             tbl_act_5.apply();
             dmac_1.apply();
             tbl_act_6.apply();
-            if (tmp_19) 
+            if (outCtrl.outputPort == 4w0xf) 
                 tbl_act_7.apply();
         }
         if (!hasReturned_0) 

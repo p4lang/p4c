@@ -31,7 +31,7 @@ namespace P4 {
    (obtained by running Typechecking(updateProgram = true)).
  */
 class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
-    bool                        in_action = false;
+    bool                        working = false;
     struct VarInfo {
         bool                    local = false;
         bool                    live = false;
@@ -42,12 +42,15 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     void flow_merge(Visitor &) override;
     void dropValuesUsing(cstring);
 
+    void visit_local_decl(const IR::Declaration_Variable *);
     const IR::Node *postorder(IR::Declaration_Variable *) override;
     const IR::Expression *postorder(IR::PathExpression *) override;
     IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
+    IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;
     IR::P4Action *preorder(IR::P4Action *) override;
     IR::P4Action *postorder(IR::P4Action *) override;
+    IR::P4Control *preorder(IR::P4Control *) override;
     class ElimDead;
 
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;

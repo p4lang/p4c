@@ -89,20 +89,20 @@ control VerifyChecksumI(in H hdr, inout M meta) {
         tmp_12 = ipv4_checksum.get<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         cksum = tmp_12;
         tmp_13 = hdr.inner_ipv4.ihl == 4w5;
-        if (!tmp_13) 
+        if (!(hdr.inner_ipv4.ihl == 4w5)) 
             tmp_14 = false;
         else {
             tmp_15 = hdr.inner_ipv4.hdrChecksum != inner_cksum;
-            tmp_14 = tmp_15;
+            tmp_14 = hdr.inner_ipv4.hdrChecksum != inner_cksum;
         }
         if (tmp_14) 
             tbl_drop.apply();
         tmp_16 = hdr.ipv4.ihl == 4w5;
-        if (!tmp_16) 
+        if (!(hdr.ipv4.ihl == 4w5)) 
             tmp_17 = false;
         else {
             tmp_18 = hdr.ipv4.hdrChecksum != cksum;
-            tmp_17 = tmp_18;
+            tmp_17 = hdr.ipv4.hdrChecksum != cksum;
         }
         if (tmp_17) 
             tbl_drop_0.apply();
@@ -124,11 +124,11 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
         tmp_20 = ipv4_checksum_2.get<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         cksum_2 = tmp_20;
         tmp_21 = hdr.inner_ipv4.ihl == 4w5;
-        if (tmp_21) 
+        if (hdr.inner_ipv4.ihl == 4w5) 
             hdr.inner_ipv4.hdrChecksum = inner_cksum_2;
         tmp_22 = hdr.ipv4.ihl == 4w5;
-        if (tmp_22) 
-            hdr.ipv4.hdrChecksum = cksum_2;
+        if (hdr.ipv4.ihl == 4w5) 
+            hdr.ipv4.hdrChecksum = tmp_20;
     }
 }
 
