@@ -27,7 +27,7 @@
 namespace bm {
 
 Context::Context() {
-  p4objects = std::make_shared<P4Objects>();
+  p4objects = std::make_shared<P4Objects>(std::cout, true);
   p4objects_rt = p4objects;
 }
 
@@ -724,7 +724,7 @@ Context::load_new_config(
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);
   // check that there is no ongoing config swap
   if (p4objects != p4objects_rt) return ErrorCode::ONGOING_SWAP;
-  p4objects_rt = std::make_shared<P4Objects>();
+  p4objects_rt = std::make_shared<P4Objects>(std::cout, true);
   init_objects(is, lookup_factory, required_fields, arith_objects);
   return ErrorCode::SUCCESS;
 }

@@ -86,8 +86,9 @@ class P4Objects {
  public:
   // A reference works great here, but should I switch to a pointer?
   // NOLINTNEXTLINE(runtime/references)
-  explicit P4Objects(std::ostream &outstream = std::cout)
-      : outstream(outstream) { }
+  explicit P4Objects(std::ostream &outstream = std::cout,
+                     bool verbose_output = false)
+      : outstream(outstream), verbose_output(verbose_output) { }
 
   int init_objects(std::istream *is,
                    LookupStructureFactory *lookup_factory,
@@ -230,9 +231,6 @@ class P4Objects {
   const std::string &get_enum_name(const std::string &enum_name,
                                    EnumMap::type_t entry_value) const;
 
-  // public to be accessed by test class
-  std::ostream &outstream;
-
  private:
   void add_header_type(const std::string &name,
                        std::unique_ptr<HeaderType> header_type);
@@ -296,6 +294,28 @@ class P4Objects {
 
   void add_extern_instance(const std::string &name,
                            std::unique_ptr<ExternType> extern_instance);
+
+  struct InitState;
+  void init_enums(const Json::Value &root);
+  void init_header_types(const Json::Value &root);
+  void init_headers(const Json::Value &root);
+  void init_header_stacks(const Json::Value &root);
+  void init_extern_instances(const Json::Value &root);
+  void init_parse_vsets(const Json::Value &root);
+  void init_errors(const Json::Value &root);
+  void init_parsers(const Json::Value &root);
+  void init_deparsers(const Json::Value &root);
+  void init_calculations(const Json::Value &root);
+  void init_counter_arrays(const Json::Value &root);
+  void init_meter_arrays(const Json::Value &root, InitState *);
+  void init_register_arrays(const Json::Value &root);
+  void init_actions(const Json::Value &root);
+  void init_pipelines(const Json::Value &root, LookupStructureFactory *,
+                      InitState *);
+  void init_checksums(const Json::Value &root);
+  void init_learn_lists(const Json::Value &root,
+                        std::shared_ptr<TransportIface>);
+  void init_field_lists(const Json::Value &root);
 
   void build_expression(const Json::Value &json_expression, Expression *expr);
   void build_expression(const Json::Value &json_expression, Expression *expr,
@@ -407,6 +427,9 @@ class P4Objects {
   // maps primitive names to primitive instances
   std::unordered_map<std::string, std::unique_ptr<ActionPrimitive_>>
       primitives{};
+
+  std::ostream &outstream;
+  bool verbose_output;
 
  private:
   int get_field_offset(header_id_t header_id,

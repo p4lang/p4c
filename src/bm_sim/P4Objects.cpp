@@ -27,6 +27,7 @@
 #include <tuple>
 #include <vector>
 #include <set>
+#include <exception>
 
 #include "jsoncpp/json.h"
 
@@ -43,6 +44,62 @@ T hexstr_to_int(const std::string &hexstr) {
   // TODO(antonin): temporary trick to avoid code duplication
   return Data(hexstr).get<T>();
 }
+
+class json_exception : public std::exception {
+ public:
+  json_exception(const std::string &error_string, const Json::Value &json_value)
+      : error_string(error_string), json_value(json_value), with_json(true) { }
+
+  explicit json_exception(const std::string &error_string)
+      : error_string(error_string) { }
+
+  const std::string msg(bool verbose) const {
+    std::string verbose_string(error_string);
+    if (verbose && with_json) {
+      verbose_string += std::string("\nbad json:\n");
+      verbose_string += json_value.toStyledString();
+    }
+    verbose_string += std::string("\n");
+    return verbose_string;
+  }
+
+  const char *what() const noexcept override {
+    return error_string.c_str();
+  }
+
+ private:
+  std::string error_string;
+  Json::Value json_value{};
+  bool with_json{false};
+};
+
+// Inspired from
+// http://stackoverflow.com/questions/12261915/howto-throw-stdexceptions-with-variable-messages
+class ExceptionFormatter {
+ public:
+  ExceptionFormatter() = default;
+
+  template <typename Type>
+  ExceptionFormatter &operator <<(const Type &value) {
+    stream_ << value;
+    return *this;
+  }
+
+  std::string str() const { return stream_.str(); }
+  // implicit conversion to string
+  operator std::string() const { return stream_.str(); }
+
+  ExceptionFormatter(const ExceptionFormatter &other) = delete;
+  ExceptionFormatter &operator=(const ExceptionFormatter &other) = delete;
+
+  ExceptionFormatter(ExceptionFormatter &&other) = delete;
+  ExceptionFormatter &operator=(ExceptionFormatter &&other) = delete;
+
+ private:
+  std::stringstream stream_{};
+};
+
+using EFormat = ExceptionFormatter;
 
 }  // namespace
 
@@ -253,8 +310,9 @@ P4Objects::build_expression(const Json::Value &json_expression,
 
     phv_factory.enable_stack_field_arith(header_stack_id, field_offset);
   } else {
-    outstream << "Invalid 'type' in expression: '" << type << "'\n";
-    assert(0);
+    throw json_exception(
+        EFormat() << "Invalid 'type' in expression: '" << type << "'",
+        json_expression);
   }
 }
 
@@ -264,10 +322,9 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
   const auto primitive_name = cfg_primitive["op"].asString();
 
   auto primitive = get_primitive(primitive_name);
-  if (!primitive) {
-    outstream << "Unknown primitive action: " << primitive_name << "\n";
-    return 1;
-  }
+  if (!primitive)
+    throw json_exception(
+        EFormat() << "Unknown primitive action: " << primitive_name);
 
   action_fn->push_back_primitive(primitive);
 
@@ -278,10 +335,11 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
   const size_t num_params = cfg_primitive_parameters.size();
   if (num_params != num_params_expected) {
     // should not happen with a good compiler
-    outstream << "Invalid number of parameters for primitive action "
-              << primitive_name << ": expected " << num_params_expected
-              << " but got " << num_params << "\n";
-    return 1;
+    throw json_exception(
+        EFormat() << "Invalid number of parameters for primitive action "
+                  << primitive_name << ": expected " << num_params_expected
+                  << " but got " << num_params,
+        cfg_primitive);
   }
 
   for (const auto &cfg_parameter : cfg_primitive_parameters) {
@@ -374,7 +432,9 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
 
       phv_factory.enable_stack_field_arith(header_stack_id, field_offset);
     } else {
-      outstream << "Parameter type '" << type << "' not supported\n";
+      throw json_exception(
+          EFormat() << "Parameter type '" << type << "' not supported",
+          cfg_parameter);
       return 1;
     }
   }
@@ -392,45 +452,41 @@ P4Objects::parse_config_options(const Json::Value &root) {
   }
 }
 
-int
-P4Objects::init_objects(std::istream *is,
-                        LookupStructureFactory *lookup_factory,
-                        int device_id, size_t cxt_id,
-                        std::shared_ptr<TransportIface> notifications_transport,
-                        const std::set<header_field_pair> &required_fields,
-                        const ForceArith &arith_objects) {
-  Json::Value cfg_root;
-  (*is) >> cfg_root;
+namespace {
 
-  if (!notifications_transport) {
-    notifications_transport = std::shared_ptr<TransportIface>(
-        TransportIface::make_dummy());
-  }
+struct DirectMeterArray {
+  MeterArray *meter;
+  header_id_t header;
+  int offset;
+};
 
-  // enums
+}  // namespace
 
+struct P4Objects::InitState {
+  std::unordered_map<std::string, DirectMeterArray> direct_meters{};
+};
+
+void
+P4Objects::init_enums(const Json::Value &cfg_root) {
   const auto &cfg_enums = cfg_root["enums"];
   for (const auto &cfg_enum : cfg_enums) {
     auto enum_name = cfg_enum["name"].asString();
     auto enum_added = enums.add_enum(enum_name);
-    if (!enum_added) {
-      outstream << "Invalid enums specification in json\n";
-      return 1;
-    }
+    if (!enum_added)
+      throw json_exception("Invalid enums specification in json", cfg_enums);
     const auto &cfg_enum_entries = cfg_enum["entries"];
     for (const auto &cfg_enum_entry : cfg_enum_entries) {
       auto entry_name = cfg_enum_entry[0].asString();
       auto value = static_cast<EnumMap::type_t>(cfg_enum_entry[1].asInt());
       auto entry_added = enums.add_entry(enum_name, entry_name, value);
-      if (!entry_added) {
-        outstream << "Invalid enums specification in json\n";
-        return 1;
-      }
+      if (!entry_added)
+        throw json_exception("Invalid enums specification in json", cfg_enum);
     }
   }
+}
 
-  // header types
-
+void
+P4Objects::init_header_types(const Json::Value &cfg_root) {
   const Json::Value &cfg_header_types = cfg_root["header_types"];
   for (const auto &cfg_header_type : cfg_header_types) {
     const string header_type_name = cfg_header_type["name"].asString();
@@ -463,11 +519,11 @@ P4Objects::init_objects(std::istream *is,
 
     add_header_type(header_type_name, unique_ptr<HeaderType>(header_type));
   }
+}
 
-  // headers
-
+void
+P4Objects::init_headers(const Json::Value &cfg_root) {
   const Json::Value &cfg_headers = cfg_root["headers"];
-  // size_t num_headers = cfg_headers.size();
 
   for (const auto &cfg_header : cfg_headers) {
     const string header_name = cfg_header["name"].asString();
@@ -483,9 +539,10 @@ P4Objects::init_objects(std::istream *is,
     phv_factory.disable_all_field_arith(header_id);
     add_header_id(header_name, header_id);
   }
+}
 
-  // header stacks
-
+void
+P4Objects::init_header_stacks(const Json::Value &cfg_root) {
   const Json::Value &cfg_header_stacks = cfg_root["header_stacks"];
 
   for (const auto &cfg_header_stack : cfg_header_stacks) {
@@ -506,25 +563,10 @@ P4Objects::init_objects(std::istream *is,
                                        *header_stack_type, header_ids);
     add_header_stack_id(header_stack_name, header_stack_id);
   }
+}
 
-  if (cfg_root.isMember("field_aliases")) {
-    const Json::Value &cfg_field_aliases = cfg_root["field_aliases"];
-
-    for (const auto &cfg_alias : cfg_field_aliases) {
-      const auto from = cfg_alias[0].asString();
-      const auto tgt = cfg_alias[1];
-      const auto header_name = tgt[0].asString();
-      const auto field_name = tgt[1].asString();
-      assert(field_exists(header_name, field_name));
-      const auto to = header_name + "." + field_name;
-      phv_factory.add_field_alias(from, to);
-
-      field_aliases[from] = header_field_pair(header_name, field_name);
-    }
-  }
-
-  // extern instances
-
+void
+P4Objects::init_extern_instances(const Json::Value &cfg_root) {
   const Json::Value &cfg_extern_instances = cfg_root["extern_instances"];
   for (const auto &cfg_extern_instance : cfg_extern_instances) {
     const string extern_instance_name = cfg_extern_instance["name"].asString();
@@ -534,9 +576,10 @@ P4Objects::init_objects(std::istream *is,
     auto instance = ExternFactoryMap::get_instance()->get_extern_instance(
         extern_type_name);
     if (instance == nullptr) {
-      outstream << "Invalid reference to extern type '"
-                << extern_type_name << "'\n";
-      return 1;
+      throw json_exception(
+          EFormat() << "Invalid reference to extern type '"
+                    << extern_type_name << "'",
+          cfg_extern_instance);
     }
 
     instance->_register_attributes();
@@ -551,9 +594,10 @@ P4Objects::init_objects(std::istream *is,
       const string type = cfg_extern_attribute["type"].asString();
 
       if (!instance->_has_attribute(name)) {
-        outstream << "Extern type '" << extern_type_name
-                  << "' has no attribute '" << name << "'\n";
-        return 1;
+        throw json_exception(
+            EFormat() << "Extern type '" << extern_type_name
+                      << "' has no attribute '" << name << "'",
+            cfg_extern_attribute);
       }
 
       if (type == "hexstr") {
@@ -572,10 +616,9 @@ P4Objects::init_objects(std::istream *is,
         // we rely on the fact that an Expression can be copied
         instance->_set_attribute<Expression>(name, expr);
       } else {
-        outstream << "Only attributes of type 'hexstr', 'string' or"
-                  << " 'expression' are supported for extern instance"
-                  << " attribute initialization\n";
-        return 1;
+        throw json_exception("Only attributes of type 'hexstr', 'string' or"
+                             " 'expression' are supported for extern instance"
+                             " attribute initialization", cfg_extern_attribute);
       }
     }
 
@@ -584,9 +627,10 @@ P4Objects::init_objects(std::istream *is,
 
     add_extern_instance(extern_instance_name, std::move(instance));
   }
+}
 
-  // parse value sets
-
+void
+P4Objects::init_parse_vsets(const Json::Value &cfg_root) {
   const Json::Value &cfg_parse_vsets = cfg_root["parse_vsets"];
   for (const auto &cfg_parse_vset : cfg_parse_vsets) {
     const string parse_vset_name = cfg_parse_vset["name"].asString();
@@ -598,23 +642,23 @@ P4Objects::init_objects(std::istream *is,
         new ParseVSet(parse_vset_name, parse_vset_id, parse_vset_cbitwidth));
     add_parse_vset(parse_vset_name, std::move(vset));
   }
+}
 
-  // errors (parser errors)
-
+void
+P4Objects::init_errors(const Json::Value &cfg_root) {
   const auto &cfg_errors = cfg_root["errors"];
   for (const auto &cfg_error : cfg_errors) {
     auto name = cfg_error[0].asString();
     auto value = static_cast<ErrorCode::type_t>(cfg_error[1].asInt());
     auto added = error_codes.add(name, value);
-    if (!added) {
-      outstream << "Invalid errors specification in json\n";
-      return 1;
-    }
+    if (!added)
+      throw json_exception("Invalid errors specification in json", cfg_errors);
   }
   error_codes.add_core();
+}
 
-  // parsers
-
+void
+P4Objects::init_parsers(const Json::Value &cfg_root) {
   const Json::Value &cfg_parsers = cfg_root["parsers"];
   for (const auto &cfg_parser : cfg_parsers) {
     const string parser_name = cfg_parser["name"].asString();
@@ -702,8 +746,8 @@ P4Objects::init_objects(std::istream *is,
             auto error_code =  static_cast<ErrorCode::type_t>(
                 j_error_expr.asInt());
             if (!error_codes.exists(error_code)) {
-              outstream << "Invalid error code in verify statement\n";
-              return 1;
+              throw json_exception("Invalid error code in verify statement",
+                                   cfg_parser_op);
             }
             error_expr.push_back_load_const(Data(error_code));
           } else {
@@ -715,12 +759,13 @@ P4Objects::init_objects(std::istream *is,
           assert(cfg_parameters.size() == 1);
           const auto primitive_name = cfg_parameters[0]["op"].asString();
           std::unique_ptr<ActionFn> action_fn(new ActionFn(primitive_name, 0));
-          auto rc = add_primitive_to_action(cfg_parameters[0], action_fn.get());
-          if (rc != 0) return rc;
+          add_primitive_to_action(cfg_parameters[0], action_fn.get());
           parse_state->add_method_call(action_fn.get());
           parse_methods.push_back(std::move(action_fn));
         } else {
-          assert(0 && "parser op not supported");
+          throw json_exception(
+              EFormat() << "Parser op '" << op_type << "'not supported",
+              cfg_parser_op);
         }
       }
 
@@ -814,9 +859,10 @@ P4Objects::init_objects(std::istream *is,
 
     add_parser(parser_name, std::move(parser));
   }
+}
 
-  // deparsers
-
+void
+P4Objects::init_deparsers(const Json::Value &cfg_root) {
   const Json::Value &cfg_deparsers = cfg_root["deparsers"];
   for (const auto &cfg_deparser : cfg_deparsers) {
     const string deparser_name = cfg_deparser["name"].asString();
@@ -831,9 +877,10 @@ P4Objects::init_objects(std::istream *is,
 
     add_deparser(deparser_name, unique_ptr<Deparser>(deparser));
   }
+}
 
-  // calculations
-
+void
+P4Objects::init_calculations(const Json::Value &cfg_root) {
   const Json::Value &cfg_calculations = cfg_root["calculations"];
   for (const auto &cfg_calculation : cfg_calculations) {
     const string name = cfg_calculation["name"].asString();
@@ -860,16 +907,15 @@ P4Objects::init_objects(std::istream *is,
       }
     }
 
-    // check algo
-    if (!check_hash(algo)) return 1;
+    check_hash(algo);
 
-    NamedCalculation *calculation = new NamedCalculation(name, id,
-                                                         builder, algo);
+    auto calculation = new NamedCalculation(name, id, builder, algo);
     add_named_calculation(name, unique_ptr<NamedCalculation>(calculation));
   }
+}
 
-  // counter arrays
-
+void
+P4Objects::init_counter_arrays(const Json::Value &cfg_root) {
   const Json::Value &cfg_counter_arrays = cfg_root["counter_arrays"];
   for (const auto &cfg_counter_array : cfg_counter_arrays) {
     const string name = cfg_counter_array["name"].asString();
@@ -883,17 +929,12 @@ P4Objects::init_objects(std::istream *is,
     CounterArray *counter_array = new CounterArray(name, id, size);
     add_counter_array(name, unique_ptr<CounterArray>(counter_array));
   }
+}
 
-  // meter arrays
-
-  // store direct meter info until the table gets created
-  struct DirectMeterArray {
-    MeterArray *meter;
-    header_id_t header;
-    int offset;
-  };
-
-  std::unordered_map<std::string, DirectMeterArray> direct_meters;
+void
+P4Objects::init_meter_arrays(const Json::Value &cfg_root,
+                             InitState *init_state) {
+  auto &direct_meters = init_state->direct_meters;
 
   const Json::Value &cfg_meter_arrays = cfg_root["meter_arrays"];
   for (const auto &cfg_meter_array : cfg_meter_arrays) {
@@ -929,9 +970,10 @@ P4Objects::init_objects(std::istream *is,
       direct_meters.emplace(name, direct_meter);
     }
   }
+}
 
-  // register arrays
-
+void
+P4Objects::init_register_arrays(const Json::Value &cfg_root) {
   const Json::Value &cfg_register_arrays = cfg_root["register_arrays"];
   for (const auto &cfg_register_array : cfg_register_arrays) {
     const string name = cfg_register_array["name"].asString();
@@ -942,9 +984,10 @@ P4Objects::init_objects(std::istream *is,
     RegisterArray *register_array = new RegisterArray(name, id, size, bitwidth);
     add_register_array(name, unique_ptr<RegisterArray>(register_array));
   }
+}
 
-  // actions
-
+void
+P4Objects::init_actions(const Json::Value &cfg_root) {
   const Json::Value &cfg_actions = cfg_root["actions"];
   for (const auto &cfg_action : cfg_actions) {
     const string action_name = cfg_action["name"].asString();
@@ -952,18 +995,18 @@ P4Objects::init_objects(std::istream *is,
     std::unique_ptr<ActionFn> action_fn(new ActionFn(action_name, action_id));
 
     const auto &cfg_primitive_calls = cfg_action["primitives"];
-    for (const auto &cfg_primitive_call : cfg_primitive_calls) {
-      auto rc = add_primitive_to_action(cfg_primitive_call, action_fn.get());
-      if (rc != 0) return rc;
-    }
+    for (const auto &cfg_primitive_call : cfg_primitive_calls)
+      add_primitive_to_action(cfg_primitive_call, action_fn.get());
 
     add_action(action_id, std::move(action_fn));
   }
+}
 
-  // pipelines
-
-  ageing_monitor = AgeingMonitorIface::make(
-      device_id, cxt_id, notifications_transport);
+void
+P4Objects::init_pipelines(const Json::Value &cfg_root,
+                          LookupStructureFactory *lookup_factory,
+                          InitState *init_state) {
+  auto &direct_meters = init_state->direct_meters;
 
   std::unordered_map<std::string, MatchKeyParam::Type> map_name_to_match_type =
       { {"exact", MatchKeyParam::Type::EXACT},
@@ -992,7 +1035,6 @@ P4Objects::init_objects(std::istream *is,
           new ActionProfile(act_prof_name, act_prof_id, with_selection));
       if (with_selection) {
         auto calc = process_cfg_selector(cfg_act_prof["selector"]);
-        if (!calc) return 1;
         action_profile->set_hash(std::move(calc));
       }
       add_action_profile(act_prof_name, std::move(action_profile));
@@ -1037,9 +1079,10 @@ P4Objects::init_objects(std::istream *is,
         const string match_type = cfg_key_entry["match_type"].asString();
         if (match_type == "lpm") {
           if (has_lpm) {
-            outstream << "Table " << table_name << "features 2 LPM match fields"
-                      << std::endl;
-            return 1;
+            throw json_exception(
+                EFormat() << "Table " << table_name
+                          << "features 2 LPM match fields",
+                cfg_match_key);
           }
           has_lpm = true;
         }
@@ -1101,10 +1144,10 @@ P4Objects::init_objects(std::istream *is,
           add_action_profile(
               name, std::unique_ptr<ActionProfile>(action_profile));
         } else {
-          outstream << "indirect tables need to have attribute "
-                    << "'action_profile' (new JSON format) or "
-                    << "'act_prof_name' (old JSON format)\n";
-          return 1;
+          throw json_exception("indirect tables need to have attribute "
+                               "'action_profile' (new JSON format) or "
+                               "'act_prof_name' (old JSON format)\n",
+                               cfg_table);
         }
         mt_indirect->set_action_profile(action_profile);
 
@@ -1112,7 +1155,6 @@ P4Objects::init_objects(std::istream *is,
             && !cfg_table.isMember("action_profile")) {
           assert(cfg_table.isMember("selector"));
           auto calc = process_cfg_selector(cfg_table["selector"]);
-          if (!calc) return 1;
           action_profile->set_hash(std::move(calc));
         }
       }
@@ -1214,10 +1256,11 @@ P4Objects::init_objects(std::istream *is,
       if (cfg_table.isMember("default_entry")) {
         const string table_type = cfg_table["type"].asString();
         if (table_type != "simple") {
-          outstream << "Table '" << table_name << "' does not have type "
-                    << "'simple' and therefore cannot specify a "
-                    << "'default_entry' attribute\n";
-          return 1;
+          throw json_exception(
+              EFormat() << "Table '" << table_name << "' does not have type "
+                        << "'simple' and therefore cannot specify a "
+                        << "'default_entry' attribute",
+              cfg_table);
         }
 
         auto simple_table = dynamic_cast<MatchTable *>(table);
@@ -1286,9 +1329,10 @@ P4Objects::init_objects(std::istream *is,
     Pipeline *pipeline = new Pipeline(pipeline_name, pipeline_id, first_node);
     add_pipeline(pipeline_name, unique_ptr<Pipeline>(pipeline));
   }
+}
 
-  // checksums
-
+void
+P4Objects::init_checksums(const Json::Value &cfg_root) {
   const Json::Value &cfg_checksums = cfg_root["checksums"];
   for (const auto &cfg_checksum : cfg_checksums) {
     const string checksum_name = cfg_checksum["name"].asString();
@@ -1326,11 +1370,12 @@ P4Objects::init_objects(std::istream *is,
       it->second->add_checksum(checksum);
     }
   }
+}
 
-  // learn lists
-
-  learn_engine = LearnEngineIface::make(device_id, cxt_id);
-
+void
+P4Objects::init_learn_lists(
+    const Json::Value &cfg_root,
+    std::shared_ptr<TransportIface> notifications_transport) {
   const Json::Value &cfg_learn_lists = cfg_root["learn_lists"];
 
   if (cfg_learn_lists.size() > 0) {
@@ -1357,7 +1402,10 @@ P4Objects::init_objects(std::istream *is,
 
     learn_engine->list_init(list_id);
   }
+}
 
+void
+P4Objects::init_field_lists(const Json::Value &cfg_root) {
   const Json::Value &cfg_field_lists = cfg_root["field_lists"];
   // used only for cloning
 
@@ -1389,13 +1437,91 @@ P4Objects::init_objects(std::istream *is,
 
     add_field_list(list_id, std::move(field_list));
   }
+}
 
-  // invoke init() for extern instances, we do this at the very end in case
-  // init() looks up some object (e.g. RegisterArray) in P4Objects
-  for (const auto &p : extern_instances)
-    p.second->init();
+int
+P4Objects::init_objects(std::istream *is,
+                        LookupStructureFactory *lookup_factory,
+                        int device_id, size_t cxt_id,
+                        std::shared_ptr<TransportIface> notifications_transport,
+                        const std::set<header_field_pair> &required_fields,
+                        const ForceArith &arith_objects) {
+  Json::Value cfg_root;
+  (*is) >> cfg_root;
 
-  if (!check_required_fields(required_fields)) {
+  if (!notifications_transport) {
+    notifications_transport = std::shared_ptr<TransportIface>(
+        TransportIface::make_dummy());
+  }
+
+  InitState init_state;
+
+  try {
+    init_enums(cfg_root);
+
+    init_header_types(cfg_root);
+
+    init_headers(cfg_root);
+
+    init_header_stacks(cfg_root);
+
+    if (cfg_root.isMember("field_aliases")) {
+      const auto &cfg_field_aliases = cfg_root["field_aliases"];
+
+      for (const auto &cfg_alias : cfg_field_aliases) {
+        const auto from = cfg_alias[0].asString();
+        const auto tgt = cfg_alias[1];
+        const auto header_name = tgt[0].asString();
+        const auto field_name = tgt[1].asString();
+        assert(field_exists(header_name, field_name));
+        const auto to = header_name + "." + field_name;
+        phv_factory.add_field_alias(from, to);
+
+        field_aliases[from] = header_field_pair(header_name, field_name);
+      }
+    }
+
+    init_extern_instances(cfg_root);
+
+    init_parse_vsets(cfg_root);
+
+    init_errors(cfg_root);  // parser errors
+
+    init_parsers(cfg_root);
+
+    init_deparsers(cfg_root);
+
+    init_calculations(cfg_root);
+
+    init_counter_arrays(cfg_root);
+
+    init_meter_arrays(cfg_root, &init_state);
+
+    init_register_arrays(cfg_root);
+
+    init_actions(cfg_root);
+
+    ageing_monitor = AgeingMonitorIface::make(
+        device_id, cxt_id, notifications_transport);
+
+    init_pipelines(cfg_root, lookup_factory, &init_state);
+
+    init_checksums(cfg_root);
+
+    learn_engine = LearnEngineIface::make(device_id, cxt_id);
+
+    init_learn_lists(cfg_root, notifications_transport);
+
+    init_field_lists(cfg_root);
+
+    // invoke init() for extern instances, we do this at the very end in case
+    // init() looks up some object (e.g. RegisterArray) in P4Objects
+    for (const auto &p : extern_instances)
+      p.second->init();
+
+    check_required_fields(required_fields);
+  } catch (const json_exception &e) {
+    outstream << e.msg(verbose_output);
     return 1;
   }
 
@@ -1434,8 +1560,6 @@ P4Objects::init_objects(std::istream *is,
   parse_config_options(cfg_root);
 
   return 0;
-  // obviously this function is very long, but it is doing a very dumb job...
-  // NOLINTNEXTLINE(readability/fn_size)
 }
 
 void
@@ -1546,8 +1670,9 @@ P4Objects::check_required_fields(
   for (const auto &p : required_fields) {
     if (!field_exists(p.first, p.second)) {
       res = false;
-      outstream << "Field " << p.first << "." << p.second
-                << " is required by switch target but is not defined\n";
+      throw json_exception(
+          EFormat() << "Field " << p.first << "." << p.second
+                    << " is required by switch target but is not defined");
     }
   }
   return res;
@@ -1556,7 +1681,7 @@ P4Objects::check_required_fields(
 std::unique_ptr<CalculationsMap::MyC>
 P4Objects::check_hash(const std::string &name) const {
   auto h = CalculationsMap::get_instance()->get_copy(name);
-  if (!h) outstream << "Unknown hash algorithm: " << name  << std::endl;
+  if (!h) throw json_exception(EFormat() << "Unknown hash algorithm: " << name);
   return h;
 }
 
@@ -1580,8 +1705,7 @@ P4Objects::process_cfg_selector(const Json::Value &cfg_selector) const {
     builder.push_back_field(header_id, field_offset);
   }
 
-  // check algo
-  if (!check_hash(selector_algo)) return nullptr;
+  check_hash(selector_algo);
 
   return std::unique_ptr<Calculation>(new Calculation(builder, selector_algo));
 }
