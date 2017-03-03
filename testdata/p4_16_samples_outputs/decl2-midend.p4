@@ -17,7 +17,7 @@ control p() {
     }
     action act() {
         x_1 = 1w0;
-        tmp_3 = x_1;
+        tmp_3 = 1w0;
     }
     table tbl_act() {
         actions = {

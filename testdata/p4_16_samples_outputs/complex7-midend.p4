@@ -63,7 +63,7 @@ control c(inout bit<32> r) {
         switch (t.apply().action_run) {
             a_0: {
                 tbl_act_0.apply();
-                if (tmp_3) 
+                if (tmp_2 < 32w2) 
                     tbl_act_1.apply();
                 else 
                     tbl_act_2.apply();

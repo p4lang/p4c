@@ -40,6 +40,16 @@ class P4::DoLocalCopyPropagation::ElimDead : public Transform {
                 } else {
                     LOG6("  not removing assignment to non-local " << dest->path->name); } } }
         return as; }
+    IR::IfStatement *postorder(IR::IfStatement *s) override {
+        if (s->ifTrue == nullptr) {
+            /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
+             * the if statement as needed */
+            if (s->ifFalse == nullptr)
+                return nullptr;
+            s->ifTrue = s->ifFalse;
+            s->ifFalse = nullptr;
+            s->condition = new IR::LNot(s->condition); }
+        return s; }
 
  public:
     explicit ElimDead(DoLocalCopyPropagation &self) : self(self) {}
@@ -47,7 +57,7 @@ class P4::DoLocalCopyPropagation::ElimDead : public Transform {
 
 void P4::DoLocalCopyPropagation::flow_merge(Visitor &a_) {
     auto &a = dynamic_cast<DoLocalCopyPropagation &>(a_);
-    BUG_CHECK(in_action == a.in_action, "inconsitent DoLocalCopyPropagation state on merge");
+    BUG_CHECK(working == a.working, "inconsitent DoLocalCopyPropagation state on merge");
     for (auto &var : available) {
         if (auto merge = ::getref(a.available, var.first)) {
             if (merge->val != var.second.val)
@@ -70,9 +80,8 @@ void P4::DoLocalCopyPropagation::dropValuesUsing(cstring name) {
             var.second.val = nullptr; } }
 }
 
-const IR::Node *P4::DoLocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
-    if (!in_action) return var;
-    LOG1("Visiting " << getOriginal());
+void P4::DoLocalCopyPropagation::visit_local_decl(const IR::Declaration_Variable *var) {
+    LOG4("Visiting " << var);
     if (available.count(var->name))
         BUG("duplicate var declaration for %s", var->name);
     auto &local = available[var->name];
@@ -83,11 +92,16 @@ const IR::Node *P4::DoLocalCopyPropagation::postorder(IR::Declaration_Variable *
             local.val = var->initializer;
         } else {
             local.live = true; } }
+}
+
+const IR::Node *P4::DoLocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
+    if (!working) return var;
+    visit_local_decl(var);
     return var;
 }
 
 const IR::Expression *P4::DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
-    if (!in_action) return path;
+    if (!working) return path;
     if (isWrite()) {
         dropValuesUsing(path->path->name);
         return path; }
@@ -102,7 +116,7 @@ const IR::Expression *P4::DoLocalCopyPropagation::postorder(IR::PathExpression *
 }
 
 IR::AssignmentStatement *P4::DoLocalCopyPropagation::preorder(IR::AssignmentStatement *as) {
-    if (!in_action) return as;
+    if (!working) return as;
     // visit the source subtree first, before the destination subtree
     // make sure child indexes are set properly so we can detect writes -- these are the
     // extra arguments to 'visit' in order to make introspection vis the Visitor::Context
@@ -120,7 +134,7 @@ IR::AssignmentStatement *P4::DoLocalCopyPropagation::postorder(IR::AssignmentSta
     if (as->left == as->right) {   // FIXME -- need deep equals here?
         LOG3("  removing noop assignment " << *as);
         return nullptr; }
-    if (!in_action) return as;
+    if (!working) return as;
     if (auto dest = as->left->to<IR::PathExpression>()) {
         if (!hasSideEffects(as->right)) {
             if (as->right->is<IR::ListExpression>()) {
@@ -140,9 +154,20 @@ IR::AssignmentStatement *P4::DoLocalCopyPropagation::postorder(IR::AssignmentSta
     return as;
 }
 
+IR::MethodCallExpression *P4::DoLocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
+    if (!working) return mc;
+    LOG3("method call " << mc->method << "clears all saved values");
+    /* FIXME -- should look at what the called method actually reads and modifies, rather
+     * than assuming everything */
+    for (auto &var : Values(available)) {
+        var.val = nullptr;
+        var.live = true; }
+    return mc;
+}
+
 IR::P4Action *P4::DoLocalCopyPropagation::preorder(IR::P4Action *act) {
-    in_action = true;
-    if (!available.empty()) BUG("corrupt internal data struct");
+    if (working || !available.empty()) BUG("corrupt internal data struct");
+    working = true;
     LOG2("DoLocalCopyPropagation working on action " << act->name);
     LOG4(act);
     return act;
@@ -152,9 +177,33 @@ IR::P4Action *P4::DoLocalCopyPropagation::postorder(IR::P4Action *act) {
     LOG5("DoLocalCopyPropagation before ElimDead " << act->name);
     LOG5(act);
     act->body = act->body->apply(ElimDead(*this))->to<IR::BlockStatement>();
-    in_action = false;
+    working = false;
     available.clear();
     LOG3("DoLocalCopyPropagation finished action " << act->name);
     LOG4(act);
     return act;
+}
+
+IR::P4Control *P4::DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
+    if (working || !available.empty()) BUG("corrupt internal data struct");
+    visit(ctrl->type, "type");
+    visit(ctrl->constructorParams, "constructorParams");
+    visit(ctrl->controlLocals, "controlLocals");
+    if (working || !available.empty()) BUG("corrupt internal data struct");
+    working = true;
+    LOG2("DoLocalCopyPropagation working on control " << ctrl->name);
+    LOG4(ctrl);
+    for (auto local : *ctrl->controlLocals)
+        if (auto var = local->to<IR::Declaration_Variable>())
+            visit_local_decl(var);
+    visit(ctrl->body, "body");
+    LOG5("DoLocalCopyPropagation before ElimDead " << ctrl->name);
+    LOG5(ctrl);
+    ctrl->body = ctrl->body->apply(ElimDead(*this))->to<IR::BlockStatement>();
+    working = false;
+    available.clear();
+    LOG3("DoLocalCopyPropagation finished control " << ctrl->name);
+    LOG4(ctrl);
+    prune();
+    return ctrl;
 }

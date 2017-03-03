@@ -49,7 +49,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     @name("c16") Checksum16() c16;
     apply {
         tmp_2 = hdr.ipv4.ihl == 4w5;
-        if (tmp_2) {
+        if (hdr.ipv4.ihl == 4w5) {
             tmp_1 = c16.get<tuple_0>({ 1w0 });
             hdr.ipv4.hdrChecksum = tmp_1;
         }

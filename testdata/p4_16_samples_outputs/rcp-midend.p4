@@ -33,21 +33,21 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
     action act() {
         sum_rtt_Tr.read(32w0, tmp_8);
         sum_rtt_Tr_tmp = tmp_8;
-        tmp_9 = sum_rtt_Tr_tmp + pkt_hdr.rtt;
-        sum_rtt_Tr_tmp = tmp_9;
-        sum_rtt_Tr.write(sum_rtt_Tr_tmp, 32w0);
+        tmp_9 = tmp_8 + pkt_hdr.rtt;
+        sum_rtt_Tr_tmp = tmp_8 + pkt_hdr.rtt;
+        sum_rtt_Tr.write(tmp_8 + pkt_hdr.rtt, 32w0);
         num_pkts_with_rtt.read(32w0, tmp_10);
         num_pkts_with_rtt_tmp = tmp_10;
-        tmp_11 = num_pkts_with_rtt_tmp + 32w1;
-        num_pkts_with_rtt_tmp = tmp_11;
-        num_pkts_with_rtt.write(num_pkts_with_rtt_tmp, 32w0);
+        tmp_11 = tmp_10 + 32w1;
+        num_pkts_with_rtt_tmp = tmp_10 + 32w1;
+        num_pkts_with_rtt.write(tmp_10 + 32w1, 32w0);
     }
     action act_0() {
         input_traffic_bytes.read(32w0, tmp_6);
         input_traffic_bytes_tmp = tmp_6;
-        tmp_7 = input_traffic_bytes_tmp + metadata.pkt_len;
-        input_traffic_bytes_tmp = tmp_7;
-        input_traffic_bytes.write(input_traffic_bytes_tmp, 32w0);
+        tmp_7 = tmp_6 + metadata.pkt_len;
+        input_traffic_bytes_tmp = tmp_6 + metadata.pkt_len;
+        input_traffic_bytes.write(tmp_6 + metadata.pkt_len, 32w0);
         tmp_12 = pkt_hdr.rtt < 32w2500;
     }
     table tbl_act() {
@@ -65,7 +65,7 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
     apply {
         @atomic {
             tbl_act.apply();
-            if (tmp_12) {
+            if (pkt_hdr.rtt < 32w2500) {
                 tbl_act_0.apply();
             }
         }

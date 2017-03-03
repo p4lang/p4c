@@ -22,9 +22,9 @@ control C() {
     @name("fake") Fake() fake_2;
     action act() {
         x_2 = 32w0;
-        tmp_0 = x_2 + 32w1;
-        y = tmp_0;
-        fake_2.call(y);
+        tmp_0 = 32w1;
+        y = 32w1;
+        fake_2.call(32w1);
     }
     table tbl_act() {
         actions = {

@@ -88,7 +88,7 @@ control c(out bit<32> v) {
     action act_0() {
         d_2 = 32w1;
         tmp_17 = b + 32w1;
-        tmp_18 = d_2 + 32w1;
+        tmp_18 = 32w2;
         tmp_19 = e > 32w0;
     }
     action act_1() {
@@ -96,7 +96,7 @@ control c(out bit<32> v) {
     }
     action act_2() {
         tmp_20 = e + 32w1;
-        e = tmp_20;
+        e = e + 32w1;
     }
     action act_3() {
         tmp_21 = e > 32w0;
@@ -148,7 +148,7 @@ control c(out bit<32> v) {
     }
     apply {
         tbl_act.apply();
-        if (tmp_19) 
+        if (e > 32w0) 
             tbl_act_0.apply();
         else 
             ;
@@ -160,7 +160,7 @@ control c(out bit<32> v) {
         }
 
         tbl_act_3.apply();
-        if (tmp_21) 
+        if (e > 32w0) 
             t.apply();
         else 
             tbl_a1.apply();

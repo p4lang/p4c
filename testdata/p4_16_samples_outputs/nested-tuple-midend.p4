@@ -27,7 +27,7 @@ control c(inout bit<1> r) {
         s_z = 1w1;
         f<tuple_0>({ s_f1_field, s_f1_field_0 });
         tmp_0 = s_f2.f & s_z;
-        r = tmp_0;
+        r = s_f2.f & s_z;
     }
     table tbl_act() {
         actions = {

@@ -11,7 +11,7 @@ control c(inout bit<32> r) {
     action act_0() {
         tmp_7 = f(32w3);
         tmp_8 = tmp_7 < 32w0;
-        tmp_6 = tmp_8;
+        tmp_6 = tmp_7 < 32w0;
     }
     action act_1() {
         tmp_4 = f(32w2);
@@ -55,7 +55,7 @@ control c(inout bit<32> r) {
     }
     apply {
         tbl_act.apply();
-        if (!tmp_5) 
+        if (!(tmp_4 > 32w0)) 
             tbl_act_0.apply();
         else {
             tbl_act_1.apply();

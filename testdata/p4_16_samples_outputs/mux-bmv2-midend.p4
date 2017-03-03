@@ -37,7 +37,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     }
     action act() {
         res = 64w0;
-        tmp_2 = res;
+        tmp_2 = 64w0;
     }
     table tbl_act() {
         actions = {

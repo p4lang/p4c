@@ -20,8 +20,8 @@ control c(inout bit<32> arg) {
     }
     action act_0() {
         arg = x_0;
-        tmp_0 = arg + 32w1;
-        arg = tmp_0;
+        tmp_0 = x_0 + 32w1;
+        arg = x_0 + 32w1;
     }
     action act_1() {
         x_0 = arg;

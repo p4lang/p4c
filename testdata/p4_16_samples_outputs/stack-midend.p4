@@ -24,7 +24,7 @@ control c() {
     action act() {
         stack_2[3].setValid();
         b_2 = stack_2[3];
-        stack_2[2] = b_2;
+        stack_2[2] = stack_2[3];
         stack_2.push_front(2);
         stack_2.pop_front(2);
     }
