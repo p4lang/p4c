@@ -12,9 +12,9 @@ control c(inout bit<32> r) {
         tmp_7 = tmp_6;
         tmp_8 = f(32w2, 32w3);
         tmp_9 = tmp_8;
-        tmp_10 = f(32w6, tmp_9);
+        tmp_10 = f(32w6, tmp_8);
         tmp_11 = tmp_10;
-        tmp_12 = f(tmp_7, tmp_11);
+        tmp_12 = f(tmp_7, tmp_10);
         r = tmp_12;
     }
     table tbl_act() {

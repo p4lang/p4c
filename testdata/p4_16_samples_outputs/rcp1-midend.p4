@@ -36,9 +36,9 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
     action act() {
         input_traffic_bytes.count();
         tmp_1 = pkt_hdr.rtt < 32w2500;
-        sum_rtt_Tr.write(pkt_hdr.rtt, tmp_1);
+        sum_rtt_Tr.write(pkt_hdr.rtt, pkt_hdr.rtt < 32w2500);
         tmp_2 = pkt_hdr.rtt < 32w2500;
-        num_pkts_with_rtt.write(32w1, tmp_2);
+        num_pkts_with_rtt.write(32w1, pkt_hdr.rtt < 32w2500);
     }
     table tbl_act() {
         actions = {

@@ -53,9 +53,9 @@ control c(inout bit<32> r) {
     }
     apply {
         tbl_act.apply();
-        if (tmp_6) {
+        if (tmp_5 > 32w0) {
             tbl_act_0.apply();
-            if (tmp_4) 
+            if (tmp_3 < 32w2) 
                 tbl_act_1.apply();
             else 
                 tbl_act_2.apply();

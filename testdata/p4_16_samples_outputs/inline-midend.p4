@@ -37,7 +37,7 @@ control p(out bit<1> y) {
     }
     action act() {
         x_3 = 1w1;
-        tmp_13 = x_3;
+        tmp_13 = 1w1;
     }
     action act_0() {
         y = tmp_14;

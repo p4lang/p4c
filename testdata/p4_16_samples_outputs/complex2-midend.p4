@@ -10,7 +10,7 @@ control c(inout bit<32> r) {
     action act() {
         tmp_1 = f(32w2);
         tmp_2 = tmp_1;
-        h[tmp_2].setValid();
+        h[tmp_1].setValid();
     }
     table tbl_act() {
         actions = {

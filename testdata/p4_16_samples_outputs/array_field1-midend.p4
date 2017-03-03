@@ -43,8 +43,8 @@ control my(out H[2] s) {
         tmp_31 = f(tmp_30, 1w0);
         tmp_22 = tmp_30;
         tmp_23 = tmp_31;
-        tmp_32 = 32w0;
-        s[32w0].z = tmp_30;
+        tmp_32 = tmp_21;
+        s[tmp_21].z = tmp_30;
         a = (bit<32>)tmp_31;
         tmp_24 = (bit<32>)tmp_31;
         tmp_33 = (bit<32>)tmp_31;
@@ -52,8 +52,8 @@ control my(out H[2] s) {
         tmp_34 = s[(bit<32>)tmp_31].z;
         tmp_35 = f(tmp_34, 1w1);
         tmp_25 = tmp_34;
-        tmp_36 = (bit<32>)tmp_31;
-        s[(bit<32>)tmp_31].z = tmp_34;
+        tmp_36 = tmp_24;
+        s[tmp_24].z = tmp_34;
     }
     @name("tbl_act") table tbl_act() {
         actions = {

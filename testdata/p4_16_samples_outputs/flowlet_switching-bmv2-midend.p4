@@ -275,7 +275,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         @atomic {
             flowlet.apply();
             tbl_act.apply();
-            if (tmp_25) 
+            if (meta.ingress_metadata.flow_ipg > 32w50000) 
                 new_flowlet.apply();
         }
         ecmp_group.apply();
@@ -313,7 +313,7 @@ control verifyChecksum(in headers hdr, inout metadata meta) {
     apply {
         tmp_26 = ipv4_checksum.get<tuple_2>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         tmp_27 = hdr.ipv4.hdrChecksum == tmp_26;
-        if (tmp_27) 
+        if (hdr.ipv4.hdrChecksum == tmp_26) 
             mark_to_drop();
     }
 }
