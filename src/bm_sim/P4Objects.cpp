@@ -1002,18 +1002,126 @@ P4Objects::init_actions(const Json::Value &cfg_root) {
   }
 }
 
-void
-P4Objects::init_pipelines(const Json::Value &cfg_root,
-                          LookupStructureFactory *lookup_factory,
-                          InitState *init_state) {
-  auto &direct_meters = init_state->direct_meters;
+namespace {
 
+int get_table_size(const Json::Value &cfg_table) {
+  if (cfg_table.isMember("max_size") && !cfg_table.isMember("entries"))
+    return cfg_table["max_size"].asInt();
+  if (!cfg_table.isMember("max_size") && cfg_table.isMember("entries"))
+    return static_cast<int>(cfg_table["entries"].size());
+  if (!cfg_table.isMember("max_size") && !cfg_table.isMember("entries")) {
+    throw json_exception(
+        EFormat() << "Table '" << cfg_table["name"].asString()
+                  << "' has neither 'max_size' nor 'entries' attribute",
+        cfg_table);
+  }
+  // both "max_size" and "entries"
+  const auto max_size = cfg_table["max_size"].asInt();
+  const auto entries_size = static_cast<int>(cfg_table["entries"].size());
+  // TODO(antonin): print a warning if max_size != entries_size?
+  (void) max_size;
+  // we choose entries_size, because the table will be immutable anyway
+  return entries_size;
+}
+
+ActionData parse_action_data(const Json::Value &cfg_action_data) {
+  // TODO(antonin): check that the number of args match the expected number
+  // based on the action id
+  ActionData adata;
+  for (const auto &d : cfg_action_data)
+    adata.push_back_action_data(Data(d.asString()));
+  return adata;
+}
+
+MatchKeyParam::Type match_name_to_match_type(const std::string &name) {
   std::unordered_map<std::string, MatchKeyParam::Type> map_name_to_match_type =
       { {"exact", MatchKeyParam::Type::EXACT},
         {"lpm", MatchKeyParam::Type::LPM},
         {"ternary", MatchKeyParam::Type::TERNARY},
         {"valid", MatchKeyParam::Type::VALID},
         {"range", MatchKeyParam::Type::RANGE} };
+
+  auto it = map_name_to_match_type.find(name);
+  if (it == map_name_to_match_type.end())
+    throw json_exception(EFormat() << "Invalid match type: '" << name << "'");
+  return it->second;
+}
+
+std::vector<MatchKeyParam> parse_match_key(
+    const Json::Value &cfg_match_key, const Json::Value &cfg_ref_match_key) {
+  std::vector<MatchKeyParam> match_key;
+
+  if (cfg_match_key.size() != cfg_ref_match_key.size()) {
+    throw json_exception(
+        EFormat() << "Invalid number of fields in match key, expected "
+                  << cfg_ref_match_key.size() << " but got "
+                  << cfg_match_key.size(),
+        cfg_match_key);
+  }
+
+  auto convert_valid_key = [](bool key) {
+    return key ? std::string("\x01", 1) : std::string("\x00", 1);
+  };
+
+  auto transform_hexstr = [](const std::string hexstr) {
+    ByteContainer bc(hexstr);
+    return std::string(bc.data(), bc.size());
+  };
+
+  for (size_t i = 0; i < cfg_match_key.size(); i++) {
+    // cannot use [i] directly because of ambiguous operator overloading in
+    // jsoncpp code
+    auto index = static_cast<Json::ArrayIndex>(i);
+    const auto &cfg_f = cfg_match_key[index];
+    const auto match_type_str = cfg_f["match_type"].asString();
+    const auto ref_match_type_str =
+        cfg_ref_match_key[index]["match_type"].asString();
+
+    if (match_type_str != ref_match_type_str) {
+      throw json_exception(
+          EFormat() << "Invalid match type for field #" << i
+                    << " in match key, expected " << ref_match_type_str
+                    << " but got " << match_type_str,
+          cfg_match_key);
+    }
+
+    const auto match_type = match_name_to_match_type(match_type_str);
+    switch (match_type) {
+      case MatchKeyParam::Type::EXACT:
+        match_key.emplace_back(match_type,
+                               transform_hexstr(cfg_f["key"].asString()));
+        break;
+      case MatchKeyParam::Type::LPM:
+        match_key.emplace_back(match_type,
+                               transform_hexstr(cfg_f["key"].asString()),
+                               cfg_f["prefix_length"].asInt());
+        break;
+      case MatchKeyParam::Type::TERNARY:
+        match_key.emplace_back(match_type,
+                               transform_hexstr(cfg_f["key"].asString()),
+                               transform_hexstr(cfg_f["mask"].asString()));
+        break;
+      case MatchKeyParam::Type::VALID:
+        match_key.emplace_back(match_type,
+                               convert_valid_key(cfg_f["key"].asBool()));
+        break;
+      case MatchKeyParam::Type::RANGE:
+        match_key.emplace_back(match_type,
+                               transform_hexstr(cfg_f["start"].asString()),
+                               transform_hexstr(cfg_f["end"].asString()));
+        break;
+    }
+  }
+  return match_key;
+}
+
+}  // namespace
+
+void
+P4Objects::init_pipelines(const Json::Value &cfg_root,
+                          LookupStructureFactory *lookup_factory,
+                          InitState *init_state) {
+  auto &direct_meters = init_state->direct_meters;
 
   const Json::Value &cfg_pipelines = cfg_root["pipelines"];
   for (const auto &cfg_pipeline : cfg_pipelines) {
@@ -1050,14 +1158,14 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
       MatchKeyBuilder key_builder;
       const Json::Value &cfg_match_key = cfg_table["key"];
 
-      auto add_f = [this, &key_builder, &map_name_to_match_type](
+      auto add_f = [this, &key_builder](
           const Json::Value &cfg_f) {
         const Json::Value &cfg_key_field = cfg_f["target"];
         const string header_name = cfg_key_field[0].asString();
         header_id_t header_id = get_header_id(header_name);
         const string field_name = cfg_key_field[1].asString();
         int field_offset = get_field_offset(header_id, field_name);
-        const auto mtype = map_name_to_match_type.at(
+        const auto mtype = match_name_to_match_type(
             cfg_f["match_type"].asString());
         const std::string name = header_name + "." + field_name;
         if ((!cfg_f.isMember("mask")) || cfg_f["mask"].isNull()) {
@@ -1102,7 +1210,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
 
       const string match_type = cfg_table["match_type"].asString();
       const string table_type = cfg_table["type"].asString();
-      const int table_size = cfg_table["max_size"].asInt();
+      const int table_size = get_table_size(cfg_table);
       const Json::Value false_value(false);
       // if attribute is missing, default is false
       const bool with_counters =
@@ -1254,7 +1362,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
       // note that this code has to be placed after setting the next nodes, as
       // it may call MatchTable::set_default_action.
       if (cfg_table.isMember("default_entry")) {
-        const string table_type = cfg_table["type"].asString();
+        const auto table_type = cfg_table["type"].asString();
         if (table_type != "simple") {
           throw json_exception(
               EFormat() << "Table '" << table_name << "' does not have type "
@@ -1266,7 +1374,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
         auto simple_table = dynamic_cast<MatchTable *>(table);
         assert(simple_table);
 
-        const Json::Value &cfg_default_entry = cfg_table["default_entry"];
+        const auto &cfg_default_entry = cfg_table["default_entry"];
         const p4object_id_t action_id = cfg_default_entry["action_id"].asInt();
         const ActionFn *action = get_action_by_id(action_id); assert(action);
 
@@ -1276,20 +1384,7 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
         if (is_action_const) simple_table->set_const_default_action_fn(action);
 
         if (cfg_default_entry.isMember("action_data")) {
-          const Json::Value &cfg_action_data = cfg_default_entry["action_data"];
-
-          // TODO(antonin)
-          // if (action->num_params() != cfg_action_data.size()) {
-          //   outstream << "Default entry specification for table '"
-          //             << table_name << "' incorrect: expected "
-          //             << action->num_params() << " args for action data "
-          //             << "but got " << cfg_action_data.size() << "\n";
-          //   return 1;
-          // }
-
-          ActionData adata;
-          for (const auto &d : cfg_action_data)
-            adata.push_back_action_data(Data(d.asString()));
+          auto adata = parse_action_data(cfg_default_entry["action_data"]);
 
           const bool is_action_entry_const =
               cfg_default_entry.get("action_entry_const", false_value).asBool();
@@ -1297,6 +1392,58 @@ P4Objects::init_pipelines(const Json::Value &cfg_root,
           simple_table->set_default_entry(action, std::move(adata),
                                           is_action_entry_const);
         }
+      }
+
+      // for 'simple' tables, it is possible to specify immutable entries
+      if (cfg_table.isMember("entries")) {
+        const auto table_type = cfg_table["type"].asString();
+        if (table_type != "simple") {
+          throw json_exception(
+              EFormat() << "Table '" << table_name << "' does not have type "
+                        << "'simple' and therefore cannot specify a "
+                        << "'entries' attribute",
+              cfg_table);
+        }
+
+        auto simple_table = dynamic_cast<MatchTable *>(table);
+        assert(simple_table);
+
+        const auto &cfg_entries = cfg_table["entries"];
+
+        for (const auto &cfg_entry : cfg_entries) {
+          auto match_key = parse_match_key(cfg_entry["match_key"],
+                                           cfg_table["key"]);
+
+          const auto &cfg_action_entry = cfg_entry["action_entry"];
+          auto action_id = static_cast<p4object_id_t>(
+              cfg_action_entry["action_id"].asInt());
+          const ActionFn *action = get_action_by_id(action_id); assert(action);
+          auto adata = parse_action_data(cfg_action_entry["action_data"]);
+
+          const auto priority = cfg_entry["priority"].asInt();
+
+          entry_handle_t handle;
+          auto rc = simple_table->add_entry(match_key, action, std::move(adata),
+                                            &handle, priority);
+          if (rc == MatchErrorCode::BAD_MATCH_KEY) {
+            throw json_exception(
+                "Error when adding table entry, match key is malformed",
+                cfg_entry);
+          } else if (rc == MatchErrorCode::DUPLICATE_ENTRY) {
+            // We choose to treat this as an error to be consistent with the
+            // control plane behavior
+            throw json_exception("Duplicate entries in table initializer",
+                                 cfg_entries);
+          } else {
+            assert(rc == MatchErrorCode::SUCCESS);
+          }
+          (void) handle;  // we have no need for the handle
+        }
+
+        // this means that the control plane won't be able to modify the entries
+        // at runtime; we need to do this at the end otheriwse the add_entry
+        // calls above would fail.
+        simple_table->set_immutable_entries();
       }
     }
 

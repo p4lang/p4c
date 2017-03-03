@@ -917,6 +917,30 @@ TYPED_TEST(TableSizeTwo, GetEntries) {
   }
 }
 
+TYPED_TEST(TableSizeTwo, ImmutableEntries) {
+  MatchErrorCode rc;
+  entry_handle_t handle_1, handle_2;
+  std::string key_1("\xaa\xaa");
+  std::string key_2("\xbb\xbb");
+
+  rc = this->add_entry(key_1, &handle_1);
+  ASSERT_EQ(MatchErrorCode::SUCCESS, rc);
+
+  this->table->set_immutable_entries();
+
+  rc = this->add_entry(key_2, &handle_2);
+  ASSERT_EQ(MatchErrorCode::IMMUTABLE_TABLE_ENTRIES, rc);
+
+  ActionData new_action_data;
+  new_action_data.push_back_action_data(0xaba);
+  rc = this->table->modify_entry(handle_1, &(this->action_fn),
+                                 std::move(new_action_data));
+  ASSERT_EQ(MatchErrorCode::IMMUTABLE_TABLE_ENTRIES, rc);
+
+  rc = this->table->delete_entry(handle_1);
+  ASSERT_EQ(MatchErrorCode::IMMUTABLE_TABLE_ENTRIES, rc);
+}
+
 
 class TableIndirect : public ::testing::Test {
  protected:

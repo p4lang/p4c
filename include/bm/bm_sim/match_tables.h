@@ -296,6 +296,8 @@ class MatchTable : public MatchTableAbstract {
   void set_default_entry(const ActionFn *action_fn, ActionData action_data,
                          bool is_const);
 
+  void set_immutable_entries();
+
  public:
   static std::unique_ptr<MatchTable> create(
       const std::string &match_type,
@@ -321,6 +323,7 @@ class MatchTable : public MatchTableAbstract {
   std::unique_ptr<MatchUnitAbstract<ActionEntry> > match_unit;
   const ActionFn *const_default_action{nullptr};
   bool const_default_entry{false};
+  bool immutable_entries{false};
 };
 
 class MatchTableIndirect : public MatchTableAbstract {

@@ -11,7 +11,7 @@ per [this specification] (http://json-schema.org/).
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.6*.
+The version described in this document is *2.7*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -369,7 +369,7 @@ attributes for these objects are:
   - `name`
   - `id`: a unique integer; note that it has to be unique with respect to *all*
   tables in the JSON file, not just the tables included in this pipeline object
-  - `match_type`: one of `exact`, `lpm` or `ternary`
+  - `match_type`: one of `exact`, `lpm`, `ternary` or `range`
   - `type`: the implementation for the table, one of `simple`, `indirect`
   (action profiles), `indirect_ws` (action profiles with dynamic selector)
   - `action_profile`: if the table is indirect, name of the action profile to
@@ -381,16 +381,16 @@ attributes for these objects are:
   - `support_timeout`: a boolean, `true` iff the match table supports ageing
   - `key`: the lookup key format, represented by a JSON array. Each member of
   the array is a JSON object with the following attributes:
-    - `match_type`: one of `valid`, `exact`, `lpm`, `ternary`
+    - `match_type`: one of `valid`, `exact`, `lpm`, `ternary`, `range`
     - `target`: the field reference as a 2-tuple (or header as a string if
       `match_type` if `valid`)
     - `mask`: the static mask to be applied to the field, or null. Just like for
     the parser transition key, make sure that this mask is byte-padded and has
     the same width (in bytes) as the corresponding field (1 byte if `match_type`
     is `valid`).
-  - `actions`: the list of actions (order does not matter) supporyed by this
+  - `actions`: the list of actions (order does not matter) supported by this
   table
-  - `next_tables`: maps each action tp a next table name. Alternatively, maps
+  - `next_tables`: maps each action to a next table name. Alternatively, maps
   special string `__HIT__` and `__MISS__` to a next table name.
   - `direct_meters`: the name of the associated direct meter array, or null if
   the match table has no associated meter array
@@ -408,6 +408,12 @@ attributes for these objects are:
     control plane is not allowed to modify the action entry (action function +
     action data). Default value is `false`. This attribute is ignored if the
     `action_data` attribute it missing.
+  - `entries`: enables you to optionally specify match-action entries for this
+  table. Specifying entries in the JSON makes the table immutable, which means
+  the added entries cannot be modified / deleted and that new entries cannot be
+  added. This doesn't impact the default entry though (see the `default_entry`
+  attribute). `entries` is a JSON array where each element follows the
+  [match-action entry format] (#match-action-entry-format) described below.
 - `conditionals`: a JSON array of JSON objects. Each of these objects stores the
 information for a given P4 condition, which is used by the current pipeline. The
 attributes for these objects are:
@@ -419,11 +425,46 @@ attributes for these objects are:
     (#the-type-value-object) for more information on expressions format.
 
 The `match_type` for the table needs to follow the following rules:
+- If one match field is `range`, the table `match_type` has to be `range`
 - If one match field is `ternary`, the table `match_type` has to be `ternary`
 - If one match field is `lpm`, the table `match_type` is either `ternary` or
 `lpm`
 Note that it is not correct to have more than one `lpm` match field in the same
 table.
+
+#### match-action entry format
+
+We describe the format of the match-action entries contained in the `entries`
+JSON array (see table JSON format above). Each entry is a JSON object with the
+following attributes:
+- `match_key`: a JSON array of objects with the following attributes:
+  - `match_type`: one of `valid`, `exact`, `lpm`, `ternary`, `range`
+  - the other attributes depend on the `match_type`:
+    - for `valid`: we need a `key` attribute which has to be a boolean
+    - for `exact`: we need a `key` attribute which has to be a hexstring
+    - for `lpm`: we need a `key` attribute which has to be a hexstring and a
+    `prefix_length` attribute which has to be an integer
+    - for `ternary`: we need a `key` and a `mask` attributes which both have to
+    be hexstrings
+    - for `range`: we need a `start` and a `end` attribute which both have to be
+    hexstrings
+- `action_entry`: a JSON object with the following attributes:
+  - `action_id`: the id of the default action
+  - `action_data`: a JSON array where each entry is the hexstring value for an
+  action argument. The size of the array needs to match the number of parameters
+  expected by the action function with id `action_id`.
+- `priority`: an integer which indicates the priority for the entry; it is
+ignored if the match type of the table is not `ternary` or `range`. In bmv2
+having a high priority translates into a low numerical value.
+
+Note that the `match_key` and the `action_entry` need to be formatted
+correctly. In particular:
+- the number of match fields in the match key needs to match the table
+description
+- the match types of the match fields in the match key need to match the table
+description
+- the hexstrings need to have the correct byte-width
+- duplicate entries (as determined by the match keys) will trigger an error
 
 ### `calculations`
 

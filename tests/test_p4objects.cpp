@@ -29,6 +29,7 @@
 #include <sstream>
 #include <string>
 #include <set>
+#include <vector>
 
 #include "jsoncpp/json.h"
 
@@ -526,6 +527,78 @@ class JsonBuilder {
     pipelines.append(pipeline);
   }
 
+  void add_action(const std::string &name) {
+    auto &actions = json["actions"];
+    Json::Value action(Json::objectValue);
+    action["name"] = name;
+    action["id"] = actions.size();
+    action["runtime_data"] = Json::Value(Json::arrayValue);
+    action["primitives"] = Json::Value(Json::arrayValue);
+    actions.append(action);
+  }
+
+  // only supports one table for now, with a single field in the match key and a
+  // single action
+  void add_table(const std::string &name, const std::string &match_type,
+                 const std::string &hdr_name, const std::string &f_name,
+                 const std::string &action_name) {
+    auto &pipelines = json["pipelines"];
+    Json::Value pipeline(Json::objectValue);
+    pipeline["name"] = "pipe";
+    pipeline["id"] = 0;
+    pipeline["init_table"] = name;
+    pipeline["tables"] = Json::Value(Json::arrayValue);
+    pipeline["conditionals"] = Json::Value(Json::arrayValue);
+    Json::Value table(Json::objectValue);
+    table["name"] = name;
+    table["id"] = 0;
+    table["match_type"] = match_type;
+    table["type"] = "simple";
+
+    Json::Value match_key(Json::arrayValue);
+    Json::Value match_field(Json::objectValue);
+    match_field["match_type"] = match_type;
+    Json::Value target(Json::arrayValue);
+    target.append(hdr_name);
+    target.append(f_name);
+    match_field["target"] = target;
+    match_key.append(match_field);
+    table["key"] = match_key;
+
+    table["actions"] = Json::Value(Json::arrayValue);
+    table["actions"].append(action_name);
+
+    table["next_tables"] = Json::Value(Json::objectValue);
+    table["next_tables"][action_name] = Json::Value();  // null
+
+    table["entries"] = Json::Value(Json::arrayValue);
+
+    pipeline["tables"].append(table);
+    pipelines.append(pipeline);
+  }
+
+  using MatchParam = std::map<std::string, std::string>;
+  void add_entry_to_table(const std::string &table_name, int action_id,
+                          const std::vector<MatchParam> &mk) {
+    (void) table_name;
+    auto &pipeline = json["pipelines"][0u];
+    auto &table = pipeline["tables"][0u];
+    auto &entries = table["entries"];
+
+    Json::Value entry(Json::objectValue);
+    entry["action_entry"] = Json::Value(Json::objectValue);
+    entry["action_entry"]["action_id"] = action_id;
+    entry["action_entry"]["action_data"] = Json::Value(Json::arrayValue);
+    entry["match_key"] = Json::Value(Json::arrayValue);
+    for (const auto &mf : mk) {
+      Json::Value match_field(Json::objectValue);
+      for (const auto &p : mf) match_field[p.first] = p.second;
+      entry["match_key"].append(match_field);
+    }
+    entry["priority"] = entries.size();
+    entries.append(entry);
+  }
+
   void add_enum(const std::string &name,
                 const std::map<std::string, int> &enum_entries) {
     auto &enums = json["enums"];
@@ -669,4 +742,96 @@ TEST(P4Objects, FieldLists) {
   std::stringstream is(builder.to_string());
   P4Objects objects(os);
   ASSERT_EQ(0, objects.init_objects(&is, &factory));
+}
+
+TEST(P4Objects, ImmutableEntries) {
+  LookupStructureFactory factory;
+  JsonBuilder builder;
+  builder.add_header_type("hdr_t");
+  builder.add_header("hdr", "hdr_t");
+  builder.add_action("a");
+  builder.add_table("t", "exact", "hdr", "f8", "a");
+  std::map<std::string, std::string> entry_attrs = {
+    {"match_type", "exact"},
+    {"key", "0x01"}
+  };
+  builder.add_entry_to_table("t", 0 /* action_id */, {entry_attrs});
+  std::stringstream is(builder.to_string());
+  P4Objects objects;
+  ASSERT_EQ(0, objects.init_objects(&is, &factory));
+
+  auto table_ = objects.get_abstract_match_table("t");
+  auto table = dynamic_cast<MatchTable *>(table_);
+  ASSERT_NE(nullptr, table);
+  const auto entries = table->get_entries();
+  ASSERT_EQ(1u, entries.size());
+  const auto &match_key = entries.at(0).match_key;
+  ASSERT_EQ(1u, match_key.size());
+  const auto &match_field = match_key.at(0);
+  ASSERT_EQ(MatchKeyParam::Type::EXACT, match_field.type);
+  ASSERT_EQ(std::string("\x01"), match_field.key);
+}
+
+TEST(P4Objects, ImmutableEntriesBadJson) {
+  LookupStructureFactory factory;
+  JsonBuilder base_builder;
+  base_builder.add_header_type("hdr_t");
+  base_builder.add_header("hdr", "hdr_t");
+  base_builder.add_action("a");
+  base_builder.add_table("t", "exact", "hdr", "f8", "a");
+
+  auto check = [&factory](const JsonBuilder &builder,
+                          const std::string &expected_error_msg) {
+    std::stringstream is(builder.to_string());
+    std::stringstream os;
+    P4Objects objects(os);
+    ASSERT_NE(0, objects.init_objects(&is, &factory));
+    EXPECT_EQ(expected_error_msg, os.str());
+  };
+
+  {  // wrong match type
+    JsonBuilder builder(base_builder);
+    std::map<std::string, std::string> mf = {
+      {"match_type", "ternary"}, {"key", "0x01"}
+    };
+    builder.add_entry_to_table("t", 0 /* action_id */, {mf});
+    std::string expected_error_msg(
+        "Invalid match type for field #0 in match key, expected exact but got "
+        "ternary\n");
+    check(builder, expected_error_msg);
+  }
+
+  {  // two many match fields
+    JsonBuilder builder(base_builder);
+    std::map<std::string, std::string> mf = {
+      {"match_type", "exact"}, {"key", "0x01"}
+    };
+    builder.add_entry_to_table("t", 0 /* action_id */, {mf, mf});
+    std::string expected_error_msg(
+        "Invalid number of fields in match key, expected 1 but got 2\n");
+    check(builder, expected_error_msg);
+  }
+
+  {  // bad key (too many bytes
+    JsonBuilder builder(base_builder);
+    std::map<std::string, std::string> mf = {
+      {"match_type", "exact"}, {"key", "0xabcd"}
+    };
+    builder.add_entry_to_table("t", 0 /* action_id */, {mf});
+    std::string expected_error_msg(
+        "Error when adding table entry, match key is malformed\n");
+    check(builder, expected_error_msg);
+  }
+
+  {  // duplicate entries
+    JsonBuilder builder(base_builder);
+    std::map<std::string, std::string> mf = {
+      {"match_type", "exact"}, {"key", "0x01"}
+    };
+    builder.add_entry_to_table("t", 0 /* action_id */, {mf});
+    builder.add_entry_to_table("t", 0 /* action_id */, {mf});
+    std::string expected_error_msg(
+        "Duplicate entries in table initializer\n");
+    check(builder, expected_error_msg);
+  }
 }

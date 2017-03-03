@@ -346,6 +346,8 @@ MatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
                       const ActionFn *action_fn,
                       ActionData action_data,  // move it
                       entry_handle_t *handle, int priority) {
+  if (immutable_entries) return MatchErrorCode::IMMUTABLE_TABLE_ENTRIES;
+
   ActionFnEntry action_fn_entry(action_fn, std::move(action_data));
   const ControlFlowNode *next_node = get_next_node(action_fn->get_id());
 
@@ -380,6 +382,8 @@ MatchTable::add_entry(const std::vector<MatchKeyParam> &match_key,
 
 MatchErrorCode
 MatchTable::delete_entry(entry_handle_t handle) {
+  if (immutable_entries) return MatchErrorCode::IMMUTABLE_TABLE_ENTRIES;
+
   MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
   {
@@ -400,6 +404,8 @@ MatchTable::delete_entry(entry_handle_t handle) {
 MatchErrorCode
 MatchTable::modify_entry(entry_handle_t handle,
                          const ActionFn *action_fn, ActionData action_data) {
+  if (immutable_entries) return MatchErrorCode::IMMUTABLE_TABLE_ENTRIES;
+
   MatchErrorCode rc = MatchErrorCode::SUCCESS;
 
   {
@@ -561,6 +567,11 @@ MatchTable::set_default_entry(const ActionFn *action_fn,
   auto rc = set_default_action(action_fn, std::move(action_data));
   assert(rc == MatchErrorCode::SUCCESS);
   const_default_entry = is_const;
+}
+
+void
+MatchTable::set_immutable_entries() {
+  immutable_entries = true;
 }
 
 void
