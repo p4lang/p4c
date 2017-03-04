@@ -801,10 +801,14 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
         return decl;
     }
     auto orig = getOriginal<IR::Declaration_Instance>();
+    const IR::Vector<IR::Type> *typeArguments = nullptr;
 
     auto simpleType = type;
-    if (type->is<IR::Type_SpecializedCanonical>())
-        simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
+    if (type->is<IR::Type_SpecializedCanonical>()) {
+        auto tsc = type->to<IR::Type_SpecializedCanonical>();
+        simpleType = tsc->substituted;
+        typeArguments = tsc->arguments;
+    }
 
     if (simpleType->is<IR::Type_Extern>()) {
         auto et = simpleType->to<IR::Type_Extern>();
@@ -828,8 +832,11 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
         if (args != decl->arguments)
             decl->arguments = args;
     } else if (simpleType->is<IR::IContainer>()) {
-        if (decl->initializer != nullptr)
+        if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
+            prune();
+            return decl;
+        }
         auto type = containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
         if (type == nullptr) {
             prune();
